@@ -31,10 +31,12 @@ function fixture(t) {
     `${webPath}/public/client-core/${manifest.version}`,
     ...(manifest.presentation ? [`${webPath}/public/client-core/${manifest.presentation.version}`] : []),
     ...(manifest.npcPurchase ? [`${webPath}/public/client-core/${manifest.npcPurchase.version}`] : []),
+    ...(manifest.catalogTransport ? [`${webPath}/public/client-core/${manifest.catalogTransport.version}`] : []),
     `${corePath}/Cargo.toml`, `${corePath}/src`,
     `${wirePath}/Cargo.toml`, `${wirePath}/src`,
     `${bridgePath}/Cargo.toml`, `${bridgePath}/Cargo.lock`,
     `${bridgePath}/rust-toolchain.toml`, `${bridgePath}/src`,
+    "packages/protocol/Cargo.toml", "packages/protocol/src",
   ]) {
     fs.mkdirSync(path.dirname(path.join(root, relative)), { recursive: true });
     fs.cpSync(path.join(projectRoot, relative), path.join(root, relative), { recursive: true });
@@ -106,7 +108,7 @@ test("artifact hashes cannot bless bytes under the wrong immutable URL", (t) => 
 // These are data-only --verify checks: no WASM API or module instantiation.
 test("new builder requires Presentation even though the legacy release reader supports old Core", (t) => {
   const root = fixture(t); const legacy = { ...manifest };
-  delete legacy.presentation; delete legacy.npcPurchase;
+  delete legacy.presentation; delete legacy.npcPurchase; delete legacy.catalogTransport;
   fs.writeFileSync(path.join(root, manifestRelative), JSON.stringify(legacy));
   const release = readClientCoreRelease({ webRoot: path.join(root, webPath) });
   assert.deepEqual(release.manifest, legacy); assert.equal(release.files.length, 2);
@@ -170,8 +172,34 @@ for (const relative of [`${bridgePath}/Cargo.toml`, `${bridgePath}/src/strict_js
 }
 
 test("new builder rejects a legacy dual manifest without NPC Purchase before prebuilt acceptance", (t) => {
-  const root = fixture(t), legacy = { ...manifest }; delete legacy.npcPurchase;
+  const root = fixture(t), legacy = { ...manifest }; delete legacy.npcPurchase; delete legacy.catalogTransport;
   fs.writeFileSync(path.join(root, manifestRelative), JSON.stringify(legacy));
   const result = run(root);
   assert.notEqual(result.status, 0); assert.match(result.stderr, /requires its NPC Purchase bundle/);
+});
+
+test("new builder requires the independent Catalog Transport policy and checks its source bytes", (t) => {
+  const root = fixture(t), legacy = { ...manifest }; delete legacy.catalogTransport;
+  fs.writeFileSync(path.join(root, manifestRelative), JSON.stringify(legacy));
+  const missing = run(root);
+  assert.notEqual(missing.status, 0); assert.match(missing.stderr, /requires its Catalog Transport bundle/);
+  fs.writeFileSync(path.join(root, manifestRelative), JSON.stringify(manifest));
+  fs.appendFileSync(path.join(root, "packages/protocol/src/catalog_envelope.rs"), "\n// drift\n");
+  const stale = run(root);
+  assert.notEqual(stale.status, 0); assert.match(stale.stderr, /Shared client source changed/);
+});
+
+test("Catalog Transport remains a distinct immutable package under the original byte budget", (t) => {
+  const root = fixture(t);
+  for (const mutate of [
+    value => { value.catalogTransport.extra = true; },
+    value => { value.catalogTransport.sourceSha256 = "0".repeat(64); },
+    value => { value.catalogTransport.version = value.version; },
+    value => { value.catalogTransport.files["mir2_platform_web_bg.wasm"].bytes = 262144; },
+  ]) {
+    const value = JSON.parse(JSON.stringify(manifest)); mutate(value);
+    fs.writeFileSync(path.join(root, manifestRelative), JSON.stringify(value));
+    const result = run(root);
+    assert.notEqual(result.status, 0); assert.match(result.stderr, /undeclared fields|Shared client source changed|distinct immutable versions|byte budget/);
+  }
 });

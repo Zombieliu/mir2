@@ -11,8 +11,9 @@ path = "src/lib.rs"
 
 [features]
 default = []
-catalog-gzip = ["dep:flate2"]
+catalog-gzip = ["dep:flate2", "dep:serde_json"]
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }
 flate2 = { version = "1", optional = true }
+serde_json = { version = "1", optional = true }

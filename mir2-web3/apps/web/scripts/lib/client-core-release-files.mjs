@@ -35,17 +35,20 @@ function verifyBundle(manifest, label) {
   return Object.freeze({ abiVersion: 1, version: manifest.version,
     sourceSha256: manifest.sourceSha256, files: Object.freeze(files) });
 }
-/** Legacy Core and Core/Presentation manifests remain readable. New builds carry all three. */
+/** Legacy manifests remain readable. New builds carry isolated policy siblings. */
 export function verifyClientCoreManifest(manifest) {
   const hasPresentation = !!manifest && Object.hasOwn(manifest, "presentation");
   const hasNpcPurchase = !!manifest && Object.hasOwn(manifest, "npcPurchase");
+  const hasCatalogTransport = !!manifest && Object.hasOwn(manifest, "catalogTransport");
   exactKeys(manifest, ["abiVersion", "version", "sourceSha256", "files",
-    ...(hasPresentation ? ["presentation"] : []), ...(hasNpcPurchase ? ["npcPurchase"] : [])], "Core manifest");
+    ...(hasPresentation ? ["presentation"] : []), ...(hasNpcPurchase ? ["npcPurchase"] : []),
+    ...(hasCatalogTransport ? ["catalogTransport"] : [])], "Core manifest");
   const core = verifyBundle({ abiVersion: manifest.abiVersion, version: manifest.version,
     sourceSha256: manifest.sourceSha256, files: manifest.files }, "Core");
   if (hasNpcPurchase && !hasPresentation) throw new Error("NPC Purchase requires its Presentation sibling");
+  if (hasCatalogTransport && (!hasPresentation || !hasNpcPurchase)) throw new Error("Catalog Transport requires its policy siblings");
   const result = { ...core }, versions = new Set([core.version]);
-  for (const [key, label] of [["presentation", "Presentation"], ["npcPurchase", "NPC Purchase"]]) {
+  for (const [key, label] of [["presentation", "Presentation"], ["npcPurchase", "NPC Purchase"], ["catalogTransport", "Catalog Transport"]]) {
     if (!Object.hasOwn(manifest, key)) continue;
     const bundle = verifyBundle(manifest[key], label);
     if (bundle.sourceSha256 !== core.sourceSha256) throw new Error("Shared client source changed: " + label + " source differs from Core");
@@ -100,7 +103,7 @@ export function readClientCoreRelease({ webRoot, manifest, requireExactClosure =
     path.join(root, "lib", "generated", "client_core_runtime.json")).toString("utf8")));
   const parent = directory(path.join(root, "public", "client-core"));
   const bundles = [normalized, ...(normalized.presentation ? [normalized.presentation] : []),
-    ...(normalized.npcPurchase ? [normalized.npcPurchase] : [])];
+    ...(normalized.npcPurchase ? [normalized.npcPurchase] : []), ...(normalized.catalogTransport ? [normalized.catalogTransport] : [])];
   const versionDirectories = bundles.map((bundle) => directory(path.join(parent, bundle.version)));
   if (requireExactClosure) {
     entries(parent, bundles.map((bundle) => bundle.version));

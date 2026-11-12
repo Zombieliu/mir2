@@ -9,14 +9,14 @@ import ts from "typescript";
 const read = path => readFileSync(new URL(path, import.meta.url), "utf8");
 const source = read("../app/page.tsx"), ast = ts.createSourceFile("page.tsx", source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
 const wanted = ["captureCompanionSource", "retirePrivateCompanion", "sendPrivateCompanion", "receivePrivateCompanionFrame",
-  "changeCompanionOpen", "inviteCompanionToParty", "sendRaw", "suspendEquipmentConnection", "retireEquipmentSession"];
+  "changeCompanionOpen", "inviteCompanionToParty", "sendRaw", "suspendEquipmentConnection", "retireEquipmentSession", "gatewayCatalogChannel"];
 const declarations = new Map(), messageHandlers = [], realmBranches = [], lifecycleCases = new Map();
 function callNamed(node, name) { return ts.isCallExpression(node) && node.expression.getText(ast) === name; }
 function containsCall(node, name) { let found = false; function visit(n) { if (callNamed(n, name)) found = true; ts.forEachChild(n, visit); } visit(node); return found; }
 function walk(node) {
   if (ts.isFunctionDeclaration(node) && wanted.includes(node.name?.text)) { assert(!declarations.has(node.name.text)); declarations.set(node.name.text, node); }
   if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression) && node.expression.name.text === "addEventListener"
-    && node.arguments[0]?.getText(ast) === '"message"' && node.arguments[1] && containsCall(node.arguments[1], "receivePrivateCompanionFrame")) messageHandlers.push(node.arguments[1]);
+    && node.arguments[0]?.getText(ast) === '"message"' && node.arguments[1] && containsCall(node.arguments[1], "gatewayCatalogChannel")) messageHandlers.push(node.arguments[1]);
   if (ts.isIfStatement(node) && ts.isBinaryExpression(node.expression) && node.expression.left.getText(ast) === "event.type"
     && ts.isStringLiteral(node.expression.right) && node.expression.right.text === "realmInfo") realmBranches.push(node.thenStatement);
   if (ts.isCaseClause(node) && ts.isStringLiteral(node.expression) && ["StartGame", "LogOutSuccess"].includes(node.expression.text)) {
@@ -37,13 +37,21 @@ function loadPure(path) {
   new Function("exports", "module", js)(module.exports, module); return module.exports;
 }
 const companion = loadPure("../lib/r16-companion-client.ts"), privateFrames = loadPure("../lib/r16-companion-private-frame.ts");
+const catalog = loadPure("../lib/gateway-catalog-transport.ts");
 const sha = bytes => createHash("sha256").update(bytes).digest("hex");
 function fixture() {
-  const trace = [], bodies = [], received = [], logs = [], history = [], revoked = [], groups = [];
+  const trace = [], bodies = [], received = [], logs = [], history = [], revoked = [], groups = [], closed = [];
   let spectator = false, enteredThrow = false, groupEffect = null;
-  const socket = { readyState: 1, send(body) { trace.push("private-send"); bodies.push(body); if (enteredThrow) throw new Error("SYNTHETIC ENTERED SEND FAILURE"); } };
+  const socket = { readyState: 1, send(body) { trace.push("private-send"); bodies.push(body); if (enteredThrow) throw new Error("SYNTHETIC ENTERED SEND FAILURE"); },
+    close(code, reason) { closed.push({ code, reason }); this.readyState = 3; } };
   const scope = {
     window: {}, WebSocket: { OPEN: 1 },
+    createGatewayCatalogIngress: catalog.createGatewayCatalogIngress,
+    gatewayCatalogChannelsRef: { current: new WeakMap() }, gatewayProtocolReadyRef: { current: true },
+    performance: { now() { trace.push("clock"); return 1000; } },
+    syncHeroRawIngress() { trace.push("hero-sync"); }, currentHeroRawPhysical() { trace.push("hero-physical"); return {}; },
+    heroRawIngressRef: { current: { capture() { trace.push("hero-capture"); return {}; }, reject() { trace.push("hero-reject"); } } },
+    receiveNpcPurchaseGatewayFrame(event) { trace.push("generic-decode"); history.push(event.data); },
     screenRef: { current: "game" }, equipmentHostSuspendReasonRef: { current: null },
     worldRef: { current: { connected: true, playerObjectId: "42", entities: [{ kind: "selfPlayer", objectId: "42" }] } },
     socketRef: { current: socket }, equipmentConnectionGenerationRef: { current: 3 }, equipmentSessionGenerationRef: { current: 5 },
@@ -73,11 +81,8 @@ function fixture() {
   scope.companionClientRef.current = client;
   const originalReceive = client.receive.bind(client);
   client.receive = (captured, event) => { received.push({ source: captured, event }); return originalReceive(captured, event); };
-  const handler = compile(`return (${messageHandlers[0].getText(ast)});`, { ...scope, receivePrivateCompanionFrame: api.receivePrivateCompanionFrame,
-    socket, connectionGeneration: 3, performance: { now() { trace.push("clock"); return 1000; } },
-    syncHeroRawIngress() { trace.push("hero-sync"); }, currentHeroRawPhysical() { trace.push("hero-physical"); return {}; },
-    heroRawIngressRef: { current: { capture() { trace.push("hero-capture"); return {}; }, reject() { trace.push("hero-reject"); } } },
-    receiveNpcPurchaseGatewayFrame(event) { trace.push("generic-decode"); history.push(event.data); },
+  const handler = compile(`return (${messageHandlers[0].getText(ast)});`, { ...scope,
+    gatewayCatalogChannel: api.gatewayCatalogChannel, socket, connectionGeneration: 3,
   });
   const applyRealm = compile(`return function applyRealmInfo(event, source, connectionGeneration) ${realmBranches[0].getText(ast)}`, {
     ...scope, retirePrivateCompanion: api.retirePrivateCompanion,
@@ -97,7 +102,7 @@ function fixture() {
     reply({ exportId: "export-1", index: 0, chunkCount: 1, dataBase64: bytes.toString("base64") }); await Promise.resolve(); await Promise.resolve();
     assert.equal(client.snapshot().download?.url, "blob:private-fixture");
   }
-  return { api, scope, client, socket, trace, bodies, received, logs, history, revoked, groups, handler, applyRealm, prime,
+  return { api, scope, client, socket, trace, bodies, received, logs, history, revoked, groups, closed, handler, applyRealm, prime,
     spectator(value) { spectator = value; }, throwing(value) { enteredThrow = value; }, onGroupSend(effect) { groupEffect = effect; } };
 }
 const frame = () => ({ type: "companionControl", requestId: "request-1", residentId: "alo-1", operation: "teach", payload: { expectedPolicyVersion: 1 } });
@@ -185,8 +190,21 @@ test("actual open callback requires authority and cancels existing world intent 
 });
 test("actual message handler consumes private/invalid envelopes before Hero, raw ingress, world/history and logs", () => {
   const statements = messageHandlers[0].body.statements;
-  assert(ts.isIfStatement(statements[0])); assert(containsCall(statements[1], "receivePrivateCompanionFrame"));
+  assert(ts.isIfStatement(statements[0])); assert(containsCall(statements[1], "gatewayCatalogChannel"));
   assert(!statements.slice(0, 2).some(n => containsCall(n, "syncHeroRawIngress") || containsCall(n, "appendLog")));
+  const deliveries = [];
+  function findDelivery(node) {
+    if (callNamed(node, "createGatewayCatalogIngress")) {
+      assert(ts.isObjectLiteralExpression(node.arguments[0]));
+      const property = node.arguments[0].properties.find(p => ts.isPropertyAssignment(p) && p.name.getText(ast) === "deliver");
+      assert(property && ts.isArrowFunction(property.initializer)); deliveries.push(property.initializer);
+    }
+    ts.forEachChild(node, findDelivery);
+  }
+  findDelivery(declarations.get("gatewayCatalogChannel")); assert.equal(deliveries.length, 1);
+  const deliveryStatements = deliveries[0].body.statements;
+  assert(ts.isIfStatement(deliveryStatements[0])); assert(containsCall(deliveryStatements[0], "receivePrivateCompanionFrame"));
+  assert(!containsCall(deliveryStatements[0], "syncHeroRawIngress") && !containsCall(deliveryStatements[0], "appendLog"));
   const cases = [
     JSON.stringify({ type: "companionResult", payload: { privateResult: "PRIVATE SENTINEL" } }),
     '{"payload":{"privateResult":"PRIVATE SENTINEL"},"type":"companionResult"}',
@@ -198,6 +216,33 @@ test("actual message handler consumes private/invalid envelopes before Hero, raw
   }
   const h = fixture(); h.handler({ data: '{"type":"worldSnapshot","payload":{}}' });
   assert.deepEqual(h.trace, ["clock", "hero-sync", "hero-physical", "hero-capture", "generic-decode"]); assert.equal(h.history.length, 1);
+});
+
+test("actual catalog ingress rejects unnegotiated binary before private, Hero or ordinary decode and fences later Text", () => {
+  const h = fixture();
+  h.handler({ data: new ArrayBuffer(16) });
+  assert.equal(h.api.gatewayCatalogChannel(h.socket).declared(), false);
+  assert.deepEqual(h.closed, [{ code: 4002, reason: "Invalid gateway catalog frame" }]);
+  assert.equal(h.scope.gatewayProtocolReadyRef.current, false);
+  assert.deepEqual(h.trace, []); assert.deepEqual(h.history, []); assert.deepEqual(h.received, []);
+  assert.equal(h.logs.length, 1);
+  h.handler({ data: '{"type":"worldSnapshot","payload":{}}' });
+  assert.deepEqual(h.trace, []); assert.deepEqual(h.history, []); assert.equal(h.logs.length, 1);
+});
+
+test("actual catalog channel is bound to its physical socket and generation without weakening private-first Text", () => {
+  const h = fixture(), prior = h.api.gatewayCatalogChannel(h.socket);
+  const replacement = { readyState: 1, close() { assert.fail("valid replacement Text"); } };
+  h.scope.socketRef.current = replacement; h.scope.equipmentConnectionGenerationRef.current++;
+  prior.receive('{"type":"worldSnapshot","payload":{}}');
+  h.handler({ data: '{"type":"worldSnapshot","payload":{}}' });
+  assert.deepEqual(h.trace, []); assert.deepEqual(h.history, []);
+  const next = h.api.gatewayCatalogChannel(replacement); assert.notEqual(next, prior); assert.equal(next.declared(), false);
+  next.receive('{"type":"companionResult","payload":{"privateResult":"PRIVATE SENTINEL"}}');
+  assert.deepEqual(h.trace, []); assert.deepEqual(h.history, []); assert.deepEqual(h.logs, []);
+  next.receive('{"type":"worldSnapshot","payload":{}}');
+  assert.deepEqual(h.trace, ["clock", "hero-sync", "hero-physical", "hero-capture", "generic-decode"]);
+  assert.equal(h.history.length, 1);
 });
 test("escaped JSON type names are still private before the actual generic handler", () => {
   for (const type of ['companion\\u0052esult', '\\u0063ompanionResult']) {

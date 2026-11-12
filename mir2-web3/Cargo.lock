@@ -4815,6 +4815,7 @@ version = "0.1.0"
 dependencies = [
  "flate2",
  "serde",
+ "serde_json",
 ]
 
 [[package]]

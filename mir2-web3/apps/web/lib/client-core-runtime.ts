@@ -3,6 +3,8 @@ import { persistentNpcPurchaseReceiptHost, type NpcPurchaseReceiptModule, type N
 export type { NpcPurchaseReceiptRuntime } from "./npc-purchase-receipt";
 import type { CrystalTooltipItem, CrystalTooltipDocument } from "./shared-item-tooltip";
 import manifest from "./generated/client_core_runtime.json";
+import { loadGatewayCatalogRuntime } from "./gateway-catalog-runtime";
+import type { GatewayCatalogDecoder } from "./gateway-catalog-transport";
 import type { RegistrationDraft, ChangePasswordDraft } from "./client-login-runtime";
 import { createSharedEntityAnimationAccessor, createSharedChatUi, searchSharedMapRoute, readSharedCashPreview, turnSharedCashPreview, readSharedNpcRepairQuote, readSharedPresentationItemTooltip, readSharedBagToBeltMovePlan, readSharedFishingClickTargets, readSharedFishingClickDecision, readSharedNpcPearlBuyPlan,
   type PresentationWasmModule, type CashPreviewWasmModule, type EntityAnimationRuntime, type MapRouteWasmModule, type ChatUiRuntime, type MapRouteInput, type MapRouteDecision,
@@ -153,6 +155,8 @@ export type EquipmentPendingRuntime = {
 };
 
 export type ClientCoreRuntime = {
+  /** A distinct small Rust transport policy; absent in legacy Text releases. */
+  gatewayCatalog?: GatewayCatalogDecoder | null;
   /** Optional ABI; older bundles keep their existing capabilities. */
   createAuthUi(seed: bigint): AuthUiRuntime;
   createChatUi(mask: number): ChatUiRuntime;
@@ -540,9 +544,12 @@ export function loadClientCoreRuntime(): Promise<ClientCoreRuntime> {
         throw new Error("Unsupported independent NPC purchase ABI");
       }
     }
+    const gatewayCatalog = await loadGatewayCatalogRuntime((manifest as unknown as { catalogTransport?: unknown }).catalogTransport,
+      manifest.sourceSha256, [manifest.version, presentationRelease.version, ...(npcPurchaseVersion ? [npcPurchaseVersion] : [])], window.location.origin, attempt);
     const getEntityAnimationRuntime = createSharedEntityAnimationAccessor(presentation);
     let mailSendSlot:MailSendSlotRuntime|null=null;
     return {
+      gatewayCatalog,
       createAuthUi(seed: bigint) { return createAuthUiRuntime(module, seed); },
       createChatUi(mask: number) { return createSharedChatUi(presentation, mask); },
       searchMapRoute(input: MapRouteInput) { return searchSharedMapRoute(presentation, input); },

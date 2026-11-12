@@ -1,0 +1,9 @@
+
+running 5 tests
+test gateway::catalog_transport::tests::native_catalog_invalid_binary_resets_only_written_pending_purchase_once ... ok
+test gateway::catalog_transport::tests::native_catalog_dispatch_validates_whole_batch_before_any_callback ... ok
+test gateway::catalog_transport::tests::native_catalog_all_four_shapes_keep_exact_order_and_original_text ... ok
+test gateway::catalog_transport::tests::native_catalog_dispatch_keeps_order_and_legacy_text_path ... ok
+test gateway::catalog_transport::tests::native_catalog_rejects_non_catalog_bad_shapes_and_invalid_later_envelopes ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1270 filtered out; finished in 0.00s

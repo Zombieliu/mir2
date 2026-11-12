@@ -1,35 +1,39 @@
 //! Separate lightweight Core, presentation and NPC purchase policy packages.
 //! Each delegates to shared, platform-neutral client rules without a renderer.
 
-#[cfg(all(feature = "presentation-ui", feature = "npc-purchase-policy"))]
-compile_error!("presentation-ui and npc-purchase-policy are mutually exclusive product features");
+#[cfg(any(
+    all(feature = "presentation-ui", feature = "npc-purchase-policy"),
+    all(feature = "presentation-ui", feature = "catalog-transport-policy"),
+    all(feature = "npc-purchase-policy", feature = "catalog-transport-policy")
+))]
+compile_error!("presentation-ui, npc-purchase-policy and catalog-transport-policy are mutually exclusive product features");
 
 // This visitor has no WebAssembly exports. Core Mail/Gold and NPC policy share
 // the same strict raw JSON boundary without linking each other's adapter ABI.
-#[cfg(any(test, not(feature = "presentation-ui")))]
+#[cfg(any(test, not(any(feature = "presentation-ui", feature = "catalog-transport-policy"))))]
 mod strict_json;
 
-#[cfg(not(any(feature = "presentation-ui", feature = "npc-purchase-policy")))]
+#[cfg(not(any(feature = "presentation-ui", feature = "npc-purchase-policy", feature = "catalog-transport-policy")))]
 mod core_api;
-#[cfg(not(any(feature = "presentation-ui", feature = "npc-purchase-policy")))]
+#[cfg(not(any(feature = "presentation-ui", feature = "npc-purchase-policy", feature = "catalog-transport-policy")))]
 pub use core_api::*;
 
-#[cfg(not(any(feature = "presentation-ui", feature = "npc-purchase-policy")))]
+#[cfg(not(any(feature = "presentation-ui", feature = "npc-purchase-policy", feature = "catalog-transport-policy")))]
 pub mod equipment_pending;
-#[cfg(not(any(feature = "presentation-ui", feature = "npc-purchase-policy")))]
+#[cfg(not(any(feature = "presentation-ui", feature = "npc-purchase-policy", feature = "catalog-transport-policy")))]
 pub mod auth_ui;
-#[cfg(not(any(feature = "presentation-ui", feature = "npc-purchase-policy")))]
+#[cfg(not(any(feature = "presentation-ui", feature = "npc-purchase-policy", feature = "catalog-transport-policy")))]
 pub mod mail_compose;
-#[cfg(not(any(feature = "presentation-ui", feature = "npc-purchase-policy")))]
+#[cfg(not(any(feature = "presentation-ui", feature = "npc-purchase-policy", feature = "catalog-transport-policy")))]
 pub mod mail_parcel;
-#[cfg(not(any(feature = "presentation-ui", feature = "npc-purchase-policy")))]
+#[cfg(not(any(feature = "presentation-ui", feature = "npc-purchase-policy", feature = "catalog-transport-policy")))]
 pub mod npc_gold_buy_attempt;
-#[cfg(not(any(feature = "presentation-ui", feature = "npc-purchase-policy")))]
+#[cfg(not(any(feature = "presentation-ui", feature = "npc-purchase-policy", feature = "catalog-transport-policy")))]
 pub mod ranking_inspect;
-#[cfg(not(any(feature = "presentation-ui", feature = "npc-purchase-policy")))]
+#[cfg(not(any(feature = "presentation-ui", feature = "npc-purchase-policy", feature = "catalog-transport-policy")))]
 pub use ranking_inspect::{ranking_inspect_abi_version, ranking_inspect_admission};
 // Cash Preview builds item layer data and turn directions without a renderer.
-#[cfg(not(any(feature = "presentation-ui", feature = "npc-purchase-policy")))]
+#[cfg(not(any(feature = "presentation-ui", feature = "npc-purchase-policy", feature = "catalog-transport-policy")))]
 pub mod cash_preview;
 // Keep the existing pure ABI/oracle tests in default test builds. Production
 // Core/PUI do not include the unpublished NPC receipt ABI.
@@ -73,3 +77,8 @@ pub use entity_animation::{entity_animation_abi_version, EntityAnimationBridge};
 pub mod npc_pearl_buy;
 #[cfg(feature = "presentation-ui")]
 pub use npc_pearl_buy::{npc_pearl_buy_abi_version, npc_pearl_buy_plan};
+
+#[cfg(feature = "catalog-transport-policy")]
+pub mod gateway_catalog;
+#[cfg(feature = "catalog-transport-policy")]
+pub use gateway_catalog::{gateway_catalog_abi_version, decode_gateway_catalog};

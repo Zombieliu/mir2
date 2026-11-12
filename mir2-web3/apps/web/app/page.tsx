@@ -118,6 +118,7 @@ import type { WorldFishingGesture, WorldFishingPointer, WorldFishingAnimationCon
   WorldFishingAnimationCommit, WorldFishingCallbacks } from "../lib/world-fishing-input";
 import { readCrystalEntityActionPose, readCrystalEntityMovementBlocked, type CrystalEntityActionPose } from "./components/original-client-entity-animation-runtime";
 import { NATIVE_ATTACK_MOVEMENT_CAPABILITY, nativeAttackMovementChannel } from "../lib/native-attack-movement";
+import { GATEWAY_CATALOG_CAPABILITY, createGatewayCatalogIngress, type GatewayCatalogIngress } from "../lib/gateway-catalog-transport";
 import { SharedCombatModeKeys, isCrystalCombatModeFunction, nextCombatModePhysicalGeneration, type CombatModeRuntime, type CombatModeOwner, type CombatModeProof } from "../lib/shared-combat-mode-keys";
 import { HeroPlayerAuthority, HeroPlayerOperations, captureHeroAction, heroActionBasisMatches, sameHeroSession, type HeroPlayerModel, type HeroItem, type HeroActionDto, type HeroOperationProof } from "../lib/hero-player-ui";
 import type { HeroCharacterPage, HeroManagementPage, HeroManagementWindows, HeroUiOrigin, HeroUiLease } from "./components/original-client-hero-management-window";
@@ -2181,6 +2182,7 @@ export default function HomePage() {
     movementShadowBridgeRef.current = createBevyMovementShadowBridge(() => runtimeRef.current);
   }
   const socketRef = useRef<WebSocket | null>(null);
+  const gatewayCatalogChannelsRef = useRef(new WeakMap<WebSocket, GatewayCatalogIngress>());
   const socialRepliesRef = useRef(new SocialIncomingReplies());
   const groupOperationsRef = useRef(new GroupOperations());
   const groupHiddenTargetsRef = useRef<{ scope: string; ids: Set<string> }>({ scope: "", ids: new Set() });
@@ -7711,6 +7713,7 @@ export default function HomePage() {
     manualSocketCloseRef.current = false;
     gatewayProtocolReadyRef.current = false;
     const socket = new WebSocket(gatewayUrl);
+    socket.binaryType = "arraybuffer";
     retireCharacterSelection();
     if (screenRef.current === "openingLogin") {
       screenRef.current = "login";
@@ -7794,17 +7797,7 @@ export default function HomePage() {
 
     socket.addEventListener("message", (event) => {
       if (socketRef.current !== socket || connectionGeneration !== equipmentConnectionGenerationRef.current) return;
-      if (receivePrivateCompanionFrame(event.data, socket, connectionGeneration)) return;
-      const receivedAtMs=performance.now();
-      syncHeroRawIngress();
-      const physical = currentHeroRawPhysical();
-      const delivery = heroRawIngressRef.current?.capture(event.data, physical, receivedAtMs) ?? null;
-      try {
-        receiveNpcPurchaseGatewayFrame(event, connectionGeneration, socket, delivery);
-      } catch (error) {
-        heroRawIngressRef.current?.reject(delivery);
-        appendLog(t("log.invalidGatewayPayload", [String(error)]), "system");
-      }
+      gatewayCatalogChannel(socket).receive(event.data);
     });
   }
 
@@ -10585,6 +10578,36 @@ export default function HomePage() {
     npcPurchaseDisplaySourceRef.current = null;
   }
 
+  function gatewayCatalogChannel(socket: WebSocket): GatewayCatalogIngress {
+    const prior = gatewayCatalogChannelsRef.current.get(socket);
+    if (prior) return prior;
+    const connectionGeneration = equipmentConnectionGenerationRef.current;
+    const channel = createGatewayCatalogIngress({
+      current: () => socketRef.current === socket && socket.readyState === WebSocket.OPEN
+        && connectionGeneration === equipmentConnectionGenerationRef.current,
+      deliver: data => {
+        if (receivePrivateCompanionFrame(data, socket, connectionGeneration)) return;
+        const receivedAtMs = performance.now();
+        syncHeroRawIngress();
+        const physical = currentHeroRawPhysical();
+        const delivery = heroRawIngressRef.current?.capture(data, physical, receivedAtMs) ?? null;
+        try {
+          receiveNpcPurchaseGatewayFrame({ data }, connectionGeneration, socket, delivery);
+        } catch (error) {
+          heroRawIngressRef.current?.reject(delivery);
+          appendLog(t("log.invalidGatewayPayload", [String(error)]), "system");
+        }
+      },
+      reject: () => {
+        gatewayProtocolReadyRef.current = false;
+        appendLog(t("log.invalidGatewayPayload", [t("log.gatewayWsClosed")]), "system");
+        socket.close(4002, "Invalid gateway catalog frame");
+      },
+    });
+    gatewayCatalogChannelsRef.current.set(socket, channel);
+    return channel;
+  }
+
   // Gateway capability frames replace the complete connection declaration.
   // Preserve only capabilities already declared successfully on this socket.
   function sendClientCapabilities(socket: WebSocket, addedCapability: "durableNpcPurchaseOwnerV1" | "nativeGameShopReceiptV1") {
@@ -10592,7 +10615,10 @@ export default function HomePage() {
     if (npcPurchaseOptInSocketsRef.current.has(socket) || addedCapability === "durableNpcPurchaseOwnerV1") capabilities.push("durableNpcPurchaseOwnerV1");
     if (cashReceiptSocketRef.current === socket || addedCapability === "nativeGameShopReceiptV1") capabilities.push("nativeGameShopReceiptV1");
     capabilities.push(NATIVE_ATTACK_MOVEMENT_CAPABILITY);
+    const catalog = gatewayCatalogChannel(socket), codec = questCoreRuntimeRef.current?.gatewayCatalog;
+    if (catalog.declared() || codec) capabilities.push(GATEWAY_CATALOG_CAPABILITY);
     socket.send(JSON.stringify({ type: "clientCapabilities", capabilities }));
+    catalog.declare(codec);
     nativeAttackMovementChannel(socket).declare();
   }
 

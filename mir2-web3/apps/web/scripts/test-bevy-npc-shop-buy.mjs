@@ -23,6 +23,8 @@ const actualPearlBuy=loadPearlBuyDependency("../lib/npc-pearl-buy.ts",{"./npc-pe
 const actualDurableNpc=loadPearlBuyDependency("../lib/npc-purchase-client.ts");
 const actualNpcRuntimeLanguage=loadPearlBuyDependency("../lib/r16-runtime-language.ts");
 const actualSocialBudget=loadPearlBuyDependency("../lib/social-operation-budget-host.ts");
+const actualGatewayCatalog=loadPearlBuyDependency("../lib/gateway-catalog-transport.ts");
+const actualCompanionPrivateFrames=loadPearlBuyDependency("../lib/r16-companion-private-frame.ts");
 const actualAttackMovement=loadPearlBuyDependency("../lib/native-attack-movement.ts",
   {"./world-fishing-source":loadPearlBuyDependency("../lib/world-fishing-source.ts")});
 test("Source30 durable receiver and retained facade pass strict no-emit type checking", () => {
@@ -538,6 +540,7 @@ const npcPageNames = ["npcGoldBuyCurrent", "readNpcGoldBuyCurrent", "quoteNpcSho
   "currentSpellsOwner", "currentSocialReplyOwner", "currentSocialReceiveOwner", "sameSocialPhysicalOwner", "observeNpcPearlWallet",
   "npcPurchaseFullEconomyCurrent", "npcPurchaseDisplayFingerprint", "npcPurchaseSnapshotEconomics", "receiveNpcPurchaseGatewayFrame", "applyNpcPurchaseOrdinarySnapshot", "npcPurchaseSessionKey",
   "npcPurchaseShopMatches", "applyNpcPurchaseShopSnapshot", "applyNpcShopCatalogPacket", "dispatchDurableNpcPurchase", "currentNpcShopTab",
+  "gatewayCatalogChannel", "captureCompanionSource", "receivePrivateCompanionFrame",
   "sendClientCapabilities", "observeNpcPurchaseSocket", "retireNpcPurchaseClient",
   "closeNpcRepairService", "cancelWorldFishingGesture", "retireWorldFishingGesture", "retainNpcPurchaseSelectors",
   "readNpcShopUiInput", "npcShopIntentMatchesStatus", "npcShopIntentMatchesCommand", "dispatchBevyNpcShopIntent"];
@@ -623,6 +626,13 @@ function npcPageHarness({ protocol = protocolOracle(), documentOwner = {}, coreV
   legacyMap.set = (proof, lease) => { legacyProofs.push(proof); return realSet(proof, lease); };
   const scope = {
     ...actualAttackMovement,
+    ...actualGatewayCatalog,
+    gatewayCatalogChannelsRef:{current:new WeakMap()},gatewayProtocolReadyRef:{current:true},
+    companionContextEpochRef:{current:0},companionRealmRef:{current:null},companionClientRef:{current:null},
+    readR16CompanionPrivateFrame:actualCompanionPrivateFrames.readR16CompanionPrivateFrame,
+    performance:{now:()=>0},syncHeroRawIngress:()=>{},
+    currentHeroRawPhysical:()=>({socket:scope.socketRef.current,connectionGeneration:scope.equipmentConnectionGenerationRef.current}),
+    heroRawIngressRef:{current:null},
     // Buy is outside the Native social budget. Run the real host's covers path
     // with no available runtime instead of replacing admission with a true stub.
     socialBudgetRef:{current:new actualSocialBudget.SocialOperationBudgetHost(()=>null)},
@@ -3409,10 +3419,11 @@ function capabilitySocketOpenCallbacks() {
   }
   visit(actualPageAst);return callbacks;
 }
-function pageCapabilityFixture(coreEarly=true) {
+function pageCapabilityFixture(coreEarly=true,{catalogCodec}={}) {
   let spectator=false;
   const page=npcPageHarness({spectatorMode:()=>spectator}),abi=s30Harness(),controls=[],attempts=[];let failCapability=null;
-  const core={...page.scope.questCoreRuntimeRef.current,getNpcPurchaseReceiptHost:()=>abi.host};
+  const core={...page.scope.questCoreRuntimeRef.current,getNpcPurchaseReceiptHost:()=>abi.host,
+    ...(catalogCodec?{gatewayCatalog:catalogCodec}:{})};
   page.scope.questCoreRuntimeRef.current=coreEarly?core:null;
   const originalSend=page.socket.send.bind(page.socket);
   page.socket.send=body=>{
@@ -3489,6 +3500,42 @@ test("Source64 actual socket and observer blockers preserve capability send gate
     assert.equal(f.page.scope.npcPurchaseOptInSocketsRef.current.has(f.page.socket),false,edge);
     assert.equal(f.page.scope.cashReceiptSocketRef.current,null,edge);
   }
+});
+
+test("actual catalog capability coexists with early or late Core NPC cash and attack declarations",()=>{
+  // Fixed Core capability port: these negotiation tests must not request a
+  // decode. The separate codec suite runs the real built Rust WASM decoder.
+  const codec=Object.freeze({decode(){assert.fail("capability negotiation must not decode a frame");}});
+  const gzip=actualGatewayCatalog.GATEWAY_CATALOG_CAPABILITY;
+  for(const early of [true,false]) {
+    const f=pageCapabilityFixture(early,{catalogCodec:codec});f.openFor();
+    if(!early){assert(!f.declarations().at(-1).includes(gzip));f.setCore();f.page.observeNpcPurchaseSocket(f.page.socket);}
+    assert.deepEqual(new Set(f.declarations().at(-1)),new Set(["durableNpcPurchaseOwnerV1","nativeGameShopReceiptV1","nativeAttackOutcomeV1",gzip]));
+    const channel=f.page.gatewayCatalogChannel(f.page.socket);assert.equal(channel.declared(),true);
+    assert.equal(f.page.scope.npcPurchaseOptInSocketsRef.current.has(f.page.socket),true);
+    assert.equal(f.page.scope.cashReceiptSocketRef.current,f.page.socket);
+    assert.equal(f.page.sent.filter(value=>value.type==="npcPurchaseOwner"&&value.action.kind==="begin").length,1);
+    f.page.scope.questCoreRuntimeRef.current=null;
+    f.page.sendClientCapabilities(f.page.socket,"nativeGameShopReceiptV1");
+    assert(f.declarations().at(-1).includes(gzip),"a later full replacement retains the socket's bound decoder");
+  }
+});
+
+test("actual catalog declaration stays unbound after failed capability send and does not carry to a new socket",()=>{
+  const codec=Object.freeze({decode(){assert.fail("capability negotiation must not decode a frame");}});
+  const f=pageCapabilityFixture(true,{catalogCodec:codec});f.fail("durableNpcPurchaseOwnerV1");
+  f.page.observeNpcPurchaseSocket(f.page.socket);
+  assert.equal(f.page.gatewayCatalogChannel(f.page.socket).declared(),false);
+  assert.equal(f.page.scope.npcPurchaseOptInSocketsRef.current.has(f.page.socket),false);
+  assert.equal(f.declarations().length,0);
+  f.fail(null);f.openFor();const prior=f.page.gatewayCatalogChannel(f.page.socket);assert.equal(prior.declared(),true);
+  const sent=[],next={readyState:1,send:body=>sent.push(JSON.parse(body))};
+  f.page.scope.socketRef.current=next;f.page.scope.equipmentConnectionGenerationRef.current++;
+  f.page.scope.questCoreRuntimeRef.current=null;f.page.sendClientCapabilities(next,"nativeGameShopReceiptV1");
+  assert.deepEqual(sent,[{type:"clientCapabilities",capabilities:["nativeGameShopReceiptV1","nativeAttackOutcomeV1"]}]);
+  assert.notEqual(f.page.gatewayCatalogChannel(next),prior);assert.equal(f.page.gatewayCatalogChannel(next).declared(),false);
+  assert.equal(f.page.scope.npcPurchaseOptInSocketsRef.current.has(next),false);
+  assert.equal(f.page.scope.cashReceiptSocketRef.current,f.page.socket);
 });
 
 

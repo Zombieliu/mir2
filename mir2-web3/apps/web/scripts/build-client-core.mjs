@@ -23,9 +23,10 @@ export function sourceFingerprint() {
   const coreRoot = path.resolve(crateRoot, "../client-core");
   const wireRoot = path.resolve(crateRoot, "../client-wire");
   const projectRoot = path.resolve(webRoot, "../..");
+  const protocolRoot = path.join(projectRoot, "packages/protocol");
   const sources = [path.join(crateRoot, "Cargo.toml"), path.join(crateRoot, "Cargo.lock"),
     path.join(crateRoot, "rust-toolchain.toml"), path.join(coreRoot, "Cargo.toml"),
-    path.join(wireRoot, "Cargo.toml"),
+    path.join(wireRoot, "Cargo.toml"), path.join(protocolRoot, "Cargo.toml"),
     fileURLToPath(import.meta.url), fileURLToPath(new URL("./lib/renderer-wasm-opt.mjs", import.meta.url)),
     fileURLToPath(new URL("./lib/client-core-release-files.mjs", import.meta.url))];
   function collect(directory) {
@@ -38,6 +39,7 @@ export function sourceFingerprint() {
   collect(path.join(coreRoot, "src"));
   collect(path.join(wireRoot, "src"));
   collect(path.join(crateRoot, "src"));
+  collect(path.join(protocolRoot, "src"));
   const entries = sources.map((filename) => ({
     name: path.relative(projectRoot, filename).split(path.sep).join("/"),
     text: fs.readFileSync(filename, "utf8").replace(/\r\n/g, "\n"),
@@ -55,8 +57,9 @@ function verify() {
   const manifest = verifyClientCoreManifest(JSON.parse(fs.readFileSync(manifestPath, "utf8")));
   if (!manifest.presentation) throw new Error("Client-core manifest requires its Presentation bundle; run npm run client-core:build");
   if (!manifest.npcPurchase) throw new Error("Client-core manifest requires its NPC Purchase bundle; run npm run client-core:build");
+  if (!manifest.catalogTransport) throw new Error("Client-core manifest requires its Catalog Transport bundle; run npm run client-core:build");
   const sourceSha256 = sourceFingerprint();
-  if ([manifest, manifest.presentation, manifest.npcPurchase].some((bundle) => bundle.sourceSha256 !== sourceSha256)) {
+  if ([manifest, manifest.presentation, manifest.npcPurchase, manifest.catalogTransport].some((bundle) => bundle.sourceSha256 !== sourceSha256)) {
     throw new Error("Shared client source changed; rebuild and commit its small WASM packages before publishing");
   }
   const release = readClientCoreRelease({ webRoot, manifest });
@@ -66,7 +69,8 @@ function verify() {
   }
   console.log("[client-core] verified " + manifest.version + "; wasm=" + manifest.files[files[1]].bytes +
     " bytes; presentation=" + manifest.presentation.version + "; wasm=" + manifest.presentation.files[files[1]].bytes +
-    " bytes; npcPurchase=" + manifest.npcPurchase.version + "; wasm=" + manifest.npcPurchase.files[files[1]].bytes + " bytes");
+    " bytes; npcPurchase=" + manifest.npcPurchase.version + "; wasm=" + manifest.npcPurchase.files[files[1]].bytes +
+    " bytes; catalogTransport=" + manifest.catalogTransport.version + "; wasm=" + manifest.catalogTransport.files[files[1]].bytes + " bytes");
 }
 
 function buildBundle(label, features, toolConfig, bindgen) {
@@ -148,21 +152,24 @@ if (process.argv[2] === "--verify" || (process.argv.length === 2 && prebuilt)) {
     throw new Error("platform-web requires wasm-bindgen 0.2.118, matching its Cargo.lock");
   }
   const sourceSha256 = sourceFingerprint();
-  // All three builds use the same guarded Cargo executable. Capture each bundle
+  // All policy builds use the same guarded Cargo executable. Capture each bundle
   // before the next feature build replaces the target artifact; nothing is published yet.
   const core = buildBundle("core", [], toolConfig, bindgen);
   const presentation = buildBundle("presentation", ["--features", "presentation-ui"], toolConfig, bindgen);
   const npcPurchase = buildBundle("npc-purchase", ["--features", "npc-purchase-policy"], toolConfig, bindgen);
-  if (sourceFingerprint() !== sourceSha256) throw new Error("Shared client source changed during the three builds");
+  const catalogTransport = buildBundle("catalog-transport", ["--features", "catalog-transport-policy"], toolConfig, bindgen);
+  if (sourceFingerprint() !== sourceSha256) throw new Error("Shared client source changed during the policy builds");
   const manifest = { ...describeBundle(core, sourceSha256),
     presentation: describeBundle(presentation, sourceSha256),
-    npcPurchase: describeBundle(npcPurchase, sourceSha256) };
+    npcPurchase: describeBundle(npcPurchase, sourceSha256),
+    catalogTransport: describeBundle(catalogTransport, sourceSha256) };
   verifyClientCoreManifest(manifest);
-  // All optimization, metadata, budget and cleanup checks have passed for all three.
+  // Every policy passed optimization, metadata, its original budget and cleanup.
   // Only then write immutable leaves, and publish their shared manifest last.
   publishBundle(core);
   publishBundle(presentation);
   publishBundle(npcPurchase);
+  publishBundle(catalogTransport);
   readClientCoreRelease({ webRoot, manifest });
   const json = JSON.stringify(manifest, null, 2) + "\n";
   fs.mkdirSync(path.dirname(manifestPath), { recursive: true });
