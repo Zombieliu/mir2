@@ -1,0 +1,163 @@
+{
+  "source": "72c00d20aeb82a9f87c79c2a8567a3146d9a2cfc",
+  "base": "1cc89f69a05dd35046f4497254a14b91128da1ed",
+  "baseline": "dpl_CWdmzkhCR1isr22yeXM3o5WekiwB",
+  "changes": [
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/app/components/original-client-shell-types.ts",
+      "sha": "a19c7a6e68a20f81eb32fdd8a8439e9a93e0d9c4"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/app/original-client-shell.tsx",
+      "sha": "2c9144199416d1fbd654de9fc00ab83ca2c4f8dc"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/app/page.tsx",
+      "sha": "b1747f8c09b222adaf1edfbd0c6dd6c0830335e1"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/lib/use-bevy-quest-ui.ts",
+      "sha": "bd8987c9b3b527655d5e8709cdeeeb29d83b0c67"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-quest-ui.mjs",
+      "sha": "615444c3cb845e9aa63084d0d8743f437e82dc97"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-policy.mjs",
+      "sha": "cfb69e4be11e8acd090b10b48ef1365bad1df671"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-r16-keyboard-ownership.mjs",
+      "sha": "9975b30a998078e5b2846b58fa44d5ca3d61b7d9"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/AGENT-CURRENT.md",
+      "sha": "80bacafc3f258447b0b8b8241c6033ddc6550327"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+      "sha": "e0aaae454f92d9e7348d30b45de4e04bd744e6d6"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+      "sha": "750f3f0a09f9cefd0224d636864130c5715b0383"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md",
+      "sha": "55a95b540eda43e5e2d5d020bf777ef07dbbb6c8"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/README.md",
+      "sha": "29d02c5ed20a52499d749dad3e1a22cc65867761"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/baseline-keyboard-quest.log",
+      "sha": "ba0b8a183cceb4303d56b77457d73fa4c8ce491a"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/candidate-adjacent-green.log",
+      "sha": "572324090719093abee54c537e48bba8af583f02"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/dispatch-removal-red.log",
+      "sha": "68606c201f8e28cd4155d73764719900cf8723d7"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/keyboard-red.log",
+      "sha": "9cc04f4e5a363cebe5b3a16dd3f1429df57a29a0"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/production-build-r2.log",
+      "sha": "83258dc972c3aa03e5307b01d60452f3e51c6f8f"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/quest-after-r7-hud.png",
+      "sha": "d1ff3a64083e33defb30b65326f2eb3ac87683ba"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/quest-after-r8-hud.png",
+      "sha": "bafdbf16a60e752759c17d10a4878b179a03060a"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/receipt.json",
+      "sha": "047b77ef20d345f8874847cd392d82989761471a"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/shortcut-adjacent-green.log",
+      "sha": "89ce3fd84a57ad84e725851ee879886cbf7d6c65"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/ui-intent-red.log",
+      "sha": "71e70e6f42caf3bcaa3257a5c3be20841abe8171"
+    }
+  ],
+  "binding": [
+    {
+      "filename": "mir2-web3/apps/web/app/page.tsx",
+      "blob": "b1747f8c09b222adaf1edfbd0c6dd6c0830335e1",
+      "rawBuildSha256": "0bbe58156a4d7257d11b252149adf2583f2b79db265594b03a9a34a1912759f9"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/original-client-shell.tsx",
+      "blob": "2c9144199416d1fbd654de9fc00ab83ca2c4f8dc",
+      "rawBuildSha256": "98fff3b4acc7935720349919e72e4be012414208dce4cb6590f7acbaed1fb7ac"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/components/original-client-shell-types.ts",
+      "blob": "a19c7a6e68a20f81eb32fdd8a8439e9a93e0d9c4",
+      "rawBuildSha256": "f92a7a4cbf347c4507e77edaf874f36b839be2831793413f78d5fdc4b63c6115"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/use-bevy-quest-ui.ts",
+      "blob": "bd8987c9b3b527655d5e8709cdeeeb29d83b0c67",
+      "rawBuildSha256": "afc8fbfab5b45ba4d6dcd6f128423e2707ea82072052a0698b20418d49789b84"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-policy.mjs",
+      "blob": "cfb69e4be11e8acd090b10b48ef1365bad1df671",
+      "rawBuildSha256": "d2695d84bcbf482aac256f0099cf76be123a17e0eaf78ebd5aceb5737351576d"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-keyboard-ownership.mjs",
+      "blob": "9975b30a998078e5b2846b58fa44d5ca3d61b7d9",
+      "rawBuildSha256": "fe95c2289ac9852eafd9553b6e9cce85f89d5d474f64b64ddc02da08169431b7"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-quest-ui.mjs",
+      "blob": "615444c3cb845e9aa63084d0d8743f437e82dc97",
+      "rawBuildSha256": "343f4a1a76a590558e6ff1c6a080c30fe05ee691df178d2afb65e9307f1ada1a"
+    }
+  ],
+  "buildReceiptSha256": "080868d4c716a4e0b8bba8034ef7192b5fab78567800d929cbd17ffa3ad3fa17",
+  "fixedAssets": "20261108-r16-08ec86d5105c",
+  "pendingPoseExcluded": true,
+  "limits": [
+    "real CDN cold WASM timed out at the unchanged 120-second gate; prior production uses the same immutable runtime",
+    "production rollout requires actual version, QR and game smoke readback"
+  ],
+  "workerBytes": 31322,
+  "workerSha256": "a3ee48352fd28d992d677b68ec17867280fb68895794fbff2800c4f70e759e71"
+}

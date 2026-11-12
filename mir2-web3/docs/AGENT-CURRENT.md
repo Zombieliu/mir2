@@ -15,7 +15,7 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
-2026-11-12 本地候选保留运行包启动前失败后的共用UI请求，移动监听器跨任务窗提交保持订阅，实时核对Native输入占用。121项检查、生产构建及两后端各8次关Q立即移动、彻底重开、113/113和注销存档通过；默认首次503后同文档重进恢复。真实CDN两次WASM正文仍在120秒中止，冷启动未过，继续传输与字体长尾。候选未发布，正式站仍888dd59046，原62文件及3个绘制候选保全。[输入恢复与冷启动边界](evidence/r16-native-input-recovery-20261112/README.md)；此前[静态读取恢复](evidence/r16-static-header-recovery-20261112/README.md)仍有效。
+2026-11-12 正式站已发布72c00d20ae，包含静态图片响应头恢复、共用UI重试与任务窗关窗首步修复。68项发布检查、云端构建、线上9地址摘要、简繁首次出码、手机尺寸官方Testnet钱包签名、普通建角进比奇、权威移动、共享HUD/繁中Q、113/113及正常退出均通过。点击进游戏至首帧22.8秒/HUD观测138.3秒，继续CDN运行包与字体长尾；此前120秒失败保留。原62文件和3个绘制候选未纳入，完整1:1仍开放。[正式发布与试玩](evidence/r16-native-release-20261112/README.md) · [两后端输入恢复](evidence/r16-native-input-recovery-20261112/README.md)
 
 2026-11-12 正式站已发布 `51d2dcc346`：共享图片取消与图集计时/JSON大小缓存身份修复。本机75项、生产构建及两后端重开同档通过；公网简繁出码、手机尺寸官方钱包Testnet签名、进比奇、权威移动、共用HUD/任务窗、113/113预取和正常退出通过，无需回滚。云端缓存身份与计算一致；Worker正常更新缓存一次，未迁移旧007缓存。本次观测起点到首画面65.2秒/共用HUD104.7秒（点击进游戏后约6.8秒/46.3秒），继续优化冷加载；实体手机、完整1:1及历史未结项仍开放。[发布与边界](evidence/r16-cache-repair-20261112/README.md)
 

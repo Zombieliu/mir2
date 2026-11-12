@@ -1,0 +1,297 @@
+{
+  "schema": 1,
+  "kind": "numeron-r16-release",
+  "passed": true,
+  "domainMovePending": true,
+  "customDomainChanged": false,
+  "oldGameProjectMutatedByHelper": false,
+  "writes": [
+    {
+      "operation": "promote",
+      "site": "game",
+      "deployment": "dpl_DMT1cgUABySkvpn6VQEvAXD7j3dL"
+    }
+  ],
+  "rollbacks": [],
+  "credentialsRecorded": false,
+  "operation": "numeron-qr-promote",
+  "sourceSha": "72c00d20aeb82a9f87c79c2a8567a3146d9a2cfc",
+  "implementationSha": "39e8bcaeec33712491db690ed947b07116f763de",
+  "projects": {
+    "original": {
+      "project": "prj_Bl3ttB4PzcdCpJMYLRhzQjkdXyTz",
+      "production": "dpl_3NBhFUPKxNF4nccRnG94ZhDq1iz6",
+      "rootDirectory": "mir2-web3/apps/web",
+      "nodeVersion": "24.x"
+    },
+    "main": {
+      "project": "prj_Q14gZuvjxkfqOCExhqOrYiR2UbxA",
+      "production": "dpl_BWkLQWS8SUB3JFFvFXCenDr2ULmR",
+      "rootDirectory": null,
+      "nodeVersion": "24.x"
+    },
+    "game": {
+      "project": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+      "production": "dpl_CWdmzkhCR1isr22yeXM3o5WekiwB",
+      "rootDirectory": "mir2-web3/apps/web",
+      "nodeVersion": "26.x"
+    }
+  },
+  "sourceClosure": {
+    "base": "1cc89f69a05dd35046f4497254a14b91128da1ed",
+    "assetSource": "f2de762309768b51b39438c2437c14e819df9bf7",
+    "ref": "codex/windows-player-journey",
+    "changedFiles": [
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/app/components/original-client-shell-types.ts",
+        "sha": "a19c7a6e68a20f81eb32fdd8a8439e9a93e0d9c4"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/app/original-client-shell.tsx",
+        "sha": "2c9144199416d1fbd654de9fc00ab83ca2c4f8dc"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/app/page.tsx",
+        "sha": "b1747f8c09b222adaf1edfbd0c6dd6c0830335e1"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/lib/use-bevy-quest-ui.ts",
+        "sha": "bd8987c9b3b527655d5e8709cdeeeb29d83b0c67"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/scripts/test-bevy-quest-ui.mjs",
+        "sha": "615444c3cb845e9aa63084d0d8743f437e82dc97"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-policy.mjs",
+        "sha": "cfb69e4be11e8acd090b10b48ef1365bad1df671"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/scripts/test-r16-keyboard-ownership.mjs",
+        "sha": "9975b30a998078e5b2846b58fa44d5ca3d61b7d9"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/docs/AGENT-CURRENT.md",
+        "sha": "80bacafc3f258447b0b8b8241c6033ddc6550327"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+        "sha": "e0aaae454f92d9e7348d30b45de4e04bd744e6d6"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+        "sha": "750f3f0a09f9cefd0224d636864130c5715b0383"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md",
+        "sha": "55a95b540eda43e5e2d5d020bf777ef07dbbb6c8"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/README.md",
+        "sha": "29d02c5ed20a52499d749dad3e1a22cc65867761"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/baseline-keyboard-quest.log",
+        "sha": "ba0b8a183cceb4303d56b77457d73fa4c8ce491a"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/candidate-adjacent-green.log",
+        "sha": "572324090719093abee54c537e48bba8af583f02"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/dispatch-removal-red.log",
+        "sha": "68606c201f8e28cd4155d73764719900cf8723d7"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/keyboard-red.log",
+        "sha": "9cc04f4e5a363cebe5b3a16dd3f1429df57a29a0"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/production-build-r2.log",
+        "sha": "83258dc972c3aa03e5307b01d60452f3e51c6f8f"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/quest-after-r7-hud.png",
+        "sha": "d1ff3a64083e33defb30b65326f2eb3ac87683ba"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/quest-after-r8-hud.png",
+        "sha": "bafdbf16a60e752759c17d10a4878b179a03060a"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/receipt.json",
+        "sha": "047b77ef20d345f8874847cd392d82989761471a"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/shortcut-adjacent-green.log",
+        "sha": "89ce3fd84a57ad84e725851ee879886cbf7d6c65"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/ui-intent-red.log",
+        "sha": "71e70e6f42caf3bcaa3257a5c3be20841abe8171"
+      }
+    ]
+  },
+  "assetPublication": {
+    "runId": "42494701555",
+    "artifactId": 13622863928,
+    "manifestSha256": "32255399aaae2dc9a133a5827252256ece782aaae5d237152ffebc2d8f272155",
+    "manifestBytes": 15716826
+  },
+  "candidates": {
+    "game": {
+      "id": "dpl_DMT1cgUABySkvpn6VQEvAXD7j3dL",
+      "url": "numeron-r16-hdjmhq085-obelisk-labs.vercel.app"
+    }
+  },
+  "trafficBefore": {
+    "target": "dpl_CWdmzkhCR1isr22yeXM3o5WekiwB",
+    "alias": "dpl_CWdmzkhCR1isr22yeXM3o5WekiwB"
+  },
+  "protectedEntryScene": {
+    "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+    "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+    "bytes": 458475
+  },
+  "protectedEntryFloor": {
+    "path": "/bootstrap/r16-floor/e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d.json",
+    "sha256": "e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d",
+    "bytes": 439896
+  },
+  "protectedEntryPlayerMale": {
+    "path": "/bootstrap/r16-visuals/164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08.json",
+    "sha256": "164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08",
+    "bytes": 289851
+  },
+  "protectedEntryPlayerFemale": {
+    "path": "/bootstrap/r16-visuals/0f52c6a6632c44eea1ab3cf37eb58da52f6c786cf3573813d595fcdd8ca040d0.json",
+    "sha256": "0f52c6a6632c44eea1ab3cf37eb58da52f6c786cf3573813d595fcdd8ca040d0",
+    "bytes": 282415
+  },
+  "protectedEntryNpcs": {
+    "path": "/bootstrap/r16-visuals/9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9.json",
+    "sha256": "9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9",
+    "bytes": 313909
+  },
+  "protectedEntryObjects1": {
+    "path": "/bootstrap/r16-visuals/2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5.json",
+    "sha256": "2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5",
+    "bytes": 395412
+  },
+  "protectedEntryObjects2": {
+    "path": "/bootstrap/r16-visuals/8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d.json",
+    "sha256": "8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d",
+    "bytes": 395320
+  },
+  "protectedEntryObjects3": {
+    "path": "/bootstrap/r16-visuals/348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1.json",
+    "sha256": "348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1",
+    "bytes": 395216
+  },
+  "protectedEntryMonsterStanding": {
+    "path": "/bootstrap/r16-visuals/d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308.json",
+    "sha256": "d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308",
+    "bytes": 513566
+  },
+  "protectedEntryMonsterWalking": {
+    "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+    "sha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+    "bytes": 764724
+  },
+  "protectedEntryGameplayLocale": {
+    "path": "/bootstrap/r16-locales/b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c.json",
+    "sha256": "b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c",
+    "bytes": 3283113
+  },
+  "protectedQr": {
+    "relay": "https://relay.dubhe.obelisk.build",
+    "wallet": "https://wallet.dubhe.obelisk.build",
+    "pending": true
+  },
+  "trafficAfter": {
+    "target": "dpl_DMT1cgUABySkvpn6VQEvAXD7j3dL",
+    "alias": "dpl_DMT1cgUABySkvpn6VQEvAXD7j3dL"
+  },
+  "publicQr": {
+    "relay": "https://relay.dubhe.obelisk.build",
+    "wallet": "https://wallet.dubhe.obelisk.build",
+    "pending": true
+  },
+  "publicEntryScene": {
+    "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+    "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+    "bytes": 458475
+  },
+  "publicEntryFloor": {
+    "path": "/bootstrap/r16-floor/e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d.json",
+    "sha256": "e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d",
+    "bytes": 439896
+  },
+  "publicEntryPlayerMale": {
+    "path": "/bootstrap/r16-visuals/164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08.json",
+    "sha256": "164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08",
+    "bytes": 289851
+  },
+  "publicEntryPlayerFemale": {
+    "path": "/bootstrap/r16-visuals/0f52c6a6632c44eea1ab3cf37eb58da52f6c786cf3573813d595fcdd8ca040d0.json",
+    "sha256": "0f52c6a6632c44eea1ab3cf37eb58da52f6c786cf3573813d595fcdd8ca040d0",
+    "bytes": 282415
+  },
+  "publicEntryNpcs": {
+    "path": "/bootstrap/r16-visuals/9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9.json",
+    "sha256": "9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9",
+    "bytes": 313909
+  },
+  "publicEntryObjects1": {
+    "path": "/bootstrap/r16-visuals/2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5.json",
+    "sha256": "2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5",
+    "bytes": 395412
+  },
+  "publicEntryObjects2": {
+    "path": "/bootstrap/r16-visuals/8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d.json",
+    "sha256": "8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d",
+    "bytes": 395320
+  },
+  "publicEntryObjects3": {
+    "path": "/bootstrap/r16-visuals/348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1.json",
+    "sha256": "348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1",
+    "bytes": 395216
+  },
+  "publicEntryMonsterStanding": {
+    "path": "/bootstrap/r16-visuals/d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308.json",
+    "sha256": "d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308",
+    "bytes": 513566
+  },
+  "publicEntryMonsterWalking": {
+    "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+    "sha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+    "bytes": 764724
+  },
+  "publicEntryGameplayLocale": {
+    "path": "/bootstrap/r16-locales/b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c.json",
+    "sha256": "b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c",
+    "bytes": 3283113
+  }
+}
