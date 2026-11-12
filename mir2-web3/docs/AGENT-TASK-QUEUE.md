@@ -6,7 +6,7 @@ Updated 2026-11-13 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-13 已正式发布`491819b20e`：70项发布保护、云端构建与9条公网文件核验通过；简繁出码、手机尺寸官方Testnet一次签名、普通建角进比奇、首步4.144秒、113/113、共享HUD/繁中Q、六套原字体完整SHA、真实Worker停启及普通退出均通过。功能回放true，但原120秒Native冷启仍false：首可操作后158.084秒才观测到共享HUD，217.375秒采样仍未ready，未放宽门槛。上游CDP捕获SC首源13.3MB后HTTP2错误，完整备用源恢复；继续冷加载。原65及本轮134份WIP保全，整体1:1开放。[正式发布、功能与性能边界](evidence/r16-font-missing-retry-20261113/production/README.md)
+2026-11-13 首帧后独立资源并行候选通过88项、生产构建、默认/共享WebGL2及提前退出重进；受控Native34.313/34.373秒，六字体、113/113、Q、Worker停启和重开存档通过，原8秒首步/120秒Native门槛保留。尚未发布，正式站仍491819b20e；该版公网158.084秒冷启失败继续保留。旧134份WIP保全，整体1:1开放。[候选与失败边界](evidence/r16-boot-overlap-20261113/README.md) · [上一正式版](evidence/r16-font-missing-retry-20261113/production/README.md)
 
 ## 保留的当前未结项
 

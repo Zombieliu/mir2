@@ -15,7 +15,7 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
-2026-11-13 已正式发布`491819b20e`：70项发布保护、云端构建与9条公网文件核验通过；简繁出码、手机尺寸官方Testnet一次签名、普通建角进比奇、首步4.144秒、113/113、共享HUD/繁中Q、六套原字体完整SHA、真实Worker停启及普通退出均通过。功能回放true，但原120秒Native冷启仍false：首可操作后158.084秒才观测到共享HUD，217.375秒采样仍未ready，未放宽门槛。上游CDP捕获SC首源13.3MB后HTTP2错误，完整备用源恢复；继续冷加载。原65及本轮134份WIP保全，整体1:1开放。[正式发布、功能与性能边界](evidence/r16-font-missing-retry-20261113/production/README.md)
+2026-11-13 首帧后独立资源并行候选通过88项、生产构建、默认/共享WebGL2及提前退出重进；受控Native34.313/34.373秒，六字体、113/113、Q、Worker停启和重开存档通过，原8秒首步/120秒Native门槛保留。尚未发布，正式站仍491819b20e；该版公网158.084秒冷启失败继续保留。旧134份WIP保全，整体1:1开放。[候选与失败边界](evidence/r16-boot-overlap-20261113/README.md) · [上一正式版](evidence/r16-font-missing-retry-20261113/production/README.md)
 
 2026-11-12 正式站已发布 `51d2dcc346`：共享图片取消与图集计时/JSON大小缓存身份修复。本机75项、生产构建及两后端重开同档通过；公网简繁出码、手机尺寸官方钱包Testnet签名、进比奇、权威移动、共用HUD/任务窗、113/113预取和正常退出通过，无需回滚。云端缓存身份与计算一致；Worker正常更新缓存一次，未迁移旧007缓存。本次观测起点到首画面65.2秒/共用HUD104.7秒（点击进游戏后约6.8秒/46.3秒），继续优化冷加载；实体手机、完整1:1及历史未结项仍开放。[发布与边界](evidence/r16-cache-repair-20261112/README.md)
 

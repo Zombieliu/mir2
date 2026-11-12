@@ -5650,15 +5650,17 @@ export default function HomePage() {
           return;
         }
 
-        // Let existing foreground HUD attempts settle before the large binary
-        // competes for their bandwidth. A settled stage may still have failed
-        // assets; Native and ordinary image readers retain their own recovery.
-        await requestAssetPrewarmStage("game")?.catch(() => {});
+        // The scene is already playable. Start independent font/binary reads
+        // alongside the full HUD prewarm and observe its eventual settlement.
+        // Native still owns readiness and the initializer's canvas/boot checks.
+        const recordForegroundWarmSettled = () => {
+          if (!disposed) markMir2CacheMilestone("bevyRuntimeForegroundWarmSettled", { stage: "game" });
+        };
+        void requestAssetPrewarmStage("game")?.then(recordForegroundWarmSettled, recordForegroundWarmSettled);
         if (disposed) return;
-        markMir2CacheMilestone("bevyRuntimeForegroundWarmSettled", { stage: "game" });
         appendLog(t("runtime.loadingModule"), "network");
-        // Foreground HUD attempts (including bounded recovery) have settled.
-        // Overlap these independent bodies with the phase-bounded runtime read.
+        // Overlap these independent bodies with the phase-bounded runtime read
+        // and the unchanged foreground HUD attempts/recovery.
         markMir2CacheMilestone("bevyRuntimeFontPrewarmStart");
         void prewarmBevyRuntimeFonts({ signal: fontPrewarmController.signal }).then((result) => {
           if (disposed) return;

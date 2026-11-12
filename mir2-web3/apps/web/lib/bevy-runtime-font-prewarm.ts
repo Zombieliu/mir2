@@ -12,7 +12,7 @@ export const BEVY_RUNTIME_FONT_PATHS = [
   "/original-ui/fonts/NotoSansArabic-Regular.ttf",
 ] as const;
 
-/** Warm complete bodies after foreground assets; never gate renderer boot. */
+/** Warm complete bodies after first playable; never gate renderer boot. */
 export async function prewarmBevyRuntimeFonts({
   signal,
   fetchImpl,
@@ -46,7 +46,7 @@ export async function prewarmBevyRuntimeFonts({
       }
     }
   };
-  // Start after first paint, renderer checks and foreground HUD recovery.
+  // Start after first paint and renderer checks, alongside HUD recovery.
   // It cannot consume six image lanes at once.
   await Promise.all([consume(), consume()]);
   return { requested: BEVY_RUNTIME_FONT_PATHS.length, completed, failed, aborted: signal?.aborted === true, bytes };
