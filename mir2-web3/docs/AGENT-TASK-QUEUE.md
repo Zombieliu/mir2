@@ -6,14 +6,15 @@ Updated 2026-11-13 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-13 首帧后独立资源并行候选通过88项、生产构建、默认/共享WebGL2及提前退出重进；受控Native34.313/34.373秒，六字体、113/113、Q、Worker停启和重开存档通过，原8秒首步/120秒Native门槛保留。尚未发布，正式站仍491819b20e；该版公网158.084秒冷启失败继续保留。旧134份WIP保全，整体1:1开放。[候选与失败边界](evidence/r16-boot-overlap-20261113/README.md) · [上一正式版](evidence/r16-font-missing-retry-20261113/production/README.md)
+2026-11-13 已发布`40be2972ea`（含6997f810ed玩家反馈）：70项发布保护、云构建与9条公网文件核验通过。简繁出码、官方手机尺寸钱包Testnet一次签名、普通建角进比奇、113/113、共享HUD/繁中Q、六套完整原字体SHA、Worker停启和退出通过；首步15.913秒超过原8秒，完整验收false。Native首可操作后83.587秒观测，原120秒本轮通过；旧158.084秒及首步失败保留。CDP见坐标前666条初始化消息/心跳延迟，继续有序catalog协商及写入定位。134份WIP保全，整体1:1开放。[正式发布与失败边界](evidence/r16-boot-overlap-20261113/production/README.md)
 
 ## 保留的当前未结项
 
 - [x] Worker重启缓存修复已发布f6acaad6b0；公网停启后同一HUD图与配置通过。受控两后端全流程另记，公网联合检查仍false。[发布/失败范围](evidence/r16-worker-restart-20261113/production/README.md)
 - [x] 当前源临时失败＋旧源404不再变成资产负缓存；101项、构建、Chrome六字体与两后端完整重开通过。[候选](evidence/r16-font-missing-retry-20261113/README.md)
 - [x] 字体重试已发布491819b20e，公网功能回放、6套完整字体、113/113、共享HUD/Q及Worker停启通过。[正式回执](evidence/r16-font-missing-retry-20261113/production/README.md)
-- [ ] 原120秒Native冷启仍失败（首可操作后158.084秒）；继续61.084秒HUD预取阻塞独立字体/WASM启动、SC长正文与HTTP2中断。保留原8秒首步与全部失败，不提高门槛。
+- [x] 首帧后独立字体/运行包并行已发布40be2972ea；本轮公网Native83.587秒通过原120秒，六字体、113/113、共享Q与Worker停启通过，旧158.084秒失败保留。[发布](evidence/r16-boot-overlap-20261113/production/README.md)
+- [ ] 首步初始化回包长尾：本轮15.913秒超过原8秒。CDP见坐标前666条消息及心跳延迟；核对既有catalog gzip的Web有序解码/协商与Gateway写入。保留原门槛、完整定义和失败，不用冷启通过替代首步。
 
 - [x] 已执行df7aace169发布与扩展验收，公网分项通过但完整冷加载false，已回退正式站72c00d20ae。[正式回执](evidence/r16-font-release-20261112/README.md)
 - [x] 已发布a4f99c2111，公网实际113/113、6项补读、缓存标记、完整视觉/Native/Q和退出通过。[正式分项](evidence/r16-hud-recovery-20261112/production/README.md)
