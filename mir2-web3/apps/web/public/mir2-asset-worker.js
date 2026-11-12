@@ -44,6 +44,11 @@ const cacheWritesSinceTrim = new Map();
 const cacheTrimInflight = new Map();
 const TRANSIENT_FETCH_RETRY_DELAYS_MS = [120, 350];
 const TRANSIENT_FETCH_STATUSES = new Set([408, 425, 429, 500, 502, 503, 504]);
+// Shared image reads outlive individual consumers. Bound each origin's header
+// wait so a cancelled page retry cannot keep rejoining one stalled request.
+// This is shorter than the page's 10s header budget; complete response bodies
+// keep streaming after the header timer is cleared.
+const STATIC_ASSET_HEADERS_TIMEOUT_MS = 7_000;
 // A new page attempt must not inherit a coalesced network request whose
 // headers have stopped arriving. The page owns the JSON body idle deadline.
 const SCENE_HEADERS_TIMEOUT_MS = 7_000;
@@ -320,12 +325,12 @@ async function fetchStaticAsset(request, fallbackRequests) {
   }
 
   let originResponse = null;
-  originResponse = await fetchWithTransientRetries(freshStaticAssetRequest(request));
+  originResponse = await fetchStaticAssetCandidate(freshStaticAssetRequest(request));
   if (originResponse?.ok) return originResponse;
 
   let lastRemoteResponse = null;
   for (const remoteRequest of remoteRequests) {
-    const remoteResponse = await fetchWithTransientRetries(freshStaticAssetRequest(remoteRequest));
+    const remoteResponse = await fetchStaticAssetCandidate(freshStaticAssetRequest(remoteRequest));
     if (!remoteResponse) continue;
     lastRemoteResponse = remoteResponse;
     if (remoteResponse.ok) return remoteResponse;
@@ -429,6 +434,18 @@ function freshStaticAssetRequest(request) {
   // A versioned CacheStorage must never be repopulated from stale HTTP-cache
   // bytes. Atlas manifests and their PNG pages have to advance atomically.
   return new Request(source, { cache: "reload" });
+}
+
+async function fetchStaticAssetCandidate(request) {
+  const deadline = new AbortController();
+  const signal = AbortSignal.any([request.signal, deadline.signal]);
+  const timer = setTimeout(() => deadline.abort(), STATIC_ASSET_HEADERS_TIMEOUT_MS);
+  try {
+    return await fetchWithTransientRetries(new Request(request, { signal }), signal);
+  } finally {
+    // Do not abort here: consumers and CacheStorage still own the live body.
+    clearTimeout(timer);
+  }
 }
 
 async function coalescedStaticAssetFetch(request) {

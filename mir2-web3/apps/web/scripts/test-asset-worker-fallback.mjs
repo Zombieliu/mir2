@@ -877,3 +877,101 @@ test("only explicit hosted configuration opts into the current font mirror", asy
     assert.equal(vm.runInContext("runtimeConfig.fontMirrorFirst", context), value === true);
   }
 });
+
+test("a stalled shared image header retires before page retries keep joining it", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const calls = [], owner = new AbortController();
+  let releaseOrigin;
+  const { context } = createWorkerContext(request => {
+    calls.push(request);
+    if (!request.url.startsWith("https://preview.example.test/")) {
+      return Promise.resolve(new Response(new Uint8Array([137, 80, 78, 71])));
+    }
+    return new Promise((resolve, reject) => {
+      releaseOrigin = () => resolve(new Response(new Uint8Array([1])));
+      request.signal.addEventListener("abort", () => reject(request.signal.reason), { once: true });
+    });
+  });
+  vm.runInContext(`runtimeConfig = { ...runtimeConfig,
+    remoteAssetBaseUrls: ["https://public-r2.example.test/release-a"] }`, context);
+  context.image = new Request("https://preview.example.test/original-ui/Prguse/1.png", { signal: owner.signal });
+  const first = vm.runInContext("coalescedStaticAssetFetch(image)", context);
+  const retry = vm.runInContext("coalescedStaticAssetFetch(new Request(image.url))", context);
+  t.after(async () => { releaseOrigin?.(); await Promise.allSettled([first, retry]); });
+  owner.abort("first image unmounted");
+  assert.equal(calls[0].signal.aborted, false, "consumer cancellation must still leave the shared request alive");
+  t.mock.timers.tick(6_999); await new Promise(resolve => setImmediate(resolve));
+  assert.equal(calls.length, 1);
+  t.mock.timers.tick(1); await new Promise(resolve => setImmediate(resolve));
+  assert.equal(calls.length, 2, "the worker must leave a stalled origin before the page's 10s header deadline");
+  assert.equal(calls[0].signal.aborted, true);
+  assert.equal(calls[1].url, "https://public-r2.example.test/release-a/original-ui/Prguse/1.png");
+  const responses = await Promise.all([first, retry]);
+  for (const response of responses) assert.deepEqual([...new Uint8Array(await response.arrayBuffer())], [137, 80, 78, 71]);
+  assert.equal(vm.runInContext("staticAssetInflightFetches.size", context), 0);
+  assert.equal(vm.runInContext("staticAssetNegativeCache.size", context), 0);
+});
+
+test("each static fallback gets its own bounded header attempt", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const calls = [], releases = [];
+  const { context } = createWorkerContext(request => {
+    calls.push(request);
+    if (request.url.startsWith("https://second-r2.example.test/")) return Promise.resolve(new Response("complete"));
+    return new Promise((resolve, reject) => {
+      releases.push(() => resolve(new Response(null, { status: 404 })));
+      request.signal.addEventListener("abort", () => reject(request.signal.reason), { once: true });
+    });
+  });
+  vm.runInContext(`runtimeConfig = { ...runtimeConfig,
+    remoteAssetBaseUrls: ["https://first-r2.example.test/v1", "https://second-r2.example.test/v1"] }`, context);
+  const pending = vm.runInContext(`coalescedStaticAssetFetch(new Request("https://preview.example.test/original-ui/Prguse/4.png"))`, context);
+  t.after(async () => { releases.forEach(release => release()); await pending; });
+  for (let n = 0; n < 2; n++) {
+    t.mock.timers.tick(7_000); await new Promise(resolve => setImmediate(resolve));
+    assert.equal(calls.length, n + 2);
+    assert.equal(calls[n].signal.aborted, true);
+  }
+  assert.deepEqual(calls.map(request => new URL(request.url).hostname),
+    ["preview.example.test", "first-r2.example.test", "second-r2.example.test"]);
+  assert.equal(await (await pending).text(), "complete");
+  assert.equal(vm.runInContext("staticAssetInflightFetches.size", context), 0);
+});
+
+test("an exhausted static header deadline is transient and the next read is fresh", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  let calls = 0, release;
+  const { context } = createWorkerContext(request => {
+    if (++calls > 1) return Promise.resolve(new Response("recovered"));
+    return new Promise((resolve, reject) => {
+      release = () => resolve(new Response(null, { status: 404 }));
+      request.signal.addEventListener("abort", () => reject(request.signal.reason), { once: true });
+    });
+  });
+  const read = () => vm.runInContext(`coalescedStaticAssetFetch(new Request("https://preview.example.test/original-ui/Prguse/6.png"))`, context);
+  const pending = read();
+  t.after(async () => { release?.(); await pending; });
+  t.mock.timers.tick(7_000); await new Promise(resolve => setImmediate(resolve));
+  assert.equal((await pending).status, 504);
+  assert.equal(vm.runInContext("staticAssetNegativeCache.size", context), 0);
+  assert.equal(vm.runInContext("staticAssetInflightFetches.size", context), 0);
+  assert.equal(await (await read()).text(), "recovered");
+  assert.equal(calls, 2);
+});
+
+test("static header expiry never truncates an already delivered image body", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  let body, signal;
+  const { context } = createWorkerContext(request => {
+    signal = request.signal;
+    return Promise.resolve(new Response(new ReadableStream({ start(controller) { body = controller; } })));
+  });
+  const response = await vm.runInContext(`coalescedStaticAssetFetch(new Request("https://preview.example.test/original-ui/Prguse/8.png"))`, context);
+  const pending = response.arrayBuffer();
+  t.after(() => { try { body.close(); } catch {} });
+  body.enqueue(new Uint8Array([1, 2]));
+  t.mock.timers.tick(21_000); await new Promise(resolve => setImmediate(resolve));
+  assert.equal(signal.aborted, false, "header timing must be cleared before streaming the body");
+  body.enqueue(new Uint8Array([3, 4])); body.close();
+  assert.deepEqual([...new Uint8Array(await pending)], [1, 2, 3, 4]);
+});
