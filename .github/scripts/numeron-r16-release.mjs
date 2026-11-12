@@ -16,120 +16,85 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: '72c00d20aeb82a9f87c79c2a8567a3146d9a2cfc',
+  source: 'df7aace1692ccbd28291a917b7e74eafe6942940',
   sourceRef: BRANCH,
-  baseSource: '1cc89f69a05dd35046f4497254a14b91128da1ed',
+  baseSource: '99110428632b43e945c2341e8ca9058a8324937a',
   assetSource: 'f2de762309768b51b39438c2437c14e819df9bf7',
   changedFiles: [
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/app/components/original-client-shell-types.ts",
-      "sha": "a19c7a6e68a20f81eb32fdd8a8439e9a93e0d9c4"
+      "filename": "mir2-web3/apps/web/lib/bevy-runtime-font-prewarm.ts",
+      "sha": "026c4f90ca766e6ade536b1ef55e0e5bbefb8647"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/app/original-client-shell.tsx",
-      "sha": "2c9144199416d1fbd654de9fc00ab83ca2c4f8dc"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/app/page.tsx",
-      "sha": "b1747f8c09b222adaf1edfbd0c6dd6c0830335e1"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/lib/use-bevy-quest-ui.ts",
-      "sha": "bd8987c9b3b527655d5e8709cdeeeb29d83b0c67"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-bevy-quest-ui.mjs",
-      "sha": "615444c3cb845e9aa63084d0d8743f437e82dc97"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-policy.mjs",
-      "sha": "cfb69e4be11e8acd090b10b48ef1365bad1df671"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-r16-keyboard-ownership.mjs",
-      "sha": "9975b30a998078e5b2846b58fa44d5ca3d61b7d9"
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs",
+      "sha": "3285ec9deffbbb73ea3ecc189e7d222384089158"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/AGENT-CURRENT.md",
-      "sha": "80bacafc3f258447b0b8b8241c6033ddc6550327"
+      "sha": "ab1a900c1b400345cd0df1f7dc1867d25be9f7cb"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
-      "sha": "e0aaae454f92d9e7348d30b45de4e04bd744e6d6"
+      "sha": "74b03eb8771c2dd7e2ac32a2a9c9ad6ff826bbc0"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
-      "sha": "750f3f0a09f9cefd0224d636864130c5715b0383"
+      "sha": "2e705f88cf4aeeb39acb097249b479f0501a9345"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md",
-      "sha": "55a95b540eda43e5e2d5d020bf777ef07dbbb6c8"
+      "sha": "d1846fc9a0455fcdbf4c10397f58d9f1a4f09a38"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/README.md",
-      "sha": "29d02c5ed20a52499d749dad3e1a22cc65867761"
+      "filename": "mir2-web3/docs/evidence/r16-startup-timing-20261112/README.md",
+      "sha": "65598c7679944a59c27bd6a9356e5ca0b568944a"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/baseline-keyboard-quest.log",
-      "sha": "ba0b8a183cceb4303d56b77457d73fa4c8ce491a"
+      "filename": "mir2-web3/docs/evidence/r16-startup-timing-20261112/build-receipt.json",
+      "sha": "ce8f1459a4cb49ff93a4daecde23e1620316e91b"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/candidate-adjacent-green.log",
-      "sha": "572324090719093abee54c537e48bba8af583f02"
+      "filename": "mir2-web3/docs/evidence/r16-startup-timing-20261112/clean-candidate-green.log",
+      "sha": "184aa4e81752079e8dd8a5807d9c1ae13b4723b3"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/dispatch-removal-red.log",
-      "sha": "68606c201f8e28cd4155d73764719900cf8723d7"
+      "filename": "mir2-web3/docs/evidence/r16-startup-timing-20261112/observe-network.mjs",
+      "sha": "bed08531773e3f1d6b0da38440499894939e19f3"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/keyboard-red.log",
-      "sha": "9cc04f4e5a363cebe5b3a16dd3f1429df57a29a0"
+      "filename": "mir2-web3/docs/evidence/r16-startup-timing-20261112/order-red-r2.log",
+      "sha": "6f4afae45cae766449279ccf4402b270f00e1e63"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/production-build-r2.log",
-      "sha": "83258dc972c3aa03e5307b01d60452f3e51c6f8f"
+      "filename": "mir2-web3/docs/evidence/r16-startup-timing-20261112/production-build-r1.log",
+      "sha": "55e2165e1da7b875088bf2afad8a0bfc84a0f98c"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/quest-after-r7-hud.png",
-      "sha": "d1ff3a64083e33defb30b65326f2eb3ac87683ba"
+      "filename": "mir2-web3/docs/evidence/r16-startup-timing-20261112/receipt.json",
+      "sha": "1e96293acd98b04b70054e07696e4048b093a9ba"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/quest-after-r8-hud.png",
-      "sha": "bafdbf16a60e752759c17d10a4878b179a03060a"
+      "filename": "mir2-web3/docs/evidence/r16-startup-timing-20261112/webgl2-quest.png",
+      "sha": "d94cab684faefb60934aa8e6d0947aa6e8eace4d"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/receipt.json",
-      "sha": "047b77ef20d345f8874847cd392d82989761471a"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/shortcut-adjacent-green.log",
-      "sha": "89ce3fd84a57ad84e725851ee879886cbf7d6c65"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/ui-intent-red.log",
-      "sha": "71e70e6f42caf3bcaa3257a5c3be20841abe8171"
+      "filename": "mir2-web3/docs/evidence/r16-startup-timing-20261112/webgpu-quest.png",
+      "sha": "cce9619399f70aceebe1c44f712b3307b216c3fa"
     }
   ],
   entryScene: {
@@ -188,7 +153,7 @@ export const QR_RELEASE = Object.freeze({
     bytes: 3283113,
   },
   assetRunId: '42494701555',
-  baseline: 'dpl_CWdmzkhCR1isr22yeXM3o5WekiwB',
+  baseline: 'dpl_DMT1cgUABySkvpn6VQEvAXD7j3dL',
   relay: 'https://relay.dubhe.obelisk.build',
 });
 const QR_OPERATIONS = ['numeron-qr-stage', 'numeron-qr-promote', 'numeron-qr-rollback'];
