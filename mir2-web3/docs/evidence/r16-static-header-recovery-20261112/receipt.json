@@ -839,9 +839,11 @@
   ],
   "reproduction": {
     "script": "probe-worker.mjs",
-    "sha256": "020dbaad2aca9d42b273c62ef0f77de994bcf5730265f5a2c43af1cfc82b8606",
     "portablePublicProbePassed": true,
     "elapsedMs": 7620,
-    "fullBodyPassed": true
+    "fullBodyPassed": true,
+    "executedWorkingSha256": "020dbaad2aca9d42b273c62ef0f77de994bcf5730265f5a2c43af1cfc82b8606",
+    "committedScriptSha256": "cca2ffd7a000c483df0e66387af6ba6dda4ca408895991f9d4a752dcbe59f443",
+    "lineEndingNormalization": "Executed working source uses CRLF; Git stores the identical source text with LF. Equality after newline normalization verified."
   }
 }
