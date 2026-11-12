@@ -6,7 +6,7 @@ Updated 2026-11-13 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-13 Web共用catalog压缩候选通过：Rust21项、实际Native5项、Node55＋购买/英雄196项、Chrome传输与两后端整游戏通过。529条完整定义633495→80448字节，提前行走88/539/129/533毫秒；Native34.336/34.426秒，保留原8秒/120秒门槛。新增独立190701字节WASM，旧三包字节一致，原WIP及并发文档改动保留。尚未发布，公网仍40be2972ea，15.913秒首步失败保留；完整1:1开放。[候选、失败与范围](evidence/r16-web-catalog-20261113/README.md)
+2026-11-13 已发布8654cdcb36（含6997玩家反馈）：Stage/Promote、11条公网文件、简繁出码、一次官方手机尺寸Testnet登录签名、比奇及退出通过。公网529条初始化完整压成80448字节；首步1.919秒通过原8秒。运行包正文中断、共用HUD失败，原120秒Native与完整验收false；Worker真实停启后缓存字节/SHA通过。六字体与113/113恢复通过。保留旧15.913秒首步及158.084秒Native失败，下一项为boot前有界下载恢复；整体1:1开放。[正式结果与原失败](evidence/r16-web-catalog-20261113/production/README.md)
 
 ## 保留的当前未结项
 
@@ -14,8 +14,8 @@ Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 G
 - [x] 当前源临时失败＋旧源404不再变成资产负缓存；101项、构建、Chrome六字体与两后端完整重开通过。[候选](evidence/r16-font-missing-retry-20261113/README.md)
 - [x] 字体重试已发布491819b20e，公网功能回放、6套完整字体、113/113、共享HUD/Q及Worker停启通过。[正式回执](evidence/r16-font-missing-retry-20261113/production/README.md)
 - [x] 首帧后独立字体/运行包并行已发布40be2972ea；本轮公网Native83.587秒通过原120秒，六字体、113/113、共享Q与Worker停启通过，旧158.084秒失败保留。[发布](evidence/r16-boot-overlap-20261113/production/README.md)
-- [x] Web共用Rust目录解码候选通过两后端、Native5项和整批边界；529条完整定义压成10帧/80448字节。 [候选](evidence/r16-web-catalog-20261113/README.md)
-- [ ] 公网首步长尾：正式40仍保留15.913秒超原8秒。发布压缩候选后重验出码、签名、进城、原8秒首步/120秒Native与完整目录；保留失败，不用本地压缩量替代公网资格。
+- [x] Web共用Rust目录解码已发布8654；公网529条初始化完整接收，首步1.919秒通过，原失败保留。[候选](evidence/r16-web-catalog-20261113/README.md) · [发布](evidence/r16-web-catalog-20261113/production/README.md)
+- [ ] 公网运行包正文恢复：同源和固定CDN正文先后中断，App未boot、共享HUD未就绪；完整回放false。核对boot前有界重试/取消，保留原8秒首步与120秒Native门槛、既有失败及只boot一次约束。
 
 - [x] 已执行df7aace169发布与扩展验收，公网分项通过但完整冷加载false，已回退正式站72c00d20ae。[正式回执](evidence/r16-font-release-20261112/README.md)
 - [x] 已发布a4f99c2111，公网实际113/113、6项补读、缓存标记、完整视觉/Native/Q和退出通过。[正式分项](evidence/r16-hud-recovery-20261112/production/README.md)
