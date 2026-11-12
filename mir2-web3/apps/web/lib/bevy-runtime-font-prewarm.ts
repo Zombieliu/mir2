@@ -1,15 +1,15 @@
 import { fetchPrewarmAsset } from "./asset-prewarm-request";
 
-// The six families used by Native QuestDisplayLanguage::font_asset. Small
-// fallback families go first; the two CJK bodies share the same Worker fills
-// as CSS/Bevy readers. No alternative font or locale is substituted.
+// The six families used by Native QuestDisplayLanguage::font_asset. Begin the
+// two large CJK bodies first so their transfers overlap smaller fallback reads;
+// CSS/Bevy readers share the same Worker fills and unchanged font bytes.
 export const BEVY_RUNTIME_FONT_PATHS = [
+  "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+  "/original-ui/fonts/NotoSansTC.ttf",
   "/original-ui/fonts/NotoSans-Regular.ttf",
   "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
   "/original-ui/fonts/NotoSansThai-Regular.ttf",
   "/original-ui/fonts/NotoSansArabic-Regular.ttf",
-  "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
-  "/original-ui/fonts/NotoSansTC.ttf",
 ] as const;
 
 /** Warm complete bodies while the renderer downloads; never gate its boot. */

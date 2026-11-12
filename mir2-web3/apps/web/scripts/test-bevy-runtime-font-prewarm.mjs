@@ -105,3 +105,24 @@ test('a failed font does not withdraw the runtime or prevent warming the other f
  assert.equal(result.completed.length,5);assert.equal(result.failed.length,1);assert.equal(result.failed[0].path,failed);
  assert.equal(result.aborted,false);
 });
+
+test('the slow CJK families do not wait behind short fallback requests',async t=>{
+ t.mock.timers.enable({apis:['setTimeout']});
+ let done=false;
+ const owner=new AbortController();
+ const pending=library.prewarmBevyRuntimeFonts({signal:owner.signal,fetchImpl:async path=>{
+  if(!/NotoSans(?:CJKsc-Regular\.otf|TC\.ttf)$/.test(path)){
+   await new Promise(resolve=>setTimeout(resolve,4000));return new Response(new Uint8Array([1]));
+  }
+  const chunks=path.endsWith('.otf')?6:2;let count=0,timer,cancelled=false;
+  return new Response(new ReadableStream({start(stream){const emit=()=>{
+   if(cancelled)return;stream.enqueue(new Uint8Array([1]));
+   if(++count===chunks)stream.close();else timer=setTimeout(emit,10000);
+  };timer=setTimeout(emit,10000);},cancel(){cancelled=true;clearTimeout(timer);}}));
+ }}).then(result=>{done=true;return result;});
+ try{
+  await turn();for(let second=0;second<60;second++){t.mock.timers.tick(1000);await turn();}
+  assert(done,'all families should finish by the slowest CJK body; small headers must not delay its start');
+  assert.equal((await pending).completed.length,6);
+ }finally{owner.abort();await pending;await turn();}
+});
