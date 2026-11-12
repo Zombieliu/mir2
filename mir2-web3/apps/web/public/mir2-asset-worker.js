@@ -463,38 +463,58 @@ async function fetchStaticAsset(request, fallbackRequests) {
   }
 
   const remoteRequests = fallbackRequests || createRemoteAssetRequests(request);
+  const attemptedUrls = new Set();
+  let missingResponse = null;
+  let unavailableResponse = null;
+  let allSourcesMissing = true;
+  const discard = (response) => { void response?.body?.cancel().catch(() => {}); };
+  const failed = (response) => {
+    if (response?.status === 404 || response?.status === 410) {
+      discard(missingResponse);
+      missingResponse = response;
+    } else {
+      // An unavailable current source plus an absent inherited copy does not
+      // prove that this asset is missing. Preserve a useful HTTP error (and its
+      // Retry-After/body) or return a retryable 504, without poisoning retries.
+      allSourcesMissing = false;
+      if (response && !response.ok && !unavailableResponse) unavailableResponse = response;
+      else discard(response);
+    }
+  };
+  const succeeded = (response) => {
+    discard(missingResponse);
+    discard(unavailableResponse);
+    return response;
+  };
   for (const fontMirror of currentReleaseFontMirrors(request, remoteRequests)) {
+    attemptedUrls.add(fontMirror.url);
     const response = await fetchFontMirror(fontMirror, request.signal);
-    if (response?.status === 200) return response;
-    void response?.body?.cancel().catch(() => {});
+    if (response?.status === 200) return succeeded(response);
+    failed(response);
   }
 
-  let originResponse = null;
-  originResponse = await fetchStaticAssetCandidate(freshStaticAssetRequest(request));
-  if (originResponse?.ok) return originResponse;
+  const originResponse = await fetchStaticAssetCandidate(freshStaticAssetRequest(request));
+  if (originResponse?.ok) return succeeded(originResponse);
+  failed(originResponse);
 
-  let lastRemoteResponse = null;
   for (const remoteRequest of remoteRequests) {
+    // These exact URLs already ran with the complete-font reader. Repeating
+    // them here adds a second header wait and can bypass its body validation.
+    // A fresh logical request may retry them normally.
+    if (attemptedUrls.has(remoteRequest.url)) continue;
+    attemptedUrls.add(remoteRequest.url);
     const remoteResponse = await fetchStaticAssetCandidate(freshStaticAssetRequest(remoteRequest));
-    if (!remoteResponse) continue;
-    lastRemoteResponse = remoteResponse;
-    if (remoteResponse.ok) return remoteResponse;
+    if (remoteResponse?.ok) return succeeded(remoteResponse);
+    failed(remoteResponse);
   }
 
-  if (lastRemoteResponse && (lastRemoteResponse.status === 404 || !originResponse)) {
-    if (lastRemoteResponse.status === 404 || lastRemoteResponse.status === 410) {
-      rememberNegativeResult(negativeKey, lastRemoteResponse.status);
-    }
-    return lastRemoteResponse;
+  if (allSourcesMissing && missingResponse) {
+    rememberNegativeResult(negativeKey, missingResponse.status);
+    return missingResponse;
   }
 
-  if (originResponse) {
-    if (!originResponse.ok && (originResponse.status === 404 || originResponse.status === 410)) {
-      rememberNegativeResult(negativeKey, originResponse.status);
-    }
-    return originResponse;
-  }
-
+  discard(missingResponse);
+  if (unavailableResponse) return unavailableResponse;
   // Both the app origin and the remote asset origin rejected (offline / DNS /
   // aborted). Degrade gracefully for this request, but do not negative-cache
   // transient 504s because the next frame fetch may succeed immediately.

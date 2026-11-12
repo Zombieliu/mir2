@@ -1,0 +1,201 @@
+TAP version 13
+# Subtest: current font transport failure plus an older-release 404 is retryable, not confirmed missing
+not ok 1 - current font transport failure plus an older-release 404 is retryable, not confirmed missing
+  ---
+  duration_ms: 504.9458
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-asset-worker-missing-retry.mjs:40:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+
+    404 !== 504
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 504
+  actual: 404
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-worker-missing-retry.mjs:50:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: the actual prewarm retries the current font after a mixed missing/transport failure
+not ok 2 - the actual prewarm retries the current font after a mixed missing/transport failure
+  ---
+  duration_ms: 995.0346
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-asset-worker-missing-retry.mjs:56:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+
+    404 !== 200
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 200
+  actual: 404
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-worker-missing-retry.mjs:66:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: a preferred font source is attempted once per logical read and is retried on the next read
+not ok 3 - a preferred font source is attempted once per logical read and is retried on the next read
+  ---
+  duration_ms: 1.8709
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-asset-worker-missing-retry.mjs:71:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+
+      [
+        'https://assets.example.test/mir2/v/current/original-ui/fonts/NotoSansTC.ttf',
+        'https://game.example.test/original-ui/fonts/NotoSansTC.ttf',
+    +   'https://assets.example.test/mir2/v/current/original-ui/fonts/NotoSansTC.ttf',
+        'https://assets.example.test/mir2/v/older/original-ui/fonts/NotoSansTC.ttf'
+      ]
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 'https://assets.example.test/mir2/v/current/original-ui/fonts/NotoSansTC.ttf'
+    1: 'https://game.example.test/original-ui/fonts/NotoSansTC.ttf'
+    2: 'https://assets.example.test/mir2/v/older/original-ui/fonts/NotoSansTC.ttf'
+  actual:
+    0: 'https://assets.example.test/mir2/v/current/original-ui/fonts/NotoSansTC.ttf'
+    1: 'https://game.example.test/original-ui/fonts/NotoSansTC.ttf'
+    2: 'https://assets.example.test/mir2/v/current/original-ui/fonts/NotoSansTC.ttf'
+    3: 'https://assets.example.test/mir2/v/older/original-ui/fonts/NotoSansTC.ttf'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-worker-missing-retry.mjs:74:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: an original 403 is preserved instead of an optional mirror 404
+not ok 4 - an original 403 is preserved instead of an optional mirror 404
+  ---
+  duration_ms: 1.4098
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-asset-worker-missing-retry.mjs:81:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+
+    404 !== 403
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 403
+  actual: 404
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-worker-missing-retry.mjs:88:12)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: an original 429 is preserved instead of an optional mirror 404
+not ok 5 - an original 429 is preserved instead of an optional mirror 404
+  ---
+  duration_ms: 0.9063
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-asset-worker-missing-retry.mjs:81:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+
+    404 !== 429
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 429
+  actual: 404
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-worker-missing-retry.mjs:88:12)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: an original 503 is preserved instead of an optional mirror 404
+not ok 6 - an original 503 is preserved instead of an optional mirror 404
+  ---
+  duration_ms: 0.7546
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-asset-worker-missing-retry.mjs:81:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+
+    404 !== 503
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 503
+  actual: 404
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-worker-missing-retry.mjs:88:12)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: a font mirror error keeps its response body and Retry-After if later sources are missing
+not ok 7 - a font mirror error keeps its response body and Retry-After if later sources are missing
+  ---
+  duration_ms: 1.1033
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-asset-worker-missing-retry.mjs:97:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+
+    404 !== 403
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 403
+  actual: 404
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-worker-missing-retry.mjs:102:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: a single confirmed 404 still has short negative caching
+ok 8 - a single confirmed 404 still has short negative caching
+  ---
+  duration_ms: 0.7248
+  type: 'test'
+  ...
+# Subtest: a single confirmed 410 still has short negative caching
+ok 9 - a single confirmed 410 still has short negative caching
+  ---
+  duration_ms: 0.6346
+  type: 'test'
+  ...
+# Subtest: a later successful current source still wins over earlier missing/error responses
+ok 10 - a later successful current source still wins over earlier missing/error responses
+  ---
+  duration_ms: 1.8864
+  type: 'test'
+  ...
+# Subtest: a valid ranged asset keeps its complete 206 response semantics
+ok 11 - a valid ranged asset keeps its complete 206 response semantics
+  ---
+  duration_ms: 1.487
+  type: 'test'
+  ...
+1..11
+# tests 11
+# suites 0
+# pass 4
+# fail 7
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1774.2604
