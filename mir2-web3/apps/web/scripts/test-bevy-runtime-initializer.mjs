@@ -249,3 +249,128 @@ test('invalid or oversized bytes fail closed instead of consulting another sourc
     assert.equal(calls,1);assert.equal(initialized,false);assert.equal(cancelled,oversize?1:0);
   }
 });
+
+test('two interrupted pinned bodies recover once before a single glue initialization', async () => {
+  const urls = ['https://app.example.test/bevy-runtime/v/pinned/pkg-webgpu/runtime.wasm',
+    'https://assets.example.test/release/bevy-runtime/v/pinned/pkg-webgpu/runtime.wasm'];
+  const requests = [], events = [], signals = [];
+  let imports = 0, canvases = 0, initialized = 0;
+  const runtime = { async default({ module_or_path }) {
+    initialized++; assert(module_or_path instanceof WebAssembly.Module);
+  } };
+  assert.equal(await initialize({
+    loadModule: async () => { imports++; return runtime; }, wasmUrl: urls[0], wasmFallbackUrls: [urls[1]],
+    timeoutMs: 120000, waitForCanvas: async () => { canvases++; }, onDownloadAttempt: value => events.push(value),
+    fetchImpl: async request => {
+      requests.push(request.url); signals.push(request.signal);
+      if (requests.length > 2) {
+        assert(signals.slice(0, 2).every(signal => signal.aborted));
+        assert.equal(initialized, 0); return response();
+      }
+      return new Response(new ReadableStream({ start(controller) {
+        controller.enqueue(binary.slice(0, 4));
+        setImmediate(() => controller.error(new TypeError('Failed to fetch: connection reset')));
+      } }), { headers: { 'content-type': 'application/wasm' } });
+    },
+  }), runtime);
+  assert.deepEqual(requests, [urls[0], urls[1], urls[1]]);
+  assert.deepEqual([imports, canvases, initialized], [1, 1, 1]);
+  assert.deepEqual(events.filter(x => x.state === 'failed').map(x => [x.bytes, x.reason, x.retryable]),
+    [[4, 'network', true], [4, 'network', true]]);
+  assert.deepEqual(events.at(-1), { attempt: 3, sourceIndex: 1, retry: true,
+    state: 'completed', phase: 'compile', bytes: binary.length, status: 200, reason: undefined, retryable: undefined });
+});
+
+test('a stalled last mirror is canceled at the unchanged idle boundary before its one retry', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  let calls = 0, canceled = 0, initialized = 0, source, interruptedSignal;
+  const events = [];
+  const pending = initialize({ loadModule: async () => ({ async default() { initialized++; } }),
+    wasmUrl: 'https://app.example.test/pinned.wasm', wasmFallbackUrls: ['https://assets.example.test/pinned.wasm'],
+    timeoutMs: 120000, waitForCanvas: async () => {}, onDownloadAttempt: value => events.push(value),
+    fetchImpl: async request => {
+      calls++;
+      if (calls === 1) return new Response(null, { status: 503 });
+      if (calls === 3) { assert(interruptedSignal.aborted); assert.equal(canceled, 1); return response(); }
+      interruptedSignal = request.signal;
+      return new Response(new ReadableStream({ start(controller) { source = controller; controller.enqueue(binary.slice(0, 4)); },
+        cancel() { canceled++; } }), { headers: { 'content-type': 'application/wasm' } });
+    },
+  });
+  while (!source) await flush();
+  await flush(); t.mock.timers.tick(14999); await flush(); assert.equal(calls, 2);
+  t.mock.timers.tick(1); await pending;
+  assert.equal(calls, 3); assert.equal(initialized, 1); assert.equal(canceled, 1);
+  assert.throws(() => source.enqueue(binary), TypeError, 'a retired producer cannot supply the recovered binary');
+  assert(events.some(x => x.state === 'failed' && x.sourceIndex === 1 && x.reason === 'body-idle' && x.bytes === 4));
+});
+
+test('transient exhaustion remains bounded and permanent responses do not add retries', async () => {
+  for (const status of [503, 404, 403]) {
+    let calls = 0, initialized = 0;
+    await assert.rejects(initialize({ loadModule: async () => ({ async default() { initialized++; } }),
+      wasmUrl: 'https://app.example.test/pinned.wasm', wasmFallbackUrls: ['https://assets.example.test/pinned.wasm'],
+      timeoutMs: 120000, waitForCanvas: async () => {}, fetchImpl: async () => { calls++; return new Response(null, { status }); },
+    }), new RegExp('HTTP ' + status));
+    assert.equal(calls, status === 503 ? 3 : 2); assert.equal(initialized, 0);
+  }
+});
+
+test('invalid or oversized last-mirror bytes cannot turn an earlier transient failure into a retry', async () => {
+  for (const [body, limit, errorType] of [[new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]), 1024, WebAssembly.CompileError],
+    [customBinary, binary.length, RangeError]]) {
+    let calls = 0, initialized = false;
+    await assert.rejects(initialize({ loadModule: async () => ({ async default() { initialized = true; } }),
+      wasmUrl: 'https://app.example.test/pinned.wasm', wasmFallbackUrls: ['https://assets.example.test/pinned.wasm'],
+      timeoutMs: 120000, maxBodyBytes: limit, waitForCanvas: async () => {}, fetchImpl: async () => {
+        calls++; return calls === 1 ? new Response(null, { status: 503 }) : new Response(body, { headers: { 'content-type': 'application/wasm' } });
+      },
+    }), errorType);
+    assert.equal(calls, 2); assert.equal(initialized, false);
+  }
+});
+
+test('the original final header deadline is terminal even after an earlier retryable failure', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  let calls = 0, lastSignal, settled = false;
+  const pending = initialize({ loadModule: async () => ({}), wasmUrl: 'https://app.example.test/pinned.wasm',
+    wasmFallbackUrls: ['https://assets.example.test/pinned.wasm'], timeoutMs: 120000, waitForCanvas: async () => {},
+    fetchImpl: async request => {
+      calls++; if (calls === 1) return new Response(null, { status: 503 });
+      lastSignal = request.signal;
+      return new Promise((_, reject) => lastSignal.addEventListener('abort', () => reject(lastSignal.reason), { once: true }));
+    },
+  });
+  const observed = pending.then(() => assert.fail('stalled headers initialized'), error => { settled = true; return error; });
+  while (!lastSignal) await flush();
+  t.mock.timers.tick(119999); await flush(); assert.equal(settled, false);
+  t.mock.timers.tick(1); assert.equal((await observed).name, 'AbortError'); assert.equal(calls, 2);
+});
+
+test('a diagnostic callback cannot fail or repeat initialization', async () => {
+  let calls = 0, initialized = 0;
+  await initialize({ loadModule: async () => ({ async default() { initialized++; } }),
+    wasmUrl: 'https://app.example.test/pinned.wasm', wasmFallbackUrls: ['https://assets.example.test/pinned.wasm'],
+    timeoutMs: 120000, waitForCanvas: async () => {}, onDownloadAttempt: () => { throw new Error('observer unavailable'); },
+    fetchImpl: async () => { calls++; return calls === 1 ? new Response(null, { status: 503 }) : response(); },
+  });
+  assert.equal(calls, 2); assert.equal(initialized, 1);
+});
+
+test('a browser compiler wrapping an over-limit stream as a network error cannot authorize a retry', async () => {
+  let calls = 0, initialized = 0;
+  const browserCompiler = { compile: WebAssembly.compile, CompileError: WebAssembly.CompileError,
+    async compileStreaming(body) {
+      try { return await WebAssembly.compile(await body.arrayBuffer()); }
+      catch { throw new TypeError('WebAssembly response has been aborted'); }
+    },
+  };
+  await assert.rejects(load(browserCompiler)({ loadModule: async () => ({ async default() { initialized++; } }),
+    wasmUrl: 'https://app.example.test/pinned.wasm', wasmFallbackUrls: ['https://assets.example.test/pinned.wasm'],
+    timeoutMs: 120000, maxBodyBytes: binary.length, waitForCanvas: async () => {}, fetchImpl: async () => {
+      calls++; return calls === 1 ? new Response(null, { status: 503 })
+        : new Response(customBinary, { headers: { 'content-type': 'application/wasm' } });
+    },
+  }), RangeError);
+  assert.equal(calls, 2); assert.equal(initialized, 0);
+});

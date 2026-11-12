@@ -22796,6 +22796,7 @@ async function initializeBevyRuntimeModule(runtimePath: string, runtimeWasmPath:
     wasmFallbackUrls: fallbackWasmPath ? [fallbackWasmPath] : [],
     waitForCanvas: waitForBevyCanvas,
     timeoutMs: BEVY_RUNTIME_BOOT_TIMEOUT_MS,
+    onDownloadAttempt: (attempt) => markMir2CacheMilestone("bevyRuntimeDownload", { ...attempt }),
   });
 }
 

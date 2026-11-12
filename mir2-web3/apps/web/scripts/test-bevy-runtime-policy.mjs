@@ -145,7 +145,7 @@ test("QA query controls override automatic device policy", () => {
   );
 });
 
-test("network failures never trigger a second full runtime download", () => {
+test("network failures never trigger an alternate-backend runtime download", () => {
   for (const error of [
     new TypeError("Load failed"),
     new TypeError("Failed to fetch dynamically imported module"),
@@ -159,6 +159,16 @@ test("network failures never trigger a second full runtime download", () => {
   assert.equal(isBevyRuntimeNetworkFailure(gpuError), false);
   assert.equal(shouldRetryBevyRuntimeWithWebGl2("webgpu", true, gpuError), true);
   assert.equal(shouldRetryBevyRuntimeWithWebGl2("webgl2", true, gpuError), false);
+});
+
+test("rejected binary bytes cannot authorize a download retry or another backend even with network-like messages", () => {
+  for (const error of [new RangeError("Failed to fetch runtime binary: decoded byte limit"),
+    new WebAssembly.CompileError("WebAssembly streaming compilation failed")]) {
+    assert.equal(canRetryBevyRuntimeBeforeBoot(false, error), false);
+    assert.equal(canRetryBevyRuntimeBeforeBoot(true, error), false);
+    assert.equal(shouldRetryBevyRuntimeWithWebGl2("webgpu", true, error), false);
+    assert.equal(shouldRetryBevyRuntimeWithWebGl2("webgl2", true, error), false);
+  }
 });
 
 // Run the Page's actual configuration and failure blocks. URL intent and the

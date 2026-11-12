@@ -79,7 +79,8 @@ export function isBevyRuntimeNetworkFailure(error: unknown) {
 
 /** A failed download has not created a Bevy App and can be tried on the next entry. */
 export function canRetryBevyRuntimeBeforeBoot(bootAttempted: boolean, error: unknown) {
-  return !bootAttempted && !isRuntimeInitializationUncertain(error) && isBevyRuntimeNetworkFailure(error);
+  return !bootAttempted && !isRuntimeInitializationUncertain(error) && !isRuntimeBinaryRejected(error)
+    && isBevyRuntimeNetworkFailure(error);
 }
 
 export function shouldRetryBevyRuntimeWithWebGl2(
@@ -87,7 +88,12 @@ export function shouldRetryBevyRuntimeWithWebGl2(
   webGl2Supported: boolean,
   error: unknown,
 ) {
-  return backend === "webgpu" && webGl2Supported && !isRuntimeInitializationUncertain(error) && !isBevyRuntimeNetworkFailure(error);
+  return backend === "webgpu" && webGl2Supported && !isRuntimeInitializationUncertain(error)
+    && !isRuntimeBinaryRejected(error) && !isBevyRuntimeNetworkFailure(error);
+}
+
+function isRuntimeBinaryRejected(error: unknown) {
+  return error instanceof RangeError || (typeof WebAssembly !== "undefined" && error instanceof WebAssembly.CompileError);
 }
 
 function isRuntimeInitializationUncertain(error: unknown) {
