@@ -1,0 +1,66 @@
+▲ Next.js 16.4.4 (webpack)
+✓ Running next.config.ts took 27ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 8.5s
+  Running TypeScript ...
+  Finished TypeScript in 11.7s ...
+  Collecting page data using 31 workers ...
+  Generating static pages using 31 workers (0/18) ...
+  Generating static pages using 31 workers (4/18) 
+  Generating static pages using 31 workers (8/18) 
+  Generating static pages using 31 workers (13/18) 
+✓ Generating static pages using 31 workers (18/18) in 1234ms
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /ai-live
+├ ƒ /api/ai-live/[...path]
+├ ƒ /api/asset-manifest
+├ ƒ /api/channels/guest
+├ ƒ /api/channels/identity/link
+├ ƒ /api/channels/session/exchange
+├ ƒ /api/debug-snapshots
+├ ƒ /api/identity/[...path]
+├ ƒ /api/movement-diagnostics
+├ ƒ /api/original-ui-meta
+├ ƒ /api/passkey/challenge
+├ ƒ /api/passkey/login
+├ ƒ /api/promotions/[...path]
+├ ƒ /api/promotions/auth/challenge
+├ ƒ /api/promotions/auth/logout
+├ ƒ /api/promotions/auth/password
+├ ƒ /api/promotions/auth/poll
+├ ƒ /api/promotions/billing/[operation]
+├ ƒ /api/promotions/bootstrap
+├ ƒ /api/promotions/game-session
+├ ƒ /api/qa/map-monster-scenes
+├ ƒ /api/r2-proxy/[...path]
+├ ƒ /api/remote-asset/[...path]
+├ ƒ /api/scene/collision
+├ ƒ /api/scene/crystal
+├ ƒ /api/scene/starter
+├ ƒ /api/wallet/dubhe/session
+├ ƒ /api/wallet/dubhe/session/status
+├ ○ /game
+├ ƒ /health
+├ ○ /manifest.webmanifest
+├ ○ /promotions
+├ ƒ /promotions/invite/[code]
+├ ○ /promotions/play
+├ ○ /qa/button-sounds
+├ ƒ /qa/map-monsters
+├ ○ /qa/webgl2-entity-renderer
+├ ○ /spectate
+├ ƒ /version
+└ ƒ /world-report
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

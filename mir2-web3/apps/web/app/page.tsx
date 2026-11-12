@@ -5657,6 +5657,16 @@ export default function HomePage() {
         if (disposed) return;
         markMir2CacheMilestone("bevyRuntimeForegroundWarmSettled", { stage: "game" });
         appendLog(t("runtime.loadingModule"), "network");
+        // Foreground HUD attempts (including bounded recovery) have settled.
+        // Overlap these independent bodies with the phase-bounded runtime read.
+        markMir2CacheMilestone("bevyRuntimeFontPrewarmStart");
+        void prewarmBevyRuntimeFonts({ signal: fontPrewarmController.signal }).then((result) => {
+          if (disposed) return;
+          markMir2CacheMilestone("bevyRuntimeFontPrewarmComplete", {
+            requested: result.requested, ok: result.completed.length,
+            failed: result.failed.length, aborted: result.aborted, bytes: result.bytes,
+          });
+        }).catch(() => { /* Native readers keep their own recovery path. */ });
         let runtimeBackend = selectedBackend;
         let fallbackFrom: BevyRuntimeBackend | undefined;
         let runtime: RuntimeModule;
@@ -5680,18 +5690,6 @@ export default function HomePage() {
           }
         }
         if (disposed) return;
-
-        // Reserve the bounded binary download for the renderer. The speculative
-        // CJK bodies begin only after it has arrived, before Native requests its
-        // fonts; both readers still share the Worker's complete cache fills.
-        markMir2CacheMilestone("bevyRuntimeFontPrewarmStart");
-        void prewarmBevyRuntimeFonts({ signal: fontPrewarmController.signal }).then((result) => {
-          if (disposed) return;
-          markMir2CacheMilestone("bevyRuntimeFontPrewarmComplete", {
-            requested: result.requested, ok: result.completed.length,
-            failed: result.failed.length, aborted: result.aborted, bytes: result.bytes,
-          });
-        }).catch(() => { /* Native readers keep their own recovery path. */ });
 
         // The fixed canvas placement must agree with the initialized bytes before
         // handing control to an App. A failed boot needs a fresh document to retry.

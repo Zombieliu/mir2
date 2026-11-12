@@ -68,13 +68,13 @@ test('actual Page settles current HUD attempts before allocating runtime downloa
  }finally{await run.settle();}
 });
 
-test('actual Page reserves runtime download bandwidth, then starts fonts before Native boot',async()=>{
+test('actual Page overlaps fonts and binary only after foreground HUD attempts settle',async()=>{
  const run=actualBoot();
  try{await turn();assert(run.events.some(e=>e.name==='module'));
-  assert(!run.events.some(e=>e.name==='fonts'),'large speculative fonts must not contend with the pending runtime binary');
+  assert(run.events.some(e=>e.name==='fonts'),'independent font bodies may overlap the phase-bounded binary read');
+  assert(run.events.findIndex(e=>e.name==='bevyRuntimeForegroundWarmSettled')<run.events.findIndex(e=>e.name==='fonts'));
   run.finishModule();await run.waitForBoot();
   assert(run.events.some(e=>e.name==='fonts'));
-  assert(run.events.findIndex(e=>e.name==='module')<run.events.findIndex(e=>e.name==='fonts'));
   assert(run.events.findIndex(e=>e.name==='fonts')<run.events.findIndex(e=>e.name==='bevyRuntimeReady'));
   assert.equal(run.fontSignals[0].aborted,false);run.cleanup();assert(run.fontSignals[0].aborted);
  }finally{await run.settle();}
@@ -87,16 +87,16 @@ test('actual Page leaves fonts deferred before first paint and for disabled, tou
  }
 });
 
-test('actual retryable module failure starts no speculative font work and keeps the retry boundary',async()=>{
+test('actual retryable module failure cancels overlapping fonts and keeps the retry boundary',async()=>{
  const run=actualBoot();try{await turn();run.failModule(new TypeError('Failed to fetch'));
-  await run.waitForBoot();assert.equal(run.fontSignals.length,0);
+  await run.waitForBoot();assert.equal(run.fontSignals.length,1);assert(run.fontSignals[0].aborted);
   assert.equal(run.window.__mir2BevyRuntimeRetryable,true);assert.equal(run.window.__mir2BevyRuntimeBooted,false);
  }finally{await run.settle();}
 });
 
-test('leaving while the runtime downloads cannot start late font reads',async()=>{
+test('leaving while the runtime downloads cancels fonts and prevents late boot',async()=>{
  const run=actualBoot();try{await turn();run.cleanup();run.finishModule();await run.waitForBoot();
-  assert(!run.events.some(e=>e.name==='fonts'));
+  assert(run.fontSignals.every(signal=>signal.aborted));assert(!run.events.some(e=>e.name==='bevyRuntimeReady'));
  }finally{await run.settle();}
 });
 

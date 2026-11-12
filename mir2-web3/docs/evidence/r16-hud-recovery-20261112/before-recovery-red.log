@@ -1,0 +1,180 @@
+TAP version 13
+# Subtest: HUD recovery reads only failed URLs after worker configuration and keeps first failures
+not ok 1 - HUD recovery reads only failed URLs after worker configuration and keeps first failures
+  ---
+  duration_ms: 513.8709
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-asset-prewarm-request.mjs:47:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      {
+    +   failed: 5,
+    +   failedUrls: [
+    +     '/hud/1.png',
+    +     '/hud/2.png',
+    +     '/hud/3.png',
+    +     '/hud/4.png',
+    +     '/hud/5.png'
+    +   ],
+    +   ok: 1,
+    -   failed: 0,
+    -   failedUrls: [],
+    -   ok: 6,
+        requested: 6
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    requested: 6
+    ok: 6
+    failed: 0
+    failedUrls:
+  actual:
+    requested: 6
+    ok: 1
+    failed: 5
+    failedUrls:
+      0: '/hud/1.png'
+      1: '/hud/2.png'
+      2: '/hud/3.png'
+      3: '/hud/4.png'
+      4: '/hud/5.png'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-prewarm-request.mjs:57:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: recovery does not erase a failure before its replacement body reaches EOF
+not ok 2 - recovery does not erase a failure before its replacement body reaches EOF
+  ---
+  duration_ms: 2023.3641
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-asset-prewarm-request.mjs:62:1'
+  failureType: 'testCodeFailure'
+  error: 'failed HUD body must receive a recovery read'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  operator: 'fail'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-prewarm-request.mjs:67:36)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: persistent HUD failures get at most one bounded recovery sweep
+not ok 3 - persistent HUD failures get at most one bounded recovery sweep
+  ---
+  duration_ms: 484.1707
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-asset-prewarm-request.mjs:73:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    3 !== 6
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 6
+  actual: 3
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-prewarm-request.mjs:77:43)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: owner cancellation during the configuration refresh prevents every recovery request
+not ok 4 - owner cancellation during the configuration refresh prevents every recovery request
+  ---
+  duration_ms: 2020.9978
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-asset-prewarm-request.mjs:82:1'
+  failureType: 'testCodeFailure'
+  error: 'HUD recovery must request bounded worker configuration'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  operator: 'fail'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-prewarm-request.mjs:87:37)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: healthy HUD and non-HUD packs do not configure or retry
+ok 5 - healthy HUD and non-HUD packs do not configure or retry
+  ---
+  duration_ms: 483.5696
+  type: 'test'
+  ...
+# Subtest: public prewarm progress waits for the complete response body
+ok 6 - public prewarm progress waits for the complete response body
+  ---
+  duration_ms: 16.2266
+  type: 'test'
+  ...
+# Subtest: a disconnected body is retried and only the final complete bytes are returned
+ok 7 - a disconnected body is retried and only the final complete bytes are returned
+  ---
+  duration_ms: 156.3259
+  type: 'test'
+  ...
+# Subtest: three broken bodies produce one failed prewarm metric and its URL
+ok 8 - three broken bodies produce one failed prewarm metric and its URL
+  ---
+  duration_ms: 483.5003
+  type: 'test'
+  ...
+# Subtest: body inactivity cancels the incomplete stream before retrying
+ok 9 - body inactivity cancels the incomplete stream before retrying
+  ---
+  duration_ms: 184.2313
+  type: 'test'
+  ...
+# Subtest: continuing chunks renew the idle deadline instead of imposing a total body deadline
+ok 10 - continuing chunks renew the idle deadline instead of imposing a total body deadline
+  ---
+  duration_ms: 372.4357
+  type: 'test'
+  ...
+# Subtest: an owner cancellation cannot turn a cancelled body prefix into success
+ok 11 - an owner cancellation cannot turn a cancelled body prefix into success
+  ---
+  duration_ms: 1.0592
+  type: 'test'
+  ...
+# Subtest: an owner cancellation during backoff prevents another request
+ok 12 - an owner cancellation during backoff prevents another request
+  ---
+  duration_ms: 29.8342
+  type: 'test'
+  ...
+# Subtest: a header timeout retires and retries the request
+ok 13 - a header timeout retires and retries the request
+  ---
+  duration_ms: 187.2518
+  type: 'test'
+  ...
+# Subtest: non-success responses are cancelled, bounded and never counted as warmed
+ok 14 - non-success responses are cancelled, bounded and never counted as warmed
+  ---
+  duration_ms: 467.7274
+  type: 'test'
+  ...
+# Subtest: oversized bodies are cancelled once without retaining or retrying their prefix
+ok 15 - oversized bodies are cancelled once without retaining or retrying their prefix
+  ---
+  duration_ms: 0.3807
+  type: 'test'
+  ...
+1..15
+# tests 15
+# suites 0
+# pass 11
+# fail 4
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 7724.9022

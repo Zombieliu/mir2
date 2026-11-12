@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "source": "c6bc815bae08fc4022d9113e61bf0a1734878cff",
+  "candidate": "7a7e428abed5-runtime-delivery3-bdd50837",
+  "buildReceiptSha256": "2cf6263e0eacf336991ab5ac500f0a65148cf745c5aee87b65d9c8592daf58a8",
+  "matchingGitBlobs": 53,
+  "originalFilesUnchanged": 65
+}
