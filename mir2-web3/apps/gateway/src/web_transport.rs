@@ -1,5 +1,7 @@
 //! A socket failure ends transport work, never authoritative persistence.
 use std::io;
+#[cfg(test)]
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex as SyncMutex};
 use std::time::Duration;
 
@@ -118,6 +120,10 @@ pub(super) struct SocketSender<S> {
     sink: Mutex<S>,
     terminal: TransportSignal,
     timeout: Duration,
+    #[cfg(test)]
+    peer_close_started: AtomicBool,
+    #[cfg(test)]
+    peer_close_gate: Mutex<()>,
 }
 
 impl<S> SocketSender<S>
@@ -129,6 +135,10 @@ where
             sink: Mutex::new(sink),
             terminal,
             timeout: WRITE_TIMEOUT,
+            #[cfg(test)]
+            peer_close_started: AtomicBool::new(false),
+            #[cfg(test)]
+            peer_close_gate: Mutex::new(()),
         }
     }
 
@@ -137,7 +147,7 @@ where
             return Err(ended_error());
         }
         let deadline = tokio::time::Instant::now() + self.timeout;
-        let mut sink = match tokio::time::timeout_at(deadline, self.sink.lock()).await {
+        let sink = match tokio::time::timeout_at(deadline, self.sink.lock()).await {
             Ok(sink) => sink,
             Err(_) => {
                 self.terminal.end(TransportEnd::WriteTimeout);
@@ -147,12 +157,21 @@ where
         if self.terminal.ended() {
             return Err(ended_error());
         }
+        let mut write = InFlightBatch {
+            sink,
+            terminal: &self.terminal,
+            completed: false,
+        };
         // Latch a failed/partial write while still holding the sink guard.
         // A waiting producer must not acquire and reuse a partially flushed
         // sink in the interval between cancellation and the terminal signal.
-        match tokio::time::timeout_at(deadline, sink.send(message)).await {
-            Ok(Ok(())) => Ok(()),
+        match tokio::time::timeout_at(deadline, write.sink.send(message)).await {
+            Ok(Ok(())) => {
+                write.completed = true;
+                Ok(())
+            }
             Ok(Err(error)) => {
+                flush_rejected_peer_close(&mut *write.sink, &error, deadline).await;
                 self.terminal.end(TransportEnd::WriteError);
                 Err(error)
             }
@@ -167,6 +186,11 @@ where
     /// ending the reader, but do not let an occupied writer delay teardown for
     /// the full ordinary write deadline.
     pub(super) async fn flush_peer_close_reply(&self) -> Result<(), axum::Error> {
+        #[cfg(test)]
+        let _close_gate = {
+            self.peer_close_started.store(true, Ordering::Release);
+            self.peer_close_gate.lock().await
+        };
         if self.terminal.ended() {
             return Err(ended_error());
         }
@@ -264,6 +288,7 @@ where
                 Ok(timings)
             }
             Ok(Err(error)) => {
+                flush_rejected_peer_close(&mut *write.sink, &error, deadline).await;
                 self.terminal.end(TransportEnd::WriteError);
                 Err(error)
             }
@@ -277,6 +302,50 @@ where
     #[cfg(test)]
     pub(super) async fn lock_for_test(&self) -> tokio::sync::MutexGuard<'_, S> {
         self.sink.lock().await
+    }
+
+    #[cfg(test)]
+    pub(super) async fn pause_peer_close_reply_for_test(&self) -> tokio::sync::MutexGuard<'_, ()> {
+        self.peer_close_gate.lock().await
+    }
+
+    #[cfg(test)]
+    pub(super) fn peer_close_reply_started_for_test(&self) -> bool {
+        self.peer_close_started.load(Ordering::Acquire)
+    }
+}
+
+/// A split reader has already queued the automatic Close reply when this exact
+/// protocol refusal occurs. No frame from the rejected write was accepted.
+/// Complete only that control flush while retaining the writer lock, before
+/// publishing WriteError: publishing first lets the owner abort the reader and
+/// drop both socket halves before its reply can run. All other errors, write
+/// cancellation and timeouts retain their ordinary partial-write fence.
+async fn flush_rejected_peer_close<S>(
+    sink: &mut S,
+    error: &axum::Error,
+    write_deadline: tokio::time::Instant,
+) where
+    S: Sink<Message, Error = axum::Error> + Unpin,
+{
+    use std::error::Error;
+    use tokio_tungstenite::tungstenite::{error::ProtocolError, Error as WebSocketError};
+
+    if !matches!(
+        error
+            .source()
+            .and_then(|source| source.downcast_ref::<WebSocketError>()),
+        Some(WebSocketError::Protocol(ProtocolError::SendAfterClosing))
+    ) {
+        return;
+    }
+    let deadline = write_deadline.min(tokio::time::Instant::now() + PEER_CLOSE_REPLY_GRACE);
+    match tokio::time::timeout_at(deadline, sink.flush()).await {
+        Ok(Ok(())) => {}
+        Ok(Err(error)) => {
+            eprintln!("[gateway-transport] rejected-write Close reply flush failed: {error}")
+        }
+        Err(_) => eprintln!("[gateway-transport] rejected-write Close reply flush timed out"),
     }
 }
 
@@ -420,6 +489,111 @@ mod tests {
 
     fn message() -> Message {
         Message::Text("test".into())
+    }
+
+    struct CloseRefusalSink {
+        typed: bool,
+        flush_ready: bool,
+        flushes: Arc<AtomicUsize>,
+    }
+
+    impl Sink<Message> for CloseRefusalSink {
+        type Error = axum::Error;
+
+        fn poll_ready(self: Pin<&mut Self>, _: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+            Poll::Ready(Ok(()))
+        }
+
+        fn start_send(self: Pin<&mut Self>, _: Message) -> Result<(), Self::Error> {
+            if self.typed {
+                Err(axum::Error::new(
+                    tokio_tungstenite::tungstenite::Error::Protocol(
+                        tokio_tungstenite::tungstenite::error::ProtocolError::SendAfterClosing,
+                    ),
+                ))
+            } else {
+                // The same text from another error is deliberately insufficient.
+                Err(axum::Error::new(io::Error::other(
+                    "WebSocket protocol error: Sending after closing is not allowed",
+                )))
+            }
+        }
+
+        fn poll_flush(self: Pin<&mut Self>, _: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+            self.flushes.fetch_add(1, Ordering::SeqCst);
+            if self.flush_ready {
+                Poll::Ready(Ok(()))
+            } else {
+                Poll::Pending
+            }
+        }
+
+        fn poll_close(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+            self.poll_flush(cx)
+        }
+    }
+
+    #[tokio::test]
+    async fn transport_close_refusal_requires_typed_protocol_error_and_never_reopens_sender() {
+        for typed in [false, true] {
+            let flushes = Arc::new(AtomicUsize::new(0));
+            let sender = SocketSender::new(
+                CloseRefusalSink {
+                    typed,
+                    flush_ready: true,
+                    flushes: Arc::clone(&flushes),
+                },
+                TransportSignal::new(),
+            );
+            assert!(sender.send(message()).await.is_err());
+            assert_eq!(sender.terminal.reason(), Some(TransportEnd::WriteError));
+            assert_eq!(flushes.load(Ordering::SeqCst), usize::from(typed));
+            assert!(sender.send(message()).await.is_err());
+            assert_eq!(flushes.load(Ordering::SeqCst), usize::from(typed));
+        }
+    }
+
+    #[tokio::test]
+    async fn transport_close_refusal_flush_shares_original_deadline_and_preserves_write_error() {
+        let flushes = Arc::new(AtomicUsize::new(0));
+        let mut sender = SocketSender::new(
+            CloseRefusalSink {
+                typed: true,
+                flush_ready: false,
+                flushes: Arc::clone(&flushes),
+            },
+            TransportSignal::new(),
+        );
+        sender.timeout = Duration::from_millis(10);
+        assert!(
+            tokio::time::timeout(Duration::from_secs(1), sender.send(message()))
+                .await
+                .expect("the refused-write reply must remain bounded")
+                .is_err()
+        );
+        assert!(flushes.load(Ordering::SeqCst) > 0);
+        assert_eq!(sender.terminal.reason(), Some(TransportEnd::WriteError));
+        let count = flushes.load(Ordering::SeqCst);
+        assert!(sender.send(message()).await.is_err());
+        assert_eq!(flushes.load(Ordering::SeqCst), count);
+        assert_eq!(PEER_CLOSE_REPLY_GRACE, Duration::from_secs(1));
+        assert_eq!(WRITE_TIMEOUT, Duration::from_secs(10));
+    }
+
+    #[tokio::test]
+    async fn transport_single_write_cancellation_fences_sink_before_unlock() {
+        let (mut sender, sent) = sender(true, false, false);
+        sender.timeout = Duration::from_secs(1);
+        assert!(
+            tokio::time::timeout(Duration::from_millis(5), sender.send(message()))
+                .await
+                .is_err()
+        );
+        assert_eq!(sender.terminal.reason(), Some(TransportEnd::WriteError));
+        assert_eq!(sent.load(Ordering::SeqCst), 1);
+        assert!(sender.flush_peer_close_reply().await.is_err());
+        assert!(sender.send(message()).await.is_err());
+        assert_eq!(sent.load(Ordering::SeqCst), 1);
     }
 
     #[tokio::test]
