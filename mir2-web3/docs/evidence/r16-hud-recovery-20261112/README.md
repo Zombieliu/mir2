@@ -7,3 +7,5 @@
 177项检查与生产构建通过，覆盖完整正文前不报成功、失败项专属重试、8项上限、并发、配置失败和取消日志。原65文件保全，另外的WIP不纳入。本次未变更WASM、规则、授权或存档。[回执](receipt.json) · [构建](build-receipt.json) · [177项](tests.log) · [修复前失败](before-recovery-red.log) · [构建输出](production-build.log)。
 
 当前正式站仍c6bc815bae，画面/共享HUD/Q/签名到退出通过，预取108/113失败[保留](../r16-runtime-delivery-20261112/production/README.md)。本候选须再次部署并验实际113/113、缓存标记、完整画面/Native与退出，未预先记为通过。原120秒Native冷启动、实体手机和整体1:1继续开放。
+
+后续已发布：公网113项和6项补读实际通过，首步19.7秒仍失败，见[正式分项与未通过项](production/README.md)。本记录保留发布前范围。

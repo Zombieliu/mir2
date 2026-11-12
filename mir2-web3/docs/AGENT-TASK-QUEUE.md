@@ -6,12 +6,13 @@ Updated 2026-11-12 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-12 正式站c6bc815bae的公网签名/进城/移动/完整画面/共享HUD/繁中Q/退出通过，原108/113预取失败保留。HUD补读候选通过177项和构建：最多8个实际失败URL、并发2、一次补读，配置ACK有界、保留初始与取消日志，完整正文后才更新计数；HUD后并行字库/运行包。期间Gateway历史前进但未改变Web/客户端、未部署Gateway；65文件保全。待新源码公开复验113/113，120秒冷启和整体1:1开放。[补读候选](evidence/r16-hud-recovery-20261112/README.md) · [当前公网分项](evidence/r16-runtime-delivery-20261112/production/README.md)
+2026-11-12 正式站已发布`a4f99c2111`，替换c6bc815bae。177项/构建、68项发布保护、固定源码云构建及9条公网读回通过；简繁出码、官方手机尺寸Testnet一次签名、普通建角进比奇、完整视觉包、共享HUD/繁中Q、113/113和退出通过，6个实际失败URL全部补读成功。完整试玩仍false：首步正确位置回包19.7秒，超过原8秒门槛；同期KeepAlive约14.1秒，客户端最长任务206ms，待定位网络/网关链路。点击后首帧7.2秒、HUD观测232.2秒。原65文件保全；实体手机、原120秒冷启失败及整体1:1开放。[正式分项与失败](evidence/r16-hud-recovery-20261112/production/README.md)
 
 ## 保留的当前未结项
 
 - [x] 已执行df7aace169发布与扩展验收，公网分项通过但完整冷加载false，已回退正式站72c00d20ae。[正式回执](evidence/r16-font-release-20261112/README.md)
-- [ ] 发布HUD补读候选，复验实际113/113、缓存标记与完整Native/退出；c6的108/113失败保留。继续120秒Native冷启、慢字体、已有角色与其他地图。
+- [x] 已发布a4f99c2111，公网实际113/113、6项补读、缓存标记、完整视觉/Native/Q和退出通过。[正式分项](evidence/r16-hud-recovery-20261112/production/README.md)
+- [ ] 完整公网试玩仍false：本轮首步权威回包19.7秒，超过原8秒；同期KeepAlive长尾，继续网络/网关定位。原120秒Native冷启、慢字体、已有角色/地图及整体1:1仍开放。
 
 - [ ] 当前R16已接入编号近战结果与实际/排队动作障碍，两个普通浏览器后端完成真实单击攻击→攻击中右键→到达→注销存档，无第二击。共享WebGL2末帧5未观测到，首包与最后观测帧约-7/-5ms，继续帧级接管、纯GPU实体、Hosted、追怪/施法和其他职业。保留旧回执/原型失败，888已发布，后续绘制候选仍未发布。[候选范围](evidence/r16-attack-handoff-20261112/README.md)；另复测玩家跳官网的实际入口。
 - [ ] 继续核对图集纯 GPU 选怪、其他普通窗重叠、移动时的场景分块更新和其余技能时序。保留原始截图和失败记录。
