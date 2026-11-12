@@ -16,135 +16,115 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: 'a4f99c21115f0c558f78914c120eb1ce12028bff',
+  source: 'f6acaad6b0046553bcc5d2fb15784b29877f5eb9',
   sourceRef: BRANCH,
-  baseSource: '8ecf4ef58ed01b30b78ee08b3b24fda819fe6b20',
+  baseSource: '699f09419b31cd1f14fadce3f0b1004361e2333f',
   assetSource: 'f2de762309768b51b39438c2437c14e819df9bf7',
   changedFiles: [
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
-      "sha": "0978a7c5b7d1ab3d7897c17fedc8e2824628ad9b"
+      "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+      "sha": "762efe15633ea8fab1324106bb0b57ffe92089ad"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/scripts/smoke-asset-worker-restart.mjs",
+      "sha": "dcd4699e6f21104459828834110c61f0dd0bcd7e"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/app/page.tsx",
-      "sha": "f824ead652555d71d39a90adf4cddec3f09d1d7a"
+      "filename": "mir2-web3/apps/web/scripts/test-asset-startup-budget.mjs",
+      "sha": "4af7d850972254b5a37fb29587a12a67947af89e"
     },
     {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/lib/bevy-runtime-font-prewarm.ts",
-      "sha": "b8fc5e3c53e26e39aa929901b6bc0f962523560c"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-asset-prewarm-request.mjs",
-      "sha": "6ac2e0a61249d7182336b5ebc8a31ca15fd839a8"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs",
-      "sha": "7541f4ff18f7244bb7d0d65727cd16b1ae2ff340"
+      "status": "added",
+      "filename": "mir2-web3/apps/web/scripts/test-asset-worker-lifecycle.mjs",
+      "sha": "c6ddec224d66637d3f56b49f8da4272ab9133358"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/AGENT-CURRENT.md",
-      "sha": "899feb03dbaa83580b32d682b344188e0d628a8d"
+      "sha": "cc488fdace2defe998605dc39193679a90acab28"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
-      "sha": "85c98431e95064dc0d82b7d48ba9f37a41912172"
+      "sha": "acb64c9677a724469672528a65cabea8757a0dd6"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
-      "sha": "7b8baa3aa7fa07ec1a72bf47ed6a94f80cf6d319"
+      "sha": "097315fbbe18c60823833ea6fd819a1d489f212d"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md",
-      "sha": "ec8178dad067d2e8a0bfda517fbf8051d9d1ff21"
+      "sha": "814868bb64473a4261e0fa72b2c126f19a9d4f39"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-hud-recovery-20261112/README.md",
-      "sha": "f08dad8c7321546d4054900a40876904fb4b3ce4"
+      "filename": "mir2-web3/docs/evidence/r16-worker-restart-20261113/README.md",
+      "sha": "a63586406e9a7a14edebd1d296e2a871af175e87"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-hud-recovery-20261112/before-recovery-red.log",
-      "sha": "1753723c0fe8e99414fc14c774c0e5e09de25389"
+      "filename": "mir2-web3/docs/evidence/r16-worker-restart-20261113/after-browser.json",
+      "sha": "3e01eac631821f0420b9c84c43856ceaab85bf6a"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-hud-recovery-20261112/build-receipt.json",
-      "sha": "391605bf9349eb76ff3b1a735273eb7d55757652"
+      "filename": "mir2-web3/docs/evidence/r16-worker-restart-20261113/before-browser.json",
+      "sha": "65eaaf47f765c1f01552d42bdeca2273e4ae6f44"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-hud-recovery-20261112/production-build.log",
-      "sha": "199d981f409f3093de9734f891335e49440a8b01"
+      "filename": "mir2-web3/docs/evidence/r16-worker-restart-20261113/before-unit-red.log",
+      "sha": "3e3828e7d1e0fab8d114d2d6366c8d68fc6b3055"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-hud-recovery-20261112/receipt.json",
-      "sha": "048cfde289cc15077aa8603576996973710f42a6"
+      "filename": "mir2-web3/docs/evidence/r16-worker-restart-20261113/build-receipt.json",
+      "sha": "0f41b650438d2731d52a8c8ec927b326f2d5b543"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-hud-recovery-20261112/tests.log",
-      "sha": "3c38f7d7a8cea3905d602149e1fdf4d62882a496"
+      "filename": "mir2-web3/docs/evidence/r16-worker-restart-20261113/compatibility-after-worker-restart.png",
+      "sha": "f532c033ad403e2a5504a8d92c958b9d76e1e8e2"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-delivery-20261112/production/README.md",
-      "sha": "ca35aef68a6f91bcb9ec1c2bdf6bb874bac0a7fe"
+      "filename": "mir2-web3/docs/evidence/r16-worker-restart-20261113/compatibility-runtime-body.json",
+      "sha": "4aa5ac3d2fb86010e01e9f3fe7220b23112daeee"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-delivery-20261112/production/committed-source-binding.json",
-      "sha": "d582d61a5f569609ff295bf4f9023d3d2d4a0ecd"
+      "filename": "mir2-web3/docs/evidence/r16-worker-restart-20261113/production-build.log",
+      "sha": "c76e922743d9988689a54e42227e6d03eb393251"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-delivery-20261112/production/final-public-readback.json",
-      "sha": "573cbc38a915ecefb5dad2958ab60a9c4c723e49"
+      "filename": "mir2-web3/docs/evidence/r16-worker-restart-20261113/receipt.json",
+      "sha": "5b03449100580c1c508d0ff3975c49e433ef3d8f"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-delivery-20261112/production/promote.json",
-      "sha": "abeda526560cbcd0c9071ac0afcef5b8b462804b"
+      "filename": "mir2-web3/docs/evidence/r16-worker-restart-20261113/source-binding.json",
+      "sha": "e649bae49efadc93a9aaebe8ebc8805d55cafcdc"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-delivery-20261112/production/promotion-readback.json",
-      "sha": "ab2187f17fb78cc3303663672626dc3a3aa65b35"
+      "filename": "mir2-web3/docs/evidence/r16-worker-restart-20261113/tests.log",
+      "sha": "020d2b8176bd342cb044f7797944a36dc3e5e822"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-delivery-20261112/production/public-shared-quest.png",
-      "sha": "0c13122408c96132ddb2b2e761f1935990f18be7"
+      "filename": "mir2-web3/docs/evidence/r16-worker-restart-20261113/webgl2-after-worker-restart.png",
+      "sha": "f0e14d3b308d703462ce4b1351f753404c1ec8fe"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-delivery-20261112/production/readback-network-attempts.json",
-      "sha": "7e05d821732cb1d703703e0e0939984769612437"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-delivery-20261112/production/receipt.json",
-      "sha": "3fb750d53ca3c01451e018831ba1950283463d02"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-delivery-20261112/production/source-pin.json",
-      "sha": "43238d64e286b9ae81c5aa8d7880e6c51586149c"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-delivery-20261112/production/stage.json",
-      "sha": "a94eeb6341ff56a4b18048d95864e1ef386f13b1"
+      "filename": "mir2-web3/docs/evidence/r16-worker-restart-20261113/webgl2-runtime-body.json",
+      "sha": "aac38df74cce4ad9db73f64cdd493b381044606b"
     }
   ],
   entryScene: {
@@ -203,7 +183,7 @@ export const QR_RELEASE = Object.freeze({
     bytes: 3283113,
   },
   assetRunId: '42494701555',
-  baseline: 'dpl_4w5R1XV8xoks6xx2eiJgv2KbtHYr',
+  baseline: 'dpl_FmfiLkJySDfuwDMPv9VUArWgS7cy',
   relay: 'https://relay.dubhe.obelisk.build',
 });
 const QR_OPERATIONS = ['numeron-qr-stage', 'numeron-qr-promote', 'numeron-qr-rollback'];
