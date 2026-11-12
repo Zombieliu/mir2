@@ -15,7 +15,7 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
-2026-11-12 近战转移动迁入当前R16候选，重建源码可核验的小型WASM。122+13项Web、181项NPC/Stage5条目、118项Rust和19个WASM/Page场景通过；普通账号两后端均攻击中右键一次、到达并存档，无补发攻击。共享WebGL2未观测到攻击末帧5，两路首包与最后观测帧有约-7/-5ms偏移；实体层为DOM。继续逐帧、纯GPU、Hosted和其它职业/施法/追怪，不关闭该项全部门槛；未发布，正式站仍为51d2dcc346。[候选、失败与边界](evidence/r16-attack-handoff-20261112/README.md)
+2026-11-12 已按用户部署要求发布已提交R16源码888dd59046。68项发布检查、版本/6个JS-WASM摘要、简繁出码、官方手机尺寸Testnet钱包登录签名、进比奇、实走、共用HUD/任务窗和正常退出通过。完整预取109/113，4张Prguse图片头部超时，独立浏览器补查仍失败，保留signed smoke=false。原62文件/38行WIP与3个未提交绘制候选完整保留；末帧严格边界、纯GPU、Hosted等继续开放，100%1:1未完成。[补刷正式站与分项回执](evidence/r16-requested-deploy-20261112/README.md)
 
 2026-11-12 正式站已发布 `51d2dcc346`：共享图片取消与图集计时/JSON大小缓存身份修复。本机75项、生产构建及两后端重开同档通过；公网简繁出码、手机尺寸官方钱包Testnet签名、进比奇、权威移动、共用HUD/任务窗、113/113预取和正常退出通过，无需回滚。云端缓存身份与计算一致；Worker正常更新缓存一次，未迁移旧007缓存。本次观测起点到首画面65.2秒/共用HUD104.7秒（点击进游戏后约6.8秒/46.3秒），继续优化冷加载；实体手机、完整1:1及历史未结项仍开放。[发布与边界](evidence/r16-cache-repair-20261112/README.md)
 

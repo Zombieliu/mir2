@@ -1,0 +1,354 @@
+{
+  "kind": "r16-requested-committed-production-refresh",
+  "productionDeployed": true,
+  "releaseControlsPassed": true,
+  "fullVerificationPassed": false,
+  "source": "888dd59046fa625989c8d9df903f5fff0a89035d",
+  "implementation": "c962a9e7b4392a09fa4c82d0791302c7bb007725",
+  "branch": "codex/windows-player-journey",
+  "origin": "https://numeron.obelisk.build/game",
+  "deploymentId": "dpl_CWdmzkhCR1isr22yeXM3o5WekiwB",
+  "previousDeploymentId": "dpl_2iiMnPf3ZutyF2x8pHN4fbih34c4",
+  "actions": {
+    "stage": "43128862128",
+    "promote": "43129959110",
+    "bothPassed": true
+  },
+  "trafficAfter": {
+    "target": "dpl_CWdmzkhCR1isr22yeXM3o5WekiwB",
+    "alias": "dpl_CWdmzkhCR1isr22yeXM3o5WekiwB"
+  },
+  "protectedQr": {
+    "relay": "https://relay.dubhe.obelisk.build",
+    "wallet": "https://wallet.dubhe.obelisk.build",
+    "pending": true
+  },
+  "publicQr": {
+    "relay": "https://relay.dubhe.obelisk.build",
+    "wallet": "https://wallet.dubhe.obelisk.build",
+    "pending": true
+  },
+  "releaseGuardTests": {
+    "passed": 68,
+    "failed": 0
+  },
+  "publicReadback": {
+    "passed": true,
+    "checkedAt": "2026-11-12T00:52:30.869Z",
+    "source": "888dd59046fa625989c8d9df903f5fff0a89035d",
+    "origin": "https://numeron.obelisk.build",
+    "workerUnchanged": true,
+    "routes": [
+      {
+        "path": "/version",
+        "status": 200,
+        "bytes": 55,
+        "sha256": "3c5ae07702fa69f452d08fed5f5e091406ec4609b0539fb0dd344fe4e5ce3abc"
+      },
+      {
+        "path": "/game",
+        "status": 200,
+        "bytes": 11168,
+        "sha256": "75a55d6a103edb114c0ac48df9e3de9c0d14dbdeb2d50528aabd960d4e4a907c"
+      },
+      {
+        "path": "/mir2-asset-worker.js",
+        "status": 200,
+        "bytes": 30521,
+        "sha256": "18920fbeaa0eeb7966400e84a9cf16bc9ddba4fbb46d74128425557ea11697b5"
+      },
+      {
+        "path": "/client-core/a27a7e3155c84c1c67e78e2353318999c5e6c73c5db29afffcdbd0e02a466f4a/mir2_platform_web.js",
+        "status": 200,
+        "bytes": 26425,
+        "sha256": "87154c4d2b22eceffeda71d2eb52b799db0a4558d1cfb7b6510f48521ea1248a"
+      },
+      {
+        "path": "/client-core/a27a7e3155c84c1c67e78e2353318999c5e6c73c5db29afffcdbd0e02a466f4a/mir2_platform_web_bg.wasm",
+        "status": 200,
+        "bytes": 252454,
+        "sha256": "e6fc11126f0f1e798fd705e96bae03293d6b9506220cd5a0058910723e17e89c"
+      },
+      {
+        "path": "/client-core/b07b1e73d80a6c0dd204a5f2586910dae9755a5d5616a1128e13bcc6e9591594/mir2_platform_web.js",
+        "status": 200,
+        "bytes": 22689,
+        "sha256": "226578557b1c61d7290f32e539f41e300a75e9f2b411dd1007a588e6de4c614d"
+      },
+      {
+        "path": "/client-core/b07b1e73d80a6c0dd204a5f2586910dae9755a5d5616a1128e13bcc6e9591594/mir2_platform_web_bg.wasm",
+        "status": 200,
+        "bytes": 259326,
+        "sha256": "f912ce669742f00bf1e70acafab0a05d6a90b804b87eff775c7daacedfcd4c96"
+      },
+      {
+        "path": "/client-core/809742bb9bcb5aa6d7b0dd89f41aa75efbd804c109b7d2ec05fedf22f8c8bf3c/mir2_platform_web.js",
+        "status": 200,
+        "bytes": 8332,
+        "sha256": "b6a3e9848e46934dd5187120ea543da5d174bf97f1a34d63ca9be714e0b18218"
+      },
+      {
+        "path": "/client-core/809742bb9bcb5aa6d7b0dd89f41aa75efbd804c109b7d2ec05fedf22f8c8bf3c/mir2_platform_web_bg.wasm",
+        "status": 200,
+        "bytes": 164087,
+        "sha256": "9cfcddcac59fc301e9500ead41fcd4ed40e48ef38d9ca09d6313111ec0b2914d"
+      }
+    ]
+  },
+  "qr": [
+    {
+      "locale": "zh-CN",
+      "passed": true,
+      "checks": {
+        "exactRevision": true,
+        "nativeBrowserLocale": true,
+        "noSplitLocaleRequestsBeforeAuth": true,
+        "localizedTitle": true,
+        "firstPartyLink": true,
+        "renderedQr": true,
+        "sameIntentPending": true,
+        "localizedPending": true,
+        "normalCancel": true,
+        "pollingStopped": true,
+        "remainedLogin": true
+      }
+    },
+    {
+      "locale": "zh-TW",
+      "passed": true,
+      "checks": {
+        "exactRevision": true,
+        "nativeBrowserLocale": true,
+        "noSplitLocaleRequestsBeforeAuth": true,
+        "localizedTitle": true,
+        "firstPartyLink": true,
+        "renderedQr": true,
+        "sameIntentPending": true,
+        "localizedPending": true,
+        "normalCancel": true,
+        "pollingStopped": true,
+        "remainedLogin": true
+      }
+    }
+  ],
+  "loginJourney": {
+    "passed": true,
+    "officialWallet": true,
+    "mobileBrowserEmulation": true,
+    "virtualPasskey": true,
+    "network": "Testnet",
+    "actualPhoneCameraTested": false,
+    "loginApprovals": 1,
+    "forbiddenWalletOperations": 0,
+    "normalRoleCreated": true,
+    "staticEntryPassed": true,
+    "qrPixels": {
+      "valid": true,
+      "width": 240,
+      "height": 240,
+      "matched": 2401,
+      "total": 2401
+    },
+    "movement": {
+      "attempted": true,
+      "passed": true,
+      "status": "one-authoritative-walk",
+      "from": {
+        "x": 288,
+        "y": 616
+      },
+      "to": {
+        "x": 289,
+        "y": 616,
+        "direction": "Right"
+      },
+      "geometry": {
+        "source": "sha256-pinned-local-release-reference",
+        "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325"
+      },
+      "physical": {
+        "input": "trusted-playwright-keyboard-pulse",
+        "key": "ArrowRight",
+        "atMs": 87557
+      },
+      "wire": {
+        "type": "walk",
+        "direction": "Right",
+        "atMs": 87561
+      },
+      "ack": {
+        "x": 289,
+        "y": 616,
+        "packet": "UserLocation",
+        "atMs": 89544
+      },
+      "ackWithinEightSeconds": true,
+      "rendered": {
+        "x": 289,
+        "y": 616,
+        "atMs": 89587
+      }
+    },
+    "sharedHud": {
+      "optional": true,
+      "passed": true,
+      "status": "observed",
+      "gateReady": true,
+      "runtimeDelivered": true,
+      "diary": {
+        "passed": true,
+        "locale": "zh-TW",
+        "renderer": "ordinary-shared-native",
+        "questOpened": true,
+        "qClosed": true,
+        "owner": "bevy",
+        "package": {
+          "backend": "webgpu",
+          "packageId": "webgpu"
+        },
+        "navigation": {
+          "characterOpen": false,
+          "characterPage": "character",
+          "bagOpen": false,
+          "questOpen": false
+        },
+        "zeroWorldCommands": true,
+        "screenshot": "quest-shared-zh-TW.png"
+      }
+    },
+    "quest": {
+      "passed": true,
+      "locale": "zh-TW",
+      "renderer": "ordinary-react-fallback",
+      "questId": 2110001,
+      "stage": "available",
+      "objective": "向助理簡報告",
+      "counter": "0/1",
+      "chapter": "章節 1/6 · 村莊起步 · 本章 0/4",
+      "journey": "當前主線 0/26",
+      "zeroWorldCommands": true,
+      "screenshot": "quest-available-zh-TW.png"
+    },
+    "logout": {
+      "attempted": true,
+      "passed": true,
+      "returnedToSelect": true,
+      "sent": 1,
+      "acknowledged": 1
+    },
+    "timing": {
+      "clockEpochMs": 1794444755201,
+      "authoritativeLoginSuccessMs": 49613,
+      "startIntentMs": 80505,
+      "startAckMs": 83973,
+      "authoritativeStarterMapMs": 83979,
+      "authoritativeSelfMs": 83981,
+      "firstPlayableObservedMs": 87364,
+      "terrainPaintVerifiedMs": 110191,
+      "sharedHudObservedMs": 162034,
+      "logoutIntentMs": 181138,
+      "logoutAckMs": 182209,
+      "manifestAttemptsBeforeStart": 1,
+      "manifestAttemptsAtOrAfterStart": 0,
+      "starterRegionRequestMs": 49619,
+      "starterRegionWireHeadersMs": 50811.576,
+      "starterRegionResponseEventMs": 50812,
+      "starterRegionBodyMs": 50883,
+      "starterRegionCommitMs": 84220,
+      "sceneSpritesReadyMs": 84277,
+      "localeRequestMs": 49619,
+      "localeBodyMs": 52048,
+      "localeReadyMs": 52075,
+      "firstPlayableFrameMs": 87287,
+      "rendererBodyMs": 108932
+    },
+    "browsersClosed": true
+  },
+  "completePrewarm": {
+    "passed": false,
+    "requested": 113,
+    "ok": 109,
+    "failed": 4,
+    "failedUrls": [
+      "/original-ui/Prguse/1.png",
+      "/original-ui/Prguse/4.png",
+      "/original-ui/Prguse/6.png",
+      "/original-ui/Prguse/8.png"
+    ],
+    "originalFailure": {
+      "phase": "verify-complete-body-HUD-prewarm-and-quest-markers",
+      "code": "AUTOMATION_FAILED"
+    },
+    "markersMatchedOriginal": true,
+    "followUp": {
+      "passed": false,
+      "scope": "Fresh ordinary Chrome read-only follow-up of the four failed image URLs; no wallet, no new role, no repeat game or complete-prewarm acceptance",
+      "originalFailureRetained": true,
+      "gateMs": 10000,
+      "pins": [
+        {
+          "path": "/original-ui/Prguse/1.png",
+          "bytes": 66374,
+          "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+        },
+        {
+          "path": "/original-ui/Prguse/4.png",
+          "bytes": 11776,
+          "sha256": "ae4c41ead8c2ce9eed73d021c59902b793586d30237e1db9d070c61eebcf038e"
+        },
+        {
+          "path": "/original-ui/Prguse/6.png",
+          "bytes": 10938,
+          "sha256": "00e7c0ba38a1866e8d40aa696e04975339bb0197503657bcc97d533d67740c67"
+        },
+        {
+          "path": "/original-ui/Prguse/8.png",
+          "bytes": 2578,
+          "sha256": "dfca5edbca559509d20fd0cade0b5d8d906c06773b1d926326e042ec1fd9be1e"
+        }
+      ],
+      "rows": [
+        {
+          "path": "/original-ui/Prguse/1.png",
+          "error": "TimeoutError",
+          "durationMs": 10004
+        },
+        {
+          "path": "/original-ui/Prguse/4.png",
+          "error": "TimeoutError",
+          "durationMs": 10004
+        },
+        {
+          "path": "/original-ui/Prguse/6.png",
+          "error": "TimeoutError",
+          "durationMs": 10004
+        },
+        {
+          "path": "/original-ui/Prguse/8.png",
+          "error": "TimeoutError",
+          "durationMs": 10004
+        }
+      ],
+      "failure": "/original-ui/Prguse/1.png\n\nundefined !== 200\n",
+      "browserClosed": true
+    }
+  },
+  "runtimeLogScan": {
+    "scope": "Only queried Vercel server runtime groups for this deployment, last 15 minutes; client errors and global absence not covered",
+    "errorGroups": 0,
+    "fatalGroups": 0
+  },
+  "preservation": {
+    "originalFiles": 62,
+    "originalStatusRows": 38,
+    "pendingPublicationFiles": 3,
+    "releaseScope": "Committed source only; no local publication candidate, Gateway rollout, schema, DNS or marketing project changes"
+  },
+  "open": [
+    "Full HUD prewarm failed 109/113 and the four read-only follow-up image reads still timed out at 10s",
+    "Native Windows window and pure GPU entities",
+    "Exact final attack frame boundary, Hosted attack/chase/spell and other classes",
+    "Full current 1:1 and final human acceptance"
+  ],
+  "rollbacks": []
+}
