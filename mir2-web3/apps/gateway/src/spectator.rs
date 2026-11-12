@@ -775,40 +775,38 @@ fn merge_worlds(previous: Option<Value>, next: Value) -> Value {
     let Some(previous_object) = previous.as_object_mut() else {
         return next;
     };
-    let Some(next_object) = next.as_object() else {
+    let Value::Object(mut next_object) = next else {
         return previous;
     };
+    // The caller already owns both trees. Take only array values here so map
+    // key order and all non-array fallback behavior stay the same.
+    let next_entities = next_object.get_mut("entities").map(std::mem::take);
+    let next_drops = next_object.get_mut("groundDrops").map(std::mem::take);
     for (key, value) in next_object {
         if key != "entities" && key != "groundDrops" {
-            previous_object.insert(key.clone(), value.clone());
+            previous_object.insert(key, value);
         }
     }
-    merge_object_array(previous_object, next_object, "entities", "objectId");
-    merge_object_array(previous_object, next_object, "groundDrops", "objectId");
+    merge_object_array(previous_object, next_entities, "entities", "objectId");
+    merge_object_array(previous_object, next_drops, "groundDrops", "objectId");
     previous
 }
 
 fn merge_object_array(
     previous: &mut Map<String, Value>,
-    next: &Map<String, Value>,
+    next: Option<Value>,
     field: &str,
     key: &str,
 ) {
     let mut values = BTreeMap::<u64, Value>::new();
-    for item in previous
-        .get(field)
-        .and_then(Value::as_array)
-        .into_iter()
-        .flatten()
-        .chain(
-            next.get(field)
-                .and_then(Value::as_array)
-                .into_iter()
-                .flatten(),
-        )
-    {
+    let prior = previous.get_mut(field).map(std::mem::take);
+    let owned_array = |value| match value {
+        Some(Value::Array(items)) => items,
+        _ => Vec::new(),
+    };
+    for item in owned_array(prior).into_iter().chain(owned_array(next)) {
         if let Some(id) = item.get(key).and_then(Value::as_u64) {
-            values.insert(id, item.clone());
+            values.insert(id, item);
         }
     }
     previous.insert(
@@ -1186,6 +1184,10 @@ fn constant_time_eq(left: &[u8], right: &[u8]) -> bool {
         .fold(0u8, |difference, (left, right)| difference | (left ^ right))
         == 0
 }
+
+#[cfg(test)]
+#[path = "spectator_merge_owned_tests.rs"]
+mod merge_owned_tests;
 
 #[cfg(test)]
 mod tests {
