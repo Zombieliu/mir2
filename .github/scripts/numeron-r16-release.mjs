@@ -16,175 +16,120 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: '888dd59046fa625989c8d9df903f5fff0a89035d',
+  source: '72c00d20aeb82a9f87c79c2a8567a3146d9a2cfc',
   sourceRef: BRANCH,
-  baseSource: '2f2a411d512cbc75adf310d3fee1d1aa9d0ca9e0',
+  baseSource: '1cc89f69a05dd35046f4497254a14b91128da1ed',
   assetSource: 'f2de762309768b51b39438c2437c14e819df9bf7',
   changedFiles: [
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/game-client/platform-web/src/entity_animation_state.rs",
-      "sha": "9f2faa85f4b96013f79afb8b8581ea942190c620"
+      "filename": "mir2-web3/apps/web/app/components/original-client-shell-types.ts",
+      "sha": "a19c7a6e68a20f81eb32fdd8a8439e9a93e0d9c4"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/game-client/platform-web/src/lib.rs",
-      "sha": "405f9e86f8c4a9af62b2356cacf49d70c54514a3"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/app/components/original-client-entity-animation-runtime.ts",
-      "sha": "eaa81509078b1690051160ac5940d2033d94419c"
+      "filename": "mir2-web3/apps/web/app/original-client-shell.tsx",
+      "sha": "2c9144199416d1fbd654de9fc00ab83ca2c4f8dc"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/apps/web/app/page.tsx",
-      "sha": "87a86fdc0c22be63aab4d77420867f09e9614c94"
+      "sha": "b1747f8c09b222adaf1edfbd0c6dd6c0830335e1"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/lib/client-core-runtime.ts",
-      "sha": "2fb8593c7b94f8c178ebe1ddf79a225cd924afeb"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/lib/client-presentation-runtime.ts",
-      "sha": "5f4d85cb917d4fdb019924f1b9de66beda699749"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/lib/generated/client_core_runtime.json",
-      "sha": "886b5f37e7571a47d8a931772ba5f525a339aabd"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/lib/native-attack-movement.ts",
-      "sha": "077a538a1f3f0346761e04277662a8648ed4aea5"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/public/client-core/809742bb9bcb5aa6d7b0dd89f41aa75efbd804c109b7d2ec05fedf22f8c8bf3c/mir2_platform_web.js",
-      "sha": "1c6e01e81a30d7c69da3357684d582a20d1ce3b5"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/public/client-core/809742bb9bcb5aa6d7b0dd89f41aa75efbd804c109b7d2ec05fedf22f8c8bf3c/mir2_platform_web_bg.wasm",
-      "sha": "baeaa46d50c82eb6153042f56b2bd92fd86cc879"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/public/client-core/a27a7e3155c84c1c67e78e2353318999c5e6c73c5db29afffcdbd0e02a466f4a/mir2_platform_web.js",
-      "sha": "4c7fe9b30c5165dbf02ff3f0e24d60544d2d3c2a"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/public/client-core/a27a7e3155c84c1c67e78e2353318999c5e6c73c5db29afffcdbd0e02a466f4a/mir2_platform_web_bg.wasm",
-      "sha": "7b53c1b678180f5d850692e9b1a6278386eb80c0"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/public/client-core/b07b1e73d80a6c0dd204a5f2586910dae9755a5d5616a1128e13bcc6e9591594/mir2_platform_web.js",
-      "sha": "8702d9e6c719333372fa40f12b4371ddc96b304b"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/public/client-core/b07b1e73d80a6c0dd204a5f2586910dae9755a5d5616a1128e13bcc6e9591594/mir2_platform_web_bg.wasm",
-      "sha": "58de992c48dc7cf9ee8ed7d8a4a73f980ffddb37"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-bevy-combat-input.mjs",
-      "sha": "6712f1fbea65eadce414ac69366fdf89deb9aeb4"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs",
-      "sha": "00e732dedcdcbeb7a352da98a164b74c7cff6c71"
+      "filename": "mir2-web3/apps/web/lib/use-bevy-quest-ui.ts",
+      "sha": "bd8987c9b3b527655d5e8709cdeeeb29d83b0c67"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/apps/web/scripts/test-bevy-quest-ui.mjs",
-      "sha": "fd40aa76569dd6bb15f0f85047873f18e6a8810c"
+      "sha": "615444c3cb845e9aa63084d0d8743f437e82dc97"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-client-core-runtime.mjs",
-      "sha": "20617a8db9ef15ba1b62e2c70991ba69198d872a"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/scripts/test-native-attack-movement.mjs",
-      "sha": "401f346461ba2157d91bff293e893356f2c2900f"
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-policy.mjs",
+      "sha": "cfb69e4be11e8acd090b10b48ef1365bad1df671"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-player-attack-input.mjs",
-      "sha": "0383a20884d84695f495690a75b88de98c4ab16c"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-r16-route-correction.mjs",
-      "sha": "f5b9b8936e30d2104fd2d1b8bba7c9a0fddc79b8"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-stage5-adapters.mjs",
-      "sha": "a8af5488094ea63a3ab3680ca469a9383d9062ec"
+      "filename": "mir2-web3/apps/web/scripts/test-r16-keyboard-ownership.mjs",
+      "sha": "9975b30a998078e5b2846b58fa44d5ca3d61b7d9"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/AGENT-CURRENT.md",
-      "sha": "5bffa26fd1a7ad010177c97a118ac3754bc33aab"
+      "sha": "80bacafc3f258447b0b8b8241c6033ddc6550327"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
-      "sha": "c5aa9f3ba5ea22208c870b26e8b9f9ab64120d1c"
+      "sha": "e0aaae454f92d9e7348d30b45de4e04bd744e6d6"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
-      "sha": "d0e1bb0d8af4bf91951693e6ce03a7728a5b33a7"
+      "sha": "750f3f0a09f9cefd0224d636864130c5715b0383"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md",
-      "sha": "37725dcb65782b6dd26d3fee08c765dcbb64cd93"
+      "sha": "55a95b540eda43e5e2d5d020bf777ef07dbbb6c8"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-attack-handoff-20261112/README.md",
-      "sha": "f89edc116d1cf66bb4137e721de572bae5ab9696"
+      "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/README.md",
+      "sha": "29d02c5ed20a52499d749dad3e1a22cc65867761"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-attack-handoff-20261112/baseline-page-clock.json",
-      "sha": "42aaa8020dfb93f9309635f1bd05ebf6d2ac886a"
+      "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/baseline-keyboard-quest.log",
+      "sha": "ba0b8a183cceb4303d56b77457d73fa4c8ce491a"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-attack-handoff-20261112/page-wasm-clock.json",
-      "sha": "507eb050b1da70f8d7c7570d77dd84e55cc171b9"
+      "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/candidate-adjacent-green.log",
+      "sha": "572324090719093abee54c537e48bba8af583f02"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-attack-handoff-20261112/preexisting-scene-static-assertion.json",
-      "sha": "5f31645969581398977b12f9c8b0684ebaebc817"
+      "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/dispatch-removal-red.log",
+      "sha": "68606c201f8e28cd4155d73764719900cf8723d7"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-attack-handoff-20261112/receipt.json",
-      "sha": "4f1de08460aef8c4c211a89e360644810ef4518e"
+      "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/keyboard-red.log",
+      "sha": "9cc04f4e5a363cebe5b3a16dd3f1429df57a29a0"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-attack-handoff-20261112/shared-destination.png",
-      "sha": "02e5ae562844dd3709cc9c5f7a5e2bce9d959453"
+      "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/production-build-r2.log",
+      "sha": "83258dc972c3aa03e5307b01d60452f3e51c6f8f"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-attack-handoff-20261112/webgpu-destination.png",
-      "sha": "cbac7c1310a9421865aa6457036464b8be502611"
+      "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/quest-after-r7-hud.png",
+      "sha": "d1ff3a64083e33defb30b65326f2eb3ac87683ba"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/quest-after-r8-hud.png",
+      "sha": "bafdbf16a60e752759c17d10a4878b179a03060a"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/receipt.json",
+      "sha": "047b77ef20d345f8874847cd392d82989761471a"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/shortcut-adjacent-green.log",
+      "sha": "89ce3fd84a57ad84e725851ee879886cbf7d6c65"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-native-input-recovery-20261112/ui-intent-red.log",
+      "sha": "71e70e6f42caf3bcaa3257a5c3be20841abe8171"
     }
   ],
   entryScene: {
@@ -243,7 +188,7 @@ export const QR_RELEASE = Object.freeze({
     bytes: 3283113,
   },
   assetRunId: '42494701555',
-  baseline: 'dpl_2iiMnPf3ZutyF2x8pHN4fbih34c4',
+  baseline: 'dpl_CWdmzkhCR1isr22yeXM3o5WekiwB',
   relay: 'https://relay.dubhe.obelisk.build',
 });
 const QR_OPERATIONS = ['numeron-qr-stage', 'numeron-qr-promote', 'numeron-qr-rollback'];
