@@ -317,8 +317,7 @@ async function fetchStaticAsset(request, fallbackRequests) {
   }
 
   const remoteRequests = fallbackRequests || createRemoteAssetRequests(request);
-  const fontMirror = currentReleaseFontMirror(request, remoteRequests);
-  if (fontMirror) {
+  for (const fontMirror of currentReleaseFontMirrors(request, remoteRequests)) {
     const response = await fetchFontMirror(fontMirror, request.signal);
     if (response?.status === 200) return response;
     void response?.body?.cancel().catch(() => {});
@@ -357,17 +356,25 @@ async function fetchStaticAsset(request, fallbackRequests) {
 }
 
 function currentReleaseFontMirror(request, remoteRequests) {
+  return currentReleaseFontMirrors(request, remoteRequests)[0] || null;
+}
+
+function currentReleaseFontMirrors(request, remoteRequests) {
   const version = runtimeConfig.assetVersion;
   if (!runtimeConfig.fontMirrorFirst || !isSharedUiFont(request) || request.headers.has("range") || version === DEFAULT_VERSION ||
-      typeof version !== "string" || !/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(version)) return null;
+      typeof version !== "string" || !/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(version)) return [];
   const source = new URL(request.url);
   const suffix = `/mir2/v/${version}${source.pathname}`;
-  // Only the configured current release may precede the app. Inherited releases
-  // remain fallbacks so an older font cannot shadow a valid current local file.
-  return remoteRequests.find(remote => {
+  // Exhaust the configured mirrors of this exact release before returning to
+  // the app. A slow preferred path must not hide a healthy current origin;
+  // inherited releases remain later fallbacks. Each source keeps its own bounds.
+  const seen = new Set();
+  return remoteRequests.filter(remote => {
     const url = new URL(remote.url);
-    return url.origin !== source.origin && url.pathname.endsWith(suffix);
-  }) || null;
+    if (url.origin === source.origin || !url.pathname.endsWith(suffix) || seen.has(url.href)) return false;
+    seen.add(url.href);
+    return true;
+  });
 }
 
 async function fetchFontMirror(request, owner) {

@@ -193,7 +193,8 @@ function pageFailureFixture(search = "", strict = false, bootAttempted = false) 
   const state = { quest: false, bag: false, started: true, generation: 1, phase: "running", withdrawals: 0 };
   const window = { location: { search }, __mir2BevyRuntimeBootAttempted: bootAttempted };
   const runtimeRef = { current: { clearMir2StatusSink() {} } };
-  const scope = { disposed: false, error: new DOMException("runtime download interrupted", "AbortError"), window, runtimeRef,
+  const scope = { disposed: false, fontPrewarmController: new AbortController(),
+    error: new DOMException("runtime download interrupted", "AbortError"), window, runtimeRef,
     webGl2SharedCanvasPrototype: strict, resolveSharedUiRequests: sharedModule.exports.resolveSharedUiRequests,
     setBevyQuestUiRequested: value => state.quest = value, setBevyBagUiRequested: value => state.bag = value,
     setBevyRuntimeGeneration: update => state.generation = update(state.generation),

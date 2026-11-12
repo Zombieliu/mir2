@@ -388,6 +388,7 @@ import {
 import bevyRuntimeVersion from "../lib/bevy-runtime-build-manifest";
 import { isAbortError, signalAssetFirstPlayable } from "../lib/asset-orchestrator";
 import { createBevyRuntimeUrls } from "../lib/bevy-runtime-url";
+import { prewarmBevyRuntimeFonts } from "../lib/bevy-runtime-font-prewarm";
 import {
   selectBevyRuntimeStartup,
   getBevyRuntimePackageForBackend,
@@ -5529,6 +5530,7 @@ export default function HomePage() {
 
   useEffect(() => {
     let disposed = false;
+    const fontPrewarmController = new AbortController();
     setBevyRuntimeStarted(false);
 
     if (!shouldBootBevyRuntime) {
@@ -5649,6 +5651,14 @@ export default function HomePage() {
         }
 
         appendLog(t("runtime.loadingModule"), "network");
+        markMir2CacheMilestone("bevyRuntimeFontPrewarmStart");
+        void prewarmBevyRuntimeFonts({ signal: fontPrewarmController.signal }).then((result) => {
+          if (disposed) return;
+          markMir2CacheMilestone("bevyRuntimeFontPrewarmComplete", {
+            requested: result.requested, ok: result.completed.length,
+            failed: result.failed.length, aborted: result.aborted, bytes: result.bytes,
+          });
+        }).catch(() => { /* Native readers keep their own recovery path. */ });
         let runtimeBackend = selectedBackend;
         let fallbackFrom: BevyRuntimeBackend | undefined;
         let runtime: RuntimeModule;
@@ -5739,6 +5749,7 @@ export default function HomePage() {
 
         wireAndBootRuntime(runtime, runtimeBackend, fallbackFrom);
       } catch (error) {
+        fontPrewarmController.abort();
         if (disposed) return;
         const message = error instanceof Error ? error.message : String(error);
         const failedWindow = window as typeof window & {
@@ -5784,6 +5795,7 @@ export default function HomePage() {
 
     return () => {
       disposed = true;
+      fontPrewarmController.abort();
     };
   }, [bevyRuntimeStartup, clientProfile.input, clientProfile.layout, screen, shouldBootBevyRuntime]);
 

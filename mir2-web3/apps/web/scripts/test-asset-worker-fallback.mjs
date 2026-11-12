@@ -609,7 +609,7 @@ test("font response retention stays bounded when many distinct fonts are request
   assert.equal(vm.runInContext("fontAssetInflightFetches.size",f.context),0);
 });
 
-function configureCurrentFontMirror(context, version = "font-release-a") {
+function configureCurrentFontMirror(context, version = "font-release-a", includeSecondary = false) {
   const origin = "https://preview.example.test/original-ui/fonts/NotoSansTC.ttf";
   const mirror = `https://public-r2.example.test/hotlink-ok/mir2/v/${version}/original-ui/fonts/NotoSansTC.ttf`;
   context.fontRouteConfig = {
@@ -618,12 +618,66 @@ function configureCurrentFontMirror(context, version = "font-release-a") {
     remoteAssetBaseUrls: [
       "https://public-r2.example.test/hotlink-ok/mir2/v/older-release",
       `https://public-r2.example.test/hotlink-ok/mir2/v/${version}`,
-      `https://cdn.example.test/mir2/v/${version}`,
+      ...(includeSecondary ? [`https://cdn.example.test/mir2/v/${version}`] : []),
     ],
   };
   vm.runInContext("runtimeConfig = { ...runtimeConfig, ...fontRouteConfig }", context);
-  return { origin, mirror };
+  return { origin, mirror, secondary: `https://cdn.example.test/mir2/v/${version}/original-ui/fonts/NotoSansTC.ttf` };
 }
+
+test("a timed-out preferred font mirror tries the other current-release origin before the app", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const calls = [];
+  let routes;
+  const { context } = createWorkerContext(request => {
+    calls.push(request);
+    if (request.url === routes.mirror) return new Promise((_, reject) =>
+      request.signal.addEventListener("abort", () => reject(request.signal.reason), { once: true }));
+    assert([routes.secondary, routes.origin].includes(request.url));
+    return Promise.resolve(new Response(new Uint8Array(request.url === routes.secondary ? [7, 8, 9] : [0])));
+  });
+  routes = configureCurrentFontMirror(context, "font-release-a", true);
+  const pending = vm.runInContext(`fetchStaticAsset(new Request(${JSON.stringify(routes.origin)}))`, context);
+  await new Promise(resolve => setImmediate(resolve));
+  t.mock.timers.tick(7999); await new Promise(resolve => setImmediate(resolve)); assert.equal(calls.length, 1);
+  t.mock.timers.tick(1);
+  assert.deepEqual([...new Uint8Array(await (await pending).arrayBuffer())], [7, 8, 9]);
+  assert.deepEqual(calls.map(r => r.url), [routes.mirror, routes.secondary]);
+  assert(calls[0].signal.aborted);
+});
+
+test("a stopped preferred font body is replaced by one complete current-release mirror", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const calls = [];
+  let routes, cancelled = false;
+  const { context } = createWorkerContext(async request => {
+    calls.push(request.url);
+    if (request.url === routes.mirror) return new Response(new ReadableStream({
+      start(stream) { stream.enqueue(new Uint8Array([1])); }, cancel() { cancelled = true; },
+    }));
+    assert([routes.secondary, routes.origin].includes(request.url));
+    return new Response(new Uint8Array(request.url === routes.secondary ? [7, 8, 9] : [0]));
+  });
+  routes = configureCurrentFontMirror(context, "font-release-a", true);
+  const pending = vm.runInContext(`fetchStaticAsset(new Request(${JSON.stringify(routes.origin)}))`, context);
+  await new Promise(resolve => setImmediate(resolve));
+  t.mock.timers.tick(15000);
+  assert.deepEqual([...new Uint8Array(await (await pending).arrayBuffer())], [7, 8, 9]);
+  assert(cancelled); assert.deepEqual(calls, [routes.mirror, routes.secondary]);
+});
+
+test("all current font mirrors precede the app while inherited releases remain later fallbacks", async () => {
+  const calls = [];
+  const { context } = createWorkerContext(async request => {
+    calls.push(request.url);
+    return request.url.startsWith("https://preview.example.test/")
+      ? new Response(new Uint8Array([6])) : new Response(null, { status: 404 });
+  });
+  const routes = configureCurrentFontMirror(context, "font-release-a", true);
+  const response = await vm.runInContext(`fetchStaticAsset(new Request(${JSON.stringify(routes.origin)}))`, context);
+  assert.deepEqual([...new Uint8Array(await response.arrayBuffer())], [6]);
+  assert.deepEqual(calls, [routes.mirror, routes.secondary, routes.origin]);
+});
 
 test("a current-release font mirror precedes a successful but slow app origin", async () => {
   const calls = [];
