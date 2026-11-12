@@ -16,115 +16,110 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: 'f6acaad6b0046553bcc5d2fb15784b29877f5eb9',
+  source: '491819b20efd53d4cc8442cb87e8c6fc1e1a80e8',
   sourceRef: BRANCH,
-  baseSource: '699f09419b31cd1f14fadce3f0b1004361e2333f',
+  baseSource: 'eb8e4d29cfcc27d1b058070366d0b3b5bebdba85',
   assetSource: 'f2de762309768b51b39438c2437c14e819df9bf7',
   changedFiles: [
     {
       "status": "modified",
       "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
-      "sha": "762efe15633ea8fab1324106bb0b57ffe92089ad"
+      "sha": "b9e2807a408974cdb6867d36269c5c1f6b26717f"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/apps/web/scripts/smoke-asset-worker-restart.mjs",
-      "sha": "dcd4699e6f21104459828834110c61f0dd0bcd7e"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-asset-startup-budget.mjs",
-      "sha": "4af7d850972254b5a37fb29587a12a67947af89e"
+      "filename": "mir2-web3/apps/web/scripts/smoke-asset-font-retry.mjs",
+      "sha": "dd1a902ff4ff34dcaea11650cb6fac54ba00560f"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/apps/web/scripts/test-asset-worker-lifecycle.mjs",
-      "sha": "c6ddec224d66637d3f56b49f8da4272ab9133358"
+      "filename": "mir2-web3/apps/web/scripts/test-asset-worker-missing-retry.mjs",
+      "sha": "5bd5373e7566c12bb1f8242e6263295a5703a716"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/AGENT-CURRENT.md",
-      "sha": "cc488fdace2defe998605dc39193679a90acab28"
+      "sha": "d74aa1ff2b23880dd1a5ac62f8439bf2486dd2d3"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
-      "sha": "acb64c9677a724469672528a65cabea8757a0dd6"
+      "sha": "1f67f2a8798ab11c3b45947b07c4289277ba54e0"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
-      "sha": "097315fbbe18c60823833ea6fd819a1d489f212d"
+      "sha": "d2a0c3677b578b05d2679d25350819591732683e"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md",
-      "sha": "814868bb64473a4261e0fa72b2c126f19a9d4f39"
+      "sha": "f9553997f3af1d6664c121262988667df87172a4"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-worker-restart-20261113/README.md",
-      "sha": "a63586406e9a7a14edebd1d296e2a871af175e87"
+      "filename": "mir2-web3/docs/evidence/r16-font-missing-retry-20261113/README.md",
+      "sha": "9cebbc1c3f61fd4e49646f0993de3ce90969ea37"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-worker-restart-20261113/after-browser.json",
-      "sha": "3e01eac631821f0420b9c84c43856ceaab85bf6a"
+      "filename": "mir2-web3/docs/evidence/r16-font-missing-retry-20261113/after-browser.json",
+      "sha": "11c8e6d678a107f8a82a3ece85720bcee059930b"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-worker-restart-20261113/before-browser.json",
-      "sha": "65eaaf47f765c1f01552d42bdeca2273e4ae6f44"
+      "filename": "mir2-web3/docs/evidence/r16-font-missing-retry-20261113/before-browser.json",
+      "sha": "e1dd190548c451458ee3e85f244993b3b281a103"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-worker-restart-20261113/before-unit-red.log",
-      "sha": "3e3828e7d1e0fab8d114d2d6366c8d68fc6b3055"
+      "filename": "mir2-web3/docs/evidence/r16-font-missing-retry-20261113/before-unit-red-11.log",
+      "sha": "5cf6553cb1c4ae3376c9a18dcac5aac7ef32fb91"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-worker-restart-20261113/build-receipt.json",
-      "sha": "0f41b650438d2731d52a8c8ec927b326f2d5b543"
+      "filename": "mir2-web3/docs/evidence/r16-font-missing-retry-20261113/build-receipt.json",
+      "sha": "e8f145d1363b2cffaaa6798a4f0d3bc9d9cd4845"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-worker-restart-20261113/compatibility-after-worker-restart.png",
-      "sha": "f532c033ad403e2a5504a8d92c958b9d76e1e8e2"
+      "filename": "mir2-web3/docs/evidence/r16-font-missing-retry-20261113/default-native-after-restart.png",
+      "sha": "aa933af9eeafaec488bd4610dc7f0f09b1fe1b38"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-worker-restart-20261113/compatibility-runtime-body.json",
-      "sha": "4aa5ac3d2fb86010e01e9f3fe7220b23112daeee"
+      "filename": "mir2-web3/docs/evidence/r16-font-missing-retry-20261113/default-runtime-body.json",
+      "sha": "f6396bbe6d29844dbcc2a219a9af24a80299afe5"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-worker-restart-20261113/production-build.log",
-      "sha": "c76e922743d9988689a54e42227e6d03eb393251"
+      "filename": "mir2-web3/docs/evidence/r16-font-missing-retry-20261113/original-traditional-font.png",
+      "sha": "252b6e2e42eb4b5e7eab4b0c4409d14411d2aace"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-worker-restart-20261113/receipt.json",
-      "sha": "5b03449100580c1c508d0ff3975c49e433ef3d8f"
+      "filename": "mir2-web3/docs/evidence/r16-font-missing-retry-20261113/production-font-observation.json",
+      "sha": "2f279599c147b8a645c4c7ddfa5f96cca5074318"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-worker-restart-20261113/source-binding.json",
-      "sha": "e649bae49efadc93a9aaebe8ebc8805d55cafcdc"
+      "filename": "mir2-web3/docs/evidence/r16-font-missing-retry-20261113/receipt.json",
+      "sha": "bfa23febadc414980198ca852966423d7eafd97f"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-worker-restart-20261113/tests.log",
-      "sha": "020d2b8176bd342cb044f7797944a36dc3e5e822"
+      "filename": "mir2-web3/docs/evidence/r16-font-missing-retry-20261113/tests.log",
+      "sha": "eb3c2ad57642504039c5ba52e6b9b48c94cd2861"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-worker-restart-20261113/webgl2-after-worker-restart.png",
-      "sha": "f0e14d3b308d703462ce4b1351f753404c1ec8fe"
+      "filename": "mir2-web3/docs/evidence/r16-font-missing-retry-20261113/webgl2-native-after-restart.png",
+      "sha": "8bebc37d5a9894c51ba8615e7dadcd0bbe94b80d"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-worker-restart-20261113/webgl2-runtime-body.json",
-      "sha": "aac38df74cce4ad9db73f64cdd493b381044606b"
+      "filename": "mir2-web3/docs/evidence/r16-font-missing-retry-20261113/webgl2-runtime-body.json",
+      "sha": "ee0a0194b10c526964bcdd776ff9684e3bc306b4"
     }
   ],
   entryScene: {
@@ -183,7 +178,7 @@ export const QR_RELEASE = Object.freeze({
     bytes: 3283113,
   },
   assetRunId: '42494701555',
-  baseline: 'dpl_FmfiLkJySDfuwDMPv9VUArWgS7cy',
+  baseline: 'dpl_FmUSMsypVxYjrBHfAEHVaPZovHrC',
   relay: 'https://relay.dubhe.obelisk.build',
 });
 const QR_OPERATIONS = ['numeron-qr-stage', 'numeron-qr-promote', 'numeron-qr-rollback'];
