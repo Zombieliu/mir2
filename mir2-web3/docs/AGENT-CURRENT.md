@@ -15,7 +15,7 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
-2026-11-13 Worker重启缓存失效候选通过147项、生产构建和默认/共享WebGL2的113/113、Q、移动、Worker重启、完整浏览器重开及存档；65文件保全。候选未发布，公网仍a4f99c2111，原首步19.7秒/HUD232.2秒及整体1:1未结。[本轮候选](evidence/r16-worker-restart-20261113/README.md) · [正式站分项](evidence/r16-hud-recovery-20261112/production/README.md)
+2026-11-13 正式站已发布`f6acaad6b0`（替换a4f99c2111）：147项、构建及68项发布保护通过，9条公网文件与简繁出码复核通过。官方手机尺寸Testnet钱包一次登录签名、普通建角进比奇、首步2.421秒、备用繁中Q、113/113（6项补读）和正常退出通过。公网Worker真实stopped→running后，同一HUD图200、摘要与缓存配置相同；共享HUD因字体/皮肤加载失败仍未就绪，所以完整试玩及新增联合重启检查仍false。受控两后端完整重开通过不覆盖公网失败；65份原WIP保全，实体手机、冷加载和整体1:1继续。[正式发布与分项](evidence/r16-worker-restart-20261113/production/README.md)
 
 2026-11-12 正式站已发布 `51d2dcc346`：共享图片取消与图集计时/JSON大小缓存身份修复。本机75项、生产构建及两后端重开同档通过；公网简繁出码、手机尺寸官方钱包Testnet签名、进比奇、权威移动、共用HUD/任务窗、113/113预取和正常退出通过，无需回滚。云端缓存身份与计算一致；Worker正常更新缓存一次，未迁移旧007缓存。本次观测起点到首画面65.2秒/共用HUD104.7秒（点击进游戏后约6.8秒/46.3秒），继续优化冷加载；实体手机、完整1:1及历史未结项仍开放。[发布与边界](evidence/r16-cache-repair-20261112/README.md)
 
