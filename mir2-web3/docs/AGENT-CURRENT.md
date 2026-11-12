@@ -1,6 +1,6 @@
 # Agent Current Context
 
-Short routing summary, updated 2026-11-12 (Asia/Shanghai). This indexes recorded decisions and open work; it does not revalidate today's
+Short routing summary, updated 2026-11-13 (Asia/Shanghai). This indexes recorded decisions and open work; it does not revalidate today's
 working tree, services, release packages, source snapshots or parity percentages.
 
 ## Start with the user task
@@ -15,7 +15,7 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
-2026-11-12 正式站已发布`a4f99c2111`，替换c6bc815bae。177项/构建、68项发布保护、固定源码云构建及9条公网读回通过；简繁出码、官方手机尺寸Testnet一次签名、普通建角进比奇、完整视觉包、共享HUD/繁中Q、113/113和退出通过，6个实际失败URL全部补读成功。完整试玩仍false：首步正确位置回包19.7秒，超过原8秒门槛；同期KeepAlive约14.1秒，客户端最长任务206ms，待定位网络/网关链路。点击后首帧7.2秒、HUD观测232.2秒。原65文件保全；实体手机、原120秒冷启失败及整体1:1开放。[正式分项与失败](evidence/r16-hud-recovery-20261112/production/README.md)
+2026-11-13 Worker重启缓存失效候选通过147项、生产构建和默认/共享WebGL2的113/113、Q、移动、Worker重启、完整浏览器重开及存档；65文件保全。候选未发布，公网仍a4f99c2111，原首步19.7秒/HUD232.2秒及整体1:1未结。[本轮候选](evidence/r16-worker-restart-20261113/README.md) · [正式站分项](evidence/r16-hud-recovery-20261112/production/README.md)
 
 2026-11-12 正式站已发布 `51d2dcc346`：共享图片取消与图集计时/JSON大小缓存身份修复。本机75项、生产构建及两后端重开同档通过；公网简繁出码、手机尺寸官方钱包Testnet签名、进比奇、权威移动、共用HUD/任务窗、113/113预取和正常退出通过，无需回滚。云端缓存身份与计算一致；Worker正常更新缓存一次，未迁移旧007缓存。本次观测起点到首画面65.2秒/共用HUD104.7秒（点击进游戏后约6.8秒/46.3秒），继续优化冷加载；实体手机、完整1:1及历史未结项仍开放。[发布与边界](evidence/r16-cache-repair-20261112/README.md)
 

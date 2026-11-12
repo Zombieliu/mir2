@@ -1,6 +1,14 @@
 const CACHE_PREFIX = "mir2-asset-cache";
 const CACHE_SCHEMA_VERSION = "sw8";
 const DEFAULT_VERSION = "bootstrap";
+const CONFIGURATION_CACHE_NAME = `${CACHE_PREFIX}-configuration-${CACHE_SCHEMA_VERSION}`;
+const CONFIGURATION_CACHE_URL = `${self.location.origin}/__mir2_asset_worker_configuration__`;
+const CONFIGURATION_RESTORE_TIMEOUT_MS = 750;
+let configurationRevision = 0;
+let configurationRestore = null;
+let configurationRestoreWake = null;
+let configurationWrites = Promise.resolve();
+let configurationPersistenceAllowed = true;
 
 let runtimeConfig = {
   version: DEFAULT_VERSION,
@@ -74,8 +82,14 @@ self.addEventListener("message", (event) => {
   }
 
   if (data.type === "MIR2_ASSET_CACHE_RESET") {
+    noteConfigurationChange();
+    configurationPersistenceAllowed = false;
+    // A reset also owns any earlier durable write. Otherwise a late put can
+    // silently recreate the old configuration after the cache was cleared.
+    const reset = configurationWrites.catch(() => null).then(deleteAllMir2Caches);
+    configurationWrites = reset.catch(() => null);
     event.waitUntil(
-      deleteAllMir2Caches()
+      reset
         .then((deletedCaches) => {
           postClientMessage(event, "MIR2_ASSET_CACHE_RESET_DONE", {
             deletedCaches,
@@ -93,7 +107,7 @@ self.addEventListener("message", (event) => {
 
   if (data.type === "MIR2_ASSET_CACHE_STATUS") {
     event.waitUntil(
-      readCacheStatus().then((status) => {
+      ensureWorkerConfiguration().then(readCacheStatus).then((status) => {
         postClientMessage(event, "MIR2_ASSET_CACHE_STATUS", status);
       }),
     );
@@ -101,13 +115,28 @@ self.addEventListener("message", (event) => {
   }
 
   if (data.type === "MIR2_ASSET_CACHE_HINT") {
-    const result = addStaticAssetTierHints(data.urls, data.cacheTier);
-    postClientMessage(event, "MIR2_ASSET_CACHE_HINTED", result);
+    const revision = configurationRevision;
+    event.waitUntil(ensureWorkerConfiguration().then(async () => {
+      if (revision !== configurationRevision) return;
+      const result = addStaticAssetTierHints(data.urls, data.cacheTier);
+      if (result.added > 0 && runtimeConfig.version !== DEFAULT_VERSION && configurationPersistenceAllowed) {
+        // Canonical packs are already indexed, so ordinary prewarm hints do
+        // not write again. Persist a changed batch once, not once per image.
+        const serialized = JSON.stringify(workerConfigurationSnapshot());
+        const saved = configurationWrites.catch(() => null).then(() =>
+          revision === configurationRevision && persistWorkerConfiguration(serialized));
+        configurationWrites = saved.catch(() => null);
+        result.configurationPersisted = await saved;
+      }
+      postClientMessage(event, "MIR2_ASSET_CACHE_HINTED", result);
+    }));
     return;
   }
 
   if (data.type !== "MIR2_ASSET_CACHE_CONFIG") return;
 
+  noteConfigurationChange();
+  configurationPersistenceAllowed = true;
   const manifest = data.manifest || {};
   const caches = manifest.runtimeCaches || {};
   const remoteAssets = manifest.remoteAssets || {};
@@ -137,21 +166,31 @@ self.addEventListener("message", (event) => {
     fontMirrorFirst: data.fontMirrorFirst === true,
   };
   staticAssetTiers = buildStaticAssetTierIndex(manifest.resourcePacks || []);
-
-  event.waitUntil(
-    cleanupOldCaches(runtimeConfig.version).then((deletedCaches) => {
+  const revision = configurationRevision;
+  const snapshot = workerConfigurationSnapshot();
+  // Snapshot before joining the queue: a newer CONFIG must not change the
+  // bytes of a write already in flight. Only the last configured version may
+  // clean old image caches.
+  const serialized = JSON.stringify(snapshot);
+  const configured = configurationWrites.catch(() => null)
+    .then(() => persistWorkerConfiguration(serialized))
+    .then(async (configurationPersisted) => {
+      const deletedCaches = revision === configurationRevision
+        ? await cleanupOldCaches(snapshot.runtimeConfig.version).catch(() => []) : [];
       postClientMessage(event, "MIR2_ASSET_CACHE_CONFIGURED", {
         deletedCaches,
-        version: runtimeConfig.version,
-        assetVersion: runtimeConfig.assetVersion,
-        cacheNamespace: runtimeConfig.version,
-        remoteAssetBaseUrl: runtimeConfig.remoteAssetBaseUrl || null,
-        remoteAssetBaseUrls: runtimeConfig.remoteAssetBaseUrls,
-        fontMirrorFirst: runtimeConfig.fontMirrorFirst,
-        staticAssetTiers: summarizeStaticAssetTiers(),
+        version: snapshot.runtimeConfig.version,
+        assetVersion: snapshot.runtimeConfig.assetVersion,
+        cacheNamespace: snapshot.runtimeConfig.version,
+        remoteAssetBaseUrl: snapshot.runtimeConfig.remoteAssetBaseUrl || null,
+        remoteAssetBaseUrls: snapshot.runtimeConfig.remoteAssetBaseUrls,
+        fontMirrorFirst: snapshot.runtimeConfig.fontMirrorFirst,
+        staticAssetTiers: summarizeStaticAssetTiers(new Map(snapshot.staticAssetTiers)),
+        configurationPersisted,
       });
-    }),
-  );
+    });
+  configurationWrites = configured.catch(() => null);
+  event.waitUntil(configured);
 });
 
 self.addEventListener("fetch", (event) => {
@@ -165,7 +204,33 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (request.method !== "GET") return;
-  if (runtimeConfig.version === DEFAULT_VERSION) return;
+  if (url.pathname === "/api/scene/crystal" && request.cache === "reload") return;
+  if (!isStaticGameAsset(url) && !["/api/scene/crystal", "/api/asset-manifest", "/api/original-ui-meta"].includes(url.pathname)) return;
+
+  // Browsers stop idle workers without removing their registration or
+  // CacheStorage. Rehydrate once before choosing a namespace or mirror.
+  // Native FetchEvent lifetime methods are registered in this dispatch;
+  // later cache writes never delay foreground response headers.
+  const background = [];
+  const dispatch = () => {
+    if (runtimeConfig.version === DEFAULT_VERSION) return fetch(request);
+    let result;
+    dispatchConfiguredFetch({
+      request,
+      respondWith(value) { result = value; },
+      waitUntil(value) { background.push(value); },
+    });
+    return result;
+  };
+  const response = runtimeConfig.version === DEFAULT_VERSION
+    ? ensureWorkerConfiguration().then(dispatch) : Promise.resolve(dispatch());
+  event.respondWith(response);
+  event.waitUntil(response.then(() => Promise.allSettled(background)).catch(() => null));
+});
+
+function dispatchConfiguredFetch(event) {
+  const request = event.request;
+  const url = new URL(request.url);
 
   if (isStaticGameAsset(url)) {
     const stableRequest = stableStaticAssetRequest(request);
@@ -199,7 +264,88 @@ self.addEventListener("fetch", (event) => {
       networkFirst(request, cacheName("api"), runtimeConfig.apiMetadataMaxEntries),
     );
   }
-});
+}
+
+function noteConfigurationChange() {
+  configurationRevision += 1;
+  configurationRestoreWake?.();
+}
+
+function workerConfigurationSnapshot() {
+  return {
+    schema: 1,
+    runtimeConfig: { ...runtimeConfig, remoteAssetBaseUrls: [...runtimeConfig.remoteAssetBaseUrls] },
+    staticAssetTiers: [...staticAssetTiers],
+  };
+}
+
+async function persistWorkerConfiguration(serialized) {
+  try {
+    const cache = await caches.open(CONFIGURATION_CACHE_NAME);
+    await cache.put(CONFIGURATION_CACHE_URL, new Response(serialized, {
+      headers: { "content-type": "application/json", "cache-control": "no-store" },
+    }));
+    return true;
+  } catch {
+    // Private mode and quota failures do not disable the live configuration.
+    return false;
+  }
+}
+
+function ensureWorkerConfiguration() {
+  if (runtimeConfig.version !== DEFAULT_VERSION) return Promise.resolve();
+  if (configurationRestore) return configurationRestore;
+  const revision = configurationRevision;
+  let wake, timer;
+  const changed = new Promise(resolve => { wake = resolve; });
+  configurationRestoreWake = wake;
+  const restore = (async () => {
+    try {
+      const cache = await caches.open(CONFIGURATION_CACHE_NAME);
+      const response = await cache.match(CONFIGURATION_CACHE_URL);
+      if (!response) return;
+      const stored = decodeWorkerConfiguration(await response.json());
+      if (!stored || revision !== configurationRevision || runtimeConfig.version !== DEFAULT_VERSION) return;
+      // Keep any foreground tier hints received while the disk read waited.
+      for (const [key, tier] of staticAssetTiers) putStaticAssetTier(stored.tiers, key, tier);
+      runtimeConfig = stored.config;
+      staticAssetTiers = stored.tiers;
+    } catch {
+      // Corrupt/denied metadata falls back to the ordinary origin path.
+    }
+  })();
+  const timeout = new Promise(resolve => { timer = setTimeout(resolve, CONFIGURATION_RESTORE_TIMEOUT_MS); });
+  configurationRestore = Promise.race([restore, changed, timeout]).finally(() => {
+    clearTimeout(timer);
+    if (configurationRestoreWake === wake) configurationRestoreWake = null;
+  });
+  return configurationRestore;
+}
+
+function decodeWorkerConfiguration(stored) {
+  if (!stored || stored.schema !== 1 || !stored.runtimeConfig || !Array.isArray(stored.staticAssetTiers)) return null;
+  const config = stored.runtimeConfig;
+  if (typeof config.version !== "string" || !config.version || config.version === DEFAULT_VERSION ||
+      typeof config.assetVersion !== "string" || !config.assetVersion || config.assetVersion === DEFAULT_VERSION ||
+      typeof config.remoteAssetBaseUrl !== "string" || !Array.isArray(config.remoteAssetBaseUrls) ||
+      !config.remoteAssetBaseUrls.every(value => typeof value === "string") || typeof config.fontMirrorFirst !== "boolean") return null;
+  const limits = ["staticAssetMaxEntries", "staticCriticalMaxEntries", "staticBackgroundMaxEntries", "staticRuntimeMaxEntries", "sceneBlueprintMaxEntries", "apiMetadataMaxEntries"];
+  if (!limits.every(key => typeof config[key] === "number" && Number.isFinite(config[key]) && config[key] > 0)) return null;
+  const tiers = new Map();
+  for (const entry of stored.staticAssetTiers) {
+    if (!Array.isArray(entry) || entry.length !== 2 || !["critical", "background"].includes(entry[1])) return null;
+    const key = normalizeStaticAssetCacheKey(entry[0]);
+    if (!key || key !== entry[0]) return null;
+    putStaticAssetTier(tiers, key, entry[1]);
+  }
+  return { config: {
+    version: config.version, assetVersion: config.assetVersion,
+    ...Object.fromEntries(limits.map(key => [key, config[key]])),
+    remoteAssetBaseUrl: normalizeAssetBaseUrl(config.remoteAssetBaseUrl),
+    remoteAssetBaseUrls: normalizeAssetBaseUrls(config.remoteAssetBaseUrls),
+    fontMirrorFirst: config.fontMirrorFirst,
+  }, tiers };
+}
 
 function isStaticGameAsset(url) {
   return (
@@ -703,13 +849,15 @@ async function trimCache(cache, maxEntries) {
 
 async function cleanupOldCaches(activeVersion) {
   const names = await caches.keys();
+  if (runtimeConfig.version !== activeVersion) return [];
   const staleNames = names
     .filter((name) => name.startsWith(CACHE_PREFIX))
+    .filter((name) => name !== CONFIGURATION_CACHE_NAME)
     .filter((name) => !name.endsWith(`-${activeVersion}`));
   const results = await Promise.all(
     staleNames.map(async (name) => ({
       name,
-      deleted: await caches.delete(name),
+      deleted: runtimeConfig.version === activeVersion && await caches.delete(name),
     })),
   );
   return results.filter((result) => result.deleted).map((result) => result.name);
@@ -838,9 +986,9 @@ function tierPriority(tier) {
   return tier === "critical" ? 0 : 1;
 }
 
-function summarizeStaticAssetTiers() {
+function summarizeStaticAssetTiers(tiers = staticAssetTiers) {
   const summary = { critical: 0, background: 0, runtime: 0 };
-  for (const tier of staticAssetTiers.values()) {
+  for (const tier of tiers.values()) {
     if (tier === "background") summary.background += 1;
     else summary.critical += 1;
   }

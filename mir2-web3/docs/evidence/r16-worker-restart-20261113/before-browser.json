@@ -1,0 +1,68 @@
+{
+  "kind": "r16-real-chrome-worker-restart",
+  "workerSha256": "d86af7087c4701e020847fff0e22d9014b0deef4175d3dd81b69c48ad5688005",
+  "imageSha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa",
+  "passed": false,
+  "ordinaryLoginUsed": false,
+  "publicNetworkUsed": false,
+  "initialConfigurationAcknowledged": true,
+  "beforeRestart": {
+    "status": 200,
+    "bytes": 66374,
+    "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+  },
+  "workerTimeOriginBefore": 1794498741074.4,
+  "workerStopped": true,
+  "afterRestart": {
+    "status": 504,
+    "bytes": 26,
+    "sha256": "fd27c6b55acf9e60043e2a6ad2d20ad93ec88d997811726a96827ab5343baf8b"
+  },
+  "workerTimeOriginAfter": null,
+  "callsAfterRestart": [
+    {
+      "path": "/original-ui/Prguse/1.png",
+      "at": 1794498741686
+    }
+  ],
+  "workerLifecycle": [
+    {
+      "versionId": "0",
+      "runningStatus": "running",
+      "status": "activated"
+    },
+    {
+      "versionId": "0",
+      "runningStatus": "stopping",
+      "status": "activated"
+    },
+    {
+      "versionId": "0",
+      "runningStatus": "stopped",
+      "status": "activated"
+    },
+    {
+      "versionId": "0",
+      "runningStatus": "starting",
+      "status": "activated"
+    },
+    {
+      "versionId": "0",
+      "runningStatus": "starting",
+      "status": "activated"
+    },
+    {
+      "versionId": "0",
+      "runningStatus": "starting",
+      "status": "activated"
+    },
+    {
+      "versionId": "0",
+      "runningStatus": "running",
+      "status": "activated"
+    }
+  ],
+  "reusedVersionedCache": false,
+  "browserClosed": true,
+  "serverClosed": true
+}

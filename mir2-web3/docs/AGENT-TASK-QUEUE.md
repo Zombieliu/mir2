@@ -1,14 +1,17 @@
 # Agent Task Queue
 
-Updated 2026-11-12 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) and [current context](AGENT-CURRENT.md), then the current user task. Preserve unrelated WIP and evidence; historical ports, candidates and checks are snapshots.
+Updated 2026-11-13 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) and [current context](AGENT-CURRENT.md), then the current user task. Preserve unrelated WIP and evidence; historical ports, candidates and checks are snapshots.
 
 ## 当前范围
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-12 正式站已发布`a4f99c2111`，替换c6bc815bae。177项/构建、68项发布保护、固定源码云构建及9条公网读回通过；简繁出码、官方手机尺寸Testnet一次签名、普通建角进比奇、完整视觉包、共享HUD/繁中Q、113/113和退出通过，6个实际失败URL全部补读成功。完整试玩仍false：首步正确位置回包19.7秒，超过原8秒门槛；同期KeepAlive约14.1秒，客户端最长任务206ms，待定位网络/网关链路。点击后首帧7.2秒、HUD观测232.2秒。原65文件保全；实体手机、原120秒冷启失败及整体1:1开放。[正式分项与失败](evidence/r16-hud-recovery-20261112/production/README.md)
+2026-11-13 Worker重启缓存失效候选通过147项、生产构建和默认/共享WebGL2的113/113、Q、移动、Worker重启、完整浏览器重开及存档；65文件保全。候选未发布，公网仍a4f99c2111，原首步19.7秒/HUD232.2秒及整体1:1未结。[本轮候选](evidence/r16-worker-restart-20261113/README.md) · [正式站分项](evidence/r16-hud-recovery-20261112/production/README.md)
 
 ## 保留的当前未结项
+
+- [x] Worker在浏览器中真实停止后恢复相同HUD缓存，无额外原站读取；147项、构建、两后端Q/移动/存档及彻底重开通过。候选未发布。[复测](evidence/r16-worker-restart-20261113/README.md)
+- [ ] 发布并复验Worker候选公网重登；首步下行、49秒来源链与30秒页面预算错位继续定位，保留原失败和严格门槛。
 
 - [x] 已执行df7aace169发布与扩展验收，公网分项通过但完整冷加载false，已回退正式站72c00d20ae。[正式回执](evidence/r16-font-release-20261112/README.md)
 - [x] 已发布a4f99c2111，公网实际113/113、6项补读、缓存标记、完整视觉/Native/Q和退出通过。[正式分项](evidence/r16-hud-recovery-20261112/production/README.md)

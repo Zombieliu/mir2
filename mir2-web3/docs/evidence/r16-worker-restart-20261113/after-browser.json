@@ -1,0 +1,59 @@
+{
+  "kind": "real-chrome-worker-cache-restart",
+  "passed": true,
+  "workerSha256": "a0b5b907f3eaad2540aa50c6297e2c52b74103adeefc697d9cbe129198eb7f5e",
+  "imageSha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa",
+  "publicNetworkUsed": false,
+  "gameAccountUsed": false,
+  "before": {
+    "status": 200,
+    "bytes": 66374,
+    "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+  },
+  "after": {
+    "status": 200,
+    "bytes": 66374,
+    "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+  },
+  "restartObserved": true,
+  "requestsAfterRestart": [],
+  "workerLifecycle": [
+    {
+      "versionId": "0",
+      "runningStatus": "running",
+      "status": "activated"
+    },
+    {
+      "versionId": "0",
+      "runningStatus": "stopping",
+      "status": "activated"
+    },
+    {
+      "versionId": "0",
+      "runningStatus": "stopped",
+      "status": "activated"
+    },
+    {
+      "versionId": "0",
+      "runningStatus": "starting",
+      "status": "activated"
+    },
+    {
+      "versionId": "0",
+      "runningStatus": "starting",
+      "status": "activated"
+    },
+    {
+      "versionId": "0",
+      "runningStatus": "starting",
+      "status": "activated"
+    },
+    {
+      "versionId": "0",
+      "runningStatus": "running",
+      "status": "activated"
+    }
+  ],
+  "browserClosed": true,
+  "serverClosed": true
+}
