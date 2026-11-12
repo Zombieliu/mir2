@@ -16,110 +16,80 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: '491819b20efd53d4cc8442cb87e8c6fc1e1a80e8',
+  source: '40be2972eaba27a69f77ffe6b961ce96326ae13c',
   sourceRef: BRANCH,
-  baseSource: 'eb8e4d29cfcc27d1b058070366d0b3b5bebdba85',
+  baseSource: 'e0606908734021ccfd913e5d94ebc9cc320dc76b',
   assetSource: 'f2de762309768b51b39438c2437c14e819df9bf7',
   changedFiles: [
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
-      "sha": "b9e2807a408974cdb6867d36269c5c1f6b26717f"
+      "filename": "mir2-web3/apps/web/app/page.tsx",
+      "sha": "00ccdca6abb25fff7519639b68c69aebb0e1c434"
     },
     {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/scripts/smoke-asset-font-retry.mjs",
-      "sha": "dd1a902ff4ff34dcaea11650cb6fac54ba00560f"
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/lib/bevy-runtime-font-prewarm.ts",
+      "sha": "0d73de8e50aee59bbbb6f84dfb98e232291704f0"
     },
     {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/scripts/test-asset-worker-missing-retry.mjs",
-      "sha": "5bd5373e7566c12bb1f8242e6263295a5703a716"
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs",
+      "sha": "6c51512521901e285cad9f1e9c33073de21e4da6"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/AGENT-CURRENT.md",
-      "sha": "d74aa1ff2b23880dd1a5ac62f8439bf2486dd2d3"
+      "sha": "0a1a02ce4b545527234d0e3d55f6bb1fbc585883"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
-      "sha": "1f67f2a8798ab11c3b45947b07c4289277ba54e0"
+      "sha": "619810028b735cdf984a9739c3282f7f15d6d29c"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
-      "sha": "d2a0c3677b578b05d2679d25350819591732683e"
+      "sha": "8965d633e166c551fb3f5ac0e6a123ec71af4917"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md",
-      "sha": "f9553997f3af1d6664c121262988667df87172a4"
+      "sha": "922bf1e26e975935c78fa1b34442e75d37d00989"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-font-missing-retry-20261113/README.md",
-      "sha": "9cebbc1c3f61fd4e49646f0993de3ce90969ea37"
+      "filename": "mir2-web3/docs/evidence/r16-boot-overlap-20261113/README.md",
+      "sha": "3ba3f2ea166018571c45543892e7f171f5b6f48f"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-font-missing-retry-20261113/after-browser.json",
-      "sha": "11c8e6d678a107f8a82a3ece85720bcee059930b"
+      "filename": "mir2-web3/docs/evidence/r16-boot-overlap-20261113/before-unit-red.log",
+      "sha": "905e63e8108ccb6cbb2c422ab9ec4a59bb3ca6ab"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-font-missing-retry-20261113/before-browser.json",
-      "sha": "e1dd190548c451458ee3e85f244993b3b281a103"
+      "filename": "mir2-web3/docs/evidence/r16-boot-overlap-20261113/build-receipt.json",
+      "sha": "4c5aea8d096ccc2bc82b0aad12c92bb89fa73d3d"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-font-missing-retry-20261113/before-unit-red-11.log",
-      "sha": "5cf6553cb1c4ae3376c9a18dcac5aac7ef32fb91"
+      "filename": "mir2-web3/docs/evidence/r16-boot-overlap-20261113/default-native-after-worker-restart.png",
+      "sha": "80873110d6c4cca12b695dcaab1e64517e913432"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-font-missing-retry-20261113/build-receipt.json",
-      "sha": "e8f145d1363b2cffaaa6798a4f0d3bc9d9cd4845"
+      "filename": "mir2-web3/docs/evidence/r16-boot-overlap-20261113/receipt.json",
+      "sha": "b2db5f66dec40af2ae7ce7a9d421af6f8422212b"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-font-missing-retry-20261113/default-native-after-restart.png",
-      "sha": "aa933af9eeafaec488bd4610dc7f0f09b1fe1b38"
+      "filename": "mir2-web3/docs/evidence/r16-boot-overlap-20261113/regression.log",
+      "sha": "83f4cba428c6af08bbdbc5a26253d28bf3961f1d"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-font-missing-retry-20261113/default-runtime-body.json",
-      "sha": "f6396bbe6d29844dbcc2a219a9af24a80299afe5"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-font-missing-retry-20261113/original-traditional-font.png",
-      "sha": "252b6e2e42eb4b5e7eab4b0c4409d14411d2aace"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-font-missing-retry-20261113/production-font-observation.json",
-      "sha": "2f279599c147b8a645c4c7ddfa5f96cca5074318"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-font-missing-retry-20261113/receipt.json",
-      "sha": "bfa23febadc414980198ca852966423d7eafd97f"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-font-missing-retry-20261113/tests.log",
-      "sha": "eb3c2ad57642504039c5ba52e6b9b48c94cd2861"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-font-missing-retry-20261113/webgl2-native-after-restart.png",
-      "sha": "8bebc37d5a9894c51ba8615e7dadcd0bbe94b80d"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-font-missing-retry-20261113/webgl2-runtime-body.json",
-      "sha": "ee0a0194b10c526964bcdd776ff9684e3bc306b4"
+      "filename": "mir2-web3/docs/evidence/r16-boot-overlap-20261113/webgl2-traditional-quest.png",
+      "sha": "6cf2c94aeb5f9ab64a5b5f09e85ffc3950e4ce2a"
     }
   ],
   entryScene: {
@@ -178,7 +148,7 @@ export const QR_RELEASE = Object.freeze({
     bytes: 3283113,
   },
   assetRunId: '42494701555',
-  baseline: 'dpl_FmUSMsypVxYjrBHfAEHVaPZovHrC',
+  baseline: 'dpl_9Trr2mCdbfG79mFmgV8PGuFS6Cw9',
   relay: 'https://relay.dubhe.obelisk.build',
 });
 const QR_OPERATIONS = ['numeron-qr-stage', 'numeron-qr-promote', 'numeron-qr-rollback'];
