@@ -1,6 +1,6 @@
 # R16 字体临时失败后真正重试：本地候选
 
-2026-11-13，候选通过下列范围，尚未发布。公网仍`f6acaad6b0`，前次[共享HUD字体/皮肤失败](../r16-worker-restart-20261113/production/README.md)保持false。
+2026-11-13，下列保留发布前候选范围。随后已正式发布491819b20e：公网功能回放、六字体完整SHA和共享HUD通过，原120秒Native冷启仍失败；见[正式发布与性能边界](production/README.md)。前次f6acaad6b0的[共享HUD失败](../r16-worker-restart-20261113/production/README.md)记录保留。
 
 ## 真实问题与修改
 
@@ -35,6 +35,6 @@ node mir2-web3/apps/web/scripts/smoke-asset-font-retry.mjs --output <新的证�
 
 浏览器脚本仅新建自己的隐藏Chrome与loopback HTTP，无账号/公网访问；用`--worker-source`可读旧版Worker重放失败。只发送正常缓存配置，不把字节预填CacheStorage。
 
-下一步发布该候选并复验真实公网共享HUD及冷加载。受控41秒/1.5秒不是公网保证，也不覆盖原120秒冷启和18.635/19.7秒首步失败。截图中仍有既有NPC名字碎片和中英混合，语言像素、其他地图/技能、阿洛、三职业当前1–30、Hosted/Windows窗口、实体手机和最终Accepted均保持开放。全局1:1 Goal继续。
+该候选随后已发布，真实公网六字体和共享HUD功能通过，原120秒冷启仍失败，见[正式发布](production/README.md)。受控41秒/1.5秒不是公网保证，也不覆盖原120秒冷启和18.635/19.7秒首步失败。截图中仍有既有NPC名字碎片和中英混合，语言像素、其他地图/技能、阿洛、三职业当前1–30、Hosted/Windows窗口、实体手机和最终Accepted均保持开放。全局1:1 Goal继续。
 
 65份原WIP逐字节保全；本轮没有改公网网关、DNS、官网、钱包/付费或生产存档。仓库日志仅规范行尾/末尾空白，原日志摘要保留于receipt。

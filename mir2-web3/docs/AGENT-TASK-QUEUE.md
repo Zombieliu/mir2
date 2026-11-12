@@ -6,13 +6,14 @@ Updated 2026-11-13 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-13 字体错误404候选已修复并通过101项、隔离生产构建和真实Chrome对照：旧版5/6字体且繁中加载失败，新版6/6原版完整SHA与实际字体渲染通过。默认WebGPU/共享WebGL2在当前源503＋应用源/旧源404后恢复，共享HUD/繁中Q、113/113、8次关Q即移动、Worker停启、彻底重开及普通保存通过。候选未发布，公网仍f6acaad6b0及其共享HUD字体/皮肤失败保留；65份原WIP未动，冷加载和整体1:1继续。[候选与范围](evidence/r16-font-missing-retry-20261113/README.md) · [公网失败](evidence/r16-worker-restart-20261113/production/README.md)
+2026-11-13 已正式发布`491819b20e`：70项发布保护、云端构建与9条公网文件核验通过；简繁出码、手机尺寸官方Testnet一次签名、普通建角进比奇、首步4.144秒、113/113、共享HUD/繁中Q、六套原字体完整SHA、真实Worker停启及普通退出均通过。功能回放true，但原120秒Native冷启仍false：首可操作后158.084秒才观测到共享HUD，217.375秒采样仍未ready，未放宽门槛。上游CDP捕获SC首源13.3MB后HTTP2错误，完整备用源恢复；继续冷加载。原65及本轮134份WIP保全，整体1:1开放。[正式发布、功能与性能边界](evidence/r16-font-missing-retry-20261113/production/README.md)
 
 ## 保留的当前未结项
 
 - [x] Worker重启缓存修复已发布f6acaad6b0；公网停启后同一HUD图与配置通过。受控两后端全流程另记，公网联合检查仍false。[发布/失败范围](evidence/r16-worker-restart-20261113/production/README.md)
 - [x] 当前源临时失败＋旧源404不再变成资产负缓存；101项、构建、Chrome六字体与两后端完整重开通过。[候选](evidence/r16-font-missing-retry-20261113/README.md)
-- [ ] 发布字体重试候选并复验公网共享HUD；继续源响应头长尾、30秒页面预算、原120秒Native冷启及历史18.635/19.7秒首步失败，不降低门槛。
+- [x] 字体重试已发布491819b20e，公网功能回放、6套完整字体、113/113、共享HUD/Q及Worker停启通过。[正式回执](evidence/r16-font-missing-retry-20261113/production/README.md)
+- [ ] 原120秒Native冷启仍失败（首可操作后158.084秒）；继续61.084秒HUD预取阻塞独立字体/WASM启动、SC长正文与HTTP2中断。保留原8秒首步与全部失败，不提高门槛。
 
 - [x] 已执行df7aace169发布与扩展验收，公网分项通过但完整冷加载false，已回退正式站72c00d20ae。[正式回执](evidence/r16-font-release-20261112/README.md)
 - [x] 已发布a4f99c2111，公网实际113/113、6项补读、缓存标记、完整视觉/Native/Q和退出通过。[正式分项](evidence/r16-hud-recovery-20261112/production/README.md)
