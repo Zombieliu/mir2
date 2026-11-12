@@ -235,6 +235,7 @@ export type OriginalClientShellProps = BagBeltCallbacks & WorldFishingCallbacks 
   dispatchBevyHudNavigation?: (action: import("../../lib/bevy-hud-ui").HudAction) => boolean;
   bevyQuestUiReady?: boolean;
   bevyQuestUiCapturesPointer?: boolean;
+  readBevyQuestKeyboardCapture?: () => boolean | null;
   bevyQuestWorldUiReady?: boolean;
   readBevyQuestWorldControls?: () => import("../../lib/bevy-quest-world-controls").QuestWorldControls | null;
   readBevyQuestWorldControlBlockers?: () => import("../../lib/bevy-quest-world-controls").QuestWorldControls | null;

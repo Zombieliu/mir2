@@ -5758,8 +5758,9 @@ export default function HomePage() {
           failedWindow.__mir2BevyRuntimeBootAttempted === true, error,
         );
         failedWindow.__mir2BevyRuntimeBackend = undefined;
-        setBevyQuestUiRequested(false);
-        setBevyBagUiRequested(false);
+        // These states describe URL intent. Runtime availability is withdrawn
+        // above; clearing intent here would leave same-backend retries without
+        // a HUD because the canvas-selection effect need not run again.
         withdrawHudBarDrawPlanOutputs();
         setBevyRuntimeGeneration((generation) => generation + 1);
         resetBevyMapImageResidency();
@@ -21842,6 +21843,7 @@ export default function HomePage() {
       dispatchBevyHudNavigation={bevyHudUi.dispatch}
       bevyQuestUiReady={bevyQuestUi.ready && !showInventory}
       bevyQuestUiCapturesPointer={bevyQuestUi.capturesPointer && !showInventory}
+      readBevyQuestKeyboardCapture={showInventory ? undefined : bevyQuestUi.readLiveKeyboardCapture}
       bevyQuestWorldUiReady={bevyQuestUi.worldControlsReady && !showInventory}
       readBevyQuestWorldControls={bevyQuestUi.readLiveWorldControls}
       readBevyQuestWorldControlBlockers={bevyQuestUi.readLiveWorldControlBlockers}

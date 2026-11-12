@@ -574,6 +574,7 @@ export function OriginalClientShell({
   dispatchBevyHudNavigation,
   bevyQuestUiReady = false,
   bevyQuestUiCapturesPointer = false,
+  readBevyQuestKeyboardCapture,
   bevyQuestWorldUiReady = false,
   readBevyQuestWorldControls,
   readBevyQuestWorldControlBlockers,
@@ -1661,6 +1662,11 @@ export function OriginalClientShell({
     return (...args) => { if (npcShopBlocksWorldInput()) { stopNpcShopWorldInput(); return; } callback(...args); };
   }
 
+  function questBlocksKeyboardMovement(): boolean {
+    try { return readBevyQuestKeyboardCapture?.() ?? bevyQuestUiCapturesPointer; }
+    catch { return bevyQuestUiCapturesPointer; }
+  }
+
   function dispatchKeyboardMoveInput(source: "edge" | "held" = "held") {
     const diagnostic = (reason: string) => { keyboardMovementDiagnosticsRef.current.lastDispatch = { reason, source, at: Date.now(), sceneInteractionReady, bevyQuestUiCapturesPointer }; };
     diagnostic("received");
@@ -1676,7 +1682,11 @@ export function OriginalClientShell({
     }
     const latest = latestMoveInputRef.current;
     if (latest.screen !== "game") { diagnostic("screen"); return; }
-    if (!sceneInteractionReady || bevyQuestUiCapturesPointer) { diagnostic("scene-or-quest"); return; }
+    if (questBlocksKeyboardMovement()) {
+      diagnostic("quest");
+      heldKeyboardMoveKeysRef.current.clear(); heldKeyboardRunModeRef.current = false; onViewportDirectionStop(); return;
+    }
+    if (!sceneInteractionReady) { diagnostic("scene-or-quest"); return; }
     if (!latest.renderPlayer && !latest.player) { diagnostic("no-player"); return; }
 
     const heldKeys = heldKeyboardMoveKeysRef.current;
@@ -1696,93 +1706,104 @@ export function OriginalClientShell({
     });
   }
 
+  const keyboardMoveCallbacksRef = useRef<{
+    down: (event: KeyboardEvent) => void;
+    up: (event: KeyboardEvent) => void;
+    dispatch: () => void;
+  } | null>(null);
+  function handleKeyboardMoveDown(event: KeyboardEvent) {
+    if (stageExitDialogRef.current?.open) return;
+    if (guildKeyboardOwnsEvent(event.target)) { stopNpcShopWorldInput(); return; }
+    const diagnosticDirection = keyboardMoveDirectionForKey(event.key);
+    // This capture listener owns movement only. Panel shortcuts must reach
+    // their owner even while a window correctly blocks world movement.
+    if (!diagnosticDirection && event.key !== "Shift") return;
+    if (diagnosticDirection) keyboardMovementDiagnosticsRef.current.lastKey = { direction: diagnosticDirection,
+      at: Date.now(), defaultPrevented: event.defaultPrevented, editable: keyboardInputTargetIsEditable(event.target),
+      modifiers: event.altKey || event.ctrlKey || event.metaKey, sceneInteractionReady, reason: "received" };
+    if (event.defaultPrevented || getKeybindCaptureActive?.()) { stopNpcShopWorldInput(); return; }
+    if (npcShopBlocksWorldInput()) { stopNpcShopWorldInput(); event.preventDefault(); return; }
+    if (bevyStorageUiActive || bevyStorageUiTransitioning) { event.preventDefault(); return; }
+    if(bevyMailComposeReady||bevyMailComposePending){heldKeyboardMoveKeysRef.current.clear();heldKeyboardRunModeRef.current=false;onViewportDirectionStop();
+      if(isCurrentMailTextTarget(event.target))return;event.preventDefault();return;}
+    if (spellsPointerCallbacksRef.current.getBevySpellsPointerContext?.()?.modal) { event.preventDefault(); return; }
+    if (event.altKey || event.ctrlKey || event.metaKey || keyboardInputTargetIsEditable(event.target)) {
+      return;
+    }
+
+    if (event.key === "Shift") {
+      if (!sceneInteractionReady) {
+        return;
+      }
+      heldKeyboardRunModeRef.current = true;
+      dispatchKeyboardMoveInput("held");
+      return;
+    }
+
+    const direction = diagnosticDirection;
+    if (!direction) {
+      return;
+    }
+
+    event.preventDefault();
+    if (!sceneInteractionReady) {
+      return;
+    }
+    heldKeyboardRunModeRef.current = event.shiftKey || heldKeyboardRunModeRef.current;
+    const alreadyHeld = heldKeyboardMoveKeysRef.current.has(direction);
+    heldKeyboardMoveKeysRef.current.add(direction);
+    if (!alreadyHeld && !event.repeat) {
+      dispatchKeyboardMoveInput("edge");
+    }
+  }
+
+  function handleKeyboardMoveUp(event: KeyboardEvent) {
+    if (guildKeyboardOwnsEvent(event.target)) { stopNpcShopWorldInput(); return; }
+    const direction = keyboardMoveDirectionForKey(event.key);
+    if (!direction && event.key !== "Shift") return;
+    if (npcShopBlocksWorldInput()) { stopNpcShopWorldInput(); event.preventDefault(); return; }
+    if(bevyMailComposeReady||bevyMailComposePending){heldKeyboardMoveKeysRef.current.clear();heldKeyboardRunModeRef.current=false;onViewportDirectionStop();
+      if(isCurrentMailTextTarget(event.target))return;event.preventDefault();return;}
+    if (event.key === "Shift") {
+      heldKeyboardRunModeRef.current = false;
+      if (heldKeyboardMoveKeysRef.current.size === 0) {
+        onViewportDirectionStop();
+        return;
+      }
+      dispatchKeyboardMoveInput("held");
+      return;
+    }
+
+    if (direction) {
+      event.preventDefault();
+      heldKeyboardMoveKeysRef.current.delete(direction);
+      heldKeyboardRunModeRef.current = event.shiftKey || heldKeyboardRunModeRef.current;
+      if (heldKeyboardMoveKeysRef.current.size === 0) {
+        onViewportDirectionStop();
+        return;
+      }
+      dispatchKeyboardMoveInput("edge");
+    }
+  }
+
+  useLayoutEffect(() => {
+    keyboardMoveCallbacksRef.current = { down: handleKeyboardMoveDown, up: handleKeyboardMoveUp,
+      dispatch: () => dispatchKeyboardMoveInput("held") };
+  });
+
   useEffect(() => {
-    if (screen !== "game" || bevyQuestUiCapturesPointer || bevyStorageUiActive || bevyStorageUiTransitioning
+    if (screen !== "game" || bevyStorageUiActive || bevyStorageUiTransitioning
       || bevyNpcShopUiActive || bevyNpcShopUiTransitioning) {
       onViewportDirectionStop();
       heldKeyboardMoveKeysRef.current.clear();
       heldKeyboardRunModeRef.current = false;
       return;
     }
-    // Live ownership is checked by every key/held dispatch below. A transient
-    // renderer guard must not prevent installing listeners until a prop changes.
-
-    function handleKeyboardMoveDown(event: KeyboardEvent) {
-      if (stageExitDialogRef.current?.open) return;
-      if (guildKeyboardOwnsEvent(event.target)) { stopNpcShopWorldInput(); return; }
-      const diagnosticDirection = keyboardMoveDirectionForKey(event.key);
-      // This capture listener owns movement only. Panel shortcuts must reach
-      // their owner even while a window correctly blocks world movement.
-      if (!diagnosticDirection && event.key !== "Shift") return;
-      if (diagnosticDirection) keyboardMovementDiagnosticsRef.current.lastKey = { direction: diagnosticDirection,
-        at: Date.now(), defaultPrevented: event.defaultPrevented, editable: keyboardInputTargetIsEditable(event.target),
-        modifiers: event.altKey || event.ctrlKey || event.metaKey, sceneInteractionReady, reason: "received" };
-      if (event.defaultPrevented || getKeybindCaptureActive?.()) { stopNpcShopWorldInput(); return; }
-      if (npcShopBlocksWorldInput()) { stopNpcShopWorldInput(); event.preventDefault(); return; }
-      if (bevyStorageUiActive || bevyStorageUiTransitioning) { event.preventDefault(); return; }
-      if(bevyMailComposeReady||bevyMailComposePending){heldKeyboardMoveKeysRef.current.clear();heldKeyboardRunModeRef.current=false;onViewportDirectionStop();
-        if(isCurrentMailTextTarget(event.target))return;event.preventDefault();return;}
-      if (spellsPointerCallbacksRef.current.getBevySpellsPointerContext?.()?.modal) { event.preventDefault(); return; }
-      if (event.altKey || event.ctrlKey || event.metaKey || keyboardInputTargetIsEditable(event.target)) {
-        return;
-      }
-
-      if (event.key === "Shift") {
-        if (!sceneInteractionReady) {
-          return;
-        }
-        heldKeyboardRunModeRef.current = true;
-        dispatchKeyboardMoveInput("held");
-        return;
-      }
-
-      const direction = diagnosticDirection;
-      if (!direction) {
-        return;
-      }
-
-      event.preventDefault();
-      if (!sceneInteractionReady) {
-        return;
-      }
-      heldKeyboardRunModeRef.current = event.shiftKey || heldKeyboardRunModeRef.current;
-      const alreadyHeld = heldKeyboardMoveKeysRef.current.has(direction);
-      heldKeyboardMoveKeysRef.current.add(direction);
-      if (!alreadyHeld && !event.repeat) {
-        dispatchKeyboardMoveInput("edge");
-      }
-    }
-
-    function handleKeyboardMoveUp(event: KeyboardEvent) {
-      if (guildKeyboardOwnsEvent(event.target)) { stopNpcShopWorldInput(); return; }
-      const direction = keyboardMoveDirectionForKey(event.key);
-      if (!direction && event.key !== "Shift") return;
-      if (npcShopBlocksWorldInput()) { stopNpcShopWorldInput(); event.preventDefault(); return; }
-      if(bevyMailComposeReady||bevyMailComposePending){heldKeyboardMoveKeysRef.current.clear();heldKeyboardRunModeRef.current=false;onViewportDirectionStop();
-        if(isCurrentMailTextTarget(event.target))return;event.preventDefault();return;}
-      if (event.key === "Shift") {
-        heldKeyboardRunModeRef.current = false;
-        if (heldKeyboardMoveKeysRef.current.size === 0) {
-          onViewportDirectionStop();
-          return;
-        }
-        dispatchKeyboardMoveInput("held");
-        return;
-      }
-
-      if (direction) {
-        event.preventDefault();
-        heldKeyboardMoveKeysRef.current.delete(direction);
-        heldKeyboardRunModeRef.current = event.shiftKey || heldKeyboardRunModeRef.current;
-        if (heldKeyboardMoveKeysRef.current.size === 0) {
-          onViewportDirectionStop();
-          return;
-        }
-        dispatchKeyboardMoveInput("edge");
-      }
-    }
-
-    const timer = window.setInterval(() => dispatchKeyboardMoveInput("held"), CRYSTAL_MOVE_INPUT_INTERVAL_MS);
+    // A prior capture listener may synchronously commit a UI update while this
+    // same key is dispatching. Retain the subscription and call committed code.
+    const handleWindowKeyboardMoveDown = (event: KeyboardEvent) => keyboardMoveCallbacksRef.current?.down(event);
+    const handleWindowKeyboardMoveUp = (event: KeyboardEvent) => keyboardMoveCallbacksRef.current?.up(event);
+    const timer = window.setInterval(() => keyboardMoveCallbacksRef.current?.dispatch(), CRYSTAL_MOVE_INPUT_INTERVAL_MS);
     const stop = () => {
       heldKeyboardMoveKeysRef.current.clear();
       heldKeyboardRunModeRef.current = false;
@@ -1792,17 +1813,17 @@ export function OriginalClientShell({
     // Winit consumes keyboard events at the shared Canvas target. Direction
     // routing, like the owned shortcuts above, must run before that target;
     // all existing modal, focus, ownership and movement guards still apply.
-    window.addEventListener("keydown", handleKeyboardMoveDown, true);
-    window.addEventListener("keyup", handleKeyboardMoveUp, true);
+    window.addEventListener("keydown", handleWindowKeyboardMoveDown, true);
+    window.addEventListener("keyup", handleWindowKeyboardMoveUp, true);
     window.addEventListener("blur", stop);
 
     return () => {
       window.clearInterval(timer);
-      window.removeEventListener("keydown", handleKeyboardMoveDown, true);
-      window.removeEventListener("keyup", handleKeyboardMoveUp, true);
+      window.removeEventListener("keydown", handleWindowKeyboardMoveDown, true);
+      window.removeEventListener("keyup", handleWindowKeyboardMoveUp, true);
       window.removeEventListener("blur", stop);
     };
-  }, [screen, sceneInteractionReady, bevyQuestUiCapturesPointer, bevyStorageUiActive, bevyStorageUiTransitioning, bevyNpcShopUiActive, bevyNpcShopUiTransitioning, bevyMailComposeReady, bevyMailComposePending, onViewportDirectionIntent, onViewportDirectionStop]);
+  }, [screen, bevyStorageUiActive, bevyStorageUiTransitioning, bevyNpcShopUiActive, bevyNpcShopUiTransitioning, onViewportDirectionStop]);
 
   const lastMotionNowRef = useRef(0);
   useEffect(() => {

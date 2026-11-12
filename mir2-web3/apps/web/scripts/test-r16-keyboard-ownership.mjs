@@ -19,14 +19,16 @@ function compile(text, scope, result = "") {
 const shell = source("../app/original-client-shell.tsx");
 const effect = nodes(shell, node => ts.isCallExpression(node) && ts.isIdentifier(node.expression)
   && node.expression.text === "useEffect" && ts.isArrowFunction(node.arguments[0])
-  && ts.isBlock(node.arguments[0].body) && node.arguments[0].body.statements.some(statement =>
-    ts.isFunctionDeclaration(statement) && statement.name?.text === "handleKeyboardMoveDown"));
+  && ts.isBlock(node.arguments[0].body) && node.arguments[0].body.getText(shell).includes('window.addEventListener("keydown", handleWindowKeyboardMoveDown'));
 assert.equal(effect.length, 1, "extract the actual movement keyboard effect");
-const handlers = effect[0].arguments[0].body.statements.filter(node => ts.isFunctionDeclaration(node)
+const handlers = nodes(shell, node => ts.isFunctionDeclaration(node)
   && ["handleKeyboardMoveDown", "handleKeyboardMoveUp"].includes(node.name?.text));
 assert.equal(handlers.length, 2);
+const movementBinding = nodes(shell, node => ts.isCallExpression(node) && node.expression.getText(shell) === "useLayoutEffect"
+  && node.arguments[0]?.getText(shell).includes("keyboardMoveCallbacksRef.current ="));
+assert.equal(movementBinding.length, 1, "extract the actual committed movement handler binding");
 const helperNames = ["keyboardMoveDirectionForKey", "crystalDirectionFromKeyboardVector", "keyboardInputTargetIsEditable",
-  "npcShopBlocksWorldInput", "stopNpcShopWorldInput", "dispatchKeyboardMoveInput", "heroBlocksWorldInput"];
+  "npcShopBlocksWorldInput", "stopNpcShopWorldInput", "dispatchKeyboardMoveInput", "heroBlocksWorldInput", "questBlocksKeyboardMovement"];
 const helpers = nodes(shell, node => ts.isFunctionDeclaration(node) && helperNames.includes(node.name?.text));
 assert.equal(helpers.length, helperNames.length);
 const guildKeyboard = source("../lib/r16-guild-keyboard.ts");
@@ -62,7 +64,7 @@ function clock() {
       const group = listeners.get(type) ?? new Set(); group.add(fn); listeners.set(type, group);
     },
     removeEventListener(type, fn) { listeners.get(type)?.delete(fn); },
-    emit(type, event) { for (const fn of [...(listeners.get(type) ?? [])]) fn(event); },
+    emit(type, event) { for (const fn of [...(listeners.get(type) ?? [])]) if (listeners.get(type)?.has(fn)) fn(event); },
     advance(ms) {
       const end = now + ms;
       for (;;) {
@@ -86,6 +88,12 @@ function shellFixture(changes = {}) {
     window, Element, HTMLElement: Element, HTMLInputElement: Input, HTMLTextAreaElement: Textarea, HTMLSelectElement: Select,
     CRYSTAL_MOVE_INPUT_INTERVAL_MS: intervalMs, screen: flags.screen, sceneInteractionReady: flags.sceneReady,
     bevyQuestUiCapturesPointer: !!flags.quest, bevyStorageUiActive: !!flags.storageActive,
+    readBevyQuestKeyboardCapture: changes.liveQuest === undefined ? undefined : () => {
+      if (flags.liveQuest === "throws") throw new Error("retired renderer");
+      return flags.liveQuest;
+    },
+    stageExitDialogRef: { current: null },
+    keyboardMoveCallbacksRef: { current: null }, useLayoutEffect: setup => setup(),
     bevyStorageUiTransitioning: !!flags.storageTransition, bevyNpcShopUiActive: !!flags.shopActive,
     bevyNpcShopUiTransitioning: !!flags.shopTransition, bevyMailComposeReady: !!flags.mailReady,
     bevyMailComposePending: !!flags.mailPending, parityUiBlocksGameplay: () => !!flags.parity,
@@ -112,7 +120,7 @@ function shellFixture(changes = {}) {
     "return { down: handleKeyboardMoveDown, up: handleKeyboardMoveUp };");
   return {
     flags, window, moves, stops, cancellations, combatPointers, held, running, scenePointer, diagnostic, direct,
-    render(callbacks = {}) { Object.assign(scope, callbacks); compile(`${helperSource}\n${effect[0].getText(shell)};`, scope); },
+    render(callbacks = {}) { Object.assign(scope, callbacks); compile(`${helperSource}\n${handlers.map(node => node.getText(shell)).join("\n")}\n${movementBinding[0].getText(shell)};\n${effect[0].getText(shell)};`, scope); },
     cleanup() { cleanup?.(); cleanup = null; }, get installs() { return installs; }
   };
 }
@@ -178,7 +186,7 @@ test("the installed capture effect preserves Arrow edges, held cadence, Shift, d
 });
 
 test("the installed effect withdraws on modal mount and dynamic parity still denies Arrow while yielding F9", () => {
-  for (const flags of [{ quest: true }, { storageActive: true }, { storageTransition: true }, { shopActive: true }, { shopTransition: true }, { screen: "select" }]) {
+  for (const flags of [{ storageActive: true }, { storageTransition: true }, { shopActive: true }, { shopTransition: true }, { screen: "select" }]) {
     const f = shellFixture(flags); f.held.current.add("down"); f.running.current = true; f.render();
     assert.equal(f.window.listeners, 0); assert.equal(f.window.timers, 0); assert.equal(f.stops.length, 1);
     assert.equal(f.held.current.size, 0); assert.equal(f.running.current, false);
@@ -207,6 +215,59 @@ test("a transient live guard at mount cannot prevent listener installation or re
       assert.deepEqual(f.moves.at(-1), ["Down", "walk", { discrete: true }], guard);
       assert.equal(f.installs, 1, "no prop rerender or listener reinstall was necessary");
       f.window.emit("keyup", key("ArrowDown"));
+    } finally { f.cleanup(); }
+  }
+});
+
+test("Native Quest close accepts the immediate physical Arrow while the React capture prop is still true", () => {
+  const f = shellFixture({ quest: true, liveQuest: true }); f.render();
+  try {
+    assert.equal(f.window.listeners, 3, "Quest ownership never removes the movement subscription");
+    f.window.emit("keydown", key("ArrowLeft"));
+    assert.equal(f.moves.length, 0); assert.equal(f.held.current.size, 0);
+    f.flags.liveQuest = false;
+    f.window.advance(300); assert.equal(f.moves.length, 0, "a blocked hold cannot replay after close");
+    f.window.emit("keydown", key("ArrowLeft"));
+    assert.deepEqual(f.moves, [["Left", "walk", { discrete: true }]]);
+    assert.equal(f.installs, 1, "the first edge does not wait for a React render/poll");
+  } finally { f.cleanup(); }
+});
+
+test("an earlier capture listener committing the Q close cannot remove the same physical Arrow from dispatch", () => {
+  const f = shellFixture({ quest: true, liveQuest: false });
+  f.window.addEventListener("keydown", event => {
+    if (event.key === "ArrowLeft") f.render({ bevyQuestUiCapturesPointer: false });
+  }, true);
+  f.render();
+  try {
+    f.window.emit("keydown", key("ArrowLeft"));
+    assert.deepEqual(f.moves, [["Left", "walk", { discrete: true }]]);
+    assert.equal(f.installs, 1, "the window subscription survives the committed render");
+  } finally { f.cleanup(); }
+});
+
+test("live Native Quest capture blocks a lagging false prop and cancels an already held movement", () => {
+  const f = shellFixture({ liveQuest: false }); f.render();
+  try {
+    f.window.emit("keydown", key("ArrowDown")); assert.equal(f.moves.length, 1);
+    f.flags.liveQuest = true; f.window.advance(100);
+    assert.equal(f.moves.length, 1); assert.equal(f.held.current.size, 0); assert.equal(f.running.current, false);
+    f.window.emit("keydown", key("Shift")); f.window.emit("keydown", key("ArrowLeft"));
+    assert.equal(f.moves.length, 1); assert.equal(f.held.current.size, 0);
+    f.flags.liveQuest = false; f.window.advance(300); assert.equal(f.moves.length, 1);
+    f.window.emit("keydown", key("ArrowRight"));
+    assert.deepEqual(f.moves.at(-1), ["Right", "walk", { discrete: true }]);
+  } finally { f.cleanup(); }
+});
+
+test("unavailable, failed or legacy Quest readers retain the existing capture boundary", () => {
+  for (const liveQuest of [undefined, null, "throws"]) {
+    const f = shellFixture({ quest: true, liveQuest }); f.render();
+    try {
+      f.window.emit("keydown", key("ArrowDown")); f.window.advance(300);
+      assert.equal(f.moves.length, 0); assert.equal(f.held.current.size, 0);
+      const panel = key("q"); f.window.emit("keydown", panel);
+      assert.equal(panel.defaultPrevented, false, "the Quest shortcut retains its owner");
     } finally { f.cleanup(); }
   }
 });

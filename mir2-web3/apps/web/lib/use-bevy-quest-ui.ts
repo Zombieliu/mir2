@@ -50,6 +50,10 @@ export function useBevyQuestUi(options: Options) {
   const refresh = useCallback(() => refreshRef.current?.(), []);
   const liveWorldControlsReaderRef = useRef<(() => QuestWorldControls | null) | null>(null);
   const worldControlBlockersReaderRef = useRef<(() => QuestWorldControls | null) | null>(null);
+  const keyboardCaptureReaderRef = useRef<(() => boolean | null) | null>(null);
+  const readLiveKeyboardCapture = useCallback(() => {
+    try { return keyboardCaptureReaderRef.current?.() ?? null; } catch { return null; }
+  }, []);
   const questNameTargetsReaderRef = useRef<(() => readonly number[] | null) | null>(null);
   const readLiveQuestNameTargets = useCallback(() => {
     try { return questNameTargetsReaderRef.current?.() ?? null; } catch { return null; }
@@ -146,6 +150,29 @@ export function useBevyQuestUi(options: Options) {
       return readQuestWorldControls(runtime, context, live.presentation.logicalWidth, live.presentation.logicalHeight);
     };
     liveWorldControlsReaderRef.current = liveWorldControlsReader;
+    const keyboardCaptureReader = (): boolean | null => {
+      const context = acknowledgedSnapshot?.worldContext;
+      if (stopped || !context || !latest.current.requested || !documentVisible()
+        || latest.current.runtimeRef.current !== runtime
+        || latest.current.runtimeGeneration !== options.runtimeGeneration) return null;
+      const live = latest.current.snapshot();
+      if (!live.inGame || !live.hostVisible || !live.presentation
+        || JSON.stringify(live.presentation) !== JSON.stringify(acknowledgedSnapshot?.presentation)
+        || !sameQuestWorldDraft(live.worldDraft ?? null, context)) return null;
+      // An NPC dialog blocks immediately. Native local Q navigation may precede
+      // its React projection, but cannot override an unsubmitted host request.
+      if (live.dialog.isOpen || live.dialog.hasInput) return true;
+      if (live.questLogOpen !== lastRequestedOpen) return null;
+      const status = readBevyQuestUiStatus(runtime, live.generation), now = performance.now();
+      if (!status?.ready || status.revision !== context.revision || status.openRevision !== openRevision
+        || !Number.isFinite(now) || status.frame < lastFrame
+        || !currentBevyQuestLocale(status, live.language, requiredPresentationRevision,
+          supportsBevyQuestDisplayLocale(runtime) ? live.displayLanguage : undefined)) return null;
+      if (status.frame > lastFrame) { lastFrame = status.frame; lastFrameAt = now; }
+      if (now < lastFrameAt || now - lastFrameAt > 2000) return null;
+      return status.capturesPointer || status.questLogOpen;
+    };
+    keyboardCaptureReaderRef.current = keyboardCaptureReader;
     const questNameTargetsReader = (): readonly number[] | null => {
       const context = acknowledgedSnapshot?.worldContext;
       if (stopped || !context || !latest.current.requested || latest.current.runtimeRef.current !== runtime
@@ -365,6 +392,7 @@ export function useBevyQuestUi(options: Options) {
       if (liveHudBarReaderRef.current === liveHudBarReader) liveHudBarReaderRef.current = null;
       if (liveWorldControlsReaderRef.current === liveWorldControlsReader) liveWorldControlsReaderRef.current = null;
       if (worldControlBlockersReaderRef.current === worldControlBlockersReader) worldControlBlockersReaderRef.current = null;
+      if (keyboardCaptureReaderRef.current === keyboardCaptureReader) keyboardCaptureReaderRef.current = null;
       if (questNameTargetsReaderRef.current === questNameTargetsReader) questNameTargetsReaderRef.current = null;
       if (refreshRef.current === tick) refreshRef.current = null;
       window.clearInterval(timer);
@@ -377,5 +405,6 @@ export function useBevyQuestUi(options: Options) {
       }
     };
   }, [options.requested, options.runtimeGeneration]);
-  return { ...state, refresh, readLiveHudBarPlans, readLiveWorldControls, readLiveWorldControlBlockers, readLiveQuestNameTargets };
+  return { ...state, refresh, readLiveHudBarPlans, readLiveWorldControls, readLiveWorldControlBlockers, readLiveQuestNameTargets,
+    readLiveKeyboardCapture };
 }

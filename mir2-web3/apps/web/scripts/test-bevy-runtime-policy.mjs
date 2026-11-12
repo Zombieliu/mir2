@@ -160,3 +160,98 @@ test("network failures never trigger a second full runtime download", () => {
   assert.equal(shouldRetryBevyRuntimeWithWebGl2("webgpu", true, gpuError), true);
   assert.equal(shouldRetryBevyRuntimeWithWebGl2("webgl2", true, gpuError), false);
 });
+
+// Run the Page's actual configuration and failure blocks. URL intent and the
+// current runtime's availability have independent lifetimes; a same-backend
+// retry does not rerun the canvas-selection effect.
+const pageSource = readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8");
+const pageAst = ts.createSourceFile("page.tsx", pageSource, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+const findPageNodes = predicate => {
+  const found = [];
+  const visit = node => { if (predicate(node)) found.push(node); ts.forEachChild(node, visit); };
+  visit(pageAst); return found;
+};
+const uiConfiguration = findPageNodes(node => ts.isCallExpression(node) && node.expression.getText(pageAst) === "useEffect"
+  && ts.isArrowFunction(node.arguments[0]) && node.arguments[0].body.getText(pageAst).includes("const requests = resolveSharedUiRequests"));
+assert.equal(uiConfiguration.length, 1);
+const pageBoot = findPageNodes(node => ts.isFunctionDeclaration(node) && node.name?.text === "bootRuntime");
+assert.equal(pageBoot.length, 1);
+const pageFailure = pageBoot[0].body.statements.find(ts.isTryStatement)?.catchClause?.block;
+assert(pageFailure);
+const projections = findPageNodes(node => ts.isVariableDeclaration(node)
+  && ["bevyQuestUiRequested", "bevyBagUiRequested"].includes(node.name.getText(pageAst)));
+assert.equal(projections.length, 2);
+function runPageBlock(text, scope, result = "") {
+  const javascript = ts.transpileModule(text, { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText;
+  return new Function(...Object.keys(scope), javascript + result)(...Object.values(scope));
+}
+const sharedModule = { exports: {} };
+new Function("exports", "module", ts.transpileModule(readFileSync(new URL("../lib/bevy-shared-canvas-mode.ts", import.meta.url), "utf8"), {
+  compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+}).outputText)(sharedModule.exports, sharedModule);
+function pageFailureFixture(search = "", strict = false, bootAttempted = false) {
+  const state = { quest: false, bag: false, started: true, generation: 1, phase: "running", withdrawals: 0 };
+  const window = { location: { search }, __mir2BevyRuntimeBootAttempted: bootAttempted };
+  const runtimeRef = { current: { clearMir2StatusSink() {} } };
+  const scope = { disposed: false, error: new DOMException("runtime download interrupted", "AbortError"), window, runtimeRef,
+    webGl2SharedCanvasPrototype: strict, resolveSharedUiRequests: sharedModule.exports.resolveSharedUiRequests,
+    setBevyQuestUiRequested: value => state.quest = value, setBevyBagUiRequested: value => state.bag = value,
+    setBevyRuntimeGeneration: update => state.generation = update(state.generation),
+    withdrawHudBarDrawPlanOutputs: () => state.withdrawals++, resetBevyMapImageResidency() {},
+    setRuntimePhase: value => state.phase = value, setRuntimeMessage() {},
+    setBevyRuntimeStarted: value => state.started = value, setBevyEntityRendererReady() {}, setBevyRuntimeBackend() {},
+    canRetryBevyRuntimeBeforeBoot, isBevyRuntimeNetworkFailure, markMir2CacheMilestone() {},
+    scheduleBevyRuntimeCacheRecovery: () => false, console: { warn() {}, info() {} } };
+  runPageBlock(uiConfiguration[0].arguments[0].body.getText(pageAst), scope);
+  return { state, scope, window, runtimeRef,
+    fail: () => runPageBlock(pageFailure.getText(pageAst), scope),
+    requested: () => runPageBlock(projections.map(node => "const " + node.getText(pageAst) + ";").join("\n"), {
+      bevyQuestUiRequestedByUrl: state.quest, bevyBagUiRequestedByUrl: state.bag,
+      currentUiRequests: sharedModule.exports.resolveSharedUiRequests(search, strict),
+    }, "return { quest: bevyQuestUiRequested, bag: bevyBagUiRequested };") };
+}
+
+test("Page keeps default shared UI intent across a pre-boot failure on the same backend", () => {
+  const f = pageFailureFixture();
+  assert.deepEqual(f.requested(), { quest: true, bag: true });
+  f.fail();
+  assert.equal(f.window.__mir2BevyRuntimeRetryable, true);
+  assert.equal(f.runtimeRef.current, null);
+  assert.equal(f.state.started, false);
+  assert.equal(f.state.withdrawals, 1);
+  assert.deepEqual(f.requested(), { quest: true, bag: true }, "a later successful WebGPU retry must still request its original HUD");
+});
+
+test("Page failure preserves explicit disabled and mixed shared UI choices", () => {
+  for (const [search, strict, expected] of [
+    ["?bevyQuestUi=0&bevyBagUi=0", false, { quest: false, bag: false }],
+    ["?bevyQuestUi=1&bevyBagUi=0", false, { quest: true, bag: false }],
+    ["?bevyBackend=webgl2&bevySharedCanvas=1&bevyQuestUi=1&bevyBagUi=0", true, { quest: true, bag: false }],
+  ]) {
+    const f = pageFailureFixture(search, strict);
+    assert.deepEqual(f.requested(), expected);
+    f.fail();
+    assert.deepEqual(f.requested(), expected, search);
+  }
+});
+
+test("preserving Page UI intent does not turn a failed App boot into an automatic retry", () => {
+  const f = pageFailureFixture("", false, true);
+  f.fail();
+  assert.equal(f.window.__mir2BevyRuntimeRetryable, false);
+  assert.equal(f.window.__mir2BevyRuntimeBootAttempted, true);
+  assert.equal(f.runtimeRef.current, null);
+  assert.equal(f.state.started, false);
+  assert.deepEqual(f.requested(), { quest: true, bag: true });
+});
+
+test("a disposed Page attempt cannot withdraw the newer runtime or its UI choices", () => {
+  const f = pageFailureFixture();
+  const runtime = f.runtimeRef.current;
+  f.scope.disposed = true;
+  f.fail();
+  assert.equal(f.runtimeRef.current, runtime);
+  assert.equal(f.state.generation, 1);
+  assert.equal(f.state.withdrawals, 0);
+  assert.deepEqual(f.requested(), { quest: true, bag: true });
+});

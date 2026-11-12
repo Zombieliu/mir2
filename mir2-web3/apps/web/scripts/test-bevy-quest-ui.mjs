@@ -460,7 +460,8 @@ test("renderer restart, first NPC input capture and stopped-loop fallback preser
       "an old bundle never receives an unknown world field");
     runtime.getMir2QuestWorldContextVersion = () => 2;
     const draft = completeQuestDraft(101);
-    model = { ...model, worldDraft: draft, presentation: { ...model.presentation, touch: false } };
+    model = { ...model, worldDraft: draft, dialog: host.projectBevyQuestDialog(null),
+      presentation: { ...model.presentation, touch: false } };
     tick();
     const context = submitted.at(-1).worldContext;
     assert.equal(context.revision, submitted.at(-1).revision);
@@ -474,6 +475,28 @@ test("renderer restart, first NPC input capture and stopped-loop fallback preser
       rects: paintedRects });
     tick();
     assert.equal(state.current.worldControlsReady, true);
+    assert.equal(hookView.readLiveKeyboardCapture(), false);
+    applied = { ...applied, questLogOpen: true, capturesPointer: true };
+    assert.equal(hookView.readLiveKeyboardCapture(), true, "Native open blocks before the React projection catches up");
+    applied = { ...applied, questLogOpen: false, capturesPointer: false };
+    assert.equal(hookView.readLiveKeyboardCapture(), false, "Native close is readable without waiting for a polling tick");
+    const beforeCaptureChecks = model, beforeCaptureStatus = applied;
+    model = { ...model, questLogOpen: true };
+    assert.equal(hookView.readLiveKeyboardCapture(), null, "a new unsubmitted host-open request cannot borrow old closed status");
+    model = { ...beforeCaptureChecks, dialog: { ...beforeCaptureChecks.dialog, isOpen: true } };
+    assert.equal(hookView.readLiveKeyboardCapture(), true, "a host NPC dialog remains a world-input blocker");
+    model = beforeCaptureChecks;
+    for (const stale of [{ revision: applied.revision - 1 }, { openRevision: applied.openRevision - 1 },
+      { generation: 102 }, { frame: applied.frame - 1 }, { ready: false }]) {
+      applied = { ...beforeCaptureStatus, ...stale };
+      assert.equal(hookView.readLiveKeyboardCapture(), null, JSON.stringify(stale));
+    }
+    applied = beforeCaptureStatus;
+    now += 2001;
+    assert.equal(hookView.readLiveKeyboardCapture(), null, "a stopped renderer cannot release keyboard capture");
+    applied = { ...applied, frame: applied.frame + 1 };
+    assert.equal(hookView.readLiveKeyboardCapture(), false, "a new actual frame restores the current owner");
+    tick();
     assert.equal(worldControls.questWorldControlAt(hookView.readLiveWorldControls(), 20, 30), true);
     assert.equal(worldControls.questWorldControlAt(hookView.readLiveWorldControls(), 110, 30), true,
       "the current Native detail button claims its actual rectangle without becoming a world action");
@@ -504,12 +527,14 @@ test("renderer restart, first NPC input capture and stopped-loop fallback preser
     assert.equal(JSON.parse(sink(JSON.stringify(mapIntent))).accepted, false);
     model = { ...model, quests: originalQuests };
     runtimeHolder.current = { ...runtime };
+    assert.equal(hookView.readLiveKeyboardCapture(), null, "capture is tied to the exact runtime object");
     assert.equal(hookView.readLiveWorldControls(), null);
     assert.equal(hookView.readLiveWorldControlBlockers(), null, "the painted cache belongs to the exact runtime object");
     assert.equal(JSON.parse(sink(JSON.stringify(mapIntent))).accepted, false,
       "an old sink cannot act after a runtime replacement");
     runtimeHolder.current = runtime;
     globalThis.document.visibilityState = "hidden";
+    assert.equal(hookView.readLiveKeyboardCapture(), null, "hidden surfaces cannot authorize a key");
     assert.equal(hookView.readLiveWorldControls(), null);
     assert.equal(hookView.readLiveWorldControlBlockers(), null, "hidden paint cannot capture a new gesture");
     assert.equal(worldControls.questWorldControlAt(hookView.readLiveWorldControlBlockers(), 110, 30), false,
@@ -539,6 +564,7 @@ test("renderer restart, first NPC input capture and stopped-loop fallback preser
     assert.deepEqual(hookView.readLiveWorldControlBlockers()?.rects, [],
       "an applied empty layout replaces old painted rectangles instead of keeping a stale button");
     model = { ...model, generation: 102, inGame: false, presentation: null };
+    assert.equal(hookView.readLiveKeyboardCapture(), null, "logout withdraws the live keyboard owner synchronously");
     assert.equal(hookView.readLiveWorldControlBlockers(), null, "session exit immediately withdraws paint blockers");
     tick();
     assert.equal(submitted.at(-1).generation, 102, "logout during invalid geometry must reach the current session");
