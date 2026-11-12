@@ -256,3 +256,11 @@ test("a disposed Page attempt cannot withdraw the newer runtime or its UI choice
   assert.equal(f.state.withdrawals, 0);
   assert.deepEqual(f.requested(), { quest: true, bag: true });
 });
+
+test('an indeterminate wasm-bindgen initialization requires a fresh document for either backend',()=>{
+  const error=Object.assign(new TypeError('Failed to fetch after initializer entry'),{runtimeInitializationUncertain:true});
+  assert.equal(canRetryBevyRuntimeBeforeBoot(false,error),false);
+  assert.equal(shouldRetryBevyRuntimeWithWebGl2('webgpu',true,error),false);
+  const fixture=pageFailureFixture();fixture.scope.error=error;fixture.fail();
+  assert.equal(fixture.window.__mir2BevyRuntimeRetryable,false);
+});

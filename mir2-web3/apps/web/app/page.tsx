@@ -1641,7 +1641,7 @@ function requestAssetPrewarmStage(stage: AssetPrewarmStageName) {
     __mir2PendingAssetPrewarmStage?: AssetPrewarmStageName;
   };
   cacheWindow.__mir2PendingAssetPrewarmStage = stage;
-  void cacheWindow.__mir2AssetCachePrewarmStage?.(stage);
+  return cacheWindow.__mir2AssetCachePrewarmStage?.(stage);
 }
 
 function scheduleBevyRuntimeCacheRecovery(message: string) {
@@ -5650,15 +5650,13 @@ export default function HomePage() {
           return;
         }
 
+        // Let existing foreground HUD attempts settle before the large binary
+        // competes for their bandwidth. A settled stage may still have failed
+        // assets; Native and ordinary image readers retain their own recovery.
+        await requestAssetPrewarmStage("game")?.catch(() => {});
+        if (disposed) return;
+        markMir2CacheMilestone("bevyRuntimeForegroundWarmSettled", { stage: "game" });
         appendLog(t("runtime.loadingModule"), "network");
-        markMir2CacheMilestone("bevyRuntimeFontPrewarmStart");
-        void prewarmBevyRuntimeFonts({ signal: fontPrewarmController.signal }).then((result) => {
-          if (disposed) return;
-          markMir2CacheMilestone("bevyRuntimeFontPrewarmComplete", {
-            requested: result.requested, ok: result.completed.length,
-            failed: result.failed.length, aborted: result.aborted, bytes: result.bytes,
-          });
-        }).catch(() => { /* Native readers keep their own recovery path. */ });
         let runtimeBackend = selectedBackend;
         let fallbackFrom: BevyRuntimeBackend | undefined;
         let runtime: RuntimeModule;
@@ -5682,6 +5680,18 @@ export default function HomePage() {
           }
         }
         if (disposed) return;
+
+        // Reserve the bounded binary download for the renderer. The speculative
+        // CJK bodies begin only after it has arrived, before Native requests its
+        // fonts; both readers still share the Worker's complete cache fills.
+        markMir2CacheMilestone("bevyRuntimeFontPrewarmStart");
+        void prewarmBevyRuntimeFonts({ signal: fontPrewarmController.signal }).then((result) => {
+          if (disposed) return;
+          markMir2CacheMilestone("bevyRuntimeFontPrewarmComplete", {
+            requested: result.requested, ok: result.completed.length,
+            failed: result.failed.length, aborted: result.aborted, bytes: result.bytes,
+          });
+        }).catch(() => { /* Native readers keep their own recovery path. */ });
 
         // The fixed canvas placement must agree with the initialized bytes before
         // handing control to an App. A failed boot needs a fresh document to retry.
@@ -22742,7 +22752,10 @@ async function loadBevyRuntimeModule(backend: BevyRuntimeBackend, startup: BevyR
   );
   const existing = bevyRuntimeModuleLoads.get(runtimePath);
   if (existing) return existing;
-  const loading = initializeBevyRuntimeModule(runtimePath, runtimeWasmPath);
+  // The manifest-checked app rewrite serves this exact version/package. Keep
+  // glue on its immutable release URL and the same remote binary as fallback.
+  const { wasmUrl: localRuntimeWasmPath } = createBevyRuntimeUrls(startup.manifest.version, selectedPackage.id);
+  const loading = initializeBevyRuntimeModule(runtimePath, localRuntimeWasmPath, runtimeWasmPath);
   bevyRuntimeModuleLoads.set(runtimePath, loading);
   void loading.catch(() => {
     if (bevyRuntimeModuleLoads.get(runtimePath) === loading) bevyRuntimeModuleLoads.delete(runtimePath);
@@ -22750,10 +22763,11 @@ async function loadBevyRuntimeModule(backend: BevyRuntimeBackend, startup: BevyR
   return loading;
 }
 
-async function initializeBevyRuntimeModule(runtimePath: string, runtimeWasmPath: string): Promise<RuntimeModule> {
+async function initializeBevyRuntimeModule(runtimePath: string, runtimeWasmPath: string, fallbackWasmPath?: string): Promise<RuntimeModule> {
   return initializeBevyRuntime({
     loadModule: () => import(/* webpackIgnore: true */ runtimePath) as Promise<RuntimeModule>,
     wasmUrl: runtimeWasmPath,
+    wasmFallbackUrls: fallbackWasmPath ? [fallbackWasmPath] : [],
     waitForCanvas: waitForBevyCanvas,
     timeoutMs: BEVY_RUNTIME_BOOT_TIMEOUT_MS,
   });

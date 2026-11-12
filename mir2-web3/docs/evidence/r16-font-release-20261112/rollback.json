@@ -1,0 +1,142 @@
+{
+  "schema": 1,
+  "kind": "numeron-r16-release",
+  "passed": true,
+  "domainMovePending": true,
+  "customDomainChanged": false,
+  "oldGameProjectMutatedByHelper": false,
+  "writes": [
+    {
+      "operation": "rollback",
+      "site": "game",
+      "deployment": "dpl_DMT1cgUABySkvpn6VQEvAXD7j3dL"
+    }
+  ],
+  "rollbacks": [],
+  "credentialsRecorded": false,
+  "operation": "numeron-qr-rollback",
+  "sourceSha": "df7aace1692ccbd28291a917b7e74eafe6942940",
+  "implementationSha": "7a7e428abed58a4a19f7adc5496238f094738043",
+  "projects": {
+    "original": {
+      "project": "prj_Bl3ttB4PzcdCpJMYLRhzQjkdXyTz",
+      "production": "dpl_3NBhFUPKxNF4nccRnG94ZhDq1iz6",
+      "rootDirectory": "mir2-web3/apps/web",
+      "nodeVersion": "24.x"
+    },
+    "main": {
+      "project": "prj_Q14gZuvjxkfqOCExhqOrYiR2UbxA",
+      "production": "dpl_BWkLQWS8SUB3JFFvFXCenDr2ULmR",
+      "rootDirectory": null,
+      "nodeVersion": "24.x"
+    },
+    "game": {
+      "project": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+      "production": "dpl_AX8yVT3mRrwfAmMSZmv5NfZi2DgQ",
+      "rootDirectory": "mir2-web3/apps/web",
+      "nodeVersion": "26.x"
+    }
+  },
+  "sourceClosure": {
+    "base": "99110428632b43e945c2341e8ca9058a8324937a",
+    "assetSource": "f2de762309768b51b39438c2437c14e819df9bf7",
+    "ref": "codex/windows-player-journey",
+    "changedFiles": [
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/lib/bevy-runtime-font-prewarm.ts",
+        "sha": "026c4f90ca766e6ade536b1ef55e0e5bbefb8647"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs",
+        "sha": "3285ec9deffbbb73ea3ecc189e7d222384089158"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/docs/AGENT-CURRENT.md",
+        "sha": "ab1a900c1b400345cd0df1f7dc1867d25be9f7cb"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+        "sha": "74b03eb8771c2dd7e2ac32a2a9c9ad6ff826bbc0"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+        "sha": "2e705f88cf4aeeb39acb097249b479f0501a9345"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md",
+        "sha": "d1846fc9a0455fcdbf4c10397f58d9f1a4f09a38"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-startup-timing-20261112/README.md",
+        "sha": "65598c7679944a59c27bd6a9356e5ca0b568944a"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-startup-timing-20261112/build-receipt.json",
+        "sha": "ce8f1459a4cb49ff93a4daecde23e1620316e91b"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-startup-timing-20261112/clean-candidate-green.log",
+        "sha": "184aa4e81752079e8dd8a5807d9c1ae13b4723b3"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-startup-timing-20261112/observe-network.mjs",
+        "sha": "bed08531773e3f1d6b0da38440499894939e19f3"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-startup-timing-20261112/order-red-r2.log",
+        "sha": "6f4afae45cae766449279ccf4402b270f00e1e63"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-startup-timing-20261112/production-build-r1.log",
+        "sha": "55e2165e1da7b875088bf2afad8a0bfc84a0f98c"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-startup-timing-20261112/receipt.json",
+        "sha": "1e96293acd98b04b70054e07696e4048b093a9ba"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-startup-timing-20261112/webgl2-quest.png",
+        "sha": "d94cab684faefb60934aa8e6d0947aa6e8eace4d"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/docs/evidence/r16-startup-timing-20261112/webgpu-quest.png",
+        "sha": "cce9619399f70aceebe1c44f712b3307b216c3fa"
+      }
+    ]
+  },
+  "assetPublication": {
+    "runId": "42494701555",
+    "artifactId": 13622863928,
+    "manifestSha256": "32255399aaae2dc9a133a5827252256ece782aaae5d237152ffebc2d8f272155",
+    "manifestBytes": 15716826
+  },
+  "candidates": {
+    "game": {
+      "id": "dpl_AX8yVT3mRrwfAmMSZmv5NfZi2DgQ",
+      "url": "numeron-r16-5r36cxj9r-obelisk-labs.vercel.app"
+    }
+  },
+  "trafficBefore": {
+    "target": "dpl_AX8yVT3mRrwfAmMSZmv5NfZi2DgQ",
+    "alias": "dpl_AX8yVT3mRrwfAmMSZmv5NfZi2DgQ"
+  },
+  "trafficAfter": {
+    "target": "dpl_DMT1cgUABySkvpn6VQEvAXD7j3dL",
+    "alias": "dpl_DMT1cgUABySkvpn6VQEvAXD7j3dL"
+  }
+}

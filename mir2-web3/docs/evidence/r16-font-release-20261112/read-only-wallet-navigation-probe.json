@@ -1,0 +1,362 @@
+{
+  "scope": "read-only official wallet navigation; no credential or wallet create/approval clicks",
+  "rows": [
+    {
+      "path": "/auth/create",
+      "method": "GET",
+      "type": "document",
+      "at": 6,
+      "headersAt": 926,
+      "status": 200,
+      "finishedAt": 946
+    },
+    {
+      "path": "/_next/static/css/c97cd009107e7b81.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "at": 935,
+      "headersAt": 1143,
+      "status": 200,
+      "finishedAt": 1144
+    },
+    {
+      "path": "/_next/static/css/2fe494d22c063b7e.css",
+      "method": "GET",
+      "type": "stylesheet",
+      "at": 936,
+      "headersAt": 1051,
+      "status": 200,
+      "finishedAt": 1051
+    },
+    {
+      "path": "/brand/dubhe-mark.png",
+      "method": "GET",
+      "type": "image",
+      "at": 936,
+      "headersAt": 4213,
+      "status": 200,
+      "finishedAt": 4213
+    },
+    {
+      "path": "/fonts/material-symbols-outlined.woff2",
+      "method": "GET",
+      "type": "font",
+      "at": 936,
+      "headersAt": 3057,
+      "status": 200,
+      "finishedAt": 3057
+    },
+    {
+      "path": "/_next/static/chunks/webpack-5ce7a98ac907be72.js",
+      "method": "GET",
+      "type": "script",
+      "at": 936,
+      "headersAt": 3050,
+      "status": 200,
+      "finishedAt": 3050
+    },
+    {
+      "path": "/_next/static/chunks/framework-19637330d964477a.js",
+      "method": "GET",
+      "type": "script",
+      "at": 936,
+      "headersAt": 1144,
+      "status": 200,
+      "finishedAt": 1144
+    },
+    {
+      "path": "/_next/static/chunks/main-35d08c6daf2ee51e.js",
+      "method": "GET",
+      "type": "script",
+      "at": 936,
+      "headersAt": 4157,
+      "status": 200,
+      "finishedAt": 4157
+    },
+    {
+      "path": "/_next/static/chunks/pages/_app-7b4f28e193967de9.js",
+      "method": "GET",
+      "type": "script",
+      "at": 936,
+      "headersAt": 4820,
+      "status": 200,
+      "finishedAt": 4820
+    },
+    {
+      "path": "/_next/static/chunks/3614-ed1b3674b2335016.js",
+      "method": "GET",
+      "type": "script",
+      "at": 936,
+      "headersAt": 3740,
+      "status": 200,
+      "finishedAt": 3740
+    },
+    {
+      "path": "/_next/static/chunks/9249-5994cbab27b45f59.js",
+      "method": "GET",
+      "type": "script",
+      "at": 936,
+      "headersAt": 1161,
+      "status": 200,
+      "finishedAt": 1162
+    },
+    {
+      "path": "/_next/static/chunks/1211-e4cb79120e7d23e6.js",
+      "method": "GET",
+      "type": "script",
+      "at": 936,
+      "headersAt": 3739,
+      "status": 200,
+      "finishedAt": 3739
+    },
+    {
+      "path": "/_next/static/chunks/pages/auth/create-f68d4c1c6e7516a1.js",
+      "method": "GET",
+      "type": "script",
+      "at": 936,
+      "headersAt": 3488,
+      "status": 200,
+      "finishedAt": 3488
+    },
+    {
+      "path": "/_next/static/BarZ7bNlaT-OHiRJVvW4z/_buildManifest.js",
+      "method": "GET",
+      "type": "script",
+      "at": 936,
+      "headersAt": 4184,
+      "status": 200,
+      "finishedAt": 4185
+    },
+    {
+      "path": "/_next/static/BarZ7bNlaT-OHiRJVvW4z/_ssgManifest.js",
+      "method": "GET",
+      "type": "script",
+      "at": 936,
+      "headersAt": 4185,
+      "status": 200,
+      "finishedAt": 4185
+    },
+    {
+      "path": "/manifest.json",
+      "method": "GET",
+      "type": "manifest",
+      "at": 947,
+      "headersAt": 2922,
+      "status": 200,
+      "finishedAt": 2922
+    },
+    {
+      "path": "/brand/card-grain.svg",
+      "method": "GET",
+      "type": "image",
+      "at": 1266,
+      "headersAt": 4820,
+      "status": 200,
+      "finishedAt": 4825
+    },
+    {
+      "path": "/fonts/manrope-latin.woff2",
+      "method": "GET",
+      "type": "font",
+      "at": 1266,
+      "headersAt": 5181,
+      "status": 200,
+      "finishedAt": 5181
+    },
+    {
+      "path": "/fonts/space-grotesk-latin.woff2",
+      "method": "GET",
+      "type": "font",
+      "at": 1266,
+      "headersAt": 5400,
+      "status": 200,
+      "finishedAt": 5400
+    },
+    {
+      "path": "/_next/static/chunks/6673.fdffc74a1a529260.js",
+      "method": "GET",
+      "type": "script",
+      "at": 4841,
+      "headersAt": 5427,
+      "status": 200,
+      "finishedAt": 5427
+    },
+    {
+      "path": "/_next/static/chunks/5191.eed25f6c7d683d3f.js",
+      "method": "GET",
+      "type": "script",
+      "at": 4852,
+      "headersAt": 5441,
+      "status": 200,
+      "finishedAt": 5441
+    },
+    {
+      "path": "/_next/static/chunks/ccbf4334-b0751213cf324d0b.js",
+      "method": "GET",
+      "type": "script",
+      "at": 4852
+    },
+    {
+      "path": "/_next/static/chunks/7021-6a93cbfd9336b426.js",
+      "method": "GET",
+      "type": "script",
+      "at": 4852,
+      "headersAt": 5679,
+      "status": 200,
+      "finishedAt": 5679
+    },
+    {
+      "path": "/_next/static/chunks/1987-44b54849f81c0d1f.js",
+      "method": "GET",
+      "type": "script",
+      "at": 4852
+    },
+    {
+      "path": "/_next/static/chunks/8287-c070748b0a7dd16f.js",
+      "method": "GET",
+      "type": "script",
+      "at": 4852
+    },
+    {
+      "path": "/_next/static/chunks/5069-13105b8d649862a8.js",
+      "method": "GET",
+      "type": "script",
+      "at": 4852
+    },
+    {
+      "path": "/_next/static/chunks/1044-88561928c250c130.js",
+      "method": "GET",
+      "type": "script",
+      "at": 4852
+    },
+    {
+      "path": "/_next/static/chunks/4742-8aaa105022336f9f.js",
+      "method": "GET",
+      "type": "script",
+      "at": 4852
+    },
+    {
+      "path": "/_next/static/chunks/4502.5c1b3174545bd552.js",
+      "method": "GET",
+      "type": "script",
+      "at": 4852
+    },
+    {
+      "path": "/_next/static/chunks/2116.6bd7f6eeb1fac269.js",
+      "method": "GET",
+      "type": "script",
+      "at": 4852,
+      "headersAt": 5679,
+      "status": 200,
+      "finishedAt": 5679
+    },
+    {
+      "path": "/_next/static/chunks/1214.be08c876bb0bbf1e.js",
+      "method": "GET",
+      "type": "script",
+      "at": 4852
+    },
+    {
+      "path": "/_next/static/chunks/1734.6b707b8e4fdb6f92.js",
+      "method": "GET",
+      "type": "script",
+      "at": 4853
+    },
+    {
+      "path": "/_next/static/chunks/pages/welcome-f911a82ecbda8f36.js",
+      "method": "GET",
+      "type": "other",
+      "at": 4878
+    },
+    {
+      "path": "/_next/static/chunks/pages/auth/browser-help-0b04c3ff4824b787.js",
+      "method": "GET",
+      "type": "other",
+      "at": 4878
+    }
+  ],
+  "domContentLoadedMs": 4832,
+  "status": 200,
+  "navigationMs": 4832,
+  "headingVisible": true,
+  "document": {
+    "readyState": "interactive",
+    "timeOrigin": 1794488955724.9,
+    "navigation": [
+      {
+        "domContentLoaded": 4827,
+        "responseStart": 786.3999999985099,
+        "responseEnd": 921.1999999955297
+      }
+    ]
+  },
+  "pending": [
+    {
+      "path": "/_next/static/chunks/ccbf4334-b0751213cf324d0b.js",
+      "type": "script",
+      "at": 4852,
+      "status": null
+    },
+    {
+      "path": "/_next/static/chunks/1987-44b54849f81c0d1f.js",
+      "type": "script",
+      "at": 4852,
+      "status": null
+    },
+    {
+      "path": "/_next/static/chunks/8287-c070748b0a7dd16f.js",
+      "type": "script",
+      "at": 4852,
+      "status": null
+    },
+    {
+      "path": "/_next/static/chunks/5069-13105b8d649862a8.js",
+      "type": "script",
+      "at": 4852,
+      "status": null
+    },
+    {
+      "path": "/_next/static/chunks/1044-88561928c250c130.js",
+      "type": "script",
+      "at": 4852,
+      "status": null
+    },
+    {
+      "path": "/_next/static/chunks/4742-8aaa105022336f9f.js",
+      "type": "script",
+      "at": 4852,
+      "status": null
+    },
+    {
+      "path": "/_next/static/chunks/4502.5c1b3174545bd552.js",
+      "type": "script",
+      "at": 4852,
+      "status": null
+    },
+    {
+      "path": "/_next/static/chunks/1214.be08c876bb0bbf1e.js",
+      "type": "script",
+      "at": 4852,
+      "status": null
+    },
+    {
+      "path": "/_next/static/chunks/1734.6b707b8e4fdb6f92.js",
+      "type": "script",
+      "at": 4853,
+      "status": null
+    },
+    {
+      "path": "/_next/static/chunks/pages/welcome-f911a82ecbda8f36.js",
+      "type": "other",
+      "at": 4878,
+      "status": null
+    },
+    {
+      "path": "/_next/static/chunks/pages/auth/browser-help-0b04c3ff4824b787.js",
+      "type": "other",
+      "at": 4878,
+      "status": null
+    }
+  ],
+  "browserClosed": true
+}

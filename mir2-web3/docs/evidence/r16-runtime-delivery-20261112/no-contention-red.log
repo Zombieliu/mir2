@@ -1,0 +1,110 @@
+TAP version 13
+# Subtest: actual Page reserves runtime download bandwidth, then starts fonts before Native boot
+not ok 1 - actual Page reserves runtime download bandwidth, then starts fonts before Native boot
+  ---
+  duration_ms: 187.5984
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-runtime-font-prewarm.mjs:53:1'
+  failureType: 'testCodeFailure'
+  error: 'large speculative fonts must not contend with the pending runtime binary'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs:56:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: actual Page leaves fonts deferred before first paint and for disabled, touch, missing metadata or GPU
+ok 2 - actual Page leaves fonts deferred before first paint and for disabled, touch, missing metadata or GPU
+  ---
+  duration_ms: 432.1562
+  type: 'test'
+  ...
+# Subtest: actual retryable module failure starts no speculative font work and keeps the retry boundary
+not ok 3 - actual retryable module failure starts no speculative font work and keeps the retry boundary
+  ---
+  duration_ms: 84.8022
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-runtime-font-prewarm.mjs:72:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    1 !== 0
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 1
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs:74:34)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: leaving while the runtime downloads cannot start late font reads
+not ok 4 - leaving while the runtime downloads cannot start late font reads
+  ---
+  duration_ms: 105.6853
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-runtime-font-prewarm.mjs:79:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The expression evaluated to a falsy value:
+    
+      assert(!run.events.some(e=>e.name==='fonts'))
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs:81:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: prewarm paths exactly cover the Native display font families
+ok 5 - prewarm paths exactly cover the Native display font families
+  ---
+  duration_ms: 1.2892
+  type: 'test'
+  ...
+# Subtest: two pending font bodies bound concurrency and completion waits for full bytes
+ok 6 - two pending font bodies bound concurrency and completion waits for full bytes
+  ---
+  duration_ms: 11.4083
+  type: 'test'
+  ...
+# Subtest: leaving cancels active font bodies and never starts the queued fonts
+ok 7 - leaving cancels active font bodies and never starts the queued fonts
+  ---
+  duration_ms: 0.8349
+  type: 'test'
+  ...
+# (node:33080) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: a failed font does not withdraw the runtime or prevent warming the other families
+ok 8 - a failed font does not withdraw the runtime or prevent warming the other families
+  ---
+  duration_ms: 467.173
+  type: 'test'
+  ...
+# Subtest: the slow CJK families do not wait behind short fallback requests
+ok 9 - the slow CJK families do not wait behind short fallback requests
+  ---
+  duration_ms: 2.433
+  type: 'test'
+  ...
+1..9
+# tests 9
+# suites 0
+# pass 6
+# fail 3
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1624.0918

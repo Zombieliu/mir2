@@ -1,0 +1,666 @@
+{
+  "kind": "r16-bounded-runtime-delivery-and-foreground-scheduling",
+  "sourceBase": "7a7e428abed58a4a19f7adc5496238f094738043",
+  "candidate": "7a7e428abed5-runtime-delivery3-bdd50837",
+  "buildReceiptSha256": "2cf6263e0eacf336991ab5ac500f0a65148cf745c5aee87b65d9c8592daf58a8",
+  "tests": {
+    "passed": 160,
+    "failed": 0,
+    "duplicateRunsNotAdded": true
+  },
+  "preservedOriginalFileCount": 65,
+  "policy": {
+    "firstSourceHeadersMs": 8000,
+    "lastSourceHeadersMs": 120000,
+    "scriptImportMs": 120000,
+    "bodyIdlePositiveBytesMs": 15000,
+    "bodyHardLimitMs": 600000,
+    "decodedByteLimit": 33554432,
+    "compilerOrInitializationMs": 120000,
+    "coldQaUnchangedMs": 120000
+  },
+  "cases": [
+    {
+      "run": "quest-after-r5",
+      "mode": "compatibility",
+      "candidate": "7a7e428abed5-runtime-delivery3-bdd50837",
+      "backend": "webgpu",
+      "packageId": "webgpu",
+      "fullColdRunPassed": false,
+      "coldGate": {
+        "passed": false,
+        "budgetMs": 120000,
+        "failure": {
+          "stage": "verify-hosted-font-policy-and-wait-native-hud",
+          "code": "NATIVE_READINESS_EXCEEDED_120_SECONDS"
+        }
+      },
+      "recovery": {
+        "flagsBefore": {
+          "booted": true,
+          "attempted": true,
+          "failed": false,
+          "retryable": false
+        },
+        "passed": true,
+        "extraObservationBudgetMs": 180000,
+        "kind": "observe-existing-app"
+      },
+      "observedNativeWaitMs": 50770,
+      "observedWaitIsRecovery": true,
+      "functionalAfterObservation": true,
+      "fontCache": [
+        {
+          "name": "NotoSansTC.ttf",
+          "bytes": 11941968,
+          "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+        },
+        {
+          "name": "NotoSansCJKsc-Regular.otf",
+          "bytes": 16437364,
+          "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+        },
+        {
+          "name": "NotoSans-Regular.ttf",
+          "bytes": 621572,
+          "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+        },
+        {
+          "name": "NotoSansDevanagari-Regular.ttf",
+          "bytes": 243520,
+          "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+        },
+        {
+          "name": "NotoSansThai-Regular.ttf",
+          "bytes": 37780,
+          "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+        },
+        {
+          "name": "NotoSansArabic-Regular.ttf",
+          "bytes": 234892,
+          "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+        }
+      ],
+      "prewarm": {
+        "requested": 113,
+        "ok": 113,
+        "failed": 0
+      },
+      "quest": {
+        "passed": true,
+        "locale": "zh-TW",
+        "renderer": "ordinary-shared-native",
+        "questOpened": true,
+        "qClosed": true,
+        "owner": "bevy",
+        "package": {
+          "backend": "webgpu",
+          "packageId": "webgpu"
+        },
+        "navigation": {
+          "characterOpen": false,
+          "characterPage": "character",
+          "bagOpen": false,
+          "questOpen": false
+        },
+        "zeroWorldCommands": true,
+        "screenshot": "quest-available-zh-TW.png"
+      },
+      "immediateMoves": [
+        {
+          "index": 0,
+          "key": "ArrowLeft",
+          "from": {
+            "x": 289,
+            "y": 616
+          },
+          "to": {
+            "x": 288,
+            "y": 616
+          },
+          "arrived": {
+            "x": 288,
+            "y": 616
+          }
+        },
+        {
+          "index": 1,
+          "key": "ArrowRight",
+          "from": {
+            "x": 288,
+            "y": 616
+          },
+          "to": {
+            "x": 289,
+            "y": 616
+          },
+          "arrived": {
+            "x": 289,
+            "y": 616
+          }
+        },
+        {
+          "index": 2,
+          "key": "ArrowLeft",
+          "from": {
+            "x": 289,
+            "y": 616
+          },
+          "to": {
+            "x": 288,
+            "y": 616
+          },
+          "arrived": {
+            "x": 288,
+            "y": 616
+          }
+        },
+        {
+          "index": 3,
+          "key": "ArrowRight",
+          "from": {
+            "x": 288,
+            "y": 616
+          },
+          "to": {
+            "x": 289,
+            "y": 616
+          },
+          "arrived": {
+            "x": 289,
+            "y": 616
+          }
+        },
+        {
+          "index": 4,
+          "key": "ArrowLeft",
+          "from": {
+            "x": 289,
+            "y": 616
+          },
+          "to": {
+            "x": 288,
+            "y": 616
+          },
+          "arrived": {
+            "x": 288,
+            "y": 616
+          }
+        },
+        {
+          "index": 5,
+          "key": "ArrowRight",
+          "from": {
+            "x": 288,
+            "y": 616
+          },
+          "to": {
+            "x": 289,
+            "y": 616
+          },
+          "arrived": {
+            "x": 289,
+            "y": 616
+          }
+        },
+        {
+          "index": 6,
+          "key": "ArrowLeft",
+          "from": {
+            "x": 289,
+            "y": 616
+          },
+          "to": {
+            "x": 288,
+            "y": 616
+          },
+          "arrived": {
+            "x": 288,
+            "y": 616
+          }
+        },
+        {
+          "index": 7,
+          "key": "ArrowRight",
+          "from": {
+            "x": 288,
+            "y": 616
+          },
+          "to": {
+            "x": 289,
+            "y": 616
+          },
+          "arrived": {
+            "x": 289,
+            "y": 616
+          }
+        }
+      ],
+      "warm": {
+        "passed": true,
+        "nativeWaitMs": 1143,
+        "prewarm": {
+          "requested": 113,
+          "ok": 113,
+          "failed": 0
+        },
+        "quest": {
+          "passed": true,
+          "locale": "zh-TW",
+          "renderer": "ordinary-shared-native",
+          "questOpened": true,
+          "qClosed": true,
+          "owner": "bevy",
+          "package": {
+            "backend": "webgpu",
+            "packageId": "webgpu"
+          },
+          "navigation": {
+            "characterOpen": false,
+            "characterPage": "character",
+            "bagOpen": false,
+            "questOpen": false
+          },
+          "zeroWorldCommands": true,
+          "screenshot": "quest-available-zh-TW.png"
+        },
+        "saved": true,
+        "finalTile": {
+          "x": 288,
+          "y": 616
+        }
+      },
+      "originalSaveComparison": {
+        "passed": true,
+        "fields": [
+          "map_file_name",
+          "position",
+          "direction",
+          "gold",
+          "credit",
+          "experience",
+          "max_experience",
+          "inventory_items_json",
+          "belt_items_json",
+          "equipment_items_json",
+          "equipment_items_explicit_empty",
+          "storage_items_json",
+          "hero_inventory_items_json",
+          "hero_equipment_items_json",
+          "quest_states_json",
+          "skill_states_json"
+        ],
+        "questStateCount": 26
+      },
+      "fixtureUnchanged": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "binaryRequests": [
+        {
+          "owner": "page:0",
+          "path": "http://127.0.0.1:20631/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+          "status": 200,
+          "serviceWorker": false,
+          "headersMs": 46.13799999788171,
+          "totalMs": 426.1149999946356,
+          "decodedBytes": 31441753,
+          "encodedBytes": 6602268,
+          "failure": null
+        }
+      ],
+      "rawReceipt": {
+        "path": "C:\\r16-startup-timing-20261112\\game\\quest-after-r5\\entry-visual-receipt.json",
+        "sha256": "8476364f213ffffdf5e7b66ea4be8c637de505083c6772f4622b4cac35c22f98"
+      },
+      "rawNetwork": {
+        "path": "C:\\r16-startup-timing-20261112\\game\\quest-after-r5\\network-cold.json",
+        "sha256": "66fdae99be11073f0d5f8b28d7d9dfae8a0c53eedfc0cc7b9d732660f5aefdd5"
+      }
+    },
+    {
+      "run": "quest-after-r6",
+      "mode": "webgl2",
+      "candidate": "7a7e428abed5-runtime-delivery3-bdd50837",
+      "backend": "webgl2",
+      "packageId": "webgl2-shared",
+      "fullColdRunPassed": false,
+      "coldGate": {
+        "passed": false,
+        "budgetMs": 120000,
+        "failure": {
+          "stage": "verify-hosted-font-policy-and-wait-native-hud",
+          "code": "NATIVE_READINESS_EXCEEDED_120_SECONDS"
+        }
+      },
+      "recovery": {
+        "flagsBefore": {
+          "booted": true,
+          "attempted": true,
+          "failed": false,
+          "retryable": false
+        },
+        "passed": true,
+        "extraObservationBudgetMs": 180000,
+        "kind": "observe-existing-app"
+      },
+      "observedNativeWaitMs": 54883,
+      "observedWaitIsRecovery": true,
+      "functionalAfterObservation": true,
+      "fontCache": [
+        {
+          "name": "NotoSansTC.ttf",
+          "bytes": 11941968,
+          "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+        },
+        {
+          "name": "NotoSansCJKsc-Regular.otf",
+          "bytes": 16437364,
+          "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+        },
+        {
+          "name": "NotoSans-Regular.ttf",
+          "bytes": 621572,
+          "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+        },
+        {
+          "name": "NotoSansDevanagari-Regular.ttf",
+          "bytes": 243520,
+          "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+        },
+        {
+          "name": "NotoSansThai-Regular.ttf",
+          "bytes": 37780,
+          "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+        },
+        {
+          "name": "NotoSansArabic-Regular.ttf",
+          "bytes": 234892,
+          "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+        }
+      ],
+      "prewarm": {
+        "requested": 113,
+        "ok": 113,
+        "failed": 0
+      },
+      "quest": {
+        "passed": true,
+        "locale": "zh-TW",
+        "renderer": "ordinary-shared-native",
+        "questOpened": true,
+        "qClosed": true,
+        "owner": "bevy",
+        "package": {
+          "backend": "webgl2",
+          "packageId": "webgl2-shared"
+        },
+        "navigation": {
+          "characterOpen": false,
+          "characterPage": "character",
+          "bagOpen": false,
+          "questOpen": false
+        },
+        "zeroWorldCommands": true,
+        "screenshot": "quest-available-zh-TW.png"
+      },
+      "immediateMoves": [
+        {
+          "index": 0,
+          "key": "ArrowLeft",
+          "from": {
+            "x": 289,
+            "y": 616
+          },
+          "to": {
+            "x": 288,
+            "y": 616
+          },
+          "arrived": {
+            "x": 288,
+            "y": 616
+          }
+        },
+        {
+          "index": 1,
+          "key": "ArrowRight",
+          "from": {
+            "x": 288,
+            "y": 616
+          },
+          "to": {
+            "x": 289,
+            "y": 616
+          },
+          "arrived": {
+            "x": 289,
+            "y": 616
+          }
+        },
+        {
+          "index": 2,
+          "key": "ArrowLeft",
+          "from": {
+            "x": 289,
+            "y": 616
+          },
+          "to": {
+            "x": 288,
+            "y": 616
+          },
+          "arrived": {
+            "x": 288,
+            "y": 616
+          }
+        },
+        {
+          "index": 3,
+          "key": "ArrowRight",
+          "from": {
+            "x": 288,
+            "y": 616
+          },
+          "to": {
+            "x": 289,
+            "y": 616
+          },
+          "arrived": {
+            "x": 289,
+            "y": 616
+          }
+        },
+        {
+          "index": 4,
+          "key": "ArrowLeft",
+          "from": {
+            "x": 289,
+            "y": 616
+          },
+          "to": {
+            "x": 288,
+            "y": 616
+          },
+          "arrived": {
+            "x": 288,
+            "y": 616
+          }
+        },
+        {
+          "index": 5,
+          "key": "ArrowRight",
+          "from": {
+            "x": 288,
+            "y": 616
+          },
+          "to": {
+            "x": 289,
+            "y": 616
+          },
+          "arrived": {
+            "x": 289,
+            "y": 616
+          }
+        },
+        {
+          "index": 6,
+          "key": "ArrowLeft",
+          "from": {
+            "x": 289,
+            "y": 616
+          },
+          "to": {
+            "x": 288,
+            "y": 616
+          },
+          "arrived": {
+            "x": 288,
+            "y": 616
+          }
+        },
+        {
+          "index": 7,
+          "key": "ArrowRight",
+          "from": {
+            "x": 288,
+            "y": 616
+          },
+          "to": {
+            "x": 289,
+            "y": 616
+          },
+          "arrived": {
+            "x": 289,
+            "y": 616
+          }
+        }
+      ],
+      "warm": {
+        "passed": true,
+        "nativeWaitMs": 1151,
+        "prewarm": {
+          "requested": 113,
+          "ok": 113,
+          "failed": 0
+        },
+        "quest": {
+          "passed": true,
+          "locale": "zh-TW",
+          "renderer": "ordinary-shared-native",
+          "questOpened": true,
+          "qClosed": true,
+          "owner": "bevy",
+          "package": {
+            "backend": "webgl2",
+            "packageId": "webgl2-shared"
+          },
+          "navigation": {
+            "characterOpen": false,
+            "characterPage": "character",
+            "bagOpen": false,
+            "questOpen": false
+          },
+          "zeroWorldCommands": true,
+          "screenshot": "quest-available-zh-TW.png"
+        },
+        "saved": true,
+        "finalTile": {
+          "x": 288,
+          "y": 616
+        }
+      },
+      "originalSaveComparison": {
+        "passed": true,
+        "fields": [
+          "map_file_name",
+          "position",
+          "direction",
+          "gold",
+          "credit",
+          "experience",
+          "max_experience",
+          "inventory_items_json",
+          "belt_items_json",
+          "equipment_items_json",
+          "equipment_items_explicit_empty",
+          "storage_items_json",
+          "hero_inventory_items_json",
+          "hero_equipment_items_json",
+          "quest_states_json",
+          "skill_states_json"
+        ],
+        "questStateCount": 26
+      },
+      "fixtureUnchanged": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "binaryRequests": [
+        {
+          "owner": "page:0",
+          "path": "http://127.0.0.1:20631/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+          "status": 200,
+          "serviceWorker": false,
+          "headersMs": 15.176999993855134,
+          "totalMs": 413.4699999988079,
+          "decodedBytes": 32369572,
+          "encodedBytes": 6939726,
+          "failure": null
+        }
+      ],
+      "rawReceipt": {
+        "path": "C:\\r16-startup-timing-20261112\\game\\quest-after-r6\\entry-visual-receipt.json",
+        "sha256": "61d914582621dfc686460f8a3d60d1f3cf9b008b7e4231c89497f7ff035ae631"
+      },
+      "rawNetwork": {
+        "path": "C:\\r16-startup-timing-20261112\\game\\quest-after-r6\\network-cold.json",
+        "sha256": "28fe5ebd62ade8ff3d288d31aaf9c53a0bf5b65709f1b249ac2fe203feee690c"
+      }
+    }
+  ],
+  "priorDeferredOnlyFailure": {
+    "passed": false,
+    "coldFailure": {
+      "stage": "verify-hosted-font-policy-and-wait-native-hud",
+      "code": "NATIVE_READINESS_EXCEEDED_120_SECONDS"
+    },
+    "firstRuntimeRequests": [
+      {
+        "owner": "page:0",
+        "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "status": 200,
+        "headerWaitMs": 93497.377,
+        "decodedBytes": 2839102,
+        "maxDataGapMs": 860.8079999976326,
+        "totalMs": 120005.25400000066,
+        "lastDataToFailureMs": 176.67900000378722,
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "owner": "page:0",
+        "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "totalMs": 120000.85700000077,
+        "lastDataToFailureMs": null,
+        "failure": "net::ERR_ABORTED"
+      }
+    ],
+    "fixtureUnchanged": true,
+    "closed": {
+      "browser": true,
+      "proxy": true,
+      "next": true,
+      "gateway": true
+    }
+  },
+  "limits": [
+    "private game uses actual fixed versioned app files on loopback; it is not a public binary throughput benchmark",
+    "all six original font digests and fallback requirements remain; actual release CDN font reads may exceed120-second cold QA",
+    "late completion, recovery and warm reopen do not replace failed cold gates; global100%Candidate not claimed",
+    "public rollout must rerun version/body, QR, ordinary wallet approval, city/move/visuals/HUD/Q/prewarm/logout"
+  ]
+}

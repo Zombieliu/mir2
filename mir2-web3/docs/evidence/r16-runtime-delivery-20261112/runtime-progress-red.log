@@ -1,0 +1,153 @@
+TAP version 13
+# Subtest: binary compilation overlaps a pending script import and canvas gates initialization
+ok 1 - binary compilation overlaps a pending script import and canvas gates initialization
+  ---
+  duration_ms: 15.6569
+  type: 'test'
+  ...
+# (node:40996) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: wrong MIME and missing streaming support compile the original single response
+ok 2 - wrong MIME and missing streaming support compile the original single response
+  ---
+  duration_ms: 11.5754
+  type: 'test'
+  ...
+# Subtest: an import failure aborts the independent binary fetch
+ok 3 - an import failure aborts the independent binary fetch
+  ---
+  duration_ms: 0.8962
+  type: 'test'
+  ...
+# Subtest: unavailable or invalid binaries never initialize a runtime
+ok 4 - unavailable or invalid binaries never initialize a runtime
+  ---
+  duration_ms: 0.615
+  type: 'test'
+  ...
+# Subtest: the existing 120-second budget cancels a stalled binary
+ok 5 - the existing 120-second budget cancels a stalled binary
+  ---
+  duration_ms: 0.5761
+  type: 'test'
+  ...
+# Subtest: a stalled script also exits after the binary has finished compiling
+ok 6 - a stalled script also exits after the binary has finished compiling
+  ---
+  duration_ms: 1.1521
+  type: 'test'
+  ...
+# Subtest: actual page loader shares pending/successful work and retries a failed URL
+ok 7 - actual page loader shares pending/successful work and retries a failed URL
+  ---
+  duration_ms: 169.626
+  type: 'test'
+  ...
+# Subtest: a valid advancing binary can finish beyond the header budget without a second GET
+not ok 8 - a valid advancing binary can finish beyond the header budget without a second GET
+  ---
+  duration_ms: 2.4606
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-runtime-initializer.mjs:117:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    132 seconds of advancing valid bytes must not be treated as a120-second stall
+    + actual - expected
+    
+    + DOMException [AbortError]: This operation was aborted
+    +     at new DOMException (node:internal/per_context/domexception:66:5)
+    +     at AbortController.abort (node:internal/abort_controller:504:18)
+    +     at eval (eval at load (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-runtime-initializer.mjs:10:3), <anonymous>:9:49)
+    +     at MockTimers.tick (node:internal/test_runner/mock/mock_timers:688:7)
+    +     at TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-runtime-initializer.mjs:124:49)
+    +     at async Test.run (node:internal/test_runner/test:1054:7)
+    +     at async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+    - undefined
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  actual:
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-runtime-initializer.mjs:126:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: a body without positive bytes stops at the idle boundary, including empty chunks
+not ok 9 - a body without positive bytes stops at the idle boundary, including empty chunks
+  ---
+  duration_ms: 1.3376
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-runtime-initializer.mjs:130:1'
+  failureType: 'testCodeFailure'
+  error: 'zero-length chunks must not renew the15-second positive-byte deadline'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-runtime-initializer.mjs:139:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: decoded bytes are capped before runtime initialization without trusting Content-Length
+not ok 10 - decoded bytes are capped before runtime initialization without trusting Content-Length
+  ---
+  duration_ms: 0.8086
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-runtime-initializer.mjs:142:1'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection (RangeError).'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  stack: |-
+    async TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-runtime-initializer.mjs:144:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: a progressing body still has an absolute lifetime cap
+not ok 11 - a progressing body still has an absolute lifetime cap
+  ---
+  duration_ms: 1.1097
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-runtime-initializer.mjs:150:1'
+  failureType: 'testCodeFailure'
+  error: 'positive bytes must not extend the absolute body window'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-runtime-initializer.mjs:158:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: a failed pinned binary source can use its supplied same-version fallback once
+not ok 12 - a failed pinned binary source can use its supplied same-version fallback once
+  ---
+  duration_ms: 0.3339
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-runtime-initializer.mjs:161:1'
+  failureType: 'testCodeFailure'
+  error: 'Failed to fetch runtime binary (HTTP 503)'
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    compile (eval at load (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-runtime-initializer.mjs:10:3), <anonymous>:19:19)
+    async Promise.all (index 1)
+    async initializeBevyRuntime (eval at load (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-runtime-initializer.mjs:10:3), <anonymous>:32:37)
+    async TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-runtime-initializer.mjs:163:16)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..12
+# tests 12
+# suites 0
+# pass 7
+# fail 5
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 519.2421
