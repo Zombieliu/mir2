@@ -1252,6 +1252,10 @@ mod merge_owned_tests;
 mod capacity_profile_tests;
 
 #[cfg(test)]
+#[path = "spectator_full_publish_profile_tests.rs"]
+mod full_publish_profile_tests;
+
+#[cfg(test)]
 mod tests {
     use super::*;
     use crate::GatewayConfig;

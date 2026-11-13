@@ -4,13 +4,23 @@
 每档 300 秒，另测共同近战场景；找出差距后再验证实际云机。
 下面的本机结果不能认证云机或三端实际分发的 CCU。
 
-## 最新已验证结果（2026-11-14，修复版两人实跑通过，100 人执行中）
+## 最新已验证结果（2026-11-14，修复版两人通过，100 人未达标）
 
 修复版后端源码为 `7403bc5ee5cbb472477db101b8be603136049dcf`，Windows Release SHA `95614fad36fa8228c2aeabfb0f7b1bf29c6fdde478f915c1a53134cefedf4008`。干净快照构建的 Cargo 实际退出 0；外层构建 Job 因 MSVC 后台子进程未在收尾期退出而失败，原失败保留。性能运行由新的独立 Job 另行完整验证，不把构建 Job 写成正常退出。
 
 新 SDK7 两人 dense 校准：64/64、2/2 窗口、装备/正常退出/fresh/全员 File 与 v7 独立复核全部通过，controller/driver/server 均 0。新两人近战：104/104、2/2 窗口，原始回包独立重建为 56 次有效伤害与 44 次明确零伤害阻挡，双方普通退出后朝向分别 Right→Right、Left→Left；全员 File 与 gameplay verifier V8 都实际退出 0。File 回执 SHA `c560c94aaa145d714bbb91f56e2b6438a2363a186573a19db5059c550b97cc95`，增强复核 `94f279bf84c99a4afa4727d42f9f39ac1a16fa9b4e7b54d337bdf01940304fb5`。V7 漏读真实 `damageType` 字段的拒绝保留；V8 仅补三种数值别名严格一致校验，100 项离线测试通过，其他伤害、HP、原始引用及 SLO 门不变。旧 SDK6 近战仍因 fresh 朝向/正常注销证据失败。
 
-同一修复版 100 人共同 dense 计划已实际启动，继承累计 555 次原登录尝试，按原 30/900s 配额进场；尚无新 100 人稳态结论。Linux CI `43491883414` 全流程成功，新 ELF SHA `26c131881c6c1e9de4ca2179d9f7a05f97d07f7e29269c80dca3dcd04cae1082`；七项门禁、真实 PG/Redis startup 与全部 1620 张地图通过，严格 artifact V8 回执 `46827f7441affa122213faef6c1b7f7a7030483daaeaf32652271addb8a47390`。这是另一份 Linux 工件，尚未部署。TEST 仍是旧 82 版本；V8 控制器 108 项离线检查及一次实际只读 status 通过，未进行服务操作。
+同一修复版 100 人共同 dense 计划已完整结束：1047/16000 按时完成，4713 超时、10240 未发送，0/500 逐人分钟窗口通过。controller/driver/server 分别退出 1/1/0，3751 行资源证据完整，正常停止且没有 kill；全部 100 人普通 Logout/Close 和 fresh 0/99 通过，但整体仍 FAIL。File V8 因 SLO 前置门拒绝，未读取 private store；增强 V8 实际退出 1。不能将生命周期通过写成 100 人容量通过，也不能沿用旧版本 25/50 人结果认证本修复版。报告 SHA `bbbfa86f878254357d363af4ea7bd76c2062f88af833ece7bbfa630fae341929`，File/增强结果分别 `daa7a3ec0823a138105560b82e9bcb847ae10223113dd2424625f30fdb7fb2e1` / `3a2ad3979b6c964cec39c043ee0d9c2d08c35e90a4e86e7acde310476997369c`。新增认证全部并入原历史，累计 669 次，未重置 30/900s 配额。
+
+该轮完整 300 秒内 server 平均 1.627782 核、全轮峰 Commit 2427.949MiB；injector 平均 0.123107 核、峰 294.137MiB。大量未发送使较低 CPU 不能代表吞吐改善。首个 Walk 的 owner/peer 正确回包分别晚至 3757.494/6114.347ms，发送偏差只有 3.25ms；该 actor 没有更早的 Walk/Run，也未在此动作闭合前发送第二个 Walk，接收和 KeepAlive 持续。证据支持动作发出后出现多秒延迟，尚不能排他归因到某一把锁或网络。资源汇总 SHA `6d2f6d2ea06b95f862285b28300389af63cb1c4ae4aff279b9ac8fa827fbaf77`，首超时取证 `143a19335e8eec93ba332430d10072044edc1e4d1ad1a8d4cf37adc3abd811d9`。
+
+Linux CI `43491883414` 全流程成功，新 ELF SHA `26c131881c6c1e9de4ca2179d9f7a05f97d07f7e29269c80dca3dcd04cae1082`；七项门禁、真实 PG/Redis startup 与全部 1620 张地图通过，严格 artifact V8 回执 `46827f7441affa122213faef6c1b7f7a7030483daaeaf32652271addb8a47390`。这是另一份 Linux 工件。云机同池准备 V5 已结束：65 人本轮 fresh 加 35 人继承已验证准备，共覆盖 100 人；本轮 65 人全部普通注销，账号池和账本前后校验通过，不能标成全 100 人本轮 fresh 或容量通过。报告 SHA `0f45c358b229861cedfc2bed0da8d2fded21afcf39eeb8a7678a8840c7de3c21`。
+
+V8 更新工具在发送 SSH 命令前因完整请求超过 98304 字节限制拒绝 install；失败保留，实际只读复核确认旧服务及全部受保护基线未变。V9 只修正完整请求的有界压缩传输，wire 上限不变，解压限 131072 字节，全部审计字段保留；120 项离线测试通过，规范目录补测 34 项通过。仅将本地 V8 的未安装 prepared 计划原字节归档，原 V5 installed 状态不动；使用新鲜 status 重新 prepare/install V9 通过。实际同一 TEST 已运行 7403 / ELF 26c，install 回执 SHA `3e28434f9fd302ed8a7ac9ca5f5c9ea9534ecaaa2239259d0d05cae1d7006365`，19 个 EnvFile、原上限 51/66/51，受保护进程指纹均未变。临时测试上限 120/150/120 已生效（20 个 EnvFile），原账号池的逐档负载正在执行；结束后须恢复 51/66/51。
+
+云机实际配置与本机不同（云机 recording 关闭、测试服务 MemoryMax 1600MiB，且共享主机），故另做 2/25/50/100、每档 300 秒的实际测量；首个安全或 SLO 失败即停止升级。该公共 movement/chat 计划与本机 common dense 分开报告，不据此宣称本地 100 人已修好、完整战斗容量或真实三端渲染通过。
+
+另行完整调用 Hub 的 Release 专项测量已正常结束：18 组、33600 次真实 publish，包含真实互斥、节流、事件、环缓存、录制、回放和 digest/字节一致性断言；独立 Job 退出 0、所有成员退出且无 kill。100 owner / 4 producer 的三次 publish 外层 P95 为 3.493/3.615/3.990ms，最大 37.893ms，未复现游戏路径的多秒延迟。这是 13 秒左右、匿名构造输入、每轮空闲时重设 emit gate 的专项实验，不能认证 4Hz 吞吐或 CCU，也不能排除长运行的录制、snapshot/Zone/owner 路径。借用编码虽在小组件中更快，不能据此宣称解决 4 秒超时。本轮实际失败的录制文件最大约 849MB，抽样中 91 个实体约 88KB；专项帧最大约 115KB、单目录仅数 MB，长期文件行为仍不同。完整 build/test Cargo 已成功，外层因 MSVC 子进程未退出而失败的记录保留，独立冻结 exe 后重新实跑才作为正常退出证据。结果记录 `full-publish-profile-summary-v2.json`，测试 exe SHA `85739f74f4fa8de2a49f33c0d3f106ef1c9defbcaad050cd96b3ac8980c4fee2`。
 
 以下均为修正后的共同 dense 排程；旧失败记录仍在后文保留。
 
@@ -23,6 +33,7 @@
 | 观战候选 / SDK V5 | 100 / 计划 300s，排程超时 | 1887 / 16000 | 245 / 13868 | 未通过 | 全 100 人正常 Logout/Close、fresh 2；全员 File 回读前置门拒绝，未读 private store |
 | 同一观战候选 / SDK V6 | 2 / 60s | 64 / 64 | 0 / 0 | 2 通过 | 正常退出、fresh 2、全员 File 与 v7 增强复核均通过 |
 | 同一观战候选 / SDK V6 | 100 / 300s | 13914 / 16000 | 444 / 1642 | 12/500 通过 | 全 100 人正常 Logout/Close、fresh 0/99 通过；整体仍 FAIL，File 前置门拒绝，增强 v7 复核实际退出 1 |
+| 修复版 7403 / SDK7 | 100 / 300s | 1047 / 16000 | 4713 / 10240 | 0/500 通过 | 全 100 人正常 Logout/Close、fresh 0/99 通过；整体 FAIL，File 前置门拒绝、增强 V8 退出 1 |
 
 25 人 v7 独立复核 SHA256
 `61eda521c04c8fa22613fb6b5deeb4cbfb6d955461e01e079e15b5d47274b4f5`；
