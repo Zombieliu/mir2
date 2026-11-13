@@ -6,7 +6,7 @@ Updated 2026-11-13 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-13 d99212e3cd已上线并通过公网完整功能；原120秒Native冷加载仍false（185.240秒），没有提升全局Candidate。下一步先记录同款Edge右键/拖动的可信事件及取消结果，区分DOM菜单与浏览器手势，避免重复拦截或破坏mousedown移动；继续关键加载与其他R16缺项。[发布](evidence/r16-firstparty-font-delivery-20261113/production/README.md) · [优先反馈](evidence/r16-edge-right-button-report-20261113/README.md)
+2026-11-13 已正式发布ab02b84938：八方向格式修复、有效路线单步等待8秒/超时与取消；121+7项、70保护、构建及猫区9步到达、6.926秒恢复/手动中断/退出重登通过。首次公网资源失败已回退并保留；146项完整SHA确认后，同源重试的官方手机尺寸Testnet签名、进城/首步126ms、共用HUD/NativeQ、六字体、113/113、Worker停启与退出均通过。点击至首帧7.161秒，Native就绪观测239.322秒，原冷120秒仍false；优先改善冷传输，蓝线手势/死亡弹窗英文/完整1:1继续开放，Goal active。[当前证据](evidence/r16-route-direction-20261113/README.md) · [正式回执](evidence/r16-route-direction-20261113/production/README.md)
 
 ## 保留的当前未结项
 

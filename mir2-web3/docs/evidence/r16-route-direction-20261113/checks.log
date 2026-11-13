@@ -1,0 +1,736 @@
+TAP version 13
+# Subtest: optional Native display locales are independent of four-language wire and require an exact capability
+ok 1 - optional Native display locales are independent of four-language wire and require an exact capability
+  ---
+  duration_ms: 1.3255
+  type: 'test'
+  ...
+# Subtest: NPC display defers Native prose while target, input, name and disabled state remain opaque
+ok 2 - NPC display defers Native prose while target, input, name and disabled state remain opaque
+  ---
+  duration_ms: 27.0381
+  type: 'test'
+  ...
+# Subtest: 844×390 touch stage, DPR and resize project the shell's actual CSS scale
+ok 3 - 844×390 touch stage, DPR and resize project the shell's actual CSS scale
+  ---
+  duration_ms: 0.4008
+  type: 'test'
+  ...
+# Subtest: missing or inconsistent stage/canvas geometry cannot transfer UI ownership
+ok 4 - missing or inconsistent stage/canvas geometry cannot transfer UI ownership
+  ---
+  duration_ms: 0.3885
+  type: 'test'
+  ...
+# Subtest: static definitions never become available quests without an authoritative stage
+ok 5 - static definitions never become available quests without an authoritative stage
+  ---
+  duration_ms: 0.3607
+  type: 'test'
+  ...
+# Subtest: missing endpoints, source sections, counters and exact reward indices survive projection
+ok 6 - missing endpoints, source sections, counters and exact reward indices survive projection
+  ---
+  duration_ms: 0.179
+  type: 'test'
+  ...
+# Subtest: malformed selectable rewards fail closed instead of becoming another valid choice
+ok 7 - malformed selectable rewards fail closed instead of becoming another valid choice
+  ---
+  duration_ms: 0.2434
+  type: 'test'
+  ...
+# Subtest: fixed and selectable reward previews retain their exact source through the Bevy DTO
+ok 8 - fixed and selectable reward previews retain their exact source through the Bevy DTO
+  ---
+  duration_ms: 3.3266
+  type: 'test'
+  ...
+# Subtest: NPC links retain exact wire targets, disabled state and required-input fallback
+ok 9 - NPC links retain exact wire targets, disabled state and required-input fallback
+  ---
+  duration_ms: 0.4449
+  type: 'test'
+  ...
+# Subtest: session and request sequences survive independent module loads
+ok 10 - session and request sequences survive independent module loads
+  ---
+  duration_ms: 32.0147
+  type: 'test'
+  ...
+# Subtest: old generation and malformed renderer status cannot take UI ownership
+ok 11 - old generation and malformed renderer status cannot take UI ownership
+  ---
+  duration_ms: 0.3113
+  type: 'test'
+  ...
+# Subtest: Quest world context requires a complete same-player projection and exact version capability
+ok 12 - Quest world context requires a complete same-player projection and exact version capability
+  ---
+  duration_ms: 1.6561
+  type: 'test'
+  ...
+# Subtest: the actual Page capture retires raw Quest skills for self NewMagic only on the current connection
+ok 13 - the actual Page capture retires raw Quest skills for self NewMagic only on the current connection
+  ---
+  duration_ms: 144.4771
+  type: 'test'
+  ...
+# Subtest: renderer restart, first NPC input capture and stopped-loop fallback preserve one UI owner
+ok 14 - renderer restart, first NPC input capture and stopped-loop fallback preserve one UI owner
+  ---
+  duration_ms: 111.2132
+  type: 'test'
+  ...
+# Subtest: v2 Quest world preserves nullable facts, canonical IDs and unknown current map
+ok 15 - v2 Quest world preserves nullable facts, canonical IDs and unknown current map
+  ---
+  duration_ms: 0.6403
+  type: 'test'
+  ...
+# Subtest: local Quest actions require exact seven-field stamp, role and nested route payload
+ok 16 - local Quest actions require exact seven-field stamp, role and nested route payload
+  ---
+  duration_ms: 0.8902
+  type: 'test'
+  ...
+# Subtest: ordinary map packets retire same-map transitions and images never supply map authority
+ok 17 - ordinary map packets retire same-map transitions and images never supply map authority
+  ---
+  duration_ms: 0.197
+  type: 'test'
+  ...
+# Subtest: Quest handoffs retire each lifetime dimension and attack roles keep raw life evidence
+ok 18 - Quest handoffs retire each lifetime dimension and attack roles keep raw life evidence
+  ---
+  duration_ms: 0.1928
+  type: 'test'
+  ...
+# Subtest: the shared route adapter verifies a complete JS-fake WASM response against collision and exact endpoint
+ok 19 - the shared route adapter verifies a complete JS-fake WASM response against collision and exact endpoint
+  ---
+  duration_ms: 1.2831
+  type: 'test'
+  ...
+# Subtest: NPC route targets preserve object IDs, task roles and the exact two-tile approach
+ok 20 - NPC route targets preserve object IDs, task roles and the exact two-tile approach
+  ---
+  duration_ms: 0.8075
+  type: 'test'
+  ...
+# Subtest: route execution follows bends, validates each 2/3-tile run and replans deviations
+ok 21 - route execution follows bends, validates each 2/3-tile run and replans deviations
+  ---
+  duration_ms: 0.223
+  type: 'test'
+  ...
+# Subtest: collision cache uses injected fake chunks, reuses only complete geometry and discards partial failures
+ok 22 - collision cache uses injected fake chunks, reuses only complete geometry and discards partial failures
+  ---
+  duration_ms: 3.7617
+  type: 'test'
+  ...
+# Subtest: world control reader requires actual current stamped rectangles and claims only button hits
+ok 23 - world control reader requires actual current stamped rectangles and claims only button hits
+  ---
+  duration_ms: 0.9042
+  type: 'test'
+  ...
+# Subtest: Native Quest local UI has only current measured pointer rectangles, never inferred or stale controls
+ok 24 - Native Quest local UI has only current measured pointer rectangles, never inferred or stale controls
+  ---
+  duration_ms: 0.4727
+  type: 'test'
+  ...
+# Subtest: questLocalUi never parses as an authorized world action or sends through the actual Page dispatcher
+ok 25 - questLocalUi never parses as an authorized world action or sends through the actual Page dispatcher
+  ---
+  duration_ms: 108.6846
+  type: 'test'
+  ...
+# Subtest: actual Page queued movement preserves replacement intent and retires stale Quest routes before ordinary A* or send
+ok 26 - actual Page queued movement preserves replacement intent and retires stale Quest routes before ordinary A* or send
+  ---
+  duration_ms: 112.7455
+  type: 'test'
+  ...
+# Subtest: actual Page map-image press and route ownership retire only the captured source and preserve sent movement
+ok 27 - actual Page map-image press and route ownership retire only the captured source and preserve sent movement
+  ---
+  duration_ms: 113.9358
+  type: 'test'
+  ...
+# Subtest: packaged CJK font matches its pinned upstream bytes and retains its license
+ok 28 - packaged CJK font matches its pinned upstream bytes and retains its license
+  ---
+  duration_ms: 13.5783
+  type: 'test'
+  ...
+# Subtest: right image and canvas presses and menus are cancelled inside the game
+ok 29 - right image and canvas presses and menus are cancelled inside the game
+  ---
+  duration_ms: 1.6105
+  type: 'test'
+  ...
+# Subtest: a game press owns the context menu after mouseup outside
+ok 30 - a game press owns the context menu after mouseup outside
+  ---
+  duration_ms: 0.2666
+  type: 'test'
+  ...
+# Subtest: an ordinary outside press and menu stay available
+ok 31 - an ordinary outside press and menu stay available
+  ---
+  duration_ms: 0.1635
+  type: 'test'
+  ...
+# Subtest: a new outside right press replaces an earlier unconsumed game press
+ok 32 - a new outside right press replaces an earlier unconsumed game press
+  ---
+  duration_ms: 0.0758
+  type: 'test'
+  ...
+# Subtest: keyboard context menu outside does not consume a still-held right press
+ok 33 - keyboard context menu outside does not consume a still-held right press
+  ---
+  duration_ms: 0.072
+  type: 'test'
+  ...
+# Subtest: keyboard context menu inside does not consume the held right release outside
+ok 34 - keyboard context menu inside does not consume the held right release outside
+  ---
+  duration_ms: 0.0579
+  type: 'test'
+  ...
+# Subtest: outside-to-inside release still protects the current game target
+ok 35 - outside-to-inside release still protects the current game target
+  ---
+  duration_ms: 0.9745
+  type: 'test'
+  ...
+# Subtest: blur clears press ownership
+ok 36 - blur clears press ownership
+  ---
+  duration_ms: 0.1478
+  type: 'test'
+  ...
+# Subtest: cleanup removes the guard and a later mount starts without stale ownership
+ok 37 - cleanup removes the guard and a later mount starts without stale ownership
+  ---
+  duration_ms: 0.2904
+  type: 'test'
+  ...
+# Subtest: left and middle mouse entry points and pointerdown stay uncancelled
+ok 38 - left and middle mouse entry points and pointerdown stay uncancelled
+  ---
+  duration_ms: 0.4588
+  type: 'test'
+  ...
+# Subtest: Native pointer cancellation can suppress mousedown without losing game ownership
+ok 39 - Native pointer cancellation can suppress mousedown without losing game ownership
+  ---
+  duration_ms: 0.1807
+  type: 'test'
+  ...
+# Subtest: a fresh outside mouse pointerdown replaces prior game ownership without mousedown
+ok 40 - a fresh outside mouse pointerdown replaces prior game ownership without mousedown
+  ---
+  duration_ms: 0.1032
+  type: 'test'
+  ...
+# Subtest: unrelated touch pointerdown does not create a right-button lease
+ok 41 - unrelated touch pointerdown does not create a right-button lease
+  ---
+  duration_ms: 0.0565
+  type: 'test'
+  ...
+# Subtest: custom game handlers still receive the right mouse and menu events
+ok 42 - custom game handlers still receive the right mouse and menu events
+  ---
+  duration_ms: 0.4607
+  type: 'test'
+  ...
+# Subtest: non-Element targets remain ordinary outside targets
+ok 43 - non-Element targets remain ordinary outside targets
+  ---
+  duration_ms: 0.0574
+  type: 'test'
+  ...
+# Subtest: a detached target from a game press retains release ownership
+ok 44 - a detached target from a game press retains release ownership
+  ---
+  duration_ms: 0.0455
+  type: 'test'
+  ...
+# Subtest: uncancelable input does not throw or stop custom handlers
+ok 45 - uncancelable input does not throw or stop custom handlers
+  ---
+  duration_ms: 0.056
+  type: 'test'
+  ...
+# Subtest: actual Shell installs only in game and returns the shared guard cleanup
+ok 46 - actual Shell installs only in game and returns the shared guard cleanup
+  ---
+  duration_ms: 135.1835
+  type: 'test'
+  ...
+# Subtest: browser dictionaries use the ten native languages in the native order
+ok 47 - browser dictionaries use the ten native languages in the native order
+  ---
+  duration_ms: 1.2011
+  type: 'test'
+  ...
+# Subtest: zh-CN supplies every browser control without blank values
+ok 48 - zh-CN supplies every browser control without blank values
+  ---
+  duration_ms: 0.5901
+  type: 'test'
+  ...
+# Subtest: zh-TW supplies every browser control without blank values
+ok 49 - zh-TW supplies every browser control without blank values
+  ---
+  duration_ms: 0.2059
+  type: 'test'
+  ...
+# Subtest: en supplies every browser control without blank values
+ok 50 - en supplies every browser control without blank values
+  ---
+  duration_ms: 0.1762
+  type: 'test'
+  ...
+# Subtest: pt-BR supplies every browser control without blank values
+ok 51 - pt-BR supplies every browser control without blank values
+  ---
+  duration_ms: 0.148
+  type: 'test'
+  ...
+# Subtest: ru supplies every browser control without blank values
+ok 52 - ru supplies every browser control without blank values
+  ---
+  duration_ms: 0.144
+  type: 'test'
+  ...
+# Subtest: hi supplies every browser control without blank values
+ok 53 - hi supplies every browser control without blank values
+  ---
+  duration_ms: 0.2134
+  type: 'test'
+  ...
+# Subtest: id supplies every browser control without blank values
+ok 54 - id supplies every browser control without blank values
+  ---
+  duration_ms: 0.1506
+  type: 'test'
+  ...
+# Subtest: vi supplies every browser control without blank values
+ok 55 - vi supplies every browser control without blank values
+  ---
+  duration_ms: 0.3204
+  type: 'test'
+  ...
+# Subtest: th supplies every browser control without blank values
+ok 56 - th supplies every browser control without blank values
+  ---
+  duration_ms: 0.3982
+  type: 'test'
+  ...
+# Subtest: ar supplies every browser control without blank values
+ok 57 - ar supplies every browser control without blank values
+  ---
+  duration_ms: 0.1978
+  type: 'test'
+  ...
+# Subtest: unknown languages and keys preserve the caller's fallback
+ok 58 - unknown languages and keys preserve the caller's fallback
+  ---
+  duration_ms: 0.1549
+  type: 'test'
+  ...
+# Subtest: native wallet captions are not redefined by the browser dictionary
+ok 59 - native wallet captions are not redefined by the browser dictionary
+  ---
+  duration_ms: 0.1691
+  type: 'test'
+  ...
+# Subtest: browser settings explain the extra volume/account/sign-in scope
+ok 60 - browser settings explain the extra volume/account/sign-in scope
+  ---
+  duration_ms: 0.1449
+  type: 'test'
+  ...
+# Subtest: type-only native compatibility does not pull a runtime dependency
+ok 61 - type-only native compatibility does not pull a runtime dependency
+  ---
+  duration_ms: 0.3198
+  type: 'test'
+  ...
+# Subtest: quest feedback covers every language without exposing implementation terms
+ok 62 - quest feedback covers every language without exposing implementation terms
+  ---
+  duration_ms: 0.6824
+  type: 'test'
+  ...
+# Subtest: zh-CN route feedback preserves exact coordinate placeholders and local wording
+ok 63 - zh-CN route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.638
+  type: 'test'
+  ...
+# Subtest: zh-TW route feedback preserves exact coordinate placeholders and local wording
+ok 64 - zh-TW route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.2928
+  type: 'test'
+  ...
+# Subtest: en route feedback preserves exact coordinate placeholders and local wording
+ok 65 - en route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.2597
+  type: 'test'
+  ...
+# Subtest: pt-BR route feedback preserves exact coordinate placeholders and local wording
+ok 66 - pt-BR route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.1176
+  type: 'test'
+  ...
+# Subtest: ru route feedback preserves exact coordinate placeholders and local wording
+ok 67 - ru route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.1955
+  type: 'test'
+  ...
+# Subtest: hi route feedback preserves exact coordinate placeholders and local wording
+ok 68 - hi route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.1043
+  type: 'test'
+  ...
+# Subtest: id route feedback preserves exact coordinate placeholders and local wording
+ok 69 - id route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.0982
+  type: 'test'
+  ...
+# Subtest: vi route feedback preserves exact coordinate placeholders and local wording
+ok 70 - vi route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.0987
+  type: 'test'
+  ...
+# Subtest: th route feedback preserves exact coordinate placeholders and local wording
+ok 71 - th route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.0966
+  type: 'test'
+  ...
+# Subtest: ar route feedback preserves exact coordinate placeholders and local wording
+ok 72 - ar route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.0944
+  type: 'test'
+  ...
+# Subtest: route arrival describes a hunting area or NPC approach and leaves the next action to the player
+ok 73 - route arrival describes a hunting area or NPC approach and leaves the next action to the player
+  ---
+  duration_ms: 0.1968
+  type: 'test'
+  ...
+# Subtest: movement confirmation timeout is localized without placeholders, budgets or implementation terms
+ok 74 - movement confirmation timeout is localized without placeholders, budgets or implementation terms
+  ---
+  duration_ms: 0.8235
+  type: 'test'
+  ...
+# Subtest: actual Page: zero-step huntRegion arrival explains what to do without sending movement
+ok 75 - actual Page: zero-step huntRegion arrival explains what to do without sending movement
+  ---
+  duration_ms: 3.414
+  type: 'test'
+  ...
+# Subtest: actual Page: zero-step taskNpc arrival explains what to do without sending movement
+ok 76 - actual Page: zero-step taskNpc arrival explains what to do without sending movement
+  ---
+  duration_ms: 1.0937
+  type: 'test'
+  ...
+# Subtest: actual Page: zero-step mapNpc arrival explains what to do without sending movement
+ok 77 - actual Page: zero-step mapNpc arrival explains what to do without sending movement
+  ---
+  duration_ms: 0.362
+  type: 'test'
+  ...
+# Subtest: actual Page: zero-step supply arrival explains what to do without sending movement
+ok 78 - actual Page: zero-step supply arrival explains what to do without sending movement
+  ---
+  duration_ms: 0.2988
+  type: 'test'
+  ...
+# Subtest: actual Page: zero-step entrance arrival explains what to do without sending movement
+ok 79 - actual Page: zero-step entrance arrival explains what to do without sending movement
+  ---
+  duration_ms: 0.4306
+  type: 'test'
+  ...
+# Subtest: actual Page: a complete route keeps moving until authoritative endpoint arrival, then reports once
+ok 80 - actual Page: a complete route keeps moving until authoritative endpoint arrival, then reports once
+  ---
+  duration_ms: 0.8565
+  type: 'test'
+  ...
+# Subtest: actual Page: occupied next step replans original hunt area and unavailable
+ok 81 - actual Page: occupied next step replans original hunt area and unavailable
+  ---
+  duration_ms: 0.539
+  type: 'test'
+  ...
+# Subtest: actual Page: occupied next step replans original hunt area and arrived
+ok 82 - actual Page: occupied next step replans original hunt area and arrived
+  ---
+  duration_ms: 0.2931
+  type: 'test'
+  ...
+# Subtest: actual Page: occupied next step replans original hunt area and detour
+ok 83 - actual Page: occupied next step replans original hunt area and detour
+  ---
+  duration_ms: 0.6566
+  type: 'test'
+  ...
+# Subtest: actual Page: loading deadline is active while I/O hangs and late geometry cannot resume the action
+ok 84 - actual Page: loading deadline is active while I/O hangs and late geometry cannot resume the action
+  ---
+  duration_ms: 1.0775
+  type: 'test'
+  ...
+# Subtest: actual Page: delayed timer delivery still enforces the original collision deadline
+ok 85 - actual Page: delayed timer delivery still enforces the original collision deadline
+  ---
+  duration_ms: 0.4826
+  type: 'test'
+  ...
+# Subtest: actual Page: replaced resolve callback cannot clear another route or report a stale error
+ok 86 - actual Page: replaced resolve callback cannot clear another route or report a stale error
+  ---
+  duration_ms: 0.3402
+  type: 'test'
+  ...
+# Subtest: actual Page: replaced reject callback cannot clear another route or report a stale error
+ok 87 - actual Page: replaced reject callback cannot clear another route or report a stale error
+  ---
+  duration_ms: 0.3105
+  type: 'test'
+  ...
+# Subtest: actual Page: quest change during map loading retires the old objective
+ok 88 - actual Page: quest change during map loading retires the old objective
+  ---
+  duration_ms: 0.1884
+  type: 'test'
+  ...
+# Subtest: actual Page: socket change during map loading retires the old objective
+ok 89 - actual Page: socket change during map loading retires the old objective
+  ---
+  duration_ms: 0.0992
+  type: 'test'
+  ...
+# Subtest: actual Page: scene change during map loading retires the old objective
+ok 90 - actual Page: scene change during map loading retires the old objective
+  ---
+  duration_ms: 0.0865
+  type: 'test'
+  ...
+# Subtest: actual Page: blocked change during map loading retires the old objective
+ok 91 - actual Page: blocked change during map loading retires the old objective
+  ---
+  duration_ms: 0.0817
+  type: 'test'
+  ...
+# Subtest: actual Page: initial route failure and current loading error both explain unavailability
+ok 92 - actual Page: initial route failure and current loading error both explain unavailability
+  ---
+  duration_ms: 0.2274
+  type: 'test'
+  ...
+# Subtest: collision geometry: at most four concurrent validated readers publish only all nine complete regions
+ok 93 - collision geometry: at most four concurrent validated readers publish only all nine complete regions
+  ---
+  duration_ms: 15.9338
+  type: 'test'
+  ...
+# Subtest: collision geometry: hung headers aborts at15s, evicts pending and permits a fresh retry
+ok 94 - collision geometry: hung headers aborts at15s, evicts pending and permits a fresh retry
+  ---
+  duration_ms: 19.8563
+  type: 'test'
+  ...
+# Subtest: collision geometry: hung body aborts at15s, evicts pending and permits a fresh retry
+ok 95 - collision geometry: hung body aborts at15s, evicts pending and permits a fresh retry
+  ---
+  duration_ms: 18.9123
+  type: 'test'
+  ...
+# Subtest: collision geometry: a bad parallel region leaves no partial cache and retry validates the entire map
+ok 96 - collision geometry: a bad parallel region leaves no partial cache and retry validates the entire map
+  ---
+  duration_ms: 11.7892
+  type: 'test'
+  ...
+# Subtest: quest: a seven-second in-flight result keeps one owned route, never duplicates a move, then resumes from authority
+ok 97 - quest: a seven-second in-flight result keeps one owned route, never duplicates a move, then resumes from authority
+  ---
+  duration_ms: 4.3871
+  type: 'test'
+  ...
+# Subtest: map: a seven-second in-flight result keeps one owned route, never duplicates a move, then resumes from authority
+ok 98 - map: a seven-second in-flight result keeps one owned route, never duplicates a move, then resumes from authority
+  ---
+  duration_ms: 1.621
+  type: 'test'
+  ...
+# Subtest: newMove: a seven-second in-flight result keeps one owned route, never duplicates a move, then resumes from authority
+ok 99 - newMove: a seven-second in-flight result keeps one owned route, never duplicates a move, then resumes from authority
+  ---
+  duration_ms: 0.6073
+  type: 'test'
+  ...
+# Subtest: quest: no confirmation at eight seconds retires owner and queue with one localized notice
+ok 100 - quest: no confirmation at eight seconds retires owner and queue with one localized notice
+  ---
+  duration_ms: 0.3607
+  type: 'test'
+  ...
+# Subtest: map: no confirmation at eight seconds retires owner and queue with one localized notice
+ok 101 - map: no confirmation at eight seconds retires owner and queue with one localized notice
+  ---
+  duration_ms: 0.4675
+  type: 'test'
+  ...
+# Subtest: newMove: no confirmation at eight seconds retires owner and queue with one localized notice
+ok 102 - newMove: no confirmation at eight seconds retires owner and queue with one localized notice
+  ---
+  duration_ms: 0.3761
+  type: 'test'
+  ...
+# Subtest: manual: the original three-second timeout remains
+ok 103 - manual: the original three-second timeout remains
+  ---
+  duration_ms: 0.3497
+  type: 'test'
+  ...
+# Subtest: unownedTarget: the original three-second timeout remains
+ok 104 - unownedTarget: the original three-second timeout remains
+  ---
+  duration_ms: 0.2977
+  type: 'test'
+  ...
+# Subtest: quest: manual replacement during grace cancels the old route and late ACK cannot resurrect it
+ok 105 - quest: manual replacement during grace cancels the old route and late ACK cannot resurrect it
+  ---
+  duration_ms: 0.6333
+  type: 'test'
+  ...
+# Subtest: map: manual replacement during grace cancels the old route and late ACK cannot resurrect it
+ok 106 - map: manual replacement during grace cancels the old route and late ACK cannot resurrect it
+  ---
+  duration_ms: 0.3933
+  type: 'test'
+  ...
+# Subtest: newMove: manual replacement during grace cancels the old route and late ACK cannot resurrect it
+ok 107 - newMove: manual replacement during grace cancels the old route and late ACK cannot resurrect it
+  ---
+  duration_ms: 0.1967
+  type: 'test'
+  ...
+# Subtest: quest: lost ownership or focus retires the queue before grace can retain it
+ok 108 - quest: lost ownership or focus retires the queue before grace can retain it
+  ---
+  duration_ms: 0.3912
+  type: 'test'
+  ...
+# Subtest: map: lost ownership or focus retires the queue before grace can retain it
+ok 109 - map: lost ownership or focus retires the queue before grace can retain it
+  ---
+  duration_ms: 0.1647
+  type: 'test'
+  ...
+# Subtest: newMove: lost ownership or focus retires the queue before grace can retain it
+ok 110 - newMove: lost ownership or focus retires the queue before grace can retain it
+  ---
+  duration_ms: 0.1417
+  type: 'test'
+  ...
+# Subtest: a newly chosen route may wait for a previous manual in-flight move, then plans only the new destination
+ok 111 - a newly chosen route may wait for a previous manual in-flight move, then plans only the new destination
+  ---
+  duration_ms: 0.2386
+  type: 'test'
+  ...
+# Subtest: a delayed run degraded to one walk tile confirms and resumes from the actual shorter endpoint
+ok 112 - a delayed run degraded to one walk tile confirms and resumes from the actual shorter endpoint
+  ---
+  duration_ms: 0.1696
+  type: 'test'
+  ...
+# Subtest: real Up route output → Page send → one-tile server degradation → Page ACK → next route step
+ok 113 - real Up route output → Page send → one-tile server degradation → Page ACK → next route step
+  ---
+  duration_ms: 0.3419
+  type: 'test'
+  ...
+# Subtest: real UpRight route output → Page send → one-tile server degradation → Page ACK → next route step
+ok 114 - real UpRight route output → Page send → one-tile server degradation → Page ACK → next route step
+  ---
+  duration_ms: 0.1382
+  type: 'test'
+  ...
+# Subtest: real Right route output → Page send → one-tile server degradation → Page ACK → next route step
+ok 115 - real Right route output → Page send → one-tile server degradation → Page ACK → next route step
+  ---
+  duration_ms: 0.2243
+  type: 'test'
+  ...
+# Subtest: real DownRight route output → Page send → one-tile server degradation → Page ACK → next route step
+ok 116 - real DownRight route output → Page send → one-tile server degradation → Page ACK → next route step
+  ---
+  duration_ms: 0.1401
+  type: 'test'
+  ...
+# Subtest: real Down route output → Page send → one-tile server degradation → Page ACK → next route step
+ok 117 - real Down route output → Page send → one-tile server degradation → Page ACK → next route step
+  ---
+  duration_ms: 0.1123
+  type: 'test'
+  ...
+# Subtest: real DownLeft route output → Page send → one-tile server degradation → Page ACK → next route step
+ok 118 - real DownLeft route output → Page send → one-tile server degradation → Page ACK → next route step
+  ---
+  duration_ms: 0.1072
+  type: 'test'
+  ...
+# Subtest: real Left route output → Page send → one-tile server degradation → Page ACK → next route step
+ok 119 - real Left route output → Page send → one-tile server degradation → Page ACK → next route step
+  ---
+  duration_ms: 0.0942
+  type: 'test'
+  ...
+# Subtest: real UpLeft route output → Page send → one-tile server degradation → Page ACK → next route step
+ok 120 - real UpLeft route output → Page send → one-tile server degradation → Page ACK → next route step
+  ---
+  duration_ms: 0.0993
+  type: 'test'
+  ...
+# Subtest: a genuine off-path authority still clears the real generated route and cannot be resumed
+ok 121 - a genuine off-path authority still clears the real generated route and cannot be resumed
+  ---
+  duration_ms: 0.222
+  type: 'test'
+  ...
+1..121
+# tests 121
+# suites 0
+# pass 121
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1582.2311

@@ -15,7 +15,7 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
-2026-11-13 已发布d99212e3cd：公网扫码签名、进城、移动、共用HUD/Q、六字体、113/113、Worker停启及退出通过；Native185.240秒超过原120秒，冷资格false，保留线上。下一项优先复现Edge右键手势/原生菜单，再继续冷加载与1:1余项；原脏改动未纳入。[正式结果](evidence/r16-firstparty-font-delivery-20261113/production/README.md) · [新反馈](evidence/r16-edge-right-button-report-20261113/README.md)
+2026-11-13 已正式发布ab02b84938：八方向格式修复、有效路线单步等待8秒/超时与取消；121+7项、70保护、构建及猫区9步到达、6.926秒恢复/手动中断/退出重登通过。首次公网资源失败已回退并保留；146项完整SHA确认后，同源重试的官方手机尺寸Testnet签名、进城/首步126ms、共用HUD/NativeQ、六字体、113/113、Worker停启与退出均通过。点击至首帧7.161秒，Native就绪观测239.322秒，原冷120秒仍false；优先改善冷传输，蓝线手势/死亡弹窗英文/完整1:1继续开放，Goal active。[当前证据](evidence/r16-route-direction-20261113/README.md) · [正式回执](evidence/r16-route-direction-20261113/production/README.md)
 
 2026-11-12 正式站已发布 `51d2dcc346`：共享图片取消与图集计时/JSON大小缓存身份修复。本机75项、生产构建及两后端重开同档通过；公网简繁出码、手机尺寸官方钱包Testnet签名、进比奇、权威移动、共用HUD/任务窗、113/113预取和正常退出通过，无需回滚。云端缓存身份与计算一致；Worker正常更新缓存一次，未迁移旧007缓存。本次观测起点到首画面65.2秒/共用HUD104.7秒（点击进游戏后约6.8秒/46.3秒），继续优化冷加载；实体手机、完整1:1及历史未结项仍开放。[发布与边界](evidence/r16-cache-repair-20261112/README.md)
 

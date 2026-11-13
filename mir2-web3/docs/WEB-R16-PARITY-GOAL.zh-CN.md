@@ -1,5 +1,7 @@
 # Windows R16 与 Web 1:1 验收
 
+2026-11-13 已正式发布ab02b84938：八方向格式修复、有效路线单步等待8秒/超时与取消；121+7项、70保护、构建及猫区9步到达、6.926秒恢复/手动中断/退出重登通过。首次公网资源失败已回退并保留；146项完整SHA确认后，同源重试的官方手机尺寸Testnet签名、进城/首步126ms、共用HUD/NativeQ、六字体、113/113、Worker停启与退出均通过。点击至首帧7.161秒，Native就绪观测239.322秒，原冷120秒仍false；优先改善冷传输，蓝线手势/死亡弹窗英文/完整1:1继续开放，Goal active。[当前证据](evidence/r16-route-direction-20261113/README.md) · [正式回执](evidence/r16-route-direction-20261113/production/README.md)
+
 2026-11-13 d99212e3cd优先现有第一方完整字体，显式六字体预热移到最终运行包成功之后；231项、构建和四会话及正式扫码签名/进城/移动/共用HUD/Q/六字体/113/Worker停启/退出通过。公网Native185.240秒超原120秒，冷资格false，持续Goal未完成。先跟进Edge右键手势和图片菜单的真实事件复现，完整三职业/旧档/像素/实体手机仍开放。[正式结果](evidence/r16-firstparty-font-delivery-20261113/production/README.md) · [玩家反馈](evidence/r16-edge-right-button-report-20261113/README.md)
 
 2026-11-13 已发布ff957默认人物完整目录候选，公网简繁出码、官方手机尺寸Testnet一次签名、比奇首步149ms、113/113及正常退出通过；但SC字体缓存缺项5/6、运行包正文首帧后192.203秒才完成、共享HUD/Q未就绪，完整资格false，已回退正式e7cb。回退后简繁出码复验通过，131份WIP保留。继续稳定单帧/保留已解码人物、持续慢PNG及字体/运行包冷读；整体1:1开放。[发布、失败与回退](evidence/r16-entry-player-directory-20261113/production/README.md)
