@@ -1,0 +1,2208 @@
+{
+  "passed": true,
+  "source": "f6603c89a34e27813d7495fceab3292cc293c47b",
+  "base": "401c8f9855fda0966467fc98f3d9ff63822e5e12",
+  "build": {
+    "parent": "401c8f9855fda0966467fc98f3d9ff63822e5e12",
+    "candidate": "401c8f9855fd-runtime-source-rotation-23643485",
+    "sourceRoot": "C:\\r16-ui-asset-recovery-20261113\\source",
+    "sourceArchiveSha256": "995458ccb096d9d682d3c0d67324e0a9962e0856f49647c17fa3875dbe52db00",
+    "sourceOverlayReceiptSha256": "ed53ef9ed52db793c6391855b0227cc3a0d9c770c492533b467872daabdac3f4",
+    "version": "20261108-r16-08ec86d5105c",
+    "runtime": "bevy-0c553a754308e5b8",
+    "status": {
+      "code": 0,
+      "signal": null
+    },
+    "builtId": "gwendc2C8OVj5Fg2CjMbJ",
+    "dist": ".next-runtime-source-rotation-r1",
+    "tsconfigPath": "tsconfig.runtime-source-rotation-r1.json",
+    "changedFiles": [
+      {
+        "filename": "mir2-web3/apps/web/lib/bevy-runtime-initializer.ts",
+        "sha256": "f28ebffe724f5a2357682a741b5b57ea6a0e41dbff45c8d16bc36559d971eef7",
+        "bytes": 14080
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-initializer.mjs",
+        "sha256": "1b08b1a7423aa7ac5b43859d5a18f1d68a9db41ea1ecb1f73c6aca299fa84941",
+        "bytes": 26410
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-source-rotation.mjs",
+        "sha256": "0fda5e643dfc166bbc2bad83cbc25d626cd8dead5000f34a2e5ab0dc1f9c6e14",
+        "bytes": 14742
+      },
+      {
+        "filename": "mir2-web3/apps/web/package.json",
+        "sha256": "8b5fbc13144c1ed0e724aa2306253ee178b2bcf0e2e0dfaa11e7ae36f68623df",
+        "bytes": 24160
+      }
+    ],
+    "generatedInputs": {
+      "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js": "3eb60cb1c4b3a931befe42485b10925ef161da576c47974c63b4b811a7a0ee99",
+      "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+      "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js": "2c18b5168f4a5210f4879c06e7373807a6dedb3a81137fdc28080191bc0f5aa5",
+      "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm": "9950afa3eb67ba5d618269f72ba1aeb23413f766a6d9bfa00021bfd4e85fbe8f",
+      "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime.js": "04e9fc42f89f1f302047b5d5101cf4e02035b0cf6241d8f9f4550e2dd531d92b",
+      "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm": "5f8b82ab48665cd20e8c45ce0da0f221a6919dfab07aca43fea7fd312f34c185",
+      "public/bevy-runtime-releases/bevy-0c553a754308e5b8/runtime-manifest.json": "36bdaa0116064c9b41cf8f54a547e53319011180e2275e1c5549e2ed7a33041b",
+      "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime.js": "3eb60cb1c4b3a931befe42485b10925ef161da576c47974c63b4b811a7a0ee99",
+      "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+      "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgl2/mir2_bevy_runtime.js": "2c18b5168f4a5210f4879c06e7373807a6dedb3a81137fdc28080191bc0f5aa5",
+      "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgl2/mir2_bevy_runtime_bg.wasm": "9950afa3eb67ba5d618269f72ba1aeb23413f766a6d9bfa00021bfd4e85fbe8f",
+      "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgl2-shared/mir2_bevy_runtime.js": "04e9fc42f89f1f302047b5d5101cf4e02035b0cf6241d8f9f4550e2dd531d92b",
+      "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm": "5f8b82ab48665cd20e8c45ce0da0f221a6919dfab07aca43fea7fd312f34c185",
+      "public/original-asset-manifest.generated.json": "4c4df4a5043dabd373f29ad781746d8b4e9f185db4beac51f4ac299190e6dc75",
+      "public/bootstrap/login/chrsel-0-1024.webp": "bc59b901477dfc3870e1f29e288af76006d0b1f2fea0b0e906fd6817f08fe592",
+      "public/bootstrap/login/chrsel-0-768.webp": "c6a175bda3546115b852c031c638c390bded87c8f9874dda163cf3a1b21999ca",
+      "public/bevy-entity-atlases/hooking-cat.png": "2102df985c82359a4d9bfee382c734996c25692e08669dc38173f6b81b436173",
+      "public/bevy-entity-atlases/manifest.json": "61754d2b8456fe55adecc18ec537b7b15e19998cb701c7c7a403ea1b5b1ff64d",
+      "public/bevy-entity-atlases/starter-bichon-base-p1.png": "54b329bc0716f0d866908b7a098ca7be2a62bc300087e6adb938a08341b4594d",
+      "public/bevy-entity-atlases/starter-bichon-base-p2.png": "6ecfdd3d20040ea8ac552efb7bed07c8ed0a85f67c9aa6184ee83828e7a9d0df",
+      "public/bevy-entity-atlases/starter-bichon-base-p3.png": "5c0ba7723386202ee0b70d302362c4a7e0f793c8bca7ddfb1fb9f5a000289e35",
+      "public/bevy-entity-atlases/starter-bichon-base-p4.png": "b47bba6a9948a2ecdfb6b77c7d4b153a03b66d5d930a636192929bc7662d5db4",
+      "public/bevy-entity-atlases/starter-bichon-base-p5.png": "201422cd1b26625e7205f7f7afa332ca0d3d1f159ddc95b367bcb448e1cb0a11",
+      "public/bevy-entity-atlases/starter-bichon-base-p6.png": "c0b0c1b04170ee851fbb4d83ff0d95423723ad1b5280fd0e7a9c9e3b32a0235b",
+      "public/bevy-entity-atlases/starter-bichon-base-p7.png": "26a3eb81c31001e1e47893e67e9fb3b614837cb56f165b3972b1fafeab929d20",
+      "public/bevy-entity-atlases/starter-bichon-base.png": "9cd99e43693cab3d706b4b8324e70d0697709cb5ddf2df0d957d27f0b95395ed",
+      "lib/generated/bevy_runtime_version.json": "36bdaa0116064c9b41cf8f54a547e53319011180e2275e1c5549e2ed7a33041b"
+    },
+    "packageLockSha256": "7fe1bebf3c7bd3561223fb729c78e18b251cfa74eedb0cd84b17b1ee33ff9ef6",
+    "buildConfigSha256": "ed404152e6377fb763c0504d5f0eb38de619c952eb088b1d17719c47e1367d09",
+    "durationMs": 58328
+  },
+  "checks": {
+    "focused": 95,
+    "releaseGuards": 70
+  },
+  "runs": [
+    {
+      "mode": "compatibility",
+      "passed": true,
+      "ordinaryNewcomer": {
+        "map": "0",
+        "position": {
+          "x": 288,
+          "y": 616
+        },
+        "level": 1,
+        "ordinaryLogout": true
+      },
+      "package": "webgpu",
+      "cold": {
+        "nativeReadyWaitMs": 37044,
+        "prewarm": {
+          "runs": [
+            {
+              "name": "hud-core",
+              "label": "Core HUD",
+              "requested": 113,
+              "ok": 113,
+              "failed": 0,
+              "failedUrls": [],
+              "durationMs": 7009.5,
+              "sceneCacheHits": 0,
+              "sceneCacheMisses": 0,
+              "status": "done"
+            }
+          ],
+          "summary": {
+            "requested": 113,
+            "ok": 113,
+            "failed": 0
+          },
+          "orchestrator": {
+            "backgroundMode": "afterPlayable",
+            "firstPlayable": true,
+            "requestedStage": "game",
+            "pendingBackgroundStage": null,
+            "activeBackgroundStage": null,
+            "completed": [
+              "game:background"
+            ],
+            "disposed": false
+          }
+        },
+        "fontCache": [
+          {
+            "name": "NotoSansTC.ttf",
+            "bytes": 11941968,
+            "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+          },
+          {
+            "name": "NotoSansCJKsc-Regular.otf",
+            "bytes": 16437364,
+            "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+          },
+          {
+            "name": "NotoSans-Regular.ttf",
+            "bytes": 621572,
+            "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+          },
+          {
+            "name": "NotoSansDevanagari-Regular.ttf",
+            "bytes": 243520,
+            "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+          },
+          {
+            "name": "NotoSansThai-Regular.ttf",
+            "bytes": 37780,
+            "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+          },
+          {
+            "name": "NotoSansArabic-Regular.ttf",
+            "bytes": 234892,
+            "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+          }
+        ],
+        "native": {
+          "hud": {
+            "version": 1,
+            "frame": 1412,
+            "ready": true,
+            "characterStatsReady": false,
+            "generation": 2,
+            "revision": 1,
+            "navigation": {
+              "characterOpen": false,
+              "characterPage": "character",
+              "bagOpen": false,
+              "questOpen": false
+            },
+            "plan": {
+              "hp": "HP 30/30",
+              "mp": "",
+              "name": "SpawnSmoke",
+              "level": "3",
+              "gold": "200",
+              "experience": "0%",
+              "weight": "28",
+              "hpOnly": true,
+              "main": {
+                "left": 0,
+                "top": 616,
+                "width": 1024,
+                "height": 152
+              },
+              "orb": {
+                "left": 0,
+                "top": 646,
+                "width": 104,
+                "height": 80
+              },
+              "experienceBar": {
+                "left": 9,
+                "top": 759,
+                "width": 1004,
+                "height": 8
+              },
+              "weightBar": {
+                "left": 919,
+                "top": 719,
+                "width": 76,
+                "height": 12
+              },
+              "buttons": [
+                {
+                  "action": "character",
+                  "rect": {
+                    "left": 905,
+                    "top": 692,
+                    "width": 20,
+                    "height": 20
+                  },
+                  "normal": "original-ui/Prguse/1900.png",
+                  "hover": "original-ui/Prguse/1901.png",
+                  "pressed": "original-ui/Prguse/1902.png"
+                },
+                {
+                  "action": "bag",
+                  "rect": {
+                    "left": 928,
+                    "top": 692,
+                    "width": 20,
+                    "height": 20
+                  },
+                  "normal": "original-ui/Prguse/1903.png",
+                  "hover": "original-ui/Prguse/1904.png",
+                  "pressed": "original-ui/Prguse/1905.png"
+                },
+                {
+                  "action": "skill",
+                  "rect": {
+                    "left": 951,
+                    "top": 692,
+                    "width": 20,
+                    "height": 20
+                  },
+                  "normal": "original-ui/Prguse/1906.png",
+                  "hover": "original-ui/Prguse/1907.png",
+                  "pressed": "original-ui/Prguse/1908.png"
+                },
+                {
+                  "action": "quest",
+                  "rect": {
+                    "left": 974,
+                    "top": 692,
+                    "width": 20,
+                    "height": 20
+                  },
+                  "normal": "original-ui/Prguse/1909.png",
+                  "hover": "original-ui/Prguse/1910.png",
+                  "pressed": "original-ui/Prguse/1911.png"
+                },
+                {
+                  "action": "option",
+                  "rect": {
+                    "left": 997,
+                    "top": 692,
+                    "width": 20,
+                    "height": 20
+                  },
+                  "normal": "original-ui/Prguse/1912.png",
+                  "hover": "original-ui/Prguse/1913.png",
+                  "pressed": "original-ui/Prguse/1914.png"
+                },
+                {
+                  "action": "menu",
+                  "rect": {
+                    "left": 969,
+                    "top": 651,
+                    "width": 40,
+                    "height": 40
+                  },
+                  "normal": "original-ui/Prguse/1960.png",
+                  "hover": "original-ui/Prguse/1961.png",
+                  "pressed": "original-ui/Prguse/1962.png"
+                },
+                {
+                  "action": "gameShop",
+                  "rect": {
+                    "left": 919,
+                    "top": 651,
+                    "width": 40,
+                    "height": 38
+                  },
+                  "normal": "original-ui/Prguse/826.png",
+                  "hover": "original-ui/Prguse/827.png",
+                  "pressed": "original-ui/Prguse/828.png"
+                }
+              ],
+              "characterRect": {
+                "left": 760,
+                "top": 0,
+                "width": 264,
+                "height": 380
+              },
+              "characterHits": [
+                {
+                  "action": {
+                    "type": "selectCharacterPage",
+                    "page": "character"
+                  },
+                  "rect": {
+                    "left": 768,
+                    "top": 70,
+                    "width": 64,
+                    "height": 20
+                  }
+                },
+                {
+                  "action": {
+                    "type": "selectCharacterPage",
+                    "page": "stats1"
+                  },
+                  "rect": {
+                    "left": 830,
+                    "top": 70,
+                    "width": 64,
+                    "height": 20
+                  }
+                },
+                {
+                  "action": {
+                    "type": "selectCharacterPage",
+                    "page": "stats2"
+                  },
+                  "rect": {
+                    "left": 892,
+                    "top": 70,
+                    "width": 64,
+                    "height": 20
+                  }
+                },
+                {
+                  "action": {
+                    "type": "selectCharacterPage",
+                    "page": "spells"
+                  },
+                  "rect": {
+                    "left": 954,
+                    "top": 70,
+                    "width": 64,
+                    "height": 20
+                  }
+                },
+                {
+                  "action": {
+                    "type": "closeCharacter"
+                  },
+                  "rect": {
+                    "left": 1001,
+                    "top": 3,
+                    "width": 24,
+                    "height": 21
+                  }
+                }
+              ],
+              "experienceSprite": {
+                "current": 0,
+                "maximum": 300,
+                "image": null,
+                "source": {
+                  "left": 0,
+                  "top": 0,
+                  "width": 0,
+                  "height": 8
+                },
+                "destination": {
+                  "left": 9,
+                  "top": 759,
+                  "width": 0,
+                  "height": 8
+                }
+              },
+              "weightSprite": {
+                "current": 25,
+                "maximum": 53,
+                "image": "original-ui/Prguse/76.png",
+                "source": {
+                  "left": 0,
+                  "top": 0,
+                  "width": 34,
+                  "height": 12
+                },
+                "destination": {
+                  "left": 919,
+                  "top": 719,
+                  "width": 34,
+                  "height": 12
+                }
+              }
+            },
+            "error": null,
+            "foregroundRects": [],
+            "modal": false
+          },
+          "quest": {
+            "questLocaleVersion": 1,
+            "language": "en",
+            "displayLocaleVersion": 1,
+            "displayLanguage": "zh-TW",
+            "ready": true,
+            "error": null,
+            "capturesPointer": false,
+            "questLogOpen": false,
+            "frame": 1412,
+            "generation": 2,
+            "revision": 2,
+            "openRevision": 1,
+            "hpOrb": {
+              "supported": true,
+              "ready": false,
+              "generation": 2,
+              "revision": 2,
+              "hp": null,
+              "maxHp": null,
+              "hpOnly": null,
+              "slot": null,
+              "image": null,
+              "source": null,
+              "destination": null,
+              "layout": null
+            },
+            "mpOrb": {
+              "supported": true,
+              "ready": false,
+              "generation": 2,
+              "revision": 2,
+              "mp": null,
+              "maxMp": null,
+              "hpOnly": null,
+              "slot": null,
+              "image": null,
+              "source": null,
+              "destination": null,
+              "layout": null
+            },
+            "experienceBar": {
+              "supported": false,
+              "ready": false,
+              "generation": 2,
+              "revision": 2,
+              "experience": null,
+              "maxExperience": null,
+              "slot": null,
+              "image": null,
+              "source": null,
+              "destination": null,
+              "layout": null
+            },
+            "weightBar": {
+              "supported": false,
+              "ready": false,
+              "generation": 2,
+              "revision": 2,
+              "currentWeight": null,
+              "maxWeight": null,
+              "slot": null,
+              "image": null,
+              "source": null,
+              "destination": null,
+              "layout": null
+            },
+            "hudBarDrawPlan": {
+              "version": 1,
+              "generation": 2,
+              "revision": 2,
+              "lifetime": "r1-g2-p1000",
+              "experience": {
+                "token": "e-1",
+                "sequence": 1,
+                "state": "known-empty",
+                "current": 0,
+                "maximum": 300,
+                "slot": {
+                  "left": 9,
+                  "top": 759,
+                  "width": 1004,
+                  "height": 8
+                },
+                "image": null,
+                "source": {
+                  "left": 0,
+                  "top": 0,
+                  "width": 0,
+                  "height": 8
+                },
+                "destination": {
+                  "left": 9,
+                  "top": 759,
+                  "width": 0,
+                  "height": 8
+                }
+              },
+              "weight": {
+                "token": "w-1",
+                "sequence": 1,
+                "state": "draw",
+                "current": 22,
+                "maximum": 53,
+                "slot": {
+                  "left": 919,
+                  "top": 719,
+                  "width": 76,
+                  "height": 12
+                },
+                "image": "original-ui/Prguse/76.png",
+                "source": {
+                  "left": 0,
+                  "top": 0,
+                  "width": 34,
+                  "height": 12
+                },
+                "destination": {
+                  "left": 919,
+                  "top": 719,
+                  "width": 34,
+                  "height": 12
+                }
+              }
+            }
+          },
+          "backend": "webgpu",
+          "packageId": "webgpu"
+        },
+        "rightButtons": {
+          "passed": true,
+          "scope": "Real Edge headless ordinary game inputs, authority and DOM cancellation; native browser overlay pixels remain unobserved.",
+          "startPosition": {
+            "x": 289,
+            "y": 616
+          },
+          "rows": [
+            {
+              "case": "ordinary-right-movement-and-release",
+              "started": 1794587504159,
+              "first": {
+                "x": 290,
+                "y": 616
+              },
+              "release": 1794587504454,
+              "settled": {
+                "x": 290,
+                "y": 616
+              },
+              "events": [
+                {
+                  "phase": "cold-move",
+                  "type": "pointerdown",
+                  "at": 1794587504176,
+                  "trusted": true,
+                  "cancelable": true,
+                  "button": 2,
+                  "buttons": 2,
+                  "pointerType": "mouse",
+                  "target": {
+                    "tag": "CANVAS",
+                    "id": "mir2-quest-ui-canvas",
+                    "classes": [
+                      "shared-quest-ui-visible"
+                    ]
+                  },
+                  "inFrame": true,
+                  "x": 680,
+                  "y": 464,
+                  "frame": {
+                    "x": 128,
+                    "y": 96,
+                    "width": 1024,
+                    "height": 768
+                  },
+                  "cancelled": true
+                },
+                {
+                  "phase": "cold-move",
+                  "type": "pointerup",
+                  "at": 1794587504451,
+                  "trusted": true,
+                  "cancelable": true,
+                  "button": 2,
+                  "buttons": 0,
+                  "pointerType": "mouse",
+                  "target": {
+                    "tag": "CANVAS",
+                    "id": "mir2-quest-ui-canvas",
+                    "classes": [
+                      "shared-quest-ui-visible"
+                    ]
+                  },
+                  "inFrame": true,
+                  "x": 680,
+                  "y": 464,
+                  "frame": {
+                    "x": 128,
+                    "y": 96,
+                    "width": 1024,
+                    "height": 768
+                  },
+                  "cancelled": true
+                },
+                {
+                  "phase": "cold-move",
+                  "type": "contextmenu",
+                  "at": 1794587504454,
+                  "trusted": true,
+                  "cancelable": true,
+                  "button": 2,
+                  "buttons": 0,
+                  "pointerType": "mouse",
+                  "target": {
+                    "tag": "CANVAS",
+                    "id": "mir2-quest-ui-canvas",
+                    "classes": [
+                      "shared-quest-ui-visible"
+                    ]
+                  },
+                  "inFrame": true,
+                  "x": 680,
+                  "y": 464,
+                  "frame": {
+                    "x": 128,
+                    "y": 96,
+                    "width": 1024,
+                    "height": 768
+                  },
+                  "cancelled": true
+                }
+              ],
+              "wire": [
+                {
+                  "type": "walk",
+                  "at": 1794587504364,
+                  "direction": "Right"
+                }
+              ]
+            },
+            {
+              "case": "right-press-in-game-release-in-gutter",
+              "started": 1794587508059,
+              "gutterRelease": 1794587508123,
+              "geometry": {
+                "inside": {
+                  "x": 680,
+                  "y": 464
+                },
+                "gutter": {
+                  "x": 116,
+                  "y": 480
+                },
+                "frame": {
+                  "x": 128,
+                  "y": 96,
+                  "width": 1024,
+                  "height": 768
+                }
+              },
+              "events": [
+                {
+                  "phase": "cold-gutter",
+                  "type": "pointerdown",
+                  "at": 1794587508080,
+                  "trusted": true,
+                  "cancelable": true,
+                  "button": 2,
+                  "buttons": 2,
+                  "pointerType": "mouse",
+                  "target": {
+                    "tag": "CANVAS",
+                    "id": "mir2-quest-ui-canvas",
+                    "classes": [
+                      "shared-quest-ui-visible"
+                    ]
+                  },
+                  "inFrame": true,
+                  "x": 680,
+                  "y": 464,
+                  "frame": {
+                    "x": 128,
+                    "y": 96,
+                    "width": 1024,
+                    "height": 768
+                  },
+                  "cancelled": true
+                },
+                {
+                  "phase": "cold-gutter",
+                  "type": "pointerup",
+                  "at": 1794587508119,
+                  "trusted": true,
+                  "cancelable": true,
+                  "button": 2,
+                  "buttons": 0,
+                  "pointerType": "mouse",
+                  "target": {
+                    "tag": "CANVAS",
+                    "id": "mir2-quest-ui-canvas",
+                    "classes": [
+                      "shared-quest-ui-visible"
+                    ]
+                  },
+                  "inFrame": true,
+                  "x": 116,
+                  "y": 480,
+                  "frame": {
+                    "x": 128,
+                    "y": 96,
+                    "width": 1024,
+                    "height": 768
+                  },
+                  "cancelled": true
+                },
+                {
+                  "phase": "cold-gutter",
+                  "type": "contextmenu",
+                  "at": 1794587508123,
+                  "trusted": true,
+                  "cancelable": true,
+                  "button": 2,
+                  "buttons": 0,
+                  "pointerType": "mouse",
+                  "target": {
+                    "tag": "SECTION",
+                    "id": "",
+                    "classes": [
+                      "mir-stage"
+                    ]
+                  },
+                  "inFrame": false,
+                  "x": 116,
+                  "y": 480,
+                  "frame": {
+                    "x": 128,
+                    "y": 96,
+                    "width": 1024,
+                    "height": 768
+                  },
+                  "cancelled": true
+                }
+              ],
+              "settled": {
+                "x": 288,
+                "y": 617
+              }
+            }
+          ],
+          "returnSteps": [
+            {
+              "from": {
+                "x": 290,
+                "y": 616
+              },
+              "key": "ArrowLeft",
+              "at": 1794587506390,
+              "arrived": {
+                "x": 289,
+                "y": 616
+              },
+              "authority": [
+                {
+                  "at": 1794587506491,
+                  "payload": {
+                    "direction": "Left",
+                    "x": 289,
+                    "y": 616
+                  }
+                }
+              ]
+            },
+            {
+              "from": {
+                "x": 288,
+                "y": 617
+              },
+              "key": "ArrowUp",
+              "at": 1794587510057,
+              "arrived": {
+                "x": 288,
+                "y": 616
+              },
+              "authority": [
+                {
+                  "at": 1794587510205,
+                  "payload": {
+                    "direction": "Up",
+                    "x": 288,
+                    "y": 616
+                  }
+                }
+              ]
+            },
+            {
+              "from": {
+                "x": 288,
+                "y": 616
+              },
+              "key": "ArrowRight",
+              "at": 1794587510936,
+              "arrived": {
+                "x": 289,
+                "y": 616
+              },
+              "authority": [
+                {
+                  "at": 1794587511077,
+                  "payload": {
+                    "direction": "Right",
+                    "x": 289,
+                    "y": 616
+                  }
+                }
+              ]
+            }
+          ],
+          "finalTile": {
+            "x": 289,
+            "y": 616
+          }
+        }
+      },
+      "sourceRotation": {
+        "passed": true,
+        "sourceOrder": [
+          "app",
+          "cdn",
+          "app"
+        ],
+        "rows": [
+          {
+            "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+            "source": "app",
+            "attempt": 1,
+            "requestedAt": 1794587442381,
+            "offeredBytes": 0,
+            "bytes": 0,
+            "expectedBytes": 31452436,
+            "intentionalNoHeaders": true,
+            "requestAbortedAt": 1794587450376,
+            "closedAt": 1794587450376,
+            "closedBeforeFinish": true
+          },
+          {
+            "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+            "source": "cdn",
+            "attempt": 2,
+            "requestedAt": 1794587450376,
+            "offeredBytes": 31386900,
+            "bytes": 31386900,
+            "expectedBytes": 31452436,
+            "headersAt": 1794587450376,
+            "status": 200,
+            "intentionalPartialBody": true,
+            "withheldTailBytes": 65536,
+            "prefixBytes": 31386900,
+            "prefixSha256": "061f93ac89c41bed8da28e3d5a297a58efd0197d3c50201503060e148fddaa7e",
+            "writeCallbackAt": 1794587450394,
+            "requestAbortedAt": 1794587465635,
+            "closedAt": 1794587465635,
+            "closedBeforeFinish": true
+          },
+          {
+            "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+            "source": "app",
+            "attempt": 3,
+            "requestedAt": 1794587465625,
+            "offeredBytes": 31452436,
+            "bytes": 31452436,
+            "expectedBytes": 31452436,
+            "headersAt": 1794587465625,
+            "status": 200,
+            "sha256": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+            "finishedAt": 1794587465632,
+            "closedAt": 1794587465632,
+            "closedBeforeFinish": false
+          }
+        ],
+        "appHeaderWaitMs": 8000.800000011921,
+        "bodyIdleObservedMs": 15027,
+        "completedBody": {
+          "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+          "source": "app",
+          "requestedAt": 1794587465622,
+          "dataEvents": 21,
+          "decodedBytes": 31452436,
+          "encodedDataBytes": 31452436,
+          "maxDataGapMs": 342,
+          "headersAt": 1794587465638,
+          "status": 200,
+          "protocol": "http/1.1",
+          "serviceWorker": false,
+          "fromDiskCache": false,
+          "cacheControl": "no-store",
+          "firstDataAt": 1794587465638,
+          "lastDataAt": 1794587466080,
+          "finishedAt": 1794587466107,
+          "totalEncodedBytes": 31452654,
+          "completeBodyBytes": 31452436,
+          "bodySha256": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+          "bodyObservedAt": 1794587466678,
+          "expectedBytes": 31452436,
+          "expectedSha256": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e"
+        },
+        "closePropagationDeltasMs": {
+          "appCloseMinusNextGet": 0,
+          "cdnCloseMinusNextGet": 10
+        },
+        "milestones": [
+          {
+            "name": "bevyRuntimeDownload",
+            "detail": {
+              "attempt": 1,
+              "sourceIndex": 0,
+              "retry": false,
+              "state": "started",
+              "phase": "headers",
+              "bytes": 0
+            },
+            "epochMs": 1794587442372,
+            "atMs": 48900.90000000596
+          },
+          {
+            "name": "bevyRuntimeDownload",
+            "detail": {
+              "attempt": 1,
+              "sourceIndex": 0,
+              "retry": false,
+              "state": "failed",
+              "phase": "headers",
+              "bytes": 0,
+              "reason": "headers-timeout",
+              "retryable": true
+            },
+            "epochMs": 1794587450374,
+            "atMs": 56902.09999999404
+          },
+          {
+            "name": "bevyRuntimeDownload",
+            "detail": {
+              "attempt": 2,
+              "sourceIndex": 1,
+              "retry": false,
+              "state": "started",
+              "phase": "headers",
+              "bytes": 0
+            },
+            "epochMs": 1794587450374,
+            "atMs": 56902.19999998808
+          },
+          {
+            "name": "bevyRuntimeDownload",
+            "detail": {
+              "attempt": 2,
+              "sourceIndex": 1,
+              "retry": false,
+              "state": "failed",
+              "phase": "body",
+              "bytes": 31386900,
+              "status": 200,
+              "reason": "body-idle",
+              "retryable": true
+            },
+            "epochMs": 1794587465621,
+            "atMs": 72149.40000000596
+          },
+          {
+            "name": "bevyRuntimeDownload",
+            "detail": {
+              "attempt": 3,
+              "sourceIndex": 0,
+              "retry": true,
+              "state": "started",
+              "phase": "headers",
+              "bytes": 0
+            },
+            "epochMs": 1794587465621,
+            "atMs": 72149.40000000596
+          },
+          {
+            "name": "bevyRuntimeDownload",
+            "detail": {
+              "attempt": 3,
+              "sourceIndex": 0,
+              "retry": true,
+              "state": "completed",
+              "phase": "compile",
+              "bytes": 31452436,
+              "status": 200
+            },
+            "epochMs": 1794587465744,
+            "atMs": 72272.30000001192
+          },
+          {
+            "name": "bevyRuntimeFontPrewarmStart",
+            "epochMs": 1794587465754,
+            "atMs": 72282.19999998808
+          },
+          {
+            "name": "bevyRuntimeModuleReady",
+            "detail": {
+              "backend": "webgpu",
+              "compiledBackend": "webgpu",
+              "fallbackFrom": null
+            },
+            "epochMs": 1794587465755,
+            "atMs": 72283.40000000596
+          },
+          {
+            "name": "bevyRuntimeReady",
+            "detail": {
+              "reused": false,
+              "backend": "webgpu",
+              "compiledBackend": "webgpu",
+              "fallbackFrom": null,
+              "packageId": "webgpu"
+            },
+            "epochMs": 1794587466069,
+            "atMs": 72597.09999999404
+          },
+          {
+            "name": "bevyRuntimeFontPrewarmComplete",
+            "detail": {
+              "requested": 6,
+              "ok": 6,
+              "failed": 0,
+              "aborted": false,
+              "bytes": 29517096
+            },
+            "epochMs": 1794587479122,
+            "atMs": 85650.90000000596
+          }
+        ]
+      },
+      "workerRestart": {
+        "passed": true,
+        "originalFrame": "/original-ui/Prguse/1.png",
+        "expectedSha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa",
+        "restored": {
+          "status": 200,
+          "bytes": 66374,
+          "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+        },
+        "originNetworkReads": 0,
+        "lifecycle": [
+          {
+            "versionId": "0",
+            "runningStatus": "running",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "stopping",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "stopped",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "running",
+            "status": "activated"
+          }
+        ]
+      },
+      "firstLogout": {
+        "sentAt": 1794587513295,
+        "acknowledgedAt": 1794587517052,
+        "savedPosition": {
+          "x": 289,
+          "y": 616
+        },
+        "returnedToSelect": true,
+        "gutter": {
+          "x": 64,
+          "y": 480
+        }
+      },
+      "browserRestart": {
+        "firstProcessCount": 7,
+        "allFirstProcessesExited": true,
+        "persistedProfileExists": true,
+        "secondProcessCount": 7
+      },
+      "warm": {
+        "passed": true,
+        "authoritativeStart": {
+          "position": {
+            "x": 289,
+            "y": 616
+          },
+          "characterIndex": 2
+        },
+        "nativeReadyWaitMs": 2035,
+        "logout": {
+          "sentAt": 1794587558178,
+          "acknowledgedAt": 1794587561720,
+          "savedPosition": {
+            "x": 288,
+            "y": 616
+          },
+          "returnedToSelect": true,
+          "gutter": {
+            "x": 64,
+            "y": 480
+          }
+        },
+        "originalGraduateFixtureStillVerified": true
+      },
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true,
+      "rawReceiptSha256": "4546d51b7857206bd11bd5563a0334c2a1099ae201529c1bcb8eea45e6c10277"
+    },
+    {
+      "mode": "webgl2",
+      "passed": true,
+      "ordinaryNewcomer": {
+        "map": "0",
+        "position": {
+          "x": 288,
+          "y": 616
+        },
+        "level": 1,
+        "ordinaryLogout": true
+      },
+      "package": "webgl2-shared",
+      "cold": {
+        "nativeReadyWaitMs": 37115,
+        "prewarm": {
+          "runs": [
+            {
+              "name": "hud-core",
+              "label": "Core HUD",
+              "requested": 113,
+              "ok": 113,
+              "failed": 0,
+              "failedUrls": [],
+              "durationMs": 7053.300000011921,
+              "sceneCacheHits": 0,
+              "sceneCacheMisses": 0,
+              "status": "done"
+            }
+          ],
+          "summary": {
+            "requested": 113,
+            "ok": 113,
+            "failed": 0
+          },
+          "orchestrator": {
+            "backgroundMode": "afterPlayable",
+            "firstPlayable": true,
+            "requestedStage": "game",
+            "pendingBackgroundStage": null,
+            "activeBackgroundStage": null,
+            "completed": [
+              "game:background"
+            ],
+            "disposed": false
+          }
+        },
+        "fontCache": [
+          {
+            "name": "NotoSansTC.ttf",
+            "bytes": 11941968,
+            "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+          },
+          {
+            "name": "NotoSansCJKsc-Regular.otf",
+            "bytes": 16437364,
+            "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+          },
+          {
+            "name": "NotoSans-Regular.ttf",
+            "bytes": 621572,
+            "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+          },
+          {
+            "name": "NotoSansDevanagari-Regular.ttf",
+            "bytes": 243520,
+            "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+          },
+          {
+            "name": "NotoSansThai-Regular.ttf",
+            "bytes": 37780,
+            "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+          },
+          {
+            "name": "NotoSansArabic-Regular.ttf",
+            "bytes": 234892,
+            "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+          }
+        ],
+        "native": {
+          "hud": {
+            "version": 1,
+            "frame": 1869,
+            "ready": true,
+            "characterStatsReady": false,
+            "generation": 2,
+            "revision": 1,
+            "navigation": {
+              "characterOpen": false,
+              "characterPage": "character",
+              "bagOpen": false,
+              "questOpen": false
+            },
+            "plan": {
+              "hp": "HP 30/30",
+              "mp": "",
+              "name": "SpawnSmoke",
+              "level": "3",
+              "gold": "200",
+              "experience": "0%",
+              "weight": "28",
+              "hpOnly": true,
+              "main": {
+                "left": 0,
+                "top": 616,
+                "width": 1024,
+                "height": 152
+              },
+              "orb": {
+                "left": 0,
+                "top": 646,
+                "width": 104,
+                "height": 80
+              },
+              "experienceBar": {
+                "left": 9,
+                "top": 759,
+                "width": 1004,
+                "height": 8
+              },
+              "weightBar": {
+                "left": 919,
+                "top": 719,
+                "width": 76,
+                "height": 12
+              },
+              "buttons": [
+                {
+                  "action": "character",
+                  "rect": {
+                    "left": 905,
+                    "top": 692,
+                    "width": 20,
+                    "height": 20
+                  },
+                  "normal": "original-ui/Prguse/1900.png",
+                  "hover": "original-ui/Prguse/1901.png",
+                  "pressed": "original-ui/Prguse/1902.png"
+                },
+                {
+                  "action": "bag",
+                  "rect": {
+                    "left": 928,
+                    "top": 692,
+                    "width": 20,
+                    "height": 20
+                  },
+                  "normal": "original-ui/Prguse/1903.png",
+                  "hover": "original-ui/Prguse/1904.png",
+                  "pressed": "original-ui/Prguse/1905.png"
+                },
+                {
+                  "action": "skill",
+                  "rect": {
+                    "left": 951,
+                    "top": 692,
+                    "width": 20,
+                    "height": 20
+                  },
+                  "normal": "original-ui/Prguse/1906.png",
+                  "hover": "original-ui/Prguse/1907.png",
+                  "pressed": "original-ui/Prguse/1908.png"
+                },
+                {
+                  "action": "quest",
+                  "rect": {
+                    "left": 974,
+                    "top": 692,
+                    "width": 20,
+                    "height": 20
+                  },
+                  "normal": "original-ui/Prguse/1909.png",
+                  "hover": "original-ui/Prguse/1910.png",
+                  "pressed": "original-ui/Prguse/1911.png"
+                },
+                {
+                  "action": "option",
+                  "rect": {
+                    "left": 997,
+                    "top": 692,
+                    "width": 20,
+                    "height": 20
+                  },
+                  "normal": "original-ui/Prguse/1912.png",
+                  "hover": "original-ui/Prguse/1913.png",
+                  "pressed": "original-ui/Prguse/1914.png"
+                },
+                {
+                  "action": "menu",
+                  "rect": {
+                    "left": 969,
+                    "top": 651,
+                    "width": 40,
+                    "height": 40
+                  },
+                  "normal": "original-ui/Prguse/1960.png",
+                  "hover": "original-ui/Prguse/1961.png",
+                  "pressed": "original-ui/Prguse/1962.png"
+                },
+                {
+                  "action": "gameShop",
+                  "rect": {
+                    "left": 919,
+                    "top": 651,
+                    "width": 40,
+                    "height": 38
+                  },
+                  "normal": "original-ui/Prguse/826.png",
+                  "hover": "original-ui/Prguse/827.png",
+                  "pressed": "original-ui/Prguse/828.png"
+                }
+              ],
+              "characterRect": {
+                "left": 760,
+                "top": 0,
+                "width": 264,
+                "height": 380
+              },
+              "characterHits": [
+                {
+                  "action": {
+                    "type": "selectCharacterPage",
+                    "page": "character"
+                  },
+                  "rect": {
+                    "left": 768,
+                    "top": 70,
+                    "width": 64,
+                    "height": 20
+                  }
+                },
+                {
+                  "action": {
+                    "type": "selectCharacterPage",
+                    "page": "stats1"
+                  },
+                  "rect": {
+                    "left": 830,
+                    "top": 70,
+                    "width": 64,
+                    "height": 20
+                  }
+                },
+                {
+                  "action": {
+                    "type": "selectCharacterPage",
+                    "page": "stats2"
+                  },
+                  "rect": {
+                    "left": 892,
+                    "top": 70,
+                    "width": 64,
+                    "height": 20
+                  }
+                },
+                {
+                  "action": {
+                    "type": "selectCharacterPage",
+                    "page": "spells"
+                  },
+                  "rect": {
+                    "left": 954,
+                    "top": 70,
+                    "width": 64,
+                    "height": 20
+                  }
+                },
+                {
+                  "action": {
+                    "type": "closeCharacter"
+                  },
+                  "rect": {
+                    "left": 1001,
+                    "top": 3,
+                    "width": 24,
+                    "height": 21
+                  }
+                }
+              ],
+              "experienceSprite": {
+                "current": 0,
+                "maximum": 300,
+                "image": null,
+                "source": {
+                  "left": 0,
+                  "top": 0,
+                  "width": 0,
+                  "height": 8
+                },
+                "destination": {
+                  "left": 9,
+                  "top": 759,
+                  "width": 0,
+                  "height": 8
+                }
+              },
+              "weightSprite": {
+                "current": 25,
+                "maximum": 53,
+                "image": "original-ui/Prguse/76.png",
+                "source": {
+                  "left": 0,
+                  "top": 0,
+                  "width": 34,
+                  "height": 12
+                },
+                "destination": {
+                  "left": 919,
+                  "top": 719,
+                  "width": 34,
+                  "height": 12
+                }
+              }
+            },
+            "error": null,
+            "foregroundRects": [],
+            "modal": false
+          },
+          "quest": {
+            "questLocaleVersion": 1,
+            "language": "en",
+            "displayLocaleVersion": 1,
+            "displayLanguage": "zh-TW",
+            "ready": true,
+            "error": null,
+            "capturesPointer": false,
+            "questLogOpen": false,
+            "frame": 1869,
+            "generation": 2,
+            "revision": 1,
+            "openRevision": 1,
+            "hpOrb": {
+              "supported": true,
+              "ready": true,
+              "generation": 2,
+              "revision": 1,
+              "hp": 30,
+              "maxHp": 30,
+              "hpOnly": true,
+              "slot": {
+                "left": 0,
+                "top": 646
+              },
+              "image": "original-ui/Prguse/6.png",
+              "source": {
+                "left": 0,
+                "top": 0,
+                "width": 100,
+                "height": 80
+              },
+              "destination": {
+                "left": 0,
+                "top": 646,
+                "width": 100,
+                "height": 80
+              },
+              "layout": {
+                "left": 0,
+                "top": 646,
+                "width": 100,
+                "height": 80
+              }
+            },
+            "mpOrb": {
+              "supported": true,
+              "ready": false,
+              "generation": 2,
+              "revision": 1,
+              "mp": null,
+              "maxMp": null,
+              "hpOnly": null,
+              "slot": null,
+              "image": null,
+              "source": null,
+              "destination": null,
+              "layout": null
+            },
+            "experienceBar": {
+              "supported": false,
+              "ready": false,
+              "generation": 2,
+              "revision": 1,
+              "experience": null,
+              "maxExperience": null,
+              "slot": null,
+              "image": null,
+              "source": null,
+              "destination": null,
+              "layout": null
+            },
+            "weightBar": {
+              "supported": false,
+              "ready": false,
+              "generation": 2,
+              "revision": 1,
+              "currentWeight": null,
+              "maxWeight": null,
+              "slot": null,
+              "image": null,
+              "source": null,
+              "destination": null,
+              "layout": null
+            },
+            "hudBarDrawPlan": {
+              "version": 1,
+              "generation": 2,
+              "revision": 1,
+              "lifetime": "r1-g2-p1000",
+              "experience": {
+                "token": "e-1",
+                "sequence": 1,
+                "state": "known-empty",
+                "current": 0,
+                "maximum": 300,
+                "slot": {
+                  "left": 9,
+                  "top": 759,
+                  "width": 1004,
+                  "height": 8
+                },
+                "image": null,
+                "source": {
+                  "left": 0,
+                  "top": 0,
+                  "width": 0,
+                  "height": 8
+                },
+                "destination": {
+                  "left": 9,
+                  "top": 759,
+                  "width": 0,
+                  "height": 8
+                }
+              },
+              "weight": {
+                "token": "w-1",
+                "sequence": 1,
+                "state": "draw",
+                "current": 22,
+                "maximum": 53,
+                "slot": {
+                  "left": 919,
+                  "top": 719,
+                  "width": 76,
+                  "height": 12
+                },
+                "image": "original-ui/Prguse/76.png",
+                "source": {
+                  "left": 0,
+                  "top": 0,
+                  "width": 34,
+                  "height": 12
+                },
+                "destination": {
+                  "left": 919,
+                  "top": 719,
+                  "width": 34,
+                  "height": 12
+                }
+              }
+            }
+          },
+          "backend": "webgl2",
+          "packageId": "webgl2-shared"
+        },
+        "rightButtons": {
+          "passed": true,
+          "scope": "Real Edge headless ordinary game inputs, authority and DOM cancellation; native browser overlay pixels remain unobserved.",
+          "startPosition": {
+            "x": 289,
+            "y": 616
+          },
+          "rows": [
+            {
+              "case": "ordinary-right-movement-and-release",
+              "started": 1794587745831,
+              "first": {
+                "x": 290,
+                "y": 616
+              },
+              "release": 1794587746082,
+              "settled": {
+                "x": 290,
+                "y": 616
+              },
+              "events": [
+                {
+                  "phase": "cold-move",
+                  "type": "pointerdown",
+                  "at": 1794587745851,
+                  "trusted": true,
+                  "cancelable": true,
+                  "button": 2,
+                  "buttons": 2,
+                  "pointerType": "mouse",
+                  "target": {
+                    "tag": "CANVAS",
+                    "id": "mir2-quest-ui-canvas",
+                    "classes": [
+                      "shared-quest-ui-visible"
+                    ]
+                  },
+                  "inFrame": true,
+                  "x": 680,
+                  "y": 464,
+                  "frame": {
+                    "x": 128,
+                    "y": 96,
+                    "width": 1024,
+                    "height": 768
+                  },
+                  "cancelled": true
+                },
+                {
+                  "phase": "cold-move",
+                  "type": "pointerup",
+                  "at": 1794587746077,
+                  "trusted": true,
+                  "cancelable": true,
+                  "button": 2,
+                  "buttons": 0,
+                  "pointerType": "mouse",
+                  "target": {
+                    "tag": "CANVAS",
+                    "id": "mir2-quest-ui-canvas",
+                    "classes": [
+                      "shared-quest-ui-visible"
+                    ]
+                  },
+                  "inFrame": true,
+                  "x": 680,
+                  "y": 464,
+                  "frame": {
+                    "x": 128,
+                    "y": 96,
+                    "width": 1024,
+                    "height": 768
+                  },
+                  "cancelled": true
+                },
+                {
+                  "phase": "cold-move",
+                  "type": "contextmenu",
+                  "at": 1794587746081,
+                  "trusted": true,
+                  "cancelable": true,
+                  "button": 2,
+                  "buttons": 0,
+                  "pointerType": "mouse",
+                  "target": {
+                    "tag": "CANVAS",
+                    "id": "mir2-quest-ui-canvas",
+                    "classes": [
+                      "shared-quest-ui-visible"
+                    ]
+                  },
+                  "inFrame": true,
+                  "x": 680,
+                  "y": 464,
+                  "frame": {
+                    "x": 128,
+                    "y": 96,
+                    "width": 1024,
+                    "height": 768
+                  },
+                  "cancelled": true
+                }
+              ],
+              "wire": [
+                {
+                  "type": "walk",
+                  "at": 1794587746023,
+                  "direction": "Right"
+                }
+              ]
+            },
+            {
+              "case": "right-press-in-game-release-in-gutter",
+              "started": 1794587749627,
+              "gutterRelease": 1794587749701,
+              "geometry": {
+                "inside": {
+                  "x": 680,
+                  "y": 464
+                },
+                "gutter": {
+                  "x": 116,
+                  "y": 480
+                },
+                "frame": {
+                  "x": 128,
+                  "y": 96,
+                  "width": 1024,
+                  "height": 768
+                }
+              },
+              "events": [
+                {
+                  "phase": "cold-gutter",
+                  "type": "pointerdown",
+                  "at": 1794587749636,
+                  "trusted": true,
+                  "cancelable": true,
+                  "button": 2,
+                  "buttons": 2,
+                  "pointerType": "mouse",
+                  "target": {
+                    "tag": "CANVAS",
+                    "id": "mir2-quest-ui-canvas",
+                    "classes": [
+                      "shared-quest-ui-visible"
+                    ]
+                  },
+                  "inFrame": true,
+                  "x": 680,
+                  "y": 464,
+                  "frame": {
+                    "x": 128,
+                    "y": 96,
+                    "width": 1024,
+                    "height": 768
+                  },
+                  "cancelled": true
+                },
+                {
+                  "phase": "cold-gutter",
+                  "type": "pointerup",
+                  "at": 1794587749695,
+                  "trusted": true,
+                  "cancelable": true,
+                  "button": 2,
+                  "buttons": 0,
+                  "pointerType": "mouse",
+                  "target": {
+                    "tag": "CANVAS",
+                    "id": "mir2-quest-ui-canvas",
+                    "classes": [
+                      "shared-quest-ui-visible"
+                    ]
+                  },
+                  "inFrame": true,
+                  "x": 116,
+                  "y": 480,
+                  "frame": {
+                    "x": 128,
+                    "y": 96,
+                    "width": 1024,
+                    "height": 768
+                  },
+                  "cancelled": true
+                },
+                {
+                  "phase": "cold-gutter",
+                  "type": "contextmenu",
+                  "at": 1794587749701,
+                  "trusted": true,
+                  "cancelable": true,
+                  "button": 2,
+                  "buttons": 0,
+                  "pointerType": "mouse",
+                  "target": {
+                    "tag": "SECTION",
+                    "id": "",
+                    "classes": [
+                      "mir-stage"
+                    ]
+                  },
+                  "inFrame": false,
+                  "x": 116,
+                  "y": 480,
+                  "frame": {
+                    "x": 128,
+                    "y": 96,
+                    "width": 1024,
+                    "height": 768
+                  },
+                  "cancelled": true
+                }
+              ],
+              "settled": {
+                "x": 288,
+                "y": 617
+              }
+            }
+          ],
+          "returnSteps": [
+            {
+              "from": {
+                "x": 290,
+                "y": 616
+              },
+              "key": "ArrowLeft",
+              "at": 1794587748021,
+              "arrived": {
+                "x": 289,
+                "y": 616
+              },
+              "authority": [
+                {
+                  "at": 1794587748093,
+                  "payload": {
+                    "direction": "Left",
+                    "x": 289,
+                    "y": 616
+                  }
+                }
+              ]
+            },
+            {
+              "from": {
+                "x": 288,
+                "y": 617
+              },
+              "key": "ArrowUp",
+              "at": 1794587751640,
+              "arrived": {
+                "x": 288,
+                "y": 616
+              },
+              "authority": [
+                {
+                  "at": 1794587751703,
+                  "payload": {
+                    "direction": "Up",
+                    "x": 288,
+                    "y": 616
+                  }
+                }
+              ]
+            },
+            {
+              "from": {
+                "x": 288,
+                "y": 616
+              },
+              "key": "ArrowRight",
+              "at": 1794587752441,
+              "arrived": {
+                "x": 289,
+                "y": 616
+              },
+              "authority": [
+                {
+                  "at": 1794587752507,
+                  "payload": {
+                    "direction": "Right",
+                    "x": 289,
+                    "y": 616
+                  }
+                }
+              ]
+            }
+          ],
+          "finalTile": {
+            "x": 289,
+            "y": 616
+          }
+        }
+      },
+      "sourceRotation": {
+        "passed": true,
+        "sourceOrder": [
+          "app",
+          "cdn",
+          "app"
+        ],
+        "rows": [
+          {
+            "path": "/_qa/runtime-body/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+            "source": "app",
+            "attempt": 1,
+            "requestedAt": 1794587685233,
+            "offeredBytes": 0,
+            "bytes": 0,
+            "expectedBytes": 32378001,
+            "intentionalNoHeaders": true,
+            "requestAbortedAt": 1794587693241,
+            "closedAt": 1794587693241,
+            "closedBeforeFinish": true
+          },
+          {
+            "path": "/_qa/runtime-body/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+            "source": "cdn",
+            "attempt": 2,
+            "requestedAt": 1794587693242,
+            "offeredBytes": 32312465,
+            "bytes": 32312465,
+            "expectedBytes": 32378001,
+            "headersAt": 1794587693242,
+            "status": 200,
+            "intentionalPartialBody": true,
+            "withheldTailBytes": 65536,
+            "prefixBytes": 32312465,
+            "prefixSha256": "fd539f153b667aaab504c71956e3e5cad9a0fd8646a3b0812f68841313abc697",
+            "writeCallbackAt": 1794587693261,
+            "requestAbortedAt": 1794587708550,
+            "closedAt": 1794587708550,
+            "closedBeforeFinish": true
+          },
+          {
+            "path": "/_qa/runtime-body/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+            "source": "app",
+            "attempt": 3,
+            "requestedAt": 1794587708553,
+            "offeredBytes": 32378001,
+            "bytes": 32378001,
+            "expectedBytes": 32378001,
+            "headersAt": 1794587708553,
+            "status": 200,
+            "sha256": "5f8b82ab48665cd20e8c45ce0da0f221a6919dfab07aca43fea7fd312f34c185",
+            "finishedAt": 1794587708558,
+            "closedAt": 1794587708558,
+            "closedBeforeFinish": false
+          }
+        ],
+        "appHeaderWaitMs": 8012.5,
+        "bodyIdleObservedMs": 15018,
+        "completedBody": {
+          "path": "/_qa/runtime-body/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+          "source": "app",
+          "requestedAt": 1794587708550,
+          "dataEvents": 16,
+          "decodedBytes": 32378001,
+          "encodedDataBytes": 32378001,
+          "maxDataGapMs": 416,
+          "headersAt": 1794587708569,
+          "status": 200,
+          "protocol": "http/1.1",
+          "serviceWorker": false,
+          "fromDiskCache": false,
+          "cacheControl": "no-store",
+          "firstDataAt": 1794587708585,
+          "lastDataAt": 1794587709099,
+          "finishedAt": 1794587709791,
+          "totalEncodedBytes": 32378219,
+          "completeBodyBytes": 32378001,
+          "bodySha256": "5f8b82ab48665cd20e8c45ce0da0f221a6919dfab07aca43fea7fd312f34c185",
+          "bodyObservedAt": 1794587710409,
+          "expectedBytes": 32378001,
+          "expectedSha256": "5f8b82ab48665cd20e8c45ce0da0f221a6919dfab07aca43fea7fd312f34c185"
+        },
+        "closePropagationDeltasMs": {
+          "appCloseMinusNextGet": -1,
+          "cdnCloseMinusNextGet": -3
+        },
+        "milestones": [
+          {
+            "name": "bevyRuntimeDownload",
+            "detail": {
+              "attempt": 1,
+              "sourceIndex": 0,
+              "retry": false,
+              "state": "started",
+              "phase": "headers",
+              "bytes": 0
+            },
+            "epochMs": 1794587685226,
+            "atMs": 48824
+          },
+          {
+            "name": "bevyRuntimeDownload",
+            "detail": {
+              "attempt": 1,
+              "sourceIndex": 0,
+              "retry": false,
+              "state": "failed",
+              "phase": "headers",
+              "bytes": 0,
+              "reason": "headers-timeout",
+              "retryable": true
+            },
+            "epochMs": 1794587693239,
+            "atMs": 56836.80000001192
+          },
+          {
+            "name": "bevyRuntimeDownload",
+            "detail": {
+              "attempt": 2,
+              "sourceIndex": 1,
+              "retry": false,
+              "state": "started",
+              "phase": "headers",
+              "bytes": 0
+            },
+            "epochMs": 1794587693239,
+            "atMs": 56836.80000001192
+          },
+          {
+            "name": "bevyRuntimeDownload",
+            "detail": {
+              "attempt": 2,
+              "sourceIndex": 1,
+              "retry": false,
+              "state": "failed",
+              "phase": "body",
+              "bytes": 32312465,
+              "status": 200,
+              "reason": "body-idle",
+              "retryable": true
+            },
+            "epochMs": 1794587708548,
+            "atMs": 72145.30000001192
+          },
+          {
+            "name": "bevyRuntimeDownload",
+            "detail": {
+              "attempt": 3,
+              "sourceIndex": 0,
+              "retry": true,
+              "state": "started",
+              "phase": "headers",
+              "bytes": 0
+            },
+            "epochMs": 1794587708548,
+            "atMs": 72145.5
+          },
+          {
+            "name": "bevyRuntimeDownload",
+            "detail": {
+              "attempt": 3,
+              "sourceIndex": 0,
+              "retry": true,
+              "state": "completed",
+              "phase": "compile",
+              "bytes": 32378001,
+              "status": 200
+            },
+            "epochMs": 1794587708698,
+            "atMs": 72295.09999999404
+          },
+          {
+            "name": "bevyRuntimeFontPrewarmStart",
+            "epochMs": 1794587708716,
+            "atMs": 72313.5
+          },
+          {
+            "name": "bevyRuntimeModuleReady",
+            "detail": {
+              "backend": "webgl2",
+              "compiledBackend": "webgl2",
+              "fallbackFrom": null
+            },
+            "epochMs": 1794587708718,
+            "atMs": 72315.5
+          },
+          {
+            "name": "bevyRuntimeReady",
+            "detail": {
+              "reused": false,
+              "backend": "webgl2",
+              "compiledBackend": "webgl2",
+              "fallbackFrom": null,
+              "packageId": "webgl2-shared"
+            },
+            "epochMs": 1794587709071,
+            "atMs": 72668.5
+          },
+          {
+            "name": "bevyRuntimeFontPrewarmComplete",
+            "detail": {
+              "requested": 6,
+              "ok": 6,
+              "failed": 0,
+              "aborted": false,
+              "bytes": 29517096
+            },
+            "epochMs": 1794587721961,
+            "atMs": 85558.59999999404
+          }
+        ]
+      },
+      "workerRestart": {
+        "passed": true,
+        "originalFrame": "/original-ui/Prguse/1.png",
+        "expectedSha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa",
+        "restored": {
+          "status": 200,
+          "bytes": 66374,
+          "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+        },
+        "originNetworkReads": 0,
+        "lifecycle": [
+          {
+            "versionId": "0",
+            "runningStatus": "running",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "stopping",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "stopped",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "running",
+            "status": "activated"
+          }
+        ]
+      },
+      "firstLogout": {
+        "sentAt": 1794587753941,
+        "acknowledgedAt": 1794587757345,
+        "savedPosition": {
+          "x": 289,
+          "y": 616
+        },
+        "returnedToSelect": true,
+        "gutter": {
+          "x": 64,
+          "y": 480
+        }
+      },
+      "browserRestart": {
+        "firstProcessCount": 7,
+        "allFirstProcessesExited": true,
+        "persistedProfileExists": true,
+        "secondProcessCount": 7
+      },
+      "warm": {
+        "passed": true,
+        "authoritativeStart": {
+          "position": {
+            "x": 289,
+            "y": 616
+          },
+          "characterIndex": 2
+        },
+        "nativeReadyWaitMs": 1996,
+        "logout": {
+          "sentAt": 1794587795258,
+          "acknowledgedAt": 1794587798813,
+          "savedPosition": {
+            "x": 288,
+            "y": 616
+          },
+          "returnedToSelect": true,
+          "gutter": {
+            "x": 64,
+            "y": 480
+          }
+        },
+        "originalGraduateFixtureStillVerified": true
+      },
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true,
+      "rawReceiptSha256": "0e016cadd1791a49981157a757dbfc5f74ae4a60640014f5b2dbe587360f4c61"
+    }
+  ],
+  "scope": "Actual installed Edge; isolated File gateway; same pinned WASM real HTTP App no headers8s then CDN pinned prefix withholding64KiB and15s idle then full App body. Two render paths, complete browser exit and same-role save/reentry, all original movement8s/Native120s gates retained. Private transport control is not a public WAN latency benchmark. Original graduate fixture checks are separate from newcomer position save."
+}

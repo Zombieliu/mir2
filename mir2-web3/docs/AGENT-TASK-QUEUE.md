@@ -1,14 +1,17 @@
 # Agent Task Queue
 
-Updated 2026-11-13 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) and [current context](AGENT-CURRENT.md), then the current user task. Preserve unrelated WIP and evidence; historical ports, candidates and checks are snapshots.
+Updated 2026-11-14 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) and [current context](AGENT-CURRENT.md), then the current user task. Preserve unrelated WIP and evidence; historical ports, candidates and checks are snapshots.
 
 ## 当前范围
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-13 已正式发布ab02b84938：八方向格式修复、有效路线单步等待8秒/超时与取消；121+7项、70保护、构建及猫区9步到达、6.926秒恢复/手动中断/退出重登通过。首次公网资源失败已回退并保留；146项完整SHA确认后，同源重试的官方手机尺寸Testnet签名、进城/首步126ms、共用HUD/NativeQ、六字体、113/113、Worker停启与退出均通过。点击至首帧7.161秒，Native就绪观测239.322秒，原冷120秒仍false；优先改善冷传输，蓝线手势/死亡弹窗英文/完整1:1继续开放，Goal active。[当前证据](evidence/r16-route-direction-20261113/README.md) · [正式回执](evidence/r16-route-direction-20261113/production/README.md)
+2026-11-14 已保留正式 f6603c89a3：运行包部分正文失败后的有限来源轮换，95＋70项及两后端四会话通过。首次公网失败／回退保留，完整读回后同源新浏览器扫码签名、进城首步127ms、共享HUD/Q、六字体、113/113、Worker停启与退出通过。首帧30.667秒、Native观测204.320秒，冷120秒false；接着补行走包恢复并继续冷加载，整体1:1／实体手机开放，Goal active。[发布与分项证据](evidence/r16-runtime-source-rotation-20261114/production/README.md) · [已保留的寻路修复](evidence/r16-route-direction-20261113/README.md)
 
 ## 保留的当前未结项
+
+- [ ] 行走包两次正文8秒idle后缺恢复。当前CDN404；下一项给相同764724B／SHA41fc…接入既有一次20秒 pinned compiled fallback，完整240帧／终止失败／超时及晚到不发布另验，不加JSON请求或放宽期限。[实际失败](evidence/r16-runtime-source-rotation-20261114/production/first-attempt.json)
+- [ ] Web死亡弹窗四个 ui.death.* 未登记；补齐十语言并独立验收文案，不将其冒充共享弹窗外观1:1。
 
 - [x] Worker重启缓存修复已发布f6acaad6b0；公网停启后同一HUD图与配置通过。受控两后端全流程另记，公网联合检查仍false。[发布/失败范围](evidence/r16-worker-restart-20261113/production/README.md)
 - [x] 当前源临时失败＋旧源404不再变成资产负缓存；101项、构建、Chrome六字体与两后端完整重开通过。[候选](evidence/r16-font-missing-retry-20261113/README.md)

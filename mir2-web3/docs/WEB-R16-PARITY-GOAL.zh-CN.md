@@ -1,6 +1,6 @@
 # Windows R16 与 Web 1:1 验收
 
-2026-11-13 已正式发布ab02b84938：八方向格式修复、有效路线单步等待8秒/超时与取消；121+7项、70保护、构建及猫区9步到达、6.926秒恢复/手动中断/退出重登通过。首次公网资源失败已回退并保留；146项完整SHA确认后，同源重试的官方手机尺寸Testnet签名、进城/首步126ms、共用HUD/NativeQ、六字体、113/113、Worker停启与退出均通过。点击至首帧7.161秒，Native就绪观测239.322秒，原冷120秒仍false；优先改善冷传输，蓝线手势/死亡弹窗英文/完整1:1继续开放，Goal active。[当前证据](evidence/r16-route-direction-20261113/README.md) · [正式回执](evidence/r16-route-direction-20261113/production/README.md)
+2026-11-14 当前正式来源 f6603c89a3，继承 Windows R16 寻路修复并新增部分正文失败后的有限来源轮换。95项、70保护、构建、两后端四会话及第二次公网功能回放／完整静态读回通过；首次行走包失败和回退单列。原120秒冷资格仍false：第二轮首帧30.667秒、Native观测204.320秒，不能由本地37秒或功能通过替代。保留版本继续改进，不上调整体Candidate；行走包恢复、死亡弹窗十语、蓝线手势和其余1:1／实体手机继续开放，Goal active。[最新证据](evidence/r16-runtime-source-rotation-20261114/production/README.md) · [寻路方向与确认](evidence/r16-route-direction-20261113/README.md)
 
 2026-11-13 d99212e3cd优先现有第一方完整字体，显式六字体预热移到最终运行包成功之后；231项、构建和四会话及正式扫码签名/进城/移动/共用HUD/Q/六字体/113/Worker停启/退出通过。公网Native185.240秒超原120秒，冷资格false，持续Goal未完成。先跟进Edge右键手势和图片菜单的真实事件复现，完整三职业/旧档/像素/实体手机仍开放。[正式结果](evidence/r16-firstparty-font-delivery-20261113/production/README.md) · [玩家反馈](evidence/r16-edge-right-button-report-20261113/README.md)
 
