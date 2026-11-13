@@ -16,165 +16,45 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: 'e7cbab02f030ae50b28031ca0237d630eccb7c03',
+  source: 'ff957548919e9d306c11af57dad224f2178c2d0f',
   sourceRef: BRANCH,
-  baseSource: '54706a86499bbe5b0d73ef9318d679697f39d33d',
+  baseSource: '8e82f53fcd749e8c2f6a69cb9b911c3165de006a',
   assetSource: 'f2de762309768b51b39438c2437c14e819df9bf7',
   changedFiles: [
     {
       "status": "modified",
-      "filename": ".github/workflows/bevy-runtime-r2-release.yml",
-      "sha": "471360c44b4dd79eb861ba635530ec530a3c9711"
+      "filename": "mir2-web3/apps/web/app/original-client-shell.tsx",
+      "sha": "83bcfc0b9cbcd3f99d2bcd7b0b372d6a8acf6693"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/lib/generated/r16-entry-player-meta.json",
+      "sha": "3459e2d7be8904d7f53edb17da2e429de817265b"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/game-client/runtime/src/hud_ui_host.rs",
-      "sha": "ae93d84bb4ebfaa55219978aa27650e404ce2ec2"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/game-client/runtime/src/portable_ui_asset_recovery.rs",
-      "sha": "fa6166b3d21f3cdb832d20c5f563df01ec7a07ad"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/game-client/runtime/src/portable_ui_asset_recovery_io_tests.rs",
-      "sha": "e6209e8b0ff9c3a1ba9d1a45ce1071b3fdd4a8fb"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/game-client/runtime/src/portable_ui_asset_recovery_tests.rs",
-      "sha": "3afefc4d0d990e41a26420057e86b4e92dce94e6"
+      "filename": "mir2-web3/apps/web/lib/r16-entry-scene.ts",
+      "sha": "294c22fe90fb5e5a8e30d0ec7f3e6099f73c4beb"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/game-client/runtime/src/portable_ui_fonts.rs",
-      "sha": "5e046353a3cbbeef2cb40f48fdeb3afe9b943aca"
+      "filename": "mir2-web3/apps/web/package.json",
+      "sha": "01752c37bc57db080ffb65a607430899154b3c7e"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/game-client/runtime/src/portable_ui_fonts_tests.rs",
-      "sha": "db2d6515923158c3001f47ccd70503b640f44752"
+      "filename": "mir2-web3/apps/web/scripts/generate-r16-entry-visuals.mjs",
+      "sha": "c25be54c5f45790bdea3dc0f3707a299e0d2f848"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/apps/game-client/runtime/src/quest_ui_asset_recovery_tests.rs",
-      "sha": "661956358a190b04827f1bda60eb78a005739943"
+      "filename": "mir2-web3/apps/web/scripts/test-r16-entry-player-readiness.mjs",
+      "sha": "147cccb6c37163d927a727d74bb94f4f89589057"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/game-client/runtime/src/quest_ui_host.rs",
-      "sha": "f7c32602f4f6873f4d4f962799419e29b74cff07"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/lib/generated/bevy_runtime_version_numeron_r16.json",
-      "sha": "92442307c0c4c103991bf97eb561265ae5e8d5ab"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/lib/production-asset-config.mjs",
-      "sha": "0bf3005de53c5af29e20ebb668fe0e248c583f84"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-r2-upload.mjs",
-      "sha": "f771e631f05d06ccf41da7e3d2db40207cf47e9e"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-production-asset-config.mjs",
-      "sha": "d75423eadb3ff803c657890971b62ced9eb340ca"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/config/numeron-r16-web-assets.json",
-      "sha": "42dad9ccca851a7bf40490abbf8e53739ab9c062"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/docs/AGENT-CURRENT.md",
-      "sha": "8ca95cf8150f768d97de1b55413a00c84afb132b"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
-      "sha": "cf896d65578017f2bbc7104df08b2ba233f73aae"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
-      "sha": "466589fdff03d9e14ba204dcf8668aba87278dd9"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md",
-      "sha": "47b74a3b95dfd2cf1421362d87844dd8f627fa5a"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/README.md",
-      "sha": "2b5704e73b2a0ea26c6c295300562b8b29909827"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/browser-cases.json",
-      "sha": "1c1232785eea82c5d220cd9915fb02b3c276e548"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/build-receipt.json",
-      "sha": "ebaedb20ff0e61bd3f8d190fb564335b0b52bf0e"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/default-font-recovered.png",
-      "sha": "54218e4047919a81746c80bb7e6b8a0da06581fe"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/preservation.json",
-      "sha": "cd8620473d8b00b790afe543cd6ffaa91fee7616"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/production-before.json",
-      "sha": "c2001cdb68c86ebe4412e413e289731823cad963"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/receipt.json",
-      "sha": "f4db12e374559653a4bd5ac131bcf350537555c7"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/retained-failures.json",
-      "sha": "85cb28e60c0bf472a355f5e02de6a4f6c53e2468"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/runtime-artifact.json",
-      "sha": "ab7d400925ec920375e8803962be5a2584e40d22"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/rust-source-closure.json",
-      "sha": "8d1d24fa383f99625eb881667c405b4f2b70b656"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/tests.txt",
-      "sha": "70becec917a7d4f5bffac4da11ef60b0b79bedcb"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/ui-asset-fault.mjs",
-      "sha": "0275073569bc5005daadd8e74f368f2f064ca6ca"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/webgl2-skins-recovered.png",
-      "sha": "4c8cba6d3acb5e8b9e613703319e91a58da3170a"
+      "filename": "mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs",
+      "sha": "fbbdb76b9dc19524be57483840cbd43096a563ae"
     }
   ],
   entryScene: {
@@ -233,7 +113,7 @@ export const QR_RELEASE = Object.freeze({
     bytes: 3283113,
   },
   assetRunId: '42494701555',
-  baseline: 'dpl_YKNdqLqcPpNRCXDch444krb7Y1Vs',
+  baseline: 'dpl_4jjpevpspsVtf61hUCgTHiKxRatZ',
   relay: 'https://relay.dubhe.obelisk.build',
 });
 const QR_OPERATIONS = ['numeron-qr-stage', 'numeron-qr-promote', 'numeron-qr-rollback'];
