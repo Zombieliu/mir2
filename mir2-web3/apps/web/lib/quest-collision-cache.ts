@@ -18,9 +18,10 @@ type Chunk = {
   blockedCells: Array<{ x: number; y: number }>;
 };
 type Bounds = Chunk["bounds"];
-type Fetcher = (url: string) => Promise<Pick<Response, "ok" | "json">>;
+type Fetcher = (url: string, init?: Pick<RequestInit, "signal">) => Promise<Pick<Response, "ok" | "json">>;
 const SPAN = 256;
 const MAX_CELLS = 16_777_216;
+const CHUNK_TIMEOUT_MS = 15_000;
 const object = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 const size = (value: unknown): value is number =>
@@ -63,7 +64,7 @@ function readChunk(value: unknown, file: string, requested: Bounds, expected?: C
 export class QuestCollisionCache {
   private complete = new Map<string, QuestCollisionGeometry>();
   private pending = new Map<string, Promise<QuestCollisionGeometry>>();
-  constructor(private readonly fetcher: Fetcher = async url => fetch(url, { cache: "no-cache" })) {}
+  constructor(private readonly fetcher: Fetcher = async (url, init) => fetch(url, { cache: "no-cache", ...init })) {}
 
   /** Cached geometry cannot carry or resume a player action. The Page owns that lifetime. */
   load(mapFileName: string): Promise<QuestCollisionGeometry> {
@@ -84,9 +85,18 @@ export class QuestCollisionCache {
   private async chunk(file: string, bounds: Bounds, expected?: Chunk): Promise<Chunk> {
     const query = new URLSearchParams({ map: file, quest: "1", ...Object.fromEntries(
       Object.entries(bounds).map(([key, value]) => [key, String(value)])) });
-    const response = await this.fetcher(`/api/scene/collision?${query}`);
-    if (!response.ok) throw new Error("Quest map collision is unavailable.");
-    return readChunk(await response.json(), file, bounds, expected);
+    const controller = new AbortController();
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timeout = new Promise<never>((_, reject) => {
+      timer = setTimeout(() => { controller.abort(); reject(new Error("Quest map collision loading timed out.")); }, CHUNK_TIMEOUT_MS);
+    });
+    try {
+      return await Promise.race([timeout, (async () => {
+        const response = await this.fetcher(`/api/scene/collision?${query}`, { signal: controller.signal });
+        if (!response.ok) throw new Error("Quest map collision is unavailable.");
+        return readChunk(await response.json(), file, bounds, expected);
+      })()]);
+    } finally { if (timer !== undefined) clearTimeout(timer); }
   }
 
   private async collect(file: string): Promise<QuestCollisionGeometry> {
@@ -99,13 +109,24 @@ export class QuestCollisionCache {
       }
     };
     apply(first);
-    // Each region is requested exactly once. Unknown regions are never filled as walkable.
+    // Keep full-map validation while avoiding one network round trip per region in series.
+    // Four readers bound request pressure; geometry is published only after all regions pass.
+    const regions: Bounds[] = [];
     for (let minX = 0; minX < first.mapWidth; minX += SPAN) {
       for (let minY = 0; minY < first.mapHeight; minY += SPAN) {
         if (minX === 0 && minY === 0) continue;
-        apply(await this.chunk(file, { minX, minY, maxX: minX + SPAN - 1, maxY: minY + SPAN - 1 }, first));
+        regions.push({ minX, minY, maxX: minX + SPAN - 1, maxY: minY + SPAN - 1 });
       }
     }
+    let nextRegion = 0, failed = false;
+    let failure: unknown;
+    await Promise.all(Array.from({ length: Math.min(4, regions.length) }, async () => {
+      while (!failed && nextRegion < regions.length) {
+        try { apply(await this.chunk(file, regions[nextRegion++], first)); }
+        catch (error) { failed = true; failure = error; }
+      }
+    }));
+    if (failed) throw failure;
     return { mapFileName: file, width: first.mapWidth, height: first.mapHeight,
       fingerprint: first.geometryFingerprint, blockedBits: bits };
   }

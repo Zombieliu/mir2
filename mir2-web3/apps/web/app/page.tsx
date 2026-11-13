@@ -2450,7 +2450,8 @@ export default function HomePage() {
   const questCollisionCacheRef = useRef<QuestCollisionCache | null>(null);
   if (!questCollisionCacheRef.current) questCollisionCacheRef.current = new QuestCollisionCache();
   const questRouteRunRef = useRef<{ lifetime: QuestWorldLifetime; action: QuestRouteAction; acceptedAt: number;
-    geometry: QuestCollisionGeometry | null; plan: QuestRoutePlan | null; queued: QueuedMoveIntent | null } | null>(null);
+    geometry: QuestCollisionGeometry | null; plan: QuestRoutePlan | null; queued: QueuedMoveIntent | null;
+    loadingTimer: number | null } | null>(null);
   const mapImageSourceRef = useRef<{ source: MapImageRouteSource; identity: QuestWorldIdentity;
     socket: WebSocket; core: ClientCoreRuntime; renderer: RuntimeModule | null; rendererGeneration: number } | null>(null);
   const mapImageRouteRef = useRef<{ source: MapImageRouteSource; goal: QuestRoutePoint; acceptedAt: number;
@@ -12944,9 +12945,28 @@ export default function HomePage() {
   function cancelQuestRoute() {
     const route = questRouteRunRef.current;
     questRouteRunRef.current = null;
+    if (route?.loadingTimer != null) { window.clearTimeout(route.loadingTimer); route.loadingTimer = null; }
     if (route?.queued && queuedMoveIntentRef.current === route.queued) {
       queuedMoveIntentRef.current = null;
       movementPlanRef.current = null;
+    }
+  }
+
+  function finishQuestRoute(route: NonNullable<typeof questRouteRunRef.current>, status: "arrived" | "unavailable" | "loadingTimeout") {
+    if (questRouteRunRef.current !== route) return;
+    cancelQuestRoute();
+    if (status === "unavailable") {
+      appendLog(t("ui.questRouteUnavailable", [], "No complete route is currently available. Choose another destination or try again."), "system");
+    } else if (status === "loadingTimeout") {
+      appendLog(t("ui.questRouteLoadingTimeout", [], "The route map took too long to load. Please try again."), "system");
+    } else {
+      const target = route.action.routeTarget.type;
+      const [key, fallback] = target === "huntRegion"
+        ? ["ui.questRouteHuntArrived", "You are in the hunting area around ({0}, {1}). Select a quest monster to fight."]
+        : target === "taskNpc" || target === "mapNpc" || target === "supply"
+          ? ["ui.questRouteNpcArrived", "You have arrived near ({0}, {1}). Talk to the NPC to continue."]
+          : ["ui.questRouteArrived", "You have arrived at ({0}, {1})."];
+      appendLog(t(key, [route.action.x, route.action.y], fallback), "system");
     }
   }
 
@@ -12997,6 +13017,7 @@ export default function HomePage() {
 
   function questRouteMovement(route: NonNullable<typeof questRouteRunRef.current>, self: WorldEntity,
     mode: "walk" | "run", now: number) {
+    if (questRouteRunRef.current !== route) return null;
     if (!route.geometry || !route.plan || !sameQuestWorldLifetime(route.lifetime, currentQuestWorldLifetime())
       || questWorldBlockedRef.current || !document.hasFocus()) { cancelQuestRoute(); return null; }
     const geometry = route.geometry, occupied = questRouteOccupancy(), edges = questRouteRejectedEdges(now);
@@ -13013,15 +13034,15 @@ export default function HomePage() {
       // Reuse the original region and radius, never the previously chosen endpoint alone.
       route.plan = planBevyQuestRoute(route.lifetime.runtime as RuntimeModule, route.action, geometry,
         { x: self.x, y: self.y }, occupied, edges);
-      if (!route.plan) { cancelQuestRoute(); return null; }
+      if (!route.plan) { finishQuestRoute(route, "unavailable"); return null; }
       step = nextQuestRouteStep(route.plan, self, runDistance, blocked);
     }
-    if (step.type !== "move") { cancelQuestRoute(); return null; }
+    if (step.type !== "move") { finishQuestRoute(route, step.type === "arrived" ? "arrived" : "unavailable"); return null; }
     if (movementStepBlockedByRecentCorrection(self, step.direction, step.mode,
       recentMovementBlockedSteps(movementBlockedStepsRef.current, now))) {
       // A rejected multi-tile run still permits a validated one-tile walk.
       const walk = nextQuestRouteStep(route.plan, self, 1, blocked);
-      if (walk.type !== "move") { cancelQuestRoute(); return null; }
+      if (walk.type !== "move") { finishQuestRoute(route, walk.type === "arrived" ? "arrived" : "unavailable"); return null; }
       return { point: walk.point, direction: walk.direction, mode: walk.mode };
     }
     return { point: step.point, direction: step.direction, mode: step.mode };
@@ -13033,29 +13054,38 @@ export default function HomePage() {
     retireQuestWorldActions(); cancelLockedMonsterAttack(); stopOnchainMining();
     queuedMoveIntentRef.current = null; movementPlanRef.current = null;
     const route = { lifetime, action, acceptedAt: Date.now(), geometry: null as QuestCollisionGeometry | null,
-      plan: null as QuestRoutePlan | null, queued: null as QueuedMoveIntent | null };
+      plan: null as QuestRoutePlan | null, queued: null as QueuedMoveIntent | null, loadingTimer: null as number | null };
     questRouteRunRef.current = route;
     if (!navigateSharedHud({ type: "closeQuest" })) setShowQuestLog(false);
+    appendLog(t("ui.questRoutePlanning", [action.x, action.y], "Planning a route to ({0}, {1})…"), "system");
+    route.loadingTimer = window.setTimeout(() => {
+      if (questRouteRunRef.current !== route) return;
+      if (!sameQuestWorldLifetime(lifetime, currentQuestWorldLifetime()) || questWorldBlockedRef.current) { cancelQuestRoute(); return; }
+      finishQuestRoute(route, "loadingTimeout");
+    }, 30_000);
     void questCollisionCacheRef.current!.load(action.mapFileName).then(geometry => {
       // Loading collision cannot resurrect an action that was replaced while awaiting I/O.
       if (questRouteRunRef.current !== route || !sameQuestWorldLifetime(lifetime, currentQuestWorldLifetime())
-        || Date.now() - route.acceptedAt > 30_000 || questWorldBlockedRef.current) {
+        || questWorldBlockedRef.current) {
         if (questRouteRunRef.current === route) cancelQuestRoute(); return;
       }
+      if (Date.now() - route.acceptedAt >= 30_000) { finishQuestRoute(route, "loadingTimeout"); return; }
+      if (route.loadingTimer !== null) { window.clearTimeout(route.loadingTimer); route.loadingTimer = null; }
       const self = currentAuthoritativeSelf();
       if (!self) { cancelQuestRoute(); return; }
       route.geometry = geometry;
       route.plan = planBevyQuestRoute(lifetime.runtime as RuntimeModule, action, geometry,
         { x: self.x, y: self.y }, questRouteOccupancy(), questRouteRejectedEdges(Date.now()));
-      if (!route.plan) { cancelQuestRoute(); appendLog(t("ui.questRouteUnavailable", [], "No complete route is available."), "system"); return; }
-      if (route.plan.steps.length === 0) { cancelQuestRoute(); return; }
+      if (!route.plan) { finishQuestRoute(route, "unavailable"); return; }
+      if (route.plan.steps.length === 0) { finishQuestRoute(route, "arrived"); return; }
       route.queued = { kind: "target", targetX: route.plan.destination.x, targetY: route.plan.destination.y,
         requestedMode: "run", requestedAt: Date.now(), consumeAfterSend: false };
       crystalRunPrimedUntilRef.current = Math.max(crystalRunPrimedUntilRef.current, Date.now() + CRYSTAL_RUN_PRIME_MS);
       queueCrystalMoveIntent(route.queued);
     }).catch(() => {
       if (questRouteRunRef.current !== route) return;
-      cancelQuestRoute(); appendLog(t("ui.questRouteUnavailable", [], "No complete route is available."), "system");
+      if (!sameQuestWorldLifetime(lifetime, currentQuestWorldLifetime()) || questWorldBlockedRef.current) { cancelQuestRoute(); return; }
+      finishQuestRoute(route, "unavailable");
     });
     return true;
   }

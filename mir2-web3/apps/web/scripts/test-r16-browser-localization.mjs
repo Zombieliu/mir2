@@ -21,7 +21,10 @@ const expectedKeys = [
   "browser.settings", "browser.settingsDetail", "browser.accountSecurity", "browser.accountInfo", "browser.signIn", "browser.diagnostics",
   "ui.walletQrAlt", "ui.walletQrFailed", "ui.walletQrRetryHint", "ui.walletApproveOnDevice", "ui.walletMissing",
   "ui.questClientLoading", "ui.questClientUnavailable", "ui.questActionPending", "ui.questActionRewardRequired",
-  "ui.questActionTalkToNpc", "ui.questActionStateChanged", "ui.retry", "ui.sceneLoadUnavailable", "ui.fishingReel", "ui.characterCreateUnconfirmed",
+  "ui.questActionTalkToNpc", "ui.questActionStateChanged",
+  "ui.questRoutePlanning", "ui.questRouteHuntArrived", "ui.questRouteNpcArrived", "ui.questRouteArrived",
+  "ui.questRouteUnavailable", "ui.questRouteLoadingTimeout",
+  "ui.retry", "ui.sceneLoadUnavailable", "ui.fishingReel", "ui.characterCreateUnconfirmed",
   "ui.gameTextLoading", "ui.gameTextLoadUnavailable", "ui.confirmReturnToCharacterSelect",
 ];
 
@@ -87,4 +90,34 @@ test("quest feedback covers every language without exposing implementation terms
   assert.equal(browserText("zh-CN", "ui.questActionPending"), "请求处理中，请稍候。");
   assert.equal(browserText("zh-TW", "ui.retry"), "重試");
   assert.equal(browserText("en", "ui.questActionTalkToNpc"), "Talk to the quest giver first.");
+});
+
+const routeCoordinateKeys = ["ui.questRoutePlanning", "ui.questRouteHuntArrived", "ui.questRouteNpcArrived", "ui.questRouteArrived"];
+const routeFeedbackKeys = [...routeCoordinateKeys, "ui.questRouteUnavailable", "ui.questRouteLoadingTimeout"];
+
+for (const language of expectedLanguages) test(`${language} route feedback preserves exact coordinate placeholders and local wording`, () => {
+  for (const key of routeFeedbackKeys) {
+    const value = browserText(language, key);
+    assert.ok(value?.trim(), `${language}/${key}`);
+    assert.deepEqual([...value.matchAll(/\{[^{}]*\}/gu)].map(match => match[0]),
+      routeCoordinateKeys.includes(key) ? ["{0}", "{1}"] : [], `${language}/${key} coordinate contract`);
+    const rendered = value.replace(/\{(\d+)\}/gu, (_, index) => [340, 550][Number(index)]);
+    assert.doesNotMatch(rendered, /[{}]/u);
+    if (routeCoordinateKeys.includes(key)) assert.ok(rendered.includes("(340, 550)"), `${language}/${key} must preserve x/y order`);
+    if (language !== "en") assert.notEqual(value, browserText("en", key), `${language}/${key} must not fall back to English`);
+    assert.doesNotMatch(value, /wasm|websocket|\b(?:ABI|ECS|dispatch|modelRevision|ownerRevision)\b/iu);
+  }
+});
+
+test("route arrival describes a hunting area or NPC approach and leaves the next action to the player", () => {
+  assert.equal(browserText("en", "ui.questRoutePlanning"), "Planning a route to ({0}, {1})…");
+  assert.equal(browserText("en", "ui.questRouteHuntArrived"), "You are in the hunting area around ({0}, {1}). Select a quest monster to fight.");
+  assert.equal(browserText("en", "ui.questRouteNpcArrived"), "You have arrived near ({0}, {1}). Talk to the NPC to continue.");
+  assert.equal(browserText("en", "ui.questRouteArrived"), "You have arrived at ({0}, {1}).");
+  assert.equal(browserText("en", "ui.questRouteUnavailable"), "No complete route is currently available. Choose another destination or try again.");
+  assert.equal(browserText("en", "ui.questRouteLoadingTimeout"), "The route map took too long to load. Please try again.");
+  assert.match(browserText("zh-CN", "ui.questRouteHuntArrived"), /附近的狩猎区域。请选择任务目标怪物进行战斗。$/u);
+  assert.match(browserText("zh-TW", "ui.questRouteHuntArrived"), /附近的狩獵區域。請選擇任務目標怪物進行戰鬥。$/u);
+  assert.match(browserText("zh-CN", "ui.questRouteNpcArrived"), /附近。请与 NPC 交谈以继续。$/u);
+  assert.match(browserText("zh-TW", "ui.questRouteNpcArrived"), /附近。請與 NPC 交談以繼續。$/u);
 });

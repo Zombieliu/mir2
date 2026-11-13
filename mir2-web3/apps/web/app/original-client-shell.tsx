@@ -2,6 +2,7 @@
 import { crystalEntityDepth, crystalEntityLayerDepth } from "../lib/crystal-world-depth";
 import { pickCrystalActor, sampleCrystalBodyPixel, warmCrystalBodyPixels, type CrystalBodyFrame } from "../lib/crystal-actor-hit";
 import { useWindowKeydown } from "../lib/use-window-keydown";
+import { installGameBrowserDefaults } from "../lib/game-browser-defaults";
 import { guildKeyboardOwnsEvent } from "../lib/r16-guild-keyboard";
 import {
   preloadR16EntryFloor, preloadR16EntryMonsterFrames, loadR16EntryNpcsWithRecovery, preloadR16EntryObjects, loadR16EntryPlayerWithRecovery,
@@ -1468,35 +1469,8 @@ export function OriginalClientShell({
   }, [screen]);
 
   useEffect(() => {
-    if (screen !== "game") {
-      return;
-    }
-
-    function suppressBrowserContextMenu(event: globalThis.MouseEvent) {
-      const target = event.target;
-      if (target instanceof Element && target.closest(".client-stage-frame")) {
-        event.preventDefault();
-      }
-    }
-
-    function suppressRightMouseDefault(event: globalThis.MouseEvent) {
-      if (event.button !== 2) {
-        return;
-      }
-
-      const target = event.target;
-      if (target instanceof Element && target.closest(".client-stage-frame")) {
-        event.preventDefault();
-      }
-    }
-
-    window.addEventListener("contextmenu", suppressBrowserContextMenu, true);
-    window.addEventListener("mousedown", suppressRightMouseDefault, true);
-
-    return () => {
-      window.removeEventListener("contextmenu", suppressBrowserContextMenu, true);
-      window.removeEventListener("mousedown", suppressRightMouseDefault, true);
-    };
+    if (screen !== "game") return;
+    return installGameBrowserDefaults(window);
   }, [screen]);
 
     function handleShortcutKey(event: KeyboardEvent) {
