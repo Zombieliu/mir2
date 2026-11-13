@@ -16,35 +16,30 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: '9f8a2407bc9f97dff5851677ed04890e1a2be387',
+  source: 'ab02b84938eeb61ac844c6e0c894d04abf1c8bb0',
   sourceRef: BRANCH,
-  baseSource: '5a356ae0d5b79b846675f623bd5d2dc21c09a10f',
+  baseSource: '9ad10fb628eb24c23e2a2b17170b3fa8b633618a',
   assetSource: 'f2de762309768b51b39438c2437c14e819df9bf7',
   changedFiles: [
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/app/page.tsx",
-      "sha": "05403ac1447d9d71011739abcdfb374b9c423c9c"
+      "filename": "mir2-web3/apps/web/lib/quest-route-execution.ts",
+      "sha": "e3aefd34aa18dbcec63cdd211752a6525ab13f57"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/lib/r16-browser-localization.ts",
-      "sha": "ac1662a3c2bea2bfd5a875a3b412f69f1b3a1574"
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-quest-ui.mjs",
+      "sha": "9c30b92a76a03dc1f92e0e2a25e2f68ed78a2a48"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/package.json",
-      "sha": "69f72d22ff3126c3584177eb69630054e8458da9"
+      "filename": "mir2-web3/apps/web/scripts/test-r16-quest-navigation.mjs",
+      "sha": "0c6917966f1f69a0ca1a5d5fce52b262b61183fe"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-r16-browser-localization.mjs",
-      "sha": "97f07330921947299907bd3d30aa39ce1edb9fca"
-    },
-    {
-      "status": "added",
       "filename": "mir2-web3/apps/web/scripts/test-route-authority-wait.mjs",
-      "sha": "84a3ef4ca1d6a8f685586bfb96b9ed2889dc4c70"
+      "sha": "b8bd73c53d195cb6728947eedc94369a1d384614"
     }
   ],
   entryScene: {
