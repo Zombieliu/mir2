@@ -1,0 +1,175 @@
+{
+  "baselineSource": "82efff2c8c0eef72a950501d84acad3c6c3de958",
+  "integrationParent": "38a911769a5ec2d012c538dcb95f454ef1ca37c9",
+  "integrationCommit": "7403bc5ee5cbb472477db101b8be603136049dcf",
+  "candidateSource": "7403bc5ee5cbb472477db101b8be603136049dcf",
+  "reviewedSourcePaths": [
+    ".github/workflows/bevy-runtime-r2-release.yml",
+    "mir2-web3/apps/gateway/src/bin/seed_comparable_accounts.rs",
+    "mir2-web3/apps/gateway/src/routing.rs",
+    "mir2-web3/apps/gateway/src/routing/tests/accepted_attack_transform_tests.rs",
+    "mir2-web3/apps/gateway/src/routing/tests/spectator_scene_projection_tests.rs",
+    "mir2-web3/apps/gateway/src/routing/tests/zone_player_attack_mode_tests.rs",
+    "mir2-web3/apps/gateway/src/session.rs",
+    "mir2-web3/apps/gateway/src/spectator.rs",
+    "mir2-web3/apps/gateway/src/spectator_capacity_profile_tests.rs",
+    "mir2-web3/apps/gateway/src/spectator_merge_owned_tests.rs",
+    "mir2-web3/apps/gateway/src/web.rs",
+    "mir2-web3/apps/simulation/src/runtime/packets.rs",
+    "mir2-web3/apps/simulation/src/runtime/session.rs",
+    "mir2-web3/apps/simulation/src/runtime/spectator_scene_snapshot_tests.rs",
+    "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+    "mir2-web3/apps/simulation/src/world_runtime.rs",
+    "mir2-web3/scripts/capacity/cloud-reference/cloud_monitor_v3.README.md",
+    "mir2-web3/scripts/capacity/cloud-reference/cloud_monitor_v3.py",
+    "mir2-web3/scripts/capacity/cloud-reference/cloud_test_release_scene_v6.py",
+    "mir2-web3/scripts/capacity/cloud-reference/cloud_test_release_scene_v7.py",
+    "mir2-web3/scripts/capacity/cloud-reference/cloud_test_release_v5.README.md",
+    "mir2-web3/scripts/capacity/cloud-reference/cloud_test_release_v5.py",
+    "mir2-web3/scripts/capacity/cloud-reference/public_signed_load.mjs",
+    "mir2-web3/scripts/capacity/cloud-reference/public_signed_load.test.mjs",
+    "mir2-web3/scripts/capacity/cloud-reference/test_cloud_monitor_v3.py",
+    "mir2-web3/scripts/capacity/cloud-reference/test_cloud_test_release_scene_v6.py",
+    "mir2-web3/scripts/capacity/cloud-reference/test_cloud_test_release_scene_v7.py",
+    "mir2-web3/scripts/capacity/cloud-reference/test_cloud_test_release_v5.py",
+    "mir2-web3/scripts/capacity/comparable-reference/README.md",
+    "mir2-web3/scripts/capacity/comparable-reference/adapter_source_binding.py",
+    "mir2-web3/scripts/capacity/comparable-reference/cloud/README.md",
+    "mir2-web3/scripts/capacity/comparable-reference/cloud/read_inventory.py",
+    "mir2-web3/scripts/capacity/comparable-reference/cloud/read_live_maps_scene.py",
+    "mir2-web3/scripts/capacity/comparable-reference/cloud/scene_candidate_v6.py",
+    "mir2-web3/scripts/capacity/comparable-reference/cloud/test_read_live_maps_scene.py",
+    "mir2-web3/scripts/capacity/comparable-reference/cloud/test_scene_candidate_v6.py",
+    "mir2-web3/scripts/capacity/comparable-reference/cloud/verify_scene_candidate_artifact.py",
+    "mir2-web3/scripts/capacity/comparable-reference/combat-contract.v1.json",
+    "mir2-web3/scripts/capacity/comparable-reference/combat_workload.py",
+    "mir2-web3/scripts/capacity/comparable-reference/crystal/ApplicationTraffic.cs",
+    "mir2-web3/scripts/capacity/comparable-reference/crystal/CombatPolicy.cs",
+    "mir2-web3/scripts/capacity/comparable-reference/crystal/ComparableCrystal.csproj",
+    "mir2-web3/scripts/capacity/comparable-reference/crystal/Infrastructure.cs",
+    "mir2-web3/scripts/capacity/comparable-reference/crystal/ItemState.cs",
+    "mir2-web3/scripts/capacity/comparable-reference/crystal/MELEE-PREP.md",
+    "mir2-web3/scripts/capacity/comparable-reference/crystal/NativeActor.cs",
+    "mir2-web3/scripts/capacity/comparable-reference/crystal/NativeCombat.cs",
+    "mir2-web3/scripts/capacity/comparable-reference/crystal/NativeCombatTests.cs",
+    "mir2-web3/scripts/capacity/comparable-reference/crystal/NuGet.Config",
+    "mir2-web3/scripts/capacity/comparable-reference/crystal/OfflineTests.cs",
+    "mir2-web3/scripts/capacity/comparable-reference/crystal/PendingCombatAction.cs",
+    "mir2-web3/scripts/capacity/comparable-reference/crystal/Plan.cs",
+    "mir2-web3/scripts/capacity/comparable-reference/crystal/Program.cs",
+    "mir2-web3/scripts/capacity/comparable-reference/crystal/ReactivePotions.cs",
+    "mir2-web3/scripts/capacity/comparable-reference/crystal/Runner.cs",
+    "mir2-web3/scripts/capacity/comparable-reference/crystal/WorldTools.cs",
+    "mir2-web3/scripts/capacity/comparable-reference/crystal/build.py",
+    "mir2-web3/scripts/capacity/comparable-reference/modern/MELEE.md",
+    "mir2-web3/scripts/capacity/comparable-reference/modern/README.md",
+    "mir2-web3/scripts/capacity/comparable-reference/modern/combat.mjs",
+    "mir2-web3/scripts/capacity/comparable-reference/modern/combat.test.mjs",
+    "mir2-web3/scripts/capacity/comparable-reference/modern/contract.mjs",
+    "mir2-web3/scripts/capacity/comparable-reference/modern/driver.mjs",
+    "mir2-web3/scripts/capacity/comparable-reference/modern/driver.test.mjs",
+    "mir2-web3/scripts/capacity/comparable-reference/modern/idle_logout_probe.mjs",
+    "mir2-web3/scripts/capacity/comparable-reference/modern/idle_logout_probe.test.mjs",
+    "mir2-web3/scripts/capacity/comparable-reference/modern/melee-driver.mjs",
+    "mir2-web3/scripts/capacity/comparable-reference/modern/melee-source.test.mjs",
+    "mir2-web3/scripts/capacity/comparable-reference/modern/prepare.mjs",
+    "mir2-web3/scripts/capacity/comparable-reference/run_offline_verification.py",
+    "mir2-web3/scripts/capacity/comparable-reference/run_stage.py",
+    "mir2-web3/scripts/capacity/comparable-reference/service_host.py",
+    "mir2-web3/scripts/capacity/comparable-reference/test_adapter_source_binding.py",
+    "mir2-web3/scripts/capacity/comparable-reference/test_combat_workload.py",
+    "mir2-web3/scripts/capacity/comparable-reference/test_service_host.py",
+    "mir2-web3/scripts/capacity/comparable-reference/test_windows_service_job.py",
+    "mir2-web3/scripts/capacity/comparable-reference/test_workload.py",
+    "mir2-web3/scripts/capacity/comparable-reference/verification/README.md",
+    "mir2-web3/scripts/capacity/comparable-reference/verification/read_modern_disk.py",
+    "mir2-web3/scripts/capacity/comparable-reference/verification/test_combat_verification.py",
+    "mir2-web3/scripts/capacity/comparable-reference/verification/test_read_modern_disk.py",
+    "mir2-web3/scripts/capacity/comparable-reference/verification/test_streaming.py",
+    "mir2-web3/scripts/capacity/comparable-reference/verification/test_verify_report.py",
+    "mir2-web3/scripts/capacity/comparable-reference/verification/verify_report.py",
+    "mir2-web3/scripts/capacity/comparable-reference/windows_service_job.py",
+    "mir2-web3/scripts/capacity/comparable-reference/workload.py",
+    "mir2-web3/scripts/capacity/comparable-reference/workload.v1.json",
+    "mir2-web3/scripts/capacity/comparable-reference/workload.v2.json"
+  ],
+  "exactIntegrationCommitDelta": [
+    "mir2-web3/apps/gateway/src/routing.rs",
+    "mir2-web3/apps/gateway/src/routing/tests/accepted_attack_transform_tests.rs",
+    "mir2-web3/apps/gateway/src/routing/tests/zone_player_attack_mode_tests.rs",
+    "mir2-web3/apps/gateway/src/spectator.rs",
+    "mir2-web3/apps/gateway/src/spectator_capacity_profile_tests.rs",
+    "mir2-web3/apps/gateway/src/spectator_merge_owned_tests.rs",
+    "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+    "mir2-web3/docs/BACKEND-1TO1-PROGRESS.md",
+    "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
+    "mir2-web3/docs/CRYSTAL-SERVER-PARITY.md"
+  ],
+  "sourceNormalization": "exact",
+  "protectedProtocolDataCargoAndMapsIdentical": true,
+  "protectedWorkflowAndPackagingScriptIdentical": true,
+  "nativeInputIdentity": {
+    "candidateSourceIsIntegrationCommit": true,
+    "candidateParent": "38a911769a5ec2d012c538dcb95f454ef1ca37c9",
+    "exactWholeRepositoryCommitDelta": [
+      "mir2-web3/apps/gateway/src/routing.rs",
+      "mir2-web3/apps/gateway/src/routing/tests/accepted_attack_transform_tests.rs",
+      "mir2-web3/apps/gateway/src/routing/tests/zone_player_attack_mode_tests.rs",
+      "mir2-web3/apps/gateway/src/spectator.rs",
+      "mir2-web3/apps/gateway/src/spectator_capacity_profile_tests.rs",
+      "mir2-web3/apps/gateway/src/spectator_merge_owned_tests.rs",
+      "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "mir2-web3/docs/BACKEND-1TO1-PROGRESS.md",
+      "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
+      "mir2-web3/docs/CRYSTAL-SERVER-PARITY.md"
+    ],
+    "nativeBuildInputObjects": [
+      {
+        "path": "mir2-web3",
+        "gitObject": "eddb2341912e2398c2253b0ace376d96e3fe8344"
+      },
+      {
+        "path": ".github/workflows",
+        "gitObject": "b56dd92640fe6e4c679764fb16f180e9cb65bc2b"
+      },
+      {
+        "path": "mir2-web3/apps/gateway",
+        "gitObject": "bdc464281719153452a1f5647c7eef36cf138c40"
+      },
+      {
+        "path": "mir2-web3/apps/simulation",
+        "gitObject": "30d9c4e83c0242db2d7f76d5d4b07bb811b9f1b1"
+      },
+      {
+        "path": "mir2-web3/packages",
+        "gitObject": "0ac8d40656b3e70d41e2a536b5bdacdcc5b9b242"
+      },
+      {
+        "path": "mir2-web3/vendor",
+        "gitObject": "280e78482d85de9d39a290e0cf18478d1ffece15"
+      },
+      {
+        "path": "mir2-web3/Cargo.toml",
+        "gitObject": "8c0567acb253eec7f94fad349d0d7de2883b8c16"
+      },
+      {
+        "path": "mir2-web3/Cargo.lock",
+        "gitObject": "a5d1d50d7ba8701e08e3a5a9e0e47b9287251fa3"
+      },
+      {
+        "path": "mir2-web3/scripts",
+        "gitObject": "28dab6b75ff83ad04f1a693489ddcb65599888ef"
+      },
+      {
+        "path": "mir2-web3/infra",
+        "gitObject": "c0a0392de151feca82ff0259c3b0dab282662245"
+      },
+      {
+        "path": "mir2-web3/apps/web/lib/generated/crystal-map-pack",
+        "gitObject": "4095e707e1602a09503deeb2a34cab9e62f35423"
+      }
+    ],
+    "nativeJobBodySha256": "4ff0de4c2946fbe3a0a95d8f9c7a3bf985891a683534616e365a094153df33c2",
+    "nonNativeDeltaClaimed": false
+  }
+}
