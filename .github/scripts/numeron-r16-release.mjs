@@ -16,45 +16,45 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: 'ff957548919e9d306c11af57dad224f2178c2d0f',
+  source: 'b2097fdfd13a2d8bc0acde435cd612fd83672cac',
   sourceRef: BRANCH,
-  baseSource: '8e82f53fcd749e8c2f6a69cb9b911c3165de006a',
+  baseSource: 'd269c56b33a4a1481622c022534d6b307277736b',
   assetSource: 'f2de762309768b51b39438c2437c14e819df9bf7',
   changedFiles: [
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/app/original-client-shell.tsx",
-      "sha": "83bcfc0b9cbcd3f99d2bcd7b0b372d6a8acf6693"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/lib/generated/r16-entry-player-meta.json",
-      "sha": "3459e2d7be8904d7f53edb17da2e429de817265b"
+      "filename": "mir2-web3/apps/web/app/components/original-client-scene-map-rendering.tsx",
+      "sha": "b43ef539c1d828b81e69d82c6585e7adc4304267"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/lib/r16-entry-scene.ts",
-      "sha": "294c22fe90fb5e5a8e30d0ec7f3e6099f73c4beb"
+      "filename": "mir2-web3/apps/web/app/components/original-client-scene-visual-layers.tsx",
+      "sha": "712aef3d3caa6ad3ffb72986bcaf0bea655b92ce"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/app/components/original-client-self-sprite.tsx",
+      "sha": "7371526457c072d3a99ce4071efb0226a96a384f"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/lib/self-sprite-image.ts",
+      "sha": "a2d0267aa564a4553d7f117fc27a52ef724f53c0"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/lib/self-sprite-residency.ts",
+      "sha": "c437d6d563689bb47ba394928b5c56c841a58e76"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/apps/web/package.json",
-      "sha": "01752c37bc57db080ffb65a607430899154b3c7e"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/generate-r16-entry-visuals.mjs",
-      "sha": "c25be54c5f45790bdea3dc0f3707a299e0d2f848"
+      "sha": "dd1e6c4d9472e73d5b7afbe0e2c3f0a5e19578d1"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/apps/web/scripts/test-r16-entry-player-readiness.mjs",
-      "sha": "147cccb6c37163d927a727d74bb94f4f89589057"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs",
-      "sha": "fbbdb76b9dc19524be57483840cbd43096a563ae"
+      "filename": "mir2-web3/apps/web/scripts/test-self-sprite-residency.mjs",
+      "sha": "7e75a0326f39eedae6276d51c1a89a1f9cca00be"
     }
   ],
   entryScene: {
