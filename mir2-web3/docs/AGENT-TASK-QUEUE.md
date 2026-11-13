@@ -10,7 +10,7 @@ Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 G
 
 ## 保留的当前未结项
 
-- [ ] 行走包91b8fc9b4f候选Stage/READY；默认冷启实画compiled六张Walking，完整四会话仍false、未Promote。独立普通寻路两后端确认后161/162ms换目标均排队并到达，Worker／保存通过；不代替R15战后8秒停步，旧失败未定因。已修QA状态DOM采集，继续合法同点点击与战后回镇的完整冷暖流程；R7/R8站立3/4和原8秒／20秒／120秒保留。[原件与限定阳性](evidence/r16-walking-recovery-20261114/README.md)
+- [ ] 行走包91b8fc9b4f的118＋70项／构建及R21/R22完整四会话通过，两个共享Native HUD后端＋真实DOM Walking、战后快速回镇、Worker／存档重开均有原件。已启动43518539244发布，继续正式alias与独立公网签名回放／静态读回。唯一NoClick在原额度内并有零输入证明；R15旧停步未定因、R7/R8旧失败与原8秒／20秒／120秒均保留。[新资格与原失败](evidence/r16-walking-recovery-20261114/README.md)
 - [ ] Web死亡弹窗四个 ui.death.* 未登记；补齐十语言并独立验收文案，不将其冒充共享弹窗外观1:1。
 
 - [x] Worker重启缓存修复已发布f6acaad6b0；公网停启后同一HUD图与配置通过。受控两后端全流程另记，公网联合检查仍false。[发布/失败范围](evidence/r16-worker-restart-20261113/production/README.md)

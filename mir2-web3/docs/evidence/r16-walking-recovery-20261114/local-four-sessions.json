@@ -1,0 +1,913 @@
+{
+  "kind": "walking-recovery-four-local-sessions-qualified",
+  "source": "91b8fc9b4f5170cb37b6619b991707ed76a34d73",
+  "base": "f6e30a0ee8021d745ecce35e295edf5f60e39964",
+  "candidate": "f6e30a0ee802-walking-recovery-668d1d43",
+  "buildId": "Lgy7EhuAT0ZovaqfJlwVL",
+  "baselineDeployment": "dpl_3eNPP4uaj3nT3HsAMhJUUoXpN4Dh",
+  "stagedDeployment": "dpl_44ctBTrdq2T5fb91EjrUEt6B3GUk",
+  "localAnimationPrerequisite": true,
+  "qualifiedLocalSessions": 4,
+  "checks": {
+    "qualifiedScene": 118,
+    "releaseGuards": 70,
+    "offlineObserver": 19
+  },
+  "nativeDeadlineMs": 120000,
+  "movementDeadlineMs": 8000,
+  "compiledImportDeadlineMs": 20000,
+  "scope": "Two actual shared Native HUD backends, each cold plus complete-browser-restart warm, real same-character save, two failed original walking JSON reads and the one complete canonical compiled payload, actual authority plus exact decoded/visible/packed DOM Walking frames, normal town return, Worker cache restart and ordinary logout/File save. No product AI/input/game/save rules changed.",
+  "limits": "Historical failed runs remain false. R15 cause remains unassigned; this source passed subsequent comparable battle/retreat and rapid-return cases. This is not public deployment, physical-phone, pure-GPU scene or overall1:1 acceptance.",
+  "runs": [
+    {
+      "name": "quest-after-r21",
+      "mode": "compatibility",
+      "passed": true,
+      "nativeBackend": {
+        "backend": "webgpu",
+        "packageId": "webgpu"
+      },
+      "firstSessionPassed": true,
+      "warmSessionPassed": true,
+      "workerRestartPassed": true,
+      "sameEntryRecoveryPassed": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true,
+      "sessions": {
+        "cold": {
+          "passed": true,
+          "scenario": "guarded-one-hit",
+          "actualAttackCount": 1,
+          "pointMode": "ordinary-visible-nameplate",
+          "runtimeDelivery": [
+            {
+              "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+              "source": "app",
+              "attempt": 1,
+              "requestedAt": 1794607725609,
+              "bytes": 31452436,
+              "expectedBytes": 31452436,
+              "sha256": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+              "status": 200,
+              "finishedAt": 1794607725612,
+              "closedAt": 1794607725612
+            }
+          ],
+          "compiled": {
+            "path": "/_next/static/chunks/r16-entry-monster-walking-fallback.711d89a507e416d3.js",
+            "bytes": 764839,
+            "bodySha256": "2b943dfba306b69c13a50b0d5c0c418dcfaaaee109c5ae12e07daf4c23682ff2",
+            "finishedAt": 1794607745038
+          },
+          "exactVisibleFrames": [
+            {
+              "at": 1794607779990,
+              "objectId": "206324",
+              "path": "/original-ui/Monster/004/62.png",
+              "action": "walking",
+              "logicalFrame": "0",
+              "incarnation": "1",
+              "pngSha256": "478adea96d81d8a16ce97095b6f4cc8c4e04420541b8faa2eb7f1b8f89d11731",
+              "pixelSha256": "1124394501b7dc8deb51b628b85c463d40765033e4485d2b4ec4e83631770f48"
+            },
+            {
+              "at": 1794607780153,
+              "objectId": "206324",
+              "path": "/original-ui/Monster/004/63.png",
+              "action": "walking",
+              "logicalFrame": "1",
+              "incarnation": "1",
+              "pngSha256": "faf987d42d5406a086dc2f44d3f6afa6e73cae8dda5fdd7a8aed60d2ae3afbe4",
+              "pixelSha256": "072d3c6a7db357bccbca6fa1fa9486c2d045cce74a2422a4778bcf3244afe4ef"
+            },
+            {
+              "at": 1794607780247,
+              "objectId": "206324",
+              "path": "/original-ui/Monster/004/64.png",
+              "action": "walking",
+              "logicalFrame": "2",
+              "incarnation": "1",
+              "pngSha256": "3a53bd6ab54b67afbe36e8755f4992c6ba2ab3f00e5a53002260b5127e7e5a68",
+              "pixelSha256": "5e9d72967f783ccbe298c96c2cc3c18a1435efaaf7586b07456811cddbd794f8"
+            },
+            {
+              "at": 1794607780457,
+              "objectId": "206324",
+              "path": "/original-ui/Monster/004/65.png",
+              "action": "walking",
+              "logicalFrame": "3",
+              "incarnation": "1",
+              "pngSha256": "6d9d65edf817580b1c01a92cdd911aa5ce8758686b6ce9997b0c772db79972bf",
+              "pixelSha256": "46203a71eb05b8cbb4e090247260a46500420e834bced61ddba82dc923632fa2"
+            },
+            {
+              "at": 1794607780529,
+              "objectId": "206324",
+              "path": "/original-ui/Monster/004/67.png",
+              "action": "walking",
+              "logicalFrame": "5",
+              "incarnation": "1",
+              "pngSha256": "93caef8b4548337e5465dc56b6357733924bb08f5297e545fafec60624e2ee3e",
+              "pixelSha256": "3a52fa91da51fcb3056b45fd07f586648c9e31c89ffe6239013125de0f087f7b"
+            }
+          ],
+          "authority": [
+            {
+              "packet": "ObjectWalk",
+              "payload": {
+                "direction": "DownLeft",
+                "objectId": 206324,
+                "x": 288,
+                "y": 605
+              },
+              "type": "packet",
+              "seq": 272,
+              "at": 1794607779835,
+              "source": "server-movement-packet"
+            }
+          ],
+          "townReturn": {
+            "passed": true,
+            "start": {
+              "position": {
+                "x": 287,
+                "y": 605
+              },
+              "at": 1794607779463,
+              "seq": 268,
+              "source": "UserLocation"
+            },
+            "end": {
+              "position": {
+                "x": 289,
+                "y": 616
+              },
+              "at": 1794607787161,
+              "seq": 320,
+              "source": "UserLocation"
+            },
+            "attempts": 2,
+            "issued": [
+              {
+                "target": {
+                  "x": 288,
+                  "y": 612
+                },
+                "timing": {
+                  "clockOrigin": 1794607780989,
+                  "plannedClickAt": 1794607780989,
+                  "trustedDownAt": 1794607780999,
+                  "trustedUpAt": 1794607781002,
+                  "lastAckBeforeDown": {
+                    "at": 1794607779463,
+                    "seq": 268,
+                    "packet": "UserLocation",
+                    "position": {
+                      "x": 287,
+                      "y": 605
+                    },
+                    "direction": "Left",
+                    "samePositionAsClickOwner": true
+                  },
+                  "ackToDownMs": 1536,
+                  "ackToUpMs": 1539
+                },
+                "accepted": {
+                  "position": {
+                    "x": 288,
+                    "y": 612
+                  },
+                  "at": 1794607784725,
+                  "seq": 303,
+                  "source": "UserLocation"
+                },
+                "commandCount": 7
+              },
+              {
+                "target": {
+                  "x": 289,
+                  "y": 616
+                },
+                "timing": {
+                  "clockOrigin": 1794607784992,
+                  "plannedClickAt": 1794607784992,
+                  "trustedDownAt": 1794607785000,
+                  "trustedUpAt": 1794607785003,
+                  "lastAckBeforeDown": {
+                    "at": 1794607784725,
+                    "seq": 303,
+                    "packet": "UserLocation",
+                    "position": {
+                      "x": 288,
+                      "y": 612
+                    },
+                    "direction": "Down",
+                    "samePositionAsClickOwner": true
+                  },
+                  "ackToDownMs": 275,
+                  "ackToUpMs": 278
+                },
+                "accepted": {
+                  "position": {
+                    "x": 289,
+                    "y": 616
+                  },
+                  "at": 1794607787161,
+                  "seq": 320,
+                  "source": "UserLocation"
+                },
+                "commandCount": 4
+              }
+            ],
+            "noClicks": []
+          },
+          "resourceScope": "Actual shared Native HUD backend and actual DOM/single-image Deer animation. This is not full-scene GPU rendering coverage.",
+          "route": {
+            "path": "C:/r16-walking-recovery-20261114/fixture-r13/game-full/quest-after-r21/cold-return-town-ordinary-ground-route.json",
+            "sha256": "69165791009cf6678c43da56ba0c366fe5d2ad95837f4f5e04584195b480e2d5"
+          }
+        },
+        "warm": {
+          "passed": true,
+          "scenario": "guarded-one-hit",
+          "actualAttackCount": 1,
+          "pointMode": "ordinary-visible-nameplate",
+          "runtimeDelivery": [
+            {
+              "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+              "source": "app",
+              "attempt": 2,
+              "requestedAt": 1794607808119,
+              "bytes": 31452436,
+              "expectedBytes": 31452436,
+              "sha256": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+              "status": 200,
+              "finishedAt": 1794607808122,
+              "closedAt": 1794607808122
+            }
+          ],
+          "compiled": {
+            "path": "/_next/static/chunks/r16-entry-monster-walking-fallback.711d89a507e416d3.js",
+            "bytes": 764839,
+            "bodySha256": "2b943dfba306b69c13a50b0d5c0c418dcfaaaee109c5ae12e07daf4c23682ff2",
+            "finishedAt": 1794607824325
+          },
+          "exactVisibleFrames": [
+            {
+              "at": 1794607835240,
+              "objectId": "206711",
+              "path": "/original-ui/Monster/004/51.png",
+              "action": "walking",
+              "logicalFrame": "1",
+              "incarnation": "1",
+              "pngSha256": "df792026a8d34875f71d286a4dad26feadc0bd39f6d003c3e088fdedbcfa4c56",
+              "pixelSha256": "1a510280348224fe5133b11f394f134489f84813fd3654c7309871b616a2c793"
+            },
+            {
+              "at": 1794607835375,
+              "objectId": "206711",
+              "path": "/original-ui/Monster/004/52.png",
+              "action": "walking",
+              "logicalFrame": "2",
+              "incarnation": "1",
+              "pngSha256": "1f28dbaaa50b7000394f85a7fb015f2f05d2fd6fac424ba2d3c07cafed90e09b",
+              "pixelSha256": "740a36c5c86f3db564486d1112e45ec5e712e45174f358fa0db5779a1e63aa4a"
+            },
+            {
+              "at": 1794607835488,
+              "objectId": "206711",
+              "path": "/original-ui/Monster/004/53.png",
+              "action": "walking",
+              "logicalFrame": "3",
+              "incarnation": "1",
+              "pngSha256": "030ef87c359f4a461856637518338e9859614740e33d12f99a1889e4e06c5912",
+              "pixelSha256": "1efbb9c3ea9aedac5dc0a995296f5cd2b63cbe960b31e4e1761bb05824bb29d6"
+            },
+            {
+              "at": 1794607835585,
+              "objectId": "206711",
+              "path": "/original-ui/Monster/004/54.png",
+              "action": "walking",
+              "logicalFrame": "4",
+              "incarnation": "1",
+              "pngSha256": "dd8621f98aa5001917020af8d10d487895cdd22b086904fa5857517934a8687d",
+              "pixelSha256": "29a2702b0ca79e3e0646ef78f3e1690c5eb46e87988825a1b047681c8f3d55d3"
+            },
+            {
+              "at": 1794607835683,
+              "objectId": "206711",
+              "path": "/original-ui/Monster/004/55.png",
+              "action": "walking",
+              "logicalFrame": "5",
+              "incarnation": "1",
+              "pngSha256": "7d980ba53de9b6d8d31bc8f09ab964f128b7d1d4803035a0fcfa9617b938978b",
+              "pixelSha256": "50067e8c2210c2d743f223161cb7e383a97862bff1d711fa5957bb1dd2e49ec0"
+            }
+          ],
+          "authority": [
+            {
+              "packet": "ObjectWalk",
+              "payload": {
+                "direction": "DownRight",
+                "objectId": 206711,
+                "x": 277,
+                "y": 604
+              },
+              "type": "packet",
+              "seq": 190,
+              "at": 1794607835037,
+              "source": "server-movement-packet"
+            }
+          ],
+          "townReturn": {
+            "passed": true,
+            "start": {
+              "position": {
+                "x": 277,
+                "y": 605
+              },
+              "at": 1794607834818,
+              "seq": 188,
+              "source": "UserLocation"
+            },
+            "end": {
+              "position": {
+                "x": 288,
+                "y": 616
+              },
+              "at": 1794607843074,
+              "seq": 252,
+              "source": "UserLocation"
+            },
+            "attempts": 3,
+            "issued": [
+              {
+                "target": {
+                  "x": 284,
+                  "y": 612
+                },
+                "timing": {
+                  "clockOrigin": 1794607836314,
+                  "plannedClickAt": 1794607836314,
+                  "trustedDownAt": 1794607836318,
+                  "trustedUpAt": 1794607836321,
+                  "lastAckBeforeDown": {
+                    "at": 1794607834818,
+                    "seq": 188,
+                    "packet": "UserLocation",
+                    "position": {
+                      "x": 277,
+                      "y": 605
+                    },
+                    "direction": "Down",
+                    "samePositionAsClickOwner": true
+                  },
+                  "ackToDownMs": 1500,
+                  "ackToUpMs": 1503
+                },
+                "accepted": {
+                  "position": {
+                    "x": 284,
+                    "y": 612
+                  },
+                  "at": 1794607839964,
+                  "seq": 229,
+                  "source": "UserLocation"
+                },
+                "commandCount": 7
+              },
+              {
+                "target": {
+                  "x": 288,
+                  "y": 616
+                },
+                "timing": {
+                  "clockOrigin": 1794607840595,
+                  "plannedClickAt": 1794607840595,
+                  "trustedDownAt": 1794607840610,
+                  "trustedUpAt": 1794607840613,
+                  "lastAckBeforeDown": {
+                    "at": 1794607839964,
+                    "seq": 229,
+                    "packet": "UserLocation",
+                    "position": {
+                      "x": 284,
+                      "y": 612
+                    },
+                    "direction": "DownRight",
+                    "samePositionAsClickOwner": true
+                  },
+                  "ackToDownMs": 646,
+                  "ackToUpMs": 649
+                },
+                "accepted": {
+                  "position": {
+                    "x": 288,
+                    "y": 616
+                  },
+                  "at": 1794607843074,
+                  "seq": 252,
+                  "source": "UserLocation"
+                },
+                "commandCount": 5
+              }
+            ],
+            "noClicks": [
+              {
+                "startedAt": 1794607840168,
+                "finishedAt": 1794607840260,
+                "reason": "opaque-world-actor-at-ground-point",
+                "originalPoint": {
+                  "x": 824,
+                  "y": 592,
+                  "sceneX": 696,
+                  "sceneY": 496,
+                  "insideStage": true,
+                  "needsActualTopElementAndHudGuard": true,
+                  "pathValidated": false
+                },
+                "selectedTile": {
+                  "x": 288,
+                  "y": 616
+                },
+                "reinspectedPoint": {
+                  "x": 824,
+                  "y": 592,
+                  "sceneX": 696,
+                  "sceneY": 496,
+                  "insideStage": true,
+                  "needsActualTopElementAndHudGuard": true,
+                  "pathValidated": false
+                },
+                "sentStart": 30,
+                "sentEndExclusive": 30,
+                "consumesOriginalAttempt": true,
+                "attempt": 1,
+                "successfulRouteStep": false,
+                "capturedGameCommands": [],
+                "actualInputEvents": [],
+                "pointerDownCount": 0,
+                "verifiedNoInput": true
+              }
+            ]
+          },
+          "resourceScope": "Actual shared Native HUD backend and actual DOM/single-image Deer animation. This is not full-scene GPU rendering coverage.",
+          "route": {
+            "path": "C:/r16-walking-recovery-20261114/fixture-r13/game-full/quest-after-r21/warm/warm-return-town-ordinary-ground-route.json",
+            "sha256": "8f4cc8576f8354c3788b6636cdff0f0169c75f24a5ac53df889e9a5dd7c4048d"
+          }
+        }
+      },
+      "receipt": {
+        "path": "C:/r16-walking-recovery-20261114/fixture-r13/game-full/quest-after-r21/entry-visual-receipt.json",
+        "sha256": "1083acf0c9cd3f85cc7a21279c379bcfc74e049fc4d3024695a1022572f13a47"
+      }
+    },
+    {
+      "name": "quest-after-r22",
+      "mode": "webgl2",
+      "passed": true,
+      "nativeBackend": {
+        "backend": "webgl2",
+        "packageId": "webgl2-shared"
+      },
+      "firstSessionPassed": true,
+      "warmSessionPassed": true,
+      "workerRestartPassed": true,
+      "sameEntryRecoveryPassed": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true,
+      "sessions": {
+        "cold": {
+          "passed": true,
+          "scenario": "natural-before-hit",
+          "actualAttackCount": 0,
+          "pointMode": null,
+          "runtimeDelivery": [
+            {
+              "path": "/_qa/runtime-body/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+              "source": "app",
+              "attempt": 1,
+              "requestedAt": 1794607949438,
+              "bytes": 32378001,
+              "expectedBytes": 32378001,
+              "sha256": "5f8b82ab48665cd20e8c45ce0da0f221a6919dfab07aca43fea7fd312f34c185",
+              "status": 200,
+              "finishedAt": 1794607949441,
+              "closedAt": 1794607949441
+            }
+          ],
+          "compiled": {
+            "path": "/_next/static/chunks/r16-entry-monster-walking-fallback.711d89a507e416d3.js",
+            "bytes": 764839,
+            "bodySha256": "2b943dfba306b69c13a50b0d5c0c418dcfaaaee109c5ae12e07daf4c23682ff2",
+            "finishedAt": 1794607968686
+          },
+          "exactVisibleFrames": [
+            {
+              "at": 1794608000314,
+              "objectId": "206324",
+              "path": "/original-ui/Monster/004/38.png",
+              "action": "walking",
+              "logicalFrame": "0",
+              "incarnation": "1",
+              "pngSha256": "f9f6bc0d4202c2367fc7ee2c196091ae0117aa529d2cf804d3a28c6f8b355b78",
+              "pixelSha256": "48888ad0761251d27e46cc982937ec79f90196bcc7e5d3709befe5eab84afae7"
+            },
+            {
+              "at": 1794608000512,
+              "objectId": "206324",
+              "path": "/original-ui/Monster/004/39.png",
+              "action": "walking",
+              "logicalFrame": "1",
+              "incarnation": "1",
+              "pngSha256": "b7258e87e68d0f164853f45900312e50de025df381b04b9f61c9087918755bcc",
+              "pixelSha256": "a3c099a6c68ec2028efcb33eee8a8635c68f5ca98fac81dcd1a538df7c9b6a82"
+            }
+          ],
+          "authority": [
+            {
+              "packet": "ObjectWalk",
+              "payload": {
+                "direction": "UpRight",
+                "objectId": 206324,
+                "x": 290,
+                "y": 603
+              },
+              "type": "packet",
+              "seq": 252,
+              "at": 1794608000225,
+              "source": "server-movement-packet"
+            }
+          ],
+          "townReturn": {
+            "passed": true,
+            "start": {
+              "position": {
+                "x": 288,
+                "y": 605
+              },
+              "at": 1794608000204,
+              "seq": 251,
+              "source": "UserLocation"
+            },
+            "end": {
+              "position": {
+                "x": 289,
+                "y": 616
+              },
+              "at": 1794608006930,
+              "seq": 292,
+              "source": "UserLocation"
+            },
+            "attempts": 3,
+            "issued": [
+              {
+                "target": {
+                  "x": 289,
+                  "y": 612
+                },
+                "timing": {
+                  "clockOrigin": 1794608000836,
+                  "plannedClickAt": 1794608000836,
+                  "trustedDownAt": 1794608000841,
+                  "trustedUpAt": 1794608000845,
+                  "lastAckBeforeDown": {
+                    "at": 1794608000204,
+                    "seq": 251,
+                    "packet": "UserLocation",
+                    "position": {
+                      "x": 288,
+                      "y": 605
+                    },
+                    "direction": "Up",
+                    "samePositionAsClickOwner": true
+                  },
+                  "ackToDownMs": 637,
+                  "ackToUpMs": 641
+                },
+                "accepted": {
+                  "position": {
+                    "x": 289,
+                    "y": 612
+                  },
+                  "at": 1794608004497,
+                  "seq": 279,
+                  "source": "UserLocation"
+                },
+                "commandCount": 7
+              },
+              {
+                "target": {
+                  "x": 289,
+                  "y": 615
+                },
+                "timing": {
+                  "clockOrigin": 1794608004722,
+                  "plannedClickAt": 1794608004722,
+                  "trustedDownAt": 1794608004727,
+                  "trustedUpAt": 1794608004730,
+                  "lastAckBeforeDown": {
+                    "at": 1794608004497,
+                    "seq": 279,
+                    "packet": "UserLocation",
+                    "position": {
+                      "x": 289,
+                      "y": 612
+                    },
+                    "direction": "Down",
+                    "samePositionAsClickOwner": true
+                  },
+                  "ackToDownMs": 230,
+                  "ackToUpMs": 233
+                },
+                "accepted": {
+                  "position": {
+                    "x": 289,
+                    "y": 615
+                  },
+                  "at": 1794608006326,
+                  "seq": 290,
+                  "source": "UserLocation"
+                },
+                "commandCount": 3
+              },
+              {
+                "target": {
+                  "x": 289,
+                  "y": 616
+                },
+                "timing": {
+                  "clockOrigin": 1794608006445,
+                  "plannedClickAt": 1794608006445,
+                  "trustedDownAt": 1794608006449,
+                  "trustedUpAt": 1794608006453,
+                  "lastAckBeforeDown": {
+                    "at": 1794608006326,
+                    "seq": 290,
+                    "packet": "UserLocation",
+                    "position": {
+                      "x": 289,
+                      "y": 615
+                    },
+                    "direction": "Down",
+                    "samePositionAsClickOwner": true
+                  },
+                  "ackToDownMs": 123,
+                  "ackToUpMs": 127
+                },
+                "accepted": {
+                  "position": {
+                    "x": 289,
+                    "y": 616
+                  },
+                  "at": 1794608006930,
+                  "seq": 292,
+                  "source": "UserLocation"
+                },
+                "commandCount": 1
+              }
+            ],
+            "noClicks": []
+          },
+          "resourceScope": "Actual shared Native HUD backend and actual DOM/single-image Deer animation. This is not full-scene GPU rendering coverage.",
+          "route": {
+            "path": "C:/r16-walking-recovery-20261114/fixture-r13/game-full/quest-after-r22/cold-return-town-ordinary-ground-route.json",
+            "sha256": "3b5801cfa7ac189fc769400b6f9eccd85eb143e80020e2bf99c8a76d5b18283b"
+          }
+        },
+        "warm": {
+          "passed": true,
+          "scenario": "guarded-one-hit",
+          "actualAttackCount": 1,
+          "pointMode": "ordinary-visible-nameplate",
+          "runtimeDelivery": [
+            {
+              "path": "/_qa/runtime-body/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+              "source": "app",
+              "attempt": 2,
+              "requestedAt": 1794608029553,
+              "bytes": 32378001,
+              "expectedBytes": 32378001,
+              "sha256": "5f8b82ab48665cd20e8c45ce0da0f221a6919dfab07aca43fea7fd312f34c185",
+              "status": 200,
+              "finishedAt": 1794608029556,
+              "closedAt": 1794608029556
+            }
+          ],
+          "compiled": {
+            "path": "/_next/static/chunks/r16-entry-monster-walking-fallback.711d89a507e416d3.js",
+            "bytes": 764839,
+            "bodySha256": "2b943dfba306b69c13a50b0d5c0c418dcfaaaee109c5ae12e07daf4c23682ff2",
+            "finishedAt": 1794608045733
+          },
+          "exactVisibleFrames": [
+            {
+              "at": 1794608056753,
+              "objectId": "206711",
+              "path": "/original-ui/Monster/004/50.png",
+              "action": "walking",
+              "logicalFrame": "0",
+              "incarnation": "1",
+              "pngSha256": "013a29b52066bf33c57f330dd3582e3f95bc35ef4e897336b21fcf5c5d25dbb1",
+              "pixelSha256": "0f096d11d4492512255da7871981b0c9b3889dbefbea2602706ecf44e6b331d4"
+            },
+            {
+              "at": 1794608056971,
+              "objectId": "206711",
+              "path": "/original-ui/Monster/004/51.png",
+              "action": "walking",
+              "logicalFrame": "1",
+              "incarnation": "1",
+              "pngSha256": "df792026a8d34875f71d286a4dad26feadc0bd39f6d003c3e088fdedbcfa4c56",
+              "pixelSha256": "1a510280348224fe5133b11f394f134489f84813fd3654c7309871b616a2c793"
+            },
+            {
+              "at": 1794608057069,
+              "objectId": "206711",
+              "path": "/original-ui/Monster/004/52.png",
+              "action": "walking",
+              "logicalFrame": "2",
+              "incarnation": "1",
+              "pngSha256": "1f28dbaaa50b7000394f85a7fb015f2f05d2fd6fac424ba2d3c07cafed90e09b",
+              "pixelSha256": "740a36c5c86f3db564486d1112e45ec5e712e45174f358fa0db5779a1e63aa4a"
+            },
+            {
+              "at": 1794608057140,
+              "objectId": "206711",
+              "path": "/original-ui/Monster/004/53.png",
+              "action": "walking",
+              "logicalFrame": "3",
+              "incarnation": "1",
+              "pngSha256": "030ef87c359f4a461856637518338e9859614740e33d12f99a1889e4e06c5912",
+              "pixelSha256": "1efbb9c3ea9aedac5dc0a995296f5cd2b63cbe960b31e4e1761bb05824bb29d6"
+            }
+          ],
+          "authority": [
+            {
+              "packet": "ObjectWalk",
+              "payload": {
+                "direction": "DownRight",
+                "objectId": 206711,
+                "x": 277,
+                "y": 604
+              },
+              "type": "packet",
+              "seq": 186,
+              "at": 1794608056543,
+              "source": "server-movement-packet"
+            }
+          ],
+          "townReturn": {
+            "passed": true,
+            "start": {
+              "position": {
+                "x": 277,
+                "y": 605
+              },
+              "at": 1794608056272,
+              "seq": 183,
+              "source": "UserLocation"
+            },
+            "end": {
+              "position": {
+                "x": 288,
+                "y": 616
+              },
+              "at": 1794608064456,
+              "seq": 247,
+              "source": "UserLocation"
+            },
+            "attempts": 2,
+            "issued": [
+              {
+                "target": {
+                  "x": 284,
+                  "y": 612
+                },
+                "timing": {
+                  "clockOrigin": 1794608057767,
+                  "plannedClickAt": 1794608057767,
+                  "trustedDownAt": 1794608057774,
+                  "trustedUpAt": 1794608057778,
+                  "lastAckBeforeDown": {
+                    "at": 1794608056272,
+                    "seq": 183,
+                    "packet": "UserLocation",
+                    "position": {
+                      "x": 277,
+                      "y": 605
+                    },
+                    "direction": "Down",
+                    "samePositionAsClickOwner": true
+                  },
+                  "ackToDownMs": 1502,
+                  "ackToUpMs": 1506
+                },
+                "accepted": {
+                  "position": {
+                    "x": 284,
+                    "y": 612
+                  },
+                  "at": 1794608061407,
+                  "seq": 223,
+                  "source": "UserLocation"
+                },
+                "commandCount": 7
+              },
+              {
+                "target": {
+                  "x": 288,
+                  "y": 616
+                },
+                "timing": {
+                  "clockOrigin": 1794608061863,
+                  "plannedClickAt": 1794608061863,
+                  "trustedDownAt": 1794608061872,
+                  "trustedUpAt": 1794608061877,
+                  "lastAckBeforeDown": {
+                    "at": 1794608061407,
+                    "seq": 223,
+                    "packet": "UserLocation",
+                    "position": {
+                      "x": 284,
+                      "y": 612
+                    },
+                    "direction": "DownRight",
+                    "samePositionAsClickOwner": true
+                  },
+                  "ackToDownMs": 465,
+                  "ackToUpMs": 470
+                },
+                "accepted": {
+                  "position": {
+                    "x": 288,
+                    "y": 616
+                  },
+                  "at": 1794608064456,
+                  "seq": 247,
+                  "source": "UserLocation"
+                },
+                "commandCount": 5
+              }
+            ],
+            "noClicks": []
+          },
+          "resourceScope": "Actual shared Native HUD backend and actual DOM/single-image Deer animation. This is not full-scene GPU rendering coverage.",
+          "route": {
+            "path": "C:/r16-walking-recovery-20261114/fixture-r13/game-full/quest-after-r22/warm/warm-return-town-ordinary-ground-route.json",
+            "sha256": "b3f9f224cce39f16893cd54935b241b595a5577517d36babf08c589781e8c839"
+          }
+        }
+      },
+      "receipt": {
+        "path": "C:/r16-walking-recovery-20261114/fixture-r13/game-full/quest-after-r22/entry-visual-receipt.json",
+        "sha256": "02177999f74e0c7d10d836515041166018b94cc1c85580e54ed59914e64cc86d"
+      }
+    }
+  ],
+  "qualificationInputs": [
+    {
+      "path": "C:/r16-walking-recovery-20261114/build-receipt.json",
+      "sha256": "cb800d32eb8319298671b43145f92da0a4e1c110fe671faeec65233f166fdcf5"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/candidate-qualification.json",
+      "sha256": "0627c7766825ac9d551315f12b5d413e35442787a505b67f4b3048605ecb33de"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/qualified-source-closure.json",
+      "sha256": "05bf44477d534a597a0845c323aef692b57b37af607f6b4a0911e9a8e3532683"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/qualified-scene-checks.log",
+      "sha256": "75d0eb9188932b9d8572217f3728356d3ce750cde5fee4174d7832d7eae3d24d"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/release-guards.log",
+      "sha256": "6e288022c4f15b04ebeb952e5c051035632192b8715d8f2c7af17ab724d874c0"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/public-observer-tests/receipt-r2.json",
+      "sha256": "719cc99bb02d8d70757b9caa06b3ea04fa922d1740cd5d3aa5b539b97fc7158d"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/fixture-r13/browser-preparation-r1.json",
+      "sha256": "42ae8b4e9bee3c7a04cb31deefc6eb99b803c04c8614c86454fdb638843c4260"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/release/source-pin-qualified.json",
+      "sha256": "1e38a769cc4852c64f3e977d98e7e09f7941759769530d208f68eb6f5bbd98d8"
+    }
+  ]
+}

@@ -2,7 +2,7 @@
 
 ## R16 行走包恢复候选（2026-11-14）
 
-91b8fc9b4f已提交、Stage/READY，118项、70保护与构建通过。R9默认冷启两次部分JSON后实画compiled六张Walking原帧、回镇保存／重开；暖场点中前方Royal_Guard，完整四会话资格仍false，未Promote，正式保持f6603c89a3。新私有点检需完整正常命中优先级与最终同一点hover/click。五轮旧失败、R7/R8站立3/4及R9原窗口通过均保留，不据此宣称CPU／时钟问题已修复。原冷120秒false，整体1:1与最终人类Accepted开放。[证据与范围](evidence/r16-walking-recovery-20261114/README.md)
+91b8fc9b4f已提交、Stage/READY，118项、70保护与构建通过；R21/R22已过两个共享Native HUD后端的完整冷暖四会话、真实DOM Walking帧、战斗／自然移动、快速回镇、Worker及普通存档重开。发布工作流已启动，正式读回与公网尚待；旧失败仍false，R15停步未定因、R7/R8站立3/4不据后续通过倒填原因。无650ms寻路等待，唯一NoClick在原额度内且有零输入证明。原公网冷120秒false、NPC姓名、全场景GPU、整体1:1及最终人类Accepted开放。[新资格与全部旧失败](evidence/r16-walking-recovery-20261114/README.md)
 
 ## R16 部分下载来源轮换与发布（2026-11-14）
 
