@@ -16,30 +16,30 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: 'ab02b84938eeb61ac844c6e0c894d04abf1c8bb0',
+  source: 'f6603c89a34e27813d7495fceab3292cc293c47b',
   sourceRef: BRANCH,
-  baseSource: '9ad10fb628eb24c23e2a2b17170b3fa8b633618a',
+  baseSource: '401c8f9855fda0966467fc98f3d9ff63822e5e12',
   assetSource: 'f2de762309768b51b39438c2437c14e819df9bf7',
   changedFiles: [
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/lib/quest-route-execution.ts",
-      "sha": "e3aefd34aa18dbcec63cdd211752a6525ab13f57"
+      "filename": "mir2-web3/apps/web/lib/bevy-runtime-initializer.ts",
+      "sha": "2299800b5d29d99fa1c40c04b88eb4e7265dee62"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-bevy-quest-ui.mjs",
-      "sha": "9c30b92a76a03dc1f92e0e2a25e2f68ed78a2a48"
+      "filename": "mir2-web3/apps/web/package.json",
+      "sha": "bb0f710c09e684eb34860a5a89a3707a9bce0617"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-r16-quest-navigation.mjs",
-      "sha": "0c6917966f1f69a0ca1a5d5fce52b262b61183fe"
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-initializer.mjs",
+      "sha": "c182b827bc00ae8cad254eeed93213ea5bf14ba3"
     },
     {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-route-authority-wait.mjs",
-      "sha": "b8bd73c53d195cb6728947eedc94369a1d384614"
+      "status": "added",
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-source-rotation.mjs",
+      "sha": "c8b523be02181aa9a9ba9ebbd464939cda8d12dd"
     }
   ],
   entryScene: {
@@ -98,7 +98,7 @@ export const QR_RELEASE = Object.freeze({
     bytes: 3283113,
   },
   assetRunId: '42494701555',
-  baseline: 'dpl_AvrMevD6suL7fXC56fKC6EZzu3AA',
+  baseline: 'dpl_ET4yRQHzgEvDLDD6qXUN1sZA6GWQ',
   relay: 'https://relay.dubhe.obelisk.build',
 });
 const QR_OPERATIONS = ['numeron-qr-stage', 'numeron-qr-promote', 'numeron-qr-rollback'];
