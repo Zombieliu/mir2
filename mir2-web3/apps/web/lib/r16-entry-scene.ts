@@ -3,7 +3,7 @@ import entryFloor from "./generated/r16-entry-floor.json";
 import entryVisuals from "./generated/r16-entry-visuals.json";
 import entryPlayerMetadata from "./generated/r16-entry-player-meta.json";
 import { fetchBootstrapResponse, PINNED_BOOTSTRAP_HEADER_TIMEOUT_MS, shouldRetryBootstrapResponse, isRetryableBootstrapReadFailure } from "./first-crystal-scene-request";
-import { readR16EntrySceneChunk, readR16EntryFloorChunk } from "./generated/r16-entry-bootstrap-chunks";
+import { readR16EntrySceneChunk, readR16EntryFloorChunk, readR16EntryMonsterWalkingChunk } from "./generated/r16-entry-bootstrap-chunks";
 import type { OriginalSceneSpriteLibraryMeta } from "./original-scene-sprite-meta";
 import {
   createCrystalSceneBlueprintRequestKey,
@@ -96,10 +96,16 @@ function preloadVisual<T>(
   loads: Map<string, Promise<T | null>>,
   priority?: RequestPriority,
   cache: RequestCache = "force-cache",
+  compiledFallback?: () => Promise<T>,
 ): Promise<T | null> {
   const cached = loads.get(asset.path);
   if (cached) return cached;
   const pending: Promise<T | null> = loadProgressiveEntryJson<T>(asset, priority, VISUAL_BODY_TIMEOUT_MS, cache).catch((error) => {
+    // Only exhausted transport failures may use an independently verified chunk.
+    // Definitive responses and rejected complete bytes do not grant a fallback.
+    if (compiledFallback && isRetryableBootstrapReadFailure(error)) return compiledFallback();
+    throw error;
+  }).catch((error) => {
     if (error instanceof TypeError || (error instanceof DOMException &&
         (error.name === "TimeoutError" || error.name === "AbortError"))) {
       transientVisualFailures.add(pending);
@@ -226,7 +232,8 @@ export function loadR16EntryNpcsWithRecovery(
 export function preloadR16EntryMonsterFrames(pinnedRelease: string | undefined, action: EntryMonsterAction) {
   if (!entryVisualsMatch(pinnedRelease)) return null;
   const asset = action === "standing" ? entryVisuals.monsterStanding : entryVisuals.monsterWalking;
-  return preloadVisual(asset, actorLoads, action === "walking" ? "low" : undefined);
+  return preloadVisual(asset, actorLoads, action === "walking" ? "low" : undefined, "force-cache",
+    action === "walking" ? readR16EntryMonsterWalkingChunk : undefined);
 }
 
 async function decodePinnedEntryJson<T>(
