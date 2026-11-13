@@ -15,3 +15,7 @@
 ![默认路径恢复后的繁中任务窗](default-font-recovered.png)
 
 ![共享 WebGL2 皮肤恢复后的任务窗](webgl2-skins-recovered.png)
+
+源码已提交并推送为 `e7cbab02f0`；运行包归档由新 tag `codex/r16-ui-asset-recovery-runtime-20261113` 保留。460 份输入中 454 份与 Git 原文逐字节一致，另六份仅为 Git 换行规范差异，已用 `git hash-object --path` 核对；本轮八份覆盖文件全部匹配。[提交与换行核对](source-binding.json)
+
+新六叶已由 [R2 发布 43339966843](https://github.com/Zombieliu/mir2/actions/runs/43339966843) 上传并逐叶读回、核对存储表示；没有改动既有素材 manifest 或旧运行包。匹配 Web 生产候选尚待切换。

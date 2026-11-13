@@ -16,110 +16,165 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: '432c58a07e44db021679aab9a6562a02c9124b10',
+  source: 'e7cbab02f030ae50b28031ca0237d630eccb7c03',
   sourceRef: BRANCH,
-  baseSource: 'a92d080debc893f7c804e70e89f5a8d4b9988aa6',
+  baseSource: '54706a86499bbe5b0d73ef9318d679697f39d33d',
   assetSource: 'f2de762309768b51b39438c2437c14e819df9bf7',
   changedFiles: [
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/app/page.tsx",
-      "sha": "1f53a12072fe573bde2869d5e2816329e46aea03"
+      "filename": ".github/workflows/bevy-runtime-r2-release.yml",
+      "sha": "471360c44b4dd79eb861ba635530ec530a3c9711"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/lib/bevy-runtime-initializer.ts",
-      "sha": "917bad39fafe5c5b6242476463d717cb0359373e"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/lib/bevy-runtime-policy.ts",
-      "sha": "17f54182792433f0fac30cddd529fb9b66a761e6"
+      "filename": "mir2-web3/apps/game-client/runtime/src/hud_ui_host.rs",
+      "sha": "ae93d84bb4ebfaa55219978aa27650e404ce2ec2"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/apps/web/scripts/smoke-bevy-runtime-download-recovery.mjs",
-      "sha": "d547e519729ba0fe40624fb1624aff42eef4b4aa"
+      "filename": "mir2-web3/apps/game-client/runtime/src/portable_ui_asset_recovery.rs",
+      "sha": "fa6166b3d21f3cdb832d20c5f563df01ec7a07ad"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/game-client/runtime/src/portable_ui_asset_recovery_io_tests.rs",
+      "sha": "e6209e8b0ff9c3a1ba9d1a45ce1071b3fdd4a8fb"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/game-client/runtime/src/portable_ui_asset_recovery_tests.rs",
+      "sha": "3afefc4d0d990e41a26420057e86b4e92dce94e6"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-initializer.mjs",
-      "sha": "950f43cfee943a01be65f88bca94126c41d18a1a"
+      "filename": "mir2-web3/apps/game-client/runtime/src/portable_ui_fonts.rs",
+      "sha": "5e046353a3cbbeef2cb40f48fdeb3afe9b943aca"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-policy.mjs",
-      "sha": "b2ef35bee124a235cc105406c67694489d2bd1c9"
+      "filename": "mir2-web3/apps/game-client/runtime/src/portable_ui_fonts_tests.rs",
+      "sha": "db2d6515923158c3001f47ccd70503b640f44752"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/game-client/runtime/src/quest_ui_asset_recovery_tests.rs",
+      "sha": "661956358a190b04827f1bda60eb78a005739943"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/game-client/runtime/src/quest_ui_host.rs",
+      "sha": "f7c32602f4f6873f4d4f962799419e29b74cff07"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/lib/generated/bevy_runtime_version_numeron_r16.json",
+      "sha": "92442307c0c4c103991bf97eb561265ae5e8d5ab"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/lib/production-asset-config.mjs",
+      "sha": "0bf3005de53c5af29e20ebb668fe0e248c583f84"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-r2-upload.mjs",
+      "sha": "f771e631f05d06ccf41da7e3d2db40207cf47e9e"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-production-asset-config.mjs",
+      "sha": "d75423eadb3ff803c657890971b62ced9eb340ca"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/config/numeron-r16-web-assets.json",
+      "sha": "42dad9ccca851a7bf40490abbf8e53739ab9c062"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/AGENT-CURRENT.md",
-      "sha": "402e9a27906aecb401cbf57a993e309b2e89b000"
+      "sha": "8ca95cf8150f768d97de1b55413a00c84afb132b"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
-      "sha": "2f821ac9368d0f7c44bd7bbb3303daca30bb7dc3"
+      "sha": "cf896d65578017f2bbc7104df08b2ba233f73aae"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
-      "sha": "21930764f43e3aebd3d6c8d7e5b5686e69c346c0"
+      "sha": "466589fdff03d9e14ba204dcf8668aba87278dd9"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md",
-      "sha": "3906eab58b453db9d055e2301ce63773bbbb256b"
+      "sha": "47b74a3b95dfd2cf1421362d87844dd8f627fa5a"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-body-recovery-20261113/README.md",
-      "sha": "9a3083d22d7f9fd9b008560e2fbc5e4763f890c7"
+      "filename": "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/README.md",
+      "sha": "2b5704e73b2a0ea26c6c295300562b8b29909827"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-body-recovery-20261113/browser-final.json",
-      "sha": "bdc8e69b466d7f65f72da535874779515e1b2d6e"
+      "filename": "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/browser-cases.json",
+      "sha": "1c1232785eea82c5d220cd9915fb02b3c276e548"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-body-recovery-20261113/browser-first-failure.json",
-      "sha": "b2e15be422f1b5e551e61fca9f3740a5621a091b"
+      "filename": "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/build-receipt.json",
+      "sha": "ebaedb20ff0e61bd3f8d190fb564335b0b52bf0e"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-body-recovery-20261113/build-first-failure.json",
-      "sha": "7c61e320172acde5b1baef0b73f0f226d2df00d7"
+      "filename": "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/default-font-recovered.png",
+      "sha": "54218e4047919a81746c80bb7e6b8a0da06581fe"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-body-recovery-20261113/build-first-failure.txt",
-      "sha": "499044382d5369754f55259e2c594293149bda78"
+      "filename": "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/preservation.json",
+      "sha": "cd8620473d8b00b790afe543cd6ffaa91fee7616"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-body-recovery-20261113/build-receipt.json",
-      "sha": "5b046897c482c8cad98841646ac3b58b4fa1ca03"
+      "filename": "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/production-before.json",
+      "sha": "c2001cdb68c86ebe4412e413e289731823cad963"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-body-recovery-20261113/default-native.png",
-      "sha": "e997a82c367427ac63d0e2a680d1d6bc3f0e8f51"
+      "filename": "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/receipt.json",
+      "sha": "f4db12e374559653a4bd5ac131bcf350537555c7"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-body-recovery-20261113/focused-tests.txt",
-      "sha": "8a91def60db6e54c3e5f1574984b8dd7a6d68874"
+      "filename": "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/retained-failures.json",
+      "sha": "85cb28e60c0bf472a355f5e02de6a4f6c53e2468"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-body-recovery-20261113/receipt.json",
-      "sha": "42a16df36b957e8c627b657588c3ab400376f6ec"
+      "filename": "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/runtime-artifact.json",
+      "sha": "ab7d400925ec920375e8803962be5a2584e40d22"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-body-recovery-20261113/webgl2-quest.png",
-      "sha": "7daef4d8fd78c7f5473e6f6828c4b574c21421cd"
+      "filename": "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/rust-source-closure.json",
+      "sha": "8d1d24fa383f99625eb881667c405b4f2b70b656"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/tests.txt",
+      "sha": "70becec917a7d4f5bffac4da11ef60b0b79bedcb"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/ui-asset-fault.mjs",
+      "sha": "0275073569bc5005daadd8e74f368f2f064ca6ca"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-ui-asset-recovery-20261113/webgl2-skins-recovered.png",
+      "sha": "4c8cba6d3acb5e8b9e613703319e91a58da3170a"
     }
   ],
   entryScene: {
@@ -178,7 +233,7 @@ export const QR_RELEASE = Object.freeze({
     bytes: 3283113,
   },
   assetRunId: '42494701555',
-  baseline: 'dpl_9KSedR4DePS2tFQGh4T5qZiMVdAK',
+  baseline: 'dpl_YKNdqLqcPpNRCXDch444krb7Y1Vs',
   relay: 'https://relay.dubhe.obelisk.build',
 });
 const QR_OPERATIONS = ['numeron-qr-stage', 'numeron-qr-promote', 'numeron-qr-rollback'];
