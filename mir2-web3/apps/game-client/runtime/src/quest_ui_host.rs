@@ -897,6 +897,7 @@ fn ingest_quest_ui_snapshot(
             .iter()
             .map(|path| asset_server.load::<Image>(*path))
             .collect();
+        fonts.track_images(&assets.skins);
         assets.requested = true;
     }
     // The host's open/close revision changes only for an explicit external
@@ -1113,10 +1114,7 @@ fn sync_quest_hint_surface(
         assets.get_load_state(hud.font.id()),
         Some(bevy::asset::LoadState::Loaded)
     );
-    let hero_hint_owner = hero.active
-        && hero.ready
-        && hero.input_enabled
-        && hud_font_ready;
+    let hero_hint_owner = hero.active && hero.ready && hero.input_enabled && hud_font_ready;
     // Skill hover uses the shared HUD font and retires with its current owner,
     // including the frames where a modal disables the page's input surface.
     let spells_hint_owner = spells.active
@@ -1133,7 +1131,11 @@ fn sync_quest_hint_surface(
     if surface.active != active {
         surface.active = active;
     }
-    let hint_font = if hero_hint_owner || spells_hint_owner { &hud.font } else { &font.0 };
+    let hint_font = if hero_hint_owner || spells_hint_owner {
+        &hud.font
+    } else {
+        &font.0
+    };
     if surface.font != *hint_font {
         surface.font = hint_font.clone();
     }
@@ -1423,9 +1425,7 @@ fn publish_quest_ui_status(
                 })
                 .collect(),
         });
-        if asset_error {
-            status.error = Some("quest UI font or skin failed to load".to_owned());
-        }
+        reconcile_asset_error(&mut status.error, loading, asset_error);
         const PRESENTATION_ERROR: &str = "Quest UI viewport metrics are not ready";
         if applied.presentation_ready && status.error.as_deref() == Some(PRESENTATION_ERROR) {
             status.error = None;
@@ -1458,6 +1458,20 @@ fn publish_quest_ui_status(
         }
     });
 }
+
+#[cfg(any(target_arch = "wasm32", test))]
+fn reconcile_asset_error(error: &mut Option<String>, loading: bool, failed: bool) {
+    const ASSET_ERROR: &str = "quest UI font or skin failed to load";
+    if failed && error.is_none() {
+        *error = Some(ASSET_ERROR.to_owned());
+    } else if !loading && !failed && error.as_deref() == Some(ASSET_ERROR) {
+        *error = None;
+    }
+}
+
+#[cfg(test)]
+#[path = "quest_ui_asset_recovery_tests.rs"]
+mod asset_recovery_tests;
 
 #[cfg(target_arch = "wasm32")]
 #[derive(Deserialize)]

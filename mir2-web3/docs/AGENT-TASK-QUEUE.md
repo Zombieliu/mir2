@@ -6,7 +6,7 @@ Updated 2026-11-13 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-13 已发布432c58a07e：68项发布保护、7项诊断检查、Stage/Promote及11条公网文件通过。公网运行包31441753字节完整、App在首帧后45.948秒启动；TC字库缺失、HUD112/113、Quest字体/皮肤错误，共用界面及完整验收false。冻结脚本未发送Walk，Worker未执行，不记8秒/120秒通过。源码确认失败资源句柄与Quest错误缺少同实例恢复；下一项为有界再请求与对应错误清理。131份WIP保全，整体1:1开放。[正式结果与固定源码](evidence/r16-runtime-body-recovery-20261113/production/README.md)
+2026-11-13 共用UI失败资源的同实例有界恢复候选通过：48项Rust、38项Node、两渲染路径四条全流程／八个冷热会话；字体和HUD／Quest皮肤实际失败后恢复，原句柄、generation及原8秒／120秒门槛保持。新三包bevy-0c553a754308e5b8已构建，尚待R2与匹配Web发布。生产仍为432c，原公网失败、未发送Walk及未执行Worker保留。131份WIP未变，另一个任务的容量文档更新单列；整体1:1开放。[候选与失败边界](evidence/r16-ui-asset-recovery-20261113/README.md)
 
 ## 保留的当前未结项
 
@@ -17,7 +17,8 @@ Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 G
 - [x] Web共用Rust目录解码已发布8654；公网529条初始化完整接收，首步1.919秒通过，原失败保留。[候选](evidence/r16-web-catalog-20261113/README.md) · [发布](evidence/r16-web-catalog-20261113/production/README.md)
 - [x] 运行包boot前有界恢复候选通过两后端、真实Chrome边界与85项检查；两次503后完整包恢复，原门槛和失败保留。[候选](evidence/r16-runtime-body-recovery-20261113/README.md)
 - [x] 已发布432c并完成一次公网签名回放；完整运行包/App启动通过，TC缺失与112/113导致共用界面未就绪，Walk未发送/Worker未执行，完整资格false。[正式回执](evidence/r16-runtime-body-recovery-20261113/production/README.md)
-- [ ] 在共享Rust层补字体及HUD/Quest必需图片的Failed有界重试，保留句柄/generation/FontCx；真正恢复后只清对应asset error。验证同实例恢复及永久失败，再沿原8秒/120秒门槛复验公网；补动态相邻格核对，保留原跳过。[源码与测试边界](evidence/r16-runtime-body-recovery-20261113/production/font-skin-source-review.md)
+- [x] 共享Rust字体及HUD/Quest必需图的Failed有界恢复候选通过48项Rust、38项Node和两渲染路径四条完整流程，保留句柄/generation/FontCx；只清已恢复的asset error。[候选与原失败](evidence/r16-ui-asset-recovery-20261113/README.md)
+- [ ] 发布新六叶运行包和匹配Web，再沿原8秒/120秒门槛复验公网；补动态相邻格核对，保留原Walk跳过和未完成资格。
 - [ ] 恢复候选截图仍见NPC名称不完整、任务提示英文和球内血量文字未见，继续像素/状态对照；不由Native ready或原字体缓存通过代替视觉验收。[截图范围](evidence/r16-runtime-body-recovery-20261113/README.md)
 
 - [x] 已执行df7aace169发布与扩展验收，公网分项通过但完整冷加载false，已回退正式站72c00d20ae。[正式回执](evidence/r16-font-release-20261112/README.md)

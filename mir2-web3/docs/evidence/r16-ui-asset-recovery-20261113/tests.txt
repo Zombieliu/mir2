@@ -1,0 +1,313 @@
+native-tests-r2.log
+running 41 tests
+test quest_ui_host::asset_recovery_tests::asset_error_survives_loading_and_clears_only_after_real_readiness ... ok
+test quest_ui_host::asset_recovery_tests::asset_failure_and_recovery_preserve_unrelated_errors ... ok
+test quest_ui_host::display_tests::optional_native_display_language_is_exact_and_does_not_expand_the_wire_enum ... ok
+test quest_ui_host::display_tests::status_advertises_display_opt_in_separately_and_real_npc_wire_keeps_targets_disabled_state ... ok
+test quest_ui_host::portable_fonts::asset_recovery::tests::each_cooldown_starts_at_the_failure_and_loading_cannot_spend_retries ... ok
+test quest_ui_host::portable_fonts::asset_recovery::tests::retry_identity_includes_the_complete_source_path_and_label ... ok
+test quest_ui_host::portable_fonts::tests::a_ready_old_cjk_face_cannot_authorize_a_pending_multilingual_font_set ... ok
+test quest_ui_host::portable_fonts::tests::all_ten_primaries_shape_and_rasterize_mixed_opaque_names_without_system_fonts ... ok
+test quest_ui_host::portable_fonts::tests::arabic_joins_and_reopened_opaque_runs_keep_source_identity_and_atlas_counts ... ok
+test quest_ui_host::portable_fonts::tests::exact_opt_in_uses_quest_font_policy_and_missing_opt_in_keeps_legacy_cjk ... ok
+test quest_ui_host::portable_fonts::tests::handles_without_fallbacks_have_missing_glyphs_but_the_real_helper_recovers_them ... ok
+test quest_ui_host::portable_fonts::tests::real_font_registration_restores_script_and_han_maps_after_collection_rebuild ... ok
+test quest_ui_host::portable_fonts::tests::recovery_io::failed_font_and_skin_recover_in_one_app_with_same_handles_and_real_fallbacks ... ok
+test quest_ui_host::portable_fonts::tests::recovery_io::loaded_invalid_font_cannot_advertise_readiness_or_clear_the_asset_error ... ok
+test quest_ui_host::portable_fonts::tests::recovery_io::permanent_failures_stop_after_three_total_requests_even_after_tracking_again ... ok
+test quest_ui_host::portable_fonts::tests::shared_owned_left_alignment_follows_bidi_and_preserves_legacy_and_other_layouts ... ok
+test quest_ui_host::tests::ack_requires_exact_operation_fields ... ok
+test quest_ui_host::tests::draw_plan_commit_is_exact_optional_and_bounded ... ok
+test quest_ui_host::tests::draw_plan_route_resolves_four_required_host_resources_without_painters ... ok
+test quest_ui_host::tests::duplicate_quest_and_missing_open_npc_are_rejected ... ok
+test quest_ui_host::tests::m8_strict_abi1_rejects_extended_player_and_cleanup_cannot_erase_full_hud ... ok
+test quest_ui_host::tests::map_npc_route_output_preserves_selected_server_object_id_and_rechecks_its_scene ... ok
+test quest_ui_host::tests::optional_experience_pair_preserves_unknown_and_real_max_one ... ok
+test quest_ui_host::tests::optional_hp_slot_and_status_do_not_change_quest_ready_or_capture_contract ... ok
+test quest_ui_host::tests::optional_mp_preserves_missing_vs_zero_and_unready_status_is_null ... ok
+test quest_ui_host::tests::optional_weight_pair_preserves_real_empty_bag_and_rejects_bad_u16 ... ok
+test quest_ui_host::tests::ordinary_ui_keeps_sibling_window_and_primary_unmarked ... ok
+test quest_ui_host::tests::presentation_accepts_css_scale_without_confusing_it_with_device_pixels ... ok
+test quest_ui_host::tests::quest_locale_dto_distinguishes_missing_from_present_invalid_and_publishes_initial_capability ... ok
+test quest_ui_host::tests::quest_name_targets_are_native_tracker_projection_with_current_full_stamp ... ok
+test quest_ui_host::tests::quest_name_targets_missing_context_stale_host_or_incomplete_quest_are_unknown_or_empty ... ok
+test quest_ui_host::tests::quest_world_context_rejects_stale_or_partial_authority_and_preserves_zero_gold ... ok
+test quest_ui_host::tests::quest_world_local_messages_preserve_origin_and_recheck_life_tile_and_revision ... ok
+test quest_ui_host::tests::quest_world_route_output_revalidates_shared_supply_and_unknown_map ... ok
+test quest_ui_host::tests::quest_world_v2_requires_complete_nullable_rows_and_unique_bounded_object_ids ... ok
+test quest_ui_host::tests::resized_or_invalid_presentation_cannot_take_shared_input ... ok
+test quest_ui_host::tests::reward_preview_retains_original_item_info_and_rejects_invalid_widths ... ok
+test quest_ui_host::tests::shared_ui_uses_only_primary_window_and_active_transparent_layer_camera ... ok
+test quest_ui_host::tests::task_npc_route_output_preserves_real_stewards_and_rejects_changed_task_or_destination ... ok
+test quest_ui_host::tests::typed_reward_and_zero_endpoint_survive_projection ... ok
+test quest_ui_host::tests::unsupported_touch_viewports_do_not_silently_use_desktop_buttons ... ok
+test result: ok. 41 passed; 0 failed; 0 ignored; 0 measured; 493 filtered out; finished in 0.10s
+
+io-tests-identity.log
+running 3 tests
+test quest_ui_host::portable_fonts::tests::recovery_io::failed_font_and_skin_recover_in_one_app_with_same_handles_and_real_fallbacks ... ok
+test quest_ui_host::portable_fonts::tests::recovery_io::loaded_invalid_font_cannot_advertise_readiness_or_clear_the_asset_error ... ok
+test quest_ui_host::portable_fonts::tests::recovery_io::permanent_failures_stop_after_three_total_requests_even_after_tracking_again ... ok
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 531 filtered out; finished in 0.04s
+
+hud-tests.log
+running 2 tests
+test hud_ui_host::hud_hp_preferences_tests::hud_hp_view_optional_is_strict_and_old_snapshot_defaults_to_native_compact ... ok
+test hud_ui_host::hud_hp_preferences_tests::hud_hp_view_stale_snapshot_never_relabels_current_preferences ... ok
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 532 filtered out; finished in 0.00s
+
+shared-hud-tests.log
+running 5 tests
+test full_hud_ingest_is_atomic_and_independent_from_quest_revision ... ok
+test logout_full_snapshot_clears_but_surface_withdrawal_preserves_authority ... ok
+test name_is_optional_and_explicit_fallback_navigation_recovery_has_its_own_clock ... ok
+test new_hud_snapshot_rejects_unknown_nested_authority_fields ... ok
+test ready_and_root_visibility_yield_and_recover_together_without_losing_layout ... ok
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+TAP version 13
+# webgpu: raw=31429183 gzip=6532019 wrapper=141747
+# webgl2: raw=16601428 gzip=4249858 wrapper=117805
+# webgl2-shared: raw=32357557 gzip=6872027 wrapper=139721
+# bevy runtime budget passed (bevy-0cd68510886134e0)
+# Subtest: scripts\\test-bevy-runtime-budget.mjs
+ok 1 - scripts\\test-bevy-runtime-budget.mjs
+  ---
+  duration_ms: 1625.9466
+  type: 'test'
+  ...
+# Subtest: accepts exactly three immutable packages and six gzip-bound upload leaves
+ok 2 - accepts exactly three immutable packages and six gzip-bound upload leaves
+  ---
+  duration_ms: 18.5011
+  type: 'test'
+  ...
+# Subtest: rejects a different manifest digest, version or incomplete package set
+ok 3 - rejects a different manifest digest, version or incomplete package set
+  ---
+  duration_ms: 17.9956
+  type: 'test'
+  ...
+# Subtest: rejects missing or altered immutable bytes
+ok 4 - rejects missing or altered immutable bytes
+  ---
+  duration_ms: 12.2404
+  type: 'test'
+  ...
+# Subtest: rejects manifest publication, extra payloads, duplicate leaves and escaped object keys
+ok 5 - rejects manifest publication, extra payloads, duplicate leaves and escaped object keys
+  ---
+  duration_ms: 9.4904
+  type: 'test'
+  ...
+# Subtest: rejects missing gzip metadata and mismatched compressed bytes
+ok 6 - rejects missing gzip metadata and mismatched compressed bytes
+  ---
+  duration_ms: 10.092
+  type: 'test'
+  ...
+# Subtest: missing-object preflight retains all six new leaves and fails closed on lookup errors
+ok 7 - missing-object preflight retains all six new leaves and fails closed on lookup errors
+  ---
+  duration_ms: 19.4293
+  type: 'test'
+  ...
+# Subtest: partial and complete retries skip existing leaves only after actual decoded hash checks
+ok 8 - partial and complete retries skip existing leaves only after actual decoded hash checks
+  ---
+  duration_ms: 93.927
+  type: 'test'
+  ...
+# Subtest: resume rejects existing objects with wrong bytes, type or storage encoding
+ok 9 - resume rejects existing objects with wrong bytes, type or storage encoding
+  ---
+  duration_ms: 8.0543
+  type: 'test'
+  ...
+# Subtest: published verification checks every decoded hash and WASM storage encoding
+ok 10 - published verification checks every decoded hash and WASM storage encoding
+  ---
+  duration_ms: 8.7474
+  type: 'test'
+  ...
+# Subtest: workflow binds the reviewed commit and isolates credentials behind a checked missing subset
+ok 11 - workflow binds the reviewed commit and isolates credentials behind a checked missing subset
+  ---
+  duration_ms: 0.9128
+  type: 'test'
+  ...
+# Subtest: legacy four-file, UI0 four-file and UI1 six-file releases resolve immutable URLs
+ok 12 - legacy four-file, UI0 four-file and UI1 six-file releases resolve immutable URLs
+  ---
+  duration_ms: 41.4487
+  type: 'test'
+  ...
+# Subtest: flat source replacement after a read never changes the old immutable selection
+ok 13 - flat source replacement after a read never changes the old immutable selection
+  ---
+  duration_ms: 16.6035
+  type: 'test'
+  ...
+# Subtest: wrong manifest version and corrupted immutable bytes fail closed
+ok 14 - wrong manifest version and corrupted immutable bytes fail closed
+  ---
+  duration_ms: 11.7626
+  type: 'test'
+  ...
+# Subtest: saved manifest capability mismatch, missing package pair, and extra files are rejected
+ok 15 - saved manifest capability mismatch, missing package pair, and extra files are rejected
+  ---
+  duration_ms: 12.1268
+  type: 'test'
+  ...
+# Subtest: manifest override must stay absolute and inside webRoot
+ok 16 - manifest override must stay absolute and inside webRoot
+  ---
+  duration_ms: 8.9124
+  type: 'test'
+  ...
+# Subtest: immutable file and directory symlinks are rejected where host permits creation
+ok 17 - immutable file and directory symlinks are rejected where host permits creation
+  ---
+  duration_ms: 19.2112
+  type: 'test'
+  ...
+# Subtest: schema2 capability changes get different immutable identities for the same files
+ok 18 - schema2 capability changes get different immutable identities for the same files
+  ---
+  duration_ms: 1.7941
+  type: 'test'
+  ...
+# Subtest: schema2 order is canonical and file mutation cannot reuse its immutable URL
+ok 19 - schema2 order is canonical and file mutation cannot reuse its immutable URL
+  ---
+  duration_ms: 0.4322
+  type: 'test'
+  ...
+# Subtest: schema2 immutable identity is equal in fresh Node processes with different locales
+ok 20 - schema2 immutable identity is equal in fresh Node processes with different locales
+  ---
+  duration_ms: 102.0811
+  type: 'test'
+  ...
+# Subtest: legacy95e4 keeps its original four-file URL and does not invent capability metadata
+ok 21 - legacy95e4 keeps its original four-file URL and does not invent capability metadata
+  ---
+  duration_ms: 0.356
+  type: 'test'
+  ...
+# Subtest: published version is complete and older bytes survive a flat-current directory swap
+ok 22 - published version is complete and older bytes survive a flat-current directory swap
+  ---
+  duration_ms: 24.1117
+  type: 'test'
+  ...
+# Subtest: valid version reuse checks bytes and semantic manifest even if metadata ordering differs
+ok 23 - valid version reuse checks bytes and semantic manifest even if metadata ordering differs
+  ---
+  duration_ms: 11.8378
+  type: 'test'
+  ...
+# Subtest: bad version, incomplete pair, and source hash mismatch publish nothing
+ok 24 - bad version, incomplete pair, and source hash mismatch publish nothing
+  ---
+  duration_ms: 3.4612
+  type: 'test'
+  ...
+# Subtest: existing version corruption cannot be overwritten or repaired silently
+ok 25 - existing version corruption cannot be overwritten or repaired silently
+  ---
+  duration_ms: 9.6398
+  type: 'test'
+  ...
+# Subtest: reuse still rejects a changed flat source while preserving the good version
+ok 26 - reuse still rejects a changed flat source while preserving the good version
+  ---
+  duration_ms: 11.1656
+  type: 'test'
+  ...
+# Subtest: saved capability/version corruption and undeclared destination entries reject reuse
+ok 27 - saved capability/version corruption and undeclared destination entries reject reuse
+  ---
+  duration_ms: 9.0997
+  type: 'test'
+  ...
+# Subtest: existing nonce staging is never deleted or overwritten
+ok 28 - existing nonce staging is never deleted or overwritten
+  ---
+  duration_ms: 3.7406
+  type: 'test'
+  ...
+# Subtest: cross-device hardlink failure uses exclusive copy, other link errors do not
+ok 29 - cross-device hardlink failure uses exclusive copy, other link errors do not
+  ---
+  duration_ms: 13.6293
+  type: 'test'
+  ...
+# Subtest: rejects traversal metadata and relative roots
+ok 30 - rejects traversal metadata and relative roots
+  ---
+  duration_ms: 4.2532
+  type: 'test'
+  ...
+# Subtest: rejects source file, destination version, and root symlinks when host permits them
+ok 31 - rejects source file, destination version, and root symlinks when host permits them
+  ---
+  duration_ms: 16.1268
+  type: 'test'
+  ...
+# Subtest: the default keeps the existing full-pack/map-atlas profile and permits only two exact filenames
+ok 32 - the default keeps the existing full-pack/map-atlas profile and permits only two exact filenames
+  ---
+  duration_ms: 5.4152
+  type: 'test'
+  ...
+# Subtest: the Numeron profile binds the finite art manifest, six R16 renderer leaves and browser-safe fallbacks
+ok 33 - the Numeron profile binds the finite art manifest, six R16 renderer leaves and browser-safe fallbacks
+  ---
+  duration_ms: 4.2578
+  type: 'test'
+  ...
+# Subtest: remote manifest bytes and identity are checked before using the finite inventory
+ok 34 - remote manifest bytes and identity are checked before using the finite inventory
+  ---
+  duration_ms: 2.8039
+  type: 'test'
+  ...
+# (node:17616) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///E:/mir2-player-journey/mir2-web3/apps/web/next.config.ts?profile-test=legacy is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to E:\\mir2-player-journey\\mir2-web3\\apps\\web\\package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: finite Atlas is explicitly disabled, never passes the full atlas gate and cannot enable full-pack compilation
+ok 35 - finite Atlas is explicitly disabled, never passes the full atlas gate and cannot enable full-pack compilation
+  ---
+  duration_ms: 275.0031
+  type: 'test'
+  ...
+# Subtest: Next production exposes the selected profile while its unset default remains the original release
+ok 36 - Next production exposes the selected profile while its unset default remains the original release
+  ---
+  duration_ms: 41.5479
+  type: 'test'
+  ...
+# Subtest: all script entry points reject path selection before work and shell uses the same selector
+ok 37 - all script entry points reject path selection before work and shell uses the same selector
+  ---
+  duration_ms: 488.7718
+  type: 'test'
+  ...
+# Subtest: a selected config must be a regular file, never an environment-selected path or link
+ok 38 - a selected config must be a regular file, never an environment-selected path or link
+  ---
+  duration_ms: 2.8677
+  type: 'test'
+  ...
+1..38
+# tests 38
+# suites 0
+# pass 38
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1632.0134

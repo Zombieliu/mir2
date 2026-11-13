@@ -5,6 +5,9 @@ use bevy::text::{
 };
 use std::collections::BTreeSet;
 
+#[path = "portable_ui_asset_recovery_io_tests.rs"]
+mod recovery_io;
+
 fn font_app(configure: bool) -> App {
     let mut app = App::new();
     app.init_resource::<Assets<Font>>()

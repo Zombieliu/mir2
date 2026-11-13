@@ -24,16 +24,16 @@ jobs:
     if: >-
       github.repository == 'Zombieliu/mir2' &&
       github.ref == 'refs/heads/codex/windows-player-journey' &&
-      inputs.runtime_version == 'bevy-84ef836460a84e03' &&
-      inputs.runtime_manifest_sha256 == '32bf5c4ffcf59fb352d27afd6d1e2a20758dd56edc0dfba0e015fece42d936a8'
+      inputs.runtime_version == 'bevy-0c553a754308e5b8' &&
+      inputs.runtime_manifest_sha256 == '36bdaa0116064c9b41cf8f54a547e53319011180e2275e1c5549e2ed7a33041b'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     defaults:
       run:
         working-directory: mir2-web3/apps/web
     env:
-      EXPECTED_RUNTIME_VERSION: bevy-84ef836460a84e03
-      EXPECTED_RUNTIME_MANIFEST_SHA256: 32bf5c4ffcf59fb352d27afd6d1e2a20758dd56edc0dfba0e015fece42d936a8
+      EXPECTED_RUNTIME_VERSION: bevy-0c553a754308e5b8
+      EXPECTED_RUNTIME_MANIFEST_SHA256: 36bdaa0116064c9b41cf8f54a547e53319011180e2275e1c5549e2ed7a33041b
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
@@ -42,7 +42,7 @@ jobs:
       - name: Read the immutable renderer bundle
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          ref: 52b3b30b7074c7f67830bd6f5e8c828362a3b523
+          ref: c52640554fde32200d1d0da802c5b1bad74a08cb
           path: r16-renderer-artifact
           persist-credentials: false
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
@@ -50,8 +50,8 @@ jobs:
           node-version: '22'
       - name: Verify local files and derive the six versioned object keys
         run: |
-          bundle="$GITHUB_WORKSPACE/r16-renderer-artifact/r16-6997-bevy.tar.gz"
-          printf '%s  %s\n' '009216614ef11588930fe0644008ff813fc2ae01f4a2c1bf8927682ed5608686' "$bundle" | sha256sum --check
+          bundle="$GITHUB_WORKSPACE/r16-renderer-artifact/r16-ui-asset-recovery-bevy.tar.gz"
+          printf '%s  %s\n' '9088d3ca71c77866d652f362524bd9e50cc3b27f8871e7cf7033ec0cb448ea92' "$bundle" | sha256sum --check
           mkdir -p public/bevy-runtime-releases
           tar --no-same-owner --no-same-permissions -xzf "$bundle" -C public/bevy-runtime-releases
           cp lib/generated/bevy_runtime_version_numeron_r16.json lib/generated/bevy_runtime_version.json

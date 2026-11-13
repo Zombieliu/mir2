@@ -356,6 +356,7 @@ mod web {
                         mir2_client_bevy::crystal_ui::character_stats_portable::required_assets(),
                     );
                     applied.images = paths.into_iter().map(|p| server.load::<Image>(p)).collect();
+                    fonts.track_images(&applied.images);
                     applied.requested = true;
                 }
                 applied.snapshot = Some(snapshot);

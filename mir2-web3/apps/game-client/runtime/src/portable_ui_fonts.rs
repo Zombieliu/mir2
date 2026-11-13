@@ -7,6 +7,9 @@ use mir2_client_bevy::native_i18n::{self, Locale};
 use mir2_client_bevy::quest_presentation_text::QuestDisplayLanguage;
 use std::collections::HashMap;
 
+#[path = "portable_ui_asset_recovery.rs"]
+mod asset_recovery;
+
 pub(crate) const LEGACY_CJK_FONT: &str = "original-ui/fonts/NotoSansCJKsc-Regular.otf";
 const FONT_LOCALES: [Locale; 6] = [
     Locale::English,
@@ -47,12 +50,24 @@ impl FontReadiness {
 #[derive(Resource, Default)]
 pub(crate) struct PortableUiFonts {
     handles: HashMap<&'static str, Handle<Font>>,
+    skins: HashMap<bevy::asset::AssetPath<'static>, Handle<Image>>,
+    recovery: asset_recovery::UiAssetRecovery,
     fallbacks_ready: bool,
     // Atlas keys include Blob identity. Retain actual shaped sources alongside
     // Bevy's atlases, rather than allowing SourceCache pruning to recreate them.
     retained_sources: HashMap<u64, Font>,
 }
 impl PortableUiFonts {
+    pub(crate) fn track_images(&mut self, images: &[Handle<Image>]) {
+        for image in images {
+            if let Some(path) = image.path() {
+                self.skins
+                    .entry(path.clone())
+                    .or_insert_with(|| image.clone());
+            }
+        }
+    }
+
     pub(crate) fn request(&mut self, server: &AssetServer, display: Option<QuestDisplayLanguage>) {
         self.handles
             .entry(LEGACY_CJK_FONT)
@@ -110,6 +125,29 @@ impl PortableUiFonts {
                     });
             }
         }
+    }
+}
+
+fn retry_failed_ui_assets(
+    mut fonts: ResMut<PortableUiFonts>,
+    server: Option<Res<AssetServer>>,
+    time: Option<Res<Time<Real>>>,
+) {
+    // Bare shaping fixtures need neither IO nor a clock. The real App has both.
+    let (Some(server), Some(time)) = (server, time) else {
+        return;
+    };
+    let PortableUiFonts {
+        handles,
+        skins,
+        recovery,
+        ..
+    } = &mut *fonts;
+    for handle in handles.values() {
+        recovery.retry_failed(&server, handle, time.elapsed());
+    }
+    for handle in skins.values() {
+        recovery.retry_failed(&server, handle, time.elapsed());
     }
 }
 
@@ -231,6 +269,7 @@ pub(crate) fn install(app: &mut App) {
         .resource_mut::<FontCx>()
         .source_cache
         .make_shared();
+    app.add_systems(PreUpdate, retry_failed_ui_assets);
     app.add_systems(
         PostUpdate,
         restore_fallbacks

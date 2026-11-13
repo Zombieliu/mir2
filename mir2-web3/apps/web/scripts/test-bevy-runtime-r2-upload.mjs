@@ -210,13 +210,13 @@ test("workflow binds the reviewed commit and isolates credentials behind a check
   assert.match(workflow, /github\.repository == 'Zombieliu\/mir2'/);
   assert.match(workflow, /github\.ref == 'refs\/heads\/codex\/windows-player-journey'/);
   assert.match(workflow, /ref: \$\{\{ github\.sha \}\}/);
-  assert.match(workflow, /ref: 52b3b30b7074c7f67830bd6f5e8c828362a3b523/);
-  assert.match(workflow, /009216614ef11588930fe0644008ff813fc2ae01f4a2c1bf8927682ed5608686/);
+  assert.match(workflow, /ref: c52640554fde32200d1d0da802c5b1bad74a08cb/);
+  assert.match(workflow, /9088d3ca71c77866d652f362524bd9e50cc3b27f8871e7cf7033ec0cb448ea92/);
   assert.match(workflow, /persist-credentials: false/);
   assert.match(workflow, /actions\/checkout@[0-9a-f]{40}/);
   assert.match(workflow, /actions\/setup-node@[0-9a-f]{40}/);
-  assert.match(workflow, /inputs\.runtime_version == 'bevy-84ef836460a84e03'/);
-  assert.match(workflow, /inputs\.runtime_manifest_sha256 == '32bf5c4ffcf59fb352d27afd6d1e2a20758dd56edc0dfba0e015fece42d936a8'/);
+  assert.match(workflow, /inputs\.runtime_version == 'bevy-0c553a754308e5b8'/);
+  assert.match(workflow, /inputs\.runtime_manifest_sha256 == '36bdaa0116064c9b41cf8f54a547e53319011180e2275e1c5549e2ed7a33041b'/);
   assert.ok(workflow.indexOf("--dryRun true") < workflow.indexOf("secrets.MIR2_R2_UPLOAD_SECRET"));
   assert.ok(workflow.indexOf("--prepareMissing") < workflow.indexOf("secrets.MIR2_R2_UPLOAD_SECRET"));
   assert.ok(workflow.indexOf("sha256sum --check") < workflow.indexOf("tar --no-same-owner"));

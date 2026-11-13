@@ -58,7 +58,7 @@ test("the Numeron profile binds the finite art manifest, six R16 renderer leaves
   for (const prefix of FIXED_R16.fallbackPrefixes) assert(profile.browserFallbackBaseUrls.some(base => base.endsWith(`/${prefix}`)));
   assert(profile.browserFallbackBaseUrls.every(base => !base.startsWith("https://mir2.obelisk.build/")));
   const runtimeBytes = await fs.readFile(path.join(webRoot, "lib/generated/bevy_runtime_version_numeron_r16.json"));
-  assert.equal(digest(runtimeBytes), "32bf5c4ffcf59fb352d27afd6d1e2a20758dd56edc0dfba0e015fece42d936a8");
+  assert.equal(digest(runtimeBytes), "36bdaa0116064c9b41cf8f54a547e53319011180e2275e1c5549e2ed7a33041b");
   const runtime = JSON.parse(runtimeBytes);
   assert.equal(runtime.version, profile.bevyRuntime.version);
   assert.equal(FIXED_R16.runtimeVersion, "bevy-a46905128c316656");
