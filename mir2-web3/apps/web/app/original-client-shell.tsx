@@ -542,6 +542,7 @@ export function OriginalClientShell({
   viewportEntities: sourceViewportEntities,
   viewportTiles,
   sceneInteractionReady,
+  sceneAssetReleaseId = null,
   sceneLoadingText,
   onRetrySceneLoad,
   bevyEntityRendererReady,
@@ -5616,6 +5617,7 @@ export function OriginalClientShell({
 
             <OriginalClientSceneVisualLayers
               screen={screen}
+              assetReleaseId={sceneAssetReleaseId}
               t={t}
               world={world}
               fishingEffects={fishingEffects}

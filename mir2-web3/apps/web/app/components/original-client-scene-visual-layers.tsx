@@ -502,6 +502,7 @@ function FallbackVfxNode({
 
 function OriginalClientSceneVisualLayersInner({
   screen,
+  assetReleaseId = null,
   t,
   world,
   fishingEffects,
@@ -531,6 +532,7 @@ function OriginalClientSceneVisualLayersInner({
   viewportLayout,
 }: {
   screen: ClientScreen;
+  assetReleaseId?: string | null;
   t: TranslateFn;
   world: DisplayWorld;
   fishingEffects: readonly DisplaySceneEffect[];
@@ -894,7 +896,7 @@ function OriginalClientSceneVisualLayersInner({
                   entity.sprite?.altBodyLibrary, entity.sprite?.altHairLibrary, entity.sprite?.altWeaponLibrary,
                   entity.sprite?.altWeaponLibrarySecondary, entity.sprite?.frameBaseOffset, entity.sprite?.weaponFrameOffset,
                   entity.sprite?.altFrameBaseOffset, entity.sprite?.altWeaponFrameOffset, entity.sprite?.mountFrameOffset])}
-                  sprite={sprite} packedActors={packedActors}>
+                  sprite={sprite} packedActors={packedActors} assetReleaseId={assetReleaseId}>
                   {(displayed, images, failed) => <EntitySpriteLayers useBevyEntityRenderer={false}
                     effectsEnabled={effectsEnabled} packedActors={packedActors} sprite={displayed}
                     objectId={entity.objectId} residentImages={images} onResidentError={failed} />}

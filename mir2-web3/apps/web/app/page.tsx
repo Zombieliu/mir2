@@ -21848,6 +21848,7 @@ export default function HomePage() {
       player={self}
       predictedPlayerPosition={null}
       sceneInteractionReady={screen !== "game" || initialSceneAssetsReady}
+      sceneAssetReleaseId={loadedSceneAssetReleaseRef.current}
       sceneLoadingText={gameplayLocaleReady ? undefined : gameplayLocaleStatus === "failed"
         ? t("ui.gameTextLoadUnavailable", [], "Game text could not be loaded.")
         : t("ui.gameTextLoading", [], "Loading game text…")}
