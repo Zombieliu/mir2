@@ -1,0 +1,150 @@
+{
+  "kind": "first-walking-candidate-public-cohort-failed-and-rolled-back",
+  "source": "91b8fc9b4f5170cb37b6619b991707ed76a34d73",
+  "candidate": "dpl_44ctBTrdq2T5fb91EjrUEt6B3GUk",
+  "overallPassed": false,
+  "promotionWorkflow": 43518539244,
+  "rollbackWorkflow": 43519792110,
+  "baselineRestored": {
+    "source": "f6603c89a34e27813d7495fceab3292cc293c47b",
+    "deploymentId": "dpl_3eNPP4uaj3nT3HsAMhJUUoXpN4Dh",
+    "checkedAt": "2026-11-13T22:37:23.315Z",
+    "qr": [
+      {
+        "locale": "zh-cn",
+        "passed": true,
+        "browserClosed": true,
+        "raw": {
+          "path": "C:/r16-walking-recovery-20261114/release/public-qr/qr-zh-cn-receipt.json",
+          "sha256": "f3f61ad6676ec0b34602346ba34447b0dba3f02388eb13eb0702fe447238e577"
+        }
+      },
+      {
+        "locale": "zh-tw",
+        "passed": true,
+        "browserClosed": true,
+        "raw": {
+          "path": "C:/r16-walking-recovery-20261114/release/public-qr/qr-zh-tw-receipt.json",
+          "sha256": "477d4d956bfa693f99aeefd72f9428d4e88380d642e48c89c7e23211c3323027"
+        }
+      }
+    ]
+  },
+  "failure": {
+    "phase": "one-ordinary-adjacent-walk",
+    "code": "ORDINARY_WALK_NOT_VERIFIED"
+  },
+  "movement": {
+    "attempted": false,
+    "passed": false,
+    "status": "skipped-no-authoritative-playable-spawn",
+    "failure": {
+      "phase": "one-ordinary-adjacent-walk",
+      "code": "ORDINARY_WALK_NOT_VERIFIED"
+    }
+  },
+  "initialAuthority": {
+    "initialSelfPosition": {
+      "x": 288,
+      "y": 616
+    },
+    "selfPacketMatches": true,
+    "starterMapPacket": true
+  },
+  "actualFirstPlayable": {
+    "position": {
+      "x": 287,
+      "y": 617
+    },
+    "camera": {
+      "x": 287,
+      "y": 617
+    },
+    "interactionReady": true,
+    "hasPlayer": true,
+    "hasMap": true
+  },
+  "observationBoundary": "The driver required current selfPosition to remain canonical288616 before sending a movement key. A later UserLocation was received, and the actual playable DOM/camera was287617. The old frame metadata omitted that packet coordinate; do not assign the relocation cause or infer a server/collision defect. The movement input and original8s ACK/presentation test did not execute. The full attempt stays false.",
+  "staticEntryChecks": {
+    "completeCapture": true,
+    "exactStaticHttpBody": true,
+    "afterAuthBeforeStart": true,
+    "authoritativeSpawn": true,
+    "staticSceneCommit": true,
+    "exactFirstPlayable": false,
+    "noMatchingDynamicRequest": true
+  },
+  "positive": {
+    "officialTestnetLoginAndRole": true,
+    "cityRendered": true,
+    "sharedHud": true,
+    "originalFonts": true,
+    "prewarm": true,
+    "workerRestart": true,
+    "ordinaryLogout": true,
+    "returnedToSelect": true
+  },
+  "timing": {
+    "clockEpochMs": 1794608812038,
+    "authoritativeLoginSuccessMs": 28262,
+    "startIntentMs": 59079,
+    "startAckMs": 62654,
+    "authoritativeStarterMapMs": 62662,
+    "authoritativeSelfMs": 62662,
+    "firstPlayableObservedMs": 65827,
+    "terrainPaintVerifiedMs": 131932,
+    "sharedHudObservedMs": 171501,
+    "logoutIntentMs": 183218,
+    "logoutAckMs": 184240,
+    "manifestAttemptsBeforeStart": 1,
+    "manifestAttemptsAtOrAfterStart": 0,
+    "starterRegionRequestMs": 28265,
+    "starterRegionWireHeadersMs": 29512.096,
+    "starterRegionResponseEventMs": 29512,
+    "starterRegionBodyMs": 29769,
+    "starterRegionCommitMs": 62773,
+    "sceneSpritesReadyMs": 62803,
+    "localeRequestMs": 28265,
+    "localeBodyMs": 40676,
+    "localeReadyMs": 40705,
+    "firstPlayableFrameMs": 65810,
+    "rendererBodyMs": 129711,
+    "clickToFirstFrameMs": 6731,
+    "firstFrameToSharedHudObservedMs": 105691
+  },
+  "next": "New private observer only: preserve canonical initial UserInformation, record ordered same-socket/owner/map UserLocation facts before any world input, freeze a qualified latest-position proof before the one safe adjacent input, and keep protected static body/SHA/6819cells/957sprites plus original8s/120s. Derive eligible neighbors from exact Git-pinned full map/production collision parser, never from absent sparse presentation cells. No product gameplay or auth change.",
+  "evidence": [
+    {
+      "path": "C:/r16-walking-recovery-20261114/release/signed-public/desktop-walking-compiled-recovery/receipt.json",
+      "sha256": "4d394c6248b806a272feae3c7a78c236f2b186f7ad72a80cd3689617ac3ba750"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/release/signed-public/desktop-walking-compiled-recovery/websocket-frame-metadata.json",
+      "sha256": "f59a85512f3e7c96d792ead7c598b669c7c8c4146a5176cd195358fa23666828"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/release/signed-public/desktop-walking-compiled-recovery/startup-probe.json",
+      "sha256": "7b801677db487f82e38f00e92e2f399ed9781be3ae0caa96ed4fc167598de63a"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/release/signed-public/first-party-signed-summary.json",
+      "sha256": "858dc8a9968ca8946b28774b81220f4244d890a1a9860def726b142f226ee7a9"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/release/signed-public/preparation.json",
+      "sha256": "06b2167e13d9b9045a4a5d3c7bfe7bddadb111a90c1c8079617772ff57484562"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/release/promotion/numeron-r16-release.json",
+      "sha256": "1b10be76980ffea8a80c3309f727c51451d0fdeb155c229e6b363dbb7ff701ce"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/release/rollback/numeron-r16-release.json",
+      "sha256": "2992392d50c0a85f1a30649c9c758632f96419e47c77b2d144291535f3ef78e2"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/release/rollback-readback.json",
+      "sha256": "55b239ee01cb441dab46c4dd591ae615da6fd4f5f9dd84d5f3ab0b3376590c74"
+    }
+  ]
+}

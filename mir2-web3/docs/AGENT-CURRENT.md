@@ -14,7 +14,7 @@ Short routing summary, updated 2026-11-14 (Asia/Shanghai). This indexes recorded
 
 ## Last recorded decisions and open work
 
-2026-11-14 发布前正式f6603c89a3／dpl_3eNPP4uaj3nT3HsAMhJUUoXpN4Dh保留寻路修复；[前次公网](evidence/r16-runtime-source-rotation-20261114/production/README.md)首步127ms／Native204.320秒，原冷120秒false。walking恢复91b8fc9b4f的118＋70项／构建及R21/R22完整四会话通过；两个真实共享Native HUD后端＋DOM原Walking帧，三次单击和一次满血零攻击自然反应、快速战后回镇、Worker、普通存档重开均有证据。一处遮挡NoClick消耗原4次之一，真实零输入；未加650ms寻路等待或放宽8秒。已启动43518539244发布，正式alias与公网尚待复验。旧失败保留、R15停步未定因，不倒填为已修。[唯一候选与四场资格](evidence/r16-walking-recovery-20261114/README.md)。NPC姓名已定位层级及固定字图截字、尚未实施；冷加载、死亡弹窗十语、全场景GPU、实体手机及其余1:1开放，Goal active。
+2026-11-14 当前已回退f6603c89a3／dpl_3eNPP4uaj3nT3HsAMhJUUoXpN4Dh，简繁扫码复验通过，保留寻路修复。walking恢复91b8fc9b4f的118＋70项／构建及R21/R22完整四会话通过；43518539244发布及alias读回成功，但公网观察器因固定288616与首帧287617不同在发键前早退，whole=false，43519792110已回退。不是已发移动8秒失败，旧metadata未存后到UserLocation坐标，不给位置变化指定碰撞原因。新retry准备保留canonical初始包、同连接／角色／地图有序权威及输入前绑定，用Git-pinned完整0.map和生产parser证明相邻碰撞；不泛化稀疏cells缺项，静态SHA及8秒／20秒／120秒不变。[本地四场及发布回退](evidence/r16-walking-recovery-20261114/README.md)。R15未定因，NPC姓名已定位但未实施；冷加载、死亡弹窗十语、全场景GPU、实体手机及其余1:1开放，Goal active。
 
 2026-11-12 正式站已发布 `51d2dcc346`：共享图片取消与图集计时/JSON大小缓存身份修复。本机75项、生产构建及两后端重开同档通过；公网简繁出码、手机尺寸官方钱包Testnet签名、进比奇、权威移动、共用HUD/任务窗、113/113预取和正常退出通过，无需回滚。云端缓存身份与计算一致；Worker正常更新缓存一次，未迁移旧007缓存。本次观测起点到首画面65.2秒/共用HUD104.7秒（点击进游戏后约6.8秒/46.3秒），继续优化冷加载；实体手机、完整1:1及历史未结项仍开放。[发布与边界](evidence/r16-cache-repair-20261112/README.md)
 
