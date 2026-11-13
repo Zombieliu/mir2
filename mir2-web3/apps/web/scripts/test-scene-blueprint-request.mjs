@@ -269,6 +269,18 @@ const entrySource = ts.transpileModule(readFileSync(new URL("../lib/r16-entry-sc
 }).outputText;
 
 function entryFixture(fetcher, bundledPlayerMetadata = playerMetadata) {
+  const chunks = new Map();
+  const loadChunkDependency = file => {
+    if (file.pathname.endsWith(".json")) return { default: JSON.parse(readFileSync(file, "utf8")) };
+    if (chunks.has(file.href)) return chunks.get(file.href);
+    const exports = {}; chunks.set(file.href, exports);
+    const code = ts.transpileModule(readFileSync(file, "utf8"), {
+      compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+    }).outputText;
+    new Function("exports", "require", code)(exports, name =>
+      loadChunkDependency(new URL(name + (name.endsWith(".json") ? "" : ".ts"), file)));
+    return exports;
+  };
   const timeouts = [];
   const signals = {
     any: AbortSignal.any.bind(AbortSignal),
@@ -285,6 +297,7 @@ function entryFixture(fetcher, bundledPlayerMetadata = playerMetadata) {
     if (name === "./generated/r16-entry-visuals.json") return { default: visualsMetadata };
     if (name === "./generated/r16-entry-player-meta.json") return { default: bundledPlayerMetadata };
     if (name === "./first-crystal-scene-request") return sceneReaderModule.exports;
+    if (name === "./generated/r16-entry-bootstrap-chunks") return loadChunkDependency(new URL("../lib/generated/r16-entry-bootstrap-chunks.ts", import.meta.url));
     assert.equal(name, "./scene-blueprint-request");
     return loadedModule.exports;
   };

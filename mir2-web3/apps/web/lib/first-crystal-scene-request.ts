@@ -120,6 +120,8 @@ function isRetryableFailure(error: unknown): boolean {
     (error instanceof DOMException && (error.name === "TimeoutError" || error.name === "AbortError"));
 }
 
+export { isRetryableFailure as isRetryableBootstrapReadFailure };
+
 /** Bound the wait for headers, a stalled body, and the entire body separately. */
 export async function fetchBootstrapResponse<T>(
   url: string,

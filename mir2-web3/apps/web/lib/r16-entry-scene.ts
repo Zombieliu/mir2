@@ -2,7 +2,8 @@ import entryScene from "./generated/r16-entry-scene.json";
 import entryFloor from "./generated/r16-entry-floor.json";
 import entryVisuals from "./generated/r16-entry-visuals.json";
 import entryPlayerMetadata from "./generated/r16-entry-player-meta.json";
-import { fetchBootstrapResponse, PINNED_BOOTSTRAP_HEADER_TIMEOUT_MS, shouldRetryBootstrapResponse } from "./first-crystal-scene-request";
+import { fetchBootstrapResponse, PINNED_BOOTSTRAP_HEADER_TIMEOUT_MS, shouldRetryBootstrapResponse, isRetryableBootstrapReadFailure } from "./first-crystal-scene-request";
+import { readR16EntrySceneChunk, readR16EntryFloorChunk } from "./generated/r16-entry-bootstrap-chunks";
 import type { OriginalSceneSpriteLibraryMeta } from "./original-scene-sprite-meta";
 import {
   createCrystalSceneBlueprintRequestKey,
@@ -41,7 +42,10 @@ const VISUAL_RECOVERY_DELAY_MS = 1_000;
 export function preloadR16EntryScene(pinnedRelease?: string): Promise<SceneBlueprint | null> | null {
   if (pinnedRelease !== entryScene.assetReleaseId || entryScene.schemaVersion !== SCENE_BLUEPRINT_SCHEMA_VERSION ||
       !globalThis.crypto?.subtle) return null;
-  entryLoad ??= loadProgressiveEntryJson<SceneBlueprint>(entryScene, "high").catch(() => null).then((blueprint) => {
+  entryLoad ??= loadProgressiveEntryJson<SceneBlueprint>(entryScene, "high").catch((error) => {
+    if (!isRetryableBootstrapReadFailure(error)) throw error;
+    return readR16EntrySceneChunk();
+  }).catch(() => null).then((blueprint) => {
     if (!blueprint) entryLoad = null;
     return blueprint;
   });
@@ -51,7 +55,10 @@ export function preloadR16EntryScene(pinnedRelease?: string): Promise<SceneBluep
 export function preloadR16EntryFloor(pinnedRelease?: string): Promise<R16EntrySpriteImages | null> | null {
   if (pinnedRelease !== entryFloor.assetReleaseId || entryFloor.assetReleaseId !== entryScene.assetReleaseId ||
       entryFloor.sceneSha256 !== entryScene.sha256 || !globalThis.crypto?.subtle) return null;
-  floorLoad ??= loadProgressiveEntryJson<R16EntrySpriteImages>(entryFloor, "high").catch(() => null).then((images) => {
+  floorLoad ??= loadProgressiveEntryJson<R16EntrySpriteImages>(entryFloor, "high").catch((error) => {
+    if (!isRetryableBootstrapReadFailure(error)) throw error;
+    return readR16EntryFloorChunk();
+  }).catch(() => null).then((images) => {
     if (!images) floorLoad = null;
     return images;
   });

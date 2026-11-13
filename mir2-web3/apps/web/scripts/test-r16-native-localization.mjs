@@ -25,11 +25,14 @@ function compile(source) {
 }
 const request = {};
 new Function("exports", compile(read("apps/web/lib/first-crystal-scene-request.ts")))(request);
+const bootstrapChunk = {};
+new Function("exports", compile(read("apps/web/lib/pinned-bootstrap-chunk.ts")))(bootstrapChunk);
 
 function helper(data = generated, readGameplay = () => core, readNpc = () => npc, fetcher) {
   const exports = {}, source = read("apps/web/lib/r16-native-localization.ts");
   new Function("exports", "require", "window", "fetch", compile(source))(exports, name => {
     if (name === "./first-crystal-scene-request") return request;
+    if (name === "./pinned-bootstrap-chunk") return bootstrapChunk;
     if (name === startupPath) return data;
     if (name === deliveryPath) return delivery;
     if (name === gameplayPath) return readGameplay();

@@ -1,6 +1,7 @@
 import startup from "./generated/r16-native-localization-startup.json";
 import gameplayAsset from "./generated/r16-native-localization-delivery.json";
-import { fetchBootstrapResponse, PINNED_BOOTSTRAP_HEADER_TIMEOUT_MS } from "./first-crystal-scene-request";
+import { fetchBootstrapResponse, PINNED_BOOTSTRAP_HEADER_TIMEOUT_MS, shouldRetryBootstrapResponse, isRetryableBootstrapReadFailure } from "./first-crystal-scene-request";
+import { createPinnedBootstrapChunk } from "./pinned-bootstrap-chunk";
 
 /** Presentation codes only. Do not forward this list to legacy protocol/WASM enums. */
 export const R16_NATIVE_LANGUAGES = ["zh-CN", "zh-TW", "en", "pt-BR", "ru", "hi", "id", "vi", "th", "ar"] as const;
@@ -21,18 +22,15 @@ let gameplayCatalog: GameplayCatalog | null = null;
 let gameplayRequest: Promise<void> | null = null;
 let npcReady = false;
 let npcRequest: Promise<void> | null = null;
+const readGameplayChunk = createPinnedBootstrapChunk<GameplayCatalog>(gameplayAsset,
+  () => import(/* webpackChunkName: "r16-gameplay-locales" */ "./generated/r16-native-localization-gameplay.json"), "json-line");
 
 export function hasR16GameplayLocalization(): boolean {
   return gameplayCatalog !== null;
 }
 
-async function readGameplayCatalog(cache: RequestCache): Promise<GameplayCatalog> {
-  if (typeof window === "undefined" || !globalThis.crypto?.subtle) {
-    // An unsecured LAN development host cannot use SubtleCrypto.
-    const { default: core } = await import(/* webpackChunkName: "r16-gameplay-locales" */ "./generated/r16-native-localization-gameplay.json");
-    return core as GameplayCatalog;
-  }
-  const { path, bytes, sha256 } = gameplayAsset;
+async function readGameplayBytes(cache: RequestCache): Promise<ArrayBuffer> {
+  const { path, bytes } = gameplayAsset;
   const { response, body } = await fetchBootstrapResponse(
     path,
     {
@@ -42,9 +40,28 @@ async function readGameplayCatalog(cache: RequestCache): Promise<GameplayCatalog
     response => response.arrayBuffer(),
     (url, init) => fetch(url, { ...init, credentials: "omit", redirect: "error", priority: "high" }),
   );
+  if (shouldRetryBootstrapResponse(response)) {
+    throw new TypeError(`R16 gameplay localization is temporarily unavailable (HTTP ${response.status})`);
+  }
   if (!response.ok || !body || body.byteLength !== bytes) {
     throw new Error("R16 gameplay localization response is incomplete.");
   }
+  return body;
+}
+
+async function readGameplayCatalog(cache: RequestCache): Promise<GameplayCatalog> {
+  if (typeof window === "undefined" || !globalThis.crypto?.subtle) {
+    // An unsecured LAN development host cannot use SubtleCrypto.
+    const { default: core } = await import(/* webpackChunkName: "r16-gameplay-locales" */ "./generated/r16-native-localization-gameplay.json");
+    return core as GameplayCatalog;
+  }
+  let body: ArrayBuffer;
+  try { body = await readGameplayBytes(cache); }
+  catch (error) {
+    if (!isRetryableBootstrapReadFailure(error)) throw error;
+    return readGameplayChunk();
+  }
+  const { sha256 } = gameplayAsset;
   const hash = new Uint8Array(await crypto.subtle.digest("SHA-256", body));
   const actual = Array.from(hash, byte => byte.toString(16).padStart(2, "0")).join("");
   if (actual !== sha256) throw new Error("R16 gameplay localization digest mismatch.");
