@@ -60,8 +60,14 @@
     },
     {
       "name": "protocol-evidence.json",
-      "bytes": 22442,
-      "sha256": "0b2f1a35bb40fc630c27caef7284a3bc0d1c0a61e5c998e991795843c3185f3b"
+      "bytes": 21795,
+      "sha256": "ab8764ab3a3b3845acc2c166b8eb3ed384a8d8f5519c4c1cb6762c8dc6b3592b",
+      "sourceSerialization": {
+        "rawLocalPath": "C:/r16-walking-recovery-20261114/protocol-evidence/protocol-evidence.json",
+        "bytes": 22442,
+        "sha256": "0b2f1a35bb40fc630c27caef7284a3bc0d1c0a61e5c998e991795843c3185f3b",
+        "transform": "Git text CRLF to LF; JSON value and original local artifact unchanged"
+      }
     },
     {
       "name": "r7-standing-diagnosis.json",
