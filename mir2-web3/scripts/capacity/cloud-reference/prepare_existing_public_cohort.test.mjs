@@ -13,7 +13,7 @@ import { parseCrystalCollisionMap, findProtocolWalkPath, protocolMapCellIsWalkab
 import { createNavigator } from '../../../apps/web/scripts/quest-agent/protocol-play.mjs';
 import { poolFingerprints, validateExistingPool, validateLedger, validateMapProof, assertMonitorIdentity,
   buildLayout, walkToTarget, freshSafeState, prepareBatches, optionsFrom, canonical, MAP_METADATA_SHA256, NPC_METADATA_SHA256,
-  validateTargetLayout, createTargetSelectionState, selectPreparationTarget }
+  validateTargetLayout, createTargetSelectionState, selectPreparationTarget, validateResumeEvidence, readPublicResumeFile, RESUME_V4_PINS }
   from './prepare_existing_public_cohort.mjs';
 
 const endpoint = 'wss://165.154.65.136.sslip.io/playtest/ws', webBase = 'https://numeron.obelisk.build';
@@ -94,12 +94,13 @@ test('live-matched map0 origin 312,601 escapes the old added door moat without c
   assert.equal(route([]).length - 1, 24);
   const oldDoorMoat = m.doors.flatMap(d => Array.from({ length: 9 }, (_, i) => ({ x: d.x + i % 3 - 1, y: d.y + Math.floor(i / 3) - 1 })));
   assert.equal(route([...l.hazards, ...oldDoorMoat]), null);
-  const repaired = route(l.hazards); assert.ok(repaired); assert.equal(repaired.length - 1, 25); // Retained NPC/transfer clearance adds one step to the raw-map minimum.
+  const repaired = route(l.hazards); assert.ok(repaired); assert.equal(repaired.length - 1, 24);
   assert.deepEqual(Buffer.from(m.blocked), before);
   assert.ok(m.doors.every(d => !protocolMapCellIsWalkable(m, d)));
   const forbidden = new Set(l.hazards.map(p => `${p.x},${p.y}`));
   assert.ok(repaired.every(p => protocolMapCellIsWalkable(m, p) && !forbidden.has(`${p.x},${p.y}`)));
-  for (const p of [...npcs.filter(n => n.map_file_name === '0').map(n => n.location), ...r.movements.map(t => t.source)])
+  for (const p of npcs.filter(n => n.map_file_name === '0').map(n => n.location)) assert.ok(forbidden.has(`${p.x},${p.y}`));
+  for (const p of r.movements.map(t => t.source))
     for (let y = p.y - 1; y <= p.y + 1; y++) for (let x = p.x - 1; x <= p.x + 1; x++) assert.ok(forbidden.has(`${x},${y}`));
 });
 
@@ -388,9 +389,150 @@ test('CLI retains ordinary endpoint, finite wall, exact metadata and no login-no
     '--live-map-proof-sha256', 'c'.repeat(64), '--map-metadata', path.join(outside, 'maps.json'), '--map-metadata-sha256', MAP_METADATA_SHA256,
     '--npc-metadata', path.join(outside, 'npcs.json'), '--npc-metadata-sha256', NPC_METADATA_SHA256];
   assert.equal(optionsFrom(args).wallSeconds, 7200);
+  assert.throws(() => optionsFrom([...args, '--resume-report', path.join(outside, 'resume.json')]), /paired_public_resume/);
+  assert.equal(optionsFrom([...args, '--resume-report', path.join(outside, 'resume.json'), '--resume-report-sha256', 'd'.repeat(64)])['resume-report-sha256'], 'd'.repeat(64));
   assert.throws(() => optionsFrom([...args, '--login-not-before', '0']), /unknown/);
   const changed = [...args]; changed[changed.indexOf('--endpoint') + 1] = 'wss://other.invalid/ws';
   assert.throws(() => optionsFrom(changed), /original_public_endpoint/);
+});
+
+test('real actor35 old NPC moat exhausts64 paths but exact NPC tiles preserve the original seven-step route', async () => {
+  const bytes = await fs.readFile(new URL('../../../apps/web/lib/generated/crystal-map-pack/0.map.gz', import.meta.url));
+  assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'), 'bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5');
+  const m = parseCrystalCollisionMap(gunzipSync(bytes), '0'), blockedBefore = Buffer.from(m.blocked);
+  const metadata = JSON.parse(await fs.readFile(new URL('../../../packages/game-data/data/generated/crystal_respawn_manifest.json', import.meta.url)));
+  const npcs = JSON.parse(await fs.readFile(new URL('../../../packages/game-data/data/generated/crystal_npc_info_manifest.json', import.meta.url)));
+  const r = metadata.maps.find(r => r.map_file_name === '0'), l = buildLayout(m, r, npcs.npcs);
+  const occupied = [[1,287,615],[2,284,615],[3,284,606],[4,294,619],[5,296,613],[6,292,603],[8,288,608],[42,291,610],[43,295,605],
+    [200339,276,604],[200340,280,600],[200716,291,620],[206007,294,592],[206302,287,611],[206320,281,596],[206324,289,604],
+    [206339,280,609],[206515,284,611],[206524,294,606],[206530,288,603],[206536,291,600],[206545,271,596],[206604,281,600],
+    [206610,286,601],[206619,285,591],[206641,287,616],[206700,270,599],[206711,276,603],[206714,275,611],[271801,291,616],[271806,292,613]]
+    .map(([objectId,x,y]) => ({objectId,x,y,kind:objectId<100?'npc':'monster',dead:false}));
+  // The raw packets did not expose a blocking flag: conservatively block all30.
+  const spells = [[46,278,606],[47,279,606],[48,280,606],[49,281,606],[50,284,606],[51,285,606],[52,286,606],[53,287,606],
+    [54,288,606],[55,292,606],[56,293,606],[57,294,606],[58,295,606],[59,296,606],[60,297,606],[61,298,606],[62,298,607],
+    [63,278,609],[64,278,610],[65,278,611],[66,278,612],[67,278,613],[68,278,614],[69,298,614],[70,298,615],[71,298,616],
+    [72,298,619],[73,298,620],[74,298,621],[75,298,622]].map(([objectId,x,y])=>({objectId,x,y,kind:'spell',dead:false}));
+  const transfers = [[347,188],[308,264],[326,288],[322,247],[354,319],[295,251],[295,250],[335,299],[335,300],[344,308],[345,308],
+    [295,284],[295,285],[305,276],[307,311],[307,310],[317,302],[317,301],[289,292],[286,296],[278,239],[284,236],[271,256],
+    [283,268],[396,230],[396,229],[400,225],[399,225],[404,221],[403,221],[414,243],[415,241],[416,241],[315,613],[266,630],
+    [271,621],[295,649],[283,636],[282,636],[282,635],[274,636],[302,622],[311,631],[307,627],[314,474],[43,111],[664,215],
+    [663,215],[324,41],[325,42],[326,43],[326,42],[325,41],[325,40],[326,40],[666,86],[667,87],[667,88],[316,649],[315,650],
+    [316,650],[315,649],[315,648],[314,649],[310,600],[286,296],[347,189],[147,33],[148,34]].map(([x,y])=>({x,y}));
+  const setup = layout => {
+    const state=createTargetSelectionState(layout);
+    layout.targets[13].target={x:293,y:616};
+    for(let i=0;i<35;i++)state.actual.set(i,{...layout.targets[i].target});
+    state.margins.add('294,616');
+    const c=targetClient(35,{x:285,y:606},[...occupied,...spells]);
+    c.sequence=679;c.events=[{type:'worldSnapshot',sequence:678}];
+    c.snapshot.mapTransfers=transfers.map(({x,y})=>({bounds:{minX:x,maxX:x,minY:y,maxY:y}}));
+    const records=[];return{state,c,records,context:{map:m,assert(){},emit(r){records.push(r);}}};
+  };
+  const moat=npcs.npcs.filter(n=>n.map_file_name==='0').flatMap(n=>Array.from({length:9},(_,i)=>({x:n.location.x+i%3-1,y:n.location.y+Math.floor(i/3)-1})));
+  const old=buildLayout(m,r,npcs.npcs);old.hazards.push(...moat);const red=setup(old);
+  assert.throws(()=>selectPreparationTarget(red.c,old.targets[35],old,red.state,red.context),/no_legal_reachable/);
+  assert.equal(red.records[0].pathQueries,64);assert.equal(red.records[0].actualTarget,null);
+  const green=setup(l);assert.deepEqual(l.targets[35].target,{x:287,y:612});
+  assert.deepEqual(selectPreparationTarget(green.c,l.targets[35],l,green.state,green.context),{x:287,y:612});
+  const obstacles=[...l.hazards,...occupied,...spells,...transfers];
+  const route=findProtocolWalkPath({map:m,start:{x:285,y:606},target:l.targets[35].target,dynamicObstacles:obstacles,maxExpanded:100000});
+  assert.deepEqual(route,[{x:285,y:606},{x:285,y:607},{x:285,y:608},{x:285,y:609},{x:285,y:610},{x:286,y:611},{x:286,y:612},{x:287,y:612}]);
+  const forbidden=new Set(obstacles.map(p=>`${p.x},${p.y}`));
+  assert.ok(route.slice(1).every(p=>protocolMapCellIsWalkable(m,p)&&!forbidden.has(`${p.x},${p.y}`)));
+  assert.ok(!l.goalCells.some(p=>p.x===285&&p.y===606));assert.equal(green.records[0].changed,false);
+  assert.deepEqual(Buffer.from(m.blocked),blockedBefore);assert.ok(validateTargetLayout(l));
+});
+
+test('NPC neighbours are transit only while occupied NPC spell transfer and door tiles stay blocked', () => {
+  const m=map(),r=row(),npc={map_file_name:'0',location:{x:30,y:30}},l=buildLayout(m,r,[npc]);
+  assert.ok(l.hazards.some(p=>p.x===30&&p.y===30));assert.ok(!l.hazards.some(p=>p.x===31&&p.y===30));
+  assert.ok(!l.goalCells.some(p=>Math.max(Math.abs(p.x-30),Math.abs(p.y-30))<=1));
+  assert.equal(findProtocolWalkPath({map:m,start:{x:29,y:30},target:{x:30,y:30},dynamicObstacles:l.hazards}),null);
+  assert.ok(findProtocolWalkPath({map:m,start:{x:31,y:30},target:{x:31,y:31},dynamicObstacles:l.hazards}));
+  for(const kind of ['npc','monster','spell','player'])assert.equal(findProtocolWalkPath({map:m,start:{x:31,y:30},target:{x:31,y:31},
+    dynamicObstacles:[...l.hazards,{x:31,y:31,kind}]}),null);
+});
+
+function resumeFixture() {
+  const l=layout(), p=pool(), options={...pins(p),'live-map-proof-sha256':'a'.repeat(64)}, binding=validateMapProof(proof());
+  const manifest={schema:'mir2.public-existing-cohort-resume-manifest.v1',...Object.fromEntries(Object.entries(RESUME_V4_PINS).map(([k,v])=>[k,{path:path.join(os.tmpdir(),`${k}.json`),sha256:v}])),
+    freshBefore:{path:path.join(os.tmpdir(),'fresh-before.json'),sha256:'f'.repeat(64)}};
+  const fp=poolFingerprints(p), original=structuredClone(l.targets), prepared=original.slice(0,35).map((t,i)=>({actorOrdinal:i,group:Math.floor(i/5),connection:i+1,
+    snapshotSequence:100+i,snapshotAtMs:1000+i,mapFileName:'0',inSafeZone:true,hp:18,x:t.target.x,y:t.target.y}));
+  const selections=original.slice(0,35).map((t,i)=>({actorOrdinal:i,selected:true,originalTarget:{...t.target},actualTarget:{...t.target},movementMargin:null}));
+  const prior={schema:'mir2.public-existing-cohort-preparation.v1',runId:'old-failed-v4',ok:false,failure:{code:'no_legal_reachable_preparation_target'},
+    preparationOnly:true,capacityEvidence:false,ccuQualified:false,actorsRequested:100,poolUnchanged:true,poolBefore:fp,poolAfter:fp,
+    mapFileName:'0',safeZoneIndex:0,storedMapSha256:binding.row.sha256,mapMetadataSha256:MAP_METADATA_SHA256,npcMetadataSha256:NPC_METADATA_SHA256,
+    liveMapProofSha256:options['live-map-proof-sha256'],sourceRevision:binding.sourceRevision,binarySha256FromProof:binding.binarySha256,liveMapIdentity:binding.identity,
+    startedAtUtc:new Date(200).toISOString(),endedAtUtc:new Date(300).toISOString(),originalTargets:original,prepared,
+    groups:Array.from({length:7},(_,g)=>({group:g,actorOrdinals:Array.from({length:5},(_,i)=>g*5+i),actualMutualAoi:true,maximumDistance:4})),
+    targetSelections:selections,targetReceiptSha256:RESUME_V4_PINS.targets,
+    cleanup:Array.from({length:36},(_,i)=>({actorOrdinal:i,connection:i+1,initiallyInGame:true,normalLogout:true,logoutPacket:'LogOutSuccess',logoutElapsedMs:10}))};
+  const targets={schema:'mir2.public-existing-cohort-targets.v1',runId:prior.runId,preparedAll:false,poolIdentitySha256:options.poolIdentitySha256,
+    mapFileName:'0',storedMapSha256:binding.row.sha256,liveMapProofSha256:prior.liveMapProofSha256,mapMetadataSha256:MAP_METADATA_SHA256,nativeSafeZone:l.zone,
+    originalTargets:structuredClone(original),targets:structuredClone(original),targetSelections:selections,preparedOrdinals:Array.from({length:35},(_,i)=>i)};
+  const preflight=(phase,at)=>({schema:'mir2.existing-public-pool-preflight.v3',phase,passed:true,identitiesGenerated:false,ledgerWrittenOrReset:false,readOnlyPrivateInputs:true,
+    sourceLockSha256:'581ceed8f6b9f0c32b7b49035211fa3ccd703dbd5c2b64e673d8387d983a899d',sourcePolicy:{passed:true,policyId:'exact-old-runtime-except-top-level-web-package-scripts-v1'},
+    pool:{actorCount:100,...fp,capturedAtMs:at}});
+  const before=preflight('before',100),after=preflight('after',400),freshBefore=preflight('before',500);
+  after.comparison={baselineReceiptSha256:RESUME_V4_PINS.before,actorIdentityUnchanged:true,entireCanonicalActorArrayUnchanged:true,allUnexpiredLedgerAttemptsRetained:true};
+  const events=prepared.map(r=>({actorOrdinal:r.actorOrdinal,connection:r.connection,sequence:r.snapshotSequence,direction:'received',kind:'worldSnapshot',
+    ownerNameMatches:true,ownerNameHash:'e'.repeat(64),expectedNameHash:'e'.repeat(64),mapFileName:'0',ownerHp:r.hp,ownerX:r.x,ownerY:r.y,monotonicMs:r.snapshotAtMs}));
+  for(const r of prior.cleanup)events.push({actorOrdinal:r.actorOrdinal,connection:r.connection,kind:'logoutReceipt',packet:'LogOutSuccess',elapsedMs:10,monotonicMs:2000,observedAfter5000Ms:false},
+    ...['validCloseFrameReceived','webSocketClose'].map((edge,i)=>({actorOrdinal:r.actorOrdinal,connection:r.connection,kind:'webSocketClosing',edge,closeFrameSent:true,closeFrameReceived:true,monotonicMs:2010+i})));
+  const job={schema:'mir2.cloud-client-job-result.v4',actualExitCode:1,sourceLockSha256:before.sourceLockSha256,allOwnedMembersExited:true,
+    jobClose:{closed:true,allMembersExited:true,killAppliedByClose:false,rootExitCodes:{cloudClient:1},failedLaunches:[]},forceKillUsed:false,
+    finalJobSample:{jobActiveProcesses:0,members:[],memberPids:[]},clientRuntimeSourcePolicyPassed:true,runtimeSourceObservations:{beforeLaunch:{passed:true},afterExit:{passed:true}},
+    processEnvelopePassed:false,allLiveResourceSamplesQualified:false,processCreationToExitResourceEvidenceComplete:false,startupResourceGapCount:1,normalDrainMarker:null};
+  return{manifest,evidence:{report:prior,targets,events,before,after,job,freshBefore},parameters:{options,layout:l,binding,nowMs:600},p};
+}
+
+test('resume reuses exactly35 closed historical actors and normal-admits only65 without promoting old flags', async () => {
+  const r=resumeFixture(), resume=validateResumeEvidence(r.manifest,r.evidence,r.parameters), f=batches();
+  f.context.resume=resume;
+  await prepareBatches(f.p.actors,f.l,f.context,f.report,f.deps);
+  assert.equal(f.report.inheritedPrepared.length,35);assert.equal(f.report.prepared.length,65);
+  assert.equal(f.report.inheritedGroups.length,7);assert.equal(f.report.groups.length,13);assert.equal(f.report.cleanup.length,65);
+  assert.equal(f.order.filter(s=>s.startsWith('login')).length,65);assert.equal(f.order[0],'login35');
+  assert.ok(!f.order.includes('login0'));assert.ok(!f.order.includes('login34'));assert.equal(f.active.size,0);assert.equal(f.maxActive(),5);
+  assert.equal(resume.summary.priorRunPassed,false);assert.equal(resume.summary.priorActualExitCode,1);
+  assert.equal(resume.summary.priorProcessEnvelopePassed,false);assert.equal(resume.summary.priorProcessCreationToExitResourceEvidenceComplete,false);
+  assert.equal(resume.summary.closeCodeObserved,null);assert.equal(resume.summary.all100FreshThisRun,false);
+});
+
+test('resume refuses wrong pool partial groups snapshot mismatch abnormal close and owned-job kill', () => {
+  const changes=[
+    r=>{r.evidence.report.poolAfter.identityFingerprintSha256='0'.repeat(64);},
+    r=>{r.evidence.report.prepared.pop();},r=>{r.evidence.report.groups.pop();},r=>{r.evidence.report.prepared[0].hp=0;},
+    r=>{r.evidence.report.prepared[0].mapFileName='1';},r=>{r.evidence.events[0].ownerX++;},
+    r=>{r.evidence.report.cleanup[35].normalLogout=false;},r=>{r.evidence.events.find(e=>e.edge==='webSocketClose').monotonicMs=8000;},
+    r=>{r.evidence.job.jobClose.killAppliedByClose=true;},r=>{r.evidence.job.allOwnedMembersExited=false;},
+    r=>{r.evidence.targets.targets[1].target={...r.evidence.targets.targets[0].target};},
+    r=>{r.evidence.after.comparison.baselineReceiptSha256='0'.repeat(64);},r=>{r.evidence.freshBefore.pool.capturedAtMs=0;},
+    r=>{r.parameters.nowMs=301000;},r=>{r.manifest.report.sha256='0'.repeat(64);},r=>{r.manifest.unreviewed={};},
+  ];
+  for(const change of changes){const r=resumeFixture();change(r);assert.throws(()=>validateResumeEvidence(r.manifest,r.evidence,r.parameters));}
+});
+
+test('resume cannot turn a new failure green or skip cleanup of its current group', async () => {
+  const r=resumeFixture(),f=batches({failWalkAt:36});f.context.resume=validateResumeEvidence(r.manifest,r.evidence,r.parameters);
+  await assert.rejects(prepareBatches(f.p.actors,f.l,f.context,f.report,f.deps),/field death/);
+  assert.deepEqual(f.report.cleanup.map(r=>r.actorOrdinal),[35,36]);assert.ok(f.report.cleanup.every(r=>r.normalLogout));
+  assert.equal(f.report.inheritedPrepared.length,35);assert.equal(f.report.prepared.length,1);assert.ok(!f.order.includes('login37'));
+});
+
+test('public resume input refuses private descendants bad hashes oversized files and hard links', async () => {
+  const root=await fs.mkdtemp(path.join(os.tmpdir(),'mir2-public-resume-')), privateRoot=path.join(root,'private');await fs.mkdir(privateRoot);
+  const file=path.join(root,'public.json'),bytes=Buffer.from('{}');await fs.writeFile(file,bytes);
+  const digest=crypto.createHash('sha256').update(bytes).digest('hex');
+  assert.deepEqual(await readPublicResumeFile(file,digest,16,privateRoot),bytes);
+  await assert.rejects(readPublicResumeFile(file,'0'.repeat(64),16,privateRoot),/input_hash_changed/);
+  await assert.rejects(readPublicResumeFile(file,digest,1,privateRoot),/bounded_input/);
+  const privateFile=path.join(privateRoot,'forbidden.json');await fs.writeFile(privateFile,bytes);
+  await assert.rejects(readPublicResumeFile(privateFile,digest,16,privateRoot),/public_outside/);
+  const linked=path.join(root,'linked.json');await fs.link(file,linked);
+  await assert.rejects(readPublicResumeFile(linked,digest,16,privateRoot),/linked_resume_input/);
 });
 test('actual CLI rejects before private reads/network and emits only a fixed failure code', () => {
   const r = spawnSync(process.execPath, [fileURLToPath(new URL('./prepare_existing_public_cohort.mjs', import.meta.url)), '--login-not-before', '0'], { encoding: 'utf8' });

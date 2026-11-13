@@ -16,9 +16,9 @@ still drain normally. There are no write retries.
 
 The 100 planned destinations are globally unique, two cells inside one native safe square,
 and compact per original five-person group. Destination selection still excludes
-NPCs, source transfers, and one cell around doors. Transit excludes NPC/transfer
-hazards and the actual door cells/native closed-door collision; it does not add a
-door-neighbour moat around an otherwise legal saved origin. Live occupancy and
+NPCs, source transfers, and one cell around doors. Transit blocks actual NPC
+tiles and the unchanged transfer hazards/door cells/native closed-door collision;
+it adds no NPC-neighbour or door-neighbour goal moat around a legal saved origin. Live occupancy and
 transfer bounds still constrain each route. The ordinary navigator receives only the next adjacent cell, a
 one-successful-cell cap, no automatic supplies/escape, and the original 2500ms
 owner-response budget. Every successful step needs its exact fresh `UserLocation`.
@@ -92,6 +92,49 @@ stays compact. The actual V2 failure remains preserved: actor13's planned
 291,616 cell was occupied by Monster271801. The real-map offline regression keeps
 that original path null and selects reachable 293,616 without changing collision
 bytes. These tests are not an actual preparation or capacity result.
+
+V5 separates NPC goal clearance (radius one, unchanged) from transit collision
+(the actual NPC tile). The actual V4 actor35 origin 285,606 was inside native
+safety but outside the required destination inset. Two NPC neighbour moats
+enclosed it, so all 64 path checks failed. With only the real NPC tiles blocked,
+the original 287,612 goal has a seven-step ordinary route. The regression also
+blocks every raw spell coordinate conservatively; it neither infers a missing
+spell blocking flag nor changes any collision, door, transfer or live occupancy.
+
+Optional resume accepts exactly two additional flags:
+`--resume-report C:/PUBLIC/resume-manifest.json --resume-report-sha256 RAW_SHA256`.
+Despite the historical flag name, this file is a **new public manifest**, schema
+`mir2.public-existing-cohort-resume-manifest.v1`, not an edited old report. Its
+exact fields are `schema`, `report`, `targets`, `events`, `before`, `after`, `job`,
+and `freshBefore`. Each field other than `schema` is `{ "path": "C:/PUBLIC/...",
+"sha256": "..." }`. The first six hashes must equal exported `RESUME_V4_PINS`;
+they refer to the immutable failed V4 report f23d593…38d0, its target/event files,
+both old P3 receipts and its normally closed owned Job. `freshBefore` must bind
+the current successful P3-before receipt, created within five minutes of entry;
+the wrapper also requires it to equal its own `preflightBefore` descriptor.
+Root creates this manifest after the new exact-source P3-before succeeds.
+
+All files must be unique bounded regular C files outside the repository/private
+pool; linked inputs and recursive/duplicate references are refused. The manifest
+is at most 32KiB, events at most 16MiB, other receipts at most 4MiB. The tool
+validates all 35 raw owner snapshot references, seven complete mutually visible
+groups, original pool identity/order hashes, all 36 timely LogOutSuccess and real
+Close frame/close-event pairs, no forced Job kill and all owned members exited.
+Raw Close code was not exported and stays null. The old FAIL/exit1 and false
+whole-process resource flags remain historical facts; no normal marker is invented.
+
+Only the exact 0..34 prefix is inherited. Actor13's actual fallback target and
+movement margin, all 100 original reservations and prior actual targets are
+restored. Ordinary login starts at actor35, with unchanged ledger and budgets;
+no prior actor is re-authenticated by this preparation run. A new failure still
+fails and normally drains its current clients. No unknown write is retried.
+
+V5 report/target schemas are version2. `prepared`, `groups` and `cleanup` describe
+only **this run's fresh clients**; `inheritedPrepared`/`inheritedGroups` and their
+origin run IDs describe historical preparation. A successful resume covers
+35 inherited plus 65 fresh actors, with `all100FreshThisRun=false`. It proves
+neither current 100 CCU nor all-100 fresh admission. The actual capacity run must
+normally admit and revalidate all 100 actors again.
 
 V4 plans each next step after the existing pace wait. If a later obstacle change
 still makes the navigator take a legal detour, only its exact one-successful-step

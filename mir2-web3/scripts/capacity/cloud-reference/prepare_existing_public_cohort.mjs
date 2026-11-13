@@ -12,6 +12,14 @@ import { loadProtocolCollisionMap, findProtocolWalkPath, protocolMapCellIsWalkab
 
 export const MAP_METADATA_SHA256 = '907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2';
 export const NPC_METADATA_SHA256 = 'dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105';
+export const RESUME_V4_PINS = Object.freeze({
+  report: 'f23d59317b76dcbe53239462ef1ed0435a7fb31d87c2381fc2ee76725c8e38d0',
+  targets: 'f5f1ceb57219979eefef00ad72cabc3de911aa347db2a924c06e6f48dd03ff92',
+  events: '668823b220143c933643f86bf44456b73fb50678e508417ffe1f79fdcf0f4d97',
+  before: '8c8e2bf67054d6a37a08611c504f59e394da0bca0a7eaca4acec69f71b2e50b0',
+  after: '8058d23b230d68c92b3f326160e2074f56bf38d804eb0f5c1efcf448728b451e',
+  job: '82197e9c9a3e40ba5eb68c4efef9d423ca8fc3271b5b926f0afa5c5dfbcbed2e',
+});
 const ENDPOINT = 'wss://165.154.65.136.sslip.io/playtest/ws', WEB_BASE = 'https://numeron.obelisk.build';
 const HASH = /^[0-9a-f]{64}$/, pointKey = p => `${p.x},${p.y}`;
 const WALK_VECTORS = { up: [0, -1], upright: [1, -1], right: [1, 0], downright: [1, 1],
@@ -98,7 +106,9 @@ export function buildLayout(map, row, npcRows, safeZoneIndex = 0) {
     need(Number.isInteger(p?.x) && Number.isInteger(p.y), 'malformed_map_hazard');
     for (let y = p.y - radius; y <= p.y + radius; y++) for (let x = p.x - radius; x <= p.x + radius; x++) destination.push({ x, y });
   };
-  for (const npc of npcRows.filter(n => n.map_file_name === '0')) exclude(npc.location, 1);
+  for (const npc of npcRows.filter(n => n.map_file_name === '0')) {
+    exclude(npc.location, 1, targetOnlyHazards); exclude(npc.location, 0);
+  }
   for (const movement of row.movements) exclude(movement.source, 1);
   for (const door of map.doors ?? []) {
     // Final destinations retain the V1 one-cell door clearance. Transit retains
@@ -287,11 +297,141 @@ export async function walkToTarget(c, target, context, map, hazards, { navigator
   }
 }
 
+// One reviewed failed V4 prefix only. These are preparation facts, never fresh
+// admission or capacity evidence; old failure/resource flags remain unchanged.
+export function validateResumeEvidence(manifest, evidence, { options, layout, binding, nowMs = Date.now() }) {
+  need(manifest?.schema === 'mir2.public-existing-cohort-resume-manifest.v1' &&
+    canonical(Object.keys(manifest).sort()) === canonical(['schema', ...Object.keys(RESUME_V4_PINS), 'freshBefore'].sort()), 'exact_resume_manifest_required');
+  for (const [key, digest] of Object.entries(RESUME_V4_PINS)) need(manifest[key]?.sha256 === digest, 'reviewed_closed_v4_pin_required');
+  const { report: prior, targets, events, before, after, job, freshBefore } = evidence;
+  const fingerprints = { identityFingerprintSha256: options.poolIdentitySha256, canonicalActorArraySha256: options.poolActorsSha256 };
+  need(prior?.schema === 'mir2.public-existing-cohort-preparation.v1' && prior.ok === false && prior.failure?.code === 'no_legal_reachable_preparation_target' &&
+    prior.preparationOnly === true && prior.capacityEvidence === false && prior.ccuQualified === false && prior.actorsRequested === 100 &&
+    prior.poolUnchanged === true && canonical(prior.poolBefore) === canonical(fingerprints) && canonical(prior.poolAfter) === canonical(fingerprints),
+  'resume_original_100_identity_and_failed_run_required');
+  need(prior.mapFileName === '0' && prior.safeZoneIndex === layout.safeZoneIndex && prior.storedMapSha256 === binding.row.sha256 &&
+    prior.mapMetadataSha256 === MAP_METADATA_SHA256 && prior.npcMetadataSha256 === NPC_METADATA_SHA256 &&
+    prior.liveMapProofSha256 === options['live-map-proof-sha256'] && prior.sourceRevision === binding.sourceRevision &&
+    prior.binarySha256FromProof === binding.binarySha256 && canonical(prior.liveMapIdentity) === canonical(binding.identity), 'resume_same_world_and_map_required');
+  const checkPreflight = (receipt, phase) => {
+    need(receipt?.schema === 'mir2.existing-public-pool-preflight.v3' && receipt.phase === phase && receipt.passed === true &&
+      receipt.identitiesGenerated === false && receipt.ledgerWrittenOrReset === false && receipt.readOnlyPrivateInputs === true &&
+      receipt.sourcePolicy?.passed === true && receipt.sourcePolicy.policyId === 'exact-old-runtime-except-top-level-web-package-scripts-v1' &&
+      receipt.pool?.actorCount === 100 && receipt.pool.identityFingerprintSha256 === fingerprints.identityFingerprintSha256 &&
+      receipt.pool.canonicalActorArraySha256 === fingerprints.canonicalActorArraySha256 && Number.isFinite(receipt.pool.capturedAtMs),
+    'resume_passed_original_pool_preflight_required');
+  };
+  checkPreflight(before, 'before'); checkPreflight(after, 'after'); checkPreflight(freshBefore, 'before');
+  need(before.sourceLockSha256 === '581ceed8f6b9f0c32b7b49035211fa3ccd703dbd5c2b64e673d8387d983a899d' &&
+    after.sourceLockSha256 === before.sourceLockSha256 && after.comparison?.baselineReceiptSha256 === manifest.before.sha256 &&
+    after.comparison.actorIdentityUnchanged === true && after.comparison.entireCanonicalActorArrayUnchanged === true &&
+    after.comparison.allUnexpiredLedgerAttemptsRetained === true && HASH.test(freshBefore.sourceLockSha256) &&
+    before.pool.capturedAtMs <= Date.parse(prior.startedAtUtc) && Date.parse(prior.endedAtUtc) <= after.pool.capturedAtMs &&
+    after.pool.capturedAtMs <= freshBefore.pool.capturedAtMs && freshBefore.pool.capturedAtMs <= nowMs &&
+    nowMs - freshBefore.pool.capturedAtMs <= 300000, 'resume_fresh_before_and_old_after_chain_required');
+  need(Array.isArray(prior.prepared) && prior.prepared.length === 35 && prior.prepared.length % 5 === 0 &&
+    prior.prepared.every((r, i) => r.actorOrdinal === i && r.group === Math.floor(i / 5) && r.mapFileName === '0' &&
+      r.inSafeZone === true && r.hp > 0 && Number.isInteger(r.x) && Number.isInteger(r.y) && Number.isSafeInteger(r.snapshotSequence)) &&
+    Array.isArray(prior.groups) && prior.groups.length === 7 && prior.groups.every((g, i) => g.group === i &&
+      canonical(g.actorOrdinals) === canonical(Array.from({ length: 5 }, (_, j) => i * 5 + j)) && g.actualMutualAoi === true &&
+      Number.isFinite(g.maximumDistance) && g.maximumDistance >= 0 && g.maximumDistance <= 12),
+  'resume_exact_35_prefix_and_seven_complete_groups_required');
+  need(targets?.schema === 'mir2.public-existing-cohort-targets.v1' && targets.runId === prior.runId && targets.preparedAll === false &&
+    prior.targetReceiptSha256 === manifest.targets.sha256 && targets.poolIdentitySha256 === options.poolIdentitySha256 &&
+    targets.mapFileName === '0' && targets.storedMapSha256 === binding.row.sha256 && targets.liveMapProofSha256 === prior.liveMapProofSha256 &&
+    targets.mapMetadataSha256 === MAP_METADATA_SHA256 && canonical(targets.nativeSafeZone) === canonical(layout.zone) &&
+    canonical(targets.originalTargets) === canonical(layout.targets) && canonical(prior.originalTargets) === canonical(layout.targets) &&
+    canonical(targets.preparedOrdinals) === canonical(Array.from({ length: 35 }, (_, i) => i)) &&
+    canonical(targets.targetSelections) === canonical(prior.targetSelections) &&
+    canonical(targets.targets?.slice(35)) === canonical(layout.targets.slice(35)), 'resume_original_and_actual_targets_required');
+  validateTargetLayout({ ...layout, targets: targets.targets });
+  const selections = prior.targetSelections?.slice(0, 35), goals = new Set(layout.goalCells.map(pointKey));
+  need(selections?.length === 35 && selections.every((s, i) => s.actorOrdinal === i && s.selected === true &&
+    canonical(s.originalTarget) === canonical(layout.targets[i].target) && canonical(s.actualTarget) === canonical(targets.targets[i].target) &&
+    (!s.movementMargin || goals.has(pointKey(s.movementMargin)))) && prior.prepared.every((r, i) =>
+    r.x === targets.targets[i].target.x && r.y === targets.targets[i].target.y), 'resume_prefix_targets_and_reservations_required');
+  need(Array.isArray(events) && events.length <= 100000 && prior.cleanup?.length === 36 && prior.cleanup.every((r, i) =>
+    r.actorOrdinal === i && r.initiallyInGame === true && r.normalLogout === true && r.logoutPacket === 'LogOutSuccess' &&
+    Number.isFinite(r.logoutElapsedMs) && r.logoutElapsedMs >= 0 && r.logoutElapsedMs <= 5000), 'resume_all_36_normal_logouts_required');
+  for (const r of prior.prepared) {
+    const matches = events.filter(e => e.actorOrdinal === r.actorOrdinal && e.connection === r.connection && e.sequence === r.snapshotSequence &&
+      e.direction === 'received' && e.kind === 'worldSnapshot');
+    need(matches.length === 1 && matches[0].ownerNameMatches === true && HASH.test(matches[0].ownerNameHash) &&
+      matches[0].ownerNameHash === matches[0].expectedNameHash && matches[0].mapFileName === '0' && matches[0].ownerHp === r.hp &&
+      matches[0].ownerX === r.x && matches[0].ownerY === r.y && matches[0].monotonicMs === r.snapshotAtMs, 'resume_fresh_safe_snapshot_not_bound');
+  }
+  for (const r of prior.cleanup) {
+    const rows = events.filter(e => e.actorOrdinal === r.actorOrdinal && e.connection === r.connection);
+    const logout = rows.filter(e => e.kind === 'logoutReceipt'), frame = rows.filter(e => e.kind === 'webSocketClosing' && e.edge === 'validCloseFrameReceived');
+    const close = rows.filter(e => e.kind === 'webSocketClosing' && e.edge === 'webSocketClose');
+    need(logout.length === 1 && logout[0].packet === 'LogOutSuccess' && logout[0].elapsedMs === r.logoutElapsedMs &&
+      logout[0].observedAfter5000Ms === false && frame.length === 1 && close.length === 1 &&
+      [frame[0], close[0]].every(e => e.closeFrameSent === true && e.closeFrameReceived === true &&
+        e.monotonicMs >= logout[0].monotonicMs && e.monotonicMs - logout[0].monotonicMs <= 5000) &&
+      close[0].monotonicMs >= frame[0].monotonicMs && !rows.some(e => e.kind === 'webSocketClosing' && e.edge === 'closeEventDeadlineExceeded'),
+    'resume_real_36_wire_closes_required');
+  }
+  need(job?.schema === 'mir2.cloud-client-job-result.v4' && job.actualExitCode === 1 && job.sourceLockSha256 === before.sourceLockSha256 &&
+    job.allOwnedMembersExited === true && job.jobClose?.closed === true && job.jobClose.allMembersExited === true &&
+    job.jobClose.killAppliedByClose === false && job.forceKillUsed === false && job.jobClose.rootExitCodes?.cloudClient === 1 &&
+    Array.isArray(job.jobClose.failedLaunches) && job.jobClose.failedLaunches.length === 0 && job.finalJobSample?.jobActiveProcesses === 0 &&
+    job.finalJobSample.members?.length === 0 && job.finalJobSample.memberPids?.length === 0 &&
+    job.clientRuntimeSourcePolicyPassed === true && job.runtimeSourceObservations?.beforeLaunch?.passed === true &&
+    job.runtimeSourceObservations?.afterExit?.passed === true, 'resume_closed_owned_failed_job_required');
+  return { count: 35, prior, targets, selections, summary: { inheritedPreparedCount: 35, currentFreshRequiredCount: 65,
+    priorRunId: prior.runId, priorRunPassed: false, priorActualExitCode: 1, closeCodeObserved: null,
+    priorProcessEnvelopePassed: job.processEnvelopePassed, priorAllLiveResourceSamplesQualified: job.allLiveResourceSamplesQualified,
+    priorProcessCreationToExitResourceEvidenceComplete: job.processCreationToExitResourceEvidenceComplete,
+    priorStartupResourceGapCount: job.startupResourceGapCount, priorNormalDrainMarker: job.normalDrainMarker,
+    evidencePins: manifest, all100FreshThisRun: false, capacityEvidence: false, finalCapacityAdmissionMustRevalidateAll100: true } };
+}
+
+export async function readPublicResumeFile(file, digest, maxBytes, privateDirectory) {
+  need(typeof file === 'string' && path.isAbsolute(file) && /^c:[\\/]/i.test(file) && HASH.test(digest), 'public_c_pinned_resume_file_required');
+  const absolute = path.resolve(file), privateRoot = path.resolve(privateDirectory), relative = path.relative(privateRoot, absolute);
+  need((relative === '..' || relative.startsWith('..' + path.sep) || path.isAbsolute(relative)) &&
+    outsideRepository(absolute) === absolute, 'resume_file_must_be_public_outside_pool_and_repository');
+  for (let current = absolute; ; current = path.dirname(current)) {
+    need(!(await fs.lstat(current)).isSymbolicLink(), 'linked_resume_input_refused');
+    if (path.dirname(current) === current) break;
+  }
+  need((await fs.stat(absolute)).nlink === 1, 'linked_resume_input_refused');
+  return readBounded(absolute, maxBytes, digest);
+}
+
+export async function loadResumeEvidence(options, layout, binding) {
+  if (!options['resume-report']) return null;
+  const raw = await readPublicResumeFile(options['resume-report'], options['resume-report-sha256'], 32768, options.privateDirectory);
+  const manifest = JSON.parse(raw), evidence = {}, seen = new Set([path.resolve(options['resume-report']).toLowerCase()]);
+  need(manifest?.schema === 'mir2.public-existing-cohort-resume-manifest.v1' &&
+    canonical(Object.keys(manifest).sort()) === canonical(['schema', ...Object.keys(RESUME_V4_PINS), 'freshBefore'].sort()), 'exact_resume_manifest_required');
+  for (const key of [...Object.keys(RESUME_V4_PINS), 'freshBefore']) {
+    const row = manifest[key]; need(row && typeof row.path === 'string' && HASH.test(row.sha256) &&
+      (!RESUME_V4_PINS[key] || row.sha256 === RESUME_V4_PINS[key]), 'reviewed_closed_v4_pin_required');
+    const absolute = path.resolve(row.path).toLowerCase(); need(!seen.has(absolute), 'duplicate_or_cyclic_resume_input'); seen.add(absolute);
+    const bytes = await readPublicResumeFile(row.path, row.sha256, key === 'events' ? 16 * 1024 * 1024 : 4 * 1024 * 1024, options.privateDirectory);
+    evidence[key] = key === 'events' ? bytes.toString('utf8').trimEnd().split('\n').map(line => JSON.parse(line)) : JSON.parse(bytes);
+  }
+  return validateResumeEvidence(manifest, evidence, { options, layout, binding });
+}
+
 export async function prepareBatches(actors, layout, context, report,
   { Client = SignedClient, loginActor = login, walk = walkToTarget, fresh = freshSafeState } = {}) {
   const targetState = createTargetSelectionState(layout);
   report.originalTargets = targetState.originalTargets; report.targetSelections = targetState.selections;
-  for (let group = 0; group < 20; group++) {
+  if (context.resume) {
+    const resume = context.resume;
+    report.inheritedPrepared = resume.prior.prepared.map(r => ({ ...r, inherited: true, originRunId: resume.prior.runId }));
+    report.inheritedGroups = resume.prior.groups.map(r => ({ ...r, inherited: true, originRunId: resume.prior.runId }));
+    layout.targets = resume.targets.targets.map(t => ({ ...t, target: { ...t.target } }));
+    for (const s of resume.selections) {
+      targetState.actual.set(s.actorOrdinal, { ...s.actualTarget });
+      if (s.movementMargin) targetState.margins.add(pointKey(s.movementMargin));
+      targetState.selections.push({ ...s, inherited: true, originRunId: resume.prior.runId });
+    }
+    validateTargetLayout(layout);
+  }
+  for (let group = (context.resume?.count ?? 0) / 5; group < 20; group++) {
     context.assert(); const batch = []; let failure;
     try {
       for (const target of layout.targets.filter(t => t.group === group)) {
@@ -339,11 +479,13 @@ export async function prepareBatches(actors, layout, context, report,
 export function optionsFrom(args) {
   const allowed = new Set(['private-directory', 'output', 'monitor', 'web-base', 'endpoint', 'wall-seconds', 'pool-identity-sha256',
     'pool-actors-sha256', 'map-root', 'live-map-proof', 'live-map-proof-sha256', 'map-metadata', 'map-metadata-sha256',
-    'npc-metadata', 'npc-metadata-sha256', 'safe-zone-index']);
+    'npc-metadata', 'npc-metadata-sha256', 'safe-zone-index', 'resume-report', 'resume-report-sha256']);
   const o = {};
   for (let i = 0; i < args.length; i += 2) { const key = args[i]?.slice(2);
     need(args[i]?.startsWith('--') && args[i + 1] !== undefined && allowed.has(key) && !Object.hasOwn(o, key), 'unknown_or_repeated_option'); o[key] = args[i + 1]; }
-  for (const key of allowed) if (!['wall-seconds', 'safe-zone-index'].includes(key)) need(o[key], 'required_option_missing');
+  for (const key of allowed) if (!['wall-seconds', 'safe-zone-index', 'resume-report', 'resume-report-sha256'].includes(key)) need(o[key], 'required_option_missing');
+  need(Boolean(o['resume-report']) === Boolean(o['resume-report-sha256']) &&
+    (!o['resume-report'] || path.isAbsolute(o['resume-report']) && /^c:[\\/]/i.test(o['resume-report']) && HASH.test(o['resume-report-sha256'])), 'paired_public_resume_options_required');
   need(validateEndpoint(o.endpoint) === ENDPOINT && o['web-base'] === WEB_BASE, 'original_public_endpoint_required');
   for (const key of ['pool-identity-sha256', 'pool-actors-sha256', 'live-map-proof-sha256']) need(HASH.test(o[key]), 'explicit_hash_required');
   need(o['map-metadata-sha256'] === MAP_METADATA_SHA256 && o['npc-metadata-sha256'] === NPC_METADATA_SHA256, 'reviewed_82_metadata_pins_required');
@@ -373,6 +515,7 @@ export async function runPreparation(options) {
   need(path.resolve(map.sourcePath) === path.resolve(mapFile), 'unreviewed_map_fallback');
   const row = metadata.maps?.find(m => m.map_file_name === '0');
   const layout = buildLayout(map, row, npcs.npcs, options.safeZoneIndex);
+  const resume = await loadResumeEvidence(options, layout, binding);
   need(options.privateDirectory !== options.output, 'private_and_public_paths_must_differ');
   await fs.realpath(options.privateDirectory); // Must already exist; never create a pool or ledger.
   const lockFile = path.join(options.privateDirectory, '.cloud-reference.lock'), lock = await fs.open(lockFile, 'wx', 0o600);
@@ -386,15 +529,16 @@ export async function runPreparation(options) {
     await secureDirectory(options.privateDirectory); await fs.mkdir(options.output, { recursive: true });
     writer = new BoundedEvidence(path.join(options.output, runId + '.events.jsonl'));
     guard = new CapacityMonitor(options.monitor, writer);
-    report = { schema: 'mir2.public-existing-cohort-preparation.v1', runId, startedAtUtc: new Date().toISOString(),
+    report = { schema: 'mir2.public-existing-cohort-preparation.v2', runId, startedAtUtc: new Date().toISOString(),
       preparationOnly: true, capacityEvidence: false, ccuQualified: false, actorsRequested: 100, maximumOwnedConcurrent: 5,
       poolBefore: checked.fingerprints, priorAuthAttemptCount: ledger.attempts.length, mapFileName: '0', safeZoneIndex: layout.safeZoneIndex,
       mapMetadataSha256: MAP_METADATA_SHA256, npcMetadataSha256: NPC_METADATA_SHA256,
       liveMapProofSha256: options['live-map-proof-sha256'], storedMapSha256: binding.row.sha256,
       liveMapIdentity: binding.identity, sourceRevision: binding.sourceRevision, binarySha256FromProof: binding.binarySha256,
-      prepared: [], groups: [], cleanup: [], ok: false };
+      prepared: [], groups: [], cleanup: [], inheritedPrepared: [], inheritedGroups: [], resume: resume?.summary ?? null,
+      all100FreshThisRun: false, finalCapacityAdmissionMustRevalidateAll100: true, ok: false };
     const context = { endpoint: options.endpoint, webBase: options.webBase, pool, actorsFile, ledgerFile, loginBudget, map,
-      connection: 0, guard, deadline: Date.now() + options.wallSeconds * 1000, transportForActor: i => probeTransportForActor('mixed', i),
+      connection: 0, guard, resume, deadline: Date.now() + options.wallSeconds * 1000, transportForActor: i => probeTransportForActor('mixed', i),
       admissionTransportRecovery: [], firstAttemptAdmissionOk: true,
       secrets: pool.actors.flatMap(a => [a.cookie, a.accountId, a.walletIdentity.secretKey, a.walletIdentity.address, a.walletIdentity.accountId].filter(Boolean)),
       assert() { guard.assert(); assertMonitorIdentity(guard.latest, binding); need(Date.now() < this.deadline, 'finite_preparation_wall_exhausted'); },
@@ -409,7 +553,8 @@ export async function runPreparation(options) {
       timer = setTimeout(() => guard.stop('Finite preparation wall exhausted'), options.wallSeconds * 1000);
       await prepareBatches(checked.actors, layout, context, report);
       context.assert(); validateTargetLayout(layout);
-      report.ok = report.prepared.length === 100 && report.groups.length === 20 && report.cleanup.length === 100 && report.cleanup.every(r => r.normalLogout);
+      report.ok = report.prepared.length + report.inheritedPrepared.length === 100 && report.groups.length + report.inheritedGroups.length === 20 &&
+        report.cleanup.length === 100 - (resume?.count ?? 0) && report.cleanup.every(r => r.normalLogout);
     } catch (error) {
       report.failure = { code: /^[a-z0-9_]+$/.test(error.code ?? '') ? error.code : 'preparation_failed',
         errorClass: ['Error', 'TypeError', 'RangeError', 'ProbeWaitDeadline', 'SafetyStop'].includes(error.name) ? error.name : 'ExternalError' };
@@ -420,13 +565,18 @@ export async function runPreparation(options) {
         report.poolUnchanged = canonical(report.poolAfter) === canonical(report.poolBefore);
       } catch { report.poolUnchanged = false; }
       report.ok &&= report.poolUnchanged && !guard.stopped && !writer.failure;
+      report.all100FreshThisRun = report.ok && !resume;
       report.monitorStopped = guard.stopped; report.endedAtUtc = new Date().toISOString();
-      const targetReceipt = { schema: 'mir2.public-existing-cohort-targets.v1', runId, preparationOnly: true, capacityEvidence: false,
+      report.inheritedPreparedCount = report.inheritedPrepared.length; report.currentFreshPreparedCount = report.prepared.length;
+      const targetReceipt = { schema: 'mir2.public-existing-cohort-targets.v2', runId, preparationOnly: true, capacityEvidence: false,
         preparedAll: report.ok, poolIdentitySha256: checked.fingerprints.identityFingerprintSha256,
         liveMapProofSha256: options['live-map-proof-sha256'], mapMetadataSha256: MAP_METADATA_SHA256, storedMapSha256: binding.row.sha256,
         mapFileName: '0', nativeSafeZone: layout.zone, originalTargets: report.originalTargets ?? layout.targets,
-        targets: layout.targets, targetSelections: report.targetSelections ?? [], preparedOrdinals: report.prepared.map(a => a.actorOrdinal),
-        evidenceBoundary: 'fresh authoritative pre-logout positions plus normal Logout/Close; no private database readback; next load must verify its real landing positions' };
+        targets: layout.targets, targetSelections: report.targetSelections ?? [],
+        preparedOrdinals: [...report.inheritedPrepared, ...report.prepared].map(a => a.actorOrdinal),
+        inheritedPreparedOrdinals: report.inheritedPrepared.map(a => a.actorOrdinal), currentFreshPreparedOrdinals: report.prepared.map(a => a.actorOrdinal),
+        all100FreshThisRun: report.all100FreshThisRun, resume: report.resume, finalCapacityAdmissionMustRevalidateAll100: true,
+        evidenceBoundary: 'preparation coverage only; inherited V4 prefix is historical, current records use fresh normal admission; final capacity must normally admit and revalidate all100; no private database readback' };
       await writer.close();
       const targetBytes = Buffer.from(JSON.stringify(targetReceipt, null, 2) + '\n');
       await fs.writeFile(path.join(options.output, runId + '.targets.json'), targetBytes, { flag: 'wx' });
@@ -441,6 +591,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.ar
   Promise.resolve().then(() => runPreparation(optionsFrom(process.argv.slice(2)))).then(report => {
     console.log(JSON.stringify({ runId: report.runId, preparationOnly: true, capacityEvidence: false, ok: report.ok,
       preparedActors: report.prepared.length, groups: report.groups.length, normalCloses: report.cleanup.filter(r => r.normalLogout).length,
+      inheritedPreparedActors: report.inheritedPreparedCount, all100FreshThisRun: report.all100FreshThisRun,
       targetReceiptSha256: report.targetReceiptSha256 })); process.exitCode = report.ok ? 0 : 1;
   }).catch(() => { console.error(JSON.stringify({ preparationOnly: true, capacityEvidence: false, ok: false, errorCode: 'preparation_preflight_or_evidence_failed' })); process.exitCode = 1; });
 }
