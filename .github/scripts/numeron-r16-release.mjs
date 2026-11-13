@@ -16,60 +16,45 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: '2029b44abdee104445c569204477a219a1353f79',
+  source: 'd99212e3cdde834b6eb751dd36e9a6361bc2d100',
   sourceRef: BRANCH,
-  baseSource: 'bfbee701891748d7897ea228677165fa0fed0d46',
+  baseSource: 'e10a84e129234092e1f6f69bcffdf14537789eb3',
   assetSource: 'f2de762309768b51b39438c2437c14e819df9bf7',
   changedFiles: [
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/lib/first-crystal-scene-request.ts",
-      "sha": "dc68afd8d4b2e405f4a6f2ac7d1b1e7ea01ebb74"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/lib/generated/r16-entry-bootstrap-chunks.ts",
-      "sha": "d83aa75dd0d64a641c232f61e433b9bddafd7b6b"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/lib/pinned-bootstrap-chunk.ts",
-      "sha": "09aa098598b8ad8cfa138d9ac4fd2891a415bd09"
+      "filename": "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
+      "sha": "ef8002d167a1b5a75fd73c74c4a51d679d4cf976"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/lib/r16-entry-scene.ts",
-      "sha": "bc87b6f721ebff752cb06fcff43d1b77ae7284bd"
+      "filename": "mir2-web3/apps/web/app/page.tsx",
+      "sha": "f2a2a4402e9b948d4b705e8a4056d13363617841"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/lib/r16-native-localization.ts",
-      "sha": "6c493030b4a3bde8f8b178c0312db232d270d2c0"
+      "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+      "sha": "43c76ddb72af02c8f74a34dde5cb08f598bed7b4"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/package.json",
-      "sha": "755bd2411173ef54763f1abc9e1e812ca8e6cf11"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/scripts/generate-r16-bootstrap-chunks.mjs",
-      "sha": "0a02079df607dcf75f0c5e230e53dd25f21fed66"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/scripts/test-pinned-bootstrap-chunk.mjs",
-      "sha": "0a0363f551d1b259264131979b94d561653c1e27"
+      "filename": "mir2-web3/apps/web/scripts/test-asset-worker-fallback.mjs",
+      "sha": "2975b686f7b206ca5566b1943800885b20e4ce74"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-r16-native-localization.mjs",
-      "sha": "0af27631012b74be65a84eb8929d1a0b00d270b7"
+      "filename": "mir2-web3/apps/web/scripts/test-asset-worker-lifecycle.mjs",
+      "sha": "60db8b36092f00a08432af7c95b22735fe67d12f"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs",
-      "sha": "f2a9b6042d9986e78c67beb02467c3cc988e829a"
+      "filename": "mir2-web3/apps/web/scripts/test-asset-worker-missing-retry.mjs",
+      "sha": "33e20c6b761be35c9fe2e96edd3b0b4803453787"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs",
+      "sha": "e64e80c1a12cf6eee648e73211b778343d86d5b4"
     }
   ],
   entryScene: {
