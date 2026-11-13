@@ -1,0 +1,130 @@
+{
+  "parent": "8e82f53fcd749e8c2f6a69cb9b911c3165de006a",
+  "candidate": "8e82f53fcd74-player-meta-1e35025e",
+  "sourceRoot": "C:\\r16-ui-asset-recovery-20261113\\source",
+  "sourceArchiveSha256": "995458ccb096d9d682d3c0d67324e0a9962e0856f49647c17fa3875dbe52db00",
+  "sourceOverlayReceiptSha256": "92e6df6d230ef1919a9a37a287c4e6579ce11b881ad9a203b2af08cc52e209ca",
+  "version": "20261108-r16-08ec86d5105c",
+  "runtime": "bevy-0c553a754308e5b8",
+  "status": {
+    "code": 0,
+    "signal": null
+  },
+  "builtId": "gTDW8nubMytUf3HI9TkPg",
+  "dist": ".next-entry-player-meta-r2",
+  "tsconfigPath": "tsconfig.entry-player-meta-r2.json",
+  "changedFiles": [
+    {
+      "filename": "mir2-web3/apps/game-client/runtime/src/portable_ui_fonts.rs",
+      "sha256": "d297b159192d4313d71ab175c4de52aa4ca67151b2b6bf5290ab6ff35ba25ba0"
+    },
+    {
+      "filename": "mir2-web3/apps/game-client/runtime/src/portable_ui_asset_recovery.rs",
+      "sha256": "834b32f24e959c8bd2f4a04309dbb083a98f46e767f22c1f0fac1be1cfef325e"
+    },
+    {
+      "filename": "mir2-web3/apps/game-client/runtime/src/portable_ui_asset_recovery_tests.rs",
+      "sha256": "2eeb90de3df8c514cf497838939fedcd440888750bff581cf0abcf7913d27f90"
+    },
+    {
+      "filename": "mir2-web3/apps/game-client/runtime/src/portable_ui_asset_recovery_io_tests.rs",
+      "sha256": "ff5ea4f7b42eb069d2a84ec9957244ebefac1f78a1b47f844b906447c8e63d3b"
+    },
+    {
+      "filename": "mir2-web3/apps/game-client/runtime/src/portable_ui_fonts_tests.rs",
+      "sha256": "f93255555f27e4c282e89deaf2e8a89e60fcbdb6918f6c2623618a608d61cd74"
+    },
+    {
+      "filename": "mir2-web3/apps/game-client/runtime/src/hud_ui_host.rs",
+      "sha256": "7c18d302dfb48a83154df8fbe0558d16c7b3f8b60ea98f8d02da387d1a4bcc48"
+    },
+    {
+      "filename": "mir2-web3/apps/game-client/runtime/src/quest_ui_host.rs",
+      "sha256": "7065c7c16cf82cd91dcd66e1a0198b0c74408b2f9dba2ad3128fa6d548c84bf6"
+    },
+    {
+      "filename": "mir2-web3/apps/game-client/runtime/src/quest_ui_asset_recovery_tests.rs",
+      "sha256": "25a33008b071bbc3dad6f01c82a10b7524b82911a4b46386848ca1bd1f023967"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/generated/bevy_runtime_version_numeron_r16.json",
+      "sha256": "36bdaa0116064c9b41cf8f54a547e53319011180e2275e1c5549e2ed7a33041b"
+    },
+    {
+      "filename": "mir2-web3/config/numeron-r16-web-assets.json",
+      "sha256": "ed404152e6377fb763c0504d5f0eb38de619c952eb088b1d17719c47e1367d09"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/lib/production-asset-config.mjs",
+      "sha256": "812d40691adbbdc333b44b3492455b2a9fdea86492b53e5a84f670f28cf6075d"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-r2-upload.mjs",
+      "sha256": "7dcb651a471994bc61e885269f1dc14716ffb112085379928cc2c28db9953238"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-production-asset-config.mjs",
+      "sha256": "36e79fa9e637df835172c3cdd8b3a4515e42c66b84f000f18e9d5dcbdd4d0f72"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/r16-entry-scene.ts",
+      "sha256": "efa3b08d696355960ee5e0715ee911519f89313bbdb6e81a26f99bcfe802c29c"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/generated/r16-entry-player-meta.json",
+      "sha256": "ad6009d407e1aa8f6f64cbf8ab475d57390295f1403cbde0d99abc0e8da233ed"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/generate-r16-entry-visuals.mjs",
+      "sha256": "350dadce53f8fa6c3b404418baffba9eb2c80d09f95be9ce2af52d37da692e75"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs",
+      "sha256": "78188442505883ce17c6e25075f0a309d2bcd911dfe56d1413feb92fee985cbf"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-entry-player-readiness.mjs",
+      "sha256": "619e876df03e06c5ad17849793462dcfedee9c14d6e6fc575fb98cce66d34b41"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/original-client-shell.tsx",
+      "sha256": "4b7745f5c76de9c76469593f142d957b51d8921563d2e6be01237b2003cbd1ad"
+    },
+    {
+      "filename": "mir2-web3/apps/web/package.json",
+      "sha256": "91c3db872e8af8d0d860e3ede9abe463c996e00b6516debfb662aa749d316da2"
+    }
+  ],
+  "generatedInputs": {
+    "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js": "3eb60cb1c4b3a931befe42485b10925ef161da576c47974c63b4b811a7a0ee99",
+    "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+    "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js": "2c18b5168f4a5210f4879c06e7373807a6dedb3a81137fdc28080191bc0f5aa5",
+    "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm": "9950afa3eb67ba5d618269f72ba1aeb23413f766a6d9bfa00021bfd4e85fbe8f",
+    "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime.js": "04e9fc42f89f1f302047b5d5101cf4e02035b0cf6241d8f9f4550e2dd531d92b",
+    "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm": "5f8b82ab48665cd20e8c45ce0da0f221a6919dfab07aca43fea7fd312f34c185",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/runtime-manifest.json": "36bdaa0116064c9b41cf8f54a547e53319011180e2275e1c5549e2ed7a33041b",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime.js": "3eb60cb1c4b3a931befe42485b10925ef161da576c47974c63b4b811a7a0ee99",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgl2/mir2_bevy_runtime.js": "2c18b5168f4a5210f4879c06e7373807a6dedb3a81137fdc28080191bc0f5aa5",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgl2/mir2_bevy_runtime_bg.wasm": "9950afa3eb67ba5d618269f72ba1aeb23413f766a6d9bfa00021bfd4e85fbe8f",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgl2-shared/mir2_bevy_runtime.js": "04e9fc42f89f1f302047b5d5101cf4e02035b0cf6241d8f9f4550e2dd531d92b",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm": "5f8b82ab48665cd20e8c45ce0da0f221a6919dfab07aca43fea7fd312f34c185",
+    "public/original-asset-manifest.generated.json": "4c4df4a5043dabd373f29ad781746d8b4e9f185db4beac51f4ac299190e6dc75",
+    "public/bootstrap/login/chrsel-0-1024.webp": "bc59b901477dfc3870e1f29e288af76006d0b1f2fea0b0e906fd6817f08fe592",
+    "public/bootstrap/login/chrsel-0-768.webp": "c6a175bda3546115b852c031c638c390bded87c8f9874dda163cf3a1b21999ca",
+    "public/bevy-entity-atlases/hooking-cat.png": "2102df985c82359a4d9bfee382c734996c25692e08669dc38173f6b81b436173",
+    "public/bevy-entity-atlases/manifest.json": "61754d2b8456fe55adecc18ec537b7b15e19998cb701c7c7a403ea1b5b1ff64d",
+    "public/bevy-entity-atlases/starter-bichon-base-p1.png": "54b329bc0716f0d866908b7a098ca7be2a62bc300087e6adb938a08341b4594d",
+    "public/bevy-entity-atlases/starter-bichon-base-p2.png": "6ecfdd3d20040ea8ac552efb7bed07c8ed0a85f67c9aa6184ee83828e7a9d0df",
+    "public/bevy-entity-atlases/starter-bichon-base-p3.png": "5c0ba7723386202ee0b70d302362c4a7e0f793c8bca7ddfb1fb9f5a000289e35",
+    "public/bevy-entity-atlases/starter-bichon-base-p4.png": "b47bba6a9948a2ecdfb6b77c7d4b153a03b66d5d930a636192929bc7662d5db4",
+    "public/bevy-entity-atlases/starter-bichon-base-p5.png": "201422cd1b26625e7205f7f7afa332ca0d3d1f159ddc95b367bcb448e1cb0a11",
+    "public/bevy-entity-atlases/starter-bichon-base-p6.png": "c0b0c1b04170ee851fbb4d83ff0d95423723ad1b5280fd0e7a9c9e3b32a0235b",
+    "public/bevy-entity-atlases/starter-bichon-base-p7.png": "26a3eb81c31001e1e47893e67e9fb3b614837cb56f165b3972b1fafeab929d20",
+    "public/bevy-entity-atlases/starter-bichon-base.png": "9cd99e43693cab3d706b4b8324e70d0697709cb5ddf2df0d957d27f0b95395ed",
+    "lib/generated/bevy_runtime_version.json": "36bdaa0116064c9b41cf8f54a547e53319011180e2275e1c5549e2ed7a33041b"
+  },
+  "packageLockSha256": "7fe1bebf3c7bd3561223fb729c78e18b251cfa74eedb0cd84b17b1ee33ff9ef6",
+  "buildConfigSha256": "ed404152e6377fb763c0504d5f0eb38de619c952eb088b1d17719c47e1367d09",
+  "durationMs": 33977
+}

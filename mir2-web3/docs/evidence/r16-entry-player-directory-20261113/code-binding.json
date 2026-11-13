@@ -1,0 +1,41 @@
+{
+  "commit": "ff957548919e9d306c11af57dad224f2178c2d0f",
+  "candidate": "8e82f53fcd74-player-meta-1e35025e",
+  "files": [
+    {
+      "path": "mir2-web3/apps/web/lib/r16-entry-scene.ts",
+      "sha256": "efa3b08d696355960ee5e0715ee911519f89313bbdb6e81a26f99bcfe802c29c",
+      "matchesBuiltSource": true
+    },
+    {
+      "path": "mir2-web3/apps/web/lib/generated/r16-entry-player-meta.json",
+      "sha256": "ad6009d407e1aa8f6f64cbf8ab475d57390295f1403cbde0d99abc0e8da233ed",
+      "matchesBuiltSource": true
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/generate-r16-entry-visuals.mjs",
+      "sha256": "350dadce53f8fa6c3b404418baffba9eb2c80d09f95be9ce2af52d37da692e75",
+      "matchesBuiltSource": true
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs",
+      "sha256": "78188442505883ce17c6e25075f0a309d2bcd911dfe56d1413feb92fee985cbf",
+      "matchesBuiltSource": true
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-r16-entry-player-readiness.mjs",
+      "sha256": "619e876df03e06c5ad17849793462dcfedee9c14d6e6fc575fb98cce66d34b41",
+      "matchesBuiltSource": true
+    },
+    {
+      "path": "mir2-web3/apps/web/app/original-client-shell.tsx",
+      "sha256": "4b7745f5c76de9c76469593f142d957b51d8921563d2e6be01237b2003cbd1ad",
+      "matchesBuiltSource": true
+    },
+    {
+      "path": "mir2-web3/apps/web/package.json",
+      "sha256": "91c3db872e8af8d0d860e3ede9abe463c996e00b6516debfb662aa749d316da2",
+      "matchesBuiltSource": true
+    }
+  ]
+}

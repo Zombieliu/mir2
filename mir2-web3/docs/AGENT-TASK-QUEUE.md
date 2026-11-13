@@ -19,7 +19,8 @@ Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 G
 - [x] 已发布432c并完成一次公网签名回放；完整运行包/App启动通过，TC缺失与112/113导致共用界面未就绪，Walk未发送/Worker未执行，完整资格false。[正式回执](evidence/r16-runtime-body-recovery-20261113/production/README.md)
 - [x] 共享Rust字体及HUD/Quest必需图的Failed有界恢复候选通过48项Rust、38项Node和两渲染路径四条完整流程，保留句柄/generation/FontCx；只清已恢复的asset error。[候选与原失败](evidence/r16-ui-asset-recovery-20261113/README.md)
 - [x] 新六叶与匹配Web已发布e7cb，公网首步131ms、原HUD118.667秒及功能回放通过；两秒联合采样120.238秒单列。[正式回执](evidence/r16-ui-asset-recovery-20261113/production/README.md)
-- [ ] 继续冷加载／CDN响应头、精确联合打点、公开旧档和动态相邻格核对；保留原Walk跳过与全局未完成资格。
+- [x] 本地ff957默认人物完整目录先行候选通过核心57、构建及两后端四会话；保留既有Fishing断言失败。[候选](evidence/r16-entry-player-directory-20261113/README.md)
+- [ ] 发布完整人物目录候选并做公网冷读；继续CDN响应头、精确联合打点、公开旧档和动态相邻格核对；保留原Walk跳过与全局未完成资格。
 - [ ] 恢复候选截图仍见NPC名称不完整、任务提示英文和球内血量文字未见，继续像素/状态对照；不由Native ready或原字体缓存通过代替视觉验收。[截图范围](evidence/r16-runtime-body-recovery-20261113/README.md)
 
 - [x] 已执行df7aace169发布与扩展验收，公网分项通过但完整冷加载false，已回退正式站72c00d20ae。[正式回执](evidence/r16-font-release-20261112/README.md)
