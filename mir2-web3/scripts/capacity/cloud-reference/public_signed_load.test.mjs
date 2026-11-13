@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import os from 'node:os';
 import path from 'node:path';
 import { performance } from 'node:perf_hooks';
-import { fixedDue, assessActorMinute, movementWitnessLatency, closeVerification, fighterForProfile, stageApplicationTraffic,
+import { fixedDue, assessActorMinute, movementWitnessLatency, closeVerification, closeLoadClients, fighterForProfile, stageApplicationTraffic,
   campaignMode, workloadAdequacy, campaignMayContinue, campaignAllSloPassed,walkOne,
   lateBootstrapObservation, campaignSloFailure, optionsFrom } from './public_signed_load.mjs';
 import { SignedClient, chatAll, optionsFrom as probeOptions } from './public_signed_probe.mjs';
@@ -11,6 +11,59 @@ function healthy(fighter=true){return [
   ...Array.from({length:30},()=>({kind:'walk',completed:true,latencyMs:60,latenessMs:10})),
   ...Array.from({length:2},()=>({kind:'chat',completed:true,latencyMs:60,latenessMs:10})),
   ...(fighter?Array.from({length:30},(_,i)=>({kind:'attack',completed:true,launched:true,positive:i<12,hpLatencyMs:150,latencyMs:30,latenessMs:10})):[])];}
+
+function cleanupClient(ordinal, { dead = false, closeFailure = null } = {}) {
+  const calls = [];
+  return { ordinal, calls, inGame: true, closed: false,
+    snapshot: { playerObjectId: 1000, mapFileName: '0', gold: 10, inventoryItems: [], equipmentItems: [],
+      entities: [{ objectId: 1000, x: 12, y: 34, direction: 'Down', dead }] },
+    async close() {
+      calls.push('normalLogout');
+      if (closeFailure) throw new Error(closeFailure);
+      this.inGame = false; calls.push('webSocketClose'); this.closed = true;
+    } };
+}
+
+test('dead state capture still invokes normal logout and Close without reviving or passing the sample', async () => {
+  const client = cleanupClient(0, { dead: true }), result = await closeLoadClients([client]);
+  assert.deepEqual(client.calls, ['normalLogout', 'webSocketClose']);
+  assert.equal(client.snapshot.entities[0].dead, true);
+  assert.equal(result.samples.length, 0); assert.equal(result.passed, false);
+  assert.deepEqual(result.results[0], { actorOrdinal: 0, stateCaptured: false,
+    captureFailure: 'Exact living authenticated owner required', normalLogout: true, passed: false });
+});
+
+test('close failure remains a failure even when the final state was captured', async () => {
+  const client = cleanupClient(1, { closeFailure: 'synthetic close failure' });
+  const result = await closeLoadClients([client], message => 'safe: ' + message);
+  assert.deepEqual(client.calls, ['normalLogout']); assert.equal(result.samples.length, 1);
+  assert.equal(result.passed, false); assert.equal(result.results[0].stateCaptured, true);
+  assert.equal(result.results[0].captureFailure, null); assert.equal(result.results[0].normalLogout, false);
+  assert.equal(result.results[0].closeFailure, 'safe: synthetic close failure');
+});
+
+test('one capture failure blocks fresh-save qualification even when all close and two other samples preserve state', async () => {
+  const clients = [cleanupClient(0, { dead: true }), cleanupClient(1), cleanupClient(2)];
+  const result = await closeLoadClients(clients);
+  assert.ok(result.results.every(row => row.normalLogout === true));
+  assert.deepEqual(result.samples.map(sample => sample.client.ordinal), [1, 2]);
+  const fresh = result.samples.map(sample => ({ actorOrdinal: sample.client.ordinal, statePreserved: true, normalLogout: true, passed: true }));
+  assert.equal(fresh.length, 2); assert.ok(fresh.every(row => row.passed));
+  assert.equal(result.passed, false, 'initial cleanup remains failed; other fresh samples cannot replace its evidence');
+  assert.ok(clients.every(client => client.calls.includes('webSocketClose')));
+});
+
+test('normal cleanup captures the pre-close state and preserves the original sequential close path', async () => {
+  const clients = [cleanupClient(0), cleanupClient(1)], order = [];
+  for (const client of clients) {
+    const original = client.close;
+    client.close = async function () { order.push(this.ordinal); await original.call(this); this.snapshot.entities[0].x = 99; };
+  }
+  const result = await closeLoadClients(clients);
+  assert.deepEqual(order, [0, 1]); assert.equal(result.passed, true);
+  assert.ok(result.results.every(row => row.stateCaptured && row.captureFailure === null && row.normalLogout && row.passed));
+  assert.ok(result.samples.every(sample => sample.expected.x === 12 && sample.expected.y === 34));
+});
 test('missed fixed opportunities remain due and next clock is not shifted after work completion',()=>{
   assert.deepEqual(fixedDue(1000,2000,7500),{due:[1000,3000,5000,7000],next:9000});
 });

@@ -1,0 +1,78 @@
+{
+  "schema": "mir2.comparable.workload.v2",
+  "populations": [
+    2,
+    25,
+    50,
+    100
+  ],
+  "functionalDurationMs": 60000,
+  "capacityDurationMs": 300000,
+  "actorTemplate": {
+    "class": "Warrior",
+    "level": 40,
+    "gender": "Male"
+  },
+  "map": {
+    "index": 440,
+    "fileName": "DogYoHyun",
+    "width": 800,
+    "height": 800,
+    "rawSha256": "d34167876db45bcac3d879e3ca1e8909efc38fffedbfc1511cef4c4215c2f608"
+  },
+  "scenarios": {
+    "dense-movement-chat": {
+      "walkIntervalMs": 2000,
+      "chatIntervalMs": 30000,
+      "chatFirstOffsetMs": 15000,
+      "laneColumns": 10,
+      "chatPhaseRule": "same-primary-phase-with-midpoint-offset"
+    },
+    "dispersed-melee": {
+      "attackIntervalMs": 1200,
+      "chatIntervalMs": 30000,
+      "chatFirstOffsetMs": 15000,
+      "groupSeparationTiles": 40,
+      "chatPhaseRule": "same-primary-phase-with-midpoint-offset"
+    }
+  },
+  "thresholds": {
+    "minimumCompletionRatio": 0.95,
+    "maximumTimeoutRatioExclusive": 0.01,
+    "movementP95Ms": 750,
+    "chatP95Ms": 1000,
+    "attackP95Ms": 750,
+    "scheduleP95Ms": 250,
+    "walkDeadlineMs": 2000,
+    "chatDeadlineMs": 2500,
+    "attackDeadlineMs": 2500,
+    "equipmentAckDeadlineMs": 15000,
+    "equipmentStateDeadlineMs": 15000,
+    "logoutAckDeadlineMs": 5000,
+    "transportCloseDeadlineMs": 5000
+  },
+  "resourceContract": {
+    "logicalCpus": 4,
+    "serverAffinityMaskHex": "0xf",
+    "memoryCommitBytes": 8589934592,
+    "budgetScope": "all-declared-server-processes",
+    "includesOsOrInjector": false,
+    "injectorAffinityMaskHex": "0xff0"
+  },
+  "causality": {
+    "maximumUnresolvedActionsPerActor": 1,
+    "absoluteDeadlineFromPlannedTime": true,
+    "lateReceiptCanRestoreSuccess": false,
+    "newSendBeforePreviousEvidenceTerminal": false,
+    "receivedPacketTimeMustBeRecorded": true,
+    "freshReceiveSequenceFloorsRequired": true,
+    "targetAndExpectedObserversRequired": true,
+    "nonceHashRequiredForChat": true
+  },
+  "settleBeforeLogoutMs": 11000,
+  "qualificationLayers": [
+    "game-core-local",
+    "full-stack-local",
+    "cloud-production"
+  ]
+}

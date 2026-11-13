@@ -38,6 +38,25 @@ export async function closeVerification(client, result, safe = value => value) {
   result.passed = result.statePreserved === true && result.normalLogout === true;
   return result;
 }
+export async function closeLoadClients(clients, safe = value => value) {
+  const results = [], samples = [];
+  for (const client of clients) {
+    const result = { actorOrdinal: client.ordinal, stateCaptured: false, captureFailure: null, normalLogout: false };
+    let captureError, closeError;
+    try {
+      const expected = probe.state(client);
+      samples.push({ client, expected }); result.stateCaptured = true;
+    } catch (error) { captureError = error; }
+    // A failed living-state sample must not skip the original normal logout/Close.
+    try { await client.close(); result.normalLogout = !client.inGame && client.closed; }
+    catch (error) { closeError = error; }
+    if (captureError) result.captureFailure = safe(captureError.message);
+    if (closeError) { result.closeFailure = safe(closeError.message); result.message = result.closeFailure; }
+    result.passed = result.stateCaptured === true && result.normalLogout === true;
+    results.push(result);
+  }
+  return { results, samples, passed: results.every(result => result.passed === true) };
+}
 export function stageApplicationTraffic(before, after, elapsedMs) {
   check(Number.isFinite(elapsedMs) && elapsedMs > 0, 'Application traffic requires a real positive measurement span');
   const actors = before.map(b => {
@@ -347,10 +366,10 @@ export async function runLoad(options) {
     clearTimeout(timer);await sleep(live.some(c=>c.inGame&&!c.closed)?11000:0);
     report.allSloPassed=campaignAllSloPassed(report.campaignCompleted,context.allSloPassed,report.stages,report.admissionSloMisses);
     report.measurementOk=report.measurementOk===true&&report.allSloPassed;
-    const samples=[];
-    for(const c of live){try{if(c.inGame&&!c.closed)samples.push({client:c,expected:probe.state(c)});await c.close();report.cleanup.push({actorOrdinal:c.ordinal,normalLogout:!c.inGame&&c.closed});}
-      catch(error){report.cleanup.push({actorOrdinal:c.ordinal,normalLogout:false,message:context.safe(error.message)});}}
-    if((report.measurementOk||options.campaignMode==='explore'&&report.campaignCompleted)&&!guard.stopped&&!context.evidenceLimitExceeded&&!writer.failure&&report.cleanup.every(r=>r.normalLogout)){
+    const cleanup=await closeLoadClients(live,message=>context.safe(message));
+    report.cleanup.push(...cleanup.results);
+    const samples=cleanup.samples,initialCleanupPassed=cleanup.passed;
+    if((report.measurementOk||options.campaignMode==='explore'&&report.campaignCompleted)&&!guard.stopped&&!context.evidenceLimitExceeded&&!writer.failure&&initialCleanupPassed&&report.cleanup.every(r=>r.normalLogout)){
       for(const sample of samples.slice(0,2)){const c=new probe.SignedClient(context.endpoint,sample.client.actor,sample.client.ordinal,context);live.push(c);
         const result={actorOrdinal:c.ordinal,statePreserved:false,passed:false};
         try{await probe.login(c,context,'verification');check(JSON.stringify(probe.state(c))===JSON.stringify(sample.expected),'Save/relogin state changed');result.statePreserved=true;}
@@ -367,7 +386,7 @@ export async function runLoad(options) {
     if(report.campaignCompleted&&!report.measurementOk&&(!report.failure||['campaign','admission-SLO'].includes(report.failure.phase)))
       report.failure=campaignSloFailure(context.activitySloPassed,report.stages,report.admissionSloMisses);
     report.diagnosticObserveUsed=context.diagnosticObserveUsed===true;
-    report.ok=report.measurementOk===true&&report.admissionSloMisses.length===0&&!guard.stopped&&!context.evidenceLimitExceeded&&!writer.failure&&report.cleanup.every(r=>r.normalLogout)&&report.savedVerification.length===Math.min(2,options.stages.at(-1))&&report.savedVerification.every(r=>r.passed);
+    report.ok=report.measurementOk===true&&report.admissionSloMisses.length===0&&!guard.stopped&&!context.evidenceLimitExceeded&&!writer.failure&&initialCleanupPassed&&report.cleanup.every(r=>r.normalLogout)&&report.savedVerification.length===Math.min(2,options.stages.at(-1))&&report.savedVerification.every(r=>r.passed);
     report.completedAtUtc=utc();report.eventsFile=eventsFile;report.transports=live.filter(c=>c.connection<=options.stages.at(-1)).map(c=>({actorOrdinal:c.ordinal,profile:c.transportProfile,setupBudgetMs:c.transportProfile==='plain-Web'?60000:20000}));
     report.rows=writer.rows;report.evidenceLimitExceeded=context.evidenceLimitExceeded===true;
     report.evidenceComplete=!report.evidenceLimitExceeded&&!writer.failure;
