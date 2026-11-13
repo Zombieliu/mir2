@@ -6,7 +6,7 @@ Updated 2026-11-13 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-13 已发布e7cbab02f0及新六叶运行包：简繁出码、官方手机尺寸Testnet一次签名、比奇实走、共享HUD/Q、六字体、113/113、Worker停启和正常退出通过。同实例19个asset错误样本后恢复；原首步131ms／HUD118.667秒门槛通过，联合粗采样120.238秒单列。冷加载45.079秒及CDN头55.860秒仍待优化；实体手机、公开旧档和整体1:1开放。131份WIP未变，外部容量文档提交另记。[正式结果与边界](evidence/r16-ui-asset-recovery-20261113/production/README.md)
+2026-11-13 正式站为b2097fdfd1：自体直接保留解码Image，两后端持续慢PNG与重开通过；公网扫码确认、比奇实走、共享HUD/Q、六字体、113/113及Worker停启通过。功能发布保留，原HUD120.651秒仍未过120秒冷门槛，点击到首帧53.165秒；131份WIP未变，整体1:1开放。[最新正式结果](evidence/r16-self-sprite-residency-20261113/production/README.md)
 
 ## 保留的当前未结项
 
@@ -21,7 +21,8 @@ Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 G
 - [x] 新六叶与匹配Web已发布e7cb，公网首步131ms、原HUD118.667秒及功能回放通过；两秒联合采样120.238秒单列。[正式回执](evidence/r16-ui-asset-recovery-20261113/production/README.md)
 - [x] 本地ff957默认人物完整目录先行候选通过核心57、构建及两后端四会话；保留既有Fishing断言失败。[候选](evidence/r16-entry-player-directory-20261113/README.md)
 - [x] 已发布ff957并公网回放，扫码/签名/进城走路/退出通过，SC5/6及共享HUD失败后回退e7cb，回退简繁出码通过。[发布与回退](evidence/r16-entry-player-directory-20261113/production/README.md)
-- [ ] 稳定自体当前动作单帧读取并保留已解码图片；用每次PNG>1s、包/完整meta扣住的持续故障验证站立和走路，继续SC字库/大运行包冷读。再次发布前保留原8秒/120秒门槛；公开旧档、动态占位和整体资格仍开放。
+- [x] 自体当前动作PNG读取归角色持有，并直接保留解码Image与几何；每次PNG约1.2s、包/完整meta扣住时两后端站立/16步通过，四会话与正式功能回放通过。[候选及发布](evidence/r16-self-sprite-residency-20261113/README.md)
+- [ ] 继续冷启动：本轮点击到首帧53.165秒、原HUD120.651秒，门槛false；原8秒/120秒不变。公开旧档、动态占位、NPC名称/指导文字及整体资格仍开放。[正式原值](evidence/r16-self-sprite-residency-20261113/production/README.md)
 - [ ] 恢复候选截图仍见NPC名称不完整、任务提示英文和球内血量文字未见，继续像素/状态对照；不由Native ready或原字体缓存通过代替视觉验收。[截图范围](evidence/r16-runtime-body-recovery-20261113/README.md)
 
 - [x] 已执行df7aace169发布与扩展验收，公网分项通过但完整冷加载false，已回退正式站72c00d20ae。[正式回执](evidence/r16-font-release-20261112/README.md)

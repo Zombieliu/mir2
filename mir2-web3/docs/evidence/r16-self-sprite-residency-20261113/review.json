@@ -1,0 +1,7 @@
+{
+  "readOnlyReview": true,
+  "blockingFindings": [],
+  "scope": "Image ownership, complete pose geometry, generation, role isolation, self-only picking/GPU boundaries",
+  "limit": "Controller stop/start is tested; no actual React StrictMode mount/unmount browser claim",
+  "fullNativeCompletedAfterReview": true
+}

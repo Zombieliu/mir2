@@ -1,0 +1,9 @@
+{
+  "kind": "numeron-verified-production-alias-v1",
+  "publicAlias": "numeron.obelisk.build",
+  "deploymentId": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd",
+  "revision": "b2097fdfd13a2d8bc0acde435cd612fd83672cac",
+  "checkedAt": "2026-11-13T04:19:11.667Z",
+  "firstPartyRelayCanaryPassed": true,
+  "relayOrigin": "https://relay.dubhe.obelisk.build"
+}

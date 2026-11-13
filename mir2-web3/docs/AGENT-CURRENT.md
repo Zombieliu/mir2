@@ -15,7 +15,7 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
-2026-11-13 已发布ff957默认人物完整目录候选，公网简繁出码、官方手机尺寸Testnet一次签名、比奇首步149ms、113/113及正常退出通过；但SC字体缓存缺项5/6、运行包正文首帧后192.203秒才完成、共享HUD/Q未就绪，完整资格false，已回退正式e7cb。回退后简繁出码复验通过，131份WIP保留。继续稳定单帧/保留已解码人物、持续慢PNG及字体/运行包冷读；整体1:1开放。[发布、失败与回退](evidence/r16-entry-player-directory-20261113/production/README.md)
+2026-11-13 已发布b2097fdfd1自体图片驻留修复：动画换帧不取消请求，直接复用解码Image；两后端持续慢PNG及四会话通过。公网简繁出码、官方手机尺寸Testnet一次登录确认、首步127ms、共享HUD/Q、六字体、113/113、Worker停启及退出通过。冷读仍false：点击到首帧53.165秒，原HUD120.651秒超过120秒；不放宽门槛。131份WIP未变，整体1:1开放。继续冷资源/公开旧档/动态占位和视觉缺项；[本次正式回执](evidence/r16-self-sprite-residency-20261113/production/README.md)，[此前ff957失败与回退](evidence/r16-entry-player-directory-20261113/production/README.md)保留。
 
 2026-11-12 正式站已发布 `51d2dcc346`：共享图片取消与图集计时/JSON大小缓存身份修复。本机75项、生产构建及两后端重开同档通过；公网简繁出码、手机尺寸官方钱包Testnet签名、进比奇、权威移动、共用HUD/任务窗、113/113预取和正常退出通过，无需回滚。云端缓存身份与计算一致；Worker正常更新缓存一次，未迁移旧007缓存。本次观测起点到首画面65.2秒/共用HUD104.7秒（点击进游戏后约6.8秒/46.3秒），继续优化冷加载；实体手机、完整1:1及历史未结项仍开放。[发布与边界](evidence/r16-cache-repair-20261112/README.md)
 

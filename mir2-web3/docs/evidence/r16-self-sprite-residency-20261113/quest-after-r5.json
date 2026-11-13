@@ -1,0 +1,3090 @@
+{
+  "run": "quest-after-r5",
+  "gender": "female",
+  "mode": "webgl2",
+  "passed": true,
+  "rawReceiptSha256": "a956e20ebb81159a559231a6f22b278fdd66c433c76896452b23195e419664ed",
+  "early": {
+    "completePackWithheld": true,
+    "completeRemoteMetadataWithheld": true,
+    "completedPng": 38,
+    "minPngTtfbMs": 1199,
+    "samples": 43,
+    "everySampleDecoded": true,
+    "initialBodyDelayMs": 6000,
+    "firstPlayable": {
+      "epochMs": 1794542733701,
+      "observedAt": 1794542733712
+    },
+    "walks": {
+      "passed": true,
+      "firstPlayableAt": 1794542733701,
+      "rows": [
+        {
+          "key": "ArrowRight",
+          "direction": "Right",
+          "to": {
+            "x": 289,
+            "y": 616
+          },
+          "nativeHudReadyBeforeInput": false,
+          "inputAt": 1794542733722,
+          "wireAt": 1794542733759,
+          "ackAt": 1794542733813,
+          "renderedAt": 1794542733843,
+          "ackMs": 54,
+          "inputToRenderedMs": 121,
+          "rendered": {
+            "x": 289,
+            "y": 616
+          }
+        },
+        {
+          "key": "ArrowLeft",
+          "direction": "Left",
+          "to": {
+            "x": 288,
+            "y": 616
+          },
+          "nativeHudReadyBeforeInput": false,
+          "inputAt": 1794542733877,
+          "wireAt": 1794542734360,
+          "ackAt": 1794542734361,
+          "renderedAt": 1794542734392,
+          "ackMs": 1,
+          "inputToRenderedMs": 515,
+          "rendered": {
+            "x": 288,
+            "y": 616
+          }
+        }
+      ],
+      "returnedToSpawn": true
+    },
+    "continuous": {
+      "startedAt": 1794542734392,
+      "rows": [
+        {
+          "step": 0,
+          "key": "ArrowRight",
+          "commands": 1,
+          "arrivedAt": 1794542735373
+        },
+        {
+          "step": 0,
+          "key": "ArrowLeft",
+          "commands": 1,
+          "arrivedAt": 1794542735944
+        },
+        {
+          "step": 1,
+          "key": "ArrowRight",
+          "commands": 1,
+          "arrivedAt": 1794542736531
+        },
+        {
+          "step": 1,
+          "key": "ArrowLeft",
+          "commands": 1,
+          "arrivedAt": 1794542737137
+        },
+        {
+          "step": 2,
+          "key": "ArrowRight",
+          "commands": 1,
+          "arrivedAt": 1794542737773
+        },
+        {
+          "step": 2,
+          "key": "ArrowLeft",
+          "commands": 1,
+          "arrivedAt": 1794542738331
+        },
+        {
+          "step": 3,
+          "key": "ArrowRight",
+          "commands": 1,
+          "arrivedAt": 1794542738950
+        },
+        {
+          "step": 3,
+          "key": "ArrowLeft",
+          "commands": 1,
+          "arrivedAt": 1794542739552
+        },
+        {
+          "step": 4,
+          "key": "ArrowRight",
+          "commands": 1,
+          "arrivedAt": 1794542740140
+        },
+        {
+          "step": 4,
+          "key": "ArrowLeft",
+          "commands": 1,
+          "arrivedAt": 1794542740775
+        },
+        {
+          "step": 5,
+          "key": "ArrowRight",
+          "commands": 1,
+          "arrivedAt": 1794542741374
+        },
+        {
+          "step": 5,
+          "key": "ArrowLeft",
+          "commands": 1,
+          "arrivedAt": 1794542741963
+        },
+        {
+          "step": 6,
+          "key": "ArrowRight",
+          "commands": 1,
+          "arrivedAt": 1794542742552
+        },
+        {
+          "step": 6,
+          "key": "ArrowLeft",
+          "commands": 1,
+          "arrivedAt": 1794542743172
+        },
+        {
+          "step": 7,
+          "key": "ArrowRight",
+          "commands": 1,
+          "arrivedAt": 1794542743773
+        },
+        {
+          "step": 7,
+          "key": "ArrowLeft",
+          "commands": 1,
+          "arrivedAt": 1794542744372
+        }
+      ],
+      "endedAt": 1794542744372
+    },
+    "fullPackUpgrade": {
+      "observedAt": 1794542744529,
+      "actualDecodedDataImage": true
+    },
+    "bodyRows": [
+      {
+        "at": 1794542735083,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/852.png",
+        "displaySource": "blob",
+        "left": "6px",
+        "top": "-45px",
+        "width": "64px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542736484,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/853.png",
+        "displaySource": "blob",
+        "left": "11px",
+        "top": "-46px",
+        "width": "60px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542737402,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/852.png",
+        "displaySource": "blob",
+        "left": "6px",
+        "top": "-45px",
+        "width": "64px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542737686,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/854.png",
+        "displaySource": "blob",
+        "left": "14px",
+        "top": "-47px",
+        "width": "56px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542737804,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/855.png",
+        "displaySource": "blob",
+        "left": "6px",
+        "top": "-46px",
+        "width": "64px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542738525,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/879.png",
+        "displaySource": "blob",
+        "left": "6px",
+        "top": "-44px",
+        "width": "60px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542738602,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/852.png",
+        "displaySource": "blob",
+        "left": "6px",
+        "top": "-45px",
+        "width": "64px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542738788,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/853.png",
+        "displaySource": "blob",
+        "left": "11px",
+        "top": "-46px",
+        "width": "60px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542738984,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/854.png",
+        "displaySource": "blob",
+        "left": "14px",
+        "top": "-47px",
+        "width": "56px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542739084,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/855.png",
+        "displaySource": "blob",
+        "left": "6px",
+        "top": "-46px",
+        "width": "64px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542739224,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/876.png",
+        "displaySource": "blob",
+        "left": "5px",
+        "top": "-45px",
+        "width": "64px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542739684,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/879.png",
+        "displaySource": "blob",
+        "left": "6px",
+        "top": "-44px",
+        "width": "60px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542739801,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/852.png",
+        "displaySource": "blob",
+        "left": "6px",
+        "top": "-45px",
+        "width": "64px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542739984,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/853.png",
+        "displaySource": "blob",
+        "left": "11px",
+        "top": "-46px",
+        "width": "60px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542740184,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/854.png",
+        "displaySource": "blob",
+        "left": "14px",
+        "top": "-47px",
+        "width": "56px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542740284,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/855.png",
+        "displaySource": "blob",
+        "left": "6px",
+        "top": "-46px",
+        "width": "64px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542740401,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/876.png",
+        "displaySource": "blob",
+        "left": "5px",
+        "top": "-45px",
+        "width": "64px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542740884,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/879.png",
+        "displaySource": "blob",
+        "left": "6px",
+        "top": "-44px",
+        "width": "60px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542741010,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/852.png",
+        "displaySource": "blob",
+        "left": "6px",
+        "top": "-45px",
+        "width": "64px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542741184,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/853.png",
+        "displaySource": "blob",
+        "left": "11px",
+        "top": "-46px",
+        "width": "60px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542741384,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/854.png",
+        "displaySource": "blob",
+        "left": "14px",
+        "top": "-47px",
+        "width": "56px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542741483,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/855.png",
+        "displaySource": "blob",
+        "left": "6px",
+        "top": "-46px",
+        "width": "64px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542741603,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/876.png",
+        "displaySource": "blob",
+        "left": "5px",
+        "top": "-45px",
+        "width": "64px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542741724,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/877.png",
+        "displaySource": "blob",
+        "left": "17px",
+        "top": "-45px",
+        "width": "52px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542741904,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/878.png",
+        "displaySource": "blob",
+        "left": "13px",
+        "top": "-45px",
+        "width": "56px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542742084,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/879.png",
+        "displaySource": "blob",
+        "left": "6px",
+        "top": "-44px",
+        "width": "60px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542742207,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/852.png",
+        "displaySource": "blob",
+        "left": "6px",
+        "top": "-45px",
+        "width": "64px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542742484,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/853.png",
+        "displaySource": "blob",
+        "left": "11px",
+        "top": "-46px",
+        "width": "60px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542742584,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/854.png",
+        "displaySource": "blob",
+        "left": "14px",
+        "top": "-47px",
+        "width": "56px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542742684,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/855.png",
+        "displaySource": "blob",
+        "left": "6px",
+        "top": "-46px",
+        "width": "64px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542742785,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/856.png",
+        "displaySource": "blob",
+        "left": "11px",
+        "top": "-47px",
+        "width": "60px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542742815,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/876.png",
+        "displaySource": "blob",
+        "left": "5px",
+        "top": "-45px",
+        "width": "64px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542742984,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/877.png",
+        "displaySource": "blob",
+        "left": "17px",
+        "top": "-45px",
+        "width": "52px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542743184,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/878.png",
+        "displaySource": "blob",
+        "left": "13px",
+        "top": "-45px",
+        "width": "56px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542743284,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/879.png",
+        "displaySource": "blob",
+        "left": "6px",
+        "top": "-44px",
+        "width": "60px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542743392,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/881.png",
+        "displaySource": "blob",
+        "left": "13px",
+        "top": "-45px",
+        "width": "56px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542743420,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/852.png",
+        "displaySource": "blob",
+        "left": "6px",
+        "top": "-45px",
+        "width": "64px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542743643,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/853.png",
+        "displaySource": "blob",
+        "left": "11px",
+        "top": "-46px",
+        "width": "60px",
+        "height": "68px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542743688,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/854.png",
+        "displaySource": "blob",
+        "left": "14px",
+        "top": "-47px",
+        "width": "56px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542743884,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/855.png",
+        "displaySource": "blob",
+        "left": "6px",
+        "top": "-46px",
+        "width": "64px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542743984,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/856.png",
+        "displaySource": "blob",
+        "left": "11px",
+        "top": "-47px",
+        "width": "60px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542744019,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/876.png",
+        "displaySource": "blob",
+        "left": "5px",
+        "top": "-45px",
+        "width": "64px",
+        "height": "72px",
+        "firstPlayable": true
+      },
+      {
+        "at": 1794542744284,
+        "waitingForEntryPlayer": false,
+        "ready": true,
+        "pending": false,
+        "hasBody": true,
+        "bodyDecoded": true,
+        "bodyPath": "/original-ui/CArmour/00/877.png",
+        "displaySource": "blob",
+        "left": "17px",
+        "top": "-45px",
+        "width": "52px",
+        "height": "68px",
+        "firstPlayable": true
+      }
+    ]
+  },
+  "cold": {
+    "nativeReadyWaitMs": 26558,
+    "prewarm": {
+      "passed": true,
+      "selection": "latest current-session hud-core; prior cancelled runs retained",
+      "waitMs": 1833,
+      "snapshot": {
+        "runs": [
+          {
+            "name": "hud-core",
+            "label": "Core HUD",
+            "requested": 113,
+            "ok": 113,
+            "failed": 0,
+            "failedUrls": [],
+            "durationMs": 7013.0999999940395,
+            "sceneCacheHits": 0,
+            "sceneCacheMisses": 0,
+            "status": "done"
+          }
+        ],
+        "summary": {
+          "requested": 113,
+          "ok": 113,
+          "failed": 0
+        },
+        "orchestrator": {
+          "backgroundMode": "afterPlayable",
+          "firstPlayable": true,
+          "requestedStage": "game",
+          "pendingBackgroundStage": null,
+          "activeBackgroundStage": null,
+          "completed": [
+            "game:background"
+          ],
+          "disposed": false
+        }
+      },
+      "originalMarkerPins": [
+        {
+          "frame": 985,
+          "bytes": 469,
+          "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+        },
+        {
+          "frame": 986,
+          "bytes": 486,
+          "sha256": "f3ae75e6be631c2fa4aee4a0bf996fa90cdc7ac20a8aac4e54315fb85a64b9f9"
+        }
+      ],
+      "cached": [
+        {
+          "frame": 985,
+          "bytes": 469,
+          "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+        },
+        {
+          "frame": 986,
+          "bytes": 486,
+          "sha256": "f3ae75e6be631c2fa4aee4a0bf996fa90cdc7ac20a8aac4e54315fb85a64b9f9"
+        }
+      ],
+      "samples": [
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/985.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ],
+        [
+          {
+            "path": "/original-ui/Prguse/986.png",
+            "complete": true,
+            "width": 28,
+            "height": 29,
+            "failed": null,
+            "hidden": false
+          }
+        ]
+      ],
+      "staleRequests": []
+    },
+    "fontCache": [
+      {
+        "name": "NotoSansTC.ttf",
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+      },
+      {
+        "name": "NotoSansCJKsc-Regular.otf",
+        "bytes": 16437364,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+      },
+      {
+        "name": "NotoSans-Regular.ttf",
+        "bytes": 621572,
+        "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      },
+      {
+        "name": "NotoSansDevanagari-Regular.ttf",
+        "bytes": 243520,
+        "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+      },
+      {
+        "name": "NotoSansThai-Regular.ttf",
+        "bytes": 37780,
+        "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+      },
+      {
+        "name": "NotoSansArabic-Regular.ttf",
+        "bytes": 234892,
+        "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+      }
+    ],
+    "diary": {
+      "passed": true,
+      "locale": "zh-TW",
+      "renderer": "ordinary-shared-native",
+      "questOpened": true,
+      "qClosed": true,
+      "owner": "bevy",
+      "package": {
+        "backend": "webgl2",
+        "packageId": "webgl2-shared"
+      },
+      "navigation": {
+        "characterOpen": false,
+        "characterPage": "character",
+        "bagOpen": false,
+        "questOpen": false
+      },
+      "zeroWorldCommands": true,
+      "screenshot": "quest-available-zh-TW.png"
+    },
+    "finalTile": {
+      "x": 289,
+      "y": 616
+    }
+  },
+  "workerRestart": {
+    "passed": true,
+    "originalFrame": "/original-ui/Prguse/1.png",
+    "expectedSha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa",
+    "restored": {
+      "status": 200,
+      "bytes": 66374,
+      "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+    },
+    "originNetworkReads": 0,
+    "lifecycle": [
+      {
+        "versionId": "0",
+        "runningStatus": "running",
+        "status": "activated"
+      },
+      {
+        "versionId": "0",
+        "runningStatus": "stopping",
+        "status": "activated"
+      },
+      {
+        "versionId": "0",
+        "runningStatus": "stopped",
+        "status": "activated"
+      },
+      {
+        "versionId": "0",
+        "runningStatus": "starting",
+        "status": "activated"
+      },
+      {
+        "versionId": "0",
+        "runningStatus": "starting",
+        "status": "activated"
+      },
+      {
+        "versionId": "0",
+        "runningStatus": "starting",
+        "status": "activated"
+      },
+      {
+        "versionId": "0",
+        "runningStatus": "running",
+        "status": "activated"
+      }
+    ]
+  },
+  "firstSave": {
+    "passed": true,
+    "className": "Warrior",
+    "level": 30,
+    "gold": 76360,
+    "experience": 19497,
+    "fields": [
+      "map_file_name",
+      "position",
+      "direction",
+      "gold",
+      "credit",
+      "experience",
+      "max_experience",
+      "inventory_items_json",
+      "belt_items_json",
+      "equipment_items_json",
+      "equipment_items_explicit_empty",
+      "storage_items_json",
+      "hero_inventory_items_json",
+      "hero_equipment_items_json",
+      "quest_states_json",
+      "skill_states_json"
+    ],
+    "questStateCount": 26
+  },
+  "browserRestart": {
+    "firstProcessCount": 8,
+    "allFirstProcessesExited": true,
+    "persistedProfileExists": true,
+    "secondProcessCount": 8
+  },
+  "warmSession": {
+    "passed": true,
+    "loginKind": "normal-password",
+    "navigationAt": 1794542784626,
+    "startClickAt": 1794542790733,
+    "startAcknowledgedAt": 1794542798931,
+    "authoritativeStart": {
+      "position": {
+        "x": 289,
+        "y": 616
+      },
+      "characterIndex": 2
+    },
+    "preStartCache": {
+      "assetVersion": "20261108-r16-08ec86d5105c",
+      "cacheNamespace": "20261108-r16-08ec86d5105c-9a821c959783",
+      "rows": [
+        {
+          "name": "NotoSansCJKsc-Regular.otf",
+          "present": true,
+          "contentLength": "16437364"
+        },
+        {
+          "name": "NotoSansTC.ttf",
+          "present": true,
+          "contentLength": "11941968"
+        },
+        {
+          "name": "NotoSans-Regular.ttf",
+          "present": true,
+          "contentLength": "621572"
+        },
+        {
+          "name": "NotoSansDevanagari-Regular.ttf",
+          "present": true,
+          "contentLength": "243520"
+        },
+        {
+          "name": "NotoSansThai-Regular.ttf",
+          "present": true,
+          "contentLength": "37780"
+        },
+        {
+          "name": "NotoSansArabic-Regular.ttf",
+          "present": true,
+          "contentLength": "234892"
+        }
+      ]
+    },
+    "interaction": {
+      "passed": true,
+      "prewarm": {
+        "passed": true,
+        "selection": "latest current-session hud-core; prior cancelled runs retained",
+        "waitMs": 1873,
+        "snapshot": {
+          "runs": [
+            {
+              "name": "hud-core",
+              "label": "Core HUD",
+              "requested": 113,
+              "ok": 113,
+              "failed": 0,
+              "failedUrls": [],
+              "durationMs": 186.5,
+              "sceneCacheHits": 0,
+              "sceneCacheMisses": 0,
+              "status": "done"
+            }
+          ],
+          "summary": {
+            "requested": 113,
+            "ok": 113,
+            "failed": 0
+          },
+          "orchestrator": {
+            "backgroundMode": "afterPlayable",
+            "firstPlayable": true,
+            "requestedStage": "game",
+            "pendingBackgroundStage": null,
+            "activeBackgroundStage": null,
+            "completed": [
+              "game:background"
+            ],
+            "disposed": false
+          }
+        },
+        "originalMarkerPins": [
+          {
+            "frame": 985,
+            "bytes": 469,
+            "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+          },
+          {
+            "frame": 986,
+            "bytes": 486,
+            "sha256": "f3ae75e6be631c2fa4aee4a0bf996fa90cdc7ac20a8aac4e54315fb85a64b9f9"
+          }
+        ],
+        "cached": [
+          {
+            "frame": 985,
+            "bytes": 469,
+            "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+          },
+          {
+            "frame": 986,
+            "bytes": 486,
+            "sha256": "f3ae75e6be631c2fa4aee4a0bf996fa90cdc7ac20a8aac4e54315fb85a64b9f9"
+          }
+        ],
+        "samples": [
+          [
+            {
+              "path": "/original-ui/Prguse/985.png",
+              "complete": true,
+              "width": 28,
+              "height": 29,
+              "failed": null,
+              "hidden": false
+            }
+          ],
+          [
+            {
+              "path": "/original-ui/Prguse/985.png",
+              "complete": true,
+              "width": 28,
+              "height": 29,
+              "failed": null,
+              "hidden": false
+            }
+          ],
+          [
+            {
+              "path": "/original-ui/Prguse/985.png",
+              "complete": true,
+              "width": 28,
+              "height": 29,
+              "failed": null,
+              "hidden": false
+            }
+          ],
+          [
+            {
+              "path": "/original-ui/Prguse/985.png",
+              "complete": true,
+              "width": 28,
+              "height": 29,
+              "failed": null,
+              "hidden": false
+            }
+          ],
+          [
+            {
+              "path": "/original-ui/Prguse/986.png",
+              "complete": true,
+              "width": 28,
+              "height": 29,
+              "failed": null,
+              "hidden": false
+            }
+          ],
+          [
+            {
+              "path": "/original-ui/Prguse/986.png",
+              "complete": true,
+              "width": 28,
+              "height": 29,
+              "failed": null,
+              "hidden": false
+            }
+          ],
+          [
+            {
+              "path": "/original-ui/Prguse/986.png",
+              "complete": true,
+              "width": 28,
+              "height": 29,
+              "failed": null,
+              "hidden": false
+            }
+          ],
+          [
+            {
+              "path": "/original-ui/Prguse/986.png",
+              "complete": true,
+              "width": 28,
+              "height": 29,
+              "failed": null,
+              "hidden": false
+            }
+          ],
+          [
+            {
+              "path": "/original-ui/Prguse/985.png",
+              "complete": true,
+              "width": 28,
+              "height": 29,
+              "failed": null,
+              "hidden": false
+            }
+          ],
+          [
+            {
+              "path": "/original-ui/Prguse/985.png",
+              "complete": true,
+              "width": 28,
+              "height": 29,
+              "failed": null,
+              "hidden": false
+            }
+          ],
+          [
+            {
+              "path": "/original-ui/Prguse/985.png",
+              "complete": true,
+              "width": 28,
+              "height": 29,
+              "failed": null,
+              "hidden": false
+            }
+          ],
+          [
+            {
+              "path": "/original-ui/Prguse/985.png",
+              "complete": true,
+              "width": 28,
+              "height": 29,
+              "failed": null,
+              "hidden": false
+            }
+          ],
+          [
+            {
+              "path": "/original-ui/Prguse/986.png",
+              "complete": true,
+              "width": 28,
+              "height": 29,
+              "failed": null,
+              "hidden": false
+            }
+          ],
+          [
+            {
+              "path": "/original-ui/Prguse/986.png",
+              "complete": true,
+              "width": 28,
+              "height": 29,
+              "failed": null,
+              "hidden": false
+            }
+          ]
+        ],
+        "staleRequests": []
+      },
+      "nativeReadyWaitMs": 1350,
+      "policy": {
+        "enabled": true,
+        "assetVersion": "20261108-r16-08ec86d5105c",
+        "mirrorCode": true,
+        "bodyIdleMs": 15000,
+        "bodyLimit": 33554432
+      },
+      "native": {
+        "hud": {
+          "version": 1,
+          "frame": 8,
+          "ready": true,
+          "characterStatsReady": false,
+          "generation": 2,
+          "revision": 1,
+          "navigation": {
+            "characterOpen": false,
+            "characterPage": "character",
+            "bagOpen": false,
+            "questOpen": false
+          },
+          "plan": {
+            "hp": "HP 18/18",
+            "mp": "",
+            "name": "SpawnSmoke",
+            "level": "1",
+            "gold": "0",
+            "experience": "0%",
+            "weight": "39",
+            "hpOnly": true,
+            "main": {
+              "left": 0,
+              "top": 616,
+              "width": 1024,
+              "height": 152
+            },
+            "orb": {
+              "left": 0,
+              "top": 646,
+              "width": 104,
+              "height": 80
+            },
+            "experienceBar": {
+              "left": 9,
+              "top": 759,
+              "width": 1004,
+              "height": 8
+            },
+            "weightBar": {
+              "left": 919,
+              "top": 719,
+              "width": 76,
+              "height": 12
+            },
+            "buttons": [
+              {
+                "action": "character",
+                "rect": {
+                  "left": 905,
+                  "top": 692,
+                  "width": 20,
+                  "height": 20
+                },
+                "normal": "original-ui/Prguse/1900.png",
+                "hover": "original-ui/Prguse/1901.png",
+                "pressed": "original-ui/Prguse/1902.png"
+              },
+              {
+                "action": "bag",
+                "rect": {
+                  "left": 928,
+                  "top": 692,
+                  "width": 20,
+                  "height": 20
+                },
+                "normal": "original-ui/Prguse/1903.png",
+                "hover": "original-ui/Prguse/1904.png",
+                "pressed": "original-ui/Prguse/1905.png"
+              },
+              {
+                "action": "skill",
+                "rect": {
+                  "left": 951,
+                  "top": 692,
+                  "width": 20,
+                  "height": 20
+                },
+                "normal": "original-ui/Prguse/1906.png",
+                "hover": "original-ui/Prguse/1907.png",
+                "pressed": "original-ui/Prguse/1908.png"
+              },
+              {
+                "action": "quest",
+                "rect": {
+                  "left": 974,
+                  "top": 692,
+                  "width": 20,
+                  "height": 20
+                },
+                "normal": "original-ui/Prguse/1909.png",
+                "hover": "original-ui/Prguse/1910.png",
+                "pressed": "original-ui/Prguse/1911.png"
+              },
+              {
+                "action": "option",
+                "rect": {
+                  "left": 997,
+                  "top": 692,
+                  "width": 20,
+                  "height": 20
+                },
+                "normal": "original-ui/Prguse/1912.png",
+                "hover": "original-ui/Prguse/1913.png",
+                "pressed": "original-ui/Prguse/1914.png"
+              },
+              {
+                "action": "menu",
+                "rect": {
+                  "left": 969,
+                  "top": 651,
+                  "width": 40,
+                  "height": 40
+                },
+                "normal": "original-ui/Prguse/1960.png",
+                "hover": "original-ui/Prguse/1961.png",
+                "pressed": "original-ui/Prguse/1962.png"
+              },
+              {
+                "action": "gameShop",
+                "rect": {
+                  "left": 919,
+                  "top": 651,
+                  "width": 40,
+                  "height": 38
+                },
+                "normal": "original-ui/Prguse/826.png",
+                "hover": "original-ui/Prguse/827.png",
+                "pressed": "original-ui/Prguse/828.png"
+              }
+            ],
+            "characterRect": {
+              "left": 760,
+              "top": 0,
+              "width": 264,
+              "height": 380
+            },
+            "characterHits": [
+              {
+                "action": {
+                  "type": "selectCharacterPage",
+                  "page": "character"
+                },
+                "rect": {
+                  "left": 768,
+                  "top": 70,
+                  "width": 64,
+                  "height": 20
+                }
+              },
+              {
+                "action": {
+                  "type": "selectCharacterPage",
+                  "page": "stats1"
+                },
+                "rect": {
+                  "left": 830,
+                  "top": 70,
+                  "width": 64,
+                  "height": 20
+                }
+              },
+              {
+                "action": {
+                  "type": "selectCharacterPage",
+                  "page": "stats2"
+                },
+                "rect": {
+                  "left": 892,
+                  "top": 70,
+                  "width": 64,
+                  "height": 20
+                }
+              },
+              {
+                "action": {
+                  "type": "selectCharacterPage",
+                  "page": "spells"
+                },
+                "rect": {
+                  "left": 954,
+                  "top": 70,
+                  "width": 64,
+                  "height": 20
+                }
+              },
+              {
+                "action": {
+                  "type": "closeCharacter"
+                },
+                "rect": {
+                  "left": 1001,
+                  "top": 3,
+                  "width": 24,
+                  "height": 21
+                }
+              }
+            ],
+            "experienceSprite": {
+              "current": 0,
+              "maximum": 100,
+              "image": null,
+              "source": {
+                "left": 0,
+                "top": 0,
+                "width": 0,
+                "height": 8
+              },
+              "destination": {
+                "left": 9,
+                "top": 759,
+                "width": 0,
+                "height": 8
+              }
+            },
+            "weightSprite": {
+              "current": 11,
+              "maximum": 50,
+              "image": "original-ui/Prguse/76.png",
+              "source": {
+                "left": 0,
+                "top": 0,
+                "width": 16,
+                "height": 12
+              },
+              "destination": {
+                "left": 919,
+                "top": 719,
+                "width": 16,
+                "height": 12
+              }
+            }
+          },
+          "error": null,
+          "foregroundRects": [],
+          "modal": false
+        },
+        "quest": {
+          "questLocaleVersion": 1,
+          "language": "en",
+          "displayLocaleVersion": 1,
+          "displayLanguage": "zh-TW",
+          "ready": true,
+          "error": null,
+          "capturesPointer": false,
+          "questLogOpen": false,
+          "frame": 8,
+          "generation": 2,
+          "revision": 1,
+          "openRevision": 1,
+          "hpOrb": {
+            "supported": true,
+            "ready": true,
+            "generation": 2,
+            "revision": 1,
+            "hp": 18,
+            "maxHp": 18,
+            "hpOnly": true,
+            "slot": {
+              "left": 0,
+              "top": 646
+            },
+            "image": "original-ui/Prguse/6.png",
+            "source": {
+              "left": 0,
+              "top": 0,
+              "width": 100,
+              "height": 80
+            },
+            "destination": {
+              "left": 0,
+              "top": 646,
+              "width": 100,
+              "height": 80
+            },
+            "layout": {
+              "left": 0,
+              "top": 646,
+              "width": 100,
+              "height": 80
+            }
+          },
+          "mpOrb": {
+            "supported": true,
+            "ready": false,
+            "generation": 2,
+            "revision": 1,
+            "mp": null,
+            "maxMp": null,
+            "hpOnly": null,
+            "slot": null,
+            "image": null,
+            "source": null,
+            "destination": null,
+            "layout": null
+          },
+          "experienceBar": {
+            "supported": false,
+            "ready": false,
+            "generation": 2,
+            "revision": 1,
+            "experience": null,
+            "maxExperience": null,
+            "slot": null,
+            "image": null,
+            "source": null,
+            "destination": null,
+            "layout": null
+          },
+          "weightBar": {
+            "supported": false,
+            "ready": false,
+            "generation": 2,
+            "revision": 1,
+            "currentWeight": null,
+            "maxWeight": null,
+            "slot": null,
+            "image": null,
+            "source": null,
+            "destination": null,
+            "layout": null
+          },
+          "hudBarDrawPlan": {
+            "version": 1,
+            "generation": 2,
+            "revision": 1,
+            "lifetime": "r1-g2-p1000",
+            "experience": {
+              "token": "e-1",
+              "sequence": 1,
+              "state": "known-empty",
+              "current": 0,
+              "maximum": 100,
+              "slot": {
+                "left": 9,
+                "top": 759,
+                "width": 1004,
+                "height": 8
+              },
+              "image": null,
+              "source": {
+                "left": 0,
+                "top": 0,
+                "width": 0,
+                "height": 8
+              },
+              "destination": {
+                "left": 9,
+                "top": 759,
+                "width": 0,
+                "height": 8
+              }
+            },
+            "weight": {
+              "token": "w-1",
+              "sequence": 1,
+              "state": "draw",
+              "current": 11,
+              "maximum": 50,
+              "slot": {
+                "left": 919,
+                "top": 719,
+                "width": 76,
+                "height": 12
+              },
+              "image": "original-ui/Prguse/76.png",
+              "source": {
+                "left": 0,
+                "top": 0,
+                "width": 16,
+                "height": 12
+              },
+              "destination": {
+                "left": 919,
+                "top": 719,
+                "width": 16,
+                "height": 12
+              }
+            }
+          }
+        },
+        "backend": "webgl2",
+        "packageId": "webgl2-shared"
+      },
+      "fontCache": [
+        {
+          "name": "NotoSansTC.ttf",
+          "bytes": 11941968,
+          "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+        },
+        {
+          "name": "NotoSansCJKsc-Regular.otf",
+          "bytes": 16437364,
+          "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+        },
+        {
+          "name": "NotoSans-Regular.ttf",
+          "bytes": 621572,
+          "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+        },
+        {
+          "name": "NotoSansDevanagari-Regular.ttf",
+          "bytes": 243520,
+          "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+        },
+        {
+          "name": "NotoSansThai-Regular.ttf",
+          "bytes": 37780,
+          "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+        },
+        {
+          "name": "NotoSansArabic-Regular.ttf",
+          "bytes": 234892,
+          "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+        }
+      ],
+      "stalledAppFontRequests": 0,
+      "diary": {
+        "passed": true,
+        "locale": "zh-TW",
+        "renderer": "ordinary-shared-native",
+        "questOpened": true,
+        "qClosed": true,
+        "owner": "bevy",
+        "package": {
+          "backend": "webgl2",
+          "packageId": "webgl2-shared"
+        },
+        "navigation": {
+          "characterOpen": false,
+          "characterPage": "character",
+          "bagOpen": false,
+          "questOpen": false
+        },
+        "zeroWorldCommands": true,
+        "screenshot": "quest-available-zh-TW.png"
+      },
+      "finalTile": {
+        "x": 288,
+        "y": 616
+      },
+      "ordinaryLogouts": 0
+    },
+    "runtimeTransfers": [
+      {
+        "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgl2-shared/mir2_bevy_runtime.js",
+        "fromDiskCache": false,
+        "cacheEvent": false,
+        "encodedBytes": null,
+        "decodedBytes": 139721
+      },
+      {
+        "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgl2-shared/mir2_bevy_runtime.js",
+        "fromDiskCache": false,
+        "cacheEvent": false,
+        "encodedBytes": 139865,
+        "decodedBytes": 139721
+      },
+      {
+        "path": "/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+        "fromDiskCache": false,
+        "cacheEvent": false,
+        "encodedBytes": 32378141,
+        "decodedBytes": 32378001
+      },
+      {
+        "path": "/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+        "fromDiskCache": false,
+        "cacheEvent": false,
+        "encodedBytes": null
+      }
+    ],
+    "runtimeNetwork": [
+      {
+        "path": "/original-ui/fonts/NotoSansTC.ttf",
+        "requestedAt": 1794542790280,
+        "dataEvents": 132,
+        "decodedBytes": 11941968,
+        "encodedDataBytes": 0,
+        "maxDataGapMs": 0,
+        "headersAt": 1794542790314,
+        "status": 200,
+        "protocol": "http/1.1",
+        "serviceWorker": true,
+        "fromDiskCache": true,
+        "cacheControl": "public, max-age=31536000",
+        "firstDataAt": 1794542790314,
+        "lastDataAt": 1794542790314,
+        "finishedAt": 1794542790314,
+        "totalEncodedBytes": 0
+      },
+      {
+        "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgl2-shared/mir2_bevy_runtime.js",
+        "requestedAt": 1794542808444,
+        "observer": "playwright-complete-body",
+        "expectedBytes": 139721,
+        "expectedSha256": "04e9fc42f89f1f302047b5d5101cf4e02035b0cf6241d8f9f4550e2dd531d92b",
+        "status": 200,
+        "headersAt": 1794542808522,
+        "serviceWorker": false,
+        "decodedBytes": 139721,
+        "bodySha256": "04e9fc42f89f1f302047b5d5101cf4e02035b0cf6241d8f9f4550e2dd531d92b",
+        "finishedAt": 1794542809142
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+        "requestedAt": 1794542808445,
+        "dataEvents": 18,
+        "decodedBytes": 16437364,
+        "encodedDataBytes": 0,
+        "maxDataGapMs": 1,
+        "headersAt": 1794542808521,
+        "status": 200,
+        "protocol": "http/1.1",
+        "serviceWorker": true,
+        "fromDiskCache": true,
+        "cacheControl": "public, max-age=31536000",
+        "firstDataAt": 1794542808521,
+        "lastDataAt": 1794542808522,
+        "finishedAt": 1794542808523,
+        "totalEncodedBytes": 0
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansTC.ttf",
+        "requestedAt": 1794542808445,
+        "dataEvents": 11,
+        "decodedBytes": 11941968,
+        "encodedDataBytes": 0,
+        "maxDataGapMs": 1,
+        "headersAt": 1794542808521,
+        "status": 200,
+        "protocol": "http/1.1",
+        "serviceWorker": true,
+        "fromDiskCache": true,
+        "cacheControl": "public, max-age=31536000",
+        "firstDataAt": 1794542808522,
+        "lastDataAt": 1794542808522,
+        "finishedAt": 1794542808523,
+        "totalEncodedBytes": 0
+      },
+      {
+        "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgl2-shared/mir2_bevy_runtime.js",
+        "requestedAt": 1794542808445,
+        "dataEvents": 2,
+        "decodedBytes": 139721,
+        "encodedDataBytes": 139721,
+        "maxDataGapMs": 0,
+        "headersAt": 1794542808523,
+        "status": 200,
+        "protocol": "http/1.1",
+        "serviceWorker": false,
+        "fromDiskCache": false,
+        "cacheControl": "public, max-age=31536000",
+        "firstDataAt": 1794542808523,
+        "lastDataAt": 1794542808523,
+        "finishedAt": 1794542808523,
+        "totalEncodedBytes": 139865,
+        "completeBodyBytes": 139721,
+        "bodySha256": "04e9fc42f89f1f302047b5d5101cf4e02035b0cf6241d8f9f4550e2dd531d92b",
+        "bodyObservedAt": 1794542809142,
+        "expectedBytes": 139721,
+        "expectedSha256": "04e9fc42f89f1f302047b5d5101cf4e02035b0cf6241d8f9f4550e2dd531d92b"
+      },
+      {
+        "path": "/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+        "requestedAt": 1794542808445,
+        "dataEvents": 1,
+        "decodedBytes": 32378001,
+        "encodedDataBytes": 32378001,
+        "maxDataGapMs": 249,
+        "headersAt": 1794542808726,
+        "status": 200,
+        "protocol": "http/1.1",
+        "serviceWorker": false,
+        "fromDiskCache": false,
+        "cacheControl": "public, max-age=31536000",
+        "firstDataAt": 1794542808975,
+        "lastDataAt": 1794542808975,
+        "finishedAt": 1794542808975,
+        "totalEncodedBytes": 32378141,
+        "completeBodyBytes": 32378001,
+        "bodySha256": "5f8b82ab48665cd20e8c45ce0da0f221a6919dfab07aca43fea7fd312f34c185",
+        "bodyObservedAt": 1794542809477,
+        "expectedBytes": 32378001,
+        "expectedSha256": "5f8b82ab48665cd20e8c45ce0da0f221a6919dfab07aca43fea7fd312f34c185"
+      },
+      {
+        "path": "/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+        "requestedAt": 1794542808445,
+        "observer": "playwright-complete-body",
+        "expectedBytes": 32378001,
+        "expectedSha256": "5f8b82ab48665cd20e8c45ce0da0f221a6919dfab07aca43fea7fd312f34c185",
+        "status": 200,
+        "headersAt": 1794542808726,
+        "serviceWorker": false,
+        "observationFailure": "RESPONSE_BODY_OBSERVATION_FAILED"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+        "requestedAt": 1794542808523,
+        "dataEvents": 1,
+        "decodedBytes": 621572,
+        "encodedDataBytes": 0,
+        "maxDataGapMs": 7,
+        "headersAt": 1794542808536,
+        "status": 200,
+        "protocol": "http/1.1",
+        "serviceWorker": true,
+        "fromDiskCache": true,
+        "cacheControl": "public, max-age=31536000",
+        "firstDataAt": 1794542808543,
+        "lastDataAt": 1794542808543,
+        "finishedAt": 1794542808543,
+        "totalEncodedBytes": 0
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+        "requestedAt": 1794542808523,
+        "dataEvents": 1,
+        "decodedBytes": 243520,
+        "encodedDataBytes": 0,
+        "maxDataGapMs": 7,
+        "headersAt": 1794542808537,
+        "status": 200,
+        "protocol": "http/1.1",
+        "serviceWorker": true,
+        "fromDiskCache": true,
+        "cacheControl": "public, max-age=31536000",
+        "firstDataAt": 1794542808544,
+        "lastDataAt": 1794542808544,
+        "finishedAt": 1794542808544,
+        "totalEncodedBytes": 0
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+        "requestedAt": 1794542808543,
+        "dataEvents": 1,
+        "decodedBytes": 37780,
+        "encodedDataBytes": 0,
+        "maxDataGapMs": 0,
+        "headersAt": 1794542808545,
+        "status": 200,
+        "protocol": "http/1.1",
+        "serviceWorker": true,
+        "fromDiskCache": true,
+        "cacheControl": "public, max-age=31536000",
+        "firstDataAt": 1794542808545,
+        "lastDataAt": 1794542808545,
+        "finishedAt": 1794542808545,
+        "totalEncodedBytes": 0
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+        "requestedAt": 1794542808544,
+        "dataEvents": 1,
+        "decodedBytes": 234892,
+        "encodedDataBytes": 0,
+        "maxDataGapMs": 0,
+        "headersAt": 1794542808545,
+        "status": 200,
+        "protocol": "http/1.1",
+        "serviceWorker": true,
+        "fromDiskCache": true,
+        "cacheControl": "public, max-age=31536000",
+        "firstDataAt": 1794542808545,
+        "lastDataAt": 1794542808545,
+        "finishedAt": 1794542808546,
+        "totalEncodedBytes": 0
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+        "requestedAt": 1794542809479,
+        "dataEvents": 15,
+        "decodedBytes": 16437364,
+        "encodedDataBytes": 0,
+        "maxDataGapMs": 20,
+        "headersAt": 1794542809487,
+        "status": 200,
+        "protocol": "http/1.1",
+        "serviceWorker": true,
+        "fromDiskCache": true,
+        "cacheControl": "public, max-age=31536000",
+        "firstDataAt": 1794542809507,
+        "lastDataAt": 1794542809513,
+        "finishedAt": 1794542809540,
+        "totalEncodedBytes": 0
+      },
+      {
+        "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+        "requestedAt": 1794542809479,
+        "dataEvents": 1,
+        "decodedBytes": 621572,
+        "encodedDataBytes": 0,
+        "maxDataGapMs": 20,
+        "headersAt": 1794542809487,
+        "status": 200,
+        "protocol": "http/1.1",
+        "serviceWorker": true,
+        "fromDiskCache": true,
+        "cacheControl": "public, max-age=31536000",
+        "firstDataAt": 1794542809507,
+        "lastDataAt": 1794542809507,
+        "finishedAt": 1794542809507,
+        "totalEncodedBytes": 0
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansTC.ttf",
+        "requestedAt": 1794542809479,
+        "dataEvents": 10,
+        "decodedBytes": 11941968,
+        "encodedDataBytes": 0,
+        "maxDataGapMs": 20,
+        "headersAt": 1794542809487,
+        "status": 200,
+        "protocol": "http/1.1",
+        "serviceWorker": true,
+        "fromDiskCache": true,
+        "cacheControl": "public, max-age=31536000",
+        "firstDataAt": 1794542809507,
+        "lastDataAt": 1794542809507,
+        "finishedAt": 1794542809556,
+        "totalEncodedBytes": 0
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+        "requestedAt": 1794542809479,
+        "dataEvents": 1,
+        "decodedBytes": 243520,
+        "encodedDataBytes": 0,
+        "maxDataGapMs": 17,
+        "headersAt": 1794542809490,
+        "status": 200,
+        "protocol": "http/1.1",
+        "serviceWorker": true,
+        "fromDiskCache": true,
+        "cacheControl": "public, max-age=31536000",
+        "firstDataAt": 1794542809507,
+        "lastDataAt": 1794542809507,
+        "finishedAt": 1794542809507,
+        "totalEncodedBytes": 0
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+        "requestedAt": 1794542809479,
+        "dataEvents": 1,
+        "decodedBytes": 37780,
+        "encodedDataBytes": 0,
+        "maxDataGapMs": 17,
+        "headersAt": 1794542809490,
+        "status": 200,
+        "protocol": "http/1.1",
+        "serviceWorker": true,
+        "fromDiskCache": true,
+        "cacheControl": "public, max-age=31536000",
+        "firstDataAt": 1794542809507,
+        "lastDataAt": 1794542809507,
+        "finishedAt": 1794542809507,
+        "totalEncodedBytes": 0
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+        "requestedAt": 1794542809479,
+        "dataEvents": 1,
+        "decodedBytes": 234892,
+        "encodedDataBytes": 0,
+        "maxDataGapMs": 17,
+        "headersAt": 1794542809490,
+        "status": 200,
+        "protocol": "http/1.1",
+        "serviceWorker": true,
+        "fromDiskCache": true,
+        "cacheControl": "public, max-age=31536000",
+        "firstDataAt": 1794542809507,
+        "lastDataAt": 1794542809507,
+        "finishedAt": 1794542809507,
+        "totalEncodedBytes": 0
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansTC.ttf",
+        "requestedAt": 1794542814893,
+        "dataEvents": 1,
+        "decodedBytes": 11941968,
+        "encodedDataBytes": 0,
+        "maxDataGapMs": 0,
+        "cacheEvent": true,
+        "headersAt": 1794542814893,
+        "status": 200,
+        "protocol": "http/1.1",
+        "serviceWorker": true,
+        "fromDiskCache": true,
+        "cacheControl": "public, max-age=31536000",
+        "firstDataAt": 1794542814893,
+        "lastDataAt": 1794542814893,
+        "finishedAt": 1794542814893,
+        "totalEncodedBytes": 0
+      }
+    ],
+    "browserRequests": [
+      {
+        "path": "/api/asset-manifest",
+        "requestedAt": 1794542785348,
+        "status": 200,
+        "headersAt": 1794542785348,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542785348
+      },
+      {
+        "path": "/bootstrap/r16-floor/e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d.json",
+        "scope": "floor-pack",
+        "requestedAt": 1794542788300,
+        "status": 200,
+        "headersAt": 1794542788323,
+        "serviceWorker": false,
+        "bodyCompleteAt": 1794542788333
+      },
+      {
+        "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+        "scope": "static",
+        "requestedAt": 1794542788301,
+        "status": 200,
+        "headersAt": 1794542805314,
+        "serviceWorker": false,
+        "bodyCompleteAt": 1794542805315
+      },
+      {
+        "path": "/bootstrap/r16-locales/b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c.json",
+        "scope": "gameplay-locale",
+        "requestedAt": 1794542788301,
+        "status": 200,
+        "headersAt": 1794542788323,
+        "serviceWorker": false,
+        "bodyCompleteAt": 1794542788350
+      },
+      {
+        "path": "/bootstrap/r16-visuals/9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9.json",
+        "scope": "visual-pack",
+        "kind": "npcs",
+        "requestedAt": 1794542788386,
+        "status": 200,
+        "headersAt": 1794542788396,
+        "serviceWorker": false,
+        "bodyCompleteAt": 1794542788400
+      },
+      {
+        "path": "/bootstrap/r16-visuals/2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5.json",
+        "scope": "visual-pack",
+        "kind": "objects1",
+        "requestedAt": 1794542788386,
+        "status": 200,
+        "headersAt": 1794542788396,
+        "serviceWorker": false,
+        "bodyCompleteAt": 1794542788400
+      },
+      {
+        "path": "/bootstrap/r16-visuals/8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d.json",
+        "scope": "visual-pack",
+        "kind": "objects2",
+        "requestedAt": 1794542788386,
+        "status": 200,
+        "headersAt": 1794542788396,
+        "serviceWorker": false,
+        "bodyCompleteAt": 1794542788401
+      },
+      {
+        "path": "/bootstrap/r16-visuals/348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1.json",
+        "scope": "visual-pack",
+        "kind": "objects3",
+        "requestedAt": 1794542788387,
+        "status": 200,
+        "headersAt": 1794542788396,
+        "serviceWorker": false,
+        "bodyCompleteAt": 1794542788402
+      },
+      {
+        "path": "/bootstrap/r16-visuals/0f52c6a6632c44eea1ab3cf37eb58da52f6c786cf3573813d595fcdd8ca040d0.json",
+        "scope": "visual-pack",
+        "kind": "player",
+        "requestedAt": 1794542790722,
+        "status": 200,
+        "headersAt": 1794542790725,
+        "serviceWorker": false,
+        "bodyCompleteAt": 1794542790725
+      },
+      {
+        "path": "/api/scene/crystal",
+        "scope": "dynamic",
+        "query": {
+          "v": "2026-08-14-v7-door-interaction",
+          "assetRelease": "20261108-r16-08ec86d5105c",
+          "map": "0",
+          "x": "296",
+          "y": "620",
+          "width": "56",
+          "height": "72"
+        },
+        "requestedAt": 1794542801668,
+        "status": 503,
+        "headersAt": 1794542801669,
+        "serviceWorker": false,
+        "failureAt": 1794542801669,
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "path": "/api/scene/crystal",
+        "scope": "dynamic",
+        "query": {
+          "v": "2026-08-14-v7-door-interaction",
+          "assetRelease": "20261108-r16-08ec86d5105c",
+          "map": "0",
+          "x": "296",
+          "y": "620",
+          "width": "56",
+          "height": "72"
+        },
+        "requestedAt": 1794542801883,
+        "status": 503,
+        "headersAt": 1794542801884,
+        "serviceWorker": false,
+        "failureAt": 1794542801884,
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "path": "/original-ui/Monster/000/meta.json",
+        "scope": "covered-meta",
+        "library": "Monster/000",
+        "requestedAt": 1794542805403,
+        "status": 200,
+        "headersAt": 1794542805403,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805422
+      },
+      {
+        "path": "/original-ui/Monster/003/meta.json",
+        "scope": "covered-meta",
+        "library": "Monster/003",
+        "requestedAt": 1794542805403,
+        "status": 200,
+        "headersAt": 1794542805403,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805423
+      },
+      {
+        "path": "/original-ui/Monster/004/meta.json",
+        "scope": "covered-meta",
+        "library": "Monster/004",
+        "requestedAt": 1794542805403,
+        "status": 200,
+        "headersAt": 1794542805404,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805423
+      },
+      {
+        "path": "/original-ui/Monster/005/meta.json",
+        "scope": "covered-meta",
+        "library": "Monster/005",
+        "requestedAt": 1794542805404,
+        "status": 200,
+        "headersAt": 1794542805404,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805423
+      },
+      {
+        "path": "/original-ui/Monster/139/meta.json",
+        "scope": "covered-meta",
+        "library": "Monster/139",
+        "requestedAt": 1794542805404,
+        "status": 200,
+        "headersAt": 1794542805404,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805424
+      },
+      {
+        "path": "/original-ui/NPC/00/meta.json",
+        "scope": "covered-meta",
+        "library": "NPC/00",
+        "requestedAt": 1794542805404,
+        "status": 200,
+        "headersAt": 1794542805404,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805424
+      },
+      {
+        "path": "/original-ui/NPC/01/meta.json",
+        "scope": "covered-meta",
+        "library": "NPC/01",
+        "requestedAt": 1794542805404,
+        "status": 200,
+        "headersAt": 1794542805404,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805424
+      },
+      {
+        "path": "/original-ui/NPC/03/meta.json",
+        "scope": "covered-meta",
+        "library": "NPC/03",
+        "requestedAt": 1794542805404,
+        "status": 200,
+        "headersAt": 1794542805404,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805424
+      },
+      {
+        "path": "/original-ui/NPC/05/meta.json",
+        "scope": "covered-meta",
+        "library": "NPC/05",
+        "requestedAt": 1794542805404,
+        "status": 200,
+        "headersAt": 1794542805404,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805424
+      },
+      {
+        "path": "/original-ui/NPC/07/meta.json",
+        "scope": "covered-meta",
+        "library": "NPC/07",
+        "requestedAt": 1794542805404,
+        "status": 200,
+        "headersAt": 1794542805404,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805424
+      },
+      {
+        "path": "/original-ui/NPC/11/meta.json",
+        "scope": "covered-meta",
+        "library": "NPC/11",
+        "requestedAt": 1794542805404,
+        "status": 200,
+        "headersAt": 1794542805404,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805424
+      },
+      {
+        "path": "/original-ui/NPC/15/meta.json",
+        "scope": "covered-meta",
+        "library": "NPC/15",
+        "requestedAt": 1794542805404,
+        "status": 200,
+        "headersAt": 1794542805404,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805424
+      },
+      {
+        "path": "/original-ui/NPC/45/meta.json",
+        "scope": "covered-meta",
+        "library": "NPC/45",
+        "requestedAt": 1794542805404,
+        "status": 200,
+        "headersAt": 1794542805404,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805424
+      },
+      {
+        "path": "/original-ui/Monster/003/5.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805450,
+        "status": 200,
+        "headersAt": 1794542805450,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805450
+      },
+      {
+        "path": "/original-ui/Monster/005/20.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805450,
+        "status": 200,
+        "headersAt": 1794542805450,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805451
+      },
+      {
+        "path": "/original-ui/Monster/003/2.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805450,
+        "status": 200,
+        "headersAt": 1794542805450,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805452
+      },
+      {
+        "path": "/original-ui/Monster/000/1.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805450,
+        "status": 200,
+        "headersAt": 1794542805450,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805452
+      },
+      {
+        "path": "/original-ui/Monster/005/26.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805451,
+        "status": 200,
+        "headersAt": 1794542805451,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805451
+      },
+      {
+        "path": "/original-ui/Monster/004/30.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805451,
+        "status": 200,
+        "headersAt": 1794542805451,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805451
+      },
+      {
+        "path": "/original-ui/Monster/004/16.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805451,
+        "status": 200,
+        "headersAt": 1794542805451,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805451
+      },
+      {
+        "path": "/original-ui/Monster/005/11.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805452,
+        "status": 200,
+        "headersAt": 1794542805452,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805452
+      },
+      {
+        "path": "/original-ui/Monster/139/14.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805452,
+        "status": 200,
+        "headersAt": 1794542805452,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805452
+      },
+      {
+        "path": "/original-ui/Monster/004/1.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805452,
+        "status": 200,
+        "headersAt": 1794542805452,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805452
+      },
+      {
+        "path": "/original-ui/Monster/004/25.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805452,
+        "status": 200,
+        "headersAt": 1794542805452,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805452
+      },
+      {
+        "path": "/original-ui/Monster/004/28.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805452,
+        "status": 200,
+        "headersAt": 1794542805452,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805452
+      },
+      {
+        "path": "/original-ui/Monster/004/7.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805452,
+        "status": 200,
+        "headersAt": 1794542805452,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805452
+      },
+      {
+        "path": "/original-ui/Monster/005/3.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805452,
+        "status": 200,
+        "headersAt": 1794542805452,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805452
+      },
+      {
+        "path": "/original-ui/Monster/004/27.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805453,
+        "status": 200,
+        "headersAt": 1794542805453,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805453
+      },
+      {
+        "path": "/original-ui/Monster/000/28.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805453,
+        "status": 200,
+        "headersAt": 1794542805453,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805453
+      },
+      {
+        "path": "/original-ui/Monster/004/14.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805453,
+        "status": 200,
+        "headersAt": 1794542805453,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805453
+      },
+      {
+        "path": "/original-ui/Monster/005/27.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805453,
+        "status": 200,
+        "headersAt": 1794542805453,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805453
+      },
+      {
+        "path": "/api/original-ui-meta",
+        "scope": "covered-meta",
+        "library": "NPC/05",
+        "requestedAt": 1794542805453,
+        "status": 200,
+        "headersAt": 1794542805453,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805461
+      },
+      {
+        "path": "/original-ui/Monster/003/6.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805873,
+        "status": 200,
+        "headersAt": 1794542805873,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805873
+      },
+      {
+        "path": "/original-ui/Monster/005/21.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805874,
+        "status": 200,
+        "headersAt": 1794542805874,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805874
+      },
+      {
+        "path": "/original-ui/Monster/003/3.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805874,
+        "status": 200,
+        "headersAt": 1794542805874,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805874
+      },
+      {
+        "path": "/original-ui/Monster/000/2.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805874,
+        "status": 200,
+        "headersAt": 1794542805874,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805874
+      },
+      {
+        "path": "/original-ui/Monster/004/31.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805874,
+        "status": 200,
+        "headersAt": 1794542805874,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805874
+      },
+      {
+        "path": "/original-ui/Monster/004/17.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805874,
+        "status": 200,
+        "headersAt": 1794542805874,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805874
+      },
+      {
+        "path": "/original-ui/Monster/005/8.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805874,
+        "status": 200,
+        "headersAt": 1794542805874,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805874
+      },
+      {
+        "path": "/original-ui/Monster/139/15.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805874,
+        "status": 200,
+        "headersAt": 1794542805874,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805874
+      },
+      {
+        "path": "/original-ui/Monster/004/2.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805874,
+        "status": 200,
+        "headersAt": 1794542805874,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805874
+      },
+      {
+        "path": "/original-ui/Monster/004/26.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805874,
+        "status": 200,
+        "headersAt": 1794542805874,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805874
+      },
+      {
+        "path": "/original-ui/Monster/004/29.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805874,
+        "status": 200,
+        "headersAt": 1794542805874,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805874
+      },
+      {
+        "path": "/original-ui/Monster/004/4.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805874,
+        "status": 200,
+        "headersAt": 1794542805874,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805875
+      },
+      {
+        "path": "/original-ui/Monster/005/0.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805875,
+        "status": 200,
+        "headersAt": 1794542805875,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805875
+      },
+      {
+        "path": "/original-ui/Monster/004/24.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805875,
+        "status": 200,
+        "headersAt": 1794542805875,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805875
+      },
+      {
+        "path": "/original-ui/Monster/000/29.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805875,
+        "status": 200,
+        "headersAt": 1794542805875,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805875
+      },
+      {
+        "path": "/original-ui/Monster/004/15.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805875,
+        "status": 200,
+        "headersAt": 1794542805875,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805875
+      },
+      {
+        "path": "/original-ui/Monster/005/24.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542805875,
+        "status": 200,
+        "headersAt": 1794542805875,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542805875
+      },
+      {
+        "path": "/original-ui/Monster/003/7.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542806374,
+        "status": 200,
+        "headersAt": 1794542806374,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542806374
+      },
+      {
+        "path": "/original-ui/Monster/003/0.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542806374,
+        "status": 200,
+        "headersAt": 1794542806374,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542806374
+      },
+      {
+        "path": "/original-ui/Monster/005/22.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542806375,
+        "status": 200,
+        "headersAt": 1794542806375,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542806375
+      },
+      {
+        "path": "/original-ui/Monster/000/3.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542806375,
+        "status": 200,
+        "headersAt": 1794542806375,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542806375
+      },
+      {
+        "path": "/original-ui/Monster/004/18.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542806375,
+        "status": 200,
+        "headersAt": 1794542806375,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542806375
+      },
+      {
+        "path": "/original-ui/Monster/005/9.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542806376,
+        "status": 200,
+        "headersAt": 1794542806376,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542806376
+      },
+      {
+        "path": "/original-ui/Monster/139/12.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542806376,
+        "status": 200,
+        "headersAt": 1794542806376,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542806376
+      },
+      {
+        "path": "/original-ui/Monster/004/3.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542806376,
+        "status": 200,
+        "headersAt": 1794542806376,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542806376
+      },
+      {
+        "path": "/original-ui/Monster/004/5.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542806376,
+        "status": 200,
+        "headersAt": 1794542806376,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542806376
+      },
+      {
+        "path": "/original-ui/Monster/005/1.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542806376,
+        "status": 200,
+        "headersAt": 1794542806376,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542806376
+      },
+      {
+        "path": "/original-ui/Monster/000/30.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542806376,
+        "status": 200,
+        "headersAt": 1794542806376,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542806376
+      },
+      {
+        "path": "/original-ui/Monster/005/25.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542806376,
+        "status": 200,
+        "headersAt": 1794542806376,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542806376
+      },
+      {
+        "path": "/original-ui/Monster/004/12.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542806376,
+        "status": 200,
+        "headersAt": 1794542806376,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542806376
+      },
+      {
+        "path": "/original-ui/CHair/00/meta.json",
+        "scope": "covered-meta",
+        "library": "CHair/00",
+        "requestedAt": 1794542806782,
+        "status": 200,
+        "headersAt": 1794542806782,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542808576
+      },
+      {
+        "path": "/original-ui/Monster/003/4.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542806875,
+        "status": 200,
+        "headersAt": 1794542806875,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542806875
+      },
+      {
+        "path": "/original-ui/Monster/005/23.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542806875,
+        "status": 200,
+        "headersAt": 1794542806875,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542806875
+      },
+      {
+        "path": "/original-ui/Monster/003/1.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542806875,
+        "status": 200,
+        "headersAt": 1794542806875,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542806875
+      },
+      {
+        "path": "/original-ui/Monster/000/0.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542806876,
+        "status": 200,
+        "headersAt": 1794542806876,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542806876
+      },
+      {
+        "path": "/original-ui/Monster/004/19.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542806876,
+        "status": 200,
+        "headersAt": 1794542806876,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542806876
+      },
+      {
+        "path": "/original-ui/Monster/005/10.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542806876,
+        "status": 200,
+        "headersAt": 1794542806876,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542806876
+      },
+      {
+        "path": "/original-ui/Monster/139/13.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542806876,
+        "status": 200,
+        "headersAt": 1794542806876,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542806876
+      },
+      {
+        "path": "/original-ui/Monster/004/0.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542806876,
+        "status": 200,
+        "headersAt": 1794542806876,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542806876
+      },
+      {
+        "path": "/original-ui/Monster/004/6.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542806876,
+        "status": 200,
+        "headersAt": 1794542806876,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542806876
+      },
+      {
+        "path": "/original-ui/Monster/005/2.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542806876,
+        "status": 200,
+        "headersAt": 1794542806876,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542806876
+      },
+      {
+        "path": "/original-ui/Monster/000/31.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542806876,
+        "status": 200,
+        "headersAt": 1794542806876,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542806876
+      },
+      {
+        "path": "/original-ui/Monster/004/13.png",
+        "scope": "covered-actor",
+        "requestedAt": 1794542806876,
+        "status": 200,
+        "headersAt": 1794542806876,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542806876
+      },
+      {
+        "path": "/original-ui/CArmour/00/meta.json",
+        "scope": "covered-meta",
+        "library": "CArmour/00",
+        "requestedAt": 1794542806891,
+        "status": 200,
+        "headersAt": 1794542806891,
+        "serviceWorker": true,
+        "bodyCompleteAt": 1794542808577
+      },
+      {
+        "path": "/bootstrap/r16-visuals/d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308.json",
+        "scope": "visual-pack",
+        "kind": "monsterStanding",
+        "requestedAt": 1794542808356,
+        "status": 200,
+        "headersAt": 1794542808364,
+        "serviceWorker": false,
+        "bodyCompleteAt": 1794542808377
+      },
+      {
+        "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+        "scope": "visual-pack",
+        "kind": "monsterWalking",
+        "requestedAt": 1794542808378,
+        "status": 200,
+        "headersAt": 1794542808390,
+        "serviceWorker": false,
+        "bodyCompleteAt": 1794542808393
+      }
+    ],
+    "logout": {
+      "sentAt": 1794542812537,
+      "acknowledgedAt": 1794542814893,
+      "savedPosition": {
+        "x": 288,
+        "y": 616
+      },
+      "returnedToSelect": true,
+      "gutter": {
+        "x": 64,
+        "y": 480
+      }
+    },
+    "saved": true
+  },
+  "closed": {
+    "browser": true,
+    "proxy": true,
+    "next": true,
+    "gateway": true
+  },
+  "fixtureUnchanged": true
+}
