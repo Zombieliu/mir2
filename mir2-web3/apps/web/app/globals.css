@@ -737,7 +737,8 @@ body:has([data-shared-touch-quest-open="true"], [data-shared-touch-bag-open="tru
 }
 
 .viewport-entity-overlay {
-  z-index: 32761;
+  /* DrawNames follows world sprites/effects; drop labels retain their higher layer. */
+  z-index: 3500000;
   pointer-events: none;
 }
 

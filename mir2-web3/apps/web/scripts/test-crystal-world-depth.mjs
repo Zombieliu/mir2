@@ -112,17 +112,24 @@ test("malformed far outliers cannot escape their bounded row passes", () => {
   assert.ok(Number.isFinite(depth.crystalObjectDepth(Number.NaN, Number.POSITIVE_INFINITY, center)));
 });
 
-test("floating drop labels stay above the largest actor hit region inside the isolated world", () => {
+test("floating entity and drop labels stay above world drawing inside the isolated world", () => {
   const css = readFileSync(new URL("../app/globals.css", import.meta.url), "utf8");
   const rule = (selector) => {
-    const start = css.indexOf(`${selector} {`);
-    assert.notEqual(start, -1, selector);
-    return css.slice(start, css.indexOf("}", start));
+    const blocks = css.split(`${selector} {`).slice(1);
+    assert.ok(blocks.length > 0, selector);
+    return blocks.map(block => block.slice(0, block.indexOf("}"))).join("\n");
   };
-  const drop = rule(".viewport-drop-overlay"), world = rule(".game-world-composite");
+  const drop = rule(".viewport-drop-overlay"), names = rule(".viewport-entity-overlay"), world = rule(".game-world-composite");
   const dropZ = Number(drop.match(/z-index:\s*(\d+)/)?.[1]);
+  const namesZ = Number(names.match(/z-index:\s*(\d+)/)?.[1]);
   const largestActor = depth.crystalObjectDepth(Number.MAX_VALUE, Number.MAX_VALUE, center);
+  const visuals = readFileSync(new URL("../app/components/original-client-scene-visual-layers.tsx", import.meta.url), "utf8");
+  const targetedEffectDepth = Number(visuals.match(/const R16_TARGETED_EFFECT_DEPTH = ([\d_]+);/)?.[1].replaceAll("_", ""));
+  assert.ok(Number.isFinite(targetedEffectDepth), "the explicit targeted/fishing effect depth is accounted for");
+  assert.ok(namesZ > Math.max(largestActor + 20, targetedEffectDepth + 1), "opaque map, actor and effect pixels cannot cover floating entity names");
+  assert.ok(namesZ < dropZ, "ground-drop labels keep their existing priority above entity names");
   assert.ok(dropZ > largestActor + 20, "a corpse's transparent hit region cannot cover the visible drop label");
+  assert.match(names, /pointer-events:\s*none/, "the space between entity names remains pass-through");
   assert.match(drop, /pointer-events:\s*none/, "the space between labels remains pass-through");
   assert.match(world, /isolation:\s*isolate/, "the high label depth cannot escape above sibling game UI");
   assert.match(world, /z-index:\s*1\s*;/);
