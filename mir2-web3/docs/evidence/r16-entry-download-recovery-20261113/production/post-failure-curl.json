@@ -1,0 +1,80 @@
+{
+  "checkedAt": "2026-11-13T08:23:12.233Z",
+  "kind": "Read-only curl diagnostic after failed browser ended; not browser qualification or cache-prefill for a rerun",
+  "origin": "https://numeron.obelisk.build",
+  "rows": [
+    {
+      "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+      "exit": 0,
+      "status": 200,
+      "httpVersion": "1.1",
+      "firstByteSeconds": 0.816241,
+      "totalSeconds": 0.920476,
+      "downloadedBytes": 36560,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "age": "14516",
+        "cache-control": "public, max-age=86400, stale-while-revalidate=604800",
+        "server": "cloudflare",
+        "x-mir2-asset-cache": "bootstrap",
+        "x-vercel-cache": "HIT",
+        "cf-cache-status": "DYNAMIC",
+        "vary": "accept-encoding",
+        "content-encoding": "gzip"
+      },
+      "decodedBytes": 458475,
+      "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+      "exactExpectedBody": true
+    },
+    {
+      "path": "/bootstrap/r16-floor/e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d.json",
+      "exit": 0,
+      "status": 200,
+      "httpVersion": "1.1",
+      "firstByteSeconds": 0.811431,
+      "totalSeconds": 3.137854,
+      "downloadedBytes": 305090,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "age": "14516",
+        "cache-control": "public, max-age=86400, stale-while-revalidate=604800",
+        "server": "cloudflare",
+        "x-mir2-asset-cache": "bootstrap",
+        "x-vercel-cache": "HIT",
+        "cf-cache-status": "DYNAMIC",
+        "vary": "accept-encoding",
+        "content-encoding": "gzip"
+      },
+      "decodedBytes": 439896,
+      "sha256": "e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d",
+      "exactExpectedBody": true
+    },
+    {
+      "path": "/bootstrap/r16-locales/b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c.json",
+      "exit": 0,
+      "status": 200,
+      "httpVersion": "1.1",
+      "firstByteSeconds": 0.892969,
+      "totalSeconds": 11.172026,
+      "downloadedBytes": 780146,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "age": "14517",
+        "cache-control": "public, max-age=31536000, immutable",
+        "server": "cloudflare",
+        "x-mir2-asset-cache": "bootstrap",
+        "x-vercel-cache": "HIT",
+        "cf-cache-status": "DYNAMIC",
+        "vary": "accept-encoding",
+        "content-encoding": "gzip"
+      },
+      "decodedBytes": 3283113,
+      "sha256": "b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c",
+      "exactExpectedBody": true
+    }
+  ],
+  "proxyEquivalenceVerified": false,
+  "inheritedProxyEnvironmentPresent": true,
+  "fixedCandidateNotProved": true,
+  "scope": "Read-only after failed browser ended and during rollback interval; curlHTTP1.1/gzip, inherited proxy env. Not same-candidate/browser transport evidence and not qualification."
+}

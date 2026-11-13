@@ -1,0 +1,9 @@
+{
+  "source": "9dc7294c0269eee93086e88ac83d2bc9d93d387e",
+  "deployment": "dpl_XPzRmyXdXVbC96weq8xUEeW9KCkF",
+  "baseline": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd",
+  "signedScripts": 19,
+  "run": "first-party-entry-recovery",
+  "executed": false,
+  "scope": "Only exact source/deployment/run identities changed from frozen predecessor. Standing chunk observer will resolve actual deployed names before browser execution. Original real input, privacy, one login-only Testnet approval, 8s walk/120s Native thresholds retained. No network interception, resource prefill or relaxed gates."
+}
