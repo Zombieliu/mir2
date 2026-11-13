@@ -21,7 +21,9 @@
     "skipped": 0
   },
   "publicProductionRevision": "e7cbab02f030ae50b28031ca0237d630eccb7c03",
-  "newDeployment": false,
   "overallCandidate100": false,
-  "humanAccepted": false
+  "humanAccepted": false,
+  "newDeploymentAtCandidateQualification": false,
+  "recordedBeforePublication": true,
+  "subsequentPublicationRecord": "production/receipt.json"
 }

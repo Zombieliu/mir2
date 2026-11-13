@@ -1,7 +1,8 @@
 # 默认人物完整帧目录先行（2026-11-13）
 
-本轮完成本地候选，**尚未发布**。正式站仍为
-`e7cbab02f030ae50b28031ca0237d630eccb7c03`；本轮没有改 DNS、Gateway、R2、官网、链上状态或既有玩家档案。
+本轮本地候选已发布并公网回放，**完整资格失败后已回退**。正式站当前为
+`e7cbab02f030ae50b28031ca0237d630eccb7c03`；代码和本机结果保留。DNS、Gateway、R2、官网、链上状态及既有玩家档案未改。
+[发布、字体/HUD失败、单帧取消与回退](production/README.md)
 实现已提交 `ff957548919e9d306c11af57dad224f2178c2d0f`。最终候选为 `8e82f53fcd74-player-meta-1e35025e`，基于干净 Windows R16
 `8e82f53fcd749e8c2f6a69cb9b911c3165de006a` 加本轮独立补丁。编译目录见
 [构建回执](build-receipt.json)，来源闭包见 [输入记录](source-inputs.json)。
@@ -69,5 +70,5 @@ canonical manifest SHA：`32255399aaae2dc9a133a5827252256ece782aaae5d237152ffebc
 修正夹具后重跑，旧失败保留。附带旧地图缓存源码正则、Fishing0..175/0..351 断言失败也保留，
 相关源与测试均未改。[失败及资格](qualification-and-retained-failures.json)
 
-正式发布及公网冷读仍待执行。其他服装、完整战斗像素、NPC 名称、既有英文提示、公开旧档、
+正式发布及公网冷读已执行，失败及回退单独记录。其他服装、完整战斗像素、NPC 名称、既有英文提示、公开旧档、
 实体手机、完整三职业路线及整体 1:1 继续开放。100% Candidate 和最终人类 Accepted 均未成立。

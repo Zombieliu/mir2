@@ -1,0 +1,14 @@
+{
+  "protectedFiles": 131,
+  "allOriginalBytesPreservedAfterRemovingOnlyOwnedHunk": true,
+  "sourceCommit": "ff957548919e9d306c11af57dad224f2178c2d0f",
+  "releaseImplementation": "02c1e6104b4b9fc66ea1698114f92ea922ef6b46",
+  "finalProductionSource": "e7cbab02f030ae50b28031ca0237d630eccb7c03",
+  "finalProductionDeployment": "dpl_4jjpevpspsVtf61hUCgTHiKxRatZ",
+  "aliasProject": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+  "versionAndGameStatus": 200,
+  "postRollbackQrSc": true,
+  "postRollbackQrTc": true,
+  "newCandidateFullQualification": false,
+  "allOwnedBrowsersClosed": true
+}
