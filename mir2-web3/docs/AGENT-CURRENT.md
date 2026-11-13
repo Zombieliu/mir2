@@ -14,7 +14,7 @@ Short routing summary, updated 2026-11-14 (Asia/Shanghai). This indexes recorded
 
 ## Last recorded decisions and open work
 
-2026-11-14 正式仍f6603c89a3／dpl_3eNPP4uaj3nT3HsAMhJUUoXpN4Dh，保留寻路修复；[正式回放](evidence/r16-runtime-source-rotation-20261114/production/README.md) 首步127ms／Native204.320秒，原冷120秒false。walking恢复91b8fc9b4f已提交、Stage/READY，118＋70项／构建通过。区外普通协议实际移动通过；R9默认冷启两次JSON失败后实画同一compiled的六张Walking原帧，并正常回镇保存／重开。暖场脚本误中前方Royal_Guard，完整两后端四会话仍false，尚未Promote；新私有草稿补最终同点hover/click及完整命中规则。R7/R8短站立窗口3/4失败、R9原窗口通过及其心跳另记，未据此宣称时钟问题已修复。[唯一候选记录](evidence/r16-walking-recovery-20261114/README.md)。死亡弹窗十语、冷加载、实体手机及其余1:1开放，Goal active。
+2026-11-14 正式仍f6603c89a3／dpl_3eNPP4uaj3nT3HsAMhJUUoXpN4Dh，保留寻路修复；[正式回放](evidence/r16-runtime-source-rotation-20261114/production/README.md) 首步127ms／Native204.320秒，原冷120秒false。walking恢复91b8fc9b4f已提交、Stage/READY，118＋70项／构建通过；默认冷启已实画compiled六张Walking，完整两后端四会话仍false，未Promote。R13暖场因正常呼吸改变QA全几何键失败；R15冷回镇第一目标到达后，快速点第二目标8秒无进展，旧记录未保留该次发包，不能归因冷却。R17在回镇前点击检查失败且移动状态DOM读错节点；原件均保留。改为独立普通寻路诊断，正确读取main状态与frame相机、保留快速换目标和原8秒，不以650ms等待绕过。[唯一候选与失败记录](evidence/r16-walking-recovery-20261114/README.md)。R7/R8站立3/4、冷加载、死亡弹窗十语、实体手机及其余1:1开放，Goal active。
 
 2026-11-12 正式站已发布 `51d2dcc346`：共享图片取消与图集计时/JSON大小缓存身份修复。本机75项、生产构建及两后端重开同档通过；公网简繁出码、手机尺寸官方钱包Testnet签名、进比奇、权威移动、共用HUD/任务窗、113/113预取和正常退出通过，无需回滚。云端缓存身份与计算一致；Worker正常更新缓存一次，未迁移旧007缓存。本次观测起点到首画面65.2秒/共用HUD104.7秒（点击进游戏后约6.8秒/46.3秒），继续优化冷加载；实体手机、完整1:1及历史未结项仍开放。[发布与边界](evidence/r16-cache-repair-20261112/README.md)
 

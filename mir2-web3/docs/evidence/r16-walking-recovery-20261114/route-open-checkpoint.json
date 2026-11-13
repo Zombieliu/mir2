@@ -1,0 +1,294 @@
+{
+  "kind": "walking-recovery-unresolved-route-and-observer-checkpoint",
+  "sourceCommit": "91b8fc9b4f5170cb37b6619b991707ed76a34d73",
+  "fullPairedQualification": false,
+  "productionPromoted": false,
+  "r13": {
+    "oldResult": "FAILED_AND_PRESERVED",
+    "scope": "Cold natural response and normal return/save/Worker/browser restart passed. Warm zero-attack stimulus failed a QA full-geometry equality check, despite the same physical point, owner/camera/actor foot and same known target winner. Only ordinary breathing image paths/rectangles changed. A narrower spatial check was then introduced in a new private fixture.",
+    "source": {
+      "kind": "preserved-r13-breathing-spatial-point",
+      "oldResult": "FAILED_AND_PRESERVED",
+      "desiredObjectId": 206711,
+      "cold": {
+        "scenario": "natural-before-hit",
+        "passed": true,
+        "ordinaryTownReturn": true
+      },
+      "warm": {
+        "passed": false,
+        "attackCount": 0,
+        "error": "full image geometry equality rejected normal breathing despite unchanged point/stage/owner/actor root and both normal picks desired"
+      },
+      "before": {
+        "allowed": true,
+        "point": {
+          "x": 578.5,
+          "y": 413.5,
+          "mode": "opaque-body",
+          "pixelX": 43,
+          "pixelY": 17,
+          "alpha": 255
+        },
+        "owner": {
+          "position": {
+            "x": 277,
+            "y": 604
+          },
+          "at": 1794603211013,
+          "seq": 157,
+          "source": "UserLocation"
+        },
+        "frame": {
+          "left": 128,
+          "top": 96,
+          "width": 1024,
+          "height": 768,
+          "logicalWidth": 1024,
+          "logicalHeight": 768,
+          "centerX": 504,
+          "centerY": 368,
+          "cellWidth": 48,
+          "cellHeight": 32,
+          "ownerX": 277,
+          "ownerY": 604
+        },
+        "targetBody": {
+          "path": "/original-ui/Monster/004/25.png",
+          "rect": {
+            "left": 535,
+            "top": 396,
+            "width": 96,
+            "height": 44
+          },
+          "root": {
+            "left": 560,
+            "top": 416,
+            "width": 0,
+            "height": 0
+          },
+          "decoded": true,
+          "visible": true,
+          "pointPixel": {
+            "x": 43,
+            "y": 17
+          },
+          "pointAlpha": 255
+        },
+        "pick": {
+          "known": true,
+          "kind": "entity",
+          "objectId": "206711",
+          "reason": "pinned-production-pickCrystalActor"
+        },
+        "geometryKey": "{\"frame\":{\"left\":128,\"top\":96,\"width\":1024,\"height\":768,\"logicalWidth\":1024,\"logicalHeight\":768,\"centerX\":504,\"centerY\":368,\"cellWidth\":48,\"cellHeight\":32,\"ownerX\":277,\"ownerY\":604},\"targetBody\":{\"path\":\"/original-ui/Monster/004/25.png\",\"rect\":{\"left\":535,\"top\":396,\"width\":96,\"height\":44},\"root\":{\"left\":560,\"top\":416,\"width\":0,\"height\":0},\"decoded\":true,\"visible\":true,\"pointPixel\":{\"x\":43,\"y\":17},\"pointAlpha\":255},\"targetLabel\":{\"rect\":{\"left\":560,\"top\":398,\"width\":48,\"height\":12},\"visible\":true},\"geometry\":[{\"objectId\":\"200339\",\"entity\":{\"x\":276,\"y\":604,\"kind\":\"monster\",\"dead\":false,\"ai\":6},\"root\":{\"left\":560,\"top\":448,\"width\":0,\"height\":0},\"rect\":{\"left\":567,\"top\":366,\"width\":80,\"height\":108},\"path\":\"/original-ui/Monster/000/28.png\",\"style\":{\"left\":\"7px\",\"top\":\"-82px\",\"width\":\"80px\",\"height\":\"108px\"}},{\"objectId\":\"206711\",\"entity\":{\"x\":276,\"y\":603,\"kind\":\"monster\",\"dead\":false,\"ai\":2},\"root\":{\"left\":560,\"top\":416,\"width\":0,\"height\":0},\"rect\":{\"left\":535,\"top\":396,\"width\":96,\"height\":44},\"path\":\"/original-ui/Monster/004/25.png\",\"style\":{\"left\":\"-25px\",\"top\":\"-20px\",\"width\":\"96px\",\"height\":\"44px\"}}],\"markers\":[{\"type\":\"entity-sprite-hit\",\"objectId\":\"200339\"},{\"type\":\"entity-sprite-hit\",\"objectId\":\"206711\"}]}"
+      },
+      "after": {
+        "allowed": true,
+        "point": {
+          "x": 578.5,
+          "y": 413.5,
+          "mode": "opaque-body",
+          "pixelX": 43,
+          "pixelY": 17,
+          "alpha": 255
+        },
+        "owner": {
+          "position": {
+            "x": 277,
+            "y": 604
+          },
+          "at": 1794603211013,
+          "seq": 157,
+          "source": "UserLocation"
+        },
+        "frame": {
+          "left": 128,
+          "top": 96,
+          "width": 1024,
+          "height": 768,
+          "logicalWidth": 1024,
+          "logicalHeight": 768,
+          "centerX": 504,
+          "centerY": 368,
+          "cellWidth": 48,
+          "cellHeight": 32,
+          "ownerX": 277,
+          "ownerY": 604
+        },
+        "targetBody": {
+          "path": "/original-ui/Monster/004/26.png",
+          "rect": {
+            "left": 534,
+            "top": 396,
+            "width": 92,
+            "height": 44
+          },
+          "root": {
+            "left": 560,
+            "top": 416,
+            "width": 0,
+            "height": 0
+          },
+          "decoded": true,
+          "visible": true,
+          "pointPixel": {
+            "x": 44,
+            "y": 17
+          },
+          "pointAlpha": 255
+        },
+        "pick": {
+          "known": true,
+          "kind": "entity",
+          "objectId": "206711",
+          "reason": "pinned-production-pickCrystalActor"
+        },
+        "geometryKey": "{\"frame\":{\"left\":128,\"top\":96,\"width\":1024,\"height\":768,\"logicalWidth\":1024,\"logicalHeight\":768,\"centerX\":504,\"centerY\":368,\"cellWidth\":48,\"cellHeight\":32,\"ownerX\":277,\"ownerY\":604},\"targetBody\":{\"path\":\"/original-ui/Monster/004/26.png\",\"rect\":{\"left\":534,\"top\":396,\"width\":92,\"height\":44},\"root\":{\"left\":560,\"top\":416,\"width\":0,\"height\":0},\"decoded\":true,\"visible\":true,\"pointPixel\":{\"x\":44,\"y\":17},\"pointAlpha\":255},\"targetLabel\":{\"rect\":{\"left\":560,\"top\":398,\"width\":48,\"height\":12},\"visible\":true},\"geometry\":[{\"objectId\":\"200339\",\"entity\":{\"x\":276,\"y\":604,\"kind\":\"monster\",\"dead\":false,\"ai\":6},\"root\":{\"left\":560,\"top\":448,\"width\":0,\"height\":0},\"rect\":{\"left\":566,\"top\":366,\"width\":76,\"height\":108},\"path\":\"/original-ui/Monster/000/29.png\",\"style\":{\"left\":\"6px\",\"top\":\"-82px\",\"width\":\"76px\",\"height\":\"108px\"}},{\"objectId\":\"206711\",\"entity\":{\"x\":276,\"y\":603,\"kind\":\"monster\",\"dead\":false,\"ai\":2},\"root\":{\"left\":560,\"top\":416,\"width\":0,\"height\":0},\"rect\":{\"left\":534,\"top\":396,\"width\":92,\"height\":44},\"path\":\"/original-ui/Monster/004/26.png\",\"style\":{\"left\":\"-26px\",\"top\":\"-20px\",\"width\":\"92px\",\"height\":\"44px\"}}],\"markers\":[{\"type\":\"entity-sprite-hit\",\"objectId\":\"200339\"},{\"type\":\"entity-sprite-hit\",\"objectId\":\"206711\"}]}"
+      },
+      "interpretation": "The new guard compares actual spatial stability, preserving current complete picker/visible witness revalidation. PNG path and body-frame rectangle changes alone do not mean camera or actor-foot motion. Full old geometryKey remains diagnostic; old R13 result is not relabeled.",
+      "evidence": [
+        {
+          "path": "C:\\r16-walking-recovery-20261114\\fixture-r9\\game-full\\quest-after-r13\\walking-compiled-recovery.json",
+          "sha256": "c4c4580dd984fd54ad42d68959793d9c4656f1796031dc3de0ec573529d606e1"
+        },
+        {
+          "path": "C:\\r16-walking-recovery-20261114\\fixture-r9\\game-full\\quest-after-r13\\ordinary-return-town.json",
+          "sha256": "0eaca0d6b638a8ac974a0738bcc278b51e8f0e90f684c83d160ae3946564f38d"
+        },
+        {
+          "path": "C:\\r16-walking-recovery-20261114\\fixture-r9\\game-full\\quest-after-r13\\warm\\ordinary-deer-movement-trigger.json",
+          "sha256": "cead2caf27d18252df59a4d01c321e6683ca10e529427a201a8762d6d74c9ff2"
+        },
+        {
+          "path": "C:\\r16-walking-recovery-20261114\\fixture-r9\\game-full\\quest-after-r13\\entry-visual-receipt.json",
+          "sha256": "1a94a7c983808f7f0a857f1e18e321ff61dbb2afe4a5a5214734630af20c25b0"
+        }
+      ]
+    }
+  },
+  "r15": {
+    "kind": "preserved-r15-rapid-retarget-unresolved",
+    "oldResult": "FAILED_AND_PRESERVED",
+    "firstReturnClick": {
+      "at": 1794604066020,
+      "from": {
+        "x": 287,
+        "y": 605
+      },
+      "waypoint": {
+        "x": 288,
+        "y": 612
+      },
+      "acceptedSteps": 7,
+      "lastCommandAt": 1794604069647,
+      "lastAckAt": 1794604069649
+    },
+    "secondReturnClick": {
+      "plannedAt": 1794604069910,
+      "trustedDownAt": 1794604069938,
+      "trustedUpAt": 1794604069940,
+      "ackToDownMs": 289,
+      "ackToUpMs": 291,
+      "target": {
+        "x": 289,
+        "y": 616
+      },
+      "acceptedOwnerUpdatesBeforeFailure": 0
+    },
+    "unresolved": "The old row.commands was populated only after arrival, so null on failure does not prove no command was sent. The raw receipt did not retain this click's existing pointer/host queued/lastAttempt DOM diagnostics. Cadence overlap alone does not establish legitimate rejection or a product defect.",
+    "nextScope": "Observe the same rapid250ms waypoint behavior and original8s click/progress clock. Do not add650ms readiness waiting. Read only the existing committed dataset before/after clicks and bounded changed-only samples, and always record actual sent/ACK slices and a pre-cancel boundary. No new exports, product handlers, commands, preference or gameplay state changes.",
+    "evidence": [
+      {
+        "path": "C:/r16-walking-recovery-20261114/fixture-r10/game-full/quest-after-r15/cold-return-town-ordinary-ground-route.json",
+        "sha256": "c386d9acc998a204fed8e622175f03d0a4b5cf668d6f1497c035e48bb77d7524"
+      },
+      {
+        "path": "C:/r16-walking-recovery-20261114/fixture-r10/game-full/quest-after-r15/entry-visual-receipt.json",
+        "sha256": "4267034e43931ed9cc17d064a76aee038c8c471296766c8dc7c4508f1afefca0"
+      },
+      {
+        "path": "C:/r16-walking-recovery-20261114/fixture-r10/game-full/quest-after-r15/walking-compiled-recovery.json",
+        "sha256": "8e48524b9d00c033fd1c20fd2bf823cce6f0c3a938ac1d6549cb3827607684df"
+      }
+    ]
+  },
+  "r17": {
+    "oldResult": "FAILED_AND_PRESERVED",
+    "scope": "Ordinary outside approach succeeded. The guarded Deer fixed-point inspection failed before return-town, so this run did not reproduce or resolve the R15 rapid-retarget failure.",
+    "failureStage": "ordinary-outside-safe-deer-approach-hit-step",
+    "triggerError": {
+      "name": "AssertionError",
+      "message": "both fixed-point inspections must be allowed"
+    },
+    "approach": {
+      "passed": true,
+      "start": {
+        "position": {
+          "x": 289,
+          "y": 616
+        },
+        "at": 1794605554054,
+        "seq": 208,
+        "source": "UserLocation"
+      },
+      "end": {
+        "position": {
+          "x": 288,
+          "y": 605
+        },
+        "at": 1794605561434,
+        "seq": 251,
+        "source": "UserLocation"
+      },
+      "clickCount": 1
+    },
+    "actualDiagnostics": {
+      "sampleCount": 13,
+      "allMovementDatasetAbsent": true,
+      "reason": "Observer read data-movement-input-status from .client-stage-frame. Qualified source places this existing attribute on main.mir-client-page; camera remains on .client-stage-frame. Null fields cannot establish intent/cadence or absence of dispatch."
+    },
+    "closed": {
+      "browser": true,
+      "proxy": true,
+      "next": true,
+      "gateway": true
+    },
+    "fixtureUnchanged": true
+  },
+  "next": "Separate ordinary navigation-only replay from animal stimulation. Read the existing main movement attribute and frame camera separately, require a usable host before clicks, retain rapid retarget/no added650ms wait and original8s progress deadline. Keep all real commands, corrections and before-cancel evidence. Diagnostic success alone is not a product fix or complete walking qualification.",
+  "rawEvidence": [
+    {
+      "path": "C:/r16-walking-recovery-20261114/fixture-r11/r13-spatial-evidence.json",
+      "sha256": "aba185737ab2f85debd2c50b989d5e467a9d56c717d0af572f52593e8d4471fd"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/fixture-r11/r15-rapid-retarget-evidence.json",
+      "sha256": "5ad2d9eb199ec17f424bd40b76fbc6e41b97825b961337f150429760bf688f99"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/fixture-r9/game-full/quest-after-r13/entry-visual-receipt.json",
+      "sha256": "1a94a7c983808f7f0a857f1e18e321ff61dbb2afe4a5a5214734630af20c25b0"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/fixture-r10/game-full/quest-after-r15/entry-visual-receipt.json",
+      "sha256": "4267034e43931ed9cc17d064a76aee038c8c471296766c8dc7c4508f1afefca0"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/fixture-r11/game-full/quest-after-r17/entry-visual-receipt.json",
+      "sha256": "4d36a9c4109951601c0386573ecdb29a40f45e0ee0a2b56a404c8e4e2830c5bf"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/fixture-r11/game-full/quest-after-r17/cold-outside-approach-ordinary-ground-route.json",
+      "sha256": "f10fa6e38a8491f85978acd79e0cc89b1adc79979813767c3f01dbfb814e0824"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/fixture-r11/game-full/quest-after-r17/ordinary-deer-movement-trigger.json",
+      "sha256": "e77fdee0561dc040e36eaeebc0a9016926ead464dafc3b9cd69961ba37910532"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/fixture-r11/browser-preparation-r1.json",
+      "sha256": "e8728799d5276f414b5dbf09b8174e9d352dc057ac8686e726c9f4de806569f8"
+    }
+  ]
+}
