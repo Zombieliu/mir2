@@ -37,7 +37,7 @@ def terminal_v3(identity=TEST_IDENTITY):
 
 
 def sample(at,identity=TEST_IDENTITY):
-    return {'sampledAt':at,'targetProcess':{'pid':identity[0],'startTicks':identity[1],'VmRSSBytes':1000},
+    return {'sampledAt':at,'stop':False,'targetProcess':{'pid':identity[0],'startTicks':identity[1],'VmRSSBytes':1000},
       'targetUnit':{'InvocationID':identity[2],'MemoryMax':1600*2**20},'health':{'revision':m.REVISION},
       'targetCgroup':{'cpu.stat':{'usage_usec':at*2000},'memory.events':{'oom_kill':0},'memory.current':2000},
       'host':{'memory':{'MemAvailable':3000}},'network':{'primaryNic':'eth0','rxBytes':at*1000,'txBytes':at*2000}}
@@ -68,7 +68,63 @@ def close_prefix(root,identity=TEST_IDENTITY):
     return job
 
 
+def closed_failure_case():
+    root=fixture();close_prefix(root);client=root/'client';client.mkdir();events=client/'run.events.jsonl';events.write_bytes(b'')
+    report={'schema':'mir2.cloud-reference-public-signed-load.v1','evidenceComplete':True,'evidenceLimitExceeded':False,'startedAtUtc':'2026-01-01T00:00:00Z',
+      'completedAtUtc':'2026-01-01T00:00:01Z','profile':'movement-chat','stages':[],'eventsFile':str(events),'eventsSha256':hashlib.sha256(b'').hexdigest(),
+      'rows':0,'ok':False,'campaignCompleted':False,'failure':{'message':'No legal unoccupied ordinary step'},'cleanup':[],
+      'capacityEvidence':False,'ccuQualified':False,'combatTested':False,'fullCombatCapacityQualified':False,'physicalTriClientTested':False,
+      **{key:value[1] for key,value in m.PINS.items()}}
+    write(client/'run.report.json',report);write(root/'inputs.json',{'sourceRevision':m.REVISION,'binarySha256':m.BINARY})
+    (root/'host.history.jsonl').write_text(json.dumps(terminal_v3())+'\n',encoding='utf8')
+    return root
+
+
 class ClosedSummaryBoundaries(unittest.TestCase):
+    def test_exact_first_initialization_placeholder_is_excluded_not_zero_sample(self):
+        root=closed_failure_case();at=1700000000000
+        initialization={'schemaVersion':1,'sampledAt':at,'stop':True,'reason':'monitor starting; not ready for admission'}
+        rows=[initialization,sample(at+1000),sample(at+62000),terminal_v3()]
+        (root/'host.history.jsonl').write_text(''.join(json.dumps(row)+'\n' for row in rows),encoding='utf8')
+        report_path=root/'client/run.report.json';report=m.read_json(report_path)
+        report['stages']=[{'name':'synthetic-failed-window','players':2,'seconds':60,'startedAtMs':1000,'endedAtMs':61000,
+          'passed':False,'failure':'synthetic incomplete actors','population':[{'atUtc':'2023-11-14T22:13:22Z','elapsedMs':0,'controlled':2,'serverWs':2,'serverActive':2}],
+          'windows':[{'minute':1,'passed':False,'actors':[]}]}]
+        write(report_path,report)
+        def resources(samples,bounds,identity):
+            self.assertEqual(samples,rows[1:]);self.assertEqual(identity,TEST_IDENTITY)
+            self.assertTrue(all('targetCgroup' in row for row in samples if not row.get('monitorTerminal')))
+            return {'valid':False,'reason':'synthetic resource-capture fixture only'}
+        with patch.object(m,'host_statistics',side_effect=resources) as checked:
+            result=m.summarize(root,TEST_IDENTITY)
+        checked.assert_called_once()
+        self.assertEqual(result['historyInitialization']['excludedInitializationRowCount'],1)
+        self.assertEqual(result['historyInitialization']['firstValidatedIdentitySampleAtUnixMs'],at+1000)
+        self.assertFalse(result['historyInitialization']['includedAsResourceSample'])
+        self.assertFalse(result['reportOk']);self.assertFalse(result['capacityQualified100'])
+        self.assertIsNone(result['resourceContract']['provisionedMbps'])
+        self.assertEqual(result['resourceContract']['userProvidedBandwidthText'],'30MBPS')
+        self.assertFalse(result['resourceContract']['bandwidthContractVerified'])
+        self.assertNotIn('nominalPublicMbps',result['resourceContract'])
+
+    def test_later_unknown_or_unfollowed_initialization_placeholder_refuses(self):
+        at=1700000000000
+        initialization={'schemaVersion':1,'sampledAt':at,'stop':True,'reason':'monitor starting; not ready for admission'}
+        for mode in ['later','repeated','extra-key','wrong-reason','non-int-time','no-identity-sample','time-before-start','wrong-identity','unknown-stop']:
+            root=closed_failure_case();first=copy.deepcopy(initialization);regular=sample(at+1000)
+            rows=[first,regular,terminal_v3()]
+            if mode=='later':rows=[regular,first,terminal_v3()]
+            elif mode=='repeated':rows=[first,regular,copy.deepcopy(first),terminal_v3()]
+            elif mode=='extra-key':first['extra']=False
+            elif mode=='wrong-reason':first['reason']='unknown stop reason'
+            elif mode=='non-int-time':first['sampledAt']=float(at)
+            elif mode=='no-identity-sample':rows=[first,terminal_v3()]
+            elif mode=='time-before-start':regular['sampledAt']=at-1
+            elif mode=='wrong-identity':rows[1]=sample(at+1000,NEW_IDENTITY)
+            else:regular['stop']=True;regular['reason']='unknown nonterminal stop'
+            (root/'host.history.jsonl').write_text(''.join(json.dumps(row)+'\n' for row in rows),encoding='utf8')
+            with self.subTest(mode=mode),self.assertRaises(m.Refusal):m.summarize(root,TEST_IDENTITY)
+
     def test_cli_requires_complete_valid_explicit_identity_before_case_read(self):
         base=['--case-dir','C:/synthetic-not-read']
         pins=['--expected-pid',str(NEW_IDENTITY[0]),'--expected-start-ticks',str(NEW_IDENTITY[1]),'--expected-invocation-id',NEW_IDENTITY[2]]
@@ -281,14 +337,7 @@ class ClosedSummaryBoundaries(unittest.TestCase):
         self.assertEqual(result['allRawActionOutcomeCounts']['notSent'],4)
 
     def test_closed_failed_report_is_summarized_without_100_or_combat_upgrade(self):
-        root=fixture();close_prefix(root);client=root/'client';client.mkdir();events=client/'run.events.jsonl';events.write_bytes(b'')
-        report={'schema':'mir2.cloud-reference-public-signed-load.v1','evidenceComplete':True,'evidenceLimitExceeded':False,'startedAtUtc':'2026-01-01T00:00:00Z',
-          'completedAtUtc':'2026-01-01T00:00:01Z','profile':'movement-chat','stages':[],'eventsFile':str(events),'eventsSha256':hashlib.sha256(b'').hexdigest(),
-          'rows':0,'ok':False,'campaignCompleted':False,'failure':{'message':'No legal unoccupied ordinary step'},'cleanup':[],
-          'capacityEvidence':False,'ccuQualified':False,'combatTested':False,'fullCombatCapacityQualified':False,'physicalTriClientTested':False,
-          **{key:value[1] for key,value in m.PINS.items()}}
-        write(client/'run.report.json',report);write(root/'inputs.json',{'sourceRevision':m.REVISION,'binarySha256':m.BINARY})
-        (root/'host.history.jsonl').write_text(json.dumps(terminal_v3())+'\n',encoding='utf8')
+        root=closed_failure_case()
         summary=m.summarize(root,TEST_IDENTITY)
         self.assertTrue(summary['runCompleted']);self.assertFalse(summary['reportOk']);self.assertFalse(summary['capacityQualified100'])
         self.assertFalse(summary['fullCombatCapacityQualified']);self.assertEqual(summary['stages'],[])

@@ -73,6 +73,12 @@ def source_digest():
     return hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
 
 
+def initialization_placeholder(row):
+    return (isinstance(row,dict) and set(row)=={'schemaVersion','sampledAt','stop','reason'} and
+      type(row['schemaVersion']) is int and row['schemaVersion']==1 and type(row['sampledAt']) is int and
+      0<row['sampledAt']<2**63 and row['stop'] is True and row['reason']=='monitor starting; not ready for admission')
+
+
 def digest(p):
     p=public_path(p);info=p.stat();need(p.is_file() and info.st_nlink==1,'regular_input_required')
     with p.open('rb') as f:value=hashlib.file_digest(f,'sha256').hexdigest()
@@ -413,22 +419,33 @@ def summarize(case,identity):
     events=public_path(report['eventsFile']);need(events.parent==case/'client' and events.name==reports[0].name.replace('.report.json','.events.jsonl'),'report_event_path_mismatch')
     info=scan_events(events,report)
     history=case/'host.history.jsonl';need(history.is_file() and history.stat().st_size<=512*2**20,'closed_host_history_required')
-    host_rows=[];hasher=hashlib.sha256()
+    host_rows=[];hasher=hashlib.sha256();initialization=None;first_identity_sample_at=None;history_records=0
     with history.open('rb') as stream:
-        for line in stream:
+        for line_index,line in enumerate(stream):
             hasher.update(line);need(len(line)<=2**20 and line.endswith(b'\n'),'truncated_monitor_line')
             if line.strip():
                 row=json.loads(line)
+                need(isinstance(row,dict),'monitor_history_object_required')
+                history_records+=1;need(history_records<=100000,'monitor_row_bound_exceeded')
+                if initialization_placeholder(row):
+                    need(line_index==0 and initialization is None,'initialization_placeholder_not_first')
+                    initialization=row;continue
                 if row.get('monitorTerminal'):monitor_completion(row,True,identity)
-                else:need(sample_identity(row)==identity and row.get('health',{}).get('revision')==REVISION,'history_identity_pin_mismatch')
+                else:
+                    need(row.get('stop') is False,'unknown_nonterminal_monitor_stop_row')
+                    need(sample_identity(row)==identity and row.get('health',{}).get('revision')==REVISION,'history_identity_pin_mismatch')
+                    if initialization is not None and first_identity_sample_at is None:
+                        need(number(row.get('sampledAt')) and row['sampledAt']>=initialization['sampledAt'],'initialization_timestamp_not_ordered')
+                        first_identity_sample_at=row['sampledAt']
                 host_rows.append(row);need(len(host_rows)<=100000,'monitor_row_bound_exceeded')
+    need(initialization is None or first_identity_sample_at is not None,'initialization_missing_identity_sample')
     stages=[]
     for stage,rows in zip(report['stages'],info['stageRows']):
         s=summarize_stage(stage,rows)
         s['serverResources']=host_statistics(host_rows,s['utcBounds'],identity) if s['fullyCompletedDuration'] else {'valid':False,'reason':'partial_stage_not_used_for_full_stage_resource_mean'}
         stages.append(s)
     options=dict(zip(spec['command'][2::2],spec['command'][3::2]))
-    return {'schema':'mir2.closed-cloud-progressive-movement-summary.v4','sourceRevision':REVISION,'declaredInstalledBinarySha256':BINARY,
+    return {'schema':'mir2.closed-cloud-progressive-movement-summary.v5','sourceRevision':REVISION,'declaredInstalledBinarySha256':BINARY,
       'monitorTargetIdentity':{'pid':identity[0],'startTicks':identity[1],'invocationId':identity[2]},
       'runCompleted':True,'reportOk':report.get('ok'),'campaignCompleted':report.get('campaignCompleted'),'allSloPassed':report.get('allSloPassed'),
       'measurementOk':report.get('measurementOk'),'steadyStageSloPassed':report.get('steadyStageSloPassed'),
@@ -448,8 +465,12 @@ def summarize(case,identity):
       'originalQualificationFlags':{k:report.get(k) for k in ['capacityEvidence','ccuQualified','combatTested','fullCombatCapacityQualified','physicalTriClientTested']},
       'capacityQualified':False,'capacityQualified100':False,'fullCombatCapacityQualified':False,'physicalTriClientTested':False,
       'scope':'actual public legacy movement/chat harness; distinct from local common-plan game-core comparison',
-      'resourceContract':{'hostLogicalCpus':4,'hostMemoryGiB':8,'nominalPublicMbps':30,'testCgroupMemoryMaxMiB':1600,
+      'resourceContract':{'hostLogicalCpus':4,'hostMemoryGiB':8,'provisionedMbps':None,
+        'userProvidedBandwidthText':'30MBPS','bandwidthContractVerified':False,'testCgroupMemoryMaxMiB':1600,
         'sharedHost':True,'networkExclusiveToGame':False,'hostAvailableReserveIsObservedNotAnAllocation':True},
+      'historyInitialization':{'excludedInitializationRowCount':1 if initialization else 0,'initializationControlRow':initialization,
+        'firstValidatedIdentitySampleAtUnixMs':first_identity_sample_at,'includedAsResourceSample':False,
+        'scope':'only exact four-key first-line initialization placeholder excluded; no zero counter or memory sample fabricated'},
       'observedMonitorRevisions':sorted({r.get('health',{}).get('revision') for r in host_rows if r.get('health',{}).get('revision')}),
       'closedEvidence':{'ownedJobActualExitCode':job.get('actualExitCode'),'allOwnedExited':True,'noKill':True,'monitorTerminal':True,
         'monitorCompletion':monitor_completion(latest,True,identity),
