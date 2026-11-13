@@ -1645,8 +1645,10 @@ def melee_attack_terminal(plan, action, sent, row, seen, packets, admissions, fl
     need(len(launches) == 1 and len(indicators) == 1 and len(impacts) <= 1 and len(decreases) <= 1, "combat_target_chain_missing_or_ambiguous")
     indicator = indicators[0];body = indicator["body"]
     need(launches[0]["sequence"]<indicator["sequence"] and (not impacts or launches[0]["sequence"]<impacts[0]["sequence"]<indicator["sequence"]),"combat_launch_struck_indicator_FIFO_broken")
-    dtype = body.get("type", body.get("damage_type"));damage = body.get("damage")
-    need(type(dtype) is int and type(damage) is int, "combat_damage_type_or_magnitude_missing")
+    types = [body[key] for key in ["type", "damage_type", "damageType"] if key in body];damage = body.get("damage")
+    need(types and all(type(value) is int for value in types) and type(damage) is int, "combat_damage_type_or_magnitude_missing")
+    need(all(value == types[0] for value in types), "combat_damage_type_aliases_conflict")
+    dtype = types[0]
     if dtype == 1 and damage == 0:
         need(not impacts and not decreases, "combat_miss_contested_by_damage_or_struck")
         outcome, terminal = "explicitMiss", indicator

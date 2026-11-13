@@ -136,6 +136,60 @@ class CombatActionTests(unittest.TestCase):
                 p,r,e,c,(windows,derived,_,_)=self.verify(engine)
                 self.assertFalse(c.failures);self.assertEqual(len(derived),104);self.assertTrue(all(w['passed'] and w['offered']==52 and w['completed']==52 for w in windows))
 
+    @staticmethod
+    def actual_modern_damage_dtos(events):
+        # Exact DTO keys observed in both real melee2 runs (not a live/pass claim).
+        for row in events:
+            if row.get('packet') == 'DamageIndicator':
+                body = row['payload']
+                row['payload'] = {'objectId': body['object_id'], 'damage': body['damage'],
+                                  'damageType': body['damage_type'], 'typed': True}
+
+    def test_actual_camel_damage_type_accepts_hit_zero_block_and_explicit_miss(self):
+        for terminal in ['hit', 'block', 'miss']:
+            with self.subTest(terminal=terminal):
+                p,r,e=actions('modern',terminal=terminal);self.actual_modern_damage_dtos(e);checks=v.Checks()
+                windows,derived,_,_=v.verify_actions(p,r,e,'modern',checks)
+                self.assertFalse(checks.failures);self.assertEqual(len(derived),104)
+                self.assertTrue(all(w['passed'] and w['completed']==52 for w in windows))
+
+    def test_consistent_legacy_and_camel_damage_type_aliases_remain_valid(self):
+        for terminal in ['hit','miss']:
+            p,r,e=actions('modern',terminal=terminal);self.actual_modern_damage_dtos(e)
+            for row in e:
+                if row.get('packet')=='DamageIndicator':
+                    body=row['payload'];body['type']=body['damage_type']=body['damageType']
+            checks=v.Checks();windows,_,_,_=v.verify_actions(p,r,e,'modern',checks)
+            self.assertFalse(checks.failures);self.assertTrue(all(w['passed'] for w in windows))
+
+    def test_missing_invalid_and_conflicting_damage_type_aliases_are_rejected(self):
+        aliases=[{}, {'damageType':None}, {'damageType':True}, {'damageType':False}, {'damageType':0.0}, {'damageType':'0'},
+                 {'damageType':0,'damage_type':1}, {'damageType':1,'type':0}, {'damageType':None,'damage_type':0},
+                 {'damageType':0,'damage_type':False}, {'damageType':0,'type':None}]
+        for fields in aliases:
+            with self.subTest(aliases=fields):
+                p,r,e=actions();raw=next(x for x in e if x.get('packet')=='DamageIndicator')
+                raw['payload']={'objectId':1000,'damage':5,'typed':True,**fields}
+                with self.assertRaises(v.EvidenceError):v.verify_actions(p,r,e,'modern',v.Checks())
+        for magnitude in [None,True,False,5.0,'5']:
+            with self.subTest(magnitude=magnitude):
+                p,r,e=actions();raw=next(x for x in e if x.get('packet')=='DamageIndicator')
+                raw['payload']={'objectId':1000,'damage':magnitude,'damageType':0,'typed':True}
+                with self.assertRaises(v.EvidenceError):v.verify_actions(p,r,e,'modern',v.Checks())
+
+    def test_actual_camel_dto_keeps_exact_hp_attacker_victim_and_ticket_reference_gates(self):
+        for mutation,code in [('hp','combat_hp_operation_not_exact_damage_delta'),('attacker','combat_competing_or_wrong_attacker'),
+                              ('victim','combat_target_chain_missing_or_ambiguous'),('reference','combat_required_chain_not_bound_to_ticket_receipts|combat_target_chain_missing_or_ambiguous')]:
+            with self.subTest(mutation=mutation):
+                p,r,e=actions();self.actual_modern_damage_dtos(e)
+                if mutation=='hp':next(x for x in e if x.get('packet')=='DamageIndicator')['payload']['damage']=7
+                elif mutation=='attacker':next(x for x in e if x.get('packet')=='ObjectStruck')['payload']['attackerId']=999
+                elif mutation=='victim':next(x for x in e if x.get('packet')=='DamageIndicator')['payload']['objectId']=999
+                else:
+                    row=next(x for x in e if x.get('event')=='actionTerminal' and x['actorOrdinal']==0 and x['ticketSequence']==1)
+                    row['receipts']=[ref for ref in row['receipts'] if ref['packet']!='DamageIndicator']
+                with self.assertRaisesRegex(v.EvidenceError,code):v.verify_actions(p,r,e,'modern',v.Checks())
+
     def test_explicit_miss_and_attacker_bound_zero_are_separate_terminals(self):
         for engine in ['modern','crystal']:
             for terminal in ['miss','block']:
