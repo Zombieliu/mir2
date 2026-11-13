@@ -11,9 +11,13 @@ const page = ts.createSourceFile(
   ts.ScriptKind.TSX,
 );
 const declared = new Map();
+const movementConstants = [];
 let secondary;
 function collect(node) {
   if (ts.isFunctionDeclaration(node) && node.name) declared.set(node.name.text, node.getText(page));
+  if (ts.isVariableDeclaration(node) && node.name.getText(page) === "AUTO_ROUTE_PENDING_MAX_AGE_MS") {
+    movementConstants.push("const " + node.getText(page) + ";");
+  }
   if (ts.isBinaryExpression(node) && node.left.getText(page) === "onViewportTileSecondaryActionRef.current") {
     secondary = node.right.getText(page);
   }
@@ -29,7 +33,7 @@ const handlers = [
 for (const name of handlers) assert(declared.has(name), name);
 const functions = handlers.concat(["newMoveOwnerCurrent", "keepCorrectedRoute"].filter(name => declared.has(name)));
 const compiled = ts.transpileModule(
-  functions.map(name => declared.get(name)).join("\n") + "\nconst secondaryClick = " + secondary + "\nreturn {" + handlers.join(",") + ",secondaryClick};",
+  movementConstants.join("\n") + "\n" + functions.map(name => declared.get(name)).join("\n") + "\nconst secondaryClick = " + secondary + "\nreturn {" + handlers.join(",") + ",secondaryClick};",
   { compilerOptions: { target: ts.ScriptTarget.ES2022 } },
 ).outputText;
 const fixtureApi = new Function("scope", "with (scope) {\n" + compiled + "\n}");
@@ -96,6 +100,7 @@ function fixture() {
     clearDirectionStepPendingQueue: () => {},
     recordMovementConsoleEvent: () => {},
     captureMovementConsoleState: () => ({}),
+    t: key => key, appendLog: () => {},
     bumpCorrectionCounter: type => corrections.push(type),
     send: command => {
       if (flags.unknown) throw Error("unknown movement send");
@@ -218,10 +223,21 @@ test("Classic short steps, pickup approaches and unknown sends never gain retry 
     f.flags.unknown = true;
     assert.throws(() => f.start("ground"), /unknown movement send/);
     assert.equal(f.sends.length, 0);
+    const uncertain = f.scope.pendingSelfMoveRef.current;
+    assert(uncertain); assert.equal(f.scope.sentSelfMoves.has(uncertain), false);
     f.flags.unknown = false;
     if (resolve) assert.equal(f.ack(1050, 10), "correction");
     assert.equal(f.tick(4100), false);
+    if (!resolve) {
+      // The owned route may wait through its new bounded confirmation window;
+      // an uncertain send never authorizes another movement in that interval.
+      assert(f.scope.queuedMoveIntentRef.current);
+      assert.equal(f.scope.pendingSelfMoveRef.current, uncertain);
+      assert.equal(f.sends.length, 0);
+      assert.equal(f.tick(uncertain.sentAt + 8100), false);
+    }
     assert.equal(f.scope.queuedMoveIntentRef.current, null);
+    assert.equal(f.scope.pendingSelfMoveRef.current, null);
     assert.equal(f.sends.length, 0);
   }
 });
