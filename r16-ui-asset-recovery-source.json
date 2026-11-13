@@ -1,0 +1,92 @@
+{
+  "createdAt": "2026-11-13T00:21:46.665077+00:00",
+  "sourceSnapshot": "63977fd7e102682ce3fe08f9223a127f7bd6250a",
+  "rustSourceClosureSha256": "05e1af19f75f9b1eb5d34a1c60555f1281ad6d4daff762813e837a18cad0d4f2",
+  "ownedOverlays": [
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/portable_ui_fonts.rs",
+      "sha256": "d297b159192d4313d71ab175c4de52aa4ca67151b2b6bf5290ab6ff35ba25ba0",
+      "gitBlob": "5e046353a3cbbeef2cb40f48fdeb3afe9b943aca"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/portable_ui_asset_recovery.rs",
+      "sha256": "834b32f24e959c8bd2f4a04309dbb083a98f46e767f22c1f0fac1be1cfef325e",
+      "gitBlob": "fa6166b3d21f3cdb832d20c5f563df01ec7a07ad"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/portable_ui_asset_recovery_tests.rs",
+      "sha256": "2eeb90de3df8c514cf497838939fedcd440888750bff581cf0abcf7913d27f90",
+      "gitBlob": "3afefc4d0d990e41a26420057e86b4e92dce94e6"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/portable_ui_asset_recovery_io_tests.rs",
+      "sha256": "ff5ea4f7b42eb069d2a84ec9957244ebefac1f78a1b47f844b906447c8e63d3b",
+      "gitBlob": "e6209e8b0ff9c3a1ba9d1a45ce1071b3fdd4a8fb"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/portable_ui_fonts_tests.rs",
+      "sha256": "f93255555f27e4c282e89deaf2e8a89e60fcbdb6918f6c2623618a608d61cd74",
+      "gitBlob": "db2d6515923158c3001f47ccd70503b640f44752"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/hud_ui_host.rs",
+      "sha256": "7c18d302dfb48a83154df8fbe0558d16c7b3f8b60ea98f8d02da387d1a4bcc48",
+      "gitBlob": "ae93d84bb4ebfaa55219978aa27650e404ce2ec2"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/quest_ui_host.rs",
+      "sha256": "7065c7c16cf82cd91dcd66e1a0198b0c74408b2f9dba2ad3128fa6d548c84bf6",
+      "gitBlob": "f7c32602f4f6873f4d4f962799419e29b74cff07"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/quest_ui_asset_recovery_tests.rs",
+      "sha256": "25a33008b071bbc3dad6f01c82a10b7524b82911a4b46386848ca1bd1f023967",
+      "gitBlob": "661956358a190b04827f1bda60eb78a005739943"
+    }
+  ],
+  "runtimeVersion": "bevy-0c553a754308e5b8",
+  "runtimeManifestSha256": "36bdaa0116064c9b41cf8f54a547e53319011180e2275e1c5549e2ed7a33041b",
+  "files": [
+    {
+      "path": "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js",
+      "sha256": "3eb60cb1c4b3a931befe42485b10925ef161da576c47974c63b4b811a7a0ee99",
+      "bytes": 141747
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "sha256": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+      "bytes": 31452436
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js",
+      "sha256": "2c18b5168f4a5210f4879c06e7373807a6dedb3a81137fdc28080191bc0f5aa5",
+      "bytes": 117805
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+      "sha256": "9950afa3eb67ba5d618269f72ba1aeb23413f766a6d9bfa00021bfd4e85fbe8f",
+      "bytes": 16607464
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime.js",
+      "sha256": "04e9fc42f89f1f302047b5d5101cf4e02035b0cf6241d8f9f4550e2dd531d92b",
+      "bytes": 139721
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+      "sha256": "5f8b82ab48665cd20e8c45ce0da0f221a6919dfab07aca43fea7fd312f34c185",
+      "bytes": 32378001
+    }
+  ],
+  "bundle": {
+    "name": "r16-ui-asset-recovery-bevy.tar.gz",
+    "bytes": 17405190,
+    "sha256": "9088d3ca71c77866d652f362524bd9e50cc3b27f8871e7cf7033ec0cb448ea92"
+  },
+  "toolchain": {
+    "rust": "1.95.0",
+    "bindgen": "0.2.118",
+    "binaryen": "131",
+    "binaryenSha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3"
+  }
+}
