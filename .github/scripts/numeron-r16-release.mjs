@@ -16,30 +16,30 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: 'f6603c89a34e27813d7495fceab3292cc293c47b',
+  source: '91b8fc9b4f5170cb37b6619b991707ed76a34d73',
   sourceRef: BRANCH,
-  baseSource: '401c8f9855fda0966467fc98f3d9ff63822e5e12',
+  baseSource: 'f6e30a0ee8021d745ecce35e295edf5f60e39964',
   assetSource: 'f2de762309768b51b39438c2437c14e819df9bf7',
   changedFiles: [
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/lib/bevy-runtime-initializer.ts",
-      "sha": "2299800b5d29d99fa1c40c04b88eb4e7265dee62"
+      "filename": "mir2-web3/apps/web/lib/generated/r16-entry-bootstrap-chunks.ts",
+      "sha": "a8dca3b25a331be195ea446246b65692f6e58941"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/package.json",
-      "sha": "bb0f710c09e684eb34860a5a89a3707a9bce0617"
+      "filename": "mir2-web3/apps/web/lib/r16-entry-scene.ts",
+      "sha": "dd29f8197b00e5c04a08c28d28f0b08e2f321a36"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-initializer.mjs",
-      "sha": "c182b827bc00ae8cad254eeed93213ea5bf14ba3"
+      "filename": "mir2-web3/apps/web/scripts/generate-r16-bootstrap-chunks.mjs",
+      "sha": "04813b6d7e2d5a71f46b23170b0b5e7184905bae"
     },
     {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-source-rotation.mjs",
-      "sha": "c8b523be02181aa9a9ba9ebbd464939cda8d12dd"
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-pinned-bootstrap-chunk.mjs",
+      "sha": "05f50153009d532577235705d6ac3b2aa60b3147"
     }
   ],
   entryScene: {
@@ -98,7 +98,7 @@ export const QR_RELEASE = Object.freeze({
     bytes: 3283113,
   },
   assetRunId: '42494701555',
-  baseline: 'dpl_ET4yRQHzgEvDLDD6qXUN1sZA6GWQ',
+  baseline: 'dpl_3eNPP4uaj3nT3HsAMhJUUoXpN4Dh',
   relay: 'https://relay.dubhe.obelisk.build',
 });
 const QR_OPERATIONS = ['numeron-qr-stage', 'numeron-qr-promote', 'numeron-qr-rollback'];
