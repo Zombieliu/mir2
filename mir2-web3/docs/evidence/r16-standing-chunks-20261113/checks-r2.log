@@ -1,0 +1,482 @@
+TAP version 13
+# (node:38828) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: first-scene deadline covers stalled headers and retries the exact URL once
+ok 1 - first-scene deadline covers stalled headers and retries the exact URL once
+  ---
+  duration_ms: 13.6913
+  type: 'test'
+  ...
+# Subtest: first-scene deadline covers stalled json body and retries the exact URL once
+ok 2 - first-scene deadline covers stalled json body and retries the exact URL once
+  ---
+  duration_ms: 1.0418
+  type: 'test'
+  ...
+# Subtest: slow headers leave a separate deadline for valid scene JSON
+ok 3 - slow headers leave a separate deadline for valid scene JSON
+  ---
+  duration_ms: 0.3507
+  type: 'test'
+  ...
+# Subtest: a progressing scene body can take more than eight seconds after slow headers
+ok 4 - a progressing scene body can take more than eight seconds after slow headers
+  ---
+  duration_ms: 1.6085
+  type: 'test'
+  ...
+# Subtest: a stalled body retries eight seconds after its last bytes and ignores empty chunks
+ok 5 - a stalled body retries eight seconds after its last bytes and ignores empty chunks
+  ---
+  duration_ms: 3.4482
+  type: 'test'
+  ...
+# Subtest: continuous body progress cannot exceed the absolute scene body limit
+ok 6 - continuous body progress cannot exceed the absolute scene body limit
+  ---
+  duration_ms: 2.4398
+  type: 'test'
+  ...
+# Subtest: a body that stalls after slow headers still retries the same URL
+ok 7 - a body that stalls after slow headers still retries the same URL
+  ---
+  duration_ms: 1.1994
+  type: 'test'
+  ...
+# Subtest: first-scene transport and transient HTTP failures get only one retry
+ok 8 - first-scene transport and transient HTTP failures get only one retry
+  ---
+  duration_ms: 0.6064
+  type: 'test'
+  ...
+# Subtest: both stalled first-scene attempts have finite deadlines
+ok 9 - both stalled first-scene attempts have finite deadlines
+  ---
+  duration_ms: 0.9425
+  type: 'test'
+  ...
+# Subtest: definitive HTTP errors, Retry-After and complete malformed JSON do not retry
+ok 10 - definitive HTTP errors, Retry-After and complete malformed JSON do not retry
+  ---
+  duration_ms: 1.4631
+  type: 'test'
+  ...
+# Subtest: a typed Crystal dependency failure returns its original 424 response and JSON
+ok 11 - a typed Crystal dependency failure returns its original 424 response and JSON
+  ---
+  duration_ms: 0.4125
+  type: 'test'
+  ...
+# Subtest: the scene owner cancels during body without launching a replacement
+ok 12 - the scene owner cancels during body without launching a replacement
+  ---
+  duration_ms: 0.2904
+  type: 'test'
+  ...
+# Subtest: the scene owner cancels during backoff without launching a replacement
+ok 13 - the scene owner cancels during backoff without launching a replacement
+  ---
+  duration_ms: 0.1846
+  type: 'test'
+  ...
+# Subtest: the injected manifest reader keeps a cancelled or older release out of accepted memory
+ok 14 - the injected manifest reader keeps a cancelled or older release out of accepted memory
+  ---
+  duration_ms: 19.656
+  type: 'test'
+  ...
+# Subtest: metadata alone never starts the image-pack timer or releases an absent/undecoded body
+ok 15 - metadata alone never starts the image-pack timer or releases an absent/undecoded body
+  ---
+  duration_ms: 1.1361
+  type: 'test'
+  ...
+# Subtest: an already decoded body is recognized on the first animation frame
+ok 16 - an already decoded body is recognized on the first animation frame
+  ---
+  duration_ms: 0.2097
+  type: 'test'
+  ...
+# Subtest: only a verified nonempty image pack retains the existing decode safety timer
+ok 17 - only a verified nonempty image pack retains the existing decode safety timer
+  ---
+  duration_ms: 0.1712
+  type: 'test'
+  ...
+# Subtest: retiring a metadata observer removes load and RAF publication
+ok 18 - retiring a metadata observer removes load and RAF publication
+  ---
+  duration_ms: 0.0928
+  type: 'test'
+  ...
+# Subtest: actual loaded release and exact default standing paths gate the optimization
+ok 19 - actual loaded release and exact default standing paths gate the optimization
+  ---
+  duration_ms: 1.4796
+  type: 'test'
+  ...
+# Subtest: one actual lazy import serves four phases; unused directions and gender do not load
+ok 20 - one actual lazy import serves four phases; unused directions and gender do not load
+  ---
+  duration_ms: 3.41
+  type: 'test'
+  ...
+# Subtest: both sexes, eight directions and all four phases retain the original PNG bytes and dimensions
+ok 21 - both sexes, eight directions and all four phases retain the original PNG bytes and dimensions
+  ---
+  duration_ms: 16.9153
+  type: 'test'
+  ...
+# Subtest: retiring one consumer does not cancel another consumer or publish to the retired owner
+ok 22 - retiring one consumer does not cancel another consumer or publish to the retired owner
+  ---
+  duration_ms: 1.2886
+  type: 'test'
+  ...
+# Subtest: a bounded observer can time out while a late chunk remains reusable
+ok 23 - a bounded observer can time out while a late chunk remains reusable
+  ---
+  duration_ms: 6.2915
+  type: 'test'
+  ...
+# Subtest: chunk failures back off, stop after two attempts and leave the ordinary image path available
+ok 24 - chunk failures back off, stop after two attempts and leave the ordinary image path available
+  ---
+  duration_ms: 0.4791
+  type: 'test'
+  ...
+# Subtest: wrong source, direction or missing phase cannot become a startup image map
+ok 25 - wrong source, direction or missing phase cannot become a startup image map
+  ---
+  duration_ms: 3.6726
+  type: 'test'
+  ...
+# Subtest: startup PNGs retain each layer's geometry, reject mismatched dimensions and yield to the complete pack
+ok 26 - startup PNGs retain each layer's geometry, reject mismatched dimensions and yield to the complete pack
+  ---
+  duration_ms: 12.9348
+  type: 'test'
+  ...
+# Subtest: the release prop comes from the accepted scene, not the build's fixed-release hint
+ok 27 - the release prop comes from the accepted scene, not the build's fixed-release hint
+  ---
+  duration_ms: 179.3579
+  type: 'test'
+  ...
+# Subtest: the mounted observer retries a failed or expired read once without waiting for a turn, and retirement clears it
+ok 28 - the mounted observer retries a failed or expired read once without waiting for a turn, and retirement clears it
+  ---
+  duration_ms: 5.4714
+  type: 'test'
+  ...
+# Subtest: nearby player positions share one canonical scene request
+ok 29 - nearby player positions share one canonical scene request
+  ---
+  duration_ms: 0.8493
+  type: 'test'
+  ...
+# Subtest: the public request URL is canonical and schema-versioned
+ok 30 - the public request URL is canonical and schema-versioned
+  ---
+  duration_ms: 0.3504
+  type: 'test'
+  ...
+# Subtest: asset release versions isolate canonical scene and starter HTTP keys without changing chunks
+ok 31 - asset release versions isolate canonical scene and starter HTTP keys without changing chunks
+  ---
+  duration_ms: 0.7061
+  type: 'test'
+  ...
+# Subtest: default capability loading retains force-cache, pending deduplication and accepted memory
+ok 32 - default capability loading retains force-cache, pending deduplication and accepted memory
+  ---
+  duration_ms: 0.5133
+  type: 'test'
+  ...
+# Subtest: fresh capability loading bypasses old memory and pending defaults without allowing stale publication
+ok 33 - fresh capability loading bypasses old memory and pending defaults without allowing stale publication
+  ---
+  duration_ms: 0.4595
+  type: 'test'
+  ...
+# Subtest: fresh capability races and cancellation never overwrite a newer accepted release
+ok 34 - fresh capability races and cancellation never overwrite a newer accepted release
+  ---
+  duration_ms: 0.2908
+  type: 'test'
+  ...
+# Subtest: a verified hosted preload serves only the exact release, map and region key
+ok 35 - a verified hosted preload serves only the exact release, map and region key
+  ---
+  duration_ms: 20.7913
+  type: 'test'
+  ...
+# (node:37144) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: the entry floor preload is shared only for the pinned release
+ok 36 - the entry floor preload is shared only for the pinned release
+  ---
+  duration_ms: 2.4719
+  type: 'test'
+  ...
+# Subtest: the pinned floor preload waits for twelve-second response headers
+ok 37 - the pinned floor preload waits for twelve-second response headers
+  ---
+  duration_ms: 2.0824
+  type: 'test'
+  ...
+# Subtest: the floor preload survives more than twelve seconds of body progress
+ok 38 - the floor preload survives more than twelve seconds of body progress
+  ---
+  duration_ms: 2.5245
+  type: 'test'
+  ...
+# Subtest: a stalled floor body restarts once at the same address with a reload
+ok 39 - a stalled floor body restarts once at the same address with a reload
+  ---
+  duration_ms: 2.9452
+  type: 'test'
+  ...
+# Subtest: the bundled player directory exactly matches both pinned packs without embedding PNG bytes
+ok 40 - the bundled player directory exactly matches both pinned packs without embedding PNG bytes
+  ---
+  duration_ms: 14.8224
+  type: 'test'
+  ...
+# Subtest: a stalled full pack immediately exposes exact frame paths and later upgrades to verified images
+ok 41 - a stalled full pack immediately exposes exact frame paths and later upgrades to verified images
+  ---
+  duration_ms: 16.2127
+  type: 'test'
+  ...
+# Subtest: the real renderer keeps every run/attack frame before and after the smaller image pack arrives
+ok 42 - the real renderer keeps every run/attack frame before and after the smaller image pack arrives
+  ---
+  duration_ms: 517.1822
+  type: 'test'
+  ...
+# Subtest: stale bundled metadata cannot seed another source pin, release or scene
+ok 43 - stale bundled metadata cannot seed another source pin, release or scene
+  ---
+  duration_ms: 3.7742
+  type: 'test'
+  ...
+# Subtest: player, NPC and building packs load independently and publish only pinned bytes
+ok 44 - player, NPC and building packs load independently and publish only pinned bytes
+  ---
+  duration_ms: 15.6646
+  type: 'test'
+  ...
+# Subtest: a player pack can finish after thirty seconds of continuous body progress
+ok 45 - a player pack can finish after thirty seconds of continuous body progress
+  ---
+  duration_ms: 2.0643
+  type: 'test'
+  ...
+# Subtest: a player recovers after both original reads time out and releases fallback before retrying
+ok 46 - a player recovers after both original reads time out and releases fallback before retrying
+  ---
+  duration_ms: 7.0181
+  type: 'test'
+  ...
+# Subtest: changing role during the recovery wait prevents another request or stale update
+ok 47 - changing role during the recovery wait prevents another request or stale update
+  ---
+  duration_ms: 8.6979
+  type: 'test'
+  ...
+# Subtest: a role change during a shared read cancels only its observer
+ok 48 - a role change during a shared read cancels only its observer
+  ---
+  duration_ms: 11.7902
+  type: 'test'
+  ...
+# Subtest: two player observers share the recovery fetch and both receive the verified body
+ok 49 - two player observers share the recovery fetch and both receive the verified body
+  ---
+  duration_ms: 10.9089
+  type: 'test'
+  ...
+# Subtest: persistent player transport failures stop after two bounded rounds
+ok 50 - persistent player transport failures stop after two bounded rounds
+  ---
+  duration_ms: 8.5195
+  type: 'test'
+  ...
+# Subtest: recovery never publishes truncated, hash-invalid, or another-release player assets
+ok 51 - recovery never publishes truncated, hash-invalid, or another-release player assets
+  ---
+  duration_ms: 10.3289
+  type: 'test'
+  ...
+# Subtest: player recovery leaves definitive HTTP errors and Retry-After responses terminal
+ok 52 - player recovery leaves definitive HTTP errors and Retry-After responses terminal
+  ---
+  duration_ms: 15.691
+  type: 'test'
+  ...
+# Subtest: the staged monster packages retain the exact eight directions and independent fallback
+ok 53 - the staged monster packages retain the exact eight directions and independent fallback
+  ---
+  duration_ms: 6.85
+  type: 'test'
+  ...
+# Subtest: corrupt floor bytes are never published and the prefetch can retry
+ok 54 - corrupt floor bytes are never published and the prefetch can retry
+  ---
+  duration_ms: 1.823
+  type: 'test'
+  ...
+# Subtest: changed static bytes are rejected even with the expected response length
+ok 55 - changed static bytes are rejected even with the expected response length
+  ---
+  duration_ms: 3.8677
+  type: 'test'
+  ...
+# Subtest: the owner and the short entry grace can leave an independently warming map
+ok 56 - the owner and the short entry grace can leave an independently warming map
+  ---
+  duration_ms: 2.9599
+  type: 'test'
+  ...
+# Subtest: the pinned map uses the progressive header boundary instead of a twelve-second total deadline
+ok 57 - the pinned map uses the progressive header boundary instead of a twelve-second total deadline
+  ---
+  duration_ms: 2.9313
+  type: 'test'
+  ...
+# Subtest: late verified map remains eligible after the ordinary route fails
+ok 58 - late verified map remains eligible after the ordinary route fails
+  ---
+  duration_ms: 4.1662
+  type: 'test'
+  ...
+# Subtest: actual Page installs the warmed entry only for the active character and falls back if outside its bounds
+ok 59 - actual Page installs the warmed entry only for the active character and falls back if outside its bounds
+  ---
+  duration_ms: 11.1217
+  type: 'test'
+  ...
+# Subtest: a pinned hosted build requests the authoritative scene while the manifest is still pending
+ok 60 - a pinned hosted build requests the authoritative scene while the manifest is still pending
+  ---
+  duration_ms: 0.7032
+  type: 'test'
+  ...
+# Subtest: an invalid build pin uses the same fresh manifest request as an unpinned build
+ok 61 - an invalid build pin uses the same fresh manifest request as an unpinned build
+  ---
+  duration_ms: 0.3458
+  type: 'test'
+  ...
+# Subtest: actual Page waits for a fresh server release before issuing a versioned Scene request
+ok 62 - actual Page waits for a fresh server release before issuing a versioned Scene request
+  ---
+  duration_ms: 0.8768
+  type: 'test'
+  ...
+# Subtest: actual Page unavailable or cancelled release never fetches an old Scene or starter fallback
+ok 63 - actual Page unavailable or cancelled release never fetches an old Scene or starter fallback
+  ---
+  duration_ms: 1.1063
+  type: 'test'
+  ...
+# Subtest: actual Page release changes reload an interior region while unchanged chunks retain margin stability
+ok 64 - actual Page release changes reload an interior region while unchanged chunks retain margin stability
+  ---
+  duration_ms: 0.6783
+  type: 'test'
+  ...
+# Subtest: actual Page starter fallback retains the captured release and superseded Scene disposal is exact
+ok 65 - actual Page starter fallback retains the captured release and superseded Scene disposal is exact
+  ---
+  duration_ms: 0.8836
+  type: 'test'
+  ...
+# Subtest: actual Page accepts sparse map tiles inside both authoritative region bounds
+ok 66 - actual Page accepts sparse map tiles inside both authoritative region bounds
+  ---
+  duration_ms: 0.3709
+  type: 'test'
+  ...
+# Subtest: actual Page refuses wrong, empty and out-of-bounds regions, including the starter fallback
+ok 67 - actual Page refuses wrong, empty and out-of-bounds regions, including the starter fallback
+  ---
+  duration_ms: 1.1062
+  type: 'test'
+  ...
+# Subtest: changing animation targets retains requests and only publishes a complete current pose
+ok 68 - changing animation targets retains requests and only publishes a complete current pose
+  ---
+  duration_ms: 3.8317
+  type: 'test'
+  ...
+# Subtest: latest demand replaces queued frames without canceling the bounded in-flight reads
+ok 69 - latest demand replaces queued frames without canceling the bounded in-flight reads
+  ---
+  duration_ms: 0.9609
+  type: 'test'
+  ...
+# Subtest: a verified local pack can take over while four network reads remain pending
+ok 70 - a verified local pack can take over while four network reads remain pending
+  ---
+  duration_ms: 0.5185
+  type: 'test'
+  ...
+# Subtest: LRU eviction never revokes a URL still presented by React
+ok 71 - LRU eviction never revokes a URL still presented by React
+  ---
+  duration_ms: 0.4422
+  type: 'test'
+  ...
+# Subtest: owner retirement and StrictMode restart reject late completion from the previous generation
+ok 72 - owner retirement and StrictMode restart reject late completion from the previous generation
+  ---
+  duration_ms: 0.4863
+  type: 'test'
+  ...
+# Subtest: transient failures back off and stop after three attempts; failure history is bounded
+ok 73 - transient failures back off and stop after three attempts; failure history is bounded
+  ---
+  duration_ms: 13.6901
+  type: 'test'
+  ...
+# Subtest: PNG bytes are bounded, verified and decoded once before an owned local URL is published
+ok 74 - PNG bytes are bounded, verified and decoded once before an owned local URL is published
+  ---
+  duration_ms: 14.8085
+  type: 'test'
+  ...
+# Subtest: invalid PNG or metadata dimensions are terminal; failed decode releases the local URL
+ok 75 - invalid PNG or metadata dimensions are terminal; failed decode releases the local URL
+  ---
+  duration_ms: 2.2775
+  type: 'test'
+  ...
+# Subtest: owner cancellation stops network work and cannot publish an image
+ok 76 - owner cancellation stops network work and cannot publish an image
+  ---
+  duration_ms: 0.5637
+  type: 'test'
+  ...
+# Subtest: full-pack images retain the verified data URI and require no object URL
+ok 77 - full-pack images retain the verified data URI and require no object URL
+  ---
+  duration_ms: 1.7823
+  type: 'test'
+  ...
+# Subtest: standing warmup uses only this direction's four bodies, and held poses keep layer geometry
+ok 78 - standing warmup uses only this direction's four bodies, and held poses keep layer geometry
+  ---
+  duration_ms: 9.8027
+  type: 'test'
+  ...
+1..78
+# tests 78
+# suites 0
+# pass 78
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1286.6258

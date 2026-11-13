@@ -6,7 +6,7 @@ Updated 2026-11-13 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-13 正式站为b2097fdfd1：自体直接保留解码Image，两后端持续慢PNG与重开通过；公网扫码确认、比奇实走、共享HUD/Q、六字体、113/113及Worker停启通过。功能发布保留，原HUD120.651秒仍未过120秒冷门槛，点击到首帧53.165秒；131份WIP未变，整体1:1开放。[最新正式结果](evidence/r16-self-sprite-residency-20261113/production/README.md)
+2026-11-13 站立分包440f82d4d2候选已推送（86项、68项保护及两后端六会话通过）；正式发布后三轮公网完整资格false，已回退b2097fdfd1。回退版本/11文件/简繁出码通过；候选16分包静态一致，未取得新分包在完整公网通过流程中提供首帧的证据。131份原WIP保全，原8秒/120秒及整体1:1开放。[本轮发布、失败与回退](evidence/r16-standing-chunks-20261113/production/README.md)
 
 ## 保留的当前未结项
 

@@ -1,0 +1,10 @@
+{
+  "source": "440f82d4d2a7db2b44046cfbd7885680e437aa65",
+  "deployment": "dpl_46u3rSTnfvPrDpzCka6qUBmMhwed",
+  "retainedFirstRun": "signed-public",
+  "firstFailure": {
+    "phase": "inspect-world-paint",
+    "code": "PUBLIC_VISUAL_PACK_BODY_NOT_OBSERVED:entry-npcs"
+  },
+  "scope": "A separate clean public browser and fresh login-only Testnet QA wallet after the first NPC pack transfer failure. Same source,19 scripts,original gates,normal network and no resource prefill; only unique run label changed."
+}
