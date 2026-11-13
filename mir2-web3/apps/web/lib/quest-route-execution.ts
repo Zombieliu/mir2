@@ -4,8 +4,10 @@ export type QuestRouteStep = { type: "arrived" } | { type: "replan" } | {
   type: "move"; point: QuestRoutePoint; direction: string; mode: "walk" | "run";
 };
 const samePoint = (a: QuestRoutePoint, b: QuestRoutePoint) => a.x === b.x && a.y === b.y;
-const directions: Record<string, string> = { "0,-1": "up", "1,-1": "upright", "1,0": "right",
-  "1,1": "downright", "0,1": "down", "-1,1": "downleft", "-1,0": "left", "-1,-1": "upleft" };
+// Use the same canonical directions as the movement controller. Its run-to-walk
+// confirmation computes the intermediate tile from this value before transport encoding.
+const directions: Record<string, string> = { "0,-1": "Up", "1,-1": "UpRight", "1,0": "Right",
+  "1,1": "DownRight", "0,1": "Down", "-1,1": "DownLeft", "-1,0": "Left", "-1,-1": "UpLeft" };
 
 /** Follow only the complete common route. A deviation never resumes the old short-range planner. */
 export function nextQuestRouteStep(plan: QuestRoutePlan, current: QuestRoutePoint,

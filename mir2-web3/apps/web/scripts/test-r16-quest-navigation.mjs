@@ -106,7 +106,7 @@ test("actual Page: a complete route keeps moving until authoritative endpoint ar
   const h = harness(), plan = straightPlan(h); h.plans.push(plan); const route = h.begin();
   h.loading[0].resolve(h.geometry); await flush();
   assert.equal(h.timer.timers.size, 0); assert.equal(h.sent.length, 1);
-  assert.deepEqual(h.questRouteMovement(route, h.state.self, "run", h.timer.now()), { point: plan.destination, direction: "right", mode: "run" });
+  assert.deepEqual(h.questRouteMovement(route, h.state.self, "run", h.timer.now()), { point: plan.destination, direction: "Right", mode: "run" });
   assert.deepEqual(terminal(h), [], "a visual prediction is not arrival");
   h.state.self = { ...plan.destination };
   assert.equal(h.questRouteMovement(route, h.state.self, "run", h.timer.now()), null);
@@ -124,7 +124,7 @@ for (const outcome of ["unavailable", "arrived", "detour"]) test(`actual Page: o
   assert.equal(h.queries.length, 2); assert.equal(h.queries[1][1], h.action);
   assert.equal(h.queries[1][1].routeTarget.radius, 50); assert.deepEqual(h.queries[1][4], h.state.occupied);
   if (outcome === "detour") {
-    assert.deepEqual(step, { point: detour.steps[0], direction: "downright", mode: "walk" });
+    assert.deepEqual(step, { point: detour.steps[0], direction: "DownRight", mode: "walk" });
     assert.equal(h.routeRef.current, route); assert.deepEqual(terminal(h), []);
   } else {
     assert.equal(step, null); assert.equal(h.routeRef.current, null);

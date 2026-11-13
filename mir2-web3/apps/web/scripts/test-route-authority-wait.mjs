@@ -12,11 +12,12 @@ function load(relative) {
   return module.exports;
 }
 const controller = load("../app/components/original-client-movement-controller.ts");
+const { nextQuestRouteStep } = load("../lib/quest-route-execution.ts");
 const lifecycle = load("../lib/quest-world-lifecycle.ts");
 const source = readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8");
 const tree = ts.createSourceFile("page.tsx", source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
 const names = ["trySendQueuedCrystalMove", "dropReleasedViewportStep", "observeQuestWorldActions",
-  "cancelQuestRoute", "finishQuestRoute", "cancelPendingPickup", "cancelMapImageRoute", "queueCrystalMoveIntent"];
+  "cancelQuestRoute", "finishQuestRoute", "cancelPendingPickup", "cancelMapImageRoute", "queueCrystalMoveIntent", "reconcileSelfMovementAck"];
 const constants = ["MOVEMENT_PENDING_ACTION_MAX_AGE_MS", "AUTO_ROUTE_PENDING_MAX_AGE_MS"];
 const declarations = [];
 function visit(node) {
@@ -28,7 +29,7 @@ visit(tree);
 assert.equal(declarations.length, names.length + constants.length);
 const code = ts.transpileModule(declarations.join("\n"), { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText;
 
-function harness(kind = "quest") {
+function harness(kind = "quest", realPlan = null) {
   const ref = current => ({ current });
   const identity = { connectionGeneration: 1, sessionGeneration: 1, sceneRevision: 1, playerObjectId: 1000, mapFileName: "0" };
   const lifetime = { identity, generation: 1, runtime: {}, runtimeGeneration: 1, socket: {}, questSource: "cat0/2" };
@@ -40,7 +41,8 @@ function harness(kind = "quest") {
   const route = { queued, lifetime, action: { mapIndex: 0, routeTarget: { type: "huntRegion" }, x: 10, y: 10 } };
   const refs = { queued: ref(queued), pending: ref(pending), quest: ref(kind === "quest" ? route : null), map: ref(kind === "map" ? route : null) };
   const sends = [], logs = [], plans = [], counters = []; let ticks = 0, predictionsCleared = 0;
-  const currentStep = (_route, self) => { plans.push({ ...self }); return { point: { x: self.x + 1, y: self.y }, direction: "Right", mode: "walk" }; };
+  const currentStep = (_route, self) => { plans.push({ ...self }); return realPlan ? nextQuestRouteStep(realPlan, self, 2, () => false)
+    : { point: { x: self.x + 1, y: self.y }, direction: "Right", mode: "walk" }; };
   const deps = {
     Date: { now: () => state.now }, window: { clearTimeout() {} },
     MOVEMENT_PENDING_MAX_AGE_MS: controller.MOVEMENT_PENDING_MAX_AGE_MS,
@@ -58,7 +60,12 @@ function harness(kind = "quest") {
     bumpCorrectionCounter: (name, value) => counters.push({ name, value }), clearLegacySelfMovementCoordinateSources() {},
     clearLocalSelfPrediction: () => { predictionsCleared++; },
     crystalRunPrimedUntilRef: ref(0), movementInputBlockedUntilRef: ref(0), CRYSTAL_CORRECTION_BLOCK_MS: 400,
-    readSelfMovementControllerState: () => ({ pending: refs.pending.current, nextMoveSendAt: 0, inputBlockedUntil: 0 }),
+    readSelfMovementControllerState: () => ({ pending: refs.pending.current, prediction: null, nextMoveSendAt: 0, inputBlockedUntil: 0, runPrimedUntil: 0 }),
+    applySelfMovementControllerState: state => { refs.pending.current = state.pending; },
+    reconcileMovementAck: controller.reconcileMovementAck, movementPointMatches: controller.movementPointMatches,
+    lastSelfMovementAckRef: ref(null), lastSelfPacketMovementAckRef: ref(null), movementPredictionBlockedUntilRef: ref(0),
+    keepCorrectedRoute: () => false, recordMovementConsoleEvent() {}, captureMovementConsoleState: () => ({}),
+    CRYSTAL_RUN_PRIME_MS: controller.CRYSTAL_RUN_PRIME_MS,
     canSendMovement: controller.canSendMovement, selfMovementActionBlocked: () => false, MOVEMENT_QUEUED_DIRECTION_MAX_AGE_MS: 3000,
     crystalEffectiveMovementMode: mode => mode, questRouteMovement: currentStep, mapImageRouteMovement: currentStep,
     crystalMovementActionTowardWithRouteHints: self => currentStep(null, self),
@@ -75,9 +82,7 @@ function harness(kind = "quest") {
   const api = new Function(...Object.keys(deps), `${code}; return {${names.join(",")}};`)(...Object.values(deps));
   const advance = age => { state.now = pending.sentAt + age; return api.trySendQueuedCrystalMove(state.now); };
   const ack = value => {
-    const result = controller.reconcileMovementAck({ state: { pending: refs.pending.current, prediction: null, nextMoveSendAt: 0, inputBlockedUntil: 0, runPrimedUntil: 0 },
-      ack: value, packetName: "UserLocation", now: state.now });
-    refs.pending.current = result.state.pending; state.self = { ...value }; return result.outcome;
+    state.self = { ...value }; return api.reconcileSelfMovementAck(value, "UserLocation", state.now, true);
   };
   return { ...api, kind, state, refs, queued, pending, route, sends, logs, plans, counters, advance, ack,
     ticks: () => ticks, predictionsCleared: () => predictionsCleared, deps };
@@ -153,4 +158,28 @@ test("a delayed run degraded to one walk tile confirms and resumes from the actu
   const degraded = { x: 2, y: 1, direction: "Right" };
   assert.equal(h.ack(degraded), "confirmed"); assert.equal(h.trySendQueuedCrystalMove(h.state.now), true);
   assert.deepEqual(h.plans, [degraded]); assert.equal(h.sends.length, 1);
+});
+
+const routeDirections = [["Up",0,-1],["UpRight",1,-1],["Right",1,0],["DownRight",1,1],
+  ["Down",0,1],["DownLeft",-1,1],["Left",-1,0],["UpLeft",-1,-1]];
+for (const [direction,dx,dy] of routeDirections) test(`real ${direction} route output → Page send → one-tile server degradation → Page ACK → next route step`, () => {
+  const origin={x:288,y:616},steps=[1,2,3,4].map(n=>({x:origin.x+dx*n,y:origin.y+dy*n}));
+  const h=harness("quest",{origin,steps,destination:steps.at(-1)});
+  h.state.self={...origin,direction:"Down"};h.refs.pending.current=null;h.deps.crystalRunPrimedUntilRef.current=5000;
+  assert.equal(h.trySendQueuedCrystalMove(h.state.now),true);assert.deepEqual(h.sends,[{type:"run",direction}]);
+  assert.deepEqual(h.refs.pending.current.to,{...steps[1],direction});assert.equal(h.refs.pending.current.direction,direction);
+  h.state.now+=10;assert.equal(h.ack({...steps[0],direction}),"confirmed");
+  assert.equal(h.refs.queued.current,h.queued);assert(h.counters.some(r=>r.name==="confirmDegraded"));
+  assert(!h.counters.some(r=>r.name==="ack"));h.state.now+=600;
+  assert.equal(h.trySendQueuedCrystalMove(h.state.now),true);assert.equal(h.sends.length,2);
+  assert.deepEqual(h.refs.pending.current.from,{...steps[0],direction});
+});
+
+test("a genuine off-path authority still clears the real generated route and cannot be resumed",()=>{
+  const origin={x:288,y:616},steps=[1,2,3].map(n=>({x:288+n,y:616}));
+  const h=harness("quest",{origin,steps,destination:steps.at(-1)});
+  h.state.self={...origin,direction:"Down"};h.refs.pending.current=null;h.deps.crystalRunPrimedUntilRef.current=5000;
+  assert.equal(h.trySendQueuedCrystalMove(h.state.now),true);h.state.now+=10;
+  assert.equal(h.ack({x:288,y:615,direction:"Up"}),"correction");assert.equal(h.refs.queued.current,null);
+  h.state.now+=1000;assert.equal(h.trySendQueuedCrystalMove(h.state.now),false);assert.equal(h.sends.length,1);
 });
