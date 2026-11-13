@@ -20568,6 +20568,8 @@ mod tests {
     mod zone_melee_passive_progression_tests;
     #[path = "zone_player_attack_mode_tests.rs"]
     mod zone_player_attack_mode_tests;
+    #[path = "accepted_attack_transform_tests.rs"]
+    mod accepted_attack_transform_tests;
     #[path = "zone_skill_cadence_tests.rs"]
     mod zone_skill_cadence_tests;
     #[path = "zone_soulfire_practice_tests.rs"]

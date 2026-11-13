@@ -2068,6 +2068,16 @@ impl ZoneRuntime {
                         None
                     }
                 });
+        let combat_transform_before = combat_actor.as_ref().and_then(
+            |(session_id, _, _, magic, _)| {
+                if *magic {
+                    return None;
+                }
+                self.players
+                    .get(session_id)
+                    .map(|player| (player.position.clone(), player.direction))
+            },
+        );
         let mut out = self.handle_inner(command);
         if let Some((session_id, actor_id, now_ms, magic, action_delay)) = combat_actor {
             if zone_outbounds_contain_accepted_player_action(&out, &session_id, actor_id) {
@@ -2081,6 +2091,33 @@ impl ZoneRuntime {
                     if magic {
                         player.next_attack_ready_at_ms =
                             now_ms.saturating_add(ZONE_NATIVE_PLAYER_MAGIC_ACTION_MS);
+                    }
+                }
+                if let (Some((position_before, direction_before)), Some(player)) =
+                    (combat_transform_before, self.players.get(&session_id))
+                {
+                    let changed = position_before != player.position
+                        || direction_before != player.direction;
+                    let notified = out.iter().rev().find_map(|outbound| match outbound {
+                        ZoneOutbound::SaveTransform {
+                            session_id: owner,
+                            position,
+                            direction,
+                        } if owner == &session_id => Some((position, direction)),
+                        _ => None,
+                    }).is_some_and(|(position, direction)| {
+                        position == &player.position && *direction == player.direction
+                    });
+                    if changed && !notified {
+                        // Attacks already turn the authoritative Zone player.
+                        // Keep the Gateway's save projection in the same epoch,
+                        // just as Walk/Turn do; never copy a personal transform
+                        // back over the shared world when the player logs out.
+                        out.push(ZoneOutbound::SaveTransform {
+                            session_id: session_id.clone(),
+                            position: player.position.clone(),
+                            direction: player.direction,
+                        });
                     }
                 }
             }

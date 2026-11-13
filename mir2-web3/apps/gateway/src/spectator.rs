@@ -459,7 +459,7 @@ impl SpectatorHub {
         );
         let previous_world = {
             let _stage = crate::web::GatewaySlowStage::start("spectator.previous_clone");
-            stream.latest_world.clone()
+            stream.latest_world.as_ref().map(previous_event_world)
         };
         let mut merged_world = {
             let _stage = crate::web::GatewaySlowStage::start("spectator.merge");
@@ -885,6 +885,43 @@ fn indexed_objects<'a>(world: Option<&'a Value>, field: &str) -> BTreeMap<u64, &
         .collect()
 }
 
+// Only these previous fields are read by world_events. Keep the full current
+// world for merging, frames and replay, without copying its scene geometry or
+// unrelated entity fields for every observation under the Hub mutex.
+fn previous_event_world(previous: &Value) -> Value {
+    let Value::Object(object) = previous else {
+        return previous.clone();
+    };
+    let mut projected = Map::new();
+    for (field, keys) in [
+        ("entities", &["objectId", "name", "x", "y", "hp", "dead"][..]),
+        ("groundDrops", &["objectId", "name"][..]),
+    ] {
+        let Some(value) = object.get(field) else {
+            continue;
+        };
+        let projected_field = match value {
+            Value::Array(rows) => Value::Array(
+                rows.iter()
+                    .map(|row| match row {
+                        Value::Object(row) => Value::Object(
+                            keys.iter()
+                                .filter_map(|key| {
+                                    row.get(*key).map(|value| ((*key).to_string(), value.clone()))
+                                })
+                                .collect(),
+                        ),
+                        other => other.clone(),
+                    })
+                    .collect(),
+            ),
+            other => other.clone(),
+        };
+        projected.insert(field.to_string(), projected_field);
+    }
+    Value::Object(projected)
+}
+
 fn world_events(previous: Option<&Value>, current: &Value, at_ms: u64) -> Vec<SpectatorEvent> {
     let previous_entities = indexed_objects(previous, "entities");
     let current_entities = indexed_objects(Some(current), "entities");
@@ -1209,6 +1246,10 @@ fn constant_time_eq(left: &[u8], right: &[u8]) -> bool {
 #[cfg(test)]
 #[path = "spectator_merge_owned_tests.rs"]
 mod merge_owned_tests;
+
+#[cfg(test)]
+#[path = "spectator_capacity_profile_tests.rs"]
+mod capacity_profile_tests;
 
 #[cfg(test)]
 mod tests {

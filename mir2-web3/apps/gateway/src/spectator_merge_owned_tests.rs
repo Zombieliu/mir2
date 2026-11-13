@@ -1,5 +1,60 @@
 use super::*;
 
+#[test]
+fn previous_event_projection_preserves_all_events_and_raw_fallbacks() {
+    let full = json!({
+        "sceneView": {"terrain": "unrelated public geometry".repeat(256)},
+        "entities": [
+            {"objectId": 1, "name": "first", "x": 1, "y": 2, "hp": 9, "dead": false,
+             "equipment": [1, 2, 3]},
+            {"objectId": 2, "name": "revive", "x": 4, "y": 5, "hp": 0, "dead": true},
+            {"objectId": 3, "name": "leave", "x": 6, "y": 7}
+        ],
+        "groundDrops": [{"objectId": 10, "name": "old drop", "quantity": 4}]
+    });
+    let current = json!({
+        "entities": [
+            {"objectId": 1, "name": "current", "x": 3, "y": 2, "hp": 8, "dead": true},
+            {"objectId": 2, "name": "revive", "x": 4, "y": 5, "hp": 20, "dead": false},
+            {"objectId": 4, "name": "join", "x": 8, "y": 9, "kind": "player"}
+        ],
+        "groundDrops": [{"objectId": 11, "name": "new drop", "x": 1, "y": 2, "quantity": 3}]
+    });
+    let baseline = previous_event_world(&full);
+    assert!(baseline.get("sceneView").is_none());
+    assert!(baseline["entities"][0].get("equipment").is_none());
+    let events = world_events(Some(&full), &current, 42);
+    for expected in ["spawn", "move", "health", "death", "revive", "despawn", "dropSpawn", "dropRemove"] {
+        assert!(events.iter().any(|event| event.kind == expected), "missing {expected}");
+    }
+    let previous_cases = [
+        full,
+        Value::Null,
+        json!({}),
+        json!({"entities": "not an array", "groundDrops": null}),
+        json!({
+            "entities": [
+                {"objectId": 1, "name": "first duplicate", "x": 1},
+                {"objectId": 1, "name": 7, "x": "1", "y": null, "hp": 9.5, "dead": "false"},
+                {"objectId": 2, "name": null}, {"objectId": -1}, 5, null
+            ],
+            "groundDrops": [{"objectId": 10, "name": "first"}, {"objectId": 10, "name": 7}]
+        }),
+    ];
+    for previous in previous_cases {
+        let original = previous.clone();
+        let projected = previous_event_world(&previous);
+        for next in [&current, &json!({}), &json!({"entities": null, "groundDrops": 3})] {
+            assert_eq!(
+                serde_json::to_vec(&world_events(Some(&previous), next, 42)).unwrap(),
+                serde_json::to_vec(&world_events(Some(&projected), next, 42)).unwrap(),
+                "the full previous world is the independent event oracle"
+            );
+        }
+        assert_eq!(previous, original);
+    }
+}
+
 // Frozen pre-change algorithm: equality against this reference guards merge,
 // fallback, duplicate-ID and malformed-object behavior independently of moves.
 fn reference_merge(previous: Option<Value>, next: Value) -> Value {

@@ -159,32 +159,57 @@ fn public_switch_from_all_to_peace_rejects_directional_player_attack() {
 
 #[test]
 fn public_all_mode_directional_attack_rejects_either_players_safe_zone() {
-    for protect_attacker in [true, false] {
-        let (mut attacker, mut target) = adjacent_players();
-        set_mode(&mut attacker, 5);
-        let protected = if protect_attacker {
-            &mut attacker
-        } else {
-            &mut target
-        };
-        let session = protected.current_zone_session_id().unwrap();
-        let mut profile = {
-            let state = protected.zone_state.lock().unwrap();
+    let map = mir2_game_data::crystal_map_respawns_ref("0").expect("Bichon map geometry");
+    let safe_zone = map
+        .safe_zones
+        .iter()
+        .find(|zone| zone.start_point)
+        .expect("Bichon starting safe zone");
+    let assert_safety = |runtime: &SharedInProcessZoneSessionRuntime, expected| {
+        assert_eq!(runtime.inner.world_snapshot().in_safe_zone, expected);
+        assert_eq!(runtime.world_snapshot().in_safe_zone, expected);
+        let session = runtime.current_zone_session_id().unwrap();
+        let state = runtime.zone_state.lock().unwrap();
+        assert_eq!(
             state
                 .zone_manager
                 .zone(&ZoneKey::for_map("0"))
                 .unwrap()
                 .player_chat_profile(&session)
                 .unwrap()
-        };
-        profile.in_safe_zone = true;
-        protected.dispatch_zone_player_command(
-            ZoneCommand::UpdateChatProfile {
-                session_id: session,
-                profile,
-            },
-            false,
+                .in_safe_zone,
+            expected,
+            "personal geometry and authoritative combat profile must agree"
         );
+    };
+    for protect_attacker in [true, false] {
+        let (mut attacker, mut target) = adjacent_players();
+        // Trusted placement at the actual imported safe-area boundary. The
+        // old fixture set only a chat flag while both players stood outside;
+        // a normal authoritative refresh correctly replaced that false input.
+        // Keep the target one tile to the right in both cases, with exactly
+        // one player inside, so range/mode cannot explain the rejection.
+        let edge = if protect_attacker {
+            safe_zone.location.x + i32::from(safe_zone.size)
+        } else {
+            safe_zone.location.x - i32::from(safe_zone.size) - 1
+        };
+        for (runtime, x) in [(&mut attacker, edge), (&mut target, edge + 1)] {
+            runtime
+                .execute(WorldCommand::TransferMap {
+                    key: format!("crystal:0:{x}:{}", safe_zone.location.y),
+                })
+                .expect("real safe-boundary fixture placement");
+        }
+        set_mode(&mut attacker, 5);
+        assert_safety(&attacker, protect_attacker);
+        assert_safety(&target, !protect_attacker);
+        assert!(attacker
+            .prepare_zone_native_player_attack(&attack_packet())
+            .expect("real adjacent player must resolve before safe-area policy")
+            .is_player_target);
         assert_blocked(&mut attacker, &mut target);
+        assert_safety(&attacker, protect_attacker);
+        assert_safety(&target, !protect_attacker);
     }
 }

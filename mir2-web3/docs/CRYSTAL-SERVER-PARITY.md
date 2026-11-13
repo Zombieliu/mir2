@@ -1,5 +1,9 @@
 # Crystal Server Parity
 
+## Physical attack save transform and capacity follow-up (2026-11-14)
+
+Accepted physical attacks now project the final shared Zone transform through the existing SaveTransform path before normal logout. Three focused Gateway regressions pass (the original code fails both accepted cases); four adjacent shared-Zone tests and 26 spectator tests pass. The spectator event comparison copies only the previous fields it reads, preserving current frames and event bytes. The existing synthetic safe-zone fixture failed on the baseline; after replacing its injected flag with real imported safe-boundary positions, all three attack-mode regressions pass. Fresh 100-player validation and cloud rollout remain pending; no CCU or project-wide parity increase is claimed. [Evidence and retained failures](evidence/comparable-capacity-20261113/README.zh-CN.md).
+
 ## R16 Web共用目录传输发布（2026-11-13）
 
 2026-11-13 已发布8654cdcb36（含6997玩家反馈）：Stage/Promote、11条公网文件、简繁出码、一次官方手机尺寸Testnet登录签名、比奇及退出通过。公网529条初始化完整压成80448字节；首步1.919秒通过原8秒。运行包正文中断、共用HUD失败，原120秒Native与完整验收false；Worker真实停启后缓存字节/SHA通过。六字体与113/113恢复通过。保留旧15.913秒首步及158.084秒Native失败，下一项为boot前有界下载恢复；整体1:1开放。[正式结果与原失败](evidence/r16-web-catalog-20261113/production/README.md)
