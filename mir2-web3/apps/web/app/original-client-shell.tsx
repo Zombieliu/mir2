@@ -3615,7 +3615,10 @@ export function OriginalClientShell({
     };
     frame.addEventListener("load", onLoad, true);
     const animationFrame = window.requestAnimationFrame(check);
-    const decodeTimeout = entryPlayer ? window.setTimeout(ready, SCENE_READINESS_SAFETY_MS) : undefined;
+    // A bundled frame directory enables ordinary PNG loading, but is not a
+    // verified image pack. It must wait for the actual body load above.
+    const decodeTimeout = entryPlayer && Object.keys(entryPlayer.images).length > 0
+      ? window.setTimeout(ready, SCENE_READINESS_SAFETY_MS) : undefined;
     return () => {
       frame.removeEventListener("load", onLoad, true);
       window.cancelAnimationFrame(animationFrame);

@@ -1,6 +1,7 @@
 import entryScene from "./generated/r16-entry-scene.json";
 import entryFloor from "./generated/r16-entry-floor.json";
 import entryVisuals from "./generated/r16-entry-visuals.json";
+import entryPlayerMetadata from "./generated/r16-entry-player-meta.json";
 import { fetchBootstrapResponse, PINNED_BOOTSTRAP_HEADER_TIMEOUT_MS } from "./first-crystal-scene-request";
 import type { OriginalSceneSpriteLibraryMeta } from "./original-scene-sprite-meta";
 import {
@@ -31,6 +32,8 @@ type EntryPlayerGender = keyof typeof entryVisuals.players;
 type EntryMonsterAction = "standing" | "walking";
 const objectLoads = new Map<string, Promise<R16EntrySpriteImages | null>>();
 const actorLoads = new Map<string, Promise<R16EntryActorAssets | null>>();
+const playerDirectories = new Map<EntryPlayerGender, R16EntryActorAssets>();
+const playerPublications = new WeakMap<R16EntryActorAssets, R16EntryActorAssets>();
 const transientVisualFailures = new WeakSet<Promise<unknown>>();
 const VISUAL_BODY_TIMEOUT_MS = 45_000;
 const PLAYER_RECOVERY_DELAY_MS = 1_000;
@@ -108,7 +111,37 @@ export function preloadR16EntryPlayer(pinnedRelease: string | undefined, gender:
   return preloadVisual(entryVisuals.players[gender], actorLoads, "high");
 }
 
-/** Recover one failed player load in the background without suppressing loose-image fallback. */
+function readEntryPlayerMetadata(gender: EntryPlayerGender): R16EntryActorAssets | null {
+  const metadata = entryPlayerMetadata.players[gender];
+  if (entryPlayerMetadata.schemaVersion !== 2 || entryPlayerMetadata.assetReleaseId !== entryVisuals.assetReleaseId ||
+      entryPlayerMetadata.sceneSha256 !== entryVisuals.sceneSha256 ||
+      metadata.sourceSha256 !== entryVisuals.players[gender].sha256) return null;
+  let directory = playerDirectories.get(gender);
+  if (!directory) {
+    directory = { libraries: Object.fromEntries(Object.entries(metadata.libraries).map(([key, library]) => [key, {
+      ...library,
+      frames: library.frames.map(([index, width, height, x, y, shadowX, shadowY]) => ({
+        index, width, height, x, y, shadowX, shadowY, path: "/original-ui/" + key + "/" + index + ".png", maskPath: null,
+      })),
+    }])), images: {} };
+    playerDirectories.set(gender, directory);
+  }
+  return directory;
+}
+
+function publishEntryPlayer(assets: R16EntryActorAssets, directory: R16EntryActorAssets | null) {
+  if (!directory) return assets;
+  let published = playerPublications.get(assets);
+  if (!published) {
+    // The image pack contains only standing/walking frames. Its completion must
+    // not replace the full action directory with that smaller subset.
+    published = { libraries: directory.libraries, images: assets.images };
+    playerPublications.set(assets, published);
+  }
+  return published;
+}
+
+/** Expose pinned frame metadata immediately; recover the complete image pack in the background. */
 export function loadR16EntryPlayerWithRecovery(
   pinnedRelease: string | undefined,
   gender: EntryPlayerGender,
@@ -119,12 +152,18 @@ export function loadR16EntryPlayerWithRecovery(
   const first = preloadR16EntryPlayer(pinnedRelease, gender);
   if (!first) return null;
   return (async () => {
+    // Metadata is tiny and bundled with the client. The renderer can request
+    // the actual standing/walking PNG now, even if the full pack or remote
+    // library index stalls. Its existing decoded-body gate still owns readiness.
+    const metadata = readEntryPlayerMetadata(gender);
+    if (metadata) onSettled(metadata);
     const assets = await first;
     if (owner.aborted) return;
-    onSettled(assets);
+    if (assets) onSettled(publishEntryPlayer(assets, metadata));
+    else if (!metadata) onSettled(null);
     if (assets || !transientVisualFailures.has(first)) return;
 
-    // The initial null releases the ordinary image path immediately. Retry only
+    // Keep usable metadata and the ordinary image path during recovery. Retry only
     // once after backing off; changing role or leaving the game cancels the observer.
     await new Promise<void>((resolve) => {
       const finish = () => {
@@ -138,7 +177,7 @@ export function loadR16EntryPlayerWithRecovery(
     });
     if (owner.aborted) return;
     const recovered = await preloadVisual(entryVisuals.players[gender], actorLoads, "high", "reload");
-    if (!owner.aborted && recovered) onSettled(recovered);
+    if (!owner.aborted && recovered) onSettled(publishEntryPlayer(recovered, metadata));
   })();
 }
 

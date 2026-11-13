@@ -9,6 +9,7 @@ const release = readJson(new URL("../../../config/numeron-r16-web-assets.json", 
 const entry = readJson(new URL("r16-entry-scene.json", generated));
 const sources = readJson(new URL("r16-entry-object-paths.json", generated));
 const metadataFile = new URL("r16-entry-visuals.json", generated);
+const playerMetadataFile = new URL("r16-entry-player-meta.json", generated);
 const digest = (bytes) => createHash("sha256").update(bytes).digest("hex");
 const media = "data:image/png;base64,";
 const pngSignature = Buffer.from("89504e470d0a1a0a", "hex");
@@ -225,9 +226,50 @@ const metadata = {
   monsterWalking: monsterPack("monsterWalking", "Walking", 48, 820_000),
 };
 const text = JSON.stringify(metadata, null, 2) + "\n";
+// The first visible player frame must not wait for either the complete motion
+// pack or a remote library index. Keep only its exact, pinned frame directory
+// in the client bundle; PNGs still use their ordinary asset paths.
+const playerSourceMetas = {};
+const playerDirectories = {};
+for (const key of playerLibraries) {
+  const path = "original-ui/" + key + "/meta.json";
+  const bytes = fromAssets ? fromRelease(path, "application/json") : readFileSync(new URL(path, publicRoot));
+  const source = JSON.parse(bytes);
+  assert.equal(source.count, 1616);
+  assert.equal(source.frames.length, source.count);
+  assert(source.frames.every(frame => frame.maskPath === null), "Default player frames must retain their unmasked source");
+  playerSourceMetas[key] = { path, bytes: bytes.length, sha256: digest(bytes) };
+  playerDirectories[key] = source;
+}
+const playerMetadata = JSON.stringify({
+  schemaVersion: 2,
+  assetReleaseId: entry.assetReleaseId,
+  sceneSha256: entry.sha256,
+  releaseManifestSha256: release.remoteReleaseSha256,
+  sourceMetas: playerSourceMetas,
+  players: Object.fromEntries([["male", male], ["female", female]].map(([gender, pack]) => [gender, {
+    sourceSha256: metadata.players[gender].sha256,
+    // All actions need geometry before the slow full index arrives, including
+    // run/attack/cast/hit/death/fishing. Keep the original count and exact frames;
+    // paths follow the source library and index. No PNG bytes enter this bundle.
+    libraries: Object.fromEntries(playerLibraries.map(key => {
+      const source = playerDirectories[key];
+      const frames = source.frames.filter(frame => gender === "male" ? frame.index < 808 : frame.index >= 808);
+      assert.equal(frames.length, 808);
+      assert.deepEqual(frames.filter(frame => isEntryActorFrame(key, frame.index))
+        .map(({ index, width, height, x, y, shadowX, shadowY, path, maskPath }) =>
+          ({ index, width, height, x, y, shadowX, shadowY, path, maskPath })), pack.libraries[key].frames);
+      return [key, { version: source.version, count: source.count, frameSet: pack.libraries[key].frameSet,
+        frames: frames.map(frame => [frame.index, frame.width, frame.height, frame.x, frame.y, frame.shadowX, frame.shadowY]) }];
+    })),
+  }])),
+}) + "\n";
+assert(Buffer.byteLength(playerMetadata) <= 80_000, "Player frame directory exceeds its bundle budget");
 if (check) {
   assert.equal(readFileSync(metadataFile, "utf8"), text, "Entry visuals metadata is stale");
+  assert.equal(readFileSync(playerMetadataFile, "utf8"), playerMetadata, "Player frame directory is stale");
 } else {
   writeFileSync(metadataFile, text);
+  writeFileSync(playerMetadataFile, playerMetadata);
 }
 console.log(JSON.stringify({ checked: check, ...metadata }));

@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { createRequire } from "node:module";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
@@ -261,11 +263,12 @@ const entryRequest = { ...entryMetadata.request, assetReleaseId: entryMetadata.a
 const floorMetadata = JSON.parse(readFileSync(new URL("../lib/generated/r16-entry-floor.json", import.meta.url), "utf8"));
 const floorBytes = readFileSync(new URL("../public" + floorMetadata.path, import.meta.url));
 const visualsMetadata = JSON.parse(readFileSync(new URL("../lib/generated/r16-entry-visuals.json", import.meta.url), "utf8"));
+const playerMetadata = JSON.parse(readFileSync(new URL("../lib/generated/r16-entry-player-meta.json", import.meta.url), "utf8"));
 const entrySource = ts.transpileModule(readFileSync(new URL("../lib/r16-entry-scene.ts", import.meta.url), "utf8"), {
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
 }).outputText;
 
-function entryFixture(fetcher) {
+function entryFixture(fetcher, bundledPlayerMetadata = playerMetadata) {
   const timeouts = [];
   const signals = {
     any: AbortSignal.any.bind(AbortSignal),
@@ -280,6 +283,7 @@ function entryFixture(fetcher) {
     if (name === "./generated/r16-entry-scene.json") return { default: entryMetadata };
     if (name === "./generated/r16-entry-floor.json") return { default: floorMetadata };
     if (name === "./generated/r16-entry-visuals.json") return { default: visualsMetadata };
+    if (name === "./generated/r16-entry-player-meta.json") return { default: bundledPlayerMetadata };
     if (name === "./first-crystal-scene-request") return sceneReaderModule.exports;
     assert.equal(name, "./scene-blueprint-request");
     return loadedModule.exports;
@@ -398,6 +402,137 @@ test("a stalled floor body restarts once at the same address with a reload", asy
 
 const readEntryVisual = (asset) => readFileSync(new URL("../public" + asset.path, import.meta.url));
 
+function assertPlayerFrameDirectory(assets, gender = "male") {
+  assert.deepEqual(assets, { libraries: fullPlayerDirectory(gender), images: {} });
+}
+
+function fullPlayerDirectory(gender) {
+  return Object.fromEntries(["CArmour/00", "CHair/00"].map(key => {
+    const source = JSON.parse(readFileSync(new URL("../public/original-ui/" + key + "/meta.json", import.meta.url)));
+    return [key, { version: source.version, count: source.count, frameSet: null,
+      frames: source.frames.filter(frame => gender === "male" ? frame.index < 808 : frame.index >= 808)
+        .map(({ index, width, height, x, y, shadowX, shadowY, path, maskPath }) =>
+          ({ index, width, height, x, y, shadowX, shadowY, path, maskPath })) }];
+  }));
+}
+
+test("the bundled player directory exactly matches both pinned packs without embedding PNG bytes", () => {
+  assert.equal(playerMetadata.schemaVersion, 2);
+  assert.equal(playerMetadata.assetReleaseId, entryMetadata.assetReleaseId);
+  assert.equal(playerMetadata.sceneSha256, entryMetadata.sha256);
+  const raw = readFileSync(new URL("../lib/generated/r16-entry-player-meta.json", import.meta.url));
+  assert(raw.length <= 80_000);
+  assert(!raw.includes(Buffer.from("data:image")));
+  for (const gender of ["male", "female"]) {
+    const pack = JSON.parse(readEntryVisual(visualsMetadata.players[gender]));
+    assert.equal(playerMetadata.players[gender].sourceSha256, visualsMetadata.players[gender].sha256);
+    for (const [key, source] of Object.entries(fullPlayerDirectory(gender))) {
+      const compact = playerMetadata.players[gender].libraries[key];
+      assert.deepEqual(compact.frames, source.frames.map(frame =>
+        [frame.index, frame.width, frame.height, frame.x, frame.y, frame.shadowX, frame.shadowY]));
+      assert.equal(compact.count, 1616);
+      const raw = readFileSync(new URL("../public/" + playerMetadata.sourceMetas[key].path, import.meta.url));
+      assert.equal(playerMetadata.sourceMetas[key].bytes, raw.length);
+      assert.equal(playerMetadata.sourceMetas[key].sha256, createHash("sha256").update(raw).digest("hex"));
+    }
+    assert.deepEqual(Object.keys(pack.libraries), ["CArmour/00", "CHair/00"]);
+    assert.equal(Object.values(pack.libraries).flatMap(library => library.frames).length, 160);
+  }
+});
+
+test("a stalled full pack immediately exposes exact frame paths and later upgrades to verified images", async () => {
+  for (const gender of ["male", "female"]) {
+    const body = deferred(), updates = [], calls = [];
+    const entry = entryFixture((url, options) => { calls.push({ url, options }); return body.promise; });
+    const done = entry.loadR16EntryPlayerWithRecovery(entryMetadata.assetReleaseId, gender,
+      new AbortController().signal, assets => updates.push(assets));
+    assert.equal(calls.length, 1);
+    assert.equal(updates.length, 1);
+    assertPlayerFrameDirectory(updates[0], gender);
+    body.resolve(new Response(readEntryVisual(visualsMetadata.players[gender])));
+    await done;
+    assert.equal(updates.length, 2);
+    assert.equal(Object.keys(updates[1].images).length, 160);
+    assert.deepEqual(updates[1].libraries, updates[0].libraries);
+  }
+});
+
+const sourceModules = new Map();
+const nodeRequire = createRequire(import.meta.url);
+function sourceModule(url) {
+  if (sourceModules.has(url.href)) return sourceModules.get(url.href).exports;
+  if (url.pathname.endsWith(".json")) return JSON.parse(readFileSync(url, "utf8"));
+  const module = { exports: {} }; sourceModules.set(url.href, module);
+  const source = ts.transpileModule(readFileSync(url, "utf8"), {
+    compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS,
+      jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true },
+  }).outputText;
+  const require = specifier => {
+    if (!specifier.startsWith(".")) return nodeRequire(specifier);
+    for (const suffix of ["", ".ts", ".tsx", ".json"]) {
+      const candidate = new URL(specifier + suffix, url);
+      if (existsSync(candidate)) return sourceModule(candidate);
+    }
+    throw Error("Unresolved test source " + specifier);
+  };
+  new Function("exports", "module", "require", source)(module.exports, module, require);
+  return module.exports;
+}
+
+test("the real renderer keeps every run/attack frame before and after the smaller image pack arrives", async () => {
+  const { buildViewportEntitySprite } = sourceModule(new URL("../app/components/original-client-scene-rendering.tsx", import.meta.url));
+  const directions = ["Up", "UpRight", "Right", "DownRight", "Down", "DownLeft", "Left", "UpLeft"];
+  for (const gender of ["male", "female"]) {
+    const body = deferred(), updates = [];
+    const originals = fullPlayerDirectory(gender);
+    const entry = entryFixture(() => body.promise);
+    const done = entry.loadR16EntryPlayerWithRecovery(entryMetadata.assetReleaseId, gender,
+      new AbortController().signal, assets => updates.push(assets));
+    const check = assets => {
+      const libraries = Object.fromEntries(Object.entries(assets.libraries).map(([key, library]) => [key,
+        { ...library, startupFramesOnly: true, frameMap: new Map(library.frames.map(frame => [frame.index, frame])) }]));
+      for (const [state, action, start] of [["running", "running", 80], ["attackMelee", "attack1", 136]]) {
+        for (const [directionIndex, direction] of directions.entries()) for (let frame = 0; frame < 6; frame++) {
+          const base = gender === "male" ? 0 : 808;
+          const entity = { kind: "selfPlayer", objectId: "test-owner", classKey: "warrior", genderKey: gender,
+            direction, sprite: { bodyLibrary: "CArmour/00", hairLibrary: "CHair/00",
+              frameBaseOffset: base, frameCount: 4, directionStride: 4, weaponFrameOffset: null } };
+          const pose = { action, direction, logicalFrameIndex: frame };
+          const rendered = buildViewportEntitySprite(entity, libraries, 0, 0, state, undefined, null, pose);
+          const index = base + start + directionIndex * 6 + frame;
+          for (const [layer, key] of [["body", "CArmour/00"], ["hair", "CHair/00"]]) {
+            const expected = originals[key].frames.find(row => row.index === index);
+            assert.equal(rendered?.[layer]?.path, expected.path, `${gender} ${state} ${direction} ${frame} ${layer}`);
+            for (const field of ["width", "height", "x", "y"]) assert.equal(rendered[layer][field], expected[field]);
+          }
+          const otherArmour = buildViewportEntitySprite({ ...entity, sprite: { ...entity.sprite, bodyLibrary: "CArmour/01" } },
+            libraries, 0, 0, state, undefined, null, pose);
+          assert.equal(otherArmour?.body, null, "a missing actual outfit never substitutes default armour");
+        }
+      }
+    };
+    check(updates[0]);
+    body.resolve(new Response(readEntryVisual(visualsMetadata.players[gender]))); await done;
+    assert.equal(updates.length, 2); check(updates[1]);
+  }
+});
+
+test("stale bundled metadata cannot seed another source pin, release or scene", async () => {
+  for (const field of ["schemaVersion", "assetReleaseId", "sceneSha256", "sourceSha256"]) {
+    const stale = structuredClone(playerMetadata);
+    if (field === "sourceSha256") stale.players.male.sourceSha256 = "0".repeat(64);
+    else stale[field] = field === "schemaVersion" ? 3 : "stale";
+    const body = deferred(), updates = [];
+    const entry = entryFixture(() => body.promise, stale);
+    const done = entry.loadR16EntryPlayerWithRecovery(entryMetadata.assetReleaseId, "male",
+      new AbortController().signal, assets => updates.push(assets));
+    assert.deepEqual(updates, []);
+    body.resolve(new Response(null, { status: 404 }));
+    await done;
+    assert.deepEqual(updates, [null]);
+  }
+});
+
 test("player, NPC and building packs load independently and publish only pinned bytes", async () => {
   const { male, female } = visualsMetadata.players;
   const [firstObject, secondObject, thirdObject] = visualsMetadata.objectParts;
@@ -487,7 +622,8 @@ test("a player recovers after both original reads time out and releases fallback
   t.mock.timers.tick(200); await settleSceneFixture();
   t.mock.timers.tick(20_000); await settleSceneFixture();
   assert.equal(calls.length, 2);
-  assert.deepEqual(updates, [null], "loose images can render while background recovery waits");
+  assert.equal(updates.length, 1);
+  assertPlayerFrameDirectory(updates[0]);
   assert(calls.slice(0, 2).every(call => call.options.signal.reason.name === "TimeoutError"));
   t.mock.timers.tick(999); await settleSceneFixture(); assert.equal(calls.length, 2);
   t.mock.timers.tick(1); await done;
@@ -499,7 +635,10 @@ test("a player recovers after both original reads time out and releases fallback
   ]);
   assert.equal(updates.length, 2);
   assert.equal(Object.keys(updates[1].images).length, 160);
-  assert.equal(await entry.preloadR16EntryPlayer(entryMetadata.assetReleaseId, "male"), updates[1]);
+  const cached = await entry.preloadR16EntryPlayer(entryMetadata.assetReleaseId, "male");
+  assert.equal(cached.images, updates[1].images);
+  assert.equal(cached.libraries["CArmour/00"].frames.length, 80, "verified image-pack cache remains the original payload");
+  assert.equal(updates[1].libraries["CArmour/00"].frames.length, 808, "publication retains every action directory");
 });
 
 test("changing role during the recovery wait prevents another request or stale update", async (t) => {
@@ -509,10 +648,10 @@ test("changing role during the recovery wait prevents another request or stale u
   const done = entry.loadR16EntryPlayerWithRecovery(entryMetadata.assetReleaseId, "male", owner.signal,
     assets => updates.push(assets));
   await settleSceneFixture(); t.mock.timers.tick(200); await settleSceneFixture();
-  assert.deepEqual(updates, [null]);
+  assert.equal(updates.length, 1); assertPlayerFrameDirectory(updates[0]);
   owner.abort(); await done;
   t.mock.timers.tick(60_000); await settleSceneFixture();
-  assert.equal(calls.length, 2); assert.deepEqual(updates, [null]);
+  assert.equal(calls.length, 2); assert.equal(updates.length, 1); assertPlayerFrameDirectory(updates[0]);
 });
 
 test("a role change during a shared read cancels only its observer", async () => {
@@ -520,11 +659,12 @@ test("a role change during a shared read cancels only its observer", async () =>
   const entry = entryFixture((url, options) => { calls.push({ url, options }); return delayed.promise; });
   const done = entry.loadR16EntryPlayerWithRecovery(entryMetadata.assetReleaseId, "male", owner.signal,
     assets => updates.push(assets));
+  assert.equal(updates.length, 1); assertPlayerFrameDirectory(updates[0]);
   owner.abort();
   delayed.resolve(new Response(readEntryVisual(visualsMetadata.players.male)));
   await done;
   assert.equal(calls.length, 1); assert.equal(calls[0].options.signal.aborted, false);
-  assert.deepEqual(updates, []);
+  assert.equal(updates.length, 1); assertPlayerFrameDirectory(updates[0]);
   assert.equal(Object.keys((await entry.preloadR16EntryPlayer(entryMetadata.assetReleaseId, "male")).images).length, 160);
 });
 
@@ -542,7 +682,8 @@ test("two player observers share the recovery fetch and both receive the verifie
     assets => second.push(assets));
   await settleSceneFixture(); t.mock.timers.tick(200); await settleSceneFixture();
   assert.equal(calls.length, 2);
-  assert.deepEqual(first, [null]); assert.deepEqual(second, [null]);
+  assert.equal(first.length, 1); assert.equal(second.length, 1);
+  assertPlayerFrameDirectory(first[0]); assertPlayerFrameDirectory(second[0]);
   t.mock.timers.tick(1_000); await Promise.all([a, b]);
   assert.equal(calls.length, 3); assert.equal(calls[2].options.cache, "reload");
   assert.equal(first[1], second[1]); assert.equal(Object.keys(first[1].images).length, 160);
@@ -557,10 +698,10 @@ test("persistent player transport failures stop after two bounded rounds", async
   const done = entry.loadR16EntryPlayerWithRecovery(entryMetadata.assetReleaseId, "female", new AbortController().signal,
     assets => updates.push(assets));
   await settleSceneFixture(); t.mock.timers.tick(200); await settleSceneFixture();
-  assert.deepEqual(updates, [null]); assert.equal(calls.length, 2);
+  assert.equal(updates.length, 1); assertPlayerFrameDirectory(updates[0], "female"); assert.equal(calls.length, 2);
   t.mock.timers.tick(1_000); await settleSceneFixture();
   t.mock.timers.tick(200); await done;
-  assert.equal(calls.length, 4); assert.deepEqual(updates, [null]);
+  assert.equal(calls.length, 4); assert.equal(updates.length, 1); assertPlayerFrameDirectory(updates[0], "female");
   t.mock.timers.tick(600_000); await settleSceneFixture(); assert.equal(calls.length, 4);
 });
 
@@ -581,12 +722,12 @@ test("recovery never publishes truncated, hash-invalid, or another-release playe
   const done = entry.loadR16EntryPlayerWithRecovery(entryMetadata.assetReleaseId, "male", new AbortController().signal,
     assets => updates.push(assets));
   await done; t.mock.timers.tick(600_000); await settleSceneFixture();
-  assert.equal(calls.length, 1); assert.deepEqual(updates, [null]);
+  assert.equal(calls.length, 1); assert.equal(updates.length, 1); assertPlayerFrameDirectory(updates[0]);
   const truncated = entryFixture(async () => new Response(original.subarray(0, 4096)));
   const invalid = [];
   await truncated.loadR16EntryPlayerWithRecovery(entryMetadata.assetReleaseId, "male", new AbortController().signal,
     assets => invalid.push(assets));
-  assert.deepEqual(invalid, [null]);
+  assert.equal(invalid.length, 1); assertPlayerFrameDirectory(invalid[0]);
 });
 
 test("player recovery leaves definitive HTTP errors and Retry-After responses terminal", async (t) => {
@@ -601,7 +742,7 @@ test("player recovery leaves definitive HTTP errors and Retry-After responses te
     await entry.loadR16EntryPlayerWithRecovery(entryMetadata.assetReleaseId, "male", new AbortController().signal,
       assets => updates.push(assets));
     t.mock.timers.tick(600_000); await settleSceneFixture();
-    assert.equal(calls, 1); assert.deepEqual(updates, [null]);
+    assert.equal(calls, 1); assert.equal(updates.length, 1); assertPlayerFrameDirectory(updates[0]);
   }
 });
 
