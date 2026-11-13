@@ -805,7 +805,8 @@ test("route execution follows bends, validates each 2/3-tile run and replans dev
   assert.deepEqual(routeExecution.nextQuestRouteStep(plan, plan.origin, 2, () => false), { type: "move", point: { x: 3, y: 1 }, direction: "Right", mode: "run" });
   assert.deepEqual(routeExecution.nextQuestRouteStep(plan, { x: 3, y: 1 }, 2, () => false), { type: "move", point: { x: 4, y: 1 }, direction: "Right", mode: "walk" }, "turning paths cannot be flattened into a straight run");
   assert.deepEqual(routeExecution.nextQuestRouteStep(plan, { x: 4, y: 1 }, 2, () => false), { type: "move", point: plan.destination, direction: "Down", mode: "run" });
-  assert.deepEqual(routeExecution.nextQuestRouteStep(plan, plan.origin, 3, (_from, to) => to.x === 3), { type: "move", point: { x: 2, y: 1 }, direction: "Right", mode: "walk" });
+  assert.deepEqual(routeExecution.nextQuestRouteStep(plan, plan.origin, 3, (_from, to) => to.x === 3), { type: "replan" },
+    "a known obstruction within the Windows three-edge window invalidates the old route before moving");
   assert.deepEqual(routeExecution.nextQuestRouteStep(plan, { x: 2, y: 1 }, 1, () => true), { type: "replan" });
   assert.deepEqual(routeExecution.nextQuestRouteStep(plan, { x: 1, y: 2 }, 3, () => false), { type: "replan" });
   assert.deepEqual(routeExecution.nextQuestRouteStep(plan, plan.destination, 3, () => false), { type: "arrived" });
@@ -1128,13 +1129,13 @@ test("actual Page map-image press and route ownership retire only the captured s
   const route = { ...oldRoute, queued: null };
   deps.mapImageRouteRef.current = route;
   const run = api.mapImageRouteMovement(route, { x: 0, y: 0 }, "run", 20);
-  assert.deepEqual(run, { point: { x: 1, y: 0 }, direction: "Right", mode: "walk" },
-    "the shared route executor falls back to a validated one-tile walk when a run intermediate tile is occupied");
+  assert.equal(run, null, "an occupied route edge triggers full replanning before another walk or run");
+  assert.equal(refreshes, 1, "dynamic occupancy is included in the new complete map route");
   occupied = [];
   route.geometry.blockedBits[4] = 1;
   const replan = api.mapImageRouteMovement(route, { x: 0, y: 0 }, "run", 20);
   assert.equal(replan, null);
-  assert.equal(refreshes, 1, "blocked route steps replan through the shared route path");
+  assert.equal(refreshes, 2, "static blockers also replan through the shared route path");
   blocked = true;
   assert.equal(api.mapImageRouteCurrent(route), false, "modal or focus gates retire route authority at the final check");
   blocked = false;

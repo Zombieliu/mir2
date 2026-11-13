@@ -16,15 +16,24 @@ export function nextQuestRouteStep(plan: QuestRoutePlan, current: QuestRoutePoin
   if (at === -1 && !samePoint(current, plan.origin)) return { type: "replan" };
   const next = plan.steps[at + 1];
   if (!next) return samePoint(current, plan.destination) ? { type: "arrived" } : { type: "replan" };
+  // Match Windows big_map_input::advance: inspect the next three route edges,
+  // including bends, before committing even a one-tile walk or a two-tile run.
+  let previous = current;
+  for (const point of plan.steps.slice(at + 1, at + 4)) {
+    if (!directions[`${point.x - previous.x},${point.y - previous.y}`] || blocked(previous, point)) {
+      return { type: "replan" };
+    }
+    previous = point;
+  }
   const dx = next.x - current.x, dy = next.y - current.y, direction = directions[`${dx},${dy}`];
-  if (!direction || blocked(current, next)) return { type: "replan" };
   // A run requires every intermediate tile to be on the same straight route and currently free.
   if (runDistance > 1) {
     let previous = next, complete = true;
     for (let distance = 2; distance <= runDistance; distance++) {
       const point = plan.steps[at + distance];
-      if (!point || point.x !== current.x + dx * distance || point.y !== current.y + dy * distance
-        || blocked(previous, point)) { complete = false; break; }
+      if (!point || point.x !== current.x + dx * distance || point.y !== current.y + dy * distance) {
+        complete = false; break;
+      }
       previous = point;
     }
     if (complete) return { type: "move", point: previous, direction, mode: "run" };

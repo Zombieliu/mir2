@@ -87,6 +87,43 @@ const arrivedPlan = h => ({ origin: { ...h.state.self }, destination: { ...h.sta
 const straightPlan = h => ({ origin: { ...h.state.self }, destination: { x: h.state.self.x + 2, y: h.state.self.y }, radius: 50,
   steps: [{ x: h.state.self.x + 1, y: h.state.self.y }, { x: h.state.self.x + 2, y: h.state.self.y }] });
 
+for (const distance of [1, 2, 3]) test(`route lookahead: ${distance}-tile movement replans before any of the next three edges becomes blocked`, () => {
+  const plan = { origin: { x: 10, y: 10 }, destination: { x: 14, y: 11 }, radius: 0,
+    steps: [{ x: 11, y: 10 }, { x: 12, y: 10 }, { x: 13, y: 11 }, { x: 14, y: 11 }] };
+  for (const blockedIndex of [0, 1, 2]) {
+    const target = plan.steps[blockedIndex];
+    assert.deepEqual(nextQuestRouteStep(plan, plan.origin, distance,
+      (_from, to) => to.x === target.x && to.y === target.y), { type: "replan" },
+    `edge ${blockedIndex + 1} must be checked before walking or running toward the obstruction`);
+  }
+  const outside = plan.steps[3];
+  assert.deepEqual(nextQuestRouteStep(plan, plan.origin, distance,
+    (_from, to) => to.x === outside.x && to.y === outside.y), {
+    type: "move", point: plan.steps[distance === 1 || distance === 3 ? 0 : 1], direction: "Right",
+    mode: distance === 2 ? "run" : "walk",
+  }, "the fourth edge is checked only as it enters the three-edge window; bends still degrade to a walk");
+});
+
+for (const index of [1, 2]) test(`actual Page: blocker at upcoming edge ${index + 1} reroutes while retaining the same quest destination`, async () => {
+  const h = harness(), origin = { ...h.state.self }, destination = { x: origin.x + 4, y: origin.y };
+  const plan = { origin, destination, radius: 50,
+    steps: [1, 2, 3, 4].map(dx => ({ x: origin.x + dx, y: origin.y })) };
+  h.plans.push(plan); const route = h.begin(); h.loading[0].resolve(h.geometry); await flush();
+  h.state.occupied = [plan.steps[index]];
+  const detour = { ...plan, steps: [
+    { x: origin.x + 1, y: origin.y + 1 }, { x: origin.x + 2, y: origin.y + 1 },
+    { x: origin.x + 3, y: origin.y + 1 }, destination,
+  ] };
+  h.plans.push(detour);
+  assert.deepEqual(h.questRouteMovement(route, h.state.self, "run", h.timer.now()), {
+    point: detour.steps[0], direction: "DownRight", mode: "walk",
+  });
+  assert.equal(h.queries.length, 2); assert.equal(h.queries[1][1], h.action);
+  assert.equal(h.routeRef.current, route); assert.deepEqual(route.plan.destination, destination);
+  assert.equal(h.queuedRef.current.targetX, destination.x); assert.equal(h.queuedRef.current.targetY, destination.y);
+  assert.deepEqual(terminal(h), [], "replanning cannot report arrival or clear the current goal");
+});
+
 for (const [target, key] of [
   [{ type: "huntRegion", monsterIndex: 44, radius: 50 }, "ui.questRouteHuntArrived"],
   [{ type: "taskNpc", objectId: 4 }, "ui.questRouteNpcArrived"],
