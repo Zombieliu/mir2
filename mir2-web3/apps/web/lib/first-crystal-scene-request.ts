@@ -26,6 +26,10 @@ export const PINNED_BOOTSTRAP_HEADER_TIMEOUT_MS = 20_000;
 const RETRY_DELAY_MS = 200;
 const TRANSIENT_STATUS = new Set([408, 425, 429, 500, 502, 503, 504]);
 
+export function shouldRetryBootstrapResponse(response: Pick<Response, "status" | "headers">): boolean {
+  return TRANSIENT_STATUS.has(response.status) && !response.headers.has("retry-after");
+}
+
 async function readAttempt<T>(
   url: string,
   {
@@ -125,7 +129,7 @@ export async function fetchBootstrapResponse<T>(
 ): Promise<SceneJsonResult<T>> {
   try {
     const result = await readAttempt(url, options, fetcher, readBody);
-    if (!TRANSIENT_STATUS.has(result.response.status) || result.response.headers.has("retry-after")) {
+    if (!shouldRetryBootstrapResponse(result.response)) {
       return result;
     }
   } catch (error) {

@@ -4,7 +4,7 @@ import { pickCrystalActor, sampleCrystalBodyPixel, warmCrystalBodyPixels, type C
 import { useWindowKeydown } from "../lib/use-window-keydown";
 import { guildKeyboardOwnsEvent } from "../lib/r16-guild-keyboard";
 import {
-  preloadR16EntryFloor, preloadR16EntryMonsterFrames, preloadR16EntryNpcs, preloadR16EntryObjects, loadR16EntryPlayerWithRecovery,
+  preloadR16EntryFloor, preloadR16EntryMonsterFrames, loadR16EntryNpcsWithRecovery, preloadR16EntryObjects, loadR16EntryPlayerWithRecovery,
   R16_ENTRY_FLOOR_BOUNDS, R16_ENTRY_FLOOR_MAP, R16_ENTRY_MONSTER_BOUNDS,
   type R16EntryActorAssets, type R16EntrySpriteImages,
 } from "../lib/r16-entry-scene";
@@ -1978,13 +1978,14 @@ export function OriginalClientShell({
     if (!warmEntryArt) return;
     const release = process.env.MIR2_PINNED_ASSET_VERSION;
     let current = true;
-    void preloadR16EntryNpcs(release)?.then((assets) => { if (current) setEntryNpcs(assets); });
+    const owner = new AbortController();
+    void loadR16EntryNpcsWithRecovery(release, owner.signal, setEntryNpcs);
     for (const part of preloadR16EntryObjects(release) ?? []) {
       void part.then((images) => {
         if (current && images) setEntryObjects((previous) => ({ ...previous, ...images }));
       });
     }
-    return () => { current = false; };
+    return () => { current = false; owner.abort(); };
   }, [warmEntryArt]);
 
   useEffect(() => {

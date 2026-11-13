@@ -12,18 +12,18 @@ function compile(source,dependencies={}){
  new Function('module','exports','require',js)(module,module.exports,name=>{assert(name in dependencies,name);return dependencies[name];});
  return module.exports;
 }
-function actualBoot({playable=true,mode='eager',allowed=true,criticalPending=false,support={webgpu:true,webgl2:true}}={}){
+function actualBoot({playable=true,mode='eager',allowed=true,criticalPending=false,support={webgpu:true,webgl2:true},screen='game',recoveryBudget=new Set()}={}){
  const source=readFileSync(pagePath,'utf8'),ast=ts.createSourceFile('page.tsx',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
  let callback;
  const visit=node=>{if(ts.isCallExpression(node)&&node.expression.getText(ast)==='useEffect'){
   const candidate=node.arguments[0];if(candidate&&candidate.getText(ast).includes('async function bootRuntime()'))callback=candidate;
  }ts.forEachChild(node,visit);};visit(ast);assert(callback);
  const events=[];let finishModule,failModule,finishFonts,finishCritical,failCritical,observed=Promise.resolve();
- const fontSignals=[];
+ const fontSignals=[],runtimeOptions=[];
  const noop=()=>{},ref=()=>({current:null});
  const env={
   AbortController,window:{location:{search:''},matchMedia:()=>({matches:false})},navigator:{maxTouchPoints:0,userAgent:'Chrome desktop'},
-  URLSearchParams,console:{warn:noop,info:noop},shouldBootBevyRuntime:playable,screen:'game',
+  URLSearchParams,console:{warn:noop,info:noop},shouldBootBevyRuntime:playable,screen,
   clientProfile:{input:'keyboardMouse',layout:'desktop'},bevyRuntimeStartup:{runtimeAllowed:allowed},
   BEVY_RUNTIME_VERSION:'pinned',BEVY_RUNTIME_ASSET_BASE_URL:'https://assets.example.test/release',
   resolveBevyRuntimeBootDecision:()=>({mode,reason:'test'}),detectBevyRuntimeSupport:async()=>support,
@@ -37,16 +37,16 @@ function actualBoot({playable=true,mode='eager',allowed=true,criticalPending=fal
   resetBevyMapImageResidency:noop,withdrawHudBarDrawPlanOutputs:noop,setBevyRuntimeGeneration:noop,
   shouldRetryBevyRuntimeWithWebGl2:()=>false,canRetryBevyRuntimeBeforeBoot:()=>true,
   isBevyRuntimeNetworkFailure:()=>true,scheduleBevyRuntimeCacheRecovery:()=>false,
-  runtimeRef:ref(),lastBevyEntityRenderStateJsonRef:ref(),lastBevyMapRenderStateJsonRef:ref(),lastBevyMapCameraOffsetRef:ref(),
+  runtimeRef:ref(),runtimeDownloadRecoveryRef:{current:recoveryBudget},lastBevyEntityRenderStateJsonRef:ref(),lastBevyMapRenderStateJsonRef:ref(),lastBevyMapCameraOffsetRef:ref(),
   prewarmBevyRuntimeFonts:options=>{events.push({name:'fonts'});fontSignals.push(options.signal);return new Promise(resolve=>{finishFonts=resolve;});},
-  loadBevyRuntimeModule:()=>{events.push({name:'module'});return new Promise((resolve,reject)=>{finishModule=resolve;failModule=reject;});},
+  loadBevyRuntimeModule:(_backend,_startup,options)=>{runtimeOptions.push(options);events.push({name:'module'});return new Promise((resolve,reject)=>{finishModule=resolve;failModule=reject;});},
   testObserve:value=>{observed=value;},
  };
  const body=callback.body.getText(ast).replace('void bootRuntime();','testObserve(bootRuntime());');
  assert(body.includes('testObserve(bootRuntime());'));
  const js=ts.transpileModule('function effect()'+body,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText;
  const cleanup=new Function(...Object.keys(env),js+'\nreturn effect();')(...Object.values(env));
- return{events,fontSignals,cleanup,window:env.window,failModule:error=>failModule(error),
+ return{events,fontSignals,runtimeOptions,cleanup,window:env.window,failModule:error=>failModule(error),
   finishCritical:()=>finishCritical(),failCritical:()=>failCritical(),finishModule:()=>finishModule({getMir2RendererBackend:()=> 'webgpu',bootMir2Runtime:noop}),waitForBoot:()=>observed,
   settle:async()=>{cleanup();finishCritical?.();await turn();finishModule?.({});finishFonts?.({requested:6,completed:[],failed:[],aborted:true,bytes:0});await observed;await turn();}};
 }
@@ -118,6 +118,27 @@ test('leaving while the runtime downloads cancels fonts and prevents late boot',
  const run=actualBoot();try{await turn();run.cleanup();run.finishModule();await run.waitForBoot();
   assert(run.fontSignals.every(signal=>signal.aborted));assert(!run.events.some(e=>e.name==='bevyRuntimeReady'));
  }finally{await run.settle();}
+});
+
+test('Page keeps fonts alive during finite binary recovery and cancels both owners on exit',async()=>{
+ const run=actualBoot();try{await turn();const options=run.runtimeOptions[0];assert(options);
+  assert.equal(options.ownerSignal.aborted,false);assert.equal(options.takeRecovery('fixed-source'),true);
+  await turn();assert.equal(run.fontSignals[0].aborted,false);assert.equal(run.events.filter(e=>e.name==='module').length,1);
+  run.finishModule();await run.waitForBoot();assert.equal(run.events.filter(e=>e.name==='bevyRuntimeReady').length,1);
+  run.cleanup();assert(options.ownerSignal.aborted);assert(run.fontSignals[0].aborted);
+ }finally{await run.settle();}
+});
+
+test('Page spends recovery once per entry/source and preserves it across same-game effect reruns',async()=>{
+ const budget=new Set(),source='immutable/version/backend.js';
+ const first=actualBoot({recoveryBudget:budget});try{await turn();const take=first.runtimeOptions[0].takeRecovery;
+  assert.equal(take(source),true);assert.equal(take(source),false);first.cleanup();assert.equal(take('other-source'),false);
+ }finally{await first.settle();}
+ const sameGame=actualBoot({recoveryBudget:budget});try{await turn();assert.equal(sameGame.runtimeOptions[0].takeRecovery(source),false);}
+ finally{await sameGame.settle();}
+ const left=actualBoot({screen:'select',playable:false,recoveryBudget:budget});await left.settle();assert.equal(budget.size,0);
+ const nextGame=actualBoot({recoveryBudget:budget});try{await turn();assert.equal(nextGame.runtimeOptions[0].takeRecovery(source),true);}
+ finally{await nextGame.settle();}
 });
 
 const request=compile(readFileSync(new URL('../lib/asset-prewarm-request.ts',import.meta.url),'utf8'));

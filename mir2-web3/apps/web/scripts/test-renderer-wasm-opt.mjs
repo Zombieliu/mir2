@@ -594,7 +594,7 @@ test("Core cleanup rejects a retargeted staging ancestor and retains tool postpi
   fs.unlinkSync(generated); coreUnchanged(f);
 });
 
-test("actual Core sourceFingerprint includes optimizer and client-wire bytes and retains LF normalization sorted old recipe", () => {
+test("actual Core sourceFingerprint includes optimizer, client-wire and protocol bytes with sorted LF normalization", () => {
   const source = fs.readFileSync(new URL("./build-client-core.mjs", import.meta.url), "utf8");
   const start = source.indexOf("function sourceFingerprint() {"), end = source.indexOf("\nfunction run(", start);
   assert(start >= 0 && end > start); const declaration = source.slice(start, end);
@@ -603,11 +603,14 @@ test("actual Core sourceFingerprint includes optimizer and client-wire bytes and
   const executable = declaration.replaceAll("import.meta.url", "builderUrl");
   const projectRoot = path.resolve("virtual-core-fingerprint"), webRoot = path.join(projectRoot, "apps", "web"), crateRoot = path.join(projectRoot, "apps", "game-client", "platform-web"), coreRoot = path.join(projectRoot, "apps", "game-client", "client-core");
   const wireRoot = path.join(projectRoot, "apps", "game-client", "client-wire");
+  const protocolRoot = path.join(projectRoot, "packages", "protocol");
   const builderFile = path.join(webRoot, "scripts", "build-client-core.mjs"), optimizerFile = path.join(webRoot, "scripts", "lib", "renderer-wasm-opt.mjs"), releaseHelperFile = path.join(webRoot, "scripts", "lib", "client-core-release-files.mjs");
   const data = new Map([
     [path.join(crateRoot, "Cargo.toml"), "platform crate\n"], [path.join(crateRoot, "Cargo.lock"), "locked\n"],
     [path.join(crateRoot, "rust-toolchain.toml"), "pinned toolchain\n"], [path.join(coreRoot, "Cargo.toml"), "core crate\n"],
     [path.join(wireRoot, "Cargo.toml"), "wire crate\n"],
+    [path.join(protocolRoot, "Cargo.toml"), "protocol crate\n"],
+    [path.join(protocolRoot, "src", "lib.rs"), "protocol lib\n"],
     [path.join(wireRoot, "src", "lib.rs"), "wire lib\n"], [path.join(wireRoot, "src", "packets.rs"), "wire packets\n"],
     [builderFile, "builder bytes\n"], [optimizerFile, "optimizer bytes\n"], [releaseHelperFile, "release helper bytes\n"],
     [path.join(coreRoot, "src", "z.rs"), "z\n"], [path.join(coreRoot, "src", "a.rs"), "a\n"],
@@ -618,7 +621,8 @@ test("actual Core sourceFingerprint includes optimizer and client-wire bytes and
   const dirent = (name, directory = false) => ({ name, isDirectory: () => directory, isFile: () => !directory });
   const directoryRows = new Map([[path.join(coreRoot, "src"), [dirent("z.rs"), dirent("nested", true), dirent("a.rs")]],
     [path.join(coreRoot, "src", "nested"), [dirent("b.rs")]], [path.join(crateRoot, "src"), [dirent("z.rs"), dirent("a.rs")]],
-    [path.join(wireRoot, "src"), [dirent("packets.rs"), dirent("lib.rs")]]]);
+    [path.join(wireRoot, "src"), [dirent("packets.rs"), dirent("lib.rs")]],
+    [path.join(protocolRoot, "src"), [dirent("lib.rs")]]]);
   const fakeFs = { readdirSync(directory, options) { assert.deepEqual(options, { withFileTypes: true }); assert(directoryRows.has(directory)); const rows = directoryRows.get(directory); return reverse ? [...rows].reverse() : [...rows]; },
     readFileSync(filename, encoding) { assert.equal(encoding, "utf8"); assert(data.has(filename), "unexpected source read " + filename); return data.get(filename); } };
   const run = new Function("fs", "path", "crateRoot", "webRoot", "fileURLToPath", "hash", "builderUrl", executable + "\nreturn sourceFingerprint();");
@@ -634,9 +638,10 @@ test("actual Core sourceFingerprint includes optimizer and client-wire bytes and
   data.set(releaseHelperFile, "release helper changed\r\n"); assert.notEqual(invoke(), baseline);
   assert.equal(JSON.parse(hashInput).filter(row => row.name === "apps/web/scripts/lib/client-core-release-files.mjs").length, 1);
   data.set(releaseHelperFile, "release helper bytes\r\n"); assert.equal(invoke(), baseline);
-  for (const filename of [path.join(wireRoot, "Cargo.toml"), path.join(wireRoot, "src", "lib.rs")]) {
+  for (const filename of [path.join(wireRoot, "Cargo.toml"), path.join(wireRoot, "src", "lib.rs"),
+    path.join(protocolRoot, "Cargo.toml"), path.join(protocolRoot, "src", "lib.rs")]) {
     const original = data.get(filename);
-    data.set(filename, original + "// wire identity changed\r\n"); assert.notEqual(invoke(), baseline);
+    data.set(filename, original + "// source identity changed\r\n"); assert.notEqual(invoke(), baseline);
     const relative = path.relative(projectRoot, filename).split(path.sep).join("/");
     assert.equal(JSON.parse(hashInput).filter(row => row.name === relative).length, 1);
     data.set(filename, original); assert.equal(invoke(), baseline);

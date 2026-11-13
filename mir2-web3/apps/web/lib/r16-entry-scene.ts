@@ -2,7 +2,7 @@ import entryScene from "./generated/r16-entry-scene.json";
 import entryFloor from "./generated/r16-entry-floor.json";
 import entryVisuals from "./generated/r16-entry-visuals.json";
 import entryPlayerMetadata from "./generated/r16-entry-player-meta.json";
-import { fetchBootstrapResponse, PINNED_BOOTSTRAP_HEADER_TIMEOUT_MS } from "./first-crystal-scene-request";
+import { fetchBootstrapResponse, PINNED_BOOTSTRAP_HEADER_TIMEOUT_MS, shouldRetryBootstrapResponse } from "./first-crystal-scene-request";
 import type { OriginalSceneSpriteLibraryMeta } from "./original-scene-sprite-meta";
 import {
   createCrystalSceneBlueprintRequestKey,
@@ -36,7 +36,7 @@ const playerDirectories = new Map<EntryPlayerGender, R16EntryActorAssets>();
 const playerPublications = new WeakMap<R16EntryActorAssets, R16EntryActorAssets>();
 const transientVisualFailures = new WeakSet<Promise<unknown>>();
 const VISUAL_BODY_TIMEOUT_MS = 45_000;
-const PLAYER_RECOVERY_DELAY_MS = 1_000;
+const VISUAL_RECOVERY_DELAY_MS = 1_000;
 
 export function preloadR16EntryScene(pinnedRelease?: string): Promise<SceneBlueprint | null> | null {
   if (pinnedRelease !== entryScene.assetReleaseId || entryScene.schemaVersion !== SCENE_BLUEPRINT_SCHEMA_VERSION ||
@@ -70,6 +70,11 @@ async function loadProgressiveEntryJson<T>(
     response => response.arrayBuffer(),
     (path, options) => fetch(path, { ...options, credentials: "omit", redirect: "error", priority }),
   );
+  if (shouldRetryBootstrapResponse(response)) {
+    // Both bounded HTTP attempts failed transiently. Preserve this distinction
+    // from a definitive HTTP response or a rejected byte/hash verification.
+    throw new TypeError(`Pinned bootstrap response is temporarily unavailable (HTTP ${response.status})`);
+  }
   return response.ok && body ? decodePinnedEntryJson<T>(asset, body) : null;
 }
 
@@ -141,6 +146,19 @@ function publishEntryPlayer(assets: R16EntryActorAssets, directory: R16EntryActo
   return published;
 }
 
+function waitToRecoverVisual(owner: AbortSignal): Promise<void> {
+  return new Promise((resolve) => {
+    const finish = () => {
+      clearTimeout(timer);
+      owner.removeEventListener("abort", finish);
+      resolve();
+    };
+    const timer = setTimeout(finish, VISUAL_RECOVERY_DELAY_MS);
+    owner.addEventListener("abort", finish, { once: true });
+    if (owner.aborted) finish();
+  });
+}
+
 /** Expose pinned frame metadata immediately; recover the complete image pack in the background. */
 export function loadR16EntryPlayerWithRecovery(
   pinnedRelease: string | undefined,
@@ -165,16 +183,7 @@ export function loadR16EntryPlayerWithRecovery(
 
     // Keep usable metadata and the ordinary image path during recovery. Retry only
     // once after backing off; changing role or leaving the game cancels the observer.
-    await new Promise<void>((resolve) => {
-      const finish = () => {
-        clearTimeout(timer);
-        owner.removeEventListener("abort", finish);
-        resolve();
-      };
-      const timer = setTimeout(finish, PLAYER_RECOVERY_DELAY_MS);
-      owner.addEventListener("abort", finish, { once: true });
-      if (owner.aborted) finish();
-    });
+    await waitToRecoverVisual(owner);
     if (owner.aborted) return;
     const recovered = await preloadVisual(entryVisuals.players[gender], actorLoads, "high", "reload");
     if (!owner.aborted && recovered) onSettled(publishEntryPlayer(recovered, metadata));
@@ -183,7 +192,28 @@ export function loadR16EntryPlayerWithRecovery(
 
 export function preloadR16EntryNpcs(pinnedRelease?: string) {
   if (!entryVisualsMatch(pinnedRelease)) return null;
-  return preloadVisual(entryVisuals.npcs, actorLoads, "low");
+  return preloadVisual(entryVisuals.npcs, actorLoads, "high");
+}
+
+/** Recover town actors once after a transient pack failure, while ordinary PNGs remain available. */
+export function loadR16EntryNpcsWithRecovery(
+  pinnedRelease: string | undefined,
+  owner: AbortSignal,
+  onSettled: (assets: R16EntryActorAssets | null) => void,
+): Promise<void> | null {
+  if (owner.aborted) return null;
+  const first = preloadR16EntryNpcs(pinnedRelease);
+  if (!first) return null;
+  return (async () => {
+    const assets = await first;
+    if (owner.aborted) return;
+    onSettled(assets);
+    if (assets || !transientVisualFailures.has(first)) return;
+    await waitToRecoverVisual(owner);
+    if (owner.aborted) return;
+    const recovered = await preloadVisual(entryVisuals.npcs, actorLoads, "high", "reload");
+    if (!owner.aborted && recovered) onSettled(recovered);
+  })();
 }
 
 export function preloadR16EntryMonsterFrames(pinnedRelease: string | undefined, action: EntryMonsterAction) {

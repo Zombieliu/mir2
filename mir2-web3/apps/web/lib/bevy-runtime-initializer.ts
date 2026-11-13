@@ -27,6 +27,9 @@ export async function initializeBevyRuntime<T extends RuntimeInitializer>({
   maxBodyBytes = 32 * 1024 * 1024,
   fetchImpl = fetch,
   onDownloadAttempt,
+  takeRecovery,
+  ownerSignal,
+  onInitializationStarted,
 }: {
   loadModule: () => Promise<T>;
   wasmUrl: string;
@@ -38,8 +41,18 @@ export async function initializeBevyRuntime<T extends RuntimeInitializer>({
   maxBodyBytes?: number;
   fetchImpl?: typeof fetch;
   onDownloadAttempt?: (attempt: RuntimeBinaryAttempt) => void;
+  takeRecovery?: () => boolean;
+  ownerSignal?: AbortSignal;
+  onInitializationStarted?: () => void;
 }): Promise<T> {
+  if (ownerSignal?.aborted) throw ownerSignal.reason;
   const controller = new AbortController();
+  let defaultStarted = false;
+  const uncertain = () => Object.assign(new Error("Runtime initializer owner retired after initialization began; fresh page required"), {
+    runtimeInitializationUncertain: true,
+  });
+  const abortOwner = () => controller.abort(defaultStarted ? uncertain() : ownerSignal?.reason);
+  ownerSignal?.addEventListener("abort", abortOwner, { once: true });
   const scriptTimeout = setTimeout(() => controller.abort(), timeoutMs);
   let initializationTimeout: ReturnType<typeof setTimeout> | undefined;
   let onAbort: (() => void) | undefined;
@@ -47,13 +60,26 @@ export async function initializeBevyRuntime<T extends RuntimeInitializer>({
     onAbort = () => reject(controller.signal.reason);
     controller.signal.addEventListener("abort", onAbort, { once: true });
   });
+  // Also cover synchronous import failures which exit before the race is built.
+  void cancelled.catch(() => {});
+  const recoveryCooldown = () => new Promise<void>((resolve, reject) => {
+    if (controller.signal.aborted) { reject(controller.signal.reason); return; }
+    const abort = () => { clearTimeout(timer); reject(controller.signal.reason); };
+    const timer = setTimeout(() => {
+      controller.signal.removeEventListener("abort", abort); resolve();
+    }, 1_000);
+    controller.signal.addEventListener("abort", abort, { once: true });
+  });
   const compile = async () => {
     const sources = [...new Set([wasmUrl, ...wasmFallbackUrls])];
     const attempts = [...sources];
     let retrySource: string | undefined;
     let lastError: unknown;
+    let groupStart = 0, recoveryTaken = false;
     for (const [index, url] of attempts.entries()) {
       if (controller.signal.aborted) throw controller.signal.reason;
+      const groupIndex = index - groupStart;
+      let recoverableTransport = false;
       let phase: RuntimeBinaryAttempt["phase"] = "headers";
       let reason: RuntimeBinaryAttempt["reason"];
       let bodyFailure: unknown;
@@ -61,7 +87,7 @@ export async function initializeBevyRuntime<T extends RuntimeInitializer>({
       const report = (state: RuntimeBinaryAttempt["state"], retryable?: boolean) => {
         try {
           onDownloadAttempt?.({ attempt: index + 1, sourceIndex: sources.indexOf(url),
-            retry: index >= sources.length, state, phase, bytes, status, reason, retryable });
+            retry: recoveryTaken || groupIndex >= sources.length, state, phase, bytes, status, reason, retryable });
         } catch { /* Diagnostics must not change download or startup ownership. */ }
       };
       const attempt = new AbortController();
@@ -92,7 +118,7 @@ export async function initializeBevyRuntime<T extends RuntimeInitializer>({
           // A configured alternate should not wait behind an unresponsive edge.
           // The final source retains the original response-header budget.
           const headers = timer(() => expire("headers-timeout", "Runtime binary response headers timed out", "AbortError"),
-            index < sources.length - 1 ? Math.min(8_000, timeoutMs) : timeoutMs);
+            groupIndex < sources.length - 1 ? Math.min(8_000, timeoutMs) : timeoutMs);
           const response = await fetchImpl(new Request(url, { signal: attempt.signal }));
           stop(headers);
           status = response.status;
@@ -156,7 +182,7 @@ export async function initializeBevyRuntime<T extends RuntimeInitializer>({
         const failure = bodyFailure ?? error;
         const invalid = typeof WebAssembly.CompileError === "function" && failure instanceof WebAssembly.CompileError;
         const terminal = failure instanceof RangeError || invalid || reason === "consumer-timeout" || reason === "body-timeout"
-          || (reason === "headers-timeout" && index >= sources.length - 1);
+          || (reason === "headers-timeout" && groupIndex >= sources.length - 1);
         const network = failure instanceof TypeError && /failed to fetch|fetch failed|network|terminated|aborted|load failed|connection/i.test(failure.message);
         const retryable = !controller.signal.aborted && !terminal && (reason === "body-idle"
           || reason === "headers-timeout" || (reason === "http"
@@ -169,11 +195,13 @@ export async function initializeBevyRuntime<T extends RuntimeInitializer>({
         report("failed", retryable);
         if (controller.signal.aborted) throw controller.signal.reason;
         if (terminal) throw failure;
-        if (retryable && index < sources.length) retrySource = url;
+        if (retryable && groupIndex < sources.length) retrySource = url;
         // Once the configured mirrors are exhausted, retry only the last
         // transient source once. All retries remain before glue initialization;
         // corrupt bytes and expired terminal phase budgets never get another GET.
-        if (index === sources.length - 1 && sources.length > 1 && retrySource) attempts.push(retrySource);
+        if (groupIndex === sources.length - 1 && sources.length > 1 && retrySource) attempts.push(retrySource);
+        // The async reader may have reached EOF before the compiler rejects.
+        recoverableTransport = retryable && (phase as RuntimeBinaryAttempt["phase"]) !== "compile";
         lastError = failure;
       } finally {
         for (const id of timers) clearTimeout(id);
@@ -181,6 +209,18 @@ export async function initializeBevyRuntime<T extends RuntimeInitializer>({
         attempt.signal.removeEventListener("abort", cancelReader);
         if (rejectAttempt) attempt.signal.removeEventListener("abort", rejectAttempt);
         attempt.abort(); cancelReader();
+      }
+      if (index === attempts.length - 1 && !recoveryTaken && recoverableTransport && !controller.signal.aborted) {
+        let granted = false;
+        try { granted = takeRecovery?.() === true; } catch { /* A failed owner guard cannot authorize more reads. */ }
+        if (controller.signal.aborted) throw controller.signal.reason;
+        if (granted) {
+          recoveryTaken = true;
+          await recoveryCooldown();
+          groupStart = attempts.length;
+          retrySource = undefined;
+          attempts.push(...sources);
+        }
       }
     }
     throw lastError ?? new TypeError("Failed to fetch runtime binary");
@@ -190,7 +230,6 @@ export async function initializeBevyRuntime<T extends RuntimeInitializer>({
     const initialize = async () => {
       const [runtime, compiled] = await Promise.all([script, compile()]);
       if (controller.signal.aborted) throw controller.signal.reason;
-      let defaultStarted = false;
       initializationTimeout = setTimeout(() => {
         if (!defaultStarted) { controller.abort(); return; }
         // wasm-bindgen initialization cannot be canceled after entry. A late
@@ -204,6 +243,8 @@ export async function initializeBevyRuntime<T extends RuntimeInitializer>({
         await waitForCanvas();
         if (controller.signal.aborted) throw controller.signal.reason;
         defaultStarted = true;
+        try { onInitializationStarted?.(); } catch { /* Coordination observers cannot repeat or replace initialization. */ }
+        if (controller.signal.aborted) throw controller.signal.reason;
         await runtime.default({ module_or_path: compiled });
       }
       if (controller.signal.aborted) throw controller.signal.reason;
@@ -214,6 +255,7 @@ export async function initializeBevyRuntime<T extends RuntimeInitializer>({
     clearTimeout(scriptTimeout);
     if (initializationTimeout !== undefined) clearTimeout(initializationTimeout);
     if (onAbort) controller.signal.removeEventListener("abort", onAbort);
+    ownerSignal?.removeEventListener("abort", abortOwner);
     controller.abort();
   }
 }

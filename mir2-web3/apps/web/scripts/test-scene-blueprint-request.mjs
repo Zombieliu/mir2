@@ -574,7 +574,7 @@ test("player, NPC and building packs load independently and publish only pinned 
   assert.equal(retried[2], objectLoads[2]);
   assert.deepEqual({ ...await retried[0], ...second, ...third }, JSON.parse(readEntryVisual(visualsMetadata.objects)));
   assert.deepEqual(calls.map(({ url, options }) => [url, options.priority]), [
-    [male.path, "high"], [female.path, "high"], [visualsMetadata.npcs.path, "low"],
+    [male.path, "high"], [female.path, "high"], [visualsMetadata.npcs.path, "high"],
     [firstObject.path, "low"], [secondObject.path, "low"], [thirdObject.path, "low"], [firstObject.path, "low"],
   ]);
 });

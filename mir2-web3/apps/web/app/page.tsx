@@ -2174,6 +2174,7 @@ export default function HomePage() {
     [wideMobileActive, wideMobileViewport.height, wideMobileViewport.width],
   );
   const runtimeRef = useRef<RuntimeModule | null>(null);
+  const runtimeDownloadRecoveryRef = useRef(new Set<string>());
   const socialBudgetRef = useRef<SocialOperationBudgetHost | null>(null);
   if (socialBudgetRef.current === null) socialBudgetRef.current = new SocialOperationBudgetHost(() => runtimeRef.current);
   const socialBudgetBootstrapRef = useRef<SocialReplyOwner | null>(null);
@@ -5533,6 +5534,14 @@ export default function HomePage() {
   useEffect(() => {
     let disposed = false;
     const fontPrewarmController = new AbortController();
+    const runtimeOwner = new AbortController();
+    if (screen !== "game") runtimeDownloadRecoveryRef.current.clear();
+    const takeRuntimeRecovery = (sourceKey: string) => {
+      if (disposed || runtimeOwner.signal.aborted || runtimeDownloadRecoveryRef.current.has(sourceKey)) return false;
+      runtimeDownloadRecoveryRef.current.add(sourceKey);
+      markMir2CacheMilestone("bevyRuntimeDownloadRecovery", { sourceKey });
+      return true;
+    };
     setBevyRuntimeStarted(false);
 
     if (!shouldBootBevyRuntime) {
@@ -5541,6 +5550,7 @@ export default function HomePage() {
       markMir2CacheMilestone("bevyRuntimeDeferred", { screen });
       return () => {
         disposed = true;
+        runtimeOwner.abort();
       };
     }
 
@@ -5675,7 +5685,9 @@ export default function HomePage() {
         let fallbackFrom: BevyRuntimeBackend | undefined;
         let runtime: RuntimeModule;
         try {
-          runtime = await loadBevyRuntimeModule(runtimeBackend, bevyRuntimeStartup);
+          runtime = await loadBevyRuntimeModule(runtimeBackend, bevyRuntimeStartup, {
+            ownerSignal: runtimeOwner.signal, takeRecovery: takeRuntimeRecovery,
+          });
         } catch (error) {
           if (shouldRetryBevyRuntimeWithWebGl2(runtimeBackend, runtimeSupport.webgl2, error)) {
             fallbackFrom = runtimeBackend;
@@ -5688,7 +5700,9 @@ export default function HomePage() {
               stage: "module-load",
               message: error instanceof Error ? error.message : String(error),
             });
-            runtime = await loadBevyRuntimeModule(runtimeBackend, bevyRuntimeStartup);
+            runtime = await loadBevyRuntimeModule(runtimeBackend, bevyRuntimeStartup, {
+              ownerSignal: runtimeOwner.signal, takeRecovery: takeRuntimeRecovery,
+            });
           } else {
             throw error;
           }
@@ -5807,6 +5821,7 @@ export default function HomePage() {
 
     return () => {
       disposed = true;
+      runtimeOwner.abort();
       fontPrewarmController.abort();
     };
   }, [bevyRuntimeStartup, clientProfile.input, clientProfile.layout, screen, shouldBootBevyRuntime]);
@@ -22767,9 +22782,29 @@ async function waitForBevyCanvas(timeoutMs = 15000): Promise<void> {
   });
 }
 
-const bevyRuntimeModuleLoads = new Map<string, Promise<RuntimeModule>>();
+type RuntimeModuleLoad = {
+  promise: Promise<RuntimeModule>;
+  initializationStarted: boolean;
+  initialized: boolean;
+  uncertain: boolean;
+};
+type RuntimeModuleLoadOwner = {
+  ownerSignal?: AbortSignal;
+  takeRecovery?: (sourceKey: string) => boolean;
+};
+const bevyRuntimeModuleLoads = new Map<string, RuntimeModuleLoad>();
 
-async function loadBevyRuntimeModule(backend: BevyRuntimeBackend, startup: BevyRuntimeStartup): Promise<RuntimeModule> {
+async function loadBevyRuntimeModule(
+  backend: BevyRuntimeBackend,
+  startup: BevyRuntimeStartup,
+  owner: RuntimeModuleLoadOwner = {},
+): Promise<RuntimeModule> {
+  owner.ownerSignal?.throwIfAborted();
+  for (const record of bevyRuntimeModuleLoads.values()) {
+    if (record.uncertain) throw Object.assign(new Error("Runtime initialization is indeterminate; reload required"), {
+      runtimeInitializationUncertain: true,
+    });
+  }
   const selectedPackage = getBevyRuntimePackageForBackend(startup, backend);
   if (!selectedPackage || !startup.manifest) throw new Error("Runtime package is unavailable for fixed startup mode");
   const { moduleUrl: runtimePath, wasmUrl: runtimeWasmPath } = createBevyRuntimeUrls(
@@ -22778,20 +22813,66 @@ async function loadBevyRuntimeModule(backend: BevyRuntimeBackend, startup: BevyR
     BEVY_RUNTIME_ASSET_BASE_URL,
   );
   const existing = bevyRuntimeModuleLoads.get(runtimePath);
-  if (existing) return existing;
+  if (existing) return existing.promise;
   // The manifest-checked app rewrite serves this exact version/package. Keep
   // glue on its immutable release URL and the same remote binary as fallback.
   const { wasmUrl: localRuntimeWasmPath } = createBevyRuntimeUrls(startup.manifest.version, selectedPackage.id);
-  const loading = initializeBevyRuntimeModule(runtimePath, localRuntimeWasmPath, runtimeWasmPath);
-  bevyRuntimeModuleLoads.set(runtimePath, loading);
-  void loading.catch(() => {
-    if (bevyRuntimeModuleLoads.get(runtimePath) === loading) bevyRuntimeModuleLoads.delete(runtimePath);
-  });
+  const record: RuntimeModuleLoad = {
+    promise: undefined as unknown as Promise<RuntimeModule>,
+    initializationStarted: false, initialized: false, uncertain: false,
+  };
+  const retire = () => {
+    if (record.initialized) return;
+    if (record.initializationStarted) record.uncertain = true;
+    else if (bevyRuntimeModuleLoads.get(runtimePath) === record) bevyRuntimeModuleLoads.delete(runtimePath);
+  };
+  owner.ownerSignal?.addEventListener("abort", retire, { once: true });
+  let pending: Promise<RuntimeModule>;
+  try {
+    pending = initializeBevyRuntimeModule(runtimePath, localRuntimeWasmPath, runtimeWasmPath, {
+      ownerSignal: owner.ownerSignal,
+      takeRecovery: owner.takeRecovery ? () => owner.takeRecovery!(runtimePath) : undefined,
+      onInitializationStarted: () => { record.initializationStarted = true; },
+    });
+  } catch (error) {
+    owner.ownerSignal?.removeEventListener("abort", retire);
+    throw error;
+  }
+  const loading = pending.then((runtime) => {
+    record.initialized = true;
+    record.uncertain = false;
+    return runtime;
+  }, (error: unknown) => {
+    if (record.initializationStarted || (typeof error === "object" && error !== null &&
+        "runtimeInitializationUncertain" in error && error.runtimeInitializationUncertain === true)) {
+      record.uncertain = true;
+      throw Object.assign(new Error("Runtime initialization is indeterminate; reload required"), {
+        runtimeInitializationUncertain: true, cause: error,
+      });
+    }
+    if (bevyRuntimeModuleLoads.get(runtimePath) === record) bevyRuntimeModuleLoads.delete(runtimePath);
+    throw error;
+  }).finally(() => owner.ownerSignal?.removeEventListener("abort", retire));
+  record.promise = loading;
+  bevyRuntimeModuleLoads.set(runtimePath, record);
+  // A retired pre-initialization owner must not leave its rejected promise in
+  // the cache while a new effect starts. Its late catch cannot evict the new one.
+  if (owner.ownerSignal?.aborted) retire();
   return loading;
 }
 
-async function initializeBevyRuntimeModule(runtimePath: string, runtimeWasmPath: string, fallbackWasmPath?: string): Promise<RuntimeModule> {
+async function initializeBevyRuntimeModule(
+  runtimePath: string,
+  runtimeWasmPath: string,
+  fallbackWasmPath?: string,
+  owner: {
+    ownerSignal?: AbortSignal;
+    takeRecovery?: () => boolean;
+    onInitializationStarted?: () => void;
+  } = {},
+): Promise<RuntimeModule> {
   return initializeBevyRuntime({
+    ...owner,
     loadModule: () => import(/* webpackIgnore: true */ runtimePath) as Promise<RuntimeModule>,
     wasmUrl: runtimeWasmPath,
     wasmFallbackUrls: fallbackWasmPath ? [fallbackWasmPath] : [],
