@@ -1,0 +1,128 @@
+{
+  "kind": "r16-frozen-public-walking-observer-offline-tests",
+  "passed": true,
+  "manifestSha256": "6c62b7f981ee0f799b2eec7706b8408f614ef0a7c91afbe44b8bf3960ff65382",
+  "templateSha256": {
+    "bootstrap-chunk-observation.mjs": "28138d86a82c0030421845d8b198fc2d010ae0ffc5b1f486480dddb36c41bf37",
+    "terrain-observation.mjs": "90ab5e328f6a93713b6ee797545632fd8a47f5897d72d7009b175aa331845f45",
+    "desktop-qr-city-direct-cdp.mjs": "f5ce5684fcb067ea1c67eecaf93e9b5db224428bd0c04ae132160c69b5e3132f"
+  },
+  "testSha256": "897455fbc553936d5e85f8fda42c1a8d85ab0bf145de8469fd0bec13c0a2d585",
+  "realScriptSha256": "2b943dfba306b69c13a50b0d5c0c418dcfaaaee109c5ae12e07daf4c23682ff2",
+  "realPayloadSha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+  "tests": 19,
+  "pass": 19,
+  "fail": 0,
+  "results": [
+    {
+      "name": "real dist AST validates all 764724 original bytes, SHA and 240 PNGs including Monster139 skip3",
+      "passed": true,
+      "ms": 26
+    },
+    {
+      "name": "walking image path set is disjoint from the real pinned standing pack",
+      "passed": true,
+      "ms": 1
+    },
+    {
+      "name": "the three preexisting real scene floor locale chunks keep their exact baseline acceptance pins and counts",
+      "passed": true,
+      "ms": 95
+    },
+    {
+      "name": "truncated corrupt duplicate foreign-kind and empty scripts reject without evaluating observed JS",
+      "passed": true,
+      "ms": 46
+    },
+    {
+      "name": "CDP loadingFailed and partial bodies never request a body or qualify compiled walking",
+      "passed": true,
+      "ms": 1
+    },
+    {
+      "name": "CDP complete but truncated script fails body verification and retains its failure row",
+      "passed": true,
+      "ms": 1
+    },
+    {
+      "name": "foreign resource and non200 script cannot qualify or trigger an out-of-scope body read",
+      "passed": true,
+      "ms": 0
+    },
+    {
+      "name": "a full compiled body alone stays unqualified; legitimate Next query does not invalidate payload",
+      "passed": true,
+      "ms": 30
+    },
+    {
+      "name": "direct JSON classification is unchanged, failed/partial/wrong-kind attempts remain preserved",
+      "passed": true,
+      "ms": 0
+    },
+    {
+      "name": "Node-side PNG validation independently rejects wrong declared SHA false body and visibility flags",
+      "passed": true,
+      "ms": 169
+    },
+    {
+      "name": "Node-side valid full PNG is decoded and hash checked; returned evidence strips PNG body",
+      "passed": true,
+      "ms": 27
+    },
+    {
+      "name": "trusted DOM function positive control qualifies a real pinned decoded PNG in Node model",
+      "passed": true,
+      "ms": 30
+    },
+    {
+      "name": "trusted DOM function rejects dead hidden retired blob undecoded and zero-area initial images",
+      "passed": true,
+      "ms": 194
+    },
+    {
+      "name": "trusted DOM function rechecks death hide owner retirement and blob changes after async hash",
+      "passed": true,
+      "ms": 131
+    },
+    {
+      "name": "stopped DOM observer cannot publish a hash that completes after cleanup",
+      "passed": true,
+      "ms": 26
+    },
+    {
+      "name": "late script or post-deadline PNG cannot turn the frozen Walking gate into a pass",
+      "passed": true,
+      "ms": 41
+    },
+    {
+      "name": "terrain resource classifier and nonwalking network semantics remain exact baseline logic",
+      "passed": true,
+      "ms": 19
+    },
+    {
+      "name": "driver is byte-token equivalent outside four specific Walking-observer edits; auth wallet one-role 8s/120s gates retained",
+      "passed": true,
+      "ms": 48
+    },
+    {
+      "name": "terrain uses the same 67.5s observation budget, checkpoints and unchanged six nonwalking prerequisites",
+      "passed": true,
+      "ms": 0
+    }
+  ],
+  "actions": {
+    "browser": false,
+    "network": false,
+    "auth": false,
+    "driverImport": false,
+    "observedJavaScriptEvaluation": false,
+    "sourceMutation": false
+  },
+  "scopes": [
+    "Static AST/JSON parsing and actual full PNG decode/SHA in Node",
+    "Synthetic EventEmitter CDP and synthetic Page/DOM/Canvas model only",
+    "Trusted local observer function executes in isolated Node context; observed JS never executes",
+    "No real layout compositor animation AI or public acceptance result"
+  ],
+  "node": "v22.18.0"
+}

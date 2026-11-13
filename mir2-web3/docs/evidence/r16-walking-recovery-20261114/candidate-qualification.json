@@ -1,0 +1,35 @@
+{
+  "source": "91b8fc9b4f5170cb37b6619b991707ed76a34d73",
+  "base": "f6e30a0ee8021d745ecce35e295edf5f60e39964",
+  "candidate": "f6e30a0ee802-walking-recovery-668d1d43",
+  "buildReceiptSha256": "cb800d32eb8319298671b43145f92da0a4e1c110fe671faeec65233f166fdcf5",
+  "sourceClosureSha256": "05bf44477d534a597a0845c323aef692b57b37af607f6b4a0911e9a8e3532683",
+  "checks": {
+    "qualifiedScene": 118,
+    "failed": 0,
+    "skipped": 0
+  },
+  "inputs": [
+    {
+      "filename": "mir2-web3/apps/web/lib/r16-entry-scene.ts",
+      "sha256": "72aeb6697c929dd24a7c1c570d72eb02cd33ceb914c1f3a4d2931074e27ae23e",
+      "bytes": 12426
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/generate-r16-bootstrap-chunks.mjs",
+      "sha256": "a16626bcbd405102a6c9e9cb03252c1b60ddc3c7772859506359ab78a6b129ee",
+      "bytes": 3125
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/generated/r16-entry-bootstrap-chunks.ts",
+      "sha256": "76c2755c68f439b98b027478c06dec86ba92c993edf18ad32c5e8ec5c07205dd",
+      "bytes": 1307
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-pinned-bootstrap-chunk.mjs",
+      "sha256": "22cee4887853438fad9323f4f5b698aec12a968b4e630a1a5599e79e8b548c61",
+      "bytes": 17798
+    }
+  ],
+  "scope": "Committed exact source after qualified build and committedShell-based tests; browser/releasequalification pending."
+}

@@ -1,0 +1,28 @@
+{
+  "source": "91b8fc9b4f5170cb37b6619b991707ed76a34d73",
+  "checks": [
+    {
+      "name": "qualified-scene-checks.log",
+      "count": 118,
+      "passed": 118,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "bytes": 29992,
+      "sha256": "75d0eb9188932b9d8572217f3728356d3ce750cde5fee4174d7832d7eae3d24d",
+      "rawLocalPath": "C:/r16-walking-recovery-20261114/qualified-scene-checks.log"
+    },
+    {
+      "name": "release-guards.log",
+      "count": 70,
+      "passed": 70,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "bytes": 17408,
+      "sha256": "6e288022c4f15b04ebeb952e5c051035632192b8715d8f2c7af17ab724d874c0",
+      "rawLocalPath": "C:/r16-walking-recovery-20261114/release-guards.log"
+    }
+  ],
+  "scope": "Existing exact-qualified-source tests, not rerun or a substitute for the still-open actual animation gate."
+}

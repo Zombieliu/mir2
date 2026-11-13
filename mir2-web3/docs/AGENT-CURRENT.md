@@ -14,7 +14,7 @@ Short routing summary, updated 2026-11-14 (Asia/Shanghai). This indexes recorded
 
 ## Last recorded decisions and open work
 
-2026-11-14 正式为 f6603c89a3／dpl_3eNPP4uaj3nT3HsAMhJUUoXpN4Dh，保留 R16 寻路方向与确认修复。部分正文失败的现有额外重试先轮换来源；95＋70 项、构建及两后端四会话通过。首次公网行走包部分读取失败后回退，独立完整 SHA 后同源新浏览器功能回放及静态读回通过。第二轮首步127ms、点击至首帧30.667秒、Native观测204.320秒，原冷120秒仍false；Goal active。[唯一详细回执](evidence/r16-runtime-source-rotation-20261114/production/README.md)。下一有界项是 walking 两次传输失败后的已校验 compiled 恢复，保留原次数／期限；死亡弹窗四个 ui.death.* 未登记及其余1:1仍开放。
+2026-11-14 正式仍为 f6603c89a3／dpl_3eNPP4uaj3nT3HsAMhJUUoXpN4Dh，保留 R16 寻路方向、目标与确认修复；[正式功能回放](evidence/r16-runtime-source-rotation-20261114/production/README.md) 的首步127ms、首帧30.667秒、Native观测204.320秒，原冷120秒仍false。walking有限compiled恢复91b8fc9b4f已提交、Stage/READY，118＋70项与构建通过；本地两次部分JSON后完整240PNG载荷通过，但五轮实际动画未过，qualified sessions仍0，尚未Promote。r5单击与退步已接受，当前场景在村庄安全区；先以普通协议确认区外真实移动，再重做画面及重登。原失败／旧GPU猜测的替代证据及旧pin元数据纠正均保留。[候选与边界](evidence/r16-walking-recovery-20261114/README.md)。死亡弹窗四个ui.death.*、冷加载、实体手机及其余1:1开放，Goal active。
 
 2026-11-12 正式站已发布 `51d2dcc346`：共享图片取消与图集计时/JSON大小缓存身份修复。本机75项、生产构建及两后端重开同档通过；公网简繁出码、手机尺寸官方钱包Testnet签名、进比奇、权威移动、共用HUD/任务窗、113/113预取和正常退出通过，无需回滚。云端缓存身份与计算一致；Worker正常更新缓存一次，未迁移旧007缓存。本次观测起点到首画面65.2秒/共用HUD104.7秒（点击进游戏后约6.8秒/46.3秒），继续优化冷加载；实体手机、完整1:1及历史未结项仍开放。[发布与边界](evidence/r16-cache-repair-20261112/README.md)
 

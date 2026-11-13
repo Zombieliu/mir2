@@ -1,0 +1,23 @@
+{
+  "candidate": "f6e30a0ee802-walking-recovery-668d1d43",
+  "buildId": "Lgy7EhuAT0ZovaqfJlwVL",
+  "dist": ".next-walking-recovery-r1",
+  "chunk": {
+    "kind": "walking",
+    "path": "/_next/static/chunks/r16-entry-monster-walking-fallback.711d89a507e416d3.js",
+    "bytes": 764839,
+    "sha256": "2b943dfba306b69c13a50b0d5c0c418dcfaaaee109c5ae12e07daf4c23682ff2",
+    "gzipBytes": 529779,
+    "jsonBytes": 764724,
+    "payloadSha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+    "sourcePath": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+    "format": "json-line"
+  },
+  "pin": {
+    "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+    "bytes": 764724,
+    "sha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f"
+  },
+  "images": 240,
+  "scope": "Actual complete production JS; static AST only; json-line reconstructs exact original walking bytes/SHA."
+}

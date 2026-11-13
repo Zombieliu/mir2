@@ -10,7 +10,7 @@ Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 G
 
 ## 保留的当前未结项
 
-- [ ] 行走包两次正文8秒idle后缺恢复。当前CDN404；下一项给相同764724B／SHA41fc…接入既有一次20秒 pinned compiled fallback，完整240帧／终止失败／超时及晚到不发布另验，不加JSON请求或放宽期限。[实际失败](evidence/r16-runtime-source-rotation-20261114/production/first-attempt.json)
+- [ ] 行走包有限compiled恢复91b8fc9b4f已提交、Stage/READY；118＋70项、构建和完整240PNG载荷通过，实际动画与两后端四会话仍未过，未Promote。r5真实单击／退步通过但在安全区、怪物移动为0；先验普通区外移动，暖场保留实际保存点与地图应用检查。原8秒／20秒／120秒不变。[候选及五轮失败](evidence/r16-walking-recovery-20261114/README.md)
 - [ ] Web死亡弹窗四个 ui.death.* 未登记；补齐十语言并独立验收文案，不将其冒充共享弹窗外观1:1。
 
 - [x] Worker重启缓存修复已发布f6acaad6b0；公网停启后同一HUD图与配置通过。受控两后端全流程另记，公网联合检查仍false。[发布/失败范围](evidence/r16-worker-restart-20261113/production/README.md)

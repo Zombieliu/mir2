@@ -1,5 +1,9 @@
 # Frontend 1:1 Gaps
 
+## R16 行走包恢复候选（2026-11-14）
+
+91b8fc9b4f已提交、Stage/READY，118项、70保护与生产构建通过；实际浏览器两次部分JSON后完整240PNG编译载荷通过，但Walking动画仍为0、完整会话资格false，尚未Promote，正式保持f6603c89a3。r5单击及权威退步已通过，需换正常区外场景确认移动后再验消费；保留五轮失败和被替代的GPU猜测。原冷120秒仍false，整体1:1及最终人类Accepted开放。[证据与范围](evidence/r16-walking-recovery-20261114/README.md)
+
 ## R16 部分下载来源轮换与发布（2026-11-14）
 
 2026-11-14 正式 f6603c89a3 已通过两后端四会话及新浏览器公网功能回放：部分运行包失败后换源，首步127ms、共享HUD/Q、六字体、113/113、Worker停启和退出通过。首次行走包部分读取失败与回退保留，第二轮静态11路径、16站立chunk和3bootstrap完整SHA通过。点击到首帧30.667秒／Native观测204.320秒，原120秒冷资格仍false。行走包最后恢复、混合英文／NPC名称、蓝线浏览器手势、实体手机及整体1:1继续开放。[本轮详细回执](evidence/r16-runtime-source-rotation-20261114/production/README.md) · [保留的寻路修复](evidence/r16-route-direction-20261113/README.md)

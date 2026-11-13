@@ -1,5 +1,7 @@
 # Windows R16 与 Web 1:1 验收
 
+2026-11-14 行走包恢复91b8fc9b4f已提交并Stage/READY，118＋70项、生产构建和完整240PNG编译载荷通过；实际动画与完整本地四会话尚未过，未Promote，正式仍f6603c89a3。r5真实单击／退步通过但在村庄安全区、怪物移动0；先做普通区外协议确认再重验。原失败和元数据纠正保留，不提高整体Candidate，Goal active。[候选与下一门槛](evidence/r16-walking-recovery-20261114/README.md)
+
 2026-11-14 当前正式来源 f6603c89a3，继承 Windows R16 寻路修复并新增部分正文失败后的有限来源轮换。95项、70保护、构建、两后端四会话及第二次公网功能回放／完整静态读回通过；首次行走包失败和回退单列。原120秒冷资格仍false：第二轮首帧30.667秒、Native观测204.320秒，不能由本地37秒或功能通过替代。保留版本继续改进，不上调整体Candidate；行走包恢复、死亡弹窗十语、蓝线手势和其余1:1／实体手机继续开放，Goal active。[最新证据](evidence/r16-runtime-source-rotation-20261114/production/README.md) · [寻路方向与确认](evidence/r16-route-direction-20261113/README.md)
 
 2026-11-13 d99212e3cd优先现有第一方完整字体，显式六字体预热移到最终运行包成功之后；231项、构建和四会话及正式扫码签名/进城/移动/共用HUD/Q/六字体/113/Worker停启/退出通过。公网Native185.240秒超原120秒，冷资格false，持续Goal未完成。先跟进Edge右键手势和图片菜单的真实事件复现，完整三职业/旧档/像素/实体手机仍开放。[正式结果](evidence/r16-firstparty-font-delivery-20261113/production/README.md) · [玩家反馈](evidence/r16-edge-right-button-report-20261113/README.md)
