@@ -1,0 +1,40 @@
+{
+  "attempted": true,
+  "passed": true,
+  "status": "one-authoritative-walk",
+  "from": {
+    "x": 288,
+    "y": 616
+  },
+  "to": {
+    "x": 289,
+    "y": 616,
+    "direction": "Right"
+  },
+  "geometry": {
+    "source": "sha256-pinned-local-release-reference",
+    "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325"
+  },
+  "physical": {
+    "input": "trusted-playwright-keyboard-pulse",
+    "key": "ArrowRight",
+    "atMs": 117187
+  },
+  "wire": {
+    "type": "walk",
+    "direction": "Right",
+    "atMs": 117190
+  },
+  "ack": {
+    "x": 289,
+    "y": 616,
+    "packet": "UserLocation",
+    "atMs": 117321
+  },
+  "ackWithinEightSeconds": true,
+  "rendered": {
+    "x": 289,
+    "y": 616,
+    "atMs": 117343
+  }
+}

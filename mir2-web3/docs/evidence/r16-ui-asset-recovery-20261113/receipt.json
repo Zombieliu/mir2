@@ -7,7 +7,7 @@
   "browserCases": 4,
   "coldAndWarmSessions": 8,
   "featureCandidatePassed": true,
-  "newCandidatePublished": false,
+  "newCandidatePublished": true,
   "projectCandidate100": false,
   "humanAccepted": false,
   "existingProduction": "432c58a07e44db021679aab9a6562a02c9124b10",
@@ -15,5 +15,10 @@
   "originalGates": {
     "movementMs": 8000,
     "sharedUiMs": 120000
-  }
+  },
+  "publicationPassed": true,
+  "publishedSource": "e7cbab02f030ae50b28031ca0237d630eccb7c03",
+  "deployment": "dpl_4jjpevpspsVtf61hUCgTHiKxRatZ",
+  "functionalPublicSamplePassed": true,
+  "publicationEvidence": "production/README.md"
 }

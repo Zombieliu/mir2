@@ -6,7 +6,7 @@ Updated 2026-11-13 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-13 共用UI失败资源的同实例有界恢复候选通过：48项Rust、38项Node、两渲染路径四条全流程／八个冷热会话；字体和HUD／Quest皮肤实际失败后恢复，原句柄、generation及原8秒／120秒门槛保持。新三包bevy-0c553a754308e5b8已构建，尚待R2与匹配Web发布。生产仍为432c，原公网失败、未发送Walk及未执行Worker保留。131份WIP未变，另一个任务的容量文档更新单列；整体1:1开放。[候选与失败边界](evidence/r16-ui-asset-recovery-20261113/README.md)
+2026-11-13 已发布e7cbab02f0及新六叶运行包：简繁出码、官方手机尺寸Testnet一次签名、比奇实走、共享HUD/Q、六字体、113/113、Worker停启和正常退出通过。同实例19个asset错误样本后恢复；原首步131ms／HUD118.667秒门槛通过，联合粗采样120.238秒单列。冷加载45.079秒及CDN头55.860秒仍待优化；实体手机、公开旧档和整体1:1开放。131份WIP未变，外部容量文档提交另记。[正式结果与边界](evidence/r16-ui-asset-recovery-20261113/production/README.md)
 
 ## 保留的当前未结项
 
@@ -18,7 +18,8 @@ Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 G
 - [x] 运行包boot前有界恢复候选通过两后端、真实Chrome边界与85项检查；两次503后完整包恢复，原门槛和失败保留。[候选](evidence/r16-runtime-body-recovery-20261113/README.md)
 - [x] 已发布432c并完成一次公网签名回放；完整运行包/App启动通过，TC缺失与112/113导致共用界面未就绪，Walk未发送/Worker未执行，完整资格false。[正式回执](evidence/r16-runtime-body-recovery-20261113/production/README.md)
 - [x] 共享Rust字体及HUD/Quest必需图的Failed有界恢复候选通过48项Rust、38项Node和两渲染路径四条完整流程，保留句柄/generation/FontCx；只清已恢复的asset error。[候选与原失败](evidence/r16-ui-asset-recovery-20261113/README.md)
-- [ ] 发布新六叶运行包和匹配Web，再沿原8秒/120秒门槛复验公网；补动态相邻格核对，保留原Walk跳过和未完成资格。
+- [x] 新六叶与匹配Web已发布e7cb，公网首步131ms、原HUD118.667秒及功能回放通过；两秒联合采样120.238秒单列。[正式回执](evidence/r16-ui-asset-recovery-20261113/production/README.md)
+- [ ] 继续冷加载／CDN响应头、精确联合打点、公开旧档和动态相邻格核对；保留原Walk跳过与全局未完成资格。
 - [ ] 恢复候选截图仍见NPC名称不完整、任务提示英文和球内血量文字未见，继续像素/状态对照；不由Native ready或原字体缓存通过代替视觉验收。[截图范围](evidence/r16-runtime-body-recovery-20261113/README.md)
 
 - [x] 已执行df7aace169发布与扩展验收，公网分项通过但完整冷加载false，已回退正式站72c00d20ae。[正式回执](evidence/r16-font-release-20261112/README.md)

@@ -1,6 +1,6 @@
 # R16 共用 UI 资源同实例恢复候选
 
-本地候选 `63977fd7e102-ui-assets-fa52144b`，新运行包 `bevy-0c553a754308e5b8`。**本页记录候选，尚未发布这份新运行包。** 当前生产仍为 `432c58a07e`，其[公网失败与固定源码](../r16-runtime-body-recovery-20261113/production/README.md)保留；整体 1:1 与真人 Accepted 未完成。
+本地候选 `63977fd7e102-ui-assets-fa52144b`，新运行包 `bevy-0c553a754308e5b8`。**本页记录候选验证；现已正式发布 `e7cbab02f0`，见[正式回执](production/README.md)。** 此前 `432c58a07e` 的[公网失败与固定源码](../r16-runtime-body-recovery-20261113/production/README.md)保留；整体 1:1 与真人 Accepted 未完成。
 
 共享 Rust 资源所有者保留原 Font/Image 句柄，按完整 AssetPath 去重。只对 Failed 使用 `Time<Real>` 的 1 秒／2 秒间隔，最多两次额外请求；Loading、Loaded、窗口开关与重复所有者不重置额度。HUD 和 Quest 注册各自必需皮肤，每帧系统可在没有新快照时恢复。全部资源实际加载、六套 FontCx 映射恢复后，仅清除对应 asset error；其他错误保持独立。
 
@@ -18,4 +18,4 @@
 
 源码已提交并推送为 `e7cbab02f0`；运行包归档由新 tag `codex/r16-ui-asset-recovery-runtime-20261113` 保留。460 份输入中 454 份与 Git 原文逐字节一致，另六份仅为 Git 换行规范差异，已用 `git hash-object --path` 核对；本轮八份覆盖文件全部匹配。[提交与换行核对](source-binding.json)
 
-新六叶已由 [R2 发布 43339966843](https://github.com/Zombieliu/mir2/actions/runs/43339966843) 上传并逐叶读回、核对存储表示；没有改动既有素材 manifest 或旧运行包。匹配 Web 生产候选尚待切换。
+新六叶已由 [R2 发布 43339966843](https://github.com/Zombieliu/mir2/actions/runs/43339966843) 上传并逐叶读回、核对存储表示；没有改动既有素材 manifest 或旧运行包。匹配 Web 生产候选已切换，见[正式回执](production/README.md)。

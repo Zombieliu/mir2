@@ -15,7 +15,7 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
-2026-11-13 共用UI失败资源的同实例有界恢复候选通过：48项Rust、38项Node、两渲染路径四条全流程／八个冷热会话；字体和HUD／Quest皮肤实际失败后恢复，原句柄、generation及原8秒／120秒门槛保持。新三包bevy-0c553a754308e5b8已构建，尚待R2与匹配Web发布。生产仍为432c，原公网失败、未发送Walk及未执行Worker保留。131份WIP未变，另一个任务的容量文档更新单列；整体1:1开放。[候选与失败边界](evidence/r16-ui-asset-recovery-20261113/README.md)
+2026-11-13 已发布e7cbab02f0及新六叶运行包：简繁出码、官方手机尺寸Testnet一次签名、比奇实走、共享HUD/Q、六字体、113/113、Worker停启和正常退出通过。同实例19个asset错误样本后恢复；原首步131ms／HUD118.667秒门槛通过，联合粗采样120.238秒单列。冷加载45.079秒及CDN头55.860秒仍待优化；实体手机、公开旧档和整体1:1开放。131份WIP未变，外部容量文档提交另记。[正式结果与边界](evidence/r16-ui-asset-recovery-20261113/production/README.md)
 
 2026-11-12 正式站已发布 `51d2dcc346`：共享图片取消与图集计时/JSON大小缓存身份修复。本机75项、生产构建及两后端重开同档通过；公网简繁出码、手机尺寸官方钱包Testnet签名、进比奇、权威移动、共用HUD/任务窗、113/113预取和正常退出通过，无需回滚。云端缓存身份与计算一致；Worker正常更新缓存一次，未迁移旧007缓存。本次观测起点到首画面65.2秒/共用HUD104.7秒（点击进游戏后约6.8秒/46.3秒），继续优化冷加载；实体手机、完整1:1及历史未结项仍开放。[发布与边界](evidence/r16-cache-repair-20261112/README.md)
 

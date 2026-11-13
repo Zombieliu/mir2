@@ -1,0 +1,146 @@
+{
+  "revision": "e7cbab02f030ae50b28031ca0237d630eccb7c03",
+  "deploymentId": "dpl_4jjpevpspsVtf61hUCgTHiKxRatZ",
+  "passed": true,
+  "walletNetworkGuard": {
+    "schema": 1,
+    "requestInterception": false,
+    "operations": {
+      "http-read": 168,
+      "testnet-grpc-read": 2,
+      "testnet-graphql-query": 2,
+      "exact-login-session-read": 1,
+      "signed-login-approval": 1
+    },
+    "forbiddenCount": 0,
+    "forbidden": [],
+    "browserClosed": true
+  },
+  "failure": null,
+  "gameProtocol": {
+    "gameSockets": 1,
+    "passkeyLogin": 1,
+    "loginSuccess": 1,
+    "newCharacter": 1,
+    "newCharacterSuccess": 1,
+    "startGame": 1,
+    "startGameResult": 4,
+    "walk": 1,
+    "logOut": 1,
+    "logOutSuccess": 1,
+    "unexpectedMutation": 0
+  },
+  "normalTestnetWalletCreated": true,
+  "qaGameRoleCreated": true,
+  "authorizedApprovalOnly": {
+    "approved": true,
+    "exactAppAndSession": true,
+    "loginOnlyConsent": true,
+    "noFunds": true,
+    "httpsRelayReadAndApprove": true,
+    "oneClick": true,
+    "oneRequest": true
+  },
+  "walletNetworkMode": "default",
+  "sharedHud": {
+    "optional": true,
+    "passed": true,
+    "status": "observed",
+    "gateReady": true,
+    "runtimeDelivered": true,
+    "diary": {
+      "passed": true,
+      "locale": "zh-TW",
+      "renderer": "ordinary-shared-native",
+      "questOpened": true,
+      "qClosed": true,
+      "owner": "bevy",
+      "package": {
+        "backend": "webgpu",
+        "packageId": "webgpu"
+      },
+      "navigation": {
+        "characterOpen": false,
+        "characterPage": "character",
+        "bagOpen": false,
+        "questOpen": false
+      },
+      "zeroWorldCommands": true,
+      "screenshot": "quest-shared-zh-TW.png"
+    }
+  },
+  "logout": {
+    "attempted": true,
+    "passed": true,
+    "returnedToSelect": true,
+    "sent": 1,
+    "acknowledged": 1
+  },
+  "timing": {
+    "clockEpochMs": 1794532465354,
+    "authoritativeLoginSuccessMs": 41062,
+    "startIntentMs": 71912,
+    "startAckMs": 75998,
+    "authoritativeStarterMapMs": 76006,
+    "authoritativeSelfMs": 76006,
+    "firstPlayableObservedMs": 117028,
+    "terrainPaintVerifiedMs": 185125,
+    "sharedHudObservedMs": 235658,
+    "logoutIntentMs": 265176,
+    "logoutAckMs": 266227,
+    "manifestAttemptsBeforeStart": 1,
+    "manifestAttemptsAtOrAfterStart": 0,
+    "starterRegionRequestMs": 41065,
+    "starterRegionWireHeadersMs": 42315.961,
+    "starterRegionResponseEventMs": 42316,
+    "starterRegionBodyMs": 42390,
+    "starterRegionCommitMs": 76122,
+    "sceneSpritesReadyMs": 76152,
+    "localeRequestMs": 41065,
+    "localeBodyMs": 43280,
+    "localeReadyMs": 43300,
+    "firstPlayableFrameMs": 116991,
+    "rendererBodyMs": 193983
+  },
+  "movement": {
+    "attempted": true,
+    "passed": true,
+    "status": "one-authoritative-walk",
+    "from": {
+      "x": 288,
+      "y": 616
+    },
+    "to": {
+      "x": 289,
+      "y": 616,
+      "direction": "Right"
+    },
+    "geometry": {
+      "source": "sha256-pinned-local-release-reference",
+      "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325"
+    },
+    "physical": {
+      "input": "trusted-playwright-keyboard-pulse",
+      "key": "ArrowRight",
+      "atMs": 117187
+    },
+    "wire": {
+      "type": "walk",
+      "direction": "Right",
+      "atMs": 117190
+    },
+    "ack": {
+      "x": 289,
+      "y": 616,
+      "packet": "UserLocation",
+      "atMs": 117321
+    },
+    "ackWithinEightSeconds": true,
+    "rendered": {
+      "x": 289,
+      "y": 616,
+      "atMs": 117343
+    }
+  },
+  "returnedToSelect": true
+}
