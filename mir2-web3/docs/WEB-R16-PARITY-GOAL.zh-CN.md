@@ -1,6 +1,6 @@
 # Windows R16 与 Web 1:1 验收
 
-2026-11-14 行走包恢复91b8fc9b4f已提交并Stage/READY，118＋70项、生产构建和完整240PNG编译载荷通过；实际动画与完整本地四会话尚未过，未Promote，正式仍f6603c89a3。r5真实单击／退步通过但在村庄安全区、怪物移动0；先做普通区外协议确认再重验。原失败和元数据纠正保留，不提高整体Candidate，Goal active。[候选与下一门槛](evidence/r16-walking-recovery-20261114/README.md)
+2026-11-14 行走包91b8fc9b4f候选Stage/READY，118＋70项／构建通过。R9默认冷启已在两次JSON失败后实画compiled六张原Walking帧，并正常回镇保存／重开；暖场误中前方Royal_Guard，完整本地四会话仍false，未Promote，正式仍f6603c89a3。继续补同点命中检查；R7/R8短站立窗口失败、R9通过与原期限均保留。整体Candidate不提高，Goal active。[实际画面及未过项](evidence/r16-walking-recovery-20261114/README.md)
 
 2026-11-14 当前正式来源 f6603c89a3，继承 Windows R16 寻路修复并新增部分正文失败后的有限来源轮换。95项、70保护、构建、两后端四会话及第二次公网功能回放／完整静态读回通过；首次行走包失败和回退单列。原120秒冷资格仍false：第二轮首帧30.667秒、Native观测204.320秒，不能由本地37秒或功能通过替代。保留版本继续改进，不上调整体Candidate；行走包恢复、死亡弹窗十语、蓝线手势和其余1:1／实体手机继续开放，Goal active。[最新证据](evidence/r16-runtime-source-rotation-20261114/production/README.md) · [寻路方向与确认](evidence/r16-route-direction-20261113/README.md)
 

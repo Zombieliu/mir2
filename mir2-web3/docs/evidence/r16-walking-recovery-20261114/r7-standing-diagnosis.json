@@ -1,0 +1,64 @@
+{
+  "kind": "read-only-r7-standing-gate-diagnosis",
+  "status": "FAILURE_PRESERVED_CAUSE_UNRESOLVED",
+  "candidate": "f6e30a0ee802-walking-recovery-668d1d43",
+  "buildId": "Lgy7EhuAT0ZovaqfJlwVL",
+  "evidence": [
+    {
+      "path": "C:/r16-walking-recovery-20261114/fixture-r6/game-full/quest-after-r7/early-player-before-assert.json",
+      "sha256": "654e0e8c9f645f6d84593c028f44e19a7ac72898561362578cd616978c164cc1"
+    },
+    {
+      "path": "C:/r16-walking-recovery-20261114/fixture-r6/game-full/quest-after-r7/entry-visual-receipt.json",
+      "sha256": "cf7f7bc3f661558fc2082d1169380ab0ca6d93fe170eb27af5f08626cd7130c5"
+    }
+  ],
+  "firstPlayableEpochMs": 1794598662434,
+  "idle": {
+    "startedAt": 1794598662437,
+    "endedAt": 1794598664638,
+    "durationMs": 2201,
+    "requiredPhases": 4,
+    "observedPhases": [0, 1, 2],
+    "rows": [
+      {"at": 1794598662447, "path": "/original-ui/CArmour/00/16.png"},
+      {"at": 1794598662685, "path": "/original-ui/CArmour/00/17.png"},
+      {"at": 1794598663408, "path": "/original-ui/CArmour/00/18.png"},
+      {"at": 1794598664210, "path": "/original-ui/CArmour/00/16.png"}
+    ],
+    "largestChangedRowGapMs": 802,
+    "nextChangedRow": {"at": 1794598664682, "path": "/original-ui/CArmour/00/17.png"}
+  },
+  "missingPhaseResource": {
+    "path": "/original-ui/CArmour/00/19.png",
+    "bytes": 2438,
+    "sha256": "14eee434f14d0f1546c1ffe007b78ca9ec18f52182c3375c76d003962d8364ec",
+    "verifiedAgainstPinnedOriginalPlayerPack": true,
+    "decodedDataRowsBeforeFirstPlayable": [1794598659877, 1794598661670],
+    "standingChunkFinishedAt": 1794598659468,
+    "firstOrdinaryStandingPngFinishedAt": 1794598665393,
+    "fullPlayerPackStillWithheldAtAssertion": true,
+    "interpretation": "The fourth PNG was available and published before first playable. It was not observed in the exact post-first-playable idle window. Pre-first-playable rows are not substituted for that required gate."
+  },
+  "overlappingRuntimeEvents": {
+    "wasmRequestedAt": 1794598662619,
+    "wasmServerFinishedAt": 1794598662629,
+    "gpuBootWarningAt": 1794598663108,
+    "interpretation": "Real runtime delivery/initialization overlapped the short idle window. Timing overlap does not establish longtask, clock reset or causation."
+  },
+  "functionalProgressBeforeFailure": {
+    "earlyWalkAckMs": [31, 2],
+    "continuousAcceptedWalkingInputs": 16,
+    "selfBodyStayedDecodedAfterFirstPlayableInRecordedRows": true,
+    "outsideStimulusReached": false,
+    "walkingPatchAnimationQualified": false
+  },
+  "sourceBoundaries": [
+    "entry-player-probe.mjs samples at intended20ms but only saves changed keys; it contains no heartbeat/longtask/target-pose evidence for this run.",
+    "original-client-scene-rendering.tsx prioritizes animationPose when supplied; otherwise its standing selector uses elapsed-time frame arithmetic.",
+    "Page publishes the initialized Native runtime, the entity-animation wrapper reads that runtime, and committed Shell poses can then replace the fallback selector.",
+    "DOM self-nameplate data-animation-action/frame/incarnation comes directly from the target animationPose; it does not by itself prove the held decoded body already displays that target pose."
+  ],
+  "conclusion": "The existing four-phase gate genuinely failed. Resource absence is contradicted by complete decoded exact19PNG evidence. Current records cannot separate an actual presentation skip, a Native clock handoff/reset, and a missed sampler interval. Do not relabel passed or change the original2200ms/4-phase/8s/120s conditions. The next isolated fixture adds observation only.",
+  "preparationActions": "Read-only file/source comparison and hashes only; no source/script edits to frozen r6, browser rerun, network, cache fill or game-state change."
+}

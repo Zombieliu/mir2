@@ -14,7 +14,7 @@ Short routing summary, updated 2026-11-14 (Asia/Shanghai). This indexes recorded
 
 ## Last recorded decisions and open work
 
-2026-11-14 正式仍为 f6603c89a3／dpl_3eNPP4uaj3nT3HsAMhJUUoXpN4Dh，保留 R16 寻路方向、目标与确认修复；[正式功能回放](evidence/r16-runtime-source-rotation-20261114/production/README.md) 的首步127ms、首帧30.667秒、Native观测204.320秒，原冷120秒仍false。walking有限compiled恢复91b8fc9b4f已提交、Stage/READY，118＋70项与构建通过；本地两次部分JSON后完整240PNG载荷通过，但五轮实际动画未过，qualified sessions仍0，尚未Promote。r5单击与退步已接受，当前场景在村庄安全区；先以普通协议确认区外真实移动，再重做画面及重登。原失败／旧GPU猜测的替代证据及旧pin元数据纠正均保留。[候选与边界](evidence/r16-walking-recovery-20261114/README.md)。死亡弹窗四个ui.death.*、冷加载、实体手机及其余1:1开放，Goal active。
+2026-11-14 正式仍f6603c89a3／dpl_3eNPP4uaj3nT3HsAMhJUUoXpN4Dh，保留寻路修复；[正式回放](evidence/r16-runtime-source-rotation-20261114/production/README.md) 首步127ms／Native204.320秒，原冷120秒false。walking恢复91b8fc9b4f已提交、Stage/READY，118＋70项／构建通过。区外普通协议实际移动通过；R9默认冷启两次JSON失败后实画同一compiled的六张Walking原帧，并正常回镇保存／重开。暖场脚本误中前方Royal_Guard，完整两后端四会话仍false，尚未Promote；新私有草稿补最终同点hover/click及完整命中规则。R7/R8短站立窗口3/4失败、R9原窗口通过及其心跳另记，未据此宣称时钟问题已修复。[唯一候选记录](evidence/r16-walking-recovery-20261114/README.md)。死亡弹窗十语、冷加载、实体手机及其余1:1开放，Goal active。
 
 2026-11-12 正式站已发布 `51d2dcc346`：共享图片取消与图集计时/JSON大小缓存身份修复。本机75项、生产构建及两后端重开同档通过；公网简繁出码、手机尺寸官方钱包Testnet签名、进比奇、权威移动、共用HUD/任务窗、113/113预取和正常退出通过，无需回滚。云端缓存身份与计算一致；Worker正常更新缓存一次，未迁移旧007缓存。本次观测起点到首画面65.2秒/共用HUD104.7秒（点击进游戏后约6.8秒/46.3秒），继续优化冷加载；实体手机、完整1:1及历史未结项仍开放。[发布与边界](evidence/r16-cache-repair-20261112/README.md)
 

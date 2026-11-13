@@ -1,0 +1,73 @@
+{
+  "source": "91b8fc9b4f5170cb37b6619b991707ed76a34d73",
+  "files": [
+    {
+      "name": "cold-walking-decoded-body-01.png",
+      "bytes": 3313,
+      "sha256": "f16d8bc43d7f2bd2e4709d4ff402857504bdd49419ffe16b3c360ae732b78a39",
+      "originalPath": "/original-ui/Monster/004/62.png",
+      "pixelSha256": "1124394501b7dc8deb51b628b85c463d40765033e4485d2b4ec4e83631770f48"
+    },
+    {
+      "name": "cold-walking-decoded-body-02.png",
+      "bytes": 3220,
+      "sha256": "3c6e7963e0cc68c70f7b35c8477b710103cc25aad5e78c0b991d4e900cc0c45f",
+      "originalPath": "/original-ui/Monster/004/63.png",
+      "pixelSha256": "072d3c6a7db357bccbca6fa1fa9486c2d045cce74a2422a4778bcf3244afe4ef"
+    },
+    {
+      "name": "cold-walking-decoded-body-03.png",
+      "bytes": 3354,
+      "sha256": "8792c8ce75499da46ec22a729cb83d6df4605ae34d9a6a861ef3452dab97374d",
+      "originalPath": "/original-ui/Monster/004/64.png",
+      "pixelSha256": "5e9d72967f783ccbe298c96c2cc3c18a1435efaaf7586b07456811cddbd794f8"
+    },
+    {
+      "name": "cold-walking-decoded-body-04.png",
+      "bytes": 3380,
+      "sha256": "206fa8dfce503453b30660d4e2060e7b8547379e7c0a464326310e16cd108fe7",
+      "originalPath": "/original-ui/Monster/004/65.png",
+      "pixelSha256": "46203a71eb05b8cbb4e090247260a46500420e834bced61ddba82dc923632fa2"
+    },
+    {
+      "name": "cold-walking-decoded-body-05.png",
+      "bytes": 3342,
+      "sha256": "10f55f20f5b8a41ce5109fa0e5a2c9ae97bac493a92fd088d9c33b46c240135f",
+      "originalPath": "/original-ui/Monster/004/66.png",
+      "pixelSha256": "aad0b4f39946acc977598d2246d8158e042629478591fdc9a998ebea39a2fd17"
+    },
+    {
+      "name": "cold-walking-decoded-body-06.png",
+      "bytes": 3205,
+      "sha256": "d7949c996d8f03ff78cb6b5aaed9c0831885d8991646384f159b3251339af910",
+      "originalPath": "/original-ui/Monster/004/67.png",
+      "pixelSha256": "3a52fa91da51fcb3056b45fd07f586648c9e31c89ffe6239013125de0f087f7b"
+    },
+    {
+      "name": "cold-walking-stage.png",
+      "bytes": 1395567,
+      "sha256": "c9c5f9acfd548821b7240a871a019c772826026034bfc81c810ed7c0c768783f"
+    },
+    {
+      "name": "local-r9-partial.json",
+      "bytes": 10677,
+      "sha256": "ce95054eaefc931557d7c39eb0f345915393872707e56a65f703f8e874026915"
+    },
+    {
+      "name": "standing-window-r9.json",
+      "bytes": 32496,
+      "sha256": "01095e33ad859d7569517e9dfcede82597778acf13cc34991ab07438408127fb"
+    },
+    {
+      "name": "protocol-evidence.json",
+      "bytes": 22442,
+      "sha256": "0b2f1a35bb40fc630c27caef7284a3bc0d1c0a61e5c998e991795843c3185f3b"
+    },
+    {
+      "name": "r7-standing-diagnosis.json",
+      "bytes": 3800,
+      "sha256": "cc4505965a8fd86499821164d43dcd89e872effe97c7e30ddbd26e9c2e38ed26"
+    }
+  ],
+  "scope": "Preserved partial result and actual cold UI consumption; overall qualification false."
+}
