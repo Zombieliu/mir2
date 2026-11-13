@@ -434,11 +434,16 @@ impl SpectatorHub {
             .ok_or_else(|| "world snapshot has no map file name".to_string())?
             .to_string();
         let now_ms = now_ms();
-        let sanitized = sanitize_world(snapshot, self.config.max_entities)?;
+        let sanitized = {
+            let _stage = crate::web::GatewaySlowStage::start("spectator.sanitize");
+            sanitize_world(snapshot, self.config.max_entities)?
+        };
+        let lock_wait = crate::web::GatewaySlowStage::start("spectator.lock_wait");
         let mut state = self
             .state
             .lock()
             .map_err(|_| "spectator hub mutex poisoned".to_string())?;
+        drop(lock_wait);
         let stream = state.maps.entry(map_file_name.clone()).or_default();
         record_seen_ids(
             &sanitized,
@@ -452,8 +457,14 @@ impl SpectatorHub {
             now_ms,
             &mut stream.drop_last_seen_ms,
         );
-        let previous_world = stream.latest_world.clone();
-        let mut merged_world = merge_worlds(stream.latest_world.take(), sanitized);
+        let previous_world = {
+            let _stage = crate::web::GatewaySlowStage::start("spectator.previous_clone");
+            stream.latest_world.clone()
+        };
+        let mut merged_world = {
+            let _stage = crate::web::GatewaySlowStage::start("spectator.merge");
+            merge_worlds(stream.latest_world.take(), sanitized)
+        };
         prune_stale_objects(
             &mut merged_world,
             "entities",
@@ -468,9 +479,12 @@ impl SpectatorHub {
             self.config.entity_stale_ms,
             &mut stream.drop_last_seen_ms,
         );
-        stream
-            .pending_events
-            .extend(world_events(previous_world.as_ref(), &merged_world, now_ms));
+        {
+            let _stage = crate::web::GatewaySlowStage::start("spectator.events");
+            stream
+                .pending_events
+                .extend(world_events(previous_world.as_ref(), &merged_world, now_ms));
+        }
         if stream.pending_events.len() > MAX_EVENTS_PER_FRAME * 4 {
             let remove = stream.pending_events.len() - MAX_EVENTS_PER_FRAME * 4;
             stream.pending_events.drain(..remove);
@@ -486,10 +500,12 @@ impl SpectatorHub {
         stream.last_emit_ms = now_ms;
         stream.sequence = stream.sequence.saturating_add(1);
         let recording_id = recording_id(&map_file_name, now_ms);
+        let emit_clone = crate::web::GatewaySlowStage::start("spectator.emit_clone");
         let world = stream
             .latest_world
             .clone()
             .ok_or_else(|| "spectator merged world disappeared".to_string())?;
+        drop(emit_clone);
         let events = if stream.pending_events.len() > MAX_EVENTS_PER_FRAME {
             stream
                 .pending_events
@@ -497,11 +513,13 @@ impl SpectatorHub {
         } else {
             std::mem::take(&mut stream.pending_events)
         };
+        let encode_stage = crate::web::GatewaySlowStage::start("spectator.encode");
         let encoded = serde_json::to_vec(&json!({
             "world": &world,
             "events": &events
         }))
         .map_err(|error| format!("encode spectator frame payload failed: {error}"))?;
+        drop(encode_stage);
         if encoded.len() > MAX_FRAME_BYTES {
             state.dropped_frames_total = state.dropped_frames_total.saturating_add(1);
             return Err(format!(
@@ -521,12 +539,15 @@ impl SpectatorHub {
             events,
             world,
         };
+        let ring_clone = crate::web::GatewaySlowStage::start("spectator.ring_clone");
         stream.frames.push_back(frame.clone());
+        drop(ring_clone);
         while stream.frames.len() > self.config.ring_frames {
             stream.frames.pop_front();
         }
         state.published_frames_total = state.published_frames_total.saturating_add(1);
         if self.config.recording_enabled {
+            let _stage = crate::web::GatewaySlowStage::start("spectator.recording");
             match append_frame(&self.config.data_dir, &frame) {
                 Ok(()) => {
                     state.persisted_frames_total = state.persisted_frames_total.saturating_add(1)
@@ -684,7 +705,7 @@ impl SpectatorHub {
     }
 }
 
-fn sanitize_world(snapshot: &WorldSnapshot, max_entities: usize) -> Result<Value, String> {
+pub(crate) fn sanitize_world(snapshot: &WorldSnapshot, max_entities: usize) -> Result<Value, String> {
     // Project only spectator fields. Serializing the complete client view first
     // also encodes private inventory and systems which this boundary discards.
     let entities = snapshot
@@ -1333,6 +1354,23 @@ mod tests {
             "activeBuffs": [], "stage5Systems": {}, "mapTransfers": source["mapTransfers"],
             "interactionHints": []
         })
+    }
+
+    #[test]
+    fn spectator_scene_builder_preserves_sanitized_output_without_mutating_full_view() {
+        let session = started_demo_session();
+        let before = session.world_snapshot();
+        let scene = session.spectator_world_snapshot();
+        assert!(!before.inventory_items.is_empty() || !before.equipment_items.is_empty());
+        assert!(scene.inventory_items.is_empty());
+        assert!(scene.equipment_items.is_empty());
+        for maximum in [0, 1, usize::MAX] {
+            let full_public = sanitize_world(&before, maximum).unwrap();
+            let scene_public = sanitize_world(&scene, maximum).unwrap();
+            assert_eq!(full_public, scene_public);
+            assert_eq!(serde_json::to_vec(&full_public).unwrap(), serde_json::to_vec(&scene_public).unwrap());
+        }
+        assert_eq!(before, session.world_snapshot());
     }
 
     #[test]

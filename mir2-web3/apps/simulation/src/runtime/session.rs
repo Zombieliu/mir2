@@ -863,6 +863,12 @@ impl SimulationSession {
         build_world_snapshot(self.app.world())
     }
 
+    /// Read-only scene projection for the spectator boundary. Owners still
+    /// require `world_snapshot` for complete inventory and private UI evidence.
+    pub fn spectator_world_snapshot(&self) -> WorldSnapshot {
+        build_spectator_world_snapshot(self.app.world())
+    }
+
     /// Read the same clock exposed by WorldSnapshot without materializing its
     /// inventory, quests or entities. Reading it never advances the clock.
     pub fn current_tick(&self) -> u64 {

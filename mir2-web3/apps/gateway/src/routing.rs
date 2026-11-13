@@ -515,6 +515,12 @@ pub trait ZoneOwnerCommandClient: fmt::Debug + Send + Sync {
         Ok(runtime.world_snapshot())
     }
 
+    /// Keep alternate/RPC clients on their authoritative snapshot transport.
+    /// Only clients that own the runtime may select its public scene projection.
+    fn spectator_world_snapshot(&self, runtime: &ZoneRuntimeHandle) -> Result<WorldSnapshot, String> {
+        self.world_snapshot(runtime)
+    }
+
     fn active_identity(
         &self,
         runtime: &ZoneRuntimeHandle,
@@ -1192,6 +1198,10 @@ fn execute_typed_native_attack_runtime(
 }
 
 impl ZoneOwnerCommandClient for InProcessZoneOwnerCommandClient {
+    fn spectator_world_snapshot(&self, runtime: &ZoneRuntimeHandle) -> Result<WorldSnapshot, String> {
+        Ok(runtime.spectator_world_snapshot())
+    }
+
     fn execute_procurement_owner(
         &self,
         runtime: &mut ZoneRuntimeHandle,
@@ -1733,6 +1743,17 @@ impl HostedZoneOwnerCommandClient {
             .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())
     }
 
+    pub fn spectator_world_snapshot(&self) -> Result<WorldSnapshot, String> {
+        let runtime = self
+            .runtime
+            .lock()
+            .map_err(|_| "zone owner hosted runtime mutex was poisoned".to_string())?;
+        runtime
+            .as_ref()
+            .map(|runtime| runtime.spectator_world_snapshot())
+            .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())
+    }
+
     pub fn on_connect(&self) -> Result<Vec<ServerPacket>, String> {
         let runtime = self
             .runtime
@@ -2147,6 +2168,10 @@ impl ZoneOwnerCommandClient for HostedZoneOwnerCommandClient {
 
     fn world_snapshot(&self, _runtime: &ZoneRuntimeHandle) -> Result<WorldSnapshot, String> {
         HostedZoneOwnerCommandClient::world_snapshot(self)
+    }
+
+    fn spectator_world_snapshot(&self, _runtime: &ZoneRuntimeHandle) -> Result<WorldSnapshot, String> {
+        HostedZoneOwnerCommandClient::spectator_world_snapshot(self)
     }
 
     fn active_identity(
@@ -11558,6 +11583,185 @@ impl fmt::Debug for SharedInProcessZoneSessionRuntime {
 }
 
 impl SharedInProcessZoneSessionRuntime {
+    fn apply_shared_snapshot_authority(&self, mut snapshot: WorldSnapshot) -> WorldSnapshot {
+        let personal_quest_icons = snapshot
+            .entities
+            .iter()
+            .filter_map(|entity| entity.quest_icon.map(|icon| (entity.object_id, icon)))
+            .collect::<BTreeMap<_, _>>();
+        let current_key = self.current_presence_key();
+        let current_identity_key = self
+            .inner
+            .active_identity()
+            .as_ref()
+            .map(ZonePresenceKey::from_identity);
+        let local_self_object_id = self.local_self_object_id();
+        let zone_state = self
+            .zone_state
+            .lock()
+            .expect("shared zone presence mutex should not be poisoned");
+        // Movement can already be committed in the Zone while the personal
+        // mirror is stale. Establish the authoritative AOI centre before
+        // selecting shared objects, under the same lock as vitals/players.
+        if let (Some(key), Some(map_file_name)) =
+            (current_key.as_ref(), snapshot.map_file_name.as_deref())
+        {
+            if let Some(presence) = zone_state.players.get(key) {
+                if presence.map_file_name == map_file_name {
+                    if let Some(self_entity) = snapshot
+                        .entities
+                        .iter_mut()
+                        .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+                    {
+                        self_entity.x = presence.entity.x;
+                        self_entity.y = presence.entity.y;
+                        self_entity.direction = presence.entity.direction;
+                    }
+                }
+            }
+        }
+        // A personal snapshot cannot infer the raw transform type. Project it
+        // only from the current player's matching retained Zone membership.
+        if current_key.as_ref() == current_identity_key.as_ref() {
+            if let (Some(key), Some(map_file_name), Some(local_self_object_id)) = (
+                current_key.as_ref(),
+                snapshot.map_file_name.as_deref(),
+                local_self_object_id,
+            ) {
+                if let (Some(presence), Some(session_id)) = (
+                    zone_state.players.get(key),
+                    zone_state.zone_sessions.get(key),
+                ) {
+                    let expected_zone_key = ZoneKey::for_map(map_file_name);
+                    if presence.map_file_name == map_file_name
+                        && zone_state
+                            .zone_manager
+                            .zone_key_for_session(session_id)
+                            .as_ref()
+                            == Some(&expected_zone_key)
+                    {
+                        if let Some(zone) = zone_state.zone_manager.zone(&expected_zone_key) {
+                            if zone.player_object_id(session_id).map(|id| id.0)
+                                == Some(presence.zone_object_id)
+                            {
+                                if let Some(self_entity) =
+                                    snapshot.entities.iter_mut().find(|entity| {
+                                        entity.kind == WorldEntityKind::SelfPlayer
+                                            && entity.object_id == local_self_object_id
+                                    })
+                                {
+                                    self_entity.transform_type =
+                                        zone.player_transform_type(session_id);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        let native_zone = snapshot.map_file_name.as_deref().and_then(|map_file_name| {
+            zone_state
+                .zone_manager
+                .zone(&ZoneKey::for_map(map_file_name))
+        });
+        let public_native_actor = |entity: &WorldEntitySnapshot| {
+            entity.kind != WorldEntityKind::Monster
+                || native_zone
+                    .and_then(|zone| zone.native_monster_is_visible(entity.object_id))
+                    .unwrap_or(true)
+        };
+        if let Some(shared_map) = snapshot
+            .map_file_name
+            .as_deref()
+            .and_then(|name| zone_state.maps.get(name))
+        {
+            // Personal metadata retains buried actors to hydrate their eventual
+            // reveal. Only the Zone owns Crystal's public GetInfo visibility;
+            // fence before cloning into this client's AOI without retiring the
+            // shared actor or altering stealth/stone/owned-object semantics.
+            shared_map.overlay_visible_snapshot(&mut snapshot, public_native_actor);
+            for entity in &mut snapshot.entities {
+                entity.quest_icon = personal_quest_icons.get(&entity.object_id).copied();
+            }
+        } else {
+            // Bootstrap/compatibility snapshots may precede the map index.
+            // Apply the same authoritative gate wherever a native Zone exists.
+            snapshot.entities.retain(public_native_actor);
+        }
+        if let (Some(key), Some(map_file_name)) =
+            (current_key.as_ref(), snapshot.map_file_name.as_deref())
+        {
+            if let Some(session_id) = zone_state.zone_sessions.get(key) {
+                if let Some(zone) = zone_state
+                    .zone_manager
+                    .zone(&ZoneKey::for_map(map_file_name))
+                {
+                    if let Some(in_safe_zone) = zone.player_in_safe_zone(session_id) {
+                        snapshot.in_safe_zone = in_safe_zone;
+                    }
+                    // Personal ticks can advance through packet processing.
+                    // Shared casts are admitted by the Zone wall clock, so
+                    // their public readiness must use that same authority.
+                    let now_ms = Self::zone_now_ms();
+                    for skill in &mut snapshot.known_skills {
+                        let Some(spell) = skill.spell.as_deref().and_then(|name| {
+                            serde_json::from_value::<Spell>(serde_json::json!(name)).ok()
+                        }) else {
+                            continue;
+                        };
+                        if spell != Spell::FlamingSword
+                            && matches!(skill.cast_kind.as_str(), "passive" | "toggle")
+                        {
+                            continue;
+                        }
+                        if let Some(remaining_ms) =
+                            zone.player_magic_cooldown_remaining_ms(session_id, spell, now_ms)
+                        {
+                            skill.cooldown_remaining_ticks =
+                                remaining_ms.div_ceil(1_000).min(u64::from(u32::MAX)) as u32;
+                            skill.cooldown_remaining_ms =
+                                Some(remaining_ms.min(u64::from(u32::MAX)) as u32);
+                        }
+                    }
+                }
+                if let Some((hp, max_hp, mp)) = zone_state.zone_manager.player_vitals(session_id) {
+                    snapshot.player_hp = Some(hp);
+                    snapshot.player_max_hp = Some(max_hp);
+                    snapshot.player_mp = Some(mp);
+                    if let Some(self_entity) = snapshot
+                        .entities
+                        .iter_mut()
+                        .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+                    {
+                        self_entity.hp = Some(hp);
+                        self_entity.max_hp = Some(max_hp);
+                        self_entity.dead = hp <= 0;
+                    }
+                }
+            }
+        }
+        let mut remote_players = zone_state
+            .remote_player_entities(snapshot.map_file_name.as_deref(), current_key.as_ref());
+        snapshot.entities.append(&mut remote_players);
+        drop(zone_state);
+        if let Some((self_x, self_y)) = snapshot
+            .entities
+            .iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .map(|entity| (entity.x, entity.y))
+        {
+            let range = CRYSTAL_OBJECT_DATA_RANGE as u32;
+            let visible =
+                |x: i32, y: i32| self_x.abs_diff(x) <= range && self_y.abs_diff(y) <= range;
+            snapshot
+                .entities
+                .retain(|entity| visible(entity.x, entity.y));
+            snapshot.ground_drops.retain(|drop| visible(drop.x, drop.y));
+        }
+        snapshot.entities.sort_by_key(|entity| entity.object_id);
+        snapshot
+    }
+
     fn ranking_inspect_presence(
         &self,
         identity: &RankingInspectIdentity,
@@ -19713,183 +19917,11 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
     }
 
     fn world_snapshot(&self) -> WorldSnapshot {
-        let mut snapshot = self.inner.world_snapshot();
-        let personal_quest_icons = snapshot
-            .entities
-            .iter()
-            .filter_map(|entity| entity.quest_icon.map(|icon| (entity.object_id, icon)))
-            .collect::<BTreeMap<_, _>>();
-        let current_key = self.current_presence_key();
-        let current_identity_key = self
-            .inner
-            .active_identity()
-            .as_ref()
-            .map(ZonePresenceKey::from_identity);
-        let local_self_object_id = self.local_self_object_id();
-        let zone_state = self
-            .zone_state
-            .lock()
-            .expect("shared zone presence mutex should not be poisoned");
-        // Movement can already be committed in the Zone while the personal
-        // mirror is stale. Establish the authoritative AOI centre before
-        // selecting shared objects, under the same lock as vitals/players.
-        if let (Some(key), Some(map_file_name)) =
-            (current_key.as_ref(), snapshot.map_file_name.as_deref())
-        {
-            if let Some(presence) = zone_state.players.get(key) {
-                if presence.map_file_name == map_file_name {
-                    if let Some(self_entity) = snapshot
-                        .entities
-                        .iter_mut()
-                        .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
-                    {
-                        self_entity.x = presence.entity.x;
-                        self_entity.y = presence.entity.y;
-                        self_entity.direction = presence.entity.direction;
-                    }
-                }
-            }
-        }
-        // A personal snapshot cannot infer the raw transform type. Project it
-        // only from the current player's matching retained Zone membership.
-        if current_key.as_ref() == current_identity_key.as_ref() {
-            if let (Some(key), Some(map_file_name), Some(local_self_object_id)) = (
-                current_key.as_ref(),
-                snapshot.map_file_name.as_deref(),
-                local_self_object_id,
-            ) {
-                if let (Some(presence), Some(session_id)) = (
-                    zone_state.players.get(key),
-                    zone_state.zone_sessions.get(key),
-                ) {
-                    let expected_zone_key = ZoneKey::for_map(map_file_name);
-                    if presence.map_file_name == map_file_name
-                        && zone_state
-                            .zone_manager
-                            .zone_key_for_session(session_id)
-                            .as_ref()
-                            == Some(&expected_zone_key)
-                    {
-                        if let Some(zone) = zone_state.zone_manager.zone(&expected_zone_key) {
-                            if zone.player_object_id(session_id).map(|id| id.0)
-                                == Some(presence.zone_object_id)
-                            {
-                                if let Some(self_entity) =
-                                    snapshot.entities.iter_mut().find(|entity| {
-                                        entity.kind == WorldEntityKind::SelfPlayer
-                                            && entity.object_id == local_self_object_id
-                                    })
-                                {
-                                    self_entity.transform_type =
-                                        zone.player_transform_type(session_id);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        let native_zone = snapshot.map_file_name.as_deref().and_then(|map_file_name| {
-            zone_state
-                .zone_manager
-                .zone(&ZoneKey::for_map(map_file_name))
-        });
-        let public_native_actor = |entity: &WorldEntitySnapshot| {
-            entity.kind != WorldEntityKind::Monster
-                || native_zone
-                    .and_then(|zone| zone.native_monster_is_visible(entity.object_id))
-                    .unwrap_or(true)
-        };
-        if let Some(shared_map) = snapshot
-            .map_file_name
-            .as_deref()
-            .and_then(|name| zone_state.maps.get(name))
-        {
-            // Personal metadata retains buried actors to hydrate their eventual
-            // reveal. Only the Zone owns Crystal's public GetInfo visibility;
-            // fence before cloning into this client's AOI without retiring the
-            // shared actor or altering stealth/stone/owned-object semantics.
-            shared_map.overlay_visible_snapshot(&mut snapshot, public_native_actor);
-            for entity in &mut snapshot.entities {
-                entity.quest_icon = personal_quest_icons.get(&entity.object_id).copied();
-            }
-        } else {
-            // Bootstrap/compatibility snapshots may precede the map index.
-            // Apply the same authoritative gate wherever a native Zone exists.
-            snapshot.entities.retain(public_native_actor);
-        }
-        if let (Some(key), Some(map_file_name)) =
-            (current_key.as_ref(), snapshot.map_file_name.as_deref())
-        {
-            if let Some(session_id) = zone_state.zone_sessions.get(key) {
-                if let Some(zone) = zone_state
-                    .zone_manager
-                    .zone(&ZoneKey::for_map(map_file_name))
-                {
-                    if let Some(in_safe_zone) = zone.player_in_safe_zone(session_id) {
-                        snapshot.in_safe_zone = in_safe_zone;
-                    }
-                    // Personal ticks can advance through packet processing.
-                    // Shared casts are admitted by the Zone wall clock, so
-                    // their public readiness must use that same authority.
-                    let now_ms = Self::zone_now_ms();
-                    for skill in &mut snapshot.known_skills {
-                        let Some(spell) = skill.spell.as_deref().and_then(|name| {
-                            serde_json::from_value::<Spell>(serde_json::json!(name)).ok()
-                        }) else {
-                            continue;
-                        };
-                        if spell != Spell::FlamingSword
-                            && matches!(skill.cast_kind.as_str(), "passive" | "toggle")
-                        {
-                            continue;
-                        }
-                        if let Some(remaining_ms) =
-                            zone.player_magic_cooldown_remaining_ms(session_id, spell, now_ms)
-                        {
-                            skill.cooldown_remaining_ticks =
-                                remaining_ms.div_ceil(1_000).min(u64::from(u32::MAX)) as u32;
-                            skill.cooldown_remaining_ms =
-                                Some(remaining_ms.min(u64::from(u32::MAX)) as u32);
-                        }
-                    }
-                }
-                if let Some((hp, max_hp, mp)) = zone_state.zone_manager.player_vitals(session_id) {
-                    snapshot.player_hp = Some(hp);
-                    snapshot.player_max_hp = Some(max_hp);
-                    snapshot.player_mp = Some(mp);
-                    if let Some(self_entity) = snapshot
-                        .entities
-                        .iter_mut()
-                        .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
-                    {
-                        self_entity.hp = Some(hp);
-                        self_entity.max_hp = Some(max_hp);
-                        self_entity.dead = hp <= 0;
-                    }
-                }
-            }
-        }
-        let mut remote_players = zone_state
-            .remote_player_entities(snapshot.map_file_name.as_deref(), current_key.as_ref());
-        snapshot.entities.append(&mut remote_players);
-        drop(zone_state);
-        if let Some((self_x, self_y)) = snapshot
-            .entities
-            .iter()
-            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
-            .map(|entity| (entity.x, entity.y))
-        {
-            let range = CRYSTAL_OBJECT_DATA_RANGE as u32;
-            let visible =
-                |x: i32, y: i32| self_x.abs_diff(x) <= range && self_y.abs_diff(y) <= range;
-            snapshot
-                .entities
-                .retain(|entity| visible(entity.x, entity.y));
-            snapshot.ground_drops.retain(|drop| visible(drop.x, drop.y));
-        }
-        snapshot.entities.sort_by_key(|entity| entity.object_id);
-        snapshot
+        self.apply_shared_snapshot_authority(self.inner.world_snapshot())
+    }
+
+    fn spectator_world_snapshot(&self) -> WorldSnapshot {
+        self.apply_shared_snapshot_authority(self.inner.spectator_world_snapshot())
     }
 
     fn active_identity(&self) -> Option<ActiveSessionIdentity> {
@@ -20438,6 +20470,8 @@ impl fmt::Debug for ZoneRegistry {
 
 #[cfg(test)]
 mod tests {
+    #[path = "spectator_scene_projection_tests.rs"]
+    mod spectator_scene_projection_tests;
     #[path = "safety_profile_projection_tests.rs"]
     mod safety_profile_projection_tests;
     #[path = "zone_economy_adapter_tests.rs"]
@@ -28861,7 +28895,7 @@ mod tests {
     fn snapshot_aoi_uses_authoritative_position_before_cloning_all_edge_objects() {
         let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
         let mut runtime = shared_session_runtime(zone_state.clone());
-        start_new_runtime(&mut runtime, "snapshot-authority", "Scout");
+        start_new_runtime(&mut runtime, "snapshot-authority", "AoiEdgeOwner");
         let key = runtime.current_presence_key().expect("active presence");
         let personal = runtime.inner.world_snapshot();
         let personal_self = personal
@@ -28946,7 +28980,7 @@ mod tests {
     fn snapshot_aoi_ignores_presence_from_another_map() {
         let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
         let mut runtime = shared_session_runtime(zone_state.clone());
-        start_new_runtime(&mut runtime, "snapshot-map-mismatch", "Scout");
+        start_new_runtime(&mut runtime, "snapshot-map-mismatch", "AoiMapOwner");
         let key = runtime.current_presence_key().unwrap();
         let personal = runtime.inner.world_snapshot();
         let player = personal

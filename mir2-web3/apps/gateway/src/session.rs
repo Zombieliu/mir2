@@ -1122,6 +1122,12 @@ impl GatewaySession {
             .expect("zone owner world snapshot should not fail")
     }
 
+    pub fn spectator_world_snapshot(&self) -> WorldSnapshot {
+        self.zone_owner_command_client
+            .spectator_world_snapshot(&self.runtime)
+            .expect("zone owner spectator snapshot should not fail")
+    }
+
     pub fn active_identity(&self) -> Option<ActiveSessionIdentity> {
         self.zone_owner_command_client
             .active_identity(&self.runtime)

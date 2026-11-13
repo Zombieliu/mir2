@@ -585,6 +585,12 @@ pub trait WorldRuntime: Send + Sync {
 
     fn world_snapshot(&self) -> WorldSnapshot;
 
+    /// Existing/remote runtimes keep their original snapshot route unless
+    /// they explicitly provide the equivalent public scene projection.
+    fn spectator_world_snapshot(&self) -> WorldSnapshot {
+        self.world_snapshot()
+    }
+
     /// Read-only outcome clock projection. Other runtimes retain their
     /// existing snapshot behavior unless they can provide the same clock.
     fn current_tick(&self) -> u64 {
@@ -2023,6 +2029,10 @@ impl WorldRuntime for InProcessWorldRuntime {
 
     fn world_snapshot(&self) -> WorldSnapshot {
         self.session.world_snapshot()
+    }
+
+    fn spectator_world_snapshot(&self) -> WorldSnapshot {
+        self.session.spectator_world_snapshot()
     }
 
     fn current_tick(&self) -> u64 {

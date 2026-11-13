@@ -7077,7 +7077,38 @@ mod item_tooltip_source_tests {
     }
 }
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum SnapshotProjection {
+    Full,
+    SpectatorScene,
+}
+
+impl SnapshotProjection {
+    fn includes_private_ui(self) -> bool {
+        self == Self::Full
+    }
+
+    fn private_ui<T: Default>(self, build: impl FnOnce() -> T) -> T {
+        if self.includes_private_ui() {
+            build()
+        } else {
+            T::default()
+        }
+    }
+}
+
 pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
+    build_world_snapshot_projected(world, SnapshotProjection::Full)
+}
+
+/// Only the scene consumed by the existing spectator sanitizer. Private UI
+/// fields are placeholders, never a replacement for an owner's full snapshot.
+/// Entity appearance still reads the real equipment/skills/buffs in `world`.
+pub(super) fn build_spectator_world_snapshot(world: &World) -> WorldSnapshot {
+    build_world_snapshot_projected(world, SnapshotProjection::SpectatorScene)
+}
+
+fn build_world_snapshot_projected(world: &World, projection: SnapshotProjection) -> WorldSnapshot {
     let resources = world.resource::<InventoryResource>();
     let hero_inventory = world.resource::<HeroInventoryResource>();
     let player_runtime = world.resource::<PlayerRuntimeResource>();
@@ -7098,22 +7129,25 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
         .hero
         .as_ref()
         .map(|hero| (hero.level, hero.class));
-    let hero_stats = super::hero_stats::compute(world);
-    let hero_vitals = stage5.stage5_systems.hero.as_ref().map(|_| {
-        let live = hero_entity(world).and_then(|entity| entity_player_vitals(world, entity));
-        let saved = hero_inventory.saved_vitals;
-        crate::config::HeroVitalsSnapshot {
-            hp: live
-                .map(|v| v.hp)
-                .or_else(|| saved.map(|v| v.hp))
-                .unwrap_or(hero_stats.get(12)),
-            mp: live
-                .map(|v| v.mp)
-                .or_else(|| saved.map(|v| v.mp))
-                .unwrap_or(hero_stats.get(13)),
-            max_hp: hero_stats.get(12),
-            max_mp: hero_stats.get(13),
-        }
+    let hero_stats = projection.includes_private_ui().then(|| super::hero_stats::compute(world));
+    let hero_vitals = projection.private_ui(|| {
+        let hero_stats = hero_stats.as_ref().expect("full snapshot computed hero stats");
+        stage5.stage5_systems.hero.as_ref().map(|_| {
+            let live = hero_entity(world).and_then(|entity| entity_player_vitals(world, entity));
+            let saved = hero_inventory.saved_vitals;
+            crate::config::HeroVitalsSnapshot {
+                hp: live
+                    .map(|v| v.hp)
+                    .or_else(|| saved.map(|v| v.hp))
+                    .unwrap_or(hero_stats.get(12)),
+                mp: live
+                    .map(|v| v.mp)
+                    .or_else(|| saved.map(|v| v.mp))
+                    .unwrap_or(hero_stats.get(13)),
+                max_hp: hero_stats.get(12),
+                max_mp: hero_stats.get(13),
+            }
+        })
     });
     let tick = super::session::runtime_tick(world);
     let scene_view = active_scene_view(world);
@@ -7127,33 +7161,41 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
 
     let player_object_id = current_player_object_id(world);
     let player_vitals = player_entity(world).and_then(|entity| entity_player_vitals(world, entity));
-    let mut stage5_systems = stage5.stage5_systems.clone();
-    if let Some(trade) = stage5_systems.trade.as_mut() {
-        trade.trade_recovery_version = None;
-        trade.own_items = super::trade_custody::project_owned_items(trade, language);
-        if let Some(items) = trade.own_items.as_mut() {
-            for item in items.iter_mut().flatten() {
-                resolve_item_tooltip_source_for_viewer(&mut item.tooltip_source, tooltip_viewer);
+    let stage5_systems = projection.private_ui(|| {
+        let mut stage5_systems = stage5.stage5_systems.clone();
+        if let Some(trade) = stage5_systems.trade.as_mut() {
+            trade.trade_recovery_version = None;
+            trade.own_items = super::trade_custody::project_owned_items(trade, language);
+            if let Some(items) = trade.own_items.as_mut() {
+                for item in items.iter_mut().flatten() {
+                    resolve_item_tooltip_source_for_viewer(&mut item.tooltip_source, tooltip_viewer);
+                }
             }
         }
-    }
-    if let Some(guild) = super::shared_guilds::project_legacy_shape(world) {
-        stage5_systems.guild = guild;
-    }
-    stage5_systems.item_rental = item_rental_snapshot(world);
-    super::refine_oven::snapshot_timer(&mut stage5_systems.refine, false);
+        if let Some(guild) = super::shared_guilds::project_legacy_shape(world) {
+            stage5_systems.guild = guild;
+        }
+        stage5_systems.item_rental = item_rental_snapshot(world);
+        super::refine_oven::snapshot_timer(&mut stage5_systems.refine, false);
+        stage5_systems
+    });
 
     // Seed every known city to 0 so the HUD renders a stable row set, then
     // overlay the player's actual balances.
-    let mut city_currencies: BTreeMap<String, u32> = crate::config::CITY_CURRENCY_KEYS
-        .iter()
-        .map(|key| ((*key).to_string(), 0))
-        .collect();
-    for (key, amount) in &player_runtime.city_currencies {
-        city_currencies.insert(key.clone(), *amount);
-    }
-    let player_stats = super::stats::player_stats(world);
-    let max_weight = u16::try_from(player_stats.bag_weight().max(0)).unwrap_or(u16::MAX);
+    let city_currencies = projection.private_ui(|| {
+        let mut city_currencies: BTreeMap<String, u32> = crate::config::CITY_CURRENCY_KEYS
+            .iter()
+            .map(|key| ((*key).to_string(), 0))
+            .collect();
+        for (key, amount) in &player_runtime.city_currencies {
+            city_currencies.insert(key.clone(), *amount);
+        }
+        city_currencies
+    });
+    let player_stats = projection.includes_private_ui().then(|| super::stats::player_stats(world));
+    let max_weight = projection.private_ui(|| {
+        u16::try_from(player_stats.as_ref().expect("full snapshot computed player stats").bag_weight().max(0)).unwrap_or(u16::MAX)
+    });
 
     WorldSnapshot {
         tick,
@@ -7175,27 +7217,27 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
         player_max_hp: player_vitals.map(|vitals| vitals.max_hp),
         player_mp: player_vitals.map(|vitals| vitals.mp),
         player_max_mp: player_vitals.map(|vitals| vitals.max_mp),
-        player_crystal_stats: player_stats.snapshot_entries(),
+        player_crystal_stats: projection.private_ui(|| player_stats.as_ref().expect("full snapshot computed player stats").snapshot_entries()),
         player_pk_points: player_runtime.pk_points,
         player_experience: player_runtime.experience,
         player_max_experience: player_runtime.max_experience,
         gold: player_runtime.gold,
         credit: player_runtime.credit,
         city_currencies,
-        current_weight: current_weight(resources),
-        player_weights: tooltip_viewer.and_then(|(level, class)| {
+        current_weight: projection.private_ui(|| current_weight(resources)),
+        player_weights: projection.private_ui(|| tooltip_viewer.and_then(|(level, class)| {
             super::player_weights::compute(
                 resources,
                 level,
                 class,
                 world.resource::<MountResource>().riding_mount,
             )
-        }),
+        })),
         max_weight,
-        free_bag_slots: free_bag_slots(resources),
-        max_bag_slots: crate::config::crystal_bag_slot_capacity(resources.inventory_capacity),
+        free_bag_slots: projection.private_ui(|| free_bag_slots(resources)),
+        max_bag_slots: projection.private_ui(|| crate::config::crystal_bag_slot_capacity(resources.inventory_capacity)),
         inventory_capacity: resources.inventory_capacity,
-        npc_gold_trade_capacity: Some(npc_gold_trade_capacity_evidence(resources)),
+        npc_gold_trade_capacity: projection.private_ui(|| Some(npc_gold_trade_capacity_evidence(resources))),
         storage_size: resources.storage_size,
         has_expanded_storage: resources.has_expanded_storage,
         has_storage_password: resources.storage_has_password,
@@ -7213,7 +7255,7 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
         decor_objects: filter_decor_objects(world, scene_view.as_ref()),
         entities,
         ground_drops: collect_ground_drops(world, scene_view.as_ref(), language),
-        belt_items: resources
+        belt_items: projection.private_ui(|| resources
             .belt_items
             .iter()
             .map(|item| {
@@ -7224,8 +7266,8 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
                 );
                 snapshot
             })
-            .collect(),
-        inventory_items: resources
+            .collect()),
+        inventory_items: projection.private_ui(|| resources
             .inventory_items
             .iter()
             .map(|item| {
@@ -7236,8 +7278,8 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
                 );
                 snapshot
             })
-            .collect(),
-        hero_inventory_items: hero_inventory
+            .collect()),
+        hero_inventory_items: projection.private_ui(|| hero_inventory
             .items
             .iter()
             .map(|item| {
@@ -7245,8 +7287,8 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
                 resolve_item_tooltip_source_for_viewer(&mut snapshot.tooltip_source, hero_viewer);
                 snapshot
             })
-            .collect(),
-        hero_equipment_items: hero_inventory
+            .collect()),
+        hero_equipment_items: projection.private_ui(|| hero_inventory
             .equipment
             .iter()
             .map(|item| {
@@ -7254,22 +7296,28 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
                 resolve_item_tooltip_source_for_viewer(&mut snapshot.tooltip_source, hero_viewer);
                 snapshot
             })
-            .collect(),
-        hero_inventory_capacity: hero_inventory.capacity,
-        hero_stats: hero_stats.snapshot(),
+            .collect()),
+        hero_inventory_capacity: projection.private_ui(|| hero_inventory.capacity),
+        hero_stats: projection.private_ui(|| {
+            let hero_stats = hero_stats.as_ref().expect("full snapshot computed hero stats");
+            hero_stats.snapshot()
+        }),
         hero_vitals,
-        hero_weights: crate::config::HeroWeightsSnapshot {
+        hero_weights: projection.private_ui(|| {
+            let hero_stats = hero_stats.as_ref().expect("full snapshot computed hero stats");
+            crate::config::HeroWeightsSnapshot {
             bag: hero_stats.bag,
             wear: hero_stats.wear,
             hand: hero_stats.hand,
-        },
-        hero_max_experience: stage5
+        }
+        }),
+        hero_max_experience: projection.private_ui(|| stage5
             .stage5_systems
             .hero
             .as_ref()
-            .map(|hero| mir2_game_data::crystal_hero_settings().max_experience(hero.level)),
-        native_npc_shop: super::npc_purchase_snapshot::current_shop(world),
-        storage_items: resources
+            .map(|hero| mir2_game_data::crystal_hero_settings().max_experience(hero.level))),
+        native_npc_shop: projection.private_ui(|| super::npc_purchase_snapshot::current_shop(world)),
+        storage_items: projection.private_ui(|| resources
             .storage_items
             .iter()
             .map(|item| {
@@ -7280,8 +7328,8 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
                 );
                 snapshot
             })
-            .collect(),
-        equipment_items: resources
+            .collect()),
+        equipment_items: projection.private_ui(|| resources
             .equipment_items
             .iter()
             .map(|item| {
@@ -7292,13 +7340,13 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
                 );
                 snapshot
             })
-            .collect(),
-        quest_log: quest_log_snapshots(world, language),
-        active_npc_dialog: npc_state
+            .collect()),
+        quest_log: projection.private_ui(|| quest_log_snapshots(world, language)),
+        active_npc_dialog: projection.private_ui(|| npc_state
             .active_npc_dialog
             .as_ref()
-            .map(|dialog| dialog.snapshot(language)),
-        npc_script_diagnostics: npc_state
+            .map(|dialog| dialog.snapshot(language))),
+        npc_script_diagnostics: projection.private_ui(|| npc_state
             .npc_script_diagnostics
             .iter()
             .map(|diagnostic| NpcScriptDiagnosticSnapshot {
@@ -7308,23 +7356,27 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
                 command: diagnostic.command.clone(),
                 message: diagnostic.message.clone(),
             })
-            .collect(),
-        known_skills: skills
+            .collect()),
+        known_skills: projection.private_ui(|| skills
             .skills
             .iter()
             .map(|skill| skill.snapshot(tick, language))
-            .collect(),
-        active_buffs: buffs
+            .collect()),
+        active_buffs: projection.private_ui(|| buffs
             .buffs
             .iter()
             .filter(|buff| !buff.expired(tick))
             .map(|buff| buff.snapshot(tick, language))
-            .collect(),
+            .collect()),
         stage5_systems,
         map_transfers: collect_map_transfer_snapshots(world),
-        interaction_hints: build_interaction_hints(world, resources),
+        interaction_hints: projection.private_ui(|| build_interaction_hints(world, resources)),
     }
 }
+
+#[cfg(test)]
+#[path = "spectator_scene_snapshot_tests.rs"]
+mod spectator_scene_snapshot_tests;
 
 fn item_rental_snapshot(world: &World) -> Stage5ItemRentalSnapshot {
     let rental = world.resource::<ItemRentalResource>();

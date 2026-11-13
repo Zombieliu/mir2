@@ -6273,6 +6273,7 @@ fn publish_spectator_frame_if_enabled(
     let Some(snapshot) = snapshot() else {
         return Ok(None);
     };
+    let _publish_stage = GatewaySlowStage::start("spectator.publish");
     spectator.publish(&snapshot)
 }
 
@@ -7989,7 +7990,10 @@ async fn handle_socket_work(
                 );
                 let result = tokio::task::block_in_place(|| {
                     publish_spectator_frame_if_enabled(&spectator, || {
-                        session.active_identity().map(|_| session.world_snapshot())
+                        let _snapshot_stage = GatewaySlowStage::for_socket(
+                            "spectator.snapshot", &diagnostics,
+                        );
+                        session.active_identity().map(|_| session.spectator_world_snapshot())
                     })
                 });
                 if let Err(error) = result {
@@ -14970,7 +14974,7 @@ mod tests {
         let mut snapshot_calls = 0;
         let frame = super::publish_spectator_frame_if_enabled(&spectator, || {
             snapshot_calls += 1;
-            Some(session.world_snapshot())
+            Some(session.spectator_world_snapshot())
         })
         .expect("enabled spectator should publish")
         .expect("first active snapshot should produce a frame");
