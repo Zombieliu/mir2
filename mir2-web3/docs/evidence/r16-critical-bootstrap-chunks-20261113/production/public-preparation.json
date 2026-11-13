@@ -1,0 +1,9 @@
+{
+  "source": "2029b44abdee104445c569204477a219a1353f79",
+  "deployment": "dpl_MS6JwmRmgJzqH411PKzFrDRaACmu",
+  "baseline": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd",
+  "signedScripts": 20,
+  "run": "first-party-bootstrap-chunks",
+  "executed": false,
+  "scope": "Exact source/deployment/run identities and passive bounded compiled-JSON observer only. Larger CDP response buffer supports full3.3MB script observation; no network overrides/prefill/state injection or gate changes. All original QR/auth/walk8s/Native120s/static-prefetch/locale/visual conditions retained; any fallback not satisfying original transport qualification remains a separately recorded failure."
+}

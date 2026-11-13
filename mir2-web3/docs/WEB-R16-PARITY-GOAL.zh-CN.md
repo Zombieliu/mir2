@@ -1,6 +1,6 @@
 # Windows R16 与 Web 1:1 验收
 
-2026-11-13 进城下载恢复候选9dc7294c02已提交推送：213项、68项发布保护、构建及两后端冷暖四会话通过。正式出码/官方Testnet登录确认正常，但scene/floor/locale正文不完整，首场景未提交，移动和Native未进入，完整公网资格false。已回退b2097fdfd1（含6997玩家反馈），11文件与简繁出码复验通过；131份WIP保全，原8秒/120秒与整体1:1开放。继续固定部署单个scene传输定位，不据跨版本/代理不同的curl归因或放宽门槛。[本轮发布、失败与回退](evidence/r16-entry-download-recovery-20261113/production/README.md)
+2026-11-13 关键首屏分包2029b44abd补齐瞬时下载失败后的验证备用路径，本地四会话通过。公网扫码、签名、进城、移动、React任务分项通过；Native运行包及字体0/6失败，已回退B209，未提升全局Candidate。下一项先验现有第一方重资源完整读取；完整三职业路线、旧档及原1:1范围不变。[最新证据](evidence/r16-critical-bootstrap-chunks-20261113/production/README.md)
 
 2026-11-13 已发布ff957默认人物完整目录候选，公网简繁出码、官方手机尺寸Testnet一次签名、比奇首步149ms、113/113及正常退出通过；但SC字体缓存缺项5/6、运行包正文首帧后192.203秒才完成、共享HUD/Q未就绪，完整资格false，已回退正式e7cb。回退后简繁出码复验通过，131份WIP保留。继续稳定单帧/保留已解码人物、持续慢PNG及字体/运行包冷读；整体1:1开放。[发布、失败与回退](evidence/r16-entry-player-directory-20261113/production/README.md)
 

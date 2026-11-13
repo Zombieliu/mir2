@@ -15,7 +15,7 @@ working tree, services, release packages, source snapshots or parity percentages
 
 ## Last recorded decisions and open work
 
-2026-11-13 进城下载恢复候选9dc7294c02已提交推送：213项、68项发布保护、构建及两后端冷暖四会话通过。正式出码/官方Testnet登录确认正常，但scene/floor/locale正文不完整，首场景未提交，移动和Native未进入，完整公网资格false。已回退b2097fdfd1（含6997玩家反馈），11文件与简繁出码复验通过；131份WIP保全，原8秒/120秒与整体1:1开放。继续固定部署单个scene传输定位，不据跨版本/代理不同的curl归因或放宽门槛。[本轮发布、失败与回退](evidence/r16-entry-download-recovery-20261113/production/README.md)
+2026-11-13 关键首屏分包2029b44abd本地四会话及线上静态内容通过；公网城市/移动/React任务通过，运行包及Native字体失败，已回退b2097fdfd1，11文件与简繁出码复验通过。下一项读取现有第一方immutable WASM及字体；独立CDN全SHA读取55.8秒不代替整场或证明根因。原8秒/120秒与整体1:1开放。[本轮证据](evidence/r16-critical-bootstrap-chunks-20261113/production/README.md)
 
 2026-11-12 正式站已发布 `51d2dcc346`：共享图片取消与图集计时/JSON大小缓存身份修复。本机75项、生产构建及两后端重开同档通过；公网简繁出码、手机尺寸官方钱包Testnet签名、进比奇、权威移动、共用HUD/任务窗、113/113预取和正常退出通过，无需回滚。云端缓存身份与计算一致；Worker正常更新缓存一次，未迁移旧007缓存。本次观测起点到首画面65.2秒/共用HUD104.7秒（点击进游戏后约6.8秒/46.3秒），继续优化冷加载；实体手机、完整1:1及历史未结项仍开放。[发布与边界](evidence/r16-cache-repair-20261112/README.md)
 

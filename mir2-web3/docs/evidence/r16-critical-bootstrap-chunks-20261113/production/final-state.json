@@ -1,0 +1,17 @@
+{
+  "checkedAt": "2026-11-13T10:01:38.575Z",
+  "origin": "https://numeron.obelisk.build",
+  "gamePath": "/game",
+  "source": "b2097fdfd13a2d8bc0acde435cd612fd83672cac",
+  "deployment": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd",
+  "rolledBack": true,
+  "candidate": "2029b44abdee104445c569204477a219a1353f79",
+  "candidateDeployment": "dpl_MS6JwmRmgJzqH411PKzFrDRaACmu",
+  "candidateFullQualificationPassed": false,
+  "primaryStaticSceneCityMovementAndReactQuestPassed": true,
+  "candidatePublicCompiledAvailabilityPassed": true,
+  "publicRecoveryViaCompiledChunksObserved": false,
+  "restoredVersionFilesAndQrPassed": true,
+  "includesPlayerFeedback6997": true,
+  "goalStillActive": true
+}

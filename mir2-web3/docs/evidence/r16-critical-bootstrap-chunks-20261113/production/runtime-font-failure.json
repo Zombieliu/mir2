@@ -1,0 +1,174 @@
+{
+  "source": "2029b44abdee104445c569204477a219a1353f79",
+  "wasmAttempts": [
+    {
+      "path": "https://numeron.obelisk.build/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "requestTimestamp": 110708.869616,
+      "requestAtMs": 85689,
+      "failedTimestamp": 110716.870019,
+      "failedAtMs": 93690,
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "requestTimestamp": 110716.869916,
+      "requestAtMs": 93690,
+      "status": 200,
+      "headersTimestamp": 110760.071923,
+      "headersAtMs": 136892,
+      "protocol": "h2",
+      "serviceWorker": false,
+      "diskCache": false,
+      "dataEvents": 72,
+      "receivedDataLength": 1769498,
+      "receivedEncodedDataLength": 668693,
+      "maxDataGapMs": 3914,
+      "firstDataAtMs": 136900,
+      "lastDataAtMs": 152093,
+      "failedTimestamp": 110790.2761,
+      "failedAtMs": 167096,
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "requestTimestamp": 110790.27584,
+      "requestAtMs": 167096,
+      "failedTimestamp": 110910.287651,
+      "failedAtMs": 287107,
+      "failure": "net::ERR_ABORTED"
+    }
+  ],
+  "firstBootFailed": {
+    "observedAtMs": 287720,
+    "atMs": 286771.799999997,
+    "timeOrigin": 1794562231594.7,
+    "bootAttempted": false,
+    "booted": false,
+    "bootFailed": true,
+    "package": null,
+    "capabilities": null,
+    "quest": null,
+    "hud": null,
+    "screen": "game",
+    "sceneReady": true,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    },
+    "longTasks": [
+      {
+        "startMs": 13296.89999999106,
+        "durationMs": 70,
+        "name": "self"
+      },
+      {
+        "startMs": 81410.29999999702,
+        "durationMs": 114,
+        "name": "self"
+      }
+    ],
+    "timerDrifts": []
+  },
+  "lastRuntime": {
+    "observedAtMs": 371720,
+    "atMs": 370771.200000003,
+    "timeOrigin": 1794562231594.7,
+    "bootAttempted": false,
+    "booted": false,
+    "bootFailed": true,
+    "package": null,
+    "capabilities": null,
+    "quest": null,
+    "hud": null,
+    "screen": "game",
+    "sceneReady": true,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    },
+    "longTasks": [
+      {
+        "startMs": 13296.89999999106,
+        "durationMs": 70,
+        "name": "self"
+      },
+      {
+        "startMs": 81410.29999999702,
+        "durationMs": 114,
+        "name": "self"
+      }
+    ],
+    "timerDrifts": []
+  },
+  "cache": {
+    "passed": false,
+    "expected": [
+      {
+        "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+        "bytes": 16437364,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansTC.ttf",
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+        "bytes": 621572,
+        "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+        "bytes": 243520,
+        "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+        "bytes": 37780,
+        "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+        "bytes": 234892,
+        "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+      }
+    ],
+    "cacheReadsOnly": true,
+    "rows": [
+      {
+        "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+        "present": false
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansTC.ttf",
+        "present": false
+      },
+      {
+        "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+        "present": false
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+        "present": false
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+        "present": false
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+        "present": false
+      }
+    ]
+  },
+  "consoleHeaderTimeouts": [
+    {
+      "atMs": 287098,
+      "level": "warning",
+      "message": "[mir2] Bevy runtime unavailable; compatibility renderer remains active AbortError: Runtime binary response headers timed out"
+    }
+  ],
+  "rawStartupSha256": "255a88df5d32743b0a71d7b45be0ee6328b701203780950df97b12d76c2c2098",
+  "interpretation": "App8s header failure; CDN200gzipHIT partial body then15s idle; final same-CDN120s header deadline. Final header deadline is intentionally terminal: additional transport group is not granted. No complete runtime, no App/default initialization. Font cache0/6. Not a retry-budget bug or proof of HTTP2 causality."
+}

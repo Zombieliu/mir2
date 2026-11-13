@@ -6,7 +6,7 @@ Updated 2026-11-13 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-13 进城下载恢复候选9dc7294c02已提交推送：213项、68项发布保护、构建及两后端冷暖四会话通过。正式出码/官方Testnet登录确认正常，但scene/floor/locale正文不完整，首场景未提交，移动和Native未进入，完整公网资格false。已回退b2097fdfd1（含6997玩家反馈），11文件与简繁出码复验通过；131份WIP保全，原8秒/120秒与整体1:1开放。继续固定部署单个scene传输定位，不据跨版本/代理不同的curl归因或放宽门槛。[本轮发布、失败与回退](evidence/r16-entry-download-recovery-20261113/production/README.md)
+2026-11-13 首屏分包候选2029b44abd已提交推送并完成受控恢复；正式整场仍因运行包/Native字体失败，已回退B209。优先核验现有第一方WASM与字体完整字节，再决定请求调度；保留原门槛、全部失败及独立Windows工作区变化，继续R16其他缺项。[当前发布与下一项](evidence/r16-critical-bootstrap-chunks-20261113/production/README.md)
 
 ## 保留的当前未结项
 
