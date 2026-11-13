@@ -250,7 +250,7 @@ test('invalid or oversized bytes fail closed instead of consulting another sourc
   }
 });
 
-test('two interrupted pinned bodies recover once before a single glue initialization', async () => {
+test('two interrupted pinned bodies rotate once before a single glue initialization', async () => {
   const urls = ['https://app.example.test/bevy-runtime/v/pinned/pkg-webgpu/runtime.wasm',
     'https://assets.example.test/release/bevy-runtime/v/pinned/pkg-webgpu/runtime.wasm'];
   const requests = [], events = [], signals = [];
@@ -273,11 +273,11 @@ test('two interrupted pinned bodies recover once before a single glue initializa
       } }), { headers: { 'content-type': 'application/wasm' } });
     },
   }), runtime);
-  assert.deepEqual(requests, [urls[0], urls[1], urls[1]]);
+  assert.deepEqual(requests, [urls[0], urls[1], urls[0]]);
   assert.deepEqual([imports, canvases, initialized], [1, 1, 1]);
   assert.deepEqual(events.filter(x => x.state === 'failed').map(x => [x.bytes, x.reason, x.retryable]),
     [[4, 'network', true], [4, 'network', true]]);
-  assert.deepEqual(events.at(-1), { attempt: 3, sourceIndex: 1, retry: true,
+  assert.deepEqual(events.at(-1), { attempt: 3, sourceIndex: 0, retry: true,
     state: 'completed', phase: 'compile', bytes: binary.length, status: 200, reason: undefined, retryable: undefined });
 });
 

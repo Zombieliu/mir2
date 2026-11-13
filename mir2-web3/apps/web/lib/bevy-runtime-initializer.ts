@@ -73,9 +73,10 @@ export async function initializeBevyRuntime<T extends RuntimeInitializer>({
   const compile = async () => {
     const sources = [...new Set([wasmUrl, ...wasmFallbackUrls])];
     const attempts = [...sources];
-    let retrySource: string | undefined;
+    const transientSources: string[] = [];
     let lastError: unknown;
     let groupStart = 0, recoveryTaken = false;
+    let rotateAfterPartialFailure = false;
     for (const [index, url] of attempts.entries()) {
       if (controller.signal.aborted) throw controller.signal.reason;
       const groupIndex = index - groupStart;
@@ -195,11 +196,17 @@ export async function initializeBevyRuntime<T extends RuntimeInitializer>({
         report("failed", retryable);
         if (controller.signal.aborted) throw controller.signal.reason;
         if (terminal) throw failure;
-        if (retryable && groupIndex < sources.length) retrySource = url;
-        // Once the configured mirrors are exhausted, retry only the last
-        // transient source once. All retries remain before glue initialization;
-        // corrupt bytes and expired terminal phase budgets never get another GET.
-        if (groupIndex === sources.length - 1 && sources.length > 1 && retrySource) attempts.push(retrySource);
+        if (retryable && groupIndex < sources.length) transientSources.push(url);
+        // A source that transferred bytes before failing may repeat a costly
+        // partial download. Spend the same one retry on an earlier transient
+        // source first. Zero-byte and HTTP failures retain their existing order.
+        // A missing/denied source never acquires retry authority.
+        if (groupIndex === sources.length - 1 && sources.length > 1 && transientSources.length) {
+          const partialBody = retryable && (phase as RuntimeBinaryAttempt["phase"]) === "body" && bytes > 0;
+          const retrySource = partialBody ? transientSources[0] : transientSources[transientSources.length - 1];
+          rotateAfterPartialFailure = partialBody && retrySource !== url;
+          attempts.push(retrySource);
+        }
         // The async reader may have reached EOF before the compiler rejects.
         recoverableTransport = retryable && (phase as RuntimeBinaryAttempt["phase"]) !== "compile";
         lastError = failure;
@@ -218,8 +225,12 @@ export async function initializeBevyRuntime<T extends RuntimeInitializer>({
           recoveryTaken = true;
           await recoveryCooldown();
           groupStart = attempts.length;
-          retrySource = undefined;
-          attempts.push(...sources);
+          transientSources.length = 0;
+          // If the partial-body retry was rotated, do not immediately repeat it
+          // again. The authorized group still has the same size and budgets.
+          const next = rotateAfterPartialFailure ? (sources.indexOf(url) + 1) % sources.length : 0;
+          rotateAfterPartialFailure = false;
+          attempts.push(...sources.slice(next), ...sources.slice(0, next));
         }
       }
     }

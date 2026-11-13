@@ -139,7 +139,7 @@
     "test:bevy-presentation-pose": "node ./scripts/test-bevy-presentation-pose.mjs",
     "test:bevy-runtime-budget": "node ./scripts/test-bevy-runtime-budget.mjs",
     "test:bevy-runtime-policy": "node --test ./scripts/test-bevy-runtime-policy.mjs ./scripts/test-renderer-wasm-opt.mjs && npm run test:bevy-runtime-startup",
-    "test:bevy-runtime-startup": "node --test ./scripts/test-bevy-runtime-initializer.mjs ./scripts/test-bevy-runtime-finite-recovery.mjs ./scripts/test-bevy-runtime-module-owner.mjs ./scripts/test-bevy-runtime-font-prewarm.mjs",
+    "test:bevy-runtime-startup": "node --test ./scripts/test-bevy-runtime-initializer.mjs ./scripts/test-bevy-runtime-finite-recovery.mjs ./scripts/test-bevy-runtime-source-rotation.mjs ./scripts/test-bevy-runtime-module-owner.mjs ./scripts/test-bevy-runtime-font-prewarm.mjs",
     "test:local-command-pose-latency": "node ./scripts/test-local-command-pose-latency.mjs",
     "test:cdp-debug-port": "node ./scripts/test-cdp-debug-port.mjs",
     "test:cdp-message": "node ./scripts/test-cdp-message.mjs",
