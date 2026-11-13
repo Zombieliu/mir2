@@ -14,7 +14,7 @@ Short routing summary, updated 2026-11-14 (Asia/Shanghai). This indexes recorded
 
 ## Last recorded decisions and open work
 
-2026-11-14 当前已回退f6603c89a3／dpl_3eNPP4uaj3nT3HsAMhJUUoXpN4Dh，简繁扫码复验通过，保留寻路修复。walking恢复91b8fc9b4f的118＋70项／构建及R21/R22完整四会话通过；43518539244发布及alias读回成功，但公网观察器因固定288616与首帧287617不同在发键前早退，whole=false，43519792110已回退。不是已发移动8秒失败，旧metadata未存后到UserLocation坐标，不给位置变化指定碰撞原因。新retry准备保留canonical初始包、同连接／角色／地图有序权威及输入前绑定，用Git-pinned完整0.map和生产parser证明相邻碰撞；不泛化稀疏cells缺项，静态SHA及8秒／20秒／120秒不变。[本地四场及发布回退](evidence/r16-walking-recovery-20261114/README.md)。R15未定因，NPC姓名已定位但未实施；冷加载、死亡弹窗十语、全场景GPU、实体手机及其余1:1开放，Goal active。
+2026-11-14 正式已保留91b8fc9b4f／dpl_44ctBTrdq2T5fb91EjrUEt6B3GUk：118＋70项／构建、本地四会话及43522596457第二次公网普通签名／进城／首步124ms／共享HUD-Q／六字体／113项／Worker／退出、简繁出码和全部静态读回通过。首轮固定出生格早退／回退原件保持false；新权威绑定与完整地图proof保留canonical初始包，改点287617分支仅离线覆盖。Native108.238秒低于原120秒，但87条资源HTTP错误、88 console仍保留，性能未解决。[正式分项及边界](evidence/r16-walking-recovery-20261114/production/README.md)。R15旧停步未定因；NPC姓名层级本地CSS＋15项及前后组件截图通过，尚未完整游戏／发布，GDI长名字截字仍开放。死亡弹窗十语、全场景GPU、实体手机及其余1:1开放，Goal active。
 
 2026-11-12 正式站已发布 `51d2dcc346`：共享图片取消与图集计时/JSON大小缓存身份修复。本机75项、生产构建及两后端重开同档通过；公网简繁出码、手机尺寸官方钱包Testnet签名、进比奇、权威移动、共用HUD/任务窗、113/113预取和正常退出通过，无需回滚。云端缓存身份与计算一致；Worker正常更新缓存一次，未迁移旧007缓存。本次观测起点到首画面65.2秒/共用HUD104.7秒（点击进游戏后约6.8秒/46.3秒），继续优化冷加载；实体手机、完整1:1及历史未结项仍开放。[发布与边界](evidence/r16-cache-repair-20261112/README.md)
 

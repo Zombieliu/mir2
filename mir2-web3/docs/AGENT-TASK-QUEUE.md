@@ -6,11 +6,12 @@ Updated 2026-11-14 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-14 已保留正式 f6603c89a3：运行包部分正文失败后的有限来源轮换，95＋70项及两后端四会话通过。首次公网失败／回退保留，完整读回后同源新浏览器扫码签名、进城首步127ms、共享HUD/Q、六字体、113/113、Worker停启与退出通过。首帧30.667秒、Native观测204.320秒，冷120秒false；接着补行走包恢复并继续冷加载，整体1:1／实体手机开放，Goal active。[发布与分项证据](evidence/r16-runtime-source-rotation-20261114/production/README.md) · [已保留的寻路修复](evidence/r16-route-direction-20261113/README.md)
+2026-11-14 已保留正式91b8fc9b4f：118＋70项／构建、本地四会话及第二次公网普通签名／进城首步124ms／共享HUD-Q／六字体／113项／Worker／退出、简繁出码与全部静态读回通过。首轮早退／回退保留，Native108.238秒低于120秒但87条资源错误与88 console仍记录；整体1:1／实体手机开放，Goal active。[当前正式分项](evidence/r16-walking-recovery-20261114/production/README.md) · [已保留的寻路修复](evidence/r16-route-direction-20261113/README.md)
 
 ## 保留的当前未结项
 
-- [ ] 行走包91b8fc9b4f的118＋70项／构建与本地四会话通过。43518539244发布成功，公网因固定出生格在首步前早退而整体false；43519792110已回退f660、简繁二维码复验通过。补同连接有序权威／输入前绑定与Git-pinned完整地图碰撞后再重验，固定初始出生／静态SHA及8秒／20秒／120秒不变；R15及旧失败保留。[本地资格与发布回退](evidence/r16-walking-recovery-20261114/README.md)
+- [x] 行走包有限恢复91b8fc9b4f的118＋70项／构建、本地四会话、第二次公网功能回放和完整静态读回通过，正式保留；首轮失败／回退均存档。原静态SHA与8秒／20秒／120秒未改，公网compiled恢复未触发、资格来自本地；不冒充全部1:1。[当前正式与范围](evidence/r16-walking-recovery-20261114/production/README.md)
+- [ ] R15战后回镇一次8秒停步仍未定因；新本地快速回镇通过不倒填旧原因。首步前权威改点287617的公网实走覆盖、其余自动路线与动态占位继续验收。
 - [ ] Web死亡弹窗四个 ui.death.* 未登记；补齐十语言并独立验收文案，不将其冒充共享弹窗外观1:1。
 
 - [x] Worker重启缓存修复已发布f6acaad6b0；公网停启后同一HUD图与配置通过。受控两后端全流程另记，公网联合检查仍false。[发布/失败范围](evidence/r16-worker-restart-20261113/production/README.md)

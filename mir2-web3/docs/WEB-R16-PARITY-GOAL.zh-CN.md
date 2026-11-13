@@ -1,8 +1,8 @@
 # Windows R16 与 Web 1:1 验收
 
-2026-11-14 行走包91b8fc9b4f的118＋70项／构建及R21/R22两后端冷暖四会话通过。首次发布／alias读回成功，公网未发首步：固定出生格假设与首帧287617不符导致前置早退，整体false后已回退f660并复验简繁出码。继续保留canonical初始包、补有序最新权威与完整碰撞来源后重验；原静态SHA、8秒／20秒／120秒不变。R15旧停步及其余1:1仍开放，Goal active。[本地资格、首次失败及回退](evidence/r16-walking-recovery-20261114/README.md)
+2026-11-14 行走包91b8fc9b4f已保留正式；118＋70项／构建、本地两后端四会话、第二次公网登录进城／首步124ms／共享HUD-Q／六字体／113项／Worker／退出与16站立、4bootstrap、8core完整读回通过。首轮前置早退和回退不重写，当前改点分支仅离线覆盖；原静态SHA与8秒／20秒／120秒不变。Native108.238秒且原资源错误仍保留，R15、NPC名字和整体1:1开放，Goal active。[正式分项及边界](evidence/r16-walking-recovery-20261114/production/README.md)
 
-2026-11-14 当前正式来源 f6603c89a3，继承 Windows R16 寻路修复并新增部分正文失败后的有限来源轮换。95项、70保护、构建、两后端四会话及第二次公网功能回放／完整静态读回通过；首次行走包失败和回退单列。原120秒冷资格仍false：第二轮首帧30.667秒、Native观测204.320秒，不能由本地37秒或功能通过替代。保留版本继续改进，不上调整体Candidate；行走包恢复、死亡弹窗十语、蓝线手势和其余1:1／实体手机继续开放，Goal active。[最新证据](evidence/r16-runtime-source-rotation-20261114/production/README.md) · [寻路方向与确认](evidence/r16-route-direction-20261113/README.md)
+2026-11-14 上一版来源 f6603c89a3，继承 Windows R16 寻路修复并新增部分正文失败后的有限来源轮换。95项、70保护、构建、两后端四会话及第二次公网功能回放／完整静态读回通过；首次行走包失败和回退单列。该次120秒冷资格false：首帧30.667秒、Native观测204.320秒，不由后续通过倒填；该版作为本轮回退基线继续保留。[历史分项](evidence/r16-runtime-source-rotation-20261114/production/README.md) · [寻路方向与确认](evidence/r16-route-direction-20261113/README.md)
 
 2026-11-13 d99212e3cd优先现有第一方完整字体，显式六字体预热移到最终运行包成功之后；231项、构建和四会话及正式扫码签名/进城/移动/共用HUD/Q/六字体/113/Worker停启/退出通过。公网Native185.240秒超原120秒，冷资格false，持续Goal未完成。先跟进Edge右键手势和图片菜单的真实事件复现，完整三职业/旧档/像素/实体手机仍开放。[正式结果](evidence/r16-firstparty-font-delivery-20261113/production/README.md) · [玩家反馈](evidence/r16-edge-right-button-report-20261113/README.md)
 
