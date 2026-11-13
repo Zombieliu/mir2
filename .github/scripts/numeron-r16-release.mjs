@@ -16,135 +16,70 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: '440f82d4d2a7db2b44046cfbd7885680e437aa65',
+  source: '9dc7294c0269eee93086e88ac83d2bc9d93d387e',
   sourceRef: BRANCH,
-  baseSource: '210fa4716a24b7028ad7fd45aae4edb497ec7fd7',
+  baseSource: '31e9b6a74661c31d6515dd7322b466285f975d71',
   assetSource: 'f2de762309768b51b39438c2437c14e819df9bf7',
   changedFiles: [
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/app/components/original-client-scene-visual-layers.tsx",
-      "sha": "2d23f472bff5d342edafc72029c2a5b19caab858"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/app/components/original-client-self-sprite.tsx",
-      "sha": "b2d3cd728c7435cd90534fb2feb8249cffc3478f"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/app/components/original-client-shell-types.ts",
-      "sha": "e1f4d3ec487fa0b5199f88499019e87dae2ace50"
-    },
-    {
-      "status": "modified",
       "filename": "mir2-web3/apps/web/app/original-client-shell.tsx",
-      "sha": "c6323812a200ea893ab4a939361ac6ce5497cc76"
+      "sha": "0ee785da7ef317bc76d1d42017050643bd63a01e"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/apps/web/app/page.tsx",
-      "sha": "8a3fa593ac84ce30affaefdd4d6a800e63879b6b"
+      "sha": "9bdedad2c362d24a153b17c1e02712fa81b3bf94"
     },
     {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-0.json",
-      "sha": "2440e35ab53bedbc2f784dc9017a4612167b4866"
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/lib/bevy-runtime-initializer.ts",
+      "sha": "9e550d44d6649ac84cadf5b9c6c9b3928a814b5d"
     },
     {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-1.json",
-      "sha": "ec1cdfe243fa088a92bf5e4ea5352630c1f0d17a"
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/lib/first-crystal-scene-request.ts",
+      "sha": "f7fa858f05dbe86472a38f9769ed38e445b23809"
     },
     {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-2.json",
-      "sha": "87a22c4aa46def08cb525cf117dd25cd2f6298b8"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-3.json",
-      "sha": "ef5cb5d44533946581d517f56efcbafa8fdf6ec5"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-4.json",
-      "sha": "187951b06c554f7172864997fb6b57019c6c5eae"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-5.json",
-      "sha": "97896d1ce3965491982525657ed61500c8a38620"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-6.json",
-      "sha": "ec563064ab58da8428900276a9b6af18f584e9da"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-7.json",
-      "sha": "f366d09b9579a52403f0609b5bc6a6cfbfd4f6c9"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-0.json",
-      "sha": "2467f033931898cac70f2211e9226fe855018f9c"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-1.json",
-      "sha": "aea45e7079d57c2ed86cc476506678f8ba0dbc23"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-2.json",
-      "sha": "4c5e9b71898f8374b3a8536a0121fe4339a840d2"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-3.json",
-      "sha": "5792b64728d1ee50ff25503eab9160478a650eb1"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-4.json",
-      "sha": "706f7652ac36bad2416305d74b3a1769213a395a"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-5.json",
-      "sha": "371629d262760c4d2d14ddd22f0ad3866ad3f211"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-6.json",
-      "sha": "7eb053454f5751e9a058952818f6cc434a68a90e"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-7.json",
-      "sha": "2b3bec42e6ddb7e3ed563e1afbb286c6e9620808"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/lib/r16-standing-sprites.ts",
-      "sha": "f3ec6b434631f3cc260da79a3891d64b03fac6d8"
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/lib/r16-entry-scene.ts",
+      "sha": "a4d56dd9fb29fae449d421ceb0e9ca0befd55964"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/apps/web/package.json",
-      "sha": "4bd1aaa76e3974a097e6347065e779106d9d6774"
+      "sha": "03bb778ae1538c2cc47a0869cbc8021665d26094"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/apps/web/scripts/generate-r16-standing-sprites.mjs",
-      "sha": "edf4f925237aa066b267e5a94b8c5d0153bcc0e0"
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-finite-recovery.mjs",
+      "sha": "ea9fc59a59213f252c92fd636d378d309043abb6"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs",
+      "sha": "47a15f4a7e0a1df2d1e5530aab366bc569ec9844"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/apps/web/scripts/test-r16-standing-sprites.mjs",
-      "sha": "861da8e04ccde4516fa05754d3fce9dc1f34d407"
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-module-owner.mjs",
+      "sha": "b6f4fedd2efe9f810ae98b4e2bf28133685cd25e"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/scripts/test-r16-entry-npc-recovery.mjs",
+      "sha": "845baaf963b20998659c6ef65cba1885f78ab9fb"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-renderer-wasm-opt.mjs",
+      "sha": "f6f6c657213c8b950bc9ecae2e4bb79a2109f5bc"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs",
+      "sha": "a47fb7d3920d3c8c988d9303d576e7adb2045927"
     }
   ],
   entryScene: {
