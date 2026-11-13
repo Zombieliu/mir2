@@ -11,6 +11,18 @@ const older = 'https://assets.example.test/mir2/v/older';
 const fontPath = '/original-ui/fonts/NotoSansTC.ttf';
 const font = new Uint8Array([9, 7, 5, 3]);
 
+test('the shipped registrar explicitly prefers its first-party font files', () => {
+  const source = ts.createSourceFile('asset-cache-registrar.tsx', readFileSync(
+    new URL('../app/components/asset-cache-registrar.tsx', import.meta.url), 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const policies = [];
+  const visit = node => {
+    if (ts.isPropertyAssignment(node) && node.name.getText(source) === 'fontMirrorFirst') policies.push(node.initializer.kind);
+    ts.forEachChild(node, visit);
+  };
+  visit(source);
+  assert.deepEqual(policies, [ts.SyntaxKind.FalseKeyword]);
+});
+
 function fixture(fetchImpl, { path = fontPath, mirrorFirst = true, remotes = [current, older], headers } = {}) {
   const calls = [];
   const context = vm.createContext({
@@ -75,6 +87,31 @@ test('a preferred font source is attempted once before all-missing negative cach
   const calls = f.calls.length;
   assert.equal((await f.read()).status, 404);
   assert.equal(f.calls.length, calls, 'all sources confirmed missing still has bounded negative caching');
+});
+
+test('app-first all-missing fonts retain one ordered fallback group and short negative caching', async () => {
+  const f = fixture(async () => new Response(null, { status: 404 }), { mirrorFirst: false });
+  assert.equal((await f.read()).status, 404);
+  assert.deepEqual(f.calls, [origin + fontPath, current + fontPath, older + fontPath]);
+  assert.equal((await f.read()).status, 404);
+  assert.equal(f.calls.length, 3); assert.equal(f.negativeEntries(), 1);
+});
+
+test('an app-first transport error plus missing fallbacks remains retryable', async () => {
+  let healthy = false;
+  const f = fixture(async request => {
+    if (request.url === origin + fontPath) {
+      if (!healthy) throw new TypeError('temporary app connection failure');
+      return new Response(font);
+    }
+    return new Response(null, { status: 404 });
+  }, { mirrorFirst: false });
+  assert.equal((await f.read()).status, 504);
+  assert.equal(f.negativeEntries(), 0);
+  assert.deepEqual(f.calls, [origin + fontPath, origin + fontPath, origin + fontPath, current + fontPath, older + fontPath]);
+  healthy = true;
+  assert.deepEqual(new Uint8Array(await (await f.read()).arrayBuffer()), font);
+  assert.equal(f.calls.at(-1), origin + fontPath);
 });
 
 for (const status of [403, 429, 503]) {

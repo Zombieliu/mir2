@@ -5662,8 +5662,8 @@ export default function HomePage() {
           return;
         }
 
-        // The scene is already playable. Start independent font/binary reads
-        // alongside the full HUD prewarm and observe its eventual settlement.
+        // The scene is already playable. Keep the HUD prewarm independent of
+        // the runtime download and observe its eventual settlement.
         // Native still owns readiness and the initializer's canvas/boot checks.
         const recordForegroundWarmSettled = () => {
           if (!disposed) markMir2CacheMilestone("bevyRuntimeForegroundWarmSettled", { stage: "game" });
@@ -5671,16 +5671,6 @@ export default function HomePage() {
         void requestAssetPrewarmStage("game")?.then(recordForegroundWarmSettled, recordForegroundWarmSettled);
         if (disposed) return;
         appendLog(t("runtime.loadingModule"), "network");
-        // Overlap these independent bodies with the phase-bounded runtime read
-        // and the unchanged foreground HUD attempts/recovery.
-        markMir2CacheMilestone("bevyRuntimeFontPrewarmStart");
-        void prewarmBevyRuntimeFonts({ signal: fontPrewarmController.signal }).then((result) => {
-          if (disposed) return;
-          markMir2CacheMilestone("bevyRuntimeFontPrewarmComplete", {
-            requested: result.requested, ok: result.completed.length,
-            failed: result.failed.length, aborted: result.aborted, bytes: result.bytes,
-          });
-        }).catch(() => { /* Native readers keep their own recovery path. */ });
         let runtimeBackend = selectedBackend;
         let fallbackFrom: BevyRuntimeBackend | undefined;
         let runtime: RuntimeModule;
@@ -5708,6 +5698,19 @@ export default function HomePage() {
           }
         }
         if (disposed) return;
+
+        // Do not proactively start both large CJK fonts while the runtime body
+        // is still downloading or recovering. DOM fonts may already be in use;
+        // warm every Native family after the final backend succeeds, without
+        // making font completion a prerequisite for App initialization.
+        markMir2CacheMilestone("bevyRuntimeFontPrewarmStart");
+        void prewarmBevyRuntimeFonts({ signal: fontPrewarmController.signal }).then((result) => {
+          if (disposed) return;
+          markMir2CacheMilestone("bevyRuntimeFontPrewarmComplete", {
+            requested: result.requested, ok: result.completed.length,
+            failed: result.failed.length, aborted: result.aborted, bytes: result.bytes,
+          });
+        }).catch(() => { /* Native readers keep their own recovery path. */ });
 
         // The fixed canvas placement must agree with the initialized bytes before
         // handing control to an App. A failed boot needs a fresh document to retry.

@@ -80,6 +80,27 @@ async function configure(w, version) {
   return message.replies.find(x => x.type === "MIR2_ASSET_CACHE_CONFIGURED");
 }
 
+for (const mirrorFirst of [false, true]) {
+  test(`a restarted worker preserves explicit fontMirrorFirst=${mirrorFirst} and complete font bytes`, async () => {
+    const cache = storage(), first = worker(cache);
+    const payload = configuration("a");
+    payload.fontMirrorFirst = mirrorFirst;
+    const mirror = "https://mirror.example.test/mir2/v/release-a";
+    payload.manifest.remoteAssets.assetBaseUrl = mirror;
+    await first.message(payload).done;
+    const fontPath = "/original-ui/fonts/NotoSansTC.ttf";
+    const restarted = worker(cache, async () => new Response(new Uint8Array(bytes)));
+    const read = restarted.fetch(fontPath);
+    assert.deepEqual([...new Uint8Array(await (await read.response).arrayBuffer())], bytes);
+    await read.done();
+    assert.equal(vm.runInContext("runtimeConfig.fontMirrorFirst", restarted.context), mirrorFirst);
+    assert.deepEqual(restarted.calls, [(mirrorFirst ? mirror : origin) + fontPath]);
+    const cached = restarted.fetch(fontPath);
+    assert.deepEqual([...new Uint8Array(await (await cached.response).arrayBuffer())], bytes);
+    await cached.done(); assert.equal(restarted.calls.length, 1);
+  });
+}
+
 test("a restarted worker serves the complete already-versioned HUD cache without another network read", async () => {
   const cache = storage(), first = worker(cache);
   await configure(first, "a");

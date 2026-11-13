@@ -482,6 +482,8 @@ function fontWorkerFixture(t) {
   return { context, read, calls, streams, completions, stores, writes: () => writes };
 }
 
+const fontTurn = () => new Promise(resolve => setImmediate(resolve));
+
 test("retiring the first HUD consumer cannot cancel a coalesced prewarm body", async t => {
   const owner = new AbortController(), calls = [];
   let headers, body;
@@ -511,18 +513,21 @@ test("retiring the first HUD consumer cannot cancel a coalesced prewarm body", a
 
 test("CSS and renderer consumers share one font through its unfinished body and cache fill", async t => {
   const f = fontWorkerFixture(t);
-  const first = await f.read();
-  const firstBody = first.arrayBuffer();
+  let exposed = false;
+  const first = f.read().then(response => { exposed = true; return response; });
+  await fontTurn();
   f.streams[0].enqueue(new Uint8Array([1, 2]));
-  const second = await f.read();
-  const secondBody = second.arrayBuffer();
+  const second = f.read();
+  await fontTurn();
   assert.equal(f.calls.length, 1, "the second consumer must not download the same font again");
-  assert.equal(f.writes(), 1, "one in-flight body has only one cache writer");
+  assert.equal(exposed, false, "neither CSS nor the renderer may see an unfinished font prefix");
+  assert.equal(f.writes(), 0, "an unfinished font must not enter CacheStorage");
   assert.equal(vm.runInContext("fontAssetInflightFetches.size", f.context), 1);
   f.streams[0].enqueue(new Uint8Array([3, 4])); f.streams[0].close();
-  assert.deepEqual([...new Uint8Array(await firstBody)], [1,2,3,4]);
-  assert.deepEqual([...new Uint8Array(await secondBody)], [1,2,3,4]);
+  assert.deepEqual([...new Uint8Array(await (await first).arrayBuffer())], [1,2,3,4]);
+  assert.deepEqual([...new Uint8Array(await (await second).arrayBuffer())], [1,2,3,4]);
   await Promise.all(f.completions);
+  assert.equal(f.writes(), 1, "one complete shared font has only one cache writer");
   assert.equal(vm.runInContext("fontAssetInflightFetches.size", f.context), 0);
   const cached = await f.read();
   assert.deepEqual([...new Uint8Array(await cached.arrayBuffer())], [1,2,3,4]);
@@ -531,42 +536,52 @@ test("CSS and renderer consumers share one font through its unfinished body and 
 
 test("one font consumer retiring does not cancel another consumer's shared download", async t => {
   const f = fontWorkerFixture(t), owner = new AbortController();
-  const first = await f.read(undefined, new Request("https://preview.example.test/original-ui/fonts/NotoSansTC.ttf", { signal: owner.signal }));
+  const first = f.read(undefined, new Request("https://preview.example.test/original-ui/fonts/NotoSansTC.ttf", { signal: owner.signal }));
+  await fontTurn();
   owner.abort("first document left");
   assert.equal(f.calls[0].signal.aborted, false);
-  const second = await f.read();
+  const second = f.read();
+  await fontTurn();
   assert.equal(f.calls.length, 1);
   f.streams[0].enqueue(new Uint8Array([8,9])); f.streams[0].close();
-  assert.deepEqual([...new Uint8Array(await second.arrayBuffer())], [8,9]);
-  assert.deepEqual([...new Uint8Array(await first.arrayBuffer())], [8,9]);
+  assert.deepEqual([...new Uint8Array(await (await second).arrayBuffer())], [8,9]);
+  assert.deepEqual([...new Uint8Array(await (await first).arrayBuffer())], [8,9]);
   await Promise.all(f.completions);
 });
 
 test("font fills retain separate cache namespaces across a release change", async t => {
   const f = fontWorkerFixture(t);
-  const old = await f.read("version-a"), next = await f.read("version-b");
+  const old = f.read("version-a"), next = f.read("version-b");
+  await fontTurn();
   assert.equal(f.calls.length, 2);
   f.streams[0].enqueue(new Uint8Array([1])); f.streams[0].close();
   f.streams[1].enqueue(new Uint8Array([2])); f.streams[1].close();
-  assert.deepEqual([...new Uint8Array(await old.arrayBuffer())], [1]);
-  assert.deepEqual([...new Uint8Array(await next.arrayBuffer())], [2]);
+  assert.deepEqual([...new Uint8Array(await (await old).arrayBuffer())], [1]);
+  assert.deepEqual([...new Uint8Array(await (await next).arrayBuffer())], [2]);
   await Promise.all(f.completions);
 });
 
 test("font lookup expiry releases the retained entry without truncating either body", async t => {
   t.mock.timers.enable({ apis: ["setTimeout"] });
-  const f = fontWorkerFixture(t), first = await f.read();
-  t.mock.timers.tick(180_000);
+  const f = fontWorkerFixture(t), first = f.read(), progress = [];
+  await fontTurn();
+  for (let index = 0; index < 13; index++) {
+    t.mock.timers.tick(14_000); await fontTurn();
+    if (index < 12) {
+      f.streams[0].enqueue(new Uint8Array([2])); progress.push(2); await fontTurn();
+    }
+  }
   assert.equal(vm.runInContext("fontAssetInflightFetches.size", f.context), 0);
   assert.equal(f.calls[0].signal.aborted, false);
-  const second = await f.read();
+  const second = f.read();
+  await fontTurn();
   assert.equal(f.calls.length, 2);
   f.streams[0].enqueue(new Uint8Array([3])); f.streams[0].close();
-  assert.deepEqual([...new Uint8Array(await first.arrayBuffer())], [3]);
+  assert.deepEqual([...new Uint8Array(await (await first).arrayBuffer())], [...progress, 3]);
   await f.completions[0];
   assert.equal(vm.runInContext("fontAssetInflightFetches.size", f.context), 1, "retiring an expired fill cannot delete its successor");
   f.streams[1].enqueue(new Uint8Array([4])); f.streams[1].close();
-  assert.deepEqual([...new Uint8Array(await second.arrayBuffer())], [4]);
+  assert.deepEqual([...new Uint8Array(await (await second).arrayBuffer())], [4]);
   await Promise.all(f.completions);
   assert.equal(vm.runInContext("fontAssetInflightFetches.size", f.context), 0);
 });
@@ -587,24 +602,27 @@ test("fonts stay in the critical cache before and after background or runtime hi
 test("a byte-range font read cannot join or replace a whole-font fill", async t => {
   const f = fontWorkerFixture(t);
   const partial = await f.read(undefined, new Request("https://preview.example.test/original-ui/fonts/NotoSansTC.ttf", { headers: { range: "bytes=0-1" } }));
-  const whole = await f.read();
+  const whole = f.read();
+  await fontTurn();
   assert.equal(f.calls.length, 2);
   assert.equal(vm.runInContext("fontAssetInflightFetches.size", f.context), 1);
   f.streams[0].enqueue(new Uint8Array([1,2])); f.streams[0].close();
   f.streams[1].enqueue(new Uint8Array([1,2,3])); f.streams[1].close();
   assert.equal((await partial.arrayBuffer()).byteLength, 2);
-  assert.equal((await whole.arrayBuffer()).byteLength, 3);
+  assert.equal((await (await whole).arrayBuffer()).byteLength, 3);
   await Promise.all(f.completions);
 });
 
 test("font response retention stays bounded when many distinct fonts are requested", async t => {
   const f = fontWorkerFixture(t), responses = [];
-  for (let index=0; index<17; index++) responses.push(await f.read(undefined,
-    new Request(`https://preview.example.test/original-ui/fonts/Font-${index}.ttf`)));
+  for (let index=0; index<17; index++) {
+    responses.push(f.read(undefined, new Request(`https://preview.example.test/original-ui/fonts/Font-${index}.ttf`)));
+    await fontTurn();
+  }
   assert.equal(f.calls.length,17);
   assert.equal(vm.runInContext("fontAssetInflightFetches.size",f.context),16);
   for (const stream of f.streams) { stream.enqueue(new Uint8Array([1])); stream.close(); }
-  await Promise.all(responses.map(response=>response.arrayBuffer()));
+  await Promise.all(responses.map(async response=>(await response).arrayBuffer()));
   await Promise.all(f.completions);
   assert.equal(vm.runInContext("fontAssetInflightFetches.size",f.context),0);
 });
@@ -624,6 +642,122 @@ function configureCurrentFontMirror(context, version = "font-release-a", include
   vm.runInContext("runtimeConfig = { ...runtimeConfig, ...fontRouteConfig }", context);
   return { origin, mirror, secondary: `https://cdn.example.test/mir2/v/${version}/original-ui/fonts/NotoSansTC.ttf` };
 }
+
+function configureAppFirstFont(context) {
+  const routes = configureCurrentFontMirror(context);
+  vm.runInContext(`runtimeConfig.fontMirrorFirst = false;
+    runtimeConfig.remoteAssetBaseUrls = [fontRouteConfig.remoteAssetBaseUrls[1], fontRouteConfig.remoteAssetBaseUrls[0]]`, context);
+  return routes;
+}
+
+test("a complete shipped app font is exposed and cached without any CDN read", async t => {
+  const f = fontWorkerFixture(t), { origin } = configureAppFirstFont(f.context);
+  let exposed = false;
+  const pending = f.read().then(response => { exposed = true; return response; });
+  await fontTurn();
+  f.streams[0].enqueue(new Uint8Array([1, 2])); await fontTurn();
+  assert.equal(exposed, false); assert.equal(f.writes(), 0);
+  assert.deepEqual(f.calls.map(request => request.url), [origin]);
+  f.streams[0].enqueue(new Uint8Array([3, 4])); f.streams[0].close();
+  assert.deepEqual([...new Uint8Array(await (await pending).arrayBuffer())], [1, 2, 3, 4]);
+  await Promise.all(f.completions);
+  assert.equal(f.writes(), 1);
+  assert.deepEqual([...new Uint8Array(await (await f.read()).arrayBuffer())], [1, 2, 3, 4]);
+  assert.deepEqual(f.calls.map(request => request.url), [origin]);
+});
+
+test("a stalled app font prefix waits for a complete CDN fallback and never poisons the shared cache", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const f = fontWorkerFixture(t), { origin, mirror } = configureAppFirstFont(f.context);
+  let exposed = false;
+  const pending = f.read().then(response => { exposed = true; return response; });
+  await fontTurn();
+  f.streams[0].enqueue(new Uint8Array([1, 2])); await fontTurn();
+  t.mock.timers.tick(14_999); await fontTurn();
+  assert.equal(f.calls.length, 1); assert.equal(exposed, false); assert.equal(f.writes(), 0);
+  t.mock.timers.tick(1); await fontTurn();
+  assert(f.calls[0].signal.aborted);
+  assert.deepEqual(f.calls.map(request => request.url), [origin, mirror]);
+  f.streams[1].enqueue(new Uint8Array([7])); await fontTurn();
+  assert.equal(exposed, false); assert.equal(f.writes(), 0);
+  f.streams[1].enqueue(new Uint8Array([8, 9])); f.streams[1].close();
+  assert.deepEqual([...new Uint8Array(await (await pending).arrayBuffer())], [7, 8, 9]);
+  await Promise.all(f.completions);
+  assert.equal(f.writes(), 1);
+  assert.deepEqual([...new Uint8Array(await (await f.read()).arrayBuffer())], [7, 8, 9]);
+  assert.equal(f.calls.length, 2, "the cache must contain only the completed fallback bytes");
+});
+
+test("app font response headers retain their seven-second bound before ordinary mirror fallback", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const calls = [];
+  let routes;
+  const { context } = createWorkerContext(request => {
+    calls.push(request);
+    if (request.url === routes.origin) return new Promise((_, reject) =>
+      request.signal.addEventListener("abort", () => reject(request.signal.reason), { once: true }));
+    assert.equal(request.url, routes.mirror);
+    return Promise.resolve(new Response(new Uint8Array([7, 8])));
+  });
+  routes = configureAppFirstFont(context);
+  const pending = vm.runInContext(`fetchStaticAsset(new Request(${JSON.stringify(routes.origin)}))`, context);
+  await fontTurn(); t.mock.timers.tick(6_999); await fontTurn();
+  assert.equal(calls.length, 1);
+  t.mock.timers.tick(1);
+  assert.deepEqual([...new Uint8Array(await (await pending).arrayBuffer())], [7, 8]);
+  assert.deepEqual(calls.map(request => request.url), [routes.origin, routes.mirror]);
+  assert(calls[0].signal.aborted);
+});
+
+test("app-first fonts preserve an explicitly older-first ordinary fallback order", async () => {
+  const calls = [];
+  const { context } = createWorkerContext(async request => {
+    calls.push(request.url);
+    return request.url.includes("older-release") ? new Response(new Uint8Array([7])) : new Response(null, { status: 404 });
+  });
+  const { origin } = configureCurrentFontMirror(context);
+  vm.runInContext("runtimeConfig.fontMirrorFirst = false", context);
+  const response = await vm.runInContext(`fetchStaticAsset(new Request(${JSON.stringify(origin)}))`, context);
+  assert.deepEqual([...new Uint8Array(await response.arrayBuffer())], [7]);
+  assert.deepEqual(calls, [origin, "https://public-r2.example.test/hotlink-ok/mir2/v/older-release/original-ui/fonts/NotoSansTC.ttf"]);
+});
+
+test("app-first complete font reads work without CacheStorage", async t => {
+  let body, exposed = false;
+  const calls = [];
+  const { context } = createWorkerContext(async request => {
+    calls.push(request.url);
+    return new Response(new ReadableStream({ start(controller) { body = controller; } }));
+  }, { async open() { throw new Error("storage denied"); } });
+  const { origin } = configureAppFirstFont(context);
+  t.after(() => { try { body?.close(); } catch {} });
+  const pending = vm.runInContext(`cacheFirst(new Request(${JSON.stringify(origin)}), "disabled", 20)`, context)
+    .then(response => { exposed = true; return response; });
+  await fontTurn(); body.enqueue(new Uint8Array([1])); await fontTurn();
+  assert.equal(exposed, false);
+  body.enqueue(new Uint8Array([2])); body.close();
+  assert.deepEqual([...new Uint8Array(await (await pending).arrayBuffer())], [1, 2]);
+  assert.deepEqual(calls, [origin]);
+});
+
+test("partial, empty and oversized app fonts fall back without exposing their bytes", async () => {
+  for (const invalid of ["empty", "partial", "range-header", "oversized"]) {
+    const calls = [];
+    let routes;
+    const { context } = createWorkerContext(async request => {
+      calls.push(request.url);
+      if (request.url !== routes.origin) return new Response(new Uint8Array([7, 8]));
+      if (invalid === "empty") return new Response("");
+      if (invalid === "partial") return new Response(new Uint8Array([1]), { status: 206 });
+      if (invalid === "range-header") return new Response(new Uint8Array([1]), { headers: { "content-range": "bytes 0-0/4" } });
+      return new Response(new Uint8Array(32 * 1024 * 1024 + 1));
+    });
+    routes = configureAppFirstFont(context);
+    const response = await vm.runInContext(`fetchStaticAsset(new Request(${JSON.stringify(routes.origin)}))`, context);
+    assert.deepEqual([...new Uint8Array(await response.arrayBuffer())], [7, 8], invalid);
+    assert.deepEqual(calls, [routes.origin, routes.mirror], invalid);
+  }
+});
 
 test("a timed-out preferred font mirror tries the other current-release origin before the app", async t => {
   t.mock.timers.enable({ apis: ["setTimeout"] });

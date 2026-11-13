@@ -493,7 +493,11 @@ async function fetchStaticAsset(request, fallbackRequests) {
     failed(response);
   }
 
-  const originResponse = await fetchStaticAssetCandidate(freshStaticAssetRequest(request));
+  const completeFont = isSharedUiFont(request) && !request.headers.has("range");
+  const fetchCandidate = source => completeFont
+    ? fetchCompleteFont(source, request.signal, STATIC_ASSET_HEADERS_TIMEOUT_MS, true)
+    : fetchStaticAssetCandidate(freshStaticAssetRequest(source));
+  const originResponse = await fetchCandidate(request);
   if (originResponse?.ok) return succeeded(originResponse);
   failed(originResponse);
 
@@ -503,7 +507,7 @@ async function fetchStaticAsset(request, fallbackRequests) {
     // A fresh logical request may retry them normally.
     if (attemptedUrls.has(remoteRequest.url)) continue;
     attemptedUrls.add(remoteRequest.url);
-    const remoteResponse = await fetchStaticAssetCandidate(freshStaticAssetRequest(remoteRequest));
+    const remoteResponse = await fetchCandidate(remoteRequest);
     if (remoteResponse?.ok) return succeeded(remoteResponse);
     failed(remoteResponse);
   }
@@ -544,42 +548,71 @@ function currentReleaseFontMirrors(request, remoteRequests) {
 }
 
 async function fetchFontMirror(request, owner) {
+  return fetchCompleteFont(request, owner, FONT_MIRROR_HEADER_TIMEOUT_MS, false);
+}
+
+async function fetchCompleteFont(request, owner, headerTimeoutMs, transientRetries) {
   const deadline = new AbortController();
-  const headerTimer = setTimeout(() => deadline.abort(), FONT_MIRROR_HEADER_TIMEOUT_MS);
+  const signal = AbortSignal.any([owner, request.signal, deadline.signal]);
+  const headerTimer = setTimeout(() => deadline.abort(), headerTimeoutMs);
   let bodyTimer, reader;
+  let rejectAborted;
+  const aborted = new Promise((_, reject) => { rejectAborted = reject; });
+  const abortRead = () => {
+    void reader?.cancel(signal.reason).catch(() => {});
+    rejectAborted(signal.reason);
+  };
+  signal.addEventListener("abort", abortRead, { once: true });
+  // A retired direct caller need not wait for a fetch implementation to notice
+  // its signal. Shared cache fills already have their own detached owner.
+  void aborted.catch(() => {});
   try {
-    const response = await fetch(freshStaticAssetRequest(new Request(request, {
-      signal: AbortSignal.any([owner, request.signal, deadline.signal]),
-    })));
+    if (signal.aborted) throw signal.reason;
+    const source = freshStaticAssetRequest(new Request(request, { signal }));
+    const headersRead = Promise.resolve(transientRetries
+      ? fetchWithTransientRetries(source, signal) : fetch(source)).then(response => {
+      if (signal.aborted) {
+        void response?.body?.cancel().catch(() => {});
+        throw signal.reason;
+      }
+      return response;
+    });
+    const response = await Promise.race([headersRead, aborted]);
     clearTimeout(headerTimer);
-    if (response.status !== 200) return response;
+    if (!response) return null;
+    if (response.status !== 200) {
+      if (response.ok) { void response.body?.cancel().catch(() => {}); return null; }
+      return response;
+    }
+    if (response.headers.has("content-range")) {
+      void response.body?.cancel().catch(() => {});
+      return null;
+    }
     if (!response.body) return null;
     reader = response.body.getReader();
-    let rejectIdle;
-    const idle = new Promise((_, reject) => { rejectIdle = reject; });
     const expectProgress = () => {
       clearTimeout(bodyTimer);
       bodyTimer = setTimeout(() => {
         deadline.abort();
-        rejectIdle(new Error("font body stopped progressing"));
       }, FONT_MIRROR_BODY_IDLE_TIMEOUT_MS);
     };
     expectProgress();
     const chunks = [];
     let length = 0;
     for (;;) {
-      const { value, done } = await Promise.race([reader.read(), idle]);
+      const { value, done } = await Promise.race([reader.read(), aborted]);
+      if (signal.aborted) throw signal.reason;
       if (done) break;
       if (!value.byteLength) continue;
       length += value.byteLength;
-      if (length > FONT_MIRROR_MAX_BYTES) throw new Error("font mirror body too large");
+      if (length > FONT_MIRROR_MAX_BYTES) throw new Error("font body too large");
       chunks.push(value);
       expectProgress();
     }
     if (!length) return null;
     // Fonts become usable only after their full body arrives. Do not expose a
-    // partial prefix: a stalled mirror must be replaceable by the complete app
-    // response, without mixing two sources or poisoning the shared font cache.
+    // partial prefix: any stalled source must be replaceable by a complete
+    // fallback, without mixing sources or poisoning the shared font cache.
     const bytes = new Uint8Array(length);
     let offset = 0;
     for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
@@ -598,6 +631,7 @@ async function fetchFontMirror(request, owner) {
     // idle budget, so a large progressing original font can finish normally.
     clearTimeout(headerTimer);
     clearTimeout(bodyTimer);
+    signal.removeEventListener("abort", abortRead);
     reader?.releaseLock();
   }
 }

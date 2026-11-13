@@ -12,14 +12,14 @@ function compile(source,dependencies={}){
  new Function('module','exports','require',js)(module,module.exports,name=>{assert(name in dependencies,name);return dependencies[name];});
  return module.exports;
 }
-function actualBoot({playable=true,mode='eager',allowed=true,criticalPending=false,support={webgpu:true,webgl2:true},screen='game',recoveryBudget=new Set()}={}){
+function actualBoot({playable=true,mode='eager',allowed=true,criticalPending=false,support={webgpu:true,webgl2:true},screen='game',recoveryBudget=new Set(),retryWithWebGl2=false,reused=false}={}){
  const source=readFileSync(pagePath,'utf8'),ast=ts.createSourceFile('page.tsx',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
  let callback;
  const visit=node=>{if(ts.isCallExpression(node)&&node.expression.getText(ast)==='useEffect'){
   const candidate=node.arguments[0];if(candidate&&candidate.getText(ast).includes('async function bootRuntime()'))callback=candidate;
  }ts.forEachChild(node,visit);};visit(ast);assert(callback);
  const events=[];let finishModule,failModule,finishFonts,finishCritical,failCritical,observed=Promise.resolve();
- const fontSignals=[],runtimeOptions=[];
+ const fontSignals=[],runtimeOptions=[],runtimeBackends=[];
  const noop=()=>{},ref=()=>({current:null});
  const env={
   AbortController,window:{location:{search:''},matchMedia:()=>({matches:false})},navigator:{maxTouchPoints:0,userAgent:'Chrome desktop'},
@@ -35,19 +35,21 @@ function actualBoot({playable=true,mode='eager',allowed=true,criticalPending=fal
   requestAssetPrewarmStage:stage=>{events.push({name:'critical-assets',stage});return criticalPending?new Promise((resolve,reject)=>{finishCritical=()=>{events.push({name:'critical-settled'});resolve();};failCritical=()=>{events.push({name:'critical-rejected'});reject(Error('HUD prewarm failed'));};}):Promise.resolve();},
   setBevyRuntimeStarted:noop,setRuntimePhase:noop,setRuntimeMessage:noop,setBevyEntityRendererReady:noop,setBevyRuntimeBackend:noop,
   resetBevyMapImageResidency:noop,withdrawHudBarDrawPlanOutputs:noop,setBevyRuntimeGeneration:noop,
-  shouldRetryBevyRuntimeWithWebGl2:()=>false,canRetryBevyRuntimeBeforeBoot:()=>true,
+  shouldRetryBevyRuntimeWithWebGl2:backend=>retryWithWebGl2&&backend==='webgpu',canRetryBevyRuntimeBeforeBoot:()=>true,
+  safeLocalStorageRemove:noop,
   isBevyRuntimeNetworkFailure:()=>true,scheduleBevyRuntimeCacheRecovery:()=>false,
   runtimeRef:ref(),runtimeDownloadRecoveryRef:{current:recoveryBudget},lastBevyEntityRenderStateJsonRef:ref(),lastBevyMapRenderStateJsonRef:ref(),lastBevyMapCameraOffsetRef:ref(),
   prewarmBevyRuntimeFonts:options=>{events.push({name:'fonts'});fontSignals.push(options.signal);return new Promise(resolve=>{finishFonts=resolve;});},
-  loadBevyRuntimeModule:(_backend,_startup,options)=>{runtimeOptions.push(options);events.push({name:'module'});return new Promise((resolve,reject)=>{finishModule=resolve;failModule=reject;});},
+  loadBevyRuntimeModule:(backend,_startup,options)=>{runtimeOptions.push(options);runtimeBackends.push(backend);events.push({name:'module',backend});return new Promise((resolve,reject)=>{finishModule=resolve;failModule=reject;});},
   testObserve:value=>{observed=value;},
  };
+ if(reused)Object.assign(env.window,{__mir2BevyRuntimeBooted:true,__mir2BevyRuntimeBackend:'webgpu',__mir2BevyRuntime:{}});
  const body=callback.body.getText(ast).replace('void bootRuntime();','testObserve(bootRuntime());');
  assert(body.includes('testObserve(bootRuntime());'));
  const js=ts.transpileModule('function effect()'+body,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText;
  const cleanup=new Function(...Object.keys(env),js+'\nreturn effect();')(...Object.values(env));
- return{events,fontSignals,runtimeOptions,cleanup,window:env.window,failModule:error=>failModule(error),
-  finishCritical:()=>finishCritical(),failCritical:()=>failCritical(),finishModule:()=>finishModule({getMir2RendererBackend:()=> 'webgpu',bootMir2Runtime:noop}),waitForBoot:()=>observed,
+ return{events,fontSignals,runtimeOptions,runtimeBackends,cleanup,window:env.window,failModule:error=>failModule(error),
+  finishCritical:()=>finishCritical(),failCritical:()=>failCritical(),finishModule:()=>{const backend=runtimeBackends.at(-1);events.push({name:'module-resolved',backend});finishModule({getMir2RendererBackend:()=>backend,bootMir2Runtime:noop});},waitForBoot:()=>observed,
   settle:async()=>{cleanup();finishCritical?.();await turn();finishModule?.({});finishFonts?.({requested:6,completed:[],failed:[],aborted:true,bytes:0});await observed;await turn();}};
 }
 
@@ -60,23 +62,25 @@ test('Page prewarm delegation returns the real shared stage promise',()=>{
  assert.equal(actual('game'),pending);assert.equal(cacheWindow.__mir2PendingAssetPrewarmStage,'game');
 });
 
-test('actual Page starts independent fonts and runtime while the HUD stage is still pending',async()=>{
+test('actual Page downloads the runtime without speculative fonts while the HUD stage is pending',async()=>{
  const run=actualBoot({criticalPending:true});try{await turn();assert(run.events.some(e=>e.name==='critical-assets'&&e.stage==='game'));
-  assert(run.events.some(e=>e.name==='module'));assert(run.events.some(e=>e.name==='fonts'));
+  assert(run.events.some(e=>e.name==='module'));assert.equal(run.fontSignals.length,0);
   assert(!run.events.some(e=>e.name==='bevyRuntimeForegroundWarmSettled'));
   run.finishModule();await run.waitForBoot();assert(run.events.some(e=>e.name==='bevyRuntimeReady'));
+  assert.equal(run.fontSignals.length,1,'all-family prewarm starts without waiting for the independent HUD stage');
   run.finishCritical();await turn();assert.equal(run.events.filter(e=>e.name==='bevyRuntimeForegroundWarmSettled').length,1);
   assert.equal(run.events.filter(e=>e.name==='module').length,1);assert.equal(run.events.filter(e=>e.name==='fonts').length,1);
  }finally{await run.settle();}
 });
 
-test('actual Page retains the HUD request while overlapping fonts and binary after first paint',async()=>{
+test('actual Page starts fonts only after the runtime resolves and boots without waiting for fonts',async()=>{
  const run=actualBoot();
  try{await turn();assert(run.events.some(e=>e.name==='module'));
-  assert(run.events.some(e=>e.name==='fonts'),'independent font bodies may overlap the phase-bounded binary read');
-  assert(run.events.findIndex(e=>e.name==='critical-assets')<run.events.findIndex(e=>e.name==='fonts'));
+  assert.equal(run.fontSignals.length,0,'pending runtime must not start the six-family prewarm');
+  assert(run.events.findIndex(e=>e.name==='critical-assets')<run.events.findIndex(e=>e.name==='module'));
   run.finishModule();await run.waitForBoot();
   assert(run.events.some(e=>e.name==='fonts'));
+  assert(run.events.findIndex(e=>e.name==='module-resolved')<run.events.findIndex(e=>e.name==='fonts'));
   assert(run.events.findIndex(e=>e.name==='fonts')<run.events.findIndex(e=>e.name==='bevyRuntimeReady'));
   assert.equal(run.fontSignals[0].aborted,false);run.cleanup();assert(run.fontSignals[0].aborted);
  }finally{await run.settle();}
@@ -91,10 +95,10 @@ test('a failed independent HUD stage cannot withdraw an already ready runtime',a
  }finally{await run.settle();}
 });
 
-test('leaving before the HUD stage settles cancels independent fonts and fences late diagnostics and boot',async()=>{
- const run=actualBoot({criticalPending:true});try{await turn();assert.equal(run.fontSignals.length,1);
+test('leaving before the runtime or HUD settles prevents late fonts, diagnostics and boot',async()=>{
+ const run=actualBoot({criticalPending:true});try{await turn();assert.equal(run.fontSignals.length,0);
   run.cleanup();run.finishCritical();run.finishModule();await run.waitForBoot();await turn();
-  assert(run.fontSignals[0].aborted);
+  assert.equal(run.fontSignals.length,0);
   assert(!run.events.some(e=>e.name==='bevyRuntimeReady'));
   assert(!run.events.some(e=>e.name==='bevyRuntimeForegroundWarmSettled'));
  }finally{await run.settle();}
@@ -107,25 +111,51 @@ test('actual Page leaves fonts deferred before first paint and for disabled, tou
  }
 });
 
-test('actual retryable module failure cancels overlapping fonts and keeps the retry boundary',async()=>{
+test('actual retryable module failure never starts fonts and keeps the retry boundary',async()=>{
  const run=actualBoot();try{await turn();run.failModule(new TypeError('Failed to fetch'));
-  await run.waitForBoot();assert.equal(run.fontSignals.length,1);assert(run.fontSignals[0].aborted);
+  await run.waitForBoot();assert.equal(run.fontSignals.length,0);
   assert.equal(run.window.__mir2BevyRuntimeRetryable,true);assert.equal(run.window.__mir2BevyRuntimeBooted,false);
  }finally{await run.settle();}
 });
 
-test('leaving while the runtime downloads cancels fonts and prevents late boot',async()=>{
+test('leaving while the runtime downloads prevents late fonts and boot',async()=>{
  const run=actualBoot();try{await turn();run.cleanup();run.finishModule();await run.waitForBoot();
-  assert(run.fontSignals.every(signal=>signal.aborted));assert(!run.events.some(e=>e.name==='bevyRuntimeReady'));
+  assert.equal(run.fontSignals.length,0);assert(!run.events.some(e=>e.name==='bevyRuntimeReady'));
  }finally{await run.settle();}
 });
 
-test('Page keeps fonts alive during finite binary recovery and cancels both owners on exit',async()=>{
+test('Page defers fonts through finite binary recovery and cancels both owners after successful boot',async()=>{
  const run=actualBoot();try{await turn();const options=run.runtimeOptions[0];assert(options);
   assert.equal(options.ownerSignal.aborted,false);assert.equal(options.takeRecovery('fixed-source'),true);
-  await turn();assert.equal(run.fontSignals[0].aborted,false);assert.equal(run.events.filter(e=>e.name==='module').length,1);
+  await turn();assert.equal(run.fontSignals.length,0);assert.equal(run.events.filter(e=>e.name==='module').length,1);
   run.finishModule();await run.waitForBoot();assert.equal(run.events.filter(e=>e.name==='bevyRuntimeReady').length,1);
   run.cleanup();assert(options.ownerSignal.aborted);assert(run.fontSignals[0].aborted);
+ }finally{await run.settle();}
+});
+
+test('only the final fallback backend starts fonts, once, before its single boot',async()=>{
+ const run=actualBoot({retryWithWebGl2:true});try{
+  await turn();run.failModule(new TypeError('Failed to fetch'));await turn();
+  assert.deepEqual(run.runtimeBackends,['webgpu','webgl2']);assert.equal(run.fontSignals.length,0);
+  run.finishModule();await run.waitForBoot();assert.equal(run.fontSignals.length,1);
+  assert.equal(run.events.filter(e=>e.name==='bevyRuntimeReady').length,1);
+  assert.equal(run.events.find(e=>e.name==='bevyRuntimeReady').detail.backend,'webgl2');
+ }finally{await run.settle();}
+});
+
+test('leaving during fallback cannot start fonts from a late module',async()=>{
+ const run=actualBoot({retryWithWebGl2:true});try{
+  await turn();run.failModule(new TypeError('Failed to fetch'));await turn();
+  assert.deepEqual(run.runtimeBackends,['webgpu','webgl2']);run.cleanup();run.finishModule();await run.waitForBoot();
+  assert.equal(run.fontSignals.length,0);assert(!run.events.some(e=>e.name==='bevyRuntimeReady'));
+ }finally{await run.settle();}
+});
+
+test('an already booted runtime is reused without another module or font prewarm',async()=>{
+ const run=actualBoot({reused:true});try{
+  await run.waitForBoot();assert.equal(run.runtimeOptions.length,0);assert.equal(run.fontSignals.length,0);
+  assert.equal(run.events.filter(e=>e.name==='bevyRuntimeReady').length,1);
+  assert.equal(run.events.find(e=>e.name==='bevyRuntimeReady').detail.reused,true);
  }finally{await run.settle();}
 });
 
