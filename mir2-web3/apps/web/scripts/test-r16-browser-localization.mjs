@@ -23,7 +23,7 @@ const expectedKeys = [
   "ui.questClientLoading", "ui.questClientUnavailable", "ui.questActionPending", "ui.questActionRewardRequired",
   "ui.questActionTalkToNpc", "ui.questActionStateChanged",
   "ui.questRoutePlanning", "ui.questRouteHuntArrived", "ui.questRouteNpcArrived", "ui.questRouteArrived",
-  "ui.questRouteUnavailable", "ui.questRouteLoadingTimeout",
+  "ui.questRouteUnavailable", "ui.questRouteLoadingTimeout", "ui.routeConfirmationTimeout",
   "ui.retry", "ui.sceneLoadUnavailable", "ui.fishingReel", "ui.characterCreateUnconfirmed",
   "ui.gameTextLoading", "ui.gameTextLoadUnavailable", "ui.confirmReturnToCharacterSelect",
 ];
@@ -93,7 +93,7 @@ test("quest feedback covers every language without exposing implementation terms
 });
 
 const routeCoordinateKeys = ["ui.questRoutePlanning", "ui.questRouteHuntArrived", "ui.questRouteNpcArrived", "ui.questRouteArrived"];
-const routeFeedbackKeys = [...routeCoordinateKeys, "ui.questRouteUnavailable", "ui.questRouteLoadingTimeout"];
+const routeFeedbackKeys = [...routeCoordinateKeys, "ui.questRouteUnavailable", "ui.questRouteLoadingTimeout", "ui.routeConfirmationTimeout"];
 
 for (const language of expectedLanguages) test(`${language} route feedback preserves exact coordinate placeholders and local wording`, () => {
   for (const key of routeFeedbackKeys) {
@@ -120,4 +120,17 @@ test("route arrival describes a hunting area or NPC approach and leaves the next
   assert.match(browserText("zh-TW", "ui.questRouteHuntArrived"), /附近的狩獵區域。請選擇任務目標怪物進行戰鬥。$/u);
   assert.match(browserText("zh-CN", "ui.questRouteNpcArrived"), /附近。请与 NPC 交谈以继续。$/u);
   assert.match(browserText("zh-TW", "ui.questRouteNpcArrived"), /附近。請與 NPC 交談以繼續。$/u);
+});
+
+test("movement confirmation timeout is localized without placeholders, budgets or implementation terms", () => {
+  assert.equal(browserText("en", "ui.routeConfirmationTimeout"),
+    "Movement confirmation timed out. Auto-route stopped; retry after your position updates.");
+  assert.equal(browserText("zh-CN", "ui.routeConfirmationTimeout"), "移动确认超时。自动寻路已停止，请等位置更新后重试。");
+  assert.equal(browserText("zh-TW", "ui.routeConfirmationTimeout"), "移動確認逾時。自動尋路已停止，請等位置更新後重試。");
+  for (const language of expectedLanguages) {
+    const value = browserText(language, "ui.routeConfirmationTimeout");
+    assert.ok(value?.trim(), language);
+    assert.doesNotMatch(value, /[{}]|\p{Number}|wasm|websocket|\b(?:ACK|RTT|FIFO|pending|queue|ABI|ECS|dispatch)\b/iu, language);
+    if (language !== "en") assert.notEqual(value, browserText("en", "ui.routeConfirmationTimeout"), language);
+  }
 });

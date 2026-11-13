@@ -1455,6 +1455,7 @@ const MOVEMENT_TURN_VISUAL_HOLD_MS = CRYSTAL_ENTITY_MOVE_ACTION_MS;
 const MOVEMENT_QUEUE_INPUT_LEAD_MS = 0;
 const MOVEMENT_SERVER_CORRECTION_GRACE_MS = 1000;
 const MOVEMENT_PENDING_ACTION_MAX_AGE_MS = MOVEMENT_PENDING_MAX_AGE_MS;
+const AUTO_ROUTE_PENDING_MAX_AGE_MS = 8000;
 const MAX_UPLOADED_BEVY_ENTITY_ATLAS_KEYS = 8;
 const MOVEMENT_OUTSTANDING_ACTION_SETTLE_GRACE_MS = CRYSTAL_ENTITY_MOVE_ACTION_MS + MOVEMENT_CONFIRM_TICK_DELAY_MS;
 const MOVEMENT_PENDING_ACTION_RECOVERY_MS = CRYSTAL_ENTITY_MOVE_ACTION_MS + CRYSTAL_INPUT_CORRECTION_DELAY_MS;
@@ -9130,6 +9131,15 @@ export default function HomePage() {
       return false;
     }
     const pending = pendingSelfMoveRef.current;
+    const waitingForRoute = queued.kind === "target" && queued.consumeAfterSend === false && !queued.pointerHeld
+      && Boolean(ownedQuestRoute || ownedMapRoute || queued.newMoveOwner);
+    if (pending && waitingForRoute && now - pending.sentAt < AUTO_ROUTE_PENDING_MAX_AGE_MS) {
+      // Keep exactly one in-flight step. A route can also be waiting for a previous
+      // manual step; its eventual authority will replan the current destination.
+      lastQueuedMovementAttemptRef.current = { reason: "route-awaiting-authority", at: now };
+      scheduleMovementConfirmTick();
+      return false;
+    }
     if (pending && now - pending.sentAt > MOVEMENT_PENDING_ACTION_MAX_AGE_MS) {
       bumpCorrectionCounter("pendingTimeout", {
         ageMs: Math.round(now - pending.sentAt),
@@ -9138,6 +9148,13 @@ export default function HomePage() {
         pendingMode: pending.mode,
       });
       pendingSelfMoveRef.current = null;
+      if (ownedQuestRoute) finishQuestRoute(ownedQuestRoute, "confirmationTimeout");
+      else if (ownedMapRoute) {
+        cancelMapImageRoute();
+        appendLog(t("ui.routeConfirmationTimeout", [], "Movement confirmation timed out. Auto-route stopped; retry after your position updates."), "system");
+      } else if (waitingForRoute) {
+        appendLog(t("ui.routeConfirmationTimeout", [], "Movement confirmation timed out. Auto-route stopped; retry after your position updates."), "system");
+      }
       queuedMoveIntentRef.current = null;
       crystalRunPrimedUntilRef.current = 0;
       movementInputBlockedUntilRef.current = Math.max(
@@ -12952,10 +12969,12 @@ export default function HomePage() {
     }
   }
 
-  function finishQuestRoute(route: NonNullable<typeof questRouteRunRef.current>, status: "arrived" | "unavailable" | "loadingTimeout") {
+  function finishQuestRoute(route: NonNullable<typeof questRouteRunRef.current>, status: "arrived" | "unavailable" | "loadingTimeout" | "confirmationTimeout") {
     if (questRouteRunRef.current !== route) return;
     cancelQuestRoute();
-    if (status === "unavailable") {
+    if (status === "confirmationTimeout") {
+      appendLog(t("ui.routeConfirmationTimeout", [], "Movement confirmation timed out. Auto-route stopped; retry after your position updates."), "system");
+    } else if (status === "unavailable") {
       appendLog(t("ui.questRouteUnavailable", [], "No complete route is currently available. Choose another destination or try again."), "system");
     } else if (status === "loadingTimeout") {
       appendLog(t("ui.questRouteLoadingTimeout", [], "The route map took too long to load. Please try again."), "system");
