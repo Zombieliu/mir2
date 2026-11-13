@@ -1,0 +1,76 @@
+{
+  "passed": true,
+  "source": "d99212e3cdde834b6eb751dd36e9a6361bc2d100",
+  "versionBeforeAndAfterMatched": true,
+  "checkedAt": "2026-11-13T11:21:51.069Z",
+  "origin": "https://numeron.obelisk.build",
+  "rows": [
+    {
+      "kind": "scene",
+      "path": "/_next/static/chunks/r16-entry-scene-fallback.2de96a71b81f435a.js",
+      "passed": true,
+      "scriptBytes": 458590,
+      "scriptSha256": "598afb15d7b7098a63aba85c1d0b43a6e9df3f04ffe08e5dfd89464e525818a4",
+      "jsonBytes": 458475,
+      "payloadSha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+      "counts": {
+        "cells": 6819,
+        "sprites": 957
+      },
+      "scope": "Read-only static AST/JSON parsing of the actual browser-complete script; no remote JavaScript execution or resource prefill.",
+      "attempts": [
+        {
+          "round": 1,
+          "status": 200,
+          "exit": 0,
+          "bytes": 458590
+        }
+      ]
+    },
+    {
+      "kind": "floor",
+      "path": "/_next/static/chunks/r16-entry-floor-fallback.c9903a19ce2f9700.js",
+      "passed": true,
+      "scriptBytes": 439514,
+      "scriptSha256": "77b660b7ed9a23ce3877ba30ca15f1c1469647a3c6aee72ccb3455804489e4cf",
+      "jsonBytes": 439896,
+      "payloadSha256": "e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d",
+      "counts": {
+        "pngs": 124
+      },
+      "scope": "Read-only static AST/JSON parsing of the actual browser-complete script; no remote JavaScript execution or resource prefill.",
+      "attempts": [
+        {
+          "round": 1,
+          "status": 200,
+          "exit": 0,
+          "bytes": 439514
+        }
+      ]
+    },
+    {
+      "kind": "locale",
+      "path": "/_next/static/chunks/r16-gameplay-locales.f7512df8286a3b70.js",
+      "passed": true,
+      "scriptBytes": 3336037,
+      "scriptSha256": "8673630a4b4a1a306f44c09d5ed01132353fec81b4dc7fa2cc019d0a319c902d",
+      "jsonBytes": 3283113,
+      "payloadSha256": "b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c",
+      "counts": {
+        "entries": 5164,
+        "fullTenVectors": true
+      },
+      "scope": "Read-only static AST/JSON parsing of the actual browser-complete script; no remote JavaScript execution or resource prefill.",
+      "attempts": [
+        {
+          "round": 1,
+          "status": 200,
+          "exit": 0,
+          "bytes": 3336037
+        }
+      ]
+    }
+  ],
+  "performedAfterSignedColdBrowser": true,
+  "scope": "Actual deployed names resolved statically from production webpack; full response bytes parsed as static AST/JSON, exact original payload bytes and SHA. No remote code execution; performed after the ordinary cold-browser replay."
+}

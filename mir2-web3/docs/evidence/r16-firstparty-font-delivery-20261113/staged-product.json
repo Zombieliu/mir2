@@ -1,0 +1,57 @@
+{
+  "parent": "e10a84e129234092e1f6f69bcffdf14537789eb3",
+  "files": [
+    {
+      "filename": "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
+      "blob": "ef8002d167a1b5a75fd73c74c4a51d679d4cf976",
+      "buildBytes": 72401,
+      "buildSha256": "9596b1d73b39f0454fafe27e018210054d72651185b10e6761624b2c9c591ccd",
+      "lineEndingOnly": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/page.tsx",
+      "blob": "f2a2a4402e9b948d4b705e8a4056d13363617841",
+      "buildBytes": 1202343,
+      "buildSha256": "4f4f253b03ce0a10b79bb2d5308539b66d9bb8be5c10f1a3d63459c1c4f3e231",
+      "lineEndingOnly": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+      "blob": "43c76ddb72af02c8f74a34dde5cb08f598bed7b4",
+      "buildBytes": 41492,
+      "buildSha256": "772eafdc70ff4cfb30eea32913f492f4ce07ac9910f5dd468b5b86876289f800",
+      "lineEndingOnly": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-asset-worker-fallback.mjs",
+      "blob": "2975b686f7b206ca5566b1943800885b20e4ce74",
+      "buildBytes": 53149,
+      "buildSha256": "73ca5ffb49c7cc8b0af3a7ca4c84b7317cbf2618a90913d50d93a8afe6ceac80",
+      "lineEndingOnly": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-asset-worker-lifecycle.mjs",
+      "blob": "60db8b36092f00a08432af7c95b22735fe67d12f",
+      "buildBytes": 20017,
+      "buildSha256": "b77588913d6ef95bb8ba488edee8d8f3315a1e90ecdd0ab667b68725ef08cd6d",
+      "lineEndingOnly": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-asset-worker-missing-retry.mjs",
+      "blob": "33e20c6b761be35c9fe2e96edd3b0b4803453787",
+      "buildBytes": 8702,
+      "buildSha256": "514f02f4f04dde18a277c9a08bcc2b079949a16135d033a6cdbf63793496d973",
+      "lineEndingOnly": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs",
+      "blob": "e64e80c1a12cf6eee648e73211b778343d86d5b4",
+      "buildBytes": 16757,
+      "buildSha256": "b644156310e865ecf9dfec6c3ebad7d32e316609626a7ead92cbce109ec35ce6",
+      "lineEndingOnly": false
+    }
+  ],
+  "sourceMatchesQualifiedBuild": true,
+  "foreignWriteSetOverlap": 0,
+  "foreignShellExcluded": true
+}

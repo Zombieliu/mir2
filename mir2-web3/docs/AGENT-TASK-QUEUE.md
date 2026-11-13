@@ -6,7 +6,7 @@ Updated 2026-11-13 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-13 首屏分包候选2029b44abd已提交推送并完成受控恢复；正式整场仍因运行包/Native字体失败，已回退B209。优先核验现有第一方WASM与字体完整字节，再决定请求调度；保留原门槛、全部失败及独立Windows工作区变化，继续R16其他缺项。[当前发布与下一项](evidence/r16-critical-bootstrap-chunks-20261113/production/README.md)
+2026-11-13 d99212e3cd已上线并通过公网完整功能；原120秒Native冷加载仍false（185.240秒），没有提升全局Candidate。下一步先记录同款Edge右键/拖动的可信事件及取消结果，区分DOM菜单与浏览器手势，避免重复拦截或破坏mousedown移动；继续关键加载与其他R16缺项。[发布](evidence/r16-firstparty-font-delivery-20261113/production/README.md) · [优先反馈](evidence/r16-edge-right-button-report-20261113/README.md)
 
 ## 保留的当前未结项
 

@@ -1,0 +1,60 @@
+[
+  {
+    "locale": "zh-CN",
+    "passed": true,
+    "revision": "d99212e3cdde834b6eb751dd36e9a6361bc2d100",
+    "checks": {
+      "exactRevision": true,
+      "nativeBrowserLocale": true,
+      "noSplitLocaleRequestsBeforeAuth": true,
+      "localizedTitle": true,
+      "firstPartyLink": true,
+      "renderedQr": true,
+      "sameIntentPending": true,
+      "localizedPending": true,
+      "normalCancel": true,
+      "pollingStopped": true,
+      "remainedLogin": true
+    },
+    "renderedQr": {
+      "valid": true,
+      "width": 240,
+      "height": 240,
+      "matched": 2401,
+      "total": 2401
+    },
+    "createAttempts": 1,
+    "pollsAfterCancel": 0,
+    "browserClosed": true,
+    "rawSha256": "9df20286962c41848d366352348e566d51530d0e5360f916272e1a8aea6cd25d"
+  },
+  {
+    "locale": "zh-TW",
+    "passed": true,
+    "revision": "d99212e3cdde834b6eb751dd36e9a6361bc2d100",
+    "checks": {
+      "exactRevision": true,
+      "nativeBrowserLocale": true,
+      "noSplitLocaleRequestsBeforeAuth": true,
+      "localizedTitle": true,
+      "firstPartyLink": true,
+      "renderedQr": true,
+      "sameIntentPending": true,
+      "localizedPending": true,
+      "normalCancel": true,
+      "pollingStopped": true,
+      "remainedLogin": true
+    },
+    "renderedQr": {
+      "valid": true,
+      "width": 240,
+      "height": 240,
+      "matched": 2401,
+      "total": 2401
+    },
+    "createAttempts": 1,
+    "pollsAfterCancel": 0,
+    "browserClosed": true,
+    "rawSha256": "e20a6b8382b2d2ffc735b42fea169ef75c649f5b99735b6f3ab876ae22f72990"
+  }
+]

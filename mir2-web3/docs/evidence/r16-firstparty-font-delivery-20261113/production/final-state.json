@@ -1,0 +1,14 @@
+{
+  "checkedAt": "2026-11-13T11:22:33.418Z",
+  "source": "d99212e3cdde834b6eb751dd36e9a6361bc2d100",
+  "alias": "numeron.obelisk.build",
+  "project": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+  "deployment": "dpl_7jUyC8yS8wxhfznJ8z5P42CPwbkX",
+  "functionalReplayPassed": true,
+  "coldQualificationPassed": false,
+  "rollbackPerformed": false,
+  "foreignSnapshotPaths": 481,
+  "cleanCommittedShellUsed": true,
+  "desktopClosed": true,
+  "mobileClosed": true
+}

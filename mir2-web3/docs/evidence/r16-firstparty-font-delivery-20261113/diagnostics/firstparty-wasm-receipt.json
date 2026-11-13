@@ -1,0 +1,82 @@
+{
+  "kind": "one-firstparty-wasm-read-without-game",
+  "startedAt": "2026-11-13T10:15:49.923Z",
+  "origin": "https://numeron.obelisk.build",
+  "path": "/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+  "expectedBytes": 31452436,
+  "expectedSha256": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+  "deployment": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd",
+  "passed": true,
+  "removedProxyEnvironmentNames": [
+    "ALL_PROXY",
+    "HTTPS_PROXY",
+    "HTTP_PROXY",
+    "NO_PROXY"
+  ],
+  "budgets": {
+    "totalMs": 120000,
+    "positiveByteIdleMs": 15000,
+    "maxBytes": 33554432
+  },
+  "requests": [
+    {
+      "atMs": 1898,
+      "initialPriority": "High",
+      "bytes": 31452436,
+      "encodedDataBytes": 6027134,
+      "status": 200,
+      "headersMs": 2511,
+      "protocol": "h2",
+      "diskCache": false,
+      "serviceWorker": false,
+      "timing": {
+        "requestTime": 113344.355499,
+        "proxyStart": -1,
+        "proxyEnd": -1,
+        "dnsStart": -1,
+        "dnsEnd": -1,
+        "connectStart": 0.098,
+        "connectEnd": 339.879,
+        "sslStart": 0.754,
+        "sslEnd": 339.874,
+        "workerStart": -1,
+        "workerReady": -1,
+        "workerFetchStart": -1,
+        "workerRespondWithSettled": -1,
+        "sendStart": 339.951,
+        "sendEnd": 340.003,
+        "pushStart": 0,
+        "pushEnd": 0,
+        "receiveHeadersStart": 611.619,
+        "receiveHeadersEnd": 611.685
+      },
+      "headers": {
+        "content-type": "application/wasm",
+        "content-encoding": "br",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "age": "21202",
+        "cf-cache-status": "DYNAMIC",
+        "x-vercel-cache": "HIT",
+        "access-control-allow-origin": "*"
+      },
+      "firstDataMs": 2539,
+      "maxDataGapMs": 421,
+      "lastDataMs": 53327,
+      "finishMs": 53373,
+      "encodedTotalBytes": 6027549
+    }
+  ],
+  "browserClosed": true,
+  "scope": "One intentional firstparty object GET in a fresh default-network Chrome context after plain /version. No game, wallet, bootstrap, fonts registration, Worker, glue, compilation or App. Diagnostic only; no timeout/production gate change or protocol override.",
+  "versionBefore": "b2097fdfd13a2d8bc0acde435cd612fd83672cac",
+  "read": {
+    "passed": true,
+    "bytes": 31452436,
+    "sha256": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+    "headerAfterMs": 612.7999999970198,
+    "durationMs": 51473.59999999404
+  },
+  "workersObserved": 0,
+  "versionAfter": "b2097fdfd13a2d8bc0acde435cd612fd83672cac",
+  "finishedAt": "2026-11-13T10:16:43.624Z"
+}

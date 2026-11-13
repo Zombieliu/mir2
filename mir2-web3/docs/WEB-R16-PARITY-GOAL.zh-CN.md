@@ -1,6 +1,6 @@
 # Windows R16 与 Web 1:1 验收
 
-2026-11-13 关键首屏分包2029b44abd补齐瞬时下载失败后的验证备用路径，本地四会话通过。公网扫码、签名、进城、移动、React任务分项通过；Native运行包及字体0/6失败，已回退B209，未提升全局Candidate。下一项先验现有第一方重资源完整读取；完整三职业路线、旧档及原1:1范围不变。[最新证据](evidence/r16-critical-bootstrap-chunks-20261113/production/README.md)
+2026-11-13 d99212e3cd优先现有第一方完整字体，显式六字体预热移到最终运行包成功之后；231项、构建和四会话及正式扫码签名/进城/移动/共用HUD/Q/六字体/113/Worker停启/退出通过。公网Native185.240秒超原120秒，冷资格false，持续Goal未完成。先跟进Edge右键手势和图片菜单的真实事件复现，完整三职业/旧档/像素/实体手机仍开放。[正式结果](evidence/r16-firstparty-font-delivery-20261113/production/README.md) · [玩家反馈](evidence/r16-edge-right-button-report-20261113/README.md)
 
 2026-11-13 已发布ff957默认人物完整目录候选，公网简繁出码、官方手机尺寸Testnet一次签名、比奇首步149ms、113/113及正常退出通过；但SC字体缓存缺项5/6、运行包正文首帧后192.203秒才完成、共享HUD/Q未就绪，完整资格false，已回退正式e7cb。回退后简繁出码复验通过，131份WIP保留。继续稳定单帧/保留已解码人物、持续慢PNG及字体/运行包冷读；整体1:1开放。[发布、失败与回退](evidence/r16-entry-player-directory-20261113/production/README.md)
 
