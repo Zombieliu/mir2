@@ -16,9 +16,17 @@
 
 Linux CI `43491883414` 全流程成功，新 ELF SHA `26c131881c6c1e9de4ca2179d9f7a05f97d07f7e29269c80dca3dcd04cae1082`；七项门禁、真实 PG/Redis startup 与全部 1620 张地图通过，严格 artifact V8 回执 `46827f7441affa122213faef6c1b7f7a7030483daaeaf32652271addb8a47390`。这是另一份 Linux 工件。云机同池准备 V5 已结束：65 人本轮 fresh 加 35 人继承已验证准备，共覆盖 100 人；本轮 65 人全部普通注销，账号池和账本前后校验通过，不能标成全 100 人本轮 fresh 或容量通过。报告 SHA `0f45c358b229861cedfc2bed0da8d2fded21afcf39eeb8a7678a8840c7de3c21`。
 
-V8 更新工具在发送 SSH 命令前因完整请求超过 98304 字节限制拒绝 install；失败保留，实际只读复核确认旧服务及全部受保护基线未变。V9 只修正完整请求的有界压缩传输，wire 上限不变，解压限 131072 字节，全部审计字段保留；120 项离线测试通过，规范目录补测 34 项通过。仅将本地 V8 的未安装 prepared 计划原字节归档，原 V5 installed 状态不动；使用新鲜 status 重新 prepare/install V9 通过。实际同一 TEST 已运行 7403 / ELF 26c，install 回执 SHA `3e28434f9fd302ed8a7ac9ca5f5c9ea9534ecaaa2239259d0d05cae1d7006365`，19 个 EnvFile、原上限 51/66/51，受保护进程指纹均未变。临时测试上限 120/150/120 已生效（20 个 EnvFile），原账号池的逐档负载正在执行；结束后须恢复 51/66/51。
+V8 更新工具在发送 SSH 命令前因完整请求超过 98304 字节限制拒绝 install；失败保留，实际只读复核确认旧服务及全部受保护基线未变。V9 只修正完整请求的有界压缩传输，wire 上限不变，解压限 131072 字节，全部审计字段保留；120 项离线测试通过，规范目录补测 34 项通过。仅将本地 V8 的未安装 prepared 计划原字节归档，原 V5 installed 状态不动；使用新鲜 status 重新 prepare/install V9 通过。实际同一 TEST 已运行 7403 / ELF 26c，install 回执 SHA `3e28434f9fd302ed8a7ac9ca5f5c9ea9534ecaaa2239259d0d05cae1d7006365`，19 个 EnvFile、原上限 51/66/51，受保护进程指纹均未变。第一轮临时测试上限 120/150/120 已在普通收尾后恢复 51/66/51，restore 回执 `cd4a9ff9a2dbba3a6652a3e6effca1786482fa85f3189e817959bc55d0c6b602`。第二轮相同门槛的逐档复测已另行启动、再次临时提高上限；结束后仍须恢复。
 
 云机实际配置与本机不同（云机 recording 关闭、测试服务 MemoryMax 1600MiB，且共享主机），故另做 2/25/50/100、每档 300 秒的实际测量；首个安全或 SLO 失败即停止升级。该公共 movement/chat 计划与本机 common dense 分开报告，不据此宣称本地 100 人已修好、完整战斗容量或真实三端渲染通过。
+
+第一轮实际云测已结束，报告 `ed10b6a4096de8ee55fdb0ec17c8a05809e37155fce47040ef3f002c6332e240`：2 人与 25 人各完整活动 300 秒通过，评分动作 320/320、4000/4000，10/125 个逐人分钟窗口通过且阶段内零超时；25 人阶段 target CPU 平均约 0.40 核、采样峰 cgroup 内存约 475MiB，游戏 WS 应用下行约 0.326Mbps。主机 NIC 同期约 1.399Mbps，包含其他服务，不能当成游戏流量。进入 50 人档时、30 人已入场后，既有玩家的 continuous minute 超时导致整轮 FAIL，未完成 50/100 稳态和最终 fresh-save。31 个 cleanup normal 标记包含 30 个真实已入场连接及一个未建立连接的 no-op，不冒充 31 次业务 LogOut。六个穿脱回合通过，owned Job 全成员退出且无 kill，同池前后校验通过。独立闭合汇总 V3 实际退出 0、容量标记保持 false，回执 SHA `421536305224d083d96c2a15cd21c2b30dacd7d5048f7a98b3b1a4c9f3cc8df0`。V1 监控字段拒绝、V2 漏计 admission 超时的旧结果均保留；V3 区分已完成阶段零 timeout 与全日志四次 timeout，19 项离线检查通过。
+
+四次 timeout 的共同见证者为 peer20/plain-Web。四步 owner ACK 均按时，但 peer20 的原目标包分别在发出约 2.35–2.38 秒后才收到；该连接 2313.10ms 没有任何 received 或 KeepAlive echo，同期其他 29 个角色收到 1284 包、36 个 echo。首步其他观察者约 63ms 收到同一个移动；实际位置在 Zone AOI 内，没有对应 ObjectRemove。可确认单连接应用接收空档，尚不能定位 Gateway writer、代理/TCP 或本机单连接处理。证据 SHA `7129efcaf9ada83525a122e4a204cf6f6d24fa2a09a715b45988b52bfc6cdfbe`；不能把约 30 人解释为硬件上限。第二轮使用相同 load/probe、阶段、频率、截止时间、评分和原账号/账本，坐标继承上轮普通保存；另准备只读 TCP 统计辅助定位，不改网络或 VPN 设置。
+
+本地也已开始 100 人录盘 A/B：同一 7403 Windows exe、SDK7、a2caf 300 秒计划、4CPU/8GiB 及全部门槛，仅增加 `MIR2_SPECTATOR_RECORDING_ENABLED=false`，spectator 保持开启。继承完整 669 次原认证历史，尚在进场，不能当成通过。冻结准备 SHA `878b5836e454f2c36f1116aa7df84d40e6e54b3e874b8c3c30cb91aeae29cd07`。
+
+用户提到的重启亦作只读核对：近三天 System 日志中的两条 1074（2026-11-12 02:44/02:46 UTC，即本地 10:44/10:46）分别记录 MoUsoCoreWorker 与 TrustedInstaller 发起计划内系统更新重启。该日志投影 SHA `e614b2e8804b707f68935e682e4d79a9293675410107d47101ee99b5223f8383`；本轮没有修改更新、电源或 VPN 设置。
 
 另行完整调用 Hub 的 Release 专项测量已正常结束：18 组、33600 次真实 publish，包含真实互斥、节流、事件、环缓存、录制、回放和 digest/字节一致性断言；独立 Job 退出 0、所有成员退出且无 kill。100 owner / 4 producer 的三次 publish 外层 P95 为 3.493/3.615/3.990ms，最大 37.893ms，未复现游戏路径的多秒延迟。这是 13 秒左右、匿名构造输入、每轮空闲时重设 emit gate 的专项实验，不能认证 4Hz 吞吐或 CCU，也不能排除长运行的录制、snapshot/Zone/owner 路径。借用编码虽在小组件中更快，不能据此宣称解决 4 秒超时。本轮实际失败的录制文件最大约 849MB，抽样中 91 个实体约 88KB；专项帧最大约 115KB、单目录仅数 MB，长期文件行为仍不同。完整 build/test Cargo 已成功，外层因 MSVC 子进程未退出而失败的记录保留，独立冻结 exe 后重新实跑才作为正常退出证据。结果记录 `full-publish-profile-summary-v2.json`，测试 exe SHA `85739f74f4fa8de2a49f33c0d3f106ef1c9defbcaad050cd96b3ac8980c4fee2`。
 
