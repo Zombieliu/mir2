@@ -3,7 +3,7 @@
 import type { R16EntrySpriteImages } from "../../lib/r16-entry-scene";
 import { crystalEntityDepth } from "../../lib/crystal-world-depth";
 
-import { Fragment, memo, useEffect, useRef, useState, type CSSProperties } from "react";
+import { Fragment, memo, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 
 import type { ClientScreen } from "../../lib/original-ui";
 import { originalAssetPath } from "../../lib/asset-url";
@@ -82,6 +82,7 @@ import {
   type ViewportOffset,
 } from "./original-client-scene-rendering";
 import { OriginalClientWeatherLayer } from "./original-client-weather-layer";
+import { DecodedSelfSprite, type ResidentActorImage, type ResidentActorImages } from "./original-client-self-sprite";
 
 type ViewportGroundDrop = DisplayWorld["groundDrops"][number] & {
   dx: number;
@@ -140,6 +141,8 @@ type EntitySpriteLayersProps = {
   effectsEnabled: boolean;
   sprite: ViewportEntitySprite | null;
   objectId: number | string;
+  residentImages?: ResidentActorImages;
+  onResidentError?: (key: string, url: string) => void;
 };
 
 // The body/hair/weapon <img> layers for one actor. Memoised so they only re-render when their
@@ -153,91 +156,22 @@ const EntitySpriteLayers = memo(function EntitySpriteLayers({
   effectsEnabled,
   sprite,
   objectId,
-  packedActors,
+  packedActors, residentImages, onResidentError,
 }: EntitySpriteLayersProps) {
   return (
     <>
-      {!useBevyEntityRenderer && sprite?.mount ? (
-        <img
-          className="entity-sprite-layer mount"
-          src={originalAssetPath(sprite.mount.path)}
-          alt=""
-          draggable={false}
-          data-mir2-original-src={originalAssetPath(sprite.mount.path)}
-          onError={handleSceneAssetImageError}
-          onLoad={handleSceneAssetImageLoad}
-          style={{
-            left: sprite.mount.x,
-            top: sprite.mount.y,
-            width: sprite.mount.width,
-            height: sprite.mount.height,
-          }}
-        />
-      ) : null}
-      {!useBevyEntityRenderer &&
-        sprite?.rearWeapons.map((weapon, index) => (
-          <img
-            key={`rear-${objectId}-${index}-${weapon.path}`}
-            className="entity-sprite-layer weapon rear"
-            src={originalAssetPath(weapon.path)}
-            alt=""
-            draggable={false}
-            data-mir2-original-src={originalAssetPath(weapon.path)}
-            onError={handleSceneAssetImageError}
-            onLoad={handleSceneAssetImageLoad}
-            style={{ left: weapon.x, top: weapon.y, width: weapon.width, height: weapon.height }}
-          />
-        ))}
-      {!useBevyEntityRenderer && sprite?.body ? (
-        <img
-          className="entity-sprite-layer body"
-          src={packedActors?.[sprite.body.path] ?? originalAssetPath(sprite.body.path)}
-          data-mir2-packed-asset={packedActors?.[sprite.body.path] ? "true" : undefined}
-          alt=""
-          draggable={false}
-          data-mir2-original-src={originalAssetPath(sprite.body.path)}
-          onError={handleSceneAssetImageError}
-          onLoad={handleSceneAssetImageLoad}
-          style={{
-            left: sprite.body.x,
-            top: sprite.body.y,
-            width: sprite.body.width,
-            height: sprite.body.height,
-          }}
-        />
-      ) : null}
-      {!useBevyEntityRenderer && sprite?.hair ? (
-        <img
-          className="entity-sprite-layer hair"
-          src={packedActors?.[sprite.hair.path] ?? originalAssetPath(sprite.hair.path)}
-          data-mir2-packed-asset={packedActors?.[sprite.hair.path] ? "true" : undefined}
-          alt=""
-          draggable={false}
-          data-mir2-original-src={originalAssetPath(sprite.hair.path)}
-          onError={handleSceneAssetImageError}
-          onLoad={handleSceneAssetImageLoad}
-          style={{
-            left: sprite.hair.x,
-            top: sprite.hair.y,
-            width: sprite.hair.width,
-            height: sprite.hair.height,
-          }}
-        />
-      ) : null}
-      {!useBevyEntityRenderer &&
-        sprite?.frontWeapons.map((weapon, index) => (
-          <img
-            key={`front-${objectId}-${index}-${weapon.path}`}
-            className="entity-sprite-layer weapon front"
-            src={originalAssetPath(weapon.path)}
-            alt=""
-            draggable={false}
-            data-mir2-original-src={originalAssetPath(weapon.path)}
-            onError={handleSceneAssetImageError}
-            onLoad={handleSceneAssetImageLoad}
-            style={{ left: weapon.x, top: weapon.y, width: weapon.width, height: weapon.height }}
-          />
-        ))}
+      {!useBevyEntityRenderer && sprite?.mount ? <ActorSpriteImage role="mount" layer={sprite.mount}
+        className="entity-sprite-layer mount" residentImages={residentImages} onResidentError={onResidentError} /> : null}
+      {!useBevyEntityRenderer && sprite?.rearWeapons.map((weapon, index) => <ActorSpriteImage
+        key={`rear-${objectId}-${index}-${weapon.path}`} role={"rear:" + index} layer={weapon}
+        className="entity-sprite-layer weapon rear" residentImages={residentImages} onResidentError={onResidentError} />)}
+      {!useBevyEntityRenderer && sprite?.body ? <ActorSpriteImage role="body" layer={sprite.body}
+        className="entity-sprite-layer body" packedActors={packedActors} residentImages={residentImages} onResidentError={onResidentError} /> : null}
+      {!useBevyEntityRenderer && sprite?.hair ? <ActorSpriteImage role="hair" layer={sprite.hair}
+        className="entity-sprite-layer hair" packedActors={packedActors} residentImages={residentImages} onResidentError={onResidentError} /> : null}
+      {!useBevyEntityRenderer && sprite?.frontWeapons.map((weapon, index) => <ActorSpriteImage
+        key={`front-${objectId}-${index}-${weapon.path}`} role={"front:" + index} layer={weapon}
+        className="entity-sprite-layer weapon front" residentImages={residentImages} onResidentError={onResidentError} />)}
       {effectsEnabled && sprite?.effect ? (
         <>
           <img
@@ -286,6 +220,50 @@ const EntitySpriteLayers = memo(function EntitySpriteLayers({
     </>
   );
 });
+
+function ActorSpriteImage({ role, layer, className, packedActors, residentImages, onResidentError }: {
+  role: string; layer: NonNullable<ViewportEntitySprite["body"]>; className: string;
+  packedActors?: R16EntrySpriteImages | null; residentImages?: ResidentActorImages;
+  onResidentError?: (key: string, url: string) => void;
+}) {
+  const resident = residentImages?.get(role);
+  if (resident) return <ResidentActorSpriteImage layer={layer} className={className} resident={resident} onError={onResidentError} />;
+  const source = packedActors?.[layer.path] ?? originalAssetPath(layer.path);
+  return <img className={className} src={source} alt="" draggable={false}
+    data-mir2-original-src={originalAssetPath(layer.path)}
+    data-mir2-packed-asset={source.startsWith("data:") ? "true" : undefined}
+    onError={handleSceneAssetImageError}
+    onLoad={handleSceneAssetImageLoad}
+    style={{ left: layer.x, top: layer.y, width: layer.width, height: layer.height }} />;
+}
+
+function ResidentActorSpriteImage({ layer, className, resident, onError }: {
+  layer: NonNullable<ViewportEntitySprite["body"]>; className: string;
+  resident: ResidentActorImage;
+  onError?: (key: string, url: string) => void;
+}) {
+  const slot = useRef<HTMLSpanElement>(null);
+  useLayoutEffect(() => {
+    const container = slot.current, image = resident.image;
+    if (!container || !image.complete || image.naturalWidth < 1) return;
+    // Move the exact decoded element into this React-owned slot. Assigning its
+    // URL to a different <img> can briefly clear the body's decoded/paint state.
+    image.className = className; image.alt = ""; image.draggable = false;
+    image.dataset.mir2OriginalSrc = originalAssetPath(layer.path);
+    image.dataset.mir2ActorResident = "true";
+    if (resident.url.startsWith("data:")) image.dataset.mir2PackedAsset = "true";
+    else delete image.dataset.mir2PackedAsset;
+    Object.assign(image.style, { left: layer.x + "px", top: layer.y + "px", width: layer.width + "px", height: layer.height + "px" });
+    const failed = () => onError?.(resident.key, resident.url);
+    image.addEventListener("error", failed);
+    container.replaceChildren(image);
+    // The native load occurred before attachment. Wake the existing body gate;
+    // it still checks this actual element's complete/naturalWidth/visibility.
+    image.dispatchEvent(new Event("load"));
+    return () => { image.removeEventListener("error", failed); if (image.parentNode === container) image.remove(); };
+  }, [resident.image, resident.key, resident.url, layer.path, layer.x, layer.y, layer.width, layer.height, className, onError]);
+  return <span ref={slot} style={{ display: "contents" }} />;
+}
 
 // --- Procedural magic / map VFX fallback ----------------------------------
 // The real effect atlases (lib/crystal-magic-effects) are PREFERRED: loadEffectAssets fetches the
@@ -909,13 +887,20 @@ function OriginalClientSceneVisualLayersInner({
                   }}
                 />
               ) : null}
-              <EntitySpriteLayers
-                useBevyEntityRenderer={useBevyEntityRenderer}
-                effectsEnabled={effectsEnabled}
-                packedActors={packedActors}
-                sprite={sprite}
-                objectId={entity.objectId}
-              />
+              {isPlayer && screen === "game" && !useBevyEntityRenderer ? (
+                <DecodedSelfSprite key={JSON.stringify([world.mapFileName, entity.objectId, entity.genderKey, entity.classKey,
+                  entity.sprite?.bodyLibrary, entity.sprite?.hairLibrary, entity.sprite?.weaponLibrary,
+                  entity.sprite?.weaponLibrarySecondary, entity.sprite?.mountLibrary,
+                  entity.sprite?.altBodyLibrary, entity.sprite?.altHairLibrary, entity.sprite?.altWeaponLibrary,
+                  entity.sprite?.altWeaponLibrarySecondary, entity.sprite?.frameBaseOffset, entity.sprite?.weaponFrameOffset,
+                  entity.sprite?.altFrameBaseOffset, entity.sprite?.altWeaponFrameOffset, entity.sprite?.mountFrameOffset])}
+                  sprite={sprite} packedActors={packedActors}>
+                  {(displayed, images, failed) => <EntitySpriteLayers useBevyEntityRenderer={false}
+                    effectsEnabled={effectsEnabled} packedActors={packedActors} sprite={displayed}
+                    objectId={entity.objectId} residentImages={images} onResidentError={failed} />}
+                </DecodedSelfSprite>
+              ) : <EntitySpriteLayers useBevyEntityRenderer={useBevyEntityRenderer} effectsEnabled={effectsEnabled}
+                packedActors={packedActors} sprite={sprite} objectId={entity.objectId} />}
             </div>
           );
         })}

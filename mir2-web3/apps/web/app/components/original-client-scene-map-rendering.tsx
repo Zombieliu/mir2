@@ -777,6 +777,9 @@ export function rescueStalledSceneAssetImages(root: ParentNode = document) {
   const images = Array.from(root.querySelectorAll<HTMLImageElement>("img[data-mir2-original-src]"));
 
   for (const image of images) {
+    // The self residency owns these already-decoded URLs and its finite retry
+    // lifecycle. A stalled target must never redirect or hide the displayed pose.
+    if (image.dataset.mir2ActorResident === "true") continue;
     checked += 1;
     if (image.complete && image.naturalWidth > 0 && image.naturalHeight > 0) {
       clearSceneAssetRetryState(image);
