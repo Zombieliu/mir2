@@ -1,0 +1,1151 @@
+{
+  "schema": "mir2.projection-singleflight-dense100-failure-compact.v1",
+  "sourceRevision": "6024d8ffc095dd3a149ddb2b12bd3fce4cc4245c",
+  "binarySha256": "c155bb789e3c37bb4b9ed5b003c74dacef68e13240cdd9a364703945d1393e51",
+  "capacityQualified": false,
+  "originalOverallPassed": false,
+  "controllerActualExits": [
+    1,
+    1,
+    0
+  ],
+  "normalClosedNoKill": true,
+  "steadyUtc": [
+    "2026-11-14T16:16:06.015000+00:00",
+    "2026-11-14T16:21:06.015000+00:00"
+  ],
+  "totals": {
+    "offered": 16000,
+    "completed": 15398,
+    "sent": 15469,
+    "notSent": 531,
+    "timeout": 71,
+    "timeout:owner_late__peer_onTime": 30,
+    "timeout:owner_onTime__peer_late": 26,
+    "timeout:owner_late__peer_late": 15
+  },
+  "byKind": {
+    "walk": {
+      "offered": 15000,
+      "completed": 14639,
+      "sent": 14710,
+      "notSent": 290,
+      "timeout": 71,
+      "timeout:owner_late__peer_onTime": 30,
+      "timeout:owner_onTime__peer_late": 26,
+      "timeout:owner_late__peer_late": 15
+    },
+    "chat": {
+      "offered": 1000,
+      "completed": 759,
+      "sent": 759,
+      "notSent": 241
+    }
+  },
+  "byMinute": [
+    {
+      "minute0Based": 0,
+      "offered": 3200,
+      "completed": 3016,
+      "sent": 3044,
+      "notSent": 156,
+      "timeout": 28,
+      "timeout:owner_late__peer_onTime": 8,
+      "timeout:owner_onTime__peer_late": 9,
+      "timeout:owner_late__peer_late": 11,
+      "scheduleMs": {
+        "count": 3044,
+        "p95": 14.571800000034273,
+        "max": 16.861200000159442
+      }
+    },
+    {
+      "minute0Based": 1,
+      "offered": 3200,
+      "completed": 3047,
+      "sent": 3069,
+      "notSent": 131,
+      "timeout": 22,
+      "timeout:owner_onTime__peer_late": 8,
+      "timeout:owner_late__peer_onTime": 12,
+      "timeout:owner_late__peer_late": 2,
+      "scheduleMs": {
+        "count": 3069,
+        "p95": 14.519800000358373,
+        "max": 16.66470000008121
+      }
+    },
+    {
+      "minute0Based": 2,
+      "offered": 3200,
+      "completed": 3137,
+      "sent": 3141,
+      "notSent": 59,
+      "timeout": 4,
+      "timeout:owner_late__peer_onTime": 2,
+      "timeout:owner_onTime__peer_late": 2,
+      "scheduleMs": {
+        "count": 3141,
+        "p95": 14.287400000263005,
+        "max": 17.07230000011623
+      }
+    },
+    {
+      "minute0Based": 3,
+      "offered": 3200,
+      "completed": 3094,
+      "sent": 3105,
+      "notSent": 95,
+      "timeout": 11,
+      "timeout:owner_onTime__peer_late": 5,
+      "timeout:owner_late__peer_onTime": 4,
+      "timeout:owner_late__peer_late": 2,
+      "scheduleMs": {
+        "count": 3105,
+        "p95": 14.474799999967217,
+        "max": 17.250900000333786
+      }
+    },
+    {
+      "minute0Based": 4,
+      "offered": 3200,
+      "completed": 3104,
+      "sent": 3110,
+      "notSent": 90,
+      "timeout": 6,
+      "timeout:owner_onTime__peer_late": 2,
+      "timeout:owner_late__peer_onTime": 4,
+      "scheduleMs": {
+        "count": 3110,
+        "p95": 14.498600000049919,
+        "max": 17.068600000347942
+      }
+    }
+  ],
+  "byActor": [
+    {
+      "actorOrdinal": 0,
+      "offered": 160,
+      "completed": 151,
+      "sent": 154,
+      "timeout": 3,
+      "timeout:owner_late__peer_onTime": 2,
+      "notSent": 6,
+      "timeout:owner_late__peer_late": 1
+    },
+    {
+      "actorOrdinal": 1,
+      "offered": 160,
+      "completed": 148,
+      "sent": 152,
+      "timeout": 4,
+      "timeout:owner_onTime__peer_late": 2,
+      "notSent": 8,
+      "timeout:owner_late__peer_onTime": 1,
+      "timeout:owner_late__peer_late": 1
+    },
+    {
+      "actorOrdinal": 2,
+      "offered": 160,
+      "completed": 157,
+      "sent": 158,
+      "timeout": 1,
+      "timeout:owner_late__peer_late": 1,
+      "notSent": 2
+    },
+    {
+      "actorOrdinal": 3,
+      "offered": 160,
+      "completed": 157,
+      "sent": 158,
+      "timeout": 1,
+      "timeout:owner_onTime__peer_late": 1,
+      "notSent": 2
+    },
+    {
+      "actorOrdinal": 4,
+      "offered": 160,
+      "completed": 157,
+      "sent": 158,
+      "timeout": 1,
+      "timeout:owner_onTime__peer_late": 1,
+      "notSent": 2
+    },
+    {
+      "actorOrdinal": 5,
+      "offered": 160,
+      "completed": 157,
+      "sent": 158,
+      "timeout": 1,
+      "timeout:owner_late__peer_onTime": 1,
+      "notSent": 2
+    },
+    {
+      "actorOrdinal": 6,
+      "offered": 160,
+      "completed": 160,
+      "sent": 160
+    },
+    {
+      "actorOrdinal": 7,
+      "offered": 160,
+      "completed": 157,
+      "sent": 158,
+      "timeout": 1,
+      "timeout:owner_late__peer_onTime": 1,
+      "notSent": 2
+    },
+    {
+      "actorOrdinal": 8,
+      "offered": 160,
+      "completed": 160,
+      "sent": 160
+    },
+    {
+      "actorOrdinal": 9,
+      "offered": 160,
+      "completed": 160,
+      "sent": 160
+    },
+    {
+      "actorOrdinal": 10,
+      "offered": 160,
+      "completed": 160,
+      "sent": 160
+    },
+    {
+      "actorOrdinal": 11,
+      "offered": 160,
+      "completed": 160,
+      "sent": 160
+    },
+    {
+      "actorOrdinal": 12,
+      "offered": 160,
+      "completed": 160,
+      "sent": 160
+    },
+    {
+      "actorOrdinal": 13,
+      "offered": 160,
+      "completed": 160,
+      "sent": 160
+    },
+    {
+      "actorOrdinal": 14,
+      "offered": 160,
+      "completed": 158,
+      "sent": 158,
+      "notSent": 2
+    },
+    {
+      "actorOrdinal": 15,
+      "offered": 160,
+      "completed": 158,
+      "sent": 158,
+      "notSent": 2
+    },
+    {
+      "actorOrdinal": 16,
+      "offered": 160,
+      "completed": 160,
+      "sent": 160
+    },
+    {
+      "actorOrdinal": 17,
+      "offered": 160,
+      "completed": 156,
+      "sent": 156,
+      "notSent": 4
+    },
+    {
+      "actorOrdinal": 18,
+      "offered": 160,
+      "completed": 160,
+      "sent": 160
+    },
+    {
+      "actorOrdinal": 19,
+      "offered": 160,
+      "completed": 160,
+      "sent": 160
+    },
+    {
+      "actorOrdinal": 20,
+      "offered": 160,
+      "completed": 158,
+      "sent": 158,
+      "notSent": 2
+    },
+    {
+      "actorOrdinal": 21,
+      "offered": 160,
+      "completed": 160,
+      "sent": 160
+    },
+    {
+      "actorOrdinal": 22,
+      "offered": 160,
+      "completed": 160,
+      "sent": 160
+    },
+    {
+      "actorOrdinal": 23,
+      "offered": 160,
+      "completed": 160,
+      "sent": 160
+    },
+    {
+      "actorOrdinal": 24,
+      "offered": 160,
+      "completed": 158,
+      "sent": 158,
+      "notSent": 2
+    },
+    {
+      "actorOrdinal": 25,
+      "offered": 160,
+      "completed": 158,
+      "sent": 158,
+      "notSent": 2
+    },
+    {
+      "actorOrdinal": 26,
+      "offered": 160,
+      "completed": 158,
+      "sent": 158,
+      "notSent": 2
+    },
+    {
+      "actorOrdinal": 27,
+      "offered": 160,
+      "completed": 158,
+      "sent": 158,
+      "notSent": 2
+    },
+    {
+      "actorOrdinal": 28,
+      "offered": 160,
+      "completed": 160,
+      "sent": 160
+    },
+    {
+      "actorOrdinal": 29,
+      "offered": 160,
+      "completed": 158,
+      "sent": 158,
+      "notSent": 2
+    },
+    {
+      "actorOrdinal": 30,
+      "offered": 160,
+      "completed": 160,
+      "sent": 160
+    },
+    {
+      "actorOrdinal": 31,
+      "offered": 160,
+      "completed": 156,
+      "sent": 156,
+      "notSent": 4
+    },
+    {
+      "actorOrdinal": 32,
+      "offered": 160,
+      "completed": 154,
+      "sent": 154,
+      "notSent": 6
+    },
+    {
+      "actorOrdinal": 33,
+      "offered": 160,
+      "completed": 158,
+      "sent": 158,
+      "notSent": 2
+    },
+    {
+      "actorOrdinal": 34,
+      "offered": 160,
+      "completed": 158,
+      "sent": 158,
+      "notSent": 2
+    },
+    {
+      "actorOrdinal": 35,
+      "offered": 160,
+      "completed": 160,
+      "sent": 160
+    },
+    {
+      "actorOrdinal": 36,
+      "offered": 160,
+      "completed": 156,
+      "sent": 156,
+      "notSent": 4
+    },
+    {
+      "actorOrdinal": 37,
+      "offered": 160,
+      "completed": 158,
+      "sent": 158,
+      "notSent": 2
+    },
+    {
+      "actorOrdinal": 38,
+      "offered": 160,
+      "completed": 154,
+      "sent": 154,
+      "notSent": 6
+    },
+    {
+      "actorOrdinal": 39,
+      "offered": 160,
+      "completed": 156,
+      "sent": 156,
+      "notSent": 4
+    },
+    {
+      "actorOrdinal": 40,
+      "offered": 160,
+      "completed": 160,
+      "sent": 160
+    },
+    {
+      "actorOrdinal": 41,
+      "offered": 160,
+      "completed": 156,
+      "sent": 156,
+      "notSent": 4
+    },
+    {
+      "actorOrdinal": 42,
+      "offered": 160,
+      "completed": 158,
+      "sent": 158,
+      "notSent": 2
+    },
+    {
+      "actorOrdinal": 43,
+      "offered": 160,
+      "completed": 154,
+      "sent": 154,
+      "notSent": 6
+    },
+    {
+      "actorOrdinal": 44,
+      "offered": 160,
+      "completed": 158,
+      "sent": 158,
+      "notSent": 2
+    },
+    {
+      "actorOrdinal": 45,
+      "offered": 160,
+      "completed": 154,
+      "sent": 154,
+      "notSent": 6
+    },
+    {
+      "actorOrdinal": 46,
+      "offered": 160,
+      "completed": 156,
+      "sent": 156,
+      "notSent": 4
+    },
+    {
+      "actorOrdinal": 47,
+      "offered": 160,
+      "completed": 158,
+      "sent": 158,
+      "notSent": 2
+    },
+    {
+      "actorOrdinal": 48,
+      "offered": 160,
+      "completed": 154,
+      "sent": 154,
+      "notSent": 6
+    },
+    {
+      "actorOrdinal": 49,
+      "offered": 160,
+      "completed": 156,
+      "sent": 156,
+      "notSent": 4
+    },
+    {
+      "actorOrdinal": 50,
+      "offered": 160,
+      "completed": 160,
+      "sent": 160
+    },
+    {
+      "actorOrdinal": 51,
+      "offered": 160,
+      "completed": 158,
+      "sent": 158,
+      "notSent": 2
+    },
+    {
+      "actorOrdinal": 52,
+      "offered": 160,
+      "completed": 159,
+      "sent": 159,
+      "notSent": 1
+    },
+    {
+      "actorOrdinal": 53,
+      "offered": 160,
+      "completed": 158,
+      "sent": 158,
+      "notSent": 2
+    },
+    {
+      "actorOrdinal": 54,
+      "offered": 160,
+      "completed": 153,
+      "sent": 153,
+      "notSent": 7
+    },
+    {
+      "actorOrdinal": 55,
+      "offered": 160,
+      "completed": 153,
+      "sent": 153,
+      "notSent": 7
+    },
+    {
+      "actorOrdinal": 56,
+      "offered": 160,
+      "completed": 157,
+      "sent": 157,
+      "notSent": 3
+    },
+    {
+      "actorOrdinal": 57,
+      "offered": 160,
+      "completed": 157,
+      "sent": 157,
+      "notSent": 3
+    },
+    {
+      "actorOrdinal": 58,
+      "offered": 160,
+      "completed": 152,
+      "sent": 153,
+      "notSent": 7,
+      "timeout": 1,
+      "timeout:owner_late__peer_onTime": 1
+    },
+    {
+      "actorOrdinal": 59,
+      "offered": 160,
+      "completed": 151,
+      "sent": 152,
+      "notSent": 8,
+      "timeout": 1,
+      "timeout:owner_late__peer_onTime": 1
+    },
+    {
+      "actorOrdinal": 60,
+      "offered": 160,
+      "completed": 151,
+      "sent": 153,
+      "notSent": 7,
+      "timeout": 2,
+      "timeout:owner_late__peer_onTime": 1,
+      "timeout:owner_onTime__peer_late": 1
+    },
+    {
+      "actorOrdinal": 61,
+      "offered": 160,
+      "completed": 155,
+      "sent": 155,
+      "notSent": 5
+    },
+    {
+      "actorOrdinal": 62,
+      "offered": 160,
+      "completed": 155,
+      "sent": 156,
+      "notSent": 4,
+      "timeout": 1,
+      "timeout:owner_onTime__peer_late": 1
+    },
+    {
+      "actorOrdinal": 63,
+      "offered": 160,
+      "completed": 151,
+      "sent": 152,
+      "notSent": 8,
+      "timeout": 1,
+      "timeout:owner_late__peer_onTime": 1
+    },
+    {
+      "actorOrdinal": 64,
+      "offered": 160,
+      "completed": 150,
+      "sent": 152,
+      "notSent": 8,
+      "timeout": 2,
+      "timeout:owner_onTime__peer_late": 2
+    },
+    {
+      "actorOrdinal": 65,
+      "offered": 160,
+      "completed": 153,
+      "sent": 153,
+      "notSent": 7
+    },
+    {
+      "actorOrdinal": 66,
+      "offered": 160,
+      "completed": 147,
+      "sent": 149,
+      "notSent": 11,
+      "timeout": 2,
+      "timeout:owner_late__peer_onTime": 1,
+      "timeout:owner_onTime__peer_late": 1
+    },
+    {
+      "actorOrdinal": 67,
+      "offered": 160,
+      "completed": 146,
+      "sent": 149,
+      "notSent": 11,
+      "timeout": 3,
+      "timeout:owner_onTime__peer_late": 1,
+      "timeout:owner_late__peer_onTime": 2
+    },
+    {
+      "actorOrdinal": 68,
+      "offered": 160,
+      "completed": 154,
+      "sent": 155,
+      "notSent": 5,
+      "timeout": 1,
+      "timeout:owner_late__peer_onTime": 1
+    },
+    {
+      "actorOrdinal": 69,
+      "offered": 160,
+      "completed": 148,
+      "sent": 149,
+      "notSent": 11,
+      "timeout": 1,
+      "timeout:owner_late__peer_onTime": 1
+    },
+    {
+      "actorOrdinal": 70,
+      "offered": 160,
+      "completed": 150,
+      "sent": 151,
+      "notSent": 9,
+      "timeout": 1,
+      "timeout:owner_onTime__peer_late": 1
+    },
+    {
+      "actorOrdinal": 71,
+      "offered": 160,
+      "completed": 146,
+      "sent": 148,
+      "notSent": 12,
+      "timeout": 2,
+      "timeout:owner_late__peer_late": 1,
+      "timeout:owner_onTime__peer_late": 1
+    },
+    {
+      "actorOrdinal": 72,
+      "offered": 160,
+      "completed": 147,
+      "sent": 149,
+      "notSent": 11,
+      "timeout": 2,
+      "timeout:owner_late__peer_late": 1,
+      "timeout:owner_onTime__peer_late": 1
+    },
+    {
+      "actorOrdinal": 73,
+      "offered": 160,
+      "completed": 147,
+      "sent": 149,
+      "notSent": 11,
+      "timeout": 2,
+      "timeout:owner_late__peer_late": 1,
+      "timeout:owner_late__peer_onTime": 1
+    },
+    {
+      "actorOrdinal": 74,
+      "offered": 160,
+      "completed": 149,
+      "sent": 151,
+      "notSent": 9,
+      "timeout": 2,
+      "timeout:owner_onTime__peer_late": 2
+    },
+    {
+      "actorOrdinal": 75,
+      "offered": 160,
+      "completed": 145,
+      "sent": 147,
+      "notSent": 13,
+      "timeout": 2,
+      "timeout:owner_late__peer_onTime": 2
+    },
+    {
+      "actorOrdinal": 76,
+      "offered": 160,
+      "completed": 149,
+      "sent": 151,
+      "notSent": 9,
+      "timeout": 2,
+      "timeout:owner_onTime__peer_late": 1,
+      "timeout:owner_late__peer_onTime": 1
+    },
+    {
+      "actorOrdinal": 77,
+      "offered": 160,
+      "completed": 146,
+      "sent": 148,
+      "notSent": 12,
+      "timeout": 2,
+      "timeout:owner_late__peer_late": 1,
+      "timeout:owner_onTime__peer_late": 1
+    },
+    {
+      "actorOrdinal": 78,
+      "offered": 160,
+      "completed": 146,
+      "sent": 148,
+      "notSent": 12,
+      "timeout": 2,
+      "timeout:owner_late__peer_late": 2
+    },
+    {
+      "actorOrdinal": 79,
+      "offered": 160,
+      "completed": 146,
+      "sent": 149,
+      "notSent": 11,
+      "timeout": 3,
+      "timeout:owner_late__peer_late": 2,
+      "timeout:owner_late__peer_onTime": 1
+    },
+    {
+      "actorOrdinal": 80,
+      "offered": 160,
+      "completed": 143,
+      "sent": 146,
+      "notSent": 14,
+      "timeout": 3,
+      "timeout:owner_late__peer_late": 1,
+      "timeout:owner_onTime__peer_late": 2
+    },
+    {
+      "actorOrdinal": 81,
+      "offered": 160,
+      "completed": 151,
+      "sent": 152,
+      "notSent": 8,
+      "timeout": 1,
+      "timeout:owner_late__peer_onTime": 1
+    },
+    {
+      "actorOrdinal": 82,
+      "offered": 160,
+      "completed": 153,
+      "sent": 153,
+      "notSent": 7
+    },
+    {
+      "actorOrdinal": 83,
+      "offered": 160,
+      "completed": 152,
+      "sent": 152,
+      "notSent": 8
+    },
+    {
+      "actorOrdinal": 84,
+      "offered": 160,
+      "completed": 156,
+      "sent": 156,
+      "notSent": 4
+    },
+    {
+      "actorOrdinal": 85,
+      "offered": 160,
+      "completed": 155,
+      "sent": 155,
+      "notSent": 5
+    },
+    {
+      "actorOrdinal": 86,
+      "offered": 160,
+      "completed": 149,
+      "sent": 150,
+      "notSent": 10,
+      "timeout": 1,
+      "timeout:owner_late__peer_onTime": 1
+    },
+    {
+      "actorOrdinal": 87,
+      "offered": 160,
+      "completed": 147,
+      "sent": 149,
+      "notSent": 11,
+      "timeout": 2,
+      "timeout:owner_late__peer_onTime": 1,
+      "timeout:owner_onTime__peer_late": 1
+    },
+    {
+      "actorOrdinal": 88,
+      "offered": 160,
+      "completed": 153,
+      "sent": 153,
+      "notSent": 7
+    },
+    {
+      "actorOrdinal": 89,
+      "offered": 160,
+      "completed": 148,
+      "sent": 150,
+      "notSent": 10,
+      "timeout": 2,
+      "timeout:owner_late__peer_late": 1,
+      "timeout:owner_late__peer_onTime": 1
+    },
+    {
+      "actorOrdinal": 90,
+      "offered": 160,
+      "completed": 144,
+      "sent": 146,
+      "notSent": 14,
+      "timeout": 2,
+      "timeout:owner_late__peer_onTime": 1,
+      "timeout:owner_onTime__peer_late": 1
+    },
+    {
+      "actorOrdinal": 91,
+      "offered": 160,
+      "completed": 149,
+      "sent": 149,
+      "notSent": 11
+    },
+    {
+      "actorOrdinal": 92,
+      "offered": 160,
+      "completed": 149,
+      "sent": 150,
+      "notSent": 10,
+      "timeout": 1,
+      "timeout:owner_late__peer_late": 1
+    },
+    {
+      "actorOrdinal": 93,
+      "offered": 160,
+      "completed": 144,
+      "sent": 146,
+      "notSent": 14,
+      "timeout": 2,
+      "timeout:owner_onTime__peer_late": 1,
+      "timeout:owner_late__peer_onTime": 1
+    },
+    {
+      "actorOrdinal": 94,
+      "offered": 160,
+      "completed": 149,
+      "sent": 151,
+      "notSent": 9,
+      "timeout": 2,
+      "timeout:owner_onTime__peer_late": 1,
+      "timeout:owner_late__peer_late": 1
+    },
+    {
+      "actorOrdinal": 95,
+      "offered": 160,
+      "completed": 148,
+      "sent": 150,
+      "notSent": 10,
+      "timeout": 2,
+      "timeout:owner_late__peer_onTime": 1,
+      "timeout:owner_onTime__peer_late": 1
+    },
+    {
+      "actorOrdinal": 96,
+      "offered": 160,
+      "completed": 148,
+      "sent": 149,
+      "notSent": 11,
+      "timeout": 1,
+      "timeout:owner_onTime__peer_late": 1
+    },
+    {
+      "actorOrdinal": 97,
+      "offered": 160,
+      "completed": 146,
+      "sent": 148,
+      "notSent": 12,
+      "timeout": 2,
+      "timeout:owner_late__peer_onTime": 2
+    },
+    {
+      "actorOrdinal": 98,
+      "offered": 160,
+      "completed": 151,
+      "sent": 152,
+      "notSent": 8,
+      "timeout": 1,
+      "timeout:owner_onTime__peer_late": 1
+    },
+    {
+      "actorOrdinal": 99,
+      "offered": 160,
+      "completed": 146,
+      "sent": 148,
+      "notSent": 12,
+      "timeout": 2,
+      "timeout:owner_late__peer_onTime": 2
+    }
+  ],
+  "notSentReasons": {
+    "previousActionPending": 386,
+    "preconditionFailed": 145
+  },
+  "reasonBinding": {
+    "reason": "preconditionFailed",
+    "reasonSha256": "cc9997b13e246bdbbe01f89c3223cb3160acd98ffac10c04b8704d8cd9d21e34",
+    "firstReportValueRef": {
+      "byteOffset": 1729655,
+      "valueBytes": 634,
+      "valueSha256": "077ae4552eadb2c3f027e9dde21601f857fc22d34506ea2af1a853797c6b2872"
+    },
+    "firstObservedFailure": "Planned lane target no longer matches authoritative owner",
+    "hardEvidence": false,
+    "firstActorOrdinal": 17,
+    "firstTicketSequence": 11
+  },
+  "reportedTimeoutReceiptTiming": {
+    "owner_late__peer_onTime": 30,
+    "owner_onTime__peer_late": 26,
+    "owner_late__peer_late": 15
+  },
+  "firstTimeout": {
+    "event": "actionTerminal",
+    "actorOrdinal": 60,
+    "ticketSequence": 8,
+    "kind": "walk",
+    "connection": 61,
+    "dueMs": 15200,
+    "dueAtMs": 3339966.5253,
+    "deadlineMs": 17200,
+    "deadlineAtMs": 3341966.5253,
+    "offeredAtMs": 3339970.8625,
+    "sentAtMs": 3339970.8744,
+    "completedAtMs": 3342061.7177,
+    "scheduleDelayMs": 4.3491000002250075,
+    "passed": false,
+    "timedOut": true,
+    "accepted": true,
+    "expectedPeerOrdinals": [
+      61
+    ],
+    "actualTarget": {
+      "x": 47,
+      "y": 64
+    },
+    "expectedSharedIds": [
+      {
+        "observerOrdinal": 61,
+        "connection": 62,
+        "objectId": 50060
+      }
+    ],
+    "reasonCode": "unspecified",
+    "receipts": [
+      {
+        "observerOrdinal": 60,
+        "connection": 61,
+        "receiveSeq": 2621,
+        "receiveAtUtc": "2026-11-14T16:16:23.310Z",
+        "atMs": 3342061.7177,
+        "packet": "UserLocation",
+        "objectId": null,
+        "location": {
+          "x": 47,
+          "y": 64
+        },
+        "textSha256": null
+      },
+      {
+        "observerOrdinal": 61,
+        "connection": 62,
+        "receiveSeq": 2776,
+        "receiveAtUtc": "2026-11-14T16:16:23.120Z",
+        "atMs": 3341871.1311,
+        "packet": "ObjectWalk",
+        "objectId": 50060,
+        "location": {
+          "x": 47,
+          "y": 64
+        },
+        "textSha256": null
+      }
+    ],
+    "reportValueRef": {
+      "byteOffset": 1532046,
+      "valueBytes": 1782,
+      "valueSha256": "417e02ab1a39b87045199bea1e1044a987d7fec5c3daca1d8280005223a955df",
+      "arrayIndex": 881
+    },
+    "reportedReceiptDeadlineCategory": "owner_late__peer_onTime"
+  },
+  "firstNotSent": {
+    "event": "notSent",
+    "actorOrdinal": 58,
+    "ticketSequence": 9,
+    "kind": "chat",
+    "connection": 59,
+    "dueMs": 16160,
+    "dueAtMs": 3340926.5253,
+    "deadlineMs": 18660,
+    "deadlineAtMs": 3343426.5253,
+    "offeredAtMs": 3340927.5082,
+    "expectedPeerOrdinals": [
+      59
+    ],
+    "reasonCode": "previousActionPending",
+    "receipts": [],
+    "reportValueRef": {
+      "byteOffset": 1432805,
+      "valueBytes": 716,
+      "valueSha256": "4a3b3d40fb4421c4f58bceb0d0c9f9e2fa79fbd19c83e43506684b0d2e07a244",
+      "arrayIndex": 796
+    }
+  },
+  "firstTimeoutIntervalsMs": {
+    "sentAfterPlanned": 4.3491000002250075,
+    "ownerFromSent": 2090.843299999833,
+    "peerFromSent": 1900.2566999997944,
+    "ownerPastAbsoluteDeadline": 95.19240000005811,
+    "peerPastAbsoluteDeadline": -95.39419999998063
+  },
+  "originalWindowVerdicts": {
+    "offeredWindows": 500,
+    "passed": 159,
+    "failed": 341,
+    "actorsWithTimeout": 41,
+    "actorsWithNotSent": 82,
+    "actorsWithOriginalFailedWindow": 98,
+    "failedByMinute0Based": {
+      "0": 79,
+      "1": 72,
+      "2": 60,
+      "3": 72,
+      "4": 58
+    },
+    "stickyEarlierAssessmentRetained": true
+  },
+  "scheduleMsSentOnly": {
+    "count": 15469,
+    "p95": 14.488400000147521,
+    "max": 17.250900000333786
+  },
+  "offeredLatenessMsIncludingNotSent": {
+    "count": 16000,
+    "p95": 14.446400000248104,
+    "max": 17.2312000002712
+  },
+  "reportedSendToLastReceiptMsByKind": {
+    "walk": {
+      "count": 14710,
+      "p95": 767.7095000003465,
+      "max": 3011.4180000000633
+    },
+    "chat": {
+      "count": 759,
+      "p95": 1257.841800000053,
+      "max": 2198.9873000001535
+    }
+  },
+  "resources": {
+    "server": {
+      "rowsFullFile": 3611,
+      "steadyRows": 292,
+      "sha256": "06e52a91fd1c22cbf1d995bd6b745396d1241b719597b812fde0538acfdd2f85",
+      "bytes": 8141937,
+      "averageCores": 1.2182176888851912,
+      "cumulativeCpuSecondsDelta": 365.46530666555736,
+      "boundaryInterpolation": [
+        {
+          "leftAtUnixMs": 1794672965949,
+          "rightAtUnixMs": 1794672966975,
+          "gapMs": 1026
+        },
+        {
+          "leftAtUnixMs": 1794673266008,
+          "rightAtUnixMs": 1794673267036,
+          "gapMs": 1028
+        }
+      ],
+      "maximumAdjacentGapMs": 1038,
+      "p95AdjacentGapMs": 1030,
+      "gapsAbove2500ms": 0,
+      "unqualifiedSteadySamples": 0,
+      "wholeCampaignReportedJobPeakCommitBytes": 2647486464,
+      "maximumOverlappingIntervalCores": 3.932823129251701,
+      "maximumReportedRunningJobPeakCommitBytes": 2636681216,
+      "maximumSampledCurrentMemberPrivateCommitBytes": 2633478144,
+      "scope": "running Job peak includes earlier campaign; instantaneous member private sum is sampled, not an exact continuous commit maximum. CPU averages do not prove per-thread headroom."
+    },
+    "injector": {
+      "rowsFullFile": 3609,
+      "steadyRows": 291,
+      "sha256": "88e1194f2032444fb74fa9975c2c3cf87c740990512562f9408b26448309df77",
+      "bytes": 5670909,
+      "averageCores": 0.2268722078109238,
+      "cumulativeCpuSecondsDelta": 68.06166234327713,
+      "boundaryInterpolation": [
+        {
+          "leftAtUnixMs": 1794672965958,
+          "rightAtUnixMs": 1794672966986,
+          "gapMs": 1028
+        },
+        {
+          "leftAtUnixMs": 1794673264992,
+          "rightAtUnixMs": 1794673266018,
+          "gapMs": 1026
+        }
+      ],
+      "maximumAdjacentGapMs": 1048,
+      "p95AdjacentGapMs": 1030,
+      "gapsAbove2500ms": 0,
+      "unqualifiedSteadySamples": 0,
+      "wholeCampaignReportedJobPeakCommitBytes": 817881088,
+      "maximumOverlappingIntervalCores": 0.5787037037037037,
+      "maximumReportedRunningJobPeakCommitBytes": 310022144,
+      "maximumSampledCurrentMemberPrivateCommitBytes": 306462720,
+      "scope": "running Job peak includes earlier campaign; instantaneous member private sum is sampled, not an exact continuous commit maximum. CPU averages do not prove per-thread headroom."
+    }
+  },
+  "cleanupReportOnly": {
+    "rows": 100,
+    "normalLogout": 100,
+    "transportClose": 100
+  },
+  "selectedFreshReportOnly": {
+    "rows": 2,
+    "normalLogout": 2,
+    "transportClose": 2,
+    "passed": 2
+  },
+  "boundaries": [
+    "Report-only action verdicts and receipts; the 545MB event file was not read in this audit. No independent KeepAlive or physical network continuity proof.",
+    "Small schedule delay describes offer/send scheduling; it does not identify an execute, gate, Store, writer, kernel or receiver delay.",
+    "Cumulative Job CPU averages and roughly 1s interval peaks do not prove per-thread headroom or locate a lock stall.",
+    "All 145 preconditionFailed share the reason enum; only the first failure text was independently checked by exact report offset here.",
+    "SDK connection61/62 and object50060 are current-epoch evidence; no assumption about future epoch mapping or recurrence.",
+    "Cleanup/fresh facts are report claims, not an independent all-actor File qualification. No private File, save, ledger, auth or network read was performed.",
+    "Sparse default gateway-response-write logs are conditional; they cannot establish complete steady writer/gate coverage. Parent reported nine transport-ended state-flush failures; no Store persistence failure is established by that label."
+  ],
+  "nextDiagnosticDirection": "Same source/PE and original workload with existing bounded SLOW20 source-anchored stage diagnostics can distinguish execute/gate/flush waits; select actor60/peer61 only as observation candidates, independently map a new epoch, and retain original SLO failures. No specific backend change is justified by report counts alone."
+}
