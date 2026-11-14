@@ -478,15 +478,16 @@ impl SimulationSession {
         {
             return Ok(None);
         }
-        let mentor_active = mentor_checkpoint_required(world);
-        let guild_active = super::shared_guilds::enabled(world)
-            && super::shared_guilds::guild_view(world).is_some();
-        if !force
-            && !mentor_active
-            && !guild_active
-            && !super::shared_pet_progress::has_live_admission(world)
-        {
-            return Ok(None);
+        if !force {
+            let mentor_active = mentor_checkpoint_required(world);
+            let guild_active = super::shared_guilds::enabled(world)
+                && super::shared_guilds::guild_view(world).is_some();
+            if !mentor_active
+                && !guild_active
+                && !super::shared_pet_progress::has_live_admission(world)
+            {
+                return Ok(None);
+            }
         }
         world
             .resource::<RuntimeConfigResource>()

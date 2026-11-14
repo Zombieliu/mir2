@@ -1,6 +1,94 @@
 use super::*;
 use std::time::{SystemTime, UNIX_EPOCH};
 
+fn checkpoint_with_held_account_store(force: bool) -> (bool, bool) {
+    use std::sync::mpsc;
+    use std::time::Duration;
+
+    let mut session = super::tests::session();
+    let store = session
+        .app
+        .world()
+        .resource::<RuntimeConfigResource>()
+        .config
+        .account_store
+        .clone();
+    let (held_tx, held_rx) = mpsc::sync_channel(0);
+    let (release_tx, release_rx) = mpsc::sync_channel(0);
+    let hold_limit = if force {
+        Duration::from_secs(5)
+    } else {
+        Duration::from_millis(250)
+    };
+    let holder = std::thread::spawn(move || {
+        let guard = store.lock().unwrap();
+        held_tx.send(()).unwrap();
+        // The bounded fallback releases the Store even against old code or a
+        // panic. Successful forced admission must finish before this fallback.
+        let explicitly_released = release_rx.recv_timeout(hold_limit).is_ok();
+        drop(guard);
+        explicitly_released
+    });
+    let held = held_rx.recv_timeout(Duration::from_secs(5));
+    if held.is_err() {
+        drop(release_tx);
+        holder.join().unwrap();
+        panic!("AccountStore holder did not reach the synchronous barrier");
+    }
+    // Keep the session on this thread: no private runtime is moved across lanes.
+    let attempt = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        if force {
+            session.begin_default_npc_source_command()
+        } else {
+            session.begin_guild_experience_command(false)
+        }
+    }));
+    let released_by_test = release_tx.send(()).is_ok();
+    let held_until_explicit_release = holder.join().unwrap();
+    // Assertions and unwraps are deliberately after the Store release/join.
+    let checkpoint = attempt.expect("checkpoint admission panicked").unwrap();
+    let captured = checkpoint.is_some();
+    session
+        .finish_guild_experience_command(checkpoint, Vec::new())
+        .unwrap();
+    (captured, released_by_test && held_until_explicit_release)
+}
+
+#[test]
+fn forced_checkpoint_captures_before_unrelated_account_store_is_released() {
+    let (captured, completed_while_store_held) = checkpoint_with_held_account_store(true);
+    assert!(
+        captured,
+        "forced personal Source checkpoint is still complete"
+    );
+    assert!(
+        completed_while_store_held,
+        "forced checkpoint must not wait for unused mentor/guild eligibility lookups"
+    );
+}
+
+#[test]
+fn unforced_checkpoint_still_checks_store_and_skips_absent_eligibility() {
+    let (captured, completed_while_store_held) = checkpoint_with_held_account_store(false);
+    assert!(!completed_while_store_held);
+    assert!(
+        !captured,
+        "no mentor, guild or pet admission needs no checkpoint"
+    );
+}
+
+#[test]
+fn unforced_checkpoint_still_captures_an_existing_guild_member() {
+    let mut session = super::tests::session();
+    session.grant_shared_guild_creation_from_npc();
+    session.submit_shared_guild_name("CheckpointGuild").unwrap();
+    let checkpoint = session.begin_guild_experience_command(false).unwrap();
+    assert!(checkpoint.is_some());
+    session
+        .finish_guild_experience_command(checkpoint, Vec::new())
+        .unwrap();
+}
+
 #[test]
 fn prepared_kill_runtime_rejection_restores_complete_private_source() {
     let mut session = super::tests::session();
