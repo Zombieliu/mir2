@@ -1,0 +1,79 @@
+{
+  "classifier": {
+    "sha256": "17086d553a3eebddb9a656d09c94024417081656e1e3c939a6bc3916f61ee402",
+    "unchanged": true
+  },
+  "privateArtifacts": [
+    {
+      "privateArtifact": "receipt.json",
+      "sha256": "08bd81d607bab518af5a0e9817ee3d86f83148f8a12a8c7c27cc77e8802b96ef",
+      "bytes": 76759
+    },
+    {
+      "privateArtifact": "startup-probe.json",
+      "sha256": "710b1dfd1af45b0adae844bf817f72e8452c46e6aa31a7335f8a7d5f340f8709",
+      "bytes": 155907
+    },
+    {
+      "privateArtifact": "static-transport.json",
+      "sha256": "d2ee4c39145bf9eaaaed1f8dec2897f3ebcb9a3dd2f8bb5e1fa72c2c2da85c7f",
+      "bytes": 562277
+    },
+    {
+      "privateArtifact": "static-waterfall.json",
+      "sha256": "ca99574a19ae2c7a9aac90ef14dfb51a47af4a711173d16f0cb5feb17d3f5c26",
+      "bytes": 829878
+    },
+    {
+      "privateArtifact": "worker-font-network.json",
+      "sha256": "e9c57ff624ee03a616057ea69214ed67b1fbbaaa64b73d4e7e2f1eda22e41eee",
+      "bytes": 6848
+    },
+    {
+      "privateArtifact": "private-game-start-trace.json",
+      "sha256": "557d3a39a66e78b424c049a8f4d1424be328328cf31578604a432cff8241d319",
+      "bytes": 61502
+    }
+  ],
+  "preparedScripts": {
+    "run.mjs": "d76ce970c5120f168adb0840fb44dd333f52e4b4e91b7bb60b4c12c61614a544",
+    "desktop-qr-city-direct-cdp.mjs": "d1a0f80e50c88744e549ad51221267f588eece2084ec37f99e9984ee58ac1b3d",
+    "scene-gate.mjs": "9903b46871a62bf245760050d773532f7a52d02fe32375b620d0866cacd1c2f6",
+    "mobile-wallet-public.mjs": "7b77f6d5a971e82536f31d5cf0a45f91617e4f03bf248dcd958181252eb8dc12",
+    "coordinated-approval-step.mjs": "d1517f42b9b89025b46a50a73818d4c13ad228dcb7f0d7e61e8e5ade908c1d45",
+    "passive-approval-round.mjs": "a0b9c0c5685421940ec922366db6af4d6c2dbd01debec60227988c7ec27e90b4",
+    "classify-wallet-request.mjs": "ab34b854c2847ba041a63ebfd50df3b5cca95673731d243cbd2a9d6d4a52ea25",
+    "handoff.mjs": "2aae21d569d3c339ba190e9184b650de1647ef902b802bbc6aa85c676566918f",
+    "verify-rendered-qr.mjs": "bdf0db36bf23fc6a2efb43bb2e741b7926c12176cdda6dee2b7fc24153f418ef",
+    "terrain-observation.mjs": "90ab5e328f6a93713b6ee797545632fd8a47f5897d72d7009b175aa331845f45",
+    "verify-public-quest.mjs": "db07bef80fb1ea49fe6e679fe53d0e7011ea20b3feddd259edca79e0ef389fdf",
+    "perf-probe.mjs": "951dafdc08341c325794ff4aed6be0feebd7313e59ed53352a8212de50a33f0b",
+    "verify-shared-quest.mjs": "d584dd70091f9861f532385f4a31cf5c5e7a34a14776f6cd14dcfc2ee4ec6a8b",
+    "verify-prewarm.mjs": "e5bbac30271e8fdcc4ed7d5bad466bd0f16e37ee0f32ec2936e8994bdea54d3e",
+    "frame-metadata.mjs": "779634248a24da426b82402289065e317c1cc479acc6db54619a1820ce250825",
+    "handoff-time.mjs": "6dc1d58a2d8101bf1f7272b73cc4a23691b58fd2a3b243d2dc28c5f5b05e85d7",
+    "verify-worker-restart.mjs": "fd678683ec19b582324937df06ab4a22624cd7e57ae032d90e823b742911e203",
+    "worker-font-network.mjs": "767fadc087773203b9381c9a1efa271e8d2bac108ccfc75064d5da02743005b0",
+    "verify-original-fonts.mjs": "5ce7c7a01c76f9a3dd2a19d71c5a9a0936b5b2c9b9a3631c1c0a4a507424c86d",
+    "bootstrap-chunk-observation.mjs": "28138d86a82c0030421845d8b198fc2d010ae0ffc5b1f486480dddb36c41bf37",
+    "r16-static-waterfall.mjs": "8e59499334a97e2b92b8a1aeeb9902d18043d50e08c388d219a02916209587f8",
+    "r16-static-transport.mjs": "ff35ad6e7638f9839713091a7d6ba61887c10c0510f557386b51b551240d5ab0"
+  },
+  "geometryProvenance": {
+    "changedField": "sourceRevision",
+    "before": "f310e242a48b6ad69f27fcf133c90c1f8655674c",
+    "after": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+    "beforeSha256": "77c2a033c738d4e6bd27929e04612e3cee316ef0f2facbe62ee27cba60800217",
+    "afterSha256": "598deb470a3123f557c002ee018cca9fa153eb9c05e4b16270ec357236f50766",
+    "otherParsedFieldsUnchanged": true,
+    "committedSourceBlobsRechecked": 6,
+    "originalGatesAndCodeUnchanged": true
+  },
+  "walletSource": {
+    "url": "https://wallet.dubhe.obelisk.build/",
+    "checkedAt": "2026-11-14T21:57:40.268Z",
+    "status": 200,
+    "revision": "c74a27a48d57a6dd14cfc0ccfcf47e68ab58163b"
+  },
+  "rawAuthAndProfilesNotPublished": true
+}

@@ -1,0 +1,29 @@
+{
+  "kind": "r16-font-chain-production-qualified",
+  "accepted": true,
+  "retained": true,
+  "rolledBack": false,
+  "source": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+  "deployment": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8",
+  "implementation": "f51306c5f1527a025b1a7a23dc2e0e624e05aa0d",
+  "originalMoveBudgetMs": 8000,
+  "originalNativeBudgetMs": 120000,
+  "moveAckMs": 1435,
+  "nativeAfterFirstFrameMs": 81431,
+  "runtimeBodyAfterFirstFrameMs": 23602,
+  "publicCrossMapTested": false,
+  "humanPhoneCameraTested": false,
+  "officialPhoneSizedWalletSignedLogin": true,
+  "oneInternalQaWalletAndRole": true,
+  "realFundsOrAssetTransactions": false,
+  "wholeParityAccepted": false,
+  "knownResourceErrors": {
+    "count": 97,
+    "status": 504,
+    "throughWorker": true,
+    "fonts": 3,
+    "images": 94,
+    "allFailedUrlRecoveryAudited": false
+  },
+  "originalClassifierSha256": "17086d553a3eebddb9a656d09c94024417081656e1e3c939a6bc3916f61ee402"
+}

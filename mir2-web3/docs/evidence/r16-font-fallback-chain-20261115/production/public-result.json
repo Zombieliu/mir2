@@ -1,0 +1,188 @@
+{
+  "passed": true,
+  "source": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+  "deployment": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8",
+  "normalSystemNetwork": true,
+  "timing": {
+    "clockEpochMs": 1794694358767,
+    "authoritativeLoginSuccessMs": 27607,
+    "startIntentMs": 58322,
+    "startAckMs": 63170,
+    "authoritativeStarterMapMs": 63179,
+    "authoritativeSelfMs": 63180,
+    "firstPlayableObservedMs": 66460,
+    "terrainPaintVerifiedMs": 108838,
+    "sharedHudObservedMs": 147771,
+    "logoutIntentMs": 160660,
+    "logoutAckMs": 161611,
+    "manifestAttemptsBeforeStart": 1,
+    "manifestAttemptsAtOrAfterStart": 0,
+    "starterRegionRequestMs": 27610,
+    "starterRegionWireHeadersMs": 28779.064,
+    "starterRegionResponseEventMs": 28779,
+    "starterRegionBodyMs": 28794,
+    "starterRegionCommitMs": 63295,
+    "sceneSpritesReadyMs": 63328,
+    "localeRequestMs": 27611,
+    "localeBodyMs": 28881,
+    "localeReadyMs": 28914,
+    "firstPlayableFrameMs": 66340,
+    "rendererBodyMs": 89942
+  },
+  "firstFrameAfterStartClickMs": 8018,
+  "approval": {
+    "passed": true,
+    "approveUiClicks": 1,
+    "forbiddenCount": 0,
+    "onlySignedLogin": true
+  },
+  "freshEmptyRoster": true,
+  "newCharacterMessages": 1,
+  "newCharacterSuccess": 1,
+  "movement": {
+    "attempted": true,
+    "passed": true,
+    "status": "one-authoritative-walk",
+    "from": {
+      "x": 288,
+      "y": 616
+    },
+    "to": {
+      "x": 289,
+      "y": 616,
+      "direction": "Right"
+    },
+    "authorityBinding": {
+      "connection": 1,
+      "startOrdinal": 1,
+      "seq": 20,
+      "packet": "UserInformation",
+      "atMs": 66584
+    },
+    "geometry": {
+      "source": "sha256-pinned-local-release-reference-and-complete-production-map-collision",
+      "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+      "townCollisionSha256": "598deb470a3123f557c002ee018cca9fa153eb9c05e4b16270ec357236f50766"
+    },
+    "physical": {
+      "input": "trusted-playwright-keyboard-pulse",
+      "key": "ArrowRight",
+      "atMs": 66584
+    },
+    "wire": {
+      "type": "walk",
+      "direction": "Right",
+      "atMs": 66592
+    },
+    "ack": {
+      "x": 289,
+      "y": 616,
+      "packet": "UserLocation",
+      "atMs": 68019
+    },
+    "ackWithinEightSeconds": true,
+    "rendered": {
+      "x": 289,
+      "y": 616,
+      "atMs": 68162
+    }
+  },
+  "prewarm": {
+    "passed": true,
+    "summary": {
+      "requested": 113,
+      "ok": 113,
+      "failed": 0
+    }
+  },
+  "fonts": {
+    "passed": true,
+    "expected": [
+      {
+        "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+        "bytes": 16437364,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansTC.ttf",
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+        "bytes": 621572,
+        "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+        "bytes": 243520,
+        "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+        "bytes": 37780,
+        "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+        "bytes": 234892,
+        "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+      }
+    ],
+    "cacheReadsOnly": true,
+    "rows": [
+      {
+        "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+        "present": true,
+        "bytes": 16437364,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansTC.ttf",
+        "present": true,
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+        "present": true,
+        "bytes": 621572,
+        "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+        "present": true,
+        "bytes": 243520,
+        "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+        "present": true,
+        "bytes": 37780,
+        "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+        "present": true,
+        "bytes": 234892,
+        "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+      }
+    ]
+  },
+  "sharedHud": {
+    "passed": true,
+    "questPassed": true
+  },
+  "workerRestartPassed": true,
+  "normalLogout": true,
+  "returnedToSelect": true,
+  "ui": {
+    "engine": "chrome",
+    "headlessDesktopViewport": true,
+    "networkMock": false,
+    "pageErrors": 0,
+    "consoleErrors": 97,
+    "browserClosed": true
+  },
+  "mobileClosed": true
+}

@@ -1,0 +1,22 @@
+{
+  "checkedAt": "2026-11-14T22:34:21.187Z",
+  "independentAlias": {
+    "checkedAt": "2026-11-14T22:25:54.415Z",
+    "deploymentId": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8",
+    "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+    "source": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+    "readyState": "READY",
+    "url": "numeron-r16-cm65ll2xj-obelisk-labs.vercel.app"
+  },
+  "publicVersion": {
+    "status": 200,
+    "revision": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339"
+  },
+  "gateway": {
+    "status": 200,
+    "revision": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5",
+    "ok": true
+  },
+  "retained": true,
+  "rolledBack": false
+}

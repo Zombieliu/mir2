@@ -6,7 +6,7 @@ Updated 2026-11-15 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-15 正式仍b9acf175fa／6k5u，fd3未改。f310换图修复曾因公网Native125445ms超原120秒回退。[原失败与回退](evidence/r16-map-world-baseline-20261115/production/README.md)。本轮修复完整字体回退重新排队及旧缓存清理打断登录：146项／独立构建，英繁两后端实际清理5缓存、登录不中断、六字体／113、跨图补读1次、晚到碰撞注销、同角新目标及存档通过，29份WIP的SHA未变。[源码与本地完整回放](evidence/r16-font-fallback-chain-20261115/README.md)。原8秒移动／120秒Native和完整资源门槛不变；源码20de及24输入／83项发布保护已冻结，下一项创建候选并走公网全流程。此前[双客户端第三边挡路](evidence/r16-live-route-occupancy-20261115/README.md)通过。其他地图／途中断网／公网跨图与双钱包占位、室内地面／反馈、三职业完整1–30、语言像素及整体1:1仍开放。
+2026-11-15 正式已保留20de5ea4fd／AWss，Gateway仍fd3；原8秒移动／120秒Native及完整资源门槛未改，公网首步1435ms、首帧后运行包23602ms／Native81431ms、六字体SHA／113／共用Q／Worker恢复／正常注销与最终简繁扫码均过。[正式发布、原判定与边界](evidence/r16-font-fallback-chain-20261115/production/README.md)。146项／独立构建、英繁两后端实际旧缓存清理不中断登录、跨图补读／晚到碰撞注销／同角新目标及存档通过；24输入／83项发布保护绑定源码，29份内容WIP的SHA保持。f310原125445ms失败与回退不改判。公网仍有97次经Worker的资源504（3字体／94图），指定113项最终齐全但全部失败URL恢复未审，下一项逐源／排队／缓存关联及过早“失败”进度。其他地图／途中断网／公网跨图与双钱包占位、室内地面／反馈、三职业完整1–30、语言像素及整体1:1仍开放。
 
 ## 保留的当前未结项
 
@@ -39,7 +39,7 @@ Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 G
 - [ ] 当前R16已接入编号近战结果与实际/排队动作障碍，两个普通浏览器后端完成真实单击攻击→攻击中右键→到达→注销存档，无第二击。共享WebGL2末帧5未观测到，首包与最后观测帧约-7/-5ms，继续帧级接管、纯GPU实体、Hosted、追怪/施法和其他职业。保留旧回执/原型失败，888已发布，后续绘制候选仍未发布。[候选范围](evidence/r16-attack-handoff-20261112/README.md)；另复测玩家跳官网的实际入口。
 - [ ] 继续核对图集纯 GPU 选怪、其他普通窗重叠、移动时的场景分块更新和其余技能时序。保留原始截图和失败记录。
 - [ ] 继续 Windows 窗口、Hosted 联调和正式发行。保留连续续抛时早期咬钩的短探针超时记录。
-- [ ] 三格前视已发布，双客户端挡路绕行通过。f310换图修复公网125445ms超120秒后已回退b9。本轮字体来源链及安全缓存更新候选146项／独立构建／两后端实际清理旧缓存、不中断登录、六字体／113／跨图／晚到数据／重登目标及保存通过。已推送20de并冻结24输入／83保护，按原8/120与完整资源门槛发布、公网验收；继续其他地图／目标、途中断网、公网跨图／双钱包占位、室内地面／入口反馈和语言。[本轮候选](evidence/r16-font-fallback-chain-20261115/README.md) · [原公网失败](evidence/r16-map-world-baseline-20261115/production/README.md) · [第三边见证](evidence/r16-live-route-occupancy-20261115/README.md)
+- [ ] 三格前视及双客户端挡路绕行已验。换图补读、字体来源链与安全缓存更新已随20de正式保留：146项／独立构建／两后端跨图及重登保存通过；公网首步1435ms／Native81431ms、六字体／113／共用Q／Worker／注销及简繁扫码通过原8/120门槛。97次资源504及全部失败URL的最终恢复仍待查；继续其他地图／目标、途中断网、公网跨图／双钱包占位、室内地面／入口反馈和语言。[正式回执与范围](evidence/r16-font-fallback-chain-20261115/production/README.md) · [旧失败保留](evidence/r16-map-world-baseline-20261115/production/README.md) · [第三边见证](evidence/r16-live-route-occupancy-20261115/README.md)
 - [ ] Windows 窗口重名／满槽实机暂缓，发行包另验。旧档原第五角色普通协议可用，四槽界面的恢复方案待核对。
 - [ ] 跨 Gateway／TCP 的慢保存恢复和 Windows 窗口实机另验。普通注销后的三职业同档往返见本节独立记录。
 - [ ] 拖动图标、水面波纹、声音时点、自动重抛动画、Windows 窗口与发行素材闭包另验。继续其余技能。
