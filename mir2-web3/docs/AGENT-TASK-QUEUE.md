@@ -6,7 +6,7 @@ Updated 2026-11-15 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-15 响应头优先候选127项/构建、Chrome四场和两后端四会话通过：冷Native54.650/52.246秒、重进1.400/1.442秒，两条189次商人路线到合法邻格，原8/120及六字体113/保存通过。后台最多等头8秒、离场排队退休；33份已跟踪WIP未变。共享热场诊断4096行丢148，附加完整性false保留。当前未发布，正式仍E6/Ae3和fd3；继续冻结来源/发布保护/公网原门槛实测，其他任务/动态占位/语言像素/整体1:1开放。[证据](evidence/r16-runtime-header-priority-20261115/README.md)。
+2026-11-15 响应头优先b9acf175fa已正式保留（6k5u）；127项/构建/Chrome四场及英繁两后端四会话、两条189次商人路线通过，83发布保护与切流前后30项资源通过。公网首步193ms、运行包首帧后54.074秒/Native110.235秒，原8/120与六字体SHA/113/Q/Worker/注销均过；最终简繁出码/待确认/取消及独立API复验通过，fd3未改。公开623+951静态行分别无截断；本地共享热场另丢148行保留，33份已跟踪WIP未变。点击至Native116.630秒仍需优化，缓存/路径不同不归因；其他任务/动态占位/三职业1–30复验/语言像素/整体1:1开放。[资格](evidence/r16-runtime-header-priority-20261115/README.md) · [正式回放](evidence/r16-runtime-header-priority-20261115/production/README.md)。
 
 ## 保留的当前未结项
 
