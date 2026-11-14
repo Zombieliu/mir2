@@ -16,15 +16,21 @@
 
 Linux CI `43491883414` 全流程成功，新 ELF SHA `26c131881c6c1e9de4ca2179d9f7a05f97d07f7e29269c80dca3dcd04cae1082`；七项门禁、真实 PG/Redis startup 与全部 1620 张地图通过，严格 artifact V8 回执 `46827f7441affa122213faef6c1b7f7a7030483daaeaf32652271addb8a47390`。这是另一份 Linux 工件。云机同池准备 V5 已结束：65 人本轮 fresh 加 35 人继承已验证准备，共覆盖 100 人；本轮 65 人全部普通注销，账号池和账本前后校验通过，不能标成全 100 人本轮 fresh 或容量通过。报告 SHA `0f45c358b229861cedfc2bed0da8d2fded21afcf39eeb8a7678a8840c7de3c21`。
 
-V8 更新工具在发送 SSH 命令前因完整请求超过 98304 字节限制拒绝 install；失败保留，实际只读复核确认旧服务及全部受保护基线未变。V9 只修正完整请求的有界压缩传输，wire 上限不变，解压限 131072 字节，全部审计字段保留；120 项离线测试通过，规范目录补测 34 项通过。仅将本地 V8 的未安装 prepared 计划原字节归档，原 V5 installed 状态不动；使用新鲜 status 重新 prepare/install V9 通过。实际同一 TEST 已运行 7403 / ELF 26c，install 回执 SHA `3e28434f9fd302ed8a7ac9ca5f5c9ea9534ecaaa2239259d0d05cae1d7006365`，19 个 EnvFile、原上限 51/66/51，受保护进程指纹均未变。第一轮临时测试上限 120/150/120 已在普通收尾后恢复 51/66/51，restore 回执 `cd4a9ff9a2dbba3a6652a3e6effca1786482fa85f3189e817959bc55d0c6b602`。第二轮相同门槛的逐档复测已另行启动、再次临时提高上限；结束后仍须恢复。
+V8 更新工具在发送 SSH 命令前因完整请求超过 98304 字节限制拒绝 install；失败保留，实际只读复核确认旧服务及全部受保护基线未变。V9 只修正完整请求的有界压缩传输，wire 上限不变，解压限 131072 字节，全部审计字段保留；120 项离线测试通过，规范目录补测 34 项通过。仅将本地 V8 的未安装 prepared 计划原字节归档，原 V5 installed 状态不动；使用新鲜 status 重新 prepare/install V9 通过。实际同一 TEST 已运行 7403 / ELF 26c，install 回执 SHA `3e28434f9fd302ed8a7ac9ca5f5c9ea9534ecaaa2239259d0d05cae1d7006365`，19 个 EnvFile、原上限 51/66/51，受保护进程指纹均未变。第一轮临时测试上限 120/150/120 已在普通收尾后恢复 51/66/51，restore 回执 `cd4a9ff9a2dbba3a6652a3e6effca1786482fa85f3189e817959bc55d0c6b602`。第二轮临时上限也已恢复，结果及回执见下文。
 
 云机实际配置与本机不同（云机 recording 关闭、测试服务 MemoryMax 1600MiB，且共享主机），故另做 2/25/50/100、每档 300 秒的实际测量；首个安全或 SLO 失败即停止升级。该公共 movement/chat 计划与本机 common dense 分开报告，不据此宣称本地 100 人已修好、完整战斗容量或真实三端渲染通过。
 
 第一轮实际云测已结束，报告 `ed10b6a4096de8ee55fdb0ec17c8a05809e37155fce47040ef3f002c6332e240`：2 人与 25 人各完整活动 300 秒通过，评分动作 320/320、4000/4000，10/125 个逐人分钟窗口通过且阶段内零超时；25 人阶段 target CPU 平均约 0.40 核、采样峰 cgroup 内存约 475MiB，游戏 WS 应用下行约 0.326Mbps。主机 NIC 同期约 1.399Mbps，包含其他服务，不能当成游戏流量。进入 50 人档时、30 人已入场后，既有玩家的 continuous minute 超时导致整轮 FAIL，未完成 50/100 稳态和最终 fresh-save。31 个 cleanup normal 标记包含 30 个真实已入场连接及一个未建立连接的 no-op，不冒充 31 次业务 LogOut。六个穿脱回合通过，owned Job 全成员退出且无 kill，同池前后校验通过。独立闭合汇总 V3 实际退出 0、容量标记保持 false，回执 SHA `421536305224d083d96c2a15cd21c2b30dacd7d5048f7a98b3b1a4c9f3cc8df0`。V1 监控字段拒绝、V2 漏计 admission 超时的旧结果均保留；V3 区分已完成阶段零 timeout 与全日志四次 timeout，19 项离线检查通过。
 
-四次 timeout 的共同见证者为 peer20/plain-Web。四步 owner ACK 均按时，但 peer20 的原目标包分别在发出约 2.35–2.38 秒后才收到；该连接 2313.10ms 没有任何 received 或 KeepAlive echo，同期其他 29 个角色收到 1284 包、36 个 echo。首步其他观察者约 63ms 收到同一个移动；实际位置在 Zone AOI 内，没有对应 ObjectRemove。可确认单连接应用接收空档，尚不能定位 Gateway writer、代理/TCP 或本机单连接处理。证据 SHA `7129efcaf9ada83525a122e4a204cf6f6d24fa2a09a715b45988b52bfc6cdfbe`；不能把约 30 人解释为硬件上限。第二轮使用相同 load/probe、阶段、频率、截止时间、评分和原账号/账本，坐标继承上轮普通保存；另准备只读 TCP 统计辅助定位，不改网络或 VPN 设置。
+四次 timeout 的共同见证者为 peer20/plain-Web。四步 owner ACK 均按时，但 peer20 的原目标包分别在发出约 2.35–2.38 秒后才收到；该连接 2313.10ms 没有任何 received 或 KeepAlive echo，同期其他 29 个角色收到 1284 包、36 个 echo。首步其他观察者约 63ms 收到同一个移动；实际位置在 Zone AOI 内，没有对应 ObjectRemove。可确认单连接应用接收空档，尚不能定位 Gateway writer、代理/TCP 或本机单连接处理。证据 SHA `7129efcaf9ada83525a122e4a204cf6f6d24fa2a09a715b45988b52bfc6cdfbe`；不能把约 30 人解释为硬件上限。第二轮同一 load/probe、频率、截止时间、评分和原账号/账本的结果见下文；只读 TCP 统计另行补采，不为旧两轮补造覆盖。
 
-本地也已开始 100 人录盘 A/B：同一 7403 Windows exe、SDK7、a2caf 300 秒计划、4CPU/8GiB 及全部门槛，仅增加 `MIR2_SPECTATOR_RECORDING_ENABLED=false`，spectator 保持开启。继承完整 669 次原认证历史，尚在进场，不能当成通过。冻结准备 SHA `878b5836e454f2c36f1116aa7df84d40e6e54b3e874b8c3c30cb91aeae29cd07`。
+第二轮云机测试已经结束，整体 FAIL：2 人 300 秒通过；25 人阶段开始时发现 26 个 WS / 25 个 active，约 0.214ms 后因原人口门槛停止。此前新角色 warmup 已发出 23 次动作，全日志 546/546 outcome 完成且零动作超时，不能称为全轮未发动作。全部 25 人收到普通 LogOutSuccess，但其中 9 人未在原 5 秒内收到正常 Close，随后本地强制清理不算正常关闭证明。额外 WS 的归属及计数原因未确定，没有停止未知客户端或放宽人口门槛。独立闭合汇总 V5 实际退出 0，第一轮 SHA `e16485202a53099b26a77d5ebd06c756330cc68e292086d6f4d1507a512c6e1d`，第二轮 `dcdb2c96cafe820ba2adf341a5ac5e3bfb7bc7a39fafcc6ccd76070b022311d5`；汇总成功不改变负载 FAIL，全部容量认证标志仍为 false。两轮临时上限均已恢复 51/66/51，第二轮 restore 为 `restore-caps-20261113T223148.133381Z.json`，19 个 EnvFile、受保护进程指纹不变。
+
+本机 100 人关闭录盘对照已完整结束：同一 7403 Windows exe、SDK7、a2caf 300 秒计划、4CPU/8GiB 和全部原门槛，仅增加 `MIR2_SPECTATOR_RECORDING_ENABLED=false`，spectator 保持开启。15172/16000 按时完成，121 超时、707 未发送，109/500 逐人分钟窗口通过，仍为 FAIL。全部 100 人正常 Logout/Close、fresh 0/99 和 12 次穿脱后的重登通过；controller/driver/server 分别退出 1/1/0，普通收尾且没有 kill。File V8 因 SLO 前置门拒绝，未打开 private store；增强 V8 实际退出 1，不能宣称全员磁盘重读通过。报告 SHA `06d9f15549b108ed146b42724569654e61b904121c40d1fa1b9c62c2e5294c6b`，增强结果 `23f0d978bc278902e26c1bf70eaf934e9294150238596460a0b24b4fb15fcd46`。认证历史完整追加至 783 次，没有重置额度。
+
+关闭录盘轮完整 300 秒内 server 平均 1.186168 核、全轮峰 Commit 2447.797MiB，injector 平均 0.206284 核；资源汇总 SHA `3fcdd323a0b2b022fed1c4d31128257f1df269017e0aa17d74199ef7654e2851`。首个已发超时 Chat 的 owner 为 57.255ms、正确 peer 包为 2560.295ms；peer 曾有 1264.034ms 的所有接收空档，但该空档内没有 KeepAlive 发送，不能从空档前后的快速 echo 推断空档期间网络正常。取证 SHA `afc8f819155da4cb01618fbecd219dc5062ebea87cf32205cf7893a5a8eec1e6`。关闭录盘后的明显改善是受限对照结果；硬限 CPU 并非独占物理核心，其他时间差异仍在，不能把全部差距只归因于录盘。
+
+新增本机 100 人慢阶段诊断在相同关闭录盘配置上仅增加 `MIR2_GATEWAY_SLOW_STAGE_MS=20`；截至 2026-11-14 00:10 UTC 仍在正常限流入场，60 active，尚非 steady 结果。两次只读日志解析器因未登记阶段名退出 1，原记录保留，补齐源码证明后重读原日志；游戏不重启。另有云机 2/25 人、每档 300 秒的只读 TCP 诊断正在运行，初始 WS/active 均为 0，使用现有原上限，未修改上限或重启服务。两者均为诊断，不提前认定容量通过；主机带宽“30MBPS”的合同单位尚未核实。
 
 用户提到的重启亦作只读核对：近三天 System 日志中的两条 1074（2026-11-12 02:44/02:46 UTC，即本地 10:44/10:46）分别记录 MoUsoCoreWorker 与 TrustedInstaller 发起计划内系统更新重启。该日志投影 SHA `e614b2e8804b707f68935e682e4d79a9293675410107d47101ee99b5223f8383`；本轮没有修改更新、电源或 VPN 设置。
 
@@ -42,6 +48,7 @@ V8 更新工具在发送 SSH 命令前因完整请求超过 98304 字节限制�
 | 同一观战候选 / SDK V6 | 2 / 60s | 64 / 64 | 0 / 0 | 2 通过 | 正常退出、fresh 2、全员 File 与 v7 增强复核均通过 |
 | 同一观战候选 / SDK V6 | 100 / 300s | 13914 / 16000 | 444 / 1642 | 12/500 通过 | 全 100 人正常 Logout/Close、fresh 0/99 通过；整体仍 FAIL，File 前置门拒绝，增强 v7 复核实际退出 1 |
 | 修复版 7403 / SDK7 | 100 / 300s | 1047 / 16000 | 4713 / 10240 | 0/500 通过 | 全 100 人正常 Logout/Close、fresh 0/99 通过；整体 FAIL，File 前置门拒绝、增强 V8 退出 1 |
+| 同版关闭录盘 / SDK7 | 100 / 300s | 15172 / 16000 | 121 / 707 | 109/500 通过 | 全 100 人正常 Logout/Close、fresh 0/99 通过；整体 FAIL，File 前置门拒绝、增强 V8 退出 1 |
 
 25 人 v7 独立复核 SHA256
 `61eda521c04c8fa22613fb6b5deeb4cbfb6d955461e01e079e15b5d47274b4f5`；
@@ -209,7 +216,7 @@ P95 为 0.4899ms / 0.1031ms。9600 次更新事件序列及 96 次 emit 的编�
 digest 全部相同。原始 stdout SHA256
 `9300148b743b77fffafd7611696404b15f30a360997576bf573caad7bc3cf64f`。
 这不是完整 publish、锁等待、Tokio 或 CCU 的加速比；同次测量未覆盖非空掉落、
-ring 淘汰、真实地图或进程并发。previous 事件字段投影已有实现，26 项观战回归及原始字段/异常值差分测试通过；修复版 100 人已另开实跑、结果待完成，旧 100 人 FAIL 保持不变。
+ring 淘汰、真实地图或进程并发。previous 事件字段投影已有实现，26 项观战回归及原始字段/异常值差分测试通过；修复版录盘开/关两轮 100 人均已结束且 FAIL，结果见顶部，旧失败保持不变。
 
 ## 已固定的边界
 
