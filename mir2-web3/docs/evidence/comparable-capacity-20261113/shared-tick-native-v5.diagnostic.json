@@ -1,0 +1,144 @@
+{
+  "schema": "mir2.native-full-tick-v5-compact.v1",
+  "sourceRevision": "fd87d72d6d6c7a75174a6729aabb327781847e79",
+  "exeSha256": "cf848bf733c5f9fd9e9b4d2e53409005a052bab8b2f10c1150d2a12002a512c2",
+  "gatewayPackageOptLevel": 0,
+  "simulationAndDependenciesOptLevel": 3,
+  "configurationDifferencesFromGame": [
+    "memory store",
+    "ordinary newcharacter level1",
+    "map0",
+    "12turns not full sustainedwalk load",
+    "noWebSocket/write gate",
+    "Gateway packageunoptimized"
+  ],
+  "capacityQualified": false,
+  "diagnosticOnly": true,
+  "actualExitCodes": [
+    0,
+    0
+  ],
+  "jobElapsedSeconds": 200.361780599982,
+  "jobPeakCommitBytes": 300584960,
+  "allOwnedNormalNoKill": true,
+  "sourceLogSha256": "eb71e32665e3424a620c4c591ecbd4062872d9d84e59c04456383551394104aa",
+  "burst100": {
+    "actual_tick_calls": 100,
+    "callers_joined": 100,
+    "capacity_qualified": false,
+    "diagnostic_only": true,
+    "elapsed_since_test_start_ms": 179497,
+    "outer_tick": {
+      "count": 100,
+      "max_us": 630604,
+      "p50_us": 444183,
+      "p95_us": 625506
+    },
+    "personal_clock_advances": 100,
+    "population": 100,
+    "successful_tick_calls": 100
+  },
+  "fourCaller300": {
+    "actual_tick_calls": 300,
+    "artificial_lock_hold": false,
+    "backend": "memory",
+    "caller_workers": 4,
+    "caller_workers_joined": 4,
+    "capacity_qualified": false,
+    "content_profile": "crystal_full",
+    "deadline_failed": false,
+    "debug_assertions": false,
+    "diagnostic_only": true,
+    "failures": 0,
+    "initial_presence": 100,
+    "initialization_ms": 178852,
+    "level_equipment": "ordinary_new_character_defaults; differs fromL40/SharpBracelet fixture",
+    "map": "0",
+    "normal_logouts": 100,
+    "ordinary_turns": 12,
+    "outer_tick": {
+      "count": 300,
+      "max_us": 78470,
+      "p50_us": 1626,
+      "p95_us": 27209
+    },
+    "personal_clock_advances": 290,
+    "population": 100,
+    "preceding_burst_callers_joined": 100,
+    "preceding_burst_tick_calls": 100,
+    "remaining_presence": 0,
+    "rounds": 3,
+    "schema": "mir2.native-full-shared-tick-probe.v1",
+    "socket_write_gate_or_network_measured": false,
+    "whole_diagnostic_ms": 199859
+  },
+  "selectedSubstages": {
+    "shared_session.experience.owner_publication": {
+      "recordsAtOrAbove20ms": 32,
+      "maxMs": 105,
+      "maxLine": 296,
+      "sumMsNotWallTime": 1086
+    },
+    "shared_session.predrain.pet_context": {
+      "recordsAtOrAbove20ms": 10,
+      "maxMs": 44,
+      "maxLine": 277,
+      "sumMsNotWallTime": 308
+    },
+    "shared_session.predrain.experience_context": {
+      "recordsAtOrAbove20ms": 105,
+      "maxMs": 576,
+      "maxLine": 673,
+      "sumMsNotWallTime": 29055
+    },
+    "shared_session.predrain.pending_drain": {
+      "recordsAtOrAbove20ms": 9,
+      "maxMs": 69,
+      "maxLine": 291,
+      "sumMsNotWallTime": 352
+    },
+    "shared_session.experience.peer_projection_and_wars": {
+      "recordsAtOrAbove20ms": 155,
+      "maxMs": 572,
+      "maxLine": 664,
+      "sumMsNotWallTime": 35037
+    },
+    "shared_session.predrain.mentor_accounting": {
+      "recordsAtOrAbove20ms": 4,
+      "maxMs": 73,
+      "maxLine": 279,
+      "sumMsNotWallTime": 142
+    },
+    "shared_session.reconcile.experience_profiles": {
+      "recordsAtOrAbove20ms": 56,
+      "maxMs": 426,
+      "maxLine": 616,
+      "sumMsNotWallTime": 7895
+    },
+    "shared_session.reconcile.player_kills": {
+      "recordsAtOrAbove20ms": 1,
+      "maxMs": 27,
+      "maxLine": 313,
+      "sumMsNotWallTime": 27
+    },
+    "shared_session.predrain.pending_lock_wait": {
+      "recordsAtOrAbove20ms": 1,
+      "maxMs": 30,
+      "maxLine": 391,
+      "sumMsNotWallTime": 30
+    },
+    "shared_session.experience.admission_capture": {
+      "recordsAtOrAbove20ms": 4,
+      "maxMs": 29,
+      "maxLine": 452,
+      "sumMsNotWallTime": 92
+    },
+    "shared_session.reconcile.mentor_accounting": {
+      "recordsAtOrAbove20ms": 1,
+      "maxMs": 22,
+      "maxLine": 455,
+      "sumMsNotWallTime": 22
+    }
+  },
+  "interpretation": "Diagnostic-only repeated peer projection hotspot; not normal Release/File/SDK capacity or proof of cloud cause. Concurrent duration sums overlap."
+}
