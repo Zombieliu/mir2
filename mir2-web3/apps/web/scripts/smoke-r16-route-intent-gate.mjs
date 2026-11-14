@@ -1,0 +1,31 @@
+import assert from 'node:assert/strict';
+import {createServer} from 'node:http';
+import {createRequire} from 'node:module';
+import {readFile,writeFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {isAbsolute} from 'node:path';
+import {installRouteIntentGate} from './lib/r16-route-intent-gate.mjs';
+const [output,browserExecutable,playwrightPackage]=process.argv.slice(2);
+assert.equal(process.argv.length,5,'Supply output JSON, browser executable and Playwright package.json');
+assert([output,browserExecutable,playwrightPackage].every(isAbsolute),'QA paths must be explicit absolute paths');
+const require=createRequire(playwrightPackage),{chromium}=require('playwright');
+const {WebSocketServer}=createRequire(new URL('../package.json',import.meta.url))('next/dist/compiled/ws');
+const server=createServer((q,s)=>s.end('<html><body>QA relay</body></html>'));
+const wss=new WebSocketServer({server,path:'/ws',perMessageDeflate:false}),received=[];
+wss.on('connection',s=>s.on('message',(bytes,binary)=>{received.push({text:bytes.toString(),binary});s.send(bytes,{binary});}));
+const proof={passed:false,scope:'Real browser and unchanged payload forwarding through a loopback QA intent gate; not a gameplay or public-network qualification.',gateSourceSha256:createHash('sha256').update(await readFile(new URL('./lib/r16-route-intent-gate.mjs',import.meta.url))).digest('hex')};let browser,gate;
+try{
+ await new Promise(r=>server.listen(0,'127.0.0.1',r));const origin='http://127.0.0.1:'+server.address().port,url=origin.replace('http:','ws:')+'/ws';
+ browser=await chromium.launch({executablePath:browserExecutable,headless:true});proof.browserVersion=browser.version();const page=await browser.newPage();
+ let wireSent=0,wireReceived=0;page.on('websocket',s=>{s.on('framesent',()=>wireSent++);s.on('framereceived',()=>wireReceived++);});
+ gate=await installRouteIntentGate(page,url);await page.goto(origin);await page.evaluate(async url=>{window.rows=[];window.socket=new WebSocket(url);socket.binaryType='arraybuffer';socket.onmessage=e=>rows.push(typeof e.data==='string'?e.data:[...new Uint8Array(e.data)]);await new Promise(r=>socket.onopen=r);},url);
+ await page.evaluate(()=>socket.send('initial'));await page.waitForFunction(()=>rows.length===1);
+ const held=gate.arm('Up');const raw=JSON.stringify({type:'walk',direction:'Up'});
+ await page.evaluate(raw=>{socket.send(raw);socket.send('later');socket.send(new Uint8Array([1,2,255]));},raw);await held.held;
+ assert.deepEqual(received,[{text:'initial',binary:false}]);assert(gate.status().held);assert.equal(wireSent,1,'Playwright framesent observes actual forwarding, not the prewire gate');proof.framesentBoundaryVerified=true;gate.release();await page.waitForFunction(()=>rows.length===4);
+ assert.deepEqual(received.map(r=>r.binary),[false,false,false,true]);assert.equal(received[1].text,raw);
+ assert.deepEqual(await page.evaluate(()=>rows),['initial',raw,'later',[1,2,255]]);assert.equal(wireSent,4);assert.equal(wireReceived,4);
+ assert.equal(gate.events.find(e=>e.type==='released').reason,'explicit');proof.events=gate.events;proof.wire={sent:wireSent,received:wireReceived};
+ const unmatched=gate.arm('Down');await new Promise(r=>setTimeout(r,2700));await assert.rejects(unmatched.held,/No matching real walk/);assert.equal(received.length,4);proof.unmatchedArmTerminates=true;proof.passed=true;
+}finally{gate?.close();await browser?.close();for(const s of wss.clients)s.terminate();await new Promise(r=>wss.close(r));await new Promise(r=>server.close(r));proof.closed={browser:!browser?.isConnected(),server:!server.listening};proof.passed&&=Object.values(proof.closed).every(Boolean);await writeFile(output,JSON.stringify(proof,null,2)+'\n',{flag:'wx'});}
+console.log(JSON.stringify(proof));
