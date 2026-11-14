@@ -6,13 +6,13 @@ Updated 2026-11-14 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-14 已保留正式91b8fc9b4f：118＋70项／构建、本地四会话及第二次公网普通签名／进城首步124ms／共享HUD-Q／六字体／113项／Worker／退出、简繁出码与全部静态读回通过。首轮早退／回退保留，Native108.238秒低于120秒但87条资源错误与88 console仍记录；整体1:1／实体手机开放，Goal active。[当前正式分项](evidence/r16-walking-recovery-20261114/production/README.md) · [已保留的寻路修复](evidence/r16-route-direction-20261113/README.md)
+2026-11-14 已保留正式e6c923b7c6：三格前视／姓名层级与命中修复的88＋126＋75项／构建、两后端四会话同NPC对话／X／长路线与保存通过。公网普通出码／官方手机尺寸Testnet确认／进城首步141ms／共享HUD-Q／六字体／113项／Worker／退出与完整静态SHA通过；首帧后HUD126.060秒，原120秒冷资格false，3次资源错误、4 console保留。整体1:1／实体手机开放，Goal active。[当前正式范围](evidence/r16-route-lookahead-20261114/production/README.md)
 
 ## 保留的当前未结项
 
 - [x] 行走包有限恢复91b8fc9b4f的118＋70项／构建、本地四会话、第二次公网功能回放和完整静态读回通过，正式保留；首轮失败／回退均存档。原静态SHA与8秒／20秒／120秒未改，公网compiled恢复未触发、资格来自本地；不冒充全部1:1。[当前正式与范围](evidence/r16-walking-recovery-20261114/production/README.md)
 - [ ] R15战后回镇一次8秒停步仍未定因；新本地快速回镇通过不倒填旧原因。首步前权威改点287617的公网实走覆盖、其余自动路线与动态占位继续验收。
-- [ ] NPC姓名图层CSS已改、15项及前后组件截图通过；继续完整游戏／点击／发布。英文长名字GDI固定宽截字需另做AutoSize；公开91b尚无此补丁。[本地候选](evidence/r16-npc-name-layer-20261114/README.md)
+- [ ] NPC姓名层级与可见姓名优先命中已发布e6c923，组件及两后端完整游戏／同NPC对话通过；英文长名字GDI固定宽截字仍需AutoSize。[组件](evidence/r16-npc-name-layer-20261114/README.md) · [完整范围](evidence/r16-route-lookahead-20261114/README.md)
 - [ ] Web死亡弹窗四个 ui.death.* 未登记；补齐十语言并独立验收文案，不将其冒充共享弹窗外观1:1。
 
 - [x] Worker重启缓存修复已发布f6acaad6b0；公网停启后同一HUD图与配置通过。受控两后端全流程另记，公网联合检查仍false。[发布/失败范围](evidence/r16-worker-restart-20261113/production/README.md)
@@ -37,7 +37,7 @@ Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 G
 - [ ] 当前R16已接入编号近战结果与实际/排队动作障碍，两个普通浏览器后端完成真实单击攻击→攻击中右键→到达→注销存档，无第二击。共享WebGL2末帧5未观测到，首包与最后观测帧约-7/-5ms，继续帧级接管、纯GPU实体、Hosted、追怪/施法和其他职业。保留旧回执/原型失败，888已发布，后续绘制候选仍未发布。[候选范围](evidence/r16-attack-handoff-20261112/README.md)；另复测玩家跳官网的实际入口。
 - [ ] 继续核对图集纯 GPU 选怪、其他普通窗重叠、移动时的场景分块更新和其余技能时序。保留原始截图和失败记录。
 - [ ] 继续 Windows 窗口、Hosted 联调和正式发行。保留连续续抛时早期咬钩的短探针超时记录。
-- [ ] 小地图第三格占位时，离线对照显示 Windows 重算，Web 仍选择前两格跑步。继续真实动态占位、换图和重连，核对无缓存点击时的碰撞数据等待。 [离线差异](evidence/web-r16-parity-goal-20261107/minimap-long-route-offline.json)
+- [ ] 小地图第三格占位的前视语义已修复并发布e6c923；真实执行器与Page回归通过，保留原目标重算。继续新的真实多人第三格占位、换图／重连及无缓存地图等待；不由本地长路线覆盖这些边界。[修复及范围](evidence/r16-route-lookahead-20261114/README.md) · [原差异](evidence/web-r16-parity-goal-20261107/minimap-long-route-offline.json)
 - [ ] Windows 窗口重名／满槽实机暂缓，发行包另验。旧档原第五角色普通协议可用，四槽界面的恢复方案待核对。
 - [ ] 跨 Gateway／TCP 的慢保存恢复和 Windows 窗口实机另验。普通注销后的三职业同档往返见本节独立记录。
 - [ ] 拖动图标、水面波纹、声音时点、自动重抛动画、Windows 窗口与发行素材闭包另验。继续其余技能。

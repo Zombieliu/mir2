@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "source": "e6c923b7c669cb061a7a03703f05fadd91211c97",
+  "deploymentId": "dpl_Ae3hNyFygQuSMZDesBXCZDpUECTY",
+  "origin": "https://numeron.obelisk.build",
+  "baseline": {
+    "source": "91b8fc9b4f5170cb37b6619b991707ed76a34d73",
+    "deploymentId": "dpl_44ctBTrdq2T5fb91EjrUEt6B3GUk"
+  },
+  "workflows": {
+    "stage": "https://github.com/Zombieliu/mir2/actions/runs/43536647657",
+    "promote": "https://github.com/Zombieliu/mir2/actions/runs/43539774527"
+  },
+  "functionalReplayPassed": true,
+  "completeColdQualificationPassed": false,
+  "humanAccepted": false,
+  "browser": {
+    "engine": "chrome",
+    "headlessDesktopViewport": true,
+    "networkMock": false,
+    "closed": true,
+    "pageErrors": 0,
+    "consoleErrors": 4,
+    "assetHttpErrors": 3
+  },
+  "scope": {
+    "ordinaryPublicBrowser": true,
+    "phoneSizedOfficialWallet": true,
+    "walletNetwork": "Testnet",
+    "approval": "login-only personal-message",
+    "physicalPhone": false,
+    "payment": false,
+    "longPublicRoute": false,
+    "localNpcAndLongRoutes": "Four sessions in ../local-verification.json"
+  },
+  "checks": {
+    "realQrPixels": {
+      "valid": true,
+      "width": 240,
+      "height": 240,
+      "matched": 2401,
+      "total": 2401
+    },
+    "approvedLogin": true,
+    "createdOneQaRole": true,
+    "started": true,
+    "renderedCity": true,
+    "staticEntry": true,
+    "sharedHud": true,
+    "sharedQuest": true,
+    "originalSixFonts": true,
+    "prewarm": true,
+    "workerRestart": true,
+    "normalLogout": true,
+    "returnedToSelect": true,
+    "unexpectedMutations": 0
+  },
+  "movement": {
+    "passed": true,
+    "from": {
+      "x": 288,
+      "y": 616
+    },
+    "to": {
+      "x": 289,
+      "y": 616,
+      "direction": "Right"
+    },
+    "wireToAuthoritativeAckMs": 141,
+    "wireToRenderedMs": 157,
+    "originalLimitMs": 8000,
+    "withinOriginalLimit": true
+  },
+  "timing": {
+    "startIntentToFirstPlayableFrameMs": 6501,
+    "firstPlayableFrameMs": 87482,
+    "sharedHudJointObservationMs": 213542,
+    "firstFrameToJointHudMs": 126060,
+    "firstPassiveNativeReadyMs": 215152,
+    "lastPassiveNativeNotReadyMs": 213148,
+    "originalColdLimitMs": 120000,
+    "originalColdLimitPassed": false,
+    "explanation": "The inherited public helper retains its optional 180-second observation window. Its functional true does not pass the separate original 120-second cold qualification. Local four-session checks used the original 120-second gate. No deadline was widened."
+  },
+  "unchanged": {
+    "assetVersion": "20261108-r16-08ec86d5105c",
+    "runtimeVersion": "bevy-0c553a754308e5b8",
+    "workerSha256": "772eafdc70ff4cfb30eea32913f492f4ce07ac9910f5dd468b5b86876289f800",
+    "gateway": true,
+    "auth": true,
+    "server": true
+  },
+  "originals": {
+    "receiptSha256": "d9fb1fec7ea4c73c6438edc0261b37ed8a515efeda2c5c13b31a6cfdd4b6e490",
+    "summarySha256": "a7a3ee69b8369dd0cd56d417a0a621dd8fde432fc5c99c4611a9bdbc1fa7792d",
+    "passiveProbeSha256": "e2b7a168ec6fdba3f0ab1927c2963a59788c3b508309e860fef2bcdac34a0b7b"
+  }
+}
