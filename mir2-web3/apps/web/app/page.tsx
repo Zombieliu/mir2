@@ -87,6 +87,7 @@ import { buildMapRouteEdges, type MapImageRouteSource, type MapImageRouteIntent 
 import mapRouteRasterMeta from "../public/original-ui/MMap/meta.json";
 import { observeQuestMapPacket, currentQuestMapIndex, sameQuestWorldLifetime, questAttackTargetCurrent,
   type QuestMapAuthority, type QuestWorldLifetime } from "../lib/quest-world-lifecycle";
+import { MapWorldBaselineRefresh, sameMapWorldBaselineSource, type MapWorldBaselineSource } from "../lib/map-world-baseline-refresh";
 import { readBevyHpOrbSlot } from "../lib/bevy-hp-orb";
 import { advanceExperienceAuthority, experienceAuthorityFromPacket, matchingExperienceAuthority,
   readBevyExperienceBarSlot, type ExperienceAuthority } from "../lib/bevy-experience-bar";
@@ -2448,6 +2449,8 @@ export default function HomePage() {
   const questCapturedWorldRef = useRef<QuestWorldIdentity | null>(null);
   const questSkillsBaselineCurrentRef = useRef(false);
   const questMapAuthorityRef = useRef<QuestMapAuthority | null>(null);
+  const mapWorldBaselineRefreshRef = useRef<MapWorldBaselineRefresh | null>(null);
+  useEffect(() => () => mapWorldBaselineRefreshRef.current?.cancel(), []);
   const questRuntimeLifetimeRef = useRef(0);
   const questCollisionCacheRef = useRef<QuestCollisionCache | null>(null);
   if (!questCollisionCacheRef.current) questCollisionCacheRef.current = new QuestCollisionCache();
@@ -14859,9 +14862,32 @@ export default function HomePage() {
       sameSkillsOwner ? skills.snapshot.knownSkills : null,
       currentQuestMapIndex(questMapAuthorityRef.current, currentQuestWorldIdentity()));
   }
+  function currentMapWorldBaselineSource(): MapWorldBaselineSource | null {
+    const identity = currentQuestWorldIdentity(), socket = socketRef.current;
+    if (!identity || !socket || socket.readyState !== WebSocket.OPEN || screenRef.current !== "game"
+      || !worldRef.current.connected || currentQuestMapIndex(questMapAuthorityRef.current, identity) === null) return null;
+    return { ...identity, socket };
+  }
+  function refreshMapWorldBaseline(authority: QuestMapAuthority) {
+    const socket = socketRef.current, playerObjectId = Number(worldRef.current.playerObjectId);
+    if (!socket || !Number.isSafeInteger(playerObjectId) || playerObjectId <= 0) return;
+    const refresh = mapWorldBaselineRefreshRef.current ??= new MapWorldBaselineRefresh({
+      current: currentMapWorldBaselineSource,
+      complete: owner => sameQuestWorldIdentity(owner, questCapturedWorldRef.current) && questSkillsBaselineCurrentRef.current,
+      request: owner => sameMapWorldBaselineSource(owner, currentMapWorldBaselineSource())
+        && send({ type: "clientVersion" }, { quiet: true }),
+    });
+    refresh.schedule({ ...authority, playerObjectId, socket });
+  }
   function captureQuestMapGatewayEvent(event: GatewayEvent, connectionGeneration: number) {
     if (connectionGeneration !== equipmentConnectionGenerationRef.current) return;
+    if (event.type === "packet" && (event.packet === "StartGame" || event.packet === "LogOutSuccess" || event.packet === "ReturnToLogin"))
+      mapWorldBaselineRefreshRef.current?.cancel();
     if (event.type === "packet" && (event.packet === "MapInformation" || event.packet === "MapChanged")) {
+      const captured = questCapturedWorldRef.current;
+      const hadBaseline = captured?.connectionGeneration === connectionGeneration
+        && captured.sessionGeneration === equipmentSessionGenerationRef.current;
+      const needsRefresh = hadBaseline || mapWorldBaselineRefreshRef.current?.hasPending() === true;
       const observed = observeQuestMapPacket(questMapAuthorityRef.current, event.packet, event.payload ?? {},
         connectionGeneration, equipmentSessionGenerationRef.current, questSceneRevisionRef.current, worldRef.current.mapFileName);
       questMapAuthorityRef.current = observed.authority;
@@ -14869,6 +14895,9 @@ export default function HomePage() {
       if (observed.retired) {
         questCapturedWorldRef.current = null; questSkillsBaselineCurrentRef.current = false;
         retireQuestWorldActions();
+        // Initial StartGame already supplies its full baseline. A later ordinary
+        // entrance does not: refresh its personal state without resuming a route.
+        if (needsRefresh && observed.authority) refreshMapWorldBaseline(observed.authority);
       }
     } else if (event.type === "worldSnapshot"
       && normalizeQuestMapFileName((event.payload as GatewayWorldSnapshot).mapFileName ?? null)
