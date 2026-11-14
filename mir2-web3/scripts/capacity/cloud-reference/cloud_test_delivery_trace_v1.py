@@ -32,6 +32,7 @@ OWN_PATHS = (TRACE_ENV, TRACE_DROPIN)
 TRACE_KEYS = ("MIR2_GATEWAY_ZONE_DELIVERY_TRACE", "MIR2_GATEWAY_ZONE_DELIVERY_TRACE_RECIPIENTS")
 RUNTIME_KEYS = ("INVOCATION_ID", "JOURNAL_STREAM", "SYSTEMD_EXEC_PID")
 RECIPIENTS = "50006,50012"
+DEFAULT_CAPS = {"maxActiveSessions": 51, "maxWsConnections": 66, "maxReconnectLeases": 51}
 CONTENTS = {TRACE_ENV: TRACE_KEYS[0] + "=1\n" + TRACE_KEYS[1] + "=" + RECIPIENTS + "\n",
             TRACE_DROPIN: "[Service]\nEnvironmentFile=" + TRACE_ENV + "\n"}
 PLAN = {path: {"sha256": hashlib.sha256(content.encode()).hexdigest(), "bytes": len(content.encode())} for path, content in CONTENTS.items()}
@@ -86,6 +87,8 @@ def validate_active(view, historical, empty=True):
     need(view["health"]["revision"] == REVISION and view["binarySha256"] == BINARY, "fixed_release_changed")
     need(view["nonTraceEnvironmentSha256"] == NONTRACE_ENV_SHA, "nontrace_environment_changed")
     need(isinstance(view["health"]["capacity"], dict), "capacity_object_required")
+    need(all(type(view["health"]["capacity"].get(key)) is int and view["health"]["capacity"][key] == cap
+             for key, cap in DEFAULT_CAPS.items()), "default_health_caps_changed")
     envs, drops = view["environmentFiles"], view["dropIns"]
     own = view["ownedFiles"]
     expected_env = historical["snapshot"]["environmentFiles"] + ([{"path": TRACE_ENV, "ignoreErrors": False}] if TRACE_ENV in own else [])
@@ -207,7 +210,21 @@ class TraceHost:
             for r in config["historical"]["snapshot"]["protectedProcesses"]], "protectedProof": None})
         self.created_files = {}; self.last_started_identity = None; self.normal_stop_proof = None
 
+    def guard_parents(self):
+        # Walk the un-resolved parent spelling. No directory is created here.
+        # A missing runtime leaf directory still requires every existing ancestor
+        # to pass the original root-owned/non-writable/non-symlink predicate.
+        for path in OWN_PATHS:
+            directory = Path(path).parent
+            for candidate in [directory, *directory.parents]:
+                try: candidate.lstat()
+                except FileNotFoundError: continue
+                self.native.root_directory(candidate, create=False)
+                break
+            else: raise Refusal("owned_trace_parent_not_observed")
+
     def owned(self):
+        self.guard_parents()
         return {path: self.B.metadata(path) for path in OWN_PATHS if os.path.lexists(path)}
 
     def environment(self, pid):
@@ -220,6 +237,7 @@ class TraceHost:
         return trace_flags(env), jhash({k: v for k, v in env.items() if k not in TRACE_KEYS + RUNTIME_KEYS})
 
     def view(self, state=None):
+        self.guard_parents()
         unit = self.B.show(self.B.UNIT); pid = int(unit.get("MainPID") or 0)
         if pid == 0:
             need(state and state.get("stopProof"), "inactive_without_owned_stop")
@@ -237,11 +255,13 @@ class TraceHost:
         return snapshot
 
     def stop(self, identity):
+        self.guard_parents()
         self.native.config["protectedProof"] = {"targetIdentity": identity, **self.B.fence_payload(self.config["historical"]["snapshot"])}
         globals_ = self.B.NativeHost.stop.__globals__
         original = globals_["command"]
         def guarded_command(args):
             if args == ["systemctl", "--no-block", "stop", self.B.UNIT]:
+                self.guard_parents()
                 need(self.B.process_identity(self.B.show(self.B.UNIT)) == identity, "last_signal_epoch_changed")
                 health = self.B.health(7210); self.B.empty({"health": health})
                 need(health["revision"] == REVISION and {k: health["capacity"].get(k) for k in self.B.OLD_CAPS} == self.B.OLD_CAPS,
@@ -267,6 +287,7 @@ class TraceHost:
         need(count > 0, "cgroup_subtree_not_observed")
 
     def inactive(self, state):
+        self.guard_parents()
         proof = state["stopProof"]; need(proof is not None, "normal_stop_proof_required")
         self.native.normal_stop_proof = proof
         self.native.config["protectedProof"] = {"targetIdentity": proof["identity"], **self.B.fence_payload(self.config["historical"]["snapshot"])}
@@ -289,6 +310,7 @@ class TraceHost:
 
     def create(self, state):
         for path in OWN_PATHS:
+            self.guard_parents()
             self.native.root_directory(Path(path).parent, create=True)
             descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
             first = os.fstat(descriptor)
@@ -299,25 +321,33 @@ class TraceHost:
                 state["ownedFiles"][path] = item; self.created_files[path] = item
             except Exception:
                 try:
+                    self.guard_parents()
                     now = Path(path).lstat()
                     if (now.st_dev, now.st_ino, now.st_uid, stat.S_IMODE(now.st_mode)) == (first.st_dev, first.st_ino, 0, 0o600):
                         need(stat.S_ISREG(now.st_mode) and CONTENTS[path].encode().startswith(Path(path).read_bytes()), "partial_trace_write_foreign")
+                        self.guard_parents()
                         os.unlink(path)
                 except FileNotFoundError: pass
                 raise
 
     def remove(self, state):
+        self.guard_parents()
         need(self.owned() == state["ownedFiles"], "restore_owned_cas_changed")
         for path in [TRACE_DROPIN, TRACE_ENV]:
             if path not in state["ownedFiles"]: continue
+            self.guard_parents()
             item = self.B.metadata(path)
             need(item == state["ownedFiles"][path] and item["uid"] == 0 and item["mode"] == 0o600 and
                  item["sha256"] == PLAN[path]["sha256"] and item["bytes"] == PLAN[path]["bytes"], "restore_trace_inode_or_hash_changed")
+            self.guard_parents()
             os.unlink(path); state["ownedFiles"].pop(path)
 
-    def reload(self, state): self.native.reload()
+    def reload(self, state):
+        self.guard_parents()
+        self.native.reload()
 
     def start(self, state):
+        self.guard_parents()
         try: self.native.start()
         finally: self.last_started_identity = self.native.last_started_identity
         need(self.last_started_identity is not None, "new_activation_not_observed")
@@ -474,4 +504,3 @@ if __name__ == "__main__":
     try: raise SystemExit(main())
     except (Refusal, ValueError) as error:
         print(json.dumps({"passed": False, "error": str(error), "capacityQualified": False})); raise SystemExit(2)
-
