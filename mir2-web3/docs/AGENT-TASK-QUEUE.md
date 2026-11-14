@@ -6,14 +6,14 @@ Updated 2026-11-14 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-14 已保留正式e6c923b7c6：三格前视／姓名层级与命中修复的88＋126＋75项／构建、两后端四会话同NPC对话／X／长路线与保存通过。公网普通出码／官方手机尺寸Testnet确认／进城首步141ms／共享HUD-Q／六字体／113项／Worker／退出与完整静态SHA通过；首帧后HUD126.060秒，原120秒冷资格false，3次资源错误、4 console保留。整体1:1／实体手机开放，Goal active。[当前正式范围](evidence/r16-route-lookahead-20261114/production/README.md)
+2026-11-14 正式保留e6c923b7c6／Ae3；后续b19姓名／死亡文案尝试发布后，出码／官方手机尺寸Testnet确认／进城／首步234ms／113项／退出通过，但字体504、五套缓存缺失和共享HUD失败，整轮false，已回退；独立API及回退简繁真实出码pending通过。[本次失败与回退](evidence/r16-name-autosize-20261114/production/README.md)。原正式三格前视／姓名层级与命中的88＋126＋75项、构建、两后端四会话长路线／保存及原公网分项仍有效；原HUD126.060秒超120秒保持false。整体1:1／实体手机开放，Goal active。[原正式范围](evidence/r16-route-lookahead-20261114/production/README.md)
 
 ## 保留的当前未结项
 
 - [x] 行走包有限恢复91b8fc9b4f的118＋70项／构建、本地四会话、第二次公网功能回放和完整静态读回通过，正式保留；首轮失败／回退均存档。原静态SHA与8秒／20秒／120秒未改，公网compiled恢复未触发、资格来自本地；不冒充全部1:1。[当前正式与范围](evidence/r16-walking-recovery-20261114/production/README.md)
 - [ ] R15战后回镇一次8秒停步仍未定因；新本地快速回镇通过不倒填旧原因。首步前权威改点287617的公网实走覆盖、其余自动路线与动态占位继续验收。
-- [ ] NPC层级／命中已发e6c923；AutoSize及完整行候选b19通过39项、11图自检、构建／2,771项绑定、4次框外命中和英／繁两后端四会话NPC／长路线／同角保存，尚未发布。其余文字像素、raw标题与翻译后分行仍需Windows对照。[候选与范围](evidence/r16-name-autosize-20261114/README.md)
-- [ ] Web死亡弹窗四个 ui.death.* 十语已补齐，33项与40个组件画面通过；真实死亡／复活、Windows外观与本批发布仍需验收，不将文案通过冒充弹窗1:1。[本地与范围](evidence/r16-death-locale-20261114/README.md)
+- [ ] NPC层级／命中已发e6c923；AutoSize及完整行候选b19通过39项、11图自检、构建／2,771项绑定、4次框外命中和英／繁两后端四会话NPC／长路线／同角保存；已尝试发布但字体／共享HUD失败后回退。先修复字体504并复验，未留正式；文字像素、raw标题与翻译后分行仍需Windows对照。[候选与范围](evidence/r16-name-autosize-20261114/README.md) · [发布失败](evidence/r16-name-autosize-20261114/production/README.md)
+- [ ] Web死亡弹窗四个 ui.death.* 十语已补齐，33项与40个组件画面通过；随b19尝试发布后回退，真实死亡／复活、Windows外观与正式验收仍开放，不将文案通过冒充弹窗1:1。[本地与范围](evidence/r16-death-locale-20261114/README.md)
 
 - [x] Worker重启缓存修复已发布f6acaad6b0；公网停启后同一HUD图与配置通过。受控两后端全流程另记，公网联合检查仍false。[发布/失败范围](evidence/r16-worker-restart-20261113/production/README.md)
 - [x] 当前源临时失败＋旧源404不再变成资产负缓存；101项、构建、Chrome六字体与两后端完整重开通过。[候选](evidence/r16-font-missing-retry-20261113/README.md)

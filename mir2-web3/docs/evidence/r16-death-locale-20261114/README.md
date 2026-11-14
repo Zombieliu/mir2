@@ -8,4 +8,4 @@
 
 root 已查看简繁、葡、俄、印地、印尼、越、泰、阿、英语代表截图；未见文案截断。窄屏长句会按原组件自动换行。[修前简中](before-zh-CN.png) · [修后简中](after/360-zh-CN-ready.png) · [印地请求中](after/360-hi-busy.png) · [阿语](after/360-ar-ready.png) · [审图与 SHA](visual-review.json)
 
-边界：这是语言与实际组件显示的本地 Candidate；未用此组件快照替代真实死亡／正常复活流程，也未证明它的自有弹窗外观与 Windows R16 或 Crystal 提示框 1:1。已提交 Windows 的 V 键只在 HP≤0、maxHP>0 时发回城复活，Crystal 原提示框见 `GameScene`／`DiedTip`；其余输入与外观仍需对照。公网仍为 `e6c923b7c6`，本批尚未部署；全局 Goal active。
+边界：这是语言与实际组件显示的本地 Candidate；未用此组件快照替代真实死亡／正常复活流程，也未证明它的自有弹窗外观与 Windows R16 或 Crystal 提示框 1:1。已提交 Windows 的 V 键只在 HP≤0、maxHP>0 时发回城复活，Crystal 原提示框见 `GameScene`／`DiedTip`；其余输入与外观仍需对照。本批随b19尝试发布，因公网字体504和共享HUD失败已回退，正式恢复 `e6c923b7c6`，本批未留正式；原失败与回退出码均保留。[发布回执](../r16-name-autosize-20261114/production/README.md)。全局 Goal active。

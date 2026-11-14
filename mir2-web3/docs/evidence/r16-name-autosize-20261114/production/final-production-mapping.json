@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "checkedAt": "2026-11-14T03:34:30.528Z",
+  "publicOrigin": "https://numeron.obelisk.build",
+  "rollbackWorkflowRun": 43552001521,
+  "rollbackVerified": true,
+  "postQrReadback": {"checkedAt":"2026-11-14T03:39:49.407Z","publicAlias":"numeron.obelisk.build","projectId":"prj_QzS3a2wirTJCixU4tYRVY5nmvSjC","deploymentId":"dpl_Ae3hNyFygQuSMZDesBXCZDpUECTY","source":"e6c923b7c669cb061a7a03703f05fadd91211c97","ref":"codex/windows-player-journey","state":"READY","target":"production","afterBothLanguageBrowserChecks":true},
+  "alias": {
+    "at": "2026-11-14T03:34:11.241Z",
+    "alias": "numeron.obelisk.build",
+    "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+    "deploymentId": "dpl_Ae3hNyFygQuSMZDesBXCZDpUECTY"
+  },
+  "deployment": {
+    "at": "2026-11-14T03:34:11.241Z",
+    "id": "dpl_Ae3hNyFygQuSMZDesBXCZDpUECTY",
+    "readyState": "READY",
+    "target": "production",
+    "source": "e6c923b7c669cb061a7a03703f05fadd91211c97",
+    "ref": "codex/windows-player-journey"
+  },
+  "candidate": {
+    "kind": "deployment",
+    "at": "2026-11-14T03:31:39.450Z",
+    "id": "dpl_GAmrbFTE548Y6C3xSuMAX1qdfe6B",
+    "readyState": "READY",
+    "target": "production",
+    "source": "b19ca73072db16ac7f351857aa752ecc57953591",
+    "ref": "codex/windows-player-journey"
+  }
+}

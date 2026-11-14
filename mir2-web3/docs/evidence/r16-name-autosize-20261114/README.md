@@ -24,4 +24,4 @@
 
 本候选已包含[死亡／复活文案十语](../r16-death-locale-20261114/README.md)，该文案只有实际组件检查，不由上述普通冒险替代真实死亡／复活验收。新截图仍见英文攻击模式与部分货币行夹中文、原生NPC标题保留原始下划线；繁中别名还可能合并原始分行。继续与已提交Windows核对这些语言边界。三张字图之外的浏览器文字像素也未声称与Windows GDI全部一致。
 
-2026-11-14 02:46 UTC API独立读回公网仍是 `e6c923b7c6`／`dpl_Ae3hNyFygQuSMZDesBXCZDpUECTY` READY；本轮未发布。[正式映射](production-readback.json)。真实多人第三格占位、R15旧战后停步、实体Windows／手机、全部场景GPU、当前三职业完整新手线和整体1:1继续开放，Goal active；不计最终人类Accepted。
+2026-11-14 02:46 UTC 的[原正式映射](production-readback.json)保留。后续已尝试发布b19，Stage／Promote及三张新PNG切流前后完整校验通过；公网出码、官方手机尺寸Testnet确认、进城首步234ms、113项与正常退出通过，但字体504、五套缓存缺失及共享HUD失败，整轮false，已回退。03:34 UTC独立API与后续简繁实际出码pending均通过，正式恢复 `e6c923b7c6`／`dpl_Ae3hNyFygQuSMZDesBXCZDpUECTY` READY；候选未留正式。[失败、回退与全部边界](production/README.md)。真实多人第三格占位、R15旧战后停步、实体Windows／手机、全部场景GPU、当前三职业完整新手线和整体1:1继续开放，Goal active；不计最终人类Accepted。

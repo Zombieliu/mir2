@@ -1,0 +1,12 @@
+{
+  "reviewed": true,
+  "image": "public-quest-before-failure.png",
+  "bytes": 1393604,
+  "sha256": "fb54bdff71f5bd9e9459830e3293441b947e840c6d77ff7c443ec59d83fdd90f",
+  "observed": [
+    "Traditional Chinese fallback quest panel visible",
+    "resource-prewarm failure shown in lower left at capture time",
+    "full shared HUD absent; not a passing shared HUD image"
+  ],
+  "frontendAccepted": false
+}
