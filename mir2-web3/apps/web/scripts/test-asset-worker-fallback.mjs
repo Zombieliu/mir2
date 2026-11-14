@@ -484,6 +484,63 @@ function fontWorkerFixture(t) {
 
 const fontTurn = () => new Promise(resolve => setImmediate(resolve));
 
+test("six renderer font reads share two complete-body lanes while ordinary images stay independent", async t => {
+  const f = fontWorkerFixture(t);
+  const names = ["NotoSansTC", "NotoSans", "NotoSansArabic", "NotoSansThai", "NotoSansDevanagari", "NotoSansCJKsc"];
+  const reads = names.map(name => f.read(undefined, new Request(`https://preview.example.test/original-ui/fonts/${name}.ttf`)));
+  await fontTurn();
+  assert.equal(f.calls.length, 2, "the renderer must not bypass the font download budget");
+  const image = await vm.runInContext('fetchStaticAsset(new Request("https://preview.example.test/original-ui/Prguse/1.png"))', f.context);
+  assert.equal(f.calls.length, 3, "font admission must not occupy the ordinary image lane");
+  f.streams[2].enqueue(new Uint8Array([137, 80])); f.streams[2].close();
+  assert.deepEqual([...new Uint8Array(await image.arrayBuffer())], [137, 80]);
+  const fontStreams = () => f.calls.map((request, index) => ({ request, stream: f.streams[index] }))
+    .filter(row => new URL(row.request.url).pathname.includes("/fonts/"));
+  for (let index = 0; index < names.length; index++) {
+    await fontTurn();
+    const streams = fontStreams();
+    assert(streams[index], "a completed body admits the next waiting font");
+    assert(streams.length - index <= 2, "headers alone cannot release a font lane");
+    streams[index].stream.enqueue(new Uint8Array([index + 1])); streams[index].stream.close();
+  }
+  const responses = await Promise.all(reads);
+  assert.deepEqual(await Promise.all(responses.map(async response => [...new Uint8Array(await response.arrayBuffer())])), names.map((_, i) => [i + 1]));
+  await Promise.all(f.completions);
+});
+
+test("a font waiting behind live bodies starts its own unchanged header budget only after admission", async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const f = fontWorkerFixture(t);
+  const reads = ["First", "Second", "Third"].map(name => f.read(undefined, new Request(`https://preview.example.test/original-ui/fonts/${name}.ttf`)));
+  await fontTurn(); assert.equal(f.calls.length, 2);
+  t.mock.timers.tick(8000); await fontTurn();
+  assert.equal(f.calls.length, 2, "queue time is not network header time");
+  f.streams[0].enqueue(new Uint8Array([1])); f.streams[0].close();
+  await fontTurn();
+  assert.equal(f.calls.length, 3); assert.equal(f.calls[2].signal.aborted, false);
+  f.streams[1].enqueue(new Uint8Array([2])); f.streams[1].close();
+  f.streams[2].enqueue(new Uint8Array([3])); f.streams[2].close();
+  assert.deepEqual(await Promise.all(reads.map(async read => [...new Uint8Array(await (await read).arrayBuffer())])), [[1], [2], [3]]);
+  await Promise.all(f.completions);
+});
+
+test("a cancelled queued direct font reader leaves no network request or occupied lane", async t => {
+  const f = fontWorkerFixture(t), owner = new AbortController();
+  const first = f.read("font-a"), second = f.read("font-b");
+  await fontTurn();
+  f.context.cancelledFont = new Request("https://preview.example.test/original-ui/fonts/Cancelled.ttf", { signal: owner.signal });
+  const cancelled = vm.runInContext('fetchCompleteFont(cancelledFont, cancelledFont.signal, 7000, true)', f.context);
+  await fontTurn(); assert.equal(f.calls.length, 2);
+  owner.abort("queued direct reader left"); assert.equal(await cancelled, null);
+  f.streams[0].enqueue(new Uint8Array([1])); f.streams[0].close();
+  f.streams[1].enqueue(new Uint8Array([2])); f.streams[1].close();
+  await Promise.all([first, second]); await Promise.all(f.completions);
+  assert.equal(f.calls.length, 2);
+  const next = f.read("font-c"); await fontTurn();
+  assert.equal(f.calls.length, 3); f.streams[2].enqueue(new Uint8Array([3])); f.streams[2].close();
+  assert.deepEqual([...new Uint8Array(await (await next).arrayBuffer())], [3]); await Promise.all(f.completions);
+});
+
 test("retiring the first HUD consumer cannot cancel a coalesced prewarm body", async t => {
   const owner = new AbortController(), calls = [];
   let headers, body;
@@ -619,9 +676,13 @@ test("font response retention stays bounded when many distinct fonts are request
     responses.push(f.read(undefined, new Request(`https://preview.example.test/original-ui/fonts/Font-${index}.ttf`)));
     await fontTurn();
   }
-  assert.equal(f.calls.length,17);
+  assert.equal(f.calls.length,2);
   assert.equal(vm.runInContext("fontAssetInflightFetches.size",f.context),16);
-  for (const stream of f.streams) { stream.enqueue(new Uint8Array([1])); stream.close(); }
+  for (let index=0; index<17; index++) {
+    await fontTurn();
+    assert(f.streams[index]);
+    f.streams[index].enqueue(new Uint8Array([1])); f.streams[index].close();
+  }
   await Promise.all(responses.map(async response=>(await response).arrayBuffer()));
   await Promise.all(f.completions);
   assert.equal(vm.runInContext("fontAssetInflightFetches.size",f.context),0);

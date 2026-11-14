@@ -41,6 +41,12 @@ const FONT_INFLIGHT_MAX_AGE_MS = 180_000;
 const FONT_MIRROR_HEADER_TIMEOUT_MS = 8_000;
 const FONT_MIRROR_BODY_IDLE_TIMEOUT_MS = 15_000;
 const FONT_MIRROR_MAX_BYTES = 32 * 1024 * 1024;
+// The renderer, CSS and prewarmer share this budget. Limiting the prewarmer
+// alone still lets the renderer start all six complete font bodies together.
+// A queued read has no network deadline until its source actually starts.
+const FONT_DOWNLOAD_CONCURRENCY = 2;
+const fontDownloadQueue = [];
+let activeFontDownloads = 0;
 const sceneBlueprintInflightFetches = new Map();
 // CacheStorage operations are serialized by browsers much more aggressively
 // than ordinary HTTP/2 requests. Rewriting every cache hit and calling
@@ -551,7 +557,43 @@ async function fetchFontMirror(request, owner) {
   return fetchCompleteFont(request, owner, FONT_MIRROR_HEADER_TIMEOUT_MS, false);
 }
 
-async function fetchCompleteFont(request, owner, headerTimeoutMs, transientRetries) {
+function fetchCompleteFont(request, owner, headerTimeoutMs, transientRetries) {
+  const signal = AbortSignal.any([owner, request.signal]);
+  if (signal.aborted) return Promise.resolve(null);
+  return new Promise(resolve => {
+    let queued = true;
+    const abortQueued = () => {
+      if (!queued) return;
+      queued = false;
+      const index = fontDownloadQueue.indexOf(start);
+      if (index >= 0) fontDownloadQueue.splice(index, 1);
+      signal.removeEventListener("abort", abortQueued);
+      resolve(null);
+    };
+    const start = () => {
+      queued = false;
+      signal.removeEventListener("abort", abortQueued);
+      if (signal.aborted) { resolve(null); return; }
+      activeFontDownloads++;
+      // readCompleteFont resolves only after a complete body or a failed
+      // source. Headers and partial prefixes cannot release this lane.
+      readCompleteFont(request, signal, headerTimeoutMs, transientRetries)
+        .then(resolve, () => resolve(null))
+        .finally(() => { activeFontDownloads--; drainFontDownloads(); });
+    };
+    signal.addEventListener("abort", abortQueued, { once: true });
+    fontDownloadQueue.push(start);
+    drainFontDownloads();
+  });
+}
+
+function drainFontDownloads() {
+  while (activeFontDownloads < FONT_DOWNLOAD_CONCURRENCY && fontDownloadQueue.length) {
+    fontDownloadQueue.shift()();
+  }
+}
+
+async function readCompleteFont(request, owner, headerTimeoutMs, transientRetries) {
   const deadline = new AbortController();
   const signal = AbortSignal.any([owner, request.signal, deadline.signal]);
   const headerTimer = setTimeout(() => deadline.abort(), headerTimeoutMs);
