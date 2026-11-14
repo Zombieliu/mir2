@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "scope": "Standalone fixed-byte reads only; no full-game acceptance or causal claim.",
+  "privateScript": "C:\\r16-runtime-header-probe-20261114\\isolated-runtime-read.mjs",
+  "scriptSha256": "65486a64005f716422402bf078414d78b407a6f7988727b7bfa3de11368f1b4b",
+  "receiptSha256": "038c8e4376f076f48462ce118bcbd7b7ea39429f34ecd3d06e410a3e753fae30",
+  "workerPolicy": "blocked on the /version-only isolated page; actual full-game WASM request also reported fromServiceWorker=false",
+  "systemNetwork": "default; no request interception, DNS override, TLS override or proxy override",
+  "formalSource": "e6c923b7c669cb061a7a03703f05fadd91211c97",
+  "fullGameComparedSource": "5b011e5d2fcce78883b517e5992ef23245052f84",
+  "cacheStateNotMatched": true,
+  "browserClosed": true,
+  "publicDeploymentChanged": false
+}
