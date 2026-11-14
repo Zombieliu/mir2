@@ -10431,14 +10431,14 @@ impl ZoneRuntimeFactory for SharedInProcessZoneRuntimeFactory {
 
     fn create_runtime(&self, config: GatewayConfig, zone_id: &ZoneId) -> ZoneRuntimeHandle {
         let resources = self.resources_for_zone(zone_id);
+        let (shared_social_generation, experience_projection_flight) = {
+            let coordinator = self.shared_mentors.lock().expect("social coordinator");
+            (coordinator.generation.clone(), coordinator.experience_projection_flight.clone())
+        };
         Box::new(SharedInProcessZoneSessionRuntime {
             inner: InProcessWorldRuntime::new(config),
-            shared_social_generation: self
-                .shared_mentors
-                .lock()
-                .expect("social coordinator")
-                .generation
-                .clone(),
+            shared_social_generation,
+            experience_projection_flight,
             last_social_refresh: None,
             last_experience_projection: None,
             next_social_refresh_ms: 0,
@@ -11301,6 +11301,7 @@ struct SharedInProcessZoneSessionRuntime {
     shared_social_generation: Arc<AtomicU64>,
     last_social_refresh: Option<u64>,
     last_experience_projection: Option<(u64, u64)>,
+    experience_projection_flight: Arc<shared_experience_profiles::SharedExperienceProjectionFlight>,
     next_social_refresh_ms: u64,
     shared_mentors: Arc<Mutex<shared_mentor::SharedMentorCoordinator>>,
     ranking_zones: Arc<Mutex<BTreeMap<ZoneId, SharedInProcessZoneResources>>>,
@@ -35973,10 +35974,14 @@ mod tests {
         let shared_mentors = Arc::new(Mutex::new(
             crate::routing::shared_mentor::SharedMentorCoordinator::default(),
         ));
-        let shared_social_generation = shared_mentors.lock().unwrap().generation.clone();
+        let (shared_social_generation, experience_projection_flight) = {
+            let coordinator = shared_mentors.lock().unwrap();
+            (coordinator.generation.clone(), coordinator.experience_projection_flight.clone())
+        };
         SharedInProcessZoneSessionRuntime {
             inner: InProcessWorldRuntime::new(config),
             shared_social_generation,
+            experience_projection_flight,
             last_social_refresh: None,
             last_experience_projection: None,
             next_social_refresh_ms: 0,

@@ -32,6 +32,22 @@ fn projection_test_phase(phase: ProjectionTestPhase) {
     if let Some(hook) = hook { hook(phase); }
 }
 
+#[derive(Default)]
+pub(super) struct SharedExperienceProjectionFlight {
+    sequence: AtomicU64,
+    completed: Mutex<Option<ExperienceProjectionCompletion>>,
+}
+impl fmt::Debug for SharedExperienceProjectionFlight {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { f.debug_struct("SharedExperienceProjectionFlight").finish_non_exhaustive() }
+}
+struct ExperienceProjectionCompletion {
+    sequence: u64,
+    signature: (u64, u64),
+    authority: GatewayConfig,
+    zones: std::sync::Weak<Mutex<BTreeMap<ZoneId, SharedInProcessZoneResources>>>,
+    replicas: std::sync::Weak<Mutex<BTreeSet<ZoneId>>>,
+}
+
 pub(super) type ExperienceAuthorityRebase<'a> = dyn Fn(
         &mir2_simulation::Stage5FriendIdentity,
         &mut Option<mir2_simulation::ZoneExperienceProfile>,
@@ -304,6 +320,8 @@ impl SharedInProcessZoneSessionRuntime {
             self.last_experience_projection = None;
             return Ok(());
         };
+        let flight = self.experience_projection_flight.clone();
+        let entered_sequence = flight.sequence.load(Ordering::Acquire);
         #[cfg(test)]
         projection_test_phase(ProjectionTestPhase::Entry);
         // Personal level/stats/live buff inputs can change without a shared
@@ -323,6 +341,17 @@ impl SharedInProcessZoneSessionRuntime {
         }
         // A partial/error projection is retried on the next command.
         self.last_experience_projection = None;
+        let mut completed = flight.completed.lock().map_err(|_| "experience projection flight poisoned")?;
+        let signature = (self.shared_social_generation.load(Ordering::Acquire), config.shared_guild_clock_generation());
+        if completed.as_ref().is_some_and(|last| last.sequence > entered_sequence
+            && last.signature == signature && config.same_shared_experience_projection_authority(&last.authority)
+            && last.zones.ptr_eq(&Arc::downgrade(&self.ranking_zones))
+            && last.replicas.ptr_eq(&Arc::downgrade(&self.ranking_replica_zones))) {
+            self.last_experience_projection = Some(signature);
+            return Ok(());
+        }
+        // Never leave an older success reusable after this miss fails or changes generation.
+        *completed = None;
         let peer_stage = shared_session_substage("shared_session.experience.peer_projection_and_wars");
         #[cfg(test)]
         projection_test_phase(ProjectionTestPhase::ScanStarted);
@@ -384,6 +413,11 @@ impl SharedInProcessZoneSessionRuntime {
         );
         if after == signature {
             self.last_experience_projection = Some(signature);
+            if let Some(sequence) = flight.sequence.load(Ordering::Relaxed).checked_add(1) {
+                *completed = Some(ExperienceProjectionCompletion { sequence, signature, authority: config,
+                    zones: Arc::downgrade(&self.ranking_zones), replicas: Arc::downgrade(&self.ranking_replica_zones) });
+                flight.sequence.store(sequence, Ordering::Release);
+            }
         }
         Ok(())
     }
