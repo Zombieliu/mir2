@@ -22,6 +22,9 @@
 *.cmd text eol=crlf
 *.ps1 text eol=crlf
 
+# GDI exporter ownership markers are exact LF bytes on every checkout.
+mir2-web3/tools/crystal-gdi-text/fixtures/generated/.crystal-gdi-text-output text eol=lf
+
 # Preserve the frozen read-only CI security probe bytes.
 mir2-web3/scripts/cloudflare_read_authority_probe.py -text
 mir2-web3/scripts/test_cloudflare_read_authority_probe.py -text
