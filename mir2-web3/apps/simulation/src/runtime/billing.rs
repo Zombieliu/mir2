@@ -2,6 +2,7 @@
 use crate::billing::{
     apply_pending_to_save, has_pending, validate_complete_store, RechargeCreditApplication,
 };
+use crate::config_account_store_diagnostics::{Operation, Record, Stage};
 use mir2_protocol::ServerPacket;
 
 use super::resources::{PlayerRuntimeResource, RuntimeConfigResource, SessionResource};
@@ -30,16 +31,26 @@ impl SimulationSession {
             return Ok(Vec::new());
         };
         let config = &self.app.world().resource::<RuntimeConfigResource>().config;
-        let has_ledger = config
-            .account_store
-            .lock()
-            .map_err(|_| "billingStoreUnavailable")?
-            .accounts
-            .get(&identity.account_id)
-            .ok_or("billingAccountMissing")?
-            .billing
-            .as_ref()
-            .is_some_and(|ledger| !ledger.orders.is_empty() || !ledger.sui_usdc_orders.is_empty());
+        let has_ledger = {
+            // Collect scalars under the guard; Record emits after Store unlock.
+            let diagnostics = Record::new(Operation::BillingPollFront);
+            let store_wait = diagnostics.span(Stage::StoreWait);
+            let store = config
+                .account_store
+                .lock()
+                .map_err(|_| "billingStoreUnavailable")?;
+            drop(store_wait);
+            let _store_held = diagnostics.span(Stage::StoreHeld);
+            store
+                .accounts
+                .get(&identity.account_id)
+                .ok_or("billingAccountMissing")?
+                .billing
+                .as_ref()
+                .is_some_and(|ledger| {
+                    !ledger.orders.is_empty() || !ledger.sui_usdc_orders.is_empty()
+                })
+        };
         if !has_ledger && config.billing_monthly_card_credit_price.is_none() {
             self.billing_last_recharge_poll = None;
             return Ok(Vec::new());
@@ -119,11 +130,18 @@ impl SimulationSession {
             .clone();
         config.refresh_account_store_account(&identity.account_id)?;
         {
+            let diagnostics = Record::new(Operation::BillingPendingRead);
+            let store_wait = diagnostics.span(Stage::StoreWait);
             let store = config
                 .account_store
                 .lock()
                 .map_err(|_| "billingStoreUnavailable")?;
-            validate_complete_store(&store)?;
+            drop(store_wait);
+            let _store_held = diagnostics.span(Stage::StoreHeld);
+            {
+                let _validation = diagnostics.span(Stage::Validate);
+                validate_complete_store(&store)?;
+            }
             let account = store
                 .accounts
                 .get(&identity.account_id)

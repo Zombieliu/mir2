@@ -12,6 +12,9 @@ pub(crate) enum Operation {
     Save,
     Transaction,
     GuildClock,
+    BillingPollFront,
+    BillingPendingRead,
+    SocialProfileRead,
 }
 
 impl Operation {
@@ -22,6 +25,9 @@ impl Operation {
             Self::Save => "save",
             Self::Transaction => "transaction",
             Self::GuildClock => "guild_clock",
+            Self::BillingPollFront => "billing_poll_front",
+            Self::BillingPendingRead => "billing_pending_read",
+            Self::SocialProfileRead => "social_profile_read",
         }
     }
 }
@@ -32,6 +38,7 @@ pub(crate) enum Stage {
     PersistWait,
     StoreWait,
     StoreHeld,
+    Validate,
     FileWriterWait,
     Serialize,
     TempWriteSync,
@@ -45,11 +52,12 @@ pub(crate) enum Stage {
 }
 
 impl Stage {
-    const ALL: [Self; 14] = [
+    const ALL: [Self; 15] = [
         Self::WritableWait,
         Self::PersistWait,
         Self::StoreWait,
         Self::StoreHeld,
+        Self::Validate,
         Self::FileWriterWait,
         Self::Serialize,
         Self::TempWriteSync,
@@ -68,6 +76,7 @@ impl Stage {
             Self::PersistWait => "account_store.persist_wait",
             Self::StoreWait => "account_store.store_wait",
             Self::StoreHeld => "account_store.store_held",
+            Self::Validate => "account_store.validate",
             Self::FileWriterWait => "account_store.file_writer_wait",
             Self::Serialize => "account_store.serialize",
             Self::TempWriteSync => "account_store.temp_write_sync",

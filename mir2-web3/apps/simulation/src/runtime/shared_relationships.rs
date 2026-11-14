@@ -4,6 +4,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use mir2_protocol::{MirClass, ServerPacket};
 
 use crate::config::{AccountStore, Stage5FriendIdentity, Stage5MentorState, Stage5SystemsState};
+use crate::config_account_store_diagnostics::{Operation, Record, Stage};
 use crate::{SimulationConfig, SimulationSession};
 
 use super::resources::{is_in_world, RuntimeConfigResource, Stage5SystemsResource};
@@ -44,18 +45,17 @@ pub(super) fn profile(
         .saves
         .get(&identity.character_index)
         .ok_or("social character save missing")?;
-    let systems: Stage5SystemsState = match save.stage5_systems_json.as_deref() {
-        Some(value) => {
-            serde_json::from_str(value).map_err(|e| format!("invalid social state: {e}"))?
-        }
-        None => Stage5SystemsState::default(),
-    };
+    let systems = super::shared_experience_profile::parse_locked_stage5_systems(
+        identity,
+        save.stage5_systems_json.as_deref(),
+    )
+    .map_err(|e| format!("invalid social state: {e}"))?;
     Ok(SharedMentorProfile {
         identity: identity.clone(),
         name: character.name.clone(),
         class: character.class,
         level: character.level,
-        mentor: systems.mentor,
+        mentor: systems.mentor.clone(),
     })
 }
 
@@ -127,13 +127,15 @@ impl SimulationConfig {
         &self,
         identity: &Stage5FriendIdentity,
     ) -> Result<SharedMentorProfile, String> {
-        profile(
-            &*self
-                .account_store
-                .lock()
-                .map_err(|_| "social account store unavailable")?,
-            identity,
-        )
+        let diagnostics = Record::new(Operation::SocialProfileRead);
+        let store_wait = diagnostics.span(Stage::StoreWait);
+        let store = self
+            .account_store
+            .lock()
+            .map_err(|_| "social account store unavailable")?;
+        drop(store_wait);
+        let _store_held = diagnostics.span(Stage::StoreHeld);
+        profile(&store, identity)
     }
 
     pub fn commit_shared_mentor_mutation(
@@ -390,3 +392,7 @@ pub(super) fn bank_mentor_gain(
     mentor.ledger = ledger;
     Ok(true)
 }
+
+#[cfg(test)]
+#[path = "shared_relationships_parse_cache_tests.rs"]
+mod parse_cache_tests;

@@ -383,7 +383,40 @@ fn systems_for_with_cache(
         .get(&identity.account_id)
         .and_then(|account| account.saves.get(&identity.character_index))
         .ok_or("experience profile character checkpoint missing")?;
-    let json = save.stage5_systems_json.as_deref();
+    parse_stage5_systems_with_cache(identity, save.stage5_systems_json.as_deref(), cache)
+        .map_err(|error| format!("invalid experience relationship authority: {error}"))
+}
+
+/// Pure parsing only: callers must still read and validate their current locked
+/// checkpoint and character metadata. No authority/profile/revision is cached.
+pub(super) fn parse_locked_stage5_systems(
+    identity: &Stage5FriendIdentity,
+    json: Option<&str>,
+) -> Result<Arc<Stage5SystemsState>, serde_json::Error> {
+    parse_stage5_systems_with_cache(identity, json, &SYSTEMS_PARSE_CACHE)
+}
+
+#[cfg(test)]
+std::thread_local! {
+    static STAGE5_FULL_JSON_DECODES: std::cell::Cell<u64> = const { std::cell::Cell::new(0) };
+}
+
+#[cfg(test)]
+pub(super) fn full_json_decodes_for_test() -> u64 {
+    STAGE5_FULL_JSON_DECODES.with(std::cell::Cell::get)
+}
+
+#[cfg(test)]
+pub(super) fn with_parse_cache_locked_for_test<T>(body: impl FnOnce() -> T) -> T {
+    let _guard = SYSTEMS_PARSE_CACHE.lock().unwrap();
+    body()
+}
+
+fn parse_stage5_systems_with_cache(
+    identity: &Stage5FriendIdentity,
+    json: Option<&str>,
+    cache: &Mutex<SystemsParseCache>,
+) -> Result<Arc<Stage5SystemsState>, serde_json::Error> {
     let cacheable = json.map_or(0, str::len) <= SYSTEMS_PARSE_CACHE_BLOB_BYTES;
     if cacheable {
         if let Ok(cache) = cache.try_lock() {
@@ -395,11 +428,14 @@ fn systems_for_with_cache(
 
     // Full deserialization and its original error semantics stay inside the
     // caller's Store guard, but never hold the optional cache mutex.
-    let systems = json
-        .map(serde_json::from_str)
-        .transpose()
-        .map(|systems| systems.unwrap_or_default())
-        .map_err(|error| format!("invalid experience relationship authority: {error}"))?;
+    let systems: Stage5SystemsState = json
+        .map(|encoded| {
+            #[cfg(test)]
+            STAGE5_FULL_JSON_DECODES.with(|count| count.set(count.get() + 1));
+            serde_json::from_str(encoded)
+        })
+        .transpose()?
+        .unwrap_or_default();
     let systems = Arc::new(systems);
     if cacheable {
         let entry = CachedSystemsParse {
