@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "scope": "local frontend candidate",
+  "candidate": "20de-static-admission-ea797d99",
+  "formalSourceUnchanged": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+  "productionDeployment": false,
+  "wholeParityAccepted": false,
+  "tests": 253,
+  "buildId": "FwyAa-YYQ828TTWsU61eC",
+  "buildDurationMs": 45679,
+  "twoLocalGamesPassed": true,
+  "knownHistoricalErrors": 97,
+  "uniqueFailedPaths": 92,
+  "laterPage200FinishedPaths": 41,
+  "unverifiedRecoveryPaths": 51,
+  "originalMoveBudgetMs": 8000,
+  "originalNativeBudgetMs": 120000,
+  "foreignContentFilesPreserved": 29,
+  "regressionEvidence": {
+    "privateRawSha256": "6c818aa0486033afc14810dc7908beb22b6d15aa1da813b3ce742041495cdbf7",
+    "publishedSha256": "56dfd65fed69804158c34ed83fe4b99eca5e128465aab596a25627263336d596",
+    "normalization": "Only excess trailing empty lines removed to satisfy git diff --check; original private output retained."
+  }
+}

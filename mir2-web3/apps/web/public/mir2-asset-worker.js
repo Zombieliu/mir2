@@ -50,6 +50,14 @@ const FONT_MIRROR_MAX_BYTES = 32 * 1024 * 1024;
 const FONT_DOWNLOAD_CONCURRENCY = 2;
 const fontDownloadQueue = [];
 let activeFontDownloads = 0;
+// Native panels can discover over a hundred small images in one frame. Starting
+// every header timer at once makes browser connection-queue time exhaust healthy
+// sources before they are sent. Admit six logical source chains; each existing
+// per-source header budget starts only after admission. Bodies still stream and
+// complete fonts retain their separate two-reader budget.
+const STATIC_ASSET_HEADERS_CONCURRENCY = 6;
+const staticHeaderQueue = [];
+let activeStaticHeaderFetches = 0;
 const sceneBlueprintInflightFetches = new Map();
 // CacheStorage operations are serialized by browsers much more aggressively
 // than ordinary HTTP/2 requests. Rewriting every cache hit and calling
@@ -470,7 +478,58 @@ async function fetchStaticAsset(request, fallbackRequests) {
       fetchStaticAssetSources(request, fallbackRequests, readCompleteFont));
     return response || syntheticAssetResponse(504, "font fetch failed");
   }
-  return fetchStaticAssetSources(request, fallbackRequests);
+  // The cache fill already owns a release/cache namespace. A queued read must
+  // not pick up a later CONFIG's mirrors and cache newer bytes under that name.
+  const sources = fallbackRequests || createRemoteAssetRequests(request);
+  const response = await withStaticHeaderSlot(request, () => fetchStaticAssetSources(request, sources));
+  return response || syntheticAssetResponse(504, "asset fetch failed");
+}
+
+function withStaticHeaderSlot(request, read) {
+  const signal = request.signal;
+  if (signal.aborted) return Promise.resolve(null);
+  return new Promise(resolve => {
+    let queued = true;
+    const entry = { request, start: null };
+    const abortQueued = () => {
+      if (!queued) return;
+      queued = false;
+      const index = staticHeaderQueue.indexOf(entry);
+      if (index >= 0) staticHeaderQueue.splice(index, 1);
+      signal.removeEventListener("abort", abortQueued);
+      resolve(null);
+    };
+    entry.start = () => {
+      queued = false;
+      signal.removeEventListener("abort", abortQueued);
+      if (signal.aborted) { resolve(null); return; }
+      activeStaticHeaderFetches++;
+      // Source fallback retains admission; successful headers release it without
+      // buffering images or changing ownership of foreground/cache body streams.
+      Promise.resolve(read())
+        .then(resolve, () => resolve(null))
+        .finally(() => { activeStaticHeaderFetches--; drainStaticHeaders(); });
+    };
+    signal.addEventListener("abort", abortQueued, { once: true });
+    staticHeaderQueue.push(entry);
+    drainStaticHeaders();
+  });
+}
+
+function drainStaticHeaders() {
+  const priority = entry => {
+    const tier = staticAssetCachePolicy(entry.request).cacheKind;
+    return tier === "static-critical" ? 0 : tier === "static-background" ? 2 : 1;
+  };
+  while (activeStaticHeaderFetches < STATIC_ASSET_HEADERS_CONCURRENCY && staticHeaderQueue.length) {
+    // Existing manifest/hints identify core HUD work. Read hints at dispatch so a
+    // later core hint can promote waiting work; retain FIFO within each tier.
+    let next = 0;
+    for (let i = 1; i < staticHeaderQueue.length; i++) {
+      if (priority(staticHeaderQueue[i]) < priority(staticHeaderQueue[next])) next = i;
+    }
+    staticHeaderQueue.splice(next, 1)[0].start();
+  }
 }
 
 async function fetchStaticAssetSources(request, fallbackRequests, readFont = fetchCompleteFont) {

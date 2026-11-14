@@ -26,6 +26,8 @@ import {
 } from "../../lib/asset-release-capabilities";
 import { normalizeDeviceMemoryGiB, resolveRenderTier } from "../../lib/render-tier";
 import { canReloadAssetNamespace } from "../../lib/asset-namespace-reload";
+import { assetCacheProgressView } from "../../lib/asset-cache-progress";
+import { browserText, R16_BROWSER_LANGUAGES } from "../../lib/r16-browser-localization";
 import { fetchPrewarmAsset, type PrewarmAttemptDiagnostic } from "../../lib/asset-prewarm-request";
 import { getRuntimeHeaderPriority } from "../../lib/runtime-header-priority";
 import { OriginalClientStagePortal } from "./original-client-stage-portal";
@@ -767,20 +769,22 @@ export function AssetCacheRegistrar() {
 
 function CacheProgressPanel({ snapshot }: { snapshot: CacheMetricsSnapshot }) {
   const summary = snapshot.summary;
-  const activeRun = getActivePrewarmRun(snapshot);
-  const completed = summary.prewarmOk + summary.prewarmFailed;
-  const isComplete = summary.prewarmRequested > 0 && completed >= summary.prewarmRequested;
-  const statusLabel = summary.prewarmFailed > 0 ? "失败" : isComplete ? "完成" : "加载中";
-  const percent =
-    summary.prewarmRequested > 0
-      ? Math.min(100, Math.round((completed / summary.prewarmRequested) * 100))
-      : 0;
+  const progress = assetCacheProgressView(summary, snapshot.prewarmRuns);
+  const locale = document.documentElement.lang.toLowerCase();
+  const language = /^zh-(?:tw|hk|mo|hant)/.test(locale) ? "zh-TW" : /^zh(?:-|$)/.test(locale) ? "zh-CN"
+    : R16_BROWSER_LANGUAGES.find(code => code.toLowerCase() === locale || code.split("-")[0] === locale.split("-")[0]) ?? "en";
+  const text = (key: string) => browserText(language, key) ?? browserText("en", key) ?? key;
+  const statusLabel = text(`ui.assetCache.${progress.state}`);
+  const percent = progress.percent;
   const localCount = summary.cachedLikeCount + summary.cacheStorageEntryCount;
 
   return (
     <section
       className="mir-cache-progress-panel"
-      aria-label="Mir2 resource loading status"
+      lang={language}
+      dir={language === "ar" ? "rtl" : "ltr"}
+      role="status"
+      aria-label={`${text("ui.assetCache.title")} · ${statusLabel}`}
       style={{
         position: "absolute",
         left: 12,
@@ -799,7 +803,7 @@ function CacheProgressPanel({ snapshot }: { snapshot: CacheMetricsSnapshot }) {
       }}
     >
       <div style={{ display: "flex", justifyContent: "space-between", gap: 8, fontWeight: 700 }}>
-        <span>资源缓存 · {statusLabel}</span>
+        <span>{text("ui.assetCache.title")} · {statusLabel}</span>
         <span>{percent}%</span>
       </div>
       <div
@@ -820,14 +824,14 @@ function CacheProgressPanel({ snapshot }: { snapshot: CacheMetricsSnapshot }) {
         />
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
-        <span>{activeRun?.label ?? "准备资源包"}</span>
+        <span>{text("ui.assetCache.preparing")}</span>
         <span>
-          {completed}/{summary.prewarmRequested}
+          {progress.ok}/{progress.total}
         </span>
       </div>
       <div style={{ color: "rgba(245, 241, 223, 0.72)", marginTop: 3 }}>
-        本地 {localCount} 项 · 远程 {formatBytes(summary.transferBytes)}
-        {summary.prewarmFailed > 0 ? ` · 失败 ${summary.prewarmFailed}` : ""}
+        {text("ui.assetCache.local")} {localCount} · {text("ui.assetCache.remote")} {formatBytes(summary.transferBytes)}
+        {progress.unresolved > 0 ? ` · ${text(progress.state === "failed" ? "ui.assetCache.failed" : "ui.assetCache.pending")} ${progress.unresolved}` : ""}
       </div>
     </section>
   );
@@ -1820,27 +1824,7 @@ function logCacheProgress(
 }
 
 function shouldShowCacheProgress(snapshot: CacheMetricsSnapshot) {
-  const summary = snapshot.summary;
-  if (summary.prewarmRequested <= 0) return false;
-  // The panel is a loading INDICATOR pinned over the HP orb (bottom-left), not a
-  // permanent HUD element — once the prewarm has caught up it must hide, or it sits
-  // on top of the HUD for the whole session reading as "完成 100%" forever (the
-  // gating returned true whenever any prewarm was ever requested). It re-appears if a
-  // later wave requests more, then hides again. Keep it visible while anything failed
-  // so the user still sees the failure count.
-  const completed = summary.prewarmOk + summary.prewarmFailed;
-  if (completed >= summary.prewarmRequested && summary.prewarmFailed === 0) {
-    return false;
-  }
-  return true;
-}
-
-function getActivePrewarmRun(snapshot: CacheMetricsSnapshot) {
-  return (
-    snapshot.prewarmRuns.find((run) => run.status === "running") ??
-    snapshot.prewarmRuns[snapshot.prewarmRuns.length - 1] ??
-    null
-  );
+  return assetCacheProgressView(snapshot.summary, snapshot.prewarmRuns).visible;
 }
 
 function resolveFetchUrl(input: RequestInfo | URL) {

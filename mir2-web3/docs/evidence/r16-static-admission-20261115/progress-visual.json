@@ -1,0 +1,310 @@
+{
+  "kind": "actual-ten-language-cache-progress-panels",
+  "passed": true,
+  "panels": [
+    {
+      "language": "zh-CN",
+      "state": "loading",
+      "visible": true,
+      "dir": "ltr",
+      "role": "status",
+      "overflow": false
+    },
+    {
+      "language": "zh-CN",
+      "state": "retrying",
+      "visible": true,
+      "dir": "ltr",
+      "role": "status",
+      "overflow": false
+    },
+    {
+      "language": "zh-CN",
+      "state": "failed",
+      "visible": true,
+      "dir": "ltr",
+      "role": "status",
+      "overflow": false
+    },
+    {
+      "language": "zh-CN",
+      "state": "complete",
+      "visible": false,
+      "overflow": false
+    },
+    {
+      "language": "zh-TW",
+      "state": "loading",
+      "visible": true,
+      "dir": "ltr",
+      "role": "status",
+      "overflow": false
+    },
+    {
+      "language": "zh-TW",
+      "state": "retrying",
+      "visible": true,
+      "dir": "ltr",
+      "role": "status",
+      "overflow": false
+    },
+    {
+      "language": "zh-TW",
+      "state": "failed",
+      "visible": true,
+      "dir": "ltr",
+      "role": "status",
+      "overflow": false
+    },
+    {
+      "language": "zh-TW",
+      "state": "complete",
+      "visible": false,
+      "overflow": false
+    },
+    {
+      "language": "en",
+      "state": "loading",
+      "visible": true,
+      "dir": "ltr",
+      "role": "status",
+      "overflow": false
+    },
+    {
+      "language": "en",
+      "state": "retrying",
+      "visible": true,
+      "dir": "ltr",
+      "role": "status",
+      "overflow": false
+    },
+    {
+      "language": "en",
+      "state": "failed",
+      "visible": true,
+      "dir": "ltr",
+      "role": "status",
+      "overflow": false
+    },
+    {
+      "language": "en",
+      "state": "complete",
+      "visible": false,
+      "overflow": false
+    },
+    {
+      "language": "pt-BR",
+      "state": "loading",
+      "visible": true,
+      "dir": "ltr",
+      "role": "status",
+      "overflow": false
+    },
+    {
+      "language": "pt-BR",
+      "state": "retrying",
+      "visible": true,
+      "dir": "ltr",
+      "role": "status",
+      "overflow": false
+    },
+    {
+      "language": "pt-BR",
+      "state": "failed",
+      "visible": true,
+      "dir": "ltr",
+      "role": "status",
+      "overflow": false
+    },
+    {
+      "language": "pt-BR",
+      "state": "complete",
+      "visible": false,
+      "overflow": false
+    },
+    {
+      "language": "ru",
+      "state": "loading",
+      "visible": true,
+      "dir": "ltr",
+      "role": "status",
+      "overflow": false
+    },
+    {
+      "language": "ru",
+      "state": "retrying",
+      "visible": true,
+      "dir": "ltr",
+      "role": "status",
+      "overflow": false
+    },
+    {
+      "language": "ru",
+      "state": "failed",
+      "visible": true,
+      "dir": "ltr",
+      "role": "status",
+      "overflow": false
+    },
+    {
+      "language": "ru",
+      "state": "complete",
+      "visible": false,
+      "overflow": false
+    },
+    {
+      "language": "hi",
+      "state": "loading",
+      "visible": true,
+      "dir": "ltr",
+      "role": "status",
+      "overflow": false
+    },
+    {
+      "language": "hi",
+      "state": "retrying",
+      "visible": true,
+      "dir": "ltr",
+      "role": "status",
+      "overflow": false
+    },
+    {
+      "language": "hi",
+      "state": "failed",
+      "visible": true,
+      "dir": "ltr",
+      "role": "status",
+      "overflow": false
+    },
+    {
+      "language": "hi",
+      "state": "complete",
+      "visible": false,
+      "overflow": false
+    },
+    {
+      "language": "id",
+      "state": "loading",
+      "visible": true,
+      "dir": "ltr",
+      "role": "status",
+      "overflow": false
+    },
+    {
+      "language": "id",
+      "state": "retrying",
+      "visible": true,
+      "dir": "ltr",
+      "role": "status",
+      "overflow": false
+    },
+    {
+      "language": "id",
+      "state": "failed",
+      "visible": true,
+      "dir": "ltr",
+      "role": "status",
+      "overflow": false
+    },
+    {
+      "language": "id",
+      "state": "complete",
+      "visible": false,
+      "overflow": false
+    },
+    {
+      "language": "vi",
+      "state": "loading",
+      "visible": true,
+      "dir": "ltr",
+      "role": "status",
+      "overflow": false
+    },
+    {
+      "language": "vi",
+      "state": "retrying",
+      "visible": true,
+      "dir": "ltr",
+      "role": "status",
+      "overflow": false
+    },
+    {
+      "language": "vi",
+      "state": "failed",
+      "visible": true,
+      "dir": "ltr",
+      "role": "status",
+      "overflow": false
+    },
+    {
+      "language": "vi",
+      "state": "complete",
+      "visible": false,
+      "overflow": false
+    },
+    {
+      "language": "th",
+      "state": "loading",
+      "visible": true,
+      "dir": "ltr",
+      "role": "status",
+      "overflow": false
+    },
+    {
+      "language": "th",
+      "state": "retrying",
+      "visible": true,
+      "dir": "ltr",
+      "role": "status",
+      "overflow": false
+    },
+    {
+      "language": "th",
+      "state": "failed",
+      "visible": true,
+      "dir": "ltr",
+      "role": "status",
+      "overflow": false
+    },
+    {
+      "language": "th",
+      "state": "complete",
+      "visible": false,
+      "overflow": false
+    },
+    {
+      "language": "ar",
+      "state": "loading",
+      "visible": true,
+      "dir": "rtl",
+      "role": "status",
+      "overflow": false
+    },
+    {
+      "language": "ar",
+      "state": "retrying",
+      "visible": true,
+      "dir": "rtl",
+      "role": "status",
+      "overflow": false
+    },
+    {
+      "language": "ar",
+      "state": "failed",
+      "visible": true,
+      "dir": "rtl",
+      "role": "status",
+      "overflow": false
+    },
+    {
+      "language": "ar",
+      "state": "complete",
+      "visible": false,
+      "overflow": false
+    }
+  ],
+  "pageErrors": [],
+  "externalRequests": [],
+  "fixtureSha256": "9ee152642e432c7bfe1607edabbcb16b676a800d8793bf9995be531d9935e9b8",
+  "browserClosed": true
+}

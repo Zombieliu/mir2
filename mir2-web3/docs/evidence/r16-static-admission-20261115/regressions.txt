@@ -1,0 +1,1542 @@
+TAP version 13
+# Subtest: an unfinished pack with failed attempts remains loading and does not mutate diagnostic history
+ok 1 - an unfinished pack with failed attempts remains loading and does not mutate diagnostic history
+  ---
+  duration_ms: 0.7777
+  type: 'test'
+  ...
+# Subtest: retrying three failed full reads is 110/113, not failed or 100 percent
+ok 2 - retrying three failed full reads is 110/113, not failed or 100 percent
+  ---
+  duration_ms: 0.0843
+  type: 'test'
+  ...
+# Subtest: completed recovery hides the indicator and completed unresolved failures remain visible
+ok 3 - completed recovery hides the indicator and completed unresolved failures remain visible
+  ---
+  duration_ms: 0.0749
+  type: 'test'
+  ...
+# Subtest: cancelled obsolete work does not make a new load look retrying, and later work reopens progress
+ok 4 - cancelled obsolete work does not make a new load look retrying, and later work reopens progress
+  ---
+  duration_ms: 0.0928
+  type: 'test'
+  ...
+# Subtest: the actual panel consumes the shared presentation and all ten dictionaries own its nine keys
+ok 5 - the actual panel consumes the shared presentation and all ten dictionaries own its nine keys
+  ---
+  duration_ms: 0.4417
+  type: 'test'
+  ...
+# Subtest: actual zh-CN panel renders loading with matching language, counters and direction
+ok 6 - actual zh-CN panel renders loading with matching language, counters and direction
+  ---
+  duration_ms: 20.3849
+  type: 'test'
+  ...
+# Subtest: actual zh-CN panel renders retrying with matching language, counters and direction
+ok 7 - actual zh-CN panel renders retrying with matching language, counters and direction
+  ---
+  duration_ms: 5.3495
+  type: 'test'
+  ...
+# Subtest: actual zh-CN panel renders failed with matching language, counters and direction
+ok 8 - actual zh-CN panel renders failed with matching language, counters and direction
+  ---
+  duration_ms: 5.0519
+  type: 'test'
+  ...
+# Subtest: actual zh-CN panel renders complete with matching language, counters and direction
+ok 9 - actual zh-CN panel renders complete with matching language, counters and direction
+  ---
+  duration_ms: 6.0664
+  type: 'test'
+  ...
+# Subtest: actual zh-TW panel renders loading with matching language, counters and direction
+ok 10 - actual zh-TW panel renders loading with matching language, counters and direction
+  ---
+  duration_ms: 6.7498
+  type: 'test'
+  ...
+# Subtest: actual zh-TW panel renders retrying with matching language, counters and direction
+ok 11 - actual zh-TW panel renders retrying with matching language, counters and direction
+  ---
+  duration_ms: 6.1253
+  type: 'test'
+  ...
+# Subtest: actual zh-TW panel renders failed with matching language, counters and direction
+ok 12 - actual zh-TW panel renders failed with matching language, counters and direction
+  ---
+  duration_ms: 6.2654
+  type: 'test'
+  ...
+# Subtest: actual zh-TW panel renders complete with matching language, counters and direction
+ok 13 - actual zh-TW panel renders complete with matching language, counters and direction
+  ---
+  duration_ms: 3.1859
+  type: 'test'
+  ...
+# Subtest: actual en panel renders loading with matching language, counters and direction
+ok 14 - actual en panel renders loading with matching language, counters and direction
+  ---
+  duration_ms: 4.1768
+  type: 'test'
+  ...
+# Subtest: actual en panel renders retrying with matching language, counters and direction
+ok 15 - actual en panel renders retrying with matching language, counters and direction
+  ---
+  duration_ms: 3.7532
+  type: 'test'
+  ...
+# Subtest: actual en panel renders failed with matching language, counters and direction
+ok 16 - actual en panel renders failed with matching language, counters and direction
+  ---
+  duration_ms: 2.6674
+  type: 'test'
+  ...
+# Subtest: actual en panel renders complete with matching language, counters and direction
+ok 17 - actual en panel renders complete with matching language, counters and direction
+  ---
+  duration_ms: 6.5268
+  type: 'test'
+  ...
+# Subtest: actual pt-BR panel renders loading with matching language, counters and direction
+ok 18 - actual pt-BR panel renders loading with matching language, counters and direction
+  ---
+  duration_ms: 3.7318
+  type: 'test'
+  ...
+# Subtest: actual pt-BR panel renders retrying with matching language, counters and direction
+ok 19 - actual pt-BR panel renders retrying with matching language, counters and direction
+  ---
+  duration_ms: 2.8265
+  type: 'test'
+  ...
+# Subtest: actual pt-BR panel renders failed with matching language, counters and direction
+ok 20 - actual pt-BR panel renders failed with matching language, counters and direction
+  ---
+  duration_ms: 2.5836
+  type: 'test'
+  ...
+# Subtest: actual pt-BR panel renders complete with matching language, counters and direction
+ok 21 - actual pt-BR panel renders complete with matching language, counters and direction
+  ---
+  duration_ms: 2.5203
+  type: 'test'
+  ...
+# Subtest: actual ru panel renders loading with matching language, counters and direction
+ok 22 - actual ru panel renders loading with matching language, counters and direction
+  ---
+  duration_ms: 2.4387
+  type: 'test'
+  ...
+# Subtest: actual ru panel renders retrying with matching language, counters and direction
+ok 23 - actual ru panel renders retrying with matching language, counters and direction
+  ---
+  duration_ms: 2.4218
+  type: 'test'
+  ...
+# Subtest: actual ru panel renders failed with matching language, counters and direction
+ok 24 - actual ru panel renders failed with matching language, counters and direction
+  ---
+  duration_ms: 2.5804
+  type: 'test'
+  ...
+# Subtest: actual ru panel renders complete with matching language, counters and direction
+ok 25 - actual ru panel renders complete with matching language, counters and direction
+  ---
+  duration_ms: 4.791
+  type: 'test'
+  ...
+# Subtest: actual hi panel renders loading with matching language, counters and direction
+ok 26 - actual hi panel renders loading with matching language, counters and direction
+  ---
+  duration_ms: 2.3563
+  type: 'test'
+  ...
+# Subtest: actual hi panel renders retrying with matching language, counters and direction
+ok 27 - actual hi panel renders retrying with matching language, counters and direction
+  ---
+  duration_ms: 2.3283
+  type: 'test'
+  ...
+# Subtest: actual hi panel renders failed with matching language, counters and direction
+ok 28 - actual hi panel renders failed with matching language, counters and direction
+  ---
+  duration_ms: 2.3799
+  type: 'test'
+  ...
+# Subtest: actual hi panel renders complete with matching language, counters and direction
+ok 29 - actual hi panel renders complete with matching language, counters and direction
+  ---
+  duration_ms: 2.3714
+  type: 'test'
+  ...
+# Subtest: actual id panel renders loading with matching language, counters and direction
+ok 30 - actual id panel renders loading with matching language, counters and direction
+  ---
+  duration_ms: 2.4935
+  type: 'test'
+  ...
+# Subtest: actual id panel renders retrying with matching language, counters and direction
+ok 31 - actual id panel renders retrying with matching language, counters and direction
+  ---
+  duration_ms: 5.179
+  type: 'test'
+  ...
+# Subtest: actual id panel renders failed with matching language, counters and direction
+ok 32 - actual id panel renders failed with matching language, counters and direction
+  ---
+  duration_ms: 2.1494
+  type: 'test'
+  ...
+# Subtest: actual id panel renders complete with matching language, counters and direction
+ok 33 - actual id panel renders complete with matching language, counters and direction
+  ---
+  duration_ms: 2.2176
+  type: 'test'
+  ...
+# Subtest: actual vi panel renders loading with matching language, counters and direction
+ok 34 - actual vi panel renders loading with matching language, counters and direction
+  ---
+  duration_ms: 2.2794
+  type: 'test'
+  ...
+# Subtest: actual vi panel renders retrying with matching language, counters and direction
+ok 35 - actual vi panel renders retrying with matching language, counters and direction
+  ---
+  duration_ms: 3.2928
+  type: 'test'
+  ...
+# Subtest: actual vi panel renders failed with matching language, counters and direction
+ok 36 - actual vi panel renders failed with matching language, counters and direction
+  ---
+  duration_ms: 2.7242
+  type: 'test'
+  ...
+# Subtest: actual vi panel renders complete with matching language, counters and direction
+ok 37 - actual vi panel renders complete with matching language, counters and direction
+  ---
+  duration_ms: 2.4606
+  type: 'test'
+  ...
+# Subtest: actual th panel renders loading with matching language, counters and direction
+ok 38 - actual th panel renders loading with matching language, counters and direction
+  ---
+  duration_ms: 2.0465
+  type: 'test'
+  ...
+# Subtest: actual th panel renders retrying with matching language, counters and direction
+ok 39 - actual th panel renders retrying with matching language, counters and direction
+  ---
+  duration_ms: 2.2122
+  type: 'test'
+  ...
+# Subtest: actual th panel renders failed with matching language, counters and direction
+ok 40 - actual th panel renders failed with matching language, counters and direction
+  ---
+  duration_ms: 2.2138
+  type: 'test'
+  ...
+# Subtest: actual th panel renders complete with matching language, counters and direction
+ok 41 - actual th panel renders complete with matching language, counters and direction
+  ---
+  duration_ms: 4.8637
+  type: 'test'
+  ...
+# Subtest: actual ar panel renders loading with matching language, counters and direction
+ok 42 - actual ar panel renders loading with matching language, counters and direction
+  ---
+  duration_ms: 2.2894
+  type: 'test'
+  ...
+# Subtest: actual ar panel renders retrying with matching language, counters and direction
+ok 43 - actual ar panel renders retrying with matching language, counters and direction
+  ---
+  duration_ms: 4.8382
+  type: 'test'
+  ...
+# Subtest: actual ar panel renders failed with matching language, counters and direction
+ok 44 - actual ar panel renders failed with matching language, counters and direction
+  ---
+  duration_ms: 3.0741
+  type: 'test'
+  ...
+# Subtest: actual ar panel renders complete with matching language, counters and direction
+ok 45 - actual ar panel renders complete with matching language, counters and direction
+  ---
+  duration_ms: 3.9106
+  type: 'test'
+  ...
+# Subtest: regional document locales follow the selected canonical Windows language
+ok 46 - regional document locales follow the selected canonical Windows language
+  ---
+  duration_ms: 9.6337
+  type: 'test'
+  ...
+# (node:81936) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: only a visible, connected, empty ordinary login form is eligible
+ok 47 - only a visible, connected, empty ordinary login form is eligible
+  ---
+  duration_ms: 30.7061
+  type: 'test'
+  ...
+# Subtest: an empty idle login reloads once at the original delay and marks only its actual reload
+ok 48 - an empty idle login reloads once at the original delay and marks only its actual reload
+  ---
+  duration_ms: 4.4833
+  type: 'test'
+  ...
+# Subtest: a namespace change preserves active screen=game
+ok 49 - a namespace change preserves active screen=game
+  ---
+  duration_ms: 2.8108
+  type: 'test'
+  ...
+# Subtest: a namespace change preserves active screen=select
+ok 50 - a namespace change preserves active screen=select
+  ---
+  duration_ms: 2.4995
+  type: 'test'
+  ...
+# Subtest: a namespace change preserves active visible=false
+ok 51 - a namespace change preserves active visible=false
+  ---
+  duration_ms: 2.5807
+  type: 'test'
+  ...
+# Subtest: a namespace change preserves active disabled=true
+ok 52 - a namespace change preserves active disabled=true
+  ---
+  duration_ms: 2.5532
+  type: 'test'
+  ...
+# Subtest: a namespace change preserves active value=typed account
+ok 53 - a namespace change preserves active value=typed account
+  ---
+  duration_ms: 2.6942
+  type: 'test'
+  ...
+# Subtest: a namespace change preserves active modal=true
+ok 54 - a namespace change preserves active modal=true
+  ---
+  duration_ms: 2.6926
+  type: 'test'
+  ...
+# Subtest: a pending reload rechecks value at execution
+ok 55 - a pending reload rechecks value at execution
+  ---
+  duration_ms: 2.0976
+  type: 'test'
+  ...
+# Subtest: a pending reload rechecks disabled at execution
+ok 56 - a pending reload rechecks disabled at execution
+  ---
+  duration_ms: 3.5894
+  type: 'test'
+  ...
+# Subtest: a pending reload rechecks screen at execution
+ok 57 - a pending reload rechecks screen at execution
+  ---
+  duration_ms: 5.3242
+  type: 'test'
+  ...
+# Subtest: a pending reload rechecks visible at execution
+ok 58 - a pending reload rechecks visible at execution
+  ---
+  duration_ms: 1.2929
+  type: 'test'
+  ...
+# Subtest: a pending reload rechecks modal at execution
+ok 59 - a pending reload rechecks modal at execution
+  ---
+  duration_ms: 1.2473
+  type: 'test'
+  ...
+# Subtest: an older namespace callback cannot reload or mark a later configuration
+ok 60 - an older namespace callback cannot reload or mark a later configuration
+  ---
+  duration_ms: 1.1966
+  type: 'test'
+  ...
+# Subtest: no removed cache or an unchanged namespace needs no reload
+ok 61 - no removed cache or an unchanged namespace needs no reload
+  ---
+  duration_ms: 1.4449
+  type: 'test'
+  ...
+# Subtest: retiring a redundant pack preserves the published cache-namespace inventory input
+ok 62 - retiring a redundant pack preserves the published cache-namespace inventory input
+  ---
+  duration_ms: 0.9241
+  type: 'test'
+  ...
+# Subtest: low tier bounds scene prewarm and disables background packs by default
+ok 63 - low tier bounds scene prewarm and disables background packs by default
+  ---
+  duration_ms: 0.153
+  type: 'test'
+  ...
+# Subtest: medium and high tiers preserve progressively more eager prewarming
+ok 64 - medium and high tiers preserve progressively more eager prewarming
+  ---
+  duration_ms: 0.0715
+  type: 'test'
+  ...
+# Subtest: an explicit background mode remains available for deterministic QA
+ok 65 - an explicit background mode remains available for deterministic QA
+  ---
+  duration_ms: 0.0643
+  type: 'test'
+  ...
+# Subtest: initial critical prewarm contains only the lightweight login shell
+ok 66 - initial critical prewarm contains only the lightweight login shell
+  ---
+  duration_ms: 0.1235
+  type: 'test'
+  ...
+# Subtest: deferred scene stages expose deterministic follow-up pack selections
+ok 67 - deferred scene stages expose deterministic follow-up pack selections
+  ---
+  duration_ms: 0.2353
+  type: 'test'
+  ...
+# Subtest: the UI lifecycle requests each deferred prewarm stage
+ok 68 - the UI lifecycle requests each deferred prewarm stage
+  ---
+  duration_ms: 2.9896
+  type: 'test'
+  ...
+# Subtest: only the low tier prewarms raw map frames for the DOM compatibility path
+ok 69 - only the low tier prewarms raw map frames for the DOM compatibility path
+  ---
+  duration_ms: 0.0887
+  type: 'test'
+  ...
+# Subtest: heavy map and effect metadata loaders stay behind the game screen boundary
+ok 70 - heavy map and effect metadata loaders stay behind the game screen boundary
+  ---
+  duration_ms: 2.974
+  type: 'test'
+  ...
+# Subtest: playable cache acceptance waits for lifecycle background work to settle
+ok 71 - playable cache acceptance waits for lifecycle background work to settle
+  ---
+  duration_ms: 0.4748
+  type: 'test'
+  ...
+# Subtest: HUD recovery reads only failed URLs after worker configuration and keeps first failures
+ok 72 - HUD recovery reads only failed URLs after worker configuration and keeps first failures
+  ---
+  duration_ms: 535.9569
+  type: 'test'
+  ...
+# Subtest: recovery does not erase a failure before its replacement body reaches EOF
+ok 73 - recovery does not erase a failure before its replacement body reaches EOF
+  ---
+  duration_ms: 494.7173
+  type: 'test'
+  ...
+# Subtest: persistent HUD failures get at most one bounded recovery sweep
+ok 74 - persistent HUD failures get at most one bounded recovery sweep
+  ---
+  duration_ms: 2358.8119
+  type: 'test'
+  ...
+# Subtest: owner cancellation during the configuration refresh prevents every recovery request
+ok 75 - owner cancellation during the configuration refresh prevents every recovery request
+  ---
+  duration_ms: 486.3384
+  type: 'test'
+  ...
+# Subtest: healthy HUD and non-HUD packs do not configure or retry
+ok 76 - healthy HUD and non-HUD packs do not configure or retry
+  ---
+  duration_ms: 501.6818
+  type: 'test'
+  ...
+# Subtest: a failed configuration refresh cannot manufacture success or retain the stage forever
+ok 77 - a failed configuration refresh cannot manufacture success or retain the stage forever
+  ---
+  duration_ms: 957.5885
+  type: 'test'
+  ...
+# Subtest: canceling a recovery body preserves its attempt diagnostics and cancels its bytes
+ok 78 - canceling a recovery body preserves its attempt diagnostics and cancels its bytes
+  ---
+  duration_ms: 488.7838
+  type: 'test'
+  ...
+# Subtest: public prewarm progress waits for the complete response body
+ok 79 - public prewarm progress waits for the complete response body
+  ---
+  duration_ms: 11.2864
+  type: 'test'
+  ...
+# Subtest: a disconnected body is retried and only the final complete bytes are returned
+ok 80 - a disconnected body is retried and only the final complete bytes are returned
+  ---
+  duration_ms: 161.9181
+  type: 'test'
+  ...
+# Subtest: three broken bodies produce one failed prewarm metric and its URL
+ok 81 - three broken bodies produce one failed prewarm metric and its URL
+  ---
+  duration_ms: 488.6584
+  type: 'test'
+  ...
+# Subtest: body inactivity cancels the incomplete stream before retrying
+ok 82 - body inactivity cancels the incomplete stream before retrying
+  ---
+  duration_ms: 187.6782
+  type: 'test'
+  ...
+# Subtest: continuing chunks renew the idle deadline instead of imposing a total body deadline
+ok 83 - continuing chunks renew the idle deadline instead of imposing a total body deadline
+  ---
+  duration_ms: 380.2632
+  type: 'test'
+  ...
+# Subtest: an owner cancellation cannot turn a cancelled body prefix into success
+ok 84 - an owner cancellation cannot turn a cancelled body prefix into success
+  ---
+  duration_ms: 0.7758
+  type: 'test'
+  ...
+# Subtest: an owner cancellation during backoff prevents another request
+ok 85 - an owner cancellation during backoff prevents another request
+  ---
+  duration_ms: 30.4935
+  type: 'test'
+  ...
+# Subtest: a header timeout retires and retries the request
+ok 86 - a header timeout retires and retries the request
+  ---
+  duration_ms: 191.0493
+  type: 'test'
+  ...
+# Subtest: non-success responses are cancelled, bounded and never counted as warmed
+ok 87 - non-success responses are cancelled, bounded and never counted as warmed
+  ---
+  duration_ms: 471.4907
+  type: 'test'
+  ...
+# Subtest: oversized bodies are cancelled once without retaining or retrying their prefix
+ok 88 - oversized bodies are cancelled once without retaining or retrying their prefix
+  ---
+  duration_ms: 0.4675
+  type: 'test'
+  ...
+# Subtest: browser-safe R2 fallback resolves before a referer-sensitive CDN
+ok 89 - browser-safe R2 fallback resolves before a referer-sensitive CDN
+  ---
+  duration_ms: 19.3953
+  type: 'test'
+  ...
+# Subtest: remote candidates are deduplicated and preserve fallback-first order
+ok 90 - remote candidates are deduplicated and preserve fallback-first order
+  ---
+  duration_ms: 0.9477
+  type: 'test'
+  ...
+# Subtest: legacy image retry query parameters collapse to one stable cache key
+ok 91 - legacy image retry query parameters collapse to one stable cache key
+  ---
+  duration_ms: 0.9167
+  type: 'test'
+  ...
+# Subtest: a cold asset streams before its background CacheStorage write completes
+ok 92 - a cold asset streams before its background CacheStorage write completes
+  ---
+  duration_ms: 1.8097
+  type: 'test'
+  ...
+# Subtest: a warm asset cache hit does not rewrite or scan CacheStorage
+ok 93 - a warm asset cache hit does not rewrite or scan CacheStorage
+  ---
+  duration_ms: 0.7885
+  type: 'test'
+  ...
+# Subtest: cache trimming is amortized across a burst of writes
+ok 94 - cache trimming is amortized across a burst of writes
+  ---
+  duration_ms: 5.5662
+  type: 'test'
+  ...
+# Subtest: /api/asset-manifest returns headers and JSON while the independent cache write remains blocked
+ok 95 - /api/asset-manifest returns headers and JSON while the independent cache write remains blocked
+  ---
+  duration_ms: 2.8416
+  type: 'test'
+  ...
+# Subtest: /api/scene/crystal?map=0&x=296&y=620&assetRelease=test returns headers and JSON while the independent cache write remains blocked
+ok 96 - /api/scene/crystal?map=0&x=296&y=620&assetRelease=test returns headers and JSON while the independent cache write remains blocked
+  ---
+  duration_ms: 2.9438
+  type: 'test'
+  ...
+# Subtest: a warm versioned Crystal request returns cached data and refreshes it in the background
+ok 97 - a warm versioned Crystal request returns cached data and refreshes it in the background
+  ---
+  duration_ms: 2.0368
+  type: 'test'
+  ...
+# Subtest: a Crystal reload leaves the retry to the browser without joining the worker cache path
+ok 98 - a Crystal reload leaves the retry to the browser without joining the worker cache path
+  ---
+  duration_ms: 0.9072
+  type: 'test'
+  ...
+# Subtest: asset-manifest stays network-first and uses the same key for offline fallback
+ok 99 - asset-manifest stays network-first and uses the same key for offline fallback
+  ---
+  duration_ms: 2.7167
+  type: 'test'
+  ...
+# Subtest: Crystal preserves Retry-After and the typed resource-missing 424 without cache writes
+ok 100 - Crystal preserves Retry-After and the typed resource-missing 424 without cache writes
+  ---
+  duration_ms: 2.3432
+  type: 'test'
+  ...
+# (node:81196) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: six renderer font reads share two complete-body lanes while ordinary images stay independent
+ok 101 - six renderer font reads share two complete-body lanes while ordinary images stay independent
+  ---
+  duration_ms: 15.4668
+  type: 'test'
+  ...
+# Subtest: a font waiting behind live bodies starts its own unchanged header budget only after admission
+ok 102 - a font waiting behind live bodies starts its own unchanged header budget only after admission
+  ---
+  duration_ms: 3.1729
+  type: 'test'
+  ...
+# Subtest: a cancelled queued direct font reader leaves no network request or occupied lane
+ok 103 - a cancelled queued direct font reader leaves no network request or occupied lane
+  ---
+  duration_ms: 3.7677
+  type: 'test'
+  ...
+# Subtest: retiring the first HUD consumer cannot cancel a coalesced prewarm body
+ok 104 - retiring the first HUD consumer cannot cancel a coalesced prewarm body
+  ---
+  duration_ms: 1.4492
+  type: 'test'
+  ...
+# Subtest: CSS and renderer consumers share one font through its unfinished body and cache fill
+ok 105 - CSS and renderer consumers share one font through its unfinished body and cache fill
+  ---
+  duration_ms: 1.5134
+  type: 'test'
+  ...
+# Subtest: one font consumer retiring does not cancel another consumer's shared download
+ok 106 - one font consumer retiring does not cancel another consumer's shared download
+  ---
+  duration_ms: 1.2869
+  type: 'test'
+  ...
+# Subtest: font fills retain separate cache namespaces across a release change
+ok 107 - font fills retain separate cache namespaces across a release change
+  ---
+  duration_ms: 1.5533
+  type: 'test'
+  ...
+# Subtest: font lookup expiry releases the retained entry without truncating either body
+ok 108 - font lookup expiry releases the retained entry without truncating either body
+  ---
+  duration_ms: 2.291
+  type: 'test'
+  ...
+# Subtest: fonts stay in the critical cache before and after background or runtime hints
+ok 109 - fonts stay in the critical cache before and after background or runtime hints
+  ---
+  duration_ms: 0.7438
+  type: 'test'
+  ...
+# Subtest: a byte-range font read cannot join or replace a whole-font fill
+ok 110 - a byte-range font read cannot join or replace a whole-font fill
+  ---
+  duration_ms: 1.7608
+  type: 'test'
+  ...
+# Subtest: font response retention stays bounded when many distinct fonts are requested
+ok 111 - font response retention stays bounded when many distinct fonts are requested
+  ---
+  duration_ms: 10.2033
+  type: 'test'
+  ...
+# Subtest: SC origin split: only SC prefers the configured primary current-release CDN
+ok 112 - SC origin split: only SC prefers the configured primary current-release CDN
+  ---
+  duration_ms: 1.5626
+  type: 'test'
+  ...
+# Subtest: SC origin split: CDN prefix stays unexposed and only its complete body is cached
+ok 113 - SC origin split: CDN prefix stays unexposed and only its complete body is cached
+  ---
+  duration_ms: 2.1409
+  type: 'test'
+  ...
+# Subtest: SC origin split: original headers timeout recovers through the app with no mixed prefix
+ok 114 - SC origin split: original headers timeout recovers through the app with no mixed prefix
+  ---
+  duration_ms: 2.9671
+  type: 'test'
+  ...
+# Subtest: SC origin split: original body timeout recovers through the app with no mixed prefix
+ok 115 - SC origin split: original body timeout recovers through the app with no mixed prefix
+  ---
+  duration_ms: 1.7586
+  type: 'test'
+  ...
+# Subtest: SC origin split: ranges, unversioned and older-only sources remain app-first
+ok 116 - SC origin split: ranges, unversioned and older-only sources remain app-first
+  ---
+  duration_ms: 2.6398
+  type: 'test'
+  ...
+# Subtest: SC origin split: explicit all-font mirror-first preserves the configured mirror order
+ok 117 - SC origin split: explicit all-font mirror-first preserves the configured mirror order
+  ---
+  duration_ms: 1.0761
+  type: 'test'
+  ...
+# Subtest: a complete shipped app font is exposed and cached without any CDN read
+ok 118 - a complete shipped app font is exposed and cached without any CDN read
+  ---
+  duration_ms: 4.5233
+  type: 'test'
+  ...
+# Subtest: a stalled app font prefix waits for a complete CDN fallback and never poisons the shared cache
+ok 119 - a stalled app font prefix waits for a complete CDN fallback and never poisons the shared cache
+  ---
+  duration_ms: 2.1836
+  type: 'test'
+  ...
+# Subtest: app font response headers retain their seven-second bound before ordinary mirror fallback
+ok 120 - app font response headers retain their seven-second bound before ordinary mirror fallback
+  ---
+  duration_ms: 1.2695
+  type: 'test'
+  ...
+# Subtest: app-first fonts preserve an explicitly older-first ordinary fallback order
+ok 121 - app-first fonts preserve an explicitly older-first ordinary fallback order
+  ---
+  duration_ms: 1.7749
+  type: 'test'
+  ...
+# Subtest: app-first complete font reads work without CacheStorage
+ok 122 - app-first complete font reads work without CacheStorage
+  ---
+  duration_ms: 2.3104
+  type: 'test'
+  ...
+# Subtest: partial, empty and oversized app fonts fall back without exposing their bytes
+ok 123 - partial, empty and oversized app fonts fall back without exposing their bytes
+  ---
+  duration_ms: 19.8896
+  type: 'test'
+  ...
+# Subtest: a timed-out preferred font mirror tries the other current-release origin before the app
+ok 124 - a timed-out preferred font mirror tries the other current-release origin before the app
+  ---
+  duration_ms: 2.9929
+  type: 'test'
+  ...
+# Subtest: a stopped preferred font body is replaced by one complete current-release mirror
+ok 125 - a stopped preferred font body is replaced by one complete current-release mirror
+  ---
+  duration_ms: 1.3323
+  type: 'test'
+  ...
+# Subtest: all current font mirrors precede the app while inherited releases remain later fallbacks
+ok 126 - all current font mirrors precede the app while inherited releases remain later fallbacks
+  ---
+  duration_ms: 0.9553
+  type: 'test'
+  ...
+# Subtest: a current-release font mirror precedes a successful but slow app origin
+ok 127 - a current-release font mirror precedes a successful but slow app origin
+  ---
+  duration_ms: 0.8346
+  type: 'test'
+  ...
+# Subtest: a missing current font mirror returns to the app before inherited releases
+ok 128 - a missing current font mirror returns to the app before inherited releases
+  ---
+  duration_ms: 1.7749
+  type: 'test'
+  ...
+# Subtest: a font mirror connection failure still allows the original complete font
+ok 129 - a font mirror connection failure still allows the original complete font
+  ---
+  duration_ms: 1.6642
+  type: 'test'
+  ...
+# Subtest: font mirror headers have an eight-second bound before returning to the app
+ok 130 - font mirror headers have an eight-second bound before returning to the app
+  ---
+  duration_ms: 3.5659
+  type: 'test'
+  ...
+# Subtest: font mirror header timeout does not truncate a progressing body
+ok 131 - font mirror header timeout does not truncate a progressing body
+  ---
+  duration_ms: 3.0062
+  type: 'test'
+  ...
+# Subtest: a font mirror body that stops after a prefix returns the complete app font
+ok 132 - a font mirror body that stops after a prefix returns the complete app font
+  ---
+  duration_ms: 2.2262
+  type: 'test'
+  ...
+# Subtest: font body idle time resets on progress beyond the header and idle budgets
+ok 133 - font body idle time resets on progress beyond the header and idle budgets
+  ---
+  duration_ms: 2.4444
+  type: 'test'
+  ...
+# Subtest: an errored font body returns the complete app font instead of its prefix
+ok 134 - an errored font body returns the complete app font instead of its prefix
+  ---
+  duration_ms: 1.7844
+  type: 'test'
+  ...
+# Subtest: a completed decoded font retains its type and correct body metadata
+ok 135 - a completed decoded font retains its type and correct body metadata
+  ---
+  duration_ms: 1.3211
+  type: 'test'
+  ...
+# Subtest: empty mirror bodies return to the app
+ok 136 - empty mirror bodies return to the app
+  ---
+  duration_ms: 2.4844
+  type: 'test'
+  ...
+# Subtest: font mirror buffering is bounded before returning to the app
+ok 137 - font mirror buffering is bounded before returning to the app
+  ---
+  duration_ms: 11.9025
+  type: 'test'
+  ...
+# Subtest: empty chunks do not renew a stalled font body
+ok 138 - empty chunks do not renew a stalled font body
+  ---
+  duration_ms: 3.9517
+  type: 'test'
+  ...
+# Subtest: font mirror selection works even when CacheStorage is unavailable
+ok 139 - font mirror selection works even when CacheStorage is unavailable
+  ---
+  duration_ms: 1.3014
+  type: 'test'
+  ...
+# Subtest: unversioned fonts, byte ranges and images keep their app-first route
+ok 140 - unversioned fonts, byte ranges and images keep their app-first route
+  ---
+  duration_ms: 2.3096
+  type: 'test'
+  ...
+# Subtest: partial or empty mirror responses cannot replace an entire font
+ok 141 - partial or empty mirror responses cannot replace an entire font
+  ---
+  duration_ms: 1.6151
+  type: 'test'
+  ...
+# Subtest: only explicit hosted configuration opts into the current font mirror
+ok 142 - only explicit hosted configuration opts into the current font mirror
+  ---
+  duration_ms: 3.7627
+  type: 'test'
+  ...
+# Subtest: a stalled shared image header retires before page retries keep joining it
+ok 143 - a stalled shared image header retires before page retries keep joining it
+  ---
+  duration_ms: 2.7655
+  type: 'test'
+  ...
+# Subtest: each static fallback gets its own bounded header attempt
+ok 144 - each static fallback gets its own bounded header attempt
+  ---
+  duration_ms: 2.3214
+  type: 'test'
+  ...
+# Subtest: an exhausted static header deadline is transient and the next read is fresh
+ok 145 - an exhausted static header deadline is transient and the next read is fresh
+  ---
+  duration_ms: 2.0067
+  type: 'test'
+  ...
+# Subtest: static header expiry never truncates an already delivered image body
+ok 146 - static header expiry never truncates an already delivered image body
+  ---
+  duration_ms: 1.5329
+  type: 'test'
+  ...
+# (node:91520) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: a headers failure continues the admitted SC font before four queued renderer families
+ok 147 - a headers failure continues the admitted SC font before four queued renderer families
+  ---
+  duration_ms: 36.0088
+  type: 'test'
+  ...
+# Subtest: a body failure continues the admitted SC font before four queued renderer families
+ok 148 - a body failure continues the admitted SC font before four queued renderer families
+  ---
+  duration_ms: 9.7663
+  type: 'test'
+  ...
+# Subtest: successive mirrors retain two lanes through full bodies and still admit images
+ok 149 - successive mirrors retain two lanes through full bodies and still admit images
+  ---
+  duration_ms: 3.4018
+  type: 'test'
+  ...
+# Subtest: a queued direct whole-font abort releases no network work and cannot cancel live bodies
+ok 150 - a queued direct whole-font abort releases no network work and cannot cancel live bodies
+  ---
+  duration_ms: 2.4449
+  type: 'test'
+  ...
+# Subtest: one exhausted logical font releases its slot and only confirmed absence is negatively cached
+ok 151 - one exhausted logical font releases its slot and only confirmed absence is negatively cached
+  ---
+  duration_ms: 3.2656
+  type: 'test'
+  ...
+# Subtest: a restarted worker preserves explicit fontMirrorFirst=false and complete font bytes
+ok 152 - a restarted worker preserves explicit fontMirrorFirst=false and complete font bytes
+  ---
+  duration_ms: 27.1547
+  type: 'test'
+  ...
+# Subtest: a restarted worker preserves explicit fontMirrorFirst=true and complete font bytes
+ok 153 - a restarted worker preserves explicit fontMirrorFirst=true and complete font bytes
+  ---
+  duration_ms: 3.1756
+  type: 'test'
+  ...
+# Subtest: a restarted worker serves the complete already-versioned HUD cache without another network read
+ok 154 - a restarted worker serves the complete already-versioned HUD cache without another network read
+  ---
+  duration_ms: 491.786
+  type: 'test'
+  ...
+# Subtest: an uncached frame after restart retains exact-release remote fallbacks and original cache tier
+ok 155 - an uncached frame after restart retains exact-release remote fallbacks and original cache tier
+  ---
+  duration_ms: 499.9087
+  type: 'test'
+  ...
+# Subtest: an explicit newer configuration cannot be replaced by an older delayed restore
+ok 156 - an explicit newer configuration cannot be replaced by an older delayed restore
+  ---
+  duration_ms: 498.2474
+  type: 'test'
+  ...
+# Subtest: overlapping configuration writes are serialized so a restart restores the latest release
+ok 157 - overlapping configuration writes are serialized so a restart restores the latest release
+  ---
+  duration_ms: 482.3322
+  type: 'test'
+  ...
+# Subtest: CacheStorage denial preserves active in-memory fallbacks and reports non-durable configuration
+ok 158 - CacheStorage denial preserves active in-memory fallbacks and reports non-durable configuration
+  ---
+  duration_ms: 491.3995
+  type: 'test'
+  ...
+# Subtest: corrupt persisted metadata is ignored without fetching a stored arbitrary remote URL
+ok 159 - corrupt persisted metadata is ignored without fetching a stored arbitrary remote URL
+  ---
+  duration_ms: 1.8711
+  type: 'test'
+  ...
+# Subtest: configuration cleanup keeps its single metadata record and the current versioned cache
+ok 160 - configuration cleanup keeps its single metadata record and the current versioned cache
+  ---
+  duration_ms: 498.6599
+  type: 'test'
+  ...
+# Subtest: reset waits for an older pending configuration write and cannot resurrect it
+ok 161 - reset waits for an older pending configuration write and cannot resurrect it
+  ---
+  duration_ms: 2.4258
+  type: 'test'
+  ...
+# Subtest: restart restoration leaves auth, other origins, POST and explicit scene reload outside the worker
+ok 162 - restart restoration leaves auth, other origins, POST and explicit scene reload outside the worker
+  ---
+  duration_ms: 0.6568
+  type: 'test'
+  ...
+# (node:86120) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: simultaneous cold requests share one configuration read
+ok 163 - simultaneous cold requests share one configuration read
+  ---
+  duration_ms: 485.7167
+  type: 'test'
+  ...
+# Subtest: a stalled metadata read has a bounded ordinary-origin fallback
+ok 164 - a stalled metadata read has a bounded ordinary-origin fallback
+  ---
+  duration_ms: 1.5024
+  type: 'test'
+  ...
+# Subtest: reset interrupts an old restore and its later result cannot revive configuration
+ok 165 - reset interrupts an old restore and its later result cannot revive configuration
+  ---
+  duration_ms: 2.4346
+  type: 'test'
+  ...
+# Subtest: STATUS wakes and restores a worker before reporting its namespace and canonical tiers
+ok 166 - STATUS wakes and restores a worker before reporting its namespace and canonical tiers
+  ---
+  duration_ms: 1.4578
+  type: 'test'
+  ...
+# Subtest: a batched dynamic tier HINT hydrates first and survives the next restart
+ok 167 - a batched dynamic tier HINT hydrates first and survives the next restart
+  ---
+  duration_ms: 497.0704
+  type: 'test'
+  ...
+# Subtest: an old HINT waiting for disk cannot persist or alter tiers after reset
+ok 168 - an old HINT waiting for disk cannot persist or alter tiers after reset
+  ---
+  duration_ms: 1.5991
+  type: 'test'
+  ...
+# Subtest: a restarted cold image responds before its background cache write while retaining the write lifetime
+ok 169 - a restarted cold image responds before its background cache write while retaining the write lifetime
+  ---
+  duration_ms: 488.52
+  type: 'test'
+  ...
+# Subtest: a new HINT after live reset cannot recreate durable configuration until a fresh CONFIG
+ok 170 - a new HINT after live reset cannot recreate durable configuration until a fresh CONFIG
+  ---
+  duration_ms: 483.1774
+  type: 'test'
+  ...
+# Subtest: the shipped registrar explicitly prefers its first-party font files
+ok 171 - the shipped registrar explicitly prefers its first-party font files
+  ---
+  duration_ms: 48.1493
+  type: 'test'
+  ...
+# Subtest: current font transport failure plus an older-release 404 is retryable, not confirmed missing
+ok 172 - current font transport failure plus an older-release 404 is retryable, not confirmed missing
+  ---
+  duration_ms: 21.2963
+  type: 'test'
+  ...
+# Subtest: the actual prewarm retries the current font after a mixed missing/transport failure
+ok 173 - the actual prewarm retries the current font after a mixed missing/transport failure
+  ---
+  duration_ms: 205.6077
+  type: 'test'
+  ...
+# Subtest: a preferred font source is attempted once before all-missing negative caching
+ok 174 - a preferred font source is attempted once before all-missing negative caching
+  ---
+  duration_ms: 1.9783
+  type: 'test'
+  ...
+# Subtest: app-first all-missing fonts retain one ordered fallback group and short negative caching
+ok 175 - app-first all-missing fonts retain one ordered fallback group and short negative caching
+  ---
+  duration_ms: 1.9702
+  type: 'test'
+  ...
+# Subtest: an app-first transport error plus missing fallbacks remains retryable
+ok 176 - an app-first transport error plus missing fallbacks remains retryable
+  ---
+  duration_ms: 497.6558
+  type: 'test'
+  ...
+# Subtest: an original 403 is preserved instead of an optional mirror 404
+ok 177 - an original 403 is preserved instead of an optional mirror 404
+  ---
+  duration_ms: 2.0029
+  type: 'test'
+  ...
+# Subtest: an original 429 is preserved instead of an optional mirror 404
+ok 178 - an original 429 is preserved instead of an optional mirror 404
+  ---
+  duration_ms: 1.5261
+  type: 'test'
+  ...
+# Subtest: an original 503 is preserved instead of an optional mirror 404
+ok 179 - an original 503 is preserved instead of an optional mirror 404
+  ---
+  duration_ms: 1.1212
+  type: 'test'
+  ...
+# Subtest: a font mirror error keeps its response body and Retry-After if later sources are missing
+ok 180 - a font mirror error keeps its response body and Retry-After if later sources are missing
+  ---
+  duration_ms: 1.1334
+  type: 'test'
+  ...
+# Subtest: a single confirmed 404 still has short negative caching
+ok 181 - a single confirmed 404 still has short negative caching
+  ---
+  duration_ms: 0.7153
+  type: 'test'
+  ...
+# Subtest: a single confirmed 410 still has short negative caching
+ok 182 - a single confirmed 410 still has short negative caching
+  ---
+  duration_ms: 0.5992
+  type: 'test'
+  ...
+# Subtest: a later successful current source still wins over earlier missing/error responses
+ok 183 - a later successful current source still wins over earlier missing/error responses
+  ---
+  duration_ms: 0.9716
+  type: 'test'
+  ...
+# Subtest: an invalid complete-font mirror 200 cannot become a confirmed missing result
+ok 184 - an invalid complete-font mirror 200 cannot become a confirmed missing result
+  ---
+  duration_ms: 0.9155
+  type: 'test'
+  ...
+# Subtest: an invalid complete-font mirror 206 cannot become a confirmed missing result
+ok 185 - an invalid complete-font mirror 206 cannot become a confirmed missing result
+  ---
+  duration_ms: 0.9308
+  type: 'test'
+  ...
+# Subtest: a valid ranged asset keeps its complete 206 response semantics
+ok 186 - a valid ranged asset keeps its complete 206 response semantics
+  ---
+  duration_ms: 0.8346
+  type: 'test'
+  ...
+# (node:89688) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: a renderer burst admits six logical images and starts queued deadlines only on dispatch
+ok 187 - a renderer burst admits six logical images and starts queued deadlines only on dispatch
+  ---
+  duration_ms: 37.1188
+  type: 'test'
+  ...
+# Subtest: queued critical HUD images precede runtime and background work, with FIFO within each tier
+ok 188 - queued critical HUD images precede runtime and background work, with FIFO within each tier
+  ---
+  duration_ms: 5.0731
+  type: 'test'
+  ...
+# Subtest: a source fallback keeps its logical admission instead of rejoining a burst
+ok 189 - a source fallback keeps its logical admission instead of rejoining a burst
+  ---
+  duration_ms: 12.8859
+  type: 'test'
+  ...
+# Subtest: cancelling a queued direct image starts no fetch and leaves admitted readers alive
+ok 190 - cancelling a queued direct image starts no fetch and leaves admitted readers alive
+  ---
+  duration_ms: 2.725
+  type: 'test'
+  ...
+# Subtest: coalesced image ownership, complete cache bodies and fonts stay independent of image admission
+ok 191 - coalesced image ownership, complete cache bodies and fonts stay independent of image admission
+  ---
+  duration_ms: 6.8163
+  type: 'test'
+  ...
+# Subtest: a queued image retains its release sources across a later Worker configuration
+ok 192 - a queued image retains its release sources across a later Worker configuration
+  ---
+  duration_ms: 5.5185
+  type: 'test'
+  ...
+# Subtest: Page prewarm delegation returns the real shared stage promise
+ok 193 - Page prewarm delegation returns the real shared stage promise
+  ---
+  duration_ms: 187.2943
+  type: 'test'
+  ...
+# Subtest: actual Page downloads the runtime without speculative fonts while the HUD stage is pending
+ok 194 - actual Page downloads the runtime without speculative fonts while the HUD stage is pending
+  ---
+  duration_ms: 122.4749
+  type: 'test'
+  ...
+# Subtest: actual Page starts fonts only after the runtime resolves and boots without waiting for fonts
+ok 195 - actual Page starts fonts only after the runtime resolves and boots without waiting for fonts
+  ---
+  duration_ms: 100.6342
+  type: 'test'
+  ...
+# Subtest: the actual Page header callback releases its real document coordinator without starting fonts early
+ok 196 - the actual Page header callback releases its real document coordinator without starting fonts early
+  ---
+  duration_ms: 93.7899
+  type: 'test'
+  ...
+# Subtest: the actual Page cleanup retires its real pending document coordinator
+ok 197 - the actual Page cleanup retires its real pending document coordinator
+  ---
+  duration_ms: 85.7467
+  type: 'test'
+  ...
+# Subtest: a failed independent HUD stage cannot withdraw an already ready runtime
+ok 198 - a failed independent HUD stage cannot withdraw an already ready runtime
+  ---
+  duration_ms: 83.9227
+  type: 'test'
+  ...
+# Subtest: leaving before the runtime or HUD settles prevents late fonts, diagnostics and boot
+ok 199 - leaving before the runtime or HUD settles prevents late fonts, diagnostics and boot
+  ---
+  duration_ms: 84.7309
+  type: 'test'
+  ...
+# Subtest: actual Page leaves fonts deferred before first paint and for disabled, touch, missing metadata or GPU
+ok 200 - actual Page leaves fonts deferred before first paint and for disabled, touch, missing metadata or GPU
+  ---
+  duration_ms: 427.5656
+  type: 'test'
+  ...
+# Subtest: actual retryable module failure never starts fonts and keeps the retry boundary
+ok 201 - actual retryable module failure never starts fonts and keeps the retry boundary
+  ---
+  duration_ms: 81.0322
+  type: 'test'
+  ...
+# Subtest: leaving while the runtime downloads prevents late fonts and boot
+ok 202 - leaving while the runtime downloads prevents late fonts and boot
+  ---
+  duration_ms: 80.0119
+  type: 'test'
+  ...
+# Subtest: Page defers fonts through finite binary recovery and cancels both owners after successful boot
+ok 203 - Page defers fonts through finite binary recovery and cancels both owners after successful boot
+  ---
+  duration_ms: 83.8607
+  type: 'test'
+  ...
+# Subtest: only the final fallback backend starts fonts, once, before its single boot
+ok 204 - only the final fallback backend starts fonts, once, before its single boot
+  ---
+  duration_ms: 81.5936
+  type: 'test'
+  ...
+# Subtest: leaving during fallback cannot start fonts from a late module
+ok 205 - leaving during fallback cannot start fonts from a late module
+  ---
+  duration_ms: 83.0293
+  type: 'test'
+  ...
+# Subtest: an already booted runtime is reused without another module or font prewarm
+ok 206 - an already booted runtime is reused without another module or font prewarm
+  ---
+  duration_ms: 83.0129
+  type: 'test'
+  ...
+# Subtest: Page spends recovery once per entry/source and preserves it across same-game effect reruns
+ok 207 - Page spends recovery once per entry/source and preserves it across same-game effect reruns
+  ---
+  duration_ms: 342.7593
+  type: 'test'
+  ...
+# Subtest: prewarm paths exactly cover the Native display font families
+ok 208 - prewarm paths exactly cover the Native display font families
+  ---
+  duration_ms: 0.9745
+  type: 'test'
+  ...
+# Subtest: two pending font bodies bound concurrency and completion waits for full bytes
+ok 209 - two pending font bodies bound concurrency and completion waits for full bytes
+  ---
+  duration_ms: 12.6486
+  type: 'test'
+  ...
+# Subtest: leaving cancels active font bodies and never starts the queued fonts
+ok 210 - leaving cancels active font bodies and never starts the queued fonts
+  ---
+  duration_ms: 0.6982
+  type: 'test'
+  ...
+# (node:82212) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: a failed font does not withdraw the runtime or prevent warming the other families
+ok 211 - a failed font does not withdraw the runtime or prevent warming the other families
+  ---
+  duration_ms: 473.739
+  type: 'test'
+  ...
+# Subtest: the slow CJK families do not wait behind short fallback requests
+ok 212 - the slow CJK families do not wait behind short fallback requests
+  ---
+  duration_ms: 2.3984
+  type: 'test'
+  ...
+# Subtest: browser dictionaries use the ten native languages in the native order
+ok 213 - browser dictionaries use the ten native languages in the native order
+  ---
+  duration_ms: 1.0745
+  type: 'test'
+  ...
+# Subtest: zh-CN supplies every browser control without blank values
+ok 214 - zh-CN supplies every browser control without blank values
+  ---
+  duration_ms: 0.3543
+  type: 'test'
+  ...
+# Subtest: zh-TW supplies every browser control without blank values
+ok 215 - zh-TW supplies every browser control without blank values
+  ---
+  duration_ms: 0.1401
+  type: 'test'
+  ...
+# Subtest: en supplies every browser control without blank values
+ok 216 - en supplies every browser control without blank values
+  ---
+  duration_ms: 0.1107
+  type: 'test'
+  ...
+# Subtest: pt-BR supplies every browser control without blank values
+ok 217 - pt-BR supplies every browser control without blank values
+  ---
+  duration_ms: 0.0876
+  type: 'test'
+  ...
+# Subtest: ru supplies every browser control without blank values
+ok 218 - ru supplies every browser control without blank values
+  ---
+  duration_ms: 0.0781
+  type: 'test'
+  ...
+# Subtest: hi supplies every browser control without blank values
+ok 219 - hi supplies every browser control without blank values
+  ---
+  duration_ms: 0.1295
+  type: 'test'
+  ...
+# Subtest: id supplies every browser control without blank values
+ok 220 - id supplies every browser control without blank values
+  ---
+  duration_ms: 0.0811
+  type: 'test'
+  ...
+# Subtest: vi supplies every browser control without blank values
+ok 221 - vi supplies every browser control without blank values
+  ---
+  duration_ms: 0.1898
+  type: 'test'
+  ...
+# Subtest: th supplies every browser control without blank values
+ok 222 - th supplies every browser control without blank values
+  ---
+  duration_ms: 0.2533
+  type: 'test'
+  ...
+# Subtest: ar supplies every browser control without blank values
+ok 223 - ar supplies every browser control without blank values
+  ---
+  duration_ms: 1.1505
+  type: 'test'
+  ...
+# Subtest: unknown languages and keys preserve the caller's fallback
+ok 224 - unknown languages and keys preserve the caller's fallback
+  ---
+  duration_ms: 0.1707
+  type: 'test'
+  ...
+# Subtest: native wallet captions are not redefined by the browser dictionary
+ok 225 - native wallet captions are not redefined by the browser dictionary
+  ---
+  duration_ms: 0.1719
+  type: 'test'
+  ...
+# Subtest: browser settings explain the extra volume/account/sign-in scope
+ok 226 - browser settings explain the extra volume/account/sign-in scope
+  ---
+  duration_ms: 0.1302
+  type: 'test'
+  ...
+# Subtest: type-only native compatibility does not pull a runtime dependency
+ok 227 - type-only native compatibility does not pull a runtime dependency
+  ---
+  duration_ms: 0.1528
+  type: 'test'
+  ...
+# Subtest: quest feedback covers every language without exposing implementation terms
+ok 228 - quest feedback covers every language without exposing implementation terms
+  ---
+  duration_ms: 0.6628
+  type: 'test'
+  ...
+# Subtest: zh-CN route feedback preserves exact coordinate placeholders and local wording
+ok 229 - zh-CN route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.6539
+  type: 'test'
+  ...
+# Subtest: zh-TW route feedback preserves exact coordinate placeholders and local wording
+ok 230 - zh-TW route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.2143
+  type: 'test'
+  ...
+# Subtest: en route feedback preserves exact coordinate placeholders and local wording
+ok 231 - en route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.2372
+  type: 'test'
+  ...
+# Subtest: pt-BR route feedback preserves exact coordinate placeholders and local wording
+ok 232 - pt-BR route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.1115
+  type: 'test'
+  ...
+# Subtest: ru route feedback preserves exact coordinate placeholders and local wording
+ok 233 - ru route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.1836
+  type: 'test'
+  ...
+# Subtest: hi route feedback preserves exact coordinate placeholders and local wording
+ok 234 - hi route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.1002
+  type: 'test'
+  ...
+# Subtest: id route feedback preserves exact coordinate placeholders and local wording
+ok 235 - id route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.1063
+  type: 'test'
+  ...
+# Subtest: vi route feedback preserves exact coordinate placeholders and local wording
+ok 236 - vi route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.1038
+  type: 'test'
+  ...
+# Subtest: th route feedback preserves exact coordinate placeholders and local wording
+ok 237 - th route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.0939
+  type: 'test'
+  ...
+# Subtest: ar route feedback preserves exact coordinate placeholders and local wording
+ok 238 - ar route feedback preserves exact coordinate placeholders and local wording
+  ---
+  duration_ms: 0.0919
+  type: 'test'
+  ...
+# Subtest: route arrival describes a hunting area or NPC approach and leaves the next action to the player
+ok 239 - route arrival describes a hunting area or NPC approach and leaves the next action to the player
+  ---
+  duration_ms: 0.1748
+  type: 'test'
+  ...
+# Subtest: movement confirmation timeout is localized without placeholders, budgets or implementation terms
+ok 240 - movement confirmation timeout is localized without placeholders, budgets or implementation terms
+  ---
+  duration_ms: 0.6934
+  type: 'test'
+  ...
+# (node:94076) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: a real successful response releases background work before its unfinished binary body
+ok 241 - a real successful response releases background work before its unfinished binary body
+  ---
+  duration_ms: 13.2355
+  type: 'test'
+  ...
+# Subtest: one fixed eight-second allowance is shared by late background consumers
+ok 242 - one fixed eight-second allowance is shared by late background consumers
+  ---
+  duration_ms: 2.6978
+  type: 'test'
+  ...
+# Subtest: a skipped or failed runtime releases prewarm immediately without waiting for a timeout
+ok 243 - a skipped or failed runtime releases prewarm immediately without waiting for a timeout
+  ---
+  duration_ms: 0.146
+  type: 'test'
+  ...
+# Subtest: an old runtime cannot release a later adventure
+ok 244 - an old runtime cannot release a later adventure
+  ---
+  duration_ms: 0.5007
+  type: 'test'
+  ...
+# Subtest: retiring one prewarm consumer does not release another consumer
+ok 245 - retiring one prewarm consumer does not release another consumer
+  ---
+  duration_ms: 0.2792
+  type: 'test'
+  ...
+# Subtest: an already canceled owner starts no wait and completed headers need no renewed allowance
+ok 246 - an already canceled owner starts no wait and completed headers need no renewed allowance
+  ---
+  duration_ms: 0.3692
+  type: 'test'
+  ...
+# Subtest: server rendering has no shared gate and the browser document has one stable coordinator
+ok 247 - server rendering has no shared gate and the browser document has one stable coordinator
+  ---
+  duration_ms: 11.9629
+  type: 'test'
+  ...
+# Subtest: actual registrar delays only game background admission while critical and select work proceed
+ok 248 - actual registrar delays only game background admission while critical and select work proceed
+  ---
+  duration_ms: 30.9428
+  type: 'test'
+  ...
+# Subtest: actual registrar never starts a retired game prewarm, even when login prewarm is disabled
+ok 249 - actual registrar never starts a retired game prewarm, even when login prewarm is disabled
+  ---
+  duration_ms: 20.2007
+  type: 'test'
+  ...
+# Subtest: actual orchestrator callbacks queued before a screen retirement cannot start later
+ok 250 - actual orchestrator callbacks queued before a screen retirement cannot start later
+  ---
+  duration_ms: 38.8862
+  type: 'test'
+  ...
+# Subtest: actual screen effect arms priority before requesting game prewarm and cancels on select/login
+ok 251 - actual screen effect arms priority before requesting game prewarm and cancels on select/login
+  ---
+  duration_ms: 147.3381
+  type: 'test'
+  ...
+# Subtest: denied and owner-retired responses cannot announce successful runtime headers
+ok 252 - denied and owner-retired responses cannot announce successful runtime headers
+  ---
+  duration_ms: 0.5888
+  type: 'test'
+  ...
+# Subtest: a scheduling callback exception cannot fail compilation or repeat initialization
+ok 253 - a scheduling callback exception cannot fail compilation or repeat initialization
+  ---
+  duration_ms: 1.0937
+  type: 'test'
+  ...
+1..253
+# tests 253
+# suites 0
+# pass 253
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 8145.9926

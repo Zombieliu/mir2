@@ -27,6 +27,7 @@ const expectedKeys = [
   "ui.retry", "ui.sceneLoadUnavailable", "ui.fishingReel", "ui.characterCreateUnconfirmed",
   "ui.gameTextLoading", "ui.gameTextLoadUnavailable", "ui.confirmReturnToCharacterSelect",
   "ui.death.title", "ui.death.message", "ui.death.revive", "ui.death.reviving",
+  "ui.assetCache.title", "ui.assetCache.loading", "ui.assetCache.retrying", "ui.assetCache.failed", "ui.assetCache.complete", "ui.assetCache.preparing", "ui.assetCache.local", "ui.assetCache.remote", "ui.assetCache.pending",
 ];
 
 test("browser dictionaries use the ten native languages in the native order", () => {
