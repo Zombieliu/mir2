@@ -3933,7 +3933,8 @@ export function OriginalClientShell({
       }
       return pixel ?? entity.kind === "npc";
     });
-    const objectId = actor ? actor.objectId : label;
+    // Nameplates are painted above actor bodies; picking follows that visible order.
+    const objectId = label ?? actor?.objectId;
     if (objectId) return { kind: "entity", objectId };
   }
 

@@ -228,6 +228,35 @@ test("real stage capture retains a Canvas-underlay Gold marker and compatibility
   } finally { f.cleanup(); }
 });
 
+test("a visible NPC name above another actor keeps its own identity through the real stage and shared canvas", () => {
+  const f = fixture({ marker: "entity" });
+  try {
+    const tile = f.api.tileFromScenePoint(f.labelPoint.x, f.labelPoint.y);
+    f.addActor("npc-15", "npc", tile);
+    const underlying = f.addActor("underlying-scarecrow", "monster", tile);
+    f.layers = [f.canvas, f.label, f.markerNode, underlying, f.frame];
+    f.down();
+    assert.deepEqual(f.held.current.worldTarget, { kind: "entity", objectId: "npc-15" },
+      "the painted name owns its point, even when the actor beneath has an opaque body pixel");
+    f.mouseDown(); f.up();
+    assert.deepEqual(f.activations, ["npc-15"]);
+    assert.deepEqual(f.moves, []); assert.deepEqual(f.clicks, []); assert.deepEqual(f.picks, []);
+  } finally { f.cleanup(); }
+});
+
+test("ground drops above NPC names and actor bodies keep their existing pickup priority", () => {
+  const f = fixture();
+  try {
+    const tile = f.api.tileFromScenePoint(f.labelPoint.x, f.labelPoint.y);
+    const body = f.addActor("npc-15", "npc", tile);
+    const name = new Element({ classes: ["entity-nameplate"], dataset: { objectId: "npc-15", uiInteractive: "true" }, parent: f.frame });
+    f.layers = [f.canvas, f.label, f.markerNode, name, body, f.frame];
+    f.down(); f.up();
+    assert.deepEqual(f.picks, ["gold-drop-7"]); assert.deepEqual(f.activations, []);
+    assert.deepEqual(f.moves, []); assert.deepEqual(f.clicks, []);
+  } finally { f.cleanup(); }
+});
+
 test("a HUD Options press releases its original combat hold while the new modal blocks world input", () => {
   for (const phase of ["up", "lostCapture"]) {
     const f = fixture({ marker: "entity", newMove: true, modalOnHud: true });
