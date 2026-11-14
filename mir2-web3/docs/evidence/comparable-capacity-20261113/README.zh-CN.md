@@ -46,6 +46,8 @@ V8 更新工具在发送 SSH 命令前因完整请求超过 98304 字节限制�
 
 三案相同资源公式复核退出 0，SHA `2fa909a9347979b8f2741511c8394770e329d307248614d9bc321316c9b566fc`：原版 100 平均 1.521516 核、全程采样峰 Commit 3473.324MiB；旧 7403 OFF100 为 1.186168 核/2447.797MiB；新 8f100 为 1.258587 核/2528.039MiB、重叠采样间隔 CPU P95 3.267875 核。峰 Commit 不是稳态独占 RAM，失败/未发送的较低 CPU 不能代表吞吐余量。应用下行分别约 0.878593/4.931909/4.938494Mbps；原版包含 4 字节原生帧头且为计数读窗，现代为精确 epoch JSON payload 窗，不能当作同编码线速或云机带宽合同。
 
+已直接使用同一 GREEN native exe `2957e857e6f991f62b44704cdd6e532f016e2f3c02572e30f22bf385502cba71` 跑原有 ignored Crystal Tick profiler，实际退出 0、66.607 秒、独立 4 核/8GiB Job 全成员正常退出且无 kill。4 个 owner、256 次 memory-store Tick 的 outer P95 540.9μs、最大 1798.2μs，checkpoint begin/finish P95 241/94.2μs；64 次实际 wrapper 基线 P95 444μs。它没有 Gateway、File/PG 或并发持锁者，不能排除现场锁等待或认证 CCU，只说明这份无争用叶节点计算本身未复现秒级停顿。
+
 Linux CI `43539916415` 的同一 8f/head、canonical branch 全工作流已 success，明确 `playtest_wallet_no_docker=true/publish_r2=false/numeron_operation=off`。新 ELF SHA `edd9f48cdb36ddd96334598aca4abc2f2e212e46ef2cbb60d4a1f5ab15a7ded5`、103748080 字节；独立 V9 实际校验退出 0，证明 SHA `6990c78333a0e28369fd701276c981e4611bd93b5027c1adbe808716ed46ce7d`，七项 native 门、真实 PG/Redis startup、源码/包及全 1620 地图匹配通过。更新前 7403 测试服的全量地图只读 V5 实采也退出 0，证明 `b44d5f3c250b508f8005f4157c35af9516bbf767abcba5c77722dc740083761e`；V4 漏投影 systemd 限制导致的实际拒绝 `8fff224d5ec280cce009e4b857dd8defbd3391350d7d56e5a23bf7483b7bec63` 保留，未改写或重标旧 82 证明。
 
 02:44 UTC 同一 TEST 实际 install 退出 0，回执 SHA `64e9359de27a9a89508ece2cf7ae8e9023abb9de8f2c246eafd1aa1f9713d074`：运行源码 8f、上述 ELF，PID 1150828，20 个 EnvFile、19 个 drop-in，原上限 51/66/51。独立工具集成提交 `7d55b0411f`，V10 只绑定实际 native 证明的 24 项常量，函数/核心 AST 与已审查 V2 相同；V2 离线 121 次执行包括 5 次继承重复，不能称 121 项独立保护。实际绑定 5 项、负例 19 个及公共负载准备 9 项均通过。原 V5 与 V6 安装状态保持原字节。
@@ -55,6 +57,10 @@ Linux CI `43539916415` 的同一 8f/head、canonical branch 全工作流已 succ
 云机第三轮 2/25 人诊断于 00:18 UTC 完整结束：每档 300 秒，窗口评分 320/320、4000/4000，10/125 个逐人分钟窗口全部通过；27 个连接（含最终 fresh 2）全部在各自原 5 秒门槛内取得 LogOutSuccess 和正常 Close，6 轮穿脱与 fresh 保存核对通过，最终 WS/active 为 0。load client 实际退出 0、所有 owned 成员退出且无 kill，同池 after 校验通过；报告 SHA `2e83a85433ee37437ee026d35653f0b5d4786d04c9cded764833309a4dccef0a`，after `f89891e33fd6a2834d1df538ff98363502ba7a816856357f2d53ba1759ff2cc7`。25 人 target CPU 平均 0.429567 核、采样峰 cgroup 约 344MiB、游戏 WS 应用下行 0.342651Mbps。沿用 51/66/51，无服务重启或上限操作；一次成功不能排除前两轮的间歇性故障，也不是 50/100 人、完整战斗或物理三端认证。
 
 该轮主监视器 505 samples、本地退出 0；TCP 补采 505 samples，按 own stop-file 结束、本地退出 1，部分内核字段缺失，远端退出码仍为 unknown/null。独立汇总 V5 曾将 SSH method 的 -1 未取得退出码标记拒绝，旧拒绝保留；V6 原样保留 method=-1、remoteExitStatus=null/received=false，28 项离线检查通过，实际闭合汇总退出 0，SHA `2af24c06653068efc2f3c11664710705c7a0f652f20974c32c8cceff29e8ae6e`，容量标志继续 false。TCP 有公网重传/排队阳性，但包含 Caddy 全部路由，未绑定 TEST、actor 或旧失败连接；不据此修改网络。主机带宽“30MBPS”的合同单位尚未核实。
+
+新 8f 云测的历史 invocation `fbb25efb4f464bae96a74b948f3b0744` / PID 1151510、03:00–03:02 UTC 日志已作有界只读实采：965 行、静态选取 825 行，未触及 2000 行上限，远端实际退出 0；回执 SHA `e3c4d7eca4da6f5bd84d971ad60ce663ba50c74e8d76a8210ab190b3fbabbf66`。采集前后当前程序与 8 个保护进程全指纹一致，未改变服务/网络设置。整窗已记录 runtime Tick 最大 141ms、AccountStore wait 42ms、Zone outbound serial wait 31ms；四次超时发送所在 03:00:45–53 UTC 的已选行最大 input turn 65ms。日志缺失仍不证明没有服务端延迟，SDK 与服务端 connection 编号没有可直接相等的证据，暂不据此把两个约 2.07 秒接收空档断言为 WAN 故障。准备使用现有 owner delivery 的 recipientZoneID/坐标及 enqueue→gate→send→sent 追踪继续缩小范围。
+
+新增已闭合材料归档到受保护的私有 evidence 目录 V7：314 文件、1000676388 字节，manifest SHA `3c8f8065087ae98b9daa5e64c328b8233bf14c2992e24e30671646e1bc84a9fd`。V1–V6 与原始文件保持不变，排除账号池、认证账本、存档、工作树与构建缓存；归档不升级任何容量标志。
 
 用户提到的重启亦作只读核对：近三天 System 日志中的两条 1074（2026-11-12 02:44/02:46 UTC，即本地 10:44/10:46）分别记录 MoUsoCoreWorker 与 TrustedInstaller 发起计划内系统更新重启。该日志投影 SHA `e614b2e8804b707f68935e682e4d79a9293675410107d47101ee99b5223f8383`；本轮没有修改更新、电源或 VPN 设置。
 
