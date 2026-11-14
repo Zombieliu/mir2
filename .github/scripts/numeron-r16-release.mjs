@@ -16,73 +16,123 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: "5b011e5d2fcce78883b517e5992ef23245052f84",
+  source: "b9acf175fad0bb582f20fd76282580f179c4b0d2",
   sourceRef: BRANCH,
-  baseSource: "cf12f2d5f4af4a3de2279f4d332cfa37a4e0d74d",
+  baseSource: "1995a556f7f5e1d4e63e0d5d47cbf3e9ee109826",
   assetSource: "f2de762309768b51b39438c2437c14e819df9bf7",
   sourceCommits: [
-    "5b011e5d2fcce78883b517e5992ef23245052f84"
+    "b9acf175fad0bb582f20fd76282580f179c4b0d2"
   ],
   changedFiles: [
     {
       "status": "modified",
+      "filename": "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
+      "sha": "aebc9eaae9dd312eae9f2c2d4c600484282830e8"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/app/page.tsx",
+      "sha": "e2a05ed5320612d87d7053f278d41fc94718c11f"
+    },
+    {
+      "status": "modified",
       "filename": "mir2-web3/apps/web/lib/bevy-runtime-initializer.ts",
-      "sha": "9b7ddb89d5893bd36ce802c0f4c05ace0f595a32"
+      "sha": "766c73059d7db02c71b6f0319a5d9c5430db7566"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/apps/web/scripts/smoke-bevy-runtime-header-probes.mjs",
-      "sha": "33c7762a3c7be35f0a46585a2dbd50f8c2e9e265"
+      "filename": "mir2-web3/apps/web/lib/runtime-header-priority.ts",
+      "sha": "57618d47a3d25f75526805e2bd05fcc6438f4f91"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/scripts/lib/r16-static-transport.mjs",
+      "sha": "04301bd5c70261080db6e224fdfa4842a798df64"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-finite-recovery.mjs",
-      "sha": "24966c60581e3b8c61ea868bedb44a3f43caf8a3"
+      "filename": "mir2-web3/apps/web/scripts/lib/r16-static-waterfall.mjs",
+      "sha": "7697be12556c5c2a35bdcc235e50af7d72c06054"
     },
     {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-initializer.mjs",
-      "sha": "9bda11b5d92e973b912f1ae3f747590dee131bac"
+      "status": "added",
+      "filename": "mir2-web3/apps/web/scripts/smoke-runtime-header-priority.mjs",
+      "sha": "0c0a01c06afdf8b431ae956e64746c1c8e5ebf33"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/scripts/test-r16-static-transport.mjs",
+      "sha": "9010f05fffa7871ea24d0daaf9778815ec3d3974"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/scripts/test-runtime-header-priority.mjs",
+      "sha": "4a8c6985eab7ffecfdd66d08465301a75b87d539"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/AGENT-CURRENT.md",
-      "sha": "0a4a63a88e1751d35292d80d541a225097d4683b"
+      "sha": "c6ebe493ff8e9534a9b7b70d1ea4359865f02bdc"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
-      "sha": "a8c8b8c5269690990bf5d19ca8fdd38341b73093"
+      "sha": "0d9bbbe733a2a18eecfa3ca94a69adedffcc90d0"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
-      "sha": "5da9bef3d0e974f32ce0bac25ceeeae92b81b0c4"
+      "sha": "c49a48c039b42ae879e0b3025e1bae6a212f3aaf"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-header-probes-20261114/README.md",
-      "sha": "2f0a3d0fb45f77027c362dd6d5ff3b551a49e14e"
+      "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/README.md",
+      "sha": "f87322804685cb229b8f89e95d49e56a94f250db"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-header-probes-20261114/default-vendor-arrival.png",
-      "sha": "2842ada3ac7694c4420600457c13c78f333c83ac"
+      "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/chrome-order-failed-r1.json",
+      "sha": "1d6ec5efb791bb94e3965f7566b28299ccd1c860"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-header-probes-20261114/inherited-branch-scope.json",
-      "sha": "6aee806d8bf42f24af85c96b31ec612dc0352da0"
+      "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/chrome-order-passed-r2.json",
+      "sha": "076cd0be4b2123ab7020ae961fd5b155f3cdc6dd"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-header-probes-20261114/qualification.json",
-      "sha": "845bda00db972b5a9c29c24b5d275353c6ff5ff3"
+      "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/default-static-transport.json",
+      "sha": "5268543c29658050fca0b820d3ae8ad10301d7b0"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-header-probes-20261114/webgl2-vendor-arrival.png",
-      "sha": "673ef513a4a985ff656acc5c7b50edcc84d77b48"
+      "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/default-vendor-arrival.png",
+      "sha": "a0257ad5540bdd6ddd0e25b454bdf96a88429a2e"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/foreign-preservation.json",
+      "sha": "f59eef2f30a90e1bf35f7467f89ce6b5209b6020"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/game-fixture-preparation.json",
+      "sha": "cacf3ce9c04bbb4eed7015a0d3af7065d2463ac1"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/qualification.json",
+      "sha": "bb319f3d8439725dac66ea81275c4beb3cfa6995"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/webgl2-static-transport.json",
+      "sha": "1ca8110359e2a87f4dae73869dd10901208346d8"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/webgl2-vendor-arrival.png",
+      "sha": "91cd5d6b8c2e1b157d76a0a96cd1b4f61c7eac39"
     }
   ],
   entryScene: {
