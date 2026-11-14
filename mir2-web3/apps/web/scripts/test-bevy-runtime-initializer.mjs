@@ -330,11 +330,63 @@ test('invalid or oversized last-mirror bytes cannot turn an earlier transient fa
   }
 });
 
-test('the original final header deadline is terminal even after an earlier retryable failure', async t => {
+test('two absent header probes return to the app before one initialization', async t => {
   t.mock.timers.enable({ apis: ['setTimeout'] });
-  let calls = 0, lastSignal, settled = false;
+  const urls=['https://app.example.test/pinned.wasm','https://assets.example.test/pinned.wasm'];
+  const requests=[], signals=[], events=[];
+  let imports=0, canvases=0, defaults=0, recovery=0;
+  const runtime={async default({module_or_path}){defaults++;assert(module_or_path instanceof WebAssembly.Module);}};
+  const pending=initialize({loadModule:async()=>{imports++;return runtime;},wasmUrl:urls[0],wasmFallbackUrls:[urls[1]],
+    timeoutMs:120000,waitForCanvas:async()=>{canvases++;},takeRecovery:()=>{recovery++;return true;},
+    onDownloadAttempt:e=>events.push(e),fetchImpl:request=>{
+      requests.push(request.url);signals.push(request.signal);
+      if(requests.length===3){assert(signals.slice(0,2).every(s=>s.aborted));return Promise.resolve(response());}
+      return new Promise((_,reject)=>request.signal.addEventListener('abort',()=>reject(request.signal.reason),{once:true}));
+    }});
+  const observed=pending.then(value=>({value}),error=>({error}));
+  await flush();t.mock.timers.tick(7999);await flush();const beforeFirst=requests.length;
+  t.mock.timers.tick(1);await flush();const afterFirst=requests.length;
+  t.mock.timers.tick(7999);await flush();const beforeSecond=requests.length;
+  t.mock.timers.tick(1);await flush();const afterSecond=requests.length;
+  // Settle the old implementation too, so the regression fails without leaking work.
+  t.mock.timers.tick(120000);await flush();const result=await observed;
+  assert.deepEqual([beforeFirst,afterFirst,beforeSecond,afterSecond],[1,2,2,3]);
+  assert.equal(result.error,undefined);assert.equal(result.value,runtime);
+  assert.deepEqual(requests,[urls[0],urls[1],urls[0]]);
+  assert.deepEqual([imports,canvases,defaults,recovery],[1,1,1,0]);
+  assert.deepEqual(events.filter(e=>e.state==='failed').map(e=>[e.sourceIndex,e.reason,e.bytes,e.retryable]),
+    [[0,'headers-timeout',0,true],[1,'headers-timeout',0,true]]);
+  assert.equal(events.at(-1).bytes,binary.length);assert.equal(events.at(-1).state,'completed');
+});
+
+test('a slow mirror keeps the final header budget after a missing or unavailable app', async t => {
+  t.mock.timers.enable({apis:['setTimeout']});
+  for(const status of [404,503]){
+    const urls=['https://app.example.test/pinned.wasm','https://assets.example.test/pinned.wasm'],requests=[];
+    let initialized=0;
+    const pending=initialize({loadModule:async()=>({async default(){initialized++;}}),wasmUrl:urls[0],wasmFallbackUrls:[urls[1]],
+      timeoutMs:120000,waitForCanvas:async()=>{},fetchImpl:request=>{
+        requests.push(request.url);
+        if(request.url===urls[0])return Promise.resolve(new Response(null,{status}));
+        return new Promise((resolve,reject)=>{
+          const timer=setTimeout(()=>resolve(response()),9000);
+          request.signal.addEventListener('abort',()=>{clearTimeout(timer);reject(request.signal.reason);},{once:true});
+        });
+      }});
+    const observed=pending.then(value=>({value}),error=>({error}));
+    await flush();t.mock.timers.tick(8000);await flush();
+    t.mock.timers.tick(9000);await flush();const result=await observed;
+    assert.equal(result.error,undefined);assert.equal(initialized,1);
+    assert.deepEqual(requests,[urls[0],urls[1],urls[1]],'the slow viable mirror must get its fresh read');
+  }
+});
+
+test('the final fresh-read header deadline remains terminal after both probes', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  let calls = 0, lastSignal, settled = false, recovery=0;
   const pending = initialize({ loadModule: async () => ({}), wasmUrl: 'https://app.example.test/pinned.wasm',
     wasmFallbackUrls: ['https://assets.example.test/pinned.wasm'], timeoutMs: 120000, waitForCanvas: async () => {},
+    takeRecovery:()=>{recovery++;return true;},
     fetchImpl: async request => {
       calls++; if (calls === 1) return new Response(null, { status: 503 });
       lastSignal = request.signal;
@@ -343,8 +395,27 @@ test('the original final header deadline is terminal even after an earlier retry
   });
   const observed = pending.then(() => assert.fail('stalled headers initialized'), error => { settled = true; return error; });
   while (!lastSignal) await flush();
+  t.mock.timers.tick(8000);await flush();const afterProbe=calls;
   t.mock.timers.tick(119999); await flush(); assert.equal(settled, false);
-  t.mock.timers.tick(1); assert.equal((await observed).name, 'AbortError'); assert.equal(calls, 2);
+  t.mock.timers.tick(1); assert.equal((await observed).name, 'AbortError');
+  assert.equal(afterProbe,3);assert.equal(calls,3);assert(lastSignal.aborted);assert.equal(recovery,0);
+  t.mock.timers.tick(600000);await flush();assert.equal(calls,3);
+});
+
+test('owner retirement in the second header probe cannot start the fresh read', async t => {
+  t.mock.timers.enable({apis:['setTimeout']});
+  const owner=new AbortController(),signals=[];let calls=0,initialized=0,recovery=0;
+  const result=initialize({loadModule:async()=>({async default(){initialized++;}}),wasmUrl:'https://app.example.test/pinned.wasm',
+    wasmFallbackUrls:['https://assets.example.test/pinned.wasm'],timeoutMs:120000,waitForCanvas:async()=>{},ownerSignal:owner.signal,
+    takeRecovery:()=>{recovery++;return true;},fetchImpl:request=>{
+      calls++;signals.push(request.signal);
+      return new Promise((_,reject)=>request.signal.addEventListener('abort',()=>reject(request.signal.reason),{once:true}));
+    }});
+  const observed=result.then(()=>assert.fail('retired owner initialized'),e=>e);
+  await flush();t.mock.timers.tick(8000);await flush();assert.equal(calls,2);
+  owner.abort();assert.equal(await observed,owner.signal.reason);
+  t.mock.timers.tick(600000);await flush();assert(signals.every(s=>s.aborted));
+  assert.deepEqual([calls,initialized,recovery],[2,0,0]);
 });
 
 test('a diagnostic callback cannot fail or repeat initialization', async () => {

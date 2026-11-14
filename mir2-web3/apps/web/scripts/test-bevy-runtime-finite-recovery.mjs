@@ -193,14 +193,15 @@ test("a network-like compiler error after EOF cannot authorize an additional gro
   assert.equal(calls, 3, "only the established first-group classification remains"); assert.equal(spent, 0);
 });
 
-test("the final header deadline is terminal even with an available recovery budget", async t => {
+test("the fresh-read header deadline is terminal even with an available recovery budget", async t => {
   t.mock.timers.enable({ apis: ["setTimeout"] }); let calls = 0, spent = 0;
   const result = observe(initialize(settings({ takeRecovery: () => { spent++; return true; }, fetchImpl: request => {
     calls++; if (calls === 1) return Promise.resolve(new Response(null, { status: 503 }));
     return new Promise((_, reject) => request.signal.addEventListener("abort", () => reject(request.signal.reason), { once: true }));
   } })));
-  await turns(); await tick(t, 120000); assert.equal((await result).error.name, "AbortError");
-  assert.equal(calls, 2); assert.equal(spent, 0);
+  await turns(); await tick(t, 8000);assert.equal(calls,3);
+  await tick(t, 120000); assert.equal((await result).error.name, "AbortError");
+  assert.equal(calls, 3); assert.equal(spent, 0);
 });
 
 test("body absolute and compiler backpressure deadlines cannot spend recovery", async t => {

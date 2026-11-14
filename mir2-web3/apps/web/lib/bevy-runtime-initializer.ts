@@ -74,12 +74,14 @@ export async function initializeBevyRuntime<T extends RuntimeInitializer>({
     const sources = [...new Set([wasmUrl, ...wasmFallbackUrls])];
     const attempts = [...sources];
     const transientSources: string[] = [];
+    const stalledHeaderSources = new Set<string>();
     let lastError: unknown;
     let groupStart = 0, recoveryTaken = false;
-    let rotateAfterPartialFailure = false;
+    let rotateAfterSourceFailure = false;
     for (const [index, url] of attempts.entries()) {
       if (controller.signal.aborted) throw controller.signal.reason;
       const groupIndex = index - groupStart;
+      const probingSources = sources.length > 1 && groupIndex < sources.length;
       let recoverableTransport = false;
       let phase: RuntimeBinaryAttempt["phase"] = "headers";
       let reason: RuntimeBinaryAttempt["reason"];
@@ -116,10 +118,11 @@ export async function initializeBevyRuntime<T extends RuntimeInitializer>({
       try {
         report("started");
         const consume = async () => {
-          // A configured alternate should not wait behind an unresponsive edge.
-          // The final source retains the original response-header budget.
+          // Probe every configured source before spending the final header
+          // budget on one fresh read. An unresponsive last mirror must not
+          // prevent returning to an earlier transient source.
           const headers = timer(() => expire("headers-timeout", "Runtime binary response headers timed out", "AbortError"),
-            groupIndex < sources.length - 1 ? Math.min(8_000, timeoutMs) : timeoutMs);
+            probingSources ? Math.min(8_000, timeoutMs) : timeoutMs);
           const response = await fetchImpl(new Request(url, { signal: attempt.signal }));
           stop(headers);
           status = response.status;
@@ -183,7 +186,7 @@ export async function initializeBevyRuntime<T extends RuntimeInitializer>({
         const failure = bodyFailure ?? error;
         const invalid = typeof WebAssembly.CompileError === "function" && failure instanceof WebAssembly.CompileError;
         const terminal = failure instanceof RangeError || invalid || reason === "consumer-timeout" || reason === "body-timeout"
-          || (reason === "headers-timeout" && groupIndex >= sources.length - 1);
+          || (reason === "headers-timeout" && !probingSources);
         const network = failure instanceof TypeError && /failed to fetch|fetch failed|network|terminated|aborted|load failed|connection/i.test(failure.message);
         const retryable = !controller.signal.aborted && !terminal && (reason === "body-idle"
           || reason === "headers-timeout" || (reason === "http"
@@ -197,14 +200,18 @@ export async function initializeBevyRuntime<T extends RuntimeInitializer>({
         if (controller.signal.aborted) throw controller.signal.reason;
         if (terminal) throw failure;
         if (retryable && groupIndex < sources.length) transientSources.push(url);
-        // A source that transferred bytes before failing may repeat a costly
-        // partial download. Spend the same one retry on an earlier transient
-        // source first. Zero-byte and HTTP failures retain their existing order.
-        // A missing/denied source never acquires retry authority.
+        if (retryable && reason === "headers-timeout") stalledHeaderSources.add(url);
+        // A partial body or absent headers can repeat a costly/stalled source.
+        // Spend the same one retry on an earlier transient source first.
+        // Other zero-byte and HTTP failures retain their existing order.
+        // Missing/denied sources never acquire retry authority.
         if (groupIndex === sources.length - 1 && sources.length > 1 && transientSources.length) {
           const partialBody = retryable && (phase as RuntimeBinaryAttempt["phase"]) === "body" && bytes > 0;
-          const retrySource = partialBody ? transientSources[0] : transientSources[transientSources.length - 1];
-          rotateAfterPartialFailure = partialBody && retrySource !== url;
+          const earlierStalledHeaders = retryable && reason === "headers-timeout"
+            ? transientSources.find(source => source !== url && stalledHeaderSources.has(source)) : undefined;
+          const retrySource = partialBody ? transientSources[0]
+            : earlierStalledHeaders ?? transientSources[transientSources.length - 1];
+          rotateAfterSourceFailure = (partialBody || earlierStalledHeaders !== undefined) && retrySource !== url;
           attempts.push(retrySource);
         }
         // The async reader may have reached EOF before the compiler rejects.
@@ -226,10 +233,11 @@ export async function initializeBevyRuntime<T extends RuntimeInitializer>({
           await recoveryCooldown();
           groupStart = attempts.length;
           transientSources.length = 0;
-          // If the partial-body retry was rotated, do not immediately repeat it
+          stalledHeaderSources.clear();
+          // If the source retry was rotated, do not immediately repeat it
           // again. The authorized group still has the same size and budgets.
-          const next = rotateAfterPartialFailure ? (sources.indexOf(url) + 1) % sources.length : 0;
-          rotateAfterPartialFailure = false;
+          const next = rotateAfterSourceFailure ? (sources.indexOf(url) + 1) % sources.length : 0;
+          rotateAfterSourceFailure = false;
           attempts.push(...sources.slice(next), ...sources.slice(0, next));
         }
       }
