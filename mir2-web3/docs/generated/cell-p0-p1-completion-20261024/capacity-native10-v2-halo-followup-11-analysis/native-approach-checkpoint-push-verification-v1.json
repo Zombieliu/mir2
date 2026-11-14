@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-25T04:26:29.9081338+00:00",
+  "commit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+  "pushExitCode": 0,
+  "remoteBranch": "refs/heads/codex/cell-preproduction-p0-p1-20261024",
+  "lsRemoteCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+  "originalBranch": "refs/heads/codex/windows-player-journey",
+  "originalBranchCommit": "e11c32fb15ca4cf18d933768b8e70866cd089f26",
+  "remoteVerifiedBy": "git ls-remote origin refs/heads/codex/cell-preproduction-p0-p1-20261024 refs/heads/codex/windows-player-journey",
+  "trackedCleanAfterCommit": true,
+  "driverSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+  "capacityAccepted": 0,
+  "P2Started": false
+}

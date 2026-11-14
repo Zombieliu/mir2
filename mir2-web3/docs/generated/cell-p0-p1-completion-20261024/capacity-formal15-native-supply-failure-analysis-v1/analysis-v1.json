@@ -1,0 +1,2350 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-26T00:49:16.674768+00:00",
+  "runId": "1792974410829-a5288349",
+  "scope": "Bounded closed-run supply diagnosis; one raw stream, completed diagnostics only. Not independent acceptance replay or a causal proof.",
+  "source": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\reports\\1792974410829-a5288349.samples.jsonl",
+    "bytes": 50817509,
+    "rows": 82451,
+    "sha256": "721be7e82a41ea08e1cad5d705a67ea603a09cc7ca08418871b1765741854d0d"
+  },
+  "catalog": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\collect-formal-native-v2-scout-anti-convergence-ladder-15-public-artifact-catalog.json",
+    "bytes": 67349,
+    "sha256": "6cf8f584e0b1f248d16ebe3febec276cbbcb3d9ae7945ba830500c4481ef1d7a"
+  },
+  "report": {
+    "pin": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\reports\\1792974410829-a5288349.report.json",
+      "bytes": 424421,
+      "sha256": "e938a814eed311b80281ffcd6cadf16e57d36c78f48a1f35ad4caf68d90355a3"
+    },
+    "ok": false,
+    "passedStages": [
+      [
+        "stage-2",
+        true,
+        300.126
+      ],
+      [
+        "stage-10",
+        true,
+        300.257
+      ],
+      [
+        "stage-25",
+        false,
+        300.276
+      ]
+    ],
+    "stage25RollingPass": [
+      true,
+      true,
+      true,
+      false,
+      true
+    ],
+    "stage25AttackActions": 233,
+    "wholeSuccessfulAttacks": 451,
+    "wholeAttackStatus": {
+      "success": 451
+    },
+    "continuous": {
+      "passed": true,
+      "failureCount": 0,
+      "assessedWindows": 230
+    },
+    "failedWindow": {
+      "index": 4,
+      "startedAtMs": 1792975361172,
+      "endedAtMs": 1792975421220,
+      "seconds": 60.048,
+      "passed": false
+    }
+  },
+  "sourceCode": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+    "bytes": 155475,
+    "sha256": "6c2f4e3dfcbc38465a13cf05c8c8945fdb4fe7c99acaea43dfad493fb77696d8"
+  },
+  "currentDriverFreeze": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-scout-anti-convergence-driver-frozen-v1.json",
+    "bytes": 9472,
+    "sha256": "ed0d9783871dd74107c3ec7980574a31acf06a1ed7c5daac40f1f94e78a40182"
+  },
+  "formalFreeze": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\launcher-source-frozen-v1.json",
+    "bytes": 52054,
+    "sha256": "9f2af38f22337788512700dce010f83a312b2cbdfc8877a57acdce7be46c3f65"
+  },
+  "rawParsePasses": 1,
+  "rawSourceMatchesActualCatalog": true,
+  "rowTypes": {
+    "monitor": 545,
+    "phaseStarted": 6,
+    "action": 19059,
+    "coverage": 1063,
+    "playerLifecycle": 27640,
+    "admitted": 25,
+    "selfTransform": 15996,
+    "fanoutDistribution": 12233,
+    "compactNavigationWire": 5155,
+    "phaseEnded": 6,
+    "continuousWindow": 230,
+    "window": 15,
+    "movementCorrection": 3,
+    "stageComplete": 3,
+    "combatArrival": 2,
+    "pendingAttackEvidence": 451,
+    "combatScoutSelection": 9,
+    "combatScoutAdvanced": 7,
+    "combatChaseDeferred": 2,
+    "finished": 1
+  },
+  "rowTypeKeys": {
+    "monitor": [
+      "type",
+      "sample"
+    ],
+    "phaseStarted": [
+      "type",
+      "at",
+      "name",
+      "kind",
+      "targetActors",
+      "startedAtMs",
+      "endedAtMs",
+      "completed"
+    ],
+    "action": [
+      "type",
+      "at",
+      "phase",
+      "actor",
+      "kind",
+      "status",
+      "latencyMs"
+    ],
+    "coverage": [
+      "type",
+      "phase",
+      "at",
+      "aoi",
+      "driver",
+      "density"
+    ],
+    "playerLifecycle": [
+      "type",
+      "actor",
+      "connection",
+      "at",
+      "sequence",
+      "monotonicMs",
+      "phase",
+      "source",
+      "before",
+      "after"
+    ],
+    "admitted": [
+      "type",
+      "actor",
+      "role",
+      "characterIndex",
+      "at",
+      "controlledActors"
+    ],
+    "selfTransform": [
+      "type",
+      "actor",
+      "connection",
+      "at",
+      "sequence",
+      "monotonicMs",
+      "phase",
+      "source",
+      "mapFileName",
+      "wire",
+      "before",
+      "after"
+    ],
+    "fanoutDistribution": [
+      "type",
+      "actor",
+      "phase",
+      "kind",
+      "expected",
+      "delivered",
+      "latencyUpperBoundsMs",
+      "at"
+    ],
+    "compactNavigationWire": [
+      "type",
+      "schemaVersion",
+      "connection",
+      "diagnosticSequence",
+      "observedAtMs",
+      "monotonicMs",
+      "phase",
+      "event",
+      "source",
+      "command",
+      "sequenceBefore",
+      "sequenceAfter",
+      "originalOutcome",
+      "before",
+      "after",
+      "hint",
+      "pending",
+      "priorPendingSuperseded",
+      "truncated"
+    ],
+    "phaseEnded": [
+      "type",
+      "at",
+      "name",
+      "kind",
+      "targetActors",
+      "startedAtMs",
+      "endedAtMs",
+      "completed"
+    ],
+    "continuousWindow": [
+      "type",
+      "actor",
+      "role",
+      "phases",
+      "seconds",
+      "final",
+      "activityDurationSufficient",
+      "activity",
+      "nativeActivity",
+      "activityPassed",
+      "latencyPassed",
+      "fanoutPassed",
+      "timeoutRatio",
+      "correctionRatio",
+      "metrics",
+      "passed",
+      "at"
+    ],
+    "window": [
+      "type",
+      "phase",
+      "startedAtMs",
+      "endedAtMs",
+      "assessment"
+    ],
+    "movementCorrection": [
+      "type",
+      "actor",
+      "connection",
+      "at",
+      "monotonicMs",
+      "sequence",
+      "phase",
+      "kind",
+      "mapFileName",
+      "origin",
+      "first",
+      "target",
+      "actual",
+      "ownHp",
+      "temporaryAvoidance",
+      "nearbyOccupants",
+      "nearbyOccupantCount",
+      "occupantsTruncated"
+    ],
+    "stageComplete": [
+      "type",
+      "stage"
+    ],
+    "combatArrival": [
+      "type",
+      "actor",
+      "at",
+      "phase",
+      "mapFileName",
+      "declaredHome",
+      "actual",
+      "authoritativeSequence",
+      "activeElapsedMs"
+    ],
+    "pendingAttackEvidence": [
+      "type",
+      "actor",
+      "phase",
+      "connection",
+      "at",
+      "sentAtMs",
+      "sentAtWallMs",
+      "sendCursor",
+      "endedAtMs",
+      "endedAtWallMs",
+      "owner",
+      "target",
+      "outcome",
+      "protocolVersion",
+      "requestId",
+      "maximumPackets",
+      "packetCount",
+      "truncated",
+      "packets",
+      "rule"
+    ],
+    "combatScoutSelection": [
+      "type",
+      "actor",
+      "phase",
+      "at",
+      "reason",
+      "fallbackHomeIndex",
+      "selectedHomeIndex",
+      "pathSearches",
+      "hintPathSearches",
+      "hintScanTruncated",
+      "hintOrderChangedByActiveScoutPreference",
+      "hintTargetId",
+      "hintTarget",
+      "actualObserver",
+      "potentialAttackTile",
+      "truncated"
+    ],
+    "combatScoutAdvanced": [
+      "type",
+      "actor",
+      "phase",
+      "at",
+      "reason",
+      "homeIndex",
+      "confirmedMoves",
+      "elapsedMs"
+    ],
+    "combatChaseDeferred": [
+      "type",
+      "actor",
+      "phase",
+      "at",
+      "targetId",
+      "mapFileName",
+      "nonImprovingMoves",
+      "elapsedMs",
+      "pursuitMs",
+      "confirmedMoves",
+      "reason",
+      "ttlMs",
+      "actual",
+      "target",
+      "attacksSent"
+    ],
+    "finished": [
+      "type",
+      "ok",
+      "playableCapacityAccepted"
+    ]
+  },
+  "wireRowsByConnection": {
+    "1": 3262,
+    "2": 1893
+  },
+  "fighters": [
+    {
+      "actor": "Ldf5bef05",
+      "reportActivity": {
+        "actor": "Ldf5bef05",
+        "role": "combat",
+        "plans": 67,
+        "gaps": 0,
+        "moves": 44,
+        "attacks": 16,
+        "hits": 16,
+        "damage": 59,
+        "lastSuccessAt": 1792975420574,
+        "runs": 32,
+        "cells": 76,
+        "nativeOpportunities": 67,
+        "nativeCompleted": 67,
+        "offeredDurationMs": 60330,
+        "evidenceWaits": 0,
+        "ownerAckWaits": 0,
+        "unknownPacing": 0,
+        "nativeActivity": {
+          "passed": true,
+          "completionRatio": 1,
+          "runRatio": 0.7272727272727273,
+          "cellsPerMinute": 75.9392486011191,
+          "positiveHitsPerMinute": 15.987210231814547,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "offeredDurationMs": 60330,
+          "unknownPacing": 0,
+          "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+        },
+        "passed": false
+      },
+      "rawWindowKinds": {
+        "attack": 16,
+        "walk": 12,
+        "run": 32,
+        "rtt": 5,
+        "turn": 5,
+        "chat": 2,
+        "peerChat": 2,
+        "refresh": 1
+      },
+      "rawWindowStatus": {
+        "success": 75
+      },
+      "scoutMoves": 8,
+      "chaseMoves": 36,
+      "scoutHomeIndices": {
+        "17": 3,
+        "6": 5
+      },
+      "chaseTargetIds": {
+        "206634": 9,
+        "206708": 5,
+        "206646": 7,
+        "206613": 7,
+        "206706": 8
+      },
+      "attackTargetIds": {
+        "206517": 1,
+        "206634": 5,
+        "206646": 6,
+        "206613": 2,
+        "206706": 2
+      },
+      "maximumActionLatencyMs": 173.83559999999125,
+      "maximumPlannedIntervalMs": 1380
+    },
+    {
+      "actor": "Ldf5bef0f",
+      "reportActivity": {
+        "actor": "Ldf5bef0f",
+        "role": "combat",
+        "plans": 67,
+        "gaps": 0,
+        "moves": 45,
+        "attacks": 15,
+        "hits": 15,
+        "damage": 39,
+        "lastSuccessAt": 1792975420417,
+        "runs": 29,
+        "cells": 74,
+        "nativeOpportunities": 67,
+        "nativeCompleted": 67,
+        "offeredDurationMs": 60120,
+        "evidenceWaits": 0,
+        "ownerAckWaits": 0,
+        "unknownPacing": 0,
+        "nativeActivity": {
+          "passed": true,
+          "completionRatio": 1,
+          "runRatio": 0.6444444444444445,
+          "cellsPerMinute": 73.94084732214229,
+          "positiveHitsPerMinute": 14.988009592326138,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "offeredDurationMs": 60120,
+          "unknownPacing": 0,
+          "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+        },
+        "passed": false
+      },
+      "rawWindowKinds": {
+        "walk": 16,
+        "run": 29,
+        "rtt": 5,
+        "chat": 2,
+        "peerChat": 2,
+        "turn": 5,
+        "attack": 15,
+        "refresh": 1
+      },
+      "rawWindowStatus": {
+        "success": 75
+      },
+      "scoutMoves": 12,
+      "chaseMoves": 33,
+      "scoutHomeIndices": {
+        "6": 12
+      },
+      "chaseTargetIds": {
+        "206634": 3,
+        "206708": 9,
+        "206646": 7,
+        "206613": 5,
+        "206335": 7,
+        "206706": 2
+      },
+      "attackTargetIds": {
+        "206708": 10,
+        "206613": 5
+      },
+      "maximumActionLatencyMs": 109.9782000000123,
+      "maximumPlannedIntervalMs": 1408
+    }
+  ],
+  "scoutSelectionDiagnostics": {
+    "allRunRows": 9,
+    "stage25Rows": 6,
+    "failedWindowRows": 3,
+    "allRunReorderTrueRows": 1,
+    "stage25ReorderTrueRows": 1,
+    "failedWindowReorderTrueRows": 0,
+    "capSentinelRows": [],
+    "allStage25Rows": [
+      {
+        "line": 44589,
+        "type": "combatScoutSelection",
+        "actor": "Ldf5bef05",
+        "phase": "stage-25",
+        "at": 1792975254781,
+        "reason": "observer-target-waypoint",
+        "fallbackHomeIndex": 9,
+        "selectedHomeIndex": 14,
+        "pathSearches": 2,
+        "hintPathSearches": 1,
+        "hintScanTruncated": true,
+        "hintOrderChangedByActiveScoutPreference": false,
+        "hintTargetId": 206710,
+        "hintTarget": {
+          "x": 249,
+          "y": 581
+        },
+        "actualObserver": {
+          "x": 245,
+          "y": 586
+        },
+        "potentialAttackTile": {
+          "x": 249,
+          "y": 580
+        },
+        "truncated": false
+      },
+      {
+        "line": 44940,
+        "type": "combatScoutSelection",
+        "actor": "Ldf5bef0f",
+        "phase": "stage-25",
+        "at": 1792975256881,
+        "reason": "observer-target-waypoint",
+        "fallbackHomeIndex": 0,
+        "selectedHomeIndex": 4,
+        "pathSearches": 2,
+        "hintPathSearches": 1,
+        "hintScanTruncated": true,
+        "hintOrderChangedByActiveScoutPreference": true,
+        "hintTargetId": 206604,
+        "hintTarget": {
+          "x": 258,
+          "y": 591
+        },
+        "actualObserver": {
+          "x": 252,
+          "y": 585
+        },
+        "potentialAttackTile": {
+          "x": 258,
+          "y": 590
+        },
+        "truncated": false
+      },
+      {
+        "line": 61271,
+        "type": "combatScoutSelection",
+        "actor": "Ldf5bef0f",
+        "phase": "stage-25",
+        "at": 1792975355943,
+        "reason": "observer-target-waypoint",
+        "fallbackHomeIndex": 5,
+        "selectedHomeIndex": 6,
+        "pathSearches": 2,
+        "hintPathSearches": 1,
+        "hintScanTruncated": true,
+        "hintOrderChangedByActiveScoutPreference": false,
+        "hintTargetId": 206706,
+        "hintTarget": {
+          "x": 261,
+          "y": 615
+        },
+        "actualObserver": {
+          "x": 257,
+          "y": 609
+        },
+        "potentialAttackTile": {
+          "x": 261,
+          "y": 614
+        },
+        "truncated": false
+      },
+      {
+        "line": 62452,
+        "type": "combatScoutSelection",
+        "actor": "Ldf5bef05",
+        "phase": "stage-25",
+        "at": 1792975362827,
+        "reason": "observer-target-waypoint",
+        "fallbackHomeIndex": 15,
+        "selectedHomeIndex": 17,
+        "pathSearches": 2,
+        "hintPathSearches": 1,
+        "hintScanTruncated": true,
+        "hintOrderChangedByActiveScoutPreference": false,
+        "hintTargetId": 206634,
+        "hintTarget": {
+          "x": 253,
+          "y": 586
+        },
+        "actualObserver": {
+          "x": 249,
+          "y": 584
+        },
+        "potentialAttackTile": {
+          "x": 253,
+          "y": 585
+        },
+        "truncated": false
+      },
+      {
+        "line": 69380,
+        "type": "combatScoutSelection",
+        "actor": "Ldf5bef05",
+        "phase": "stage-25",
+        "at": 1792975404268,
+        "reason": "observer-target-waypoint",
+        "fallbackHomeIndex": 18,
+        "selectedHomeIndex": 6,
+        "pathSearches": 2,
+        "hintPathSearches": 1,
+        "hintScanTruncated": false,
+        "hintOrderChangedByActiveScoutPreference": false,
+        "hintTargetId": 206706,
+        "hintTarget": {
+          "x": 261,
+          "y": 615
+        },
+        "actualObserver": {
+          "x": 257,
+          "y": 609
+        },
+        "potentialAttackTile": {
+          "x": 261,
+          "y": 614
+        },
+        "truncated": false
+      },
+      {
+        "line": 70278,
+        "type": "combatScoutSelection",
+        "actor": "Ldf5bef0f",
+        "phase": "stage-25",
+        "at": 1792975409889,
+        "reason": "observer-target-waypoint",
+        "fallbackHomeIndex": 7,
+        "selectedHomeIndex": 6,
+        "pathSearches": 2,
+        "hintPathSearches": 1,
+        "hintScanTruncated": false,
+        "hintOrderChangedByActiveScoutPreference": false,
+        "hintTargetId": 206706,
+        "hintTarget": {
+          "x": 261,
+          "y": 615
+        },
+        "actualObserver": {
+          "x": 257,
+          "y": 609
+        },
+        "potentialAttackTile": {
+          "x": 261,
+          "y": 614
+        },
+        "truncated": false
+      }
+    ],
+    "failedWindowRowsProjection": [
+      {
+        "line": 62452,
+        "type": "combatScoutSelection",
+        "actor": "Ldf5bef05",
+        "phase": "stage-25",
+        "at": 1792975362827,
+        "reason": "observer-target-waypoint",
+        "fallbackHomeIndex": 15,
+        "selectedHomeIndex": 17,
+        "pathSearches": 2,
+        "hintPathSearches": 1,
+        "hintScanTruncated": true,
+        "hintOrderChangedByActiveScoutPreference": false,
+        "hintTargetId": 206634,
+        "hintTarget": {
+          "x": 253,
+          "y": 586
+        },
+        "actualObserver": {
+          "x": 249,
+          "y": 584
+        },
+        "potentialAttackTile": {
+          "x": 253,
+          "y": 585
+        },
+        "truncated": false
+      },
+      {
+        "line": 69380,
+        "type": "combatScoutSelection",
+        "actor": "Ldf5bef05",
+        "phase": "stage-25",
+        "at": 1792975404268,
+        "reason": "observer-target-waypoint",
+        "fallbackHomeIndex": 18,
+        "selectedHomeIndex": 6,
+        "pathSearches": 2,
+        "hintPathSearches": 1,
+        "hintScanTruncated": false,
+        "hintOrderChangedByActiveScoutPreference": false,
+        "hintTargetId": 206706,
+        "hintTarget": {
+          "x": 261,
+          "y": 615
+        },
+        "actualObserver": {
+          "x": 257,
+          "y": 609
+        },
+        "potentialAttackTile": {
+          "x": 261,
+          "y": 614
+        },
+        "truncated": false
+      },
+      {
+        "line": 70278,
+        "type": "combatScoutSelection",
+        "actor": "Ldf5bef0f",
+        "phase": "stage-25",
+        "at": 1792975409889,
+        "reason": "observer-target-waypoint",
+        "fallbackHomeIndex": 7,
+        "selectedHomeIndex": 6,
+        "pathSearches": 2,
+        "hintPathSearches": 1,
+        "hintScanTruncated": false,
+        "hintOrderChangedByActiveScoutPreference": false,
+        "hintTargetId": 206706,
+        "hintTarget": {
+          "x": 261,
+          "y": 615
+        },
+        "actualObserver": {
+          "x": 257,
+          "y": 609
+        },
+        "potentialAttackTile": {
+          "x": 261,
+          "y": 614
+        },
+        "truncated": false
+      }
+    ]
+  },
+  "longestAttackGapScalars": [
+    {
+      "actor": "Ldf5bef05",
+      "durationMs": 11124,
+      "leftAttack": {
+        "line": 65205,
+        "type": "action",
+        "actor": "Ldf5bef05",
+        "phase": "stage-25",
+        "at": 1792975378971,
+        "kind": "attack",
+        "status": "success",
+        "scheduledAtMs": 987482.0778999999,
+        "sentAtMs": 987491.8566,
+        "latencyMs": 97.08539999998175,
+        "plannedIntervalMs": 1380,
+        "cadence": {
+          "intervalMs": 1380,
+          "cooldownMs": 1330,
+          "pacingKnown": true,
+          "nativeAttackMs": 1330,
+          "zoneAttackFloorMs": 600,
+          "level": 5,
+          "attackSpeed": 0,
+          "statBlockPresent": true,
+          "statCount": 24,
+          "attackSpeedSource": "authoritative-sparse-zero"
+        },
+        "targetId": 206634,
+        "targetPosition": {
+          "x": 253,
+          "y": 586
+        },
+        "hunting": "Scarecrow",
+        "attackResult": "launched",
+        "attackRequestSent": true,
+        "requestId": "280",
+        "damage": 3,
+        "sharedHealthVerified": true,
+        "nativeOpportunity": true,
+        "initialCombatTransit": false
+      },
+      "rightAttack": {
+        "line": 66982,
+        "type": "action",
+        "actor": "Ldf5bef05",
+        "phase": "stage-25",
+        "at": 1792975390095,
+        "kind": "attack",
+        "status": "success",
+        "scheduledAtMs": 998612.0778999999,
+        "sentAtMs": 998646.8919,
+        "latencyMs": 70.08569999993779,
+        "plannedIntervalMs": 1380,
+        "cadence": {
+          "intervalMs": 1380,
+          "cooldownMs": 1330,
+          "pacingKnown": true,
+          "nativeAttackMs": 1330,
+          "zoneAttackFloorMs": 600,
+          "level": 5,
+          "attackSpeed": 0,
+          "statBlockPresent": true,
+          "statCount": 24,
+          "attackSpeedSource": "authoritative-sparse-zero"
+        },
+        "targetId": 206646,
+        "targetPosition": {
+          "x": 254,
+          "y": 581
+        },
+        "hunting": "Scarecrow",
+        "attackResult": "launched",
+        "attackRequestSent": true,
+        "requestId": "281",
+        "damage": 4,
+        "sharedHealthVerified": true,
+        "nativeOpportunity": true,
+        "initialCombatTransit": false
+      },
+      "interveningCounts": {
+        "chase": 12,
+        "turn": 1
+      },
+      "intersectsFailedWindow": true
+    },
+    {
+      "actor": "Ldf5bef05",
+      "durationMs": 11111,
+      "leftAttack": {
+        "line": 69990,
+        "type": "action",
+        "actor": "Ldf5bef05",
+        "phase": "stage-25",
+        "at": 1792975408062,
+        "kind": "attack",
+        "status": "success",
+        "scheduledAtMs": 1016522.0778999999,
+        "sentAtMs": 1016549.2755,
+        "latencyMs": 130.09310000005644,
+        "plannedIntervalMs": 1380,
+        "cadence": {
+          "intervalMs": 1380,
+          "cooldownMs": 1330,
+          "pacingKnown": true,
+          "nativeAttackMs": 1330,
+          "zoneAttackFloorMs": 600,
+          "level": 5,
+          "attackSpeed": 0,
+          "statBlockPresent": true,
+          "statCount": 24,
+          "attackSpeedSource": "authoritative-sparse-zero"
+        },
+        "targetId": 206613,
+        "targetPosition": {
+          "x": 257,
+          "y": 592
+        },
+        "hunting": "Scarecrow",
+        "attackResult": "launched",
+        "attackRequestSent": true,
+        "requestId": "288",
+        "damage": 3,
+        "sharedHealthVerified": true,
+        "nativeOpportunity": true,
+        "initialCombatTransit": false
+      },
+      "rightAttack": {
+        "line": 71902,
+        "type": "action",
+        "actor": "Ldf5bef05",
+        "phase": "stage-25",
+        "at": 1792975419173,
+        "kind": "attack",
+        "status": "success",
+        "scheduledAtMs": 1027652.0778999999,
+        "sentAtMs": 1027661.1078,
+        "latencyMs": 129.07180000003427,
+        "plannedIntervalMs": 1380,
+        "cadence": {
+          "intervalMs": 1380,
+          "cooldownMs": 1330,
+          "pacingKnown": true,
+          "nativeAttackMs": 1330,
+          "zoneAttackFloorMs": 600,
+          "level": 5,
+          "attackSpeed": 0,
+          "statBlockPresent": true,
+          "statCount": 24,
+          "attackSpeedSource": "authoritative-sparse-zero"
+        },
+        "targetId": 206706,
+        "targetPosition": {
+          "x": 261,
+          "y": 615
+        },
+        "hunting": "Deer",
+        "attackResult": "launched",
+        "attackRequestSent": true,
+        "requestId": "289",
+        "damage": 5,
+        "sharedHealthVerified": true,
+        "nativeOpportunity": true,
+        "initialCombatTransit": false
+      },
+      "interveningCounts": {
+        "scout": 4,
+        "chase": 8,
+        "turn": 1
+      },
+      "intersectsFailedWindow": true
+    },
+    {
+      "actor": "Ldf5bef05",
+      "durationMs": 11106,
+      "leftAttack": {
+        "line": 62241,
+        "type": "action",
+        "actor": "Ldf5bef05",
+        "phase": "stage-25",
+        "at": 1792975361539,
+        "kind": "attack",
+        "status": "success",
+        "scheduledAtMs": 970082.0778999999,
+        "sentAtMs": 970086.6802,
+        "latencyMs": 96.75940000009723,
+        "plannedIntervalMs": 1380,
+        "cadence": {
+          "intervalMs": 1380,
+          "cooldownMs": 1330,
+          "pacingKnown": true,
+          "nativeAttackMs": 1330,
+          "zoneAttackFloorMs": 600,
+          "level": 5,
+          "attackSpeed": 0,
+          "statBlockPresent": true,
+          "statCount": 24,
+          "attackSpeedSource": "authoritative-sparse-zero"
+        },
+        "targetId": 206517,
+        "targetPosition": {
+          "x": 231,
+          "y": 580
+        },
+        "hunting": "Deer",
+        "attackResult": "launched",
+        "attackRequestSent": true,
+        "requestId": "275",
+        "damage": 4,
+        "sharedHealthVerified": true,
+        "nativeOpportunity": true,
+        "initialCombatTransit": false
+      },
+      "rightAttack": {
+        "line": 64142,
+        "type": "action",
+        "actor": "Ldf5bef05",
+        "phase": "stage-25",
+        "at": 1792975372645,
+        "kind": "attack",
+        "status": "success",
+        "scheduledAtMs": 981212.0778999999,
+        "sentAtMs": 981215.3925,
+        "latencyMs": 62.427900000009686,
+        "plannedIntervalMs": 1380,
+        "cadence": {
+          "intervalMs": 1380,
+          "cooldownMs": 1330,
+          "pacingKnown": true,
+          "nativeAttackMs": 1330,
+          "zoneAttackFloorMs": 600,
+          "level": 5,
+          "attackSpeed": 0,
+          "statBlockPresent": true,
+          "statCount": 24,
+          "attackSpeedSource": "authoritative-sparse-zero"
+        },
+        "targetId": 206634,
+        "targetPosition": {
+          "x": 253,
+          "y": 586
+        },
+        "hunting": "Scarecrow",
+        "attackResult": "launched",
+        "attackRequestSent": true,
+        "requestId": "276",
+        "damage": 4,
+        "sharedHealthVerified": true,
+        "nativeOpportunity": true,
+        "initialCombatTransit": false
+      },
+      "interveningCounts": {
+        "scout": 3,
+        "chase": 9,
+        "turn": 1
+      },
+      "intersectsFailedWindow": true
+    },
+    {
+      "actor": "Ldf5bef0f",
+      "durationMs": 27702,
+      "leftAttack": {
+        "line": 70054,
+        "type": "action",
+        "actor": "Ldf5bef0f",
+        "phase": "stage-25",
+        "at": 1792975408561,
+        "kind": "attack",
+        "status": "success",
+        "scheduledAtMs": 1017098.7698,
+        "sentAtMs": 1017111.6372,
+        "latencyMs": 72.70010000001639,
+        "plannedIntervalMs": 1408,
+        "cadence": {
+          "intervalMs": 1408,
+          "cooldownMs": 1358,
+          "pacingKnown": true,
+          "nativeAttackMs": 1358,
+          "zoneAttackFloorMs": 600,
+          "level": 3,
+          "attackSpeed": 0,
+          "statBlockPresent": true,
+          "statCount": 24,
+          "attackSpeedSource": "authoritative-sparse-zero"
+        },
+        "targetId": 206613,
+        "targetPosition": {
+          "x": 257,
+          "y": 592
+        },
+        "hunting": "Scarecrow",
+        "attackResult": "launched",
+        "attackRequestSent": true,
+        "requestId": "113",
+        "damage": 2,
+        "sharedHealthVerified": true,
+        "nativeOpportunity": true,
+        "initialCombatTransit": false
+      },
+      "rightAttack": {
+        "line": 74767,
+        "type": "action",
+        "actor": "Ldf5bef0f",
+        "phase": "stage-25",
+        "at": 1792975436263,
+        "kind": "attack",
+        "status": "success",
+        "scheduledAtMs": 1044756.7698,
+        "sentAtMs": 1044779.9818,
+        "latencyMs": 96.9375,
+        "plannedIntervalMs": 1408,
+        "cadence": {
+          "intervalMs": 1408,
+          "cooldownMs": 1358,
+          "pacingKnown": true,
+          "nativeAttackMs": 1358,
+          "zoneAttackFloorMs": 600,
+          "level": 3,
+          "attackSpeed": 0,
+          "statBlockPresent": true,
+          "statCount": 24,
+          "attackSpeedSource": "authoritative-sparse-zero"
+        },
+        "targetId": 206539,
+        "targetPosition": {
+          "x": 248,
+          "y": 599
+        },
+        "hunting": "Deer",
+        "attackResult": "launched",
+        "attackRequestSent": true,
+        "requestId": "114",
+        "damage": 2,
+        "sharedHealthVerified": true,
+        "nativeOpportunity": true,
+        "initialCombatTransit": false
+      },
+      "interveningCounts": {
+        "scout": 5,
+        "chase": 26,
+        "turn": 3
+      },
+      "intersectsFailedWindow": true
+    },
+    {
+      "actor": "Ldf5bef0f",
+      "durationMs": 17908,
+      "leftAttack": {
+        "line": 62054,
+        "type": "action",
+        "actor": "Ldf5bef0f",
+        "phase": "stage-25",
+        "at": 1792975360457,
+        "kind": "attack",
+        "status": "success",
+        "scheduledAtMs": 968978.7698,
+        "sentAtMs": 969010.8506,
+        "latencyMs": 78.45050000003539,
+        "plannedIntervalMs": 1408,
+        "cadence": {
+          "intervalMs": 1408,
+          "cooldownMs": 1358,
+          "pacingKnown": true,
+          "nativeAttackMs": 1358,
+          "zoneAttackFloorMs": 600,
+          "level": 3,
+          "attackSpeed": 0,
+          "statBlockPresent": true,
+          "statCount": 24,
+          "attackSpeedSource": "authoritative-sparse-zero"
+        },
+        "targetId": 206517,
+        "targetPosition": {
+          "x": 231,
+          "y": 580
+        },
+        "hunting": "Deer",
+        "attackResult": "launched",
+        "attackRequestSent": true,
+        "requestId": "98",
+        "damage": 3,
+        "sharedHealthVerified": true,
+        "nativeOpportunity": true,
+        "initialCombatTransit": false
+      },
+      "rightAttack": {
+        "line": 65086,
+        "type": "action",
+        "actor": "Ldf5bef0f",
+        "phase": "stage-25",
+        "at": 1792975378365,
+        "kind": "attack",
+        "status": "success",
+        "scheduledAtMs": 986886.7698,
+        "sentAtMs": 986901.3481,
+        "latencyMs": 85.5853000000352,
+        "plannedIntervalMs": 1408,
+        "cadence": {
+          "intervalMs": 1408,
+          "cooldownMs": 1358,
+          "pacingKnown": true,
+          "nativeAttackMs": 1358,
+          "zoneAttackFloorMs": 600,
+          "level": 3,
+          "attackSpeed": 0,
+          "statBlockPresent": true,
+          "statCount": 24,
+          "attackSpeedSource": "authoritative-sparse-zero"
+        },
+        "targetId": 206708,
+        "targetPosition": {
+          "x": 259,
+          "y": 596
+        },
+        "hunting": "Deer",
+        "attackResult": "launched",
+        "attackRequestSent": true,
+        "requestId": "99",
+        "damage": 3,
+        "sharedHealthVerified": true,
+        "nativeOpportunity": true,
+        "initialCombatTransit": false
+      },
+      "interveningCounts": {
+        "scout": 7,
+        "chase": 12,
+        "turn": 2
+      },
+      "intersectsFailedWindow": true
+    },
+    {
+      "actor": "Ldf5bef0f",
+      "durationMs": 11882,
+      "leftAttack": {
+        "line": 67166,
+        "type": "action",
+        "actor": "Ldf5bef0f",
+        "phase": "stage-25",
+        "at": 1792975391067,
+        "kind": "attack",
+        "status": "success",
+        "scheduledAtMs": 999558.7698,
+        "sentAtMs": 999576.1415,
+        "latencyMs": 109.9782000000123,
+        "plannedIntervalMs": 1408,
+        "cadence": {
+          "intervalMs": 1408,
+          "cooldownMs": 1358,
+          "pacingKnown": true,
+          "nativeAttackMs": 1358,
+          "zoneAttackFloorMs": 600,
+          "level": 3,
+          "attackSpeed": 0,
+          "statBlockPresent": true,
+          "statCount": 24,
+          "attackSpeedSource": "authoritative-sparse-zero"
+        },
+        "targetId": 206708,
+        "targetPosition": {
+          "x": 259,
+          "y": 596
+        },
+        "hunting": "Deer",
+        "attackResult": "launched",
+        "attackRequestSent": true,
+        "requestId": "108",
+        "damage": 3,
+        "sharedHealthVerified": true,
+        "nativeOpportunity": true,
+        "initialCombatTransit": false
+      },
+      "rightAttack": {
+        "line": 69166,
+        "type": "action",
+        "actor": "Ldf5bef0f",
+        "phase": "stage-25",
+        "at": 1792975402949,
+        "kind": "attack",
+        "status": "success",
+        "scheduledAtMs": 1011466.7698,
+        "sentAtMs": 1011498.8283,
+        "latencyMs": 82.72879999992438,
+        "plannedIntervalMs": 1408,
+        "cadence": {
+          "intervalMs": 1408,
+          "cooldownMs": 1358,
+          "pacingKnown": true,
+          "nativeAttackMs": 1358,
+          "zoneAttackFloorMs": 600,
+          "level": 3,
+          "attackSpeed": 0,
+          "statBlockPresent": true,
+          "statCount": 24,
+          "attackSpeedSource": "authoritative-sparse-zero"
+        },
+        "targetId": 206613,
+        "targetPosition": {
+          "x": 257,
+          "y": 592
+        },
+        "hunting": "Scarecrow",
+        "attackResult": "launched",
+        "attackRequestSent": true,
+        "requestId": "109",
+        "damage": 2,
+        "sharedHealthVerified": true,
+        "nativeOpportunity": true,
+        "initialCombatTransit": false
+      },
+      "interveningCounts": {
+        "chase": 12,
+        "turn": 1
+      },
+      "intersectsFailedWindow": true
+    }
+  ],
+  "sameTargetAckSpanOverlapCountInFailedWindow": 3,
+  "slowStage": {
+    "data": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\slow-stage-public.jsonl",
+      "bytes": 153617,
+      "sha256": "2c8d24b1973b71340f97e2170a4afbba6f994055e915ef56e9deb672fcae22ac"
+    },
+    "status": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\slow-stage-public-status.json",
+      "bytes": 1025,
+      "sha256": "20f8f07a0302c45d259497b94cd3aea4b3a3523699b4deda68b05623c94e9f74"
+    },
+    "captureComplete": true,
+    "rowCount": 1624,
+    "maximumCompletedMs": 1012,
+    "largestCompletedRows": [
+      {
+        "line": 37,
+        "observedAtMs": 1792974760144,
+        "stage": "socket_turn.input",
+        "durationMs": 1012,
+        "connection": 6
+      },
+      {
+        "line": 36,
+        "observedAtMs": 1792974760112,
+        "stage": "session_action.execute",
+        "durationMs": 980,
+        "connection": 6
+      },
+      {
+        "line": 35,
+        "observedAtMs": 1792974760111,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 978
+      },
+      {
+        "line": 229,
+        "observedAtMs": 1792975155326,
+        "stage": "socket_turn.input",
+        "durationMs": 976,
+        "connection": 25
+      },
+      {
+        "line": 34,
+        "observedAtMs": 1792974760097,
+        "stage": "shared_session.inner_execute",
+        "durationMs": 965
+      }
+    ],
+    "receivedWithinFailedWindow": [
+      {
+        "line": 736,
+        "observedAtMs": 1792975361522,
+        "stage": "socket_turn.input",
+        "durationMs": 68,
+        "connection": 6
+      },
+      {
+        "line": 737,
+        "observedAtMs": 1792975361652,
+        "stage": "runtime_tick.total",
+        "durationMs": 53,
+        "connection": 6
+      },
+      {
+        "line": 738,
+        "observedAtMs": 1792975361652,
+        "stage": "serial_gate.zone_outbound_wait",
+        "durationMs": 53,
+        "connection": 6
+      },
+      {
+        "line": 739,
+        "observedAtMs": 1792975375405,
+        "stage": "socket_turn.input",
+        "durationMs": 57,
+        "connection": 6
+      },
+      {
+        "line": 740,
+        "observedAtMs": 1792975377546,
+        "stage": "socket_turn.input",
+        "durationMs": 70,
+        "connection": 6
+      },
+      {
+        "line": 741,
+        "observedAtMs": 1792975378342,
+        "stage": "socket_turn.input",
+        "durationMs": 76,
+        "connection": 16
+      },
+      {
+        "line": 742,
+        "observedAtMs": 1792975378342,
+        "stage": "serial_gate.zone_outbound_wait",
+        "durationMs": 57,
+        "connection": 16
+      },
+      {
+        "line": 743,
+        "observedAtMs": 1792975381141,
+        "stage": "socket_turn.input",
+        "durationMs": 57,
+        "connection": 16
+      },
+      {
+        "line": 744,
+        "observedAtMs": 1792975383976,
+        "stage": "socket_turn.input",
+        "durationMs": 89,
+        "connection": 16
+      },
+      {
+        "line": 745,
+        "observedAtMs": 1792975383976,
+        "stage": "serial_gate.zone_outbound_wait",
+        "durationMs": 64,
+        "connection": 16
+      },
+      {
+        "line": 746,
+        "observedAtMs": 1792975385374,
+        "stage": "socket_turn.input",
+        "durationMs": 59,
+        "connection": 16
+      },
+      {
+        "line": 747,
+        "observedAtMs": 1792975385374,
+        "stage": "serial_gate.zone_outbound_wait",
+        "durationMs": 58,
+        "connection": 16
+      },
+      {
+        "line": 748,
+        "observedAtMs": 1792975390072,
+        "stage": "socket_turn.input",
+        "durationMs": 69,
+        "connection": 6
+      },
+      {
+        "line": 749,
+        "observedAtMs": 1792975390072,
+        "stage": "serial_gate.zone_outbound_wait",
+        "durationMs": 68,
+        "connection": 6
+      },
+      {
+        "line": 750,
+        "observedAtMs": 1792975390995,
+        "stage": "socket_turn.input",
+        "durationMs": 62,
+        "connection": 16
+      },
+      {
+        "line": 751,
+        "observedAtMs": 1792975390995,
+        "stage": "serial_gate.zone_outbound_wait",
+        "durationMs": 61,
+        "connection": 16
+      },
+      {
+        "line": 752,
+        "observedAtMs": 1792975391431,
+        "stage": "socket_turn.input",
+        "durationMs": 53,
+        "connection": 6
+      },
+      {
+        "line": 753,
+        "observedAtMs": 1792975392796,
+        "stage": "socket_turn.input",
+        "durationMs": 58,
+        "connection": 6
+      },
+      {
+        "line": 754,
+        "observedAtMs": 1792975395561,
+        "stage": "session_action.execute",
+        "durationMs": 51,
+        "connection": 6
+      },
+      {
+        "line": 755,
+        "observedAtMs": 1792975395589,
+        "stage": "socket_turn.input",
+        "durationMs": 79,
+        "connection": 6
+      },
+      {
+        "line": 756,
+        "observedAtMs": 1792975395589,
+        "stage": "serial_gate.zone_outbound_wait",
+        "durationMs": 77,
+        "connection": 6
+      },
+      {
+        "line": 757,
+        "observedAtMs": 1792975398318,
+        "stage": "shared_session.predrain",
+        "durationMs": 50
+      },
+      {
+        "line": 758,
+        "observedAtMs": 1792975398318,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 50
+      },
+      {
+        "line": 759,
+        "observedAtMs": 1792975398318,
+        "stage": "runtime_tick.execute",
+        "durationMs": 50,
+        "connection": 11
+      },
+      {
+        "line": 760,
+        "observedAtMs": 1792975398318,
+        "stage": "shared_session.predrain",
+        "durationMs": 50
+      },
+      {
+        "line": 761,
+        "observedAtMs": 1792975398318,
+        "stage": "shared_session.predrain",
+        "durationMs": 50
+      },
+      {
+        "line": 762,
+        "observedAtMs": 1792975398318,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 50
+      },
+      {
+        "line": 763,
+        "observedAtMs": 1792975398318,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 50
+      },
+      {
+        "line": 764,
+        "observedAtMs": 1792975398318,
+        "stage": "runtime_tick.execute",
+        "durationMs": 50,
+        "connection": 18
+      },
+      {
+        "line": 765,
+        "observedAtMs": 1792975398318,
+        "stage": "runtime_tick.execute",
+        "durationMs": 50,
+        "connection": 2
+      },
+      {
+        "line": 766,
+        "observedAtMs": 1792975398318,
+        "stage": "runtime_tick.total",
+        "durationMs": 50,
+        "connection": 11
+      },
+      {
+        "line": 767,
+        "observedAtMs": 1792975398318,
+        "stage": "runtime_tick.total",
+        "durationMs": 50,
+        "connection": 2
+      },
+      {
+        "line": 768,
+        "observedAtMs": 1792975398318,
+        "stage": "runtime_tick.total",
+        "durationMs": 50,
+        "connection": 18
+      },
+      {
+        "line": 769,
+        "observedAtMs": 1792975399845,
+        "stage": "shared_session.predrain",
+        "durationMs": 52
+      },
+      {
+        "line": 770,
+        "observedAtMs": 1792975399845,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 53
+      },
+      {
+        "line": 771,
+        "observedAtMs": 1792975399845,
+        "stage": "runtime_tick.execute",
+        "durationMs": 53,
+        "connection": 7
+      },
+      {
+        "line": 772,
+        "observedAtMs": 1792975399845,
+        "stage": "runtime_tick.total",
+        "durationMs": 53,
+        "connection": 7
+      },
+      {
+        "line": 773,
+        "observedAtMs": 1792975402929,
+        "stage": "socket_turn.input",
+        "durationMs": 73,
+        "connection": 16
+      },
+      {
+        "line": 774,
+        "observedAtMs": 1792975405746,
+        "stage": "socket_turn.input",
+        "durationMs": 89,
+        "connection": 16
+      },
+      {
+        "line": 775,
+        "observedAtMs": 1792975405746,
+        "stage": "serial_gate.zone_outbound_wait",
+        "durationMs": 55,
+        "connection": 16
+      },
+      {
+        "line": 776,
+        "observedAtMs": 1792975405838,
+        "stage": "socket_turn.input",
+        "durationMs": 61,
+        "connection": 6
+      },
+      {
+        "line": 777,
+        "observedAtMs": 1792975405838,
+        "stage": "serial_gate.zone_outbound_wait",
+        "durationMs": 60,
+        "connection": 6
+      },
+      {
+        "line": 778,
+        "observedAtMs": 1792975407103,
+        "stage": "socket_turn.input",
+        "durationMs": 53,
+        "connection": 16
+      },
+      {
+        "line": 779,
+        "observedAtMs": 1792975407103,
+        "stage": "serial_gate.zone_outbound_wait",
+        "durationMs": 52,
+        "connection": 16
+      },
+      {
+        "line": 780,
+        "observedAtMs": 1792975407985,
+        "stage": "socket_turn.input",
+        "durationMs": 79,
+        "connection": 6
+      },
+      {
+        "line": 781,
+        "observedAtMs": 1792975407985,
+        "stage": "serial_gate.zone_outbound_wait",
+        "durationMs": 52,
+        "connection": 6
+      },
+      {
+        "line": 782,
+        "observedAtMs": 1792975408540,
+        "stage": "socket_turn.input",
+        "durationMs": 72,
+        "connection": 16
+      },
+      {
+        "line": 783,
+        "observedAtMs": 1792975408540,
+        "stage": "serial_gate.zone_outbound_wait",
+        "durationMs": 67,
+        "connection": 16
+      },
+      {
+        "line": 784,
+        "observedAtMs": 1792975408677,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 53
+      },
+      {
+        "line": 785,
+        "observedAtMs": 1792975408677,
+        "stage": "runtime_tick.execute",
+        "durationMs": 53,
+        "connection": 16
+      },
+      {
+        "line": 786,
+        "observedAtMs": 1792975408688,
+        "stage": "runtime_tick.total",
+        "durationMs": 58,
+        "connection": 16
+      },
+      {
+        "line": 787,
+        "observedAtMs": 1792975415641,
+        "stage": "shared_session.predrain",
+        "durationMs": 54
+      },
+      {
+        "line": 788,
+        "observedAtMs": 1792975415641,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 55
+      },
+      {
+        "line": 789,
+        "observedAtMs": 1792975415641,
+        "stage": "runtime_tick.execute",
+        "durationMs": 55,
+        "connection": 20
+      },
+      {
+        "line": 790,
+        "observedAtMs": 1792975415641,
+        "stage": "shared_session.predrain",
+        "durationMs": 54
+      },
+      {
+        "line": 791,
+        "observedAtMs": 1792975415641,
+        "stage": "runtime_tick.total",
+        "durationMs": 55,
+        "connection": 20
+      },
+      {
+        "line": 792,
+        "observedAtMs": 1792975415641,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 55
+      },
+      {
+        "line": 793,
+        "observedAtMs": 1792975415641,
+        "stage": "runtime_tick.execute",
+        "durationMs": 55,
+        "connection": 17
+      },
+      {
+        "line": 794,
+        "observedAtMs": 1792975415641,
+        "stage": "runtime_tick.total",
+        "durationMs": 55,
+        "connection": 17
+      },
+      {
+        "line": 795,
+        "observedAtMs": 1792975415641,
+        "stage": "shared_session.predrain",
+        "durationMs": 54
+      },
+      {
+        "line": 796,
+        "observedAtMs": 1792975415641,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 55
+      },
+      {
+        "line": 797,
+        "observedAtMs": 1792975415641,
+        "stage": "runtime_tick.execute",
+        "durationMs": 55,
+        "connection": 11
+      },
+      {
+        "line": 798,
+        "observedAtMs": 1792975415641,
+        "stage": "runtime_tick.total",
+        "durationMs": 55,
+        "connection": 11
+      },
+      {
+        "line": 799,
+        "observedAtMs": 1792975419103,
+        "stage": "socket_turn.input",
+        "durationMs": 86,
+        "connection": 6
+      },
+      {
+        "line": 800,
+        "observedAtMs": 1792975419103,
+        "stage": "serial_gate.zone_outbound_wait",
+        "durationMs": 55,
+        "connection": 6
+      },
+      {
+        "line": 801,
+        "observedAtMs": 1792975420491,
+        "stage": "session_action.execute",
+        "durationMs": 68,
+        "connection": 6
+      },
+      {
+        "line": 802,
+        "observedAtMs": 1792975420505,
+        "stage": "socket_turn.input",
+        "durationMs": 82,
+        "connection": 6
+      }
+    ],
+    "completedSpanIntersectsFailedWindow": [
+      {
+        "line": 736,
+        "observedAtMs": 1792975361522,
+        "stage": "socket_turn.input",
+        "durationMs": 68,
+        "connection": 6
+      },
+      {
+        "line": 737,
+        "observedAtMs": 1792975361652,
+        "stage": "runtime_tick.total",
+        "durationMs": 53,
+        "connection": 6
+      },
+      {
+        "line": 738,
+        "observedAtMs": 1792975361652,
+        "stage": "serial_gate.zone_outbound_wait",
+        "durationMs": 53,
+        "connection": 6
+      },
+      {
+        "line": 739,
+        "observedAtMs": 1792975375405,
+        "stage": "socket_turn.input",
+        "durationMs": 57,
+        "connection": 6
+      },
+      {
+        "line": 740,
+        "observedAtMs": 1792975377546,
+        "stage": "socket_turn.input",
+        "durationMs": 70,
+        "connection": 6
+      },
+      {
+        "line": 741,
+        "observedAtMs": 1792975378342,
+        "stage": "socket_turn.input",
+        "durationMs": 76,
+        "connection": 16
+      },
+      {
+        "line": 742,
+        "observedAtMs": 1792975378342,
+        "stage": "serial_gate.zone_outbound_wait",
+        "durationMs": 57,
+        "connection": 16
+      },
+      {
+        "line": 743,
+        "observedAtMs": 1792975381141,
+        "stage": "socket_turn.input",
+        "durationMs": 57,
+        "connection": 16
+      },
+      {
+        "line": 744,
+        "observedAtMs": 1792975383976,
+        "stage": "socket_turn.input",
+        "durationMs": 89,
+        "connection": 16
+      },
+      {
+        "line": 745,
+        "observedAtMs": 1792975383976,
+        "stage": "serial_gate.zone_outbound_wait",
+        "durationMs": 64,
+        "connection": 16
+      },
+      {
+        "line": 746,
+        "observedAtMs": 1792975385374,
+        "stage": "socket_turn.input",
+        "durationMs": 59,
+        "connection": 16
+      },
+      {
+        "line": 747,
+        "observedAtMs": 1792975385374,
+        "stage": "serial_gate.zone_outbound_wait",
+        "durationMs": 58,
+        "connection": 16
+      },
+      {
+        "line": 748,
+        "observedAtMs": 1792975390072,
+        "stage": "socket_turn.input",
+        "durationMs": 69,
+        "connection": 6
+      },
+      {
+        "line": 749,
+        "observedAtMs": 1792975390072,
+        "stage": "serial_gate.zone_outbound_wait",
+        "durationMs": 68,
+        "connection": 6
+      },
+      {
+        "line": 750,
+        "observedAtMs": 1792975390995,
+        "stage": "socket_turn.input",
+        "durationMs": 62,
+        "connection": 16
+      },
+      {
+        "line": 751,
+        "observedAtMs": 1792975390995,
+        "stage": "serial_gate.zone_outbound_wait",
+        "durationMs": 61,
+        "connection": 16
+      },
+      {
+        "line": 752,
+        "observedAtMs": 1792975391431,
+        "stage": "socket_turn.input",
+        "durationMs": 53,
+        "connection": 6
+      },
+      {
+        "line": 753,
+        "observedAtMs": 1792975392796,
+        "stage": "socket_turn.input",
+        "durationMs": 58,
+        "connection": 6
+      },
+      {
+        "line": 754,
+        "observedAtMs": 1792975395561,
+        "stage": "session_action.execute",
+        "durationMs": 51,
+        "connection": 6
+      },
+      {
+        "line": 755,
+        "observedAtMs": 1792975395589,
+        "stage": "socket_turn.input",
+        "durationMs": 79,
+        "connection": 6
+      },
+      {
+        "line": 756,
+        "observedAtMs": 1792975395589,
+        "stage": "serial_gate.zone_outbound_wait",
+        "durationMs": 77,
+        "connection": 6
+      },
+      {
+        "line": 757,
+        "observedAtMs": 1792975398318,
+        "stage": "shared_session.predrain",
+        "durationMs": 50
+      },
+      {
+        "line": 758,
+        "observedAtMs": 1792975398318,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 50
+      },
+      {
+        "line": 759,
+        "observedAtMs": 1792975398318,
+        "stage": "runtime_tick.execute",
+        "durationMs": 50,
+        "connection": 11
+      },
+      {
+        "line": 760,
+        "observedAtMs": 1792975398318,
+        "stage": "shared_session.predrain",
+        "durationMs": 50
+      },
+      {
+        "line": 761,
+        "observedAtMs": 1792975398318,
+        "stage": "shared_session.predrain",
+        "durationMs": 50
+      },
+      {
+        "line": 762,
+        "observedAtMs": 1792975398318,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 50
+      },
+      {
+        "line": 763,
+        "observedAtMs": 1792975398318,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 50
+      },
+      {
+        "line": 764,
+        "observedAtMs": 1792975398318,
+        "stage": "runtime_tick.execute",
+        "durationMs": 50,
+        "connection": 18
+      },
+      {
+        "line": 765,
+        "observedAtMs": 1792975398318,
+        "stage": "runtime_tick.execute",
+        "durationMs": 50,
+        "connection": 2
+      },
+      {
+        "line": 766,
+        "observedAtMs": 1792975398318,
+        "stage": "runtime_tick.total",
+        "durationMs": 50,
+        "connection": 11
+      },
+      {
+        "line": 767,
+        "observedAtMs": 1792975398318,
+        "stage": "runtime_tick.total",
+        "durationMs": 50,
+        "connection": 2
+      },
+      {
+        "line": 768,
+        "observedAtMs": 1792975398318,
+        "stage": "runtime_tick.total",
+        "durationMs": 50,
+        "connection": 18
+      },
+      {
+        "line": 769,
+        "observedAtMs": 1792975399845,
+        "stage": "shared_session.predrain",
+        "durationMs": 52
+      },
+      {
+        "line": 770,
+        "observedAtMs": 1792975399845,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 53
+      },
+      {
+        "line": 771,
+        "observedAtMs": 1792975399845,
+        "stage": "runtime_tick.execute",
+        "durationMs": 53,
+        "connection": 7
+      },
+      {
+        "line": 772,
+        "observedAtMs": 1792975399845,
+        "stage": "runtime_tick.total",
+        "durationMs": 53,
+        "connection": 7
+      },
+      {
+        "line": 773,
+        "observedAtMs": 1792975402929,
+        "stage": "socket_turn.input",
+        "durationMs": 73,
+        "connection": 16
+      },
+      {
+        "line": 774,
+        "observedAtMs": 1792975405746,
+        "stage": "socket_turn.input",
+        "durationMs": 89,
+        "connection": 16
+      },
+      {
+        "line": 775,
+        "observedAtMs": 1792975405746,
+        "stage": "serial_gate.zone_outbound_wait",
+        "durationMs": 55,
+        "connection": 16
+      },
+      {
+        "line": 776,
+        "observedAtMs": 1792975405838,
+        "stage": "socket_turn.input",
+        "durationMs": 61,
+        "connection": 6
+      },
+      {
+        "line": 777,
+        "observedAtMs": 1792975405838,
+        "stage": "serial_gate.zone_outbound_wait",
+        "durationMs": 60,
+        "connection": 6
+      },
+      {
+        "line": 778,
+        "observedAtMs": 1792975407103,
+        "stage": "socket_turn.input",
+        "durationMs": 53,
+        "connection": 16
+      },
+      {
+        "line": 779,
+        "observedAtMs": 1792975407103,
+        "stage": "serial_gate.zone_outbound_wait",
+        "durationMs": 52,
+        "connection": 16
+      },
+      {
+        "line": 780,
+        "observedAtMs": 1792975407985,
+        "stage": "socket_turn.input",
+        "durationMs": 79,
+        "connection": 6
+      },
+      {
+        "line": 781,
+        "observedAtMs": 1792975407985,
+        "stage": "serial_gate.zone_outbound_wait",
+        "durationMs": 52,
+        "connection": 6
+      },
+      {
+        "line": 782,
+        "observedAtMs": 1792975408540,
+        "stage": "socket_turn.input",
+        "durationMs": 72,
+        "connection": 16
+      },
+      {
+        "line": 783,
+        "observedAtMs": 1792975408540,
+        "stage": "serial_gate.zone_outbound_wait",
+        "durationMs": 67,
+        "connection": 16
+      },
+      {
+        "line": 784,
+        "observedAtMs": 1792975408677,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 53
+      },
+      {
+        "line": 785,
+        "observedAtMs": 1792975408677,
+        "stage": "runtime_tick.execute",
+        "durationMs": 53,
+        "connection": 16
+      },
+      {
+        "line": 786,
+        "observedAtMs": 1792975408688,
+        "stage": "runtime_tick.total",
+        "durationMs": 58,
+        "connection": 16
+      },
+      {
+        "line": 787,
+        "observedAtMs": 1792975415641,
+        "stage": "shared_session.predrain",
+        "durationMs": 54
+      },
+      {
+        "line": 788,
+        "observedAtMs": 1792975415641,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 55
+      },
+      {
+        "line": 789,
+        "observedAtMs": 1792975415641,
+        "stage": "runtime_tick.execute",
+        "durationMs": 55,
+        "connection": 20
+      },
+      {
+        "line": 790,
+        "observedAtMs": 1792975415641,
+        "stage": "shared_session.predrain",
+        "durationMs": 54
+      },
+      {
+        "line": 791,
+        "observedAtMs": 1792975415641,
+        "stage": "runtime_tick.total",
+        "durationMs": 55,
+        "connection": 20
+      },
+      {
+        "line": 792,
+        "observedAtMs": 1792975415641,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 55
+      },
+      {
+        "line": 793,
+        "observedAtMs": 1792975415641,
+        "stage": "runtime_tick.execute",
+        "durationMs": 55,
+        "connection": 17
+      },
+      {
+        "line": 794,
+        "observedAtMs": 1792975415641,
+        "stage": "runtime_tick.total",
+        "durationMs": 55,
+        "connection": 17
+      },
+      {
+        "line": 795,
+        "observedAtMs": 1792975415641,
+        "stage": "shared_session.predrain",
+        "durationMs": 54
+      },
+      {
+        "line": 796,
+        "observedAtMs": 1792975415641,
+        "stage": "zone_owner.in_process.execute_request",
+        "durationMs": 55
+      },
+      {
+        "line": 797,
+        "observedAtMs": 1792975415641,
+        "stage": "runtime_tick.execute",
+        "durationMs": 55,
+        "connection": 11
+      },
+      {
+        "line": 798,
+        "observedAtMs": 1792975415641,
+        "stage": "runtime_tick.total",
+        "durationMs": 55,
+        "connection": 11
+      },
+      {
+        "line": 799,
+        "observedAtMs": 1792975419103,
+        "stage": "socket_turn.input",
+        "durationMs": 86,
+        "connection": 6
+      },
+      {
+        "line": 800,
+        "observedAtMs": 1792975419103,
+        "stage": "serial_gate.zone_outbound_wait",
+        "durationMs": 55,
+        "connection": 6
+      },
+      {
+        "line": 801,
+        "observedAtMs": 1792975420491,
+        "stage": "session_action.execute",
+        "durationMs": 68,
+        "connection": 6
+      },
+      {
+        "line": 802,
+        "observedAtMs": 1792975420505,
+        "stage": "socket_turn.input",
+        "durationMs": 82,
+        "connection": 6
+      }
+    ],
+    "windowMaximumCompletedMs": 89,
+    "countsByStageInWindow": {
+      "socket_turn.input": 20,
+      "runtime_tick.total": 9,
+      "serial_gate.zone_outbound_wait": 13,
+      "session_action.execute": 2,
+      "shared_session.predrain": 7,
+      "zone_owner.in_process.execute_request": 8,
+      "runtime_tick.execute": 8
+    },
+    "completedOnly": true,
+    "emissionClockNotActionIdentity": true
+  },
+  "storeStage": {
+    "data": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\store-stage-public.jsonl",
+      "bytes": 20154,
+      "sha256": "c4d814b9c7281c1c283b01050d66e3ffd56481760fbcd6787a5d074e621afce8"
+    },
+    "status": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\store-stage-public-status.json",
+      "bytes": 2592,
+      "sha256": "f96755f98a9e13db6022df398af9d6c46ccd319d83cb9e262b994acb84a043ab"
+    },
+    "captureComplete": true,
+    "rowCount": 92,
+    "maximumCompletedMs": 401,
+    "largestCompletedRows": [
+      {
+        "line": 67,
+        "observedAtMs": 1792975423861,
+        "stage": "account_store.store_held",
+        "durationMs": 401,
+        "operation": "guild_clock",
+        "traceId": 116530,
+        "startedUnixMs": 1792975423460,
+        "maxStartUs": 2,
+        "maxEndUs": 401381,
+        "samples": 1,
+        "totalUs": 401379
+      },
+      {
+        "line": 68,
+        "observedAtMs": 1792975423862,
+        "stage": "account_store.store_wait",
+        "durationMs": 401,
+        "operation": "guild_lookup",
+        "traceId": 116531,
+        "startedUnixMs": 1792975423460,
+        "maxStartUs": 0,
+        "maxEndUs": 401278,
+        "samples": 1,
+        "totalUs": 401277
+      },
+      {
+        "line": 71,
+        "observedAtMs": 1792975423862,
+        "stage": "account_store.driver_held",
+        "durationMs": 401,
+        "operation": "guild_clock",
+        "traceId": 116530,
+        "startedUnixMs": 1792975423460,
+        "maxStartUs": 0,
+        "maxEndUs": 401384,
+        "samples": 1,
+        "totalUs": 401384
+      },
+      {
+        "line": 74,
+        "observedAtMs": 1792975423935,
+        "stage": "account_store.store_wait",
+        "durationMs": 392,
+        "operation": "experience_admission",
+        "traceId": 116532,
+        "startedUnixMs": 1792975423538,
+        "maxStartUs": 0,
+        "maxEndUs": 392635,
+        "samples": 1,
+        "totalUs": 392634
+      },
+      {
+        "line": 75,
+        "observedAtMs": 1792975423935,
+        "stage": "account_store.store_wait",
+        "durationMs": 367,
+        "operation": "guild_lookup",
+        "traceId": 116534,
+        "startedUnixMs": 1792975423568,
+        "maxStartUs": 0,
+        "maxEndUs": 367123,
+        "samples": 1,
+        "totalUs": 367123
+      }
+    ],
+    "receivedWithinFailedWindow": [],
+    "completedSpanIntersectsFailedWindow": [],
+    "windowMaximumCompletedMs": null,
+    "countsByStageInWindow": {},
+    "completedOnly": true,
+    "emissionClockNotActionIdentity": true
+  },
+  "selectedEvidence": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-supply-failure-analysis-v1\\selected-evidence-v1.json",
+    "bytes": 243096,
+    "sha256": "6d87c31611fbac423fea8737c23875a8a04f26ce45e12f89e501694e33d7807f"
+  },
+  "limitations": [
+    "Scout-selection rows are emitted only when hints exist and at most31 rows plus a cap sentinel per actor/phase. Absent rows do not establish absent hints or an inactive preference.",
+    "Active scout preference sorts at most4 existing hint waypoints only while making a new scout; it does not reset existing scout state, make exclusive claims, prove movement or provide owner AOI.",
+    "The raw wire diagnostic only observes connections1/2, so the combat actors05/0f owner/peer candidate snapshots, exact failed/deferred filters and targetClaims states cannot be reconstructed from it.",
+    "Completed Store and slow spans can be nested and must not be added. Threshold50ms omits shorter or unfinished work; no emitted row does not exclude a stall. traceId is not an account/action/request identity.",
+    "Action row wall timestamps are accounting/completion times; chase ACK-span overlap is conservative observed span evidence, not a complete internal pursuit lifetime or exact authority simultaneity.",
+    "No per-request900ms dual-packet replay, server holder attribution, map spawn guarantee, causal improvement claim or new acceptance is made."
+  ],
+  "gameOrSourceModified": false,
+  "capacityAccepted": false,
+  "P0Accepted": false,
+  "P2Started": false
+}

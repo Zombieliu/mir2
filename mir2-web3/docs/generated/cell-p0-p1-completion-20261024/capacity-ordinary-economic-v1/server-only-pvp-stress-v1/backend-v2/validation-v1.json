@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-27T17:56:47.158Z",
+  "finishedAt": "2026-10-27T17:59:42.231Z",
+  "project": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3",
+  "headAtStart": "c74acdb0a",
+  "sourceBefore": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\web.rs",
+    "bytes": 888946,
+    "sha256": "5f6a59c8735a42e2f884d94492ed43fb36647857e5dc81b035ab74436b6ca655"
+  },
+  "sourceAfter": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\web.rs",
+    "bytes": 888946,
+    "sha256": "5f6a59c8735a42e2f884d94492ed43fb36647857e5dc81b035ab74436b6ca655"
+  },
+  "sourceUnchanged": true,
+  "results": [
+    {
+      "name": "load-test-login-policy",
+      "command": [
+        "rustup",
+        "run",
+        "1.95.0",
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "4",
+        "-p",
+        "mir2-gateway",
+        "--lib",
+        "web::load_test_login_policy_tests::",
+        "--",
+        "--test-threads=1"
+      ],
+      "code": 0,
+      "signal": null,
+      "counts": [
+        {
+          "passed": 7,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v2\\load-test-login-policy.stdout.log",
+        "bytes": 915,
+        "sha256": "41d864bc6f89724e3a7f2ca135ae0a2fa1b954c585a25066b9a96c9516b92dcf"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v2\\load-test-login-policy.stderr.log",
+        "bytes": 53553,
+        "sha256": "b51be192446774f4f9185ae8123217bad0d2fdea9f3e74a0a110efd6151fd146"
+      }
+    },
+    {
+      "name": "adjacent-auth",
+      "command": [
+        "rustup",
+        "run",
+        "1.95.0",
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "4",
+        "-p",
+        "mir2-gateway",
+        "--lib",
+        "auth_",
+        "--",
+        "--test-threads=1"
+      ],
+      "code": 0,
+      "signal": null,
+      "counts": [
+        {
+          "passed": 12,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v2\\adjacent-auth.stdout.log",
+        "bytes": 1334,
+        "sha256": "985fa1083e65d3d0d32bcc6b08013d114dcbfb82881d0da5f8f938b168ef7f6e"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v2\\adjacent-auth.stderr.log",
+        "bytes": 53409,
+        "sha256": "6cf753ef00f4ee073f9a1c49129f5420d846cac6eec0d126055068198576123e"
+      }
+    },
+    {
+      "name": "gateway-release",
+      "command": [
+        "rustup",
+        "run",
+        "1.95.0",
+        "cargo",
+        "build",
+        "--locked",
+        "--offline",
+        "--release",
+        "--jobs",
+        "4",
+        "-p",
+        "mir2-gateway",
+        "--bin",
+        "mir2-gateway"
+      ],
+      "code": 0,
+      "signal": null,
+      "counts": null,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v2\\gateway-release.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v2\\gateway-release.stderr.log",
+        "bytes": 55884,
+        "sha256": "395016760a0348046b6f4de8f5b7466e4605acac67d5dc2285fb2d9530055ff0"
+      }
+    }
+  ],
+  "immutableExecutable": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v2\\bin\\mir2-gateway.exe",
+    "bytes": 87439360,
+    "sha256": "e55d15eef60e2ee289a92bc17a72ce3731376b5ed8b06bd36831807b99bb0a7b"
+  },
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

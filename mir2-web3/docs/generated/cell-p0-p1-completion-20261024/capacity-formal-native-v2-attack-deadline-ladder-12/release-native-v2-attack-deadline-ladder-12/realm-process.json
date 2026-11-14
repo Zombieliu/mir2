@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "pid": 68516,
+  "runnerPid": 67696,
+  "exe": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\bin\\mir2-gateway.exe",
+  "sha256": "1980b7bed58499977eb6443aa3f1bf0fabcb9e8262b490f2bc6fb74cf6f7b318",
+  "sourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "backendSourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "driverSourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "endpoint": "ws://127.0.0.1:17510/ws",
+  "startedAtUtc": "2026-10-25T17:56:59.401Z",
+  "tokioWorkers": 4,
+  "content": "platinum_176",
+  "routing": "single",
+  "accountBackend": "file",
+  "explicitAdmissionCaps": [
+    128,
+    100,
+    100,
+    4,
+    1,
+    2
+  ],
+  "wireDiagnostics": {
+    "version": "v2",
+    "manifest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\source-frozen-v2.json",
+      "bytes": 10830,
+      "sha256": "4ca6eee4f0ef9b2046bb5f56531ceec6eb2e1958141d0b7325cdb47de28e8ce3"
+    },
+    "review": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-wrapper-independent-review-v1\\review-v2.json",
+      "bytes": 6809,
+      "sha256": "4cda8f7ec69f710090cc3c4999cb847a8bf620bba6f2573978fe9245ddc50603"
+    },
+    "sourceSha256": "a3d938d2b9e92d97e445ca930640ccf1c838271d827efd45d11ff970f44cab49",
+    "driverSourceCommit": "4cab00893b861395b63906b1b8183a021d397cdb",
+    "coreCodeEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+    "coreDriverSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+    "wrapperTests": 28,
+    "core187CoversWrapper": false,
+    "terminalFile": "compact-navigation-wire-terminal.json",
+    "terminalOutsideRaw": true,
+    "existingWriter": {
+      "defaultMaxBufferedBytes": 4194304,
+      "addMayRecordFailureAndReturn": true,
+      "durableRowsRequireRawCrosscheck": true
+    }
+  },
+  "coreCodeEvidenceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "sceneProfile": "ordinary-native-span2-five-by-five-static-halo-v1",
+  "sceneSourceSha256": "e3eaf0604f0e99fde70fbbe90585f171e3a5068b6e89e1fffbaab13dafe92adf",
+  "scene10Sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba",
+  "scene100Sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205",
+  "sceneAnalysisSha256": "1669a862e5281a7623e0ba112471282556804df1c6eac24ea2d2cd78c5e43fd5",
+  "patrolSpan": 2,
+  "attackResults": "v2",
+  "slowStageThresholdMs": 50,
+  "slowStagePublicSchema": "socket-context-v1",
+  "slowStageHelperSha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c",
+  "full16RunId": "1792946599345-0034c2b9",
+  "slowStagePublicFile": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\slow-stage-public.jsonl",
+  "stdinShutdown": true,
+  "freshPrivateSecrets": 4,
+  "parallelCompilation": false,
+  "capacityAcceptanceEligible": true,
+  "capacityAcceptanceActuallyPassed": false,
+  "spectatorDataDir": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\recordings",
+  "spectatorEnabledFromFrozenDefault": true,
+  "spectatorRecordingFromFrozenDefault": true,
+  "spectatorPublicFromFrozenDefault": true
+}

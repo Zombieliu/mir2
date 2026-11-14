@@ -1,0 +1,14 @@
+{
+  "accountStoreSchema": 10,
+  "charactersCreated": 0,
+  "created": 100,
+  "existingStoreModified": false,
+  "gameplayGrants": 0,
+  "loginTested": false,
+  "networkRequests": 0,
+  "passed": true,
+  "provisioning": "admin-provisioned-file-account-only",
+  "registrationLoadTested": false,
+  "requested": 100,
+  "schemaVersion": 1
+}

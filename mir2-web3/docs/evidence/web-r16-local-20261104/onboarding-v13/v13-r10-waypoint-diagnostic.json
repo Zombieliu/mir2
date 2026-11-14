@@ -1,0 +1,1203 @@
+{
+  "schema": "r16-onboarding-v11-browser-smoke/1",
+  "startedAt": "2026-11-04T23:50:58.651Z",
+  "passed": false,
+  "villageFirstTwoCompleted": true,
+  "scope": {
+    "freshOrdinaryAccount": false,
+    "reusedOwnOrdinaryQaAccount": true,
+    "primaryUiOnly": true,
+    "rootPrivateFilesRead": false,
+    "rootSecretValuesPassedToBrowser": false,
+    "credentialsOnlyUsedForNormalUiFill": true,
+    "readOnlyRuntimeGetters": [
+      "getMir2QuestUiStatus",
+      "getMir2QuestWorldControlRects",
+      "getMir2NpcShopUiStatus"
+    ],
+    "mockedRoutes": false,
+    "hiddenActions": false,
+    "qaCommands": 0,
+    "saveDataEdits": false,
+    "modelCallsRequested": 0,
+    "walletOpened": false,
+    "originalOwnerOrAloOpened": false
+  },
+  "sourceHashes": {
+    "quests": "fd35732d9356fcf5aeb4c06d639261a816626a54ccaf33f8cc6d461e98c93182",
+    "journeyUi": "e52630f84ee09e3e2d3abd821db00dde01b62e7d803d18972c8fd906db38c747",
+    "questLayout": "57c00b606dd1d63cde0db984489fa3073a5afe5756092061f2edbc8c99358c92",
+    "keys": "ebfd4f283523f658d33793f604e697a5c4e4b0430fc5d63586ec8597bf31d208",
+    "bag": "10a1dd118f66e6924de84ac611fdd0f7473e255e9f5b31063027f72a411d83c7",
+    "panel": "d6436a807c81b42525aa7e74b6bb6288819ed8bf4db9cdda914e2ad58a264fd8",
+    "npcShop": "6112790ba0b9a57fb529fbbf85d25dd20c3d8b98a63884a9098267badb42c5a1",
+    "shopPaint": "b7279b5d15b7c27960afeddf8ece13b37cb58c795817f74edeec3170b63c85d6",
+    "spawns": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+  },
+  "plan": {
+    "profile": "newcomer-v2",
+    "quests": [
+      {
+        "id": 2110001,
+        "startNpcId": 3,
+        "finishNpcId": 3,
+        "gold": 100,
+        "experience": 100,
+        "kills": []
+      },
+      {
+        "id": 2110002,
+        "startNpcId": 0,
+        "finishNpcId": 0,
+        "gold": 100,
+        "experience": 200,
+        "kills": []
+      },
+      {
+        "id": 2110003,
+        "startNpcId": 0,
+        "finishNpcId": 0,
+        "gold": 150,
+        "experience": 2200,
+        "kills": [
+          {
+            "monster": "Scarecrow",
+            "monsterIndex": 39,
+            "count": 2,
+            "message": "Defeat 2 Scarecrow."
+          },
+          {
+            "monster": "RakingCat",
+            "monsterIndex": 44,
+            "count": 2,
+            "message": "Defeat 2 RakingCat."
+          }
+        ]
+      }
+    ],
+    "jane": {
+      "map": "0",
+      "x": 284,
+      "y": 606
+    },
+    "diaryKeyRequested": "KeyQ",
+    "diaryKeyFromCurrentSharedDefaults": "KeyQ",
+    "readOnlyGetters": [
+      "getMir2QuestUiStatus",
+      "getMir2QuestWorldControlRects",
+      "getMir2NpcShopUiStatus"
+    ],
+    "coldEntryWaitMs": 45000
+  },
+  "checks": [
+    {
+      "name": "town-has-no-old-tour-and-current-shared-native-quest-host",
+      "passed": true
+    },
+    {
+      "name": "server-history-retains-completed-2110001-without-reclaim",
+      "passed": true
+    },
+    {
+      "name": "server-history-retains-completed-2110002-without-reclaim",
+      "passed": true
+    },
+    {
+      "name": "ordinary-relogin-retains-progress-and-ui-does-not-repeat-rewards",
+      "passed": true
+    }
+  ],
+  "phases": [
+    "ordinary-owned-qa-character-relogin",
+    "ordinary-remaining-village-hunt-2110003",
+    "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+    "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+    "first-two-complete-natural-hunt-incomplete"
+  ],
+  "screenshots": [
+    "01-village-native-task-card-before-measured-readiness.png",
+    "02-fresh-village-native-task-card.png",
+    "03-bounded-natural-hunt-incomplete.png",
+    "04-saved-progress-native-diary.png"
+  ],
+  "packetEvidence": [
+    {
+      "sequence": 13,
+      "method": "LoginSuccess",
+      "phase": "ordinary-owned-qa-character-relogin"
+    },
+    {
+      "sequence": 17,
+      "method": "StartGame",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "result": 4
+    },
+    {
+      "sequence": 22,
+      "method": "MapInformation",
+      "phase": "ordinary-owned-qa-character-relogin"
+    },
+    {
+      "sequence": 23,
+      "method": "UserInformation",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "gold": 0,
+      "hp": 30,
+      "maxHp": 30,
+      "mp": 21,
+      "maxMp": 21,
+      "objectId": 1000,
+      "direction": "Right"
+    },
+    {
+      "sequence": 445,
+      "method": "CompleteQuest",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "completedQuestIds": [
+        2110001,
+        2110002
+      ]
+    },
+    {
+      "sequence": 627,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 200325
+    },
+    {
+      "sequence": 628,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 200716
+    },
+    {
+      "sequence": 629,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206302
+    },
+    {
+      "sequence": 630,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206324
+    },
+    {
+      "sequence": 631,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206339
+    },
+    {
+      "sequence": 632,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206515
+    },
+    {
+      "sequence": 633,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206524
+    },
+    {
+      "sequence": 634,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206530
+    },
+    {
+      "sequence": 635,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206536
+    },
+    {
+      "sequence": 636,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206604
+    },
+    {
+      "sequence": 637,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206626
+    },
+    {
+      "sequence": 638,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206632
+    },
+    {
+      "sequence": 639,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206641
+    },
+    {
+      "sequence": 640,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206644
+    },
+    {
+      "sequence": 641,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206711
+    },
+    {
+      "sequence": 642,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206714
+    },
+    {
+      "sequence": 643,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206717
+    },
+    {
+      "sequence": 644,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 271801
+    },
+    {
+      "sequence": 645,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 271806
+    },
+    {
+      "sequence": 701,
+      "method": "LogOutSuccess",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward"
+    },
+    {
+      "sequence": 716,
+      "method": "LoginSuccess",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward"
+    },
+    {
+      "sequence": 720,
+      "method": "StartGame",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "result": 4
+    },
+    {
+      "sequence": 725,
+      "method": "MapInformation",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward"
+    },
+    {
+      "sequence": 726,
+      "method": "UserInformation",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "gold": 0,
+      "hp": 30,
+      "maxHp": 30,
+      "mp": 21,
+      "maxMp": 21,
+      "objectId": 1000,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1148,
+      "method": "CompleteQuest",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "completedQuestIds": [
+        2110001,
+        2110002
+      ]
+    },
+    {
+      "sequence": 1330,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 200325
+    },
+    {
+      "sequence": 1331,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 200716
+    },
+    {
+      "sequence": 1332,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 206302
+    },
+    {
+      "sequence": 1333,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 206324
+    },
+    {
+      "sequence": 1334,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 206339
+    },
+    {
+      "sequence": 1335,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 206515
+    },
+    {
+      "sequence": 1336,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 206524
+    },
+    {
+      "sequence": 1337,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 206530
+    },
+    {
+      "sequence": 1338,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 206536
+    },
+    {
+      "sequence": 1339,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 206604
+    },
+    {
+      "sequence": 1340,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 206626
+    },
+    {
+      "sequence": 1341,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 206632
+    },
+    {
+      "sequence": 1342,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 206641
+    },
+    {
+      "sequence": 1343,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 206644
+    },
+    {
+      "sequence": 1344,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 206711
+    },
+    {
+      "sequence": 1345,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 206714
+    },
+    {
+      "sequence": 1346,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 206717
+    },
+    {
+      "sequence": 1347,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 271801
+    },
+    {
+      "sequence": 1348,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 271806
+    },
+    {
+      "sequence": 1405,
+      "method": "LogOutSuccess",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward"
+    }
+  ],
+  "questOperations": [],
+  "movement": [],
+  "native": [
+    {
+      "name": "fresh-v2-chapter-task-card",
+      "ready": true,
+      "generation": 2,
+      "revision": 1,
+      "frame": 45,
+      "questLogOpen": false,
+      "capturesPointer": false,
+      "owner": "bevy",
+      "currentWorldContext": true,
+      "rects": [
+        {
+          "type": "navigateQuestRoute",
+          "left": 19,
+          "top": 237,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "questLocalUi",
+          "left": 19,
+          "top": 266,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "openDestinationMap",
+          "left": 19,
+          "top": 295,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "toggleSupplies",
+          "left": 19,
+          "top": 324,
+          "width": 282,
+          "height": 25
+        }
+      ],
+      "compact": null
+    }
+  ],
+  "errors": [],
+  "network": {
+    "failed": [],
+    "httpErrors": [],
+    "cancelled": [
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "9eeb5fa233df82531dffea86ffb49fa4f48ac32bcba5fb5d93a58ab367fe0e40",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "59b575174e75b5bd4afcfbd6f7f338462fb173fabd1e9572382da322fe3dffef",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+        "method": "GET",
+        "pathHash": "b5a477466acb573db09051484a348dc305a615e912e5fd4fb8cdfc59b6aa0454",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+        "method": "GET",
+        "pathHash": "9eeb5fa233df82531dffea86ffb49fa4f48ac32bcba5fb5d93a58ab367fe0e40",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+        "method": "GET",
+        "pathHash": "9eeb5fa233df82531dffea86ffb49fa4f48ac32bcba5fb5d93a58ab367fe0e40",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+        "method": "GET",
+        "pathHash": "b5a477466acb573db09051484a348dc305a615e912e5fd4fb8cdfc59b6aa0454",
+        "successfulResponseObserved": true
+      }
+    ]
+  },
+  "console": {
+    "errorCount": 0,
+    "warningCount": 10,
+    "hashes": [
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "175c73d54d8d443a965a16a38ac036c2de536a3920f173064fd6837866b00186"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "49327b4b9b8190510edde58767786caa7361f3b966d0e36f6410302a3bc80690"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "279e871e7d94a9d4279a8b358919c16104dce28f0c48addcccb588f6ee3f7895"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "d0fd95a1ee8684ca218f9b1b70cb8a788a343792667b3de5a8b1ee936ff6e450"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "d0fd95a1ee8684ca218f9b1b70cb8a788a343792667b3de5a8b1ee936ff6e450"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "d0fd95a1ee8684ca218f9b1b70cb8a788a343792667b3de5a8b1ee936ff6e450"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "f394bdeddfbc878ffac2a6f47e4d131fb1236ef2e28eeba877c24c8b19304b6b"
+      },
+      {
+        "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+        "name": "warning",
+        "hash": "175c73d54d8d443a965a16a38ac036c2de536a3920f173064fd6837866b00186"
+      },
+      {
+        "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+        "name": "warning",
+        "hash": "49327b4b9b8190510edde58767786caa7361f3b966d0e36f6410302a3bc80690"
+      },
+      {
+        "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+        "name": "warning",
+        "hash": "279e871e7d94a9d4279a8b358919c16104dce28f0c48addcccb588f6ee3f7895"
+      }
+    ]
+  },
+  "commands": {
+    "clientCapabilities": 4,
+    "setLanguage": 2,
+    "clientVersion": 2,
+    "login": 2,
+    "startGame": 2,
+    "npcPurchaseOwner": 2,
+    "keepAlive": 2,
+    "logOut": 2
+  },
+  "unknownCommandCount": 0,
+  "unknownTypeHashes": [],
+  "cleanup": {
+    "ordinaryLogout": true,
+    "browserClosed": true
+  },
+  "vitals": [
+    {
+      "sequence": 3,
+      "receivedAtMs": 1793836262386,
+      "method": "realmInfo",
+      "hp": null,
+      "maxHp": null,
+      "mp": null,
+      "maxMp": null,
+      "dead": false,
+      "position": null
+    },
+    {
+      "sequence": 23,
+      "receivedAtMs": 1793836271646,
+      "method": "UserInformation",
+      "hp": 30,
+      "maxHp": 30,
+      "mp": 21,
+      "maxMp": 21,
+      "dead": false,
+      "position": {
+        "x": 288,
+        "y": 616
+      }
+    },
+    {
+      "sequence": 701,
+      "receivedAtMs": 1793836286411,
+      "method": "LogOutSuccess",
+      "hp": null,
+      "maxHp": null,
+      "mp": null,
+      "maxMp": null,
+      "dead": false,
+      "position": null
+    },
+    {
+      "sequence": 726,
+      "receivedAtMs": 1793836299632,
+      "method": "UserInformation",
+      "hp": 30,
+      "maxHp": 30,
+      "mp": 21,
+      "maxMp": 21,
+      "dead": false,
+      "position": {
+        "x": 288,
+        "y": 616
+      }
+    },
+    {
+      "sequence": 1405,
+      "receivedAtMs": 1793836311526,
+      "method": "LogOutSuccess",
+      "hp": null,
+      "maxHp": null,
+      "mp": null,
+      "maxMp": null,
+      "dead": false,
+      "position": null
+    }
+  ],
+  "medicine": [],
+  "npcPurchaseEvidence": [
+    {
+      "sequence": 697,
+      "action": "begin",
+      "reply": "producer",
+      "completeSnapshot": true,
+      "matchingRequestAndOperation": true,
+      "bootstrapObserverNotGated": true
+    },
+    {
+      "sequence": 1401,
+      "action": "begin",
+      "reply": "producer",
+      "completeSnapshot": true,
+      "matchingRequestAndOperation": true,
+      "bootstrapObserverNotGated": true
+    }
+  ],
+  "inventoryClose": {
+    "method": "visible-native-x",
+    "shortcutRetested": false,
+    "priorUnconfirmedF9Run": "onboarding-v12-browser-r5"
+  },
+  "budgets": {
+    "maxHuntMs": 360000,
+    "maxSteps": 420
+  },
+  "resumeState": {
+    "hp": 30,
+    "maxHp": 30,
+    "mp": 21,
+    "maxMp": 21,
+    "dead": false,
+    "position": {
+      "x": 288,
+      "y": 616
+    },
+    "gold": 0,
+    "smallHpMedicine": 2,
+    "equipment": [
+      {
+        "name": "WoodenSword",
+        "slot": "weapon",
+        "durabilityCurrent": 4000,
+        "durabilityMax": 4000
+      }
+    ],
+    "bagEquipment": [],
+    "clothingInBag": [],
+    "clothingEquipped": [],
+    "hpMedicineOnBelt": [
+      {
+        "slot": 0,
+        "quantity": 2,
+        "key": "Digit1"
+      }
+    ],
+    "completedQuestIds": [
+      2110001,
+      2110002
+    ],
+    "questLog": [
+      {
+        "questId": 2110001,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Report to Assistant Jane",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110002,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Equip a weapon you can use",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110003,
+        "stage": "inProgress",
+        "current": 3,
+        "required": 4,
+        "objectives": [
+          {
+            "label": "Defeat 2 Scarecrow.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          },
+          {
+            "label": "Defeat 2 RakingCat.",
+            "current": 1,
+            "required": 2,
+            "done": false
+          }
+        ]
+      }
+    ]
+  },
+  "renderer": {
+    "expected": null,
+    "observedPublicReleases": [
+      "bevy-07bd13d63fcbbd3a"
+    ]
+  },
+  "initialNativeReadiness": [
+    {
+      "ready": true,
+      "frame": 45,
+      "generation": 2,
+      "revision": 1,
+      "rectCount": 4,
+      "worldCurrent": true,
+      "genericNativeActionsRequireNonemptyWorldRects": false
+    }
+  ],
+  "resumedCompletedQuestIds": [
+    2110001
+  ],
+  "firstQuestRewardNotReclaimed": true,
+  "thirdQuestResumedWithoutReaccept": true,
+  "resumedThirdQuest": {
+    "questId": 2110003,
+    "stage": "inProgress",
+    "current": 3,
+    "required": 4,
+    "objectives": [
+      {
+        "label": "Defeat 2 Scarecrow.",
+        "current": 2,
+        "required": 2,
+        "done": true
+      },
+      {
+        "label": "Defeat 2 RakingCat.",
+        "current": 1,
+        "required": 2,
+        "done": false
+      }
+    ]
+  },
+  "keyboardPanelChecks": [
+    {
+      "phase": "ordinary-remaining-village-hunt-2110003",
+      "visibleShopWindows": 0,
+      "nativeShop": null,
+      "bag": {
+        "active": false
+      },
+      "quest": {
+        "capturesPointer": false
+      }
+    }
+  ],
+  "existingSuppliesOnly": {
+    "gold": 0,
+    "hpMedicine": 2,
+    "equipment": [
+      {
+        "name": "WoodenSword",
+        "slot": "weapon"
+      }
+    ],
+    "belt": [
+      {
+        "slot": 0,
+        "quantity": 2,
+        "key": "Digit1"
+      }
+    ],
+    "newPurchases": 0
+  },
+  "clothingAtHuntStart": {
+    "inventory": [],
+    "equipment": []
+  },
+  "hunt": {
+    "required": {
+      "Scarecrow": 2,
+      "RakingCat": 2
+    },
+    "deaths": [],
+    "waypoints": [
+      {
+        "x": 313,
+        "y": 610
+      },
+      {
+        "x": 313,
+        "y": 592
+      },
+      {
+        "x": 340,
+        "y": 550
+      }
+    ],
+    "targetsObserved": [
+      {
+        "position": {
+          "x": 288,
+          "y": 616
+        },
+        "hp": 30,
+        "targets": []
+      }
+    ],
+    "completed": false,
+    "blocker": "NO_LEGAL_PATH_TO_CURRENT_ORDINARY_EXPLORATION_WAYPOINT",
+    "authoritativeQuestLog": [
+      {
+        "questId": 2110001,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Report to Assistant Jane",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110002,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Equip a weapon you can use",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110003,
+        "stage": "inProgress",
+        "current": 3,
+        "required": 4,
+        "objectives": [
+          {
+            "label": "Defeat 2 Scarecrow.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          },
+          {
+            "label": "Defeat 2 RakingCat.",
+            "current": 1,
+            "required": 2,
+            "done": false
+          }
+        ]
+      }
+    ]
+  },
+  "persistence": {
+    "normalLogoutAck": true,
+    "freshLogin": true,
+    "exactAssetsRetained": true,
+    "exactProgressRetained": true,
+    "completedQuestIds": [
+      2110001,
+      2110002
+    ],
+    "completedNpcRewardNotOffered": null,
+    "priorNpcRevisitEvidence": "../onboarding-v12-browser-r6/onboarding-v11-browser-proof.json",
+    "completedDiaryRewardNotOffered": true,
+    "noRepeatedRewardOnUiRevisit": true,
+    "arbitraryProtocolReplayTested": false
+  },
+  "lastPhysicalNativeInput": {
+    "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+    "logical": {
+      "x": 493,
+      "y": 73.5
+    },
+    "css": {
+      "x": 621,
+      "y": 169.5
+    },
+    "clickCount": 1,
+    "delayMs": 80,
+    "quest": {
+      "questLocaleVersion": 1,
+      "language": "zh-CN",
+      "ready": true,
+      "error": null,
+      "capturesPointer": true,
+      "questLogOpen": true,
+      "frame": 81,
+      "generation": 2,
+      "revision": 2,
+      "openRevision": 2,
+      "hpOrb": {
+        "supported": true,
+        "ready": false,
+        "generation": 2,
+        "revision": 2,
+        "hp": null,
+        "maxHp": null,
+        "hpOnly": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "mpOrb": {
+        "supported": true,
+        "ready": false,
+        "generation": 2,
+        "revision": 2,
+        "mp": null,
+        "maxMp": null,
+        "hpOnly": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "experienceBar": {
+        "supported": false,
+        "ready": false,
+        "generation": 2,
+        "revision": 2,
+        "experience": null,
+        "maxExperience": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "weightBar": {
+        "supported": false,
+        "ready": false,
+        "generation": 2,
+        "revision": 2,
+        "currentWeight": null,
+        "maxWeight": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "hudBarDrawPlan": {
+        "version": 1,
+        "generation": 2,
+        "revision": 2,
+        "lifetime": "r1-g2-p1000",
+        "experience": {
+          "token": "e-1",
+          "sequence": 1,
+          "state": "draw",
+          "current": 144,
+          "maximum": 300,
+          "slot": {
+            "left": 9,
+            "top": 759,
+            "width": 1004,
+            "height": 8
+          },
+          "image": "original-ui/Prguse/8.png",
+          "source": {
+            "left": 0,
+            "top": 0,
+            "width": 480,
+            "height": 8
+          },
+          "destination": {
+            "left": 9,
+            "top": 759,
+            "width": 480,
+            "height": 8
+          }
+        },
+        "weight": {
+          "token": "w-1",
+          "sequence": 1,
+          "state": "draw",
+          "current": 2,
+          "maximum": 53,
+          "slot": {
+            "left": 919,
+            "top": 719,
+            "width": 76,
+            "height": 12
+          },
+          "image": "original-ui/Prguse/76.png",
+          "source": {
+            "left": 0,
+            "top": 0,
+            "width": 2,
+            "height": 12
+          },
+          "destination": {
+            "left": 919,
+            "top": 719,
+            "width": 2,
+            "height": 12
+          }
+        }
+      }
+    },
+    "receivedSequenceBefore": 1403
+  },
+  "partialSatisfied": true,
+  "focusedFirstTwoCompleted": false,
+  "incompleteReason": "NO_LEGAL_PATH_TO_CURRENT_ORDINARY_EXPLORATION_WAYPOINT",
+  "finishedAt": "2026-11-04T23:51:51.696Z",
+  "finalQuestLog": [
+    {
+      "questId": 2110001,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Report to Assistant Jane",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110002,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Equip a weapon you can use",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110003,
+      "stage": "inProgress",
+      "current": 3,
+      "required": 4,
+      "objectives": [
+        {
+          "label": "Defeat 2 Scarecrow.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        },
+        {
+          "label": "Defeat 2 RakingCat.",
+          "current": 1,
+          "required": 2,
+          "done": false
+        }
+      ]
+    }
+  ],
+  "completedQuestIds": [
+    2110001,
+    2110002
+  ],
+  "lastFullSnapshot": {
+    "sequence": 1406,
+    "receivedAtMs": 1793836311543,
+    "position": null,
+    "inSafeZone": false,
+    "mapFileName": null,
+    "hp": null,
+    "maxHp": null,
+    "dead": false
+  },
+  "lastUserLocation": null,
+  "movementSteps": 0,
+  "finalVitals": {
+    "hp": null,
+    "maxHp": null,
+    "mp": null,
+    "maxMp": null,
+    "dead": false,
+    "position": null
+  }
+}

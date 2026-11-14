@@ -1,0 +1,44 @@
+{
+  "observedAtUtc": "2026-10-30T22:06:06.1762339Z",
+  "schema": "mir2.promotion-full-monthly-frontend.v1",
+  "sourceWorktree": "C:/Users/Administrator/.codex/worktrees/promotion-vercel-release/mir2-player-journey/mir2-web3/apps/web",
+  "checks": {
+    "browserWriteRequests": 0,
+    "adjacentTests": 54,
+    "screenshotReview": "desktop, 390px Simplified Chinese and Arabic reviewed; readable with no horizontal overflow",
+    "browserErrors": 0,
+    "focusedTests": 34,
+    "strictTypecheck": "passed",
+    "browserMockOnlyChecks": 6,
+    "nextProductionBuild": "passed",
+    "releaseGuardTests": 23,
+    "nextBuildCommand": "npx next build --webpack"
+  },
+  "buildStage": "E:/mir2-task-temp/promotion-full-monthly-ui-f33faf5f6efa/mir2-web3/apps/web",
+  "resolvedLocalBoundary": "Initial C: checkout cross-drive node_modules junction failed webpack resolution. Same E: drive staging with exact affected source, tracked public JSON metadata and original favicons completed Next build and fixture browser checks.",
+  "limits": {
+    "browserBackendMocked": true,
+    "pushPerformedByWorker": false,
+    "deployPerformedByWorker": false,
+    "realUserCommissionVerified": false
+  },
+  "sources": [
+    {
+      "stagingMatches": true,
+      "sha256": "d59bff5307524cc272cdca085ddfb908f9878eb78d37b5ca2ef4c0bde0979263",
+      "path": "app/promotions/promotion-app.tsx"
+    },
+    {
+      "stagingMatches": true,
+      "sha256": "991e53ed8665aaa50c1fb4f0d21c765560c253b0eb43ea24c6e533ceb10d1434",
+      "path": "app/promotions/promotion-admin.tsx"
+    },
+    {
+      "stagingMatches": true,
+      "sha256": "472c35945aeada4ef3686aad520f0e46ae32f81998761c57a624c829377de8e8",
+      "path": "app/promotions/promotion-earnings-copy.ts"
+    }
+  ],
+  "sourceHead": "3a52daef5c3fe92e1e738d6656b9fdbf54de56c3",
+  "finalHeadBrowserRerun": true
+}

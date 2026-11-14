@@ -1,0 +1,19 @@
+{
+  "projectedReport": {
+    "activated": false,
+    "archiveSha256": "1C94A7B6E4C0D1CC2752F6C325EAD7E9CD6B7716DBC603EC8CBDE5E5808E57E5",
+    "passed": true,
+    "reportedPassed": true,
+    "schema": "mir2.evidence.linux-v4-tests-summary.v1",
+    "testCount": 9,
+    "testSeconds": 0.38,
+    "unittestPassed": true,
+    "verifiedMembers": 16,
+    "wrapperExitCode": 0
+  },
+  "projectionBoundary": "Explicit fields only; raw log/body/attempt/env/argv/private config excluded.",
+  "role": "v4-linux9",
+  "schema": "mir2.evidence.public-projection.v1",
+  "sourceSha256": "4469A7804BE4B0BB809FB9DD01883B523277B92F3573C6041AA3044ABDAEB488",
+  "sourceSize": 2021
+}

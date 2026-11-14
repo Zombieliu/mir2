@@ -1,0 +1,174 @@
+{
+  "schema": "mir2-supply-live-reviewed/1",
+  "reviewedAtUtc": "2026-11-03T12:03:41.3831078Z",
+  "passed": true,
+  "scope": "Read-only review of a prerecorded ordinary local Windows /ws acceptance in a fresh synthetic private world; no new gameplay or API calls were made for this review",
+  "sourceSummary": {
+    "path": "F:\\mir2-builds\\alo-cultivation-20261103\\private-fixtures\\experience-68440d7c-437e-45bf-b90d-760e608c1fe7\\supply-acceptance-summary.json",
+    "sha256": "40e17baf55590d83cb0dbb271f86c849745a1bf1e6af8b54052898bcc8b843c6"
+  },
+  "sourceLog": {
+    "path": "F:\\mir2-builds\\alo-cultivation-20261103\\supply-live-2.log",
+    "sha256": "73d080917906fcd99e8ac42fba6123c41eef3aa29f06e84a61dc6820d13d96e4"
+  },
+  "gateway": {
+    "path": "F:/mir2-builds/canonical-companion-gateway/debug/mir2-gateway.exe",
+    "sha256": "cd35f1f8cba5c2d6602dc344421b25db613c4c82061fdf6f34b1946df914a3d7",
+    "matchesRecordedSummary": true
+  },
+  "sourceHashes": [
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\ai-player\\scripts\\run-supply-acceptance.mjs",
+      "sha256": "5b931d29c5f6c341df1abb9a2c202a32f5d87818461fe991c0be3c1305a6043a",
+      "lastWriteTimeUtc": "2026-11-03T11:38:28.4262808Z",
+      "modifiedBeforeSummary": true
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\ai-player\\scripts\\supply-acceptance-actor.mjs",
+      "sha256": "f9c75c5a9afc7a59214d091b8e2312f5c926e1ebfd1f48f282b1198449ac445e",
+      "lastWriteTimeUtc": "2026-11-03T09:26:35.1271269Z",
+      "modifiedBeforeSummary": true
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\ai-player\\scripts\\supply-acceptance-funding.mjs",
+      "sha256": "bba0520cc2ff7134a82b685e7e7747169459d1bfbf19cfa9a991e031a5a5ccdf",
+      "lastWriteTimeUtc": "2026-11-03T09:15:20.9553688Z",
+      "modifiedBeforeSummary": true
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\ai-player\\scripts\\companion-trial-fixture.mjs",
+      "sha256": "c6e35e62dad1740d08a2a520cb01e810b21f393660516f337db3049fee3f8bd7",
+      "lastWriteTimeUtc": "2026-11-03T09:33:24.7864277Z",
+      "modifiedBeforeSummary": true
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\ai-player\\src\\supply\\supply-controller.mjs",
+      "sha256": "553fc7983fffa46c98397323bfe198230fc884bb9025fc374aab845bc559331e",
+      "lastWriteTimeUtc": "2026-11-03T11:36:56.7524662Z",
+      "modifiedBeforeSummary": true
+    }
+  ],
+  "sourceHashScope": "Current source files were hashed at review time; their timestamps precede the run summary; this is not a frozen source manifest captured at process launch",
+  "contentProfile": "platinum_fiveclass",
+  "modelCalls": 0,
+  "humanTrial": false,
+  "checkCount": 7,
+  "checks": [
+    {
+      "id": "ordinary-synthetic-funding",
+      "verified": true,
+      "initialGold": 0,
+      "afterOwnedStarterResaleGold": 85,
+      "syntheticOnly": true,
+      "productSellingCapabilityAdded": false,
+      "combatRevenueClaimed": false
+    },
+    {
+      "id": "owner-outside-actor-AOI",
+      "verified": true,
+      "actorCouldSeeOwner": false,
+      "ownerPosition": {
+        "x": 309,
+        "y": 634
+      },
+      "actorStartPosition": {
+        "x": 288,
+        "y": 616
+      }
+    },
+    {
+      "id": "server-cap51-refused",
+      "verified": true,
+      "evidence": "Recorded run-script status rejection and zero Purchase assertions; the raw rejected response is not retained in this summary",
+      "attemptedBudgetGold": 51
+    },
+    {
+      "id": "observed-price40-with-budget39-no-purchase",
+      "verified": true,
+      "observedBudgetGold": 39,
+      "observedPriceGold": 40,
+      "goldUnchanged": true,
+      "ownedPotionQuantityUnchanged": true,
+      "noPurchaseAttempted": true,
+      "uniqueRefusalCauseProven": false,
+      "serverCommitBudgetEnforcementProvenByThisCase": false
+    },
+    {
+      "id": "actual-first-purchase-and-return",
+      "verified": true,
+      "beforeGold": 85,
+      "afterGold": 45,
+      "beforeHpPotions": 1,
+      "afterHpPotions": 2,
+      "chargedGold": 40,
+      "acquiredQuantity": 1,
+      "completePairedSnapshot": true,
+      "operationHash": "e2fc2e178190642090b37ef0623a30875b7000e6d6f429e0f44f0b9eae24f5c3",
+      "returnAnchor": {
+        "x": 309,
+        "y": 634
+      },
+      "actualReturnPosition": {
+        "x": 308,
+        "y": 634
+      },
+      "arrivalDistance": 1
+    },
+    {
+      "id": "explicit-cancel-stops-new-purchase",
+      "verified": true,
+      "goldUnchanged": true,
+      "noAdditionalPurchase": true,
+      "finalStatus": "cancelled"
+    },
+    {
+      "id": "second-commit-result-loss-and-different-Node-query",
+      "verified": true,
+      "beforeSecondGold": 45,
+      "afterSecondGold": 5,
+      "beforeSecondHpPotions": 2,
+      "afterSecondHpPotions": 3,
+      "chargedGold": 40,
+      "originalOperationHash": "1d8805cd67856fe3f2d58b74603564303d24c4c7f40fd76df77b4560da788d3c",
+      "exactQueryOperationAssertedByRunScript": true,
+      "receiptOperationHashIndependentlyMatched": true,
+      "queryCallsAfterRestart": 1,
+      "newPurchaseCallsAfterRestart": 0,
+      "stateAfterRecovery": "paused",
+      "returnClaimedAfterRecovery": false,
+      "faultInjection": "Actual server commit; the returned method result was intentionally dropped before runner consumption",
+      "realNetworkFailureTested": false,
+      "gatewayRestartRecoveryTested": false
+    }
+  ],
+  "cleanup": {
+    "observedAtUtc": "2026-11-03T12:03:41.3852847Z",
+    "actorProcesses": [
+      {
+        "processId": 47252,
+        "exists": false,
+        "name": null,
+        "parentProcessId": null
+      },
+      {
+        "processId": 33344,
+        "exists": false,
+        "name": null,
+        "parentProcessId": null
+      }
+    ],
+    "actorProcessesAbsent": true,
+    "fixtureCloseInFinally": true,
+    "cleanupErrorsSuppressedByHarness": true,
+    "gatewayExitIndependentlyConfirmed": false,
+    "gatewayExitEvidence": "The acceptance summary does not retain the Gateway or driver PID; no unrelated process was treated as this run",
+    "noProcessKilledDuringReview": true
+  },
+  "limitations": [
+    "This is a deterministic synthetic local acceptance, not a human continuous-experience trial.",
+    "The 39-gold run records observed price and absence of spending, not a uniquely diagnosed rejection cause.",
+    "The recovery fault deliberately drops a committed method result and restarts Node; real network failure and Gateway restart were not tested.",
+    "No credentials, private server MAC configuration, API keys, or original user state were read or copied."
+  ],
+  "originalFailedLiveEvidencePreserved": true
+}

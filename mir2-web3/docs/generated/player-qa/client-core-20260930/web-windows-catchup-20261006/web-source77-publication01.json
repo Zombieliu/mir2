@@ -1,0 +1,37 @@
+{
+  "owner": "Root",
+  "kind": "Source77 normal publication with independent remote acknowledgement",
+  "commit": "ead9311a37edf6ba71ac7633726a1d01b0d5df0a",
+  "parent": "e20b1f4556f18f74cc8b65fbb6ef2b8da04e98a1",
+  "branch": "codex/windows-player-journey",
+  "ownedCodeLeaves": 4,
+  "ownedDocLeaves": 7,
+  "ownedQaLeaves": 42,
+  "totalCommittedLeaves": 53,
+  "all53RawIndexBlobShaVerified": true,
+  "all53CommittedBlobIdentitiesMatched": true,
+  "indexEmptyAfterCommit": true,
+  "workingForeignDocsAndTsconfigPreserved": true,
+  "push": {
+    "closed0": true,
+    "acknowledgement": "To github.com:Zombieliu/mir2.git\n   e20b1f4556..ead9311a37  codex/windows-player-journey -> codex/windows-player-journey"
+  },
+  "independentHttpsRemote": {
+    "closed0": true,
+    "head": "ead9311a37edf6ba71ac7633726a1d01b0d5df0a"
+  },
+  "checks": {
+    "sourceDocAndStructuredQaWhitespacePassed": 49,
+    "windowsCrLfRecognized": true,
+    "rawActualLogsPreserved": 4,
+    "rawNextAndFirstFailureLogWhitespacePreservedIntentionally": true,
+    "testsPassed": 141,
+    "strictNextAndThinClosed0": true,
+    "ordinaryBuySaveReloginPassed": true
+  },
+  "remainingEmptySpellsNativeGap": true,
+  "mobileAccepted": false,
+  "candidate100Accepted": false,
+  "goalStatus": "active",
+  "goalComplete": false
+}

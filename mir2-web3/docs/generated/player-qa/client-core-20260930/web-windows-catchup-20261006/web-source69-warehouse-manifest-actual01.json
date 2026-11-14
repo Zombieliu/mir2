@@ -1,0 +1,47 @@
+{
+  "kind": "Source69 actual unchanged filesystem manifest generator bounded inventory",
+  "originalCallerBytes": 4569,
+  "originalCallerSha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383",
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 73664,
+    "kind": "Source69 bounded selected manifest inventory original filesystem generator pending",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 1300,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source69-warehouse-map-local-20261011-01/root-approved01/manifest01-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "oldAssetCount": 41132,
+  "newAssetCount": 41248,
+  "exactAddedCount": 116,
+  "oldEntryDifferences": 0,
+  "newEntryHashAndSizeDifferences": 0,
+  "addedBytes": 204399,
+  "assetHash": "004f5da2655d1901625e51a3baf4b5f83354461a8f04b8143114a45af38a14c0",
+  "recomputedAssetHashMatches": true,
+  "mainManifestCopyHashMatches": true,
+  "collectionMode": "filesystem",
+  "sourceAndGuardBeforeAfterPassed": true,
+  "sourceInputs": 41251,
+  "unrelatedMainAssetsExcluded": 73755,
+  "doesNotClaimCompleteMainPublicInventory": true,
+  "stderrProgressLines": 2,
+  "rootDataValidationCorrection": "Initial Root data reader incorrectly required contentType; original filesystem entry schema only writes size/source/sha256. Corrected reader to unchanged original schema without changing generator or assertions.",
+  "originalManifestPin": {
+    "bytes": 7617155,
+    "sha256": "ff44eb74cca85c422533af87fdd1efe29443b984ef3c78364ca974abaec6f357"
+  },
+  "newManifestPin": {
+    "bytes": 7639644,
+    "sha256": "496339ab035ae1beec45b2bd8bc39d66ca4174417655b966bb8fcaf8abd6a867"
+  },
+  "candidateAccepted": false,
+  "goalComplete": false
+}

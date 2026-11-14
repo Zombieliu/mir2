@@ -1,0 +1,231 @@
+{
+  "schemaVersion": 1,
+  "bridgeVersion": 1,
+  "sourceBaseline": "8a8fd7a8a3",
+  "purpose": "Synthetic ordinary BrowserCommand to existing Native SocialPendingOperation mapping; no server actions or invented acknowledgements",
+  "execution": {
+    "resetBeforeEachCase": true,
+    "seedSequenceValuesAreOrderedBridgeOperations": true,
+    "mergeVersionAndOwnerIntoEverySeedAndReserveOperation": true,
+    "reserveInput": "operation=reserve, command=case.command, optional invite/deadlineMs from case",
+    "nativeKindIsSerdeLowerCamelVariantName": true,
+    "semanticFieldsArePartialAssertionsNotAnInjectedNativeRequest": true,
+    "classificationDoesNotPrescribeTheBridgeHandledFlagForUnbudgetedCommands": true
+  },
+  "owner": {
+    "generation": 1,
+    "connectionGeneration": 1,
+    "sessionGeneration": 2,
+    "playerObjectId": 1000,
+    "sceneRevision": 3,
+    "mapFileName": "0"
+  },
+  "identity": {
+    "viewer": {"name": "Leader", "characterIndex": 7},
+    "playerObjectIdIsNotTheCharacterIndex": true,
+    "uiInviteEpochIsNotTheNativeInviteEpoch": true
+  },
+  "nativeVariants": [
+    "GroupSwitch", "GroupAdd", "GroupRemove", "GroupInviteAccept", "GuildInfo",
+    "GuildRosterRead", "GuildMember", "GuildRankRename", "GuildRankPermission",
+    "GuildNotice", "GuildInviteAccept", "GuildStorageGold", "GuildStorageItem",
+    "TradeRequest", "TradeReply", "TradeGold", "TradeDeposit", "TradeRetrieve",
+    "TradeConfirm", "TradeCancel"
+  ],
+  "aliases": [
+    {
+      "nativeVariant": "GuildInfo",
+      "ordinaryCommand": "requestGuildInfo",
+      "createdVariant": "GuildRosterRead",
+      "note": "Native push_social_pending upgrades the legacy request to the typed builder. There is no second public command and no second budget slot."
+    }
+  ],
+  "permissionKeysInWireOptionOrder": [
+    "CanChangeRank", "CanRecruit", "CanKick", "CanStoreItem", "CanRetrieveItem",
+    "CanAlterAlliance", "CanChangeNotice", "CanActivateBuff"
+  ],
+  "seedSequences": {
+    "viewer": [
+      {"operation": "setViewer", "payload": {"objectId": 1000, "realId": 7, "name": "Leader"}}
+    ],
+    "groupInvite": [
+      {"operation": "setViewer", "payload": {"objectId": 1000, "realId": 7, "name": "Leader"}},
+      {"operation": "packet", "packet": "GroupInvite", "payload": {"name": "Inviter"}}
+    ],
+    "repeatedGroupInvite": [
+      {"operation": "setViewer", "payload": {"objectId": 1000, "realId": 7, "name": "Leader"}},
+      {"operation": "packet", "packet": "GroupInvite", "payload": {"name": "Inviter"}},
+      {"operation": "packet", "packet": "GroupInvite", "payload": {"name": "Inviter"}}
+    ],
+    "guildInvite": [
+      {"operation": "setViewer", "payload": {"objectId": 1000, "realId": 7, "name": "Leader"}},
+      {"operation": "packet", "packet": "GuildInvite", "payload": {"name": "GuildInviter"}}
+    ],
+    "repeatedGuildInvite": [
+      {"operation": "setViewer", "payload": {"objectId": 1000, "realId": 7, "name": "Leader"}},
+      {"operation": "packet", "packet": "GuildInvite", "payload": {"name": "GuildInviter"}},
+      {"operation": "packet", "packet": "GuildInvite", "payload": {"name": "GuildInviter"}}
+    ],
+    "guild": [
+      {"operation": "setViewer", "payload": {"objectId": 1000, "realId": 7, "name": "Leader"}},
+      {
+        "operation": "packet", "packet": "GuildStatus",
+        "payload": {"guildName": "Guild", "guildRankName": "Leader", "level": 3,
+          "experience": 41, "maxExperience": 1000, "gold": 1000, "sparePoints": 2,
+          "memberCount": 3, "maxMembers": 50, "voting": false, "itemCount": 0,
+          "buffCount": 0, "myOptions": 255, "myRankId": 0}
+      },
+      {
+        "operation": "packet", "packet": "GuildMemberChange",
+        "payload": {"status": 255, "name": "", "rankIndex": 0, "ranks": [
+          {"index": 0, "name": "Leader", "options": 255, "members": [
+            {"id": 7, "name": "Leader", "lastLoginBinaryDatetime": 123, "hasVoted": false, "online": true}]},
+          {"index": 1, "name": "Officer", "options": 65, "members": [
+            {"id": 9, "name": "Officer", "lastLoginBinaryDatetime": 123, "hasVoted": false, "online": true}]},
+          {"index": 2, "name": "Members", "options": 2, "members": [
+            {"id": 8, "name": "Peer", "lastLoginBinaryDatetime": 123, "hasVoted": false, "online": true}]}
+        ]}
+      }
+    ],
+    "tradeRequested": [
+      {"operation": "setViewer", "payload": {"objectId": 1000, "realId": 7, "name": "Leader"}},
+      {"operation": "packet", "packet": "TradeRequest", "payload": {"name": "Guest"}}
+    ],
+    "tradeOpen": [
+      {"operation": "setViewer", "payload": {"objectId": 1000, "realId": 7, "name": "Leader"}},
+      {"operation": "packet", "packet": "TradeAccept", "payload": {"name": "Guest"}}
+    ]
+  },
+  "cases": [
+    {"id": "group-switch-on", "seed": "viewer", "command": {"type": "switchGroup", "allowGroup": true},
+      "expected": {"classification": "budgeted", "budgeted": true, "nativeVariant": "GroupSwitch", "nativeKind": "groupSwitch", "semanticFields": {"allow_group": true}}},
+    {"id": "group-switch-off", "seed": "viewer", "command": {"type": "switchGroup", "allowGroup": false},
+      "expected": {"classification": "budgeted", "budgeted": true, "nativeVariant": "GroupSwitch", "nativeKind": "groupSwitch", "semanticFields": {"allow_group": false}}},
+    {"id": "group-add", "seed": "viewer", "command": {"type": "addMember", "name": "Peer"},
+      "expected": {"classification": "budgeted", "budgeted": true, "nativeVariant": "GroupAdd", "nativeKind": "groupAdd", "semanticFields": {"name": "Peer"}}},
+    {"id": "group-remove", "seed": "viewer", "command": {"type": "delMember", "name": "Peer"},
+      "expected": {"classification": "budgeted", "budgeted": true, "nativeVariant": "GroupRemove", "nativeKind": "groupRemove", "semanticFields": {"name": "Peer"}}},
+    {"id": "group-accept-ui-epoch-is-opaque", "seed": "groupInvite", "command": {"type": "groupInvite", "acceptInvite": true},
+      "invite": {"name": "Inviter", "epoch": 101},
+      "expected": {"classification": "budgeted", "budgeted": true, "nativeVariant": "GroupInviteAccept", "nativeKind": "groupInviteAccept", "semanticFields": {"inviter": "Inviter", "invite_epoch": 1}}},
+    {"id": "group-repeat-arrival-uses-native-epoch", "seed": "repeatedGroupInvite", "command": {"type": "groupInvite", "acceptInvite": true},
+      "invite": {"name": "Inviter", "epoch": 103},
+      "expected": {"classification": "budgeted", "budgeted": true, "nativeVariant": "GroupInviteAccept", "nativeKind": "groupInviteAccept", "semanticFields": {"inviter": "Inviter", "invite_epoch": 2}}},
+    {"id": "guild-roster-read", "seed": "guild", "command": {"type": "requestGuildInfo", "infoType": 1},
+      "expected": {"classification": "budgeted", "budgeted": true, "nativeVariant": "GuildRosterRead", "nativeKind": "guildRosterRead", "semanticFields": {"guildName": "Guild", "viewer": {"name": "Leader", "characterIndex": 7}, "infoType": 1}}},
+    {"id": "guild-info-zero-typed-alias", "seed": "guild", "command": {"type": "requestGuildInfo", "infoType": 0},
+      "expected": {"classification": "budgeted", "budgeted": true, "nativeVariant": "GuildRosterRead", "nativeKind": "guildRosterRead", "coversLegacyVariant": "GuildInfo", "semanticFields": {"infoType": 0}}},
+    {"id": "guild-recruit", "seed": "guild", "command": {"type": "editGuildMember", "changeType": 0, "rankIndex": 0, "name": "NewPeer", "rankName": ""},
+      "expected": {"classification": "budgeted", "budgeted": true, "nativeVariant": "GuildMember", "nativeKind": "guildMember", "semanticFields": {"change_type": 0, "rank_index": 0, "name": "NewPeer"}, "note": "Existing Native generic recruit completion is unresolved; no invented ACK."}},
+    {"id": "guild-kick", "seed": "guild", "command": {"type": "editGuildMember", "changeType": 1, "rankIndex": 0, "name": "Peer", "rankName": ""},
+      "expected": {"classification": "budgeted", "budgeted": true, "nativeVariant": "GuildMember", "nativeKind": "guildMember", "semanticFields": {"change_type": 1, "rank_index": 0, "name": "Peer"}}},
+    {"id": "guild-move-member", "seed": "guild", "command": {"type": "editGuildMember", "changeType": 2, "rankIndex": 1, "name": "Peer", "rankName": "Officer"},
+      "expected": {"classification": "budgeted", "budgeted": true, "nativeVariant": "GuildMember", "nativeKind": "guildMember", "semanticFields": {"change_type": 2, "rank_index": 1, "name": "Peer"}}},
+    {"id": "guild-rename-exact-draft", "seed": "guild", "command": {"type": "editGuildMember", "changeType": 3, "rankIndex": 2, "name": "", "rankName": " Scouts "}, "deadlineMs": 6000,
+      "expected": {"classification": "budgeted", "budgeted": true, "nativeVariant": "GuildRankRename", "nativeKind": "guildRankRename", "semanticFields": {"requester": "Leader", "rankIndex": 2, "rankName": " Scouts ", "deadlineMs": 6000}}},
+    {"id": "guild-create-is-existing-generic-member", "seed": "guild", "command": {"type": "editGuildMember", "changeType": 4, "rankIndex": 0, "name": "", "rankName": "Rank-2"},
+      "expected": {"classification": "budgeted", "budgeted": true, "nativeVariant": "GuildMember", "nativeKind": "guildMember", "semanticFields": {"change_type": 4, "rank_index": 0, "name": ""}, "note": "No new Native create kind. Existing generic Native type4 ACK limitation remains separate."}},
+    {"id": "guild-permission-set-one-bit", "seed": "guild", "command": {"type": "editGuildMember", "changeType": 5, "rankIndex": 2, "name": "true", "rankName": "3"},
+      "expected": {"classification": "budgeted", "budgeted": true, "nativeVariant": "GuildRankPermission", "nativeKind": "guildRankPermission", "semanticFields": {"requester": {"name": "Leader", "characterIndex": 7}, "rankIndex": 2, "option": 3, "enabled": true}}},
+    {"id": "guild-permission-clear-one-bit", "seed": "guild", "command": {"type": "editGuildMember", "changeType": 5, "rankIndex": 2, "name": "false", "rankName": "1"},
+      "expected": {"classification": "budgeted", "budgeted": true, "nativeVariant": "GuildRankPermission", "nativeKind": "guildRankPermission", "semanticFields": {"requester": {"name": "Leader", "characterIndex": 7}, "rankIndex": 2, "option": 1, "enabled": false}}},
+    {"id": "guild-notice", "seed": "guild", "command": {"type": "editGuildNotice", "notice": ["First line", "Second line"]},
+      "expected": {"classification": "budgeted", "budgeted": true, "nativeVariant": "GuildNotice", "nativeKind": "guildNotice", "semanticFields": {"notice": ["First line", "Second line"]}}},
+    {"id": "guild-accept-ui-epoch-is-opaque", "seed": "guildInvite", "command": {"type": "guildInvite", "acceptInvite": true}, "invite": {"name": "GuildInviter", "epoch": 102},
+      "expected": {"classification": "budgeted", "budgeted": true, "nativeVariant": "GuildInviteAccept", "nativeKind": "guildInviteAccept", "semanticFields": {"inviter": "GuildInviter", "invite_epoch": 1}}},
+    {"id": "guild-repeat-same-name-does-not-copy-ui-epoch", "seed": "repeatedGuildInvite", "command": {"type": "guildInvite", "acceptInvite": true}, "invite": {"name": "GuildInviter", "epoch": 104},
+      "expected": {"classification": "budgeted", "budgeted": true, "nativeVariant": "GuildInviteAccept", "nativeKind": "guildInviteAccept", "semanticFields": {"inviter": "GuildInviter", "invite_epoch": 1}}},
+    {"id": "guild-gold-deposit", "seed": "guild", "command": {"type": "guildStorageGoldChange", "changeType": 0, "amount": 25},
+      "expected": {"classification": "budgeted", "budgeted": true, "nativeVariant": "GuildStorageGold", "nativeKind": "guildStorageGold", "semanticFields": {"change_type": 0, "amount": 25}}},
+    {"id": "guild-gold-withdraw", "seed": "guild", "command": {"type": "guildStorageGoldChange", "changeType": 1, "amount": 25},
+      "expected": {"classification": "budgeted", "budgeted": true, "nativeVariant": "GuildStorageGold", "nativeKind": "guildStorageGold", "semanticFields": {"change_type": 1, "amount": 25}}},
+    {"id": "guild-item-deposit", "seed": "guild", "command": {"type": "guildStorageItemChange", "changeType": 0, "from": 42, "to": 5},
+      "expected": {"classification": "budgeted", "budgeted": true, "nativeVariant": "GuildStorageItem", "nativeKind": "guildStorageItem", "semanticFields": {"change_type": 0, "from": 42, "to": 5}}},
+    {"id": "guild-item-retrieve", "seed": "guild", "command": {"type": "guildStorageItemChange", "changeType": 1, "from": 5, "to": 42},
+      "expected": {"classification": "budgeted", "budgeted": true, "nativeVariant": "GuildStorageItem", "nativeKind": "guildStorageItem", "semanticFields": {"change_type": 1, "from": 5, "to": 42}}},
+    {"id": "guild-item-rearrange", "seed": "guild", "command": {"type": "guildStorageItemChange", "changeType": 2, "from": 5, "to": 6},
+      "expected": {"classification": "budgeted", "budgeted": true, "nativeVariant": "GuildStorageItem", "nativeKind": "guildStorageItem", "semanticFields": {"change_type": 2, "from": 5, "to": 6}}},
+    {"id": "trade-request", "seed": "viewer", "command": {"type": "tradeRequest"},
+      "expected": {"classification": "budgeted", "budgeted": true, "nativeVariant": "TradeRequest", "nativeKind": "tradeRequest", "note": "Native core mapping; Page admission/definitely-unsent handling must not invent a permanent entry."}},
+    {"id": "trade-reply-accept", "seed": "tradeRequested", "command": {"type": "tradeReply", "acceptInvite": true},
+      "expected": {"classification": "budgeted", "budgeted": true, "nativeVariant": "TradeReply", "nativeKind": "tradeReply"}},
+    {"id": "trade-reply-decline-still-is-native-unit", "seed": "tradeRequested", "command": {"type": "tradeReply", "acceptInvite": false},
+      "expected": {"classification": "budgeted", "budgeted": true, "nativeVariant": "TradeReply", "nativeKind": "tradeReply", "note": "Unlike group/guild declines, Native TradeReply has no bool field and remains budgeted."}},
+    {"id": "trade-gold", "seed": "tradeOpen", "command": {"type": "tradeGold", "amount": 25},
+      "expected": {"classification": "budgeted", "budgeted": true, "nativeVariant": "TradeGold", "nativeKind": "tradeGold", "semanticFields": {"amount": 25}}},
+    {"id": "trade-item-deposit-physical-bag2", "seed": "tradeOpen", "command": {"type": "depositTradeItem", "from": 42, "to": 1},
+      "expected": {"classification": "budgeted", "budgeted": true, "nativeVariant": "TradeDeposit", "nativeKind": "tradeDeposit", "semanticFields": {"from": 42, "to": 1}}},
+    {"id": "trade-item-retrieve-physical-bag2", "seed": "tradeOpen", "command": {"type": "retrieveTradeItem", "from": 1, "to": 42},
+      "expected": {"classification": "budgeted", "budgeted": true, "nativeVariant": "TradeRetrieve", "nativeKind": "tradeRetrieve", "semanticFields": {"from": 1, "to": 42}}},
+    {"id": "trade-lock", "seed": "tradeOpen", "command": {"type": "tradeConfirm", "locked": true},
+      "expected": {"classification": "budgeted", "budgeted": true, "nativeVariant": "TradeConfirm", "nativeKind": "tradeConfirm", "semanticFields": {"locked": true}}},
+    {"id": "trade-unlock", "seed": "tradeOpen", "command": {"type": "tradeConfirm", "locked": false},
+      "expected": {"classification": "budgeted", "budgeted": true, "nativeVariant": "TradeConfirm", "nativeKind": "tradeConfirm", "semanticFields": {"locked": false}}},
+    {"id": "trade-cancel", "seed": "tradeOpen", "command": {"type": "tradeCancel"},
+      "expected": {"classification": "budgeted", "budgeted": true, "nativeVariant": "TradeCancel", "nativeKind": "tradeCancel"}},
+    {"id": "group-decline-outside-native-pending", "seed": "groupInvite", "command": {"type": "groupInvite", "acceptInvite": false}, "invite": {"name": "Inviter", "epoch": 101},
+      "expected": {"classification": "outsideBudget", "budgeted": false, "nativeVariant": null, "nativeKind": null}},
+    {"id": "guild-decline-outside-native-pending", "seed": "guildInvite", "command": {"type": "guildInvite", "acceptInvite": false}, "invite": {"name": "GuildInviter", "epoch": 102},
+      "expected": {"classification": "outsideBudget", "budgeted": false, "nativeVariant": null, "nativeKind": null}},
+    {"id": "guild-storage-read-outside-native-item-pending", "seed": "guild", "command": {"type": "guildStorageItemChange", "changeType": 3, "from": 0, "to": 0},
+      "expected": {"classification": "outsideBudget", "budgeted": false, "nativeVariant": null, "nativeKind": null}},
+    {"id": "friend-refresh-outside-social-eight", "seed": "viewer", "command": {"type": "refreshFriends"},
+      "expected": {"classification": "outsideBudget", "budgeted": false, "nativeVariant": null, "nativeKind": null}},
+    {"id": "mentor-reply-outside-social-eight", "seed": "viewer", "command": {"type": "mentorReply", "acceptInvite": true},
+      "expected": {"classification": "outsideBudget", "budgeted": false, "nativeVariant": null, "nativeKind": null}},
+    {"id": "guild-buff-outside-social-eight", "seed": "guild", "command": {"type": "guildBuffUpdate", "action": 1, "id": 1},
+      "expected": {"classification": "outsideBudget", "budgeted": false, "nativeVariant": null, "nativeKind": null}},
+    {"id": "permission-needs-real-viewer-and-guild", "seed": "viewer", "command": {"type": "editGuildMember", "changeType": 5, "rankIndex": 2, "name": "true", "rankName": "3"},
+      "expected": {"classification": "invalid", "budgeted": false, "nativeVariant": null, "nativeKind": null}},
+    {"id": "permission-no-unknown-option", "seed": "guild", "command": {"type": "editGuildMember", "changeType": 5, "rankIndex": 2, "name": "true", "rankName": "8"},
+      "expected": {"classification": "invalid", "budgeted": false, "nativeVariant": null, "nativeKind": null}},
+    {"id": "permission-expects-bool-string", "seed": "guild", "command": {"type": "editGuildMember", "changeType": 5, "rankIndex": 2, "name": "yes", "rankName": "3"},
+      "expected": {"classification": "invalid", "budgeted": false, "nativeVariant": null, "nativeKind": null}},
+    {"id": "guild-info-no-unsupported-type", "seed": "guild", "command": {"type": "requestGuildInfo", "infoType": 2},
+      "expected": {"classification": "invalid", "budgeted": false, "nativeVariant": null, "nativeKind": null}},
+    {"id": "invite-name-cannot-borrow-current-epoch", "seed": "groupInvite", "command": {"type": "groupInvite", "acceptInvite": true}, "invite": {"name": "OtherInviter", "epoch": 101},
+      "expected": {"classification": "invalid", "budgeted": false, "nativeVariant": null, "nativeKind": null}}
+  ],
+  "snapshotFixtures": [
+    {
+      "id": "own-offer-bag2-physical42",
+      "seed": "tradeOpen",
+      "snapshot": {
+        "inventoryCapacity": 54, "maxBagSlots": 48, "gold": 100,
+        "inventoryItems": [{"uniqueId": 7101, "authoritativeUniqueId": 7101, "key": "crystal-item-17", "name": "Synthetic twig",
+          "quantity": 2, "slot": 2, "container": "bag2", "icon": 1, "description": "Synthetic fixture",
+          "tooltipSource": {"info": {"item_index": 17, "name": "Synthetic twig"}, "userItem": {"unique_id": 7101, "item_index": 17, "count": 2}}}],
+        "beltItems": [], "equipmentItems": [],
+        "stage5Systems": {"trade": {"settlementNonce": "synthetic-exchange-1", "partner": "Guest",
+          "offeredSlots": {"1": 42}, "offeredUniqueIds": {"1": 7101}, "offeredGold": 25,
+          "offeredCurrency": "gold", "locked": false, "completed": false}}
+      },
+      "inventoryJson": {
+        "capacity": 54, "gold": 100,
+        "items": [{"uniqueId": 7101, "key": "crystal-item-17", "name": "Synthetic twig", "quantity": 2,
+          "slot": 42, "container": 0, "icon": 1, "description": "Synthetic fixture",
+          "tooltipSource": {"info": {"item_index": 17, "name": "Synthetic twig"}, "userItem": {"unique_id": 7101, "item_index": 17, "count": 2}}}]
+      },
+      "expected": {"changedFirstTime": true, "changedOnIdenticalRepeat": false,
+        "event": "NativeOwnTradeSnapshot", "myGold": 25, "tradeSlot": 1, "bagSlot": 42, "uniqueId": 7101,
+        "note": "inventoryJson is a serialized InventoryModel object, not a bare inventoryItems array or DOM cells."},
+      "negativeControls": [
+        {"id": "local-bag2-slot-is-not-physical", "replace": {"pointer": "/inventoryJson/items/0/slot", "value": 2}, "expectedChanged": false},
+        {"id": "wrong-owned-uid", "replace": {"pointer": "/inventoryJson/items/0/uniqueId", "value": 7102}, "expectedChanged": false},
+        {"id": "wrong-partner", "replace": {"pointer": "/snapshot/stage5Systems/trade/partner", "value": "Other"}, "expectedChanged": false},
+        {"id": "completed-is-not-own-offer-ack", "replace": {"pointer": "/snapshot/stage5Systems/trade/completed", "value": true}, "expectedChanged": false}
+      ]
+    }
+  ],
+  "sourceRefs": {
+    "nativeEnumAndBuilders": "apps/game-client/client-bevy/src/social.rs",
+    "nativeIntentMapping": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+    "browserCommandDto": "apps/gateway/src/web.rs",
+    "guildCommands": "apps/web/lib/social-parity-actions.ts",
+    "webInviteEpoch": "apps/web/lib/social-incoming-replies.ts",
+    "inventoryModel": "apps/game-client/client-bevy/src/inventory.rs",
+    "nativeOwnOfferProjection": "apps/game-client/platform-windows/src/trade_projection.rs",
+    "webInventoryProjection": "apps/web/lib/bevy-bag-model.ts",
+    "hostFeedAndPhysicalOwner": "apps/web/app/page.tsx"
+  }
+}

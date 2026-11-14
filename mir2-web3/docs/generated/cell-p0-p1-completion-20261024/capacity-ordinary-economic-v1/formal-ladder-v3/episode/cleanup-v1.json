@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-economic-formal-ladder-v3",
+  "checks": {
+    "sixCountersZero": true,
+    "monitorStoppedBeforeGateway": true,
+    "monitorExitZero": true,
+    "monitorTerminalPreserved": true,
+    "monitorSamplerAbsent": true,
+    "normalOwnedShutdown": true,
+    "gatewayProcessAbsent": true,
+    "driverProcessAbsent": true,
+    "monitorProcessAbsent": true,
+    "portsFree": true,
+    "postSourceUnchanged": true
+  },
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "formalAcceptanceEligible": false,
+  "driverExit": {
+    "exitCode": 1,
+    "signal": null,
+    "error": null
+  },
+  "monitorExit": {
+    "exitCode": 0,
+    "signal": null,
+    "error": null
+  },
+  "monitorTerminal": {
+    "sampledAt": 1793108784678,
+    "stop": true,
+    "reason": "Operator requested load drain"
+  },
+  "remainingMonitorChildren": [],
+  "gatewayExit": {
+    "exitCode": 0,
+    "signal": null,
+    "error": null
+  },
+  "remainingListeners": [],
+  "publicDiagnostics": {
+    "slow": {
+      "schemaVersion": 1,
+      "complete": true,
+      "reasons": [],
+      "stopRequested": false,
+      "stderrEnded": true,
+      "writerFinished": true,
+      "rowsQueued": 19,
+      "bytesQueued": 1750,
+      "maxBufferedLineBytes": 236,
+      "lineLimitBytes": 8192,
+      "totalLimitBytes": 33554432,
+      "writeLimitBytes": 1048576,
+      "writeHighWaterMarkBytes": 1048576,
+      "maxQueuedWriteBytes": 279,
+      "scope": "Only complete ASCII exact-format lines from the frozen static GatewaySlowStage label/phase/class allowlists. observedAtMs is the launcher receive clock, not server span start/end. connection is an opaque diagnostic counter, never identity or an action/request ID; queuedPhase and phaseElapsedMs were sampled when the input was queued. Queued counts alone do not prove durable output when incomplete. Existing50ms logging is left-censored; missing rows do not prove absence of a stall.",
+      "actualRows": 19,
+      "actualBytes": 1750,
+      "sha256": "f2d75593d72cbab02deb9b880360fec1403b90d29f525c8cb8f2d7bb14054f47"
+    },
+    "store": {
+      "schemaVersion": 1,
+      "dataset": "account-store",
+      "complete": true,
+      "reasons": [],
+      "stopRequested": false,
+      "stderrEnded": true,
+      "writerFinished": true,
+      "rowsQueued": 0,
+      "bytesQueued": 0,
+      "maxBufferedLineBytes": 236,
+      "lineLimitBytes": 8192,
+      "totalLimitBytes": 33554432,
+      "writeLimitBytes": 1048576,
+      "writeHighWaterMarkBytes": 1048576,
+      "maxQueuedWriteBytes": 0,
+      "scope": "Only complete ASCII exact-format lines from the frozen static GatewaySlowStage label/phase/class allowlists. Account-store rows use separate fixed stage/operation allowlists and scalar-only metadata; malformed targeted account_store lines stop this capture. Their durationMs is the floored maximum completed single occurrence; samples and totalUs aggregate same-stage occurrences, nested stages overlap and must not be summed. Endpoint microsecond truncation can add one microsecond to their difference. traceId is an opaque process-local record counter, not identity; only completed records emit after their business guards release, so missing rows do not prove an ongoing holder is absent. observedAtMs is the launcher receive clock, not server span start/end. connection is an opaque diagnostic counter, never identity or an action/request ID; queuedPhase and phaseElapsedMs were sampled when the input was queued. Queued counts alone do not prove durable output when incomplete. Existing50ms logging is left-censored; missing rows do not prove absence of a stall.",
+      "independentDatasetValidation": {
+        "schemaVersion": 1,
+        "dataset": "account-store",
+        "complete": true,
+        "formatValid": true,
+        "captureComplete": true,
+        "countsMatch": true,
+        "readEnded": true,
+        "reasons": [],
+        "captureReasons": [],
+        "rows": 0,
+        "validRows": 0,
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "rowsByStage": {
+          "account_store.writable_wait": 0,
+          "account_store.persist_wait": 0,
+          "account_store.store_wait": 0,
+          "account_store.store_held": 0,
+          "account_store.file_writer_wait": 0,
+          "account_store.serialize": 0,
+          "account_store.temp_write_sync": 0,
+          "account_store.atomic_replace": 0,
+          "account_store.marker_wait": 0,
+          "account_store.marker_state_wait": 0,
+          "account_store.marker_begin_sync": 0,
+          "account_store.marker_settle_sync": 0,
+          "account_store.driver_wait": 0,
+          "account_store.driver_held": 0
+        },
+        "rowsByOperation": {
+          "experience_admission": 0,
+          "guild_lookup": 0,
+          "save": 0,
+          "transaction": 0,
+          "guild_clock": 0
+        },
+        "scope": "Independent completed account-store scalar projection only. Queued callback counts are compared with actual ended JSONL; they are not durable proof alone. Completeness is diagnostic only, never game acceptance, ACK credit, a holder/deadlock diagnosis, or proof of absence."
+      }
+    },
+    "complete": true,
+    "thresholdMs": 50,
+    "receiveClockNotServerStart": true,
+    "leftCensored": true,
+    "nestedSpansNotAdditive": true,
+    "connectionIsOpaqueNotActor": true,
+    "compactWirePatchApplied": false,
+    "compactWireDiagnosticCertificate": false,
+    "contributesToGameAcceptance": false
+  },
+  "logErrors": [],
+  "finishedAt": "2026-10-27T13:46:38.141Z"
+}

@@ -1,0 +1,966 @@
+{
+  "schemaVersion": 1,
+  "runId": "1793012683829-20203b04",
+  "actor": "L4ca4e60f",
+  "analysisKind": "single-actor-final30s-health-presence-and-ordinary-supply",
+  "raw": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v6\\episode-50\\reports\\1793012683829-20203b04.samples.jsonl",
+    "bytes": 24116164,
+    "rows": 41603,
+    "sha256": "4c29d121501ccfc3d35126c653efcc3bf39f23a46da3e2794e2fb1926de060d9"
+  },
+  "report": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v6\\episode-50\\reports\\1793012683829-20203b04.report.json",
+    "bytes": 61863,
+    "sha256": "54e896f03eeca7b295573e2f791ebe4afb404a06a5e36d55e2826217a1816114"
+  },
+  "selectedEvidence": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\steady-profile-v6-death-analysis-v1\\selected-evidence-v1.json",
+    "bytes": 196026,
+    "sha256": "56a64c92f13c69ef074ae19f969e6fb050f5e07d0123d017ebd27fcae6b578c5"
+  },
+  "selector": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\steady-profile-v6-death-analysis-v1\\select-death-v1.py",
+    "bytes": 4411,
+    "sha256": "7d28d3216443cdcb322632f1c588d97c7e33543de6ac38dcd3bdb394abb14a21"
+  },
+  "actualRawReadPasses": 1,
+  "rawStatStable": true,
+  "originalOutcome": {
+    "error": "Actor L4ca4e60f died or lost presence; no automatic resurrection",
+    "safetyReason": "Actor L4ca4e60f died or lost presence; no automatic resurrection",
+    "safetyStopped": true,
+    "phaseWindows": [
+      {
+        "name": "bootstrap-50",
+        "kind": "bootstrap",
+        "targetActors": 50,
+        "startedAtMs": 1793012683865,
+        "endedAtMs": 1793013027642,
+        "completed": false
+      }
+    ],
+    "stages": [],
+    "peakServerActive": 50,
+    "peakControlledActors": 50,
+    "cleanupErrors": []
+  },
+  "analysisWindow": {
+    "requestedReportStopMs": 1793013027642,
+    "actualSafetyStopMs": 1793013027570,
+    "selectedStartMs": 1793012997642,
+    "selectedEndMs": 1793013030642,
+    "meaning": "Report bootstrap-end minus30s through plus3s. Exact safetyStop is72ms before report-end, so actor window covers29.928s before safetyStop. No raw rescan was taken for that72ms edge; all HP-maintenance notices for this actor were selected regardless of time."
+  },
+  "findings": {
+    "healthDepletionSupported": true,
+    "recordedOwnerPresenceLossBeforeStop": false,
+    "lastExactRecordedHp": 1,
+    "lastHpRecordToStopMs": 34,
+    "inference": "The recorded owner health falls18→14→10→5→1 while its self entity remains present at the same terminal tile. This supports combat health depletion and a health/dead-state check rather than an observed missing-self transition. The actual final exact0/dead flag packet is not present in this bounded raw evidence, so a complete death proof or unique killer is not claimed.",
+    "notAnEstablishedHarnessMisjudgment": "The helper does not classify percent0 by itself as death. The last lifecycle projection before stop and the next one after stop both contain self1000 at(232,609). There is no recorded self removal/map reset before stop, but unlogged state transitions prevent absolute exclusion of every possible transient.",
+    "ordinarySupplyEvidence": "One already-held HP potion was sent at3020523 and verified at3022184 by fresh UseItem acknowledgement plus inventory consumption to0. hpIncreaseObserved=false, so verified means the original ack/consumption rule passed, not that health was healed. At3022913 the actor reported no-held-hp-item.",
+    "lastAttackEvidence": "Request8 targeted the driver-reported ordinary Deer object206518 adjacent at(232,610) from owner(232,609), ownerHP5 at send3025526. It timed out under the original900ms attack deadline at3026437 and remains a timeout. No owner/observer packets were captured inside that pending window; no retroactive hit/launch credit is added.",
+    "originalFailurePreserved": true,
+    "automaticResurrectionPerformed": false,
+    "fixtureChanged": false,
+    "capacityAccepted": false,
+    "p0Accepted": false
+  },
+  "ownerHpTimeline": [
+    {
+      "rawLine": 35062,
+      "effectiveAtMs": 1793013003907,
+      "rowWrittenAtMs": 1793013004814,
+      "kind": "owner snapshot at attack send",
+      "hp": 18,
+      "maxHp": 18,
+      "dead": false,
+      "position": {
+        "x": 238,
+        "y": 601
+      }
+    },
+    {
+      "rawLine": 35496,
+      "effectiveAtMs": 1793013006546,
+      "kind": "movement correction owner.entity.hp",
+      "hp": 18,
+      "position": {
+        "x": 238,
+        "y": 601
+      }
+    },
+    {
+      "rawLine": 37758,
+      "effectiveAtMs": 1793013014347,
+      "rowWrittenAtMs": 1793013015255,
+      "kind": "owner snapshot at attack send",
+      "hp": 14,
+      "maxHp": 18,
+      "dead": false,
+      "position": {
+        "x": 235,
+        "y": 607
+      }
+    },
+    {
+      "rawLine": 38178,
+      "effectiveAtMs": 1793013016973,
+      "kind": "movement correction owner.entity.hp",
+      "hp": 14,
+      "position": {
+        "x": 235,
+        "y": 607
+      }
+    },
+    {
+      "rawLine": 39235,
+      "effectiveAtMs": 1793013020523,
+      "kind": "ordinary potion sent",
+      "hp": 10,
+      "maxHp": 18
+    },
+    {
+      "rawLine": 39607,
+      "effectiveAtMs": 1793013022184,
+      "kind": "ordinary potion verified",
+      "hp": 10,
+      "maxHp": 18
+    },
+    {
+      "rawLine": 40829,
+      "effectiveAtMs": 1793013025526,
+      "rowWrittenAtMs": 1793013026437,
+      "kind": "owner snapshot at attack send",
+      "hp": 5,
+      "maxHp": 18,
+      "dead": false,
+      "position": {
+        "x": 232,
+        "y": 609
+      }
+    },
+    {
+      "rawLine": 41088,
+      "effectiveAtMs": 1793013027536,
+      "kind": "movement correction owner.entity.hp",
+      "hp": 1,
+      "position": {
+        "x": 232,
+        "y": 609
+      }
+    }
+  ],
+  "presenceEvidence": {
+    "lastUserLocationBeforeStop": {
+      "line": 40142,
+      "type": "selfTransform",
+      "actor": "L4ca4e60f",
+      "connection": 16,
+      "at": 1793013024033,
+      "sequence": 4981,
+      "monotonicMs": 356880.1469,
+      "phase": "settle",
+      "source": "UserLocation",
+      "mapFileName": "0",
+      "before": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 233,
+          "y": 608
+        },
+        "direction": "DownLeft"
+      },
+      "after": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 232,
+          "y": 609
+        },
+        "direction": "DownLeft"
+      },
+      "wire": {
+        "x": 232,
+        "y": 609,
+        "direction": "DownLeft"
+      },
+      "planned": null,
+      "actual": null,
+      "requested": null,
+      "observed": null
+    },
+    "lastLifecycleBeforeStop": {
+      "line": 41099,
+      "type": "playerLifecycle",
+      "actor": "L4ca4e60f",
+      "connection": 16,
+      "at": 1793013027557,
+      "sequence": 5112,
+      "monotonicMs": 360404.2198,
+      "phase": "settle",
+      "source": "ObjectPlayer",
+      "beforePresent": false,
+      "afterPresent": true,
+      "identitySource": "packet",
+      "orphanMotion": false,
+      "before": {
+        "mapFileName": "0",
+        "playerObjectId": 1000,
+        "self": {
+          "objectId": 1000,
+          "name": "L4ca4e60f",
+          "x": 232,
+          "y": 609
+        },
+        "count": 14,
+        "truncated": false,
+        "players": []
+      },
+      "after": {
+        "mapFileName": "0",
+        "playerObjectId": 1000,
+        "self": {
+          "objectId": 1000,
+          "name": "L4ca4e60f",
+          "x": 232,
+          "y": 609
+        },
+        "count": 15,
+        "truncated": false,
+        "players": []
+      }
+    },
+    "firstLifecycleAfterStop": {
+      "line": 41117,
+      "type": "playerLifecycle",
+      "actor": "L4ca4e60f",
+      "connection": 16,
+      "at": 1793013027571,
+      "sequence": 5127,
+      "monotonicMs": 360418.2403,
+      "phase": "settle",
+      "source": "ObjectRemove",
+      "beforePresent": true,
+      "afterPresent": false,
+      "identitySource": "projection-before",
+      "orphanMotion": false,
+      "before": {
+        "mapFileName": "0",
+        "playerObjectId": 1000,
+        "self": {
+          "objectId": 1000,
+          "name": "L4ca4e60f",
+          "x": 232,
+          "y": 609
+        },
+        "count": 15,
+        "truncated": false,
+        "players": []
+      },
+      "after": {
+        "mapFileName": "0",
+        "playerObjectId": 1000,
+        "self": {
+          "objectId": 1000,
+          "name": "L4ca4e60f",
+          "x": 232,
+          "y": 609
+        },
+        "count": 14,
+        "truncated": false,
+        "players": []
+      }
+    },
+    "ownLifecycleRowsWithMissingSelfBeforeStop": [],
+    "lastLifecycleToStopMs": 13,
+    "firstLifecycleAfterStopDeltaMs": 1,
+    "nearbyObserverNote": "Observer L4ca4e60d removes/re-adds this actor around its own radius boundary (250,596→248,596 versus owner232,609). Those peer-view transitions are not owner self-presence loss or a death proof.",
+    "selectedPeerBoundaryExamples": [
+      {
+        "line": 40699,
+        "type": "playerLifecycle",
+        "actor": "L4ca4e60d",
+        "connection": 14,
+        "at": 1793013026244,
+        "sequence": 5868,
+        "monotonicMs": 359091.3155,
+        "phase": "settle",
+        "source": "ObjectRemove",
+        "beforePresent": true,
+        "afterPresent": false,
+        "identitySource": "projection-before",
+        "orphanMotion": false,
+        "peer": {
+          "objectId": 50015,
+          "name": "L4ca4e60f"
+        },
+        "before": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L4ca4e60d",
+            "x": 250,
+            "y": 596
+          },
+          "count": 20,
+          "truncated": false,
+          "players": [
+            {
+              "objectId": 50015,
+              "name": "L4ca4e60f",
+              "x": 232,
+              "y": 609
+            }
+          ]
+        },
+        "after": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L4ca4e60d",
+            "x": 250,
+            "y": 596
+          },
+          "count": 19,
+          "truncated": false,
+          "players": []
+        },
+        "ownerViewOnly": false
+      },
+      {
+        "line": 41013,
+        "type": "playerLifecycle",
+        "actor": "L4ca4e60d",
+        "connection": 14,
+        "at": 1793013027163,
+        "sequence": 5907,
+        "monotonicMs": 360009.8713,
+        "phase": "settle",
+        "source": "ObjectPlayer",
+        "beforePresent": false,
+        "afterPresent": true,
+        "identitySource": "packet",
+        "orphanMotion": false,
+        "peer": {
+          "objectId": 50015,
+          "name": "L4ca4e60f"
+        },
+        "before": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L4ca4e60d",
+            "x": 248,
+            "y": 596
+          },
+          "count": 17,
+          "truncated": false,
+          "players": []
+        },
+        "after": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L4ca4e60d",
+            "x": 248,
+            "y": 596
+          },
+          "count": 18,
+          "truncated": false,
+          "players": [
+            {
+              "objectId": 50015,
+              "name": "L4ca4e60f",
+              "x": 232,
+              "y": 609
+            }
+          ]
+        },
+        "ownerViewOnly": false
+      },
+      {
+        "line": 41119,
+        "type": "playerLifecycle",
+        "actor": "L4ca4e60d",
+        "connection": 14,
+        "at": 1793013027572,
+        "sequence": 5934,
+        "monotonicMs": 360418.5367,
+        "phase": "settle",
+        "source": "ObjectRemove",
+        "beforePresent": true,
+        "afterPresent": false,
+        "identitySource": "projection-before",
+        "orphanMotion": false,
+        "peer": {
+          "objectId": 50015,
+          "name": "L4ca4e60f"
+        },
+        "before": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L4ca4e60d",
+            "x": 250,
+            "y": 596
+          },
+          "count": 18,
+          "truncated": false,
+          "players": [
+            {
+              "objectId": 50015,
+              "name": "L4ca4e60f",
+              "x": 232,
+              "y": 609
+            }
+          ]
+        },
+        "after": {
+          "mapFileName": "0",
+          "playerObjectId": 1000,
+          "self": {
+            "objectId": 1000,
+            "name": "L4ca4e60d",
+            "x": 250,
+            "y": 596
+          },
+          "count": 17,
+          "truncated": false,
+          "players": []
+        },
+        "ownerViewOnly": false
+      }
+    ],
+    "lastFiveCoverageRows": [
+      {
+        "line": 39837,
+        "type": "coverage",
+        "phase": "settle",
+        "at": 1793013023053,
+        "aoi": {
+          "expectedPairs": 474,
+          "observedPairs": 469,
+          "activeOwners": 50,
+          "issues": []
+        },
+        "driver": {
+          "rssBytes": 387121152,
+          "eventLoopLagP99Ms": 30.621695,
+          "eventLoopLagMaxMs": 30.621695
+        }
+      },
+      {
+        "line": 40143,
+        "type": "coverage",
+        "phase": "settle",
+        "at": 1793013024056,
+        "aoi": {
+          "expectedPairs": 466,
+          "observedPairs": 463,
+          "activeOwners": 50,
+          "issues": []
+        },
+        "driver": {
+          "rssBytes": 393056256,
+          "eventLoopLagP99Ms": 37.093375,
+          "eventLoopLagMaxMs": 37.093375
+        }
+      },
+      {
+        "line": 40358,
+        "type": "coverage",
+        "phase": "settle",
+        "at": 1793013025056,
+        "aoi": {
+          "expectedPairs": 472,
+          "observedPairs": 469,
+          "activeOwners": 50,
+          "issues": []
+        },
+        "driver": {
+          "rssBytes": 380141568,
+          "eventLoopLagP99Ms": 38.076415,
+          "eventLoopLagMaxMs": 38.076415
+        }
+      },
+      {
+        "line": 40621,
+        "type": "coverage",
+        "phase": "settle",
+        "at": 1793013026059,
+        "aoi": {
+          "expectedPairs": 490,
+          "observedPairs": 489,
+          "activeOwners": 50,
+          "issues": []
+        },
+        "driver": {
+          "rssBytes": 386564096,
+          "eventLoopLagP99Ms": 37.879807,
+          "eventLoopLagMaxMs": 37.879807
+        }
+      },
+      {
+        "line": 40999,
+        "type": "coverage",
+        "phase": "settle",
+        "at": 1793013027060,
+        "aoi": {
+          "expectedPairs": 492,
+          "observedPairs": 486,
+          "activeOwners": 50,
+          "issues": []
+        },
+        "driver": {
+          "rssBytes": 363233280,
+          "eventLoopLagP99Ms": 43.384831,
+          "eventLoopLagMaxMs": 43.384831
+        }
+      }
+    ]
+  },
+  "ordinaryHpMaintenance": {
+    "allActorNoticesAcrossRaw": [
+      {
+        "line": 39235,
+        "type": "nativeHpRecovery",
+        "actor": "L4ca4e60f",
+        "phase": "settle",
+        "at": 1793013020523,
+        "uniqueId": 2,
+        "grid": "inventory",
+        "hpBefore": 10,
+        "maximumHp": 18,
+        "status": "sent"
+      },
+      {
+        "line": 39607,
+        "type": "nativeHpRecovery",
+        "actor": "L4ca4e60f",
+        "phase": "settle",
+        "at": 1793013022184,
+        "uniqueId": 2,
+        "grid": "inventory",
+        "hpBefore": 10,
+        "maximumHp": 18,
+        "status": "verified",
+        "consumed": true,
+        "hpIncreaseObserved": false,
+        "hpIncrease": null,
+        "acknowledgement": {
+          "sequence": 4898,
+          "monotonicMs": 354690.3641
+        },
+        "consumption": {
+          "sequence": 4899,
+          "monotonicMs": 355011.2145,
+          "quantity": 0
+        }
+      },
+      {
+        "line": 39810,
+        "type": "nativeHpRecovery",
+        "actor": "L4ca4e60f",
+        "phase": "settle",
+        "at": 1793013022913,
+        "status": "not-sent",
+        "reason": "no-held-hp-item"
+      }
+    ],
+    "sentCount": 1,
+    "verifiedCount": 1,
+    "verifiedHpIncreaseCount": 0,
+    "noHeldItemNotice": {
+      "line": 39810,
+      "type": "nativeHpRecovery",
+      "actor": "L4ca4e60f",
+      "phase": "settle",
+      "at": 1793013022913,
+      "status": "not-sent",
+      "reason": "no-held-hp-item"
+    },
+    "sendToVerificationMs": 1661,
+    "verifiedToNoHeldItemNoticeMs": 729,
+    "lastPotionSendToStopMs": 7047,
+    "policy": {
+      "scope": "Already-held ordinary HP potions only; no MP, purchase, grants or revival.",
+      "hpThreshold": 0.6,
+      "reuseDelayMs": 6000,
+      "evidenceDeadlineMs": 2000,
+      "commandBudgetPerSecond": 3,
+      "rule": "Fresh matching UseItem success plus complete-inventory consumption or exact HP increase within the same deadline; consumption is not proof of healing.",
+      "activityRule": "Independent auxiliary promise; native opportunities continue and HP maintenance never credits movement, attack or native completion."
+    },
+    "interpretation": "No evidence of further held stock. No purchase/grant/MP/revival was added. No observed HP increase could reflect no healing, healing offset by simultaneous damage, or an effect not positively captured; this raw cannot distinguish those. Consumption alone must not be promoted to healing."
+  },
+  "attackAndDamageContext": {
+    "last30sActorAttackRows": [
+      {
+        "line": 35061,
+        "type": "action",
+        "at": 1793013004814,
+        "phase": "settle",
+        "actor": "L4ca4e60f",
+        "kind": "attack",
+        "plannedGameplay": true,
+        "scheduledAtMs": 336743.8262,
+        "sentAtMs": 336753.8067,
+        "targetId": 206533,
+        "hunting": "Deer",
+        "nativeOpportunity": true,
+        "plannedIntervalMs": 1436,
+        "pacingKnown": true,
+        "initialCombatTransit": false,
+        "attackResults": "v2",
+        "requestId": "6",
+        "attackRequestSent": true,
+        "status": "timeout",
+        "latencyMs": 907.2980000000098,
+        "plannedLatencyMs": 917.2785999999614,
+        "error": "L4ca4e60f timed out waiting for attack authoritative acknowledgement",
+        "targetStillAdjacent": true,
+        "ambiguousTargetQuarantined": true
+      },
+      {
+        "line": 37757,
+        "type": "action",
+        "at": 1793013015255,
+        "phase": "settle",
+        "actor": "L4ca4e60f",
+        "kind": "attack",
+        "plannedGameplay": true,
+        "scheduledAtMs": 347179.8262,
+        "sentAtMs": 347194.5109,
+        "targetId": 206313,
+        "hunting": "Deer",
+        "nativeOpportunity": true,
+        "plannedIntervalMs": 1436,
+        "pacingKnown": true,
+        "initialCombatTransit": false,
+        "attackResults": "v2",
+        "requestId": "7",
+        "attackRequestSent": true,
+        "status": "timeout",
+        "latencyMs": 907.8106000000262,
+        "plannedLatencyMs": 922.4954000000143,
+        "error": "L4ca4e60f timed out waiting for attack authoritative acknowledgement",
+        "targetStillAdjacent": true,
+        "ambiguousTargetQuarantined": true
+      },
+      {
+        "line": 40828,
+        "type": "action",
+        "at": 1793013026437,
+        "phase": "settle",
+        "actor": "L4ca4e60f",
+        "kind": "attack",
+        "plannedGameplay": true,
+        "scheduledAtMs": 358365.8262,
+        "sentAtMs": 358372.9809,
+        "targetId": 206518,
+        "hunting": "Deer",
+        "nativeOpportunity": true,
+        "plannedIntervalMs": 1436,
+        "pacingKnown": true,
+        "initialCombatTransit": false,
+        "attackResults": "v2",
+        "requestId": "8",
+        "attackRequestSent": true,
+        "status": "timeout",
+        "latencyMs": 911.4533999999985,
+        "plannedLatencyMs": 918.6082999999635,
+        "error": "L4ca4e60f timed out waiting for attack authoritative acknowledgement",
+        "targetStillAdjacent": true,
+        "ambiguousTargetQuarantined": true
+      }
+    ],
+    "last30sPendingAttackSnapshots": [
+      {
+        "line": 35062,
+        "type": "pendingAttackEvidence",
+        "actor": "L4ca4e60f",
+        "phase": "settle",
+        "connection": 16,
+        "at": 1793013004814,
+        "sentAtMs": 336753.8067,
+        "sentAtWallMs": 1793013003907,
+        "sendCursor": 4473,
+        "endedAtMs": 337661.1382,
+        "endedAtWallMs": 1793013004814,
+        "outcome": null,
+        "protocolVersion": 2,
+        "requestId": "6",
+        "maximumPackets": 64,
+        "packetCount": 6,
+        "truncated": false,
+        "rule": "Observed public packet fields only; no server incarnation is present or inferred. Diagnostic evidence never changes timeout, miss, rejection or damage accounting.",
+        "owner": {
+          "objectId": 1000,
+          "x": 238,
+          "y": 601,
+          "dead": false,
+          "hp": 18,
+          "maxHp": 18
+        },
+        "target": {
+          "objectId": 206533,
+          "x": 237,
+          "y": 602,
+          "dead": false,
+          "hp": 25,
+          "maxHp": 25
+        },
+        "packets": [
+          {
+            "receiver": "observer",
+            "sequence": 4035,
+            "monotonicMs": 336773.0947,
+            "atMs": 1793013003926,
+            "packet": "ObjectTurn",
+            "payload": {
+              "objectId": 50015,
+              "x": 238,
+              "y": 601,
+              "direction": "DownLeft"
+            }
+          },
+          {
+            "receiver": "observer",
+            "sequence": 4073,
+            "monotonicMs": 337596.3561,
+            "atMs": 1793013004749,
+            "packet": "ObjectAttack",
+            "payload": {
+              "objectId": 50015,
+              "direction": "DownLeft"
+            }
+          },
+          {
+            "receiver": "observer",
+            "sequence": 4074,
+            "monotonicMs": 337596.3789,
+            "atMs": 1793013004749,
+            "packet": "ObjectStruck",
+            "payload": {
+              "objectId": 206533,
+              "attackerId": 50015,
+              "direction": "Right"
+            }
+          },
+          {
+            "receiver": "observer",
+            "sequence": 4075,
+            "monotonicMs": 337596.4082,
+            "atMs": 1793013004749,
+            "packet": "DamageIndicator",
+            "payload": {
+              "objectId": 206533,
+              "damage": 3
+            }
+          },
+          {
+            "receiver": "observer",
+            "sequence": 4076,
+            "monotonicMs": 337596.424,
+            "atMs": 1793013004749,
+            "packet": "ObjectHealth",
+            "payload": {
+              "objectId": 206533,
+              "percent": 88
+            }
+          },
+          {
+            "receiver": "observer",
+            "sequence": 4079,
+            "monotonicMs": 337596.4515,
+            "atMs": 1793013004749,
+            "packet": "ObjectAttack",
+            "payload": {
+              "objectId": 206533,
+              "direction": "UpRight"
+            }
+          }
+        ]
+      },
+      {
+        "line": 37758,
+        "type": "pendingAttackEvidence",
+        "actor": "L4ca4e60f",
+        "phase": "settle",
+        "connection": 16,
+        "at": 1793013015255,
+        "sentAtMs": 347194.5109,
+        "sentAtWallMs": 1793013014347,
+        "sendCursor": 4731,
+        "endedAtMs": 348102.5119,
+        "endedAtWallMs": 1793013015255,
+        "outcome": null,
+        "protocolVersion": 2,
+        "requestId": "7",
+        "maximumPackets": 64,
+        "packetCount": 2,
+        "truncated": false,
+        "rule": "Observed public packet fields only; no server incarnation is present or inferred. Diagnostic evidence never changes timeout, miss, rejection or damage accounting.",
+        "owner": {
+          "objectId": 1000,
+          "x": 235,
+          "y": 607,
+          "dead": false,
+          "hp": 14,
+          "maxHp": 18
+        },
+        "target": {
+          "objectId": 206313,
+          "x": 235,
+          "y": 608,
+          "dead": false,
+          "hp": 25,
+          "maxHp": 25
+        },
+        "packets": [
+          {
+            "receiver": "observer",
+            "sequence": 4410,
+            "monotonicMs": 347785.9299,
+            "atMs": 1793013014939,
+            "packet": "ObjectTurn",
+            "payload": {
+              "objectId": 50015,
+              "x": 235,
+              "y": 607,
+              "direction": "Down"
+            }
+          },
+          {
+            "receiver": "observer",
+            "sequence": 4435,
+            "monotonicMs": 347856.7649,
+            "atMs": 1793013015010,
+            "packet": "ObjectHealth",
+            "payload": {
+              "objectId": 50015,
+              "percent": 83
+            }
+          }
+        ]
+      },
+      {
+        "line": 40829,
+        "type": "pendingAttackEvidence",
+        "actor": "L4ca4e60f",
+        "phase": "settle",
+        "connection": 16,
+        "at": 1793013026437,
+        "sentAtMs": 358372.9809,
+        "sentAtWallMs": 1793013025526,
+        "sendCursor": 5052,
+        "endedAtMs": 359284.5222,
+        "endedAtWallMs": 1793013026437,
+        "outcome": null,
+        "protocolVersion": 2,
+        "requestId": "8",
+        "maximumPackets": 64,
+        "packetCount": 0,
+        "truncated": false,
+        "rule": "Observed public packet fields only; no server incarnation is present or inferred. Diagnostic evidence never changes timeout, miss, rejection or damage accounting.",
+        "owner": {
+          "objectId": 1000,
+          "x": 232,
+          "y": 609,
+          "dead": false,
+          "hp": 5,
+          "maxHp": 18
+        },
+        "target": {
+          "objectId": 206518,
+          "x": 232,
+          "y": 610,
+          "dead": false,
+          "hp": 25,
+          "maxHp": 25
+        },
+        "packets": []
+      }
+    ],
+    "targetIdsInAttackRows": [
+      206533,
+      206313,
+      206518
+    ],
+    "reportedHuntingNames": [
+      "Deer"
+    ],
+    "last30sActionKindStatusCounts": {
+      "('run', 'success')": 4,
+      "('walk', 'owner-ack-wait')": 9,
+      "('walk', 'success')": 10,
+      "('rtt', 'success')": 3,
+      "('turn', 'success')": 3,
+      "('attack', 'timeout')": 3,
+      "('walk', 'corrected')": 5,
+      "('chat', 'success')": 1,
+      "('peerChat', 'success')": 1,
+      "('walk', 'navigation-blocked')": 3,
+      "('fanout-run', 'timeout')": 1
+    },
+    "originalActorActivity": {
+      "actor": "L4ca4e60f",
+      "plans": 147,
+      "gaps": 28,
+      "moves": 88,
+      "attacks": 0,
+      "hits": 0,
+      "damage": 0,
+      "lastSuccessAt": 1793013024057,
+      "runs": 42,
+      "cells": 130,
+      "nativeOpportunities": 147,
+      "nativeCompleted": 99,
+      "offeredDurationMs": 115738,
+      "evidenceWaits": 1,
+      "ownerAckWaits": 14,
+      "unknownPacing": 0
+    },
+    "damageEvidenceLimit": "The first pending window records observer damage3 to monster206533 and a subsequent ObjectAttack from that monster. The next window records remote player health83percent. They establish surrounding combat/health traffic, not an identified killing hit. Actor action rows remain3timeouts in the selected final30s; the final original activity report credits0 attacks/hits/damage."
+  },
+  "sourceContract": [
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-steady-single-stage-diagnostic-v6/diagnostic-capacity.mjs",
+      "line": 1323,
+      "meaning": "checkOwner throws only when self missing or hasAuthoritativePlayerDeath true; no automatic resurrection"
+    },
+    {
+      "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/protocol-observation.mjs",
+      "line": 140,
+      "meaning": "Death requires player.dead true or known exact snapshot/player hp<=0; rounded percent alone is insufficient"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-steady-single-stage-diagnostic-v6/diagnostic-capacity.mjs",
+      "line": 653,
+      "meaning": "movementCorrection ownHp is owner.hp, not observed percent estimate"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/native-steady-single-stage-diagnostic-v6/diagnostic-capacity.mjs",
+      "line": 1614,
+      "meaning": "HP verification accepts ACK plus consumption OR exact HP increase, and separately records hpIncreaseObserved"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/compact-navigation-wire-diagnostics-v2/wrapper.mjs",
+      "line": 49,
+      "meaning": "Compact navigation diagnostics select lifecycleConnection1/2 only; owner here is16. It also excludes known players, so its428 raw rows cannot supply this owners death frame."
+    }
+  ],
+  "limitations": [
+    "No exact terminal HealthChanged0/ObjectDied or attacker-of-owner death packet was retained by the general raw producer for this connection. A short pendingAttackEvidence window records only allowlisted packets and already ended before final stop; absence of such a row is not absence of a packet.",
+    "WorldSnapshot lifecycle projections preserve identity/membership/position, not exact HP or dead fields. selfTransform records changes in position, so unchanging health-only packets are not necessarily represented.",
+    "A possible compact-wire schema mismatch was noticed after selection; static wrapper inspection proved connection16 is outside its1/2 scope. A second-pass request was withdrawn before any second raw read. Actual rawReadPasses remains1.",
+    "Presence stays observed around the stop, but neither the exact terminal flag nor killer/causal source of every HP reduction is provable here. Do not label this a lost-presence harness bug or assert a unique monster/server/network cause.",
+    "Bootstrap settles for this diagnostic do not produce a completed stage50 measurement; original safety stop/empty stages remain. No raw replay, test, server or automatic revival was run."
+  ]
+}

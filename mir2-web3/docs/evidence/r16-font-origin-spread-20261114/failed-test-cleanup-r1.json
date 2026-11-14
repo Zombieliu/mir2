@@ -1,0 +1,114 @@
+{
+  "createdAt": "2026-11-14T06:06:42.554Z",
+  "head": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5",
+  "baseline": "6ae96fa6017d511255ac46216c034594b6fe500f",
+  "baselineWorkerSha256": "3b07de456c113135d2d37248893a707ce98179b419429fe6d58c18981b510dba",
+  "candidateWorkerSha256": "94796b40517c7fd1ca7914ebaeb7a99d6ebd4a3546e2fa28d1c9d75abe836218",
+  "results": [
+    {
+      "name": "before",
+      "args": [
+        "--test",
+        "--test-reporter=tap",
+        "--test-name-pattern=SC origin split",
+        "scripts/test-asset-worker-fallback.mjs"
+      ],
+      "exitCode": null,
+      "counts": {
+        "tests": null,
+        "pass": null,
+        "fail": null,
+        "cancelled": null,
+        "skipped": null
+      },
+      "logSha256": "280312a75511ea46f88383144cb47386846e5ee1c677d1fb3ac7107d249bee2a",
+      "inputs": [
+        {
+          "path": "scripts/test-asset-worker-fallback.mjs",
+          "sha256": "8819babeec3bf0492a8f9e334fefb9b88c38dd15128313af93bf628f5c3e3d46"
+        }
+      ]
+    },
+    {
+      "name": "after",
+      "args": [
+        "--test",
+        "--test-reporter=tap",
+        "scripts/test-asset-worker-fallback.mjs",
+        "scripts/test-bevy-runtime-font-prewarm.mjs",
+        "scripts/test-asset-prewarm-request.mjs",
+        "scripts/test-asset-worker-missing-retry.mjs",
+        "scripts/test-asset-worker-lifecycle.mjs",
+        "scripts/test-bevy-runtime-initializer.mjs"
+      ],
+      "exitCode": 0,
+      "counts": {
+        "tests": 155,
+        "pass": 155,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0
+      },
+      "logSha256": "72317c3647e33cbfc80024501742ce65fb6449e319fb9b566cdd188382bbbdbd",
+      "inputs": [
+        {
+          "path": "scripts/test-asset-worker-fallback.mjs",
+          "sha256": "8819babeec3bf0492a8f9e334fefb9b88c38dd15128313af93bf628f5c3e3d46"
+        },
+        {
+          "path": "scripts/test-bevy-runtime-font-prewarm.mjs",
+          "sha256": "b644156310e865ecf9dfec6c3ebad7d32e316609626a7ead92cbce109ec35ce6"
+        },
+        {
+          "path": "scripts/test-asset-prewarm-request.mjs",
+          "sha256": "3f3aec2d72aa8374c69b7a7f3ff808183f3e647c7b5f117622a25d1c8c717c01"
+        },
+        {
+          "path": "scripts/test-asset-worker-missing-retry.mjs",
+          "sha256": "514f02f4f04dde18a277c9a08bcc2b079949a16135d033a6cdbf63793496d973"
+        },
+        {
+          "path": "scripts/test-asset-worker-lifecycle.mjs",
+          "sha256": "b77588913d6ef95bb8ba488edee8d8f3315a1e90ecdd0ab667b68725ef08cd6d"
+        },
+        {
+          "path": "scripts/test-bevy-runtime-initializer.mjs",
+          "sha256": "1b08b1a7423aa7ac5b43859d5a18f1d68a9db41ea1ecb1f73c6aca299fa84941"
+        }
+      ]
+    },
+    {
+      "name": "routes",
+      "args": [
+        "--test",
+        "--test-reporter=tap",
+        "scripts/test-r16-quest-navigation.mjs",
+        "scripts/test-r16-route-correction.mjs",
+        "scripts/test-route-authority-wait.mjs"
+      ],
+      "exitCode": 0,
+      "counts": {
+        "tests": 59,
+        "pass": 59,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0
+      },
+      "logSha256": "fbbaa5f3283b3818e05aaa434028e9f096325751376408b1684f92c08e7b1d8e",
+      "inputs": [
+        {
+          "path": "scripts/test-r16-quest-navigation.mjs",
+          "sha256": "9b127ebc87f252354f2fec01fa85785185e41373a69e7b57cab89ba06cb9a9a1"
+        },
+        {
+          "path": "scripts/test-r16-route-correction.mjs",
+          "sha256": "27c5cdc284c3531b1c55bdff60f714c9e9f825df74f5e26e4b880f4c3122bda6"
+        },
+        {
+          "path": "scripts/test-route-authority-wait.mjs",
+          "sha256": "13bcdbbd31267a4235be56c16884a53fe6cf1f938f74dc39b9b913d15064ad28"
+        }
+      ]
+    }
+  ]
+}

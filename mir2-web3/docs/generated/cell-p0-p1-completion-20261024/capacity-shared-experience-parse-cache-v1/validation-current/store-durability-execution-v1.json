@@ -1,0 +1,48 @@
+{
+  "name": "store-durability",
+  "command": [
+    "C:/Users/Administrator/.cargo/bin/rustup.exe",
+    "run",
+    "1.95.0",
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "--jobs",
+    "4",
+    "-p",
+    "mir2-simulation",
+    "--lib",
+    "config::config_account_store_durability_tests::",
+    "--",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "durationMs": 451.90849999999773,
+  "totals": [
+    {
+      "status": "ok",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "measured": 0,
+      "filteredOut": 2944
+    }
+  ],
+  "passed": true,
+  "logs": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\store-durability-stdout-v1.log",
+      "bytes": 368,
+      "sha256": "9899b97c10b02e3132e6f46753aad1c0ee65a5810e2a3c807d0d2fd37d05dd3d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v3\\store-durability-stderr-v1.log",
+      "bytes": 43101,
+      "sha256": "bc3db98f513089721f0e6cd2ca295f74f48b768f447218ec01c416b43ef0d6a6"
+    }
+  ]
+}

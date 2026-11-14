@@ -1,0 +1,422 @@
+{
+  "source": "f310e242a48b6ad69f27fcf133c90c1f8655674c",
+  "releaseClosureBase": "b29c15a9bf08c33885b5c4c91866e9a7f119f5e6",
+  "qualifiedBuildBase": "b9acf175fad0bb582f20fd76282580f179c4b0d2",
+  "candidate": "b9-map-world-refresh-f9d91453",
+  "buildId": "s4qkap9m8wKLgVK0WnZG-",
+  "commits": [
+    "f310e242a48b6ad69f27fcf133c90c1f8655674c"
+  ],
+  "files": [
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/app/page.tsx",
+      "sha": "3f37a1e54c16598cb2c7b54b14e65d0ef53c2255"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/lib/map-world-baseline-refresh.ts",
+      "sha": "511ce5d713be3732e75855633e425b88ffc7ade5"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/scripts/test-map-world-baseline-refresh.mjs",
+      "sha": "4809fd4dcb879b4529b6cc8bc21c58b8ea5c36fc"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/AGENT-CURRENT.md",
+      "sha": "67805c7563edb9384f31141eea076e552edc319b"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+      "sha": "27dca7aed8ed076690585056c6a8bdb938b98a97"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+      "sha": "7da01750bd78d33b6fee21d934048295bc3f6053"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/README.md",
+      "sha": "ba2513c9feaad5f0d78a87b16270332c012d8401"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/before-missing-guidance.png",
+      "sha": "c6d9b9f0fbfd41dc006dc2f7ef811cb0bb65995c"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/default-fresh-goal-and-manual-step.png",
+      "sha": "8bb6109889f5ade3fc954c0469bb75aac58fc2d1"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/default-interior-exit-arrival.png",
+      "sha": "ce51926b7b75344e5baf816061029cc1958abf62"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/default-interior-route-before.png",
+      "sha": "ccc3f30992050fe819613da241b6f3833d043e04"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/default-ordinary-entry.json",
+      "sha": "f3f123d100b6fb3bbc50b736a06675f17ae454b0"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/default-route.json",
+      "sha": "b385a95445462eb660716dc4a193149a7834de5a"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/fixture-source-pins.json",
+      "sha": "8085a96270cdf80e163502f77bab6ba24ee966ac"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/qualification.json",
+      "sha": "b121062fb1c33dc9412b3116176cd4bc40790083"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/regression-before-fix.txt",
+      "sha": "ae4fc2b439583525b69697f6bdee728f3d9a7133"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/regressions.txt",
+      "sha": "eb6dd4d9e5b0561e6867c1148cd2b1b2b24df1c6"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/retained-failures.json",
+      "sha": "e0880dccffebde84e45af174315f9bd8f14949c8"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/webgl2-fresh-goal-and-manual-step.png",
+      "sha": "1bac9c7b65f8edf23dfe4fcf3cfae1e654473925"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/webgl2-interior-exit-arrival.png",
+      "sha": "287b3a09caffc51820953f13556911351f343d5e"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/webgl2-interior-route-before.png",
+      "sha": "3b209b32f63a3dfbd709ec2fb56015e627b6d802"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/webgl2-ordinary-entry.json",
+      "sha": "5464eecaa4bc9caaf449a2f8e1fafda96d000ccb"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/webgl2-route.json",
+      "sha": "dbfa260712443e55dc7c38a827c674145691ea4a"
+    }
+  ],
+  "frontendBindings": [
+    {
+      "filename": "mir2-web3/apps/web/lib/scene-asset-preloader.ts",
+      "localBuiltSha256": "0f1d3a0a09d9cdd25dbe1de8539ec4c814305548f9610d019cb4b51856adf93d",
+      "committedSha256": "0f1d3a0a09d9cdd25dbe1de8539ec4c814305548f9610d019cb4b51856adf93d",
+      "gitBlob": "1a1c90f28769f66399eac36302221931704cea5e",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/components/r16-login-door.tsx",
+      "localBuiltSha256": "9233ba688e2233fe05f89a4853aa5e69ac037f1d63e7aa68e36095ca08d44a2c",
+      "committedSha256": "9233ba688e2233fe05f89a4853aa5e69ac037f1d63e7aa68e36095ca08d44a2c",
+      "gitBlob": "0e57fe6da9a9b0c4df08fafdb0f82f4173cfcb8a",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-scene-asset-preloader.mjs",
+      "localBuiltSha256": "0c1aa0ce081bb7733aeb822a76aaf8c33514b986ad05c93d29a4b1751830c4bf",
+      "committedSha256": "0c1aa0ce081bb7733aeb822a76aaf8c33514b986ad05c93d29a4b1751830c4bf",
+      "gitBlob": "cca6c14de54ffac1fb8ac40b90640623b922e6a9",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-auth-layout.mjs",
+      "localBuiltSha256": "9187eb5db8e883da78b55353684d0c3badb8fc5755393ea8fe5bcdaf0db27e5a",
+      "committedSha256": "9187eb5db8e883da78b55353684d0c3badb8fc5755393ea8fe5bcdaf0db27e5a",
+      "gitBlob": "aab7b723b3717cac9d3b33a8dc983db33da446da",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/bevy-runtime-initializer.ts",
+      "localBuiltSha256": "15681d741f5d0e5509913a683dc719631e1e091e46d85cfeef7a9654c7b8eef4",
+      "committedSha256": "15681d741f5d0e5509913a683dc719631e1e091e46d85cfeef7a9654c7b8eef4",
+      "gitBlob": "766c73059d7db02c71b6f0319a5d9c5430db7566",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-initializer.mjs",
+      "localBuiltSha256": "f5f5459a3b5c140a30c15857e96a406237994b94386c0eb7e5933898fb877e6c",
+      "committedSha256": "f5f5459a3b5c140a30c15857e96a406237994b94386c0eb7e5933898fb877e6c",
+      "gitBlob": "9bda11b5d92e973b912f1ae3f747590dee131bac",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-finite-recovery.mjs",
+      "localBuiltSha256": "c87a2661b386054b5c0060a2e71c4409046fbbe2201141b9aefbed4ffc1f10f4",
+      "committedSha256": "c87a2661b386054b5c0060a2e71c4409046fbbe2201141b9aefbed4ffc1f10f4",
+      "gitBlob": "24966c60581e3b8c61ea868bedb44a3f43caf8a3",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/smoke-bevy-runtime-header-probes.mjs",
+      "localBuiltSha256": "aa30eb56dc7547e2ffdcd71ea019a3318b85910a1f7898b4a162bd85977e17bc",
+      "committedSha256": "aa30eb56dc7547e2ffdcd71ea019a3318b85910a1f7898b4a162bd85977e17bc",
+      "gitBlob": "33c7762a3c7be35f0a46585a2dbd50f8c2e9e265",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/page.tsx",
+      "localBuiltSha256": "95074eb037f52fa87262ba98cdb87920083fba64ebade51fdfd727913b80fd63",
+      "committedSha256": "95074eb037f52fa87262ba98cdb87920083fba64ebade51fdfd727913b80fd63",
+      "gitBlob": "3f37a1e54c16598cb2c7b54b14e65d0ef53c2255",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
+      "localBuiltSha256": "92fc7deb19085261dbd7aafb107473263033f855b0f958d6c5b4084ba6a93e42",
+      "committedSha256": "92fc7deb19085261dbd7aafb107473263033f855b0f958d6c5b4084ba6a93e42",
+      "gitBlob": "aebc9eaae9dd312eae9f2c2d4c600484282830e8",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/runtime-header-priority.ts",
+      "localBuiltSha256": "f4626abc2ad4bb523d0ea198085c38e162feb0213e2a6cf9370f5a06e55c19cb",
+      "committedSha256": "f4626abc2ad4bb523d0ea198085c38e162feb0213e2a6cf9370f5a06e55c19cb",
+      "gitBlob": "57618d47a3d25f75526805e2bd05fcc6438f4f91",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-runtime-header-priority.mjs",
+      "localBuiltSha256": "7f991c996d7c5f9bc8873fc95404d835aee9c9e064481505d157ecfb6588ad6f",
+      "committedSha256": "7f991c996d7c5f9bc8873fc95404d835aee9c9e064481505d157ecfb6588ad6f",
+      "gitBlob": "4a8c6985eab7ffecfdd66d08465301a75b87d539",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/lib/r16-static-waterfall.mjs",
+      "localBuiltSha256": "8e59499334a97e2b92b8a1aeeb9902d18043d50e08c388d219a02916209587f8",
+      "committedSha256": "8e59499334a97e2b92b8a1aeeb9902d18043d50e08c388d219a02916209587f8",
+      "gitBlob": "7697be12556c5c2a35bdcc235e50af7d72c06054",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/lib/r16-static-transport.mjs",
+      "localBuiltSha256": "ff35ad6e7638f9839713091a7d6ba61887c10c0510f557386b51b551240d5ab0",
+      "committedSha256": "ff35ad6e7638f9839713091a7d6ba61887c10c0510f557386b51b551240d5ab0",
+      "gitBlob": "04301bd5c70261080db6e224fdfa4842a798df64",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-static-transport.mjs",
+      "localBuiltSha256": "64cf95f53385c4bb0c434ba0757d3a7d6a22a598bd49ac0af7e9fde3cc8bf0dd",
+      "committedSha256": "64cf95f53385c4bb0c434ba0757d3a7d6a22a598bd49ac0af7e9fde3cc8bf0dd",
+      "gitBlob": "9010f05fffa7871ea24d0daaf9778815ec3d3974",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/smoke-runtime-header-priority.mjs",
+      "localBuiltSha256": "54cef1603191344782bb950cde02bdee217db979570ab635235ea6e0251bf417",
+      "committedSha256": "54cef1603191344782bb950cde02bdee217db979570ab635235ea6e0251bf417",
+      "gitBlob": "0c0a01c06afdf8b431ae956e64746c1c8e5ebf33",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/map-world-baseline-refresh.ts",
+      "localBuiltSha256": "9ae435d3b96e1be2ce644ef1456e6215e694953237ba33e78be0d1be09109138",
+      "committedSha256": "9ae435d3b96e1be2ce644ef1456e6215e694953237ba33e78be0d1be09109138",
+      "gitBlob": "511ce5d713be3732e75855633e425b88ffc7ade5",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-map-world-baseline-refresh.mjs",
+      "localBuiltSha256": "c90379b61d767c76b6f2ad7e327091ea979d0a987e83a6674d64cdfe22c884df",
+      "committedSha256": "c90379b61d767c76b6f2ad7e327091ea979d0a987e83a6674d64cdfe22c884df",
+      "gitBlob": "4809fd4dcb879b4529b6cc8bc21c58b8ea5c36fc",
+      "eol": "exact"
+    }
+  ],
+  "independentRemoteCompare": {
+    "repository": "Zombieliu/mir2",
+    "base": "b29c15a9bf08c33885b5c4c91866e9a7f119f5e6",
+    "source": "f310e242a48b6ad69f27fcf133c90c1f8655674c",
+    "status": "ahead",
+    "aheadBy": 1,
+    "behindBy": 0,
+    "totalCommits": 1,
+    "mergeBase": "b29c15a9bf08c33885b5c4c91866e9a7f119f5e6",
+    "files": [
+      {
+        "filename": "mir2-web3/apps/web/app/page.tsx",
+        "status": "modified",
+        "additions": 29,
+        "deletions": 0
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/map-world-baseline-refresh.ts",
+        "status": "added",
+        "additions": 56,
+        "deletions": 0
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-map-world-baseline-refresh.mjs",
+        "status": "added",
+        "additions": 61,
+        "deletions": 0
+      },
+      {
+        "filename": "mir2-web3/docs/AGENT-CURRENT.md",
+        "status": "modified",
+        "additions": 1,
+        "deletions": 1
+      },
+      {
+        "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+        "status": "modified",
+        "additions": 2,
+        "deletions": 2
+      },
+      {
+        "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+        "status": "modified",
+        "additions": 4,
+        "deletions": 0
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/README.md",
+        "status": "added",
+        "additions": 60,
+        "deletions": 0
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/before-missing-guidance.png",
+        "status": "added",
+        "additions": 0,
+        "deletions": 0
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/default-fresh-goal-and-manual-step.png",
+        "status": "added",
+        "additions": 0,
+        "deletions": 0
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/default-interior-exit-arrival.png",
+        "status": "added",
+        "additions": 0,
+        "deletions": 0
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/default-interior-route-before.png",
+        "status": "added",
+        "additions": 0,
+        "deletions": 0
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/default-ordinary-entry.json",
+        "status": "added",
+        "additions": 302,
+        "deletions": 0
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/default-route.json",
+        "status": "added",
+        "additions": 779,
+        "deletions": 0
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/fixture-source-pins.json",
+        "status": "added",
+        "additions": 159,
+        "deletions": 0
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/qualification.json",
+        "status": "added",
+        "additions": 739,
+        "deletions": 0
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/regression-before-fix.txt",
+        "status": "added",
+        "additions": 192,
+        "deletions": 0
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/regressions.txt",
+        "status": "added",
+        "additions": 670,
+        "deletions": 0
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/retained-failures.json",
+        "status": "added",
+        "additions": 105,
+        "deletions": 0
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/webgl2-fresh-goal-and-manual-step.png",
+        "status": "added",
+        "additions": 0,
+        "deletions": 0
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/webgl2-interior-exit-arrival.png",
+        "status": "added",
+        "additions": 0,
+        "deletions": 0
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/webgl2-interior-route-before.png",
+        "status": "added",
+        "additions": 0,
+        "deletions": 0
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/webgl2-ordinary-entry.json",
+        "status": "added",
+        "additions": 302,
+        "deletions": 0
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/webgl2-route.json",
+        "status": "added",
+        "additions": 779,
+        "deletions": 0
+      }
+    ]
+  },
+  "remoteBlobVerification": "Commit content address independently returned by GitHub; per-file blob equality is also enforced by the guarded release GitHub compare at dispatch.",
+  "rollback": {
+    "project": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+    "deployment": "dpl_6k5uD7UbVAcyzBdtto8PPAC9qNFK",
+    "revision": "b9acf175fad0bb582f20fd76282580f179c4b0d2",
+    "independentVercelRead": true
+  },
+  "assetSource": "f2de762309768b51b39438c2437c14e819df9bf7",
+  "assetRunId": "42494701555",
+  "oldHelperSha256": "6ccd20b3cc7c7237aad7b5da4a211425d5c5555aabb46a8409b97e2cec85841e",
+  "newHelperSha256": "8ad9ffb53d07542905d307a7c9b55c82c259f16f5552467f71e538fb949e010d",
+  "releaseChecks": {
+    "releaseAndEntry": 57,
+    "domainAndProxy": 24,
+    "ingress": 2,
+    "failed": 0
+  }
+}

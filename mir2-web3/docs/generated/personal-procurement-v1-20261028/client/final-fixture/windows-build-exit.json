@@ -1,0 +1,9 @@
+{
+  "finishedAtUtc": "2026-10-28T15:01:28.4504292Z",
+  "command": "cargo +1.95.0 build --locked --offline --manifest-path apps/game-client/platform-windows/Cargo.toml --bin mir2-platform-windows --target-dir C:/mir2-build/guild-pixel-parity-20261028/target-native",
+  "binaryBytes": 132221440,
+  "exitCode": 0,
+  "startedAtUtc": "2026-10-28T15:00:11.0200738Z",
+  "binarySha256": "76178f1c6b82ac6628d95de8bed5bda82ef2afc8689dee8e00559e342b201226",
+  "binaryPath": "C:\\mir2-build\\personal-procurement-v1-20261028\\bin-final\\mir2-platform-windows.exe"
+}

@@ -1,6 +1,87 @@
 {
   "version": 3,
+  "sourceLibrary": {
+    "path": "Monster/013.Lib",
+    "sha256": "f2d5f9bfab4216f43fec66b5f0ab103cd2c4f7222a8bbe97ce51207ab4d3a26a",
+    "bytes": 1048854
+  },
   "count": 22,
+  "frameSet": {
+    "seek": 1048675,
+    "count": 5,
+    "actions": [
+      {
+        "actionId": 0,
+        "actionName": "Standing",
+        "start": 0,
+        "count": 10,
+        "skip": -10,
+        "interval": 500,
+        "effectStart": 0,
+        "effectCount": 0,
+        "effectSkip": 0,
+        "effectInterval": 0,
+        "reverse": false,
+        "blend": false
+      },
+      {
+        "actionId": 18,
+        "actionName": "Struck",
+        "start": 10,
+        "count": 2,
+        "skip": -2,
+        "interval": 200,
+        "effectStart": 0,
+        "effectCount": 0,
+        "effectSkip": 0,
+        "effectInterval": 0,
+        "reverse": false,
+        "blend": false
+      },
+      {
+        "actionId": 21,
+        "actionName": "Die",
+        "start": 12,
+        "count": 10,
+        "skip": -10,
+        "interval": 100,
+        "effectStart": 0,
+        "effectCount": 0,
+        "effectSkip": 0,
+        "effectInterval": 0,
+        "reverse": false,
+        "blend": false
+      },
+      {
+        "actionId": 22,
+        "actionName": "Dead",
+        "start": 21,
+        "count": 1,
+        "skip": -1,
+        "interval": 1000,
+        "effectStart": 0,
+        "effectCount": 0,
+        "effectSkip": 0,
+        "effectInterval": 0,
+        "reverse": false,
+        "blend": false
+      },
+      {
+        "actionId": 28,
+        "actionName": "Revive",
+        "start": 12,
+        "count": 10,
+        "skip": -10,
+        "interval": 100,
+        "effectStart": 0,
+        "effectCount": 0,
+        "effectSkip": 0,
+        "effectInterval": 0,
+        "reverse": true,
+        "blend": false
+      }
+    ]
+  },
   "frames": [
     {
       "index": 0,
@@ -13,6 +94,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "912df27ded6f94a9c67f075b301c67567a059a378581436bbd395cd2ab7e753e",
+      "pngSha256": "44a5dae8c46f4889cae3ef9e0d61f142226b633bdc6b56538f9b1e6e0ce0a8a5",
       "path": "/original-ui/Monster/013/0.png",
       "maskPath": null
     },
@@ -27,6 +110,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "930d0d42638b687baf98b28f68fc717c9d35a5fc76cdcc259ff7b5e22023ffc3",
+      "pngSha256": "dec232c10d3caf857ef3ed2e667a648dec73f204a6c360fd37e8d7cc7a7895a4",
       "path": "/original-ui/Monster/013/1.png",
       "maskPath": null
     },
@@ -41,6 +126,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "6c3f1d629e227d3bdf781bb219841be1d4f5cf66e85081bf16699ef8cfaa8a97",
+      "pngSha256": "7e15330ef30a7e407917f103eead30add4c67aa7d55797089551b0bb29a2c256",
       "path": "/original-ui/Monster/013/2.png",
       "maskPath": null
     },
@@ -55,6 +142,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "0e1a5038d76d8093ab45d11ad945bdc357cb085e92a77e6dbe44614abb27ae51",
+      "pngSha256": "baff26c5499dba56b271db048b28fe93ed9efe54ce056121691902c489634123",
       "path": "/original-ui/Monster/013/3.png",
       "maskPath": null
     },
@@ -69,6 +158,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "912df27ded6f94a9c67f075b301c67567a059a378581436bbd395cd2ab7e753e",
+      "pngSha256": "44a5dae8c46f4889cae3ef9e0d61f142226b633bdc6b56538f9b1e6e0ce0a8a5",
       "path": "/original-ui/Monster/013/4.png",
       "maskPath": null
     },
@@ -83,6 +174,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "930d0d42638b687baf98b28f68fc717c9d35a5fc76cdcc259ff7b5e22023ffc3",
+      "pngSha256": "dec232c10d3caf857ef3ed2e667a648dec73f204a6c360fd37e8d7cc7a7895a4",
       "path": "/original-ui/Monster/013/5.png",
       "maskPath": null
     },
@@ -97,6 +190,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "6c3f1d629e227d3bdf781bb219841be1d4f5cf66e85081bf16699ef8cfaa8a97",
+      "pngSha256": "7e15330ef30a7e407917f103eead30add4c67aa7d55797089551b0bb29a2c256",
       "path": "/original-ui/Monster/013/6.png",
       "maskPath": null
     },
@@ -111,6 +206,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "0e1a5038d76d8093ab45d11ad945bdc357cb085e92a77e6dbe44614abb27ae51",
+      "pngSha256": "baff26c5499dba56b271db048b28fe93ed9efe54ce056121691902c489634123",
       "path": "/original-ui/Monster/013/7.png",
       "maskPath": null
     },
@@ -125,6 +222,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "6c3f1d629e227d3bdf781bb219841be1d4f5cf66e85081bf16699ef8cfaa8a97",
+      "pngSha256": "7e15330ef30a7e407917f103eead30add4c67aa7d55797089551b0bb29a2c256",
       "path": "/original-ui/Monster/013/8.png",
       "maskPath": null
     },
@@ -139,6 +238,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "930d0d42638b687baf98b28f68fc717c9d35a5fc76cdcc259ff7b5e22023ffc3",
+      "pngSha256": "dec232c10d3caf857ef3ed2e667a648dec73f204a6c360fd37e8d7cc7a7895a4",
       "path": "/original-ui/Monster/013/9.png",
       "maskPath": null
     },
@@ -153,6 +254,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "912df27ded6f94a9c67f075b301c67567a059a378581436bbd395cd2ab7e753e",
+      "pngSha256": "44a5dae8c46f4889cae3ef9e0d61f142226b633bdc6b56538f9b1e6e0ce0a8a5",
       "path": "/original-ui/Monster/013/10.png",
       "maskPath": null
     },
@@ -167,6 +270,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "4bc61c0939c5c56831dc72ab9eabf9579bd3d0b7604204550c3b5eaf930268e2",
+      "pngSha256": "c7b281d96c28a914bc280b275b9ecf3584e8f0a1f2d86a1f5337ced13a2f270d",
       "path": "/original-ui/Monster/013/11.png",
       "maskPath": null
     },
@@ -181,6 +286,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "75148cf5d9324a4c1a9ce4e99fb112c18fa02ce914c9d802df63313eab6fcf48",
+      "pngSha256": "e5be81d4e61d1ad87d9d5c6e9cca9931d8b986b101ab396f7c1266584966370c",
       "path": "/original-ui/Monster/013/12.png",
       "maskPath": null
     },
@@ -195,6 +302,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "94ad0dbd4edb5a72c35761a1a32bb5932a1a17d47e8c7cc77c9166f348af6da4",
+      "pngSha256": "d28b5e89c7cc0edbf98f171666fdf4088e0db592a2d8d900b94ba4b483f6bb59",
       "path": "/original-ui/Monster/013/13.png",
       "maskPath": null
     },
@@ -209,6 +318,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "e59af1464351f5b97d3d16df759df2e3a7f2a2f48283d2a4412d079c1af563fb",
+      "pngSha256": "6acfb39a4e98977f60ee1d3bd666377940ae565011160e2267052fa7bdc88562",
       "path": "/original-ui/Monster/013/14.png",
       "maskPath": null
     },
@@ -223,6 +334,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "9f80edf0e0017b72e0bc498d3901aa3217906fedaae6706a36830342d0123fe4",
+      "pngSha256": "ae8b49873236ed5279ce8a8f1d5dfab117d93732a2106ac8c4e648a1cb0805b5",
       "path": "/original-ui/Monster/013/15.png",
       "maskPath": null
     },
@@ -237,6 +350,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "87f52d3bb157699906303ab0a256892fd19f1d6971d6755bcfe9200b31248e3b",
+      "pngSha256": "9b42092f22395d58c09486a3645531a7b644c49b7ce47a8521429a2b81fd6677",
       "path": "/original-ui/Monster/013/16.png",
       "maskPath": null
     },
@@ -251,6 +366,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "c43a24b5f1a3cdc8dc45825459ca000a7caa5b07ba42d11da317a9b5c847ca7b",
+      "pngSha256": "7f5166e7fa6d1af0739b6707b32d4032ed0da9f1750cca75a5fd1ff2ab979d70",
       "path": "/original-ui/Monster/013/17.png",
       "maskPath": null
     },
@@ -265,6 +382,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "3ef5de02ea9d466a4e4e8ce8a3491dabb0c852215ed19fa05ee829f77c811558",
+      "pngSha256": "78b396bca287fbea6c9a4c4bea2f51aca67c97e6b7ea33ee917935716c732b6c",
       "path": "/original-ui/Monster/013/18.png",
       "maskPath": null
     },
@@ -279,6 +398,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "89598dd8f2d838574b7bd40210248a00ffe8da359e5a50c4d99c61eec587bb9e",
+      "pngSha256": "c25d9df1aff129c38dbc02d61b1156bf1faa4aca565af2c35c620a371281ab8b",
       "path": "/original-ui/Monster/013/19.png",
       "maskPath": null
     },
@@ -293,6 +414,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "171ce2c467786527c48f33f1c0fc423925b9536476a979256810c9d5c40dd069",
+      "pngSha256": "3537e4f0aeb47013a21c0b55766490ddf1b724d55dacb4470c12c53161d539a4",
       "path": "/original-ui/Monster/013/20.png",
       "maskPath": null
     },
@@ -307,6 +430,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "75148cf5d9324a4c1a9ce4e99fb112c18fa02ce914c9d802df63313eab6fcf48",
+      "pngSha256": "e5be81d4e61d1ad87d9d5c6e9cca9931d8b986b101ab396f7c1266584966370c",
       "path": "/original-ui/Monster/013/21.png",
       "maskPath": null
     }

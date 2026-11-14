@@ -1,0 +1,295 @@
+{
+  "schemaVersion": 1,
+  "hashMode": "raw-bytes",
+  "scope": "Exact individually authorized public files copied without normalizing bytes. No traversal, copy, or read of private/credentials/secrets directories or account stores. Generated projections are separately checked against external raw samples by the frozen verifier.",
+  "files": [
+    {
+      "path": "capacity-diagnostics/native-5-gate-02-supply-diagnostics.json",
+      "source": "native-5-gate-02-supply-diagnostics.json",
+      "bytes": 29586,
+      "sha256": "1a56cd20a16801bdbf21ee433766f34b0b881892704fd1054847f241c0f9525b"
+    },
+    {
+      "path": "capacity-diagnostics/probe-natural-5-02/gateway-build-pin.json",
+      "source": "probe-natural-5-02/gateway-build-pin.json",
+      "bytes": 564,
+      "sha256": "2cd6be2d67ef1f2584acdb5e0d98264bad95b617645f0093e57e1687ab29b45a"
+    },
+    {
+      "path": "capacity-diagnostics/probe-natural-5-02/realm-cleanup.json",
+      "source": "probe-natural-5-02/realm-cleanup.json",
+      "bytes": 942,
+      "sha256": "97884c7e155263f8979efe3487ee82d0758fe209c43d467df97ea56da39d2263"
+    },
+    {
+      "path": "capacity-diagnostics/probe-natural-5-02/realm-process.json",
+      "source": "probe-natural-5-02/realm-process.json",
+      "bytes": 713,
+      "sha256": "f068308154b21fea3802920a63d314377c756eeb4ac4293c1a353e294525a260"
+    },
+    {
+      "path": "capacity-diagnostics/probe-natural-5-02/reports/1792853206032-d849fbda.report.json",
+      "source": "probe-natural-5-02/reports/1792853206032-d849fbda.report.json",
+      "bytes": 27920,
+      "sha256": "aaa12922d4bef93e290df0cdb8fa71881ac743e881888175d5b068fac262e663"
+    },
+    {
+      "path": "capacity-diagnostics/probe-natural-5-02/run03/reports/1792853910738-69505bbc.report.json",
+      "source": "probe-natural-5-02/run03/reports/1792853910738-69505bbc.report.json",
+      "bytes": 30794,
+      "sha256": "b6b6b7f54de6a5c4773a84c749a915185d932315b65ce629f9009c522d3a241c"
+    },
+    {
+      "path": "capacity-diagnostics/probe-natural-5-02/run03/source-pins.json",
+      "source": "probe-natural-5-02/run03/source-pins.json",
+      "bytes": 2171,
+      "sha256": "55e0c9d44e3b88d49a82c0f0a907fad08eb9391f31616e12c378ef5df932dc92"
+    },
+    {
+      "path": "capacity-diagnostics/probe-natural-5-02/run04/reports/1792854301701-cb47cee2.report.json",
+      "source": "probe-natural-5-02/run04/reports/1792854301701-cb47cee2.report.json",
+      "bytes": 85592,
+      "sha256": "801757e450b5d7cf073ba77cda9d165397c67c8ce12e191700d70ea5b4a8c6df"
+    },
+    {
+      "path": "capacity-diagnostics/probe-natural-5-02/run04/source-snapshot/playtest-capacity-soak.mjs",
+      "source": "probe-natural-5-02/run04/source-snapshot/playtest-capacity-soak.mjs",
+      "bytes": 100094,
+      "sha256": "ae45ef0cb1047cf829e93140a5b5b781b39c885440a782596e7aa0847286d677"
+    },
+    {
+      "path": "capacity-diagnostics/probe-natural-5-02/run04/source-snapshot/playtest-capacity-soak.test.mjs",
+      "source": "probe-natural-5-02/run04/source-snapshot/playtest-capacity-soak.test.mjs",
+      "bytes": 125848,
+      "sha256": "47a6db1fc0bdf6b8270006608317215c024695f4bd1ca328e3a4bccdc688d097"
+    },
+    {
+      "path": "capacity-diagnostics/probe-natural-5-02/run05/reports/1792854957028-bcdabf40.report.json",
+      "source": "probe-natural-5-02/run05/reports/1792854957028-bcdabf40.report.json",
+      "bytes": 24947,
+      "sha256": "81dcd791d0a88445fa429487e4b204b998f03fcf61e7b1c22853035eea82fc4d"
+    },
+    {
+      "path": "capacity-diagnostics/probe-natural-5-02/run05/source-pins.json",
+      "source": "probe-natural-5-02/run05/source-pins.json",
+      "bytes": 2761,
+      "sha256": "dd435f75eda8e80f73fc4172c78521c40b14674ab07e9d88cd03c2a6c15beda9"
+    },
+    {
+      "path": "capacity-diagnostics/probe-natural-5-02/source-pins.json",
+      "source": "probe-natural-5-02/source-pins.json",
+      "bytes": 1957,
+      "sha256": "c743fbd7c9aaedde21c5415c1f27d8d97acb21fb45df70df5c2e67a3d4325743"
+    },
+    {
+      "path": "capacity-diagnostics/probe-natural-5-02/source-snapshot/playtest-capacity-monitor.mjs",
+      "source": "probe-natural-5-02/source-snapshot/playtest-capacity-monitor.mjs",
+      "bytes": 20511,
+      "sha256": "ef4d47225cb8ddc878e4add4c3111a6d3194d214aa39b40d720e6ad67f3f299d"
+    },
+    {
+      "path": "capacity-diagnostics/probe-natural-5/cleanup.json",
+      "source": "probe-natural-5/cleanup.json",
+      "bytes": 409,
+      "sha256": "7071523ed8cac8d5463efcb5dd60a47a5d6c5003ef7c0fcf8683ff8ead4844a8"
+    },
+    {
+      "path": "capacity-diagnostics/probe-natural-5/final-save-life-projection.json",
+      "source": "probe-natural-5/final-save-life-projection.json",
+      "bytes": 324,
+      "sha256": "7ffad69a98f2fefab49411932d90728e8b8e1f052af340d91ba7debef2f97ac0"
+    },
+    {
+      "path": "capacity-diagnostics/probe-natural-5/gateway-build-pin.json",
+      "source": "probe-natural-5/gateway-build-pin.json",
+      "bytes": 564,
+      "sha256": "7c605e7b596a86ceb811c67e7a39b5c405cace5b51c29405abc5c6847e013925"
+    },
+    {
+      "path": "capacity-diagnostics/probe-natural-5/realm-process.json",
+      "source": "probe-natural-5/realm-process.json",
+      "bytes": 710,
+      "sha256": "e01cd6d7c6d8fe88d01f455239ae0611f40fac35edcadd00793992cd752cf555"
+    },
+    {
+      "path": "capacity-diagnostics/probe-natural-5/reports/1792852782794-f1476a1d.report.json",
+      "source": "probe-natural-5/reports/1792852782794-f1476a1d.report.json",
+      "bytes": 14590,
+      "sha256": "78a1fee1c9872d5bae0eebccd4bfb95e78be5299e1b955bd5f4dc6cf9571de15"
+    },
+    {
+      "path": "capacity-diagnostics/probe-natural-5/resource-profile.json",
+      "source": "probe-natural-5/resource-profile.json",
+      "bytes": 1124,
+      "sha256": "472c48bcbca8ba6e2809759467d753502c5644d7a3632a522cacb3556209d1a9"
+    },
+    {
+      "path": "capacity-diagnostics/probe-natural-5/run-options.json",
+      "source": "probe-natural-5/run-options.json",
+      "bytes": 813,
+      "sha256": "fc5260f58c50491dd7919c49d77767f7a0d3ef97a807aae7b654dde4cb7a2771"
+    },
+    {
+      "path": "capacity-diagnostics/probe-natural-5/source-pins.json",
+      "source": "probe-natural-5/source-pins.json",
+      "bytes": 1750,
+      "sha256": "c3879c6090319d2c2056dd72584efac8b412813a5d7b4a302d8ad83fb3a407f0"
+    },
+    {
+      "path": "capacity-diagnostics/release-accessibility-5-01/accessibility-actual-spawn.json",
+      "source": "release-accessibility-5-01/accessibility-actual-spawn.json",
+      "bytes": 180994,
+      "sha256": "27c77727ed4b92dd7648c9b7758a6420775d841bf03b92a98fa7d383f3b6aa9f"
+    },
+    {
+      "path": "capacity-diagnostics/release-accessibility-5-01/accessibility-report.json",
+      "source": "release-accessibility-5-01/accessibility-report.json",
+      "bytes": 498247,
+      "sha256": "ff4102e1e2c387ff01b3522107dde7f78332fd6f4d18edd9d8798dd05841832e"
+    },
+    {
+      "path": "capacity-diagnostics/release-accessibility-5-01/accessibility-south-first.json",
+      "source": "release-accessibility-5-01/accessibility-south-first.json",
+      "bytes": 107587,
+      "sha256": "1bb9c50c50d95ba5d59cb5a42f0bb9aba04389a979ab89f4be91e1985a665317"
+    },
+    {
+      "path": "capacity-diagnostics/release-accessibility-5-01/accessibility-south-openfield.json",
+      "source": "release-accessibility-5-01/accessibility-south-openfield.json",
+      "bytes": 117101,
+      "sha256": "88dc67d637cdf22f7723c24ae8f5b1b1e91934300ebdef71553266f26d88bcd3"
+    },
+    {
+      "path": "capacity-diagnostics/release-accessibility-5-01/gateway-build-pin.json",
+      "source": "release-accessibility-5-01/gateway-build-pin.json",
+      "bytes": 603,
+      "sha256": "d097894e1ffcf142acb47e677ec07215b0270f138ed6ffd51abb4854d65afffc"
+    },
+    {
+      "path": "capacity-diagnostics/release-accessibility-5-01/native-5-gate-01/reports/1792855739500-1962792b.report.json",
+      "source": "release-accessibility-5-01/native-5-gate-01/reports/1792855739500-1962792b.report.json",
+      "bytes": 119448,
+      "sha256": "081240f66b652140f5818da54c218fd4d5a47b8b387add546cc6da4096bcd9f4"
+    },
+    {
+      "path": "capacity-diagnostics/release-accessibility-5-01/native-5-gate-01/resource-profile.json",
+      "source": "release-accessibility-5-01/native-5-gate-01/resource-profile.json",
+      "bytes": 1145,
+      "sha256": "17d5e43a91547a92c1bc5b00815d176c8fa6927cb17e15b8d0ce2ec8fe1a8076"
+    },
+    {
+      "path": "capacity-diagnostics/release-accessibility-5-01/native-5-gate-01/run-options.json",
+      "source": "release-accessibility-5-01/native-5-gate-01/run-options.json",
+      "bytes": 479,
+      "sha256": "3b1338a745fcfa8b8749ee7ba1067df983dc9be1e12a8c133f85f810888fa2c1"
+    },
+    {
+      "path": "capacity-diagnostics/release-accessibility-5-01/native-5-gate-01/scenario.json",
+      "source": "release-accessibility-5-01/native-5-gate-01/scenario.json",
+      "bytes": 18978,
+      "sha256": "60e5ccba87112fb4ae998320f7f8c1458168a4ac0db86a27d2bfaca4f8542d3f"
+    },
+    {
+      "path": "capacity-diagnostics/release-accessibility-5-01/native-5-gate-01/source-pins.json",
+      "source": "release-accessibility-5-01/native-5-gate-01/source-pins.json",
+      "bytes": 3219,
+      "sha256": "527791baabb6263a8204a1448f16252ecb4c948d1fa7044557d74419f66ab5cb"
+    },
+    {
+      "path": "capacity-diagnostics/release-accessibility-5-01/native-5-gate-01/source-snapshot/playtest-capacity-soak.mjs",
+      "source": "release-accessibility-5-01/native-5-gate-01/source-snapshot/playtest-capacity-soak.mjs",
+      "bytes": 102939,
+      "sha256": "bcac9f576e0302e2160fd58891905c1b7cb7f6cbada6329583e7e525f9a90e28"
+    },
+    {
+      "path": "capacity-diagnostics/release-accessibility-5-01/native-5-gate-01/source-snapshot/playtest-capacity-soak.test.mjs",
+      "source": "release-accessibility-5-01/native-5-gate-01/source-snapshot/playtest-capacity-soak.test.mjs",
+      "bytes": 134488,
+      "sha256": "558d885b2b3262a21bae64fa2d6151e5526b59827a31b5f85290a4e9275db28a"
+    },
+    {
+      "path": "capacity-diagnostics/release-accessibility-5-01/native-5-gate-02/reports/1792857141547-1233ee1e.report.json",
+      "source": "release-accessibility-5-01/native-5-gate-02/reports/1792857141547-1233ee1e.report.json",
+      "bytes": 120392,
+      "sha256": "940bd6b2e769c62a11726c2038d7882ea472e2dde9000354dfd296829aea9f32"
+    },
+    {
+      "path": "capacity-diagnostics/release-accessibility-5-01/native-5-gate-02/resource-profile.json",
+      "source": "release-accessibility-5-01/native-5-gate-02/resource-profile.json",
+      "bytes": 1159,
+      "sha256": "99eae0ce6ff46447f4f9d2333bc9c731b0deaa3a61b2ffe017907c49c03e3cce"
+    },
+    {
+      "path": "capacity-diagnostics/release-accessibility-5-01/native-5-gate-02/run-options.json",
+      "source": "release-accessibility-5-01/native-5-gate-02/run-options.json",
+      "bytes": 556,
+      "sha256": "dad5fb9fc058d79fb15152d41e44ce49f097a3ad65d5f03b016d5fffbca9d794"
+    },
+    {
+      "path": "capacity-diagnostics/release-accessibility-5-01/native-5-gate-02/scenario.json",
+      "source": "release-accessibility-5-01/native-5-gate-02/scenario.json",
+      "bytes": 19097,
+      "sha256": "e176c72d09dc729e50f6550ef9c3d95ec7ff3cdeb27a1824f832ce4c4642548b"
+    },
+    {
+      "path": "capacity-diagnostics/release-accessibility-5-01/native-5-gate-02/source-pins.json",
+      "source": "release-accessibility-5-01/native-5-gate-02/source-pins.json",
+      "bytes": 3705,
+      "sha256": "cfc91c23e131d9b58f548e3ef0aa5c0156590b2341e31ce7e288112ee8abc0d4"
+    },
+    {
+      "path": "capacity-diagnostics/release-accessibility-5-01/postgate-02-public-snapshot.json",
+      "source": "release-accessibility-5-01/postgate-02-public-snapshot.json",
+      "bytes": 2095,
+      "sha256": "602b2c7817ffd2b4649e2fc588787e43210cf70691a8818c03e11c6a7f652ac3"
+    },
+    {
+      "path": "capacity-diagnostics/release-accessibility-5-01/postgate-public-snapshot.json",
+      "source": "release-accessibility-5-01/postgate-public-snapshot.json",
+      "bytes": 2519,
+      "sha256": "08cff05c18b72bf40bad8740340ed9f39c9eab9182a90c5a259667dd82621b1b"
+    },
+    {
+      "path": "capacity-diagnostics/release-accessibility-5-01/realm-cleanup.json",
+      "source": "release-accessibility-5-01/realm-cleanup.json",
+      "bytes": 980,
+      "sha256": "de31c6ec2919de8e9340d7372120226147ae48f3964967d215ad64197c7c2b1e"
+    },
+    {
+      "path": "capacity-diagnostics/release-accessibility-5-01/realm-process.json",
+      "source": "release-accessibility-5-01/realm-process.json",
+      "bytes": 722,
+      "sha256": "df990289ded6627642801a6b04d56f4e365afcc7986197896390452959334556"
+    },
+    {
+      "path": "capacity-diagnostics/static-native-deer-probe-5-02.json",
+      "source": "static-native-deer-probe-5-02.json",
+      "bytes": 1195,
+      "sha256": "c0dd761ba46ad24b08a0803dc3ad45d70a625eea4d95249035f693c668903a6e"
+    },
+    {
+      "path": "capacity-diagnostics/static-native-focused-probe-2-04.json",
+      "source": "static-native-focused-probe-2-04.json",
+      "bytes": 1219,
+      "sha256": "c8d8ef5791a5c76c06c7cac66ab3b915e830f1f04dbbf831b89073bc007920c3"
+    },
+    {
+      "path": "capacity-diagnostics/static-native-mixed-probe-5.json",
+      "source": "static-native-mixed-probe-5.json",
+      "bytes": 1262,
+      "sha256": "267d5aace8e270f74dcb266278b3a8254291685a01e47e6f0c61377cf5b48b02"
+    },
+    {
+      "path": "capacity-diagnostics/static-native-observed-probe-5-03.json",
+      "source": "static-native-observed-probe-5-03.json",
+      "bytes": 2021,
+      "sha256": "03b4ef1e219f5f6a735d97736608463ed750f68d127234eb01e50b4b3958994f"
+    },
+    {
+      "path": "capacity-diagnostics/static-native-observed-probe-5-05.json",
+      "source": "static-native-observed-probe-5-05.json",
+      "bytes": 2997,
+      "sha256": "290b6c470cd25126bf5359f9b18980032ad8cd40ebc6f28e686ccdfda68b520d"
+    }
+  ]
+}

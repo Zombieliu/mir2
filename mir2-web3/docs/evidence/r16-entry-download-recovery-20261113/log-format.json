@@ -1,0 +1,43 @@
+{
+  "files": [
+    {
+      "from": "final-checks-r2.log",
+      "to": "checks.log",
+      "rawBytes": 50375,
+      "rawSha256": "c344533cd8dfcdc593e99821b032d28e3c5d5f49020d8ecb0751768ae17cf1ec",
+      "publishedBytes": 49075,
+      "publishedSha256": "3e15a4aed978c4e3b55a5ec023223291ea6ffa5aa6897a960359695a2160526c",
+      "onlyFormattingNormalized": true
+    },
+    {
+      "from": "build-r2.log",
+      "to": "build.log",
+      "rawBytes": 2446,
+      "rawSha256": "72af30799117d60fc2bad8d1d44c352c06db89b0dd6e92bc14284dce65fa62ec",
+      "publishedBytes": 2441,
+      "publishedSha256": "612776502c243abc4ce52b02ba61cb3480ec5dce976856046d24392f2b451bba",
+      "onlyFormattingNormalized": true
+    },
+    {
+      "from": "release/guard-tests.log",
+      "to": "release-guards.log",
+      "rawBytes": 16931,
+      "rawSha256": "68bbba75ccf4305f24a03c650a3bc7f24d84d385a72c0781ca05cdec6f597bd0",
+      "publishedBytes": 16513,
+      "publishedSha256": "b7706c77196be87d7560ec691bc91dafb9e3d05e712617a1ed105ce90b340934",
+      "onlyFormattingNormalized": true
+    }
+  ],
+  "checks": {
+    "passed": 213,
+    "failed": 0
+  },
+  "scope": "Only indentation, trailing whitespace and line endings normalized. Raw logs remain in the private task folder.",
+  "retainedInitialChecks": {
+    "rawPath": "C:/r16-npc-pack-recovery-20261113/final-checks.log",
+    "rawSha256": "9dd7a198dc58fc8fd1bf2e2352ae8c00b6ded4af5cb80d18c60e56b1a73d62a2",
+    "passed": 212,
+    "failed": 1,
+    "scope": "Original run retained. Existing renderer fingerprint virtual fixture lacked packages/protocol; final fixture correction leaves production fingerprint recipe unchanged."
+  }
+}

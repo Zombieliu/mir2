@@ -1,0 +1,29 @@
+{
+  "actualEngineBinaryExecuted": false,
+  "afterEngine": "F2F1AB36F3ECA608F990D08DB0EEC045222B50AF97A960476623DC374D8F33A2",
+  "beforeEngine": "9213EC3FE1A992F757EA48C53981AFA661765B42E637C1AD811E326060B170B8",
+  "gameLaunched": false,
+  "healthyFirstLaunchSimulated": true,
+  "librarySourceRevision": "b4390ee4c987bbf000ba1d95761151e39fc0d54f",
+  "outcome": {
+    "activated": true,
+    "candidate": "WN-CANDIDATE-20261011-invited-25",
+    "changedGameFiles": 0,
+    "delivery": {
+      "bundles": 0,
+      "fallbacks": 0,
+      "patches": 0
+    },
+    "downloadedBytes": 1952256,
+    "downloadedFiles": 1,
+    "sequence": 21,
+    "wireBytes": 1957064
+  },
+  "passed": true,
+  "pendingActivationVerified": true,
+  "personalAndLogsPreserved": true,
+  "requests": [
+    "releases/updater-F2F1AB36F3ECA608-s21/Mir2Updater.exe"
+  ],
+  "transport": "local immutable signed production artifact bytes"
+}

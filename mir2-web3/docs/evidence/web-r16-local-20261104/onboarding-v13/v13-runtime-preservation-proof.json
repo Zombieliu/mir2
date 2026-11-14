@@ -1,0 +1,25 @@
+{
+  "schema": "mir2.r16.onboarding-resource-fix-preservation.v1",
+  "stoppedBeforeCopy": true,
+  "oldDirectoryPreserved": true,
+  "backupName": "Numeron-Web-R16-20261104-before-onboarding-resources-v13",
+  "runtime": [
+    {
+      "directory": "private",
+      "files": 25,
+      "bytes": 489554,
+      "beforeTreeSha256": "497f1279a47c3b0edf5e4fc6b0f7134e20f142f0497337140650e34f475d1a35",
+      "afterTreeSha256": "497f1279a47c3b0edf5e4fc6b0f7134e20f142f0497337140650e34f475d1a35",
+      "allFilesMatched": true
+    },
+    {
+      "directory": ".mir2-data",
+      "files": 19,
+      "bytes": 8174201251,
+      "beforeTreeSha256": "1a99ff33b93e802f380541f132fcb261bdc678511b0835696aaa607ab5572ce2",
+      "afterTreeSha256": "1a99ff33b93e802f380541f132fcb261bdc678511b0835696aaa607ab5572ce2",
+      "allFilesMatched": true
+    }
+  ],
+  "allMatched": true
+}

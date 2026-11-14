@@ -1,0 +1,54 @@
+{
+  "passed": true,
+  "phase": "merged-updater-source-debug-tests",
+  "library": {
+    "passed": 126,
+    "ignored": 8
+  },
+  "updaterBinary": {
+    "passed": 3,
+    "ignored": 0
+  },
+  "launcherBinary": {
+    "passed": 0,
+    "ignored": 0
+  },
+  "signedIntegrationDefaultIgnored": 4,
+  "allTargetsLog": {
+    "filename": "release-updater-all-v3.log",
+    "bytes": 17526,
+    "sha256": "1e5192bce5097bceb8b3a99d6a02f0c79b2fc171c173601660153ceb54926875",
+    "rawLogIncluded": false
+  },
+  "separatelyExecutedRealSignedR10Readonly": {
+    "passed": 2,
+    "areTwoOfDefaultLibraryIgnoredTests": true,
+    "logs": [
+      {
+        "filename": "release-r10-signed-retention-final.log",
+        "bytes": 240,
+        "sha256": "95039f924e716de0bfca02dad67f32007b8468b1976a0b1ce942e365582ae372",
+        "rawLogIncluded": false
+      },
+      {
+        "filename": "release-r10-signed-root17-final.log",
+        "bytes": 231,
+        "sha256": "e4481d24a163d5ae62736c3683ebf4671735726e5c0414515f001dc32f5e2ed3",
+        "rawLogIncluded": false
+      }
+    ],
+    "proof": "Real existing pinned-CMS legacy metadata, complete ROOT17 manifest, executable/attestation and signed floor; retention performs no receipt/floor/selector writes.",
+    "freshSignedPackedFeedToNewGenerationVerified": false,
+    "gameLaunchedByTheseTests": false
+  },
+  "retentionNegativeCases": [
+    "equal sequence",
+    "bad CMS",
+    "malformed feed",
+    "string-lookalike unknown errors",
+    "existing packed selector",
+    "damaged packed receipt pointer",
+    "missing authenticated legacy install"
+  ],
+  "freshCleanReleaseBuild": false
+}

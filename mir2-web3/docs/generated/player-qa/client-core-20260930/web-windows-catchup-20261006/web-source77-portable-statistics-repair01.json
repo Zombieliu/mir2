@@ -1,0 +1,108 @@
+{
+  "kind": "Source77 bounded test statistics definition repair",
+  "owner": "storage_prepare_paint_worker",
+  "mainWriteAuthority": "apps/web/scripts/test-portable-next-standalone.mjs appended region after original76389B only",
+  "before": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\worker-code01\\portable-statistics-repair01\\before.mjs",
+    "bytes": 94774,
+    "sha256": "0e77068d23b56ebdaaccaabf07b540546b5070f15cfff4d7ffa3a5a7bbbe5b40"
+  },
+  "after": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\worker-code01\\portable-statistics-repair01\\after.mjs",
+    "bytes": 95989,
+    "sha256": "22ef9cb1ccbc5dac56f7fdebcc1b4a52ebada58ae4bd1531a24c19f2b3341f0d"
+  },
+  "old31Prefix": {
+    "bytes": 76389,
+    "sha256": "b5b4a8967eef8d8c50d2c57f80a9573ce3bb0d8b824089eee8c160b4b6b07835",
+    "preserved": true
+  },
+  "failureAnalysis": "Original assertion named resolvedTradeScripts but helper counted every referenced first Trade section. The canonical report counted sections producing at least one resolved good. No product asset-selection mismatch.",
+  "independentDataStats": {
+    "referencedTradeSections": 131,
+    "usableTradeScripts": 128,
+    "resolvedGoods": 2239,
+    "unresolvedNonemptyNoncommentLines": 421,
+    "emptyTradeSections": 2,
+    "whollyUnresolvedTradeSections": 1,
+    "commentOnlyTradeSections": 0
+  },
+  "unusableTradeSections": [
+    {
+      "scriptKey": "BichonProvince/BichonWall/Lottery",
+      "lineNumber": 170,
+      "lineCount": 0,
+      "unresolved": 0,
+      "classification": "empty section"
+    },
+    {
+      "scriptKey": "GM/GM-Script",
+      "lineNumber": 29,
+      "lineCount": 29,
+      "unresolved": 29,
+      "classification": "all29 item names absent from canonical item manifest; no goods; no client admin ability"
+    },
+    {
+      "scriptKey": "WoomyonWoods/Castle-GI/Stones",
+      "lineNumber": 29,
+      "lineCount": 0,
+      "unresolved": 0,
+      "classification": "empty section"
+    }
+  ],
+  "sourcePins": [
+    {
+      "relativePath": "packages/game-data/data/generated/crystal_npc_info_manifest.json",
+      "bytes": 313945,
+      "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105"
+    },
+    {
+      "relativePath": "packages/game-data/data/generated/crystal_npc_manifest.json",
+      "bytes": 5244108,
+      "sha256": "7ff29f221c39e5d16b7ebdc7efcde5090daf7ff3daacf6b2b1552b5b36429e93"
+    },
+    {
+      "relativePath": "packages/game-data/data/generated/crystal_item_manifest.json",
+      "bytes": 1589543,
+      "sha256": "b0d48ada978d8a062e993fe0425b6a724672aeea354a3b7b4508fb4c161658b7"
+    },
+    {
+      "relativePath": "apps/simulation/src/runtime/npc.rs",
+      "bytes": 52162,
+      "sha256": "4f47ab5221c03121cd9f1e32508bd94da1f6f383c16a70651708852c4d40b7b5"
+    },
+    {
+      "relativePath": "apps/simulation/src/runtime/npc_script.rs",
+      "bytes": 126077,
+      "sha256": "413ae3e944405a249766840333dc40cbb89d754f68b23e44395a20b554b90aeb"
+    },
+    {
+      "relativePath": "packages/game-data/src/lib.rs",
+      "bytes": 167647,
+      "sha256": "56266851a23632b1844bea8cd9a9cd5781f2a9bed308988b39f22d74c485f614"
+    }
+  ],
+  "changes": [
+    "Split total referenced Trade sections131 from usable Trade scripts128",
+    "Keep2239 legalgoods assertion and add421 unresolved noncomment lines assertion",
+    "Assert exact3 unusable section identities/line numbers/line counts/unresolved counts; keep exact860 union and negative cases"
+  ],
+  "preservation": {
+    "testCount": 34,
+    "beforeAssertionOccurrences": 386,
+    "afterAssertionOccurrences": 389,
+    "noTestDeletedSkippedOrWeakened": true,
+    "old31TestsUnchanged": true,
+    "selector709Unchanged": true,
+    "otherCodeLeavesUnchanged": true,
+    "rootCInputsUnchanged": true
+  },
+  "checks": {
+    "dataOnly": true,
+    "productExecution": false,
+    "testExecution": false,
+    "runnerExecution": false,
+    "cargoExecution": false,
+    "requiresNextRebuild": false
+  }
+}

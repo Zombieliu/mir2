@@ -1,0 +1,10 @@
+{
+  "pid": 45972,
+  "verifiedOwnedExecutable": "C:\\mir2-build\\p01-completion-20261024\\probe-natural-5\\bin\\mir2-gateway.exe",
+  "verifiedSha256": "d7a085f4d82f533f0ac9a9008cecdee763f4b226ca192cf67e7110ec894b7d70",
+  "allSixCountersZero": true,
+  "monitorEndedByExternalCtrlC": true,
+  "monitorStopMarkerWritten": false,
+  "gatewayStopped": true,
+  "atUtc": "2026-10-24T14:46:16.2256873+00:00"
+}

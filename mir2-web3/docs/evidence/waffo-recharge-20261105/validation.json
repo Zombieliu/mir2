@@ -1,0 +1,149 @@
+{
+  "schema": "mir2.waffo.local-validation.v1",
+  "capturedAt": "2026-11-05T01:24:28.445329+08:00",
+  "branch": "codex/windows-player-journey",
+  "baseHead": "c404bde8a5190534f6bc83ec8a4fe78fffc8cb50",
+  "sourceState": "shared uncommitted working tree; hashes include retained pre-existing WIP",
+  "sourceSha256": {
+    "apps/gateway/Cargo.toml": "6fc8840d0ae4682d4ed5c9e949511bf20d882be63384793219045700c83f2b0f",
+    "apps/gateway/src/lib.rs": "ce4019b649dab44c072203b5ad7b7d3277429bb8e4890e500b0665af71d8b59d",
+    "apps/gateway/src/fiat_billing.rs": "0bbc2aec26370d5bd907f1a3d73db6f2c76c5d4c47c84e9e0c430fe42a7a89d5",
+    "apps/gateway/src/waffo_billing.rs": "64f5153583b676d39fcb836798d3d120ca92d7f828cbb903f0ca650b0a66c557",
+    "apps/gateway/src/waffo_billing_protocol.rs": "a7536001807480df6917f35a35816975e99ede3d04596b501536e08ff9b67333",
+    "apps/gateway/src/waffo_billing_tests.rs": "3698c4b8df2cb55fefa5e543aeedac36e877d8ed124be86c948d2b7eed4afde1",
+    "apps/gateway/src/stripe_billing.rs": "fddd1110d3c301a0c752c8236a8a339dfe0525ade6fa3c10fa20be2f9094b4fa",
+    "apps/gateway/src/web_billing.rs": "2e022061d006a87b759778873674fe779457be6e732aef66951631bb2c9b5321",
+    "apps/gateway/src/web_billing_tests.rs": "7f83b5d1149214af405b090c612d8624e81b18bffe69a798a7c7242850db2119",
+    "apps/simulation/src/activities.rs": "21b2c48202aecdc9f401ea8f44d66d6fa055c2de377dd7752e0cd227fe814afe",
+    "apps/simulation/src/billing.rs": "4903f0fac9aebc04e8f422a50c183581008c735e19e8c4796e5200306bb6b283",
+    "apps/simulation/src/billing_provenance.rs": "912a838c1c897a1ec0ab8a9bd66b719fde61f1bef296ab33a598445708270f37",
+    "apps/simulation/src/config.rs": "1e5bb32489bad714eab9629417e98a0fbc5fe455c4a1656a48b2cbb330bd933d",
+    "apps/simulation/src/config_schema_compat_tests.rs": "b605404fa3f9f2d650abced27274f7f0fcc8457cc795f97e7506a0a44a2832b3",
+    "apps/simulation/src/procurement_fees.rs": "4c8155df6913af8cc790e94cce0ae65ec757da7f1989b83ee4407482d1921889",
+    "apps/simulation/src/promotion/attribution_migration.rs": "2858b9746476dcc48367971db512105525a419d769fd6b45c3f1a9f58ca91c06",
+    "apps/simulation/tests/promotion_postgres.rs": "c1266dd20691babbcaababb07432ac1b78220ace373c922def1218be8fb12bcb",
+    "apps/simulation/tests/billing_providers.rs": "1555b4f0c33a0a0ff66aad2dd3a5b0c7dc6aefd33c2f86bf161c64ed4f5f48ac",
+    "apps/simulation/tests/waffo_restore.rs": "969968e086f249c5890ccb3939423bdebbdc4ee8dd3db77f8149115174d4c8e2",
+    "apps/game-client/client-bevy/src/native_billing.rs": "368a8a572aabd37eb10c113803548f34e632e9393c9167846230aa1365f12b6a",
+    "apps/game-client/platform-windows/src/native_protocol.rs": "6e6c3025228c9679b2ea9d27a38dfd487a9f8defc1f8557a019d1b5d92981bed",
+    "apps/game-client/platform-windows/src/billing_browser.rs": "45a26471ffdaaac08f0031964adebe8d151f42e5b882df55359c26328d967d5d",
+    "apps/game-client/platform-windows/src/shell_bridge.rs": "28f7c6ef74dad2e28d273e9b865d27f35806c5061f4efbcebb7c71a2c68b44e3",
+    "apps/game-client/platform-windows/src/gateway.rs": "74d65d795ac5deeba53208ca4d8b55395ed49944b4ba990b3c5be8a70f6cef7f",
+    "apps/recharge-web/public/core.js": "ff2860e4b0e77ac66d0c4ea95c728e1fd46d770cca4ce8db0aa704bac2e7563d",
+    "apps/recharge-web/public/app.js": "5c139cb051066602293c9ae5e97fe419c7079ee391a93092aa2d5aa5a46a7433",
+    "apps/recharge-web/public/index.html": "f837c04d5e53347bb1813fe2ae1f3b833bbf6229722a8674496d34904aba03af",
+    "apps/recharge-web/public/styles.css": "a08ec011df73e0a2d7ac1df80751c3ef85a78d83daa8d3609ba6668032408a26",
+    "apps/recharge-web/public/locales.js": "7cfe11583c27831114c9b9e3f79d2aa87638a6ff12c614f1b44b87557733f386",
+    "apps/recharge-web/public/activities.js": "8284cf6efbbf8e8c52253aeb598880ab10445fbc8e6d65308bdd6a8d108de481",
+    "apps/recharge-web/server/deploy.py": "f6ec5976d304b341aa4f8906a03082b22388322a1cf6697370d8bfc9ad59e51b",
+    "apps/recharge-web/tests/core.test.mjs": "8ac7b40170180958aa023107edce202f265a623864fed936b1de35ac4d5cb31c",
+    "apps/recharge-web/tests/activities.test.mjs": "8902d27fc2c965cd9b916503eb06d8561d345db7edb65b768f7496529c2c937a",
+    "apps/recharge-web/tests/payment-channels.test.mjs": "bfeeb09aa5ebbe78aeff6aca932fd1ecf680e613906f63c1345965fd2b6e1b42",
+    "apps/recharge-web/tests/test_deploy.py": "c2042720dbfd6bc67e70ea988f20dbb2408e6f5ecb68ef138065486d0f751bd4",
+    "config/waffo-billing.env.example": "2b0be14774555ae7c574d761405e028aa73d8bc4ad782bc651d99f25be96a3d2"
+  },
+  "checks": {
+    "simulation": [
+      {
+        "result": "ok",
+        "passed": 27,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "result": "ok",
+        "passed": 8,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "result": "ok",
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "result": "ok",
+        "passed": 24,
+        "failed": 0,
+        "ignored": 0
+      }
+    ],
+    "gatewayBilling": [
+      {
+        "result": "ok",
+        "passed": 80,
+        "failed": 0,
+        "ignored": 0
+      }
+    ],
+    "waffoRestore": [
+      {
+        "result": "ok",
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0
+      }
+    ],
+    "paidHistoryRestore": [
+      {
+        "result": "ok",
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0
+      }
+    ],
+    "ordinaryRestore": [
+      {
+        "result": "ok",
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0
+      }
+    ],
+    "backendAllTargetsLocked": true,
+    "portalNodePassed": 35,
+    "proxyPythonPassed": 22,
+    "sharedNativePassed": 26,
+    "nativeTransportPassed": 7,
+    "nativeHostTemporaryLockPassed": true,
+    "nativeGpu": {
+      "passed": true,
+      "screenshots": 45,
+      "locales": [
+        "en",
+        "zh-TW",
+        "zh-CN"
+      ],
+      "missingGlyphs": 0,
+      "overflowingTextNodes": 0,
+      "outsideViewportNodes": 0,
+      "report": "native-gpu/billing-entry-native-gpu.json",
+      "scope": "offline mocked server data, actual shared renderer and bundled fonts; rendering code unchanged by subsequent terminal-replay state fix"
+    }
+  },
+  "logSha256": {
+    "backend-all-targets-check.log": "831c4e104f62c69d25c6cb11a83238697d0075795eb2b448c665fedd01cf568e",
+    "gateway-billing-tests.log": "66158bf06ce064b57b1832b2bb0116c13e4f45ab8452787443998bd9727216ca",
+    "gateway-waffo-tests.log": "806e04e4cad64f206f4b78810b8fd5843ece5eab8437a5c9737e970e2cff502a",
+    "native-billing-final-tests.log": "65fa0fe676c8069ccfb8052f8665ac98af000df10b0f26bd6df16ff30cf13934",
+    "native-billing-gpu.log": "4128f1cd6360f070a6c0344431dc95f7ae85dd0f25100a98b2c374ab8a2c8fb2",
+    "native-billing-tests.log": "2e164c710d4448d5f6ef5e66ff1f2d5bfff2133de5efddead4adb415c71a6469",
+    "native-host-check-offline.log": "cc26faba210c3b17dad7de8722a496fd78130b0676a3d6e63c0945db0f8ca32e",
+    "native-host-resolve-offline.log": "65a8d623b8cdf7ca1b0bf5e797898bbf6791f392d203eb7f52f7e200fbc4ac78",
+    "native-transport-offline-unseeded.log": "a3223bb9aee6de78b2a5ac41a13c394c9995e24a00a6a5a15b0273931b0f0b04",
+    "native-transport-tests.log": "7ffca818edbdf255261c13f0b1529b80983e16347d441654bddfc2856346c40e",
+    "native-windows-check.log": "e2e411bd8f797df8846f741c9228609d75bdac7ad0e5ff9f896d227f7f42499f",
+    "ordinary-backup-restore-regression.log": "b2b3084c42f9893d57b01170a821aaa63cd93b72067d9d5769c121eedd1e1cfe",
+    "paid-history-restore-regression.log": "c3a09e1fb384ec466e18e3e460fbc2339a6680a3c1d03cc74214a3d700705801",
+    "portal-tests.log": "4cda068dc8fcd83f8b8a99339843eabe4995a3afaaae849c54dd34d80f8748f1",
+    "proxy-tests.log": "83066955731ed336777b61e7f1f3ca0828d9485373979ecef7c1e0ed715c8509",
+    "simulation-tests.log": "8b920a71d3e709f4032c623db5c6e3e5501ef1cad0d60b40fd4752701b073c1a",
+    "waffo-restore-after-fix.log": "1f1d76341b9ad82f45ba04aaca32429241e5170aeccc976e7f48da169b204c4e",
+    "waffo-restore-before-fix.log": "f63bf0689b6ad81f74da872e0a8c38b71b634a22d7e180fb8d741f35cbf30a49"
+  },
+  "packageRevision": null,
+  "publicDeploymentRevision": null,
+  "realWaffoMerchantAcceptance": false,
+  "waffoEnabledByDefault": false
+}

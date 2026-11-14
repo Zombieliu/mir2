@@ -1,0 +1,20 @@
+
+running 1 test
+test runtime::session::tests::use_item_packet_dynamic_crystal_town_teleport_routes_through_template_scroll ... FAILED
+
+failures:
+
+---- runtime::session::tests::use_item_packet_dynamic_crystal_town_teleport_routes_through_template_scroll stdout ----
+
+thread 'runtime::session::tests::use_item_packet_dynamic_crystal_town_teleport_routes_through_template_scroll' (95584) panicked at apps\simulation\src\runtime\tests.rs:37792:5:
+assertion `left == right` failed
+  left: Point { x: 328, y: 264 }
+ right: Point { x: 330, y: 270 }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    runtime::session::tests::use_item_packet_dynamic_crystal_town_teleport_routes_through_template_scroll
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 1921 filtered out; finished in 0.52s
+

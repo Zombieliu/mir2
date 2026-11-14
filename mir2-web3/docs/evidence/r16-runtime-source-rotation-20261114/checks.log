@@ -1,0 +1,588 @@
+TAP version 13
+# (node:50468) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: R2 header timeout and two zero-byte idle bodies recover in one extra group before one initialization
+ok 1 - R2 header timeout and two zero-byte idle bodies recover in one extra group before one initialization
+  ---
+  duration_ms: 29.3236
+  type: 'test'
+  ...
+# Subtest: an always-granting owner cannot authorize a third transport group
+ok 2 - an always-granting owner cannot authorize a third transport group
+  ---
+  duration_ms: 3.3554
+  type: 'test'
+  ...
+# Subtest: missing, denied and throwing recovery guards retain the original bounded requests
+ok 3 - missing, denied and throwing recovery guards retain the original bounded requests
+  ---
+  duration_ms: 2.7191
+  type: 'test'
+  ...
+# Subtest: retiring an owner during cooldown clears it without another GET
+ok 4 - retiring an owner during cooldown clears it without another GET
+  ---
+  duration_ms: 1.9529
+  type: 'test'
+  ...
+# Subtest: retiring an owner cancels the pending body and prevents late bytes from initializing
+ok 5 - retiring an owner cancels the pending body and prevents late bytes from initializing
+  ---
+  duration_ms: 1.5095
+  type: 'test'
+  ...
+# Subtest: retiring an owner in the second group's headers cancels that exact request
+ok 6 - retiring an owner in the second group's headers cancels that exact request
+  ---
+  duration_ms: 1.7577
+  type: 'test'
+  ...
+# Subtest: an already retired owner starts neither script nor binary
+ok 7 - an already retired owner starts neither script nor binary
+  ---
+  duration_ms: 0.4661
+  type: 'test'
+  ...
+# Subtest: owner cancellation while waiting for canvas cannot enter default later
+ok 8 - owner cancellation while waiting for canvas cannot enter default later
+  ---
+  duration_ms: 2.2323
+  type: 'test'
+  ...
+# Subtest: owner abort after default entry is indeterminate and cannot authorize a retry
+ok 9 - owner abort after default entry is indeterminate and cannot authorize a retry
+  ---
+  duration_ms: 1.961
+  type: 'test'
+  ...
+# Subtest: retirement in the initialization-start notification prevents default and poisons ownership
+ok 10 - retirement in the initialization-start notification prevents default and poisons ownership
+  ---
+  duration_ms: 1.3714
+  type: 'test'
+  ...
+# Subtest: permanent responses, corrupt bytes and decoded byte limits never spend recovery
+ok 11 - permanent responses, corrupt bytes and decoded byte limits never spend recovery
+  ---
+  duration_ms: 3.2305
+  type: 'test'
+  ...
+# Subtest: a network-like compiler error after EOF cannot authorize an additional group
+ok 12 - a network-like compiler error after EOF cannot authorize an additional group
+  ---
+  duration_ms: 39.682
+  type: 'test'
+  ...
+# Subtest: the final header deadline is terminal even with an available recovery budget
+ok 13 - the final header deadline is terminal even with an available recovery budget
+  ---
+  duration_ms: 5.3983
+  type: 'test'
+  ...
+# Subtest: body absolute and compiler backpressure deadlines cannot spend recovery
+ok 14 - body absolute and compiler backpressure deadlines cannot spend recovery
+  ---
+  duration_ms: 49.2843
+  type: 'test'
+  ...
+# Subtest: script failure during cooldown cancels the cycle without reimporting
+ok 15 - script failure during cooldown cancels the cycle without reimporting
+  ---
+  duration_ms: 1.258
+  type: 'test'
+  ...
+# Subtest: script, canvas and default failures do not turn into transport recovery
+ok 16 - script, canvas and default failures do not turn into transport recovery
+  ---
+  duration_ms: 3.0356
+  type: 'test'
+  ...
+# Subtest: completed initialization detaches owner cancellation without changing the module
+ok 17 - completed initialization detaches owner cancellation without changing the module
+  ---
+  duration_ms: 1.6357
+  type: 'test'
+  ...
+# Subtest: Page prewarm delegation returns the real shared stage promise
+ok 18 - Page prewarm delegation returns the real shared stage promise
+  ---
+  duration_ms: 290.3292
+  type: 'test'
+  ...
+# Subtest: actual Page downloads the runtime without speculative fonts while the HUD stage is pending
+ok 19 - actual Page downloads the runtime without speculative fonts while the HUD stage is pending
+  ---
+  duration_ms: 181.8621
+  type: 'test'
+  ...
+# Subtest: actual Page starts fonts only after the runtime resolves and boots without waiting for fonts
+ok 20 - actual Page starts fonts only after the runtime resolves and boots without waiting for fonts
+  ---
+  duration_ms: 139.3998
+  type: 'test'
+  ...
+# Subtest: a failed independent HUD stage cannot withdraw an already ready runtime
+ok 21 - a failed independent HUD stage cannot withdraw an already ready runtime
+  ---
+  duration_ms: 121.8864
+  type: 'test'
+  ...
+# Subtest: leaving before the runtime or HUD settles prevents late fonts, diagnostics and boot
+ok 22 - leaving before the runtime or HUD settles prevents late fonts, diagnostics and boot
+  ---
+  duration_ms: 124.8417
+  type: 'test'
+  ...
+# Subtest: actual Page leaves fonts deferred before first paint and for disabled, touch, missing metadata or GPU
+ok 23 - actual Page leaves fonts deferred before first paint and for disabled, touch, missing metadata or GPU
+  ---
+  duration_ms: 597.7681
+  type: 'test'
+  ...
+# Subtest: actual retryable module failure never starts fonts and keeps the retry boundary
+ok 24 - actual retryable module failure never starts fonts and keeps the retry boundary
+  ---
+  duration_ms: 113.5169
+  type: 'test'
+  ...
+# Subtest: leaving while the runtime downloads prevents late fonts and boot
+ok 25 - leaving while the runtime downloads prevents late fonts and boot
+  ---
+  duration_ms: 103.7745
+  type: 'test'
+  ...
+# Subtest: Page defers fonts through finite binary recovery and cancels both owners after successful boot
+ok 26 - Page defers fonts through finite binary recovery and cancels both owners after successful boot
+  ---
+  duration_ms: 116.9234
+  type: 'test'
+  ...
+# Subtest: only the final fallback backend starts fonts, once, before its single boot
+ok 27 - only the final fallback backend starts fonts, once, before its single boot
+  ---
+  duration_ms: 106.9495
+  type: 'test'
+  ...
+# Subtest: leaving during fallback cannot start fonts from a late module
+ok 28 - leaving during fallback cannot start fonts from a late module
+  ---
+  duration_ms: 101.5424
+  type: 'test'
+  ...
+# Subtest: an already booted runtime is reused without another module or font prewarm
+ok 29 - an already booted runtime is reused without another module or font prewarm
+  ---
+  duration_ms: 102.5687
+  type: 'test'
+  ...
+# Subtest: Page spends recovery once per entry/source and preserves it across same-game effect reruns
+ok 30 - Page spends recovery once per entry/source and preserves it across same-game effect reruns
+  ---
+  duration_ms: 454.0084
+  type: 'test'
+  ...
+# Subtest: prewarm paths exactly cover the Native display font families
+ok 31 - prewarm paths exactly cover the Native display font families
+  ---
+  duration_ms: 1.6769
+  type: 'test'
+  ...
+# Subtest: two pending font bodies bound concurrency and completion waits for full bytes
+ok 32 - two pending font bodies bound concurrency and completion waits for full bytes
+  ---
+  duration_ms: 18.5843
+  type: 'test'
+  ...
+# Subtest: leaving cancels active font bodies and never starts the queued fonts
+ok 33 - leaving cancels active font bodies and never starts the queued fonts
+  ---
+  duration_ms: 1.5242
+  type: 'test'
+  ...
+# (node:71632) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: a failed font does not withdraw the runtime or prevent warming the other families
+ok 34 - a failed font does not withdraw the runtime or prevent warming the other families
+  ---
+  duration_ms: 473.8154
+  type: 'test'
+  ...
+# Subtest: the slow CJK families do not wait behind short fallback requests
+ok 35 - the slow CJK families do not wait behind short fallback requests
+  ---
+  duration_ms: 4.2813
+  type: 'test'
+  ...
+# Subtest: binary compilation overlaps a pending script import and canvas gates initialization
+ok 36 - binary compilation overlaps a pending script import and canvas gates initialization
+  ---
+  duration_ms: 25.6639
+  type: 'test'
+  ...
+# (node:74808) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: wrong MIME and missing streaming support compile the original single response
+ok 37 - wrong MIME and missing streaming support compile the original single response
+  ---
+  duration_ms: 65.0166
+  type: 'test'
+  ...
+# Subtest: an import failure aborts the independent binary fetch
+ok 38 - an import failure aborts the independent binary fetch
+  ---
+  duration_ms: 1.5413
+  type: 'test'
+  ...
+# Subtest: unavailable or invalid binaries never initialize a runtime
+ok 39 - unavailable or invalid binaries never initialize a runtime
+  ---
+  duration_ms: 2.3141
+  type: 'test'
+  ...
+# Subtest: the existing 120-second budget cancels a stalled binary
+ok 40 - the existing 120-second budget cancels a stalled binary
+  ---
+  duration_ms: 1.3997
+  type: 'test'
+  ...
+# Subtest: a stalled script also exits after the binary has finished compiling
+ok 41 - a stalled script also exits after the binary has finished compiling
+  ---
+  duration_ms: 3.6232
+  type: 'test'
+  ...
+# Subtest: actual page loader shares pending/successful work and retries a failed URL
+ok 42 - actual page loader shares pending/successful work and retries a failed URL
+  ---
+  duration_ms: 272.9398
+  type: 'test'
+  ...
+# Subtest: a valid advancing binary can finish beyond the header budget without a second GET
+ok 43 - a valid advancing binary can finish beyond the header budget without a second GET
+  ---
+  duration_ms: 3.0242
+  type: 'test'
+  ...
+# Subtest: a body without positive bytes stops at the idle boundary, including empty chunks
+ok 44 - a body without positive bytes stops at the idle boundary, including empty chunks
+  ---
+  duration_ms: 2.0068
+  type: 'test'
+  ...
+# Subtest: decoded bytes are capped before runtime initialization without trusting Content-Length
+ok 45 - decoded bytes are capped before runtime initialization without trusting Content-Length
+  ---
+  duration_ms: 1.6246
+  type: 'test'
+  ...
+# Subtest: a progressing body still has an absolute lifetime cap
+ok 46 - a progressing body still has an absolute lifetime cap
+  ---
+  duration_ms: 1.1426
+  type: 'test'
+  ...
+# Subtest: a failed pinned binary source can use its supplied same-version fallback once
+ok 47 - a failed pinned binary source can use its supplied same-version fallback once
+  ---
+  duration_ms: 0.8667
+  type: 'test'
+  ...
+# Subtest: actual Page selects versioned app binary with same-package remote fallback and glue
+ok 48 - actual Page selects versioned app binary with same-package remote fallback and glue
+  ---
+  duration_ms: 140.7207
+  type: 'test'
+  ...
+# Subtest: an unavailable first source yields to its fallback after8 seconds
+ok 49 - an unavailable first source yields to its fallback after8 seconds
+  ---
+  duration_ms: 1.6106
+  type: 'test'
+  ...
+# Subtest: a stalled first source body is canceled before the next binary is read
+ok 50 - a stalled first source body is canceled before the next binary is read
+  ---
+  duration_ms: 1.0321
+  type: 'test'
+  ...
+# Subtest: binary progress cannot renew a stalled script import deadline
+ok 51 - binary progress cannot renew a stalled script import deadline
+  ---
+  duration_ms: 1.1684
+  type: 'test'
+  ...
+# Subtest: a streaming compiler which never reads remains bounded
+ok 52 - a streaming compiler which never reads remains bounded
+  ---
+  duration_ms: 14.3524
+  type: 'test'
+  ...
+# Subtest: a late canvas cannot initialize an expired attempt
+ok 53 - a late canvas cannot initialize an expired attempt
+  ---
+  duration_ms: 1.5573
+  type: 'test'
+  ...
+# Subtest: a default initializer which has already started cannot be classified as a retryable download
+ok 54 - a default initializer which has already started cannot be classified as a retryable download
+  ---
+  duration_ms: 2.1528
+  type: 'test'
+  ...
+# Subtest: invalid or oversized bytes fail closed instead of consulting another source
+ok 55 - invalid or oversized bytes fail closed instead of consulting another source
+  ---
+  duration_ms: 1.4432
+  type: 'test'
+  ...
+# Subtest: two interrupted pinned bodies rotate once before a single glue initialization
+ok 56 - two interrupted pinned bodies rotate once before a single glue initialization
+  ---
+  duration_ms: 2.8411
+  type: 'test'
+  ...
+# Subtest: a stalled last mirror is canceled at the unchanged idle boundary before its one retry
+ok 57 - a stalled last mirror is canceled at the unchanged idle boundary before its one retry
+  ---
+  duration_ms: 1.2554
+  type: 'test'
+  ...
+# Subtest: transient exhaustion remains bounded and permanent responses do not add retries
+ok 58 - transient exhaustion remains bounded and permanent responses do not add retries
+  ---
+  duration_ms: 0.7247
+  type: 'test'
+  ...
+# Subtest: invalid or oversized last-mirror bytes cannot turn an earlier transient failure into a retry
+ok 59 - invalid or oversized last-mirror bytes cannot turn an earlier transient failure into a retry
+  ---
+  duration_ms: 1.0182
+  type: 'test'
+  ...
+# Subtest: the original final header deadline is terminal even after an earlier retryable failure
+ok 60 - the original final header deadline is terminal even after an earlier retryable failure
+  ---
+  duration_ms: 1.7679
+  type: 'test'
+  ...
+# Subtest: a diagnostic callback cannot fail or repeat initialization
+ok 61 - a diagnostic callback cannot fail or repeat initialization
+  ---
+  duration_ms: 0.7946
+  type: 'test'
+  ...
+# Subtest: a browser compiler wrapping an over-limit stream as a network error cannot authorize a retry
+ok 62 - a browser compiler wrapping an over-limit stream as a network error cannot authorize a retry
+  ---
+  duration_ms: 12.0973
+  type: 'test'
+  ...
+# Subtest: owner replacement evicts only its pending source before initialization
+ok 63 - owner replacement evicts only its pending source before initialization
+  ---
+  duration_ms: 368.6692
+  type: 'test'
+  ...
+# Subtest: cancellation after glue initialization starts fences every backend until reload
+ok 64 - cancellation after glue initialization starts fences every backend until reload
+  ---
+  duration_ms: 173.2853
+  type: 'test'
+  ...
+# Subtest: any failed default initialization poisons the cache without a second default
+ok 65 - any failed default initialization poisons the cache without a second default
+  ---
+  duration_ms: 121.2571
+  type: 'test'
+  ...
+# Subtest: a known fulfilled initializer survives retirement before its cache callback runs
+ok 66 - a known fulfilled initializer survives retirement before its cache callback runs
+  ---
+  duration_ms: 109.573
+  type: 'test'
+  ...
+# Subtest: retired inputs never acquire a cache slot or spend a recovery allowance
+ok 67 - retired inputs never acquire a cache slot or spend a recovery allowance
+  ---
+  duration_ms: 111.0218
+  type: 'test'
+  ...
+# Subtest: an initialization timeout marker is retained even before the boundary callback arrives
+ok 68 - an initialization timeout marker is retained even before the boundary callback arrives
+  ---
+  duration_ms: 101.834
+  type: 'test'
+  ...
+# Subtest: the source-specific budget is offered to the initializer without spending it eagerly
+ok 69 - the source-specific budget is offered to the initializer without spending it eagerly
+  ---
+  duration_ms: 108.7867
+  type: 'test'
+  ...
+# Subtest: only network failures before the Bevy boot remain retryable
+ok 70 - only network failures before the Bevy boot remain retryable
+  ---
+  duration_ms: 1.382
+  type: 'test'
+  ...
+# Subtest: the actual page retry gate preserves the single-boot boundary
+ok 71 - the actual page retry gate preserves the single-boot boundary
+  ---
+  duration_ms: 5.7373
+  type: 'test'
+  ...
+# Subtest: desktop keeps the Bevy runtime enhancement enabled
+ok 72 - desktop keeps the Bevy runtime enhancement enabled
+  ---
+  duration_ms: 0.3816
+  type: 'test'
+  ...
+# Subtest: touch-first phones and tablets use the immediately playable compatibility renderer
+ok 73 - touch-first phones and tablets use the immediately playable compatibility renderer
+  ---
+  duration_ms: 0.1497
+  type: 'test'
+  ...
+# Subtest: a fine-pointer desktop with a touch screen is not misclassified as mobile
+ok 74 - a fine-pointer desktop with a touch screen is not misclassified as mobile
+  ---
+  duration_ms: 0.0792
+  type: 'test'
+  ...
+# Subtest: QA query controls override automatic device policy
+ok 75 - QA query controls override automatic device policy
+  ---
+  duration_ms: 0.1043
+  type: 'test'
+  ...
+# Subtest: network failures never trigger an alternate-backend runtime download
+ok 76 - network failures never trigger an alternate-backend runtime download
+  ---
+  duration_ms: 0.1885
+  type: 'test'
+  ...
+# Subtest: rejected binary bytes cannot authorize a download retry or another backend even with network-like messages
+ok 77 - rejected binary bytes cannot authorize a download retry or another backend even with network-like messages
+  ---
+  duration_ms: 0.0926
+  type: 'test'
+  ...
+# Subtest: Page keeps default shared UI intent across a pre-boot failure on the same backend
+ok 78 - Page keeps default shared UI intent across a pre-boot failure on the same backend
+  ---
+  duration_ms: 9.0739
+  type: 'test'
+  ...
+# Subtest: Page failure preserves explicit disabled and mixed shared UI choices
+ok 79 - Page failure preserves explicit disabled and mixed shared UI choices
+  ---
+  duration_ms: 21.5828
+  type: 'test'
+  ...
+# Subtest: preserving Page UI intent does not turn a failed App boot into an automatic retry
+ok 80 - preserving Page UI intent does not turn a failed App boot into an automatic retry
+  ---
+  duration_ms: 5.3682
+  type: 'test'
+  ...
+# Subtest: a disposed Page attempt cannot withdraw the newer runtime or its UI choices
+ok 81 - a disposed Page attempt cannot withdraw the newer runtime or its UI choices
+  ---
+  duration_ms: 4.6124
+  type: 'test'
+  ...
+# Subtest: an indeterminate wasm-bindgen initialization requires a fresh document for either backend
+ok 82 - an indeterminate wasm-bindgen initialization requires a fresh document for either backend
+  ---
+  duration_ms: 4.1694
+  type: 'test'
+  ...
+# (node:65560) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: 8s App headers then positive CDN body-idle rotates the one retry back to App
+ok 83 - 8s App headers then positive CDN body-idle rotates the one retry back to App
+  ---
+  duration_ms: 34.2303
+  type: 'test'
+  ...
+# Subtest: a zero-byte CDN body-idle retains the existing CDN retry order
+ok 84 - a zero-byte CDN body-idle retains the existing CDN retry order
+  ---
+  duration_ms: 2.7436
+  type: 'test'
+  ...
+# Subtest: a final-source HTTP 503 retains the existing last-transient retry
+ok 85 - a final-source HTTP 503 retains the existing last-transient retry
+  ---
+  duration_ms: 3.7159
+  type: 'test'
+  ...
+# Subtest: an initial HTTP 403 source cannot acquire partial-body retry authority
+ok 86 - an initial HTTP 403 source cannot acquire partial-body retry authority
+  ---
+  duration_ms: 3.2083
+  type: 'test'
+  ...
+# Subtest: a final HTTP 403 must not rotate the later owner recovery group
+ok 87 - a final HTTP 403 must not rotate the later owner recovery group
+  ---
+  duration_ms: 3.029
+  type: 'test'
+  ...
+# Subtest: an initial HTTP 404 source cannot acquire partial-body retry authority
+ok 88 - an initial HTTP 404 source cannot acquire partial-body retry authority
+  ---
+  duration_ms: 2.4125
+  type: 'test'
+  ...
+# Subtest: a final HTTP 404 must not rotate the later owner recovery group
+ok 89 - a final HTTP 404 must not rotate the later owner recovery group
+  ---
+  duration_ms: 2.7926
+  type: 'test'
+  ...
+# Subtest: a failed rotated retry recovers from CDN with one owner grant and at most six GETs
+ok 90 - a failed rotated retry recovers from CDN with one owner grant and at most six GETs
+  ---
+  duration_ms: 4.9281
+  type: 'test'
+  ...
+# Subtest: owner cancellation during a partial CDN read prevents the rotated retry
+ok 91 - owner cancellation during a partial CDN read prevents the rotated retry
+  ---
+  duration_ms: 2.3247
+  type: 'test'
+  ...
+# Subtest: owner cancellation during the authorized cooldown prevents every recovery GET
+ok 92 - owner cancellation during the authorized cooldown prevents every recovery GET
+  ---
+  duration_ms: 2.6246
+  type: 'test'
+  ...
+# Subtest: three-source rotation chooses the earliest transient source, excluding a denied source
+ok 93 - three-source rotation chooses the earliest transient source, excluding a denied source
+  ---
+  duration_ms: 1.9929
+  type: 'test'
+  ...
+# Subtest: three transient sources rotate to the first source rather than the last failed mirror
+ok 94 - three transient sources rotate to the first source rather than the last failed mirror
+  ---
+  duration_ms: 2.8154
+  type: 'test'
+  ...
+# Subtest: permanent denial on every source grants neither retry nor owner recovery
+ok 95 - permanent denial on every source grants neither retry nor owner recovery
+  ---
+  duration_ms: 1.406
+  type: 'test'
+  ...
+1..95
+# tests 95
+# suites 0
+# pass 95
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3580.7554

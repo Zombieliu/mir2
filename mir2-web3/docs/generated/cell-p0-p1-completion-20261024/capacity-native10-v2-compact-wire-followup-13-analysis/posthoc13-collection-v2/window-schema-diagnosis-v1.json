@@ -1,0 +1,642 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-25T07:39:39.901Z",
+  "scope": "Post-stop public numeric timing/schema projection only; no input or verdict change.",
+  "runId": "1792912711217-e7ea81f2",
+  "report": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-compact-wire-feasibility-13\\reports\\1792912711217-e7ea81f2.report.json",
+    "bytes": 324347,
+    "sha256": "2843083724cd658254f6eab39370148cb360786e0819c7f25fa7acad5744be7f"
+  },
+  "raw": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-compact-wire-feasibility-13\\reports\\1792912711217-e7ea81f2.samples.jsonl",
+    "bytes": 29072097,
+    "sha256": "83a7a56df6780212dd7a4671f3fd9bb1ee721cba5ad473e91f86c8c04bd13152",
+    "rows": 41088
+  },
+  "conditions": [
+    {
+      "name": "stage-2",
+      "completed": true,
+      "passed": true,
+      "controlledActors": 2,
+      "configuredSeconds": 300,
+      "measuredSeconds": 300.301,
+      "actualSeconds": 300.301,
+      "reportWindows": [
+        {
+          "j": 0,
+          "passed": true,
+          "seconds": 60.107,
+          "elapsedSeconds": 60.107,
+          "startedAtMs": 1792912748445,
+          "endedAtMs": 1792912808552,
+          "oldConditionFailed": false
+        },
+        {
+          "j": 1,
+          "passed": true,
+          "seconds": 60.026,
+          "elapsedSeconds": 120.133,
+          "startedAtMs": 1792912808552,
+          "endedAtMs": 1792912868578,
+          "oldConditionFailed": false
+        },
+        {
+          "j": 2,
+          "passed": true,
+          "seconds": 60.052,
+          "elapsedSeconds": 180.185,
+          "startedAtMs": 1792912868578,
+          "endedAtMs": 1792912928630,
+          "oldConditionFailed": false
+        },
+        {
+          "j": 3,
+          "passed": true,
+          "seconds": 60.104,
+          "elapsedSeconds": 240.289,
+          "startedAtMs": 1792912928630,
+          "endedAtMs": 1792912988734,
+          "oldConditionFailed": false
+        },
+        {
+          "j": 4,
+          "passed": true,
+          "seconds": 60.012,
+          "elapsedSeconds": 300.301,
+          "startedAtMs": 1792912988734,
+          "endedAtMs": 1792913048746,
+          "oldConditionFailed": false
+        }
+      ],
+      "rawWindows": [
+        {
+          "line": 1195,
+          "phase": "stage-2",
+          "assessmentKeys": [
+            "passed",
+            "seconds",
+            "activity",
+            "timeoutRatio",
+            "correctionRatio",
+            "movementPassed",
+            "chatPassed",
+            "combatCoverage",
+            "metrics"
+          ],
+          "passed": true,
+          "assessmentSeconds": 60.107,
+          "startedAtMs": 1792912748445,
+          "endedAtMs": 1792912808552,
+          "keys": [
+            "type",
+            "phase",
+            "startedAtMs",
+            "endedAtMs",
+            "assessment"
+          ]
+        },
+        {
+          "line": 2011,
+          "phase": "stage-2",
+          "assessmentKeys": [
+            "passed",
+            "seconds",
+            "activity",
+            "timeoutRatio",
+            "correctionRatio",
+            "movementPassed",
+            "chatPassed",
+            "combatCoverage",
+            "metrics"
+          ],
+          "passed": true,
+          "assessmentSeconds": 60.026,
+          "startedAtMs": 1792912808552,
+          "endedAtMs": 1792912868578,
+          "keys": [
+            "type",
+            "phase",
+            "startedAtMs",
+            "endedAtMs",
+            "assessment"
+          ]
+        },
+        {
+          "line": 2827,
+          "phase": "stage-2",
+          "assessmentKeys": [
+            "passed",
+            "seconds",
+            "activity",
+            "timeoutRatio",
+            "correctionRatio",
+            "movementPassed",
+            "chatPassed",
+            "combatCoverage",
+            "metrics"
+          ],
+          "passed": true,
+          "assessmentSeconds": 60.052,
+          "startedAtMs": 1792912868578,
+          "endedAtMs": 1792912928630,
+          "keys": [
+            "type",
+            "phase",
+            "startedAtMs",
+            "endedAtMs",
+            "assessment"
+          ]
+        },
+        {
+          "line": 3646,
+          "phase": "stage-2",
+          "assessmentKeys": [
+            "passed",
+            "seconds",
+            "activity",
+            "timeoutRatio",
+            "correctionRatio",
+            "movementPassed",
+            "chatPassed",
+            "combatCoverage",
+            "metrics"
+          ],
+          "passed": true,
+          "assessmentSeconds": 60.104,
+          "startedAtMs": 1792912928630,
+          "endedAtMs": 1792912988734,
+          "keys": [
+            "type",
+            "phase",
+            "startedAtMs",
+            "endedAtMs",
+            "assessment"
+          ]
+        },
+        {
+          "line": 4475,
+          "phase": "stage-2",
+          "assessmentKeys": [
+            "passed",
+            "seconds",
+            "activity",
+            "timeoutRatio",
+            "correctionRatio",
+            "movementPassed",
+            "chatPassed",
+            "combatCoverage",
+            "metrics"
+          ],
+          "passed": true,
+          "assessmentSeconds": 60.012,
+          "startedAtMs": 1792912988734,
+          "endedAtMs": 1792913048746,
+          "keys": [
+            "type",
+            "phase",
+            "startedAtMs",
+            "endedAtMs",
+            "assessment"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "stage-10",
+      "completed": true,
+      "passed": true,
+      "controlledActors": 10,
+      "configuredSeconds": 300,
+      "measuredSeconds": 300.119,
+      "actualSeconds": 300.119,
+      "reportWindows": [
+        {
+          "j": 0,
+          "passed": true,
+          "seconds": 60.05,
+          "elapsedSeconds": 60.05,
+          "startedAtMs": 1792913101928,
+          "endedAtMs": 1792913161978,
+          "oldConditionFailed": false
+        },
+        {
+          "j": 1,
+          "passed": true,
+          "seconds": 60.006,
+          "elapsedSeconds": 120.056,
+          "startedAtMs": 1792913161978,
+          "endedAtMs": 1792913221984,
+          "oldConditionFailed": false
+        },
+        {
+          "j": 2,
+          "passed": true,
+          "seconds": 60.032,
+          "elapsedSeconds": 180.088,
+          "startedAtMs": 1792913221984,
+          "endedAtMs": 1792913282016,
+          "oldConditionFailed": false
+        },
+        {
+          "j": 3,
+          "passed": true,
+          "seconds": 60.018,
+          "elapsedSeconds": 240.106,
+          "startedAtMs": 1792913282016,
+          "endedAtMs": 1792913342034,
+          "oldConditionFailed": false
+        },
+        {
+          "j": 4,
+          "passed": true,
+          "seconds": 60.013,
+          "elapsedSeconds": 300.119,
+          "startedAtMs": 1792913342034,
+          "endedAtMs": 1792913402047,
+          "oldConditionFailed": false
+        }
+      ],
+      "rawWindows": [
+        {
+          "line": 9858,
+          "phase": "stage-10",
+          "assessmentKeys": [
+            "passed",
+            "seconds",
+            "activity",
+            "timeoutRatio",
+            "correctionRatio",
+            "movementCorrectionRatio",
+            "attackRejectionRatio",
+            "movementPassed",
+            "chatPassed",
+            "combatCoverage",
+            "metrics"
+          ],
+          "passed": true,
+          "assessmentSeconds": 60.05,
+          "startedAtMs": 1792913101928,
+          "endedAtMs": 1792913161978,
+          "keys": [
+            "type",
+            "phase",
+            "startedAtMs",
+            "endedAtMs",
+            "assessment"
+          ]
+        },
+        {
+          "line": 12968,
+          "phase": "stage-10",
+          "assessmentKeys": [
+            "passed",
+            "seconds",
+            "activity",
+            "timeoutRatio",
+            "correctionRatio",
+            "movementCorrectionRatio",
+            "attackRejectionRatio",
+            "movementPassed",
+            "chatPassed",
+            "combatCoverage",
+            "metrics"
+          ],
+          "passed": true,
+          "assessmentSeconds": 60.006,
+          "startedAtMs": 1792913161978,
+          "endedAtMs": 1792913221984,
+          "keys": [
+            "type",
+            "phase",
+            "startedAtMs",
+            "endedAtMs",
+            "assessment"
+          ]
+        },
+        {
+          "line": 16038,
+          "phase": "stage-10",
+          "assessmentKeys": [
+            "passed",
+            "seconds",
+            "activity",
+            "timeoutRatio",
+            "correctionRatio",
+            "movementCorrectionRatio",
+            "attackRejectionRatio",
+            "movementPassed",
+            "chatPassed",
+            "combatCoverage",
+            "metrics"
+          ],
+          "passed": true,
+          "assessmentSeconds": 60.032,
+          "startedAtMs": 1792913221984,
+          "endedAtMs": 1792913282016,
+          "keys": [
+            "type",
+            "phase",
+            "startedAtMs",
+            "endedAtMs",
+            "assessment"
+          ]
+        },
+        {
+          "line": 19069,
+          "phase": "stage-10",
+          "assessmentKeys": [
+            "passed",
+            "seconds",
+            "activity",
+            "timeoutRatio",
+            "correctionRatio",
+            "movementCorrectionRatio",
+            "attackRejectionRatio",
+            "movementPassed",
+            "chatPassed",
+            "combatCoverage",
+            "metrics"
+          ],
+          "passed": true,
+          "assessmentSeconds": 60.018,
+          "startedAtMs": 1792913282016,
+          "endedAtMs": 1792913342034,
+          "keys": [
+            "type",
+            "phase",
+            "startedAtMs",
+            "endedAtMs",
+            "assessment"
+          ]
+        },
+        {
+          "line": 22199,
+          "phase": "stage-10",
+          "assessmentKeys": [
+            "passed",
+            "seconds",
+            "activity",
+            "timeoutRatio",
+            "correctionRatio",
+            "movementCorrectionRatio",
+            "attackRejectionRatio",
+            "movementPassed",
+            "chatPassed",
+            "combatCoverage",
+            "metrics"
+          ],
+          "passed": true,
+          "assessmentSeconds": 60.013,
+          "startedAtMs": 1792913342034,
+          "endedAtMs": 1792913402047,
+          "keys": [
+            "type",
+            "phase",
+            "startedAtMs",
+            "endedAtMs",
+            "assessment"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "soak",
+      "completed": true,
+      "passed": true,
+      "controlledActors": 10,
+      "configuredSeconds": 360,
+      "measuredSeconds": 360.406,
+      "actualSeconds": 360.406,
+      "reportWindows": [
+        {
+          "j": 0,
+          "passed": true,
+          "seconds": 60.061,
+          "elapsedSeconds": 60.061,
+          "startedAtMs": 1792913402048,
+          "endedAtMs": 1792913462109,
+          "oldConditionFailed": false
+        },
+        {
+          "j": 1,
+          "passed": true,
+          "seconds": 60.019,
+          "elapsedSeconds": 120.08,
+          "startedAtMs": 1792913462109,
+          "endedAtMs": 1792913522128,
+          "oldConditionFailed": false
+        },
+        {
+          "j": 2,
+          "passed": true,
+          "seconds": 60.112,
+          "elapsedSeconds": 180.192,
+          "startedAtMs": 1792913522128,
+          "endedAtMs": 1792913582240,
+          "oldConditionFailed": false
+        },
+        {
+          "j": 3,
+          "passed": true,
+          "seconds": 60.016,
+          "elapsedSeconds": 240.208,
+          "startedAtMs": 1792913582240,
+          "endedAtMs": 1792913642256,
+          "oldConditionFailed": false
+        },
+        {
+          "j": 4,
+          "passed": true,
+          "seconds": 60.104,
+          "elapsedSeconds": 300.312,
+          "startedAtMs": 1792913642256,
+          "endedAtMs": 1792913702360,
+          "oldConditionFailed": false
+        },
+        {
+          "j": 5,
+          "passed": true,
+          "seconds": 60.094,
+          "elapsedSeconds": 360.406,
+          "startedAtMs": 1792913702360,
+          "endedAtMs": 1792913762454,
+          "oldConditionFailed": false
+        }
+      ],
+      "rawWindows": [
+        {
+          "line": 25327,
+          "phase": "soak",
+          "assessmentKeys": [
+            "passed",
+            "seconds",
+            "activity",
+            "timeoutRatio",
+            "correctionRatio",
+            "movementCorrectionRatio",
+            "attackRejectionRatio",
+            "movementPassed",
+            "chatPassed",
+            "combatCoverage",
+            "metrics"
+          ],
+          "passed": true,
+          "assessmentSeconds": 60.061,
+          "startedAtMs": 1792913402048,
+          "endedAtMs": 1792913462109,
+          "keys": [
+            "type",
+            "phase",
+            "startedAtMs",
+            "endedAtMs",
+            "assessment"
+          ]
+        },
+        {
+          "line": 28504,
+          "phase": "soak",
+          "assessmentKeys": [
+            "passed",
+            "seconds",
+            "activity",
+            "timeoutRatio",
+            "correctionRatio",
+            "movementCorrectionRatio",
+            "attackRejectionRatio",
+            "movementPassed",
+            "chatPassed",
+            "combatCoverage",
+            "metrics"
+          ],
+          "passed": true,
+          "assessmentSeconds": 60.019,
+          "startedAtMs": 1792913462109,
+          "endedAtMs": 1792913522128,
+          "keys": [
+            "type",
+            "phase",
+            "startedAtMs",
+            "endedAtMs",
+            "assessment"
+          ]
+        },
+        {
+          "line": 31686,
+          "phase": "soak",
+          "assessmentKeys": [
+            "passed",
+            "seconds",
+            "activity",
+            "timeoutRatio",
+            "correctionRatio",
+            "movementCorrectionRatio",
+            "attackRejectionRatio",
+            "movementPassed",
+            "chatPassed",
+            "combatCoverage",
+            "metrics"
+          ],
+          "passed": true,
+          "assessmentSeconds": 60.112,
+          "startedAtMs": 1792913522128,
+          "endedAtMs": 1792913582240,
+          "keys": [
+            "type",
+            "phase",
+            "startedAtMs",
+            "endedAtMs",
+            "assessment"
+          ]
+        },
+        {
+          "line": 34832,
+          "phase": "soak",
+          "assessmentKeys": [
+            "passed",
+            "seconds",
+            "activity",
+            "timeoutRatio",
+            "correctionRatio",
+            "movementCorrectionRatio",
+            "attackRejectionRatio",
+            "movementPassed",
+            "chatPassed",
+            "combatCoverage",
+            "metrics"
+          ],
+          "passed": true,
+          "assessmentSeconds": 60.016,
+          "startedAtMs": 1792913582240,
+          "endedAtMs": 1792913642256,
+          "keys": [
+            "type",
+            "phase",
+            "startedAtMs",
+            "endedAtMs",
+            "assessment"
+          ]
+        },
+        {
+          "line": 37885,
+          "phase": "soak",
+          "assessmentKeys": [
+            "passed",
+            "seconds",
+            "activity",
+            "timeoutRatio",
+            "correctionRatio",
+            "movementCorrectionRatio",
+            "attackRejectionRatio",
+            "movementPassed",
+            "chatPassed",
+            "combatCoverage",
+            "metrics"
+          ],
+          "passed": true,
+          "assessmentSeconds": 60.104,
+          "startedAtMs": 1792913642256,
+          "endedAtMs": 1792913702360,
+          "keys": [
+            "type",
+            "phase",
+            "startedAtMs",
+            "endedAtMs",
+            "assessment"
+          ]
+        },
+        {
+          "line": 41039,
+          "phase": "soak",
+          "assessmentKeys": [
+            "passed",
+            "seconds",
+            "activity",
+            "timeoutRatio",
+            "correctionRatio",
+            "movementCorrectionRatio",
+            "attackRejectionRatio",
+            "movementPassed",
+            "chatPassed",
+            "combatCoverage",
+            "metrics"
+          ],
+          "passed": true,
+          "assessmentSeconds": 60.094,
+          "startedAtMs": 1792913702360,
+          "endedAtMs": 1792913762454,
+          "keys": [
+            "type",
+            "phase",
+            "startedAtMs",
+            "endedAtMs",
+            "assessment"
+          ]
+        }
+      ]
+    }
+  ],
+  "gameVerdictUnchanged": true,
+  "capacityAccepted": false
+}

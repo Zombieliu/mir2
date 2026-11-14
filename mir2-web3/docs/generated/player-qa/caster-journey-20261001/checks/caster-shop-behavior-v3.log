@@ -1,0 +1,10 @@
+
+running 5 tests
+test crystal_ui::overlays::npc_shop_layout_tests::caster_medicine_and_material_services_keep_buy_sell_close_reopen_usable ... ok
+test crystal_ui::overlays::npc_shop_layout_tests::direct_medicine_service_opens_separate_bag_and_usable_buy_controls_in_one_frame ... ok
+test crystal_ui::overlays::npc_shop_layout_tests::paired_service_and_bag_remain_visible_across_supported_viewport_transforms ... ok
+test crystal_ui::overlays::npc_shop_layout_tests::service_open_preserves_visible_bag_positions_and_repairs_collisions_or_offstage_state ... ok
+test crystal_ui::overlays::npc_shop_layout_tests::shop_tab_switch_and_bag_reopen_repair_overlap_but_idle_updates_preserve_manual_drag ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1191 filtered out; finished in 0.38s
+

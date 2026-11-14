@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-24T16:19:46.888Z",
+  "scope": "Unrun ordinary10 candidate static safety and representative initial occupancy only. No actual Gateway observation of these ten actors together.",
+  "anchors": [
+    {
+      "x": 252,
+      "y": 671
+    },
+    {
+      "x": 256,
+      "y": 671
+    },
+    {
+      "x": 237,
+      "y": 665
+    },
+    {
+      "x": 236,
+      "y": 650
+    },
+    {
+      "x": 252,
+      "y": 645
+    },
+    {
+      "x": 260,
+      "y": 670
+    },
+    {
+      "x": 266,
+      "y": 648
+    },
+    {
+      "x": 279,
+      "y": 661
+    },
+    {
+      "x": 278,
+      "y": 673
+    },
+    {
+      "x": 248,
+      "y": 678
+    }
+  ],
+  "fighterIndex": 5,
+  "activeObservers": [
+    {
+      "x": 252,
+      "y": 671
+    },
+    {
+      "x": 256,
+      "y": 671
+    },
+    {
+      "x": 237,
+      "y": 665
+    },
+    {
+      "x": 236,
+      "y": 650
+    },
+    {
+      "x": 252,
+      "y": 645
+    },
+    {
+      "x": 266,
+      "y": 648
+    },
+    {
+      "x": 279,
+      "y": 661
+    },
+    {
+      "x": 278,
+      "y": 673
+    },
+    {
+      "x": 248,
+      "y": 678
+    }
+  ],
+  "bootstrapPaths": [
+    {
+      "home": {
+        "x": 252,
+        "y": 671
+      },
+      "pathSteps": 69,
+      "nonSelectedCanonicalMonstersWithinViewOfPath": []
+    },
+    {
+      "home": {
+        "x": 256,
+        "y": 671
+      },
+      "pathSteps": 65,
+      "nonSelectedCanonicalMonstersWithinViewOfPath": []
+    },
+    {
+      "home": {
+        "x": 237,
+        "y": 665
+      },
+      "pathSteps": 78,
+      "nonSelectedCanonicalMonstersWithinViewOfPath": []
+    },
+    {
+      "home": {
+        "x": 236,
+        "y": 650
+      },
+      "pathSteps": 61,
+      "nonSelectedCanonicalMonstersWithinViewOfPath": []
+    },
+    {
+      "home": {
+        "x": 252,
+        "y": 645
+      },
+      "pathSteps": 56,
+      "nonSelectedCanonicalMonstersWithinViewOfPath": []
+    },
+    {
+      "home": {
+        "x": 260,
+        "y": 670
+      },
+      "pathSteps": 61,
+      "nonSelectedCanonicalMonstersWithinViewOfPath": []
+    },
+    {
+      "home": {
+        "x": 266,
+        "y": 648
+      },
+      "pathSteps": 55,
+      "nonSelectedCanonicalMonstersWithinViewOfPath": []
+    },
+    {
+      "home": {
+        "x": 279,
+        "y": 661
+      },
+      "pathSteps": 46,
+      "nonSelectedCanonicalMonstersWithinViewOfPath": []
+    },
+    {
+      "home": {
+        "x": 278,
+        "y": 673
+      },
+      "pathSteps": 58,
+      "nonSelectedCanonicalMonstersWithinViewOfPath": []
+    },
+    {
+      "home": {
+        "x": 248,
+        "y": 678
+      },
+      "pathSteps": 73,
+      "nonSelectedCanonicalMonstersWithinViewOfPath": []
+    }
+  ],
+  "representativeStaticOccupancy": {
+    "targets": 31,
+    "isolatedObservers": [],
+    "rates": {
+      "3": 62.44999999999998,
+      "5": 34.98333333333334,
+      "10": 19.950000000000003,
+      "25": 7.5166666666666675
+    }
+  },
+  "nonSelectedCanonicalMonstersInsideCoverage": [],
+  "staticOnly": true,
+  "accepted": false,
+  "limitations": [
+    "Canonical spawn positions are a JavaScript mirror of current local Rust geometry, not a new server observation; monsters may wander and simultaneous player occupancy is not simulated.",
+    "No target can supply more than its own spawn rule across overlapping clusters; fractional max-flow is an optimistic upper bound ignoring kill/turn/travel time and burst phase.",
+    "Fixed damage scenarios are sensitivity estimates; measured damage varies and ordinary leveling during a two-hour soak may increase damage. Averages do not prove all 60-second windows.",
+    "Reachability uses initial static collision, stationary NPCs and observer initial anchors; no dynamic monster blockage, health safety, owner/observer packets or persistence acceptance."
+  ]
+}

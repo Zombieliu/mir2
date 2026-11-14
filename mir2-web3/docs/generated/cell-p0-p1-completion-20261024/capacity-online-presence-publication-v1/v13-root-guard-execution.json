@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-26T17:19:06.180Z",
+  "finishedAt": "2026-10-26T17:19:11.792Z",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "check-source-readonly-v1.mjs",
+    "--repository",
+    "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey",
+    "--expected-head",
+    "7b43caa41ee12f2e6b41d0a5df7e9ab45a32580d"
+  ],
+  "cwd": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13",
+  "expectedHead": "7b43caa41ee12f2e6b41d0a5df7e9ab45a32580d",
+  "readOnly": true,
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "sourcePin": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\check-source-readonly-v1.mjs",
+    "bytes": 2333,
+    "sha256": "9f6f6a3fe2157881c623c516052ba5234da1a3f28bb360534a26e3bb7f22ae1c"
+  },
+  "runnerPin": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\root-execution-runner-v1.mjs",
+    "bytes": 3028,
+    "sha256": "a8a889c4ccba416c06258e329612ce23fc3bd2e30eaa288be36f029f85663ecb"
+  },
+  "stdoutFile": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\online-presence-reuse-v13-root-guard-stdout-v1.log",
+  "stderrFile": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\online-presence-reuse-v13-root-guard-stderr-v1.log",
+  "stdout": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\online-presence-reuse-v13-root-guard-stdout-v1.log",
+    "bytes": 1572,
+    "sha256": "767a9d70790fbf27e10a690bb839592c3b74e7654c4ce642c84e900bbb213336"
+  },
+  "stderr": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\online-presence-reuse-v13-root-guard-stderr-v1.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "formalAcceptanceEligible": false
+}

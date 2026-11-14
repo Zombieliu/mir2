@@ -1,0 +1,38 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import assert from 'node:assert/strict';
+const base='C:/mir2-build/p01-completion-20261024',root=path.join(base,'formal-native-v2-compact-wire-ladder-10');
+const sha=b=>crypto.createHash('sha256').update(b).digest('hex'),pin=async file=>{const b=await fs.readFile(file);return{file,bytes:b.length,sha256:sha(b)}};
+const oldReceiptFile=path.join(base,'compact-wire-formal10-preseal-input-check-v4.json'),receipt=JSON.parse(await fs.readFile(oldReceiptFile,'utf8'));
+for(const p of receipt.reviewedFiles)assert.deepEqual(await pin(p.file),p);
+let helper=await fs.readFile(path.join(base,'posthoc13-collection-v2/passed-probe-window-contract.mjs'),'utf8');
+helper=helper.replace("const EXPECTED = Object.freeze([['stage-2',5],['stage-10',5],['soak',6]]);","const PROBE13 = Object.freeze([['stage-2',5],['stage-10',5],['soak',6]]);\nconst FORMAL = Object.freeze([['stage-2',5],['stage-10',5],['stage-25',5],['stage-50',5],['stage-100',5],['soak',120],['post-resume-observation',1]]);");
+helper=helper.replace('export function createPassedProbeWindowCounter(report) {',"export function createPhaseWindowCounter(report,scope) {\n  assert.ok(scope==='probe13'||scope==='formal','Only the frozen probe13 or full formal phase profile is supported');\n  const EXPECTED=scope==='probe13'?PROBE13:FORMAL,maximum=scope==='probe13'?16:146;");
+helper=helper.replaceAll('5/5/6','fixed phase counts').replace('total<16','total<maximum').replace('assert.equal(total,16)','assert.equal(total,maximum)');
+helper=helper.replace('Read-only supplemental window projection:', 'Read-only bounded16/146 supplemental window projection:');
+const helperFile=path.join(root,'phase-window-contract.mjs');await fs.writeFile(helperFile,helper,{flag:'wx'});
+const changes=[];
+for(const name of ['verify-feasibility-gate.mjs','collect-public.mjs','verify-public.mjs']){
+ const file=path.join(root,name),bytes=await fs.readFile(file),preimage=path.join(base,'compact-wire-formal10-v4-'+name+'.txt');await fs.writeFile(preimage,bytes,{flag:'wx'});
+ let text=bytes.toString('utf8');const rules=[],prefix="import {createPhaseWindowCounter} from './phase-window-contract.mjs';\n";text=prefix+text;rules.push({kind:'new-bounded-window-projection-import',before:'',after:prefix,prefix:true});
+ function replace(kind,before,after){assert.equal(text.split(before).length-1,1,kind);text=text.replace(before,after);rules.push({kind,before,after});}
+ if(name==='verify-feasibility-gate.mjs'){
+  replace('fresh13-count-in-existing-raw-pass',"const wireCounter=createWireRawCounter();for await(const line of createInterface({input:createReadStream(rawFile),crlfDelay:Infinity})){if(!line||Buffer.byteLength(line)>16*1024*1024)throw Error('Invalid ended13 raw diagnostic line');wireCounter.observe(JSON.parse(line));}","const wireCounter=createWireRawCounter(),minuteWindows=createPhaseWindowCounter(report,'probe13');for await(const line of createInterface({input:createReadStream(rawFile),crlfDelay:Infinity})){if(!line||Buffer.byteLength(line)>16*1024*1024)throw Error('Invalid ended13 raw diagnostic line');const row=JSON.parse(line);wireCounter.observe(row);minuteWindows.observe(row);}minuteWindows.assertComplete();");
+  replace('read-real16-windows-not-generic-selected-phase-events',"const rows=streamed.selected.filter(row=>row.type==='window'&&row.phase===name);","const rows=minuteWindows.forPhase(name);");
+ }else if(name==='collect-public.mjs'){
+  replace('bounded-formal-counter-in-existing-raw-pass','const rawActions = {}, windows = [], typeCounts = {}, windowsByPhase = {}, wireRaw=createWireRawCounter();',"const rawActions = {}, windows = [], typeCounts = {}, windowsByPhase = {}, wireRaw=createWireRawCounter(),minuteWindows=report.ok===true?createPhaseWindowCounter(report,'formal'):null;");
+  replace('observe-original146-windows-only','  wireRaw.observe(row);','  wireRaw.observe(row);minuteWindows?.observe(row);');
+  replace('require-full-standard-minute-projection-only-on-existing-accepted-branch','  api.verifyCapacityPhases(report, streamed.selected);','  api.verifyCapacityPhases(report, streamed.selected);minuteWindows.assertComplete();');
+  replace('public-runtime-helper-allowlist',"realmFiles.push('DIAGNOSTICS-PREPARED.md'","realmFiles.push('phase-window-contract.mjs','hp-maintenance-status-schema.mjs','DIAGNOSTICS-PREPARED.md'");
+ }else{
+  replace('bounded-formal-counter-in-existing-raw-pass','const wireRaw=createWireRawCounter();for await(const line of createInterface({input:createReadStream(expectedRaw),crlfDelay:Infinity})){assert.ok(Buffer.byteLength(line)<=16*1024*1024);if(line)wireRaw.observe(JSON.parse(line));}',"const wireRaw=createWireRawCounter(),minuteWindows=report.ok===true?createPhaseWindowCounter(report,'formal'):null;for await(const line of createInterface({input:createReadStream(expectedRaw),crlfDelay:Infinity})){assert.ok(Buffer.byteLength(line)<=16*1024*1024);if(line){const row=JSON.parse(line);wireRaw.observe(row);minuteWindows?.observe(row);}}");
+  replace('require-full-standard-minute-projection-only-on-existing-accepted-branch','  api.verifyCapacityPhases(report, streamed.selected);','  api.verifyCapacityPhases(report, streamed.selected);minuteWindows.assertComplete();');
+ }
+ let inverse=text;for(const rule of [...rules].reverse()){if(rule.prefix){assert.ok(inverse.startsWith(rule.after));inverse=inverse.slice(rule.after.length);}else{assert.equal(inverse.split(rule.after).length-1,1);inverse=inverse.replace(rule.after,rule.before);}}assert.ok(Buffer.from(inverse).equals(bytes));await fs.writeFile(file,text);changes.push({original:receipt.reviewedFiles.find(p=>p.file===file),preimage:await pin(preimage),derived:await pin(file),rules,exactInverseRestoresOriginalBytes:true});
+}
+const changedPaths=new Set(changes.map(p=>p.derived.file));let preserved=0;for(const p of receipt.reviewedFiles)if(!changedPaths.has(p.file)){assert.deepEqual(await pin(p.file),p);preserved++;}
+const actualSources=[['probe13-independent-verification-v1/final-verification.json',359693,'c96b6cc7fbc960592f60c0b81dac3fc4d43238d424a2bfaf968d5528165e946c'],['posthoc13-collection-v2/posthoc-source-frozen-v2.json',3980,'2efbafd38a518da087384a5680ca269ed7213df664fd586da81ab06b496de3f4'],['compact-probe13-collection-independent-review-v2/review-v2.json',8896,'a6ade1027296cb35863d677b556cf453bae29a26495e62d00deeb566cbd6fc52']];
+const evidence=[];for(const[relative,bytes,sha256]of actualSources){const actual=await pin(path.join(base,relative));assert.equal(actual.bytes,bytes);assert.equal(actual.sha256,sha256);evidence.push(actual);}
+const proof={schemaVersion:1,recordedAt:new Date().toISOString(),scope:'Unsealed formal10 same-root supplemental minute-window projection correction. This is a gate/collection schema repair, not a gameplay change or real formal pass.',oldPreseal:await pin(oldReceiptFile),newHelper:await pin(helperFile),changes,otherPreviousLocalInputsUnchanged:preserved,probeMinuteWindows:16,formalMinuteWindows:146,formalCounts:[5,5,5,5,5,120,1],partialFailuresRemainArchivable:true,partialTailDoesNotCountAsCompleteMinute:true,actualProbe13CorrectedEvidence:evidence,originalGameplayThresholdsUnchanged:true,originalGenericApiChanged:false,old13RuntimeChanged:false,gateInvoked:false,realmStarted:false,sealed:false};
+const proofFile=path.join(base,'compact-wire-formal10-window-normalization-v5.json');await fs.writeFile(proofFile,JSON.stringify(proof,null,2)+'\n',{flag:'wx'});console.log(JSON.stringify({proof:await pin(proofFile),helper:await pin(helperFile),changedFiles:changes.map(c=>c.derived),preserved}));

@@ -1,0 +1,28 @@
+    Finished `test` profile [unoptimized] target(s) in 38.66s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+
+running 22 tests
+test zone_owner_resolver::tests::a_clock_outside_postgres_range_is_rejected ... ok
+test zone_owner_resolver::tests::an_expired_or_removed_current_lease_never_accepts_an_old_pin ... ok
+test zone_owner_resolver::tests::endpoint_change_in_another_registry_cannot_reuse_an_old_pin ... ok
+test zone_owner_resolver::tests::endpoints_require_explicit_nonzero_unicast_ip_sockets ... ok
+test zone_owner_resolver::tests::errors_are_sanitized_and_rebind_has_a_machine_readable_code ... ok
+test zone_owner_resolver::tests::expected_fence_outside_postgres_range_is_not_observed_or_accepted ... ok
+test zone_owner_resolver::tests::expiry_is_checked_after_observation_finishes ... ok
+test zone_owner_resolver::tests::invalid_observed_owner_and_heartbeat_are_rejected_without_panicking ... ok
+test zone_owner_resolver::tests::lease_expiry_must_be_future_and_fit_postgres_bigint ... ok
+test zone_owner_resolver::tests::missing_lease_is_not_created_or_replaced_with_a_fallback ... ok
+test zone_owner_resolver::tests::observed_fences_must_fit_positive_postgres_bigint ... ok
+test zone_owner_resolver::tests::observer_failure_cannot_reuse_a_previous_success ... ok
+test zone_owner_resolver::tests::owner_identifiers_are_exact_bounded_ascii_components ... ok
+test zone_owner_resolver::tests::owner_or_epoch_change_requires_explicit_rebind_even_if_new_owner_is_unknown ... ok
+test zone_owner_resolver::tests::registry_additions_and_reordering_do_not_change_an_existing_route ... ok
+test zone_owner_resolver::tests::registry_rejects_duplicate_json_fields_at_both_levels ... ok
+test zone_owner_resolver::tests::registry_rejects_duplicate_owners_and_canonical_endpoint_aliases ... ok
+test zone_owner_resolver::tests::registry_rejects_unknown_missing_and_wrongly_typed_fields ... ok
+test zone_owner_resolver::tests::registry_version_and_size_are_bounded ... ok
+test zone_owner_resolver::tests::resolution_uses_observed_owner_instead_of_zone_hash_or_host_order ... ok
+test zone_owner_resolver::tests::same_epoch_renewal_preserves_the_binding_without_writing_a_lease ... ok
+test zone_owner_resolver::tests::unknown_owner_is_not_hashed_to_a_registered_host ... ok
+
+test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 1337 filtered out; finished in 0.01s

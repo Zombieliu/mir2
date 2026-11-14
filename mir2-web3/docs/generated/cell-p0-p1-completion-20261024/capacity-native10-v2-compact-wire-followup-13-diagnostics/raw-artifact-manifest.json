@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "files": [
+    {
+      "kind": "capacity-samples-jsonl",
+      "runId": "1792912711217-e7ea81f2",
+      "report": "capacity-native10-v2-compact-wire-followup-13-diagnostics/release-native-10-v2-compact-wire-feasibility-13/reports/1792912711217-e7ea81f2.report.json",
+      "path": "release-native-10-v2-compact-wire-feasibility-13/reports/1792912711217-e7ea81f2.samples.jsonl",
+      "bytes": 29072097,
+      "sha256": "83a7a56df6780212dd7a4671f3fd9bb1ee721cba5ad473e91f86c8c04bd13152",
+      "projection": "capacity-native10-v2-compact-wire-followup-13-diagnostics/release-native-10-v2-compact-wire-feasibility-13/reports/1792912711217-e7ea81f2.raw-projection.json"
+    }
+  ]
+}

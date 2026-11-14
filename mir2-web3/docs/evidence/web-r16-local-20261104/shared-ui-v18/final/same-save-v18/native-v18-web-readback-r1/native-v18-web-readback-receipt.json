@@ -1,0 +1,266 @@
+{
+  "schema": "r16-native-v18-web-same-save-readback/1",
+  "startedAt": "2026-11-06T03:45:42.512Z",
+  "passed": true,
+  "nativeSequenceReportedByCoordinator": {
+    "enteredPreviousWebSave": {
+      "map": "0",
+      "position": {
+        "x": 138,
+        "y": 52
+      },
+      "level": 11,
+      "gold": 440,
+      "q7": {
+        "current": 2,
+        "required": 4
+      }
+    },
+    "ordinaryDeathAndVRevive": {
+      "map": "0",
+      "position": {
+        "x": 328,
+        "y": 264
+      }
+    },
+    "ordinaryClickMovement": {
+      "x": 329,
+      "y": 265
+    },
+    "normalLogoutAndExit": true
+  },
+  "scope": {
+    "existingOrdinaryQaRole": true,
+    "ordinaryWebUiReadbackOnly": true,
+    "originalOwner": false,
+    "sentGameplayOrEconomicActions": 0,
+    "modelInstructions": 0
+  },
+  "releaseReportedByCoordinator": {
+    "nextBuildId": "-WCOg-GmVTGJ9mSZugKL0",
+    "renderer": "bevy-a46905128c316656"
+  },
+  "phases": [
+    "normal-ui-login",
+    "normal-ui-start-game",
+    "current-authoritative-web-readback",
+    "normal-ui-logout"
+  ],
+  "commands": {
+    "clientCapabilities": 2,
+    "setLanguage": 1,
+    "clientVersion": 1,
+    "login": 1,
+    "startGame": 1,
+    "logOut": 1,
+    "keepAlive": 1
+  },
+  "receipts": [
+    {
+      "sequence": 8,
+      "packet": "LoginSuccess"
+    },
+    {
+      "sequence": 11,
+      "packet": "StartGame",
+      "result": 4
+    },
+    {
+      "sequence": 694,
+      "packet": "LogOutSuccess"
+    }
+  ],
+  "errors": [],
+  "network": {
+    "httpErrors": [
+      {
+        "status": 404,
+        "phase": "normal-ui-start-game",
+        "pathHash": "8125f1afef91f07b1f575cb698019f9d36efef52713007cf8cdae7fba08d2fa9",
+        "publicMapSamplePath": "/debug/map-samples/smtile-32.png"
+      },
+      {
+        "status": 404,
+        "phase": "normal-ui-start-game",
+        "pathHash": "1c48f1acf8efc69d4258221ef8822ee1d438ed81e8a29b9648aa98b4d5db0e36",
+        "publicMapSamplePath": "/debug/map-samples/smtile-104.png"
+      },
+      {
+        "status": 404,
+        "phase": "normal-ui-start-game",
+        "pathHash": "b04a23450f887ba8d8da85e5cd6c45be0191b2e0ca785e3af52c60602d48fed5",
+        "publicMapSamplePath": "/debug/map-samples/tiles-0.png"
+      },
+      {
+        "status": 404,
+        "phase": "normal-ui-start-game",
+        "pathHash": "f4c77ffb320e33d1223c08093c9760e3ca665b7171f56c4d4cb137faec468200",
+        "publicMapSamplePath": "/debug/map-samples/smtile-52.png"
+      },
+      {
+        "status": 404,
+        "phase": "normal-ui-start-game",
+        "pathHash": "25c7b98a0f9a5fee1410d2c79c9fcac948c61c6f6271d2e22c05732e4d961cb4",
+        "publicMapSamplePath": "/debug/map-samples/tiles-1.png"
+      }
+    ],
+    "failed": [],
+    "cancelled": 3,
+    "responseWasm": [
+      {
+        "status": 200,
+        "pathHash": "8f77bcacd6a870cce7b13ae058c8ab90f0ab09fe874c8c9276919a8f04ef0863"
+      }
+    ]
+  },
+  "console": {
+    "errors": 5,
+    "warnings": 7,
+    "messageHashes": [
+      {
+        "type": "error",
+        "phase": "normal-ui-start-game",
+        "hash": "377ab8b4b5e86078109682c970bd4bbb24606becc5d12a775b80b84e922bbad6"
+      },
+      {
+        "type": "error",
+        "phase": "normal-ui-start-game",
+        "hash": "377ab8b4b5e86078109682c970bd4bbb24606becc5d12a775b80b84e922bbad6"
+      },
+      {
+        "type": "error",
+        "phase": "normal-ui-start-game",
+        "hash": "377ab8b4b5e86078109682c970bd4bbb24606becc5d12a775b80b84e922bbad6"
+      },
+      {
+        "type": "error",
+        "phase": "normal-ui-start-game",
+        "hash": "377ab8b4b5e86078109682c970bd4bbb24606becc5d12a775b80b84e922bbad6"
+      },
+      {
+        "type": "error",
+        "phase": "normal-ui-start-game",
+        "hash": "377ab8b4b5e86078109682c970bd4bbb24606becc5d12a775b80b84e922bbad6"
+      },
+      {
+        "type": "warning",
+        "phase": "normal-ui-start-game",
+        "hash": "175c73d54d8d443a965a16a38ac036c2de536a3920f173064fd6837866b00186"
+      },
+      {
+        "type": "warning",
+        "phase": "current-authoritative-web-readback",
+        "hash": "8a35b01567a50aa5510a85bd1dc66a2063285cb79d89dec37906cdffd1ee5a9b"
+      },
+      {
+        "type": "warning",
+        "phase": "normal-ui-logout",
+        "hash": "8a35b01567a50aa5510a85bd1dc66a2063285cb79d89dec37906cdffd1ee5a9b"
+      },
+      {
+        "type": "warning",
+        "phase": "normal-ui-logout",
+        "hash": "02806df32c31b004424afd91b73ed0797c3da931dfb202195f4e711fc9c24365"
+      },
+      {
+        "type": "warning",
+        "phase": "normal-ui-logout",
+        "hash": "02806df32c31b004424afd91b73ed0797c3da931dfb202195f4e711fc9c24365"
+      },
+      {
+        "type": "warning",
+        "phase": "normal-ui-logout",
+        "hash": "02806df32c31b004424afd91b73ed0797c3da931dfb202195f4e711fc9c24365"
+      },
+      {
+        "type": "warning",
+        "phase": "normal-ui-logout",
+        "hash": "331a00569bf9814bfa60291df6459a50393a06531670462f2b1d5d723ea61615"
+      }
+    ]
+  },
+  "cleanup": {
+    "normalLogoutAcknowledged": true,
+    "browserClosed": true
+  },
+  "driverSha256": "b72d1ab73f125410471e295c38c0fb4ee796ad41be779707c3fb8aeea4522b17",
+  "bootstrapCustodyDeclarations": 1,
+  "authority": {
+    "sequence": 690,
+    "map": "0",
+    "position": {
+      "x": 329,
+      "y": 265
+    },
+    "inSafeZone": true,
+    "level": 11,
+    "experience": 582,
+    "maxExperience": 8000,
+    "hp": 99,
+    "maxHp": 99,
+    "mp": 49,
+    "maxMp": 49,
+    "gold": 440,
+    "completedQuestIds": [
+      2110001,
+      2110002,
+      2110003,
+      2110004,
+      2110005,
+      2110006
+    ],
+    "quest7": {
+      "questId": 2110007,
+      "stage": "inProgress",
+      "current": 2,
+      "required": 4,
+      "objectives": [
+        {
+          "current": 2,
+          "required": 4,
+          "done": false
+        }
+      ]
+    },
+    "hpMedicine": 9,
+    "equipment": [
+      {
+        "name": "WoodenSword",
+        "slot": "weapon",
+        "durabilityCurrent": 4000,
+        "durabilityMax": 4000
+      },
+      {
+        "name": "BaseDress(M)",
+        "slot": "armour",
+        "durabilityCurrent": 5000,
+        "durabilityMax": 5000
+      }
+    ],
+    "fencing": {
+      "known": true,
+      "level": 0
+    }
+  },
+  "checks": {
+    "nativeSavedTransformRestored": true,
+    "previousGoldAndLevelRetained": true,
+    "experienceObserved": true,
+    "previousSixQuestsCompleted": true,
+    "questSevenProgressRetained": true,
+    "hpMedicineRetained": true,
+    "equipmentRetained": true,
+    "fencingRetained": true
+  },
+  "screenshot": {
+    "file": "01-native-v18-save-restored-by-web.png",
+    "sha256": "fbfa093609b4c03624c049291ec59ab143ca57992781492d8ee712a4606036c5",
+    "fixedIdentityMasks": true
+  },
+  "finishedAt": "2026-11-06T03:46:00.740Z",
+  "networkClean": false,
+  "secretScan": {
+    "publicTextFilesIncludingReceipt": 2,
+    "matches": 0
+  }
+}

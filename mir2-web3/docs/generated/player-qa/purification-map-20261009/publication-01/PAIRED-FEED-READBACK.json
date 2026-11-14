@@ -1,0 +1,22 @@
+{
+  "createdUtc": "2026-10-09T12:53:45.105526+00:00",
+  "clientFeedSequence": 18,
+  "clientRelease": "R23",
+  "httpsTlsVerified": true,
+  "actualHttpStatus": 200,
+  "objects": [
+    {
+      "url": "https://assets.mir2.obelisk.build/client-updates/latest.json",
+      "bytes": 1159,
+      "sha256": "2d87c59edb2aff2b55237dad1fcc418eac6ba03b6514720982ac16c1215f20d2"
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/client-updates/latest.p7s",
+      "bytes": 1614,
+      "sha256": "1f94346017807b0d6a2c24a3f4cdd3226461cc9618ed6dc0daa43460e7c0f8f4"
+    }
+  ],
+  "byteIdenticalToPriorWindowsCmsAcceptedFeed": true,
+  "newCmsExecution": false,
+  "clientFilesChanged": false
+}

@@ -1,0 +1,10 @@
+{
+  "schema": "mir2.production-audit-attempt.v1",
+  "observedUtc": "2026-10-09T00:47:17.0978746Z",
+  "actualCargoStarted": false,
+  "testsExecuted": 0,
+  "packagingStarted": false,
+  "rawErrorCapturedToFile": false,
+  "observedError": "Get-Content audit-results.ps1 line10: save-regression-01/result.json did not exist after the bounded wait deferred Cargo; audit aborted before writing result-audit or packaging. Root will run the pending save check before repeating audit.",
+  "auditHelperSha256": "c2892c1f3d29db51d858516b27a7324a1fe78896e2f98b6ef73668bb2861197a"
+}

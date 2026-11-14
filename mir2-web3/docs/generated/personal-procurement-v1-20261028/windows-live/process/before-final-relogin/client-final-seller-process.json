@@ -1,0 +1,10 @@
+{
+  "pid": 74544,
+  "exe": "C:/mir2-build/personal-procurement-v1-20261028/bin-final-v3/mir2-platform-windows.exe",
+  "sha256": "1a8c941bac3ae9be03bf64652dc64b555d8699a6a65bd65c9ca532da6b0bc144",
+  "endpoint": "ws://127.0.0.1:17830/ws",
+  "role": "seller",
+  "character": "SellQA1028",
+  "startedAt": "2026-10-28T15:35:23.215Z",
+  "testOnly": true
+}

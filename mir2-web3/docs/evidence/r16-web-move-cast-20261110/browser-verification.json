@@ -1,0 +1,1707 @@
+{
+  "schema": "mir2.r16.move-cast-browser.v1",
+  "scope": "Loopback production Next and isolated shared File Gateway with normal inputs and one read-only animation call observer",
+  "originalBaseline": [
+    {
+      "name": "baseline-moving-r1",
+      "receiptSha256": "3c4ca6b5beec7459de5e6e73ce3c259cf9bbfbff8f799883cf69eab5795cda5f",
+      "sourceHead": "8fa80d83ce4ef288db4fad6314e2544db3446d75",
+      "gatewaySha256": "517328cd8d2badcf2a7fb9ae1532964435e703a40398838b540551c0a697867c",
+      "runtimeVersion": "bevy-22790e9223ec130f",
+      "runtimeManifestSha256": "68fb2a35cf983f9a380ebb995e03f3a065f89d1c74d8390ba53bd12925385f00",
+      "sources": {
+        "app/page.tsx": "233f7b8b5120d3e67bff944317af14289bb34d23aa9580ee45ea07cdae605d30",
+        "app/original-client-shell.tsx": "72d262f4cea9aff1a67aedc086e91cf247916659c0011ea0d97127137006277d",
+        "app/components/original-client-entity-animation-runtime.ts": "f477a5b06d095d8e7c18474af73add726ed423ba50a9d7018b0d2c6f4b8dd5a2",
+        "app/components/original-client-scene-visual-layers.tsx": "c13a415ba69744fa7eb832755d34ea1ae096a4e206b416c03cd2a58c279fb744",
+        "app/components/original-client-scene-motion.ts": "40a5eb1fef9ad3c85b343058e340886452e10502d404220f6a6e7140d594f887",
+        "app/components/original-client-scene-rendering.tsx": "69b977941e92704ecf14027855d8366d071f6fef4145ddc7c53d6820e4d53da8",
+        "lib/world-fishing-source.ts": "ee24569a0ae5946397fff550784e7ef5a2e0bc62abb93a981bf3136a4c18c2f4",
+        "lib/r16-targeted-projectiles.ts": "4fef9947719cecb83db992bf41a70a3fbe8d023f12b23c64afa314e7792ef69e",
+        "lib/generated/bevy_runtime_version.json": "fceed58ba19d24a92ac8bf27258c9443f5e1126c32c5e4be7aa5860820cbc27b"
+      },
+      "diagnosticTap": {
+        "file": "app/components/original-client-entity-animation-runtime.ts",
+        "originalSha256": "f477a5b06d095d8e7c18474af73add726ed423ba50a9d7018b0d2c6f4b8dd5a2",
+        "scratchSha256": "7ca429f489cf0e2da86cea26c3bd27d07aeda23cdc47a9f6574f8a799e6c645c",
+        "instrumentationSha256": "f76da009e238dbb16abddf010e60deb52b93f3fbcfac4438e2686b3c0ddf7cbb",
+        "advancesRuntime": false
+      },
+      "fixtureSha256": "3645dc2efd9f49333a57780250ad9092469a92fc995ab8defbe434ba0e64beab",
+      "renderer": {
+        "backend": "webgl2",
+        "booted": true,
+        "entityEnabled": false
+      },
+      "images": [
+        {
+          "phase": "projectile",
+          "file": "projectile-baseline.jpg",
+          "at": 1794265827436,
+          "relativeToVisualSampleMs": -35,
+          "sha256": "1481f209350edd0765d807b0d178644761927093f26efce2cdaf21fe7ac16b57"
+        },
+        {
+          "phase": "impact",
+          "file": "impact-baseline.jpg",
+          "at": 1794265828040,
+          "relativeToVisualSampleMs": 8,
+          "sha256": "574fb7875421f4223671e909c00bad61ee086dc3c381263495d0dabb86ee7a06"
+        }
+      ],
+      "navigation": {
+        "acceptedTiles": 19,
+        "finalAck": {
+          "from": [
+            300,
+            266
+          ],
+          "waypoint": [
+            300,
+            267
+          ],
+          "after": [
+            300,
+            267
+          ],
+          "walkOrRunCommands": [
+            "walk"
+          ],
+          "ackSequence": 780,
+          "ackEpochMs": 1794265825636,
+          "ackDirection": "Down"
+        },
+        "packetMovementTokens": 0,
+        "presentationMovementTokens": 24,
+        "currentMotionHintsSent": 0,
+        "allMovementTokens": 24,
+        "maximumQueue": 5
+      },
+      "sameCellFacingAck": {
+        "seq": 786,
+        "epochMs": 1794265826759,
+        "packet": "UserLocation",
+        "position": {
+          "x": 300,
+          "y": 267
+        },
+        "direction": "DownLeft"
+      },
+      "settled": null,
+      "authoritativeSpell": {
+        "atMs": 44,
+        "legacyState": "attackRange",
+        "action": "spell",
+        "known": true,
+        "sourceRevision": 23,
+        "queueBefore": 3,
+        "queueOnInput": 4,
+        "outActionOnInput": "walking",
+        "motionExpiryMs": -548
+      },
+      "displayed": {
+        "firstSpell": null,
+        "starts": [],
+        "castWindowActions": [
+          "walking",
+          "running"
+        ],
+        "missileMs": 640,
+        "impactMs": 1078,
+        "damageIndicatorMs": 659,
+        "firstVisibleNumberMs": 828,
+        "packetToNumberMs": 169
+      },
+      "afterMove": null,
+      "socket": {
+        "magicCommands": 1,
+        "sequence": [
+          [
+            780,
+            -1148,
+            "UserLocation"
+          ],
+          [
+            784,
+            -266,
+            "DeleteItem"
+          ],
+          [
+            786,
+            -25,
+            "UserLocation"
+          ],
+          [
+            788,
+            -4,
+            "Magic"
+          ],
+          [
+            789,
+            0,
+            "ObjectMagic"
+          ],
+          [
+            790,
+            3,
+            "ObjectMana"
+          ],
+          [
+            791,
+            6,
+            "ObjectProjectile"
+          ],
+          [
+            794,
+            638,
+            "ObjectStruck"
+          ],
+          [
+            795,
+            659,
+            "DamageIndicator"
+          ],
+          [
+            796,
+            662,
+            "ObjectHealth"
+          ],
+          [
+            797,
+            666,
+            "ObjectDied"
+          ],
+          [
+            799,
+            848,
+            "MagicLeveled"
+          ]
+        ]
+      },
+      "persisted": {
+        "normalLogout": true,
+        "freshNormalLogout": true,
+        "skill": {
+          "hotkey": 9,
+          "level": 0,
+          "experience": 473
+        },
+        "ammo": 42,
+        "initialAmmo": 43
+      }
+    },
+    {
+      "name": "baseline-stationary-r1",
+      "receiptSha256": "a2a9f5c790b74da805572de6f503bffeb1a71d7c4c4e2b3bf60912b2163914c5",
+      "sourceHead": "8fa80d83ce4ef288db4fad6314e2544db3446d75",
+      "gatewaySha256": "517328cd8d2badcf2a7fb9ae1532964435e703a40398838b540551c0a697867c",
+      "runtimeVersion": "bevy-22790e9223ec130f",
+      "runtimeManifestSha256": "68fb2a35cf983f9a380ebb995e03f3a065f89d1c74d8390ba53bd12925385f00",
+      "sources": {
+        "app/page.tsx": "233f7b8b5120d3e67bff944317af14289bb34d23aa9580ee45ea07cdae605d30",
+        "app/original-client-shell.tsx": "72d262f4cea9aff1a67aedc086e91cf247916659c0011ea0d97127137006277d",
+        "app/components/original-client-entity-animation-runtime.ts": "f477a5b06d095d8e7c18474af73add726ed423ba50a9d7018b0d2c6f4b8dd5a2",
+        "app/components/original-client-scene-visual-layers.tsx": "c13a415ba69744fa7eb832755d34ea1ae096a4e206b416c03cd2a58c279fb744",
+        "app/components/original-client-scene-motion.ts": "40a5eb1fef9ad3c85b343058e340886452e10502d404220f6a6e7140d594f887",
+        "app/components/original-client-scene-rendering.tsx": "69b977941e92704ecf14027855d8366d071f6fef4145ddc7c53d6820e4d53da8",
+        "lib/world-fishing-source.ts": "ee24569a0ae5946397fff550784e7ef5a2e0bc62abb93a981bf3136a4c18c2f4",
+        "lib/r16-targeted-projectiles.ts": "4fef9947719cecb83db992bf41a70a3fbe8d023f12b23c64afa314e7792ef69e",
+        "lib/generated/bevy_runtime_version.json": "fceed58ba19d24a92ac8bf27258c9443f5e1126c32c5e4be7aa5860820cbc27b"
+      },
+      "diagnosticTap": {
+        "file": "app/components/original-client-entity-animation-runtime.ts",
+        "originalSha256": "f477a5b06d095d8e7c18474af73add726ed423ba50a9d7018b0d2c6f4b8dd5a2",
+        "scratchSha256": "7ca429f489cf0e2da86cea26c3bd27d07aeda23cdc47a9f6574f8a799e6c645c",
+        "instrumentationSha256": "f76da009e238dbb16abddf010e60deb52b93f3fbcfac4438e2686b3c0ddf7cbb",
+        "advancesRuntime": false
+      },
+      "fixtureSha256": "3645dc2efd9f49333a57780250ad9092469a92fc995ab8defbe434ba0e64beab",
+      "renderer": {
+        "backend": "webgl2",
+        "booted": true,
+        "entityEnabled": false
+      },
+      "images": [
+        {
+          "phase": "projectile",
+          "file": "projectile-baseline.jpg",
+          "at": 1794265893598,
+          "relativeToVisualSampleMs": -8,
+          "sha256": "a1b28dd8a4d721f9e80caf08d7fda9d2c645a63d8af2a56d19cc12d40db6a02d"
+        },
+        {
+          "phase": "impact",
+          "file": "impact-baseline.jpg",
+          "at": 1794265894249,
+          "relativeToVisualSampleMs": -6,
+          "sha256": "8173b08d360137b67c8c9fd902a3233987d636c4e90112448ba3e78755a54c93"
+        }
+      ],
+      "navigation": {
+        "acceptedTiles": 18,
+        "finalAck": {
+          "from": [
+            300,
+            266
+          ],
+          "waypoint": [
+            300,
+            267
+          ],
+          "after": [
+            300,
+            267
+          ],
+          "walkOrRunCommands": [
+            "walk"
+          ],
+          "ackSequence": 780,
+          "ackEpochMs": 1794265890744,
+          "ackDirection": "Down"
+        },
+        "packetMovementTokens": 0,
+        "presentationMovementTokens": 25,
+        "currentMotionHintsSent": 0,
+        "allMovementTokens": 25,
+        "maximumQueue": 7
+      },
+      "sameCellFacingAck": {
+        "seq": 788,
+        "epochMs": 1794265892880,
+        "packet": "UserLocation",
+        "position": {
+          "x": 300,
+          "y": 267
+        },
+        "direction": "DownLeft"
+      },
+      "settled": null,
+      "authoritativeSpell": {
+        "atMs": 147,
+        "legacyState": "attackRange",
+        "action": "spell",
+        "known": true,
+        "sourceRevision": 22,
+        "queueBefore": 3,
+        "queueOnInput": 4,
+        "outActionOnInput": "walking",
+        "motionExpiryMs": -1594
+      },
+      "displayed": {
+        "firstSpell": null,
+        "starts": [],
+        "castWindowActions": [
+          "running",
+          "walking"
+        ],
+        "missileMs": 642,
+        "impactMs": 979,
+        "damageIndicatorMs": 768,
+        "firstVisibleNumberMs": 948,
+        "packetToNumberMs": 180
+      },
+      "afterMove": null,
+      "socket": {
+        "magicCommands": 1,
+        "sequence": [
+          [
+            780,
+            -2162,
+            "UserLocation"
+          ],
+          [
+            786,
+            -169,
+            "DeleteItem"
+          ],
+          [
+            788,
+            -26,
+            "UserLocation"
+          ],
+          [
+            790,
+            -4,
+            "Magic"
+          ],
+          [
+            791,
+            0,
+            "ObjectMagic"
+          ],
+          [
+            792,
+            3,
+            "ObjectMana"
+          ],
+          [
+            793,
+            6,
+            "ObjectProjectile"
+          ],
+          [
+            795,
+            758,
+            "ObjectStruck"
+          ],
+          [
+            796,
+            768,
+            "DamageIndicator"
+          ],
+          [
+            797,
+            770,
+            "ObjectHealth"
+          ],
+          [
+            798,
+            774,
+            "ObjectDied"
+          ],
+          [
+            800,
+            1023,
+            "MagicLeveled"
+          ]
+        ]
+      },
+      "persisted": {
+        "normalLogout": true,
+        "freshNormalLogout": true,
+        "skill": {
+          "hotkey": 9,
+          "level": 0,
+          "experience": 472
+        },
+        "ammo": 42,
+        "initialAmmo": 43
+      }
+    },
+    {
+      "name": "baseline-settled-r1",
+      "receiptSha256": "50d65792615b3f56501f2705babea3d9523da35a398cdce7615183128b7f874b",
+      "sourceHead": "8fa80d83ce4ef288db4fad6314e2544db3446d75",
+      "gatewaySha256": "517328cd8d2badcf2a7fb9ae1532964435e703a40398838b540551c0a697867c",
+      "runtimeVersion": "bevy-22790e9223ec130f",
+      "runtimeManifestSha256": "68fb2a35cf983f9a380ebb995e03f3a065f89d1c74d8390ba53bd12925385f00",
+      "sources": {
+        "app/page.tsx": "233f7b8b5120d3e67bff944317af14289bb34d23aa9580ee45ea07cdae605d30",
+        "app/original-client-shell.tsx": "72d262f4cea9aff1a67aedc086e91cf247916659c0011ea0d97127137006277d",
+        "app/components/original-client-entity-animation-runtime.ts": "f477a5b06d095d8e7c18474af73add726ed423ba50a9d7018b0d2c6f4b8dd5a2",
+        "app/components/original-client-scene-visual-layers.tsx": "c13a415ba69744fa7eb832755d34ea1ae096a4e206b416c03cd2a58c279fb744",
+        "app/components/original-client-scene-motion.ts": "40a5eb1fef9ad3c85b343058e340886452e10502d404220f6a6e7140d594f887",
+        "app/components/original-client-scene-rendering.tsx": "69b977941e92704ecf14027855d8366d071f6fef4145ddc7c53d6820e4d53da8",
+        "lib/world-fishing-source.ts": "ee24569a0ae5946397fff550784e7ef5a2e0bc62abb93a981bf3136a4c18c2f4",
+        "lib/r16-targeted-projectiles.ts": "4fef9947719cecb83db992bf41a70a3fbe8d023f12b23c64afa314e7792ef69e",
+        "lib/generated/bevy_runtime_version.json": "fceed58ba19d24a92ac8bf27258c9443f5e1126c32c5e4be7aa5860820cbc27b"
+      },
+      "diagnosticTap": {
+        "file": "app/components/original-client-entity-animation-runtime.ts",
+        "originalSha256": "f477a5b06d095d8e7c18474af73add726ed423ba50a9d7018b0d2c6f4b8dd5a2",
+        "scratchSha256": "7ca429f489cf0e2da86cea26c3bd27d07aeda23cdc47a9f6574f8a799e6c645c",
+        "instrumentationSha256": "f76da009e238dbb16abddf010e60deb52b93f3fbcfac4438e2686b3c0ddf7cbb",
+        "advancesRuntime": false
+      },
+      "fixtureSha256": "3645dc2efd9f49333a57780250ad9092469a92fc995ab8defbe434ba0e64beab",
+      "renderer": {
+        "backend": "webgl2",
+        "packageId": "webgl2-shared",
+        "booted": true,
+        "entityEnabled": false
+      },
+      "images": [
+        {
+          "phase": "caster-spell",
+          "file": "caster-spell.jpg",
+          "at": 1794266050106,
+          "relativeToVisualSampleMs": 5,
+          "sha256": "ef81c7eedacaeef00249dcae2c37ee274717c113efd94e3af80242c7ef131e89"
+        },
+        {
+          "phase": "damage-number",
+          "file": "damage-number.jpg",
+          "at": 1794266050627,
+          "relativeToVisualSampleMs": 3,
+          "sha256": "a00379767db4f44f0d70afd96c283dc04c93ba313f44a9b106c1fc68b19c58a9"
+        },
+        {
+          "phase": "projectile",
+          "file": "projectile-baseline.jpg",
+          "at": 1794266050685,
+          "relativeToVisualSampleMs": 6,
+          "sha256": "e3882c19ea920a4680ddd991088a662450efd294d18836a542575e3fd5bce52a"
+        },
+        {
+          "phase": "impact",
+          "file": "impact-baseline.jpg",
+          "at": 1794266051085,
+          "relativeToVisualSampleMs": 6,
+          "sha256": "2053ffca6b67832bc105c82b04e59d7755e09851ac74a7ae8f6da6dcdfe7b17e"
+        }
+      ],
+      "navigation": {
+        "acceptedTiles": 18,
+        "finalAck": {
+          "from": [
+            300,
+            266
+          ],
+          "waypoint": [
+            300,
+            267
+          ],
+          "after": [
+            300,
+            267
+          ],
+          "walkOrRunCommands": [
+            "walk"
+          ],
+          "ackSequence": 780,
+          "ackEpochMs": 1794266042710,
+          "ackDirection": "Down"
+        },
+        "packetMovementTokens": 0,
+        "presentationMovementTokens": 28,
+        "currentMotionHintsSent": 0,
+        "allMovementTokens": 28,
+        "maximumQueue": 10
+      },
+      "sameCellFacingAck": {
+        "seq": 793,
+        "epochMs": 1794266049777,
+        "packet": "UserLocation",
+        "position": {
+          "x": 300,
+          "y": 267
+        },
+        "direction": "DownLeft"
+      },
+      "settled": {
+        "waitedMs": 5910,
+        "action": "standing",
+        "queueDepth": 0
+      },
+      "authoritativeSpell": {
+        "atMs": 24,
+        "legacyState": "attackRange",
+        "action": "spell",
+        "known": true,
+        "sourceRevision": 22,
+        "queueBefore": 0,
+        "queueOnInput": 0,
+        "outActionOnInput": "spell",
+        "motionExpiryMs": -6516
+      },
+      "displayed": {
+        "firstSpell": {
+          "atMs": 296,
+          "action": "spell",
+          "logicalFrame": "0",
+          "bodyPath": "/original-ui/CArmour/05/326.png"
+        },
+        "starts": [
+          24
+        ],
+        "castWindowActions": [
+          "standing",
+          "spell"
+        ],
+        "missileMs": 741,
+        "impactMs": 999,
+        "damageIndicatorMs": 597,
+        "firstVisibleNumberMs": 819,
+        "packetToNumberMs": 222
+      },
+      "afterMove": null,
+      "socket": {
+        "magicCommands": 1,
+        "sequence": [
+          [
+            780,
+            -7095,
+            "UserLocation"
+          ],
+          [
+            791,
+            -293,
+            "DeleteItem"
+          ],
+          [
+            793,
+            -28,
+            "UserLocation"
+          ],
+          [
+            795,
+            -4,
+            "Magic"
+          ],
+          [
+            796,
+            0,
+            "ObjectMagic"
+          ],
+          [
+            797,
+            3,
+            "ObjectMana"
+          ],
+          [
+            798,
+            7,
+            "ObjectProjectile"
+          ],
+          [
+            800,
+            584,
+            "ObjectStruck"
+          ],
+          [
+            801,
+            597,
+            "DamageIndicator"
+          ],
+          [
+            802,
+            600,
+            "ObjectHealth"
+          ],
+          [
+            803,
+            604,
+            "ObjectDied"
+          ],
+          [
+            805,
+            767,
+            "MagicLeveled"
+          ]
+        ]
+      },
+      "persisted": {
+        "normalLogout": true,
+        "freshNormalLogout": true,
+        "skill": {
+          "hotkey": 9,
+          "level": 0,
+          "experience": 471
+        },
+        "ammo": 42,
+        "initialAmmo": 43
+      }
+    }
+  ],
+  "bevyOnlyNegative": [
+    {
+      "name": "candidate-primary-r1",
+      "receiptSha256": "22e35bb500c353e8310d4cb57c52176cb7228c2361947bf308143da84628b165",
+      "sourceHead": "8fa80d83ce4ef288db4fad6314e2544db3446d75",
+      "gatewaySha256": "517328cd8d2badcf2a7fb9ae1532964435e703a40398838b540551c0a697867c",
+      "runtimeVersion": "bevy-7c0a3b5dc8a548d9",
+      "runtimeManifestSha256": "fe94d505e148a5ae01704597707bf9611e0d12e64a3efd9860ce27052767d395",
+      "sources": {
+        "app/page.tsx": "233f7b8b5120d3e67bff944317af14289bb34d23aa9580ee45ea07cdae605d30",
+        "app/original-client-shell.tsx": "72d262f4cea9aff1a67aedc086e91cf247916659c0011ea0d97127137006277d",
+        "app/components/original-client-entity-animation-runtime.ts": "f477a5b06d095d8e7c18474af73add726ed423ba50a9d7018b0d2c6f4b8dd5a2",
+        "app/components/original-client-scene-visual-layers.tsx": "c13a415ba69744fa7eb832755d34ea1ae096a4e206b416c03cd2a58c279fb744",
+        "app/components/original-client-scene-motion.ts": "40a5eb1fef9ad3c85b343058e340886452e10502d404220f6a6e7140d594f887",
+        "app/components/original-client-scene-rendering.tsx": "69b977941e92704ecf14027855d8366d071f6fef4145ddc7c53d6820e4d53da8",
+        "lib/world-fishing-source.ts": "ee24569a0ae5946397fff550784e7ef5a2e0bc62abb93a981bf3136a4c18c2f4",
+        "lib/r16-targeted-projectiles.ts": "4fef9947719cecb83db992bf41a70a3fbe8d023f12b23c64afa314e7792ef69e",
+        "lib/generated/bevy_runtime_version.json": "fceed58ba19d24a92ac8bf27258c9443f5e1126c32c5e4be7aa5860820cbc27b"
+      },
+      "productOverlay": {
+        "app/components/original-client-entity-animation-runtime.ts": "81d405140bb9f8759e40435cea9a9f0c0d0ccf88ceb7bcdd1ea111acd169e46c"
+      },
+      "diagnosticTap": {
+        "file": "app/components/original-client-entity-animation-runtime.ts",
+        "originalSha256": "81d405140bb9f8759e40435cea9a9f0c0d0ccf88ceb7bcdd1ea111acd169e46c",
+        "scratchSha256": "6e6dc375483c43c934be9fa45ebaa3bc3818c69057a17463f66784dd57be1375",
+        "instrumentationSha256": "5e3a93a25e1e6d24dd1723a9afc0c0acda42d2af1ce3e5f3818a6d4e3206ce67",
+        "advancesRuntime": false
+      },
+      "fixtureSha256": "3645dc2efd9f49333a57780250ad9092469a92fc995ab8defbe434ba0e64beab",
+      "renderer": {
+        "backend": "webgl2",
+        "packageId": "webgl2-shared",
+        "booted": true,
+        "entityEnabled": false
+      },
+      "images": [
+        {
+          "phase": "damage-number",
+          "file": "damage-number.jpg",
+          "at": 1794266510085,
+          "relativeToVisualSampleMs": 13,
+          "sha256": "8174da0e44ec4893839f55990880c91948588095b280c69cc3aec44e4ea7900e"
+        },
+        {
+          "phase": "projectile",
+          "file": "projectile-baseline.jpg",
+          "at": 1794266510085,
+          "relativeToVisualSampleMs": 13,
+          "sha256": "8174da0e44ec4893839f55990880c91948588095b280c69cc3aec44e4ea7900e"
+        },
+        {
+          "phase": "impact",
+          "file": "impact-baseline.jpg",
+          "at": 1794266510402,
+          "relativeToVisualSampleMs": -5,
+          "sha256": "1871ec6b2948604fc6e6a2fb63bd193dd21576bf707d2949c03a1241050adca1"
+        }
+      ],
+      "navigation": {
+        "acceptedTiles": 18,
+        "finalAck": {
+          "from": [
+            300,
+            266
+          ],
+          "waypoint": [
+            300,
+            267
+          ],
+          "after": [
+            300,
+            267
+          ],
+          "walkOrRunCommands": [
+            "walk"
+          ],
+          "ackSequence": 778,
+          "ackEpochMs": 1794266508061,
+          "ackDirection": "Down"
+        },
+        "packetMovementTokens": 0,
+        "presentationMovementTokens": 26,
+        "currentMotionHintsSent": 26,
+        "allMovementTokens": 26,
+        "maximumQueue": 8
+      },
+      "sameCellFacingAck": {
+        "seq": 785,
+        "epochMs": 1794266509208,
+        "packet": "UserLocation",
+        "position": {
+          "x": 300,
+          "y": 267
+        },
+        "direction": "DownLeft"
+      },
+      "settled": null,
+      "authoritativeSpell": {
+        "atMs": 162,
+        "legacyState": "attackRange",
+        "action": "spell",
+        "known": true,
+        "sourceRevision": 22,
+        "queueBefore": 6,
+        "queueOnInput": 7,
+        "outActionOnInput": "running",
+        "motionExpiryMs": -577
+      },
+      "displayed": {
+        "firstSpell": null,
+        "starts": [],
+        "castWindowActions": [
+          "running",
+          "walking"
+        ],
+        "missileMs": 643,
+        "impactMs": 998,
+        "damageIndicatorMs": 662,
+        "firstVisibleNumberMs": 850,
+        "packetToNumberMs": 188
+      },
+      "afterMove": null,
+      "socket": {
+        "magicCommands": 1,
+        "sequence": [
+          [
+            778,
+            -1161,
+            "UserLocation"
+          ],
+          [
+            782,
+            -286,
+            "DeleteItem"
+          ],
+          [
+            785,
+            -14,
+            "UserLocation"
+          ],
+          [
+            788,
+            -4,
+            "Magic"
+          ],
+          [
+            789,
+            0,
+            "ObjectMagic"
+          ],
+          [
+            790,
+            3,
+            "ObjectMana"
+          ],
+          [
+            791,
+            5,
+            "ObjectProjectile"
+          ],
+          [
+            792,
+            659,
+            "ObjectStruck"
+          ],
+          [
+            793,
+            662,
+            "DamageIndicator"
+          ],
+          [
+            794,
+            665,
+            "ObjectHealth"
+          ],
+          [
+            795,
+            669,
+            "ObjectDied"
+          ],
+          [
+            798,
+            838,
+            "MagicLeveled"
+          ]
+        ]
+      },
+      "persisted": {
+        "normalLogout": true,
+        "freshNormalLogout": true,
+        "skill": {
+          "hotkey": 9,
+          "level": 0,
+          "experience": 472
+        },
+        "ammo": 42,
+        "initialAmmo": 43
+      }
+    }
+  ],
+  "postCastWalkOpen": [
+    {
+      "name": "baseline-after-move-r1",
+      "receiptSha256": "4217b336ca3cae022041bac8679de1f6114c7fbd97f6fa539338d4dffe88ca8b",
+      "sourceHead": "8fa80d83ce4ef288db4fad6314e2544db3446d75",
+      "gatewaySha256": "517328cd8d2badcf2a7fb9ae1532964435e703a40398838b540551c0a697867c",
+      "runtimeVersion": "bevy-22790e9223ec130f",
+      "runtimeManifestSha256": "68fb2a35cf983f9a380ebb995e03f3a065f89d1c74d8390ba53bd12925385f00",
+      "sources": {
+        "app/page.tsx": "233f7b8b5120d3e67bff944317af14289bb34d23aa9580ee45ea07cdae605d30",
+        "app/original-client-shell.tsx": "72d262f4cea9aff1a67aedc086e91cf247916659c0011ea0d97127137006277d",
+        "app/components/original-client-entity-animation-runtime.ts": "f477a5b06d095d8e7c18474af73add726ed423ba50a9d7018b0d2c6f4b8dd5a2",
+        "app/components/original-client-scene-visual-layers.tsx": "c13a415ba69744fa7eb832755d34ea1ae096a4e206b416c03cd2a58c279fb744",
+        "app/components/original-client-scene-motion.ts": "40a5eb1fef9ad3c85b343058e340886452e10502d404220f6a6e7140d594f887",
+        "app/components/original-client-scene-rendering.tsx": "69b977941e92704ecf14027855d8366d071f6fef4145ddc7c53d6820e4d53da8",
+        "lib/world-fishing-source.ts": "ee24569a0ae5946397fff550784e7ef5a2e0bc62abb93a981bf3136a4c18c2f4",
+        "lib/r16-targeted-projectiles.ts": "4fef9947719cecb83db992bf41a70a3fbe8d023f12b23c64afa314e7792ef69e",
+        "lib/generated/bevy_runtime_version.json": "fceed58ba19d24a92ac8bf27258c9443f5e1126c32c5e4be7aa5860820cbc27b"
+      },
+      "diagnosticTap": {
+        "file": "app/components/original-client-entity-animation-runtime.ts",
+        "originalSha256": "f477a5b06d095d8e7c18474af73add726ed423ba50a9d7018b0d2c6f4b8dd5a2",
+        "scratchSha256": "7ca429f489cf0e2da86cea26c3bd27d07aeda23cdc47a9f6574f8a799e6c645c",
+        "instrumentationSha256": "f76da009e238dbb16abddf010e60deb52b93f3fbcfac4438e2686b3c0ddf7cbb",
+        "advancesRuntime": false
+      },
+      "fixtureSha256": "3645dc2efd9f49333a57780250ad9092469a92fc995ab8defbe434ba0e64beab",
+      "renderer": {
+        "backend": "webgl2",
+        "packageId": "webgl2-shared",
+        "booted": true,
+        "entityEnabled": false
+      },
+      "images": [
+        {
+          "phase": "caster-spell",
+          "file": "caster-spell.jpg",
+          "at": 1794266189528,
+          "relativeToVisualSampleMs": -6,
+          "sha256": "7938eef69692c18263634849200b9f8c63465021d05be5717daa55ab0b5c417d"
+        },
+        {
+          "phase": "damage-number",
+          "file": "damage-number.jpg",
+          "at": 1794266190207,
+          "relativeToVisualSampleMs": -8,
+          "sha256": "74d6ff3fbd6553b27e1d4c0e0d51ae11f764743b8bcf808c1d6cbf3b0166388d"
+        },
+        {
+          "phase": "projectile",
+          "file": "projectile-baseline.jpg",
+          "at": 1794266190207,
+          "relativeToVisualSampleMs": 15,
+          "sha256": "74d6ff3fbd6553b27e1d4c0e0d51ae11f764743b8bcf808c1d6cbf3b0166388d"
+        },
+        {
+          "phase": "impact",
+          "file": "impact-baseline.jpg",
+          "at": 1794266190586,
+          "relativeToVisualSampleMs": 6,
+          "sha256": "a781b5f3712d8e4ae48a6bdd2c62ef7da6292fad583b7eca198b1cdc7e2265a9"
+        }
+      ],
+      "navigation": {
+        "acceptedTiles": 18,
+        "finalAck": {
+          "from": [
+            300,
+            266
+          ],
+          "waypoint": [
+            300,
+            267
+          ],
+          "after": [
+            300,
+            267
+          ],
+          "walkOrRunCommands": [
+            "walk"
+          ],
+          "ackSequence": 780,
+          "ackEpochMs": 1794266183932,
+          "ackDirection": "Down"
+        },
+        "packetMovementTokens": 0,
+        "presentationMovementTokens": 25,
+        "currentMotionHintsSent": 0,
+        "allMovementTokens": 25,
+        "maximumQueue": 7
+      },
+      "sameCellFacingAck": {
+        "seq": 792,
+        "epochMs": 1794266189311,
+        "packet": "UserLocation",
+        "position": {
+          "x": 300,
+          "y": 267
+        },
+        "direction": "DownLeft"
+      },
+      "settled": {
+        "waitedMs": 4243,
+        "action": "standing",
+        "queueDepth": 0
+      },
+      "authoritativeSpell": {
+        "atMs": 30,
+        "legacyState": "attackRange",
+        "action": "spell",
+        "known": true,
+        "sourceRevision": 22,
+        "queueBefore": 0,
+        "queueOnInput": 0,
+        "outActionOnInput": "spell",
+        "motionExpiryMs": -4819
+      },
+      "displayed": {
+        "firstSpell": {
+          "atMs": 216,
+          "action": "spell",
+          "logicalFrame": "0",
+          "bodyPath": "/original-ui/CArmour/05/326.png"
+        },
+        "starts": [
+          30
+        ],
+        "castWindowActions": [
+          "standing",
+          "spell"
+        ],
+        "missileMs": 633,
+        "impactMs": 1110,
+        "damageIndicatorMs": 642,
+        "firstVisibleNumberMs": 897,
+        "packetToNumberMs": 255
+      },
+      "afterMove": {
+        "from": [
+          300,
+          267
+        ],
+        "to": [
+          301,
+          267
+        ],
+        "ackMs": 2209,
+        "subsequentMagic": 0,
+        "walkBody": null,
+        "spellStartsAfterAck": [],
+        "liveLegacyStates": [
+          "walking",
+          "standing"
+        ],
+        "inputActionsAfterAck": [
+          "spell"
+        ],
+        "outputActionsAfterAck": [
+          "standing"
+        ],
+        "oldSpellTokenDeliveries": 5
+      },
+      "socket": {
+        "magicCommands": 1,
+        "sequence": [
+          [
+            780,
+            -5386,
+            "UserLocation"
+          ],
+          [
+            789,
+            -263,
+            "DeleteItem"
+          ],
+          [
+            792,
+            -7,
+            "UserLocation"
+          ],
+          [
+            793,
+            -7,
+            "Magic"
+          ],
+          [
+            794,
+            0,
+            "ObjectMagic"
+          ],
+          [
+            795,
+            1,
+            "ObjectMana"
+          ],
+          [
+            796,
+            4,
+            "ObjectProjectile"
+          ],
+          [
+            798,
+            624,
+            "ObjectStruck"
+          ],
+          [
+            799,
+            642,
+            "DamageIndicator"
+          ],
+          [
+            800,
+            645,
+            "ObjectHealth"
+          ],
+          [
+            801,
+            649,
+            "ObjectDied"
+          ],
+          [
+            803,
+            841,
+            "MagicLeveled"
+          ],
+          [
+            810,
+            2209,
+            "UserLocation"
+          ]
+        ]
+      },
+      "persisted": {
+        "normalLogout": true,
+        "freshNormalLogout": true,
+        "skill": {
+          "hotkey": 9,
+          "level": 0,
+          "experience": 471
+        },
+        "ammo": 42,
+        "initialAmmo": 43
+      }
+    }
+  ],
+  "finalSummarySha256": "5618e67bf99fc55d5fbd02e1b2e02a26d801a92603e3e648687b8313ce0eaa8c",
+  "candidate": [
+    {
+      "name": "candidate-exact-shared-r1",
+      "receiptSha256": "78e36062787ed2b3737b30e29195fcc2c4de50861b3d02764580c0887ce64290",
+      "sourceHead": "8fa80d83ce4ef288db4fad6314e2544db3446d75",
+      "gatewaySha256": "517328cd8d2badcf2a7fb9ae1532964435e703a40398838b540551c0a697867c",
+      "runtimeVersion": "bevy-7c0a3b5dc8a548d9",
+      "runtimeManifestSha256": "fe94d505e148a5ae01704597707bf9611e0d12e64a3efd9860ce27052767d395",
+      "clientCore": {
+        "manifestSha256": "e15e592ca9ddd35f2755942642336820c5fffb9efe2ecf4b60e139a4dc948d50",
+        "presentation": "393cfd53c2235c51cfb1dc136ccd7a468ad584e9a6e71fe3bf13533f4a281302",
+        "sourceSha256": "5ef63b14578c39e5b183ade5668e5bad949c916508fa08bdcae536f7e7ce8ab7",
+        "files": [
+          {
+            "section": "core",
+            "version": "4688b711bf9629b5b006d21e7c188bae6e4dc878ddac632c982df2434b85b499",
+            "name": "mir2_platform_web.js",
+            "sha256": "875090fd42d891cb003f63e46aaed848ead048f322e86ad5338db9a088fa01e7",
+            "bytes": 24393
+          },
+          {
+            "section": "core",
+            "version": "4688b711bf9629b5b006d21e7c188bae6e4dc878ddac632c982df2434b85b499",
+            "name": "mir2_platform_web_bg.wasm",
+            "sha256": "1db592d6bf105a7aa88563b0ba7947a214725757713819f353c3377415cab4a2",
+            "bytes": 247982
+          },
+          {
+            "section": "presentation",
+            "version": "393cfd53c2235c51cfb1dc136ccd7a468ad584e9a6e71fe3bf13533f4a281302",
+            "name": "mir2_platform_web.js",
+            "sha256": "8bbff9179937703b7fff70bbf3ea8136b46da027470427036a9bee11605c810c",
+            "bytes": 24721
+          },
+          {
+            "section": "presentation",
+            "version": "393cfd53c2235c51cfb1dc136ccd7a468ad584e9a6e71fe3bf13533f4a281302",
+            "name": "mir2_platform_web_bg.wasm",
+            "sha256": "b677b4eac9423037ad867f2c4efd8a1d3f78dfa0b125dffea215223e6b740501",
+            "bytes": 261300
+          },
+          {
+            "section": "npcPurchase",
+            "version": "9d88153071248d9523b85718be6c4cf6eb3daf5791fba9e6050b7ec405e91dd8",
+            "name": "mir2_platform_web.js",
+            "sha256": "b6a3e9848e46934dd5187120ea543da5d174bf97f1a34d63ca9be714e0b18218",
+            "bytes": 8332
+          },
+          {
+            "section": "npcPurchase",
+            "version": "9d88153071248d9523b85718be6c4cf6eb3daf5791fba9e6050b7ec405e91dd8",
+            "name": "mir2_platform_web_bg.wasm",
+            "sha256": "279287cba87cab0ce2db344be00d1c3bd5bdc7fffc12e275da5837f8f917dd9d",
+            "bytes": 164684
+          }
+        ]
+      },
+      "runtimeAssetRequests": [
+        {
+          "event": "response",
+          "at": 1794266838543,
+          "path": "/client-core/4688b711bf9629b5b006d21e7c188bae6e4dc878ddac632c982df2434b85b499/mir2_platform_web.js",
+          "status": 200
+        },
+        {
+          "event": "response",
+          "at": 1794266838588,
+          "path": "/client-core/4688b711bf9629b5b006d21e7c188bae6e4dc878ddac632c982df2434b85b499/mir2_platform_web_bg.wasm",
+          "status": 200
+        },
+        {
+          "event": "response",
+          "at": 1794266838671,
+          "path": "/client-core/393cfd53c2235c51cfb1dc136ccd7a468ad584e9a6e71fe3bf13533f4a281302/mir2_platform_web.js",
+          "status": 200
+        },
+        {
+          "event": "response",
+          "at": 1794266839072,
+          "path": "/client-core/393cfd53c2235c51cfb1dc136ccd7a468ad584e9a6e71fe3bf13533f4a281302/mir2_platform_web_bg.wasm",
+          "status": 200
+        },
+        {
+          "event": "response",
+          "at": 1794266839096,
+          "path": "/client-core/9d88153071248d9523b85718be6c4cf6eb3daf5791fba9e6050b7ec405e91dd8/mir2_platform_web.js",
+          "status": 200
+        },
+        {
+          "event": "response",
+          "at": 1794266839103,
+          "path": "/client-core/9d88153071248d9523b85718be6c4cf6eb3daf5791fba9e6050b7ec405e91dd8/mir2_platform_web_bg.wasm",
+          "status": 200
+        },
+        {
+          "event": "response",
+          "at": 1794266852752,
+          "path": "/bevy-runtime/v/bevy-7c0a3b5dc8a548d9/pkg-webgl2-shared/mir2_bevy_runtime.js",
+          "status": 200
+        },
+        {
+          "event": "response",
+          "at": 1794266852764,
+          "path": "/bevy-runtime/v/bevy-7c0a3b5dc8a548d9/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+          "status": 200
+        }
+      ],
+      "sources": {
+        "app/page.tsx": "233f7b8b5120d3e67bff944317af14289bb34d23aa9580ee45ea07cdae605d30",
+        "app/original-client-shell.tsx": "72d262f4cea9aff1a67aedc086e91cf247916659c0011ea0d97127137006277d",
+        "app/components/original-client-entity-animation-runtime.ts": "f477a5b06d095d8e7c18474af73add726ed423ba50a9d7018b0d2c6f4b8dd5a2",
+        "app/components/original-client-scene-visual-layers.tsx": "c13a415ba69744fa7eb832755d34ea1ae096a4e206b416c03cd2a58c279fb744",
+        "app/components/original-client-scene-motion.ts": "40a5eb1fef9ad3c85b343058e340886452e10502d404220f6a6e7140d594f887",
+        "app/components/original-client-scene-rendering.tsx": "69b977941e92704ecf14027855d8366d071f6fef4145ddc7c53d6820e4d53da8",
+        "lib/world-fishing-source.ts": "ee24569a0ae5946397fff550784e7ef5a2e0bc62abb93a981bf3136a4c18c2f4",
+        "lib/r16-targeted-projectiles.ts": "4fef9947719cecb83db992bf41a70a3fbe8d023f12b23c64afa314e7792ef69e",
+        "lib/generated/bevy_runtime_version.json": "fceed58ba19d24a92ac8bf27258c9443f5e1126c32c5e4be7aa5860820cbc27b",
+        "lib/generated/client_core_runtime.json": "7e71968e1ba93c332d12312bb764b8595457ce8d6a49b35e18fcaabff627b386"
+      },
+      "productOverlay": {
+        "app/components/original-client-entity-animation-runtime.ts": "81d405140bb9f8759e40435cea9a9f0c0d0ccf88ceb7bcdd1ea111acd169e46c"
+      },
+      "diagnosticTap": {
+        "file": "app/components/original-client-entity-animation-runtime.ts",
+        "originalSha256": "81d405140bb9f8759e40435cea9a9f0c0d0ccf88ceb7bcdd1ea111acd169e46c",
+        "scratchSha256": "6e6dc375483c43c934be9fa45ebaa3bc3818c69057a17463f66784dd57be1375",
+        "instrumentationSha256": "5e3a93a25e1e6d24dd1723a9afc0c0acda42d2af1ce3e5f3818a6d4e3206ce67",
+        "advancesRuntime": false
+      },
+      "fixtureSha256": "3645dc2efd9f49333a57780250ad9092469a92fc995ab8defbe434ba0e64beab",
+      "renderer": {
+        "backend": "webgl2",
+        "packageId": "webgl2-shared",
+        "booted": true,
+        "entityEnabled": false
+      },
+      "images": [
+        {
+          "phase": "caster-spell",
+          "file": "caster-spell.jpg",
+          "at": 1794266870247,
+          "relativeToVisualSampleMs": 8,
+          "sha256": "3d889adfe8d946ea2a827e6221ae984d79cee73b33a258df523cffd7acf0832b"
+        },
+        {
+          "phase": "damage-number",
+          "file": "damage-number.jpg",
+          "at": 1794266870901,
+          "relativeToVisualSampleMs": -35,
+          "sha256": "227341c122b81281f5d97c1e97a55433bf2edcaf334c5f1d99de4a7e38fb27d4"
+        },
+        {
+          "phase": "projectile",
+          "file": "projectile-baseline.jpg",
+          "at": 1794266870685,
+          "relativeToVisualSampleMs": -11,
+          "sha256": "49d221e103dde4619d210bf1fbbb8ad7ac426d9641a4a5b7f829b47e2b803e1b"
+        },
+        {
+          "phase": "impact",
+          "file": "impact-baseline.jpg",
+          "at": 1794266871301,
+          "relativeToVisualSampleMs": 3,
+          "sha256": "31be22894edcf6e5c01ef99e75aa3f388f972fa471513e1bcb7a8e8b37305ea4"
+        }
+      ],
+      "navigation": {
+        "acceptedTiles": 18,
+        "finalAck": {
+          "from": [
+            300,
+            266
+          ],
+          "waypoint": [
+            300,
+            267
+          ],
+          "after": [
+            300,
+            267
+          ],
+          "walkOrRunCommands": [
+            "walk"
+          ],
+          "ackSequence": 778,
+          "ackEpochMs": 1794266868850,
+          "ackDirection": "Down"
+        },
+        "packetMovementTokens": 0,
+        "presentationMovementTokens": 25,
+        "currentMotionHintsSent": 25,
+        "allMovementTokens": 25,
+        "maximumQueue": 0
+      },
+      "sameCellFacingAck": {
+        "seq": 784,
+        "epochMs": 1794266869969,
+        "packet": "UserLocation",
+        "position": {
+          "x": 300,
+          "y": 267
+        },
+        "direction": "DownLeft"
+      },
+      "settled": null,
+      "authoritativeSpell": {
+        "atMs": 28,
+        "legacyState": "attackRange",
+        "action": "spell",
+        "known": true,
+        "sourceRevision": 22,
+        "queueBefore": 0,
+        "queueOnInput": 0,
+        "outActionOnInput": "spell",
+        "motionExpiryMs": -576
+      },
+      "displayed": {
+        "firstSpell": {
+          "atMs": 246,
+          "action": "spell",
+          "logicalFrame": "0",
+          "bodyPath": "/original-ui/CArmour/05/326.png"
+        },
+        "starts": [
+          28
+        ],
+        "castWindowActions": [
+          "standing",
+          "spell"
+        ],
+        "missileMs": 636,
+        "impactMs": 1152,
+        "damageIndicatorMs": 688,
+        "firstVisibleNumberMs": 943,
+        "packetToNumberMs": 255
+      },
+      "afterMove": null,
+      "socket": {
+        "magicCommands": 1,
+        "sequence": [
+          [
+            778,
+            -1143,
+            "UserLocation"
+          ],
+          [
+            782,
+            -272,
+            "DeleteItem"
+          ],
+          [
+            784,
+            -24,
+            "UserLocation"
+          ],
+          [
+            786,
+            -3,
+            "Magic"
+          ],
+          [
+            787,
+            0,
+            "ObjectMagic"
+          ],
+          [
+            788,
+            3,
+            "ObjectMana"
+          ],
+          [
+            789,
+            6,
+            "ObjectProjectile"
+          ],
+          [
+            792,
+            679,
+            "ObjectStruck"
+          ],
+          [
+            793,
+            688,
+            "DamageIndicator"
+          ],
+          [
+            794,
+            691,
+            "ObjectHealth"
+          ],
+          [
+            795,
+            695,
+            "ObjectDied"
+          ],
+          [
+            797,
+            902,
+            "MagicLeveled"
+          ]
+        ]
+      },
+      "persisted": {
+        "normalLogout": true,
+        "freshNormalLogout": true,
+        "skill": {
+          "hotkey": 9,
+          "level": 0,
+          "experience": 472
+        },
+        "ammo": 42,
+        "initialAmmo": 43
+      },
+      "damage": 5,
+      "mp": {
+        "before": 260,
+        "after": 257,
+        "freshReadback": 257
+      },
+      "errors": 0,
+      "stopped": {
+        "gateway": true,
+        "next": true
+      }
+    },
+    {
+      "name": "candidate-exact-webgpu-r1",
+      "receiptSha256": "3a98e9773ba0baf19cdc2bd276d0c98dcc3dfb4c63ad0a04df91c4e8e3cc35aa",
+      "sourceHead": "8fa80d83ce4ef288db4fad6314e2544db3446d75",
+      "gatewaySha256": "517328cd8d2badcf2a7fb9ae1532964435e703a40398838b540551c0a697867c",
+      "runtimeVersion": "bevy-7c0a3b5dc8a548d9",
+      "runtimeManifestSha256": "fe94d505e148a5ae01704597707bf9611e0d12e64a3efd9860ce27052767d395",
+      "clientCore": {
+        "manifestSha256": "e15e592ca9ddd35f2755942642336820c5fffb9efe2ecf4b60e139a4dc948d50",
+        "presentation": "393cfd53c2235c51cfb1dc136ccd7a468ad584e9a6e71fe3bf13533f4a281302",
+        "sourceSha256": "5ef63b14578c39e5b183ade5668e5bad949c916508fa08bdcae536f7e7ce8ab7",
+        "files": [
+          {
+            "section": "core",
+            "version": "4688b711bf9629b5b006d21e7c188bae6e4dc878ddac632c982df2434b85b499",
+            "name": "mir2_platform_web.js",
+            "sha256": "875090fd42d891cb003f63e46aaed848ead048f322e86ad5338db9a088fa01e7",
+            "bytes": 24393
+          },
+          {
+            "section": "core",
+            "version": "4688b711bf9629b5b006d21e7c188bae6e4dc878ddac632c982df2434b85b499",
+            "name": "mir2_platform_web_bg.wasm",
+            "sha256": "1db592d6bf105a7aa88563b0ba7947a214725757713819f353c3377415cab4a2",
+            "bytes": 247982
+          },
+          {
+            "section": "presentation",
+            "version": "393cfd53c2235c51cfb1dc136ccd7a468ad584e9a6e71fe3bf13533f4a281302",
+            "name": "mir2_platform_web.js",
+            "sha256": "8bbff9179937703b7fff70bbf3ea8136b46da027470427036a9bee11605c810c",
+            "bytes": 24721
+          },
+          {
+            "section": "presentation",
+            "version": "393cfd53c2235c51cfb1dc136ccd7a468ad584e9a6e71fe3bf13533f4a281302",
+            "name": "mir2_platform_web_bg.wasm",
+            "sha256": "b677b4eac9423037ad867f2c4efd8a1d3f78dfa0b125dffea215223e6b740501",
+            "bytes": 261300
+          },
+          {
+            "section": "npcPurchase",
+            "version": "9d88153071248d9523b85718be6c4cf6eb3daf5791fba9e6050b7ec405e91dd8",
+            "name": "mir2_platform_web.js",
+            "sha256": "b6a3e9848e46934dd5187120ea543da5d174bf97f1a34d63ca9be714e0b18218",
+            "bytes": 8332
+          },
+          {
+            "section": "npcPurchase",
+            "version": "9d88153071248d9523b85718be6c4cf6eb3daf5791fba9e6050b7ec405e91dd8",
+            "name": "mir2_platform_web_bg.wasm",
+            "sha256": "279287cba87cab0ce2db344be00d1c3bd5bdc7fffc12e275da5837f8f917dd9d",
+            "bytes": 164684
+          }
+        ]
+      },
+      "runtimeAssetRequests": [
+        {
+          "event": "response",
+          "at": 1794266907681,
+          "path": "/client-core/4688b711bf9629b5b006d21e7c188bae6e4dc878ddac632c982df2434b85b499/mir2_platform_web.js",
+          "status": 200
+        },
+        {
+          "event": "response",
+          "at": 1794266907726,
+          "path": "/client-core/4688b711bf9629b5b006d21e7c188bae6e4dc878ddac632c982df2434b85b499/mir2_platform_web_bg.wasm",
+          "status": 200
+        },
+        {
+          "event": "response",
+          "at": 1794266907806,
+          "path": "/client-core/393cfd53c2235c51cfb1dc136ccd7a468ad584e9a6e71fe3bf13533f4a281302/mir2_platform_web.js",
+          "status": 200
+        },
+        {
+          "event": "response",
+          "at": 1794266907809,
+          "path": "/client-core/393cfd53c2235c51cfb1dc136ccd7a468ad584e9a6e71fe3bf13533f4a281302/mir2_platform_web_bg.wasm",
+          "status": 200
+        },
+        {
+          "event": "response",
+          "at": 1794266908241,
+          "path": "/client-core/9d88153071248d9523b85718be6c4cf6eb3daf5791fba9e6050b7ec405e91dd8/mir2_platform_web.js",
+          "status": 200
+        },
+        {
+          "event": "response",
+          "at": 1794266908247,
+          "path": "/client-core/9d88153071248d9523b85718be6c4cf6eb3daf5791fba9e6050b7ec405e91dd8/mir2_platform_web_bg.wasm",
+          "status": 200
+        },
+        {
+          "event": "response",
+          "at": 1794266921841,
+          "path": "/bevy-runtime/v/bevy-7c0a3b5dc8a548d9/pkg-webgpu/mir2_bevy_runtime.js",
+          "status": 200
+        },
+        {
+          "event": "response",
+          "at": 1794266921853,
+          "path": "/bevy-runtime/v/bevy-7c0a3b5dc8a548d9/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+          "status": 200
+        }
+      ],
+      "sources": {
+        "app/page.tsx": "233f7b8b5120d3e67bff944317af14289bb34d23aa9580ee45ea07cdae605d30",
+        "app/original-client-shell.tsx": "72d262f4cea9aff1a67aedc086e91cf247916659c0011ea0d97127137006277d",
+        "app/components/original-client-entity-animation-runtime.ts": "f477a5b06d095d8e7c18474af73add726ed423ba50a9d7018b0d2c6f4b8dd5a2",
+        "app/components/original-client-scene-visual-layers.tsx": "c13a415ba69744fa7eb832755d34ea1ae096a4e206b416c03cd2a58c279fb744",
+        "app/components/original-client-scene-motion.ts": "40a5eb1fef9ad3c85b343058e340886452e10502d404220f6a6e7140d594f887",
+        "app/components/original-client-scene-rendering.tsx": "69b977941e92704ecf14027855d8366d071f6fef4145ddc7c53d6820e4d53da8",
+        "lib/world-fishing-source.ts": "ee24569a0ae5946397fff550784e7ef5a2e0bc62abb93a981bf3136a4c18c2f4",
+        "lib/r16-targeted-projectiles.ts": "4fef9947719cecb83db992bf41a70a3fbe8d023f12b23c64afa314e7792ef69e",
+        "lib/generated/bevy_runtime_version.json": "fceed58ba19d24a92ac8bf27258c9443f5e1126c32c5e4be7aa5860820cbc27b",
+        "lib/generated/client_core_runtime.json": "7e71968e1ba93c332d12312bb764b8595457ce8d6a49b35e18fcaabff627b386"
+      },
+      "productOverlay": {
+        "app/components/original-client-entity-animation-runtime.ts": "81d405140bb9f8759e40435cea9a9f0c0d0ccf88ceb7bcdd1ea111acd169e46c"
+      },
+      "diagnosticTap": {
+        "file": "app/components/original-client-entity-animation-runtime.ts",
+        "originalSha256": "81d405140bb9f8759e40435cea9a9f0c0d0ccf88ceb7bcdd1ea111acd169e46c",
+        "scratchSha256": "6e6dc375483c43c934be9fa45ebaa3bc3818c69057a17463f66784dd57be1375",
+        "instrumentationSha256": "5e3a93a25e1e6d24dd1723a9afc0c0acda42d2af1ce3e5f3818a6d4e3206ce67",
+        "advancesRuntime": false
+      },
+      "fixtureSha256": "3645dc2efd9f49333a57780250ad9092469a92fc995ab8defbe434ba0e64beab",
+      "renderer": {
+        "backend": "webgpu",
+        "packageId": "webgpu",
+        "booted": true,
+        "entityEnabled": false
+      },
+      "images": [
+        {
+          "phase": "caster-spell",
+          "file": "caster-spell.jpg",
+          "at": 1794266939606,
+          "relativeToVisualSampleMs": 0,
+          "sha256": "59b57ca74af23db0e2433b1d8c7b2cd8bc3c78d28841116372aed82e46d96247"
+        },
+        {
+          "phase": "damage-number",
+          "file": "damage-number.jpg",
+          "at": 1794266940389,
+          "relativeToVisualSampleMs": -22,
+          "sha256": "8b49754b22589cc372258aa62511dffd343ee3078beb8234c2a13cb74fceaf67"
+        },
+        {
+          "phase": "projectile",
+          "file": "projectile-baseline.jpg",
+          "at": 1794266940019,
+          "relativeToVisualSampleMs": -13,
+          "sha256": "e5289fc257ec0451dfcf7229bf54c5f5432c8dd666b57cca0eb03405dbd6eef6"
+        },
+        {
+          "phase": "impact",
+          "file": "impact-baseline.jpg",
+          "at": 1794266940598,
+          "relativeToVisualSampleMs": -14,
+          "sha256": "c9b4948ed664f43d51306c2059233281ae3645edd39169ca3e3126d5a8fea9ab"
+        }
+      ],
+      "navigation": {
+        "acceptedTiles": 18,
+        "finalAck": {
+          "from": [
+            300,
+            266
+          ],
+          "waypoint": [
+            300,
+            267
+          ],
+          "after": [
+            300,
+            267
+          ],
+          "walkOrRunCommands": [
+            "walk"
+          ],
+          "ackSequence": 778,
+          "ackEpochMs": 1794266938181,
+          "ackDirection": "Down"
+        },
+        "packetMovementTokens": 0,
+        "presentationMovementTokens": 19,
+        "currentMotionHintsSent": 19,
+        "allMovementTokens": 19,
+        "maximumQueue": 0
+      },
+      "sameCellFacingAck": {
+        "seq": 784,
+        "epochMs": 1794266939338,
+        "packet": "UserLocation",
+        "position": {
+          "x": 300,
+          "y": 267
+        },
+        "direction": "DownLeft"
+      },
+      "settled": null,
+      "authoritativeSpell": {
+        "atMs": 167,
+        "legacyState": "attackRange",
+        "action": "spell",
+        "known": true,
+        "sourceRevision": 22,
+        "queueBefore": 0,
+        "queueOnInput": 0,
+        "outActionOnInput": "spell",
+        "motionExpiryMs": -613
+      },
+      "displayed": {
+        "firstSpell": {
+          "atMs": 241,
+          "action": "spell",
+          "logicalFrame": "0",
+          "bodyPath": "/original-ui/CArmour/05/326.png"
+        },
+        "starts": [
+          167
+        ],
+        "castWindowActions": [
+          "standing",
+          "spell"
+        ],
+        "missileMs": 639,
+        "impactMs": 1083,
+        "damageIndicatorMs": 651,
+        "firstVisibleNumberMs": 1046,
+        "packetToNumberMs": 395
+      },
+      "afterMove": null,
+      "socket": {
+        "magicCommands": 1,
+        "sequence": [
+          [
+            778,
+            -1184,
+            "UserLocation"
+          ],
+          [
+            782,
+            -279,
+            "DeleteItem"
+          ],
+          [
+            784,
+            -27,
+            "UserLocation"
+          ],
+          [
+            786,
+            -5,
+            "Magic"
+          ],
+          [
+            787,
+            0,
+            "ObjectMagic"
+          ],
+          [
+            788,
+            2,
+            "ObjectMana"
+          ],
+          [
+            789,
+            5,
+            "ObjectProjectile"
+          ],
+          [
+            792,
+            638,
+            "ObjectStruck"
+          ],
+          [
+            793,
+            651,
+            "DamageIndicator"
+          ],
+          [
+            794,
+            654,
+            "ObjectHealth"
+          ],
+          [
+            795,
+            659,
+            "ObjectDied"
+          ],
+          [
+            797,
+            847,
+            "MagicLeveled"
+          ]
+        ]
+      },
+      "persisted": {
+        "normalLogout": true,
+        "freshNormalLogout": true,
+        "skill": {
+          "hotkey": 9,
+          "level": 0,
+          "experience": 473
+        },
+        "ammo": 42,
+        "initialAmmo": 43
+      },
+      "damage": 5,
+      "mp": {
+        "before": 260,
+        "after": 257,
+        "freshReadback": 257
+      },
+      "errors": 0,
+      "stopped": {
+        "gateway": true,
+        "next": true
+      }
+    }
+  ],
+  "images": [
+    {
+      "run": "candidate-exact-shared-r1",
+      "file": "webgl2-shared-caster-spell.jpg",
+      "sha256": "3d889adfe8d946ea2a827e6221ae984d79cee73b33a258df523cffd7acf0832b",
+      "sourcePhase": "caster-spell"
+    },
+    {
+      "run": "candidate-exact-webgpu-r1",
+      "file": "webgpu-impact-number.jpg",
+      "sha256": "c9b4948ed664f43d51306c2059233281ae3645edd39169ca3e3126d5a8fea9ab",
+      "sourcePhase": "impact"
+    }
+  ]
+}

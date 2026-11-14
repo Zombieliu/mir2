@@ -1,0 +1,75 @@
+{
+  "failedRunsNotReclassified": true,
+  "runs": [
+    {
+      "name": "full-r1",
+      "path": "C:/r16-live-route-occupancy-20261115/fixture-r1/game-full/quest-after-r1/entry-visual-receipt.json",
+      "sha256": "a6d3acd7847ccec0f63c40ecc15bdc4d087b86d480a2c887707ab4a19fff035c",
+      "passed": false,
+      "reason": "Fixture used map file0 as mapIndex0; Rust rejected invalidDestination."
+    },
+    {
+      "name": "full-r2",
+      "path": "C:/r16-live-route-occupancy-20261115/fixture-r2/game-full/quest-after-r1/entry-visual-receipt.json",
+      "sha256": "35b7b3d6c9231a7e37e578a39603914a2a897da76bc70100f59db0bff1b44f6a",
+      "passed": false,
+      "reason": "Fixture expected camelCase in raw snake_case NPC manifest."
+    },
+    {
+      "name": "focused-r1",
+      "path": "C:/r16-live-route-occupancy-20261115/focused-default-r1.log",
+      "sha256": "1ba1e5db7dd0d6d74e9a495ab10d9b8e22665d6d4b9aa0a749f0c5cca4e37fca",
+      "passed": false,
+      "reason": "Extracted frontend-only source did not contain the QA service dependency. No server was started."
+    },
+    {
+      "name": "focused-r2",
+      "path": "C:/r16-live-route-occupancy-20261115/focused-r2/run-1/receipt.json",
+      "sha256": "5292f7edbf8cf9ef9bc9a55c1700ce4723db3652dc50afee6a6e8333143b9f19",
+      "passed": false,
+      "reason": "New-level1 marker assertion incorrectly applied to an already-accepted hunt save."
+    },
+    {
+      "name": "focused-r3",
+      "path": "C:/r16-live-route-occupancy-20261115/focused-r3/run-1/receipt.json",
+      "sha256": "f9c4edfb29d65fc08cbe1cfcca633af8e605bfa784ec498bf86ee4139e6c2b87",
+      "passed": false,
+      "reason": "Same marker assumption retained as false; actual screenshot and source packet later showed authoritative zero markers."
+    },
+    {
+      "name": "focused-r4",
+      "path": "C:/r16-live-route-occupancy-20261115/focused-r4/run-1/receipt.json",
+      "sha256": "4e2e4fc860f2e7dc174190dfd6adf949740ebd4855d2ccd977e3191ce4015288",
+      "passed": false,
+      "reason": "Fixture did not propagate en-US to the caption helper; real English arrival was observed."
+    },
+    {
+      "name": "focused-r5",
+      "path": "C:/r16-live-route-occupancy-20261115/focused-r5/run-1/receipt.json",
+      "sha256": "9c0c9dfeb56333969fdc7f25ba3bc361318c887013ffe67c946ccb81451e8b64",
+      "passed": false,
+      "reason": "Fixture unnecessarily required four straight edges; actual shared route bends."
+    },
+    {
+      "name": "focused-r6",
+      "path": "C:/r16-live-route-occupancy-20261115/focused-default-r6.log",
+      "sha256": "514a4a616a57801c28023c3041801032fc30711065fb042d11d22a2ffd50fc97",
+      "passed": false,
+      "reason": "Four-key fixture rejected a diagonal first step, then an unmatched-arm rejection escaped cleanup. Process was terminal; independent listener/profile census found none alive. Original receipt is missing, not fabricated."
+    },
+    {
+      "name": "focused-r7",
+      "path": "C:/r16-live-route-occupancy-20261115/focused-r7/run-1/receipt.json",
+      "sha256": "5f2d9142731959875226d61420b67e49756486a3def48366ac90907b4fcdc76e",
+      "passed": false,
+      "reason": "Waited for actual wire event before releasing the held prewire message; auto-deadline made witness invalid."
+    },
+    {
+      "name": "marker-authority-r1",
+      "path": "C:/r16-live-route-occupancy-20261115/marker-authority-r1/receipt.json",
+      "sha256": "3992a032affc5e015d16e43e609ad75d24e7a19dcc465e53e778bae1218aaab8",
+      "passed": false,
+      "reason": "SDK8s bootstrap timeout was incorrectly shared with movement; not a movement failure. Existing15s SDK bootstrap restored, individual8s move checks retained."
+    }
+  ]
+}

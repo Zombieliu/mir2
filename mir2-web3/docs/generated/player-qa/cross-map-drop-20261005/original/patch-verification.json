@@ -1,0 +1,10 @@
+{
+  "patch": "C:\\mir2-playtest-releases\\20261004-native-r18\\cross-map-drop-implementation-01\\p3a-complete.patch",
+  "sha256": "57b26653d284164c7122baa4f7de72fb441b08eeb394d473c57df238db9f7ded",
+  "files": 14,
+  "gitDiffCheckExit": 0,
+  "reverseCurrentCheckExit": 0,
+  "forwardPhysicalBaselineCheckExit": 0,
+  "applied": false,
+  "lineEndings": "Git patch normalized; frozen-source retains actual reviewed Windows bytes"
+}

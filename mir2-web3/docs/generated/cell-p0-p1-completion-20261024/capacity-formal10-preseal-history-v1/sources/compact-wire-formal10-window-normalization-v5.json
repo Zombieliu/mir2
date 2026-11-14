@@ -1,0 +1,172 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-25T07:50:40.230Z",
+  "scope": "Unsealed formal10 same-root supplemental minute-window projection correction. This is a gate/collection schema repair, not a gameplay change or real formal pass.",
+  "oldPreseal": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-formal10-preseal-input-check-v4.json",
+    "bytes": 24832,
+    "sha256": "902eaaca85a006f6831fed9854199abb64c301b2ad87e89e2b0c6e27a4d76c17"
+  },
+  "newHelper": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\phase-window-contract.mjs",
+    "bytes": 3442,
+    "sha256": "f62c44c11d415a6a277c1259b047adf04d823c553b75b4d36b74f47de9d82ea7"
+  },
+  "changes": [
+    {
+      "original": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\verify-feasibility-gate.mjs",
+        "bytes": 19368,
+        "sha256": "d2ab9d0698027dc24d678098514dc927331859ba13c11a9abc90d6b9b39a6539"
+      },
+      "preimage": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-formal10-v4-verify-feasibility-gate.mjs.txt",
+        "bytes": 19368,
+        "sha256": "d2ab9d0698027dc24d678098514dc927331859ba13c11a9abc90d6b9b39a6539"
+      },
+      "derived": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\verify-feasibility-gate.mjs",
+        "bytes": 19527,
+        "sha256": "1271b11da525a7c228bcfca473a1255f224e7919826ffd1bc86d25b4d193cdc4"
+      },
+      "rules": [
+        {
+          "kind": "new-bounded-window-projection-import",
+          "before": "",
+          "after": "import {createPhaseWindowCounter} from './phase-window-contract.mjs';\n",
+          "prefix": true
+        },
+        {
+          "kind": "fresh13-count-in-existing-raw-pass",
+          "before": "const wireCounter=createWireRawCounter();for await(const line of createInterface({input:createReadStream(rawFile),crlfDelay:Infinity})){if(!line||Buffer.byteLength(line)>16*1024*1024)throw Error('Invalid ended13 raw diagnostic line');wireCounter.observe(JSON.parse(line));}",
+          "after": "const wireCounter=createWireRawCounter(),minuteWindows=createPhaseWindowCounter(report,'probe13');for await(const line of createInterface({input:createReadStream(rawFile),crlfDelay:Infinity})){if(!line||Buffer.byteLength(line)>16*1024*1024)throw Error('Invalid ended13 raw diagnostic line');const row=JSON.parse(line);wireCounter.observe(row);minuteWindows.observe(row);}minuteWindows.assertComplete();"
+        },
+        {
+          "kind": "read-real16-windows-not-generic-selected-phase-events",
+          "before": "const rows=streamed.selected.filter(row=>row.type==='window'&&row.phase===name);",
+          "after": "const rows=minuteWindows.forPhase(name);"
+        }
+      ],
+      "exactInverseRestoresOriginalBytes": true
+    },
+    {
+      "original": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\collect-public.mjs",
+        "bytes": 41612,
+        "sha256": "ad73316fe4a43c8605c208d08f5d3d138849e3c345513aa8a5e303e54ff3a015"
+      },
+      "preimage": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-formal10-v4-collect-public.mjs.txt",
+        "bytes": 41612,
+        "sha256": "ad73316fe4a43c8605c208d08f5d3d138849e3c345513aa8a5e303e54ff3a015"
+      },
+      "derived": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\collect-public.mjs",
+        "bytes": 41882,
+        "sha256": "59f25bff4ca5f6da894b9c6fae157883c10f2efea47365e8c36e25ecd2c98650"
+      },
+      "rules": [
+        {
+          "kind": "new-bounded-window-projection-import",
+          "before": "",
+          "after": "import {createPhaseWindowCounter} from './phase-window-contract.mjs';\n",
+          "prefix": true
+        },
+        {
+          "kind": "bounded-formal-counter-in-existing-raw-pass",
+          "before": "const rawActions = {}, windows = [], typeCounts = {}, windowsByPhase = {}, wireRaw=createWireRawCounter();",
+          "after": "const rawActions = {}, windows = [], typeCounts = {}, windowsByPhase = {}, wireRaw=createWireRawCounter(),minuteWindows=report.ok===true?createPhaseWindowCounter(report,'formal'):null;"
+        },
+        {
+          "kind": "observe-original146-windows-only",
+          "before": "  wireRaw.observe(row);",
+          "after": "  wireRaw.observe(row);minuteWindows?.observe(row);"
+        },
+        {
+          "kind": "require-full-standard-minute-projection-only-on-existing-accepted-branch",
+          "before": "  api.verifyCapacityPhases(report, streamed.selected);",
+          "after": "  api.verifyCapacityPhases(report, streamed.selected);minuteWindows.assertComplete();"
+        },
+        {
+          "kind": "public-runtime-helper-allowlist",
+          "before": "realmFiles.push('DIAGNOSTICS-PREPARED.md'",
+          "after": "realmFiles.push('phase-window-contract.mjs','hp-maintenance-status-schema.mjs','DIAGNOSTICS-PREPARED.md'"
+        }
+      ],
+      "exactInverseRestoresOriginalBytes": true
+    },
+    {
+      "original": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\verify-public.mjs",
+        "bytes": 18506,
+        "sha256": "b1df0ddb0704f8e3ac78efd890175253d747191d5df0acaa5796865fa5bb2554"
+      },
+      "preimage": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-formal10-v4-verify-public.mjs.txt",
+        "bytes": 18506,
+        "sha256": "b1df0ddb0704f8e3ac78efd890175253d747191d5df0acaa5796865fa5bb2554"
+      },
+      "derived": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\verify-public.mjs",
+        "bytes": 18729,
+        "sha256": "42b634bdf9f31ecc27e1eda803a8b730e298887316f7b07a6d1dd96a632fbab3"
+      },
+      "rules": [
+        {
+          "kind": "new-bounded-window-projection-import",
+          "before": "",
+          "after": "import {createPhaseWindowCounter} from './phase-window-contract.mjs';\n",
+          "prefix": true
+        },
+        {
+          "kind": "bounded-formal-counter-in-existing-raw-pass",
+          "before": "const wireRaw=createWireRawCounter();for await(const line of createInterface({input:createReadStream(expectedRaw),crlfDelay:Infinity})){assert.ok(Buffer.byteLength(line)<=16*1024*1024);if(line)wireRaw.observe(JSON.parse(line));}",
+          "after": "const wireRaw=createWireRawCounter(),minuteWindows=report.ok===true?createPhaseWindowCounter(report,'formal'):null;for await(const line of createInterface({input:createReadStream(expectedRaw),crlfDelay:Infinity})){assert.ok(Buffer.byteLength(line)<=16*1024*1024);if(line){const row=JSON.parse(line);wireRaw.observe(row);minuteWindows?.observe(row);}}"
+        },
+        {
+          "kind": "require-full-standard-minute-projection-only-on-existing-accepted-branch",
+          "before": "  api.verifyCapacityPhases(report, streamed.selected);",
+          "after": "  api.verifyCapacityPhases(report, streamed.selected);minuteWindows.assertComplete();"
+        }
+      ],
+      "exactInverseRestoresOriginalBytes": true
+    }
+  ],
+  "otherPreviousLocalInputsUnchanged": 43,
+  "probeMinuteWindows": 16,
+  "formalMinuteWindows": 146,
+  "formalCounts": [
+    5,
+    5,
+    5,
+    5,
+    5,
+    120,
+    1
+  ],
+  "partialFailuresRemainArchivable": true,
+  "partialTailDoesNotCountAsCompleteMinute": true,
+  "actualProbe13CorrectedEvidence": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe13-independent-verification-v1\\final-verification.json",
+      "bytes": 359693,
+      "sha256": "c96b6cc7fbc960592f60c0b81dac3fc4d43238d424a2bfaf968d5528165e946c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\posthoc13-collection-v2\\posthoc-source-frozen-v2.json",
+      "bytes": 3980,
+      "sha256": "2efbafd38a518da087384a5680ca269ed7213df664fd586da81ab06b496de3f4"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-probe13-collection-independent-review-v2\\review-v2.json",
+      "bytes": 8896,
+      "sha256": "a6ade1027296cb35863d677b556cf453bae29a26495e62d00deeb566cbd6fc52"
+    }
+  ],
+  "originalGameplayThresholdsUnchanged": true,
+  "originalGenericApiChanged": false,
+  "old13RuntimeChanged": false,
+  "gateInvoked": false,
+  "realmStarted": false,
+  "sealed": false
+}

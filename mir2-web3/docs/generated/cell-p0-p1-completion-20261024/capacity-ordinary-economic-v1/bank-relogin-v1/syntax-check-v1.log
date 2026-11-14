@@ -1,0 +1,8 @@
+node --check C:\mir2-build\p01-completion-20261024\ordinary-bank-relogin-pilot-v1\copy-bank-v1.mjs
+exitCode=0 stdoutBytes=0 stderrBytes=0
+node --check C:\mir2-build\p01-completion-20261024\ordinary-bank-relogin-pilot-v1\source-lib-v1.mjs
+exitCode=0 stdoutBytes=0 stderrBytes=0
+node --check C:\mir2-build\p01-completion-20261024\ordinary-bank-relogin-pilot-v1\owned-child-v1.mjs
+exitCode=0 stdoutBytes=0 stderrBytes=0
+node --check C:\mir2-build\p01-completion-20261024\ordinary-bank-relogin-pilot-v1\run-bank-pilot-v1.mjs
+exitCode=0 stdoutBytes=0 stderrBytes=0

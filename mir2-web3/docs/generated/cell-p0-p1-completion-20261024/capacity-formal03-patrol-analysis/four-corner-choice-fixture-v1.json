@@ -1,0 +1,1472 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-24T21:04:03.865Z",
+  "scope": "Read-only approximate-obstacle fixture computation on the real packaged map0. No harness/source changes or live server. Original4 corners and4000-node existing planner only.",
+  "candidate": "Keep current primed native fastpath. In native+primed fallback only, inspect the existing4corner routes; choose first genuinely collinear2-step Run, else retain original first Walk. No extra targets, fabricated positions or changed denominator.",
+  "originalGoals": [
+    {
+      "x": 254,
+      "y": 671
+    },
+    {
+      "x": 254,
+      "y": 673
+    },
+    {
+      "x": 252,
+      "y": 673
+    },
+    {
+      "x": 252,
+      "y": 671
+    }
+  ],
+  "cases": [
+    {
+      "frameIndex": 0,
+      "origin": {
+        "x": 252,
+        "y": 671
+      },
+      "initialCursor": 0,
+      "frameSequence": 1148,
+      "obstacles": [
+        {
+          "objectId": 50001,
+          "name": "Lc7785701",
+          "kind": "player",
+          "x": 256,
+          "y": 671,
+          "dead": false,
+          "hp": null
+        },
+        {
+          "objectId": 206639,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 253,
+          "y": 672,
+          "dead": false,
+          "hp": 20
+        },
+        {
+          "objectId": 206642,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 253,
+          "y": 671,
+          "dead": false,
+          "hp": 20
+        },
+        {
+          "objectId": 206648,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 252,
+          "y": 672,
+          "dead": false,
+          "hp": 20
+        }
+      ],
+      "primedAssumed": true,
+      "fastPlan": null,
+      "routes": [
+        {
+          "goalIndex": 0,
+          "goal": {
+            "x": 254,
+            "y": 671
+          },
+          "kind": "walk",
+          "first": {
+            "x": 252,
+            "y": 670
+          },
+          "target": {
+            "x": 252,
+            "y": 670
+          },
+          "route": [
+            {
+              "x": 252,
+              "y": 671
+            },
+            {
+              "x": 252,
+              "y": 670
+            },
+            {
+              "x": 253,
+              "y": 670
+            },
+            {
+              "x": 254,
+              "y": 670
+            },
+            {
+              "x": 254,
+              "y": 671
+            }
+          ]
+        },
+        {
+          "goalIndex": 1,
+          "goal": {
+            "x": 254,
+            "y": 673
+          },
+          "kind": "walk",
+          "first": {
+            "x": 252,
+            "y": 670
+          },
+          "target": {
+            "x": 252,
+            "y": 670
+          },
+          "route": [
+            {
+              "x": 252,
+              "y": 671
+            },
+            {
+              "x": 252,
+              "y": 670
+            },
+            {
+              "x": 253,
+              "y": 670
+            },
+            {
+              "x": 254,
+              "y": 670
+            },
+            {
+              "x": 254,
+              "y": 671
+            },
+            {
+              "x": 254,
+              "y": 672
+            },
+            {
+              "x": 254,
+              "y": 673
+            }
+          ]
+        },
+        {
+          "goalIndex": 2,
+          "goal": {
+            "x": 252,
+            "y": 673
+          },
+          "kind": "walk",
+          "first": {
+            "x": 251,
+            "y": 671
+          },
+          "target": {
+            "x": 251,
+            "y": 671
+          },
+          "route": [
+            {
+              "x": 252,
+              "y": 671
+            },
+            {
+              "x": 251,
+              "y": 671
+            },
+            {
+              "x": 251,
+              "y": 672
+            },
+            {
+              "x": 251,
+              "y": 673
+            },
+            {
+              "x": 252,
+              "y": 673
+            }
+          ]
+        },
+        {
+          "goalIndex": 3,
+          "goal": {
+            "x": 252,
+            "y": 671
+          },
+          "kind": null,
+          "reason": "already-at-corner"
+        }
+      ],
+      "oldChoice": {
+        "goalIndex": 0,
+        "goal": {
+          "x": 254,
+          "y": 671
+        },
+        "kind": "walk",
+        "first": {
+          "x": 252,
+          "y": 670
+        },
+        "target": {
+          "x": 252,
+          "y": 670
+        },
+        "route": [
+          {
+            "x": 252,
+            "y": 671
+          },
+          {
+            "x": 252,
+            "y": 670
+          },
+          {
+            "x": 253,
+            "y": 670
+          },
+          {
+            "x": 254,
+            "y": 670
+          },
+          {
+            "x": 254,
+            "y": 671
+          }
+        ]
+      },
+      "candidateChoice": {
+        "goalIndex": 0,
+        "goal": {
+          "x": 254,
+          "y": 671
+        },
+        "kind": "walk",
+        "first": {
+          "x": 252,
+          "y": 670
+        },
+        "target": {
+          "x": 252,
+          "y": 670
+        },
+        "route": [
+          {
+            "x": 252,
+            "y": 671
+          },
+          {
+            "x": 252,
+            "y": 670
+          },
+          {
+            "x": 253,
+            "y": 670
+          },
+          {
+            "x": 254,
+            "y": 670
+          },
+          {
+            "x": 254,
+            "y": 671
+          }
+        ]
+      },
+      "addedRealRun": false
+    },
+    {
+      "frameIndex": 0,
+      "origin": {
+        "x": 252,
+        "y": 670
+      },
+      "initialCursor": 0,
+      "frameSequence": 1148,
+      "obstacles": [
+        {
+          "objectId": 50001,
+          "name": "Lc7785701",
+          "kind": "player",
+          "x": 256,
+          "y": 671,
+          "dead": false,
+          "hp": null
+        },
+        {
+          "objectId": 206639,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 253,
+          "y": 672,
+          "dead": false,
+          "hp": 20
+        },
+        {
+          "objectId": 206642,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 253,
+          "y": 671,
+          "dead": false,
+          "hp": 20
+        },
+        {
+          "objectId": 206648,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 252,
+          "y": 672,
+          "dead": false,
+          "hp": 20
+        }
+      ],
+      "primedAssumed": true,
+      "fastPlan": null,
+      "routes": [
+        {
+          "goalIndex": 0,
+          "goal": {
+            "x": 254,
+            "y": 671
+          },
+          "kind": "run",
+          "first": {
+            "x": 253,
+            "y": 670
+          },
+          "target": {
+            "x": 254,
+            "y": 670
+          },
+          "route": [
+            {
+              "x": 252,
+              "y": 670
+            },
+            {
+              "x": 253,
+              "y": 670
+            },
+            {
+              "x": 254,
+              "y": 670
+            },
+            {
+              "x": 254,
+              "y": 671
+            }
+          ]
+        },
+        {
+          "goalIndex": 1,
+          "goal": {
+            "x": 254,
+            "y": 673
+          },
+          "kind": "run",
+          "first": {
+            "x": 253,
+            "y": 670
+          },
+          "target": {
+            "x": 254,
+            "y": 670
+          },
+          "route": [
+            {
+              "x": 252,
+              "y": 670
+            },
+            {
+              "x": 253,
+              "y": 670
+            },
+            {
+              "x": 254,
+              "y": 670
+            },
+            {
+              "x": 254,
+              "y": 671
+            },
+            {
+              "x": 254,
+              "y": 672
+            },
+            {
+              "x": 254,
+              "y": 673
+            }
+          ]
+        },
+        {
+          "goalIndex": 2,
+          "goal": {
+            "x": 252,
+            "y": 673
+          },
+          "kind": "walk",
+          "first": {
+            "x": 251,
+            "y": 671
+          },
+          "target": {
+            "x": 251,
+            "y": 671
+          },
+          "route": [
+            {
+              "x": 252,
+              "y": 670
+            },
+            {
+              "x": 251,
+              "y": 671
+            },
+            {
+              "x": 251,
+              "y": 672
+            },
+            {
+              "x": 251,
+              "y": 673
+            },
+            {
+              "x": 252,
+              "y": 673
+            }
+          ]
+        },
+        {
+          "goalIndex": 3,
+          "goal": {
+            "x": 252,
+            "y": 671
+          },
+          "kind": "walk",
+          "first": {
+            "x": 252,
+            "y": 671
+          },
+          "target": {
+            "x": 252,
+            "y": 671
+          },
+          "route": [
+            {
+              "x": 252,
+              "y": 670
+            },
+            {
+              "x": 252,
+              "y": 671
+            }
+          ]
+        }
+      ],
+      "oldChoice": {
+        "goalIndex": 0,
+        "goal": {
+          "x": 254,
+          "y": 671
+        },
+        "kind": "run",
+        "first": {
+          "x": 253,
+          "y": 670
+        },
+        "target": {
+          "x": 254,
+          "y": 670
+        },
+        "route": [
+          {
+            "x": 252,
+            "y": 670
+          },
+          {
+            "x": 253,
+            "y": 670
+          },
+          {
+            "x": 254,
+            "y": 670
+          },
+          {
+            "x": 254,
+            "y": 671
+          }
+        ]
+      },
+      "candidateChoice": {
+        "goalIndex": 0,
+        "goal": {
+          "x": 254,
+          "y": 671
+        },
+        "kind": "run",
+        "first": {
+          "x": 253,
+          "y": 670
+        },
+        "target": {
+          "x": 254,
+          "y": 670
+        },
+        "route": [
+          {
+            "x": 252,
+            "y": 670
+          },
+          {
+            "x": 253,
+            "y": 670
+          },
+          {
+            "x": 254,
+            "y": 670
+          },
+          {
+            "x": 254,
+            "y": 671
+          }
+        ]
+      },
+      "addedRealRun": false
+    },
+    {
+      "frameIndex": 0,
+      "origin": {
+        "x": 254,
+        "y": 670
+      },
+      "initialCursor": 0,
+      "frameSequence": 1148,
+      "obstacles": [
+        {
+          "objectId": 50001,
+          "name": "Lc7785701",
+          "kind": "player",
+          "x": 256,
+          "y": 671,
+          "dead": false,
+          "hp": null
+        },
+        {
+          "objectId": 206639,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 253,
+          "y": 672,
+          "dead": false,
+          "hp": 20
+        },
+        {
+          "objectId": 206642,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 253,
+          "y": 671,
+          "dead": false,
+          "hp": 20
+        },
+        {
+          "objectId": 206648,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 252,
+          "y": 672,
+          "dead": false,
+          "hp": 20
+        }
+      ],
+      "primedAssumed": true,
+      "fastPlan": null,
+      "routes": [
+        {
+          "goalIndex": 0,
+          "goal": {
+            "x": 254,
+            "y": 671
+          },
+          "kind": "walk",
+          "first": {
+            "x": 254,
+            "y": 671
+          },
+          "target": {
+            "x": 254,
+            "y": 671
+          },
+          "route": [
+            {
+              "x": 254,
+              "y": 670
+            },
+            {
+              "x": 254,
+              "y": 671
+            }
+          ]
+        },
+        {
+          "goalIndex": 1,
+          "goal": {
+            "x": 254,
+            "y": 673
+          },
+          "kind": "run",
+          "first": {
+            "x": 254,
+            "y": 671
+          },
+          "target": {
+            "x": 254,
+            "y": 672
+          },
+          "route": [
+            {
+              "x": 254,
+              "y": 670
+            },
+            {
+              "x": 254,
+              "y": 671
+            },
+            {
+              "x": 254,
+              "y": 672
+            },
+            {
+              "x": 254,
+              "y": 673
+            }
+          ]
+        },
+        {
+          "goalIndex": 2,
+          "goal": {
+            "x": 252,
+            "y": 673
+          },
+          "kind": "run",
+          "first": {
+            "x": 254,
+            "y": 671
+          },
+          "target": {
+            "x": 254,
+            "y": 672
+          },
+          "route": [
+            {
+              "x": 254,
+              "y": 670
+            },
+            {
+              "x": 254,
+              "y": 671
+            },
+            {
+              "x": 254,
+              "y": 672
+            },
+            {
+              "x": 254,
+              "y": 673
+            },
+            {
+              "x": 253,
+              "y": 673
+            },
+            {
+              "x": 252,
+              "y": 673
+            }
+          ]
+        },
+        {
+          "goalIndex": 3,
+          "goal": {
+            "x": 252,
+            "y": 671
+          },
+          "kind": "run",
+          "first": {
+            "x": 253,
+            "y": 670
+          },
+          "target": {
+            "x": 252,
+            "y": 670
+          },
+          "route": [
+            {
+              "x": 254,
+              "y": 670
+            },
+            {
+              "x": 253,
+              "y": 670
+            },
+            {
+              "x": 252,
+              "y": 670
+            },
+            {
+              "x": 252,
+              "y": 671
+            }
+          ]
+        }
+      ],
+      "oldChoice": {
+        "goalIndex": 0,
+        "goal": {
+          "x": 254,
+          "y": 671
+        },
+        "kind": "walk",
+        "first": {
+          "x": 254,
+          "y": 671
+        },
+        "target": {
+          "x": 254,
+          "y": 671
+        },
+        "route": [
+          {
+            "x": 254,
+            "y": 670
+          },
+          {
+            "x": 254,
+            "y": 671
+          }
+        ]
+      },
+      "candidateChoice": {
+        "goalIndex": 1,
+        "goal": {
+          "x": 254,
+          "y": 673
+        },
+        "kind": "run",
+        "first": {
+          "x": 254,
+          "y": 671
+        },
+        "target": {
+          "x": 254,
+          "y": 672
+        },
+        "route": [
+          {
+            "x": 254,
+            "y": 670
+          },
+          {
+            "x": 254,
+            "y": 671
+          },
+          {
+            "x": 254,
+            "y": 672
+          },
+          {
+            "x": 254,
+            "y": 673
+          }
+        ]
+      },
+      "addedRealRun": true
+    },
+    {
+      "frameIndex": 0,
+      "origin": {
+        "x": 254,
+        "y": 671
+      },
+      "initialCursor": 0,
+      "frameSequence": 1148,
+      "obstacles": [
+        {
+          "objectId": 50001,
+          "name": "Lc7785701",
+          "kind": "player",
+          "x": 256,
+          "y": 671,
+          "dead": false,
+          "hp": null
+        },
+        {
+          "objectId": 206639,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 253,
+          "y": 672,
+          "dead": false,
+          "hp": 20
+        },
+        {
+          "objectId": 206642,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 253,
+          "y": 671,
+          "dead": false,
+          "hp": 20
+        },
+        {
+          "objectId": 206648,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 252,
+          "y": 672,
+          "dead": false,
+          "hp": 20
+        }
+      ],
+      "primedAssumed": true,
+      "fastPlan": {
+        "goalIndex": 1,
+        "kind": "run",
+        "first": {
+          "x": 254,
+          "y": 672
+        },
+        "target": {
+          "x": 254,
+          "y": 673
+        }
+      },
+      "routes": [
+        {
+          "goalIndex": 0,
+          "goal": {
+            "x": 254,
+            "y": 671
+          },
+          "kind": null,
+          "reason": "already-at-corner"
+        },
+        {
+          "goalIndex": 1,
+          "goal": {
+            "x": 254,
+            "y": 673
+          },
+          "kind": "run",
+          "first": {
+            "x": 254,
+            "y": 672
+          },
+          "target": {
+            "x": 254,
+            "y": 673
+          },
+          "route": [
+            {
+              "x": 254,
+              "y": 671
+            },
+            {
+              "x": 254,
+              "y": 672
+            },
+            {
+              "x": 254,
+              "y": 673
+            }
+          ]
+        },
+        {
+          "goalIndex": 2,
+          "goal": {
+            "x": 252,
+            "y": 673
+          },
+          "kind": "run",
+          "first": {
+            "x": 254,
+            "y": 672
+          },
+          "target": {
+            "x": 254,
+            "y": 673
+          },
+          "route": [
+            {
+              "x": 254,
+              "y": 671
+            },
+            {
+              "x": 254,
+              "y": 672
+            },
+            {
+              "x": 254,
+              "y": 673
+            },
+            {
+              "x": 253,
+              "y": 673
+            },
+            {
+              "x": 252,
+              "y": 673
+            }
+          ]
+        },
+        {
+          "goalIndex": 3,
+          "goal": {
+            "x": 252,
+            "y": 671
+          },
+          "kind": "walk",
+          "first": {
+            "x": 254,
+            "y": 670
+          },
+          "target": {
+            "x": 254,
+            "y": 670
+          },
+          "route": [
+            {
+              "x": 254,
+              "y": 671
+            },
+            {
+              "x": 254,
+              "y": 670
+            },
+            {
+              "x": 253,
+              "y": 670
+            },
+            {
+              "x": 252,
+              "y": 670
+            },
+            {
+              "x": 252,
+              "y": 671
+            }
+          ]
+        }
+      ],
+      "oldChoice": {
+        "goalIndex": 1,
+        "kind": "run",
+        "first": {
+          "x": 254,
+          "y": 672
+        },
+        "target": {
+          "x": 254,
+          "y": 673
+        }
+      },
+      "candidateChoice": {
+        "goalIndex": 1,
+        "kind": "run",
+        "first": {
+          "x": 254,
+          "y": 672
+        },
+        "target": {
+          "x": 254,
+          "y": 673
+        }
+      },
+      "addedRealRun": false
+    },
+    {
+      "frameIndex": 3,
+      "origin": {
+        "x": 254,
+        "y": 673
+      },
+      "initialCursor": 2,
+      "frameSequence": 1284,
+      "obstacles": [
+        {
+          "objectId": 50001,
+          "name": "Lc7785701",
+          "kind": "player",
+          "x": 256,
+          "y": 671,
+          "dead": false,
+          "hp": null
+        },
+        {
+          "objectId": 206639,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 252,
+          "y": 671,
+          "dead": false,
+          "hp": 20
+        },
+        {
+          "objectId": 206642,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 254,
+          "y": 672,
+          "dead": false,
+          "hp": 20
+        },
+        {
+          "objectId": 206648,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 253,
+          "y": 673,
+          "dead": false,
+          "hp": 20
+        }
+      ],
+      "primedAssumed": true,
+      "fastPlan": null,
+      "routes": [
+        {
+          "goalIndex": 2,
+          "goal": {
+            "x": 252,
+            "y": 673
+          },
+          "kind": "walk",
+          "first": {
+            "x": 254,
+            "y": 674
+          },
+          "target": {
+            "x": 254,
+            "y": 674
+          },
+          "route": [
+            {
+              "x": 254,
+              "y": 673
+            },
+            {
+              "x": 254,
+              "y": 674
+            },
+            {
+              "x": 253,
+              "y": 674
+            },
+            {
+              "x": 252,
+              "y": 674
+            },
+            {
+              "x": 252,
+              "y": 673
+            }
+          ]
+        },
+        {
+          "goalIndex": 3,
+          "goal": {
+            "x": 252,
+            "y": 671
+          },
+          "kind": null,
+          "reason": "no-path-or-4000-node-limit"
+        },
+        {
+          "goalIndex": 0,
+          "goal": {
+            "x": 254,
+            "y": 671
+          },
+          "kind": "walk",
+          "first": {
+            "x": 255,
+            "y": 673
+          },
+          "target": {
+            "x": 255,
+            "y": 673
+          },
+          "route": [
+            {
+              "x": 254,
+              "y": 673
+            },
+            {
+              "x": 255,
+              "y": 673
+            },
+            {
+              "x": 255,
+              "y": 672
+            },
+            {
+              "x": 255,
+              "y": 671
+            },
+            {
+              "x": 254,
+              "y": 671
+            }
+          ]
+        },
+        {
+          "goalIndex": 1,
+          "goal": {
+            "x": 254,
+            "y": 673
+          },
+          "kind": null,
+          "reason": "already-at-corner"
+        }
+      ],
+      "oldChoice": {
+        "goalIndex": 2,
+        "goal": {
+          "x": 252,
+          "y": 673
+        },
+        "kind": "walk",
+        "first": {
+          "x": 254,
+          "y": 674
+        },
+        "target": {
+          "x": 254,
+          "y": 674
+        },
+        "route": [
+          {
+            "x": 254,
+            "y": 673
+          },
+          {
+            "x": 254,
+            "y": 674
+          },
+          {
+            "x": 253,
+            "y": 674
+          },
+          {
+            "x": 252,
+            "y": 674
+          },
+          {
+            "x": 252,
+            "y": 673
+          }
+        ]
+      },
+      "candidateChoice": {
+        "goalIndex": 2,
+        "goal": {
+          "x": 252,
+          "y": 673
+        },
+        "kind": "walk",
+        "first": {
+          "x": 254,
+          "y": 674
+        },
+        "target": {
+          "x": 254,
+          "y": 674
+        },
+        "route": [
+          {
+            "x": 254,
+            "y": 673
+          },
+          {
+            "x": 254,
+            "y": 674
+          },
+          {
+            "x": 253,
+            "y": 674
+          },
+          {
+            "x": 252,
+            "y": 674
+          },
+          {
+            "x": 252,
+            "y": 673
+          }
+        ]
+      },
+      "addedRealRun": false
+    },
+    {
+      "frameIndex": 3,
+      "origin": {
+        "x": 252,
+        "y": 674
+      },
+      "initialCursor": 2,
+      "frameSequence": 1284,
+      "obstacles": [
+        {
+          "objectId": 50001,
+          "name": "Lc7785701",
+          "kind": "player",
+          "x": 256,
+          "y": 671,
+          "dead": false,
+          "hp": null
+        },
+        {
+          "objectId": 206639,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 252,
+          "y": 671,
+          "dead": false,
+          "hp": 20
+        },
+        {
+          "objectId": 206642,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 254,
+          "y": 672,
+          "dead": false,
+          "hp": 20
+        },
+        {
+          "objectId": 206648,
+          "name": "Scarecrow",
+          "kind": "monster",
+          "x": 253,
+          "y": 673,
+          "dead": false,
+          "hp": 20
+        }
+      ],
+      "primedAssumed": true,
+      "fastPlan": null,
+      "routes": [
+        {
+          "goalIndex": 2,
+          "goal": {
+            "x": 252,
+            "y": 673
+          },
+          "kind": "walk",
+          "first": {
+            "x": 252,
+            "y": 673
+          },
+          "target": {
+            "x": 252,
+            "y": 673
+          },
+          "route": [
+            {
+              "x": 252,
+              "y": 674
+            },
+            {
+              "x": 252,
+              "y": 673
+            }
+          ]
+        },
+        {
+          "goalIndex": 3,
+          "goal": {
+            "x": 252,
+            "y": 671
+          },
+          "kind": null,
+          "reason": "no-path-or-4000-node-limit"
+        },
+        {
+          "goalIndex": 0,
+          "goal": {
+            "x": 254,
+            "y": 671
+          },
+          "kind": "run",
+          "first": {
+            "x": 252,
+            "y": 673
+          },
+          "target": {
+            "x": 252,
+            "y": 672
+          },
+          "route": [
+            {
+              "x": 252,
+              "y": 674
+            },
+            {
+              "x": 252,
+              "y": 673
+            },
+            {
+              "x": 252,
+              "y": 672
+            },
+            {
+              "x": 253,
+              "y": 672
+            },
+            {
+              "x": 253,
+              "y": 671
+            },
+            {
+              "x": 254,
+              "y": 671
+            }
+          ]
+        },
+        {
+          "goalIndex": 1,
+          "goal": {
+            "x": 254,
+            "y": 673
+          },
+          "kind": "run",
+          "first": {
+            "x": 253,
+            "y": 674
+          },
+          "target": {
+            "x": 254,
+            "y": 674
+          },
+          "route": [
+            {
+              "x": 252,
+              "y": 674
+            },
+            {
+              "x": 253,
+              "y": 674
+            },
+            {
+              "x": 254,
+              "y": 674
+            },
+            {
+              "x": 254,
+              "y": 673
+            }
+          ]
+        }
+      ],
+      "oldChoice": {
+        "goalIndex": 2,
+        "goal": {
+          "x": 252,
+          "y": 673
+        },
+        "kind": "walk",
+        "first": {
+          "x": 252,
+          "y": 673
+        },
+        "target": {
+          "x": 252,
+          "y": 673
+        },
+        "route": [
+          {
+            "x": 252,
+            "y": 674
+          },
+          {
+            "x": 252,
+            "y": 673
+          }
+        ]
+      },
+      "candidateChoice": {
+        "goalIndex": 0,
+        "goal": {
+          "x": 254,
+          "y": 671
+        },
+        "kind": "run",
+        "first": {
+          "x": 252,
+          "y": 673
+        },
+        "target": {
+          "x": 252,
+          "y": 672
+        },
+        "route": [
+          {
+            "x": 252,
+            "y": 674
+          },
+          {
+            "x": 252,
+            "y": 673
+          },
+          {
+            "x": 252,
+            "y": 672
+          },
+          {
+            "x": 253,
+            "y": 672
+          },
+          {
+            "x": 253,
+            "y": 671
+          },
+          {
+            "x": 254,
+            "y": 671
+          }
+        ]
+      },
+      "addedRealRun": true
+    }
+  ],
+  "addedRealRunCases": 2,
+  "limitations": [
+    "The five public frames are merged observation snapshots, not actor00 exact send-time AOI. The fixture uses their nearby live obstacles and current known peer, excluding the spectator self/remote duplication of actor00. It does not reconstruct every original decision.",
+    "Transfer list is empty for this local fixture; these candidate cell segments were traversed by ordinary successful movement in the original run. A product change must still reuse the real existing movement/transfer/routeAllowed and conservative-union checks, with no relaxation.",
+    "Priming is explicitly assumed true to isolate route choice. Real mode/priming/cadence checks must remain and can still yield Walk or fail load quality.",
+    "A larger number of real Run choices is not proof of a future60s window or sustainable100-player workload. Fresh tests, source closure and a new live feasibility gate are required."
+  ],
+  "inputPins": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-navigation.mjs",
+      "bytes": 18249,
+      "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack\\0.map.gz",
+      "bytes": 512762,
+      "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal03-analysis\\five-public-position-frames-v1.json",
+      "bytes": 9779,
+      "sha256": "acc4a6a8872a1a932fe724e2a1f61976c18910d1f8b1d8b9ec01b3235469abd6"
+    }
+  ]
+}

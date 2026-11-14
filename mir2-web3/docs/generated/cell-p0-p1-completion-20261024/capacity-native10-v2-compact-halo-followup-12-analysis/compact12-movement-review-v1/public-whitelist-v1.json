@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T06:33:58.678Z",
+  "scope": "Explicit public-safe raw-byte copy whitelist for this agent owned probe12 forensic and historical formal09 readonly-review artifacts only. No source/old evidence mutated. Whitelist excludes itself.",
+  "archiveRoot": "C:/mir2-build/p01-completion-20261024",
+  "files": [
+    {
+      "path": "compact12-movement-review-v1/source-review-v1.json",
+      "bytes": 7082,
+      "sha256": "e588f69a82474d6d406af09a9e8343f9a734d6a4f4c4f004018a5d7ef87ad792"
+    },
+    {
+      "path": "compact12-movement-review-v1/selected-corrections-crosscheck-v1.json",
+      "bytes": 8485,
+      "sha256": "4623c6a5b0ad815c2310bf7cd19aa210c0a72f0316e9c4f78146dd759402b958"
+    },
+    {
+      "path": "compact12-movement-review-v1/project-three-public-frames-v1.mjs",
+      "bytes": 5612,
+      "sha256": "4e78109163c588517e6467fef1a21dab02b9a9ae3cad2c54ebc1ec76eaac1891"
+    },
+    {
+      "path": "compact12-movement-review-v1/three-public-local-frames-v1.json",
+      "bytes": 5886,
+      "sha256": "9049cc437d6f72ab6f67674b2703da69c26cd10d59a82b13ad95a6b9996c2275"
+    },
+    {
+      "path": "compact12-movement-review-v1/authoritative-occupancy-visibility-review-v1.json",
+      "bytes": 13438,
+      "sha256": "b251190881d8ba44e97eaf623c7b4fd7082c1343346be33b095b04f1e17a1498"
+    },
+    {
+      "path": "compact12-movement-review-v1/completion-addendum-v1.json",
+      "bytes": 3530,
+      "sha256": "0fb372c689ca9b0b08c6f2fad5c856c71f53f36382236a4c79493aeb868ef8eb"
+    },
+    {
+      "path": "compact-formal09-independent-review-v1/review-checklist-v1.json",
+      "bytes": 8167,
+      "sha256": "f63300398656874f344f0385a7dee16d05f5f9cb9e8225bf3e1c5d84e0d42247"
+    },
+    {
+      "path": "compact-formal09-independent-review-v1/check-preseal-raw.mjs",
+      "bytes": 4585,
+      "sha256": "5805588e5cf914024783cc0893a4d01dbae4a3440e60d7dc2371a839d7f0a66e"
+    },
+    {
+      "path": "compact-formal09-independent-review-v1/preseal-raw-check-v1.json",
+      "bytes": 890,
+      "sha256": "beb8909735cbf0ef0528c0e7527127227551f14bb4e645b672d072a5e625e8a4"
+    },
+    {
+      "path": "compact-formal09-independent-review-v1/historical-preseal-independent-review-v1.json",
+      "bytes": 6655,
+      "sha256": "2d72a85d39b4c4561824d9a58016de15adcf293a76b0b4c443361f4d7447d31f"
+    }
+  ],
+  "count": 10,
+  "totalBytes": 64330,
+  "sourceSha256": "d78df89b10e1176833324b999ea1d6d361091abbb6eea2de2e8f740e4057a39c",
+  "referencesOnlyAlreadySeparatelyOwned": [
+    {
+      "path": "probe12-independent-verification-v1/selected-movement-events-v1.json",
+      "bytes": 103223,
+      "sha256": "96883d2b942c8be8360709e332bc7165e0d5043ff582f2054a4115696f76c463"
+    },
+    {
+      "path": "probe12-independent-verification-v1/final-verification.json",
+      "bytes": 124145,
+      "sha256": "acbc8d169409420fece19f5376037ea6b61405a249f5e63434803dcae364755e"
+    },
+    {
+      "path": "compact-formal09-expected12-rejection-v1.json",
+      "bytes": 4790,
+      "sha256": "d7e27d665471d06bc41a58bb92f865b017aa9a63506b69ad98853b8330dc46b1"
+    }
+  ],
+  "noPrivateOrRecordingPayload": true,
+  "capacityAccepted": false
+}

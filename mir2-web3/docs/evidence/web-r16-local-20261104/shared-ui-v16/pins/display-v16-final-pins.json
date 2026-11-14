@@ -1,0 +1,16 @@
+{
+  "schema": "mir2.r16.display-build-pins.v1",
+  "buildId": "LJMP040z-kH8ldOIs5Y6V",
+  "renderer": "bevy-e7afab3714b4abba",
+  "packageManifestSha256": "4620930b42de82f60e82fc01f0beb5b405fd082439131bd982fefddfa4268cc3",
+  "sources": [
+    {
+      "path": "apps/web/lib/generated/r16-native-localization.json",
+      "sha256": "d42c1568e3a6fa2798f30038f7a553f4fb4cb3f04abfb44672dc9cab37185938"
+    },
+    {
+      "path": "packages/game-data/data/generated/portable-native-i18n.json",
+      "sha256": "9d1d6e78a784647af47f76d4ccf032519cc5d177976788c80813bb24d75c7800"
+    }
+  ]
+}

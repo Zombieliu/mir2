@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "scope": "Original six existing source preimages are represented by exact Git7644 blob and raw pins, rather than duplicated full source files in this public validation archive.",
+  "baseline": [
+    {
+      "sourcePath": "apps/simulation/src/lib.rs",
+      "rawPreimage": {
+        "bytes": 7153,
+        "sha256": "3b7bcf3abfa84ad25fdb0aa8857439aa870f154549dd98168ae319739e4c25dc"
+      },
+      "gitCommit": "7644faa14402aa1bfdad8096fedfe61dc6a0a660",
+      "gitBlob": "a60597941a46b97cd0d144fb77d11c5382252507",
+      "attributeFilteredRawObject": "a60597941a46b97cd0d144fb77d11c5382252507",
+      "rawIsPubliclyDuplicatedHere": false
+    },
+    {
+      "sourcePath": "apps/simulation/src/config.rs",
+      "rawPreimage": {
+        "bytes": 342825,
+        "sha256": "9f1315fb16d48e4b19cdfd1d9c1e8c2acab9fb9458eb0ce96e5fa5674261dde5"
+      },
+      "gitCommit": "7644faa14402aa1bfdad8096fedfe61dc6a0a660",
+      "gitBlob": "1a325051b3e553ffa79e2927a5d8122d0b9ba26a",
+      "attributeFilteredRawObject": "1a325051b3e553ffa79e2927a5d8122d0b9ba26a",
+      "rawIsPubliclyDuplicatedHere": false
+    },
+    {
+      "sourcePath": "apps/simulation/src/config_file_authority.rs",
+      "rawPreimage": {
+        "bytes": 23763,
+        "sha256": "fa853f265b936b7a552dd9a3284dc8185456ebe57186dace7f0d1f947729d0c2"
+      },
+      "gitCommit": "7644faa14402aa1bfdad8096fedfe61dc6a0a660",
+      "gitBlob": "c52b170011aabff67fd0acb2ed3a5a282686f42b",
+      "attributeFilteredRawObject": "c52b170011aabff67fd0acb2ed3a5a282686f42b",
+      "rawIsPubliclyDuplicatedHere": false
+    },
+    {
+      "sourcePath": "apps/simulation/src/config_shared_guilds.rs",
+      "rawPreimage": {
+        "bytes": 53032,
+        "sha256": "9271257ce0c800e337d3f53a3d07844bef071002854b58132a3a484757fb96a5"
+      },
+      "gitCommit": "7644faa14402aa1bfdad8096fedfe61dc6a0a660",
+      "gitBlob": "267e92c5f3630af60f61325de1f625cf27a773a9",
+      "attributeFilteredRawObject": "267e92c5f3630af60f61325de1f625cf27a773a9",
+      "rawIsPubliclyDuplicatedHere": false
+    },
+    {
+      "sourcePath": "apps/simulation/src/config_guild_clock_driver.rs",
+      "rawPreimage": {
+        "bytes": 21788,
+        "sha256": "ae9edfa7336d27a8546ef12f3e45ca1d523d2f9f3860c3eb17b6dc985a63342c"
+      },
+      "gitCommit": "7644faa14402aa1bfdad8096fedfe61dc6a0a660",
+      "gitBlob": "ec17fbceb05ddecf5069e1b3c9e59b7a98140326",
+      "attributeFilteredRawObject": "ec17fbceb05ddecf5069e1b3c9e59b7a98140326",
+      "rawIsPubliclyDuplicatedHere": false
+    },
+    {
+      "sourcePath": "apps/simulation/src/runtime/shared_experience_profile.rs",
+      "rawPreimage": {
+        "bytes": 75946,
+        "sha256": "fe7767bec9d255e9fbf6e727bc7ab9a380f29166417f3c2a50085e0083ace190"
+      },
+      "gitCommit": "7644faa14402aa1bfdad8096fedfe61dc6a0a660",
+      "gitBlob": "fd0009f807711916228605a4568f2eb5fb5d9577",
+      "attributeFilteredRawObject": "fd0009f807711916228605a4568f2eb5fb5d9577",
+      "rawIsPubliclyDuplicatedHere": false
+    }
+  ],
+  "existingSixDiff": {
+    "path": "C:/mir2-build/p01-completion-20261024/formal12-account-store-diagnostics-v1/simulation-source-changes-v1.patch",
+    "bytes": 31840,
+    "sha256": "52ebbf3ae4e97bb5f4c171bd3310d0b8f79d7c66c4abcbaaba926c187d45a2fc"
+  },
+  "newPrivateModule": {
+    "path": "apps/simulation/src/config_account_store_diagnostics.rs",
+    "sourcePin": {
+      "path": "apps/simulation/src/config_account_store_diagnostics.rs",
+      "bytes": 10863,
+      "sha256": "bdd0805104f396d924a6663be46166a9b2bb759c580efcb6e07b6fbf0cb970e4"
+    },
+    "publicDestination": "source/config_account_store_diagnostics.rs.txt"
+  },
+  "sourceCandidate": {
+    "path": "C:/mir2-build/p01-completion-20261024/formal12-account-store-diagnostics-v1/source-candidate-v1.json",
+    "bytes": 6682,
+    "sha256": "fe037243485836fae250965c710b8096dcf10e7d254d75c4533b0241569912e7"
+  },
+  "businessInvariants": "Diagnostic-only lexical additions; actual source review and 22-test validation are separately bound. This proof alone is not semantic equivalence or live acceptance.",
+  "testsExecutedByThisProof": false
+}

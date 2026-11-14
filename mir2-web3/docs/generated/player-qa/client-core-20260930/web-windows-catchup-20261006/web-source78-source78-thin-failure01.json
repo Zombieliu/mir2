@@ -1,0 +1,43 @@
+{
+  "owner": "Root",
+  "kind": "actual original Source78 Thin01 failure retained before repair",
+  "outer": {
+    "owner": "Root",
+    "exitCode": 1,
+    "builderPid": 95856,
+    "kind": "Root approved original Source78 Thin01 after strict Next and actual175 tests",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 19873,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source78-spells-readiness-20261012-01/root-approved01/source78-thin-config01.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-thin-config01.json",
+    "bytes": 6715,
+    "sha256": "922c4e7019815c4df0fe90ab3c53833e3f0f752c38013b7e8be15e521fd5a03b"
+  },
+  "input": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-full-snapshot01.json",
+    "bytes": 44117766,
+    "sha256": "f557764464a335300d7a5782ec0765dcaa29fc1d130a44387949e12ab224462b"
+  },
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\thin-build01\\stdout.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\thin-build01\\stderr.txt",
+    "bytes": 1359,
+    "sha256": "135e51de09054619d1e8574ee10546fbd0daf5b0c3dd870f52dac83bbe073030"
+  },
+  "reason": "ENOENT while selecting finite local map closure on missing WemadeMir2 parent directory in own new Thin output",
+  "originalPreAndPostSourceToolGuardPassed": true,
+  "goalComplete": false
+}

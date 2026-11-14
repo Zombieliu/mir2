@@ -1,0 +1,130 @@
+{
+  "schema": "numeron.atlas.source-recovery.v1",
+  "recoveredAt": "2026-11-05",
+  "sourceWorktree": "E:\\mir2-yc-review-20261102\\atlas",
+  "candidate": "C:\\codex-numeron-recharge-20261105\\mir2-web3\\apps\\explorer",
+  "sourceType": "Previous reconstructed presentation, not exact original production source",
+  "productionDeployment": "dpl_DMAnDnqHoBzs9jKkuwYBpNZPrFcf",
+  "productionGitSha": null,
+  "excluded": [
+    ".env*",
+    "credentials",
+    "node_modules",
+    ".next",
+    ".vercel",
+    "historical QA output",
+    "user data"
+  ],
+  "files": [
+    {
+      "path": "mir2-web3/apps/explorer/AGENTS.md",
+      "sha256": "63f2c50380ed6303237cce215ce27af1d620d094c215e28d1b1538a3c070e3bb",
+      "bytes": 678
+    },
+    {
+      "path": "mir2-web3/apps/explorer/CLAUDE.md",
+      "sha256": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49",
+      "bytes": 11
+    },
+    {
+      "path": "mir2-web3/apps/explorer/RECOVERY-PROVENANCE.json",
+      "sha256": "4e860a098ddceb34a636ac539ff0f4074c2590e26be53e590977fb7dbc8ed788",
+      "bytes": 1316
+    },
+    {
+      "path": "mir2-web3/apps/explorer/app/(root)/layout.tsx",
+      "sha256": "70f6656063040ccfd4eb81976f87511db89db5e28f27b72d3f4e9d4d5c5706aa",
+      "bytes": 234
+    },
+    {
+      "path": "mir2-web3/apps/explorer/app/(root)/page.tsx",
+      "sha256": "c604ed9488e659421b56a51836f7102f5f46699280dbb6c7e89b122b0029edcd",
+      "bytes": 106
+    },
+    {
+      "path": "mir2-web3/apps/explorer/app/[locale]/archive/[kind]/[slug]/page.tsx",
+      "sha256": "50178efe8e0a1503893cc574dda32838d7ce9e7e8aa68b5be4c6a2f1763983ed",
+      "bytes": 7508
+    },
+    {
+      "path": "mir2-web3/apps/explorer/app/[locale]/layout.tsx",
+      "sha256": "f67680de1007014d503ac19035d1287ad760d8b4dac3918c8e24dfacf6a159e2",
+      "bytes": 1799
+    },
+    {
+      "path": "mir2-web3/apps/explorer/app/[locale]/page.tsx",
+      "sha256": "936736bbf6ef84031fb4a490c7596f4c8c97b29ebdf283aed800a971c7be4bfa",
+      "bytes": 536
+    },
+    {
+      "path": "mir2-web3/apps/explorer/app/components/explorer-dashboard.d.ts",
+      "sha256": "9854595c6550436ce4cb73550fc6570f616da1d8ed710ef6d5c55cb474072acd",
+      "bytes": 162
+    },
+    {
+      "path": "mir2-web3/apps/explorer/app/components/explorer-dashboard.js",
+      "sha256": "a30bbe8a53f53947109458ff0d957ae9e3d460ba68c36ac1b0a899065f467e2a",
+      "bytes": 33239
+    },
+    {
+      "path": "mir2-web3/apps/explorer/app/explorer-icon/route.ts",
+      "sha256": "82e8a7d7e812d185b05b2002f79bca2ece690f2bcbd5ea67e4fc2e18821f5e9b",
+      "bytes": 567
+    },
+    {
+      "path": "mir2-web3/apps/explorer/app/globals.css",
+      "sha256": "0e5d20fd72de2c08914494278cb75c8661ed88dfa77d8a2fe99d92f55724ec94",
+      "bytes": 51447
+    },
+    {
+      "path": "mir2-web3/apps/explorer/app/icon.tsx",
+      "sha256": "6220800da41bef143dd26728bc02aacf1d226a594d311bda6088ab1aa7838e39",
+      "bytes": 438
+    },
+    {
+      "path": "mir2-web3/apps/explorer/lib/atlas-data.d.mts",
+      "sha256": "38b027b9951dc72e1f025fae892d98a238117b3ea0fff3909e0985c7430df699",
+      "bytes": 1551
+    },
+    {
+      "path": "mir2-web3/apps/explorer/lib/atlas-data.mjs",
+      "sha256": "d285518b976599c3db74cc9462b28560a645a3cd92ac2b7139a1e447170232f4",
+      "bytes": 47126
+    },
+    {
+      "path": "mir2-web3/apps/explorer/next.config.mjs",
+      "sha256": "1c9ac749d57a8e7440d0e10b7f3da0bc38c3ef64a8c2db8f26d481035ae2bfd3",
+      "bytes": 315
+    },
+    {
+      "path": "mir2-web3/apps/explorer/package-lock.json",
+      "sha256": "df839a7f9c31b9cbc4a14643c68f6bc70e6609b71689bf00d2d647f1c1212d06",
+      "bytes": 33392
+    },
+    {
+      "path": "mir2-web3/apps/explorer/package.json",
+      "sha256": "4a75078d29be739760142abc9c3a4806057abeb5b1ae9083bb5d0935799a83df",
+      "bytes": 576
+    },
+    {
+      "path": "mir2-web3/apps/explorer/public/og.png",
+      "sha256": "a93359c8185f837e1dcec41c5fa538dec2a3387877f192ab4d75a3aa60c25d0f",
+      "bytes": 1385192
+    },
+    {
+      "path": "mir2-web3/apps/explorer/scripts/check-rendered-truth.mjs",
+      "sha256": "6ff563fa450e67f178ec166052eae8e9881798ed0879cc9388486c1fe9d10d3c",
+      "bytes": 2191
+    },
+    {
+      "path": "mir2-web3/apps/explorer/scripts/check-truth.mjs",
+      "sha256": "ffea060d4c3c9b814c926d6a997beced45c159b044aa70b105c57568abfaea1a",
+      "bytes": 1778
+    },
+    {
+      "path": "mir2-web3/apps/explorer/tsconfig.json",
+      "sha256": "9fe2e4a0352b37c3b291fccd18e3fa462aaa018f20e286432dd5697a4fb12450",
+      "bytes": 699
+    }
+  ]
+}

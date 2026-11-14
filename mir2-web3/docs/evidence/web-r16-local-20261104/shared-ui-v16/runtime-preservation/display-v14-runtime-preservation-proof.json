@@ -1,0 +1,25 @@
+{
+  "schema": "mir2.r16.shared-display-preservation.v1",
+  "stoppedBeforeCopy": true,
+  "oldDirectoryPreserved": true,
+  "backupName": "Numeron-Web-R16-20261104-before-display-v14",
+  "runtime": [
+    {
+      "directory": "private",
+      "files": 25,
+      "bytes": 538072,
+      "beforeTreeSha256": "e27d08b7d621ec032a56713f16e46504ab9c150221fc2bdcbdb44cb55bd930db",
+      "afterTreeSha256": "e27d08b7d621ec032a56713f16e46504ab9c150221fc2bdcbdb44cb55bd930db",
+      "allFilesMatched": true
+    },
+    {
+      "directory": ".mir2-data",
+      "files": 37,
+      "bytes": 16495395702,
+      "beforeTreeSha256": "3697366c4ec39dab0b46c6b37b93534d1dcb5b7a8394fea40ec95ffdd5022c8c",
+      "afterTreeSha256": "3697366c4ec39dab0b46c6b37b93534d1dcb5b7a8394fea40ec95ffdd5022c8c",
+      "allFilesMatched": true
+    }
+  ],
+  "allMatched": true
+}

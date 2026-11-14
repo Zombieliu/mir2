@@ -1,6 +1,8 @@
+import type { ClientScreen } from "../../lib/original-ui";
+
 export type Mir2StageLayout = "desktop" | "touch" | "tv";
 export type Mir2StageInput = "keyboardMouse" | "touch" | "gamepad";
-export type Mir2StageScreen = "login" | "select" | "game";
+export type Mir2StageScreen = ClientScreen;
 
 export type Mir2StagePresentationInput = {
   cssWidth: number;
@@ -83,7 +85,7 @@ const REGULAR_TOUCH_CONTROL_METRICS: Mir2TouchControlMetrics = {
 const COMPACT_TOUCH_CONTROL_METRICS: Mir2TouchControlMetrics = {
   actionSize: 36,
   primarySize: 52,
-  panelSize: 36,
+  panelSize: 40,
   padWidth: 98,
   columnStep: 38,
   quickRowTops: [40, 78, 116],

@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "startedAt": "2026-11-14T15:52:47.907Z",
+  "scope": "Fresh ordinary Chrome at public /version, serial GETs of one fixed WASM only. No auth, scene, relay or gateway. Post-rollback warm/unknown-cache observations, not matched cold controls or public game qualification.",
+  "expected": {
+    "bytes": 31452436,
+    "sha256": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e"
+  },
+  "rows": [
+    {
+      "url": "https://numeron.obelisk.build/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "status": 200,
+      "headersMs": 856.5999999940395,
+      "totalMs": 51326.79999998212,
+      "bytes": 31452436,
+      "sha256": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+      "fullBodyVerified": true
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "status": 200,
+      "headersMs": 834.3999999761581,
+      "totalMs": 54146.5,
+      "bytes": 31452436,
+      "sha256": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+      "fullBodyVerified": true
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "status": 200,
+      "headersMs": 166.90000000596046,
+      "totalMs": 52899.20000001788,
+      "bytes": 31452436,
+      "sha256": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+      "fullBodyVerified": true
+    }
+  ],
+  "headers": [
+    {
+      "url": "https://numeron.obelisk.build/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "status": 200,
+      "fromServiceWorker": false,
+      "headers": {
+        "content-type": "application/wasm",
+        "content-encoding": "br",
+        "cache-control": "public, max-age=31536000, immutable",
+        "cf-cache-status": "DYNAMIC",
+        "x-vercel-cache": "HIT",
+        "server": "cloudflare",
+        "age": "52056",
+        "x-mir2-runtime-version": "bevy-0c553a754308e5b8"
+      }
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "status": 200,
+      "fromServiceWorker": false,
+      "headers": {
+        "content-type": "application/wasm",
+        "content-encoding": "gzip",
+        "cache-control": "public, max-age=31536000",
+        "cf-cache-status": "HIT",
+        "server": "cloudflare",
+        "age": "138980"
+      }
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "status": 200,
+      "fromServiceWorker": false,
+      "headers": {
+        "content-type": "application/wasm",
+        "content-encoding": "gzip",
+        "cache-control": "public, max-age=31536000",
+        "cf-cache-status": "HIT",
+        "server": "cloudflare",
+        "age": "139034"
+      }
+    }
+  ],
+  "pageErrors": 0,
+  "forbiddenEdges": 0,
+  "browserClosed": true,
+  "browserVersion": "157.0.8103.78",
+  "formalRevision": "e6c923b7c669cb061a7a03703f05fadd91211c97",
+  "completed": true,
+  "finishedAt": "2026-11-14T15:55:28.359Z"
+}

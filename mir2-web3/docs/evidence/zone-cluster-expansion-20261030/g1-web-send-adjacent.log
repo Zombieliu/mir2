@@ -1,0 +1,102 @@
+    Finished `test` profile [unoptimized] target(s) in 0.34s
+
+running 26 tests
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+test web::web_live_overflow_tests::live_overflow_cancels_stalled_real_websocket_writer_and_closes_transport ... ok
+test web::web_live_overflow_tests::live_overflow_old_registration_signal_cannot_stop_replacement ... ok
+test web::web_live_overflow_tests::live_overflow_prepared_registration_signal_waits_for_matching_activation ... ok
+gateway lifecycle session_id=gateway-77460-1793343430512-1 stage=persist.prepare phase=begin
+gateway lifecycle session_id=gateway-77460-1793343430512-1 stage=persist.prepare phase=end elapsed_ms=1
+gateway lifecycle session_id=gateway-77460-1793343430512-1 stage=persist.save phase=begin
+gateway lifecycle session_id=gateway-77460-1793343430512-1 stage=persist.save phase=end elapsed_ms=1
+[save-recovery] status=saved transport=web-teardown count=1 detail=immutable drained checkpoint committed before teardown
+gateway lifecycle session_id=gateway-77460-1793343430512-1 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-77460-1793343430512-1 stage=session.close phase=end elapsed_ms=0
+test web::web_live_overflow_tests::live_overflow_transport_loss_saves_authoritative_move_and_keeps_one_use_resume ... ok
+[gateway-zone-live] owner_location result=full registration_id=1 account=mapepochowner character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=mapepochowner character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=mapepochowner character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=mapepochowner character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=mapepochowner character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=mapepochowner character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=mapepochowner character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=mapepochowner character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=mapepochowner character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=mapepochowner character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=mapepochowner character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=mapepochowner character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=mapepochowner character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=mapepochowner character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=mapepochowner character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=mapepochowner character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=mapepochowner character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=mapepochowner character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=mapepochowner character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=mapepochowner character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=mapepochowner character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=mapepochowner character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=mapepochowner character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=mapepochowner character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=mapepochowner character_index=1
+[gateway-zone-live] owner_location result=full registration_id=1 account=mapepochowner character_index=1
+gateway transport_registration registration_id=1 stage=unregister phase=begin
+gateway transport_registration registration_id=1 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=2 stage=unregister phase=begin
+gateway transport_registration registration_id=2 stage=unregister phase=end elapsed_ms=0
+gateway transport_registration registration_id=3 stage=unregister phase=begin
+gateway transport_registration registration_id=3 stage=unregister phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-77460-1793343450896-3 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-77460-1793343450896-3 stage=session.close phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-77460-1793343435369-2 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-77460-1793343435369-2 stage=session.close phase=end elapsed_ms=0
+test web::web_live_overflow_tests::owner_ack_order_real_tick_map_information_rebinds_owner_and_observer_after_portal ... ok
+[gateway-zone-live] owner_location result=stale_after_gate registration_id=41 active_registration_id=42
+test web::web_live_overflow_tests::owner_ack_order_web_sender_waits_for_prepared_registration_activation ... ok
+test web::web_live_overflow_tests::owner_health_web_current_health_is_sent_once_before_next_normal_packet ... ok
+test web::web_live_overflow_tests::owner_health_web_final_gate_rejects_already_dequeued_stale_health ... ok
+test web::web_live_overflow_tests::owner_health_web_validation_failure_cancels_the_whole_current_transport ... ok
+test web::web_live_overflow_tests::owner_route_web_final_gate_rejects_dequeued_non_health_frame_and_cancels_transport ... ok
+test web::web_live_overflow_tests::zone_delivery_trace_disabled_and_nonplayer_remove_preserve_wire ... ok
+[gateway-zone-delivery-trace] stage=enqueue serverTraceID=1 registration=42 recipientZoneID=50048 kind=UserLocation targetObjectID=50048 hasPosition=1 x=25 y=23 producerUnixMs=1793343470643 elapsedUs=6 queueAgeUs=0 gateWaitUs=0
+[gateway-zone-delivery-trace] stage=full serverTraceID=2 registration=42 recipientZoneID=50048 kind=UserLocation targetObjectID=50048 hasPosition=1 x=25 y=23 producerUnixMs=1793343470643 elapsedUs=0 queueAgeUs=0 gateWaitUs=0
+[gateway-zone-delivery-trace] stage=closed serverTraceID=3 registration=42 recipientZoneID=50048 kind=UserLocation targetObjectID=50048 hasPosition=1 x=25 y=23 producerUnixMs=1793343470643 elapsedUs=0 queueAgeUs=0 gateWaitUs=0
+test web::web_live_overflow_tests::zone_delivery_trace_full_and_closed_are_not_enqueue_success ... ok
+[gateway-zone-delivery-trace] stage=dequeue serverTraceID=4 registration=42 recipientZoneID=50048 kind=ObjectRemove targetObjectID=50041 hasPosition=0 x=0 y=0 producerUnixMs=1793343470643 elapsedUs=1 queueAgeUs=1 gateWaitUs=0
+test web::web_live_overflow_tests::zone_delivery_trace_player_remove_keeps_distinct_recipient_and_target ... ok
+[gateway-zone-delivery-trace] stage=enqueue serverTraceID=5 registration=42 recipientZoneID=50048 kind=UserLocation targetObjectID=50048 hasPosition=1 x=25 y=23 producerUnixMs=1793343470644 elapsedUs=2 queueAgeUs=0 gateWaitUs=0
+[gateway-zone-delivery-trace] stage=dequeue serverTraceID=5 registration=42 recipientZoneID=50048 kind=UserLocation targetObjectID=50048 hasPosition=1 x=25 y=23 producerUnixMs=1793343470644 elapsedUs=39 queueAgeUs=39 gateWaitUs=0
+[gateway-zone-delivery-trace] stage=gate serverTraceID=5 registration=42 recipientZoneID=50048 kind=UserLocation targetObjectID=50048 hasPosition=1 x=25 y=23 producerUnixMs=1793343470644 elapsedUs=108 queueAgeUs=39 gateWaitUs=69
+[gateway-zone-delivery-trace] stage=send serverTraceID=5 registration=42 recipientZoneID=50048 kind=UserLocation targetObjectID=50048 hasPosition=1 x=25 y=23 producerUnixMs=1793343470644 elapsedUs=114 queueAgeUs=39 gateWaitUs=69
+[gateway-zone-delivery-trace] stage=sent serverTraceID=5 registration=42 recipientZoneID=50048 kind=UserLocation targetObjectID=50048 hasPosition=1 x=25 y=23 producerUnixMs=1793343470644 elapsedUs=197 queueAgeUs=39 gateWaitUs=69
+test web::web_live_overflow_tests::zone_delivery_trace_same_packet_survives_queue_gate_and_send ... ok
+[gateway-zone-delivery-trace] stage=dequeue serverTraceID=6 registration=42 recipientZoneID=50048 kind=UserLocation targetObjectID=50048 hasPosition=1 x=25 y=23 producerUnixMs=1793343470646 elapsedUs=26 queueAgeUs=25 gateWaitUs=0
+[gateway-zone-delivery-trace] stage=gate serverTraceID=6 registration=42 recipientZoneID=50048 kind=UserLocation targetObjectID=50048 hasPosition=1 x=25 y=23 producerUnixMs=1793343470646 elapsedUs=95 queueAgeUs=25 gateWaitUs=69
+[gateway-zone-delivery-trace] stage=stale serverTraceID=6 registration=42 recipientZoneID=50048 kind=UserLocation targetObjectID=50048 hasPosition=1 x=25 y=23 producerUnixMs=1793343470646 elapsedUs=100 queueAgeUs=25 gateWaitUs=69
+[gateway-zone-live] owner_location result=stale_after_gate registration_id=42 active_registration_id=43
+[gateway-zone-delivery-trace] stage=dequeue serverTraceID=7 registration=42 recipientZoneID=50048 kind=UserLocation targetObjectID=50048 hasPosition=1 x=25 y=23 producerUnixMs=1793343470647 elapsedUs=10 queueAgeUs=10 gateWaitUs=0
+[gateway-zone-delivery-trace] stage=gate serverTraceID=7 registration=42 recipientZoneID=50048 kind=UserLocation targetObjectID=50048 hasPosition=1 x=25 y=23 producerUnixMs=1793343470647 elapsedUs=48 queueAgeUs=10 gateWaitUs=38
+[gateway-zone-delivery-trace] stage=health-empty serverTraceID=7 registration=42 recipientZoneID=50048 kind=UserLocation targetObjectID=50048 hasPosition=1 x=25 y=23 producerUnixMs=1793343470647 elapsedUs=170 queueAgeUs=10 gateWaitUs=38
+[gateway-zone-delivery-trace] stage=dequeue serverTraceID=8 registration=42 recipientZoneID=50048 kind=UserLocation targetObjectID=50048 hasPosition=1 x=25 y=23 producerUnixMs=1793343470648 elapsedUs=10 queueAgeUs=9 gateWaitUs=0
+[gateway-zone-delivery-trace] stage=gate serverTraceID=8 registration=42 recipientZoneID=50048 kind=UserLocation targetObjectID=50048 hasPosition=1 x=25 y=23 producerUnixMs=1793343470648 elapsedUs=38 queueAgeUs=9 gateWaitUs=28
+[gateway-zone-delivery-trace] stage=health-error serverTraceID=8 registration=42 recipientZoneID=50048 kind=UserLocation targetObjectID=50048 hasPosition=1 x=25 y=23 producerUnixMs=1793343470648 elapsedUs=65 queueAgeUs=9 gateWaitUs=28
+[gateway-zone-delivery-trace] stage=dequeue serverTraceID=9 registration=42 recipientZoneID=50048 kind=UserLocation targetObjectID=50048 hasPosition=1 x=25 y=23 producerUnixMs=1793343470675 elapsedUs=19 queueAgeUs=18 gateWaitUs=0
+[gateway-zone-delivery-trace] stage=gate serverTraceID=9 registration=42 recipientZoneID=50048 kind=UserLocation targetObjectID=50048 hasPosition=1 x=25 y=23 producerUnixMs=1793343470675 elapsedUs=58 queueAgeUs=18 gateWaitUs=40
+[gateway-zone-delivery-trace] stage=overload serverTraceID=9 registration=42 recipientZoneID=50048 kind=UserLocation targetObjectID=50048 hasPosition=1 x=25 y=23 producerUnixMs=1793343470675 elapsedUs=63 queueAgeUs=18 gateWaitUs=40
+[gateway-zone-delivery-trace] stage=dequeue serverTraceID=10 registration=42 recipientZoneID=50048 kind=UserLocation targetObjectID=50048 hasPosition=1 x=25 y=23 producerUnixMs=1793343470705 elapsedUs=18 queueAgeUs=17 gateWaitUs=0
+[gateway-zone-delivery-trace] stage=gate serverTraceID=10 registration=42 recipientZoneID=50048 kind=UserLocation targetObjectID=50048 hasPosition=1 x=25 y=23 producerUnixMs=1793343470705 elapsedUs=63 queueAgeUs=17 gateWaitUs=45
+[gateway-zone-delivery-trace] stage=send serverTraceID=10 registration=42 recipientZoneID=50048 kind=UserLocation targetObjectID=50048 hasPosition=1 x=25 y=23 producerUnixMs=1793343470705 elapsedUs=72 queueAgeUs=17 gateWaitUs=45
+[gateway-zone-delivery-trace] stage=send-error serverTraceID=10 registration=42 recipientZoneID=50048 kind=UserLocation targetObjectID=50048 hasPosition=1 x=25 y=23 producerUnixMs=1793343470705 elapsedUs=100 queueAgeUs=17 gateWaitUs=45
+test web::web_live_overflow_tests::zone_delivery_trace_terminal_results_preserve_sender_fences ... ok
+test web::web_live_overflow_tests::zone_outbound_batch_health_claim_remains_validated_between_normal_packets ... ok
+test web::web_live_overflow_tests::zone_outbound_batch_health_completion_rechecks_epoch_before_send_or_failure ... ok
+test web::web_live_overflow_tests::zone_outbound_batch_overload_stops_before_later_packet ... ok
+test web::web_live_overflow_tests::zone_outbound_batch_prepared_ack_waits_for_bootstrap_and_filters_stale_epoch ... ok
+test web::web_live_overflow_tests::zone_outbound_batch_preserves_first_packet_then_owner_priority_and_closed_channel ... ok
+test web::web_live_overflow_tests::zone_outbound_batch_ready_fifo_precedes_queued_writer_after_bootstrap_wait ... ok
+test web::web_live_overflow_tests::zone_outbound_batch_send_error_stops_and_releases_gate ... ok
+test web::web_live_overflow_tests::zone_outbound_batch_slow_empty_health_releases_budget_before_next_packet ... ok
+test web::web_live_overflow_tests::zone_outbound_batch_stale_backlog_is_count_bounded_and_yields_to_writer ... ok
+test web::web_live_overflow_tests::zone_outbound_block_flag_requires_exact_opt_in_without_env_mutation ... ok
+test web::web_live_overflow_tests::zone_outbound_block_threshold_and_schema_are_numeric_or_fixed_enums ... ok
+
+test result: ok. 26 passed; 0 failed; 0 ignored; 0 measured; 1399 filtered out; finished in 40.54s

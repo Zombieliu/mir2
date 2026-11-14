@@ -1,0 +1,618 @@
+{
+  "schema": "mir2.r16.session-return.browser.v1",
+  "mode": "journey",
+  "locale": "zh-CN",
+  "passed": true,
+  "renderer": "bevy-db5e53a91f4d11de",
+  "startedAt": "2026-11-07T10:51:53.964Z",
+  "phases": [
+    "normal-login",
+    "cold-entry-single-q",
+    "normal-logout-to-selection",
+    "same-connection-entry",
+    "normal-logout-to-selection",
+    "same-connection-entry",
+    "normal-logout-to-selection",
+    "explicit-selection-exit",
+    "normal-login",
+    "same-connection-entry",
+    "normal-logout-to-selection",
+    "explicit-selection-exit",
+    "complete"
+  ],
+  "commands": {
+    "clientCapabilities": 4,
+    "setLanguage": 2,
+    "clientVersion": 2,
+    "login": 2,
+    "startGame": 4,
+    "keepAlive": 5,
+    "npcPurchaseOwner": 4,
+    "logOut": 4
+  },
+  "sockets": [
+    {
+      "id": 1,
+      "closed": true
+    },
+    {
+      "id": 2,
+      "closed": true
+    }
+  ],
+  "coldKeys": [
+    {
+      "code": "KeyQ",
+      "trusted": true,
+      "repeat": false,
+      "focused": true,
+      "visible": "visible",
+      "alt": false,
+      "control": false,
+      "defaultPrevented": false,
+      "activeTag": "DIV",
+      "questReady": false,
+      "questOpen": false,
+      "hudReady": false,
+      "hudQuestOpen": null,
+      "edge": "before"
+    }
+  ],
+  "keyboard": [
+    {
+      "code": "KeyQ",
+      "trusted": true,
+      "repeat": false,
+      "focused": true,
+      "visible": "visible",
+      "alt": false,
+      "control": false,
+      "defaultPrevented": false,
+      "activeTag": "DIV",
+      "questReady": false,
+      "questOpen": false,
+      "hudReady": false,
+      "hudQuestOpen": null,
+      "edge": "before",
+      "phase": "cold-entry-single-q"
+    },
+    {
+      "code": "KeyQ",
+      "trusted": true,
+      "repeat": false,
+      "focused": true,
+      "visible": "visible",
+      "alt": false,
+      "control": false,
+      "defaultPrevented": false,
+      "activeTag": "DIV",
+      "questReady": false,
+      "questOpen": false,
+      "hudReady": false,
+      "hudQuestOpen": null,
+      "edge": "after",
+      "phase": "cold-entry-single-q"
+    },
+    {
+      "code": "KeyX",
+      "trusted": true,
+      "repeat": false,
+      "focused": true,
+      "visible": "visible",
+      "alt": true,
+      "control": false,
+      "defaultPrevented": false,
+      "activeTag": "DIV",
+      "questReady": true,
+      "questOpen": false,
+      "hudReady": true,
+      "hudQuestOpen": false,
+      "edge": "before",
+      "phase": "normal-logout-to-selection"
+    },
+    {
+      "code": "KeyX",
+      "trusted": true,
+      "repeat": false,
+      "focused": true,
+      "visible": "visible",
+      "alt": true,
+      "control": false,
+      "defaultPrevented": false,
+      "activeTag": "DIV",
+      "questReady": true,
+      "questOpen": false,
+      "hudReady": true,
+      "hudQuestOpen": false,
+      "edge": "after",
+      "phase": "normal-logout-to-selection"
+    },
+    {
+      "code": "F11",
+      "trusted": true,
+      "repeat": false,
+      "focused": true,
+      "visible": "visible",
+      "alt": false,
+      "control": false,
+      "defaultPrevented": false,
+      "activeTag": "DIV",
+      "questReady": true,
+      "questOpen": false,
+      "hudReady": true,
+      "hudQuestOpen": false,
+      "edge": "before",
+      "phase": "same-connection-entry"
+    },
+    {
+      "code": "F11",
+      "trusted": true,
+      "repeat": false,
+      "focused": true,
+      "visible": "visible",
+      "alt": false,
+      "control": false,
+      "defaultPrevented": false,
+      "activeTag": "DIV",
+      "questReady": true,
+      "questOpen": false,
+      "hudReady": true,
+      "hudQuestOpen": false,
+      "edge": "after",
+      "phase": "same-connection-entry"
+    },
+    {
+      "code": "KeyX",
+      "trusted": true,
+      "repeat": false,
+      "focused": true,
+      "visible": "visible",
+      "alt": true,
+      "control": false,
+      "defaultPrevented": false,
+      "activeTag": "DIV",
+      "questReady": true,
+      "questOpen": false,
+      "hudReady": true,
+      "hudQuestOpen": false,
+      "edge": "before",
+      "phase": "normal-logout-to-selection"
+    },
+    {
+      "code": "KeyX",
+      "trusted": true,
+      "repeat": false,
+      "focused": true,
+      "visible": "visible",
+      "alt": true,
+      "control": false,
+      "defaultPrevented": false,
+      "activeTag": "DIV",
+      "questReady": true,
+      "questOpen": false,
+      "hudReady": true,
+      "hudQuestOpen": false,
+      "edge": "after",
+      "phase": "normal-logout-to-selection"
+    },
+    {
+      "code": "KeyX",
+      "trusted": true,
+      "repeat": false,
+      "focused": true,
+      "visible": "visible",
+      "alt": true,
+      "control": false,
+      "defaultPrevented": false,
+      "activeTag": "DIV",
+      "questReady": true,
+      "questOpen": false,
+      "hudReady": true,
+      "hudQuestOpen": false,
+      "edge": "before",
+      "phase": "normal-logout-to-selection"
+    },
+    {
+      "code": "KeyX",
+      "trusted": true,
+      "repeat": false,
+      "focused": true,
+      "visible": "visible",
+      "alt": true,
+      "control": false,
+      "defaultPrevented": false,
+      "activeTag": "DIV",
+      "questReady": true,
+      "questOpen": false,
+      "hudReady": true,
+      "hudQuestOpen": false,
+      "edge": "after",
+      "phase": "normal-logout-to-selection"
+    },
+    {
+      "code": "KeyX",
+      "trusted": true,
+      "repeat": false,
+      "focused": true,
+      "visible": "visible",
+      "alt": true,
+      "control": false,
+      "defaultPrevented": false,
+      "activeTag": "DIV",
+      "questReady": true,
+      "questOpen": false,
+      "hudReady": true,
+      "hudQuestOpen": false,
+      "edge": "before",
+      "phase": "normal-logout-to-selection"
+    },
+    {
+      "code": "KeyX",
+      "trusted": true,
+      "repeat": false,
+      "focused": true,
+      "visible": "visible",
+      "alt": true,
+      "control": false,
+      "defaultPrevented": false,
+      "activeTag": "DIV",
+      "questReady": true,
+      "questOpen": false,
+      "hudReady": true,
+      "hudQuestOpen": false,
+      "edge": "after",
+      "phase": "normal-logout-to-selection"
+    }
+  ],
+  "entries": [
+    {
+      "role": "original",
+      "index": 1,
+      "level": 30,
+      "completedMainAndGrowth": 26,
+      "characterPage": "character",
+      "characterOpen": false,
+      "position": {
+        "x": 328,
+        "y": 264
+      },
+      "stamp": {
+        "generation": 2,
+        "revision": 3,
+        "connectionGeneration": 1,
+        "sessionGeneration": 1,
+        "sceneRevision": 3,
+        "playerObjectId": 1000,
+        "mapFileName": "0"
+      },
+      "socketId": 1
+    },
+    {
+      "role": "new",
+      "index": 4,
+      "level": 1,
+      "completedMainAndGrowth": 0,
+      "characterPage": "character",
+      "characterOpen": false,
+      "position": {
+        "x": 288,
+        "y": 616
+      },
+      "stamp": {
+        "generation": 4,
+        "revision": 10,
+        "connectionGeneration": 1,
+        "sessionGeneration": 2,
+        "sceneRevision": 6,
+        "playerObjectId": 1000,
+        "mapFileName": "0"
+      },
+      "socketId": 1
+    },
+    {
+      "role": "new",
+      "index": 4,
+      "level": 1,
+      "completedMainAndGrowth": 0,
+      "characterPage": "character",
+      "characterOpen": false,
+      "position": {
+        "x": 288,
+        "y": 616
+      },
+      "stamp": {
+        "generation": 6,
+        "revision": 18,
+        "connectionGeneration": 1,
+        "sessionGeneration": 3,
+        "sceneRevision": 9,
+        "playerObjectId": 1000,
+        "mapFileName": "0"
+      },
+      "socketId": 1
+    },
+    {
+      "role": "original",
+      "index": 1,
+      "level": 30,
+      "completedMainAndGrowth": 26,
+      "characterPage": "character",
+      "characterOpen": false,
+      "position": {
+        "x": 328,
+        "y": 264
+      },
+      "stamp": {
+        "generation": 9,
+        "revision": 29,
+        "connectionGeneration": 2,
+        "sessionGeneration": 4,
+        "sceneRevision": 17,
+        "playerObjectId": 1000,
+        "mapFileName": "0"
+      },
+      "socketId": 2
+    }
+  ],
+  "returns": [
+    {
+      "index": 1,
+      "selectedPosition": 0,
+      "roster": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "sourceSocketUnchanged": true,
+      "loginCountUnchanged": true
+    },
+    {
+      "index": 4,
+      "selectedPosition": 3,
+      "roster": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "sourceSocketUnchanged": true,
+      "loginCountUnchanged": true
+    },
+    {
+      "index": 4,
+      "selectedPosition": 3,
+      "roster": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "sourceSocketUnchanged": true,
+      "loginCountUnchanged": true
+    },
+    {
+      "index": 1,
+      "selectedPosition": 0,
+      "roster": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "sourceSocketUnchanged": true,
+      "loginCountUnchanged": true
+    }
+  ],
+  "screenshots": [
+    "01-first-q-native-diary.png",
+    "02-logout-selection.png",
+    "03-logout-selection.png",
+    "04-logout-selection.png",
+    "05-logout-selection.png"
+  ],
+  "network": {
+    "errors": [],
+    "failed": []
+  },
+  "pageErrors": [],
+  "releases": [
+    "bevy-db5e53a91f4d11de"
+  ],
+  "errors": [],
+  "reusesOrdinaryCreatedRole": true,
+  "browser": {
+    "version": "156.0.8078.80",
+    "kind": "installed-chrome-headless",
+    "gpu": {
+      "devices": [
+        {
+          "vendorId": 4318,
+          "deviceId": 11269,
+          "vendorString": "",
+          "deviceString": "NVIDIA GeForce RTX 5070 Ti"
+        },
+        {
+          "vendorId": 4318,
+          "deviceId": 11269,
+          "vendorString": "",
+          "deviceString": "NVIDIA GeForce RTX 5070 Ti"
+        },
+        {
+          "vendorId": 4318,
+          "deviceId": 11269,
+          "vendorString": "",
+          "deviceString": "NVIDIA GeForce RTX 5070 Ti"
+        },
+        {
+          "vendorId": 5140,
+          "deviceId": 140,
+          "vendorString": "",
+          "deviceString": "Microsoft Basic Render Driver"
+        }
+      ],
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti (0x00002C05) Direct3D11 vs_5_0 ps_5_0, D3D11-32.0.16.1074)",
+      "backend": "(gl=egl-angle,angle=d3d11)",
+      "features": {
+        "2d_canvas": "enabled",
+        "direct_rendering_display_compositor": "disabled_off_ok",
+        "gpu_compositing": "enabled",
+        "multiple_raster_threads": "enabled_on",
+        "opengl": "enabled_on",
+        "rasterization": "enabled",
+        "raw_draw": "disabled_off_ok",
+        "skia_graphite": "disabled_off",
+        "trees_in_viz": "disabled_off",
+        "video_decode": "enabled",
+        "video_encode": "enabled",
+        "webgl": "enabled",
+        "webgpu": "enabled",
+        "webnn": "disabled_off"
+      }
+    }
+  },
+  "coldOpen": {
+    "singlePhysicalQ": true,
+    "trigger": "visible-world",
+    "before": {
+      "questReady": false,
+      "hudReady": false,
+      "questOpen": false
+    },
+    "after": {
+      "questReady": true,
+      "hudReady": false,
+      "questOpen": true,
+      "locale": "zh-CN"
+    },
+    "elapsedMs": 4315
+  },
+  "beforeLogout": [
+    null,
+    null,
+    null,
+    null
+  ],
+  "readiness": [
+    {
+      "elapsedMs": 394,
+      "rawReadMs": 243,
+      "contextReadMs": 151,
+      "metrics": null,
+      "quest": {
+        "ready": false,
+        "generation": 4,
+        "revision": 9,
+        "frame": 1682
+      },
+      "hud": {
+        "ready": true,
+        "generation": 4,
+        "revision": 9,
+        "frame": 1682
+      },
+      "context": null
+    },
+    {
+      "elapsedMs": 600,
+      "rawReadMs": 78,
+      "contextReadMs": 68,
+      "metrics": null,
+      "quest": {
+        "ready": true,
+        "generation": 4,
+        "revision": 10,
+        "frame": 1684
+      },
+      "hud": {
+        "ready": true,
+        "generation": 4,
+        "revision": 10,
+        "frame": 1684
+      },
+      "context": null
+    },
+    {
+      "elapsedMs": 506,
+      "rawReadMs": 237,
+      "contextReadMs": 269,
+      "metrics": null,
+      "quest": {
+        "ready": false,
+        "generation": 6,
+        "revision": 17,
+        "frame": 3249
+      },
+      "hud": {
+        "ready": true,
+        "generation": 6,
+        "revision": 18,
+        "frame": 3249
+      },
+      "context": null
+    },
+    {
+      "elapsedMs": 824,
+      "rawReadMs": 175,
+      "contextReadMs": 92,
+      "metrics": null,
+      "quest": {
+        "ready": true,
+        "generation": 6,
+        "revision": 18,
+        "frame": 3251
+      },
+      "hud": {
+        "ready": true,
+        "generation": 6,
+        "revision": 19,
+        "frame": 3251
+      },
+      "context": null
+    },
+    {
+      "elapsedMs": 479,
+      "rawReadMs": 279,
+      "contextReadMs": 200,
+      "metrics": null,
+      "quest": {
+        "ready": false,
+        "generation": 9,
+        "revision": 27,
+        "frame": 5678
+      },
+      "hud": {
+        "ready": true,
+        "generation": 9,
+        "revision": 30,
+        "frame": 5678
+      },
+      "context": null
+    },
+    {
+      "elapsedMs": 734,
+      "rawReadMs": 94,
+      "contextReadMs": 97,
+      "metrics": null,
+      "quest": {
+        "ready": true,
+        "generation": 9,
+        "revision": 28,
+        "frame": 5680
+      },
+      "hud": {
+        "ready": true,
+        "generation": 9,
+        "revision": 31,
+        "frame": 5680
+      },
+      "context": null
+    }
+  ],
+  "exit": {
+    "socketClosed": true,
+    "additionalLogoutCommands": 0,
+    "loginVisible": true
+  },
+  "finishedAt": "2026-11-07T10:53:34.064Z"
+}

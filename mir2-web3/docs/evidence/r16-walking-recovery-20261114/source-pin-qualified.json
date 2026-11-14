@@ -1,0 +1,72 @@
+{
+  "source": "91b8fc9b4f5170cb37b6619b991707ed76a34d73",
+  "base": "f6e30a0ee8021d745ecce35e295edf5f60e39964",
+  "baseline": "dpl_3eNPP4uaj3nT3HsAMhJUUoXpN4Dh",
+  "previousProductionSource": "f6603c89a34e27813d7495fceab3292cc293c47b",
+  "runtime": "bevy-0c553a754308e5b8",
+  "fixedAssets": "20261108-r16-08ec86d5105c",
+  "assetRelease": "20261108-r16-08ec86d5105c",
+  "changes": [
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/lib/generated/r16-entry-bootstrap-chunks.ts",
+      "sha": "a8dca3b25a331be195ea446246b65692f6e58941"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/lib/r16-entry-scene.ts",
+      "sha": "dd29f8197b00e5c04a08c28d28f0b08e2f321a36"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/generate-r16-bootstrap-chunks.mjs",
+      "sha": "04813b6d7e2d5a71f46b23170b0b5e7184905bae"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-pinned-bootstrap-chunk.mjs",
+      "sha": "05f50153009d532577235705d6ac3b2aa60b3147"
+    }
+  ],
+  "changedFiles": [
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/lib/generated/r16-entry-bootstrap-chunks.ts",
+      "sha": "a8dca3b25a331be195ea446246b65692f6e58941"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/lib/r16-entry-scene.ts",
+      "sha": "dd29f8197b00e5c04a08c28d28f0b08e2f321a36"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/generate-r16-bootstrap-chunks.mjs",
+      "sha": "04813b6d7e2d5a71f46b23170b0b5e7184905bae"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-pinned-bootstrap-chunk.mjs",
+      "sha": "05f50153009d532577235705d6ac3b2aa60b3147"
+    }
+  ],
+  "workerBytes": 41492,
+  "workerSha256": "772eafdc70ff4cfb30eea32913f492f4ce07ac9910f5dd468b5b86876289f800",
+  "noNewRuntimeOrAssetUpload": true,
+  "localCandidate": "f6e30a0ee802-walking-recovery-668d1d43",
+  "localBuildReceiptSha256": "cb800d32eb8319298671b43145f92da0a4e1c110fe671faeec65233f166fdcf5",
+  "sourceQualificationSha256": "0627c7766825ac9d551315f12b5d413e35442787a505b67f4b3048605ecb33de",
+  "checks": {
+    "qualifiedScene": 118,
+    "releaseGuards": 70,
+    "offlineObserver": 19
+  },
+  "qualifiedLocalSessions": 0,
+  "localAnimationPrerequisite": false,
+  "supersededLocalMetadata": {
+    "file": "source-pin.json",
+    "sha256": "7c293494794c5c616b74e57ee0d2a046b0994f4f1149d12162e2d539f460e7df",
+    "reason": "The private preparation helper inherited unrelated historical candidate/count/build fields. CI source/base/changedFiles/baseline were correct. This explicit qualification replaces those bookkeeping fields; the original file is preserved."
+  },
+  "scope": "Staged candidate only. Actual local animation and four complete browser sessions have not yet passed. Public cohort is unexecuted; production remains baseline."
+}

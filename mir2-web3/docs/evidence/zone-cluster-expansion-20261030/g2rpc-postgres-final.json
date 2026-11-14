@@ -1,0 +1,13 @@
+{
+  "database": "mir2_zone_lease_test_20261030_69f2a7f5",
+  "serverVersion": "16.15",
+  "leaseTablePresent": true,
+  "receiptTablePresent": true,
+  "remainingLeaseRows": 0,
+  "remainingReceiptRows": 0,
+  "otherClientConnections": 0,
+  "remainingCustomSchemas": [
+    "observer_owned"
+  ],
+  "retainedSchemaReason": "observer_owned is the intentionally retained G1 forbidden-owner-role fixture"
+}

@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T22:17:12.256Z",
+  "scope": "Minimal actual fresh18 binding after actual independent PASS. No runtime imports, gates, seal, preparation, account, realm or product test.",
+  "pendingBindingPreserved": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\pending-formal14-binding-v1.json",
+    "bytes": 1060,
+    "sha256": "84c7282c84301f2339f52142a8343db7efa41d317e7b5ed58d628ee6a8262f9b"
+  },
+  "boundBinding": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\bound-formal14-binding-v1.json",
+    "bytes": 10922,
+    "sha256": "047ba6642ffbce4cd5cc45efcadadea473e63ad0874e0165ffca9f86ea57cdc1"
+  },
+  "originalPreparedPreserved": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\runtime-prepared-v1.json",
+    "bytes": 20869,
+    "sha256": "68fd707fe69b60c4b6e3a5786d8492f7851793560c17efdf89b7b6378e39ef34"
+  },
+  "mutations": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\root-seal-and-guard-v1.mjs",
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\root-seal-and-guard-v1.mjs",
+        "bytes": 16503,
+        "sha256": "6bd3ae52fc59e81754a5f955aec1c1bb9579ee54393936c8bc4701eb67ed5630"
+      },
+      "preimage": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\root-seal-and-guard-v1.mjs.before-actual18-binding-v1.txt",
+        "bytes": 16503,
+        "sha256": "6bd3ae52fc59e81754a5f955aec1c1bb9579ee54393936c8bc4701eb67ed5630"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\root-seal-and-guard-v1.mjs",
+        "bytes": 16503,
+        "sha256": "b4440acd5a721719f064499cc67d2b135a49283b02ee965100a885f8f8e5115b"
+      }
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\root-controller-preparation-v1.json",
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\root-controller-preparation-v1.json",
+        "bytes": 932,
+        "sha256": "e637ad9c82225f6002f220ef5d040e5c5c7f7be9ac7ec91dd885508d05f5eef9"
+      },
+      "preimage": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\root-controller-preparation-v1.json.before-actual18-binding-v1.txt",
+        "bytes": 932,
+        "sha256": "e637ad9c82225f6002f220ef5d040e5c5c7f7be9ac7ec91dd885508d05f5eef9"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\root-controller-preparation-v1.json",
+        "bytes": 946,
+        "sha256": "7c73d6f9583203e57cf9ca5144edc2df49c58ccec502d2c4c557e0cb09d806da"
+      }
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\preparation-plan.json",
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\preparation-plan.json",
+        "bytes": 1645,
+        "sha256": "858cde6a35a9425d012a90fa875a0d211fa06926e8ecf32d8bd07ca3180d1f4c"
+      },
+      "preimage": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\preparation-plan.json.before-actual18-binding-v1.txt",
+        "bytes": 1645,
+        "sha256": "858cde6a35a9425d012a90fa875a0d211fa06926e8ecf32d8bd07ca3180d1f4c"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\preparation-plan.json",
+        "bytes": 2104,
+        "sha256": "879244c21d8e19afdb81ff86f1b605124ef83fdbdcfc18ba2a63629981b37e85"
+      }
+    }
+  ],
+  "controllerExactRule": {
+    "before": "reviewed-formal14-fresh17-bound-not-executed",
+    "after": "reviewed-formal14-fresh18-bound-not-executed",
+    "count": 1,
+    "forwardRawExact": true,
+    "inverseRawExact": true
+  },
+  "actual": {
+    "runId": "1792965008290-fc5e2eed",
+    "independent": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\final-verification.json",
+      "bytes": 437094,
+      "sha256": "d8558cb32ec366f21d744c132f30e64cb1923e3d73d60427d0edd21c9935c9e4"
+    },
+    "sourceSeal": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\tool-source-frozen-v1.json",
+      "bytes": 2111,
+      "sha256": "4a1d392606edeb54700a7d49e5e620dcd17c35d9466c5c019788945bb722a5aa"
+    },
+    "execution": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\actual-verification-execution-receipt-v1.json",
+      "bytes": 813,
+      "sha256": "e9841d7cf9355ec66a980ea2056fba49de870c645b830bb2fbfceb91c0fc9257"
+    },
+    "rootFacts": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-actual-terminal-and-consumer-facts-v1.json",
+      "bytes": 8568,
+      "sha256": "2ba0c6750a0f02533e141554ca639ad611a215e722236e732946d9648d2db106"
+    },
+    "independentTerminalFacts": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-actual-terminal-independent-facts-v1.json",
+      "bytes": 10133,
+      "sha256": "ef3a0ec4f8f5cf69e2bcfa0e73bfc96041074de60d3383852527d676eec6cdf3"
+    }
+  },
+  "capacityAccepted": false,
+  "formalAccepted": false,
+  "oldFailuresUnchanged": true
+}

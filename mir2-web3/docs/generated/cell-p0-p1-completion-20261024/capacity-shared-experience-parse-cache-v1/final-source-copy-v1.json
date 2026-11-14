@@ -1,0 +1,14 @@
+{
+  "files": [
+    {
+      "file": "final-backend-authority-delta-v1.json",
+      "bytes": 26568,
+      "sha256": "208c2e14b3b63ad9b9548cde61e911cdb0c76a20302a3cfc6df5409bc092c0bd"
+    },
+    {
+      "file": "source-diff-final-v1.patch",
+      "bytes": 20530,
+      "sha256": "05b1b3e9b4f2d3ae7f760fd56078ab823f0dfc3821484bb93c2e4b78d08eae22"
+    }
+  ]
+}

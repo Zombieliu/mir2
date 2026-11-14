@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "kind": "parse-cache-source-change-validation",
+  "verifiedAt": "2026-10-26T10:03:30.764Z",
+  "state": "DIAGNOSTIC_CANDIDATE_WITH_REPRODUCED_BASELINE_TEST_FAILURES",
+  "sourceChangeAcceptancePassed": true,
+  "allSelectedTestsPassed": false,
+  "passingRustTests": 26,
+  "formatPassed": true,
+  "passingCheckNames": [
+    "format",
+    "experience-profile",
+    "store-durability",
+    "guild-clock-store",
+    "admission-lock-order",
+    "kill-award-commit"
+  ],
+  "knownBaselineFailures": [
+    {
+      "test": "routing::tests::guild_kill_source_tests::guild_kill_source_known_failure_retains_envelope_and_new_service_replays_durable_receipt",
+      "location": "apps\\gateway\\src\\routing\\tests\\guild_kill_source_tests.rs:37:5:",
+      "message": "assertion `left == right` failed\n  left: []\n right: [ZoneMonsterKillAward { source_receipt_key: None, experience_selection: None, mentor_bank: None, monster_object_id: 912345, killed_at_ms: 1000, monster_name: \"Scarecrow\", experience: 6, drops: [], boss_audit: None }]"
+    },
+    {
+      "test": "routing::tests::guild_kill_source_tests::guild_kill_source_unknown_keeps_original_pending_reward_and_key_without_success_packets",
+      "location": "apps\\gateway\\src\\routing\\tests\\guild_kill_source_tests.rs:127:68:",
+      "message": "index out of bounds: the len is 0 but the index is 0"
+    }
+  ],
+  "baselineControlConfirmed": true,
+  "baselineBackendCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "all50ControlInputsExactC": true,
+  "candidateRestoredExactly": true,
+  "sourceBefore": {
+    "file": "C:/mir2-build/p01-completion-20261024/root-shared-experience-parse-cache-validation-v3/source-before-v1.json",
+    "bytes": 11186,
+    "sha256": "91988b44c93cbc81074bd63d64b033065e2b87feef0c01190892d40e4bd55b85"
+  },
+  "sourceAfter": {
+    "file": "C:/mir2-build/p01-completion-20261024/root-shared-experience-parse-cache-validation-v3/source-after-v1.json",
+    "bytes": 11186,
+    "sha256": "91988b44c93cbc81074bd63d64b033065e2b87feef0c01190892d40e4bd55b85"
+  },
+  "rawFocusedReceipt": {
+    "file": "C:/mir2-build/p01-completion-20261024/root-shared-experience-parse-cache-validation-v3/root-focused-receipt-v1.json",
+    "bytes": 9543,
+    "sha256": "7870f577ab2d0a8e1db728acc3332682aede8fa32f7922e08450b2ea4e864c23"
+  },
+  "baselineControlReceipt": {
+    "file": "C:/mir2-build/p01-completion-20261024/shared-experience-parse-cache-c-baseline-control-v1/actual-control-receipt-v1.json",
+    "bytes": 1846,
+    "sha256": "84fa9bd16e6b11cba6c625c3123c1db66fbbe81936854d600b4e35108e3318e3"
+  },
+  "candidatePin": {
+    "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/shared_experience_profile.rs",
+    "bytes": 94359,
+    "sha256": "bfec50446f970f8d9bea811019bdef5519bb8c5bd860b8930db7a6688c7629ea"
+  },
+  "qualificationScope": "Diagnostic performance candidate only. Six current checks (format and26 Rust tests) passed; two additional guild-kill fixture failures reproduced with all50 exact C baseline inputs and identical failure signatures. Original failed verdicts retained. No current-backend full lifecycle or capacity acceptance.",
+  "formalAcceptanceEligible": false,
+  "p0Accepted": false,
+  "capacityAccepted": false
+}

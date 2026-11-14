@@ -1,0 +1,49 @@
+{
+  "scope": "Loopback preconfigured PvP; PostgreSQL16.15 SourceOfTruth; development in-memory session cache; gateway4 Tokio workers; no CPU hard quota",
+  "ordinaryEvidence": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "attempts": [
+    {
+      "attempt": 7,
+      "category": "startup-configuration-error",
+      "reason": "require-postgres flag also required Redis; no load measurement",
+      "gatewayExit": 1,
+      "postgresExit": 0
+    },
+    {
+      "attempt": 8,
+      "plannedStages": [
+        25,
+        50,
+        100,
+        250,
+        500
+      ],
+      "stageSeconds": 300,
+      "admissions": [
+        {
+          "target": 25,
+          "elapsedMs": 65776
+        }
+      ],
+      "totalElapsedMs": 193583,
+      "completedStages": 0,
+      "firstFailureAt": "2026-10-27T21:18:52.869Z",
+      "failureCategory": "attack-outcome-not-received-by-2s",
+      "actorIndex": 6,
+      "requestId": "123",
+      "lastReceivedRequestId": "122",
+      "normalLogouts": 25,
+      "gatewayExit": 0,
+      "postgresExit": 0,
+      "cleanupComplete": true
+    }
+  ],
+  "limits": [
+    "No completed300-second25-fighter stage",
+    "50/100/250/500 and2-hour soak unmeasured",
+    "PG process CPU is excluded from gateway-only process monitor",
+    "No real NIC/TLS/cloud-server or production capacity acceptance"
+  ]
+}

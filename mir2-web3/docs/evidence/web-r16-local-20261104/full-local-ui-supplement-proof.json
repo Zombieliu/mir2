@@ -1,0 +1,83 @@
+{
+  "files": [
+    {
+      "path": "web/mir2-web3/apps/web/public/original-ui/Prguse/544.png",
+      "kind": "r16-ui-supplement",
+      "bytes": 190,
+      "sha256": "be05f447b96694a5edec1cd9314b3fed1b40a0d320e35a33d043a4c576e2c9fd"
+    },
+    {
+      "path": "web/mir2-web3/apps/web/public/original-ui/Prguse/983.png",
+      "kind": "r16-ui-supplement",
+      "bytes": 469,
+      "sha256": "47bf0c5fea5f11299a49ca2f700ac01cd98920d5c0b766a9147db9c87eb8fc59"
+    },
+    {
+      "path": "web/mir2-web3/apps/web/public/original-ui/Prguse/984.png",
+      "kind": "r16-ui-supplement",
+      "bytes": 482,
+      "sha256": "f9f967a2f66283c6cfd7572a527963dbadb80676725436344e133044b003173f"
+    },
+    {
+      "path": "web/mir2-web3/apps/web/public/original-ui/Prguse/985.png",
+      "kind": "r16-ui-supplement",
+      "bytes": 469,
+      "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+    },
+    {
+      "path": "web/mir2-web3/apps/web/public/original-ui/Prguse/986.png",
+      "kind": "r16-ui-supplement",
+      "bytes": 486,
+      "sha256": "f3ae75e6be631c2fa4aee4a0bf996fa90cdc7ac20a8aac4e54315fb85a64b9f9"
+    },
+    {
+      "path": "web/mir2-web3/apps/web/public/original-ui/Prguse/987.png",
+      "kind": "r16-ui-supplement",
+      "bytes": 500,
+      "sha256": "fb9637a4aa1217cb471b3b3f7b771d765eb6bf25707470b0d6f9692eb12843fa"
+    },
+    {
+      "path": "web/mir2-web3/apps/web/public/original-ui/Prguse/988.png",
+      "kind": "r16-ui-supplement",
+      "bytes": 522,
+      "sha256": "5da8a9aa995e1417aeb767ce9b12fa7243f6d2b01152bc7e1989dbeeb26688be"
+    },
+    {
+      "path": "web/mir2-web3/apps/web/public/original-ui/Prguse/1085.png",
+      "kind": "r16-ui-supplement",
+      "bytes": 416,
+      "sha256": "39036f3fe6e2aee093abce696f0ec05107f7f3746d0bfffba83b111613318614"
+    },
+    {
+      "path": "web/mir2-web3/apps/web/public/original-ui/Prguse/1086.png",
+      "kind": "r16-ui-supplement",
+      "bytes": 428,
+      "sha256": "61f03404fe44ad488602d46c7aad7c2e6903472bf81c2923ff59da60f8163ec9"
+    },
+    {
+      "path": "web/mir2-web3/apps/web/public/original-ui/Prguse/1087.png",
+      "kind": "r16-ui-supplement",
+      "bytes": 462,
+      "sha256": "b332cf36d050247bf465da6f7a4fe626434a267fb6128d53a3c40febafffd3e0"
+    },
+    {
+      "path": "web/mir2-web3/apps/web/public/original-ui/Prguse/1088.png",
+      "kind": "r16-ui-supplement",
+      "bytes": 457,
+      "sha256": "35fc94f4d0bf71832876a071a1822f3f19da6a60844c0d41554cff75bc9ad03b"
+    },
+    {
+      "path": "web/mir2-web3/apps/web/public/original-ui/CArmour/00/18.png",
+      "kind": "r16-ui-supplement",
+      "bytes": 2446,
+      "sha256": "54fe54a03cbe7c0f18466cee8a29a6317bafdf15aa26f2202da398e81de002be"
+    },
+    {
+      "path": "web/mir2-web3/apps/web/public/original-ui/CHair/00/18.png",
+      "kind": "r16-ui-supplement",
+      "bytes": 201,
+      "sha256": "dd50601957cf5c79fe658a360196134043b72c2b22b9d86bd13aef30cf9f5a90"
+    }
+  ],
+  "totalBytes": 7528
+}

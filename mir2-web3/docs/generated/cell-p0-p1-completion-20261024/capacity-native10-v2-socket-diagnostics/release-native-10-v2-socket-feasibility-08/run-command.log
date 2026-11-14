@@ -1,0 +1,14 @@
+{"phase":"owned-native-patrol-probe07-ready","pid":64860,"monitorPid":70856,"sha256":"a43078b05e70b480f948fee505e23d2757ce1ae20fdc1f22b2348df46ee7125d","sourceCommit":"46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b","backendSourceCommit":"46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b","driverSourceCommit":"46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b","explicitAttackResults":"v2","endpoint":"ws://127.0.0.1:17510/ws"}
+{"stage":"admitted","controlledActors":1,"target":2}
+{"stage":"admitted","controlledActors":2,"target":2}
+{"stage":"stage-2","passed":true}
+{"stage":"admitted","controlledActors":3,"target":10}
+{"stage":"admitted","controlledActors":4,"target":10}
+{"stage":"admitted","controlledActors":5,"target":10}
+{"stage":"admitted","controlledActors":6,"target":10}
+{"stage":"admitted","controlledActors":7,"target":10}
+{"stage":"admitted","controlledActors":8,"target":10}
+{"stage":"admitted","controlledActors":9,"target":10}
+{"stage":"admitted","controlledActors":10,"target":10}
+{"stage":"stage-10","passed":true}
+{"phase":"finished","root":"C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-socket-feasibility-08\\","report":{"reportPath":"C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-socket-feasibility-08\\reports\\1792885245847-0368d2eb.report.json","runId":"1792885245847-0368d2eb","backendSourceCommit":"46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b","driverSourceCommit":"46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b","ok":false,"playableCapacityAccepted":false,"error":"Continuous activity window failed, regardless of the measured stage"},"cleanupComplete":true,"checks":{"sixCountersZero":true,"monitorTerminalPreserved":true,"monitorStoppedBeforeGateway":true,"monitorExitZero":true,"normalOwnedShutdown":true,"processAbsent":true,"portsFree":true},"capacityAccepted":false,"capacityAcceptanceAdjudicated":false,"formalStarted":false}

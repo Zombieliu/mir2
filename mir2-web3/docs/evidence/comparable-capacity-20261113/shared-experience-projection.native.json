@@ -1,0 +1,76 @@
+{
+  "schema": "mir2.shared-projection-complete-native-validation.v1",
+  "sourceRevision": "f6511a5d367a105b4544f6295e1b26efa9174527",
+  "rootReviewed": true,
+  "allRequiredNativePassed": true,
+  "uniquePassed": 29,
+  "gatewayPassed": 27,
+  "simulationIdentityPassed": 1,
+  "realReplicaPromotionPassed": 1,
+  "gatewayFocusedProofSha256": "ef3342cf69e1a4aae97c1a7e8b55f124f0c2ed1fbaad3cafc490f05d5a3e4e73",
+  "otherComponents": [
+    {
+      "component": "simulation",
+      "actualExitCodes": [
+        0,
+        0
+      ],
+      "allOwnedNormalNoKill": true,
+      "jobReceiptSha256": "36d545f4acd5ce46f3e121f8471e988fd980263bf19990d6e806acc27786bd48",
+      "stdoutSha256": "86f1b72719e01ed0ecab7287f8600df3e4d674f75b96281b8f461c3c221ccb94",
+      "exeSha256": "ebb143ddf696cb8bbe2958ea8daeade40d28bc25c04a66fc781de4b900d3f036"
+    },
+    {
+      "component": "zoneRpc",
+      "actualExitCodes": [
+        0,
+        0
+      ],
+      "allOwnedNormalNoKill": true,
+      "jobReceiptSha256": "933d4c57a9ff8982be522efdd3be96cb6920ba5c2b15098a25c82b2bf4a94768",
+      "stdoutSha256": "8f397950038b9c1ed1c37b02b0a60dea78e9b9f4e9d8800765cc5515e976b111",
+      "exeSha256": "7e3149724da1efec420762216d05fcc276a22b05c906946aad9c9e1a3e96ce1e"
+    }
+  ],
+  "testedSourcesSha256": {
+    "mir2-web3/apps/gateway/src/shared_mentor.rs": "8f02ca1385e2495c110e47a243efa2750a552a6848e802d3813bda081992a354",
+    "mir2-web3/apps/gateway/src/shared_experience_profiles.rs": "06b99529ec1939fd5f6b9e8a3a6140d040ad601504433f78d7d9a4267ad79509",
+    "mir2-web3/apps/gateway/src/routing.rs": "28b5e28a5ed8d6f445bf33b73298f6c1bc23756b3781c6b8e97ab21e044873e0",
+    "mir2-web3/apps/gateway/src/routing/replica_restore.rs": "6c6970f9e27d457f84a3296952c110accf9f92f8432371f26d1259cd478fd88e",
+    "mir2-web3/apps/simulation/src/config.rs": "a71f414429d642885257d60434659ccfec9154c8e2f0b817704471c3a3cc323e",
+    "mir2-web3/apps/gateway/src/routing/tests/shared_experience_projection_singleflight_tests.rs": "822a4422726af9ee220d5e1fbc4b6750337f1c0097cde11511c0db5d5757067a",
+    "mir2-web3/apps/gateway/src/routing/tests/tick_leaf_probe_tests.rs": "d9c9650908f69f32f11971dea4f21a35dac150f3fd2a788325253e40c03a7db6"
+  },
+  "sameGenerationNegativePremisesExplicitlyAsserted": true,
+  "compileFacts": {
+    "allCargoExitCodes": [
+      0,
+      0,
+      0
+    ],
+    "aggregateWrapperExitCode": 1,
+    "normalDrainFailedAfter180": true,
+    "exactOwnedIdleCompilerHelperOnlyForced": true,
+    "allCompilerMembersClosedBeforeNative": true,
+    "bulkJobKillUsed": false
+  },
+  "nativeJobsAllNormalNoKill": true,
+  "prototypeFailuresPreserved": [
+    "original03dRED101scan2",
+    "B17initial7of8 andsolo failure",
+    "c0actualinitialgen6to7properrefusal"
+  ],
+  "diagnosticNative100V6": {
+    "sourceRevision": "ebc5dd905a34cebabdc5f4499e4b25208746c464",
+    "compactSha256": "584464acf8a1b3da3a44a612a79ddee1f6be102beb2598409cf12757757170f4",
+    "sameProductionAndProbeSource": true,
+    "actualExitCodes": [
+      0,
+      0
+    ],
+    "capacityQualified": false
+  },
+  "emptyUninitializedGitlinkDirectoryOnlyRestoredAfterNative": true,
+  "defaultReleaseArtifactNotYetBuilt": true,
+  "capacityQualified": false
+}

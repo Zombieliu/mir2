@@ -1,0 +1,212 @@
+{
+  "schema": "mir2.r18.cold.original-timeline-audit.v1",
+  "originalHelperEvents": [
+    {
+      "event": "external-mark",
+      "mark": {
+        "captured_utc": "2026-11-01T11:09:35.778Z",
+        "event": "D0",
+        "evidence_id": "R18-COLD-UNIQUE-PUBLIC-GET",
+        "screenshot_sha256": null
+      },
+      "monotonicNs": 77030706485500,
+      "screenshotBytesVerifiedByHelper": false,
+      "timingBasis": "receipt monotonic time; external timestamp is recorded, never subtracted",
+      "utc": "2026-11-01T11:09:35.779293+00:00"
+    },
+    {
+      "assignedBeforeResume": true,
+      "event": "started",
+      "monotonicNs": 77031115973100,
+      "pid": 45800,
+      "target": "downloader",
+      "utc": "2026-11-01T11:09:36.188784+00:00"
+    },
+    {
+      "event": "external-mark",
+      "mark": {
+        "captured_utc": "2026-11-01T11:17:06.472Z",
+        "event": "D1",
+        "evidence_id": "R18-COLD-DOWNLOAD-COMPLETE",
+        "screenshot_sha256": null
+      },
+      "monotonicNs": 77481401144900,
+      "screenshotBytesVerifiedByHelper": false,
+      "timingBasis": "receipt monotonic time; external timestamp is recorded, never subtracted",
+      "utc": "2026-11-01T11:17:06.473951+00:00"
+    },
+    {
+      "event": "external-mark",
+      "mark": {
+        "captured_utc": "2026-11-01T11:17:07.963Z",
+        "event": "I0",
+        "evidence_id": "R18-COLD-NORMAL-INSTALLER",
+        "screenshot_sha256": null
+      },
+      "monotonicNs": 77482891793800,
+      "screenshotBytesVerifiedByHelper": false,
+      "timingBasis": "receipt monotonic time; external timestamp is recorded, never subtracted",
+      "utc": "2026-11-01T11:17:07.964602+00:00"
+    },
+    {
+      "assignedBeforeResume": true,
+      "event": "started",
+      "monotonicNs": 77484071472200,
+      "pid": 9952,
+      "target": "installer",
+      "utc": "2026-11-01T11:17:09.144283+00:00"
+    },
+    {
+      "event": "external-mark",
+      "mark": {
+        "captured_utc": "2026-11-01T11:19:08.494Z",
+        "event": "L0",
+        "evidence_id": "R18-COLD-AUTOMATIC-LAUNCHER",
+        "screenshot_sha256": null
+      },
+      "monotonicNs": 77603422669400,
+      "screenshotBytesVerifiedByHelper": false,
+      "timingBasis": "receipt monotonic time; external timestamp is recorded, never subtracted",
+      "utc": "2026-11-01T11:19:08.495478+00:00"
+    },
+    {
+      "event": "external-mark",
+      "mark": {
+        "captured_utc": "2026-11-01T11:19:15.807Z",
+        "event": "G0",
+        "evidence_id": "R18-COLD-NORMAL-START-GAME",
+        "screenshot_sha256": null
+      },
+      "monotonicNs": 77610736094800,
+      "screenshotBytesVerifiedByHelper": false,
+      "timingBasis": "receipt monotonic time; external timestamp is recorded, never subtracted",
+      "utc": "2026-11-01T11:19:15.808903+00:00"
+    },
+    {
+      "event": "external-mark",
+      "mark": {
+        "captured_utc": "2026-11-01T11:20:18.083Z",
+        "event": "U0",
+        "evidence_id": "R18-COLD-HEALTHY-NATIVE-LOGIN",
+        "screenshot_sha256": "8491c6321244c7f748031b2dfb4844501edd7317fe0a8ae6f59a68cbaf34443a"
+      },
+      "monotonicNs": 77679806544600,
+      "screenshotBytesVerifiedByHelper": false,
+      "timingBasis": "receipt monotonic time; external timestamp is recorded, never subtracted",
+      "utc": "2026-11-01T11:20:24.879343+00:00"
+    },
+    {
+      "event": "external-mark",
+      "mark": {
+        "captured_utc": "2026-11-01T11:20:47.249Z",
+        "event": "X0",
+        "evidence_id": "R18-COLD-NORMAL-EXIT",
+        "screenshot_sha256": null
+      },
+      "monotonicNs": 77702177850500,
+      "screenshotBytesVerifiedByHelper": false,
+      "timingBasis": "receipt monotonic time; external timestamp is recorded, never subtracted",
+      "utc": "2026-11-01T11:20:47.250660+00:00"
+    },
+    {
+      "activeProcessesRetained": 0,
+      "actualLimits": {
+        "affinityMask": "0x55",
+        "breakawayAllowed": false,
+        "flags": 528,
+        "jobMemoryBytes": 8589934592,
+        "killOnJobClose": false,
+        "limitsMatch": true,
+        "logicalCpuCount": 4,
+        "memoryMeaning": "aggregate process committed virtual memory; not physical RAM",
+        "peakJobMemoryBytes": 2330136576
+      },
+      "event": "closed",
+      "monotonicNs": 77702542437200,
+      "processesKilled": false,
+      "utc": "2026-11-01T11:20:47.615246+00:00"
+    }
+  ],
+  "originalMonotonicSeconds": 649.1000591,
+  "scoreRecomputed": false,
+  "fileTimeObservations": {
+    "schema": "mir2.r18.filetime-observations.v1",
+    "auditedUtc": "2026-11-01T11:25:51.5207607+00:00",
+    "meaning": "Actual NTFS metadata read after the run, UTC wall-clock corroboration; not monotonic event capture or an exact GUI button clock",
+    "files": [
+      {
+        "path": "installed/.update/install.lock",
+        "bytes": 0,
+        "creationTimeUtc": "2026-11-01T11:18:06.5380069Z",
+        "lastWriteTimeUtc": "2026-11-01T11:18:06.5380069Z"
+      },
+      {
+        "path": "installed/uninstall/unins000.dat",
+        "bytes": 81773,
+        "creationTimeUtc": "2026-11-01T11:18:06.5630850Z",
+        "lastWriteTimeUtc": "2026-11-01T11:18:42.7768788Z"
+      },
+      {
+        "path": "installed/README.ar.txt",
+        "bytes": 6866,
+        "creationTimeUtc": "2026-11-01T11:18:42.7157519Z",
+        "lastWriteTimeUtc": "2026-11-01T10:39:48.0000000Z"
+      },
+      {
+        "path": "installed/.update/engine-A0872632767F6E1338DBC97D776F5DFF3DD18814D39668B7B281E2092B360EB9.exe",
+        "bytes": 4973056,
+        "creationTimeUtc": "2026-11-01T11:18:52.3441552Z",
+        "lastWriteTimeUtc": "2026-11-01T11:18:52.3461552Z"
+      },
+      {
+        "path": "selector-before-first-game.json",
+        "bytes": 328,
+        "creationTimeUtc": "2026-11-01T11:19:09.2581065Z",
+        "lastWriteTimeUtc": "2026-11-01T11:18:56.7124841Z"
+      },
+      {
+        "path": "selector-first-launch-started.json",
+        "bytes": 327,
+        "creationTimeUtc": "2026-11-01T11:19:32.2143760Z",
+        "lastWriteTimeUtc": "2026-11-01T11:19:25.4199562Z"
+      },
+      {
+        "path": "selector-healthy.json",
+        "bytes": 317,
+        "creationTimeUtc": "2026-11-01T11:20:03.5303172Z",
+        "lastWriteTimeUtc": "2026-11-01T11:20:01.2896106Z"
+      }
+    ]
+  },
+  "finishScreenshotUtc": "2026-11-01T11:18:52.190Z",
+  "firstUiBeforeHealthyUtc": "2026-11-01T11:19:40.524Z",
+  "healthySelectorWrittenUtc": "2026-11-01T11:20:01.2896106Z",
+  "healthyObservationSavedUtc": "2026-11-01T11:20:03.5319556+00:00",
+  "healthyUiScreenshotUtc": "2026-11-01T11:20:18.083Z",
+  "u0ReceiptUtc": "2026-11-01T11:20:24.879343+00:00",
+  "firstUiToU0WallIntervalsSeconds": {
+    "firstUiToHealthySelectorWrite": 20.76561,
+    "healthyWriteToSavedObservation": 2.242345,
+    "savedObservationToFinalScreenshot": 14.551045,
+    "finalScreenshotToU0Receipt": 6.796343
+  },
+  "readyExactUtc": null,
+  "readyMeaning": "No independent Ready-success log. Exact engine requires matching Game PID/nonce/generation Ready and >=10s liveness before Healthy. UI-to-Healthy initialization and liveness cannot be split exactly.",
+  "perPageExactUtcAvailable": false,
+  "pageOrder": [
+    "Language default Traditional Chinese OK",
+    "Information Next",
+    "Destination exact cold-01/installed verified by UIA, Next",
+    "Desktop unchecked, Next",
+    "Normal Install",
+    "Progress observed",
+    "Finish with default launch checked",
+    "Automatic engine observed in Job",
+    "Normal Start Game",
+    "Login visible, waited for Healthy",
+    "Normal Alt+F4"
+  ],
+  "pageTimingLimit": "Earlier pages were observed in tool order without separately persisted UTC; no exact button time is invented. Finish capture precedes actual Finish action; G0 precedes actual Start click. File creation timestamps corroborate activity, not exact final-write or button clocks.",
+  "observerWaitsDeducted": false,
+  "observerDelayMeaning": "Healthy observation to screenshot and screenshot to U0 are our observation/tool coordination intervals, not product liveness. Entire original duration retained."
+}

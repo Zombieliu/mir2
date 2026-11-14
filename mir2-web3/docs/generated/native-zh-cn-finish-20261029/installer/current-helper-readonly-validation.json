@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "kind": "current-external-installer-helper-readonly-proof",
+  "report": "installer-readonly-audit-final-helper.json",
+  "reportSha256": "c222dfdec8e2a3ef2c250cb4060c387dab8fa983f6b8a4eb7a09cb5f7319a463",
+  "currentHelperBytes": 2802,
+  "currentHelperSha256": "91823f73e8bfa5b8953f612fa47abb02ff2d5376a30abf4f6ecc27eebfc55241",
+  "curatorVerifiedCurrentHelperIdentity": true,
+  "previousAuditRawBytesPreserved": true,
+  "producerExactThreeChangeInverseProjectionMatchedOldHelper": true,
+  "sourceAndSyntaxOnly": true,
+  "runtimeSuccessClaimed": false,
+  "helperSourceCopiedToGit": false
+}

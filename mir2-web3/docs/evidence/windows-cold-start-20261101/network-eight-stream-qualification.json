@@ -1,0 +1,94 @@
+{
+  "diagnosticOnly": true,
+  "coldAcceptance": false,
+  "rateLimitedAcceptanceClaimed": false,
+  "concurrency": 8,
+  "perTransferLimit": null,
+  "aggregateApplicationCapBytesPerSecond": null,
+  "bytes": 33554432,
+  "elapsed": 31.278101400006562,
+  "aggregateMbps": 8.582217077918408,
+  "allEightRangeHashesMatch": true,
+  "rows": [
+    {
+      "http_code": 206,
+      "size_download": 4194304,
+      "speed_download": 135265,
+      "time_total": 31.007892,
+      "remote_ip": "104.18.16.68",
+      "proxy_used": 0,
+      "ssl_verify_result": 0,
+      "exitcode": 0
+    },
+    {
+      "http_code": 206,
+      "size_download": 4194304,
+      "speed_download": 219518,
+      "time_total": 19.106875,
+      "remote_ip": "104.18.16.68",
+      "proxy_used": 0,
+      "ssl_verify_result": 0,
+      "exitcode": 0
+    },
+    {
+      "http_code": 206,
+      "size_download": 4194304,
+      "speed_download": 310355,
+      "time_total": 13.514506,
+      "remote_ip": "104.18.16.68",
+      "proxy_used": 0,
+      "ssl_verify_result": 0,
+      "exitcode": 0
+    },
+    {
+      "http_code": 206,
+      "size_download": 4194304,
+      "speed_download": 411790,
+      "time_total": 10.185529,
+      "remote_ip": "104.18.16.68",
+      "proxy_used": 0,
+      "ssl_verify_result": 0,
+      "exitcode": 0
+    },
+    {
+      "http_code": 206,
+      "size_download": 4194304,
+      "speed_download": 272394,
+      "time_total": 15.397914,
+      "remote_ip": "104.18.17.68",
+      "proxy_used": 0,
+      "ssl_verify_result": 0,
+      "exitcode": 0
+    },
+    {
+      "http_code": 206,
+      "size_download": 4194304,
+      "speed_download": 215471,
+      "time_total": 19.465725,
+      "remote_ip": "104.18.16.68",
+      "proxy_used": 0,
+      "ssl_verify_result": 0,
+      "exitcode": 0
+    },
+    {
+      "http_code": 206,
+      "size_download": 4194304,
+      "speed_download": 134211,
+      "time_total": 31.251484,
+      "remote_ip": "104.18.16.68",
+      "proxy_used": 0,
+      "ssl_verify_result": 0,
+      "exitcode": 0
+    },
+    {
+      "http_code": 206,
+      "size_download": 4194304,
+      "speed_download": 196178,
+      "time_total": 21.380028,
+      "remote_ip": "104.18.16.68",
+      "proxy_used": 0,
+      "ssl_verify_result": 0,
+      "exitcode": 0
+    }
+  ]
+}

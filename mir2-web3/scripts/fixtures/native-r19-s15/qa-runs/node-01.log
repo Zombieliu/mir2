@@ -1,0 +1,877 @@
+TAP version 13
+# Subtest: fixed15 closure binds exact new R19 and genuine predecessor14
+ok 1 - fixed15 closure binds exact new R19 and genuine predecessor14
+  ---
+  duration_ms: 15.0916
+  type: 'test'
+  ...
+# Subtest: default admission is closed; no fake passed/CMS or old receipt can admit13
+ok 2 - default admission is closed; no fake passed/CMS or old receipt can admit13
+  ---
+  duration_ms: 5.7127
+  type: 'test'
+  ...
+# Subtest: authentication precedes storage/fetch/admission and authorized prepared operation fails closed
+ok 3 - authentication precedes storage/fetch/admission and authorized prepared operation fails closed
+  ---
+  duration_ms: 15.6893
+  type: 'test'
+  ...
+# Subtest: stage template permits only null/exact12/exact13; old and forged stage scope stay distinct
+ok 4 - stage template permits only null/exact12/exact13; old and forged stage scope stay distinct
+  ---
+  duration_ms: 0.8188
+  type: 'test'
+  ...
+# Subtest: fixed111MB deadline policy is finite and transport margin exceeds worker budget
+not ok 5 - fixed111MB deadline policy is finite and transport margin exceeds worker budget
+  ---
+  duration_ms: 0.6113
+  type: 'test'
+  location: 'C:\\Users\\Administrator\\.codex\\worktrees\\native-packed-resources\\mir2-player-journey\\mir2-web3\\infra\\cloudflare\\mir2-r2-bulk-upload\\test\\native-r19-s15-publication.test.mjs:195:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 111107072
+    - 111013376
+         ^
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 111013376
+  actual: 111107072
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/Administrator/.codex/worktrees/native-packed-resources/mir2-player-journey/mir2-web3/infra/cloudflare/mir2-r2-bulk-upload/test/native-r19-s15-publication.test.mjs:197:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: first object import201 is create-only; actual small full-hash resume200 does not refetch
+ok 6 - first object import201 is create-only; actual small full-hash resume200 does not refetch
+  ---
+  duration_ms: 11.803
+  type: 'test'
+  ...
+# Subtest: bad existing body or wrong stored checksum cannot count as immutable resume
+ok 7 - bad existing body or wrong stored checksum cannot count as immutable resume
+  ---
+  duration_ms: 4.7844
+  type: 'test'
+  ...
+# Subtest: lost object ACK retains unknown and never retries; independent later stage hashes existing bytes
+ok 8 - lost object ACK retains unknown and never retries; independent later stage hashes existing bytes
+  ---
+  duration_ms: 5.1884
+  type: 'test'
+  ...
+# Subtest: source redirect/encoding/length fail before any immutable write
+ok 9 - source redirect/encoding/length fail before any immutable write
+  ---
+  duration_ms: 9.3819
+  type: 'test'
+  ...
+# Subtest: scaled header deadline cancels upstream and never changes pointer
+ok 10 - scaled header deadline cancels upstream and never changes pointer
+  ---
+  duration_ms: 32.987
+  type: 'test'
+  ...
+# Subtest: scaled total timeout bounds a stalled R2 put; cancellation cannot claim it never committed
+ok 11 - scaled total timeout bounds a stalled R2 put; cancellation cannot claim it never committed
+  ---
+  duration_ms: 48.081
+  type: 'test'
+  ...
+# Subtest: null pointer creation uses only If-None-Match and reads exact13 after commit
+ok 12 - null pointer creation uses only If-None-Match and reads exact13 after commit
+  ---
+  duration_ms: 5.1215
+  type: 'test'
+  ...
+# Subtest: observed exact12 upgrade uses that actual ETag If-Match;13 is idempotent
+ok 13 - observed exact12 upgrade uses that actual ETag If-Match;13 is idempotent
+  ---
+  duration_ms: 5.7745
+  type: 'test'
+  ...
+# Subtest: unknown/conflicting pointer or changed actual stage state rejects before put
+ok 14 - unknown/conflicting pointer or changed actual stage state rejects before put
+  ---
+  duration_ms: 9.0565
+  type: 'test'
+  ...
+# Subtest: pointer race gets412 and preserves raced pointer; no overwrite retry
+ok 15 - pointer race gets412 and preserves raced pointer; no overwrite retry
+  ---
+  duration_ms: 4.1576
+  type: 'test'
+  ...
+# Subtest: lost pointer ACK retains unknown; separate retry reconciles exact13 without second write
+ok 16 - lost pointer ACK retains unknown; separate retry reconciles exact13 without second write
+  ---
+  duration_ms: 5.0061
+  type: 'test'
+  ...
+# Subtest: immutable15 preview cannot promote while current origin latest pair remains14
+ok 17 - immutable15 preview cannot promote while current origin latest pair remains14
+  ---
+  duration_ms: 4.0375
+  type: 'test'
+  ...
+# Subtest: old v1 receipt/changed candidate is rejected before heads or source fetch
+ok 18 - old v1 receipt/changed candidate is rejected before heads or source fetch
+  ---
+  duration_ms: 8.1881
+  type: 'test'
+  ...
+# Subtest: caller cannot select arbitrary URL/body/hash/key or normalized/query escape
+ok 19 - caller cannot select arbitrary URL/body/hash/key or normalized/query escape
+  ---
+  duration_ms: 5.1722
+  type: 'test'
+  ...
+# Subtest: fresh wrong SHA body cannot publish even with correct declared length
+ok 20 - fresh wrong SHA body cannot publish even with correct declared length
+  ---
+  duration_ms: 3.073
+  type: 'test'
+  ...
+# Subtest: concurrent same immutable key creates exactly once and never overwrites
+ok 21 - concurrent same immutable key creates exactly once and never overwrites
+  ---
+  duration_ms: 3.467
+  type: 'test'
+  ...
+# Subtest: no-progress source cancels partial stream with unknown put and no pointer writes
+ok 22 - no-progress source cancels partial stream with unknown put and no pointer writes
+  ---
+  duration_ms: 39.996
+  type: 'test'
+  ...
+# Subtest: legacy PUT rejects reserved native prefix: mir2/native/windows-invited/releases/protected.exe
+ok 23 - legacy PUT rejects reserved native prefix: mir2/native/windows-invited/releases/protected.exe
+  ---
+  duration_ms: 0.4507
+  type: 'test'
+  ...
+# Subtest: legacy PUT rejects reserved native prefix:   ///mir2/native/windows-invited/channels/invited.json  
+ok 24 - legacy PUT rejects reserved native prefix:   ///mir2/native/windows-invited/channels/invited.json  
+  ---
+  duration_ms: 0.1598
+  type: 'test'
+  ...
+# Subtest: unrelated legacy Web PUT retains its existing behavior
+ok 25 - unrelated legacy Web PUT retains its existing behavior
+  ---
+  duration_ms: 0.1985
+  type: 'test'
+  ...
+# Subtest: source proof and actual small feed/signature match literal closure
+ok 26 - source proof and actual small feed/signature match literal closure
+  ---
+  duration_ms: 2.9445
+  type: 'test'
+  ...
+# Subtest: changed frozen plan cannot redefine authority: candidate
+ok 27 - changed frozen plan cannot redefine authority: candidate
+  ---
+  duration_ms: 0.5975
+  type: 'test'
+  ...
+# Subtest: changed frozen plan cannot redefine authority: object
+ok 28 - changed frozen plan cannot redefine authority: object
+  ---
+  duration_ms: 0.3329
+  type: 'test'
+  ...
+# Subtest: changed frozen plan cannot redefine authority: root
+ok 29 - changed frozen plan cannot redefine authority: root
+  ---
+  duration_ms: 0.3036
+  type: 'test'
+  ...
+# Subtest: changed frozen plan cannot redefine authority: origin
+ok 30 - changed frozen plan cannot redefine authority: origin
+  ---
+  duration_ms: 0.2818
+  type: 'test'
+  ...
+# Subtest: changed frozen plan cannot redefine authority: installer
+ok 31 - changed frozen plan cannot redefine authority: installer
+  ---
+  duration_ms: 0.3027
+  type: 'test'
+  ...
+# Subtest: unauthorized request precedes every fetch/storage operation: /import
+ok 32 - unauthorized request precedes every fetch/storage operation: /import
+  ---
+  duration_ms: 0.3173
+  type: 'test'
+  ...
+# Subtest: unauthorized request precedes every fetch/storage operation: /promote
+ok 33 - unauthorized request precedes every fetch/storage operation: /promote
+  ---
+  duration_ms: 0.0874
+  type: 'test'
+  ...
+# Subtest: unauthorized request precedes every fetch/storage operation: /objects/0
+ok 34 - unauthorized request precedes every fetch/storage operation: /objects/0
+  ---
+  duration_ms: 0.0786
+  type: 'test'
+  ...
+# Subtest: unauthorized request precedes every fetch/storage operation: /pointer
+ok 35 - unauthorized request precedes every fetch/storage operation: /pointer
+  ---
+  duration_ms: 0.0617
+  type: 'test'
+  ...
+# Subtest: index dispatch reaches native authorization before old PUT-only gate
+ok 36 - index dispatch reaches native authorization before old PUT-only gate
+  ---
+  duration_ms: 0.1332
+  type: 'test'
+  ...
+# Subtest: import rejects caller authority input: {"index":0,"url":"https://attacker.invalid/"}
+ok 37 - import rejects caller authority input: {"index":0,"url":"https://attacker.invalid/"}
+  ---
+  duration_ms: 3.0192
+  type: 'test'
+  ...
+# Subtest: import rejects caller authority input: {"index":0,"sha256":"0000000000000000000000000000000000000000000000000000000000000000"}
+ok 38 - import rejects caller authority input: {"index":0,"sha256":"0000000000000000000000000000000000000000000000000000000000000000"}
+  ---
+  duration_ms: 2.4988
+  type: 'test'
+  ...
+# Subtest: import rejects caller authority input: {"index":0,"key":"mir2/native/windows-invited/channels/invited.json"}
+ok 39 - import rejects caller authority input: {"index":0,"key":"mir2/native/windows-invited/channels/invited.json"}
+  ---
+  duration_ms: 2.5819
+  type: 'test'
+  ...
+# Subtest: import rejects caller authority input: {"index":0,"path":"feeds/s15-11a2c8eaaa5f18e654d185223312b18d1c5c32412f844aec64bb341df1c5009c/latest.json"}
+ok 40 - import rejects caller authority input: {"index":0,"path":"feeds/s15-11a2c8eaaa5f18e654d185223312b18d1c5c32412f844aec64bb341df1c5009c/latest.json"}
+  ---
+  duration_ms: 2.6638
+  type: 'test'
+  ...
+# Subtest: import rejects caller authority input: {"index":-1}
+ok 41 - import rejects caller authority input: {"index":-1}
+  ---
+  duration_ms: 2.5761
+  type: 'test'
+  ...
+# Subtest: import rejects caller authority input: {"index":40}
+ok 42 - import rejects caller authority input: {"index":40}
+  ---
+  duration_ms: 2.4341
+  type: 'test'
+  ...
+# Subtest: import rejects caller authority input: {"index":0.1}
+ok 43 - import rejects caller authority input: {"index":0.1}
+  ---
+  duration_ms: 2.3474
+  type: 'test'
+  ...
+# Subtest: import rejects caller authority input: {"index":"0"}
+ok 44 - import rejects caller authority input: {"index":"0"}
+  ---
+  duration_ms: 2.416
+  type: 'test'
+  ...
+# Subtest: import rejects caller authority input: {"path":"latest.json"}
+ok 45 - import rejects caller authority input: {"path":"latest.json"}
+  ---
+  duration_ms: 2.5251
+  type: 'test'
+  ...
+# Subtest: import rejects caller authority input: {"path":"../channels/invited.json"}
+ok 46 - import rejects caller authority input: {"path":"../channels/invited.json"}
+  ---
+  duration_ms: 2.5777
+  type: 'test'
+  ...
+# Subtest: import rejects caller authority input: {"path":"https://attacker.invalid/"}
+ok 47 - import rejects caller authority input: {"path":"https://attacker.invalid/"}
+  ---
+  duration_ms: 2.5989
+  type: 'test'
+  ...
+# Subtest: import rejects caller authority input: []
+ok 48 - import rejects caller authority input: []
+  ---
+  duration_ms: 2.4181
+  type: 'test'
+  ...
+# Subtest: import rejects caller authority input: null
+ok 49 - import rejects caller authority input: null
+  ---
+  duration_ms: 2.5257
+  type: 'test'
+  ...
+# Subtest: native path/query is literal only: /import?anything=1
+ok 50 - native path/query is literal only: /import?anything=1
+  ---
+  duration_ms: 0.1872
+  type: 'test'
+  ...
+# Subtest: native path/query is literal only: /import?
+ok 51 - native path/query is literal only: /import?
+  ---
+  duration_ms: 0.0738
+  type: 'test'
+  ...
+# Subtest: native path/query is literal only: /objects/00
+ok 52 - native path/query is literal only: /objects/00
+  ---
+  duration_ms: 2.7146
+  type: 'test'
+  ...
+# Subtest: native path/query is literal only: /objects/40
+ok 53 - native path/query is literal only: /objects/40
+  ---
+  duration_ms: 2.4878
+  type: 'test'
+  ...
+# Subtest: native path/query is literal only: /objects/%30
+ok 54 - native path/query is literal only: /objects/%30
+  ---
+  duration_ms: 0.1241
+  type: 'test'
+  ...
+# Subtest: native path/query is literal only: /objects/0/
+ok 55 - native path/query is literal only: /objects/0/
+  ---
+  duration_ms: 2.5304
+  type: 'test'
+  ...
+# Subtest: native path/query is literal only: /arbitrary
+ok 56 - native path/query is literal only: /arbitrary
+  ---
+  duration_ms: 2.5485
+  type: 'test'
+  ...
+# Subtest: native path/query is literal only: /pointer/
+ok 57 - native path/query is literal only: /pointer/
+  ---
+  duration_ms: 2.4405
+  type: 'test'
+  ...
+# Subtest: strict request JSON rejects ambiguity/complexity: {"index":0,"index":1}
+ok 58 - strict request JSON rejects ambiguity/complexity: {"index":0,"index":1}
+  ---
+  duration_ms: 2.6425
+  type: 'test'
+  ...
+# Subtest: strict request JSON rejects ambiguity/complexity: {"index":0,"\\u0069ndex":1}
+ok 59 - strict request JSON rejects ambiguity/complexity: {"index":0,"\\u0069ndex":1}
+  ---
+  duration_ms: 2.5299
+  type: 'test'
+  ...
+# Subtest: strict request JSON rejects ambiguity/complexity: {"index":0} trailing
+ok 60 - strict request JSON rejects ambiguity/complexity: {"index":0} trailing
+  ---
+  duration_ms: 2.5748
+  type: 'test'
+  ...
+# Subtest: strict request JSON rejects ambiguity/complexity: ﻿{"index":0}
+ok 61 - strict request JSON rejects ambiguity/complexity: ﻿{"index":0}
+  ---
+  duration_ms: 2.8631
+  type: 'test'
+  ...
+# Subtest: strict request JSON rejects ambiguity/complexity: {"index":[[[[[[[[[[[[[[[0]]]]]]]]]]]]]]]}
+ok 62 - strict request JSON rejects ambiguity/complexity: {"index":[[[[[[[[[[[[[[[0]]]]]]]]]]]]]]]}
+  ---
+  duration_ms: 2.6244
+  type: 'test'
+  ...
+# Subtest: actual request stream and declared length are independently bounded
+ok 63 - actual request stream and declared length are independently bounded
+  ---
+  duration_ms: 12.6663
+  type: 'test'
+  ...
+# Subtest: actual signed small object streams with checksum/create-only and read-after-write: {"index":0}
+ok 64 - actual signed small object streams with checksum/create-only and read-after-write: {"index":0}
+  ---
+  duration_ms: 4.1366
+  type: 'test'
+  ...
+# Subtest: actual signed small object streams with checksum/create-only and read-after-write: {"path":"feeds/s15-11a2c8eaaa5f18e654d185223312b18d1c5c32412f844aec64bb341df1c5009c/latest.json"}
+ok 65 - actual signed small object streams with checksum/create-only and read-after-write: {"path":"feeds/s15-11a2c8eaaa5f18e654d185223312b18d1c5c32412f844aec64bb341df1c5009c/latest.json"}
+  ---
+  duration_ms: 3.0259
+  type: 'test'
+  ...
+# Subtest: actual signed small object streams with checksum/create-only and read-after-write: {"index":1}
+ok 66 - actual signed small object streams with checksum/create-only and read-after-write: {"index":1}
+  ---
+  duration_ms: 3.3197
+  type: 'test'
+  ...
+# Subtest: exact existing object resumes only after full incremental hash and metadata
+ok 67 - exact existing object resumes only after full incremental hash and metadata
+  ---
+  duration_ms: 3.2044
+  type: 'test'
+  ...
+# Subtest: existing immutable mismatch cannot resume/overwrite: body
+ok 68 - existing immutable mismatch cannot resume/overwrite: body
+  ---
+  duration_ms: 2.6001
+  type: 'test'
+  ...
+# Subtest: existing immutable mismatch cannot resume/overwrite: short
+ok 69 - existing immutable mismatch cannot resume/overwrite: short
+  ---
+  duration_ms: 2.9453
+  type: 'test'
+  ...
+# Subtest: existing immutable mismatch cannot resume/overwrite: extra
+ok 70 - existing immutable mismatch cannot resume/overwrite: extra
+  ---
+  duration_ms: 2.6501
+  type: 'test'
+  ...
+# Subtest: existing immutable mismatch cannot resume/overwrite: size
+ok 71 - existing immutable mismatch cannot resume/overwrite: size
+  ---
+  duration_ms: 2.6575
+  type: 'test'
+  ...
+# Subtest: existing immutable mismatch cannot resume/overwrite: etag
+ok 72 - existing immutable mismatch cannot resume/overwrite: etag
+  ---
+  duration_ms: 2.4038
+  type: 'test'
+  ...
+# Subtest: existing immutable mismatch cannot resume/overwrite: weak-etag
+ok 73 - existing immutable mismatch cannot resume/overwrite: weak-etag
+  ---
+  duration_ms: 2.5948
+  type: 'test'
+  ...
+# Subtest: existing immutable mismatch cannot resume/overwrite: custom-sha
+ok 74 - existing immutable mismatch cannot resume/overwrite: custom-sha
+  ---
+  duration_ms: 2.2783
+  type: 'test'
+  ...
+# Subtest: existing immutable mismatch cannot resume/overwrite: stored-sha
+ok 75 - existing immutable mismatch cannot resume/overwrite: stored-sha
+  ---
+  duration_ms: 2.5424
+  type: 'test'
+  ...
+# Subtest: existing immutable mismatch cannot resume/overwrite: missing-checksum
+ok 76 - existing immutable mismatch cannot resume/overwrite: missing-checksum
+  ---
+  duration_ms: 2.4249
+  type: 'test'
+  ...
+# Subtest: existing immutable mismatch cannot resume/overwrite: mime
+ok 77 - existing immutable mismatch cannot resume/overwrite: mime
+  ---
+  duration_ms: 2.5641
+  type: 'test'
+  ...
+# Subtest: existing immutable mismatch cannot resume/overwrite: cache
+ok 78 - existing immutable mismatch cannot resume/overwrite: cache
+  ---
+  duration_ms: 2.3151
+  type: 'test'
+  ...
+# Subtest: existing immutable mismatch cannot resume/overwrite: encoding
+ok 79 - existing immutable mismatch cannot resume/overwrite: encoding
+  ---
+  duration_ms: 2.4943
+  type: 'test'
+  ...
+# Subtest: existing immutable mismatch cannot resume/overwrite: key
+ok 80 - existing immutable mismatch cannot resume/overwrite: key
+  ---
+  duration_ms: 2.3179
+  type: 'test'
+  ...
+# Subtest: origin contract fails closed: 301
+ok 81 - origin contract fails closed: 301
+  ---
+  duration_ms: 2.7653
+  type: 'test'
+  ...
+# Subtest: origin contract fails closed: 302
+ok 82 - origin contract fails closed: 302
+  ---
+  duration_ms: 2.468
+  type: 'test'
+  ...
+# Subtest: origin contract fails closed: 307
+ok 83 - origin contract fails closed: 307
+  ---
+  duration_ms: 2.6293
+  type: 'test'
+  ...
+# Subtest: origin contract fails closed: 206
+ok 84 - origin contract fails closed: 206
+  ---
+  duration_ms: 2.3998
+  type: 'test'
+  ...
+# Subtest: origin contract fails closed: 404
+ok 85 - origin contract fails closed: 404
+  ---
+  duration_ms: 2.7647
+  type: 'test'
+  ...
+# Subtest: origin contract fails closed: gzip
+ok 86 - origin contract fails closed: gzip
+  ---
+  duration_ms: 2.4765
+  type: 'test'
+  ...
+# Subtest: origin contract fails closed: missing-length
+ok 87 - origin contract fails closed: missing-length
+  ---
+  duration_ms: 2.6273
+  type: 'test'
+  ...
+# Subtest: origin contract fails closed: wrong-length
+ok 88 - origin contract fails closed: wrong-length
+  ---
+  duration_ms: 2.3751
+  type: 'test'
+  ...
+# Subtest: origin contract fails closed: noncanonical-length
+ok 89 - origin contract fails closed: noncanonical-length
+  ---
+  duration_ms: 2.6523
+  type: 'test'
+  ...
+# Subtest: origin contract fails closed: short-stream
+ok 90 - origin contract fails closed: short-stream
+  ---
+  duration_ms: 2.6557
+  type: 'test'
+  ...
+# Subtest: origin contract fails closed: extra-stream
+ok 91 - origin contract fails closed: extra-stream
+  ---
+  duration_ms: 3.1171
+  type: 'test'
+  ...
+# Subtest: origin contract fails closed: wrong-sha
+ok 92 - origin contract fails closed: wrong-sha
+  ---
+  duration_ms: 2.9855
+  type: 'test'
+  ...
+# Subtest: early create race cancels blocked source and never retries unconditionally
+ok 93 - early create race cancels blocked source and never retries unconditionally
+  ---
+  duration_ms: 2.8291
+  type: 'test'
+  ...
+# Subtest: runtime without FixedLengthStream refuses before origin request
+ok 94 - runtime without FixedLengthStream refuses before origin request
+  ---
+  duration_ms: 2.7379
+  type: 'test'
+  ...
+# Subtest: actual game executable artifact is consumed in 64KiB chunks, checksum rejects synthetic bytes without commit
+ok 95 - actual game executable artifact is consumed in 64KiB chunks, checksum rejects synthetic bytes without commit
+  ---
+  duration_ms: 132.1615
+  type: 'test'
+  ...
+# Subtest: authenticated native GET/HEAD are limited, byte exact and no-store
+ok 96 - authenticated native GET/HEAD are limited, byte exact and no-store
+  ---
+  duration_ms: 6.3282
+  type: 'test'
+  ...
+# Subtest: GET never serves an object whose stored checksum was changed
+ok 97 - GET never serves an object whose stored checksum was changed
+  ---
+  duration_ms: 2.5015
+  type: 'test'
+  ...
+# Subtest: promote rejects incomplete/forged bound stage: missing
+ok 98 - promote rejects incomplete/forged bound stage: missing
+  ---
+  duration_ms: 3.1397
+  type: 'test'
+  ...
+# Subtest: promote rejects incomplete/forged bound stage: not-passed
+ok 99 - promote rejects incomplete/forged bound stage: not-passed
+  ---
+  duration_ms: 2.8007
+  type: 'test'
+  ...
+# Subtest: promote rejects incomplete/forged bound stage: mode
+ok 100 - promote rejects incomplete/forged bound stage: mode
+  ---
+  duration_ms: 3.0269
+  type: 'test'
+  ...
+# Subtest: promote rejects incomplete/forged bound stage: plan
+ok 101 - promote rejects incomplete/forged bound stage: plan
+  ---
+  duration_ms: 2.7436
+  type: 'test'
+  ...
+# Subtest: promote rejects incomplete/forged bound stage: root
+ok 102 - promote rejects incomplete/forged bound stage: root
+  ---
+  duration_ms: 3.2155
+  type: 'test'
+  ...
+# Subtest: promote rejects incomplete/forged bound stage: table
+ok 103 - promote rejects incomplete/forged bound stage: table
+  ---
+  duration_ms: 3.2769
+  type: 'test'
+  ...
+# Subtest: promote rejects incomplete/forged bound stage: closure
+ok 104 - promote rejects incomplete/forged bound stage: closure
+  ---
+  duration_ms: 3.2187
+  type: 'test'
+  ...
+# Subtest: promote rejects incomplete/forged bound stage: candidate
+ok 105 - promote rejects incomplete/forged bound stage: candidate
+  ---
+  duration_ms: 2.6023
+  type: 'test'
+  ...
+# Subtest: promote rejects incomplete/forged bound stage: expected-current
+ok 106 - promote rejects incomplete/forged bound stage: expected-current
+  ---
+  duration_ms: 2.9035
+  type: 'test'
+  ...
+# Subtest: promote rejects incomplete/forged bound stage: pointer-changed
+ok 107 - promote rejects incomplete/forged bound stage: pointer-changed
+  ---
+  duration_ms: 2.6045
+  type: 'test'
+  ...
+# Subtest: promote rejects incomplete/forged bound stage: public-false
+ok 108 - promote rejects incomplete/forged bound stage: public-false
+  ---
+  duration_ms: 3.0558
+  type: 'test'
+  ...
+# Subtest: promote rejects incomplete/forged bound stage: public-host
+ok 109 - promote rejects incomplete/forged bound stage: public-host
+  ---
+  duration_ms: 2.9301
+  type: 'test'
+  ...
+# Subtest: promote rejects incomplete/forged bound stage: missing-object
+ok 110 - promote rejects incomplete/forged bound stage: missing-object
+  ---
+  duration_ms: 2.8858
+  type: 'test'
+  ...
+# Subtest: promote rejects incomplete/forged bound stage: extra-object
+ok 111 - promote rejects incomplete/forged bound stage: extra-object
+  ---
+  duration_ms: 2.5026
+  type: 'test'
+  ...
+# Subtest: promote rejects incomplete/forged bound stage: altered-size
+ok 112 - promote rejects incomplete/forged bound stage: altered-size
+  ---
+  duration_ms: 3.0447
+  type: 'test'
+  ...
+# Subtest: promote rejects incomplete/forged bound stage: reordered
+ok 113 - promote rejects incomplete/forged bound stage: reordered
+  ---
+  duration_ms: 2.9306
+  type: 'test'
+  ...
+# Subtest: promote rejects incomplete/forged bound stage: extra-field
+ok 114 - promote rejects incomplete/forged bound stage: extra-field
+  ---
+  duration_ms: 2.8929
+  type: 'test'
+  ...
+# Subtest: complete stage cannot bypass actual R2 metadata: installer-missing
+ok 115 - complete stage cannot bypass actual R2 metadata: installer-missing
+  ---
+  duration_ms: 2.7648
+  type: 'test'
+  ...
+# Subtest: complete stage cannot bypass actual R2 metadata: ordinary-missing
+ok 116 - complete stage cannot bypass actual R2 metadata: ordinary-missing
+  ---
+  duration_ms: 2.9276
+  type: 'test'
+  ...
+# Subtest: complete stage cannot bypass actual R2 metadata: stored-sha
+ok 117 - complete stage cannot bypass actual R2 metadata: stored-sha
+  ---
+  duration_ms: 2.7343
+  type: 'test'
+  ...
+# Subtest: complete stage cannot bypass actual R2 metadata: cache
+ok 118 - complete stage cannot bypass actual R2 metadata: cache
+  ---
+  duration_ms: 2.8762
+  type: 'test'
+  ...
+# Subtest: promotion rereads exact unexpired origin pair: json
+ok 119 - promotion rereads exact unexpired origin pair: json
+  ---
+  duration_ms: 2.979
+  type: 'test'
+  ...
+# Subtest: promotion rereads exact unexpired origin pair: signature
+ok 120 - promotion rereads exact unexpired origin pair: signature
+  ---
+  duration_ms: 3.3653
+  type: 'test'
+  ...
+# Subtest: promotion rereads exact unexpired origin pair: expired
+ok 121 - promotion rereads exact unexpired origin pair: expired
+  ---
+  duration_ms: 3.218
+  type: 'test'
+  ...
+# Subtest: promotion rereads exact unexpired origin pair: not-created
+ok 122 - promotion rereads exact unexpired origin pair: not-created
+  ---
+  duration_ms: 2.9627
+  type: 'test'
+  ...
+# Subtest: only after all fixed object checks and source pair does pointer create; exact retry never rewrites
+ok 123 - only after all fixed object checks and source pair does pointer create; exact retry never rewrites
+  ---
+  duration_ms: 5.0422
+  type: 'test'
+  ...
+# Subtest: current unknown pointer is refused, never overwritten
+ok 124 - current unknown pointer is refused, never overwritten
+  ---
+  duration_ms: 3.9663
+  type: 'test'
+  ...
+# Subtest: pointer CAS race stops with 412 and a single conditional attempt
+ok 125 - pointer CAS race stops with 412 and a single conditional attempt
+  ---
+  duration_ms: 3.6394
+  type: 'test'
+  ...
+# Subtest: uncertain pointer outcome survives sanitized failure: throw-before-put
+ok 126 - uncertain pointer outcome survives sanitized failure: throw-before-put
+  ---
+  duration_ms: 3.4527
+  type: 'test'
+  ...
+# Subtest: uncertain pointer outcome survives sanitized failure: throw-after-commit
+ok 127 - uncertain pointer outcome survives sanitized failure: throw-after-commit
+  ---
+  duration_ms: 3.0598
+  type: 'test'
+  ...
+# Subtest: uncertain pointer outcome survives sanitized failure: read-after-write
+ok 128 - uncertain pointer outcome survives sanitized failure: read-after-write
+  ---
+  duration_ms: 3.4552
+  type: 'test'
+  ...
+# Subtest: concurrent prepared promotions have one winner and no unconditional overwrite
+not ok 129 - concurrent prepared promotions have one winner and no unconditional overwrite
+  ---
+  duration_ms: 4.165
+  type: 'test'
+  location: 'C:\\Users\\Administrator\\.codex\\worktrees\\native-packed-resources\\mir2-player-journey\\mir2-web3\\infra\\cloudflare\\mir2-r2-bulk-upload\\test\\native-r19-s15-publication.test.mjs:850:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    41 !== 37
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 37
+  actual: 41
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/Administrator/.codex/worktrees/native-packed-resources/mir2-player-journey/mir2-web3/infra/cloudflare/mir2-r2-bulk-upload/test/native-r19-s15-publication.test.mjs:855:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: exact authority rejects authenticated wronghost/port before side effects: wrong.invalid/import
+ok 130 - exact authority rejects authenticated wronghost/port before side effects: wrong.invalid/import
+  ---
+  duration_ms: 0.3436
+  type: 'test'
+  ...
+# Subtest: exact authority rejects authenticated wronghost/port before side effects: wrong.invalid/promote
+ok 131 - exact authority rejects authenticated wronghost/port before side effects: wrong.invalid/promote
+  ---
+  duration_ms: 0.151
+  type: 'test'
+  ...
+# Subtest: exact authority rejects authenticated wronghost/port before side effects: wrong.invalid/objects/0
+ok 132 - exact authority rejects authenticated wronghost/port before side effects: wrong.invalid/objects/0
+  ---
+  duration_ms: 0.1056
+  type: 'test'
+  ...
+# Subtest: exact authority rejects authenticated wronghost/port before side effects: wrong.invalid/pointer
+ok 133 - exact authority rejects authenticated wronghost/port before side effects: wrong.invalid/pointer
+  ---
+  duration_ms: 0.0953
+  type: 'test'
+  ...
+# Subtest: exact authority rejects authenticated wronghost/port before side effects: assets.mir2.obelisk.build:444/import
+ok 134 - exact authority rejects authenticated wronghost/port before side effects: assets.mir2.obelisk.build:444/import
+  ---
+  duration_ms: 0.1094
+  type: 'test'
+  ...
+# Subtest: exact authority rejects authenticated wronghost/port before side effects: assets.mir2.obelisk.build:444/promote
+ok 135 - exact authority rejects authenticated wronghost/port before side effects: assets.mir2.obelisk.build:444/promote
+  ---
+  duration_ms: 0.1186
+  type: 'test'
+  ...
+# Subtest: exact authority rejects authenticated wronghost/port before side effects: assets.mir2.obelisk.build:444/objects/0
+ok 136 - exact authority rejects authenticated wronghost/port before side effects: assets.mir2.obelisk.build:444/objects/0
+  ---
+  duration_ms: 0.0877
+  type: 'test'
+  ...
+# Subtest: exact authority rejects authenticated wronghost/port before side effects: assets.mir2.obelisk.build:444/pointer
+ok 137 - exact authority rejects authenticated wronghost/port before side effects: assets.mir2.obelisk.build:444/pointer
+  ---
+  duration_ms: 0.0855
+  type: 'test'
+  ...
+# Subtest: late read-only R2 get resolution cancels orphaned body after operation deadline
+ok 138 - late read-only R2 get resolution cancels orphaned body after operation deadline
+  ---
+  duration_ms: 86.8664
+  type: 'test'
+  ...
+1..138
+# tests 138
+# suites 0
+# pass 136
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 839.6636

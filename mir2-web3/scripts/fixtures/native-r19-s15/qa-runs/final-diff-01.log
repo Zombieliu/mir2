@@ -1,0 +1,281 @@
+--- scripts/native_r17_s14_r2_delivery.py
+
++++ scripts/native_r19_s15_r2_delivery.py
+
+@@ -1,4 +1,4 @@
+
+ #!/usr/bin/env python3
+-"""Fixed R17 CI delivery orchestration. Credentials and HTTP bodies are never logged.
++"""Fixed R19/s15 CI delivery orchestration. Credentials and HTTP bodies are never logged.
+ 
+ Only the trusted opaque CI invocation may read MIR2_R2_UPLOAD_SECRET. This is
+@@ -28,12 +28,17 @@
+
+ PUBLIC_PREFIX = '/client-updates/'
+ PUBLIC_BASE = 'https://' + HOST + PUBLIC_PREFIX
+-PRIVATE_PREFIX = '/upload/native-r17-s14'
++PRIVATE_PREFIX = '/upload/native-r19-s15'
+ IMMUTABLE = 'public, max-age=31536000, immutable'
+-SOURCE_PLAN_SHA = 'e9daa352802c6c092a7c575b35e6eff7ccf4a4baf139606925a8c348c22925ee'
+-ROOT_SHA = 'd86637fe188e84a671db378643f865d4dc0ce48d33625dd90cf1f9f87dbef7e5'
+-NATIVE_SHA = 'a2f209448875cd200ea182b4da880ceba426e9b05e8ef8e9034192f09c360d6a'
+-LITERAL_SHA = '2bb21fd0a2387de39641e37a3a11663b62610bcc32d8f35e8207e842184a1eb1'
+-OBJECTS_SHA = 'b6691b9a90d40248934ec93adfc36e7d1e1ec81c3929fadd0c09fd9166c4cc94'
+-PLAN_FILE = Path(__file__).resolve().parents[1] / 'infra/cloudflare/mir2-r2-bulk-upload/src/native-r17-s14-publication-plan.json'
++SOURCE_PLAN_SHA = '852b474af0f9c7a5512b1ea1b3d9d2c957cc512dec95e366b8907052641c2356'
++ROOT_SHA = '099702223680a43d63fb500740763e8b8f67442c6fcd414b6d5f178293d7d7a3'
++NATIVE_SHA = '3e697bbe0a1f8ecc31bbe12920068b39c56a2c2669303b38577558b20e70a83f'
++LITERAL_SHA = 'b9ef3bb67e663d687402a96d6825ffbb5c3ee69ae9a3a352a927584e117e7d7d'
++OBJECTS_SHA = '16746cd549d609b1c2e5ce08403bc36c1fa4be9ceee8452e518e996aa1d7ee8a'
++PLAN_FILE = Path(__file__).resolve().parents[1] / 'infra/cloudflare/mir2-r2-bulk-upload/src/native-r19-s15-publication-plan.json'
++<frozen raw proof literal>
++<frozen raw proof literal>
++<frozen raw proof literal>
++<frozen raw proof literal>
++OBJECT_COUNT = 40
+ CHUNK = 65536
+ CONTROL_LIMIT = 65536
+@@ -140,18 +145,18 @@
+
+     """Literal/table proof only. It does NOT admit this prepared release."""
+     try:
+-        require(len(raw) == 63692 and digest(raw) == LITERAL_SHA, 'plan_invalid')
++        require(len(raw) == 28137 and digest(raw) == LITERAL_SHA, 'plan_invalid')
+         plan = strict_json(raw)
+         require(digest(canonical(plan)) == NATIVE_SHA
+-                and plan['schema'] == 'mir2.native.r17.fixed-origin-plan.v1'
+-                and plan['candidate']['sequence'] == 14
++                and plan['schema'] == 'mir2.native.r19.fixed-origin-plan.v1'
++                and plan['candidate']['sequence'] == 15
+                 and plan['candidate']['sourceRevision'] == 'b4390ee4c987bbf000ba1d95761151e39fc0d54f'
+-                and plan['preparation']['requiredGameSourceRevision'] == '6032ef8b3e27dd97bad0b20c8676ef9f185db64b'
++                and plan['preparation']['requiredGameSourceRevision'] == '2b04e82c4f42b22f895f5f95b5bd79a8147eacdf'
+                 and plan['objectsSha256'] == OBJECTS_SHA and plan['publicBase'] == PUBLIC_BASE
+                 and plan['originBase'] == 'https://165.154.65.136.sslip.io/client-updates/'
+                 and plan['promotionOriginPair'] == {'json': 'latest.json', 'signature': 'latest.p7s'}
+-                and len(plan['objects']) == 36, 'plan_invalid')
++                and len(plan['objects']) == OBJECT_COUNT and 6 <= OBJECT_COUNT <= 100, 'plan_invalid')
+         proof = plan['predecessorProof']
+-        previous_raw = base64.b64decode(proof['sourcePlanBase64'], validate=True)
+-        previous_root_raw = base64.b64decode(proof['rootVerificationBase64'], validate=True)
++        previous_raw = base64.b64decode(PREDECESSOR_PLAN_BASE64, validate=True)
++        previous_root_raw = base64.b64decode(PREDECESSOR_ROOT_BASE64, validate=True)
+         require(digest(previous_raw) == proof['sourcePlanSha256']
+                 and digest(previous_root_raw) == proof['rootVerificationSha256'], 'plan_invalid')
+@@ -159,5 +164,5 @@
+
+         previous_root = strict_json(previous_root_raw)
+         require(previous['schema'] == 'mir2.windows.r2-publication.v1'
+-                and previous['candidate'] == plan['knownPrevious'] and plan['knownPrevious']['sequence'] == 13
++                and previous['candidate'] == plan['knownPrevious'] and plan['knownPrevious']['sequence'] == 14
+                 and previous['verificationReceipt']['sha256'] == proof['rootVerificationSha256']
+                 and previous_root['schema'] == 'mir2.windows.r2-verification.v1'
+@@ -166,9 +171,8 @@
+
+                 and all(previous_root[k] == plan['knownPrevious'][k] for k in
+                         ('sourceRevision', 'sequence', 'feedSha256', 'signatureSha256')), 'plan_invalid')
+-        old_game = sorted([e for e in previous['objects'] if e['path'].startswith('releases/game-')],
+-                          key=lambda e: e['path'])
+-        new_game = [e for e in plan['objects'] if e['path'].startswith('releases/game-')]
+-        require(len(old_game) == len(new_game) == 30
+-                and closure({'objects': old_game}) == closure({'objects': new_game})
++        game_prefix = 'releases/game-WN-CANDIDATE-20261007-invited-19/'
++        game_objects = [entry for entry in plan['objects'] if entry['path'].startswith('releases/game-')]
++        require(plan['preparation']['requiredGameCandidate'] == 'WN-CANDIDATE-20261007-invited-19'
++                and game_objects and all(entry['path'].startswith(game_prefix) for entry in game_objects)
+                 and digest(canonical(closure(plan))) == OBJECTS_SHA, 'plan_invalid')
+         operation = plan['operationPolicy']
+@@ -182,5 +186,5 @@
+
+         for index, entry in enumerate(plan['objects']):
+             require(type(entry['index']) is int and entry['index'] == index
+-                    and type(entry['size']) is int and 0 < entry['size'] <= 128 * 1024 * 1024
++                    and type(entry['size']) is int and 0 < entry['size'] <= (32 if re.search(r'\.(json|p7s|sig|txt)$', entry['path'], re.I) else 128) * 1024 * 1024
+                     and SHA_RE.fullmatch(entry['sha256']) and entry['cacheControl'] == IMMUTABLE
+                     and entry['r2Key'] == plan['r2Prefix'] + entry['path']
+@@ -195,5 +199,5 @@
+
+ def load_plan_bytes(raw):
+     plan = read_prepared_plan_bytes(raw)
+-    # Admission binds the root-issued actual CMS/closed36 proof bytes. A test
++    # Admission binds the root-issued actual CMS/complete R19 proof bytes. A test
+     # mock, hash-only build receipt or old12 proof cannot admit a different plan.
+     require(plan['admission'] == 'admitted' and isinstance(SOURCE_PLAN_SHA, str)
+@@ -201,6 +205,6 @@
+
+             and SHA_RE.fullmatch(ROOT_SHA), 'prepared_release_unadmitted')
+     try:
+-        original_raw = base64.b64decode(plan['sourcePlanBase64'], validate=True)
+-        root_raw = base64.b64decode(plan['rootVerificationBase64'], validate=True)
++        original_raw = base64.b64decode(SOURCE_PLAN_BASE64, validate=True)
++        root_raw = base64.b64decode(ROOT_VERIFICATION_BASE64, validate=True)
+         require(digest(original_raw) == SOURCE_PLAN_SHA and digest(root_raw) == ROOT_SHA, 'plan_invalid')
+         original = strict_json(original_raw)
+@@ -490,9 +494,9 @@
+
+         public = path in self.public_paths and method in ('GET', 'HEAD') and body is None and token is None
+         private_read = method in ('GET', 'HEAD') and body is None and (path == PRIVATE_PREFIX + '/pointer'
+-            or re.fullmatch(re.escape(PRIVATE_PREFIX) + r'/objects/(?:[0-9]|[12][0-9]|3[0-5])', path))
++            or path in {PRIVATE_PREFIX + '/objects/' + str(entry['index']) for entry in self.plan['objects']})
+         private_post = method == 'POST' and isinstance(body, bytes) and (
+             (path == PRIVATE_PREFIX + '/import' and len(body) <= 1024
+              and type(strict_json(body).get('index')) is int
+-             and 0 <= strict_json(body)['index'] < 36
++             and 0 <= strict_json(body)['index'] < len(self.plan['objects'])
+              and body == canonical({'index': strict_json(body)['index']}))
+             or (path == PRIVATE_PREFIX + '/promote' and len(body) <= CONTROL_LIMIT
+@@ -665,5 +669,5 @@
+
+             and stage['sourceSha256'] == source_sha() and stage['bindings'] == plan_bindings()
+             and stage['candidate'] == plan['candidate'] and stage['publicVerified'] is True
+-            and stage['verifiedObjectCount'] == 36
++            and stage['verifiedObjectCount'] == len(plan['objects'])
+             and stage['publicVerifiedBytes'] == sum(e['size'] for e in plan['objects'])
+             and stage['verifiedObjects'] == closure(plan)
+@@ -704,5 +708,5 @@
+
+             and stage['calls'][0]['receivedBytes'] == (pointer_entry(plan, stage['observedCurrent'])['size']
+                 if stage['calls'][0]['status'] == 200 else 0), 'stage_receipt_invalid')
+-    for index in range(36):
++    for index in range(len(plan['objects'])):
+         require(stage['calls'][1 + index * 4]['status'] in (200, 404)
+                 and stage['calls'][3 + index * 4]['status'] == 200, 'stage_receipt_invalid')
+@@ -714,5 +718,5 @@
+
+     require(canonical(current) == canonical(stage['observedCurrent'])
+             or canonical(current) == canonical(plan['candidate']), 'stage_pointer_changed')
+-    # The Worker must still recheck all immutable metadata, current-origin13
++    # The Worker must still recheck all immutable metadata, current-origin15
+     # signed pair, actual pointer and observed ETag; this is not client authority.
+     receipt.update(pointerAttempted=True, pointerOutcomeUnknown=True)
+@@ -756,5 +760,5 @@
+
+         receipt['verifiedObjectCount'] += 1
+         receipt['publicVerifiedBytes'] += entry['size']
+-    require(receipt['verifiedObjectCount'] == 36 and receipt['verifiedObjects'] == closure(plan)
++    require(receipt['verifiedObjectCount'] == len(plan['objects']) and receipt['verifiedObjects'] == closure(plan)
+             and receipt['publicVerifiedBytes'] == sum(e['size'] for e in plan['objects']), 'stage_incomplete')
+     # An envelope is created only after the last real stream/headers/close gate.
+--- infra/cloudflare/mir2-r2-bulk-upload/src/native-r17-s14-publication.mjs
+
++++ infra/cloudflare/mir2-r2-bulk-upload/src/native-r19-s15-publication.mjs
+
+@@ -1,10 +1,15 @@
+
+-import definition from './native-r17-s14-publication-plan.json' with {type: 'json'};
+-
+-// Fixed preview14 binds the root-issued actual source/CMS receipt. The original
++import definition from './native-r19-s15-publication-plan.json' with {type: 'json'};
++
++// Fixed R19/s15 binds the root-issued actual source/CMS receipt. The original
+ // prepared snapshot remains immutable outside this source. CMS admission does
+ // not prove origin/R2/publication/network or game acceptance; those stay open.
+-export const NATIVE_PLAN_SHA256 = 'a2f209448875cd200ea182b4da880ceba426e9b05e8ef8e9034192f09c360d6a';
++export const NATIVE_PLAN_SHA256 = '3e697bbe0a1f8ecc31bbe12920068b39c56a2c2669303b38577558b20e70a83f';
++const OBJECT_COUNT = 40;
++<frozen raw proof literal>
++<frozen raw proof literal>
++<frozen raw proof literal>
++<frozen raw proof literal>
+ export const STAGE_SCHEMA = 'mir2.windows.r2-native-stage.v2';
+-const PREFIX = '/upload/native-r17-s14';
++const PREFIX = '/upload/native-r19-s15';
+ const POINTER = 'channels/invited.json';
+ const MAX_POINTER = 4096;
+@@ -72,12 +77,12 @@
+
+   requireValue(await digest(ENCODER.encode(canonical(candidate)), cryptoApi) === NATIVE_PLAN_SHA256,
+     'native_plan_hash_mismatch', 503);
+-  requireValue(candidate.candidate.sequence === 14
++  requireValue(candidate.candidate.sequence === 15
+     && candidate.candidate.sourceRevision === 'b4390ee4c987bbf000ba1d95761151e39fc0d54f'
+-    && candidate.preparation.requiredGameSourceRevision === '6032ef8b3e27dd97bad0b20c8676ef9f185db64b'
++    && candidate.preparation.requiredGameSourceRevision === '2b04e82c4f42b22f895f5f95b5bd79a8147eacdf'
+     && candidate.originBase === 'https://165.154.65.136.sslip.io/client-updates/'
+     && candidate.promotionOriginPair.json === 'latest.json'
+     && candidate.promotionOriginPair.signature === 'latest.p7s', 'prepared_scope_mismatch', 503);
+-  const priorSourceBytes = decodeBase64(candidate.predecessorProof.sourcePlanBase64);
+-  const priorRootBytes = decodeBase64(candidate.predecessorProof.rootVerificationBase64);
++  const priorSourceBytes = decodeBase64(PREDECESSOR_PLAN_BASE64);
++  const priorRootBytes = decodeBase64(PREDECESSOR_ROOT_BASE64);
+   requireValue(await digest(priorSourceBytes, cryptoApi) === candidate.predecessorProof.sourcePlanSha256
+     && await digest(priorRootBytes, cryptoApi) === candidate.predecessorProof.rootVerificationSha256,
+@@ -88,5 +93,5 @@
+
+     && priorRoot.schema === 'mir2.windows.r2-verification.v1'
+     && same(priorSource.candidate, candidate.knownPrevious)
+-    && candidate.knownPrevious.sequence === 13
++    && candidate.knownPrevious.sequence === 14
+     && priorSource.verificationReceipt.sha256 === candidate.predecessorProof.rootVerificationSha256
+     && priorRoot.passed === true && priorRoot.cmsVerified === true && priorRoot.candidateVerified === true
+@@ -94,15 +99,14 @@
+
+       .every(field => priorRoot[field] === candidate.knownPrevious[field]),
+     'predecessor_binding_mismatch', 503);
+-  const oldGame = priorSource.objects.filter(entry => entry.path.startsWith('releases/game-'))
+-    .sort((a, b) => a.path < b.path ? -1 : a.path > b.path ? 1 : 0);
+-  const newGame = candidate.objects.filter(entry => entry.path.startsWith('releases/game-'));
+-  requireValue(oldGame.length === 30 && newGame.length === 30
+-    && same(closure(oldGame), closure(newGame))
+-    && candidate.objects.length === 36
++  const gameObjects = candidate.objects.filter(entry => entry.path.startsWith('releases/game-'));
++  requireValue(candidate.schema === 'mir2.native.r19.fixed-origin-plan.v1'
++    && candidate.preparation.requiredGameCandidate === 'WN-CANDIDATE-20261007-invited-19'
++    && gameObjects.length > 0 && gameObjects.every(entry => entry.path.startsWith('releases/game-WN-CANDIDATE-20261007-invited-19/'))
++    && OBJECT_COUNT >= 6 && OBJECT_COUNT <= 100 && candidate.objects.length === OBJECT_COUNT
+     && await digest(ENCODER.encode(canonical(closure(candidate.objects))), cryptoApi) === candidate.objectsSha256,
+     'prepared_closure_mismatch', 503);
+   for (const [index, entry] of candidate.objects.entries()) {
+     requireValue(entry.index === index && Number.isSafeInteger(entry.size)
+-      && entry.size > 0 && entry.size <= 128 * 1024 * 1024 && SHA_PATTERN.test(entry.sha256)
++      && entry.size > 0 && entry.size <= (/\.(json|p7s|sig|txt)$/i.test(entry.path) ? 32 : 128) * 1024 * 1024 && SHA_PATTERN.test(entry.sha256)
+       && entry.r2Key === candidate.r2Prefix + entry.path
+       && /^[A-Za-z0-9._/-]+$/.test(entry.path) && !entry.path.includes('..')
+@@ -119,6 +123,6 @@
+
+     && typeof candidate.rootVerificationSha256 === 'string' && SHA_PATTERN.test(candidate.rootVerificationSha256),
+     'prepared_release_unadmitted', 503);
+-  const originalBytes = decodeBase64(candidate.sourcePlanBase64);
+-  const rootBytes = decodeBase64(candidate.rootVerificationBase64);
++  const originalBytes = decodeBase64(SOURCE_PLAN_BASE64);
++  const rootBytes = decodeBase64(ROOT_VERIFICATION_BASE64);
+   requireValue(await digest(originalBytes, cryptoApi) === candidate.sourcePlanSha256
+     && await digest(rootBytes, cryptoApi) === candidate.rootVerificationSha256,
+@@ -132,5 +136,5 @@
+
+   'frozen_plan_binding_mismatch', 503);
+   const originalClosure = closure([...original.objects].sort((a, b) => a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
+-  requireValue(candidate.objects.length === 36 && same(originalClosure, closure(candidate.objects))
++  requireValue(candidate.objects.length === OBJECT_COUNT && same(originalClosure, closure(candidate.objects))
+     && await digest(ENCODER.encode(canonical(closure(candidate.objects))), cryptoApi) === candidate.objectsSha256
+     && root.schema === 'mir2.windows.r2-verification.v1' && root.passed === true
+@@ -276,9 +280,9 @@
+
+ 
+ // Dependency injection is internal unit scaffolding only. The default exported
+-// nativeR17S14Fetch always calls validateNativePlan against exact actual receipt
++// nativeR19S15Fetch always calls validateNativePlan against exact actual receipt
+ // bytes. No env/client setting can choose admission, URLs, scope or deadlines.
+ // Injected fetch/stream/timer models exercise policy only after the REAL literal
+ // admission gate succeeds; they never provide CMS authority.
+-export function createNativeR17S14Handler(dependencies = {}) {
++export function createNativeR19S15Handler(dependencies = {}) {
+   const cryptoApi = dependencies.crypto ?? globalThis.crypto;
+   const fetchOrigin = dependencies.fetch ?? ((...args) => globalThis.fetch(...args));
+@@ -453,6 +457,6 @@
+
+     let parsedFeed;
+     for (const entry of definition.objects.filter(item => item.index === 0 || item.index === 1)) {
+-      // Promotion checks current aliases only. Immutable preview14 objects can
+-      // be staged while current origin13 remains; they never authorize promote.
++      // Promotion checks current aliases only. Immutable R19/s15 objects can
++      // be staged while current origin14 remains; they never authorize promote.
+       const currentEntry = {...entry, originRelativePath:
+         entry.index === 0 ? definition.promotionOriginPair.json : definition.promotionOriginPair.signature};
+@@ -591,3 +595,3 @@
+
+ }
+ 
+-export const nativeR17S14Fetch = createNativeR17S14Handler();
++export const nativeR19S15Fetch = createNativeR19S15Handler();
+All seven owned production/generator/test text files: LF and no trailing whitespace

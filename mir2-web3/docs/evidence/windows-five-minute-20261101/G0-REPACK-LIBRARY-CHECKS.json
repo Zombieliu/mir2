@@ -1,0 +1,97 @@
+{
+  "schema": "mir2.native.resource-repack-library-checks.v1",
+  "recordedUtc": "2026-11-01T15:31:58.208958+00:00",
+  "checkExecutedUtc": null,
+  "checkExecutedUtcNote": "Exact wall-clock timestamp was not persisted by the agent; the check was actually executed earlier in this session, not rerun for this summary.",
+  "workingDirectory": "E:\\mir2-player-journey",
+  "checks": {
+    "allTargets": {
+      "command": "cargo +1.95.0 test --locked --offline --manifest-path mir2-web3/apps/game-client/resource-pack/Cargo.toml --all-targets",
+      "actuallyExecuted": true,
+      "exitCode": 0,
+      "toolHistoryChunkId": "2f0ad5",
+      "toolReportedWallTimeSeconds": 3.0223298,
+      "testsPassed": 19,
+      "testsFailed": 0,
+      "testsIgnored": 0,
+      "suites": [
+        {
+          "target": "tests/read_profile.rs",
+          "passed": 4,
+          "failed": 0
+        },
+        {
+          "target": "tests/repack.rs",
+          "passed": 7,
+          "failed": 0
+        },
+        {
+          "target": "tests/roundtrip.rs",
+          "passed": 8,
+          "failed": 0
+        }
+      ],
+      "zeroTestHarnessesCompiledAndSucceeded": [
+        "src/lib.rs",
+        "examples/build.rs",
+        "examples/repack.rs",
+        "examples/verify.rs"
+      ],
+      "rawLogPersisted": false,
+      "rawLogPath": null,
+      "rawLogSha256": null,
+      "rawLogNote": "Original stdout/stderr was returned by exec_command in tool history only. This JSON is a check summary, not a reconstructed raw log."
+    },
+    "rustfmt": {
+      "command": "rustfmt +1.95.0 --edition 2021 --config skip_children=true mir2-web3/apps/game-client/resource-pack/src/lib.rs mir2-web3/apps/game-client/resource-pack/src/repack.rs mir2-web3/apps/game-client/resource-pack/examples/repack.rs mir2-web3/apps/game-client/resource-pack/tests/repack.rs",
+      "actuallyExecuted": true,
+      "exitCode": 0,
+      "toolHistoryChunkId": "15749f",
+      "rawLogPersisted": false
+    },
+    "diffCheck": {
+      "command": "git diff --check -- mir2-web3/apps/game-client/resource-pack/src/lib.rs mir2-web3/apps/game-client/resource-pack/src/repack.rs mir2-web3/apps/game-client/resource-pack/examples/repack.rs mir2-web3/apps/game-client/resource-pack/tests/repack.rs",
+      "actuallyExecuted": true,
+      "observedNoDiagnostics": true,
+      "toolHistoryChunkId": "255dcf",
+      "rawLogPersisted": false
+    }
+  },
+  "sourceFiles": [
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\resource-pack\\src\\lib.rs",
+      "sizeBytes": 35515,
+      "sha256": "BBA6882030991CDEC8C4C9A070A714E547217AAD4BC09EC3FAFC34073353F04F",
+      "matchesRecordedTestSourcePin": true
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\resource-pack\\src\\repack.rs",
+      "sizeBytes": 19677,
+      "sha256": "1678FE390AD552D78E5AE568B76A79461C6CA688CCE2B4D276F672C14D715CBF",
+      "matchesRecordedTestSourcePin": true
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\resource-pack\\examples\\repack.rs",
+      "sizeBytes": 1231,
+      "sha256": "D7D7E6FA8B1902CE06A8AC3FDFFD53E28C71D3AE534875CD8667D5131817F63D",
+      "matchesRecordedTestSourcePin": true
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\resource-pack\\tests\\repack.rs",
+      "sizeBytes": 13282,
+      "sha256": "7F6486AE1A6D136AEB37CCDF21ADF46DF553D55E1C4AA3E17D3ED0CE5720C0CD",
+      "matchesRecordedTestSourcePin": true
+    }
+  ],
+  "verificationScope": {
+    "librarySmallFixtures": true,
+    "existingReadProfileAndRoundtripTestsIncluded": true,
+    "largeR19RepackRunByThisAgent": false,
+    "resourceQaOrGuiRun": false,
+    "networkOrDeploymentPerformed": false,
+    "sourceEditedForThisSummary": false,
+    "checksRerunForThisSummary": false,
+    "bootstrapAuthorized": false
+  },
+  "boundary": "Root separately executed the real R19 full repack. Its full-data evidence is not replaced or certified by this small-fixture library summary."
+}

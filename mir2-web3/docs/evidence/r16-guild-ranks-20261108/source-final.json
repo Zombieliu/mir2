@@ -1,0 +1,66 @@
+{
+  "schema": "mir2.r16.guild-ranks.browser-source.v2",
+  "createdAt": "2026-11-07T21:59:48.880Z",
+  "head": "068fd0bd35688fc78190d9d9cd96056ac5d28091",
+  "frontendPins": {
+    "app/page.tsx": "fc538357264fbf9bd89553d41b32804bdcd4390b30e22c7876539ff124812f5c",
+    "app/components/original-client-guild-window.tsx": "21d9e67f37c55969ac0df69f6fb40ea6c6e7f4223a3ca7218886c8a0f93cb2d8",
+    "app/components/original-client-extra-windows.tsx": "9520987aeaa00b7630ece550de29547275abe42e0c36915813c3b38f98fc68b3",
+    "lib/social-parity-actions.ts": "c768dfcdbb1a7dd7c7b70609bca8d5bde8b10300d476917f718ec7dcbe8747a1",
+    "lib/guild-rank-operations.ts": "35fc9787dfedaf48f722c84fe902611632e77e3a6e75612a83ded0c56eb3c3f9",
+    "lib/guild-rank-projection.ts": "a99fc44667181f75321fe12d4b2cde221613acf6aec4c90ba9abd9e83918c476",
+    "app/original-client-shell.tsx": "33e3e82f00bd9f2960ed70b89dc93e1ad4f9761b21b62dd6ce209b67b07cf521",
+    "lib/use-window-keydown.ts": "8149b087c0fa1ec32b04224bfc8dc5f1b4389fd0a93fed123580f6ef294be7ce"
+  },
+  "renderer": "bevy-a46905128c316656",
+  "runtimePins": [
+    {
+      "path": "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js",
+      "sha256": "10216eafd2ddcdeb0dab62c1b4dc5b0b4896eb1ebf8b8add06985f4e817ecb58",
+      "immutable": "public/bevy-runtime-releases/bevy-a46905128c316656/pkg-webgpu/mir2_bevy_runtime.js"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "sha256": "2ae03a75e72d96412dc25fbbe054c9405bcedc8ce020dbfc06d0aaa3adee249d",
+      "immutable": "public/bevy-runtime-releases/bevy-a46905128c316656/pkg-webgpu/mir2_bevy_runtime_bg.wasm"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js",
+      "sha256": "2e4c58270f49998063cf64b3605b412edce725f5df73254ce4bbf764b282998d",
+      "immutable": "public/bevy-runtime-releases/bevy-a46905128c316656/pkg-webgl2/mir2_bevy_runtime.js"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+      "sha256": "44e1fe130faccba3fe53f5adb4e3aec49a5155201db43ca5e5f2ba6478a32531",
+      "immutable": "public/bevy-runtime-releases/bevy-a46905128c316656/pkg-webgl2/mir2_bevy_runtime_bg.wasm"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime.js",
+      "sha256": "792e256c91e98eae6d07fe53e79f2fc1adf622ffa1a29ef90bb97fb109feb0b3",
+      "immutable": "public/bevy-runtime-releases/bevy-a46905128c316656/pkg-webgl2-shared/mir2_bevy_runtime.js"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+      "sha256": "c591c3ef00c758ed7915e4f9490540baf8d531e49dc481831ef8caa1ac28caf2",
+      "immutable": "public/bevy-runtime-releases/bevy-a46905128c316656/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm"
+    }
+  ],
+  "gatewaySha256": "3666eb7e67b8c99ab45621fd5b320f5e0874869868a45f48e3a1414e3e6bd9c1",
+  "sourceAccountSnapshotSha256": "53ed4e0dea88376e057b1d2377ae2bb768a23bb939523edcfc41d8bb290d4ea8",
+  "seededSnapshotSha256": "b85560055237caf5c1cf703d99d8a34e77893843af6811496a10ed3239092869",
+  "fixtureGuildCreatedBeforeStartup": true,
+  "guildCreationViaGameplayClaimed": false,
+  "baselinePersonalAccountsUnchangedByFixture": true,
+  "sourceRoles": 5,
+  "fixtureGuildMembers": 3,
+  "preparationIssue": "Initial prepared public linked an older renderer; frontend manifest verification did not complete. Public tree was replaced with an owned directory linking current canonical renderer and existing finite assets before browser startup. Original linked public tree retained untouched.",
+  "originalServicesAndExePreserved": true,
+  "changesAfterCheckpoint": [
+    {
+      "file": "app/components/original-client-guild-window.tsx",
+      "reason": "Use complete one-pixel border values for default and selected states; avoid React shorthand/longhand removal conflict.",
+      "gitBlob": "cd1d1fa16fdb7497119c579132b4d189b164e7a0"
+    }
+  ],
+  "testFixture": "qualified-snapshot.json; see fixture-qualification.json"
+}

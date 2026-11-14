@@ -1,0 +1,103 @@
+{
+  "status": "source-confirmed public Manager defect; no collision test or live run executed in this phase",
+  "distinguishedFrom": "same-tick local typed Dead follow-up",
+  "sources": [
+    {
+      "file": "apps/simulation/src/runtime/zone/manager.rs",
+      "sha256": "887b6d75e4ea513828075693e32f11c5f9c34adeb9311cf61880dd052ed56e70",
+      "lines": [
+        56,
+        519,
+        524,
+        543,
+        566,
+        598,
+        680
+      ]
+    },
+    {
+      "file": "apps/simulation/src/runtime/zone/runtime.rs",
+      "sha256": "9ab2f4cb3d138be9347b17efafe7bde654f66ab4eff95e4ea2181a7f67712fb3",
+      "lines": [
+        671,
+        2478,
+        2483,
+        3714,
+        12682,
+        14298,
+        14314
+      ]
+    },
+    {
+      "file": "apps/simulation/src/runtime/zone/online_identity.rs",
+      "sha256": "8fc962e0c7d270081576b37477619596efedc1b7663730c9620c79b389c54e03",
+      "lines": [
+        21,
+        27,
+        81
+      ]
+    },
+    {
+      "file": "apps/gateway/src/routing.rs",
+      "sha256": "bb838c99429da46e9bd4e051bd86daaeb0e88bb385cc67fe0c9875c9e631d931",
+      "lines": [
+        2883,
+        3363,
+        3380,
+        9636,
+        9644,
+        11658
+      ]
+    },
+    {
+      "file": "apps/simulation/src/runtime/monsters.rs",
+      "sha256": "8d26212566703b93c1fb18f1c35f267f6085ed9672396ba007871f29ff1d8b84",
+      "lines": [
+        183,
+        2121,
+        2126,
+        2129
+      ]
+    },
+    {
+      "file": "apps/simulation/src/runtime/crystal_compat.rs",
+      "sha256": "0bef0f11e4c61cd5e52a57175a4cb54978564f45ad4ffb96f76143ec011eacb7",
+      "lines": [
+        5
+      ]
+    }
+  ],
+  "original": [
+    {
+      "file": "E:/mir2/Crystal/Server/MirObjects/MapObject.cs",
+      "sha256": "f465ee5fe84bc9fe6ab3ef9dd0c138c8c6b1dee83d1ea5b007cc5cb3afe53f7f",
+      "line": 21
+    },
+    {
+      "file": "E:/mir2/Crystal/Server/MirEnvir/Envir.cs",
+      "sha256": "13595bbff0963d8f5ddcbaa10947def81d60b41fb77b1a734238772097bf203f",
+      "line": 92
+    }
+  ],
+  "freshManager": "admit(requested ID) precedes unique_object_id actual remapping. Zero or an occupied player/monster/object/ground/claimed ID yields player-world membership but no matching online presence and no native ownership.",
+  "crossMapManager": "destination collision remaps actual object while retained same-epoch proof keeps the original ID. Refresh excludes the transferred player and source/other zones clear old claims/protection. The book proof may still validate while no presence matches.",
+  "standalone": "safe for this mismatch: ZoneRuntime admits local book against actual remapped ID.",
+  "ordinaryGateway": "client cannot pick server ID. Shared counter starts50000, personal-drop projection shares it, but configured/native objects and Zone allocator do not. Initial fifty-to-one-hundred players are not proven to collide: native dynamic starts1000000; classic respawn derives from200000; legacy starter monster60000. Counter growth/restore has no cross-domain availability guard.",
+  "recommendedNextPolicy": "Preflight destination identity before revoke/admit/detach; reject zero or another occupied ID and preserve original membership, proof, award/custody references, and clocks. Return a visible failure to Gateway. Allocate checked fresh globally unused IDs for new online players. Cross-map retain the same global Node ID; do not remint/rewrite all old ownership on collision.",
+  "proposedMinimumFiles": [
+    "apps/simulation/src/runtime/zone/runtime.rs",
+    "apps/simulation/src/runtime/zone/manager.rs",
+    "apps/gateway/src/routing.rs",
+    "apps/simulation/tests/shared_online_object_identity.rs (NEW)",
+    "apps/gateway/src/routing/tests/online_object_identity_tests.rs (NEW)"
+  ],
+  "minimumTests": [
+    "fresh requested0 failclosed",
+    "occupied player/monster/NPC/live-drop/held-drop destination IDs",
+    "fresh admission has matching actual proof and one source-issued award",
+    "cross-map collision leaves original source membership and proof/claims/clocks unchanged",
+    "ordinary Gateway NewAccount/Login/NewCharacter/StartGame with prepared allocation collision",
+    "counter exhaustion never recycles and never detaches old membership"
+  ],
+  "filesChangedForThisFinding": []
+}

@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "mir2-native-visual-capture-draft-v1",
+  "producer": "windows-native",
+  "runId": "item-actor-assets-20260903-r1",
+  "scene": "character",
+  "capturedAt": "2026-09-02T20:49:00.018Z",
+  "imagePath": "assets-two-f-r1-character-1788382140018-1.png",
+  "imageSha256": "3f5188671a51c078bf7861c6a519f6008ebf3bebf764872accf044907f9f4a71",
+  "logicalSize": {
+    "width": 1024,
+    "height": 768
+  },
+  "dpiScale": 1.0,
+  "uiState": "shell=in-game;screen=InGame;panel=Character;inventoryPage=0;inventoryLocation=0.00,0.00;questDetail=None;minimap=true;chatFocused=false;security=None;inspect=false;inventoryOperation=false;dropConfirm=false;inventoryDeleteMode=false;inventoryDeletePrompt=false",
+  "world": {
+    "map": "BichonProvince",
+    "x": 289,
+    "y": 619,
+    "light": null
+  },
+  "build": {
+    "sourceRevision": null,
+    "executableSha256": null,
+    "assetManifestSha256": null
+  },
+  "acceptance": {
+    "eligible": false,
+    "blockers": [
+      "authoritative-world-state-incomplete",
+      "trusted-build-provenance-unavailable"
+    ]
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "preparedAt": "2026-10-25T01:11:28.375Z",
+  "state": "final-static-source-bound-not-executed",
+  "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "driverSourceCommit": "30ba328ad3d1b1eb46e51540cb1880d66eba3ee1",
+  "backendInputCount": 41,
+  "backendRebuilt": false,
+  "driverSourceSha256": "72005514809dd480a015ee5414b14f60fe6264f10e35a7b825a6dc5e35e85c82",
+  "driverFrozenManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-phase-window-timing-driver-frozen-v1.json",
+    "bytes": 15970,
+    "sha256": "39c163a36a713f8c2bbf500eeaff0fe095a1b3848726345745a6f26372a177c3"
+  },
+  "actualAdmissionCaps": [
+    24,
+    10,
+    10,
+    4,
+    1,
+    2
+  ],
+  "tokioWorkers": 4,
+  "slowStageThresholdMs": 50,
+  "sourceConfigNotYet": true,
+  "accountsProvisioned": false,
+  "prepareExecuted": false,
+  "realmStarted": false,
+  "capacityAccepted": false,
+  "originalGameplayPolicyAndResourcePreserved": true,
+  "helper25SyntheticEvidenceReusedWithoutRetest": true,
+  "fullRegressionOnFinalDriverClaimed": false,
+  "driverEvidenceScope": "Full151 pre-finalbcc53; final7200 compatibility delta plus7focused/25adjacent.",
+  "sceneProfile": "ordinary-native-span4-seven-by-seven-static-halo-v1",
+  "scene10Sha256": "539c8abab8a3930a33a5a130601591c3bfdaede166e5b93cec995479df1c745c",
+  "scene100Sha256": "19c80f2722a9fc992f6834304c4fc5bf54f2fe86dbcf7c53887589d11aa9f8fb",
+  "staticAnalysis": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span4-halo-static-validation-v2.json",
+    "bytes": 420058,
+    "sha256": "462f11fe28b7c42096256c525c2282bb80813e461efaf7f1bbeb9748adc18fae"
+  },
+  "staticReadiness": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span4-halo-static-readiness-v2.json",
+    "bytes": 17944,
+    "sha256": "6bd5c05fa4b9474c5d5f77935b126ff3a7c47accac9909dd25d18c6267749284"
+  }
+}

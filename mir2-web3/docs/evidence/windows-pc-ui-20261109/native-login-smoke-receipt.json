@@ -1,0 +1,35 @@
+{
+  "schema": "pc-ui-native-login-smoke-v1",
+  "scope": "development executable login window only",
+  "sourceBase": "6d30e0f9e57dc2da410446b292810b22ef26ecc1",
+  "executable": "C:\\Users\\Administrator\\Documents\\Codex\\2026-11-08\\task\\pc-ui-integration\\client\\Numeron-PC-UI-Dev.exe",
+  "executableSha256": "CBC9374B6C832708D59E51336534DA6894F5B99344A860E92330016F87507F06",
+  "capturedAt": "2026-11-08T21:22:25.782Z",
+  "imageSha256": "18b2110186f930c46cc35ebedfb5f6beda9e860cb70d2d81122b29d0df8cd821",
+  "libraryFileId": "libfile_fde3_f-52980fdfd3d881919de1743fee625678_d90e5c8db8508191aeaed744f725d135",
+  "locale": "zh-CN",
+  "logicalSize": {
+    "width": 1024,
+    "height": 768
+  },
+  "autoLogin": false,
+  "walletRequest": false,
+  "accountEntry": false,
+  "gameWorldEntered": false,
+  "gateway": "ws://127.0.0.1:17110/ws",
+  "assetRoot": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\public",
+  "profileIsolation": "fresh task-local APPDATA and LOCALAPPDATA",
+  "shutdownEvidence": [
+    "os_close_requested window=103v0 in_game=false",
+    "exit_source=os_close_outside_game",
+    "app_exit event=Success",
+    "event_loop_returned exit=Success"
+  ],
+  "officialAcceptance": {
+    "eligible": false,
+    "blockers": [
+      "trusted-build-provenance-unavailable"
+    ]
+  },
+  "launcherReceiptNote": "The initial launcher receipt write failed after successful capture and shutdown because of an invalid PowerShell boolean literal. This receipt was reconstructed from the capture metadata and native lifecycle logs; the smoke was not repeated."
+}

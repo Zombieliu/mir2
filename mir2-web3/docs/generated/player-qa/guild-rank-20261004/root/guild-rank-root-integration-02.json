@@ -1,0 +1,34 @@
+{
+  "sourceBase": "321316b791120a6fe549e4006623e63333a5543f",
+  "patchSha256": "48fbcac187c23836634b2b0faf7bcc388a7bdee833453b9c6be56313722c711f",
+  "allSixSourceBytesExact": true,
+  "runtimeTestsExecuted": false,
+  "r18FrozenReleaseUnchanged": true,
+  "sourceFiles": {
+    "apps/simulation/src/runtime/shared_guilds.rs": {
+      "sha256": "a2ed1cc11013cd1763d7e885557f4739d1caca31a1897abc9f26f6e3ff050356",
+      "bytes": 40196
+    },
+    "apps/simulation/src/runtime/shared_guild_management.rs": {
+      "sha256": "1e3beec2699b3ae5c8b7a9d87af0bc4df20c3cb926f88387ff14e054764f0a26",
+      "bytes": 3246
+    },
+    "apps/gateway/src/shared_guilds.rs": {
+      "sha256": "b51a93a339fae841813a67cb3782218ed75e9003869e5c2e2723d622a99afe22",
+      "bytes": 19369
+    },
+    "apps/simulation/tests/shared_guild_rank_management.rs": {
+      "sha256": "be8e42a9fd37bf2accc6f150c76f92fea2742123d80a8e4904107fc92d530291",
+      "bytes": 9539
+    },
+    "apps/gateway/tests/shared_guild_rank_management.rs": {
+      "sha256": "7a8cfe15c24149a99145401ff46d1904e33757ab5c23ae175ec0e677c48ef60e",
+      "bytes": 16260
+    },
+    "docs/SHARED-GUILD-RANK-RENAME-20261004.md": {
+      "sha256": "0d808c7af661e56066c9c492154beaa67fec2b566b36023b0b696d5c1af28c06",
+      "bytes": 11197
+    }
+  },
+  "rootStatus": "M mir2-web3/apps/gateway/src/shared_guilds.rs\n M mir2-web3/apps/simulation/src/runtime/shared_guilds.rs\n?? mir2-web3/apps/gateway/tests/shared_guild_rank_management.rs\n?? mir2-web3/apps/simulation/src/runtime/shared_guild_management.rs\n?? mir2-web3/apps/simulation/tests/shared_guild_rank_management.rs\n?? mir2-web3/docs/SHARED-GUILD-RANK-RENAME-20261004.md"
+}

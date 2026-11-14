@@ -1,0 +1,1575 @@
+{
+  "schema": 1,
+  "passed": true,
+  "scope": "Actual generated JS+WASM initialization and pure Native social reducer execution in headless Chrome; no renderer boot, game account, server packet transport, or ordinary gameplay claimed.",
+  "version": "bevy-0cd68510886134e0",
+  "oldVersion": "bevy-a46905128c316656",
+  "capabilitiesEqualToA469": true,
+  "fixtureSha256": "53bf006916c8e5dc78070a2b383c1ec0061e49c9a0e16afcc1e81d37e05e7693",
+  "pins": [
+    {
+      "path": "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js",
+      "sha256": "c319fbc229c3bf23513354f342a310547fe32c2dcb9b34c8626c55c0e88d85ba",
+      "bytes": 141747
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "sha256": "6536f5df619817ba4bc173461b7a6b4ee9765233fa2a8f1951bed579fc291b7e",
+      "bytes": 31429183
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js",
+      "sha256": "6e105aa2fce2f29ff2c645766f4fc91fd992bcf42fe1199d2be025214b225f9b",
+      "bytes": 117805
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+      "sha256": "5bf0298ee31262c7cc22cf8e77203f510037554a2bce3caa68945bedc46eb0f5",
+      "bytes": 16601428
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime.js",
+      "sha256": "916012e00e0a01130c2f1598cebfb0f7c8f233b7bd6986772b9c87bc620f47d1",
+      "bytes": 139721
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+      "sha256": "9b28bf2a5a0c366ea8463c765f1c7ba036d7a48e751d3b882190f51d36447ba0",
+      "bytes": 32357557
+    }
+  ],
+  "budgets": [
+    {
+      "id": "webgpu",
+      "wasmBytes": 31429183,
+      "gzipBytes": 6590584,
+      "jsBytes": 141747
+    },
+    {
+      "id": "webgl2",
+      "wasmBytes": 16601428,
+      "gzipBytes": 4272132,
+      "jsBytes": 117805
+    },
+    {
+      "id": "webgl2-shared",
+      "wasmBytes": 32357557,
+      "gzipBytes": 6930974,
+      "jsBytes": 139721
+    }
+  ],
+  "packages": [
+    {
+      "id": "webgpu",
+      "passed": true,
+      "wasmInitialized": true,
+      "newExportExecuted": true,
+      "bridgeCalls": 338,
+      "oldPublicExportCount": 127,
+      "oldPublicExportsAllRetained": true,
+      "backend": "webgpu",
+      "runtimeUiCapabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "smoke": [
+        {
+          "handled": true,
+          "kind": null,
+          "ok": true,
+          "pending": [],
+          "pendingCount": 0,
+          "released": [],
+          "token": null,
+          "version": 1
+        },
+        {
+          "handled": true,
+          "kind": "groupAdd",
+          "ok": true,
+          "pending": [
+            {
+              "entered": false,
+              "kind": "groupAdd",
+              "token": 1
+            }
+          ],
+          "pendingCount": 1,
+          "released": [],
+          "token": 1,
+          "version": 1
+        },
+        {
+          "handled": true,
+          "kind": null,
+          "ok": true,
+          "pending": [
+            {
+              "entered": false,
+              "kind": "groupAdd",
+              "token": 1
+            }
+          ],
+          "pendingCount": 1,
+          "released": [],
+          "token": null,
+          "version": 1
+        },
+        {
+          "handled": true,
+          "kind": null,
+          "ok": true,
+          "pending": [
+            {
+              "entered": true,
+              "kind": "groupAdd",
+              "token": 1
+            }
+          ],
+          "pendingCount": 1,
+          "released": [],
+          "token": null,
+          "version": 1
+        },
+        {
+          "handled": true,
+          "kind": null,
+          "ok": true,
+          "pending": [],
+          "pendingCount": 0,
+          "released": [
+            1
+          ],
+          "token": null,
+          "version": 1
+        }
+      ],
+      "cases": [
+        {
+          "id": "group-switch-on",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "groupSwitch",
+          "pendingCount": 1
+        },
+        {
+          "id": "group-switch-off",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "groupSwitch",
+          "pendingCount": 1
+        },
+        {
+          "id": "group-add",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "groupAdd",
+          "pendingCount": 1
+        },
+        {
+          "id": "group-remove",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "groupRemove",
+          "pendingCount": 1
+        },
+        {
+          "id": "group-accept-ui-epoch-is-opaque",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "groupInviteAccept",
+          "pendingCount": 1
+        },
+        {
+          "id": "group-repeat-arrival-uses-native-epoch",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "groupInviteAccept",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-roster-read",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildRosterRead",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-info-zero-typed-alias",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildRosterRead",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-recruit",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildMember",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-kick",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildMember",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-move-member",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildMember",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-rename-exact-draft",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildRankRename",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-create-is-existing-generic-member",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildMember",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-permission-set-one-bit",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildRankPermission",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-permission-clear-one-bit",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildRankPermission",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-notice",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildNotice",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-accept-ui-epoch-is-opaque",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildInviteAccept",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-repeat-same-name-does-not-copy-ui-epoch",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildInviteAccept",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-gold-deposit",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildStorageGold",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-gold-withdraw",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildStorageGold",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-item-deposit",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildStorageItem",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-item-retrieve",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildStorageItem",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-item-rearrange",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildStorageItem",
+          "pendingCount": 1
+        },
+        {
+          "id": "trade-request",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "tradeRequest",
+          "pendingCount": 1
+        },
+        {
+          "id": "trade-reply-accept",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "tradeReply",
+          "pendingCount": 1
+        },
+        {
+          "id": "trade-reply-decline-still-is-native-unit",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "tradeReply",
+          "pendingCount": 1
+        },
+        {
+          "id": "trade-gold",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "tradeGold",
+          "pendingCount": 1
+        },
+        {
+          "id": "trade-item-deposit-physical-bag2",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "tradeDeposit",
+          "pendingCount": 1
+        },
+        {
+          "id": "trade-item-retrieve-physical-bag2",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "tradeRetrieve",
+          "pendingCount": 1
+        },
+        {
+          "id": "trade-lock",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "tradeConfirm",
+          "pendingCount": 1
+        },
+        {
+          "id": "trade-unlock",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "tradeConfirm",
+          "pendingCount": 1
+        },
+        {
+          "id": "trade-cancel",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "tradeCancel",
+          "pendingCount": 1
+        },
+        {
+          "id": "group-decline-outside-native-pending",
+          "classification": "outsideBudget",
+          "ok": true,
+          "handled": false,
+          "kind": null,
+          "pendingCount": 0
+        },
+        {
+          "id": "guild-decline-outside-native-pending",
+          "classification": "outsideBudget",
+          "ok": true,
+          "handled": false,
+          "kind": null,
+          "pendingCount": 0
+        },
+        {
+          "id": "guild-storage-read-outside-native-item-pending",
+          "classification": "outsideBudget",
+          "ok": true,
+          "handled": false,
+          "kind": null,
+          "pendingCount": 0
+        },
+        {
+          "id": "friend-refresh-outside-social-eight",
+          "classification": "outsideBudget",
+          "ok": true,
+          "handled": false,
+          "kind": null,
+          "pendingCount": 0
+        },
+        {
+          "id": "mentor-reply-outside-social-eight",
+          "classification": "outsideBudget",
+          "ok": true,
+          "handled": false,
+          "kind": null,
+          "pendingCount": 0
+        },
+        {
+          "id": "guild-buff-outside-social-eight",
+          "classification": "outsideBudget",
+          "ok": true,
+          "handled": false,
+          "kind": null,
+          "pendingCount": 0
+        },
+        {
+          "id": "permission-needs-real-viewer-and-guild",
+          "classification": "invalid",
+          "ok": false,
+          "handled": true,
+          "kind": null,
+          "pendingCount": 0
+        },
+        {
+          "id": "permission-no-unknown-option",
+          "classification": "invalid",
+          "ok": false,
+          "handled": true,
+          "kind": null,
+          "pendingCount": 0
+        },
+        {
+          "id": "permission-expects-bool-string",
+          "classification": "invalid",
+          "ok": false,
+          "handled": true,
+          "kind": null,
+          "pendingCount": 0
+        },
+        {
+          "id": "guild-info-no-unsupported-type",
+          "classification": "invalid",
+          "ok": false,
+          "handled": true,
+          "kind": null,
+          "pendingCount": 0
+        },
+        {
+          "id": "invite-name-cannot-borrow-current-epoch",
+          "classification": "invalid",
+          "ok": false,
+          "handled": true,
+          "kind": null,
+          "pendingCount": 0
+        }
+      ],
+      "counts": {
+        "budgeted": 32,
+        "outsideBudget": 6,
+        "invalid": 5
+      },
+      "nativeKindCount": 19,
+      "mixedEight": {
+        "kinds": [
+          "groupSwitch",
+          "groupAdd",
+          "groupRemove",
+          "guildStorageGold",
+          "guildStorageItem",
+          "tradeDeposit",
+          "tradeGold",
+          "tradeCancel"
+        ],
+        "ninthRejected": true,
+        "definitelyUnsentRefunded": true,
+        "enteredRefundRejected": true,
+        "duplicateRejectedWithCapacity": true,
+        "retireReleased": 8
+      },
+      "snapshots": [
+        {
+          "id": "own-offer-bag2-physical42",
+          "accepted": true,
+          "identicalRepeatChanged": false,
+          "negatives": [
+            {
+              "id": "local-bag2-slot-is-not-physical",
+              "handled": false
+            },
+            {
+              "id": "wrong-owned-uid",
+              "handled": false
+            },
+            {
+              "id": "wrong-partner",
+              "handled": false
+            },
+            {
+              "id": "completed-is-not-own-offer-ack",
+              "handled": false
+            }
+          ],
+          "internalModelFieldsNotExposedByBridge": true
+        }
+      ],
+      "uiEpochRejected": true,
+      "unknownOutsideBudget": true,
+      "rendererBootInvoked": false
+    },
+    {
+      "id": "webgl2",
+      "passed": true,
+      "wasmInitialized": true,
+      "newExportExecuted": true,
+      "bridgeCalls": 338,
+      "oldPublicExportCount": 57,
+      "oldPublicExportsAllRetained": true,
+      "backend": "webgl2",
+      "runtimeUiCapabilities": {
+        "schemaVersion": 1,
+        "backend": "webgl2",
+        "questUiAbiVersion": 0,
+        "bagUiAbiVersion": 0,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "smoke": [
+        {
+          "handled": true,
+          "kind": null,
+          "ok": true,
+          "pending": [],
+          "pendingCount": 0,
+          "released": [],
+          "token": null,
+          "version": 1
+        },
+        {
+          "handled": true,
+          "kind": "groupAdd",
+          "ok": true,
+          "pending": [
+            {
+              "entered": false,
+              "kind": "groupAdd",
+              "token": 1
+            }
+          ],
+          "pendingCount": 1,
+          "released": [],
+          "token": 1,
+          "version": 1
+        },
+        {
+          "handled": true,
+          "kind": null,
+          "ok": true,
+          "pending": [
+            {
+              "entered": false,
+              "kind": "groupAdd",
+              "token": 1
+            }
+          ],
+          "pendingCount": 1,
+          "released": [],
+          "token": null,
+          "version": 1
+        },
+        {
+          "handled": true,
+          "kind": null,
+          "ok": true,
+          "pending": [
+            {
+              "entered": true,
+              "kind": "groupAdd",
+              "token": 1
+            }
+          ],
+          "pendingCount": 1,
+          "released": [],
+          "token": null,
+          "version": 1
+        },
+        {
+          "handled": true,
+          "kind": null,
+          "ok": true,
+          "pending": [],
+          "pendingCount": 0,
+          "released": [
+            1
+          ],
+          "token": null,
+          "version": 1
+        }
+      ],
+      "cases": [
+        {
+          "id": "group-switch-on",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "groupSwitch",
+          "pendingCount": 1
+        },
+        {
+          "id": "group-switch-off",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "groupSwitch",
+          "pendingCount": 1
+        },
+        {
+          "id": "group-add",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "groupAdd",
+          "pendingCount": 1
+        },
+        {
+          "id": "group-remove",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "groupRemove",
+          "pendingCount": 1
+        },
+        {
+          "id": "group-accept-ui-epoch-is-opaque",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "groupInviteAccept",
+          "pendingCount": 1
+        },
+        {
+          "id": "group-repeat-arrival-uses-native-epoch",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "groupInviteAccept",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-roster-read",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildRosterRead",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-info-zero-typed-alias",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildRosterRead",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-recruit",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildMember",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-kick",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildMember",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-move-member",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildMember",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-rename-exact-draft",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildRankRename",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-create-is-existing-generic-member",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildMember",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-permission-set-one-bit",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildRankPermission",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-permission-clear-one-bit",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildRankPermission",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-notice",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildNotice",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-accept-ui-epoch-is-opaque",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildInviteAccept",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-repeat-same-name-does-not-copy-ui-epoch",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildInviteAccept",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-gold-deposit",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildStorageGold",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-gold-withdraw",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildStorageGold",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-item-deposit",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildStorageItem",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-item-retrieve",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildStorageItem",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-item-rearrange",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildStorageItem",
+          "pendingCount": 1
+        },
+        {
+          "id": "trade-request",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "tradeRequest",
+          "pendingCount": 1
+        },
+        {
+          "id": "trade-reply-accept",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "tradeReply",
+          "pendingCount": 1
+        },
+        {
+          "id": "trade-reply-decline-still-is-native-unit",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "tradeReply",
+          "pendingCount": 1
+        },
+        {
+          "id": "trade-gold",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "tradeGold",
+          "pendingCount": 1
+        },
+        {
+          "id": "trade-item-deposit-physical-bag2",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "tradeDeposit",
+          "pendingCount": 1
+        },
+        {
+          "id": "trade-item-retrieve-physical-bag2",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "tradeRetrieve",
+          "pendingCount": 1
+        },
+        {
+          "id": "trade-lock",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "tradeConfirm",
+          "pendingCount": 1
+        },
+        {
+          "id": "trade-unlock",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "tradeConfirm",
+          "pendingCount": 1
+        },
+        {
+          "id": "trade-cancel",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "tradeCancel",
+          "pendingCount": 1
+        },
+        {
+          "id": "group-decline-outside-native-pending",
+          "classification": "outsideBudget",
+          "ok": true,
+          "handled": false,
+          "kind": null,
+          "pendingCount": 0
+        },
+        {
+          "id": "guild-decline-outside-native-pending",
+          "classification": "outsideBudget",
+          "ok": true,
+          "handled": false,
+          "kind": null,
+          "pendingCount": 0
+        },
+        {
+          "id": "guild-storage-read-outside-native-item-pending",
+          "classification": "outsideBudget",
+          "ok": true,
+          "handled": false,
+          "kind": null,
+          "pendingCount": 0
+        },
+        {
+          "id": "friend-refresh-outside-social-eight",
+          "classification": "outsideBudget",
+          "ok": true,
+          "handled": false,
+          "kind": null,
+          "pendingCount": 0
+        },
+        {
+          "id": "mentor-reply-outside-social-eight",
+          "classification": "outsideBudget",
+          "ok": true,
+          "handled": false,
+          "kind": null,
+          "pendingCount": 0
+        },
+        {
+          "id": "guild-buff-outside-social-eight",
+          "classification": "outsideBudget",
+          "ok": true,
+          "handled": false,
+          "kind": null,
+          "pendingCount": 0
+        },
+        {
+          "id": "permission-needs-real-viewer-and-guild",
+          "classification": "invalid",
+          "ok": false,
+          "handled": true,
+          "kind": null,
+          "pendingCount": 0
+        },
+        {
+          "id": "permission-no-unknown-option",
+          "classification": "invalid",
+          "ok": false,
+          "handled": true,
+          "kind": null,
+          "pendingCount": 0
+        },
+        {
+          "id": "permission-expects-bool-string",
+          "classification": "invalid",
+          "ok": false,
+          "handled": true,
+          "kind": null,
+          "pendingCount": 0
+        },
+        {
+          "id": "guild-info-no-unsupported-type",
+          "classification": "invalid",
+          "ok": false,
+          "handled": true,
+          "kind": null,
+          "pendingCount": 0
+        },
+        {
+          "id": "invite-name-cannot-borrow-current-epoch",
+          "classification": "invalid",
+          "ok": false,
+          "handled": true,
+          "kind": null,
+          "pendingCount": 0
+        }
+      ],
+      "counts": {
+        "budgeted": 32,
+        "outsideBudget": 6,
+        "invalid": 5
+      },
+      "nativeKindCount": 19,
+      "mixedEight": {
+        "kinds": [
+          "groupSwitch",
+          "groupAdd",
+          "groupRemove",
+          "guildStorageGold",
+          "guildStorageItem",
+          "tradeDeposit",
+          "tradeGold",
+          "tradeCancel"
+        ],
+        "ninthRejected": true,
+        "definitelyUnsentRefunded": true,
+        "enteredRefundRejected": true,
+        "duplicateRejectedWithCapacity": true,
+        "retireReleased": 8
+      },
+      "snapshots": [
+        {
+          "id": "own-offer-bag2-physical42",
+          "accepted": true,
+          "identicalRepeatChanged": false,
+          "negatives": [
+            {
+              "id": "local-bag2-slot-is-not-physical",
+              "handled": false
+            },
+            {
+              "id": "wrong-owned-uid",
+              "handled": false
+            },
+            {
+              "id": "wrong-partner",
+              "handled": false
+            },
+            {
+              "id": "completed-is-not-own-offer-ack",
+              "handled": false
+            }
+          ],
+          "internalModelFieldsNotExposedByBridge": true
+        }
+      ],
+      "uiEpochRejected": true,
+      "unknownOutsideBudget": true,
+      "rendererBootInvoked": false
+    },
+    {
+      "id": "webgl2-shared",
+      "passed": true,
+      "wasmInitialized": true,
+      "newExportExecuted": true,
+      "bridgeCalls": 338,
+      "oldPublicExportCount": 127,
+      "oldPublicExportsAllRetained": true,
+      "backend": "webgl2",
+      "runtimeUiCapabilities": {
+        "schemaVersion": 1,
+        "backend": "webgl2",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": true,
+        "primarySharedUiStartup": true
+      },
+      "smoke": [
+        {
+          "handled": true,
+          "kind": null,
+          "ok": true,
+          "pending": [],
+          "pendingCount": 0,
+          "released": [],
+          "token": null,
+          "version": 1
+        },
+        {
+          "handled": true,
+          "kind": "groupAdd",
+          "ok": true,
+          "pending": [
+            {
+              "entered": false,
+              "kind": "groupAdd",
+              "token": 1
+            }
+          ],
+          "pendingCount": 1,
+          "released": [],
+          "token": 1,
+          "version": 1
+        },
+        {
+          "handled": true,
+          "kind": null,
+          "ok": true,
+          "pending": [
+            {
+              "entered": false,
+              "kind": "groupAdd",
+              "token": 1
+            }
+          ],
+          "pendingCount": 1,
+          "released": [],
+          "token": null,
+          "version": 1
+        },
+        {
+          "handled": true,
+          "kind": null,
+          "ok": true,
+          "pending": [
+            {
+              "entered": true,
+              "kind": "groupAdd",
+              "token": 1
+            }
+          ],
+          "pendingCount": 1,
+          "released": [],
+          "token": null,
+          "version": 1
+        },
+        {
+          "handled": true,
+          "kind": null,
+          "ok": true,
+          "pending": [],
+          "pendingCount": 0,
+          "released": [
+            1
+          ],
+          "token": null,
+          "version": 1
+        }
+      ],
+      "cases": [
+        {
+          "id": "group-switch-on",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "groupSwitch",
+          "pendingCount": 1
+        },
+        {
+          "id": "group-switch-off",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "groupSwitch",
+          "pendingCount": 1
+        },
+        {
+          "id": "group-add",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "groupAdd",
+          "pendingCount": 1
+        },
+        {
+          "id": "group-remove",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "groupRemove",
+          "pendingCount": 1
+        },
+        {
+          "id": "group-accept-ui-epoch-is-opaque",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "groupInviteAccept",
+          "pendingCount": 1
+        },
+        {
+          "id": "group-repeat-arrival-uses-native-epoch",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "groupInviteAccept",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-roster-read",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildRosterRead",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-info-zero-typed-alias",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildRosterRead",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-recruit",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildMember",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-kick",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildMember",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-move-member",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildMember",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-rename-exact-draft",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildRankRename",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-create-is-existing-generic-member",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildMember",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-permission-set-one-bit",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildRankPermission",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-permission-clear-one-bit",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildRankPermission",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-notice",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildNotice",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-accept-ui-epoch-is-opaque",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildInviteAccept",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-repeat-same-name-does-not-copy-ui-epoch",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildInviteAccept",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-gold-deposit",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildStorageGold",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-gold-withdraw",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildStorageGold",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-item-deposit",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildStorageItem",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-item-retrieve",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildStorageItem",
+          "pendingCount": 1
+        },
+        {
+          "id": "guild-item-rearrange",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "guildStorageItem",
+          "pendingCount": 1
+        },
+        {
+          "id": "trade-request",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "tradeRequest",
+          "pendingCount": 1
+        },
+        {
+          "id": "trade-reply-accept",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "tradeReply",
+          "pendingCount": 1
+        },
+        {
+          "id": "trade-reply-decline-still-is-native-unit",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "tradeReply",
+          "pendingCount": 1
+        },
+        {
+          "id": "trade-gold",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "tradeGold",
+          "pendingCount": 1
+        },
+        {
+          "id": "trade-item-deposit-physical-bag2",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "tradeDeposit",
+          "pendingCount": 1
+        },
+        {
+          "id": "trade-item-retrieve-physical-bag2",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "tradeRetrieve",
+          "pendingCount": 1
+        },
+        {
+          "id": "trade-lock",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "tradeConfirm",
+          "pendingCount": 1
+        },
+        {
+          "id": "trade-unlock",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "tradeConfirm",
+          "pendingCount": 1
+        },
+        {
+          "id": "trade-cancel",
+          "classification": "budgeted",
+          "ok": true,
+          "handled": true,
+          "kind": "tradeCancel",
+          "pendingCount": 1
+        },
+        {
+          "id": "group-decline-outside-native-pending",
+          "classification": "outsideBudget",
+          "ok": true,
+          "handled": false,
+          "kind": null,
+          "pendingCount": 0
+        },
+        {
+          "id": "guild-decline-outside-native-pending",
+          "classification": "outsideBudget",
+          "ok": true,
+          "handled": false,
+          "kind": null,
+          "pendingCount": 0
+        },
+        {
+          "id": "guild-storage-read-outside-native-item-pending",
+          "classification": "outsideBudget",
+          "ok": true,
+          "handled": false,
+          "kind": null,
+          "pendingCount": 0
+        },
+        {
+          "id": "friend-refresh-outside-social-eight",
+          "classification": "outsideBudget",
+          "ok": true,
+          "handled": false,
+          "kind": null,
+          "pendingCount": 0
+        },
+        {
+          "id": "mentor-reply-outside-social-eight",
+          "classification": "outsideBudget",
+          "ok": true,
+          "handled": false,
+          "kind": null,
+          "pendingCount": 0
+        },
+        {
+          "id": "guild-buff-outside-social-eight",
+          "classification": "outsideBudget",
+          "ok": true,
+          "handled": false,
+          "kind": null,
+          "pendingCount": 0
+        },
+        {
+          "id": "permission-needs-real-viewer-and-guild",
+          "classification": "invalid",
+          "ok": false,
+          "handled": true,
+          "kind": null,
+          "pendingCount": 0
+        },
+        {
+          "id": "permission-no-unknown-option",
+          "classification": "invalid",
+          "ok": false,
+          "handled": true,
+          "kind": null,
+          "pendingCount": 0
+        },
+        {
+          "id": "permission-expects-bool-string",
+          "classification": "invalid",
+          "ok": false,
+          "handled": true,
+          "kind": null,
+          "pendingCount": 0
+        },
+        {
+          "id": "guild-info-no-unsupported-type",
+          "classification": "invalid",
+          "ok": false,
+          "handled": true,
+          "kind": null,
+          "pendingCount": 0
+        },
+        {
+          "id": "invite-name-cannot-borrow-current-epoch",
+          "classification": "invalid",
+          "ok": false,
+          "handled": true,
+          "kind": null,
+          "pendingCount": 0
+        }
+      ],
+      "counts": {
+        "budgeted": 32,
+        "outsideBudget": 6,
+        "invalid": 5
+      },
+      "nativeKindCount": 19,
+      "mixedEight": {
+        "kinds": [
+          "groupSwitch",
+          "groupAdd",
+          "groupRemove",
+          "guildStorageGold",
+          "guildStorageItem",
+          "tradeDeposit",
+          "tradeGold",
+          "tradeCancel"
+        ],
+        "ninthRejected": true,
+        "definitelyUnsentRefunded": true,
+        "enteredRefundRejected": true,
+        "duplicateRejectedWithCapacity": true,
+        "retireReleased": 8
+      },
+      "snapshots": [
+        {
+          "id": "own-offer-bag2-physical42",
+          "accepted": true,
+          "identicalRepeatChanged": false,
+          "negatives": [
+            {
+              "id": "local-bag2-slot-is-not-physical",
+              "handled": false
+            },
+            {
+              "id": "wrong-owned-uid",
+              "handled": false
+            },
+            {
+              "id": "wrong-partner",
+              "handled": false
+            },
+            {
+              "id": "completed-is-not-own-offer-ack",
+              "handled": false
+            }
+          ],
+          "internalModelFieldsNotExposedByBridge": true
+        }
+      ],
+      "uiEpochRejected": true,
+      "unknownOutsideBudget": true,
+      "rendererBootInvoked": false
+    }
+  ],
+  "pageErrors": [],
+  "httpErrors": [],
+  "networkFailures": [],
+  "screenshots": [
+    "webgpu-actual-abi.png",
+    "webgl2-actual-abi.png",
+    "webgl2-shared-actual-abi.png"
+  ],
+  "browserClosed": true,
+  "localServerClosed": true,
+  "actualLocalRequests": [
+    {
+      "path": "/pkg-webgpu/mir2_bevy_runtime.js",
+      "status": 200,
+      "bytes": 141747,
+      "sha256": "c319fbc229c3bf23513354f342a310547fe32c2dcb9b34c8626c55c0e88d85ba"
+    },
+    {
+      "path": "/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "status": 200,
+      "bytes": 31429183,
+      "sha256": "6536f5df619817ba4bc173461b7a6b4ee9765233fa2a8f1951bed579fc291b7e"
+    },
+    {
+      "path": "/pkg-webgl2/mir2_bevy_runtime.js",
+      "status": 200,
+      "bytes": 117805,
+      "sha256": "6e105aa2fce2f29ff2c645766f4fc91fd992bcf42fe1199d2be025214b225f9b"
+    },
+    {
+      "path": "/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+      "status": 200,
+      "bytes": 16601428,
+      "sha256": "5bf0298ee31262c7cc22cf8e77203f510037554a2bce3caa68945bedc46eb0f5"
+    },
+    {
+      "path": "/pkg-webgl2-shared/mir2_bevy_runtime.js",
+      "status": 200,
+      "bytes": 139721,
+      "sha256": "916012e00e0a01130c2f1598cebfb0f7c8f233b7bd6986772b9c87bc620f47d1"
+    },
+    {
+      "path": "/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+      "status": 200,
+      "bytes": 32357557,
+      "sha256": "9b28bf2a5a0c366ea8463c765f1c7ba036d7a48e751d3b882190f51d36447ba0"
+    }
+  ]
+}

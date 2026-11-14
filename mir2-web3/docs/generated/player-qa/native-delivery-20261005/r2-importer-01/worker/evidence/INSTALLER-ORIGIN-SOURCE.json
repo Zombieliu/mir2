@@ -1,0 +1,16 @@
+{
+  "originalEvidencePath": "C:/mir2-playtest-releases/20261004-native-r18/origin-acceleration-implementation-01/post-publication-02.json",
+  "originalEvidenceSha256": "3073dde253de821c21c541655916e7f84903dc0c8a0eaa2a6219281251de8b36",
+  "selectedMapping": {
+    "device": 64769,
+    "inode": 1143484,
+    "mode": "0o644",
+    "mtimeNs": 1791083348967340952,
+    "nlink": 1,
+    "path": "/srv/mir2-client-updates/releases/bootstrap-WN-CANDIDATE-20261004-invited-17/Numeron-Legend-of-Rebirth-20261004-r17-Bootstrap.exe",
+    "sha256": "aced5e53a57c0e98081f8415c5ebfb95942be7b3cbb130490db24e5f8dc15621",
+    "size": 27482388,
+    "uid": 0
+  },
+  "noLiveCheckThisWorker": true
+}

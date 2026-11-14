@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-24T23:06:30.633Z",
+  "scope": "Diagnostic-only source validation, not a repaired queue or capacity certificate.",
+  "sourceFiles": [
+    {
+      "file": "apps/gateway/src/web.rs",
+      "bytes": 855687,
+      "sha256": "769186e87e166a7ba0fbb971463c8e0ae2b4dd119292798badee3b8e28522dd6"
+    },
+    {
+      "file": "apps/gateway/src/web_live_overflow_tests.rs",
+      "bytes": 29131,
+      "sha256": "d0dabc744d4001163cd3f57443bbf0fa22cd279ad8e1d66d5b37840ee132a2fa"
+    },
+    {
+      "file": "apps/gateway/src/web_transport_close_tests.rs",
+      "bytes": 5814,
+      "sha256": "11d946af65af9a4bad38d3879348c48a87bbf4b3d8abae15a8bb50f18e9425e5"
+    }
+  ],
+  "focused": {
+    "passed": 7,
+    "failed": 0
+  },
+  "adjacent": {
+    "selected": 161,
+    "passed": 159,
+    "failed": 0,
+    "ignored": 2
+  },
+  "rustfmt": {
+    "checked": 36,
+    "exitCode": 0
+  },
+  "initialCompilation": {
+    "failed": true,
+    "errors": 4,
+    "code": "E0061",
+    "fix": "Four missing optional diagnostic None arguments in the two original test fixture files; assertions unchanged."
+  },
+  "backendClosure": {
+    "expectedInputs": 41,
+    "previousInputs": 39,
+    "reason": "Two necessary fixture inputs are added; only web.rs and four None arguments change."
+  },
+  "capacityAccepted": false,
+  "fixedCellStarted": false,
+  "files": [
+    {
+      "source": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\p0-socket-diagnostics-focused-v2.log",
+      "destination": "validation/p0-socket-diagnostics-focused-v2.log",
+      "bytes": 78738,
+      "sha256": "a3481230de3258e989d5ad4a7b06e2f7e0300c079663c98f9528944b0ed59d70"
+    },
+    {
+      "source": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\p0-socket-diagnostics-adjacent-v1.log",
+      "destination": "validation/p0-socket-diagnostics-adjacent-v1.log",
+      "bytes": 73542,
+      "sha256": "3be3d4243c5191e0e5e7743eb4f9f27c388ed5a5fdff2d4d6b13a619254950f0"
+    },
+    {
+      "source": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\p0-socket-diagnostics-focused-v1.log",
+      "destination": "validation/p0-socket-diagnostics-focused-v1.log",
+      "bytes": 62567,
+      "sha256": "d9191d6a310a2e6c7e008046fea14aee62afd08149c38d0f293051051b15972c"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-adjacent-selection-v1.json",
+      "destination": "validation/socket-diagnostics-adjacent-selection-v1.json",
+      "bytes": 19179,
+      "sha256": "11c497c2ec8681dca6bd37bed867a815db9264d41ef1b2fa8ced5f9c250a9b5c"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\run-socket-adjacent-tests-v1.ps1",
+      "destination": "validation/run-socket-adjacent-tests-v1.ps1",
+      "bytes": 862,
+      "sha256": "46ef65917d1239a7395e860c384b319625038d9de2e84fd6552e2efba55338d8"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-prepare-socket-adjacent-tests-v1.mjs",
+      "destination": "validation/root-prepare-socket-adjacent-tests-v1.mjs",
+      "bytes": 1863,
+      "sha256": "61a5da6a7117b6d0b40ee2f6bab4c9975022b85f3dc9cff96a044203b9e42808"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\p0-socket-diagnostics-rustfmt36-v1.log",
+      "destination": "validation/p0-socket-diagnostics-rustfmt36-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\p0-socket-diagnostics-rustfmt36-v1.json",
+      "destination": "validation/p0-socket-diagnostics-rustfmt36-v1.json",
+      "bytes": 7102,
+      "sha256": "caf324a1a50d03e0d9caef28ced9a9394796c17a95ebce4644a44a69e9881fee"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-compilation-v1-web-preimage.rs.txt",
+      "destination": "validation/socket-diagnostics-compilation-v1-web-preimage.rs.txt",
+      "bytes": 855687,
+      "sha256": "769186e87e166a7ba0fbb971463c8e0ae2b4dd119292798badee3b8e28522dd6"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v1\\source-review-v1.json",
+      "destination": "validation/socket-diagnostics-web-independent-review-v1.json",
+      "bytes": 4602,
+      "sha256": "687dec7769fc8b2a83fc16bed532cb37c16005020b614fb77bfb3783b207e6c7"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v2\\source-lib.mjs",
+      "destination": "socket-queue-diagnostics-build-tools-v2/source-lib.mjs",
+      "bytes": 10176,
+      "sha256": "267bc8e45eb16ced1e7a0888d3855b4f3b00f36fbe0e61643802b8c832105298"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v2\\pin-socket-diagnostics-build-v2.mjs",
+      "destination": "socket-queue-diagnostics-build-tools-v2/pin-socket-diagnostics-build-v2.mjs",
+      "bytes": 985,
+      "sha256": "28719db17c2fa52e0091ad132a77f8252a9dcb8bd3068dd51b400716a219d648"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v2\\build-socket-diagnostics-v2.mjs",
+      "destination": "socket-queue-diagnostics-build-tools-v2/build-socket-diagnostics-v2.mjs",
+      "bytes": 4269,
+      "sha256": "f17d598a90c52dcc06c41e424870192aee7be5a5696119ecab6b8b4de5bc75bb"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v2\\capture-socket-diagnostics-release-v2.mjs",
+      "destination": "socket-queue-diagnostics-build-tools-v2/capture-socket-diagnostics-release-v2.mjs",
+      "bytes": 2965,
+      "sha256": "afc56ab662755155fdcc214b87fad6560967970a33f3dc909a1b5d89fda2305b"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v2\\prepare-catalog-v2.mjs",
+      "destination": "socket-queue-diagnostics-build-tools-v2/prepare-catalog-v2.mjs",
+      "bytes": 4571,
+      "sha256": "852ce300d0a069129421eb84ea8015fabd014884b58b08793f7b929f6902ec87"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v2\\README-prepared-v2.md",
+      "destination": "socket-queue-diagnostics-build-tools-v2/README-prepared-v2.md",
+      "bytes": 4043,
+      "sha256": "2f41d6be22da78926bcfff155bbcc5172fb953054ca3b427e6a9ba48fc7021a4"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v2\\prepared-v2.json",
+      "destination": "socket-queue-diagnostics-build-tools-v2/prepared-v2.json",
+      "bytes": 5595,
+      "sha256": "019574d8632656e3f4dc653552bf06ae47eb93abe61c8a8dd413245129986af5"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-run-socket-release-v1.ps1",
+      "destination": "socket-queue-diagnostics-build-tools-v2/root-run-socket-release-v1.ps1",
+      "bytes": 1031,
+      "sha256": "93992de2a9d41bb5105ab9b2f70746faa3ff28e3f9177f711ef548875bc6fc81"
+    }
+  ]
+}

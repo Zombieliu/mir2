@@ -1,0 +1,141 @@
+TAP version 13
+# Subtest: SC origin split: only SC prefers the configured primary current-release CDN
+not ok 1 - SC origin split: only SC prefers the configured primary current-release CDN
+  ---
+  duration_ms: 17.6599
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-asset-worker-fallback.mjs:716:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      [
+    +   'https://preview.example.test/original-ui/fonts/NotoSansCJKsc-Regular.otf',
+    -   'https://cdn.example.test/mir2/v/font-release-a/original-ui/fonts/NotoSansCJKsc-Regular.otf',
+        'https://preview.example.test/original-ui/fonts/NotoSansTC.ttf'
+      ]
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 'https://cdn.example.test/mir2/v/font-release-a/original-ui/fonts/NotoSansCJKsc-Regular.otf'
+    1: 'https://preview.example.test/original-ui/fonts/NotoSansTC.ttf'
+  actual:
+    0: 'https://preview.example.test/original-ui/fonts/NotoSansCJKsc-Regular.otf'
+    1: 'https://preview.example.test/original-ui/fonts/NotoSansTC.ttf'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-worker-fallback.mjs:727:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# (node:88040) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: SC origin split: CDN prefix stays unexposed and only its complete body is cached
+not ok 2 - SC origin split: CDN prefix stays unexposed and only its complete body is cached
+  ---
+  duration_ms: 7.0779
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-asset-worker-fallback.mjs:730:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      [
+    +   'https://preview.example.test/original-ui/fonts/NotoSansCJKsc-Regular.otf'
+    -   'https://cdn.example.test/mir2/v/font-release-a/original-ui/fonts/NotoSansCJKsc-Regular.otf'
+      ]
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 'https://cdn.example.test/mir2/v/font-release-a/original-ui/fonts/NotoSansCJKsc-Regular.otf'
+  actual:
+    0: 'https://preview.example.test/original-ui/fonts/NotoSansCJKsc-Regular.otf'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-worker-fallback.mjs:746:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: SC origin split: original headers timeout recovers through the app with no mixed prefix
+not ok 3 - SC origin split: original headers timeout recovers through the app with no mixed prefix
+  ---
+  duration_ms: 2.3332
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-asset-worker-fallback.mjs:756:42'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      [
+    -   'https://public-r2.example.test/hotlink-ok/mir2/v/font-release-a/original-ui/fonts/NotoSansCJKsc-Regular.otf',
+        'https://preview.example.test/original-ui/fonts/NotoSansCJKsc-Regular.otf'
+      ]
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 'https://public-r2.example.test/hotlink-ok/mir2/v/font-release-a/original-ui/fonts/NotoSansCJKsc-Regular.otf'
+    1: 'https://preview.example.test/original-ui/fonts/NotoSansCJKsc-Regular.otf'
+  actual:
+    0: 'https://preview.example.test/original-ui/fonts/NotoSansCJKsc-Regular.otf'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-worker-fallback.mjs:778:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: SC origin split: original body timeout recovers through the app with no mixed prefix
+not ok 4 - SC origin split: original body timeout recovers through the app with no mixed prefix
+  ---
+  duration_ms: 1.9969
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-asset-worker-fallback.mjs:756:42'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      [
+    -   'https://public-r2.example.test/hotlink-ok/mir2/v/font-release-a/original-ui/fonts/NotoSansCJKsc-Regular.otf',
+        'https://preview.example.test/original-ui/fonts/NotoSansCJKsc-Regular.otf'
+      ]
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 'https://public-r2.example.test/hotlink-ok/mir2/v/font-release-a/original-ui/fonts/NotoSansCJKsc-Regular.otf'
+    1: 'https://preview.example.test/original-ui/fonts/NotoSansCJKsc-Regular.otf'
+  actual:
+    0: 'https://preview.example.test/original-ui/fonts/NotoSansCJKsc-Regular.otf'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-worker-fallback.mjs:778:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: SC origin split: ranges, unversioned and older-only sources remain app-first
+ok 5 - SC origin split: ranges, unversioned and older-only sources remain app-first
+  ---
+  duration_ms: 2.9886
+  type: 'test'
+  ...
+# Subtest: SC origin split: explicit all-font mirror-first preserves the configured mirror order
+ok 6 - SC origin split: explicit all-font mirror-first preserves the configured mirror order
+  ---
+  duration_ms: 0.9862
+  type: 'test'
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 2
+# fail 4
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 85.9874

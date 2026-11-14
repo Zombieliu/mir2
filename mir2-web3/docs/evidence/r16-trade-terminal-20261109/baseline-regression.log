@@ -1,0 +1,19 @@
+running 1 test
+
+thread 'routing::tests::trade_invitation_tests::recipient_cancel_before_inviter_initializes_follows_queued_accept_and_offer' (177736) panicked at apps\gateway\src\routing\tests\trade_invitation_tests.rs:156:5:
+unexpected inviter trade packets: [TradeAccept { name: "Scout" }, TradeItem { trade_items: [Some(UserItem { unique_id: 0, item_index: 658, current_dura: 0, max_dura: 0, count: 5, soul_bound_id: -1, identified: true, cursed: false, slots: [], gem_count: 0, added_stats: [], awake_type: 0, awake_values: [], refined_value: 0, refine_added: 0, refine_success_chance: 0, wedding_ring: -1, expire_info: None, rental_information: None, is_shop_item: false, sealed_info: None, gm_made: false }), None, None, None, None, None, None, None, None, None] }]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+gateway lifecycle session_id=gateway-176752-1794186498619-2 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-176752-1794186498619-2 stage=session.close phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-176752-1794186498618-1 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-176752-1794186498618-1 stage=session.close phase=end elapsed_ms=0
+test routing::tests::trade_invitation_tests::recipient_cancel_before_inviter_initializes_follows_queued_accept_and_offer ... FAILED
+
+failures:
+
+failures:
+    routing::tests::trade_invitation_tests::recipient_cancel_before_inviter_initializes_follows_queued_accept_and_offer
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 1780 filtered out; finished in 2.68s
+
+error: test failed, to rerun pass `-p mir2-gateway --lib`

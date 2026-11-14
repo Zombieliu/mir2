@@ -1,0 +1,20 @@
+{
+  "name": "installed-ten-language-menu",
+  "capturedAtUtc": "2026-10-29T17:20:08.312Z",
+  "window": {
+    "app": "process:F:\\mir2-build\\unified-20261029\\installed-validation\\game\\mir2-platform-windows.exe",
+    "id": 4788964,
+    "title": "numeron-legend of rebirth"
+  },
+  "files": [
+    {
+      "path": "C:/mir2-build/unified-20261029/windows-live/screenshots/installed-ten-language-menu-0.jpg",
+      "sha256": "e6bba36024c0080b5bfffe43455e8878ba1f7ade3ec44652561e9dd3ddd3ec6a",
+      "bytes": 206827,
+      "width": 1026,
+      "height": 800,
+      "screenshotId": "screenshot-0",
+      "unmodified": true
+    }
+  ]
+}

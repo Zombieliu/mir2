@@ -1,0 +1,103 @@
+{
+  "owner": "Root",
+  "kind": "Source54 isolated portable item layout startup and adjacent actual Rust tests",
+  "sourceSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source54-schedule-fix-20261011-01\\root-approved01\\source54-isolated-snapshot02.json",
+    "bytes": 429955,
+    "sha256": "13a197af632a28fc8f4d16c7f1ab34ff2720f7f5e0d4458de7686dce8fac772e"
+  },
+  "patch": [
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/item_image.rs",
+      "bytes": 12504,
+      "sha256": "94cae1b21759625a15efb0d0005787b7ae6ee036a0d09958233b68b256b04749"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/portable_bag_ui.rs",
+      "bytes": 131174,
+      "sha256": "8adf81392f6e2224d316af79951a1176d983bbe679da836dbfdd87a07182e685"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/portable_hero_ui.rs",
+      "bytes": 48494,
+      "sha256": "07edd4be247ee4656763c1abd97871fc725d6257e018aee742da8720ff1974c4"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/portable_npc_shop_ui.rs",
+      "bytes": 40372,
+      "sha256": "6770e2340f0d7f15a61ad54515ad62d653b6b9ca75beeb8862fc2748465a8474"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/portable_storage_ui.rs",
+      "bytes": 57881,
+      "sha256": "8366dd8ca196489a30c3dcee0665be4cf6b0eec3c3de397626055d3acb44e17c"
+    }
+  ],
+  "focused": {
+    "result": "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 729 filtered out; finished in 0.07s",
+    "outer": {
+      "owner": "Root",
+      "exitCode": 0,
+      "builderPid": 53856,
+      "kind": "Source54 focused item_image five existing and new regressions",
+      "exited": true,
+      "disposed": true,
+      "elapsedMs": 1297,
+      "configPath": "C:\\mir2-cross-platform-storage-20261002\\web-source54-schedule-fix-20261011-01\\root-approved02\\item-image-test01-config02.json",
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "productionBuildAccepted": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    },
+    "inputs": 616,
+    "combinedPluginInstallOrders": 24,
+    "independentPluginInstalls": 4
+  },
+  "adjacent": {
+    "result": "test result: ok. 130 passed; 0 failed; 2 ignored; 0 measured; 602 filtered out; finished in 1.49s",
+    "outer": {
+      "owner": "Root",
+      "exitCode": 0,
+      "builderPid": 29200,
+      "kind": "Source54 adjacent portable_ regression filter",
+      "exited": true,
+      "disposed": true,
+      "elapsedMs": 2814,
+      "configPath": "C:\\mir2-cross-platform-storage-20261002\\web-source54-schedule-fix-20261011-01\\root-approved02\\portable-adjacent-test01-config02.json",
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "productionBuildAccepted": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    },
+    "defaultIgnored": 2,
+    "inputs": 616
+  },
+  "historicalFailure": {
+    "passed": 123,
+    "failed": 7,
+    "ignored": 2,
+    "reason": "Seven tests read an existing packaged CJK font omitted from isolated data; copied exact 16437364B font, no product or assertions relaxed",
+    "stdout": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source54-schedule-fix-20261011-01\\root-approved01\\portable-adjacent-test01\\stdout.log",
+      "bytes": 17989,
+      "sha256": "c80bed975a09404572e4b1863df71f3fd6ff18653b6c87a0e7c388d7a09a8514"
+    }
+  },
+  "originalGuard": {
+    "unchanged": true,
+    "thresholdBytes": 53687091200,
+    "freshnessMs": 2000,
+    "probeTimeoutMs": 15000,
+    "policy": "B",
+    "allTestCallsCompletedExitedDisposed": true
+  },
+  "gameplayAccepted": false,
+  "rendererBuildStarted": true,
+  "rendererBuildComplete": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

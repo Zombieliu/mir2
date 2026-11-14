@@ -1,0 +1,2340 @@
+{
+  "schemaVersion": 1,
+  "scope": "Offline V9 diagnostic only; no capacity or acceptance inference. Original report verdict is retained below. Inputs streamed once after operator-confirmed completion.",
+  "raw": {
+    "samples": {
+      "sha256": "d3da6ec30ac54edbb3f90ee11e2873b768eb639879dffbe434c1c600264e8dfe",
+      "bytes": 7238462,
+      "lines": 9078,
+      "oversizeLines": 0,
+      "fullReadPasses": 1
+    },
+    "stderr": {
+      "sha256": "9d3c47417ea070460845ab9921eed12d2925042a1533d6087a9a62989d6cf13f",
+      "bytes": 11960812,
+      "lines": 87106,
+      "oversizeLines": 0,
+      "fullReadPasses": 1,
+      "traceLines": 31913,
+      "ignoredStderrLines": 55193,
+      "rejectedTraceLines": 0
+    },
+    "report": {
+      "sha256": "184f2150d73520ddc9534ff094952f32fc7f0539057df1c219f0ef0f662bad48",
+      "bytes": 50353,
+      "readPasses": 1
+    }
+  },
+  "reportVerdict": {
+    "ok": false,
+    "playableCapacityAccepted": false,
+    "visualAccepted": false,
+    "safetyStopped": true,
+    "capacityUpperBound": null,
+    "peakControlledActors": 50,
+    "peakServerActive": 50,
+    "errorPresent": true,
+    "safetyReasonPresent": true,
+    "stageCount": 0
+  },
+  "phase": {
+    "lastObservedPhase": "drain",
+    "finishedRecord": {
+      "sourceLine": 9078,
+      "ok": false,
+      "playableCapacityAccepted": false
+    }
+  },
+  "sampleCounts": {
+    "monitor": 115,
+    "phaseStarted": 1,
+    "action": 721,
+    "coverage": 232,
+    "playerLifecycle": 7472,
+    "admitted": 50,
+    "diagnosticFullRosterActivated": 1,
+    "navigationBlocked": 50,
+    "selfTransform": 188,
+    "fanoutDistribution": 175,
+    "continuousFailure": 20,
+    "safetyStop": 1,
+    "phaseEnded": 1,
+    "continuousWindow": 50,
+    "finished": 1
+  },
+  "sampleParseErrors": 0,
+  "retention": {
+    "rows": 8242,
+    "bytes": 4863986,
+    "maxRows": 250000,
+    "maxRetainedBytes": 134217728,
+    "omittedRows": 0,
+    "identities": 20202,
+    "traceGroups": 1,
+    "droppedTraces": 0
+  },
+  "fatal": {
+    "observer": "actor-49",
+    "owner": "actor-42",
+    "reason": "ghost",
+    "at": 1793025145217,
+    "sourceLine": 7760,
+    "phase": "settle"
+  },
+  "actorConnections": [
+    {
+      "actor": "actor-1",
+      "connection": 1,
+      "firstAt": 1793024914088,
+      "lastAt": 1793025147268
+    },
+    {
+      "actor": "actor-2",
+      "connection": 2,
+      "firstAt": 1793024917967,
+      "lastAt": 1793025144418
+    },
+    {
+      "actor": "actor-3",
+      "connection": 3,
+      "firstAt": 1793024922305,
+      "lastAt": 1793025144418
+    },
+    {
+      "actor": "actor-4",
+      "connection": 4,
+      "firstAt": 1793024926177,
+      "lastAt": 1793025147269
+    },
+    {
+      "actor": "actor-5",
+      "connection": 5,
+      "firstAt": 1793024930264,
+      "lastAt": 1793025149914
+    },
+    {
+      "actor": "actor-6",
+      "connection": 6,
+      "firstAt": 1793024934338,
+      "lastAt": 1793025148904
+    },
+    {
+      "actor": "actor-7",
+      "connection": 7,
+      "firstAt": 1793024938316,
+      "lastAt": 1793025148889
+    },
+    {
+      "actor": "actor-8",
+      "connection": 8,
+      "firstAt": 1793024942488,
+      "lastAt": 1793025149237
+    },
+    {
+      "actor": "actor-9",
+      "connection": 9,
+      "firstAt": 1793024945901,
+      "lastAt": 1793025150940
+    },
+    {
+      "actor": "actor-10",
+      "connection": 10,
+      "firstAt": 1793024950002,
+      "lastAt": 1793025151081
+    },
+    {
+      "actor": "actor-11",
+      "connection": 11,
+      "firstAt": 1793024954074,
+      "lastAt": 1793025149906
+    },
+    {
+      "actor": "actor-12",
+      "connection": 12,
+      "firstAt": 1793024958150,
+      "lastAt": 1793025150999
+    },
+    {
+      "actor": "actor-13",
+      "connection": 13,
+      "firstAt": 1793024962136,
+      "lastAt": 1793025151853
+    },
+    {
+      "actor": "actor-14",
+      "connection": 14,
+      "firstAt": 1793024966218,
+      "lastAt": 1793025152052
+    },
+    {
+      "actor": "actor-15",
+      "connection": 15,
+      "firstAt": 1793024970297,
+      "lastAt": 1793025152238
+    },
+    {
+      "actor": "actor-16",
+      "connection": 16,
+      "firstAt": 1793024974372,
+      "lastAt": 1793025151855
+    },
+    {
+      "actor": "actor-17",
+      "connection": 17,
+      "firstAt": 1793024978465,
+      "lastAt": 1793025152849
+    },
+    {
+      "actor": "actor-18",
+      "connection": 18,
+      "firstAt": 1793024982029,
+      "lastAt": 1793025152848
+    },
+    {
+      "actor": "actor-19",
+      "connection": 19,
+      "firstAt": 1793024986132,
+      "lastAt": 1793025152230
+    },
+    {
+      "actor": "actor-20",
+      "connection": 20,
+      "firstAt": 1793024990298,
+      "lastAt": 1793025152895
+    },
+    {
+      "actor": "actor-21",
+      "connection": 21,
+      "firstAt": 1793024994282,
+      "lastAt": 1793025153571
+    },
+    {
+      "actor": "actor-22",
+      "connection": 22,
+      "firstAt": 1793024998373,
+      "lastAt": 1793025153659
+    },
+    {
+      "actor": "actor-23",
+      "connection": 23,
+      "firstAt": 1793025002482,
+      "lastAt": 1793025153517
+    },
+    {
+      "actor": "actor-24",
+      "connection": 24,
+      "firstAt": 1793025006465,
+      "lastAt": 1793025153682
+    },
+    {
+      "actor": "actor-25",
+      "connection": 25,
+      "firstAt": 1793025010031,
+      "lastAt": 1793025154190
+    },
+    {
+      "actor": "actor-26",
+      "connection": 26,
+      "firstAt": 1793025014143,
+      "lastAt": 1793025154165
+    },
+    {
+      "actor": "actor-27",
+      "connection": 27,
+      "firstAt": 1793025018215,
+      "lastAt": 1793025154141
+    },
+    {
+      "actor": "actor-28",
+      "connection": 28,
+      "firstAt": 1793025022268,
+      "lastAt": 1793025154099
+    },
+    {
+      "actor": "actor-29",
+      "connection": 29,
+      "firstAt": 1793025026304,
+      "lastAt": 1793025154612
+    },
+    {
+      "actor": "actor-30",
+      "connection": 30,
+      "firstAt": 1793025030331,
+      "lastAt": 1793025154626
+    },
+    {
+      "actor": "actor-31",
+      "connection": 31,
+      "firstAt": 1793025034475,
+      "lastAt": 1793025154623
+    },
+    {
+      "actor": "actor-32",
+      "connection": 32,
+      "firstAt": 1793025037965,
+      "lastAt": 1793025154700
+    },
+    {
+      "actor": "actor-33",
+      "connection": 33,
+      "firstAt": 1793025042141,
+      "lastAt": 1793025155087
+    },
+    {
+      "actor": "actor-34",
+      "connection": 34,
+      "firstAt": 1793025046113,
+      "lastAt": 1793025155091
+    },
+    {
+      "actor": "actor-35",
+      "connection": 35,
+      "firstAt": 1793025050230,
+      "lastAt": 1793025155106
+    },
+    {
+      "actor": "actor-36",
+      "connection": 36,
+      "firstAt": 1793025054329,
+      "lastAt": 1793025155079
+    },
+    {
+      "actor": "actor-37",
+      "connection": 37,
+      "firstAt": 1793025058386,
+      "lastAt": 1793025155475
+    },
+    {
+      "actor": "actor-38",
+      "connection": 38,
+      "firstAt": 1793025062437,
+      "lastAt": 1793025155487
+    },
+    {
+      "actor": "actor-39",
+      "connection": 39,
+      "firstAt": 1793025066478,
+      "lastAt": 1793025155507
+    },
+    {
+      "actor": "actor-40",
+      "connection": 40,
+      "firstAt": 1793025070620,
+      "lastAt": 1793025155105
+    },
+    {
+      "actor": "actor-41",
+      "connection": 41,
+      "firstAt": 1793025074632,
+      "lastAt": 1793025155954
+    },
+    {
+      "actor": "actor-42",
+      "connection": 42,
+      "firstAt": 1793025078845,
+      "lastAt": 1793025155948
+    },
+    {
+      "actor": "actor-43",
+      "connection": 43,
+      "firstAt": 1793025083174,
+      "lastAt": 1793025155947
+    },
+    {
+      "actor": "actor-44",
+      "connection": 44,
+      "firstAt": 1793025089183,
+      "lastAt": 1793025155947
+    },
+    {
+      "actor": "actor-45",
+      "connection": 45,
+      "firstAt": 1793025096472,
+      "lastAt": 1793025156337
+    },
+    {
+      "actor": "actor-46",
+      "connection": 46,
+      "firstAt": 1793025102504,
+      "lastAt": 1793025156304
+    },
+    {
+      "actor": "actor-47",
+      "connection": 47,
+      "firstAt": 1793025108458,
+      "lastAt": 1793025156326
+    },
+    {
+      "actor": "actor-48",
+      "connection": 48,
+      "firstAt": 1793025117849,
+      "lastAt": 1793025156325
+    },
+    {
+      "actor": "actor-49",
+      "connection": 49,
+      "firstAt": 1793025126563,
+      "lastAt": 1793025156690
+    },
+    {
+      "actor": "actor-50",
+      "connection": 50,
+      "firstAt": 1793025133864,
+      "lastAt": 1793025156690
+    }
+  ],
+  "pairMapping": {
+    "observer": {
+      "status": "candidates",
+      "candidates": [
+        50048,
+        1000
+      ],
+      "evidence": [
+        {
+          "actor": "actor-49",
+          "zoneObjectID": 50048,
+          "at": 1793025133880,
+          "connection": 50,
+          "sourceLine": 6595,
+          "seenBy": "actor-50"
+        },
+        {
+          "actor": "actor-49",
+          "zoneObjectID": 1000,
+          "at": 1793025156690,
+          "connection": 49,
+          "sourceLine": 9006,
+          "seenBy": "actor-49"
+        }
+      ]
+    },
+    "owner": {
+      "status": "candidates",
+      "candidates": [
+        50041,
+        1000
+      ],
+      "evidence": [
+        {
+          "actor": "actor-42",
+          "zoneObjectID": 50041,
+          "at": 1793025133879,
+          "connection": 50,
+          "sourceLine": 6588,
+          "seenBy": "actor-50"
+        },
+        {
+          "actor": "actor-42",
+          "zoneObjectID": 1000,
+          "at": 1793025155948,
+          "connection": 42,
+          "sourceLine": 8977,
+          "seenBy": "actor-42"
+        }
+      ]
+    }
+  },
+  "ownerOutOfRangeACK": {
+    "status": "one-recorded-boundary",
+    "candidates": [
+      {
+        "ownerAck": {
+          "sourceLine": 7537,
+          "type": "selfTransform",
+          "at": 1793025143876,
+          "actor": "actor-42",
+          "connection": 42,
+          "phase": "settle",
+          "source": "UserLocation",
+          "monotonicMs": 248594.0276,
+          "sequence": 986,
+          "map": "map-1",
+          "wire": {
+            "position": {
+              "x": 301,
+              "y": 614
+            }
+          },
+          "before": {
+            "objectId": 1000,
+            "actor": null,
+            "position": {
+              "x": 299,
+              "y": 616
+            }
+          },
+          "after": {
+            "objectId": 1000,
+            "actor": null,
+            "position": {
+              "x": 301,
+              "y": 614
+            }
+          }
+        },
+        "observerPosition": {
+          "sourceLine": 6846,
+          "type": "selfTransform",
+          "at": 1793025139644,
+          "actor": "actor-49",
+          "connection": 49,
+          "phase": "settle",
+          "source": "UserLocation",
+          "monotonicMs": 244363.1376,
+          "sequence": 748,
+          "map": "map-1",
+          "wire": {
+            "position": {
+              "x": 283,
+              "y": 617
+            }
+          },
+          "before": {
+            "objectId": 1000,
+            "actor": null,
+            "position": {
+              "x": 284,
+              "y": 617
+            }
+          },
+          "after": {
+            "objectId": 1000,
+            "actor": null,
+            "position": {
+              "x": 283,
+              "y": 617
+            }
+          }
+        },
+        "distance": 18
+      }
+    ]
+  },
+  "observerRemove": {
+    "status": "recorded-final-in-window",
+    "record": {
+      "sourceLine": 7806,
+      "type": "playerLifecycle",
+      "at": 1793025145365,
+      "actor": "actor-49",
+      "connection": 49,
+      "phase": "settle",
+      "source": "ObjectRemove",
+      "monotonicMs": 250082.7603,
+      "sequence": 906,
+      "peer": {
+        "objectId": 50041,
+        "actor": "actor-42"
+      },
+      "wire": {
+        "objectId": 50041,
+        "position": null
+      },
+      "beforePresent": true,
+      "afterPresent": false,
+      "before": {
+        "self": {
+          "objectId": 1000,
+          "actor": "actor-49",
+          "position": {
+            "x": 281,
+            "y": 617
+          }
+        },
+        "map": "map-1",
+        "players": [
+          {
+            "objectId": 50041,
+            "actor": "actor-42",
+            "position": {
+              "x": 299,
+              "y": 616
+            }
+          }
+        ]
+      },
+      "after": {
+        "self": {
+          "objectId": 1000,
+          "actor": "actor-49",
+          "position": {
+            "x": 281,
+            "y": 617
+          }
+        },
+        "map": "map-1",
+        "players": []
+      }
+    },
+    "allCandidates": [
+      {
+        "sourceLine": 7806,
+        "type": "playerLifecycle",
+        "at": 1793025145365,
+        "actor": "actor-49",
+        "connection": 49,
+        "phase": "settle",
+        "source": "ObjectRemove",
+        "monotonicMs": 250082.7603,
+        "sequence": 906,
+        "peer": {
+          "objectId": 50041,
+          "actor": "actor-42"
+        },
+        "wire": {
+          "objectId": 50041,
+          "position": null
+        },
+        "beforePresent": true,
+        "afterPresent": false,
+        "before": {
+          "self": {
+            "objectId": 1000,
+            "actor": "actor-49",
+            "position": {
+              "x": 281,
+              "y": 617
+            }
+          },
+          "map": "map-1",
+          "players": [
+            {
+              "objectId": 50041,
+              "actor": "actor-42",
+              "position": {
+                "x": 299,
+                "y": 616
+              }
+            }
+          ]
+        },
+        "after": {
+          "self": {
+            "objectId": 1000,
+            "actor": "actor-49",
+            "position": {
+              "x": 281,
+              "y": 617
+            }
+          },
+          "map": "map-1",
+          "players": []
+        }
+      }
+    ],
+    "removeWasLastWithinRetainedWindow": true
+  },
+  "packetLinks": [
+    {
+      "label": "owner-out-of-range-ACK",
+      "sourceLine": 7537,
+      "clientReceiptAt": 1793025143876,
+      "recipientZoneCandidates": [
+        50041,
+        1000
+      ],
+      "kind": "UserLocation",
+      "targetObjectCandidates": [],
+      "position": {
+        "x": 301,
+        "y": 614
+      },
+      "status": "unknown",
+      "candidates": [],
+      "clientReceiveAfterEstimatedSentMs": null
+    },
+    {
+      "label": "observer-final-remove",
+      "sourceLine": 7806,
+      "clientReceiptAt": 1793025145365,
+      "recipientZoneCandidates": [
+        50048,
+        1000
+      ],
+      "kind": "ObjectRemove",
+      "targetObjectCandidates": [
+        50041
+      ],
+      "position": null,
+      "status": "candidates",
+      "candidates": [
+        {
+          "serverTraceID": 5136,
+          "registration": 49,
+          "producerUnixMs": 1793025143870,
+          "timing": {
+            "queueAgeUs": 1495209,
+            "gateWaitUs": 0,
+            "sendDurationUs": 17,
+            "producerToSentUs": 1495234,
+            "estimatedSentUnixMs": 1793025145365.234
+          },
+          "completeUniqueStages": true
+        }
+      ],
+      "clientReceiveAfterEstimatedSentMs": null
+    },
+    {
+      "label": "observer-near-fatal-ACK",
+      "sourceLine": 7706,
+      "clientReceiptAt": 1793025144474,
+      "recipientZoneCandidates": [
+        50048,
+        1000
+      ],
+      "kind": "UserLocation",
+      "targetObjectCandidates": [],
+      "position": {
+        "x": 282,
+        "y": 617
+      },
+      "status": "unknown",
+      "candidates": [],
+      "clientReceiveAfterEstimatedSentMs": null
+    },
+    {
+      "label": "observer-near-fatal-ACK",
+      "sourceLine": 7805,
+      "clientReceiptAt": 1793025145365,
+      "recipientZoneCandidates": [
+        50048,
+        1000
+      ],
+      "kind": "UserLocation",
+      "targetObjectCandidates": [],
+      "position": {
+        "x": 281,
+        "y": 617
+      },
+      "status": "unknown",
+      "candidates": [],
+      "clientReceiveAfterEstimatedSentMs": null
+    }
+  ],
+  "traceStageCounts": {
+    "enqueue": 6397,
+    "dequeue": 6395,
+    "gate": 6394,
+    "send": 6333,
+    "sent": 6333,
+    "stale": 61
+  },
+  "slowestTraceEvents": [
+    {
+      "sourceLine": 78927,
+      "stage": "sent",
+      "serverTraceID": 5285,
+      "registration": 10,
+      "recipientZoneID": 50009,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50000,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025147244,
+      "elapsedUs": 1643499,
+      "queueAgeUs": 9,
+      "gateWaitUs": 1643434
+    },
+    {
+      "sourceLine": 78924,
+      "stage": "send",
+      "serverTraceID": 5285,
+      "registration": 10,
+      "recipientZoneID": 50009,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50000,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025147244,
+      "elapsedUs": 1643464,
+      "queueAgeUs": 9,
+      "gateWaitUs": 1643434
+    },
+    {
+      "sourceLine": 78920,
+      "stage": "gate",
+      "serverTraceID": 5285,
+      "registration": 10,
+      "recipientZoneID": 50009,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50000,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025147244,
+      "elapsedUs": 1643444,
+      "queueAgeUs": 9,
+      "gateWaitUs": 1643434
+    },
+    {
+      "sourceLine": 78931,
+      "stage": "sent",
+      "serverTraceID": 5332,
+      "registration": 10,
+      "recipientZoneID": 50009,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50003,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025147264,
+      "elapsedUs": 1624164,
+      "queueAgeUs": 1624145,
+      "gateWaitUs": 0
+    },
+    {
+      "sourceLine": 78930,
+      "stage": "send",
+      "serverTraceID": 5332,
+      "registration": 10,
+      "recipientZoneID": 50009,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50003,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025147264,
+      "elapsedUs": 1624150,
+      "queueAgeUs": 1624145,
+      "gateWaitUs": 0
+    },
+    {
+      "sourceLine": 78929,
+      "stage": "gate",
+      "serverTraceID": 5332,
+      "registration": 10,
+      "recipientZoneID": 50009,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50003,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025147264,
+      "elapsedUs": 1624147,
+      "queueAgeUs": 1624145,
+      "gateWaitUs": 0
+    },
+    {
+      "sourceLine": 78928,
+      "stage": "dequeue",
+      "serverTraceID": 5332,
+      "registration": 10,
+      "recipientZoneID": 50009,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50003,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025147264,
+      "elapsedUs": 1624145,
+      "queueAgeUs": 1624145,
+      "gateWaitUs": 0
+    },
+    {
+      "sourceLine": 76199,
+      "stage": "sent",
+      "serverTraceID": 5136,
+      "registration": 49,
+      "recipientZoneID": 50048,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50041,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025143870,
+      "elapsedUs": 1495234,
+      "queueAgeUs": 1495209,
+      "gateWaitUs": 0
+    },
+    {
+      "sourceLine": 76198,
+      "stage": "send",
+      "serverTraceID": 5136,
+      "registration": 49,
+      "recipientZoneID": 50048,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50041,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025143870,
+      "elapsedUs": 1495217,
+      "queueAgeUs": 1495209,
+      "gateWaitUs": 0
+    },
+    {
+      "sourceLine": 76197,
+      "stage": "gate",
+      "serverTraceID": 5136,
+      "registration": 49,
+      "recipientZoneID": 50048,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50041,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025143870,
+      "elapsedUs": 1495214,
+      "queueAgeUs": 1495209,
+      "gateWaitUs": 0
+    },
+    {
+      "sourceLine": 76196,
+      "stage": "dequeue",
+      "serverTraceID": 5136,
+      "registration": 49,
+      "recipientZoneID": 50048,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50041,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025143870,
+      "elapsedUs": 1495209,
+      "queueAgeUs": 1495209,
+      "gateWaitUs": 0
+    },
+    {
+      "sourceLine": 78938,
+      "stage": "sent",
+      "serverTraceID": 5378,
+      "registration": 10,
+      "recipientZoneID": 50009,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50002,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025147568,
+      "elapsedUs": 1319731,
+      "queueAgeUs": 1319713,
+      "gateWaitUs": 0
+    },
+    {
+      "sourceLine": 78926,
+      "stage": "sent",
+      "serverTraceID": 5373,
+      "registration": 5,
+      "recipientZoneID": 50004,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50002,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025147568,
+      "elapsedUs": 1319727,
+      "queueAgeUs": 7,
+      "gateWaitUs": 1319674
+    },
+    {
+      "sourceLine": 78935,
+      "stage": "send",
+      "serverTraceID": 5378,
+      "registration": 10,
+      "recipientZoneID": 50009,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50002,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025147568,
+      "elapsedUs": 1319718,
+      "queueAgeUs": 1319713,
+      "gateWaitUs": 0
+    },
+    {
+      "sourceLine": 78933,
+      "stage": "gate",
+      "serverTraceID": 5378,
+      "registration": 10,
+      "recipientZoneID": 50009,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50002,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025147568,
+      "elapsedUs": 1319716,
+      "queueAgeUs": 1319713,
+      "gateWaitUs": 0
+    },
+    {
+      "sourceLine": 78932,
+      "stage": "dequeue",
+      "serverTraceID": 5378,
+      "registration": 10,
+      "recipientZoneID": 50009,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50002,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025147568,
+      "elapsedUs": 1319713,
+      "queueAgeUs": 1319713,
+      "gateWaitUs": 0
+    },
+    {
+      "sourceLine": 78925,
+      "stage": "send",
+      "serverTraceID": 5373,
+      "registration": 5,
+      "recipientZoneID": 50004,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50002,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025147568,
+      "elapsedUs": 1319696,
+      "queueAgeUs": 7,
+      "gateWaitUs": 1319674
+    },
+    {
+      "sourceLine": 78921,
+      "stage": "gate",
+      "serverTraceID": 5373,
+      "registration": 5,
+      "recipientZoneID": 50004,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50002,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025147568,
+      "elapsedUs": 1319682,
+      "queueAgeUs": 7,
+      "gateWaitUs": 1319674
+    },
+    {
+      "sourceLine": 55761,
+      "stage": "sent",
+      "serverTraceID": 4387,
+      "registration": 16,
+      "recipientZoneID": 50015,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50047,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 616,
+      "producerUnixMs": 1793025118371,
+      "elapsedUs": 1251779,
+      "queueAgeUs": 1,
+      "gateWaitUs": 1251682
+    },
+    {
+      "sourceLine": 55760,
+      "stage": "send",
+      "serverTraceID": 4387,
+      "registration": 16,
+      "recipientZoneID": 50015,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50047,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 616,
+      "producerUnixMs": 1793025118371,
+      "elapsedUs": 1251705,
+      "queueAgeUs": 1,
+      "gateWaitUs": 1251682
+    },
+    {
+      "sourceLine": 55758,
+      "stage": "gate",
+      "serverTraceID": 4387,
+      "registration": 16,
+      "recipientZoneID": 50015,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50047,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 616,
+      "producerUnixMs": 1793025118371,
+      "elapsedUs": 1251683,
+      "queueAgeUs": 1,
+      "gateWaitUs": 1251682
+    },
+    {
+      "sourceLine": 67507,
+      "stage": "sent",
+      "serverTraceID": 4765,
+      "registration": 12,
+      "recipientZoneID": 50011,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50049,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 618,
+      "producerUnixMs": 1793025134815,
+      "elapsedUs": 1044553,
+      "queueAgeUs": 52,
+      "gateWaitUs": 1044437
+    },
+    {
+      "sourceLine": 67506,
+      "stage": "send",
+      "serverTraceID": 4765,
+      "registration": 12,
+      "recipientZoneID": 50011,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50049,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 618,
+      "producerUnixMs": 1793025134815,
+      "elapsedUs": 1044500,
+      "queueAgeUs": 52,
+      "gateWaitUs": 1044437
+    },
+    {
+      "sourceLine": 67504,
+      "stage": "gate",
+      "serverTraceID": 4765,
+      "registration": 12,
+      "recipientZoneID": 50011,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50049,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 618,
+      "producerUnixMs": 1793025134815,
+      "elapsedUs": 1044490,
+      "queueAgeUs": 52,
+      "gateWaitUs": 1044437
+    },
+    {
+      "sourceLine": 67490,
+      "stage": "sent",
+      "serverTraceID": 4780,
+      "registration": 27,
+      "recipientZoneID": 50026,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50049,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 618,
+      "producerUnixMs": 1793025134815,
+      "elapsedUs": 1017436,
+      "queueAgeUs": 3,
+      "gateWaitUs": 1017363
+    },
+    {
+      "sourceLine": 67489,
+      "stage": "send",
+      "serverTraceID": 4780,
+      "registration": 27,
+      "recipientZoneID": 50026,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50049,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 618,
+      "producerUnixMs": 1793025134815,
+      "elapsedUs": 1017384,
+      "queueAgeUs": 3,
+      "gateWaitUs": 1017363
+    },
+    {
+      "sourceLine": 67486,
+      "stage": "gate",
+      "serverTraceID": 4780,
+      "registration": 27,
+      "recipientZoneID": 50026,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50049,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 618,
+      "producerUnixMs": 1793025134815,
+      "elapsedUs": 1017366,
+      "queueAgeUs": 3,
+      "gateWaitUs": 1017363
+    },
+    {
+      "sourceLine": 78532,
+      "stage": "sent",
+      "serverTraceID": 5345,
+      "registration": 23,
+      "recipientZoneID": 50022,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50003,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025147264,
+      "elapsedUs": 924585,
+      "queueAgeUs": 2,
+      "gateWaitUs": 924533
+    },
+    {
+      "sourceLine": 78531,
+      "stage": "send",
+      "serverTraceID": 5345,
+      "registration": 23,
+      "recipientZoneID": 50022,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50003,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025147264,
+      "elapsedUs": 924550,
+      "queueAgeUs": 2,
+      "gateWaitUs": 924533
+    },
+    {
+      "sourceLine": 78529,
+      "stage": "gate",
+      "serverTraceID": 5345,
+      "registration": 23,
+      "recipientZoneID": 50022,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50003,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025147264,
+      "elapsedUs": 924536,
+      "queueAgeUs": 2,
+      "gateWaitUs": 924533
+    },
+    {
+      "sourceLine": 55460,
+      "stage": "sent",
+      "serverTraceID": 4381,
+      "registration": 10,
+      "recipientZoneID": 50009,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50047,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 616,
+      "producerUnixMs": 1793025118371,
+      "elapsedUs": 873716,
+      "queueAgeUs": 2,
+      "gateWaitUs": 873677
+    },
+    {
+      "sourceLine": 55459,
+      "stage": "send",
+      "serverTraceID": 4381,
+      "registration": 10,
+      "recipientZoneID": 50009,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50047,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 616,
+      "producerUnixMs": 1793025118371,
+      "elapsedUs": 873691,
+      "queueAgeUs": 2,
+      "gateWaitUs": 873677
+    },
+    {
+      "sourceLine": 55456,
+      "stage": "gate",
+      "serverTraceID": 4381,
+      "registration": 10,
+      "recipientZoneID": 50009,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50047,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 616,
+      "producerUnixMs": 1793025118371,
+      "elapsedUs": 873679,
+      "queueAgeUs": 2,
+      "gateWaitUs": 873677
+    },
+    {
+      "sourceLine": 78714,
+      "stage": "sent",
+      "serverTraceID": 5408,
+      "registration": 40,
+      "recipientZoneID": 50039,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50002,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025147568,
+      "elapsedUs": 867404,
+      "queueAgeUs": 1,
+      "gateWaitUs": 867353
+    },
+    {
+      "sourceLine": 78713,
+      "stage": "send",
+      "serverTraceID": 5408,
+      "registration": 40,
+      "recipientZoneID": 50039,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50002,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025147568,
+      "elapsedUs": 867369,
+      "queueAgeUs": 1,
+      "gateWaitUs": 867353
+    },
+    {
+      "sourceLine": 78711,
+      "stage": "gate",
+      "serverTraceID": 5408,
+      "registration": 40,
+      "recipientZoneID": 50039,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50002,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025147568,
+      "elapsedUs": 867355,
+      "queueAgeUs": 1,
+      "gateWaitUs": 867353
+    },
+    {
+      "sourceLine": 55325,
+      "stage": "sent",
+      "serverTraceID": 4394,
+      "registration": 23,
+      "recipientZoneID": 50022,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50047,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 616,
+      "producerUnixMs": 1793025118371,
+      "elapsedUs": 831170,
+      "queueAgeUs": 1,
+      "gateWaitUs": 831109
+    },
+    {
+      "sourceLine": 55324,
+      "stage": "send",
+      "serverTraceID": 4394,
+      "registration": 23,
+      "recipientZoneID": 50022,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50047,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 616,
+      "producerUnixMs": 1793025118371,
+      "elapsedUs": 831123,
+      "queueAgeUs": 1,
+      "gateWaitUs": 831109
+    },
+    {
+      "sourceLine": 55322,
+      "stage": "gate",
+      "serverTraceID": 4394,
+      "registration": 23,
+      "recipientZoneID": 50022,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50047,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 616,
+      "producerUnixMs": 1793025118371,
+      "elapsedUs": 831111,
+      "queueAgeUs": 1,
+      "gateWaitUs": 831109
+    },
+    {
+      "sourceLine": 78672,
+      "stage": "sent",
+      "serverTraceID": 5380,
+      "registration": 12,
+      "recipientZoneID": 50011,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50002,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025147568,
+      "elapsedUs": 821896,
+      "queueAgeUs": 6,
+      "gateWaitUs": 821850
+    },
+    {
+      "sourceLine": 78671,
+      "stage": "send",
+      "serverTraceID": 5380,
+      "registration": 12,
+      "recipientZoneID": 50011,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50002,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025147568,
+      "elapsedUs": 821870,
+      "queueAgeUs": 6,
+      "gateWaitUs": 821850
+    },
+    {
+      "sourceLine": 78669,
+      "stage": "gate",
+      "serverTraceID": 5380,
+      "registration": 12,
+      "recipientZoneID": 50011,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50002,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025147568,
+      "elapsedUs": 821857,
+      "queueAgeUs": 6,
+      "gateWaitUs": 821850
+    },
+    {
+      "sourceLine": 48905,
+      "stage": "sent",
+      "serverTraceID": 4210,
+      "registration": 24,
+      "recipientZoneID": 50023,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50046,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 615,
+      "producerUnixMs": 1793025109496,
+      "elapsedUs": 815394,
+      "queueAgeUs": 3,
+      "gateWaitUs": 815292
+    },
+    {
+      "sourceLine": 48904,
+      "stage": "send",
+      "serverTraceID": 4210,
+      "registration": 24,
+      "recipientZoneID": 50023,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50046,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 615,
+      "producerUnixMs": 1793025109496,
+      "elapsedUs": 815324,
+      "queueAgeUs": 3,
+      "gateWaitUs": 815292
+    },
+    {
+      "sourceLine": 48902,
+      "stage": "gate",
+      "serverTraceID": 4210,
+      "registration": 24,
+      "recipientZoneID": 50023,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50046,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 615,
+      "producerUnixMs": 1793025109496,
+      "elapsedUs": 815296,
+      "queueAgeUs": 3,
+      "gateWaitUs": 815292
+    },
+    {
+      "sourceLine": 55166,
+      "stage": "sent",
+      "serverTraceID": 4409,
+      "registration": 38,
+      "recipientZoneID": 50037,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50047,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 616,
+      "producerUnixMs": 1793025118371,
+      "elapsedUs": 806978,
+      "queueAgeUs": 2,
+      "gateWaitUs": 806902
+    },
+    {
+      "sourceLine": 55165,
+      "stage": "send",
+      "serverTraceID": 4409,
+      "registration": 38,
+      "recipientZoneID": 50037,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50047,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 616,
+      "producerUnixMs": 1793025118371,
+      "elapsedUs": 806921,
+      "queueAgeUs": 2,
+      "gateWaitUs": 806902
+    },
+    {
+      "sourceLine": 55163,
+      "stage": "gate",
+      "serverTraceID": 4409,
+      "registration": 38,
+      "recipientZoneID": 50037,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50047,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 616,
+      "producerUnixMs": 1793025118371,
+      "elapsedUs": 806904,
+      "queueAgeUs": 2,
+      "gateWaitUs": 806902
+    },
+    {
+      "sourceLine": 78636,
+      "stage": "sent",
+      "serverTraceID": 5389,
+      "registration": 21,
+      "recipientZoneID": 50020,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50002,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025147568,
+      "elapsedUs": 801432,
+      "queueAgeUs": 3,
+      "gateWaitUs": 801373
+    },
+    {
+      "sourceLine": 78635,
+      "stage": "send",
+      "serverTraceID": 5389,
+      "registration": 21,
+      "recipientZoneID": 50020,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50002,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025147568,
+      "elapsedUs": 801388,
+      "queueAgeUs": 3,
+      "gateWaitUs": 801373
+    },
+    {
+      "sourceLine": 78633,
+      "stage": "gate",
+      "serverTraceID": 5389,
+      "registration": 21,
+      "recipientZoneID": 50020,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50002,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025147568,
+      "elapsedUs": 801376,
+      "queueAgeUs": 3,
+      "gateWaitUs": 801373
+    },
+    {
+      "sourceLine": 66281,
+      "stage": "sent",
+      "serverTraceID": 4752,
+      "registration": 48,
+      "recipientZoneID": 50047,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50049,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 618,
+      "producerUnixMs": 1793025133635,
+      "elapsedUs": 796938,
+      "queueAgeUs": 2,
+      "gateWaitUs": 796882
+    },
+    {
+      "sourceLine": 66280,
+      "stage": "send",
+      "serverTraceID": 4752,
+      "registration": 48,
+      "recipientZoneID": 50047,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50049,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 618,
+      "producerUnixMs": 1793025133635,
+      "elapsedUs": 796894,
+      "queueAgeUs": 2,
+      "gateWaitUs": 796882
+    },
+    {
+      "sourceLine": 66278,
+      "stage": "gate",
+      "serverTraceID": 4752,
+      "registration": 48,
+      "recipientZoneID": 50047,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50049,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 618,
+      "producerUnixMs": 1793025133635,
+      "elapsedUs": 796885,
+      "queueAgeUs": 2,
+      "gateWaitUs": 796882
+    },
+    {
+      "sourceLine": 48851,
+      "stage": "sent",
+      "serverTraceID": 4204,
+      "registration": 18,
+      "recipientZoneID": 50017,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50046,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 615,
+      "producerUnixMs": 1793025109496,
+      "elapsedUs": 784369,
+      "queueAgeUs": 1,
+      "gateWaitUs": 784303
+    },
+    {
+      "sourceLine": 48850,
+      "stage": "send",
+      "serverTraceID": 4204,
+      "registration": 18,
+      "recipientZoneID": 50017,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50046,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 615,
+      "producerUnixMs": 1793025109496,
+      "elapsedUs": 784317,
+      "queueAgeUs": 1,
+      "gateWaitUs": 784303
+    },
+    {
+      "sourceLine": 48848,
+      "stage": "gate",
+      "serverTraceID": 4204,
+      "registration": 18,
+      "recipientZoneID": 50017,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50046,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 615,
+      "producerUnixMs": 1793025109496,
+      "elapsedUs": 784304,
+      "queueAgeUs": 1,
+      "gateWaitUs": 784303
+    },
+    {
+      "sourceLine": 67103,
+      "stage": "sent",
+      "serverTraceID": 4774,
+      "registration": 21,
+      "recipientZoneID": 50020,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50049,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 618,
+      "producerUnixMs": 1793025134815,
+      "elapsedUs": 756679,
+      "queueAgeUs": 4,
+      "gateWaitUs": 756611
+    },
+    {
+      "sourceLine": 67102,
+      "stage": "send",
+      "serverTraceID": 4774,
+      "registration": 21,
+      "recipientZoneID": 50020,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50049,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 618,
+      "producerUnixMs": 1793025134815,
+      "elapsedUs": 756627,
+      "queueAgeUs": 4,
+      "gateWaitUs": 756611
+    },
+    {
+      "sourceLine": 67100,
+      "stage": "gate",
+      "serverTraceID": 4774,
+      "registration": 21,
+      "recipientZoneID": 50020,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50049,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 618,
+      "producerUnixMs": 1793025134815,
+      "elapsedUs": 756616,
+      "queueAgeUs": 4,
+      "gateWaitUs": 756611
+    },
+    {
+      "sourceLine": 80261,
+      "stage": "sent",
+      "serverTraceID": 5527,
+      "registration": 27,
+      "recipientZoneID": 50026,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50007,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025149200,
+      "elapsedUs": 753011,
+      "queueAgeUs": 3,
+      "gateWaitUs": 752966
+    },
+    {
+      "sourceLine": 80260,
+      "stage": "send",
+      "serverTraceID": 5527,
+      "registration": 27,
+      "recipientZoneID": 50026,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50007,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025149200,
+      "elapsedUs": 752984,
+      "queueAgeUs": 3,
+      "gateWaitUs": 752966
+    },
+    {
+      "sourceLine": 80257,
+      "stage": "gate",
+      "serverTraceID": 5527,
+      "registration": 27,
+      "recipientZoneID": 50026,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50007,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025149200,
+      "elapsedUs": 752970,
+      "queueAgeUs": 3,
+      "gateWaitUs": 752966
+    },
+    {
+      "sourceLine": 55102,
+      "stage": "sent",
+      "serverTraceID": 4372,
+      "registration": 1,
+      "recipientZoneID": 50000,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50047,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 616,
+      "producerUnixMs": 1793025118371,
+      "elapsedUs": 752217,
+      "queueAgeUs": 26,
+      "gateWaitUs": 752132
+    },
+    {
+      "sourceLine": 55101,
+      "stage": "send",
+      "serverTraceID": 4372,
+      "registration": 1,
+      "recipientZoneID": 50000,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50047,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 616,
+      "producerUnixMs": 1793025118371,
+      "elapsedUs": 752166,
+      "queueAgeUs": 26,
+      "gateWaitUs": 752132
+    },
+    {
+      "sourceLine": 55099,
+      "stage": "gate",
+      "serverTraceID": 4372,
+      "registration": 1,
+      "recipientZoneID": 50000,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50047,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 616,
+      "producerUnixMs": 1793025118371,
+      "elapsedUs": 752159,
+      "queueAgeUs": 26,
+      "gateWaitUs": 752132
+    },
+    {
+      "sourceLine": 78573,
+      "stage": "sent",
+      "serverTraceID": 5416,
+      "registration": 48,
+      "recipientZoneID": 50047,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50002,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025147568,
+      "elapsedUs": 715287,
+      "queueAgeUs": 2,
+      "gateWaitUs": 715235
+    },
+    {
+      "sourceLine": 78572,
+      "stage": "send",
+      "serverTraceID": 5416,
+      "registration": 48,
+      "recipientZoneID": 50047,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50002,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025147568,
+      "elapsedUs": 715247,
+      "queueAgeUs": 2,
+      "gateWaitUs": 715235
+    },
+    {
+      "sourceLine": 78570,
+      "stage": "gate",
+      "serverTraceID": 5416,
+      "registration": 48,
+      "recipientZoneID": 50047,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50002,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025147568,
+      "elapsedUs": 715238,
+      "queueAgeUs": 2,
+      "gateWaitUs": 715235
+    },
+    {
+      "sourceLine": 78561,
+      "stage": "sent",
+      "serverTraceID": 5395,
+      "registration": 27,
+      "recipientZoneID": 50026,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50002,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025147568,
+      "elapsedUs": 706580,
+      "queueAgeUs": 3,
+      "gateWaitUs": 706524
+    },
+    {
+      "sourceLine": 78560,
+      "stage": "send",
+      "serverTraceID": 5395,
+      "registration": 27,
+      "recipientZoneID": 50026,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50002,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025147568,
+      "elapsedUs": 706542,
+      "queueAgeUs": 3,
+      "gateWaitUs": 706524
+    },
+    {
+      "sourceLine": 78558,
+      "stage": "gate",
+      "serverTraceID": 5395,
+      "registration": 27,
+      "recipientZoneID": 50026,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50002,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025147568,
+      "elapsedUs": 706528,
+      "queueAgeUs": 3,
+      "gateWaitUs": 706524
+    },
+    {
+      "sourceLine": 67084,
+      "stage": "sent",
+      "serverTraceID": 4761,
+      "registration": 8,
+      "recipientZoneID": 50007,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50049,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 618,
+      "producerUnixMs": 1793025134815,
+      "elapsedUs": 702005,
+      "queueAgeUs": 45,
+      "gateWaitUs": 701883
+    },
+    {
+      "sourceLine": 67083,
+      "stage": "send",
+      "serverTraceID": 4761,
+      "registration": 8,
+      "recipientZoneID": 50007,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50049,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 618,
+      "producerUnixMs": 1793025134815,
+      "elapsedUs": 701943,
+      "queueAgeUs": 45,
+      "gateWaitUs": 701883
+    },
+    {
+      "sourceLine": 67081,
+      "stage": "gate",
+      "serverTraceID": 4761,
+      "registration": 8,
+      "recipientZoneID": 50007,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50049,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 618,
+      "producerUnixMs": 1793025134815,
+      "elapsedUs": 701929,
+      "queueAgeUs": 45,
+      "gateWaitUs": 701883
+    },
+    {
+      "sourceLine": 61666,
+      "stage": "sent",
+      "serverTraceID": 4589,
+      "registration": 29,
+      "recipientZoneID": 50028,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50048,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 617,
+      "producerUnixMs": 1793025127430,
+      "elapsedUs": 694463,
+      "queueAgeUs": 4,
+      "gateWaitUs": 694353
+    },
+    {
+      "sourceLine": 61665,
+      "stage": "send",
+      "serverTraceID": 4589,
+      "registration": 29,
+      "recipientZoneID": 50028,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50048,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 617,
+      "producerUnixMs": 1793025127430,
+      "elapsedUs": 694371,
+      "queueAgeUs": 4,
+      "gateWaitUs": 694353
+    },
+    {
+      "sourceLine": 61663,
+      "stage": "gate",
+      "serverTraceID": 4589,
+      "registration": 29,
+      "recipientZoneID": 50028,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50048,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 617,
+      "producerUnixMs": 1793025127430,
+      "elapsedUs": 694358,
+      "queueAgeUs": 4,
+      "gateWaitUs": 694353
+    },
+    {
+      "sourceLine": 66242,
+      "stage": "sent",
+      "serverTraceID": 4748,
+      "registration": 44,
+      "recipientZoneID": 50043,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50049,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 618,
+      "producerUnixMs": 1793025133635,
+      "elapsedUs": 692616,
+      "queueAgeUs": 32,
+      "gateWaitUs": 692522
+    },
+    {
+      "sourceLine": 66241,
+      "stage": "send",
+      "serverTraceID": 4748,
+      "registration": 44,
+      "recipientZoneID": 50043,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50049,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 618,
+      "producerUnixMs": 1793025133635,
+      "elapsedUs": 692569,
+      "queueAgeUs": 32,
+      "gateWaitUs": 692522
+    },
+    {
+      "sourceLine": 66239,
+      "stage": "gate",
+      "serverTraceID": 4748,
+      "registration": 44,
+      "recipientZoneID": 50043,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50049,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 618,
+      "producerUnixMs": 1793025133635,
+      "elapsedUs": 692555,
+      "queueAgeUs": 32,
+      "gateWaitUs": 692522
+    },
+    {
+      "sourceLine": 66234,
+      "stage": "sent",
+      "serverTraceID": 4718,
+      "registration": 14,
+      "recipientZoneID": 50013,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50049,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 618,
+      "producerUnixMs": 1793025133635,
+      "elapsedUs": 676245,
+      "queueAgeUs": 161,
+      "gateWaitUs": 676027
+    },
+    {
+      "sourceLine": 66233,
+      "stage": "send",
+      "serverTraceID": 4718,
+      "registration": 14,
+      "recipientZoneID": 50013,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50049,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 618,
+      "producerUnixMs": 1793025133635,
+      "elapsedUs": 676200,
+      "queueAgeUs": 161,
+      "gateWaitUs": 676027
+    },
+    {
+      "sourceLine": 66231,
+      "stage": "gate",
+      "serverTraceID": 4718,
+      "registration": 14,
+      "recipientZoneID": 50013,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50049,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 618,
+      "producerUnixMs": 1793025133635,
+      "elapsedUs": 676188,
+      "queueAgeUs": 161,
+      "gateWaitUs": 676027
+    },
+    {
+      "sourceLine": 80068,
+      "stage": "sent",
+      "serverTraceID": 5514,
+      "registration": 14,
+      "recipientZoneID": 50013,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50007,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025149200,
+      "elapsedUs": 672215,
+      "queueAgeUs": 27,
+      "gateWaitUs": 672122
+    },
+    {
+      "sourceLine": 80067,
+      "stage": "send",
+      "serverTraceID": 5514,
+      "registration": 14,
+      "recipientZoneID": 50013,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50007,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025149200,
+      "elapsedUs": 672168,
+      "queueAgeUs": 27,
+      "gateWaitUs": 672122
+    },
+    {
+      "sourceLine": 80065,
+      "stage": "gate",
+      "serverTraceID": 5514,
+      "registration": 14,
+      "recipientZoneID": 50013,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50007,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025149200,
+      "elapsedUs": 672149,
+      "queueAgeUs": 27,
+      "gateWaitUs": 672122
+    },
+    {
+      "sourceLine": 66216,
+      "stage": "sent",
+      "serverTraceID": 4731,
+      "registration": 27,
+      "recipientZoneID": 50026,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50049,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 618,
+      "producerUnixMs": 1793025133635,
+      "elapsedUs": 650633,
+      "queueAgeUs": 117,
+      "gateWaitUs": 650457
+    },
+    {
+      "sourceLine": 66215,
+      "stage": "send",
+      "serverTraceID": 4731,
+      "registration": 27,
+      "recipientZoneID": 50026,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50049,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 618,
+      "producerUnixMs": 1793025133635,
+      "elapsedUs": 650587,
+      "queueAgeUs": 117,
+      "gateWaitUs": 650457
+    },
+    {
+      "sourceLine": 66213,
+      "stage": "gate",
+      "serverTraceID": 4731,
+      "registration": 27,
+      "recipientZoneID": 50026,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50049,
+      "hasPosition": 1,
+      "x": 284,
+      "y": 618,
+      "producerUnixMs": 1793025133635,
+      "elapsedUs": 650575,
+      "queueAgeUs": 117,
+      "gateWaitUs": 650457
+    },
+    {
+      "sourceLine": 75982,
+      "stage": "sent",
+      "serverTraceID": 5221,
+      "registration": 28,
+      "recipientZoneID": 50027,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50041,
+      "hasPosition": 1,
+      "x": 301,
+      "y": 614,
+      "producerUnixMs": 1793025144468,
+      "elapsedUs": 649782,
+      "queueAgeUs": 649755,
+      "gateWaitUs": 0
+    },
+    {
+      "sourceLine": 75981,
+      "stage": "send",
+      "serverTraceID": 5221,
+      "registration": 28,
+      "recipientZoneID": 50027,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50041,
+      "hasPosition": 1,
+      "x": 301,
+      "y": 614,
+      "producerUnixMs": 1793025144468,
+      "elapsedUs": 649760,
+      "queueAgeUs": 649755,
+      "gateWaitUs": 0
+    },
+    {
+      "sourceLine": 75980,
+      "stage": "gate",
+      "serverTraceID": 5221,
+      "registration": 28,
+      "recipientZoneID": 50027,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50041,
+      "hasPosition": 1,
+      "x": 301,
+      "y": 614,
+      "producerUnixMs": 1793025144468,
+      "elapsedUs": 649758,
+      "queueAgeUs": 649755,
+      "gateWaitUs": 0
+    },
+    {
+      "sourceLine": 75979,
+      "stage": "dequeue",
+      "serverTraceID": 5221,
+      "registration": 28,
+      "recipientZoneID": 50027,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50041,
+      "hasPosition": 1,
+      "x": 301,
+      "y": 614,
+      "producerUnixMs": 1793025144468,
+      "elapsedUs": 649755,
+      "queueAgeUs": 649755,
+      "gateWaitUs": 0
+    },
+    {
+      "sourceLine": 75978,
+      "stage": "sent",
+      "serverTraceID": 5223,
+      "registration": 28,
+      "recipientZoneID": 50027,
+      "kind": "UserLocation",
+      "targetObjectID": 50027,
+      "hasPosition": 1,
+      "x": 285,
+      "y": 607,
+      "producerUnixMs": 1793025144468,
+      "elapsedUs": 649673,
+      "queueAgeUs": 649656,
+      "gateWaitUs": 0
+    },
+    {
+      "sourceLine": 75977,
+      "stage": "send",
+      "serverTraceID": 5223,
+      "registration": 28,
+      "recipientZoneID": 50027,
+      "kind": "UserLocation",
+      "targetObjectID": 50027,
+      "hasPosition": 1,
+      "x": 285,
+      "y": 607,
+      "producerUnixMs": 1793025144468,
+      "elapsedUs": 649663,
+      "queueAgeUs": 649656,
+      "gateWaitUs": 0
+    },
+    {
+      "sourceLine": 75976,
+      "stage": "gate",
+      "serverTraceID": 5223,
+      "registration": 28,
+      "recipientZoneID": 50027,
+      "kind": "UserLocation",
+      "targetObjectID": 50027,
+      "hasPosition": 1,
+      "x": 285,
+      "y": 607,
+      "producerUnixMs": 1793025144468,
+      "elapsedUs": 649660,
+      "queueAgeUs": 649656,
+      "gateWaitUs": 0
+    },
+    {
+      "sourceLine": 75975,
+      "stage": "dequeue",
+      "serverTraceID": 5223,
+      "registration": 28,
+      "recipientZoneID": 50027,
+      "kind": "UserLocation",
+      "targetObjectID": 50027,
+      "hasPosition": 1,
+      "x": 285,
+      "y": 607,
+      "producerUnixMs": 1793025144468,
+      "elapsedUs": 649656,
+      "queueAgeUs": 649656,
+      "gateWaitUs": 0
+    },
+    {
+      "sourceLine": 80023,
+      "stage": "sent",
+      "serverTraceID": 5511,
+      "registration": 11,
+      "recipientZoneID": 50010,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50007,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025149200,
+      "elapsedUs": 633242,
+      "queueAgeUs": 31,
+      "gateWaitUs": 633177
+    },
+    {
+      "sourceLine": 80022,
+      "stage": "send",
+      "serverTraceID": 5511,
+      "registration": 11,
+      "recipientZoneID": 50010,
+      "kind": "ObjectRemove",
+      "targetObjectID": 50007,
+      "hasPosition": 0,
+      "x": 0,
+      "y": 0,
+      "producerUnixMs": 1793025149200,
+      "elapsedUs": 633218,
+      "queueAgeUs": 31,
+      "gateWaitUs": 633177
+    }
+  ],
+  "selected": {
+    "file": "selected-anonymous.jsonl",
+    "rows": 136,
+    "sha256": "5863740ce37d7480d993cf3c2cf24fa8f68232a53187d45806d4482103751744"
+  },
+  "limits": [
+    "Anonymous actor aliases and numeric connection IDs are identity evidence only; connection IDs never establish queue/gate/network causality.",
+    "No client trace ID is recorded. A unique-record-match means exactly one complete candidate fits recipient/target/position within a 30-second producer window; it is not cryptographic packet identity. Repeated packets remain candidates.",
+    "serverTraceID groups are sorted by Instant elapsedUs, never stderr line order. producerUnixMs is event creation wall clock; estimated sent wall time assumes stable system clock and has millisecond quantization.",
+    "sent is send/flush return, not client receive. Client receive after estimated sent combines network, client processing, and clock uncertainty; it cannot isolate network delay.",
+    "Owner boundary detection requires retained observer selfTransform on same map; missing initial positions or multiple crossings produce unknown/candidates.",
+    "Fatal discovery is the first recorded coverage ghost/missing/loss; a poll does not record the per-pair grace timer start.",
+    "Final remove means final retained receipt within fatal +/-15 seconds, not proof none occurs outside the window.",
+    "Raw samples and non-whitelisted stderr content are never copied or printed. Finite retention caps can make analysis incomplete."
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "startedAtUtc": "2026-10-28T15:13:09.2943394Z",
+  "finishedAtUtc": "2026-10-28T15:13:43.4903730Z",
+  "exitCode": 0,
+  "command": "cargo +1.95.0 test --locked --offline --manifest-path apps/game-client/client-bevy/Cargo.toml --features native-ui --lib procurement --target-dir C:/mir2-build/guild-pixel-parity-20261028/target-native -- --nocapture --test-threads=1"
+}

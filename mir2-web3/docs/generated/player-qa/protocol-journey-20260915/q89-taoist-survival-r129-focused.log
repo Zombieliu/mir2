@@ -1,0 +1,40 @@
+TAP version 13
+# Subtest: q89 Taoist blocks a fresh critical travel-breakout cast after sustain creates two proven attackers
+ok 1 - q89 Taoist blocks a fresh critical travel-breakout cast after sustain creates two proven attackers
+  ---
+  duration_ms: 3.1369
+  type: 'test'
+  ...
+# Subtest: q89 Taoist critical overlap uses the held escape before any SoulFireBall
+ok 2 - q89 Taoist critical overlap uses the held escape before any SoulFireBall
+  ---
+  duration_ms: 2.205
+  type: 'test'
+  ...
+# Subtest: q89 Taoist critical blocked pack ends its bounded retreat without breakout casts or recursive recovery
+ok 3 - q89 Taoist critical blocked pack ends its bounded retreat without breakout casts or recursive recovery
+  ---
+  duration_ms: 1.4079
+  type: 'test'
+  ...
+# Subtest: an opt-in pre-base-action guard blocks the captured cast after kiting navigation receives fresh critical strikes
+ok 4 - an opt-in pre-base-action guard blocks the captured cast after kiting navigation receives fresh critical strikes
+  ---
+  duration_ms: 5.6525
+  type: 'test'
+  ...
+# Subtest: an opt-in pre-base-action guard covers both fast-path and blocked-retreat fallbacks
+ok 5 - an opt-in pre-base-action guard covers both fast-path and blocked-retreat fallbacks
+  ---
+  duration_ms: 0.7726
+  type: 'test'
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 5
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 210.6911

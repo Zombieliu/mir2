@@ -18,7 +18,7 @@ fi
 # overrides stale dashboard variables so a main-branch deployment cannot point
 # at an older R2 prefix than the commit that triggered it.
 if [ "${VERCEL:-}" = "1" ] && [ "${VERCEL_ENV:-}" = "production" ]; then
-  PRODUCTION_ASSET_CONFIG="$(pwd)/../../config/production-web-assets.json"
+  PRODUCTION_ASSET_CONFIG="$(node ./scripts/lib/production-asset-config.mjs --path)"
   if [ ! -f "$PRODUCTION_ASSET_CONFIG" ]; then
     echo "[vercel-build] Missing $PRODUCTION_ASSET_CONFIG." >&2
     exit 1
@@ -40,6 +40,16 @@ if [ "${VERCEL:-}" = "1" ] && [ "${VERCEL_ENV:-}" = "production" ]; then
   export MIR2_USE_PREBUILT_BEVY_RUNTIME="${MIR2_USE_PREBUILT_BEVY_RUNTIME:-1}"
   export MIR2_REUSE_ORIGINAL_ASSET_MANIFEST="${MIR2_REUSE_ORIGINAL_ASSET_MANIFEST:-1}"
 
+  node ./scripts/lib/production-asset-config.mjs --verify-remote
+  # Keep the Numeron renderer pin separate from the legacy Web build and the
+  # previously published finite art manifest.
+  if [ "${MIR2_PRODUCTION_ASSET_CONFIG:-}" = "numeron-r16-web-assets.json" ]; then
+    cp lib/generated/bevy_runtime_version_numeron_r16.json lib/generated/bevy_runtime_version.json
+    node ./scripts/generate-r16-entry-scene.mjs --check
+    node ./scripts/generate-r16-entry-floor.mjs --check
+    node ./scripts/generate-r16-entry-visuals.mjs --check
+    node ./scripts/generate-r16-native-localization.mjs --check
+  fi
   npm run generate:original-asset-manifest
   echo "[vercel-build] Using production R2 assets $MIR2_ASSET_VERSION."
 fi
@@ -48,19 +58,12 @@ TOOLCHAIN="${RUST_TOOLCHAIN_VERSION:-1.89.0}"
 export PATH="$HOME/.cargo/bin:$PATH"
 
 RUNTIME_LOCK="$(pwd)/../game-client/runtime/Cargo.lock"
-PREBUILT_RUNTIME_WEBGPU_JS="$(pwd)/public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js"
-PREBUILT_RUNTIME_WEBGPU_WASM="$(pwd)/public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm"
-PREBUILT_RUNTIME_WEBGL2_JS="$(pwd)/public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js"
-PREBUILT_RUNTIME_WEBGL2_WASM="$(pwd)/public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm"
-
 prebuilt_runtime_ready() {
-  [ -s "$PREBUILT_RUNTIME_WEBGPU_JS" ] \
-    && [ -s "$PREBUILT_RUNTIME_WEBGPU_WASM" ] \
-    && [ -s "$PREBUILT_RUNTIME_WEBGL2_JS" ] \
-    && [ -s "$PREBUILT_RUNTIME_WEBGL2_WASM" ]
+  node scripts/check-prebuilt-bevy-runtime.mjs >/dev/null 2>&1
 }
 
-# Hosted production releases pin immutable WebGPU/WebGL2 packages that were
+# Hosted production releases pin every immutable package declared by the manifest,
+# including shared GL2 only when compiled with that capability. These were
 # already built and uploaded by the asset release gate. Do not install a Rust
 # toolchain merely because the source tree is present in the deployment
 # archive; `npm run runtime:build:release` validates and reuses these packages.

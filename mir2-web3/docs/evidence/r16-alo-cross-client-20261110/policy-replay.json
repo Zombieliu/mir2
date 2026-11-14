@@ -1,0 +1,45 @@
+{
+  "result": "pass",
+  "scope": "Actual rules function on a deterministic party fixture, using v2 from native owner projection and v3 from the same read-only SQLite. No live combat was run in this fixture.",
+  "sourceInputs": {
+    "nativeOwnerProjection": true,
+    "sqliteReadOnly": true,
+    "identicalActiveCombatFixture": true
+  },
+  "actions": {
+    "activeDuringCombat": {
+      "kind": "attack",
+      "reason": "assist-confirmed-party-engagement",
+      "policyVersion": 2,
+      "targetId": 10,
+      "target": {
+        "x": 12,
+        "y": 11
+      },
+      "direction": "DownRight",
+      "desiredDistance": 1
+    },
+    "activeAfterCombat": {
+      "kind": "loot",
+      "reason": "collect-observed-allowed-drop",
+      "policyVersion": 2,
+      "targetId": 50,
+      "target": {
+        "x": 11,
+        "y": 10
+      },
+      "desiredDistance": 0
+    },
+    "revokedDuringCombat": {
+      "kind": "loot",
+      "reason": "collect-observed-allowed-drop",
+      "policyVersion": 3,
+      "targetId": 50,
+      "target": {
+        "x": 11,
+        "y": 10
+      },
+      "desiredDistance": 0
+    }
+  }
+}

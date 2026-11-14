@@ -1,0 +1,114 @@
+{
+  "schema": "mir2.evidence.byte-archive.v1",
+  "files": [
+    {
+      "file": "CLOUDFLARE-WORKER-DEPLOY-01.json",
+      "bytes": 836,
+      "sha256": "7b770010a4601bbf27a616cfd7c72ea5f899594ce74a60451a97e399c3307514"
+    },
+    {
+      "file": "CLOUDFLARE-WORKER-READBACK-01.json",
+      "bytes": 872,
+      "sha256": "c694b88b94a084c6535b25c929cf12be9e2ea258c6db1d72dd927233616dfc0c"
+    },
+    {
+      "file": "HTTP-PREREQUISITES-01.json",
+      "bytes": 1209,
+      "sha256": "701302e9d396ca3fc34a76dd9ba0690dc76d9f05152850fcf5aec915a2b50dda"
+    },
+    {
+      "file": "HTTP-CI-USER-AGENT-02.json",
+      "bytes": 598,
+      "sha256": "c47332ef1c1a81e0760d27c72723455e0d6c9848dcd0e7d7717cf22c6ae09f80"
+    },
+    {
+      "file": "cdn-stage-ARTIFACT-METADATA.json",
+      "bytes": 1469,
+      "sha256": "6fb66d9758ee5176da7d92769733e880afe2f544ba4d69b11b5a3dd643a0a6d8"
+    },
+    {
+      "file": "cdn-stage-receipt.json",
+      "bytes": 43978,
+      "sha256": "0a8b88330fd302af8a9cff7d0fe98234c35993e9188e7ad14405f1e7fcc7d73f"
+    },
+    {
+      "file": "cdn-stage-receipt.sha256",
+      "bytes": 125,
+      "sha256": "0fa840613d21a85779622aa41426a6ab6d6b9225d34c6b00cd3c0421f7048b6f"
+    },
+    {
+      "file": "cdn-stage-DOWNLOAD-VERIFICATION.json",
+      "bytes": 396,
+      "sha256": "e34e67e1fb83d9a2b543f879fae3320fdf63fb055836feab67495ebf5d33d9e7"
+    },
+    {
+      "file": "cdn-stage-ROOT-VALIDATION.json",
+      "bytes": 399,
+      "sha256": "0cf36ea4499c55870fbcd49dc02456dcd7ab11894b78dc0c5989753d461aa4b2"
+    },
+    {
+      "file": "55-create-private-origin-stage-01.log",
+      "bytes": 109,
+      "sha256": "62eb692dc35085e9b789661247817313cf176e5dd761c776d5a34aeeaa4c9c4b"
+    },
+    {
+      "file": "56-upload-private-origin-stage-01.log",
+      "bytes": 35,
+      "sha256": "640c0e71994438f0be8dee53d7970ea2307b64370d24166f67be8fb20eee28e1"
+    },
+    {
+      "file": "58-build-worker-17-01.log",
+      "bytes": 644,
+      "sha256": "ad9165e67fb7879800e0aaf4bcf1e476f52049f7d439288ca5795ea06ddb06eb"
+    },
+    {
+      "file": "59-read-private-upload-progress-01.log",
+      "bytes": 147,
+      "sha256": "c62aa817b4ddba9842b2ce9456cdda56c347e59faa26183e7a4e6f03550edc43"
+    },
+    {
+      "file": "60-origin-private-modes-01.log",
+      "bytes": 154,
+      "sha256": "63ac46e24dbf640fd5b147867bb1108bda897569d309422bd432cf3089aad0cc"
+    },
+    {
+      "file": "61-origin-root-seal-01.log",
+      "bytes": 220,
+      "sha256": "5f5ec653acb7ff1ef47f114eddb85f39d5e178f7ebf28e8ddbcfce0193791ce6"
+    },
+    {
+      "file": "62-origin-preflight-01.log",
+      "bytes": 6601,
+      "sha256": "ccf2c4c3d85b10b5397e873707985fec7c490d5c1af79fabab6ef575bb35d6ef"
+    },
+    {
+      "file": "63-origin-immutable-append-01.log",
+      "bytes": 11746,
+      "sha256": "c06161ca1921eec48825cd01917548d8fa9e1032162e280d40f7d338b2b9e238"
+    },
+    {
+      "file": "64-r22-cdn-tooling-ci-failure-01.log",
+      "bytes": 13229,
+      "sha256": "87847b993e769c8d6cba7b85aecfe3e16848939a40435434aefe287bb9faa910"
+    },
+    {
+      "file": "65-r22-offline-portable-02.log",
+      "bytes": 112,
+      "sha256": "fe90dd170d20d10fff60b57090b1b26cb38eda4f1222e739951b2b8ff0066169"
+    },
+    {
+      "file": "66-worker-portable-ci-source-02.log",
+      "bytes": 644,
+      "sha256": "bb718665b8fe9079ff91e529c7eba6749c2c533ad9693e3f1a649a93087b0f47"
+    },
+    {
+      "file": "ROOT-STATUS.json",
+      "bytes": 764,
+      "sha256": "5fd353d9662d8c8ce985e14641991ec4b38df1a3b5c81790b8b36cb124dc72d8"
+    }
+  ],
+  "sourceBytesPreserved": true,
+  "applicationLaunched": false,
+  "serviceChanged": false,
+  "publicAliasesChanged": false
+}

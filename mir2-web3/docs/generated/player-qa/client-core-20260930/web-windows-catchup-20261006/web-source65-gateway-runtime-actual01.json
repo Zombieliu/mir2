@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "source": "Source65",
+  "acceptedBuild": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source65-gateway-build-actual01.json",
+    "bytes": 2673,
+    "sha256": "29e0ea6e695fcd90cd3b4362399e829bff28e502909fce27e69e7b6447c11eac"
+  },
+  "acceptedTests": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source65-gateway-test-actual01.json",
+    "bytes": 5634,
+    "sha256": "9001a107701c4a9acfaa0930c321be746d568b686ce7e458b2970bafb0cf19a8"
+  },
+  "runtimeBinary": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source65-npc-gold-projection-20261011-01/gateway-runtime01/mir2-gateway.exe",
+    "bytes": 109079552,
+    "sha256": "9d8c545fa15217f515ad908d85a42b51ececa35ed88fc7ec5e0e4e57e5271b98"
+  },
+  "runtimeReview": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source65-npc-gold-projection-20261011-01/root-approved01/gateway-runtime-review01.json",
+    "bytes": 1673,
+    "sha256": "a9e078d44fcefbea03ce3de0cf0ed73f00006a6b41180d741be16436361efaa5"
+  },
+  "configPin": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source65-npc-gold-projection-20261011-01/gateway-start01/config.json",
+    "bytes": 3693,
+    "sha256": "5e7fc307e32e6a5b0fbf190953b66d22a0f54808f43bf088c85865faa1f635a1"
+  },
+  "oldGateway": {
+    "source": "Source62",
+    "pid": 58656,
+    "parentPid": 56376,
+    "normalSavedLogoutObserved": true,
+    "identityBeforeStopVerified": true,
+    "exitCode": -1,
+    "exited": true,
+    "disposed": true,
+    "originalCallerPostPinsPassed": true
+  },
+  "newGateway": {
+    "pid": 66300,
+    "parentPid": 56528,
+    "exeAndEmptyArgvVerified": true,
+    "originalCallerParentVerified": true,
+    "loopbackPorts": [
+      19100,
+      19110
+    ],
+    "running": true,
+    "exited": false,
+    "disposed": false,
+    "originalCallerSession": 39351
+  },
+  "web": {
+    "source": "Source64",
+    "pid": 53752,
+    "port": 19205,
+    "unchanged": true
+  },
+  "privateEnvironmentReusedInMemory": true,
+  "privateConfigRead": false,
+  "uiBalanceFixStillToVerify": true,
+  "productionAccepted": false,
+  "candidate100": false,
+  "goalComplete": false
+}

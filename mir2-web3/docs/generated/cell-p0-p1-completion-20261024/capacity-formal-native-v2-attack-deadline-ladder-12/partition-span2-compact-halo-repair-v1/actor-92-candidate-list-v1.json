@@ -1,0 +1,680 @@
+{
+  "schemaVersion": 1,
+  "actorIndex": 92,
+  "originalHome": {
+    "x": 227,
+    "y": 531
+  },
+  "currentHome": {
+    "x": 227,
+    "y": 531
+  },
+  "from": {
+    "x": 283,
+    "y": 542
+  },
+  "radius": 6,
+  "legalAnchorCount": 24,
+  "candidatesEnteredOriginalPathRanking": 16,
+  "candidates": [
+    {
+      "home": {
+        "x": 229,
+        "y": 533
+      },
+      "paths": [
+        {
+          "goal": {
+            "x": 230,
+            "y": 532
+          },
+          "found": true,
+          "steps": 53
+        },
+        {
+          "goal": {
+            "x": 230,
+            "y": 533
+          },
+          "found": true,
+          "steps": 53
+        },
+        {
+          "goal": {
+            "x": 230,
+            "y": 534
+          },
+          "found": true,
+          "steps": 53
+        },
+        {
+          "goal": {
+            "x": 229,
+            "y": 532
+          },
+          "found": true,
+          "steps": 54
+        }
+      ],
+      "bestOriginalPathSteps": 53
+    },
+    {
+      "home": {
+        "x": 229,
+        "y": 534
+      },
+      "paths": [
+        {
+          "goal": {
+            "x": 230,
+            "y": 533
+          },
+          "found": true,
+          "steps": 53
+        },
+        {
+          "goal": {
+            "x": 230,
+            "y": 534
+          },
+          "found": true,
+          "steps": 53
+        },
+        {
+          "goal": {
+            "x": 230,
+            "y": 535
+          },
+          "found": true,
+          "steps": 53
+        },
+        {
+          "goal": {
+            "x": 229,
+            "y": 533
+          },
+          "found": true,
+          "steps": 54
+        }
+      ],
+      "bestOriginalPathSteps": 53
+    },
+    {
+      "home": {
+        "x": 229,
+        "y": 535
+      },
+      "paths": [
+        {
+          "goal": {
+            "x": 230,
+            "y": 534
+          },
+          "found": true,
+          "steps": 53
+        },
+        {
+          "goal": {
+            "x": 230,
+            "y": 535
+          },
+          "found": true,
+          "steps": 53
+        },
+        {
+          "goal": {
+            "x": 230,
+            "y": 536
+          },
+          "found": true,
+          "steps": 53
+        },
+        {
+          "goal": {
+            "x": 229,
+            "y": 534
+          },
+          "found": true,
+          "steps": 54
+        }
+      ],
+      "bestOriginalPathSteps": 53
+    },
+    {
+      "home": {
+        "x": 229,
+        "y": 536
+      },
+      "paths": [
+        {
+          "goal": {
+            "x": 230,
+            "y": 535
+          },
+          "found": true,
+          "steps": 53
+        },
+        {
+          "goal": {
+            "x": 230,
+            "y": 536
+          },
+          "found": true,
+          "steps": 53
+        },
+        {
+          "goal": {
+            "x": 230,
+            "y": 537
+          },
+          "found": true,
+          "steps": 53
+        },
+        {
+          "goal": {
+            "x": 229,
+            "y": 535
+          },
+          "found": true,
+          "steps": 54
+        }
+      ],
+      "bestOriginalPathSteps": 53
+    },
+    {
+      "home": {
+        "x": 229,
+        "y": 537
+      },
+      "paths": [
+        {
+          "goal": {
+            "x": 230,
+            "y": 536
+          },
+          "found": true,
+          "steps": 53
+        },
+        {
+          "goal": {
+            "x": 230,
+            "y": 537
+          },
+          "found": true,
+          "steps": 53
+        },
+        {
+          "goal": {
+            "x": 230,
+            "y": 538
+          },
+          "found": true,
+          "steps": 53
+        },
+        {
+          "goal": {
+            "x": 229,
+            "y": 536
+          },
+          "found": true,
+          "steps": 54
+        }
+      ],
+      "bestOriginalPathSteps": 53
+    },
+    {
+      "home": {
+        "x": 228,
+        "y": 533
+      },
+      "paths": [
+        {
+          "goal": {
+            "x": 229,
+            "y": 532
+          },
+          "found": true,
+          "steps": 54
+        },
+        {
+          "goal": {
+            "x": 229,
+            "y": 533
+          },
+          "found": true,
+          "steps": 54
+        },
+        {
+          "goal": {
+            "x": 229,
+            "y": 534
+          },
+          "found": true,
+          "steps": 54
+        },
+        {
+          "goal": {
+            "x": 228,
+            "y": 532
+          },
+          "found": true,
+          "steps": 55
+        }
+      ],
+      "bestOriginalPathSteps": 54
+    },
+    {
+      "home": {
+        "x": 228,
+        "y": 534
+      },
+      "paths": [
+        {
+          "goal": {
+            "x": 229,
+            "y": 533
+          },
+          "found": true,
+          "steps": 54
+        },
+        {
+          "goal": {
+            "x": 229,
+            "y": 534
+          },
+          "found": true,
+          "steps": 54
+        },
+        {
+          "goal": {
+            "x": 229,
+            "y": 535
+          },
+          "found": true,
+          "steps": 54
+        },
+        {
+          "goal": {
+            "x": 228,
+            "y": 533
+          },
+          "found": true,
+          "steps": 55
+        }
+      ],
+      "bestOriginalPathSteps": 54
+    },
+    {
+      "home": {
+        "x": 228,
+        "y": 535
+      },
+      "paths": [
+        {
+          "goal": {
+            "x": 229,
+            "y": 534
+          },
+          "found": true,
+          "steps": 54
+        },
+        {
+          "goal": {
+            "x": 229,
+            "y": 535
+          },
+          "found": true,
+          "steps": 54
+        },
+        {
+          "goal": {
+            "x": 229,
+            "y": 536
+          },
+          "found": true,
+          "steps": 54
+        },
+        {
+          "goal": {
+            "x": 228,
+            "y": 534
+          },
+          "found": true,
+          "steps": 55
+        }
+      ],
+      "bestOriginalPathSteps": 54
+    },
+    {
+      "home": {
+        "x": 228,
+        "y": 536
+      },
+      "paths": [
+        {
+          "goal": {
+            "x": 229,
+            "y": 535
+          },
+          "found": true,
+          "steps": 54
+        },
+        {
+          "goal": {
+            "x": 229,
+            "y": 536
+          },
+          "found": true,
+          "steps": 54
+        },
+        {
+          "goal": {
+            "x": 229,
+            "y": 537
+          },
+          "found": true,
+          "steps": 54
+        },
+        {
+          "goal": {
+            "x": 228,
+            "y": 535
+          },
+          "found": true,
+          "steps": 55
+        }
+      ],
+      "bestOriginalPathSteps": 54
+    },
+    {
+      "home": {
+        "x": 228,
+        "y": 537
+      },
+      "paths": [
+        {
+          "goal": {
+            "x": 229,
+            "y": 536
+          },
+          "found": true,
+          "steps": 54
+        },
+        {
+          "goal": {
+            "x": 229,
+            "y": 537
+          },
+          "found": true,
+          "steps": 54
+        },
+        {
+          "goal": {
+            "x": 229,
+            "y": 538
+          },
+          "found": true,
+          "steps": 54
+        },
+        {
+          "goal": {
+            "x": 228,
+            "y": 536
+          },
+          "found": true,
+          "steps": 55
+        }
+      ],
+      "bestOriginalPathSteps": 54
+    },
+    {
+      "home": {
+        "x": 227,
+        "y": 530
+      },
+      "paths": [
+        {
+          "goal": {
+            "x": 228,
+            "y": 529
+          },
+          "found": true,
+          "steps": 55
+        },
+        {
+          "goal": {
+            "x": 228,
+            "y": 530
+          },
+          "found": true,
+          "steps": 55
+        },
+        {
+          "goal": {
+            "x": 228,
+            "y": 531
+          },
+          "found": true,
+          "steps": 55
+        },
+        {
+          "goal": {
+            "x": 227,
+            "y": 529
+          },
+          "found": true,
+          "steps": 56
+        }
+      ],
+      "bestOriginalPathSteps": 55
+    },
+    {
+      "home": {
+        "x": 227,
+        "y": 532
+      },
+      "paths": [
+        {
+          "goal": {
+            "x": 228,
+            "y": 531
+          },
+          "found": true,
+          "steps": 55
+        },
+        {
+          "goal": {
+            "x": 228,
+            "y": 532
+          },
+          "found": true,
+          "steps": 55
+        },
+        {
+          "goal": {
+            "x": 228,
+            "y": 533
+          },
+          "found": true,
+          "steps": 55
+        },
+        {
+          "goal": {
+            "x": 227,
+            "y": 531
+          },
+          "found": true,
+          "steps": 56
+        }
+      ],
+      "bestOriginalPathSteps": 55
+    },
+    {
+      "home": {
+        "x": 227,
+        "y": 529
+      },
+      "paths": [
+        {
+          "goal": {
+            "x": 228,
+            "y": 528
+          },
+          "found": true,
+          "steps": 55
+        },
+        {
+          "goal": {
+            "x": 228,
+            "y": 529
+          },
+          "found": true,
+          "steps": 55
+        },
+        {
+          "goal": {
+            "x": 228,
+            "y": 530
+          },
+          "found": true,
+          "steps": 55
+        },
+        {
+          "goal": {
+            "x": 227,
+            "y": 528
+          },
+          "found": true,
+          "steps": 56
+        }
+      ],
+      "bestOriginalPathSteps": 55
+    },
+    {
+      "home": {
+        "x": 227,
+        "y": 533
+      },
+      "paths": [
+        {
+          "goal": {
+            "x": 228,
+            "y": 532
+          },
+          "found": true,
+          "steps": 55
+        },
+        {
+          "goal": {
+            "x": 228,
+            "y": 533
+          },
+          "found": true,
+          "steps": 55
+        },
+        {
+          "goal": {
+            "x": 228,
+            "y": 534
+          },
+          "found": true,
+          "steps": 55
+        },
+        {
+          "goal": {
+            "x": 227,
+            "y": 532
+          },
+          "found": true,
+          "steps": 56
+        }
+      ],
+      "bestOriginalPathSteps": 55
+    },
+    {
+      "home": {
+        "x": 227,
+        "y": 528
+      },
+      "paths": [
+        {
+          "goal": {
+            "x": 228,
+            "y": 527
+          },
+          "found": true,
+          "steps": 55
+        },
+        {
+          "goal": {
+            "x": 228,
+            "y": 528
+          },
+          "found": true,
+          "steps": 55
+        },
+        {
+          "goal": {
+            "x": 228,
+            "y": 529
+          },
+          "found": true,
+          "steps": 55
+        },
+        {
+          "goal": {
+            "x": 227,
+            "y": 527
+          },
+          "found": true,
+          "steps": 56
+        }
+      ],
+      "bestOriginalPathSteps": 55
+    },
+    {
+      "home": {
+        "x": 227,
+        "y": 534
+      },
+      "paths": [
+        {
+          "goal": {
+            "x": 228,
+            "y": 533
+          },
+          "found": true,
+          "steps": 55
+        },
+        {
+          "goal": {
+            "x": 228,
+            "y": 534
+          },
+          "found": true,
+          "steps": 55
+        },
+        {
+          "goal": {
+            "x": 228,
+            "y": 535
+          },
+          "found": true,
+          "steps": 55
+        },
+        {
+          "goal": {
+            "x": 227,
+            "y": 533
+          },
+          "found": true,
+          "steps": 56
+        }
+      ],
+      "bestOriginalPathSteps": 55
+    }
+  ],
+  "ranking": "Preselect at most16 lawful closest Chebyshev candidates; rank these by original A* first4 adjacent-goal path length, then minimum displacement. No path budget increased.",
+  "accepted": false,
+  "capacityAccepted": false
+}

@@ -1,0 +1,687 @@
+{
+  "schema": "mir2.npc.random-rollback-delivery.v1",
+  "utc": "2026-10-12T03:56:24.961486+00:00",
+  "revision": "8fee37c1afd154b18ceffe53b1fc4dd02b6f38a2",
+  "localDistinctChecks": 532,
+  "unitChecks": 395,
+  "integrationChecks": 137,
+  "newTests": 6,
+  "originalDedicatedPostgresIgnoredLocally": 1,
+  "linuxQualified": true,
+  "linuxRun": "38193711006",
+  "newBackendPublished": true,
+  "normalPublicChecks": 62,
+  "strictTimeoutsAndAssertionsUnchanged": true,
+  "knownPersonalFailureRngRewindVerified": true,
+  "unknownPublicationStillFrozen": true,
+  "pureLotteryNoWritePreserved": true,
+  "sharedWorldInvocationAccepted": false,
+  "clientReinstallRequired": false,
+  "publicFeed20Preserved": true,
+  "nativeHumanAccepted": false,
+  "fullClassicAccepted": false,
+  "originalPushAndDispatchPreflightFailureRetained": true,
+  "sources": {
+    "apps/simulation/src/runtime/mod.rs": {
+      "bytes": 7495,
+      "sha256": "5dc5a9a39fca9adc522c0da4487eece46c38528d31796fcc197dd23bc01104c9"
+    },
+    "apps/simulation/src/runtime/shared_guild_experience.rs": {
+      "bytes": 23314,
+      "sha256": "cf3d53a38152e4b6b5a8e2916512152cc4a91ebbd08cc88250ab21740c6f3e0b"
+    },
+    "apps/simulation/src/runtime/npc_random_source_guard_tests.rs": {
+      "bytes": 12415,
+      "sha256": "054bdf80641d538d64766623874087b6a937cc080dfe071d366923af98604222"
+    },
+    "apps/simulation/src/runtime/prepared_kill_experience.rs": {
+      "bytes": 11806,
+      "sha256": "70dbe225b5e3dac36c96377b037b1f170d63216bf5e27db9d91911ebac92c0e3"
+    },
+    ".github/workflows/gateway-release.yml": {
+      "bytes": 13775,
+      "sha256": "5266f4a2d89921d9a25d713f34a7119041539f833bca7ab805b1316e0196e43c"
+    }
+  },
+  "ci": {
+    "schema": "mir2.npc.random-rollback-linux-ci.v1",
+    "createdUtc": "2026-10-12T03:33:02.353045+00:00",
+    "runId": "38193711006",
+    "url": "https://github.com/Zombieliu/mir2/actions/runs/38193711006",
+    "revision": "8fee37c1afd154b18ceffe53b1fc4dd02b6f38a2",
+    "runConclusion": "success",
+    "jobs": [
+      {
+        "name": "build-linux-x64",
+        "conclusion": "success",
+        "databaseId": 114631718135
+      },
+      {
+        "name": "siege-acceptance / siege-linux",
+        "conclusion": "success",
+        "databaseId": 114631718261
+      }
+    ],
+    "githubArtifactDigest": "sha256:7b5d45ca901cdacdd85e753f86d5ed52dcde808d99fec33e787f62e3626aeaae",
+    "githubArtifactBytes": 34568530,
+    "archiveSha256": "2d2c2c1b9df09b7b8f809283d5669b002bc002384e5b1ff2caf099f880cf9f34",
+    "archiveBytes": 35028211,
+    "binarySha256": "e2781cc4d122266b070424a760a3ecac43f6853dcf55359a365bee138062f767",
+    "binaryBytes": 84860384,
+    "zoneHostBinarySha256": "8d228543d9a306062a20417476aa4cfdf2b08b292de82378d88c2c93c72f912d",
+    "manifestSha256": "699dd3740920f13df4ae53468a9c775825ff6a35ae4f34f188673d11a5581d45",
+    "logSha256": "dde3b13ac1ab3e602c5a265e742addb843c79edf279598c9d063547d38771caf",
+    "publicR2Upload": false,
+    "serverSwitched": false
+  },
+  "public": {
+    "schema": "mir2.npc.random-rollback-publication-complete.v1",
+    "passed": true,
+    "revision": "8fee37c1afd154b18ceffe53b1fc4dd02b6f38a2",
+    "pid": "3441936",
+    "run": "38193711006",
+    "binarySha256": "e2781cc4d122266b070424a760a3ecac43f6853dcf55359a365bee138062f767",
+    "binaryBytes": 84860384,
+    "newBackendPublished": true,
+    "normalPublicChecks": 62,
+    "publicApplicationRevision": "d917de1ff4988e2d9fc7ca58f958cb5c80861fdf",
+    "publicUpdaterRevision": "b4390ee4c987bbf000ba1d95761151e39fc0d54f",
+    "publicFeedSequence": 20,
+    "publicFeed20Preserved": true,
+    "privateEnvironmentAndCaddyPreserved": true,
+    "existingStripeTestConfigAndMonthlyPrice1000Preserved": true,
+    "originalRealmPreserved": true,
+    "noSessionsForceDisconnected": true,
+    "clientReinstallRequired": false,
+    "nativeHumanAccepted": false,
+    "sharedWorldInvocationAccepted": false,
+    "fullClassicAccepted": false,
+    "originalProtectedReadSha256": "8b571d09d601bce0aa32239d9bd49c03c6b79643bce48b7cbce7d8dab4f7cea2",
+    "newProtectedReadSha256": "ec1d35d87ce17c03a5c8959a90f1a321926fa47c7f509d766a8b9c42037d1911",
+    "protectedStdoutSha256": "16b1bdbf05940b9d6fe7ec438a6ca4b95cebb93951f33dbd6da2ad38140ee108",
+    "after": {
+      "binaryBytes": 84860384,
+      "binarySha256": "e2781cc4d122266b070424a760a3ecac43f6853dcf55359a365bee138062f767",
+      "files": {
+        "/etc/mir2-playtest/gateway.env": {
+          "bytes": 4746,
+          "sha256": "41d0939baa6f164a5db0605ef441647c4c8214a6b4ac1dd7c69ab1da65c647c0"
+        },
+        "/etc/systemd/system/mir2-playtest.service": {
+          "bytes": 2188,
+          "sha256": "9bf1b374db39732ad7b59e6d468086eea8c4563fbfb3185ef3bf9dfd714551a9"
+        },
+        "/etc/systemd/system/mir2-playtest.service.d/50-periodic-b71.conf": {
+          "bytes": 224,
+          "sha256": "5b0a2a90bc86e3ff52fdf669d0723b1a410ebc8944714d9e8d778ad37310b9df"
+        },
+        "/etc/systemd/system/mir2-playtest.service.d/90-spectator-watch.conf": {
+          "bytes": 594,
+          "sha256": "d136270aad3a230fd882443afc26c17e49134ba2449e5beab67b7acc45ecd1a4"
+        }
+      },
+      "ok": true,
+      "original": {
+        "ok": true,
+        "pids": [
+          "3855184"
+        ],
+        "release": "/opt/mir2/gateway/releases/79ba815c0-checkpoint-base64",
+        "revision": null
+      },
+      "remoteZoneConfigured": false,
+      "tcp7200": 0,
+      "test": {
+        "ai_live": {
+          "discordDeadLettersTotal": 0,
+          "discordFailureTotal": 0,
+          "discordSuccessTotal": 0,
+          "distributionDeadLettersTotal": 0,
+          "distributionFailureTotal": 0,
+          "distributionSuccessTotal": 0,
+          "enabled": false,
+          "generatedSegmentsTotal": 0,
+          "mode": "shadow",
+          "modelFailureTotal": 0,
+          "modelSuccessTotal": 0,
+          "persistedSegmentsTotal": 0,
+          "persistenceErrorsTotal": 0,
+          "processedFramesTotal": 0,
+          "queuedDiscordDeliveries": 0,
+          "queuedDistributionDeliveries": 0,
+          "running": false,
+          "scoredHighlightsTotal": 0,
+          "ttsFailureTotal": 0,
+          "ttsSuccessTotal": 0
+        },
+        "capacity": {
+          "currentActiveSessions": 0,
+          "currentLoginInFlight": 0,
+          "currentNewCharacterInFlight": 0,
+          "currentReconnectLeases": 0,
+          "currentStartGameInFlight": 0,
+          "currentWsConnections": 0,
+          "maxActiveSessions": 51,
+          "maxLoginInFlight": 2,
+          "maxNewCharacterInFlight": 1,
+          "maxReconnectLeases": 51,
+          "maxStartGameInFlight": 2,
+          "maxWsConnections": 66
+        },
+        "channel_identity": {
+          "accountCount": 0,
+          "backend": "postgres",
+          "durable": true,
+          "identityCount": 0
+        },
+        "gameplay_events": {
+          "accepted": 0,
+          "configured": false,
+          "dropped": 0,
+          "failed": 0,
+          "lastError": null,
+          "published": 0,
+          "sink": "none",
+          "topic": null
+        },
+        "gate15": null,
+        "http": "ready",
+        "identity_backend": "postgres",
+        "ok": true,
+        "revision": "8fee37c1afd154b18ceffe53b1fc4dd02b6f38a2",
+        "session_cache": {
+          "backend": "redis",
+          "configured": true,
+          "healthy": true,
+          "lastError": null,
+          "recordCount": 0,
+          "routeLeaseCount": 0,
+          "staleRecordCount": 0,
+          "ttlSeconds": 30
+        },
+        "spectator": {
+          "activeMaps": 1,
+          "activeViewers": 0,
+          "bufferedFrames": 81,
+          "dataDir": ".mir2-data/spectator",
+          "droppedFramesTotal": 0,
+          "persistedFramesTotal": 0,
+          "publishedFramesTotal": 81,
+          "recordingEnabled": false,
+          "recordingErrorsTotal": 0
+        },
+        "tcp_stub": "ready",
+        "ws": "ready"
+      },
+      "unit": {
+        "DropInPaths": "/etc/systemd/system/mir2-playtest.service.d/50-periodic-b71.conf /etc/systemd/system/mir2-playtest.service.d/90-spectator-watch.conf",
+        "ExecMainStatus": "0",
+        "MainPID": "3441936",
+        "NRestarts": "0",
+        "Result": "success"
+      }
+    }
+  },
+  "archive": {
+    "path": "publication-original-evidence.zip",
+    "bytes": 1039985,
+    "sha256": "9ff40f2887a70b5713cb75c137e2e209f7640be73a3a8ee0fada5318b8793b55",
+    "files": [
+      {
+        "path": "adjacent-guild-01-before.json",
+        "bytes": 1071,
+        "sha256": "ab05936ed5d0cac2c8cc84d9920232039514ffdf63256d301e7e668fbf82caaf"
+      },
+      {
+        "path": "adjacent-guild-01-result.json",
+        "bytes": 2722,
+        "sha256": "333bbc733bb5b09f4f7fcce135006d9fae0c854eb5f2de95248db8a113f3a37b"
+      },
+      {
+        "path": "adjacent-guild-01.log",
+        "bytes": 41701,
+        "sha256": "8cddafb482fbc8d0f943e2b208d8ece10effdc1fd08dab3d252d4b4af9f23d56"
+      },
+      {
+        "path": "adjacent-source-01-before.json",
+        "bytes": 1637,
+        "sha256": "d278a500c84bad0500e93df8333295dea3d956e07c6549944a2e388e2f871710"
+      },
+      {
+        "path": "adjacent-source-01-result.json",
+        "bytes": 57532,
+        "sha256": "94651a797e7a32b9b57c95a661aa16d066efdac44797b753754541edde362fb3"
+      },
+      {
+        "path": "adjacent-source-01.log",
+        "bytes": 86369,
+        "sha256": "33d06b09482001594149595347ccf57933121d4fe178e037bbdbf490813a466a"
+      },
+      {
+        "path": "GIT-PUSH-RETRY-01.json",
+        "bytes": 421,
+        "sha256": "d57615d88410707e9c18c0baccf4cb535fa14669ecd3d56528eea969e305a77a"
+      },
+      {
+        "path": "git-push-retry-01.stderr.log",
+        "bytes": 151,
+        "sha256": "bb9c2b4e9650d54896862aafa652ca2d4fe1fd4a680b2267fc3578fa6b3be4cc"
+      },
+      {
+        "path": "git-push-retry-01.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "green-focused-01-before.json",
+        "bytes": 897,
+        "sha256": "fa141e96bcfc1d39a07939ee22ea8ad78b67f2692235797841370bae5a4e85dc"
+      },
+      {
+        "path": "green-focused-01-result.json",
+        "bytes": 1687,
+        "sha256": "c73448f462d97c193506973a3db3db63299a468dcde8bd1524232cbfbf1f3fee"
+      },
+      {
+        "path": "green-focused-01.log",
+        "bytes": 4439,
+        "sha256": "bb8fa5f6d3418a156963c8cf4ef4194dbc4b6af745ed48ca78b33266e3b21de9"
+      },
+      {
+        "path": "green-focused-02-before.json",
+        "bytes": 1029,
+        "sha256": "9cd94aa8ca989b06da3fe98176e7139f457f6c418a6ca6c9342dacd63970507c"
+      },
+      {
+        "path": "green-focused-02-result.json",
+        "bytes": 2992,
+        "sha256": "22d81dc4599b7191c016fd98ddca51f8c74c15bc6011b8f5f83915d040fe9814"
+      },
+      {
+        "path": "green-focused-02.log",
+        "bytes": 42085,
+        "sha256": "f0f9b49122490a66e45b5d59c1e92352bcad106317aecada760f16f6a8b69f7a"
+      },
+      {
+        "path": "integration-source-01-before.json",
+        "bytes": 1457,
+        "sha256": "aa861fc4cc4da406f13d5e156141379b9d71af1bc41274e73746896f602608bf"
+      },
+      {
+        "path": "integration-source-01-result.json",
+        "bytes": 18292,
+        "sha256": "c536a0c3389eaa8e76e903a4e78df68abf9c1029811cc535d20d0851af6edd0d"
+      },
+      {
+        "path": "integration-source-01.log",
+        "bytes": 59737,
+        "sha256": "7f77cfbaf2013ae48d9c431aeaa712fdb576c13443fc42d3fab1dd9e71312960"
+      },
+      {
+        "path": "LOCAL-REGRESSION-01.json",
+        "bytes": 110033,
+        "sha256": "99d024df3fc745ffbb9c68fe3f84190008661998d1377c846668d3865e36b040"
+      },
+      {
+        "path": "npc_random_source_guard_tests.rs",
+        "bytes": 12415,
+        "sha256": "054bdf80641d538d64766623874087b6a937cc080dfe071d366923af98604222"
+      },
+      {
+        "path": "RECORD-FAILED-01.json",
+        "bytes": 336,
+        "sha256": "525a6d60bfff0f795e53ab552e4f97836b86c927b7b6d1b91419ec76eaa4461e"
+      },
+      {
+        "path": "red-baseline-01-before.json",
+        "bytes": 897,
+        "sha256": "94ae6287bd904cf98ecb078889008e14fee8ff944d3b66f5ca83bd8ce83620bf"
+      },
+      {
+        "path": "red-baseline-01-result.json",
+        "bytes": 1687,
+        "sha256": "3e1d916f08cfb86a29bfc289f1486866192eb60a85ef71bba0e8911ddc27ff9b"
+      },
+      {
+        "path": "red-baseline-01.log",
+        "bytes": 5722,
+        "sha256": "5c021e473d7c9d988fe0de89b867c80d531b7b94749ddec2f56f00c49f24b324"
+      },
+      {
+        "path": "red-baseline-02-before.json",
+        "bytes": 897,
+        "sha256": "ed0ae74a69d511addbe14896717e59dcf7be59c0b83eb0a8f9f1eb7c1105ac1e"
+      },
+      {
+        "path": "red-baseline-02-result.json",
+        "bytes": 1687,
+        "sha256": "9c04593ddae4bbee4e8222706164a2f6ef04376fcca6ad5a8b47311df17f6ec8"
+      },
+      {
+        "path": "red-baseline-02.log",
+        "bytes": 4920,
+        "sha256": "2789ae1728d095ce7f023ccb8caafbaaa46916743d852cf22b58985836f2baee"
+      },
+      {
+        "path": "red-baseline-03-before.json",
+        "bytes": 897,
+        "sha256": "06ecd98eddc64322519039582fffd15a997c905e6bbcff2bb8e868fdff801047"
+      },
+      {
+        "path": "red-baseline-03-result.json",
+        "bytes": 2586,
+        "sha256": "c364ca9fae37e1e623ca45a07e56ef3c6a6578d6fab0df97988aa434a582de70"
+      },
+      {
+        "path": "red-baseline-03.log",
+        "bytes": 43214,
+        "sha256": "6647c7534bf62e56e74e0f45762e887c490769855e28d11f8f62da173ab753b1"
+      },
+      {
+        "path": "red-stale-01-before.json",
+        "bytes": 944,
+        "sha256": "28e636856a04598f4449450202f4adaad894cbda8472914d2cb61a1a6e32cbdb"
+      },
+      {
+        "path": "red-stale-01-result.json",
+        "bytes": 2010,
+        "sha256": "a304d5cf500a0c8efbb89ebff1c81d2c6efd96f5e06aa63401983dc621886a15"
+      },
+      {
+        "path": "red-stale-01.log",
+        "bytes": 42203,
+        "sha256": "81fa19ccb93f6ee57c4af7b9d503deb6f6053e4ecd15478d6f697642992ed1bd"
+      },
+      {
+        "path": "ROLLOUT-DERIVATION-01.json",
+        "bytes": 565,
+        "sha256": "43546af2b966264d01a850e118e80a7b66b971697461af122dc55563b570fbbd"
+      },
+      {
+        "path": "SOURCE-DIFF-01.patch",
+        "bytes": 6003,
+        "sha256": "933494f4ca701adde75ddcf3b5eda1feea87d5475d393a997cad007824c40ee1"
+      },
+      {
+        "path": "public-preflight-01/PREPARATION.json",
+        "bytes": 268,
+        "sha256": "4e1c89581ac2b2f133ca8eace3345cdb28999cbece04ad0bab78e0793ba55ae5"
+      },
+      {
+        "path": "public-preflight-01/READONLY.command",
+        "bytes": 4751,
+        "sha256": "8b571d09d601bce0aa32239d9bd49c03c6b79643bce48b7cbce7d8dab4f7cea2"
+      },
+      {
+        "path": "public-preflight-01/stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "public-preflight-01/stdout.json",
+        "bytes": 2894,
+        "sha256": "b5719649e0f84b22e903864a9c0ad00ad6242c125e8cd920439a606c69891de4"
+      },
+      {
+        "path": "server-ci-01/PREFLIGHT-FAILED.json",
+        "bytes": 361,
+        "sha256": "da4f33478e7ed3ebb0efed776d63a81f92e5b1964858cdeb719976cc81c636d3"
+      },
+      {
+        "path": "server-ci-01/remote-read.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "server-ci-01/remote-read.stdout.log",
+        "bytes": 96,
+        "sha256": "82a62c7c38dd78cf9e12c7059efb1146806c3d1d3db1b147121dc3cafc73cc69"
+      },
+      {
+        "path": "server-ci-02/artifact-01/ci-artifacts-original.json",
+        "bytes": 751,
+        "sha256": "1b37890b783624e9d8bd4926fceec6c57df2ecf062a95f205ce024cd8f4c9536"
+      },
+      {
+        "path": "server-ci-02/artifact-01/ci-log-original.txt",
+        "bytes": 9963524,
+        "sha256": "dde3b13ac1ab3e602c5a265e742addb843c79edf279598c9d063547d38771caf"
+      },
+      {
+        "path": "server-ci-02/artifact-01/ci-status-original.json",
+        "bytes": 6678,
+        "sha256": "4256bf12d22bf51d1c54b4690c819468cbfc8b2f0526d4150a139a05ad0b4229"
+      },
+      {
+        "path": "server-ci-02/artifact-01/CI-VERIFIED.json",
+        "bytes": 1226,
+        "sha256": "3857a2481a383c1d5f0ada615dab8a0265160aa813415d3734217ea286543209"
+      },
+      {
+        "path": "server-ci-02/artifact-01/latest-mir2-gateway-release.json",
+        "bytes": 1715,
+        "sha256": "f4c72e416b1562dc277950510ad657685a92d3f222da670e4cc7c9f2a7313d9a"
+      },
+      {
+        "path": "server-ci-02/artifact-01/README.txt",
+        "bytes": 7476,
+        "sha256": "7cde83e530a922405c2d87b278dd9446537a8abf553b9b8b0a4c2e8425a1f3c2"
+      },
+      {
+        "path": "server-ci-02/artifact-01/RELEASE.json",
+        "bytes": 1550,
+        "sha256": "404a9d1e8af22ee7d4e58b5d049eedee2bb39f50a02860c04a172bf956e09dc8"
+      },
+      {
+        "path": "server-ci-02/artifact-01/VERIFIED-FILES.json",
+        "bytes": 412,
+        "sha256": "699dd3740920f13df4ae53468a9c775825ff6a35ae4f34f188673d11a5581d45"
+      },
+      {
+        "path": "server-ci-02/DISPATCH-REQUEST.json",
+        "bytes": 435,
+        "sha256": "daa3333868867852b9ef60333bec7bd3d3ff7f32d4ee43081c094a9b8d54a38e"
+      },
+      {
+        "path": "server-ci-02/DISPATCH-RESULT.json",
+        "bytes": 459,
+        "sha256": "4e4584fbd23779d3ebdc0e149c545518b9d38ee4a74ac02e587faa6de5b14454"
+      },
+      {
+        "path": "server-ci-02/dispatch.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "server-ci-02/dispatch.stdout.log",
+        "bytes": 59,
+        "sha256": "31e4fdef58a2185ddd5e8bd08671947ef6010cbd79ea84400e0ccb8a40c4c099"
+      },
+      {
+        "path": "server-ci-02/QUALIFICATION-PREPARED-01.json",
+        "bytes": 377,
+        "sha256": "b8aa48f999eb4a80c0d6ca3b7187db667ae1867de6faddace325569039e4f5c3"
+      },
+      {
+        "path": "server-ci-02/QUALIFICATION-READ-FAILED-01.json",
+        "bytes": 291,
+        "sha256": "c7b0375ffdb432a8c40238c760d59b841d25e854329b21d6940c9b3e13eb7dd5"
+      },
+      {
+        "path": "server-ci-02/remote-read.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "server-ci-02/remote-read.stdout.log",
+        "bytes": 96,
+        "sha256": "754e0c11b5f97aea989f578a57ce25d9770a58f5323f2aa5a0a4a1f7e1c6d38a"
+      },
+      {
+        "path": "server-rollout-01/deploy-after-01.log",
+        "bytes": 2893,
+        "sha256": "16b1bdbf05940b9d6fe7ec438a6ca4b95cebb93951f33dbd6da2ad38140ee108"
+      },
+      {
+        "path": "server-rollout-01/deploy-apply-01.log",
+        "bytes": 2180,
+        "sha256": "67262235d41041558d75b164305392fab55a73c08a59576e1a2db74ee0d805da"
+      },
+      {
+        "path": "server-rollout-01/deploy-before-01.log",
+        "bytes": 2894,
+        "sha256": "b5719649e0f84b22e903864a9c0ad00ad6242c125e8cd920439a606c69891de4"
+      },
+      {
+        "path": "server-rollout-01/deploy-npc-random-01.py",
+        "bytes": 11632,
+        "sha256": "329fe2bdd847e730fcdb5f4e534bb24c18532083f0f6f95e197b739b3d628c4f"
+      },
+      {
+        "path": "server-rollout-01/deploy-preflight-01.log",
+        "bytes": 1452,
+        "sha256": "af8b541706daee01e97e54152d1cda0754746d3e9d628ed68ce74a7faeffe5e9"
+      },
+      {
+        "path": "server-rollout-01/deploy-stage-created-01.log",
+        "bytes": 24,
+        "sha256": "4c71e2bbea8fd742c6963efc5ef891142587cd47dc4f286729a97d21c170bfc5"
+      },
+      {
+        "path": "server-rollout-01/deploy-stage-verified-01.log",
+        "bytes": 120,
+        "sha256": "9847f02aa9d7e24e23150c644a2bcaca79c63c2e61447b7affde4db8054ce483"
+      },
+      {
+        "path": "server-rollout-01/deploy-upload-01.log",
+        "bytes": 34,
+        "sha256": "e5730f28940662d448e21f72e570e68ff57f3c82ef1610ececb09a591b1c47be"
+      },
+      {
+        "path": "server-rollout-01/DEPLOYED-01.json",
+        "bytes": 2383,
+        "sha256": "bf81f5d53f2e0e737b5eff37513bf4e5dd03f132591dedc5aedb7107987bd757"
+      },
+      {
+        "path": "server-rollout-01/native-resume-public-01/native-resume-smoke.mjs",
+        "bytes": 13778,
+        "sha256": "c432a231644a64b93e2005c9c2b4c9501f3d3f2987babb5980c04d5a7c60415c"
+      },
+      {
+        "path": "server-rollout-01/native-resume-public-01/PREPARATION.json",
+        "bytes": 392,
+        "sha256": "f7faf5b0169c4ea462c89999716a9cb2354a5fd2b3fcea163da2fef15035f39a"
+      },
+      {
+        "path": "server-rollout-01/native-resume-public-01/RESULT.json",
+        "bytes": 3810,
+        "sha256": "0f420b63e04b8f489dffd31de046e521465da3d2ec41c123e3fd21e04310a9cf"
+      },
+      {
+        "path": "server-rollout-01/operator-prepared-01.json",
+        "bytes": 1093,
+        "sha256": "6d54915a790547209bfbbbd7c0c3744c533e6e7ddaf5011d56b6a965337fc3e4"
+      },
+      {
+        "path": "server-rollout-01/operator-prepared-02.json",
+        "bytes": 1093,
+        "sha256": "6d54915a790547209bfbbbd7c0c3744c533e6e7ddaf5011d56b6a965337fc3e4"
+      },
+      {
+        "path": "server-rollout-01/ordinary-public-01/PREPARATION.json",
+        "bytes": 392,
+        "sha256": "2412d763a0c7508c8c72e67b7889bf5e3f4ce69409345f30095d02e84ca116d8"
+      },
+      {
+        "path": "server-rollout-01/ordinary-public-01/public-smoke.mjs",
+        "bytes": 11450,
+        "sha256": "8967f994d6cd9ab78082c2c555904bf5a2d0ba52d3b02181a2b9dc79e31173f6"
+      },
+      {
+        "path": "server-rollout-01/ordinary-public-01/RESULT.json",
+        "bytes": 12631,
+        "sha256": "56e8bbe7595e106bf74ebd9ed3e659f2539fb7c77998d229b0898c27806d12f4"
+      },
+      {
+        "path": "server-rollout-01/preparation-readonly-baseline.json",
+        "bytes": 2894,
+        "sha256": "b5719649e0f84b22e903864a9c0ad00ad6242c125e8cd920439a606c69891de4"
+      },
+      {
+        "path": "server-rollout-01/PREPARATION.json",
+        "bytes": 2700,
+        "sha256": "e0cb398cd2d6db3738b9d3d780c7d7c16e35278f7f591a0774bf804c5fece1ba"
+      },
+      {
+        "path": "server-rollout-01/public-native-resume-01.log",
+        "bytes": 2460,
+        "sha256": "773fa5ea3ec0a19e3fb06d87670c9677fc02d2dcd7300a16a25886c621f7ecfb"
+      },
+      {
+        "path": "server-rollout-01/public-ordinary-01.log",
+        "bytes": 8724,
+        "sha256": "24714a7aff1dd0edf5b02a7ef9cb7c6656fa3e4d9ffd0d4ac16db916b87c7d3a"
+      },
+      {
+        "path": "server-rollout-01/PUBLIC-VERIFIED-01.json",
+        "bytes": 4215,
+        "sha256": "843700a93ab00bba38fdcb3ee15708b8dfdd8ce443ede3c679f9fc22a6ccce94"
+      },
+      {
+        "path": "server-rollout-01/remote-apply-01.sh",
+        "bytes": 379,
+        "sha256": "3c9505d2e5c4048a67c0ff3c6c1d7b6aa3b9cff437dd575794b96349c51dc7ad"
+      },
+      {
+        "path": "server-rollout-01/remote-preflight-01.sh",
+        "bytes": 371,
+        "sha256": "0f828733c723ad35f00f72ad58084846e731396b9543db7a7e3e3cb197acc954"
+      },
+      {
+        "path": "server-rollout-01/remote-stage-setup-01.sh",
+        "bytes": 511,
+        "sha256": "e1c93d746770a3838405c3cc2a227fb276f6a9c3d8f4a8de50575d0d3749e949"
+      },
+      {
+        "path": "server-rollout-01/remote-stage-verify-01.sh",
+        "bytes": 2061,
+        "sha256": "43036acd9229e5254f157c91902317b41478588d550e05f96b07fdedb41e7223"
+      },
+      {
+        "path": "server-rollout-01/upgrade-npc-random-01.py",
+        "bytes": 31712,
+        "sha256": "e8304a7105a1088b2f12976e90f79a5fedd6d685fdbf2520e40749d67f2bddf3"
+      },
+      {
+        "path": "server-rollout-01/upgrade-npc-random-02.py",
+        "bytes": 31712,
+        "sha256": "e8304a7105a1088b2f12976e90f79a5fedd6d685fdbf2520e40749d67f2bddf3"
+      },
+      {
+        "path": "server-rollout-01/upload-batch-01.json",
+        "bytes": 779,
+        "sha256": "37744b8aceb606b6d3b1c9222927f0888c2a6f153f93000c3e4a998e512e9515"
+      },
+      {
+        "path": "publication-complete-01/READONLY.command",
+        "bytes": 4751,
+        "sha256": "ec1d35d87ce17c03a5c8959a90f1a321926fa47c7f509d766a8b9c42037d1911"
+      },
+      {
+        "path": "publication-complete-01/stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "publication-complete-01/stdout.json",
+        "bytes": 2893,
+        "sha256": "16b1bdbf05940b9d6fe7ec438a6ca4b95cebb93951f33dbd6da2ad38140ee108"
+      },
+      {
+        "path": "publication-complete-01/VERIFIED.json",
+        "bytes": 5102,
+        "sha256": "639deb34ce2920e70b142229b0edd4cf269330226c38250a6e4bb9256fc23877"
+      }
+    ]
+  }
+}

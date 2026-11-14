@@ -1,0 +1,24 @@
+{
+  "phase": "same-save-v18",
+  "publicOnly": true,
+  "privateLogsCopied": false,
+  "rawNativeScreenshotCopied": false,
+  "privateIdentityMatches": 0,
+  "knownSecretPatternMatches": 0,
+  "files": 2,
+  "bytes": 1032032,
+  "entries": [
+    {
+      "path": "same-save-v18/native-v18-web-readback-r1/01-native-v18-save-restored-by-web.png",
+      "source": "D:/mir2-builds/native-shared-ui-20261106/evidence/native-v18-web-readback-r1/01-native-v18-save-restored-by-web.png",
+      "bytes": 1025168,
+      "sha256": "fbfa093609b4c03624c049291ec59ab143ca57992781492d8ee712a4606036c5"
+    },
+    {
+      "path": "same-save-v18/native-v18-web-readback-r1/native-v18-web-readback-receipt.json",
+      "source": "D:/mir2-builds/native-shared-ui-20261106/evidence/native-v18-web-readback-r1/native-v18-web-readback-receipt.json",
+      "bytes": 6864,
+      "sha256": "84b9e56b5f2a12afb5933c075fd0b2f45f11074a2717698f897fac6caaf51fac"
+    }
+  ]
+}

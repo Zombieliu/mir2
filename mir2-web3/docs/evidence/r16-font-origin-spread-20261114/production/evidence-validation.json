@@ -1,0 +1,11 @@
+{
+  "jsonFiles": 34,
+  "localLinks": 655,
+  "originalPrivateReceiptsShaMatched": 6,
+  "rollbackQrBothPassed": true,
+  "finalAfterQrApiPassed": true,
+  "originalFailureRetained": true,
+  "publicCompletePassed": false,
+  "noCredentialFields": true,
+  "goal": "active"
+}

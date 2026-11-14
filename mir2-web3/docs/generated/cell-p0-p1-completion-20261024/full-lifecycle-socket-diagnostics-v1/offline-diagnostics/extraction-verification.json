@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "scope": "Bounded independent post-extraction consistency and strict public-key checks only; no source-log content copied or disclosed. Some/scoped observed; queuedPhase real coverage absent. No original receive-time or07 causal attribution.",
+  "complete": true,
+  "helperSha256": "c2a137084f2166cbae603f721c6dde7322790c8dc2e05c2b8d59b79d7a58619f",
+  "sourceStderr": {
+    "basename": "1792884512369-f0f261da.gateway.stderr.log",
+    "bytes": 13891,
+    "sha256": "8d720a006f345fdf1294b74a5e2ae7a6c44b5aa510b918471923789de9785e14",
+    "rawCopied": false,
+    "rawPrinted": false
+  },
+  "rows": 47,
+  "scopedRows": 16,
+  "queueContextRows": 0,
+  "nonBootstrapStaticBranchOver500Ms": 0,
+  "offlineReadTimeOnly": true,
+  "files": [
+    {
+      "file": "extract-offline.mjs",
+      "bytes": 8184,
+      "sha256": "8835d90327f307dcf82eac708ba5167567f71a5e1b563e285761d68c6722c39e"
+    },
+    {
+      "file": "offline-read-whitelisted-slow-stage.jsonl",
+      "bytes": 4198,
+      "sha256": "98b51cd80e46188a5c9b0d9ba8567809cd58d25084dd017742f5fedee970c624"
+    },
+    {
+      "file": "offline-extraction-status.json",
+      "bytes": 2168,
+      "sha256": "13f999bcc3f75abc50096e82033fbc905700a70e6740466289d0b15f3916160c"
+    },
+    {
+      "file": "offline-aggregate.json",
+      "bytes": 6455,
+      "sha256": "d99fcb4f09c5518263e5041ce5b041c116999e6639e9441adce3fdaef4956568"
+    }
+  ]
+}

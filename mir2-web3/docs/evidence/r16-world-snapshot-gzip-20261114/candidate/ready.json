@@ -1,0 +1,14 @@
+{
+  "kind": "numeron-protected-candidate-ready-v1",
+  "checkedAt": "2026-11-14T12:19:42.117Z",
+  "deploymentId": "dpl_8V2DghgWPY8PyWWpxZUHuTy3dnL2",
+  "url": "https://numeron-r16-ophne7ta3-obelisk-labs.vercel.app",
+  "source": "9244ce3dd7cd2129a70e650be1430e971b6c96ab",
+  "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+  "projectName": "numeron-r16-web",
+  "target": "production",
+  "state": "READY",
+  "branch": "codex/windows-player-journey",
+  "formalDomainChanged": false,
+  "publicGameplayQualified": false
+}

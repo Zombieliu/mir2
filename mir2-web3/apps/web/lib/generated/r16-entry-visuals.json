@@ -1,0 +1,65 @@
+{
+  "assetReleaseId": "20261108-r16-08ec86d5105c",
+  "sceneSha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+  "mapFileName": "0.map",
+  "objects": {
+    "path": "/bootstrap/r16-visuals/79d26b7b9f3d03e679305b8e9e0982312825ef2fffdec50d976ce930e152e4fe.json",
+    "bytes": 1185944,
+    "sha256": "79d26b7b9f3d03e679305b8e9e0982312825ef2fffdec50d976ce930e152e4fe"
+  },
+  "actors": {
+    "path": "/bootstrap/r16-visuals/1427115a4db370cd3efdf21e10c156a772410250b131ac6b907948b72cba8895.json",
+    "bytes": 885989,
+    "sha256": "1427115a4db370cd3efdf21e10c156a772410250b131ac6b907948b72cba8895"
+  },
+  "objectParts": [
+    {
+      "path": "/bootstrap/r16-visuals/2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5.json",
+      "bytes": 395412,
+      "sha256": "2530a00967ee0aa60d4802ab50690166d676c2c58b13567dc1fdde9951e0f5b5"
+    },
+    {
+      "path": "/bootstrap/r16-visuals/8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d.json",
+      "bytes": 395320,
+      "sha256": "8d4ebe2ab7644fb7abf46cebab8c04c52747a3202049630948ef7726c581d89d"
+    },
+    {
+      "path": "/bootstrap/r16-visuals/348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1.json",
+      "bytes": 395216,
+      "sha256": "348dbb84596b95d7bfd065afb78cd4a582df808965b880e06fa5dbd1be05c0d1"
+    }
+  ],
+  "players": {
+    "male": {
+      "path": "/bootstrap/r16-visuals/164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08.json",
+      "bytes": 289851,
+      "sha256": "164d9bec51c291f17757e3c74d7e2d128d9747f5723165bc1a25c99f94445d08"
+    },
+    "female": {
+      "path": "/bootstrap/r16-visuals/0f52c6a6632c44eea1ab3cf37eb58da52f6c786cf3573813d595fcdd8ca040d0.json",
+      "bytes": 282415,
+      "sha256": "0f52c6a6632c44eea1ab3cf37eb58da52f6c786cf3573813d595fcdd8ca040d0"
+    }
+  },
+  "npcs": {
+    "path": "/bootstrap/r16-visuals/9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9.json",
+    "bytes": 313909,
+    "sha256": "9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9"
+  },
+  "monsterBounds": {
+    "minX": 272,
+    "maxX": 320,
+    "minY": 602,
+    "maxY": 638
+  },
+  "monsterStanding": {
+    "path": "/bootstrap/r16-visuals/d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308.json",
+    "bytes": 513566,
+    "sha256": "d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308"
+  },
+  "monsterWalking": {
+    "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+    "bytes": 764724,
+    "sha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f"
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "source": "Source69",
+  "normalAction": "Login then Start Game",
+  "capture": {
+    "complete": true,
+    "truncated": false,
+    "events": 171
+  },
+  "request": {
+    "pathname": "/api/scene/crystal",
+    "map": "0140",
+    "x": "8",
+    "y": "8",
+    "width": "56",
+    "height": "72"
+  },
+  "response": {
+    "status": 200,
+    "fromDiskCache": true,
+    "fromServiceWorker": false,
+    "mapFileName": "0140.map",
+    "cells": 340,
+    "sprites": 0,
+    "missingAssets": 116,
+    "regionBounds": {
+      "minX": 0,
+      "maxX": 16,
+      "minY": 0,
+      "maxY": 19
+    },
+    "playBounds": {
+      "minX": 0,
+      "maxX": 16,
+      "minY": 0,
+      "maxY": 19
+    }
+  },
+  "newManifestObserved": {
+    "version": "897f1c8804b37877",
+    "cacheNamespace": "897f1c8804b37877-fa86f32321b4",
+    "input": {
+      "name": "original-asset-manifest",
+      "exists": true,
+      "size": 6195904,
+      "assetHash": "004f5da2655d1901625e51a3baf4b5f83354461a8f04b8143114a45af38a14c0",
+      "digestSource": "assetHash"
+    }
+  },
+  "visualAccepted": false,
+  "sharedStorageOwnerAccepted": false,
+  "candidate100": false,
+  "goalComplete": false
+}

@@ -1,0 +1,640 @@
+TAP version 13
+# Subtest: actual Page receives all four incoming packets and sends only fresh epoch boolean replies once
+ok 1 - actual Page receives all four incoming packets and sends only fresh epoch boolean replies once
+  ---
+  duration_ms: 135.1953
+  type: 'test'
+  ...
+# Subtest: actual Page incoming source guard and final social owner fence reject socket session scene window and suspension changes
+ok 2 - actual Page incoming source guard and final social owner fence reject socket session scene window and suspension changes
+  ---
+  duration_ms: 19.5249
+  type: 'test'
+  ...
+# Subtest: actual Page reentrant same-kind incoming replaces the old send while proven-unsent retains only the current request
+ok 3 - actual Page reentrant same-kind incoming replaces the old send while proven-unsent retains only the current request
+  ---
+  duration_ms: 2.234
+  type: 'test'
+  ...
+# Subtest: actual Page social reply socket exception burns the entered epoch without automatic replay
+ok 4 - actual Page social reply socket exception burns the entered epoch without automatic replay
+  ---
+  duration_ms: 4.2795
+  type: 'test'
+  ...
+# Subtest: actual Page rental opening sends no command and explicit new or renewal confirmation claims once
+ok 5 - actual Page rental opening sends no command and explicit new or renewal confirmation claims once
+  ---
+  duration_ms: 3.5468
+  type: 'test'
+  ...
+# Subtest: actual Page rental cancellation and service closure cannot cancel or confirm a successor prompt
+ok 6 - actual Page rental cancellation and service closure cannot cancel or confirm a successor prompt
+  ---
+  duration_ms: 1.4913
+  type: 'test'
+  ...
+# Subtest: actual Page rental final action fence rechecks owner service size expiry capacity and live balance
+ok 7 - actual Page rental final action fence rechecks owner service size expiry capacity and live balance
+  ---
+  duration_ms: 25.3614
+  type: 'test'
+  ...
+# Subtest: actual Page rental unknown send consumes proof and cannot replay or close a reentrant newer prompt
+ok 8 - actual Page rental unknown send consumes proof and cannot replay or close a reentrant newer prompt
+  ---
+  duration_ms: 4.9291
+  type: 'test'
+  ...
+# Subtest: actual Page Trade deposit and retrieve use physical Bag2 cells and complete ACK then snapshot barriers
+ok 9 - actual Page Trade deposit and retrieve use physical Bag2 cells and complete ACK then snapshot barriers
+  ---
+  duration_ms: 6.2317
+  type: 'test'
+  ...
+# Subtest: actual Page social item source and final event fence reject replacements permissions windows and concurrent item owners
+ok 10 - actual Page social item source and final event fence reject replacements permissions windows and concurrent item owners
+  ---
+  duration_ms: 21.6741
+  type: 'test'
+  ...
+# Subtest: actual Page social item unknown outcome remains pending across closed UI and unrelated snapshots
+ok 11 - actual Page social item unknown outcome remains pending across closed UI and unrelated snapshots
+  ---
+  duration_ms: 2.6308
+  type: 'test'
+  ...
+# Subtest: actual Page Trade cancel permits one request during deposit or retrieve pending without releasing the item barrier
+ok 12 - actual Page Trade cancel permits one request during deposit or retrieve pending without releasing the item barrier
+  ---
+  duration_ms: 6.9045
+  type: 'test'
+  ...
+# Subtest: actual Page Trade cancel unknown socket result is spent while a definitely unsent cancellation can retry
+ok 13 - actual Page Trade cancel unknown socket result is spent while a definitely unsent cancellation can retry
+  ---
+  duration_ms: 17.3924
+  type: 'test'
+  ...
+# Subtest: actual Page Trade cancel retains exact owner scene map exchange and DTO guards before the final socket entry
+ok 14 - actual Page Trade cancel retains exact owner scene map exchange and DTO guards before the final socket entry
+  ---
+  duration_ms: 26.9295
+  type: 'test'
+  ...
+# Subtest: actual Page Trade cancel resists synchronous event and socket reentry and withdraws an unentered item send
+ok 15 - actual Page Trade cancel resists synchronous event and socket reentry and withdraws an unentered item send
+  ---
+  duration_ms: 6.2444
+  type: 'test'
+  ...
+# Subtest: actual Page Trade terminal packets retire only their current exchange item and late item ACKs cannot resurrect it
+ok 16 - actual Page Trade terminal packets retire only their current exchange item and late item ACKs cannot resurrect it
+  ---
+  duration_ms: 10.4995
+  type: 'test'
+  ...
+# Subtest: actual Page Trade cancel terminal rejects foreign owners and stale exchanges and never retires Guild custody
+ok 17 - actual Page Trade cancel terminal rejects foreign owners and stale exchanges and never retires Guild custody
+  ---
+  duration_ms: 18.2547
+  type: 'test'
+  ...
+# Subtest: actual Page Trade cancel spent custody retires with the actual session and cannot authorize an old lease
+ok 18 - actual Page Trade cancel spent custody retires with the actual session and cannot authorize an old lease
+  ---
+  duration_ms: 2.4492
+  type: 'test'
+  ...
+# Subtest: actual Page duplicate TradeAccept retains current own and partner offers and the pending exchange binding
+ok 19 - actual Page duplicate TradeAccept retains current own and partner offers and the pending exchange binding
+  ---
+  duration_ms: 9.98
+  type: 'test'
+  ...
+# Subtest: actual Page duplicate TradeAccept cannot renew a sent or unknown cancellation but a real new exchange can
+ok 20 - actual Page duplicate TradeAccept cannot renew a sent or unknown cancellation but a real new exchange can
+  ---
+  duration_ms: 10.0978
+  type: 'test'
+  ...
+# Subtest: actual Page duplicate TradeAccept rule does not coalesce new requests requested to open or a different partner
+ok 21 - actual Page duplicate TradeAccept rule does not coalesce new requests requested to open or a different partner
+  ---
+  duration_ms: 1.6418
+  type: 'test'
+  ...
+# Subtest: actual Page duplicate TradeAccept requires the same physical socket connection session and player
+ok 22 - actual Page duplicate TradeAccept requires the same physical socket connection session and player
+  ---
+  duration_ms: 5.7345
+  type: 'test'
+  ...
+# Subtest: actual Page Guild typed change correlates user tuple UID and source before releasing a full snapshot barrier
+ok 23 - actual Page Guild typed change correlates user tuple UID and source before releasing a full snapshot barrier
+  ---
+  duration_ms: 5.5599
+  type: 'test'
+  ...
+# Subtest: actual Page Guild failures 3 to 5 preserve raw slots and other-user broadcasts never acknowledge own operation
+ok 24 - actual Page Guild failures 3 to 5 preserve raw slots and other-user broadcasts never acknowledge own operation
+  ---
+  duration_ms: 6.9005
+  type: 'test'
+  ...
+# Subtest: actual Page logoutPending accepts authenticated Guild updates and post-ACK full snapshot but grants no new send
+ok 25 - actual Page logoutPending accepts authenticated Guild updates and post-ACK full snapshot but grants no new send
+  ---
+  duration_ms: 2.7302
+  type: 'test'
+  ...
+# Subtest: actual Page partial stale session and foreign socket snapshots cannot clear a social ACK barrier
+ok 26 - actual Page partial stale session and foreign socket snapshots cannot clear a social ACK barrier
+  ---
+  duration_ms: 5.4224
+  type: 'test'
+  ...
+# Subtest: actual Page GuildInvite opens the real Guild owner across render and replies with the captured epoch once
+ok 27 - actual Page GuildInvite opens the real Guild owner across render and replies with the captured epoch once
+  ---
+  duration_ms: 3.6406
+  type: 'test'
+  ...
+# Subtest: actual Page Guild reentrant invite and actual close setter retire only their own captured epoch
+ok 28 - actual Page Guild reentrant invite and actual close setter retire only their own captured epoch
+  ---
+  duration_ms: 1.5521
+  type: 'test'
+  ...
+# Subtest: actual Page FriendUpdate uses friendRecords identity for remove and memo without guessing display list positions
+ok 29 - actual Page FriendUpdate uses friendRecords identity for remove and memo without guessing display list positions
+  ---
+  duration_ms: 2.6784
+  type: 'test'
+  ...
+# Subtest: actual Page FriendUpdate rejects stale source and ambiguous target while complete snapshots preserve newer received identities
+ok 30 - actual Page FriendUpdate rejects stale source and ambiguous target while complete snapshots preserve newer received identities
+  ---
+  duration_ms: 1.7842
+  type: 'test'
+  ...
+# Subtest: actual Page GuildMemberChange projects actual ranks and updates permissions only for the current self name and character ID
+ok 31 - actual Page GuildMemberChange projects actual ranks and updates permissions only for the current self name and character ID
+  ---
+  duration_ms: 6.8448
+  type: 'test'
+  ...
+# Subtest: actual Page Guild rank assignment type2, rename type3 and one option type5 are separate single commands
+ok 32 - actual Page Guild rank assignment type2, rename type3 and one option type5 are separate single commands
+  ---
+  duration_ms: 3.6429
+  type: 'test'
+  ...
+# Subtest: actual Page friend final roster proof rejects same-socket logout scene replacement and closed window before immutable DTO entry
+ok 33 - actual Page friend final roster proof rejects same-socket logout scene replacement and closed window before immutable DTO entry
+  ---
+  duration_ms: 24.9128
+  type: 'test'
+  ...
+# Subtest: actual Page Guild roster final proof rejects synchronous owner guild rank permission and window replacement
+ok 34 - actual Page Guild roster final proof rejects synchronous owner guild rank permission and window replacement
+  ---
+  duration_ms: 15.9664
+  type: 'test'
+  ...
+# Subtest: actual Page quiet single Guild rank edits recheck owner, guild, role, rank and window at the final socket boundary
+ok 35 - actual Page quiet single Guild rank edits recheck owner, guild, role, rank and window at the final socket boundary
+  ---
+  duration_ms: 44.3601
+  type: 'test'
+  ...
+# Subtest: actual Page Guild rank edits require the local edit proof and cannot enter through ordinary raw DTOs
+ok 36 - actual Page Guild rank edits require the local edit proof and cannot enter through ordinary raw DTOs
+  ---
+  duration_ms: 1.7708
+  type: 'test'
+  ...
+# Subtest: actual Page definitely-unsent Guild rank edits release only their reservation and can retry without a clock advance
+ok 37 - actual Page definitely-unsent Guild rank edits release only their reservation and can retry without a clock advance
+  ---
+  duration_ms: 5.1226
+  type: 'test'
+  ...
+# Subtest: actual Page unknown rename send stays pending through Native's exact five-second boundary
+ok 38 - actual Page unknown rename send stays pending through Native's exact five-second boundary
+  ---
+  duration_ms: 2.1421
+  type: 'test'
+  ...
+# Subtest: actual Page rename release requires the actual matching status7 actor, rank and name from the current socket
+ok 39 - actual Page rename release requires the actual matching status7 actor, rank and name from the current socket
+  ---
+  duration_ms: 2.0465
+  type: 'test'
+  ...
+# Subtest: actual Page one-option requests retain the server checkbox state and enforce the 300ms input boundary
+ok 40 - actual Page one-option requests retain the server checkbox state and enforce the 300ms input boundary
+  ---
+  duration_ms: 2.4423
+  type: 'test'
+  ...
+# Subtest: actual Page only full status255 establishes complete edit authority; every valid delta remains partial
+ok 41 - actual Page only full status255 establishes complete edit authority; every valid delta remains partial
+  ---
+  duration_ms: 18.8872
+  type: 'test'
+  ...
+# Subtest: actual Page complete roster still cannot grant own role by matching only a name or only a character ID
+ok 42 - actual Page complete roster still cannot grant own role by matching only a name or only a character ID
+  ---
+  duration_ms: 4.4296
+  type: 'test'
+  ...
+# Subtest: actual Page roster read is ordinary infoType1 only and GST or a delta cannot complete its read proof
+ok 43 - actual Page roster read is ordinary infoType1 only and GST or a delta cannot complete its read proof
+  ---
+  duration_ms: 2.0972
+  type: 'test'
+  ...
+# Subtest: actual Page roster read rolls back a definitely-unsent proof and retains an unknown socket entry until full status255
+ok 44 - actual Page roster read rolls back a definitely-unsent proof and retains an unknown socket entry until full status255
+  ---
+  duration_ms: 1.7339
+  type: 'test'
+  ...
+# Subtest: actual Page roster read final proof rejects replacement or infoType tampering without consuming the read
+ok 45 - actual Page roster read final proof rejects replacement or infoType tampering without consuming the read
+  ---
+  duration_ms: 17.2973
+  type: 'test'
+  ...
+# Subtest: actual Page partner TradeItems parser preserves holes raw safe UID and complete readonly tooltip metadata
+ok 46 - actual Page partner TradeItems parser preserves holes raw safe UID and complete readonly tooltip metadata
+  ---
+  duration_ms: 1.9096
+  type: 'test'
+  ...
+# Subtest: actual Page partner TradeItems aggregate rejects unsafe duplicate and malformed UID rows as an unknown whole packet
+ok 47 - actual Page partner TradeItems aggregate rejects unsafe duplicate and malformed UID rows as an unknown whole packet
+  ---
+  duration_ms: 1.5276
+  type: 'test'
+  ...
+# Subtest: actual Page late NewItemInfo reprojects cached partner raw items and bad TradeItem forbids confirmation while allowing explicit unlock
+ok 48 - actual Page late NewItemInfo reprojects cached partner raw items and bad TradeItem forbids confirmation while allowing explicit unlock
+  ---
+  duration_ms: 2.0367
+  type: 'test'
+  ...
+# Subtest: actual Page Ranking queues selected online filter and settles old rows under their own type and offset before issuing the desired query
+ok 49 - actual Page Ranking queues selected online filter and settles old rows under their own type and offset before issuing the desired query
+  ---
+  duration_ms: 2.1486
+  type: 'test'
+  ...
+# Subtest: actual Page Ranking source session malformed response and final scene fences reject foreign authority
+ok 50 - actual Page Ranking source session malformed response and final scene fences reject foreign authority
+  ---
+  duration_ms: 9.4723
+  type: 'test'
+  ...
+# Subtest: actual Page Ranking unknown socket entry is retained without retry and actual connection retirement clears it
+ok 51 - actual Page Ranking unknown socket entry is retained without retry and actual connection retirement clears it
+  ---
+  duration_ms: 1.7318
+  type: 'test'
+  ...
+# Subtest: actual Page Ranking window opening and row movement retain online class with a single outstanding bounded offset
+ok 52 - actual Page Ranking window opening and row movement retain online class with a single outstanding bounded offset
+  ---
+  duration_ms: 1.6924
+  type: 'test'
+  ...
+# Subtest: actual Page store and take-back serialize Bag2 physical cells with one reserved proof
+ok 53 - actual Page store and take-back serialize Bag2 physical cells with one reserved proof
+  ---
+  duration_ms: 5.7972
+  type: 'test'
+  ...
+# Subtest: actual Page refuses stale display-only duplicate and revoked selections before emitting action
+ok 54 - actual Page refuses stale display-only duplicate and revoked selections before emitting action
+  ---
+  duration_ms: 8.9616
+  type: 'test'
+  ...
+# Subtest: actual Page final event fence rejects replacement target capacity password owner and socket changes
+ok 55 - actual Page final event fence rejects replacement target capacity password owner and socket changes
+  ---
+  duration_ms: 23.2087
+  type: 'test'
+  ...
+# Subtest: actual immutable storage wire rejects action-time mutation of the caller DTO
+ok 56 - actual immutable storage wire rejects action-time mutation of the caller DTO
+  ---
+  duration_ms: 3.8603
+  type: 'test'
+  ...
+# Subtest: actual synchronous reentry reserves both source and empty target and never reuses request IDs
+ok 57 - actual synchronous reentry reserves both source and empty target and never reuses request IDs
+  ---
+  duration_ms: 1.8002
+  type: 'test'
+  ...
+# Subtest: actual synchronous reentry on independent cells keeps two distinct requests
+ok 58 - actual synchronous reentry on independent cells keeps two distinct requests
+  ---
+  duration_ms: 1.5808
+  type: 'test'
+  ...
+# Subtest: actual definitely-unsent cleanup and socket.send unknown outcome have different ownership
+ok 59 - actual definitely-unsent cleanup and socket.send unknown outcome have different ownership
+  ---
+  duration_ms: 2.7434
+  type: 'test'
+  ...
+# Subtest: actual storage receipt case refuses wrong tuples malformed status and unentered flight
+ok 60 - actual storage receipt case refuses wrong tuples malformed status and unentered flight
+  ---
+  duration_ms: 4.5172
+  type: 'test'
+  ...
+# Subtest: actual Page cross-item gates lock reserved source and empty destination but allow unrelated items
+ok 61 - actual Page cross-item gates lock reserved source and empty destination but allow unrelated items
+  ---
+  duration_ms: 1.9811
+  type: 'test'
+  ...
+# Subtest: actual Mail attach quote and Send final gates respect storage UID and newly occupied target cell
+ok 62 - actual Mail attach quote and Send final gates respect storage UID and newly occupied target cell
+  ---
+  duration_ms: 4.8268
+  type: 'test'
+  ...
+# Subtest: actual confirmed session retirement releases storage cells and retains monotonic request IDs
+ok 63 - actual confirmed session retirement releases storage cells and retains monotonic request IDs
+  ---
+  duration_ms: 3.9669
+  type: 'test'
+  ...
+# Subtest: actual request sequence exhaustion permanently refuses another reservation
+ok 64 - actual request sequence exhaustion permanently refuses another reservation
+  ---
+  duration_ms: 1.6664
+  type: 'test'
+  ...
+# Subtest: actual inventory onStoreItem keeps selection on refusal and passes explicit authority/page on success
+ok 65 - actual inventory onStoreItem keeps selection on refusal and passes explicit authority/page on success
+  ---
+  duration_ms: 4.6108
+  type: 'test'
+  ...
+# Subtest: actual inventory onTakeBackItem keeps selection on refusal and passes explicit authority/page on success
+ok 66 - actual inventory onTakeBackItem keeps selection on refusal and passes explicit authority/page on success
+  ---
+  duration_ms: 2.1679
+  type: 'test'
+  ...
+# Subtest: actual new-connection and successful StartGame branches clear storage before publishing identity without resetting IDs
+ok 67 - actual new-connection and successful StartGame branches clear storage before publishing identity without resetting IDs
+  ---
+  duration_ms: 14.3555
+  type: 'test'
+  ...
+# Subtest: actual Page Hero and parcel collection barriers preserve reserved and unknown custody
+ok 68 - actual Page Hero and parcel collection barriers preserve reserved and unknown custody
+  ---
+  duration_ms: 1.64
+  type: 'test'
+  ...
+# Subtest: actual Page Guild runtime catalog projects an unobserved template while final UID slot and permission fences still apply
+ok 69 - actual Page Guild runtime catalog projects an unobserved template while final UID slot and permission fences still apply
+  ---
+  duration_ms: 16.121
+  type: 'test'
+  ...
+# Subtest: actual Page spouse Mail opens only a named local draft and Whisper uses exact Native text without sending
+ok 70 - actual Page spouse Mail opens only a named local draft and Whisper uses exact Native text without sending
+  ---
+  duration_ms: 1.7057
+  type: 'test'
+  ...
+# Subtest: actual Page spouse availability uses received mapName while unmarried and stale displayed relationships are rejected
+ok 71 - actual Page spouse availability uses received mapName while unmarried and stale displayed relationships are rejected
+  ---
+  duration_ms: 1.5321
+  type: 'test'
+  ...
+# Subtest: actual Page retained spouse callbacks reject physical owner scene visibility window epoch and relationship changes
+ok 72 - actual Page retained spouse callbacks reject physical owner scene visibility window epoch and relationship changes
+  ---
+  duration_ms: 35.7063
+  type: 'test'
+  ...
+# Subtest: actual Page spouse mail rechecks after opening and old window callbacks cannot target a new compose owner
+ok 73 - actual Page spouse mail rechecks after opening and old window callbacks cannot target a new compose owner
+  ---
+  duration_ms: 1.4463
+  type: 'test'
+  ...
+# Subtest: actual Bonds spouse buttons derive disabled state from name and map and ExtraWindows forwards their exact callbacks
+ok 74 - actual Bonds spouse buttons derive disabled state from name and map and ExtraWindows forwards their exact callbacks
+  ---
+  duration_ms: 9.3067
+  type: 'test'
+  ...
+# Subtest: actual auth persistent physical lane claims once and terminal never reopens the same socket
+ok 75 - actual auth persistent physical lane claims once and terminal never reopens the same socket
+  ---
+  duration_ms: 0.2165
+  type: 'test'
+  ...
+# Subtest: actual registration command keeps an exact DOB number token and omits confirmation and ISO draft
+ok 76 - actual registration command keeps an exact DOB number token and omits confirmation and ISO draft
+  ---
+  duration_ms: 0.5633
+  type: 'test'
+  ...
+# Subtest: actual Page registration queues immutable eight fields before Ready and double click sends once
+ok 77 - actual Page registration queues immutable eight fields before Ready and double click sends once
+  ---
+  duration_ms: 2.3786
+  type: 'test'
+  ...
+# Subtest: actual Page password change never carries confirmation or saves replacement secrets as reconnect credentials
+ok 78 - actual Page password change never carries confirmation or saves replacement secrets as reconnect credentials
+  ---
+  duration_ms: 6.9
+  type: 'test'
+  ...
+# Subtest: actual Page closing form retains entered lane and late or foreign replies cannot display retired UI
+ok 79 - actual Page closing form retains entered lane and late or foreign replies cannot display retired UI
+  ---
+  duration_ms: 2.0791
+  type: 'test'
+  ...
+# Subtest: actual auth send final lease rejects synchronous UI and physical generation changes plus legacy proofless sends
+ok 80 - actual auth send final lease rejects synchronous UI and physical generation changes plus legacy proofless sends
+  ---
+  duration_ms: 12.3677
+  type: 'test'
+  ...
+# Subtest: actual auth entered socket exception stays unknown and cannot replay on the same physical connection
+ok 81 - actual auth entered socket exception stays unknown and cannot replay on the same physical connection
+  ---
+  duration_ms: 1.8548
+  type: 'test'
+  ...
+# Subtest: actual optional Core wrapper delegates ordered fields errors focus and SafeKey edits without JS validation
+ok 82 - actual optional Core wrapper delegates ordered fields errors focus and SafeKey edits without JS validation
+  ---
+  duration_ms: 121.2891
+  type: 'test'
+  ...
+# Subtest: actual missing optional auth Core preserves ordinary login while disabling new form submission
+ok 83 - actual missing optional auth Core preserves ordinary login while disabling new form submission
+  ---
+  duration_ms: 1.6311
+  type: 'test'
+  ...
+# Subtest: actual quick-enter captures one immutable pre-Ready attempt and complete identity leases reject stale sources
+ok 84 - actual quick-enter captures one immutable pre-Ready attempt and complete identity leases reject stale sources
+  ---
+  duration_ms: 12.6952
+  type: 'test'
+  ...
+# Subtest: actual OAuth and identity linking ignore retired owner results at both awaited boundaries
+ok 85 - actual OAuth and identity linking ignore retired owner results at both awaited boundaries
+  ---
+  duration_ms: 9.7058
+  type: 'test'
+  ...
+# Subtest: actual Page Shell Overlay bridge opens registration password and SafeKey controls with 8 4 and 36 source fields
+ok 86 - actual Page Shell Overlay bridge opens registration password and SafeKey controls with 8 4 and 36 source fields
+  ---
+  duration_ms: 164.0298
+  type: 'test'
+  ...
+# Subtest: actual auth DOM registration Enter advances, password Enter waits, and pending normal login ignores optional ready
+ok 87 - actual auth DOM registration Enter advances, password Enter waits, and pending normal login ignores optional ready
+  ---
+  duration_ms: 38.3399
+  type: 'test'
+  ...
+# Subtest: actual physical socket-close Auth retirement clears queued secrets and epochs without clearing entered lane
+ok 88 - actual physical socket-close Auth retirement clears queued secrets and epochs without clearing entered lane
+  ---
+  duration_ms: 2.1518
+  type: 'test'
+  ...
+# Subtest: Pearl actual Storage Page service retirement preserves wallet and session retirement clears it
+ok 89 - Pearl actual Storage Page service retirement preserves wallet and session retirement clears it
+  ---
+  duration_ms: 1.9472
+  type: 'test'
+  ...
+# Subtest: Pearl foreign or mixed buy proof cannot enter actual Storage sendRaw on another command
+ok 90 - Pearl foreign or mixed buy proof cannot enter actual Storage sendRaw on another command
+  ---
+  duration_ms: 3.1508
+  type: 'test'
+  ...
+# Subtest: Group actual Page sends only AddMember, preserves authority until the named server receipt and deduplicates
+ok 91 - Group actual Page sends only AddMember, preserves authority until the named server receipt and deduplicates
+  ---
+  duration_ms: 2.8301
+  type: 'test'
+  ...
+# Subtest: Group raw add/remove commands require the current local proof and cannot borrow an unrelated proof
+ok 92 - Group raw add/remove commands require the current local proof and cannot borrow an unrelated proof
+  ---
+  duration_ms: 1.8494
+  type: 'test'
+  ...
+# Subtest: Group actual Page checks the current legacy roster before stale enriched rows
+ok 93 - Group actual Page checks the current legacy roster before stale enriched rows
+  ---
+  duration_ms: 14.048
+  type: 'test'
+  ...
+# Subtest: Group actual final socket boundary rejects listener-time owner, scene, leader and capacity changes
+ok 94 - Group actual final socket boundary rejects listener-time owner, scene, leader and capacity changes
+  ---
+  duration_ms: 12.0964
+  type: 'test'
+  ...
+# Subtest: Group listener reentry cannot send the same request twice
+ok 95 - Group listener reentry cannot send the same request twice
+  ---
+  duration_ms: 2.0047
+  type: 'test'
+  ...
+# Subtest: Group different names use the bounded group subqueue without a single global in-flight lock
+ok 96 - Group different names use the bounded group subqueue without a single global in-flight lock
+  ---
+  duration_ms: 2.3255
+  type: 'test'
+  ...
+# Subtest: Group socket outcome unknown remains pending and never automatically retries
+ok 97 - Group socket outcome unknown remains pending and never automatically retries
+  ---
+  duration_ms: 3.965
+  type: 'test'
+  ...
+# Subtest: Group closed transport does not reserve or leave a false pending request
+ok 98 - Group closed transport does not reserve or leave a false pending request
+  ---
+  duration_ms: 1.821
+  type: 'test'
+  ...
+# Subtest: Group only current physical-owner named or full roster receipts release pending across map changes
+ok 99 - Group only current physical-owner named or full roster receipts release pending across map changes
+  ---
+  duration_ms: 1.6478
+  type: 'test'
+  ...
+# Subtest: Group SwitchGroup and DeleteGroup are not fabricated add-member acknowledgements
+ok 100 - Group SwitchGroup and DeleteGroup are not fabricated add-member acknowledgements
+  ---
+  duration_ms: 1.4698
+  type: 'test'
+  ...
+# Subtest: Group removal completes only on its matching DeleteMember or authoritative absence
+ok 101 - Group removal completes only on its matching DeleteMember or authoritative absence
+  ---
+  duration_ms: 1.6487
+  type: 'test'
+  ...
+# Subtest: Group hover invitation uses the current visible player instead of selection and rejects invalid AOI targets
+ok 102 - Group hover invitation uses the current visible player instead of selection and rejects invalid AOI targets
+  ---
+  duration_ms: 1.8129
+  type: 'test'
+  ...
+# Subtest: Group confirmed session retirement clears pending operations and group-only hidden target history
+ok 103 - Group confirmed session retirement clears pending operations and group-only hidden target history
+  ---
+  duration_ms: 1.9007
+  type: 'test'
+  ...
+# Subtest: Group a successful new StartGame retires old pending after physical reconnect while a rejected StartGame does not
+ok 104 - Group a successful new StartGame retires old pending after physical reconnect while a rejected StartGame does not
+  ---
+  duration_ms: 1.476
+  type: 'test'
+  ...
+# Subtest: Group explicit allow toggle and leave retain their separate real SwitchGroup commands
+ok 105 - Group explicit allow toggle and leave retain their separate real SwitchGroup commands
+  ---
+  duration_ms: 3.7961
+  type: 'test'
+  ...
+1..105
+# tests 105
+# suites 0
+# pass 105
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2153.4634

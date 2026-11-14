@@ -1,0 +1,94 @@
+Test executable: E:\mir2-player-journey\mir2-web3\target\halfmoon-client\debug\deps\mir2_client_bevy-22e441988b21a850.exe
+Filter: rendered_bag_instance_and_equipment_press_recheck_uid_and_pending
+
+running 1 test
+test crystal_ui::overlays::tests::rendered_bag_instance_and_equipment_press_recheck_uid_and_pending ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1362 filtered out; finished in 0.01s
+
+Filter: inventory_buttons_use_explicit_instance_ids_and_suppress_duplicate_presses
+
+running 1 test
+test crystal_ui::overlays::tests::inventory_buttons_use_explicit_instance_ids_and_suppress_duplicate_presses ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1362 filtered out; finished in 0.01s
+
+Filter: equipment_use_classification_requires_slot_or_crystal_type_metadata
+
+running 1 test
+test crystal_ui::overlays::tests::equipment_use_classification_requires_slot_or_crystal_type_metadata ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1362 filtered out; finished in 0.00s
+
+Filter: item_use_time_is_shared_across_player_hero_and_survives_draining
+
+running 1 test
+test crystal_ui::overlays::tests::item_use_time_is_shared_across_player_hero_and_survives_draining ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1362 filtered out; finished in 0.00s
+
+Filter: inventory_item_drag_
+
+running 5 tests
+test crystal_ui::overlays::tests::inventory_item_drag_uses_ordered_cross_frame_press_and_release ... ok
+test crystal_ui::overlays::tests::inventory_item_drag_uses_ordered_same_frame_press_motion_release ... ok
+test crystal_ui::overlays::tests::inventory_item_drag_rejects_replaced_source_between_press_and_release ... ok
+test crystal_ui::overlays::tests::inventory_item_drag_to_empty_belt_emits_one_raw_slot_move ... ok
+test crystal_ui::overlays::tests::inventory_item_drag_bag_destinations_use_source_merge_or_swap_rules ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1358 filtered out; finished in 0.02s
+
+Filter: ordered_bag_drag_to_npc_
+
+running 2 tests
+test crystal_ui::overlays::tests::ordered_bag_drag_to_npc_target_selects_sale_without_inventory_move ... ok
+test crystal_ui::overlays::tests::ordered_bag_drag_to_npc_target_uses_the_active_service_and_hold_once ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1361 filtered out; finished in 0.01s
+
+Filter: storage_drag_tests
+
+running 13 tests
+test crystal_ui::overlays::storage_drag_tests::warehouse_adapter_replans_with_current_source_count_and_rejects_reused_slot ... ok
+test crystal_ui::overlays::storage_drag_tests::ordered_warehouse_bag_drag_uses_exact_store_v2_target_and_identity ... ok
+test crystal_ui::overlays::storage_drag_tests::ordered_warehouse_bag_drag_merges_only_complete_compatible_live_stacks ... ok
+test crystal_ui::overlays::storage_drag_tests::ordered_warehouse_storage_drag_merges_only_nonfull_compatible_target_and_same_slot_is_noop ... ok
+test crystal_ui::overlays::storage_drag_tests::warehouse_drag_rechecks_both_source_identities_and_cancels_on_cursor_exit ... ok
+test crystal_ui::overlays::storage_drag_tests::pending_warehouse_gesture_locks_its_item_but_not_independent_cells ... ok
+test crystal_ui::overlays::storage_drag_tests::warehouse_drag_rejects_password_locked_inaccessible_and_full_destinations ... ok
+test crystal_ui::overlays::storage_drag_tests::warehouse_storage_drag_rechecks_source_and_rejects_locked_or_inaccessible_pages ... ok
+test crystal_ui::overlays::storage_drag_tests::pending_storage_move_locks_source_and_target_cells_until_exact_ack ... ok
+test crystal_ui::overlays::storage_drag_tests::warehouse_open_close_and_npc_reopen_keep_their_source_bag_positions ... ok
+test crystal_ui::overlays::storage_drag_tests::ordered_warehouse_storage_drag_uses_exact_take_back_v2_target_and_compatible_merge ... ok
+test crystal_ui::overlays::storage_drag_tests::warehouse_bag_drag_falls_back_from_incompatible_or_stale_occupied_target ... ok
+test crystal_ui::overlays::storage_drag_tests::ordered_warehouse_storage_drag_moves_empty_and_incompatible_or_full_targets ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 1350 filtered out; finished in 0.01s
+
+Filter: equipment_storage_tests
+
+running 7 tests
+test crystal_ui::overlays::equipment_storage_tests::storage_and_character_dialogs_keep_source_bounds_and_slots_reachable_together ... ok
+test crystal_ui::overlays::equipment_storage_tests::ordered_equipment_storage_amulet_merge_uses_complete_live_identity ... ok
+test crystal_ui::overlays::equipment_storage_tests::equipment_storage_drag_rechecks_source_identity_and_storage_lock ... ok
+test crystal_ui::overlays::equipment_storage_tests::equipment_storage_amulet_merge_locks_its_live_endpoints_until_matching_ack ... ok
+test crystal_ui::overlays::equipment_storage_tests::ordered_equipment_to_storage_uses_remove_item_and_occupied_fallback ... ok
+test crystal_ui::overlays::equipment_storage_tests::ordered_storage_to_equipment_uses_actual_slot_and_source_amulet_merge ... ok
+test crystal_ui::overlays::equipment_storage_tests::concurrent_storage_character_render_keeps_all_source_character_tabs_and_equipment_cell ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1356 filtered out; finished in 0.02s
+
+Filter: parcel_locked_bag_item_is_dimmed_and_cannot_start_a_drag
+
+running 1 test
+test crystal_ui::overlays::mail_parcel_tests::parcel_locked_bag_item_is_dimmed_and_cannot_start_a_drag ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1362 filtered out; finished in 0.02s
+
+Filter: parcel_selected_uid_blocks_the_overlay_action_chain
+
+running 1 test
+test crystal_ui::overlays::mail_parcel_tests::parcel_selected_uid_blocks_the_overlay_action_chain ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1362 filtered out; finished in 0.01s
+

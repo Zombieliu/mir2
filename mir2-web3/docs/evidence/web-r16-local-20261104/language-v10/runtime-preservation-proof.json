@@ -1,0 +1,25 @@
+{
+  "schema": "mir2.r16.language-fix-preservation.v1",
+  "stoppedBeforeCopy": true,
+  "oldDirectoryPreserved": true,
+  "backupName": "Numeron-Web-R16-20261104-before-language-v10",
+  "runtime": [
+    {
+      "directory": "private",
+      "files": 25,
+      "bytes": 424917,
+      "beforeTreeSha256": "b13f5c43016a9c3862714f67bcc8ea57fe8cc6e250f7fd20413ece34e4ed0646",
+      "afterTreeSha256": "b13f5c43016a9c3862714f67bcc8ea57fe8cc6e250f7fd20413ece34e4ed0646",
+      "allFilesMatched": true
+    },
+    {
+      "directory": ".mir2-data",
+      "files": 9,
+      "bytes": 3732153820,
+      "beforeTreeSha256": "97cc2294feb3ea030617b464656619a0b43e5f5dd6aafed4364acc9d2ff389b5",
+      "afterTreeSha256": "97cc2294feb3ea030617b464656619a0b43e5f5dd6aafed4364acc9d2ff389b5",
+      "allFilesMatched": true
+    }
+  ],
+  "allMatched": true
+}

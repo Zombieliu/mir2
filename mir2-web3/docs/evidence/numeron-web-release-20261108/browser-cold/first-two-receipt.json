@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "passed": false,
+  "scope": "Public zh-CN login shell and static delivery only; no registration/login/QR/world actions",
+  "firstRun": {
+    "passed": false,
+    "elapsedMs": 17949,
+    "retainedProofSha256": "bd810dd650287128942576152aefaba1295ca1cfe4e2d0ff34712054c8d18594",
+    "retainedScriptMatches": true,
+    "limitation": "DOMContentLoaded 15s early timeout; not a full observation"
+  },
+  "secondRun": {
+    "passed": false,
+    "elapsedMs": 82827,
+    "proofSha256": "0c72adccdd37fae17b098a8c05857ead7748716ab5bddbf735eac7599d18893c",
+    "checks": {
+      "publicNavigation": true,
+      "automaticZhCn": true,
+      "cjkFontActuallyLoaded": false,
+      "auxiliaryCoreReady": false,
+      "coreSixArtifactsPinned": false,
+      "r2ProxyEnabledAndDelivered": true,
+      "rawTitleGetsDelivered": true,
+      "threeRuntimePackagesFetchedAndPinned": false,
+      "allInputValuesEmpty": true,
+      "zeroSockets": true,
+      "zeroAuthSubmissions": true
+    },
+    "coreArtifactsPinned": 3,
+    "bevyJsPins": 3,
+    "bevyWasm200BodyTimeouts": 3,
+    "pendingAtObservationEnd": 16,
+    "unselectedFontsRequested": 0,
+    "httpErrors": 0,
+    "pageErrors": 0,
+    "console": {
+      "error": 0,
+      "warning": 0
+    },
+    "sockets": 0,
+    "authenticationSubmissions": 0,
+    "allInputValuesEmpty": true,
+    "browserClosed": true
+  },
+  "screenshots": [
+    {
+      "path": "r2/01-native-login.png",
+      "sha256": "a42a70395df68602b3929a07bf7804c88c7d6b1a56f175e79cd76d0d09adc986"
+    },
+    {
+      "path": "r2/02-create-account-readiness.png",
+      "sha256": "069109f53069d2fe480beabc94a41e71e5d9e1eca2b4ee0dffee55ddf4fed6e1"
+    },
+    {
+      "path": "r2/03-native-login-final.png",
+      "sha256": "8c2681e4d09e872da5f03f004bebcc53d7d6469f2d32fa7c4b3db4b3d3f62e09"
+    }
+  ],
+  "privacy": {
+    "privateConfigRead": false,
+    "cookiesCaptured": false,
+    "credentialValuesCaptured": false,
+    "screenshotsVisuallyChecked": true
+  }
+}

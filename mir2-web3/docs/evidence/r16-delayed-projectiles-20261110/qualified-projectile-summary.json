@@ -1,0 +1,659 @@
+{
+  "schema": "mir2.r16.shared-zone-delayed-targeted-projectile-verification.v1",
+  "build": {
+    "schema": "mir2.r16.delayed-targeted-projectile-gateway-candidate.v1",
+    "baseCommit": "a6ee787b8d5b9748418831e734882d595409c24c",
+    "crystalReference": "92b4ce4ab488b11e65f63d3ad22de2e1f25ec08d",
+    "gatewaySha256": "e16a9424bedaf3d80348e382786043f11df31e15755d8abded10e2433fe9b692",
+    "routingSourceSha256": "1b318a3b61323a8ada5c3a6a2f92c58daf7f601594229ff15dcff6577cac8b36",
+    "zoneSourceSha256": "fd00052da702293e8690051e616cb0a4f7745ce040a151c2792b18ade387f0ef",
+    "zoneTestSha256": "c3e57e895df2fa3e40cc1b8c6355320e7cfdcac89283ead826a28f91abb42963",
+    "changedFiles": {
+      "mir2-web3/apps/gateway/src/routing/tests/zone_soulfire_practice_tests.rs": {
+        "baselineGitBlob": "9ec42730948e3dbaabd8f361910edb3d1a090fe2",
+        "sourceSha256": "426af429cd44f82dfab0be85420ab20127eddc86a7fcd8eb6d96f1c9804e6679"
+      },
+      "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs": {
+        "baselineGitBlob": "7e06223d22f2177e713ec7a5e0a666ef395c55e2",
+        "sourceSha256": "fd00052da702293e8690051e616cb0a4f7745ce040a151c2792b18ade387f0ef"
+      },
+      "mir2-web3/apps/simulation/src/runtime/zone/runtime/soulfire_practice_tests.rs": {
+        "baselineGitBlob": "c71ac8e402fb4b3ad54a38add4d1777e6848a6d0",
+        "sourceSha256": "c3e57e895df2fa3e40cc1b8c6355320e7cfdcac89283ead826a28f91abb42963"
+      }
+    },
+    "verifiedCommittedSourceBlobs": 1517,
+    "archiveLineEndingOnlyFiles": 107,
+    "profile": "Rust 1.95 dev debug=0; locked offline; isolated target",
+    "testLogs": [
+      "projectile-red-compiled.log",
+      "projectile-sim-final-green.log",
+      "projectile-gateway-green.log",
+      "projectile-gateway-cadence.log",
+      "projectile-gateway-build.log"
+    ]
+  },
+  "scope": {
+    "isolatedFileGateway": true,
+    "ordinaryHeadlessWebUi": true,
+    "copiedLevel30Fixtures": true,
+    "nativeRendererOrWindow": false,
+    "nativeGameplayWire": false,
+    "production": false
+  },
+  "red": {
+    "path": "projectile-red-compiled.log",
+    "sha256": "c84198a6467c71bab3ba5f6b2e32358198be7091578ddbcd6dbe7a14b3d38fbd",
+    "result": "GreatFireBall already damaged the target before the exact due tick"
+  },
+  "classes": {
+    "wizard": {
+      "spell": "GreatFireBall",
+      "normalInput": [
+        {
+          "op": "F11 bind",
+          "spell": "GreatFireBall",
+          "slot": 9,
+          "source": "content.magic.GreatFireBall.description",
+          "wire": [
+            "magicKey"
+          ],
+          "readBack": true
+        }
+      ],
+      "rangeTiles": 7,
+      "target": "Hen",
+      "fixtureSha256": "b054480795febab34176ec35b2ee8e4ee858ba6cf79ffc20ee37bae660671c8a",
+      "baseline": {
+        "path": "wizard-zone-candidate-r1/receipt.json",
+        "sha256": "c9a0fa734666126a7fda2da35835b3959e492398f78816448375f00122243c7f",
+        "observedHitAfterLaunchMs": 8
+      },
+      "candidate": {
+        "path": "wizard-projectile-r3/receipt.json",
+        "sha256": "bce228625437daa2fb7522515124d0b0bb2acb1430e768f9bdf01fc8c6635fd0",
+        "observedHitAfterLaunchMs": 534
+      },
+      "flight": {
+        "crystalDeadlineMs": 850,
+        "requestSentEpochMs": 1794259137920,
+        "launchReceivedEpochMs": 1794259138380,
+        "impactReceivedEpochMs": 1794259138914,
+        "launchSequence": 777,
+        "requestToLaunchFrameMs": 460,
+        "launchToImpactFrameMs": 534,
+        "requestToImpactFrameMs": 994,
+        "browserToleranceMs": 50,
+        "damageBeforeFirstWindow": false,
+        "manaPacketSequence": 778,
+        "manaPacketAfterLaunchMs": 3,
+        "hitSequence": 780,
+        "practiceSequence": 785,
+        "practiceAfterLaunchMs": 909
+      },
+      "retainedArrivalWindowAttempt": {
+        "path": "wizard-projectile-r1/receipt.json",
+        "result": "ObjectMagic arrival is later than authoritative cast time",
+        "observedHitAfterAckMs": 563
+      },
+      "damage": 5,
+      "mana": [
+        541,
+        536
+      ],
+      "practiceBefore": {
+        "hotkey": 9,
+        "level": 0,
+        "experience": 501
+      },
+      "practiceAfter": {
+        "hotkey": 9,
+        "level": 0,
+        "experience": 504
+      },
+      "practiceAfterFreshLogin": {
+        "hotkey": 9,
+        "level": 0,
+        "experience": 504
+      },
+      "practiceOnDisk": {
+        "hotkey": 9,
+        "level": 0,
+        "experience": 504
+      },
+      "normalLogouts": 2,
+      "originalFixtureUnchanged": true,
+      "diagnostic": {
+        "logSha256": "6bd1e5936dfb6cd151634d8057d208c71e8aa95335874da5b33a0d7edafa3cd5",
+        "testOnlyGatewaySha256": "f65a324791b1ad4baf5648246dffb2d234851eb72b4e65b93440fbd80c2107e7",
+        "castToDueMs": 850,
+        "commandClockToZoneLaunchObservationMs": 1,
+        "beforeDueTickOffsetsMs": [
+          15,
+          107,
+          217,
+          308,
+          417,
+          510,
+          618,
+          712,
+          805
+        ],
+        "castToImpactTickMs": 912,
+        "tickAfterDueMs": 62,
+        "castToLaunchAckFlushedMs": 288,
+        "castToImpactFlushedMs": 913,
+        "clientLaunchAckArrivalAfterRequestMs": 429,
+        "clientImpactArrivalAfterRequestMs": 1028,
+        "launchAckLane": "live",
+        "impactLane": "live",
+        "events": [
+          {
+            "lane": "zone",
+            "stage": "launch",
+            "spell": "GreatFireBall",
+            "target": 200203,
+            "cast_ms": 1794259133141,
+            "due_ms": 1794259133991,
+            "event_ms": 1794259133142
+          },
+          {
+            "lane": "zone",
+            "stage": "before_due",
+            "spell": "GreatFireBall",
+            "target": 200203,
+            "cast_ms": 1794259133141,
+            "due_ms": 1794259133991,
+            "tick_ms": 1794259133156,
+            "event_ms": 1794259133157
+          },
+          {
+            "lane": "zone",
+            "stage": "before_due",
+            "spell": "GreatFireBall",
+            "target": 200203,
+            "cast_ms": 1794259133141,
+            "due_ms": 1794259133991,
+            "tick_ms": 1794259133248,
+            "event_ms": 1794259133249
+          },
+          {
+            "lane": "zone",
+            "stage": "before_due",
+            "spell": "GreatFireBall",
+            "target": 200203,
+            "cast_ms": 1794259133141,
+            "due_ms": 1794259133991,
+            "tick_ms": 1794259133358,
+            "event_ms": 1794259133358
+          },
+          {
+            "lane": "live",
+            "stage": "send_start",
+            "packet": "Magic",
+            "target": 200203,
+            "event_ms": 1794259133429
+          },
+          {
+            "lane": "live",
+            "stage": "send_done",
+            "packet": "Magic",
+            "target": 200203,
+            "event_ms": 1794259133429
+          },
+          {
+            "lane": "live",
+            "stage": "send_start",
+            "packet": "ObjectMagic",
+            "target": 200203,
+            "event_ms": 1794259133429
+          },
+          {
+            "lane": "live",
+            "stage": "send_done",
+            "packet": "ObjectMagic",
+            "target": 200203,
+            "event_ms": 1794259133429
+          },
+          {
+            "lane": "live",
+            "stage": "send_start",
+            "packet": "ObjectProjectile",
+            "target": 200203,
+            "event_ms": 1794259133429
+          },
+          {
+            "lane": "live",
+            "stage": "send_done",
+            "packet": "ObjectProjectile",
+            "target": 200203,
+            "event_ms": 1794259133429
+          },
+          {
+            "lane": "zone",
+            "stage": "before_due",
+            "spell": "GreatFireBall",
+            "target": 200203,
+            "cast_ms": 1794259133141,
+            "due_ms": 1794259133991,
+            "tick_ms": 1794259133449,
+            "event_ms": 1794259133450
+          },
+          {
+            "lane": "zone",
+            "stage": "before_due",
+            "spell": "GreatFireBall",
+            "target": 200203,
+            "cast_ms": 1794259133141,
+            "due_ms": 1794259133991,
+            "tick_ms": 1794259133558,
+            "event_ms": 1794259133558
+          },
+          {
+            "lane": "zone",
+            "stage": "before_due",
+            "spell": "GreatFireBall",
+            "target": 200203,
+            "cast_ms": 1794259133141,
+            "due_ms": 1794259133991,
+            "tick_ms": 1794259133651,
+            "event_ms": 1794259133652
+          },
+          {
+            "lane": "zone",
+            "stage": "before_due",
+            "spell": "GreatFireBall",
+            "target": 200203,
+            "cast_ms": 1794259133141,
+            "due_ms": 1794259133991,
+            "tick_ms": 1794259133759,
+            "event_ms": 1794259133759
+          },
+          {
+            "lane": "zone",
+            "stage": "before_due",
+            "spell": "GreatFireBall",
+            "target": 200203,
+            "cast_ms": 1794259133141,
+            "due_ms": 1794259133991,
+            "tick_ms": 1794259133853,
+            "event_ms": 1794259133853
+          },
+          {
+            "lane": "zone",
+            "stage": "before_due",
+            "spell": "GreatFireBall",
+            "target": 200203,
+            "cast_ms": 1794259133141,
+            "due_ms": 1794259133991,
+            "tick_ms": 1794259133946,
+            "event_ms": 1794259133947
+          },
+          {
+            "lane": "zone",
+            "stage": "impact_dispatch",
+            "spell": "GreatFireBall",
+            "target": 200203,
+            "cast_ms": 1794259133141,
+            "due_ms": 1794259133991,
+            "tick_ms": 1794259134053,
+            "event_ms": 1794259134054
+          },
+          {
+            "lane": "live",
+            "stage": "send_start",
+            "packet": "ObjectStruck",
+            "target": 200203,
+            "event_ms": 1794259134054
+          },
+          {
+            "lane": "live",
+            "stage": "send_done",
+            "packet": "ObjectStruck",
+            "target": 200203,
+            "event_ms": 1794259134054
+          },
+          {
+            "lane": "live",
+            "stage": "send_start",
+            "packet": "DamageIndicator",
+            "target": 200203,
+            "event_ms": 1794259134054
+          },
+          {
+            "lane": "live",
+            "stage": "send_done",
+            "packet": "DamageIndicator",
+            "target": 200203,
+            "event_ms": 1794259134054
+          }
+        ]
+      }
+    },
+    "taoist": {
+      "spell": "SoulFireBall",
+      "normalInput": [
+        {
+          "op": "F11 bind",
+          "spell": "SoulFireBall",
+          "slot": 9,
+          "source": "content.magic.SoulFireBall.description",
+          "wire": [
+            "magicKey"
+          ],
+          "readBack": true
+        }
+      ],
+      "rangeTiles": 7,
+      "target": "Hen",
+      "fixtureSha256": "3645dc2efd9f49333a57780250ad9092469a92fc995ab8defbe434ba0e64beab",
+      "baseline": {
+        "path": "taoist-zone-candidate-r1/receipt.json",
+        "sha256": "b42811dba92ba9c67577ff3debc3af29b5f8e205b9a4ed8de0a0f6ea91b96e6e",
+        "observedHitAfterLaunchMs": 11
+      },
+      "candidate": {
+        "path": "taoist-projectile-r2/receipt.json",
+        "sha256": "4b69253ca357b97bf1e0715b4363ee461af861f2797303423027a960104006c5",
+        "observedHitAfterLaunchMs": 568
+      },
+      "flight": {
+        "crystalDeadlineMs": 850,
+        "requestSentEpochMs": 1794259005932,
+        "launchReceivedEpochMs": 1794259006407,
+        "impactReceivedEpochMs": 1794259006975,
+        "launchSequence": 794,
+        "requestToLaunchFrameMs": 475,
+        "launchToImpactFrameMs": 568,
+        "requestToImpactFrameMs": 1043,
+        "browserToleranceMs": 50,
+        "damageBeforeFirstWindow": false,
+        "manaPacketSequence": 795,
+        "manaPacketAfterLaunchMs": 3,
+        "hitSequence": 798,
+        "practiceSequence": 803,
+        "practiceAfterLaunchMs": 833
+      },
+      "retainedArrivalWindowAttempt": {
+        "path": "taoist-projectile-r1/receipt.json",
+        "result": "ObjectMagic arrival is later than authoritative cast time",
+        "observedHitAfterAckMs": 581
+      },
+      "damage": 5,
+      "mana": [
+        260,
+        257
+      ],
+      "practiceBefore": {
+        "hotkey": 9,
+        "level": 0,
+        "experience": 470
+      },
+      "practiceAfter": {
+        "hotkey": 9,
+        "level": 0,
+        "experience": 472
+      },
+      "practiceAfterFreshLogin": {
+        "hotkey": 9,
+        "level": 0,
+        "experience": 472
+      },
+      "practiceOnDisk": {
+        "hotkey": 9,
+        "level": 0,
+        "experience": 472
+      },
+      "normalLogouts": 2,
+      "originalFixtureUnchanged": true,
+      "diagnostic": {
+        "logSha256": "3574f03c13b9d5b082700c27a6caf2baa9ca1f17dac62d467d7752968a9f2dd1",
+        "testOnlyGatewaySha256": "f65a324791b1ad4baf5648246dffb2d234851eb72b4e65b93440fbd80c2107e7",
+        "castToDueMs": 850,
+        "commandClockToZoneLaunchObservationMs": 1,
+        "beforeDueTickOffsetsMs": [
+          81,
+          173,
+          278,
+          371,
+          480,
+          574,
+          679,
+          773
+        ],
+        "castToImpactTickMs": 883,
+        "tickAfterDueMs": 33,
+        "castToLaunchAckFlushedMs": 297,
+        "castToImpactFlushedMs": 885,
+        "clientLaunchAckArrivalAfterRequestMs": 498,
+        "clientImpactArrivalAfterRequestMs": 1007,
+        "launchAckLane": "live",
+        "impactLane": "live",
+        "events": [
+          {
+            "lane": "zone",
+            "stage": "launch",
+            "spell": "SoulFireBall",
+            "target": 200203,
+            "cast_ms": 1794259138208,
+            "due_ms": 1794259139058,
+            "event_ms": 1794259138209
+          },
+          {
+            "lane": "zone",
+            "stage": "before_due",
+            "spell": "SoulFireBall",
+            "target": 200203,
+            "cast_ms": 1794259138208,
+            "due_ms": 1794259139058,
+            "tick_ms": 1794259138289,
+            "event_ms": 1794259138289
+          },
+          {
+            "lane": "zone",
+            "stage": "before_due",
+            "spell": "SoulFireBall",
+            "target": 200203,
+            "cast_ms": 1794259138208,
+            "due_ms": 1794259139058,
+            "tick_ms": 1794259138381,
+            "event_ms": 1794259138381
+          },
+          {
+            "lane": "zone",
+            "stage": "before_due",
+            "spell": "SoulFireBall",
+            "target": 200203,
+            "cast_ms": 1794259138208,
+            "due_ms": 1794259139058,
+            "tick_ms": 1794259138486,
+            "event_ms": 1794259138486
+          },
+          {
+            "lane": "live",
+            "stage": "send_start",
+            "packet": "Magic",
+            "target": 200203,
+            "event_ms": 1794259138505
+          },
+          {
+            "lane": "live",
+            "stage": "send_done",
+            "packet": "Magic",
+            "target": 200203,
+            "event_ms": 1794259138505
+          },
+          {
+            "lane": "live",
+            "stage": "send_start",
+            "packet": "ObjectMagic",
+            "target": 200203,
+            "event_ms": 1794259138505
+          },
+          {
+            "lane": "live",
+            "stage": "send_done",
+            "packet": "ObjectMagic",
+            "target": 200203,
+            "event_ms": 1794259138505
+          },
+          {
+            "lane": "live",
+            "stage": "send_start",
+            "packet": "ObjectProjectile",
+            "target": 200203,
+            "event_ms": 1794259138505
+          },
+          {
+            "lane": "live",
+            "stage": "send_done",
+            "packet": "ObjectProjectile",
+            "target": 200203,
+            "event_ms": 1794259138505
+          },
+          {
+            "lane": "zone",
+            "stage": "before_due",
+            "spell": "SoulFireBall",
+            "target": 200203,
+            "cast_ms": 1794259138208,
+            "due_ms": 1794259139058,
+            "tick_ms": 1794259138579,
+            "event_ms": 1794259138580
+          },
+          {
+            "lane": "zone",
+            "stage": "before_due",
+            "spell": "SoulFireBall",
+            "target": 200203,
+            "cast_ms": 1794259138208,
+            "due_ms": 1794259139058,
+            "tick_ms": 1794259138688,
+            "event_ms": 1794259138688
+          },
+          {
+            "lane": "zone",
+            "stage": "before_due",
+            "spell": "SoulFireBall",
+            "target": 200203,
+            "cast_ms": 1794259138208,
+            "due_ms": 1794259139058,
+            "tick_ms": 1794259138782,
+            "event_ms": 1794259138782
+          },
+          {
+            "lane": "zone",
+            "stage": "before_due",
+            "spell": "SoulFireBall",
+            "target": 200203,
+            "cast_ms": 1794259138208,
+            "due_ms": 1794259139058,
+            "tick_ms": 1794259138887,
+            "event_ms": 1794259138887
+          },
+          {
+            "lane": "zone",
+            "stage": "before_due",
+            "spell": "SoulFireBall",
+            "target": 200203,
+            "cast_ms": 1794259138208,
+            "due_ms": 1794259139058,
+            "tick_ms": 1794259138981,
+            "event_ms": 1794259138981
+          },
+          {
+            "lane": "zone",
+            "stage": "impact_dispatch",
+            "spell": "SoulFireBall",
+            "target": 200203,
+            "cast_ms": 1794259138208,
+            "due_ms": 1794259139058,
+            "tick_ms": 1794259139091,
+            "event_ms": 1794259139091
+          },
+          {
+            "lane": "live",
+            "stage": "send_start",
+            "packet": "ObjectStruck",
+            "target": 200203,
+            "event_ms": 1794259139093
+          },
+          {
+            "lane": "live",
+            "stage": "send_done",
+            "packet": "ObjectStruck",
+            "target": 200203,
+            "event_ms": 1794259139093
+          },
+          {
+            "lane": "live",
+            "stage": "send_start",
+            "packet": "DamageIndicator",
+            "target": 200203,
+            "event_ms": 1794259139093
+          },
+          {
+            "lane": "live",
+            "stage": "send_done",
+            "packet": "DamageIndicator",
+            "target": 200203,
+            "event_ms": 1794259139093
+          }
+        ]
+      },
+      "reagent": {
+        "before": 43,
+        "after": 42,
+        "afterFreshLogin": 42,
+        "onDisk": 42,
+        "debit": {
+          "count": 1,
+          "sequence": 789
+        },
+        "ownPetRejected": {
+          "ordinaryTargetId": 1000000,
+          "masterId": 1000,
+          "attackMode": "Peace",
+          "countBefore": 43,
+          "noDeletePacket": true,
+          "noAcceptedCast": true,
+          "countAfter": 43
+        }
+      }
+    }
+  },
+  "tests": {
+    "totalDistinctPassed": 112,
+    "logs": {
+      "projectile-sim-final-green.log": {
+        "sha256": "e5ff4b499908f37642910660e8558d0047919ab42b2c928b287345e208154463",
+        "passed": 10
+      },
+      "projectile-adjacent-player_magic_cooldown_tests.log": {
+        "sha256": "040b86cdbd58bccfd7300d791f5cbda5b27c33b5efd28b1a0a52a6eab2e0037a",
+        "passed": 4
+      },
+      "projectile-adjacent-player_action_cadence_tests.log": {
+        "sha256": "7d42f9cd8d62af5a9ef8561af6349a9e7674c2b8d7324fa5c7f5d3fe387ab621",
+        "passed": 15
+      },
+      "projectile-adjacent-owned_pet_combat--tests.log": {
+        "sha256": "62c54c79fad6b402ca585707493116a65ae652b12d7865f11b7f080629bac0d4",
+        "passed": 52
+      },
+      "projectile-adjacent-action_boundary.log": {
+        "sha256": "9b659fbc2054d4b91e06612776b8519e14a374785f6e619f7bf8d201d546bb19",
+        "passed": 9
+      },
+      "projectile-gateway-green.log": {
+        "sha256": "6b31fa0b6be984b42dafcb3fd0d4e65caeaf3b483a3e3b3d51f14f7d0a4e6f3a",
+        "passed": 13
+      },
+      "projectile-gateway-cadence.log": {
+        "sha256": "301e4c42dfac4aa25ee99bb3c43d4e63d303e42e9e20f04e634747d091af2501",
+        "passed": 10
+      }
+    }
+  },
+  "sourceBoundary": "GreatFireBall and SoulFireBall shared-Zone player-to-monster impact only. Server schedules exactly 500 + 50 ms per Chebyshev tile. Browser frame timing reflects timer and transport scheduling. Impact defense sampling and launch line-of-sight require separate coverage."
+}

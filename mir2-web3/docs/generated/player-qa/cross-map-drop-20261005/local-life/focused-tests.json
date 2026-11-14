@@ -1,0 +1,29 @@
+{
+  "command": "cargo test -p mir2-simulation --test shared_experience_owner_tick_life --test shared_monster_ownership --test shared_cross_map_drop_lifecycle -j 2 -- --nocapture",
+  "target": "C:/mir2-build/gateway-tests-r50",
+  "jobs": 2,
+  "red": {
+    "beforeProductionEdit": true,
+    "passed": 2,
+    "failed": 1,
+    "failedCase": "owner_dies_earlier_in_same_tick_rival_poison_claims_current_dead_owner",
+    "actual": "owner",
+    "expected": "rival",
+    "rawLog": "red-attempt-01.log"
+  },
+  "green": {
+    "newPassed": 3,
+    "sameMapOwnerPassed": 21,
+    "crossMapPassed": 19,
+    "totalPassed": 43,
+    "failed": 0,
+    "rawLog": "green-and-owner-adjacent-attempt-01.log"
+  },
+  "testFormatting": {
+    "redSha256": "7650cf6a6c57b8f52cf638eb6563cab24d1d5be4b32ee799241e9826175f462b",
+    "greenSha256": "afdaa83267f217a65ddd45060bf2a0b1cb74a66df621b15fa902216ef5bff208",
+    "change": "rustfmt --edition 2021 applied only to the new test after RED; no assertion or fixture logic change"
+  },
+  "preparedTickAcceptance": true,
+  "networkAcceptance": false
+}

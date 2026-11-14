@@ -1,0 +1,565 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-25T17:15:49.543Z",
+  "endedAt": "2026-10-25T17:15:50.545Z",
+  "sourceSeal": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\launcher-source-frozen-v1.json",
+    "bytes": 40976,
+    "sha256": "a22ff77e310680b4f95d0daf5cc630bdc9c899032a265eefa890212ba39e356c"
+  },
+  "checkedScripts": 30,
+  "passed": 30,
+  "failed": 0,
+  "records": [
+    {
+      "file": "backend-driver-source-guard.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\backend-driver-source-guard.mjs",
+        "bytes": 1811,
+        "sha256": "85885be1409c9b40701dd5640d871ac01ca85db6352ece769905ca4a402d8459"
+      },
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\backend-driver-source-guard.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "collect-public.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\collect-public.mjs",
+        "bytes": 43666,
+        "sha256": "dd63ad09cb2b7deaca39fc41d7efa574fc976074d3aaf1a3cc157e608d469534"
+      },
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\collect-public.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "derive-runtime-v1.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\derive-runtime-v1.mjs",
+        "bytes": 7323,
+        "sha256": "9cb7daab38ac27d5495ad9fe69c1903e0a0014f7bc65abed4953d6487a449eb1"
+      },
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\derive-runtime-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "driver-binding-contract.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\driver-binding-contract.mjs",
+        "bytes": 1187,
+        "sha256": "4bbffabe92c1973d4065abc829651ae670ac267fcbbc9ffdb2db61576d8cf83a"
+      },
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\driver-binding-contract.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "driver-evidence-contract.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\driver-evidence-contract.mjs",
+        "bytes": 4575,
+        "sha256": "b23df3246d3f23102394f5e8652dad8890f87bf8a02021991ea7748e81224860"
+      },
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\driver-evidence-contract.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "driver-report-contract.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\driver-report-contract.mjs",
+        "bytes": 9778,
+        "sha256": "dcae5502bc7f5e5e8a658b95b4ce614c1c1ea3fe0519a25ee07f466ee0c4cc5a"
+      },
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\driver-report-contract.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "finish-runtime-preparation-v1.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\finish-runtime-preparation-v1.mjs",
+        "bytes": 14544,
+        "sha256": "c9514d568f9cad4922c2006d24d11b6240fd6da758bddedfe3f5a21e338e9278"
+      },
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\finish-runtime-preparation-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "input-lib.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\input-lib.mjs",
+        "bytes": 16479,
+        "sha256": "2da9c9b4a173875b1ddf761fa26b74021268f08a6b54be84656acacd591635cd"
+      },
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\input-lib.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "measured-phase-contract.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\measured-phase-contract.mjs",
+        "bytes": 772,
+        "sha256": "b0977c31d9ee2345977e6af85f79beabc369d4c3e5c9448a50fa39133e0e2b39"
+      },
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\measured-phase-contract.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "monitor-owned.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\monitor-owned.mjs",
+        "bytes": 1182,
+        "sha256": "204abfb6fa4000b9da770a8dbc128225ff3583caf9e7763dbedcf6b22d5adc72"
+      },
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\monitor-owned.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "native-chase-report-contract.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\native-chase-report-contract.mjs",
+        "bytes": 2266,
+        "sha256": "66b9ce1a39a1cfbe610d3f1a98559c67d178667319718f8baaa748a5d7d102c0"
+      },
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\native-chase-report-contract.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "passed-probe-window-contract.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\passed-probe-window-contract.mjs",
+        "bytes": 3040,
+        "sha256": "3a238991e9ee9b81b93cdcb282cdd7c718afa076ec5eb1db11ef96cbe4b15cdb"
+      },
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\passed-probe-window-contract.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "passed-probe-window-contract.test.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\passed-probe-window-contract.test.mjs",
+        "bytes": 3366,
+        "sha256": "7ab914ff3e0ed491b8b897b3099efd3ab4ad6613d452ec0e70351b092a8ceb58"
+      },
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\passed-probe-window-contract.test.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "prepare-inputs.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\prepare-inputs.mjs",
+        "bytes": 11638,
+        "sha256": "33f1801a462608e385a64acfa197688cf3c73b29936e957ee3dbdde78abf5dd6"
+      },
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\prepare-inputs.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "projection-build-source-lib.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\projection-build-source-lib.mjs",
+        "bytes": 153,
+        "sha256": "27716706ffe3f2c674a7193ce9a54c17cda141703d8e05a75696b1c67baa0206"
+      },
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\projection-build-source-lib.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "request-stop.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\request-stop.mjs",
+        "bytes": 915,
+        "sha256": "14a5c691187006ebb50798068100d47af7ed3a6c4358c29f75b6774c79ebc90f"
+      },
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\request-stop.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "root-seal-and-guard-v1.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\root-seal-and-guard-v1.mjs",
+        "bytes": 13330,
+        "sha256": "f7ae46ba51a62ce378ee786cd8d92a96bc8802a61ed0036fb80d69cdeec47060"
+      },
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\root-seal-and-guard-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "root-seal-and-guard-v2.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\root-seal-and-guard-v2.mjs",
+        "bytes": 13330,
+        "sha256": "0378790828b92a6f585afd25013ddec7076452ffe3f3571f22e9e5d2f3e33f14"
+      },
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\root-seal-and-guard-v2.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "run-adapter-synthetics.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\run-adapter-synthetics.mjs",
+        "bytes": 2034,
+        "sha256": "09b381ec6fcfc99628666e2a2d1107f1a271bcff2685bb6045a9d1e83dd7510f"
+      },
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\run-adapter-synthetics.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "run-owned.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\run-owned.mjs",
+        "bytes": 19729,
+        "sha256": "bcc3a4913186d7cf894a41aae497ee50c8d245d144a8486cd722d9370851a927"
+      },
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\run-owned.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "scene-contract.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\scene-contract.mjs",
+        "bytes": 10796,
+        "sha256": "6f91a930d2c1d05a7ca813aaff0c1e44d29289303913d470ac2a72c4211b207f"
+      },
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\scene-contract.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "scene-driver-compatibility.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\scene-driver-compatibility.mjs",
+        "bytes": 1550,
+        "sha256": "260b80faa43d6a52936097cb1587989cc7a9dc52022dc5f667b10dd3e76c0289"
+      },
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\scene-driver-compatibility.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "slow-stage-public.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\slow-stage-public.mjs",
+        "bytes": 10318,
+        "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c"
+      },
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\slow-stage-public.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "slow-stage-public.test.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\slow-stage-public.test.mjs",
+        "bytes": 22894,
+        "sha256": "a0f10c9d721404378e8b5bc56070425393fdf82af21588bbf70de2c274af76ae"
+      },
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\slow-stage-public.test.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "slow-stage-row-contract.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\slow-stage-row-contract.mjs",
+        "bytes": 1553,
+        "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+      },
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\slow-stage-row-contract.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "verify-full16-gate.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\verify-full16-gate.mjs",
+        "bytes": 5142,
+        "sha256": "1ecd3b23d54451ccb5eb35e9116a46ede0e039488edebac9672b52024164d4e7"
+      },
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\verify-full16-gate.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "verify-public.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\verify-public.mjs",
+        "bytes": 19225,
+        "sha256": "327b49e29aca302f9586bbfd4ded8f4b47a0c722f59c998b6aa6e036826bcc94"
+      },
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\verify-public.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "wire-diagnostics-adapter.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\wire-diagnostics-adapter.mjs",
+        "bytes": 2514,
+        "sha256": "82c5ae7432cb7b69e576e7c283e4a4ca6afe074b692342ea5a82516dd3fef164"
+      },
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\wire-diagnostics-adapter.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "wire-diagnostics-adapter.test.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\wire-diagnostics-adapter.test.mjs",
+        "bytes": 7373,
+        "sha256": "8ffa525f9df27dae593faeb355f4a82d227ae0576af4afc2b5f807cb8baab3c5"
+      },
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\wire-diagnostics-adapter.test.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "wire-diagnostics-contract.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\wire-diagnostics-contract.mjs",
+        "bytes": 15767,
+        "sha256": "8d2c06f251a3b623d4ff135211046b9d039b31e9bfdad799c0cb1fd3ddfda13a"
+      },
+      "executable": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\wire-diagnostics-contract.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "immutable99InputsUnchangedBeforeAfter": true,
+  "log": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\launcher-syntax-check.log",
+    "bytes": 15666,
+    "sha256": "000af7b498805ed65a9ebb2222ec2d3f6d6cfa277b8f9eb6b10dd20fc826ff9a"
+  },
+  "purpose": "Generate the previously missing actual syntax log after partial account-only preparation; no module execution or account changes.",
+  "accountsCreatedByThisCheck": 0,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

@@ -1,0 +1,697 @@
+{
+  "run": "quest-after-r2",
+  "source": "2029b44abdee104445c569204477a219a1353f79",
+  "localCandidate": "bfbee7018917-bootstrap-chunks-14dc8914",
+  "passed": true,
+  "originalReceiptSha256": "797a6889d5dac17b06b43f4f29e9d707f3bbc7d4e10e3b519e4aec6a9785452b",
+  "renderer": "compatibility",
+  "failure": null,
+  "bootstrap": {
+    "primaryReads": [
+      {
+        "scope": "controlled-bootstrap-header-stall",
+        "kind": "floor",
+        "path": "/bootstrap/r16-floor/e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d.json",
+        "attempt": 1,
+        "requestedAt": 1794560863367,
+        "intentionalNoHeaders": true,
+        "closedAt": 1794560883368
+      },
+      {
+        "scope": "controlled-bootstrap-header-stall",
+        "kind": "scene",
+        "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+        "attempt": 1,
+        "requestedAt": 1794560863368,
+        "intentionalNoHeaders": true,
+        "closedAt": 1794560883372
+      },
+      {
+        "scope": "controlled-bootstrap-header-stall",
+        "kind": "locale",
+        "path": "/bootstrap/r16-locales/b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c.json",
+        "attempt": 1,
+        "requestedAt": 1794560863370,
+        "intentionalNoHeaders": true,
+        "closedAt": 1794560883372
+      },
+      {
+        "scope": "controlled-bootstrap-header-stall",
+        "kind": "floor",
+        "path": "/bootstrap/r16-floor/e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d.json",
+        "attempt": 2,
+        "requestedAt": 1794560883573,
+        "intentionalNoHeaders": true,
+        "closedAt": 1794560903572
+      },
+      {
+        "scope": "controlled-bootstrap-header-stall",
+        "kind": "scene",
+        "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+        "attempt": 2,
+        "requestedAt": 1794560883573,
+        "intentionalNoHeaders": true,
+        "closedAt": 1794560903593
+      },
+      {
+        "scope": "controlled-bootstrap-header-stall",
+        "kind": "locale",
+        "path": "/bootstrap/r16-locales/b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c.json",
+        "attempt": 2,
+        "requestedAt": 1794560883574,
+        "intentionalNoHeaders": true,
+        "closedAt": 1794560903593
+      },
+      {
+        "scope": "controlled-bootstrap-header-stall",
+        "kind": "floor",
+        "path": "/bootstrap/r16-floor/e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d.json",
+        "attempt": 3,
+        "requestedAt": 1794560977263,
+        "closedAt": 1794560977267
+      },
+      {
+        "scope": "controlled-bootstrap-header-stall",
+        "kind": "scene",
+        "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+        "attempt": 3,
+        "requestedAt": 1794560977264,
+        "closedAt": 1794560977264
+      },
+      {
+        "scope": "controlled-bootstrap-header-stall",
+        "kind": "locale",
+        "path": "/bootstrap/r16-locales/b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c.json",
+        "attempt": 3,
+        "requestedAt": 1794560977264,
+        "closedAt": 1794560977268
+      },
+      {
+        "scope": "controlled-bootstrap-header-stall",
+        "kind": "scene",
+        "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+        "attempt": 4,
+        "requestedAt": 1794560977483,
+        "closedAt": 1794560977483
+      }
+    ],
+    "chunks": [
+      {
+        "scope": "compiled-static",
+        "kind": "floor",
+        "path": "/_next/static/chunks/r16-entry-floor-fallback.b86d29a8b3a60f27.js",
+        "sourcePath": "/bootstrap/r16-floor/e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d.json",
+        "status": 200,
+        "finishedAt": 1794560903590,
+        "bytes": 439514,
+        "scriptSha256": "77b660b7ed9a23ce3877ba30ca15f1c1469647a3c6aee72ccb3455804489e4cf",
+        "expectedScriptSha256": "77b660b7ed9a23ce3877ba30ca15f1c1469647a3c6aee72ccb3455804489e4cf",
+        "expectedScriptBytes": 439514,
+        "deliveredSha256": "e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d",
+        "jsonBytes": 439896,
+        "expectedPayloadSha256": "e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d",
+        "provenance": "browser-complete-body plus exact production-chunk static-AST payload audit",
+        "passed": true
+      },
+      {
+        "scope": "compiled-static",
+        "kind": "scene",
+        "path": "/_next/static/chunks/r16-entry-scene-fallback.75a734115ce2d5ba.js",
+        "sourcePath": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+        "status": 200,
+        "finishedAt": 1794560903611,
+        "bytes": 458590,
+        "scriptSha256": "598afb15d7b7098a63aba85c1d0b43a6e9df3f04ffe08e5dfd89464e525818a4",
+        "expectedScriptSha256": "598afb15d7b7098a63aba85c1d0b43a6e9df3f04ffe08e5dfd89464e525818a4",
+        "expectedScriptBytes": 458590,
+        "deliveredSha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+        "jsonBytes": 458475,
+        "expectedPayloadSha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+        "provenance": "browser-complete-body plus exact production-chunk static-AST payload audit",
+        "passed": true
+      },
+      {
+        "scope": "compiled-static",
+        "kind": "locale",
+        "path": "/_next/static/chunks/r16-gameplay-locales.37f59f0c4b531239.js",
+        "sourcePath": "/bootstrap/r16-locales/b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c.json",
+        "status": 200,
+        "finishedAt": 1794560903818,
+        "bytes": 3336037,
+        "scriptSha256": "8673630a4b4a1a306f44c09d5ed01132353fec81b4dc7fa2cc019d0a319c902d",
+        "expectedScriptSha256": "8673630a4b4a1a306f44c09d5ed01132353fec81b4dc7fa2cc019d0a319c902d",
+        "expectedScriptBytes": 3336037,
+        "deliveredSha256": "b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c",
+        "jsonBytes": 3283113,
+        "expectedPayloadSha256": "b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c",
+        "provenance": "browser-complete-body plus exact production-chunk static-AST payload audit",
+        "passed": true
+      },
+      {
+        "scope": "compiled-static",
+        "kind": "scene",
+        "path": "/_next/static/chunks/r16-entry-scene-fallback.75a734115ce2d5ba.js",
+        "sourcePath": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+        "status": 200,
+        "finishedAt": 1794560977502,
+        "bytes": 458590,
+        "scriptSha256": "598afb15d7b7098a63aba85c1d0b43a6e9df3f04ffe08e5dfd89464e525818a4",
+        "expectedScriptSha256": "598afb15d7b7098a63aba85c1d0b43a6e9df3f04ffe08e5dfd89464e525818a4",
+        "expectedScriptBytes": 458590,
+        "deliveredSha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+        "jsonBytes": 458475,
+        "expectedPayloadSha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+        "provenance": "browser-complete-body plus exact production-chunk static-AST payload audit",
+        "passed": true
+      }
+    ],
+    "scope": "Two real noheaders20s attempts per critical JSON then actual compiled Next module; all full JS bytes and parsed source payloads checked, no gate relaxation.",
+    "passed": true
+  },
+  "sameEntryRecoveryPassed": true,
+  "startGame": {
+    "acknowledgedAt": 1794560874206,
+    "bootstrapAt": 1794560874442,
+    "position": {
+      "x": 288,
+      "y": 616
+    },
+    "map": "0"
+  },
+  "firstPlayable": {
+    "epochMs": 1794560906660,
+    "observedAt": 1794560906663
+  },
+  "earlyWalks": {
+    "passed": true,
+    "firstPlayableAt": 1794560906660,
+    "rows": [
+      {
+        "key": "ArrowRight",
+        "direction": "Right",
+        "to": {
+          "x": 289,
+          "y": 616
+        },
+        "nativeHudReadyBeforeInput": false,
+        "inputAt": 1794560908868,
+        "wireAt": 1794560908886,
+        "ackAt": 1794560908899,
+        "renderedAt": 1794560908935,
+        "ackMs": 13,
+        "inputToRenderedMs": 67,
+        "rendered": {
+          "x": 289,
+          "y": 616
+        }
+      },
+      {
+        "key": "ArrowLeft",
+        "direction": "Left",
+        "to": {
+          "x": 288,
+          "y": 616
+        },
+        "nativeHudReadyBeforeInput": false,
+        "inputAt": 1794560908936,
+        "wireAt": 1794560909487,
+        "ackAt": 1794560909489,
+        "renderedAt": 1794560909518,
+        "ackMs": 2,
+        "inputToRenderedMs": 582,
+        "rendered": {
+          "x": 288,
+          "y": 616
+        }
+      }
+    ],
+    "returnedToSpawn": true
+  },
+  "continuousWalk": {
+    "startedAt": 1794560909518,
+    "rows": [
+      {
+        "step": 0,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794560910475
+      },
+      {
+        "step": 0,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794560911066
+      },
+      {
+        "step": 1,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794560911679
+      },
+      {
+        "step": 1,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794560912266
+      },
+      {
+        "step": 2,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794560912883
+      },
+      {
+        "step": 2,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794560913498
+      },
+      {
+        "step": 3,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794560914084
+      },
+      {
+        "step": 3,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794560914715
+      },
+      {
+        "step": 4,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794560915304
+      },
+      {
+        "step": 4,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794560915907
+      },
+      {
+        "step": 5,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794560916524
+      },
+      {
+        "step": 5,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794560917128
+      },
+      {
+        "step": 6,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794560917723
+      },
+      {
+        "step": 6,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794560918328
+      },
+      {
+        "step": 7,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794560918936
+      },
+      {
+        "step": 7,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794560919537
+      }
+    ],
+    "endedAt": 1794560919537
+  },
+  "native": {
+    "passed": true,
+    "waitMs": 40298,
+    "backend": "webgpu",
+    "packageId": "webgpu",
+    "hudReady": true,
+    "questReady": true,
+    "fontCache": [
+      {
+        "name": "NotoSansTC.ttf",
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+      },
+      {
+        "name": "NotoSansCJKsc-Regular.otf",
+        "bytes": 16437364,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+      },
+      {
+        "name": "NotoSans-Regular.ttf",
+        "bytes": 621572,
+        "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      },
+      {
+        "name": "NotoSansDevanagari-Regular.ttf",
+        "bytes": 243520,
+        "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+      },
+      {
+        "name": "NotoSansThai-Regular.ttf",
+        "bytes": 37780,
+        "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+      },
+      {
+        "name": "NotoSansArabic-Regular.ttf",
+        "bytes": 234892,
+        "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+      }
+    ],
+    "prewarmPassed": true,
+    "prewarmSummary": {
+      "requested": 113,
+      "ok": 113,
+      "failed": 0
+    },
+    "diary": {
+      "passed": true,
+      "locale": "zh-TW",
+      "renderer": "ordinary-shared-native",
+      "questOpened": true,
+      "qClosed": true,
+      "owner": "bevy",
+      "package": {
+        "backend": "webgpu",
+        "packageId": "webgpu"
+      },
+      "navigation": {
+        "characterOpen": false,
+        "characterPage": "character",
+        "bagOpen": false,
+        "questOpen": false
+      },
+      "zeroWorldCommands": true,
+      "screenshot": "quest-available-zh-TW.png"
+    }
+  },
+  "npcRecovery": {
+    "reads": [
+      {
+        "path": "/bootstrap/r16-visuals/9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9.json",
+        "scope": "visual-pack",
+        "kind": "npcs",
+        "requestedAt": 1794560903843,
+        "intentionalNoHeaders": true,
+        "closedAt": 1794560923847
+      },
+      {
+        "path": "/bootstrap/r16-visuals/9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9.json",
+        "scope": "visual-pack",
+        "kind": "npcs",
+        "requestedAt": 1794560924049,
+        "intentionalNoHeaders": true,
+        "closedAt": 1794560944049
+      },
+      {
+        "path": "/bootstrap/r16-visuals/9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9.json",
+        "scope": "visual-pack",
+        "kind": "npcs",
+        "requestedAt": 1794560945051,
+        "status": 200,
+        "bytes": 313909,
+        "sha256": "9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9",
+        "headersAt": 1794560945051,
+        "finishedAt": 1794560945051,
+        "closedAt": 1794560945051
+      },
+      {
+        "path": "/bootstrap/r16-visuals/9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9.json",
+        "scope": "visual-pack",
+        "kind": "npcs",
+        "requestedAt": 1794560977346,
+        "status": 200,
+        "bytes": 313909,
+        "sha256": "9093bb29d7f91ab07a44a47e888e2f1d40151130c1253ecf9451af63c4e057d9",
+        "headersAt": 1794560977346,
+        "finishedAt": 1794560977346,
+        "closedAt": 1794560977346
+      }
+    ],
+    "passed": true
+  },
+  "controlledRuntimeDelivery": {
+    "kind": "Playwright fixed-byte response; not a WAN cold-download result",
+    "version": "bevy-0c553a754308e5b8",
+    "deliveries": [
+      {
+        "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime.js",
+        "at": 1794560906786,
+        "status": 200,
+        "bytes": 141747,
+        "sha256": "3eb60cb1c4b3a931befe42485b10925ef161da576c47974c63b4b811a7a0ee99",
+        "controlledHeaderDelayMs": 0
+      },
+      {
+        "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "attempt": 1,
+        "requestedAt": 1794560906791,
+        "bytes": 0,
+        "expectedBytes": 31452436,
+        "intentionalNoHeaders": true,
+        "closedAt": 1794560914788
+      },
+      {
+        "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "attempt": 2,
+        "requestedAt": 1794560914789,
+        "bytes": 0,
+        "expectedBytes": 31452436,
+        "headersAt": 1794560914789,
+        "status": 200,
+        "intentionalZeroBody": true,
+        "closedAt": 1794560929791
+      },
+      {
+        "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "attempt": 3,
+        "requestedAt": 1794560929793,
+        "bytes": 0,
+        "expectedBytes": 31452436,
+        "headersAt": 1794560929793,
+        "status": 200,
+        "intentionalZeroBody": true,
+        "closedAt": 1794560944808
+      },
+      {
+        "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "attempt": 4,
+        "requestedAt": 1794560945813,
+        "bytes": 31452436,
+        "expectedBytes": 31452436,
+        "headersAt": 1794560945813,
+        "status": 200,
+        "sha256": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+        "finishedAt": 1794560945817,
+        "closedAt": 1794560945817
+      },
+      {
+        "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime.js",
+        "at": 1794560991965,
+        "status": 200,
+        "bytes": 141747,
+        "sha256": "3eb60cb1c4b3a931befe42485b10925ef161da576c47974c63b4b811a7a0ee99",
+        "controlledHeaderDelayMs": 0
+      },
+      {
+        "path": "/_qa/runtime-body/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "attempt": 5,
+        "requestedAt": 1794560991970,
+        "bytes": 31452436,
+        "expectedBytes": 31452436,
+        "headersAt": 1794560991970,
+        "status": 200,
+        "sha256": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+        "finishedAt": 1794560991974,
+        "closedAt": 1794560991974
+      }
+    ]
+  },
+  "firstSave": {
+    "passed": true,
+    "className": "Warrior",
+    "level": 30,
+    "gold": 76360,
+    "experience": 19497,
+    "fields": [
+      "map_file_name",
+      "position",
+      "direction",
+      "gold",
+      "credit",
+      "experience",
+      "max_experience",
+      "inventory_items_json",
+      "belt_items_json",
+      "equipment_items_json",
+      "equipment_items_explicit_empty",
+      "storage_items_json",
+      "hero_inventory_items_json",
+      "hero_equipment_items_json",
+      "quest_states_json",
+      "skill_states_json"
+    ],
+    "questStateCount": 26
+  },
+  "worker": {
+    "passed": true,
+    "expectedSha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa",
+    "restored": {
+      "status": 200,
+      "bytes": 66374,
+      "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+    },
+    "lifecycle": [
+      {
+        "versionId": "0",
+        "runningStatus": "running",
+        "status": "activated"
+      },
+      {
+        "versionId": "0",
+        "runningStatus": "stopping",
+        "status": "activated"
+      },
+      {
+        "versionId": "0",
+        "runningStatus": "stopped",
+        "status": "activated"
+      },
+      {
+        "versionId": "0",
+        "runningStatus": "starting",
+        "status": "activated"
+      },
+      {
+        "versionId": "0",
+        "runningStatus": "starting",
+        "status": "activated"
+      },
+      {
+        "versionId": "0",
+        "runningStatus": "starting",
+        "status": "activated"
+      },
+      {
+        "versionId": "0",
+        "runningStatus": "running",
+        "status": "activated"
+      }
+    ]
+  },
+  "browserRestart": {
+    "firstProcessCount": 8,
+    "allFirstProcessesExited": true,
+    "persistedProfileExists": true,
+    "secondProcessCount": 8
+  },
+  "warm": {
+    "passed": true,
+    "loginKind": "normal-password",
+    "authoritativeStart": {
+      "position": {
+        "x": 289,
+        "y": 616
+      },
+      "characterIndex": 2
+    },
+    "native": {
+      "passed": true,
+      "waitMs": 1357,
+      "backend": "webgpu",
+      "packageId": "webgpu",
+      "hudReady": true,
+      "questReady": true,
+      "fontCache": [
+        {
+          "name": "NotoSansTC.ttf",
+          "bytes": 11941968,
+          "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+        },
+        {
+          "name": "NotoSansCJKsc-Regular.otf",
+          "bytes": 16437364,
+          "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+        },
+        {
+          "name": "NotoSans-Regular.ttf",
+          "bytes": 621572,
+          "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+        },
+        {
+          "name": "NotoSansDevanagari-Regular.ttf",
+          "bytes": 243520,
+          "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+        },
+        {
+          "name": "NotoSansThai-Regular.ttf",
+          "bytes": 37780,
+          "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+        },
+        {
+          "name": "NotoSansArabic-Regular.ttf",
+          "bytes": 234892,
+          "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+        }
+      ],
+      "prewarmPassed": true,
+      "prewarmSummary": {
+        "requested": 113,
+        "ok": 113,
+        "failed": 0
+      },
+      "diary": {
+        "passed": true,
+        "locale": "zh-TW",
+        "renderer": "ordinary-shared-native",
+        "questOpened": true,
+        "qClosed": true,
+        "owner": "bevy",
+        "package": {
+          "backend": "webgpu",
+          "packageId": "webgpu"
+        },
+        "navigation": {
+          "characterOpen": false,
+          "characterPage": "character",
+          "bagOpen": false,
+          "questOpen": false
+        },
+        "zeroWorldCommands": true,
+        "screenshot": "quest-available-zh-TW.png"
+      }
+    },
+    "saved": true,
+    "logout": {
+      "sentAt": 1794560996867,
+      "acknowledgedAt": 1794560999427,
+      "savedPosition": {
+        "x": 288,
+        "y": 616
+      },
+      "returnedToSelect": true,
+      "gutter": {
+        "x": 64,
+        "y": 480
+      }
+    }
+  },
+  "closed": {
+    "browser": true,
+    "proxy": true,
+    "next": true,
+    "gateway": true
+  },
+  "fixtureUnchanged": true,
+  "scope": "Controlled original-gate fallback qualification plus closed-browser same-profile normal relogin; not WAN or full class route."
+}

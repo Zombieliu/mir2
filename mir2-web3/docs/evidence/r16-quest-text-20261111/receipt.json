@@ -1,0 +1,268 @@
+{
+  "scope": "ordinary Web fallback newcomer quest display and authoritative first-quest progression",
+  "reference": {
+    "branch": "codex/windows-player-journey",
+    "revision": "a852afd202ab7cc52d37c795ea5f7ab13835c40e",
+    "source": {
+      "mir2-web3/apps/game-client/client-bevy/src/player_text.rs": "a899dc9791795f563781520ee5c28abf2798350d",
+      "mir2-web3/apps/game-client/client-bevy/src/quest_presentation_text.rs": "56aa73044c9b49fbf9553017d28a73b26cc8ad51",
+      "mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs": "905ceabb3cc44ef0b98c4fac579d0a369b2ea20a",
+      "mir2-web3/apps/simulation/src/runtime/newcomer_v2.rs": "0fac47711095305c1cf05385d540fce976df967b",
+      "mir2-web3/apps/simulation/src/runtime/quests.rs": "5456cf10b13c4cbe09c49127727d6dd838d2db99",
+      "mir2-web3/config/quest-guidance/newcomer-journey-v2.json": "0c22523638b0a12a60793225cf23d1540195d60f",
+      "mir2-web3/packages/game-data/data/native-i18n/quest.json": "c9e54574ac3d5c3a16c0870c3f567413d3e2fff7"
+    }
+  },
+  "publicProduction": {
+    "revision": "ef0d1ee9dc7f4322d23c6332472add02e69c5f83",
+    "status": "previously published"
+  },
+  "candidate": {
+    "revision": "a852afd202ab-r16-quest-text-75dbb5aa",
+    "builtId": "vGvCEoulIqQ-di1cqwp-I",
+    "runtime": "bevy-84ef836460a84e03",
+    "buildReceiptSha256": "8a7cf417596a13aabd29e36384f2b37cb1a8b22216ea8b83fff4342d06bd49b1",
+    "productInputs": [
+      {
+        "filename": "mir2-web3/apps/web/app/components/original-client-quest-log-window.tsx",
+        "sha256": "1358f94aeaee16217d8d05e62690596431220a387c0b2875c890d14ffbb89523",
+        "gitBlob": "0eb8f320ba71fcffe8639cca9e531d84f7d0dc1a"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/newcomer-v2-journey.ts",
+        "sha256": "71695570388b613b4dd4ec7bf947ed3308acbb2ec6401212165aaa0bbb46c950",
+        "gitBlob": "1d2d4f9c178f4d26c01901d0012fc65b3ac24220"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/quest-localization.ts",
+        "sha256": "a95652a6a8d4813634c6f9569f9ae9737dd281ef95223eb46d4704c42c7e5f90",
+        "gitBlob": "c9a9a5df0065bc42e012321cc4477670a310fcc7"
+      }
+    ]
+  },
+  "checks": {
+    "passed": true,
+    "nodeTests": 56,
+    "configuredMainQuests": 22,
+    "growthRewards": [
+      15,
+      20,
+      25,
+      30
+    ],
+    "displayLanguages": 10,
+    "sourceSha256": {
+      "scripts/test-r16-native-localization.mjs": "caf2d27fa9baafc3a89f4da0285a9afd3c6991cf0f227aec50f45190ade5a80c",
+      "scripts/test-r16-language-parity.mjs": "bbae3cd74e2fd982fbe1214235918bbeed14db9f3baed43d149ecaac7f2bdc47",
+      "scripts/test-bevy-quest-ui.mjs": "453fde6ab15d197d9b28037d99633ddba8e818f8c5e0a3157b6f7fe4cbdf5e5a",
+      "scripts/test-bevy-quest-locale.mjs": "480365a944bc9adcfa315d029ec520ddb5a32e711906c225ccbde114402d3811",
+      "scripts/test-newcomer-v2-journey.mjs": "8299466ce2010fdb9fe9c0dd26dd3e522ccfbdc40a60edf45eb6474f0de4ed68",
+      "scripts/test-quest-localization.mjs": "a2abe61bbe80ecbf73571aa64ab4f58236d884c897900ef258f0aa7090873d43"
+    }
+  },
+  "before": {
+    "available": {
+      "chapter": "Chapter 1/6 · Village Beginnings · 0/4 completed",
+      "progress": "Journey 0/26",
+      "objective": "Report to Assistant Jane",
+      "count": "0/1",
+      "rendered": true
+    },
+    "originalQuest": {
+      "questId": 2110001,
+      "stage": "available",
+      "current": 0,
+      "required": 1
+    },
+    "fallback": true
+  },
+  "after": {
+    "available": {
+      "chapter": "章節 1/6 · 村莊起步 · 本章 0/4",
+      "progress": "當前主線 0/26",
+      "objective": "向助理簡報告",
+      "count": "0/1",
+      "rendered": true
+    },
+    "originalQuest": {
+      "questId": 2110001,
+      "stage": "available",
+      "current": 0,
+      "required": 1
+    },
+    "fallback": true,
+    "ready": {
+      "ackSeq": 44,
+      "actionSeq": 43,
+      "current": 1,
+      "required": 1,
+      "chapter": "章節 1/6 · 村莊起步 · 本章 0/4",
+      "detail": "首套巡邏裝備\n章節 1/6 · 村莊起步 · 本章 0/4\n可提交\n返回助理 Jane\n\n前往比奇省邊境村，向助理簡（284,606）報告，領取巡邏裝備。\n\n任務目標\n✔\n向助理簡報告\n1/1\n獎勵\n經驗 100\n金幣 100\n10"
+    },
+    "finished": {
+      "actionSeq": 52,
+      "completedHistorySeq": 53,
+      "nextQuestSeq": 54,
+      "nextQuest": 2110002,
+      "nextChapter": "章節 1/6 · 村莊起步 · 本章 1/4",
+      "nextProgress": "當前主線 1/26"
+    },
+    "routeToAssistant": {
+      "steps": [
+        {
+          "x": 290,
+          "y": 615,
+          "commandSeq": 12,
+          "ackSeq": 13
+        },
+        {
+          "x": 290,
+          "y": 614,
+          "commandSeq": 14,
+          "ackSeq": 15
+        },
+        {
+          "x": 290,
+          "y": 613,
+          "commandSeq": 16,
+          "ackSeq": 17
+        },
+        {
+          "x": 290,
+          "y": 612,
+          "commandSeq": 18,
+          "ackSeq": 19
+        },
+        {
+          "x": 290,
+          "y": 611,
+          "commandSeq": 20,
+          "ackSeq": 21
+        },
+        {
+          "x": 290,
+          "y": 610,
+          "commandSeq": 22,
+          "ackSeq": 23
+        },
+        {
+          "x": 289,
+          "y": 610,
+          "commandSeq": 24,
+          "ackSeq": 25
+        },
+        {
+          "x": 288,
+          "y": 610,
+          "commandSeq": 26,
+          "ackSeq": 27
+        },
+        {
+          "x": 288,
+          "y": 609,
+          "commandSeq": 28,
+          "ackSeq": 29
+        },
+        {
+          "x": 287,
+          "y": 609,
+          "commandSeq": 30,
+          "ackSeq": 31
+        },
+        {
+          "x": 287,
+          "y": 608,
+          "commandSeq": 32,
+          "ackSeq": 33
+        },
+        {
+          "x": 287,
+          "y": 607,
+          "commandSeq": 34,
+          "ackSeq": 35
+        },
+        {
+          "x": 286,
+          "y": 607,
+          "commandSeq": 36,
+          "ackSeq": 37
+        },
+        {
+          "x": 285,
+          "y": 607,
+          "commandSeq": 38,
+          "ackSeq": 39
+        }
+      ],
+      "attempts": [],
+      "position": {
+        "x": 285,
+        "y": 607
+      }
+    }
+  },
+  "normalLogout": {
+    "sentAt": 1794367233805,
+    "acknowledgedAt": 1794367236130,
+    "savedPosition": {
+      "x": 285,
+      "y": 607
+    },
+    "returnedToSelect": true,
+    "gutter": {
+      "x": 64,
+      "y": 480
+    }
+  },
+  "coldRestart": {
+    "passed": true,
+    "isolated": true,
+    "newProcess": true,
+    "ordinaryProtocol": true,
+    "stages": [
+      "new-gateway-healthy",
+      "same-role-authenticated",
+      "quest-history-and-followup-restored",
+      "normal-logout"
+    ],
+    "position": {
+      "x": 285,
+      "y": 607
+    },
+    "gold": 100,
+    "quests": [
+      {
+        "questId": 2110001,
+        "stage": "completed",
+        "current": 1,
+        "required": 1
+      },
+      {
+        "questId": 2110002,
+        "stage": "available",
+        "current": 0,
+        "required": 1
+      }
+    ],
+    "gatewayStopped": true
+  },
+  "originalFilesUnchanged": true,
+  "browserOrigins": {
+    "loopbackOnly": true,
+    "publicAuth": false,
+    "firstPartyGamePath": "/game",
+    "systemBrowserLocale": "zh-TW"
+  },
+  "limitations": [
+    "shared GPU quest rendering",
+    "public signed replay of this candidate",
+    "physical phone",
+    "fallback graduation chooser text"
+  ],
+  "screenshots": {
+    "before.png": "8d467c8c9b43e3444b1efd599758bcfe28795e44a75fd2398b6748c7bfbad0b8",
+    "available.png": "be6eaecc8320958e2e419a412f279be0551f51aa45cbf04f2c9fcb8b7a5873df",
+    "ready.png": "072c982b1514df2741b542d35f82978c4f3653ef36237dbc919af70dfaddbf2b",
+    "followup.png": "d215aae8a41f59110d242c153f87680c11170e8bd89cf232d70dd15a9f6e54e9"
+  }
+}

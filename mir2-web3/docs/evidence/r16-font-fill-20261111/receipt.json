@@ -1,0 +1,2257 @@
+{
+  "schema": 1,
+  "checkedAt": "2026-11-11T11:03:19.961Z",
+  "base": "ab9947fcc0ebc22818e9391682102a5f93243f3b",
+  "branch": "codex/windows-player-journey",
+  "candidate": {
+    "scope": "current R16 source with shared immutable font download held through cache completion",
+    "candidate": "ab9947fcc0eb-r16-fontshare-ea90557a",
+    "parent": "a852afd202ab7cc52d37c795ea5f7ab13835c40e",
+    "authoritativeHead": "ab9947fcc0ebc22818e9391682102a5f93243f3b",
+    "sourceArchiveSha256": "965e4be2143c1f73e862aa94eeb1f23e1c7e533cf782728bf91103b5e8a757a8",
+    "packageLockSha256": "7fe1bebf3c7bd3561223fb729c78e18b251cfa74eedb0cd84b17b1ee33ff9ef6",
+    "buildConfigSha256": "429269443ae5fef187b37271ce374b4863a1fe1620cc6dadc9f2f86e3d474c57",
+    "version": "20261108-r16-08ec86d5105c",
+    "changedFiles": [
+      {
+        "filename": "mir2-web3/apps/web/app/components/original-client-extra-windows.tsx",
+        "sha256": "2cdec232b9e043879dfa11951f1e1f8899d75260ebb17af9d90a0fe7e3de82e1",
+        "gitBlob": "c104b9e005b39d6384ce31192a70d58c825befd6"
+      },
+      {
+        "filename": "mir2-web3/apps/web/app/components/original-client-quest-log-window.tsx",
+        "sha256": "f4a07e1bf403062896f564f466118c41cadebea8ac0f963690429ff4433de42b",
+        "gitBlob": "29a1ac6e3dc7f0792f7ce67e62a82a449bc35d6f"
+      },
+      {
+        "filename": "mir2-web3/apps/web/app/original-client-shell.tsx",
+        "sha256": "caa951252658d8fea576e0504380f03d0336a4e52e4c71b5a9a974a49bbae65b",
+        "gitBlob": "4dc62bf11d7b0ff092e168dafa7046f9f68c1a37"
+      },
+      {
+        "filename": "mir2-web3/apps/web/app/page.tsx",
+        "sha256": "bc3403c48f717f383aff3a6ba41e676859ce990d4aaa5afb59e7e66096d0e224",
+        "gitBlob": "5c2604aa84e0abc59c348a552ff2aab92ab79316"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/newcomer-v2-journey.ts",
+        "sha256": "71695570388b613b4dd4ec7bf947ed3308acbb2ec6401212165aaa0bbb46c950",
+        "gitBlob": "1d2d4f9c178f4d26c01901d0012fc65b3ac24220"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/quest-localization.ts",
+        "sha256": "6eb91c281c98cf1ef9e120c4e2204b44eba805e83f2698c709976ae417c1ab18",
+        "gitBlob": "4d702deee9894bbc789d1a12faeeebd832d651c7"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/r16-entry-scene.ts",
+        "sha256": "7ae58391edc25708fc9a481ec8fd4ea8ed3cee3e8306817265a91e9469b8b0bb",
+        "gitBlob": "58f5b96b06d29bff212ffd9446588d3353904f02"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/scene-bootstrap-race.ts",
+        "sha256": "95c0bbbbd6b02bf2992d3a3f5a45e9a95dfa55501a1b9b8092aca4583d65ae5e",
+        "gitBlob": "0c8914c74b60e0916d27d197a939bcd2eb4fb54f"
+      },
+      {
+        "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+        "sha256": "d36a16e46315fa48c7ec597aded137d2bbe5c5f2c8875387e1e99a13dc364b0a",
+        "gitBlob": "6c485f578a646df2c4b122430bed97f2b77a3fcb"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-asset-worker-fallback.mjs",
+        "sha256": "bf57a55e0a5001df9050a650019559fe449501c2c627dcd2f039e5de98a1f034",
+        "gitBlob": "3678d4fdbfa7dd8fd8389b0274af499c89195ef7"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-bevy-quest-locale.mjs",
+        "sha256": "480365a944bc9adcfa315d029ec520ddb5a32e711906c225ccbde114402d3811",
+        "gitBlob": "d3eb2215de8feb20cd61f7dbfdb3dc61cf44f377"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-newcomer-v2-journey.mjs",
+        "sha256": "26b4ffb843ac0dcf524542aca620fb7a1e37e0968495d7fb8ad098c9c97a5d95",
+        "gitBlob": "f25f94561799231bef7afae98b124a95ecc598b2"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-r16-belt-shortcut-diagnostics.mjs",
+        "sha256": "e1ed3f52aa8b9e2c1674d3bb32e48e13937c68066b38726dccc07ff59ff1becb",
+        "gitBlob": "eb8e2d0c1bf161ae8f7b0e4b4cd24d70beb0aa65"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-r16-group-hover.mjs",
+        "sha256": "b28529983e1195bde2c47f7406af4ee40e531e7453f1c78b70f2ba88a97776c2",
+        "gitBlob": "fa4f30eda5912770a582dbd6de77441d25228bee"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-r16-language-parity.mjs",
+        "sha256": "51395153080a33985df3632fe286ffb85d36e821d95147043fa6717d169e8995",
+        "gitBlob": "b7f907871cb96a889588cae5da2320e711a213b7"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-r16-quest-close-shortcut.mjs",
+        "sha256": "ab05b17ad0763186079eabc97288b11080c1595db006e1ddf0926a85545bc7dc",
+        "gitBlob": "6abdf0aa794f891528aeacd3113cbf17ede85696"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs",
+        "sha256": "1a86f67e6c077e88f5672af08d2cbb3bf64c9add81c98fe25e11ec50d56cf61e",
+        "gitBlob": "041ccf9d1ccf2625fc257da98fb240aecfeff026"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-scene-bootstrap-race.mjs",
+        "sha256": "439cf1a6c90fd47b0d8bba09b9852799a939a2edfeef26c78ade1c0057fdcbd2",
+        "gitBlob": "4d34c16993eb07ef5f704de40e47f1261d0f76d6"
+      }
+    ],
+    "generatedInputs": {
+      "lib/generated/bevy_runtime_version.json": "32bf5c4ffcf59fb352d27afd6d1e2a20758dd56edc0dfba0e015fece42d936a8",
+      "public/original-asset-manifest.generated.json": "4c4df4a5043dabd373f29ad781746d8b4e9f185db4beac51f4ac299190e6dc75",
+      "public/bootstrap/login/chrsel-0-1024.webp": "bc59b901477dfc3870e1f29e288af76006d0b1f2fea0b0e906fd6817f08fe592",
+      "public/bootstrap/login/chrsel-0-768.webp": "c6a175bda3546115b852c031c638c390bded87c8f9874dda163cf3a1b21999ca",
+      "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime.js": "326d3e502d06fbffc31f84d3a5c7fb7404cc843cf689040980790828341eccdf",
+      "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm": "50c61b64dcd5493eb98b4276c4d6a4dd9a68eaf7c9278d184087e2970dca9490",
+      "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js": "2c18b5168f4a5210f4879c06e7373807a6dedb3a81137fdc28080191bc0f5aa5",
+      "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm": "6c0bc68bd87d78602a60aff7567daa4e2067d1ecf7670f683172da503a19047f",
+      "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js": "a40b7e86e2cb98bb55beee4f742004695602aa0b8fc6bea6b3f8117799d0e7e9",
+      "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm": "e66e0b11416233879b0a0c1e9778a86253c532b8e60fd4c5d8339e20264c1c82",
+      "public/bevy-runtime-releases/bevy-84ef836460a84e03/pkg-webgl2-shared/mir2_bevy_runtime.js": "326d3e502d06fbffc31f84d3a5c7fb7404cc843cf689040980790828341eccdf",
+      "public/bevy-runtime-releases/bevy-84ef836460a84e03/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm": "50c61b64dcd5493eb98b4276c4d6a4dd9a68eaf7c9278d184087e2970dca9490",
+      "public/bevy-runtime-releases/bevy-84ef836460a84e03/pkg-webgl2/mir2_bevy_runtime.js": "2c18b5168f4a5210f4879c06e7373807a6dedb3a81137fdc28080191bc0f5aa5",
+      "public/bevy-runtime-releases/bevy-84ef836460a84e03/pkg-webgl2/mir2_bevy_runtime_bg.wasm": "6c0bc68bd87d78602a60aff7567daa4e2067d1ecf7670f683172da503a19047f",
+      "public/bevy-runtime-releases/bevy-84ef836460a84e03/pkg-webgpu/mir2_bevy_runtime.js": "a40b7e86e2cb98bb55beee4f742004695602aa0b8fc6bea6b3f8117799d0e7e9",
+      "public/bevy-runtime-releases/bevy-84ef836460a84e03/pkg-webgpu/mir2_bevy_runtime_bg.wasm": "e66e0b11416233879b0a0c1e9778a86253c532b8e60fd4c5d8339e20264c1c82",
+      "public/bevy-runtime-releases/bevy-84ef836460a84e03/runtime-manifest.json": "32bf5c4ffcf59fb352d27afd6d1e2a20758dd56edc0dfba0e015fece42d936a8",
+      "public/bevy-entity-atlases/hooking-cat.png": "2102df985c82359a4d9bfee382c734996c25692e08669dc38173f6b81b436173",
+      "public/bevy-entity-atlases/manifest.json": "61754d2b8456fe55adecc18ec537b7b15e19998cb701c7c7a403ea1b5b1ff64d",
+      "public/bevy-entity-atlases/starter-bichon-base-p1.png": "54b329bc0716f0d866908b7a098ca7be2a62bc300087e6adb938a08341b4594d",
+      "public/bevy-entity-atlases/starter-bichon-base-p2.png": "6ecfdd3d20040ea8ac552efb7bed07c8ed0a85f67c9aa6184ee83828e7a9d0df",
+      "public/bevy-entity-atlases/starter-bichon-base-p3.png": "5c0ba7723386202ee0b70d302362c4a7e0f793c8bca7ddfb1fb9f5a000289e35",
+      "public/bevy-entity-atlases/starter-bichon-base-p4.png": "b47bba6a9948a2ecdfb6b77c7d4b153a03b66d5d930a636192929bc7662d5db4",
+      "public/bevy-entity-atlases/starter-bichon-base-p5.png": "201422cd1b26625e7205f7f7afa332ca0d3d1f159ddc95b367bcb448e1cb0a11",
+      "public/bevy-entity-atlases/starter-bichon-base-p6.png": "c0b0c1b04170ee851fbb4d83ff0d95423723ad1b5280fd0e7a9c9e3b32a0235b",
+      "public/bevy-entity-atlases/starter-bichon-base-p7.png": "26a3eb81c31001e1e47893e67e9fb3b614837cb56f165b3972b1fafeab929d20",
+      "public/bevy-entity-atlases/starter-bichon-base.png": "9cd99e43693cab3d706b4b8324e70d0697709cb5ddf2df0d957d27f0b95395ed"
+    },
+    "runtime": "bevy-84ef836460a84e03",
+    "status": {
+      "code": 0,
+      "signal": null
+    },
+    "builtId": "smonPRY5aKHYao4w3Smo4",
+    "buildReceiptSha256": "89f858577a29d70e21cb5157f8f7371946194da8c3ccb336d05d513dfb3a6838"
+  },
+  "workerSha256": "d36a16e46315fa48c7ec597aded137d2bbe5c5f2c8875387e1e99a13dc364b0a",
+  "workerBytes": 26374,
+  "checks": {
+    "nodeAndAdjacentTests": 64,
+    "productionAndTypeScriptBuild": true,
+    "reusedArtifacts": 27,
+    "rustRebuilt": false,
+    "normalLogouts": 4
+  },
+  "browserFontBefore": {
+    "source": "ab9947fcc0ebc22818e9391682102a5f93243f3b",
+    "fontBytes": 11941968,
+    "fontSha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f",
+    "worker": {
+      "baseline": "77c1bb466eb681a17a7bd391eca710f00718fb4e83973dbaf7daa41acdb5e16e",
+      "candidate": "4dc0f14c3fe17f51313d13ad653e1615f7ccfa7cd85c7a701dec317839453142"
+    },
+    "lanes": [
+      {
+        "lane": "baseline",
+        "startedAt": 29.199999928474426,
+        "controlled": true,
+        "nativeStartedMs": 6010,
+        "nativeHeadersMs": 6019,
+        "cssLoadedMs": 15221.700000047684,
+        "nativeFinishedMs": 21208.900000095367,
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f",
+        "fontLoaded": true,
+        "networkFontRequests": 2,
+        "wireFontBytes": 23883936
+      },
+      {
+        "lane": "candidate",
+        "startedAt": 29.59999990463257,
+        "controlled": true,
+        "nativeStartedMs": 6005.900000095367,
+        "nativeHeadersMs": 6008.100000023842,
+        "nativeFinishedMs": 15194.200000047684,
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f",
+        "cssLoadedMs": 15226,
+        "fontLoaded": true,
+        "networkFontRequests": 1,
+        "wireFontBytes": 11941968
+      }
+    ],
+    "passed": true,
+    "requests": [
+      {
+        "lane": "baseline",
+        "requestedAt": 1794393168696,
+        "chunks": [
+          {
+            "at": 1794393168696,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393169001,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393169311,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393169621,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393169931,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393170241,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393170551,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393170861,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393171171,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393171481,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393171791,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393172101,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393172411,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393172720,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393173030,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393173340,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393173650,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393173960,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393174270,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393174580,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393174890,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393175200,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393175509,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393175819,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393176129,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393176440,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393176749,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393177060,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393177370,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393177680,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393177990,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393178300,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393178610,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393178920,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393179229,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393179538,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393179848,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393180158,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393180468,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393180778,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393181088,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393181398,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393181709,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393182018,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393182328,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393182637,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393182947,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393183258,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393183568,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393183877,
+            "bytes": 238808
+          }
+        ],
+        "finishedAt": 1794393183878,
+        "closedAt": 1794393183878
+      },
+      {
+        "lane": "baseline",
+        "requestedAt": 1794393174712,
+        "chunks": [
+          {
+            "at": 1794393174712,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393175014,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393175324,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393175634,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393175943,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393176253,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393176563,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393176873,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393177184,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393177494,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393177804,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393178114,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393178424,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393178734,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393179043,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393179353,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393179663,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393179972,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393180282,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393180592,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393180902,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393181212,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393181522,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393181832,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393182142,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393182451,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393182761,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393183071,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393183381,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393183691,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393184001,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393184311,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393184621,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393184931,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393185241,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393185551,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393185861,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393186171,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393186481,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393186791,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393187102,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393187411,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393187722,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393188032,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393188342,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393188651,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393188961,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393189271,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393189581,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393189891,
+            "bytes": 238808
+          }
+        ],
+        "finishedAt": 1794393189891,
+        "closedAt": 1794393189891
+      },
+      {
+        "lane": "candidate",
+        "requestedAt": 1794393190053,
+        "chunks": [
+          {
+            "at": 1794393190053,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393190355,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393190666,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393190976,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393191286,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393191596,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393191905,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393192215,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393192525,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393192835,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393193145,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393193455,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393193765,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393194074,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393194384,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393194694,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393195003,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393195313,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393195624,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393195933,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393196243,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393196553,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393196863,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393197173,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393197482,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393197792,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393198103,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393198413,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393198723,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393199033,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393199343,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393199654,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393199963,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393200273,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393200583,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393200893,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393201203,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393201512,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393201822,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393202132,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393202442,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393202751,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393203061,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393203372,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393203682,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393203992,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393204302,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393204612,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393204922,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393205232,
+            "bytes": 238808
+          }
+        ],
+        "finishedAt": 1794393205232,
+        "closedAt": 1794393205232
+      }
+    ],
+    "closed": {
+      "browser": true,
+      "server": true
+    }
+  },
+  "browserFontFinal": {
+    "source": "ab9947fcc0ebc22818e9391682102a5f93243f3b",
+    "fontBytes": 11941968,
+    "fontSha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f",
+    "worker": {
+      "baseline": "77c1bb466eb681a17a7bd391eca710f00718fb4e83973dbaf7daa41acdb5e16e",
+      "candidate": "d36a16e46315fa48c7ec597aded137d2bbe5c5f2c8875387e1e99a13dc364b0a"
+    },
+    "lanes": [
+      {
+        "lane": "candidate",
+        "startedAt": 29.100000023841858,
+        "controlled": true,
+        "nativeStartedMs": 6009.100000023842,
+        "nativeHeadersMs": 6011.899999976158,
+        "nativeFinishedMs": 15189,
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f",
+        "cssLoadedMs": 15220.899999976158,
+        "fontLoaded": true,
+        "networkFontRequests": 1,
+        "wireFontBytes": 11941968
+      }
+    ],
+    "passed": true,
+    "baselineReference": {
+      "receipt": "font-browser/receipt.json",
+      "networkFontRequests": 2,
+      "fontSha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f",
+      "workerSha256": "77c1bb466eb681a17a7bd391eca710f00718fb4e83973dbaf7daa41acdb5e16e"
+    },
+    "requests": [
+      {
+        "lane": "candidate",
+        "requestedAt": 1794393916371,
+        "chunks": [
+          {
+            "at": 1794393916371,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393916675,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393916985,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393917295,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393917605,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393917914,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393918224,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393918534,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393918845,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393919154,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393919465,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393919775,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393920085,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393920395,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393920705,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393921014,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393921324,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393921634,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393921944,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393922254,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393922564,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393922880,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393923183,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393923491,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393923806,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393924111,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393924421,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393924731,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393925041,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393925350,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393925660,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393925970,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393926279,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393926589,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393926899,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393927208,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393927518,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393927828,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393928137,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393928448,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393928757,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393929067,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393929377,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393929686,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393929995,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393930305,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393930615,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393930925,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393931235,
+            "bytes": 238840
+          },
+          {
+            "at": 1794393931544,
+            "bytes": 238808
+          }
+        ],
+        "finishedAt": 1794393931545,
+        "closedAt": 1794393931545
+      }
+    ],
+    "closed": {
+      "browser": true,
+      "server": true
+    }
+  },
+  "gameRuns": [
+    {
+      "run": "quest-after-r1",
+      "rawReceiptSha256": "013912afa7821794b33353f7ceb8c6b4619a5ef2daa41f6addac95e21a3d3c33",
+      "passed": true,
+      "interaction": {
+        "passed": true,
+        "firstTwoStaticReads503": true,
+        "lateStaticHeadersMs": 17019,
+        "staticDigest": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+        "dynamicFailures": 4,
+        "gate": {
+          "marks": [
+            {
+              "name": "sceneBlueprintReady",
+              "atMs": 23514,
+              "epochMs": 1794394485954,
+              "detail": {
+                "sceneKey": "2026-08-14-v7-door-interaction-asset20261108-r16-08ec86d5105c-0-cx18-cy36-w56-h72",
+                "sceneCache": "r16-entry-static",
+                "spriteCount": 957,
+                "cellCount": 6819
+              }
+            }
+          ]
+        },
+        "diary": {
+          "passed": true,
+          "locale": "zh-TW",
+          "renderer": "ordinary-react-fallback",
+          "questId": 2110001,
+          "stage": "available",
+          "objective": "向助理簡報告",
+          "counter": "0/1",
+          "chapter": "章節 1/6 · 村莊起步 · 本章 0/4",
+          "journey": "當前主線 0/26",
+          "zeroWorldCommands": true,
+          "screenshot": "quest-available-zh-TW.png"
+        },
+        "finalTile": {
+          "x": 289,
+          "y": 616
+        },
+        "ordinaryLogouts": 0
+      },
+      "oldRole": {
+        "passed": true,
+        "className": "Warrior",
+        "level": 30,
+        "gold": 76360,
+        "experience": 19497,
+        "fields": [
+          "map_file_name",
+          "position",
+          "direction",
+          "gold",
+          "credit",
+          "experience",
+          "max_experience",
+          "inventory_items_json",
+          "belt_items_json",
+          "equipment_items_json",
+          "equipment_items_explicit_empty",
+          "storage_items_json",
+          "hero_inventory_items_json",
+          "hero_equipment_items_json",
+          "quest_states_json",
+          "skill_states_json"
+        ],
+        "questStateCount": 26
+      },
+      "normalLogouts": 2,
+      "fixtureUnchanged": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      }
+    },
+    {
+      "run": "quest-after-r2",
+      "rawReceiptSha256": "9d60613dae2f08c433d0418d834584b424ac254d50a2369884ccd1670d9716e9",
+      "passed": true,
+      "interaction": {
+        "passed": true,
+        "firstTwoStaticReads503": true,
+        "lateStaticHeadersMs": 17020,
+        "staticDigest": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+        "dynamicFailures": 4,
+        "gate": {
+          "marks": [
+            {
+              "name": "sceneBlueprintReady",
+              "atMs": 23578.5,
+              "epochMs": 1794394545806,
+              "detail": {
+                "sceneKey": "2026-08-14-v7-door-interaction-asset20261108-r16-08ec86d5105c-0-cx18-cy36-w56-h72",
+                "sceneCache": "r16-entry-static",
+                "spriteCount": 957,
+                "cellCount": 6819
+              }
+            }
+          ]
+        },
+        "diary": {
+          "passed": true,
+          "locale": "zh-TW",
+          "renderer": "ordinary-shared-native",
+          "questOpened": true,
+          "qClosed": true,
+          "owner": "bevy",
+          "package": {
+            "backend": "webgl2",
+            "packageId": "webgl2-shared"
+          },
+          "navigation": {
+            "characterOpen": false,
+            "characterPage": "character",
+            "bagOpen": false,
+            "questOpen": false
+          },
+          "zeroWorldCommands": true,
+          "screenshot": "quest-available-zh-TW.png"
+        },
+        "finalTile": {
+          "x": 289,
+          "y": 616
+        },
+        "ordinaryLogouts": 0
+      },
+      "oldRole": {
+        "passed": true,
+        "className": "Warrior",
+        "level": 30,
+        "gold": 76360,
+        "experience": 19497,
+        "fields": [
+          "map_file_name",
+          "position",
+          "direction",
+          "gold",
+          "credit",
+          "experience",
+          "max_experience",
+          "inventory_items_json",
+          "belt_items_json",
+          "equipment_items_json",
+          "equipment_items_explicit_empty",
+          "storage_items_json",
+          "hero_inventory_items_json",
+          "hero_equipment_items_json",
+          "quest_states_json",
+          "skill_states_json"
+        ],
+        "questStateCount": 26
+      },
+      "normalLogouts": 2,
+      "fixtureUnchanged": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      }
+    }
+  ],
+  "publicProfiles": [
+    {
+      "run": "signed-r1",
+      "rawProbeSha256": "3b2ff8a91ccbc3905e95df8e6cbd07d2cb9ae47507bc4969c4d4312f83d5dc91",
+      "functionalFlowPassed": true,
+      "firstWalkWithinEightSeconds": true,
+      "firstWalkMs": 3405,
+      "trace": {
+        "saved": true,
+        "bytes": 100663296,
+        "dataLossOccurred": true
+      },
+      "longTasks": [
+        {
+          "startMs": 17990.699951171875,
+          "durationMs": 90
+        },
+        {
+          "startMs": 97285.30004882812,
+          "durationMs": 113
+        }
+      ],
+      "longTasksDuringWalk": [],
+      "healthDuringWalk": [
+        {
+          "relativeMs": -4854,
+          "durationMs": 155,
+          "status": 200,
+          "count": 558,
+          "sumUs": 7742787
+        },
+        {
+          "relativeMs": -2852,
+          "durationMs": 72,
+          "status": 200,
+          "count": 558,
+          "sumUs": 7742787
+        },
+        {
+          "relativeMs": 1174,
+          "durationMs": 58,
+          "status": 200,
+          "count": 559,
+          "sumUs": 7743860
+        },
+        {
+          "relativeMs": -841,
+          "durationMs": 4015,
+          "status": null
+        },
+        {
+          "relativeMs": 3174,
+          "durationMs": 58,
+          "status": 200,
+          "count": 559,
+          "sumUs": 7743860
+        },
+        {
+          "relativeMs": 5174,
+          "durationMs": 443,
+          "status": 200,
+          "count": 559,
+          "sumUs": 7743860
+        },
+        {
+          "relativeMs": 7175,
+          "durationMs": 65,
+          "status": 200,
+          "count": 559,
+          "sumUs": 7743860
+        }
+      ],
+      "firstWalkTransport": {
+        "websocketFrameMs": 3404,
+        "keepAlives": [
+          {
+            "sentRelativeToWalkMs": -23638,
+            "rttMs": 156
+          },
+          {
+            "sentRelativeToWalkMs": -8637,
+            "rttMs": 129
+          },
+          {
+            "sentRelativeToWalkMs": 6365,
+            "rttMs": 152
+          },
+          {
+            "sentRelativeToWalkMs": 21362,
+            "rttMs": 142
+          },
+          {
+            "sentRelativeToWalkMs": 36364,
+            "rttMs": 185
+          },
+          {
+            "sentRelativeToWalkMs": 51366,
+            "rttMs": 135
+          },
+          {
+            "sentRelativeToWalkMs": 66364,
+            "rttMs": 130
+          },
+          {
+            "sentRelativeToWalkMs": 81365,
+            "rttMs": 148
+          },
+          {
+            "sentRelativeToWalkMs": 96363,
+            "rttMs": 137
+          }
+        ],
+        "gatewayHealthBefore": {
+          "status": null,
+          "startedAt": 93850,
+          "finishedAt": 97865
+        },
+        "gatewayHealthAfter": {
+          "status": 200,
+          "startedAt": 104142,
+          "finishedAt": 104203,
+          "revision": "d53f9e3b22e2b92c2dc86644b6ae370fc1acab53",
+          "complete": true,
+          "sinceInitializationMs": 229858345,
+          "successes": 559,
+          "failures": 0,
+          "count": 559,
+          "sumUs": 7743860
+        },
+        "admissionCounterDelta": null
+      },
+      "sharedHud": {
+        "optional": true,
+        "passed": false,
+        "status": "not-observed",
+        "gateReady": false,
+        "runtimeDelivered": false,
+        "failure": {
+          "phase": "ordinary-shared-hud-optional",
+          "code": "OPTIONAL_SHARED_HUD_OR_RUNTIME_NOT_OBSERVED"
+        }
+      },
+      "assets": [
+        {
+          "path": "https://numeron.obelisk.build/client-core/5fde16fb186299cc265cec00a085c3ecbe76e4d0ff77a12de08f567cf28fc836/mir2_platform_web_bg.wasm",
+          "requestTimestamp": 934048.11898,
+          "requestAtMs": 18281,
+          "status": 200,
+          "headersTimestamp": 934049.487794,
+          "headersAtMs": 19650,
+          "protocol": "h2",
+          "serviceWorker": false,
+          "diskCache": false,
+          "finishedTimestamp": 934050.568384,
+          "finishedAtMs": 20732,
+          "encodedBytes": 116610
+        },
+        {
+          "path": "https://numeron.obelisk.build/_next/static/media/r16-login-tc.93f45434.woff2",
+          "requestTimestamp": 934049.509667,
+          "requestAtMs": 19688,
+          "status": 200,
+          "headersTimestamp": 934055.605252,
+          "headersAtMs": 25769,
+          "protocol": "h2",
+          "serviceWorker": false,
+          "diskCache": false,
+          "finishedTimestamp": 934055.596166,
+          "finishedAtMs": 25769,
+          "encodedBytes": 247289
+        },
+        {
+          "path": "https://numeron.obelisk.build/client-core/cc64a3a85149bf9180ebc1f4e061319d29c1f8eaecb0f11e5b30d4b7aff573b4/mir2_platform_web_bg.wasm",
+          "requestTimestamp": 934056.117711,
+          "requestAtMs": 26280,
+          "status": 200,
+          "headersTimestamp": 934056.358963,
+          "headersAtMs": 26521,
+          "protocol": "h2",
+          "serviceWorker": false,
+          "diskCache": false,
+          "finishedTimestamp": 934057.476451,
+          "finishedAtMs": 27640,
+          "encodedBytes": 123524
+        },
+        {
+          "path": "https://numeron.obelisk.build/client-core/c61eebe4b256760c789b3d2566f1a272601c47ab7b07b1cd3e055ace255bb44a/mir2_platform_web_bg.wasm",
+          "requestTimestamp": 934057.597166,
+          "requestAtMs": 27759,
+          "status": 200,
+          "headersTimestamp": 934057.771396,
+          "headersAtMs": 27934,
+          "protocol": "h2",
+          "serviceWorker": false,
+          "diskCache": false,
+          "finishedTimestamp": 934058.475973,
+          "finishedAtMs": 28642,
+          "encodedBytes": 73207
+        },
+        {
+          "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+          "requestTimestamp": 934123.217775,
+          "requestAtMs": 93394,
+          "status": 200,
+          "headersTimestamp": 934222.447559,
+          "headersAtMs": 192628,
+          "protocol": "h2",
+          "serviceWorker": true,
+          "diskCache": false,
+          "finishedTimestamp": 934222.423482,
+          "finishedAtMs": 192633,
+          "encodedBytes": 0
+        },
+        {
+          "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgpu/mir2_bevy_runtime.js",
+          "requestTimestamp": 934130.377036,
+          "requestAtMs": 100540,
+          "status": 200,
+          "headersTimestamp": 934141.371601,
+          "headersAtMs": 111534,
+          "protocol": "h2",
+          "serviceWorker": false,
+          "diskCache": false,
+          "finishedTimestamp": 934141.370934,
+          "finishedAtMs": 111534,
+          "encodedBytes": 21221
+        },
+        {
+          "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+          "requestTimestamp": 934141.372469,
+          "requestAtMs": 111535,
+          "status": 200,
+          "headersTimestamp": 934141.58758,
+          "headersAtMs": 111750,
+          "protocol": "h2",
+          "serviceWorker": false,
+          "diskCache": false
+        }
+      ],
+      "workerResources": [],
+      "maxLongTaskMs": 113,
+      "closed": {
+        "browser": true
+      },
+      "runtimeTransitions": [
+        {
+          "observedAtMs": 3793,
+          "atMs": 2220,
+          "timeOrigin": 1794388388681.8,
+          "bootAttempted": false,
+          "booted": false,
+          "bootFailed": false,
+          "package": null,
+          "capabilities": null,
+          "quest": null,
+          "hud": null,
+          "fonts": {
+            "status": "loaded",
+            "loading": []
+          },
+          "longTasks": [],
+          "timerDrifts": []
+        },
+        {
+          "observedAtMs": 201786,
+          "atMs": 200212.5,
+          "timeOrigin": 1794388388681.8,
+          "bootAttempted": false,
+          "booted": false,
+          "bootFailed": false,
+          "package": null,
+          "capabilities": null,
+          "quest": null,
+          "hud": null,
+          "screen": "select",
+          "sceneReady": true,
+          "fonts": {
+            "status": "loaded",
+            "loading": []
+          },
+          "longTasks": [
+            {
+              "startMs": 16418.899999976158,
+              "durationMs": 90,
+              "name": "self"
+            },
+            {
+              "startMs": 95713.5,
+              "durationMs": 113,
+              "name": "self"
+            }
+          ],
+          "timerDrifts": []
+        }
+      ]
+    },
+    {
+      "run": "signed-r2",
+      "rawProbeSha256": "81aae45642b7dc6df72d8d953d236e328df5ce3e24ff206b74df51849794bae9",
+      "functionalFlowPassed": true,
+      "firstWalkWithinEightSeconds": false,
+      "firstWalkMs": 23112,
+      "trace": {
+        "saved": true,
+        "bytes": 33554432,
+        "eof": false,
+        "dataLossOccurred": true,
+        "filename": "private-game-start-trace.partial.json"
+      },
+      "longTasks": [
+        {
+          "startMs": 15038.199951171875,
+          "durationMs": 69
+        },
+        {
+          "startMs": 90738.39990234375,
+          "durationMs": 115
+        },
+        {
+          "startMs": 163143.80004882812,
+          "durationMs": 210
+        },
+        {
+          "startMs": 163356.39990234375,
+          "durationMs": 58
+        },
+        {
+          "startMs": 163459.09985351562,
+          "durationMs": 199
+        }
+      ],
+      "longTasksDuringWalk": [],
+      "healthDuringWalk": [
+        {
+          "relativeMs": -4572,
+          "durationMs": 63,
+          "status": 200,
+          "count": 559,
+          "sumUs": 7743860
+        },
+        {
+          "relativeMs": -2558,
+          "durationMs": 63,
+          "status": 200,
+          "count": 559,
+          "sumUs": 7743860
+        },
+        {
+          "relativeMs": -544,
+          "durationMs": 65,
+          "status": 200,
+          "count": 559,
+          "sumUs": 7743860
+        },
+        {
+          "relativeMs": 1470,
+          "durationMs": 63,
+          "status": 200,
+          "count": 560,
+          "sumUs": 7744623
+        },
+        {
+          "relativeMs": 3483,
+          "durationMs": 119,
+          "status": 200,
+          "count": 560,
+          "sumUs": 7744623
+        },
+        {
+          "relativeMs": 5498,
+          "durationMs": 71,
+          "status": 200,
+          "count": 560,
+          "sumUs": 7744623
+        },
+        {
+          "relativeMs": 7512,
+          "durationMs": 107,
+          "status": 200,
+          "count": 560,
+          "sumUs": 7744623
+        },
+        {
+          "relativeMs": 9513,
+          "durationMs": 64,
+          "status": 200,
+          "count": 560,
+          "sumUs": 7744623
+        },
+        {
+          "relativeMs": 11521,
+          "durationMs": 74,
+          "status": 200,
+          "count": 560,
+          "sumUs": 7744623
+        },
+        {
+          "relativeMs": 13527,
+          "durationMs": 62,
+          "status": 200,
+          "count": 560,
+          "sumUs": 7744623
+        },
+        {
+          "relativeMs": 15528,
+          "durationMs": 62,
+          "status": 200,
+          "count": 560,
+          "sumUs": 7744623
+        },
+        {
+          "relativeMs": 17541,
+          "durationMs": 157,
+          "status": 200,
+          "count": 560,
+          "sumUs": 7744623
+        },
+        {
+          "relativeMs": 19545,
+          "durationMs": 63,
+          "status": 200,
+          "count": 560,
+          "sumUs": 7744623
+        },
+        {
+          "relativeMs": 21548,
+          "durationMs": 62,
+          "status": 200,
+          "count": 560,
+          "sumUs": 7744623
+        },
+        {
+          "relativeMs": 23547,
+          "durationMs": 71,
+          "status": 200,
+          "count": 560,
+          "sumUs": 7744623
+        },
+        {
+          "relativeMs": 25548,
+          "durationMs": 63,
+          "status": 200,
+          "count": 560,
+          "sumUs": 7744623
+        },
+        {
+          "relativeMs": 27550,
+          "durationMs": 65,
+          "status": 200,
+          "count": 560,
+          "sumUs": 7744623
+        }
+      ],
+      "firstWalkTransport": {
+        "websocketFrameMs": 23111,
+        "keepAlives": [
+          {
+            "sentRelativeToWalkMs": -34435,
+            "rttMs": 162
+          },
+          {
+            "sentRelativeToWalkMs": -19437,
+            "rttMs": 128
+          },
+          {
+            "sentRelativeToWalkMs": -4435,
+            "rttMs": 27546
+          },
+          {
+            "sentRelativeToWalkMs": 10564,
+            "rttMs": 12610
+          },
+          {
+            "sentRelativeToWalkMs": 25564,
+            "rttMs": 130
+          },
+          {
+            "sentRelativeToWalkMs": 40565,
+            "rttMs": 128
+          },
+          {
+            "sentRelativeToWalkMs": 55563,
+            "rttMs": 128
+          },
+          {
+            "sentRelativeToWalkMs": 70562,
+            "rttMs": 134
+          },
+          {
+            "sentRelativeToWalkMs": 85564,
+            "rttMs": 126
+          },
+          {
+            "sentRelativeToWalkMs": 100561,
+            "rttMs": 129
+          },
+          {
+            "sentRelativeToWalkMs": 115563,
+            "rttMs": 129
+          },
+          {
+            "sentRelativeToWalkMs": 130562,
+            "rttMs": 132
+          },
+          {
+            "sentRelativeToWalkMs": 145562,
+            "rttMs": 371
+          },
+          {
+            "sentRelativeToWalkMs": 160564,
+            "rttMs": 129
+          },
+          {
+            "sentRelativeToWalkMs": 175563,
+            "rttMs": 128
+          },
+          {
+            "sentRelativeToWalkMs": 190563,
+            "rttMs": 128
+          },
+          {
+            "sentRelativeToWalkMs": 205562,
+            "rttMs": 129
+          },
+          {
+            "sentRelativeToWalkMs": 220562,
+            "rttMs": 130
+          },
+          {
+            "sentRelativeToWalkMs": 235564,
+            "rttMs": 129
+          },
+          {
+            "sentRelativeToWalkMs": 250562,
+            "rttMs": 127
+          }
+        ],
+        "gatewayHealthBefore": {
+          "status": 200,
+          "startedAt": 86198,
+          "finishedAt": 86596,
+          "revision": "d53f9e3b22e2b92c2dc86644b6ae370fc1acab53",
+          "complete": true,
+          "sinceInitializationMs": 231907631,
+          "successes": 559,
+          "failures": 0,
+          "count": 559,
+          "sumUs": 7743860
+        },
+        "gatewayHealthAfter": {
+          "status": 200,
+          "startedAt": 124047,
+          "finishedAt": 124109,
+          "revision": "d53f9e3b22e2b92c2dc86644b6ae370fc1acab53",
+          "complete": true,
+          "sinceInitializationMs": 231945145,
+          "successes": 560,
+          "failures": 0,
+          "count": 560,
+          "sumUs": 7744623
+        },
+        "admissionCounterDelta": {
+          "successes": 1,
+          "failures": 0,
+          "count": 1,
+          "sumUs": 763,
+          "oneObservedAdmission": true
+        }
+      },
+      "sharedHud": {
+        "optional": true,
+        "passed": false,
+        "status": "not-observed",
+        "gateReady": false,
+        "runtimeDelivered": true,
+        "failure": {
+          "phase": "ordinary-shared-hud-optional",
+          "code": "OPTIONAL_SHARED_HUD_OR_RUNTIME_NOT_OBSERVED"
+        }
+      },
+      "assets": [
+        {
+          "path": "https://numeron.obelisk.build/client-core/5fde16fb186299cc265cec00a085c3ecbe76e4d0ff77a12de08f567cf28fc836/mir2_platform_web_bg.wasm",
+          "requestTimestamp": 936112.020109,
+          "requestAtMs": 15311,
+          "status": 200,
+          "headersTimestamp": 936113.263267,
+          "headersAtMs": 16554,
+          "protocol": "h2",
+          "serviceWorker": false,
+          "diskCache": false,
+          "finishedTimestamp": 936114.463714,
+          "finishedAtMs": 17756,
+          "encodedBytes": 116556
+        },
+        {
+          "path": "https://numeron.obelisk.build/_next/static/media/r16-login-tc.93f45434.woff2",
+          "requestTimestamp": 936113.284531,
+          "requestAtMs": 16590,
+          "status": 200,
+          "headersTimestamp": 936119.182976,
+          "headersAtMs": 22474,
+          "protocol": "h2",
+          "serviceWorker": false,
+          "diskCache": false,
+          "finishedTimestamp": 936119.17403,
+          "finishedAtMs": 22475,
+          "encodedBytes": 247362
+        },
+        {
+          "path": "https://numeron.obelisk.build/client-core/cc64a3a85149bf9180ebc1f4e061319d29c1f8eaecb0f11e5b30d4b7aff573b4/mir2_platform_web_bg.wasm",
+          "requestTimestamp": 936118.893658,
+          "requestAtMs": 22185,
+          "status": 200,
+          "headersTimestamp": 936120.174717,
+          "headersAtMs": 23465,
+          "protocol": "h2",
+          "serviceWorker": false,
+          "diskCache": false,
+          "finishedTimestamp": 936121.257591,
+          "finishedAtMs": 24550,
+          "encodedBytes": 123544
+        },
+        {
+          "path": "https://numeron.obelisk.build/client-core/c61eebe4b256760c789b3d2566f1a272601c47ab7b07b1cd3e055ace255bb44a/mir2_platform_web_bg.wasm",
+          "requestTimestamp": 936121.432394,
+          "requestAtMs": 24723,
+          "status": 200,
+          "headersTimestamp": 936121.607565,
+          "headersAtMs": 24898,
+          "protocol": "h2",
+          "serviceWorker": false,
+          "diskCache": false,
+          "finishedTimestamp": 936122.20026,
+          "finishedAtMs": 25496,
+          "encodedBytes": 73212
+        },
+        {
+          "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+          "requestTimestamp": 936182.516031,
+          "requestAtMs": 85822,
+          "status": 200,
+          "headersTimestamp": 936335.92774,
+          "headersAtMs": 239234,
+          "protocol": "h2",
+          "serviceWorker": true,
+          "diskCache": false,
+          "finishedTimestamp": 936335.902012,
+          "finishedAtMs": 239238,
+          "encodedBytes": 0
+        },
+        {
+          "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgpu/mir2_bevy_runtime.js",
+          "requestTimestamp": 936197.414764,
+          "requestAtMs": 100707,
+          "status": 200,
+          "headersTimestamp": 936199.370094,
+          "headersAtMs": 102662,
+          "protocol": "h2",
+          "serviceWorker": false,
+          "diskCache": false,
+          "finishedTimestamp": 936199.368961,
+          "finishedAtMs": 102662,
+          "encodedBytes": 21232
+        },
+        {
+          "path": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+          "requestTimestamp": 936199.370912,
+          "requestAtMs": 102662,
+          "status": 200,
+          "headersTimestamp": 936199.491719,
+          "headersAtMs": 102783,
+          "protocol": "h2",
+          "serviceWorker": false,
+          "diskCache": false,
+          "finishedTimestamp": 936259.850423,
+          "finishedAtMs": 163355,
+          "encodedBytes": 6444359
+        },
+        {
+          "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "requestTimestamp": 936260.34493,
+          "requestAtMs": 163660,
+          "status": 200,
+          "headersTimestamp": 936413.00413,
+          "headersAtMs": 316298,
+          "protocol": "h2",
+          "serviceWorker": true,
+          "diskCache": false
+        },
+        {
+          "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSans-Regular.ttf",
+          "requestTimestamp": 936260.345032,
+          "requestAtMs": 163660,
+          "status": 200,
+          "headersTimestamp": 936412.508263,
+          "headersAtMs": 315803,
+          "protocol": "h2",
+          "serviceWorker": true,
+          "diskCache": false,
+          "finishedTimestamp": 936414.231155,
+          "finishedAtMs": 317527,
+          "encodedBytes": 0
+        },
+        {
+          "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+          "requestTimestamp": 936260.345137,
+          "requestAtMs": 163660,
+          "status": 200,
+          "headersTimestamp": 936413.003652,
+          "headersAtMs": 316298,
+          "protocol": "h2",
+          "serviceWorker": true,
+          "diskCache": false
+        },
+        {
+          "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+          "requestTimestamp": 936260.345234,
+          "requestAtMs": 163660,
+          "status": 200,
+          "headersTimestamp": 936406.918777,
+          "headersAtMs": 310213,
+          "protocol": "h2",
+          "serviceWorker": true,
+          "diskCache": false,
+          "finishedTimestamp": 936407.753861,
+          "finishedAtMs": 311050,
+          "encodedBytes": 0
+        },
+        {
+          "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansThai-Regular.ttf",
+          "requestTimestamp": 936260.345303,
+          "requestAtMs": 163660,
+          "status": 200,
+          "headersTimestamp": 936375.545249,
+          "headersAtMs": 278839,
+          "protocol": "h2",
+          "serviceWorker": true,
+          "diskCache": false,
+          "finishedTimestamp": 936376.195325,
+          "finishedAtMs": 279489,
+          "encodedBytes": 0
+        },
+        {
+          "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansArabic-Regular.ttf",
+          "requestTimestamp": 936260.345397,
+          "requestAtMs": 163660,
+          "status": 200,
+          "headersTimestamp": 936375.545066,
+          "headersAtMs": 278839,
+          "protocol": "h2",
+          "serviceWorker": true,
+          "diskCache": false,
+          "finishedTimestamp": 936377.538831,
+          "finishedAtMs": 280834,
+          "encodedBytes": 0
+        }
+      ],
+      "workerResources": [
+        {
+          "origin": "https://numeron.obelisk.build",
+          "timeOrigin": 1794390478552.9,
+          "rows": [
+            {
+              "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+              "startMs": 61257.5,
+              "durationMs": 153384.5,
+              "responseStart": 63239.89999997616,
+              "responseEnd": 214642,
+              "transferSize": 7662801,
+              "encodedBodySize": 7662501,
+              "decodedBodySize": 11941968
+            },
+            {
+              "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSans-Regular.ttf",
+              "startMs": 139087,
+              "durationMs": 153884.79999995232,
+              "responseStart": 291248.39999997616,
+              "responseEnd": 292971.7999999523,
+              "transferSize": 305196,
+              "encodedBodySize": 304896,
+              "decodedBodySize": 621572
+            },
+            {
+              "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+              "startMs": 139087.19999992847,
+              "durationMs": 147407.10000002384,
+              "responseStart": 285657.1999999285,
+              "responseEnd": 286494.2999999523,
+              "transferSize": 99503,
+              "encodedBodySize": 99203,
+              "decodedBodySize": 243520
+            },
+            {
+              "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansThai-Regular.ttf",
+              "startMs": 139087.39999997616,
+              "durationMs": 115848.5,
+              "responseStart": 254283.79999995232,
+              "responseEnd": 254935.89999997616,
+              "transferSize": 20060,
+              "encodedBodySize": 19760,
+              "decodedBodySize": 37780
+            },
+            {
+              "path": "https://numeron.obelisk.build/original-ui/fonts/NotoSansArabic-Regular.ttf",
+              "startMs": 139087.5,
+              "durationMs": 117191.69999992847,
+              "responseStart": 254283.69999992847,
+              "responseEnd": 256279.19999992847,
+              "transferSize": 98047,
+              "encodedBodySize": 97747,
+              "decodedBodySize": 234892
+            }
+          ]
+        }
+      ],
+      "maxLongTaskMs": 210,
+      "closed": {
+        "browser": true
+      },
+      "runtimeTransitions": [
+        {
+          "observedAtMs": 3571,
+          "atMs": 2220.2000000476837,
+          "timeOrigin": 1794390455350.7,
+          "bootAttempted": false,
+          "booted": false,
+          "bootFailed": false,
+          "package": null,
+          "capabilities": null,
+          "quest": null,
+          "hud": null,
+          "fonts": {
+            "status": "loaded",
+            "loading": []
+          },
+          "longTasks": [],
+          "timerDrifts": []
+        },
+        {
+          "observedAtMs": 163725,
+          "atMs": 162374.60000002384,
+          "timeOrigin": 1794390455350.7,
+          "bootAttempted": true,
+          "booted": true,
+          "bootFailed": false,
+          "package": {
+            "selectedBackend": "webgpu",
+            "packageId": "webgpu",
+            "runtimeVersion": "bevy-84ef836460a84e03"
+          },
+          "capabilities": {
+            "schemaVersion": 1,
+            "backend": "webgpu",
+            "questUiAbiVersion": 1,
+            "bagUiAbiVersion": 1,
+            "primarySharedUiCompiled": false,
+            "primarySharedUiStartup": false
+          },
+          "quest": {
+            "ready": false,
+            "error": null,
+            "frame": 2,
+            "generation": 2,
+            "revision": 1,
+            "displayLanguage": "zh-TW"
+          },
+          "hud": {
+            "ready": false,
+            "error": null,
+            "frame": 2,
+            "generation": 2,
+            "revision": 1
+          },
+          "screen": "game",
+          "sceneReady": true,
+          "fonts": {
+            "status": "loading",
+            "loading": [
+              "Noto Sans TC"
+            ]
+          },
+          "longTasks": [
+            {
+              "startMs": 13689.5,
+              "durationMs": 69,
+              "name": "self"
+            },
+            {
+              "startMs": 89389.70000004768,
+              "durationMs": 115,
+              "name": "self"
+            },
+            {
+              "startMs": 161795.10000002384,
+              "durationMs": 210,
+              "name": "self"
+            },
+            {
+              "startMs": 162007.70000004768,
+              "durationMs": 58,
+              "name": "self"
+            },
+            {
+              "startMs": 162110.39999997616,
+              "durationMs": 199,
+              "name": "self"
+            }
+          ],
+          "timerDrifts": [
+            {
+              "startMs": 162219.39999997616,
+              "delayMs": 155.10000002384186
+            }
+          ]
+        },
+        {
+          "observedAtMs": 361574,
+          "atMs": 360221,
+          "timeOrigin": 1794390455350.7,
+          "bootAttempted": true,
+          "booted": true,
+          "bootFailed": false,
+          "package": {
+            "selectedBackend": "webgpu",
+            "packageId": "webgpu",
+            "runtimeVersion": "bevy-84ef836460a84e03"
+          },
+          "capabilities": {
+            "schemaVersion": 1,
+            "backend": "webgpu",
+            "questUiAbiVersion": 1,
+            "bagUiAbiVersion": 1,
+            "primarySharedUiCompiled": false,
+            "primarySharedUiStartup": false
+          },
+          "quest": {
+            "ready": false,
+            "error": null,
+            "frame": 46008,
+            "generation": 2,
+            "revision": 5,
+            "displayLanguage": "zh-TW"
+          },
+          "hud": {
+            "ready": false,
+            "error": null,
+            "frame": 46008,
+            "generation": 2,
+            "revision": 5
+          },
+          "screen": "game",
+          "sceneReady": true,
+          "fonts": {
+            "status": "loaded",
+            "loading": []
+          },
+          "longTasks": [
+            {
+              "startMs": 13689.5,
+              "durationMs": 69,
+              "name": "self"
+            },
+            {
+              "startMs": 89389.70000004768,
+              "durationMs": 115,
+              "name": "self"
+            },
+            {
+              "startMs": 161795.10000002384,
+              "durationMs": 210,
+              "name": "self"
+            },
+            {
+              "startMs": 162007.70000004768,
+              "durationMs": 58,
+              "name": "self"
+            },
+            {
+              "startMs": 162110.39999997616,
+              "durationMs": 199,
+              "name": "self"
+            }
+          ],
+          "timerDrifts": [
+            {
+              "startMs": 162219.39999997616,
+              "delayMs": 155.10000002384186
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "pictures": [
+    {
+      "filename": "font-before.png",
+      "sha256": "64f3ecb8f67a02e5a9fe2471c82b1195c79aaa0f054d570c644dba3c79d9e4ec"
+    },
+    {
+      "filename": "font-after.png",
+      "sha256": "64f3ecb8f67a02e5a9fe2471c82b1195c79aaa0f054d570c644dba3c79d9e4ec"
+    },
+    {
+      "filename": "shared-task.png",
+      "sha256": "9ca157d2bffdc3ba1921e07d7bcf32f84832970623b1da320018e1db6809f993"
+    }
+  ],
+  "scope": {
+    "publicSource": "603e68a352e626b92210dd0582a106a35d2f34e2",
+    "fontCandidateDeployed": false,
+    "physicalPhone": false,
+    "currentFullLevel1To30": false
+  },
+  "remaining": [
+    "public first-step delayed output/transport after early aggregate admission",
+    "full public shared HUD asset delivery and missing Prguse/985.png",
+    "public verification of font sharing candidate",
+    "current complete three-class 1–30",
+    "runtime source audit and final human acceptance"
+  ]
+}

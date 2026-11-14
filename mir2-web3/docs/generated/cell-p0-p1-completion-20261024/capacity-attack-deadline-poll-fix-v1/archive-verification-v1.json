@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T16:27:46.695Z",
+  "copyReceipt": {
+    "file": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-public-archive-v1/public-copy-receipt-v1.json",
+    "bytes": 17105,
+    "sha256": "044330e3af1f8452b9ddf90e83dd56492b9050d2ae1801382c83945338691a16"
+  },
+  "publicProvenance": {
+    "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-attack-deadline-poll-fix-v1/public-copy-provenance-v1.json",
+    "bytes": 17105,
+    "sha256": "044330e3af1f8452b9ddf90e83dd56492b9050d2ae1801382c83945338691a16"
+  },
+  "originalCopyCount": 23,
+  "totalCopiedBytes": 955354,
+  "finalFileCount": 27,
+  "allRawCopiesExact": true,
+  "publicWhitelistMatchesExternal": true,
+  "relativeLinksValid": 10,
+  "full210EvidenceIndependentReview": {
+    "file": "C:/mir2-build/p01-completion-20261024/attack-deadline-poll-fix-final-integration-review-v1.json",
+    "bytes": 5368,
+    "sha256": "ae1758f29e44022a5893a18408833422a24003a61781d423c586a2235e57ea84"
+  },
+  "rootFunctionalSummaryIndependentReview": {
+    "file": "C:/mir2-build/p01-completion-20261024/root-attack-deadline-functional-independent-review-v1.json",
+    "bytes": 4103,
+    "sha256": "a596e20d0ca8a0275fa675c8ef3e15f972c8be7c776b5d513dfec6ebe87bb552"
+  },
+  "sourceBeforeAfterClosureChecked": true,
+  "capacityAccepted": false,
+  "p0Passed": false,
+  "p2ImplementationPermitted": false
+}

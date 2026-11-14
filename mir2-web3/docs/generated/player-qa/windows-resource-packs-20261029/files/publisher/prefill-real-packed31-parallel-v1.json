@@ -1,0 +1,194 @@
+{
+  "projectedReport": {
+    "aliasesModified": false,
+    "candidate": {
+      "channel": "invited",
+      "feedSha256": "fff8f4232fa7531979100bd194fbbf33e5f41b6d185d1cc7423ea8f2cc8a210e",
+      "platform": "windows-x64",
+      "schema": "mir2.windows.r2-channel.v1",
+      "sequence": 31,
+      "signatureSha256": "a82f3fed65868cc475380339ac3904d552d9079bc27c7faeb17c2b0e0c7c4948",
+      "sourceRevision": "29a187a272acb4129e3de2cd37e6bbdf62bf11e3"
+    },
+    "completedObjects": [
+      {
+        "path": "objects/packs/5ede1ad3bffcdb99e72347d2d2be3a8d399b47241aa334123c737dd1f4176096.m2p",
+        "sha256": "5ede1ad3bffcdb99e72347d2d2be3a8d399b47241aa334123c737dd1f4176096",
+        "size": 33452573
+      },
+      {
+        "path": "objects/packs/687c013fd076b54f8b5ebec42ce4b82e002bf9f12b4e5fec5919b6a2acbebb59.m2p",
+        "sha256": "687c013fd076b54f8b5ebec42ce4b82e002bf9f12b4e5fec5919b6a2acbebb59",
+        "size": 33553367
+      },
+      {
+        "path": "objects/packs/86327dd49a3054b208007ca6a5e49ecf5a8632ec004946e8965956910f0060e7.m2p",
+        "sha256": "86327dd49a3054b208007ca6a5e49ecf5a8632ec004946e8965956910f0060e7",
+        "size": 7229532
+      },
+      {
+        "path": "objects/packs/68282742e1d2187cd27335cc1f94a4eda6a854f0b0e2f286966d56bab69cc47e.m2p",
+        "sha256": "68282742e1d2187cd27335cc1f94a4eda6a854f0b0e2f286966d56bab69cc47e",
+        "size": 33545217
+      },
+      {
+        "path": "objects/packs/55fa67002392c549bd8540f120266af66ed93febde2b294b8dde236734112180.m2p",
+        "sha256": "55fa67002392c549bd8540f120266af66ed93febde2b294b8dde236734112180",
+        "size": 33552198
+      }
+    ],
+    "executionHost": {
+      "playerNetworkThroughputMeasured": false,
+      "playerSlaProven": false
+    },
+    "expectedPointerReadBeforePassed": true,
+    "failedObjects": [
+      {
+        "path": "objects/packs/941f2ac30c5060e369af717fd0de6afd2c3368731f30a293e31f13afd667eb03.m2p"
+      },
+      {
+        "path": "objects/packs/a8403f51da61f4ba9ce0f9c79210b5359d42c0ad6db449a99179b952ae82565c.m2p"
+      },
+      {
+        "path": "objects/packs/c30b19238fa312d101a4908e3da5b79b7d108698de82af0aa96877147f7d7339.m2p"
+      },
+      {
+        "path": "objects/packs/c1384b5b198506cdc9eee7159eb87700da51a6b8e549316605d69e15a00008f8.m2p"
+      },
+      {
+        "path": "objects/packs/e1a423ebc589ea6b7d4aa4d26e861003e1bf9d012544e6b1ce27927addff4bb3.m2p"
+      },
+      {
+        "path": "objects/packs/e967397064acad28a30d88671fde8bf798a8fc3fa7743d2af202be556fde8e11.m2p"
+      },
+      {
+        "path": "objects/packs/d1cbacd99d1f0fecf931231261efb88fd29942b1b70ca89ef3627a8a91103e32.m2p"
+      },
+      {
+        "path": "objects/packs/c4d68145203e5a01cd9e42b76468d5150f07c793cecc7082ef3ef99deca49e95.m2p"
+      },
+      {
+        "path": "objects/packs/edb420bdf2dbace65277a6d0556358f82eb533a0c6e706e350c88e3564a5fac7.m2p"
+      },
+      {
+        "path": "objects/packs/f8d1c352c437ed7b9e0579dda8e4abffb4a7083ffe645f825701775d03547966.m2p"
+      },
+      {
+        "path": "objects/packs/f7b22e2c78c0153f165694160728549508a40e769ca9a2732bd8c48b3c75fef7.m2p"
+      }
+    ],
+    "failure": {},
+    "finishedUtc": "2026-10-29T09:12:58.116476+00:00",
+    "fiveMinuteAcceptance": false,
+    "formalSerialStageStillRequired": true,
+    "maxWorkers": 4,
+    "notFormalStage": true,
+    "notRepresentativeOfPlayerThroughput": true,
+    "passed": false,
+    "planSha256": "f990de0c1236508c6cdb85280008e44697f2a2266c797518852e0d771d1a9b93",
+    "pointerAttempted": false,
+    "pointerChanged": false,
+    "remoteSecretFilesCreated": false,
+    "schema": "mir2.windows.fixed-packed-immutable-prefill.v1",
+    "selectedObjects": [
+      {
+        "path": "objects/packs/55fa67002392c549bd8540f120266af66ed93febde2b294b8dde236734112180.m2p",
+        "sha256": "55fa67002392c549bd8540f120266af66ed93febde2b294b8dde236734112180",
+        "size": 33552198
+      },
+      {
+        "path": "objects/packs/5ede1ad3bffcdb99e72347d2d2be3a8d399b47241aa334123c737dd1f4176096.m2p",
+        "sha256": "5ede1ad3bffcdb99e72347d2d2be3a8d399b47241aa334123c737dd1f4176096",
+        "size": 33452573
+      },
+      {
+        "path": "objects/packs/68282742e1d2187cd27335cc1f94a4eda6a854f0b0e2f286966d56bab69cc47e.m2p",
+        "sha256": "68282742e1d2187cd27335cc1f94a4eda6a854f0b0e2f286966d56bab69cc47e",
+        "size": 33545217
+      },
+      {
+        "path": "objects/packs/687c013fd076b54f8b5ebec42ce4b82e002bf9f12b4e5fec5919b6a2acbebb59.m2p",
+        "sha256": "687c013fd076b54f8b5ebec42ce4b82e002bf9f12b4e5fec5919b6a2acbebb59",
+        "size": 33553367
+      },
+      {
+        "path": "objects/packs/86327dd49a3054b208007ca6a5e49ecf5a8632ec004946e8965956910f0060e7.m2p",
+        "sha256": "86327dd49a3054b208007ca6a5e49ecf5a8632ec004946e8965956910f0060e7",
+        "size": 7229532
+      },
+      {
+        "path": "objects/packs/941f2ac30c5060e369af717fd0de6afd2c3368731f30a293e31f13afd667eb03.m2p",
+        "sha256": "941f2ac30c5060e369af717fd0de6afd2c3368731f30a293e31f13afd667eb03",
+        "size": 33553923
+      },
+      {
+        "path": "objects/packs/a8403f51da61f4ba9ce0f9c79210b5359d42c0ad6db449a99179b952ae82565c.m2p",
+        "sha256": "a8403f51da61f4ba9ce0f9c79210b5359d42c0ad6db449a99179b952ae82565c",
+        "size": 33553067
+      },
+      {
+        "path": "objects/packs/c1384b5b198506cdc9eee7159eb87700da51a6b8e549316605d69e15a00008f8.m2p",
+        "sha256": "c1384b5b198506cdc9eee7159eb87700da51a6b8e549316605d69e15a00008f8",
+        "size": 33301852
+      },
+      {
+        "path": "objects/packs/c30b19238fa312d101a4908e3da5b79b7d108698de82af0aa96877147f7d7339.m2p",
+        "sha256": "c30b19238fa312d101a4908e3da5b79b7d108698de82af0aa96877147f7d7339",
+        "size": 33552094
+      },
+      {
+        "path": "objects/packs/c4d68145203e5a01cd9e42b76468d5150f07c793cecc7082ef3ef99deca49e95.m2p",
+        "sha256": "c4d68145203e5a01cd9e42b76468d5150f07c793cecc7082ef3ef99deca49e95",
+        "size": 33554282
+      },
+      {
+        "path": "objects/packs/d1cbacd99d1f0fecf931231261efb88fd29942b1b70ca89ef3627a8a91103e32.m2p",
+        "sha256": "d1cbacd99d1f0fecf931231261efb88fd29942b1b70ca89ef3627a8a91103e32",
+        "size": 33549154
+      },
+      {
+        "path": "objects/packs/e1a423ebc589ea6b7d4aa4d26e861003e1bf9d012544e6b1ce27927addff4bb3.m2p",
+        "sha256": "e1a423ebc589ea6b7d4aa4d26e861003e1bf9d012544e6b1ce27927addff4bb3",
+        "size": 31580065
+      },
+      {
+        "path": "objects/packs/e967397064acad28a30d88671fde8bf798a8fc3fa7743d2af202be556fde8e11.m2p",
+        "sha256": "e967397064acad28a30d88671fde8bf798a8fc3fa7743d2af202be556fde8e11",
+        "size": 33554088
+      },
+      {
+        "path": "objects/packs/edb420bdf2dbace65277a6d0556358f82eb533a0c6e706e350c88e3564a5fac7.m2p",
+        "sha256": "edb420bdf2dbace65277a6d0556358f82eb533a0c6e706e350c88e3564a5fac7",
+        "size": 33548442
+      },
+      {
+        "path": "objects/packs/f7b22e2c78c0153f165694160728549508a40e769ca9a2732bd8c48b3c75fef7.m2p",
+        "sha256": "f7b22e2c78c0153f165694160728549508a40e769ca9a2732bd8c48b3c75fef7",
+        "size": 33531149
+      },
+      {
+        "path": "objects/packs/f8d1c352c437ed7b9e0579dda8e4abffb4a7083ffe645f825701775d03547966.m2p",
+        "sha256": "f8d1c352c437ed7b9e0579dda8e4abffb4a7083ffe645f825701775d03547966",
+        "size": 33554073
+      }
+    ],
+    "skippedObjects": [
+      {
+        "path": "objects/packs/45e37947c3ed45176e14fd267834756c7755745c27cebffd661fc6df4f27b201.m2p",
+        "sha256": "45e37947c3ed45176e14fd267834756c7755745c27cebffd661fc6df4f27b201",
+        "size": 33346502
+      },
+      {
+        "path": "objects/packs/52e10d75fb58688b6f210481e94b15a663d178cd94cbd399ce239188a838aa50.m2p",
+        "sha256": "52e10d75fb58688b6f210481e94b15a663d178cd94cbd399ce239188a838aa50",
+        "size": 33553196
+      }
+    ],
+    "startedUtc": "2026-10-29T09:09:31.024046+00:00"
+  },
+  "projectionBoundary": "Explicit fields only; raw log/body/attempt/env/argv/private config excluded.",
+  "role": "packed31-prefill-failed",
+  "schema": "mir2.evidence.public-projection.v1",
+  "sourceSha256": "50EF30ACE91CDB7782F8EE6A90DB125ED673849BAD5E20DCE92EAFD3B4088E38",
+  "sourceSize": 9442
+}

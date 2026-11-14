@@ -1,0 +1,680 @@
+{
+  "schema": "mir2.r16.web_ordinary_chase.v1",
+  "date": "2026-11-10",
+  "base": "2e205376e0999db530daa439f8fe3409833fa5ac",
+  "candidate": {
+    "buildId": "Q1uIxiLliOmrj0ODGy9fD",
+    "buildReceiptSha256": "a65c98fd2bfe3a2ea79b88cedb57d2920abbad132fffa28561428311d73160bf",
+    "paths": {
+      "apps/web/app/page.tsx": "2cba126fe77348ba4c5e7f63408eb414a1aca6c40ff2085137e21566ceec046b",
+      "apps/web/app/original-client-shell.tsx": "a9f44e981e2b159f2891278268a039231a8f87d7dae2aed73bd8db2c0cf86865",
+      "apps/web/app/components/original-client-scene-visual-layers.tsx": "08b80a359f57e5dedc4f8e5dd642da4e96848a85a2a9048f4ec9a477b9e56600",
+      "apps/game-client/client-bevy/src/combat_input.rs": "0da1b3192067931ad746aff7d1bd3c1c02ec2090581f0a9b46b2900e676c8e86",
+      "apps/game-client/client-bevy/src/combat_input_tests.rs": "0a873bcb002e9426c87ba1c46ed9dae3038bf7c7c0fd580b185b2704419f4de9"
+    },
+    "runtime": {
+      "version": "bevy-48c1f266331da4cb",
+      "files": [
+        {
+          "file": "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js",
+          "sha256": "b30146482550703a7309d8471154d2200dc55a47aea2b9910b6895aea7d70069"
+        },
+        {
+          "file": "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+          "sha256": "07916cf8797f7e9d1eba738589b0a6d136f1cb788081fd74c39c95ee6a84d0d7"
+        },
+        {
+          "file": "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js",
+          "sha256": "2c18b5168f4a5210f4879c06e7373807a6dedb3a81137fdc28080191bc0f5aa5"
+        },
+        {
+          "file": "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+          "sha256": "8380b9b5be263235508ae0f340e709a88093782eea2f3623afad0351d67ec0b7"
+        },
+        {
+          "file": "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime.js",
+          "sha256": "35d1ad1206bba4693cef1d4f19ca2bc6e4cd173c4bbf1279daaf1eb745c1e66a"
+        },
+        {
+          "file": "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+          "sha256": "d4aeb0e1c701e6a1651c7ebebc9cf98048d516de2d4244b81d9abe39e8c521d1"
+        }
+      ],
+      "releaseChecks": [
+        {
+          "packageId": "webgpu",
+          "budget": {
+            "wasmBytes": 31442089,
+            "gzipBytes": 6596856,
+            "jsBytes": 141747
+          },
+          "metadataMatched": true,
+          "optimizerSha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3"
+        },
+        {
+          "packageId": "webgl2",
+          "budget": {
+            "wasmBytes": 16607291,
+            "gzipBytes": 4276467,
+            "jsBytes": 117805
+          },
+          "metadataMatched": true,
+          "optimizerSha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3"
+        },
+        {
+          "packageId": "webgl2-shared",
+          "budget": {
+            "wasmBytes": 32369463,
+            "gzipBytes": 6933181,
+            "jsBytes": 139721
+          },
+          "metadataMatched": true,
+          "optimizerSha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3"
+        }
+      ],
+      "buildLogSha256": "08b41e1a5a49226137ba74fb2dfad790c0def58ae1c68c324551174ffa2cdabd"
+    }
+  },
+  "checks": {
+    "webPassed": 169,
+    "webLogSha256": "c41b32b8f6599fc53c53411c334cc6063e63377b42015cd85983cf516f7cd0ed",
+    "stage5Groups": 520,
+    "nativeReference": [
+      {
+        "passed": 1,
+        "sha256": "82decc9902cf4ee896ffdbb71cc7742bd8cad129d3be60f0c168060b1a08ed0b"
+      },
+      {
+        "passed": 1,
+        "sha256": "5a67ee575f88781aa6660cc5761469f7cabc00234911a84530f1111981db797a"
+      }
+    ],
+    "rustControllerPassed": 23,
+    "rustTestLogSha256": "fb9d62b1888347d78f4d1d8cc28b85d80330e22d49daad6b8c5262d662a0ba99",
+    "runtimePackagePassed": 14,
+    "runtimeTestLogSha256": "3fa4b0c2a08fe0ac80132788bbf14033f4cf7357c229ed1bfa43dfac7a0a5561"
+  },
+  "publicQr": {
+    "productionRevision": "a23cc382af1c66cd7ffeea794fd62fe7cba7e96a",
+    "receiptSha256": "f740b1bcb6c792a397274af241dbbcddeab756d31ebbfbbfebd1966a7f67957b",
+    "scope": "Default Chrome anonymous Simplified and Traditional Chinese create, pending and cancel."
+  },
+  "chase": {
+    "baseline": [
+      {
+        "receiptSha256": "83352e9725d460eab9051167e4443240c9677ce184bc6fd4bfe6806f194a468a",
+        "buildReceiptSha256": "20c09a207d679565999fa724aa32727351507e72d340da31d1e28e05b916f5ad",
+        "renderer": "webgpu",
+        "windowProfile": "plain",
+        "saveFixtureSha256": "677312ad579da5f3431832b6ec6df7e99adea0f133391c229977bf4d7ff6b0fb",
+        "initial": {
+          "point": {
+            "x": 584,
+            "y": 596
+          },
+          "distance": 5,
+          "self": {
+            "x": 298,
+            "y": 269
+          },
+          "target": {
+            "x": 297,
+            "y": 274
+          },
+          "id": "200203"
+        },
+        "steps": [
+          {
+            "from": {
+              "x": 298,
+              "y": 269
+            },
+            "to": {
+              "x": 297,
+              "y": 270
+            },
+            "command": "run",
+            "movementSeq": 636,
+            "ackSeq": 637
+          },
+          {
+            "from": {
+              "x": 297,
+              "y": 270
+            },
+            "to": {
+              "x": 295,
+              "y": 272
+            },
+            "command": "run",
+            "movementSeq": 638,
+            "ackSeq": 640
+          },
+          {
+            "from": {
+              "x": 295,
+              "y": 272
+            },
+            "to": {
+              "x": 296,
+              "y": 273
+            },
+            "command": "walk",
+            "movementSeq": 642,
+            "ackSeq": 643
+          }
+        ],
+        "hit": {
+          "attackSeq": 645,
+          "damageSeq": 656,
+          "deathSeq": 659
+        },
+        "laterAttacks": 0,
+        "laterMovement": null,
+        "saved": {
+          "position": {
+            "x": 296,
+            "y": 273
+          },
+          "level": 30,
+          "logout": 664
+        }
+      },
+      {
+        "receiptSha256": "a5009664496bb9ad8580b0deba15d743fd9ff4a2dec659f08f14a22eefab4792",
+        "buildReceiptSha256": "20c09a207d679565999fa724aa32727351507e72d340da31d1e28e05b916f5ad",
+        "renderer": "shared",
+        "windowProfile": "bag",
+        "saveFixtureSha256": "6c36451f89ee43ac5354c1211de2690ddb39fa9a17b431992b05f9a7f000cb7c",
+        "initial": {
+          "point": {
+            "x": 584,
+            "y": 596
+          },
+          "distance": 5,
+          "self": {
+            "x": 298,
+            "y": 269
+          },
+          "target": {
+            "x": 297,
+            "y": 274
+          },
+          "id": "200203"
+        },
+        "steps": [
+          {
+            "from": {
+              "x": 298,
+              "y": 269
+            },
+            "to": {
+              "x": 297,
+              "y": 270
+            },
+            "command": "run",
+            "movementSeq": 636,
+            "ackSeq": 637
+          },
+          {
+            "from": {
+              "x": 297,
+              "y": 270
+            },
+            "to": {
+              "x": 295,
+              "y": 272
+            },
+            "command": "run",
+            "movementSeq": 638,
+            "ackSeq": 640
+          },
+          {
+            "from": {
+              "x": 295,
+              "y": 272
+            },
+            "to": {
+              "x": 296,
+              "y": 273
+            },
+            "command": "walk",
+            "movementSeq": 642,
+            "ackSeq": 644
+          }
+        ],
+        "hit": {
+          "attackSeq": 645,
+          "damageSeq": 656,
+          "deathSeq": 659
+        },
+        "laterAttacks": 0,
+        "laterMovement": null,
+        "saved": {
+          "position": {
+            "x": 296,
+            "y": 273
+          },
+          "level": 30,
+          "logout": 664
+        }
+      }
+    ],
+    "candidate": [
+      {
+        "receiptSha256": "3f0a290838ffb8823a7cf4d676ee416e3867b990c724bb1101f5c2ca25bc5d4e",
+        "buildReceiptSha256": "a65c98fd2bfe3a2ea79b88cedb57d2920abbad132fffa28561428311d73160bf",
+        "renderer": "webgpu",
+        "windowProfile": "plain",
+        "saveFixtureSha256": "677312ad579da5f3431832b6ec6df7e99adea0f133391c229977bf4d7ff6b0fb",
+        "initial": {
+          "point": {
+            "x": 584,
+            "y": 596
+          },
+          "distance": 5,
+          "self": {
+            "x": 298,
+            "y": 269
+          },
+          "target": {
+            "x": 297,
+            "y": 274
+          },
+          "id": "200203"
+        },
+        "steps": [
+          {
+            "from": {
+              "x": 298,
+              "y": 269
+            },
+            "to": {
+              "x": 299,
+              "y": 270
+            },
+            "command": "walk",
+            "movementSeq": 636,
+            "ackSeq": 637
+          },
+          {
+            "from": {
+              "x": 299,
+              "y": 270
+            },
+            "to": {
+              "x": 298,
+              "y": 271
+            },
+            "command": "walk",
+            "movementSeq": 638,
+            "ackSeq": 639
+          },
+          {
+            "from": {
+              "x": 298,
+              "y": 271
+            },
+            "to": {
+              "x": 297,
+              "y": 272
+            },
+            "command": "walk",
+            "movementSeq": 640,
+            "ackSeq": 641
+          },
+          {
+            "from": {
+              "x": 297,
+              "y": 272
+            },
+            "to": {
+              "x": 296,
+              "y": 273
+            },
+            "command": "walk",
+            "movementSeq": 642,
+            "ackSeq": 644
+          }
+        ],
+        "hit": {
+          "attackSeq": 645,
+          "damageSeq": 656,
+          "deathSeq": 659
+        },
+        "laterAttacks": 0,
+        "laterMovement": 0,
+        "saved": {
+          "position": {
+            "x": 296,
+            "y": 273
+          },
+          "level": 30,
+          "logout": 666
+        }
+      },
+      {
+        "receiptSha256": "9fede618adeb525d9186e592a0d56b9d0267495092389e8037b9491aea32032d",
+        "buildReceiptSha256": "a65c98fd2bfe3a2ea79b88cedb57d2920abbad132fffa28561428311d73160bf",
+        "renderer": "shared",
+        "windowProfile": "bag",
+        "saveFixtureSha256": "6c36451f89ee43ac5354c1211de2690ddb39fa9a17b431992b05f9a7f000cb7c",
+        "initial": {
+          "point": {
+            "x": 584,
+            "y": 596
+          },
+          "distance": 5,
+          "self": {
+            "x": 298,
+            "y": 269
+          },
+          "target": {
+            "x": 297,
+            "y": 274
+          },
+          "id": "200203"
+        },
+        "steps": [
+          {
+            "from": {
+              "x": 298,
+              "y": 269
+            },
+            "to": {
+              "x": 299,
+              "y": 270
+            },
+            "command": "walk",
+            "movementSeq": 636,
+            "ackSeq": 637
+          },
+          {
+            "from": {
+              "x": 299,
+              "y": 270
+            },
+            "to": {
+              "x": 298,
+              "y": 271
+            },
+            "command": "walk",
+            "movementSeq": 638,
+            "ackSeq": 639
+          },
+          {
+            "from": {
+              "x": 298,
+              "y": 271
+            },
+            "to": {
+              "x": 297,
+              "y": 272
+            },
+            "command": "walk",
+            "movementSeq": 640,
+            "ackSeq": 641
+          },
+          {
+            "from": {
+              "x": 297,
+              "y": 272
+            },
+            "to": {
+              "x": 296,
+              "y": 273
+            },
+            "command": "walk",
+            "movementSeq": 642,
+            "ackSeq": 644
+          }
+        ],
+        "hit": {
+          "attackSeq": 645,
+          "damageSeq": 656,
+          "deathSeq": 659
+        },
+        "laterAttacks": 0,
+        "laterMovement": 0,
+        "saved": {
+          "position": {
+            "x": 296,
+            "y": 273
+          },
+          "level": 30,
+          "logout": 666
+        }
+      }
+    ]
+  },
+  "right": {
+    "baseline": [
+      {
+        "receiptSha256": "1593d51561b7d10585fb7f3760217f1cbcdffe0ce862143c5dafdbb3a1758235",
+        "buildReceiptSha256": "20c09a207d679565999fa724aa32727351507e72d340da31d1e28e05b916f5ad",
+        "renderer": "webgpu",
+        "profile": "hen",
+        "saveFixtureSha256": "677312ad579da5f3431832b6ec6df7e99adea0f133391c229977bf4d7ff6b0fb",
+        "actor": {
+          "name": "Hen",
+          "id": "200203",
+          "tile": {
+            "x": 297,
+            "y": 274
+          }
+        },
+        "physicalPoint": {
+          "x": 584,
+          "y": 596
+        },
+        "underneathGround": {
+          "x": 297,
+          "y": 273
+        },
+        "disposition": "monster-activation",
+        "attackSeq": 645,
+        "interactSeq": null,
+        "dialog": false,
+        "movementRequests": [
+          {
+            "type": "run",
+            "seq": 636
+          },
+          {
+            "type": "run",
+            "seq": 638
+          },
+          {
+            "type": "walk",
+            "seq": 642
+          }
+        ],
+        "movement": {
+          "type": "run",
+          "direction": "DownLeft",
+          "ack": 637
+        },
+        "saved": {
+          "position": {
+            "x": 296,
+            "y": 273
+          },
+          "level": 30,
+          "logout": 664
+        }
+      },
+      {
+        "receiptSha256": "f2f6e4186bc3f0131dfc018986892225e061fecd7a2cb562fcfa256a432815c5",
+        "buildReceiptSha256": "20c09a207d679565999fa724aa32727351507e72d340da31d1e28e05b916f5ad",
+        "renderer": "shared",
+        "profile": "npc",
+        "saveFixtureSha256": "ee63f1fd891d8987dced0c73bb0be8e595da732a937aae3b04032a50cf1a1666",
+        "actor": {
+          "name": "BichonWall_Board",
+          "id": "24",
+          "tile": {
+            "x": 334,
+            "y": 259
+          }
+        },
+        "physicalPoint": {
+          "x": 920,
+          "y": 283
+        },
+        "underneathGround": {
+          "x": 334,
+          "y": 258
+        },
+        "disposition": "npc-activation",
+        "attackSeq": null,
+        "interactSeq": 702,
+        "dialog": true,
+        "movementRequests": [],
+        "movement": null,
+        "saved": {
+          "position": {
+            "x": 328,
+            "y": 264
+          },
+          "level": 30,
+          "logout": 714
+        }
+      }
+    ],
+    "candidate": [
+      {
+        "receiptSha256": "3854a6a7aadd2508672be8e18e8eb4b042c44d76df3b5ed5de3842c0d82b0b77",
+        "buildReceiptSha256": "a65c98fd2bfe3a2ea79b88cedb57d2920abbad132fffa28561428311d73160bf",
+        "renderer": "webgpu",
+        "profile": "hen",
+        "saveFixtureSha256": "677312ad579da5f3431832b6ec6df7e99adea0f133391c229977bf4d7ff6b0fb",
+        "actor": {
+          "name": "Hen",
+          "id": "200203",
+          "tile": {
+            "x": 297,
+            "y": 274
+          }
+        },
+        "physicalPoint": {
+          "x": 584,
+          "y": 596
+        },
+        "underneathGround": {
+          "x": 297,
+          "y": 273
+        },
+        "disposition": "movement-only",
+        "attackSeq": null,
+        "interactSeq": null,
+        "dialog": false,
+        "movementRequests": [
+          {
+            "type": "walk",
+            "seq": 636
+          },
+          {
+            "type": "run",
+            "seq": 638
+          }
+        ],
+        "movement": {
+          "type": "walk",
+          "direction": "DownLeft",
+          "ack": 637
+        },
+        "saved": {
+          "position": {
+            "x": 295,
+            "y": 272
+          },
+          "level": 30,
+          "logout": 645
+        }
+      },
+      {
+        "receiptSha256": "c3f2cd3220d3857eb3cdd8b9640b1013adac2f7f5e4c4be7498dc4a516acee83",
+        "buildReceiptSha256": "a65c98fd2bfe3a2ea79b88cedb57d2920abbad132fffa28561428311d73160bf",
+        "renderer": "shared",
+        "profile": "npc",
+        "saveFixtureSha256": "ee63f1fd891d8987dced0c73bb0be8e595da732a937aae3b04032a50cf1a1666",
+        "actor": {
+          "name": "BichonWall_Board",
+          "id": "24",
+          "tile": {
+            "x": 334,
+            "y": 259
+          }
+        },
+        "physicalPoint": {
+          "x": 920,
+          "y": 283
+        },
+        "underneathGround": {
+          "x": 334,
+          "y": 258
+        },
+        "disposition": "movement-only",
+        "attackSeq": null,
+        "interactSeq": null,
+        "dialog": false,
+        "movementRequests": [
+          {
+            "type": "walk",
+            "seq": 702
+          }
+        ],
+        "movement": {
+          "type": "walk",
+          "direction": "UpRight",
+          "ack": 704
+        },
+        "saved": {
+          "position": {
+            "x": 329,
+            "y": 263
+          },
+          "level": 30,
+          "logout": 711
+        }
+      }
+    ]
+  },
+  "remainingAcceptance": [
+    "Natural moving target and transient occupancy in an ordinary browser.",
+    "Classic right-button release can still flush an earlier queued run. The final Hen trial covers action ownership.",
+    "Windows desktop and reviewed public promotion with the matching renderer package."
+  ],
+  "interim": [
+    {
+      "renderer": "webgpu",
+      "receiptSha256": "fdba812a834d8e233d8ab30a5dd4be2f5284c897d8f2bf589b4e0b7dbae42c3f",
+      "buildReceiptSha256": "d9e0c77fae0c4cfd4ded130d4597674830a560c2be77531f8be1ef5e67f40252"
+    },
+    {
+      "renderer": "shared",
+      "receiptSha256": "69a808258ffb221a6436f1a9027e929b696aa30667ff1584cc03ae2062fdd4be",
+      "buildReceiptSha256": "d9e0c77fae0c4cfd4ded130d4597674830a560c2be77531f8be1ef5e67f40252"
+    },
+    {
+      "renderer": "webgpu",
+      "receiptSha256": "8261a700a4b47801be6ecaf4f84b666d3ef6a4e83c7bce64776ac85dee6b1d88",
+      "buildReceiptSha256": "d9e0c77fae0c4cfd4ded130d4597674830a560c2be77531f8be1ef5e67f40252"
+    },
+    {
+      "renderer": "shared",
+      "receiptSha256": "da51411ec54c11e6e144d4af7be1e6d9db2d92f6bbd602c8537709d8a01f040c",
+      "buildReceiptSha256": "d9e0c77fae0c4cfd4ded130d4597674830a560c2be77531f8be1ef5e67f40252"
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "ordinary-chase-hit.png",
+      "sha256": "5fc10f928e66ff0937c66dac4e2bb7cb5d9621af8814f6f7f88f6ec82fd6c223"
+    },
+    {
+      "file": "right-click-npc-overlay.png",
+      "sha256": "c853fdd0bd7bac8765f6ec3187dd3eb15a96f9eedd7047428bdd22b5026053da"
+    }
+  ]
+}

@@ -1,0 +1,944 @@
+{
+  "schema": 1,
+  "profile": "newcomer-v2",
+  "checkedAt": "2026-10-01T08:23:49.850Z",
+  "scopeClasses": [
+    "Wizard",
+    "Taoist"
+  ],
+  "denominator": 52,
+  "status": "partial",
+  "independentStores": true,
+  "completedUnits": 33,
+  "allClassesCompleted": false,
+  "functionalCompletionWithinDeadline": false,
+  "freshTimedCompletion": false,
+  "measuredTime": false,
+  "visualAccepted": false,
+  "globalParityPercent": null,
+  "classes": [
+    {
+      "className": "Wizard",
+      "status": "partial",
+      "completed": false,
+      "completedUnits": 21,
+      "snapshotCompletedIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004,
+        2110005,
+        2110006,
+        2110007,
+        2110008,
+        2110009,
+        2110010,
+        2110011,
+        2110012,
+        2110013,
+        2110014,
+        2110015,
+        2110016,
+        2110017,
+        2110018,
+        2120015,
+        2120020,
+        2120025
+      ],
+      "savedCompletedIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004,
+        2110005,
+        2110006,
+        2110007,
+        2110008,
+        2110009,
+        2110010,
+        2110011,
+        2110012,
+        2110013,
+        2110014,
+        2110015,
+        2110016,
+        2110017,
+        2110018,
+        2120015,
+        2120020,
+        2120025
+      ],
+      "receiptedCompletedIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004,
+        2110005,
+        2110006,
+        2110007,
+        2110008,
+        2110009,
+        2110010,
+        2110011,
+        2110012,
+        2110013,
+        2110014,
+        2110015,
+        2110016,
+        2110017,
+        2110018,
+        2120015,
+        2120020,
+        2120025
+      ],
+      "verifiedCompletedIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004,
+        2110005,
+        2110006,
+        2110007,
+        2110008,
+        2110009,
+        2110010,
+        2110011,
+        2110012,
+        2110013,
+        2110014,
+        2110015,
+        2110016,
+        2110017,
+        2110018,
+        2120015,
+        2120020,
+        2120025
+      ],
+      "logoutCommitted": true,
+      "transformMatches": true,
+      "visualAccepted": false,
+      "reasons": [
+        {
+          "code": "unverified-nodes",
+          "questIds": [
+            2110019,
+            2110020,
+            2110021,
+            2110022,
+            2120030
+          ]
+        },
+        {
+          "code": "below-level-30"
+        },
+        {
+          "code": "runner-not-completed"
+        }
+      ],
+      "name": "JWc3f4424b",
+      "runId": "2026-10-01T07-25-46-495Z",
+      "saveRevision": 348,
+      "identityVerified": true,
+      "logoutSent": {
+        "sequence": 23642,
+        "at": "2026-10-01T08:07:02.751Z"
+      },
+      "logoutSuccess": {
+        "sequence": 23644,
+        "at": "2026-10-01T08:07:05.100Z"
+      },
+      "rawFinalSnapshot": {
+        "runId": "2026-10-01T07-25-46-495Z",
+        "sequence": 23641,
+        "at": "2026-10-01T08:07:02.713Z",
+        "selection": "pre-logout-complete-frame"
+      },
+      "level": 26,
+      "runnerSnapshotMatches": true,
+      "receipts": [
+        {
+          "questId": 2110001,
+          "runId": "2026-10-01T04-11-36-426Z",
+          "finish": {
+            "sequence": 738,
+            "at": "2026-10-01T04:11:52.398Z"
+          },
+          "change": {
+            "sequence": 739,
+            "at": "2026-10-01T04:11:52.452Z"
+          },
+          "complete": {
+            "sequence": 740,
+            "at": "2026-10-01T04:11:52.452Z"
+          }
+        },
+        {
+          "questId": 2110002,
+          "runId": "2026-10-01T04-11-36-426Z",
+          "finish": {
+            "sequence": 760,
+            "at": "2026-10-01T04:11:52.867Z"
+          },
+          "change": {
+            "sequence": 761,
+            "at": "2026-10-01T04:11:52.928Z"
+          },
+          "complete": {
+            "sequence": 762,
+            "at": "2026-10-01T04:11:52.928Z"
+          }
+        },
+        {
+          "questId": 2110003,
+          "runId": "2026-10-01T04-11-36-426Z",
+          "finish": {
+            "sequence": 1489,
+            "at": "2026-10-01T04:13:12.323Z"
+          },
+          "change": {
+            "sequence": 1490,
+            "at": "2026-10-01T04:13:12.381Z"
+          },
+          "complete": {
+            "sequence": 1491,
+            "at": "2026-10-01T04:13:12.381Z"
+          }
+        },
+        {
+          "questId": 2110004,
+          "runId": "2026-10-01T04-11-36-426Z",
+          "finish": {
+            "sequence": 2297,
+            "at": "2026-10-01T04:14:38.865Z"
+          },
+          "change": {
+            "sequence": 2298,
+            "at": "2026-10-01T04:14:38.935Z"
+          },
+          "complete": {
+            "sequence": 2299,
+            "at": "2026-10-01T04:14:38.935Z"
+          }
+        },
+        {
+          "questId": 2110005,
+          "runId": "2026-10-01T04-11-36-426Z",
+          "finish": {
+            "sequence": 2883,
+            "at": "2026-10-01T04:16:06.504Z"
+          },
+          "change": {
+            "sequence": 2885,
+            "at": "2026-10-01T04:16:06.589Z"
+          },
+          "complete": {
+            "sequence": 2886,
+            "at": "2026-10-01T04:16:06.589Z"
+          }
+        },
+        {
+          "questId": 2110006,
+          "runId": "2026-10-01T04-11-36-426Z",
+          "finish": {
+            "sequence": 2964,
+            "at": "2026-10-01T04:16:18.018Z"
+          },
+          "change": {
+            "sequence": 2965,
+            "at": "2026-10-01T04:16:18.092Z"
+          },
+          "complete": {
+            "sequence": 2966,
+            "at": "2026-10-01T04:16:18.092Z"
+          }
+        },
+        {
+          "questId": 2110007,
+          "runId": "2026-10-01T04-11-36-426Z",
+          "finish": {
+            "sequence": 5343,
+            "at": "2026-10-01T04:20:44.880Z"
+          },
+          "change": {
+            "sequence": 5344,
+            "at": "2026-10-01T04:20:44.989Z"
+          },
+          "complete": {
+            "sequence": 5345,
+            "at": "2026-10-01T04:20:44.989Z"
+          }
+        },
+        {
+          "questId": 2110008,
+          "runId": "2026-10-01T04-11-36-426Z",
+          "finish": {
+            "sequence": 6267,
+            "at": "2026-10-01T04:22:23.924Z"
+          },
+          "change": {
+            "sequence": 6268,
+            "at": "2026-10-01T04:22:24.133Z"
+          },
+          "complete": {
+            "sequence": 6269,
+            "at": "2026-10-01T04:22:24.133Z"
+          }
+        },
+        {
+          "questId": 2110009,
+          "runId": "2026-10-01T04-11-36-426Z",
+          "finish": {
+            "sequence": 6854,
+            "at": "2026-10-01T04:23:47.264Z"
+          },
+          "change": {
+            "sequence": 6855,
+            "at": "2026-10-01T04:23:47.383Z"
+          },
+          "complete": {
+            "sequence": 6856,
+            "at": "2026-10-01T04:23:47.383Z"
+          }
+        },
+        {
+          "questId": 2110010,
+          "runId": "2026-10-01T04-11-36-426Z",
+          "finish": {
+            "sequence": 7591,
+            "at": "2026-10-01T04:25:51.953Z"
+          },
+          "change": {
+            "sequence": 7592,
+            "at": "2026-10-01T04:25:52.059Z"
+          },
+          "complete": {
+            "sequence": 7593,
+            "at": "2026-10-01T04:25:52.059Z"
+          }
+        },
+        {
+          "questId": 2110011,
+          "runId": "2026-10-01T04-11-36-426Z",
+          "finish": {
+            "sequence": 8287,
+            "at": "2026-10-01T04:27:37.535Z"
+          },
+          "change": {
+            "sequence": 8288,
+            "at": "2026-10-01T04:27:37.656Z"
+          },
+          "complete": {
+            "sequence": 8289,
+            "at": "2026-10-01T04:27:37.656Z"
+          }
+        },
+        {
+          "questId": 2110012,
+          "runId": "2026-10-01T04-11-36-426Z",
+          "finish": {
+            "sequence": 9355,
+            "at": "2026-10-01T04:30:14.488Z"
+          },
+          "change": {
+            "sequence": 9356,
+            "at": "2026-10-01T04:30:14.840Z"
+          },
+          "complete": {
+            "sequence": 9357,
+            "at": "2026-10-01T04:30:14.840Z"
+          }
+        },
+        {
+          "questId": 2110013,
+          "runId": "2026-10-01T04-11-36-426Z",
+          "finish": {
+            "sequence": 10121,
+            "at": "2026-10-01T04:32:21.626Z"
+          },
+          "change": {
+            "sequence": 10122,
+            "at": "2026-10-01T04:32:21.909Z"
+          },
+          "complete": {
+            "sequence": 10123,
+            "at": "2026-10-01T04:32:21.909Z"
+          }
+        },
+        {
+          "questId": 2110014,
+          "runId": "2026-10-01T05-56-46-427Z",
+          "finish": {
+            "sequence": 1652,
+            "at": "2026-10-01T05:58:49.891Z"
+          },
+          "change": {
+            "sequence": 1653,
+            "at": "2026-10-01T05:58:50.078Z"
+          },
+          "complete": {
+            "sequence": 1654,
+            "at": "2026-10-01T05:58:50.078Z"
+          }
+        },
+        {
+          "questId": 2110015,
+          "runId": "2026-10-01T05-56-46-427Z",
+          "finish": {
+            "sequence": 1920,
+            "at": "2026-10-01T05:59:14.708Z"
+          },
+          "change": {
+            "sequence": 1921,
+            "at": "2026-10-01T05:59:14.932Z"
+          },
+          "complete": {
+            "sequence": 1922,
+            "at": "2026-10-01T05:59:14.932Z"
+          }
+        },
+        {
+          "questId": 2110016,
+          "runId": "2026-10-01T06-18-53-323Z",
+          "finish": {
+            "sequence": 3048,
+            "at": "2026-10-01T06:25:47.019Z"
+          },
+          "change": {
+            "sequence": 3051,
+            "at": "2026-10-01T06:25:47.396Z"
+          },
+          "complete": {
+            "sequence": 3052,
+            "at": "2026-10-01T06:25:47.396Z"
+          }
+        },
+        {
+          "questId": 2110017,
+          "runId": "2026-10-01T06-18-53-323Z",
+          "finish": {
+            "sequence": 3082,
+            "at": "2026-10-01T06:25:50.229Z"
+          },
+          "change": {
+            "sequence": 3083,
+            "at": "2026-10-01T06:25:50.470Z"
+          },
+          "complete": {
+            "sequence": 3084,
+            "at": "2026-10-01T06:25:50.470Z"
+          }
+        },
+        {
+          "questId": 2110018,
+          "runId": "2026-10-01T06-18-53-323Z",
+          "finish": {
+            "sequence": 4806,
+            "at": "2026-10-01T06:30:17.129Z"
+          },
+          "change": {
+            "sequence": 4807,
+            "at": "2026-10-01T06:30:17.373Z"
+          },
+          "complete": {
+            "sequence": 4808,
+            "at": "2026-10-01T06:30:17.373Z"
+          }
+        },
+        {
+          "questId": 2120015,
+          "runId": "2026-10-01T04-11-36-426Z",
+          "finish": {
+            "sequence": 5355,
+            "at": "2026-10-01T04:20:45.210Z"
+          },
+          "change": {
+            "sequence": 5356,
+            "at": "2026-10-01T04:20:45.321Z"
+          },
+          "complete": {
+            "sequence": 5357,
+            "at": "2026-10-01T04:20:45.322Z"
+          }
+        },
+        {
+          "questId": 2120020,
+          "runId": "2026-10-01T04-11-36-426Z",
+          "finish": {
+            "sequence": 9371,
+            "at": "2026-10-01T04:30:15.832Z"
+          },
+          "change": {
+            "sequence": 9372,
+            "at": "2026-10-01T04:30:16.070Z"
+          },
+          "complete": {
+            "sequence": 9373,
+            "at": "2026-10-01T04:30:16.070Z"
+          }
+        },
+        {
+          "questId": 2120025,
+          "runId": "2026-10-01T06-18-53-323Z",
+          "finish": {
+            "sequence": 3066,
+            "at": "2026-10-01T06:25:48.643Z"
+          },
+          "change": {
+            "sequence": 3067,
+            "at": "2026-10-01T06:25:48.941Z"
+          },
+          "complete": {
+            "sequence": 3068,
+            "at": "2026-10-01T06:25:48.941Z"
+          }
+        }
+      ],
+      "persistedCandidateIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004,
+        2110005,
+        2110006,
+        2110007,
+        2110008,
+        2110009,
+        2110010,
+        2110011,
+        2110012,
+        2110013,
+        2110014,
+        2110015,
+        2110016,
+        2110017,
+        2110018,
+        2120015,
+        2120020,
+        2120025
+      ],
+      "timing": {
+        "ordinary": {
+          "startedAt": "2026-10-01T04:11:36.426Z",
+          "deadlineAt": "2026-10-01T06:11:36.426Z",
+          "durationMs": 7200000,
+          "expiredAtAudit": true,
+          "completedWithinDeadline": false,
+          "elapsedToFinalLogoutMs": 14128674
+        },
+        "functional": {
+          "startedAt": "2026-10-01T06:18:52.882Z",
+          "deadlineAt": "2026-10-01T08:18:52.882Z",
+          "durationMs": 7200000,
+          "expiredAtAudit": true,
+          "inheritedCompletedIds": [
+            2110001,
+            2110002,
+            2110003,
+            2110004,
+            2110005,
+            2110006,
+            2110007,
+            2110008,
+            2110009,
+            2110010,
+            2110011,
+            2110012,
+            2110013,
+            2110014,
+            2110015,
+            2120015,
+            2120020
+          ],
+          "newlyReceiptedIds": [
+            2110016,
+            2110017,
+            2110018,
+            2120025
+          ],
+          "completedWithinDeadline": false
+        },
+        "freshTimedCompletion": false,
+        "deaths": {
+          "maxRevives": 3,
+          "originalOrdinaryLedger": [],
+          "retainedLedger": [],
+          "confirmedRecoveries": 0,
+          "preserved": true,
+          "observedDeathReceipts": []
+        }
+      },
+      "pause": {
+        "reason": "operationFailed",
+        "questId": 2110019,
+        "at": "2026-10-01T08:07:02.660Z"
+      }
+    },
+    {
+      "className": "Taoist",
+      "status": "partial",
+      "completed": false,
+      "completedUnits": 12,
+      "snapshotCompletedIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004,
+        2110005,
+        2110006,
+        2110007,
+        2110008,
+        2110009,
+        2110010,
+        2110011,
+        2120015
+      ],
+      "savedCompletedIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004,
+        2110005,
+        2110006,
+        2110007,
+        2110008,
+        2110009,
+        2110010,
+        2110011,
+        2120015
+      ],
+      "receiptedCompletedIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004,
+        2110005,
+        2110006,
+        2110007,
+        2110008,
+        2110009,
+        2110010,
+        2110011,
+        2120015
+      ],
+      "verifiedCompletedIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004,
+        2110005,
+        2110006,
+        2110007,
+        2110008,
+        2110009,
+        2110010,
+        2110011,
+        2120015
+      ],
+      "logoutCommitted": true,
+      "transformMatches": true,
+      "visualAccepted": false,
+      "reasons": [
+        {
+          "code": "unverified-nodes",
+          "questIds": [
+            2110012,
+            2110013,
+            2110014,
+            2110015,
+            2110016,
+            2110017,
+            2110018,
+            2110019,
+            2110020,
+            2110021,
+            2110022,
+            2120020,
+            2120025,
+            2120030
+          ]
+        },
+        {
+          "code": "below-level-30"
+        },
+        {
+          "code": "runner-not-completed"
+        }
+      ],
+      "name": "JT31812917",
+      "runId": "2026-10-01T07-35-00-296Z",
+      "saveRevision": 147,
+      "identityVerified": true,
+      "logoutSent": {
+        "sequence": 617,
+        "at": "2026-10-01T07:35:26.054Z"
+      },
+      "logoutSuccess": {
+        "sequence": 618,
+        "at": "2026-10-01T07:35:30.128Z"
+      },
+      "rawFinalSnapshot": {
+        "runId": "2026-10-01T07-35-00-296Z",
+        "sequence": 616,
+        "at": "2026-10-01T07:35:26.017Z",
+        "selection": "pre-logout-complete-frame"
+      },
+      "level": 19,
+      "runnerSnapshotMatches": true,
+      "receipts": [
+        {
+          "questId": 2110001,
+          "runId": "2026-10-01T04-11-36-505Z",
+          "finish": {
+            "sequence": 738,
+            "at": "2026-10-01T04:11:52.413Z"
+          },
+          "change": {
+            "sequence": 739,
+            "at": "2026-10-01T04:11:52.461Z"
+          },
+          "complete": {
+            "sequence": 740,
+            "at": "2026-10-01T04:11:52.461Z"
+          }
+        },
+        {
+          "questId": 2110002,
+          "runId": "2026-10-01T04-11-36-505Z",
+          "finish": {
+            "sequence": 760,
+            "at": "2026-10-01T04:11:52.928Z"
+          },
+          "change": {
+            "sequence": 761,
+            "at": "2026-10-01T04:11:53.000Z"
+          },
+          "complete": {
+            "sequence": 762,
+            "at": "2026-10-01T04:11:53.000Z"
+          }
+        },
+        {
+          "questId": 2110003,
+          "runId": "2026-10-01T04-11-36-505Z",
+          "finish": {
+            "sequence": 1497,
+            "at": "2026-10-01T04:13:18.979Z"
+          },
+          "change": {
+            "sequence": 1500,
+            "at": "2026-10-01T04:13:19.029Z"
+          },
+          "complete": {
+            "sequence": 1501,
+            "at": "2026-10-01T04:13:19.029Z"
+          }
+        },
+        {
+          "questId": 2110004,
+          "runId": "2026-10-01T04-11-36-505Z",
+          "finish": {
+            "sequence": 2486,
+            "at": "2026-10-01T04:14:54.760Z"
+          },
+          "change": {
+            "sequence": 2487,
+            "at": "2026-10-01T04:14:54.809Z"
+          },
+          "complete": {
+            "sequence": 2488,
+            "at": "2026-10-01T04:14:54.809Z"
+          }
+        },
+        {
+          "questId": 2110005,
+          "runId": "2026-10-01T04-11-36-505Z",
+          "finish": {
+            "sequence": 3084,
+            "at": "2026-10-01T04:16:23.096Z"
+          },
+          "change": {
+            "sequence": 3086,
+            "at": "2026-10-01T04:16:23.186Z"
+          },
+          "complete": {
+            "sequence": 3087,
+            "at": "2026-10-01T04:16:23.186Z"
+          }
+        },
+        {
+          "questId": 2110006,
+          "runId": "2026-10-01T04-11-36-505Z",
+          "finish": {
+            "sequence": 3169,
+            "at": "2026-10-01T04:16:34.664Z"
+          },
+          "change": {
+            "sequence": 3170,
+            "at": "2026-10-01T04:16:34.743Z"
+          },
+          "complete": {
+            "sequence": 3171,
+            "at": "2026-10-01T04:16:34.743Z"
+          }
+        },
+        {
+          "questId": 2110007,
+          "runId": "2026-10-01T04-11-36-505Z",
+          "finish": {
+            "sequence": 5359,
+            "at": "2026-10-01T04:20:34.965Z"
+          },
+          "change": {
+            "sequence": 5360,
+            "at": "2026-10-01T04:20:35.070Z"
+          },
+          "complete": {
+            "sequence": 5361,
+            "at": "2026-10-01T04:20:35.071Z"
+          }
+        },
+        {
+          "questId": 2110008,
+          "runId": "2026-10-01T04-43-19-397Z",
+          "finish": {
+            "sequence": 1448,
+            "at": "2026-10-01T04:45:09.447Z"
+          },
+          "change": {
+            "sequence": 1449,
+            "at": "2026-10-01T04:45:09.648Z"
+          },
+          "complete": {
+            "sequence": 1450,
+            "at": "2026-10-01T04:45:09.648Z"
+          }
+        },
+        {
+          "questId": 2110009,
+          "runId": "2026-10-01T04-43-19-397Z",
+          "finish": {
+            "sequence": 2032,
+            "at": "2026-10-01T04:46:32.957Z"
+          },
+          "change": {
+            "sequence": 2033,
+            "at": "2026-10-01T04:46:33.106Z"
+          },
+          "complete": {
+            "sequence": 2034,
+            "at": "2026-10-01T04:46:33.106Z"
+          }
+        },
+        {
+          "questId": 2110010,
+          "runId": "2026-10-01T07-23-40-716Z",
+          "finish": {
+            "sequence": 2480,
+            "at": "2026-10-01T07:28:13.960Z"
+          },
+          "change": {
+            "sequence": 2481,
+            "at": "2026-10-01T07:28:14.072Z"
+          },
+          "complete": {
+            "sequence": 2482,
+            "at": "2026-10-01T07:28:14.073Z"
+          }
+        },
+        {
+          "questId": 2110011,
+          "runId": "2026-10-01T07-23-40-716Z",
+          "finish": {
+            "sequence": 3603,
+            "at": "2026-10-01T07:29:59.186Z"
+          },
+          "change": {
+            "sequence": 3604,
+            "at": "2026-10-01T07:29:59.307Z"
+          },
+          "complete": {
+            "sequence": 3605,
+            "at": "2026-10-01T07:29:59.307Z"
+          }
+        },
+        {
+          "questId": 2120015,
+          "runId": "2026-10-01T04-11-36-505Z",
+          "finish": {
+            "sequence": 5370,
+            "at": "2026-10-01T04:20:35.291Z"
+          },
+          "change": {
+            "sequence": 5371,
+            "at": "2026-10-01T04:20:35.425Z"
+          },
+          "complete": {
+            "sequence": 5372,
+            "at": "2026-10-01T04:20:35.426Z"
+          }
+        }
+      ],
+      "persistedCandidateIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004,
+        2110005,
+        2110006,
+        2110007,
+        2110008,
+        2110009,
+        2110010,
+        2110011,
+        2120015
+      ],
+      "timing": {
+        "ordinary": {
+          "startedAt": "2026-10-01T04:11:36.506Z",
+          "deadlineAt": "2026-10-01T06:11:36.506Z",
+          "durationMs": 7200000,
+          "expiredAtAudit": true,
+          "completedWithinDeadline": false,
+          "elapsedToFinalLogoutMs": 12233622
+        },
+        "functional": {
+          "startedAt": "2026-10-01T06:18:52.882Z",
+          "deadlineAt": "2026-10-01T08:18:52.882Z",
+          "durationMs": 7200000,
+          "expiredAtAudit": true,
+          "inheritedCompletedIds": [
+            2110001,
+            2110002,
+            2110003,
+            2110004,
+            2110005,
+            2110006,
+            2110007,
+            2110008,
+            2110009,
+            2120015
+          ],
+          "newlyReceiptedIds": [
+            2110010,
+            2110011
+          ],
+          "completedWithinDeadline": false
+        },
+        "freshTimedCompletion": false,
+        "deaths": {
+          "maxRevives": 3,
+          "originalOrdinaryLedger": [],
+          "retainedLedger": [],
+          "confirmedRecoveries": 0,
+          "preserved": true,
+          "observedDeathReceipts": []
+        }
+      },
+      "pause": {
+        "reason": "awaitingOwnedPet",
+        "questId": 2110012,
+        "at": "2026-10-01T07:35:25.960Z"
+      }
+    }
+  ]
+}

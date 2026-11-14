@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "commit": "0998105c30f35502b8b569b82fb7942a5d356c89",
+  "remote": "git@github.com:Zombieliu/mir2.git",
+  "branch": "codex/cell-preproduction-p0-p1-20261024",
+  "remoteBranchCommit": "0998105c30f35502b8b569b82fb7942a5d356c89",
+  "preservedBranch": "codex/windows-player-journey",
+  "preservedBranchCommit": "e11c32fb15ca4cf18d933768b8e70866cd089f26",
+  "pushExitCode": 0,
+  "remoteVerificationExitCode": 0,
+  "forced": false,
+  "capacityAccepted": false,
+  "scope": "Driver-only checkpoint plus immutable prior diagnostics; no backend rebuild and no new capacity verdict."
+}

@@ -1,0 +1,28 @@
+{
+  "schema": "mir2.production-check.v1",
+  "kind": "inventory-regression",
+  "startedUtc": "2026-10-09T15:22:16.3592481Z",
+  "finishedUtc": "2026-10-09T15:22:22.6266255Z",
+  "exitCode": 0,
+  "argv": [
+    "+1.95.0",
+    "test",
+    "-p",
+    "mir2-simulation",
+    "--lib",
+    "runtime::inventory::",
+    "--locked",
+    "--offline",
+    "--jobs",
+    "1",
+    "--",
+    "--test-threads=1"
+  ],
+  "sourceSnapshotSha256": "dc455e5608d591264ecc33a0a47c49203b19cfe08c612caea2c749c53fffe425",
+  "declaredInputs": 470,
+  "sourceDrift": [],
+  "cargoLogSha256": "a1d137d4b16ed4779b195e5c5043bad724ded41b929921aee55a5283196e8ade",
+  "gameStarted": false,
+  "gatewayRestarted": false,
+  "controlledInventoryCommitTests": false
+}

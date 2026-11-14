@@ -1,0 +1,331 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T22:14:37.987Z",
+  "scope": "Small post-execution facts addendum to the genuinely executed Probe18 ended verifier. No second raw replay, monitor stream, trace parse, binary hash, test, service or OS query is performed by this addendum.",
+  "runId": "1792965008290-fc5e2eed",
+  "actualIndependentVerificationExecuted": true,
+  "independentVerificationPassed": true,
+  "probePassed": true,
+  "capacityAccepted": false,
+  "formalAcceptanceGranted": false,
+  "p0AcceptanceGranted": false,
+  "p2ImplementationStarted": false,
+  "pins": {
+    "toolSeal": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\tool-source-frozen-v1.json",
+      "bytes": 2111,
+      "sha256": "4a1d392606edeb54700a7d49e5e620dcd17c35d9466c5c019788945bb722a5aa"
+    },
+    "actualExecution": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\actual-verification-execution-receipt-v1.json",
+      "bytes": 813,
+      "sha256": "e9841d7cf9355ec66a980ea2056fba49de870c645b830bb2fbfceb91c0fc9257"
+    },
+    "actualLog": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\actual-verification.log",
+      "bytes": 877,
+      "sha256": "500791ad3545dbfdea51ee379a4d98a2cad0f6adbc133ad68a4985711f02a9b9"
+    },
+    "finalVerification": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\final-verification.json",
+      "bytes": 437094,
+      "sha256": "d8558cb32ec366f21d744c132f30e64cb1923e3d73d60427d0edd21c9935c9e4"
+    },
+    "sourceReview": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-ended-tool-independent-review-v1\\review-v1.json",
+      "bytes": 8417,
+      "sha256": "e029e2e080204aeb38a87c963d2ac1b01e50b33cb92f41b3d2c4c09b50d03b10"
+    },
+    "rootTerminalAndFourConsumerFacts": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-actual-terminal-and-consumer-facts-v1.json",
+      "bytes": 8568,
+      "sha256": "2ba0c6750a0f02533e141554ca639ad611a215e722236e732946d9648d2db106"
+    },
+    "rootOsCleanup": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-independent-cleanup-v1.json",
+      "bytes": 371,
+      "sha256": "1ad90c3a6ab3f6e802e90135bf6838f4befd6e7841e6d9f582aa3d9ab8e7e1af"
+    }
+  },
+  "toolSource": {
+    "sealedInputs": 10,
+    "sealAggregate": "e80bcc4ab837d340aa680c9305911bf634e3f8033169ef7864f57048a0cc1ede",
+    "allCurrentSealedInputsRechecked": true,
+    "runnerBeforeAfterIdentical": true,
+    "actualExitCode": 0,
+    "actualRunInvocationsByThisWriter": 1
+  },
+  "identities": {
+    "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+    "backendInputs": 50,
+    "gatewaySha256": "dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc",
+    "driverSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+    "coreCodeEvidenceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+    "executionSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+    "driverSourceSha256": "445325ec1b052cffffb07437c38ec0a4688741a0b9207e7895e514e8e4a7f634",
+    "scene10Sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba",
+    "scene100Sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205",
+    "sceneSourceSha256": "3e34b754d55e7ba0aa38b7600fb5746b80ef3cb272a2216ba88904e1a12c785d",
+    "sourceConfigSha256": "ce15097005c6a7abd3e861b3f4b8fd1708f95d1145096d58e747462e57c87f07"
+  },
+  "phaseChecks": [
+    {
+      "name": "stage-2",
+      "configuredSeconds": 300,
+      "measuredSeconds": 300.258,
+      "completed": true,
+      "completeWindowCount": 5,
+      "requiredCompleteWindows": 5,
+      "rawReportWindowsEqual": true,
+      "activityCounterReplayEqual": true,
+      "strictGatesPassed": true
+    },
+    {
+      "name": "stage-10",
+      "configuredSeconds": 300,
+      "measuredSeconds": 300.32,
+      "completed": true,
+      "completeWindowCount": 5,
+      "requiredCompleteWindows": 5,
+      "rawReportWindowsEqual": true,
+      "activityCounterReplayEqual": true,
+      "strictGatesPassed": true
+    },
+    {
+      "name": "soak",
+      "configuredSeconds": 360,
+      "measuredSeconds": 360.252,
+      "completed": true,
+      "completeWindowCount": 6,
+      "requiredCompleteWindows": 6,
+      "rawReportWindowsEqual": true,
+      "activityCounterReplayEqual": true,
+      "strictGatesPassed": true
+    }
+  ],
+  "measurementWindowCount": 16,
+  "combatRoleWindowCount": 11,
+  "combatWindows": [
+    {
+      "phase": "stage-10",
+      "index": 1,
+      "seconds": 60.058,
+      "actors": [
+        {
+          "actor": "L22b92f05",
+          "launchedAttacks": 35,
+          "positiveHits": 35,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "phase": "stage-10",
+      "index": 2,
+      "seconds": 60.069,
+      "actors": [
+        {
+          "actor": "L22b92f05",
+          "launchedAttacks": 33,
+          "positiveHits": 33,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "phase": "stage-10",
+      "index": 3,
+      "seconds": 60.087,
+      "actors": [
+        {
+          "actor": "L22b92f05",
+          "launchedAttacks": 34,
+          "positiveHits": 34,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "phase": "stage-10",
+      "index": 4,
+      "seconds": 60.037,
+      "actors": [
+        {
+          "actor": "L22b92f05",
+          "launchedAttacks": 29,
+          "positiveHits": 29,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "phase": "stage-10",
+      "index": 5,
+      "seconds": 60.069,
+      "actors": [
+        {
+          "actor": "L22b92f05",
+          "launchedAttacks": 35,
+          "positiveHits": 35,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "phase": "soak",
+      "index": 1,
+      "seconds": 60.018,
+      "actors": [
+        {
+          "actor": "L22b92f05",
+          "launchedAttacks": 33,
+          "positiveHits": 33,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "phase": "soak",
+      "index": 2,
+      "seconds": 60.107,
+      "actors": [
+        {
+          "actor": "L22b92f05",
+          "launchedAttacks": 34,
+          "positiveHits": 34,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "phase": "soak",
+      "index": 3,
+      "seconds": 60.041,
+      "actors": [
+        {
+          "actor": "L22b92f05",
+          "launchedAttacks": 34,
+          "positiveHits": 34,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "phase": "soak",
+      "index": 4,
+      "seconds": 60,
+      "actors": [
+        {
+          "actor": "L22b92f05",
+          "launchedAttacks": 27,
+          "positiveHits": 27,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "phase": "soak",
+      "index": 5,
+      "seconds": 60.066,
+      "actors": [
+        {
+          "actor": "L22b92f05",
+          "launchedAttacks": 30,
+          "positiveHits": 30,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "phase": "soak",
+      "index": 6,
+      "seconds": 60.02,
+      "actors": [
+        {
+          "actor": "L22b92f05",
+          "launchedAttacks": 29,
+          "positiveHits": 29,
+          "passed": true
+        }
+      ]
+    }
+  ],
+  "attackCounts": {
+    "wholeRun": 358,
+    "measurementPhases": 353,
+    "bootstrapOrRamp": 5,
+    "stage10": 166,
+    "soak": 187
+  },
+  "continuous": {
+    "rawWindows": 132,
+    "failureCount": 0,
+    "allPassed": true
+  },
+  "sourceBoundPolicy": {
+    "exactOriginalProbePolicy": true,
+    "minimumCombatLaunchedPerMinute": 18,
+    "minimumCombatPositiveHitsPerMinute": 12,
+    "minimumNativeCellsPerMinute": 80,
+    "minimumNativeRunRatio": 0.5,
+    "minimumNativeCompletionRatio": 0.95,
+    "maximumCorrectionRatio": 0.05,
+    "timeoutExclusive": 0.01,
+    "witnessMaximumDistance": 6,
+    "typedAndDualEvidenceDeadlineMs": 900,
+    "independentPerRequest900msPacketReplayPerformed": false
+  },
+  "raw": {
+    "rows": 41154,
+    "bytes": 29612729,
+    "sha256": "ab31e2b81cf6e1fd89fabc9c9d25699c742f724fda2570140feb629ddb56444e",
+    "publicCopiesVerified": 204,
+    "wholeRunCorrectedMovementActions": 2
+  },
+  "hp": {
+    "totalRows": 0,
+    "verifiedEventsChecked": 0,
+    "successProofChecked": false,
+    "noVerifiedDoseObserved": true
+  },
+  "wire": {
+    "present": true,
+    "sourceValid": true,
+    "countsMatch": true,
+    "uninstallSucceeded": true,
+    "complete": true,
+    "reasons": []
+  },
+  "store": {
+    "sourceValid": true,
+    "countsMatch": true,
+    "complete": true,
+    "rows": 21,
+    "bytes": 4571,
+    "sha256": "1844e2991d25f74dbcbb511455df7e576af405ce999ddfc1a20da5375a43f377",
+    "contributesToGameAcceptance": false
+  },
+  "cleanup": {
+    "originalAllSevenTrue": true,
+    "gatewayExit0": true,
+    "monitorExit0": true,
+    "rootOsProofExactSchemaChecked": true,
+    "rootOsQueryPerformedByThisAddendum": false,
+    "rootObservedAt": "2026-10-25T22:08:04.2172566Z",
+    "ownedPids": [
+      70676,
+      45472
+    ],
+    "remainingOwnedProcesses": [],
+    "remainingOwnedPortListeners": []
+  },
+  "historicalPendingNote": "Root terminal-and-consumer facts retain independentWindowAdjudicationPending:true from their earlier write time. The later genuinely executed ended verifier recorded here resolves that pending check without rewriting the Root historical artifact.",
+  "limitations": [
+    "The original frozen Node H/219 gates require900ms typed and dual-end evidence; this verifier did not independently match every request packet within that deadline.",
+    "HP0 is no observed dose, not proof of successful healing, HP survival coverage or future survival.",
+    "A passed2/10+360probe is a formal prerequisite only, not a100-actor or two-hour capacity result.",
+    "Wire and Store completeness are independent diagnostics and create no ACK, attack, health or capacity credit.",
+    "Current backendc743 was reused byte-identically with execution/driverH; no new Rust build was performed for this scout-only change.",
+    "No causal improvement claim is established by a single probe pass."
+  ]
+}

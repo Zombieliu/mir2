@@ -1,0 +1,62 @@
+{
+  "owner": "Root",
+  "kind": "Source73 actual strict Next original caller result",
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source73-warehouse-local-skins-20261012-01\\root-approved01\\next-build01-config.json",
+    "bytes": 5637,
+    "sha256": "d762774dfd3c5535e96e97282cad241e5f0d21d27f6dac7121603d861bc66c0e"
+  },
+  "sourceSnapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/root-approved01/source73-strict-final-snapshot01.json",
+    "bytes": 38015193,
+    "sha256": "e64b855761c24825d69db65fdb1d3c398ae029df262a6ddb754457d419c05a01"
+  },
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 87052,
+    "kind": "Source73 Root accepted strict Next build after actual portable25/25",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 84863,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/root-approved01/next-build01-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source73-warehouse-local-skins-20261012-01\\next-build01\\stdout.log",
+    "bytes": 2027,
+    "sha256": "69f96250ec9028c8ea6ef137bd7bc97a6ddab2d98ea6003302e588b02f2c2763"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source73-warehouse-local-skins-20261012-01\\next-build01\\stderr.log",
+    "bytes": 3462,
+    "sha256": "360400e1dbed731f5b7dfa14cc1f4a69ce03ad39154ac2bf18ac3aab435a6f17"
+  },
+  "compiled": true,
+  "strictTypeScriptFinished": true,
+  "pagesGenerated": 13,
+  "nextOutputManifest": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source73-warehouse-local-skins-20261012-01\\root-approved01\\source73-next-output-manifest01.json",
+    "bytes": 1437892,
+    "sha256": "1cd3e013b42ab142253c3d7ceb0c5f1341e23b4296682428709d8d6952e918ec"
+  },
+  "files": 2450,
+  "directories": 580,
+  "links": 0,
+  "warningCount": 4,
+  "stderrEmpty": false,
+  "mainTsconfig": {
+    "path": "E:/mir2-player-journey/mir2-web3/apps/web/tsconfig.json",
+    "bytes": 4932,
+    "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+  },
+  "packageAccepted": false,
+  "uiTested": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

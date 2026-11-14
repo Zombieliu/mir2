@@ -1,0 +1,96 @@
+{
+  "version": 1,
+  "observedAtUtc": "2026-10-10T01:23:25.611652+00:00",
+  "gatewaySource": "703ebadb73c1bde83710301e6795bffe748ca640",
+  "nativeSource": "fd660003db5b40d78308b118f8d58e37c1280ab1",
+  "binaryHashes": {
+    "gateway": "70c10f6db2dea19a18d3a43ff67f998243378704e07bc77400f3f4b586b4b224",
+    "native": "828d34de89510aa7d013b7d3f37d4fd46b5524db6ac08ae063216b8eda1b2726",
+    "ordinaryQaHelper": "d57c9eeea7bc1cbb31f0cf23ca0e6dc3999bcbdb02ec5bce355eb33a53680ea0"
+  },
+  "exactCodeCiRun": 37969367117,
+  "ciReadback": "Authenticated exact-source success readback archived",
+  "mode": "isolated local sandbox, owner-only file store and profiles, no autologin",
+  "assertions": {
+    "ordinarySignupLoginCreation": true,
+    "expiredEntryDenied": true,
+    "actualHostedTestPayment": true,
+    "livemode": false,
+    "USDMinorUnits": 1000,
+    "signedCompletedCallback200": true,
+    "realProviderReadback": true,
+    "sourceAppliedCredits": 1000,
+    "monthlyDebitCredits": 1000,
+    "purchaseReplayNoSecondDebitOrCard": true,
+    "uidReplayNoExtension": true,
+    "monthlyDurationMs": 2592000000,
+    "expiresAtMs": 1794185654793,
+    "normalRenewedEntryLogout": true,
+    "reloginPreservedExpiry": true,
+    "finalCredits": 0,
+    "finalPendingCredits": 0,
+    "nativeLoginScreenObserved": true,
+    "humanNativeBillingAcceptance": false,
+    "gatewayColdRestartTested": false
+  },
+  "retainedFailures": [
+    "empty helper email refused before connection; private fictional email corrected",
+    "initial Stripe JS chunk failed then recovered after reload",
+    "Chrome connector unavailable; no Chrome tab created",
+    "form fill timeout; fresh observation confirmed filled fields, no repeat payment",
+    "later native minimized/user-input state; no further UI input performed",
+    "earlier Quick Tunnel policy block retained in preparation checkpoint; not retried"
+  ],
+  "presentationScope": "USD explicitly selected. Canonical validators unchanged; actual SGD-paid trial not performed.",
+  "production": {
+    "public": "R22/Gateway a41/signed feed17 unchanged",
+    "liveKeysInstalled": false,
+    "permanentCallbackCreated": false,
+    "schemaRolloutPerformed": false,
+    "originalP1ToP7Complete": false
+  },
+  "artifacts": [
+    {
+      "file": "EXACT-CODE-CI.json",
+      "bytes": 210,
+      "sha256": "ee145b6320c810e1169000fea6479005299ad8628525c948cdc405284da4b670"
+    },
+    {
+      "file": "HEALTH-OBSERVED.json",
+      "bytes": 452,
+      "sha256": "28a94daa37604920dc22017fe51e604109f6d07c38fa97314f05554cc8c22307"
+    },
+    {
+      "file": "NATIVE-EXIT-OBSERVED.json",
+      "bytes": 198,
+      "sha256": "5eb158d235ad86f3f0a680dcd3ce7b346187b635b1bb547b463a57d583a2789e"
+    },
+    {
+      "file": "NATIVE-LOGIN-OBSERVED.jpg",
+      "bytes": 319149,
+      "sha256": "d5fa4ac3886f9d15e8f3185f8662282dc31825f9fc1cb44698a033bc2e8be99f"
+    },
+    {
+      "file": "ORDINARY-WS-REDACTED.json",
+      "bytes": 44726,
+      "sha256": "4318c68705a896da8d18ac33b14175b611e9f6cdcd2c43e0f0368599dc9094d8"
+    },
+    {
+      "file": "PROVIDER-PAID-READBACK.json",
+      "bytes": 1567,
+      "sha256": "e08f8a8b493b05e57de20cf5c55aa47f92ddd865b14d8447b5765a5ad3a9edda"
+    },
+    {
+      "file": "README.md",
+      "bytes": 6506,
+      "sha256": "6c38405a0731fb3e98b59d0c05a584f11f30c60a8fbcc5f5f15f9f0ddf3a9f6b"
+    }
+  ],
+  "nativeHandoff": {
+    "startedAndLoginObserved": true,
+    "normalExitCode": 0,
+    "currentlyRunning": false,
+    "reopenWithIsolatedLauncher": true,
+    "noFurtherUiAfterUserInput": true
+  }
+}

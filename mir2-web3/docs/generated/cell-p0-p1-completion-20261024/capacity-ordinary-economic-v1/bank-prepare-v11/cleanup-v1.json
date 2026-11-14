@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-capacity-bank-prepare-v11",
+  "checks": {
+    "sixCountersZero": true,
+    "monitorStoppedBeforeGateway": true,
+    "monitorExitZero": true,
+    "monitorTerminalPreserved": true,
+    "monitorSamplerAbsent": true,
+    "normalOwnedShutdown": true,
+    "gatewayProcessAbsent": true,
+    "driverProcessAbsent": true,
+    "monitorProcessAbsent": true,
+    "portsFree": true,
+    "postSourceUnchanged": true
+  },
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "formalAcceptanceEligible": false,
+  "driverExit": {
+    "exitCode": 1,
+    "signal": null,
+    "error": null
+  },
+  "monitorExit": {
+    "exitCode": 0,
+    "signal": null,
+    "error": null
+  },
+  "monitorTerminal": {
+    "sampledAt": 1793061756482,
+    "stop": true,
+    "reason": "Operator requested load drain"
+  },
+  "remainingMonitorChildren": [],
+  "gatewayExit": {
+    "exitCode": 0,
+    "signal": null,
+    "error": null
+  },
+  "remainingListeners": [],
+  "logErrors": [],
+  "finishedAt": "2026-10-27T00:42:50.243Z"
+}

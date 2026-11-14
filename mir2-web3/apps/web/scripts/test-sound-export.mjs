@@ -21,6 +21,7 @@ import {
   parseSoundList,
   runCrystalSoundExport,
 } from "./export-crystal-sounds.mjs";
+import { FIVE_CLASS_MISSING_WAVS, FIVE_CLASS_SKILL_SOUNDS } from "./asset-pipeline/five-class-skill-source.mjs";
 
 const nodeRequire = createRequire(import.meta.url);
 
@@ -132,24 +133,46 @@ try {
     ["M61-1.wav", 15],
     ["M76-0.wav", 16],
     ["M79-1.wav", 17],
+    ["M121-0.wav", 18],
+    ["M121-2.wav", 19],
+    ["M121-5.wav", 20],
   ]) {
     writeFileSync(path.join(soundSrc, name), makeWav(seed));
+  }
+  for (const entry of DIRECT_CRYSTAL_SOUND_ENTRIES) {
+    if (!FIVE_CLASS_MISSING_WAVS.includes(entry.fileName)) {
+      writeFileSync(path.join(soundSrc, entry.fileName), makeWav(entry.id));
+    }
   }
 
   const outputDir = path.join(tempRoot, "out", "Sound");
   const indexPath = path.join(tempRoot, "out", "sound-index.generated.json");
-  const { summary } = await runCrystalSoundExport({
+  const docPath = path.join(tempRoot, "qa", "source-sounds.json");
+  const { summary, copiedSoundCount } = await runCrystalSoundExport({
     clientRoot,
     outputDir,
     indexPath,
-    docPath: null,
+    docPath,
     strict: false,
   });
 
-  assert.equal(summary.soundListEntryCount, 22);
-  assert.equal(summary.exportedSoundCount, 21, "20 exact + 1 fallback copy");
+  assert.equal(summary.clientRoot, "Client");
+  assert.equal(summary.soundDir, "Client/Sound");
+  assert.equal(summary.soundListPath, "Client/Sound/SoundList.lst");
+  const publicIndexText = readFileSync(indexPath, "utf8");
+  assert.ok(!publicIndexText.includes(tempRoot), "public index must not leak the machine Source root");
+  assert.ok(!publicIndexText.includes(clientRoot), "public index must not leak the client machine path");
+  const sourceReport = JSON.parse(readFileSync(docPath, "utf8"));
+  assert.equal(sourceReport.clientRoot, clientRoot, "isolated QA report retains the actual Source path");
+  assert.equal(sourceReport.soundDir, soundSrc);
+  assert.deepEqual(sourceReport.sounds, summary.sounds, "path sanitization must not change WAV availability or identity");
+  assert.equal(copiedSoundCount, summary.exportedSoundCount);
+
+  const expectedEntryCount = mergeSoundEntries(parseSoundList(soundList), DIRECT_CRYSTAL_SOUND_ENTRIES).length;
+  assert.equal(summary.soundListEntryCount, expectedEntryCount);
+  assert.equal(summary.exportedSoundCount, expectedEntryCount - 1 - FIVE_CLASS_MISSING_WAVS.length);
   assert.equal(summary.fallbackSoundCount, 1, "22.wav must fall back to 23.wav");
-  assert.equal(summary.missingSoundCount, 1, "9999.wav must be recorded missing");
+  assert.equal(summary.missingSoundCount, 1 + FIVE_CLASS_MISSING_WAVS.length, "9999.wav and exact-source gaps must be recorded missing");
   assert.equal(summary.sounds["10100"].path, "/original-ui/Sound/100.wav");
   assert.equal(summary.sounds["10100"].exactSourceExists, true);
   assert.equal(summary.sounds["10022"].fallback, true);
@@ -171,6 +194,23 @@ try {
   assert.equal(summary.sounds["20611"].path, "/original-ui/Sound/M61-1.wav");
   assert.equal(summary.sounds["20760"].path, "/original-ui/Sound/M76-0.wav");
   assert.equal(summary.sounds["20791"].path, "/original-ui/Sound/M79-1.wav");
+  for (const [id, name] of [[21210, "M121-0.wav"], [21212, "M121-2.wav"], [21215, "M121-5.wav"]]) {
+    assert.equal(summary.sounds[id].path, `/original-ui/Sound/${name}`);
+    assert.equal(summary.sounds[id].exactSourceExists, true);
+    assert.deepEqual(readFileSync(path.join(outputDir, name)), readFileSync(path.join(soundSrc, name)));
+  }
+  for (const entry of FIVE_CLASS_SKILL_SOUNDS) {
+    const indexed = summary.sounds[entry.id];
+    assert.equal(indexed.fallback, false, `${entry.fileName} must never use a substitute`);
+    if (entry.expectedSourceAbsent) {
+      assert.equal(indexed.sourceExists, false);
+      assert.equal(indexed.exactSourceExists, false);
+      assert.equal(indexed.path, null);
+    } else {
+      assert.equal(indexed.exactSourceExists, true);
+      assert.deepEqual(readFileSync(path.join(outputDir, entry.fileName)), readFileSync(path.join(soundSrc, entry.fileName)));
+    }
+  }
 
   // Files actually landed on disk.
   const copied = new Set(readdirSync(outputDir));
@@ -195,10 +235,25 @@ try {
     "M61-1.wav",
     "M76-0.wav",
     "M79-1.wav",
+    "M121-0.wav",
+    "M121-2.wav",
+    "M121-5.wav",
   ]) {
     assert.ok(copied.has(f), `exported Sound dir must contain ${f}`);
   }
   assert.ok(!copied.has("9999.wav"), "missing sound must not be written");
+
+  const boundedOutput = path.join(tempRoot, "bounded", "Sound");
+  const boundedIndex = path.join(tempRoot, "bounded", "sound-index.generated.json");
+  const bounded = await runCrystalSoundExport({ clientRoot: soundSrc, outputDir: boundedOutput, indexPath: boundedIndex,
+    docPath: null, copySoundIds: [21210, 21212, 21215, 20940] });
+  assert.equal(bounded.copiedSoundCount, 3);
+  assert.deepEqual(readdirSync(boundedOutput).sort(), ["M121-0.wav", "M121-2.wav", "M121-5.wav"]);
+  assert.deepEqual(bounded.summary.sounds, summary.sounds, "bounded copying preserves the complete Source index");
+  assert.equal(bounded.summary.sounds[20940].path, null, "bounded export cannot create an absent Source WAV");
+  assert.equal(bounded.summary.soundDir, "Client/Sound", "Sound-directory input uses the same safe relative provenance");
+  await assert.rejects(runCrystalSoundExport({ clientRoot, outputDir: boundedOutput, indexPath: boundedIndex,
+    docPath: null, copySoundIds: [987654321] }), /invalid or unindexed Source id/);
 
   // --- 3. present-sound manifest derived from the exported files -------------------------------
   const presentManifest = {

@@ -1,0 +1,17 @@
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+0 !== 1
+
+    at file:///C:/mir2-build/p01-completion-20261024/root-scout-target-waypoint-routing-validation-v1/run-full-driver-v1.mjs:41:155 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 0,
+  expected: 1,
+  operator: 'strictEqual'
+}
+
+Node.js v22.18.0

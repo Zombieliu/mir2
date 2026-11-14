@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "source": "Source67",
+  "kind": "actual original complete Thin build",
+  "capturedAt": "2026-10-11T11:46:57.586Z",
+  "execution": {
+    "owner": "Root",
+    "builderPid": 50668,
+    "exitCode": 0,
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 19374
+  },
+  "config": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source67-storage-ownership-20261011-01/root-approved01/thin-build01-config.json",
+    "bytes": 5372,
+    "sha256": "66d31eda7c51cbbcef197ff34c918dec15c36db6411839b195aa334ba24b890f"
+  },
+  "inputReview": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source67-storage-ownership-20261011-01/root-approved01/thin-source-review01.json",
+    "bytes": 12025,
+    "sha256": "34552386127b98daa31a36be0d0ef25d949798fce42193b7f239fc2e0ce55848"
+  },
+  "logs": [
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source67-storage-ownership-20261011-01/thin-build01/outer.json",
+      "bytes": 527,
+      "sha256": "a817c0b4b2292c54234795cf958aa9f34f7bf854ed42f26251c28e00892ce16b"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source67-storage-ownership-20261011-01/thin-build01/stdout.log",
+      "bytes": 36553,
+      "sha256": "13cf42f48ab3bc461beb95b2b5f215844290b4385a025520b408e236f1e0e20b"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source67-storage-ownership-20261011-01/thin-build01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source67-storage-ownership-20261011-01/thin-build01/size-report.json",
+      "bytes": 36553,
+      "sha256": "13cf42f48ab3bc461beb95b2b5f215844290b4385a025520b408e236f1e0e20b"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source67-storage-ownership-20261011-01/thin-build01/size-report.json-compaction-details.json",
+      "bytes": 2885,
+      "sha256": "0a62f98cf7f1343165b33b15ceb5356a142c9fb4474ec269676c3a0d0d3ef048"
+    }
+  ],
+  "inputs": {
+    "union": 70550,
+    "internal": 70549,
+    "external": 1,
+    "completeInstalledDependencies": 15209,
+    "completeActualStandaloneDependencies": 15209,
+    "hashDifferences": 0,
+    "membershipDifferences": 0,
+    "nftTraces": 61,
+    "nftRawReferences": 129822,
+    "nftRegularTargets": 39100,
+    "originalNextLeaves": 20920,
+    "oldAttemptProductsCopied": false
+  },
+  "package": {
+    "path": "E:\\mir2-player-journey\\work\\web-source67-storage-ownership-full-deps03\\mir2-web3\\apps\\web\\.mir2-thin-client-web-windows-catchup-source67-01",
+    "regularFiles": 4066,
+    "ordinaryDirectoriesIncludingRoot": 513,
+    "links": 0,
+    "bytes": 284883638,
+    "originalInclusiveCapBytes": 377487360,
+    "capPassed": true,
+    "fullPackageHashCount": 4066,
+    "atlasPages": 79,
+    "jsonCompactionFiles": 10,
+    "jsonCompactionSavedBytes": 20712325
+  },
+  "diagnostics": {
+    "stderrBytes": 0,
+    "dependencyWarnings": 59,
+    "warningDetails": 59,
+    "messageTruncatedRows": 0,
+    "warningCodes": {
+      "Error": 59
+    },
+    "nativePackageFiles": 8,
+    "nativePackageBytes": 19199007
+  },
+  "acceptance": {
+    "thinBuildAccepted": true,
+    "runtimePrepared": false,
+    "runtimeStarted": false,
+    "storageLiveUiAccepted": false,
+    "mobileDeviceAccepted": false,
+    "completeAssetCoverageAccepted": false,
+    "candidate100": false,
+    "humanFrontendAccepted": false,
+    "overallPercentage": null,
+    "goalComplete": false
+  }
+}

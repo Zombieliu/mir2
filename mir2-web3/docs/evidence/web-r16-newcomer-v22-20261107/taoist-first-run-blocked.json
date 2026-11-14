@@ -1,0 +1,178 @@
+{
+  "schema": "mir2.web-r16-taoist-v22-ordinary-block/1",
+  "recordedAt": "2026-11-06T18:59:58.347Z",
+  "scope": "Fresh isolated ordinary Taoist v22 protocol run.",
+  "passed": false,
+  "completed": false,
+  "uninterrupted": false,
+  "terminalReason": "mineExitBlockedByLiveOccupancy",
+  "runtime": {
+    "profile": "platinum_fiveclass",
+    "cadence": "newcomer-v2",
+    "gatewaySha256": "1b705387db5c1ce14a12909dec87f8af3268eb0cc7c43957069bdfaba76327d7",
+    "configSha256": "59b4e1b8a0dcc9f95de7871a178f715d6ce1baefe96e263f38e5d4328d4dccf7",
+    "port": 19233,
+    "file": true
+  },
+  "ordinaryClock": {
+    "startedAt": "2026-11-06T18:01:15.023Z",
+    "deadlineAt": "2026-11-06T20:01:15.023Z",
+    "checkpointAt": "2026-11-06T18:52:11.840Z",
+    "finishUnitsWithinDeadline": 17,
+    "levelWithinDeadline": 24,
+    "goalCompletedWithinDeadline": false,
+    "elapsedToFinalLogoutMs": 3058730,
+    "finalLogoutWithinDeadline": true,
+    "separatelyTimedFunctionalContinuation": false
+  },
+  "elapsedToLastNormalLogoutMs": 3352960,
+  "current": {
+    "level": 24,
+    "map": "D401",
+    "position": {
+      "x": 48,
+      "y": 183
+    },
+    "direction": "Right",
+    "hp": 11,
+    "maxHp": 170,
+    "mp": 126,
+    "gold": 17610,
+    "experience": 10582,
+    "alive": true,
+    "main": 15,
+    "growth": 2,
+    "confirmedRevives": 3,
+    "maximumRevives": 3,
+    "quest": {
+      "id": 2110016,
+      "stage": "inprogress",
+      "current": 3,
+      "required": 4,
+      "objectives": [
+        {
+          "current": 2,
+          "required": 3,
+          "done": false
+        },
+        {
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    "ordinaryLogout": true,
+    "stableFileMatchesLastAuthoritativeProjection": true
+  },
+  "exitAttempt": {
+    "map": "D401",
+    "goal": {
+      "x": 24,
+      "y": 182
+    },
+    "actualPlayerPosition": {
+      "x": 48,
+      "y": 183
+    },
+    "initialHp": 70,
+    "finalHp": 11,
+    "ownerStruckPackets": 1,
+    "replans": 3,
+    "walkOrRunCommands": 0,
+    "occupiedWalkableNeighbors": 5,
+    "staticWallNeighbors": 3,
+    "neighbors": [
+      {
+        "direction": "N",
+        "x": 48,
+        "y": 182,
+        "staticWalkable": true,
+        "occupied": true,
+        "available": false
+      },
+      {
+        "direction": "NE",
+        "x": 49,
+        "y": 182,
+        "staticWalkable": true,
+        "occupied": true,
+        "available": false
+      },
+      {
+        "direction": "E",
+        "x": 49,
+        "y": 183,
+        "staticWalkable": false,
+        "occupied": false,
+        "available": false
+      },
+      {
+        "direction": "SE",
+        "x": 49,
+        "y": 184,
+        "staticWalkable": false,
+        "occupied": false,
+        "available": false
+      },
+      {
+        "direction": "S",
+        "x": 48,
+        "y": 184,
+        "staticWalkable": false,
+        "occupied": false,
+        "available": false
+      },
+      {
+        "direction": "SW",
+        "x": 47,
+        "y": 184,
+        "staticWalkable": true,
+        "occupied": true,
+        "available": false
+      },
+      {
+        "direction": "W",
+        "x": 47,
+        "y": 183,
+        "staticWalkable": true,
+        "occupied": true,
+        "available": false
+      },
+      {
+        "direction": "NW",
+        "x": 47,
+        "y": 182,
+        "staticWalkable": true,
+        "occupied": true,
+        "available": false
+      }
+    ],
+    "exactOccupancyPath": false,
+    "staticPathSteps": 24,
+    "heldHpDrugs": 0,
+    "heldTeleportScrolls": 0
+  },
+  "trainingAreaD022Observed": false,
+  "browserReadbackIncluded": false,
+  "gatewayRemainsAvailable": true,
+  "priorV20Ordinary": {
+    "receiptSha256": "122568cd81c46e70ddad023d06e8fb4097d9705265195f1ce5728f80e3037126",
+    "ordinaryPassed": false,
+    "main": 19,
+    "growth": 3,
+    "level": 27,
+    "q20": 1
+  },
+  "evidencePins": {
+    "sealedJourneyAudit": {
+      "file": "taoist-v22-ordinary-r3-pause.json",
+      "sha256": "4cb0f67d978d355c0bd0e896547fffe2f591d597c3c6fdeaa7d097fcf1aafa7b"
+    },
+    "exitAttemptReceipt": {
+      "file": "taoist-v22-q16-town-supply.json",
+      "sha256": "17e8aad95cfed0dfec7d6e1f1df293f316fc63241ca45a2ba0cdc5701991924b"
+    },
+    "exitAttemptTraceSha256": "f7f32d53bc11e185568804d931b8a54f595a932c6b4bb8ee5ca576d701239df4"
+  }
+}

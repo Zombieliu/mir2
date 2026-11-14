@@ -1,0 +1,153 @@
+{
+  "schema": "mir2.windows.asset-input-closure-final.v1",
+  "capturedAtUtc": "2026-10-29T09:36:50.501Z",
+  "passed": true,
+  "gameSourceRevision": "24216899acd4301d8c3b1eff08b825f4896cc410",
+  "playerRecovery": {
+    "createdPng": 98880,
+    "createdBytes": 145604378,
+    "verifiedSourceLibraries": 103,
+    "verifiedPackedPageReads": 184,
+    "allPixelsAndCanonicalPngMatchCommittedMetadata": true,
+    "fullIndexSha256": "77a9050818df502f65a7b151976ee7d66bd01e94d87680cf0760b925dd10dbee",
+    "fullIndexContentHash": "f71b89aa38504c6c127b937043d4af6ecd26d9dd1a2b9ed3b91100e6a1f0052e",
+    "recoveryClosureSha256": "ec51ffa1284ed42c5961db0d1d19539554423d549de9d36a0190dd6e688aa818",
+    "existingFilesOverwritten": 0,
+    "trackedFilesWritten": 0
+  },
+  "actorBootstrap": {
+    "library": "Monster/049",
+    "sourceSignedCandidate": "WN-CANDIDATE-20261011-invited-25",
+    "sourceRevision": "d917de1ff4988e2d9fc7ca58f958cb5c80861fdf",
+    "sourceSignedManifestSha256": "8F50807C9171B28D77424A113C2A55A8AB5DCDD507E3051222C49863E2EFC748",
+    "metadataSha256": "6173faeac54c9708d791c1546c0566e97af70a86c12497f7b08b63eb6a961b63",
+    "createdFiles": 225,
+    "createdPng": 224,
+    "createdBytes": 1240611,
+    "allFilesBoundToSignedOriginalCandidate": true,
+    "existingFilesOverwritten": 0,
+    "trackedFilesWritten": 0
+  },
+  "completeInventory": {
+    "metadataFiles": 324,
+    "frameImageReferences": 197652,
+    "missingImageReferences": 0,
+    "explicitActorLibraries": 128,
+    "missingActorMetadataLibraries": [],
+    "sourceClean": true
+  },
+  "originalProductionPreflight": {
+    "allPassed": true,
+    "cases": [
+      {
+        "name": "entity",
+        "passed": true,
+        "elapsedMs": 655,
+        "detail": {
+          "atlasCount": 2,
+          "pageCount": 8
+        }
+      },
+      {
+        "name": "player",
+        "passed": true,
+        "elapsedMs": 586404,
+        "detail": {
+          "familyCount": 10,
+          "libraryCount": 162,
+          "frameCount": 157088
+        }
+      },
+      {
+        "name": "item",
+        "passed": true,
+        "elapsedMs": 217,
+        "detail": {
+          "fileCount": 1004,
+          "pngCount": 1003,
+          "referencedPngCount": 1003
+        }
+      },
+      {
+        "name": "stateItem",
+        "passed": true,
+        "elapsedMs": 47,
+        "detail": {
+          "fileCount": 219,
+          "pngCount": 218,
+          "referencedPngCount": 218
+        }
+      },
+      {
+        "name": "actor",
+        "passed": true,
+        "elapsedMs": 84175,
+        "detail": {
+          "libraryCount": 128,
+          "frameCount": 25597
+        }
+      },
+      {
+        "name": "petGuild",
+        "passed": true,
+        "elapsedMs": 3382,
+        "detail": {
+          "libraries": 22,
+          "png": 6224,
+          "sounds": 11
+        }
+      },
+      {
+        "name": "sound",
+        "passed": true,
+        "elapsedMs": 27,
+        "detail": {
+          "identities": 49,
+          "allExact": true
+        }
+      }
+    ],
+    "packageSourceSha256": "2c609e305ed1a6fa5910abe0962adf7df9088b27fde2088c0ea89e51b3af6558",
+    "helper": "External harness loads only committed production function definitions; no signing/staging/map generation."
+  },
+  "artifacts": [
+    {
+      "path": "asset-input-recovery-summary.json",
+      "bytes": 43885,
+      "sha256": "4589c969471818a33a162f7aa2fd55acbd28c6e557f0e504d3403024f2b3fe08"
+    },
+    {
+      "path": "actor-source-trust.json",
+      "bytes": 860,
+      "sha256": "77a4081d8e83fb599d594288d8c4625801e4e907ae6a1dd40bbae4f34cb240d8"
+    },
+    {
+      "path": "actor-input-bootstrap.json",
+      "bytes": 797,
+      "sha256": "c9ea49c1c8f8255c3f74c2b25651c0b1ec5e117ba65b5c071fd0c329e20f70b6"
+    },
+    {
+      "path": "asset-input-gap-after-recovery.json",
+      "bytes": 558,
+      "sha256": "c3bb1c1f86f5e963dc72ee37be278a8bb7c17db5604bc52707adb54739bd109b"
+    },
+    {
+      "path": "production-asset-closure-before.json",
+      "bytes": 1918,
+      "sha256": "725cb3b41db49ceac072865ec6b9a6f230c1d99f0db077f020576cb0936b848f"
+    },
+    {
+      "path": "production-asset-closure-after.json",
+      "bytes": 1884,
+      "sha256": "a9c1d2006e3e04f0524b49cdb898c976478694221b36c420e6e645fb2d9b2304"
+    }
+  ],
+  "boundaries": {
+    "derivedIgnoredInputsOnly": true,
+    "trackedNativeCodeOrMetadataChanged": false,
+    "closureGuardsWeakened": false,
+    "gameAttestedSourceRemains242": true,
+    "fullCandidatePackageScope": "Subsequent coordinator v4 run, not claimed by this resource preflight",
+    "realUpdaterBundleAndInstallerScope": "Pending later coordinator steps"
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "preparedAt": "2026-10-26T03:49:28.018Z",
+  "original": {
+    "file": "C:/mir2-build/p01-completion-20261024/root-scout-selection-diagnostics-validation-v1/run-full-driver-v1.mjs",
+    "bytes": 4670,
+    "sha256": "a2e32cefaa7aada730f3496cc5efbdb66f64b62983db441d17bc4f2ea2d70d28"
+  },
+  "current": {
+    "file": "C:/mir2-build/p01-completion-20261024/root-scout-target-waypoint-routing-validation-v1/run-full-driver-v1.mjs",
+    "bytes": 6368,
+    "sha256": "a0ad343b35cbc41358324dd196b64ad2b6c6609fdbcdc5b99fa1249c1c9913d4"
+  },
+  "rules": [
+    {
+      "before": "const previousFile = 'C:/mir2-build/p01-completion-20261024/scout-anti-convergence-v1/root-full-driver-receipt-v1.json';",
+      "after": "const previousFile = 'C:/mir2-build/p01-completion-20261024/root-scout-selection-diagnostics-validation-v1/root-full-driver-receipt-v1.json';"
+    },
+    {
+      "before": "assert.deepEqual(previous.counts, { tests: 226, passed: 226, failed: 0, cancelled: 0, skipped: 0, todo: 0 });",
+      "after": "assert.deepEqual(previous.counts, { tests: 232, passed: 232, failed: 0, cancelled: 0, skipped: 0, todo: 0 });"
+    },
+    {
+      "before": "158aaaba83967153fc8f764895c9bce823993732618be934636654cc4401f0d2",
+      "after": "8acb34b5c1815bab0ab82ec26fff1b770cbbf159779f7c55103dacb51c127d56"
+    },
+    {
+      "before": "7cf64c8b28a7b57381dc4beaa5fa01e2d77378fa977e869205b1dc941893b68a",
+      "after": "efa0779b746d138894f63300c1e484bee72ae405d41d9e3d0271b25ad0069656"
+    },
+    {
+      "before": "assert.equal(sha(test.subarray(0, 270311)), 'f1ba119770bde34135e734780b04539206e859bd7b896977d4e6595555c032ef');",
+      "after": "const preservationFile = 'C:/mir2-build/p01-completion-20261024/scout-target-waypoint-routing-v1/source-preservation-and-focused-receipt-v1.json';\nconst maintenanceFile = 'C:/mir2-build/p01-completion-20261024/scout-target-waypoint-routing-v1/existing-test-search-count-maintenance-v1.json';\nassert.equal((await pin(preservationFile)).sha256, '3f073e4cf97dcd1d85ccefe24d37263477e5f63ef341c23273e7d864f0d082cc');\nassert.equal((await pin(maintenanceFile)).sha256, '1119032c4e1b5acab94158ba006d6affc5f30cf1aeffe71bf57afab74be6c1df');\nconst preservation = JSON.parse(await fs.readFile(preservationFile, 'utf8')), maintenance = JSON.parse(await fs.readFile(maintenanceFile, 'utf8'));\nassert.deepEqual(preservation.currentSourcePins, sourceBefore); assert.equal(preservation.sourceSha256, sha(JSON.stringify(sourceBefore)));\nassert.equal(maintenance.rules.length, 6); assert.deepEqual(maintenance.changedOriginalCases, [3173,3308,3447]);\nlet restoredTest = test.toString('utf8'); const eol = restoredTest.includes('\\r\\n') ? '\\r\\n' : '\\n';\nfor (const rule of [...maintenance.rules].reverse()) { const after = rule.after.replace(/\\r?\\n/g,eol), before = rule.before.replace(/\\r?\\n/g,eol); assert.equal(restoredTest.split(after).length-1,1); restoredTest=restoredTest.replace(after,before); }\nconst restoredBytes=Buffer.from(restoredTest,'utf8'); assert.equal(sha(restoredBytes.subarray(0,278248)), '7cf64c8b28a7b57381dc4beaa5fa01e2d77378fa977e869205b1dc941893b68a');\nassert.deepEqual({bytes:restoredBytes.length-278248,sha256:sha(restoredBytes.subarray(278248))},preservation.preservation.newTestsAppendedAfterOriginalPrefixInverse); assert.equal(preservation.preservation.newTestCount,5);"
+    },
+    {
+      "before": "JSON.stringify(counts) === JSON.stringify({ tests: 232, passed: 232, failed: 0, cancelled: 0, skipped: 0, todo: 0 })",
+      "after": "JSON.stringify(counts) === JSON.stringify({ tests: 237, passed: 237, failed: 0, cancelled: 0, skipped: 0, todo: 0 })"
+    },
+    {
+      "before": "prior226Receipt: await pin(previousFile)",
+      "after": "prior232Receipt: await pin(previousFile), sourcePreservationReceipt: await pin(preservationFile), existingTestMaintenance: await pin(maintenanceFile)"
+    }
+  ],
+  "inverseRawExact": true,
+  "expectedTests": 237,
+  "executionPerformed": false,
+  "capacityAccepted": false
+}

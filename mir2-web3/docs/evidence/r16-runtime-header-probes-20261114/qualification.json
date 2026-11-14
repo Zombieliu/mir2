@@ -1,0 +1,932 @@
+{
+  "kind": "r16-runtime-header-probes",
+  "baseSource": "9244ce3dd7cd2129a70e650be1430e971b6c96ab",
+  "candidate": "9244-header-probes-c90ee46e",
+  "passed": true,
+  "localBrowserSessions": 4,
+  "tests": {
+    "currentAdjacentPassed": 99,
+    "currentAdjacentFailed": 0,
+    "baselineTargetedPassed": 0,
+    "baselineTargetedFailed": 2
+  },
+  "build": {
+    "status": {
+      "code": 0,
+      "signal": null
+    },
+    "builtId": "hXWkLjIJfTBh-J9ay3Dkd",
+    "sourceRoot": "C:/r16-runtime-header-probe-20261114/source",
+    "dist": ".next-runtime-header-probes-r2",
+    "durationMs": 46526,
+    "changedFiles": [
+      {
+        "filename": "mir2-web3/apps/web/lib/scene-asset-preloader.ts",
+        "sha256": "0f1d3a0a09d9cdd25dbe1de8539ec4c814305548f9610d019cb4b51856adf93d",
+        "bytes": 7849,
+        "baseSha256": "fb0d93cc659695131f74cbd1f9c0a220f8e84904c57d02ac0bdf25b62ef951cd",
+        "inheritedFrom": "ea4b1c363eb9089bf0fbe57245660782cae3fe70"
+      },
+      {
+        "filename": "mir2-web3/apps/web/app/components/r16-login-door.tsx",
+        "sha256": "9233ba688e2233fe05f89a4853aa5e69ac037f1d63e7aa68e36095ca08d44a2c",
+        "bytes": 2151,
+        "baseSha256": "b042f6b8f3cc6b55bf53b2382598faecfe94b6789c4f746bb03a215be7a466f8",
+        "inheritedFrom": "ea4b1c363eb9089bf0fbe57245660782cae3fe70"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-scene-asset-preloader.mjs",
+        "sha256": "0c1aa0ce081bb7733aeb822a76aaf8c33514b986ad05c93d29a4b1751830c4bf",
+        "bytes": 10406,
+        "baseSha256": "d933b215213fb9d0376f8dbbcb41361804f495225159932044920dc7e84a17cb",
+        "inheritedFrom": "ea4b1c363eb9089bf0fbe57245660782cae3fe70"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-r16-auth-layout.mjs",
+        "sha256": "9187eb5db8e883da78b55353684d0c3badb8fc5755393ea8fe5bcdaf0db27e5a",
+        "bytes": 45458,
+        "baseSha256": "1cd3e55dfbb6186fa2367072cffce73d7606ee4b0af3540eb9b3af7c046d66c6",
+        "inheritedFrom": "ea4b1c363eb9089bf0fbe57245660782cae3fe70"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/bevy-runtime-initializer.ts",
+        "sha256": "c676e10257431a2d51397a743df8f76bcc0e740e31442490e05e9c04b52b035f",
+        "bytes": 14612,
+        "baseSha256": "f28ebffe724f5a2357682a741b5b57ea6a0e41dbff45c8d16bc36559d971eef7",
+        "priorDraftSha256": "f7ed3390259489a3b91d4ca9835a105990b2b94104e77712874bd4b4e18ae701",
+        "scope": "bounded runtime header probes"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-initializer.mjs",
+        "sha256": "f5f5459a3b5c140a30c15857e96a406237994b94386c0eb7e5933898fb877e6c",
+        "bytes": 31187,
+        "baseSha256": "1b08b1a7423aa7ac5b43859d5a18f1d68a9db41ea1ecb1f73c6aca299fa84941",
+        "priorDraftSha256": "083b924f8ca6e4314eca9044c234d1ace3e66188073d404937eea43da3344c7b",
+        "scope": "bounded runtime header probes"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-finite-recovery.mjs",
+        "sha256": "c87a2661b386054b5c0060a2e71c4409046fbbe2201141b9aefbed4ffc1f10f4",
+        "bytes": 15492,
+        "baseSha256": "c9878a9194302880e847af162430888ea1c53e03538f4e81bbf4015f070f9e89",
+        "priorDraftSha256": "c87a2661b386054b5c0060a2e71c4409046fbbe2201141b9aefbed4ffc1f10f4",
+        "scope": "bounded runtime header probes"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/smoke-bevy-runtime-header-probes.mjs",
+        "sha256": "aa30eb56dc7547e2ffdcd71ea019a3318b85910a1f7898b4a162bd85977e17bc",
+        "bytes": 6568,
+        "baseSha256": null,
+        "priorDraftSha256": "0aa6e453244f561dada933d8055bb09af868cc480972ba2fb9722c1695da0094",
+        "scope": "bounded runtime header probes"
+      }
+    ],
+    "sourceClosureFiles": 126109,
+    "sourceClosureBytes": 919548348,
+    "archiveSha256": "9e64474aefee61821a75b8fcbc1164aeda9d180964fc265d44a792ab0d7f6b1d",
+    "provenGitArchiveEolNormalizations": 123,
+    "fixedRuntime": "bevy-0c553a754308e5b8",
+    "fixedAssets": "20261108-r16-08ec86d5105c",
+    "prebuiltRuntimeAndCoreUnmodified": true
+  },
+  "browserContract": {
+    "passed": true,
+    "scope": "Actual Chrome, loopback no-header faults and original WASM compilation; no external account/game/public performance claim",
+    "sourceSha256": "c676e10257431a2d51397a743df8f76bcc0e740e31442490e05e9c04b52b035f",
+    "closed": {
+      "browser": true,
+      "server": true
+    },
+    "chromeVersion": "157.0.8103.78",
+    "cases": [
+      {
+        "scenario": "headers",
+        "elapsedMs": 16021,
+        "requests": [
+          {
+            "path": "/headers/app.wasm",
+            "atMs": 1,
+            "priorAborted": true
+          },
+          {
+            "path": "/headers/mirror.wasm",
+            "atMs": 8009,
+            "priorAborted": true
+          },
+          {
+            "path": "/headers/app.wasm",
+            "atMs": 16017,
+            "priorAborted": true
+          }
+        ],
+        "events": [
+          {
+            "attempt": 1,
+            "sourceIndex": 0,
+            "retry": false,
+            "state": "started",
+            "phase": "headers",
+            "bytes": 0
+          },
+          {
+            "attempt": 1,
+            "sourceIndex": 0,
+            "retry": false,
+            "state": "failed",
+            "phase": "headers",
+            "bytes": 0,
+            "reason": "headers-timeout",
+            "retryable": true
+          },
+          {
+            "attempt": 2,
+            "sourceIndex": 1,
+            "retry": false,
+            "state": "started",
+            "phase": "headers",
+            "bytes": 0
+          },
+          {
+            "attempt": 2,
+            "sourceIndex": 1,
+            "retry": false,
+            "state": "failed",
+            "phase": "headers",
+            "bytes": 0,
+            "reason": "headers-timeout",
+            "retryable": true
+          },
+          {
+            "attempt": 3,
+            "sourceIndex": 0,
+            "retry": true,
+            "state": "started",
+            "phase": "headers",
+            "bytes": 0
+          },
+          {
+            "attempt": 3,
+            "sourceIndex": 0,
+            "retry": true,
+            "state": "completed",
+            "phase": "compile",
+            "bytes": 39,
+            "status": 200
+          }
+        ],
+        "imports": 1,
+        "canvases": 1,
+        "initialized": 1,
+        "recovery": 0,
+        "answer": 42,
+        "errorName": null,
+        "allRequestsRetired": true
+      },
+      {
+        "scenario": "retired",
+        "elapsedMs": 8005,
+        "requests": [
+          {
+            "path": "/retired/app.wasm",
+            "atMs": 0,
+            "priorAborted": true
+          },
+          {
+            "path": "/retired/mirror.wasm",
+            "atMs": 8005,
+            "priorAborted": true
+          }
+        ],
+        "events": [
+          {
+            "attempt": 1,
+            "sourceIndex": 0,
+            "retry": false,
+            "state": "started",
+            "phase": "headers",
+            "bytes": 0
+          },
+          {
+            "attempt": 1,
+            "sourceIndex": 0,
+            "retry": false,
+            "state": "failed",
+            "phase": "headers",
+            "bytes": 0,
+            "reason": "headers-timeout",
+            "retryable": true
+          },
+          {
+            "attempt": 2,
+            "sourceIndex": 1,
+            "retry": false,
+            "state": "started",
+            "phase": "headers",
+            "bytes": 0
+          },
+          {
+            "attempt": 2,
+            "sourceIndex": 1,
+            "retry": false,
+            "state": "failed",
+            "phase": "headers",
+            "bytes": 0,
+            "reason": "cancelled",
+            "retryable": false
+          }
+        ],
+        "imports": 1,
+        "canvases": 0,
+        "initialized": 0,
+        "recovery": 0,
+        "answer": null,
+        "errorName": "AbortError",
+        "allRequestsRetired": true
+      },
+      {
+        "scenario": "denied",
+        "elapsedMs": 4,
+        "requests": [
+          {
+            "path": "/denied/app.wasm",
+            "atMs": 0,
+            "priorAborted": true
+          },
+          {
+            "path": "/denied/mirror.wasm",
+            "atMs": 3,
+            "priorAborted": true
+          }
+        ],
+        "events": [
+          {
+            "attempt": 1,
+            "sourceIndex": 0,
+            "retry": false,
+            "state": "started",
+            "phase": "headers",
+            "bytes": 0
+          },
+          {
+            "attempt": 1,
+            "sourceIndex": 0,
+            "retry": false,
+            "state": "failed",
+            "phase": "headers",
+            "bytes": 0,
+            "status": 403,
+            "reason": "http",
+            "retryable": false
+          },
+          {
+            "attempt": 2,
+            "sourceIndex": 1,
+            "retry": false,
+            "state": "started",
+            "phase": "headers",
+            "bytes": 0
+          },
+          {
+            "attempt": 2,
+            "sourceIndex": 1,
+            "retry": false,
+            "state": "failed",
+            "phase": "headers",
+            "bytes": 0,
+            "status": 403,
+            "reason": "http",
+            "retryable": false
+          }
+        ],
+        "imports": 1,
+        "canvases": 0,
+        "initialized": 0,
+        "recovery": 0,
+        "answer": null,
+        "errorName": "TypeError",
+        "allRequestsRetired": true
+      },
+      {
+        "scenario": "slow",
+        "elapsedMs": 17030,
+        "requests": [
+          {
+            "path": "/slow/app.wasm",
+            "atMs": 0,
+            "priorAborted": true
+          },
+          {
+            "path": "/slow/mirror.wasm",
+            "atMs": 1,
+            "priorAborted": true
+          },
+          {
+            "path": "/slow/mirror.wasm",
+            "atMs": 8012,
+            "priorAborted": true
+          }
+        ],
+        "events": [
+          {
+            "attempt": 1,
+            "sourceIndex": 0,
+            "retry": false,
+            "state": "started",
+            "phase": "headers",
+            "bytes": 0
+          },
+          {
+            "attempt": 1,
+            "sourceIndex": 0,
+            "retry": false,
+            "state": "failed",
+            "phase": "headers",
+            "bytes": 0,
+            "status": 503,
+            "reason": "http",
+            "retryable": true
+          },
+          {
+            "attempt": 2,
+            "sourceIndex": 1,
+            "retry": false,
+            "state": "started",
+            "phase": "headers",
+            "bytes": 0
+          },
+          {
+            "attempt": 2,
+            "sourceIndex": 1,
+            "retry": false,
+            "state": "failed",
+            "phase": "headers",
+            "bytes": 0,
+            "reason": "headers-timeout",
+            "retryable": true
+          },
+          {
+            "attempt": 3,
+            "sourceIndex": 1,
+            "retry": true,
+            "state": "started",
+            "phase": "headers",
+            "bytes": 0
+          },
+          {
+            "attempt": 3,
+            "sourceIndex": 1,
+            "retry": true,
+            "state": "completed",
+            "phase": "compile",
+            "bytes": 39,
+            "status": 200
+          }
+        ],
+        "imports": 1,
+        "canvases": 1,
+        "initialized": 1,
+        "recovery": 0,
+        "answer": 42,
+        "errorName": null,
+        "allRequestsRetired": true
+      }
+    ],
+    "requests": [
+      {
+        "scenario": "headers",
+        "lane": "app",
+        "count": 1,
+        "at": 1794667223265,
+        "headersSent": false
+      },
+      {
+        "scenario": "headers",
+        "lane": "mirror",
+        "count": 1,
+        "at": 1794667231273,
+        "headersSent": false
+      },
+      {
+        "scenario": "headers",
+        "lane": "app",
+        "count": 2,
+        "at": 1794667239282,
+        "headersSent": true
+      },
+      {
+        "scenario": "retired",
+        "lane": "app",
+        "count": 1,
+        "at": 1794667239284,
+        "headersSent": false
+      },
+      {
+        "scenario": "retired",
+        "lane": "mirror",
+        "count": 1,
+        "at": 1794667247290,
+        "headersSent": false
+      },
+      {
+        "scenario": "denied",
+        "lane": "app",
+        "count": 1,
+        "at": 1794667247291,
+        "headersSent": true
+      },
+      {
+        "scenario": "denied",
+        "lane": "mirror",
+        "count": 1,
+        "at": 1794667247292,
+        "headersSent": true
+      },
+      {
+        "scenario": "slow",
+        "lane": "app",
+        "count": 1,
+        "at": 1794667247293,
+        "headersSent": true
+      },
+      {
+        "scenario": "slow",
+        "lane": "mirror",
+        "count": 1,
+        "at": 1794667247294,
+        "headersSent": false
+      },
+      {
+        "scenario": "slow",
+        "lane": "mirror",
+        "count": 2,
+        "at": 1794667255306,
+        "headersSent": true
+      }
+    ],
+    "retiredHeaders": [
+      {
+        "scenario": "headers",
+        "lane": "app",
+        "count": 1,
+        "at": 1794667231274
+      },
+      {
+        "scenario": "headers",
+        "lane": "mirror",
+        "count": 1,
+        "at": 1794667239282
+      },
+      {
+        "scenario": "retired",
+        "lane": "mirror",
+        "count": 1,
+        "at": 1794667247291
+      },
+      {
+        "scenario": "retired",
+        "lane": "app",
+        "count": 1,
+        "at": 1794667247291
+      }
+    ],
+    "pageErrors": []
+  },
+  "runs": [
+    {
+      "ordinal": 1,
+      "mode": "compatibility",
+      "language": "en-US",
+      "sessions": [
+        {
+          "passed": true,
+          "nativeReadyWaitMs": 54677,
+          "fonts": [
+            {
+              "name": "NotoSansTC.ttf",
+              "bytes": 11941968,
+              "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+            },
+            {
+              "name": "NotoSansCJKsc-Regular.otf",
+              "bytes": 16437364,
+              "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+            },
+            {
+              "name": "NotoSans-Regular.ttf",
+              "bytes": 621572,
+              "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+            },
+            {
+              "name": "NotoSansDevanagari-Regular.ttf",
+              "bytes": 243520,
+              "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+            },
+            {
+              "name": "NotoSansThai-Regular.ttf",
+              "bytes": 37780,
+              "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+            },
+            {
+              "name": "NotoSansArabic-Regular.ttf",
+              "bytes": 234892,
+              "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+            }
+          ],
+          "prewarm": {
+            "requested": 113,
+            "ok": 113,
+            "failed": 0
+          },
+          "nativeQuest": "ordinary-shared-native",
+          "rightButtonsPassed": true
+        },
+        {
+          "passed": true,
+          "nativeReadyWaitMs": 1663,
+          "fonts": [
+            {
+              "name": "NotoSansTC.ttf",
+              "bytes": 11941968,
+              "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+            },
+            {
+              "name": "NotoSansCJKsc-Regular.otf",
+              "bytes": 16437364,
+              "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+            },
+            {
+              "name": "NotoSans-Regular.ttf",
+              "bytes": 621572,
+              "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+            },
+            {
+              "name": "NotoSansDevanagari-Regular.ttf",
+              "bytes": 243520,
+              "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+            },
+            {
+              "name": "NotoSansThai-Regular.ttf",
+              "bytes": 37780,
+              "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+            },
+            {
+              "name": "NotoSansArabic-Regular.ttf",
+              "bytes": 234892,
+              "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+            }
+          ],
+          "prewarm": {
+            "requested": 113,
+            "ok": 113,
+            "failed": 0
+          },
+          "nativeQuest": "ordinary-shared-native",
+          "rightButtonsPassed": true
+        }
+      ],
+      "walkRunCommands": 189,
+      "originalMoveGateMs": 8000,
+      "originalNativeGateMs": 120000,
+      "requestedDestination": {
+        "x": 324,
+        "y": 291
+      },
+      "authoritativeArrival": {
+        "x": 322,
+        "y": 293
+      },
+      "collisionRegions": 9,
+      "worldSnapshotTransport": {
+        "passed": true,
+        "gatewayKind": "merged",
+        "compressionExpected": true,
+        "sessions": [
+          {
+            "worldDeclared": true,
+            "worldSnapshots": 5,
+            "worldWireBytes": 44832,
+            "worldDecodedBytes": 242757,
+            "browserConsumption": {
+              "passed": true,
+              "version": 6,
+              "tick": 1,
+              "mapFileName": "0",
+              "entityCount": 31,
+              "rawIngressTickMatched": true,
+              "wireKind": "M2WSPGZ1"
+            }
+          },
+          {
+            "worldDeclared": true,
+            "worldSnapshots": 7,
+            "worldWireBytes": 61506,
+            "worldDecodedBytes": 342776,
+            "browserConsumption": {
+              "passed": true,
+              "version": 6,
+              "tick": 1,
+              "mapFileName": "0",
+              "entityCount": 32,
+              "rawIngressTickMatched": true,
+              "wireKind": "M2WSPGZ1"
+            }
+          }
+        ],
+        "scope": "Actual Page snapshot consumer, catalog gzip mixed ordering, existing gameplay/save gates; loopback HTTP, not public or latency-causality proof"
+      },
+      "catalogCountEachSession": 529,
+      "npcNameLayerPassed": true,
+      "workerRestartPassed": true,
+      "browserFullyRestarted": true,
+      "ordinaryLogoutAndSavePassed": true,
+      "sourceFixtureUnchanged": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "screenshot": {
+        "path": "default-vendor-arrival.png",
+        "sha256": "b923c8b9fe6fa7161b0019b3e9c22960de2d253d130653392416cd528de6fb83"
+      }
+    },
+    {
+      "ordinal": 2,
+      "mode": "webgl2",
+      "language": "zh-TW",
+      "sessions": [
+        {
+          "passed": true,
+          "nativeReadyWaitMs": 52293,
+          "fonts": [
+            {
+              "name": "NotoSansTC.ttf",
+              "bytes": 11941968,
+              "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+            },
+            {
+              "name": "NotoSansCJKsc-Regular.otf",
+              "bytes": 16437364,
+              "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+            },
+            {
+              "name": "NotoSans-Regular.ttf",
+              "bytes": 621572,
+              "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+            },
+            {
+              "name": "NotoSansDevanagari-Regular.ttf",
+              "bytes": 243520,
+              "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+            },
+            {
+              "name": "NotoSansThai-Regular.ttf",
+              "bytes": 37780,
+              "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+            },
+            {
+              "name": "NotoSansArabic-Regular.ttf",
+              "bytes": 234892,
+              "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+            }
+          ],
+          "prewarm": {
+            "requested": 113,
+            "ok": 113,
+            "failed": 0
+          },
+          "nativeQuest": "ordinary-shared-native",
+          "rightButtonsPassed": true
+        },
+        {
+          "passed": true,
+          "nativeReadyWaitMs": 1370,
+          "fonts": [
+            {
+              "name": "NotoSansTC.ttf",
+              "bytes": 11941968,
+              "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+            },
+            {
+              "name": "NotoSansCJKsc-Regular.otf",
+              "bytes": 16437364,
+              "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+            },
+            {
+              "name": "NotoSans-Regular.ttf",
+              "bytes": 621572,
+              "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+            },
+            {
+              "name": "NotoSansDevanagari-Regular.ttf",
+              "bytes": 243520,
+              "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+            },
+            {
+              "name": "NotoSansThai-Regular.ttf",
+              "bytes": 37780,
+              "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+            },
+            {
+              "name": "NotoSansArabic-Regular.ttf",
+              "bytes": 234892,
+              "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+            }
+          ],
+          "prewarm": {
+            "requested": 113,
+            "ok": 113,
+            "failed": 0
+          },
+          "nativeQuest": "ordinary-shared-native",
+          "rightButtonsPassed": true
+        }
+      ],
+      "walkRunCommands": 189,
+      "originalMoveGateMs": 8000,
+      "originalNativeGateMs": 120000,
+      "requestedDestination": {
+        "x": 324,
+        "y": 291
+      },
+      "authoritativeArrival": {
+        "x": 322,
+        "y": 293
+      },
+      "collisionRegions": 9,
+      "worldSnapshotTransport": {
+        "passed": true,
+        "gatewayKind": "merged",
+        "compressionExpected": true,
+        "sessions": [
+          {
+            "worldDeclared": true,
+            "worldSnapshots": 5,
+            "worldWireBytes": 44832,
+            "worldDecodedBytes": 242761,
+            "browserConsumption": {
+              "passed": true,
+              "version": 6,
+              "tick": 1,
+              "mapFileName": "0",
+              "entityCount": 31,
+              "rawIngressTickMatched": true,
+              "wireKind": "M2WSPGZ1"
+            }
+          },
+          {
+            "worldDeclared": true,
+            "worldSnapshots": 7,
+            "worldWireBytes": 61543,
+            "worldDecodedBytes": 342787,
+            "browserConsumption": {
+              "passed": true,
+              "version": 6,
+              "tick": 1,
+              "mapFileName": "0",
+              "entityCount": 32,
+              "rawIngressTickMatched": true,
+              "wireKind": "M2WSPGZ1"
+            }
+          }
+        ],
+        "scope": "Actual Page snapshot consumer, catalog gzip mixed ordering, existing gameplay/save gates; loopback HTTP, not public or latency-causality proof"
+      },
+      "catalogCountEachSession": 529,
+      "npcNameLayerPassed": true,
+      "workerRestartPassed": true,
+      "browserFullyRestarted": true,
+      "ordinaryLogoutAndSavePassed": true,
+      "sourceFixtureUnchanged": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "screenshot": {
+        "path": "webgl2-vendor-arrival.png",
+        "sha256": "cc15d656e5f9a45ed8133469de8307c78d02112e222c7a8684ec8ef77443e42d"
+      }
+    }
+  ],
+  "preservedForeignWorkingFiles": 29,
+  "foreignWorkingFilesUnchanged": true,
+  "retainedFailures": {
+    "staleFinalProbeUnitDeadlineCancelledFiveTestsInR1": true,
+    "firstFullGameRunRejectedCrossProcessFirstPlayableAge": true,
+    "firstFullGameFailureReclassified": false,
+    "firstBuildSupersededBySlowMirrorRefinement": true
+  },
+  "publicPerformanceRetested": false,
+  "newSourceDeployed": false,
+  "public120SecondIssueClaimedFixed": false,
+  "globalParityCandidateOrAccepted": false,
+  "privateInputs": [
+    {
+      "path": "C:/r16-runtime-header-probe-20261114/build-receipt-r1.json",
+      "sha256": "e3006d008407e7b1d629a8c534075fdfbfe23c2e5c5c79f958acd386dc7d93d3"
+    },
+    {
+      "path": "C:/r16-runtime-header-probe-20261114/next-build-r1.log",
+      "sha256": "a2beb85f4d718daaedb40de6fe2c847edf5217c9bcb1c8efacf6119b97c9b761"
+    },
+    {
+      "path": "C:/r16-runtime-header-probe-20261114/build-receipt-r2.json",
+      "sha256": "c72db23ac73c69503917020909790b5d95f89cc022485637b895a68cf1f21a6f"
+    },
+    {
+      "path": "C:/r16-runtime-header-probe-20261114/next-build-r2.log",
+      "sha256": "7459c0ed039152d80563314c9aa5c63efbc25b9de3b5e7826b9e531a63ab2630"
+    },
+    {
+      "path": "C:/r16-runtime-header-probe-20261114/build-inputs-r1.json",
+      "sha256": "d0f5e7368b079da9a979c8c113667a403d5c58b4b85270dcdfc29010270249f5"
+    },
+    {
+      "path": "C:/r16-runtime-header-probe-20261114/build-inputs-r2.json",
+      "sha256": "839391d631365dfd22f43ac9c5f4e33bf789c45c43d9e1d17ba8212db28d6d89"
+    },
+    {
+      "path": "C:/r16-runtime-header-probe-20261114/web-closure.json",
+      "sha256": "a37b3711833b1f3f380e8f3479247a020cc1b5f0e773b3903192ca6e1fd7ad5b"
+    },
+    {
+      "path": "C:/r16-runtime-header-probe-20261114/extract-source.py",
+      "sha256": "273935c2fc1545cb954689d0e3cd46e0153075659d9d0b7cbdcad57da2456f3c"
+    },
+    {
+      "path": "C:/r16-runtime-header-probe-20261114/inherited-branch-scope.json",
+      "sha256": "3d6e690a6155633c3c946db18c56adab71989a59981c8da04ac2e96087048f3b"
+    },
+    {
+      "path": "C:/r16-runtime-header-probe-20261114/initializer-tests-r1.log",
+      "sha256": "2e4c3f7ca9bb738b0d90e14b0742a9158d8fb99863cbbf5674ec72eb516d08bb"
+    },
+    {
+      "path": "C:/r16-runtime-header-probe-20261114/initializer-tests-r2.log",
+      "sha256": "9328e38b3a920a6c8bb5cb03322c6fbcd8d5889122e46537f3ff67d6b48b7d52"
+    },
+    {
+      "path": "C:/r16-runtime-header-probe-20261114/combined-tests-r3.log",
+      "sha256": "43ac81ddfe9484039ea7869ac186c2281287c80ce2d2270455f8ce546f7a9a3c"
+    },
+    {
+      "path": "C:/r16-runtime-header-probe-20261114/adjacent-tests-r1.log",
+      "sha256": "e46c0436feb8a31e207d4e93ee533fc13def9c88dff6828e59b7113688f07a2d"
+    },
+    {
+      "path": "C:/r16-runtime-header-probe-20261114/baseline-header-regression-r1.log",
+      "sha256": "0a803ff000e26927609d755bd2ac81c16dd6a7b9af461a4f287b1e083d7ca29b"
+    },
+    {
+      "path": "C:/r16-runtime-header-probe-20261114/baseline-header-regression.mjs",
+      "sha256": "004ec5004add6709204f805156f83a2721b704bb1e776d74d0815b39b1478474"
+    },
+    {
+      "path": "C:/r16-runtime-header-probe-20261114/chrome-headers-r1/receipt.json",
+      "sha256": "76c0ba1bb1b5445f2ab547c8c1bee3d4ffcfe170c03ce9872648802b58682ca8"
+    },
+    {
+      "path": "C:/r16-runtime-header-probe-20261114/chrome-headers-r2/receipt.json",
+      "sha256": "c0ab4403f0e1bb78649d9b5abd87c5c8d83d2596b0316581ae85febdad32784b"
+    },
+    {
+      "path": "C:/r16-runtime-header-probe-20261114/game-fixture-preparation.json",
+      "sha256": "9fb4cdab59a72504c85c82e99f184b3c5b72f2f477dee93659b019e9c8da94b4"
+    },
+    {
+      "path": "C:/r16-runtime-header-probe-20261114/game-fixture-preparation-r2.json",
+      "sha256": "33bb26cac4a8719e50b5fb09c3c81f2ea944351658bafe6d688a1aa2b50e5b2d"
+    },
+    {
+      "path": "C:/r16-runtime-header-probe-20261114/fixture-r2/build-receipt.json",
+      "sha256": "8cf844ddbbcaf58ecd117939a8a98e4cf190177ad12bc989b7da1f4866a855cb"
+    },
+    {
+      "path": "C:/r16-runtime-header-probe-20261114/browser-r1.log",
+      "sha256": "359745a9b39bf8060bd9ca943fe01bd3cd9051ed1d22cebaac833afe94028b8e"
+    },
+    {
+      "path": "C:/r16-runtime-header-probe-20261114/browser-f2-r1.log",
+      "sha256": "3064f8fa86c7f059768e5c21447eafa4534682740b6ccb492b079f84f46b372d"
+    },
+    {
+      "path": "C:/r16-runtime-header-probe-20261114/browser-f2-r2.log",
+      "sha256": "b5b40cefd1bfc65d10fce12ce58cc6d94b5bcde94d126033e42465ac1a6c293b"
+    },
+    {
+      "path": "C:/r16-runtime-header-probe-20261114/fixture-r1/game-full/quest-after-r1/entry-visual-receipt.json",
+      "sha256": "b28f0099c6d72786b8e0cdd20c986c370a72562818940bca0404db82cd8c27c0"
+    },
+    {
+      "path": "C:/r16-runtime-header-probe-20261114/fixture-r2/game-full/quest-after-r1/entry-visual-receipt.json",
+      "sha256": "04cbd001d1c01b5c73569a7bfbc6983e233ac0715ed80069161b5838bb5cf517"
+    },
+    {
+      "path": "C:/r16-runtime-header-probe-20261114/fixture-r2/game-full/quest-after-r2/entry-visual-receipt.json",
+      "sha256": "c99e29c4bb253baf438ed2e3787fe4d83d61950ad230a80b31aaaac68ca6b72e"
+    }
+  ]
+}

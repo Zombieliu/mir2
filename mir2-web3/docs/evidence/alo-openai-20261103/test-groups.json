@@ -1,0 +1,70 @@
+{
+  "recordedAt": "2026-11-03T01:07:31.078Z",
+  "groups": [
+    {
+      "name": "node-full",
+      "passed": 214,
+      "failed": 0,
+      "path": "F:/mir2-builds/alo-openai-20261103/checks/node-suite-final.txt",
+      "sha256": "161d4716fa7ac37c055bc255f7b6302e6a4aec4b3e48ab436029acdcb75ea635"
+    },
+    {
+      "name": "fixture-support",
+      "passed": 18,
+      "failed": 0,
+      "path": "F:/mir2-builds/alo-openai-20261103/checks/fixture-support.txt",
+      "sha256": "4e3d12958ab07a7d31b4ac2773ce6f81e25de4e4285cb0cf42d804869efbbee5"
+    },
+    {
+      "name": "gateway-companion",
+      "passed": 20,
+      "failed": 0,
+      "path": "F:/mir2-builds/alo-openai-20261103/checks/gateway-companion.txt",
+      "sha256": "4b0634261e1420d0824f6dcd9a2f341523bc3b61b8f796e899fd3d4a951486a7"
+    },
+    {
+      "name": "native-companion-ui",
+      "passed": 29,
+      "failed": 0,
+      "path": "F:/mir2-builds/canonical-companion-native/model-ui-client-final.log",
+      "sha256": "725b92d590fef83fcaaceed24afc86c8a2d2df9221ca6cc8ffb4b0b5c08e2aa9"
+    },
+    {
+      "name": "native-existing-ime",
+      "passed": 10,
+      "failed": 0,
+      "path": "F:/mir2-builds/canonical-companion-native/model-ui-existing-ime.log",
+      "sha256": "45943912e270fbb4affef2aa5ba03132ce37250a1f27548f86d8d3aaa14680b5"
+    },
+    {
+      "name": "native-platform-companion",
+      "passed": 13,
+      "failed": 0,
+      "path": "F:/mir2-builds/canonical-companion-native/model-ui-platform-final.log",
+      "sha256": "cf81928d422c0f97e621bebb0f2677fc949ef779ea37aadc8ee057b0a48f31d7"
+    },
+    {
+      "name": "native-chat-input",
+      "passed": 4,
+      "failed": 0,
+      "path": "F:/mir2-builds/canonical-companion-native/model-ui-chat-input.log",
+      "sha256": "75c827f4683e1193da44ca1e9c7ba7611a60c6533bd7f7f3c3549c960f73d552"
+    },
+    {
+      "name": "native-quest-input",
+      "passed": 7,
+      "failed": 0,
+      "path": "F:/mir2-builds/canonical-companion-native/model-ui-quest-input.log",
+      "sha256": "4b9740fe13b00fa81ec686e7f277dc5dab2d737330ef1621361b95d7f5919aee"
+    },
+    {
+      "name": "native-skill-input",
+      "passed": 26,
+      "failed": 0,
+      "path": "F:/mir2-builds/canonical-companion-native/model-ui-skill-input.log",
+      "sha256": "fa915e018eb81989f49aaaed75ed0ff6185a6b4152d081429b1f99bcf81d1b16"
+    }
+  ],
+  "totalsAreNotUnique": true,
+  "liveModelApiValidated": false
+}

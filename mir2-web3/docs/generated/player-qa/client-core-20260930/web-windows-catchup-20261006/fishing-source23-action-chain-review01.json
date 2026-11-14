@@ -1,0 +1,561 @@
+{
+  "schemaVersion": 1,
+  "id": "fishing-source23-action-chain-review01",
+  "generatedAtUtc": "2026-10-07T01:59:47.010Z",
+  "parentCommit": "4cc32c3f9a3348ebbcd4dce9475acc4c6c7d91ef",
+  "fixedWindowsBaseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "row": "F02.world.fishing-click",
+  "finiteResult": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-finite-result01.json",
+    "bytes": 25598,
+    "sha256": "dc3f7d952147b40d9f5d73342ef92c4bb681854fa8b683c818b1aa6ae7da4e6d"
+  },
+  "products": [
+    {
+      "relativePath": "apps/game-client/client-core/src/entity_animation.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\entity_animation.rs",
+      "bytes": 63457,
+      "sha256": "48afc568bb2e7e867dd30906b020ac1039a2b913ac7e6145abacea0666ab5d1e"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/ordered_map.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\ordered_map.rs",
+      "bytes": 9323,
+      "sha256": "e01db4fc2679d8174948d9820fb3d971c0cb041d9b64373bec667b0e4f754a31"
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/src/entity_animation.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\entity_animation.rs",
+      "bytes": 4527,
+      "sha256": "091ef8e7ee6282a14cca14fcff464e25352bb74fe6e0edf2673e289bb3bfd38f"
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/src/entity_animation_state.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\entity_animation_state.rs",
+      "bytes": 36055,
+      "sha256": "cb49aff50076dfd29669cb191651e1a6185a066d09727ed50f68a6a6d4b71552"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/input.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\input.rs",
+      "bytes": 367623,
+      "sha256": "6d67ff71dc910e76f452ec468e42e9da15780e306ae7a35b01046da91c4f36c9"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/map_parser.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\map_parser.rs",
+      "bytes": 105184,
+      "sha256": "376d1f6416032c93484bfd8ca91fec39f6aa67a4bba6a1c3d3fd694d5d6d78c9"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/entity_animation.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\entity_animation.rs",
+      "bytes": 203,
+      "sha256": "380d310bf2d761159915dd820142a671cfd460f45bed4ee5e33f305c68ffb9e4"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/entity_animation_bridge.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\entity_animation_bridge.rs",
+      "bytes": 236,
+      "sha256": "74b7fc12e7354bfdfef49f0ce7bd100e01de259e57d2e39af208e25cd3b106e0"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/lib.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\lib.rs",
+      "bytes": 435227,
+      "sha256": "751be21351e0dd01902fced467e46aeee43e560ec80147a8b92c366cb1091041"
+    },
+    {
+      "relativePath": "apps/web/lib/shared-fishing-click.ts",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\shared-fishing-click.ts",
+      "bytes": 8842,
+      "sha256": "21e0ef36d53cba70f9168975e73c63444cab8d383e4a547aeca4cabf756cd6bf"
+    },
+    {
+      "relativePath": "apps/web/lib/world-fishing-source.ts",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\world-fishing-source.ts",
+      "bytes": 14284,
+      "sha256": "ee24569a0ae5946397fff550784e7ef5a2e0bc62abb93a981bf3136a4c18c2f4"
+    },
+    {
+      "relativePath": "apps/web/lib/world-fishing-input.ts",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\world-fishing-input.ts",
+      "bytes": 1056,
+      "sha256": "224a6a3c91336cb699bf70987880536fe2d0f3e6a01e9415cd923187d1e89135"
+    },
+    {
+      "relativePath": "apps/web/lib/client-core-runtime.ts",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\client-core-runtime.ts",
+      "bytes": 40650,
+      "sha256": "b2976241abb57c2c33513962e7dc44845e356ff781f2e51d37fd68de07e2224a"
+    },
+    {
+      "relativePath": "apps/web/app/page.tsx",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\page.tsx",
+      "bytes": 995759,
+      "sha256": "7836bf1a0c8bb4934efbaccb269eca4d75605ac5f205fb5abe77d34c13167307"
+    },
+    {
+      "relativePath": "apps/web/app/original-client-shell.tsx",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\original-client-shell.tsx",
+      "bytes": 321102,
+      "sha256": "303b6645cbb445273f2b3258d989a7de010f7b6e508d409cacf7ffc6bb768b71"
+    },
+    {
+      "relativePath": "apps/web/app/components/original-client-shell-types.ts",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\components\\original-client-shell-types.ts",
+      "bytes": 18241,
+      "sha256": "128661db8387300b0ccd027f7ad7943db50211d81374921eeece2c1fd92650fe"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/fishing_click.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\fishing_click.rs",
+      "bytes": 14575,
+      "sha256": "b022699aef538a4cf70d550cecb0c9abec31bf629b961bf249816200c1d8f0aa"
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/src/fishing_click.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\fishing_click.rs",
+      "bytes": 34144,
+      "sha256": "aed8af65acd91c1189a4c3b23d4500ac9747c7dcb64363472c22b6fadcb59b4c"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/mount_fishing_dialog.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\mount_fishing_dialog.rs",
+      "bytes": 16447,
+      "sha256": "9494e5ba9042b3915f3429318732015a62ddbd3a983dbcda2bd2505eb4297117"
+    },
+    {
+      "relativePath": "apps/web/app/components/original-client-entity-animation-runtime.ts",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\components\\original-client-entity-animation-runtime.ts",
+      "bytes": 15571,
+      "sha256": "f477a5b06d095d8e7c18474af73add726ed423ba50a9d7018b0d2c6f4b8dd5a2"
+    },
+    {
+      "relativePath": "apps/web/lib/client-presentation-runtime.ts",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\client-presentation-runtime.ts",
+      "bytes": 24534,
+      "sha256": "d8206341fa5e594f3474bb6504e2e69c40e8691e07fce21f96b6e76552034c12"
+    }
+  ],
+  "reviewer": "/root/w2b_final_source_review with Root frontier integration review",
+  "readOnly": true,
+  "executionsByReviewer": 0,
+  "conclusion": "OnlyF02.world.fishing-click bounded sourceCandidate chain closed; categorylegacy retained because whole world painter is not promoted to shared. Actual runtime/UI/player remainsnot-run.",
+  "originalRecords": {
+    "nativeFixedBaselineAndOriginalAuditRetained": true,
+    "priorMatrix": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\feature-matrix08.json",
+    "priorMatrixPin": {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\feature-matrix08.json",
+      "bytes": 3019610,
+      "sha256": "9e5577449d9b0a495dd5358d3a60b3b057b15c414e5921294d5d35c565132236"
+    }
+  },
+  "sharedCore": {
+    "planner": "apps/game-client/client-core/src/fishing_click.rs",
+    "animation": "apps/game-client/client-core/src/entity_animation.rs",
+    "ownedAnimation": "apps/game-client/platform-web/src/entity_animation_state.rs",
+    "nativeAdapter": "apps/game-client/platform-windows/src/input.rs",
+    "rawMapLight": "100..119",
+    "geometry": "Three exact checked one-tile candidates direct,+1,-1 all known blocked; target exact three-tile checked offset; no JS geometry arithmetic fork.",
+    "turnBeforeCastExclusions": true,
+    "turnDelayMs": 200,
+    "castClock": "Full-width saturating one-second readiness, owner claims only actual enteredsend; definitelyunsent release only; unknown transport retains clock, no automaticreplay.",
+    "unknownFactsNeverDefaultStandingOrTransform": true
+  },
+  "webEvidence": {
+    "page": [
+      {
+        "pattern": "function worldFishingOwner",
+        "matches": [
+          {
+            "line": 7707,
+            "excerpt": "function worldFishingOwner(playerObjectId = Number(worldRef.current.playerObjectId), map = worldRef.current.mapFileName): WorldFishingOwner | null {"
+          }
+        ]
+      },
+      {
+        "pattern": "function retireWorldFishingGesture",
+        "matches": [
+          {
+            "line": 7720,
+            "excerpt": "function retireWorldFishingGesture() {"
+          }
+        ]
+      },
+      {
+        "pattern": "function captureWorldFishingSnapshot",
+        "matches": [
+          {
+            "line": 7747,
+            "excerpt": "function captureWorldFishingSnapshot(snapshot: GatewayWorldSnapshot, connectionGeneration: number) {"
+          }
+        ]
+      },
+      {
+        "pattern": "function commitWorldFishingAnimation",
+        "matches": [
+          {
+            "line": 7759,
+            "excerpt": "function commitWorldFishingAnimation(commit: WorldFishingAnimationCommit | null, previous?: object) {"
+          }
+        ]
+      },
+      {
+        "pattern": "function readWorldFishingRod",
+        "matches": [
+          {
+            "line": 7769,
+            "excerpt": "function readWorldFishingRod() {"
+          }
+        ]
+      },
+      {
+        "pattern": "function worldFishingFinalCurrent",
+        "matches": [
+          {
+            "line": 7858,
+            "excerpt": "function worldFishingFinalCurrent(proof: WorldFishingFinalProof, command: Record<string, unknown>): boolean {"
+          }
+        ]
+      },
+      {
+        "pattern": "function enterWorldFishingSend",
+        "matches": [
+          {
+            "line": 7907,
+            "excerpt": "function enterWorldFishingSend(proof: WorldFishingFinalProof, command: Record<string, unknown>, socket: WebSocket): boolean {"
+          }
+        ]
+      },
+      {
+        "pattern": "function tryBlockedWorldFishing",
+        "matches": []
+      },
+      {
+        "pattern": "if (options?.worldFishingProof",
+        "matches": [
+          {
+            "line": 6257,
+            "excerpt": "if (options?.worldFishingProof && !worldFishingFinalCurrent(options.worldFishingProof, command)) return false;"
+          },
+          {
+            "line": 6483,
+            "excerpt": "if (options?.worldFishingProof && !enterWorldFishingSend(options.worldFishingProof, wireCommand, socket)) return false;"
+          }
+        ]
+      },
+      {
+        "pattern": "socket.send(JSON.stringify(wireCommand))",
+        "matches": []
+      }
+    ],
+    "shell": [
+      {
+        "pattern": "const worldFishingPhysicalRef",
+        "matches": [
+          {
+            "line": 1006,
+            "excerpt": "const worldFishingPhysicalRef = useRef<WorldFishingPhysicalPointer | null>(null);"
+          }
+        ]
+      },
+      {
+        "pattern": "function retireWorldFishingPhysical",
+        "matches": [
+          {
+            "line": 3560,
+            "excerpt": "function retireWorldFishingPhysical(lease = worldFishingPhysicalRef.current) {"
+          }
+        ]
+      },
+      {
+        "pattern": "function cancelWorldFishingHeldPointer",
+        "matches": [
+          {
+            "line": 3567,
+            "excerpt": "function cancelWorldFishingHeldPointer() {"
+          }
+        ]
+      },
+      {
+        "pattern": "function worldFishingStageGeometry",
+        "matches": [
+          {
+            "line": 3571,
+            "excerpt": "function worldFishingStageGeometry(stage: HTMLElement): string | null {"
+          }
+        ]
+      },
+      {
+        "pattern": "function attachWorldFishingPhysical",
+        "matches": [
+          {
+            "line": 3624,
+            "excerpt": "function attachWorldFishingPhysical(held: HeldScenePointer, source: globalThis.PointerEvent): void {"
+          }
+        ]
+      },
+      {
+        "pattern": "function finishWorldFishingPhysical",
+        "matches": [
+          {
+            "line": 3659,
+            "excerpt": "function finishWorldFishingPhysical(lease: WorldFishingPhysicalPointer, click: boolean) {"
+          }
+        ]
+      },
+      {
+        "pattern": "commitWorldFishingAnimation",
+        "matches": []
+      },
+      {
+        "pattern": "getMir2EntityActionPose",
+        "matches": []
+      }
+    ]
+  },
+  "intentAndCustody": {
+    "physicalOnly": "Fresh primary mouse or real stage touch Walk; no queuedroute/autoroute, Run, keyboard, itemdrop or actor move promotes Fishing authority.",
+    "owner": "Actualsocket+connectiongeneration+session+scene+selfObject+map, real raw rodUID including0, rawequipmentlayout, Core/PUI object, rawmap region, rawsource epoch/revision/continuity and pointer custody.",
+    "retirement": "Blur,visibility,terminal,secondpointer,source/map/session/scene/Core changes retire; terminal burns beforecallback; staleup and old cleanup cannot clear successor.",
+    "unknown": "Requiredunknown map cell/candidate/water/target/ABI/currentcommittedownedpose/decision/clock/finalpeek permanently burns oldgesture. Ordinary equivalent snapshot/getter/source recovery cannot heal it; freshdown required.",
+    "knownRetry": "Known valid cooldown/nonstanding/nonwater None may hold ordinary retry; wrongfacing Turn admitted beforepose/fishing/transform exclusions."
+  },
+  "sourceAndPose": {
+    "raw": "Raw snapshot/event capture occurs before legacy projections/defaults. Nullable bool fishing and signedi16 transform remainunknown, neverfake0.",
+    "backend": "PersonalNone unless exactcurrentZone membership selfobject matches actualpersonalSelfPlayer andretainedaccount/character/map/session; remoteObjectPlayer exactsigned transform.",
+    "pose": "Actual sharedownedRust state machine, useLayoutEffect commit; readonlypose with exact independent epoch/incarnation/continuity and<=250ms freshness, source event descriptor custody. UI paint fallback cannot grantstanding orcast.",
+    "limits": "Commit paint cache can lag one frame; actual viewport timing/performance remainsunverified."
+  },
+  "send": {
+    "actualPage": "apps/web/app/page.tsx",
+    "finalProofLine": 6483,
+    "socketSendLine": 6484,
+    "opaqueOneUseProof": true,
+    "wire": "Exactturn direction or fishingCast/castOut; old public rawsystem casts do not constitute this physical route.",
+    "finalChecks": "All reentrant ABI/DOM/source/rod/owner/Core/pose/clock callbacks complete before final pending mail/storage/social/hero/Bag/repair/admission checks; irreversible proof enter immediately adjacent actual socket.send.",
+    "unknownOutcome": "Send throw retainscastclock, no timeout or autoreplay. This is Native action timing, no economicACK orsave claim."
+  },
+  "footprint": {
+    "orderedStorage": "Private sortedVec map/set borrowedstr lookup O(logn), insertion/removalO(n), equalkey preservesstoredkey and exactiterator/Debug semantics;4 realBTree oracles.",
+    "incarnationLimit": "Historical incarnation records are retained without pruning or capped2048 claim; only activefeedbounded2048. O(n) insertion cost may grow with retainedhistory; runtimeperformance not measured.",
+    "manualCodecs": "Reuse originalStrictJsonValue visitor unchanged; exact signedwidth/type/null/duplicate/unknownfield contracts. Test-only legacyserde fullfacts/outputoracles preserve12Fishing/11Tooltip/5Bag old testbytes. Bag positionalinput exact3 afteractualoraclefailure; tooltip defaultedpositionaltrailingOptions preserved."
+  },
+  "finiteFixtureGroups": [
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5781,
+      "declaration": "Fishing optional ABI forwards exact raw geometry clocks and nullable facts without host arithmetic"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5795,
+      "declaration": "Fishing adapters reject coerced raw coordinates clocks directions and malformed outputs"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5820,
+      "declaration": "Fishing optional ABI custody rejects getter replacement and reentrant input mutation before and after calls"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5836,
+      "declaration": "WorldFishingSource preserves raw own facts and rejects foreign or stale owner packets"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5847,
+      "declaration": "WorldFishingSource unknown intervals cannot revive from ordinary snapshots or partial actions"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5863,
+      "declaration": "WorldFishingSource initial unknown bootstrap is once while malformed raw facts stay unknown"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5873,
+      "declaration": "WorldFishingSource complete normal actions preserve bootstrap continuity and raw transform zero"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5885,
+      "declaration": "WorldFishingSource equivalent full snapshots retain exact immutable authority and revision"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5895,
+      "declaration": "WorldFishingSource own Harvest retires authority until a fresh complete canonical action"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5914,
+      "declaration": "Owned animation optional facade lazily owns one bridge and preserves actual method receiver"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5922,
+      "declaration": "Owned animation optional facade rejects changed ABI bridge methods and bounded payloads"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5937,
+      "declaration": "Owned animation optional facade burns construction attempt and rejects ABI and method reentry"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5956,
+      "declaration": "Core actual fishing and animation facade forwards optional presentation capabilities independently"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5974,
+      "declaration": "Animation action peek is read only exact authority revision and fresh shared pose without standing fallback"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5990,
+      "declaration": "Animation action peek rejects getter replacement and does not advance or resolve an animation world"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5995,
+      "declaration": "Animation renderer forwards exact clock and canonical action tokens while missing event facts remain unknown"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 6017,
+      "declaration": "WorldFishingSource captures immutable canonical action evidence without invented receive clocks"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 6028,
+      "declaration": "WorldFishingSource UserLocation updates transform but cannot heal unknown or fabricate standing"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 6046,
+      "declaration": "Animation own transient authority rejects missing receive time old timestamps and metadata mismatch"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 6061,
+      "declaration": "Animation own descriptor cache preserves canonical token after selector standing and rejects reused old event"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 6072,
+      "declaration": "Animation action peek binds exact captured layout clock and independent bridge authority counters"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 6078,
+      "declaration": "Animation action peek rejects reentrant commit context owner source and getter mutation"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 6160,
+      "declaration": "Fishing Page actual raw UID-zero rod and normalized map sends one exact cast through consumed socket proof"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 6175,
+      "declaration": "Fishing Page actual all-three blockers typed water and readonly standing gates never invent cast facts"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 6188,
+      "declaration": "Fishing Page actual final getter and synchronous listener reentry reject changed source owner gates and bridge counters"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 6211,
+      "declaration": "Fishing Page equivalent full snapshot preserves current gesture while Harvest and old commit cleanup retire only their owner"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 6277,
+      "declaration": "Fishing Shell actual short primary pointer terminal burns custody before real Page sink and one cast"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 6288,
+      "declaration": "Fishing Shell actual geometry terminal quarantine and lifecycle retirement keep old pointer proof spent"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 6318,
+      "declaration": "Fishing Shell actual shared animation advances only in committed layout with captured clock and successor cleanup"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 6326,
+      "declaration": "Fishing Page final physical callback sees new equipment NPC and composer pending before irreversible entry"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 6336,
+      "declaration": "Fishing Page final actual ingress getter reentry cannot replace owner source or create pending after a captured gate"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 6362,
+      "declaration": "Fishing Page actual equipment both NPC and composer reserve prefixes retire gesture before reentrant Core call"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 6374,
+      "declaration": "Fishing Page required facing pose unknown permanently spends gesture despite exact getter and commit recovery"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 6387,
+      "declaration": "Fishing Page optional targets and decision ABI loss permanently spends gesture after exact facade recovery"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 6398,
+      "declaration": "Fishing Page final cast peek loss permanently spends held gesture before socket entry and survives getter restoration"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 6408,
+      "declaration": "Fishing Page known nonstanding and valid cooldown none preserve held retry without new physical gesture"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 6419,
+      "declaration": "Fishing Page wrong facing uses actual turn branch and socket proof with known water and unavailable owned pose"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 6428,
+      "declaration": "Fishing Shell unknown physical geometry cannot revive old pointer after repaint but fresh down owns a new cast"
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 6436,
+      "declaration": "Fishing Page unknown water spends either facing gesture while known nonwater retains valid none"
+    }
+  ],
+  "matrixQualification": "Onlyone currentrow changes; other316 wholeJSON/native/originalAudit/rawCounts remainexact; all317playersnot-run. Association counts are source mappings, not executions/fullparitydenominator.",
+  "nextWork": "Source24 Pearl source/wallet/quote and explicit pending limitations, then Source25RankingInspect, widerqueue; no routineconfirmation.",
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-node05-source-review06.json",
+    "bytes": 9643,
+    "sha256": "c7c3f08fc7f94b82b23738c44862bc99d706d09e2eae2a60820d43af12831fec"
+  },
+  "limitations": [
+    "No browser/native/headless/server launch,HTTP/socket probes,WASMAPI/instance,realplayer/login/combat/save/relogin ormobiledeviceacceptance",
+    "No overallpercentage orCandidate100/goalcompletion",
+    "Renderer immutable release remainsignoredgeneratedassets, noforcedGitpublication"
+  ],
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmApiUsed": false,
+  "candidateAccepted": false,
+  "playerAccepted": false,
+  "goalComplete": false
+}

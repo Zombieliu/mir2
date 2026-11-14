@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Tests-only fixture repair; raw preimages archived before source mutation; no production changes or Cargo execution.",
+  "files": [
+    {
+      "path": "apps/gateway/src/routing/tests/live_aoi_order_tests.rs",
+      "source": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\routing\\tests\\live_aoi_order_tests.rs",
+      "preimage": "C:\\mir2-build\\p01-completion-20261024\\probe14-adjacent-fixture-repair-v1\\live_aoi_order_tests.rs.before.txt",
+      "bytes": 26272,
+      "sha256": "95da0e53b5c0ec844c85a383b327e07130a41d2aa09846272720dfe63874f7d3"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/pending_zone_aoi_tests.rs",
+      "source": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\routing\\tests\\pending_zone_aoi_tests.rs",
+      "preimage": "C:\\mir2-build\\p01-completion-20261024\\probe14-adjacent-fixture-repair-v1\\pending_zone_aoi_tests.rs.before.txt",
+      "bytes": 12970,
+      "sha256": "83d1bd558fad894ebeb7862de11eaf81b71f442d7bb57b11ebc2acefb3fa1267"
+    }
+  ]
+}

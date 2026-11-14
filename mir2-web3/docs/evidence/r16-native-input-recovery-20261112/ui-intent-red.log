@@ -1,0 +1,121 @@
+TAP version 13
+# Subtest: Page keeps default shared UI intent across a pre-boot failure on the same backend
+not ok 1 - Page keeps default shared UI intent across a pre-boot failure on the same backend
+  ---
+  duration_ms: 6.5416
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-runtime-policy.mjs:214:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    a later successful WebGPU retry must still request its original HUD
+    + actual - expected
+    
+      {
+    +   bag: false,
+    +   quest: false
+    -   bag: true,
+    -   quest: true
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    quest: true
+    bag: true
+  actual:
+    quest: false
+    bag: false
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-runtime-policy.mjs:222:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.start (node:internal/test_runner/test:944:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+  ...
+# Subtest: Page failure preserves explicit disabled and mixed shared UI choices
+not ok 2 - Page failure preserves explicit disabled and mixed shared UI choices
+  ---
+  duration_ms: 8.7729
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-runtime-policy.mjs:225:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    ?bevyQuestUi=1&bevyBagUi=0
+    + actual - expected
+    
+      {
+        bag: false,
+    +   quest: false
+    -   quest: true
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    quest: true
+    bag: false
+  actual:
+    quest: false
+    bag: false
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-runtime-policy.mjs:234:12)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: preserving Page UI intent does not turn a failed App boot into an automatic retry
+not ok 3 - preserving Page UI intent does not turn a failed App boot into an automatic retry
+  ---
+  duration_ms: 2.4702
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-runtime-policy.mjs:238:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      {
+    +   bag: false,
+    +   quest: false
+    -   bag: true,
+    -   quest: true
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    quest: true
+    bag: true
+  actual:
+    quest: false
+    bag: false
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-runtime-policy.mjs:245:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: a disposed Page attempt cannot withdraw the newer runtime or its UI choices
+ok 4 - a disposed Page attempt cannot withdraw the newer runtime or its UI choices
+  ---
+  duration_ms: 2.6643
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 1
+# fail 3
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 535.6878

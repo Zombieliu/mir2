@@ -1,0 +1,28 @@
+{
+  "schema": "mir2.production-check.v1",
+  "kind": "save-regression",
+  "startedUtc": "2026-10-08T09:27:15.7722692Z",
+  "finishedUtc": "2026-10-08T09:27:28.9024136Z",
+  "exitCode": 0,
+  "argv": [
+    "+1.95.0",
+    "test",
+    "-p",
+    "mir2-simulation",
+    "--lib",
+    "runtime::save::",
+    "--locked",
+    "--offline",
+    "--jobs",
+    "1",
+    "--",
+    "--test-threads=1"
+  ],
+  "sourceSnapshotSha256": "d84b816e1d04933f69676a2b751cef8a62dee62928ee171ca1011fd943b2a41b",
+  "declaredInputs": 452,
+  "sourceDrift": [],
+  "cargoLogSha256": "a75beb2a24b7ee98f271da053bc6829b5762dc22d063a300eea32121d027eb42",
+  "gameStarted": false,
+  "gatewayRestarted": false,
+  "controlledInventoryCommitTests": false
+}

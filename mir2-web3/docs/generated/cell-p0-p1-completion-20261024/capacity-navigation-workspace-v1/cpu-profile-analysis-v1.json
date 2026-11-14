@@ -1,0 +1,1454 @@
+{
+  "schemaVersion": 1,
+  "kind": "one-pass-v8-cpu-profile-weighted-analysis",
+  "analyzedAt": "2026-10-26T11:16:28.557Z",
+  "source": {
+    "file": "C:/mir2-build/p01-completion-20261024/native-steady-single-stage-v6-cpu-profile-v1/steady50-v6.cpuprofile",
+    "bytes": 863327,
+    "sha256": "ca3a7acbf9864535ce468ac6fefddb1f6ad35c771a81811f493ba5c9ab4eb747"
+  },
+  "sourceReadCount": 1,
+  "profile": {
+    "startTimeUs": 188577369380,
+    "endTimeUs": 188959304149,
+    "durationMs": 381934.769,
+    "nodeCount": 1204,
+    "sampleCount": 70123,
+    "weightedSampleMs": 381934.675,
+    "durationMinusWeightedSamplesMs": 0.094,
+    "uniqueFunctionCount": 574,
+    "sampleDeltaUs": {
+      "min": 7,
+      "median": 5503,
+      "p95": 5603,
+      "p99": 5824,
+      "max": 11169,
+      "modes": [
+        {
+          "microseconds": 5504,
+          "count": 1311
+        },
+        {
+          "microseconds": 5503,
+          "count": 1296
+        },
+        {
+          "microseconds": 5505,
+          "count": 1280
+        },
+        {
+          "microseconds": 5507,
+          "count": 1274
+        },
+        {
+          "microseconds": 5506,
+          "count": 1261
+        },
+        {
+          "microseconds": 5502,
+          "count": 1233
+        },
+        {
+          "microseconds": 5508,
+          "count": 1157
+        },
+        {
+          "microseconds": 5501,
+          "count": 1109
+        },
+        {
+          "microseconds": 5509,
+          "count": 1109
+        },
+        {
+          "microseconds": 5500,
+          "count": 1048
+        }
+      ]
+    }
+  },
+  "method": {
+    "self": "Assign timeDeltas[i] to the leaf frame of samples[i]. Each delta is the sampling interval preceding the sample; it is not exact function execution duration.",
+    "inclusive": "Follow each leaf ancestry; count a function identity (function name, URL, line, column), file, or file group at most once per sample, preventing recursive/different-depth duplicate charging.",
+    "units": "V8 microsecond timeDeltas, converted to weighted milliseconds. Requested nominal 5ms sampling must be distinguished from actual deltas below.",
+    "sampledNonIdle": "All weighted samples except (idle), including GC and (program); not measured process CPU time or core utilization.",
+    "phase": "Whole profile only; no unverified alignment between V8 monotonic profile timestamps and report wall-clock phases.",
+    "nonIdlePercentages": "For each row exclude all (idle) leaf sample weight from its numerator as well as from the shared denominator. Root/pseudo-inclusive therefore equal 100%, while idle itself equals zero."
+  },
+  "categories": {
+    "idle": {
+      "weightedMs": 314054.487,
+      "percentAllWeighted": 82.227278
+    },
+    "nonIdle": {
+      "weightedMs": 67880.188,
+      "percentAllWeighted": 17.772722
+    },
+    "garbageCollector": {
+      "weightedMs": 1816.386,
+      "percentAllWeighted": 0.475575,
+      "percentNonIdleWeighted": 2.675871
+    },
+    "program": {
+      "weightedMs": 3337.52,
+      "percentAllWeighted": 0.873846
+    },
+    "rootLeaf": {
+      "weightedMs": 0
+    }
+  },
+  "topSelfFunctions": [
+    {
+      "functionName": "(idle)",
+      "file": "",
+      "line": null,
+      "column": null,
+      "samples": 57516,
+      "weightedMs": 314054.487,
+      "percentAllWeighted": 82.227278,
+      "percentNonIdleWeighted": 0,
+      "nonIdleWeightedMs": 0
+    },
+    {
+      "functionName": "spawnSync",
+      "file": "node:internal/child_process",
+      "line": 1105,
+      "column": 19,
+      "samples": 2841,
+      "weightedMs": 15674.16,
+      "percentAllWeighted": 4.103885,
+      "percentNonIdleWeighted": 23.09092,
+      "nonIdleWeightedMs": 15674.16
+    },
+    {
+      "functionName": "findProtocolWalkPath",
+      "file": "file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "line": 186,
+      "column": 37,
+      "samples": 2563,
+      "weightedMs": 14042.073,
+      "percentAllWeighted": 3.676564,
+      "percentNonIdleWeighted": 20.686556,
+      "nonIdleWeightedMs": 14042.073
+    },
+    {
+      "functionName": "wait",
+      "file": "file:///C:/mir2-build/p01-completion-20261024/native-steady-single-stage-diagnostic-v6/diagnostic-capacity.mjs",
+      "line": 374,
+      "column": 13,
+      "samples": 893,
+      "weightedMs": 4897.281,
+      "percentAllWeighted": 1.28223,
+      "percentNonIdleWeighted": 7.214596,
+      "nonIdleWeightedMs": 4897.281
+    },
+    {
+      "functionName": "verifyObservers",
+      "file": "file:///C:/mir2-build/p01-completion-20261024/native-steady-single-stage-diagnostic-v6/diagnostic-capacity.mjs",
+      "line": 1457,
+      "column": 31,
+      "samples": 672,
+      "weightedMs": 3648.195,
+      "percentAllWeighted": 0.955188,
+      "percentNonIdleWeighted": 5.374462,
+      "nonIdleWeightedMs": 3648.195
+    },
+    {
+      "functionName": "(program)",
+      "file": "",
+      "line": null,
+      "column": null,
+      "samples": 604,
+      "weightedMs": 3337.52,
+      "percentAllWeighted": 0.873846,
+      "percentNonIdleWeighted": 4.916781,
+      "nonIdleWeightedMs": 3337.52
+    },
+    {
+      "functionName": "walkableAt",
+      "file": "file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "line": 388,
+      "column": 20,
+      "samples": 550,
+      "weightedMs": 3027.225,
+      "percentAllWeighted": 0.792603,
+      "percentNonIdleWeighted": 4.459659,
+      "nonIdleWeightedMs": 3027.225
+    },
+    {
+      "functionName": "(garbage collector)",
+      "file": "",
+      "line": null,
+      "column": null,
+      "samples": 331,
+      "weightedMs": 1816.386,
+      "percentAllWeighted": 0.475575,
+      "percentNonIdleWeighted": 2.675871,
+      "nonIdleWeightedMs": 1816.386
+    },
+    {
+      "functionName": "runMicrotasks",
+      "file": "",
+      "line": null,
+      "column": null,
+      "samples": 324,
+      "weightedMs": 1787.14,
+      "percentAllWeighted": 0.467918,
+      "percentNonIdleWeighted": 2.632786,
+      "nonIdleWeightedMs": 1787.14
+    },
+    {
+      "functionName": "match",
+      "file": "file:///C:/mir2-build/p01-completion-20261024/native-steady-single-stage-diagnostic-v6/diagnostic-capacity.mjs",
+      "line": 1461,
+      "column": 21,
+      "samples": 295,
+      "weightedMs": 1584.8,
+      "percentAllWeighted": 0.41494,
+      "percentNonIdleWeighted": 2.334702,
+      "nonIdleWeightedMs": 1584.8
+    },
+    {
+      "functionName": "(anonymous)",
+      "file": "file:///C:/mir2-build/p01-completion-20261024/native-steady-single-stage-diagnostic-v6/diagnostic-capacity.mjs",
+      "line": 1660,
+      "column": 32,
+      "samples": 225,
+      "weightedMs": 1228.399,
+      "percentAllWeighted": 0.321625,
+      "percentNonIdleWeighted": 1.809658,
+      "nonIdleWeightedMs": 1228.399
+    },
+    {
+      "functionName": "sanitize",
+      "file": "file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "line": 14,
+      "column": 25,
+      "samples": 222,
+      "weightedMs": 1196.553,
+      "percentAllWeighted": 0.313287,
+      "percentNonIdleWeighted": 1.762743,
+      "nonIdleWeightedMs": 1196.553
+    },
+    {
+      "functionName": "acknowledgement",
+      "file": "file:///C:/mir2-build/p01-completion-20261024/native-steady-single-stage-diagnostic-v6/diagnostic-capacity.mjs",
+      "line": 1406,
+      "column": 29,
+      "samples": 149,
+      "weightedMs": 804.188,
+      "percentAllWeighted": 0.210556,
+      "percentNonIdleWeighted": 1.184717,
+      "nonIdleWeightedMs": 804.188
+    },
+    {
+      "functionName": "movement",
+      "file": "file:///C:/mir2-build/p01-completion-20261024/native-steady-single-stage-diagnostic-v6/diagnostic-capacity.mjs",
+      "line": 716,
+      "column": 18,
+      "samples": 144,
+      "weightedMs": 775.471,
+      "percentAllWeighted": 0.203038,
+      "percentNonIdleWeighted": 1.142411,
+      "nonIdleWeightedMs": 775.471
+    },
+    {
+      "functionName": "(anonymous)",
+      "file": "file:///C:/mir2-build/p01-completion-20261024/native-steady-single-stage-diagnostic-v6/diagnostic-capacity.mjs",
+      "line": 1462,
+      "column": 61,
+      "samples": 132,
+      "weightedMs": 689.768,
+      "percentAllWeighted": 0.180598,
+      "percentNonIdleWeighted": 1.016155,
+      "nonIdleWeightedMs": 689.768
+    },
+    {
+      "functionName": "listOnTimeout",
+      "file": "node:internal/timers",
+      "line": 528,
+      "column": 25,
+      "samples": 124,
+      "weightedMs": 677.546,
+      "percentAllWeighted": 0.177398,
+      "percentNonIdleWeighted": 0.99815,
+      "nonIdleWeightedMs": 677.546
+    },
+    {
+      "functionName": "structuredClone",
+      "file": "node:internal/worker/js_transferable",
+      "line": 112,
+      "column": 25,
+      "samples": 125,
+      "weightedMs": 671.66,
+      "percentAllWeighted": 0.175857,
+      "percentNonIdleWeighted": 0.989479,
+      "nonIdleWeightedMs": 671.66
+    },
+    {
+      "functionName": "decodePlaytestFrame",
+      "file": "file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-catalog-transport.mjs",
+      "line": 66,
+      "column": 36,
+      "samples": 83,
+      "weightedMs": 446.829,
+      "percentAllWeighted": 0.116991,
+      "percentNonIdleWeighted": 0.658261,
+      "nonIdleWeightedMs": 446.829
+    },
+    {
+      "functionName": "pop",
+      "file": "file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "line": 441,
+      "column": 6,
+      "samples": 77,
+      "weightedMs": 426.291,
+      "percentAllWeighted": 0.111614,
+      "percentNonIdleWeighted": 0.628005,
+      "nonIdleWeightedMs": 426.291
+    },
+    {
+      "functionName": "observe",
+      "file": "file:///C:/mir2-build/p01-completion-20261024/native-steady-single-stage-diagnostic-v6/diagnostic-capacity.mjs",
+      "line": 252,
+      "column": 10,
+      "samples": 78,
+      "weightedMs": 374.806,
+      "percentAllWeighted": 0.098134,
+      "percentNonIdleWeighted": 0.552158,
+      "nonIdleWeightedMs": 374.806
+    },
+    {
+      "functionName": "fresh",
+      "file": "file:///C:/mir2-build/p01-completion-20261024/native-steady-single-stage-diagnostic-v6/diagnostic-capacity.mjs",
+      "line": 27,
+      "column": 15,
+      "samples": 71,
+      "weightedMs": 372.965,
+      "percentAllWeighted": 0.097652,
+      "percentNonIdleWeighted": 0.549446,
+      "nonIdleWeightedMs": 372.965
+    },
+    {
+      "functionName": "navigationObstacles",
+      "file": "file:///C:/mir2-build/p01-completion-20261024/native-steady-single-stage-diagnostic-v6/diagnostic-capacity.mjs",
+      "line": 678,
+      "column": 36,
+      "samples": 67,
+      "weightedMs": 340.377,
+      "percentAllWeighted": 0.089119,
+      "percentNonIdleWeighted": 0.501438,
+      "nonIdleWeightedMs": 340.377
+    },
+    {
+      "functionName": "processTimers",
+      "file": "node:internal/timers",
+      "line": 508,
+      "column": 25,
+      "samples": 59,
+      "weightedMs": 331.8,
+      "percentAllWeighted": 0.086873,
+      "percentNonIdleWeighted": 0.488802,
+      "nonIdleWeightedMs": 331.8
+    },
+    {
+      "functionName": "emit",
+      "file": "file:///C:/mir2-build/p01-completion-20261024/release-native-v2-scout-target-waypoint-routing-ladder-17/slow-stage-public.mjs",
+      "line": 57,
+      "column": 16,
+      "samples": 59,
+      "weightedMs": 322.686,
+      "percentAllWeighted": 0.084487,
+      "percentNonIdleWeighted": 0.475376,
+      "nonIdleWeightedMs": 322.686
+    },
+    {
+      "functionName": "action",
+      "file": "file:///C:/mir2-build/p01-completion-20261024/native-steady-single-stage-diagnostic-v6/diagnostic-capacity.mjs",
+      "line": 1334,
+      "column": 29,
+      "samples": 61,
+      "weightedMs": 318.862,
+      "percentAllWeighted": 0.083486,
+      "percentNonIdleWeighted": 0.469742,
+      "nonIdleWeightedMs": 318.862
+    },
+    {
+      "functionName": "update",
+      "file": "node:internal/crypto/hash",
+      "line": 132,
+      "column": 40,
+      "samples": 52,
+      "weightedMs": 284.495,
+      "percentAllWeighted": 0.074488,
+      "percentNonIdleWeighted": 0.419113,
+      "nonIdleWeightedMs": 284.495
+    },
+    {
+      "functionName": "writeBuffer",
+      "file": "",
+      "line": null,
+      "column": null,
+      "samples": 51,
+      "weightedMs": 278.716,
+      "percentAllWeighted": 0.072975,
+      "percentNonIdleWeighted": 0.4106,
+      "nonIdleWeightedMs": 278.716
+    },
+    {
+      "functionName": "writev",
+      "file": "",
+      "line": null,
+      "column": null,
+      "samples": 45,
+      "weightedMs": 246.185,
+      "percentAllWeighted": 0.064457,
+      "percentNonIdleWeighted": 0.362676,
+      "nonIdleWeightedMs": 246.185
+    },
+    {
+      "functionName": "(anonymous)",
+      "file": "file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "line": 16,
+      "column": 95,
+      "samples": 37,
+      "weightedMs": 192.047,
+      "percentAllWeighted": 0.050283,
+      "percentNonIdleWeighted": 0.282921,
+      "nonIdleWeightedMs": 192.047
+    },
+    {
+      "functionName": "inspectMonitor",
+      "file": "file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-load-smoke.mjs",
+      "line": 46,
+      "column": 31,
+      "samples": 33,
+      "weightedMs": 183.006,
+      "percentAllWeighted": 0.047916,
+      "percentNonIdleWeighted": 0.269601,
+      "nonIdleWeightedMs": 183.006
+    },
+    {
+      "functionName": "structuredClone",
+      "file": "",
+      "line": null,
+      "column": null,
+      "samples": 33,
+      "weightedMs": 178.009,
+      "percentAllWeighted": 0.046607,
+      "percentNonIdleWeighted": 0.26224,
+      "nonIdleWeightedMs": 178.009
+    },
+    {
+      "functionName": "upsertEntity",
+      "file": "file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/protocol-observation.mjs",
+      "line": 38,
+      "column": 22,
+      "samples": 30,
+      "weightedMs": 164.483,
+      "percentAllWeighted": 0.043066,
+      "percentNonIdleWeighted": 0.242314,
+      "nonIdleWeightedMs": 164.483
+    },
+    {
+      "functionName": "record",
+      "file": "file:///C:/mir2-build/p01-completion-20261024/native-steady-single-stage-diagnostic-v6/diagnostic-capacity.mjs",
+      "line": 238,
+      "column": 9,
+      "samples": 34,
+      "weightedMs": 158.455,
+      "percentAllWeighted": 0.041487,
+      "percentNonIdleWeighted": 0.233433,
+      "nonIdleWeightedMs": 158.455
+    },
+    {
+      "functionName": "add",
+      "file": "file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "line": 476,
+      "column": 6,
+      "samples": 27,
+      "weightedMs": 150.342,
+      "percentAllWeighted": 0.039363,
+      "percentNonIdleWeighted": 0.221481,
+      "nonIdleWeightedMs": 150.342
+    },
+    {
+      "functionName": "recordPlayerLifecycle",
+      "file": "file:///C:/mir2-build/p01-completion-20261024/native-steady-single-stage-diagnostic-v6/diagnostic-capacity.mjs",
+      "line": 293,
+      "column": 24,
+      "samples": 33,
+      "weightedMs": 150.338,
+      "percentAllWeighted": 0.039362,
+      "percentNonIdleWeighted": 0.221476,
+      "nonIdleWeightedMs": 150.338
+    }
+  ],
+  "topInclusiveFunctions": [
+    {
+      "functionName": "(root)",
+      "file": "",
+      "line": null,
+      "column": null,
+      "samples": 70123,
+      "weightedMs": 381934.675,
+      "percentAllWeighted": 100,
+      "percentNonIdleWeighted": 100,
+      "nonIdleWeightedMs": 67880.188
+    },
+    {
+      "functionName": "(idle)",
+      "file": "",
+      "line": null,
+      "column": null,
+      "samples": 57516,
+      "weightedMs": 314054.487,
+      "percentAllWeighted": 82.227278,
+      "percentNonIdleWeighted": 0,
+      "nonIdleWeightedMs": 0
+    },
+    {
+      "functionName": "processTimers",
+      "file": "node:internal/timers",
+      "line": 508,
+      "column": 25,
+      "samples": 6932,
+      "weightedMs": 37252.526,
+      "percentAllWeighted": 9.753638,
+      "percentNonIdleWeighted": 54.879821,
+      "nonIdleWeightedMs": 37252.526
+    },
+    {
+      "functionName": "listOnTimeout",
+      "file": "node:internal/timers",
+      "line": 528,
+      "column": 25,
+      "samples": 6837,
+      "weightedMs": 36724.857,
+      "percentAllWeighted": 9.615481,
+      "percentNonIdleWeighted": 54.102468,
+      "nonIdleWeightedMs": 36724.857
+    },
+    {
+      "functionName": "(anonymous)",
+      "file": "file:///C:/mir2-build/p01-completion-20261024/native-steady-single-stage-diagnostic-v6/diagnostic-capacity.mjs",
+      "line": 1660,
+      "column": 32,
+      "samples": 4221,
+      "weightedMs": 22678.085,
+      "percentAllWeighted": 5.937687,
+      "percentNonIdleWeighted": 33.40899,
+      "nonIdleWeightedMs": 22678.085
+    },
+    {
+      "functionName": "offerNativeAction",
+      "file": "file:///C:/mir2-build/p01-completion-20261024/native-steady-single-stage-diagnostic-v6/diagnostic-capacity.mjs",
+      "line": 1635,
+      "column": 34,
+      "samples": 3929,
+      "weightedMs": 21132.288,
+      "percentAllWeighted": 5.532959,
+      "percentNonIdleWeighted": 31.131746,
+      "nonIdleWeightedMs": 21132.288
+    },
+    {
+      "functionName": "selectNativeAction",
+      "file": "file:///C:/mir2-build/p01-completion-20261024/native-steady-single-stage-diagnostic-v6/diagnostic-capacity.mjs",
+      "line": 1327,
+      "column": 35,
+      "samples": 3573,
+      "weightedMs": 19353.157,
+      "percentAllWeighted": 5.067138,
+      "percentNonIdleWeighted": 28.510759,
+      "nonIdleWeightedMs": 19353.157
+    },
+    {
+      "functionName": "movement",
+      "file": "file:///C:/mir2-build/p01-completion-20261024/native-steady-single-stage-diagnostic-v6/diagnostic-capacity.mjs",
+      "line": 716,
+      "column": 18,
+      "samples": 3453,
+      "weightedMs": 18852.938,
+      "percentAllWeighted": 4.936168,
+      "percentNonIdleWeighted": 27.773845,
+      "nonIdleWeightedMs": 18852.938
+    },
+    {
+      "functionName": "findProtocolWalkPath",
+      "file": "file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "line": 186,
+      "column": 37,
+      "samples": 3239,
+      "weightedMs": 17743.097,
+      "percentAllWeighted": 4.645584,
+      "percentNonIdleWeighted": 26.138845,
+      "nonIdleWeightedMs": 17743.097
+    },
+    {
+      "functionName": "patrol",
+      "file": "file:///C:/mir2-build/p01-completion-20261024/native-steady-single-stage-diagnostic-v6/diagnostic-capacity.mjs",
+      "line": 742,
+      "column": 23,
+      "samples": 3217,
+      "weightedMs": 17573.303,
+      "percentAllWeighted": 4.601128,
+      "percentNonIdleWeighted": 25.888707,
+      "nonIdleWeightedMs": 17573.303
+    },
+    {
+      "functionName": "execFileSync",
+      "file": "node:child_process",
+      "line": 940,
+      "column": 22,
+      "samples": 2850,
+      "weightedMs": 15719.558,
+      "percentAllWeighted": 4.115771,
+      "percentNonIdleWeighted": 23.1578,
+      "nonIdleWeightedMs": 15719.558
+    },
+    {
+      "functionName": "spawnSync",
+      "file": "node:child_process",
+      "line": 856,
+      "column": 19,
+      "samples": 2847,
+      "weightedMs": 15703.618,
+      "percentAllWeighted": 4.111598,
+      "percentNonIdleWeighted": 23.134317,
+      "nonIdleWeightedMs": 15703.618
+    },
+    {
+      "functionName": "spawnSync",
+      "file": "node:internal/child_process",
+      "line": 1105,
+      "column": 19,
+      "samples": 2842,
+      "weightedMs": 15676.599,
+      "percentAllWeighted": 4.104524,
+      "percentNonIdleWeighted": 23.094513,
+      "nonIdleWeightedMs": 15676.599
+    },
+    {
+      "functionName": "runMicrotasks",
+      "file": "",
+      "line": null,
+      "column": null,
+      "samples": 2760,
+      "weightedMs": 14845.451,
+      "percentAllWeighted": 3.886908,
+      "percentNonIdleWeighted": 21.870079,
+      "nonIdleWeightedMs": 14845.451
+    },
+    {
+      "functionName": "runNextTicks",
+      "file": "node:internal/process/task_queues",
+      "line": 63,
+      "column": 22,
+      "samples": 2404,
+      "weightedMs": 12899.386,
+      "percentAllWeighted": 3.37738,
+      "percentNonIdleWeighted": 19.003168,
+      "nonIdleWeightedMs": 12899.386
+    },
+    {
+      "functionName": "captureSource",
+      "file": "file:///C:/mir2-build/p01-completion-20261024/shared-experience-parse-cache-release-v1/release-tools-v2.mjs",
+      "line": 113,
+      "column": 29,
+      "samples": 2080,
+      "weightedMs": 11504.099,
+      "percentAllWeighted": 3.012059,
+      "percentNonIdleWeighted": 16.947653,
+      "nonIdleWeightedMs": 11504.099
+    },
+    {
+      "functionName": "git",
+      "file": "file:///C:/mir2-build/p01-completion-20261024/shared-experience-parse-cache-release-v1/release-tools-v2.mjs",
+      "line": 26,
+      "column": 11,
+      "samples": 2074,
+      "weightedMs": 11471.323,
+      "percentAllWeighted": 3.003478,
+      "percentNonIdleWeighted": 16.899368,
+      "nonIdleWeightedMs": 11471.323
+    },
+    {
+      "functionName": "onStreamRead",
+      "file": "node:internal/stream_base_commons",
+      "line": 166,
+      "column": 22,
+      "samples": 1377,
+      "weightedMs": 7048.295,
+      "percentAllWeighted": 1.845419,
+      "percentNonIdleWeighted": 10.383435,
+      "nonIdleWeightedMs": 7048.295
+    },
+    {
+      "functionName": "Readable.push",
+      "file": "node:internal/streams/readable",
+      "line": 387,
+      "column": 35,
+      "samples": 1355,
+      "weightedMs": 6937.064,
+      "percentAllWeighted": 1.816296,
+      "percentNonIdleWeighted": 10.219571,
+      "nonIdleWeightedMs": 6937.064
+    },
+    {
+      "functionName": "readableAddChunkPushByteMode",
+      "file": "node:internal/streams/readable",
+      "line": 463,
+      "column": 38,
+      "samples": 1351,
+      "weightedMs": 6926.294,
+      "percentAllWeighted": 1.813476,
+      "percentNonIdleWeighted": 10.203705,
+      "nonIdleWeightedMs": 6926.294
+    },
+    {
+      "functionName": "addChunk",
+      "file": "node:internal/streams/readable",
+      "line": 550,
+      "column": 18,
+      "samples": 1347,
+      "weightedMs": 6909.002,
+      "percentAllWeighted": 1.808949,
+      "percentNonIdleWeighted": 10.178231,
+      "nonIdleWeightedMs": 6909.002
+    },
+    {
+      "functionName": "emit",
+      "file": "node:events",
+      "line": 465,
+      "column": 44,
+      "samples": 1317,
+      "weightedMs": 6725.9,
+      "percentAllWeighted": 1.761008,
+      "percentNonIdleWeighted": 9.908488,
+      "nonIdleWeightedMs": 6725.9
+    },
+    {
+      "functionName": "verifyObservers",
+      "file": "file:///C:/mir2-build/p01-completion-20261024/native-steady-single-stage-diagnostic-v6/diagnostic-capacity.mjs",
+      "line": 1457,
+      "column": 31,
+      "samples": 1211,
+      "weightedMs": 6450.715,
+      "percentAllWeighted": 1.688958,
+      "percentNonIdleWeighted": 9.503089,
+      "nonIdleWeightedMs": 6450.715
+    },
+    {
+      "functionName": "wait",
+      "file": "file:///C:/mir2-build/p01-completion-20261024/native-steady-single-stage-diagnostic-v6/diagnostic-capacity.mjs",
+      "line": 374,
+      "column": 13,
+      "samples": 1140,
+      "weightedMs": 6178.915,
+      "percentAllWeighted": 1.617794,
+      "percentNonIdleWeighted": 9.102678,
+      "nonIdleWeightedMs": 6178.915
+    },
+    {
+      "functionName": "Writable.write",
+      "file": "node:internal/streams/writable",
+      "line": 504,
+      "column": 36,
+      "samples": 1143,
+      "weightedMs": 5778.674,
+      "percentAllWeighted": 1.513001,
+      "percentNonIdleWeighted": 8.513049,
+      "nonIdleWeightedMs": 5778.674
+    },
+    {
+      "functionName": "_write",
+      "file": "node:internal/streams/writable",
+      "line": 453,
+      "column": 16,
+      "samples": 1137,
+      "weightedMs": 5745.657,
+      "percentAllWeighted": 1.504356,
+      "percentNonIdleWeighted": 8.464409,
+      "nonIdleWeightedMs": 5745.657
+    },
+    {
+      "functionName": "writeOrBuffer",
+      "file": "node:internal/streams/writable",
+      "line": 548,
+      "column": 23,
+      "samples": 1118,
+      "weightedMs": 5642.379,
+      "percentAllWeighted": 1.477315,
+      "percentNonIdleWeighted": 8.312262,
+      "nonIdleWeightedMs": 5642.379
+    },
+    {
+      "functionName": "socketOnData",
+      "file": "file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/node_modules/next/dist/compiled/ws/index.js",
+      "line": 1,
+      "column": 44481,
+      "samples": 1043,
+      "weightedMs": 5245.599,
+      "percentAllWeighted": 1.373428,
+      "percentNonIdleWeighted": 7.727732,
+      "nonIdleWeightedMs": 5245.599
+    },
+    {
+      "functionName": "_write",
+      "file": "file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/node_modules/next/dist/compiled/ws/index.js",
+      "line": 1,
+      "column": 13562,
+      "samples": 1032,
+      "weightedMs": 5191.218,
+      "percentAllWeighted": 1.35919,
+      "percentNonIdleWeighted": 7.647619,
+      "nonIdleWeightedMs": 5191.218
+    },
+    {
+      "functionName": "startLoop",
+      "file": "file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/node_modules/next/dist/compiled/ws/index.js",
+      "line": 1,
+      "column": 14131,
+      "samples": 1031,
+      "weightedMs": 5185.287,
+      "percentAllWeighted": 1.357637,
+      "percentNonIdleWeighted": 7.638881,
+      "nonIdleWeightedMs": 5185.287
+    },
+    {
+      "functionName": "getData",
+      "file": "file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/node_modules/next/dist/compiled/ws/index.js",
+      "line": 1,
+      "column": 17294,
+      "samples": 1018,
+      "weightedMs": 5126.618,
+      "percentAllWeighted": 1.342276,
+      "percentNonIdleWeighted": 7.552451,
+      "nonIdleWeightedMs": 5126.618
+    },
+    {
+      "functionName": "dataMessage",
+      "file": "file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/node_modules/next/dist/compiled/ws/index.js",
+      "line": 1,
+      "column": 18101,
+      "samples": 1006,
+      "weightedMs": 5071.976,
+      "percentAllWeighted": 1.32797,
+      "percentNonIdleWeighted": 7.471953,
+      "nonIdleWeightedMs": 5071.976
+    },
+    {
+      "functionName": "receiverOnMessage",
+      "file": "file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/node_modules/next/dist/compiled/ws/index.js",
+      "line": 1,
+      "column": 43659,
+      "samples": 989,
+      "weightedMs": 4978.114,
+      "percentAllWeighted": 1.303394,
+      "percentNonIdleWeighted": 7.333677,
+      "nonIdleWeightedMs": 4978.114
+    },
+    {
+      "functionName": "onMessage",
+      "file": "file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/node_modules/next/dist/compiled/ws/index.js",
+      "line": 1,
+      "column": 3280,
+      "samples": 983,
+      "weightedMs": 4950.876,
+      "percentAllWeighted": 1.296263,
+      "percentNonIdleWeighted": 7.293551,
+      "nonIdleWeightedMs": 4950.876
+    },
+    {
+      "functionName": "wrappers.<computed>",
+      "file": "file:///C:/mir2-build/p01-completion-20261024/compact-navigation-wire-diagnostics-v2/wrapper.mjs",
+      "line": 104,
+      "column": 28,
+      "samples": 965,
+      "weightedMs": 4864.538,
+      "percentAllWeighted": 1.273657,
+      "percentNonIdleWeighted": 7.166359,
+      "nonIdleWeightedMs": 4864.538
+    }
+  ],
+  "fileSelf": [
+    {
+      "file": "[V8 pseudo/unattributed]",
+      "samples": 59009,
+      "weightedMs": 322278.187,
+      "percentAllWeighted": 84.380447,
+      "percentNonIdleWeighted": 12.115022,
+      "nonIdleWeightedMs": 8223.7
+    },
+    {
+      "file": "file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "samples": 3242,
+      "weightedMs": 17756.449,
+      "percentAllWeighted": 4.64908,
+      "percentNonIdleWeighted": 26.158515,
+      "nonIdleWeightedMs": 17756.449
+    },
+    {
+      "file": "file:///C:/mir2-build/p01-completion-20261024/native-steady-single-stage-diagnostic-v6/diagnostic-capacity.mjs",
+      "samples": 3286,
+      "weightedMs": 17202.206,
+      "percentAllWeighted": 4.503966,
+      "percentNonIdleWeighted": 25.342013,
+      "nonIdleWeightedMs": 17202.206
+    },
+    {
+      "file": "node:internal/child_process",
+      "samples": 2842,
+      "weightedMs": 15679.657,
+      "percentAllWeighted": 4.105324,
+      "percentNonIdleWeighted": 23.099018,
+      "nonIdleWeightedMs": 15679.657
+    },
+    {
+      "file": "file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "samples": 416,
+      "weightedMs": 2103.019,
+      "percentAllWeighted": 0.550623,
+      "percentNonIdleWeighted": 3.098134,
+      "nonIdleWeightedMs": 2103.019
+    },
+    {
+      "file": "node:internal/timers",
+      "samples": 206,
+      "weightedMs": 1134.163,
+      "percentAllWeighted": 0.296952,
+      "percentNonIdleWeighted": 1.670831,
+      "nonIdleWeightedMs": 1134.163
+    },
+    {
+      "file": "node:internal/worker/js_transferable",
+      "samples": 125,
+      "weightedMs": 671.66,
+      "percentAllWeighted": 0.175857,
+      "percentNonIdleWeighted": 0.989479,
+      "nonIdleWeightedMs": 671.66
+    },
+    {
+      "file": "file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-catalog-transport.mjs",
+      "samples": 94,
+      "weightedMs": 507.058,
+      "percentAllWeighted": 0.13276,
+      "percentNonIdleWeighted": 0.74699,
+      "nonIdleWeightedMs": 507.058
+    },
+    {
+      "file": "file:///C:/mir2-build/p01-completion-20261024/release-native-v2-scout-target-waypoint-routing-ladder-17/slow-stage-public.mjs",
+      "samples": 78,
+      "weightedMs": 429.31,
+      "percentAllWeighted": 0.112404,
+      "percentNonIdleWeighted": 0.632453,
+      "nonIdleWeightedMs": 429.31
+    },
+    {
+      "file": "file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/protocol-observation.mjs",
+      "samples": 85,
+      "weightedMs": 413.523,
+      "percentAllWeighted": 0.108271,
+      "percentNonIdleWeighted": 0.609195,
+      "nonIdleWeightedMs": 413.523
+    },
+    {
+      "file": "file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-multiplayer-smoke.mjs",
+      "samples": 79,
+      "weightedMs": 379.921,
+      "percentAllWeighted": 0.099473,
+      "percentNonIdleWeighted": 0.559693,
+      "nonIdleWeightedMs": 379.921
+    },
+    {
+      "file": "node:internal/crypto/hash",
+      "samples": 54,
+      "weightedMs": 295.498,
+      "percentAllWeighted": 0.077369,
+      "percentNonIdleWeighted": 0.435323,
+      "nonIdleWeightedMs": 295.498
+    },
+    {
+      "file": "file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/node_modules/next/dist/compiled/ws/index.js",
+      "samples": 59,
+      "weightedMs": 290.792,
+      "percentAllWeighted": 0.076137,
+      "percentNonIdleWeighted": 0.42839,
+      "nonIdleWeightedMs": 290.792
+    },
+    {
+      "file": "file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-load-smoke.mjs",
+      "samples": 43,
+      "weightedMs": 238.336,
+      "percentAllWeighted": 0.062402,
+      "percentNonIdleWeighted": 0.351113,
+      "nonIdleWeightedMs": 238.336
+    },
+    {
+      "file": "file:///C:/mir2-build/p01-completion-20261024/account-store-slow-stage-diagnostics-v1/slow-stage-public.mjs",
+      "samples": 43,
+      "weightedMs": 236.64,
+      "percentAllWeighted": 0.061958,
+      "percentNonIdleWeighted": 0.348614,
+      "nonIdleWeightedMs": 236.64
+    },
+    {
+      "file": "file:///C:/mir2-build/p01-completion-20261024/compact-navigation-wire-diagnostics-v2/wrapper.mjs",
+      "samples": 51,
+      "weightedMs": 215.865,
+      "percentAllWeighted": 0.056519,
+      "percentNonIdleWeighted": 0.318009,
+      "nonIdleWeightedMs": 215.865
+    },
+    {
+      "file": "node:internal/streams/writable",
+      "samples": 45,
+      "weightedMs": 206.994,
+      "percentAllWeighted": 0.054196,
+      "percentNonIdleWeighted": 0.30494,
+      "nonIdleWeightedMs": 206.994
+    },
+    {
+      "file": "node:internal/process/task_queues",
+      "samples": 34,
+      "weightedMs": 182.312,
+      "percentAllWeighted": 0.047734,
+      "percentNonIdleWeighted": 0.268579,
+      "nonIdleWeightedMs": 182.312
+    },
+    {
+      "file": "node:buffer",
+      "samples": 31,
+      "weightedMs": 167.206,
+      "percentAllWeighted": 0.043779,
+      "percentNonIdleWeighted": 0.246325,
+      "nonIdleWeightedMs": 167.206
+    },
+    {
+      "file": "node:fs",
+      "samples": 26,
+      "weightedMs": 145.694,
+      "percentAllWeighted": 0.038146,
+      "percentNonIdleWeighted": 0.214634,
+      "nonIdleWeightedMs": 145.694
+    },
+    {
+      "file": "node:internal/streams/readable",
+      "samples": 31,
+      "weightedMs": 138.234,
+      "percentAllWeighted": 0.036193,
+      "percentNonIdleWeighted": 0.203644,
+      "nonIdleWeightedMs": 138.234
+    },
+    {
+      "file": "node:internal/stream_base_commons",
+      "samples": 19,
+      "weightedMs": 100.522,
+      "percentAllWeighted": 0.026319,
+      "percentNonIdleWeighted": 0.148087,
+      "nonIdleWeightedMs": 100.522
+    },
+    {
+      "file": "node:internal/async_hooks",
+      "samples": 18,
+      "weightedMs": 99.773,
+      "percentAllWeighted": 0.026123,
+      "percentNonIdleWeighted": 0.146984,
+      "nonIdleWeightedMs": 99.773
+    },
+    {
+      "file": "node:internal/crypto/random",
+      "samples": 18,
+      "weightedMs": 97.864,
+      "percentAllWeighted": 0.025623,
+      "percentNonIdleWeighted": 0.144172,
+      "nonIdleWeightedMs": 97.864
+    },
+    {
+      "file": "node:internal/priority_queue",
+      "samples": 17,
+      "weightedMs": 92.095,
+      "percentAllWeighted": 0.024113,
+      "percentNonIdleWeighted": 0.135673,
+      "nonIdleWeightedMs": 92.095
+    }
+  ],
+  "fileInclusive": [
+    {
+      "file": "[V8 pseudo/unattributed]",
+      "samples": 70123,
+      "weightedMs": 381934.675,
+      "percentAllWeighted": 100,
+      "percentNonIdleWeighted": 100,
+      "nonIdleWeightedMs": 67880.188
+    },
+    {
+      "file": "file:///C:/mir2-build/p01-completion-20261024/native-steady-single-stage-diagnostic-v6/diagnostic-capacity.mjs",
+      "samples": 7467,
+      "weightedMs": 39777.404,
+      "percentAllWeighted": 10.414714,
+      "percentNonIdleWeighted": 58.599431,
+      "nonIdleWeightedMs": 39777.404
+    },
+    {
+      "file": "node:internal/timers",
+      "samples": 6949,
+      "weightedMs": 37345.105,
+      "percentAllWeighted": 9.777878,
+      "percentNonIdleWeighted": 55.016207,
+      "nonIdleWeightedMs": 37345.105
+    },
+    {
+      "file": "file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "samples": 3244,
+      "weightedMs": 17766.27,
+      "percentAllWeighted": 4.651651,
+      "percentNonIdleWeighted": 26.172983,
+      "nonIdleWeightedMs": 17766.27
+    },
+    {
+      "file": "node:child_process",
+      "samples": 2852,
+      "weightedMs": 15730.241,
+      "percentAllWeighted": 4.118568,
+      "percentNonIdleWeighted": 23.173538,
+      "nonIdleWeightedMs": 15730.241
+    },
+    {
+      "file": "node:internal/child_process",
+      "samples": 2844,
+      "weightedMs": 15687.282,
+      "percentAllWeighted": 4.107321,
+      "percentNonIdleWeighted": 23.110251,
+      "nonIdleWeightedMs": 15687.282
+    },
+    {
+      "file": "node:internal/process/task_queues",
+      "samples": 2815,
+      "weightedMs": 15133.629,
+      "percentAllWeighted": 3.962361,
+      "percentNonIdleWeighted": 22.294619,
+      "nonIdleWeightedMs": 15133.629
+    },
+    {
+      "file": "file:///C:/mir2-build/p01-completion-20261024/shared-experience-parse-cache-release-v1/release-tools-v2.mjs",
+      "samples": 2096,
+      "weightedMs": 11591.728,
+      "percentAllWeighted": 3.035003,
+      "percentNonIdleWeighted": 17.076747,
+      "nonIdleWeightedMs": 11591.728
+    },
+    {
+      "file": "node:internal/stream_base_commons",
+      "samples": 1428,
+      "weightedMs": 7311.607,
+      "percentAllWeighted": 1.914361,
+      "percentNonIdleWeighted": 10.771342,
+      "nonIdleWeightedMs": 7311.607
+    },
+    {
+      "file": "node:internal/streams/readable",
+      "samples": 1373,
+      "weightedMs": 7020.379,
+      "percentAllWeighted": 1.83811,
+      "percentNonIdleWeighted": 10.342309,
+      "nonIdleWeightedMs": 7020.379
+    },
+    {
+      "file": "node:events",
+      "samples": 1317,
+      "weightedMs": 6725.9,
+      "percentAllWeighted": 1.761008,
+      "percentNonIdleWeighted": 9.908488,
+      "nonIdleWeightedMs": 6725.9
+    },
+    {
+      "file": "node:internal/streams/writable",
+      "samples": 1247,
+      "weightedMs": 6326.264,
+      "percentAllWeighted": 1.656373,
+      "percentNonIdleWeighted": 9.31975,
+      "nonIdleWeightedMs": 6326.264
+    },
+    {
+      "file": "file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/node_modules/next/dist/compiled/ws/index.js",
+      "samples": 1132,
+      "weightedMs": 5709.739,
+      "percentAllWeighted": 1.494952,
+      "percentNonIdleWeighted": 8.411496,
+      "nonIdleWeightedMs": 5709.739
+    },
+    {
+      "file": "file:///C:/mir2-build/p01-completion-20261024/native-steady-single-stage-diagnostic-v6/diagnostic-connect.mjs",
+      "samples": 971,
+      "weightedMs": 4890.919,
+      "percentAllWeighted": 1.280564,
+      "percentNonIdleWeighted": 7.205223,
+      "nonIdleWeightedMs": 4890.919
+    },
+    {
+      "file": "file:///C:/mir2-build/p01-completion-20261024/compact-navigation-wire-diagnostics-v2/wrapper.mjs",
+      "samples": 966,
+      "weightedMs": 4869.624,
+      "percentAllWeighted": 1.274989,
+      "percentNonIdleWeighted": 7.173852,
+      "nonIdleWeightedMs": 4869.624
+    },
+    {
+      "file": "file:///C:/mir2-build/p01-completion-20261024/release-native-v2-scout-target-waypoint-routing-ladder-17/input-lib.mjs",
+      "samples": 837,
+      "weightedMs": 4582.109,
+      "percentAllWeighted": 1.19971,
+      "percentNonIdleWeighted": 6.750289,
+      "nonIdleWeightedMs": 4582.109
+    },
+    {
+      "file": "file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-multiplayer-smoke.mjs",
+      "samples": 658,
+      "weightedMs": 3397.627,
+      "percentAllWeighted": 0.889583,
+      "percentNonIdleWeighted": 5.005329,
+      "nonIdleWeightedMs": 3397.627
+    },
+    {
+      "file": "file:///C:/mir2-build/p01-completion-20261024/native-steady-single-stage-diagnostic-v6/run-episode.mjs",
+      "samples": 537,
+      "weightedMs": 2940.352,
+      "percentAllWeighted": 0.769857,
+      "percentNonIdleWeighted": 4.331679,
+      "nonIdleWeightedMs": 2940.352
+    },
+    {
+      "file": "file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-native-resume-smoke.mjs",
+      "samples": 517,
+      "weightedMs": 2648.953,
+      "percentAllWeighted": 0.693562,
+      "percentNonIdleWeighted": 3.902395,
+      "nonIdleWeightedMs": 2648.953
+    },
+    {
+      "file": "file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "samples": 510,
+      "weightedMs": 2618.883,
+      "percentAllWeighted": 0.685689,
+      "percentNonIdleWeighted": 3.858096,
+      "nonIdleWeightedMs": 2618.883
+    },
+    {
+      "file": "file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/protocol-observation.mjs",
+      "samples": 243,
+      "weightedMs": 1263.192,
+      "percentAllWeighted": 0.330735,
+      "percentNonIdleWeighted": 1.860914,
+      "nonIdleWeightedMs": 1263.192
+    },
+    {
+      "file": "node:internal/worker/js_transferable",
+      "samples": 158,
+      "weightedMs": 849.669,
+      "percentAllWeighted": 0.222464,
+      "percentNonIdleWeighted": 1.251719,
+      "nonIdleWeightedMs": 849.669
+    },
+    {
+      "file": "node:fs",
+      "samples": 132,
+      "weightedMs": 722.154,
+      "percentAllWeighted": 0.189078,
+      "percentNonIdleWeighted": 1.063866,
+      "nonIdleWeightedMs": 722.154
+    },
+    {
+      "file": "node:internal/fs/streams",
+      "samples": 127,
+      "weightedMs": 694.266,
+      "percentAllWeighted": 0.181776,
+      "percentNonIdleWeighted": 1.022781,
+      "nonIdleWeightedMs": 694.266
+    },
+    {
+      "file": "file:///C:/mir2-build/p01-completion-20261024/release-native-v2-scout-target-waypoint-routing-ladder-17/slow-stage-public.mjs",
+      "samples": 125,
+      "weightedMs": 686.675,
+      "percentAllWeighted": 0.179789,
+      "percentNonIdleWeighted": 1.011599,
+      "nonIdleWeightedMs": 686.675
+    }
+  ],
+  "fileGroupSelf": [
+    {
+      "file": "[V8 pseudo/unattributed]",
+      "samples": 59009,
+      "weightedMs": 322278.187,
+      "percentAllWeighted": 84.380447,
+      "percentNonIdleWeighted": 12.115022,
+      "nonIdleWeightedMs": 8223.7
+    },
+    {
+      "file": "[Node built-in]",
+      "samples": 3600,
+      "weightedMs": 19710.692,
+      "percentAllWeighted": 5.16075,
+      "percentNonIdleWeighted": 29.037474,
+      "nonIdleWeightedMs": 19710.692
+    },
+    {
+      "file": "protocol navigation",
+      "samples": 3242,
+      "weightedMs": 17756.449,
+      "percentAllWeighted": 4.64908,
+      "percentNonIdleWeighted": 26.158515,
+      "nonIdleWeightedMs": 17756.449
+    },
+    {
+      "file": "derived capacity driver",
+      "samples": 3286,
+      "weightedMs": 17202.206,
+      "percentAllWeighted": 4.503966,
+      "percentNonIdleWeighted": 25.342013,
+      "nonIdleWeightedMs": 17202.206
+    },
+    {
+      "file": "canonical capacity core",
+      "samples": 416,
+      "weightedMs": 2103.019,
+      "percentAllWeighted": 0.550623,
+      "percentNonIdleWeighted": 3.098134,
+      "nonIdleWeightedMs": 2103.019
+    },
+    {
+      "file": "other JavaScript",
+      "samples": 261,
+      "weightedMs": 1367.755,
+      "percentAllWeighted": 0.358112,
+      "percentNonIdleWeighted": 2.014955,
+      "nonIdleWeightedMs": 1367.755
+    },
+    {
+      "file": "catalog transport",
+      "samples": 94,
+      "weightedMs": 507.058,
+      "percentAllWeighted": 0.13276,
+      "percentNonIdleWeighted": 0.74699,
+      "nonIdleWeightedMs": 507.058
+    },
+    {
+      "file": "protocol observation",
+      "samples": 85,
+      "weightedMs": 413.523,
+      "percentAllWeighted": 0.108271,
+      "percentNonIdleWeighted": 0.609195,
+      "nonIdleWeightedMs": 413.523
+    },
+    {
+      "file": "base playtest client",
+      "samples": 79,
+      "weightedMs": 379.921,
+      "percentAllWeighted": 0.099473,
+      "percentNonIdleWeighted": 0.559693,
+      "nonIdleWeightedMs": 379.921
+    },
+    {
+      "file": "wire diagnostics",
+      "samples": 51,
+      "weightedMs": 215.865,
+      "percentAllWeighted": 0.056519,
+      "percentNonIdleWeighted": 0.318009,
+      "nonIdleWeightedMs": 215.865
+    }
+  ],
+  "fileGroupInclusive": [
+    {
+      "file": "[V8 pseudo/unattributed]",
+      "samples": 70123,
+      "weightedMs": 381934.675,
+      "percentAllWeighted": 100,
+      "percentNonIdleWeighted": 100,
+      "nonIdleWeightedMs": 67880.188
+    },
+    {
+      "file": "[Node built-in]",
+      "samples": 11361,
+      "weightedMs": 61070.289,
+      "percentAllWeighted": 15.989721,
+      "percentNonIdleWeighted": 89.967766,
+      "nonIdleWeightedMs": 61070.289
+    },
+    {
+      "file": "derived capacity driver",
+      "samples": 7467,
+      "weightedMs": 39777.404,
+      "percentAllWeighted": 10.414714,
+      "percentNonIdleWeighted": 58.599431,
+      "nonIdleWeightedMs": 39777.404
+    },
+    {
+      "file": "other JavaScript",
+      "samples": 4341,
+      "weightedMs": 23395.015,
+      "percentAllWeighted": 6.125397,
+      "percentNonIdleWeighted": 34.465159,
+      "nonIdleWeightedMs": 23395.015
+    },
+    {
+      "file": "protocol navigation",
+      "samples": 3244,
+      "weightedMs": 17766.27,
+      "percentAllWeighted": 4.651651,
+      "percentNonIdleWeighted": 26.172983,
+      "nonIdleWeightedMs": 17766.27
+    },
+    {
+      "file": "wire diagnostics",
+      "samples": 967,
+      "weightedMs": 4875.127,
+      "percentAllWeighted": 1.27643,
+      "percentNonIdleWeighted": 7.181959,
+      "nonIdleWeightedMs": 4875.127
+    },
+    {
+      "file": "base playtest client",
+      "samples": 658,
+      "weightedMs": 3397.627,
+      "percentAllWeighted": 0.889583,
+      "percentNonIdleWeighted": 5.005329,
+      "nonIdleWeightedMs": 3397.627
+    },
+    {
+      "file": "canonical capacity core",
+      "samples": 510,
+      "weightedMs": 2618.883,
+      "percentAllWeighted": 0.685689,
+      "percentNonIdleWeighted": 3.858096,
+      "nonIdleWeightedMs": 2618.883
+    },
+    {
+      "file": "protocol observation",
+      "samples": 243,
+      "weightedMs": 1263.192,
+      "percentAllWeighted": 0.330735,
+      "percentNonIdleWeighted": 1.860914,
+      "nonIdleWeightedMs": 1263.192
+    },
+    {
+      "file": "catalog transport",
+      "samples": 107,
+      "weightedMs": 578.216,
+      "percentAllWeighted": 0.151391,
+      "percentNonIdleWeighted": 0.851819,
+      "nonIdleWeightedMs": 578.216
+    }
+  ],
+  "limits": [
+    "Sampling-weighted attribution is not an allocation profile, retained memory size, blocking wall time, or exact GC pause duration.",
+    "Inclusive rows overlap and must not be summed across functions/files/groups.",
+    "A long delta assigned to the following sample can include scheduling/profiling delay; nominal 5ms does not mean every delta equals 5ms.",
+    "Profiler overhead is diagnostic-only. This run ended from actor death/presence loss per Root; no capacity acceptance or single root-cause inference is made.",
+    "No gameplay raw or report was read; no phase-specific hotspot claim is made."
+  ],
+  "verdict": {
+    "profileParsePassed": true,
+    "capacityAccepted": false,
+    "rootCauseProven": false
+  }
+}

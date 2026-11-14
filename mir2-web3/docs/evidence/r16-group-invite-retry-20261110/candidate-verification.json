@@ -1,0 +1,214 @@
+{
+  "schema": "mir2.r16.group-manual-retry.verify.v1",
+  "sourceBase": "62acffcba483df433c6ac3a28836f8c1106b917e",
+  "nativeBridgeSha256": "ab60a0750dfec301ed47dfd8148c35636f71fad438127eb2b74f9d7ba8481342",
+  "runtimeVersion": "bevy-22790e9223ec130f",
+  "runtimeManifestSha256": "68fb2a35cf983f9a380ebb995e03f3a065f89d1c74d8390ba53bd12925385f00",
+  "scenarios": [
+    {
+      "scenario": "decline",
+      "receiptSha256": "38710587f815ba7b160eb863a58b64a7b85047ad9ac1015e704e2a6164bb3451",
+      "gatewaySha256": "517328cd8d2badcf2a7fb9ae1532964435e703a40398838b540551c0a697867c",
+      "mode": "decline",
+      "checks": [
+        {
+          "stage": "decline-named-system-chat-no-party",
+          "packet": {
+            "at": 96534.6323,
+            "connection": 1,
+            "packet": "Chat",
+            "chatType": "System",
+            "message": "Blade has declined your group invite."
+          },
+          "domVisible": true
+        },
+        {
+          "stage": "no-spontaneous-add-member-before-retry",
+          "manualWireNames": [
+            "bLaDe"
+          ],
+          "spontaneousRequests": 0
+        },
+        {
+          "stage": "manual-repeat-ui-and-wire",
+          "rawName": "bLaDe",
+          "clickedAfterMs": 2589,
+          "sinceLastManualAttemptMs": 2589,
+          "beforeSent": 1,
+          "afterSent": 2,
+          "editorVisible": false,
+          "addButtonEnabled": true,
+          "inputEnabled": true,
+          "submitEnabled": true,
+          "invitesBefore": 1,
+          "invitesAfter": 2
+        },
+        {
+          "stage": "manual-retry-authoritatively-joined",
+          "canonical": "Blade",
+          "inviteConnection": 1
+        },
+        {
+          "stage": "exact-manual-send-count-and-order",
+          "manualWireNames": [
+            "bLaDe",
+            "bLaDe"
+          ],
+          "spontaneousRequests": 0
+        }
+      ],
+      "manualNames": [
+        "bLaDe",
+        "bLaDe"
+      ],
+      "recipientReplies": [
+        false,
+        true
+      ],
+      "recipientInvitationCount": 2,
+      "normalBrowserLogouts": 2,
+      "stopped": {
+        "next": true,
+        "gateway": true,
+        "gatewayForced": false,
+        "gatewayProcessExited": true
+      },
+      "qualifiedWebgpuRequests": 4,
+      "screenshotSha256": "c7bad6f70f9e57422d1b37e6228539984347f390f5416a56cad66ecf072f7faa"
+    },
+    {
+      "scenario": "optout-cooldown",
+      "receiptSha256": "abdadae46830036499aae441723a682e145d640f6f794fb7d0c1c05a4a8df7e3",
+      "gatewaySha256": "517328cd8d2badcf2a7fb9ae1532964435e703a40398838b540551c0a697867c",
+      "mode": "optout-cooldown",
+      "checks": [
+        {
+          "stage": "different-spelling-second-send",
+          "deltaMs": 360
+        },
+        {
+          "stage": "one-named-opt-out-and-no-second-chat-or-invite",
+          "packet": {
+            "at": 57047.4989,
+            "connection": 1,
+            "packet": "Chat",
+            "chatType": "System",
+            "message": "Blade is not allowing group."
+          },
+          "domVisible": true
+        },
+        {
+          "stage": "no-spontaneous-add-member-before-retry",
+          "manualWireNames": [
+            "bLaDe",
+            "bLADe"
+          ],
+          "spontaneousRequests": 0
+        },
+        {
+          "stage": "manual-repeat-ui-and-wire",
+          "rawName": "bLADe",
+          "clickedAfterMs": 2960,
+          "sinceLastManualAttemptMs": 2600,
+          "beforeSent": 2,
+          "afterSent": 3,
+          "editorVisible": false,
+          "addButtonEnabled": true,
+          "inputEnabled": true,
+          "submitEnabled": true,
+          "invitesBefore": 0,
+          "invitesAfter": 1
+        },
+        {
+          "stage": "manual-retry-authoritatively-joined",
+          "canonical": "Blade",
+          "inviteConnection": 1
+        },
+        {
+          "stage": "exact-manual-send-count-and-order",
+          "manualWireNames": [
+            "bLaDe",
+            "bLADe",
+            "bLADe"
+          ],
+          "spontaneousRequests": 0
+        }
+      ],
+      "manualNames": [
+        "bLaDe",
+        "bLADe",
+        "bLADe"
+      ],
+      "recipientReplies": [
+        true
+      ],
+      "recipientInvitationCount": 1,
+      "normalBrowserLogouts": 2,
+      "stopped": {
+        "next": true,
+        "gateway": true,
+        "gatewayForced": false,
+        "gatewayProcessExited": true
+      },
+      "qualifiedWebgpuRequests": 4,
+      "screenshotSha256": "c7bad6f70f9e57422d1b37e6228539984347f390f5416a56cad66ecf072f7faa"
+    }
+  ],
+  "tests": {
+    "rustSharedBaseline": {
+      "sha256": "730586aeacf8ee5789b8455ae36fd0a52d7bff2a9f787757469f72fd03750fb3",
+      "log": "rust-red-r2.log",
+      "observed": "test result: FAILED. 0 passed; 1 failed"
+    },
+    "rustSharedFinal": {
+      "sha256": "2ce1c4dc763872998e789283d4763c0690173dbceeeaa99b0d4c2d28f29695fa",
+      "log": "rust-social-green.log",
+      "observed": "test result: ok. 92 passed; 0 failed"
+    },
+    "rustRuntimeJsonFinal": {
+      "sha256": "1d7220c9820e78e1bcfeef3d18400b3afd2de2f0becc69a97ce945b8572b0150",
+      "log": "rust-host-green.log",
+      "observed": "test result: ok. 9 passed; 0 failed"
+    },
+    "nativeBaseline": {
+      "sha256": "64e87f928927d0e8af62a6565823f441224b7b9b31ef021748138b913bab2883",
+      "log": "native-red.log",
+      "observed": "test result: FAILED. 0 passed; 1 failed"
+    },
+    "nativeGroupFinal": {
+      "sha256": "58abfdf4a6fcf32ef7188dda0ba58ea2247db1ceb82a0bca8459ae879cdc43e0",
+      "log": "native-green-local-assets.log",
+      "observed": "test result: ok. 6 passed; 0 failed"
+    },
+    "nativeBridgeFinal": {
+      "sha256": "fc66a30b8d4ca426adb5f0f7ee1f9c120fabf8a224a894fc35d37de1dd3c1687",
+      "log": "native-bridge-adjacent.log",
+      "observed": "test result: ok. 156 passed; 0 failed"
+    },
+    "nativeCommandProvenance": {
+      "sha256": "421fe1d111e0fb59dedab13935f2490d0c865aaa32f07d7b18fe83f289fbf24e",
+      "log": "native-command-provenance.log",
+      "observed": "test result: ok. 5 passed; 0 failed"
+    },
+    "webFinal": {
+      "sha256": "71b225570d8a4e4377d66999a959572d3d026f100b20130e6c37d57c83661a60",
+      "log": "web-candidate-regression-r2.log",
+      "observed": "# pass 258"
+    },
+    "webAdaptersFinal": {
+      "sha256": "1ccb6365737b23385a955901bfae70b4724ccbccb3ce5341ba2d61f929fe51d0",
+      "log": "web-candidate-adapters.log",
+      "observed": "stage5 adapter tests passed (508 groups)"
+    },
+    "nativeCombinedGroup": {
+      "inputPins": {
+        "apps/game-client/client-bevy/src/social_operation_budget.rs": "5c239cbe2932ec70a1aea1ac31d5e3ed8c5d856c926db4dc36f95d0340aef201",
+        "apps/game-client/platform-windows/src/gameplay_bridge.rs": "ab60a0750dfec301ed47dfd8148c35636f71fad438127eb2b74f9d7ba8481342"
+      },
+      "log": "native-combined-group-rebuilt.log",
+      "sha256": "7bb61f6144c2ac5d3a137805c59376f7cf05a89fe8fb0259f010e61844795b4b",
+      "pinsSha256": "a33e43367f27c24cbcbd8ca1334de5c2442d8e57b011ac909d6350e2b99a9d90",
+      "observed": "Compiled shared budget and ran six Windows group tests with the matching bridge"
+    }
+  }
+}

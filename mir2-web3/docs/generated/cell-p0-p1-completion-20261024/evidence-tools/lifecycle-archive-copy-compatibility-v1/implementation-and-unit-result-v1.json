@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "scope": "Final tool-only compatibility implementation and actual single verifier unit entry. No commit/topic-preview, capacity replay, game tests or services were performed.",
+  "sources": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\evidence-tools\\verify-evidence.mjs",
+      "bytes": 49105,
+      "sha256": "cc376548a7040fa5179badaffc8b201ff908902ed70fe50258305681d74a1457"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\evidence-tools\\verify-evidence.test.mjs",
+      "bytes": 42364,
+      "sha256": "cdebbfab167c9f22dd40ff125847b667f4c6aa67ec25c51d118cb537b6e285d1"
+    }
+  ],
+  "backup": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\lifecycle-archive-copy-compatibility-v1\\source-before-v1.json",
+    "bytes": 1102,
+    "sha256": "0a8edd18ef5e8d7914c9cfae137f21ce4f76e5f14192914ea0b757dd944197a3"
+  },
+  "preservation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\lifecycle-archive-copy-compatibility-v1\\source-preservation-v1.json",
+    "bytes": 9543,
+    "sha256": "65359ce21e10d1e5c10108d575a7d8b85169b470af9259fc89ac527bfdddcc40"
+  },
+  "diff": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\lifecycle-archive-copy-compatibility-v1\\source-diff-v1.patch",
+    "bytes": 21124,
+    "sha256": "936d79f792532859262833dad186aebd764c8743cd88f7d599966a4c9fcf524f"
+  },
+  "unitExecution": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\lifecycle-archive-copy-compatibility-v1\\unit-execution-v2.json",
+    "bytes": 2497,
+    "sha256": "b7da7a82d6106e1d62843390ad4fe8dd15e10e9afc95809a53c481e38033a96e"
+  },
+  "preliminaryUnitExecution": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\lifecycle-archive-copy-compatibility-v1\\unit-execution-v1.json",
+    "bytes": 2453,
+    "sha256": "67ed35229f494ed522866ccfbb08dd6db1922fc6e9ae8e9cbd3892ce3ec160f5"
+  },
+  "actualFooter": {
+    "tests": 23,
+    "pass": 23,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "sourceBeforeAfterIdentical": true,
+  "diffCheckExitCode": 0,
+  "diffCheckStdoutBytes": 0,
+  "diffCheckStderrBytes": 0,
+  "coverage": [
+    "same-run complete copies count once; distinct runs count separately",
+    "report raw conflict checked before ok/failed branches in both orders",
+    "same-directory unique realm required; neighbor/nested borrowing rejected",
+    "all trace suffixes including c..f require exact filenames/bytes/SHA",
+    "realm/metrics/audit/trace conflict and missing required artifact rejected",
+    "original full16/cleanup/metrics/current-driver/audit checks retained for every copy"
+  ],
+  "limitations": [
+    "Relies on the already raw-verified inventory from verifyInventory; does not substitute JSON semantic equivalence for raw identity.",
+    "Only this test entry was run; Root owns the integrated topic preview."
+  ],
+  "gameAcceptanceChanged": false,
+  "capacityAccepted": false,
+  "P0Accepted": false,
+  "P2Started": false
+}

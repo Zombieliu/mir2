@@ -1,0 +1,22 @@
+{
+  "schema": "mir2.wallet.real-launcher-aborted-attempt.v1",
+  "passed": false,
+  "actualLegacyLauncherExecuted": true,
+  "actualEngineBinaryExecuted": true,
+  "enginePid": 83608,
+  "abortedAtParentRequest": true,
+  "gameLaunched": false,
+  "activationCompleted": false,
+  "sequenceStillAccepted": 21,
+  "candidateStillInstalled": "WN-CANDIDATE-20261011-invited-25",
+  "exeStillOriginalR25": "901C47188259B5F2A6B73070B12456D4ECC13AAB02C68B975E1843FFFC507348",
+  "transactionPhase": "accepted",
+  "newGameHealthAccepted": false,
+  "observedIssue": "Bundle planner selected 2 bundles and 1 delta but left 33933 unique hashes for individual public HTTP downloads; unacceptable request count",
+  "originSignedDeliveryWorking": true,
+  "predictedRemainingRawPaths": 33992,
+  "predictedRemainingRawUniqueHashes": 33933,
+  "fixtureOrCacheArtificiallyPrefilled": false,
+  "logPath": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-wallet-windows-release-20261029\\updater\\REAL-LEGACY-LAUNCHER-PUBLIC-S22-ATTEMPT2-PERFORMANCE-ABORTED.jsonl",
+  "logSha256": "F0B727A86D89B8559524306712A9AD8DACB67D3281B3D6CE4B8B4750B963943A"
+}

@@ -1,0 +1,89 @@
+{
+  "schema": "mir2.r26.map-profile-fix-evidence.v1",
+  "createdUtc": "2026-10-12T03:46:48.866037+00:00",
+  "beforeSource": "02457be9afbb6e836e4c89b2aae5fd55954e77a8",
+  "problem": "Original package01 rejected map coverage because its Node audit read platinum_176 while the requested release was platinum_fiveclass. Both profiles have identical map names, so map-count-only checks cannot establish selection.",
+  "changedProductFiles": 2,
+  "changedTestFiles": 2,
+  "actualNodeTests": {
+    "passed": 15,
+    "failed": 0,
+    "skipped": 0
+  },
+  "actualPowerShellScopeTests": "Both original callers exit 0; latest includes bidirectional rejection of wrong profile identity.",
+  "scope": [
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/audit-candidate-map-coverage.mjs",
+      "sha256": "c1e2520b652a67a62b40233588d7283ecd9ae6e23b1f50158a34dc7f482f9e95",
+      "length": 26478,
+      "sourceRole": "changed product/test"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/package-windows-candidate.ps1",
+      "sha256": "6f0a85d93a57521beac4ea076c016f7b7497e5c6725b4191c46298bd6690f6e3",
+      "length": 121213,
+      "sourceRole": "changed product/test"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/test-candidate-map-coverage.mjs",
+      "sha256": "112defcbf172daeaf7a7a6c7ee24d6fdcfa13e1624d7c40826cd23cdbd10ce90",
+      "length": 15010,
+      "sourceRole": "changed product/test"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/test-candidate-map-scope.ps1",
+      "sha256": "05beab299b90052927fbdc500948932ac26119c64eacfe4f6d52fc455ba6c595",
+      "length": 12118,
+      "sourceRole": "changed product/test"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/candidate-release-profile.ps1",
+      "sha256": "2311297dd58f81609f194991f5135b4e5ec6a25a337d1badada8f545f5db3f98",
+      "length": 36192,
+      "sourceRole": "retained dependency"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/verify-windows-candidate.ps1",
+      "sha256": "b83169c03e097ddace8e2c4e2167c636ae1c71be71a2eaf0815a85b5216f5209",
+      "length": 172030,
+      "sourceRole": "retained dependency"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/build-attested-windows-candidate.ps1",
+      "sha256": "b76821bbebf8b281eef74e70622a4ae02e3af199d650e07a2b76594e92e0c5b5",
+      "length": 12073,
+      "sourceRole": "retained dependency"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/route-manifest.mjs",
+      "sha256": "9ebe65b8744a79a6e9577d653112f039d4ca656434cd5d7e3e9a8e272f6f9ad3",
+      "length": 53412,
+      "sourceRole": "retained dependency"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/content_profiles/platinum_176.json",
+      "sha256": "7ee7a6de1c253e8ba3831e3455d6ba0c59bc9dc00ef90841947d5ec58989395d",
+      "length": 47571,
+      "sourceRole": "retained dependency"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/content_profiles/platinum_fiveclass.json",
+      "sha256": "9fc2d6875c78691f7e34650eae8e8df868690a1ee6e5960becc113cae0e9d4ac",
+      "length": 66727,
+      "sourceRole": "retained dependency"
+    }
+  ],
+  "originalFailedPackageRetained": true,
+  "archive": {
+    "path": "artifacts/qa-evidence/five-class-candidate-20261011/r26-map-profile-fix-original01.zip",
+    "length": 422108,
+    "sha256": "8240d3b81f77cc41e4fc87c32162f98d8bf2228e2e97fd93c83f90ec1b7fc942"
+  },
+  "independentActualSourceReviewSha256": "f292741cd91e689e901ede620ac2f4232504bb133e23bb291e8485cb7b4197b0",
+  "acceptedForSourceCommit": true,
+  "newCleanAttestedSourceRequired": true,
+  "releaseBuildCompleted": false,
+  "packageCreated": false,
+  "published": false,
+  "humanAcceptance": false
+}

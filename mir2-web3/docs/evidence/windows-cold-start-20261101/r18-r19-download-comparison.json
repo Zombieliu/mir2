@@ -1,0 +1,367 @@
+{
+  "schema": "mir2.r19.readonly-download-comparison.v1",
+  "createdUtc": "2026-11-01T13:11:11.930117+00:00",
+  "networkRequestsMade": 0,
+  "oldRunUnmodified": true,
+  "r18": {
+    "footer": {
+      "schema": "mir2.windows.https-download.v1",
+      "http_code": "200",
+      "remote_ip": "104.18.17.68",
+      "remote_port": 443,
+      "size_download": 1040067893,
+      "time_namelookup": 0.123911,
+      "time_connect": 0.271176,
+      "time_appconnect": 1.42505,
+      "time_starttransfer": 2.005486,
+      "time_total": 438.021467,
+      "num_redirects": 0,
+      "ssl_verify_result": 0,
+      "proxy_used": 0,
+      "exitcode": 0
+    },
+    "effectivePayloadMbps": 18.995742836503492,
+    "progressSampleRows": 364,
+    "sampledProgress": {
+      "10": {
+        "curlElapsedSeconds": 10,
+        "receivedBytesApprox": 3921674.24,
+        "currentBytesPerSecondApprox": 586240.0,
+        "rawProgressLine": "  0 991.8M   0  3.74M   0      0 383.1k      0   44:10   00:10   44:00 572.5k"
+      },
+      "30": {
+        "curlElapsedSeconds": 30,
+        "receivedBytesApprox": 39311114.24,
+        "currentBytesPerSecondApprox": 2548039.68,
+        "rawProgressLine": "  3 991.8M   3 37.49M   0      0  1.22M      0   13:27   00:30   12:57  2.43M"
+      },
+      "60": {
+        "curlElapsedSeconds": 60,
+        "receivedBytesApprox": 110834483.2,
+        "currentBytesPerSecondApprox": 2139095.04,
+        "rawProgressLine": " 10 991.8M  10 105.7M   0      0  1.76M      0   09:22   01:00   08:22  2.04M"
+      },
+      "90": {
+        "curlElapsedSeconds": 90,
+        "receivedBytesApprox": 170079027.2,
+        "currentBytesPerSecondApprox": 2422210.56,
+        "rawProgressLine": " 16 991.8M  16 162.2M   0      0  1.80M      0   09:10   01:30   07:40  2.31M"
+      },
+      "120": {
+        "curlElapsedSeconds": 120,
+        "receivedBytesApprox": 246100787.2,
+        "currentBytesPerSecondApprox": 2673868.8,
+        "rawProgressLine": " 23 991.8M  23 234.7M   0      0  1.95M      0   08:27   02:00   06:27  2.55M"
+      },
+      "180": {
+        "curlElapsedSeconds": 180,
+        "receivedBytesApprox": 394998579.2,
+        "currentBytesPerSecondApprox": 2495610.88,
+        "rawProgressLine": " 37 991.8M  37 376.7M   0      0  2.09M      0   07:53   03:00   04:53  2.38M"
+      },
+      "240": {
+        "curlElapsedSeconds": 240,
+        "receivedBytesApprox": 545049804.8,
+        "currentBytesPerSecondApprox": 2495610.88,
+        "rawProgressLine": " 52 991.8M  52 519.8M   0      0  2.16M      0   07:37   04:00   03:37  2.38M"
+      },
+      "300": {
+        "curlElapsedSeconds": 299,
+        "receivedBytesApprox": 691326156.8,
+        "currentBytesPerSecondApprox": 2495610.88,
+        "rawProgressLine": " 66 991.8M  66 659.3M   0      0  2.20M      0   07:29   04:59   02:30  2.38M"
+      },
+      "360": {
+        "curlElapsedSeconds": 360,
+        "receivedBytesApprox": 845991116.8,
+        "currentBytesPerSecondApprox": 2443182.08,
+        "rawProgressLine": " 81 991.8M  81 806.8M   0      0  2.24M      0   07:22   06:00   01:22  2.33M"
+      },
+      "420": {
+        "curlElapsedSeconds": 419,
+        "receivedBytesApprox": 992267468.8,
+        "currentBytesPerSecondApprox": 2694840.32,
+        "rawProgressLine": " 95 991.8M  95 946.3M   0      0  2.25M      0   07:19   06:59   00:20  2.57M"
+      }
+    },
+    "approx64MiBBoundaries": [
+      {
+        "boundaryMiB": 64,
+        "firstRoundedProgressAtOrAboveSeconds": 43,
+        "secondsSincePriorBoundary": 43,
+        "windowBeforeBytesApprox": 49629102.08,
+        "windowAfterBytesApprox": 89474990.08,
+        "windowSeconds": 16
+      },
+      {
+        "boundaryMiB": 128,
+        "firstRoundedProgressAtOrAboveSeconds": 73,
+        "secondsSincePriorBoundary": 30,
+        "windowBeforeBytesApprox": 123312537.6,
+        "windowAfterBytesApprox": 149002649.6,
+        "windowSeconds": 16
+      },
+      {
+        "boundaryMiB": 192,
+        "firstRoundedProgressAtOrAboveSeconds": 103,
+        "secondsSincePriorBoundary": 30,
+        "windowBeforeBytesApprox": 184654233.6,
+        "windowAfterBytesApprox": 219991244.8,
+        "windowSeconds": 15
+      },
+      {
+        "boundaryMiB": 256,
+        "firstRoundedProgressAtOrAboveSeconds": 131,
+        "secondsSincePriorBoundary": 28,
+        "windowBeforeBytesApprox": 253650534.4,
+        "windowAfterBytesApprox": 292552704.0,
+        "windowSeconds": 16
+      },
+      {
+        "boundaryMiB": 320,
+        "firstRoundedProgressAtOrAboveSeconds": 156,
+        "secondsSincePriorBoundary": 25,
+        "windowBeforeBytesApprox": 316145664.0,
+        "windowAfterBytesApprox": 355047833.6,
+        "windowSeconds": 16
+      },
+      {
+        "boundaryMiB": 384,
+        "firstRoundedProgressAtOrAboveSeconds": 184,
+        "secondsSincePriorBoundary": 28,
+        "windowBeforeBytesApprox": 385037107.2,
+        "windowAfterBytesApprox": 424987852.8,
+        "windowSeconds": 16
+      },
+      {
+        "boundaryMiB": 448,
+        "firstRoundedProgressAtOrAboveSeconds": 210,
+        "secondsSincePriorBoundary": 26,
+        "windowBeforeBytesApprox": 447532236.8,
+        "windowAfterBytesApprox": 489999564.8,
+        "windowSeconds": 17
+      },
+      {
+        "boundaryMiB": 512,
+        "firstRoundedProgressAtOrAboveSeconds": 237,
+        "secondsSincePriorBoundary": 27,
+        "windowBeforeBytesApprox": 517577113.6,
+        "windowAfterBytesApprox": 557527859.2,
+        "windowSeconds": 16
+      },
+      {
+        "boundaryMiB": 576,
+        "firstRoundedProgressAtOrAboveSeconds": 264,
+        "secondsSincePriorBoundary": 27,
+        "windowBeforeBytesApprox": 585000550.4,
+        "windowAfterBytesApprox": 623902720.0,
+        "windowSeconds": 16
+      },
+      {
+        "boundaryMiB": 640,
+        "firstRoundedProgressAtOrAboveSeconds": 292,
+        "secondsSincePriorBoundary": 28,
+        "windowBeforeBytesApprox": 653891993.6,
+        "windowAfterBytesApprox": 691326156.8,
+        "windowSeconds": 15
+      },
+      {
+        "boundaryMiB": 704,
+        "firstRoundedProgressAtOrAboveSeconds": 318,
+        "secondsSincePriorBoundary": 26,
+        "windowBeforeBytesApprox": 718903705.6,
+        "windowAfterBytesApprox": 758854451.2,
+        "windowSeconds": 16
+      },
+      {
+        "boundaryMiB": 768,
+        "firstRoundedProgressAtOrAboveSeconds": 345,
+        "secondsSincePriorBoundary": 27,
+        "windowBeforeBytesApprox": 783810560.0,
+        "windowAfterBytesApprox": 826382745.6,
+        "windowSeconds": 17
+      },
+      {
+        "boundaryMiB": 832,
+        "firstRoundedProgressAtOrAboveSeconds": 372,
+        "secondsSincePriorBoundary": 27,
+        "windowBeforeBytesApprox": 853855436.8,
+        "windowAfterBytesApprox": 896113049.6,
+        "windowSeconds": 16
+      },
+      {
+        "boundaryMiB": 896,
+        "firstRoundedProgressAtOrAboveSeconds": 399,
+        "secondsSincePriorBoundary": 27,
+        "windowBeforeBytesApprox": 920125440.0,
+        "windowAfterBytesApprox": 960181043.2,
+        "windowSeconds": 16
+      },
+      {
+        "boundaryMiB": 960,
+        "firstRoundedProgressAtOrAboveSeconds": 426,
+        "secondsSincePriorBoundary": 27,
+        "windowBeforeBytesApprox": 987653734.4,
+        "windowAfterBytesApprox": 1029806489.6,
+        "windowSeconds": 16
+      }
+    ],
+    "flatRoundedReceivedRunsAtLeast3s": [],
+    "rawFooterEvidence": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r18\\acceptance-audit\\windows-https\\r18-cold-01\\logs\\downloader.stdout.log",
+      "sha256": "da3d36c2024b62a7af52c0c0a22d1155ca8b12773b62421ec3012c51e43dbeda",
+      "bytes": 337,
+      "localOnly": true
+    },
+    "rawProgressEvidence": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r18\\acceptance-audit\\windows-https\\r18-cold-01\\logs\\downloader.stderr.log",
+      "sha256": "330f80adb0a756edab5b4ed8d63eeb2bf1bb43aeea0f54c9cbb04056ee3e22e6",
+      "bytes": 28942,
+      "localOnly": true
+    }
+  },
+  "r19": {
+    "footer": {
+      "schema": "mir2.windows.https-download.v1",
+      "http_code": "200",
+      "remote_ip": "104.18.17.68",
+      "remote_port": 443,
+      "size_download": 400858816,
+      "time_namelookup": 0.122584,
+      "time_connect": 0.300374,
+      "time_appconnect": 0.716673,
+      "time_starttransfer": 1.579361,
+      "time_total": 480.003216,
+      "num_redirects": 0,
+      "ssl_verify_result": 0,
+      "proxy_used": 0,
+      "exitcode": 28
+    },
+    "effectivePayloadMbps": 6.6809355043987875,
+    "progressSampleRows": 442,
+    "sampledProgress": {
+      "10": {
+        "curlElapsedSeconds": 10,
+        "receivedBytesApprox": 1751121.92,
+        "currentBytesPerSecondApprox": 232345.6,
+        "rawProgressLine": "  0 991.8M   0  1.67M   0      0 161.7k      0 1:44:38   00:10 1:44:28 226.9k"
+      },
+      "30": {
+        "curlElapsedSeconds": 30,
+        "receivedBytesApprox": 7675576.32,
+        "currentBytesPerSecondApprox": 329728.0,
+        "rawProgressLine": "  0 991.8M   0  7.32M   0      0 249.5k      0 1:07:49   00:30 1:07:19 322.0k"
+      },
+      "60": {
+        "curlElapsedSeconds": 60,
+        "receivedBytesApprox": 18077450.24,
+        "currentBytesPerSecondApprox": 255078.4,
+        "rawProgressLine": "  1 991.8M   1 17.24M   0      0 290.2k      0   58:19   01:00   57:19 249.1k"
+      },
+      "90": {
+        "curlElapsedSeconds": 90,
+        "receivedBytesApprox": 24987566.08,
+        "currentBytesPerSecondApprox": 197734.4,
+        "rawProgressLine": "  2 991.8M   2 23.83M   0      0 270.0k      0 1:02:41   01:30 1:01:11 193.1k"
+      },
+      "120": {
+        "curlElapsedSeconds": 120,
+        "receivedBytesApprox": 34896609.28,
+        "currentBytesPerSecondApprox": 345292.8,
+        "rawProgressLine": "  3 991.8M   3 33.28M   0      0 283.2k      0   59:45   02:00   57:45 337.2k"
+      },
+      "180": {
+        "curlElapsedSeconds": 180,
+        "receivedBytesApprox": 68954357.76,
+        "currentBytesPerSecondApprox": 733593.6,
+        "rawProgressLine": "  6 991.8M   6 65.76M   0      0 372.8k      0   45:23   03:00   42:23 716.4k"
+      },
+      "240": {
+        "curlElapsedSeconds": 240,
+        "receivedBytesApprox": 116077363.2,
+        "currentBytesPerSecondApprox": 1090519.04,
+        "rawProgressLine": " 11 991.8M  11 110.7M   0      0 472.6k      0   35:49   04:00   31:49  1.04M"
+      },
+      "300": {
+        "curlElapsedSeconds": 300,
+        "receivedBytesApprox": 184339660.8,
+        "currentBytesPerSecondApprox": 881868.8,
+        "rawProgressLine": " 17 991.8M  17 175.8M   0      0 600.0k      0   28:12   05:00   23:12 861.2k"
+      },
+      "360": {
+        "curlElapsedSeconds": 360,
+        "receivedBytesApprox": 263297433.6,
+        "currentBytesPerSecondApprox": 1373634.56,
+        "rawProgressLine": " 25 991.8M  25 251.1M   0      0 712.5k      0   23:45   06:00   17:45  1.31M"
+      },
+      "420": {
+        "curlElapsedSeconds": 420,
+        "receivedBytesApprox": 342464921.6,
+        "currentBytesPerSecondApprox": 1321205.76,
+        "rawProgressLine": " 32 991.8M  32 326.6M   0      0 795.8k      0   21:16   07:00   14:16  1.26M"
+      }
+    },
+    "approx64MiBBoundaries": [
+      {
+        "boundaryMiB": 64,
+        "firstRoundedProgressAtOrAboveSeconds": 178,
+        "secondsSincePriorBoundary": 178,
+        "windowBeforeBytesApprox": 62170071.04,
+        "windowAfterBytesApprox": 72802631.68,
+        "windowSeconds": 16
+      },
+      {
+        "boundaryMiB": 128,
+        "firstRoundedProgressAtOrAboveSeconds": 254,
+        "secondsSincePriorBoundary": 76,
+        "windowBeforeBytesApprox": 123312537.6,
+        "windowAfterBytesApprox": 144074342.4,
+        "windowSeconds": 16
+      },
+      {
+        "boundaryMiB": 192,
+        "firstRoundedProgressAtOrAboveSeconds": 314,
+        "secondsSincePriorBoundary": 60,
+        "windowBeforeBytesApprox": 191889408.0,
+        "windowAfterBytesApprox": 208981196.8,
+        "windowSeconds": 16
+      },
+      {
+        "boundaryMiB": 256,
+        "firstRoundedProgressAtOrAboveSeconds": 365,
+        "secondsSincePriorBoundary": 51,
+        "windowBeforeBytesApprox": 259417702.4,
+        "windowAfterBytesApprox": 279445504.0,
+        "windowSeconds": 16
+      },
+      {
+        "boundaryMiB": 320,
+        "firstRoundedProgressAtOrAboveSeconds": 415,
+        "secondsSincePriorBoundary": 50,
+        "windowBeforeBytesApprox": 323695411.2,
+        "windowAfterBytesApprox": 345505792.0,
+        "windowSeconds": 16
+      }
+    ],
+    "flatRoundedReceivedRunsAtLeast3s": [],
+    "rawFooterEvidence": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\r19-cold-01\\logs\\downloader.stdout.log",
+      "sha256": "83e1974879b21309c400e7d9dfc5c224137093228f3dbeb49bf93ca48c633672",
+      "bytes": 337,
+      "localOnly": true
+    },
+    "rawProgressEvidence": {
+      "path": "E:\\mir2-release\\windows-cold-start-20261101\\r19\\acceptance-audit\\windows-https\\r19-cold-01\\logs\\downloader.stderr.log",
+      "sha256": "4e9a30667a8696c7e9576cee8945abd4ee0264020ae3f3758f172ec0722a69a0",
+      "bytes": 34820,
+      "localOnly": true
+    }
+  },
+  "r19MinusR18TtfbSeconds": -0.42612499999999986,
+  "limits": [
+    "Progress received/speed fields are rounded human curl output, converted with binary suffixes; boundary times are approximate seconds from curl, not D0.",
+    "Equal rounded readings are not proof of zero network bytes. No packet trace or origin telemetry is available.",
+    "These logs do not identify ISP/R2/Worker/root cause. Root separately reports that privatefetch had not started.",
+    "No score is recomputed or deductions made."
+  ]
+}

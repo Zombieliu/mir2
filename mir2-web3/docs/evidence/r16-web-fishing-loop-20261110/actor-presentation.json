@@ -1,0 +1,637 @@
+{
+  "passed": true,
+  "scope": {
+    "web": "Same-source isolated production /game with actual headless Chromium WebGPU and explicit WebGL2 shared surface; physical ordinary input, exact Gateway WS, actual compositor PNG readback.",
+    "native": "Source-derived Bevy offscreen GPU pixels using actual Bichon map/actor assets and Windows typed replay of observed Web Gateway packets. Windows desktop pointer and UI acceptance remains open.",
+    "remaining": "Water-point splash and a world-spanning fishing line remain outside the verified visual change. Water ROI held byte-identical to idle across all observed phases."
+  },
+  "crystalReference": {
+    "path": "C:\\r16-fishing-presentation-qa-20261110\\original-source-reference-r2\\source-frame-proof.json",
+    "sha256": "a402aae7abbe9cb13b4fbcfb94e5d63729c1c34c582c133f021167feff642762"
+  },
+  "runs": {
+    "beforeWebGPU": {
+      "raw": {
+        "path": "C:\\r16-fishing-presentation-qa-20261110\\baseline-webgpu-r1\\presentation-receipt.json",
+        "sha256": "1859cbfa1d04f9011321e77be18406cd84658b61a7eee4934f6b26fdde34958b"
+      },
+      "pixels": {
+        "path": "C:\\r16-fishing-presentation-qa-20261110\\baseline-webgpu-r1\\pixel-readback.json",
+        "sha256": "3f199257ad8a53108fa2e5599e7716e24e92d0025bd690934fffc81de9705b21"
+      },
+      "contact": {
+        "path": "C:\\r16-fishing-presentation-qa-20261110\\baseline-webgpu-r1\\actor-water-contact.png",
+        "sha256": "76a0b48f35102dfaed6b5d9dc93b24725846212dc70929e4902f4b2de1e29b71",
+        "bounds": [
+          457,
+          357,
+          690,
+          591
+        ]
+      },
+      "renderer": "webgpu",
+      "webBuildReceiptSha256": "c831956727032c82d90da67337ccc59f61f6af7dfd3a820604757b09f0fd3d05",
+      "captureRows": 115,
+      "windowFrames": {
+        "idle": 8,
+        "expectedThrow": 17,
+        "expectedWait": 12,
+        "expectedReel": 16,
+        "expectedEarlyThrow": 6,
+        "expectedCancellation": 18,
+        "terminalIdle": 7
+      },
+      "actorPixelCounts": {
+        "cast": {
+          "samples": 17,
+          "unique": 5,
+          "observedAlsoIdle": 13,
+          "newSignatures": 2
+        },
+        "wait": {
+          "samples": 12,
+          "unique": 4,
+          "observedAlsoIdle": 0,
+          "newSignatures": 4
+        },
+        "reel": {
+          "samples": 16,
+          "unique": 6,
+          "observedAlsoIdle": 4,
+          "newSignatures": 5
+        },
+        "cancelReel": {
+          "samples": 18,
+          "unique": 5,
+          "observedAlsoIdle": 13,
+          "newSignatures": 3
+        }
+      },
+      "unchangedWaterPixelCounts": {
+        "cast": {
+          "samples": 17,
+          "unique": 1,
+          "observedAlsoIdle": 17,
+          "newSignatures": 0
+        },
+        "wait": {
+          "samples": 12,
+          "unique": 1,
+          "observedAlsoIdle": 12,
+          "newSignatures": 0
+        },
+        "reel": {
+          "samples": 16,
+          "unique": 1,
+          "observedAlsoIdle": 16,
+          "newSignatures": 0
+        },
+        "cancelReel": {
+          "samples": 18,
+          "unique": 1,
+          "observedAlsoIdle": 18,
+          "newSignatures": 0
+        }
+      },
+      "wire": [
+        {
+          "kind": "manual-X",
+          "cast": 620,
+          "active": 624,
+          "terminal": 638
+        },
+        {
+          "kind": "manual-X",
+          "cast": 640,
+          "active": 644,
+          "terminal": 661
+        },
+        {
+          "kind": "Escape",
+          "cast": 663,
+          "active": 667,
+          "terminal": 670
+        }
+      ],
+      "saved": {
+        "map": "0",
+        "position": {
+          "x": 342,
+          "y": 244
+        },
+        "direction": "DownLeft",
+        "rodUid": "51970049",
+        "rodDura": 9997,
+        "hookDura": 7997,
+        "baitCount": 12,
+        "reelDura": 5998
+      },
+      "fixture": {
+        "originalUpLeft": true,
+        "sha256": "8351bc6a9174dd979b64d3ff3c574344b5ec6e362f12a57bb61e07e11a15cc41",
+        "mapSha256": "ed4783215ffa989658f79892c2dd6720753fb111e1102cb14da8e6182d88d7f6"
+      },
+      "gatewaySha": "f35261772f379b04759011a63a2f3c463a36e754ebbde71915e893c84d77d490"
+    },
+    "beforeShared": {
+      "raw": {
+        "path": "C:\\r16-fishing-presentation-qa-20261110\\baseline-shared-r1\\presentation-receipt.json",
+        "sha256": "e4f03755273e6657f32491299e41529a67ee579080efa3be815c4cb717a83fe5"
+      },
+      "pixels": {
+        "path": "C:\\r16-fishing-presentation-qa-20261110\\baseline-shared-r1\\pixel-readback.json",
+        "sha256": "7edb8bb46fe703ae4ee90671ebdabc8415c015ede30e63fadc8303e10811e725"
+      },
+      "contact": {
+        "path": "C:\\r16-fishing-presentation-qa-20261110\\baseline-shared-r1\\actor-water-contact.png",
+        "sha256": "a70ab505b01f0af3487c6b16a8cc8c74d260cfe0e0d3a2fa89b18c9451ff0cc3",
+        "bounds": [
+          457,
+          357,
+          690,
+          591
+        ]
+      },
+      "renderer": "shared",
+      "webBuildReceiptSha256": "c831956727032c82d90da67337ccc59f61f6af7dfd3a820604757b09f0fd3d05",
+      "captureRows": 113,
+      "windowFrames": {
+        "idle": 8,
+        "expectedThrow": 17,
+        "expectedWait": 13,
+        "expectedReel": 16,
+        "expectedEarlyThrow": 5,
+        "expectedCancellation": 17,
+        "terminalIdle": 7
+      },
+      "actorPixelCounts": {
+        "cast": {
+          "samples": 17,
+          "unique": 4,
+          "observedAlsoIdle": 6,
+          "newSignatures": 2
+        },
+        "wait": {
+          "samples": 13,
+          "unique": 3,
+          "observedAlsoIdle": 5,
+          "newSignatures": 2
+        },
+        "reel": {
+          "samples": 16,
+          "unique": 3,
+          "observedAlsoIdle": 15,
+          "newSignatures": 1
+        },
+        "cancelReel": {
+          "samples": 17,
+          "unique": 5,
+          "observedAlsoIdle": 5,
+          "newSignatures": 3
+        }
+      },
+      "unchangedWaterPixelCounts": {
+        "cast": {
+          "samples": 17,
+          "unique": 1,
+          "observedAlsoIdle": 17,
+          "newSignatures": 0
+        },
+        "wait": {
+          "samples": 13,
+          "unique": 1,
+          "observedAlsoIdle": 13,
+          "newSignatures": 0
+        },
+        "reel": {
+          "samples": 16,
+          "unique": 1,
+          "observedAlsoIdle": 16,
+          "newSignatures": 0
+        },
+        "cancelReel": {
+          "samples": 17,
+          "unique": 1,
+          "observedAlsoIdle": 17,
+          "newSignatures": 0
+        }
+      },
+      "wire": [
+        {
+          "kind": "manual-X",
+          "cast": 620,
+          "active": 624,
+          "terminal": 636
+        },
+        {
+          "kind": "manual-X",
+          "cast": 638,
+          "active": 642,
+          "terminal": 658
+        },
+        {
+          "kind": "Escape",
+          "cast": 660,
+          "active": 664,
+          "terminal": 667
+        }
+      ],
+      "saved": {
+        "map": "0",
+        "position": {
+          "x": 342,
+          "y": 244
+        },
+        "direction": "DownLeft",
+        "rodUid": "51970049",
+        "rodDura": 9997,
+        "hookDura": 7997,
+        "baitCount": 12,
+        "reelDura": 6000
+      },
+      "fixture": {
+        "originalUpLeft": true,
+        "sha256": "8351bc6a9174dd979b64d3ff3c574344b5ec6e362f12a57bb61e07e11a15cc41",
+        "mapSha256": "ed4783215ffa989658f79892c2dd6720753fb111e1102cb14da8e6182d88d7f6"
+      },
+      "gatewaySha": "f35261772f379b04759011a63a2f3c463a36e754ebbde71915e893c84d77d490"
+    },
+    "afterWebGPU": {
+      "raw": {
+        "path": "C:\\r16-fishing-presentation-qa-20261110\\candidate-webgpu-r2\\presentation-receipt.json",
+        "sha256": "7e3359aebe7831ccb5ff0eea03c56b460008b4fb285d9d7670fee1aa2d4af665"
+      },
+      "pixels": {
+        "path": "C:\\r16-fishing-presentation-qa-20261110\\candidate-webgpu-r2\\pixel-readback.json",
+        "sha256": "502ddddaf8950f46353b7284a9271cc3f0196498706525511b761efff15bcc0c"
+      },
+      "contact": {
+        "path": "C:\\r16-fishing-presentation-qa-20261110\\candidate-webgpu-r2\\actor-water-contact.png",
+        "sha256": "5b603600016b542c3a396bbab26a3c6a198614ed574c149e5053fc18f53ba859",
+        "bounds": [
+          457,
+          357,
+          690,
+          591
+        ]
+      },
+      "renderer": "webgpu",
+      "webBuildReceiptSha256": "4e29c8630c2d0c1136080508389f96567ce16c8ddda71be8525b106526a74150",
+      "captureRows": 139,
+      "windowFrames": {
+        "idle": 9,
+        "expectedThrow": 18,
+        "expectedWait": 12,
+        "expectedReel": 18,
+        "expectedEarlyThrow": 3,
+        "expectedCancellation": 18,
+        "terminalIdle": 11
+      },
+      "actorPixelCounts": {
+        "cast": {
+          "samples": 18,
+          "unique": 8,
+          "observedAlsoIdle": 0,
+          "newSignatures": 8
+        },
+        "wait": {
+          "samples": 12,
+          "unique": 5,
+          "observedAlsoIdle": 0,
+          "newSignatures": 5
+        },
+        "reel": {
+          "samples": 18,
+          "unique": 6,
+          "observedAlsoIdle": 0,
+          "newSignatures": 6
+        },
+        "cancelReel": {
+          "samples": 18,
+          "unique": 10,
+          "observedAlsoIdle": 1,
+          "newSignatures": 9
+        }
+      },
+      "unchangedWaterPixelCounts": {
+        "cast": {
+          "samples": 18,
+          "unique": 1,
+          "observedAlsoIdle": 18,
+          "newSignatures": 0
+        },
+        "wait": {
+          "samples": 12,
+          "unique": 1,
+          "observedAlsoIdle": 12,
+          "newSignatures": 0
+        },
+        "reel": {
+          "samples": 18,
+          "unique": 1,
+          "observedAlsoIdle": 18,
+          "newSignatures": 0
+        },
+        "cancelReel": {
+          "samples": 18,
+          "unique": 1,
+          "observedAlsoIdle": 18,
+          "newSignatures": 0
+        }
+      },
+      "wire": [
+        {
+          "kind": "manual-X",
+          "cast": 620,
+          "active": 624,
+          "terminal": 638
+        },
+        {
+          "kind": "manual-X",
+          "cast": 640,
+          "active": 644,
+          "terminal": 659
+        },
+        {
+          "kind": "Escape",
+          "cast": 661,
+          "active": 665,
+          "terminal": 668
+        }
+      ],
+      "saved": {
+        "map": "0",
+        "position": {
+          "x": 342,
+          "y": 244
+        },
+        "direction": "DownLeft",
+        "rodUid": "51970049",
+        "rodDura": 9997,
+        "hookDura": 7997,
+        "baitCount": 12,
+        "reelDura": 6000
+      },
+      "fixture": {
+        "originalUpLeft": true,
+        "sha256": "8351bc6a9174dd979b64d3ff3c574344b5ec6e362f12a57bb61e07e11a15cc41",
+        "mapSha256": "ed4783215ffa989658f79892c2dd6720753fb111e1102cb14da8e6182d88d7f6"
+      },
+      "gatewaySha": "f35261772f379b04759011a63a2f3c463a36e754ebbde71915e893c84d77d490"
+    },
+    "afterShared": {
+      "raw": {
+        "path": "C:\\r16-fishing-presentation-qa-20261110\\candidate-shared-r1\\presentation-receipt.json",
+        "sha256": "5ab310bfeac40ff14cc3ca83fff41949f36b03d6bb2e35c7505bb3b08c211b88"
+      },
+      "pixels": {
+        "path": "C:\\r16-fishing-presentation-qa-20261110\\candidate-shared-r1\\pixel-readback.json",
+        "sha256": "0adfce7d816cbb263566042a472950363493af331f9b2cd49a72388eab824f80"
+      },
+      "contact": {
+        "path": "C:\\r16-fishing-presentation-qa-20261110\\candidate-shared-r1\\actor-water-contact.png",
+        "sha256": "185f939c4d7df721b1a246e2eb634481a839f7343acb02d30b6a82f1b7c45cf6",
+        "bounds": [
+          457,
+          357,
+          690,
+          591
+        ]
+      },
+      "renderer": "shared",
+      "webBuildReceiptSha256": "4e29c8630c2d0c1136080508389f96567ce16c8ddda71be8525b106526a74150",
+      "captureRows": 132,
+      "windowFrames": {
+        "idle": 7,
+        "expectedThrow": 18,
+        "expectedWait": 12,
+        "expectedReel": 17,
+        "expectedEarlyThrow": 6,
+        "expectedCancellation": 16,
+        "terminalIdle": 9
+      },
+      "actorPixelCounts": {
+        "cast": {
+          "samples": 18,
+          "unique": 9,
+          "observedAlsoIdle": 1,
+          "newSignatures": 8
+        },
+        "wait": {
+          "samples": 12,
+          "unique": 5,
+          "observedAlsoIdle": 0,
+          "newSignatures": 5
+        },
+        "reel": {
+          "samples": 17,
+          "unique": 9,
+          "observedAlsoIdle": 1,
+          "newSignatures": 8
+        },
+        "cancelReel": {
+          "samples": 16,
+          "unique": 15,
+          "observedAlsoIdle": 0,
+          "newSignatures": 15
+        }
+      },
+      "unchangedWaterPixelCounts": {
+        "cast": {
+          "samples": 18,
+          "unique": 1,
+          "observedAlsoIdle": 18,
+          "newSignatures": 0
+        },
+        "wait": {
+          "samples": 12,
+          "unique": 1,
+          "observedAlsoIdle": 12,
+          "newSignatures": 0
+        },
+        "reel": {
+          "samples": 17,
+          "unique": 1,
+          "observedAlsoIdle": 17,
+          "newSignatures": 0
+        },
+        "cancelReel": {
+          "samples": 16,
+          "unique": 1,
+          "observedAlsoIdle": 16,
+          "newSignatures": 0
+        }
+      },
+      "wire": [
+        {
+          "kind": "manual-X",
+          "cast": 620,
+          "active": 624,
+          "terminal": 636
+        },
+        {
+          "kind": "manual-X",
+          "cast": 638,
+          "active": 642,
+          "terminal": 657
+        },
+        {
+          "kind": "Escape",
+          "cast": 659,
+          "active": 663,
+          "terminal": 666
+        }
+      ],
+      "saved": {
+        "map": "0",
+        "position": {
+          "x": 342,
+          "y": 244
+        },
+        "direction": "DownLeft",
+        "rodUid": "51970049",
+        "rodDura": 9997,
+        "hookDura": 7997,
+        "baitCount": 12,
+        "reelDura": 6000
+      },
+      "fixture": {
+        "originalUpLeft": true,
+        "sha256": "8351bc6a9174dd979b64d3ff3c574344b5ec6e362f12a57bb61e07e11a15cc41",
+        "mapSha256": "ed4783215ffa989658f79892c2dd6720753fb111e1102cb14da8e6182d88d7f6"
+      },
+      "gatewaySha": "f35261772f379b04759011a63a2f3c463a36e754ebbde71915e893c84d77d490"
+    }
+  },
+  "native": {
+    "gpuReceipt": {
+      "path": "C:\\r16-fishing-presentation-qa-20261110\\native-offscreen-r1\\native-offscreen-receipt.json",
+      "sha256": "c15c5cd8d928acebc9b022664e149ee9712d7fd9e9c2172cadc3c4acc1465dfa"
+    },
+    "nativeFreeze": {
+      "path": "C:\\r16-fishing-presentation-qa-20261110\\native-freeze.json",
+      "sha256": "cf92243be502adc3c5d6ead63922097a19ee19334dc3a31e28dbb1dbe63dc5fa"
+    },
+    "gpuFreeze": {
+      "path": "C:\\r16-fishing-presentation-qa-20261110\\native-offscreen-freeze.json",
+      "sha256": "ecafa0fce2b620502b1dabdcd6dcfd5f2010631352511476ae0b46570fd2d25e"
+    },
+    "captured": [
+      {
+        "body": "/original-ui/CArmour/05/20.png",
+        "clockMs": 100,
+        "hair": "/original-ui/CHair/00/20.png",
+        "label": "native-idle-before",
+        "png": "native-idle-before.png",
+        "rgbaSha256": "bc0cec32cc46a479e3b7ce185753c52b21e21c6a6d477e5e525dbef1534a9947",
+        "rod": null
+      },
+      {
+        "body": "/original-ui/CArmour/05/672.png",
+        "clockMs": 1000,
+        "hair": "/original-ui/CHair/00/672.png",
+        "label": "native-manual-cast-0",
+        "png": "native-manual-cast-0.png",
+        "rgbaSha256": "a02f2c18bf79161022adc750de49e50bc07d72062b54682e736bdbc8c43a45d0",
+        "rod": "/original-ui/Fishing/00/40.png"
+      },
+      {
+        "body": "/original-ui/CArmour/05/675.png",
+        "clockMs": 1300,
+        "hair": "/original-ui/CHair/00/675.png",
+        "label": "native-manual-cast-3",
+        "png": "native-manual-cast-3.png",
+        "rgbaSha256": "33e16248c9c4249fdd148b8d2eb13cc40d3255125484b24c752b40902a5954a7",
+        "rod": "/original-ui/Fishing/00/43.png"
+      },
+      {
+        "body": "/original-ui/CArmour/05/727.png",
+        "clockMs": 1920,
+        "hair": "/original-ui/CHair/00/727.png",
+        "label": "native-manual-wait-1",
+        "png": "native-manual-wait-1.png",
+        "rgbaSha256": "eaa4efc484c7af204a0d54081bb42cc093d08e4e783bf546412fa58273d39ca6",
+        "rod": "/original-ui/Fishing/00/95.png"
+      },
+      {
+        "body": "/original-ui/CArmour/05/784.png",
+        "clockMs": 3240,
+        "hair": "/original-ui/CHair/00/784.png",
+        "label": "native-manual-reel-0",
+        "png": "native-manual-reel-0.png",
+        "rgbaSha256": "b50d58ef74fe9004b3e0e6bbcd1ee7410e71d5ec8ca7b1c29ff1a7705508774c",
+        "rod": "/original-ui/Fishing/00/152.png"
+      },
+      {
+        "body": "/original-ui/CArmour/05/788.png",
+        "clockMs": 3640,
+        "hair": "/original-ui/CHair/00/788.png",
+        "label": "native-manual-reel-4",
+        "png": "native-manual-reel-4.png",
+        "rgbaSha256": "7d9c4d41cc927524c2c8a97714b6e50f1cfe197dc851b998517a8d97a78b4e34",
+        "rod": "/original-ui/Fishing/00/156.png"
+      },
+      {
+        "body": "/original-ui/CArmour/05/20.png",
+        "clockMs": 4040,
+        "hair": "/original-ui/CHair/00/20.png",
+        "label": "native-manual-idle-after",
+        "png": "native-manual-idle-after.png",
+        "rgbaSha256": "bc0cec32cc46a479e3b7ce185753c52b21e21c6a6d477e5e525dbef1534a9947",
+        "rod": null
+      },
+      {
+        "body": "/original-ui/CArmour/05/672.png",
+        "clockMs": 5000,
+        "hair": "/original-ui/CHair/00/672.png",
+        "label": "native-cancel-cast-0",
+        "png": "native-cancel-cast-0.png",
+        "rgbaSha256": "a02f2c18bf79161022adc750de49e50bc07d72062b54682e736bdbc8c43a45d0",
+        "rod": "/original-ui/Fishing/00/40.png"
+      },
+      {
+        "body": "/original-ui/CArmour/05/675.png",
+        "clockMs": 5300,
+        "hair": "/original-ui/CHair/00/675.png",
+        "label": "native-cancel-cast-3",
+        "png": "native-cancel-cast-3.png",
+        "rgbaSha256": "33e16248c9c4249fdd148b8d2eb13cc40d3255125484b24c752b40902a5954a7",
+        "rod": "/original-ui/Fishing/00/43.png"
+      },
+      {
+        "body": "/original-ui/CArmour/05/784.png",
+        "clockMs": 5800,
+        "hair": "/original-ui/CHair/00/784.png",
+        "label": "native-cancel-reel-0",
+        "png": "native-cancel-reel-0.png",
+        "rgbaSha256": "b50d58ef74fe9004b3e0e6bbcd1ee7410e71d5ec8ca7b1c29ff1a7705508774c",
+        "rod": "/original-ui/Fishing/00/152.png"
+      },
+      {
+        "body": "/original-ui/CArmour/05/788.png",
+        "clockMs": 6200,
+        "hair": "/original-ui/CHair/00/788.png",
+        "label": "native-cancel-reel-4",
+        "png": "native-cancel-reel-4.png",
+        "rgbaSha256": "7d9c4d41cc927524c2c8a97714b6e50f1cfe197dc851b998517a8d97a78b4e34",
+        "rod": "/original-ui/Fishing/00/156.png"
+      },
+      {
+        "body": "/original-ui/CArmour/05/21.png",
+        "clockMs": 6600,
+        "hair": "/original-ui/CHair/00/21.png",
+        "label": "native-cancel-idle-after",
+        "png": "native-cancel-idle-after.png",
+        "rgbaSha256": "9b6abb4672d07580b06c67c739ab54246e7ff3f81d675fe781ef752317f42a54",
+        "rod": null
+      }
+    ],
+    "uniqueRgbaFrames": 7,
+    "windowsCreated": 0,
+    "compiledTestExeSha256": "4a6023009b6c08746b96feb581e4399c2196083c8b7278e13e0209c46f3c9b45",
+    "compile": {
+      "exe": "C:\\r16-fishing-presentation-qa-20261110\\native-target\\release\\mir2-platform-windows.exe",
+      "sha256": "25eb212983761d5e0442d66743b91080c533a4788d55e015d3a3885dd5d77907"
+    }
+  }
+}

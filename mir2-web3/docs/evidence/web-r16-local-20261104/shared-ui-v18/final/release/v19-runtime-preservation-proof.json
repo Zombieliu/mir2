@@ -1,0 +1,29 @@
+{
+  "schema": "mir2.r16.route-assets-preservation.v1",
+  "stoppedBeforeCopy": true,
+  "oldDirectoryPreserved": true,
+  "privateBackupPreserved": true,
+  "journalHistoryMovedIntact": true,
+  "backupName": "Numeron-Web-R16-20261104-before-route-assets-v19",
+  "runtime": [
+    {
+      "directory": "private",
+      "transfer": "copied",
+      "files": 25,
+      "bytes": 723506,
+      "beforeTreeSha256": "e4fd0868a2efb822302e3069bfb00b7ccead7998b3c9d66a07dc99cc19971574",
+      "afterTreeSha256": "e4fd0868a2efb822302e3069bfb00b7ccead7998b3c9d66a07dc99cc19971574",
+      "allFilesMatched": true
+    },
+    {
+      "directory": ".mir2-data",
+      "transfer": "moved-intact",
+      "files": 54,
+      "bytes": 23876824215,
+      "beforeTreeSha256": "02fb4b2602abdfa0500192d86f048309e1752e84098ed7835995821374635cc3",
+      "afterTreeSha256": "02fb4b2602abdfa0500192d86f048309e1752e84098ed7835995821374635cc3",
+      "allFilesMatched": true
+    }
+  ],
+  "allMatched": true
+}

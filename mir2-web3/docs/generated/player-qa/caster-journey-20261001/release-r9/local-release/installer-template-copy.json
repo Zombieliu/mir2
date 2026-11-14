@@ -1,0 +1,247 @@
+{
+  "schema": "mir2.windows.installer-template-copy.v1",
+  "passed": true,
+  "previousRoot": "C:\\mir2-playtest-releases\\20261001-native-r8\\installer-build",
+  "outputRoot": "C:\\mir2-playtest-releases\\20261001-native-r9\\installer-build",
+  "candidate": "WN-CANDIDATE-20261001-invited-09",
+  "sourceRevision": "715078944ac7a84a61b6d64901b80568a8e8d63b",
+  "generatedVerificationInputsCopied": false,
+  "files": [
+    {
+      "path": "Mir2-Invite.iss",
+      "inputSha256": "B1281A04E4C073E8D9214CC320C6023E4F82C038D6F80C95EF86C966395D66BB",
+      "outputSha256": "538D83A74A5DCB13D394C99EDB96B0EA92B5D3B17048CEF65BC408B7B6036C1A",
+      "changes": [
+        {
+          "from": "2026.10.01.8",
+          "to": "2026.10.01.9",
+          "count": 1
+        },
+        {
+          "from": "2026.10.1.8",
+          "to": "2026.10.1.9",
+          "count": 1
+        },
+        {
+          "from": "r8",
+          "to": "r9",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "path": "prepare-installer-input.py",
+      "inputSha256": "A3F8CC548B82AEF19A81CB47ADB04A0EDB76F5AC9A1DFDE6B999CFC185C802D5",
+      "outputSha256": "62F337CA352FB2C48D55DF079F2FF8460D19A0B0F66CF7620441FE4DDE9DC0B2",
+      "changes": [
+        {
+          "from": "WN-CANDIDATE-20261001-invited-08",
+          "to": "WN-CANDIDATE-20261001-invited-09",
+          "count": 1
+        },
+        {
+          "from": "r8",
+          "to": "r9",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "path": "README.ar.txt",
+      "inputSha256": "E19834680B858DDA01396AA6753EF41F5821DA7B7508BBCCCAC9CEF54E96BAAD",
+      "outputSha256": "EAE5B020A79E3857A1B340A891AF631FA8CB033046F1C5A8A20C76A69D9EAB23",
+      "changes": [
+        {
+          "from": "r8",
+          "to": "r9",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "path": "README.en.txt",
+      "inputSha256": "27E753C1CE3FEF3E1C02C88D6266BF6378B34E4DE74E3C4AAD9196A9CEC82B48",
+      "outputSha256": "A696DA40B0F160720D17E40B0AD13D9435AD57F1F6614A7C59325EDF84BF9205",
+      "changes": [
+        {
+          "from": "r8",
+          "to": "r9",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "path": "README.hi.txt",
+      "inputSha256": "2CF3C28CCC78309C6AF4B30E1150C0FB5CA63EEA047D53070F8E2195B56A0417",
+      "outputSha256": "3CD31F4B869BBA7AEA1F96394617A6540B3AA2F55BAE809E82B4B58D6E8E0955",
+      "changes": [
+        {
+          "from": "r8",
+          "to": "r9",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "path": "README.id.txt",
+      "inputSha256": "E07EC0DC6D3F417D3E528159ACB8F2AEA3A377E29460D55C739949DC9D8EBB0A",
+      "outputSha256": "8EE009F9612C4433969BD15CF380D40EE0CBDCF1266C2B0FA9899D77DE183B1F",
+      "changes": [
+        {
+          "from": "r8",
+          "to": "r9",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "path": "README.md",
+      "inputSha256": "29B45BEDA50F46481FDA4ADBED6F753AADC73CB8142E8FC3DBBF3D830FDB137A",
+      "outputSha256": "54D75A914EE14AC2C7236E8E0122C7FE064AB92D886842E7EBF21D8E4F5D2727",
+      "changes": [
+        {
+          "from": "WN-CANDIDATE-20261001-invited-08",
+          "to": "WN-CANDIDATE-20261001-invited-09",
+          "count": 1
+        },
+        {
+          "from": "2026.10.01.8",
+          "to": "2026.10.01.9",
+          "count": 1
+        },
+        {
+          "from": "r8",
+          "to": "r9",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "path": "README.pt-BR.txt",
+      "inputSha256": "78E0979DB944A7B9D9DB4201074AE5DC219D8E67A152DA0D554BEE29EF6D5A30",
+      "outputSha256": "9B82CA0B22A1F28DBEC1B575E20D5B81B5BC564454288F4B3C333673C9E0CC2C",
+      "changes": [
+        {
+          "from": "r8",
+          "to": "r9",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "path": "README.ru.txt",
+      "inputSha256": "433FB9CB2583A52DC03C3583721BE8523AA466F99C76503F22784CB0CA895F88",
+      "outputSha256": "0FAB10BA74409097AC554A3AE66189C19FEEE117CD489654622F19FDC2501C5D",
+      "changes": [
+        {
+          "from": "r8",
+          "to": "r9",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "path": "README.th.txt",
+      "inputSha256": "C177C05FEC6D5BB58E74692F9B4221C23D45BA2D044449F885267BDE9DBE311F",
+      "outputSha256": "EAAF0A4D00AF519AE06EB2F62A3AB75B6D492F87A2C9109EC72BDE7BBB6F866B",
+      "changes": [
+        {
+          "from": "r8",
+          "to": "r9",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "path": "README.vi.txt",
+      "inputSha256": "98CF852081DC8C17905CF5CC266A8F8F248CAD100EA1CDF95A7399CE89B9ADF5",
+      "outputSha256": "2322BE46CB9E2EC9480FE423A2B28AFDD203CFE3A4C84C9BBA233B0F079557AE",
+      "changes": [
+        {
+          "from": "r8",
+          "to": "r9",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "path": "README.zh-TW.txt",
+      "inputSha256": "46396173AEC2517C12410B9F8E903B036C35301F709459923CEF671262F8DA4B",
+      "outputSha256": "3E160DEF5588E38B44A11E702608B98F71D41E79CE65004D28E8786DFDD15597",
+      "changes": [
+        {
+          "from": "r8",
+          "to": "r9",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "path": "languages/.gitattributes",
+      "inputSha256": "FCF1A16CA1173382EE689B17203EC89EB69996474E5B2F22210C29CCF00486F6",
+      "outputSha256": "FCF1A16CA1173382EE689B17203EC89EB69996474E5B2F22210C29CCF00486F6",
+      "changes": []
+    },
+    {
+      "path": "languages/HINDI-UPDATE.json",
+      "inputSha256": "EFC170EFF2E3C5DAD0051C2DDF4D8984DA9F1DFC44209A44C19F94E71DD79328",
+      "outputSha256": "EFC170EFF2E3C5DAD0051C2DDF4D8984DA9F1DFC44209A44C19F94E71DD79328",
+      "changes": []
+    },
+    {
+      "path": "languages/Hindi.isl",
+      "inputSha256": "D61D0938ACB6D5191B26A01E3CAB63A16115E8ADDA17FF0FFE19D4A95F7D7AB2",
+      "outputSha256": "D61D0938ACB6D5191B26A01E3CAB63A16115E8ADDA17FF0FFE19D4A95F7D7AB2",
+      "changes": []
+    },
+    {
+      "path": "languages/Hindi.islu",
+      "inputSha256": "FBB1045F3B25842BB926BDD5400D07875F4C8572B04FFAB14BB7ADD9882CC19B",
+      "outputSha256": "FBB1045F3B25842BB926BDD5400D07875F4C8572B04FFAB14BB7ADD9882CC19B",
+      "changes": []
+    },
+    {
+      "path": "languages/Indonesian.isl",
+      "inputSha256": "06232EFFF765902DDF7BE78E39F1C5471B7E35F4C7C537DEEB76692F3B5E208D",
+      "outputSha256": "06232EFFF765902DDF7BE78E39F1C5471B7E35F4C7C537DEEB76692F3B5E208D",
+      "changes": []
+    },
+    {
+      "path": "languages/Inno-Setup-LICENSE.txt",
+      "inputSha256": "2E5346868C2A18434489824E11D65C3031620F792FEFC415D05F19CD441ABF5C",
+      "outputSha256": "2E5346868C2A18434489824E11D65C3031620F792FEFC415D05F19CD441ABF5C",
+      "changes": []
+    },
+    {
+      "path": "languages/SOURCES.json",
+      "inputSha256": "0AF4F07A71A01326450319E640EC1563DC9EDBCC15F85CA5A828AD55B4D5E4DD",
+      "outputSha256": "0AF4F07A71A01326450319E640EC1563DC9EDBCC15F85CA5A828AD55B4D5E4DD",
+      "changes": []
+    },
+    {
+      "path": "languages/VIETNAMESE-UPDATE.json",
+      "inputSha256": "4DF649AEE446FAC497B963819787595539A89846837BC0EA86998A60D9AEF0DB",
+      "outputSha256": "4DF649AEE446FAC497B963819787595539A89846837BC0EA86998A60D9AEF0DB",
+      "changes": []
+    },
+    {
+      "path": "languages/Vietnamese.isl",
+      "inputSha256": "AAE1FADDEE261F5ED57CE9A3EB5DEB5A042F3FCA6DFB7A1E8FA83502380FE741",
+      "outputSha256": "AAE1FADDEE261F5ED57CE9A3EB5DEB5A042F3FCA6DFB7A1E8FA83502380FE741",
+      "changes": []
+    },
+    {
+      "path": "languages/Vietnamese.upstream.isl",
+      "inputSha256": "1ED7F5580DF3A302A6955C72DDBFA8E3C3E24D5ED22EA85F55BAD548859B3A19",
+      "outputSha256": "1ED7F5580DF3A302A6955C72DDBFA8E3C3E24D5ED22EA85F55BAD548859B3A19",
+      "changes": []
+    },
+    {
+      "path": "tools/vc_redist.x64.exe",
+      "inputSha256": "843068991DAAA1F73AD9F6239BCE4D0F6A07A51F18C37EA2A867E9BECA71295C",
+      "outputSha256": "843068991DAAA1F73AD9F6239BCE4D0F6A07A51F18C37EA2A867E9BECA71295C",
+      "changes": []
+    }
+  ],
+  "publicPublished": false
+}

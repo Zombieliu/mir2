@@ -1,0 +1,31 @@
+{
+  "passed": true,
+  "evidenceKind": "actual Windows native UI smoke and restart",
+  "observedAtUtc": "2026-10-29T06:24:59.8871302Z",
+  "binarySha256": "abd92be30f421328c3309eac66bbafcdd542df4117ed24ced872098e9b9b64ff",
+  "screenshots": 10,
+  "localeChoices": 10,
+  "uiLanguageSequence": [
+    "zh-CN",
+    "en",
+    "zh-CN"
+  ],
+  "savedLocale": "zh-CN",
+  "oppositeRestartSeed": "en",
+  "afterRestartObservedLocale": "zh-CN",
+  "rechargePages": [
+    "法币充值",
+    "USDC链上充值",
+    "月卡"
+  ],
+  "credit": 100,
+  "gold": 10000,
+  "usdcOrderCount": 3,
+  "economyHashUnchanged": true,
+  "stableEconomyHash": "62075679239d8dd5370fc02c307c81f74d379548844ef2f061c66f10789b8a27",
+  "newPaymentAttempted": false,
+  "monthlyCardPurchasedOrUsed": false,
+  "finalClientPanicFound": false,
+  "scope": "Actual Windows UI and isolated file-authority Gateway; no new chain payment, production deploy or human Accepted",
+  "firstStartupFailure": "Recorded separately; fixed native_display nine-column indexing and retested"
+}

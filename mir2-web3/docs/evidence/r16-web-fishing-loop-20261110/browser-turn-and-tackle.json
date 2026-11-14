@@ -1,0 +1,5703 @@
+{
+  "schema": "mir2.r16.fishing-browser-cold-and-tackle.v1",
+  "scope": "Interim physical Chrome on isolated R16 File world. The transition observer only reads frame and socket output.",
+  "runs": [
+    {
+      "tag": "candidate-r1-cold-transition-webgpu-r4",
+      "rawSha256": "469feebd65387a0ebaca27684d0029e60dc0e9c6b67d4b979b1a0302f12f503f",
+      "renderer": "webgpu",
+      "turn": {
+        "sent": {
+          "type": "turn",
+          "seq": 618,
+          "at": 1794270482030,
+          "direction": "DownLeft"
+        },
+        "ack": {
+          "packet": "UserLocation",
+          "seq": 619,
+          "at": 1794270482050,
+          "x": 342,
+          "y": 244,
+          "direction": "DownLeft"
+        }
+      },
+      "poseTransitionReadback": {
+        "earliest": [
+          {
+            "nowMs": 1794270477856,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270477856,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270477891,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270477891,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270477907,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270477907,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270477912,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270477912,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270477931,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270477931,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270477986,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270477986,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270478088,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270478088,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270478180,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270478180,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270478187,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270478187,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270478287,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270478287,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          }
+        ],
+        "firstAuthority": [
+          {
+            "nowMs": 1794270477856,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270477856,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270477891,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270477891,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270477907,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270477907,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270477912,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270477912,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270477931,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270477931,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270477986,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270477986,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270478088,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270478088,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270478180,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270478180,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270478187,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270478187,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270478287,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270478287,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270478388,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 1,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270478388,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270478487,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 1,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270478487,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          }
+        ],
+        "transitions": [
+          {
+            "nowMs": 1794270477856,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270477856,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270482042,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "DownLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": false
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "DownLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": false
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270482066,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "DownLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 3,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "DownLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": false
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 3,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "DownLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          }
+        ]
+      },
+      "cold": {
+        "normalCastOuts": [],
+        "incomingFishing": [],
+        "early": {
+          "earliest": [
+            {
+              "nowMs": 1794270477856,
+              "worldKey": "world-fishing-source:1",
+              "worldSeed": 1793403082,
+              "input": {
+                "objectId": "1000",
+                "kind": "selfPlayer",
+                "direction": "UpLeft",
+                "action": "standing",
+                "actionSourceKey": "world-fishing-source:1",
+                "actionSourceRevision": 2,
+                "bootstrapKnown": true,
+                "actionKnown": true
+              },
+              "output": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "UpLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": true,
+                "worldKey": "world-fishing-source:1",
+                "objectId": "1000",
+                "actionSourceKey": "world-fishing-source:1",
+                "sourceRevision": 2,
+                "continuityRevision": 1,
+                "bridgeEpoch": 1,
+                "incarnation": 1,
+                "lastNowMs": 1794270477856,
+                "action": "standing",
+                "direction": "UpLeft"
+              },
+              "source": {
+                "sourceKey": "world-fishing-source:1",
+                "revision": 2,
+                "continuityRevision": 1,
+                "animationKnown": true,
+                "bootstrapKnown": true,
+                "fishing": false,
+                "transformType": -1,
+                "self": {
+                  "x": 342,
+                  "y": 244,
+                  "direction": "UpLeft",
+                  "dead": false
+                },
+                "evidence": null
+              }
+            },
+            {
+              "nowMs": 1794270477891,
+              "worldKey": "world-fishing-source:1",
+              "worldSeed": 1793403082,
+              "input": {
+                "objectId": "1000",
+                "kind": "selfPlayer",
+                "direction": "UpLeft",
+                "action": "standing",
+                "actionSourceKey": "world-fishing-source:1",
+                "actionSourceRevision": 2,
+                "bootstrapKnown": true,
+                "actionKnown": true
+              },
+              "output": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "UpLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": true,
+                "worldKey": "world-fishing-source:1",
+                "objectId": "1000",
+                "actionSourceKey": "world-fishing-source:1",
+                "sourceRevision": 2,
+                "continuityRevision": 1,
+                "bridgeEpoch": 1,
+                "incarnation": 1,
+                "lastNowMs": 1794270477891,
+                "action": "standing",
+                "direction": "UpLeft"
+              },
+              "source": {
+                "sourceKey": "world-fishing-source:1",
+                "revision": 2,
+                "continuityRevision": 1,
+                "animationKnown": true,
+                "bootstrapKnown": true,
+                "fishing": false,
+                "transformType": -1,
+                "self": {
+                  "x": 342,
+                  "y": 244,
+                  "direction": "UpLeft",
+                  "dead": false
+                },
+                "evidence": null
+              }
+            },
+            {
+              "nowMs": 1794270477907,
+              "worldKey": "world-fishing-source:1",
+              "worldSeed": 1793403082,
+              "input": {
+                "objectId": "1000",
+                "kind": "selfPlayer",
+                "direction": "UpLeft",
+                "action": "standing",
+                "actionSourceKey": "world-fishing-source:1",
+                "actionSourceRevision": 2,
+                "bootstrapKnown": true,
+                "actionKnown": true
+              },
+              "output": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "UpLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": true,
+                "worldKey": "world-fishing-source:1",
+                "objectId": "1000",
+                "actionSourceKey": "world-fishing-source:1",
+                "sourceRevision": 2,
+                "continuityRevision": 1,
+                "bridgeEpoch": 1,
+                "incarnation": 1,
+                "lastNowMs": 1794270477907,
+                "action": "standing",
+                "direction": "UpLeft"
+              },
+              "source": {
+                "sourceKey": "world-fishing-source:1",
+                "revision": 2,
+                "continuityRevision": 1,
+                "animationKnown": true,
+                "bootstrapKnown": true,
+                "fishing": false,
+                "transformType": -1,
+                "self": {
+                  "x": 342,
+                  "y": 244,
+                  "direction": "UpLeft",
+                  "dead": false
+                },
+                "evidence": null
+              }
+            },
+            {
+              "nowMs": 1794270477912,
+              "worldKey": "world-fishing-source:1",
+              "worldSeed": 1793403082,
+              "input": {
+                "objectId": "1000",
+                "kind": "selfPlayer",
+                "direction": "UpLeft",
+                "action": "standing",
+                "actionSourceKey": "world-fishing-source:1",
+                "actionSourceRevision": 2,
+                "bootstrapKnown": true,
+                "actionKnown": true
+              },
+              "output": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "UpLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": true,
+                "worldKey": "world-fishing-source:1",
+                "objectId": "1000",
+                "actionSourceKey": "world-fishing-source:1",
+                "sourceRevision": 2,
+                "continuityRevision": 1,
+                "bridgeEpoch": 1,
+                "incarnation": 1,
+                "lastNowMs": 1794270477912,
+                "action": "standing",
+                "direction": "UpLeft"
+              },
+              "source": {
+                "sourceKey": "world-fishing-source:1",
+                "revision": 2,
+                "continuityRevision": 1,
+                "animationKnown": true,
+                "bootstrapKnown": true,
+                "fishing": false,
+                "transformType": -1,
+                "self": {
+                  "x": 342,
+                  "y": 244,
+                  "direction": "UpLeft",
+                  "dead": false
+                },
+                "evidence": null
+              }
+            },
+            {
+              "nowMs": 1794270477931,
+              "worldKey": "world-fishing-source:1",
+              "worldSeed": 1793403082,
+              "input": {
+                "objectId": "1000",
+                "kind": "selfPlayer",
+                "direction": "UpLeft",
+                "action": "standing",
+                "actionSourceKey": "world-fishing-source:1",
+                "actionSourceRevision": 2,
+                "bootstrapKnown": true,
+                "actionKnown": true
+              },
+              "output": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "UpLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": true,
+                "worldKey": "world-fishing-source:1",
+                "objectId": "1000",
+                "actionSourceKey": "world-fishing-source:1",
+                "sourceRevision": 2,
+                "continuityRevision": 1,
+                "bridgeEpoch": 1,
+                "incarnation": 1,
+                "lastNowMs": 1794270477931,
+                "action": "standing",
+                "direction": "UpLeft"
+              },
+              "source": {
+                "sourceKey": "world-fishing-source:1",
+                "revision": 2,
+                "continuityRevision": 1,
+                "animationKnown": true,
+                "bootstrapKnown": true,
+                "fishing": false,
+                "transformType": -1,
+                "self": {
+                  "x": 342,
+                  "y": 244,
+                  "direction": "UpLeft",
+                  "dead": false
+                },
+                "evidence": null
+              }
+            },
+            {
+              "nowMs": 1794270477986,
+              "worldKey": "world-fishing-source:1",
+              "worldSeed": 1793403082,
+              "input": {
+                "objectId": "1000",
+                "kind": "selfPlayer",
+                "direction": "UpLeft",
+                "action": "standing",
+                "actionSourceKey": "world-fishing-source:1",
+                "actionSourceRevision": 2,
+                "bootstrapKnown": true,
+                "actionKnown": true
+              },
+              "output": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "UpLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": true,
+                "worldKey": "world-fishing-source:1",
+                "objectId": "1000",
+                "actionSourceKey": "world-fishing-source:1",
+                "sourceRevision": 2,
+                "continuityRevision": 1,
+                "bridgeEpoch": 1,
+                "incarnation": 1,
+                "lastNowMs": 1794270477986,
+                "action": "standing",
+                "direction": "UpLeft"
+              },
+              "source": {
+                "sourceKey": "world-fishing-source:1",
+                "revision": 2,
+                "continuityRevision": 1,
+                "animationKnown": true,
+                "bootstrapKnown": true,
+                "fishing": false,
+                "transformType": -1,
+                "self": {
+                  "x": 342,
+                  "y": 244,
+                  "direction": "UpLeft",
+                  "dead": false
+                },
+                "evidence": null
+              }
+            },
+            {
+              "nowMs": 1794270478088,
+              "worldKey": "world-fishing-source:1",
+              "worldSeed": 1793403082,
+              "input": {
+                "objectId": "1000",
+                "kind": "selfPlayer",
+                "direction": "UpLeft",
+                "action": "standing",
+                "actionSourceKey": "world-fishing-source:1",
+                "actionSourceRevision": 2,
+                "bootstrapKnown": true,
+                "actionKnown": true
+              },
+              "output": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "UpLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": true,
+                "worldKey": "world-fishing-source:1",
+                "objectId": "1000",
+                "actionSourceKey": "world-fishing-source:1",
+                "sourceRevision": 2,
+                "continuityRevision": 1,
+                "bridgeEpoch": 1,
+                "incarnation": 1,
+                "lastNowMs": 1794270478088,
+                "action": "standing",
+                "direction": "UpLeft"
+              },
+              "source": {
+                "sourceKey": "world-fishing-source:1",
+                "revision": 2,
+                "continuityRevision": 1,
+                "animationKnown": true,
+                "bootstrapKnown": true,
+                "fishing": false,
+                "transformType": -1,
+                "self": {
+                  "x": 342,
+                  "y": 244,
+                  "direction": "UpLeft",
+                  "dead": false
+                },
+                "evidence": null
+              }
+            },
+            {
+              "nowMs": 1794270478180,
+              "worldKey": "world-fishing-source:1",
+              "worldSeed": 1793403082,
+              "input": {
+                "objectId": "1000",
+                "kind": "selfPlayer",
+                "direction": "UpLeft",
+                "action": "standing",
+                "actionSourceKey": "world-fishing-source:1",
+                "actionSourceRevision": 2,
+                "bootstrapKnown": true,
+                "actionKnown": true
+              },
+              "output": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "UpLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": true,
+                "worldKey": "world-fishing-source:1",
+                "objectId": "1000",
+                "actionSourceKey": "world-fishing-source:1",
+                "sourceRevision": 2,
+                "continuityRevision": 1,
+                "bridgeEpoch": 1,
+                "incarnation": 1,
+                "lastNowMs": 1794270478180,
+                "action": "standing",
+                "direction": "UpLeft"
+              },
+              "source": {
+                "sourceKey": "world-fishing-source:1",
+                "revision": 2,
+                "continuityRevision": 1,
+                "animationKnown": true,
+                "bootstrapKnown": true,
+                "fishing": false,
+                "transformType": -1,
+                "self": {
+                  "x": 342,
+                  "y": 244,
+                  "direction": "UpLeft",
+                  "dead": false
+                },
+                "evidence": null
+              }
+            },
+            {
+              "nowMs": 1794270478187,
+              "worldKey": "world-fishing-source:1",
+              "worldSeed": 1793403082,
+              "input": {
+                "objectId": "1000",
+                "kind": "selfPlayer",
+                "direction": "UpLeft",
+                "action": "standing",
+                "actionSourceKey": "world-fishing-source:1",
+                "actionSourceRevision": 2,
+                "bootstrapKnown": true,
+                "actionKnown": true
+              },
+              "output": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "UpLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": true,
+                "worldKey": "world-fishing-source:1",
+                "objectId": "1000",
+                "actionSourceKey": "world-fishing-source:1",
+                "sourceRevision": 2,
+                "continuityRevision": 1,
+                "bridgeEpoch": 1,
+                "incarnation": 1,
+                "lastNowMs": 1794270478187,
+                "action": "standing",
+                "direction": "UpLeft"
+              },
+              "source": {
+                "sourceKey": "world-fishing-source:1",
+                "revision": 2,
+                "continuityRevision": 1,
+                "animationKnown": true,
+                "bootstrapKnown": true,
+                "fishing": false,
+                "transformType": -1,
+                "self": {
+                  "x": 342,
+                  "y": 244,
+                  "direction": "UpLeft",
+                  "dead": false
+                },
+                "evidence": null
+              }
+            },
+            {
+              "nowMs": 1794270478287,
+              "worldKey": "world-fishing-source:1",
+              "worldSeed": 1793403082,
+              "input": {
+                "objectId": "1000",
+                "kind": "selfPlayer",
+                "direction": "UpLeft",
+                "action": "standing",
+                "actionSourceKey": "world-fishing-source:1",
+                "actionSourceRevision": 2,
+                "bootstrapKnown": true,
+                "actionKnown": true
+              },
+              "output": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "UpLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": true,
+                "worldKey": "world-fishing-source:1",
+                "objectId": "1000",
+                "actionSourceKey": "world-fishing-source:1",
+                "sourceRevision": 2,
+                "continuityRevision": 1,
+                "bridgeEpoch": 1,
+                "incarnation": 1,
+                "lastNowMs": 1794270478287,
+                "action": "standing",
+                "direction": "UpLeft"
+              },
+              "source": {
+                "sourceKey": "world-fishing-source:1",
+                "revision": 2,
+                "continuityRevision": 1,
+                "animationKnown": true,
+                "bootstrapKnown": true,
+                "fishing": false,
+                "transformType": -1,
+                "self": {
+                  "x": 342,
+                  "y": 244,
+                  "direction": "UpLeft",
+                  "dead": false
+                },
+                "evidence": null
+              }
+            }
+          ],
+          "firstAuthority": [
+            {
+              "nowMs": 1794270477856,
+              "worldKey": "world-fishing-source:1",
+              "worldSeed": 1793403082,
+              "input": {
+                "objectId": "1000",
+                "kind": "selfPlayer",
+                "direction": "UpLeft",
+                "action": "standing",
+                "actionSourceKey": "world-fishing-source:1",
+                "actionSourceRevision": 2,
+                "bootstrapKnown": true,
+                "actionKnown": true
+              },
+              "output": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "UpLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": true,
+                "worldKey": "world-fishing-source:1",
+                "objectId": "1000",
+                "actionSourceKey": "world-fishing-source:1",
+                "sourceRevision": 2,
+                "continuityRevision": 1,
+                "bridgeEpoch": 1,
+                "incarnation": 1,
+                "lastNowMs": 1794270477856,
+                "action": "standing",
+                "direction": "UpLeft"
+              },
+              "source": {
+                "sourceKey": "world-fishing-source:1",
+                "revision": 2,
+                "continuityRevision": 1,
+                "animationKnown": true,
+                "bootstrapKnown": true,
+                "fishing": false,
+                "transformType": -1,
+                "self": {
+                  "x": 342,
+                  "y": 244,
+                  "direction": "UpLeft",
+                  "dead": false
+                },
+                "evidence": null
+              }
+            },
+            {
+              "nowMs": 1794270477891,
+              "worldKey": "world-fishing-source:1",
+              "worldSeed": 1793403082,
+              "input": {
+                "objectId": "1000",
+                "kind": "selfPlayer",
+                "direction": "UpLeft",
+                "action": "standing",
+                "actionSourceKey": "world-fishing-source:1",
+                "actionSourceRevision": 2,
+                "bootstrapKnown": true,
+                "actionKnown": true
+              },
+              "output": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "UpLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": true,
+                "worldKey": "world-fishing-source:1",
+                "objectId": "1000",
+                "actionSourceKey": "world-fishing-source:1",
+                "sourceRevision": 2,
+                "continuityRevision": 1,
+                "bridgeEpoch": 1,
+                "incarnation": 1,
+                "lastNowMs": 1794270477891,
+                "action": "standing",
+                "direction": "UpLeft"
+              },
+              "source": {
+                "sourceKey": "world-fishing-source:1",
+                "revision": 2,
+                "continuityRevision": 1,
+                "animationKnown": true,
+                "bootstrapKnown": true,
+                "fishing": false,
+                "transformType": -1,
+                "self": {
+                  "x": 342,
+                  "y": 244,
+                  "direction": "UpLeft",
+                  "dead": false
+                },
+                "evidence": null
+              }
+            },
+            {
+              "nowMs": 1794270477907,
+              "worldKey": "world-fishing-source:1",
+              "worldSeed": 1793403082,
+              "input": {
+                "objectId": "1000",
+                "kind": "selfPlayer",
+                "direction": "UpLeft",
+                "action": "standing",
+                "actionSourceKey": "world-fishing-source:1",
+                "actionSourceRevision": 2,
+                "bootstrapKnown": true,
+                "actionKnown": true
+              },
+              "output": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "UpLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": true,
+                "worldKey": "world-fishing-source:1",
+                "objectId": "1000",
+                "actionSourceKey": "world-fishing-source:1",
+                "sourceRevision": 2,
+                "continuityRevision": 1,
+                "bridgeEpoch": 1,
+                "incarnation": 1,
+                "lastNowMs": 1794270477907,
+                "action": "standing",
+                "direction": "UpLeft"
+              },
+              "source": {
+                "sourceKey": "world-fishing-source:1",
+                "revision": 2,
+                "continuityRevision": 1,
+                "animationKnown": true,
+                "bootstrapKnown": true,
+                "fishing": false,
+                "transformType": -1,
+                "self": {
+                  "x": 342,
+                  "y": 244,
+                  "direction": "UpLeft",
+                  "dead": false
+                },
+                "evidence": null
+              }
+            },
+            {
+              "nowMs": 1794270477912,
+              "worldKey": "world-fishing-source:1",
+              "worldSeed": 1793403082,
+              "input": {
+                "objectId": "1000",
+                "kind": "selfPlayer",
+                "direction": "UpLeft",
+                "action": "standing",
+                "actionSourceKey": "world-fishing-source:1",
+                "actionSourceRevision": 2,
+                "bootstrapKnown": true,
+                "actionKnown": true
+              },
+              "output": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "UpLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": true,
+                "worldKey": "world-fishing-source:1",
+                "objectId": "1000",
+                "actionSourceKey": "world-fishing-source:1",
+                "sourceRevision": 2,
+                "continuityRevision": 1,
+                "bridgeEpoch": 1,
+                "incarnation": 1,
+                "lastNowMs": 1794270477912,
+                "action": "standing",
+                "direction": "UpLeft"
+              },
+              "source": {
+                "sourceKey": "world-fishing-source:1",
+                "revision": 2,
+                "continuityRevision": 1,
+                "animationKnown": true,
+                "bootstrapKnown": true,
+                "fishing": false,
+                "transformType": -1,
+                "self": {
+                  "x": 342,
+                  "y": 244,
+                  "direction": "UpLeft",
+                  "dead": false
+                },
+                "evidence": null
+              }
+            },
+            {
+              "nowMs": 1794270477931,
+              "worldKey": "world-fishing-source:1",
+              "worldSeed": 1793403082,
+              "input": {
+                "objectId": "1000",
+                "kind": "selfPlayer",
+                "direction": "UpLeft",
+                "action": "standing",
+                "actionSourceKey": "world-fishing-source:1",
+                "actionSourceRevision": 2,
+                "bootstrapKnown": true,
+                "actionKnown": true
+              },
+              "output": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "UpLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": true,
+                "worldKey": "world-fishing-source:1",
+                "objectId": "1000",
+                "actionSourceKey": "world-fishing-source:1",
+                "sourceRevision": 2,
+                "continuityRevision": 1,
+                "bridgeEpoch": 1,
+                "incarnation": 1,
+                "lastNowMs": 1794270477931,
+                "action": "standing",
+                "direction": "UpLeft"
+              },
+              "source": {
+                "sourceKey": "world-fishing-source:1",
+                "revision": 2,
+                "continuityRevision": 1,
+                "animationKnown": true,
+                "bootstrapKnown": true,
+                "fishing": false,
+                "transformType": -1,
+                "self": {
+                  "x": 342,
+                  "y": 244,
+                  "direction": "UpLeft",
+                  "dead": false
+                },
+                "evidence": null
+              }
+            },
+            {
+              "nowMs": 1794270477986,
+              "worldKey": "world-fishing-source:1",
+              "worldSeed": 1793403082,
+              "input": {
+                "objectId": "1000",
+                "kind": "selfPlayer",
+                "direction": "UpLeft",
+                "action": "standing",
+                "actionSourceKey": "world-fishing-source:1",
+                "actionSourceRevision": 2,
+                "bootstrapKnown": true,
+                "actionKnown": true
+              },
+              "output": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "UpLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": true,
+                "worldKey": "world-fishing-source:1",
+                "objectId": "1000",
+                "actionSourceKey": "world-fishing-source:1",
+                "sourceRevision": 2,
+                "continuityRevision": 1,
+                "bridgeEpoch": 1,
+                "incarnation": 1,
+                "lastNowMs": 1794270477986,
+                "action": "standing",
+                "direction": "UpLeft"
+              },
+              "source": {
+                "sourceKey": "world-fishing-source:1",
+                "revision": 2,
+                "continuityRevision": 1,
+                "animationKnown": true,
+                "bootstrapKnown": true,
+                "fishing": false,
+                "transformType": -1,
+                "self": {
+                  "x": 342,
+                  "y": 244,
+                  "direction": "UpLeft",
+                  "dead": false
+                },
+                "evidence": null
+              }
+            },
+            {
+              "nowMs": 1794270478088,
+              "worldKey": "world-fishing-source:1",
+              "worldSeed": 1793403082,
+              "input": {
+                "objectId": "1000",
+                "kind": "selfPlayer",
+                "direction": "UpLeft",
+                "action": "standing",
+                "actionSourceKey": "world-fishing-source:1",
+                "actionSourceRevision": 2,
+                "bootstrapKnown": true,
+                "actionKnown": true
+              },
+              "output": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "UpLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": true,
+                "worldKey": "world-fishing-source:1",
+                "objectId": "1000",
+                "actionSourceKey": "world-fishing-source:1",
+                "sourceRevision": 2,
+                "continuityRevision": 1,
+                "bridgeEpoch": 1,
+                "incarnation": 1,
+                "lastNowMs": 1794270478088,
+                "action": "standing",
+                "direction": "UpLeft"
+              },
+              "source": {
+                "sourceKey": "world-fishing-source:1",
+                "revision": 2,
+                "continuityRevision": 1,
+                "animationKnown": true,
+                "bootstrapKnown": true,
+                "fishing": false,
+                "transformType": -1,
+                "self": {
+                  "x": 342,
+                  "y": 244,
+                  "direction": "UpLeft",
+                  "dead": false
+                },
+                "evidence": null
+              }
+            },
+            {
+              "nowMs": 1794270478180,
+              "worldKey": "world-fishing-source:1",
+              "worldSeed": 1793403082,
+              "input": {
+                "objectId": "1000",
+                "kind": "selfPlayer",
+                "direction": "UpLeft",
+                "action": "standing",
+                "actionSourceKey": "world-fishing-source:1",
+                "actionSourceRevision": 2,
+                "bootstrapKnown": true,
+                "actionKnown": true
+              },
+              "output": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "UpLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": true,
+                "worldKey": "world-fishing-source:1",
+                "objectId": "1000",
+                "actionSourceKey": "world-fishing-source:1",
+                "sourceRevision": 2,
+                "continuityRevision": 1,
+                "bridgeEpoch": 1,
+                "incarnation": 1,
+                "lastNowMs": 1794270478180,
+                "action": "standing",
+                "direction": "UpLeft"
+              },
+              "source": {
+                "sourceKey": "world-fishing-source:1",
+                "revision": 2,
+                "continuityRevision": 1,
+                "animationKnown": true,
+                "bootstrapKnown": true,
+                "fishing": false,
+                "transformType": -1,
+                "self": {
+                  "x": 342,
+                  "y": 244,
+                  "direction": "UpLeft",
+                  "dead": false
+                },
+                "evidence": null
+              }
+            },
+            {
+              "nowMs": 1794270478187,
+              "worldKey": "world-fishing-source:1",
+              "worldSeed": 1793403082,
+              "input": {
+                "objectId": "1000",
+                "kind": "selfPlayer",
+                "direction": "UpLeft",
+                "action": "standing",
+                "actionSourceKey": "world-fishing-source:1",
+                "actionSourceRevision": 2,
+                "bootstrapKnown": true,
+                "actionKnown": true
+              },
+              "output": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "UpLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": true,
+                "worldKey": "world-fishing-source:1",
+                "objectId": "1000",
+                "actionSourceKey": "world-fishing-source:1",
+                "sourceRevision": 2,
+                "continuityRevision": 1,
+                "bridgeEpoch": 1,
+                "incarnation": 1,
+                "lastNowMs": 1794270478187,
+                "action": "standing",
+                "direction": "UpLeft"
+              },
+              "source": {
+                "sourceKey": "world-fishing-source:1",
+                "revision": 2,
+                "continuityRevision": 1,
+                "animationKnown": true,
+                "bootstrapKnown": true,
+                "fishing": false,
+                "transformType": -1,
+                "self": {
+                  "x": 342,
+                  "y": 244,
+                  "direction": "UpLeft",
+                  "dead": false
+                },
+                "evidence": null
+              }
+            },
+            {
+              "nowMs": 1794270478287,
+              "worldKey": "world-fishing-source:1",
+              "worldSeed": 1793403082,
+              "input": {
+                "objectId": "1000",
+                "kind": "selfPlayer",
+                "direction": "UpLeft",
+                "action": "standing",
+                "actionSourceKey": "world-fishing-source:1",
+                "actionSourceRevision": 2,
+                "bootstrapKnown": true,
+                "actionKnown": true
+              },
+              "output": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "UpLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": true,
+                "worldKey": "world-fishing-source:1",
+                "objectId": "1000",
+                "actionSourceKey": "world-fishing-source:1",
+                "sourceRevision": 2,
+                "continuityRevision": 1,
+                "bridgeEpoch": 1,
+                "incarnation": 1,
+                "lastNowMs": 1794270478287,
+                "action": "standing",
+                "direction": "UpLeft"
+              },
+              "source": {
+                "sourceKey": "world-fishing-source:1",
+                "revision": 2,
+                "continuityRevision": 1,
+                "animationKnown": true,
+                "bootstrapKnown": true,
+                "fishing": false,
+                "transformType": -1,
+                "self": {
+                  "x": 342,
+                  "y": 244,
+                  "direction": "UpLeft",
+                  "dead": false
+                },
+                "evidence": null
+              }
+            },
+            {
+              "nowMs": 1794270478388,
+              "worldKey": "world-fishing-source:1",
+              "worldSeed": 1793403082,
+              "input": {
+                "objectId": "1000",
+                "kind": "selfPlayer",
+                "direction": "UpLeft",
+                "action": "standing",
+                "actionSourceKey": "world-fishing-source:1",
+                "actionSourceRevision": 2,
+                "bootstrapKnown": true,
+                "actionKnown": true
+              },
+              "output": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "UpLeft",
+                "logicalFrameIndex": 1,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": true,
+                "worldKey": "world-fishing-source:1",
+                "objectId": "1000",
+                "actionSourceKey": "world-fishing-source:1",
+                "sourceRevision": 2,
+                "continuityRevision": 1,
+                "bridgeEpoch": 1,
+                "incarnation": 1,
+                "lastNowMs": 1794270478388,
+                "action": "standing",
+                "direction": "UpLeft"
+              },
+              "source": {
+                "sourceKey": "world-fishing-source:1",
+                "revision": 2,
+                "continuityRevision": 1,
+                "animationKnown": true,
+                "bootstrapKnown": true,
+                "fishing": false,
+                "transformType": -1,
+                "self": {
+                  "x": 342,
+                  "y": 244,
+                  "direction": "UpLeft",
+                  "dead": false
+                },
+                "evidence": null
+              }
+            },
+            {
+              "nowMs": 1794270478487,
+              "worldKey": "world-fishing-source:1",
+              "worldSeed": 1793403082,
+              "input": {
+                "objectId": "1000",
+                "kind": "selfPlayer",
+                "direction": "UpLeft",
+                "action": "standing",
+                "actionSourceKey": "world-fishing-source:1",
+                "actionSourceRevision": 2,
+                "bootstrapKnown": true,
+                "actionKnown": true
+              },
+              "output": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "UpLeft",
+                "logicalFrameIndex": 1,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": true,
+                "worldKey": "world-fishing-source:1",
+                "objectId": "1000",
+                "actionSourceKey": "world-fishing-source:1",
+                "sourceRevision": 2,
+                "continuityRevision": 1,
+                "bridgeEpoch": 1,
+                "incarnation": 1,
+                "lastNowMs": 1794270478487,
+                "action": "standing",
+                "direction": "UpLeft"
+              },
+              "source": {
+                "sourceKey": "world-fishing-source:1",
+                "revision": 2,
+                "continuityRevision": 1,
+                "animationKnown": true,
+                "bootstrapKnown": true,
+                "fishing": false,
+                "transformType": -1,
+                "self": {
+                  "x": 342,
+                  "y": 244,
+                  "direction": "UpLeft",
+                  "dead": false
+                },
+                "evidence": null
+              }
+            }
+          ],
+          "transitions": [
+            {
+              "nowMs": 1794270477856,
+              "worldKey": "world-fishing-source:1",
+              "worldSeed": 1793403082,
+              "input": {
+                "objectId": "1000",
+                "kind": "selfPlayer",
+                "direction": "UpLeft",
+                "action": "standing",
+                "actionSourceKey": "world-fishing-source:1",
+                "actionSourceRevision": 2,
+                "bootstrapKnown": true,
+                "actionKnown": true
+              },
+              "output": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "UpLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": true,
+                "worldKey": "world-fishing-source:1",
+                "objectId": "1000",
+                "actionSourceKey": "world-fishing-source:1",
+                "sourceRevision": 2,
+                "continuityRevision": 1,
+                "bridgeEpoch": 1,
+                "incarnation": 1,
+                "lastNowMs": 1794270477856,
+                "action": "standing",
+                "direction": "UpLeft"
+              },
+              "source": {
+                "sourceKey": "world-fishing-source:1",
+                "revision": 2,
+                "continuityRevision": 1,
+                "animationKnown": true,
+                "bootstrapKnown": true,
+                "fishing": false,
+                "transformType": -1,
+                "self": {
+                  "x": 342,
+                  "y": 244,
+                  "direction": "UpLeft",
+                  "dead": false
+                },
+                "evidence": null
+              }
+            },
+            {
+              "nowMs": 1794270482042,
+              "worldKey": "world-fishing-source:1",
+              "worldSeed": 1793403082,
+              "input": {
+                "objectId": "1000",
+                "kind": "selfPlayer",
+                "direction": "DownLeft",
+                "action": "standing",
+                "actionSourceKey": "world-fishing-source:1",
+                "actionSourceRevision": 2,
+                "bootstrapKnown": true,
+                "actionKnown": false
+              },
+              "output": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "DownLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": false
+              },
+              "source": {
+                "sourceKey": "world-fishing-source:1",
+                "revision": 2,
+                "continuityRevision": 1,
+                "animationKnown": true,
+                "bootstrapKnown": true,
+                "fishing": false,
+                "transformType": -1,
+                "self": {
+                  "x": 342,
+                  "y": 244,
+                  "direction": "UpLeft",
+                  "dead": false
+                },
+                "evidence": null
+              }
+            },
+            {
+              "nowMs": 1794270482066,
+              "worldKey": "world-fishing-source:1",
+              "worldSeed": 1793403082,
+              "input": {
+                "objectId": "1000",
+                "kind": "selfPlayer",
+                "direction": "DownLeft",
+                "action": "standing",
+                "actionSourceKey": "world-fishing-source:1",
+                "actionSourceRevision": 3,
+                "bootstrapKnown": true,
+                "actionKnown": true
+              },
+              "output": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "DownLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": false
+              },
+              "source": {
+                "sourceKey": "world-fishing-source:1",
+                "revision": 3,
+                "continuityRevision": 1,
+                "animationKnown": true,
+                "bootstrapKnown": true,
+                "fishing": false,
+                "transformType": -1,
+                "self": {
+                  "x": 342,
+                  "y": 244,
+                  "direction": "DownLeft",
+                  "dead": false
+                },
+                "evidence": null
+              }
+            }
+          ]
+        },
+        "latest": [
+          {
+            "nowMs": 1794270487506,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "DownLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 3,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "DownLeft",
+              "logicalFrameIndex": 3,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": false
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 3,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "DownLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270487596,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "DownLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 3,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "DownLeft",
+              "logicalFrameIndex": 3,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": false
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 3,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "DownLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270487697,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "DownLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 3,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "DownLeft",
+              "logicalFrameIndex": 3,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": false
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 3,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "DownLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270487809,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "DownLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 3,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "DownLeft",
+              "logicalFrameIndex": 3,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": false
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 3,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "DownLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270487916,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "DownLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 3,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "DownLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": false
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 3,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "DownLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270487998,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "DownLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 3,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "DownLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": false
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 3,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "DownLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270488102,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "DownLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 3,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "DownLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": false
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 3,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "DownLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270488211,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "DownLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 3,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "DownLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": false
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 3,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "DownLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270488309,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "DownLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 3,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "DownLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": false
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 3,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "DownLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270488417,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "DownLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 3,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "DownLeft",
+              "logicalFrameIndex": 1,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": false
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 3,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "DownLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270488516,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "DownLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 3,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "DownLeft",
+              "logicalFrameIndex": 1,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": false
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 3,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "DownLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270488622,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 1793403082,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "DownLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 3,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "DownLeft",
+              "logicalFrameIndex": 1,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": false
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 3,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "DownLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          }
+        ],
+        "input": {
+          "keyboard": {
+            "lastKey": null,
+            "lastDispatch": {
+              "reason": "no-held-direction",
+              "source": "held",
+              "at": 1794270488574,
+              "sceneInteractionReady": true,
+              "bevyQuestUiCapturesPointer": false
+            },
+            "lastShortcut": null
+          },
+          "pointer": {
+            "at": 1794270487964,
+            "phase": "click-dispatch",
+            "held": true,
+            "worldTarget": null,
+            "hudHeld": true,
+            "bagHeld": false,
+            "heroHeld": false,
+            "storageHeld": false,
+            "layers": [
+              {
+                "tag": "CANVAS",
+                "canvas": true,
+                "classes": [
+                  "shared-quest-ui-visible"
+                ],
+                "objectId": null
+              },
+              {
+                "tag": "DIV",
+                "canvas": false,
+                "classes": [
+                  "game-world-composite"
+                ],
+                "objectId": null
+              },
+              {
+                "tag": "DIV",
+                "canvas": false,
+                "classes": [
+                  "client-stage-frame"
+                ],
+                "objectId": null
+              },
+              {
+                "tag": "SECTION",
+                "canvas": false,
+                "classes": [
+                  "mir-stage"
+                ],
+                "objectId": null
+              },
+              {
+                "tag": "MAIN",
+                "canvas": false,
+                "classes": [
+                  "mir-client-page"
+                ],
+                "objectId": null
+              },
+              {
+                "tag": "BODY",
+                "canvas": false,
+                "classes": [
+                  "notranslate"
+                ],
+                "objectId": null
+              },
+              {
+                "tag": "HTML",
+                "canvas": false,
+                "classes": [
+                  "notranslate"
+                ],
+                "objectId": null
+              }
+            ]
+          },
+          "host": {
+            "connectionGeneration": 1,
+            "sessionGeneration": 1,
+            "suspended": null,
+            "sceneDeferred": false,
+            "lastIntent": null,
+            "lastAttempt": null,
+            "lastPickup": null,
+            "self": {
+              "x": 342,
+              "y": 244,
+              "direction": "DownLeft",
+              "dead": false
+            },
+            "queued": null,
+            "controller": {
+              "canSend": true,
+              "sendDelayMs": 0,
+              "blockedMs": 0,
+              "pending": null
+            },
+            "target": null,
+            "targetMapBlocked": false,
+            "targetMapCell": null,
+            "nearbyEntities": [
+              {
+                "objectId": "28",
+                "kind": "npc",
+                "x": 341,
+                "y": 243,
+                "dead": false
+              },
+              {
+                "objectId": "1000000",
+                "kind": "monster",
+                "x": 341,
+                "y": 243,
+                "dead": false
+              }
+            ]
+          }
+        }
+      },
+      "logout": {
+        "sent": {
+          "type": "logOut",
+          "seq": 620,
+          "at": 1794270488976
+        },
+        "ack": {
+          "packet": "LogOutSuccess",
+          "seq": 621,
+          "at": 1794270491435
+        },
+        "file": {
+          "map": "0",
+          "position": {
+            "x": 342,
+            "y": 244
+          },
+          "direction": "DownLeft",
+          "bait": 15,
+          "rodDura": 10000,
+          "hookDura": 8000,
+          "reelDura": 6000
+        }
+      },
+      "errors": [],
+      "closed": {
+        "browser": true,
+        "next": true,
+        "gateway": true
+      }
+    },
+    {
+      "tag": "candidate-r2-cold-transition-webgpu-r1",
+      "rawSha256": "f3ac80abd36917f5a6ec551342275801601c7128abfab14b16222325ef1ad701",
+      "renderer": "webgpu",
+      "turn": {
+        "sent": {
+          "type": "turn",
+          "seq": 618,
+          "at": 1794270710458,
+          "direction": "DownLeft"
+        },
+        "ack": {
+          "packet": "UserLocation",
+          "seq": 619,
+          "at": 1794270710480,
+          "x": 342,
+          "y": 244,
+          "direction": "DownLeft"
+        }
+      },
+      "poseTransitionReadback": {
+        "earliest": [
+          {
+            "nowMs": 1794270705829,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 2297716023,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270705829,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270705850,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 2297716023,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270705850,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270705924,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 2297716023,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270705924,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270706024,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 2297716023,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270706024,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270706138,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 2297716023,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270706138,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270706141,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 2297716023,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270706141,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270706224,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 2297716023,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270706224,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270706315,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 2297716023,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270706315,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270706323,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 2297716023,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270706323,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270706328,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 2297716023,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270706328,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          }
+        ],
+        "firstAuthority": [
+          {
+            "nowMs": 1794270705829,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 2297716023,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270705829,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270705850,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 2297716023,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270705850,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270705924,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 2297716023,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270705924,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270706024,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 2297716023,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270706024,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270706138,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 2297716023,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270706138,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270706141,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 2297716023,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270706141,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270706224,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 2297716023,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270706224,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270706315,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 2297716023,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270706315,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270706323,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 2297716023,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270706323,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270706328,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 2297716023,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270706328,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270706423,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 2297716023,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 1,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270706423,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270706523,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 2297716023,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 1,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270706523,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          }
+        ],
+        "transitions": [
+          {
+            "nowMs": 1794270705829,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 2297716023,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "UpLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "UpLeft",
+              "logicalFrameIndex": 0,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 2,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270705829,
+              "action": "standing",
+              "direction": "UpLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270710494,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 2297716023,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "DownLeft",
+              "action": "standing",
+              "retainedActionToken": "",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 2,
+              "bootstrapKnown": true,
+              "actionKnown": false
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "DownLeft",
+              "logicalFrameIndex": 1,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": false
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 2,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "UpLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270710501,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 2297716023,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "DownLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 3,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "DownLeft",
+              "logicalFrameIndex": 1,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 3,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270710501,
+              "action": "standing",
+              "direction": "DownLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 3,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": false,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "DownLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          },
+          {
+            "nowMs": 1794270711638,
+            "worldKey": "world-fishing-source:1",
+            "worldSeed": 2297716023,
+            "input": {
+              "objectId": "1000",
+              "kind": "selfPlayer",
+              "direction": "DownLeft",
+              "action": "standing",
+              "actionSourceKey": "world-fishing-source:1",
+              "actionSourceRevision": 4,
+              "bootstrapKnown": true,
+              "actionKnown": true
+            },
+            "output": {
+              "objectId": "1000",
+              "incarnation": 1,
+              "animationState": "standing",
+              "action": "standing",
+              "direction": "DownLeft",
+              "logicalFrameIndex": 3,
+              "queueDepth": 0
+            },
+            "peek": {
+              "version": 1,
+              "known": true,
+              "worldKey": "world-fishing-source:1",
+              "objectId": "1000",
+              "actionSourceKey": "world-fishing-source:1",
+              "sourceRevision": 4,
+              "continuityRevision": 1,
+              "bridgeEpoch": 1,
+              "incarnation": 1,
+              "lastNowMs": 1794270711638,
+              "action": "standing",
+              "direction": "DownLeft"
+            },
+            "source": {
+              "sourceKey": "world-fishing-source:1",
+              "revision": 4,
+              "continuityRevision": 1,
+              "animationKnown": true,
+              "bootstrapKnown": true,
+              "fishing": true,
+              "transformType": -1,
+              "self": {
+                "x": 342,
+                "y": 244,
+                "direction": "DownLeft",
+                "dead": false
+              },
+              "evidence": null
+            }
+          }
+        ]
+      },
+      "cast": {
+        "sent": {
+          "type": "fishingCast",
+          "seq": 620,
+          "at": 1794270711457,
+          "castOut": true
+        },
+        "ack": {
+          "packet": "FishingUpdate",
+          "seq": 624,
+          "at": 1794270711614,
+          "objectId": 1000,
+          "fishing": true,
+          "progressPercent": 0,
+          "chancePercent": 38,
+          "foundFish": false,
+          "fishingPoint": {
+            "x": 339,
+            "y": 247
+          }
+        },
+        "baitDebit": {
+          "packet": "DeleteItem",
+          "seq": 622,
+          "at": 1794270711602,
+          "uniqueId": 52297734,
+          "count": 1
+        },
+        "rodDura": {
+          "packet": "DuraChanged",
+          "seq": 623,
+          "at": 1794270711608,
+          "uniqueId": 51970049,
+          "currentDura": 9999
+        },
+        "hookDura": {
+          "packet": "DuraChanged",
+          "seq": 621,
+          "at": 1794270711588,
+          "uniqueId": 52101122,
+          "currentDura": 7999
+        }
+      },
+      "logout": {
+        "sent": {
+          "type": "logOut",
+          "seq": 630,
+          "at": 1794270711995
+        },
+        "ack": {
+          "packet": "LogOutSuccess",
+          "seq": 631,
+          "at": 1794270714216
+        },
+        "file": {
+          "map": "0",
+          "position": {
+            "x": 342,
+            "y": 244
+          },
+          "direction": "DownLeft",
+          "bait": 14,
+          "rodDura": 9999,
+          "hookDura": 7999,
+          "reelDura": 6000
+        }
+      },
+      "errors": [],
+      "closed": {
+        "browser": true,
+        "next": true,
+        "gateway": true
+      },
+      "passed": true
+    },
+    {
+      "tag": "candidate-r2-cold-manual-webgpu-r1",
+      "rawSha256": "f5ef4c0fdbb83e09f85aa1392c10c20a13ec3ac7a02ada916ceda61175f0f333",
+      "renderer": "webgpu",
+      "turn": {
+        "sent": {
+          "type": "turn",
+          "seq": 618,
+          "at": 1794270643196,
+          "direction": "DownLeft"
+        },
+        "ack": {
+          "packet": "UserLocation",
+          "seq": 619,
+          "at": 1794270643216,
+          "x": 342,
+          "y": 244,
+          "direction": "DownLeft"
+        }
+      },
+      "cast": {
+        "sent": {
+          "type": "fishingCast",
+          "seq": 620,
+          "at": 1794270644166,
+          "castOut": true
+        },
+        "ack": {
+          "packet": "FishingUpdate",
+          "seq": 624,
+          "at": 1794270644321,
+          "objectId": 1000,
+          "fishing": true,
+          "progressPercent": 0,
+          "chancePercent": 38,
+          "foundFish": false,
+          "fishingPoint": {
+            "x": 339,
+            "y": 247
+          }
+        },
+        "baitDebit": {
+          "packet": "DeleteItem",
+          "seq": 622,
+          "at": 1794270644313,
+          "uniqueId": 52297734,
+          "count": 1
+        },
+        "rodDura": {
+          "packet": "DuraChanged",
+          "seq": 623,
+          "at": 1794270644316,
+          "uniqueId": 51970049,
+          "currentDura": 9999
+        },
+        "hookDura": {
+          "packet": "DuraChanged",
+          "seq": 621,
+          "at": 1794270644300,
+          "uniqueId": 52101122,
+          "currentDura": 7999
+        }
+      },
+      "reel": {
+        "phases": [
+          {
+            "packet": "FishingUpdate",
+            "seq": 624,
+            "at": 1794270644321,
+            "objectId": 1000,
+            "fishing": true,
+            "progressPercent": 0,
+            "chancePercent": 38,
+            "foundFish": false,
+            "fishingPoint": {
+              "x": 339,
+              "y": 247
+            },
+            "relativeMs": 0
+          },
+          {
+            "packet": "FishingUpdate",
+            "seq": 630,
+            "at": 1794270653940,
+            "objectId": 1000,
+            "fishing": true,
+            "progressPercent": 25,
+            "chancePercent": 38,
+            "foundFish": false,
+            "fishingPoint": {
+              "x": 339,
+              "y": 247
+            },
+            "relativeMs": 9619
+          },
+          {
+            "packet": "FishingUpdate",
+            "seq": 631,
+            "at": 1794270654024,
+            "objectId": 1000,
+            "fishing": true,
+            "progressPercent": 50,
+            "chancePercent": 38,
+            "foundFish": false,
+            "fishingPoint": {
+              "x": 339,
+              "y": 247
+            },
+            "relativeMs": 9703
+          },
+          {
+            "packet": "FishingUpdate",
+            "seq": 632,
+            "at": 1794270654115,
+            "objectId": 1000,
+            "fishing": true,
+            "progressPercent": 75,
+            "chancePercent": 38,
+            "foundFish": false,
+            "fishingPoint": {
+              "x": 339,
+              "y": 247
+            },
+            "relativeMs": 9794
+          },
+          {
+            "packet": "FishingUpdate",
+            "seq": 633,
+            "at": 1794270654209,
+            "objectId": 1000,
+            "fishing": true,
+            "progressPercent": 100,
+            "chancePercent": 38,
+            "foundFish": true,
+            "fishingPoint": {
+              "x": 339,
+              "y": 247
+            },
+            "relativeMs": 9888
+          }
+        ],
+        "bite": {
+          "packet": "FishingUpdate",
+          "seq": 633,
+          "at": 1794270654209,
+          "objectId": 1000,
+          "fishing": true,
+          "progressPercent": 100,
+          "chancePercent": 38,
+          "foundFish": true,
+          "fishingPoint": {
+            "x": 339,
+            "y": 247
+          }
+        },
+        "status": {
+          "biteView": "true",
+          "bars": [
+            {
+              "name": "Success Chance + 38%",
+              "value": "38"
+            },
+            {
+              "name": "Progress",
+              "value": "100"
+            }
+          ],
+          "visible": true
+        },
+        "manual": {
+          "sent": {
+            "type": "fishingCast",
+            "seq": 643,
+            "at": 1794270655088,
+            "castOut": false
+          },
+          "ack": {
+            "packet": "FishingUpdate",
+            "seq": 645,
+            "at": 1794270655229,
+            "objectId": 1000,
+            "fishing": false,
+            "progressPercent": 100,
+            "chancePercent": 38,
+            "foundFish": false,
+            "fishingPoint": {
+              "x": 339,
+              "y": 247
+            }
+          },
+          "defaultEscapeSentNothing": true,
+          "outcome": [
+            {
+              "packet": "Chat",
+              "seq": 644,
+              "at": 1794270655209,
+              "message": "Your fish got away!",
+              "chatType": "System"
+            }
+          ]
+        },
+        "escape": {
+          "cast": {
+            "sent": {
+              "type": "fishingCast",
+              "seq": 649,
+              "at": 1794270656828,
+              "castOut": true
+            },
+            "ack": {
+              "packet": "FishingUpdate",
+              "seq": 653,
+              "at": 1794270656985,
+              "objectId": 1000,
+              "fishing": true,
+              "progressPercent": 0,
+              "chancePercent": 48,
+              "foundFish": false,
+              "fishingPoint": {
+                "x": 339,
+                "y": 247
+              }
+            }
+          },
+          "sent": {
+            "type": "fishingCast",
+            "seq": 656,
+            "at": 1794270657300,
+            "castOut": false
+          },
+          "ack": {
+            "packet": "FishingUpdate",
+            "seq": 657,
+            "at": 1794270657434,
+            "objectId": 1000,
+            "fishing": false,
+            "progressPercent": 100,
+            "chancePercent": 48,
+            "foundFish": false,
+            "fishingPoint": {
+              "x": 339,
+              "y": 247
+            }
+          }
+        },
+        "earlyX": {
+          "cast": {
+            "sent": {
+              "type": "fishingCast",
+              "seq": 659,
+              "at": 1794270658818,
+              "castOut": true
+            },
+            "ack": {
+              "packet": "FishingUpdate",
+              "seq": 663,
+              "at": 1794270658966,
+              "objectId": 1000,
+              "fishing": true,
+              "progressPercent": 0,
+              "chancePercent": 48,
+              "foundFish": false,
+              "fishingPoint": {
+                "x": 339,
+                "y": 247
+              }
+            }
+          },
+          "sent": {
+            "type": "fishingCast",
+            "seq": 665,
+            "at": 1794270659173,
+            "castOut": false
+          },
+          "ack": {
+            "packet": "FishingUpdate",
+            "seq": 666,
+            "at": 1794270659340,
+            "objectId": 1000,
+            "fishing": false,
+            "progressPercent": 100,
+            "chancePercent": 48,
+            "foundFish": false,
+            "fishingPoint": {
+              "x": 339,
+              "y": 247
+            }
+          },
+          "singleTerminal": true
+        },
+        "rewards": [],
+        "baitDebits": 3
+      },
+      "logout": {
+        "sent": {
+          "type": "logOut",
+          "seq": 668,
+          "at": 1794270659820
+        },
+        "ack": {
+          "packet": "LogOutSuccess",
+          "seq": 669,
+          "at": 1794270662169
+        },
+        "file": {
+          "map": "0",
+          "position": {
+            "x": 342,
+            "y": 244
+          },
+          "direction": "DownLeft",
+          "bait": 12,
+          "rodDura": 9997,
+          "hookDura": 7997,
+          "reelDura": 6000,
+          "catchItems": []
+        }
+      },
+      "errors": [],
+      "fixtureUnchanged": true,
+      "originalFixtureUnchanged": true,
+      "closed": {
+        "browser": true,
+        "next": true,
+        "gateway": true
+      },
+      "passed": true
+    },
+    {
+      "tag": "candidate-r2-cold-manual-shared-observed-r1",
+      "rawSha256": "5e0e1bc36a72ab9277130d4780e98f0a21a5f00823922b4cf2b9427dd33eeb0f",
+      "renderer": "shared",
+      "turn": {
+        "sent": {
+          "type": "turn",
+          "seq": 618,
+          "at": 1794270710366,
+          "direction": "DownLeft"
+        },
+        "ack": {
+          "packet": "UserLocation",
+          "seq": 619,
+          "at": 1794270710377,
+          "x": 342,
+          "y": 244,
+          "direction": "DownLeft"
+        }
+      },
+      "cast": {
+        "sent": {
+          "type": "fishingCast",
+          "seq": 620,
+          "at": 1794270711382,
+          "castOut": true
+        },
+        "ack": {
+          "packet": "FishingUpdate",
+          "seq": 624,
+          "at": 1794270711537,
+          "objectId": 1000,
+          "fishing": true,
+          "progressPercent": 0,
+          "chancePercent": 38,
+          "foundFish": false,
+          "fishingPoint": {
+            "x": 339,
+            "y": 247
+          }
+        },
+        "baitDebit": {
+          "packet": "DeleteItem",
+          "seq": 622,
+          "at": 1794270711528,
+          "uniqueId": 52297734,
+          "count": 1
+        },
+        "rodDura": {
+          "packet": "DuraChanged",
+          "seq": 623,
+          "at": 1794270711532,
+          "uniqueId": 51970049,
+          "currentDura": 9999
+        },
+        "hookDura": {
+          "packet": "DuraChanged",
+          "seq": 621,
+          "at": 1794270711517,
+          "uniqueId": 52101122,
+          "currentDura": 7999
+        }
+      },
+      "reel": {
+        "phases": [
+          {
+            "packet": "FishingUpdate",
+            "seq": 624,
+            "at": 1794270711537,
+            "objectId": 1000,
+            "fishing": true,
+            "progressPercent": 0,
+            "chancePercent": 38,
+            "foundFish": false,
+            "fishingPoint": {
+              "x": 339,
+              "y": 247
+            },
+            "relativeMs": 0
+          },
+          {
+            "packet": "FishingUpdate",
+            "seq": 630,
+            "at": 1794270720938,
+            "objectId": 1000,
+            "fishing": true,
+            "progressPercent": 25,
+            "chancePercent": 38,
+            "foundFish": false,
+            "fishingPoint": {
+              "x": 339,
+              "y": 247
+            },
+            "relativeMs": 9401
+          },
+          {
+            "packet": "FishingUpdate",
+            "seq": 631,
+            "at": 1794270721025,
+            "objectId": 1000,
+            "fishing": true,
+            "progressPercent": 50,
+            "chancePercent": 38,
+            "foundFish": false,
+            "fishingPoint": {
+              "x": 339,
+              "y": 247
+            },
+            "relativeMs": 9488
+          },
+          {
+            "packet": "FishingUpdate",
+            "seq": 632,
+            "at": 1794270721124,
+            "objectId": 1000,
+            "fishing": true,
+            "progressPercent": 75,
+            "chancePercent": 38,
+            "foundFish": false,
+            "fishingPoint": {
+              "x": 339,
+              "y": 247
+            },
+            "relativeMs": 9587
+          },
+          {
+            "packet": "FishingUpdate",
+            "seq": 633,
+            "at": 1794270721208,
+            "objectId": 1000,
+            "fishing": true,
+            "progressPercent": 100,
+            "chancePercent": 38,
+            "foundFish": true,
+            "fishingPoint": {
+              "x": 339,
+              "y": 247
+            },
+            "relativeMs": 9671
+          }
+        ],
+        "bite": {
+          "packet": "FishingUpdate",
+          "seq": 633,
+          "at": 1794270721208,
+          "objectId": 1000,
+          "fishing": true,
+          "progressPercent": 100,
+          "chancePercent": 38,
+          "foundFish": true,
+          "fishingPoint": {
+            "x": 339,
+            "y": 247
+          }
+        },
+        "status": {
+          "biteView": "true",
+          "bars": [
+            {
+              "name": "Success Chance + 38%",
+              "value": "38"
+            },
+            {
+              "name": "Progress",
+              "value": "100"
+            }
+          ],
+          "visible": true
+        },
+        "manual": {
+          "sent": {
+            "type": "fishingCast",
+            "seq": 641,
+            "at": 1794270721882,
+            "castOut": false
+          },
+          "ack": {
+            "packet": "FishingUpdate",
+            "seq": 644,
+            "at": 1794270722240,
+            "objectId": 1000,
+            "fishing": false,
+            "progressPercent": 100,
+            "chancePercent": 38,
+            "foundFish": false,
+            "fishingPoint": {
+              "x": 339,
+              "y": 247
+            }
+          },
+          "defaultEscapeSentNothing": true,
+          "outcome": [
+            {
+              "packet": "Chat",
+              "seq": 642,
+              "at": 1794270722223,
+              "message": "Your fish got away!",
+              "chatType": "System"
+            }
+          ]
+        },
+        "escape": {
+          "cast": {
+            "sent": {
+              "type": "fishingCast",
+              "seq": 648,
+              "at": 1794270723690,
+              "castOut": true
+            },
+            "ack": {
+              "packet": "FishingUpdate",
+              "seq": 652,
+              "at": 1794270723830,
+              "objectId": 1000,
+              "fishing": true,
+              "progressPercent": 0,
+              "chancePercent": 38,
+              "foundFish": false,
+              "fishingPoint": {
+                "x": 339,
+                "y": 247
+              }
+            }
+          },
+          "sent": {
+            "type": "fishingCast",
+            "seq": 654,
+            "at": 1794270724054,
+            "castOut": false
+          },
+          "ack": {
+            "packet": "FishingUpdate",
+            "seq": 655,
+            "at": 1794270724256,
+            "objectId": 1000,
+            "fishing": false,
+            "progressPercent": 100,
+            "chancePercent": 38,
+            "foundFish": false,
+            "fishingPoint": {
+              "x": 339,
+              "y": 247
+            }
+          }
+        },
+        "earlyX": {
+          "cast": {
+            "sent": {
+              "type": "fishingCast",
+              "seq": 657,
+              "at": 1794270725563,
+              "castOut": true
+            },
+            "ack": {
+              "packet": "FishingUpdate",
+              "seq": 661,
+              "at": 1794270725710,
+              "objectId": 1000,
+              "fishing": true,
+              "progressPercent": 0,
+              "chancePercent": 38,
+              "foundFish": false,
+              "fishingPoint": {
+                "x": 339,
+                "y": 247
+              }
+            }
+          },
+          "sent": {
+            "type": "fishingCast",
+            "seq": 663,
+            "at": 1794270725922,
+            "castOut": false
+          },
+          "ack": {
+            "packet": "FishingUpdate",
+            "seq": 665,
+            "at": 1794270726041,
+            "objectId": 1000,
+            "fishing": false,
+            "progressPercent": 100,
+            "chancePercent": 38,
+            "foundFish": false,
+            "fishingPoint": {
+              "x": 339,
+              "y": 247
+            }
+          },
+          "singleTerminal": true
+        },
+        "rewards": [],
+        "baitDebits": 3
+      },
+      "logout": {
+        "sent": {
+          "type": "logOut",
+          "seq": 667,
+          "at": 1794270726340
+        },
+        "ack": {
+          "packet": "LogOutSuccess",
+          "seq": 668,
+          "at": 1794270728289
+        },
+        "file": {
+          "map": "0",
+          "position": {
+            "x": 342,
+            "y": 244
+          },
+          "direction": "DownLeft",
+          "bait": 12,
+          "rodDura": 9997,
+          "hookDura": 7997,
+          "reelDura": 5999,
+          "catchItems": []
+        }
+      },
+      "errors": [],
+      "fixtureUnchanged": true,
+      "originalFixtureUnchanged": true,
+      "closed": {
+        "browser": true,
+        "next": true,
+        "gateway": true
+      },
+      "passed": true
+    },
+    {
+      "tag": "candidate-r2-inventory-webgpu-r1",
+      "rawSha256": "afd8d357f679e1f8af9eedac5fb9e1ad590cc6274599e7a17b30fcb3a2e0ab3c",
+      "renderer": "webgpu",
+      "fishingWindow": {
+        "opened": "N",
+        "slots": 5,
+        "ops": [
+          {
+            "slot": 0,
+            "oldUid": 52101122,
+            "newUid": 52101122,
+            "remove": {
+              "sent": {
+                "type": "removeSlotItem",
+                "seq": 618,
+                "at": 1794270655239,
+                "uniqueId": 52101122,
+                "to": 15,
+                "grid": "fishing",
+                "gridTo": "inventory",
+                "fromUniqueId": 51970049
+              },
+              "ack": {
+                "packet": "RemoveSlotItem",
+                "seq": 619,
+                "at": 1794270655393,
+                "success": true,
+                "uniqueId": 52101122,
+                "to": 15,
+                "grid": "Fishing",
+                "gridTo": "Inventory"
+              },
+              "snapshot": 624
+            },
+            "attach": {
+              "sent": {
+                "type": "equipSlotItem",
+                "seq": 625,
+                "at": 1794270655835,
+                "uniqueId": 52101122,
+                "to": 0,
+                "grid": "inventory",
+                "gridTo": "fishing",
+                "toUniqueId": 51970049
+              },
+              "ack": {
+                "packet": "EquipSlotItem",
+                "seq": 626,
+                "at": 1794270655959,
+                "success": true,
+                "uniqueId": 52101122,
+                "to": 0,
+                "grid": "Inventory",
+                "gridTo": "Fishing"
+              },
+              "snapshot": 627
+            }
+          },
+          {
+            "slot": 2,
+            "oldUid": 52297734,
+            "newUid": 52297734,
+            "remove": {
+              "sent": {
+                "type": "removeSlotItem",
+                "seq": 628,
+                "at": 1794270656447,
+                "uniqueId": 52297734,
+                "to": 15,
+                "grid": "fishing",
+                "gridTo": "inventory",
+                "fromUniqueId": 51970049
+              },
+              "ack": {
+                "packet": "RemoveSlotItem",
+                "seq": 629,
+                "at": 1794270656576,
+                "success": true,
+                "uniqueId": 52297734,
+                "to": 15,
+                "grid": "Fishing",
+                "gridTo": "Inventory"
+              },
+              "snapshot": 630
+            },
+            "attach": {
+              "sent": {
+                "type": "equipSlotItem",
+                "seq": 631,
+                "at": 1794270656992,
+                "uniqueId": 52297734,
+                "to": 2,
+                "grid": "inventory",
+                "gridTo": "fishing",
+                "toUniqueId": 51970049
+              },
+              "ack": {
+                "packet": "EquipSlotItem",
+                "seq": 632,
+                "at": 1794270657119,
+                "success": true,
+                "uniqueId": 52297734,
+                "to": 2,
+                "grid": "Inventory",
+                "gridTo": "Fishing"
+              },
+              "snapshot": 633
+            }
+          }
+        ],
+        "worldMovement": []
+      },
+      "finalBaitQty": 15,
+      "logout": {
+        "sent": {
+          "type": "logOut",
+          "seq": 634,
+          "at": 1794270657776
+        },
+        "ack": {
+          "packet": "LogOutSuccess",
+          "seq": 635,
+          "at": 1794270659937
+        },
+        "file": {
+          "map": "0",
+          "position": {
+            "x": 342,
+            "y": 244
+          },
+          "direction": "UpLeft",
+          "bait": 15,
+          "rodDura": 10000,
+          "hookDura": 8000,
+          "reelDura": 6000,
+          "ownedSpare": [
+            {
+              "id": 52559878,
+              "slot": 13,
+              "qty": 1
+            },
+            {
+              "id": 52559879,
+              "slot": 14,
+              "qty": 3
+            }
+          ]
+        }
+      },
+      "errors": [],
+      "fixtureUnchanged": true,
+      "originalFixtureUnchanged": true,
+      "closed": {
+        "browser": true,
+        "next": true,
+        "gateway": true
+      },
+      "passed": true
+    }
+  ]
+}

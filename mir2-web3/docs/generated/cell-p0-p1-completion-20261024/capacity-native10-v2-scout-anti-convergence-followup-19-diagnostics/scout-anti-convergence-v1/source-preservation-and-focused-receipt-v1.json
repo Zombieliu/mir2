@@ -1,0 +1,199 @@
+{
+  "schemaVersion": 1,
+  "scope": "Only two authorized Node files changed; proof does not certify capacity,formal25rootcause,newcommit or full regression.",
+  "baseline": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\baseline-nine-inputs-v1.json",
+    "bytes": 2375,
+    "sha256": "287f4d745eae9582d31f49360d7a90bf76334e1f141d6119be33573d698719ca"
+  },
+  "preimages": {
+    "main": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\preimages\\playtest-capacity-soak.mjs.txt",
+      "bytes": 153586,
+      "sha256": "99914efc602be1600207ab4e2e78f960766332d3064a93307f5268c29448e037"
+    },
+    "test": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\preimages\\playtest-capacity-soak.test.mjs.txt",
+      "bytes": 258200,
+      "sha256": "0e28f856648a69053fd538d2e493c97ad046b0714381e8fdfaacb72782abe711"
+    }
+  },
+  "files": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 155475,
+      "sha256": "6c2f4e3dfcbc38465a13cf05c8c8945fdb4fe7c99acaea43dfad493fb77696d8"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 270311,
+      "sha256": "f1ba119770bde34135e734780b04539206e859bd7b896977d4e6595555c032ef"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    }
+  ],
+  "sourceSha256": "3b0a0a8300744d6e0d34315f7bbab934252e1e70b124353ae7cf7a2398952df8",
+  "onlyMainAndTestChanged": true,
+  "otherSevenRawExact": true,
+  "mainMutation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\production-mutation-v1.json",
+    "bytes": 3057,
+    "sha256": "de8a3c6c059c1775039f8ce0f04327a430334aaddc72eed3c5513b844328866d"
+  },
+  "mainThreeRangesInverseRawExact": true,
+  "originalMainRawSha256": "99914efc602be1600207ab4e2e78f960766332d3064a93307f5268c29448e037",
+  "originalTestPrefix": {
+    "bytes": 258200,
+    "sha256": "0e28f856648a69053fd538d2e493c97ad046b0714381e8fdfaacb72782abe711",
+    "rawExact": true,
+    "newTests": 7
+  },
+  "sixImmutableReportDeclarations": [
+    {
+      "name": "measurementClock",
+      "bytes": 742,
+      "sha256": "f2eda2c20d5a7c4bef388b41dfd1e55ab4733d7ca69b10f9c3eab211b60cc99f",
+      "rawExact": true
+    },
+    {
+      "name": "navigationCoordination",
+      "bytes": 548,
+      "sha256": "72d016c9f4836113bc358570bc6f310500092da14345dd59cb94deabacd24423",
+      "rawExact": true
+    },
+    {
+      "name": "nativePatrolPlanning",
+      "bytes": 583,
+      "sha256": "6e1fd09fde3d17f1d331d6ca9b85314aa33698b12d3d8890cd8f8617c36895d9",
+      "rawExact": true
+    },
+    {
+      "name": "nativeHpMaintenance",
+      "bytes": 639,
+      "sha256": "0eb7baf64b02f24588e49c2e439d52ad5b64ddfb9b252258b72715827cf56054",
+      "rawExact": true
+    },
+    {
+      "name": "nativeChasePreference",
+      "bytes": 902,
+      "sha256": "4d1658ef243a1b06dcd9ea2e187be112b95c1d5f551274199f40ce765b762a01",
+      "rawExact": true
+    },
+    {
+      "name": "nativeAttackWitness",
+      "bytes": 896,
+      "sha256": "acfad94aa6dd482a8631c766a2d02c7ae9e32d4b18b705504b7a29bf18d7012a",
+      "rawExact": true
+    }
+  ],
+  "originalPolicyCadence900msWindowAndAckCodeOutsideMutationRangesRawExact": true,
+  "syntax": {
+    "checks": [
+      {
+        "source": {
+          "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+          "bytes": 155475,
+          "sha256": "6c2f4e3dfcbc38465a13cf05c8c8945fdb4fe7c99acaea43dfad493fb77696d8"
+        },
+        "arguments": [
+          "--check",
+          "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs"
+        ],
+        "exitCode": 0,
+        "signal": null
+      },
+      {
+        "source": {
+          "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs",
+          "bytes": 270311,
+          "sha256": "f1ba119770bde34135e734780b04539206e859bd7b896977d4e6595555c032ef"
+        },
+        "arguments": [
+          "--check",
+          "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs"
+        ],
+        "exitCode": 0,
+        "signal": null
+      }
+    ],
+    "log": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\syntax-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "moduleImportedForSyntax": false
+  },
+  "gitDiff": {
+    "patch": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\source-diff-v1.patch",
+      "bytes": 16995,
+      "sha256": "8ba32b8c6d7f9795867ff09314cc2ccb8b36cc63a1d6f4b81f30685549e14e54"
+    },
+    "stderr": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\source-diff-v1.stderr.log",
+      "bytes": 146,
+      "sha256": "ea9f1b6885e41071899b399fccb93a506c92ac0069a8ea31b4aa0585f0dd22ee"
+    },
+    "checkExitCode": 0,
+    "checkLog": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\diff-check-v1.log",
+      "bytes": 146,
+      "sha256": "ea9f1b6885e41071899b399fccb93a506c92ac0069a8ea31b4aa0585f0dd22ee"
+    }
+  },
+  "focusedRed": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\focused-red-execution-v1.json",
+    "bytes": 1386,
+    "sha256": "052e4688bdcc7ccab30bec21463ea1584bf9d7f12ece575710acb21e31a1082b"
+  },
+  "focusedGreen": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\focused-green-execution-v1.json",
+    "bytes": 4603,
+    "sha256": "cabe331b979c15692e5673fef90f5538b9ed000fc9f76275286a23dd942e1b9b"
+  },
+  "redSourceCoverage": "Red receipt binds its261077B intermediate test source and real target failure after two route preconditions; it is not a nine-source before/after replay.",
+  "greenSourceCoverage": "Actual7tests with all nine source pins before/after identical.",
+  "limits": [
+    "Other scout means a current active/living same-map owner with an unexpired declared combatScout plan; this can have zero ACKs and can remain during a pursuit. It is not actual arrival,exclusive occupancy or authority.",
+    "Preference only stably partitions existing <=4 hints; all-shared/single/no-distinction preserves original order. No distance sorting was added.",
+    "A changed planning-order diagnostic boolean gives no native/gameplay/attack completion credit; existing32rowcap remains.",
+    "Original Formal14failure and all historical evidence remain; no actual capacity rerun was performed here.",
+    "Root concurrently owns three status docs; no later whole-tree-clean claim is made."
+  ],
+  "fullRegressionExecutedHere": false,
+  "commitOrPushPerformed": false,
+  "capacityAccepted": false
+}

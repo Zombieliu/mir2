@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "root647Receipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v9\\root-focused-receipt-v1.json",
+    "bytes": 20859,
+    "sha256": "48f32bd71d4e7476463998a0db898248b3037397892f4101719c2efffff4b8c4"
+  },
+  "localMetadata": "qualification/root-focused-receipt-v1.json",
+  "root647SameMetadataCrossArchive": "../bank-prepare-v9/node-v9/root-focused-receipt-v1.json",
+  "root647RunnerCrossArchive": "../bank-prepare-v9/node-v9/root-validation-runner-v9.mjs",
+  "root647Logs": [
+    {
+      "name": "complete-preparation-and-protected-navigation",
+      "kind": "stdout",
+      "original": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v9\\complete-preparation-and-protected-navigation.stdout.log",
+        "bytes": 51931,
+        "sha256": "2e169b08196309ff199478fb862dff2160995a18e77ba9d549e5372dcc0d3821"
+      },
+      "relativeArchive": "../bank-prepare-v9/node-v9/complete-preparation-and-protected-navigation.stdout.log",
+      "archiveRawPin": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-ordinary-economic-v1\\bank-prepare-v9\\node-v9\\complete-preparation-and-protected-navigation.stdout.log",
+        "bytes": 51931,
+        "sha256": "2e169b08196309ff199478fb862dff2160995a18e77ba9d549e5372dcc0d3821"
+      },
+      "copiedHere": false
+    },
+    {
+      "name": "complete-preparation-and-protected-navigation",
+      "kind": "stderr",
+      "original": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v9\\complete-preparation-and-protected-navigation.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "relativeArchive": "../bank-prepare-v9/node-v9/complete-preparation-and-protected-navigation.stderr.log",
+      "archiveRawPin": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-ordinary-economic-v1\\bank-prepare-v9\\node-v9\\complete-preparation-and-protected-navigation.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "copiedHere": false
+    },
+    {
+      "name": "ordinary-economy-and-navigation-dependencies",
+      "kind": "stdout",
+      "original": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v9\\ordinary-economy-and-navigation-dependencies.stdout.log",
+        "bytes": 75534,
+        "sha256": "562a4c219623824bd61164ca2bc5a2867d6ad9038bbb5a8409634a2570b3a324"
+      },
+      "relativeArchive": "../bank-prepare-v9/node-v9/ordinary-economy-and-navigation-dependencies.stdout.log",
+      "archiveRawPin": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-ordinary-economic-v1\\bank-prepare-v9\\node-v9\\ordinary-economy-and-navigation-dependencies.stdout.log",
+        "bytes": 75534,
+        "sha256": "562a4c219623824bd61164ca2bc5a2867d6ad9038bbb5a8409634a2570b3a324"
+      },
+      "copiedHere": false
+    },
+    {
+      "name": "ordinary-economy-and-navigation-dependencies",
+      "kind": "stderr",
+      "original": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v9\\ordinary-economy-and-navigation-dependencies.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "relativeArchive": "../bank-prepare-v9/node-v9/ordinary-economy-and-navigation-dependencies.stderr.log",
+      "archiveRawPin": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-ordinary-economic-v1\\bank-prepare-v9\\node-v9\\ordinary-economy-and-navigation-dependencies.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "copiedHere": false
+    },
+    {
+      "name": "ordinary-full-lifecycle-driver-units",
+      "kind": "stdout",
+      "original": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v9\\ordinary-full-lifecycle-driver-units.stdout.log",
+        "bytes": 13224,
+        "sha256": "9e4d85dfe1cbf1f08e0be66d43508a6d5e64291cbf099213de5015ee35be4eb6"
+      },
+      "relativeArchive": "../bank-prepare-v9/node-v9/ordinary-full-lifecycle-driver-units.stdout.log",
+      "archiveRawPin": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-ordinary-economic-v1\\bank-prepare-v9\\node-v9\\ordinary-full-lifecycle-driver-units.stdout.log",
+        "bytes": 13224,
+        "sha256": "9e4d85dfe1cbf1f08e0be66d43508a6d5e64291cbf099213de5015ee35be4eb6"
+      },
+      "copiedHere": false
+    },
+    {
+      "name": "ordinary-full-lifecycle-driver-units",
+      "kind": "stderr",
+      "original": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v9\\ordinary-full-lifecycle-driver-units.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "relativeArchive": "../bank-prepare-v9/node-v9/ordinary-full-lifecycle-driver-units.stderr.log",
+      "archiveRawPin": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-ordinary-economic-v1\\bank-prepare-v9\\node-v9\\ordinary-full-lifecycle-driver-units.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "copiedHere": false
+    }
+  ],
+  "originalV6": {
+    "release": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\release-v6.json",
+      "bytes": 2257,
+      "sha256": "5e6326b1994cb771fefbcd8187de0d9dedaa47d1fe3fa68f136ddc58fb08cc8d"
+    },
+    "backendManifest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\backend-source-v6.json",
+      "bytes": 50669,
+      "sha256": "c0f4465432f2effbb7de5a0e430a4b6049b42464bcf1824f879783f4a4441970"
+    },
+    "buildReceipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\build-receipt-v6.json",
+      "bytes": 2241,
+      "sha256": "c82d4812b8c4fe8a1b2fa887d6694cf59b29b281c404eeb88ddd771ad02c5b59"
+    },
+    "rust32Receipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\root-focused-receipt-v1.json",
+      "bytes": 28585,
+      "sha256": "b11edacef0931e437503df444d87c16c4d95b98d6b026a242e5eb1cf3861783d"
+    },
+    "immutableExecutable": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\bin\\mir2-gateway.exe",
+      "bytes": 87456256,
+      "sha256": "ad13d15a6fd294cae0beda04d8f91b7773a9b8390cc9c85e5a84d3e72c2567f6"
+    },
+    "backendBuildTools": [
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\source-lib-v6.mjs",
+        "bytes": 22267,
+        "sha256": "ed10735da3b15b1cb201e7d691f33de7dbc7d24d89296a51e67c655bb36f630b"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\build-release-v6.mjs",
+        "bytes": 7075,
+        "sha256": "ec3b2f989481135f71475be2d13fdcd17c8d312ecaba4a72af7b1e69f6bc7c6a"
+      }
+    ]
+  },
+  "sourceScope": "External original absolute paths are preserved inside raw artifacts. Copies are indexed by raw digest; private source paths are metadata only. No binary, private credential, Store or gateway-log payload is published."
+}

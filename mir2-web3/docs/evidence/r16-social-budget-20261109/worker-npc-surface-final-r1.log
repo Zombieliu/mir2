@@ -1,0 +1,232 @@
+TAP version 13
+# Subtest: actual compatibility shop missing quote or total reports unavailable and never invents a total or sends
+ok 1 - actual compatibility shop missing quote or total reports unavailable and never invents a total or sends
+  ---
+  duration_ms: 59.1618
+  type: 'test'
+  ...
+# Subtest: actual compatibility shop labels only explicit gold denial as insufficient funds
+ok 2 - actual compatibility shop labels only explicit gold denial as insufficient funds
+  ---
+  duration_ms: 18.885
+  type: 'test'
+  ...
+# Subtest: actual compatibility shop preserves full inventory and pending reasons for both currencies
+ok 3 - actual compatibility shop preserves full inventory and pending reasons for both currencies
+  ---
+  duration_ms: 24.7412
+  type: 'test'
+  ...
+# Subtest: actual compatibility pearl shop distinguishes insufficient pearls from missing wallet or wrong quote currency
+ok 4 - actual compatibility pearl shop distinguishes insufficient pearls from missing wallet or wrong quote currency
+  ---
+  duration_ms: 14.0419
+  type: 'test'
+  ...
+# Subtest: actual compatibility Buy accepts a successful quote and rechecks authority on confirm and double click
+ok 5 - actual compatibility Buy accepts a successful quote and rechecks authority on confirm and double click
+  ---
+  duration_ms: 95.6801
+  type: 'test'
+  ...
+# Subtest: actual compatibility shop without a selected current row has no insufficient-funds feedback or purchase
+ok 6 - actual compatibility shop without a selected current row has no insufficient-funds feedback or purchase
+  ---
+  duration_ms: 19.4098
+  type: 'test'
+  ...
+# Subtest: actual combat NPC channel holds only the current opaque token and leaves other channels intact
+ok 7 - actual combat NPC channel holds only the current opaque token and leaves other channels intact
+  ---
+  duration_ms: 0.635
+  type: 'test'
+  ...
+# Subtest: actual combat channel rejects unknown labels and retires old-owner NPC hold before publishing
+ok 8 - actual combat channel rejects unknown labels and retires old-owner NPC hold before publishing
+  ---
+  duration_ms: 0.2712
+  type: 'test'
+  ...
+# Subtest: actual Page read model carries full player raw inventory and readonly canonical Core without observing in final checks
+ok 9 - actual Page read model carries full player raw inventory and readonly canonical Core without observing in final checks
+  ---
+  duration_ms: 335.7024
+  type: 'test'
+  ...
+# Subtest: actual Page shared Buy uses common selected quantity and claims UI then exact Core body immediately before socket
+ok 10 - actual Page shared Buy uses common selected quantity and claims UI then exact Core body immediately before socket
+  ---
+  duration_ms: 251.114
+  type: 'test'
+  ...
+# Subtest: actual Page final synchronous listener rejects changed service raw inventory owner layout status and socket before entry
+ok 11 - actual Page final synchronous listener rejects changed service raw inventory owner layout status and socket before entry
+  ---
+  duration_ms: 2116.3553
+  type: 'test'
+  ...
+# Subtest: actual Page nonBuy two-phase local actions retire exact preentry before claim and never send a wire
+ok 12 - actual Page nonBuy two-phase local actions retire exact preentry before claim and never send a wire
+  ---
+  duration_ms: 1382.055
+  type: 'test'
+  ...
+# Subtest: actual Page Close and Sell defer retirement before source or compatibility tab mutation
+ok 13 - actual Page Close and Sell defer retirement before source or compatibility tab mutation
+  ---
+  duration_ms: 457.1286
+  type: 'test'
+  ...
+# Subtest: actual Page entered socket exception reports Unknown plus exact unentered cleanup without inventing an ACK
+ok 14 - actual Page entered socket exception reports Unknown plus exact unentered cleanup without inventing an ACK
+  ---
+  duration_ms: 241.0601
+  type: 'test'
+  ...
+# Subtest: actual final Page checkpoint rejects deferred UI withdraw or stop after all Core callbacks despite unchanged status
+ok 15 - actual final Page checkpoint rejects deferred UI withdraw or stop after all Core callbacks despite unchanged status
+  ---
+  duration_ms: 475.6551
+  type: 'test'
+  ...
+# Subtest: actual Page hook and Shell props carry the same host without acquiring Bag ownership
+ok 16 - actual Page hook and Shell props carry the same host without acquiring Bag ownership
+  ---
+  duration_ms: 276.0243
+  type: 'test'
+  ...
+# Subtest: actual shared Page denies naked legacy mixed DTO and stale current status before reservation
+ok 17 - actual shared Page denies naked legacy mixed DTO and stale current status before reservation
+  ---
+  duration_ms: 1478.6197
+  type: 'test'
+  ...
+# Subtest: actual Shell arming blocks synchronously before pointer context and clears keyboard direction combat intent
+ok 18 - actual Shell arming blocks synchronously before pointer context and clears keyboard direction combat intent
+  ---
+  duration_ms: 27.0268
+  type: 'test'
+  ...
+# Subtest: actual Shell routes shop origin with an exact combat hold and consumes world origin without a shop hold
+ok 19 - actual Shell routes shop origin with an exact combat hold and consumes world origin without a shop hold
+  ---
+  duration_ms: 52.4869
+  type: 'test'
+  ...
+# Subtest: actual Shell rejects wrong canvas invalid pointer and a competing panel without leaking to legacy gameplay
+ok 20 - actual Shell rejects wrong canvas invalid pointer and a competing panel without leaking to legacy gameplay
+  ---
+  duration_ms: 154.9111
+  type: 'test'
+  ...
+# Subtest: actual Shell old nonce terminal cannot clear the new same-pointer lease or its combat hold
+ok 21 - actual Shell old nonce terminal cannot clear the new same-pointer lease or its combat hold
+  ---
+  duration_ms: 25.2358
+  type: 'test'
+  ...
+# Subtest: actual Shell refused RPC cleans its own lease but synchronous replacement cannot be canceled by the old finally
+ok 22 - actual Shell refused RPC cleans its own lease but synchronous replacement cannot be canceled by the old finally
+  ---
+  duration_ms: 54.5431
+  type: 'test'
+  ...
+# Subtest: actual gamepad and touch props evaluate arming active and synchronous blocker without relying on a React update
+ok 23 - actual gamepad and touch props evaluate arming active and synchronous blocker without relying on a React update
+  ---
+  duration_ms: 4.9592
+  type: 'test'
+  ...
+# Subtest: actual gamepad and touch render props use pure Hero and parity blockers without invoking their live methods
+ok 24 - actual gamepad and touch render props use pure Hero and parity blockers without invoking their live methods
+  ---
+  duration_ms: 4.4971
+  type: 'test'
+  ...
+# Subtest: actual mobile menu close feedback always cleans up while opening remains blocked by the current NPC host
+ok 25 - actual mobile menu close feedback always cleans up while opening remains blocked by the current NPC host
+  ---
+  duration_ms: 3.6681
+  type: 'test'
+  ...
+# Subtest: actual Shell refused current Up sends one exact cancel and the next manual Down is admitted
+ok 26 - actual Shell refused current Up sends one exact cancel and the next manual Down is admitted
+  ---
+  duration_ms: 26.0755
+  type: 'test'
+  ...
+# Subtest: actual Shell failed old terminal cannot cancel a synchronous new Down quarantine or new scene state
+ok 27 - actual Shell failed old terminal cannot cancel a synchronous new Down quarantine or new scene state
+  ---
+  duration_ms: 54.3976
+  type: 'test'
+  ...
+# Subtest: actual compatibility Buy final Core callback refuses synchronous shared arming or changed closed socket before entry
+ok 28 - actual compatibility Buy final Core callback refuses synchronous shared arming or changed closed socket before entry
+  ---
+  duration_ms: 974.9839
+  type: 'test'
+  ...
+# Subtest: actual Page retires inventory availability before log-only gain, merge and extended item patch handlers
+ok 29 - actual Page retires inventory availability before log-only gain, merge and extended item patch handlers
+  ---
+  duration_ms: 2207.3046
+  type: 'test'
+  ...
+# Subtest: actual Page restores only a successful full current-owner snapshot and refuses reentrant invalidation
+ok 30 - actual Page restores only a successful full current-owner snapshot and refuses reentrant invalidation
+  ---
+  duration_ms: 1447.5484
+  type: 'test'
+  ...
+# Subtest: actual Page full snapshot and every Native inventory invalidator revoke Web availability at ingress
+ok 31 - actual Page full snapshot and every Native inventory invalidator revoke Web availability at ingress
+  ---
+  duration_ms: 257.914
+  type: 'test'
+  ...
+# Subtest: NPC-only bag projection accepts attested cross-grid aliases and validates listed identity without weakening ordinary Bag
+ok 32 - NPC-only bag projection accepts attested cross-grid aliases and validates listed identity without weakening ordinary Bag
+  ---
+  duration_ms: 0.9836
+  type: 'test'
+  ...
+# Subtest: a successful nested full snapshot cannot authorize an older outer inventory during synchronous publication
+ok 33 - a successful nested full snapshot cannot authorize an older outer inventory during synchronous publication
+  ---
+  duration_ms: 246.4783
+  type: 'test'
+  ...
+# Subtest: actual Page collected mail barrier needs same physical receiver and a strictly later valid full snapshot
+ok 34 - actual Page collected mail barrier needs same physical receiver and a strictly later valid full snapshot
+  ---
+  duration_ms: 248.6591
+  type: 'test'
+  ...
+# Subtest: actual ordinary unqualified snapshot delegates readiness while stale physical owners stay blocked
+ok 35 - actual ordinary unqualified snapshot delegates readiness while stale physical owners stay blocked
+  ---
+  duration_ms: 981.1841
+  type: 'test'
+  ...
+# Subtest: ordinary compatibility click diagnostic distinguishes existing local refusal from Page callback
+ok 36 - ordinary compatibility click diagnostic distinguishes existing local refusal from Page callback
+  ---
+  duration_ms: 55.853
+  type: 'test'
+  ...
+# Subtest: main exposes retained action state independently of preview with no raw source fields
+ok 37 - main exposes retained action state independently of preview with no raw source fields
+  ---
+  duration_ms: 17.8442
+  type: 'test'
+  ...
+1..37
+# tests 37
+# suites 0
+# pass 37
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 14923.8492

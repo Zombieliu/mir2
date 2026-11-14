@@ -1,0 +1,12 @@
+    Finished `test` profile [unoptimized] target(s) in 1m 14s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+
+running 6 tests
+test routing::zone_save_fence_tests::zone_save_fence_bound_validation_rejects_old_generation_without_adopting_current ... ok
+test routing::zone_save_fence_tests::zone_save_fence_in_process_and_hosted_bind_before_execute_and_save_dispatch ... ok
+test routing::zone_save_fence_tests::zone_save_fence_legacy_authority_still_uses_outer_guard ... ok
+test routing::zone_save_fence_tests::zone_save_fence_shared_world_runtime_delegates_binding_to_personal_runtime_config ... ok
+test routing::zone_save_fence_tests::zone_save_fence_stale_unsupported_and_file_runtimes_never_dispatch ... ok
+test routing::zone_save_fence_tests::zone_save_fence_transactional_guard_calls_once_and_never_uses_outer_lock ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 1425 filtered out; finished in 0.09s

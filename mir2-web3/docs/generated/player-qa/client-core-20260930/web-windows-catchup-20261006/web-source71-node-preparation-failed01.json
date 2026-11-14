@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "kind": "Source71 original Node caller failed while persisting closed execution logs",
+  "callerSessionClosed": true,
+  "callerExit": 1,
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source71-storage-first-refusal-20261012-01\\root-approved01\\node-tests01-config.json",
+    "bytes": 5699,
+    "sha256": "47532a14a8189cf3c9c1b2821627896ca111e3cd1937cb7b10346e4490d2ce88"
+  },
+  "observedFailure": "Original unchanged caller could not open stdout.log because node-tests01 parent directory was not prepared",
+  "stdoutPersisted": false,
+  "stderrPersisted": false,
+  "outerPersisted": false,
+  "actualNodeExit": null,
+  "actualTests": null,
+  "actualPass": null,
+  "actualFail": null,
+  "postExitGuardCompleted": false,
+  "requiresSameOriginalTestsRetry": true,
+  "productCodeChangedForRetry": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

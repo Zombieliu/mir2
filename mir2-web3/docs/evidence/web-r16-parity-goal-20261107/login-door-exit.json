@@ -1,0 +1,15 @@
+{
+  "schema": "mir2.r16.login-door-exit.v1",
+  "scope": "Real StartGame result 4 forwarded, later bootstrap packets held, actual Exit button",
+  "profile": "platinum_176",
+  "gatewaySha256": "3dd4f2b5c053f0d35c0ba172130a5731eb8944afd4b78e7605c03a9271fcad3e",
+  "passed": true,
+  "checks": {
+    "exitDuringBootstrap": {
+      "startAccepted": true,
+      "exitAvailable": true,
+      "loginRestored": true
+    }
+  },
+  "pageErrors": []
+}

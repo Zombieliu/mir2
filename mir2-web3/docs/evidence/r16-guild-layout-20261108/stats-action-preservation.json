@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "unchangedActionAndAuthorityFunctions": [
+    "sendRaw",
+    "createGuildRank",
+    "readGuildRankEditSource",
+    "socialRosterProofCurrent",
+    "guildDepositGold",
+    "guildWithdrawGold",
+    "currentGuildBuffSource",
+    "submitGuildBuffAction",
+    "currentSocialReplyOwner"
+  ],
+  "rankCardUnchanged": true,
+  "stage5WindowAdapterUnmodifiedThisTask": true
+}

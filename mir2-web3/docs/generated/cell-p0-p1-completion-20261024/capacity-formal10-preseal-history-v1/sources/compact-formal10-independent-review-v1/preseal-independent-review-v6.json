@@ -1,0 +1,323 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T07:57:58.3610285Z",
+  "reviewer": "/root/fixed_cell_gate_audit",
+  "scope": "Final independent read-only static formal10 preseal v6 review. No target import, synthetic rerun, full raw rescan, actual fresh gate, sourceguard, sealing, accounts or realm was executed by reviewer.",
+  "targetDirectory": "C:/mir2-build/p01-completion-20261024/formal-native-v2-compact-wire-ladder-10",
+  "preseal": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-formal10-preseal-input-check-v6.json",
+    "bytes": 26339,
+    "sha256": "de146199a73f1be24c5c1a7ce241fead3b92126455d7096c0f5fcd6c02376163"
+  },
+  "priorBlockedReview": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-formal10-independent-review-v1\\preseal-independent-review-v2.json",
+    "bytes": 7865,
+    "sha256": "2da7ef2b4c7b1969c0bd4dbd475d26e526a20e50bdb32d3d99a5cad24a75fa0b"
+  },
+  "executionPrerequisites": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-formal10-execution-prerequisites-v5.json",
+    "bytes": 9818,
+    "sha256": "77c4ffa11dba05e93a8e4ec3df397d6d723bbb06451680b0e67b1c5fc1445073"
+  },
+  "rootSealExecutor": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\seal-compact-wire-formal10-v6.mjs",
+    "bytes": 8008,
+    "sha256": "f41409bf89547f8d7500f9ac2eb34a85e8a2d075419361fe1d24e0b7fcd9e471"
+  },
+  "rootExecutorNormalization": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-formal10-executor-normalization-v6.json",
+    "bytes": 1208,
+    "sha256": "d549df6acb154a8d311390cf8d694c0efacb3c80b5a98755437dcfbfd1265f9a"
+  },
+  "windowNormalization": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-formal10-window-normalization-v5.json",
+    "bytes": 8427,
+    "sha256": "78a3ff0f0e6eed21958b896c1b1eb3e57981d04f6efe1d58caffa57bca577941"
+  },
+  "hpNormalization": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-formal10-schema-normalization-v4.json",
+    "bytes": 4365,
+    "sha256": "53292bee2b108a80bd5451c3648e17da8dd414efe7d8800abfd70dc8b4f77007"
+  },
+  "actualProbe13IndependentReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe13-independent-verification-v1\\final-verification.json",
+    "bytes": 359693,
+    "sha256": "c96b6cc7fbc960592f60c0b81dac3fc4d43238d424a2bfaf968d5528165e946c"
+  },
+  "actualPublicVerification": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-compact-wire-followup-13-diagnostics\\public-verification.json",
+    "bytes": 7105,
+    "sha256": "3262726320069fb1795ef1e9136bcdd29203ffc22838d8b9ab56cd6afb3cb9fb"
+  },
+  "staticClosure": {
+    "localPins": 47,
+    "localPinsRawVerified": 47,
+    "sourceAggregate": "8da1bd38d58031129c0ccdc57b6a18baf49dda4e07e00c400be270216a83417b",
+    "sourceAggregateIndependentlyRecomputed": true,
+    "wrapperPins": 11,
+    "wrapperPinsRawVerified": 11,
+    "prerequisitePins": 36,
+    "prerequisitePinsRawVerified": 36,
+    "rawPinMismatches": 0,
+    "v5AndV6Template47PinsExact": true,
+    "v4PreviousLocalInputsUnchanged": 43,
+    "windowAffectedFiles": [
+      "verify-feasibility-gate.mjs",
+      "collect-public.mjs",
+      "verify-public.mjs"
+    ],
+    "windowRulesIndependentlyInverted": [
+      {
+        "file": "verify-feasibility-gate.mjs",
+        "rules": 3,
+        "exactV4Preimage": true
+      },
+      {
+        "file": "collect-public.mjs",
+        "rules": 5,
+        "exactV4Preimage": true
+      },
+      {
+        "file": "verify-public.mjs",
+        "rules": 3,
+        "exactV4Preimage": true
+      }
+    ],
+    "executorV6RulesIndependentlyInverted": 3,
+    "executorV5ExactRestored": true,
+    "syntaxScripts": 31,
+    "syntaxResult": "Writer-run31syntaxpass is raw-pinned; reviewer did not rerun syntax.",
+    "formalRuntimeStateAbsent": true,
+    "finalFreezeAbsent": true,
+    "reviewerDidNotRun124CoreClosureGuard": true
+  },
+  "identity": {
+    "currentDriverDocumentationCommit": "4cab00893b861395b63906b1b8183a021d397cdb",
+    "coreCodeEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+    "coreDriverSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+    "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+    "backendInputs": 41,
+    "gatewayBinarySha256": "a43078b05e70b480f948fee505e23d2757ce1ae20fdc1f22b2348df46ee7125d",
+    "full16RunId": "1792884517374-04264602",
+    "onlyFreshProbeRunId": "1792912711217-e7ea81f2",
+    "preparedProbeSourceAggregate": "f80a5894c1d47ad02016ab8116bfb2404ba99398f5b4f667b3981a8066486cbb",
+    "scene100Sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205",
+    "scene10Sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba",
+    "sceneProfile": "compact span2 with3x3 body and5x5 static halo",
+    "sourceScopes": "187core regression,28wrapper unit and8adapter unit remain separate historical scopes, not rerun by this review."
+  },
+  "previousFindings": {
+    "B1": {
+      "closed": true,
+      "reason": "Plain finite ten-status dictionary of nonnegative canonical safe integer counts replaces the incorrect array requirement. Actual independent hp.observedStatuses is an empty object and is accepted without claiming a dose."
+    },
+    "B2": {
+      "closedForFresh13Precondition": true,
+      "reason": "Success-only helper now requires independent verifierRevision2 and exact22979/803ecb producer plus4644/cbf676 HP contract raw pins. The corrected producer checks real verified rows. Actual ended run has zero HP events; successProofChecked=false,verifiedEventsChecked0,noVerifiedDoseObservedtrue and no continuous health claim."
+    },
+    "oldV2BlockedReceiptPreserved": true
+  },
+  "hpEvidence": {
+    "statusEnum": [
+      "not-sent",
+      "sent",
+      "send-failed",
+      "verified",
+      "cancelled",
+      "owner-changed",
+      "owner-dead",
+      "public-error",
+      "rejected",
+      "timeout"
+    ],
+    "dictionaryPlainObjectAndOwnDataFieldsOnly": true,
+    "unsafeNegativeZeroUnknownAndArraysRejected": true,
+    "verifiedEventsCheckedEqualsVerifiedStatusCount": true,
+    "successProofCheckedEquivalentPositiveVerifiedCount": true,
+    "noVerifiedDoseObservedEquivalentZeroCount": true,
+    "actualReceipt": {
+      "observedStatuses": {},
+      "statusValidationChecked": true,
+      "totalRows": 0,
+      "verifiedEventsChecked": 0,
+      "successProofChecked": false,
+      "noVerifiedDoseObserved": true,
+      "pendingSentWithoutTerminal": 0,
+      "notContinuousHpCoverage": true,
+      "claim": "Only actual verified rows with matching sent/acknowledgement and effect proof are checked. Zero verified events claim neither a real dose nor survival.",
+      "proofLimitations": [
+        "The raw producer does not persist send monotonic time, receipt cursor or quantityBefore. This verifier cannot independently reconstruct the original freshness deadline or the numeric inventory decrease.",
+        "Consumed and increased HP remain distinct observations. A consumption proof alone does not claim healing.",
+        "No HP event or diagnostic proof contributes to native opportunity, launched attack, dual hit, ACK or original gameplay acceptance."
+      ]
+    },
+    "cannotIndependentlyReplayMissingSendMonoCursorOrQuantityBefore": true,
+    "consumptionDoesNotProveHealing": true,
+    "hpProofDoesNotCreditGameplay": true
+  },
+  "windowContract": {
+    "freshProbe13Maximum": 16,
+    "freshCounts": [
+      5,
+      5,
+      6
+    ],
+    "formalMaximum": 146,
+    "formalCounts": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      120,
+      1
+    ],
+    "fixedPhaseOrder": true,
+    "existingRawPassOnlyNoAdditionalPayloadAccumulation": true,
+    "retainsOnlyBoundedClockSecondsPassedProjection": true,
+    "actualMinimumWindowMs": 60000,
+    "rawAndReportStartEndExact": true,
+    "contiguousActualBoundaries": true,
+    "withinOriginalPhase": true,
+    "rawAndReportSecondsEqualActualElapsed": true,
+    "reportCumulativeElapsedEqualsActualPhaseClock": true,
+    "fullOriginalAssessmentDeepEqual": true,
+    "missingExtraUnknownReorderedShortOrChangedAssessmentRejected": true,
+    "genericSelectedProjectionNeverUsedForWindowLookup": true,
+    "genericApiUnchanged": true,
+    "originalGateChecksRetained": true,
+    "failedPartialReportDoesNotConstructPassingCounter": true,
+    "formal146ChecksOnlySyntheticNoFormalRawExists": true
+  },
+  "actualFresh13SmallEvidence": {
+    "verifierRevision": 2,
+    "independentVerificationPassed": true,
+    "probePassed": true,
+    "capacityAccepted": false,
+    "completeWindows": [
+      5,
+      5,
+      6
+    ],
+    "measuredSeconds": [
+      300.301,
+      300.119,
+      360.406
+    ],
+    "minimumCompleteWindowSeconds": 60.006,
+    "rawRows": 41088,
+    "rawBytes": 29072097,
+    "rawSha256": "83a7a56df6780212dd7a4671f3fd9bb1ee721cba5ad473e91f86c8c04bd13152",
+    "continuousWindows": 132,
+    "sourceMatchedPublicCopies": 138,
+    "wireRows": 5101,
+    "wireTerminalPresent": true,
+    "wireSourceValid": true,
+    "wireCountsMatch": true,
+    "wireUninstallSucceeded": true,
+    "terminalPath": "release-native-10-v2-compact-wire-feasibility-13/compact-navigation-wire-terminal.json",
+    "terminalBytes": 5089,
+    "terminalSha256": "bbf5ef307c13cd88aa1c03731a64d21173c3f41bc5270de4d996a64024248ba4",
+    "terminalPathAndBytesShaStrictNoEndsWith": true,
+    "boundedDiagnosticIncompleteIsNotNewGameplayGate": true,
+    "source": "Reviewer read/hash-bound actual completed small receipts/public verification only; capacity independently streamed full raw."
+  },
+  "unchangedFormalContract": {
+    "baselineFormal08PolicyJsonExact": true,
+    "baselineResourceRawBytesExact": true,
+    "orderedStages": [
+      2,
+      10,
+      25,
+      50,
+      100
+    ],
+    "stageSeconds": 300,
+    "soakSeconds": 7200,
+    "postResumeSeconds": 60,
+    "resumeSamples": 5,
+    "saveSamples": 5,
+    "wallSeconds": 18000,
+    "actualEnvAndExpectedCaps": [
+      128,
+      100,
+      100,
+      4,
+      1,
+      2
+    ],
+    "tokioWorkers": 4,
+    "slowStageThresholdMs": 50,
+    "softCpuLogical": 24,
+    "softPrivateGiB": 32,
+    "softWorkingSetGiB": 40,
+    "nativeIntervalMs": 750,
+    "commandsPerSecond": 3,
+    "attacksPerFighterMinute": 18,
+    "dualPositiveHitsPerFighterMinute": 12,
+    "minimumRunRatio": 0.5,
+    "minimumReceiptBackedCellsPerMinute": 80,
+    "maximumMissedOpportunityRatio": 0.05,
+    "maximumCorrectionRatio": 0.05,
+    "attackEvidenceDeadlineMs": 900,
+    "originalThresholdsAndAllPhasesPreserved": true
+  },
+  "rootExecutionBoundary": {
+    "explicitSealModeAndExactPresealReviewShaRequired": true,
+    "reviewPinAndVerdictCheckedBeforeWrites": true,
+    "prerequisitesAndOriginalSourcesRawChecked": true,
+    "actualFresh13GatePreflightBeforeMetadataWrites": true,
+    "sealed13OnlySuppliesIdenticalImmutableBindingBeforeFormalFreezeExists": true,
+    "stateMatchesExistingInputLib": "final-source-bound-not-executed",
+    "allSealWritesUseWx": true,
+    "readonlyGuardSeparateExplicitMode": true,
+    "runtimePathsMustRemainAbsent": true,
+    "noAccountProvisionOrRealmActionInExecutor": true,
+    "prepareAndRunRemainDistinctExplicitLaterCommands": true
+  },
+  "syntheticEvidence": [
+    {
+      "receipt": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-formal10-window-synthetic-v5.json",
+        "bytes": 2983,
+        "sha256": "75ba15ebc4f32f86f639b19123a751f75978214d78dbc530a5ff8e9f1192f042"
+      },
+      "tests": 10,
+      "pass": 10,
+      "fail": 0,
+      "tapAndSourceBeforeAfterRawVerified": true,
+      "scope": "Fixed16/146 minute clocks and schema only."
+    },
+    {
+      "receipt": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-formal10-hp-schema-synthetic-v4.json",
+        "bytes": 2445,
+        "sha256": "93e2f29f6a066b1b41966a6187da4cb9804757d156047e774242963b06efb040"
+      },
+      "tests": 11,
+      "pass": 11,
+      "fail": 0,
+      "tapAndSourceBeforeAfterRawVerified": true,
+      "scope": "Finite HP dictionary/evidence shape only."
+    }
+  ],
+  "verdict": {
+    "presealContractPassed": true,
+    "eligibleForSealNow": true,
+    "blockingFindingIds": [],
+    "eligibleOnlyForRootExplicitSealAndReadonlyGuard": true,
+    "actualFreshGateExecutedByReviewer": false,
+    "sealExecutedByReviewer": false,
+    "prepareAuthorized": false,
+    "formalRunAuthorized": false,
+    "capacityAccepted": false,
+    "p0Accepted": false,
+    "p2Authorized": false
+  },
+  "limitations": [
+    "The coordinator must execute the exact reviewed seal entry with these preseal/review hashes; its actualfresh13 preflight and separate readonlyguard remain required. This static review does not run either.",
+    "A passing10actor probe is a precondition only. No formal five-stage or7200s raw has been produced or validated by this review.",
+    "The100actor180launch/120hit supply and two-hour progression, original25actor stall and886-step/24ACK20s scout risks remain pending.",
+    "No old frozen13source, generic API, product driver/Rust, raw/report, prior blocked review or other original evidence was modified. Only this new receipt is written."
+  ]
+}

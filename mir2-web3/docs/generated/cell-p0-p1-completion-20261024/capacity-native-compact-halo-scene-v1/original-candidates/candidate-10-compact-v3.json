@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "mapFileName": "0",
+  "patrolSpan": 2,
+  "monsterNames": [
+    "Deer",
+    "Scarecrow"
+  ],
+  "anchors": [
+    {
+      "x": 263,
+      "y": 676
+    },
+    {
+      "x": 253,
+      "y": 664
+    },
+    {
+      "x": 255,
+      "y": 653
+    },
+    {
+      "x": 260,
+      "y": 653
+    },
+    {
+      "x": 263,
+      "y": 653
+    },
+    {
+      "x": 260,
+      "y": 670
+    },
+    {
+      "x": 268,
+      "y": 662
+    },
+    {
+      "x": 273,
+      "y": 657
+    },
+    {
+      "x": 277,
+      "y": 660
+    },
+    {
+      "x": 272,
+      "y": 671
+    }
+  ],
+  "combatClusters": [
+    {
+      "combatActorIndices": [
+        5
+      ],
+      "movementActorIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        6,
+        7,
+        8,
+        9
+      ]
+    }
+  ]
+}

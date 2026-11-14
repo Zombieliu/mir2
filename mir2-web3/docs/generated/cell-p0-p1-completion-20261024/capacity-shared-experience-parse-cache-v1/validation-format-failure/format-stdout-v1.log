@@ -1,0 +1,78 @@
+Diff in \\?\C:\Users\Administrator\.codex\worktrees\cell-preproduction-p0-p1\mir2-player-journey\mir2-web3\apps\simulation\src\runtime\shared_experience_profile.rs:820:
+     use crate::{AccountRecord, CharacterSaveRecord};
+     use mir2_protocol::{ClientPacket, MirGridType, ServerPacket, UserItemStat};
+ 
+-    fn parse_cache_fixture() -> (
+-        AccountStore,
+-        Stage5FriendIdentity,
+-        Mutex<SystemsParseCache>,
+-    ) {
++    fn parse_cache_fixture() -> (AccountStore, Stage5FriendIdentity, Mutex<SystemsParseCache>) {
+         let config = SimulationConfig::default();
+         let identity = Stage5FriendIdentity {
+             account_id: "demo".into(),
+Diff in \\?\C:\Users\Administrator\.codex\worktrees\cell-preproduction-p0-p1\mir2-player-journey\mir2-web3\apps\simulation\src\runtime\shared_experience_profile.rs:955:
+         }
+         assert_eq!(cache.entries.len(), 256);
+         assert_eq!(cache.json_bytes, 0);
+-        assert_eq!(cache.entries.front().unwrap().identity.account_id, "cache-1");
++        assert_eq!(
++            cache.entries.front().unwrap().identity.account_id,
++            "cache-1"
++        );
+         assert_eq!(retired.len(), 1);
+ 
+         let blob = format!("{{}}{}", " ".repeat(SYSTEMS_PARSE_CACHE_BLOB_BYTES - 2));
+Diff in \\?\C:\Users\Administrator\.codex\worktrees\cell-preproduction-p0-p1\mir2-player-journey\mir2-web3\apps\simulation\src\runtime\shared_experience_profile.rs:976:
+         }
+         assert_eq!(cache.json_bytes, 8 * 1024 * 1024);
+         assert_eq!(cache.entries.len(), 128);
+-        assert_eq!(cache.entries.front().unwrap().identity.account_id, "large-1");
++        assert_eq!(
++            cache.entries.front().unwrap().identity.account_id,
++            "large-1"
++        );
+     }
+ 
+     #[test]
+Diff in \\?\C:\Users\Administrator\.codex\worktrees\cell-preproduction-p0-p1\mir2-player-journey\mir2-web3\apps\simulation\src\runtime\shared_experience_profile.rs:1090:
+             .refresh_zone_experience_profile_authority(&mut profile)
+             .unwrap();
+         assert!(profile.lover_partner.is_none());
+-        assert!(profile.mentee_partner.is_none(), "changed peer epoch is fresh");
++        assert!(
++            profile.mentee_partner.is_none(),
++            "changed peer epoch is fresh"
++        );
+         assert_eq!(profile.guild.as_ref().unwrap().membership_epoch, 11);
+         {
+             let mut store = config.account_store.lock().unwrap();
+Diff in \\?\C:\Users\Administrator\.codex\worktrees\cell-preproduction-p0-p1\mir2-player-journey\mir2-web3\apps\simulation\src\runtime\shared_experience_profile.rs:1131:
+             called = true;
+             Ok(())
+         });
+-        assert_eq!(result.unwrap_err(), "experience profile authority mutex poisoned");
++        assert_eq!(
++            result.unwrap_err(),
++            "experience profile authority mutex poisoned"
++        );
+         assert!(!called);
+     }
+ 
+Diff in \\?\C:\Users\Administrator\.codex\worktrees\cell-preproduction-p0-p1\mir2-player-journey\mir2-web3\apps\simulation\src\runtime\shared_experience_profile.rs:1140:
+         let directory = std::env::temp_dir().join(format!(
+             "mir2-experience-parse-cache-{}-{}",
+             std::process::id(),
+-            SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos()
++            SystemTime::now()
++                .duration_since(UNIX_EPOCH)
++                .unwrap()
++                .as_nanos()
+         ));
+-        let config = SimulationConfig::default()
+-            .with_account_store_path(directory.join("accounts.json"));
++        let config =
++            SimulationConfig::default().with_account_store_path(directory.join("accounts.json"));
+         config.save_account_store().unwrap();
+         let actor = Stage5FriendIdentity {
+             account_id: "demo".into(),

@@ -1,0 +1,1248 @@
+{
+  "schema": "mir2.native-normal-ui-acceptance-plan.v1",
+  "created_utc": "2026-10-09T16:58:46.764506+00:00",
+  "worker": "/root/stone_ui_explore",
+  "operator": "Root/sky exclusively; this worker never starts or controls UI",
+  "installed_build": {
+    "candidate": "WN-CANDIDATE-20261007-invited-19",
+    "git_revision": "2b04e82c4f42b22f895f5f95b5bd79a8147eacdf",
+    "build_completed_utc": "2026-10-06T20:29:26.9403794+00:00",
+    "installed_exe_sha256": "3abc0c7b74af234d797705ac9ce32a68abefac70bf43095093a353c81145f297",
+    "matches_version_exe_sha256": true,
+    "package_accepted": false,
+    "declared_scope": "levels0–30; Wizard/Taoist full routes still need player acceptance",
+    "gateway_url": "wss://165.154.65.136.sslip.io/playtest/ws",
+    "live_gateway_revision": "not_checked_by_this_worker; installation client build is not server release evidence"
+  },
+  "current_checkout_head": "12880592d68a498921c25b8bc8d4ebdebc909ed1",
+  "priority_shortest_route": [
+    "先录r19版本/职业/等级/坐标；Q确认实际任务profile。",
+    "若边界村：Assistant_Jane(284,606)→Merchant_Ruben(288,608)买药/滚轮/Bag→Blacksmith_Smith(296,613)；若在比奇城：Samuel(324,291)→Board(334,259)，不做无用往返。",
+    "安全区走跑/松键/Esc→弱怪攻击/逃跑→三职业实际已学技能与资源/快捷键→正常保存重登。",
+    "再在比奇城Albert(341,243)钓鱼、Alice(321,265)查看实际制作入口；矿点依在线配置；石工坊与新SLG暂列未发布。",
+    "日周任务等待真实时间；行会/师徒准备两账号；沙巴克/后期需要实际资格和活动窗口，不能一次单账号冒充完成。"
+  ],
+  "controls_caution": "r19 Big Map open + Esc closes map while preserving route; with map closed Esc cancels route/attack/harvest. This is verified at installed Git revision, not inferred only from current input code.",
+  "delivery_boundaries": [
+    "EXE hash verifies current installed invited19 client against its VERSION, not all package entries or live server revision.",
+    "r19 contains ordinary shop, skill/assignment, Fishing/Mentor/Guild UI paths, input controls and newcomer-v2 configuration. Presence is not player acceptance.",
+    "Current Native input/quest_ui/overlays differ substantially from r19 source; do not assume current fixes appear in installed EXE.",
+    "Current stone workshop and newer SLG transaction/UID work explicitly remain unpublished/default disabled. Source50 complete Web package is separate from this installed Native r19.",
+    "Normal Native crafting renderer/submit path is not established; validated NewRecipeInfo is not a visible crafting UI.",
+    "Only four server LanguageCode variants exist; nine client language controls do not prove nine server NPC text languages."
+  ],
+  "matrix": [
+    {
+      "id": "P0-00",
+      "priority": 0,
+      "title": "安装与会话基线",
+      "r19_delivery_status": "installed_r19_exe_hash_verified",
+      "live_server_status": "not_checked_by_this_read_only_worker",
+      "entry_conditions": [
+        "使用当前 D:/Mir2Invite 安装与正常已授权账号；记录角色职业、等级、地图坐标。"
+      ],
+      "shortest_normal_ui_route": [
+        "打开现有启动入口；正常登录或选择角色；先记录当前版本与角色状态，再做玩法动作。"
+      ],
+      "visible_ui_assertions": [
+        "实际 EXE 哈希与 VERSION/BUILD-ATTESTATION 相同；本报告仅核对 EXE，不代表154576项包清单或签名验收。",
+        "进入真实游戏地图，有本人 HP/MP、金币和背包；没有把测试说明中的演示NPC/怪当作在线角色。"
+      ],
+      "accounts_needed": 1,
+      "event_or_time_requirement": null,
+      "blocked_or_deferred_when": [],
+      "evidence": [
+        {
+          "path": "D:/Mir2Invite/game/VERSION.json",
+          "line": 3
+        },
+        {
+          "path": "D:/Mir2Invite/game/KNOWN-ISSUES.md",
+          "line": 3
+        }
+      ],
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "P0-01",
+      "priority": 0,
+      "title": "新手首次报告、背包与装备",
+      "r19_delivery_status": "r19_config_and_ui_present_server_profile_requires_observation",
+      "live_server_status": "not_checked_by_this_read_only_worker",
+      "entry_conditions": [
+        "新角色或未完成起步任务；先看 Q 是否为2110001系列 newcomer-v2，不凭本地 quest_guidance 推断服务器已启用该任务集。"
+      ],
+      "shortest_normal_ui_route": [
+        "Q 查看首个任务并使用原有前往按钮/地图路径；比奇0走到 Assistant_Jane(284,606)；点击本人NPC对话中的任务并提交首次报告。",
+        "I 查看真实 WoodenSword/药品；通过原背包使用/装备入口装备武器；C 核对武器槽。"
+      ],
+      "visible_ui_assertions": [
+        "报告只获得一次真实奖励，金币与物品刷新；任务更新对应角色。",
+        "Bag1/Bag2/Quest标签能切换，物品图标、数量、选中与提示不越界；装备后背包/装备槽一致。",
+        "只有任务可接/可提交时动作有效；对话正文、奖励、返回/退出可读且不被遮住。"
+      ],
+      "accounts_needed": 1,
+      "event_or_time_requirement": null,
+      "blocked_or_deferred_when": [],
+      "evidence": [
+        {
+          "path": "mir2-web3/config/quest-guidance/newcomer-journey-v2.json",
+          "line": 77,
+          "needle": "\"id\": 2110001",
+          "git_ref": null
+        },
+        {
+          "path": "mir2-web3/config/quest-guidance/newcomer-v2.json",
+          "line": 5,
+          "needle": "2110001",
+          "git_ref": null
+        },
+        {
+          "path": "mir2-web3/packages/game-data/data/generated/crystal_npc_info_manifest.json",
+          "selector": "npcs[script_key=BichonProvince/BorderVillage/Jane]"
+        }
+      ],
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "P0-02",
+      "priority": 0,
+      "title": "正常NPC买药、滚轮及背包布局",
+      "r19_delivery_status": "r19_shop_ui_and_original_trade_scripts_present",
+      "live_server_status": "not_checked_by_this_read_only_worker",
+      "entry_conditions": [
+        "白名/低PK角色、有正常赚取金币与负重空间；保留买药前金币和药品数量。"
+      ],
+      "shortest_normal_ui_route": [
+        "若在初始边界村，最短是 Merchant_Ruben(比奇0,288,608)→View Store；不必先走300格到城内。",
+        "若已在比奇城，Alchemist_Samuel(0,324,291)→View Store；比较两处同类小红/小蓝药。",
+        "鼠标放商品区上下滚轮到首尾，选择单件/显示数量后正常 Buy；打开 I，移动背包，再返回/退出。"
+      ],
+      "visible_ui_assertions": [
+        "滚轮只滚动鼠标所处商店列表，不造成世界移动、攻击或意外购买；列表可到首尾，选中商品保持正确。",
+        "购买一次按实际报价扣款并增加正确物品/数量；取消数量/确认不扣款。",
+        "商店/NPC/真实Bag核心控件不互相遮挡；买/卖、金币、数量、返回/退出均可点击，背包移动后仍可用。",
+        "关闭对话后不能用残留控件再次购买；重开显示新权威数量。"
+      ],
+      "accounts_needed": 1,
+      "event_or_time_requirement": null,
+      "blocked_or_deferred_when": [],
+      "evidence": [
+        {
+          "path": "mir2-web3/packages/game-data/data/generated/crystal_npc_info_manifest.json",
+          "selector": "npcs[script_key=BichonProvince/BorderVillage/Grocery]"
+        },
+        {
+          "path": "mir2-web3/packages/game-data/data/generated/crystal_npc_manifest.json",
+          "selector": "scripts[script_key=BichonProvince/BorderVillage/Grocery].raw_text; click labels only, never send targets manually"
+        },
+        {
+          "path": "mir2-web3/packages/game-data/data/generated/crystal_npc_info_manifest.json",
+          "selector": "npcs[script_key=BichonProvince/BichonWall/Potion1]"
+        },
+        {
+          "path": "mir2-web3/packages/game-data/data/generated/crystal_npc_manifest.json",
+          "selector": "scripts[script_key=BichonProvince/BichonWall/Potion1].raw_text; click labels only, never send targets manually"
+        }
+      ],
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "P0-03",
+      "priority": 0,
+      "title": "任务/NPC语言和字体",
+      "r19_delivery_status": "r19_nine_language_client_controls_present_server_dialog_languages_limited",
+      "live_server_status": "not_checked_by_this_read_only_worker",
+      "entry_conditions": [
+        "在安全区正常语言选项切换；优先繁中/English/pt-BR，再检查其余六种客户端选项；保留同一任务和读页。"
+      ],
+      "shortest_normal_ui_route": [
+        "在登录或Options选择语言；重新打开同一 Q 任务/同一NPC；检查正文、奖励、按钮与滚动；输入个人名字/聊天保持原文。"
+      ],
+      "visible_ui_assertions": [
+        "九种客户端语言的控制说明、按钮和字体可读、没有方框或错误裁切。",
+        "任务详情和服务端NPC正文的实际语言单独记证据，不将客户端九语等同服务端九语；当前 game-data LanguageCode 仅en/zh-CN/es/pt-BR。",
+        "动态NPC/玩家名、聊天和用户自写文本依现有限制保留原文；按钮与正文混语若非已声明fallback应登记具体缺口。",
+        "换语言不误提交任务、丢失滚动/所选奖励或改变金币物品。"
+      ],
+      "accounts_needed": 1,
+      "event_or_time_requirement": null,
+      "blocked_or_deferred_when": [],
+      "evidence": [
+        {
+          "path": "D:/Mir2Invite/game/CONTROLS.txt",
+          "line": 3
+        },
+        {
+          "path": "D:/Mir2Invite/game/KNOWN-ISSUES.md",
+          "line": 3
+        },
+        {
+          "path": "mir2-web3/packages/game-data/src/lib.rs",
+          "line": 2105,
+          "needle": "pub enum LanguageCode",
+          "git_ref": null
+        }
+      ],
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "P1-00",
+      "priority": 1,
+      "title": "走/跑、寻路与停止",
+      "r19_delivery_status": "r19_input_controls_and_escape_map_behavior_present",
+      "live_server_status": "not_checked_by_this_read_only_worker",
+      "entry_conditions": [
+        "安全区、无NPC/输入框/模态窗口；已关闭聊天输入；按当前地图可行走格操作。"
+      ],
+      "shortest_normal_ui_route": [
+        "空地按住左键走，右键跑；松开停止；WASD/箭头再Shift跑。",
+        "用当前大地图/小地图点目的地；关闭地图，观察路线继续；地图已闭时按Esc停止。",
+        "如果大地图仍开，第一次Esc关闭地图而保留路线；第二次Esc才做普通停止。"
+      ],
+      "visible_ui_assertions": [
+        "松键/松鼠标后不会继续继承旧奔跑；走跑动画、速度和坐标变化一致。",
+        "墙、门槛与其他实体阻挡不穿越；首步/变向无持续回弹。",
+        "关闭地图保持合法路线；普通Esc清路线/攻击/采集目标；NPC/聊天期间世界动作被正确捕获。"
+      ],
+      "accounts_needed": 1,
+      "event_or_time_requirement": null,
+      "blocked_or_deferred_when": [],
+      "evidence": [
+        {
+          "path": "D:/Mir2Invite/game/CONTROLS.txt",
+          "line": 3
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-windows/src/input.rs",
+          "line": 2240,
+          "needle": "The Big Map owns Escape",
+          "git_ref": "2b04e82c4f42b22f895f5f95b5bd79a8147eacdf"
+        }
+      ],
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "P1-01",
+      "priority": 1,
+      "title": "战士技能、快捷键与战斗节奏",
+      "r19_delivery_status": "r19_skill_ui_present_three_class_live_acceptance_pending",
+      "live_server_status": "not_checked_by_this_read_only_worker",
+      "entry_conditions": [
+        "战士；Lv7 Fencing、Lv15 Slaying、Lv22 Thrusting、Lv26 HalfMoon按实际已学列表选用；不能用Lv35 FlamingSword冒充0–30技能。"
+      ],
+      "shortest_normal_ui_route": [
+        "完成普通任务获得/使用技能书；C→Spells/技能页；选择已学可绑定技能，选F1–F8并保存，等待服务器确认；关闭所有模态再打弱怪。",
+        "Fencing/Slaying是被动，验收其学习/命中展示；Lv26后再测试HalfMoon等实际主动/切换技能。"
+      ],
+      "visible_ui_assertions": [
+        "保存后技能键位图标和重开显示一致，失败不伪造已保存状态；未学/不满足等级不能施放。",
+        "连续按键不会无视服务端攻击节奏重复伤害/耗蓝；被动技能不强求主动技能冷却遮罩。",
+        "背包1–6用药符合真实数量与公共使用节奏，聊天输入不触发快捷键。"
+      ],
+      "accounts_needed": 1,
+      "event_or_time_requirement": null,
+      "blocked_or_deferred_when": [
+        "没有达到26级或未学主动技能时，该主动冷却项延期，不能用QA升级补齐。"
+      ],
+      "evidence": [
+        {
+          "path": "mir2-web3/packages/game-data/data/generated/crystal_magic_manifest.json",
+          "selector": "magics[name in Fencing,FireBall,Healing,Slaying,GreatFireBall,Poisoning,SoulFireBall,SummonSkeleton,HalfMoon]"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/skill_assign_dialog.rs",
+          "line": 56,
+          "needle": "MagicKey",
+          "git_ref": "2b04e82c4f42b22f895f5f95b5bd79a8147eacdf"
+        },
+        {
+          "path": "D:/Mir2Invite/game/CONTROLS.txt",
+          "line": 3
+        }
+      ],
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "P1-02",
+      "priority": 1,
+      "title": "法师施法、冷却与缺蓝",
+      "r19_delivery_status": "r19_skill_ui_present_wizard_full_route_not_accepted",
+      "live_server_status": "not_checked_by_this_read_only_worker",
+      "entry_conditions": [
+        "Wizard：FireBall Lv7、GreatFireBall Lv15、ThunderBolt Lv17；学会相应书，有MP和小蓝药。"
+      ],
+      "shortest_normal_ui_route": [
+        "正常任务/书店获得技能，C→Spells绑定F1–F8；对可见可选中弱怪按技能。",
+        "记录一次施法MP与命中，再快速重复按键；在自然低MP或不够MP时尝试一次，随后正常补蓝。"
+      ],
+      "visible_ui_assertions": [
+        "只有合法施法消耗MP、产生相应动画和伤害；重复键不会越过实际冷却/动作约束。",
+        "冷却提示或图标若存在应与实际可再次施放一致；以服务器效果为准，不把静态delayBase1800硬当实机计时。",
+        "缺蓝时明确失败/无成功伤害，补蓝恢复可施放；目标丢失/出视野不继续攻击旧对象。"
+      ],
+      "accounts_needed": 1,
+      "event_or_time_requirement": null,
+      "blocked_or_deferred_when": [],
+      "evidence": [
+        {
+          "path": "mir2-web3/packages/game-data/data/generated/crystal_magic_manifest.json",
+          "selector": "magics[name in Fencing,FireBall,Healing,Slaying,GreatFireBall,Poisoning,SoulFireBall,SummonSkeleton,HalfMoon]"
+        },
+        {
+          "path": "D:/Mir2Invite/game/CONTROLS.txt",
+          "line": 3
+        },
+        {
+          "path": "D:/Mir2Invite/game/KNOWN-ISSUES.md",
+          "line": 3
+        }
+      ],
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "P1-03",
+      "priority": 1,
+      "title": "道士治疗、毒/符与召唤",
+      "r19_delivery_status": "r19_skill_ui_present_taoist_full_route_not_accepted",
+      "live_server_status": "not_checked_by_this_read_only_worker",
+      "entry_conditions": [
+        "Taoist：Healing Lv7、Poisoning Lv14、SoulFireBall Lv18、SummonSkeleton Lv19；普通药/毒/符足够，做治疗时有实际缺血。"
+      ],
+      "shortest_normal_ui_route": [
+        "C→Spells正常绑定；先Healing与弱怪普通攻击；到等级后在普通商店买毒、符并装备要求槽，再测毒、火符、召唤。",
+        "城内毒剂入口Specialist_Travis(0109,4,9)，符在Merchant_Ruben/Bull正常列表；由地图入口/Board店铺传送进入，不能手输地图命令。"
+      ],
+      "visible_ui_assertions": [
+        "治疗只增加真实HP，耗蓝/冷却受限；满血不制造伤害或无穷回血表现。",
+        "缺符/毒/MP时不伪造成功；成功时扣正确资源、展示状态和召唤物。",
+        "Esc/逃跑后不继承对旧目标的自动符攻击；召唤物信息与本人分开。"
+      ],
+      "accounts_needed": 1,
+      "event_or_time_requirement": null,
+      "blocked_or_deferred_when": [],
+      "evidence": [
+        {
+          "path": "mir2-web3/packages/game-data/data/generated/crystal_magic_manifest.json",
+          "selector": "magics[name in Fencing,FireBall,Healing,Slaying,GreatFireBall,Poisoning,SoulFireBall,SummonSkeleton,HalfMoon]"
+        },
+        {
+          "path": "mir2-web3/config/quest-guidance/newcomer-supplies.json",
+          "line": 21,
+          "needle": "\"merchants\"",
+          "git_ref": null
+        },
+        {
+          "path": "mir2-web3/packages/game-data/data/generated/crystal_npc_info_manifest.json",
+          "selector": "npcs[script_key=BichonProvince/BichonWall/Grocery]"
+        },
+        {
+          "path": "D:/Mir2Invite/game/CONTROLS.txt",
+          "line": 3
+        }
+      ],
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "P1-04",
+      "priority": 1,
+      "title": "战斗停止、逃跑和生命反馈",
+      "r19_delivery_status": "r19_pointer_attack_and_escape_present_live_behavior_not_accepted",
+      "live_server_status": "not_checked_by_this_read_only_worker",
+      "entry_conditions": [
+        "三个职业分别选择可退回安全区的弱怪；先带药，选当前可见对象；不以死亡为必须条件。"
+      ],
+      "shortest_normal_ui_route": [
+        "点击一只弱怪开始攻击；按Esc，再点击远离怪物的空地/右键跑；观察本人HP、怪物HP和坐标。",
+        "停止后重新点新目标，确认旧目标没有排队攻击；若自然死亡则走原复活按钮并核对复活地图。"
+      ],
+      "visible_ui_assertions": [
+        "Esc后旧目标/自动路由停止，移动撤退不会被持续攻击请求拉回或沿用旧奔跑。",
+        "逃跑与追击有真实权威坐标、HP更新；失败/延迟要记录而不计通过。",
+        "一次释放/停止不误触别的UI；正常保存重登后HP/地图符合最后有效状态。"
+      ],
+      "accounts_needed": 1,
+      "event_or_time_requirement": null,
+      "blocked_or_deferred_when": [],
+      "evidence": [
+        {
+          "path": "mir2-web3/apps/game-client/platform-windows/src/input.rs",
+          "line": 2240,
+          "needle": "The Big Map owns Escape",
+          "git_ref": "2b04e82c4f42b22f895f5f95b5bd79a8147eacdf"
+        },
+        {
+          "path": "D:/Mir2Invite/game/CONTROLS.txt",
+          "line": 3
+        }
+      ],
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "P2-00",
+      "priority": 2,
+      "title": "采矿",
+      "r19_delivery_status": "r19_mining_core_present_requires_live_map_configuration",
+      "live_server_status": "not_checked_by_this_read_only_worker",
+      "entry_conditions": [
+        "正常购买PickAxe、装备CanMine武器、有持久可发行库存且负重空间；只能朝具有mine spot的阻挡格普通挥击。"
+      ],
+      "shortest_normal_ui_route": [
+        "边界村Blacksmith_Smith(0,296,613)→View Store买PickAxe并装备；按正常地图路线到配置的矿点。",
+        "当前with_crystal_map_runtime配置小矿区为比奇0 x[331,335),y[268,272)，从相邻可站格面向实际阻挡矿格，普通左键挥镐。"
+      ],
+      "visible_ui_assertions": [
+        "有挖矿挥击/尘土，合法挥击消耗镐耐久；成功矿石进入真实Bag，显示数量和纯度。",
+        "成功率为随机，短时间没出矿不是自动通过或自动故障；应区分未配置mine spot/非阻挡格/不合格工具。",
+        "满包/负重/工具不满足时明确失败且无幽灵矿石；没有on-chain矿点时不将它们作为普通玩法要求。"
+      ],
+      "accounts_needed": 1,
+      "event_or_time_requirement": null,
+      "blocked_or_deferred_when": [
+        "在线gateway是否加载这处mine_zone未读取确认；D401战斗地图本身不证明全图可挖矿。"
+      ],
+      "evidence": [
+        {
+          "path": "mir2-web3/apps/simulation/src/runtime/mining.rs",
+          "line": 4,
+          "needle": "Mining is triggered",
+          "git_ref": null
+        },
+        {
+          "path": "mir2-web3/apps/simulation/src/config.rs",
+          "line": 4219,
+          "needle": "Starter mining zone",
+          "git_ref": null
+        },
+        {
+          "path": "mir2-web3/packages/game-data/data/generated/crystal_npc_manifest.json",
+          "selector": "scripts[script_key=BichonProvince/BorderVillage/Blacksmith].raw_text; click labels only, never send targets manually"
+        }
+      ],
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "P2-01",
+      "priority": 2,
+      "title": "钓鱼",
+      "r19_delivery_status": "r19_fishing_ui_and_cast_source_present_requires_live_water_points",
+      "live_server_status": "not_checked_by_this_read_only_worker",
+      "entry_conditions": [
+        "BlueFishingRod、FishingHook、FishBait；浮漂/探测器/卷线器为实际槽位，自动抛竿要求卷线器；站立并面对合法水格。"
+      ],
+      "shortest_normal_ui_route": [
+        "比奇城WiseFisherman_Albert(0,341,243)→Purchase Fishing Stuff正常购买。",
+        "C装备鱼竿；点装备侧边Fishing图标，装钩/饵等实际槽；到地图显示的水边，面向水格点击抛竿；正常Reel/Stop收竿。"
+      ],
+      "visible_ui_assertions": [
+        "鱼竿/槽位物品、抛竿进度/状态显示；收竿结果以真实Bag为准；饵与耐久按有效动作消耗。",
+        "无钩/无饵/非水点不能成功；自动功能未装卷线器不能假开启。",
+        "移动/Esc/关闭窗口后状态清理，重开不继承旧抛竿；售鱼使用原NPC Sell，金币符合实际结果。"
+      ],
+      "accounts_needed": 1,
+      "event_or_time_requirement": null,
+      "blocked_or_deferred_when": [],
+      "evidence": [
+        {
+          "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+          "line": 3198,
+          "needle": "ToggleFishing",
+          "git_ref": "2b04e82c4f42b22f895f5f95b5bd79a8147eacdf"
+        },
+        {
+          "path": "mir2-web3/apps/simulation/src/runtime/fishing.rs",
+          "line": 197,
+          "needle": "fn begin_fishing_cast",
+          "git_ref": null
+        },
+        {
+          "path": "mir2-web3/packages/game-data/data/generated/crystal_npc_info_manifest.json",
+          "selector": "npcs[script_key=BichonProvince/BichonWall/WiseFisher]"
+        },
+        {
+          "path": "mir2-web3/packages/game-data/data/generated/crystal_npc_manifest.json",
+          "selector": "scripts[script_key=BichonProvince/BichonWall/WiseFisher].raw_text; click labels only, never send targets manually"
+        }
+      ],
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "P2-02",
+      "priority": 2,
+      "title": "原版即时制作/配方入口探查",
+      "r19_delivery_status": "native_r19_recipe_renderer_and_submit_ui_not_established",
+      "live_server_status": "not_checked_by_this_read_only_worker",
+      "entry_conditions": [
+        "只用正常CraftsLady；已有材料/金币时也先确认Native实际有配方面板和按钮。"
+      ],
+      "shortest_normal_ui_route": [
+        "比奇城CraftsLady_Alice(0,321,265)→Crafting；边界村CraftsLady_Jude(0,294,619)可先查看正常菜单。",
+        "若出现实际配方/材料/制作按钮，再选配方查看要求并执行一次；若只是对话/无面板，记录Native入口缺口并停止该项。"
+      ],
+      "visible_ui_assertions": [
+        "NewRecipeInfo被结构校验或后台目录存在不能算真实制作UI完成。",
+        "必须可见配方成品、材料数量、金币、成功率、实际提交与真实扣料/成品；取消不变动。",
+        "当前r19 overlays源码没有Recipe/Crafting渲染入口，当前Native也未发现完整制作消费者；不以Web/后端测试替代。"
+      ],
+      "accounts_needed": 1,
+      "event_or_time_requirement": null,
+      "blocked_or_deferred_when": [
+        "未确认Native配方面板/提交链；不得用原始packet或管理命令补齐该UI。"
+      ],
+      "evidence": [
+        {
+          "path": "mir2-web3/packages/game-data/data/generated/crystal_npc_info_manifest.json",
+          "selector": "npcs[script_key=BichonProvince/BichonWall/CraftsLady]"
+        },
+        {
+          "path": "mir2-web3/packages/game-data/data/generated/crystal_npc_manifest.json",
+          "selector": "scripts[script_key=BichonProvince/BichonWall/CraftsLady].raw_text; click labels only, never send targets manually"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-windows/src/gateway_catalog_transport.rs",
+          "line": 38,
+          "needle": "\"NewRecipeInfo\"",
+          "git_ref": null
+        }
+      ],
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "P2-03",
+      "priority": 2,
+      "title": "新SLG订单/公共工坊/生产侧栏",
+      "r19_delivery_status": "explicitly_unpublished_disabled_no_normal_ui_route",
+      "live_server_status": "not_checked_by_this_read_only_worker",
+      "entry_conditions": [
+        "需要独立发布正常NPC/网关目录和匹配客户端；当前不满足。"
+      ],
+      "shortest_normal_ui_route": [
+        "本轮只记录为未发布；无需在r19反复寻找新订单、种植、建筑、食品等入口。"
+      ],
+      "visible_ui_assertions": [
+        "不能把纯规则/个人File事务测试、UID补丁或设计目录当成当前玩家入口。"
+      ],
+      "accounts_needed": 1,
+      "event_or_time_requirement": null,
+      "blocked_or_deferred_when": [
+        "公共配方、正常绑定、NPC/网关新入口和安装包未切换。"
+      ],
+      "evidence": [
+        {
+          "path": "mir2-web3/docs/SLG-PRODUCTION-IMPLEMENTATION.zh-CN.md",
+          "line": 15,
+          "needle": "没有NPC/网关新入口或安装包切换",
+          "git_ref": null
+        }
+      ],
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "P2-04",
+      "priority": 2,
+      "title": "三档原石工坊",
+      "r19_delivery_status": "explicitly_unpublished_default_disabled_missing_in_r19_expected",
+      "live_server_status": "not_checked_by_this_read_only_worker",
+      "entry_conditions": [
+        "必须先发布并启用真实持久服务器与匹配Native客户端；有合法铜/银/金矿，正常金币；现在只规划，不能在当前r19验收交易。"
+      ],
+      "shortest_normal_ui_route": [
+        "发布后比奇Blacksmith_Bill(0,302,221)或Bruce(0159,5,9)→原石工坊→选择真实矿石封存→可选鉴定→切割。",
+        "每次看原Bag格、金币、公开UID/serial、鉴定提示；退出重登再选择同一原石；两账号按正常交易/邮件转交后继续。"
+      ],
+      "visible_ui_assertions": [
+        "桌面右侧440×224且Bag不重叠；小屏/移动/普通NPC保持原布局；工坊仍模态。",
+        "三个档位六种概率和冻结费用完整可见；封存免费，鉴定100/250/500、切割1500/2500/3500；不提前显示精确隐藏结果。",
+        "鉴定只有粗线索；成功切割原格替换真实材料，不能再次切同一原石；金币不足/失效链接无损失。",
+        "满Bag仍可原格切割；重登/转交不重抽或重复扣费。"
+      ],
+      "accounts_needed": 2,
+      "event_or_time_requirement": null,
+      "blocked_or_deferred_when": [
+        "当前r19没侧栏/菜单是已知发布边界；默认关闭，尚无服务器/安装包更新。",
+        "双账号转交、真实服务重启、PG迁移、九语/独立图标仍未实机验收；不能靠普通交易回归认定原石转交成功。"
+      ],
+      "evidence": [
+        {
+          "path": "mir2-web3/docs/SLG-STONE-WORKSHOP.zh-CN.md",
+          "line": 3
+        },
+        {
+          "path": "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
+          "line": 3
+        }
+      ],
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "P3-00",
+      "priority": 3,
+      "title": "日任务",
+      "r19_delivery_status": "r19_cadence_source_present_server_profile_and_live_list_unverified",
+      "live_server_status": "not_checked_by_this_read_only_worker",
+      "entry_conditions": [
+        "正常Q/NPC任务列表中实际存在Daily任务；遵循显示等级/前置；newcomer-v2主线不要求每日等待。"
+      ],
+      "shortest_normal_ui_route": [
+        "Q和比奇Board查看实际可接的Daily，正常接取→击杀/收集→回NPC提交；保存重登核对今日完成。"
+      ],
+      "visible_ui_assertions": [
+        "今日完成不立即再次可接、不重复奖励；当前进行/可提交任务跨重置保持，不无故丢掉进度。",
+        "只按实际UI列表和服务器返回记录，不把历史v1每日编号硬套给v2。"
+      ],
+      "accounts_needed": 1,
+      "event_or_time_requirement": "完整重置验收需跨服务器 UTC+8 00:00；不得改机器/服务器时间代替。",
+      "blocked_or_deferred_when": [],
+      "evidence": [
+        {
+          "path": "mir2-web3/apps/simulation/src/runtime/quest_recurrence.rs",
+          "line": 85,
+          "needle": "Daily reset:",
+          "git_ref": null
+        },
+        {
+          "path": "mir2-web3/packages/game-data/data/generated/crystal_npc_info_manifest.json",
+          "selector": "npcs[script_key=BichonProvince/BichonWall/Board]"
+        }
+      ],
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "P3-01",
+      "priority": 3,
+      "title": "周任务",
+      "r19_delivery_status": "r19_weekly_source_present_v1_quest140_gate_not_v2_guarantee",
+      "live_server_status": "not_checked_by_this_read_only_worker",
+      "entry_conditions": [
+        "实际UI有Weekly/周任务；源码只有newcomer-v1开启时把q140归为周任务，v2是否提供周任务未证实。"
+      ],
+      "shortest_normal_ui_route": [
+        "Q→实际Weekly项目→正常NPC接取/完成/提交；若无Weekly项，记录profile/任务目录缺口，不强发q140。"
+      ],
+      "visible_ui_assertions": [
+        "本周不重复领奖，重登保留；到下个有效周任务期才能重开；进行中/待交任务不会因周界丢失。"
+      ],
+      "accounts_needed": 1,
+      "event_or_time_requirement": "完整重置验收需跨周一服务器UTC+8 00:00。",
+      "blocked_or_deferred_when": [],
+      "evidence": [
+        {
+          "path": "mir2-web3/apps/simulation/src/runtime/quest_recurrence.rs",
+          "line": 54,
+          "needle": "newcomer_v1 && quest_id == 140",
+          "git_ref": null
+        },
+        {
+          "path": "mir2-web3/apps/simulation/src/runtime/quest_recurrence.rs",
+          "line": 85,
+          "needle": "Daily reset:",
+          "git_ref": null
+        }
+      ],
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "P3-02",
+      "priority": 3,
+      "title": "行会入会与双账号",
+      "r19_delivery_status": "r19_guild_ui_present_live_shared_authority_unverified",
+      "live_server_status": "not_checked_by_this_read_only_worker",
+      "entry_conditions": [
+        "最短入会：等级1–25、当前无行会；双账号可用已存在行会与有邀请权限的成员。"
+      ],
+      "shortest_normal_ui_route": [
+        "边界村BorderVillage_Board(0,284,615)→Newbie Guild Recruitment，按当前可见正常菜单入会。",
+        "打开HUD行会按钮查看真实成员/公告；已有行会成员向第二账号发正常邀请，第二账号接受，双方刷新/重登核对。"
+      ],
+      "visible_ui_assertions": [
+        "行会名称、成员、权限、公告来自服务端；接受/拒绝及离线状态双方一致，不产生个人假行会。",
+        "无权限编辑/存取操作应拒绝；存取验收只用实际可见权限/已有资源，记录金币物品前后。"
+      ],
+      "accounts_needed": 2,
+      "event_or_time_requirement": null,
+      "blocked_or_deferred_when": [],
+      "evidence": [
+        {
+          "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+          "line": 3228,
+          "needle": "ToggleGuild",
+          "git_ref": "2b04e82c4f42b22f895f5f95b5bd79a8147eacdf"
+        },
+        {
+          "path": "mir2-web3/packages/game-data/data/generated/crystal_npc_manifest.json",
+          "selector": "scripts[script_key=BichonProvince/BorderVillage/BountyBoard].raw_text; click labels only, never send targets manually"
+        }
+      ],
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "P3-03",
+      "priority": 3,
+      "title": "正常创建行会",
+      "r19_delivery_status": "r19_npc_guild_creation_route_present_costly_conditional",
+      "live_server_status": "not_checked_by_this_read_only_worker",
+      "entry_conditions": [
+        "角色>=22级、无行会、有正常获得的100万金币和1 WoomaHorn；不为短测消耗不够条件的角色资源。"
+      ],
+      "shortest_normal_ui_route": [
+        "比奇Board(0,334,259)→village stores→Bichon Inner Wall，到Administrator_Edward(0122,28,33)→Request Guild creation→正常名字确认。"
+      ],
+      "visible_ui_assertions": [
+        "只有实际满足资格才给命名窗；确认成功扣真实成本一次，取消不扣。",
+        "创建后Guild UI显示同一权威行会，重登仍存在，重复提交不重复消耗。"
+      ],
+      "accounts_needed": 1,
+      "event_or_time_requirement": null,
+      "blocked_or_deferred_when": [
+        "缺金币/角/等级则仅测试菜单和明确拒绝，完整创建延期。"
+      ],
+      "evidence": [
+        {
+          "path": "mir2-web3/packages/game-data/data/generated/crystal_guild_settings.json",
+          "line": 4
+        },
+        {
+          "path": "mir2-web3/packages/game-data/data/generated/crystal_npc_info_manifest.json",
+          "selector": "npcs[script_key=BichonProvince/BichonWall/Administrator]"
+        },
+        {
+          "path": "mir2-web3/packages/game-data/data/generated/crystal_npc_manifest.json",
+          "selector": "scripts[script_key=BichonProvince/BichonWall/Administrator].raw_text; click labels only, never send targets manually"
+        }
+      ],
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "P3-04",
+      "priority": 3,
+      "title": "师徒双账号",
+      "r19_delivery_status": "r19_mentor_ui_present_live_bilateral_relation_unverified",
+      "live_server_status": "not_checked_by_this_read_only_worker",
+      "entry_conditions": [
+        "两独立账号、同职业；师父至少高10级，允许师徒请求，双方无冲突关系/冷却。"
+      ],
+      "shortest_normal_ui_route": [
+        "C装备页侧边Mentor图标→Allow；徒弟通过正常Add Mentor填师父游戏名；师父在邀请窗接受/拒绝；双方重开并重登查看。"
+      ],
+      "visible_ui_assertions": [
+        "只有受邀请账号确认后双方关系成立；名字、等级、在线状态与奖励数据一致。",
+        "不同职业/不足10级差/禁邀请/已有关系应明确拒绝；取消按现有确认，不借旧窗口影响新关系。"
+      ],
+      "accounts_needed": 2,
+      "event_or_time_requirement": "手动解除后的当前规则有7天冷却；持续经验/毕业验收需实际练级和时间，不可本轮假造。",
+      "blocked_or_deferred_when": [],
+      "evidence": [
+        {
+          "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+          "line": 3202,
+          "needle": "ToggleMentor",
+          "git_ref": "2b04e82c4f42b22f895f5f95b5bd79a8147eacdf"
+        },
+        {
+          "path": "mir2-web3/apps/simulation/src/runtime/shared_relationships.rs",
+          "line": 11,
+          "needle": "SHARED_MENTOR_LEVEL_GAP",
+          "git_ref": null
+        }
+      ],
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "P3-05",
+      "priority": 3,
+      "title": "沙巴克与活动时间",
+      "r19_delivery_status": "original_npc_schedule_route_present_full_conquest_not_accepted_r19_scope",
+      "live_server_status": "not_checked_by_this_read_only_worker",
+      "entry_conditions": [
+        "会长/有权限行会与ZumaRelic等当前服务器要求；实际已安排攻城时间，至少两敌对行会/多账号。"
+      ],
+      "shortest_normal_ui_route": [
+        "Administrator_Edward正常Request Sabuk conquest war查看说明和实际日期；若需要正式报名且条件已授权满足，再经UI报名。",
+        "正常地图/传送路线到盟重3沙巴克；拥有城时进入SabukOfficer(0150,9,13)查看税、城库/修复等权限菜单。"
+      ],
+      "visible_ui_assertions": [
+        "日期/时间/攻城名单由实际UI给出；申请、取消、资源成本、权限反馈正确。",
+        "活动内必须验证双方玩家可见、城门/守卫/占领与结束结算；静态城地图/个人会话状态不算多人攻城。"
+      ],
+      "accounts_needed": 2,
+      "event_or_time_requirement": "脚本说明申请后2天、历史文案20:00；实际服务器活动配置未读取，必须用正常NPC当前显示核验，不能承诺今天可攻城。",
+      "blocked_or_deferred_when": [
+        "0–30安装说明不是后期攻城验收；缺活动/两行会则本轮只记正常菜单与访问限制。"
+      ],
+      "evidence": [
+        {
+          "path": "mir2-web3/packages/game-data/data/generated/crystal_npc_manifest.json",
+          "selector": "scripts[script_key=BichonProvince/BichonWall/Administrator].raw_text; click labels only, never send targets manually"
+        },
+        {
+          "path": "mir2-web3/packages/game-data/data/generated/crystal_npc_manifest.json",
+          "selector": "scripts[script_key=MongchonProvince/SabukWall/Conquest].raw_text; click labels only, never send targets manually"
+        },
+        {
+          "path": "D:/Mir2Invite/game/KNOWN-ISSUES.md",
+          "line": 3
+        }
+      ],
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "P3-06",
+      "priority": 3,
+      "title": "0–30后半段与真正后期地图",
+      "r19_delivery_status": "r19_invited_scope_0_30_only_later_world_acceptance_not_published_claim",
+      "live_server_status": "not_checked_by_this_read_only_worker",
+      "entry_conditions": [
+        "正常逐步完成前置任务与装备/补给；已达到相应等级；记录每个洞口真实地图坐标。"
+      ],
+      "shortest_normal_ui_route": [
+        "newcomer-v2：Lv16 q2110009正常进入Oma Cave D001；Lv20 q2110013正常进入Dead Mine D401；Lv26 q2110018从Wooma Temple D021走到D022；每段任务导航/正常洞口，回比奇Board交报告。",
+        "沙巴克、Lv35+技能、Rebirth60+及其他更后地图单列条件项目，不在r19的0–30承诺内；只经实际显示的正常门/传送NPC。"
+      ],
+      "visible_ui_assertions": [
+        "每次地图切换本人位置、碰撞、敌人、可见NPC、任务进度都正确；没有旧图怪物/路径/攻击遗留。",
+        "离开危险地图补给与重登保存能保持权威地图；到达目标地图不等于整后期玩法完成。"
+      ],
+      "accounts_needed": 1,
+      "event_or_time_requirement": null,
+      "blocked_or_deferred_when": [
+        "需要实际升级与长期路线；不能用快速管理员传图代替普通入口。"
+      ],
+      "evidence": [
+        {
+          "path": "mir2-web3/config/quest-guidance/newcomer-journey-v2.json",
+          "line": 77,
+          "needle": "\"id\": 2110001",
+          "git_ref": null
+        },
+        {
+          "path": "mir2-web3/config/quest-guidance/newcomer-v2.json",
+          "line": 5,
+          "needle": "2110001",
+          "git_ref": null
+        },
+        {
+          "path": "D:/Mir2Invite/game/KNOWN-ISSUES.md",
+          "line": 3
+        }
+      ],
+      "acceptance_status": "not_run"
+    },
+    {
+      "id": "P0-04",
+      "priority": 0,
+      "title": "每组结束的正常保存/重登",
+      "r19_delivery_status": "r19_logout_save_controls_present",
+      "live_server_status": "not_checked_by_this_read_only_worker",
+      "entry_conditions": [
+        "完成任一小组后，在安全区记录角色、地图、金币、背包与技能键位。"
+      ],
+      "shortest_normal_ui_route": [
+        "通过普通System Menu/Log out退出角色，等待角色界面；再正常进入同一角色；最终正常登出后关闭客户端。"
+      ],
+      "visible_ui_assertions": [
+        "金币、物品、任务、装备和位置与最后有效结果一致；没有重复奖励、撤销成功购买或旧动作自动重启。",
+        "只看到断连提示/强关窗口不算保存确认；记录失败时刻与实际重新登录结果。"
+      ],
+      "accounts_needed": 1,
+      "event_or_time_requirement": null,
+      "blocked_or_deferred_when": [],
+      "evidence": [
+        {
+          "path": "D:/Mir2Invite/game/CONTROLS.txt",
+          "line": 3
+        }
+      ],
+      "acceptance_status": "not_run"
+    }
+  ],
+  "source_refs": {
+    "controls": {
+      "path": "D:/Mir2Invite/game/CONTROLS.txt",
+      "line": 3
+    },
+    "installed_version": {
+      "path": "D:/Mir2Invite/game/VERSION.json",
+      "line": 3
+    },
+    "limits": {
+      "path": "D:/Mir2Invite/game/KNOWN-ISSUES.md",
+      "line": 3
+    },
+    "journey": {
+      "path": "mir2-web3/config/quest-guidance/newcomer-journey-v2.json",
+      "line": 77,
+      "needle": "\"id\": 2110001",
+      "git_ref": null
+    },
+    "guidance": {
+      "path": "mir2-web3/config/quest-guidance/newcomer-v2.json",
+      "line": 5,
+      "needle": "2110001",
+      "git_ref": null
+    },
+    "supplies": {
+      "path": "mir2-web3/config/quest-guidance/newcomer-supplies.json",
+      "line": 21,
+      "needle": "\"merchants\"",
+      "git_ref": null
+    },
+    "r19_input": {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/input.rs",
+      "line": 2240,
+      "needle": "The Big Map owns Escape",
+      "git_ref": "2b04e82c4f42b22f895f5f95b5bd79a8147eacdf"
+    },
+    "r19_fishing_ui": {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "line": 3198,
+      "needle": "ToggleFishing",
+      "git_ref": "2b04e82c4f42b22f895f5f95b5bd79a8147eacdf"
+    },
+    "r19_mentor_ui": {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "line": 3202,
+      "needle": "ToggleMentor",
+      "git_ref": "2b04e82c4f42b22f895f5f95b5bd79a8147eacdf"
+    },
+    "r19_guild_ui": {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "line": 3228,
+      "needle": "ToggleGuild",
+      "git_ref": "2b04e82c4f42b22f895f5f95b5bd79a8147eacdf"
+    },
+    "r19_skill_assign": {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/skill_assign_dialog.rs",
+      "line": 56,
+      "needle": "MagicKey",
+      "git_ref": "2b04e82c4f42b22f895f5f95b5bd79a8147eacdf"
+    },
+    "magic": {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_magic_manifest.json",
+      "selector": "magics[name in Fencing,FireBall,Healing,Slaying,GreatFireBall,Poisoning,SoulFireBall,SummonSkeleton,HalfMoon]"
+    },
+    "mining": {
+      "path": "mir2-web3/apps/simulation/src/runtime/mining.rs",
+      "line": 4,
+      "needle": "Mining is triggered",
+      "git_ref": null
+    },
+    "mine_zone": {
+      "path": "mir2-web3/apps/simulation/src/config.rs",
+      "line": 4219,
+      "needle": "Starter mining zone",
+      "git_ref": null
+    },
+    "fishing": {
+      "path": "mir2-web3/apps/simulation/src/runtime/fishing.rs",
+      "line": 197,
+      "needle": "fn begin_fishing_cast",
+      "git_ref": null
+    },
+    "catalog_validation": {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/gateway_catalog_transport.rs",
+      "line": 38,
+      "needle": "\"NewRecipeInfo\"",
+      "git_ref": null
+    },
+    "recurrence": {
+      "path": "mir2-web3/apps/simulation/src/runtime/quest_recurrence.rs",
+      "line": 85,
+      "needle": "Daily reset:",
+      "git_ref": null
+    },
+    "weekly_gate": {
+      "path": "mir2-web3/apps/simulation/src/runtime/quest_recurrence.rs",
+      "line": 54,
+      "needle": "newcomer_v1 && quest_id == 140",
+      "git_ref": null
+    },
+    "guild_settings": {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_guild_settings.json",
+      "line": 4
+    },
+    "mentor_rules": {
+      "path": "mir2-web3/apps/simulation/src/runtime/shared_relationships.rs",
+      "line": 11,
+      "needle": "SHARED_MENTOR_LEVEL_GAP",
+      "git_ref": null
+    },
+    "stone_unpublished": {
+      "path": "mir2-web3/docs/SLG-STONE-WORKSHOP.zh-CN.md",
+      "line": 3
+    },
+    "stone_roadmap": {
+      "path": "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
+      "line": 3
+    },
+    "production_unpublished": {
+      "path": "mir2-web3/docs/SLG-PRODUCTION-IMPLEMENTATION.zh-CN.md",
+      "line": 15,
+      "needle": "没有NPC/网关新入口或安装包切换",
+      "git_ref": null
+    }
+  },
+  "real_npc_lookup": [
+    {
+      "npc_index": 2,
+      "name": "BorderVillage_Board",
+      "map_file_name": "0",
+      "location": {
+        "x": 284,
+        "y": 615
+      },
+      "script_key": "BichonProvince/BorderVillage/BountyBoard",
+      "min_level": 0,
+      "time_visible": false,
+      "day_of_week": ""
+    },
+    {
+      "npc_index": 3,
+      "name": "Assistant_Jane",
+      "map_file_name": "0",
+      "location": {
+        "x": 284,
+        "y": 606
+      },
+      "script_key": "BichonProvince/BorderVillage/Jane",
+      "min_level": 0,
+      "time_visible": false,
+      "day_of_week": ""
+    },
+    {
+      "npc_index": 5,
+      "name": "Blacksmith_Smith",
+      "map_file_name": "0",
+      "location": {
+        "x": 296,
+        "y": 613
+      },
+      "script_key": "BichonProvince/BorderVillage/Blacksmith",
+      "min_level": 0,
+      "time_visible": false,
+      "day_of_week": ""
+    },
+    {
+      "npc_index": 9,
+      "name": "Merchant_Ruben",
+      "map_file_name": "0",
+      "location": {
+        "x": 288,
+        "y": 608
+      },
+      "script_key": "BichonProvince/BorderVillage/Grocery",
+      "min_level": 0,
+      "time_visible": false,
+      "day_of_week": ""
+    },
+    {
+      "npc_index": 27,
+      "name": "Blacksmith_Bill",
+      "map_file_name": "0",
+      "location": {
+        "x": 302,
+        "y": 221
+      },
+      "script_key": "BichonProvince/BichonWall/Blacksmith",
+      "min_level": 0,
+      "time_visible": false,
+      "day_of_week": ""
+    },
+    {
+      "npc_index": 28,
+      "name": "Alchemist_Samuel",
+      "map_file_name": "0",
+      "location": {
+        "x": 324,
+        "y": 291
+      },
+      "script_key": "BichonProvince/BichonWall/Potion1",
+      "min_level": 0,
+      "time_visible": false,
+      "day_of_week": ""
+    },
+    {
+      "npc_index": 33,
+      "name": "Merchant_Bull",
+      "map_file_name": "0",
+      "location": {
+        "x": 374,
+        "y": 296
+      },
+      "script_key": "BichonProvince/BichonWall/Grocery",
+      "min_level": 0,
+      "time_visible": false,
+      "day_of_week": ""
+    },
+    {
+      "npc_index": 35,
+      "name": "BichonWall_Board",
+      "map_file_name": "0",
+      "location": {
+        "x": 334,
+        "y": 259
+      },
+      "script_key": "BichonProvince/BichonWall/Board",
+      "min_level": 0,
+      "time_visible": false,
+      "day_of_week": ""
+    },
+    {
+      "npc_index": 39,
+      "name": "WiseFisherman_Albert",
+      "map_file_name": "0",
+      "location": {
+        "x": 341,
+        "y": 243
+      },
+      "script_key": "BichonProvince/BichonWall/WiseFisher",
+      "min_level": 0,
+      "time_visible": false,
+      "day_of_week": ""
+    },
+    {
+      "npc_index": 55,
+      "name": "CraftsLady_Alice",
+      "map_file_name": "0",
+      "location": {
+        "x": 321,
+        "y": 265
+      },
+      "script_key": "BichonProvince/BichonWall/CraftsLady",
+      "min_level": 0,
+      "time_visible": false,
+      "day_of_week": ""
+    },
+    {
+      "npc_index": 44,
+      "name": "Administrator_Edward",
+      "map_file_name": "0122",
+      "location": {
+        "x": 28,
+        "y": 33
+      },
+      "script_key": "BichonProvince/BichonWall/Administrator",
+      "min_level": 0,
+      "time_visible": false,
+      "day_of_week": ""
+    },
+    {
+      "npc_index": 45,
+      "name": "Librarian_Steven",
+      "map_file_name": "0104",
+      "location": {
+        "x": 5,
+        "y": 8
+      },
+      "script_key": "BichonProvince/BichonWall/BookStore",
+      "min_level": 0,
+      "time_visible": false,
+      "day_of_week": ""
+    },
+    {
+      "npc_index": 158,
+      "name": "Merchant_Bruce",
+      "map_file_name": "0159",
+      "location": {
+        "x": 5,
+        "y": 9
+      },
+      "script_key": "MongchonProvince/MudWall/Blacksmith",
+      "min_level": 0,
+      "time_visible": false,
+      "day_of_week": ""
+    },
+    {
+      "npc_index": 304,
+      "name": "Administrator_SabukOfficer",
+      "map_file_name": "0150",
+      "location": {
+        "x": 9,
+        "y": 13
+      },
+      "script_key": "MongchonProvince/SabukWall/Conquest",
+      "min_level": 0,
+      "time_visible": false,
+      "day_of_week": ""
+    }
+  ],
+  "input_hashes": [
+    {
+      "path": "mir2-web3/config/quest-guidance/newcomer-v2.json",
+      "sha256": "381be9f89f92f81bfae2fe34f310aa48410875129581049204bd5c34c4821819"
+    },
+    {
+      "path": "mir2-web3/config/quest-guidance/newcomer-journey-v2.json",
+      "sha256": "e72e9ac2131af268f637097e3472618b93c539a1b59a5a168a31b875c13efd11"
+    },
+    {
+      "path": "mir2-web3/config/quest-guidance/newcomer-supplies.json",
+      "sha256": "313de1d7e0faf0cc70ab62e8a5079ea8d211fd75d06479d290621fd0aa5fa1f2"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_npc_info_manifest.json",
+      "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_npc_manifest.json",
+      "sha256": "7ff29f221c39e5d16b7ebdc7efcde5090daf7ff3daacf6b2b1552b5b36429e93"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_magic_manifest.json",
+      "sha256": "ccbb31513c006860790a4c374b3f788665902cfa3fffe810695199882860153d"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_guild_settings.json",
+      "sha256": "e1a16a6b08ba033fb8cfdf91a1e175e15b6d4ae8223baca06e7b90a112e2c1d4"
+    },
+    {
+      "path": "mir2-web3/docs/SLG-STONE-WORKSHOP.zh-CN.md",
+      "sha256": "11d830387770cfd2f187f31abb6336a2ff42205eb08e22dc5259d1d96ae0b219"
+    },
+    {
+      "path": "mir2-web3/docs/SLG-PRODUCTION-IMPLEMENTATION.zh-CN.md",
+      "sha256": "b2c4958e7e8741f358d30188907c2de87b116d8f44a755eefb95a22c76020408"
+    },
+    {
+      "path": "D:/Mir2Invite/game/VERSION.json",
+      "sha256": "66e60b50a181511acb7a9076c959d1d23c9d890d9e2fa6caa168e42ccbf52681"
+    },
+    {
+      "path": "D:/Mir2Invite/game/CONTROLS.txt",
+      "sha256": "b9ad2a5a01b3ecbe673a3d38b1974b38492d3a62a0e28932eb8367ce19ebf7c6"
+    },
+    {
+      "path": "D:/Mir2Invite/game/KNOWN-ISSUES.md",
+      "sha256": "d2a2ffca1d2170ee0a0f2e3d3fdf0eff644f2fe4472c5ba7e6120ce12c4eadc9"
+    }
+  ],
+  "normal_ui_only": {
+    "transport_direct_calls": false,
+    "raw_admin_or_qa_routes": false,
+    "debug_teleports": false,
+    "server_clock_changes": false,
+    "normal_current_npc_labels_only": true
+  },
+  "record_template": {
+    "per_case": [
+      "installed build ID",
+      "account role without credentials",
+      "class/level",
+      "map/coordinates",
+      "visible pre-state",
+      "normal UI actions",
+      "post-state",
+      "screenshot/video reference",
+      "PASS/FAIL/BLOCKED/DEFERRED and reason",
+      "normal logout/relogin result"
+    ],
+    "acceptance_status": "not_run_by_worker",
+    "all_cases_require_actual_observation": true
+  },
+  "limits": [
+    "This report is a source-backed plan, not gameplay or screenshot acceptance.",
+    "No client, UI, Cargo, server process or network session was started by this worker.",
+    "Live gateway revision, enabled profiles, mine/fishing map configuration and actual event schedules were not read.",
+    "NPC static catalog coordinates identify legal normal entries; visibility and eligibility must be observed live.",
+    "Historical protocol QA/debug traces are not prescribed as ordinary player actions."
+  ]
+}

@@ -1,0 +1,5669 @@
+{
+  "timing": {
+    "clockEpochMs": 1794532465354,
+    "authoritativeLoginSuccessMs": 41062,
+    "startIntentMs": 71912,
+    "startAckMs": 75998,
+    "authoritativeStarterMapMs": 76006,
+    "authoritativeSelfMs": 76006,
+    "firstPlayableObservedMs": 117028,
+    "terrainPaintVerifiedMs": 185125,
+    "sharedHudObservedMs": 235658,
+    "logoutIntentMs": 265176,
+    "logoutAckMs": 266227,
+    "manifestAttemptsBeforeStart": 1,
+    "manifestAttemptsAtOrAfterStart": 0,
+    "starterRegionRequestMs": 41065,
+    "starterRegionWireHeadersMs": 42315.961,
+    "starterRegionResponseEventMs": 42316,
+    "starterRegionBodyMs": 42390,
+    "starterRegionCommitMs": 76122,
+    "sceneSpritesReadyMs": 76152,
+    "localeRequestMs": 41065,
+    "localeBodyMs": 43280,
+    "localeReadyMs": 43300,
+    "firstPlayableFrameMs": 116991,
+    "rendererBodyMs": 193983
+  },
+  "runtime": [
+    {
+      "observedAtMs": 3226,
+      "atMs": 2166.699999988079,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 5235,
+      "atMs": 4176.699999988079,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 7238,
+      "atMs": 6180.199999988079,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 9229,
+      "atMs": 8171.699999988079,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 11232,
+      "atMs": 10174.29999999702,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 13226,
+      "atMs": 12168.699999988079,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 15226,
+      "atMs": 14168.699999988079,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "login",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Numeron Login TC"
+        ]
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 17227,
+      "atMs": 16168.89999999106,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "login",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Numeron Login TC"
+        ]
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 19225,
+      "atMs": 18167.59999999404,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "login",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Numeron Login TC"
+        ]
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 21225,
+      "atMs": 20166.79999999702,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "login",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 23227,
+      "atMs": 22169.59999999404,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "login",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 25227,
+      "atMs": 24170,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "login",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 27227,
+      "atMs": 26169.89999999106,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "login",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 29225,
+      "atMs": 28167.19999998808,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "login",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 31228,
+      "atMs": 30170.39999999106,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "login",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 33228,
+      "atMs": 32170.59999999404,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "login",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 35224,
+      "atMs": 34166.69999998808,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "login",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 37224,
+      "atMs": 36166.89999999106,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "login",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 39225,
+      "atMs": 38167.19999998808,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "login",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 41225,
+      "atMs": 40167,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "openingLogin",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 43225,
+      "atMs": 42167.19999998808,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "openingLogin",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 45225,
+      "atMs": 44167.19999998808,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "openingLogin",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 47225,
+      "atMs": 46167.09999999404,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "openingLogin",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 49225,
+      "atMs": 48167.19999998808,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "openingLogin",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 51226,
+      "atMs": 50168.59999999404,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "openingLogin",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 53224,
+      "atMs": 52167.09999999404,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "openingLogin",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 55228,
+      "atMs": 54169.29999999702,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "openingLogin",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 57226,
+      "atMs": 56169.09999999404,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "openingLogin",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 59224,
+      "atMs": 58166.79999999702,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "openingLogin",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 61225,
+      "atMs": 60167.39999999106,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "openingLogin",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 63227,
+      "atMs": 62169.79999999702,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "openingLogin",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 65225,
+      "atMs": 64167.39999999106,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "openingLogin",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 67224,
+      "atMs": 66166.59999999404,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "openingLogin",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 69224,
+      "atMs": 68166.69999998808,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "openingLogin",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 71228,
+      "atMs": 70170.59999999404,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "select",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 73224,
+      "atMs": 72166.69999998808,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "select",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 75224,
+      "atMs": 74167,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "select",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 77225,
+      "atMs": 76167.29999999702,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": false,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 79225,
+      "atMs": 78167.59999999404,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": false,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 81225,
+      "atMs": 80167.79999999702,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": false,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 83225,
+      "atMs": 82167.89999999106,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": false,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 85226,
+      "atMs": 84168.09999999404,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": false,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 87226,
+      "atMs": 86168.5,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": false,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 89226,
+      "atMs": 88168.69999998808,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": false,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 91225,
+      "atMs": 90167.39999999106,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": false,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 93224,
+      "atMs": 92167,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": false,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 95227,
+      "atMs": 94169.29999999702,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": false,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 97227,
+      "atMs": 96169.59999999404,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": false,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 99227,
+      "atMs": 98169.69999998808,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": false,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 101227,
+      "atMs": 100170,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": false,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 103224,
+      "atMs": 102166.69999998808,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": false,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 105224,
+      "atMs": 104166.59999999404,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": false,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 107228,
+      "atMs": 106170.5,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": false,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 109224,
+      "atMs": 108166.59999999404,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": false,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 111224,
+      "atMs": 110166.79999999702,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": false,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 113225,
+      "atMs": 112167.09999999404,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": false,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 115225,
+      "atMs": 114167.19999998808,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": false,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 117225,
+      "atMs": 116167.29999999702,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 119225,
+      "atMs": 118167.5,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 121224,
+      "atMs": 120166.89999999106,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loading",
+        "loading": [
+          "Noto Sans TC"
+        ]
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 123224,
+      "atMs": 122167.09999999404,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 125224,
+      "atMs": 124166.69999998808,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 127224,
+      "atMs": 126167.39999999106,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 129225,
+      "atMs": 128168.19999998808,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 131224,
+      "atMs": 130167.19999998808,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 133226,
+      "atMs": 132169.09999999404,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 135224,
+      "atMs": 134166.69999998808,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 137227,
+      "atMs": 136169.39999999106,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 139225,
+      "atMs": 138167.79999999702,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 141224,
+      "atMs": 140166.59999999404,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 143224,
+      "atMs": 142166.59999999404,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 145227,
+      "atMs": 144170.29999999702,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 147228,
+      "atMs": 146170.59999999404,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 149224,
+      "atMs": 148166.59999999404,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 151224,
+      "atMs": 150166.79999999702,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 153224,
+      "atMs": 152167.09999999404,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 155224,
+      "atMs": 154167.29999999702,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 157224,
+      "atMs": 156167.39999999106,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 159224,
+      "atMs": 158166.69999998808,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 161225,
+      "atMs": 160167.89999999106,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 163225,
+      "atMs": 162168.09999999404,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 165225,
+      "atMs": 164167.89999999106,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 167224,
+      "atMs": 166167.19999998808,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 169224,
+      "atMs": 168167.19999998808,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 171224,
+      "atMs": 170166.69999998808,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 173226,
+      "atMs": 172169.09999999404,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 175225,
+      "atMs": 174167.79999999702,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 177224,
+      "atMs": 176167.19999998808,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 179228,
+      "atMs": 178169.89999999106,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 181230,
+      "atMs": 180170.89999999106,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 183225,
+      "atMs": 182166.89999999106,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 185232,
+      "atMs": 184173.5,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loading",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 187229,
+      "atMs": 186170.69999998808,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 189225,
+      "atMs": 188167.09999999404,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 191225,
+      "atMs": 190167.09999999404,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 193225,
+      "atMs": 192167.29999999702,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": false,
+      "booted": false,
+      "bootFailed": false,
+      "package": null,
+      "capabilities": null,
+      "quest": null,
+      "hud": null,
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 195226,
+      "atMs": 194168.29999999702,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 153,
+        "generation": 2,
+        "revision": 2,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 153,
+        "generation": 2,
+        "revision": 1
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 197229,
+      "atMs": 196171.39999999106,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 613,
+        "generation": 2,
+        "revision": 2,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 613,
+        "generation": 2,
+        "revision": 1
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 199229,
+      "atMs": 198170.39999999106,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 1073,
+        "generation": 2,
+        "revision": 2,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 1073,
+        "generation": 2,
+        "revision": 1
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 201227,
+      "atMs": 200168.29999999702,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 1531,
+        "generation": 2,
+        "revision": 2,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 1531,
+        "generation": 2,
+        "revision": 1
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 203229,
+      "atMs": 202170.59999999404,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 1991,
+        "generation": 2,
+        "revision": 2,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 1991,
+        "generation": 2,
+        "revision": 1
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 205227,
+      "atMs": 204168.89999999106,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 2452,
+        "generation": 2,
+        "revision": 2,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 2452,
+        "generation": 2,
+        "revision": 1
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 207227,
+      "atMs": 206168.89999999106,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 2911,
+        "generation": 2,
+        "revision": 2,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 2911,
+        "generation": 2,
+        "revision": 1
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 209227,
+      "atMs": 208168.79999999702,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 3371,
+        "generation": 2,
+        "revision": 2,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 3371,
+        "generation": 2,
+        "revision": 1
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 211227,
+      "atMs": 210169.19999998808,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 3828,
+        "generation": 2,
+        "revision": 2,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 3828,
+        "generation": 2,
+        "revision": 1
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 213228,
+      "atMs": 212169.69999998808,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 4289,
+        "generation": 2,
+        "revision": 2,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 4289,
+        "generation": 2,
+        "revision": 1
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 215227,
+      "atMs": 214168.59999999404,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 4753,
+        "generation": 2,
+        "revision": 2,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 4753,
+        "generation": 2,
+        "revision": 1
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 217228,
+      "atMs": 216169.59999999404,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 5215,
+        "generation": 2,
+        "revision": 2,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 5215,
+        "generation": 2,
+        "revision": 1
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 219226,
+      "atMs": 218167.89999999106,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 5681,
+        "generation": 2,
+        "revision": 2,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 5681,
+        "generation": 2,
+        "revision": 1
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 221228,
+      "atMs": 220169.5,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 6143,
+        "generation": 2,
+        "revision": 2,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 6143,
+        "generation": 2,
+        "revision": 1
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 223227,
+      "atMs": 222169.39999999106,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 6611,
+        "generation": 2,
+        "revision": 2,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 6611,
+        "generation": 2,
+        "revision": 1
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 225228,
+      "atMs": 224170.19999998808,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 7075,
+        "generation": 2,
+        "revision": 2,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 7075,
+        "generation": 2,
+        "revision": 1
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 227227,
+      "atMs": 226169.29999999702,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 7534,
+        "generation": 2,
+        "revision": 2,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 7534,
+        "generation": 2,
+        "revision": 1
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 229230,
+      "atMs": 228171.59999999404,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 8000,
+        "generation": 2,
+        "revision": 2,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 8000,
+        "generation": 2,
+        "revision": 1
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 231230,
+      "atMs": 230171.79999999702,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": false,
+        "error": "quest UI font or skin failed to load",
+        "frame": 8451,
+        "generation": 2,
+        "revision": 2,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 8451,
+        "generation": 2,
+        "revision": 1
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 233231,
+      "atMs": 232173.39999999106,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": true,
+        "error": null,
+        "frame": 8893,
+        "generation": 2,
+        "revision": 2,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 8893,
+        "generation": 2,
+        "revision": 1
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        },
+        {
+          "startMs": 231179.69999998808,
+          "durationMs": 72,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 235232,
+      "atMs": 234173.59999999404,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": true,
+        "error": null,
+        "frame": 9347,
+        "generation": 2,
+        "revision": 2,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": false,
+        "error": null,
+        "frame": 9347,
+        "generation": 2,
+        "revision": 1
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        },
+        {
+          "startMs": 231179.69999998808,
+          "durationMs": 72,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 237229,
+      "atMs": 236170.5,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": true,
+        "error": null,
+        "frame": 9755,
+        "generation": 2,
+        "revision": 4,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": true,
+        "error": null,
+        "frame": 9755,
+        "generation": 2,
+        "revision": 2
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        },
+        {
+          "startMs": 231179.69999998808,
+          "durationMs": 72,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 239230,
+      "atMs": 238172.89999999106,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": true,
+        "error": null,
+        "frame": 10215,
+        "generation": 2,
+        "revision": 4,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": true,
+        "error": null,
+        "frame": 10215,
+        "generation": 2,
+        "revision": 2
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        },
+        {
+          "startMs": 231179.69999998808,
+          "durationMs": 72,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 241231,
+      "atMs": 240173.29999999702,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": true,
+        "error": null,
+        "frame": 10667,
+        "generation": 2,
+        "revision": 4,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": true,
+        "error": null,
+        "frame": 10667,
+        "generation": 2,
+        "revision": 2
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        },
+        {
+          "startMs": 231179.69999998808,
+          "durationMs": 72,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 243230,
+      "atMs": 242172.19999998808,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": true,
+        "error": null,
+        "frame": 11124,
+        "generation": 2,
+        "revision": 4,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": true,
+        "error": null,
+        "frame": 11124,
+        "generation": 2,
+        "revision": 2
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        },
+        {
+          "startMs": 231179.69999998808,
+          "durationMs": 72,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 245231,
+      "atMs": 244173.39999999106,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": true,
+        "error": null,
+        "frame": 11578,
+        "generation": 2,
+        "revision": 4,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": true,
+        "error": null,
+        "frame": 11578,
+        "generation": 2,
+        "revision": 2
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        },
+        {
+          "startMs": 231179.69999998808,
+          "durationMs": 72,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 247228,
+      "atMs": 246171,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": true,
+        "error": null,
+        "frame": 12029,
+        "generation": 2,
+        "revision": 4,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": true,
+        "error": null,
+        "frame": 12029,
+        "generation": 2,
+        "revision": 2
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        },
+        {
+          "startMs": 231179.69999998808,
+          "durationMs": 72,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 249231,
+      "atMs": 248173.19999998808,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": true,
+        "error": null,
+        "frame": 12461,
+        "generation": 2,
+        "revision": 4,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": true,
+        "error": null,
+        "frame": 12461,
+        "generation": 2,
+        "revision": 2
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        },
+        {
+          "startMs": 231179.69999998808,
+          "durationMs": 72,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 251231,
+      "atMs": 250173,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": true,
+        "error": null,
+        "frame": 12906,
+        "generation": 2,
+        "revision": 4,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": true,
+        "error": null,
+        "frame": 12906,
+        "generation": 2,
+        "revision": 2
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        },
+        {
+          "startMs": 231179.69999998808,
+          "durationMs": 72,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 253231,
+      "atMs": 252173.59999999404,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": true,
+        "error": null,
+        "frame": 13342,
+        "generation": 2,
+        "revision": 4,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": true,
+        "error": null,
+        "frame": 13342,
+        "generation": 2,
+        "revision": 2
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        },
+        {
+          "startMs": 231179.69999998808,
+          "durationMs": 72,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 255232,
+      "atMs": 254174.39999999106,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": true,
+        "error": null,
+        "frame": 13775,
+        "generation": 2,
+        "revision": 4,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": true,
+        "error": null,
+        "frame": 13775,
+        "generation": 2,
+        "revision": 2
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        },
+        {
+          "startMs": 231179.69999998808,
+          "durationMs": 72,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 257234,
+      "atMs": 256175.39999999106,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": true,
+        "error": null,
+        "frame": 14208,
+        "generation": 2,
+        "revision": 4,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": true,
+        "error": null,
+        "frame": 14208,
+        "generation": 2,
+        "revision": 2
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        },
+        {
+          "startMs": 231179.69999998808,
+          "durationMs": 72,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 259238,
+      "atMs": 258180.29999999702,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": true,
+        "error": null,
+        "frame": 14641,
+        "generation": 2,
+        "revision": 4,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": true,
+        "error": null,
+        "frame": 14641,
+        "generation": 2,
+        "revision": 2
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        },
+        {
+          "startMs": 231179.69999998808,
+          "durationMs": 72,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 261233,
+      "atMs": 260175.09999999404,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": true,
+        "error": null,
+        "frame": 15080,
+        "generation": 2,
+        "revision": 4,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": true,
+        "error": null,
+        "frame": 15080,
+        "generation": 2,
+        "revision": 2
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        },
+        {
+          "startMs": 231179.69999998808,
+          "durationMs": 72,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 263234,
+      "atMs": 262176.6999999881,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": true,
+        "error": null,
+        "frame": 15516,
+        "generation": 2,
+        "revision": 4,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": true,
+        "error": null,
+        "frame": 15516,
+        "generation": 2,
+        "revision": 2
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        },
+        {
+          "startMs": 231179.69999998808,
+          "durationMs": 72,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    },
+    {
+      "observedAtMs": 265231,
+      "atMs": 264173.6999999881,
+      "timeOrigin": 1794532466412.1,
+      "bootAttempted": true,
+      "booted": true,
+      "bootFailed": false,
+      "package": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu",
+        "runtimeVersion": "bevy-0c553a754308e5b8"
+      },
+      "capabilities": {
+        "schemaVersion": 1,
+        "backend": "webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "primarySharedUiStartup": false
+      },
+      "quest": {
+        "ready": true,
+        "error": null,
+        "frame": 15919,
+        "generation": 2,
+        "revision": 4,
+        "displayLanguage": "zh-TW"
+      },
+      "hud": {
+        "ready": true,
+        "error": null,
+        "frame": 15919,
+        "generation": 2,
+        "revision": 3
+      },
+      "screen": "game",
+      "sceneReady": true,
+      "fonts": {
+        "status": "loaded",
+        "loading": []
+      },
+      "longTasks": [
+        {
+          "startMs": 12462.39999999106,
+          "durationMs": 91,
+          "name": "self"
+        },
+        {
+          "startMs": 74946.79999999702,
+          "durationMs": 117,
+          "name": "self"
+        },
+        {
+          "startMs": 192927.79999999702,
+          "durationMs": 192,
+          "name": "self"
+        },
+        {
+          "startMs": 193124.89999999106,
+          "durationMs": 55,
+          "name": "self"
+        },
+        {
+          "startMs": 193231.89999999106,
+          "durationMs": 179,
+          "name": "self"
+        },
+        {
+          "startMs": 231179.69999998808,
+          "durationMs": 72,
+          "name": "self"
+        }
+      ],
+      "timerDrifts": []
+    }
+  ],
+  "sceneDelivery": [
+    {
+      "scope": "releaseManifest",
+      "path": "/api/asset-manifest",
+      "requestOrdinal": 1,
+      "requestedMs": 13632,
+      "decodedBytes": 10005,
+      "encodedBytes": 2221,
+      "status": 200,
+      "ttfbMs": 114,
+      "headersMs": 13746,
+      "responseEventMs": 13746,
+      "responseTiming": {
+        "scope": "browser-network-response",
+        "connectionReused": true,
+        "requestTimeFromRequestEventMs": 0.274,
+        "offsetsMs": {
+          "proxyStart": null,
+          "proxyEnd": null,
+          "dnsStart": null,
+          "dnsEnd": null,
+          "connectStart": null,
+          "connectEnd": null,
+          "sslStart": null,
+          "sslEnd": null,
+          "workerStart": null,
+          "workerReady": null,
+          "workerFetchStart": null,
+          "workerRespondWithSettled": null,
+          "sendStart": 0.089,
+          "sendEnd": 0.173,
+          "receiveHeadersStart": 113.175,
+          "receiveHeadersEnd": 113.238
+        },
+        "firstHeadersAfterRequestMs": 113.449,
+        "completeHeadersAfterRequestMs": 113.512,
+        "beforeSendAfterRequestMs": 0.363,
+        "sendToHeadersMs": 113.002,
+        "firstHeadersMs": 13745.449,
+        "completeHeadersMs": 13745.512
+      },
+      "protocol": "h2",
+      "serviceWorker": false,
+      "diskCache": false,
+      "contentEncoding": "br",
+      "edgeCache": "DYNAMIC",
+      "functionCache": "STALE",
+      "firstDataMs": 13755,
+      "lastDataMs": 13759,
+      "transferMs": 127,
+      "bodyCompleteMs": 13759,
+      "totalEncodedBytes": 2455
+    },
+    {
+      "scope": "staticStarterRegion",
+      "queryless": true,
+      "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+      "requestOrdinal": 2,
+      "requestedMs": 41065,
+      "decodedBytes": 458475,
+      "encodedBytes": 35280,
+      "status": 200,
+      "ttfbMs": 1251,
+      "headersMs": 42316,
+      "responseEventMs": 42316,
+      "responseTiming": {
+        "scope": "browser-network-response",
+        "connectionReused": true,
+        "requestTimeFromRequestEventMs": 0.78,
+        "offsetsMs": {
+          "proxyStart": null,
+          "proxyEnd": null,
+          "dnsStart": null,
+          "dnsEnd": null,
+          "connectStart": null,
+          "connectEnd": null,
+          "sslStart": null,
+          "sslEnd": null,
+          "workerStart": null,
+          "workerReady": null,
+          "workerFetchStart": null,
+          "workerRespondWithSettled": null,
+          "sendStart": 343.829,
+          "sendEnd": 343.901,
+          "receiveHeadersStart": 1250.108,
+          "receiveHeadersEnd": 1250.181
+        },
+        "firstHeadersAfterRequestMs": 1250.888,
+        "completeHeadersAfterRequestMs": 1250.961,
+        "beforeSendAfterRequestMs": 344.609,
+        "sendToHeadersMs": 906.207,
+        "firstHeadersMs": 42315.888,
+        "completeHeadersMs": 42315.961
+      },
+      "protocol": "h2",
+      "serviceWorker": false,
+      "diskCache": false,
+      "contentEncoding": "br",
+      "edgeCache": "DYNAMIC",
+      "functionCache": "MISS",
+      "firstDataMs": 42327,
+      "lastDataMs": 42390,
+      "transferMs": 1325,
+      "bodyCompleteMs": 42390,
+      "totalEncodedBytes": 35776
+    },
+    {
+      "scope": "gameplayLocale",
+      "queryless": true,
+      "path": "/bootstrap/r16-locales/b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c.json",
+      "requestOrdinal": 3,
+      "requestedMs": 41065,
+      "decodedBytes": 3283113,
+      "encodedBytes": 748590,
+      "status": 200,
+      "ttfbMs": 2074,
+      "headersMs": 43139,
+      "responseEventMs": 43139,
+      "responseTiming": {
+        "scope": "browser-network-response",
+        "connectionReused": true,
+        "requestTimeFromRequestEventMs": 0.574,
+        "offsetsMs": {
+          "proxyStart": null,
+          "proxyEnd": null,
+          "dnsStart": null,
+          "dnsEnd": null,
+          "connectStart": null,
+          "connectEnd": null,
+          "sslStart": null,
+          "sslEnd": null,
+          "workerStart": null,
+          "workerReady": null,
+          "workerFetchStart": null,
+          "workerRespondWithSettled": null,
+          "sendStart": 343.612,
+          "sendEnd": 343.668,
+          "receiveHeadersStart": 2072.405,
+          "receiveHeadersEnd": 2072.49
+        },
+        "firstHeadersAfterRequestMs": 2072.979,
+        "completeHeadersAfterRequestMs": 2073.064,
+        "beforeSendAfterRequestMs": 344.186,
+        "sendToHeadersMs": 1728.737,
+        "firstHeadersMs": 43137.979,
+        "completeHeadersMs": 43138.064
+      },
+      "protocol": "h2",
+      "serviceWorker": false,
+      "diskCache": false,
+      "contentEncoding": "br",
+      "edgeCache": "DYNAMIC",
+      "functionCache": "MISS",
+      "firstDataMs": 43148,
+      "lastDataMs": 43281,
+      "transferMs": 2215,
+      "bodyCompleteMs": 43280,
+      "totalEncodedBytes": 748874
+    },
+    {
+      "scope": "expectedBevyRuntime",
+      "path": "/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "requestOrdinal": 4,
+      "requestedMs": 117073,
+      "decodedBytes": 0,
+      "encodedBytes": 0,
+      "failure": "net::ERR_ABORTED",
+      "failureMs": 125074
+    },
+    {
+      "scope": "expectedBevyRuntime",
+      "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "requestOrdinal": 5,
+      "requestedMs": 125074,
+      "decodedBytes": 31452436,
+      "encodedBytes": 6442648,
+      "status": 200,
+      "ttfbMs": 55860,
+      "headersMs": 180934,
+      "responseEventMs": 180934,
+      "responseTiming": {
+        "scope": "browser-network-response",
+        "connectionReused": true,
+        "requestTimeFromRequestEventMs": 0.448,
+        "offsetsMs": {
+          "proxyStart": null,
+          "proxyEnd": null,
+          "dnsStart": null,
+          "dnsEnd": null,
+          "connectStart": null,
+          "connectEnd": null,
+          "sslStart": null,
+          "sslEnd": null,
+          "workerStart": null,
+          "workerReady": null,
+          "workerFetchStart": null,
+          "workerRespondWithSettled": null,
+          "sendStart": 0.04,
+          "sendEnd": 0.066,
+          "receiveHeadersStart": 55859.347,
+          "receiveHeadersEnd": 55859.396
+        },
+        "firstHeadersAfterRequestMs": 55859.795,
+        "completeHeadersAfterRequestMs": 55859.844,
+        "beforeSendAfterRequestMs": 0.488,
+        "sendToHeadersMs": 55859.281,
+        "firstHeadersMs": 180933.795,
+        "completeHeadersMs": 180933.844
+      },
+      "protocol": "h2",
+      "serviceWorker": false,
+      "diskCache": false,
+      "contentEncoding": "gzip",
+      "firstDataMs": 181295,
+      "lastDataMs": 193986,
+      "transferMs": 68909,
+      "bodyCompleteMs": 193983,
+      "totalEncodedBytes": 6442807
+    }
+  ],
+  "assetErrorSamples": 19,
+  "sameGeneration": 2,
+  "frameCounterMonotonic": true,
+  "scriptHashesUnchanged": 19,
+  "consoleLevels": {
+    "error": 67,
+    "warning": 1
+  },
+  "resourceErrorCount": 61,
+  "runtimeErrorScan": {
+    "checked": false,
+    "reason": "Vercel runtime-errors connector transport failed; no clean server-log claim."
+  }
+}

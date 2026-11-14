@@ -1,0 +1,83 @@
+{
+  "passed": true,
+  "evidenceKind": "single-writer integration of independently reviewed system names",
+  "namingReviewKeys": 3545,
+  "uniqueChineseTexts": 3068,
+  "suggestionsIntegrated": 167,
+  "sourceReview": "content-review-coverage.json",
+  "sourceSuggestionsReceipt": {
+    "filename": "content-reviewed-suggestions.json",
+    "bytes": 72350,
+    "sha256": "5aea461300eea9738d50b6f8d6cfbdb4481e17ad81fbbe222d80d6a1a2031dc3",
+    "included": false
+  },
+  "explicitOverrideData": "../../../../packages/game-data/data/native-i18n/extra/zh-CN-editorial-overrides.json",
+  "latinOrProperNameInventoryKeys": 382,
+  "latinInventoryReceipt": {
+    "filename": "content-latin-and-proper-name-review.json",
+    "bytes": 109679,
+    "sha256": "bf7ed69d4e945edb434e7892113cd74be46606e5632944569a11ab3728af659e",
+    "included": false
+  },
+  "preservedExamples": [
+    {
+      "key": "content.skill.battleFocus.description",
+      "value": "用于验证 buff 运行时的短时攻防强化。",
+      "sourceEnglish": "Short attack/defence buff used to validate the buff runtime.",
+      "knownSuggestedFix": false,
+      "reason": "Latin residual or source proper noun; verify exact source instead of inventing an official Chinese name"
+    },
+    {
+      "key": "content.item.1084.description",
+      "value": "Jack Sparrow",
+      "sourceEnglish": "Jack Sparrow",
+      "knownSuggestedFix": false,
+      "reason": "Latin residual or source proper noun; verify exact source instead of inventing an official Chinese name"
+    },
+    {
+      "key": "content.item.1124.name",
+      "value": "Olivia 的戒指",
+      "sourceEnglish": "Olivias Ring",
+      "knownSuggestedFix": false,
+      "reason": "Latin residual or source proper noun; verify exact source instead of inventing an official Chinese name"
+    },
+    {
+      "key": "content.item.1360.description",
+      "value": "Yizhili",
+      "sourceEnglish": "Yizhili",
+      "knownSuggestedFix": false,
+      "reason": "Latin residual or source proper noun; verify exact source instead of inventing an official Chinese name"
+    },
+    {
+      "key": "content.item.1360.name",
+      "value": "Yizhili",
+      "sourceEnglish": "Yizhili",
+      "knownSuggestedFix": false,
+      "reason": "Latin residual or source proper noun; verify exact source instead of inventing an official Chinese name"
+    },
+    {
+      "key": "content.item.1451.name",
+      "value": "Gonryun He Publication（宝）",
+      "sourceEnglish": "Gonryun He Publication (Treasure)",
+      "knownSuggestedFix": false,
+      "reason": "Latin residual or source proper noun; verify exact source instead of inventing an official Chinese name"
+    },
+    {
+      "key": "content.item.1452.name",
+      "value": "Gonryun He Publication（圣）",
+      "sourceEnglish": "Gonryun He Publication (Holy)",
+      "knownSuggestedFix": false,
+      "reason": "Latin residual or source proper noun; verify exact source instead of inventing an official Chinese name"
+    },
+    {
+      "key": "content.item.1453.name",
+      "value": "Gonryun He Publication（神）",
+      "sourceEnglish": "Gonryun He Publication (Divine)",
+      "knownSuggestedFix": false,
+      "reason": "Latin residual or source proper noun; verify exact source instead of inventing an official Chinese name"
+    }
+  ],
+  "scope": "Exact item/monster/map/NPC/magic identifiers, including template 870 versus 1156 and Lightning versus ThunderBolt. No fuzzy merging of similar source identities.",
+  "humanCanonicalNameAcceptance": false,
+  "note": "The reviewer coverage report is a pre-integration observation. This separate receipt records completed single-writer integration plus subsequent exact-key refinements; it does not rewrite that historical report."
+}

@@ -1,0 +1,191 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T22:13:33.115Z",
+  "scope": "Independent static source-contract review only; no target module import, test, raw/monitor/recording/exe scan or verifier execution.",
+  "preparation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\preparation-v1.json",
+    "bytes": 4186,
+    "sha256": "6714b4206d762cc25676357267eea107e0a3ebd479dbec4927043fc79219547b"
+  },
+  "verdict": {
+    "toolSourceContractPassed": true,
+    "eligibleForRootSealing": true,
+    "blockingFindingIds": []
+  },
+  "rawClosure": {
+    "files": [
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\verify-ended-probe18-v1.mjs",
+        "bytes": 36368,
+        "sha256": "92acea1f0fa6bfadea32a62ea0e35ea53327bef7e5c797cf65f1ada0ea71e5a1"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\probe-contract-v1.mjs",
+        "bytes": 5695,
+        "sha256": "c40b20f789f72ff34a264d8b3fc4509829d834bf9999caf4e706befbeab6e06a"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\expected-probe-policy-v1.json",
+        "bytes": 1008,
+        "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\run-ended-probe18-v1.mjs",
+        "bytes": 2257,
+        "sha256": "b26816d6ed4694e21ef1443c12b6df9f6834cea5d6d8c4dadbb7b07921d2ab45"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\seal-tool-source-v1.mjs",
+        "bytes": 3011,
+        "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\derivation-v1.json",
+        "bytes": 15779,
+        "sha256": "ea5509d304431d0e7c4033e712d760f08b16bcb8ee822c74456cc2f9f17fe2ff"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\derive-verifier-v1.mjs",
+        "bytes": 9843,
+        "sha256": "ca6816fe56b271aa9b2dcbeac64440f4edc2e4189be518ada4f8a48fa24bb9ba"
+      }
+    ],
+    "sourceSha256": "4e0ad7c6292fc13738fcaffbd29c44b9eee494505fd077a8ba02deb8866ea3d3",
+    "orderedAggregateMatched": true,
+    "syntaxLog": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\syntax-check-v1.log",
+      "bytes": 435,
+      "sha256": "1dc6594544683ffbe0693eb34a23db37f2c26d87964e41c74e6ffbb0eb2073da"
+    },
+    "actualSyntaxResultsReviewed": 6
+  },
+  "exactDerivation": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\verify-ended-probe17-v1.mjs",
+        "bytes": 34205,
+        "sha256": "91e33b39a79ba686d6fdadeacfa7d0a774eba791804dddad606e6a40fa6179f6"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\verify-ended-probe18-v1.mjs",
+        "bytes": 36368,
+        "sha256": "92acea1f0fa6bfadea32a62ea0e35ea53327bef7e5c797cf65f1ada0ea71e5a1"
+      },
+      "rules": 14,
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\probe-contract-v1.mjs",
+        "bytes": 5820,
+        "sha256": "b80bedae18b07659fb77fa02f2e581bc2879b3274245e0f27cc7a0f3e00452d4"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\probe-contract-v1.mjs",
+        "bytes": 5695,
+        "sha256": "c40b20f789f72ff34a264d8b3fc4509829d834bf9999caf4e706befbeab6e06a"
+      },
+      "rules": 2,
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\run-ended-probe17-v1.mjs",
+        "bytes": 2257,
+        "sha256": "433169eb07d542f5afff0dc77727545c60e8c6b770bd64b109ca1d190d10eb07"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\run-ended-probe18-v1.mjs",
+        "bytes": 2257,
+        "sha256": "b26816d6ed4694e21ef1443c12b6df9f6834cea5d6d8c4dadbb7b07921d2ab45"
+      },
+      "rules": 1,
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      },
+      "rules": 0,
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\expected-probe-policy-v1.json",
+        "bytes": 1008,
+        "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\expected-probe-policy-v1.json",
+        "bytes": 1008,
+        "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+      },
+      "rules": 0,
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\seal-tool-source-v1.mjs",
+        "bytes": 3011,
+        "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-independent-verification-v1\\seal-tool-source-v1.mjs",
+        "bytes": 3011,
+        "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+      },
+      "rules": 0,
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    }
+  ],
+  "checks": {
+    "originalProbe17SourcesPreserved": true,
+    "currentNodeH219ArraySchemaAndFullRegressionPinsMatched": true,
+    "backendC50AndImmutableDae1KeptSeparate": true,
+    "launcher121PinAndPreparedSourceConfigExact": true,
+    "rootCleanupActualSchemaAndShaChecked": true,
+    "originalExpectedPolicyHpAndSealerRawExact": true,
+    "actualMeasuredPhaseDurationAndSixteenMinuteWindowsPreserved": true,
+    "failedAndPartialBranchesPreserved": true,
+    "hpZeroIsNotDoseProof": true,
+    "wireAndStoreDoNotCreateGameCredit": true,
+    "streamVerifierStrongPinnedBeforeImport": true,
+    "runnerSourceBeforeAfterAndWxOutputsReviewed": true,
+    "explicitEndedInvocationAndRootOnlySourceSealReviewed": true
+  },
+  "limitations": [
+    "This review does not adjudicate the actual Probe18 result.",
+    "The verifier replays action counters, actual-duration windows, continuous counters and HP proof rows; per-request typed/dual-positive packets within900ms are not independently replayed.",
+    "Stage2 has two movement actors;16 measurement windows include11 combat-role windows.",
+    "Store rows cover completed occurrences only; absence cannot identify or exclude an ongoing holder.",
+    "Readline line bounds are checked after accumulation on trusted frozen SHA-bound input; no adversarial pre-accumulation bound is claimed."
+  ],
+  "rootCleanup": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-independent-cleanup-v1.json",
+    "bytes": 371,
+    "sha256": "1ad90c3a6ab3f6e802e90135bf6838f4befd6e7841e6d9f582aa3d9ab8e7e1af"
+  },
+  "capacityAccepted": false,
+  "formalAccepted": false,
+  "privateDataRead": false,
+  "productImportedOrTested": false,
+  "verifierExecuted": false
+}

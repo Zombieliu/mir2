@@ -1,0 +1,13 @@
+{
+  "source": "440f82d4d2a7db2b44046cfbd7885680e437aa65",
+  "deployment": "dpl_46u3rSTnfvPrDpzCka6qUBmMhwed",
+  "retainedFailures": [
+    "signed-public",
+    "signed-public-r2"
+  ],
+  "previousFailure": {
+    "phase": "verify-six-original-font-cache-bodies",
+    "code": "AUTOMATION_FAILED"
+  },
+  "scope": "Separate clean public browser/Testnet login-only QA wallet. Original gates and normal network. Passive Next observer uses actual deployment chunk filenames resolved from the public webpack loader; no game resources prefetched,intercepted or injected."
+}

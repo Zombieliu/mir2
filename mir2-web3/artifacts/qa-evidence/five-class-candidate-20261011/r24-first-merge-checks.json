@@ -1,0 +1,482 @@
+{
+  "schema": "mir2.five-class-first-r24-merge-checks.v1",
+  "createdUtc": "2026-10-11T17:21:23.280487+00:00",
+  "testedWorkingMerge": {
+    "head": "91d9250ea1d939c3af31261f1d56078290057161",
+    "mergeHead": "87fd85a0d5a819e5b38c90d192421f9239f65678"
+  },
+  "currentPublicClientSource": "d917de1ff4988e2d9fc7ca58f958cb5c80861fdf",
+  "currentPublicGatewaySource": "4006d988b3922d0106278720abfa9b3d384c8d5e",
+  "currentPublicLegacySequence": 20,
+  "checks": [
+    {
+      "run": "r24-merged-game-data01",
+      "exitCode": 0,
+      "testGroups": [
+        {
+          "passed": 67,
+          "failed": 0,
+          "ignored": 1
+        }
+      ],
+      "resultSha256": "02a03655745aae50202c8169fcd44a42dc7f3c81962b2d3e570436c5c22235a0",
+      "cargoLogSha256": "cb2457722b8c9a81f404defba0afcb05add624ab3053a912628fe749bafcb7c4",
+      "sourceSnapshotSha256": "14d5132298186c37232027b9e5fe15d675d37cd541b4f4f0777b5fcc882e56b8",
+      "sourceDrift": [],
+      "argv": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-game-data",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "--",
+        "--test-threads=1"
+      ],
+      "completeTestResult": true,
+      "zeroMatchesExcluded": false
+    },
+    {
+      "run": "r24-merged-game-data02",
+      "exitCode": 0,
+      "testGroups": [
+        {
+          "passed": 67,
+          "failed": 0,
+          "ignored": 1
+        },
+        {
+          "passed": 5,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "passed": 0,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "resultSha256": "2c8e3bf970a7547098bb5c0159b06700731c9fb752b3f51b2b5c4d9de5acc8d1",
+      "cargoLogSha256": "8860e887265e3b5acacddbc82225555cbbbbec94b9aa9127ea822a564ca1bcac",
+      "sourceSnapshotSha256": "0a676c37b78d120bea8ac795ba825e6d0cd6c22bf6f6d29fdf99779f2d1571a0",
+      "sourceDrift": [],
+      "argv": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-game-data",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--",
+        "--test-threads=1"
+      ],
+      "completeTestResult": true,
+      "zeroMatchesExcluded": false
+    },
+    {
+      "run": "r24-merged-simulation-five01",
+      "exitCode": 101,
+      "testGroups": [],
+      "resultSha256": "951542c9ea8e59555e26c44e0542f4fafaf3bf568d0ae2e23f3fcd622d31d3f2",
+      "cargoLogSha256": "0e57710eb28ad514c56f94c079d43c2503af653812694388e33bf2d37ed6eb78",
+      "sourceSnapshotSha256": "bd3f9e262c37a7d1126c8416d72235b086c1bcd7d5ea1e1095d1ee8f2a3ccb45",
+      "sourceDrift": [],
+      "argv": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-simulation",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "five_class",
+        "--",
+        "--test-threads=1"
+      ],
+      "completeTestResult": false,
+      "zeroMatchesExcluded": false
+    },
+    {
+      "run": "r24-merged-simulation-five02",
+      "exitCode": 0,
+      "testGroups": [
+        {
+          "passed": 124,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "resultSha256": "2bc1c8c90a906dd559a18ab50b1a74d0fb053830d2567b4f5a203d1d92ba7261",
+      "cargoLogSha256": "2e6dd64b5a5b943bd0542bfd397b3da5955f9047177186161ec56b5cd3e2ddc1",
+      "sourceSnapshotSha256": "75964f71c88dd43be52aab827db8164bba8c18525664c3ed13640d8a91f01bc4",
+      "sourceDrift": [],
+      "argv": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-simulation",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "five_class",
+        "--",
+        "--test-threads=1"
+      ],
+      "completeTestResult": true,
+      "zeroMatchesExcluded": false
+    },
+    {
+      "run": "r24-merged-gateway-five01",
+      "exitCode": 101,
+      "testGroups": [],
+      "resultSha256": "fb207067c49f41f5f1a02ea50499f11ed4b5f28d9c27245046998170d55f2531",
+      "cargoLogSha256": "c480179c2d1f9d9c4d00acd71a77bd427b7e47fad6fbc723c5b12b7d3d4f0bef",
+      "sourceSnapshotSha256": "72a7b4fb1d824e94b2351523e90c98c58137d6bb731507c6eacf13b0a4cd848b",
+      "sourceDrift": [],
+      "argv": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-gateway",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "five_class",
+        "--",
+        "--test-threads=1"
+      ],
+      "completeTestResult": false,
+      "zeroMatchesExcluded": false
+    },
+    {
+      "run": "r24-merged-gateway-five02",
+      "exitCode": 101,
+      "testGroups": [
+        {
+          "passed": 12,
+          "failed": 2,
+          "ignored": 0
+        }
+      ],
+      "resultSha256": "18fcf90dcc139e5f2b59acd083aa18f4d675c2c50dfeda861cd837964d4fc1fb",
+      "cargoLogSha256": "2eb927c8e8b06aabcec920784822de0daec49ec82ecf2646328b124f6d7072b8",
+      "sourceSnapshotSha256": "c80fde1eee337cc5dc99e23689fa0848942c45281d2534238a12d26b4d8034d2",
+      "sourceDrift": [],
+      "argv": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-gateway",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "five_class",
+        "--",
+        "--test-threads=1"
+      ],
+      "completeTestResult": true,
+      "zeroMatchesExcluded": false
+    },
+    {
+      "run": "r24-merged-gateway-five03",
+      "exitCode": 101,
+      "testGroups": [
+        {
+          "passed": 16,
+          "failed": 1,
+          "ignored": 0
+        }
+      ],
+      "resultSha256": "6aff6bfaef556bf27ef61554dae1978aaa453ad2843d1cdaee2017f9fb24cadd",
+      "cargoLogSha256": "febc3d9f5c47489240a8de8f74ed59ada65b59cdc9df57c9ca8179081069ca41",
+      "sourceSnapshotSha256": "a08996a5013a1d55418579b25a9589fe70408769a8cb8a45583bf516742e7c50",
+      "sourceDrift": [],
+      "argv": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-gateway",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "five_class",
+        "--",
+        "--test-threads=1"
+      ],
+      "completeTestResult": true,
+      "zeroMatchesExcluded": false
+    },
+    {
+      "run": "r24-merged-gateway-five05",
+      "exitCode": 101,
+      "testGroups": [],
+      "resultSha256": "a2414cff8c78fca9c6db7c60a7d04e7e89e4de6c94967b70b4b580219fb00ba4",
+      "cargoLogSha256": "3d84d2efcd3e25de52a68362fb4daa8468962e4203da738af7aca5bcbb153fc3",
+      "sourceSnapshotSha256": "d0e557322db5b97ea646164325e0602376cd42c408b1594d48ab7d08d0eaae32",
+      "sourceDrift": [],
+      "argv": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-gateway",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "five_class",
+        "--",
+        "--test-threads=1"
+      ],
+      "completeTestResult": false,
+      "zeroMatchesExcluded": false
+    },
+    {
+      "run": "r24-merged-gateway-five06",
+      "exitCode": -1073740791,
+      "testGroups": [],
+      "resultSha256": "80e07fdd5ba12385b4d95554bbc4fbb4850cc5fdc4cc689dd4058e6badd69f75",
+      "cargoLogSha256": "11d5e662d63d395e52c3d46511ad6d1885cd6eb9032c3fabf1c7a5fe21700a5d",
+      "sourceSnapshotSha256": "af80b1a6d1cc399519489a149ad0df40a797acf5a2032181dfa2470996a8b8db",
+      "sourceDrift": [],
+      "argv": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-gateway",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "five_class",
+        "--",
+        "--test-threads=1"
+      ],
+      "completeTestResult": false,
+      "zeroMatchesExcluded": false
+    },
+    {
+      "run": "r24-merged-gateway-range-map-diagnostic01",
+      "exitCode": -1073740791,
+      "testGroups": [],
+      "resultSha256": "926de7b468da1c18632264c6e4740398546d6b35c87b44e8ebfe7ed428e8bea6",
+      "cargoLogSha256": "b734e8a09ac4a27aa921b170e34f7fb6acaab3e69f47b09a47eb5ff27437f04e",
+      "sourceSnapshotSha256": "20faa21abf0908fed2b009cff1be1d6ce708f0ac6b11380ede1232eee851694f",
+      "sourceDrift": [],
+      "argv": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-gateway",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "five_class_receipt_map_bootstrap",
+        "--",
+        "--test-threads=1"
+      ],
+      "completeTestResult": false,
+      "zeroMatchesExcluded": false
+    },
+    {
+      "run": "r24-merged-gateway-five07",
+      "exitCode": 0,
+      "testGroups": [
+        {
+          "passed": 18,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "resultSha256": "76a27d1b5c154a9fa78ecc2896a8bb1e981296bb0e1c77a567236648a6d59872",
+      "cargoLogSha256": "1d7c8525cb132b4d8eb2a929879cc20a9deffac448f5d7c7e62467069ee32ca7",
+      "sourceSnapshotSha256": "76deb2b5446e6a50db40acbeae886ab58bb2edc2d26b94332a6e4cc72f09a036",
+      "sourceDrift": [],
+      "argv": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-gateway",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--lib",
+        "five_class",
+        "--",
+        "--test-threads=1"
+      ],
+      "completeTestResult": true,
+      "zeroMatchesExcluded": false
+    },
+    {
+      "run": "r24-merged-native-i18n01",
+      "exitCode": 0,
+      "testGroups": [
+        {
+          "passed": 13,
+          "failed": 0,
+          "ignored": 4
+        }
+      ],
+      "resultSha256": "b810c8985308475931658de61a43940dbb3b98d909e3e259dad026629bad527f",
+      "cargoLogSha256": "e2017c07044f1f9fac421174454102a576a2b0ad90bbaad5ce3eccc988a7ea3a",
+      "sourceSnapshotSha256": "bacf4f5b04ab87a0927d03045fab060e7de3780e93f60f3b3ab6e759caec5c50",
+      "sourceDrift": [],
+      "argv": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-client-bevy",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--manifest-path",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\five-class-completion\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\Cargo.toml",
+        "--features",
+        "native-ui",
+        "--lib",
+        "native_i18n",
+        "--",
+        "--test-threads=1"
+      ],
+      "completeTestResult": true,
+      "zeroMatchesExcluded": false
+    },
+    {
+      "run": "r24-merged-native-health-zero01",
+      "exitCode": 0,
+      "testGroups": [
+        {
+          "passed": 0,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "resultSha256": "f23bff7cc6c2619e6db61330605586cb22a86924b80edf6d4c5a88cf9a276535",
+      "cargoLogSha256": "789008fdf1f910e2b97bc2dc852db4a0506a3be66c361c384b07762aa349b215",
+      "sourceSnapshotSha256": "ea5ea9a08e24bd5bf1d45642fe8fc8867fb9786dc8a8eb8245c580816077c305",
+      "sourceDrift": [],
+      "argv": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-client-bevy",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--manifest-path",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\five-class-completion\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\Cargo.toml",
+        "--features",
+        "native-ui",
+        "--lib",
+        "health_zero",
+        "--",
+        "--test-threads=1"
+      ],
+      "completeTestResult": true,
+      "zeroMatchesExcluded": true
+    },
+    {
+      "run": "r24-merged-platform-health-zero01",
+      "exitCode": 0,
+      "testGroups": [
+        {
+          "passed": 20,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "resultSha256": "d69da912163aa2f0c880a0c584dd56df5375332c304a9e5643105fe4b42bfc80",
+      "cargoLogSha256": "391ba2e719a18748dbe2b9f606a8ce85011e68747147956abba13f993d50aa27",
+      "sourceSnapshotSha256": "6e9103e52d0fc62cff36761700fde793fb8d2da6123b82f5d60099310ef78a47",
+      "sourceDrift": [],
+      "argv": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-platform-windows",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--manifest-path",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\five-class-completion\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\Cargo.toml",
+        "health_zero",
+        "--",
+        "--test-threads=1"
+      ],
+      "completeTestResult": true,
+      "zeroMatchesExcluded": false
+    },
+    {
+      "run": "r24-merged-platform-five01",
+      "exitCode": 0,
+      "testGroups": [
+        {
+          "passed": 32,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "resultSha256": "81430ded99dfb8fdf2c26cd91fde74ae3e605c734c2825430e2aab92b102dcfd",
+      "cargoLogSha256": "a8bc22d9c5761a044f8e8193a7e03a469939f2e582001e72138c5cc6d04c0807",
+      "sourceSnapshotSha256": "8151fd9df2d8f3620f209b2ec4c1c9893c8d54da575f23f2ebc3d308e221798a",
+      "sourceDrift": [],
+      "argv": [
+        "+1.95.0",
+        "test",
+        "-p",
+        "mir2-platform-windows",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--manifest-path",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\five-class-completion\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\Cargo.toml",
+        "five_class",
+        "--",
+        "--test-threads=1"
+      ],
+      "completeTestResult": true,
+      "zeroMatchesExcluded": false
+    }
+  ],
+  "originalFailuresRetained": true,
+  "priorScopeResultsNotRelabeledAsFinalR25Merge": true,
+  "countsNotSummedAcrossRepeatedOrOverlappingRuns": true,
+  "cargoBlocked04BeforeExecution": true,
+  "nativeBuildAccepted": false,
+  "published": false,
+  "humanAccepted": false,
+  "archive": {
+    "path": "r24-first-merge-original-evidence.zip",
+    "sha256": "afbfa04c7ae2b9468ae198f67c42e4edb3570eb78b1c609ed4a96afbdfdb9794",
+    "bytes": 653567
+  }
+}

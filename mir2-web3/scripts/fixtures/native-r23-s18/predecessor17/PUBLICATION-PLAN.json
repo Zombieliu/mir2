@@ -1,0 +1,267 @@
+{
+  "schema": "mir2.windows.r2-publication.v1",
+  "expectedCurrent": {
+    "schema": "mir2.windows.r2-channel.v1",
+    "channel": "invited",
+    "platform": "windows-x64",
+    "sequence": 16,
+    "sourceRevision": "b4390ee4c987bbf000ba1d95761151e39fc0d54f",
+    "feedSha256": "fd8109231f6077405c410047fab94ea1a5797e9963e81fd9a80a0cb86cf95dca",
+    "signatureSha256": "1f881c23724b892ab9814eb2eb9002a365df159a7220bb5316538a0ea181a5c7"
+  },
+  "candidate": {
+    "schema": "mir2.windows.r2-channel.v1",
+    "channel": "invited",
+    "platform": "windows-x64",
+    "sequence": 17,
+    "sourceRevision": "b4390ee4c987bbf000ba1d95761151e39fc0d54f",
+    "feedSha256": "e7efebcb6b897e15f3b93b8a7a8eeb354d0eb01ccf799bb155c26c394f6efc4f",
+    "signatureSha256": "84145fbabc752cd648d81415a5d45aba464ee67ddd0a7d2a1a9f296c31844276"
+  },
+  "verificationReceipt": {
+    "path": "C:\\mir2-playtest-releases\\20261008-classic-r22\\publication-17-02\\ROOT-VERIFICATION.json",
+    "sha256": "8ec73ca7d1e7c500a46a9c58af41789307087f6cd7d3b74a77dc5e056981cabf"
+  },
+  "objects": [
+    {
+      "path": "feeds/s17-e7efebcb6b897e15f3b93b8a7a8eeb354d0eb01ccf799bb155c26c394f6efc4f/latest.json",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\feed-17-01\\latest.json",
+      "size": 1159,
+      "sha256": "e7efebcb6b897e15f3b93b8a7a8eeb354d0eb01ccf799bb155c26c394f6efc4f"
+    },
+    {
+      "path": "feeds/s17-e7efebcb6b897e15f3b93b8a7a8eeb354d0eb01ccf799bb155c26c394f6efc4f/latest.p7s",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\feed-17-01\\latest.p7s",
+      "size": 1614,
+      "sha256": "84145fbabc752cd648d81415a5d45aba464ee67ddd0a7d2a1a9f296c31844276"
+    },
+    {
+      "path": "installers/ea1e4b3cbccd9a79cf042d9e0d1d08bcd4e016006df0e3d9f021c9c034d46e03/Mir2Setup.exe",
+      "source": "C:\\mir2-playtest-releases\\20261007-mining-r19\\bootstrap-03\\artifacts\\Numeron-Legend-of-Rebirth-20261007-r19-Bootstrap.exe",
+      "size": 29245069,
+      "sha256": "ea1e4b3cbccd9a79cf042d9e0d1d08bcd4e016006df0e3d9f021c9c034d46e03"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/BUILD-ATTESTATION.json",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\packages-03\\WN-CANDIDATE-20261008-invited-22\\BUILD-ATTESTATION.json",
+      "size": 2416,
+      "sha256": "4900e283fcae1112cec678cac98e0acca0bdc348229966ace28f69717f6fbf64"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/CONTROLS.txt",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\packages-03\\WN-CANDIDATE-20261008-invited-22\\CONTROLS.txt",
+      "size": 10612,
+      "sha256": "b9ad2a5a01b3ecbe673a3d38b1974b38492d3a62a0e28932eb8367ce19ebf7c6"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/DELIVERY.json",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\delivery-02\\DELIVERY.json",
+      "size": 10560382,
+      "sha256": "d8588a95aaa384b4fb5cc3e27f3f4b7648cdd39616fc81c699f2fc865af56f4f"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/DELIVERY.p7s",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\delivery-02\\DELIVERY.p7s",
+      "size": 1614,
+      "sha256": "813e48d37f04b96ec9f2b9da5e03d8ad8f9bfc29e177b2caa1df5b0dd6379d78"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/KNOWN-ISSUES.md",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\packages-03\\WN-CANDIDATE-20261008-invited-22\\KNOWN-ISSUES.md",
+      "size": 2152,
+      "sha256": "d2a2ffca1d2170ee0a0f2e3d3fdf0eff644f2fe4472c5ba7e6120ce12c4eadc9"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/MULTILINGUAL-SOURCES.json",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\packages-03\\WN-CANDIDATE-20261008-invited-22\\MULTILINGUAL-SOURCES.json",
+      "size": 8618,
+      "sha256": "1528b614dedb07860e22ac2e1cf62528b0ed126230657dc008fb88d2f01f6d11"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/NotoSansTC-OFL.txt",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\packages-03\\WN-CANDIDATE-20261008-invited-22\\NotoSansTC-OFL.txt",
+      "size": 4481,
+      "sha256": "e35ffdebb2225b49814c31889cbb3ce69cb3509e6a9f431edaba5e1a6de8cd15"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/OFL-NotoSans.txt",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\packages-03\\WN-CANDIDATE-20261008-invited-22\\OFL-NotoSans.txt",
+      "size": 4396,
+      "sha256": "cee9892f9f0cc8fe882c9e9537ee6a89621d86ee7ceaf70b02e2b2b1c25c061a"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/OFL-NotoSansArabic.txt",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\packages-03\\WN-CANDIDATE-20261008-invited-22\\OFL-NotoSansArabic.txt",
+      "size": 4382,
+      "sha256": "a7a5a25eb188bf1cd96982030d53e23c33485c69b1044a562254226857ee13af"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/OFL-NotoSansDevanagari.txt",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\packages-03\\WN-CANDIDATE-20261008-invited-22\\OFL-NotoSansDevanagari.txt",
+      "size": 4386,
+      "sha256": "a216f6f8d85c7228093e0ee5e258d9d377e6671f68acb4db1930b29583d0f331"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/OFL-NotoSansThai.txt",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\packages-03\\WN-CANDIDATE-20261008-invited-22\\OFL-NotoSansThai.txt",
+      "size": 4380,
+      "sha256": "dad6e6abc2bf3fc37cc698af7607c3f4d4235039695713b222e5a034fb5b9b1c"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/PACKAGE-MANIFEST.json",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\packages-03\\WN-CANDIDATE-20261008-invited-22\\PACKAGE-MANIFEST.json",
+      "size": 31538315,
+      "sha256": "00967a994d9586c574ca89d5ea4046b25f0a79c346d63fe76f261c0c23735916"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/README-START.txt",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\packages-03\\WN-CANDIDATE-20261008-invited-22\\README-START.txt",
+      "size": 49328,
+      "sha256": "b13664ec1f37e4d7b9791cb3b5e5f4783b9e65c13799f9fb7b6861bd3efc68cc"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/RELEASE-STATEMENT.json",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\packages-03\\WN-CANDIDATE-20261008-invited-22\\RELEASE-STATEMENT.json",
+      "size": 707,
+      "sha256": "ec87dbed90b51d11705bce7002363c5b32be5792b70d21dca1fb069fc609b5e5"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/RELEASE-STATEMENT.p7s",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\packages-03\\WN-CANDIDATE-20261008-invited-22\\RELEASE-STATEMENT.p7s",
+      "size": 1614,
+      "sha256": "ef2d6a84c22a683c5215f0bee815f60959ed3c273a7fed7b6682a095cf3913a6"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/VERSION.json",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\packages-03\\WN-CANDIDATE-20261008-invited-22\\VERSION.json",
+      "size": 1221,
+      "sha256": "33de36e552668c358adc1ee5f7fea2ed8bd9d79aa387f4f231c5aa4ee7ba2935"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/delivery/14ef04552aadc72ca06e5c4d647a70d617eecd702c367e3d7dda706bedeecd79.m2b.gz",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\delivery-02\\delivery\\14ef04552aadc72ca06e5c4d647a70d617eecd702c367e3d7dda706bedeecd79.m2b.gz",
+      "size": 55867942,
+      "sha256": "14ef04552aadc72ca06e5c4d647a70d617eecd702c367e3d7dda706bedeecd79"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/delivery/41393f2297ea383796668f549c8ceaa2aa7168382160642dee9a008270e3f710.m2b.gz",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\delivery-02\\delivery\\41393f2297ea383796668f549c8ceaa2aa7168382160642dee9a008270e3f710.m2b.gz",
+      "size": 46880707,
+      "sha256": "41393f2297ea383796668f549c8ceaa2aa7168382160642dee9a008270e3f710"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/delivery/53a489c9be927fbad4087d595567604c6cfa33a4960bb48eba646a631203974b.m2b.gz",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\delivery-02\\delivery\\53a489c9be927fbad4087d595567604c6cfa33a4960bb48eba646a631203974b.m2b.gz",
+      "size": 65601792,
+      "sha256": "53a489c9be927fbad4087d595567604c6cfa33a4960bb48eba646a631203974b"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/delivery/541cde1e5530e736ce2e6d02a02737364dcc88df49fa088222538e265efba3fb.m2b.gz",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\delivery-02\\delivery\\541cde1e5530e736ce2e6d02a02737364dcc88df49fa088222538e265efba3fb.m2b.gz",
+      "size": 12699904,
+      "sha256": "541cde1e5530e736ce2e6d02a02737364dcc88df49fa088222538e265efba3fb"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/delivery/55b88966ccf36fa9fe27ae9eb44eb3f152beed009aaa21eb9c1ed4ff51eddbba.m2d.gz",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\delivery-02\\delivery\\55b88966ccf36fa9fe27ae9eb44eb3f152beed009aaa21eb9c1ed4ff51eddbba.m2d.gz",
+      "size": 25720210,
+      "sha256": "55b88966ccf36fa9fe27ae9eb44eb3f152beed009aaa21eb9c1ed4ff51eddbba"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/delivery/565af7b642a235bec7518966243b586bf4668fa93f730e96f747c9400690d2e2.m2b.gz",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\delivery-02\\delivery\\565af7b642a235bec7518966243b586bf4668fa93f730e96f747c9400690d2e2.m2b.gz",
+      "size": 66861961,
+      "sha256": "565af7b642a235bec7518966243b586bf4668fa93f730e96f747c9400690d2e2"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/delivery/6fb1307f7539f7454f9552ad2639f6e8ef3f75344c958b6ede94207641301a4e.m2b.gz",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\delivery-02\\delivery\\6fb1307f7539f7454f9552ad2639f6e8ef3f75344c958b6ede94207641301a4e.m2b.gz",
+      "size": 65556826,
+      "sha256": "6fb1307f7539f7454f9552ad2639f6e8ef3f75344c958b6ede94207641301a4e"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/delivery/7b758caf2f5a63fee7832ea243066a1cdf24bddf9c840e248418cc6f473301ba.m2b.gz",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\delivery-02\\delivery\\7b758caf2f5a63fee7832ea243066a1cdf24bddf9c840e248418cc6f473301ba.m2b.gz",
+      "size": 36343140,
+      "sha256": "7b758caf2f5a63fee7832ea243066a1cdf24bddf9c840e248418cc6f473301ba"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/delivery/84ff6726ef8065d8b18e9ce6a796fb22782be8df1f36a65305fd4ae594d782e7.m2b.gz",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\delivery-02\\delivery\\84ff6726ef8065d8b18e9ce6a796fb22782be8df1f36a65305fd4ae594d782e7.m2b.gz",
+      "size": 66910012,
+      "sha256": "84ff6726ef8065d8b18e9ce6a796fb22782be8df1f36a65305fd4ae594d782e7"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/delivery/a20cd5f826b0430029b0bbb9498a24ff0e473086680db0483cca3ce46321db2b.m2b.gz",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\delivery-02\\delivery\\a20cd5f826b0430029b0bbb9498a24ff0e473086680db0483cca3ce46321db2b.m2b.gz",
+      "size": 63793866,
+      "sha256": "a20cd5f826b0430029b0bbb9498a24ff0e473086680db0483cca3ce46321db2b"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/delivery/a76d6f75ee1d567ad70e5b2d48abf3859dfd1537432c4152436f5eb7885a2799.m2b.gz",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\delivery-02\\delivery\\a76d6f75ee1d567ad70e5b2d48abf3859dfd1537432c4152436f5eb7885a2799.m2b.gz",
+      "size": 60066659,
+      "sha256": "a76d6f75ee1d567ad70e5b2d48abf3859dfd1537432c4152436f5eb7885a2799"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/delivery/aac8b63b1cf9e65f6143ebbaaa0c7598fd93d8ff8da145049b0d29689682f151.m2b.gz",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\delivery-02\\delivery\\aac8b63b1cf9e65f6143ebbaaa0c7598fd93d8ff8da145049b0d29689682f151.m2b.gz",
+      "size": 55155805,
+      "sha256": "aac8b63b1cf9e65f6143ebbaaa0c7598fd93d8ff8da145049b0d29689682f151"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/delivery/ba1d18a6fc2ae0e87f4b41ccf730a87e2e4d5f31188957ce348a376b36d08fbe.m2b.gz",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\delivery-02\\delivery\\ba1d18a6fc2ae0e87f4b41ccf730a87e2e4d5f31188957ce348a376b36d08fbe.m2b.gz",
+      "size": 59737743,
+      "sha256": "ba1d18a6fc2ae0e87f4b41ccf730a87e2e4d5f31188957ce348a376b36d08fbe"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/delivery/cbeaa575d8596522b34b20157cb4024c6e61e3b937110999cda3414d44605587.m2b.gz",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\delivery-02\\delivery\\cbeaa575d8596522b34b20157cb4024c6e61e3b937110999cda3414d44605587.m2b.gz",
+      "size": 60714247,
+      "sha256": "cbeaa575d8596522b34b20157cb4024c6e61e3b937110999cda3414d44605587"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/delivery/e14bb6681791c37ac1ddb771841db1756b7e9df00df46d240e529cdbb087ceb9.m2b.gz",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\delivery-02\\delivery\\e14bb6681791c37ac1ddb771841db1756b7e9df00df46d240e529cdbb087ceb9.m2b.gz",
+      "size": 60049370,
+      "sha256": "e14bb6681791c37ac1ddb771841db1756b7e9df00df46d240e529cdbb087ceb9"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/delivery/e83e50787df75d6e3d4a64aef7640e0d36b849e17aaae87568f8a1d526d6b25b.m2b.gz",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\delivery-02\\delivery\\e83e50787df75d6e3d4a64aef7640e0d36b849e17aaae87568f8a1d526d6b25b.m2b.gz",
+      "size": 65610644,
+      "sha256": "e83e50787df75d6e3d4a64aef7640e0d36b849e17aaae87568f8a1d526d6b25b"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/mir2-client.toml",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\packages-03\\WN-CANDIDATE-20261008-invited-22\\mir2-client.toml",
+      "size": 231,
+      "sha256": "58a5a7cf2ed6e880a7a7f259243dd9ab96150fc43e1a346e6fc79b8de6ee3641"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261008-invited-22/mir2-platform-windows.exe",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\packages-03\\WN-CANDIDATE-20261008-invited-22\\mir2-platform-windows.exe",
+      "size": 111275520,
+      "sha256": "8ebb7e8e32fbf2a577b90e2341767cc34b467a021e23406003d55597b077bc22"
+    },
+    {
+      "path": "releases/updater-9213EC3FE1A992F7-s15/ENGINE.json",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\engine-reused-01\\ENGINE.json",
+      "size": 421,
+      "sha256": "82fed6853aed2ed3d8c8c7520b9d4b84aacd4ac2723c2e47506eb4d001cb99b0"
+    },
+    {
+      "path": "releases/updater-9213EC3FE1A992F7-s15/ENGINE.p7s",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\engine-reused-01\\ENGINE.p7s",
+      "size": 1614,
+      "sha256": "c19efee65316762e459ae48afc6123184e4c66defcb33f274fec046c66908a2b"
+    },
+    {
+      "path": "releases/updater-9213EC3FE1A992F7-s15/Mir2Updater.exe",
+      "source": "C:\\mir2-playtest-releases\\20261008-classic-r22\\engine-reused-01\\Mir2Updater.exe",
+      "size": 1952256,
+      "sha256": "9213ec3fe1a992f757ea48c53981afa661765b42e637c1ad811e326060b170b8"
+    }
+  ]
+}

@@ -1,0 +1,177 @@
+
+// Actual formal25 showed two ordinary fighters spending interleaved chase ACKs
+// on the same target. This fixture preserves each connection's owner1000 while
+// using independent actor identities and actual matching UserLocation receipts.
+function chasePreferenceFixture(monsters = [huntMonster(900, 'Deer', 10), huntMonster(901, 'Scarecrow', 10, 7)]) {
+  const f = huntFixture(monsters), second = new CapacityClient('ws://127.0.0.1:1/ws', actor(15), f.context);
+  const secondOwner = { ...nativeSnapshot().entities[0], name: second.label, x: 5, y: 7 };
+  second.snapshot = { ...nativeSnapshot(), entities: [secondOwner, { ...f.owner, objectId: 50001 }, ...structuredClone(monsters)] };
+  Object.assign(second, { ready: true, inGame: true, role: 'combat', home: { x: 5, y: 7 }, combatArrival: { at: 1 },
+    nextNativeChatAt: Infinity, nextNativeTurnAt: Infinity, nativeRunPrimedUntil: 0 });
+  f.client.snapshot.entities.push({ ...secondOwner, objectId: 50002 });
+  Object.assign(f.peer.snapshot.entities[0], { x: 9, y: 6 });
+  f.peer.snapshot.entities.push({ ...secondOwner, objectId: 50002 });
+  f.peer.events = []; f.peer.sequence = 0;
+  f.context.clients = [f.client, second, f.peer];
+  return { ...f, second, secondOwner };
+}
+function chasePreferenceAck(f, hunter, mono, sequence = 1, prepared) {
+  const owner = hunter.snapshot.entities.find(e => e.objectId === hunter.snapshot.playerObjectId);
+  const plan = prepared ?? selectNativeAction(hunter, f.context, mono), origin = { x: owner.x, y: owner.y };
+  assert.ok(['walk', 'run'].includes(plan.command.type)); assert.equal(plan.chaseTargetId, 900);
+  Object.assign(owner, plan.target);
+  for (const other of f.context.clients) if (other !== hunter) {
+    const observed = other.snapshot.entities.find(e => e.name === hunter.label);
+    if (observed) Object.assign(observed, plan.target);
+  }
+  const receipt = { packet: 'UserLocation', sequence, monotonicMs: mono, payload: { ...plan.target, direction: plan.command.direction } };
+  recordCombatPursuitMovement(hunter, f.context, plan, origin, receipt, 'success', Date.now());
+  return { plan, origin, receipt };
+}
+
+test('native chase preference avoids the formal25 duplicated approach after a real peer ACK without sharing owner1000 identity', () => {
+  const f = chasePreferenceFixture(); assert.equal(f.client.snapshot.playerObjectId, 1000); assert.equal(f.second.snapshot.playerObjectId, 1000);
+  chasePreferenceAck(f, f.second, 1000);
+  const plan = selectNativeAction(f.client, f.context, 1500);
+  assert.equal(plan.chaseTargetId, 901);
+  assert.equal(f.second.combatPursuit.objectId, 900); assert.equal(f.context.targetClaims.size, 0);
+  assert.equal(f.client.failedTargets.size, 0); assert.equal(f.client.chaseDeferrals.size, 0);
+});
+
+test('native chase preference keeps first4 claimed fallback when three preferred alternatives have no path', () => {
+  const monsters = [huntMonster(900, 'Deer', 10), huntMonster(901, 'Scarecrow', 10, 7),
+    huntMonster(902, 'Deer', 10, 3), huntMonster(903, 'Scarecrow', 10, 9), huntMonster(904, 'Deer', 13)];
+  const f = chasePreferenceFixture(monsters); chasePreferenceAck(f, f.second, 1000);
+  for (const monster of monsters.slice(1, 4)) for (let y = monster.y - 1; y <= monster.y + 1; y++) for (let x = 9; x <= 11; x++) f.context.map.blocked[y * 80 + x] = 1;
+  f.client.navigationAttempts = []; f.client.navigationAttemptCount = 0;
+  const plan = selectNativeAction(f.client, f.context, 1500);
+  assert.equal(plan.chaseTargetId, 900, 'a preference never removes the original reachable fourth candidate');
+  assert.ok(f.client.navigationAttemptCount <= 32);
+  assert.equal(f.client.navigationAttempts.some(a => a.target.x >= 12), false, 'a fifth target cannot expand the original path budget');
+});
+
+test('native chase preference retains a sole reachable approach and gives an actual adjacent witnessed attack precedence', () => {
+  const only = chasePreferenceFixture([huntMonster(900, 'Deer', 10)]); chasePreferenceAck(only, only.second, 1000);
+  assert.equal(selectNativeAction(only.client, only.context, 1500).chaseTargetId, 900);
+  const adjacent = chasePreferenceFixture([huntMonster(900, 'Deer', 6), huntMonster(901, 'Scarecrow', 10, 7)]);
+  chasePreferenceAck(adjacent, adjacent.second, 1000);
+  const plan = selectNativeAction(adjacent.client, adjacent.context, 1500);
+  assert.equal(plan.command.type, 'attack'); assert.equal(plan.command.objectId, 900);
+});
+
+test('native chase preference uses a symmetric first-receipt label tiebreak regardless of client iteration order', () => {
+  for (const reverse of [false, true]) {
+    const f = chasePreferenceFixture(), a = selectNativeAction(f.client, f.context, 1000), b = selectNativeAction(f.second, f.context, 1000);
+    chasePreferenceAck(f, f.client, 1000, 1, a); chasePreferenceAck(f, f.second, 1000, 1, b);
+    if (reverse) f.context.clients.reverse();
+    assert.ok(f.client.label < f.second.label);
+    assert.equal(selectNativeAction(f.client, f.context, 1500).chaseTargetId, 900);
+    assert.equal(selectNativeAction(f.second, f.context, 1500).chaseTargetId, 901);
+  }
+});
+
+test('native chase preference honors an earlier actual receipt before lexical actor order', () => {
+  const f = chasePreferenceFixture(), a = selectNativeAction(f.client, f.context, 900), b = selectNativeAction(f.second, f.context, 900);
+  chasePreferenceAck(f, f.second, 900, 1, b); chasePreferenceAck(f, f.client, 1000, 1, a);
+  assert.equal(selectNativeAction(f.second, f.context, 1500).chaseTargetId, 900);
+  assert.equal(selectNativeAction(f.client, f.context, 1500).chaseTargetId, 901);
+});
+
+test('native chase preference expires at the original receipt age and reacquires only from a new real ACK', () => {
+  const f = chasePreferenceFixture(); chasePreferenceAck(f, f.second, 1000);
+  assert.equal(selectNativeAction(f.client, f.context, 1500).chaseTargetId, 901);
+  // This actor still has no movement receipt on either target: restoring the
+  // original selected candidate here isolates expiry from its own preference.
+  f.client.combatPursuit = null;
+  assert.equal(selectNativeAction(f.client, f.context, 4001).chaseTargetId, 900);
+  chasePreferenceAck(f, f.second, 4100, 2);
+  assert.equal(f.second.combatPursuit.coordinationFirstReceiptMonoMs, 4100);
+  assert.equal(f.second.combatPursuit.coordinationLastReceiptMonoMs, 4100);
+  assert.equal(f.second.combatPursuit.confirmedMoves, 2, 'expiry never replenishes an old movement budget');
+  assert.equal(selectNativeAction(f.client, f.context, 4200).chaseTargetId, 901);
+});
+
+test('native chase preference records the fractional actual receipt clock and ignores duplicate ACK processing', () => {
+  const f = chasePreferenceFixture(), first = chasePreferenceAck(f, f.second, 1000.125);
+  const pursuit = f.second.combatPursuit;
+  assert.equal(pursuit.coordinationFirstReceiptMonoMs, 1000.125); assert.equal(pursuit.coordinationLastReceiptMonoMs, 1000.125);
+  recordCombatPursuitMovement(f.second, f.context, first.plan, first.origin, { ...first.receipt, monotonicMs: 2500 }, 'success', Date.now());
+  assert.equal(pursuit.coordinationLastReceiptMonoMs, 1000.125); assert.equal(pursuit.confirmedMoves, 1);
+  assert.equal(selectNativeAction(f.client, f.context, 4001).chaseTargetId, 900, 'processing a receipt again cannot refresh its TTL');
+});
+
+test('native chase preference rejects invalid, zero, corrected and unmatched movement evidence', () => {
+  for (const mutation of ['wrong-packet', 'stale-sequence', 'zero-step', 'wrong-location', 'wrong-target', 'corrected', 'missing-mono']) {
+    const f = chasePreferenceFixture(), plan = selectNativeAction(f.second, f.context, 1000), origin = { x: f.secondOwner.x, y: f.secondOwner.y };
+    const receipt = { packet: 'UserLocation', sequence: 1, monotonicMs: 1000, payload: { ...plan.target } };
+    if (mutation === 'wrong-packet') receipt.packet = 'ObjectWalk';
+    if (mutation === 'stale-sequence') receipt.sequence = f.second.combatPursuit.lastReceiptSequence;
+    if (mutation === 'zero-step') receipt.payload = { ...origin };
+    if (mutation === 'wrong-location') receipt.payload = { x: 70, y: 70 };
+    if (mutation === 'wrong-target') plan.chaseTargetId = 901;
+    if (mutation === 'missing-mono') delete receipt.monotonicMs;
+    Object.assign(f.secondOwner, receipt.payload);
+    recordCombatPursuitMovement(f.second, f.context, plan, origin, receipt, mutation === 'corrected' ? 'corrected' : 'success', Date.now());
+    assert.equal(f.second.combatPursuit.coordinationFirstReceiptMonoMs, null, mutation);
+    assert.equal(f.second.combatPursuit.coordinationLastReceiptMonoMs, null, mutation);
+    assert.equal(selectNativeAction(f.client, f.context, 1500).chaseTargetId, 900, mutation);
+  }
+});
+
+test('native chase preference clears a stale or malformed new receipt clock without inventing coordination progress', () => {
+  for (const mono of [NaN, Infinity, -1, 999]) {
+    const f = chasePreferenceFixture(); chasePreferenceAck(f, f.second, 1000);
+    const plan = selectNativeAction(f.second, f.context, 1200), origin = { x: f.secondOwner.x, y: f.secondOwner.y };
+    Object.assign(f.secondOwner, plan.target);
+    recordCombatPursuitMovement(f.second, f.context, plan, origin, { packet: 'UserLocation', sequence: 2, monotonicMs: mono, payload: { ...plan.target } }, 'success', Date.now());
+    assert.equal(f.second.combatPursuit.coordinationFirstReceiptMonoMs, null);
+    assert.equal(f.second.combatPursuit.coordinationLastReceiptMonoMs, null);
+    assert.equal(selectNativeAction(f.client, f.context, 1300).chaseTargetId, 900);
+  }
+});
+
+test('native chase preference does not arise from pure plans or a throwing ordinary movement send', async () => {
+  const f = chasePreferenceFixture(); for (let i = 0; i < 20; i++) assert.equal(selectNativeAction(f.second, f.context, 1000).chaseTargetId, 900);
+  assert.equal(f.second.combatPursuit.coordinationFirstReceiptMonoMs, null);
+  assert.equal(selectNativeAction(f.client, f.context, 1500).chaseTargetId, 900);
+  f.second.plan = { sent() {} }; f.second.send = () => { throw new Error('ordinary movement send failed'); };
+  const plan = selectNativeAction(f.second, f.context, 1600);
+  await action(f.second, f.context, { due: performance.now(), cadence: { cooldownMs: 600, intervalMs: 750, pacingKnown: true } }, plan);
+  assert.equal(f.second.combatPursuit.coordinationFirstReceiptMonoMs, null); assert.equal(f.second.combatPursuit.coordinationLastReceiptMonoMs, null);
+  assert.equal(f.actions.some(row => row.status === 'error'), true);
+  assert.equal(selectNativeAction(f.client, f.context, 1700).chaseTargetId, 900);
+});
+
+test('native chase preference ignores inactive, wrong-map, noncombat, invalid-target and already-attacking peers', () => {
+  for (const invalidate of [f => { f.second.ready = false; }, f => { f.second.inGame = false; }, f => { f.second.closed = true; },
+    f => { f.second.paused = true; }, f => { f.second.draining = true; }, f => { f.second.navigationClosing = true; },
+    f => { f.second.role = 'movement'; }, f => { f.second.snapshot.mapFileName = 'other'; }, f => { f.secondOwner.dead = true; },
+    f => { f.second.combatPursuit.attackSent = true; },
+    f => { f.second.snapshot.entities = f.second.snapshot.entities.filter(e => e.objectId !== 900); },
+    f => { f.second.snapshot.entities.find(e => e.objectId === 900).dead = true; },
+    f => { f.second.combatPursuit.name = 'other-monster'; }]) {
+    const f = chasePreferenceFixture(); chasePreferenceAck(f, f.second, 1000); invalidate(f);
+    assert.equal(selectNativeAction(f.client, f.context, 1500).chaseTargetId, 900);
+  }
+});
+
+test('native chase preference resume drops socket receipt preference while retaining spent chase and quarantine budgets', () => {
+  const f = chasePreferenceFixture(); chasePreferenceAck(f, f.client, 1000); const now = Date.now(), pursuit = f.client.combatPursuit;
+  Object.assign(pursuit, { startedAt: now, lastMovementAt: now + 1000, activeElapsedMs: 2000, confirmedMoves: 39 });
+  pursuit.visited.set('6,5', 2); f.client.failedTargets.set(999, { until: Infinity, ambiguous: true }); f.client.combatPursuitPausedAt = now + 2000;
+  const restored = new CapacityClient('ws://127.0.0.1:1/ws', actor(0), f.context); restored.snapshot = structuredClone(f.client.snapshot); restored.sequence = 99;
+  restoreCombatPursuit(f.client, restored, f.context, now + 40000);
+  assert.equal(restored.combatPursuit.coordinationFirstReceiptMonoMs, null); assert.equal(restored.combatPursuit.coordinationLastReceiptMonoMs, null);
+  assert.equal(restored.combatPursuit.confirmedMoves, 39); assert.equal(restored.combatPursuit.activeElapsedMs, 4000);
+  assert.equal(restored.combatPursuit.visited.get('6,5'), 2); assert.notEqual(restored.combatPursuit.visited, pursuit.visited);
+  assert.equal(f.client.failedTargets.get(999).until, Infinity, 'rebasing a pursuit cannot erase the existing attack quarantine');
+});
+
+test('native chase preference leaves baseline candidate choice and every declared gameplay gate unchanged', () => {
+  const f = chasePreferenceFixture(); chasePreferenceAck(f, f.second, 1000);
+  const original = f.context.policy; f.context.policy = capacityPolicy({ profile: 'probe' });
+  assert.equal(selectNativeAction(f.client, f.context, 1500).chaseTargetId, undefined);
+  assert.equal(selectNativeAction(f.client, f.context, 1500).hunting, 'Deer');
+  for (const field of ['minimumCombatAttacksPerMinute', 'minimumCombatHitsPerMinute', 'minimumNativeRunRatio', 'maximumMissedPlanRatio',
+    'maximumCorrectionRatio', 'movementP95Ms', 'maximumDriverLagP99Ms']) assert.equal(original[field], f.context.policy[field]);
+});

@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-27T21:45:52.213Z",
+  "freshFullLifecyclePassed": true,
+  "actualCheckCount": 16,
+  "report": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-store-optimization-v1\\reports\\1793137319083-149bb314.report.json",
+    "bytes": 104565,
+    "sha256": "a4a3fe227b73393d00188aede73595acc8594c7cb40044e496901465a27acdb8"
+  },
+  "cleanup": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-store-optimization-v1\\cleanup-v1.json",
+    "bytes": 341,
+    "sha256": "3a0b8b3f1638292b80733fe9a64680b2a96774a579d3814be36691e27f18e672"
+  },
+  "backendBuild": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v3\\validation-v1.json",
+    "bytes": 2990,
+    "sha256": "72b0a436f316475c6c1a1b75c4d79a89a7f866640f2189685a72eec136e6e6f6"
+  },
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

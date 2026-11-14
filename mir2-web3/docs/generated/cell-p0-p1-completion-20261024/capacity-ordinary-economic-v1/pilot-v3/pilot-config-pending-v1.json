@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "state": "PENDING_ROOT_SOURCE_FREEZE_NOT_RUN",
+  "purpose": "ordinary-economic-preparation-functional-pilot",
+  "actors": 2,
+  "options": {
+    "realm": "isolated",
+    "endpoint": "ws://127.0.0.1:17510/ws",
+    "profile": "probe",
+    "activityMode": "native",
+    "stages": "2",
+    "stageSeconds": 30,
+    "soakSeconds": 30,
+    "wallSeconds": 3600,
+    "combatActors": 1,
+    "resumeSamples": 0,
+    "saveSamples": 0,
+    "movementIntervalMs": 750,
+    "layout": "dispersed",
+    "attackResults": "v2",
+    "preparationProfile": "ordinary-economic-v1",
+    "preparationHpTarget": 12
+  },
+  "scenario": {
+    "mapFileName": "0",
+    "patrolSpan": 2,
+    "anchors": [
+      {
+        "x": 285,
+        "y": 602
+      },
+      {
+        "x": 288,
+        "y": 602
+      }
+    ],
+    "monsterNames": [
+      "Deer"
+    ],
+    "preparation": {
+      "stagingPoints": [
+        {
+          "x": 285,
+          "y": 602
+        },
+        {
+          "x": 288,
+          "y": 602
+        }
+      ]
+    }
+  },
+  "routeSource": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\quest-agent\\warrior-1-30-newcomer-v1.json",
+    "bytes": 2661153,
+    "sha256": "ba415e68f7c3724d367542320809d4b43b122845a3e1b7a9e3b998b2cedbc975"
+  },
+  "resourceProfile": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\resource-profile-v1.json",
+    "bytes": 1630,
+    "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+  },
+  "fixedGateway": {
+    "tcp": "127.0.0.1:17500",
+    "web": "127.0.0.1:17510",
+    "tokioWorkers": 4,
+    "maxActiveSessions": 100,
+    "maxWsConnections": 128,
+    "maxReconnectLeases": 100,
+    "maxLoginInFlight": 4,
+    "maxNewCharacterInFlight": 1,
+    "maxStartGameInFlight": 2,
+    "contentProfile": "platinum_176",
+    "zoneDeliveryTrace": true
+  },
+  "monitorWallSeconds": 4200,
+  "preparationScope": {
+    "maxSecondsPerActor": 600,
+    "maxDeerAttemptsPerActor": 8,
+    "targetHp": 12,
+    "stageResupply": false,
+    "sustainableTwoHourStockProven": false,
+    "liveHostileSafetyKnown": false
+  },
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "formalAcceptanceEligible": false,
+  "scope": "Only a fresh two-character ordinary economic function pilot, not a five-minute stage or a capacity certificate. Actual reports and every false/error remain original. No grants, revive, QA, synthetic supply or runtime occupancy overrides.",
+  "packageId": "ordinary-economic-preparation-pilot-v3"
+}

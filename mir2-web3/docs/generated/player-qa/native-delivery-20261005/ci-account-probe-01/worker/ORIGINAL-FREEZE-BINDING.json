@@ -1,0 +1,8 @@
+{
+  "sourceDirectory": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-ci-auth-probe-worker-01",
+  "unchangedSha256": {
+    "FROZEN-RECEIPT.json": "c3252223ee9d5eca55e36ef9d6781d0fa1c3607f0e316fb0ec03e5930702cb5b",
+    "cloudflare_read_authority_probe.py": "1ce602ca8e1e1dc69c6745dec0ebce68237b040aa40ea11830b6aec9cdcf02dd",
+    "test_cloudflare_read_authority_probe.py": "c9f830c69b2f552e526d0f26c251027d7a443e2504423e90289a11807fc758d5"
+  }
+}

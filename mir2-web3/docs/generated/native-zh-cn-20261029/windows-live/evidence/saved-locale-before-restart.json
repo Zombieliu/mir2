@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "observedAtUtc": "2026-10-29T06:19:39.0100510Z",
+  "schema": 1,
+  "locale": "zh-CN",
+  "source": "isolated APPDATA preference after real UI selection",
+  "restartSeed": "en",
+  "purpose": "prove saved preference overrides opposite installer seed"
+}

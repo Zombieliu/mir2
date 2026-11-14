@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "scope": "Separate cold-only whitelist and Root verification supplement; original W10 44-copy manifest unchanged. Does not repair original failed verdict or prove fresh live quote/readiness.",
+  "copies": [
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\cold-economy-projection-v1.json",
+      "file": "cold-economy/cold-economy-projection-v1.json",
+      "bytes": 4538,
+      "sha256": "ac83cdb222a5f0f2d4675c7b64fcbae96eedd512ce615647f942243a744ff679"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\root-cold-economy-projection-check-v1.json",
+      "file": "cold-economy/root-cold-economy-projection-check-v1.json",
+      "bytes": 2824,
+      "sha256": "74ad9ed0956151d72c72e6dfac7fa8ac4d2a0170481ea0e772ad3638599ad082"
+    }
+  ],
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

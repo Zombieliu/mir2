@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T17:36:40.953Z",
+  "scope": "Prepared-only static review of five safety deltas and historical-static identity correction; no gate/import/sourceguard/prepare/test/realm executed.",
+  "prepared": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\runtime-prepared-v4.json",
+    "bytes": 25154,
+    "sha256": "e2b08d32467f568b17b496f9087da028573b0eed89a614864dabf471f5f77a55"
+  },
+  "manifestFileCount": 77,
+  "manifestAggregate": "850d118c2a7933459802ba6394583625e5e49286c7ef0a1545ab4c8551ae058b",
+  "manifestAggregateChecked": true,
+  "fullHistorical77SourceClosureRerun": false,
+  "pendingSafetyAdjustment": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\pending-safety-adjustment-v3.json",
+    "bytes": 6311,
+    "sha256": "243843e83c7117f5437c943c2892213941ac26ba6eec7aff2b49bac6c9ab21aa"
+  },
+  "fiveSafetyInverseChecks": [
+    {
+      "file": "monitor-owned.mjs",
+      "exactSingleInverse": true
+    },
+    {
+      "file": "request-stop.mjs",
+      "exactSingleInverse": true
+    },
+    {
+      "file": "collect-public.mjs",
+      "exactSingleInverse": true
+    },
+    {
+      "file": "initialize-private.ps1",
+      "exactSingleInverse": true
+    },
+    {
+      "file": "recover-drained-owned.ps1",
+      "exactSingleInverse": true
+    }
+  ],
+  "sceneEvidenceCorrection": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\scene-evidence-namespace-inverse-v4.json",
+    "bytes": 1683,
+    "sha256": "27bd52b6d103e1a37a5d2b397c1884994cc6e48d3a661911cee40e1ab951f1dd"
+  },
+  "sceneEvidenceSingleInverse": true,
+  "resolvedFindings": [
+    {
+      "id": "F1",
+      "status": "closed",
+      "finding": "Original static execution commit was incorrectly attributed to current top-level d240 CORE",
+      "resolution": "Single metadata expression now uses historical WIRE_CORE6d70; current d240 three-function compatibility stays separately scoped without AStar rerun."
+    }
+  ],
+  "checks": {
+    "formalEntryPendingBarriersBeforeSideEffects": true,
+    "monitorAndStopNowPendingGuarded": true,
+    "powerShellBoundOrPendingSelectionStillRefusesPending": true,
+    "collectorAssertPinExplicitImport": true,
+    "currentTopCoreD240DistinctFromHistoricalWire6d": true,
+    "actual44ReleaseAndNode210ArePrerequisitesOnly": true,
+    "originalFiveStages300Plus7200Soak5Resume5SavePost60And146WindowsPreserved": true,
+    "actualMeasuredSecondsAndTrue60WindowContractPreserved": true,
+    "resourceAndScenarioRawEqualToOriginalFormal11": true,
+    "originalPolicyJsonEqualToFormal11": true,
+    "actualCaps128100100412Preserved": true,
+    "freshProbe16NeedsActual5_5_6WindowsAndCollectedIndependentNormalCleanup": true,
+    "independentVerifierFullSealAndExecutorClosureStillPending": true,
+    "probeCannotBePromotedToCapacity": true
+  },
+  "observedAbsent": [
+    "bound-formal12-binding-v1.json",
+    "launcher-source-frozen-v1.json",
+    "source-guard-readonly-verification.json",
+    "source-pins.json",
+    "private",
+    "bin",
+    "reports",
+    "recordings",
+    "preparation.lock",
+    "execution.lock"
+  ],
+  "verdict": {
+    "preparedOnlyContractPassed": true,
+    "eligibleForSealNow": false,
+    "eligibleForPrepare": false,
+    "eligibleForRealm": false,
+    "blockingFindingIds": [],
+    "pendingPrerequisites": [
+      "Actual ended Probe16 report/raw/provenance and Root cleanup",
+      "Collected/public verification and complete independently sealed ended16 tool/executor source closure",
+      "Fresh success-only gate and final actual binding/closure must receive a separate review"
+    ]
+  },
+  "capacityAccepted": false,
+  "gameOrFrozenSourceChangedByReviewer": false
+}

@@ -1,0 +1,84 @@
+{
+  "owner": "root",
+  "source": 64,
+  "kind": "Actual original complete Thin after strict Next",
+  "observedAt": "2026-10-11T07:58:36.548Z",
+  "actual": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 56496,
+    "kind": "Source64 pending original complete Thin after accepted strict Next",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 20778,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source64-npc-capabilities-20261011-01/root-approved01/thin-build01-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "config": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source64-npc-capabilities-20261011-01/root-approved01/thin-build01-config.json",
+    "bytes": 5335,
+    "sha256": "38d16deeab35168870c578ba3bc386f636bb3494ca7a830d7caf305510ba52d2"
+  },
+  "sourceSnapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source64-npc-capabilities-20261011-01/thin-preparation01/full-snapshot.json",
+    "bytes": 21157829,
+    "sha256": "a6106df78f24dba02ed3ddc171a552ce8b0406d8197f9717dd273c9f5d6ef256"
+  },
+  "rootReview": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source64-npc-capabilities-20261011-01/root-approved01/thin-source-review01.json",
+    "bytes": 7639,
+    "sha256": "a68dd7b3244d0a8b2384f1f66807db3f121ce3fae5553ec0bf6de78c49b7674d"
+  },
+  "fullDeclaredInputs": 55332,
+  "fullSourceVerifiedBeforeAfter": true,
+  "originalControlPinsVerifiedBeforeAfter": true,
+  "originalCaller": {
+    "bytes": 4569,
+    "sha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383",
+    "unchanged": true
+  },
+  "report": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source64-npc-capabilities-20261011-01/thin-build01/size-report.json",
+    "bytes": 27890,
+    "sha256": "5be5e33c9233127b02ed5d50c64718ec2c71a0b9808d73b8a4eda7f77275ab76"
+  },
+  "package": {
+    "exists": true,
+    "bytes": 374017832,
+    "files": 7331,
+    "directories": 778,
+    "links": 0
+  },
+  "packageCapBytes": 377487360,
+  "outputRoot": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\.mir2-thin-client-web-windows-catchup-source64-20261011-01",
+  "originalJsonCompaction": 231,
+  "stdout": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source64-npc-capabilities-20261011-01/thin-build01/stdout.log",
+    "bytes": 27890,
+    "sha256": "5be5e33c9233127b02ed5d50c64718ec2c71a0b9808d73b8a4eda7f77275ab76"
+  },
+  "stderr": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source64-npc-capabilities-20261011-01/thin-build01/stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "outer": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source64-npc-capabilities-20261011-01/thin-build01/outer.json",
+    "bytes": 526,
+    "sha256": "35fb0219ea167c067e348f6435f0542d472f318e42000ecad8c58df8db9c8bc7"
+  },
+  "gateway": "Existing accepted Source62 local File runtime unchanged",
+  "newRustOrNativeBuild": false,
+  "limits": [
+    "Build acceptance is not actual successful purchase/save/relogin",
+    "Existing optional dependency warnings retained without broadening scope"
+  ],
+  "overallPercentage": null,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

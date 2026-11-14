@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "officialWalletSource": "6c59fb545613df872e1b94d4b4b665fe7dcb4c32",
+  "passed": false,
+  "mobileBrowserEmulation": true,
+  "virtualAuthenticator": "CTAP2.1 internal resident-key with user verification",
+  "testnetPreferencePreselectedInNewProfile": true,
+  "transport": "system-browser-default-proxy",
+  "normalPwaUiActions": [],
+  "browserErrors": [],
+  "networkErrors": [],
+  "walletCreateClicks": 0,
+  "failure": {
+    "phase": "official-mobile-create-view",
+    "name": "TimeoutError",
+    "messageHash": "4f12791058d80e13619f8cfc3855e177a18be0a382e6a086b42069b30725a78b"
+  },
+  "currentPath": "/auth/create",
+  "onboardingVisible": true,
+  "vaultReadyVisible": false,
+  "alertClasses": {
+    "hasAlert": false,
+    "browserUnavailable": false,
+    "credentialCancelled": false,
+    "securityError": false
+  },
+  "finishedAt": "2026-11-12T13:07:47.584Z"
+}

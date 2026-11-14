@@ -1,0 +1,26 @@
+{
+  "owner": "Root",
+  "kind": "Source71 owned Web closed after ordinary Alt+x save/logout before Source72 replacement",
+  "normalSaveLogoutObserved": true,
+  "oldChildPid": 74932,
+  "oldParentPid": 86616,
+  "childAndParentIdentityExactBeforeStop": true,
+  "onlyOwnedChildStopped": true,
+  "parentFinishedNaturally": true,
+  "oldCallerOuter": {
+    "exitCode": -1,
+    "builderPid": 74932,
+    "elapsedMs": 3208646,
+    "exited": true,
+    "disposed": true
+  },
+  "postSourceGuardCompleted": true,
+  "gateway65Unmodified": true,
+  "gatewayPid": 66300,
+  "gatewayPorts": [
+    19100,
+    19110
+  ],
+  "candidateAccepted": false,
+  "goalComplete": false
+}

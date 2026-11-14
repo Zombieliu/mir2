@@ -1,0 +1,384 @@
+{
+  "schema": "mir2-root-dead-life-integration-v1",
+  "created_at_utc": "2026-10-04T11:14:33.134618+00:00",
+  "integration_base": "e0877a1986a15660cabc8a9b71c9a7e40d23e29c",
+  "worker_base": "17b44e08f4253bfc0905dfb951e978d82bf78ada",
+  "worker_focused": 15,
+  "worker_adjacent": 61,
+  "root_integrated_recheck": [
+    {
+      "file": "root/root-gateway-integration-01.log",
+      "passed": 12,
+      "command": "cargo +1.95.0 test --locked -p mir2-gateway --lib dead_experience_chain_tests -- --test-threads=1",
+      "bytes": 31488,
+      "sha256": "a2c4e015f1c78c1a771a78e74373523d472b564e90751b45177b528d1e4b3ead"
+    },
+    {
+      "file": "root/root-simulation-integration-01.log",
+      "passed": 3,
+      "command": "cargo +1.95.0 test --locked -p mir2-simulation --test dead_experience_chain -- --test-threads=1",
+      "bytes": 29906,
+      "sha256": "69ea0c4233ea2c45e03103a4fb710b0b034da46e2166be8092199afcf92cfa5b"
+    }
+  ],
+  "recheck_overlaps_worker_focused_do_not_sum": true,
+  "verified_crystal_sources": [
+    "Server/MirObjects/MapObject.cs",
+    "Server/MirObjects/HumanObject.cs",
+    "Server/MirObjects/MonsterObject.cs",
+    "Server/MirObjects/PlayerObject.cs",
+    "Server/MirDatabase/CharacterInfo.cs"
+  ],
+  "code_files": [
+    {
+      "relative_path": "apps/simulation/src/runtime/resources.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/resources.rs",
+      "sha256": "9d8564a428cd05bccfc735e973d6bebf97c46e432e5ebe9de8acce38a17b9020",
+      "bytes": 37070,
+      "lines": 1130,
+      "baseline_git_sha256": "cf4276868ca4d7806aa0b996feca0c3edff142f03740dd4f5de93342e31b9468",
+      "normalized_sha256": "9d8564a428cd05bccfc735e973d6bebf97c46e432e5ebe9de8acce38a17b9020",
+      "evidence_copy": "final-source/apps/simulation/src/runtime/resources.rs"
+    },
+    {
+      "relative_path": "apps/simulation/src/runtime/components.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/components.rs",
+      "sha256": "892e345ab20eeae3ca16ddc5cb94eeb89dacd5664f974b8d1cabdba73b40cb0e",
+      "bytes": 8732,
+      "lines": 306,
+      "baseline_git_sha256": "2a0476d302bd7dee542e7bc70dda720b72d67752cd68ba2b8e74fdfafe10da42",
+      "normalized_sha256": "892e345ab20eeae3ca16ddc5cb94eeb89dacd5664f974b8d1cabdba73b40cb0e",
+      "evidence_copy": "final-source/apps/simulation/src/runtime/components.rs"
+    },
+    {
+      "relative_path": "apps/simulation/src/runtime/combat.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/combat.rs",
+      "sha256": "70ff8fbb4a9cb2748bbef5782eaf05c20016c739a636dd9289da8e265fcad429",
+      "bytes": 143431,
+      "lines": 4033,
+      "baseline_git_sha256": "828e3067c75ab3b78fcb025fee1b348b5bebc5294e1dfa9f1c098545d998bed2",
+      "normalized_sha256": "70ff8fbb4a9cb2748bbef5782eaf05c20016c739a636dd9289da8e265fcad429",
+      "evidence_copy": "final-source/apps/simulation/src/runtime/combat.rs"
+    },
+    {
+      "relative_path": "apps/simulation/src/runtime/session.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/session.rs",
+      "sha256": "11bc50b110f163efe12c688414d29e3191c341d5577631a68f5ac408490f3da8",
+      "bytes": 91631,
+      "lines": 2378,
+      "baseline_git_sha256": "8a76ff18387252ad49ad65870e9de01174dbf07a23cce243aa2f94af91425e2c",
+      "normalized_sha256": "11bc50b110f163efe12c688414d29e3191c341d5577631a68f5ac408490f3da8",
+      "evidence_copy": "final-source/apps/simulation/src/runtime/session.rs"
+    },
+    {
+      "relative_path": "apps/simulation/src/runtime/packets.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/packets.rs",
+      "sha256": "135f780f28b2416a4729df7de8a5943af2f2773db16033c56394f9b18fbb986c",
+      "bytes": 386083,
+      "lines": 10463,
+      "baseline_git_sha256": "26d6e65016bf240a76df3a27098b7d25dfb24a499306805469a41504e5117c91",
+      "normalized_sha256": "135f780f28b2416a4729df7de8a5943af2f2773db16033c56394f9b18fbb986c",
+      "evidence_copy": "final-source/apps/simulation/src/runtime/packets.rs"
+    },
+    {
+      "relative_path": "apps/simulation/src/runtime/movement.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/movement.rs",
+      "sha256": "158e60cc566854089e628947235deaeac751a75d87b12f63ea1dd2b3f260e5e5",
+      "bytes": 36425,
+      "lines": 1028,
+      "baseline_git_sha256": "d5336b4ff122e9f4cdf005350fcaeef2a49ab6687cbb3bc4fb5b3bd09ec01ca7",
+      "normalized_sha256": "158e60cc566854089e628947235deaeac751a75d87b12f63ea1dd2b3f260e5e5",
+      "evidence_copy": "final-source/apps/simulation/src/runtime/movement.rs"
+    },
+    {
+      "relative_path": "apps/simulation/src/runtime/items.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/items.rs",
+      "sha256": "e49c502f32b11c3b17a075855ebf612c910cbb24c9bed3fc28c7c90dfe9f254c",
+      "bytes": 166227,
+      "lines": 4453,
+      "baseline_git_sha256": "8c375841f8e49ac970fafc4c3fbf93443a4c39872955165eeb46e0b0509ac1e6",
+      "normalized_sha256": "e49c502f32b11c3b17a075855ebf612c910cbb24c9bed3fc28c7c90dfe9f254c",
+      "evidence_copy": "final-source/apps/simulation/src/runtime/items.rs"
+    },
+    {
+      "relative_path": "apps/simulation/src/runtime/save.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/save.rs",
+      "sha256": "7f3bff188cf087dc8b65b52234f0b347ded17385fb55bbf9741a26583c5bb23d",
+      "bytes": 165229,
+      "lines": 4069,
+      "baseline_git_sha256": "c225ffc95bab7c7c6d6b98424d29d978aeb55b6b43883d582597dbdd021f0c2e",
+      "normalized_sha256": "7f3bff188cf087dc8b65b52234f0b347ded17385fb55bbf9741a26583c5bb23d",
+      "evidence_copy": "final-source/apps/simulation/src/runtime/save.rs"
+    },
+    {
+      "relative_path": "apps/simulation/src/runtime/shared_guild_experience.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/shared_guild_experience.rs",
+      "sha256": "196dff11fc3aad3be18cff4ecc5027b6504bdaf4026285549534daa1fa5a728f",
+      "bytes": 13752,
+      "lines": 373,
+      "baseline_git_sha256": "dcc41918cadd0b2c97ddab09a8db5b0494c4fe48ecab203443a47877f391bbfb",
+      "normalized_sha256": "196dff11fc3aad3be18cff4ecc5027b6504bdaf4026285549534daa1fa5a728f",
+      "evidence_copy": "final-source/apps/simulation/src/runtime/shared_guild_experience.rs"
+    },
+    {
+      "relative_path": "apps/simulation/src/runtime/prepared_kill_experience.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/prepared_kill_experience.rs",
+      "sha256": "0a110afaec958310757f6b13662da6f6ce5dc9d84010bf12daf52f208221f6f7",
+      "bytes": 10588,
+      "lines": 253,
+      "baseline_git_sha256": "de218dd898b15011ce561d81e191b3ceb2fb2598d13986174972fc96965bf805",
+      "normalized_sha256": "0a110afaec958310757f6b13662da6f6ce5dc9d84010bf12daf52f208221f6f7",
+      "evidence_copy": "final-source/apps/simulation/src/runtime/prepared_kill_experience.rs"
+    },
+    {
+      "relative_path": "apps/simulation/src/world_runtime.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/world_runtime.rs",
+      "sha256": "4b055f7050f6f10826347e7608302c9a8d620685c3aa40bfc7ad7b457de389d8",
+      "bytes": 57671,
+      "lines": 1611,
+      "baseline_git_sha256": "2f7f9c352b3821edf17411cc41269e772553c80da68ea729bdb8fc6625cd12aa",
+      "normalized_sha256": "4b055f7050f6f10826347e7608302c9a8d620685c3aa40bfc7ad7b457de389d8",
+      "evidence_copy": "final-source/apps/simulation/src/world_runtime.rs"
+    },
+    {
+      "relative_path": "apps/simulation/src/runtime/zone/runtime.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "sha256": "d0598c4ce418a26f696ec4efc07dfd1d0db3f1e5a6202f86cdbcc73a703390c3",
+      "bytes": 670420,
+      "lines": 17920,
+      "baseline_git_sha256": "c0197140c96026d031eac1ea5289b582375f809fdbe1db330de8ff365ec94832",
+      "normalized_sha256": "d0598c4ce418a26f696ec4efc07dfd1d0db3f1e5a6202f86cdbcc73a703390c3",
+      "evidence_copy": "final-source/apps/simulation/src/runtime/zone/runtime.rs"
+    },
+    {
+      "relative_path": "apps/simulation/src/runtime/zone/types.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/types.rs",
+      "sha256": "3c16e1a6b7aa191735cf5b7da0398f154c52599e4ce7df0639465669f25a4e39",
+      "bytes": 49833,
+      "lines": 1492,
+      "baseline_git_sha256": "c5afdeffcb4c09ba6d18baf52deb19debe4b04bc228ee6884e64eed786c64015",
+      "normalized_sha256": "3c16e1a6b7aa191735cf5b7da0398f154c52599e4ce7df0639465669f25a4e39",
+      "evidence_copy": "final-source/apps/simulation/src/runtime/zone/types.rs"
+    },
+    {
+      "relative_path": "apps/simulation/src/runtime/zone/manager.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/manager.rs",
+      "sha256": "523fea1cdcaaa720c4bd6c2adad0b4a386e0e5b8b3f2ee4d8452b48790c677a3",
+      "bytes": 31808,
+      "lines": 796,
+      "baseline_git_sha256": "e20291384650381e07f9b2c466808b44ec2605fcf8340f82f763f6e9a8e964c5",
+      "normalized_sha256": "523fea1cdcaaa720c4bd6c2adad0b4a386e0e5b8b3f2ee4d8452b48790c677a3",
+      "evidence_copy": "final-source/apps/simulation/src/runtime/zone/manager.rs"
+    },
+    {
+      "relative_path": "apps/gateway/src/routing.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/gateway/src/routing.rs",
+      "sha256": "938bb54d16ce8c6028eeb1164dd2509c5f3887a49c3bd9e262ceab8b67fa949f",
+      "bytes": 1203142,
+      "lines": 30355,
+      "baseline_git_sha256": "b9a3ccd3c114bff2666a3d2416ed3e10dea4691b729a79ed13f570c220788323",
+      "normalized_sha256": "938bb54d16ce8c6028eeb1164dd2509c5f3887a49c3bd9e262ceab8b67fa949f",
+      "evidence_copy": "final-source/apps/gateway/src/routing.rs"
+    },
+    {
+      "relative_path": "apps/simulation/tests/dead_experience_chain.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/tests/dead_experience_chain.rs",
+      "sha256": "84e122415a81d1ce4b643e266e3d75a051cdd7a3029b160395a36c73307e3735",
+      "bytes": 5043,
+      "lines": 140,
+      "baseline_git_sha256": null,
+      "normalized_sha256": "84e122415a81d1ce4b643e266e3d75a051cdd7a3029b160395a36c73307e3735",
+      "evidence_copy": "final-source/apps/simulation/tests/dead_experience_chain.rs"
+    },
+    {
+      "relative_path": "apps/gateway/src/routing/tests/dead_experience_chain_tests.rs",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/gateway/src/routing/tests/dead_experience_chain_tests.rs",
+      "sha256": "388ae6dca850025a8ae0c8c6c0436866fdbf95f6d5411520bd47a55af88cffb3",
+      "bytes": 37275,
+      "lines": 1036,
+      "baseline_git_sha256": null,
+      "normalized_sha256": "388ae6dca850025a8ae0c8c6c0436866fdbf95f6d5411520bd47a55af88cffb3",
+      "evidence_copy": "final-source/apps/gateway/src/routing/tests/dead_experience_chain_tests.rs"
+    },
+    {
+      "relative_path": "docs/DEAD-EXPERIENCE-CHAIN-20261004.md",
+      "absolute_path": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/docs/DEAD-EXPERIENCE-CHAIN-20261004.md",
+      "sha256": "1b45f26d7c589387e4f7d80e3cba1e968b42cb63c1587063db8197f7494d579d",
+      "bytes": 11420,
+      "lines": 132,
+      "baseline_git_sha256": null,
+      "normalized_sha256": "1b45f26d7c589387e4f7d80e3cba1e968b42cb63c1587063db8197f7494d579d",
+      "evidence_copy": "final-source/docs/DEAD-EXPERIENCE-CHAIN-20261004.md"
+    }
+  ],
+  "raw_evidence": {
+    "logs/dead-experience-chain-delayed-receipt-adjacent01-20261004.log": {
+      "bytes": 30095,
+      "sha256": "ebad8bbccb0c38f86948cb56e75ebbb074b0d335857726802d59eeaa637a2ea3"
+    },
+    "logs/dead-experience-chain-external-adjacent01-20261004.log": {
+      "bytes": 31668,
+      "sha256": "89bfa8f5ba30736ab6370ffcfb83e3b9fdd797b4caca822022a919571f9e07c4"
+    },
+    "logs/dead-experience-chain-foreign-receipt-adjacent01-20261004.log": {
+      "bytes": 30082,
+      "sha256": "b8a7a8a2f4d8bd2c0b85e379ac5be2b4bd4998d41b577c02629dd45174b2001c"
+    },
+    "logs/dead-experience-chain-gateway-green01-20261004.log": {
+      "bytes": 31374,
+      "sha256": "682979b70b7a12066e8080f3e20a9fbb211f9b7381249cbe0e07ab15c5779453"
+    },
+    "logs/dead-experience-chain-gateway-green02-20261004.log": {
+      "bytes": 31246,
+      "sha256": "a2457c11598bebdd7db02b4f6cfba7e9060932ebc65fb5f1bf92301bd0d2f4df"
+    },
+    "logs/dead-experience-chain-gateway-green03-20261004.log": {
+      "bytes": 30690,
+      "sha256": "8f8a3f17fbabe5a4158d924dce3b97cfa7ebcc653cdbeea0b9e7b1723cb367d9"
+    },
+    "logs/dead-experience-chain-gateway-green04-20261004.log": {
+      "bytes": 32203,
+      "sha256": "0d63e8ded7394aa4f7c32956ef511060fbcefe2d4e84f88feaf291d37db38c9f"
+    },
+    "logs/dead-experience-chain-gateway-green05-20261004.log": {
+      "bytes": 31779,
+      "sha256": "5755cd3562cd4d7aec0d7405e0a2f92014815306a21b85f5ecceb9434a0add15"
+    },
+    "logs/dead-experience-chain-gateway-green06-20261004.log": {
+      "bytes": 32479,
+      "sha256": "6b8b896d23ad1a7c86d5c2439f045c926ba81b27b95dccd0dc2291d1ceb0faeb"
+    },
+    "logs/dead-experience-chain-gateway-green07-20261004.log": {
+      "bytes": 31631,
+      "sha256": "4680038bdacd082e61dc45f22b4a456628083e76c714ef32624953e29973d2f1"
+    },
+    "logs/dead-experience-chain-gateway-red01-20261004.log": {
+      "bytes": 30952,
+      "sha256": "f88a4316ed5f8e9286f62615a5d9afdf82957a7d0f1b0cc82162db908091e87a"
+    },
+    "logs/dead-experience-chain-gateway-red02-20261004.log": {
+      "bytes": 30514,
+      "sha256": "a21d1e7483201bf8bf9be7c8aeda1f2aac71149e49eb5487278c6fe9493d937d"
+    },
+    "logs/dead-experience-chain-gateway-red03-20261004.log": {
+      "bytes": 42229,
+      "sha256": "39dbaf5d4e96b5278389a4ab8671e0f15cbc70f11c788d966278b7f8d1e153c5"
+    },
+    "logs/dead-experience-chain-gateway-red04-20261004.log": {
+      "bytes": 30763,
+      "sha256": "64f418e1e6a4cc354deebfb12c35b6f5a33682a71a282084e35a12d447f7a29e"
+    },
+    "logs/dead-experience-chain-gateway-red05-20261004.log": {
+      "bytes": 33098,
+      "sha256": "4b06731690c4b87f23a21409e385e1d9a204185f6a666f026261326464356bdf"
+    },
+    "logs/dead-experience-chain-guild-kill-adjacent01-20261004.log": {
+      "bytes": 30273,
+      "sha256": "a422f4d777683815c0824ec0ce6b72e39869503a92711b5fb5501932c18674a5"
+    },
+    "logs/dead-experience-chain-live-award-adjacent01-20261004.log": {
+      "bytes": 30081,
+      "sha256": "bda845e4788534194d2fb56b1f300d77e140b1e8bd7ad2b867b73b73403d9d89"
+    },
+    "logs/dead-experience-chain-potion-logout-adjacent01-20261004.log": {
+      "bytes": 30097,
+      "sha256": "f3ce487b11000d0fabbe28491fbe65d6ab59361064ab8a51c72d3ccd77bbf02c"
+    },
+    "logs/dead-experience-chain-prepared-adjacent01-20261004.log": {
+      "bytes": 37664,
+      "sha256": "a4f7e049dc7062f7375885392a13f0a168ee7290488d5fa91e054598ff75082a"
+    },
+    "logs/dead-experience-chain-private-death-adjacent01-20261004.log": {
+      "bytes": 30086,
+      "sha256": "2740996cf5f225623ead615dad828ed5681601acad0f0b941db0f064b5a8f026"
+    },
+    "logs/dead-experience-chain-reincarnation-adjacent01-20261004.log": {
+      "bytes": 37526,
+      "sha256": "cdb77606ac40304ef5c153343ba1c94c7e5120acc9c7774a82fd688853aafbc1"
+    },
+    "logs/dead-experience-chain-scroll-adjacent01-20261004.log": {
+      "bytes": 6187,
+      "sha256": "493ec976c4e849427e78cdc2f1aabafb5ab5c20b3f10d9a635bfc2b23afcb96d"
+    },
+    "logs/dead-experience-chain-scroll-adjacent02-20261004.log": {
+      "bytes": 37906,
+      "sha256": "6dab5885e262b127b153320083ef9f66fd5848096d453c2d636f116305af2ff9"
+    },
+    "logs/dead-experience-chain-security-adjacent01-20261004.log": {
+      "bytes": 30982,
+      "sha256": "fade34eb34b09bf1c485ceda4b663eb9e7270a5dde74302a17c71ebba41c3d72"
+    },
+    "logs/dead-experience-chain-simulation-green01-20261004.log": {
+      "bytes": 29906,
+      "sha256": "54e04b6333f8018820a6bf68896506ac29d2ce72fa138c717ff172d292ca8d76"
+    },
+    "logs/dead-experience-chain-simulation-red01-20261004.log": {
+      "bytes": 30860,
+      "sha256": "caeb68b4786be51fce70ed5125006823dc488cb29450dfe260e0bbe2da515864"
+    },
+    "logs/dead-experience-chain-town-adjacent01-20261004.log": {
+      "bytes": 37572,
+      "sha256": "9ff2051edddb2c75615acab85abbc2fa85d58253caffa36c7d54d40ee1fc4e3c"
+    },
+    "logs/dead-experience-chain-vital-adjacent01-20261004.log": {
+      "bytes": 30525,
+      "sha256": "5e94a02e40ace08e5ac2a61638acfe47e1318b9e5ed0db79fe97602a4c1c7c3e"
+    },
+    "source.patch": {
+      "bytes": 88325,
+      "sha256": "d6bbf7df9bfb461403ad33906d07ca37e1ffe253219184c55689ad52927981ed"
+    },
+    "source-file-index.json": {
+      "bytes": 12653,
+      "sha256": "dd33df1d7078be368b738fc0f7af89d3b1aeeea56e5363dcaa9e35fecc46ab7e"
+    },
+    "run-receipts.json": {
+      "bytes": 24460,
+      "sha256": "d5d684782c1d4c81436465ade96ef15f0e526dcbd2d8a5b5f6e99d9e2cd29c08"
+    },
+    "source-plan/source-index.json": {
+      "bytes": 27845,
+      "sha256": "b6cc56adf8cc46556234f3d814627fa55c2026b2544c86e2a76612562ff09176"
+    },
+    "source-plan/source-excerpts.txt": {
+      "bytes": 167932,
+      "sha256": "42c7a319d2d22b50aa027dd307f55d17d91cdaac54293596341fedf7182632ec"
+    },
+    "source-plan/PLAN.md": {
+      "bytes": 20294,
+      "sha256": "58f4e14cebdbb508d99fd243c8368066679fbf3d27886f7fa3bf25943327e978"
+    },
+    "source-plan/evidence-manifest.json": {
+      "bytes": 634,
+      "sha256": "4730b6bb3057d45561e0a68473149cc6b3dc7df54ea5ba257782c7cd25987eb6"
+    },
+    "root/root-gateway-integration-01.log": {
+      "bytes": 31488,
+      "sha256": "a2c4e015f1c78c1a771a78e74373523d472b564e90751b45177b528d1e4b3ead"
+    },
+    "root/root-simulation-integration-01.log": {
+      "bytes": 29906,
+      "sha256": "69ea0c4233ea2c45e03103a4fb710b0b034da46e2166be8092199afcf92cfa5b"
+    }
+  },
+  "review": [
+    "Online Dead is independent of positive level-up HP; no permanent character schema added.",
+    "Actual poison/death produces the award; prepared life is retained across same-epoch rollback.",
+    "Native execution checks current personal life before materialization, MP/material debit and Turn.",
+    "Typed server-only life sync does not expose a new normal-client command.",
+    "Fenced teardown re-reads post-reward vitals/life from the same frozen presence.",
+    "Genuine HP0 login refills only after stat refresh; full-HP corpse new login is alive at a valid saved position.",
+    "Original R17 MP-spend failures and unattribuable victim-only 8 damage remain separate."
+  ],
+  "not_accepted": [
+    "new-source TCP/WSS",
+    "native/human gameplay",
+    "authenticated retained socket resume",
+    "SQL restart",
+    "all transport teardown variants",
+    "cross-map ownership",
+    "source party/Boss/drop-duration rules"
+  ],
+  "published_changed": false,
+  "protected_installation_changed": false
+}

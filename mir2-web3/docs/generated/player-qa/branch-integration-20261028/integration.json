@@ -1,0 +1,11 @@
+{
+  "checkpoint": "5ad6b04014a87ee8661496801137b6c664e58700",
+  "originalHead": "bacb56f46f6b397e869cb12b3f490888d9d2c251",
+  "target": "e11c32fb15ca4cf18d933768b8e70866cd089f26",
+  "mergeBase": "2e9d95bbb3cd9f7852980af385a1298b57a1511e",
+  "strategy": "full-history merge preserving both parents",
+  "status": "validated_with_focused_reruns",
+  "untrackedTargetCollisions": 0,
+  "validation": "validation-summary.json",
+  "build": "merged-build-and-launch.json"
+}

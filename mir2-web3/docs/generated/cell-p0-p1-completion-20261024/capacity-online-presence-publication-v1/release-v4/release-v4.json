@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-10-26T16:26:24.251Z",
+  "sourceCommit": "b24be2b82acb7c27c0022bc520ca20a4726d6b75",
+  "backendSourceCommit": "b24be2b82acb7c27c0022bc520ca20a4726d6b75",
+  "executionSourceCommit": "b24be2b82acb7c27c0022bc520ca20a4726d6b75",
+  "driverSourceCommit": "657b7528f03f3c8f824fcadcabcdcc64e73b4745",
+  "navigationDependencyCommit": "4ecd237e25858a2080456a2e52d64b9ba0c167cd",
+  "observationDependencyCommit": "c6f46b633e087dac86b06c8872e5d2cba0665cd8",
+  "frontendSourceCommit": "c6f46b633e087dac86b06c8872e5d2cba0665cd8",
+  "config": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\zone-presence-publication-release-v4\\root-final-config-v4.json",
+    "bytes": 11987,
+    "sha256": "69005de80b12ab6458f13a160d97c5714ee750c0e5982fcf3462ea2c05c61572"
+  },
+  "backendSourceManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\zone-presence-publication-release-v4\\backend-source-v4.json",
+    "bytes": 65936,
+    "sha256": "ba5cdb916e018c0ff9e12e67d4c8c3192ff8846ff564c96d63437daec4ce44f7"
+  },
+  "buildReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\zone-presence-publication-release-v4\\build-receipt-v4.json",
+    "bytes": 2283,
+    "sha256": "830ab4553645c30e82f0ccc5e7ffb4649b430afa053d76a4c9614354a0244327"
+  },
+  "rustValidation": {
+    "file": "C:/mir2-build/p01-completion-20261024/root-presence-publication-validation-v1/root-focused-receipt-v1.json",
+    "bytes": 45890,
+    "sha256": "5ab9ec343004c176868c98d906d7d96fa91149680ace4e1f9c3636aa7c6a57b5"
+  },
+  "immutableRelease": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\zone-presence-publication-release-v4\\bin\\mir2-gateway.exe",
+    "bytes": 87448576,
+    "sha256": "14a46c155f7ebfe939fc6c2a49a37a90abf16e97ff4e6275b55ed8f43d8dcbcc"
+  },
+  "selectedRustTestsPassed": 111,
+  "rustTestsReexecuted": true,
+  "freshNodeTestsPassed": 0,
+  "reusedNodeTestsPassed": 242,
+  "reusedFocusedTestsPassed": 39,
+  "typecheckReexecuted": false,
+  "allSelectedTestsPassed": true,
+  "diagnosticOnly": true,
+  "diagnosticCandidateOnly": true,
+  "P0Eligible": false,
+  "p0Eligible": false,
+  "formalAcceptanceEligible": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "freshOrdinaryLifecyclePerformed": false,
+  "realCapacityRunPerformed": false
+}

@@ -1,0 +1,39 @@
+
+running 4 tests
+test crystal_ui::overlays::nonmodal_input_tests::actual_skills_toggle_keeps_character_frame_hit_capture_on_every_page ... FAILED
+test crystal_ui::overlays::nonmodal_input_tests::commerce_and_real_prompts_keep_global_action_capture ... FAILED
+test crystal_ui::overlays::nonmodal_input_tests::help_surface_follows_dragged_bounds_and_keeps_drag_modal_capture ... FAILED
+test crystal_ui::overlays::nonmodal_input_tests::ordinary_panels_capture_their_rectangles_without_locking_world_actions ... FAILED
+
+failures:
+
+---- crystal_ui::overlays::nonmodal_input_tests::actual_skills_toggle_keeps_character_frame_hit_capture_on_every_page stdout ----
+
+thread 'crystal_ui::overlays::nonmodal_input_tests::actual_skills_toggle_keeps_character_frame_hit_capture_on_every_page' (91732) panicked at src\crystal_ui\nonmodal_input_tests.rs:37:9:
+assertion failed: !state.blocks_world_pointer_at(700.0, 500.0)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- crystal_ui::overlays::nonmodal_input_tests::commerce_and_real_prompts_keep_global_action_capture stdout ----
+
+thread 'crystal_ui::overlays::nonmodal_input_tests::commerce_and_real_prompts_keep_global_action_capture' (92156) panicked at src\crystal_ui\nonmodal_input_tests.rs:69:9:
+assertion failed: state.blocks_world_pointer_at(700.0, 600.0)
+
+---- crystal_ui::overlays::nonmodal_input_tests::help_surface_follows_dragged_bounds_and_keeps_drag_modal_capture stdout ----
+
+thread 'crystal_ui::overlays::nonmodal_input_tests::help_surface_follows_dragged_bounds_and_keeps_drag_modal_capture' (88672) panicked at src\crystal_ui\nonmodal_input_tests.rs:47:5:
+assertion failed: !state.blocks_world_pointer_at(900.0, 600.0)
+
+---- crystal_ui::overlays::nonmodal_input_tests::ordinary_panels_capture_their_rectangles_without_locking_world_actions stdout ----
+
+thread 'crystal_ui::overlays::nonmodal_input_tests::ordinary_panels_capture_their_rectangles_without_locking_world_actions' (93928) panicked at src\crystal_ui\nonmodal_input_tests.rs:16:9:
+Inventory froze keyboard/actions
+
+
+failures:
+    crystal_ui::overlays::nonmodal_input_tests::actual_skills_toggle_keeps_character_frame_hit_capture_on_every_page
+    crystal_ui::overlays::nonmodal_input_tests::commerce_and_real_prompts_keep_global_action_capture
+    crystal_ui::overlays::nonmodal_input_tests::help_surface_follows_dragged_bounds_and_keeps_drag_modal_capture
+    crystal_ui::overlays::nonmodal_input_tests::ordinary_panels_capture_their_rectangles_without_locking_world_actions
+
+test result: FAILED. 0 passed; 4 failed; 0 ignored; 0 measured; 1182 filtered out; finished in 0.00s
+

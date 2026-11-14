@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
@@ -23,7 +24,10 @@ function loadTypeScriptModule(url) {
   );
   assert.deepEqual(errors, []);
   const loadedModule = { exports: {} };
-  new Function("exports", "module", compiled.outputText)(loadedModule.exports, loadedModule);
+  // Resolve actual Worker dependencies from the source module, not this test.
+  new Function("exports", "module", "require", compiled.outputText)(
+    loadedModule.exports, loadedModule, createRequire(sourcePath),
+  );
   return loadedModule.exports;
 }
 
@@ -321,7 +325,9 @@ test("production release and Next routing expose the pinned capability and immut
   assert.match(routeSource, /MIR2_PINNED_CRYSTAL_FULL_PACK_CONTENT_HASH/);
   assert.match(routeSource, /MIR2_PINNED_MAP_ATLAS_CONTENT_HASH/);
   assert.match(routeSource, /browserFallbackBaseUrls/);
-  assert.match(nextConfigSource, /\/bevy-runtime\/v\/:version/);
+  const runtimeProxySource = readFileSync(new URL("../proxy.ts", import.meta.url), "utf8");
+  assert.match(runtimeProxySource, /bevyRuntimeLocalRewrite\(runtimeManifest, request\.nextUrl\.pathname\)/);
+  assert.doesNotMatch(nextConfigSource, /destination: "\/bevy-runtime\/:backend/);
   assert.match(nextConfigSource, /max-age=31536000, immutable/);
   assert.match(pageSource, /const BEVY_RUNTIME_VERSION = bevyRuntimeVersion\.version \|\| "local"/);
   assert.match(pageSource, /process\.env\.NEXT_PUBLIC_MIR2_ASSET_BASE_URL\?\.trim\(\) \|\| null/);

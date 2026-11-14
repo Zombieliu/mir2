@@ -1,0 +1,367 @@
+{
+  "readOnly": true,
+  "orderId": "0xcbe276110159616beafbe56a648b2e117518e04bc7c6ead04ec5aa440421de49",
+  "observations": [
+    {
+      "at": "2026-10-28T16:19:21.977Z",
+      "status": "Publishing",
+      "objectId": "0xb230deb2ac74bbf1eeebb50816939f0d301c7171b2514a27075125a1786fb7c0",
+      "escrowGold": 500000,
+      "feeConsumed": false,
+      "expiresAtMs": 1793204357082,
+      "jobs": [
+        {
+          "kind": "Publish",
+          "status": "Submitted",
+          "attempts": 3,
+          "steps": [
+            {
+              "phase": "activate",
+              "digest": "EXEZ4HzfhJAKSEzEwmqq1dut1fCDVqfGarAkyKS66Tpt"
+            },
+            {
+              "phase": "create",
+              "digest": "DkNUeNtf4dD2njkz58B7JASd31pLyd4XrhktszAGeD1m"
+            }
+          ],
+          "digests": [
+            "DkNUeNtf4dD2njkz58B7JASd31pLyd4XrhktszAGeD1m",
+            "EXEZ4HzfhJAKSEzEwmqq1dut1fCDVqfGarAkyKS66Tpt"
+          ],
+          "failedDigests": []
+        }
+      ]
+    },
+    {
+      "at": "2026-10-28T16:19:31.993Z",
+      "status": "Open",
+      "objectId": "0xb230deb2ac74bbf1eeebb50816939f0d301c7171b2514a27075125a1786fb7c0",
+      "escrowGold": 500000,
+      "feeConsumed": true,
+      "expiresAtMs": 1793204357082,
+      "jobs": [
+        {
+          "kind": "Publish",
+          "status": "Confirmed",
+          "attempts": 3,
+          "steps": [
+            {
+              "phase": "activate",
+              "digest": "EXEZ4HzfhJAKSEzEwmqq1dut1fCDVqfGarAkyKS66Tpt"
+            },
+            {
+              "phase": "create",
+              "digest": "DkNUeNtf4dD2njkz58B7JASd31pLyd4XrhktszAGeD1m"
+            }
+          ],
+          "digests": [
+            "DkNUeNtf4dD2njkz58B7JASd31pLyd4XrhktszAGeD1m",
+            "EXEZ4HzfhJAKSEzEwmqq1dut1fCDVqfGarAkyKS66Tpt"
+          ],
+          "failedDigests": []
+        },
+        {
+          "kind": "Reconcile",
+          "status": "Pending",
+          "attempts": 0,
+          "steps": [],
+          "digests": [],
+          "failedDigests": []
+        }
+      ]
+    },
+    {
+      "at": "2026-10-28T16:19:41.997Z",
+      "status": "Open",
+      "objectId": "0xb230deb2ac74bbf1eeebb50816939f0d301c7171b2514a27075125a1786fb7c0",
+      "escrowGold": 500000,
+      "feeConsumed": true,
+      "expiresAtMs": 1793204357082,
+      "jobs": [
+        {
+          "kind": "Publish",
+          "status": "Confirmed",
+          "attempts": 3,
+          "steps": [
+            {
+              "phase": "activate",
+              "digest": "EXEZ4HzfhJAKSEzEwmqq1dut1fCDVqfGarAkyKS66Tpt"
+            },
+            {
+              "phase": "create",
+              "digest": "DkNUeNtf4dD2njkz58B7JASd31pLyd4XrhktszAGeD1m"
+            }
+          ],
+          "digests": [
+            "DkNUeNtf4dD2njkz58B7JASd31pLyd4XrhktszAGeD1m",
+            "EXEZ4HzfhJAKSEzEwmqq1dut1fCDVqfGarAkyKS66Tpt"
+          ],
+          "failedDigests": []
+        },
+        {
+          "kind": "Reconcile",
+          "status": "Pending",
+          "attempts": 0,
+          "steps": [],
+          "digests": [],
+          "failedDigests": []
+        }
+      ]
+    },
+    {
+      "at": "2026-10-28T16:19:52.002Z",
+      "status": "Open",
+      "objectId": "0xb230deb2ac74bbf1eeebb50816939f0d301c7171b2514a27075125a1786fb7c0",
+      "escrowGold": 500000,
+      "feeConsumed": true,
+      "expiresAtMs": 1793204357082,
+      "jobs": [
+        {
+          "kind": "Publish",
+          "status": "Confirmed",
+          "attempts": 3,
+          "steps": [
+            {
+              "phase": "activate",
+              "digest": "EXEZ4HzfhJAKSEzEwmqq1dut1fCDVqfGarAkyKS66Tpt"
+            },
+            {
+              "phase": "create",
+              "digest": "DkNUeNtf4dD2njkz58B7JASd31pLyd4XrhktszAGeD1m"
+            }
+          ],
+          "digests": [
+            "DkNUeNtf4dD2njkz58B7JASd31pLyd4XrhktszAGeD1m",
+            "EXEZ4HzfhJAKSEzEwmqq1dut1fCDVqfGarAkyKS66Tpt"
+          ],
+          "failedDigests": []
+        },
+        {
+          "kind": "Reconcile",
+          "status": "Pending",
+          "attempts": 1,
+          "steps": [],
+          "digests": [],
+          "failedDigests": []
+        }
+      ]
+    },
+    {
+      "at": "2026-10-28T16:20:02.005Z",
+      "status": "Open",
+      "objectId": "0xb230deb2ac74bbf1eeebb50816939f0d301c7171b2514a27075125a1786fb7c0",
+      "escrowGold": 500000,
+      "feeConsumed": true,
+      "expiresAtMs": 1793204357082,
+      "jobs": [
+        {
+          "kind": "Publish",
+          "status": "Confirmed",
+          "attempts": 3,
+          "steps": [
+            {
+              "phase": "activate",
+              "digest": "EXEZ4HzfhJAKSEzEwmqq1dut1fCDVqfGarAkyKS66Tpt"
+            },
+            {
+              "phase": "create",
+              "digest": "DkNUeNtf4dD2njkz58B7JASd31pLyd4XrhktszAGeD1m"
+            }
+          ],
+          "digests": [
+            "DkNUeNtf4dD2njkz58B7JASd31pLyd4XrhktszAGeD1m",
+            "EXEZ4HzfhJAKSEzEwmqq1dut1fCDVqfGarAkyKS66Tpt"
+          ],
+          "failedDigests": []
+        },
+        {
+          "kind": "Reconcile",
+          "status": "Pending",
+          "attempts": 1,
+          "steps": [],
+          "digests": [],
+          "failedDigests": []
+        }
+      ]
+    },
+    {
+      "at": "2026-10-28T16:20:12.009Z",
+      "status": "Open",
+      "objectId": "0xb230deb2ac74bbf1eeebb50816939f0d301c7171b2514a27075125a1786fb7c0",
+      "escrowGold": 500000,
+      "feeConsumed": true,
+      "expiresAtMs": 1793204357082,
+      "jobs": [
+        {
+          "kind": "Publish",
+          "status": "Confirmed",
+          "attempts": 3,
+          "steps": [
+            {
+              "phase": "activate",
+              "digest": "EXEZ4HzfhJAKSEzEwmqq1dut1fCDVqfGarAkyKS66Tpt"
+            },
+            {
+              "phase": "create",
+              "digest": "DkNUeNtf4dD2njkz58B7JASd31pLyd4XrhktszAGeD1m"
+            }
+          ],
+          "digests": [
+            "DkNUeNtf4dD2njkz58B7JASd31pLyd4XrhktszAGeD1m",
+            "EXEZ4HzfhJAKSEzEwmqq1dut1fCDVqfGarAkyKS66Tpt"
+          ],
+          "failedDigests": []
+        },
+        {
+          "kind": "Reconcile",
+          "status": "Pending",
+          "attempts": 1,
+          "steps": [
+            {
+              "phase": "expire",
+              "digest": "5QSMiePkqR5REuRcjW1FKNWH3UbuUdLqZcop1sC3MqkH"
+            }
+          ],
+          "digests": [],
+          "failedDigests": []
+        }
+      ]
+    },
+    {
+      "at": "2026-10-28T16:20:22.024Z",
+      "status": "Open",
+      "objectId": "0xb230deb2ac74bbf1eeebb50816939f0d301c7171b2514a27075125a1786fb7c0",
+      "escrowGold": 500000,
+      "feeConsumed": true,
+      "expiresAtMs": 1793204357082,
+      "jobs": [
+        {
+          "kind": "Publish",
+          "status": "Confirmed",
+          "attempts": 3,
+          "steps": [
+            {
+              "phase": "activate",
+              "digest": "EXEZ4HzfhJAKSEzEwmqq1dut1fCDVqfGarAkyKS66Tpt"
+            },
+            {
+              "phase": "create",
+              "digest": "DkNUeNtf4dD2njkz58B7JASd31pLyd4XrhktszAGeD1m"
+            }
+          ],
+          "digests": [
+            "DkNUeNtf4dD2njkz58B7JASd31pLyd4XrhktszAGeD1m",
+            "EXEZ4HzfhJAKSEzEwmqq1dut1fCDVqfGarAkyKS66Tpt"
+          ],
+          "failedDigests": []
+        },
+        {
+          "kind": "Reconcile",
+          "status": "Submitted",
+          "attempts": 1,
+          "steps": [
+            {
+              "phase": "expire",
+              "digest": "5QSMiePkqR5REuRcjW1FKNWH3UbuUdLqZcop1sC3MqkH"
+            }
+          ],
+          "digests": [
+            "5QSMiePkqR5REuRcjW1FKNWH3UbuUdLqZcop1sC3MqkH"
+          ],
+          "failedDigests": []
+        }
+      ]
+    },
+    {
+      "at": "2026-10-28T16:20:32.029Z",
+      "status": "Open",
+      "objectId": "0xb230deb2ac74bbf1eeebb50816939f0d301c7171b2514a27075125a1786fb7c0",
+      "escrowGold": 500000,
+      "feeConsumed": true,
+      "expiresAtMs": 1793204357082,
+      "jobs": [
+        {
+          "kind": "Publish",
+          "status": "Confirmed",
+          "attempts": 3,
+          "steps": [
+            {
+              "phase": "activate",
+              "digest": "EXEZ4HzfhJAKSEzEwmqq1dut1fCDVqfGarAkyKS66Tpt"
+            },
+            {
+              "phase": "create",
+              "digest": "DkNUeNtf4dD2njkz58B7JASd31pLyd4XrhktszAGeD1m"
+            }
+          ],
+          "digests": [
+            "DkNUeNtf4dD2njkz58B7JASd31pLyd4XrhktszAGeD1m",
+            "EXEZ4HzfhJAKSEzEwmqq1dut1fCDVqfGarAkyKS66Tpt"
+          ],
+          "failedDigests": []
+        },
+        {
+          "kind": "Reconcile",
+          "status": "Submitted",
+          "attempts": 2,
+          "steps": [
+            {
+              "phase": "expire",
+              "digest": "5QSMiePkqR5REuRcjW1FKNWH3UbuUdLqZcop1sC3MqkH"
+            }
+          ],
+          "digests": [
+            "5QSMiePkqR5REuRcjW1FKNWH3UbuUdLqZcop1sC3MqkH"
+          ],
+          "failedDigests": []
+        }
+      ]
+    },
+    {
+      "at": "2026-10-28T16:20:42.033Z",
+      "status": "Expired",
+      "objectId": "0xb230deb2ac74bbf1eeebb50816939f0d301c7171b2514a27075125a1786fb7c0",
+      "escrowGold": 0,
+      "feeConsumed": true,
+      "expiresAtMs": 1793204357082,
+      "jobs": [
+        {
+          "kind": "Publish",
+          "status": "Confirmed",
+          "attempts": 3,
+          "steps": [
+            {
+              "phase": "activate",
+              "digest": "EXEZ4HzfhJAKSEzEwmqq1dut1fCDVqfGarAkyKS66Tpt"
+            },
+            {
+              "phase": "create",
+              "digest": "DkNUeNtf4dD2njkz58B7JASd31pLyd4XrhktszAGeD1m"
+            }
+          ],
+          "digests": [
+            "DkNUeNtf4dD2njkz58B7JASd31pLyd4XrhktszAGeD1m",
+            "EXEZ4HzfhJAKSEzEwmqq1dut1fCDVqfGarAkyKS66Tpt"
+          ],
+          "failedDigests": []
+        },
+        {
+          "kind": "Reconcile",
+          "status": "Confirmed",
+          "attempts": 2,
+          "steps": [
+            {
+              "phase": "expire",
+              "digest": "5QSMiePkqR5REuRcjW1FKNWH3UbuUdLqZcop1sC3MqkH"
+            }
+          ],
+          "digests": [
+            "5QSMiePkqR5REuRcjW1FKNWH3UbuUdLqZcop1sC3MqkH"
+          ],
+          "failedDigests": []
+        }
+      ]
+    }
+  ],
+  "terminal": true
+}

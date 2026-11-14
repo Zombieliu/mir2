@@ -1,0 +1,11 @@
+{
+  "schema": "mir2.production-serial-preflight.v1",
+  "recordedUtc": "2026-10-08T16:12:30.9056225Z",
+  "requestedRun": "grant-tests-02",
+  "checkDirectoryExists": false,
+  "cargoStarted": false,
+  "testsExecuted": 0,
+  "originalGuardNonces": 0,
+  "preservedConsole": "grant-tests-02-preflight-01.console.log",
+  "observedProcesses": []
+}

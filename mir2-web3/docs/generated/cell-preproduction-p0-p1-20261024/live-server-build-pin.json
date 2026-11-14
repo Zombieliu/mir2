@@ -1,0 +1,11 @@
+{
+  "recordedAtUtc": "2026-10-24T12:40:48.6668000Z",
+  "role": "Live loopback P0 protocol-test server",
+  "sha256": "ddc134d3affabcf0f88c1bdc31acfb50fa89a78b796c133aa3eb296c0a3d8daa",
+  "binaryPath": "C:/mir2-build/cell-preproduction-p0-p1-20261024/target/debug/mir2-gateway.exe",
+  "pid": 49716,
+  "buildLog": "gateway-build.log",
+  "features": "default",
+  "configuration": "development / single execution domain / File source / 4 Tokio workers / platinum_176",
+  "sourceNote": "Built after production integration and P1 routing changes. Later edits are gated test-support wrappers, test fixtures, scripts and evidence; the live binary hash pins the executable used for the recorded protocol runs."
+}

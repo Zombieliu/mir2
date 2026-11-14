@@ -1,0 +1,161 @@
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+   --> apps\simulation\src\runtime\monster_ai\great_fox_spirit.rs:163:28
+    |
+163 |     for candidate in world.iter_entities() {
+    |                            ^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\packets.rs:7292:25
+     |
+7292 |     for entity in world.iter_entities() {
+     |                         ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\skills.rs:4946:10
+     |
+4946 |         .iter_entities()
+     |          ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\skills.rs:5028:10
+     |
+5028 |         .iter_entities()
+     |          ^^^^^^^^^^^^^
+
+warning: methods `scoped_to_account` and `scoped_to_accounts` are never used
+   --> apps\simulation\src\config.rs:225:8
+    |
+109 | impl AccountStore {
+    | ----------------- methods in this implementation
+...
+225 |     fn scoped_to_account(&self, account_id: &str) -> Self {
+    |        ^^^^^^^^^^^^^^^^^
+...
+229 |     fn scoped_to_accounts(&self, account_ids: &[&str]) -> Self {
+    |        ^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: variant `MacAgility` is never constructed
+   --> apps\simulation\src\runtime\combat.rs:734:5
+    |
+727 | pub(super) enum CrystalDefence {
+    |                 -------------- variant in this enum
+...
+734 |     MacAgility,
+    |     ^^^^^^^^^^
+    |
+    = note: `CrystalDefence` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: method `socketed_count` is never used
+   --> apps\simulation\src\runtime\equipment.rs:303:19
+    |
+119 | impl EquipmentState {
+    | ------------------- method in this implementation
+...
+303 |     pub(super) fn socketed_count(&self) -> usize {
+    |                   ^^^^^^^^^^^^^^
+
+warning: function `equipment_state_identified` is never used
+   --> apps\simulation\src\runtime\equipment.rs:308:15
+    |
+308 | pub(super) fn equipment_state_identified(item: &EquipmentState) -> bool {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `equipment_state_soul_bound_id` is never used
+   --> apps\simulation\src\runtime\equipment.rs:313:15
+    |
+313 | pub(super) fn equipment_state_soul_bound_id(item: &EquipmentState) -> i32 {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `repair_conquest_asset` is never used
+    --> apps\simulation\src\runtime\monsters.rs:1813:15
+     |
+1813 | pub(super) fn repair_conquest_asset(world: &mut World, ai: u8, asset_id: u8) -> bool {
+     |               ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `complete_quest` is never used
+   --> apps\simulation\src\runtime\quests.rs:814:15
+    |
+814 | pub(super) fn complete_quest(world: &mut World, quest_id: i32) {
+    |               ^^^^^^^^^^^^^^
+
+warning: function `default_save_for_character` is never used
+  --> apps\simulation\src\runtime\save.rs:76:15
+   |
+76 | pub(super) fn default_save_for_character(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `persist_character_save` is never used
+   --> apps\simulation\src\runtime\save.rs:818:15
+    |
+818 | pub(super) fn persist_character_save(
+    |               ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: method `game_shop_buy_product` is never used
+    --> apps\simulation\src\runtime\stage5.rs:4258:8
+     |
+3188 | impl SimulationSession {
+     | ---------------------- method in this implementation
+...
+4258 |     fn game_shop_buy_product(
+     |        ^^^^^^^^^^^^^^^^^^^^^
+
+warning: `mir2-simulation` (lib) generated 14 warnings
+   Compiling mir2-simulation v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\simulation)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.20s
+     Running tests\shared_monster_reactive_ai.rs (C:\Users\Administrator\AppData\Local\Temp\mir2-trade-gold-simulation-20260908\x86_64-pc-windows-msvc\debug\deps\shared_monster_reactive_ai-61cb3c2df45ee2dc.exe)
+
+running 4 tests
+test axe_skeleton_retreats_before_shooting_and_broadcasts_the_same_move ... ok
+test blocked_approach_rotates_to_a_free_tile_and_starts_the_attack_window ... ok
+test blocked_retreat_tries_a_free_direction_instead_of_overlapping_or_attacking ... ok
+test fear_expiry_is_strict_and_checkpoint_does_not_restart_the_window ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+     Running tests\shared_monster_revival_ai.rs (C:\Users\Administrator\AppData\Local\Temp\mir2-trade-gold-simulation-20260908\x86_64-pc-windows-msvc\debug\deps\shared_monster_revival_ai-27597d3ce5a7fc93.exe)
+
+running 4 tests
+test checkpointed_dead_zombie_replays_one_revival_without_reroll_or_second_reward ... ok
+test expired_corpse_is_removed_before_overdue_revival_after_long_offline_interval ... ok
+test random_zero_one_or_two_revivals_scale_each_life_and_reward_independently ... ok
+test revival_delay_includes_four_and_twenty_three_seconds_without_fixed_count ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.84s
+
+     Running tests\shared_monster_special_ai.rs (C:\Users\Administrator\AppData\Local\Temp\mir2-trade-gold-simulation-20260908\x86_64-pc-windows-msvc\debug\deps\shared_monster_special_ai-d5f4abab6ffcf0a5.exe)
+
+running 4 tests
+test ordinary_monster_does_not_acquire_wooma_state_or_rage_speeds ... ok
+test wooma_checkpoint_preserves_rage_phase_and_does_not_retrigger_for_unchanged_hp ... ok
+test wooma_hp_stage_uses_crystal_rage_speeds_and_expires_strictly_after_eight_seconds ... ok
+test wooma_surrounded_teleport_reconciles_two_observers_without_fake_walk_or_duplicate_tick ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests\shared_monster_stage_summons.rs (C:\Users\Administrator\AppData\Local\Temp\mir2-trade-gold-simulation-20260908\x86_64-pc-windows-msvc\debug\deps\shared_monster_stage_summons-5947af48560521bb.exe)
+
+running 3 tests
+test bone_requires_a_living_visible_target_but_zuma_does_not ... ok
+test bone_wave_is_one_shared_batch_with_parent_target_and_two_second_startup ... ok
+test checkpoint_keeps_exact_wave_identity_without_replaying_spawn_or_shortening_startup ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.36s
+
+     Running tests\shared_monster_visibility_ai.rs (C:\Users\Administrator\AppData\Local\Temp\mir2-trade-gold-simulation-20260908\x86_64-pc-windows-msvc\debug\deps\shared_monster_visibility_ai-f6e5b093f337e693.exe)
+
+running 8 tests
+test all_supported_stone_families_start_visible_and_unawake ... ok
+test centipede_keeps_seven_tile_visibility_and_plants_hide_on_strict_deadline ... ok
+test dig_out_families_reveal_once_with_original_delayed_persistent_ground_effect ... ok
+test hidden_plants_have_no_spawn_until_shared_player_proximity_reveals_once ... ok
+test lion_roar_cannot_control_stone_before_wake ... ok
+test personal_broadcast_cannot_restone_awakened_zuma_or_expose_hidden_plant ... ok
+test poison_cloud_cannot_poison_hidden_or_stoned_monster ... ok
+test stone_zuma_visible_at_spawn_and_wake_wave_does_not_recurse ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+

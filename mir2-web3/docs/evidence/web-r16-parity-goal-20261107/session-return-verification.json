@@ -1,0 +1,589 @@
+{
+  "schema": "mir2.r16.session-return.verification.v1",
+  "createdAt": "2026-11-07T11:01:12.650Z",
+  "branch": "codex/windows-player-journey",
+  "head": "c404bde8a5190534f6bc83ec8a4fe78fffc8cb50",
+  "sourcePins": {
+    "apps/web/app/page.tsx": "48fee82ec41d4e83abd2394a832b32a8d5036122f0635185e3746f938936fd4e",
+    "apps/web/app/original-client-shell.tsx": "f5715702d6fc2a52a5f4949ce1dca5ccaf90a414e369c8116f3a6e874a9d6b8d",
+    "apps/web/app/api/asset-manifest/route.ts": "396cbc0cf670b54995e76ce4cb95b79274760caf5edf384be070d27661bff296",
+    "apps/web/lib/use-bevy-hud-ui.ts": "cb2be2852dde7bb1d2ea897d709b9406b97b630cb0284663067c786238b9d33c",
+    "apps/web/scripts/test-bevy-hud-ui.mjs": "a77943411a1c303950640f29db2ec7929e18ebae281c97bb503c4426c67de32d",
+    "apps/web/scripts/test-r16-logout-selection.mjs": "4087d44c029b69e5f195fe3c01aed6e673a8aa20ef394d2b90fdd9ad40bde314",
+    "apps/web/scripts/test-r16-companion-page-host.mjs": "d978f7e9157ee51e8bcb4a908c0821cdee95528c71271b711d2a26b1eb1686b6",
+    "apps/web/scripts/test-asset-manifest-full-pack.mjs": "4d484d83f387442a44604e174827e0c08d7369c0926297a5388e9381f3daf067",
+    "apps/web/scripts/test-asset-release-contract.mjs": "77c344077fc1ea816415924d0ff0c06e1ec3a44807bffd8bd7d8e183326a5e8a",
+    "apps/game-client/client-bevy/src/native_shell.rs": "bb7645d9454d6b8a933c9389ab3992630b0e028c704203ec800ca9758d9964fe",
+    "apps/game-client/client-bevy/src/crystal_ui/overlays.rs": "4308e5ec0a54951a62479469c5b6904911b0f6ae45560509c8cb03eb7edbd983"
+  },
+  "renderer": "bevy-db5e53a91f4d11de",
+  "rendererManifestSha256": "a2724425d1e6820e7b0c0d20a599dd6d14b6f6cde2b8b53b4bb94db7cd7af4f2",
+  "finalStagingMatchesCanonicalSources": true,
+  "temporaryDiagnosticsRemoved": true,
+  "gatewaySha256": "3dd4f2b5c053f0d35c0ba172130a5731eb8944afd4b78e7605c03a9271fcad3e",
+  "tests": {
+    "sessionAndHudNode": 171,
+    "nativeLogout": 4,
+    "assetCapabilityAndAdjacentNode": 24,
+    "standaloneTraceNode": 8,
+    "typeScript": true,
+    "typeScriptScope": "External copied Web app/lib, same sources and new compiled renderer manifest; no full workspace build"
+  },
+  "regression": {
+    "fullPackBefore": {
+      "pass": 1,
+      "fail": 4
+    },
+    "fullPackAfter": {
+      "pass": 5,
+      "fail": 0
+    },
+    "retainedAdjacentSetupFailures": "asset-capability-after.log: worker test loader lacked source-relative require; trace fixture env not supplied. Fixed loader, explicit owned fixture; final 24 + 8 pass"
+  },
+  "browserTrials": [
+    {
+      "path": "session-return-cold-chrome-ar-early-1.json",
+      "passed": true,
+      "locale": "ar",
+      "entries": 1,
+      "returns": 1,
+      "browser": "installed-chrome-headless",
+      "requestedBackend": "webgl2-shared",
+      "errorCodes": [],
+      "networkErrors": 0
+    },
+    {
+      "path": "session-return-cold-chrome-ar-ready-1.json",
+      "passed": true,
+      "locale": "ar",
+      "entries": 1,
+      "returns": 1,
+      "browser": "installed-chrome-headless",
+      "requestedBackend": "webgl2-shared",
+      "errorCodes": [],
+      "networkErrors": 0
+    },
+    {
+      "path": "session-return-cold-chrome-ar-ready-2.json",
+      "passed": true,
+      "locale": "ar",
+      "entries": 1,
+      "returns": 1,
+      "browser": "installed-chrome-headless",
+      "requestedBackend": "webgl2-shared",
+      "errorCodes": [],
+      "networkErrors": 0
+    },
+    {
+      "path": "session-return-cold-chrome-en-early.json",
+      "passed": true,
+      "locale": "en",
+      "entries": 1,
+      "returns": 1,
+      "browser": "installed-chrome-headless",
+      "requestedBackend": "webgl2-shared",
+      "errorCodes": [],
+      "networkErrors": 0
+    },
+    {
+      "path": "session-return-cold-chrome-en-ready.json",
+      "passed": true,
+      "locale": "en",
+      "entries": 1,
+      "returns": 1,
+      "browser": "installed-chrome-headless",
+      "requestedBackend": "webgl2-shared",
+      "errorCodes": [],
+      "networkErrors": 0
+    },
+    {
+      "path": "session-return-cold-chrome-zh-early.json",
+      "passed": true,
+      "locale": "zh-CN",
+      "entries": 1,
+      "returns": 1,
+      "browser": "installed-chrome-headless",
+      "requestedBackend": "webgl2-shared",
+      "errorCodes": [],
+      "networkErrors": 0
+    },
+    {
+      "path": "session-return-cold-webgpu-fixed-ar.json",
+      "passed": true,
+      "locale": "ar",
+      "entries": 1,
+      "returns": 1,
+      "browser": "installed-chrome-headless",
+      "requestedBackend": null,
+      "errorCodes": [],
+      "networkErrors": 0
+    },
+    {
+      "path": "session-return-cold-webgpu-fixed-zh.json",
+      "passed": true,
+      "locale": "zh-CN",
+      "entries": 1,
+      "returns": 1,
+      "browser": "installed-chrome-headless",
+      "requestedBackend": null,
+      "errorCodes": [],
+      "networkErrors": 0
+    },
+    {
+      "path": "session-return-journey-chrome-1.json",
+      "passed": false,
+      "locale": "zh-CN",
+      "entries": 4,
+      "returns": 4,
+      "browser": "installed-chrome-headless",
+      "requestedBackend": null,
+      "errorCodes": [
+        "BROWSER_NETWORK_OR_PAGE_ERRORS"
+      ],
+      "networkErrors": 52
+    },
+    {
+      "path": "session-return-journey-chrome-final.json",
+      "passed": true,
+      "locale": "zh-CN",
+      "entries": 4,
+      "returns": 4,
+      "browser": "installed-chrome-headless",
+      "requestedBackend": "webgl2-shared",
+      "errorCodes": [],
+      "networkErrors": 0
+    },
+    {
+      "path": "session-return-journey-chrome-webgl-1.json",
+      "passed": false,
+      "locale": "zh-CN",
+      "entries": 4,
+      "returns": 3,
+      "browser": "installed-chrome-headless",
+      "requestedBackend": "webgl2-shared",
+      "errorCodes": [
+        "LOGOUT_ACK_MISSING"
+      ],
+      "networkErrors": 0
+    },
+    {
+      "path": "session-return-journey-diag-1.json",
+      "passed": false,
+      "locale": "zh-CN",
+      "entries": 3,
+      "returns": 3,
+      "browser": "playwright-headless-shell",
+      "requestedBackend": null,
+      "errorCodes": [
+        "NATIVE_UI_NOT_READY"
+      ],
+      "networkErrors": 0
+    },
+    {
+      "path": "session-return-journey-final.json",
+      "passed": false,
+      "locale": "zh-CN",
+      "entries": 2,
+      "returns": 2,
+      "browser": "playwright-headless-shell",
+      "requestedBackend": null,
+      "errorCodes": [
+        "NATIVE_UI_NOT_READY"
+      ],
+      "networkErrors": 0
+    },
+    {
+      "path": "session-return-journey-perf-1.json",
+      "passed": false,
+      "locale": "zh-CN",
+      "entries": 2,
+      "returns": 2,
+      "browser": "playwright-headless-shell",
+      "requestedBackend": null,
+      "errorCodes": [
+        "NATIVE_UI_NOT_READY"
+      ],
+      "networkErrors": 0
+    },
+    {
+      "path": "session-return-journey-r1.json",
+      "passed": false,
+      "locale": "zh-CN",
+      "entries": 1,
+      "returns": 1,
+      "browser": "playwright-headless-shell",
+      "requestedBackend": null,
+      "errorCodes": [
+        "TimeoutError"
+      ],
+      "networkErrors": 0
+    },
+    {
+      "path": "session-return-journey-r2.json",
+      "passed": true,
+      "locale": "zh-CN",
+      "entries": 4,
+      "returns": 4,
+      "browser": "playwright-headless-shell",
+      "requestedBackend": null,
+      "errorCodes": [],
+      "networkErrors": 0
+    },
+    {
+      "path": "session-return-journey-r3.json",
+      "passed": false,
+      "locale": "zh-CN",
+      "entries": 2,
+      "returns": 1,
+      "browser": "playwright-headless-shell",
+      "requestedBackend": null,
+      "errorCodes": [
+        "TimeoutError"
+      ],
+      "networkErrors": 0
+    },
+    {
+      "path": "session-return-journey-r4.json",
+      "passed": true,
+      "locale": "zh-CN",
+      "entries": 4,
+      "returns": 4,
+      "browser": "playwright-headless-shell",
+      "requestedBackend": null,
+      "errorCodes": [],
+      "networkErrors": 0
+    },
+    {
+      "path": "session-return-journey-r5.json",
+      "passed": false,
+      "locale": "zh-CN",
+      "entries": 4,
+      "returns": 3,
+      "browser": "playwright-headless-shell",
+      "requestedBackend": null,
+      "errorCodes": [
+        "LOGOUT_ACK_MISSING"
+      ],
+      "networkErrors": 0
+    },
+    {
+      "path": "session-return-journey-r6.json",
+      "passed": false,
+      "locale": "zh-CN",
+      "entries": 2,
+      "returns": 2,
+      "browser": "playwright-headless-shell",
+      "requestedBackend": null,
+      "errorCodes": [
+        "NATIVE_UI_NOT_READY"
+      ],
+      "networkErrors": 0
+    },
+    {
+      "path": "session-return-journey-shortcut-diag.json",
+      "passed": true,
+      "locale": "zh-CN",
+      "entries": 4,
+      "returns": 4,
+      "browser": "installed-chrome-headless",
+      "requestedBackend": "webgl2-shared",
+      "errorCodes": [],
+      "networkErrors": 0
+    },
+    {
+      "path": "session-return-journey-shortcut-diag-2.json",
+      "passed": true,
+      "locale": "zh-CN",
+      "entries": 4,
+      "returns": 4,
+      "browser": "installed-chrome-headless",
+      "requestedBackend": "webgl2-shared",
+      "errorCodes": [],
+      "networkErrors": 0
+    },
+    {
+      "path": "session-return-journey-webgpu-fixed.json",
+      "passed": true,
+      "locale": "zh-CN",
+      "entries": 4,
+      "returns": 4,
+      "browser": "installed-chrome-headless",
+      "requestedBackend": null,
+      "errorCodes": [],
+      "networkErrors": 0
+    }
+  ],
+  "finalPassLabels": [
+    "cold-chrome-ar-early-1",
+    "cold-chrome-ar-ready-1",
+    "cold-chrome-en-ready",
+    "cold-chrome-zh-early",
+    "cold-chrome-ar-ready-2",
+    "cold-chrome-en-early",
+    "journey-chrome-final",
+    "journey-webgpu-fixed",
+    "cold-webgpu-fixed-ar",
+    "cold-webgpu-fixed-zh"
+  ],
+  "finalColdLocales": [
+    "zh-CN",
+    "en",
+    "ar"
+  ],
+  "browserSourcePhases": {
+    "uiFinalBeforeAssetCapabilityFix": ["cold-chrome-ar-early-1", "cold-chrome-ar-ready-1", "cold-chrome-en-ready", "cold-chrome-zh-early", "cold-chrome-ar-ready-2", "cold-chrome-en-early", "journey-chrome-final"],
+    "uiAndAssetCapabilityFinal": ["journey-webgpu-fixed", "cold-webgpu-fixed-ar", "cold-webgpu-fixed-zh"],
+    "pageAndShellUnchangedAcrossThesePhases": true
+  },
+  "preservation": {
+    "baselineIsImmutable": true,
+    "baselineSha256": "40cc6a292dff1b7d867834d7858fc299beaf446c4bb1ef4e89f39f65441e8763",
+    "originalLiveStoreBytePreservationClaimed": false,
+    "sourceGatewaysRemainLive": true,
+    "originalSourceUsedReadOnly": true,
+    "allBaselineAccountsRetained": true,
+    "unrelatedAccountsEqual": true,
+    "protectedFields": {
+      "character": true,
+      "experience": true,
+      "max_experience": true,
+      "gold": true,
+      "credit": true,
+      "city_currencies": true,
+      "inventory_capacity": true,
+      "inventory_items_json": true,
+      "belt_items_json": true,
+      "equipment_items_json": true,
+      "equipment_items_explicit_empty": true,
+      "storage_items_json": true,
+      "hero_inventory_items_json": true,
+      "hero_equipment_items_json": true,
+      "hero_inventory_capacity": true,
+      "hero_inventory_legacy_40": true,
+      "hero_vitals": true,
+      "hero_registry_attachment": true,
+      "quest_states_json": true,
+      "skill_states_json": true,
+      "npc_flag_states_json": true,
+      "npc_saved_values_json": true,
+      "npc_purchase_journal": true,
+      "guild_experience_journal": true,
+      "item_rental_records_json": true,
+      "has_rented_item": true
+    },
+    "allProtectedEqual": true,
+    "originalRoleLevel": 30,
+    "originalRoleTransformEqual": true,
+    "originalSaveFieldCount": 44,
+    "originalSaveDifferingFields": [
+      "default_npc_events",
+      "revision"
+    ],
+    "addedRoles": {
+      "count": 3,
+      "createdThroughOrdinaryUi": true,
+      "levels": [
+        1,
+        1,
+        1
+      ],
+      "originalOneRoleRetainedAndThreeUiAdditions": true
+    }
+  },
+  "openItems": [
+    "Intermittent Alt+X produced no outgoing logOut in retained trials; later ordinary full journeys passed, root cause not established",
+    "Old Playwright headless-shell native/unattributed main-thread long task approximately 61 seconds; Chrome156 WebGL2-shared and default WebGPU passed; precise cause not established",
+    "Native Windows window verification and same-candidate cross-client playback",
+    "Full release build, 360 MiB package gate, continued parity work and final human Accepted"
+  ],
+  "limits": {
+    "sourceDevEvidence": true,
+    "existingPlayableEntryNotReplaced": true,
+    "productionNotDeployed": true,
+    "goalActive": true,
+    "candidate100": false,
+    "privateCpuProfileNotPublished": true
+  },
+  "files": [
+    {
+      "path": "session-return-cold-chrome-ar-early-1.json",
+      "bytes": 5640,
+      "sha256": "f074727b36c23f95471c3cf3946367056274ccb98e64d75227c93554dbff5a64"
+    },
+    {
+      "path": "session-return-cold-chrome-ar-ready-1.json",
+      "bytes": 5638,
+      "sha256": "fb030d0deb85115e39bbf7dcb77fefca20283aa738331799b82a3ceee8d04a74"
+    },
+    {
+      "path": "session-return-cold-chrome-ar-ready-2.json",
+      "bytes": 5431,
+      "sha256": "54458ff32084c8852c4f85668ab017401a4fb1e61346abf346adf3c3698981b5"
+    },
+    {
+      "path": "session-return-cold-chrome-en-early.json",
+      "bytes": 5639,
+      "sha256": "82bbcc367ee2b902bb5268d7f321a1820dedf7680db37a58aad8cdeeb722dfd2"
+    },
+    {
+      "path": "session-return-cold-chrome-en-ready.json",
+      "bytes": 5638,
+      "sha256": "618aba2a82da366e7662edc3234635de115da9e578da9134e21811495ae18f96"
+    },
+    {
+      "path": "session-return-cold-chrome-zh-early.json",
+      "bytes": 5645,
+      "sha256": "46060d92a8ef98d09599e3680f3fb3ab4862c025f9d0e36465e339c4795a6547"
+    },
+    {
+      "path": "session-return-cold-webgpu-fixed-ar.json",
+      "bytes": 5847,
+      "sha256": "5c2ecc7bfb745fa4f8b8f7a51f2108147b20d0ad294412dda9c8ff2a59496fa6"
+    },
+    {
+      "path": "session-return-cold-webgpu-fixed-zh.json",
+      "bytes": 6289,
+      "sha256": "fb6b3ccf3febe2e60b8e770c1b9b8459903a2876af51ffa465b650c6b6ec64c3"
+    },
+    {
+      "path": "session-return-journey-chrome-1.json",
+      "bytes": 24267,
+      "sha256": "2a70746ab5e9f91da0c497f42aaecd9773118bb442b964426967fc5a1fd32944"
+    },
+    {
+      "path": "session-return-journey-chrome-final.json",
+      "bytes": 12905,
+      "sha256": "0cf7f9c9acf57d037ef6b086a6653908d48b6ffb8341fc81c14505f0aafac679"
+    },
+    {
+      "path": "session-return-journey-chrome-webgl-1.json",
+      "bytes": 17399,
+      "sha256": "ca32948aa3ad66875ecabeaf463f923289507178b8bb90bcef5c853e7f281b9f"
+    },
+    {
+      "path": "session-return-journey-diag-1.json",
+      "bytes": 31394,
+      "sha256": "ad68705c8e84cbb537e717eff85c1f182bcc4a1eee5df8be820ebf14f864cbaa"
+    },
+    {
+      "path": "session-return-journey-final.json",
+      "bytes": 3125,
+      "sha256": "578fc2eed2a71a5578f68d2ca700be347ecf1fc40d9d56225155623d759202a2"
+    },
+    {
+      "path": "session-return-journey-perf-1.json",
+      "bytes": 23796,
+      "sha256": "e39f8088d6411d696f94f0dceef49c3783dde0d813ef0eff95236e969e92dd7e"
+    },
+    {
+      "path": "session-return-journey-r1.json",
+      "bytes": 2157,
+      "sha256": "737b6788d5d20f3941c8c5caa25a0d93d2f150b603fdd83a786712a5ac25165d"
+    },
+    {
+      "path": "session-return-journey-r2.json",
+      "bytes": 4365,
+      "sha256": "97c404b1d32f39d091caac6831fb603f4a75c88a409a5ed8e6e984831f2b92c2"
+    },
+    {
+      "path": "session-return-journey-r3.json",
+      "bytes": 2547,
+      "sha256": "9819aa7079406a11d954af1e8ceac994ceeb3e0e0bd65b4b14400aa6686d7f80"
+    },
+    {
+      "path": "session-return-journey-r4.json",
+      "bytes": 4673,
+      "sha256": "24387ada45e9ff99eedc8700257d4a57b0e563950a91b5ade3d6caa5b8aecfaf"
+    },
+    {
+      "path": "session-return-journey-r5.json",
+      "bytes": 5519,
+      "sha256": "7502496d15b4fd2de9bc70fe15650c2eeb385489f5cef95435486114261c20d0"
+    },
+    {
+      "path": "session-return-journey-r6.json",
+      "bytes": 7840,
+      "sha256": "175a3977b40bf4fa5e5f696d7442cebb2ec4f189f8de1d3e7407ca1c0585e6ee"
+    },
+    {
+      "path": "session-return-journey-shortcut-diag.json",
+      "bytes": 12913,
+      "sha256": "5a2a811e4c9b18bd87c1266de788909e7d9d4ca1dbbe1e61d4c01ebcb5424101"
+    },
+    {
+      "path": "session-return-journey-shortcut-diag-2.json",
+      "bytes": 24352,
+      "sha256": "f2a43efc131f7241f3d57fa7937197f47f595a7d0d5e472833527aa48eb676dc"
+    },
+    {
+      "path": "session-return-journey-webgpu-fixed.json",
+      "bytes": 13613,
+      "sha256": "3b2610375d7fd89681ccd548438a308500feae9e60a52d306925fd24b10b3870"
+    },
+    {
+      "path": "session-return-first-q-ar.png",
+      "bytes": 194747,
+      "sha256": "8b32e5d213b89c376213d570c502e782c6010771f04d0f6508bcd7061bcaaff3"
+    },
+    {
+      "path": "session-return-first-q-en.png",
+      "bytes": 116105,
+      "sha256": "72eed16c00a849de77a6c237df1adaec7f295e20277066a2016c6f270d0e07dc"
+    },
+    {
+      "path": "session-return-selection-original.png",
+      "bytes": 267431,
+      "sha256": "21c4d24df96059448f7bdfbb7c092245d1d86b269073a9036cb44119282877cc"
+    },
+    {
+      "path": "session-return-selection-nonfirst.png",
+      "bytes": 267549,
+      "sha256": "ccd55c082176d4bac356e93a26e08972593a50c81397a4176b66539fb38fb0fb"
+    },
+    {
+      "path": "session-return-first-q-webgpu-zh.png",
+      "bytes": 118196,
+      "sha256": "f9e87f53aefcc9d4d4f7a9a191d19d7b019121f4092e7739c0300fd867e8954e"
+    },
+    {
+      "path": "session-return-node-final.log",
+      "bytes": 45011,
+      "sha256": "659f367992ff448cf25285251b9611ed71527cc79f158556460d49bd3b6e4986"
+    },
+    {
+      "path": "session-return-native-logout.log",
+      "bytes": 33239,
+      "sha256": "46e3f8b20f263d61fb16311f9ebbd9c20a7e49e9c3cecb288c35a871868853a3"
+    },
+    {
+      "path": "session-return-native-return-selection.log",
+      "bytes": 33048,
+      "sha256": "ead5d38355fb18d519af926d2a01c9e3c05ab0a021e5e84f416cc3f8090dc46e"
+    },
+    {
+      "path": "session-return-asset-capability-before.log",
+      "bytes": 4568,
+      "sha256": "e87c45edbd071d8ec90d283db3fd1983ab44faf54be6ab46b24cfa4b0314dba2"
+    },
+    {
+      "path": "session-return-asset-capability-after.log",
+      "bytes": 5840,
+      "sha256": "895ffd535b2450dcbb16676e8ce323a3664a1a193ff85306a8916717cab6dd56"
+    },
+    {
+      "path": "session-return-asset-capability-final.log",
+      "bytes": 5265,
+      "sha256": "58268ec87fec860c73f515d882c5b359dc657dc8c001e9112d57bf78c37c17de"
+    },
+    {
+      "path": "session-return-asset-tracing-final.log",
+      "bytes": 1989,
+      "sha256": "0779e48a5b59548843185bd669bf01b5983e8a60149a72a1637faf6f0dee2f4f"
+    },
+    {
+      "path": "session-return-cleanup-final.json",
+      "bytes": 546,
+      "sha256": "bce6e541e5483929c00d193b85632dc3931374321c5bda518283016d46d5f842"
+    }
+  ]
+}

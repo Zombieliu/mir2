@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T06:57:35.939Z",
+  "priorManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\source-frozen-v1.json",
+    "bytes": 11470,
+    "sha256": "9b6fe294b6941ee8c751d9c4491809c41e9296b04c8a084d294ffc28bf09e06c"
+  },
+  "priorSourceSha256": "8c1b06d30f301e158cf7a880c9b2cf66c000223b28322f3c9ef89d9d6ff86ebf",
+  "prior17InputsUnchanged": true,
+  "priorReview": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-wrapper-independent-review-v1\\review-v1.json",
+    "bytes": 10774,
+    "sha256": "46f1e40b899ae5973750bdc4ec1a18e53cbbd62f5bef092e9d46462af325fc23"
+  },
+  "copies": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\wrapper.mjs",
+      "bytes": 14587,
+      "sha256": "c062c325f657c5cc753342749131b0897859ad73cb1f7202b28ffd59d0957112"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\wrapper.test.mjs",
+      "bytes": 19272,
+      "sha256": "3bc4f96e4a0bc9e916e2ea7fb4b58f6a17b70f13f1d3c35806d1c173fd85df0c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\run-synthetic-tests.mjs",
+      "bytes": 1982,
+      "sha256": "7a89a295e77db9149147fe015dcf09f59fd9cd1f2af4ecd91cb047035262cb33"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\README.md",
+      "bytes": 6294,
+      "sha256": "83aa7996dd717c2d13baa787ccbc3057f30190b344beb6191ff93a9364e9d912"
+    }
+  ],
+  "priorOutcome": "Original25/25 synthetics passed; independent review found the pending ordinary-packet scope expansion blocker. V1 remains immutable and is not used for a realm.",
+  "correction": "Only pending owner/control context may exceed regional entity interest; ordinary non-player packet interest remains regional/current/remembered.",
+  "coreNineModified": false,
+  "realmStarted": false
+}

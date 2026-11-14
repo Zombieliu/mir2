@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "gatewaySha256": "72d53d80e3b2a664ae01bfc38b96b997a86c1b184f8dc7c148e40b76e4572d62",
+  "pageSha256": "b7094c92f66fda9aecd380e7f513dc108a322b48e3173146186bba36af31a651",
+  "sourceHead": "a6ee787b8d5b9748418831e734882d595409c24c",
+  "runtimeVersion": "bevy-0cd68510886134e0",
+  "exactEquippedSlotAndUidRestored": true,
+  "identitySha256": "f2e4247854a19ebf9afbee572ca23adb354189a7a1faf86a4f135e2e5b3732a4",
+  "carriedCells": 40,
+  "currency": [
+    1000,
+    700
+  ],
+  "tradeNull": true,
+  "ordinaryCommands": {
+    "deposit": 1,
+    "retrieve": 1,
+    "removeItem": 1,
+    "equipItem": 1,
+    "confirmThenUnlock": true
+  },
+  "sourceFixtureUnchanged": true,
+  "servicesClosed": true
+}

@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "mir2-native-process-provenance-draft-v1",
+  "runId": "npc-shop-20260903-r2",
+  "capturedAtUtc": {
+    "first": "2026-09-02T19:01:02.467Z",
+    "last": "2026-09-02T19:01:27.703Z"
+  },
+  "source": {
+    "branch": "codex/windows-player-journey",
+    "baseRevision": "ff816d8f0c4071e9cd4a4e56cff61e3a2cab24e3",
+    "workingTreeCleanAtBuild": false,
+    "trustedBuildProvenance": false
+  },
+  "client": {
+    "pid": 233964,
+    "path": "apps/game-client/platform-windows/target/debug/mir2-platform-windows.exe",
+    "sizeBytes": 87704576,
+    "modifiedAtUtc": "2026-09-02T18:58:10Z",
+    "sha256": "159B13E722451C6F44B036C6B3ABD141E19362EDB28ED29180F34C6849A7DD8A"
+  },
+  "gateway": {
+    "pid": 221880,
+    "path": "C:/Users/Administrator/AppData/Local/Temp/mir2-ui-parity-cargo-target-tooltip/debug/mir2-gateway.exe",
+    "endpoint": "ws://127.0.0.1:7310/ws",
+    "sizeBytes": 95129088,
+    "modifiedAtUtc": "2026-09-02T17:23:33Z",
+    "sha256": "3BD504E843A5DA4C1BFA20DC67DCBBB76C8C2092CD8FCFB025CDEFAFC525A429"
+  },
+  "captures": [
+    {
+      "image": "mir2-in-game-1788375662467-1.png",
+      "sidecar": "mir2-in-game-1788375662467-1.json",
+      "state": "populated-baseline",
+      "sha256": "B62E187B4042434875FACF9130F20A0D443CF72C4D63462A1E8C084FBDC1FF6C"
+    },
+    {
+      "image": "mir2-in-game-1788375687703-2.png",
+      "sidecar": "mir2-in-game-1788375687703-2.json",
+      "state": "selected-and-hovered",
+      "sha256": "DCECFE0FC836F6CBA4961D40E6F259622DAAA075059CFF13817F8C9B304349DA"
+    }
+  ],
+  "acceptance": {
+    "eligible": false,
+    "visualAccepted": false,
+    "accepted": false,
+    "globalParityPercent": null,
+    "blockers": [
+      "authoritative-world-state-incomplete",
+      "trusted-build-provenance-unavailable",
+      "same-state-crystal-pair-unavailable",
+      "real-dpi-matrix-incomplete",
+      "human-comparison-open"
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "checkedAt": "2026-11-12T23:56:27.903Z",
+  "origin": "https://numeron.obelisk.build",
+  "source": "432c58a07e44db021679aab9a6562a02c9124b10",
+  "includesUserFeedback6997f810ed": true,
+  "deploymentId": "dpl_YKNdqLqcPpNRCXDch444krb7Y1Vs",
+  "initialPythonProbe": {
+    "status": 403,
+    "route": "/version"
+  },
+  "routes": [
+    {
+      "path": "/version",
+      "status": 200,
+      "bytes": 55,
+      "sha256": "1622a3dc1f050ff04d25337480d5f6576aae200df0c53c0a04beccaa93607fed",
+      "server": "cloudflare",
+      "version": {
+        "revision": "432c58a07e44db021679aab9a6562a02c9124b10"
+      }
+    },
+    {
+      "path": "/game",
+      "status": 200,
+      "bytes": 11168,
+      "sha256": "87be91a8332f42c086b04adbd04a3f1eca2db8a610b4f41febb2ab2f5f9fab59",
+      "server": "cloudflare"
+    },
+    {
+      "path": "/mir2-asset-worker.js",
+      "status": 200,
+      "bytes": 40071,
+      "sha256": "1725f95a0a238e2139a84a5aaad31f2d16f8476e28bf805c9a24b2557eb646e1",
+      "server": "cloudflare"
+    }
+  ]
+}

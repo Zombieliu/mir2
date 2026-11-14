@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "synthetic": true,
+  "protocolOnly": true,
+  "browserAcceptanceClaimed": false,
+  "passed": true,
+  "completedRoles": 3,
+  "firstRunFalsePreserved": true,
+  "fixtures": {
+    "passed": 17,
+    "failed": 0
+  },
+  "accountsReleased": true,
+  "secretScan": {
+    "files": 14,
+    "hits": 0
+  },
+  "roles": [
+    {
+      "ordinal": 1,
+      "className": "Warrior",
+      "passed": true,
+      "firstQuest": {
+        "questId": 2110001,
+        "v2AuthorityPresent": true,
+        "acceptAcknowledged": true,
+        "reportReady": true,
+        "uniqueFinishAcknowledged": true,
+        "rewardItemGroups": 2,
+        "exactItemRewardDelta": true,
+        "goldRewardDelta": 100
+      },
+      "reloginStateMatches": true,
+      "final": {
+        "level": 2,
+        "gold": 100,
+        "experience": 0,
+        "map": "0",
+        "completedQuestId": 2110001,
+        "inventoryCount": 5,
+        "equipmentCount": 0
+      }
+    },
+    {
+      "ordinal": 2,
+      "className": "Wizard",
+      "passed": true,
+      "firstQuest": {
+        "questId": 2110001,
+        "v2AuthorityPresent": true,
+        "acceptAcknowledged": true,
+        "reportReady": true,
+        "uniqueFinishAcknowledged": true,
+        "rewardItemGroups": 3,
+        "exactItemRewardDelta": true,
+        "goldRewardDelta": 100
+      },
+      "reloginStateMatches": true,
+      "final": {
+        "level": 2,
+        "gold": 100,
+        "experience": 0,
+        "map": "0",
+        "completedQuestId": 2110001,
+        "inventoryCount": 6,
+        "equipmentCount": 0
+      }
+    },
+    {
+      "ordinal": 3,
+      "className": "Taoist",
+      "passed": true,
+      "firstQuest": {
+        "questId": 2110001,
+        "v2AuthorityPresent": true,
+        "acceptAcknowledged": true,
+        "reportReady": true,
+        "uniqueFinishAcknowledged": true,
+        "rewardItemGroups": 3,
+        "exactItemRewardDelta": true,
+        "goldRewardDelta": 100
+      },
+      "reloginStateMatches": true,
+      "final": {
+        "level": 2,
+        "gold": 100,
+        "experience": 0,
+        "map": "0",
+        "completedQuestId": 2110001,
+        "inventoryCount": 6,
+        "equipmentCount": 0
+      }
+    }
+  ],
+  "pins": {
+    "public-smoke-core.mjs": "7594dde2c439e3328e41a642da9099c2695d5bb99180953011619865e66ef93c",
+    "public-smoke.mjs": "d78b6fd81425e949c04d451ca4d8939404b64178dcde8c0508fb0466964aa55a",
+    "test-public-smoke.mjs": "783b258128ea2c8c2794ae2705c6ea8bac0a7de4d5459e09d2b82114c9cb8d64",
+    "live-r1/proof.json": "7a34ae3931fb78f0a1b78c96da0bcf0279c1a44f443d56c9d6d77032e84aa074",
+    "live-r2/proof.json": "4436f518c2e906c34f219df95aee6c55da2d9835dc243ba74533ebeebd92bc0b",
+    "fixture-tests-r3.log": "c02666bc79180053fbfa0cf100bfe0100ab65159124f7143caf0ac78676d0d4a"
+  }
+}

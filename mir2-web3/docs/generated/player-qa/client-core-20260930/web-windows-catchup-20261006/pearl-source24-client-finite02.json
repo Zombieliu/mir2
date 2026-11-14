@@ -1,0 +1,417 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "stage": "Source24 current Rust03 actual finite CPU checks",
+  "snapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-pearl-source24-rust03-snapshot.json",
+    "bytes": 139087,
+    "sha256": "515910267e190fa2ca630b477ec29d5886d5dfe8c9ecf30fc14f140fa09a329c"
+  },
+  "review": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-pearl-source24-rust03-review.json",
+    "bytes": 1452,
+    "sha256": "a62a7a31baf6c362d501643c5af56699119f8771d71a2603ee428f6d56882903"
+  },
+  "declaredSources": 434,
+  "postSourcesMatched": 434,
+  "runs": [
+    {
+      "label": "Core",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-pearl-source24-core03.config.json",
+        "bytes": 3897,
+        "sha256": "78fa4f284e03b3d0f4d06a30b2247b11e23b4c692661ad5e3637ff1ccf6cf3dd"
+      },
+      "outer": {
+        "owner": "Root",
+        "exitCode": 0,
+        "guardPid": 112432,
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 3762,
+        "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-core03.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "outerPin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-core03.outer.json",
+        "bytes": 440,
+        "sha256": "0c09d89518907c8ced1c95790e564e19d8fc87d81572e7dbaf7e307268972aef"
+      },
+      "passed": 148,
+      "failed": 0,
+      "ignored": 0,
+      "before": {
+        "schemaVersion": 1,
+        "mode": "real-cargo",
+        "nonce": "b4706f59458640fd930de8e07ea8c229",
+        "policyPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-core03.policy.json",
+        "policySha": "154101af2f850fd29e3db4ebd7e58c632a81a567055592c50464f42d91489a27",
+        "args": [
+          "+1.95.0",
+          "test",
+          "--manifest-path",
+          "apps/game-client/client-core/Cargo.toml",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "1",
+          "--lib",
+          "--",
+          "--test-threads=1"
+        ],
+        "cwd": "E:\\mir2-player-journey\\mir2-web3",
+        "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+        "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+        "sample": {
+          "schemaVersion": "1",
+          "driveLetter": "C",
+          "sampleBeginUtc": "2026-10-07T03:08:38.4423976Z",
+          "sampleEndUtc": "2026-10-07T03:08:39.1255769Z",
+          "remainingBytes": "464013811712",
+          "requiredBytes": "53687091200"
+        },
+        "probePid": 109716,
+        "probeLaunchMs": 85.5903,
+        "probeEndMs": 975.3797000000001,
+        "decision": "FORWARD",
+        "thresholdBytes": "53687091200",
+        "sampleProof": "actualGetVolumeC"
+      },
+      "after": {
+        "childPid": 111336,
+        "childStartedUtc": "/Date(1791342519184)/",
+        "childStartMs": 996.7648,
+        "completed": true,
+        "exited": true,
+        "disposed": true,
+        "exitCode": 0,
+        "exitBits": "0",
+        "completedUtc": "/Date(1791342521912)/",
+        "completionMs": 3724.3477000000003,
+        "postChildPolicy": "B",
+        "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+      },
+      "sampleEndToChildStartWallUpperMs": 60,
+      "logs": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-core03.stdout.log",
+          "bytes": 13948,
+          "sha256": "b1183f05f06ea53dda261a05ba79c41ead37afa332653f38e89d058854ce0545"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-core03.stderr.log",
+          "bytes": 319,
+          "sha256": "1f7fd6663c9e91ab1972d45498d7cebd9e08a47474380566ab35aec2b35a721d"
+        }
+      ],
+      "receiptPins": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-core03-cargo-receipts/b4706f59458640fd930de8e07ea8c229/after.json",
+          "bytes": 327,
+          "sha256": "b93381de71bcec2c3fbf426f63874093be84a8bf124e73cbb4781a0fd4d7659c"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-core03-cargo-receipts/b4706f59458640fd930de8e07ea8c229/before.json",
+          "bytes": 995,
+          "sha256": "a9d48c0b78c6009d8267b8cd26de08237355409c3fc7876100d420a96514e142"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-core03-cargo-receipts/b4706f59458640fd930de8e07ea8c229/probe-process.json",
+          "bytes": 441,
+          "sha256": "9f8c4130490f829747337dc674401319b7ce193cbff4c3e14f420622b7b50a04"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-core03-cargo-receipts/b4706f59458640fd930de8e07ea8c229/probe.stderr.bin",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-core03-cargo-receipts/b4706f59458640fd930de8e07ea8c229/probe.stdout.bin",
+          "bytes": 197,
+          "sha256": "e50e76825ffc5889b8e5d2cab2aff1bd9c39107ea0e1c1a1a8a921dd83e2d638"
+        }
+      ]
+    },
+    {
+      "label": "PUI",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-pearl-source24-pui02.config.json",
+        "bytes": 3932,
+        "sha256": "4a61768d92c72ab0934fa65ad0bd7a809c2a93f101fe702487492ccd47b00654"
+      },
+      "outer": {
+        "owner": "Root",
+        "exitCode": 0,
+        "guardPid": 111300,
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 5037,
+        "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-pui02.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "outerPin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-pui02.outer.json",
+        "bytes": 439,
+        "sha256": "9f5a3322df524ee9768e0a4881577558b1d345e4fbf3f9897bd0a38330f5afa3"
+      },
+      "passed": 70,
+      "failed": 0,
+      "ignored": 0,
+      "before": {
+        "schemaVersion": 1,
+        "mode": "real-cargo",
+        "nonce": "038922f4299f44d38825753adaec3ba0",
+        "policyPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-pui02.policy.json",
+        "policySha": "58cf08a2a860a2926f9b916aa79a028694d3cfbc5e7911fc03aa31bced58b7aa",
+        "args": [
+          "+1.95.0",
+          "test",
+          "--manifest-path",
+          "apps/game-client/platform-web/Cargo.toml",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "1",
+          "--features",
+          "presentation-ui",
+          "--lib",
+          "--",
+          "--test-threads=1"
+        ],
+        "cwd": "E:\\mir2-player-journey\\mir2-web3",
+        "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+        "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+        "sample": {
+          "schemaVersion": "1",
+          "driveLetter": "C",
+          "sampleBeginUtc": "2026-10-07T03:08:48.9883060Z",
+          "sampleEndUtc": "2026-10-07T03:08:49.6051540Z",
+          "remainingBytes": "464012517376",
+          "requiredBytes": "53687091200"
+        },
+        "probePid": 110600,
+        "probeLaunchMs": 84.1438,
+        "probeEndMs": 884.7785,
+        "decision": "FORWARD",
+        "thresholdBytes": "53687091200",
+        "sampleProof": "actualGetVolumeC"
+      },
+      "after": {
+        "childPid": 109872,
+        "childStartedUtc": "/Date(1791342529667)/",
+        "childStartMs": 905.5171,
+        "completed": true,
+        "exited": true,
+        "disposed": true,
+        "exitCode": 0,
+        "exitBits": "0",
+        "completedUtc": "/Date(1791342533760)/",
+        "completionMs": 4998.5909,
+        "postChildPolicy": "B",
+        "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+      },
+      "sampleEndToChildStartWallUpperMs": 63,
+      "logs": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-pui02.stdout.log",
+          "bytes": 7518,
+          "sha256": "1c637784f012545cdeb60ee8e17c536689a16e10fa9eab5439799f3cfdd0310e"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-pui02.stderr.log",
+          "bytes": 1245,
+          "sha256": "5e0c9531737e6b982007bdea1da9f97bf538e8ac21d507c1a514c779cbf45359"
+        }
+      ],
+      "receiptPins": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-pui02-cargo-receipts/038922f4299f44d38825753adaec3ba0/after.json",
+          "bytes": 318,
+          "sha256": "9deafdd019b54da257aa8617d5554581f99bbed1e32656e5a2e42dabf8ed54cc"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-pui02-cargo-receipts/038922f4299f44d38825753adaec3ba0/before.json",
+          "bytes": 1016,
+          "sha256": "b51fd4a2722623018cd7a9ada777aa39a286b8d4cb13f9dcfb7a7f871acf9b7e"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-pui02-cargo-receipts/038922f4299f44d38825753adaec3ba0/probe-process.json",
+          "bytes": 431,
+          "sha256": "438791aeb8cefdc3a5c92ba157fdc4888616b6234021ecb6532c9b419576b09f"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-pui02-cargo-receipts/038922f4299f44d38825753adaec3ba0/probe.stderr.bin",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-pui02-cargo-receipts/038922f4299f44d38825753adaec3ba0/probe.stdout.bin",
+          "bytes": 197,
+          "sha256": "5e5e2adfc3bedab56bf402e2588ae4b7724f25472e9b6efa4f334fc7ac09af82"
+        }
+      ]
+    },
+    {
+      "label": "Native shop",
+      "config": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-pearl-source24-native-shop02.config.json",
+        "bytes": 4010,
+        "sha256": "da8cb80d4660a2afe03c7b8d2ef5bb1f2a9c068679c437a2625b746fcb8f0bad"
+      },
+      "outer": {
+        "owner": "Root",
+        "exitCode": 0,
+        "guardPid": 122972,
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 86046,
+        "configPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-native-shop02.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "outerPin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-native-shop02.outer.json",
+        "bytes": 448,
+        "sha256": "4f465e7f8f4a6643efc58064ba6e5086c8dbf8c24cbf3379857998c115509447"
+      },
+      "passed": 24,
+      "failed": 0,
+      "ignored": 0,
+      "before": {
+        "schemaVersion": 1,
+        "mode": "real-cargo",
+        "nonce": "5117926715184e3792785306288aa8d6",
+        "policyPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-native-shop02.policy.json",
+        "policySha": "764206c1ca8bbdfdc6b752e306f508a911ab5ba176f19bfff69f71abea009533",
+        "args": [
+          "+1.95.0",
+          "test",
+          "--manifest-path",
+          "apps/game-client/client-bevy/Cargo.toml",
+          "--locked",
+          "--offline",
+          "--jobs",
+          "1",
+          "--features",
+          "native-ui",
+          "--lib",
+          "shop::",
+          "--",
+          "--test-threads=1"
+        ],
+        "cwd": "E:\\mir2-player-journey\\mir2-web3",
+        "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+        "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+        "sample": {
+          "schemaVersion": "1",
+          "driveLetter": "C",
+          "sampleBeginUtc": "2026-10-07T03:50:24.0876126Z",
+          "sampleEndUtc": "2026-10-07T03:50:24.8436729Z",
+          "remainingBytes": "475534331904",
+          "requiredBytes": "53687091200"
+        },
+        "probePid": 117196,
+        "probeLaunchMs": 92.09150000000001,
+        "probeEndMs": 1068.7847000000002,
+        "decision": "FORWARD",
+        "thresholdBytes": "53687091200",
+        "sampleProof": "actualGetVolumeC"
+      },
+      "after": {
+        "childPid": 118096,
+        "childStartedUtc": "/Date(1791345024912)/",
+        "childStartMs": 1091.0027,
+        "completed": true,
+        "exited": true,
+        "disposed": true,
+        "exitCode": 0,
+        "exitBits": "0",
+        "completedUtc": "/Date(1791345109820)/",
+        "completionMs": 85997.9896,
+        "postChildPolicy": "B",
+        "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+      },
+      "sampleEndToChildStartWallUpperMs": 70,
+      "logs": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-native-shop02.stdout.log",
+          "bytes": 2130,
+          "sha256": "e051a92896d6f8bf77322868007de07917c2a8cd65cd8216233ea2752b7197e8"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-native-shop02.stderr.log",
+          "bytes": 29184,
+          "sha256": "71a10b7632605e89a3edc46edc704af9173029be9f5e17fa721dd0e8efa3134c"
+        }
+      ],
+      "receiptPins": [
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-native-shop02-cargo-receipts/5117926715184e3792785306288aa8d6/after.json",
+          "bytes": 320,
+          "sha256": "a7274f0c9c4d5bedd59f8c035a174d57b0d9844cbb82da47dacae068c0ba39e7"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-native-shop02-cargo-receipts/5117926715184e3792785306288aa8d6/before.json",
+          "bytes": 1047,
+          "sha256": "eb14414a73bbfec148cdcc333a211bddd96f15e4597b2659b18318be900226c6"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-native-shop02-cargo-receipts/5117926715184e3792785306288aa8d6/probe-process.json",
+          "bytes": 452,
+          "sha256": "3961ed328fd5390fe00cbd9da6a6ab7af156ca19a4cd8ac6edfe8b15f308b972"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-native-shop02-cargo-receipts/5117926715184e3792785306288aa8d6/probe.stderr.bin",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-pearl-source24-native-shop02-cargo-receipts/5117926715184e3792785306288aa8d6/probe.stdout.bin",
+          "bytes": 197,
+          "sha256": "14b8c4bf63e7336cbf824c8c0de9609098db8ee8335afce74aee80b791d48f0b"
+        }
+      ]
+    }
+  ],
+  "passingExecutions": 242,
+  "newDistinctTests": 17,
+  "newDistinctByModule": {
+    "Core": 7,
+    "PUI": 6,
+    "Native": 4
+  },
+  "notWholeWorkspaceSuite": true,
+  "historicalFirstChecks": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-pearl-source24-client-finite01.json",
+    "bytes": 16009,
+    "sha256": "6911ae2cbb1204e4eb4d6861ee3f2cb1dd90a8ffc912aee3fab5c8addc6f8f95"
+  },
+  "history": "Rust01 240 executions and initial guard90 rejection remain historical; not added as current distinct executions.",
+  "scope": {
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "wasmApiUsed": false,
+    "candidateAccepted": false,
+    "playerAccepted": false,
+    "goalComplete": false
+  },
+  "limits": [
+    "Finite Rust CPU tests do not establish browser runtime, real players, mobile acceptance or continuous-buy correlated economic receipt.",
+    "Source24 optional PUI Pearl ABI2 uses the shared Core unit-price oracle and planner; ordinary Gold authority remains separate."
+  ]
+}

@@ -1,0 +1,87 @@
+    Finished `test` profile [unoptimized] target(s) in 0.35s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+
+running 20 tests
+test session::save_fail_closed_tests::failed_handoff_rollback_persistence_is_reported_as_not_durable ... ok
+gateway lifecycle session_id=gateway-94820-1793371032494-1 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94820-1793371032494-1 stage=session.close phase=end elapsed_ms=0
+test session::save_fail_closed_tests::gateway_save_failure_reaches_caller_after_authoritative_transform_sync ... ok
+gateway lifecycle session_id=gateway-94820-1793371033103-2 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94820-1793371033103-2 stage=session.close phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-94820-1793371033358-3 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94820-1793371033358-3 stage=session.close phase=end elapsed_ms=0
+test session::save_fail_closed_tests::rejected_logout_and_disconnect_emit_no_success_and_keep_zone_presence ... ok
+test tcp::tcp_save_fail_closed_tests::persistence_admission_is_finite_and_releases_capacity ... ok
+test tcp::tcp_save_fail_closed_tests::socket_is_dropped_before_potentially_long_persistence_retry ... ok
+[save-recovery] status=saved transport=recovery-replay count=1 detail=journal checkpoint committed to account store
+[save-recovery] account login replay completed replayed=1 alreadyCommitted=0
+gateway lifecycle session_id=gateway-94820-1793371033694-4 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94820-1793371033694-4 stage=session.close phase=end elapsed_ms=0
+[save-recovery] status=saved transport=recovery-replay count=2 detail=journal checkpoint committed to account store
+[save-recovery] account login replay completed replayed=1 alreadyCommitted=0
+gateway lifecycle session_id=gateway-94820-1793371034029-5 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94820-1793371034029-5 stage=session.close phase=end elapsed_ms=0
+[save-recovery] status=saved transport=recovery-replay count=3 detail=journal checkpoint committed to account store
+[save-recovery] account login replay completed replayed=1 alreadyCommitted=0
+gateway lifecycle session_id=gateway-94820-1793371034362-6 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94820-1793371034362-6 stage=session.close phase=end elapsed_ms=0
+test web::web_save_fail_closed_tests::authenticated_login_replays_once_and_returns_fresh_roster_on_all_three_paths ... ok
+gateway lifecycle session_id=gateway-94820-1793371034696-7 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94820-1793371034696-7 stage=session.close phase=end elapsed_ms=0
+test web::web_save_fail_closed_tests::banned_passkey_account_never_replays_its_pending_journal ... ok
+gateway lifecycle session_id=gateway-94820-1793371034777-8 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94820-1793371034777-8 stage=session.close phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-94820-1793371034861-9 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94820-1793371034861-9 stage=session.close phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-94820-1793371034943-10 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94820-1793371034943-10 stage=session.close phase=end elapsed_ms=0
+test web::web_save_fail_closed_tests::banned_standard_login_never_replays_recovery_on_all_three_paths ... ok
+test web::web_save_fail_closed_tests::client_visible_login_and_save_errors_are_fixed_and_secret_free ... ok
+test web::web_save_fail_closed_tests::debounced_save_failure_keeps_dirty_until_successful_retry ... ok
+test web::web_save_fail_closed_tests::deleted_passkey_account_with_pending_journal_is_not_recreated ... ok
+gateway lifecycle session_id=gateway-94820-1793371035281-12 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94820-1793371035281-12 stage=session.close phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-94820-1793371035038-11 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94820-1793371035038-11 stage=session.close phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-94820-1793371036196-14 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94820-1793371036196-14 stage=session.close phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-94820-1793371035955-13 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94820-1793371035955-13 stage=session.close phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-94820-1793371037122-16 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94820-1793371037122-16 stage=session.close phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-94820-1793371036880-15 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94820-1793371036880-15 stage=session.close phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-94820-1793371038048-18 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94820-1793371038048-18 stage=session.close phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-94820-1793371037805-17 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94820-1793371037805-17 stage=session.close phase=end elapsed_ms=0
+test web::web_save_fail_closed_tests::dev_and_production_web_leave_paths_propagate_stale_save_and_keep_identity ... ok
+gateway lifecycle session_id=gateway-94820-1793371038725-19 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94820-1793371038725-19 stage=session.close phase=end elapsed_ms=0
+test web::web_save_fail_closed_tests::first_time_trusted_passkey_provisions_only_after_recovery_clear_check ... ok
+test web::web_save_fail_closed_tests::forced_save_failure_marks_clean_queue_dirty_and_retry_clears_it ... ok
+gateway lifecycle session_id=gateway-94820-1793371038771-20 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94820-1793371038771-20 stage=session.close phase=end elapsed_ms=0
+[save-recovery] status=saved transport=recovery-replay count=4 detail=journal checkpoint committed to account store
+gateway lifecycle session_id=gateway-94820-1793371039073-21 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94820-1793371039073-21 stage=session.close phase=end elapsed_ms=0
+test web::web_save_fail_closed_tests::journaled_teardown_revokes_resume_then_replay_fences_stale_writer ... ok
+test web::web_save_fail_closed_tests::persistence_admission_capacity_is_finite_and_permits_are_released ... ok
+test web::web_save_fail_closed_tests::saved_teardown_preserves_resume_policy_but_journaled_never_retains ... ok
+gateway lifecycle session_id=gateway-94820-1793371039931-22 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94820-1793371039931-22 stage=session.close phase=end elapsed_ms=0
+test web::web_save_fail_closed_tests::source_rejected_or_unavailable_preflight_never_cleans_or_applies_journal ... ok
+gateway lifecycle session_id=gateway-94820-1793371039934-23 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94820-1793371039934-23 stage=session.close phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-94820-1793371039938-24 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94820-1793371039938-24 stage=session.close phase=end elapsed_ms=0
+test web::web_save_fail_closed_tests::unverified_web_passkey_action_cannot_provision_an_account ... ok
+gateway lifecycle session_id=gateway-94820-1793371040018-25 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94820-1793371040018-25 stage=session.close phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-94820-1793371040099-26 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94820-1793371040099-26 stage=session.close phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-94820-1793371040180-27 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94820-1793371040180-27 stage=session.close phase=end elapsed_ms=0
+test web::web_save_fail_closed_tests::wrong_password_never_replays_recovery_on_tcp_production_web_or_dev_web ... ok
+
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 1459 filtered out; finished in 7.78s

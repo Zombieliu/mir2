@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "kind": "r16-source-hold-delta",
+  "sameRows": true,
+  "rows": 2,
+  "changedColumns": [
+    "updated_at_ms"
+  ],
+  "passed": true,
+  "at": "2026-11-08T17:05:02.934853+00:00",
+  "accountIdsRecorded": false,
+  "valuesRecorded": false
+}

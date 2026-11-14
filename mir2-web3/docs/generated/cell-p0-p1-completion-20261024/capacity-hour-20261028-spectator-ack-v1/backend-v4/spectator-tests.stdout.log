@@ -1,0 +1,20 @@
+
+running 15 tests
+test spectator::tests::camera_or_target_becomes_the_only_self_player ... ok
+test spectator::tests::direct_spectator_projection_matches_legacy_complete_snapshot ... ok
+test spectator::tests::direct_spectator_projection_removes_both_exact_aliases_and_quest_ids ... ok
+test spectator::tests::event_timeline_tracks_movement_health_death_and_drops ... ok
+test spectator::tests::public_delay_is_enforced_but_director_can_be_live ... ok
+test spectator::tests::recording_append_is_immediately_readable_and_replay_keeps_append_order ... ok
+test spectator::tests::recording_buffer_batches_fragment_writes_without_changing_jsonl_bytes ... ok
+test spectator::tests::recording_buffer_completes_short_and_interrupted_writes_before_success ... ok
+test spectator::tests::recording_buffer_does_not_retry_a_failed_encoding_write_on_drop ... ok
+test spectator::tests::recording_buffer_propagates_encoding_failure_without_implicit_drop_flush ... ok
+test spectator::tests::recording_buffer_reports_write_zero_and_explicit_flush_failures ... ok
+test spectator::tests::recording_disabled_keeps_live_ring_but_does_not_touch_disk ... ok
+test spectator::tests::sanitized_recording_excludes_private_inventory_and_supports_replay ... ok
+test spectator::tests::spectator_live_and_replay_redact_exact_ground_item_identity ... ok
+test spectator::tests::stale_entities_are_pruned_from_the_merged_world ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 1265 filtered out; finished in 2.25s
+

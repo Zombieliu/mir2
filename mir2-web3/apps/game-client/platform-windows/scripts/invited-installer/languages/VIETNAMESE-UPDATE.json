@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "base": "Vietnamese.upstream.isl",
+  "derived": "Vietnamese.isl",
+  "changedKeys": [
+    "SelectDirLabel3"
+  ],
+  "sha256": "aae1faddee261f5ed57ce9a3eb5deb5a042f3fca6dfb7a1e8fa83502380fe741"
+}

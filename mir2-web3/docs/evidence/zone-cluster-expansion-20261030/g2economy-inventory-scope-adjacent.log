@@ -1,0 +1,10 @@
+    Finished `test` profile [unoptimized] target(s) in 0.34s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+
+running 4 tests
+test routing::tests::inventory_receipt_scope_tests::direct_and_journaled_sequences_have_distinct_receipt_domains_in_one_zone ... ok
+test routing::tests::inventory_receipt_scope_tests::direct_item_receipts_use_actual_map_without_fabricating_fencing_context ... ok
+test routing::tests::inventory_receipt_scope_tests::fenced_gold_receipts_debit_each_zone_once ... ok
+test routing::tests::inventory_receipt_scope_tests::fenced_item_receipts_are_scoped_by_zone_but_not_fencing_generation ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1475 filtered out; finished in 2.21s

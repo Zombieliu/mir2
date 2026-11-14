@@ -1,0 +1,1339 @@
+{
+  "schema": "mir2.r16.web-targeted-spell-phases.v1",
+  "pinnedWindowsReference": "ca1028b684320b0e92021df512fc6a0d8d5a724e",
+  "pinnedCrystalSource": "92b4ce4ab488b11e65f63d3ad22de2e1f25ec08d",
+  "gatewaySha256": "c94ddf20274a45d2c571e2f367d42c6b598bf7ebf6bf7077c0344499132e0a42",
+  "scope": {
+    "ordinaryLocalBrowser": true,
+    "copiedLevel30Saves": true,
+    "nativeWindow": false,
+    "publicDeploy": false
+  },
+  "phaseClock": {
+    "castMs": 600,
+    "tileTravelMs": 50,
+    "impactMs": 600
+  },
+  "finalWebInputs": {
+    "app/page.tsx": "8ebaf11873a73c7598618e1341821fc01eccc8e660043aafd0655ebb75a5c2d6",
+    "app/components/original-client-types.ts": "d371a4066acb1d5ba7066e387eaec3baaeabff25bcac22021c03b9cd8b41dfa4",
+    "app/components/original-client-scene-visual-layers.tsx": "c13a415ba69744fa7eb832755d34ea1ae096a4e206b416c03cd2a58c279fb744",
+    "app/components/r16-companion-window.tsx": "a3984b9f387506e54f85d96225c025446fa1ce94fcbf0539d29f3949ffd25beb",
+    "lib/r16-targeted-projectiles.ts": "4fef9947719cecb83db992bf41a70a3fbe8d023f12b23c64afa314e7792ef69e",
+    "lib/r16-companion-localization.ts": "8633d6b445c2487537c500ca54f2e8d0bea1a4057166aaab738bed128f215e26",
+    "lib/world-model/types.ts": "433ace37791917d3ef5b29511ed842e71c7575fc05d35d1e09cdb3d9d7b7500a",
+    "lib/original-sound-events.ts": "895d78faae5e2de287b6b74badfc5d0a1e43c6896303f352901e4a1edc09ee8c",
+    "lib/original-sound-triggers.ts": "86962cd0f0172b10f99424d7e75e9654372c770e0e6db8dc91e161c276a9c958",
+    "public/original-ui/sound-index.generated.json": "31997187408c05106f3c887f0e848ab9c3218f4a35688724147544e08d9c417f"
+  },
+  "movingTargetWebInputs": {
+    "app/page.tsx": "8ec0ac4b18b0f4c5659f2f018b0bdf422d4193ce2e4a827e5ce3377a3194190d",
+    "app/components/original-client-types.ts": "d371a4066acb1d5ba7066e387eaec3baaeabff25bcac22021c03b9cd8b41dfa4",
+    "app/components/original-client-scene-visual-layers.tsx": "0dab1f8c391ac3b567cbc1535d9ed891ba3873144cb2dab9274261cff2aa26f7",
+    "lib/r16-targeted-projectiles.ts": "4fef9947719cecb83db992bf41a70a3fbe8d023f12b23c64afa314e7792ef69e",
+    "lib/world-model/types.ts": "433ace37791917d3ef5b29511ed842e71c7575fc05d35d1e09cdb3d9d7b7500a",
+    "lib/crystal-magic-effects.ts": "211b210b4b94cec4dd27bf5e5d4374c5bfa0aa62dc11714dd4ea80c22fa99bba",
+    "lib/original-sound-events.ts": "895d78faae5e2de287b6b74badfc5d0a1e43c6896303f352901e4a1edc09ee8c",
+    "lib/original-sound-triggers.ts": "86962cd0f0172b10f99424d7e75e9654372c770e0e6db8dc91e161c276a9c958",
+    "public/original-ui/sound-index.generated.json": "31997187408c05106f3c887f0e848ab9c3218f4a35688724147544e08d9c417f"
+  },
+  "before": {
+    "greatFireBall": {
+      "qualified": true,
+      "rawReceiptSha256": "b9d86695b8180f95e4b448c223a8a6569bbc087d2d2a178f57c2f1f99d9c339f",
+      "sourceHead": "ca1028b684320b0e92021df512fc6a0d8d5a724e",
+      "class": "Wizard",
+      "renderer": {
+        "backend": "webgpu",
+        "booted": true,
+        "entityEnabled": false,
+        "requested": "default"
+      },
+      "spell": "GreatFireBall",
+      "target": {
+        "name": "Hen",
+        "range": 7,
+        "source": {
+          "x": 300,
+          "y": 267
+        },
+        "initialTile": {
+          "x": 297,
+          "y": 274
+        },
+        "hit": {
+          "attackerVerified": true,
+          "hitMs": 608,
+          "death": true,
+          "targetHealth": [
+            0
+          ],
+          "projectile": true,
+          "damage": 5
+        },
+        "observed": [
+          {
+            "packet": "ObjectStruck",
+            "location": {
+              "x": 297,
+              "y": 274
+            },
+            "direction": "DownRight",
+            "atMs": 609
+          },
+          {
+            "packet": "ObjectDied",
+            "location": {
+              "x": 297,
+              "y": 274
+            },
+            "direction": "DownRight",
+            "atMs": 649
+          }
+        ]
+      },
+      "casterPoseSamples": [
+        "standing",
+        "spell"
+      ],
+      "targetPoseSamples": [
+        "standing",
+        "struck",
+        "die"
+      ],
+      "fallbackSamples": 0,
+      "phases": {
+        "spell": {
+          "firstMs": 49,
+          "firstFrame": "/original-effects/Magic/400.png",
+          "firstLoadedMs": 173,
+          "frames": [
+            "/original-effects/Magic/400.png",
+            "/original-effects/Magic/402.png",
+            "/original-effects/Magic/403.png",
+            "/original-effects/Magic/404.png",
+            "/original-effects/Magic/405.png",
+            "/original-effects/Magic/406.png",
+            "/original-effects/Magic/407.png",
+            "/original-effects/Magic/408.png",
+            "/original-effects/Magic/409.png"
+          ],
+          "keys": [
+            "crystal-fx:spell:93:1794260010354"
+          ],
+          "depth": [
+            1544570
+          ],
+          "blend": [
+            "plus-lighter"
+          ]
+        },
+        "projectile": {
+          "firstMs": 49,
+          "firstFrame": "/original-effects/Magic/410.png",
+          "firstLoadedMs": 173,
+          "frames": [
+            "/original-effects/Magic/410.png",
+            "/original-effects/Magic/415.png",
+            "/original-effects/Magic/411.png",
+            "/original-effects/Magic/413.png",
+            "/original-effects/Magic/412.png",
+            "/original-effects/Magic/414.png"
+          ],
+          "keys": [
+            "1000:200203:1794260010354:1"
+          ],
+          "depth": [
+            1628509
+          ],
+          "blend": [
+            "plus-lighter"
+          ]
+        },
+        "impact": {
+          "firstMs": 871,
+          "firstFrame": "/original-effects/Magic/570.png",
+          "firstLoadedMs": 871,
+          "frames": [
+            "/original-effects/Magic/570.png",
+            "/original-effects/Magic/571.png",
+            "/original-effects/Magic/572.png",
+            "/original-effects/Magic/573.png",
+            "/original-effects/Magic/574.png",
+            "/original-effects/Magic/575.png",
+            "/original-effects/Magic/576.png",
+            "/original-effects/Magic/577.png",
+            "/original-effects/Magic/578.png",
+            "/original-effects/Magic/579.png"
+          ],
+          "keys": [
+            "1000:200203:1794260010354:1"
+          ],
+          "depth": [
+            1628509
+          ],
+          "blend": [
+            "plus-lighter"
+          ]
+        }
+      },
+      "audio": [
+        {
+          "file": "M34-0.wav",
+          "atMs": 0,
+          "volume": 0.8,
+          "result": "playing",
+          "status": 206
+        }
+      ],
+      "serverWire": {
+        "expectedDelayMs": 850,
+        "commandToDamageMs": 1043,
+        "ackToDamageMs": 608,
+        "manaBeforeHit": true,
+        "practiceAfterHit": true
+      },
+      "before": {
+        "mp": 541,
+        "skill": {
+          "hotkey": 9,
+          "level": 0,
+          "experience": 501
+        },
+        "amulets": 0
+      },
+      "saved": {
+        "mp": 536,
+        "skill": {
+          "hotkey": 9,
+          "level": 0,
+          "experience": 504
+        }
+      },
+      "normalLogout": true,
+      "stopped": {
+        "gateway": true,
+        "next": true
+      },
+      "screens": {
+        "impact": {
+          "file": "old-great-fireball-impact.jpg",
+          "sha256": "07ff4e4033ddcb80c5ebe5a4cfe91434bb6c299107c26b2b52f786aee8b68b70",
+          "atMs": 1060
+        }
+      }
+    },
+    "soulFireBall": {
+      "qualified": true,
+      "rawReceiptSha256": "840d18489dff0f840e650a4dba4d31ce382525462245a33ab527feb5e8a15d61",
+      "sourceHead": "ca1028b684320b0e92021df512fc6a0d8d5a724e",
+      "class": "Taoist",
+      "renderer": {
+        "backend": "webgpu",
+        "booted": true,
+        "entityEnabled": false,
+        "requested": "default"
+      },
+      "spell": "SoulFireBall",
+      "target": {
+        "name": "Hen",
+        "range": 7,
+        "source": {
+          "x": 300,
+          "y": 267
+        },
+        "initialTile": {
+          "x": 297,
+          "y": 274
+        },
+        "hit": {
+          "attackerVerified": true,
+          "hitMs": 474,
+          "death": true,
+          "targetHealth": [
+            0
+          ],
+          "projectile": true,
+          "damage": 5
+        },
+        "observed": [
+          {
+            "packet": "ObjectStruck",
+            "location": {
+              "x": 297,
+              "y": 274
+            },
+            "direction": "DownRight",
+            "atMs": 474
+          },
+          {
+            "packet": "ObjectDied",
+            "location": {
+              "x": 297,
+              "y": 274
+            },
+            "direction": "DownRight",
+            "atMs": 533
+          }
+        ]
+      },
+      "casterPoseSamples": [
+        "standing",
+        "spell"
+      ],
+      "targetPoseSamples": [
+        "standing",
+        "struck",
+        "die"
+      ],
+      "fallbackSamples": 6,
+      "phases": {
+        "spell": {
+          "firstMs": null,
+          "firstFrame": null,
+          "firstLoadedMs": null,
+          "frames": [],
+          "keys": [],
+          "depth": [],
+          "blend": []
+        },
+        "projectile": {
+          "firstMs": 59,
+          "firstFrame": "/original-effects/Magic/1160.png",
+          "firstLoadedMs": 59,
+          "frames": [
+            "/original-effects/Magic/1160.png",
+            "/original-effects/Magic/1162.png",
+            "/original-effects/Magic/1161.png"
+          ],
+          "keys": [
+            "1000:200203:1794260013646:1"
+          ],
+          "depth": [
+            1628509
+          ],
+          "blend": [
+            "plus-lighter"
+          ]
+        },
+        "impact": {
+          "firstMs": 894,
+          "firstFrame": "/original-effects/Magic/1360.png",
+          "firstLoadedMs": 894,
+          "frames": [
+            "/original-effects/Magic/1360.png",
+            "/original-effects/Magic/1361.png",
+            "/original-effects/Magic/1362.png",
+            "/original-effects/Magic/1363.png",
+            "/original-effects/Magic/1366.png",
+            "/original-effects/Magic/1367.png",
+            "/original-effects/Magic/1368.png",
+            "/original-effects/Magic/1369.png"
+          ],
+          "keys": [
+            "1000:200203:1794260013646:1"
+          ],
+          "depth": [
+            1628509
+          ],
+          "blend": [
+            "plus-lighter"
+          ]
+        }
+      },
+      "audio": [],
+      "serverWire": {
+        "expectedDelayMs": 850,
+        "commandToDamageMs": 1011,
+        "ackToDamageMs": 474,
+        "manaBeforeHit": true,
+        "practiceAfterHit": true
+      },
+      "before": {
+        "mp": 260,
+        "skill": {
+          "hotkey": 9,
+          "level": 0,
+          "experience": 470
+        },
+        "amulets": 43
+      },
+      "saved": {
+        "mp": 257,
+        "skill": {
+          "hotkey": 9,
+          "level": 0,
+          "experience": 471
+        },
+        "amulets": 42
+      },
+      "normalLogout": true,
+      "stopped": {
+        "gateway": true,
+        "next": true
+      },
+      "screens": {}
+    }
+  },
+  "candidate": {
+    "greatFireBall": {
+      "qualified": true,
+      "rawReceiptSha256": "1c5caee86183302d04ef5afdb7710dffb1070809def626310b490f6d414c0dd7",
+      "sourceHead": "ca1028b684320b0e92021df512fc6a0d8d5a724e",
+      "overlay": "overlay-final",
+      "class": "Wizard",
+      "renderer": {
+        "backend": "webgpu",
+        "booted": true,
+        "entityEnabled": false,
+        "requested": "default"
+      },
+      "spell": "GreatFireBall",
+      "target": {
+        "name": "Hen",
+        "range": 7,
+        "source": {
+          "x": 300,
+          "y": 267
+        },
+        "initialTile": {
+          "x": 297,
+          "y": 274
+        },
+        "hit": {
+          "attackerVerified": true,
+          "hitMs": 613,
+          "death": true,
+          "targetHealth": [
+            0
+          ],
+          "projectile": true,
+          "damage": 5
+        },
+        "observed": [
+          {
+            "packet": "ObjectStruck",
+            "location": {
+              "x": 297,
+              "y": 274
+            },
+            "direction": "DownRight",
+            "atMs": 615
+          },
+          {
+            "packet": "ObjectDied",
+            "location": {
+              "x": 297,
+              "y": 274
+            },
+            "direction": "DownRight",
+            "atMs": 646
+          }
+        ]
+      },
+      "casterPoseSamples": [
+        "standing",
+        "spell"
+      ],
+      "targetPoseSamples": [
+        "standing",
+        "die"
+      ],
+      "fallbackSamples": 0,
+      "phases": {
+        "spell": {
+          "firstMs": 193,
+          "firstFrame": "/original-effects/Magic/402.png",
+          "firstLoadedMs": 193,
+          "frames": [
+            "/original-effects/Magic/402.png",
+            "/original-effects/Magic/403.png",
+            "/original-effects/Magic/404.png",
+            "/original-effects/Magic/405.png",
+            "/original-effects/Magic/406.png",
+            "/original-effects/Magic/407.png",
+            "/original-effects/Magic/408.png",
+            "/original-effects/Magic/409.png"
+          ],
+          "keys": [
+            "crystal-fx:spell:93:1794260843627"
+          ],
+          "depth": [
+            3100000
+          ],
+          "blend": [
+            "plus-lighter"
+          ]
+        },
+        "projectile": {
+          "firstMs": 792,
+          "firstFrame": "/original-effects/Magic/504.png",
+          "firstLoadedMs": 792,
+          "frames": [
+            "/original-effects/Magic/504.png",
+            "/original-effects/Magic/500.png",
+            "/original-effects/Magic/502.png"
+          ],
+          "keys": [
+            "r16-targeted:1"
+          ],
+          "depth": [
+            3100000
+          ],
+          "blend": [
+            "plus-lighter"
+          ]
+        },
+        "impact": {
+          "firstMs": 1069,
+          "firstFrame": "/original-effects/Magic/570.png",
+          "firstLoadedMs": 1069,
+          "frames": [
+            "/original-effects/Magic/570.png",
+            "/original-effects/Magic/571.png",
+            "/original-effects/Magic/572.png",
+            "/original-effects/Magic/573.png",
+            "/original-effects/Magic/574.png",
+            "/original-effects/Magic/575.png",
+            "/original-effects/Magic/576.png",
+            "/original-effects/Magic/577.png",
+            "/original-effects/Magic/578.png",
+            "/original-effects/Magic/579.png"
+          ],
+          "keys": [
+            "r16-targeted:1"
+          ],
+          "depth": [
+            3100000
+          ],
+          "blend": [
+            "plus-lighter"
+          ]
+        }
+      },
+      "audio": [
+        {
+          "file": "M34-0.wav",
+          "atMs": 0,
+          "volume": 0.8,
+          "result": "playing",
+          "status": 206
+        },
+        {
+          "file": "M34-1.wav",
+          "atMs": 614,
+          "volume": 0.8,
+          "result": "playing",
+          "status": 206
+        },
+        {
+          "file": "M34-2.wav",
+          "atMs": 1006,
+          "volume": 0.8,
+          "result": "playing",
+          "status": 206
+        }
+      ],
+      "serverWire": {
+        "expectedDelayMs": 850,
+        "commandToDamageMs": 1045,
+        "ackToDamageMs": 613,
+        "manaBeforeHit": true,
+        "practiceAfterHit": true
+      },
+      "before": {
+        "mp": 541,
+        "skill": {
+          "hotkey": 9,
+          "level": 0,
+          "experience": 501
+        },
+        "amulets": 0
+      },
+      "saved": {
+        "mp": 536,
+        "skill": {
+          "hotkey": 9,
+          "level": 0,
+          "experience": 503
+        }
+      },
+      "normalLogout": true,
+      "stopped": {
+        "gateway": true,
+        "next": true
+      },
+      "screens": {
+        "projectile": {
+          "file": "great-fireball-projectile.jpg",
+          "sha256": "5d04ebf1468d1c21b0e9ae5f5477e61104a5061353bafa0afcb2b0b623d0f692",
+          "atMs": 808
+        },
+        "impact": {
+          "file": "great-fireball-impact.jpg",
+          "sha256": "b9541e112efd5f42f48c1b73383301d4aea679035023b7032111956033812273",
+          "atMs": 1221
+        }
+      }
+    },
+    "soulFireBall": {
+      "qualified": true,
+      "rawReceiptSha256": "7c2d9090b03022d3a04765354a6afd98bd8e1ea86678b81f12eab522d523f29a",
+      "sourceHead": "ca1028b684320b0e92021df512fc6a0d8d5a724e",
+      "overlay": "overlay-final",
+      "class": "Taoist",
+      "renderer": {
+        "backend": "webgl2",
+        "booted": true,
+        "entityEnabled": false,
+        "requested": "?bevyRuntime=1&bevyBackend=webgl2&bevySharedCanvas=1&bevyQuestUi=1&bevyBagUi=1"
+      },
+      "spell": "SoulFireBall",
+      "target": {
+        "name": "Hen",
+        "range": 7,
+        "source": {
+          "x": 300,
+          "y": 267
+        },
+        "initialTile": {
+          "x": 297,
+          "y": 274
+        },
+        "hit": {
+          "attackerVerified": true,
+          "hitMs": 552,
+          "death": true,
+          "targetHealth": [
+            0
+          ],
+          "projectile": true,
+          "damage": 5
+        },
+        "observed": [
+          {
+            "packet": "ObjectStruck",
+            "location": {
+              "x": 297,
+              "y": 274
+            },
+            "direction": "DownRight",
+            "atMs": 556
+          },
+          {
+            "packet": "ObjectDied",
+            "location": {
+              "x": 297,
+              "y": 274
+            },
+            "direction": "DownRight",
+            "atMs": 601
+          }
+        ]
+      },
+      "casterPoseSamples": [
+        "walking",
+        "running"
+      ],
+      "targetPoseSamples": [
+        "standing",
+        "struck",
+        "die"
+      ],
+      "fallbackSamples": 0,
+      "phases": {
+        "spell": {
+          "firstMs": null,
+          "firstFrame": null,
+          "firstLoadedMs": null,
+          "frames": [],
+          "keys": [],
+          "depth": [],
+          "blend": []
+        },
+        "projectile": {
+          "firstMs": 892,
+          "firstFrame": "/original-effects/Magic/1250.png",
+          "firstLoadedMs": 892,
+          "frames": [
+            "/original-effects/Magic/1250.png"
+          ],
+          "keys": [
+            "r16-targeted:1"
+          ],
+          "depth": [
+            3100000
+          ],
+          "blend": [
+            "plus-lighter"
+          ]
+        },
+        "impact": {
+          "firstMs": 1122,
+          "firstFrame": "/original-effects/Magic/1362.png",
+          "firstLoadedMs": 1122,
+          "frames": [
+            "/original-effects/Magic/1362.png",
+            "/original-effects/Magic/1364.png",
+            "/original-effects/Magic/1365.png",
+            "/original-effects/Magic/1366.png",
+            "/original-effects/Magic/1367.png",
+            "/original-effects/Magic/1368.png",
+            "/original-effects/Magic/1369.png"
+          ],
+          "keys": [
+            "r16-targeted:1"
+          ],
+          "depth": [
+            3100000
+          ],
+          "blend": [
+            "plus-lighter"
+          ]
+        }
+      },
+      "audio": [
+        {
+          "file": "M64-0.wav",
+          "atMs": 0,
+          "volume": 0.8,
+          "result": "playing",
+          "status": 206
+        },
+        {
+          "file": "M64-1.wav",
+          "atMs": 751,
+          "volume": 0.8,
+          "result": "playing",
+          "status": 206
+        },
+        {
+          "file": "M64-2.wav",
+          "atMs": 1090,
+          "volume": 0.8,
+          "result": "playing",
+          "status": 206
+        }
+      ],
+      "serverWire": {
+        "expectedDelayMs": 850,
+        "commandToDamageMs": 1064,
+        "ackToDamageMs": 552,
+        "manaBeforeHit": true,
+        "practiceAfterHit": true
+      },
+      "before": {
+        "mp": 260,
+        "skill": {
+          "hotkey": 9,
+          "level": 0,
+          "experience": 470
+        },
+        "amulets": 43
+      },
+      "saved": {
+        "mp": 257,
+        "skill": {
+          "hotkey": 9,
+          "level": 0,
+          "experience": 473
+        },
+        "amulets": 42
+      },
+      "normalLogout": true,
+      "stopped": {
+        "gateway": true,
+        "next": true
+      },
+      "screens": {
+        "projectile": {
+          "file": "soul-fireball-projectile.jpg",
+          "sha256": "f7b91afddd3846c12c8b6e9f26372709d1ff4b66d603b24d08cfc660aa6a2d2b",
+          "atMs": 909
+        },
+        "impact": {
+          "file": "soul-fireball-impact.jpg",
+          "sha256": "ed69d525adb72b1c839c08233f15d2af7ef6a4b01c7513206a188714fc9cbe09",
+          "atMs": 1259
+        }
+      }
+    }
+  },
+  "movingTarget": {
+    "greatFireBall": {
+      "qualified": true,
+      "rawReceiptSha256": "57eb547514c5b6811f254dfb75c72f7726fd7d53b6ccb41812b8d3ba376593ef",
+      "sourceHead": "ca1028b684320b0e92021df512fc6a0d8d5a724e",
+      "overlay": "overlay-candidate-r1",
+      "class": "Wizard",
+      "renderer": {
+        "backend": "webgpu",
+        "booted": true,
+        "entityEnabled": false,
+        "requested": "default"
+      },
+      "spell": "GreatFireBall",
+      "target": {
+        "name": "Deer",
+        "range": 6,
+        "source": {
+          "x": 256,
+          "y": 324
+        },
+        "initialTile": {
+          "x": 250,
+          "y": 320
+        },
+        "hit": {
+          "attackerVerified": true,
+          "hitMs": 508,
+          "death": false,
+          "targetHealth": [
+            20
+          ],
+          "projectile": true,
+          "damage": 20
+        },
+        "observed": [
+          {
+            "packet": "ObjectStruck",
+            "location": {
+              "x": 250,
+              "y": 320
+            },
+            "direction": "Left",
+            "atMs": 511
+          },
+          {
+            "packet": "ObjectWalk",
+            "location": [
+              251,
+              321
+            ],
+            "direction": "DownRight",
+            "atMs": 551
+          }
+        ]
+      },
+      "casterPoseSamples": [
+        "standing",
+        "spell"
+      ],
+      "targetPoseSamples": [
+        "standing",
+        "struck",
+        "walking"
+      ],
+      "fallbackSamples": 0,
+      "phases": {
+        "spell": {
+          "firstMs": 111,
+          "firstFrame": "/original-effects/Magic/401.png",
+          "firstLoadedMs": 111,
+          "frames": [
+            "/original-effects/Magic/401.png",
+            "/original-effects/Magic/402.png",
+            "/original-effects/Magic/403.png",
+            "/original-effects/Magic/404.png",
+            "/original-effects/Magic/405.png",
+            "/original-effects/Magic/406.png",
+            "/original-effects/Magic/407.png",
+            "/original-effects/Magic/408.png",
+            "/original-effects/Magic/409.png"
+          ],
+          "keys": [
+            "crystal-fx:spell:93:1794260726956"
+          ],
+          "depth": [
+            3100000
+          ],
+          "blend": [
+            "plus-lighter"
+          ]
+        },
+        "projectile": {
+          "firstMs": 692,
+          "firstFrame": "/original-effects/Magic/541.png",
+          "firstLoadedMs": 861,
+          "frames": [
+            "/original-effects/Magic/541.png",
+            "/original-effects/Magic/542.png",
+            "/original-effects/Magic/543.png",
+            "/original-effects/Magic/545.png",
+            "/original-effects/Magic/540.png"
+          ],
+          "keys": [
+            "r16-targeted:1"
+          ],
+          "depth": [
+            3100000
+          ],
+          "blend": [
+            "plus-lighter"
+          ]
+        },
+        "impact": {
+          "firstMs": 971,
+          "firstFrame": "/original-effects/Magic/571.png",
+          "firstLoadedMs": 971,
+          "frames": [
+            "/original-effects/Magic/571.png",
+            "/original-effects/Magic/572.png",
+            "/original-effects/Magic/573.png",
+            "/original-effects/Magic/574.png",
+            "/original-effects/Magic/575.png",
+            "/original-effects/Magic/576.png",
+            "/original-effects/Magic/577.png",
+            "/original-effects/Magic/578.png",
+            "/original-effects/Magic/579.png"
+          ],
+          "keys": [
+            "r16-targeted:1"
+          ],
+          "depth": [
+            3100000
+          ],
+          "blend": [
+            "plus-lighter"
+          ]
+        }
+      },
+      "audio": [
+        {
+          "file": "M34-0.wav",
+          "atMs": 0,
+          "volume": 0.8,
+          "result": "playing",
+          "status": 206
+        },
+        {
+          "file": "M34-1.wav",
+          "atMs": 654,
+          "volume": 0.8,
+          "result": "playing",
+          "status": 206
+        },
+        {
+          "file": "M34-2.wav",
+          "atMs": 912,
+          "volume": 0.8,
+          "result": "playing",
+          "status": 206
+        }
+      ],
+      "serverWire": {
+        "expectedDelayMs": 800,
+        "commandToDamageMs": 989,
+        "ackToDamageMs": 508,
+        "manaBeforeHit": true,
+        "practiceAfterHit": true
+      },
+      "before": {
+        "mp": 541,
+        "skill": {
+          "hotkey": 9,
+          "level": 0,
+          "experience": 501
+        },
+        "amulets": 0
+      },
+      "saved": {
+        "mp": 536,
+        "skill": {
+          "hotkey": 9,
+          "level": 0,
+          "experience": 503
+        }
+      },
+      "normalLogout": true,
+      "stopped": {
+        "gateway": true,
+        "next": true
+      },
+      "screens": {}
+    },
+    "soulFireBall": {
+      "qualified": true,
+      "rawReceiptSha256": "1872824a43b9542dc7fdc7b184abbeca3029fd8eb610a81cd6f46f782a2673ec",
+      "sourceHead": "ca1028b684320b0e92021df512fc6a0d8d5a724e",
+      "overlay": "overlay-candidate-r1",
+      "class": "Taoist",
+      "renderer": {
+        "backend": "webgpu",
+        "booted": true,
+        "entityEnabled": false,
+        "requested": "default"
+      },
+      "spell": "SoulFireBall",
+      "target": {
+        "name": "Deer",
+        "range": 7,
+        "source": {
+          "x": 242,
+          "y": 324
+        },
+        "initialTile": {
+          "x": 235,
+          "y": 326
+        },
+        "hit": {
+          "attackerVerified": true,
+          "hitMs": 587,
+          "death": false,
+          "targetHealth": [
+            48
+          ],
+          "projectile": true,
+          "damage": 13
+        },
+        "observed": [
+          {
+            "packet": "ObjectStruck",
+            "location": {
+              "x": 235,
+              "y": 326
+            },
+            "direction": "UpLeft",
+            "atMs": 589
+          },
+          {
+            "packet": "ObjectWalk",
+            "location": [
+              236,
+              325
+            ],
+            "direction": "UpRight",
+            "atMs": 623
+          }
+        ]
+      },
+      "casterPoseSamples": [
+        "standing",
+        "spell"
+      ],
+      "targetPoseSamples": [
+        "standing",
+        "struck",
+        "walking"
+      ],
+      "fallbackSamples": 0,
+      "phases": {
+        "spell": {
+          "firstMs": null,
+          "firstFrame": null,
+          "firstLoadedMs": null,
+          "frames": [],
+          "keys": [],
+          "depth": [],
+          "blend": []
+        },
+        "projectile": {
+          "firstMs": 672,
+          "firstFrame": "/original-effects/Magic/1271.png",
+          "firstLoadedMs": 672,
+          "frames": [
+            "/original-effects/Magic/1271.png",
+            "/original-effects/Magic/1272.png",
+            "/original-effects/Magic/1270.png"
+          ],
+          "keys": [
+            "r16-targeted:1"
+          ],
+          "depth": [
+            3100000
+          ],
+          "blend": [
+            "plus-lighter"
+          ]
+        },
+        "impact": {
+          "firstMs": 956,
+          "firstFrame": "/original-effects/Magic/1360.png",
+          "firstLoadedMs": 974,
+          "frames": [
+            "/original-effects/Magic/1360.png",
+            "/original-effects/Magic/1361.png",
+            "/original-effects/Magic/1362.png",
+            "/original-effects/Magic/1363.png",
+            "/original-effects/Magic/1364.png",
+            "/original-effects/Magic/1365.png",
+            "/original-effects/Magic/1366.png",
+            "/original-effects/Magic/1367.png",
+            "/original-effects/Magic/1368.png",
+            "/original-effects/Magic/1369.png"
+          ],
+          "keys": [
+            "r16-targeted:1"
+          ],
+          "depth": [
+            3100000
+          ],
+          "blend": [
+            "plus-lighter"
+          ]
+        }
+      },
+      "audio": [
+        {
+          "file": "M64-0.wav",
+          "atMs": 0,
+          "volume": 0.8,
+          "result": "playing",
+          "status": 206
+        },
+        {
+          "file": "M64-1.wav",
+          "atMs": 615,
+          "volume": 0.8,
+          "result": "playing",
+          "status": 206
+        },
+        {
+          "file": "M64-2.wav",
+          "atMs": 922,
+          "volume": 0.8,
+          "result": "playing",
+          "status": 206
+        }
+      ],
+      "serverWire": {
+        "expectedDelayMs": 850,
+        "commandToDamageMs": 1007,
+        "ackToDamageMs": 587,
+        "manaBeforeHit": true,
+        "practiceAfterHit": true
+      },
+      "before": {
+        "mp": 260,
+        "skill": {
+          "hotkey": 9,
+          "level": 0,
+          "experience": 470
+        },
+        "amulets": 43
+      },
+      "saved": {
+        "mp": 257,
+        "skill": {
+          "hotkey": 9,
+          "level": 0,
+          "experience": 473
+        },
+        "amulets": 42
+      },
+      "normalLogout": true,
+      "stopped": {
+        "gateway": true,
+        "next": true
+      },
+      "screens": {
+        "impact": {
+          "file": "soul-fireball-deer-impact.jpg",
+          "sha256": "aa77516e9de18521b2b567ca5542a42654912b1bb72d09eae48a56468292d766",
+          "atMs": 1180
+        }
+      }
+    }
+  },
+  "stationaryWebGl2": {
+    "qualified": true,
+    "rawReceiptSha256": "acee24312b4457b0ad74b3cc306100d09eed01e9b02bd82b112bdd0359a6dd1b",
+    "sourceHead": "ca1028b684320b0e92021df512fc6a0d8d5a724e",
+    "overlay": "overlay-final",
+    "class": "Taoist",
+    "renderer": {
+      "backend": "webgl2",
+      "booted": true,
+      "entityEnabled": false,
+      "requested": "?bevyRuntime=1&bevyBackend=webgl2&bevySharedCanvas=1&bevyQuestUi=1&bevyBagUi=1"
+    },
+    "spell": "SoulFireBall",
+    "target": {
+      "name": "Hen",
+      "range": 7,
+      "source": {
+        "x": 300,
+        "y": 267
+      },
+      "initialTile": {
+        "x": 297,
+        "y": 274
+      },
+      "hit": {
+        "attackerVerified": true,
+        "hitMs": 604,
+        "death": true,
+        "targetHealth": [
+          0
+        ],
+        "projectile": true,
+        "damage": 5
+      },
+      "observed": [
+        {
+          "packet": "ObjectStruck",
+          "location": {
+            "x": 297,
+            "y": 274
+          },
+          "direction": "DownRight",
+          "atMs": 605
+        },
+        {
+          "packet": "ObjectDied",
+          "location": {
+            "x": 297,
+            "y": 274
+          },
+          "direction": "DownRight",
+          "atMs": 625
+        }
+      ]
+    },
+    "casterPoseSamples": [
+      "standing",
+      "spell"
+    ],
+    "targetPoseSamples": [
+      "standing",
+      "struck",
+      "die"
+    ],
+    "fallbackSamples": 0,
+    "phases": {
+      "spell": {
+        "firstMs": null,
+        "firstFrame": null,
+        "firstLoadedMs": null,
+        "frames": [],
+        "keys": [],
+        "depth": [],
+        "blend": []
+      },
+      "projectile": {
+        "firstMs": 648,
+        "firstFrame": "/original-effects/Magic/1250.png",
+        "firstLoadedMs": 767,
+        "frames": [
+          "/original-effects/Magic/1250.png",
+          "/original-effects/Magic/1252.png",
+          "/original-effects/Magic/1251.png"
+        ],
+        "keys": [
+          "r16-targeted:1"
+        ],
+        "depth": [
+          3100000
+        ],
+        "blend": [
+          "plus-lighter"
+        ]
+      },
+      "impact": {
+        "firstMs": 1171,
+        "firstFrame": "/original-effects/Magic/1362.png",
+        "firstLoadedMs": 1171,
+        "frames": [
+          "/original-effects/Magic/1362.png",
+          "/original-effects/Magic/1363.png",
+          "/original-effects/Magic/1364.png",
+          "/original-effects/Magic/1365.png",
+          "/original-effects/Magic/1366.png",
+          "/original-effects/Magic/1367.png",
+          "/original-effects/Magic/1368.png",
+          "/original-effects/Magic/1369.png"
+        ],
+        "keys": [
+          "r16-targeted:1"
+        ],
+        "depth": [
+          3100000
+        ],
+        "blend": [
+          "plus-lighter"
+        ]
+      }
+    },
+    "audio": [
+      {
+        "file": "M64-0.wav",
+        "atMs": 0,
+        "volume": 0.8,
+        "result": "playing",
+        "status": 206
+      },
+      {
+        "file": "M64-1.wav",
+        "atMs": 603,
+        "volume": 0.8,
+        "result": "playing",
+        "status": 206
+      },
+      {
+        "file": "M64-2.wav",
+        "atMs": 1058,
+        "volume": 0.8,
+        "result": "playing",
+        "status": 206
+      }
+    ],
+    "serverWire": {
+      "expectedDelayMs": 850,
+      "commandToDamageMs": 1013,
+      "ackToDamageMs": 604,
+      "manaBeforeHit": true,
+      "practiceAfterHit": true
+    },
+    "before": {
+      "mp": 260,
+      "skill": {
+        "hotkey": 9,
+        "level": 0,
+        "experience": 470
+      },
+      "amulets": 43
+    },
+    "saved": {
+      "mp": 257,
+      "skill": {
+        "hotkey": 9,
+        "level": 0,
+        "experience": 471
+      },
+      "amulets": 42
+    },
+    "normalLogout": true,
+    "stopped": {
+      "gateway": true,
+      "next": true
+    },
+    "screens": {}
+  },
+  "attemptsRetained": [
+    {
+      "rawReceiptSha256": "e708c096d0cc9713f3fc87ae6b0b3439d6e7a66ded0d3d3b58841a3c16541e0f",
+      "stage": "web-ordinary-entry",
+      "observation": "Forced standalone WebGL2 did not reach ordinary scene input readiness.",
+      "stopped": {
+        "gateway": true,
+        "next": true
+      }
+    },
+    {
+      "rawReceiptSha256": "782c551b0eaaf0abe460d841f61bd4fb43fb64f33fe7c49764fba6b501aae0d9",
+      "stage": "normal-target-projectile-hit",
+      "observation": "Concurrent browser probe received the first damage packet at 761 ms, below the prior browser tolerance.",
+      "commandToDamageMs": 761,
+      "stopped": {
+        "gateway": true,
+        "next": true
+      }
+    }
+  ],
+  "commonAssetClosure": {
+    "manifestSha256": "646351b86bc216fc7c7673162cf47b0b2d3c1c932f9cc0f95cf39b2af764160b",
+    "files": 21056,
+    "bytes": 281160211,
+    "soundIndexSha256": "31997187408c05106f3c887f0e848ab9c3218f4a35688724147544e08d9c417f"
+  }
+}

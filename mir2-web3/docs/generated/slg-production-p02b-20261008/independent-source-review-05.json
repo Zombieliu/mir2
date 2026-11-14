@@ -1,0 +1,18 @@
+{
+  "schema": "mir2.production-p02b-independent-source-review.v1",
+  "acceptedForFocusedTests": true,
+  "reviewer": "/root/production_review",
+  "authoredSourcePath": "work/slg-production-p02b-20261008/authored-source-05.json",
+  "authoredSourceSha256": "a85883d70c568f023c98253d87bcf54711029c91587a59c48c09577a50edf62a",
+  "priorReviewPath": "work/slg-production-p02b-20261008/independent-source-review-04.json",
+  "baselineCommit": "fde81a0de5084d02b3daaa30bac4d4f1fde411f4",
+  "verifiedSourceFileCount": 14,
+  "allDeclaredSourceHashesAndLengthsMatch": true,
+  "changedSourceFileCountFromPriorManifest": 2,
+  "confirmedP0P1Blockers": [],
+  "rawFinal": "Accepted for focused testing under the original CargoGuard, bound to authored-source-05.json. The bounded source delta makes refresh_world_history_floor return an error for missing InventoryResource, return without touching configuration for Legacy/Unavailable/Fenced policies, and obtain RuntimeConfigResource fallibly only for Durable. It verifies the config uses the exact same allocator before any store scan or floor adjustment, retaining account-store writability, lock/scan/drop ordering and the initialized Session active-save scan. The added real bare-World/File-authority test covers missing inventory, Legacy without config, Durable without config and Durable with Legacy config; rejection requires allocator high-water to remain exactly unchanged. All 14 current source hashes and lengths match; the other 12 paths are unchanged from source04. Prior failed and superseded runs and review records remain intact; they are not added to the final source05 test total. No Cargo or UI was run by this reviewer. This is acceptance for the final source05 focused test round, not a claim that 177 tests passed or that public rollout is ready. Normal gateway/catalog activation, remaining fresh-item issuers, deployment-wide census and PostgreSQL authority remain prerequisites.",
+  "noCargoRun": true,
+  "noUiRun": true,
+  "noSourceEdits": true,
+  "scope": "Read-only verification of the two source05 changed paths, the existing initialized-Session save snapshot contract, and the 14-file manifest; only this separate work-directory review record was written."
+}

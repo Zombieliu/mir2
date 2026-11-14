@@ -1,0 +1,357 @@
+{
+  "schemaVersion": 1,
+  "reviewKind": "bounded-owner-connection-wire-cross-check",
+  "createdAt": "2026-10-25T10:43:50.2606244Z",
+  "sourceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+  "inputPins": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-movement-correction-analysis-v1\\selected-corrections-v2.json",
+      "bytes": 1289764,
+      "sha256": "382b8e153e7247f21f6c3bfbed6c9ed684c85625fd237af701b69c62732defcb"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-movement-correction-analysis-v1\\summary-v2.json",
+      "bytes": 14064,
+      "sha256": "e4fdf21f188e4d26a66d6c7eca15ab254f8aa7097c5d9b738d58fe790ac5a13b"
+    }
+  ],
+  "priorReview": {
+    "file": "source-review-v1.json",
+    "sha256": "01a71b922194bd872511813161c556cb1de22b48a5fc0af44e56102a2f49a160"
+  },
+  "scope": {
+    "originalRawRead": false,
+    "recordingOrSpectatorRead": false,
+    "privateRead": false,
+    "productOrFixtureEdited": false,
+    "testsOrServicesRun": false,
+    "selectedPublicDerivationsOnly": true
+  },
+  "actualSendReceiptChecks": [
+    {
+      "case": 1,
+      "actionLine": 1642,
+      "kind": "run",
+      "sentAtMs": 138555.2749,
+      "hint": {
+        "kind": "run",
+        "sendCursor": 2514,
+        "sentAtMs": 138555.2749,
+        "origin": {
+          "x": 243,
+          "y": 596
+        },
+        "first": {
+          "x": 243,
+          "y": 597
+        },
+        "target": {
+          "x": 243,
+          "y": 598
+        },
+        "cells": [
+          {
+            "x": 243,
+            "y": 596
+          },
+          {
+            "x": 243,
+            "y": 597
+          },
+          {
+            "x": 243,
+            "y": 598
+          }
+        ]
+      },
+      "sendLine": 1639,
+      "sentDirection": "Down",
+      "recordedSendSequence": 2515,
+      "priorPendingSuperseded": false,
+      "localProjectionTruncated": false,
+      "receiptLine": 1640,
+      "receiptSequence": 2516,
+      "receiptMono": 138555.7566,
+      "receiptWire": {
+        "x": 243,
+        "y": 596,
+        "direction": "Down"
+      },
+      "receivedEventsInPending": 1,
+      "precedingAction": {
+        "line": 1632,
+        "kind": "run",
+        "status": "success",
+        "sentAtMs": 137778.6092,
+        "latencyMs": 2.6938000000081956
+      }
+    },
+    {
+      "case": 2,
+      "actionLine": 3473,
+      "kind": "run",
+      "sentAtMs": 260801.6379,
+      "hint": {
+        "kind": "run",
+        "sendCursor": 4605,
+        "sentAtMs": 260801.6379,
+        "origin": {
+          "x": 241,
+          "y": 599
+        },
+        "first": {
+          "x": 242,
+          "y": 599
+        },
+        "target": {
+          "x": 243,
+          "y": 599
+        },
+        "cells": [
+          {
+            "x": 241,
+            "y": 599
+          },
+          {
+            "x": 242,
+            "y": 599
+          },
+          {
+            "x": 243,
+            "y": 599
+          }
+        ]
+      },
+      "sendLine": 3470,
+      "sentDirection": "Right",
+      "recordedSendSequence": 4606,
+      "priorPendingSuperseded": false,
+      "localProjectionTruncated": false,
+      "receiptLine": 3471,
+      "receiptSequence": 4607,
+      "receiptMono": 260802.122,
+      "receiptWire": {
+        "x": 241,
+        "y": 599,
+        "direction": "Right"
+      },
+      "receivedEventsInPending": 1,
+      "precedingAction": {
+        "line": 3462,
+        "kind": "run",
+        "status": "success",
+        "sentAtMs": 260036.8039,
+        "latencyMs": 0.6951000000117347
+      }
+    },
+    {
+      "case": 3,
+      "actionLine": 3482,
+      "kind": "walk",
+      "sentAtMs": 261540.8143,
+      "hint": {
+        "kind": "walk",
+        "sendCursor": 4609,
+        "sentAtMs": 261540.8143,
+        "origin": {
+          "x": 241,
+          "y": 599
+        },
+        "first": {
+          "x": 242,
+          "y": 599
+        },
+        "target": {
+          "x": 242,
+          "y": 599
+        },
+        "cells": [
+          {
+            "x": 241,
+            "y": 599
+          },
+          {
+            "x": 242,
+            "y": 599
+          }
+        ]
+      },
+      "sendLine": 3480,
+      "sentDirection": "Right",
+      "recordedSendSequence": 4610,
+      "priorPendingSuperseded": false,
+      "localProjectionTruncated": false,
+      "receiptLine": 3481,
+      "receiptSequence": 4611,
+      "receiptMono": 261541.3237,
+      "receiptWire": {
+        "x": 241,
+        "y": 599,
+        "direction": "Right"
+      },
+      "receivedEventsInPending": 1,
+      "precedingAction": {
+        "line": 3473,
+        "kind": "run",
+        "status": "corrected",
+        "sentAtMs": 260801.6379,
+        "latencyMs": 0.4841000000014901
+      }
+    },
+    {
+      "case": 4,
+      "actionLine": 3887,
+      "kind": "run",
+      "sentAtMs": 288548.5027,
+      "hint": {
+        "kind": "run",
+        "sendCursor": 5003,
+        "sentAtMs": 288548.5027,
+        "origin": {
+          "x": 241,
+          "y": 597
+        },
+        "first": {
+          "x": 242,
+          "y": 597
+        },
+        "target": {
+          "x": 243,
+          "y": 597
+        },
+        "cells": [
+          {
+            "x": 241,
+            "y": 597
+          },
+          {
+            "x": 242,
+            "y": 597
+          },
+          {
+            "x": 243,
+            "y": 597
+          }
+        ]
+      },
+      "sendLine": 3884,
+      "sentDirection": "Right",
+      "recordedSendSequence": 5004,
+      "priorPendingSuperseded": false,
+      "localProjectionTruncated": false,
+      "receiptLine": 3885,
+      "receiptSequence": 5005,
+      "receiptMono": 288551.2813,
+      "receiptWire": {
+        "x": 241,
+        "y": 597,
+        "direction": "Right"
+      },
+      "receivedEventsInPending": 1,
+      "precedingAction": {
+        "line": 3877,
+        "kind": "walk",
+        "status": "success",
+        "sentAtMs": 287809.9796,
+        "latencyMs": 0.5124000000068918
+      }
+    },
+    {
+      "case": 5,
+      "actionLine": 3897,
+      "kind": "walk",
+      "sentAtMs": 289292.7349,
+      "hint": {
+        "kind": "walk",
+        "sendCursor": 5007,
+        "sentAtMs": 289292.7349,
+        "origin": {
+          "x": 241,
+          "y": 597
+        },
+        "first": {
+          "x": 242,
+          "y": 597
+        },
+        "target": {
+          "x": 242,
+          "y": 597
+        },
+        "cells": [
+          {
+            "x": 241,
+            "y": 597
+          },
+          {
+            "x": 242,
+            "y": 597
+          }
+        ]
+      },
+      "sendLine": 3895,
+      "sentDirection": "Right",
+      "recordedSendSequence": 5008,
+      "priorPendingSuperseded": false,
+      "localProjectionTruncated": false,
+      "receiptLine": 3896,
+      "receiptSequence": 5009,
+      "receiptMono": 289293.2136,
+      "receiptWire": {
+        "x": 241,
+        "y": 597,
+        "direction": "Right"
+      },
+      "receivedEventsInPending": 1,
+      "precedingAction": {
+        "line": 3887,
+        "kind": "run",
+        "status": "corrected",
+        "sentAtMs": 288548.5027,
+        "latencyMs": 2.7785999999614432
+      }
+    }
+  ],
+  "selectedOwnerWireRows": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  "findings": [
+    {
+      "id": "W1",
+      "status": "confirmed-input-chain",
+      "detail": "Before failed case2, ordinary ObjectWalk206613 at line3441 put it at242,599. ObjectRemove3444 removed it from this same owner view. ObjectAttack3467 still carried ID206613 at242,599 with beforePresent/afterPresent=false. The next actual Run3470 used first242,599 and target243,599. Before case4, Walk3840 put206613 at242,597, Remove3864 removed it, then Attack3868 again carried242,597 while absent. Run3884 and Walk3895 attempted that first cell. These are owner-wire events, not a spectator merge."
+    },
+    {
+      "id": "W2",
+      "status": "confirmed-fold-semantics",
+      "detail": "The observed cache behavior follows the existing fold: Remove deletes by ID; ObjectAttack only updates an existing entity. navigationObstacles includes all known non-dead entities, so it cannot block a monster ID already deleted by the preceding ordinary server packet. No driver filter that skipped a present/living613 was found. Unknown Attack does not invent a monster or its missing attributes."
+    },
+    {
+      "id": "W3",
+      "status": "additional-conflicting-position-lead",
+      "detail": "For earlier corrected case1, ObjectTurn1627 reported206613 at243,598. ObjectMonster1633 then reported the same ID at258,596 and upserted it outside the fixed local projection (afterPresent=true). Run1639 attempted243,597→243,598. This is a lead to inspect the source of different same-ID packet positions, not proof that either packet carried authoritative collision state at refusal."
+    },
+    {
+      "id": "W4",
+      "status": "late-prior-ack-not-supported-by-this-selection",
+      "detail": "Each actual send returned with priorPendingSuperseded=false. Each matching pending received UserLocation first, at sendSequence+1. Previous actions were success or already-received correction, not timeout. The protocol still has no unique movement ID, but this selected chronology provides no positive evidence for reclassifying these corrections as a delayed prior ACK."
+    }
+  ],
+  "recommendedNextBoundary": "Trace server sources of the observed ObjectRemove and subsequent same-ID near/far monster packets. A fixture can replay this exact ordinary input chain and assert current cache behavior before any fix. Do not upsert arbitrary unknown Attack packets, infer an authoritative collider from this trace alone, change the correction classification, or reduce the original5-percent gate.",
+  "verdict": {
+    "ownerViewRemovalBeforeFailedMoveProven": true,
+    "serverRefusalCauseProven": false,
+    "serverAuthorityBugProven": false,
+    "driverPresentMonsterFilterBugProven": false,
+    "sourceChangeAuthorizedByThisReceipt": false,
+    "capacityAccepted": false,
+    "p0Passed": false,
+    "eligibleForP2": false
+  }
+}

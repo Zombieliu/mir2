@@ -1,0 +1,1363 @@
+{
+  "label": "default",
+  "passed": true,
+  "candidate": "f310-font-chain-4a429129",
+  "mode": "compatibility",
+  "language": "en-US",
+  "scope": "Candidate post-map baseline refresh on qualified b9 frontend and local9244 Gateway; normal private save and real asset caches, authentication cleared. Map and navigation lifecycle qualification, not cold performance or public-network acceptance.",
+  "cacheReuse": {
+    "scope": "Copied real profile with actual cache-namespace cleanup; pre-start font misses are retained. Complete six-font SHA, 113/113 and original Native 120s gates remain required after ordinary entry. Not a public cold-start qualification.",
+    "preStart": {
+      "assetVersion": "20261108-r16-08ec86d5105c",
+      "cacheNamespace": "20261108-r16-08ec86d5105c-9efa7c359164",
+      "rows": [
+        {
+          "name": "NotoSansCJKsc-Regular.otf",
+          "present": false,
+          "contentLength": null
+        },
+        {
+          "name": "NotoSansTC.ttf",
+          "present": false,
+          "contentLength": null
+        },
+        {
+          "name": "NotoSans-Regular.ttf",
+          "present": false,
+          "contentLength": null
+        },
+        {
+          "name": "NotoSansDevanagari-Regular.ttf",
+          "present": false,
+          "contentLength": null
+        },
+        {
+          "name": "NotoSansThai-Regular.ttf",
+          "present": false,
+          "contentLength": null
+        },
+        {
+          "name": "NotoSansArabic-Regular.ttf",
+          "present": false,
+          "contentLength": null
+        }
+      ],
+      "missing": [
+        "NotoSansCJKsc-Regular.otf",
+        "NotoSansTC.ttf",
+        "NotoSans-Regular.ttf",
+        "NotoSansDevanagari-Regular.ttf",
+        "NotoSansThai-Regular.ttf",
+        "NotoSansArabic-Regular.ttf"
+      ]
+    }
+  },
+  "loginInputBindingVerified": true,
+  "loginCompletedWithoutReload": true,
+  "cacheConfigurations": [
+    {
+      "name": "serviceWorkerConfigured",
+      "epochMs": 1794692026628,
+      "deletedCaches": 5
+    }
+  ],
+  "workerBinding": [
+    {
+      "url": "http://127.0.0.1:20631/mir2-asset-worker.js",
+      "wholeFontChain": true
+    }
+  ],
+  "webSocketInterception": false,
+  "documentNavigations": [
+    {
+      "at": 1794692025866,
+      "path": "/version"
+    },
+    {
+      "at": 1794692025896,
+      "path": "/game"
+    },
+    {
+      "at": 1794692026033,
+      "path": "/game"
+    },
+    {
+      "at": 1794692063666,
+      "path": "/game"
+    },
+    {
+      "at": 1794692063839,
+      "path": "/game"
+    }
+  ],
+  "fonts": {
+    "passed": true,
+    "expected": [
+      {
+        "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+        "bytes": 16437364,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansTC.ttf",
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+        "bytes": 621572,
+        "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+        "bytes": 243520,
+        "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+        "bytes": 37780,
+        "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+        "bytes": 234892,
+        "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+      }
+    ],
+    "cacheReadsOnly": true,
+    "rows": [
+      {
+        "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+        "present": true,
+        "bytes": 16437364,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansTC.ttf",
+        "present": true,
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+        "present": true,
+        "bytes": 621572,
+        "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+        "present": true,
+        "bytes": 243520,
+        "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+        "present": true,
+        "bytes": 37780,
+        "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+        "present": true,
+        "bytes": 234892,
+        "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+      }
+    ]
+  },
+  "prewarm": {
+    "summary": {
+      "requested": 113,
+      "ok": 113,
+      "failed": 0
+    }
+  },
+  "nativeAfterFirstFrameMs": 15685,
+  "navigation": {
+    "passed": true,
+    "scope": "Actual shared Quest entrance navigation from ReagentStore0108 to Bichon0, unmodified late collision after ordinary logout, fresh socket password-login and a new supply objective. Warm asset caches; local9244; not public-network or cold-performance qualification.",
+    "phases": [
+      {
+        "phase": "interior-route",
+        "at": 1794692051755
+      },
+      {
+        "phase": "pending-logout",
+        "at": 1794692057593
+      },
+      {
+        "phase": "fresh-supply-goal",
+        "at": 1794692083045
+      }
+    ],
+    "collision": [
+      {
+        "phase": "interior-route",
+        "map": "0108",
+        "url": "/api/scene/collision?map=0108&quest=1&minX=0&maxX=255&minY=0&maxY=255",
+        "at": 1794692052370
+      },
+      {
+        "phase": "pending-logout",
+        "map": "0",
+        "url": "/api/scene/collision?map=0&quest=1&minX=0&maxX=255&minY=0&maxY=255",
+        "at": 1794692057666,
+        "sha256": "88a8a89d4835e9eebdbe30f86b4a8528865d6501e3201f6c81e5f713b4c97be6",
+        "heldAt": 1794692057940,
+        "bounds": {
+          "minX": 0,
+          "maxX": 255,
+          "minY": 0,
+          "maxY": 255
+        },
+        "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+        "releasedAt": 1794692061526,
+        "fulfilledAt": 1794692061531
+      },
+      {
+        "phase": "pending-logout",
+        "map": "0",
+        "url": "/api/scene/collision?map=0&quest=1&minX=0&minY=256&maxX=255&maxY=511",
+        "at": 1794692061577
+      },
+      {
+        "phase": "pending-logout",
+        "map": "0",
+        "url": "/api/scene/collision?map=0&quest=1&minX=0&minY=512&maxX=255&maxY=767",
+        "at": 1794692061578
+      },
+      {
+        "phase": "pending-logout",
+        "map": "0",
+        "url": "/api/scene/collision?map=0&quest=1&minX=256&minY=0&maxX=511&maxY=255",
+        "at": 1794692061580
+      },
+      {
+        "phase": "pending-logout",
+        "map": "0",
+        "url": "/api/scene/collision?map=0&quest=1&minX=256&minY=256&maxX=511&maxY=511",
+        "at": 1794692061580
+      },
+      {
+        "phase": "pending-logout",
+        "map": "0",
+        "url": "/api/scene/collision?map=0&quest=1&minX=256&minY=512&maxX=511&maxY=767",
+        "at": 1794692061860
+      },
+      {
+        "phase": "pending-logout",
+        "map": "0",
+        "url": "/api/scene/collision?map=0&quest=1&minX=512&minY=0&maxX=767&maxY=255",
+        "at": 1794692062111
+      },
+      {
+        "phase": "pending-logout",
+        "map": "0",
+        "url": "/api/scene/collision?map=0&quest=1&minX=512&minY=256&maxX=767&maxY=511",
+        "at": 1794692062362
+      },
+      {
+        "phase": "pending-logout",
+        "map": "0",
+        "url": "/api/scene/collision?map=0&quest=1&minX=512&minY=512&maxX=767&maxY=767",
+        "at": 1794692062590
+      },
+      {
+        "phase": "fresh-supply-goal",
+        "map": "0",
+        "url": "/api/scene/collision?map=0&quest=1&minX=0&maxX=255&minY=0&maxY=255",
+        "at": 1794692083368
+      },
+      {
+        "phase": "fresh-supply-goal",
+        "map": "0",
+        "url": "/api/scene/collision?map=0&quest=1&minX=0&minY=256&maxX=255&maxY=511",
+        "at": 1794692083648
+      },
+      {
+        "phase": "fresh-supply-goal",
+        "map": "0",
+        "url": "/api/scene/collision?map=0&quest=1&minX=0&minY=512&maxX=255&maxY=767",
+        "at": 1794692083649
+      },
+      {
+        "phase": "fresh-supply-goal",
+        "map": "0",
+        "url": "/api/scene/collision?map=0&quest=1&minX=256&minY=0&maxX=511&maxY=255",
+        "at": 1794692083649
+      },
+      {
+        "phase": "fresh-supply-goal",
+        "map": "0",
+        "url": "/api/scene/collision?map=0&quest=1&minX=256&minY=256&maxX=511&maxY=511",
+        "at": 1794692083649
+      },
+      {
+        "phase": "fresh-supply-goal",
+        "map": "0",
+        "url": "/api/scene/collision?map=0&quest=1&minX=256&minY=512&maxX=511&maxY=767",
+        "at": 1794692084014
+      },
+      {
+        "phase": "fresh-supply-goal",
+        "map": "0",
+        "url": "/api/scene/collision?map=0&quest=1&minX=512&minY=0&maxX=767&maxY=255",
+        "at": 1794692084331
+      },
+      {
+        "phase": "fresh-supply-goal",
+        "map": "0",
+        "url": "/api/scene/collision?map=0&quest=1&minX=512&minY=256&maxX=767&maxY=511",
+        "at": 1794692084651
+      },
+      {
+        "phase": "fresh-supply-goal",
+        "map": "0",
+        "url": "/api/scene/collision?map=0&quest=1&minX=512&minY=512&maxX=767&maxY=767",
+        "at": 1794692085087
+      }
+    ],
+    "portalSource": {
+      "manifestSha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2",
+      "from": 4,
+      "file": "0108",
+      "to": 1,
+      "map_index": 1,
+      "source": {
+        "x": 10,
+        "y": 13
+      },
+      "destination": {
+        "x": 326,
+        "y": 289
+      },
+      "need_hole": false,
+      "need_move": false,
+      "conquest_index": 0,
+      "show_on_big_map": false,
+      "icon": 0
+    },
+    "initial": {
+      "map": "0108",
+      "position": {
+        "x": 8,
+        "y": 12
+      }
+    },
+    "entranceControl": {
+      "stamp": {
+        "generation": 2,
+        "revision": 2,
+        "connectionGeneration": 1,
+        "sessionGeneration": 1,
+        "sceneRevision": 3,
+        "playerObjectId": 1000,
+        "mapFileName": "0108"
+      },
+      "rect": {
+        "type": "navigateQuestRoute",
+        "left": 19,
+        "top": 295,
+        "width": 282,
+        "height": 25
+      },
+      "point": {
+        "x": 288,
+        "y": 403.5
+      }
+    },
+    "interiorPlan": {
+      "at": 1794692052536,
+      "phase": "interior-route",
+      "query": {
+        "version": 1,
+        "stamp": {
+          "generation": 2,
+          "revision": 2,
+          "connectionGeneration": 1,
+          "sessionGeneration": 1,
+          "sceneRevision": 3,
+          "playerObjectId": 1000,
+          "mapFileName": "0108"
+        },
+        "mapIndex": 4,
+        "mapFileName": "0108",
+        "width": 15,
+        "height": 18,
+        "origin": {
+          "x": 8,
+          "y": 12
+        },
+        "destination": {
+          "x": 10,
+          "y": 13
+        },
+        "routeTarget": {
+          "type": "entrance"
+        },
+        "occupiedTiles": [
+          {
+            "x": 7,
+            "y": 7
+          }
+        ],
+        "rejectedEdges": []
+      },
+      "result": {
+        "destination": {
+          "x": 10,
+          "y": 13
+        },
+        "error": null,
+        "mapFileName": "0108",
+        "mapIndex": 4,
+        "ok": true,
+        "origin": {
+          "x": 8,
+          "y": 12
+        },
+        "radius": 0,
+        "stamp": {
+          "connectionGeneration": 1,
+          "generation": 2,
+          "mapFileName": "0108",
+          "playerObjectId": 1000,
+          "revision": 2,
+          "sceneRevision": 3,
+          "sessionGeneration": 1
+        },
+        "steps": [
+          {
+            "x": 9,
+            "y": 13
+          },
+          {
+            "x": 10,
+            "y": 13
+          }
+        ],
+        "version": 1
+      }
+    },
+    "transfer": {
+      "packet": "MapInformation",
+      "payload": {
+        "bigMapIndex": 101,
+        "fileName": "0",
+        "lights": 0,
+        "mapDarkLight": 0,
+        "mapIndex": 1,
+        "miniMapIndex": 101,
+        "music": 0,
+        "spawnFlags": {
+          "fire": false,
+          "lightning": false
+        },
+        "title": "BichonProvince",
+        "weatherParticles": 0
+      },
+      "type": "packet",
+      "seq": 13,
+      "at": 1794692056011
+    },
+    "afterTransfer": {
+      "map": "0",
+      "position": {
+        "x": 325,
+        "y": 290
+      }
+    },
+    "landingAck": {
+      "packet": "UserLocation",
+      "payload": {
+        "direction": "Down",
+        "x": 325,
+        "y": 290
+      },
+      "type": "packet",
+      "seq": 15,
+      "at": 1794692056013
+    },
+    "afterMapMoves": [],
+    "postMapControls": {
+      "stamp": {
+        "generation": 2,
+        "revision": 5,
+        "connectionGeneration": 1,
+        "sessionGeneration": 1,
+        "sceneRevision": 4,
+        "playerObjectId": 1000,
+        "mapFileName": "0"
+      },
+      "rects": [
+        {
+          "type": "navigateQuestRoute",
+          "left": 19,
+          "top": 255,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "questLocalUi",
+          "left": 19,
+          "top": 306,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "openDestinationMap",
+          "left": 19,
+          "top": 335,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "toggleSupplies",
+          "left": 19,
+          "top": 364,
+          "width": 282,
+          "height": 25
+        }
+      ],
+      "quests": [
+        {
+          "id": 2110001,
+          "stage": "completed"
+        },
+        {
+          "id": 2110002,
+          "stage": "completed"
+        },
+        {
+          "id": 2110003,
+          "stage": "inProgress"
+        },
+        {
+          "id": 154,
+          "stage": "available"
+        }
+      ]
+    },
+    "baselineReads": [
+      {
+        "type": "clientVersion",
+        "seq": 16,
+        "at": 1794692056158
+      }
+    ],
+    "postMapBaseline": {
+      "type": "worldSnapshot",
+      "seq": 17,
+      "at": 1794692056211,
+      "mapFileName": "0",
+      "playerObjectId": 1000,
+      "questLog": [
+        {
+          "current": 1,
+          "objective": "Main-node reward claimed.",
+          "objectives": [
+            {
+              "current": 1,
+              "done": true,
+              "label": "Report to Assistant Jane",
+              "required": 1
+            }
+          ],
+          "progressLabel": "Completed.",
+          "questId": 2110001,
+          "required": 1,
+          "rewardPreview": "EXP 100, Gold 100, (HP)DrugSmall x10, WoodenSword x1",
+          "stage": "completed",
+          "summary": "Newcomer V2 main node 1.",
+          "title": "Your first patrol kit",
+          "tracker": "Your first patrol kit completed."
+        },
+        {
+          "current": 1,
+          "objective": "Main-node reward claimed.",
+          "objectives": [
+            {
+              "current": 1,
+              "done": true,
+              "label": "Equip a weapon you can use",
+              "required": 1
+            }
+          ],
+          "progressLabel": "Completed.",
+          "questId": 2110002,
+          "required": 1,
+          "rewardPreview": "EXP 200, Gold 100",
+          "stage": "completed",
+          "summary": "Newcomer V2 main node 2.",
+          "title": "Equip your weapon",
+          "tracker": "Equip your weapon completed."
+        },
+        {
+          "current": 0,
+          "objective": "Defeat 2 Scarecrow.\nDefeat 2 RakingCat.",
+          "objectives": [
+            {
+              "current": 0,
+              "done": false,
+              "label": "Defeat 2 Scarecrow.",
+              "required": 2
+            },
+            {
+              "current": 0,
+              "done": false,
+              "label": "Defeat 2 RakingCat.",
+              "required": 2
+            }
+          ],
+          "progressLabel": "Progress 0/4",
+          "questId": 2110003,
+          "required": 4,
+          "rewardPreview": "EXP 2200, Gold 150, Fencing x1",
+          "stage": "inProgress",
+          "summary": "Newcomer V2 main node 3.",
+          "title": "Protect the village",
+          "tracker": "Defeat 2 Scarecrow."
+        },
+        {
+          "current": 0,
+          "objective": "Emperors Problem",
+          "progressLabel": "Level 1+, class restricted",
+          "questId": 154,
+          "required": 1,
+          "rewardPreview": "Original Crystal quest reward.",
+          "stage": "available",
+          "summary": "Emperors Problem",
+          "title": "Emperors Problem",
+          "tracker": "Emperors Problem is available."
+        }
+      ]
+    },
+    "baselineReadScope": "bounded refresh observed",
+    "interiorMoves": [
+      {
+        "type": "walk",
+        "direction": "DownRight",
+        "seq": 10,
+        "at": 1794692052538
+      },
+      {
+        "type": "walk",
+        "direction": "Right",
+        "seq": 12,
+        "at": 1794692053157
+      }
+    ],
+    "pendingControl": {
+      "stamp": {
+        "generation": 2,
+        "revision": 5,
+        "connectionGeneration": 1,
+        "sessionGeneration": 1,
+        "sceneRevision": 4,
+        "playerObjectId": 1000,
+        "mapFileName": "0"
+      },
+      "rect": {
+        "type": "navigateQuestRoute",
+        "left": 19,
+        "top": 255,
+        "width": 282,
+        "height": 25
+      },
+      "point": {
+        "x": 288,
+        "y": 363.5
+      }
+    },
+    "pendingLogout": {
+      "at": 1794692061526,
+      "normalAck": true,
+      "noMoveBeforeAck": true
+    },
+    "held": {
+      "phase": "pending-logout",
+      "map": "0",
+      "url": "/api/scene/collision?map=0&quest=1&minX=0&maxX=255&minY=0&maxY=255",
+      "at": 1794692057666,
+      "sha256": "88a8a89d4835e9eebdbe30f86b4a8528865d6501e3201f6c81e5f713b4c97be6",
+      "heldAt": 1794692057940,
+      "bounds": {
+        "minX": 0,
+        "maxX": 255,
+        "minY": 0,
+        "maxY": 255
+      },
+      "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+      "releasedAt": 1794692061526,
+      "fulfilledAt": 1794692061531
+    },
+    "reopened": {
+      "map": "0",
+      "position": {
+        "x": 325,
+        "y": 290
+      }
+    },
+    "supplies": {
+      "open": {
+        "stamp": {
+          "generation": 2,
+          "revision": 2,
+          "connectionGeneration": 1,
+          "sessionGeneration": 1,
+          "sceneRevision": 3,
+          "playerObjectId": 1000,
+          "mapFileName": "0"
+        },
+        "rect": {
+          "type": "toggleSupplies",
+          "left": 19,
+          "top": 342,
+          "width": 282,
+          "height": 25
+        },
+        "point": {
+          "x": 288,
+          "y": 450.5
+        }
+      },
+      "vendor": {
+        "stamp": {
+          "generation": 2,
+          "revision": 2,
+          "connectionGeneration": 1,
+          "sessionGeneration": 1,
+          "sceneRevision": 3,
+          "playerObjectId": 1000,
+          "mapFileName": "0"
+        },
+        "rect": {
+          "type": "selectSupplyVendor",
+          "left": 19,
+          "top": 313,
+          "width": 282,
+          "height": 25
+        },
+        "point": {
+          "x": 288,
+          "y": 421.5
+        }
+      },
+      "control": {
+        "stamp": {
+          "generation": 2,
+          "revision": 2,
+          "connectionGeneration": 1,
+          "sessionGeneration": 1,
+          "sceneRevision": 3,
+          "playerObjectId": 1000,
+          "mapFileName": "0"
+        },
+        "rect": {
+          "type": "navigateQuestRoute",
+          "left": 19,
+          "top": 331,
+          "width": 282,
+          "height": 25
+        },
+        "point": {
+          "x": 288,
+          "y": 439.5
+        }
+      },
+      "plan": {
+        "at": 1794692086302,
+        "phase": "fresh-supply-goal",
+        "query": {
+          "version": 1,
+          "stamp": {
+            "generation": 2,
+            "revision": 2,
+            "connectionGeneration": 1,
+            "sessionGeneration": 1,
+            "sceneRevision": 3,
+            "playerObjectId": 1000,
+            "mapFileName": "0"
+          },
+          "mapIndex": 1,
+          "mapFileName": "0",
+          "width": 700,
+          "height": 700,
+          "origin": {
+            "x": 325,
+            "y": 290
+          },
+          "destination": {
+            "x": 324,
+            "y": 291
+          },
+          "routeTarget": {
+            "type": "supply",
+            "vendor": "potions"
+          },
+          "occupiedTiles": [
+            {
+              "x": 324,
+              "y": 291
+            },
+            {
+              "x": 310,
+              "y": 283
+            },
+            {
+              "x": 329,
+              "y": 289
+            },
+            {
+              "x": 341,
+              "y": 275
+            }
+          ],
+          "rejectedEdges": []
+        },
+        "result": {
+          "destination": {
+            "x": 325,
+            "y": 290
+          },
+          "error": null,
+          "mapFileName": "0",
+          "mapIndex": 1,
+          "ok": true,
+          "origin": {
+            "x": 325,
+            "y": 290
+          },
+          "radius": 2,
+          "stamp": {
+            "connectionGeneration": 1,
+            "generation": 2,
+            "mapFileName": "0",
+            "playerObjectId": 1000,
+            "revision": 2,
+            "sceneRevision": 3,
+            "sessionGeneration": 1
+          },
+          "steps": [],
+          "version": 1
+        }
+      },
+      "chat": [
+        "[Mode: Peaceful]",
+        "[Pet: Attack and Move]",
+        "Planning a route to (324, 291)…",
+        "You have arrived near (324, 291). Talk to the NPC to continue."
+      ]
+    },
+    "manualStep": {
+      "at": 1794692086595,
+      "ackAt": 1794692086722,
+      "moves": [
+        {
+          "type": "walk",
+          "direction": "Down",
+          "seq": 30,
+          "at": 1794692086621
+        }
+      ],
+      "position": {
+        "x": 325,
+        "y": 291
+      }
+    },
+    "finalTile": {
+      "x": 325,
+      "y": 291
+    },
+    "planners": [
+      {
+        "phase": "old-session",
+        "rows": [
+          {
+            "at": 1794692052536,
+            "phase": "interior-route",
+            "query": {
+              "version": 1,
+              "stamp": {
+                "generation": 2,
+                "revision": 2,
+                "connectionGeneration": 1,
+                "sessionGeneration": 1,
+                "sceneRevision": 3,
+                "playerObjectId": 1000,
+                "mapFileName": "0108"
+              },
+              "mapIndex": 4,
+              "mapFileName": "0108",
+              "width": 15,
+              "height": 18,
+              "origin": {
+                "x": 8,
+                "y": 12
+              },
+              "destination": {
+                "x": 10,
+                "y": 13
+              },
+              "routeTarget": {
+                "type": "entrance"
+              },
+              "occupiedTiles": [
+                {
+                  "x": 7,
+                  "y": 7
+                }
+              ],
+              "rejectedEdges": []
+            },
+            "result": {
+              "destination": {
+                "x": 10,
+                "y": 13
+              },
+              "error": null,
+              "mapFileName": "0108",
+              "mapIndex": 4,
+              "ok": true,
+              "origin": {
+                "x": 8,
+                "y": 12
+              },
+              "radius": 0,
+              "stamp": {
+                "connectionGeneration": 1,
+                "generation": 2,
+                "mapFileName": "0108",
+                "playerObjectId": 1000,
+                "revision": 2,
+                "sceneRevision": 3,
+                "sessionGeneration": 1
+              },
+              "steps": [
+                {
+                  "x": 9,
+                  "y": 13
+                },
+                {
+                  "x": 10,
+                  "y": 13
+                }
+              ],
+              "version": 1
+            }
+          }
+        ],
+        "errors": 0,
+        "dropped": 0,
+        "paused": 0,
+        "closed": true
+      },
+      {
+        "phase": "fresh-session",
+        "rows": [
+          {
+            "at": 1794692086302,
+            "phase": "fresh-supply-goal",
+            "query": {
+              "version": 1,
+              "stamp": {
+                "generation": 2,
+                "revision": 2,
+                "connectionGeneration": 1,
+                "sessionGeneration": 1,
+                "sceneRevision": 3,
+                "playerObjectId": 1000,
+                "mapFileName": "0"
+              },
+              "mapIndex": 1,
+              "mapFileName": "0",
+              "width": 700,
+              "height": 700,
+              "origin": {
+                "x": 325,
+                "y": 290
+              },
+              "destination": {
+                "x": 324,
+                "y": 291
+              },
+              "routeTarget": {
+                "type": "supply",
+                "vendor": "potions"
+              },
+              "occupiedTiles": [
+                {
+                  "x": 324,
+                  "y": 291
+                },
+                {
+                  "x": 310,
+                  "y": 283
+                },
+                {
+                  "x": 329,
+                  "y": 289
+                },
+                {
+                  "x": 341,
+                  "y": 275
+                }
+              ],
+              "rejectedEdges": []
+            },
+            "result": {
+              "destination": {
+                "x": 325,
+                "y": 290
+              },
+              "error": null,
+              "mapFileName": "0",
+              "mapIndex": 1,
+              "ok": true,
+              "origin": {
+                "x": 325,
+                "y": 290
+              },
+              "radius": 2,
+              "stamp": {
+                "connectionGeneration": 1,
+                "generation": 2,
+                "mapFileName": "0",
+                "playerObjectId": 1000,
+                "revision": 2,
+                "sceneRevision": 3,
+                "sessionGeneration": 1
+              },
+              "steps": [],
+              "version": 1
+            }
+          }
+        ],
+        "errors": 0,
+        "dropped": 0,
+        "paused": 0,
+        "closed": true
+      }
+    ]
+  },
+  "storeVisit": {
+    "passed": true,
+    "scope": "Ordinary authenticated walking into imported ReagentStore portal; no save mutation or administrative commands.",
+    "walks": [
+      {
+        "from": {
+          "x": 322,
+          "y": 293
+        },
+        "to": {
+          "x": 323,
+          "y": 293
+        },
+        "at": 1794692018811,
+        "ackAt": 1794692018814,
+        "map": "0",
+        "authoritative": {
+          "x": 323,
+          "y": 293
+        }
+      },
+      {
+        "from": {
+          "x": 323,
+          "y": 293
+        },
+        "to": {
+          "x": 324,
+          "y": 292
+        },
+        "at": 1794692019270,
+        "ackAt": 1794692019414,
+        "map": "0",
+        "authoritative": {
+          "x": 324,
+          "y": 292
+        }
+      },
+      {
+        "from": {
+          "x": 324,
+          "y": 292
+        },
+        "to": {
+          "x": 325,
+          "y": 292
+        },
+        "at": 1794692019871,
+        "ackAt": 1794692020014,
+        "map": "0",
+        "authoritative": {
+          "x": 325,
+          "y": 292
+        }
+      },
+      {
+        "from": {
+          "x": 325,
+          "y": 292
+        },
+        "to": {
+          "x": 326,
+          "y": 291
+        },
+        "at": 1794692020476,
+        "ackAt": 1794692020620,
+        "map": "0",
+        "authoritative": {
+          "x": 326,
+          "y": 291
+        }
+      },
+      {
+        "from": {
+          "x": 326,
+          "y": 291
+        },
+        "to": {
+          "x": 327,
+          "y": 290
+        },
+        "at": 1794692021078,
+        "ackAt": 1794692021220,
+        "map": "0",
+        "authoritative": {
+          "x": 327,
+          "y": 290
+        }
+      },
+      {
+        "from": {
+          "x": 327,
+          "y": 290
+        },
+        "to": {
+          "x": 327,
+          "y": 289
+        },
+        "at": 1794692021677,
+        "ackAt": 1794692021821,
+        "map": "0",
+        "authoritative": {
+          "x": 327,
+          "y": 289
+        }
+      },
+      {
+        "from": {
+          "x": 327,
+          "y": 289
+        },
+        "to": {
+          "x": 326,
+          "y": 288
+        },
+        "at": 1794692022276,
+        "ackAt": 1794692022434,
+        "map": "0",
+        "authoritative": {
+          "x": 326,
+          "y": 288
+        }
+      }
+    ],
+    "packets": [
+      {
+        "at": 1794692018722,
+        "packet": "MapInformation",
+        "payload": {
+          "bigMapIndex": 101,
+          "fileName": "0",
+          "lights": 0,
+          "mapDarkLight": 0,
+          "mapIndex": 1,
+          "miniMapIndex": 101,
+          "music": 0,
+          "spawnFlags": {
+            "fire": false,
+            "lightning": false
+          },
+          "title": "BichonProvince",
+          "weatherParticles": 0
+        }
+      },
+      {
+        "at": 1794692018814,
+        "packet": "UserLocation",
+        "payload": {
+          "direction": "Right",
+          "x": 323,
+          "y": 293
+        }
+      },
+      {
+        "at": 1794692019414,
+        "packet": "UserLocation",
+        "payload": {
+          "direction": "UpRight",
+          "x": 324,
+          "y": 292
+        }
+      },
+      {
+        "at": 1794692020014,
+        "packet": "UserLocation",
+        "payload": {
+          "direction": "Right",
+          "x": 325,
+          "y": 292
+        }
+      },
+      {
+        "at": 1794692020620,
+        "packet": "UserLocation",
+        "payload": {
+          "direction": "UpRight",
+          "x": 326,
+          "y": 291
+        }
+      },
+      {
+        "at": 1794692021220,
+        "packet": "UserLocation",
+        "payload": {
+          "direction": "UpRight",
+          "x": 327,
+          "y": 290
+        }
+      },
+      {
+        "at": 1794692021821,
+        "packet": "UserLocation",
+        "payload": {
+          "direction": "Up",
+          "x": 327,
+          "y": 289
+        }
+      },
+      {
+        "at": 1794692022434,
+        "packet": "UserLocation",
+        "payload": {
+          "direction": "UpLeft",
+          "x": 326,
+          "y": 288
+        }
+      },
+      {
+        "at": 1794692022722,
+        "packet": "MapInformation",
+        "payload": {
+          "bigMapIndex": 0,
+          "fileName": "0108",
+          "lights": 2,
+          "mapDarkLight": 0,
+          "mapIndex": 4,
+          "miniMapIndex": 0,
+          "music": 0,
+          "spawnFlags": {
+            "fire": false,
+            "lightning": false
+          },
+          "title": "ReagentStore",
+          "weatherParticles": 0
+        }
+      },
+      {
+        "at": 1794692022723,
+        "packet": "UserLocation",
+        "payload": {
+          "direction": "Down",
+          "x": 8,
+          "y": 12
+        }
+      }
+    ],
+    "commands": [
+      {
+        "at": 1794692007986,
+        "type": "clientVersion"
+      },
+      {
+        "at": 1794692008284,
+        "type": "login"
+      },
+      {
+        "at": 1794692009033,
+        "type": "startGame"
+      },
+      {
+        "at": 1794692018290,
+        "type": "keepAlive"
+      },
+      {
+        "at": 1794692018812,
+        "type": "walk"
+      },
+      {
+        "at": 1794692019270,
+        "type": "walk"
+      },
+      {
+        "at": 1794692019871,
+        "type": "walk"
+      },
+      {
+        "at": 1794692020476,
+        "type": "walk"
+      },
+      {
+        "at": 1794692021078,
+        "type": "walk"
+      },
+      {
+        "at": 1794692021677,
+        "type": "walk"
+      },
+      {
+        "at": 1794692022277,
+        "type": "walk"
+      },
+      {
+        "at": 1794692022891,
+        "type": "clientVersion",
+        "reason": "ordinary post-transfer full observation refresh, matching protocol-travel"
+      },
+      {
+        "at": 1794692022901,
+        "type": "logOut"
+      }
+    ],
+    "arrival": {
+      "map": "0108",
+      "position": {
+        "x": 8,
+        "y": 12
+      },
+      "bootstrapWaitMs": 10
+    },
+    "normalLogout": true,
+    "closed": true
+  },
+  "saved": {
+    "normalLogout": true,
+    "position": {
+      "x": 325,
+      "y": 291
+    },
+    "preservedFields": 12,
+    "completeCharacterMetadataPreserved": true
+  },
+  "wireFailures": 0,
+  "pageErrors": 0,
+  "connections": 2,
+  "sourceSnapshotUnchanged": true,
+  "closed": {
+    "browser": true,
+    "proxy": true,
+    "next": true,
+    "gateway": true
+  }
+}

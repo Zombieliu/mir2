@@ -1,0 +1,3 @@
+# R18 generated actor input preflight
+
+All225 missing non-ignored files belong only to Monster/049 (224 PNG frames and metadata). The prior cache attempts refused changes before copying. The exact generated-library ignore declaration admits these source-bound build inputs while preserving the tracked action catalog and unshipped aggregate export index. Candidate actor/manifest/pixel closure remains mandatory; no AllowDirtyWorktree bypass is added. This is packaging input preparation, not a packaged, published, native or human acceptance. Raw failed preflight02 and independent gap03 are retained.

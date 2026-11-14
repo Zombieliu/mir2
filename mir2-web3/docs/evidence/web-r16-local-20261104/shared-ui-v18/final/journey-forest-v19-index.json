@@ -1,0 +1,48 @@
+{
+  "phase": "journey-forest-v19",
+  "publicOnly": true,
+  "privateLogsCopied": false,
+  "rawNativeScreenshotCopied": false,
+  "privateIdentityMatches": 0,
+  "knownSecretPatternMatches": 0,
+  "files": 6,
+  "bytes": 1610169,
+  "entries": [
+    {
+      "path": "journey-forest-v19/forest-forest-v19-r1/01-current-native-task-card-before-measured-readiness.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-forest-v19-r1/01-current-native-task-card-before-measured-readiness.png",
+      "bytes": 270908,
+      "sha256": "d5454097043330d25dd06452a1985d60792a5741ed9e1896d15f378f16d588f4"
+    },
+    {
+      "path": "journey-forest-v19/forest-forest-v19-r1/02-fresh-v2-native-task-card.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-forest-v19-r1/02-fresh-v2-native-task-card.png",
+      "bytes": 270583,
+      "sha256": "5e1a63bfcd6dd06e1ec1610c63a7d7d3f7dbb0e9be9f8174c5278f73aa9ae3f0"
+    },
+    {
+      "path": "journey-forest-v19/forest-forest-v19-r1/03-before-finishQuest-2110007.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-forest-v19-r1/03-before-finishQuest-2110007.png",
+      "bytes": 248466,
+      "sha256": "c02a8f73f814abfa0bfe4cac6bc67da34513cae0b917a0ed55ab1dcee13ed7ce"
+    },
+    {
+      "path": "journey-forest-v19/forest-forest-v19-r1/04-next-quest-2110007-completed.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-forest-v19-r1/04-next-quest-2110007-completed.png",
+      "bytes": 255278,
+      "sha256": "00140dad68f4e45d9b0e7b60129101f09e28325bebb2a344065b8dd17723f78a"
+    },
+    {
+      "path": "journey-forest-v19/forest-forest-v19-r1/05-segment-complete-before-normal-logout.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-forest-v19-r1/05-segment-complete-before-normal-logout.png",
+      "bytes": 243111,
+      "sha256": "0af4282f19b08f7ac30935a2c0ad597d114ff253d5f41b26dd049a6e1f5abd19"
+    },
+    {
+      "path": "journey-forest-v19/forest-forest-v19-r1/onboarding-forest-browser-proof.json",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-forest-v19-r1/onboarding-forest-browser-proof.json",
+      "bytes": 321823,
+      "sha256": "6979f1c18b8cfee845b07a805c4d252c44c02a4a3b3f14fda7ace0b2d230da2e"
+    }
+  ]
+}

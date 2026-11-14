@@ -1,0 +1,24 @@
+{
+  "schema": "mir2.unified.canary-verify-v2-local-validation.v1",
+  "passed": true,
+  "checks": [
+    "full orchestration accepts COPY clock drift; all46 exact; complete two-clock asset projections have equal SHA256",
+    "nonclock-table digest drift rejected",
+    "clock-table gold mutation rejected",
+    "clock-generation change rejected",
+    "clock store-version mismatch rejected",
+    "clock row insertion rejected",
+    "guild lease identity change rejected",
+    "AST exact equality: nine B974 predicate/parser functions",
+    "AST v1 functions unchanged except verify; ordinary acceptance/projection/PID/no-chain retained"
+  ],
+  "cases": 9,
+  "helperSha256": "963710f3fbb88a5bad39f9b96e7146701d34e7c3fc3ad675112a523eeef0e44d",
+  "predicateSourceSha256": "b974234a8a4ceeca17accc6437c9f53cf24010186a9f128675be60b40ce43346",
+  "v1HelperUnchangedSha256": "61ffc3fe8e62c82a8914ca1a8d7669bea56e096258f3774c387f75d82f0da35a",
+  "linuxPermissionChecksExecutedLocally": false,
+  "rootActualB974AuditPassed": true,
+  "nativeLinuxImportOmittedForWindowsFixture": "pwd",
+  "remoteExecutedByThisAgent": false,
+  "sourceEdited": false
+}

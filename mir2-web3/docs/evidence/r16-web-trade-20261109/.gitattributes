@@ -1,0 +1,6 @@
+# Keep recorded receipt/source byte hashes stable on Windows and Linux.
+* -text
+** -text
+ui/cleanup-verified.json whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+# Keep assertion-output indentation verbatim; these are archived stdout, not source.
+code/*.log -whitespace

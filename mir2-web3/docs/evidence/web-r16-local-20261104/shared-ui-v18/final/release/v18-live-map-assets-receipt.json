@@ -1,0 +1,44 @@
+{
+  "schema": "mir2.r16.live-assets-v18-sample/1",
+  "passed": true,
+  "ordinaryPublicHttp": true,
+  "playerActions": 0,
+  "assetCount": 4,
+  "rows": [
+    {
+      "path": "original-map/WemadeMir2/Objects/1127.png",
+      "status": 200,
+      "bytes": 1402,
+      "sha256": "fc501b2bbc10a34088fd1d2a7989ed70847b3153cc495034b5191f7cd44664db"
+    },
+    {
+      "path": "original-ui/Monster/022/0.png",
+      "status": 200,
+      "bytes": 3550,
+      "sha256": "71a9af953e5776dd2b5f3d638873ecf740ad5da17c4f9f40fecd70c313df8f0d"
+    },
+    {
+      "path": "original-ui/CWeapon/05/0.png",
+      "status": 200,
+      "bytes": 327,
+      "sha256": "6a30885b42ddcb333b226091486f549bf6872273e8228614190d1c0ddcbd71a5"
+    },
+    {
+      "path": "original-ui/NPC/04/0.png",
+      "status": 200,
+      "bytes": 2167,
+      "sha256": "60edd64b5cc0bffbab00291250994a179f1c62f23025d7b83725f9ead2aa176c"
+    }
+  ],
+  "d001PackedMap": {
+    "bytes": 99475,
+    "sha256": "b0c4ebf0c0999cdd1273fffb06ca31a8bc5171eeb68de532cdde2d7bd2a6b383"
+  },
+  "d001Scene": {
+    "status": 200,
+    "missing": 0,
+    "sprites": 390,
+    "cells": 5050,
+    "error": null
+  }
+}

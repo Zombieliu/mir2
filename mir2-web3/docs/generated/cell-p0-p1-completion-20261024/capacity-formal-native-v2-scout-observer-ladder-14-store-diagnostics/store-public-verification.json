@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T22:48:34.176Z",
+  "dataset": "account-store",
+  "runId": "1792967155359-90bac462",
+  "sourceIdentity": {
+    "schemaVersion": 1,
+    "dataset": "account-store",
+    "storeOnly": true,
+    "manifest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-slow-stage-diagnostics-v1\\source-freeze-v1.json",
+      "bytes": 4628,
+      "sha256": "632e875bd2d56299009411d6d22ee8912eed3f15c3d26f8b95466be2bd22f9cb"
+    },
+    "review": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-slow-stage-independent-review-v1\\review-v1.json",
+      "bytes": 6459,
+      "sha256": "54a9c1a27336537d0232b6f8b76ac18f92ef76f8064899b2a253f78d68eefb68"
+    },
+    "sourceSha256": "8db992f5b7246f585d0158a914e616bbf9397421b66d92f27b350444b1939c8c",
+    "helperSha256": "6cde67571184692d7b89da32adb21fb2f8a228db5e0865cb9cc96bf3a34925c7",
+    "validatorSha256": "d71add02703a84acc2d870d5c7daf96dd17e0533b2d49af0480e55dea7aea262",
+    "separateFromBaseThreeFourSeven": true,
+    "contributesToGameAcceptance": false
+  },
+  "publicCopiesVerified": 2,
+  "rows": 107,
+  "bytes": 23441,
+  "sha256": "44569e52854e5f0355d512d690db27ae44222ef859c892582bb1ef5a8e5cf60d",
+  "diagnosticComplete": true,
+  "captureReasons": [],
+  "originalReportOk": false,
+  "originalGameVerdictPreserved": true,
+  "capacityAccepted": false,
+  "contributesToGameAcceptance": false
+}

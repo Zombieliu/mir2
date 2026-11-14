@@ -1,0 +1,21 @@
+{
+  "schema": "mir2.map-phase2-apply.v1",
+  "createdUtc": "2026-10-04T06:59:39.665227+00:00",
+  "appliedToSourceHead": "3e1f9167097ff239faeffdde809a17b2c0009b6c",
+  "patchSha256": "58addd5cae73b1e8737702c91295c62ce5161514647e7297054371e78ae21228",
+  "firstRawByteComparisonFailure": {
+    "path": "apps/game-client/platform-windows/scripts/test-candidate-map-scope.ps1",
+    "actualSha256": "2fbdcfabc9e8461f3a174c3d0ba20e1e8894d113bd1c0530492ae17925b07823",
+    "actualBytes": 10641,
+    "actualCRLFCount": 131,
+    "reviewedBytes": 10510,
+    "reviewedSha256": "a0a0edfae603a4e8e6337de5e9bcec294c732e64423d09d5c4a8d64ac601134c",
+    "reviewedCRLFCount": 0,
+    "sameTextAfterNewlineNormalization": true
+  },
+  "repair": "copy exact reviewed LF bytes of this one approved test script; no logical/source change",
+  "finalByteVerifiedFileCount": 11,
+  "failures": [],
+  "consumerCompilePending": true,
+  "published": false
+}

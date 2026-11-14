@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T19:58:02.701Z",
+  "runId": "1792956759820-08151b82",
+  "sourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "driverSourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "scope": "Post-stop streaming size/SHA/count and frame-header metadata only. No replay/entity payload copied.",
+  "directory": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\recordings",
+  "fileCount": 1,
+  "totalFrames": 3977,
+  "totalBytes": 218442018,
+  "healthPersistedFramesTotal": 3977,
+  "recordingErrorsTotal": 0,
+  "files": [
+    {
+      "file": "0-498043.jsonl",
+      "bytes": 218442018,
+      "sha256": "a37b2dc4be5703f1fd5f6aae320b049d91a75c8029bd09faeec974eabf91e989",
+      "frames": 3977,
+      "minCapturedAtMs": 1792956762201,
+      "maxCapturedAtMs": 1792957806703,
+      "firstSequence": 1,
+      "lastSequence": 3977,
+      "mapFileNames": [
+        "0"
+      ],
+      "schemas": [
+        "obelisk.mir2.spectator.v1"
+      ]
+    }
+  ],
+  "rawVerifierAccepted": false,
+  "normalOwnedCleanup": true,
+  "capacityAccepted": false,
+  "persistedCounterMatchesFiles": true
+}

@@ -1,0 +1,87 @@
+{
+  "schema": "mir2.web-r16-taoist-browser-handoff-stock/2",
+  "handoffReceipt": "taoist-browser-handoff.json",
+  "handoffSha256": "0e9dedd18dbfbfcb31f7f97c9ed4e1e69821c87b4ed6956958c5f94f4e8dd438",
+  "source": "Last complete ordinary post-relogin server snapshot, verified against the final controller frame.",
+  "snapshotAt": "2026-11-06T10:12:05.607Z",
+  "gatewayPid": 106016,
+  "endpoint": "ws://127.0.0.1:19133/ws",
+  "location": {
+    "map": "0",
+    "x": 328,
+    "y": 264
+  },
+  "vitals": {
+    "hp": 108,
+    "maxHp": 203,
+    "mp": 111,
+    "maxMp": 213
+  },
+  "gold": 42795,
+  "capacity": {
+    "used": 10,
+    "max": 46,
+    "weight": 215,
+    "maxWeight": 232,
+    "compatibilityWeight": 215,
+    "crystalBagWeight": 142,
+    "handWeight": 21,
+    "wearWeight": 16,
+    "weightForV2Restock": 142,
+    "crystalBagHeadroom": 90
+  },
+  "stock": {
+    "hp": {
+      "bag": 0,
+      "belt": 0
+    },
+    "mp": {
+      "bag": 36,
+      "belt": 38
+    },
+    "amulet": {
+      "equipped": 72,
+      "belt": 5
+    }
+  },
+  "ordinaryPurchase": {
+    "merchant": "Samuel",
+    "itemIndex": 662,
+    "itemName": "(HP)DrugLarge",
+    "catalogUnitGold": 225,
+    "catalogUnitWeight": 3,
+    "catalogStackLimit": 20,
+    "weightHeadroom": 90,
+    "weightBoundedCurrentQuantity": 30,
+    "startWithQuantity": 1,
+    "quoteAndCapacityCheckedByBrowser": false,
+    "mpTargetAlreadyCovered": true,
+    "conservativeCompatibilityQuantity": 5,
+    "plannedTargetWeight": 72,
+    "plannedTargetFitsCrystalBag": true,
+    "plannedTargetRequiresMultipleOrdinaryPurchases": true,
+    "initialLiveQuoteRequired": true,
+    "q20HpTarget": 24,
+    "maximumPerOrdinaryOrder": 20
+  },
+  "q20Continuation": {
+    "requiredAmuletCount": 100,
+    "actualAmuletCount": 77,
+    "additionalAmuletsRequired": 23,
+    "originalClockPreserved": true,
+    "recordedRevives": 2,
+    "questStage": "inProgress",
+    "questProgress": 0
+  },
+  "supersedes": {
+    "file": "taoist-browser-handoff-stock.json",
+    "sha256": "303fff3594eebb65cbfea82b0738506fabcd3d479c45b8294422d17a23d4ee2e",
+    "reason": "The complete snapshot contains both compatibility currentWeight and Crystal playerWeights.bag. The V2 restock policy selects the latter."
+  },
+  "weightInterpretation": {
+    "crystalSource": "apps/simulation/src/runtime/player_weights.rs",
+    "supplySource": "apps/web/scripts/quest-agent/protocol-supplies.mjs",
+    "crystalBagIncludesBelt": true,
+    "amuletStackWeightSpecialCase": true
+  }
+}

@@ -1,0 +1,243 @@
+{
+  "schema": "mir2.bounded-public-download-probe.v1",
+  "createdUnix": 1791125845,
+  "sourceOfMeasurements": "This Windows development host only; not the other laptop or all regions",
+  "fullInstallerDownloaded": false,
+  "gameLaunched": false,
+  "playerStoresTouched": false,
+  "feedSequence": 12,
+  "gameCandidate": "WN-CANDIDATE-20261004-invited-17",
+  "signedLocalPayloadCount": 125965,
+  "signedLocalPayloadBytes": 753611651,
+  "results": [
+    {
+      "host": "165.154.65.136.sslip.io",
+      "path": "/client-updates/latest.json",
+      "status": 200,
+      "bytesRead": 1159,
+      "headersMs": 196.77,
+      "elapsedSeconds": 0.197,
+      "boundedMiBPerSecond": 0.0056,
+      "sha256ReadBytes": "7efdddf34fbf58ffa0bf8c4f7fcb1a9ad2bac869cb3f003cea0a0c9c53356c88",
+      "headers": {
+        "Content-Length": "1159",
+        "Content-Range": null,
+        "Server": "Caddy",
+        "Cache-Control": "no-store",
+        "CF-Cache-Status": null
+      }
+    },
+    {
+      "host": "165.154.65.136.sslip.io",
+      "path": "/client-updates/releases/game-WN-CANDIDATE-20261004-invited-17/mir2-assets/original-ui/AArmour/00/0.png",
+      "status": 200,
+      "bytesRead": 2432,
+      "headersMs": 69.53,
+      "elapsedSeconds": 0.07,
+      "boundedMiBPerSecond": 0.0334,
+      "sha256ReadBytes": "9fbe5b497a8be3fe7b213c2cfea88d6dff1cede8aa1942f01f072d1822223725",
+      "headers": {
+        "Content-Length": "2432",
+        "Content-Range": null,
+        "Server": "Caddy",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "CF-Cache-Status": null
+      },
+      "exactManifestBytes": true
+    },
+    {
+      "host": "165.154.65.136.sslip.io",
+      "path": "/client-updates/releases/game-WN-CANDIDATE-20261004-invited-17/mir2-assets/original-ui/AArmour/00/1.png",
+      "status": 200,
+      "bytesRead": 2439,
+      "headersMs": 60.09,
+      "elapsedSeconds": 0.06,
+      "boundedMiBPerSecond": 0.0387,
+      "sha256ReadBytes": "4606ab74d8bb4d4d7864ca480b3dd578d0cef1f045ee9e3af43a4e505e88b738",
+      "headers": {
+        "Content-Length": "2439",
+        "Content-Range": null,
+        "Server": "Caddy",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "CF-Cache-Status": null
+      },
+      "exactManifestBytes": true
+    },
+    {
+      "host": "165.154.65.136.sslip.io",
+      "path": "/client-updates/releases/game-WN-CANDIDATE-20261004-invited-17/mir2-assets/original-ui/AArmour/00/10.png",
+      "status": 200,
+      "bytesRead": 1745,
+      "headersMs": 61.29,
+      "elapsedSeconds": 0.061,
+      "boundedMiBPerSecond": 0.0272,
+      "sha256ReadBytes": "5b57b6a9651a43adcc9ad614f69bc19b6b3e7460881eadd39d05d9261dc0eae0",
+      "headers": {
+        "Content-Length": "1745",
+        "Content-Range": null,
+        "Server": "Caddy",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "CF-Cache-Status": null
+      },
+      "exactManifestBytes": true
+    },
+    {
+      "host": "165.154.65.136.sslip.io",
+      "path": "/client-updates/releases/game-WN-CANDIDATE-20261004-invited-17/mir2-assets/original-ui/AArmour/00/100.png",
+      "status": 200,
+      "bytesRead": 2282,
+      "headersMs": 61.65,
+      "elapsedSeconds": 0.062,
+      "boundedMiBPerSecond": 0.0353,
+      "sha256ReadBytes": "8abb4c6bf26d93fe9d8fa4f419ff1b6646066e3f8baa77895deb398c793cf78b",
+      "headers": {
+        "Content-Length": "2282",
+        "Content-Range": null,
+        "Server": "Caddy",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "CF-Cache-Status": null
+      },
+      "exactManifestBytes": true
+    },
+    {
+      "host": "165.154.65.136.sslip.io",
+      "path": "/client-updates/releases/game-WN-CANDIDATE-20261004-invited-17/mir2-assets/original-ui/AArmour/00/1000.png",
+      "status": 200,
+      "bytesRead": 2048,
+      "headersMs": 59.96,
+      "elapsedSeconds": 0.06,
+      "boundedMiBPerSecond": 0.0326,
+      "sha256ReadBytes": "f781e698a419fee6555d575ae7e2b38bf0f4b27459e65d24a12f1a003b663911",
+      "headers": {
+        "Content-Length": "2048",
+        "Content-Range": null,
+        "Server": "Caddy",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "CF-Cache-Status": null
+      },
+      "exactManifestBytes": true
+    },
+    {
+      "host": "165.154.65.136.sslip.io",
+      "path": "/client-updates/releases/game-WN-CANDIDATE-20261004-invited-17/mir2-assets/original-ui/AArmour/00/1001.png",
+      "status": 200,
+      "bytesRead": 2017,
+      "headersMs": 59.91,
+      "elapsedSeconds": 0.06,
+      "boundedMiBPerSecond": 0.0321,
+      "sha256ReadBytes": "bc03377215e8e48c320faf072471f4fee80b25d7fa83b331e7ba2377d5de4c0c",
+      "headers": {
+        "Content-Length": "2017",
+        "Content-Range": null,
+        "Server": "Caddy",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "CF-Cache-Status": null
+      },
+      "exactManifestBytes": true
+    },
+    {
+      "host": "165.154.65.136.sslip.io",
+      "path": "/client-updates/releases/game-WN-CANDIDATE-20261004-invited-17/mir2-assets/original-ui/AArmour/00/1002.png",
+      "status": 200,
+      "bytesRead": 1907,
+      "headersMs": 59.42,
+      "elapsedSeconds": 0.059,
+      "boundedMiBPerSecond": 0.0306,
+      "sha256ReadBytes": "95c0326e501cc0258ce08cee64336a3ab2b90d9015e4dd4a3831817a4fb97aa8",
+      "headers": {
+        "Content-Length": "1907",
+        "Content-Range": null,
+        "Server": "Caddy",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "CF-Cache-Status": null
+      },
+      "exactManifestBytes": true
+    },
+    {
+      "host": "165.154.65.136.sslip.io",
+      "path": "/client-updates/releases/game-WN-CANDIDATE-20261004-invited-17/mir2-assets/original-ui/AArmour/00/1003.png",
+      "status": 200,
+      "bytesRead": 2070,
+      "headersMs": 60.91,
+      "elapsedSeconds": 0.061,
+      "boundedMiBPerSecond": 0.0324,
+      "sha256ReadBytes": "5b01ad15b8a49cb2d45438eff271733043e00954a53b715aa4fd2f266ffe691d",
+      "headers": {
+        "Content-Length": "2070",
+        "Content-Range": null,
+        "Server": "Caddy",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "CF-Cache-Status": null
+      },
+      "exactManifestBytes": true
+    },
+    {
+      "host": "165.154.65.136.sslip.io",
+      "path": "/client-updates/releases/game-WN-CANDIDATE-20261004-invited-17/DELIVERY.json",
+      "status": 404,
+      "bytesRead": 0,
+      "headersMs": 57.75,
+      "elapsedSeconds": 0.058,
+      "boundedMiBPerSecond": 0.0,
+      "sha256ReadBytes": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "headers": {
+        "Content-Length": "0",
+        "Content-Range": null,
+        "Server": "Caddy",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "CF-Cache-Status": null
+      }
+    },
+    {
+      "host": "165.154.65.136.sslip.io",
+      "path": "/client-updates/releases/bootstrap-WN-CANDIDATE-20261003-invited-16/Numeron-Legend-of-Rebirth-20261003-r16-Bootstrap.exe",
+      "status": 206,
+      "bytesRead": 2097152,
+      "headersMs": 62.62,
+      "elapsedSeconds": 20.922,
+      "boundedMiBPerSecond": 0.0956,
+      "sha256ReadBytes": "a35e12389cde6fdd385957e54653fbd1b5b9af6f7dc60821c4e4952ebed1c08b",
+      "headers": {
+        "Content-Length": "2097152",
+        "Content-Range": "bytes 0-2097151/27481889",
+        "Server": "Caddy",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "CF-Cache-Status": null
+      }
+    },
+    {
+      "host": "165.154.65.136.sslip.io",
+      "path": "/client-updates/releases/game-WN-CANDIDATE-20261004-invited-17/mir2-platform-windows.exe",
+      "status": 206,
+      "bytesRead": 2097152,
+      "headersMs": 86.89,
+      "elapsedSeconds": 20.96,
+      "boundedMiBPerSecond": 0.0954,
+      "sha256ReadBytes": "d2420d46bcc273ace8e1a5691e0ce30f401e2b56481f0c82739b5353e39fb887",
+      "headers": {
+        "Content-Length": "2097152",
+        "Content-Range": "bytes 0-2097151/111013376",
+        "Server": "Caddy",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "CF-Cache-Status": null
+      }
+    },
+    {
+      "host": "assets.mir2.obelisk.build",
+      "path": "/client-updates/latest.json",
+      "status": 404,
+      "bytesRead": 9,
+      "headersMs": 583.66,
+      "elapsedSeconds": 0.584,
+      "boundedMiBPerSecond": 0.0,
+      "sha256ReadBytes": "8bf1172df581a12c2c602a62dd15e76b3096035a2d65c910c29838f277eafa0d",
+      "headers": {
+        "Content-Length": "9",
+        "Content-Range": null,
+        "Server": "cloudflare",
+        "Cache-Control": "no-store",
+        "CF-Cache-Status": null
+      }
+    }
+  ]
+}

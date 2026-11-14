@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-capacity-bank-prepare-v3",
+  "kind": "authoring-syntax-and-readonly-source-validation",
+  "createdAt": "2026-10-26T21:15:10.089Z",
+  "supersedes": {
+    "receipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v3\\authoring-syntax-v1.json",
+      "bytes": 4251,
+      "sha256": "a990585a3d8b81eca5e7bd1a8059f2270790239b27797bbd1ba911e97d388492"
+    },
+    "reason": "Preserve v1 as historical authoring evidence; v2 corrects source pool plan metadata from 4/96 to actual 5/95, binds config to corrected plan, adds explicit actual-pool metadata validation and forbids pickUp in all first-four no-economic-work proofs. Earlier tool/config/plan hashes are superseded."
+  },
+  "node": {
+    "file": "C:\\Program Files\\nodejs\\node.exe",
+    "bytes": 85202416,
+    "sha256": "c22d1c59a1f767a1ed0178445a027f2257d318c55430fc819d48f269586822b7"
+  },
+  "configPin": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v3\\prepare-config-pending-v1.json",
+    "bytes": 5360,
+    "sha256": "fffacbd4da3913e0e958c88debec9d5aae82de32774ff7ccc51bafddecfc255e"
+  },
+  "planPin": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v3\\source-bank-plan-pending-v1.json",
+    "bytes": 10101,
+    "sha256": "4c0f432003936756675a2903bf7229f443cf55793d1154dfb2924d2571f04c69"
+  },
+  "validation": {
+    "readOnlyValidateSourceBank": true,
+    "ready": 5,
+    "registered": 95,
+    "prepared": 4,
+    "fileCount": 11,
+    "sourceOriginalFalse": true,
+    "allSourceReferencePinsMatch": true,
+    "referencePinCount": 26
+  },
+  "checks": [
+    {
+      "name": "create-package-v1.mjs",
+      "input": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v3\\create-package-v1.mjs",
+        "bytes": 17726,
+        "sha256": "622bb1929c7436af0b5fdaa1cafc4bcd7b8c1b3c22f315c324871b1844398c21"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v3\\create-package-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "source-lib-v1.mjs",
+      "input": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v3\\source-lib-v1.mjs",
+        "bytes": 14019,
+        "sha256": "6d28ec2e825eeec639d820fa475ffea9455ea1ff009308e74894d753fbdb5e07"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v3\\source-lib-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "copy-source-bank-v1.mjs",
+      "input": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v3\\copy-source-bank-v1.mjs",
+        "bytes": 10324,
+        "sha256": "8993c532661d2fe5398906bb2af305c2c1d7401beb03ce2558f6a3b50852633f"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v3\\copy-source-bank-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "freeze-prepare-v1.mjs",
+      "input": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v3\\freeze-prepare-v1.mjs",
+        "bytes": 7723,
+        "sha256": "4d804d61d6eb5767ac577f9e7d34c1ef1bccae487c040548e5a64c2b3f0e9861"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v3\\freeze-prepare-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "run-owned-prepare-v1.mjs",
+      "input": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v3\\run-owned-prepare-v1.mjs",
+        "bytes": 24627,
+        "sha256": "2404eb74974440959552475c71851b653a8413a0469a0788b74573be04aa2c67"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v3\\run-owned-prepare-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "owned-child-v1.mjs",
+      "input": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v3\\owned-child-v1.mjs",
+        "bytes": 2201,
+        "sha256": "7845fc2e212bb15b0e036e33753c9e155a9d2152c15098f9ab001dd1f9b74375"
+      },
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v3\\owned-child-v1.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "allSyntaxPassed": true,
+  "scope": "Parser checks and read-only validateSourceBank only. No copySourceBankExclusively call, freeze, tests, Gateway or workload.",
+  "bankCopied": false,
+  "freezeExecuted": false,
+  "loadStarted": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

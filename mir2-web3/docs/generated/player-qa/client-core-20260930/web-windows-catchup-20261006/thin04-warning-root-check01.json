@@ -1,0 +1,185 @@
+{
+  "owner": "Root",
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w5-thin-build04-warning-source-review01.json",
+    "bytes": 32968,
+    "sha256": "3a472bcddc06d5c3e8dc4aab96daf6050a5393f13d5d58fca8f3f7551eae299d"
+  },
+  "warnings": 44,
+  "allRequestAndRequesterTextsMatched": true,
+  "evidencePins": [
+    {
+      "path": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\sharp\\lib\\utility.js",
+      "bytes": 9437,
+      "sha256": "ada1854f397f54ee09286094a4f4cd9a4d4af9f4ddbaae3b4f477edbd8c1fd14",
+      "matched": true
+    },
+    {
+      "path": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\sharp\\lib\\sharp.js",
+      "bytes": 4044,
+      "sha256": "59e9436f1c62a58b8781acb3803e55114bada9984cc7c39b9291769155811cd3",
+      "matched": true
+    },
+    {
+      "path": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\sharp\\lib\\libvips.js",
+      "bytes": 5947,
+      "sha256": "ae8cbc8008bf88f5100ca56729ed43d45cd88316e030dc2eed62e142f657cd79",
+      "matched": true
+    },
+    {
+      "path": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\sharp\\src\\binding.gyp",
+      "bytes": 10597,
+      "sha256": "dc753e7ef9a8b393e14ed6a6fa17baae89e6edb4f39740b1cc1e9d06cbd20478",
+      "matched": true
+    },
+    {
+      "path": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\next-server.js",
+      "bytes": 69366,
+      "sha256": "df2d1867b1e63c7aa1462938d894f72fed8de5b1bfedd229ef2ed5243145c19b",
+      "matched": true
+    },
+    {
+      "path": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\lib\\trace\\tracer.js",
+      "bytes": 11008,
+      "sha256": "f271af0df23265546ae006e6dd7c1d92483823e1b80ec63b67380ca8145598e1",
+      "matched": true
+    },
+    {
+      "path": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\lib\\router-utils\\instrumentation-node-extensions.js",
+      "bytes": 5030,
+      "sha256": "fe3a7aa4d81d865e5a66deab7e9d2a99f952e0f61219f472dc21ad427f190b5c",
+      "matched": true
+    },
+    {
+      "path": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\build\\swc\\index.js",
+      "bytes": 58769,
+      "sha256": "c30600dadbfd1eda94e9f88e5141aec9313d18502016dba16f9cc8ae91c96ccd",
+      "matched": true
+    },
+    {
+      "path": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\telemetry\\events\\swc-load-failure.js",
+      "bytes": 1929,
+      "sha256": "882322eee9598ddfe5385042e50913b75b1b7cfd8e4e6a154af45f436ab663fe",
+      "matched": true
+    },
+    {
+      "path": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\post-process.js",
+      "bytes": 1412,
+      "sha256": "8d4e89e6a039edd832843e9467a60cc219278336d8310a9769f9f31d3c563597",
+      "matched": true
+    },
+    {
+      "path": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\webpack\\webpack.js",
+      "bytes": 2147,
+      "sha256": "7ae3a1cb9950f7174a1bfc3c31d95be4687d9e90d1724d5ad28cc0f36f6c4bf6",
+      "matched": true
+    },
+    {
+      "path": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\shared\\lib\\get-rspack.js",
+      "bytes": 1263,
+      "sha256": "e0f4962a7edda3e93fbfff88fa93f93722559b59a7849372e10cf674e9e4ffe0",
+      "matched": true
+    },
+    {
+      "path": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\build\\webpack-config.js",
+      "bytes": 116603,
+      "sha256": "db284434cc84cd458302b9e49a0ca05d5d7157c78bbeda810fc7de61aaf7529b",
+      "matched": true
+    },
+    {
+      "path": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\route-modules\\app-page\\vendored\\ssr\\entrypoints.js",
+      "bytes": 4620,
+      "sha256": "c93cb2d4e4e51a516404bbfc1404849aa049239d980bbb7221fd1ce10e13a4b2",
+      "matched": true
+    },
+    {
+      "path": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\route-modules\\app-page\\vendored\\rsc\\entrypoints.js",
+      "bytes": 5461,
+      "sha256": "51b1c04a718e6f5ff362a68c8506dc53680ddf48852d59db50fe7f747d0c982c",
+      "matched": true
+    },
+    {
+      "path": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\app-render\\use-flight-response.js",
+      "bytes": 9284,
+      "sha256": "7c29832fbea172d7ea9ef180404443bc91b84d77a04e82fc49abad65ad7d3055",
+      "matched": true
+    },
+    {
+      "path": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\server\\app-render\\react-server.node.js",
+      "bytes": 1111,
+      "sha256": "dc284f03403f0e08d2d4ef0ec797a08cbe682cdf009971771f00e7528ac9fbd5",
+      "matched": true
+    },
+    {
+      "path": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\client\\components\\router-reducer\\fetch-server-response.js",
+      "bytes": 21533,
+      "sha256": "efe2663d5f5a4409e68ce4506f95b96318a72cceeb764ea40206b05fdd769171",
+      "matched": true
+    },
+    {
+      "path": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\client\\components\\router-reducer\\reducers\\server-action-reducer.js",
+      "bytes": 18906,
+      "sha256": "22da8f72a2f0931bcbdd78637f38bf1f227328a2ba559dbc017f36e53a906629",
+      "matched": true
+    },
+    {
+      "path": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\build\\get-babel-loader-config.js",
+      "bytes": 3561,
+      "sha256": "cb3730e21fc807fd16216adcdbd26d2e963237225f6a10a7f4b4d771fb69acaf",
+      "matched": true
+    },
+    {
+      "path": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\client\\dev\\hot-reloader\\app\\web-socket.js",
+      "bytes": 9777,
+      "sha256": "d2e5c7750604ced6c0137fc589c038dd1ea0db7cc0ce7c70977486bf5b028515",
+      "matched": true
+    },
+    {
+      "path": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\sass-loader\\cjs.js",
+      "bytes": 14633,
+      "sha256": "3b6b29f125195bee28d55279a0da86af31e0605f25fdfb8d44eb7d22819c422f",
+      "matched": true
+    },
+    {
+      "path": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\webpack\\bundle5.js",
+      "bytes": 2582716,
+      "sha256": "4293b6eb020382002a67bccdc2ccdaf6760fe041dd42de314e20fea7ca5a7ab7",
+      "matched": true
+    },
+    {
+      "path": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\client\\dev\\hot-reloader\\app\\hot-reloader-app.js",
+      "bytes": 23573,
+      "sha256": "0ccfe5e79b25d9611cb89ff1915763495556ae674d5c32c6e94699d22145941d",
+      "matched": true
+    },
+    {
+      "path": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\@next\\react-refresh-utils\\dist\\ReactRefreshWebpackPlugin.js",
+      "bytes": 6552,
+      "sha256": "65206e977159219d30e4ab9edca724c617a6ab4214141c40223d884484d2a456",
+      "matched": true
+    },
+    {
+      "path": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\@img\\sharp-win32-x64\\package.json",
+      "bytes": 908,
+      "sha256": "3421485756b0a25573ee62e147a62908608e3014a2bfed64381473a22e9351d2",
+      "matched": true
+    },
+    {
+      "path": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\@img\\sharp-win32-x64\\lib\\sharp-win32-x64.node",
+      "bytes": 433152,
+      "sha256": "afc813593f255968ddae8f1d66557e0f96484bb374606e4eb2267a7dbc7cb25a",
+      "matched": true
+    },
+    {
+      "path": "E:\\mir2\\mir2-web3\\apps\\web\\node_modules\\@next\\swc-win32-x64-msvc\\next-swc.win32-x64-msvc.node",
+      "bytes": 136872448,
+      "sha256": "1e11178f4bc55ba9d42ecc981c010aa2bb1eb6496fc15d3d788fdacc2eb90544",
+      "matched": true
+    }
+  ],
+  "allEvidencePinsMatched": true,
+  "noRuntimeWaiver": true,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false
+}

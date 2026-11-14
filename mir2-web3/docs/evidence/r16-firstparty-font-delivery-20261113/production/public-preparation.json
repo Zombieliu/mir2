@@ -1,0 +1,9 @@
+{
+  "source": "d99212e3cdde834b6eb751dd36e9a6361bc2d100",
+  "deployment": "dpl_7jUyC8yS8wxhfznJ8z5P42CPwbkX",
+  "baseline": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd",
+  "signedScripts": 20,
+  "run": "first-party-font-delivery",
+  "executed": false,
+  "scope": "Only source/deployment/run paths changed from prior frozen public runner. No network/protocol overrides, prefilled state or relaxed gate. Default ordinary Chrome, official mobile-sized Testnet PWA, one login-only approval, bounded shared Native observation and original strict8s walk/120s Native qualification retained separately."
+}

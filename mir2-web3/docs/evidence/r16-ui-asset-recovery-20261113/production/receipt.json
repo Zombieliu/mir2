@@ -1,0 +1,92 @@
+{
+  "recordedAt": "2026-11-13T01:38:29.347812+00:00",
+  "source": "e7cbab02f030ae50b28031ca0237d630eccb7c03",
+  "deployment": "dpl_4jjpevpspsVtf61hUCgTHiKxRatZ",
+  "implementation": "be376520441f1e65289e1450f7d6e26b2ed2f60e",
+  "origin": "https://numeron.obelisk.build",
+  "path": "/game",
+  "runtime": "bevy-0c553a754308e5b8",
+  "publicationPassed": true,
+  "signedRunnerPassed": true,
+  "originalFirstWalkGatePassed": true,
+  "originalNativeColdGatePassed": true,
+  "functionalPublicSamplePassed": true,
+  "projectCandidate100": false,
+  "humanAccepted": false,
+  "physicalPhoneTested": false,
+  "runs": {
+    "r2": 43339966843,
+    "stage": 43340773229,
+    "promote": 43342149133
+  },
+  "gates": {
+    "movementLimitMs": 8000,
+    "movementAckMs": 131,
+    "inputToRenderedMs": 156,
+    "nativeLimitMs": 120000,
+    "nativeCriterion": "sharedHudObservedMs minus firstPlayableFrameMs, unchanged from r16-boot-overlap production qualification",
+    "sharedHudObservedSinceFirstPlayableMs": 118667,
+    "separateTwoSecondJointSampleSinceFirstPlayableMs": 120238,
+    "jointSampleClaimedWithin120s": false
+  },
+  "startClickToFirstPlayableMs": 45079,
+  "sameAppAssetErrorRecovery": {
+    "failedSamples": 19,
+    "generation": 2,
+    "frameCounterMonotonic": true,
+    "laterQuestReady": true,
+    "laterHudReady": true
+  },
+  "wallet": {
+    "officialPwa": true,
+    "mobileEmulation": true,
+    "virtualPasskey": true,
+    "network": "Testnet",
+    "loginSignatures": 1,
+    "forbiddenOperations": 0
+  },
+  "logout": {
+    "attempted": true,
+    "passed": true,
+    "returnedToSelect": true,
+    "sent": 1,
+    "acknowledged": 1
+  },
+  "stage": {
+    "passed": true,
+    "trafficBefore": {
+      "target": "dpl_YKNdqLqcPpNRCXDch444krb7Y1Vs",
+      "alias": "dpl_YKNdqLqcPpNRCXDch444krb7Y1Vs"
+    },
+    "trafficAfter": {
+      "target": "dpl_YKNdqLqcPpNRCXDch444krb7Y1Vs",
+      "alias": "dpl_YKNdqLqcPpNRCXDch444krb7Y1Vs"
+    }
+  },
+  "promote": {
+    "passed": true,
+    "trafficBefore": {
+      "target": "dpl_YKNdqLqcPpNRCXDch444krb7Y1Vs",
+      "alias": "dpl_YKNdqLqcPpNRCXDch444krb7Y1Vs"
+    },
+    "trafficAfter": {
+      "target": "dpl_4jjpevpspsVtf61hUCgTHiKxRatZ",
+      "alias": "dpl_4jjpevpspsVtf61hUCgTHiKxRatZ"
+    },
+    "rollbacks": []
+  },
+  "preservation": {
+    "protectedFiles": 132,
+    "byteIdentical": 131,
+    "externalDocumentUpdatedAndCommittedSeparately": [
+      "mir2-web3/docs/evidence/gateway-equip-logout-20261112/README.md"
+    ],
+    "foreignIndexPreserved": true
+  },
+  "limits": [
+    "One ordinary public role and one frozen signed run; not a full class/level route or capacity qualification.",
+    "No physical phone acceptance.",
+    "Cold loading remains slow; the two-second joint sampler first observes both ready at 120.238s, distinct from the original HUD gate at 118.667s.",
+    "Vercel server runtime error scan unavailable due connector transport; browser recovered failures remain recorded."
+  ]
+}

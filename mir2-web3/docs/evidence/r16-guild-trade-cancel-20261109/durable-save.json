@@ -1,0 +1,16 @@
+{
+  "sourceFixtureUnchanged": true,
+  "originalFixtureSha256": "e6e9c8b184ca4818634e0b179f4866a18e9cb28cef109d525ea5be5b8444a314",
+  "finalCloneSha256": "bb48302b4302b12ddecf53d05489ebca7053c2d25e081e107ec18e1eed5a188b",
+  "ownerCandle": {
+    "uidSha256": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+    "quantity": 1,
+    "fromBagSlot": 3,
+    "toBagSlot": 4
+  },
+  "otherOwnerItemsSameUidSlotQuantity": true,
+  "peerItemsSameUidSlotQuantity": true,
+  "goldBothUnchanged": true,
+  "guildBankEmptyAfterRetrieve": true,
+  "sourceFixtureAccountCount": 4
+}

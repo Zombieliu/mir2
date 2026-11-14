@@ -1,0 +1,336 @@
+{
+  "schema": "mir2.windows.resource-pack-source-offline-verification.v1",
+  "recordedUtc": "2026-10-29T08:36:53.123539+00:00",
+  "scope": "sanitized source/build/full resource/offline real game and origin HTTP evidence; public CDN migration and performance remain separate",
+  "status": "source-and-offline-health-verified-origin-http-passed-public-migration-pending",
+  "sanitization": {
+    "explicitEvidenceAllowlist": true,
+    "secretValuesRecorded": false,
+    "privateConfigCopied": false,
+    "transportPrivateRead": false,
+    "sshCredentialsRead": false,
+    "userLogBodiesCopied": false,
+    "evidencePathsRelativeToTaskRoot": true
+  },
+  "versions": {
+    "packedSequence": 31,
+    "manifestSha256": "1E35573B0C0E5986501F646EF5552A9578DFDE59F67BE7F8687E012E7CB9F861",
+    "feedSha256": "FFF8F4232FA7531979100BD194FBBF33E5F41B6D185D1CC7423EA8F2CC8A210E",
+    "native": {
+      "sourceRevision": "29a187a272acb4129e3de2cd37e6bbdf62bf11e3",
+      "sourceCleanBeforeAndAfter": true,
+      "sourceInventorySha256": "49EFD187AC24E837D9BD90094A47E7428A37BC5626F0E10FFA3CC10D72C6BEC7",
+      "sourceFilesChecked": 1302,
+      "actualExecutable": {
+        "size": 115909632,
+        "sha256": "F3B0E756A2DF5747EFB0D2A3613E2FADD4687D982CF8CF280EA99BF0654AA25C"
+      },
+      "packedRelease": "1",
+      "toolchain": "1.95.0",
+      "hermeticOrReproducibleBuildClaimed": false
+    },
+    "engine2": {
+      "sourceRevision": "ba79cc90b47fa2fe017f977c29ea2c987342bcfe",
+      "sourceClean": true,
+      "actualExecutable": {
+        "size": 2178560,
+        "sha256": "343C5E52355E012A6E4CDABD81289A52C9D893114F378CD875AE3AF70AC2BBE3"
+      }
+    },
+    "legacyBridge29": {
+      "gameCandidate": "WN-CANDIDATE-20261011-invited-25",
+      "resourceGameSourceRevision": "d917de1ff4988e2d9fc7ca58f958cb5c80861fdf",
+      "engineSha256": "F3DE7B60F95C65D70EFEE03BCA031047D6D4E8D34268174128535F297D23495D",
+      "bundleCmsVerified": true
+    },
+    "fiveClassBridge30": {
+      "gameCandidate": "WN-CANDIDATE-20261029-wallet-28",
+      "resourceGameSourceRevision": "33f0b8c252f65cc4a24b133292cd1f9eba122dae",
+      "engineSha256": "343C5E52355E012A6E4CDABD81289A52C9D893114F378CD875AE3AF70AC2BBE3",
+      "bundleCmsVerified": true
+    },
+    "resourceSourceRevision": "33f0b8c252f65cc4a24b133292cd1f9eba122dae",
+    "resourceSourceIsNotNativeExeSource": true,
+    "sourcePackageManifestSha256": "BCA71514A99E158EB583F48D3E81095219C81C0C122CB1AE498B081460F822C0",
+    "strictResourceReportSha256": "4CDB98689B7FDEE725297670E832D3271E119A60121966A2188935485A7ECA66",
+    "catalogSha256": "708511179A1A5EBF64326C029ABEF8DB728E9DA0E95366DBF914300C723F476F",
+    "signingPublicKeyDerSha256": "6C70C777B27D50949370D494B4B25798200FBDD5C171BAEEAA94D7E289900F3E"
+  },
+  "fullResources": {
+    "resourceCount": 255057,
+    "uniquePayloads": 247471,
+    "logicalBytes": 1086897789,
+    "uniquePayloadBytes": 1053173797,
+    "catalogBytes": 68664916,
+    "packCount": 33,
+    "packBytes": 1069012997,
+    "duplicateResourcePaths": 7586,
+    "deduplicatedBytes": 33723992,
+    "actualLogicalReadsVerified": 255057,
+    "independentInventoryClosurePassed": true,
+    "independentPhysicalObjectClosurePassed": true,
+    "allSourceManifestPayloadsHashed": 255069,
+    "allSourceManifestPayloadBytes": 1202414057
+  },
+  "fullResourceBoundary": "every original mir2-assets/ entry mapped by stripping that prefix; exact logical path/size/SHA set; actual PackStore reads all resources; no loose asset trimming; stored codec; warm local preparation timings are not client or network measurements",
+  "signedGeneration": {
+    "cmsVerified": true,
+    "fullResourceVerified": true,
+    "metadataOnly": false,
+    "sourceCleanGate": true,
+    "manifestPinMatchesBuildAndHealthAndOrigin": true,
+    "publicAuthenticodeClaimed": false
+  },
+  "tests": [
+    {
+      "path": "native-tests.log",
+      "scope": "Windows native unit suite",
+      "results": [
+        {
+          "result": "ok",
+          "passed": 1181,
+          "failed": 0,
+          "ignored": 8,
+          "measured": 0,
+          "filteredOut": 0
+        }
+      ],
+      "sourceRevisionBinding": "raw log has no signed commit receipt; retain as prior bounded test evidence, not an assertion of fresh exact-29a whole-project acceptance"
+    },
+    {
+      "path": "audio-tests.log",
+      "scope": "audio filtered unit suite",
+      "results": [
+        {
+          "result": "ok",
+          "passed": 27,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 1588
+        }
+      ],
+      "sourceRevisionBinding": "raw log has no signed commit receipt; retain as prior bounded test evidence, not an assertion of fresh exact-29a whole-project acceptance"
+    },
+    {
+      "path": "resource-tests.log",
+      "scope": "earlier resource-pack all-targets snapshot",
+      "results": [
+        {
+          "result": "ok",
+          "passed": 0,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "result": "ok",
+          "passed": 7,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        },
+        {
+          "result": "ok",
+          "passed": 0,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 0
+        }
+      ],
+      "sourceRevisionBinding": "raw log has no signed commit receipt; retain as prior bounded test evidence, not an assertion of fresh exact-29a whole-project acceptance"
+    }
+  ],
+  "offlineInstallation": {
+    "productionApi": "generation::check_update",
+    "transport": "explicit LocalFiles PackSource with actual size/SHA and production pinned CMS; no network or CMS bypass",
+    "networkRequests": 0,
+    "localFileBytesReportedByUpdater": 1253598488,
+    "localUpdateElapsedMs": 6022,
+    "fixturePrepareElapsedMs": 9265,
+    "downloadedPacks": 33,
+    "baseline": "fresh minimal Candidate28 signed v4 controls/EXE/config plus original7404 launcher and signed engine2/seed30",
+    "baselineLooseResourcesCopied": 0,
+    "fullLegacyRollbackRunProven": false,
+    "initialSelectorPending": true,
+    "fakeAcceptedMarkerCreated": false
+  },
+  "offlineRealGame": {
+    "passed": true,
+    "pid": 61864,
+    "actualKernelPidAuthenticated": true,
+    "readySimulated": false,
+    "readyElapsedMs": 5751,
+    "aliveAfterFirstReadyMs": 19810,
+    "spawnToDurableAcceptedMs": 25562,
+    "acceptedViaProductionApi": true,
+    "selectorHealth": "healthy",
+    "realStdoutStderrFiles": true,
+    "mir2EnvironmentVariablesCleared": true,
+    "locale": "ru",
+    "localeOrigin": "existing preference chosen in actual old UI; no fixture rewrite",
+    "localePreferenceSha256": "D42FA0743407B36309568D27BBD5FED9D49927F4B47BC84D8D15E83C87D54658",
+    "gameExitCode": 0,
+    "driverDidNotKill": true,
+    "frontendManualAcceptance": false,
+    "phoneWalletSignatureAcceptance": false
+  },
+  "originHttp": {
+    "passed": true,
+    "checkedUtc": "2026-10-29T08:21:21Z",
+    "expectedCount": 137,
+    "attemptedCount": 137,
+    "passedCount": 137,
+    "redirectsFollowed": 0,
+    "methods": {
+      "HEAD": 40,
+      "GET": 93,
+      "POST": 1,
+      "PUT": 1,
+      "DELETE": 1,
+      "OPTIONS": 1
+    },
+    "rangeRequests": 38,
+    "legacy23AndFiveClass24UnchangedAtCheckTime": true,
+    "fullPackBodyDownloadOrPublicMigrationClaimed": false,
+    "backendPidVerification": "root-separate-check"
+  },
+  "retainedFailures": [
+    {
+      "kind": "first origin deployment attempt",
+      "receipt": "operations/ssh-results/packed-origin-deploy31-01.json",
+      "exitCode": 1,
+      "errorClass": "ValueError",
+      "countedAsSuccess": false,
+      "followupPassedReceipt": "operations/ssh-results/packed-origin-deploy31-02.json"
+    },
+    {
+      "kind": "interrupted initial archive upload",
+      "receipt": "operations/ssh-results/packed-interrupted-archive-preserve-01.json",
+      "partialPreserved": true,
+      "bytes": 953090048,
+      "originalOverwritten": false
+    },
+    {
+      "kind": "earlier full old-v4 copied fixture first normal launch",
+      "fixture": "e2e-current-v4",
+      "status": "failed fixture retained, natural rollback 24 to 23 as recorded in prior coordinator task; not rerun or repaired here",
+      "initialPanicCauseEstablished": false,
+      "evidenceBasis": "prior coordinator task record, not a fresh current-fixture validation"
+    }
+  ],
+  "remainingAcceptance": {
+    "publicCdnPromotionAndPostCleanupVerification": "pending separate live evidence",
+    "originalLauncher29or30ToPacked31PublicMigration": "pending separate live evidence",
+    "fiveMinuteEndToEndTarget": "not demonstrated by offline local-files timings or origin HEAD/Range probes",
+    "coldNetworkCacheSpeed": "not measured here",
+    "fullLegacyRollbackGameExecution": "not proven by the minimal offline baseline",
+    "humanFrontendAcceptance": "pending",
+    "realPhoneWalletSignatureAcceptance": "pending"
+  },
+  "evidence": [
+    {
+      "path": "native-release-29a/BUILD-PACKED-NATIVE.json",
+      "size": 3322,
+      "sha256": "E831E3B00E7B91906F2E07EF8A9FC1480E854FE645556F2C4A5E908F7808AF5A"
+    },
+    {
+      "path": "updater-release-ba79/BUILD-UPDATER.json",
+      "size": 616,
+      "sha256": "2BBCC93415FB027491BB9CED1343CA1C18643DC080E0CAD9E8EEA5AA9D55D88A"
+    },
+    {
+      "path": "verify-bridge29-bundle.json",
+      "size": 592,
+      "sha256": "A47DE0C343563E1EEA677020103F6F22A5FA41C398BF45EA21EE49E7A3D88E96"
+    },
+    {
+      "path": "verify-bridge30-bundle.json",
+      "size": 591,
+      "sha256": "72350B9E8D5E7675A8AD15541E8FAF16C77A074F15D47C2EDB128B84ACB6DC74"
+    },
+    {
+      "path": "packed-s31/SIGN-PACKED-GENERATION.json",
+      "size": 1451,
+      "sha256": "0F3C95DC653844F8C53D75B873434AE8E9AFD836694749660187829094C88753"
+    },
+    {
+      "path": "packed-s31/VERIFY-PACKED-GENERATION.json",
+      "size": 1096,
+      "sha256": "7C35C9841311F0D63B7A0997B37C2B087C158E66868746E28A564A24C9F89819"
+    },
+    {
+      "path": "full-resources/FULL-RESOURCE-PACK-RESULT.json",
+      "size": 2254,
+      "sha256": "D7BEDAF16830263C70DE8FC03B31DDFD7C2BF71CD496C46FC5FE7F68EEB0E7EC"
+    },
+    {
+      "path": "full-resources/ACTUAL-RESOURCE-VERIFICATION.json",
+      "size": 391,
+      "sha256": "6652EE3F8F11082E373757ABA3B3EC1848E4F7E55A554045C2DE593A77EBE10C"
+    },
+    {
+      "path": "offline-game-preflight/PREPARE-RECEIPT.json",
+      "size": 10442,
+      "sha256": "D193A5A048F15BB3CF3B58E10509AF5CD33046E9DE9517A9E51518E87F843A4E"
+    },
+    {
+      "path": "offline-game-preflight/SPAWN-RECEIPT.json",
+      "size": 1086,
+      "sha256": "1C3CB5A1B192D1CE5A09ADF7CC048AA7F2053B25103383B7FDDF3CE0CB5BB9F0"
+    },
+    {
+      "path": "offline-game-preflight/READY-RECEIPT.json",
+      "size": 382,
+      "sha256": "CDBD97C27F66371C05D11678FFB8CC9CC759DDDC891F771FD85345E9E8B7571B"
+    },
+    {
+      "path": "offline-game-preflight/HEALTH-RECEIPT.json",
+      "size": 2052,
+      "sha256": "7F902E00F2EBBB305D00BF3EECA21F78110BCC257AC63A30BA1DD78D507A9AD9"
+    },
+    {
+      "path": "offline-game-preflight/CHILD-EXIT-RECEIPT.json",
+      "size": 184,
+      "sha256": "C7AF2E217680B66C3C2419B4A6262B80779F5C9F3E5833F659599625A9908719"
+    },
+    {
+      "path": "operations/ssh-results/packed-origin-deploy31-01.json",
+      "size": 125,
+      "sha256": "91CE730B29D730FEB0631045DD0C9A5DA32A8C4E9E27A88C30BA97AD0492DF9A"
+    },
+    {
+      "path": "operations/ssh-results/packed-origin-deploy31-02.json",
+      "size": 528,
+      "sha256": "389E40E0AED6292F7BEB9CD2CE2EBDD804CC95279EEC8941C1765E98E61E9437"
+    },
+    {
+      "path": "operations/ssh-results/packed-interrupted-archive-preserve-01.json",
+      "size": 289,
+      "sha256": "250DC9A688FF1130B6B42113B572C29757FCC42E84F649E7044330AEBC6B2A16"
+    },
+    {
+      "path": "operations/origin-http-acceptance31.json",
+      "size": 122243,
+      "sha256": "712E0A0FABDA134D845EC3D16B7E85EEF96614AE65A1269E71D0AEBE534EBDB0"
+    },
+    {
+      "path": "resource-tests.log",
+      "size": 2544,
+      "sha256": "ADFF312C32C48B8A16F1F16D6B54AB0AD811B4159EB39585D801A11985EBA7AB"
+    },
+    {
+      "path": "native-tests.log",
+      "size": 168284,
+      "sha256": "DC6E62E0184034DBF442A3C45D7236B4C6119998E5DE3AA67ABA96E609EAC0C3"
+    },
+    {
+      "path": "audio-tests.log",
+      "size": 33904,
+      "sha256": "6276CACFD9D04D3BD7AC9ACB3C3B33B3A008AA3423FA98250A1ADC5BE8D72552"
+    }
+  ]
+}

@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-capacity-bank-prepare-v6",
+  "mode": "continued-actual-v5-ordinary-bank-preparation-only",
+  "actualV5PartialBankContinuation": true,
+  "sourceV5GuardFailureRetained": true,
+  "sourceBankPlan": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v6\\source-bank-plan-pending-v1.json",
+    "bytes": 11045,
+    "sha256": "b718121546daf4d791a4a50d59ff1602cbdfccf17a69328556b7601c53f97839"
+  },
+  "sourceBankCopyReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v6\\episode\\source-bank-copy-receipt-v1.json",
+    "bytes": 8690,
+    "sha256": "1ef35cc9cb217e8b84485ba3bbfc2a2c811e2a82e0d503245012f3eb61f3d3df"
+  },
+  "sourceOriginalFailedVerdictRetained": true,
+  "sourcePreparedEligibilityInherited": false,
+  "sourceFirst4InventoryReuse": true,
+  "sourceFirst4InventoryReuseEvidence": {
+    "passed": true,
+    "actors": [
+      {
+        "name": "L370e2a00",
+        "characterIndex": 1,
+        "passed": true,
+        "actualCompleteModuleCommandCounts": true,
+        "freshBeforeAfter": true,
+        "beforeHpStock": 12,
+        "afterHpStock": 12,
+        "beforeSequence": 717,
+        "afterSequence": 720,
+        "noHuntingHarvestPickupSalePurchase": true,
+        "purchased": 0,
+        "soldVenison": 0,
+        "funding": null
+      },
+      {
+        "name": "L370e2a01",
+        "characterIndex": 2,
+        "passed": true,
+        "actualCompleteModuleCommandCounts": true,
+        "freshBeforeAfter": true,
+        "beforeHpStock": 12,
+        "afterHpStock": 12,
+        "beforeSequence": 682,
+        "afterSequence": 685,
+        "noHuntingHarvestPickupSalePurchase": true,
+        "purchased": 0,
+        "soldVenison": 0,
+        "funding": null
+      },
+      {
+        "name": "L370e2a02",
+        "characterIndex": 3,
+        "passed": true,
+        "actualCompleteModuleCommandCounts": true,
+        "freshBeforeAfter": true,
+        "beforeHpStock": 12,
+        "afterHpStock": 12,
+        "beforeSequence": 674,
+        "afterSequence": 677,
+        "noHuntingHarvestPickupSalePurchase": true,
+        "purchased": 0,
+        "soldVenison": 0,
+        "funding": null
+      },
+      {
+        "name": "L370e2a03",
+        "characterIndex": 4,
+        "passed": true,
+        "actualCompleteModuleCommandCounts": true,
+        "freshBeforeAfter": true,
+        "beforeHpStock": 12,
+        "afterHpStock": 12,
+        "beforeSequence": 681,
+        "afterSequence": 684,
+        "noHuntingHarvestPickupSalePurchase": true,
+        "purchased": 0,
+        "soldVenison": 0,
+        "funding": null
+      }
+    ],
+    "duplicateOrdinaryPreparationRows": 0,
+    "scope": "Actual raw ordinaryPreparation result commandCounts must exist and sum to commands; absent members mean unsent types only within that complete module-owned count object. No missing summary commandCounts is treated as zero. Fresh ordinary-login before/after stock >=12; no hunting, harvest, pickup, sale or purchase. No inherited readiness."
+  },
+  "seederInvoked": false,
+  "loginNotBeforeOverridden": false,
+  "preparationOnly": true,
+  "workerCount": 1,
+  "maxPrepared": 100,
+  "manifestPin": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v6\\frozen-source-v1.json",
+    "bytes": 94390,
+    "sha256": "2922c1cb630540daff802187e50d918e25b5d6d21e53a9798b0e58214f170bcc"
+  },
+  "driverSourceCommit": "8aa9a1234f30ffeeb84803ce4c8daef1c84729f3",
+  "executionSourceCommit": "8aa9a1234f30ffeeb84803ce4c8daef1c84729f3",
+  "backendSourceCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+  "backendExecutable": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\bin\\mir2-gateway.exe",
+    "bytes": 87456256,
+    "sha256": "ad13d15a6fd294cae0beda04d8f91b7773a9b8390cc9c85e5a84d3e72c2567f6"
+  },
+  "backendSourcesExact": 55,
+  "newRustBuildPerformed": false,
+  "freshRustTestsPerformed": false,
+  "rawOriginalReport": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v6\\episode\\reports\\1793054581472-f2428092.preparation-report.json",
+    "bytes": 17362,
+    "sha256": "0063adec5a16e3cffdcc642e4edf6b130a21945eb0f0b22a89c3915c2b2f1b00"
+  },
+  "rawOriginalSamples": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v6\\episode\\reports\\1793054581472-f2428092.preparation.jsonl",
+    "bytes": 108562,
+    "sha256": "8d82786154db1d3ad4d1e3290bbbb37929cc8ac999a1475b233f868445e39e77"
+  },
+  "rawOriginalVerdict": {
+    "attackResults": "v2",
+    "ok": false,
+    "error": "No fresh visible unoccupied distinct declared staging candidate",
+    "preparedCount": 4,
+    "testExecution": false,
+    "ordinaryPreparationEvidenceEligible": false
+  },
+  "preparedIndexRecord": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v6\\episode\\prepared-index-v1.json",
+    "bytes": 1603,
+    "sha256": "9ac3891eabea4554dcb4eeb9abd607ea4cdb635afc993646228330c67fc79952"
+  },
+  "preparedIndexValid": false,
+  "progressCheckpoints": [],
+  "progressIsColdCheckpoint": false,
+  "productionPreparationEvidence": false,
+  "preparationComplete": false,
+  "executionError": null,
+  "cleanupComplete": true,
+  "cleanupRecord": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v6\\episode\\cleanup-v1.json",
+    "bytes": 1036,
+    "sha256": "ad6e2eaf7e3177ae5e6930ccefaafdd7cdc6cef21bf44a6216663fce23f3f7b1"
+  },
+  "coldBankEligible": false,
+  "formalOrdinaryRelogin100Verified": false,
+  "measurementPerformed": false,
+  "gameplayEngineActivated": false,
+  "nativeResumeExercisePerformed": false,
+  "sustainableTwoHourSupplyProven": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "formalAcceptanceEligible": false
+}

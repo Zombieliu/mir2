@@ -1,0 +1,9 @@
+{
+  "createdUtc": "2026-10-08T18:51:53.8248682Z",
+  "kind": "pickup-regression",
+  "cargoStarted": false,
+  "testsExecuted": 0,
+  "nonceCount": 0,
+  "reason": "Original runner refused overlapping foreign Cargo before creating a check directory",
+  "action": "Preserve refusal and wait; no process stopped"
+}

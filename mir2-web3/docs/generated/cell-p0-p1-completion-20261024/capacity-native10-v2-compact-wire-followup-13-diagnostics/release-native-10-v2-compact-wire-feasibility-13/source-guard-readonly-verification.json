@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "frozenAt": "2026-10-25T07:17:17.057Z",
+  "state": "final-source-bound-not-executed",
+  "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "backendInputCount": 41,
+  "backendRebuilt": false,
+  "sceneProfile": "ordinary-native-span2-five-by-five-static-halo-v1",
+  "patrolSpan": 2,
+  "rootApprovedFreshProbeOnly": true,
+  "formalCapacityApproved": false,
+  "driverSourceCommit": "4cab00893b861395b63906b1b8183a021d397cdb",
+  "coreCodeEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+  "sceneStaticCodeEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+  "driverSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+  "driverFrozenManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-native-witness-approach-driver-frozen-v1.json",
+    "bytes": 41896,
+    "sha256": "5cd1dafffa530e145828183e8b9089c6900b67760d79c3fe225f2399d904cada"
+  },
+  "wireDiagnostics": {
+    "version": "v2",
+    "manifest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\source-frozen-v2.json",
+      "bytes": 10830,
+      "sha256": "4ca6eee4f0ef9b2046bb5f56531ceec6eb2e1958141d0b7325cdb47de28e8ce3"
+    },
+    "review": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-wrapper-independent-review-v1\\review-v2.json",
+      "bytes": 6809,
+      "sha256": "4cda8f7ec69f710090cc3c4999cb847a8bf620bba6f2573978fe9245ddc50603"
+    },
+    "sourceSha256": "a3d938d2b9e92d97e445ca930640ccf1c838271d827efd45d11ff970f44cab49",
+    "driverSourceCommit": "4cab00893b861395b63906b1b8183a021d397cdb",
+    "coreCodeEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+    "coreDriverSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+    "wrapperTests": 28,
+    "core187CoversWrapper": false,
+    "terminalFile": "compact-navigation-wire-terminal.json",
+    "terminalOutsideRaw": true,
+    "existingWriter": {
+      "defaultMaxBufferedBytes": 4194304,
+      "addMayRecordFailureAndReturn": true,
+      "durableRowsRequireRawCrosscheck": true
+    }
+  },
+  "coreFunctionalEvidenceCoversWrapper": false,
+  "wrapperUnitTests": 28,
+  "adapterUnitTests": 8,
+  "actualAdmissionCaps": [
+    24,
+    10,
+    10,
+    4,
+    1,
+    2
+  ],
+  "tokioWorkers": 4,
+  "slowStageThresholdMs": 50,
+  "sourceConfigNotYet": true,
+  "accountsProvisioned": false,
+  "realmStarted": false,
+  "capacityAccepted": false,
+  "verifiedAt": "2026-10-25T07:17:19.820Z",
+  "passed": true,
+  "readOnly": true,
+  "backendSourceUnchangedSinceBuild": true,
+  "rebuildPerformed": false,
+  "backendSourceAggregate": "57ea1cde0ab22a03a50d1e9c7e20fdcd8a2060d1cb7922a2ad2cee91e55f5d96",
+  "binary": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v1\\bin\\mir2-gateway.exe",
+    "bytes": 87370240,
+    "sha256": "a43078b05e70b480f948fee505e23d2757ce1ae20fdc1f22b2348df46ee7125d"
+  },
+  "full16RunId": "1792884517374-04264602",
+  "driverClosurePins": 124,
+  "wireSourcePins": 11,
+  "wireSourceFiles": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\source-frozen-v2.json",
+      "bytes": 10830,
+      "sha256": "4ca6eee4f0ef9b2046bb5f56531ceec6eb2e1958141d0b7325cdb47de28e8ce3"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-wrapper-independent-review-v1\\review-v2.json",
+      "bytes": 6809,
+      "sha256": "4cda8f7ec69f710090cc3c4999cb847a8bf620bba6f2573978fe9245ddc50603"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\README.md",
+      "bytes": 7876,
+      "sha256": "6ad7017bb924f9f9e5dde7822f796103fb32b921e01db907daeb15ccbe6fbfa6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\create-from-v1.mjs",
+      "bytes": 5182,
+      "sha256": "dc675829fa7e6bb11fb2e9767a7daba83f75cb20979f80afb93dd17a3a03d4ba"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\freeze.mjs",
+      "bytes": 6062,
+      "sha256": "a34e328a606e86a2523d3c9920702883d7633d4610e370c6ada549fa519af973"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\run-synthetic-tests.mjs",
+      "bytes": 1982,
+      "sha256": "7a89a295e77db9149147fe015dcf09f59fd9cd1f2af4ecd91cb047035262cb33"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\tests-v1.json",
+      "bytes": 1711,
+      "sha256": "b4786feaae7542f73cb7f6c5a6a75cdc45df592e51a3457b2a5f4c862ec93ab9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\tests-v1.log",
+      "bytes": 7111,
+      "sha256": "1a2b03fb727ec2e1249ab18e3307fa7736b04b93b27311622afd450098e77a3b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\v1-baseline-binding.json",
+      "bytes": 2021,
+      "sha256": "be83f33aefb41306d3b950810950d71e6b2ee43f72ab814be5348f856e753ccf"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\wrapper.mjs",
+      "bytes": 14598,
+      "sha256": "169da7ebf4d9e7227494ece8413998baee0694519011b5528f2bae250b9fe98f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\wrapper.test.mjs",
+      "bytes": 21656,
+      "sha256": "216fb7fce356fbba4ee73124014270d3e968f3c68b9cd49e6c5e6c7f297abac3"
+    }
+  ],
+  "sceneSourceSha256": "4854eb58f6468ad4f8092dd375dc5363f42071470f92be4219a14df1321b163f",
+  "sceneStaticEvidenceNotRerun": true,
+  "original42InputsUnchanged": true,
+  "presealReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-probe13-preseal-input-check-v1.json",
+    "bytes": 45878,
+    "sha256": "85518e819ed70fdc3c6d36e38543ae8f42941028ce3d34e2593baf2ab0e9f77e"
+  },
+  "independentReview": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-probe13-independent-review-v1\\preseal-independent-review-v1.json",
+    "bytes": 9594,
+    "sha256": "02d1a915864d687ac2da1c230cbe97dcd612c3ca15773ee12c81e333e0dffef0"
+  },
+  "prepareEntryPointInvoked": false,
+  "runEntryPointInvoked": false
+}

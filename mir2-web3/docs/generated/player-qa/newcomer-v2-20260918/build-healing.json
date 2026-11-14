@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "sourceCommit": "5006a192de1967d63925c5ec81abeab7c31a6429",
+  "rustFixCommit": "cc1946aab02bcb483747852b74394acc16591a06",
+  "executable": "C:/mir2-newcomer-v2-20260918/mir2-gateway-5006a192d.exe",
+  "sha256": "D06F046CE10B1314901B6C343184F1BF4BE42EE84B895BD090536944640EF8C8",
+  "verifiedAt": "2026-09-17T19:00:45.7946265Z",
+  "cargoCommand": "cargo +1.95.0 build -p mir2-gateway --bin mir2-gateway --release --locked --offline -j1",
+  "cargoExitCode": 0,
+  "profile": "newcomer-v2",
+  "contentProfile": "platinum_176",
+  "ports": [
+    18800,
+    18810
+  ],
+  "accountStore": "C:/mir2-newcomer-v2-20260918/gateway/accounts.json",
+  "rustSourceSha256": [
+    {
+      "path": "apps/gateway/src/routing.rs",
+      "sha256": "90FFB4DBF290781F71AD63194F8C6A783A0068D22D2949768D6E7D6FC10CA914"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/owner_packet_normalization_tests.rs",
+      "sha256": "7A66C515FA72D20291E3C56C2BBC3EC7020E7010C94E98287CCCDD8179DC1E66"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/zone_journey_event_bridge_tests.rs",
+      "sha256": "99A012EC820461BFAD477962FD792D9099B3A50BB5BBE067A4EB69E0BF1BA486"
+    },
+    {
+      "path": "apps/simulation/src/runtime/combat.rs",
+      "sha256": "8D5E5341C769F7500CF6B939005B61420CD08247F925F55FA5122453D505FEED"
+    },
+    {
+      "path": "apps/simulation/src/runtime/newcomer_v2_events.rs",
+      "sha256": "E9B905600B38C8CE8290C0992669B1421ABEF6454DAD60CB5948F90662846713"
+    },
+    {
+      "path": "apps/simulation/src/runtime/newcomer_v2_event_tests.rs",
+      "sha256": "E3B7705C9BE4589CBAC18D6D2656E27ABC076AC1963D7883B242F61F5B77896C"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime.rs",
+      "sha256": "2E33DFAA1C37D5D5F9D4AA9BB561976C9204FF793D8B437CB69187F9D62F7325"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/journey_events.rs",
+      "sha256": "761E382D6D026FAA016C3A3419EDAEC0F7961EA850564F8E379D892873587A63"
+    }
+  ],
+  "visualAccepted": false,
+  "measuredTime": false,
+  "launcherPid": 56216,
+  "gatewayPid": 57632
+}

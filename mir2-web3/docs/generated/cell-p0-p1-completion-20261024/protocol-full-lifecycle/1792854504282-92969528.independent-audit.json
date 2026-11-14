@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "auditedAt": "2026-10-24T15:11:13.432Z",
+  "runId": "1792854507439-f411ed33",
+  "realmStamp": "1792854504282-92969528",
+  "all16Passed": true,
+  "pairedDeathReceiptsMatchRawTrace": true,
+  "onlyOrdinarySentCommands": true,
+  "sentCommandCount": 356,
+  "checkedPublicFileCount": 11,
+  "checkedPrivateValueCount": 6,
+  "credentialValuesAbsent": true,
+  "rawZoneMetricsVersion": 2,
+  "rawZoneMetricsComplete": true,
+  "nonzeroClassDeltas": {
+    "movementAdmissions": {
+      "count": 108,
+      "successCount": 108,
+      "failureCount": 0,
+      "sumUs": 1119327,
+      "overBudgetCount": 2
+    },
+    "immediateRequests": {
+      "count": 145,
+      "successCount": 145,
+      "failureCount": 0,
+      "sumUs": 1639957,
+      "overBudgetCount": 2
+    },
+    "lifecycleRequests": {
+      "count": 18,
+      "successCount": 16,
+      "failureCount": 2,
+      "sumUs": 8812785,
+      "overBudgetCount": 12
+    }
+  },
+  "binarySha256": "99bca561822a2d02bd4a012546c228923f3f34e6612612085d6caed9f82ee50d",
+  "sixCountersZeroBeforeAndAfter": true,
+  "normalExitCode": 0,
+  "firstNoLootAttemptPreserved": true,
+  "scope": "P0 normal public protocol lifecycle acceptance; no frontend/native UI, two-computer, capacity, Cell or global ghost census acceptance"
+}

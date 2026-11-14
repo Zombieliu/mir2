@@ -1,0 +1,19 @@
+{
+  "schema": "mir2.r22.stage.independent-root-02.v1",
+  "passed": true,
+  "sourceRevision": "e7850e9aef9ea038907bee621f331f3286c1ac9b",
+  "runId": 37739769708,
+  "artifactId": 11533237847,
+  "archiveBytes": 5380,
+  "archiveSha256": "2874f1d32aa09dd70629ad4287d81365169690d807e6ba324c48a560331ee545",
+  "receiptSha256": "0a8b88330fd302af8a9cff7d0fe98234c35993e9188e7ad14405f1e7fcc7d73f",
+  "stageValidatorSha256": "5026c3820c79734c696372433532ff7fcc84d0678b047ddff8e332c0b1c402e7",
+  "actualAuthenticatedRunAndArtifactMatch": true,
+  "originalStageValidatorPassed": true,
+  "verifiedObjects": 40,
+  "verifiedPublicBytes": 1052247716,
+  "pointerChanged": false,
+  "cmsReverificationByThisReadOnlyCheck": false,
+  "networkMutations": false,
+  "promoteDispatched": false
+}

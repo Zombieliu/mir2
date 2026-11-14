@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "scope": "Explicit movement owner-timeout evidence and final source-only reviews; no full raw/monitor/recording/executable/private payload. Original failure and all source files remain unchanged.",
+  "base": "C:\\mir2-build\\p01-completion-20261024",
+  "destination": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-formal12-movement-owner-timeout-analysis-v1",
+  "files": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-movement-rejection-analysis-v1\\analyze-v1.mjs",
+      "bytes": 11571,
+      "sha256": "25c63e05668acb44ade621d9df6fd585fd8859138abde74d3309fabf0d76dee1",
+      "target": "analysis/analyze-v1.mjs",
+      "category": "explicit-analysis-v2-whitelist"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-movement-rejection-analysis-v1\\selected-public-evidence-v1.json",
+      "bytes": 70065,
+      "sha256": "87172a39e9a2cdbf46f54305a26c840c492a56b6051c933ab24df7b30fee11e9",
+      "target": "analysis/selected-public-evidence-v1.json",
+      "category": "explicit-analysis-v2-whitelist"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-movement-rejection-analysis-v1\\slow-monitor-correlation-v1.json",
+      "bytes": 24478,
+      "sha256": "77b7448a2eb334ca388ff6cac1e91958e7ef86edb4e6a2f030139996409f1b19",
+      "target": "analysis/slow-monitor-correlation-v1.json",
+      "category": "explicit-analysis-v2-whitelist"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-movement-rejection-analysis-v1\\summary-v1.json",
+      "bytes": 21871,
+      "sha256": "428d120c06c5b88d15c62b848db149b3d9211bb2b9f0c9c90cb00a638a941cc8",
+      "target": "analysis/summary-v1.json",
+      "category": "explicit-analysis-v2-whitelist"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-movement-rejection-analysis-v1\\wording-clarification-v2.json",
+      "bytes": 1791,
+      "sha256": "b6318fa3984d387644eda8b9b0e74b55721c1c0ea3174129998d99a7922851d0",
+      "target": "analysis/wording-clarification-v2.json",
+      "category": "explicit-analysis-v2-whitelist"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-movement-rejection-analysis-v1\\public-whitelist-v2.json",
+      "bytes": 1850,
+      "sha256": "14a359c12af0683deeeee46016bfec6daa07cf18927d8a985b3795c4b36a998f",
+      "target": "analysis/public-whitelist-v2.json",
+      "category": "original-analysis-whitelist"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-movement-owner-wait-source-review-v1\\source-review-v1.json",
+      "bytes": 9064,
+      "sha256": "b34eef666cf491189180ac5187d452b1a10c5f9012026cff6662d3318e7989e4",
+      "target": "source-review/source-review-v1.json",
+      "category": "final-stable-source-review"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-movement-owner-wait-source-review-v1\\source-review-v2.json",
+      "bytes": 12517,
+      "sha256": "143646e754e28004ab36558d95b972f49ad34a3f531e60108c3ceb31eff07a01",
+      "target": "source-review/source-review-v2.json",
+      "category": "final-stable-source-review"
+    }
+  ],
+  "sourceCount": 8,
+  "totalBytes": 153207,
+  "originalAnalysisWhitelist": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-movement-rejection-analysis-v1\\public-whitelist-v2.json",
+    "bytes": 1850,
+    "sha256": "14a359c12af0683deeeee46016bfec6daa07cf18927d8a985b3795c4b36a998f"
+  },
+  "historicalWhitelistReferenceOnly": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-movement-rejection-analysis-v1\\public-whitelist-v1.json",
+    "bytes": 1260,
+    "sha256": "6274d39e2e6ec09e05b4151d1c4a04a5e2b9ddf1a674217d8ab847afc0f4f203"
+  },
+  "intermediateSourceAddendumNotDuplicated": true,
+  "runId": "1792951023370-34757a8d",
+  "formalResultKnown": true,
+  "formalRunPassed": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "p2Started": false,
+  "rootCauseEstablished": false,
+  "exactStoreHolderEstablished": false,
+  "collisionOrHardwareCeilingEstablished": false,
+  "rawInputReference": {
+    "bytes": 2054564,
+    "rows": 1888,
+    "sha256": "6e9a23aab7d71faee1b2e109aba076da722efcf3785f71a079137b0bbf9b1619",
+    "copy": false
+  }
+}

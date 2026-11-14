@@ -1,0 +1,36 @@
+{
+  "evidenceKind": "focused-native-tests",
+  "passed": 16,
+  "failed": 0,
+  "ignored": 3,
+  "sourcePhase": "final production host locale/font code",
+  "sourceLog": {
+    "filename": "host-native_fonts-v2.log",
+    "included": false,
+    "bytes": 55567,
+    "sha256": "8a8731f2d9a6d2ede3563bad4a65e979d8e8f709d1b873e234d86b83cc71ec47"
+  },
+  "testLines": [
+    "test native_fonts::gpu_tests::bundled_fonts_gpu_shapes_and_switches_without_os_fonts ... ignored, explicit offline ten-language GPU capture/180-switch proof; run alone with --ignored",
+    "test native_fonts::gpu_tests::font_gpu_rebuild_negative_control ... ignored, explicit offscreen GPU negative control; run alone with --ignored",
+    "test native_fonts::gpu_tests::font_gpu_rebuild_soak ... ignored, explicit 11-minute offscreen GPU soak; run alone with --ignored",
+    "test native_fonts::soak_tests::bundled_arabic_uses_joining_and_bidirectional_runs_without_reversing_numbers ... ok",
+    "test native_fonts::soak_tests::bundled_devanagari_and_thai_keep_real_cluster_shaping ... ok",
+    "test native_fonts::soak_tests::dense_game_text_stays_bounded_through_per_layout_cache_pruning ... ok",
+    "test native_fonts::soak_tests::game_fallback_fonts_remain_bounded_across_hidden_and_rebuilt_text ... ok",
+    "test native_fonts::soak_tests::installed_collector_runs_after_layout_and_survives_entity_teardown ... ok",
+    "test native_fonts::soak_tests::retained_fallback_sources_preserve_raster_pixels_and_glyph_positions ... ok",
+    "test native_fonts::soak_tests::source_sharing_and_strong_retention_are_both_required ... ok",
+    "test native_fonts::soak_tests::supported_language_switching_keeps_font_identity_and_atlas_memory_bounded ... ok",
+    "test native_fonts::soak_tests::supported_languages_shape_without_system_fonts_or_missing_glyphs ... ok",
+    "test native_fonts::tests::billing_han_supplement_is_static_licensed_and_matches_the_source_pin ... ok",
+    "test native_fonts::tests::bundled_multilingual_fonts_are_static_licensed_and_match_pinned_hashes ... ok",
+    "test native_fonts::tests::bundled_script_fallbacks_recover_after_bevy_collection_rebuild_without_system_fonts ... ok",
+    "test native_fonts::tests::bundled_traditional_face_is_registered_and_retained_without_a_language_pack ... ok",
+    "test native_fonts::tests::empty_font_bytes_do_not_create_a_pinned_asset ... ok",
+    "test native_fonts::tests::full_simplified_face_matches_immutable_upstream_source_and_license ... ok",
+    "test native_fonts::tests::installed_faces_register_under_original_names_and_survive_source_pruning ... ok",
+    "test result: ok. 16 passed; 0 failed; 3 ignored; 0 measured; 1133 filtered out; finished in 1.03s"
+  ],
+  "suite": "host native_fonts"
+}

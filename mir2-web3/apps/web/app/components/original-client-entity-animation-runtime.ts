@@ -5,8 +5,11 @@ import type {
   EntityMotionSnapshot,
   EntitySpriteAnimationState,
 } from "./original-client-types";
+import type { WorldFishingActionEvidence, WorldFishingActionFamily, WorldFishingOwner, WorldFishingSourceRecord } from "../../lib/world-fishing-source";
+import type { FishingAnimationEdge } from "../../lib/world-fishing-feedback";
 
 type EntityAnimationRuntime = {
+  getMir2EntityActionPose?: (queryJson: string) => string;
   resolveMir2EntityAnimationPoses?: (snapshotJson: string) => string;
   resetMir2EntityAnimations?: () => void;
 };
@@ -16,6 +19,7 @@ type ResolveEntityAnimationInput = {
   worldKey: string;
   worldSeed: number;
   now: number;
+  selfAuthority?: import("../../lib/world-fishing-source").WorldFishingSourceRecord | null;
   entities: Array<{
     entity: DisplayEntity;
     state: EntitySpriteAnimationState;
@@ -25,8 +29,11 @@ type ResolveEntityAnimationInput = {
 
 type RuntimeAnimationOutput = {
   worldKey?: unknown;
+  nowMs?: unknown;
   poses?: unknown;
 };
+
+const deliveredFishingEdges = new WeakMap<EntityAnimationRuntime, WeakSet<FishingAnimationEdge>>();
 
 const ANIMATION_STATES = new Set<EntitySpriteAnimationState>([
   "standing",
@@ -35,6 +42,9 @@ const ANIMATION_STATES = new Set<EntitySpriteAnimationState>([
   "running",
   "attackMelee",
   "attackRange",
+  "fishingCast",
+  "fishingWait",
+  "fishingReel",
   "struck",
   "dying",
   "dead",
@@ -52,6 +62,9 @@ const ANIMATION_ACTIONS = new Set<CrystalEntityAnimationAction>([
   "attack4",
   "attackRange1",
   "spell",
+  "fishingCast",
+  "fishingWait",
+  "fishingReel",
   "struck",
   "die",
   "dead",
@@ -63,27 +76,57 @@ export function resolveCrystalEntityAnimationPoses({
   worldKey,
   worldSeed,
   now,
+  selfAuthority,
   entities,
 }: ResolveEntityAnimationInput): Record<string, CrystalEntityAnimationPose> {
   if (!runtime?.resolveMir2EntityAnimationPoses) {
     return {};
   }
 
+  const delivered = deliveredFishingEdges.get(runtime) ?? new WeakSet<FishingAnimationEdge>();
+  deliveredFishingEdges.set(runtime, delivered);
+  const received: FishingAnimationEdge[] = [];
   const payload = {
     worldKey,
     worldSeed: Math.max(0, Math.trunc(worldSeed)) >>> 0,
     nowMs: Math.max(0, Math.trunc(now)),
-    entities: entities.map(({ entity, state, motionSnapshot }) => ({
-      objectId: entity.objectId,
-      kind: entity.kind,
-      direction: entity.direction,
-      ...animationEventForEntity(entity, state, motionSnapshot),
-    })),
+    entities: entities.map(({ entity, state, motionSnapshot }) => {
+      const own = selfAuthority && entity.objectId === String(selfAuthority.owner.playerObjectId);
+      const event: PresentedAction = own ? selfAnimationEvent(selfAuthority, entity, state, now, motionSnapshot)
+        : { ...animationEventForEntity(entity, state, motionSnapshot), actionKnown: false };
+      const movementActive = event.action === state
+        && isCurrentPlayerMovement(entity, motionSnapshot, event.action, event.actionToken, now);
+      const latestFishing = own ? selfAuthority.fishing : entity.fishing;
+      // The owner facts can commit before the rAF-coalesced actor projection.
+      // Wait for their matching packet history before advancing the clip.
+      const fishing = !entity.dead && !entity.sprite?.mountLibrary
+        && !(own && typeof entity.fishing === "boolean" && entity.fishing !== latestFishing)
+        && typeof latestFishing === "boolean" ? latestFishing : undefined;
+      let preceding = 0;
+      const history = entity.fishingEdges;
+      if (fishing !== undefined && history?.at(-1)?.active === fishing) {
+        for (let index = history.length - 1; index >= 0 && !delivered.has(history[index]); index -= 1) {
+          received.push(history[index]);
+          preceding += 1;
+        }
+      }
+      return {
+        objectId: entity.objectId, kind: entity.kind, direction: entity.direction,
+        action: event.action, ...(event.actionToken === undefined ? {} : { actionToken: event.actionToken }),
+        ...(movementActive ? { movementActive } : {}),
+        ...(fishing === undefined ? {} : { fishing }),
+        ...(preceding > 1 ? { fishingEdges: preceding - 1 } : {}),
+        ...(event.retainedActionToken === undefined ? {} : { retainedActionToken: event.retainedActionToken }),
+        ...(own ? { actionSourceKey: selfAuthority.sourceKey, actionSourceRevision: selfAuthority.revision,
+          bootstrapKnown: selfAuthority.bootstrapKnown && selfAuthority.actionEvidence === null,
+          actionKnown: event.actionKnown } : {}),
+      };
+    }),
   };
 
   try {
     const decoded = JSON.parse(runtime.resolveMir2EntityAnimationPoses(JSON.stringify(payload))) as RuntimeAnimationOutput;
-    if (decoded.worldKey !== worldKey || !Array.isArray(decoded.poses)) {
+    if (decoded.worldKey !== worldKey || decoded.nowMs !== payload.nowMs || !Array.isArray(decoded.poses)) {
       return {};
     }
 
@@ -94,12 +137,38 @@ export function resolveCrystalEntityAnimationPoses({
       }
       poses[candidate.objectId] = candidate;
     }
+    for (const edge of received) delivered.add(edge);
     return poses;
   } catch {
     // Runtime load/fallback transitions are allowed to retain the legacy JS
     // selector for one render; the next 100 ms tick retries the WASM owner.
     return {};
   }
+}
+
+function isCurrentPlayerMovement(entity: DisplayEntity, motion: EntityMotionSnapshot | undefined,
+  action: CrystalEntityAnimationAction, token: string | undefined, now: number): boolean {
+  if ((entity.kind !== "player" && entity.kind !== "selfPlayer")
+    || (action !== "walking" && action !== "running") || !token) return false;
+
+  if (entity.movementAnimation === action
+    && matchesMovementWindow(action, token, entity.movementStartedAt, entity.movementUntil, now)) return true;
+
+  // The gateway can acknowledge self movement with a transform-only
+  // UserLocation. In that case the live, already selected presentation segment
+  // owns the visible walk/run. This hint never establishes action authority.
+  if (entity.kind !== "selfPlayer" || entity.movementAnimation !== undefined
+    || motion?.animationState !== action || motion.toX !== entity.x || motion.toY !== entity.y) return false;
+  const distance = Math.max(Math.abs(motion.toX - motion.fromX), Math.abs(motion.toY - motion.fromY));
+  return distance > 0 && distance <= 3
+    && matchesMovementWindow(action, token, motion.startedAt, motion.expiresAt, now);
+}
+
+function matchesMovementWindow(action: "walking" | "running", token: string,
+  start: number | undefined, end: number | undefined, now: number): boolean {
+  if (!eventTime(start) || start > now || !eventTime(end) || end <= now) return false;
+  const expected = "move:" + start + ":" + action;
+  return token === expected || token.endsWith(":" + expected);
 }
 
 export function animationEventForEntity(
@@ -214,4 +283,168 @@ function isRuntimeAnimationPose(value: unknown): value is CrystalEntityAnimation
     typeof pose.logicalFrameIndex === "number" &&
     typeof pose.queueDepth === "number"
   );
+}
+
+type DeliveredSelfEvent = Readonly<{ action: CrystalEntityAnimationAction; actionToken: string }>;
+type PresentedAction = {
+  action: CrystalEntityAnimationAction;
+  actionToken?: string;
+  actionKnown: boolean;
+  retainedActionToken?: string;
+};
+type CachedSelfEvent = { event: DeliveredSelfEvent; startedAt: number | null; movementToken?: string };
+const deliveredSelfEvents = new WeakMap<WorldFishingActionEvidence, CachedSelfEvent>();
+const lastDeliveredDisplayTime = new WeakMap<WorldFishingOwner, number>();
+const CANONICAL_DIRECTIONS = new Set(["Up", "UpRight", "Right", "DownRight", "Down", "DownLeft", "Left", "UpLeft"]);
+function eventTime(value: unknown): value is number {
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
+}
+
+// Only actual display/motion metadata identifies a transient event. No selector
+// default, frame duration or action label is used to reconstruct a missing one.
+function actualSelfEvent(entity: DisplayEntity, state: EntitySpriteAnimationState,
+  motion?: EntityMotionSnapshot): { family: WorldFishingActionFamily; time: number; event: DeliveredSelfEvent } | null {
+  let family: WorldFishingActionFamily, time: unknown;
+  if (state === "walking" || state === "running") {
+    family = state;
+    time = entity.movementAnimation === state && eventTime(entity.movementStartedAt) ? entity.movementStartedAt
+      : motion?.animationState === state ? motion.startedAt : undefined;
+  } else if (state === "attackMelee" && ["melee1", "melee2", "melee3", "melee4"].includes(entity.attackAnimation ?? "")) {
+    family = "attackMelee"; time = entity.attackStartedAt;
+  } else if (state === "attackRange" && (entity.attackAnimation === "range" || entity.attackAnimation === "spell")) {
+    family = entity.attackAnimation === "spell" ? "spell" : "attackRange"; time = entity.attackStartedAt;
+  } else if (state === "struck") { family = "struck"; time = entity.struckStartedAt;
+  } else if (state === "dying" || state === "dead") { family = "dying"; time = entity.dieStartedAt;
+  } else if (state === "reviving") { family = "reviving"; time = entity.reviveStartedAt;
+  } else return null;
+  if (!eventTime(time)) return null;
+  const event = family === "walking" || family === "running" ? { action: family, actionToken: "move:" + time + ":" + family }
+    : animationEventForEntity(entity, state, motion);
+  // Movement's actual canonical timestamp may come from motion while an older
+  // entity field still exists. Bind the selected metadata, not that stale field.
+  const actionToken = family === "walking" || family === "running" ? "move:" + time + ":" + family : event.actionToken;
+  if (typeof actionToken !== "string" || !actionToken) return null;
+  return { family, time, event: Object.freeze({ action: event.action, actionToken }) };
+}
+
+function selfAnimationEvent(source: WorldFishingSourceRecord, entity: DisplayEntity,
+  state: EntitySpriteAnimationState, now: number, motion?: EntityMotionSnapshot): PresentedAction {
+  const fallback = animationEventForEntity(entity, state, motion);
+  if (!source.animationKnown || !source.self || entity.kind !== "selfPlayer"
+    || !CANONICAL_DIRECTIONS.has(entity.direction ?? "")) return { ...fallback, actionKnown: false };
+  const aligned = entity.x === source.self.x && entity.y === source.self.y && entity.direction === source.self.direction;
+  const evidence = source.actionEvidence;
+  const cached = evidence ? deliveredSelfEvents.get(evidence) : undefined;
+  if (cached && !source.self.dead && entity.dead !== true) {
+    const token = fallback.actionToken;
+    if (token && cached.startedAt !== null
+      && (entity.movementStartedAt ?? motion?.startedAt ?? -1) > cached.startedAt
+      && isCurrentPlayerMovement(entity, motion, fallback.action, token, now)) {
+      cached.movementToken = token;
+      return { ...fallback, actionKnown: aligned, retainedActionToken: cached.event.actionToken };
+    }
+    if (cached.movementToken !== undefined) {
+      // The consumed receipt stays tied to this source. Passing it beside the
+      // presentation lets Rust preserve proof without enqueueing that action.
+      if (state === "standing" || token === cached.movementToken
+        || token !== undefined && cached.event.actionToken.endsWith(":" + token)) {
+        return { action: "standing", actionKnown: aligned, retainedActionToken: cached.event.actionToken };
+      }
+      return { ...fallback, actionKnown: false };
+    }
+  }
+  if (!aligned) {
+    // A turn ACK can temporarily lead or trail the displayed direction.
+    // Keep the already admitted idle bootstrap masked while they differ.
+    if (!evidence && source.bootstrapKnown && state === "standing") {
+      return { action: "standing", actionKnown: false, retainedActionToken: "" };
+    }
+    return { ...fallback, actionKnown: false };
+  }
+  if (!evidence) {
+    // A complete source bootstrap can use real transient metadata; an unknown
+    // interval cannot be healed by the selector's default Standing.
+    if (!source.bootstrapKnown) return { ...fallback, actionKnown: false };
+    if (state === "standing") return { ...fallback, actionKnown: true };
+    const actual = actualSelfEvent(entity, state, motion);
+    if (!actual) return { ...fallback, actionKnown: false };
+    const previousTime = lastDeliveredDisplayTime.get(source.owner);
+    if (previousTime === undefined || actual.time > previousTime) lastDeliveredDisplayTime.set(source.owner, actual.time);
+    return { ...actual.event, actionKnown: true };
+  }
+  if (cached) return { ...cached.event, actionKnown: true };
+  if (evidence.family === "standing") {
+    const delivered = Object.freeze({ action: "standing" as const, actionToken: evidence.token });
+    deliveredSelfEvents.set(evidence, { event: delivered, startedAt: evidence.receivedAtMs });
+    return { ...delivered, actionKnown: true };
+  }
+  const actual = actualSelfEvent(entity, state, motion), lastTime = lastDeliveredDisplayTime.get(source.owner);
+  if (!eventTime(evidence.receivedAtMs) || !actual || actual.family !== evidence.family
+    || actual.time < evidence.receivedAtMs || (lastTime !== undefined && actual.time <= lastTime))
+    return { ...fallback, actionKnown: false };
+  const delivered = Object.freeze({ action: actual.event.action, actionToken: evidence.token + ":" + actual.event.actionToken });
+  deliveredSelfEvents.set(evidence, { event: delivered, startedAt: actual.time });
+  lastDeliveredDisplayTime.set(source.owner, actual.time);
+  // Subsequent default Standing reuses this consumed event; Rust owns its end.
+  return { ...delivered, actionKnown: true };
+}
+
+export type CrystalEntityActionPose = Readonly<{ worldKey: string; objectId: string; actionSourceKey: string;
+  sourceRevision: number; continuityRevision: number; bridgeEpoch: number; incarnation: number;
+  lastNowMs: number; action: string; direction: string }>;
+function readCrystalEntityActionProof(runtime: EntityAnimationRuntime,
+  commit: import("../../lib/world-fishing-input").WorldFishingAnimationCommit,
+  source: WorldFishingSourceRecord,
+  nowMs: number,
+  version: 1 | 2): CrystalEntityActionPose | null {
+  try {
+    const context = commit.context, committedSource = context.record, owner = source.owner;
+    const getter = runtime.getMir2EntityActionPose, contextRuntime = context.runtime;
+    const worldKey = commit.worldKey, worldSeed = commit.worldSeed, atMs = commit.atMs, token = commit.token;
+    const sourceKey = source.sourceKey, sourceRevision = source.revision, objectId = owner.playerObjectId;
+    if (typeof getter !== "function" || !eventTime(nowMs) || !eventTime(atMs) || atMs > nowMs || nowMs - atMs > 250
+      || !eventTime(worldSeed) || typeof worldKey !== "string" || !worldKey || worldKey.length > 512
+      || contextRuntime !== runtime || committedSource !== source || typeof sourceKey !== "string" || !sourceKey || sourceKey.length > 512
+      || !eventTime(sourceRevision) || sourceRevision === 0 || !eventTime(objectId) || objectId === 0 || objectId > 4_294_967_295) return null;
+    const current = () => commit.context === context && context.runtime === contextRuntime && contextRuntime === runtime
+      && context.record === committedSource && committedSource === source && source.owner === owner && owner.playerObjectId === objectId
+      && commit.worldKey === worldKey && commit.worldSeed === worldSeed && commit.atMs === atMs && commit.token === token
+      && source.sourceKey === sourceKey && source.revision === sourceRevision && runtime.getMir2EntityActionPose === getter;
+    const query = JSON.stringify({ version, worldKey, worldSeed, objectId: String(objectId), actionSourceKey: sourceKey });
+    if (new TextEncoder().encode(query).byteLength > 2048 || !current()) return null;
+    const raw = getter.call(runtime, query);
+    if (!current() || typeof raw !== "string" || raw.length > 2048 || new TextEncoder().encode(raw).byteLength > 2048) return null;
+    const d: unknown = JSON.parse(raw);
+    if (!d || typeof d !== "object" || Array.isArray(d)) return null;
+    const value = d as Record<string, unknown>, keys = ["version","known","worldKey","objectId","actionSourceKey",
+      "sourceRevision","continuityRevision","bridgeEpoch","incarnation","lastNowMs","action","direction"];
+    if (Object.keys(value).length !== keys.length || !keys.every(key=>Object.hasOwn(value,key))
+      || value.version !== version || value.known !== true || value.worldKey !== worldKey
+      || value.objectId !== String(objectId) || value.actionSourceKey !== sourceKey
+      || value.sourceRevision !== sourceRevision || !["sourceRevision","continuityRevision","bridgeEpoch","incarnation"].every(
+        key=>typeof value[key] === "number" && Number.isSafeInteger(value[key]) && (value[key] as number)>0)
+      || value.lastNowMs !== atMs
+      || typeof value.action !== "string" || (version === 2
+        ? value.action !== "blocked" && value.action !== "ready"
+        : !["standing","harvest","show","hide","walking","running","attack1","attack2","attack3","attack4",
+          "attackRange1","attackRange2","dashAttack","spell","struck","die","dead","skeleton","revive"].includes(value.action))
+      || typeof value.direction !== "string" || !CANONICAL_DIRECTIONS.has(value.direction) || !current()) return null;
+    const {version: _version, known: _known, ...pose} = value;
+    return Object.freeze(pose) as CrystalEntityActionPose;
+  } catch { return null; }
+}
+
+export function readCrystalEntityActionPose(runtime: EntityAnimationRuntime,
+  commit: import("../../lib/world-fishing-input").WorldFishingAnimationCommit,
+  source: WorldFishingSourceRecord,
+  nowMs: number): CrystalEntityActionPose | null {
+  return readCrystalEntityActionProof(runtime, commit, source, nowMs, 1);
+}
+
+export function readCrystalEntityMovementBlocked(runtime: EntityAnimationRuntime,
+  commit: import("../../lib/world-fishing-input").WorldFishingAnimationCommit,
+  source: WorldFishingSourceRecord,
+  nowMs: number): boolean | null {
+  const proof = readCrystalEntityActionProof(runtime, commit, source, nowMs, 2);
+  return proof ? proof.action === "blocked" : null;
 }

@@ -89,3 +89,47 @@ fn audited_serpent_mine_repairs_share_the_runtime_spawn_path() {
         );
     }
 }
+
+#[test]
+fn dead_mine_arrivals_are_clear_of_manifest_monster_spawns() {
+    let map = crystal_map_respawns_by_file_name("D401")
+        .expect("Dead Mine entrance should have Crystal respawns");
+    let arrivals = [
+        Point { x: 24, y: 181 },
+        Point { x: 25, y: 181 },
+        Point { x: 77, y: 14 },
+        Point { x: 179, y: 108 },
+    ];
+    let mut normal_area_spawn_count = 0;
+
+    for respawn in &map.respawns {
+        let spawns = crystal_world_respawn_spawns("D401", respawn);
+        assert_eq!(
+            spawns.len(),
+            usize::from(respawn.count),
+            "arrival protection should relocate broad-area slots, not remove them",
+        );
+        for (_, spawn, _) in spawns {
+            assert!(
+                arrivals
+                    .iter()
+                    .all(|arrival| chebyshev(&spawn, arrival) > 8),
+                "{} spawned at ({},{}) inside an arrival protection ring",
+                respawn.monster_name,
+                spawn.x,
+                spawn.y,
+            );
+            if arrivals
+                .iter()
+                .all(|arrival| chebyshev(&spawn, arrival) > 20)
+            {
+                normal_area_spawn_count += 1;
+            }
+        }
+    }
+
+    assert!(
+        normal_area_spawn_count > 0,
+        "D401 must keep ordinary monster coverage away from its entrances",
+    );
+}

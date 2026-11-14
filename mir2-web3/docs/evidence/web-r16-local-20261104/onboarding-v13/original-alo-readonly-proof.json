@@ -1,0 +1,174 @@
+{
+  "schema": "mir2.r16.v12.original-alo-readonly-complete.v1",
+  "passed": true,
+  "createdAt": "2026-11-04T16:33:08.033Z",
+  "buildId": "VRH5ore7ii7q6CEqo5c0y",
+  "origin": "http://127.0.0.1:19041",
+  "scope": "Original ordinary Owner login, read-only companion list/view/tab-0/4/5/refresh and explicit read-only history-pagination exception via tab-1/next-page; normal logout and browser close.",
+  "finalEvidence": {
+    "path": "r4/original-alo-readonly-proof.json",
+    "bytes": 2999,
+    "sha256": "a3440c31e4e58f79030c6de595a6ad6cd74b0595e0b92165825fd10a5df0903b",
+    "driverPath": "r4/executed-original-alo-readonly.mjs",
+    "driverSha256": "abfbd921141fb67940550f63a174c2e0fc9960205ef94f6e7bc2e4fc44948ffc"
+  },
+  "facts": {
+    "sameArchive": true,
+    "sameResident": true,
+    "sameRealm": true,
+    "sameWorld": true,
+    "originalActorCharacter": true,
+    "policyVersion": 2,
+    "enabledHabits": 3,
+    "resourcesKnown": true,
+    "gold": 10,
+    "hpPotionCount": 2,
+    "supply": {
+      "status": "completed",
+      "known": true,
+      "chargedGold": 40,
+      "acquiredQuantity": 1,
+      "returned": true
+    },
+    "growthRevisionUnchanged": true,
+    "profileUnchanged": true,
+    "supplyReceiptUnchanged": true,
+    "modelCallsBefore": 2,
+    "modelCallsAfter": 2,
+    "modelCallsUnchanged": true
+  },
+  "history": {
+    "initialFeedbackCount": 0,
+    "initialEpisodeCount": 20,
+    "readOnlyPaginationUsed": true,
+    "pagesRead": 4,
+    "teachingRecordsFound": 1,
+    "recordsHaveSummary": true,
+    "distinctEpisodesRead": 80
+  },
+  "commands": {
+    "clientCapabilities": 2,
+    "setLanguage": 1,
+    "clientVersion": 1,
+    "login": 1,
+    "startGame": 1,
+    "npcPurchaseOwner": 1,
+    "companionControl": 6,
+    "keepAlive": 1,
+    "logOut": 1
+  },
+  "companionReadCounts": {
+    "list": 1,
+    "view": 5
+  },
+  "forbiddenCommands": 0,
+  "npcPurchaseOwner": {
+    "automaticBeginOnly": 1,
+    "quoteOrQueryOrPurchaseActions": 0
+  },
+  "network": {
+    "failed": 0,
+    "httpErrors": 0
+  },
+  "console": {
+    "errors": 0,
+    "warnings": 7
+  },
+  "cleanup": {
+    "ordinaryLogout": true,
+    "browserClosed": true
+  },
+  "screenshots": [
+    {
+      "file": "r4/01-original-alo-policy.png",
+      "bytes": 61017,
+      "sha256": "eb02fb2479184804b197f78fc835865ffda86811397323021b692af8aa77649d",
+      "panelOnly": true,
+      "blackFixedIdentityMask": true,
+      "visuallyInspected": true,
+      "panelWidth": 744,
+      "panelHeight": 644
+    },
+    {
+      "file": "r4/02-original-alo-supply.png",
+      "bytes": 80393,
+      "sha256": "2ce074476528953ab91142b011440bd632c4c43931589de5dca69f9bfceeef58",
+      "panelOnly": true,
+      "blackFixedIdentityMask": true,
+      "visuallyInspected": true,
+      "panelWidth": 744,
+      "panelHeight": 644
+    },
+    {
+      "file": "r4/03-original-alo-resources.png",
+      "bytes": 88628,
+      "sha256": "64a492d0178a0310a7dba765604e6afac419f68d037347da74dea173e530ecbd",
+      "panelOnly": true,
+      "blackFixedIdentityMask": true,
+      "visuallyInspected": true,
+      "panelWidth": 744,
+      "panelHeight": 644
+    }
+  ],
+  "privacy": {
+    "ownerLoginFieldsReadInNodeOnly": true,
+    "credentialOrIdentityValuesInPublicProof": false,
+    "noRootKeyPropertyAccess": true,
+    "noRootSecretRegexInSelectors": true,
+    "noFullDomDump": true,
+    "noFullPageScreenshot": true,
+    "fixedIdentityRowsMaskedBlack": true,
+    "privateReadsLimitedToExplicitStateJson": true
+  },
+  "sideEffects": {
+    "companionMutations": 0,
+    "instructions": 0,
+    "teachingOrProposals": 0,
+    "partyInvites": 0,
+    "recalls": 0,
+    "lifeOrSupplyAuthorizations": 0,
+    "gameEconomicActions": 0,
+    "newModelCalls": 0,
+    "newAccountsOrCharacters": 0,
+    "appOrInstallEdits": 0,
+    "serviceStartsOrStops": 0
+  },
+  "previousDiagnostics": [
+    {
+      "path": "original-alo-readonly-proof.json",
+      "bytes": 1367,
+      "sha256": "8936cd04bd4c3fc307331df95b0d3662bb9b9bb9f5c6e95f06bd6de6fda20d04",
+      "rawPassed": false,
+      "rawForbidden": 3,
+      "acceptedAsFinalEvidence": false,
+      "reason": "Initial driver omitted normal clientCapabilities/clientVersion bootstrap frames.",
+      "preserved": true
+    },
+    {
+      "path": "r2/original-alo-readonly-proof.json",
+      "bytes": 1410,
+      "sha256": "b690100cf292cc000607a21b1d5a6842356ea1e6b53223a4e1181e1693f66211",
+      "rawPassed": false,
+      "rawForbidden": 1,
+      "acceptedAsFinalEvidence": false,
+      "reason": "Driver omitted ordinary automatic npcPurchaseOwner begin binding.",
+      "preserved": true
+    },
+    {
+      "path": "r3/original-alo-readonly-proof.json",
+      "bytes": 2999,
+      "sha256": "97f2bedd426c694ee48776e4efb0a8eca4db64330bc91451f7713da5e36ceccb",
+      "rawPassed": true,
+      "rawForbidden": 1,
+      "acceptedAsFinalEvidence": false,
+      "reason": "Driver omitted automatic keepAlive and had an incomplete final fatal check; raw passed flag is not accepted as final evidence.",
+      "preserved": true
+    }
+  ],
+  "limitations": [
+    "This validates the original Owner/Alo read-only UI state; it does not extend the separate newcomer journey acceptance.",
+    "Existing model call counter 2 was preserved; no model instruction or API call was initiated by this audit.",
+    "Normal UI login/logout use the existing game lifecycle; no private save or credential file was edited by the audit.",
+    "Seven browser console warnings were observed; no browser console errors, failed network requests or HTTP errors were observed."
+  ]
+}

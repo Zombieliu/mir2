@@ -1,0 +1,905 @@
+{
+  "schema": "mir2.r16.guild-cold-control.v1",
+  "recordedAt": "2026-11-09T19:48:59.447Z",
+  "receipts": {
+    "original-failure": {
+      "path": "E:/mir2-player-journey/mir2-web3/docs/evidence/r16-guild-ranks-20261108/first-qualified-browser-failed.json",
+      "sha256": "1b161c235c2599bf1eabdb395e8a57f5da2c48ba171835b9b926ff656fafecd5",
+      "passed": false,
+      "browser": "156.0.8078.80",
+      "backendSelection": "forced-webgl2-shared",
+      "phases": [
+        "ordinary-owner-login",
+        "single-rename-and-real-rank-deltas",
+        "members-refresh-and-normal-reentry",
+        "independent-officer-hierarchy"
+      ],
+      "owner": {
+        "documentRequests": null,
+        "logins": 1,
+        "startResults": null,
+        "logoutAcks": null,
+        "guildMutations": 3
+      },
+      "officer": {
+        "documentRequests": null,
+        "logins": 1,
+        "startResults": null,
+        "logoutAcks": null,
+        "guildMutations": 2
+      },
+      "checkpoints": [],
+      "checks": [
+        {
+          "name": "singleRenameKeepsOtherRanks",
+          "passed": true
+        },
+        {
+          "name": "singleAuthoritativePermission",
+          "passed": true
+        },
+        {
+          "name": "singleAuthoritativePermissionPreservesDraft",
+          "passed": true
+        },
+        {
+          "name": "NativeShortNameRejectedByOrdinaryUI",
+          "passed": true
+        },
+        {
+          "name": "NormalLogoutReentryKeepsActualRenamedRank",
+          "passed": true
+        },
+        {
+          "name": "OrdinaryOfficerCannotEditHigherRankCanEditOwnAndLower",
+          "passed": true
+        },
+        {
+          "name": "singleRenameKeepsOtherRanks",
+          "passed": true
+        },
+        {
+          "name": "singleAuthoritativePermission",
+          "passed": true
+        }
+      ],
+      "errors": {
+        "page": 0,
+        "console": null,
+        "network": 0,
+        "assertions": [
+          {
+            "phase": "independent-officer-hierarchy",
+            "code": null,
+            "messageHash": "1ade3cb3e6b0b1290b75209928d9543c096ebdc040daf6d9a9eafd16329c840c"
+          }
+        ]
+      },
+      "ownerProtocolDisconnects": null,
+      "ownerManualSocketCloseCalls": 0,
+      "ownerCompilerSyncs": [],
+      "allHmrFrames": null,
+      "ownerUnexpectedSocketTermination": []
+    },
+    "current-dev-failure": {
+      "path": "D:/mir2-builds/r16-guild-cold-20261110/current-r2/browser-current-gl-201/proof.json",
+      "sha256": "2fb46f4a4cb815ce18ef0f39833f20c2443778524ffb6ce2b6af5bb6873e537c",
+      "passed": false,
+      "browser": "156.0.8078.80",
+      "backendSelection": "forced-webgl2-shared",
+      "phases": [
+        "ordinary-owner-login",
+        "single-rename-and-real-rank-deltas",
+        "members-refresh-and-normal-reentry",
+        "independent-officer-hierarchy",
+        "driver-browser-close"
+      ],
+      "owner": {
+        "documentRequests": 2,
+        "logins": 1,
+        "startResults": [
+          4,
+          4
+        ],
+        "logoutAcks": 1,
+        "guildMutations": 3
+      },
+      "officer": {
+        "documentRequests": 1,
+        "logins": 1,
+        "startResults": [
+          4
+        ],
+        "logoutAcks": 0,
+        "guildMutations": 0
+      },
+      "checkpoints": [
+        {
+          "name": "before-officer-context",
+          "actor": "owner",
+          "at": 1794253199589,
+          "screen": "game",
+          "visibility": "visible",
+          "stageReady": true
+        },
+        {
+          "name": "officer-ready",
+          "actor": "owner",
+          "at": 1794253217531,
+          "screen": "login",
+          "visibility": "visible",
+          "stageReady": true
+        },
+        {
+          "name": "before-browser-close",
+          "actor": "owner",
+          "at": 1794253217533,
+          "screen": "login",
+          "visibility": "visible",
+          "stageReady": true
+        },
+        {
+          "name": "before-browser-close",
+          "actor": "officer",
+          "at": 1794253217690,
+          "screen": "game",
+          "visibility": "visible",
+          "stageReady": true
+        }
+      ],
+      "checks": [
+        {
+          "name": "singleRenameKeepsOtherRanks",
+          "passed": true
+        },
+        {
+          "name": "singleAuthoritativePermission",
+          "passed": true
+        },
+        {
+          "name": "singleAuthoritativePermissionPreservesDraft",
+          "passed": true
+        },
+        {
+          "name": "NativeShortNameRejectedByOrdinaryUI",
+          "passed": true
+        },
+        {
+          "name": "NormalLogoutReentryKeepsActualRenamedRank",
+          "passed": true
+        }
+      ],
+      "errors": {
+        "page": 0,
+        "console": 0,
+        "network": 0,
+        "assertions": [
+          {
+            "phase": "independent-officer-hierarchy",
+            "code": "ERR_ASSERTION",
+            "messageHash": "45f66d9442187514dd6e95b5a603e638ba8ab024b68bf7f2bc1dae716f2be08d"
+          }
+        ]
+      },
+      "ownerEarlyDocumentReload": {
+        "relativeToOfficerDocumentMs": 822,
+        "relativeToOfficerGatewaySocketMs": -1596,
+        "initiator": "script",
+        "stack": [],
+        "navigationType": "reload"
+      },
+      "ownerProtocolDisconnects": [],
+      "ownerManualSocketCloseCalls": 0,
+      "ownerCompilerSyncs": [
+        {
+          "at": 1794253165378
+        },
+        {
+          "at": 1794253200487
+        },
+        {
+          "at": 1794253201623
+        }
+      ],
+      "allHmrFrames": 20,
+      "ownerUnexpectedSocketTermination": []
+    },
+    "current-dev-stack": {
+      "path": "C:\\r16-guild-cold-20261110\\diagnostic-r1\\browser-diagnostic-gl-401\\proof.json",
+      "sha256": "96749d9489476c7e10954938bb6abcb846192a50caab1003f521bf3627b49346",
+      "passed": false,
+      "browser": "156.0.8078.80",
+      "backendSelection": "forced-webgl2-shared",
+      "phases": [
+        "ordinary-owner-login",
+        "single-rename-and-real-rank-deltas",
+        "members-refresh-and-normal-reentry",
+        "independent-officer-hierarchy",
+        "driver-browser-close"
+      ],
+      "owner": {
+        "documentRequests": 2,
+        "logins": 1,
+        "startResults": [
+          4,
+          4
+        ],
+        "logoutAcks": 1,
+        "guildMutations": 3
+      },
+      "officer": {
+        "documentRequests": 1,
+        "logins": 1,
+        "startResults": [
+          4
+        ],
+        "logoutAcks": 0,
+        "guildMutations": 0
+      },
+      "checkpoints": [
+        {
+          "name": "before-officer-context",
+          "actor": "owner",
+          "at": 1794253447975,
+          "screen": "game",
+          "visibility": "visible",
+          "stageReady": true
+        },
+        {
+          "name": "officer-ready",
+          "actor": "owner",
+          "at": 1794253468795,
+          "screen": "login",
+          "visibility": "visible",
+          "stageReady": true
+        },
+        {
+          "name": "before-browser-close",
+          "actor": "owner",
+          "at": 1794253468798,
+          "screen": "login",
+          "visibility": "visible",
+          "stageReady": true
+        },
+        {
+          "name": "before-browser-close",
+          "actor": "officer",
+          "at": 1794253468958,
+          "screen": "game",
+          "visibility": "visible",
+          "stageReady": true
+        }
+      ],
+      "checks": [
+        {
+          "name": "singleRenameKeepsOtherRanks",
+          "passed": true
+        },
+        {
+          "name": "singleAuthoritativePermission",
+          "passed": true
+        },
+        {
+          "name": "singleAuthoritativePermissionPreservesDraft",
+          "passed": true
+        },
+        {
+          "name": "NativeShortNameRejectedByOrdinaryUI",
+          "passed": true
+        },
+        {
+          "name": "NormalLogoutReentryKeepsActualRenamedRank",
+          "passed": true
+        }
+      ],
+      "errors": {
+        "page": 0,
+        "console": 0,
+        "network": 0,
+        "assertions": [
+          {
+            "phase": "independent-officer-hierarchy",
+            "code": "ERR_ASSERTION",
+            "messageHash": "45f66d9442187514dd6e95b5a603e638ba8ab024b68bf7f2bc1dae716f2be08d"
+          }
+        ]
+      },
+      "ownerEarlyDocumentReload": {
+        "relativeToOfficerDocumentMs": 1076,
+        "relativeToOfficerGatewaySocketMs": -1575,
+        "initiator": "script",
+        "stack": [
+          {
+            "name": "handleMessage",
+            "file": "webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/dev/hot-reloader/app/web-socket.js",
+            "line": 84
+          }
+        ],
+        "navigationType": "reload"
+      },
+      "ownerProtocolDisconnects": [],
+      "ownerManualSocketCloseCalls": 0,
+      "ownerCompilerSyncs": [
+        {
+          "at": 1794253406409,
+          "compilerHashSha256": "a3c9ec0a3f073483f2619226aac3b0a5c948e489422c29aebbb044b91e82bfde"
+        },
+        {
+          "at": 1794253449155,
+          "compilerHashSha256": "0e6cd80509d575880243b0a846b6ae75b2d607f5790da779a6871cef5362e749"
+        },
+        {
+          "at": 1794253450368,
+          "compilerHashSha256": "0e6cd80509d575880243b0a846b6ae75b2d607f5790da779a6871cef5362e749"
+        }
+      ],
+      "allHmrFrames": 20,
+      "ownerUnexpectedSocketTermination": []
+    },
+    "historical-source-dev-stack": {
+      "path": "C:\\r16-guild-cold-20261110\\baseline-r2\\browser-old-gl-001\\proof.json",
+      "sha256": "f8fbc9d178549f515043bb59a707114ae96730e2523da37adfa79fc1107606bf",
+      "passed": false,
+      "browser": "156.0.8078.80",
+      "backendSelection": "forced-webgl2-shared",
+      "phases": [
+        "ordinary-owner-login",
+        "single-rename-and-real-rank-deltas",
+        "members-refresh-and-normal-reentry",
+        "independent-officer-hierarchy",
+        "driver-browser-close"
+      ],
+      "owner": {
+        "documentRequests": 2,
+        "logins": 1,
+        "startResults": [
+          4,
+          4
+        ],
+        "logoutAcks": 1,
+        "guildMutations": 3
+      },
+      "officer": {
+        "documentRequests": 1,
+        "logins": 1,
+        "startResults": [
+          4
+        ],
+        "logoutAcks": 0,
+        "guildMutations": 0
+      },
+      "checkpoints": [
+        {
+          "name": "before-officer-context",
+          "actor": "owner",
+          "at": 1794253576526,
+          "screen": "game",
+          "visibility": "visible",
+          "stageReady": true
+        },
+        {
+          "name": "officer-ready",
+          "actor": "owner",
+          "at": 1794253600230,
+          "screen": "login",
+          "visibility": "visible",
+          "stageReady": true
+        },
+        {
+          "name": "before-browser-close",
+          "actor": "owner",
+          "at": 1794253600233,
+          "screen": "login",
+          "visibility": "visible",
+          "stageReady": true
+        },
+        {
+          "name": "before-browser-close",
+          "actor": "officer",
+          "at": 1794253600422,
+          "screen": "game",
+          "visibility": "visible",
+          "stageReady": true
+        }
+      ],
+      "checks": [
+        {
+          "name": "singleRenameKeepsOtherRanks",
+          "passed": true
+        },
+        {
+          "name": "singleAuthoritativePermission",
+          "passed": true
+        },
+        {
+          "name": "singleAuthoritativePermissionPreservesDraft",
+          "passed": true
+        },
+        {
+          "name": "NativeShortNameRejectedByOrdinaryUI",
+          "passed": true
+        },
+        {
+          "name": "NormalLogoutReentryKeepsActualRenamedRank",
+          "passed": true
+        }
+      ],
+      "errors": {
+        "page": 0,
+        "console": 3,
+        "network": 0,
+        "assertions": [
+          {
+            "phase": "independent-officer-hierarchy",
+            "code": "ERR_ASSERTION",
+            "messageHash": "45f66d9442187514dd6e95b5a603e638ba8ab024b68bf7f2bc1dae716f2be08d"
+          }
+        ]
+      },
+      "ownerEarlyDocumentReload": {
+        "relativeToOfficerDocumentMs": 914,
+        "relativeToOfficerGatewaySocketMs": -1119,
+        "initiator": "script",
+        "stack": [
+          {
+            "name": "handleMessage",
+            "file": "webpack-internal:///(app-pages-browser)/./node_modules/next/dist/client/dev/hot-reloader/app/web-socket.js",
+            "line": 84
+          }
+        ],
+        "navigationType": "reload"
+      },
+      "ownerProtocolDisconnects": [],
+      "ownerManualSocketCloseCalls": 0,
+      "ownerCompilerSyncs": [
+        {
+          "at": 1794253538702,
+          "compilerHashSha256": "4c7ec47c6cd99e9be6190fcd4e50b6e5314248968e958c7fcb8c8a94cb1944f0"
+        },
+        {
+          "at": 1794253577521,
+          "compilerHashSha256": "979a2c877a2de8ca2384b7f8c0461341e311f85fb210719c2862b0b1e6cc0bd0"
+        },
+        {
+          "at": 1794253578630,
+          "compilerHashSha256": "979a2c877a2de8ca2384b7f8c0461341e311f85fb210719c2862b0b1e6cc0bd0"
+        }
+      ],
+      "allHmrFrames": 21,
+      "ownerUnexpectedSocketTermination": []
+    },
+    "current-production-webgl2": {
+      "path": "C:\\r16-guild-cold-20261110\\production-r2\\browser-production-gl-301\\proof.json",
+      "sha256": "1e31735c2d61562f05f51c9d96c712961c8731a502a4de1697e96b3936689177",
+      "passed": true,
+      "browser": "156.0.8078.80",
+      "backendSelection": "forced-webgl2-shared",
+      "phases": [
+        "ordinary-owner-login",
+        "single-rename-and-real-rank-deltas",
+        "members-refresh-and-normal-reentry",
+        "independent-officer-hierarchy",
+        "final-reentry-and-preservation",
+        "complete",
+        "driver-browser-close"
+      ],
+      "owner": {
+        "documentRequests": 1,
+        "logins": 1,
+        "startResults": [
+          4,
+          4,
+          4
+        ],
+        "logoutAcks": 3,
+        "guildMutations": 3
+      },
+      "officer": {
+        "documentRequests": 1,
+        "logins": 1,
+        "startResults": [
+          4
+        ],
+        "logoutAcks": 1,
+        "guildMutations": 2
+      },
+      "checkpoints": [
+        {
+          "name": "before-officer-context",
+          "actor": "owner",
+          "at": 1794253578696,
+          "screen": "game",
+          "visibility": "visible",
+          "stageReady": true
+        },
+        {
+          "name": "officer-ready",
+          "actor": "owner",
+          "at": 1794253599407,
+          "screen": "game",
+          "visibility": "visible",
+          "stageReady": true
+        },
+        {
+          "name": "officer-guild-ready",
+          "actor": "owner",
+          "at": 1794253599805,
+          "screen": "game",
+          "visibility": "visible",
+          "stageReady": true
+        },
+        {
+          "name": "officer-deltas-sent",
+          "actor": "owner",
+          "at": 1794253601965,
+          "screen": "game",
+          "visibility": "visible",
+          "stageReady": true
+        },
+        {
+          "name": "before-browser-close",
+          "actor": "owner",
+          "at": 1794253620193,
+          "screen": "select",
+          "visibility": "visible",
+          "stageReady": true
+        },
+        {
+          "name": "before-browser-close",
+          "actor": "officer",
+          "at": 1794253620218,
+          "screen": "select",
+          "visibility": "visible",
+          "stageReady": true
+        }
+      ],
+      "checks": [
+        {
+          "name": "singleRenameKeepsOtherRanks",
+          "passed": true
+        },
+        {
+          "name": "singleAuthoritativePermission",
+          "passed": true
+        },
+        {
+          "name": "singleAuthoritativePermissionPreservesDraft",
+          "passed": true
+        },
+        {
+          "name": "NativeShortNameRejectedByOrdinaryUI",
+          "passed": true
+        },
+        {
+          "name": "NormalLogoutReentryKeepsActualRenamedRank",
+          "passed": true
+        },
+        {
+          "name": "OrdinaryOfficerCannotEditHigherRankCanEditOwnAndLower",
+          "passed": true
+        },
+        {
+          "name": "singleRenameKeepsOtherRanks",
+          "passed": true
+        },
+        {
+          "name": "singleAuthoritativePermission",
+          "passed": true
+        },
+        {
+          "name": "OtherMemberRealDeltasKeepOwnerRosterWithoutCommandReplay",
+          "passed": true
+        },
+        {
+          "name": "NoWorldMovementCombatItemsOrRosterReadLoop",
+          "passed": true
+        },
+        {
+          "name": "NoWorldMovementCombatItemsOrRosterReadLoop",
+          "passed": true
+        },
+        {
+          "name": "FinalOrdinaryReentryReadsSharedDurableChanges",
+          "passed": true
+        }
+      ],
+      "errors": {
+        "page": 0,
+        "console": 0,
+        "network": 0,
+        "assertions": []
+      },
+      "ownerProtocolDisconnects": [],
+      "ownerManualSocketCloseCalls": 0,
+      "ownerCompilerSyncs": [],
+      "allHmrFrames": 0,
+      "ownerUnexpectedSocketTermination": []
+    },
+    "current-production-webgpu": {
+      "path": "C:\\r16-guild-cold-20261110\\production-r2\\browser-production-gpu-302\\proof.json",
+      "sha256": "72282adc98f88cf6572c81143960d670d77721728a0ce213ac39338d7dd6ba59",
+      "passed": true,
+      "browser": "156.0.8078.80",
+      "backendSelection": "default-renderer-path",
+      "phases": [
+        "ordinary-owner-login",
+        "single-rename-and-real-rank-deltas",
+        "members-refresh-and-normal-reentry",
+        "independent-officer-hierarchy",
+        "final-reentry-and-preservation",
+        "complete",
+        "driver-browser-close"
+      ],
+      "owner": {
+        "documentRequests": 1,
+        "logins": 1,
+        "startResults": [
+          4,
+          4,
+          4
+        ],
+        "logoutAcks": 3,
+        "guildMutations": 3
+      },
+      "officer": {
+        "documentRequests": 1,
+        "logins": 1,
+        "startResults": [
+          4
+        ],
+        "logoutAcks": 1,
+        "guildMutations": 2
+      },
+      "checkpoints": [
+        {
+          "name": "before-officer-context",
+          "actor": "owner",
+          "at": 1794253650861,
+          "screen": "game",
+          "visibility": "visible",
+          "stageReady": true
+        },
+        {
+          "name": "officer-ready",
+          "actor": "owner",
+          "at": 1794253667052,
+          "screen": "game",
+          "visibility": "visible",
+          "stageReady": true
+        },
+        {
+          "name": "officer-guild-ready",
+          "actor": "owner",
+          "at": 1794253667496,
+          "screen": "game",
+          "visibility": "visible",
+          "stageReady": true
+        },
+        {
+          "name": "officer-deltas-sent",
+          "actor": "owner",
+          "at": 1794253669645,
+          "screen": "game",
+          "visibility": "visible",
+          "stageReady": true
+        },
+        {
+          "name": "before-browser-close",
+          "actor": "owner",
+          "at": 1794253688653,
+          "screen": "select",
+          "visibility": "visible",
+          "stageReady": true
+        },
+        {
+          "name": "before-browser-close",
+          "actor": "officer",
+          "at": 1794253688678,
+          "screen": "select",
+          "visibility": "visible",
+          "stageReady": true
+        }
+      ],
+      "checks": [
+        {
+          "name": "singleRenameKeepsOtherRanks",
+          "passed": true
+        },
+        {
+          "name": "singleAuthoritativePermission",
+          "passed": true
+        },
+        {
+          "name": "singleAuthoritativePermissionPreservesDraft",
+          "passed": true
+        },
+        {
+          "name": "NativeShortNameRejectedByOrdinaryUI",
+          "passed": true
+        },
+        {
+          "name": "NormalLogoutReentryKeepsActualRenamedRank",
+          "passed": true
+        },
+        {
+          "name": "OrdinaryOfficerCannotEditHigherRankCanEditOwnAndLower",
+          "passed": true
+        },
+        {
+          "name": "singleRenameKeepsOtherRanks",
+          "passed": true
+        },
+        {
+          "name": "singleAuthoritativePermission",
+          "passed": true
+        },
+        {
+          "name": "OtherMemberRealDeltasKeepOwnerRosterWithoutCommandReplay",
+          "passed": true
+        },
+        {
+          "name": "NoWorldMovementCombatItemsOrRosterReadLoop",
+          "passed": true
+        },
+        {
+          "name": "NoWorldMovementCombatItemsOrRosterReadLoop",
+          "passed": true
+        },
+        {
+          "name": "FinalOrdinaryReentryReadsSharedDurableChanges",
+          "passed": true
+        }
+      ],
+      "errors": {
+        "page": 0,
+        "console": 0,
+        "network": 0,
+        "assertions": []
+      },
+      "ownerProtocolDisconnects": [],
+      "ownerManualSocketCloseCalls": 0,
+      "ownerCompilerSyncs": [],
+      "allHmrFrames": 0,
+      "ownerUnexpectedSocketTermination": []
+    }
+  },
+  "startups": {
+    "diagnostic-r1": {
+      "startup": {
+        "ready": true,
+        "origin": "http://127.0.0.1:19931",
+        "gatewayUrl": "ws://127.0.0.1:19930/ws",
+        "realmId": "ai-web-937e55e6-1cef-4ecb-8a83-6e3a52b5eb42",
+        "mode": "candidate",
+        "sourceHead": "df34e3b9b4f127e8097eb8bb682c9d95983ffdf9",
+        "gatewayPid": 219568,
+        "webPid": 220904,
+        "pageSha256": "b4918778aa2698b07fb8a80abc312cf179ddc6f41e1d9a1c01e10f90bf26baba",
+        "hostSha256": "0407c2f86651f941ef374b12675c4a149b595fffa8f2071e177abbeb61053977",
+        "runtimeVersion": "bevy-0cd68510886134e0",
+        "gatewaySha256": "4d1a18644ef69eacdae0656fff1b8f49a4af1ae97ffcf6878ada86f5dff0ae0f",
+        "gatewayBuildAnchor": "8a2c47b44ec5b82f3866cfd84b93a271fd9b1f8a+ground-pickup",
+        "reusedOwnFileStore": false,
+        "clonedOwnFileStore": true,
+        "fixtureGuildPreparedBeforeStartup": true,
+        "accountStoreBeforeSha256": "e6e9c8b184ca4818634e0b179f4866a18e9cb28cef109d525ea5be5b8444a314",
+        "actorStarted": false,
+        "unsafeLocalCommands": false
+      },
+      "shutdown": {
+        "at": "2026-11-09T19:44:33.961Z",
+        "ownGatewayStopped": true,
+        "ownNextStopped": true,
+        "verifiedCopiedPage": true,
+        "sourceFixtureUnchanged": true,
+        "hostSourceUnchanged": true,
+        "accountStoreBeforeSha256": "e6e9c8b184ca4818634e0b179f4866a18e9cb28cef109d525ea5be5b8444a314",
+        "accountStoreAfterSha256": "f05bc7c13626b668d361f77bcb8c68f7e7e94f19243314dfa7de73cc46e47a9a"
+      }
+    },
+    "baseline-r2": {
+      "startup": {
+        "ready": true,
+        "origin": "http://127.0.0.1:19935",
+        "gatewayUrl": "ws://127.0.0.1:19934/ws",
+        "realmId": "ai-web-937e55e6-1cef-4ecb-8a83-6e3a52b5eb42",
+        "mode": "baseline",
+        "sourceHead": "068fd0bd35688fc78190d9d9cd96056ac5d28091",
+        "gatewayPid": 201504,
+        "webPid": 211016,
+        "pageSha256": "fc538357264fbf9bd89553d41b32804bdcd4390b30e22c7876539ff124812f5c",
+        "hostSha256": "0407c2f86651f941ef374b12675c4a149b595fffa8f2071e177abbeb61053977",
+        "runtimeVersion": "bevy-a46905128c316656",
+        "gatewaySha256": "3666eb7e67b8c99ab45621fd5b320f5e0874869868a45f48e3a1414e3e6bd9c1",
+        "gatewayBuildAnchor": "424449e8fb",
+        "reusedOwnFileStore": false,
+        "clonedOwnFileStore": true,
+        "fixtureGuildPreparedBeforeStartup": true,
+        "accountStoreBeforeSha256": "e6e9c8b184ca4818634e0b179f4866a18e9cb28cef109d525ea5be5b8444a314",
+        "actorStarted": false,
+        "unsafeLocalCommands": false
+      },
+      "shutdown": {
+        "at": "2026-11-09T19:46:46.093Z",
+        "ownGatewayStopped": true,
+        "ownNextStopped": true,
+        "verifiedCopiedPage": true,
+        "sourceFixtureUnchanged": true,
+        "hostSourceUnchanged": true,
+        "accountStoreBeforeSha256": "e6e9c8b184ca4818634e0b179f4866a18e9cb28cef109d525ea5be5b8444a314",
+        "accountStoreAfterSha256": "598dcfaee0e3fa8a412e0e02f247be4d5078ae13343cf0b53ff62b1a249ee5a8"
+      }
+    },
+    "production-r2": {
+      "startup": {
+        "ready": true,
+        "origin": "http://127.0.0.1:19938",
+        "gatewayUrl": "ws://127.0.0.1:19937/ws",
+        "realmId": "ai-web-937e55e6-1cef-4ecb-8a83-6e3a52b5eb42",
+        "mode": "production",
+        "sourceHead": "df34e3b9b4f127e8097eb8bb682c9d95983ffdf9",
+        "gatewayPid": 225416,
+        "webPid": 224028,
+        "pageSha256": "b4918778aa2698b07fb8a80abc312cf179ddc6f41e1d9a1c01e10f90bf26baba",
+        "hostSha256": "0407c2f86651f941ef374b12675c4a149b595fffa8f2071e177abbeb61053977",
+        "runtimeVersion": "bevy-0cd68510886134e0",
+        "gatewaySha256": "4d1a18644ef69eacdae0656fff1b8f49a4af1ae97ffcf6878ada86f5dff0ae0f",
+        "gatewayBuildAnchor": "8a2c47b44ec5b82f3866cfd84b93a271fd9b1f8a+ground-pickup",
+        "reusedOwnFileStore": false,
+        "clonedOwnFileStore": true,
+        "fixtureGuildPreparedBeforeStartup": true,
+        "accountStoreBeforeSha256": "e6e9c8b184ca4818634e0b179f4866a18e9cb28cef109d525ea5be5b8444a314",
+        "actorStarted": false,
+        "unsafeLocalCommands": false
+      },
+      "shutdown": {
+        "at": "2026-11-09T19:48:09.045Z",
+        "ownGatewayStopped": true,
+        "ownNextStopped": true,
+        "verifiedCopiedPage": true,
+        "sourceFixtureUnchanged": true,
+        "hostSourceUnchanged": true,
+        "accountStoreBeforeSha256": "e6e9c8b184ca4818634e0b179f4866a18e9cb28cef109d525ea5be5b8444a314",
+        "accountStoreAfterSha256": "e4f7d8ac23f4423185c392af54f684127753b97af2c3826310fc9ec799535b4e"
+      }
+    }
+  },
+  "historicalEvidence": {
+    "firstFailedRoundDocuments": 3,
+    "driverContexts": 2,
+    "previousSocketEnd": "Closed and recovery checkpoint",
+    "contemporaneousBrowserLifecycleMissing": true
+  },
+  "discardedDiagnosticAttempts": [
+    "Initial copied old selector expected three simultaneous editors. Current R16 uses one active editor plus the real rank dropdown.",
+    "The first old-source replay reproduced the owner screen reset, and the first dev WebGPU round stopped on a later logout. Both full receipts could not be persisted during D drive exhaustion. Logs are retained.",
+    "Production compilation and TypeScript initially passed; cross-drive junction tracing failed when packing standalone. The production control uses ordinary Next build/start and the /game entry."
+  ],
+  "productionControlsPassed": true,
+  "nextHmrReloadStackCaptured": true,
+  "cleanup": {
+    "checkedAt": "2026-11-09T19:48:40.1375957Z",
+    "ownedProbePorts": [
+      19930,
+      19931,
+      19932,
+      19934,
+      19935,
+      19936,
+      19937,
+      19938,
+      19939
+    ],
+    "listening": [],
+    "originalFixtureSha256": "e6e9c8b184ca4818634e0b179f4866a18e9cb28cef109d525ea5be5b8444a314"
+  },
+  "historicalSourceDevReloadStackCaptured": true,
+  "probeScriptSha256": {
+    "browser.mjs": "d2ab70e97ba3a12fed45c546ee9be94e78a76cdace202b09803347fcec22bf99",
+    "browser-baseline.mjs": "411637c22d4e4d3171136f0e38779db22d1aaefef339d68d5e566d34440af2b7",
+    "browser-production.mjs": "97bdd689560f857f800c1e504b7486af94b537d7837fd86dcb1457bdce7a8398",
+    "launch.mjs": "eeeef50669e69ae8eb32a1031cc96c0019986f1c14fdda31b88b149cc0d7e8e5",
+    "launch-baseline.mjs": "d75137cc52c3889e0b4eb3207ce06c32a98d7b376ff3d39375801ad978407062",
+    "launch-production.mjs": "441b3ea4423bdb590a94dd75e608b98f9cf2135f98a5f96ffc9b891e1dac338b"
+  }
+}

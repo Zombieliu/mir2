@@ -1,0 +1,18 @@
+{
+  "schema": "mir2.production-p02b-independent-source-review.v1",
+  "acceptedForFocusedTests": true,
+  "reviewer": "/root/production_review",
+  "authoredSourcePath": "work/slg-production-p02b-20261008/authored-source-03.json",
+  "authoredSourceSha256": "16854c2c434df7de03eed4dcfafd0fa06f80d19fa2370de14ef44b170115dec7",
+  "priorReviewPath": "work/slg-production-p02b-20261008/independent-source-review-02.json",
+  "baselineCommit": "fde81a0de5084d02b3daaa30bac4d4f1fde411f4",
+  "verifiedSourceFileCount": 14,
+  "allDeclaredSourceHashesAndLengthsMatch": true,
+  "changedSourceFileCountFromPriorManifest": 1,
+  "confirmedP0P1Blockers": [],
+  "rawFinal": "Accepted for focused testing under the original CargoGuard, bound to authored-source-03.json. This bounded test-oracle delta correctly counts both bag and belt items for inventory potion splitting, consistent with crystal_empty_add_item_slots and the actual destination-specific insertion path. Storage still counts only storage. The success, exactly two items, original UID 800001 with quantity 3, new quantity 2, fresh UID above 800001, non-slot identity and allocator high-water assertions all remain intact. All 14 current source hashes and lengths match; the other 13 paths are unchanged from authored-source-02. Prior review records remain intact. No Cargo or UI was run by this reviewer, and this review does not replace or recast the earlier failed run. This is repaired-source acceptance for controlled File-authority tests, not a claim of final test success or public rollout acceptance. Normal gateway/catalog activation, remaining fresh-item issuers, deployment-wide census and PostgreSQL authority remain prerequisites.",
+  "noCargoRun": true,
+  "noUiRun": true,
+  "noSourceEdits": true,
+  "scope": "Read-only verification of the split fixture container-count repair, the existing slot selection and insertion behavior, and the 14-file manifest; only this separate work-directory review record was written."
+}

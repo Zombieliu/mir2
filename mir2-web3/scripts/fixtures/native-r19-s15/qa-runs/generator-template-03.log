@@ -1,0 +1,6 @@
+generator syntax: PASS
+six unchanged pinned old templates and actual14 proof: PASS
+test transformation syntax objectCount=6: PASS; no publication output emitted
+test transformation syntax objectCount=44: PASS; no publication output emitted
+test transformation syntax objectCount=100: PASS; no publication output emitted
+genuine old14 publication cannot admit15: PASS

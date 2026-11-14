@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "round": "source61",
+  "observedAt": "2026-10-11T05:17:03.019Z",
+  "runtimeRound": "source60",
+  "runtimeUrl": "http://127.0.0.1:19205/",
+  "publishedCommit": "8b0515b47738435762a696f108acd7d0d11e8b37",
+  "normalUiOnly": true,
+  "debugOrAdminCommands": false,
+  "readOnlyNetworkObservation": true,
+  "steps": [
+    "Normal Scott nameplate click and automatic approach",
+    "Normal View dialog button",
+    "Normal Candle selection"
+  ],
+  "visible": {
+    "npc": "Merchant_Scott",
+    "item": "Candle",
+    "unitPrice": 10,
+    "quantity": 1,
+    "gold": 200,
+    "total": "—",
+    "buyEnabled": false,
+    "disabledHelp": "金币不足。"
+  },
+  "serverWorld": {
+    "inventoryCapacity": 46,
+    "maxBagSlots": 40,
+    "gold": 200,
+    "rosterValid": true,
+    "freshCompatibleUniqueIds": 0,
+    "nativeGoods": 7,
+    "candleCount": 1,
+    "candleRate": 1,
+    "candleShopItem": true,
+    "panelType": 0,
+    "activeNpcDialog": null
+  },
+  "purchaseSuccess": false,
+  "rootCauseNotYetConfirmed": true,
+  "errorsSinceSource60": [],
+  "screenshot": "web-source61-shop-blocked01.png"
+}

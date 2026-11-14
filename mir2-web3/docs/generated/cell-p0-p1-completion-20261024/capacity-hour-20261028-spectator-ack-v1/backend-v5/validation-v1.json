@@ -1,0 +1,82 @@
+{
+  "at": "2026-10-28T08:27:43.107Z",
+  "sources": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\web.rs",
+      "bytes": 891618,
+      "sha256": "5dada64249ca002ffe3c4dc650dcbf0aff47371bbadd1bbdd3558236c38f4d97"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\spectator.rs",
+      "bytes": 63760,
+      "sha256": "18f888c4e27cee7be2ed79af34130cf4c034f46eb92e2f7a580f0de083869dfe"
+    }
+  ],
+  "tests": [
+    {
+      "prefix": "test-0-final",
+      "passed": 2,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v5\\test-0-final.stdout.log",
+        "bytes": 298,
+        "sha256": "180f635cdec8819b0b95da45b5b262d179d543fe274bcf56802f58c59d3912b2"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v5\\test-0-final.stderr.log",
+        "bytes": 54737,
+        "sha256": "98930e4d700b1b6227b2a7f3ee0ccefc5f60f0c2bb862705b9b7e31d4d07fe58"
+      }
+    },
+    {
+      "prefix": "test-1",
+      "passed": 28,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v5\\test-1.stdout.log",
+        "bytes": 3298,
+        "sha256": "066ec7969cdf2c41de760e32917d77dcf25700e0eb1507e2c2d6971cdb69960a"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v5\\test-1.stderr.log",
+        "bytes": 55445,
+        "sha256": "ad7edf282b87b82818bd672af23dc4e38aa85e42e2189c0b884c7c1d5a125ac5"
+      }
+    },
+    {
+      "prefix": "test-2",
+      "passed": 7,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v5\\test-2.stdout.log",
+        "bytes": 744,
+        "sha256": "074954aaaa0f0bca1e09bb57a863b3cfe94bca3b402b14f8144e87b49962aa21"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v5\\test-2.stderr.log",
+        "bytes": 55780,
+        "sha256": "625da6918993ac09d8b1ee254818890f3f2996f838750d0581b18298e1507bc1"
+      }
+    },
+    {
+      "prefix": "test-3",
+      "passed": 2,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v5\\test-3.stdout.log",
+        "bytes": 271,
+        "sha256": "e991e182bb7151fc6968bce4e3e2f69cc59d41cbb864c8591fe192ed4b43e816"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v5\\test-3.stderr.log",
+        "bytes": 54737,
+        "sha256": "4fa3101461d7654e0fc7b5cc1d657fb24a4c2c02fa12284675e3997273dafc0b"
+      }
+    }
+  ],
+  "actualDistinctSelectedChecks": 39,
+  "releaseBuildRootObservedExitCode": 0,
+  "immutableExecutable": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v5\\bin\\mir2-gateway.exe",
+    "bytes": 87418880,
+    "sha256": "f9e45cd39325d5d04a0894ded8e5582f1cbb598743c2022b9d8b644c65630675"
+  },
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

@@ -173,10 +173,13 @@ function createReleaseCapabilities(version: string, inputs: ManifestInputState[]
   );
   const localHash = normalizeSha256(localFullPack?.contentSha256);
   const contentHash = pinnedHash ?? localHash;
-  const indexPath = normalizeFullPackIndexPath(
+  const pinnedIndexPath = normalizeFullPackIndexPath(
     process.env.MIR2_PINNED_CRYSTAL_FULL_PACK_PATH,
-  ) ?? (localFullPack?.exists ? "/generated/crystal-packs/full/index.json" : null);
-  const verified = (pinnedEnabled && pinnedVerified) || Boolean(localFullPack?.exists && localHash);
+  );
+  const indexPath = pinnedIndexPath ?? (localFullPack?.exists ? "/generated/crystal-packs/full/index.json" : null);
+  // Finite clients retain this index for maps and cache versioning while shipping
+  // only selected libraries. Its presence does not verify the full payload.
+  const verified = pinnedEnabled && pinnedVerified && Boolean(pinnedHash && pinnedIndexPath);
   const enabled = verified && Boolean(contentHash && indexPath);
   const pinnedMapAtlasEnabled = process.env.MIR2_PINNED_MAP_ATLAS_ENABLED === "1";
   const pinnedMapAtlasVerified = process.env.MIR2_PINNED_MAP_ATLAS_VERIFIED === "1";
@@ -299,7 +302,7 @@ function createAssetVersion(inputs: ManifestInputState[]) {
     if (input.name === "original-asset-manifest") {
       hash.update(input.assetHash ?? "");
     } else {
-      hash.update(String(input.size ?? ""));
+      hash.update(inputIdentitySize(input));
       hash.update(input.contentSha256 ?? "");
     }
   }
@@ -328,16 +331,31 @@ function createCacheNamespace(
   for (const input of inputs) {
     hash.update(input.name);
     hash.update(input.exists ? "1" : "0");
-    hash.update(String(input.size ?? ""));
+    hash.update(inputIdentitySize(input));
     hash.update(input.assetHash ?? "");
     hash.update(input.contentSha256 ?? "");
   }
   return normalizeAssetVersion(`${version}-${hash.digest("hex").slice(0, 12)}`);
 }
 
+function inputIdentitySize(input: ManifestInputState) {
+  // Stable JSON is identified by canonical content, not export whitespace or
+  // the number of digits in a build timestamp. Keep raw size for diagnostics.
+  return input.digestSource === "stableJson" ? "" : String(input.size ?? "");
+}
+
 function stableJsonDigestInput(contents: string) {
   try {
-    return stableJsonStringify(stripVolatileJsonFields(JSON.parse(contents)));
+    let value = JSON.parse(contents);
+    if (value?.kind === "mir2-bevy-entity-atlas-manifest" && value.stats &&
+        typeof value.stats === "object" && !Array.isArray(value.stats)) {
+      // Only this exporter timing is volatile. Animation/skill durationMs is
+      // gameplay content and must continue to invalidate the cache.
+      const stats = { ...value.stats };
+      delete stats.durationMs;
+      value = { ...value, stats };
+    }
+    return stableJsonStringify(stripVolatileJsonFields(value));
   } catch {
     return contents;
   }

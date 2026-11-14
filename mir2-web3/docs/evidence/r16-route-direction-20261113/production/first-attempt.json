@@ -1,0 +1,918 @@
+{
+  "source": "ab02b84938eeb61ac844c6e0c894d04abf1c8bb0",
+  "deployment": "dpl_ET4yRQHzgEvDLDD6qXUN1sZA6GWQ",
+  "firstPromotion": {
+    "deploymentId": "dpl_ET4yRQHzgEvDLDD6qXUN1sZA6GWQ",
+    "publicAlias": "numeron.obelisk.build",
+    "checkedAt": "2026-11-13T15:04:37.428Z",
+    "sha256": "447a7543975f693ec3f47a8413872de9c500916276a82448877ad9a94cc48d08"
+  },
+  "passed": false,
+  "signedApproval": {
+    "schema": 1,
+    "requestInterception": false,
+    "operations": {
+      "http-read": 155,
+      "exact-login-session-read": 1,
+      "signed-login-approval": 1
+    },
+    "forbiddenCount": 0,
+    "forbidden": [],
+    "browserClosed": true
+  },
+  "gameProtocol": {
+    "gameSockets": 1,
+    "passkeyLogin": 1,
+    "loginSuccess": 1,
+    "newCharacter": 1,
+    "newCharacterSuccess": 1,
+    "startGame": 1,
+    "startGameResult": 4,
+    "walk": 1,
+    "logOut": 1,
+    "logOutSuccess": 1,
+    "unexpectedMutation": 0
+  },
+  "checks": {
+    "exactRevision": true,
+    "publicEdgeAndTlsVerified": true,
+    "normalLoginVisible": true,
+    "quietLoginResources": true,
+    "realQrImage": true,
+    "emptyQaRoster": true,
+    "createOnApprovedSocket": true,
+    "oneDedicatedQaRoleCreated": true,
+    "startMatchesCreatedRole": true,
+    "visibleReadyGameStage": true,
+    "exactVersionedStarterRegion": true,
+    "renderedStarterCity": true,
+    "returnedToSelect": true
+  },
+  "failure": {
+    "phase": "verify-complete-body-HUD-prewarm-and-quest-markers",
+    "code": "AUTOMATION_FAILED"
+  },
+  "sharedHud": {
+    "optional": true,
+    "passed": false,
+    "status": "not-observed",
+    "gateReady": false,
+    "runtimeDelivered": true,
+    "failure": {
+      "phase": "ordinary-shared-hud-optional",
+      "code": "OPTIONAL_SHARED_HUD_OR_RUNTIME_NOT_OBSERVED"
+    }
+  },
+  "quest": {
+    "passed": true,
+    "locale": "zh-TW",
+    "renderer": "ordinary-react-fallback",
+    "questId": 2110001,
+    "stage": "available",
+    "objective": "向助理簡報告",
+    "counter": "0/1",
+    "chapter": "章節 1/6 · 村莊起步 · 本章 0/4",
+    "journey": "當前主線 0/26",
+    "zeroWorldCommands": true,
+    "screenshot": "quest-available-zh-TW.png"
+  },
+  "logout": {
+    "attempted": true,
+    "passed": true,
+    "returnedToSelect": true,
+    "sent": 1,
+    "acknowledged": 1
+  },
+  "timing": {
+    "clockEpochMs": 1794582428182,
+    "authoritativeLoginSuccessMs": 52461,
+    "startIntentMs": 83332,
+    "startAckMs": 86997,
+    "authoritativeStarterMapMs": 87012,
+    "authoritativeSelfMs": 87013,
+    "firstPlayableObservedMs": 90454,
+    "terrainPaintVerifiedMs": 160048,
+    "logoutIntentMs": 407905,
+    "logoutAckMs": 409000,
+    "manifestAttemptsBeforeStart": 1,
+    "manifestAttemptsAtOrAfterStart": 0,
+    "starterRegionRequestMs": 52468,
+    "starterRegionWireHeadersMs": 53832.17,
+    "starterRegionResponseEventMs": 53833,
+    "starterRegionBodyMs": 53885,
+    "starterRegionCommitMs": 87220,
+    "sceneSpritesReadyMs": 87288,
+    "localeRequestMs": 52468,
+    "localeBodyMs": 62308,
+    "localeReadyMs": 62355,
+    "firstPlayableFrameMs": 90303,
+    "rendererBodyMs": 210872,
+    "startIntentToFirstFrameMs": 6971,
+    "runtimeBodyAfterFirstFrameMs": 120569,
+    "nativeColdQualified": false
+  },
+  "prewarm": {
+    "status": "running",
+    "requested": 113,
+    "ok": 34,
+    "failed": 10,
+    "failedUrls": [
+      "/original-ui/Prguse/1.png",
+      "/original-ui/Prguse/4.png",
+      "/original-ui/Prguse/6.png",
+      "/original-ui/Prguse/12.png",
+      "/original-ui/Prguse/13.png",
+      "/original-ui/Prguse/1902.png",
+      "/original-ui/Prguse/1904.png",
+      "/original-ui/Prguse/1905.png",
+      "/original-ui/Prguse/1911.png",
+      "/original-ui/Prguse/1914.png"
+    ],
+    "requestFailures": [
+      {
+        "url": "/original-ui/Prguse/1.png",
+        "attempt": 1,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10000,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/4.png",
+        "attempt": 1,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10001,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/6.png",
+        "attempt": 1,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10001,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/1.png",
+        "attempt": 2,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10005,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/4.png",
+        "attempt": 2,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10004,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/6.png",
+        "attempt": 2,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10004,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/1.png",
+        "attempt": 3,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10001,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/4.png",
+        "attempt": 3,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10001,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/6.png",
+        "attempt": 3,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10002,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/12.png",
+        "attempt": 1,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10001,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/13.png",
+        "attempt": 1,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10000,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/8.png",
+        "attempt": 1,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10000,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/12.png",
+        "attempt": 2,
+        "phase": "http",
+        "status": 504,
+        "bytes": 0,
+        "durationMs": 5310
+      },
+      {
+        "url": "/original-ui/Prguse/13.png",
+        "attempt": 2,
+        "phase": "http",
+        "status": 504,
+        "bytes": 0,
+        "durationMs": 5310
+      },
+      {
+        "url": "/original-ui/Prguse/8.png",
+        "attempt": 2,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10001,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/12.png",
+        "attempt": 3,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10003,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/13.png",
+        "attempt": 3,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10003,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/76.png",
+        "attempt": 1,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10001,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/UI_32bit/473.png",
+        "attempt": 1,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10001,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/UI_32bit/472.png",
+        "attempt": 1,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10000,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/76.png",
+        "attempt": 2,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10003,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/UI_32bit/473.png",
+        "attempt": 2,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10003,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/UI_32bit/472.png",
+        "attempt": 2,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10004,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/2034.png",
+        "attempt": 1,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10004,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/826.png",
+        "attempt": 1,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10001,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/827.png",
+        "attempt": 1,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10000,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/2034.png",
+        "attempt": 2,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10001,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/826.png",
+        "attempt": 2,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10001,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/828.png",
+        "attempt": 1,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10002,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/1960.png",
+        "attempt": 1,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10001,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/1961.png",
+        "attempt": 1,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10001,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/1902.png",
+        "attempt": 1,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10005,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/1904.png",
+        "attempt": 1,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10003,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/1905.png",
+        "attempt": 1,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10021,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/1902.png",
+        "attempt": 2,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10003,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/1904.png",
+        "attempt": 2,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10001,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/1905.png",
+        "attempt": 2,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10018,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/1902.png",
+        "attempt": 3,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10012,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/1904.png",
+        "attempt": 3,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10025,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/1905.png",
+        "attempt": 3,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10007,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/1911.png",
+        "attempt": 1,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10006,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/1911.png",
+        "attempt": 2,
+        "phase": "http",
+        "status": 504,
+        "bytes": 0,
+        "durationMs": 2151
+      },
+      {
+        "url": "/original-ui/Prguse/1914.png",
+        "attempt": 1,
+        "phase": "http",
+        "status": 504,
+        "bytes": 0,
+        "durationMs": 7042
+      },
+      {
+        "url": "/original-ui/Prguse/2221.png",
+        "attempt": 1,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10009,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/1914.png",
+        "attempt": 2,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10005,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/1911.png",
+        "attempt": 3,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10004,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/2221.png",
+        "attempt": 2,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10011,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/2012.png",
+        "attempt": 1,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10008,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/1914.png",
+        "attempt": 3,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10002,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/2012.png",
+        "attempt": 2,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10003,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/2036.png",
+        "attempt": 1,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10001,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/2037.png",
+        "attempt": 1,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10006,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/2036.png",
+        "attempt": 2,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10004,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/2037.png",
+        "attempt": 2,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10002,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/2038.png",
+        "attempt": 1,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10007,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/2039.png",
+        "attempt": 1,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10016,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/2038.png",
+        "attempt": 2,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10005,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/2040.png",
+        "attempt": 1,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10004,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/2039.png",
+        "attempt": 2,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10002,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/2040.png",
+        "attempt": 2,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10000,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/2041.png",
+        "attempt": 1,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10001,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/2041.png",
+        "attempt": 2,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10004,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/2042.png",
+        "attempt": 1,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10002,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/2043.png",
+        "attempt": 1,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10008,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/2042.png",
+        "attempt": 2,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10016,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/2043.png",
+        "attempt": 2,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10007,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/2044.png",
+        "attempt": 1,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10001,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/2045.png",
+        "attempt": 1,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10004,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/2044.png",
+        "attempt": 2,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10002,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/2046.png",
+        "attempt": 1,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10003,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/2045.png",
+        "attempt": 2,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10015,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/2046.png",
+        "attempt": 2,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10011,
+        "errorName": "TimeoutError"
+      },
+      {
+        "url": "/original-ui/Prguse/2047.png",
+        "attempt": 1,
+        "phase": "headers",
+        "bytes": 0,
+        "durationMs": 10008,
+        "errorName": "TimeoutError"
+      }
+    ]
+  },
+  "fonts": {
+    "passed": false,
+    "rows": [
+      {
+        "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+        "present": false
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansTC.ttf",
+        "present": false
+      },
+      {
+        "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+        "present": true,
+        "bytes": 621572,
+        "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+        "present": false
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+        "present": true,
+        "bytes": 37780,
+        "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+        "present": true,
+        "bytes": 234892,
+        "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+      }
+    ]
+  },
+  "lastNative": {
+    "observedAtMs": 401269,
+    "atMs": 400180.60000000894,
+    "timeOrigin": 1794582429270.2,
+    "bootAttempted": true,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "capabilities": {
+      "schemaVersion": 1,
+      "backend": "webgpu",
+      "questUiAbiVersion": 1,
+      "bagUiAbiVersion": 1,
+      "primarySharedUiCompiled": false,
+      "primarySharedUiStartup": false
+    },
+    "quest": {
+      "ready": false,
+      "error": "quest UI font or skin failed to load",
+      "frame": 29826,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 29826,
+      "generation": 2,
+      "revision": 1
+    },
+    "screen": "game",
+    "sceneReady": true,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    },
+    "longTasks": [
+      {
+        "startMs": 12756.79999999702,
+        "durationMs": 81,
+        "name": "self"
+      },
+      {
+        "startMs": 85921.29999999702,
+        "durationMs": 211,
+        "name": "self"
+      },
+      {
+        "startMs": 86145.60000000894,
+        "durationMs": 87,
+        "name": "self"
+      },
+      {
+        "startMs": 209787.5,
+        "durationMs": 328,
+        "name": "self"
+      },
+      {
+        "startMs": 210123,
+        "durationMs": 110,
+        "name": "self"
+      },
+      {
+        "startMs": 210336.20000000298,
+        "durationMs": 341,
+        "name": "self"
+      },
+      {
+        "startMs": 210695.5,
+        "durationMs": 76,
+        "name": "self"
+      }
+    ],
+    "timerDrifts": [
+      {
+        "startMs": 86178.5,
+        "delayMs": 139.29999999701977
+      }
+    ]
+  },
+  "rollback": {
+    "passed": true,
+    "traffic": {
+      "target": "dpl_AvrMevD6suL7fXC56fKC6EZzu3AA",
+      "alias": "dpl_AvrMevD6suL7fXC56fKC6EZzu3AA"
+    },
+    "workflow": "https://github.com/Zombieliu/mir2/actions/runs/43450737466"
+  },
+  "resourceProbe": {
+    "checkedAt": "2026-11-13T15:18:24.896Z",
+    "rows": [
+      {
+        "origin": "https://numeron.obelisk.build",
+        "path": "/original-ui/Prguse/1.png",
+        "status": 200,
+        "headMs": 1448,
+        "fullMs": 1836,
+        "bytes": 66374,
+        "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa",
+        "type": "image/png",
+        "cache": "MISS"
+      },
+      {
+        "origin": "https://numeron.obelisk.build",
+        "path": "/original-ui/Prguse/12.png",
+        "status": 200,
+        "headMs": 1305,
+        "fullMs": 1305,
+        "bytes": 2813,
+        "sha256": "a0dcd0d9e93cfef414ec240ead9eafd2f8fb9163b2ed70cf1cc64e3e2de9ca05",
+        "type": "image/png",
+        "cache": "MISS"
+      },
+      {
+        "origin": "https://numeron.obelisk.build",
+        "path": "/original-ui/fonts/NotoSansTC.ttf",
+        "status": 200,
+        "headMs": 1784,
+        "fullMs": 32994,
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f",
+        "type": "font/ttf",
+        "cache": "MISS"
+      },
+      {
+        "origin": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c",
+        "path": "/original-ui/Prguse/1.png",
+        "status": 200,
+        "headMs": 1045,
+        "fullMs": 1274,
+        "bytes": 66374,
+        "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa",
+        "type": "image/png",
+        "cache": "HIT"
+      },
+      {
+        "origin": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c",
+        "path": "/original-ui/Prguse/12.png",
+        "status": 200,
+        "headMs": 1350,
+        "fullMs": 1351,
+        "bytes": 2813,
+        "sha256": "a0dcd0d9e93cfef414ec240ead9eafd2f8fb9163b2ed70cf1cc64e3e2de9ca05",
+        "type": "image/png",
+        "cache": null
+      },
+      {
+        "origin": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c",
+        "path": "/original-ui/fonts/NotoSansTC.ttf",
+        "status": 200,
+        "headMs": 1232,
+        "fullMs": 42909,
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f",
+        "type": "font/ttf",
+        "cache": null
+      }
+    ]
+  },
+  "scope": "Failed first production cohort retained. Resource transmission/body completion failed; route source/assets unchanged. Safely returned toDa before readiness probe and bounded retry."
+}

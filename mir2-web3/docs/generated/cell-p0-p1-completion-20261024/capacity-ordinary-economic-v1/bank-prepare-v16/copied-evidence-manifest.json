@@ -1,0 +1,1830 @@
+{
+  "schemaVersion": 1,
+  "scope": "Actual W16 continuation: historical42 notFresh, new16 original43..58 normally saved; failed59 originalfalse retained. This is58 saved-history records, not100fresh, capacity or combat acceptance.",
+  "driverSourceCommit": "05dad48ee5f6e8592598691db7b07f26a155febc",
+  "backendSourceCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+  "actualRootSelectedJsTestsPassed": 1158,
+  "actualRootTestCounts": [
+    417,
+    371,
+    55,
+    315
+  ],
+  "rootNamedSourceCount": 42,
+  "backendInputsExact": 55,
+  "reusedRustTestsPassed": 32,
+  "newRustBuildPerformed": false,
+  "freshRustTestsPerformed": false,
+  "all16ReusedAfterCompleteDependencyEquality": true,
+  "full16OriginalActualExecution": "d9ec9d2094ee058bfa909b05bbcf45dcf4a28b39",
+  "freshFull16Performed": false,
+  "originalRunPassed": false,
+  "originalError": "No walk path on 0 from 330,603 to 288,608",
+  "historicalPreparedCount": 42,
+  "historicalNotFresh": true,
+  "newPreparedCount": 16,
+  "expectedThisRun": 58,
+  "combinedSavedCount": 58,
+  "successfulOriginalIndices1Based": [
+    43,
+    58
+  ],
+  "failedActor": {
+    "name": "L370e2a1m",
+    "characterIndex": 59,
+    "before": {
+      "sequence": 688,
+      "monotonicMs": 2099740.3237,
+      "ownerId": 1000,
+      "ownerName": "L370e2a1m",
+      "map": "0",
+      "x": 288,
+      "y": 616,
+      "hp": 18,
+      "maxHp": 18,
+      "hpStock": 1,
+      "gold": 0,
+      "venison": 0,
+      "inSafeZone": true,
+      "nearbyHostileCount": 3,
+      "playerPoison": null,
+      "ownerPoison": null,
+      "dazed": false
+    },
+    "after": null,
+    "freshReadiness": null,
+    "targetHp": 12,
+    "purchased": 0,
+    "soldVenison": 2,
+    "goldEarned": 521,
+    "goldSpent": 0,
+    "funding": {
+      "method": "DeerVenison",
+      "collected": 2,
+      "hunts": 2
+    },
+    "commands": 150,
+    "movementCommands": 88,
+    "elapsedMs": 150463.37240000023,
+    "actualStagingReached": false,
+    "reusedInventoryWithoutEconomicWork": false,
+    "normalLogout": false,
+    "durableReloginReadbackPending": true,
+    "preparationRecovery": {
+      "type": "preparationHpRecovery",
+      "actor": "L370e2a1m",
+      "phase": "preparation",
+      "preparationOnly": true,
+      "measurementCredit": false,
+      "hpThreshold": 0.7,
+      "maximumDoses": 1,
+      "evidenceWindowMs": 2000,
+      "before": {
+        "ownerObjectId": 1000,
+        "ownerName": "L370e2a1m",
+        "map": "0",
+        "hp": 18,
+        "maximumHp": 18,
+        "sequence": 676,
+        "monotonicMs": 2098699.0508,
+        "hpCandidateCount": 1,
+        "candidate": {
+          "uniqueId": 2,
+          "quantity": 1,
+          "grid": "inventory",
+          "exact658": true
+        },
+        "selectedQuantity": null
+      },
+      "at": 1793092266433,
+      "status": "not-needed",
+      "doses": 0,
+      "elapsedMs": 34.69590000016615
+    },
+    "error": "No walk path on 0 from 330,603 to 288,608",
+    "navigationNoPath": {
+      "source": "ordinary-helper-terminal-navigation-failure",
+      "scope": "diagnostic-only-no-measurement-credit",
+      "state": "selling",
+      "sequence": 1508,
+      "observedRawSequence": 1508,
+      "from": {
+        "x": 330,
+        "y": 603
+      },
+      "target": {
+        "x": 288,
+        "y": 608
+      },
+      "range": 16,
+      "commands": 150,
+      "movementCommands": 88,
+      "attempts": 24,
+      "successfulSteps": 36,
+      "globalQuarantineRemainingMs": 0,
+      "shared": {
+        "schemaVersion": 1,
+        "source": "shared-navigator-exact-cache",
+        "clockBasis": "last-hostile-planning-read",
+        "mapFileName": "0",
+        "from": {
+          "x": 330,
+          "y": 603
+        },
+        "target": {
+          "x": 288,
+          "y": 608
+        },
+        "desiredDistance": 16,
+        "obstacleCount": 1662,
+        "rejectedCount": 0,
+        "allowedTotal": 11,
+        "allowedTruncated": false,
+        "allowedIds": [
+          206007,
+          206013,
+          206026,
+          206032,
+          206117,
+          206129,
+          206136,
+          206610,
+          206623,
+          206628,
+          206644
+        ],
+        "hostileMemoryTotal": 11,
+        "mapHostileMemoryTotal": 11,
+        "hostileMemoryTruncated": false,
+        "hostileMemory": [
+          {
+            "objectId": 206610,
+            "name": "scarecrow",
+            "x": 300,
+            "y": 597,
+            "remainingMs": 7917,
+            "allowed": true,
+            "currentlyVisible": false
+          },
+          {
+            "objectId": 206013,
+            "name": "rakingcat",
+            "x": 301,
+            "y": 596,
+            "remainingMs": 8538,
+            "allowed": true,
+            "currentlyVisible": false
+          },
+          {
+            "objectId": 206644,
+            "name": "scarecrow",
+            "x": 301,
+            "y": 613,
+            "remainingMs": 8538,
+            "allowed": true,
+            "currentlyVisible": false
+          },
+          {
+            "objectId": 206007,
+            "name": "rakingcat",
+            "x": 299,
+            "y": 590,
+            "remainingMs": 7324,
+            "allowed": true,
+            "currentlyVisible": false
+          },
+          {
+            "objectId": 206628,
+            "name": "scarecrow",
+            "x": 305,
+            "y": 589,
+            "remainingMs": 9126,
+            "allowed": true,
+            "currentlyVisible": false
+          },
+          {
+            "objectId": 206026,
+            "name": "rakingcat",
+            "x": 320,
+            "y": 589,
+            "remainingMs": 20000,
+            "allowed": true,
+            "currentlyVisible": true
+          },
+          {
+            "objectId": 206117,
+            "name": "hookingcat",
+            "x": 321,
+            "y": 588,
+            "remainingMs": 20000,
+            "allowed": true,
+            "currentlyVisible": true
+          },
+          {
+            "objectId": 206623,
+            "name": "scarecrow",
+            "x": 321,
+            "y": 631,
+            "remainingMs": 13696,
+            "allowed": true,
+            "currentlyVisible": false
+          },
+          {
+            "objectId": 206032,
+            "name": "rakingcat",
+            "x": 322,
+            "y": 595,
+            "remainingMs": 20000,
+            "allowed": true,
+            "currentlyVisible": true
+          },
+          {
+            "objectId": 206136,
+            "name": "hookingcat",
+            "x": 339,
+            "y": 587,
+            "remainingMs": 20000,
+            "allowed": true,
+            "currentlyVisible": true
+          },
+          {
+            "objectId": 206129,
+            "name": "hookingcat",
+            "x": 342,
+            "y": 600,
+            "remainingMs": 20000,
+            "allowed": true,
+            "currentlyVisible": true
+          }
+        ],
+        "explicitForbiddenTotal": 1577,
+        "explicitForbiddenTruncated": true,
+        "explicitForbidden": [
+          {
+            "x": 292,
+            "y": 603
+          },
+          {
+            "x": 293,
+            "y": 603
+          },
+          {
+            "x": 292,
+            "y": 602
+          },
+          {
+            "x": 293,
+            "y": 602
+          },
+          {
+            "x": 294,
+            "y": 602
+          },
+          {
+            "x": 294,
+            "y": 603
+          },
+          {
+            "x": 292,
+            "y": 601
+          },
+          {
+            "x": 293,
+            "y": 601
+          },
+          {
+            "x": 294,
+            "y": 601
+          },
+          {
+            "x": 295,
+            "y": 601
+          },
+          {
+            "x": 295,
+            "y": 602
+          },
+          {
+            "x": 295,
+            "y": 603
+          },
+          {
+            "x": 292,
+            "y": 600
+          },
+          {
+            "x": 293,
+            "y": 600
+          },
+          {
+            "x": 294,
+            "y": 600
+          },
+          {
+            "x": 295,
+            "y": 600
+          },
+          {
+            "x": 296,
+            "y": 600
+          },
+          {
+            "x": 296,
+            "y": 601
+          },
+          {
+            "x": 296,
+            "y": 602
+          },
+          {
+            "x": 296,
+            "y": 603
+          },
+          {
+            "x": 292,
+            "y": 599
+          },
+          {
+            "x": 293,
+            "y": 599
+          },
+          {
+            "x": 294,
+            "y": 599
+          },
+          {
+            "x": 295,
+            "y": 599
+          },
+          {
+            "x": 296,
+            "y": 599
+          },
+          {
+            "x": 297,
+            "y": 599
+          },
+          {
+            "x": 297,
+            "y": 600
+          },
+          {
+            "x": 297,
+            "y": 601
+          },
+          {
+            "x": 297,
+            "y": 602
+          },
+          {
+            "x": 297,
+            "y": 603
+          },
+          {
+            "x": 292,
+            "y": 598
+          },
+          {
+            "x": 293,
+            "y": 598
+          },
+          {
+            "x": 294,
+            "y": 598
+          },
+          {
+            "x": 295,
+            "y": 598
+          },
+          {
+            "x": 296,
+            "y": 598
+          },
+          {
+            "x": 297,
+            "y": 598
+          },
+          {
+            "x": 298,
+            "y": 598
+          },
+          {
+            "x": 298,
+            "y": 599
+          },
+          {
+            "x": 298,
+            "y": 600
+          },
+          {
+            "x": 298,
+            "y": 601
+          },
+          {
+            "x": 298,
+            "y": 602
+          },
+          {
+            "x": 298,
+            "y": 603
+          },
+          {
+            "x": 292,
+            "y": 597
+          },
+          {
+            "x": 293,
+            "y": 597
+          },
+          {
+            "x": 294,
+            "y": 597
+          },
+          {
+            "x": 295,
+            "y": 597
+          },
+          {
+            "x": 296,
+            "y": 597
+          },
+          {
+            "x": 297,
+            "y": 597
+          },
+          {
+            "x": 298,
+            "y": 597
+          },
+          {
+            "x": 299,
+            "y": 597
+          },
+          {
+            "x": 299,
+            "y": 598
+          },
+          {
+            "x": 299,
+            "y": 599
+          },
+          {
+            "x": 299,
+            "y": 600
+          },
+          {
+            "x": 299,
+            "y": 601
+          },
+          {
+            "x": 299,
+            "y": 602
+          },
+          {
+            "x": 299,
+            "y": 603
+          },
+          {
+            "x": 299,
+            "y": 607
+          },
+          {
+            "x": 299,
+            "y": 608
+          },
+          {
+            "x": 299,
+            "y": 609
+          },
+          {
+            "x": 299,
+            "y": 610
+          },
+          {
+            "x": 299,
+            "y": 611
+          },
+          {
+            "x": 299,
+            "y": 612
+          },
+          {
+            "x": 299,
+            "y": 613
+          },
+          {
+            "x": 299,
+            "y": 614
+          },
+          {
+            "x": 299,
+            "y": 615
+          },
+          {
+            "x": 299,
+            "y": 616
+          },
+          {
+            "x": 299,
+            "y": 617
+          },
+          {
+            "x": 299,
+            "y": 618
+          },
+          {
+            "x": 299,
+            "y": 619
+          },
+          {
+            "x": 291,
+            "y": 596
+          },
+          {
+            "x": 292,
+            "y": 596
+          },
+          {
+            "x": 293,
+            "y": 596
+          },
+          {
+            "x": 294,
+            "y": 596
+          },
+          {
+            "x": 295,
+            "y": 596
+          },
+          {
+            "x": 296,
+            "y": 596
+          },
+          {
+            "x": 297,
+            "y": 596
+          },
+          {
+            "x": 298,
+            "y": 596
+          },
+          {
+            "x": 299,
+            "y": 596
+          },
+          {
+            "x": 300,
+            "y": 596
+          },
+          {
+            "x": 300,
+            "y": 597
+          },
+          {
+            "x": 300,
+            "y": 598
+          },
+          {
+            "x": 300,
+            "y": 599
+          },
+          {
+            "x": 300,
+            "y": 600
+          },
+          {
+            "x": 300,
+            "y": 601
+          },
+          {
+            "x": 300,
+            "y": 602
+          },
+          {
+            "x": 300,
+            "y": 603
+          },
+          {
+            "x": 300,
+            "y": 607
+          },
+          {
+            "x": 300,
+            "y": 608
+          },
+          {
+            "x": 300,
+            "y": 609
+          },
+          {
+            "x": 300,
+            "y": 610
+          },
+          {
+            "x": 300,
+            "y": 611
+          },
+          {
+            "x": 300,
+            "y": 612
+          },
+          {
+            "x": 300,
+            "y": 613
+          },
+          {
+            "x": 300,
+            "y": 614
+          },
+          {
+            "x": 300,
+            "y": 615
+          },
+          {
+            "x": 300,
+            "y": 616
+          },
+          {
+            "x": 300,
+            "y": 617
+          },
+          {
+            "x": 300,
+            "y": 618
+          },
+          {
+            "x": 300,
+            "y": 619
+          },
+          {
+            "x": 291,
+            "y": 595
+          },
+          {
+            "x": 292,
+            "y": 595
+          },
+          {
+            "x": 293,
+            "y": 595
+          },
+          {
+            "x": 294,
+            "y": 595
+          },
+          {
+            "x": 295,
+            "y": 595
+          },
+          {
+            "x": 296,
+            "y": 595
+          },
+          {
+            "x": 297,
+            "y": 595
+          },
+          {
+            "x": 298,
+            "y": 595
+          },
+          {
+            "x": 299,
+            "y": 595
+          },
+          {
+            "x": 300,
+            "y": 595
+          },
+          {
+            "x": 301,
+            "y": 595
+          },
+          {
+            "x": 301,
+            "y": 596
+          },
+          {
+            "x": 301,
+            "y": 597
+          },
+          {
+            "x": 301,
+            "y": 598
+          },
+          {
+            "x": 301,
+            "y": 599
+          },
+          {
+            "x": 301,
+            "y": 600
+          },
+          {
+            "x": 301,
+            "y": 601
+          },
+          {
+            "x": 301,
+            "y": 602
+          },
+          {
+            "x": 301,
+            "y": 603
+          },
+          {
+            "x": 301,
+            "y": 607
+          },
+          {
+            "x": 301,
+            "y": 608
+          },
+          {
+            "x": 301,
+            "y": 609
+          },
+          {
+            "x": 301,
+            "y": 610
+          },
+          {
+            "x": 301,
+            "y": 611
+          },
+          {
+            "x": 301,
+            "y": 612
+          },
+          {
+            "x": 301,
+            "y": 613
+          },
+          {
+            "x": 301,
+            "y": 614
+          },
+          {
+            "x": 301,
+            "y": 615
+          },
+          {
+            "x": 301,
+            "y": 616
+          }
+        ],
+        "occupancyTotal": 16,
+        "occupancyTruncated": false,
+        "occupancy": [
+          {
+            "x": 314,
+            "y": 589,
+            "objectId": 206705,
+            "kind": "monster"
+          },
+          {
+            "x": 320,
+            "y": 589,
+            "objectId": 206026,
+            "kind": "monster"
+          },
+          {
+            "x": 321,
+            "y": 588,
+            "objectId": 206117,
+            "kind": "monster"
+          },
+          {
+            "x": 321,
+            "y": 598,
+            "objectId": 214501,
+            "kind": "monster"
+          },
+          {
+            "x": 322,
+            "y": 595,
+            "objectId": 206032,
+            "kind": "monster"
+          },
+          {
+            "x": 322,
+            "y": 587,
+            "objectId": 206208,
+            "kind": "monster"
+          },
+          {
+            "x": 325,
+            "y": 600,
+            "objectId": 206201,
+            "kind": "monster"
+          },
+          {
+            "x": 326,
+            "y": 599,
+            "objectId": 206220,
+            "kind": "monster"
+          },
+          {
+            "x": 328,
+            "y": 589,
+            "objectId": 206542,
+            "kind": "monster"
+          },
+          {
+            "x": 339,
+            "y": 587,
+            "objectId": 206136,
+            "kind": "monster"
+          },
+          {
+            "x": 342,
+            "y": 600,
+            "objectId": 206129,
+            "kind": "monster"
+          },
+          {
+            "x": 342,
+            "y": 606,
+            "objectId": 206703,
+            "kind": "monster"
+          },
+          {
+            "x": 342,
+            "y": 592,
+            "objectId": 206716,
+            "kind": "monster"
+          },
+          {
+            "x": 343,
+            "y": 592,
+            "objectId": 206214,
+            "kind": "monster"
+          },
+          {
+            "x": 344,
+            "y": 591,
+            "objectId": 210400,
+            "kind": "monster"
+          },
+          {
+            "x": 345,
+            "y": 599,
+            "objectId": 206719,
+            "kind": "monster"
+          }
+        ]
+      },
+      "qualificationTotal": 23,
+      "qualificationTruncated": false,
+      "qualifications": [
+        {
+          "objectId": 206610,
+          "live": false,
+          "qualification": "raw",
+          "blockedRemainingMs": 0,
+          "trustRemainingMs": 5138,
+          "historyRemainingMs": 7915,
+          "positionCount": 1,
+          "lastReason": "live-closed-history-not-renewed",
+          "lastSource": "worldSnapshot",
+          "lastSourceSequence": 1508,
+          "current": null,
+          "duplicates": 0
+        },
+        {
+          "objectId": 206013,
+          "live": false,
+          "qualification": "raw",
+          "blockedRemainingMs": 0,
+          "trustRemainingMs": 5138,
+          "historyRemainingMs": 8536,
+          "positionCount": 1,
+          "lastReason": "live-closed-history-not-renewed",
+          "lastSource": "worldSnapshot",
+          "lastSourceSequence": 1508,
+          "current": null,
+          "duplicates": 0
+        },
+        {
+          "objectId": 206644,
+          "live": false,
+          "qualification": "raw",
+          "blockedRemainingMs": 0,
+          "trustRemainingMs": 5138,
+          "historyRemainingMs": 8536,
+          "positionCount": 1,
+          "lastReason": "live-closed-history-not-renewed",
+          "lastSource": "worldSnapshot",
+          "lastSourceSequence": 1508,
+          "current": null,
+          "duplicates": 0
+        },
+        {
+          "objectId": 206007,
+          "live": false,
+          "qualification": "raw",
+          "blockedRemainingMs": 0,
+          "trustRemainingMs": 5138,
+          "historyRemainingMs": 7322,
+          "positionCount": 1,
+          "lastReason": "live-closed-history-not-renewed",
+          "lastSource": "worldSnapshot",
+          "lastSourceSequence": 1508,
+          "current": null,
+          "duplicates": 0
+        },
+        {
+          "objectId": 206628,
+          "live": false,
+          "qualification": "raw",
+          "blockedRemainingMs": 0,
+          "trustRemainingMs": 5138,
+          "historyRemainingMs": 9124,
+          "positionCount": 1,
+          "lastReason": "live-closed-history-not-renewed",
+          "lastSource": "worldSnapshot",
+          "lastSourceSequence": 1508,
+          "current": null,
+          "duplicates": 0
+        },
+        {
+          "objectId": 206026,
+          "live": true,
+          "qualification": "raw",
+          "blockedRemainingMs": 0,
+          "trustRemainingMs": 19221,
+          "historyRemainingMs": 0,
+          "positionCount": 1,
+          "lastReason": "raw-qualified",
+          "lastSource": "worldSnapshot",
+          "lastSourceSequence": 1508,
+          "current": {
+            "name": "RakingCat",
+            "kind": "monster",
+            "x": 320,
+            "y": 589,
+            "ai": 0,
+            "aiPresent": true,
+            "hp": 32,
+            "hpPresent": true,
+            "dead": false,
+            "disposition": "hostile",
+            "ownerPresent": true,
+            "ownerIsNull": true,
+            "classPresent": true,
+            "classIsNull": true,
+            "masterPresent": false,
+            "masterIsZero": false
+          },
+          "duplicates": 1
+        },
+        {
+          "objectId": 206117,
+          "live": true,
+          "qualification": "raw",
+          "blockedRemainingMs": 0,
+          "trustRemainingMs": 19221,
+          "historyRemainingMs": 0,
+          "positionCount": 1,
+          "lastReason": "raw-qualified",
+          "lastSource": "worldSnapshot",
+          "lastSourceSequence": 1508,
+          "current": {
+            "name": "HookingCat",
+            "kind": "monster",
+            "x": 321,
+            "y": 588,
+            "ai": 0,
+            "aiPresent": true,
+            "hp": 30,
+            "hpPresent": true,
+            "dead": false,
+            "disposition": "hostile",
+            "ownerPresent": true,
+            "ownerIsNull": true,
+            "classPresent": true,
+            "classIsNull": true,
+            "masterPresent": false,
+            "masterIsZero": false
+          },
+          "duplicates": 1
+        },
+        {
+          "objectId": 206623,
+          "live": false,
+          "qualification": "wire",
+          "blockedRemainingMs": 0,
+          "trustRemainingMs": 13015,
+          "historyRemainingMs": 13694,
+          "positionCount": 1,
+          "lastReason": "live-closed-history-not-renewed",
+          "lastSource": "worldSnapshot",
+          "lastSourceSequence": 1508,
+          "current": null,
+          "duplicates": 0
+        },
+        {
+          "objectId": 206032,
+          "live": true,
+          "qualification": "raw",
+          "blockedRemainingMs": 0,
+          "trustRemainingMs": 19221,
+          "historyRemainingMs": 0,
+          "positionCount": 1,
+          "lastReason": "raw-qualified",
+          "lastSource": "worldSnapshot",
+          "lastSourceSequence": 1508,
+          "current": {
+            "name": "RakingCat",
+            "kind": "monster",
+            "x": 322,
+            "y": 595,
+            "ai": 0,
+            "aiPresent": true,
+            "hp": 32,
+            "hpPresent": true,
+            "dead": false,
+            "disposition": "hostile",
+            "ownerPresent": true,
+            "ownerIsNull": true,
+            "classPresent": true,
+            "classIsNull": true,
+            "masterPresent": false,
+            "masterIsZero": false
+          },
+          "duplicates": 1
+        },
+        {
+          "objectId": 206136,
+          "live": true,
+          "qualification": "raw",
+          "blockedRemainingMs": 0,
+          "trustRemainingMs": 19221,
+          "historyRemainingMs": 0,
+          "positionCount": 1,
+          "lastReason": "raw-qualified",
+          "lastSource": "worldSnapshot",
+          "lastSourceSequence": 1508,
+          "current": {
+            "name": "HookingCat",
+            "kind": "monster",
+            "x": 339,
+            "y": 587,
+            "ai": 0,
+            "aiPresent": true,
+            "hp": 30,
+            "hpPresent": true,
+            "dead": false,
+            "disposition": "hostile",
+            "ownerPresent": true,
+            "ownerIsNull": true,
+            "classPresent": true,
+            "classIsNull": true,
+            "masterPresent": false,
+            "masterIsZero": false
+          },
+          "duplicates": 1
+        },
+        {
+          "objectId": 206129,
+          "live": true,
+          "qualification": "raw",
+          "blockedRemainingMs": 0,
+          "trustRemainingMs": 19221,
+          "historyRemainingMs": 0,
+          "positionCount": 1,
+          "lastReason": "raw-qualified",
+          "lastSource": "worldSnapshot",
+          "lastSourceSequence": 1508,
+          "current": {
+            "name": "HookingCat",
+            "kind": "monster",
+            "x": 342,
+            "y": 600,
+            "ai": 0,
+            "aiPresent": true,
+            "hp": 30,
+            "hpPresent": true,
+            "dead": false,
+            "disposition": "hostile",
+            "ownerPresent": true,
+            "ownerIsNull": true,
+            "classPresent": true,
+            "classIsNull": true,
+            "masterPresent": false,
+            "masterIsZero": false
+          },
+          "duplicates": 1
+        },
+        {
+          "objectId": 206201,
+          "live": false,
+          "qualification": "none",
+          "blockedRemainingMs": 19998,
+          "trustRemainingMs": 0,
+          "historyRemainingMs": 0,
+          "positionCount": 0,
+          "lastReason": "planner-current-not-qualified",
+          "lastSource": "planner-read",
+          "lastSourceSequence": 1508,
+          "current": {
+            "name": "Deer",
+            "kind": "monster",
+            "x": 325,
+            "y": 600,
+            "ai": 2,
+            "aiPresent": true,
+            "hp": 25,
+            "hpPresent": true,
+            "dead": false,
+            "disposition": "neutral",
+            "ownerPresent": true,
+            "ownerIsNull": true,
+            "classPresent": true,
+            "classIsNull": true,
+            "masterPresent": false,
+            "masterIsZero": false
+          },
+          "duplicates": 1
+        },
+        {
+          "objectId": 206208,
+          "live": false,
+          "qualification": "none",
+          "blockedRemainingMs": 19998,
+          "trustRemainingMs": 0,
+          "historyRemainingMs": 0,
+          "positionCount": 0,
+          "lastReason": "planner-current-not-qualified",
+          "lastSource": "planner-read",
+          "lastSourceSequence": 1508,
+          "current": {
+            "name": "Deer",
+            "kind": "monster",
+            "x": 322,
+            "y": 587,
+            "ai": 2,
+            "aiPresent": true,
+            "hp": 25,
+            "hpPresent": true,
+            "dead": false,
+            "disposition": "neutral",
+            "ownerPresent": true,
+            "ownerIsNull": true,
+            "classPresent": true,
+            "classIsNull": true,
+            "masterPresent": false,
+            "masterIsZero": false
+          },
+          "duplicates": 1
+        },
+        {
+          "objectId": 206214,
+          "live": false,
+          "qualification": "none",
+          "blockedRemainingMs": 19998,
+          "trustRemainingMs": 0,
+          "historyRemainingMs": 0,
+          "positionCount": 0,
+          "lastReason": "planner-current-not-qualified",
+          "lastSource": "planner-read",
+          "lastSourceSequence": 1508,
+          "current": {
+            "name": "Deer",
+            "kind": "monster",
+            "x": 343,
+            "y": 592,
+            "ai": 2,
+            "aiPresent": true,
+            "hp": 25,
+            "hpPresent": true,
+            "dead": false,
+            "disposition": "neutral",
+            "ownerPresent": true,
+            "ownerIsNull": true,
+            "classPresent": true,
+            "classIsNull": true,
+            "masterPresent": false,
+            "masterIsZero": false
+          },
+          "duplicates": 1
+        },
+        {
+          "objectId": 206220,
+          "live": false,
+          "qualification": "none",
+          "blockedRemainingMs": 19998,
+          "trustRemainingMs": 0,
+          "historyRemainingMs": 0,
+          "positionCount": 0,
+          "lastReason": "planner-current-not-qualified",
+          "lastSource": "planner-read",
+          "lastSourceSequence": 1508,
+          "current": {
+            "name": "Deer",
+            "kind": "monster",
+            "x": 326,
+            "y": 599,
+            "ai": 2,
+            "aiPresent": true,
+            "hp": 25,
+            "hpPresent": true,
+            "dead": false,
+            "disposition": "neutral",
+            "ownerPresent": true,
+            "ownerIsNull": true,
+            "classPresent": true,
+            "classIsNull": true,
+            "masterPresent": false,
+            "masterIsZero": false
+          },
+          "duplicates": 1
+        },
+        {
+          "objectId": 206509,
+          "live": false,
+          "qualification": "none",
+          "blockedRemainingMs": 19998,
+          "trustRemainingMs": 0,
+          "historyRemainingMs": 0,
+          "positionCount": 0,
+          "lastReason": "planner-current-not-qualified",
+          "lastSource": "planner-read",
+          "lastSourceSequence": 1508,
+          "current": {
+            "name": "Deer",
+            "kind": "monster",
+            "x": 330,
+            "y": 614,
+            "ai": 2,
+            "aiPresent": true,
+            "hp": 0,
+            "hpPresent": true,
+            "dead": true,
+            "disposition": "neutral",
+            "ownerPresent": true,
+            "ownerIsNull": true,
+            "classPresent": true,
+            "classIsNull": true,
+            "masterPresent": false,
+            "masterIsZero": false
+          },
+          "duplicates": 1
+        },
+        {
+          "objectId": 206542,
+          "live": false,
+          "qualification": "none",
+          "blockedRemainingMs": 19998,
+          "trustRemainingMs": 0,
+          "historyRemainingMs": 0,
+          "positionCount": 0,
+          "lastReason": "planner-current-not-qualified",
+          "lastSource": "planner-read",
+          "lastSourceSequence": 1508,
+          "current": {
+            "name": "Deer",
+            "kind": "monster",
+            "x": 328,
+            "y": 589,
+            "ai": 2,
+            "aiPresent": true,
+            "hp": 25,
+            "hpPresent": true,
+            "dead": false,
+            "disposition": "neutral",
+            "ownerPresent": true,
+            "ownerIsNull": true,
+            "classPresent": true,
+            "classIsNull": true,
+            "masterPresent": false,
+            "masterIsZero": false
+          },
+          "duplicates": 1
+        },
+        {
+          "objectId": 206703,
+          "live": false,
+          "qualification": "none",
+          "blockedRemainingMs": 19998,
+          "trustRemainingMs": 0,
+          "historyRemainingMs": 0,
+          "positionCount": 0,
+          "lastReason": "planner-current-not-qualified",
+          "lastSource": "planner-read",
+          "lastSourceSequence": 1508,
+          "current": {
+            "name": "Deer",
+            "kind": "monster",
+            "x": 342,
+            "y": 606,
+            "ai": 2,
+            "aiPresent": true,
+            "hp": 25,
+            "hpPresent": true,
+            "dead": false,
+            "disposition": "neutral",
+            "ownerPresent": true,
+            "ownerIsNull": true,
+            "classPresent": true,
+            "classIsNull": true,
+            "masterPresent": false,
+            "masterIsZero": false
+          },
+          "duplicates": 1
+        },
+        {
+          "objectId": 206705,
+          "live": false,
+          "qualification": "none",
+          "blockedRemainingMs": 19998,
+          "trustRemainingMs": 0,
+          "historyRemainingMs": 0,
+          "positionCount": 0,
+          "lastReason": "planner-current-not-qualified",
+          "lastSource": "planner-read",
+          "lastSourceSequence": 1508,
+          "current": {
+            "name": "Deer",
+            "kind": "monster",
+            "x": 314,
+            "y": 589,
+            "ai": 2,
+            "aiPresent": true,
+            "hp": 25,
+            "hpPresent": true,
+            "dead": false,
+            "disposition": "neutral",
+            "ownerPresent": true,
+            "ownerIsNull": true,
+            "classPresent": true,
+            "classIsNull": true,
+            "masterPresent": false,
+            "masterIsZero": false
+          },
+          "duplicates": 1
+        },
+        {
+          "objectId": 206716,
+          "live": false,
+          "qualification": "none",
+          "blockedRemainingMs": 19998,
+          "trustRemainingMs": 0,
+          "historyRemainingMs": 0,
+          "positionCount": 0,
+          "lastReason": "planner-current-not-qualified",
+          "lastSource": "planner-read",
+          "lastSourceSequence": 1508,
+          "current": {
+            "name": "Deer",
+            "kind": "monster",
+            "x": 342,
+            "y": 592,
+            "ai": 2,
+            "aiPresent": true,
+            "hp": 25,
+            "hpPresent": true,
+            "dead": false,
+            "disposition": "neutral",
+            "ownerPresent": true,
+            "ownerIsNull": true,
+            "classPresent": true,
+            "classIsNull": true,
+            "masterPresent": false,
+            "masterIsZero": false
+          },
+          "duplicates": 1
+        },
+        {
+          "objectId": 206719,
+          "live": false,
+          "qualification": "none",
+          "blockedRemainingMs": 19998,
+          "trustRemainingMs": 0,
+          "historyRemainingMs": 0,
+          "positionCount": 0,
+          "lastReason": "planner-current-not-qualified",
+          "lastSource": "planner-read",
+          "lastSourceSequence": 1508,
+          "current": {
+            "name": "Deer",
+            "kind": "monster",
+            "x": 345,
+            "y": 599,
+            "ai": 2,
+            "aiPresent": true,
+            "hp": 25,
+            "hpPresent": true,
+            "dead": false,
+            "disposition": "neutral",
+            "ownerPresent": true,
+            "ownerIsNull": true,
+            "classPresent": true,
+            "classIsNull": true,
+            "masterPresent": false,
+            "masterIsZero": false
+          },
+          "duplicates": 1
+        },
+        {
+          "objectId": 210400,
+          "live": false,
+          "qualification": "none",
+          "blockedRemainingMs": 19998,
+          "trustRemainingMs": 0,
+          "historyRemainingMs": 0,
+          "positionCount": 0,
+          "lastReason": "planner-current-not-qualified",
+          "lastSource": "planner-read",
+          "lastSourceSequence": 1508,
+          "current": {
+            "name": "ChestnutTree",
+            "kind": "monster",
+            "x": 344,
+            "y": 591,
+            "ai": 3,
+            "aiPresent": true,
+            "hp": 10,
+            "hpPresent": true,
+            "dead": false,
+            "disposition": "neutral",
+            "ownerPresent": true,
+            "ownerIsNull": true,
+            "classPresent": true,
+            "classIsNull": true,
+            "masterPresent": false,
+            "masterIsZero": false
+          },
+          "duplicates": 1
+        },
+        {
+          "objectId": 214501,
+          "live": false,
+          "qualification": "none",
+          "blockedRemainingMs": 19998,
+          "trustRemainingMs": 0,
+          "historyRemainingMs": 0,
+          "positionCount": 0,
+          "lastReason": "planner-current-not-qualified",
+          "lastSource": "planner-read",
+          "lastSourceSequence": 1508,
+          "current": {
+            "name": "ChestnutTree2",
+            "kind": "monster",
+            "x": 321,
+            "y": 598,
+            "ai": 3,
+            "aiPresent": true,
+            "hp": 10,
+            "hpPresent": true,
+            "dead": false,
+            "disposition": "neutral",
+            "ownerPresent": true,
+            "ownerIsNull": true,
+            "classPresent": true,
+            "classIsNull": true,
+            "masterPresent": false,
+            "masterIsZero": false
+          },
+          "duplicates": 1
+        }
+      ]
+    },
+    "proofs": [
+      {
+        "kind": "sale",
+        "sequence": 1383,
+        "monotonicMs": 2235273.304,
+        "ackSequence": 1381,
+        "quantity": 1,
+        "gold": 273
+      },
+      {
+        "kind": "sale",
+        "sequence": 1387,
+        "monotonicMs": 2235335.5638,
+        "ackSequence": 1385,
+        "quantity": 1,
+        "gold": 248
+      }
+    ],
+    "commandCounts": {
+      "clientVersion": 24,
+      "interact": 2,
+      "selectNpcDialog": 2,
+      "run": 61,
+      "walk": 27,
+      "attackV2": 20,
+      "harvest": 12,
+      "sellItem": 2
+    },
+    "pathReplans": []
+  },
+  "sourceFirst4InventoryReuse": null,
+  "first4FreshReusePerformedThisRun": false,
+  "currentPartialIndexValid": true,
+  "finalPoolIdentityValid": true,
+  "normalCleanupComplete": true,
+  "ownedExitCodes": {
+    "driver": 1,
+    "gateway": 0,
+    "monitor": 0
+  },
+  "rootIndependentCleanup": {
+    "verifiedAt": "2026-10-27T09:14:19.3881032Z",
+    "ownedGatewayPid": 56588,
+    "ownedGatewayAbsent": true,
+    "remainingListeners": [],
+    "portsFree": true
+  },
+  "all100FreshPreparedThisRun": false,
+  "fullDurableReadinessVerified": false,
+  "measurementPerformed": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "futureFinalTarget": "500 online /500 continuously fighting; unimplemented and unaccepted",
+  "privacy": "Only explicit public text originals. No private Store/pool/ledger/keys/journals/rawGateway logs/recordings/exe.",
+  "rawByteVerification": {
+    "destinationExact": true,
+    "sourcesUnchangedDuringCopy": true,
+    "actualRootRawLogPinsMatched": true
+  },
+  "copies": [
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\source-lib-v1.mjs",
+      "file": "source-lib-v1.mjs",
+      "bytes": 18471,
+      "sha256": "bdbcb65eb6027f8d0c0812ab6975b5d53beee28d133be36d8cdf75593f57ca16"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\copy-source-bank-v1.mjs",
+      "file": "copy-source-bank-v1.mjs",
+      "bytes": 13254,
+      "sha256": "9bbf125dcded1a1e808bc804b0211e9bb973a064c5bb4edaf4a481cfbbb60a64"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\freeze-prepare-v1.mjs",
+      "file": "freeze-prepare-v1.mjs",
+      "bytes": 8821,
+      "sha256": "ae91d938ed4006828488a4cd08e227a84657fcdfaeade6be028b17b297457ae6"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\run-owned-prepare-v1.mjs",
+      "file": "run-owned-prepare-v1.mjs",
+      "bytes": 26491,
+      "sha256": "6cb4fe2ec2927242ea9ef4e6d301e3d7e7f3b57841cffd48eccb19abf06d1157"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\owned-child-v1.mjs",
+      "file": "owned-child-v1.mjs",
+      "bytes": 2401,
+      "sha256": "08f7962808e5d66983766ef3ad74a284dace6ae2eeabe739a0a01445b05b08cc"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\prepare-config-pending-v1.json",
+      "file": "prepare-config-pending-v1.json",
+      "bytes": 8534,
+      "sha256": "740d34f4318c234756aad4b6e8f08dbd2a2d4f15be9e560259e1ba1bfcb92757"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\source-bank-plan-pending-v1.json",
+      "file": "source-bank-plan-pending-v1.json",
+      "bytes": 18226,
+      "sha256": "d05a78dc7930a4dfc49a77e0545f64de8c3ba74d1ccd49d67fdd69b1f6813be4"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\backend-release-binding-pending-v1.json",
+      "file": "backend-release-binding-pending-v1.json",
+      "bytes": 1513,
+      "sha256": "c42e9f45e95054b8587412bf769b51a755ab51f1242a01b4885d5d512848903c"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\root-final-binding-receipt-v1.json",
+      "file": "root-final-binding-receipt-v1.json",
+      "bytes": 2351,
+      "sha256": "582c9d97feb6217c04432eeee6c3afac1da3bb00919a39f345c3c706b2978122"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\frozen-source-v1.json",
+      "file": "frozen-source-v1.json",
+      "bytes": 134360,
+      "sha256": "4252ff13f253c9f5e98f41cc11f5eee560ef5652d9ee65ada7f62bf9375ce31c"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\derivation-v1.json",
+      "file": "derivation-v1.json",
+      "bytes": 36177,
+      "sha256": "67ff371c859c3a80b1a8850b8b69f2f7b94f4f752862cde4212fe0bf9389ae0f"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\syntax-checks-v1.json",
+      "file": "syntax-checks-v1.json",
+      "bytes": 1227,
+      "sha256": "aed8423fb08a450258e3c3dd276914cb040ddb0def7a79f6f708e46f780e7330"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\preparation-v1.json",
+      "file": "preparation-v1.json",
+      "bytes": 3685,
+      "sha256": "92ae661202af767e4fa0a1e828901326e7590e36a1edc8076d10fc36c1407cd1"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\preparation-v2.json",
+      "file": "preparation-v2.json",
+      "bytes": 4185,
+      "sha256": "9dd3619e1cec91e5941fc6a764a0244b0dea320f25b5cff1679dc231449c3bde"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\prepare-config-before-root-final-v1.json",
+      "file": "prepare-config-before-root-final-v1.json",
+      "bytes": 8209,
+      "sha256": "bb61014ac6a88ab588c3fa7dde029cd05a9dfae343b29d6a0d45d677feea5930"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\backend-release-binding-before-root-final-v1.json",
+      "file": "backend-release-binding-before-root-final-v1.json",
+      "bytes": 1216,
+      "sha256": "0e68b64abdf8d4b579c42295d956117099b41be7730fd3fdfedf0c9908e64ef7"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\root-pending-tools-review-v1.json",
+      "file": "root-pending-tools-review-v1.json",
+      "bytes": 4257,
+      "sha256": "a9f545e3846fc9fb8267d847175845f01fd6341ca1c46fd22d14dbc6a2e9650c"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\root-full16-reuse-tool-derivation-v1.json",
+      "file": "root-full16-reuse-tool-derivation-v1.json",
+      "bytes": 1391,
+      "sha256": "f14a68353c25c293f5b55c0b6671acb5f992ae9e96459ca1d3fa8d783930c170"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\prepare-config-before-ledger-reference-correction-v1.json",
+      "file": "prepare-config-before-ledger-reference-correction-v1.json",
+      "bytes": 8209,
+      "sha256": "f828b90d341b0ef91d685b6f23608348b63285aba5ea7abb4740df74202e2371"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\ledger-reference-correction-v2.json",
+      "file": "ledger-reference-correction-v2.json",
+      "bytes": 1433,
+      "sha256": "4e2e010a313fc2375aa42ae6fc5c5c5f736d785aa63295d8137a371a5c0780cf"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\source-bank-copy-receipt-v1.json",
+      "file": "source-bank-copy-receipt-v1.json",
+      "bytes": 14234,
+      "sha256": "8e3dafa26dade59754f46ce5943c73a4e1d11f0d2e255eee7dc1199afcee1fb4"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\preparation-episode-receipt-v1.json",
+      "file": "preparation-episode-receipt-v1.json",
+      "bytes": 5773,
+      "sha256": "e0acda44da49d64c125b46552163039a91917cd58e9719449fdf4eb14aa5dc46"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\prepared-index-v1.json",
+      "file": "prepared-index-v1.json",
+      "bytes": 6439,
+      "sha256": "e515646b164eefea54ef546ced556b5a71f4c688f551d9f3e3c2cf470f110601"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\combined-saved-index-v1.json",
+      "file": "combined-saved-index-v1.json",
+      "bytes": 40688,
+      "sha256": "5fde0db82f2d68dbc3454d6c513bdfd30963f39f5348f2e68417468dda670f01"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\cleanup-v1.json",
+      "file": "cleanup-v1.json",
+      "bytes": 1037,
+      "sha256": "c49b2b6e87f110873065df41b3dd178525a208c7e8c88d7902ff10e5ef33479a"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\owned-process-v1.json",
+      "file": "owned-process-v1.json",
+      "bytes": 742,
+      "sha256": "6d031c7f936fd5115bd50dcb76b299a4ff19697df6bed47f044b49381ee67f80"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\health-before-v1.json",
+      "file": "health-before-v1.json",
+      "bytes": 1122,
+      "sha256": "3d69f7051bc2356d30cab2d2408cc7e0aa124aea3e236a811828f9370f777b58"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\health-after-v1.json",
+      "file": "health-after-v1.json",
+      "bytes": 476,
+      "sha256": "bc630af4b9fc347cdbda59fbb901166d086d4f7c04fb423106dd7f2a50eae689"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\run-intent-v1.json",
+      "file": "run-intent-v1.json",
+      "bytes": 3360,
+      "sha256": "c1e184bf0c08d89a1be30d9d109a97003bda3888d15febf0bc70a81b270e8d88"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\root-independent-cleanup-v1.json",
+      "file": "root-independent-cleanup-v1.json",
+      "bytes": 164,
+      "sha256": "d8a581bdedf2f3288f28cd6e46c9a66a84453b0cd6a926a3f8eb78471b8e1e56"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\reports\\1793090167771-5bd2d680.preparation-report.json",
+      "file": "1793090167771-5bd2d680.preparation-report.json",
+      "bytes": 92721,
+      "sha256": "c4adc922a7cd57a26f8d7824717db1c0c06cd55feb25ca886d9d3ccca0369df2"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\reports\\1793090167771-5bd2d680.preparation.jsonl",
+      "file": "1793090167771-5bd2d680.preparation.jsonl",
+      "bytes": 9699582,
+      "sha256": "811f1b8af81f6c150c6b4bc90b68e535e814add76eb0b258a896d5c25e28a268"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v16\\root-focused-receipt-v1.json",
+      "file": "node-v16/root-focused-receipt-v1.json",
+      "bytes": 22059,
+      "sha256": "43011d9896545520e786b2a1bcebe586570ac4fd22a484121d2dfbaa79aa427e"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v16\\complete-preparation-and-protected-navigation.stdout.log",
+      "file": "node-v16/complete-preparation-and-protected-navigation.stdout.log",
+      "bytes": 77285,
+      "sha256": "aac56810505e2763e94ab8c0dc5efe350c7abee849a774491ee4323eae4f9ad9"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v16\\complete-preparation-and-protected-navigation.stderr.log",
+      "file": "node-v16/complete-preparation-and-protected-navigation.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v16\\ordinary-economy-and-navigation-dependencies.stdout.log",
+      "file": "node-v16/ordinary-economy-and-navigation-dependencies.stdout.log",
+      "bytes": 84180,
+      "sha256": "15fd1a7611bbc71156af0d1300515be1c920a2e8f09bf5aadd6f15c40a72d99b"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v16\\ordinary-economy-and-navigation-dependencies.stderr.log",
+      "file": "node-v16/ordinary-economy-and-navigation-dependencies.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v16\\ordinary-full-lifecycle-driver-units.stdout.log",
+      "file": "node-v16/ordinary-full-lifecycle-driver-units.stdout.log",
+      "bytes": 13218,
+      "sha256": "746c516ce1a00d58d2765f1cf82c6405362db4aad1165d5272fe43c725b65495"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v16\\ordinary-full-lifecycle-driver-units.stderr.log",
+      "file": "node-v16/ordinary-full-lifecycle-driver-units.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v16\\capacity-execution-and-policy-regression.stdout.log",
+      "file": "node-v16/capacity-execution-and-policy-regression.stdout.log",
+      "bytes": 83617,
+      "sha256": "b102d914ea8fb0ecf1136e8ed6bf5181ba06c690a8e14ac72686f2c4f19ea4cc"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v16\\capacity-execution-and-policy-regression.stderr.log",
+      "file": "node-v16/capacity-execution-and-policy-regression.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-runner-v16.mjs",
+      "file": "node-v16/root-validation-runner-v16.mjs",
+      "bytes": 6590,
+      "sha256": "3b66e7d397f152a38f65392c69d4d05f949622554cb6c579c1feb3d35c438681"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-review-pending-bank-tools-v16.mjs",
+      "file": "root-reviews/root-review-pending-bank-tools-v16.mjs",
+      "bytes": 5438,
+      "sha256": "89065fa39ff4565b21ce1ac4fe1b3042961a838547e6e660f8081976589d2067"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full16-reuse-proof-v16.json",
+      "file": "full16-reuse/ordinary-full16-reuse-proof-v16.json",
+      "bytes": 73043,
+      "sha256": "e13fe3040ad0e612b797d2531f19152c909d1a5ec6e206cc345e633beb364e5e"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\verify-full16-reuse-v8.mjs",
+      "file": "full16-reuse/verify-full16-reuse-v8.mjs",
+      "bytes": 15209,
+      "sha256": "edd63e82dc8954f0b2276cd3b2c1fb3ca472c1c656c59ffe48e3062a377ac090"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\archive-ordinary-capacity-bank-prepare-v16.mjs",
+      "file": "archive-evidence-v16.mjs",
+      "bytes": 11914,
+      "sha256": "a17ce1920f34abc315d3efd07e484a832affb3f2bb42f91ab4081c6450162f32"
+    }
+  ]
+}

@@ -1,0 +1,164 @@
+{
+  "scope": "Public normal game WebSocket; shared pinned Rust decoder; only counts, byte sizes, timestamps and body hashes; no packet payloads or identifiers.",
+  "initialTenBatches": {
+    "binaryFrames": 10,
+    "wireBytes": 80448,
+    "decodedTextBytes": 633495,
+    "packetCount": 529,
+    "packets": {
+      "NewItemInfo": 145,
+      "NewQuestInfo": 200,
+      "NewRecipeInfo": 79,
+      "GameShopInfo": 105
+    }
+  },
+  "additionalDefinitionNotifications": {
+    "binaryFrames": 1,
+    "wireBytes": 593,
+    "decodedTextBytes": 992,
+    "packetCount": 1,
+    "packets": {
+      "GameShopInfo": 1
+    }
+  },
+  "allReceived": {
+    "binaryFrames": 11,
+    "wireBytes": 81041,
+    "decodedTextBytes": 634487,
+    "packetCount": 530,
+    "packets": {
+      "NewItemInfo": 145,
+      "NewQuestInfo": 200,
+      "NewRecipeInfo": 79,
+      "GameShopInfo": 106
+    }
+  },
+  "capabilities": [
+    {
+      "atMs": 14174,
+      "declared": true
+    },
+    {
+      "atMs": 14174,
+      "declared": true
+    }
+  ],
+  "droppedFrames": 0,
+  "batches": [
+    {
+      "atMs": 53789,
+      "wireBytes": 663,
+      "count": 4,
+      "decodedTextBytes": 2422,
+      "packets": {
+        "NewItemInfo": 4
+      },
+      "bodySha256": "32c1ccabcfca2e13acf2fa1cb74a8f663c4f9251f7c7ce93982d2d2d05ce83e2"
+    },
+    {
+      "atMs": 54192,
+      "wireBytes": 19383,
+      "count": 64,
+      "decodedTextBytes": 105970,
+      "packets": {
+        "NewQuestInfo": 64
+      },
+      "bodySha256": "6dbb72071457838a0c77912cf7b74445d7bab5b15c2d41861bc35d1cc8ae38eb"
+    },
+    {
+      "atMs": 54541,
+      "wireBytes": 18096,
+      "count": 64,
+      "decodedTextBytes": 101457,
+      "packets": {
+        "NewQuestInfo": 64
+      },
+      "bodySha256": "60d3c38c0a62e2a1a02f7fad6bbd4480622a4f226e08563f1a6e037ac4cf911b"
+    },
+    {
+      "atMs": 54898,
+      "wireBytes": 12910,
+      "count": 64,
+      "decodedTextBytes": 86373,
+      "packets": {
+        "NewQuestInfo": 64
+      },
+      "bodySha256": "fe6894dfca05c93c1532e187ffd6987bf7aaa8fa1e11f923ec97d63696c24911"
+    },
+    {
+      "atMs": 54906,
+      "wireBytes": 5969,
+      "count": 64,
+      "decodedTextBytes": 61848,
+      "packets": {
+        "NewQuestInfo": 8,
+        "NewItemInfo": 41,
+        "NewRecipeInfo": 15
+      },
+      "bodySha256": "9e706d41925c3f01ec1acae80564df9e1490b75f752c0c3fadee3d94b28e0ef8"
+    },
+    {
+      "atMs": 54912,
+      "wireBytes": 5463,
+      "count": 64,
+      "decodedTextBytes": 61899,
+      "packets": {
+        "NewItemInfo": 43,
+        "NewRecipeInfo": 21
+      },
+      "bodySha256": "245fe830054e856b8bee24ec4157922da3d1a9062db7ae0c88018c2b5aee285f"
+    },
+    {
+      "atMs": 55088,
+      "wireBytes": 5484,
+      "count": 64,
+      "decodedTextBytes": 70119,
+      "packets": {
+        "NewRecipeInfo": 26,
+        "NewItemInfo": 38
+      },
+      "bodySha256": "96ad38ef1eb29d4f0d53777de7644ed50a5e8cfd3d9a6776536d9cc8a80e48c1"
+    },
+    {
+      "atMs": 55095,
+      "wireBytes": 3400,
+      "count": 36,
+      "decodedTextBytes": 42339,
+      "packets": {
+        "NewRecipeInfo": 17,
+        "NewItemInfo": 19
+      },
+      "bodySha256": "ddbb098d0b58f202a8dc60804be328075b3234731255ec6d68bf7a7fb12f8c84"
+    },
+    {
+      "atMs": 55102,
+      "wireBytes": 5270,
+      "count": 64,
+      "decodedTextBytes": 62466,
+      "packets": {
+        "GameShopInfo": 64
+      },
+      "bodySha256": "e7898ebb4ed04429abae06375ec3cd929e95a04a711d9fd6375dc26f267cbbbc"
+    },
+    {
+      "atMs": 55325,
+      "wireBytes": 3810,
+      "count": 41,
+      "decodedTextBytes": 38602,
+      "packets": {
+        "GameShopInfo": 41
+      },
+      "bodySha256": "67a902cc752dd681f067b08f5676a5de4d02eebcfcf08a22483fefa9cb9969e5"
+    },
+    {
+      "atMs": 56240,
+      "wireBytes": 593,
+      "count": 1,
+      "decodedTextBytes": 992,
+      "packets": {
+        "GameShopInfo": 1
+      },
+      "bodySha256": "6fb62a20c1349896140640ca1e8fffa9c6243b99dd258581bd3fcf2bbcdf8aa4"
+    }
+  ]
+}

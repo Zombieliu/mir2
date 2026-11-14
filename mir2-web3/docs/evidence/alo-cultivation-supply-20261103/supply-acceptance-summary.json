@@ -1,0 +1,365 @@
+{
+  "schema": "mir2-supply-acceptance/1",
+  "passed": true,
+  "modelCalls": 0,
+  "humanTrial": false,
+  "gatewaySha256": "cd35f1f8cba5c2d6602dc344421b25db613c4c82061fdf6f34b1946df914a3d7",
+  "contentProfile": "platinum_fiveclass",
+  "funding": {
+    "source": "ordinary-owned-starter-resale",
+    "initialGold": 0,
+    "finalGold": 85,
+    "sales": [
+      {
+        "merchantName": "Blacksmith_Smith",
+        "itemName": "WoodenSword",
+        "itemUniqueIdHash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+        "quantity": 1,
+        "observedUnitValue": 25,
+        "beforeGold": 0,
+        "afterGold": 25,
+        "exactInventoryRemoval": true
+      },
+      {
+        "merchantName": "Merchant_Whitney",
+        "itemName": "BaseDress(M)",
+        "itemUniqueIdHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+        "quantity": 1,
+        "observedUnitValue": 60,
+        "beforeGold": 25,
+        "afterGold": 85,
+        "exactInventoryRemoval": true
+      }
+    ],
+    "preservedHpPotions": 1,
+    "preservedCandles": 1,
+    "actualPreparationPosition": {
+      "x": 288,
+      "y": 616
+    },
+    "syntheticOnly": true,
+    "productSellingCapabilityAdded": false,
+    "questOrCombatRevenueClaimed": false
+  },
+  "budgetRefusal": {
+    "budgetGold": 39,
+    "observedPriceGold": 40,
+    "goldUnchanged": true,
+    "ownedPotionQuantityUnchanged": true,
+    "noPurchaseAttempted": true,
+    "actualStatus": "failed",
+    "scope": "observed 40-gold price exceeded the grant and the runner stopped without purchase; the unique refusal cause and server commit-budget enforcement are not established by this observation"
+  },
+  "positive": {
+    "visibility": {
+      "ownerPosition": {
+        "x": 309,
+        "y": 634
+      },
+      "actorPosition": {
+        "x": 288,
+        "y": 616
+      },
+      "actorCouldSeeOwner": false
+    },
+    "anchor": {
+      "x": 309,
+      "y": 634
+    },
+    "actualPosition": {
+      "x": 308,
+      "y": 634
+    },
+    "arrivalDistance": 1,
+    "beforeGold": 85,
+    "afterGold": 45,
+    "chargedGold": 40,
+    "acquiredQuantity": 1,
+    "purchaseReceipt": {
+      "producerScope": "8cebf03421d2e2528b678c154544789024e3c06ae8384db9151d1339ab3831b5",
+      "entry": {
+        "operation": {
+          "actor": "7ced061b80429debc4deff2557e3f245dedd7007b9799863fc1d5781edc68b3f",
+          "requestScope": "8cebf03421d2e2528b678c154544789024e3c06ae8384db9151d1339ab3831b5",
+          "sequence": "2",
+          "intent": {
+            "request": {
+              "itemIndex": "43122688",
+              "count": 1,
+              "panelType": 0
+            },
+            "currency": "gold",
+            "source": "trade",
+            "serviceCatalogProof": "79ceca8e325666667a11e7bf3f67fd135872acc7d0e8207ef6ddbc998e6dca0d"
+          }
+        },
+        "serverRevision": "22",
+        "outcome": {
+          "committed": {
+            "request": {
+              "itemIndex": "43122688",
+              "count": 1,
+              "panelType": 0
+            },
+            "currency": "gold",
+            "source": "trade",
+            "charged": 40,
+            "admittedCount": 1,
+            "incomingUniqueId": "43122689"
+          }
+        }
+      }
+    },
+    "authority": {
+      "actor": "7ced061b80429debc4deff2557e3f245dedd7007b9799863fc1d5781edc68b3f",
+      "producerScope": "8cebf03421d2e2528b678c154544789024e3c06ae8384db9151d1339ab3831b5",
+      "serverRevision": "22"
+    },
+    "operationHash": "e2fc2e178190642090b37ef0623a30875b7000e6d6f429e0f44f0b9eae24f5c3",
+    "completePairedSnapshot": true,
+    "independentActualMovement": true
+  },
+  "cancellation": {
+    "revoked": true,
+    "goldUnchanged": true,
+    "noAdditionalPurchase": true,
+    "actualStatus": "cancelled"
+  },
+  "recovery": {
+    "differentProcess": true,
+    "firstProcessId": 47252,
+    "restartedProcessId": 33344,
+    "injection": "real server commit; returned method result deliberately dropped before runner consumed it",
+    "originalOperationHash": "1d8805cd67856fe3f2d58b74603564303d24c4c7f40fd76df77b4560da788d3c",
+    "actualReceipt": {
+      "producerScope": "8cebf03421d2e2528b678c154544789024e3c06ae8384db9151d1339ab3831b5",
+      "entry": {
+        "operation": {
+          "actor": "7ced061b80429debc4deff2557e3f245dedd7007b9799863fc1d5781edc68b3f",
+          "requestScope": "8cebf03421d2e2528b678c154544789024e3c06ae8384db9151d1339ab3831b5",
+          "sequence": "4",
+          "intent": {
+            "request": {
+              "itemIndex": "43122688",
+              "count": 1,
+              "panelType": 0
+            },
+            "currency": "gold",
+            "source": "trade",
+            "serviceCatalogProof": "79ceca8e325666667a11e7bf3f67fd135872acc7d0e8207ef6ddbc998e6dca0d"
+          }
+        },
+        "serverRevision": "25",
+        "outcome": {
+          "committed": {
+            "request": {
+              "itemIndex": "43122688",
+              "count": 1,
+              "panelType": 0
+            },
+            "currency": "gold",
+            "source": "trade",
+            "charged": 40,
+            "admittedCount": 1,
+            "incomingUniqueId": "43122690"
+          }
+        }
+      }
+    },
+    "recoveredReceiptRevision": "25",
+    "queryCalls": 1,
+    "newPurchaseCallsAfterRestart": 0,
+    "chargedOnlyOnce": true,
+    "stateAfterRecovery": "paused",
+    "returnClaimedAfterRecovery": false
+  },
+  "checks": [
+    "synthetic actor ordinarily sold its own starter sword/dress; exact owned removal and real gold credit; HP potion and candle preserved",
+    "owner walked outside the actor's actual AOI before authorization and remains on the authorized return anchor",
+    "a 51-gold authorization above the server cap was rejected without a purchase",
+    "valid 39-gold grant with observed 40-gold Ruben potion stopped before purchase, with unchanged gold and owned potion quantity; unique refusal cause not inferred",
+    "actual independent Ruben interaction, one exact 40-gold/one-potion committed receipt with same-source full snapshot and real arrival beside occupied owner anchor",
+    "explicit server cancellation prevented a new economic operation and any further gold debit",
+    "different Node process recovered the exact original durable order by Query only; no new purchase, no second debit, paused rather than fabricated return completion"
+  ],
+  "commands": {
+    "clientVersion": 2,
+    "login": 2,
+    "startGame": 2,
+    "changeAMode": 2,
+    "switchGroup": 2,
+    "companionRuntimeRegister": 2,
+    "attackDirection": 21,
+    "keepAlive": 10,
+    "companionRuntimeReply": 183,
+    "walk": 59,
+    "interact": 3,
+    "selectNpcDialog": 3,
+    "clientCapabilities": 2,
+    "npcPurchaseOwner": 9,
+    "logOut": 1
+  },
+  "economicBoundaryProofs": [
+    {
+      "operation": {
+        "actor": "7ced061b80429debc4deff2557e3f245dedd7007b9799863fc1d5781edc68b3f",
+        "requestScope": "8cebf03421d2e2528b678c154544789024e3c06ae8384db9151d1339ab3831b5",
+        "sequence": "2",
+        "intent": {
+          "request": {
+            "itemIndex": "43122688",
+            "count": 1,
+            "panelType": 0
+          },
+          "currency": "gold",
+          "source": "trade",
+          "serviceCatalogProof": "79ceca8e325666667a11e7bf3f67fd135872acc7d0e8207ef6ddbc998e6dca0d"
+        }
+      },
+      "before": {
+        "gold": 85,
+        "hpPotions": 1,
+        "player": {
+          "x": 288,
+          "y": 609
+        },
+        "mapFileName": "0",
+        "playerHp": 18,
+        "playerMaxHp": 18
+      },
+      "after": {
+        "gold": 45,
+        "hpPotions": 2,
+        "player": {
+          "x": 288,
+          "y": 609
+        },
+        "mapFileName": "0",
+        "playerHp": 18,
+        "playerMaxHp": 18
+      },
+      "receipt": {
+        "producerScope": "8cebf03421d2e2528b678c154544789024e3c06ae8384db9151d1339ab3831b5",
+        "entry": {
+          "operation": {
+            "actor": "7ced061b80429debc4deff2557e3f245dedd7007b9799863fc1d5781edc68b3f",
+            "requestScope": "8cebf03421d2e2528b678c154544789024e3c06ae8384db9151d1339ab3831b5",
+            "sequence": "2",
+            "intent": {
+              "request": {
+                "itemIndex": "43122688",
+                "count": 1,
+                "panelType": 0
+              },
+              "currency": "gold",
+              "source": "trade",
+              "serviceCatalogProof": "79ceca8e325666667a11e7bf3f67fd135872acc7d0e8207ef6ddbc998e6dca0d"
+            }
+          },
+          "serverRevision": "22",
+          "outcome": {
+            "committed": {
+              "request": {
+                "itemIndex": "43122688",
+                "count": 1,
+                "panelType": 0
+              },
+              "currency": "gold",
+              "source": "trade",
+              "charged": 40,
+              "admittedCount": 1,
+              "incomingUniqueId": "43122689"
+            }
+          }
+        }
+      },
+      "authority": {
+        "actor": "7ced061b80429debc4deff2557e3f245dedd7007b9799863fc1d5781edc68b3f",
+        "producerScope": "8cebf03421d2e2528b678c154544789024e3c06ae8384db9151d1339ab3831b5",
+        "serverRevision": "22"
+      },
+      "hasCompleteSnapshot": true
+    },
+    {
+      "operation": {
+        "actor": "7ced061b80429debc4deff2557e3f245dedd7007b9799863fc1d5781edc68b3f",
+        "requestScope": "8cebf03421d2e2528b678c154544789024e3c06ae8384db9151d1339ab3831b5",
+        "sequence": "4",
+        "intent": {
+          "request": {
+            "itemIndex": "43122688",
+            "count": 1,
+            "panelType": 0
+          },
+          "currency": "gold",
+          "source": "trade",
+          "serviceCatalogProof": "79ceca8e325666667a11e7bf3f67fd135872acc7d0e8207ef6ddbc998e6dca0d"
+        }
+      },
+      "before": {
+        "gold": 45,
+        "hpPotions": 2,
+        "player": {
+          "x": 288,
+          "y": 609
+        },
+        "mapFileName": "0",
+        "playerHp": 18,
+        "playerMaxHp": 18
+      },
+      "after": {
+        "gold": 5,
+        "hpPotions": 3,
+        "player": {
+          "x": 288,
+          "y": 609
+        },
+        "mapFileName": "0",
+        "playerHp": 18,
+        "playerMaxHp": 18
+      },
+      "receipt": {
+        "producerScope": "8cebf03421d2e2528b678c154544789024e3c06ae8384db9151d1339ab3831b5",
+        "entry": {
+          "operation": {
+            "actor": "7ced061b80429debc4deff2557e3f245dedd7007b9799863fc1d5781edc68b3f",
+            "requestScope": "8cebf03421d2e2528b678c154544789024e3c06ae8384db9151d1339ab3831b5",
+            "sequence": "4",
+            "intent": {
+              "request": {
+                "itemIndex": "43122688",
+                "count": 1,
+                "panelType": 0
+              },
+              "currency": "gold",
+              "source": "trade",
+              "serviceCatalogProof": "79ceca8e325666667a11e7bf3f67fd135872acc7d0e8207ef6ddbc998e6dca0d"
+            }
+          },
+          "serverRevision": "25",
+          "outcome": {
+            "committed": {
+              "request": {
+                "itemIndex": "43122688",
+                "count": 1,
+                "panelType": 0
+              },
+              "currency": "gold",
+              "source": "trade",
+              "charged": 40,
+              "admittedCount": 1,
+              "incomingUniqueId": "43122690"
+            }
+          }
+        }
+      },
+      "authority": {
+        "actor": "7ced061b80429debc4deff2557e3f245dedd7007b9799863fc1d5781edc68b3f",
+        "producerScope": "8cebf03421d2e2528b678c154544789024e3c06ae8384db9151d1339ab3831b5",
+        "serverRevision": "25"
+      },
+      "hasCompleteSnapshot": true
+    }
+  ],
+  "unknownFaultIsExplicitInjection": true
+}

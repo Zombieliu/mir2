@@ -1,0 +1,85 @@
+{
+  "schema": "mir2.promotion-migration.component-build.v1",
+  "generatedAtUtc": "2026-10-30T20:11:19.276Z",
+  "esbuildVersion": "0.28.2",
+  "sourceWorktree": "C:/Users/Administrator/.codex/worktrees/promotion-vercel-release/mir2-player-journey/mir2-web3/apps/web",
+  "actualProductionComponentImported": true,
+  "componentLogicCopiedOrRewritten": false,
+  "actualCssModulesBundled": true,
+  "nextCompilationClaimed": false,
+  "backendAcceptanceClaimed": false,
+  "sourceInputs": [
+    {
+      "path": "app/promotions/promotion-account-copy.ts",
+      "sha256": "1d61fa7d698811bcf5c5ed5b203568f03a2a9bac44423914bca1445196380a37"
+    },
+    {
+      "path": "app/promotions/promotion-earnings-copy.ts",
+      "sha256": "39246ae344987e968e1d4f7142bf0acaac4ffc5cfb6bef2c41c809c975b0674b"
+    },
+    {
+      "path": "app/promotions/promotion-migration-copy.ts",
+      "sha256": "cb229a46002f2bb170606ba8af225142c714f4df98bb3963d66902410e6f1f8e"
+    },
+    {
+      "path": "app/promotions/promotion-refresh.ts",
+      "sha256": "dddab0c96cd72b905c060d5cf7462d7f99df82adb527dfc2bdba1bf7822b4875"
+    },
+    {
+      "path": "app/promotions/promotion-copy.ts",
+      "sha256": "24e052b9c40f4b1a882cf6af9a2e3300fb37b86566ddf452829f4c0ada6519a1"
+    },
+    {
+      "path": "app/promotions/promotion-model.ts",
+      "sha256": "96c6e2c15a8fb0c79b5e815bde9c3c8926e3295e361d7986b0e48740df376238"
+    },
+    {
+      "path": "app/promotions/promotion.module.css",
+      "sha256": "630aa3aa8ccedcaf7ca21677a4fd8154cb7f517f6b5901b79be6063639c175c3"
+    },
+    {
+      "path": "app/promotions/promotion-wallet-login.tsx",
+      "sha256": "719b390a7e295ada1f96d9edcc1b606eba45b031c9e43bbb8f75736985b69694"
+    },
+    {
+      "path": "app/promotions/promotion-admin-copy.ts",
+      "sha256": "7b1c9ffcb450b4199b03208ede002298eb82b13d2ffb2581415205f52ddcd2ad"
+    },
+    {
+      "path": "app/promotions/promotion-admin-input.ts",
+      "sha256": "bafadb3b6851396b29f914e7fa4f9d6efdbb7c09e9c294254330f3a7b1d88b85"
+    },
+    {
+      "path": "app/promotions/promotion-admin.tsx",
+      "sha256": "3437936e43951cada3f6a7fc47414bd114b85ddf125c12ff76e2b0ae80ed2e25"
+    },
+    {
+      "path": "app/promotions/promotion-windows-copy.ts",
+      "sha256": "7b7a0519542e64f22c2376a395888569e4079428f35189cf360b757189438358"
+    },
+    {
+      "path": "app/promotions/promotion-checkout-recovery.ts",
+      "sha256": "877b302cef14d25c8bbe8146d24cdc400b58ca9623ce999b154ef52962376587"
+    },
+    {
+      "path": "app/promotions/promotion-billing.tsx",
+      "sha256": "b08d48db3eec54d56229364fec0c81a72d987110031ad2bdf73ca0cb3929081f"
+    },
+    {
+      "path": "app/promotions/promotion-app.tsx",
+      "sha256": "596a27fc7d17dc731d9e7c3383f0d43f266a7fe088be4f9b33a0759dbd29e6b7"
+    }
+  ],
+  "output": [
+    {
+      "name": "app.js",
+      "bytes": 1191363,
+      "sha256": "ee753b1a6334da11e1925c10d0cea97c9f9d095ecdf45661fac5434d40672ade"
+    },
+    {
+      "name": "app.css",
+      "bytes": 19832,
+      "sha256": "5b573b689b8ce532760c55773b03250bf5bdd14f92106a5160e46c9d4651c22b"
+    }
+  ]
+}

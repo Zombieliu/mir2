@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-27T12:12:25.1986147Z",
+  "ownedGatewayPid": 75764,
+  "ownedGatewayAbsent": true,
+  "remainingListeners": [],
+  "portsFree": true,
+  "ports": [
+    17600,
+    17610
+  ],
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

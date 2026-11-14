@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "checkedAtUtc": "2026-10-26T18:33:52.7029844Z",
+  "expectedGatewayPid": 71204,
+  "processAbsent": true,
+  "remainingListeners": [],
+  "portsFree": true,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

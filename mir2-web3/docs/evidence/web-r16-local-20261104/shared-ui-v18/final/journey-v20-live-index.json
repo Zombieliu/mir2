@@ -1,0 +1,30 @@
+{
+  "phase": "journey-v20-live",
+  "publicOnly": true,
+  "privateLogsCopied": false,
+  "rawNativeScreenshotCopied": false,
+  "privateIdentityMatches": 0,
+  "knownSecretPatternMatches": 0,
+  "files": 3,
+  "bytes": 394642,
+  "entries": [
+    {
+      "path": "v20-live/01-v20-current-big-map-viewport.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/v20-save-and-big-map-browser-r1/01-v20-current-big-map-viewport.png",
+      "bytes": 374572,
+      "sha256": "faf5d39540b52988277e6e9c01d5f3a6d14c7edb282cf02b540c1773b775f15f"
+    },
+    {
+      "path": "v20-live/onboarding-forest-browser-proof.json",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/v20-save-and-big-map-browser-r1/onboarding-forest-browser-proof.json",
+      "bytes": 16844,
+      "sha256": "df9efdc9d04eb06fcc0e531f39cacccfed170d0ee80c9186d2d28dde17177ff9"
+    },
+    {
+      "path": "v20-live/v20-save-big-map-pointer-receipt.json",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/v20-save-big-map-pointer-receipt.json",
+      "bytes": 3226,
+      "sha256": "c1ae033758840e991332e8806ca8e57a7d111ab061fe02e7f86ab1171d956b35"
+    }
+  ]
+}

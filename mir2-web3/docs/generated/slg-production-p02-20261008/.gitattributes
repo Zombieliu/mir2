@@ -1,0 +1,4 @@
+# Preserve original guard/nonce/log JSON and binary evidence bytes.
+** -text
+README.md text eol=lf
+.gitattributes text eol=lf

@@ -1,0 +1,774 @@
+{
+  "schema": "mir2.r16.web-targeted-spell.v1",
+  "passed": false,
+  "sourceHead": "dbc82b9ca0ae0531fb600a80a8d3d238841b0f87",
+  "scope": {
+    "isolatedFileWorld": true,
+    "ordinaryHeadlessWebUi": true,
+    "nativeProductionTransport": false,
+    "nativeRenderer": false,
+    "nativeWindow": false,
+    "copiedLevel30Fixture": true,
+    "production": false
+  },
+  "gateway": {
+    "sha256": "79354e75a10f7563b568687dff1f6239b31b003f35f5ff820e5174b8e796cf46",
+    "routingSha256": "e163837ec99485f0b72f2bbc14ecf01101de49b1a991b893879f7bb6f795f98c",
+    "baselineGatewaySource": "870fdd4baa5ad205a91e39481d43f9a9416ecf32",
+    "changedGameFilesSinceBaseline": [
+      "mir2-web3/apps/gateway/src/routing.rs",
+      "mir2-web3/apps/gateway/src/routing/tests/trade_gold_tests.rs",
+      "mir2-web3/apps/gateway/src/routing/tests/trade_invitation_tests.rs",
+      "mir2-web3/apps/gateway/src/routing/tests/trade_item_edit_tests.rs"
+    ]
+  },
+  "fixture": {
+    "sha256": "3645dc2efd9f49333a57780250ad9092469a92fc995ab8defbe434ba0e64beab",
+    "class": "Taoist",
+    "originalOrdinaryBindingVerified": true,
+    "unchanged": true,
+    "isolatedStoreChanged": true
+  },
+  "stages": [
+    "reserve-private-loopback",
+    "prepare-frozen-web-source",
+    "web-ordinary-entry",
+    "ordinary-F11-bind-SoulFireBall",
+    "ordinary-walk-out-to-field",
+    "ordinary-natural-monster-target"
+  ],
+  "browsers": [
+    {
+      "tag": "web-cast",
+      "received": {
+        "Connected": 1,
+        "ClientVersion": 1,
+        "LoginSuccess": 1,
+        "StartGame": 1,
+        "Chat": 1,
+        "UpdateNotice": 1,
+        "NewItemInfo": 152,
+        "MapInformation": 1,
+        "UserInformation": 1,
+        "NewQuestInfo": 200,
+        "NewRecipeInfo": 79,
+        "CompleteQuest": 1,
+        "ReceiveMail": 1,
+        "FriendUpdate": 1,
+        "GameShopInfo": 105,
+        "BaseStatsInfo": 1,
+        "ObjectSpell": 92,
+        "ObjectMonster": 10,
+        "ObjectNpc": 23,
+        "TimeOfDay": 1,
+        "ChangeAMode": 1,
+        "ChangePMode": 1,
+        "SwitchGroup": 2,
+        "DefaultNPC": 1,
+        "GuildBuffList": 3,
+        "NPCUpdate": 5,
+        "NPCResponse": 4,
+        "MentorUpdate": 2,
+        "LoverUpdate": 1,
+        "GuildStatus": 2,
+        "GuildMemberChange": 2,
+        "ObjectGuildNameChanged": 1,
+        "ObjectHealth": 2,
+        "DeleteGroup": 1,
+        "KeepAlive": 4,
+        "UserLocation": 19,
+        "ObjectRemove": 10,
+        "ObjectWalk": 25
+      },
+      "sent": {
+        "clientCapabilities": 2,
+        "setLanguage": 1,
+        "clientVersion": 1,
+        "login": 1,
+        "startGame": 1,
+        "npcPurchaseOwner": 1,
+        "keepAlive": 4,
+        "magicKey": 1,
+        "run": 11,
+        "walk": 8,
+        "magic": 8
+      }
+    }
+  ],
+  "errors": [],
+  "web": {
+    "runtimeVersion": "bevy-0cd68510886134e0",
+    "sourcePageSha256": "b4918778aa2698b07fb8a80abc312cf179ddc6f41e1d9a1c01e10f90bf26baba",
+    "variant": "first",
+    "combatHostSha256": "77075ec50d0e8e1df025ac7cedef943cf9c9012d03b748584cbf87c0a8e1d26e"
+  },
+  "initialSkills": [
+    {
+      "spell": "Healing",
+      "key": "minor-heal",
+      "hotkey": 0,
+      "icon": 1,
+      "castKind": "target",
+      "mpCost": 3,
+      "delayMs": 1800
+    },
+    {
+      "spell": "SpiritSword",
+      "key": "spiritsword",
+      "hotkey": 0,
+      "icon": 3,
+      "castKind": "passive",
+      "mpCost": 0,
+      "delayMs": 1800
+    },
+    {
+      "spell": "SoulFireBall",
+      "key": "soulfireball",
+      "hotkey": 0,
+      "icon": 12,
+      "castKind": "target",
+      "mpCost": 3,
+      "delayMs": 1800
+    },
+    {
+      "spell": "SummonSkeleton",
+      "key": "summonskeleton",
+      "hotkey": 0,
+      "icon": 16,
+      "castKind": "self",
+      "mpCost": 12,
+      "delayMs": 1800
+    },
+    {
+      "spell": "Poisoning",
+      "key": "poisoning",
+      "hotkey": 0,
+      "icon": 5,
+      "castKind": "target",
+      "mpCost": 2,
+      "delayMs": 1800
+    }
+  ],
+  "ordinary": [
+    {
+      "op": "F11 bind",
+      "spell": "SoulFireBall",
+      "slot": 9,
+      "source": "content.magic.SoulFireBall.description",
+      "wire": [
+        "magicKey"
+      ],
+      "readBack": true
+    }
+  ],
+  "initialUI": {
+    "hudNavigation": {
+      "characterOpen": false,
+      "characterPage": "character",
+      "bagOpen": false,
+      "questOpen": false
+    },
+    "combat": {
+      "frame": 16,
+      "identity": {
+        "connectionGeneration": 1,
+        "controllerRun": 2,
+        "ownerRevision": 1,
+        "playerObjectId": 1000,
+        "sessionGeneration": 1
+      },
+      "map": "0",
+      "modelRevision": 4,
+      "ready": true,
+      "revision": 4,
+      "version": 1
+    }
+  },
+  "cast": {
+    "spell": "SoulFireBall",
+    "key": "Ctrl+F1",
+    "learnedRange": 9,
+    "variant": "first",
+    "attempts": [
+      {
+        "chosen": {
+          "objectId": 200203,
+          "name": "Hen",
+          "range": 7,
+          "position": [
+            297,
+            274
+          ]
+        },
+        "cursor": [
+          488,
+          678
+        ],
+        "pointerSource": "tile projection",
+        "readiness": true,
+        "outgoing": {
+          "targetId": 200203,
+          "position": [
+            297,
+            274
+          ],
+          "direction": "downleft",
+          "spellTargetLock": false,
+          "atMs": 28,
+          "sequence": 784
+        },
+        "targetWasNatural": true,
+        "correction": []
+      },
+      {
+        "chosen": {
+          "objectId": 200203,
+          "name": "Hen",
+          "range": 7,
+          "position": [
+            297,
+            274
+          ]
+        },
+        "cursor": [
+          488,
+          670
+        ],
+        "pointerSource": "tile projection",
+        "readiness": true,
+        "outgoing": {
+          "targetId": 200203,
+          "position": [
+            297,
+            274
+          ],
+          "direction": "downleft",
+          "spellTargetLock": false,
+          "atMs": 23,
+          "sequence": 789
+        },
+        "targetWasNatural": true,
+        "correction": []
+      },
+      {
+        "chosen": {
+          "objectId": 200203,
+          "name": "Hen",
+          "range": 7,
+          "position": [
+            297,
+            274
+          ]
+        },
+        "cursor": [
+          488,
+          684
+        ],
+        "pointerSource": "tile projection",
+        "readiness": true,
+        "outgoing": {
+          "targetId": 200203,
+          "position": [
+            297,
+            274
+          ],
+          "direction": "downleft",
+          "spellTargetLock": false,
+          "atMs": 22,
+          "sequence": 797
+        },
+        "targetWasNatural": true,
+        "correction": []
+      },
+      {
+        "chosen": {
+          "objectId": 200203,
+          "name": "Hen",
+          "range": 7,
+          "position": [
+            297,
+            274
+          ]
+        },
+        "cursor": [
+          488,
+          662
+        ],
+        "pointerSource": "tile projection",
+        "readiness": true,
+        "outgoing": {
+          "targetId": 200203,
+          "position": [
+            297,
+            274
+          ],
+          "direction": "downleft",
+          "spellTargetLock": false,
+          "atMs": 24,
+          "sequence": 803
+        },
+        "targetWasNatural": true,
+        "correction": []
+      },
+      {
+        "chosen": {
+          "objectId": 200203,
+          "name": "Hen",
+          "range": 7,
+          "position": [
+            297,
+            274
+          ]
+        },
+        "cursor": [
+          488,
+          678
+        ],
+        "pointerSource": "tile projection",
+        "readiness": true,
+        "outgoing": {
+          "targetId": 200203,
+          "position": [
+            297,
+            274
+          ],
+          "direction": "downleft",
+          "spellTargetLock": false,
+          "atMs": 24,
+          "sequence": 805
+        },
+        "targetWasNatural": true,
+        "correction": []
+      },
+      {
+        "chosen": {
+          "objectId": 200203,
+          "name": "Hen",
+          "range": 7,
+          "position": [
+            297,
+            274
+          ]
+        },
+        "cursor": [
+          488,
+          670
+        ],
+        "pointerSource": "tile projection",
+        "readiness": true,
+        "outgoing": {
+          "targetId": 200203,
+          "position": [
+            297,
+            274
+          ],
+          "direction": "downleft",
+          "spellTargetLock": false,
+          "atMs": 28,
+          "sequence": 807
+        },
+        "targetWasNatural": true,
+        "correction": []
+      },
+      {
+        "chosen": {
+          "objectId": 200203,
+          "name": "Hen",
+          "range": 7,
+          "position": [
+            297,
+            274
+          ]
+        },
+        "cursor": [
+          488,
+          684
+        ],
+        "pointerSource": "tile projection",
+        "readiness": true,
+        "outgoing": {
+          "targetId": 200203,
+          "position": [
+            297,
+            274
+          ],
+          "direction": "downleft",
+          "spellTargetLock": false,
+          "atMs": 21,
+          "sequence": 809
+        },
+        "targetWasNatural": true,
+        "correction": []
+      },
+      {
+        "chosen": {
+          "objectId": 200203,
+          "name": "Hen",
+          "range": 7,
+          "position": [
+            297,
+            274
+          ]
+        },
+        "cursor": [
+          488,
+          662
+        ],
+        "pointerSource": "tile projection",
+        "readiness": true,
+        "outgoing": {
+          "targetId": 200203,
+          "position": [
+            297,
+            274
+          ],
+          "direction": "downleft",
+          "spellTargetLock": false,
+          "atMs": 19,
+          "sequence": 813
+        },
+        "targetWasNatural": true,
+        "correction": []
+      }
+    ],
+    "before": {
+      "skill": {
+        "hotkey": 9,
+        "level": 0,
+        "experience": 470
+      },
+      "mp": 260,
+      "equippedAmulets": 43
+    },
+    "initialCandidates": [
+      {
+        "objectId": 200203,
+        "name": "Hen",
+        "range": 7,
+        "position": [
+          297,
+          274
+        ],
+        "point": [
+          360,
+          582
+        ]
+      }
+    ]
+  },
+  "navigation": [
+    {
+      "from": [
+        328,
+        264
+      ],
+      "waypoint": [
+        326,
+        264
+      ],
+      "after": [
+        327,
+        264
+      ],
+      "walkOrRunCommands": [
+        "run"
+      ]
+    },
+    {
+      "from": [
+        327,
+        264
+      ],
+      "waypoint": [
+        326,
+        264
+      ],
+      "after": [
+        326,
+        264
+      ],
+      "walkOrRunCommands": []
+    },
+    {
+      "from": [
+        325,
+        264
+      ],
+      "waypoint": [
+        323,
+        262
+      ],
+      "after": [
+        323,
+        262
+      ],
+      "walkOrRunCommands": [
+        "run"
+      ]
+    },
+    {
+      "from": [
+        323,
+        262
+      ],
+      "waypoint": [
+        321,
+        260
+      ],
+      "after": [
+        321,
+        260
+      ],
+      "walkOrRunCommands": [
+        "run"
+      ]
+    },
+    {
+      "from": [
+        321,
+        260
+      ],
+      "waypoint": [
+        319,
+        260
+      ],
+      "after": [
+        319,
+        260
+      ],
+      "walkOrRunCommands": [
+        "run"
+      ]
+    },
+    {
+      "from": [
+        319,
+        260
+      ],
+      "waypoint": [
+        317,
+        260
+      ],
+      "after": [
+        317,
+        260
+      ],
+      "walkOrRunCommands": [
+        "run"
+      ]
+    },
+    {
+      "from": [
+        317,
+        260
+      ],
+      "waypoint": [
+        315,
+        260
+      ],
+      "after": [
+        315,
+        260
+      ],
+      "walkOrRunCommands": [
+        "run"
+      ]
+    },
+    {
+      "from": [
+        315,
+        260
+      ],
+      "waypoint": [
+        313,
+        260
+      ],
+      "after": [
+        313,
+        260
+      ],
+      "walkOrRunCommands": [
+        "run"
+      ]
+    },
+    {
+      "from": [
+        313,
+        260
+      ],
+      "waypoint": [
+        312,
+        261
+      ],
+      "after": [
+        312,
+        261
+      ],
+      "walkOrRunCommands": [
+        "walk"
+      ]
+    },
+    {
+      "from": [
+        312,
+        261
+      ],
+      "waypoint": [
+        311,
+        260
+      ],
+      "after": [
+        311,
+        260
+      ],
+      "walkOrRunCommands": [
+        "walk"
+      ]
+    },
+    {
+      "from": [
+        311,
+        260
+      ],
+      "waypoint": [
+        309,
+        260
+      ],
+      "after": [
+        309,
+        260
+      ],
+      "walkOrRunCommands": [
+        "run"
+      ]
+    },
+    {
+      "from": [
+        309,
+        260
+      ],
+      "waypoint": [
+        308,
+        261
+      ],
+      "after": [
+        308,
+        261
+      ],
+      "walkOrRunCommands": [
+        "walk"
+      ]
+    },
+    {
+      "from": [
+        308,
+        261
+      ],
+      "waypoint": [
+        306,
+        261
+      ],
+      "after": [
+        306,
+        261
+      ],
+      "walkOrRunCommands": [
+        "run"
+      ]
+    },
+    {
+      "from": [
+        306,
+        261
+      ],
+      "waypoint": [
+        305,
+        261
+      ],
+      "after": [
+        305,
+        261
+      ],
+      "walkOrRunCommands": [
+        "walk"
+      ]
+    },
+    {
+      "from": [
+        305,
+        261
+      ],
+      "waypoint": [
+        303,
+        263
+      ],
+      "after": [
+        303,
+        263
+      ],
+      "walkOrRunCommands": [
+        "run"
+      ]
+    },
+    {
+      "from": [
+        303,
+        263
+      ],
+      "waypoint": [
+        301,
+        265
+      ],
+      "after": [
+        301,
+        265
+      ],
+      "walkOrRunCommands": [
+        "run"
+      ]
+    },
+    {
+      "from": [
+        301,
+        265
+      ],
+      "waypoint": [
+        300,
+        266
+      ],
+      "after": [
+        300,
+        266
+      ],
+      "walkOrRunCommands": [
+        "walk"
+      ]
+    },
+    {
+      "from": [
+        300,
+        266
+      ],
+      "waypoint": [
+        300,
+        267
+      ],
+      "after": [
+        300,
+        267
+      ],
+      "walkOrRunCommands": [
+        "walk"
+      ]
+    }
+  ],
+  "failure": {
+    "message": "targeted-normal-cast-receipt-missing",
+    "messageSha256": "ac846a5ee8039fd2bdb9781e91036a75ac765e5d2f2b96a67c1ca07d62795cd8",
+    "stage": "ordinary-natural-monster-target"
+  },
+  "stopped": {
+    "gateway": true,
+    "next": true
+  }
+}

@@ -1,0 +1,921 @@
+{
+  "owner": "Root",
+  "reviewer": "/root/source30_native_bundle",
+  "kind": "Source44 independent read-only actual finite evidence audit",
+  "observedAtUtc": "2026-10-08T14:00:16.814Z",
+  "accepted": true,
+  "actualIndependentReviewAccepted": true,
+  "blockingFindings": [],
+  "result": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-hero-source44-finite-result01.json",
+    "bytes": 115795,
+    "sha256": "e3dd2d17c91b10900c046e6068092adbcad87de3a6bc0b1fe939e85a360565a5"
+  },
+  "rawEvidence": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/web-hero-source44-raw-evidence01.json",
+    "bytes": 714122,
+    "sha256": "ff2e39a19e0dad80690cb53949b7d6c8bc9a4c1340be830b0e259f26e7ce9e62"
+  },
+  "readAndHashVerifiedPins": [
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\hero_ui_host.rs",
+      "bytes": 101634,
+      "sha256": "c6fb5573e7b60ae28fda739c367075f7e151662bfe04eed76b201bfe02f42fc6"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\portable_hero_ui.rs",
+      "bytes": 48418,
+      "sha256": "4a06df4ced85c5e63365c775eac2018f4b5a3c3e214acad7c7163a0bf39a4542"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\bevy-hero-ui.ts",
+      "bytes": 27141,
+      "sha256": "892dd87dd857486b504d7a02274a5f36770d83105256f9ff073f819f742b22e1"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\bevy-hero-host.ts",
+      "bytes": 37310,
+      "sha256": "62fe12c38fbe739f6f2b1ac29ad71ffaa9d1dbb47261518dbbf8fa0d85fb5122"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\use-bevy-hero-ui.ts",
+      "bytes": 3206,
+      "sha256": "1b9546cb6380b836e0cec2c666c41522ace852b1d75c2f459cd26cc3002e12c4"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\page.tsx",
+      "bytes": 1057610,
+      "sha256": "aee83fbdd2e463bfb78b32a97e354a96b39d532769317e576bb442fa13512ef6"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\original-client-shell.tsx",
+      "bytes": 331360,
+      "sha256": "9e014ad2578dc6105462bcee2c73d7748ba7cab9650946c934da476a676a52bb"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\components\\original-client-shell-types.ts",
+      "bytes": 18732,
+      "sha256": "55b7cdb51cb4e4f144b2cadd26b8bc68b48c7b34821754cf6f55244d1e93d81c"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-stage5-adapters.mjs",
+      "bytes": 719838,
+      "sha256": "02ca191dab829467667ab64646cc3897a9146b0de78b4cf786c701ce4ec70c9c"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-npc-shop-surface-integration.mjs",
+      "bytes": 57445,
+      "sha256": "985a9f9d8316218caea52ee5b59486195fbec5876a8735f3fcc700094556b628"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-rust02-snapshot.json",
+      "bytes": 1507271,
+      "sha256": "fb8a878f0a942a2060ef67461ef0a635b8fe320679ddbf556c89419dac322781"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-rust02-review01.json",
+      "bytes": 13086,
+      "sha256": "a954e86cb2593241f9a7746e2ec0387dae16f233a800576af0bcd53253df5500"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-finite-prepared02.json",
+      "bytes": 12377,
+      "sha256": "0a6f7b4c6ca62858917ba99027844b4e0e2b0ed5a41892f5efb4f1320b8dde3b"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-runtime-hero-test02.config02.json",
+      "bytes": 7218,
+      "sha256": "8b53fdc37663dcc8b88bb6426cf4d17e9fab52ce73fdb703283103a60ed5db86"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-runtime-hero-test02.policy02.json",
+      "bytes": 2312,
+      "sha256": "4dd133be882087b7eef262fa8f37271bec0f028371f245b73fcd70545cea1b05"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-hero-test02.stdout.log",
+      "bytes": 2947,
+      "sha256": "15cae4e2377e6d6d651406806dd98ffa1831287af0c28968b48fd13ad94f4348"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-hero-test02.stderr.log",
+      "bytes": 18153,
+      "sha256": "97d0b1a65a78589aa4a7a5c9d04d1a9418c30c8f842185a66a660bc39972a059"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-hero-test02.outer.json",
+      "bytes": 453,
+      "sha256": "4ac76cd8ff9ad2eb684723008839dc8f57e1d4c5fc8ba4b7a02615b183c52df7"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-hero-test02-cargo-receipts\\d5ed2f92855048b89933ae3db249f80f\\after.json",
+      "bytes": 321,
+      "sha256": "4e3b5ec1bf7f67709dbfcdf1c70b74ab98a07f4e5fa5b81c081e8eef55d40895"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-hero-test02-cargo-receipts\\d5ed2f92855048b89933ae3db249f80f\\before.json",
+      "bytes": 3684,
+      "sha256": "ba972922ebb5dc61f86c5b456aaabdd08c68a7b4dfe589fd9ee45d261311154e"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-hero-test02-cargo-receipts\\d5ed2f92855048b89933ae3db249f80f\\probe-process.json",
+      "bytes": 433,
+      "sha256": "ad2ecff44c08156eb70728617fb20522fb1a50725a7cc2be3b6e3af8f36a3d4d"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-hero-test02-cargo-receipts\\d5ed2f92855048b89933ae3db249f80f\\probe.stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-hero-test02-cargo-receipts\\d5ed2f92855048b89933ae3db249f80f\\probe.stdout.bin",
+      "bytes": 197,
+      "sha256": "f2c0a1f52d9dcb4ad17dfbfac1cf4c03f47d8bd508ef8c9169706bdacfd17129"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-bevy-portable-hero-test02.config02.json",
+      "bytes": 11282,
+      "sha256": "ffdbdf4878a2d0c17177007119645ad139a44a84d7d79de19d4783c91e6ab21c"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-bevy-portable-hero-test02.policy02.json",
+      "bytes": 2318,
+      "sha256": "99518971da539fe39343599c9e0801f3608d60b42da68f6b4b48e08d43d11af7"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-bevy-portable-hero-test02.stdout.log",
+      "bytes": 7148,
+      "sha256": "e2d2ba7b48217a913b994b4f081c39d99e1fe86d0ff8113c437f142bb42fd986"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-bevy-portable-hero-test02.stderr.log",
+      "bytes": 7350,
+      "sha256": "d7ff7c0fc4394970b5e97ab5a88cc003742e28f743b843b19fb6df3b3db5548d"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-bevy-portable-hero-test02.outer.json",
+      "bytes": 458,
+      "sha256": "5881276e6397ca3a9ea9e830d3c6a07ae51f0033a45c280a3b89c4f60c80e59e"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-bevy-portable-hero-test02-cargo-receipts\\57fb8ff6af4043ac9cab4731b1f2f22b\\after.json",
+      "bytes": 319,
+      "sha256": "3c0d69fddf9140636fdfc56fb32311cb65d026fe6bab8ddf448807581e758cef"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-bevy-portable-hero-test02-cargo-receipts\\57fb8ff6af4043ac9cab4731b1f2f22b\\before.json",
+      "bytes": 7510,
+      "sha256": "d9dfd6618cee539c2b19b7ebd1e7bad1b7ae2ee490204c1dbcd6b1d0ec7c39c1"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-bevy-portable-hero-test02-cargo-receipts\\57fb8ff6af4043ac9cab4731b1f2f22b\\probe-process.json",
+      "bytes": 443,
+      "sha256": "9abbe8f2e332227437dacfa31f521056ae56afdf3e5201937d3b4e11047bf57e"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-bevy-portable-hero-test02-cargo-receipts\\57fb8ff6af4043ac9cab4731b1f2f22b\\probe.stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-bevy-portable-hero-test02-cargo-receipts\\57fb8ff6af4043ac9cab4731b1f2f22b\\probe.stdout.bin",
+      "bytes": 197,
+      "sha256": "8061eea7dba63351c1debdab4bfde6d297fccf2ca2345d4d8efce47b5c37d4c9"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-runtime-wasm-webgl2-shared-check02.config02.json",
+      "bytes": 4820,
+      "sha256": "d7fe5529883808b9853d29fb932b4eb5807cecffeef777fb21395dc0332ee7f7"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-runtime-wasm-webgl2-shared-check02.policy02.json",
+      "bytes": 2327,
+      "sha256": "e6b6a3fe985d1a7c9399180a80d9d9cf6387f2ea657dd913ac4607772adb91e8"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgl2-shared-check02.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgl2-shared-check02.stderr.log",
+      "bytes": 12479,
+      "sha256": "d01b9b9e3da931f11c6cc5af89d4bdfacef6c67408525214b467b44fdb147fb2"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgl2-shared-check02.outer.json",
+      "bytes": 467,
+      "sha256": "af6777131e41e553cc5fb679df65651ebf35baffeef18a87a170a96690f5725d"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgl2-shared-check02-cargo-receipts\\8b8a9899a50a4f2b86fc2f0dded07819\\after.json",
+      "bytes": 319,
+      "sha256": "2697a1f3467e283d3061ae77110b0e74b00be5a4bd93905c68e89d3b07fa4bdb"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgl2-shared-check02-cargo-receipts\\8b8a9899a50a4f2b86fc2f0dded07819\\before.json",
+      "bytes": 1216,
+      "sha256": "3574cdebbb9d5a286b8a7b626c69e8eabdbc53a2ddbce4767ae9fa3721fe4b26"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgl2-shared-check02-cargo-receipts\\8b8a9899a50a4f2b86fc2f0dded07819\\probe-process.json",
+      "bytes": 442,
+      "sha256": "0fec84c2c683ea764e28709edec107f2604df3553a200634f1d68bb73dd106cb"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgl2-shared-check02-cargo-receipts\\8b8a9899a50a4f2b86fc2f0dded07819\\probe.stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgl2-shared-check02-cargo-receipts\\8b8a9899a50a4f2b86fc2f0dded07819\\probe.stdout.bin",
+      "bytes": 197,
+      "sha256": "1155ed74a31396d0011ac9ea140682a84601ded8a217457f17ff05003778de28"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-runtime-wasm-webgpu-check02.config02.json",
+      "bytes": 4740,
+      "sha256": "ac6ef9984b1415e76aa6446091aaa0983c18112999ed23ff37d2cd38ebb6c47a"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-runtime-wasm-webgpu-check02.policy02.json",
+      "bytes": 2320,
+      "sha256": "87b7d9fc2e583a9030a67d96c694eac4c9ff987c3ac821a838d302f7eec3064b"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgpu-check02.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgpu-check02.stderr.log",
+      "bytes": 12157,
+      "sha256": "ae7277079f5ef2a6dbfc97b03584850afcaed344a39ebc64b9eda13e5c450a22"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgpu-check02.outer.json",
+      "bytes": 460,
+      "sha256": "4b0b84d8e45e67d899ce2aabb1de608cb4562dbb7fb5a5f5e346588771a48027"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgpu-check02-cargo-receipts\\a9291cdca4ab41889390a62caac8194c\\after.json",
+      "bytes": 319,
+      "sha256": "f6d929f581a84ea35aa2f01d8e0862c8bd6997c1209c5dcb2592a5a82f0df78a"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgpu-check02-cargo-receipts\\a9291cdca4ab41889390a62caac8194c\\before.json",
+      "bytes": 1191,
+      "sha256": "3df0b95fa16cacfaae674e70ed079fd41e610b0972c21e79005e2e88bf859f70"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgpu-check02-cargo-receipts\\a9291cdca4ab41889390a62caac8194c\\probe-process.json",
+      "bytes": 441,
+      "sha256": "bae3ddf5ba8f6732b60c127f3d1d5201e2424d0d43a3bba89e97c3ec6c8b2bcf"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgpu-check02-cargo-receipts\\a9291cdca4ab41889390a62caac8194c\\probe.stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-wasm-webgpu-check02-cargo-receipts\\a9291cdca4ab41889390a62caac8194c\\probe.stdout.bin",
+      "bytes": 197,
+      "sha256": "9605c8931a9543ebde8f0915ba7a4c35a21058c0f3bb68cd37d7ab69ed04f1b5"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web03-snapshot.json",
+      "bytes": 5970623,
+      "sha256": "5089f4573b7597fbd859decf734ca4678d492272dee1d6ed4e8b39afad38b57d"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web03-review01.json",
+      "bytes": 4558,
+      "sha256": "41d28cbe37c571df4b032ce2994d921bd32e87f63b5a75203794e4e64fab8d03"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web-finite-prepared03.json",
+      "bytes": 5099,
+      "sha256": "59f1e6829fb8501e1d9c71013e278a9b34dc71d8b1ef0b50ff3c248736ca7e1c"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web-test03.config03.json",
+      "bytes": 4501,
+      "sha256": "5b0f6bc7989cabdb058efb313b5de40e44ee5619f24abda04ebe4125bab856bc"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web-test03.stdout.log",
+      "bytes": 20445,
+      "sha256": "21596e30e64d482f61eb990018b6abdfe09afb835c0f1f081e2056cc6848c931"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web-test03.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web-test03.outer.json",
+      "bytes": 530,
+      "sha256": "923fbdd4828277057bbd1946a0dc08626d2a5084e2ba98b1fec819668c421de3"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-tsc03.config03.json",
+      "bytes": 5039,
+      "sha256": "2e3d8b1df45c4fbe603a2fce98fe8ebf0a93559bba26e5a8d253211aa12aee24"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-tsc03.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-tsc03.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-tsc03.outer.json",
+      "bytes": 520,
+      "sha256": "d6522043707c3096160161bda20530588481f778a5cdc5a7a3eda3c0afc2df42"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-rust01-historical-failure01.json",
+      "bytes": 52860,
+      "sha256": "0a9a35053a3de9358186d83344f377cd976abd2c0c940c4aff4acf10001776fa"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web01-historical-failure01.json",
+      "bytes": 36546,
+      "sha256": "fb1a2ed6270be7a193b0fcbba898c6ecdfbb9f327a1252f456ceab239ba21c57"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web02-historical-failure01.json",
+      "bytes": 27509,
+      "sha256": "63186c613fdc7b18cedabe2a271a84287da838b99113ec0f339aa83f15dc2da3"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config.rs",
+      "bytes": 300129,
+      "sha256": "f9f7ca7fbb54d01f0edb29f9e1cb02ae3de4219448660c3ffed0c5853477e894",
+      "relativePath": "apps/simulation/src/config.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\npc_purchase_transaction_tests.rs",
+      "bytes": 41045,
+      "sha256": "1ddfc16001f1516011809ba1ac583c092f9db5932ebc1fb575c269077581915e",
+      "relativePath": "apps/simulation/src/runtime/npc_purchase_transaction_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\production_tests.rs",
+      "bytes": 30083,
+      "sha256": "7071b84ec558a2f31c48455d144cf350a4dda03a658a954e9c5ce1b342800ae5",
+      "relativePath": "apps/simulation/src/runtime/production_tests.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\production.rs",
+      "bytes": 32768,
+      "sha256": "590a3d27166a4139b7bfb0e9efb2920d722bd16c723e2e6d55661415fb30a21a",
+      "relativePath": "apps/simulation/src/runtime/production.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\item_uid_issuance.rs",
+      "bytes": 8418,
+      "sha256": "a214bbbd4aea29904d7d47de065b8ff5576ce7548bff134078f2f46e61f0cee4",
+      "relativePath": "apps/simulation/src/runtime/item_uid_issuance.rs"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-hero-source44-raw-evidence01.json",
+      "bytes": 714122,
+      "sha256": "ff2e39a19e0dad80690cb53949b7d6c8bc9a4c1340be830b0e259f26e7ce9e62"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\web-hero-source43-publication01.json",
+      "bytes": 14435,
+      "sha256": "bb56518c0a497bf15ad48b2b031df0b5b174915c8be2c514bd5303ba9905da88"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\feature-matrix11.json",
+      "bytes": 3228933,
+      "sha256": "1b533c6fba3af282d58be119cc591f004ee579b7d50e86b186a65249c100f6b1"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\tsconfig.json",
+      "bytes": 4932,
+      "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web-test01.config01.json",
+      "bytes": 4495,
+      "sha256": "0cdd1d6f5707cbc0b44ea64840b1baf32933c4c1db3a06fbee9f7786cea96f39"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web-test01.stdout.log",
+      "bytes": 30413,
+      "sha256": "39d8d65f11f2a8cbc2e77747b95313a0984c68730c722d3d77a0da1a4a153ba7"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web-test01.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web-test01.outer.json",
+      "bytes": 524,
+      "sha256": "0c718f85bb8746d2ac25ca1cd980d008fdfa24a1a600832f8d6dec163f0e791c"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-tsc01.config01.json",
+      "bytes": 5033,
+      "sha256": "fca19ab712795e9ad8bae34a8fccb16e2934b85037777cdd743d07e6abb5d6d3"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-tsc01.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-tsc01.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-tsc01.outer.json",
+      "bytes": 514,
+      "sha256": "b9333ca5c30ada92e67f21636229bbe11cf8466ac32d899c62577b7e5a903cb5"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web-test02.config02.json",
+      "bytes": 4501,
+      "sha256": "00a3d5d17efabacf3355d77a97420487a7bcf8f0933220074785715259e67783"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web-test02.stdout.log",
+      "bytes": 21483,
+      "sha256": "93f9ce13b46525ef831d80eaf0765ab8487111f2f238c3753e36095beb68635f"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web-test02.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web-test02.outer.json",
+      "bytes": 530,
+      "sha256": "39af6b43b0a5e5fa18b44b1a61342fdfa713c15de227c54bacd6202a5a439175"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-tsc02.config02.json",
+      "bytes": 5039,
+      "sha256": "c7d78ee60e93c56c80b0eb842a2f6351bfd36fea8022920ab0d837280fc8893e"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-tsc02.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-tsc02.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-tsc02.outer.json",
+      "bytes": 520,
+      "sha256": "7d90a191fb8cb276547e2a7aa7a6607925e742a803a7ad569257d04f0920d3f2"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web01-snapshot.json",
+      "bytes": 5969853,
+      "sha256": "a9deb33c852713116da44b481b63523e3cd47313bdfbbc3ec575f1a3935bd732"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web01-review01.json",
+      "bytes": 3957,
+      "sha256": "fb41e9067babffe4a7bad42cba538ad3526590d66aab7a85b44575c93a6e262e"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web02-snapshot.json",
+      "bytes": 5970480,
+      "sha256": "bdd0f49673739d839edc49b3114ec5ffe44ad0415d3521b424ecabdba4540403"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web02-review01.json",
+      "bytes": 4358,
+      "sha256": "6cdfa69a4c34f38f91f5b132bfc6a7ff2082484e073acb02363b4cb53668df61"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/game-client/runtime/src/hero_ui_host.rs",
+      "bytes": 101634,
+      "sha256": "c6fb5573e7b60ae28fda739c367075f7e151662bfe04eed76b201bfe02f42fc6"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-rust01-snapshot.json",
+      "bytes": 1503096,
+      "sha256": "40f9b29e2ce4f233da13e462cd0d8a3608fd6ebd60d4299258e849e2edcf7311"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-rust01-review01.json",
+      "bytes": 12742,
+      "sha256": "6b0c78bb2b5a2bac09e204d583cfbdb20dfb865c97fcda74f9af67d884c82b45"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-runtime-hero-test01.config01.json",
+      "bytes": 7186,
+      "sha256": "327caa87e3107511a10ede2ce8abe0cd91c0b564f58f7368b379deb5afa7eb2e"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-runtime-hero-test01.policy01.json",
+      "bytes": 2312,
+      "sha256": "411c877a22ad6e59a3b3d93420da2eba80d484068e7297f43c91716cb255c2be"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-runtime-hero-test01.stdout.log",
+      "bytes": 5473,
+      "sha256": "8dbe1a59c2b457ee482fd331888c381e6d89532b9cb805c42d22eb4d67052851",
+      "encoding": "base64",
+      "data": "CnJ1bm5pbmcgMjYgdGVzdHMKdGVzdCBoZXJvX3VpX2hvc3Q6OnRlc3RzOjpoZXJvX2hvc3RfYWN0dWFsX2xheW91dF9yZWplY3RzX21pc3NpbmdfZHVwbGljYXRlX21pc3BsYWNlZF9hbmRfd3JvbmdfcGFnZV9jZWxscyAuLi4gb2sKdGVzdCBoZXJvX3VpX2hvc3Q6OnRlc3RzOjpoZXJvX2hvc3RfYm91bmRlZF9pbnB1dF9vdmVyZmxvd19rZWVwc19hY2NlcHRlZF9maWZvX2Zvcl9vbmVfd29ybGRfY29uc3VtZXIgLi4uIG9rCnRlc3QgaGVyb191aV9ob3N0Ojp0ZXN0czo6aGVyb19ob3N0X2NoZWNrcG9pbnRfaXNfaGVsZF9zdHJpbmdfYW5kX25ld19ydW5fcmVzdG9yZXNfYmVmb3JlX2xpdmVfaW5wdXQgLi4uIG9rCnRlc3QgaGVyb191aV9ob3N0Ojp0ZXN0czo6aGVyb19ob3N0X2NoZWNrcG9pbnRfa2VlcHNfZmlyc3RfcGFja2V0X2Nsb2NrX2Fjcm9zc19pZ25vcmVkX2ZyYW1lcyAuLi4gb2sKdGVzdCBoZXJvX3VpX2hvc3Q6OnRlc3RzOjpoZXJvX2hvc3RfY2xlYXJpbmdfY3VycmVudF9zaW5rX3Jldm9rZXNfaW5wdXRfYnV0X29sZF9jbGVhbnVwX2Nhbm5vdCAuLi4gb2sKdGVzdCBoZXJvX3VpX2hvc3Q6OnRlc3RzOjpoZXJvX2hvc3RfY2xvY2tfYW5kX3Njb3BlX2JvdW5kYXJ5X3JlZnVzZV91bnNhZmVfdmFsdWVzIC4uLiBvawp0ZXN0IGhlcm9fdWlfaG9zdDo6dGVzdHM6Omhlcm9faG9zdF9jb25zdW1lcl9yZWFwcGxpZXNfY3VycmVudF9wcm9qZWN0aW9uX2FmdGVyX3Vuc2NvcGVkX3dvcmxkX3Jlc2V0IC4uLiBvawp0ZXN0IGhlcm9fdWlfaG9zdDo6dGVzdHM6Omhlcm9faG9zdF9jb250cm9sX3JldmlzaW9uX2NsZWFyc19wZW5kaW5nX2VkZ2VzX3dpdGhvdXRfcmVzZXR0aW5nX2VxdWFsX2RhdGFfZHJhZyAuLi4gb2sKdGVzdCBoZXJvX3VpX2hvc3Q6OnRlc3RzOjpoZXJvX2hvc3RfY29waWVkX3NvdXJjZV93aXRoX29sZF9oZWFsdGhfZGF0YV9pc19yZWplY3RlZF91bnRpbF9yZWFsX2NvbnN1bWUgLi4uIG9rCnRlc3QgaGVyb191aV9ob3N0Ojp0ZXN0czo6aGVyb19ob3N0X2Rpc2FibGVkX2NvbnRyb2xfY2FuY2Vsc19vbGRfcHJlc3NfZXZlbl93aXRob3V0X2FuX2ludGVydmVuaW5nX3dvcmxkX2ZyYW1lIC4uLiBvawp0ZXN0IGhlcm9fdWlfaG9zdDo6dGVzdHM6Omhlcm9faG9zdF9kcmFnX2NvbnRpbnVpdHlfcmVqZWN0c19jaGFuZ2VkX2RhdGFfY29tcGxldGVfbGVhc2VfYW5kX2VpdGhlcl93b3JsZF9yZXNldCAuLi4gb2sKdGVzdCBoZXJvX3VpX2hvc3Q6OnRlc3RzOjpoZXJvX2hvc3RfaW5kZXBlbmRlbnRfd2ViX2FuZF9ydXN0X2VtcHR5X3NvdXJjZV9zaGFyZV9vbmVfZXhhY3RfZ29sZGVuIC4uLiBvawp0ZXN0IGhlcm9fdWlfaG9zdDo6dGVzdHM6Omhlcm9faG9zdF9sZWdhY3lfY29udHJvbF9jYW5ub3RfYXV0aG9yaXplX2lucHV0X29yX2luc3RhbGxlZF9yZWFkeV9wcm9vZiAuLi4gb2sKdGVzdCBoZXJvX3VpX2hvc3Q6OnRlc3RzOjpoZXJvX2hvc3RfbWFsZm9ybWVkX29yX3N0YWxlX3dpdG5lc3NfY29udHJvbF9jYW5ub3RfcG9pc29uX2N1cnJlbnRfYm91bmRfc291cmNlIC4uLiBvawp0ZXN0IGhlcm9fdWlfaG9zdDo6dGVzdHM6Omhlcm9faG9zdF9vbGRfY2xlYW51cF9jYW5ub3RfcmV0aXJlX3JlcGxhY2VtZW50X3J1bl9vcl9zaW5rIC4uLiBvawp0ZXN0IGhlcm9fdWlfaG9zdDo6dGVzdHM6Omhlcm9faG9zdF9vbGRfc2FtZV9zY29wZV9zaW5rX2NsZWFudXBfYW5kX2lucHV0X2Nhbm5vdF90b3VjaF9yZXBsYWNlbWVudF9iaW5kaW5nIC4uLiBvawp0ZXN0IGhlcm9fdWlfaG9zdDo6dGVzdHM6Omhlcm9faG9zdF9wcmVwYXJlZF9oaWRkZW5fcm9vdF9uZWVkc19lbmFibGVkX2FjdHVhbF9pbmhlcml0ZWRfdmlzaWJpbGl0eV9mb3JfcmVhZHkgLi4uIG9rCnRlc3QgaGVyb191aV9ob3N0Ojp0ZXN0czo6aGVyb19ob3N0X3JlY2VpcHRzX2FwcGx5X2luX2ZpZm9fYmVmb3JlX2xhdGVzdF93aXRob3V0X2FuX3VuYm91bmRlZF93b3JsZF9xdWV1ZSAuLi4gb2sKdGVzdCBoZXJvX3VpX2hvc3Q6OnRlc3RzOjpoZXJvX2hvc3RfcmVlbnRyYW50X3Njb3BlX29yX3NpbmtfY2hhbmdlX2ludmFsaWRhdGVzX2FjY2VwdGFuY2VfZmVlZGJhY2sgLi4uIG9rCnRlc3QgaGVyb191aV9ob3N0Ojp0ZXN0czo6aGVyb19ob3N0X3NhbWVfc3RhbXBfbmV3X3dlYl9sZWFzZV9jYW5jZWxzX3F1ZXVlZF9hbmRfaGVsZF9vbGRfaW5wdXQgLi4uIG9rCnRlc3QgaGVyb191aV9ob3N0Ojp0ZXN0czo6aGVyb19ob3N0X3NhbWVfd2l0bmVzc19vd25lcl9yZWZyZXNoX3ByZXNlcnZlc19kcmFnX2J1dF9yZXZva2VzX29sZF9lZGdlc19hbmRfZmVlZGJhY2sgLi4uIEZBSUxFRAp0ZXN0IGhlcm9fdWlfaG9zdDo6dGVzdHM6Omhlcm9faG9zdF9zZXBhcmF0ZXNfcnVzdF9zb3VyY2VfZnJvbV93ZWJfY291bnRlcnNfYW5kX2lnbm9yZWRfcmF3X2N1cnNvciAuLi4gb2sKdGVzdCBoZXJvX3VpX2hvc3Q6OnRlc3RzOjpoZXJvX2hvc3Rfc3RhbGVfY29udHJvbF9hbmRfZHVwbGljYXRlX2pzb25fZG9fbm90X3BvaXNvbl9jdXJyZW50X293bmVyIC4uLiBvawp0ZXN0IGhlcm9fdWlfaG9zdDo6dGVzdHM6Omhlcm9faG9zdF91bnNjb3BlZF9yZXNldF9jYW5ub3RfcHJlc2VydmVfb2xkX3JlYWR5X29yX2hlbGRfcHJlc3Nfd2l0aF9zYW1lX3dpdG5lc3MgLi4uIG9rCnRlc3QgaGVyb191aV9ob3N0Ojp0ZXN0czo6aGVyb19ob3N0X3ZlcmlmaWVkX293bmVyX2lzX2Rpc3BsYXlfc291cmNlX3dpdGhvdXRfY29yZV9vcl9sZWRnZXJfc2lkZV9lZmZlY3RzIC4uLiBvawp0ZXN0IGhlcm9fdWlfaG9zdDo6dGVzdHM6Omhlcm9faG9zdF93aXRuZXNzX3F1ZXJpZXNfYW5kX3JlamVjdGlvbl9wcmVzZXJ2ZV9yZWNlaXB0X2ZpZm9fYW5kX29yaWdpbmFsX2Nsb2NrIC4uLiBvawoKZmFpbHVyZXM6CgotLS0tIGhlcm9fdWlfaG9zdDo6dGVzdHM6Omhlcm9faG9zdF9zYW1lX3dpdG5lc3Nfb3duZXJfcmVmcmVzaF9wcmVzZXJ2ZXNfZHJhZ19idXRfcmV2b2tlc19vbGRfZWRnZXNfYW5kX2ZlZWRiYWNrIHN0ZG91dCAtLS0tCgp0aHJlYWQgJ2hlcm9fdWlfaG9zdDo6dGVzdHM6Omhlcm9faG9zdF9zYW1lX3dpdG5lc3Nfb3duZXJfcmVmcmVzaF9wcmVzZXJ2ZXNfZHJhZ19idXRfcmV2b2tlc19vbGRfZWRnZXNfYW5kX2ZlZWRiYWNrJyAoMTgwODAwKSBwYW5pY2tlZCBhdCBzcmNcaGVyb191aV9ob3N0LnJzOjExMDM6OToKYXNzZXJ0aW9uIGBsZWZ0ID09IHJpZ2h0YCBmYWlsZWQKICBsZWZ0OiBTb21lKCJ7XCJhY3RvclwiOntcImNsYXNzXCI6XCJXYXJyaW9yXCIsXCJnZW5kZXJcIjpcIk1hbGVcIixcIm5hbWVcIjpcIkhlcm9cIixcIm9iamVjdElkXCI6MTIsXCJzcGF3bmVkXCI6dHJ1ZX0sXCJjb25maWdcIjp7XCJhdXRvUG90XCI6ZmFsc2UsXCJocEl0ZW1JbmRleFwiOjAsXCJocFBlcmNlbnRcIjozMCxcIm1wSXRlbUluZGV4XCI6MCxcIm1wUGVyY2VudFwiOjQwfSxcImRpc3BsYXlcIjp7XCJleHBlcmllbmNlXCI6XCI3N1wiLFwiaGFpclwiOjMsXCJocFwiOjIwLFwibGV2ZWxcIjoyLFwibWF4RXhwZXJpZW5jZVwiOlwiMjAwXCIsXCJtYXhIcFwiOjMwLFwibWF4TXBcIjoxNSxcIm1wXCI6MTB9LFwiZXF1aXBtZW50XCI6W251bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbF0sXCJpbnZlbnRvcnlcIjpbbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbF0sXCJpbnZlbnRvcnlDYXBhY2l0eVwiOjEwLFwia2V5c1wiOltdLFwicGVyc29uYWxDYXBhY2l0eVwiOjQwLFwicGVyc29uYWxJbnZlbnRvcnlcIjpbbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbF0sXCJwbGFubmVyXCI6e1wiZXhwZXJpZW5jZVwiOlwiNzdcIixcImhwXCI6MjAsXCJsZXZlbFwiOjIsXCJtYXhFeHBlcmllbmNlXCI6XCIyMDBcIixcIm1wXCI6MTB9LFwicmlkaW5nXCI6bnVsbCxcInNraWxsc1wiOltdLFwic3RhdHNcIjpbXSxcInZlcnNpb25cIjoxLFwid2VpZ2h0c1wiOntcImJhZ1wiOjEsXCJoYW5kXCI6MyxcIndlYXJcIjoyfX0iKQogcmlnaHQ6IFNvbWUoIntcImFjdG9yXCI6e1wiY2xhc3NcIjpcIldhcnJpb3JcIixcImdlbmRlclwiOlwiTWFsZVwiLFwibmFtZVwiOlwiSGVyb1wiLFwib2JqZWN0SWRcIjoxMixcInNwYXduZWRcIjpmYWxzZX0sXCJjb25maWdcIjp7XCJhdXRvUG90XCI6ZmFsc2UsXCJocEl0ZW1JbmRleFwiOjAsXCJocFBlcmNlbnRcIjozMCxcIm1wSXRlbUluZGV4XCI6MCxcIm1wUGVyY2VudFwiOjQwfSxcImRpc3BsYXlcIjp7XCJleHBlcmllbmNlXCI6XCI3N1wiLFwiaGFpclwiOjMsXCJocFwiOjIwLFwibGV2ZWxcIjoyLFwibWF4RXhwZXJpZW5jZVwiOlwiMjAwXCIsXCJtYXhIcFwiOjMwLFwibWF4TXBcIjoxNSxcIm1wXCI6MTB9LFwiZXF1aXBtZW50XCI6W251bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbF0sXCJpbnZlbnRvcnlcIjpbbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbF0sXCJpbnZlbnRvcnlDYXBhY2l0eVwiOjEwLFwia2V5c1wiOltdLFwicGVyc29uYWxDYXBhY2l0eVwiOjQwLFwicGVyc29uYWxJbnZlbnRvcnlcIjpbbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbCxudWxsLG51bGwsbnVsbF0sXCJwbGFubmVyXCI6e1wiZXhwZXJpZW5jZVwiOlwiNzdcIixcImhwXCI6MjAsXCJsZXZlbFwiOjIsXCJtYXhFeHBlcmllbmNlXCI6XCIyMDBcIixcIm1wXCI6MTB9LFwicmlkaW5nXCI6bnVsbCxcInNraWxsc1wiOltdLFwic3RhdHNcIjpbXSxcInZlcnNpb25cIjoxLFwid2VpZ2h0c1wiOntcImJhZ1wiOjEsXCJoYW5kXCI6MyxcIndlYXJcIjoyfX0iKQpub3RlOiBydW4gd2l0aCBgUlVTVF9CQUNLVFJBQ0U9MWAgZW52aXJvbm1lbnQgdmFyaWFibGUgdG8gZGlzcGxheSBhIGJhY2t0cmFjZQoKCmZhaWx1cmVzOgogICAgaGVyb191aV9ob3N0Ojp0ZXN0czo6aGVyb19ob3N0X3NhbWVfd2l0bmVzc19vd25lcl9yZWZyZXNoX3ByZXNlcnZlc19kcmFnX2J1dF9yZXZva2VzX29sZF9lZGdlc19hbmRfZmVlZGJhY2sKCnRlc3QgcmVzdWx0OiBGQUlMRUQuIDI1IHBhc3NlZDsgMSBmYWlsZWQ7IDAgaWdub3JlZDsgMCBtZWFzdXJlZDsgNDc3IGZpbHRlcmVkIG91dDsgZmluaXNoZWQgaW4gMC4xMXMKCg=="
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-runtime-hero-test01.stderr.log",
+      "bytes": 18195,
+      "sha256": "691fb34a4bdf87681eee5c2a0ebc19c9263d94e5c87ff28208d09e9e2158b58a",
+      "encoding": "base64",
+      "data": "ICAgQ29tcGlsaW5nIG1pcjItcHJvdG9jb2wgdjAuMS4wIChDOlxtaXIyLWNyb3NzLXBsYXRmb3JtLXN0b3JhZ2UtMjAyNjEwMDJccmVwby1xYS13ZWItd2luZG93cy1jYXRjaHVwLTIwMjYxMDA2LTAxXHNvdXJjZTQ0LWZyb3plbi1ydXN0MDFcbWlyMi13ZWIzXHBhY2thZ2VzXHByb3RvY29sKQogICBDb21waWxpbmcgbWlyMi1jbGllbnQtY29yZSB2MC4xLjAgKEM6XG1pcjItY3Jvc3MtcGxhdGZvcm0tc3RvcmFnZS0yMDI2MTAwMlxyZXBvLXFhLXdlYi13aW5kb3dzLWNhdGNodXAtMjAyNjEwMDYtMDFcc291cmNlNDQtZnJvemVuLXJ1c3QwMVxtaXIyLXdlYjNcYXBwc1xnYW1lLWNsaWVudFxjbGllbnQtY29yZSkKICAgQ29tcGlsaW5nIG1pcjItdWktY29yZSB2MC4xLjAgKEM6XG1pcjItY3Jvc3MtcGxhdGZvcm0tc3RvcmFnZS0yMDI2MTAwMlxyZXBvLXFhLXdlYi13aW5kb3dzLWNhdGNodXAtMjAyNjEwMDYtMDFcc291cmNlNDQtZnJvemVuLXJ1c3QwMVxtaXIyLXdlYjNcYXBwc1xnYW1lLWNsaWVudFx1aS1jb3JlKQogICBDb21waWxpbmcgbWlyMi1nYW1lLWRhdGEgdjAuMS4wIChDOlxtaXIyLWNyb3NzLXBsYXRmb3JtLXN0b3JhZ2UtMjAyNjEwMDJccmVwby1xYS13ZWItd2luZG93cy1jYXRjaHVwLTIwMjYxMDA2LTAxXHNvdXJjZTQ0LWZyb3plbi1ydXN0MDFcbWlyMi13ZWIzXHBhY2thZ2VzXGdhbWUtZGF0YSkKICAgQ29tcGlsaW5nIG1pcjItY2xpZW50LWJldnkgdjAuMS4wIChDOlxtaXIyLWNyb3NzLXBsYXRmb3JtLXN0b3JhZ2UtMjAyNjEwMDJccmVwby1xYS13ZWItd2luZG93cy1jYXRjaHVwLTIwMjYxMDA2LTAxXHNvdXJjZTQ0LWZyb3plbi1ydXN0MDFcbWlyMi13ZWIzXGFwcHNcZ2FtZS1jbGllbnRcY2xpZW50LWJldnkpCndhcm5pbmc6IHVubmVjZXNzYXJ5IHBhcmVudGhlc2VzIGFyb3VuZCB0eXBlCiAgLS0+IEM6XG1pcjItY3Jvc3MtcGxhdGZvcm0tc3RvcmFnZS0yMDI2MTAwMlxyZXBvLXFhLXdlYi13aW5kb3dzLWNhdGNodXAtMjAyNjEwMDYtMDFcc291cmNlNDQtZnJvemVuLXJ1c3QwMVxtaXIyLXdlYjNcYXBwc1xnYW1lLWNsaWVudFxjbGllbnQtYmV2eVxzcmNcY3J5c3RhbF91aVxza2lsbF9wYWdlX3NoYXJlZC5yczo2NzoyMAogICB8CjY3IHwgICAgIGxldCBtdXQgcmVjdHM6IChWZWM8KFNraWxsUGFnZUFjdGlvbiwgQ3J5c3RhbFJlY3QpPikgPSAoMS4uPTE2KQogICB8ICAgICAgICAgICAgICAgICAgICBeICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBeCiAgIHwKICAgPSBub3RlOiBgI1t3YXJuKHVudXNlZF9wYXJlbnMpXWAgKHBhcnQgb2YgYCNbd2Fybih1bnVzZWQpXWApIG9uIGJ5IGRlZmF1bHQKaGVscDogcmVtb3ZlIHRoZXNlIHBhcmVudGhlc2VzCiAgIHwKNjcgLSAgICAgbGV0IG11dCByZWN0czogKFZlYzwoU2tpbGxQYWdlQWN0aW9uLCBDcnlzdGFsUmVjdCk+KSA9ICgxLi49MTYpCjY3ICsgICAgIGxldCBtdXQgcmVjdHM6IFZlYzwoU2tpbGxQYWdlQWN0aW9uLCBDcnlzdGFsUmVjdCk+ID0gKDEuLj0xNikKICAgfAoKd2FybmluZzogdW5uZWNlc3NhcnkgcGFyZW50aGVzZXMgYXJvdW5kIG1ldGhvZCBhcmd1bWVudAogICAtLT4gQzpcbWlyMi1jcm9zcy1wbGF0Zm9ybS1zdG9yYWdlLTIwMjYxMDAyXHJlcG8tcWEtd2ViLXdpbmRvd3MtY2F0Y2h1cC0yMDI2MTAwNi0wMVxzb3VyY2U0NC1mcm96ZW4tcnVzdDAxXG1pcjItd2ViM1xhcHBzXGdhbWUtY2xpZW50XGNsaWVudC1iZXZ5XHNyY1xwb3J0YWJsZV9jaGFyYWN0ZXJfdWkucnM6NTE0OjI1CiAgICB8CjUxNCB8ICAgICAgICAgICAgICAgICAgICAgICAgIChOb2RlIHsKICAgIHwgICAgICAgICAgICAgICAgICAgICAgICAgXgouLi4KNTIzIHwgICAgICAgICAgICAgICAgICAgICAgICAgfSksCiAgICB8ICAgICAgICAgICAgICAgICAgICAgICAgICBeCiAgICB8CmhlbHA6IHJlbW92ZSB0aGVzZSBwYXJlbnRoZXNlcwogICAgfAo1MTQgfiAgICAgICAgICAgICAgICAgICAgICAgICBOb2RlIHsKNTE1IHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHBvc2l0aW9uX3R5cGU6IFBvc2l0aW9uVHlwZTo6QWJzb2x1dGUsCi4uLgo1MjIgfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgLi5kZWZhdWx0KCkKNTIzIH4gICAgICAgICAgICAgICAgICAgICAgICAgfSwKICAgIHwKCndhcm5pbmc6IHVudXNlZCB2YXJpYWJsZTogYG5lYXJieWAKICAgIC0tPiBDOlxtaXIyLWNyb3NzLXBsYXRmb3JtLXN0b3JhZ2UtMjAyNjEwMDJccmVwby1xYS13ZWItd2luZG93cy1jYXRjaHVwLTIwMjYxMDA2LTAxXHNvdXJjZTQ0LWZyb3plbi1ydXN0MDFcbWlyMi13ZWIzXGFwcHNcZ2FtZS1jbGllbnRcY2xpZW50LWJldnlcc3JjXHF1ZXN0X3VpLnJzOjIxODk6NQogICAgIHwKMjE4OSB8ICAgICBuZWFyYnk6IE9wdGlvbjxSZXM8TmVhcmJ5TnBjTW9kZWw+PiwKICAgICB8ICAgICBeXl5eXl4gaGVscDogaWYgdGhpcyBpcyBpbnRlbnRpb25hbCwgcHJlZml4IGl0IHdpdGggYW4gdW5kZXJzY29yZTogYF9uZWFyYnlgCiAgICAgfAogICAgID0gbm90ZTogYCNbd2Fybih1bnVzZWRfdmFyaWFibGVzKV1gIChwYXJ0IG9mIGAjW3dhcm4odW51c2VkKV1gKSBvbiBieSBkZWZhdWx0Cgp3YXJuaW5nOiBjb25zdGFudCBgVEVYVGAgaXMgbmV2ZXIgdXNlZAogLS0+IEM6XG1pcjItY3Jvc3MtcGxhdGZvcm0tc3RvcmFnZS0yMDI2MTAwMlxyZXBvLXFhLXdlYi13aW5kb3dzLWNhdGNodXAtMjAyNjEwMDYtMDFcc291cmNlNDQtZnJvemVuLXJ1c3QwMVxtaXIyLXdlYjNcYXBwc1xnYW1lLWNsaWVudFxjbGllbnQtYmV2eVxzcmNcY3J5c3RhbF91aVxtYWlsX2VkaXRvci5yczo4OjcKICB8CjggfCBjb25zdCBURVhUOiBDb2xvciA9IENvbG9yOjpzcmdiKDAuOTUsIDAuOTIsIDAuODIpOwogIHwgICAgICAgXl5eXgogIHwKICA9IG5vdGU6IGAjW3dhcm4oZGVhZF9jb2RlKV1gIChwYXJ0IG9mIGAjW3dhcm4odW51c2VkKV1gKSBvbiBieSBkZWZhdWx0Cgp3YXJuaW5nOiBjb25zdGFudCBgTUFJTF9QQVJDRUxfQk9EWV9SRUNUYCBpcyBuZXZlciB1c2VkCiAgLS0+IEM6XG1pcjItY3Jvc3MtcGxhdGZvcm0tc3RvcmFnZS0yMDI2MTAwMlxyZXBvLXFhLXdlYi13aW5kb3dzLWNhdGNodXAtMjAyNjEwMDYtMDFcc291cmNlNDQtZnJvemVuLXJ1c3QwMVxtaXIyLXdlYjNcYXBwc1xnYW1lLWNsaWVudFxjbGllbnQtYmV2eVxzcmNcY3J5c3RhbF91aVxtYWlsX2VkaXRvci5yczoxNToxOAogICB8CjE1IHwgcHViKGNyYXRlKSBjb25zdCBNQUlMX1BBUkNFTF9CT0RZX1JFQ1Q6IENyeXN0YWxSZWN0ID0gQ3J5c3RhbFJlY3Q6Om5ldygxNS4wLCA5OC4wLCAyMDIuMCwgMTY1LjApOwogICB8ICAgICAgICAgICAgICAgICAgXl5eXl5eXl5eXl5eXl5eXl5eXl5eCgp3YXJuaW5nOiBtdWx0aXBsZSBtZXRob2RzIGFyZSBuZXZlciB1c2VkCiAgIC0tPiBDOlxtaXIyLWNyb3NzLXBsYXRmb3JtLXN0b3JhZ2UtMjAyNjEwMDJccmVwby1xYS13ZWItd2luZG93cy1jYXRjaHVwLTIwMjYxMDA2LTAxXHNvdXJjZTQ0LWZyb3plbi1ydXN0MDFcbWlyMi13ZWIzXGFwcHNcZ2FtZS1jbGllbnRcY2xpZW50LWJldnlcc3JjXGNyeXN0YWxfdWlcbWFpbF9lZGl0b3IucnM6MTY1OjE5CiAgICB8CiA3NSB8IGltcGwgTWFpbExldHRlckVkaXRvciB7CiAgICB8IC0tLS0tLS0tLS0tLS0tLS0tLS0tLSBtZXRob2RzIGluIHRoaXMgaW1wbGVtZW50YXRpb24KLi4uCjE2NSB8ICAgICBwdWIoY3JhdGUpIGZuIGJpbmRfZHJhZnRfY2xvY2soJm11dCBzZWxmLGNsb2NrOm1pcjJfY2xpZW50X2NvcmU6Om1haWxfY29tcG9zZTo6TWFpbERyYWZ0Q2xvY2spe3NlbGYuZHJhZnRfY2xvY2s9Y2xvY2s7c2VsZi5leHRlLi4uCiAgICB8ICAgICAgICAgICAgICAgICAgIF5eXl5eXl5eXl5eXl5eXl4KLi4uCjQyOSB8ICAgICBwdWIoY3JhdGUpIGZuIHNldF9zZWxlY3RpbmcoJm11dCBzZWxmLCBzZWxlY3Rpbmc6IGJvb2wpIHsKICAgIHwgICAgICAgICAgICAgICAgICAgXl5eXl5eXl5eXl5eXgouLi4KNDMzIHwgICAgIHB1YihjcmF0ZSkgZm4gc2VsZWN0aW5nKCZzZWxmKSAtPiBib29sIHsKICAgIHwgICAgICAgICAgICAgICAgICAgXl5eXl5eXl5eCi4uLgo0NDAgfCAgICAgcHViKGNyYXRlKSBmbiBzY3JvbGxfd2hlZWxfbGluZXMoJm11dCBzZWxmLCB1cHdhcmRfbGluZXM6IGYzMikgLT4gYm9vbCB7CiAgICB8ICAgICAgICAgICAgICAgICAgIF5eXl5eXl5eXl5eXl5eXl5eXgouLi4KNDY0IHwgICAgIHB1YihjcmF0ZSkgZm4gcmVuZGVyKCZzZWxmLCBwYXJlbnQ6ICZtdXQgQ2hpbGRTcGF3bmVyQ29tbWFuZHMpIHsKICAgIHwgICAgICAgICAgICAgICAgICAgXl5eXl5eCi4uLgo0NjggfCAgICAgcHViKGNyYXRlKSBmbiByZW5kZXJfYXQoJnNlbGYsIHBhcmVudDogJm11dCBDaGlsZFNwYXduZXJDb21tYW5kcywgYm9keV9yZWN0OiBDcnlzdGFsUmVjdCkgewogICAgfCAgICAgICAgICAgICAgICAgICBeXl5eXl5eXl4KLi4uCjYzNSB8ICAgICBmbiB2aXNpYmxlX2xpbmVfaGVpZ2h0KCZzZWxmKSAtPiBPcHRpb248ZjMyPiB7CiAgICB8ICAgICAgICBeXl5eXl5eXl5eXl5eXl5eXl5eCgp3YXJuaW5nOiBmdW5jdGlvbiBgaXRlbWAgaXMgbmV2ZXIgdXNlZAogIC0tPiBDOlxtaXIyLWNyb3NzLXBsYXRmb3JtLXN0b3JhZ2UtMjAyNjEwMDJccmVwby1xYS13ZWItd2luZG93cy1jYXRjaHVwLTIwMjYxMDA2LTAxXHNvdXJjZTQ0LWZyb3plbi1ydXN0MDFcbWlyMi13ZWIzXGFwcHNcZ2FtZS1jbGllbnRcY2xpZW50LWJldnlcc3JjXGNyeXN0YWxfdWlcaGVyb19jcm9zc19pbnZlbnRvcnkucnM6NDQ6NAogICB8CjQ0IHwgZm4gaXRlbTwnYT4oY2VsbDogQ2VsbCwgcGxheWVyOiAmJ2EgSW52ZW50b3J5TW9kZWwsIGhlcm86ICYnYSBIZXJvTW9kZWwpIC0+IE9wdGlvbjwmJ2EgSXRlbU1vZGVsPiB7CiAgIHwgICAgXl5eXgoKd2FybmluZzogZnVuY3Rpb24gYHZhbGlkX3JlZ2lzdHJhdGlvbl9lbWFpbGAgaXMgbmV2ZXIgdXNlZAogICAtLT4gQzpcbWlyMi1jcm9zcy1wbGF0Zm9ybS1zdG9yYWdlLTIwMjYxMDAyXHJlcG8tcWEtd2ViLXdpbmRvd3MtY2F0Y2h1cC0yMDI2MTAwNi0wMVxzb3VyY2U0NC1mcm96ZW4tcnVzdDAxXG1pcjItd2ViM1xhcHBzXGdhbWUtY2xpZW50XGNsaWVudC1iZXZ5XHNyY1xuYXRpdmVfc2hlbGwucnM6MjUyOjE1CiAgICB8CjI1MiB8IHB1YihjcmF0ZSkgZm4gdmFsaWRfcmVnaXN0cmF0aW9uX2VtYWlsKHZhbHVlOiAmc3RyKSAtPiBib29sIHsKICAgIHwgICAgICAgICAgICAgICBeXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl4KCndhcm5pbmc6IGFzc29jaWF0ZWQgZnVuY3Rpb24gYGZyb21fcXVlc3RgIGlzIG5ldmVyIHVzZWQKICAgLS0+IEM6XG1pcjItY3Jvc3MtcGxhdGZvcm0tc3RvcmFnZS0yMDI2MTAwMlxyZXBvLXFhLXdlYi13aW5kb3dzLWNhdGNodXAtMjAyNjEwMDYtMDFcc291cmNlNDQtZnJvemVuLXJ1c3QwMVxtaXIyLXdlYjNcYXBwc1xnYW1lLWNsaWVudFxjbGllbnQtYmV2eVxzcmNccXVlc3Rfam91cm5leS5yczo2NTI6OAogICAgfAo2NTEgfCBpbXBsIEpvdXJuZXlTdGVwIHsKICAgIHwgLS0tLS0tLS0tLS0tLS0tLSBhc3NvY2lhdGVkIGZ1bmN0aW9uIGluIHRoaXMgaW1wbGVtZW50YXRpb24KNjUyIHwgICAgIGZuIGZyb21fcXVlc3QocXVlc3Q6ICZRdWVzdCwgcm91dGU6IE9wdGlvbjwmSm91cm5leVF1ZXN0T3ZlcnJpZGU+KSAtPiBTZWxmIHsKICAgIHwgICAgICAgIF5eXl5eXl5eXl4KCndhcm5pbmc6IGNvbnN0YW50IGBRVUVTVF9MT0dfQkdgIGlzIG5ldmVyIHVzZWQKICAtLT4gQzpcbWlyMi1jcm9zcy1wbGF0Zm9ybS1zdG9yYWdlLTIwMjYxMDAyXHJlcG8tcWEtd2ViLXdpbmRvd3MtY2F0Y2h1cC0yMDI2MTAwNi0wMVxzb3VyY2U0NC1mcm96ZW4tcnVzdDAxXG1pcjItd2ViM1xhcHBzXGdhbWUtY2xpZW50XGNsaWVudC1iZXZ5XHNyY1xxdWVzdF91aS5yczo3ODo3CiAgIHwKNzggfCBjb25zdCBRVUVTVF9MT0dfQkc6IENvbG9yID0gQ29sb3I6OnNyZ2JhKDAuMDgsIDAuMDYsIDAuMDQsIDAuOTYpOwogICB8ICAgICAgIF5eXl5eXl5eXl5eXgoKd2FybmluZzogdmFyaWFudHMgYFNlbGVjdFF1ZXN0RmlsdGVyYCBhbmQgYFF1ZXN0SGVscGAgYXJlIG5ldmVyIGNvbnN0cnVjdGVkCiAgICAtLT4gQzpcbWlyMi1jcm9zcy1wbGF0Zm9ybS1zdG9yYWdlLTIwMjYxMDAyXHJlcG8tcWEtd2ViLXdpbmRvd3MtY2F0Y2h1cC0yMDI2MTAwNi0wMVxzb3VyY2U0NC1mcm96ZW4tcnVzdDAxXG1pcjItd2ViM1xhcHBzXGdhbWUtY2xpZW50XGNsaWVudC1iZXZ5XHNyY1xxdWVzdF91aS5yczoxMTk2OjUKICAgICB8CjExNTEgfCBwdWIoY3JhdGUpIGVudW0gUXVlc3RVaUJ1dHRvbiB7CiAgICAgfCAgICAgICAgICAgICAgICAgLS0tLS0tLS0tLS0tLSB2YXJpYW50cyBpbiB0aGlzIGVudW0KLi4uCjExOTYgfCAgICAgU2VsZWN0UXVlc3RGaWx0ZXIgewogICAgIHwgICAgIF5eXl5eXl5eXl5eXl5eXl5eCi4uLgoxMTk5IHwgICAgIFF1ZXN0SGVscCwKICAgICB8ICAgICBeXl5eXl5eXl4KICAgICB8CiAgICAgPSBub3RlOiBgUXVlc3RVaUJ1dHRvbmAgaGFzIGRlcml2ZWQgaW1wbHMgZm9yIHRoZSB0cmFpdHMgYERlYnVnYCBhbmQgYENsb25lYCwgYnV0IHRoZXNlIGFyZSBpbnRlbnRpb25hbGx5IGlnbm9yZWQgZHVyaW5nIGRlYWQgY29kZSBhbmFseXNpcwoKd2FybmluZzogZmllbGRzIGBtYXBgIGFuZCBgYmlnX21hcGAgYXJlIG5ldmVyIHJlYWQKICAgIC0tPiBDOlxtaXIyLWNyb3NzLXBsYXRmb3JtLXN0b3JhZ2UtMjAyNjEwMDJccmVwby1xYS13ZWItd2luZG93cy1jYXRjaHVwLTIwMjYxMDA2LTAxXHNvdXJjZTQ0LWZyb3plbi1ydXN0MDFcbWlyMi13ZWIzXGFwcHNcZ2FtZS1jbGllbnRcY2xpZW50LWJldnlcc3JjXHF1ZXN0X3VpLnJzOjE5OTg6NQogICAgIHwKMTk4NSB8IHB1YihjcmF0ZSkgc3RydWN0IFF1ZXN0SW5wdXRNb2RlbHM8J3c+IHsKICAgICB8ICAgICAgICAgICAgICAgICAgIC0tLS0tLS0tLS0tLS0tLS0gZmllbGRzIGluIHRoaXMgc3RydWN0Ci4uLgoxOTk4IHwgICAgIG1hcDogT3B0aW9uPFJlczwndywgTWFwTW9kZWw+PiwKICAgICB8ICAgICBeXl4KLi4uCjIwMDYgfCAgICAgYmlnX21hcDogT3B0aW9uPFJlczwndywgY3JhdGU6OmJpZ19tYXA6OkJpZ01hcE1vZGVsPj4sCiAgICAgfCAgICAgXl5eXl5eXgoKd2FybmluZzogZnVuY3Rpb24gYGV4cGxpY2l0X3F1ZXN0X2RpYWxvZ19idXR0b25gIGlzIG5ldmVyIHVzZWQKICAgIC0tPiBDOlxtaXIyLWNyb3NzLXBsYXRmb3JtLXN0b3JhZ2UtMjAyNjEwMDJccmVwby1xYS13ZWItd2luZG93cy1jYXRjaHVwLTIwMjYxMDA2LTAxXHNvdXJjZTQ0LWZyb3plbi1ydXN0MDFcbWlyMi13ZWIzXGFwcHNcZ2FtZS1jbGllbnRcY2xpZW50LWJldnlcc3JjXHF1ZXN0X3VpLnJzOjQ3NDk6NAogICAgIHwKNDc0OSB8IGZuIGV4cGxpY2l0X3F1ZXN0X2RpYWxvZ19idXR0b24odGFyZ2V0OiAmc3RyLCBucGNfaW5kZXg6IHUzMikgLT4gT3B0aW9uPFF1ZXN0VWlCdXR0b24+IHsKICAgICB8ICAgIF5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl4KCndhcm5pbmc6IGZ1bmN0aW9uIGB3cmFwX2d1aWRhbmNlX2hpbnRgIGlzIG5ldmVyIHVzZWQKICAgIC0tPiBDOlxtaXIyLWNyb3NzLXBsYXRmb3JtLXN0b3JhZ2UtMjAyNjEwMDJccmVwby1xYS13ZWItd2luZG93cy1jYXRjaHVwLTIwMjYxMDA2LTAxXHNvdXJjZTQ0LWZyb3plbi1ydXN0MDFcbWlyMi13ZWIzXGFwcHNcZ2FtZS1jbGllbnRcY2xpZW50LWJldnlcc3JjXHF1ZXN0X3VpLnJzOjU1Njg6NAogICAgIHwKNTU2OCB8IGZuIHdyYXBfZ3VpZGFuY2VfaGludChoaW50OiAmc3RyLCBtYXhfY2hhcnM6IHVzaXplKSAtPiBWZWM8U3RyaW5nPiB7CiAgICAgfCAgICBeXl5eXl5eXl5eXl5eXl5eXl4KCndhcm5pbmc6IGZ1bmN0aW9uIGBxdWVzdF9kZXRhaWxfbGluZXNgIGlzIG5ldmVyIHVzZWQKICAgIC0tPiBDOlxtaXIyLWNyb3NzLXBsYXRmb3JtLXN0b3JhZ2UtMjAyNjEwMDJccmVwby1xYS13ZWItd2luZG93cy1jYXRjaHVwLTIwMjYxMDA2LTAxXHNvdXJjZTQ0LWZyb3plbi1ydXN0MDFcbWlyMi13ZWIzXGFwcHNcZ2FtZS1jbGllbnRcY2xpZW50LWJldnlcc3JjXHF1ZXN0X3VpLnJzOjU2NDA6NAogICAgIHwKNTY0MCB8IGZuIHF1ZXN0X2RldGFpbF9saW5lcyhxdWVzdDogJlF1ZXN0LCBndWlkYW5jZTogT3B0aW9uPCZRdWVzdEd1aWRhbmNlPiwgY2xhc3NfbmFtZTogJnN0cikgLT4gVmVjPFF1ZXN0RGV0YWlsTGluZT4gewogICAgIHwgICAgXl5eXl5eXl5eXl5eXl5eXl5eCgp3YXJuaW5nOiBmdW5jdGlvbiBgcXVlc3RfbGlzdF9tZXNzYWdlX2xpbmVzYCBpcyBuZXZlciB1c2VkCiAgICAtLT4gQzpcbWlyMi1jcm9zcy1wbGF0Zm9ybS1zdG9yYWdlLTIwMjYxMDAyXHJlcG8tcWEtd2ViLXdpbmRvd3MtY2F0Y2h1cC0yMDI2MTAwNi0wMVxzb3VyY2U0NC1mcm96ZW4tcnVzdDAxXG1pcjItd2ViM1xhcHBzXGdhbWUtY2xpZW50XGNsaWVudC1iZXZ5XHNyY1xxdWVzdF91aS5yczo1NzMwOjQKICAgICB8CjU3MzAgfCBmbiBxdWVzdF9saXN0X21lc3NhZ2VfbGluZXMoCiAgICAgfCAgICBeXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl4KCndhcm5pbmc6IGZ1bmN0aW9uIGB0cmFja2VyX3F1ZXN0X2Jsb2NrYCBpcyBuZXZlciB1c2VkCiAgICAtLT4gQzpcbWlyMi1jcm9zcy1wbGF0Zm9ybS1zdG9yYWdlLTIwMjYxMDAyXHJlcG8tcWEtd2ViLXdpbmRvd3MtY2F0Y2h1cC0yMDI2MTAwNi0wMVxzb3VyY2U0NC1mcm96ZW4tcnVzdDAxXG1pcjItd2ViM1xhcHBzXGdhbWUtY2xpZW50XGNsaWVudC1iZXZ5XHNyY1xxdWVzdF91aS5yczo3NjgzOjQKICAgICB8Cjc2ODMgfCBmbiB0cmFja2VyX3F1ZXN0X2Jsb2NrKHBhcmVudDogJm11dCBDaGlsZFNwYXduZXJDb21tYW5kcywgcXVlc3Q6ICZRdWVzdCwKICAgICB8ICAgIF5eXl5eXl5eXl5eXl5eXl5eXl4KCndhcm5pbmc6IGZ1bmN0aW9uIGB0cmFja2VyX3RpdGxlX2xpbmVgIGlzIG5ldmVyIHVzZWQKICAgIC0tPiBDOlxtaXIyLWNyb3NzLXBsYXRmb3JtLXN0b3JhZ2UtMjAyNjEwMDJccmVwby1xYS13ZWItd2luZG93cy1jYXRjaHVwLTIwMjYxMDA2LTAxXHNvdXJjZTQ0LWZyb3plbi1ydXN0MDFcbWlyMi13ZWIzXGFwcHNcZ2FtZS1jbGllbnRcY2xpZW50LWJldnlcc3JjXHF1ZXN0X3VpLnJzOjc4NzU6NAogICAgIHwKNzg3NSB8IGZuIHRyYWNrZXJfdGl0bGVfbGluZShwYXJlbnQ6ICZtdXQgQ2hpbGRTcGF3bmVyQ29tbWFuZHMsIHRleHQ6ICZzdHIpIHsKICAgICB8ICAgIF5eXl5eXl5eXl5eXl5eXl5eXgoKd2FybmluZzogZnVuY3Rpb24gYHRyYWNrZXJfdGl0bGVfbGluZV9yYXdgIGlzIG5ldmVyIHVzZWQKICAgIC0tPiBDOlxtaXIyLWNyb3NzLXBsYXRmb3JtLXN0b3JhZ2UtMjAyNjEwMDJccmVwby1xYS13ZWItd2luZG93cy1jYXRjaHVwLTIwMjYxMDA2LTAxXHNvdXJjZTQ0LWZyb3plbi1ydXN0MDFcbWlyMi13ZWIzXGFwcHNcZ2FtZS1jbGllbnRcY2xpZW50LWJldnlcc3JjXHF1ZXN0X3VpLnJzOjc4ODU6NAogICAgIHwKNzg4NSB8IGZuIHRyYWNrZXJfdGl0bGVfbGluZV9yYXcocGFyZW50OiAmbXV0IENoaWxkU3Bhd25lckNvbW1hbmRzLCB0ZXh0OiAmc3RyKSB7CiAgICAgfCAgICBeXl5eXl5eXl5eXl5eXl5eXl5eXl5eCgp3YXJuaW5nOiBmdW5jdGlvbiBgdHJhY2tlcl9ib2R5X2xpbmVfcmF3YCBpcyBuZXZlciB1c2VkCiAgICAtLT4gQzpcbWlyMi1jcm9zcy1wbGF0Zm9ybS1zdG9yYWdlLTIwMjYxMDAyXHJlcG8tcWEtd2ViLXdpbmRvd3MtY2F0Y2h1cC0yMDI2MTAwNi0wMVxzb3VyY2U0NC1mcm96ZW4tcnVzdDAxXG1pcjItd2ViM1xhcHBzXGdhbWUtY2xpZW50XGNsaWVudC1iZXZ5XHNyY1xxdWVzdF91aS5yczo3ODk5OjQKICAgICB8Cjc4OTkgfCBmbiB0cmFja2VyX2JvZHlfbGluZV9yYXcocGFyZW50OiAmbXV0IENoaWxkU3Bhd25lckNvbW1hbmRzLCB0ZXh0OiAmc3RyKSB7CiAgICAgfCAgICBeXl5eXl5eXl5eXl5eXl5eXl5eXl4KCndhcm5pbmc6IGZ1bmN0aW9uIGBpbnRlbnRfZnJvbV9idXR0b25gIGlzIG5ldmVyIHVzZWQKICAgIC0tPiBDOlxtaXIyLWNyb3NzLXBsYXRmb3JtLXN0b3JhZ2UtMjAyNjEwMDJccmVwby1xYS13ZWItd2luZG93cy1jYXRjaHVwLTIwMjYxMDA2LTAxXHNvdXJjZTQ0LWZyb3plbi1ydXN0MDFcbWlyMi13ZWIzXGFwcHNcZ2FtZS1jbGllbnRcY2xpZW50LWJldnlcc3JjXHF1ZXN0X3VpLnJzOjgwNDc6NAogICAgIHwKODA0NyB8IGZuIGludGVudF9mcm9tX2J1dHRvbihhY3Rpb246ICZRdWVzdFVpQnV0dG9uKSAtPiBPcHRpb248UXVlc3RVaUludGVudD4gewogICAgIHwgICAgXl5eXl5eXl5eXl5eXl5eXl5eCgp3YXJuaW5nOiBtZXRob2QgYG5vcm1hbGl6ZV9iaW5kaW5nc2AgaXMgbmV2ZXIgdXNlZAogICAtLT4gQzpcbWlyMi1jcm9zcy1wbGF0Zm9ybS1zdG9yYWdlLTIwMjYxMDAyXHJlcG8tcWEtd2ViLXdpbmRvd3MtY2F0Y2h1cC0yMDI2MTAwNi0wMVxzb3VyY2U0NC1mcm96ZW4tcnVzdDAxXG1pcjItd2ViM1xhcHBzXGdhbWUtY2xpZW50XGNsaWVudC1iZXZ5XHNyY1xza2lsbF9iaW5kaW5nX3VpLnJzOjMzMTo4CiAgICB8CjEzMyB8IGltcGwgU2tpbGxCaW5kaW5nVWkgewogICAgfCAtLS0tLS0tLS0tLS0tLS0tLS0tIG1ldGhvZCBpbiB0aGlzIGltcGxlbWVudGF0aW9uCi4uLgozMzEgfCAgICAgZm4gbm9ybWFsaXplX2JpbmRpbmdzKCZtdXQgc2VsZikgewogICAgfCAgICAgICAgXl5eXl5eXl5eXl5eXl5eXl5eCgp3YXJuaW5nOiBgbWlyMi1jbGllbnQtYmV2eWAgKGxpYikgZ2VuZXJhdGVkIDIyIHdhcm5pbmdzIChydW4gYGNhcmdvIGZpeCAtLWxpYiAtcCBtaXIyLWNsaWVudC1iZXZ5YCB0byBhcHBseSAzIHN1Z2dlc3Rpb25zKQogICBDb21waWxpbmcgbWlyMi1iZXZ5LXJ1bnRpbWUgdjAuMS4wIChDOlxtaXIyLWNyb3NzLXBsYXRmb3JtLXN0b3JhZ2UtMjAyNjEwMDJccmVwby1xYS13ZWItd2luZG93cy1jYXRjaHVwLTIwMjYxMDA2LTAxXHNvdXJjZTQ0LWZyb3plbi1ydXN0MDFcbWlyMi13ZWIzXGFwcHNcZ2FtZS1jbGllbnRccnVudGltZSkKd2FybmluZzogdW51c2VkIGltcG9ydDogYFVpU3lzdGVtc2AKICAtLT4gc3JjXGJhZ191aV9ob3N0LnJzOjE0OjQ5CiAgIHwKMTQgfCB1c2UgYmV2eTo6dWk6OntDb21wdXRlZE5vZGUsIFVpR2xvYmFsVHJhbnNmb3JtLCBVaVN5c3RlbXN9OwogICB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIF5eXl5eXl5eXgogICB8CiAgID0gbm90ZTogYCNbd2Fybih1bnVzZWRfaW1wb3J0cyldYCAocGFydCBvZiBgI1t3YXJuKHVudXNlZCldYCkgb24gYnkgZGVmYXVsdAoKd2FybmluZzogdW51c2VkIGltcG9ydHM6IGBCYWdVaUhvc3RDb250ZXh0YCBhbmQgYEJhZ1VpUmVhZE1vZGVsYAogIC0tPiBzcmNcYmFnX3VpX2hvc3QucnM6MTk6NjIKICAgfAoxOSB8ICAgICBCYWdJZGVudGl0eSwgQmFnUGFnZSwgQmFnUG9pbnRlck9yaWdpbiwgQmFnUG9pbnRlclBoYXNlLCBCYWdVaUhvc3RDb250ZXh0LAogICB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBeXl5eXl5eXl5eXl5eXl5eCjIwIHwgICAgIEJhZ1VpSW50ZW50LCBCYWdVaUludGVudEtpbmQsIEJhZ1VpUG9pbnRlckVkZ2UsIEJhZ1VpUmVhZE1vZGVsLAogICB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBeXl5eXl5eXl5eXl5eXgoKd2FybmluZzogdW51c2VkIGltcG9ydDogYFNlcmlhbGl6ZWAKIC0tPiBzcmNcY2hhcmFjdGVyX3VpX2hvc3QucnM6NToyNgogIHwKNSB8IHVzZSBzZXJkZTo6e0Rlc2VyaWFsaXplLCBTZXJpYWxpemV9OwogIHwgICAgICAgICAgICAgICAgICAgICAgICAgIF5eXl5eXl5eXgoKd2FybmluZzogdW51c2VkIGltcG9ydHM6IGBDb21iYXRDb250cm9sbGVyYCwgYENvbWJhdEVkZ2VgLCBgQ29tYmF0T3V0cHV0YCwgYW5kIGBDb21iYXRTbmFwc2hvdGAKIC0tPiBzcmNcY29tYmF0X2lucHV0X2hvc3QucnM6MjozOAogIHwKMiB8IHVzZSBtaXIyX2NsaWVudF9iZXZ5Ojpjb21iYXRfaW5wdXQ6OntDb21iYXRDb250cm9sbGVyLCBDb21iYXRFZGdlLCBDb21iYXRPdXRwdXQsIENvbWJhdFNuYXBzaG90fTsKICB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBeXl5eXl5eXl5eXl5eXl5eICBeXl5eXl5eXl5eICBeXl5eXl5eXl5eXl4gIF5eXl5eXl5eXl5eXl5eCgp3YXJuaW5nOiB1bnVzZWQgaW1wb3J0OiBgUGFuZWxBY3Rpb25gCiAtLT4gc3JjXGh1ZF91aV9ob3N0LnJzOjI6NTQKICB8CjIgfCB1c2UgbWlyMl9jbGllbnRfYmV2eTo6Y3J5c3RhbF91aTo6cGFuZWxfbmF2aWdhdGlvbjo6e1BhbmVsQWN0aW9uLCBQYW5lbE5hdmlnYXRpb259OwogIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBeXl5eXl5eXl5eXgoKd2FybmluZzogdW51c2VkIGltcG9ydDogYFNlcmlhbGl6ZWAKIC0tPiBzcmNcaHVkX3VpX2hvc3QucnM6NDoyNgogIHwKNCB8IHVzZSBzZXJkZTo6e0Rlc2VyaWFsaXplLCBTZXJpYWxpemV9OwogIHwgICAgICAgICAgICAgICAgICAgICAgICAgIF5eXl5eXl5eXgoKd2FybmluZzogdW51c2VkIGltcG9ydHM6IGBFeHBlcmllbmNlQmFyT2JzZXJ2YXRpb25TZXRgIGFuZCBgRXhwZXJpZW5jZUJhclJlY3RgCiAgLS0+IHNyY1xxdWVzdF91aV9ob3N0LnJzOjQyOjU3CiAgIHwKNDIgfCAgICAgRXhwZXJpZW5jZUJhckhvc3RDb250ZXh0LCBFeHBlcmllbmNlQmFyT2JzZXJ2YXRpb24sIEV4cGVyaWVuY2VCYXJPYnNlcnZhdGlvblNldCwKICAgfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIF5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXgo0MyB8ICAgICBFeHBlcmllbmNlQmFyUmVjdCwgTWlyMlBvcnRhYmxlRXhwZXJpZW5jZUJhclVpUGx1Z2luLAogICB8ICAgICBeXl5eXl5eXl5eXl5eXl5eXgoKd2FybmluZzogdW51c2VkIGltcG9ydHM6IGBXZWlnaHRCYXJPYnNlcnZhdGlvblNldGAgYW5kIGBXZWlnaHRCYXJSZWN0YAogIC0tPiBzcmNccXVlc3RfdWlfaG9zdC5yczo1ODo1CiAgIHwKNTggfCAgICAgV2VpZ2h0QmFyT2JzZXJ2YXRpb25TZXQsIFdlaWdodEJhclJlY3QsCiAgIHwgICAgIF5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eICBeXl5eXl5eXl5eXl5eCgp3YXJuaW5nOiB1bnVzZWQgaW1wb3J0OiBgU2VyaWFsaXplYAogLS0+IHNyY1xzcGVsbHNfdWlfaG9zdC5yczo3OjI2CiAgfAo3IHwgdXNlIHNlcmRlOjp7RGVzZXJpYWxpemUsIFNlcmlhbGl6ZX07CiAgfCAgICAgICAgICAgICAgICAgICAgICAgICAgXl5eXl5eXl5eCgp3YXJuaW5nOiB1bnVzZWQgaW1wb3J0OiBgTnBjU2hvcFN1cmZhY2VBY3Rpb25gCiAgLS0+IHNyY1xucGNfc2hvcF91aV9ob3N0X3Rlc3RzLnJzOjQ0OjU0CiAgIHwKNDQgfCAgICAgcG9ydGFibGVfbnBjX3Nob3BfdWk6OntOcGNTaG9wU3VyZmFjZUludGVudFF1ZXVlLE5wY1Nob3BTdXJmYWNlQWN0aW9ufX07CiAgIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBeXl5eXl5eXl5eXl5eXl5eXl5eXgoKd2FybmluZzogdW51c2VkIGltcG9ydHM6IGBTdG9yYWdlVWlDb250ZXh0YCBhbmQgYFN0b3JhZ2VVaVJlYWRNb2RlbGAKIC0tPiBzcmNcc3RvcmFnZV91aV9ob3N0LnJzOjk6MjkKICB8CjkgfCAgICAgICAgIFN0b3JhZ2VQb2ludGVyUGhhc2UsU3RvcmFnZVVpQ29udGV4dCxTdG9yYWdlVWlSZWFkTW9kZWwsU3RvcmFnZVVpSW50ZW50LFN0b3JhZ2VVaUludGVudEtpbmQsU0FGRX0sCiAgfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXl5eXl5eXl5eXl5eXl5eXiBeXl5eXl5eXl5eXl5eXl5eXl4KCndhcm5pbmc6IHVudXNlZCBpbXBvcnRzOiBgQ29tcG9zZVBvaW50ZXJFZGdlYCwgYENvbXBvc2VQb2ludGVyUm91dGVyYCwgYFByb21wdE11dGF0aW9uYCwgYFRleHRFZGdlYCwgYW5kIGBUZXh0SW50ZW50YAogICAtLT4gc3JjXG1haWxfdWlfaG9zdC5yczoyMjc6NDEKICAgIHwKMjI3IHwgLi4uYWludCxUZXh0UHJvb2YsVGV4dEVkZ2UsVGV4dEludGVudCxDb21wb3NlQWN0aW9uLEdvbGRQYWludCxDb21wb3NlUG9pbnRlckVkZ2UsQ29tcG9zZVBvaW50ZXJSb3V0ZXIsUHJvbXB0TXV0YXRpb259OwogICAgfCAgICAgICAgICAgICAgICAgICBeXl5eXl5eXiBeXl5eXl5eXl5eICAgICAgICAgICAgICAgICAgICAgICAgIF5eXl5eXl5eXl5eXl5eXl5eXiBeXl5eXl5eXl5eXl5eXl5eXl5eXiBeXl5eXl5eXl5eXl5eXgoKd2FybmluZzogZmllbGRzIGBiYWdfb3BlbmAsIGBwYWdlYCwgYGlucHV0X2VuYWJsZWRgLCBhbmQgYHBsYXllcmAgYXJlIG5ldmVyIHJlYWQKICAgLS0+IHNyY1xiYWdfdWlfaG9zdC5yczoxMzc6NQogICAgfAoxMzEgfCBzdHJ1Y3QgV2ViQmFnU25hcHNob3QgewogICAgfCAgICAgICAgLS0tLS0tLS0tLS0tLS0gZmllbGRzIGluIHRoaXMgc3RydWN0Ci4uLgoxMzcgfCAgICAgYmFnX29wZW46IGJvb2wsCiAgICB8ICAgICBeXl5eXl5eXgoxMzggfCAgICAgcGFnZTogV2ViQmFnUGFnZSwKICAgIHwgICAgIF5eXl4KMTM5IHwgICAgIGlucHV0X2VuYWJsZWQ6IGJvb2wsCiAgICB8ICAgICBeXl5eXl5eXl5eXl5eCi4uLgoxNDIgfCAgICAgcGxheWVyOiBQbGF5ZXJTdGF0cywKICAgIHwgICAgIF5eXl5eXgogICAgfAogICAgPSBub3RlOiBgV2ViQmFnU25hcHNob3RgIGhhcyBhIGRlcml2ZWQgaW1wbCBmb3IgdGhlIHRyYWl0IGBEZWJ1Z2AsIGJ1dCB0aGlzIGlzIGludGVudGlvbmFsbHkgaWdub3JlZCBkdXJpbmcgZGVhZCBjb2RlIGFuYWx5c2lzCiAgICA9IG5vdGU6IGAjW3dhcm4oZGVhZF9jb2RlKV1gIChwYXJ0IG9mIGAjW3dhcm4odW51c2VkKV1gKSBvbiBieSBkZWZhdWx0Cgp3YXJuaW5nOiBzdHJ1Y3QgYFdlYkJhZ1BvaW50ZXJFZGdlYCBpcyBuZXZlciBjb25zdHJ1Y3RlZAogICAtLT4gc3JjXGJhZ191aV9ob3N0LnJzOjIyODo4CiAgICB8CjIyOCB8IHN0cnVjdCBXZWJCYWdQb2ludGVyRWRnZSB7CiAgICB8ICAgICAgICBeXl5eXl5eXl5eXl5eXl5eXgoKd2FybmluZzogZW51bSBgV2ViQmFnUG9pbnRlclBoYXNlYCBpcyBuZXZlciB1c2VkCiAgIC0tPiBzcmNcYmFnX3VpX2hvc3QucnM6MjQzOjYKICAgIHwKMjQzIHwgZW51bSBXZWJCYWdQb2ludGVyUGhhc2UgeyBEb3duLCBNb3ZlLCBVcCwgQ2FuY2VsLCBCbHVyIH0KICAgIHwgICAgICBeXl5eXl5eXl5eXl5eXl5eXl4KCndhcm5pbmc6IGVudW0gYFdlYkJhZ1BvaW50ZXJPcmlnaW5gIGlzIG5ldmVyIHVzZWQKICAgLS0+IHNyY1xiYWdfdWlfaG9zdC5yczoyNDY6NgogICAgfAoyNDYgfCBlbnVtIFdlYkJhZ1BvaW50ZXJPcmlnaW4geyBCYWcsIFdvcmxkIH0KICAgIHwgICAgICBeXl5eXl5eXl5eXl5eXl5eXl5eCgp3YXJuaW5nOiBtZXRob2RzIGB2YWxpZGF0ZWAgYW5kIGBpbnRvX3NoYXJlZGAgYXJlIG5ldmVyIHVzZWQKICAgLS0+IHNyY1xiYWdfdWlfaG9zdC5yczoyNDk6OAogICAgfAoyNDggfCBpbXBsIFdlYkJhZ1BvaW50ZXJFZGdlIHsKICAgIHwgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSBtZXRob2RzIGluIHRoaXMgaW1wbGVtZW50YXRpb24KMjQ5IHwgICAgIGZuIHZhbGlkYXRlKHNlbGYpIC0+IGJvb2wgewogICAgfCAgICAgICAgXl5eXl5eXl4KLi4uCjI1OCB8ICAgICBmbiBpbnRvX3NoYXJlZChzZWxmKSAtPiBCYWdVaVBvaW50ZXJFZGdlIHsKICAgIHwgICAgICAgIF5eXl5eXl5eXl5eCgp3YXJuaW5nOiBmaWVsZHMgYGhvc3RfdmlzaWJsZWAsIGBxdWVzdF9sb2dfb3BlbmAsIGBibG9ja3NfZ2FtZXBsYXlfa2V5c2AsIGB0dXJuX2luX2Jsb2NrZWRgLCBhbmQgYHByZXNlbnRhdGlvbmAgYXJlIG5ldmVyIHJlYWQKICAgLS0+IHNyY1xxdWVzdF91aV9ob3N0LnJzOjg5OjkKICAgIHwKIDgzIHwgcHViKGNyYXRlKSBzdHJ1Y3QgV2ViUXVlc3RVaVNuYXBzaG90IHsKICAgIHwgICAgICAgICAgICAgICAgICAgLS0tLS0tLS0tLS0tLS0tLS0tIGZpZWxkcyBpbiB0aGlzIHN0cnVjdAouLi4KIDg5IHwgICAgIHB1YiBob3N0X3Zpc2libGU6IGJvb2wsCiAgICB8ICAgICAgICAgXl5eXl5eXl5eXl5eCiA5MCB8ICAgICBwdWIgcXVlc3RfbG9nX29wZW46IGJvb2wsCiAgICB8ICAgICAgICAgXl5eXl5eXl5eXl5eXl4KIDkxIHwgICAgIHB1YiBvcGVuX3JldmlzaW9uOiB1NjQsCiA5MiB8ICAgICBwdWIgYmxvY2tzX2dhbWVwbGF5X2tleXM6IGJvb2wsCiAgICB8ICAgICAgICAgXl5eXl5eXl5eXl5eXl5eXl5eXl4KIDkzIHwgICAgIHB1YiB0dXJuX2luX2Jsb2NrZWQ6IGJvb2wsCiAgICB8ICAgICAgICAgXl5eXl5eXl5eXl5eXl5eCi4uLgoxMDEgfCAgICAgcHViIHByZXNlbnRhdGlvbjogT3B0aW9uPFdlYlF1ZXN0VWlQcmVzZW50YXRpb24+LAogICAgfCAgICAgICAgIF5eXl5eXl5eXl5eXgogICAgfAogICAgPSBub3RlOiBgV2ViUXVlc3RVaVNuYXBzaG90YCBoYXMgYSBkZXJpdmVkIGltcGwgZm9yIHRoZSB0cmFpdCBgRGVidWdgLCBidXQgdGhpcyBpcyBpbnRlbnRpb25hbGx5IGlnbm9yZWQgZHVyaW5nIGRlYWQgY29kZSBhbmFseXNpcwoKd2FybmluZzogZmllbGQgYGhhc19pbnB1dGAgaXMgbmV2ZXIgcmVhZAogICAtLT4gc3JjXHF1ZXN0X3VpX2hvc3QucnM6NDAyOjkKICAgIHwKMzkyIHwgcHViKGNyYXRlKSBzdHJ1Y3QgV2ViTnBjRGlhbG9nIHsKICAgIHwgICAgICAgICAgICAgICAgICAgLS0tLS0tLS0tLS0tIGZpZWxkIGluIHRoaXMgc3RydWN0Ci4uLgo0MDIgfCAgICAgcHViIGhhc19pbnB1dDogYm9vbCwKICAgIHwgICAgICAgICBeXl5eXl5eXl4KICAgIHwKICAgID0gbm90ZTogYFdlYk5wY0RpYWxvZ2AgaGFzIGEgZGVyaXZlZCBpbXBsIGZvciB0aGUgdHJhaXQgYERlYnVnYCwgYnV0IHRoaXMgaXMgaW50ZW50aW9uYWxseSBpZ25vcmVkIGR1cmluZyBkZWFkIGNvZGUgYW5hbHlzaXMKCndhcm5pbmc6IGZpZWxkcyBgY29tcGxldGVkYCBhbmQgYGRpYWxvZ2AgYXJlIG5ldmVyIHJlYWQKICAgLS0+IHNyY1xxdWVzdF91aV9ob3N0LnJzOjQzOTo5CiAgICB8CjQzNyB8IHB1YihjcmF0ZSkgc3RydWN0IFF1ZXN0VWlNb2RlbHMgewogICAgfCAgICAgICAgICAgICAgICAgICAtLS0tLS0tLS0tLS0tIGZpZWxkcyBpbiB0aGlzIHN0cnVjdAo0MzggfCAgICAgcHViIHF1ZXN0czogUXVlc3RUcmFja2VyLAo0MzkgfCAgICAgcHViIGNvbXBsZXRlZDogQ29tcGxldGVkUXVlc3RUcmFja2VyLAogICAgfCAgICAgICAgIF5eXl5eXl5eXgo0NDAgfCAgICAgcHViIGRpYWxvZzogTnBjRGlhbG9nTW9kZWwsCiAgICB8ICAgICAgICAgXl5eXl5eCgp3YXJuaW5nOiBmaWVsZCBgY2FuY2VsX3BvaW50ZXJgIGlzIG5ldmVyIHJlYWQKICAgLS0+IHNyY1xzdG9yYWdlX3VpX2hvc3QucnM6MTI3OjYxCiAgICB8CjEyNCB8IHN0cnVjdCBTdG9yYWdlSW5ncmVzcyB7CiAgICB8ICAgICAgICAtLS0tLS0tLS0tLS0tLSBmaWVsZCBpbiB0aGlzIHN0cnVjdAouLi4KMTI3IHwgICAgIGxhc3RfZWRnZV9zZXF1ZW5jZTp1NjQsbGVhc2U6T3B0aW9uPFN0b3JhZ2VQb2ludGVyRWRnZT4sY2FuY2VsX3BvaW50ZXI6Ym9vbCxlcnJvcjpPcHRpb248U3RyaW5nPiwKICAgIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXl5eXl5eXl5eXl5eXl4KCndhcm5pbmc6IHN0cnVjdCBgV2ViR2wyU2hhcmVkVWlQcm90b3R5cGVgIGlzIG5ldmVyIGNvbnN0cnVjdGVkCiAtLT4gc3JjXHdlYmdsMl9zaGFyZWRfdWkucnM6ODoxOQogIHwKOCB8IHB1YihjcmF0ZSkgc3RydWN0IFdlYkdsMlNoYXJlZFVpUHJvdG90eXBlOwogIHwgICAgICAgICAgICAgICAgICAgXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl4KCndhcm5pbmc6IGBtaXIyLWJldnktcnVudGltZWAgKGxpYiB0ZXN0KSBnZW5lcmF0ZWQgMjIgd2FybmluZ3MgKHJ1biBgY2FyZ28gZml4IC0tbGliIC1wIG1pcjItYmV2eS1ydW50aW1lIC0tdGVzdHNgIHRvIGFwcGx5IDEyIHN1Z2dlc3Rpb25zKQogICAgRmluaXNoZWQgYHRlc3RgIHByb2ZpbGUgW3Vub3B0aW1pemVkICsgZGVidWdpbmZvXSB0YXJnZXQocykgaW4gMm0gMDRzCiAgICAgUnVubmluZyB1bml0dGVzdHMgc3JjXGxpYi5ycyAoQzpcbWlyMi1jcm9zcy1wbGF0Zm9ybS1zdG9yYWdlLTIwMjYxMDAyXHJ1c3QtdGFyZ2V0XHdpbmRvd3NcZGVidWdcZGVwc1xtaXIyX2JldnlfcnVudGltZS1lZjY0MzA0OTI4N2QzNmJiLmV4ZSkKZXJyb3I6IHRlc3QgZmFpbGVkLCB0byByZXJ1biBwYXNzIGAtLWxpYmAK"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-runtime-hero-test01.outer.json",
+      "bytes": 455,
+      "sha256": "fbc466156d013b527922652fe46eaae6c94b9386fd2863d3a091d2cb4fa0f915",
+      "encoding": "base64",
+      "data": "ew0KICAib3duZXIiOiAiUm9vdCIsDQogICJleGl0Q29kZSI6IDEwMSwNCiAgImd1YXJkUGlkIjogMTgwNjYwLA0KICAiZXhpdGVkIjogdHJ1ZSwNCiAgImRpc3Bvc2VkIjogdHJ1ZSwNCiAgImVsYXBzZWRNcyI6IDEyNjQyNywNCiAgImNvbmZpZ1BhdGgiOiAiQzovbWlyMi1jcm9zcy1wbGF0Zm9ybS1zdG9yYWdlLTIwMjYxMDAyL3JlcG8tcWEtd2ViLXdpbmRvd3MtY2F0Y2h1cC0yMDI2MTAwNi0wMS93MC1oZXJvLXNvdXJjZTQ0LXJ1bnRpbWUtaGVyby10ZXN0MDEuY29uZmlnMDEuanNvbiIsDQogICJ1aU9wZXJhdGVkIjogZmFsc2UsDQogICJydW50aW1lTGF1bmNoZWQiOiBmYWxzZSwNCiAgIm5ldHdvcmtVc2VkIjogZmFsc2UsDQogICJwcm9kdWN0aW9uQnVpbGRBY2NlcHRlZCI6IGZhbHNlLA0KICAiY2FuZGlkYXRlQWNjZXB0ZWQiOiBmYWxzZSwNCiAgImdvYWxDb21wbGV0ZSI6IGZhbHNlDQp9DQo="
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-hero-test01-cargo-receipts\\1ac09307dfdc40068a7d384365d5dd82\\after.json",
+      "bytes": 332,
+      "sha256": "88cf58d25e725ddedec666d1ae61c501c23e69a1e6bd96827403492c029e39ce",
+      "encoding": "base64",
+      "data": "eyJjaGlsZFBpZCI6MTg3NjY4LCJjaGlsZFN0YXJ0ZWRVdGMiOiJcL0RhdGUoMTc5MTQ2NDY1NjI0NSlcLyIsImNoaWxkU3RhcnRNcyI6MTE3Ni4xMzAzLCJjb21wbGV0ZWQiOnRydWUsImV4aXRlZCI6dHJ1ZSwiZGlzcG9zZWQiOnRydWUsImV4aXRDb2RlIjoxMDEsImV4aXRCaXRzIjoiMTAxIiwiY29tcGxldGVkVXRjIjoiXC9EYXRlKDE3OTE0NjQ3ODE0MzQpXC8iLCJjb21wbGV0aW9uTXMiOjEyNjM2My4wMzIxMDAwMDAwMSwicG9zdENoaWxkUG9saWN5IjoiQiIsImxpZmVjeWNsZSI6Ii5ORVQgU3RhcnQvRXhpdGVkL1dhaXRGb3JFeGl0L0Rpc3Bvc2U7IG5vdCBOb2RlIGNsb3NlIn0="
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-hero-test01-cargo-receipts\\1ac09307dfdc40068a7d384365d5dd82\\before.json",
+      "bytes": 3684,
+      "sha256": "6f35b721cecb0bc9eb5fda82502e1ec88a5922045e4db3a4ae32c3f31b8a2956",
+      "encoding": "base64",
+      "data": "eyJzY2hlbWFWZXJzaW9uIjoxLCJtb2RlIjoicmVhbC1jYXJnbyIsIm5vbmNlIjoiMWFjMDkzMDdkZmRjNDAwNjhhN2QzODQzNjVkNWRkODIiLCJwb2xpY3lQYXRoIjoiQzovbWlyMi1jcm9zcy1wbGF0Zm9ybS1zdG9yYWdlLTIwMjYxMDAyL3JlcG8tcWEtd2ViLXdpbmRvd3MtY2F0Y2h1cC0yMDI2MTAwNi0wMS93MC1oZXJvLXNvdXJjZTQ0LXJ1bnRpbWUtaGVyby10ZXN0MDEucG9saWN5MDEuanNvbiIsInBvbGljeVNoYSI6IjQxMWM4NzdhMjJhZDZlNTlhM2IzZDkzNDIwZGEyZWJhODBkNDg0MDY4ZTcyOTdmNDNjOTE3MTZjYjI1NWMyYmUiLCJhcmdzIjpbIisxLjk1LjAiLCJ0ZXN0IiwiLS1tYW5pZmVzdC1wYXRoIiwiYXBwcy9nYW1lLWNsaWVudC9ydW50aW1lL0NhcmdvLnRvbWwiLCItLWxvY2tlZCIsIi0tb2ZmbGluZSIsIi0tam9icyIsIjEiLCItLWZlYXR1cmVzIiwid2ViLXF1ZXN0LXVpIiwiLS1saWIiLCItLSIsIi0tdGVzdC10aHJlYWRzPTEiLCItLWV4YWN0IiwiaGVyb191aV9ob3N0Ojp0ZXN0czo6aGVyb19ob3N0X3NlcGFyYXRlc19ydXN0X3NvdXJjZV9mcm9tX3dlYl9jb3VudGVyc19hbmRfaWdub3JlZF9yYXdfY3Vyc29yIiwiaGVyb191aV9ob3N0Ojp0ZXN0czo6aGVyb19ob3N0X3N0YWxlX2NvbnRyb2xfYW5kX2R1cGxpY2F0ZV9qc29uX2RvX25vdF9wb2lzb25fY3VycmVudF9vd25lciIsImhlcm9fdWlfaG9zdDo6dGVzdHM6Omhlcm9faG9zdF9vbGRfY2xlYW51cF9jYW5ub3RfcmV0aXJlX3JlcGxhY2VtZW50X3J1bl9vcl9zaW5rIiwiaGVyb191aV9ob3N0Ojp0ZXN0czo6aGVyb19ob3N0X2JvdW5kZWRfaW5wdXRfb3ZlcmZsb3dfa2VlcHNfYWNjZXB0ZWRfZmlmb19mb3Jfb25lX3dvcmxkX2NvbnN1bWVyIiwiaGVyb191aV9ob3N0Ojp0ZXN0czo6aGVyb19ob3N0X2NvbnN1bWVyX3JlYXBwbGllc19jdXJyZW50X3Byb2plY3Rpb25fYWZ0ZXJfdW5zY29wZWRfd29ybGRfcmVzZXQiLCJoZXJvX3VpX2hvc3Q6OnRlc3RzOjpoZXJvX2hvc3RfcmVjZWlwdHNfYXBwbHlfaW5fZmlmb19iZWZvcmVfbGF0ZXN0X3dpdGhvdXRfYW5fdW5ib3VuZGVkX3dvcmxkX3F1ZXVlIiwiaGVyb191aV9ob3N0Ojp0ZXN0czo6aGVyb19ob3N0X2NoZWNrcG9pbnRfaXNfaGVsZF9zdHJpbmdfYW5kX25ld19ydW5fcmVzdG9yZXNfYmVmb3JlX2xpdmVfaW5wdXQiLCJoZXJvX3VpX2hvc3Q6OnRlc3RzOjpoZXJvX2hvc3RfcmVlbnRyYW50X3Njb3BlX29yX3NpbmtfY2hhbmdlX2ludmFsaWRhdGVzX2FjY2VwdGFuY2VfZmVlZGJhY2siLCJoZXJvX3VpX2hvc3Q6OnRlc3RzOjpoZXJvX2hvc3Rfc2FtZV9zdGFtcF9uZXdfd2ViX2xlYXNlX2NhbmNlbHNfcXVldWVkX2FuZF9oZWxkX29sZF9pbnB1dCIsImhlcm9fdWlfaG9zdDo6dGVzdHM6Omhlcm9faG9zdF9jbGVhcmluZ19jdXJyZW50X3NpbmtfcmV2b2tlc19pbnB1dF9idXRfb2xkX2NsZWFudXBfY2Fubm90IiwiaGVyb191aV9ob3N0Ojp0ZXN0czo6aGVyb19ob3N0X2FjdHVhbF9sYXlvdXRfcmVqZWN0c19taXNzaW5nX2R1cGxpY2F0ZV9taXNwbGFjZWRfYW5kX3dyb25nX3BhZ2VfY2VsbHMiLCJoZXJvX3VpX2hvc3Q6OnRlc3RzOjpoZXJvX2hvc3RfY2hlY2twb2ludF9rZWVwc19maXJzdF9wYWNrZXRfY2xvY2tfYWNyb3NzX2lnbm9yZWRfZnJhbWVzIiwiaGVyb191aV9ob3N0Ojp0ZXN0czo6aGVyb19ob3N0X29sZF9zYW1lX3Njb3BlX3NpbmtfY2xlYW51cF9hbmRfaW5wdXRfY2Fubm90X3RvdWNoX3JlcGxhY2VtZW50X2JpbmRpbmciLCJoZXJvX3VpX2hvc3Q6OnRlc3RzOjpoZXJvX2hvc3RfZGlzYWJsZWRfY29udHJvbF9jYW5jZWxzX29sZF9wcmVzc19ldmVuX3dpdGhvdXRfYW5faW50ZXJ2ZW5pbmdfd29ybGRfZnJhbWUiLCJoZXJvX3VpX2hvc3Q6OnRlc3RzOjpoZXJvX2hvc3RfY2xvY2tfYW5kX3Njb3BlX2JvdW5kYXJ5X3JlZnVzZV91bnNhZmVfdmFsdWVzIiwiaGVyb191aV9ob3N0Ojp0ZXN0czo6aGVyb19ob3N0X3ZlcmlmaWVkX293bmVyX2lzX2Rpc3BsYXlfc291cmNlX3dpdGhvdXRfY29yZV9vcl9sZWRnZXJfc2lkZV9lZmZlY3RzIiwiaGVyb191aV9ob3N0Ojp0ZXN0czo6aGVyb19ob3N0X2xlZ2FjeV9jb250cm9sX2Nhbm5vdF9hdXRob3JpemVfaW5wdXRfb3JfaW5zdGFsbGVkX3JlYWR5X3Byb29mIiwiaGVyb191aV9ob3N0Ojp0ZXN0czo6aGVyb19ob3N0X2NvcGllZF9zb3VyY2Vfd2l0aF9vbGRfaGVhbHRoX2RhdGFfaXNfcmVqZWN0ZWRfdW50aWxfcmVhbF9jb25zdW1lIiwiaGVyb191aV9ob3N0Ojp0ZXN0czo6aGVyb19ob3N0X3dpdG5lc3NfcXVlcmllc19hbmRfcmVqZWN0aW9uX3ByZXNlcnZlX3JlY2VpcHRfZmlmb19hbmRfb3JpZ2luYWxfY2xvY2siLCJoZXJvX3VpX2hvc3Q6OnRlc3RzOjpoZXJvX2hvc3RfdW5zY29wZWRfcmVzZXRfY2Fubm90X3ByZXNlcnZlX29sZF9yZWFkeV9vcl9oZWxkX3ByZXNzX3dpdGhfc2FtZV93aXRuZXNzIiwiaGVyb191aV9ob3N0Ojp0ZXN0czo6aGVyb19ob3N0X21hbGZvcm1lZF9vcl9zdGFsZV93aXRuZXNzX2NvbnRyb2xfY2Fubm90X3BvaXNvbl9jdXJyZW50X2JvdW5kX3NvdXJjZSIsImhlcm9fdWlfaG9zdDo6dGVzdHM6Omhlcm9faG9zdF9pbmRlcGVuZGVudF93ZWJfYW5kX3J1c3RfZW1wdHlfc291cmNlX3NoYXJlX29uZV9leGFjdF9nb2xkZW4iLCJoZXJvX3VpX2hvc3Q6OnRlc3RzOjpoZXJvX2hvc3RfcHJlcGFyZWRfaGlkZGVuX3Jvb3RfbmVlZHNfZW5hYmxlZF9hY3R1YWxfaW5oZXJpdGVkX3Zpc2liaWxpdHlfZm9yX3JlYWR5IiwiaGVyb191aV9ob3N0Ojp0ZXN0czo6aGVyb19ob3N0X3NhbWVfd2l0bmVzc19vd25lcl9yZWZyZXNoX3ByZXNlcnZlc19kcmFnX2J1dF9yZXZva2VzX29sZF9lZGdlc19hbmRfZmVlZGJhY2siLCJoZXJvX3VpX2hvc3Q6OnRlc3RzOjpoZXJvX2hvc3RfY29udHJvbF9yZXZpc2lvbl9jbGVhcnNfcGVuZGluZ19lZGdlc193aXRob3V0X3Jlc2V0dGluZ19lcXVhbF9kYXRhX2RyYWciLCJoZXJvX3VpX2hvc3Q6OnRlc3RzOjpoZXJvX2hvc3RfZHJhZ19jb250aW51aXR5X3JlamVjdHNfY2hhbmdlZF9kYXRhX2NvbXBsZXRlX2xlYXNlX2FuZF9laXRoZXJfd29ybGRfcmVzZXQiXSwiY3dkIjoiQzpcXG1pcjItY3Jvc3MtcGxhdGZvcm0tc3RvcmFnZS0yMDI2MTAwMlxccmVwby1xYS13ZWItd2luZG93cy1jYXRjaHVwLTIwMjYxMDA2LTAxXFxzb3VyY2U0NC1mcm96ZW4tcnVzdDAxXFxtaXIyLXdlYjMiLCJjYWxsZWVQYXRoIjoiQzovVXNlcnMvQWRtaW5pc3RyYXRvci8uY2FyZ28vYmluL2NhcmdvLmV4ZSIsImNhbGxlZVNoYSI6Ijg2NDc4ZTUzZjc2OTM3OWQ3ZjBlYmZhN2M5YWE5N2NiNzZjYTkyMjMzZjc5YWEyY2MwZGJlZTJlZmFhYzczYzciLCJzYW1wbGUiOnsic2NoZW1hVmVyc2lvbiI6IjEiLCJkcml2ZUxldHRlciI6IkMiLCJzYW1wbGVCZWdpblV0YyI6IjIwMjYtMTAtMDhUMTM6MDQ6MTUuMzc4NTIxMloiLCJzYW1wbGVFbmRVdGMiOiIyMDI2LTEwLTA4VDEzOjA0OjE2LjE3MTI3MDNaIiwicmVtYWluaW5nQnl0ZXMiOiIyMDQwNDUxODUwMjQiLCJyZXF1aXJlZEJ5dGVzIjoiNTM2ODcwOTEyMDAifSwicHJvYmVQaWQiOjE4NzQ2OCwicHJvYmVMYXVuY2hNcyI6MTA3LjgwNDUsInByb2JlRW5kTXMiOjExNTEuOTExMSwiZGVjaXNpb24iOiJGT1JXQVJEIiwidGhyZXNob2xkQnl0ZXMiOiI1MzY4NzA5MTIwMCIsInNhbXBsZVByb29mIjoiYWN0dWFsR2V0Vm9sdW1lQyJ9"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-hero-test01-cargo-receipts\\1ac09307dfdc40068a7d384365d5dd82\\probe-process.json",
+      "bytes": 433,
+      "sha256": "3bec6e5273ab355b03e6e322e4829a82c5e772683855076775d9e0cfa83aa741",
+      "encoding": "base64",
+      "data": "eyJwcm9iZVBpZCI6MTg3NDY4LCJwcm9iZUtpbGxlZCI6ZmFsc2UsInByb2JlQ29kZSI6MCwicHJvYmVMYXVuY2hVdGMiOiJcL0RhdGUoMTc5MTQ2NDY1NTE3NylcLyIsInByb2JlRW5kVXRjIjoiXC9EYXRlKDE3OTE0NjQ2NTYyMjEpXC8iLCJwcm9iZUxhdW5jaE1zIjoxMDcuODA0NSwicHJvYmVFbmRNcyI6MTE1MS45MTExLCJwcm9iZU1vZGUiOiJhY3R1YWwiLCJwcm9iZVBhdGgiOiJDOi9taXIyLWNyb3NzLXBsYXRmb3JtLXN0b3JhZ2UtMjAyNjEwMDIvcmVwby1xYS1zaGFyZWQtcXVlc3QtaGVhZGluZy1sb2NhbGUtMDEvY2FyZ28tcGVyLWNhbGwtZ3VhcmQtaW1wbGVtZW50YXRpb24wMS9wcm9iZS12b2x1bWUtQy5wczEiLCJwcm9iZVNoYSI6IjQ1ZTE0ZDI2ZTYwOGMzNmM4MDczZmE5ZThlNjE1NjIwNjJiMmQ1ZDJkZjE0MmQzNWU5MGY3MjEzZmI3MmYxYWIifQ=="
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-hero-test01-cargo-receipts\\1ac09307dfdc40068a7d384365d5dd82\\probe.stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "encoding": "base64",
+      "data": ""
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-runtime-hero-test01-cargo-receipts\\1ac09307dfdc40068a7d384365d5dd82\\probe.stdout.bin",
+      "bytes": 197,
+      "sha256": "6fb29e0be7dce5c35ac8410ae01e8801992a89be663d770fe6eeb66be6a9b395",
+      "encoding": "base64",
+      "data": "eyJzY2hlbWFWZXJzaW9uIjoiMSIsImRyaXZlTGV0dGVyIjoiQyIsInNhbXBsZUJlZ2luVXRjIjoiMjAyNi0xMC0wOFQxMzowNDoxNS4zNzg1MjEyWiIsInNhbXBsZUVuZFV0YyI6IjIwMjYtMTAtMDhUMTM6MDQ6MTYuMTcxMjcwM1oiLCJyZW1haW5pbmdCeXRlcyI6IjIwNDA0NTE4NTAyNCIsInJlcXVpcmVkQnl0ZXMiOiI1MzY4NzA5MTIwMCJ9DQo="
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-bevy-portable-hero-test01.config01.json",
+      "bytes": 11250,
+      "sha256": "fae65a537f892c4f75945327876fc7017dcd3db199195616c87f57db93b2ca67"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-runtime-wasm-webgl2-shared-check01.config01.json",
+      "bytes": 4788,
+      "sha256": "f1914e06e6c966009fb0a82e1489e9b7be52e3855ac1a99b73ffab0128122c94"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-runtime-wasm-webgpu-check01.config01.json",
+      "bytes": 4708,
+      "sha256": "7a96ac825b453d30e74141f8c13330b9ae6e7070a435b188c911bd0523a89e6f"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-shared-quest-heading-locale-01\\cargo-per-call-guard-implementation01\\CargoGuard.exe",
+      "bytes": 37376,
+      "sha256": "2025bdd29ff4df3d9f772ba7f0d44856243204909b6185cb2ab184dfcd0ab82e"
+    },
+    {
+      "path": "C:\\Program Files\\nodejs\\node.exe",
+      "bytes": 85202416,
+      "sha256": "c22d1c59a1f767a1ed0178445a027f2257d318c55430fc819d48f269586822b7"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\node_modules\\typescript\\lib\\typescript.js",
+      "bytes": 9112572,
+      "sha256": "3ae902c92cc44dace175c0e69e13a4b0899f6983c6121d76b9ab8dd5795e7675"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\node_modules\\typescript\\package.json",
+      "bytes": 3620,
+      "sha256": "822ef7ca6452205657b6288b066481ecf508bfbf43455d715cf7d3ec457561e6"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\node_modules\\typescript\\bin\\tsc",
+      "bytes": 45,
+      "sha256": "8d5fa5bd883fec0979fc2004f1fe1d99aef40570155d550eadc0b03b55513bf0"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\node_modules\\typescript\\lib\\tsc.js",
+      "bytes": 267,
+      "sha256": "2cffde0b8c6760dfb0b5b0382bbb7e00ba6a8b2d981b9205b256a700a481d983"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\node_modules\\typescript\\lib\\_tsc.js",
+      "bytes": 6213092,
+      "sha256": "e8f349eabd48486bdb2bf9dc1a00c89d58297270c54b745838879e2859194419"
+    }
+  ],
+  "policyToolsAndReferences": [
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/CargoGuard.cs",
+      "bytes": 20309,
+      "sha256": "f1eeaaf4bddf13e8e3bae1379100095c4b22fa91c6d6696ad30bd218f9516689"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/LICENSE.0BSD.txt",
+      "bytes": 661,
+      "sha256": "0715e35609fae3255502eab08ba3afea7ae64899c199c02fd2c7f32c5b98516d"
+    },
+    {
+      "path": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+      "bytes": 12814336,
+      "sha256": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7"
+    },
+    {
+      "path": "C:/Users/Administrator/.cargo/bin/rustup.exe",
+      "bytes": 12814336,
+      "sha256": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7"
+    },
+    {
+      "path": "C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "bytes": 495616,
+      "sha256": "8bb6fa8c283b4d92120b1ef249a9b311b0f804d4cabbe9981159976c8be76a5e"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/probe-volume-C.ps1",
+      "bytes": 772,
+      "sha256": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-rust02-authority.json",
+      "bytes": 522,
+      "sha256": "98da541c12338aad041aade6a8bb17f86945a1d35186b5d3b734b5a32d0204b6"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-rust02-review01.json",
+      "bytes": 13086,
+      "sha256": "a954e86cb2593241f9a7746e2ec0387dae16f233a800576af0bcd53253df5500"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-rust02-snapshot.json",
+      "bytes": 1507271,
+      "sha256": "fb8a878f0a942a2060ef67461ef0a635b8fe320679ddbf556c89419dac322781"
+    }
+  ],
+  "rawVerification": {
+    "directOriginalFiles": 64,
+    "directRawBytes": 220922,
+    "all64Base64ShaBytesAndCurrentOriginalDiskMatched": true,
+    "directFinalNonceFiles": 20,
+    "historicalRustInnerOriginalFiles": 8,
+    "historicalRustInnerBase64ShaBytesAndCurrentOriginalDiskMatched": true,
+    "historicalNonceFiles": 5,
+    "totalFinalAndHistoricalNonceFiles": 25,
+    "rawArchiveIsDataNotNewExecution": true
+  },
+  "rust": {
+    "snapshot": {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-rust02-snapshot.json",
+      "bytes": 1507271,
+      "sha256": "fb8a878f0a942a2060ef67461ef0a635b8fe320679ddbf556c89419dac322781"
+    },
+    "isolatedDeclaredPinsVerified": 917,
+    "copiedProductDataFiles": 909,
+    "originalExternalReferences": 8,
+    "all917CurrentHashesMatched": true,
+    "actualFinalCalls": [
+      {
+        "id": "runtime-hero-test02",
+        "passed": 26,
+        "minC": 202049495040,
+        "freshnessUpperMs": 79,
+        "start": "2026-10-08T13:17:38.4494960Z",
+        "complete": "/Date(1791465580418)/",
+        "policyBClosed": true
+      },
+      {
+        "id": "bevy-portable-hero-test02",
+        "passed": 66,
+        "minC": 200223891456,
+        "freshnessUpperMs": 79,
+        "start": "2026-10-08T13:20:45.7135305Z",
+        "complete": "/Date(1791465741417)/",
+        "policyBClosed": true
+      },
+      {
+        "id": "runtime-wasm-webgl2-shared-check02",
+        "passed": 0,
+        "minC": 199290814464,
+        "freshnessUpperMs": 74,
+        "start": "2026-10-08T13:23:22.1801842Z",
+        "complete": "/Date(1791465824794)/",
+        "policyBClosed": true
+      },
+      {
+        "id": "runtime-wasm-webgpu-check02",
+        "passed": 0,
+        "minC": 199272189952,
+        "freshnessUpperMs": 68,
+        "start": "2026-10-08T13:27:46.7128614Z",
+        "complete": "/Date(1791466082490)/",
+        "policyBClosed": true
+      }
+    ],
+    "successfulTestExecutions": 92,
+    "runtimePass": 26,
+    "portablePass": 66,
+    "newRustTestFunctions": 5,
+    "staticChecks": 2,
+    "staticChecksAreCargoCheckOnly": true,
+    "freshNativeExecuted": false,
+    "minimumActualRemainingBytes": 199272189952,
+    "thresholdBytes": 53687091200,
+    "maximumConservativeFreshnessMs": 79,
+    "freshnessThresholdMs": 2000,
+    "probeTimeoutMs": 15000,
+    "actualProbeStdoutSamplesMatchBefore": true,
+    "allFourAfterReceiptsCompletedExitedDisposedExitZeroPolicyB": true,
+    "serialReceiptTimesVerified": true,
+    "originalArgsMatchConfigsAndBeforeReceipts": true
+  },
+  "web": {
+    "snapshot": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web03-snapshot.json",
+      "bytes": 5970623,
+      "sha256": "5089f4573b7597fbd859decf734ca4678d492272dee1d6ed4e8b39afad38b57d"
+    },
+    "declaredSourceCount": 17130,
+    "independentFull17130AssetRehashPerformed": false,
+    "qualification": "Frozen snapshot/review/config pins and original logs verified; current10 owned sources and tsconfig rehashed. Root original-call full pre/post source-set rehash claims are preserved as recorded evidence, not mislabeled as this review independently rehashing all17130 assets.",
+    "actualCalls": [
+      {
+        "id": "web-test03",
+        "exitCode": 0,
+        "closed": true,
+        "stdoutBytes": 20445,
+        "stderrBytes": 0
+      },
+      {
+        "id": "tsc03",
+        "exitCode": 0,
+        "closed": true,
+        "stdoutBytes": 0,
+        "stderrBytes": 0
+      }
+    ],
+    "tapTests": 185,
+    "tapPass": 185,
+    "tapFail": 0,
+    "npcBuyTests": 155,
+    "npcSurfaceTests": 29,
+    "stage5ScriptTests": 1,
+    "stage5LogicalGroups": 494,
+    "stage5PriorLogicalGroups": 477,
+    "stage5AddedLogicalGroups": 17,
+    "typeScriptVersion": "5.9.3",
+    "typeCheckExitCode": 0,
+    "typeDiagnosticBytes": 0,
+    "allFinalOuterOutputsExitedDisposed": true
+  },
+  "currentOwnedSources": [
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\hero_ui_host.rs",
+      "bytes": 101634,
+      "sha256": "c6fb5573e7b60ae28fda739c367075f7e151662bfe04eed76b201bfe02f42fc6"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\portable_hero_ui.rs",
+      "bytes": 48418,
+      "sha256": "4a06df4ced85c5e63365c775eac2018f4b5a3c3e214acad7c7163a0bf39a4542"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\bevy-hero-ui.ts",
+      "bytes": 27141,
+      "sha256": "892dd87dd857486b504d7a02274a5f36770d83105256f9ff073f819f742b22e1"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\bevy-hero-host.ts",
+      "bytes": 37310,
+      "sha256": "62fe12c38fbe739f6f2b1ac29ad71ffaa9d1dbb47261518dbbf8fa0d85fb5122"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\use-bevy-hero-ui.ts",
+      "bytes": 3206,
+      "sha256": "1b9546cb6380b836e0cec2c666c41522ace852b1d75c2f459cd26cc3002e12c4"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\page.tsx",
+      "bytes": 1057610,
+      "sha256": "aee83fbdd2e463bfb78b32a97e354a96b39d532769317e576bb442fa13512ef6"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\original-client-shell.tsx",
+      "bytes": 331360,
+      "sha256": "9e014ad2578dc6105462bcee2c73d7748ba7cab9650946c934da476a676a52bb"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\components\\original-client-shell-types.ts",
+      "bytes": 18732,
+      "sha256": "55b7cdb51cb4e4f144b2cadd26b8bc68b48c7b34821754cf6f55244d1e93d81c"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-stage5-adapters.mjs",
+      "bytes": 719838,
+      "sha256": "02ca191dab829467667ab64646cc3897a9146b0de78b4cf786c701ce4ec70c9c"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-npc-shop-surface-integration.mjs",
+      "bytes": 57445,
+      "sha256": "985a9f9d8316218caea52ee5b59486195fbec5876a8735f3fcc700094556b628"
+    }
+  ],
+  "tsconfig": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\tsconfig.json",
+    "bytes": 4932,
+    "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+  },
+  "sourceReview": {
+    "finalShellCorrection": "Only three existing mobile/gamepad render expressions regain npcShopBlocksWorldInput(false); Hero/parity remain pure booleans, original synchronous NPC gate preserved.",
+    "finalStage5FixtureCorrections": "Relative to previously reviewed719441 source, only actual repair cancelSharedHeroPointer extraction/null hover refs and actual Page heroUiBlocksGameplay closure/noHero source were added; changed-line data comparison shows no assertion line removed.",
+    "surface29th": "Actual TSX expressions are extracted; new finite test verifies pure Hero/parity flags without invoking live Hero/parity readers while keeping original live NPC gate. Existing fixture sources remain explicit noHero.",
+    "finiteHostPortLimit": "Control setter acceptance only records control; distinct finite publication supplies Prepared/appliedSource/appliedWitness/sink/frame. This adapter regression evidence is not real ECS/GPU/DOM/live Ready acceptance.",
+    "old477Qualification": "Actual final Stage5 output reports494 logical groups, incorporating the prior477 and new17. Complete original477 whole-runner byte preservation is not independently proven because a complete original-before inverse mapping was not supplied; do not claim whole prior runner byte-identical."
+  },
+  "historical": {
+    "rustGeneration01": {
+      "pass": 25,
+      "fail": 1,
+      "exitCode": 101,
+      "excludedFromFinalPassCounts": true,
+      "raw": {
+        "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source44-rust01-historical-failure01.json",
+        "bytes": 52860,
+        "sha256": "0a9a35053a3de9358186d83344f377cd976abd2c0c940c4aff4acf10001776fa"
+      }
+    },
+    "webGeneration01": {
+      "pass": 175,
+      "fail": 9,
+      "exitCode": 1,
+      "excludedFromFinalPassCounts": true,
+      "evidence": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web01-historical-failure01.json",
+        "bytes": 36546,
+        "sha256": "fb1a2ed6270be7a193b0fcbba898c6ecdfbb9f327a1252f456ceab239ba21c57"
+      }
+    },
+    "webGeneration02": {
+      "pass": 184,
+      "fail": 1,
+      "exitCode": 1,
+      "excludedFromFinalPassCounts": true,
+      "evidence": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source44-web02-historical-failure01.json",
+        "bytes": 27509,
+        "sha256": "63186c613fdc7b18cedabe2a271a84287da838b99113ec0f339aa83f15dc2da3"
+      }
+    },
+    "priorTscExitZero": "Historical TSC01/02 remain history; final acceptance uses TSC03."
+  },
+  "auditReaderQualifications": [
+    "Initial data assertion assumed dev profile; actual original static check uses wasm-release, verified against exact argv and stderr, with no execution or source change.",
+    "Initial data assertion assumed probe receipt uses child completed/exited/disposed flags; actual probe-process receipt uses probeCode/probeKilled/probeMode. Verified its actual schema plus exact stdout sample; child closure is proven separately by after/outer."
+  ],
+  "notAccepted": [
+    "live Ready or renderer/GPU/DOM acceptance",
+    "fresh Native regression",
+    "WASM API or instance initialization",
+    "complete renderer/Core/EXE/Web package or metadata/gzip/publication acceptance",
+    "whole current backend or checkout parity",
+    "gameplay/combat/movement or mobile hardware acceptance",
+    "Candidate100 or goal completion"
+  ],
+  "lastCompleteWebPackage": "Source25 Next08/Thin08",
+  "coverageIsNotOverallCompletion": true,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "wasmApiUsed": false,
+  "networkUsed": false,
+  "codeOrDocsEdited": false,
+  "newExecutableHelperRunnerCreated": false,
+  "goalComplete": false
+}

@@ -1,0 +1,29 @@
+{
+  "name": "mir2-wallet-login",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "next build --webpack",
+    "start": "next start --hostname 127.0.0.1",
+    "test": "node --test ../../scripts/test-wallet-login-service.mjs"
+  },
+  "dependencies": {
+    "@mysten/sui": "2.16.2",
+    "next": "16.4.1",
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "25.0.3",
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
+    "typescript": "5.9.3"
+  },
+  "engines": { "node": ">=22" },
+  "packageManager": "npm@11.13.0",
+  "overrides": {
+    "valibot": "1.4.2",
+    "source-map-js": "1.2.2",
+    "baseline-browser-mapping": "2.11.0"
+  }
+}

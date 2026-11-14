@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-capacity-bank-prepare-v10",
+  "pendingToolsReviewed": true,
+  "approved": true,
+  "tools": [
+    {
+      "file": "source-lib-v1.mjs",
+      "exactForwardAndReverse": true,
+      "hunks": 0
+    },
+    {
+      "file": "copy-source-bank-v1.mjs",
+      "exactForwardAndReverse": true,
+      "hunks": 3
+    },
+    {
+      "file": "freeze-prepare-v1.mjs",
+      "exactForwardAndReverse": true,
+      "hunks": 2
+    },
+    {
+      "file": "run-owned-prepare-v1.mjs",
+      "exactForwardAndReverse": true,
+      "hunks": 4
+    },
+    {
+      "file": "owned-child-v1.mjs",
+      "exactForwardAndReverse": true,
+      "hunks": 0
+    }
+  ],
+  "source": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\source-lib-v1.mjs",
+      "bytes": 18471,
+      "sha256": "bdbcb65eb6027f8d0c0812ab6975b5d53beee28d133be36d8cdf75593f57ca16"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\copy-source-bank-v1.mjs",
+      "bytes": 11109,
+      "sha256": "0e77e83ad14838d13a78dc4b35b67527d779b7b4cac58c113710078e996daee2"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\freeze-prepare-v1.mjs",
+      "bytes": 8144,
+      "sha256": "503e47ab57825b826d5db1756e03ba217ab69dd736aa7465034016add0684227"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\run-owned-prepare-v1.mjs",
+      "bytes": 25123,
+      "sha256": "d30bd53c3e6a03c839ac547579e120820bb56c82f523fbdb65e538e786a555ca"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\owned-child-v1.mjs",
+      "bytes": 2201,
+      "sha256": "7845fc2e212bb15b0e036e33753c9e155a9d2152c15098f9ab001dd1f9b74375"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\prepare-config-pending-v1.json",
+      "bytes": 6993,
+      "sha256": "758cc8c11df8fddf0243f8916aa6b8eaa02da638cacd4bde6bd25755dd8fbf4b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\source-bank-plan-pending-v1.json",
+      "bytes": 16577,
+      "sha256": "76dd4c56b196d6aa3d85ea9f12341d6a5329f7de3eaf4d4325a19ecbc2a7f6e0"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\backend-release-binding-pending-v1.json",
+      "bytes": 1216,
+      "sha256": "0e68b64abdf8d4b579c42295d956117099b41be7730fd3fdfedf0c9908e64ef7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\derivation-v1.json",
+      "bytes": 38578,
+      "sha256": "292b80d61d4f62a1c114a35dbaa6fd7678f9c2c2caa72c6dc6acc60dbcd44469"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\syntax-checks-v1.json",
+      "bytes": 3289,
+      "sha256": "35f0c9c432d0cecf7fff651210cf6c753daee177a421b9d3d054f2bc83f72b68"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\README-pending-v1.md",
+      "bytes": 1299,
+      "sha256": "590a5dcea82132bae30177cc6b879884e69c41ba0b3df47b0820d7d98dae0196"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\source-readonly-review-v1.json",
+      "bytes": 2283,
+      "sha256": "8d71a7885a836119d79f628a70d5194f177fd9080bd1cd9e8334775e9fde68bf"
+    }
+  ],
+  "scope": "Only actual W9 source-bank evidence/paths/labels and pending W10 metadata changed. Source-lib and owned-child raw exact. Candidate only; no live or capacity qualification.",
+  "executionSourceCommit": "238b647e19a741e355f3412c7b06ee257a15c808",
+  "rootQualification": {
+    "file": "C:/mir2-build/p01-completion-20261024/root-capacity-preparation-validation-v10/root-focused-receipt-v1.json",
+    "bytes": 20865,
+    "sha256": "6928417377a8bac62421f50095ea9dc71fc29e050d817cf7b3e5ac70d3c50193"
+  },
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

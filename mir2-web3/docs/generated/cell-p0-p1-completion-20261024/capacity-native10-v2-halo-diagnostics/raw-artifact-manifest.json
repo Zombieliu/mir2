@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "files": [
+    {
+      "kind": "capacity-samples-jsonl",
+      "runId": "1792891029840-02155527",
+      "report": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/reports/1792891029840-02155527.report.json",
+      "path": "release-native-10-v2-halo-feasibility-09/reports/1792891029840-02155527.samples.jsonl",
+      "bytes": 8938171,
+      "sha256": "0c7d4f33b2e0a50dfc9a16c5331e5a6b3b25feb150cda01972a7244bec96443f",
+      "projection": "capacity-native10-v2-halo-diagnostics/release-native-10-v2-halo-feasibility-09/reports/1792891029840-02155527.raw-projection.json"
+    }
+  ]
+}

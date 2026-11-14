@@ -1,0 +1,143 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T17:02:45.245932+00:00",
+  "producerReceipt": {
+    "filename": "unified-packed-s2026102912/release/PREPARED.json",
+    "bytes": 4171,
+    "sha256": "bdd81923241a037b37af5ccee3dc8e20b67249e3a6b1789f469ea0253467760e"
+  },
+  "producerReport": {
+    "schema": "mir2.windows.packed-generation-preparation.v1",
+    "unsigned": true,
+    "cmsVerified": false,
+    "published": false,
+    "sourceClean": true,
+    "gameSource": {
+      "root": "F:\\ug",
+      "revision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+      "clean": true,
+      "statusSha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "sourceFilesChecked": 1343,
+      "sourceInventorySha256": "346220A00CE2B5BF3FA94FBBF134127A3098330055A800AC7204247B842A827C"
+    },
+    "engineSource": {
+      "root": "F:\\uu",
+      "revision": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+      "clean": true,
+      "statusSha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "sourceFilesChecked": 1343,
+      "sourceInventorySha256": "A084CD178843380471F318FE381C305631CD81CDCCDD5AD25AF936B9CEEBD4F1"
+    },
+    "manifestSha256": "9DFBD083B6B92972539BC01816645ED6131297BB7CA4DEDEC659438987A74186",
+    "generationDirectory": "generations/9dfbd083b6b92972539bc01816645ed6131297bb7ca4dedec659438987a74186",
+    "feedDraftSha256": "CF34211C0655574F1645B556F3E68D3DF7898980D0D0AE11BEF50381E0C17C72",
+    "createdUnix": 1793292992,
+    "expiresUnix": 1795884992,
+    "inputBindings": [
+      {
+        "path": "mir2-platform-windows.exe",
+        "size": 133843456,
+        "sha256": "85879BFEB1B44D4C759E6A338338BB58A383B7701F886D1090A96B6267F00C6F",
+        "source": "F:\\mu\\mir2-web3\\dist\\mir2-windows-candidate\\WN-CANDIDATE-20261029-unified-11\\mir2-platform-windows.exe"
+      },
+      {
+        "path": "mir2-client.toml",
+        "size": 345,
+        "sha256": "33AE7E2CF643C43B3BAB9B8839998F00051447BAF40002ECFB5B19CB3A0A4E13",
+        "source": "F:\\mu\\mir2-web3\\dist\\mir2-windows-candidate\\WN-CANDIDATE-20261029-unified-11\\mir2-client.toml"
+      },
+      {
+        "path": "catalog.json",
+        "size": 68666460,
+        "sha256": "1466EE20A770D5E2EEF87D27EAE5EB8B78AC4F8A539248679DC5A9629EEF17F7",
+        "source": "C:\\mir2-build\\unified-20261029\\unified-packed-s2026102912\\resources\\catalog.json"
+      }
+    ],
+    "resourceProvenance": {
+      "candidate": "WN-CANDIDATE-20261029-unified-11",
+      "resourceSourceRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+      "manifestPath": "F:\\mu\\mir2-web3\\dist\\mir2-windows-candidate\\WN-CANDIDATE-20261029-unified-11\\PACKAGE-MANIFEST.json",
+      "manifestSha256": "820BE88B998E414ACB23F713EBBAB0A5ABDA87B54FC4BF0870595C09DC5D812B",
+      "reportPath": "F:\\mu\\mir2-web3\\docs\\generated\\player-qa\\windows-package-preflight\\WN-CANDIDATE-20261029-unified-11-verification.json",
+      "reportSha256": "7AF3E30AA468D17A9FFCFD8A93D860D9B5C555E1A95630028FC656B2F57C5114",
+      "contentProfile": "platinum_fiveclass",
+      "mapping": "all mir2-assets/ entries, strip prefix, exact logical size/SHA set",
+      "nonResourcePayloads": [
+        {
+          "path": "BUILD-ATTESTATION.json",
+          "size": 1493,
+          "sha256": "8AE470CDE3EE893BCFE726F86A0888197820002F6A61945D12F61712F8C27292"
+        },
+        {
+          "path": "CONTROLS.txt",
+          "size": 10612,
+          "sha256": "B9AD2A5A01B3ECBE673A3D38B1974B38492D3A62A0E28932EB8367CE19EBF7C6"
+        },
+        {
+          "path": "KNOWN-ISSUES.md",
+          "size": 2152,
+          "sha256": "D2A2FFCA1D2170EE0A0F2E3D3FDF0EFF644F2FE4472C5BA7E6120CE12C4EADC9"
+        },
+        {
+          "path": "MULTILINGUAL-SOURCES.json",
+          "size": 8618,
+          "sha256": "1528B614DEDB07860E22AC2E1CF62528B0ED126230657DC008FB88D2F01F6D11"
+        },
+        {
+          "path": "NotoSansTC-OFL.txt",
+          "size": 4481,
+          "sha256": "E35FFDEBB2225B49814C31889CBB3CE69CB3509E6A9F431EDABA5E1A6DE8CD15"
+        },
+        {
+          "path": "OFL-NotoSans.txt",
+          "size": 4396,
+          "sha256": "CEE9892F9F0CC8FE882C9E9537EE6A89621D86EE7CEAF70B02E2B2B1C25C061A"
+        },
+        {
+          "path": "OFL-NotoSansArabic.txt",
+          "size": 4382,
+          "sha256": "A7A5A25EB188BF1CD96982030D53E23C33485C69B1044A562254226857EE13AF"
+        },
+        {
+          "path": "OFL-NotoSansDevanagari.txt",
+          "size": 4386,
+          "sha256": "A216F6F8D85C7228093E0EE5E258D9D377E6671F68ACB4DB1930B29583D0F331"
+        },
+        {
+          "path": "OFL-NotoSansThai.txt",
+          "size": 4380,
+          "sha256": "DAD6E6ABC2BF3FC37CC698AF7607C3F4D4235039695713B222E5A034FB5B9B1C"
+        },
+        {
+          "path": "README-START.txt",
+          "size": 52733,
+          "sha256": "D5F8D28A26939044E54ED8030C2AFF6C3D16A833E76E97F1BBC0C2E3F4ED6428"
+        },
+        {
+          "path": "mir2-client.toml",
+          "size": 345,
+          "sha256": "33AE7E2CF643C43B3BAB9B8839998F00051447BAF40002ECFB5B19CB3A0A4E13"
+        },
+        {
+          "path": "mir2-platform-windows.exe",
+          "size": 133843456,
+          "sha256": "85879BFEB1B44D4C759E6A338338BB58A383B7701F886D1090A96B6267F00C6F"
+        }
+      ]
+    },
+    "stats": {
+      "resourceCount": 255063,
+      "uniquePayloads": 247477,
+      "logicalBytes": 1086916989,
+      "uniquePayloadBytes": 1053192997,
+      "packCount": 33,
+      "packBytes": 1069032581
+    },
+    "artifactBinding": "exact EXE/config/catalog SHA and clean declared source; reproducible compilation is not certified"
+  },
+  "phase": "Original unsigned preparer: unsigned=true/cmsVerified=false retained",
+  "installed": false,
+  "gameLaunched": false,
+  "publicFeedModified": false
+}

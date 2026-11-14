@@ -1,0 +1,39 @@
+{
+  "source": "d99212e3cdde834b6eb751dd36e9a6361bc2d100",
+  "parent": "e10a84e129234092e1f6f69bcffdf14537789eb3",
+  "candidate": "e10a84e12923-firstparty-fonts-c84e5706",
+  "passingRuns": [
+    "quest-after-r2",
+    "quest-after-r3"
+  ],
+  "finalColdAndClosedBrowserWarmSessions": 4,
+  "retainedFailure": "quest-after-r1",
+  "originalWalkBudgetMs": 8000,
+  "originalNativeBudgetMs": 120000,
+  "originalFirstPlayableObservationMs": 60000,
+  "noPublicPerformanceClaim": true,
+  "runs": [
+    {
+      "run": "quest-after-r1",
+      "passed": false,
+      "originalReceiptSha256": "c7a604c33883a90ec4ba07e6c1b02a39131ec26e8cf163dc2f38152a5bf3473c",
+      "detail": "local/quest-after-r1.json"
+    },
+    {
+      "run": "quest-after-r2",
+      "passed": true,
+      "originalReceiptSha256": "45c9e11773cfa8e22ce48a39ead659f218fcd2c41b3a2e28b301d114eed1686a",
+      "nativeMs": 52097,
+      "warmNativeMs": 1299,
+      "detail": "local/quest-after-r2.json"
+    },
+    {
+      "run": "quest-after-r3",
+      "passed": true,
+      "originalReceiptSha256": "bcf2fcbc870bfd6fcc643f978856e19b6c5eb19c9b03ff261d208f23f313356e",
+      "nativeMs": 52145,
+      "warmNativeMs": 1250,
+      "detail": "local/quest-after-r3.json"
+    }
+  ]
+}

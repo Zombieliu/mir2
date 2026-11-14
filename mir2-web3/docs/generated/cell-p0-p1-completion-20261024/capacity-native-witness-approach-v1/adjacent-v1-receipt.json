@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "args": [
+    "--test",
+    "--test-name-pattern=^native hunt|^native scout|^temporary observer|^active observer|^navigation|^native fast|^native primed|^native fallback|^pending attack|^planned disconnect|^drain includes|^fanout latency|^real hit|^shared combat|^V2 admission|^attackResultV2|^native timing|^native attack pacing|^native calendar|^native evidence|^native combat walks|^native pending evidence|^native post-strike|^native attack witness|^native initial no-witness|^native HP|^native witnessed approach",
+    "apps/web/scripts/playtest-capacity-soak.test.mjs"
+  ],
+  "node": "v22.18.0",
+  "startedAtMs": 1792899955803,
+  "elapsedMs": 578,
+  "exitCode": 1,
+  "signal": null,
+  "error": null,
+  "sourceSha256": "cb1cb0ee94cb6f077a96433dbb9e3e6a65dc7c5bc6e6ed681eebc922822e25f7",
+  "sourceSha256After": "cb1cb0ee94cb6f077a96433dbb9e3e6a65dc7c5bc6e6ed681eebc922822e25f7",
+  "sourcePinsUnchangedAfterRun": true,
+  "sourcePins": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 223789,
+      "sha256": "e0630422b9a97233988697f0fdb6b8e0243d08d291f7982342fe91d95e29b7b0"
+    }
+  ],
+  "exactSourceManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v1-source-pins.json",
+    "bytes": 1796,
+    "sha256": "d8a4c7a1acd7ac0d3f2df149d20527e857471fdc009d5f294b0c06e959870769"
+  },
+  "log": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\adjacent-v1.log",
+    "bytes": 36328,
+    "sha256": "4a2a98ca817a4fde0c6df668630145cf89a0df6c8df8dbe4b42cb2cf405f1f91"
+  },
+  "counts": {
+    "tests": 88,
+    "pass": 78,
+    "fail": 10,
+    "cancelled": 0,
+    "skipped": 0
+  }
+}

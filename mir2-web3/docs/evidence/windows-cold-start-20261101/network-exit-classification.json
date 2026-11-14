@@ -1,0 +1,8 @@
+{
+  "colo": "LAX",
+  "loc": "CN",
+  "http": "http/1.1",
+  "tls": "TLSv1.3",
+  "warp": "off",
+  "gateway": "off"
+}

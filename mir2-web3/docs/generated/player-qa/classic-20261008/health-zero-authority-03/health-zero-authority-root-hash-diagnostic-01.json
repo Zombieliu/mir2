@@ -1,0 +1,117 @@
+{
+  "schema": "mir2.health-zero.root-hash-diagnostic.v1",
+  "passed": false,
+  "rows": [
+    {
+      "file": "runtime.rs",
+      "bytes": 685860,
+      "actual": "1214a6f536f975c1c18ff4eb5d3e17310f1f182a580542053bc35384d6847d42",
+      "expected": "1214a6f536f975c1c18ff4eb5d3e17310f1f182a580542053bc35384d6847d42",
+      "matches": true,
+      "lfSha256": "1214a6f536f975c1c18ff4eb5d3e17310f1f182a580542053bc35384d6847d42",
+      "crlfSha256": "c3c1adddc6274ad8de87aa6f3823334c5c1d348d78dfd2e95a817d408c2e7110",
+      "crlfCount": 0,
+      "mtimeNs": 1791440975644437200
+    },
+    {
+      "file": "packets.rs",
+      "bytes": 50387,
+      "actual": "933b07d07c0703397fd1a7c62ea6037eb7e6545b78d611cd516804d6d8602d4f",
+      "expected": "933b07d07c0703397fd1a7c62ea6037eb7e6545b78d611cd516804d6d8602d4f",
+      "matches": true,
+      "lfSha256": "933b07d07c0703397fd1a7c62ea6037eb7e6545b78d611cd516804d6d8602d4f",
+      "crlfSha256": "cb65498b127dfb2cfe2ae06db462961d21884db6cfae3881b3f449cdb22cdc01",
+      "crlfCount": 0,
+      "mtimeNs": 1791440975649065200
+    },
+    {
+      "file": "routing.rs",
+      "bytes": 1224441,
+      "actual": "4bced1d504ced4e5aaf7e2b8575fb6f8e795051e7d9050f5026fe45a3d1c918b",
+      "expected": "4bced1d504ced4e5aaf7e2b8575fb6f8e795051e7d9050f5026fe45a3d1c918b",
+      "matches": true,
+      "lfSha256": "4bced1d504ced4e5aaf7e2b8575fb6f8e795051e7d9050f5026fe45a3d1c918b",
+      "crlfSha256": "4108cbb2d5045e9325b64453a460aa2033de7f41a0a5ac0f76f85ad71aa47cbd",
+      "crlfCount": 0,
+      "mtimeNs": 1791441135674712700
+    },
+    {
+      "file": "gameplay_bridge.rs",
+      "bytes": 362919,
+      "actual": "1cf229df6e333c4d0dce9861c2adebbba01424a52d80a63ba2a21398130cf213",
+      "expected": "dd809bd54fb2941e6c7baa1dd348e5c27554163124591dfae438b220dc9b1edc",
+      "matches": false,
+      "lfSha256": "1cf229df6e333c4d0dce9861c2adebbba01424a52d80a63ba2a21398130cf213",
+      "crlfSha256": "fcef11af70851bd1fd4be424567f28e35ceff4f0885ad6ae600d1e56f681827c",
+      "crlfCount": 0,
+      "mtimeNs": 1791442999992118000
+    },
+    {
+      "file": "entity_health.rs",
+      "bytes": 16819,
+      "actual": "4e7569c699271c694ac6727ab27bcf92b6fee6cfae698596c42b9e1a395bf2ce",
+      "expected": "4e7569c699271c694ac6727ab27bcf92b6fee6cfae698596c42b9e1a395bf2ce",
+      "matches": true,
+      "lfSha256": "4e7569c699271c694ac6727ab27bcf92b6fee6cfae698596c42b9e1a395bf2ce",
+      "crlfSha256": "2f38f828eca0a0a1b03fa71f508a14401c1d991f8031a6391fb1ecc38b056a89",
+      "crlfCount": 0,
+      "mtimeNs": 1791440873669899000
+    },
+    {
+      "file": "shared_zone.rs",
+      "bytes": 475281,
+      "actual": "255ed14847dd592a80a00f2c53fdb6778e603df2b052ec58115f352850a095f1",
+      "expected": "255ed14847dd592a80a00f2c53fdb6778e603df2b052ec58115f352850a095f1",
+      "matches": true,
+      "lfSha256": "255ed14847dd592a80a00f2c53fdb6778e603df2b052ec58115f352850a095f1",
+      "crlfSha256": "7cf816480871941cc52549e1c74f7a2fe80cfe436720e8b417278c07ca5254f2",
+      "crlfCount": 0,
+      "mtimeNs": 1791441135690007200
+    },
+    {
+      "file": "health_zero_authority_tests.rs",
+      "bytes": 5174,
+      "actual": "ee2fe4f8ba36fff52d2126674355da5ea35fb45d3fe75fd4160e3e95468d8d70",
+      "expected": "ee2fe4f8ba36fff52d2126674355da5ea35fb45d3fe75fd4160e3e95468d8d70",
+      "matches": true,
+      "lfSha256": "ee2fe4f8ba36fff52d2126674355da5ea35fb45d3fe75fd4160e3e95468d8d70",
+      "crlfSha256": "db5e5e20a44d083104310d77357e99d2b7917fe6eadfe3087977464b5a86da5d",
+      "crlfCount": 0,
+      "mtimeNs": 1791441135652993600
+    },
+    {
+      "file": "health_zero_authority_tests.rs",
+      "bytes": 22557,
+      "actual": "58518acfac0356b93a4a8f7462d023dea32b59c7c8268424be8fae983309c952",
+      "expected": "58518acfac0356b93a4a8f7462d023dea32b59c7c8268424be8fae983309c952",
+      "matches": true,
+      "lfSha256": "58518acfac0356b93a4a8f7462d023dea32b59c7c8268424be8fae983309c952",
+      "crlfSha256": "b4d2f438780d1c5cecd8d9299c5bb076ef4f88f7f0e2815f760fe8dc96abc7b9",
+      "crlfCount": 0,
+      "mtimeNs": 1791440404539130300
+    },
+    {
+      "file": "health_zero_authority_tests.rs",
+      "bytes": 10526,
+      "actual": "19c149b3b05361fc0e5c891dfa24a1bb051de447661f0e07c1d175ddeaf8d612",
+      "expected": "73838fa8f7727e49031c7d1d19b72765ed662b2f1518677f8ffa5b1d2456b467",
+      "matches": false,
+      "lfSha256": "19c149b3b05361fc0e5c891dfa24a1bb051de447661f0e07c1d175ddeaf8d612",
+      "crlfSha256": "b0c1df670f21ece3e570f03360854010b38177394f803aa7743a3078a5a08b5e",
+      "crlfCount": 0,
+      "mtimeNs": 1791442841880963100
+    },
+    {
+      "file": "health_zero_display_tests.rs",
+      "bytes": 3900,
+      "actual": "06b1e3f42a033e4ad2783c757436537fc73baa04dad9e7ff4addb271615e6098",
+      "expected": "06b1e3f42a033e4ad2783c757436537fc73baa04dad9e7ff4addb271615e6098",
+      "matches": true,
+      "lfSha256": "06b1e3f42a033e4ad2783c757436537fc73baa04dad9e7ff4addb271615e6098",
+      "crlfSha256": "d83e88191941d7aada5e7ae1d207f23f5805466613b9fdc3a9660bdbb1aadfe3",
+      "crlfCount": 0,
+      "mtimeNs": 1791439689249202900
+    }
+  ],
+  "mutations": false
+}

@@ -1,0 +1,332 @@
+{
+  "sourceBranch": "codex/windows-player-journey",
+  "sourceBaseRevision": "c404bde8a5190534f6bc83ec8a4fe78fffc8cb50",
+  "includesR16": true,
+  "uncommittedIntegration": true,
+  "files": [
+    {
+      "path": "apps/ai-player/.gitignore",
+      "sha256": "963faa4caeccb8326207b24ffd1b3b4eb8f77cbd956dba8509241d54ef0c3af8"
+    },
+    {
+      "path": "apps/ai-player/README.md",
+      "sha256": "6fc50675d3a1f608ff8968091a5e2372ee115b49522b58c82c7c59b55988c462"
+    },
+    {
+      "path": "apps/ai-player/model-settings/Cargo.lock",
+      "sha256": "d386065a83056d5171d8af12720c04fd30af454daf95eb96f610f349c137e340"
+    },
+    {
+      "path": "apps/ai-player/model-settings/Cargo.toml",
+      "sha256": "5d58c522921bce08054b3ab73f981fe45e342111f99c5ddeb3b94108505c1c50"
+    },
+    {
+      "path": "apps/ai-player/model-settings/README.md",
+      "sha256": "e5f97631e169871d6debdde61826ef20289d12649dc0b5a2d1fe85b70bb27f05"
+    },
+    {
+      "path": "apps/ai-player/model-settings/src/lib.rs",
+      "sha256": "2879f27a0f82d486ee9729414d8373afaeb0502d1bdf65d6b5915d1e68120282"
+    },
+    {
+      "path": "apps/ai-player/model-settings/src/main.rs",
+      "sha256": "dfe7c443cbe630f39a8af3ec0b0555760ff0f22a04e659266e1b4c493e304454"
+    },
+    {
+      "path": "apps/ai-player/model-settings/src/windows.rs",
+      "sha256": "7c70285b6af8293759a7af04718268e5931896baea8008ca74a05859e14ba346"
+    },
+    {
+      "path": "apps/ai-player/native-launcher/main.rs",
+      "sha256": "ee4b4a53593e30b87308b88e59c81d871cf449466928cc23b6328965d5915f46"
+    },
+    {
+      "path": "apps/ai-player/native-launcher/package.mjs",
+      "sha256": "8eb677122c43f0f8dc09720cc3364d50e851003fc9a2a6c682c421e498a89b31"
+    },
+    {
+      "path": "apps/ai-player/native-launcher/windows.rs",
+      "sha256": "b3a8a9f8c82275cff79ca8a86152929d77226f562e60988570d0d382e7e50b8f"
+    },
+    {
+      "path": "apps/ai-player/package-lock.json",
+      "sha256": "fef3097035ffaa4ab9ac8fc8d9159724b16839c8f424c3bcb457c7879bf24f25"
+    },
+    {
+      "path": "apps/ai-player/package.json",
+      "sha256": "c032c0beb332d617315de29115cfe4c13d76da474ea1ccb16b5e96729786e858"
+    },
+    {
+      "path": "apps/ai-player/profiles/alo-companion.example.json",
+      "sha256": "d24e04c4065fa6c18df3d2f340eed04a7c0cc0697e43ce7a5a58c86bf613157e"
+    },
+    {
+      "path": "apps/ai-player/profiles/alo-experience.example.json",
+      "sha256": "351a9e4c0eed36d3fb7a65e6ad8c0ada4613e7877718cdd442884e1745f32647"
+    },
+    {
+      "path": "apps/ai-player/profiles/bichon-warrior.example.json",
+      "sha256": "9ce13e95a845e33d3ad4cdd909ba91463796c9e2166e8129b19dcd64018fe6ef"
+    },
+    {
+      "path": "apps/ai-player/scripts/companion-fixture.mjs",
+      "sha256": "452cb5889d22047c854be11e7b7cf7d99a0c219a306a9b0128d0ca7446832de4"
+    },
+    {
+      "path": "apps/ai-player/scripts/companion-trial-fixture.mjs",
+      "sha256": "f3669ef0f7ad2ea84fcd8ecc8b5aa29855f7737bf81f71207f4bcb24bf92b3fd"
+    },
+    {
+      "path": "apps/ai-player/scripts/field-encounter.mjs",
+      "sha256": "5457a88918f7663bf0e1252ea35b73f369aa95235a7f23d47ba93cb826423022"
+    },
+    {
+      "path": "apps/ai-player/scripts/fixture-support.test.mjs",
+      "sha256": "2f000cf08191ff66cf07c3e425e6673812ccae86870d9f86b18225afd308d49c"
+    },
+    {
+      "path": "apps/ai-player/scripts/local-gateway.mjs",
+      "sha256": "907a81f0e11b4a57983d0f4389b3c6faf856bd775d26a8173920f3fb303a40ac"
+    },
+    {
+      "path": "apps/ai-player/scripts/native-resource-input.mjs",
+      "sha256": "1c2390a4c49ffd6d713cf5fea528a38b857a88d2c8328e95a22b1379ba0c6af4"
+    },
+    {
+      "path": "apps/ai-player/scripts/run-local-acceptance.mjs",
+      "sha256": "5ce8f8955ae739216daa653c96c303657cf08b3aacd8b4cdc2141c607687da96"
+    },
+    {
+      "path": "apps/ai-player/scripts/run-local-companion-acceptance.mjs",
+      "sha256": "6734436f88ee73e9b1bc9f4b493bcb4e4680156adc031969f1812fe5ad256950"
+    },
+    {
+      "path": "apps/ai-player/scripts/run-local-experience-acceptance.mjs",
+      "sha256": "1fc54900b537bb40aa27ca367ec5e0d6888b2eaca2209ce06b5d161357a9d422"
+    },
+    {
+      "path": "apps/ai-player/scripts/run-model-companion-acceptance.mjs",
+      "sha256": "75739a1932945cb67ad8a2ec333e275377b1761fd6b5267fb7b55377d506d372"
+    },
+    {
+      "path": "apps/ai-player/scripts/run-native-experience-fixture.mjs",
+      "sha256": "5e2b6d1ec0a32ec9ee73a8bdd3fa6e4441edb196e902a74b038a218f7ed4362a"
+    },
+    {
+      "path": "apps/ai-player/scripts/trial-actor-fixture.mjs",
+      "sha256": "2351f5ce60bbd6b33ec7eaef94af29181975ac42218b923496653fbb1c4c4c06"
+    },
+    {
+      "path": "apps/ai-player/src/archive-guard.mjs",
+      "sha256": "14cd4da3a24f73ab715aad9436912e904b1f16d7d74ec1a4e22aaabb6444c6cc"
+    },
+    {
+      "path": "apps/ai-player/src/companion-control.mjs",
+      "sha256": "b73f0de8bccdc9a572e692326f4516ebafe45dae1cd0de1df949cf4f81eeb176"
+    },
+    {
+      "path": "apps/ai-player/src/companion-controller.mjs",
+      "sha256": "e0539ada38bf228202713c6d66f280385a9f063819712b11f182486b4d80150f"
+    },
+    {
+      "path": "apps/ai-player/src/companion-policy.mjs",
+      "sha256": "128921b862b3ef4f4471157de37f6b3ec71bfd133195bbaf4c00417a603d1329"
+    },
+    {
+      "path": "apps/ai-player/src/companion-runtime-service.mjs",
+      "sha256": "4c64a403ca73122fe379a98b77580cd0b730b5f063764133b01e85237abfa5c8"
+    },
+    {
+      "path": "apps/ai-player/src/experience-cli.mjs",
+      "sha256": "3232ec6460d4c678a7a52e24fb6c003f4fe3de3ffef75b3e228bc83c6793ed67"
+    },
+    {
+      "path": "apps/ai-player/src/experience/experience-ledger.mjs",
+      "sha256": "108f3288355137fd4fc336ae9da08a2b64cf1e99dc8294657ab27a7d79e32a77"
+    },
+    {
+      "path": "apps/ai-player/src/gateway-client.mjs",
+      "sha256": "73ce7baa0d63d30e591ea449001bc56d4b70509a266bb26d0251121cb85d1fa8"
+    },
+    {
+      "path": "apps/ai-player/src/local-model-settings.mjs",
+      "sha256": "b8417491a155ec2fbbac744830a55fdc02d286c34a5015903e26ed41b0833a3f"
+    },
+    {
+      "path": "apps/ai-player/src/local-playtest.mjs",
+      "sha256": "d514b1d864782f1bf09855d2c217340845ecb432c9afc5222763913c3388be25"
+    },
+    {
+      "path": "apps/ai-player/src/lossless-json.mjs",
+      "sha256": "d6812269b535bbc36070c813abc8bacb9d9b4b7d83b0cf848ee8e6174714a478"
+    },
+    {
+      "path": "apps/ai-player/src/main.mjs",
+      "sha256": "e2c14cf84414322cbc0bbbc65d444173d1b7d94a1ece89c7da5cd8f132e0e2ec"
+    },
+    {
+      "path": "apps/ai-player/src/memory-cli.mjs",
+      "sha256": "3ebfb757619cea66b0d9df72a7eba57e241646e9abcafd997b51c469298ae0a6"
+    },
+    {
+      "path": "apps/ai-player/src/memory/archive-codec.mjs",
+      "sha256": "68271c96dfba6ae56cae940aec79674de4090b75a576d5e6b0ba80389cac5a0b"
+    },
+    {
+      "path": "apps/ai-player/src/memory/companion-store.mjs",
+      "sha256": "e63be93450106d62974ee60aba66f20b7b45a3cb3a787c584bf54be7dd8788a0"
+    },
+    {
+      "path": "apps/ai-player/src/model-runtime-environment.mjs",
+      "sha256": "d69eff6918b126deb3db1319671c7bdf50e424222421d57152107d3b1c6490ab"
+    },
+    {
+      "path": "apps/ai-player/src/model/companion-model-runtime.mjs",
+      "sha256": "1aa17c39816cec3eca4fa8879f4371a9abb8bcb315ea73e35f12fd3bc5faf40f"
+    },
+    {
+      "path": "apps/ai-player/src/model/http-transport.mjs",
+      "sha256": "0926ec0a38f751a78d332cabfc9e24268e698be09b890a1b5b1d6ee98133820c"
+    },
+    {
+      "path": "apps/ai-player/src/model/memory-context.mjs",
+      "sha256": "853c269c47a95b2d1cab6801c732a272f96f15e127c8a2c93712c5fd7794e15a"
+    },
+    {
+      "path": "apps/ai-player/src/model/openai-client.mjs",
+      "sha256": "173bf1f23e7bf09085056c5f5b7a2a514a0ffcd3d15b25b79520aaa449665acf"
+    },
+    {
+      "path": "apps/ai-player/src/model/plan.mjs",
+      "sha256": "a7721c3d81bf38f00f16d8ce8c448780fc73f057c8b5797bd3afd125ba4b5378"
+    },
+    {
+      "path": "apps/ai-player/src/observation.mjs",
+      "sha256": "e3b2f12550461152de7fb3617b4438c5a384f9470001ade1cab1eef05d9d0a73"
+    },
+    {
+      "path": "apps/ai-player/src/resident-actor.mjs",
+      "sha256": "d90dfc0a4d321f234506c3c0c6fb1cc45aa84c4a474df7ff7720725cba69c07b"
+    },
+    {
+      "path": "apps/ai-player/src/skills/conversation.mjs",
+      "sha256": "011a8eecfe6f87e634e0f94cec6dca670756bc6ea28b73bbe8432a21da5358d2"
+    },
+    {
+      "path": "apps/ai-player/src/skills/navigation.mjs",
+      "sha256": "5a896ab99352132dd551dd9fc3c3f125868ea14ecd9e923b05667f2ccba94470"
+    },
+    {
+      "path": "apps/ai-player/tests/archive-guard.test.mjs",
+      "sha256": "e17c58ccd4e311b87a4f82b49d4ea28af8edbd10714ac7adc4975e23c0a733db"
+    },
+    {
+      "path": "apps/ai-player/tests/companion-archive.test.mjs",
+      "sha256": "9fdf2251c1cbfabaa67da4beb9dacc33d06606d0b0022ace289eee34fd194879"
+    },
+    {
+      "path": "apps/ai-player/tests/companion-control.test.mjs",
+      "sha256": "b817bfe43848e56d8731cc17b057363e7d4052221e1edbc3fefc4fb582c485ed"
+    },
+    {
+      "path": "apps/ai-player/tests/companion-controller.test.mjs",
+      "sha256": "33227853b086e5f8316b6f55687e70d236e00619b62df6fddc70d5af39410454"
+    },
+    {
+      "path": "apps/ai-player/tests/companion-policy.test.mjs",
+      "sha256": "e92a9451fc9d2f401b5fd7bc55e3e09c49b47ff19884f2d5340a43f1bd3e46d4"
+    },
+    {
+      "path": "apps/ai-player/tests/companion-store.test.mjs",
+      "sha256": "7aa14d4e1ce54b822ea6fd4c764a7dcafc37c6b1824d6f22cf0bb55f32aec473"
+    },
+    {
+      "path": "apps/ai-player/tests/conversation.test.mjs",
+      "sha256": "119be29ff504688a08295fc8255342ca2952ad5655501900c97caa181de94559"
+    },
+    {
+      "path": "apps/ai-player/tests/experience-ledger.test.mjs",
+      "sha256": "c6db93144dd22a92a50b5caab390b981d584151d5cef6093692cba7c04779ddc"
+    },
+    {
+      "path": "apps/ai-player/tests/gateway-client.test.mjs",
+      "sha256": "bd879b09d86e7bfb13a18ac9a8aa3a0e33ef7d82d0e9a949c51a440ffd824bc2"
+    },
+    {
+      "path": "apps/ai-player/tests/gateway-companion.test.mjs",
+      "sha256": "af8b1d7730f7134eee641631aac89e851de491a9f2137559099e9d016c0c4b7a"
+    },
+    {
+      "path": "apps/ai-player/tests/gateway-control.test.mjs",
+      "sha256": "e498f4eb47b52a4439167dad3dd67d8c9f1bc8083acd50c1ee811bf8be81a85c"
+    },
+    {
+      "path": "apps/ai-player/tests/local-model-settings.test.mjs",
+      "sha256": "447a54c074a197aa0b0476c02d46cd8df3c946dca0938a402630aed50a0412ad"
+    },
+    {
+      "path": "apps/ai-player/tests/local-playtest.test.mjs",
+      "sha256": "1e041ad9132aeb3a6a90b37f88bdd5c81ce6ad410b69e4861ac687f5a97313fb"
+    },
+    {
+      "path": "apps/ai-player/tests/lossless-json.test.mjs",
+      "sha256": "fee176f9d9bd2eb12745d9e4ba5f9048ec98a430ac5315e23c5d41a07ffa7682"
+    },
+    {
+      "path": "apps/ai-player/tests/memory-cli.test.mjs",
+      "sha256": "8706a7e89c3d297e777e066203f51127526bff4bfc140944e88bedeb3152f4d3"
+    },
+    {
+      "path": "apps/ai-player/tests/model-http-transport.test.mjs",
+      "sha256": "d38179aacbbef990dc568176a0e7088ad97121d5ac2dfe53391a92008a247b21"
+    },
+    {
+      "path": "apps/ai-player/tests/model-memory-context.test.mjs",
+      "sha256": "32e078953e9ff8312a075f0bbfe5ab27cae95eedbcd3150f3110983e3808a288"
+    },
+    {
+      "path": "apps/ai-player/tests/model-runtime-environment.test.mjs",
+      "sha256": "3ad7cef8579efecd69780d02ae77815f192067e2240b1d6de664aee05f6eff49"
+    },
+    {
+      "path": "apps/ai-player/tests/model-runtime.test.mjs",
+      "sha256": "4724818abeb2d8cc18940e0015e656248ccd0d05d5e613dc703a19f483a0e7a2"
+    },
+    {
+      "path": "apps/ai-player/tests/navigation.test.mjs",
+      "sha256": "215f9ad91c5dd693590b4ab9d2b3f93dbbc8795b761753f04833c56507222168"
+    },
+    {
+      "path": "apps/ai-player/tests/observation.test.mjs",
+      "sha256": "c07d64932729ad4c6af5e58bd1a7adbd621fa05dd7ab0520bed7682b4610f5c7"
+    },
+    {
+      "path": "apps/ai-player/tests/openai-client.test.mjs",
+      "sha256": "14fc769d783bedf8504de3b8b55eb1b1fbd6a2fadc9adb620c95b865012be1d9"
+    },
+    {
+      "path": "apps/ai-player/tests/resident-actor.test.mjs",
+      "sha256": "9b93c7df72f7ccfd063bc85a94db29414ceb671c04fdf1b3db96b1a3c69f80ef"
+    },
+    {
+      "path": "apps/ai-player/tests/runtime-service.test.mjs",
+      "sha256": "fcaf41b2a934a9868fbed2fa9360b527091154c9ad07eea4377667240ad06148"
+    },
+    {
+      "path": "docs/ALO-OPENAI-20261103.zh-CN.md",
+      "sha256": "e317f03a41395c32f1c211fc83e1a07221058ac91c6f126a9f676fb4859a252a"
+    },
+    {
+      "path": "docs/COMPANION-CONTROL-CONTRACT.md",
+      "sha256": "d406783c8a635b6afbfb79eab266601a3a0d049fb9a0ba31d37e446881d236dc"
+    }
+  ],
+  "digest": "7d98ab5c455933fc7272644e0e61ea5af393e8ad62a78fe9eedf37583c937634",
+  "nativeSha256": "6b7d4efac65a55dfce33353b428b4945f534d666f77d171f2431d296087a0e8a",
+  "gatewaySha256": "165eba1719866912d2b7da28ad430164bd1a9a8ef704fe976400d0b232dccc7b",
+  "settingsSha256": "a54695ff7ece98eb270cb94a27e462c6f71dfabeba2d9aec59363f3459f6e7a2",
+  "dependency": {
+    "name": "undici",
+    "version": "7.30.1"
+  }
+}

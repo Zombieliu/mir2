@@ -1,0 +1,1 @@
+{"output":"C:\\mir2-playtest-releases\\20261004-native-r18\\dense-network-r18-execution-01\\OFFLINE-CLASSIFIER-REVIEW-01.json","sha256":"02104f8a4d9eb533cbc6881f53e80a7d85f2f1fcc9b0bcf65931bd71e1717d27","classes":[{"className":"Warrior","status":"inconclusive"},{"className":"Wizard","status":"passed","durationMs":5473},{"className":"Taoist","status":"passed","durationMs":5525}]}

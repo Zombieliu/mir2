@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "allScriptsPassed": true,
+  "scripts": [
+    "backend-driver-source-guard.mjs",
+    "collect-public.mjs",
+    "create-from-12.mjs",
+    "driver-evidence-contract.mjs",
+    "driver-report-contract.mjs",
+    "initialize-private.ps1",
+    "input-lib.mjs",
+    "integrate-wire-collection-v1.mjs",
+    "integrate-wire-source-v1.mjs",
+    "measured-phase-contract.mjs",
+    "monitor-owned.mjs",
+    "prepare-inputs.mjs",
+    "recover-drained-owned.ps1",
+    "request-stop.mjs",
+    "run-adapter-synthetics.mjs",
+    "run-owned.mjs",
+    "scene-contract.mjs",
+    "slow-stage-public.mjs",
+    "slow-stage-public.test.mjs",
+    "slow-stage-row-contract.mjs",
+    "socket-build-source-lib.mjs",
+    "verify-full16-gate.mjs",
+    "verify-public.mjs",
+    "wire-diagnostics-adapter.mjs",
+    "wire-diagnostics-adapter.test.mjs",
+    "wire-diagnostics-contract.mjs"
+  ],
+  "checkedAt": "2026-10-25T07:12:24.658Z",
+  "presealReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-probe13-preseal-input-check-v1.json",
+    "bytes": 45878,
+    "sha256": "85518e819ed70fdc3c6d36e38543ae8f42941028ce3d34e2593baf2ab0e9f77e"
+  },
+  "exactSourcesUnchangedSinceSyntaxCheck": true,
+  "repeatedDuringSeal": false,
+  "productModulesEvaluated": false,
+  "realmStarted": false
+}

@@ -1,0 +1,269 @@
+{
+  "schema": "mir2.r17.public-tls-publication-verification.v1",
+  "passed": true,
+  "tlsVerificationEnabled": true,
+  "redirectsAllowed": false,
+  "sequence": 12,
+  "candidate": "WN-CANDIDATE-20261004-invited-17",
+  "gameSourceRevision": "6032ef8b3e27dd97bad0b20c8676ef9f185db64b",
+  "checks": [
+    {
+      "path": "/client-updates/latest.json",
+      "size": 1159,
+      "sha256": "7efdddf34fbf58ffa0bf8c4f7fcb1a9ad2bac869cb3f003cea0a0c9c53356c88",
+      "headers": {
+        "Content-Length": "1159",
+        "Cache-Control": "no-store",
+        "Content-Type": "application/json",
+        "ETag": "\"tmd4adw7\""
+      },
+      "bodyMatchesSignedInput": true
+    },
+    {
+      "path": "/client-updates/latest.p7s",
+      "size": 1614,
+      "sha256": "7dd131dddcef9107ea0c80363cc9ca44746603c586a1e23e00ff6aa178006916",
+      "headers": {
+        "Content-Length": "1614",
+        "Cache-Control": "no-store",
+        "Content-Type": "application/pkcs7-signature",
+        "ETag": "\"tmd4ad18u\""
+      },
+      "bodyMatchesSignedInput": true
+    },
+    {
+      "path": "/client-updates/releases/game-WN-CANDIDATE-20261004-invited-17/VERSION.json",
+      "size": 1221,
+      "sha256": "1409e21c9f1ae7a04b71603ce1220fe38c37f222d54859af2592cdd72ce99b16",
+      "headers": {
+        "Content-Length": "1221",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Content-Type": "application/json",
+        "ETag": "\"tmd44kxx\""
+      },
+      "bodyMatchesSignedInput": true
+    },
+    {
+      "path": "/client-updates/releases/game-WN-CANDIDATE-20261004-invited-17/RELEASE-STATEMENT.json",
+      "size": 707,
+      "sha256": "e64a8ef4fc62e6e9f6fe16625321fc8a88a0c8c29a661aeda46025b08015da82",
+      "headers": {
+        "Content-Length": "707",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Content-Type": "application/json",
+        "ETag": "\"tmd44kjn\""
+      },
+      "bodyMatchesSignedInput": true
+    },
+    {
+      "path": "/client-updates/releases/game-WN-CANDIDATE-20261004-invited-17/RELEASE-STATEMENT.p7s",
+      "size": 1614,
+      "sha256": "bee84b574f43f6411eb1bc3ab23a3ce0c389b853fb0f8b63f6ad9bdb1287856e",
+      "headers": {
+        "Content-Length": "1614",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Content-Type": "application/pkcs7-signature",
+        "ETag": "\"tmd44k18u\""
+      },
+      "bodyMatchesSignedInput": true
+    },
+    {
+      "path": "/client-updates/releases/game-WN-CANDIDATE-20261004-invited-17/PACKAGE-MANIFEST.json",
+      "method": "HEAD",
+      "size": 24360174,
+      "headers": {
+        "Content-Length": "24360174",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Content-Type": "application/json",
+        "ETag": "\"tmd44kei4fi\""
+      }
+    },
+    {
+      "path": "/client-updates/releases/game-WN-CANDIDATE-20261004-invited-17/mir2-platform-windows.exe",
+      "method": "HEAD",
+      "size": 111013376,
+      "headers": {
+        "Content-Length": "111013376",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Content-Type": "application/x-msdownload",
+        "ETag": "\"tmd46g1u3egw\""
+      }
+    },
+    {
+      "path": "/client-updates/releases/updater-FB3505D6D84D997C-s12/ENGINE.json",
+      "size": 421,
+      "sha256": "3146169fc6176a5eaea42baaa0430e345f5b7e614709971a00b0d7d0c4732bcf",
+      "headers": {
+        "Content-Length": "421",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Content-Type": "application/json",
+        "ETag": "\"tmd46gbp\""
+      },
+      "bodyMatchesSignedInput": true
+    },
+    {
+      "path": "/client-updates/releases/updater-FB3505D6D84D997C-s12/ENGINE.p7s",
+      "size": 1614,
+      "sha256": "70dc2dc11c3105fd4dd2b80bd7f9fb30f7a7f4b3bbbfe2aa1397c038c9b3c14a",
+      "headers": {
+        "Content-Length": "1614",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Content-Type": "application/pkcs7-signature",
+        "ETag": "\"tmd46g18u\""
+      },
+      "bodyMatchesSignedInput": true
+    },
+    {
+      "path": "/client-updates/releases/game-WN-CANDIDATE-20261004-invited-17/PACKAGE-MANIFEST.json",
+      "method": "GET",
+      "size": 24360174,
+      "sha256": "ceae366bebca1c19c3f529eb22f016ccc80dff5b8655694e76682e31ab12cb18",
+      "headers": {
+        "Content-Length": "24360174",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Content-Type": "application/json",
+        "ETag": "\"tmd44kei4fi\""
+      },
+      "bodyMatchesSignedInput": true
+    },
+    {
+      "path": "/client-updates/releases/game-WN-CANDIDATE-20261004-invited-17/mir2-platform-windows.exe",
+      "method": "GET",
+      "size": 111013376,
+      "sha256": "d0780475efa9f9c1ecd730dfcfc11e38b9b0659f05b3b1f7d93b4f80c3d734e0",
+      "headers": {
+        "Content-Length": "111013376",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Content-Type": "application/x-msdownload",
+        "ETag": "\"tmd46g1u3egw\""
+      },
+      "bodyMatchesSignedInput": true
+    },
+    {
+      "path": "/client-updates/releases/game-WN-CANDIDATE-20261004-invited-17/mir2-assets/crystal-map-pack/0122.map.gz",
+      "method": "GET",
+      "size": 1864,
+      "sha256": "d8898a5cb759745f15ff17c79016e84d15f8c844869fe169190c5021365c1af4",
+      "headers": {
+        "Content-Length": "1864",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Content-Type": "application/gzip",
+        "ETag": "\"tmd44k1fs\""
+      },
+      "bodyMatchesSignedInput": true
+    },
+    {
+      "path": "/client-updates/releases/game-WN-CANDIDATE-20261004-invited-17/mir2-assets/crystal-map-pack/0150.map.gz",
+      "method": "GET",
+      "size": 814,
+      "sha256": "63064fd939851f6aeaad49c44ad518fd09d2ce9bcfee0d4a4ae03f7bac77e30a",
+      "headers": {
+        "Content-Length": "814",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Content-Type": "application/gzip",
+        "ETag": "\"tmd44kmm\""
+      },
+      "bodyMatchesSignedInput": true
+    },
+    {
+      "path": "/client-updates/releases/game-WN-CANDIDATE-20261004-invited-17/mir2-assets/crystal-map-pack/0151.map.gz",
+      "method": "GET",
+      "size": 732,
+      "sha256": "c6be956b8938600d730b40cb57fedfa4331a842d0c13a16f37fd1a22aa06f31d",
+      "headers": {
+        "Content-Length": "732",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Content-Type": "application/gzip",
+        "ETag": "\"tmd44kkc\""
+      },
+      "bodyMatchesSignedInput": true
+    },
+    {
+      "path": "/client-updates/releases/game-WN-CANDIDATE-20261004-invited-17/mir2-assets/crystal-map-pack/0152.map.gz",
+      "method": "GET",
+      "size": 412,
+      "sha256": "6664427bd545cd7225ad57a4f7c8eda33d9cb22ca9e9d66b687203bd5a6bff52",
+      "headers": {
+        "Content-Length": "412",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Content-Type": "application/gzip",
+        "ETag": "\"tmd44kbg\""
+      },
+      "bodyMatchesSignedInput": true
+    },
+    {
+      "path": "/client-updates/releases/game-WN-CANDIDATE-20261004-invited-17/mir2-assets/crystal-map-pack/0153.map.gz",
+      "method": "GET",
+      "size": 694,
+      "sha256": "5218e1a119a929cfdecdaacee9d7f43ca500fd8bf6f09a1c12493a52acf2abfd",
+      "headers": {
+        "Content-Length": "694",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Content-Type": "application/gzip",
+        "ETag": "\"tmd44kja\""
+      },
+      "bodyMatchesSignedInput": true
+    },
+    {
+      "path": "/client-updates/releases/game-WN-CANDIDATE-20261004-invited-17/mir2-assets/crystal-map-pack/0154.map.gz",
+      "method": "GET",
+      "size": 713,
+      "sha256": "c510d120f95c75c109e209c9ca31fda4cc958687c8484285db478085be52988b",
+      "headers": {
+        "Content-Length": "713",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Content-Type": "application/gzip",
+        "ETag": "\"tmd44kjt\""
+      },
+      "bodyMatchesSignedInput": true
+    },
+    {
+      "path": "/client-updates/releases/game-WN-CANDIDATE-20261004-invited-17/mir2-assets/crystal-map-pack/0155.map.gz",
+      "method": "GET",
+      "size": 738,
+      "sha256": "32a0638187b800aec66fd7ec2c802c0a313de2b60f8dfd6a023fe68ba6bfa1df",
+      "headers": {
+        "Content-Length": "738",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Content-Type": "application/gzip",
+        "ETag": "\"tmd44kki\""
+      },
+      "bodyMatchesSignedInput": true
+    },
+    {
+      "path": "/client-updates/releases/updater-FB3505D6D84D997C-s12/Mir2Updater.exe",
+      "method": "GET",
+      "size": 1811456,
+      "sha256": "fb3505d6d84d997cdbcef17f986a39b930c3fce5d108ca9831d90c5f69b16734",
+      "headers": {
+        "Content-Length": "1811456",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Content-Type": "application/x-msdownload",
+        "ETag": "\"tmd46g12tq8\""
+      },
+      "bodyMatchesSignedInput": true
+    }
+  ],
+  "health": {
+    "ok": true,
+    "http": "ready",
+    "ws": "ready",
+    "revision": "6032ef8b3e27dd97bad0b20c8676ef9f185db64b",
+    "capacity": {
+      "maxWsConnections": 66,
+      "maxActiveSessions": 51,
+      "maxReconnectLeases": 51,
+      "maxLoginInFlight": 2,
+      "maxNewCharacterInFlight": 1,
+      "maxStartGameInFlight": 2,
+      "currentWsConnections": 0,
+      "currentActiveSessions": 0,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    }
+  },
+  "cmsGate": "Bodies byte-match root-verified pinned CMS inputs; no separate Python CMS assertion",
+  "noR2Promotion": true
+}

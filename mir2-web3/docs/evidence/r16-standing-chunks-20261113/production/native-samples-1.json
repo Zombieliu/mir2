@@ -1,0 +1,2091 @@
+[
+  {
+    "observedAtMs": 3183,
+    "atMs": 2182.7999999970198,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 5188,
+    "atMs": 4188.600000008941,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 7195,
+    "atMs": 6196.79999999702,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 9184,
+    "atMs": 8185.29999999702,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 11187,
+    "atMs": 10187.70000000298,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 13183,
+    "atMs": 12184.10000000894,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 15187,
+    "atMs": 14187.90000000596,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 17180,
+    "atMs": 16181.60000000894,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Numeron Login TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 19181,
+    "atMs": 18182.20000000298,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Numeron Login TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 21183,
+    "atMs": 20184.70000000298,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 23184,
+    "atMs": 22184.90000000596,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 25180,
+    "atMs": 24181.70000000298,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 27180,
+    "atMs": 26181.79999999702,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 29184,
+    "atMs": 28185,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 31180,
+    "atMs": 30181.60000000894,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 33180,
+    "atMs": 32181.79999999702,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 35181,
+    "atMs": 34181.90000000596,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 37181,
+    "atMs": 36183,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 39181,
+    "atMs": 38182.20000000298,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 41181,
+    "atMs": 40182.70000000298,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 43180,
+    "atMs": 42181.79999999702,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 45182,
+    "atMs": 44183,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 47182,
+    "atMs": 46183.29999999702,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 49182,
+    "atMs": 48182.5,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 51183,
+    "atMs": 50184.20000000298,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 53181,
+    "atMs": 52182.40000000596,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 55182,
+    "atMs": 54183.20000000298,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 57183,
+    "atMs": 56184.29999999702,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 59182,
+    "atMs": 58182.60000000894,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 61181,
+    "atMs": 60181.70000000298,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 63182,
+    "atMs": 62182.70000000298,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 65185,
+    "atMs": 64185.20000000298,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 67181,
+    "atMs": 66181.79999999702,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 69181,
+    "atMs": 68181.40000000596,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 71181,
+    "atMs": 70181.79999999702,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 73181,
+    "atMs": 72181.90000000596,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 75181,
+    "atMs": 74182.20000000298,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 77182,
+    "atMs": 76182.40000000596,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 79182,
+    "atMs": 78182.60000000894,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 81181,
+    "atMs": 80182,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 83182,
+    "atMs": 82183,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 85181,
+    "atMs": 84182,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 87181,
+    "atMs": 86182.29999999702,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 89181,
+    "atMs": 88181.60000000894,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 91183,
+    "atMs": 90183.90000000596,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 93184,
+    "atMs": 92184.20000000298,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 95184,
+    "atMs": 94184.5,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 97184,
+    "atMs": 96184.79999999702,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 99184,
+    "atMs": 98184.90000000596,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 101184,
+    "atMs": 100185,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 103184,
+    "atMs": 102185.29999999702,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 105185,
+    "atMs": 104185.5,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 107181,
+    "atMs": 106181.60000000894,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 109181,
+    "atMs": 108181.79999999702,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 111181,
+    "atMs": 110182.10000000894,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 113181,
+    "atMs": 112182.20000000298,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 115182,
+    "atMs": 114182.5,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 117182,
+    "atMs": 116182.70000000298,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 119182,
+    "atMs": 118182.10000000894,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 121183,
+    "atMs": 120183.29999999702,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 123183,
+    "atMs": 122183.40000000596,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 125183,
+    "atMs": 124183.70000000298,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 127184,
+    "atMs": 126183.79999999702,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 129183,
+    "atMs": 128184.10000000894,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 131184,
+    "atMs": 130184.40000000596,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 133184,
+    "atMs": 132184.5,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 135184,
+    "atMs": 134184.70000000298,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loading",
+      "loading": [
+        "Noto Sans TC"
+      ]
+    }
+  },
+  {
+    "observedAtMs": 137181,
+    "atMs": 136181.70000000298,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 139184,
+    "atMs": 138185,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 141181,
+    "atMs": 140181.79999999702,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 143182,
+    "atMs": 142182,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 145181,
+    "atMs": 144181.5,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 147181,
+    "atMs": 146181.79999999702,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 149182,
+    "atMs": 148182,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 151182,
+    "atMs": 150182.29999999702,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 153181,
+    "atMs": 152181.90000000596,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 155181,
+    "atMs": 154181.90000000596,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 157182,
+    "atMs": 156182.79999999702,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 159181,
+    "atMs": 158182,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 161181,
+    "atMs": 160181.79999999702,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 163183,
+    "atMs": 162183.40000000596,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 165182,
+    "atMs": 164182.70000000298,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 167183,
+    "atMs": 166183.5,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 169182,
+    "atMs": 168182.29999999702,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 171184,
+    "atMs": 170184.29999999702,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 173181,
+    "atMs": 172181.79999999702,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 175182,
+    "atMs": 174182.29999999702,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 177181,
+    "atMs": 176181.40000000596,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 179182,
+    "atMs": 178183,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 181181,
+    "atMs": 180182.5,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 183181,
+    "atMs": 182181.5,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 185181,
+    "atMs": 184181.60000000894,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 187181,
+    "atMs": 186181.79999999702,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 189181,
+    "atMs": 188182.10000000894,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 191181,
+    "atMs": 190182.20000000298,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 193182,
+    "atMs": 192182.5,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 195182,
+    "atMs": 194182.70000000298,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 197182,
+    "atMs": 196182.40000000596,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 199182,
+    "atMs": 198182.5,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 201182,
+    "atMs": 200182.70000000298,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 203181,
+    "atMs": 202181.5,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 205183,
+    "atMs": 204183.70000000298,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 207254,
+    "atMs": 206182.5,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 209181,
+    "atMs": 208182.29999999702,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 211183,
+    "atMs": 210184.40000000596,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 213184,
+    "atMs": 212184.70000000298,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 215181,
+    "atMs": 214181.60000000894,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 217181,
+    "atMs": 216181.60000000894,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 219181,
+    "atMs": 218181.90000000596,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 221181,
+    "atMs": 220181.60000000894,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 223181,
+    "atMs": 222181.60000000894,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 225181,
+    "atMs": 224181.90000000596,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 227181,
+    "atMs": 226182,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 229181,
+    "atMs": 228182.20000000298,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 231181,
+    "atMs": 230182.20000000298,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 233182,
+    "atMs": 232182.70000000298,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 235182,
+    "atMs": 234182.90000000596,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 237182,
+    "atMs": 236183.10000000894,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 239183,
+    "atMs": 238183.5,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 241182,
+    "atMs": 240182.70000000298,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 243181,
+    "atMs": 242181.70000000298,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 245183,
+    "atMs": 244183.60000000894,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 247181,
+    "atMs": 246182.20000000298,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 249182,
+    "atMs": 248182.40000000596,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 251182,
+    "atMs": 250183.40000000596,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 253184,
+    "atMs": 252184.70000000298,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 255181,
+    "atMs": 254181.70000000298,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 257181,
+    "atMs": 256182.10000000894,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 259181,
+    "atMs": 258182.20000000298,
+    "booted": false,
+    "bootFailed": false,
+    "package": null,
+    "hud": null,
+    "quest": null,
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 261183,
+    "atMs": 260183.40000000596,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 241,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 241,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 263183,
+    "atMs": 262184,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 683,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 683,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 265181,
+    "atMs": 264181.90000000596,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 1130,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 1130,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 267181,
+    "atMs": 266181.700000003,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 1576,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 1576,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 269181,
+    "atMs": 268181.700000003,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 2016,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 2016,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 271185,
+    "atMs": 270186,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": true,
+      "error": null,
+      "frame": 2338,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": true,
+      "error": null,
+      "frame": 2338,
+      "generation": 2,
+      "revision": 4,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 273181,
+    "atMs": 272181.5,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": true,
+      "error": null,
+      "frame": 2771,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": true,
+      "error": null,
+      "frame": 2771,
+      "generation": 2,
+      "revision": 4,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 275181,
+    "atMs": 274181.60000000894,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": true,
+      "error": null,
+      "frame": 3205,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": true,
+      "error": null,
+      "frame": 3205,
+      "generation": 2,
+      "revision": 4,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 277181,
+    "atMs": 276181.90000000596,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": true,
+      "error": null,
+      "frame": 3635,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": true,
+      "error": null,
+      "frame": 3635,
+      "generation": 2,
+      "revision": 4,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 279181,
+    "atMs": 278181.90000000596,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": true,
+      "error": null,
+      "frame": 4071,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": true,
+      "error": null,
+      "frame": 4071,
+      "generation": 2,
+      "revision": 4,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 281182,
+    "atMs": 280182.40000000596,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": true,
+      "error": null,
+      "frame": 4504,
+      "generation": 2,
+      "revision": 1
+    },
+    "quest": {
+      "ready": true,
+      "error": null,
+      "frame": 4504,
+      "generation": 2,
+      "revision": 4,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  },
+  {
+    "observedAtMs": 283182,
+    "atMs": 282182,
+    "booted": true,
+    "bootFailed": false,
+    "package": {
+      "selectedBackend": "webgpu",
+      "packageId": "webgpu",
+      "runtimeVersion": "bevy-0c553a754308e5b8"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 4911,
+      "generation": 3,
+      "revision": 4
+    },
+    "quest": {
+      "ready": false,
+      "error": null,
+      "frame": 4911,
+      "generation": 3,
+      "revision": 6,
+      "displayLanguage": "zh-TW"
+    },
+    "fonts": {
+      "status": "loaded",
+      "loading": []
+    }
+  }
+]

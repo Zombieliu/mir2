@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T14:03:01.176Z",
+  "readonlySourceGuardPassed": true,
+  "backendSourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+  "driverSourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+  "coreCodeEvidenceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+  "driverSourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+  "backendInputs": 44,
+  "gatewaySha256": "d8791cceeed00fdb7019d1201aad19f06005790162df1b459a8cacac96f68756",
+  "full16Gate": "1792934546937-58ce6147",
+  "sourceManifest": {
+    "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-personal-projection-feasibility-15/launcher-source-frozen-v1.json",
+    "bytes": 21939,
+    "sha256": "0ceaf9d7c051d9e56fc2b94103b53c21eb11b8b60760e9e718475e17ce60e473"
+  },
+  "guardController": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe15-root-seal-source-control-v1.mjs",
+    "bytes": 5140,
+    "sha256": "058462385fe2aab8fc27925e3a8fa9f52bb2db94f8d44757ba38823a4ea50688"
+  },
+  "sourceFilesChecked": 80,
+  "driverSourceInputs": 47,
+  "sceneSourceSha256": "2ecf0c1b01920809daa4004db7fe926092005a974c322e78bbd2a156a6326889",
+  "accountPrepared": false,
+  "binaryCopied": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

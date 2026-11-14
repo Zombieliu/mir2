@@ -1,0 +1,25 @@
+{
+  "captured_at_utc": "2026-10-04T07:04:32.132831+00:00",
+  "files": {
+    "capture_evidence.py": {
+      "sha256": "04ceca39c533de18676fd318806e87c87edb60a08bd61689eed768009e0eab71",
+      "bytes": 17960
+    },
+    "implementation.diff": {
+      "sha256": "0fddf9d5b49f043111db7a64e8a41c7d68f79d4948c24f696d5af48084469d96",
+      "bytes": 95193
+    },
+    "README.md": {
+      "sha256": "206adc10bb3357a6fb7ed17ba0cb97e130e5ec3cb28cf70d9bdfe913bc6cc76a",
+      "bytes": 5457
+    },
+    "run-receipts.json": {
+      "sha256": "02140e9449a2bc0a8978e0e0141f9e045c9fc65dd7e3697473ad52215a45b01e",
+      "bytes": 51257
+    },
+    "source-manifest.json": {
+      "sha256": "5945eb293ea1bec7b09ccb64ce3874e9e0dfb02457e9ecfe0821be9421a28385",
+      "bytes": 3150
+    }
+  }
+}

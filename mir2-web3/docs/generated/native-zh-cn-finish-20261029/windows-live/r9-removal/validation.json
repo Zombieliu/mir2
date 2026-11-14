@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "kind": "r9-failed-validation-install-removed-and-normal-state-preserved",
+  "execution": "execution.json",
+  "sourceReceipt": {
+    "filename": "installer-r9-removed.json",
+    "bytes": 410,
+    "sha256": "4276f369435be9cfe90590c2d865d3ffb52a5ef6a79c87437a2eb0e00d71affa",
+    "included": false
+  },
+  "validationRegistrationAbsent": true,
+  "gameExeRemoved": true,
+  "normalRegistrationGameAndPersonalPreferencesUnchanged": true,
+  "remainingProfileFiles": [
+    "locale-seed.json"
+  ],
+  "historicalShortcutBytePreservationClaimed": false,
+  "r9StartupStillFailedHistory": true,
+  "r10InstallRuntimeNotAsserted": true
+}

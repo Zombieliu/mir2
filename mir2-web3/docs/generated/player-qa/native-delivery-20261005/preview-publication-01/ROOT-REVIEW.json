@@ -1,0 +1,39 @@
+{
+  "schema": "mir2.native.preview.root-review.v1",
+  "rootBase": "b87aa8a8ac94d569893a1ee653be49d857d2b063",
+  "workerNode": 138,
+  "workerPython": 64,
+  "rootNode": 138,
+  "rootPython": 64,
+  "overlapNotAdditionalDistinct": true,
+  "rootWindowsActualSigint": {
+    "passed": 1,
+    "gnuTimeoutCaseSkipped": 1
+  },
+  "linuxCiNotRunYet": true,
+  "actualPublicSpeedTested": false,
+  "cloudflareAuthorizationUsed": false,
+  "actualStage": false,
+  "actualPromote": false,
+  "publicFeedStillSequence": 12,
+  "candidateSequence": 13,
+  "engineSource": "48454bba7623694ca7432613af52bee28e83970e",
+  "gameSource": "6032ef8b3e27dd97bad0b20c8676ef9f185db64b",
+  "integrationTestChanges": "fixture locations and three extra terminal LF bytes only",
+  "globalStageBudgetSeconds": 19800,
+  "globalBudgetGuaranteesAll36WorstCaseStreams": false,
+  "hardKillAndPowerLossCompleteReceiptGuaranteed": false,
+  "archives": {
+    "worker": {
+      "sha256": "3e8cc410b63ccc691c8a16fbbc24abd4d3a3dbb3e9fb1ab986694b1162b166b0"
+    },
+    "root": {
+      "members": 73,
+      "bytes": 77558,
+      "sha256": "2f769c870eaae3690687b3b32d91a5618e4a765ecacf07bacb043316d2ae306a"
+    }
+  },
+  "generatedModelFixtureFiles": 66,
+  "modelRegularBodiesArchived": 44,
+  "protectedGameUpdaterRuntimeFilesChangedInThisIntegration": false
+}

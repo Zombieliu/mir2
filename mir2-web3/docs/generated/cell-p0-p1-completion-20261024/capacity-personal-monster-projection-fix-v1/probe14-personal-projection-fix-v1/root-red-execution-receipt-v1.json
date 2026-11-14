@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T11:18:33.7164774Z",
+  "coordinatorActuallyExecuted": true,
+  "head": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+  "commandArguments": [
+    "test",
+    "--locked",
+    "--offline",
+    "-p",
+    "mir2-gateway",
+    "--lib",
+    "personal_journey_",
+    "--",
+    "--test-threads=1",
+    "--nocapture"
+  ],
+  "toolchain": "1.95.0",
+  "buildJobs": 4,
+  "mainUnchangedFromPreimage": true,
+  "mainSha256": "a0e3a19ad1184efd87a632118a98a65c975ca12d2adfda95b2f9e4a6138eff49",
+  "testV3Sha256": "640669e25796e64e5c89aae262c2d11bc810638242d905826d24dd79c7c01c33",
+  "actualExits": [
+    1,
+    1,
+    1
+  ],
+  "v1": "Compiled but first case aborted with double panic while holding state mutex; not six target failures",
+  "v2": "Three Remove target failures and three spawn fixture-setup failures; not six target failures",
+  "v3": {
+    "passed": 0,
+    "failed": 6,
+    "ignored": 0,
+    "targetRemoveFailures": 3,
+    "targetStaleSpawnFailures": 3,
+    "fixtureSetupFailures": 0,
+    "testSeconds": 73.02,
+    "productionImplementationApplied": false
+  },
+  "logs": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-journey-red-v1.log",
+      "bytes": 55074,
+      "sha256": "7d6458ce2a7e19c8141f82101934744acd0cf1e4547fc323015117b7287b3f78"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-journey-red-v2.log",
+      "bytes": 58333,
+      "sha256": "787d2756df83908188e557887b780b62396cd1c92c09ecf52f53907ab79a953d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-journey-red-v3.log",
+      "bytes": 58549,
+      "sha256": "4eca2ada5371cd87c279f05bf20bbc61e931f58683d9527a950b07c43b364f3d"
+    }
+  ],
+  "capacityAccepted": false
+}

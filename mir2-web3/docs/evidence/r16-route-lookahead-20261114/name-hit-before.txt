@@ -1,0 +1,153 @@
+TAP version 13
+# Subtest: real stage capture retains a Canvas-underlay Gold marker and compatibility mouse/up cannot duplicate it
+ok 1 - real stage capture retains a Canvas-underlay Gold marker and compatibility mouse/up cannot duplicate it
+  ---
+  duration_ms: 43.2632
+  type: 'test'
+  ...
+# Subtest: a visible NPC name above another actor keeps its own identity through the real stage and shared canvas
+not ok 2 - a visible NPC name above another actor keeps its own identity through the real stage and shared canvas
+  ---
+  duration_ms: 27.8805
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-r16-world-marker-input.mjs:231:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    the painted name owns its point, even when the actor beneath has an opaque body pixel
+    + actual - expected
+    
+      {
+        kind: 'entity',
+    +   objectId: 'underlying-scarecrow'
+    -   objectId: 'npc-15'
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    kind: 'entity'
+    objectId: 'npc-15'
+  actual:
+    kind: 'entity'
+    objectId: 'underlying-scarecrow'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-r16-world-marker-input.mjs:239:12)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: ground drops above NPC names and actor bodies keep their existing pickup priority
+ok 3 - ground drops above NPC names and actor bodies keep their existing pickup priority
+  ---
+  duration_ms: 21.8665
+  type: 'test'
+  ...
+# Subtest: a HUD Options press releases its original combat hold while the new modal blocks world input
+ok 4 - a HUD Options press releases its original combat hold while the new modal blocks world input
+  ---
+  duration_ms: 46.8215
+  type: 'test'
+  ...
+# Subtest: an unadmitted second pointer cannot replace the first retained world marker
+ok 5 - an unadmitted second pointer cannot replace the first retained world marker
+  ---
+  duration_ms: 18.2052
+  type: 'test'
+  ...
+# Subtest: the actual legacy stage mouse path preserves the visible Gold target instead of the offset tile
+ok 6 - the actual legacy stage mouse path preserves the visible Gold target instead of the offset tile
+  ---
+  duration_ms: 13.5975
+  type: 'test'
+  ...
+# Subtest: removing only the new legacy mouse property in memory reproduces zero pickup and wrong-tile fallback
+ok 7 - removing only the new legacy mouse property in memory reproduces zero pickup and wrong-tile fallback
+  ---
+  duration_ms: 19.1596
+  type: 'test'
+  ...
+# Subtest: NPC nameplate and interactive sprite-hit underlays activate exactly once through either real owner path
+ok 8 - NPC nameplate and interactive sprite-hit underlays activate exactly once through either real owner path
+  ---
+  duration_ms: 63.0194
+  type: 'test'
+  ...
+# Subtest: both real stage routes pick a solid body through a tree hole using native tile order
+ok 9 - both real stage routes pick a solid body through a tree hole using native tile order
+  ---
+  duration_ms: 54.7901
+  type: 'test'
+  ...
+# Subtest: actor hit resolution keeps exact cells, living priority, ties and unavailable NPC bounds
+ok 10 - actor hit resolution keeps exact cells, living priority, ties and unavailable NPC bounds
+  ---
+  duration_ms: 14.8405
+  type: 'test'
+  ...
+# Subtest: actor picking reads the current packed body rectangle on its own atlas page
+ok 11 - actor picking reads the current packed body rectangle on its own atlas page
+  ---
+  duration_ms: 12.5368
+  type: 'test'
+  ...
+# Subtest: a prebuilt atlas mask reads only the frame crop and shares one pending decode
+ok 12 - a prebuilt atlas mask reads only the frame crop and shares one pending decode
+  ---
+  duration_ms: 9.0476
+  type: 'test'
+  ...
+# Subtest: secondary taps on a canvas-underlay actor or drop reach only the terrain callback
+ok 13 - secondary taps on a canvas-underlay actor or drop reach only the terrain callback
+  ---
+  duration_ms: 53.089
+  type: 'test'
+  ...
+# Subtest: holding secondary over an actor keeps Classic steering and New Move terrain routing
+ok 14 - holding secondary over an actor keeps Classic steering and New Move terrain routing
+  ---
+  duration_ms: 25.5046
+  type: 'test'
+  ...
+# Subtest: direct DOM world markers pass secondary to the stage without opening an actor or picking up a drop
+ok 15 - direct DOM world markers pass secondary to the stage without opening an actor or picking up a drop
+  ---
+  duration_ms: 64.8591
+  type: 'test'
+  ...
+# Subtest: foreign frames, non-Canvas top layers, missing markers and noninteractive entity markers never acquire object authority
+ok 16 - foreign frames, non-Canvas top layers, missing markers and noninteractive entity markers never acquire object authority
+  ---
+  duration_ms: 51.8329
+  type: 'test'
+  ...
+# Subtest: foreground UI, Native modal/foreground ownership and unavailable scene keep world object callbacks blocked
+ok 17 - foreground UI, Native modal/foreground ownership and unavailable scene keep world object callbacks blocked
+  ---
+  duration_ms: 183.9875
+  type: 'test'
+  ...
+# Subtest: focus blur, owner generation change and Page rejection never replay or turn a retained marker into a tile click
+ok 18 - focus blur, owner generation change and Page rejection never replay or turn a retained marker into a tile click
+  ---
+  duration_ms: 35.7695
+  type: 'test'
+  ...
+# Subtest: the Mini Map frame stops an ordinary route for both buttons without taking image or HUD actions
+ok 19 - the Mini Map frame stops an ordinary route for both buttons without taking image or HUD actions
+  ---
+  duration_ms: 7.8203
+  type: 'test'
+  ...
+1..19
+# tests 19
+# suites 0
+# pass 18
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1189.6505

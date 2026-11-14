@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "state": "REQUIRED_FUTURE_ROOT_BINDING_FIELDS_NOT_EXECUTED",
+  "sourceCommit": null,
+  "sourcePins": "Copy exact7 repository-prefixed pins from final-source-binding-v1.json unchanged",
+  "sourceCandidate": {
+    "path": "C:/mir2-build/p01-completion-20261024/formal12-account-store-diagnostics-v1/source-candidate-v1.json",
+    "bytes": 6682,
+    "sha256": "fe037243485836fae250965c710b8096dcf10e7d254d75c4533b0241569912e7"
+  },
+  "rootFunctionalValidation": {
+    "path": "C:/mir2-build/p01-completion-20261024/root-account-store-wait-diagnostics-functional-validation-v1.json",
+    "bytes": 12175,
+    "sha256": "1ad0420e74d363088b20dca95cebbb7c84b035e1edf5d0472a185d8bd81dea57"
+  },
+  "driverSourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "driverFrozenManifest": {
+    "path": "C:/mir2-build/p01-completion-20261024/capacity-attack-deadline-driver-frozen-v1.json",
+    "bytes": 6759,
+    "sha256": "c7a4323971721eb54b574649d8c4efeea800fd08484349b5eb8d0ec0ffb11f7b"
+  },
+  "driverEvidenceReusedNotRerun": true,
+  "newNodeRegressionClaimed": false
+}

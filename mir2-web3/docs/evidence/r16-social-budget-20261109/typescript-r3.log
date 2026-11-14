@@ -1,0 +1,15 @@
+app/page.tsx(13909,11): error TS2322: Type '{ uniqueId: number; authoritativeUniqueId?: number | undefined; exactUniqueId?: string | undefined; tooltipSource?: unknown; stateImage?: number | null | undefined; equipSlot?: "stone" | "belt" | ... 13 more ... | undefined; ... 12 more ...; sellValue?: number | undefined; }[]' is not assignable to type 'readonly WorldItem[]'.
+  Type '{ uniqueId: number; authoritativeUniqueId?: number | undefined; exactUniqueId?: string | undefined; tooltipSource?: unknown; stateImage?: number | null; equipSlot?: "stone" | "belt" | "weapon" | "armour" | "helmet" | ... 10 more ... | undefined; ... 12 more ...; sellValue?: number; }' is not assignable to type 'WorldItem'.
+    Types of property 'durabilityCurrent' are incompatible.
+      Type 'number | null | undefined' is not assignable to type 'number | undefined'.
+        Type 'null' is not assignable to type 'number | undefined'.
+app/page.tsx(13909,69): error TS2322: Type '{ uniqueId: number; authoritativeUniqueId?: number | undefined; exactUniqueId?: string | undefined; tooltipSource?: unknown; stateImage?: number | null | undefined; equipSlot?: "stone" | "belt" | ... 13 more ... | undefined; ... 12 more ...; sellValue?: number | undefined; }[]' is not assignable to type 'readonly WorldItem[]'.
+  Type '{ uniqueId: number; authoritativeUniqueId?: number | undefined; exactUniqueId?: string | undefined; tooltipSource?: unknown; stateImage?: number | null; equipSlot?: "stone" | "belt" | "weapon" | "armour" | "helmet" | ... 10 more ... | undefined; ... 12 more ...; sellValue?: number; }' is not assignable to type 'WorldItem'.
+    Types of property 'durabilityCurrent' are incompatible.
+      Type 'number | null | undefined' is not assignable to type 'number | undefined'.
+        Type 'null' is not assignable to type 'number | undefined'.
+app/page.tsx(13910,11): error TS2322: Type '{ uniqueId: number | undefined; authoritativeUniqueId: number | undefined; shape: number | undefined; tooltipSource?: unknown; stateImage?: number | null | undefined; equipSlot?: EquipmentSlot | null | undefined; ... 14 more ...; socketSlots?: number | undefined; }[]' is not assignable to type 'readonly EquipmentItem[]'.
+  Type '{ uniqueId: number | undefined; authoritativeUniqueId: number | undefined; shape: number | undefined; tooltipSource?: unknown; stateImage?: number | null; equipSlot?: EquipmentSlot | null; ... 14 more ...; socketSlots?: number; }' is not assignable to type 'EquipmentItem'.
+    Types of property 'stateImage' are incompatible.
+      Type 'number | null | undefined' is not assignable to type 'number | undefined'.
+        Type 'null' is not assignable to type 'number | undefined'.

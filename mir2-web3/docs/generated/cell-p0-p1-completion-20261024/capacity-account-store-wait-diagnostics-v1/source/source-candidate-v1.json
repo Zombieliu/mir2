@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "7644faa14402aa1bfdad8096fedfe61dc6a0a660",
+  "writeScope": [
+    "apps/simulation/src/config_account_store_diagnostics.rs",
+    "apps/simulation/src/lib.rs",
+    "apps/simulation/src/config.rs",
+    "apps/simulation/src/config_file_authority.rs",
+    "apps/simulation/src/config_shared_guilds.rs",
+    "apps/simulation/src/config_guild_clock_driver.rs",
+    "apps/simulation/src/runtime/shared_experience_profile.rs"
+  ],
+  "newPrivateModule": true,
+  "baselinePins": [
+    {
+      "path": "apps/simulation/src/lib.rs",
+      "preimage": "C:\\mir2-build\\p01-completion-20261024\\formal12-account-store-diagnostics-v1\\preimages\\lib.rs.txt",
+      "bytes": 7153,
+      "sha256": "3b7bcf3abfa84ad25fdb0aa8857439aa870f154549dd98168ae319739e4c25dc"
+    },
+    {
+      "path": "apps/simulation/src/config.rs",
+      "preimage": "C:\\mir2-build\\p01-completion-20261024\\formal12-account-store-diagnostics-v1\\preimages\\config.rs.txt",
+      "bytes": 342825,
+      "sha256": "9f1315fb16d48e4b19cdfd1d9c1e8c2acab9fb9458eb0ce96e5fa5674261dde5"
+    },
+    {
+      "path": "apps/simulation/src/config_file_authority.rs",
+      "preimage": "C:\\mir2-build\\p01-completion-20261024\\formal12-account-store-diagnostics-v1\\preimages\\config_file_authority.rs.txt",
+      "bytes": 23763,
+      "sha256": "fa853f265b936b7a552dd9a3284dc8185456ebe57186dace7f0d1f947729d0c2"
+    },
+    {
+      "path": "apps/simulation/src/config_shared_guilds.rs",
+      "preimage": "C:\\mir2-build\\p01-completion-20261024\\formal12-account-store-diagnostics-v1\\preimages\\config_shared_guilds.rs.txt",
+      "bytes": 53032,
+      "sha256": "9271257ce0c800e337d3f53a3d07844bef071002854b58132a3a484757fb96a5"
+    },
+    {
+      "path": "apps/simulation/src/config_guild_clock_driver.rs",
+      "preimage": "C:\\mir2-build\\p01-completion-20261024\\formal12-account-store-diagnostics-v1\\preimages\\config_guild_clock_driver.rs.txt",
+      "bytes": 21788,
+      "sha256": "ae9edfa7336d27a8546ef12f3e45ca1d523d2f9f3860c3eb17b6dc985a63342c"
+    },
+    {
+      "path": "apps/simulation/src/runtime/shared_experience_profile.rs",
+      "preimage": "C:\\mir2-build\\p01-completion-20261024\\formal12-account-store-diagnostics-v1\\preimages\\runtime__shared_experience_profile.rs.txt",
+      "bytes": 75946,
+      "sha256": "fe7767bec9d255e9fbf6e727bc7ab9a380f29166417f3c2a50085e0083ace190"
+    }
+  ],
+  "sourcePins": [
+    {
+      "path": "apps/simulation/src/config_account_store_diagnostics.rs",
+      "bytes": 10863,
+      "sha256": "bdd0805104f396d924a6663be46166a9b2bb759c580efcb6e07b6fbf0cb970e4"
+    },
+    {
+      "path": "apps/simulation/src/lib.rs",
+      "bytes": 7191,
+      "sha256": "0724307baaf0ca81c7a55e3ab0300e28b40f2fb376f06a389a84548f7fa910c3"
+    },
+    {
+      "path": "apps/simulation/src/config.rs",
+      "bytes": 347044,
+      "sha256": "df3eceebeb434b817e32ebc9bb4c2901257f5e4199901252ec18234a5260b07d"
+    },
+    {
+      "path": "apps/simulation/src/config_file_authority.rs",
+      "bytes": 24828,
+      "sha256": "ba3d5318241173429abe5b73c836e1a2a8082fef11a1d42c768f1438ea73deff"
+    },
+    {
+      "path": "apps/simulation/src/config_shared_guilds.rs",
+      "bytes": 53319,
+      "sha256": "e73b5c6b095f84447f99d41d0cc5f2952d208655dd81c9555cee49e2ebe36bd0"
+    },
+    {
+      "path": "apps/simulation/src/config_guild_clock_driver.rs",
+      "bytes": 22968,
+      "sha256": "5b5e41dde7a38eb8f1eae3893dc54c085aa13716fd6624cad5738d3c5016b8b8"
+    },
+    {
+      "path": "apps/simulation/src/runtime/shared_experience_profile.rs",
+      "bytes": 76309,
+      "sha256": "8a6cbcb3cb1177111e8700c279583f730f8d26d475b121a316e270b7a1a8ceab"
+    }
+  ],
+  "sourceSha256": "c0df8fc3dc4ed5f411788002d2b7f157fe752d2aaff4e4ee5e8bcd5155cb21f5",
+  "mechanicalProof": {
+    "baselineSixRawPreimagesCapturedBeforeEdit": true,
+    "applyScript": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\formal12-account-store-diagnostics-v1\\apply-source-v2.mjs",
+      "bytes": 17185,
+      "sha256": "1c10e76a194e64cf552b9d1515fbf690f6a7e87242c27867647aab8f0282d61f"
+    },
+    "additionalSyntaxCorrection": "diagnostic_measure wrapper closing }); replaces original immediately-invoked closure })();; no original business expression removed",
+    "formatter": "rustfmt +1.95.0 --edition 2021 --config skip_children=true --emit stdout via stdin, retain each original newline style",
+    "baselineSixAlreadyFormatted": true,
+    "rows": [
+      {
+        "path": "apps/simulation/src/lib.rs",
+        "strictForwardReplayAndFormatterRawExact": true,
+        "sha256": "0724307baaf0ca81c7a55e3ab0300e28b40f2fb376f06a389a84548f7fa910c3"
+      },
+      {
+        "path": "apps/simulation/src/config.rs",
+        "strictForwardReplayAndFormatterRawExact": true,
+        "sha256": "df3eceebeb434b817e32ebc9bb4c2901257f5e4199901252ec18234a5260b07d"
+      },
+      {
+        "path": "apps/simulation/src/config_file_authority.rs",
+        "strictForwardReplayAndFormatterRawExact": true,
+        "sha256": "ba3d5318241173429abe5b73c836e1a2a8082fef11a1d42c768f1438ea73deff"
+      },
+      {
+        "path": "apps/simulation/src/config_shared_guilds.rs",
+        "strictForwardReplayAndFormatterRawExact": true,
+        "sha256": "e73b5c6b095f84447f99d41d0cc5f2952d208655dd81c9555cee49e2ebe36bd0"
+      },
+      {
+        "path": "apps/simulation/src/config_guild_clock_driver.rs",
+        "strictForwardReplayAndFormatterRawExact": true,
+        "sha256": "5b5e41dde7a38eb8f1eae3893dc54c085aa13716fd6624cad5738d3c5016b8b8"
+      },
+      {
+        "path": "apps/simulation/src/runtime/shared_experience_profile.rs",
+        "strictForwardReplayAndFormatterRawExact": true,
+        "sha256": "8a6cbcb3cb1177111e8700c279583f730f8d26d475b121a316e270b7a1a8ceab"
+      }
+    ]
+  },
+  "limits": {
+    "cargoExecutedByAuthor": false,
+    "behaviorPassedClaimed": false,
+    "rootOwnsActualTests": true,
+    "newFieldsAllJsSafeClaimed": false,
+    "existingThresholdFirstUseMayReadEnvAndAllocate": true,
+    "uncoveredFileCallers": [
+      "prepared_kill",
+      "item_identity",
+      "other original API -> None callers"
+    ],
+    "unfinishedWaitOrHolderProducesNoCompletedSpan": true
+  },
+  "expectedTests": {
+    "newFilter": "config_account_store_diagnostics::tests::",
+    "newCount": 3,
+    "adjacentFilters": [
+      "file_authority::tests::",
+      "guild_clock_driver::tests::",
+      "config_account_store_durability_tests::",
+      "locked_source_authority_keeps_legacy_profile_absent_and_rejects_wrong_identity",
+      "guild_scoped_read_and_account_save_cannot_write_authority",
+      "guild_file_transaction_keeps_wallet_and_bank_atomic_on_failure"
+    ]
+  }
+}

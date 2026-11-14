@@ -1,0 +1,565 @@
+name: Promotion Website Release
+
+on:
+  workflow_call:
+    inputs:
+      operation:
+        required: true
+        type: string
+      backend_source_sha:
+        required: false
+        type: string
+      unified_source_sha:
+        required: false
+        type: string
+      asset_run_id:
+        required: false
+        type: string
+      deployment_id:
+        required: false
+        type: string
+      main_deployment_id:
+        required: false
+        type: string
+    secrets:
+      VERCEL_TOKEN:
+        required: false
+      VERCEL_ORG_ID:
+        required: false
+      VERCEL_PROJECT_ID:
+        required: false
+      MIR2_R16_PASSKEY_AUTH_SECRET:
+        required: false
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Inspect, stage without aliases, or promote an accepted website deployment
+        required: true
+        default: context
+        type: choice
+        options: [context, discover-main-site, inspect-main-source, stage, promote, unified-context, unified-stage, unified-promote, realtime-context, realtime-stage, realtime-promote, windows-context, windows-config, windows-stage, windows-promote, numeron-context, numeron-stage, numeron-promote, numeron-domain-move, numeron-qr-stage, numeron-qr-check, numeron-qr-promote, numeron-qr-rollback, backend-build]
+      deployment_id:
+        description: Exact accepted production candidate; required only for promote
+        required: false
+        type: string
+      backend_source_sha:
+        description: Reviewed immutable backend source commit; required only for backend-build
+        required: false
+        type: string
+      main_deployment_id:
+        description: Exact marketing candidate paired with deployment_id for unified-promote
+        required: false
+        type: string
+      unified_source_sha:
+        description: Reviewed immutable source of both existing candidates; promote only, defaults to workflow commit
+        required: false
+        type: string
+      asset_run_id:
+        description: Exact successful fixed R16 asset publication run; required for numeron stage/promote
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: promotion-website-${{ inputs.operation == 'backend-build' && 'backend-build' || 'production-release' }}
+  cancel-in-progress: false
+
+jobs:
+  source:
+    runs-on: ubuntu-24.04
+    # Full history is required by the integrated-source guard; large historical
+    # asset trees can take more than three minutes to check out on a fresh runner.
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Validate isolated Numeron inputs before any credential-bearing job
+        if: startsWith(inputs.operation, 'numeron-')
+        env:
+          NUMERON_OPERATION: ${{ inputs.operation }}
+          NUMERON_SOURCE_SHA: ${{ inputs.unified_source_sha }}
+          NUMERON_ASSET_RUN_ID: ${{ inputs.asset_run_id }}
+          NUMERON_DEPLOYMENT_ID: ${{ inputs.deployment_id }}
+          NUMERON_MAIN_DEPLOYMENT_ID: ${{ inputs.main_deployment_id }}
+          BACKEND_SOURCE_SHA: ${{ inputs.backend_source_sha }}
+        run: |
+          node --input-type=module <<'NODE'
+          const env = process.env, operation = env.NUMERON_OPERATION;
+          const fail = code => { throw Error(code); };
+          const qr = ['numeron-qr-stage', 'numeron-qr-check', 'numeron-qr-promote', 'numeron-qr-rollback'].includes(operation);
+          if (!qr && !['numeron-context', 'numeron-stage', 'numeron-promote', 'numeron-domain-move'].includes(operation)) fail('explicitNumeronOperationRequired');
+          if (env.BACKEND_SOURCE_SHA) fail('mixedReleaseModes');
+          if (env.GITHUB_REPOSITORY !== 'Zombieliu/mir2' || env.GITHUB_REF !== 'refs/heads/codex/windows-player-journey' || !/^[a-f0-9]{40}$/.test(env.GITHUB_SHA || '')) fail('sourceIdentityInvalid');
+          const source = env.NUMERON_SOURCE_SHA || env.GITHUB_SHA;
+          if ((qr && env.NUMERON_SOURCE_SHA) || !/^[a-f0-9]{40}$/.test(source) || (operation === 'numeron-stage' && source !== env.GITHUB_SHA)) fail('sourceInputInvalid');
+          const paired = operation === 'numeron-promote' || operation === 'numeron-domain-move';
+          const gameOnly = operation === 'numeron-qr-check' || operation === 'numeron-qr-promote' || operation === 'numeron-qr-rollback';
+          if ((paired || gameOnly) ? !/^dpl_[A-Za-z0-9]+$/.test(env.NUMERON_DEPLOYMENT_ID || '') : Boolean(env.NUMERON_DEPLOYMENT_ID)) fail('candidateInputInvalid');
+          if (paired ? !/^dpl_[A-Za-z0-9]+$/.test(env.NUMERON_MAIN_DEPLOYMENT_ID || '') || env.NUMERON_DEPLOYMENT_ID === env.NUMERON_MAIN_DEPLOYMENT_ID : Boolean(env.NUMERON_MAIN_DEPLOYMENT_ID)) fail('candidateInputInvalid');
+          const assets = operation === 'numeron-stage' || operation === 'numeron-promote';
+          if (assets ? !/^[1-9][0-9]*$/.test(env.NUMERON_ASSET_RUN_ID || '') : Boolean(env.NUMERON_ASSET_RUN_ID)) fail('assetRunInputInvalid');
+          NODE
+      - name: Verify all integrated histories before any release operation
+        run: python3 mir2-web3/scripts/verify_unified_codeline.py --require-clean
+  website:
+    needs: source
+    if: inputs.operation != 'backend-build'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        if: startsWith(inputs.operation, 'unified-') || startsWith(inputs.operation, 'realtime-') || startsWith(inputs.operation, 'windows-') || startsWith(inputs.operation, 'numeron-')
+        with:
+          persist-credentials: false
+      - name: Use Node 22 for the isolated Numeron release helper
+        if: startsWith(inputs.operation, 'numeron-')
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Verify bounded Numeron release guards without credentials or network
+        if: startsWith(inputs.operation, 'numeron-')
+        run: node --test .github/scripts/test-numeron-r16-release.mjs .github/scripts/test-numeron-r16-domain.mjs .github/scripts/test-numeron-release-entry.mjs
+      - name: Inspect the three Numeron project identities without Gateway credentials
+        if: inputs.operation == 'numeron-context'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          RELEASE_OPERATION: ${{ inputs.operation }}
+          RELEASE_SOURCE_SHA: ${{ inputs.unified_source_sha }}
+        run: node .github/scripts/numeron-r16-release.mjs
+      - name: Stage or promote the isolated Numeron R16 pair or the game relay hotfix
+        if: inputs.operation == 'numeron-stage' || inputs.operation == 'numeron-promote' || startsWith(inputs.operation, 'numeron-qr-')
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          GH_TOKEN: ${{ github.token }}
+          MIR2_R16_PASSKEY_AUTH_SECRET: ${{ secrets.MIR2_R16_PASSKEY_AUTH_SECRET }}
+          RELEASE_OPERATION: ${{ inputs.operation }}
+          RELEASE_SOURCE_SHA: ${{ inputs.unified_source_sha }}
+          RELEASE_DEPLOYMENT_ID: ${{ inputs.deployment_id }}
+          RELEASE_MAIN_DEPLOYMENT_ID: ${{ inputs.main_deployment_id }}
+          RELEASE_ASSET_RUN_ID: ${{ inputs.asset_run_id }}
+        run: node .github/scripts/numeron-r16-release.mjs
+      - name: Retain bounded Numeron release metadata including failed attempts
+        if: always() && startsWith(inputs.operation, 'numeron-') && inputs.operation != 'numeron-domain-move'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: numeron-r16-release-${{ github.run_id }}
+          path: numeron-r16-release.json
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Move the Numeron custom domain only after independent paired-candidate checks
+        if: inputs.operation == 'numeron-domain-move'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          RELEASE_OPERATION: ${{ inputs.operation }}
+          RELEASE_SOURCE_SHA: ${{ inputs.unified_source_sha }}
+          RELEASE_DEPLOYMENT_ID: ${{ inputs.deployment_id }}
+          RELEASE_MAIN_DEPLOYMENT_ID: ${{ inputs.main_deployment_id }}
+        run: node .github/scripts/numeron-r16-domain.mjs
+      - name: Retain the separate bounded Numeron domain-move receipt
+        if: always() && inputs.operation == 'numeron-domain-move'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: numeron-r16-domain-${{ github.run_id }}
+          path: numeron-r16-domain.json
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Stage or promote the two existing websites from one immutable source
+        if: startsWith(inputs.operation, 'unified-')
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          RELEASE_OPERATION: ${{ inputs.operation }}
+          RELEASE_DEPLOYMENT_ID: ${{ inputs.deployment_id }}
+          RELEASE_MAIN_DEPLOYMENT_ID: ${{ inputs.main_deployment_id }}
+          RELEASE_SOURCE_SHA: ${{ inputs.unified_source_sha }}
+        run: node .github/scripts/unified-website-release.mjs
+      - name: Save paired immutable candidate identities
+        if: inputs.operation == 'unified-stage'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: unified-website-release
+          path: unified-release.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Inspect, stage or promote only the existing promotion game website
+        if: startsWith(inputs.operation, 'realtime-')
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          RELEASE_OPERATION: ${{ inputs.operation }}
+          RELEASE_DEPLOYMENT_ID: ${{ inputs.deployment_id }}
+          RELEASE_SOURCE_SHA: ${{ inputs.unified_source_sha }}
+        run: node .github/scripts/promotion-realtime-release.mjs
+      - name: Save the immutable promotion game website candidate identity
+        if: inputs.operation == 'realtime-stage'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: promotion-realtime-release
+          path: promotion-realtime-release.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Configure, stage or promote the original Windows promotion bridge
+        if: startsWith(inputs.operation, 'windows-')
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          MIR2_PROMOTION_WINDOWS_SESSION_SECRET: ${{ secrets.MIR2_PROMOTION_WINDOWS_SESSION_SECRET }}
+          MIR2_PROMOTION_WINDOWS_WALLET_AUTH_SECRET: ${{ secrets.MIR2_PROMOTION_WINDOWS_WALLET_AUTH_SECRET }}
+          RELEASE_OPERATION: ${{ inputs.operation }}
+          RELEASE_DEPLOYMENT_ID: ${{ inputs.deployment_id }}
+          RELEASE_SOURCE_SHA: ${{ inputs.unified_source_sha }}
+        run: node .github/scripts/promotion-windows-release.mjs
+      - name: Save the immutable Windows promotion website candidate identity
+        if: inputs.operation == 'windows-stage'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: promotion-windows-release
+          path: promotion-windows-release.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Verify original project and perform the requested bounded operation
+        if: ${{ !startsWith(inputs.operation, 'unified-') && !startsWith(inputs.operation, 'realtime-') && !startsWith(inputs.operation, 'windows-') && !startsWith(inputs.operation, 'numeron-') }}
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          MIR2_PROMOTION_WALLET_AUTH_SECRET: ${{ secrets.MIR2_PROMOTION_WALLET_AUTH_SECRET }}
+          MIR2_PROMOTION_SESSION_SECRET: ${{ secrets.MIR2_PROMOTION_SESSION_SECRET }}
+          RELEASE_OPERATION: ${{ inputs.operation }}
+          RELEASE_DEPLOYMENT_ID: ${{ inputs.deployment_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          const team = 'team_pXY7oaLtibSTlKSmKXMXzrQR';
+          const project = 'prj_Bl3ttB4PzcdCpJMYLRhzQjkdXyTz';
+          const baseline = 'dpl_Hmab1y6vYULtdHJZ4Zy6fsWwMbzm';
+          if (process.env.GITHUB_REF !== 'refs/heads/codex/windows-player-journey') throw Error('Unexpected release branch');
+          if (!process.env.VERCEL_TOKEN) throw Error('Missing existing Vercel CI credential');
+          if (process.env.VERCEL_ORG_ID !== team || process.env.VERCEL_PROJECT_ID !== project) {
+            throw Error('Existing CI credentials do not identify the original website project');
+          }
+          const response = await fetch(`https://api.vercel.com/v9/projects/${project}?teamId=${team}`, {
+            headers: {Authorization: `Bearer ${process.env.VERCEL_TOKEN}`}
+          });
+          if (!response.ok) throw Error(`Project inspection failed: HTTP ${response.status}`);
+          const value = await response.json();
+          if (value.id !== project || value.accountId !== team || value.name !== 'mir2-web3-web') {
+            throw Error('Project identity mismatch');
+          }
+          console.log(JSON.stringify({
+            id: value.id, name: value.name, accountId: value.accountId,
+            rootDirectory: value.rootDirectory, buildCommand: value.buildCommand,
+            installCommand: value.installCommand, framework: value.framework,
+            nodeVersion: value.nodeVersion, outputDirectory: value.outputDirectory,
+            sourceFilesOutsideRootDirectory: value.sourceFilesOutsideRootDirectory,
+            commandForIgnoringBuildStep: value.commandForIgnoringBuildStep,
+            git: value.link ? {type:value.link.type, repo:value.link.repo, productionBranch:value.link.productionBranch}:null,
+            environmentKeys: (value.env || []).map(entry => entry.key).sort()
+          }, null, 2));
+          const operation = process.env.RELEASE_OPERATION;
+          if (operation === 'context') process.exit(0);
+          async function api(path, method = 'GET', body) {
+            const result = await fetch(`https://api.vercel.com${path}${path.includes('?')?'&':'?'}teamId=${team}`, {
+              method, headers:{Authorization:`Bearer ${process.env.VERCEL_TOKEN}`, 'Content-Type':'application/json'},
+              ...(body === undefined ? {} : {body:JSON.stringify(body)})
+            });
+            if (!result.ok) throw Error(`Vercel ${method} request failed: HTTP ${result.status}`);
+            const responseBody = await result.text();
+            return responseBody.length === 0 ? {} : JSON.parse(responseBody);
+          }
+          if (operation === 'inspect-main-source') {
+            const mainProject = 'prj_Q14gZuvjxkfqOCExhqOrYiR2UbxA';
+            const id = process.env.RELEASE_DEPLOYMENT_ID;
+            if (id !== 'dpl_4uHMwZobvDW1tUwszUdbq14z8eMj') throw Error('Reviewed main-site deployment required');
+            const deployment = await api(`/v13/deployments/${id}`);
+            if (deployment.projectId !== mainProject) throw Error('Main-site project mismatch');
+            const tree = await api(`/v6/deployments/${id}/files`);
+            const files = [];
+            function visit(entries, prefix = '') {
+              for (const entry of entries) {
+                const path = prefix + entry.name;
+                if (entry.children) visit(entry.children, path + '/');
+                else files.push({path,uid:entry.uid,type:entry.type,size:entry.size});
+              }
+            }
+            visit(tree);
+            const fs = await import('node:fs/promises');
+            const path = await import('node:path');
+            const {createHash} = await import('node:crypto');
+            const recovered = [];
+            const sourceFiles = files.filter(file => file.type === 'file' && file.path.startsWith('src/') && !file.path.endsWith('.tsbuildinfo'));
+            if (sourceFiles.length < 20 || sourceFiles.length > 150) throw Error('Unexpected main-site source inventory');
+            for (const file of sourceFiles) {
+              const relative = file.path.slice(4);
+              if (!/^(?:app\/|lib\/|public\/|scripts\/|AGENTS\.md$|CLAUDE\.md$|README\.md$|package(?:-lock)?\.json$|next-env\.d\.ts$|next\.config\.mjs$|tsconfig\.json$|vercel\.json$)/.test(relative) || relative.split('/').some(part => part === '..' || part.startsWith('.'))) throw Error('Unapproved source path');
+              if (!/^[a-f0-9]{40}$/.test(file.uid)) throw Error('Expected immutable source file ID');
+              const content = await api(`/v8/deployments/${id}/files/${file.uid}`);
+              const encoded = typeof content === 'string' ? content : content.data;
+              if (typeof encoded !== 'string') throw Error(`Unexpected source response shape: ${Object.keys(content).join(',')}`);
+              const bytes = Buffer.from(encoded,'base64');
+              if (bytes.length > 25*1024*1024 || createHash('sha1').update(bytes).digest('hex') !== file.uid) throw Error('Recovered source content digest mismatch');
+              const destination = path.join('recovered-main-website',relative);
+              await fs.mkdir(path.dirname(destination),{recursive:true});
+              await fs.writeFile(destination,bytes,{flag:'wx'});
+              recovered.push({path:relative,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')});
+            }
+            await fs.writeFile('recovered-main-website/RECOVERY-MANIFEST.json',JSON.stringify({deploymentId:id,projectId:mainProject,recovered},null,2)+'\n',{flag:'wx'});
+            console.log(JSON.stringify({mainSiteSource:{id:deployment.id,url:deployment.url,
+              readyState:deployment.readyState,createdAt:deployment.createdAt,
+              source:deployment.source,rootDirectory:deployment.projectSettings?.rootDirectory,
+              sourceSha:deployment.meta?.githubCommitSha,sourceRef:deployment.meta?.githubCommitRef,
+              fileCount:files.length,files:files.slice(0,180)}},null,2));
+            process.exit(0);
+          }
+          if (operation === 'discover-main-site') {
+            // Read only public routing/build metadata; never export environment values.
+            const id = process.env.RELEASE_DEPLOYMENT_ID;
+            if (!/^dpl_[A-Za-z0-9]+$/.test(id || '')) throw Error('Exact deployment ID required');
+            let deployment;
+            try { deployment = await api(`/v13/deployments/${id}`); }
+            catch (error) {
+              if (error.message !== 'Vercel GET request failed: HTTP 404') throw error;
+              console.log(JSON.stringify({historicalDeployment:{id,notFound:true}}));
+            }
+            if (deployment && deployment.projectId !== project) throw Error('Historical deployment belongs to another project');
+            if (deployment) console.log(JSON.stringify({historicalDeployment:{id:deployment.id,url:deployment.url,
+              readyState:deployment.readyState,alias:deployment.alias,
+              rootDirectory:deployment.projectSettings?.rootDirectory,
+              sourceSha:deployment.meta?.githubCommitSha,sourceRef:deployment.meta?.githubCommitRef}},null,2));
+            const projects = await api('/v9/projects?limit=100');
+            const candidates = (projects.projects || []).filter(entry => /mir2|numeron|website/i.test(entry.name));
+            for (const candidate of candidates) {
+              const details = await api(`/v9/projects/${candidate.id}`);
+              const domains = await api(`/v9/projects/${candidate.id}/domains`);
+              console.log(JSON.stringify({websiteCandidate:{id:details.id,name:details.name,
+                rootDirectory:details.rootDirectory,
+                git:details.link?{repo:details.link.repo,productionBranch:details.link.productionBranch}:null,
+                production:details.targets?.production?{id:details.targets.production.id,url:details.targets.production.url}:null,
+                domains:(domains.domains||[]).map(domain=>({name:domain.name,redirect:domain.redirect}))}},null,2));
+            }
+            process.exit(0);
+          }
+          const current = value.targets?.production?.id || value.targets?.production?.deploymentId;
+          if (current !== baseline) throw Error('Production changed since inspection; inspect and rebase before continuing');
+          if (operation === 'stage') {
+            const wallet = process.env.MIR2_PROMOTION_WALLET_AUTH_SECRET?.trim();
+            const session = process.env.MIR2_PROMOTION_SESSION_SECRET?.trim();
+            if (!wallet || !session || wallet.length < 32 || session.length < 32 || wallet === session) throw Error('Dedicated promotion secrets missing');
+            const config = {
+              MIR2_PROMOTION_GATEWAY_HTTP_URL:'https://promotion-playtest.165.154.65.136.sslip.io',
+              MIR2_PROMOTION_GATEWAY_ALLOWED_ORIGINS:'https://promotion-playtest.165.154.65.136.sslip.io',
+              MIR2_PROMOTION_PUBLIC_ORIGIN:'https://mir2.obelisk.build',
+              MIR2_PROMOTION_ALLOWED_ORIGINS:'https://mir2.obelisk.build',
+              MIR2_PROMOTION_DUBHE_CONNECT_NETWORK:'testnet',
+              MIR2_PROMOTION_DUBHE_CONNECT_RELAY_URL:'https://dubhe-connect-relay.zombiesliu.workers.dev',
+              MIR2_PROMOTION_DUBHE_WALLET_ORIGIN:'https://wallet.dubhe.obelisk.build',
+              MIR2_PROMOTION_CAMPAIGN_ID:'numeron-playtest-20261029',
+              MIR2_PROMOTION_WALLET_AUTH_SECRET:wallet,
+              MIR2_PROMOTION_SESSION_SECRET:session
+            };
+            const environmentResult = await api(`/v10/projects/${project}/env?upsert=true`, 'POST', Object.entries(config).map(([key,value]) => ({
+              key,value,type:key.endsWith('_SECRET')?'sensitive':'plain',target:['production'],
+              comment:'Isolated test promotion deployment; preserves existing game configuration'
+            })));
+            if (!Array.isArray(environmentResult.failed) || environmentResult.failed.length !== 0) {
+              throw Error('Dedicated environment update was incomplete; no deployment created');
+            }
+            const configuredProject = await api(`/v9/projects/${project}`);
+            for (const key of Object.keys(config)) {
+              const entries = (configuredProject.env || []).filter(entry => entry.key === key && entry.target?.includes('production'));
+              if (entries.length !== 1 || (key.endsWith('_SECRET') ?
+                  entries[0].type !== 'sensitive' && entries[0].visibility !== 'secret' :
+                  entries[0].type !== 'plain' && entries[0].visibility !== 'config')) {
+                throw Error(`Dedicated environment metadata mismatch for ${key}`);
+              }
+            }
+            console.log(`Verified ${Object.keys(config).length} dedicated production environment keys and types`);
+            const deployment = await api('/v13/deployments', 'POST', {
+              name:value.name,project,target:'production',autoAssignCustomDomains:false,
+              gitSource:{type:'github',repoId:value.link.repoId,ref:'codex/windows-player-journey',sha:process.env.GITHUB_SHA},
+              meta:{promotionRelease:'20261029',promotionBaseline:baseline,promotionSourceSha:process.env.GITHUB_SHA}
+            });
+            console.log(JSON.stringify({operation,id:deployment.id,url:deployment.url,readyState:deployment.readyState,
+              target:deployment.target,alias:deployment.alias,autoAssignCustomDomains:false,sourceSha:process.env.GITHUB_SHA},null,2));
+          } else if (operation === 'promote') {
+            const id = process.env.RELEASE_DEPLOYMENT_ID;
+            if (!/^dpl_[A-Za-z0-9]+$/.test(id || '')) throw Error('Exact deployment ID required');
+            const deployment = await api(`/v13/deployments/${id}`);
+            if (deployment.projectId !== project || deployment.target !== 'production' || deployment.readyState !== 'READY' ||
+                deployment.meta?.promotionSourceSha !== process.env.GITHUB_SHA || deployment.meta?.promotionBaseline !== baseline) {
+              throw Error('Deployment does not match the reviewed, ready production candidate');
+            }
+            await api(`/v10/projects/${project}/promote/${id}`, 'POST', {});
+            console.log(JSON.stringify({operation,id,url:deployment.url,sourceSha:process.env.GITHUB_SHA},null,2));
+          } else throw Error('Unsupported release operation');
+          NODE
+      - name: Preserve verified current main-site source
+        if: inputs.operation == 'inspect-main-source'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: recovered-main-website
+          path: recovered-main-website/
+          if-no-files-found: error
+          retention-days: 7
+  backend:
+    needs: source
+    if: inputs.operation == 'backend-build'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - name: Validate immutable backend input
+        env:
+          BACKEND_SOURCE_SHA: ${{ inputs.backend_source_sha }}
+        run: |
+          [[ "$BACKEND_SOURCE_SHA" =~ ^[a-f0-9]{40}$ ]]
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ inputs.backend_source_sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+      - name: Build the original Windows realm with the promotion bridge
+        working-directory: mir2-web3
+        env:
+          CARGO_BUILD_JOBS: '2'
+          CARGO_PROFILE_RELEASE_OPT_LEVEL: '1'
+          CARGO_PROFILE_RELEASE_CODEGEN_UNITS: '16'
+          CARGO_PROFILE_RELEASE_LTO: 'false'
+          CARGO_PROFILE_RELEASE_DEBUG: '0'
+          CARGO_PROFILE_RELEASE_STRIP: symbols
+        run: |
+          set -euo pipefail
+          test "$GITHUB_SHA" = '${{ inputs.backend_source_sha }}'
+          (cd apps/gateway && npm ci --ignore-scripts && npm run build:wallet && npm run test:wallet)
+          git diff --exit-code -- apps/gateway/src/sui_usdc_dubhe_wallet.bundle.js apps/gateway/src/sui_usdc_dubhe_wallet.bundle.json
+          (cd onchain/usdc-recharge && npm ci --ignore-scripts && npm test)
+          rustup toolchain install 1.95.0 --profile minimal
+          cargo +1.95.0 build --locked --release -p mir2-gateway --bin mir2-gateway --bin usdc_native_transfer_reconcile
+          cargo +1.95.0 test --locked --release -p mir2-gateway --lib sui_usdc -- --test-threads=1
+          cargo +1.95.0 test --locked --release -p mir2-simulation --lib sui_usdc -- --test-threads=1
+          cargo +1.95.0 test --locked --release -p mir2-simulation --lib billing_provenance -- --test-threads=1
+          cargo +1.95.0 build --locked --release -p mir2-simulation --example promotion_worker --example promotion_playtest --example promotion_windows_playtest --example promotion_windows_acceptance --example promotion_recalculate --example promotion_chain_acceptance --example promotion_attribution_migration --example promotion_full_monthly_policy
+          mkdir -p ../promotion-backend-release/runtime ../promotion-backend-release/usdc-recharge/service
+          cp target/release/mir2-gateway target/release/usdc_native_transfer_reconcile target/release/examples/promotion_worker target/release/examples/promotion_playtest target/release/examples/promotion_windows_playtest target/release/examples/promotion_windows_acceptance target/release/examples/promotion_recalculate target/release/examples/promotion_chain_acceptance target/release/examples/promotion_attribution_migration target/release/examples/promotion_full_monthly_policy ../promotion-backend-release/
+          cp config/promotion-windows-playtest-20261030.test.json ../promotion-backend-release/
+          cp onchain/usdc-recharge/package.json onchain/usdc-recharge/package-lock.json onchain/usdc-recharge/.npmrc ../promotion-backend-release/usdc-recharge/
+          cp onchain/usdc-recharge/service/cli.mjs onchain/usdc-recharge/service/driver.mjs onchain/usdc-recharge/service/model.mjs ../promotion-backend-release/usdc-recharge/service/
+          cp "$(command -v node)" ../promotion-backend-release/runtime/node
+          node -p 'JSON.stringify({node:process.version,platform:process.platform,arch:process.arch})' > ../promotion-backend-release/runtime/RUNTIME.json
+          (cd ../promotion-backend-release/usdc-recharge && npm ci --omit=dev --ignore-scripts)
+          ../promotion-backend-release/runtime/node --check ../promotion-backend-release/usdc-recharge/service/cli.mjs
+          git rev-parse HEAD > ../promotion-backend-release/SOURCE-SHA.txt
+          node -e 'require("fs").writeFileSync("../promotion-backend-release/SOURCE-SHA.json", JSON.stringify({sourceSha:process.env.GITHUB_SHA}))'
+          cd ../promotion-backend-release
+          find -L . -type f ! -name SHA256SUMS ! -name SOURCE-SHA.txt -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS
+          ldd mir2-gateway
+          ldd runtime/node
+      - name: Run native PostgreSQL promotion and billing regressions
+        working-directory: mir2-web3
+        env:
+          CARGO_BUILD_JOBS: '2'
+          CARGO_PROFILE_RELEASE_OPT_LEVEL: '1'
+          CARGO_PROFILE_RELEASE_CODEGEN_UNITS: '16'
+          CARGO_PROFILE_RELEASE_LTO: 'false'
+          CARGO_PROFILE_RELEASE_DEBUG: '0'
+          CARGO_PROFILE_RELEASE_STRIP: symbols
+          MIR2_RUN_PROMOTION_PG_TESTS: '1'
+          MIR2_PROMOTION_ENVIRONMENT: test
+          MIR2_PROMOTION_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:55483/mir2_promotion_windows_ci
+          MIR2_WALLET_TEST_ISOLATED: '1'
+          MIR2_WALLET_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:55483/mir2_wallet_qa_backend_release_ci
+          MIR2_TEST_ZONE_SAVE_FENCE_URL: postgresql://postgres@127.0.0.1:55483/mir2_zone_lease_test_backend_ci
+          MIR2_TEST_ZONE_SAVE_OPERATION_URL: postgresql://postgres@127.0.0.1:55483/mir2_zone_lease_test_backend_ci
+          MIR2_GUILD_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:55483/mir2_guild_backend_release_ci
+        run: |
+          set -euo pipefail
+          PG_BIN="$(pg_config --bindir)"
+          PG_DATA="$RUNNER_TEMP/windows-promotion-pg"
+          "$PG_BIN/initdb" -D "$PG_DATA" --auth=trust --username=postgres > "$RUNNER_TEMP/windows-promotion-pg-init.log"
+          "$PG_BIN/pg_ctl" -D "$PG_DATA" -l "$RUNNER_TEMP/windows-promotion-pg.log" -o "-h 127.0.0.1 -p 55483 -k $PG_DATA" start || { tail -n 40 "$RUNNER_TEMP/windows-promotion-pg.log"; exit 1; }
+          trap '"$PG_BIN/pg_ctl" -D "$PG_DATA" -m fast stop' EXIT
+          "$PG_BIN/createdb" -h 127.0.0.1 -p 55483 -U postgres mir2_promotion_windows_ci
+          "$PG_BIN/createdb" -h 127.0.0.1 -p 55483 -U postgres mir2_wallet_qa_backend_release_ci
+          "$PG_BIN/createdb" -h 127.0.0.1 -p 55483 -U postgres mir2_zone_lease_test_backend_ci
+          "$PG_BIN/createdb" -h 127.0.0.1 -p 55483 -U postgres mir2_guild_backend_release_ci
+          # The authority owns this public table; private fixture schemas must not shadow it.
+          "$PG_BIN/psql" -X -v ON_ERROR_STOP=1 -h 127.0.0.1 -p 55483 -U postgres -d mir2_zone_lease_test_backend_ci -f infra/postgres/migrations/0003_zone_owner_leases.sql
+          WINDOWS_CLONE_DB="mir2_promotion_windows_acceptance_${GITHUB_SHA:0:12}"
+          "$PG_BIN/createdb" -h 127.0.0.1 -p 55483 -U postgres "$WINDOWS_CLONE_DB"
+          export MIR2_PROMOTION_WINDOWS_TEST_DATABASE_URL="postgresql://postgres@127.0.0.1:55483/$WINDOWS_CLONE_DB"
+          cargo +1.95.0 test --locked --release -p mir2-simulation --test billing_recharge --test promotion_backend_compat --test sui_usdc_provenance --test sui_usdc_native_transfer_postgres --test promotion_live_revenue --test promotion_postgres --test promotion_revenue_share --test promotion_wallet_enrollment --test promotion_attribution_migration --test promotion_full_monthly_policy -- --test-threads=1 --nocapture 2>&1 | tee ../promotion-backend-release/NATIVE-PG-TESTS.log
+          cargo +1.95.0 test --locked --release -p mir2-simulation --example promotion_windows_playtest --example promotion_windows_acceptance --example promotion_attribution_migration --example promotion_full_monthly_policy -- --test-threads=1 --nocapture 2>&1 | tee ../promotion-backend-release/CLONE-CLI-TESTS.log
+          cargo +1.95.0 test --locked --release -p mir2-gateway --lib promotion_ -- --test-threads=1 --nocapture 2>&1 | tee ../promotion-backend-release/WALLET-IDENTITY-TESTS.log
+          cargo +1.95.0 test --locked --release -p mir2-simulation --lib promotion -- --test-threads=1 --nocapture 2>&1 | tee ../promotion-backend-release/PROMOTION-GAME-SOURCE-PG-TESTS.log
+          cargo +1.95.0 test --locked --release -p mir2-simulation --test wallet_postgres -- --ignored --test-threads=1 --nocapture 2>&1 | tee ../promotion-backend-release/WALLET-POSTGRES-TESTS.log
+          cargo +1.95.0 test --locked --release -p mir2-simulation --lib zone_save_ -- --test-threads=1 --nocapture 2>&1 | tee ../promotion-backend-release/SIMULATION-ZONE-SAVE-PG-TESTS.log
+          cargo +1.95.0 test --locked --release -p mir2-gateway --lib zone_save_ -- --test-threads=1 --nocapture 2>&1 | tee ../promotion-backend-release/GATEWAY-ZONE-SAVE-PG-TESTS.log
+          cargo +1.95.0 test --locked --release -p mir2-gateway --lib player_drop_mail_transfer_pg_ -- --ignored --test-threads=1 --nocapture 2>&1 | tee ../promotion-backend-release/MAIL-TRANSFER-PG-TESTS.log
+          cargo +1.95.0 test --locked --release -p mir2-gateway --lib player_drop_shared_uid_pg_ -- --ignored --test-threads=1 --nocapture 2>&1 | tee ../promotion-backend-release/SHARED-UID-PG-TESTS.log
+          cargo +1.95.0 test --locked --release -p mir2-gateway --lib prepared_kill_postgres_ -- --ignored --test-threads=1 --nocapture 2>&1 | tee ../promotion-backend-release/PREPARED-KILL-PG-TESTS.log
+          node --input-type=module <<'NODE'
+          import {readFileSync,writeFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          const groups=[
+            {file:'NATIVE-PG-TESTS.log',binaries:10,includesUnitTests:true},
+            {file:'CLONE-CLI-TESTS.log',binaries:4,includesUnitTests:true},
+            {file:'WALLET-IDENTITY-TESTS.log',binaries:1,includesUnitTests:true},
+            {file:'PROMOTION-GAME-SOURCE-PG-TESTS.log',binaries:1,includesUnitTests:true},
+            {file:'WALLET-POSTGRES-TESTS.log',binaries:1,expectedPassed:1},
+            {file:'SIMULATION-ZONE-SAVE-PG-TESTS.log',binaries:1,includesUnitTests:true},
+            {file:'GATEWAY-ZONE-SAVE-PG-TESTS.log',binaries:1,includesUnitTests:true},
+            {file:'MAIL-TRANSFER-PG-TESTS.log',binaries:1,expectedPassed:4},
+            {file:'SHARED-UID-PG-TESTS.log',binaries:1,expectedPassed:11},
+            {file:'PREPARED-KILL-PG-TESTS.log',binaries:1,expectedPassed:7},
+          ];
+          const logs=Object.fromEntries(groups.map(({file,binaries,expectedPassed,includesUnitTests=false})=>{
+            const bytes=readFileSync('../promotion-backend-release/'+file);
+            const output=bytes.toString();
+            if(/\bSKIPPED\b/i.test(output))throw Error(file+': PostgreSQL opt-in was skipped');
+            const results=[...output.matchAll(/test result: ok\. (\d+) passed; (\d+) failed; (\d+) ignored; (\d+) measured; (\d+) filtered out;/g)];
+            if(results.length!==binaries||results.some(row=>Number(row[1])<=0||Number(row[2])||Number(row[3])))throw Error(file+': acceptance suite missing, empty, failed or ignored');
+            const testsExecuted=results.reduce((sum,row)=>sum+Number(row[1]),0);
+            if(expectedPassed!==undefined&&testsExecuted!==expectedPassed)throw Error(file+': exact PostgreSQL group count changed');
+            const filteredOut=results.reduce((sum,row)=>sum+Number(row[5]),0);
+            return [file,{passed:true,testsExecuted,failed:0,ignored:0,filteredOut,includesUnitTests,testBinaries:results.length,logSha256:createHash('sha256').update(bytes).digest('hex')}];
+          }));
+          writeFileSync('../promotion-backend-release/CI-ACCEPTANCE.json',JSON.stringify({
+            schema:'mir2.windows-promotion-native-pg.v1',sourceSha:process.env.GITHUB_SHA,
+            workflowRunId:process.env.GITHUB_RUN_ID,jobName:'backend',stepName:'Run native PostgreSQL promotion and billing regressions',
+            environment:'test',postgresBackend:'native',docker:false,passed:true,
+            testsExecuted:Object.values(logs).reduce((sum,value)=>sum+value.testsExecuted,0),skipped:0,
+            checks:{idempotentPaymentAttribution:logs['NATIVE-PG-TESTS.log'],noHistoricalRevenueInferred:logs['NATIVE-PG-TESTS.log'],
+              walletIdentityRegression:logs['WALLET-IDENTITY-TESTS.log'],cloneAudit:logs['CLONE-CLI-TESTS.log'],
+              promotionGameSource:logs['PROMOTION-GAME-SOURCE-PG-TESTS.log'],walletPostgres:logs['WALLET-POSTGRES-TESTS.log'],
+              simulationZoneSave:logs['SIMULATION-ZONE-SAVE-PG-TESTS.log'],gatewayZoneSave:logs['GATEWAY-ZONE-SAVE-PG-TESTS.log'],
+              mailTransfer:logs['MAIL-TRANSFER-PG-TESTS.log'],sharedUid:logs['SHARED-UID-PG-TESTS.log'],preparedKill:logs['PREPARED-KILL-PG-TESTS.log']},logs,
+            realMobileSignature:false
+          },null,2));
+          NODE
+          # Bind the final logs and acceptance receipt, which were created after packaging.
+          (cd ../promotion-backend-release && find -L . -type f ! -name SHA256SUMS ! -name SOURCE-SHA.txt -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS)
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: promotion-backend-${{ inputs.backend_source_sha }}
+          path: promotion-backend-release/
+          retention-days: 7
+          if-no-files-found: error
+          include-hidden-files: true

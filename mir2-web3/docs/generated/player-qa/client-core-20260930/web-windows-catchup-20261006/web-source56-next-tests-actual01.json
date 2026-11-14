@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "kind": "Source56 original51 input regressions and strict full Next",
+  "observedAtUtc": "2026-10-11T02:34:01.745Z",
+  "changes": "current owner/map late combat baseline recovery through original checked ingest; no fake skills or select replay",
+  "tests": {
+    "passed": 51,
+    "failed": 0,
+    "skipped": 0,
+    "actual": {
+      "owner": "Root",
+      "exitCode": 0,
+      "builderPid": 56740,
+      "kind": "Source56 original51 combat input regressions including actual late hook baseline",
+      "exited": true,
+      "disposed": true,
+      "elapsedMs": 3593,
+      "configPath": "C:/mir2-cross-platform-storage-20261002/web-source56-combat-baseline-20261011-01/node-tests01/config.json",
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "productionBuildAccepted": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    }
+  },
+  "next": {
+    "actual": {
+      "owner": "Root",
+      "exitCode": 0,
+      "builderPid": 55960,
+      "kind": "Source56 original strict full Next with combat baseline recovery",
+      "exited": true,
+      "disposed": true,
+      "elapsedMs": 93771,
+      "configPath": "C:/mir2-cross-platform-storage-20261002/web-source56-combat-baseline-20261011-01/next-build01/config.json",
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "productionBuildAccepted": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    },
+    "strictTypeScript": true,
+    "staticPages": 13,
+    "completeSources": 19569,
+    "callerPrePostHashesMatched": true,
+    "config": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source56-combat-baseline-20261011-01/next-build01/config.json",
+      "bytes": 4366,
+      "sha256": "d57b3504a352edd6cee5e232c7ad648bd5d011e264954baac8416758ef194214"
+    },
+    "snapshot": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source56-combat-baseline-20261011-01/next-build01/full-snapshot.json",
+      "bytes": 4870761,
+      "sha256": "6de2c63adcb1cb81ebe2b1d5032a578a24ff84b238e4caea4e32144ccd2df92d"
+    },
+    "renderer": "bevy-201eff554f63b9a8"
+  },
+  "scope": "Finite build/test only. Actual ordinary browser checkpoint separate.",
+  "combatVerified": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "boundAt": "2026-10-25T16:42:30.429Z",
+  "prepared": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-attack-deadline-diagnostics-v1\\template-prepared-v1.json",
+    "bytes": 6167,
+    "sha256": "0717ff370a38fabedff82e67b4f92e51a34f04a0655b3c5b95e6713071e151c8"
+  },
+  "independentPreparedReview": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-attack-deadline-diagnostics-prepared-independent-review-v1.json",
+    "bytes": 3459,
+    "sha256": "a6490407b60493792d771d96705491f94ff4093f529c7c95794aa0f6132bc6c1"
+  },
+  "sourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "files": [
+    {
+      "file": "run-owned-full.mjs",
+      "bytes": 14389,
+      "sha256": "dc7050c84a6b6601af6e2d94ed7df7778872d9748e2b377006e1c69b38385fb1"
+    },
+    {
+      "file": "audit-owned-full.mjs",
+      "bytes": 9066,
+      "sha256": "d5eab83f0649c6869dd20d7c1d3e4b8d9e63b856e18fb31d40b61669f887d893"
+    },
+    {
+      "file": "verify-inputs.mjs",
+      "bytes": 9392,
+      "sha256": "b715c67e7e0b3e764df11a885aff386b909d9f5dc81828eff89f51898660d395"
+    },
+    {
+      "file": "finalize-launcher-inputs.mjs",
+      "bytes": 2038,
+      "sha256": "df13d2a46fff49f21d147c24e4db366777ccf125338c374f1b780c7710bdc0d0"
+    },
+    {
+      "file": "projection-build-source-lib.mjs",
+      "bytes": 239,
+      "sha256": "a0cdb317c114f41ec51ba13e6682aaf77397399cfd314413d5af5b6ad304e309"
+    },
+    {
+      "file": "frozen-audit-support.mjs",
+      "bytes": 46572,
+      "sha256": "3988052a4ba9de791dbdb887b267eced6ca8bc915fa5676228f6d70c0761f4d5"
+    },
+    {
+      "file": "initialize-fresh-private.ps1",
+      "bytes": 1643,
+      "sha256": "c3a8ddecafe8c82752d963ee3237b55b25841d9674af83ea791e67ef8a82fd77"
+    },
+    {
+      "file": "full-lifecycle-profile.json",
+      "bytes": 4333,
+      "sha256": "a099b0fca2123cb75c5f781a49746c007db8803e7662b3dc12ae8a18b7356398"
+    },
+    {
+      "file": "candidate-release-binding-v1.json",
+      "bytes": 1589,
+      "sha256": "a061b31ef81c5335db5fc966806d353e77f3c030dc62dda6e8a0571438a53855"
+    },
+    {
+      "file": "slow-stage-public.mjs",
+      "bytes": 10318,
+      "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c"
+    },
+    {
+      "file": "slow-stage-row-contract.mjs",
+      "bytes": 1553,
+      "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+    },
+    {
+      "file": "slow-scoped-allowlist-proof-v1.json",
+      "bytes": 2302,
+      "sha256": "fcc174582a8a4dd33909e07121bc97b2d807c84edb68994a729f224a72885e6d"
+    },
+    {
+      "file": "derivation-proof-v1.json",
+      "bytes": 9447,
+      "sha256": "d9647020eda5d334dc0f6e57a1f311806e0405091d439b1dd8878ea3da0a078e"
+    },
+    {
+      "file": "README.md",
+      "bytes": 2026,
+      "sha256": "9e807ad6c55f01d870227a3446690765051f9a816d944e51d757e4eb0352f651"
+    },
+    {
+      "file": "prepare-template-v1.mjs",
+      "bytes": 12179,
+      "sha256": "4e2188bee53580a745bbac3f812ed58623d31cb525a128f47e914291185d5976"
+    }
+  ],
+  "sourceSha256": "d4a0766307c3ac202d49779c1e1431c2095d626e4d54993067df39efc38350a9",
+  "changedPreparedConfigurationsOnly": [
+    "full-lifecycle-profile.json",
+    "candidate-release-binding-v1.json"
+  ],
+  "otherThirteenPreparedInputsUnchanged": true,
+  "release": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\release-attack-deadline-diagnostics-v1.json",
+    "bytes": 3146,
+    "sha256": "46f97eadf345f4c43a7711ad41ad22383940a29437e6bbaf952f6408ce2569f8"
+  },
+  "backend": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\backend-source-attack-deadline-diagnostics-v1.json",
+    "bytes": 35581,
+    "sha256": "6c1d7d58de2259ae89b2f7c9e8d3768e9834fd9062e3e1c02a794cb7b7a1f31e"
+  },
+  "finalizationExecuted": false,
+  "realmStarted": false,
+  "accountsCreated": 0,
+  "capacityAccepted": false
+}

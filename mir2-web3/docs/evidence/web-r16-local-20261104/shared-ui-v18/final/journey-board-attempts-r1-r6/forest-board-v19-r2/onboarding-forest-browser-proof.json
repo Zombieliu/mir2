@@ -1,0 +1,1750 @@
+{
+  "schema": "r16-onboarding-forest-cave-entry-browser-smoke/1",
+  "startedAt": "2026-11-06T06:07:50.760Z",
+  "passed": false,
+  "villageFirstTwoCompleted": false,
+  "scope": {
+    "freshOrdinaryAccount": false,
+    "reusedOwnOrdinaryQaAccount": true,
+    "primaryUiOnly": true,
+    "rootPrivateFilesRead": false,
+    "rootSecretValuesPassedToBrowser": false,
+    "credentialsOnlyUsedForNormalUiFill": true,
+    "readOnlyRuntimeGetters": [
+      "getMir2QuestUiStatus",
+      "getMir2QuestWorldControlRects",
+      "getMir2NpcShopUiStatus",
+      "getMir2HudUiStatus"
+    ],
+    "mockedRoutes": false,
+    "hiddenActions": false,
+    "qaCommands": 0,
+    "saveDataEdits": false,
+    "modelCallsRequested": 0,
+    "walletOpened": false,
+    "originalOwnerOrAloOpened": false,
+    "trustedKeyObservation": "game-screen-Digit1-or-Digit3-keydown-up-only"
+  },
+  "sourceHashes": {
+    "quests": "fd35732d9356fcf5aeb4c06d639261a816626a54ccaf33f8cc6d461e98c93182",
+    "journeyUi": "e52630f84ee09e3e2d3abd821db00dde01b62e7d803d18972c8fd906db38c747",
+    "questLayout": "0c37a0082782be781376ccb452fda18ea6f4235a29fbbd678e7db066b81049ac",
+    "keys": "ebfd4f283523f658d33793f604e697a5c4e4b0430fc5d63586ec8597bf31d208",
+    "bag": "10a1dd118f66e6924de84ac611fdd0f7473e255e9f5b31063027f72a411d83c7",
+    "panel": "d6436a807c81b42525aa7e74b6bb6288819ed8bf4db9cdda914e2ad58a264fd8",
+    "npcShop": "6112790ba0b9a57fb529fbbf85d25dd20c3d8b98a63884a9098267badb42c5a1",
+    "shopPaint": "b7279b5d15b7c27960afeddf8ece13b37cb58c795817f74edeec3170b63c85d6",
+    "spawns": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2",
+    "leveling": "f873b9be24c3d6e151d7eee614ad1a805492dc2cbb8a28514279035e39e9eed6",
+    "questBridge": "1b94c42c228bbd0a757dd1c91f3771f9c70de07d595db31e9960e46ad83f832c",
+    "questActionPolicy": "5a8042d691109178c59cecdab3d5bb7c6a6c955049fa05a44519218e2c2e0570",
+    "nativeLocalization": "712f58b1f747d371dd511dadb7f5d3d76c5c91b4341bd7da96cfe1a1efdaad57",
+    "nativeLocalizationData": "d42c1568e3a6fa2798f30038f7a553f4fb4cb3f04abfb44672dc9cab37185938"
+  },
+  "plan": {
+    "profile": "newcomer-v2",
+    "scope": "growth15/q8 when eligible, and ordinary D001 entry/interior/exit with q9 only when eligible",
+    "segment": "class",
+    "ordinaryCaveGates": [
+      {
+        "from": "0",
+        "to": "d001",
+        "gate": {
+          "x": 147,
+          "y": 33
+        },
+        "landing": {
+          "x": 151,
+          "y": 362
+        },
+        "otherGates": [
+          {
+            "x": 148,
+            "y": 34
+          }
+        ],
+        "bounds": {
+          "minX": 134,
+          "maxX": 160,
+          "minY": 23,
+          "maxY": 50
+        }
+      },
+      {
+        "from": "d001",
+        "to": "0",
+        "gate": {
+          "x": 148,
+          "y": 365
+        },
+        "landing": {
+          "x": 143,
+          "y": 40
+        },
+        "otherGates": [
+          {
+            "x": 148,
+            "y": 366
+          },
+          {
+            "x": 149,
+            "y": 366
+          }
+        ],
+        "bounds": {
+          "minX": 136,
+          "maxX": 166,
+          "minY": 347,
+          "maxY": 377
+        }
+      }
+    ],
+    "quests": [
+      {
+        "id": 2120015,
+        "minLevel": 15,
+        "startNpcId": 0,
+        "finishNpcId": 0,
+        "gold": 5000,
+        "experience": 0,
+        "kills": [],
+        "flags": []
+      },
+      {
+        "id": 2110008,
+        "minLevel": 15,
+        "startNpcId": 0,
+        "finishNpcId": 24,
+        "gold": 500,
+        "experience": 40000,
+        "kills": [
+          {
+            "monster": "Oma",
+            "monsterIndex": 48,
+            "count": 2,
+            "message": "Defeat 2 Oma."
+          }
+        ],
+        "flags": [
+          {
+            "number": 2210081,
+            "message": "Complete your class practice",
+            "kind": "classPractice",
+            "requirements": {
+              "warrior": [
+                "Slaying learned",
+                "normal attack landed with Slaying learned"
+              ],
+              "wizard": [
+                "GreatFireBall learned",
+                "GreatFireBall damage committed"
+              ],
+              "taoist": [
+                "SpiritSword learned",
+                "normal attack landed with SpiritSword learned"
+              ],
+              "assassin": [
+                "DoubleSlash learned",
+                "DoubleSlash attack damage committed"
+              ],
+              "archer": [
+                "DoubleShot learned",
+                "DoubleShot damage committed"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "finalReloginCheck": false,
+    "ordinaryLogoutEachSegment": true,
+    "jane": {
+      "map": "0",
+      "x": 284,
+      "y": 606
+    },
+    "diaryKeyRequested": "KeyQ",
+    "diaryKeyFromCurrentSharedDefaults": "KeyQ",
+    "readOnlyGetters": [
+      "getMir2QuestUiStatus",
+      "getMir2QuestWorldControlRects",
+      "getMir2NpcShopUiStatus",
+      "getMir2HudUiStatus"
+    ],
+    "coldEntryWaitMs": 45000
+  },
+  "checks": [
+    {
+      "name": "town-has-no-old-tour-and-current-shared-native-quest-host",
+      "passed": true
+    }
+  ],
+  "phases": [
+    "ordinary-owned-qa-character-relogin",
+    "fresh-authority-q8-board-continuation",
+    "q8-visible-gilbert-town-transport"
+  ],
+  "screenshots": [
+    "01-current-native-task-card-before-measured-readiness.png",
+    "02-fresh-v2-native-task-card.png",
+    "03-failure-safe-masked.png"
+  ],
+  "packetEvidence": [
+    {
+      "sequence": 13,
+      "method": "LoginSuccess",
+      "phase": "ordinary-owned-qa-character-relogin"
+    },
+    {
+      "sequence": 19,
+      "method": "StartGame",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "result": 4
+    },
+    {
+      "sequence": 26,
+      "method": "MapInformation",
+      "phase": "ordinary-owned-qa-character-relogin"
+    },
+    {
+      "sequence": 27,
+      "method": "UserInformation",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "gold": 5780,
+      "hp": 149,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "objectId": 1000,
+      "direction": "Down"
+    },
+    {
+      "sequence": 449,
+      "method": "CompleteQuest",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "completedQuestIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004,
+        2110005,
+        2110006,
+        2110007,
+        2120015
+      ]
+    },
+    {
+      "sequence": 629,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 200325
+    },
+    {
+      "sequence": 630,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 200716
+    },
+    {
+      "sequence": 631,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206302
+    },
+    {
+      "sequence": 632,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206324
+    },
+    {
+      "sequence": 633,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206339
+    },
+    {
+      "sequence": 634,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206515
+    },
+    {
+      "sequence": 635,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206524
+    },
+    {
+      "sequence": 636,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206530
+    },
+    {
+      "sequence": 637,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206536
+    },
+    {
+      "sequence": 638,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206604
+    },
+    {
+      "sequence": 639,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206626
+    },
+    {
+      "sequence": 640,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206632
+    },
+    {
+      "sequence": 641,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206641
+    },
+    {
+      "sequence": 642,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206644
+    },
+    {
+      "sequence": 643,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206711
+    },
+    {
+      "sequence": 644,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206714
+    },
+    {
+      "sequence": 645,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206717
+    },
+    {
+      "sequence": 646,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 271801
+    },
+    {
+      "sequence": 647,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 271806
+    },
+    {
+      "sequence": 693,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 30,
+      "objectId": 206641
+    },
+    {
+      "sequence": 715,
+      "method": "UserLocation",
+      "phase": "q8-visible-gilbert-town-transport",
+      "direction": "Down"
+    },
+    {
+      "sequence": 719,
+      "method": "UserLocation",
+      "phase": "q8-visible-gilbert-town-transport",
+      "direction": "Down"
+    },
+    {
+      "sequence": 725,
+      "method": "MapInformation",
+      "phase": "q8-visible-gilbert-town-transport"
+    },
+    {
+      "sequence": 726,
+      "method": "UserLocation",
+      "phase": "q8-visible-gilbert-town-transport",
+      "direction": "Down"
+    },
+    {
+      "sequence": 788,
+      "method": "LogOutSuccess",
+      "phase": "q8-visible-gilbert-town-transport"
+    }
+  ],
+  "questOperations": [],
+  "movement": [],
+  "native": [
+    {
+      "name": "fresh-v2-chapter-task-card",
+      "ready": true,
+      "generation": 2,
+      "revision": 1,
+      "frame": 40,
+      "questLogOpen": false,
+      "capturesPointer": false,
+      "owner": "bevy",
+      "currentWorldContext": true,
+      "rects": [
+        {
+          "type": "questLocalUi",
+          "left": 19,
+          "top": 277,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "questLocalUi",
+          "left": 19,
+          "top": 306,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "openDestinationMap",
+          "left": 19,
+          "top": 335,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "toggleSupplies",
+          "left": 19,
+          "top": 364,
+          "width": 282,
+          "height": 25
+        }
+      ],
+      "compact": null
+    }
+  ],
+  "errors": [
+    {
+      "phase": "q8-visible-gilbert-town-transport",
+      "name": "ORDINARY_GILBERT_FARE_AND_LANDING_OUTCOME_UNKNOWN",
+      "hash": "8586af5510c30cfe8a65b910f02ec53be9a06cda446afb1fed06bc8f4a8ff9b8"
+    }
+  ],
+  "network": {
+    "failed": [],
+    "httpErrors": [],
+    "cancelled": [
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "ea0f53a994127e32f5f0e81ecffa7bfa94cc723f3605b50ab8b606a334668b0f",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "10779bcd7766258ee9db4a24840647515111bffec6ad14bbec19d45f4b333410",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "9eeb5fa233df82531dffea86ffb49fa4f48ac32bcba5fb5d93a58ab367fe0e40",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "59b575174e75b5bd4afcfbd6f7f338462fb173fabd1e9572382da322fe3dffef",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "71820db32d27c6346e8cf4a04c23b417152484d7dc3b3aa2dacf2bb9e49d68b9",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "330844910339dc66f4976425db799680f6ce320ae8afe1fa5ce8c7dea78b659c",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "17dd785542fc02596c8479a33e5d1673e580bf734f8df8b335490904c4f8b145",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "8ea81f5ef6eca4aea13aa61ed446a01176ff30ced91eb2b20769e80811d452f7",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "a63dca74c7308fb78ec91ee278687dcec5482360e21c64876258ff8d0a7316d1",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "1630f35e396c9cec2745e3f0e3520d145a2953e5a684e7de13a80d91dbaf98df",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "12c1a44174eff7aeed9f913487f5375450e4802b8befa496107761b4c0cbd38f",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "87688bf4a9de84fa0928bd7ffec86d61b258ae5f084d449437e48cd72e50aa5b",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "e4dd2e2a42ee7653ddee0c75c87400d67ffbf65961586f8e10934234cb68c162",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "54654d4392267be1bca77aede2376a23605464619b6e40a09bb47cf4c9c4c28d",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "cbb441feea48766b04868be4686c767cdf90958a241ca25276748c53f30b78dc",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "c9eb70d4245a43c91adfe57cc6442c9a7eefd7306facc109a1ff8ec09940cdb7",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "e3d6ca0dbd83b299c9a0de9ca88d0d19e2837a7ea4757a0e2c67b07978db9c8f",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "b0898c411cfdaaba11c360159438f75371a0e95c9942275f071a3aad207a3d7f",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "9e6ff14005d5f2a89d7f5f80846303ff806debbf46a0a53ad7ae210732e00f3e",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "q8-visible-gilbert-town-transport",
+        "method": "GET",
+        "pathHash": "b5a477466acb573db09051484a348dc305a615e912e5fd4fb8cdfc59b6aa0454",
+        "successfulResponseObserved": true
+      }
+    ]
+  },
+  "webSockets": [
+    {
+      "phase": "ordinary-owned-qa-character-relogin",
+      "endpoint": "ws://127.0.0.1:19040/ws",
+      "pathHash": "0c65a812b078db6795486113db0a40a60e82b36e6bcc9ecbaff9ac00e404f5ff",
+      "loopback": true,
+      "hasQuery": false,
+      "handshakeStatus": 101,
+      "closed": false,
+      "closeCode": null,
+      "closeFrames": []
+    }
+  ],
+  "console": {
+    "errorCount": 0,
+    "warningCount": 7,
+    "hashes": [
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "175c73d54d8d443a965a16a38ac036c2de536a3920f173064fd6837866b00186"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "f2df32e07f3b60041ea76a345cff55be605ca3aaf11b2c2a028733b59d2bb9f1"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "357002223534dfc75701fff5cac897e9924bd76e654f581263c0153794fe9655"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "01e9c2c4845d6bc8d2b4d450de44710125e26ed4deb8b0c16fcaedc4bd934b88"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "01e9c2c4845d6bc8d2b4d450de44710125e26ed4deb8b0c16fcaedc4bd934b88"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "01e9c2c4845d6bc8d2b4d450de44710125e26ed4deb8b0c16fcaedc4bd934b88"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "68dbe7185def5c1946e66ae2d7743ca56fb7f54cc34cdc518f89247599bb4e01"
+      }
+    ]
+  },
+  "commands": {
+    "clientCapabilities": 2,
+    "setLanguage": 1,
+    "clientVersion": 1,
+    "login": 1,
+    "startGame": 1,
+    "keepAlive": 4,
+    "npcPurchaseOwner": 1,
+    "interact": 1,
+    "selectNpcDialog": 2,
+    "logOut": 1
+  },
+  "unknownCommandCount": 0,
+  "unknownTypeHashes": [],
+  "cleanup": {
+    "ordinaryLogout": true,
+    "browserClosed": true
+  },
+  "vitals": [
+    {
+      "sequence": 3,
+      "receivedAtMs": 1793945276250,
+      "method": "realmInfo",
+      "hp": null,
+      "maxHp": null,
+      "mp": null,
+      "maxMp": null,
+      "dead": false,
+      "position": null
+    },
+    {
+      "sequence": 27,
+      "receivedAtMs": 1793945292247,
+      "method": "UserInformation",
+      "hp": 149,
+      "maxHp": 149,
+      "mp": 63,
+      "maxMp": 63,
+      "dead": false,
+      "position": {
+        "x": 288,
+        "y": 616
+      }
+    },
+    {
+      "sequence": 788,
+      "receivedAtMs": 1793945333705,
+      "method": "LogOutSuccess",
+      "hp": null,
+      "maxHp": null,
+      "mp": null,
+      "maxMp": null,
+      "dead": false,
+      "position": null
+    }
+  ],
+  "medicine": [],
+  "trustedBeltKeyEvents": [],
+  "npcPurchaseEvidence": [
+    {
+      "sequence": 705,
+      "action": "begin",
+      "reply": "producer",
+      "completeSnapshot": true,
+      "matchingRequestAndOperation": true,
+      "bootstrapObserverNotGated": true
+    }
+  ],
+  "inventoryClose": {
+    "method": "visible-native-x",
+    "shortcutRetested": false,
+    "priorUnconfirmedF9Run": "onboarding-v12-browser-r5"
+  },
+  "budgets": {
+    "maxHuntMs": 600000,
+    "maxSteps": 2300
+  },
+  "publicMapSceneResponses": [
+    {
+      "phase": "ordinary-owned-qa-character-relogin",
+      "map": "0",
+      "missing": 0,
+      "sourceSprites": 957
+    },
+    {
+      "phase": "ordinary-owned-qa-character-relogin",
+      "map": "0",
+      "missing": 0,
+      "sourceSprites": 768
+    }
+  ],
+  "resumeState": {
+    "hp": 149,
+    "maxHp": 149,
+    "mp": 63,
+    "maxMp": 63,
+    "dead": false,
+    "position": {
+      "x": 288,
+      "y": 616
+    },
+    "progression": {
+      "level": 15,
+      "experience": 876,
+      "maxExperience": 40000
+    },
+    "gold": 5780,
+    "smallHpMedicine": 3,
+    "equipment": [
+      {
+        "name": "BaseDress(M)",
+        "slot": "armour",
+        "durabilityCurrent": 5000,
+        "durabilityMax": 5000
+      },
+      {
+        "name": "SharpSword",
+        "slot": "weapon",
+        "durabilityCurrent": 18000,
+        "durabilityMax": 18000
+      }
+    ],
+    "playerLevel": 15,
+    "knownFencing": true,
+    "fencingBooks": 0,
+    "bagEquipment": [
+      {
+        "name": "WoodenSword",
+        "slot": 0,
+        "equipSlot": "weapon"
+      }
+    ],
+    "clothingInBag": [],
+    "clothingEquipped": [
+      {
+        "name": "BaseDress(M)",
+        "slot": "armour"
+      }
+    ],
+    "hpMedicineOnBelt": [
+      {
+        "slot": 0,
+        "quantity": 3,
+        "key": "Digit1"
+      }
+    ],
+    "completedQuestIds": [
+      2110001,
+      2110002,
+      2110003,
+      2110004,
+      2110005,
+      2110006,
+      2110007,
+      2120015
+    ],
+    "questLog": [
+      {
+        "questId": 2110001,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Report to Assistant Jane",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110002,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Equip a weapon you can use",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110003,
+        "stage": "completed",
+        "current": 4,
+        "required": 4,
+        "objectives": [
+          {
+            "label": "Defeat 2 Scarecrow.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          },
+          {
+            "label": "Defeat 2 RakingCat.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110004,
+        "stage": "completed",
+        "current": 3,
+        "required": 3,
+        "objectives": [
+          {
+            "label": "Defeat 2 Oma.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          },
+          {
+            "label": "Complete your class practice",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110005,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Reach a Bichon safe area",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110006,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Buy a small HP or MP potion from a normal shop",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110007,
+        "stage": "completed",
+        "current": 4,
+        "required": 4,
+        "objectives": [
+          {
+            "label": "Defeat 4 ForestYeti.",
+            "current": 4,
+            "required": 4,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2120015,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": []
+      },
+      {
+        "questId": 2110008,
+        "stage": "readyToTurnIn",
+        "current": 3,
+        "required": 3,
+        "objectives": [
+          {
+            "label": "Defeat 2 Oma.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          },
+          {
+            "label": "Complete your class practice",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      }
+    ]
+  },
+  "renderer": {
+    "expected": "bevy-a46905128c316656",
+    "observedPublicReleases": [
+      "bevy-a46905128c316656"
+    ]
+  },
+  "initialNativeReadiness": [
+    {
+      "ready": true,
+      "frame": 40,
+      "generation": 2,
+      "revision": 1,
+      "rectCount": 4,
+      "worldCurrent": true,
+      "genericNativeActionsRequireNonemptyWorldRects": false
+    }
+  ],
+  "boardContinuation": {
+    "q8": {
+      "questId": 2110008,
+      "stage": "readyToTurnIn",
+      "current": 3,
+      "required": 3,
+      "objectives": [
+        {
+          "label": "Defeat 2 Oma.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        },
+        {
+          "label": "Complete your class practice",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    "alreadyCompleted": false,
+    "hp": 149,
+    "maxHp": 149,
+    "mp": 63,
+    "maxMp": 63,
+    "dead": false,
+    "position": {
+      "x": 288,
+      "y": 616
+    },
+    "gold": 5780
+  },
+  "keyboardPanelChecks": [
+    {
+      "phase": "fresh-authority-q8-board-continuation",
+      "visibleShopWindows": 0,
+      "nativeShop": null,
+      "bag": {
+        "active": false
+      },
+      "quest": {
+        "capturesPointer": false
+      }
+    },
+    {
+      "phase": "q8-visible-gilbert-town-transport",
+      "visibleShopWindows": 0,
+      "nativeShop": null,
+      "bag": {
+        "active": false
+      },
+      "quest": {
+        "capturesPointer": false
+      }
+    }
+  ],
+  "exactNpcPhysicalHitPoints": [
+    {
+      "npcObjectId": "1",
+      "x": 625.8,
+      "y": 412,
+      "kind": "sprite",
+      "receivedSequenceBefore": 707
+    }
+  ],
+  "lastPhysicalNativeInput": {
+    "phase": "q8-visible-gilbert-town-transport",
+    "logical": {
+      "x": 30,
+      "y": 107
+    },
+    "css": {
+      "x": 158,
+      "y": 203
+    },
+    "clickCount": 1,
+    "delayMs": 80,
+    "quest": {
+      "questLocaleVersion": 1,
+      "language": "zh-CN",
+      "displayLocaleVersion": 1,
+      "displayLanguage": "zh-CN",
+      "ready": true,
+      "error": null,
+      "capturesPointer": true,
+      "questLogOpen": false,
+      "frame": 146,
+      "generation": 2,
+      "revision": 4,
+      "openRevision": 1,
+      "hpOrb": {
+        "supported": true,
+        "ready": false,
+        "generation": 2,
+        "revision": 4,
+        "hp": null,
+        "maxHp": null,
+        "hpOnly": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "mpOrb": {
+        "supported": true,
+        "ready": false,
+        "generation": 2,
+        "revision": 4,
+        "mp": null,
+        "maxMp": null,
+        "hpOnly": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "experienceBar": {
+        "supported": false,
+        "ready": false,
+        "generation": 2,
+        "revision": 4,
+        "experience": null,
+        "maxExperience": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "weightBar": {
+        "supported": false,
+        "ready": false,
+        "generation": 2,
+        "revision": 4,
+        "currentWeight": null,
+        "maxWeight": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "hudBarDrawPlan": {
+        "version": 1,
+        "generation": 2,
+        "revision": 4,
+        "lifetime": "r1-g2-p1000",
+        "experience": {
+          "token": "e-2",
+          "sequence": 2,
+          "state": "draw",
+          "current": 876,
+          "maximum": 40000,
+          "slot": {
+            "left": 9,
+            "top": 759,
+            "width": 1004,
+            "height": 8
+          },
+          "image": "original-ui/Prguse/8.png",
+          "source": {
+            "left": 0,
+            "top": 0,
+            "width": 21,
+            "height": 8
+          },
+          "destination": {
+            "left": 9,
+            "top": 759,
+            "width": 21,
+            "height": 8
+          }
+        },
+        "weight": {
+          "token": "w-2",
+          "sequence": 2,
+          "state": "draw",
+          "current": 5,
+          "maximum": 125,
+          "slot": {
+            "left": 919,
+            "top": 719,
+            "width": 76,
+            "height": 12
+          },
+          "image": "original-ui/Prguse/76.png",
+          "source": {
+            "left": 0,
+            "top": 0,
+            "width": 4,
+            "height": 12
+          },
+          "destination": {
+            "left": 919,
+            "top": 719,
+            "width": 4,
+            "height": 12
+          }
+        }
+      }
+    },
+    "receivedSequenceBefore": 719
+  },
+  "ordinaryGilbert": {
+    "realNpcObject": 1,
+    "menu": [
+      "@tele",
+      "@BichonWall"
+    ],
+    "fareLimit": 2000,
+    "before": {
+      "x": 288,
+      "y": 616
+    },
+    "goldBefore": 5780
+  },
+  "safeRetreat": {
+    "from": {
+      "x": 288,
+      "y": 616
+    },
+    "observedPriorTile": null,
+    "completed": false
+  },
+  "failureNative": {
+    "status": {
+      "questLocaleVersion": 1,
+      "language": "zh-CN",
+      "displayLocaleVersion": 1,
+      "displayLanguage": "zh-CN",
+      "ready": true,
+      "error": null,
+      "capturesPointer": false,
+      "questLogOpen": false,
+      "frame": 206,
+      "generation": 2,
+      "revision": 5,
+      "openRevision": 1,
+      "hpOrb": {
+        "supported": true,
+        "ready": false,
+        "generation": 2,
+        "revision": 5,
+        "hp": null,
+        "maxHp": null,
+        "hpOnly": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "mpOrb": {
+        "supported": true,
+        "ready": false,
+        "generation": 2,
+        "revision": 5,
+        "mp": null,
+        "maxMp": null,
+        "hpOnly": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "experienceBar": {
+        "supported": false,
+        "ready": false,
+        "generation": 2,
+        "revision": 5,
+        "experience": null,
+        "maxExperience": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "weightBar": {
+        "supported": false,
+        "ready": false,
+        "generation": 2,
+        "revision": 5,
+        "currentWeight": null,
+        "maxWeight": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "hudBarDrawPlan": {
+        "version": 1,
+        "generation": 2,
+        "revision": 5,
+        "lifetime": "r1-g2-p1000",
+        "experience": {
+          "token": "e-3",
+          "sequence": 3,
+          "state": "draw",
+          "current": 876,
+          "maximum": 40000,
+          "slot": {
+            "left": 9,
+            "top": 759,
+            "width": 1004,
+            "height": 8
+          },
+          "image": "original-ui/Prguse/8.png",
+          "source": {
+            "left": 0,
+            "top": 0,
+            "width": 21,
+            "height": 8
+          },
+          "destination": {
+            "left": 9,
+            "top": 759,
+            "width": 21,
+            "height": 8
+          }
+        },
+        "weight": {
+          "token": "w-3",
+          "sequence": 3,
+          "state": "draw",
+          "current": 5,
+          "maximum": 125,
+          "slot": {
+            "left": 919,
+            "top": 719,
+            "width": 76,
+            "height": 12
+          },
+          "image": "original-ui/Prguse/76.png",
+          "source": {
+            "left": 0,
+            "top": 0,
+            "width": 4,
+            "height": 12
+          },
+          "destination": {
+            "left": 919,
+            "top": 719,
+            "width": 4,
+            "height": 12
+          }
+        }
+      }
+    },
+    "worldCurrent": true,
+    "controls": {
+      "version": 1,
+      "stamp": {
+        "generation": 2,
+        "revision": 5,
+        "connectionGeneration": 1,
+        "sessionGeneration": 1,
+        "sceneRevision": 3,
+        "playerObjectId": 1000,
+        "mapFileName": "0"
+      },
+      "logicalWidth": 1024,
+      "logicalHeight": 768,
+      "rects": [
+        {
+          "type": "questLocalUi",
+          "left": 19,
+          "top": 277,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "questLocalUi",
+          "left": 19,
+          "top": 306,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "openDestinationMap",
+          "left": 19,
+          "top": 335,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "toggleSupplies",
+          "left": 19,
+          "top": 364,
+          "width": 282,
+          "height": 25
+        }
+      ]
+    }
+  },
+  "failureBag": {
+    "active": false,
+    "error": null,
+    "owner": {
+      "owner": "react",
+      "runGeneration": 1,
+      "ownerRevision": 1,
+      "connectionGeneration": 1,
+      "sessionGeneration": 1
+    },
+    "status": {
+      "runGeneration": 1,
+      "connectionGeneration": 1,
+      "sessionGeneration": 1,
+      "ownerRevision": 1,
+      "frame": 184,
+      "ready": false,
+      "inputEnabled": false,
+      "appliedRevision": 2,
+      "appliedModelRevision": 2,
+      "appliedPresentationRevision": 1,
+      "supportsBagToBelt": true,
+      "appliedBeltGeometryRevision": 0,
+      "inputRegions": [],
+      "diagnostics": {
+        "modelVisibleItems": 1,
+        "treeContentComplete": false,
+        "touchActionsComplete": null,
+        "scopedActionCount": null,
+        "expectedActionCount": null,
+        "minCssHitWidth": null,
+        "minCssHitHeight": null,
+        "firstActionFailure": null,
+        "layoutMatchesWindow": true,
+        "assetsLoading": true,
+        "layoutRegionCount": 0,
+        "sinkPresent": true,
+        "treeIdentity": null,
+        "treeModelRevision": null,
+        "treePage": null,
+        "treeVisibleItems": null,
+        "treeMatchesModel": false,
+        "gridCells": 0,
+        "itemCells": 0,
+        "occupiedCells": 0,
+        "iconNodes": 0,
+        "visibleIcons": 0,
+        "laidOutIcons": 0,
+        "stackTextNodes": 0,
+        "visibleStackTexts": 0,
+        "laidOutStackTexts": 0
+      },
+      "error": null
+    },
+    "diagnostic": {
+      "phase": "prepare",
+      "transitions": [],
+      "intentVerdicts": []
+    },
+    "hudNavigation": []
+  },
+  "failureNpcShop": {
+    "host": null,
+    "diagnostic": null,
+    "action": {
+      "route": "none",
+      "stage": "idle",
+      "reason": null
+    },
+    "status": {
+      "runGeneration": 0,
+      "connectionGeneration": 0,
+      "sessionGeneration": 0,
+      "ownerRevision": 0,
+      "playerObjectId": 0,
+      "frame": 210,
+      "ready": false,
+      "inputEnabled": false,
+      "appliedRevision": 0,
+      "appliedModelRevision": 0,
+      "appliedPresentationRevision": 0,
+      "appliedServiceRevision": 0,
+      "appliedCatalogRevision": 0,
+      "coreAuthorityRevision": null,
+      "controlRevision": null,
+      "selectedId": null,
+      "quantity": 1,
+      "startIndex": 0,
+      "feedback": {
+        "phase": null,
+        "pending": false,
+        "canReserve": false,
+        "previousUnknown": 0
+      },
+      "inputRegions": [],
+      "error": null
+    }
+  },
+  "failureBeltInput": {
+    "keyboard": null,
+    "host": {
+      "shortcut": null,
+      "equipment": null
+    }
+  },
+  "failureMovement": {
+    "keyboard": {
+      "lastKey": null,
+      "lastDispatch": {
+        "reason": "no-held-direction",
+        "source": "held",
+        "at": 1793945324663,
+        "sceneInteractionReady": true,
+        "bevyQuestUiCapturesPointer": false
+      },
+      "lastShortcut": null
+    },
+    "pointer": {
+      "at": 1793945315590,
+      "phase": "pointerdown",
+      "held": false,
+      "worldTarget": null,
+      "hudHeld": false,
+      "bagHeld": false,
+      "heroHeld": false,
+      "storageHeld": false,
+      "layers": [
+        {
+          "tag": "CANVAS",
+          "canvas": true,
+          "classes": [
+            "shared-quest-ui-visible"
+          ],
+          "objectId": null
+        },
+        {
+          "tag": "DIV",
+          "canvas": false,
+          "classes": [
+            "game-world-composite"
+          ],
+          "objectId": null
+        },
+        {
+          "tag": "DIV",
+          "canvas": false,
+          "classes": [
+            "client-stage-frame"
+          ],
+          "objectId": null
+        },
+        {
+          "tag": "SECTION",
+          "canvas": false,
+          "classes": [
+            "mir-stage"
+          ],
+          "objectId": null
+        },
+        {
+          "tag": "MAIN",
+          "canvas": false,
+          "classes": [
+            "mir-client-page"
+          ],
+          "objectId": null
+        },
+        {
+          "tag": "BODY",
+          "canvas": false,
+          "classes": [
+            "notranslate"
+          ],
+          "objectId": null
+        },
+        {
+          "tag": "HTML",
+          "canvas": false,
+          "classes": [
+            "notranslate"
+          ],
+          "objectId": null
+        }
+      ]
+    },
+    "host": {
+      "connectionGeneration": 1,
+      "sessionGeneration": 1,
+      "suspended": null,
+      "sceneDeferred": false,
+      "lastIntent": null,
+      "lastAttempt": null,
+      "lastPickup": null,
+      "self": {
+        "x": 296,
+        "y": 222,
+        "direction": "Down",
+        "dead": false
+      },
+      "queued": null,
+      "controller": {
+        "canSend": true,
+        "sendDelayMs": 0,
+        "blockedMs": 0,
+        "pending": null
+      },
+      "target": null,
+      "targetMapBlocked": false,
+      "targetMapCell": null,
+      "nearbyEntities": []
+    }
+  },
+  "finishedAt": "2026-11-06T06:08:53.809Z",
+  "finalQuestLog": [
+    {
+      "questId": 2110001,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Report to Assistant Jane",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110002,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Equip a weapon you can use",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110003,
+      "stage": "completed",
+      "current": 4,
+      "required": 4,
+      "objectives": [
+        {
+          "label": "Defeat 2 Scarecrow.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        },
+        {
+          "label": "Defeat 2 RakingCat.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110004,
+      "stage": "completed",
+      "current": 3,
+      "required": 3,
+      "objectives": [
+        {
+          "label": "Defeat 2 Oma.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        },
+        {
+          "label": "Complete your class practice",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110005,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Reach a Bichon safe area",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110006,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Buy a small HP or MP potion from a normal shop",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110007,
+      "stage": "completed",
+      "current": 4,
+      "required": 4,
+      "objectives": [
+        {
+          "label": "Defeat 4 ForestYeti.",
+          "current": 4,
+          "required": 4,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2120015,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": []
+    },
+    {
+      "questId": 2110008,
+      "stage": "readyToTurnIn",
+      "current": 3,
+      "required": 3,
+      "objectives": [
+        {
+          "label": "Defeat 2 Oma.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        },
+        {
+          "label": "Complete your class practice",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    }
+  ],
+  "completedQuestIds": [
+    2110001,
+    2110002,
+    2110003,
+    2110004,
+    2110005,
+    2110006,
+    2110007,
+    2120015
+  ],
+  "lastFullSnapshot": {
+    "sequence": 789,
+    "receivedAtMs": 1793945333738,
+    "position": null,
+    "inSafeZone": false,
+    "mapFileName": null,
+    "hp": null,
+    "maxHp": null,
+    "progression": {
+      "level": null,
+      "experience": 876,
+      "maxExperience": 40000
+    },
+    "gold": 3780,
+    "dead": false
+  },
+  "lastUserLocation": {
+    "sequence": 726,
+    "packet": "UserLocation",
+    "position": {
+      "x": 296,
+      "y": 222
+    },
+    "direction": "Down",
+    "connectionEpoch": 1,
+    "characterEpoch": 1,
+    "mapFileName": "0"
+  },
+  "movementSteps": 0,
+  "finalVitals": {
+    "hp": null,
+    "maxHp": null,
+    "mp": null,
+    "maxMp": null,
+    "dead": false,
+    "position": null
+  }
+}

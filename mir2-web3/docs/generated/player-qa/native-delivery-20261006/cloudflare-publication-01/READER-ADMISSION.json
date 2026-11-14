@@ -1,0 +1,25 @@
+{
+  "schema": "mir2.deployed-reader-source-admission.v1",
+  "source": "4c60c323aed11829abae6ee5ce6e13c675a3c1c3",
+  "byteExact": true,
+  "records": [
+    {
+      "path": "mir2-web3/infra/cloudflare/mir2-native-downloads/src/index.mjs",
+      "source": "4c60c323aed11829abae6ee5ce6e13c675a3c1c3",
+      "bytes": 11629,
+      "sha256": "0bfd3d7b2af3662fcabb2b37e9f813cda4e1573363565cfac45e4defc492ec24"
+    },
+    {
+      "path": "mir2-web3/infra/cloudflare/mir2-native-downloads/test/downloads.test.mjs",
+      "source": "4c60c323aed11829abae6ee5ce6e13c675a3c1c3",
+      "bytes": 14203,
+      "sha256": "53b27b95a2186e864c824f179d7fe1e8b56fc0ad56695189085a4e6b4a46fe1c"
+    },
+    {
+      "path": "mir2-web3/infra/cloudflare/mir2-native-downloads/wrangler.jsonc",
+      "source": "4c60c323aed11829abae6ee5ce6e13c675a3c1c3",
+      "bytes": 489,
+      "sha256": "4c1af1bcedd270bf654a8dd26b664a85a272702a6d9b9a7cf1be6b09a82fe524"
+    }
+  ]
+}

@@ -1,0 +1,245 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-10",
+  "source": {
+    "canonicalBeforeDocumentation": "e83f4a9233d228990c978ad2744e132348215f80",
+    "liveRevision": "a23cc382af1c66cd7ffeea794fd62fe7cba7e96a",
+    "url": "https://numeron.obelisk.build/game",
+    "publicVersionReadbackHttp": 200
+  },
+  "method": {
+    "boot": "Headless installed Chrome on the same Windows host, two fresh independent contexts, zh-CN, default system route then direct via --no-proxy-server, viewport 1280x960, ordinary GET until QR entry visible, no throttling or request interception. Timings are examples, not percentiles.",
+    "qr": "Separate fresh contexts on the default route in Simplified and Traditional Chinese. Clicked the normal QR entry, confirmed real QR with official wallet link and pending poll, then canceled. No sign-in or new game character in these samples.",
+    "attribution": "Fetched the exact public content-hashed script once, then parsed its Webpack module boundaries using the local TypeScript JavaScript parser. No source-map dependency.",
+    "clocks": "Boot navigation and DOM times are on the browser performance clock. Script event times use CDP Network relative to first observed request. QR process phase and CDP network times also use separate clocks."
+  },
+  "boot": [
+    {
+      "lane": "system",
+      "browserTiming": {
+        "seenAt": 25877,
+        "readAt": 26044,
+        "visibleAndEnabled": true,
+        "navigation": {
+          "requestStart": 958,
+          "responseStart": 1179,
+          "responseEnd": 1181,
+          "domInteractive": 1185,
+          "domContentLoadedEventEnd": 1678,
+          "loadEventEnd": 1679,
+          "transferSize": 3317,
+          "encodedBodySize": 3017,
+          "decodedBodySize": 11529
+        },
+        "documentReadyState": "complete",
+        "fontsStatus": "loading",
+        "control": false
+      },
+      "firstLoginChunk": {
+        "path": "/_next/static/chunks/2506-b546c84a4ed1036b.js",
+        "kind": "Script",
+        "began": 1418,
+        "priority": "High",
+        "headersAt": 24675,
+        "status": 200,
+        "serviceWorker": false,
+        "diskCache": false,
+        "cache": {
+          "cf-cache-status": "HIT",
+          "x-vercel-cache": "MISS"
+        },
+        "protocol": "h2",
+        "timing": {
+          "sendStart": 0,
+          "sendEnd": 0,
+          "receiveHeadersStart": 3607,
+          "receiveHeadersEnd": 3607
+        },
+        "finished": 24671,
+        "transferBytes": 1911350
+      },
+      "laterShellChunk": {
+        "path": "/_next/static/chunks/9399.7ed7d5a9960c4203.js",
+        "kind": "Script",
+        "began": 24786,
+        "priority": "Low",
+        "headersAt": 25843,
+        "status": 200,
+        "serviceWorker": false,
+        "diskCache": false,
+        "cache": {
+          "cf-cache-status": "HIT",
+          "x-vercel-cache": "MISS"
+        },
+        "protocol": "h2",
+        "timing": {
+          "sendStart": 629,
+          "sendEnd": 629,
+          "receiveHeadersStart": 790,
+          "receiveHeadersEnd": 790
+        },
+        "finished": 25841,
+        "transferBytes": 137194
+      }
+    },
+    {
+      "lane": "direct",
+      "browserTiming": {
+        "seenAt": 15331,
+        "readAt": 15498,
+        "visibleAndEnabled": true,
+        "navigation": {
+          "requestStart": 1384,
+          "responseStart": 1886,
+          "responseEnd": 2255,
+          "domInteractive": 2255,
+          "domContentLoadedEventEnd": 3497,
+          "loadEventEnd": 3498,
+          "transferSize": 3319,
+          "encodedBodySize": 3019,
+          "decodedBodySize": 11529
+        },
+        "documentReadyState": "complete",
+        "fontsStatus": "loading",
+        "control": false
+      },
+      "firstLoginChunk": {
+        "path": "/_next/static/chunks/2506-b546c84a4ed1036b.js",
+        "kind": "Script",
+        "began": 2833,
+        "priority": "High",
+        "headersAt": 14174,
+        "status": 200,
+        "serviceWorker": false,
+        "diskCache": false,
+        "cache": {
+          "cf-cache-status": "HIT",
+          "x-vercel-cache": "MISS"
+        },
+        "protocol": "h2",
+        "timing": {
+          "sendStart": 0,
+          "sendEnd": 0,
+          "receiveHeadersStart": 758,
+          "receiveHeadersEnd": 758
+        },
+        "finished": 14168,
+        "transferBytes": 1911299
+      },
+      "laterShellChunk": {
+        "path": "/_next/static/chunks/9399.7ed7d5a9960c4203.js",
+        "kind": "Script",
+        "began": 14285,
+        "priority": "Low",
+        "headersAt": 15297,
+        "status": 200,
+        "serviceWorker": false,
+        "diskCache": false,
+        "cache": {
+          "cf-cache-status": "HIT",
+          "x-vercel-cache": "MISS"
+        },
+        "protocol": "h2",
+        "timing": {
+          "sendStart": 0,
+          "sendEnd": 0,
+          "receiveHeadersStart": 191,
+          "receiveHeadersEnd": 191
+        },
+        "finished": 15296,
+        "transferBytes": 136976
+      }
+    }
+  ],
+  "liveChunk": {
+    "path": "/_next/static/chunks/2506-b546c84a4ed1036b.js",
+    "status": 200,
+    "decodedBytes": 7474147,
+    "sha256": "84dc377fc32d07c2dbebb29e2aa55a8673475a0ac82d4da5a43495053d3b78c3",
+    "nativeLocaleModule": {
+      "webpackId": 98206,
+      "decodedBytes": 6405638,
+      "languageCount": 10
+    },
+    "source": "apps/web/lib/r16-native-localization.ts:1",
+    "catalog": "apps/web/lib/generated/r16-native-localization.json"
+  },
+  "qr": [
+    {
+      "locale": "zh-cn",
+      "status": 200,
+      "checks": {
+        "realCodeVisible": true,
+        "firstPartyLink": true,
+        "ordinaryPending": true,
+        "ordinaryCanceled": true
+      },
+      "processPhaseMs": {
+        "navigate": 218,
+        "login-ready": 4563,
+        "ordinary-wallet-qr": 74278,
+        "pending-read": 99565
+      },
+      "waitForVisibleLoginMs": 69715,
+      "createCalls": 2,
+      "posts": [
+        {
+          "kind": "create",
+          "startedMs": 74075,
+          "headersMs": 87115,
+          "status": 200,
+          "failure": "net::ERR_ABORTED"
+        },
+        {
+          "kind": "create",
+          "startedMs": 94329,
+          "headersMs": 97052,
+          "finishedMs": 97067,
+          "status": 200
+        },
+        {
+          "kind": "poll",
+          "startedMs": 97067,
+          "headersMs": 99073,
+          "finishedMs": 99073,
+          "status": 200
+        }
+      ]
+    },
+    {
+      "locale": "zh-tw",
+      "status": 200,
+      "checks": {
+        "realCodeVisible": true,
+        "firstPartyLink": true,
+        "ordinaryPending": true,
+        "ordinaryCanceled": true
+      },
+      "processPhaseMs": {
+        "navigate": 206,
+        "login-ready": 3219,
+        "ordinary-wallet-qr": 34205,
+        "pending-read": 45263
+      },
+      "waitForVisibleLoginMs": 30986,
+      "createCalls": 1,
+      "posts": [
+        {
+          "kind": "create",
+          "startedMs": 34015,
+          "headersMs": 37766,
+          "finishedMs": 43171,
+          "status": 200
+        },
+        {
+          "kind": "poll",
+          "startedMs": 43172,
+          "headersMs": 44623,
+          "finishedMs": 44623,
+          "status": 200
+        }
+      ]
+    }
+  ],
+  "conclusion": "Separate sign-in shell and in-world map times. Reduce the pre-auth JS by partitioning R16 auth copy and deferring gameplay vocabulary, keeping exact ten-language auth and first playable visuals as acceptance checks."
+}

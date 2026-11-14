@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "schema": "mir2.windows.updater-bundle-verification.v1",
+  "sourceRevision": "180b01d46f35a5e97f4c60ee2ae033c7b53717e5",
+  "gameCandidate": "WN-CANDIDATE-20261001-invited-09",
+  "gameSourceRevision": "180b01d46f35a5e97f4c60ee2ae033c7b53717e5",
+  "files": 9,
+  "engineSha256": "00A898666E57DC0457968BEB667902C8CD3A4FCEFA74EB9BA2336A28BE21B902",
+  "launcherSha256": "57D9298D61A43F6DD412906DB88F54AC9C328DDCA361864EED3ED4878BC5BCDD",
+  "signingKeySha256": "6C70C777B27D50949370D494B4B25798200FBDD5C171BAEEAA94D7E289900F3E",
+  "publicAuthenticode": "NotSigned"
+}

@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T18:00:46.666Z",
+  "passed": true,
+  "sourceCount": 6,
+  "sourceBytes": 14258,
+  "sourceDestinationRawPinsMatched": true,
+  "preVerificationFileCount": 9,
+  "finalFileCount": 10,
+  "inventory": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-preparation-history-v1\\execution\\formal12-root-prepare-actual-v1.log",
+      "bytes": 566,
+      "sha256": "519ca40147737d5e0152bda442f52faaa743b2041efb60136530332e13203b90",
+      "relative": "execution/formal12-root-prepare-actual-v1.log"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-preparation-history-v1\\execution\\formal12-root-seal-actual-v1.log",
+      "bytes": 346,
+      "sha256": "d1973a1d5938dbf78fd4d2d7083349ebf0f92f9a13fe0f11eabef7e5616c02c1",
+      "relative": "execution/formal12-root-seal-actual-v1.log"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-preparation-history-v1\\execution\\formal12-root-source-guard-actual-v1.log",
+      "bytes": 412,
+      "sha256": "423a89ae6e1ddafd35ef70e13cd7e9fa826b330098e03253359729191f54507b",
+      "relative": "execution/formal12-root-source-guard-actual-v1.log"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-preparation-history-v1\\public-copy-receipt-v1.json",
+      "bytes": 4772,
+      "sha256": "0829dff1e309f97367ad284d77e5e392e055e9179398c703e9dbaaeb1a5ad5ac",
+      "relative": "public-copy-receipt-v1.json"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-preparation-history-v1\\public-whitelist-v1.json",
+      "bytes": 4482,
+      "sha256": "952b9b7e0f69eee4673973e4a63401235ca771ec24aeaf0cfcda87c314378377",
+      "relative": "public-whitelist-v1.json"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-preparation-history-v1\\README.md",
+      "bytes": 2512,
+      "sha256": "5ac1382a7f451861b5990e9b71ba7d33d1ac239a1a9771a17ce7c5af9155e366",
+      "relative": "README.md"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-preparation-history-v1\\review\\formal12-actual-preparation-independent-review-v1.json",
+      "bytes": 2768,
+      "sha256": "32e35b54d487aa8ac6f9a55238ecf933e6d2e705f2f93254fbb795c87ef849ba",
+      "relative": "review/formal12-actual-preparation-independent-review-v1.json"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-preparation-history-v1\\review\\prepared-review-v4.json",
+      "bytes": 3798,
+      "sha256": "1471510fc4e777ac832bc81d31e35078ce748df31f6253ba0e3d762084b8c591",
+      "relative": "review/prepared-review-v4.json"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-preparation-history-v1\\review\\preseal-independent-review-v2.json",
+      "bytes": 6368,
+      "sha256": "67706397d6287bda86f099b2561f790f187edfc5ca4198548822f66b68767b9a",
+      "relative": "review/preseal-independent-review-v2.json"
+    }
+  ],
+  "readmeRelativeLinks": 7,
+  "allLinksExist": true,
+  "privateValuesRead": false,
+  "activeRunLogsOrReportsRead": false,
+  "formalResultKnown": false,
+  "capacityAccepted": false
+}

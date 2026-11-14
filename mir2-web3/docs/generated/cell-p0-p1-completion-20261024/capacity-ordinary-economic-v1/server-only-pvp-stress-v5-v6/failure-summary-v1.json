@@ -1,0 +1,37 @@
+{
+  "scope": "Server-only preconfigured PvP, local loopback FileStore; no qualified capacity result",
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "summaries": [
+    {
+      "attempt": 5,
+      "planned": "25 actors, 60-second diagnostic pilot",
+      "completedMeasuredStages": 0,
+      "failureCategory": "healing-sampler-requires-same-snapshot-consumption-and-net-hp-growth",
+      "supersededSampler": true,
+      "privateFirstFailurePin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v5\\fixture\\private\\pvp-stress-first-failure-v1.json",
+        "bytes": 881,
+        "sha256": "75d5a6ff610047e675c3568ca6b86efe5111266b3e39b1f203ea47d019ba0c4d"
+      }
+    },
+    {
+      "attempt": 6,
+      "planned": "25/50/100/250/500 actors, 300 seconds each",
+      "completedMeasuredStages": 0,
+      "failureCategory": "correlated-attack-outcome-timeout-2s-during-admission-25",
+      "firstFailureActorIndex": 9,
+      "firstFailureAt": "2026-10-27T20:46:50.536Z",
+      "extraSnapshotQueries": {
+        "preparation": 60,
+        "drain": 20,
+        "combat": 0
+      },
+      "privateFirstFailurePin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v6\\fixture\\private\\pvp-stress-first-failure-v1.json",
+        "bytes": 1058,
+        "sha256": "ec88767368a1dbefed85faceec382be205cf836522b6753d4f6311c56b46f359"
+      }
+    }
+  ]
+}

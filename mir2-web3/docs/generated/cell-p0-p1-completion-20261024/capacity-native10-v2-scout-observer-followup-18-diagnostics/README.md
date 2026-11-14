@@ -1,0 +1,5 @@
+# Probe18 diagnostics
+
+Short probe `1792965008290-fc5e2eed` passed the 2/10 stages and 360s soak, with 16 complete measured windows (5/5/6) and 132 continuous checks, including final partial continuous windows. Measurement-stage attacks were 353; five additional attacks were in `settle` (358 whole-run). These are distinct from the fresh full16's 351 ordinary commands. A short probe does not certify 25/50/100 players or two-hour capacity; capacity/P0 acceptance remains false and P2 is frozen.
+
+See the [catalog](collect-release-native-10-v2-scout-observer-feasibility-18-public-artifact-catalog.json), [collection](collection-verification.json), [public verification](public-verification.json), [independent ended evidence](../capacity-probe18-ended-verification-analysis-v1/README.md) and [separate Store dataset](../capacity-native10-v2-scout-observer-followup-18-store-diagnostics/README.md). Counter replay is not an independent per-request 900ms packet replay. No raw or recording payload is duplicated by this summary.

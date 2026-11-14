@@ -1,0 +1,50 @@
+{
+  "schema": "mir2.promotion-paid-attribution-gate.local.v1",
+  "status": "local-fix-verified-not-deployed",
+  "observedAtUtc": "2026-10-30T19:08:25.152982+00:00",
+  "baseSha": "30c2653ec2e2acd31233c614a690bb7e0c62b8ce",
+  "sourceCanonicalLfSha256": {
+    "mir2-web3/apps/simulation/src/promotion/store.rs": "bb694f3f6802065014b29a2745a9b676ae7d650e8897b8e68c1474644cd84425",
+    "mir2-web3/apps/simulation/tests/promotion_postgres.rs": "cac4c83e2f463930d264759e95b9265c34d9cb6ec111e3a80f06020aebdc5c77"
+  },
+  "runtimeChange": "one USDC predicate: receipt.is_some() -> has_payment_receipt(); Stripe and all guard ordering unchanged",
+  "red": {
+    "expectedFailureObserved": true,
+    "runtimeStillOldPredicate": true,
+    "newTestNativePaidWasWronglyBound": true,
+    "wronglyReservedMicroUsd": 9000000,
+    "logSha256": "1849a77325a74a0c9872259bede55cacba313e3b3d6717ec1d6d2401b412160c"
+  },
+  "green": {
+    "passed": true,
+    "actualNativePostgresTestsExecuted": 2,
+    "failed": 0,
+    "ignored": 0,
+    "skipped": 0,
+    "newTestCases": 5,
+    "paidCasesDenied": [
+      "native transfer receipt only",
+      "legacy invoice receipt",
+      "Stripe paid order"
+    ],
+    "unpaidCasesAllowed": [
+      "native PayerBound",
+      "legacy InvoiceBound"
+    ],
+    "denialAttributionRows": 0,
+    "denialReservedDelta": 0,
+    "allFixtureAccountRawJsonUnchangedByConfirmation": true,
+    "oldFullPromotionInvariantsIncluded": true,
+    "logSha256": "49b0f8221f5cd350d2991624719ef784b420b3895b9c9cf89df0586cdb70d438"
+  },
+  "receiptFixtureScope": "synthetic already-verified typed native/invoice receipts checked by actual SQL authority guards; no mocked chain RPC",
+  "chainVerificationExercised": false,
+  "externalChainRpc": false,
+  "liveGameDatabaseTouched": false,
+  "phoneOrPaymentExercised": false,
+  "docker": false,
+  "ownedTestPostgresStopped": true,
+  "databaseCredentialsOrTemporaryInstanceDetailsIncluded": false,
+  "commitPerformed": false,
+  "deploymentPerformed": false
+}

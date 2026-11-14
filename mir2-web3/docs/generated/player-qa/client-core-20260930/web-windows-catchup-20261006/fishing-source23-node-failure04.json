@@ -1,0 +1,109 @@
+{
+  "owner": "Root",
+  "kind": "Source23 actual full original11 Node04 failure history and passing TSC04",
+  "sourceSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-node04-snapshot.json",
+    "bytes": 9773743,
+    "sha256": "add4a34c036a7961266b224cf3ad723ac270585acb8d3129f482f390a2bb4759"
+  },
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-node04-source-review.json",
+    "bytes": 3932,
+    "sha256": "18fe60bf740cdb2287bdfa1bf62b4ba09aa1a8239463beffb60b8c1feb33c58e"
+  },
+  "jobs": [
+    {
+      "name": "node04",
+      "configuration": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-node04.config.json",
+        "bytes": 4774,
+        "sha256": "3d943c0c5be9f84b2362e006176c6fff28f17910b55e855b3beeb868a18995d2"
+      },
+      "outer": {
+        "owner": "Root",
+        "exitCode": 1,
+        "builderPid": 100564,
+        "kind": "Source23 current original 11 finite Node scripts04",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 9567,
+        "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-fishing-source23-node04.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false,
+        "pin": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-node04.outer.json",
+          "bytes": 506,
+          "sha256": "a585ec10c937f17c9c9bbd37ca5f441a6bcfee5b624df418530423e4ab40cac1"
+        }
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-node04.stdout.log",
+        "bytes": 47822,
+        "sha256": "b54989afe31d99fbe34a57f7cf7796195e88f9b6988a69d89975801f58e27da3"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-node04.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "tsc04",
+      "configuration": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-tsc04.config.json",
+        "bytes": 3935,
+        "sha256": "572b5ac821b73d3616369bcb33698376b2e00a5fb1e8aef36909dc8e14caa494"
+      },
+      "outer": {
+        "owner": "Root",
+        "exitCode": 0,
+        "builderPid": 112412,
+        "kind": "Source23 current original strict code-only nonincremental TypeScript04",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 8420,
+        "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-fishing-source23-tsc04.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false,
+        "pin": {
+          "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-tsc04.outer.json",
+          "bytes": 525,
+          "sha256": "4392aa521eab3a942d71696fb4cb0728a6fa20bd40a49ba821a1f1490e945702"
+        }
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-tsc04.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-tsc04.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "reportedNodeTests": 152,
+  "nodePassed": 130,
+  "nodeFailed": 22,
+  "nodeCancelled": 0,
+  "nodeSkipped": 0,
+  "stage5GroupsPassed": 357,
+  "qualification": "Original roster remains11 scripts. Storage file failed early before its original65 named cases fully expanded;152 is actual reported Node count, not218. Stage5 is one filelevel test with357 internal groups. Actual failures are missing current Fishing function/ref dependencies in original Combat/Quest fixture and exact AST integration expectations. Root requested bounded fixture repair without changing product, labels or deleting assertions; new execution pending.",
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmApiUsed": false,
+  "productionBuildAccepted": false,
+  "candidateAccepted": false,
+  "playerAccepted": false,
+  "goalComplete": false
+}

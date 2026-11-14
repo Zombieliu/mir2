@@ -1,0 +1,183 @@
+{
+  "schema": "mir2.owner-health.source-binding.v1",
+  "parent": "7ef19655d47f76e3d1bc5a46a69925116495b345",
+  "code": [
+    {
+      "path": "mir2-web3/apps/gateway/src/routing.rs",
+      "workingBytes": 1238028,
+      "workingSha256": "2ab4addeb54502460a4d0bf695dd15b7a8e6359f140c8827a84d3b75f5599285",
+      "gitCleanBlob": "498866d2527cd896d83eb9db005e4983d2d7fd03"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/owner_health.rs",
+      "workingBytes": 22532,
+      "workingSha256": "56146bf6579e426ceae691a8d56bea7e2f247bc4e934d5d566539a30f86e8a47",
+      "gitCleanBlob": "7f4bc832dc8e87230392c4b3bc6cc80972f4f7cf"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/tests/owner_health_sync_tests.rs",
+      "workingBytes": 42238,
+      "workingSha256": "92be547aac54bcb14982ab35288a30a2e902cbee380a5db801c8e2a0b7a57ea5",
+      "gitCleanBlob": "70a6a45436d4456974139029a5d270a6d73a700c"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/tests/zone_skill_cadence_tests.rs",
+      "workingBytes": 24695,
+      "workingSha256": "317b5eb2b71720ca05e8d0c77fc2def103f02da1defb632f3eafacd7bb4402f6",
+      "gitCleanBlob": "7feda8c9809a1da3817dd87ea5d63c6020137a9e"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/shared_experience_profiles.rs",
+      "workingBytes": 14118,
+      "workingSha256": "c76b5d0eec3d1a45eabb4781036627ec6e45274a1e3e9d198940d8418b5c5bd2",
+      "gitCleanBlob": "ec2c05352cec9c47398cbb2b147d91d898ea0d51"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/shared_mentor.rs",
+      "workingBytes": 14370,
+      "workingSha256": "14aba732c611a5bdd4686def7479f545b049440b0f423afc44c98c911db11162",
+      "gitCleanBlob": "0279f0c7fe7d08ab2bf96b856039adb6f4f6c21f"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/shared_mentor_accounting.rs",
+      "workingBytes": 6540,
+      "workingSha256": "a373d226b0ca04a8a78684050a2844c6fe367026cf644c55f9bb572fab4b3408",
+      "gitCleanBlob": "c6a8718781cfc3b4c4bdc62b035e1072cac9b584"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/tcp.rs",
+      "workingBytes": 28808,
+      "workingSha256": "f2abf48e5150a31f3d801464089eedd7e449d661e33dcb5caf0bff032443ffe5",
+      "gitCleanBlob": "f3eb5172dc99b763b8d484a3f756c47783087a30"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/web.rs",
+      "workingBytes": 769783,
+      "workingSha256": "2df2ebc41628c8494dd71391634795c9ff82cbf51ce1f653fd7840423968f16b",
+      "gitCleanBlob": "7d6adf571a42b2f26ac5274835774c7bb256fb99"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/web_live_overflow_tests.rs",
+      "workingBytes": 26384,
+      "workingSha256": "560732ee097781b9781f407803d7cacd062aae72dc1549767d61dd294bdaa263",
+      "gitCleanBlob": "9edcec7b9fdc68b463ef307e95b50c32a25b3629"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/zone_rpc.rs",
+      "workingBytes": 326444,
+      "workingSha256": "421932b8fe7853a146cc7db6346a4b2e5c8a32de5c66866496c65e85e8378850",
+      "gitCleanBlob": "315d0e45f93dc8de108dc5156d6070dc91e7b4a3"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/zone_rpc/owner_health_sync_tests.rs",
+      "workingBytes": 22001,
+      "workingSha256": "d07a738d2b05fe9d2108fb739bb052acc6765fe23f938f6cc305d9ba7eafeaf6",
+      "gitCleanBlob": "74b0f124d5b2ddc9c36d8f0843e1bf1bd3f96c82"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/tests/mentor_shared_lifecycle.rs",
+      "workingBytes": 13495,
+      "workingSha256": "5b3962d414f3442bd97df395183d32460c072054ee417e9d5bc2b8989b9aaf38",
+      "gitCleanBlob": "6dd6231faf83fda349f1651bb8d7f4e5ce705927"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/lib.rs",
+      "workingBytes": 5425,
+      "workingSha256": "a7b921f4fa69759a40f8d01542b51d307c0a07750de59d9f39c198b06e90f8d1",
+      "gitCleanBlob": "ac7cfb91631f5684bf6791129f9ee2132c33a45e"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/default_npc_events_tests.rs",
+      "workingBytes": 33569,
+      "workingSha256": "77316fdbe60e3d4dfba5bd005fec8b24c57db313c273b56852f5ddb3e34985de",
+      "gitCleanBlob": "17bfffdb1000d6de1125424549328d6792807600"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/mentor_reward_tests.rs",
+      "workingBytes": 15273,
+      "workingSha256": "0b6780f446f64e95119404b1429016067b3a6c699be354b47dd7cd85e57959d0",
+      "gitCleanBlob": "ae3cc732fb7767eda5c540e3d63b096e340d9442"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/mod.rs",
+      "workingBytes": 6976,
+      "workingSha256": "be7e6caa6dd6c0cf389ae0fca65330351568eb41dd7c45e34769fbc9a183121d",
+      "gitCleanBlob": "9746a1a9919eeef9c91bf3f11db6bc0c8bfb6669"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/monster_ai/mod.rs",
+      "workingBytes": 123596,
+      "workingSha256": "769fc07537c7c6d7734d5c4819d12346eeb18ed2f5f15a0ca34d2fcd759a838f",
+      "gitCleanBlob": "da7057fd0825eb12860572ecf04b8e92e2d7e67f"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/session.rs",
+      "workingBytes": 93589,
+      "workingSha256": "26a386009434e1b704177b8582acdb3ddb92229039832114f3b968c5d652cdf0",
+      "gitCleanBlob": "c055c09a762ea0b2e8a3457bd25eb4654785af66"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/shared_mentor_rewards.rs",
+      "workingBytes": 14406,
+      "workingSha256": "fbaeb998d3122e822550ee96ecb41116f48240654d0c7b5147c2cfdd4c4a1e18",
+      "gitCleanBlob": "5588c8ed7a3c6fb5793a8ca8d09168b339f508d9"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/manager.rs",
+      "workingBytes": 46536,
+      "workingSha256": "8fa3f8fbc38dbdd09dc7e487dbc9b71f418431e98b036dd5b15ae009f8a7d4bc",
+      "gitCleanBlob": "ee02a799be47d2220f297187dbe43d97e2a98ffd"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/mod.rs",
+      "workingBytes": 1877,
+      "workingSha256": "e73e4ebd772876d46d05b78b068d515be3793b9124e254ff52938bc5d5d8a480",
+      "gitCleanBlob": "f56d7b53abbbb8c6783db028fbaf0a63dc6c1b4c"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/owner_health.rs",
+      "workingBytes": 2767,
+      "workingSha256": "c49ff75649995f8500d4c45db7c702004cadfaa81f220a967b218e79ddf24dc8",
+      "gitCleanBlob": "180e495790f35f2b6c3e941c2e30fdc688dd6423"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "workingBytes": 691861,
+      "workingSha256": "71c73ee818a8b46a477c3ee3a7290a319664678e9d66caa3b39ec7fb30fb0863",
+      "gitCleanBlob": "8a77dd4a4272e78cc5c8857d806d78a8df87a41f"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/owner_health_tests.rs",
+      "workingBytes": 13983,
+      "workingSha256": "21561526da9a685b206bba52f0f701edaf6ede119691346531cf1d27fb49f75e",
+      "gitCleanBlob": "a41dcc2184cd83b8f19dd97e84cd1a694d80704f"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/types.rs",
+      "workingBytes": 56614,
+      "workingSha256": "80ec47a1d96c5fa04412e4dcfacc0aed16c033d52f6f4f3b4fbb20df82006a24",
+      "gitCleanBlob": "d8af876ba5815bd44070dd474ef7f6e47df92679"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/world_runtime.rs",
+      "workingBytes": 61799,
+      "workingSha256": "66b376a81676739c165f95d099788e4c9a25e5a5525dcb82225b989fc52c9ee4",
+      "gitCleanBlob": "3509fd5e65073e9d7a3488fd1cc0b7ff1b3ea973"
+    }
+  ],
+  "crystalReferenceFiles": [
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/HumanObject.cs",
+      "bytes": 353159,
+      "sha256": "c4a4e060a6c88c41d869b4b3b6a78fe5a935e0456b8ee7c230db3d0596b299d3"
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirEnvir/Map.cs",
+      "bytes": 104536,
+      "sha256": "4df569012db86428b82b3c4994a1b0e982b1da7b5ed0b58dcf1930020ed4d5d1"
+    }
+  ],
+  "candidateDeployed": false,
+  "previousEvidenceInventorySha256": "61938fe93af1efbfc3a1c51c48090149361e7056bf399e0128ac0dd7df1838f9",
+  "fullSourceRecipientsAccepted": false
+}

@@ -1,0 +1,40 @@
+{
+  "candidate": "bfbee7018917-bootstrap-chunks-14dc8914",
+  "buildId": "7l6TKq_mcOqP9GASfj8Uz",
+  "chunks": [
+    {
+      "kind": "floor",
+      "path": "/_next/static/chunks/r16-entry-floor-fallback.b86d29a8b3a60f27.js",
+      "bytes": 439514,
+      "sha256": "77b660b7ed9a23ce3877ba30ca15f1c1469647a3c6aee72ccb3455804489e4cf",
+      "gzipBytes": 302945,
+      "jsonBytes": 439896,
+      "payloadSha256": "e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d",
+      "sourcePath": "/bootstrap/r16-floor/e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d.json",
+      "format": "pretty-json-line"
+    },
+    {
+      "kind": "scene",
+      "path": "/_next/static/chunks/r16-entry-scene-fallback.75a734115ce2d5ba.js",
+      "bytes": 458590,
+      "sha256": "598afb15d7b7098a63aba85c1d0b43a6e9df3f04ffe08e5dfd89464e525818a4",
+      "gzipBytes": 40329,
+      "jsonBytes": 458475,
+      "payloadSha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+      "sourcePath": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+      "format": "json"
+    },
+    {
+      "kind": "locale",
+      "path": "/_next/static/chunks/r16-gameplay-locales.37f59f0c4b531239.js",
+      "bytes": 3336037,
+      "sha256": "8673630a4b4a1a306f44c09d5ed01132353fec81b4dc7fa2cc019d0a319c902d",
+      "gzipBytes": 793100,
+      "jsonBytes": 3283113,
+      "payloadSha256": "b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c",
+      "sourcePath": "/bootstrap/r16-locales/b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c.json",
+      "format": "json-line"
+    }
+  ],
+  "scope": "Actual production JS bytes parsed as static AST/JSON only, no remote code evaluation; each serialized full payload retains original byte length and SHA. Gzip counts are offline, not public transfer claims."
+}

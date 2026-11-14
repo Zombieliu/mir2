@@ -1,0 +1,691 @@
+{
+  "kind": "r16-runtime-header-priority",
+  "passed": true,
+  "baseSource": "9244ce3dd7cd2129a70e650be1430e971b6c96ab",
+  "inheritedFrontendSource": "5b011e5d2fcce78883b517e5992ef23245052f84",
+  "candidate": "5b011-header-priority-5521d55e",
+  "localBrowserSessions": 4,
+  "tests": {
+    "adjacentPassed": 127,
+    "failed": 0,
+    "cancelled": 0,
+    "skipped": 0
+  },
+  "build": {
+    "status": {
+      "code": 0,
+      "signal": null
+    },
+    "builtId": "e6ZIGltcPod5MEM7KJKr1",
+    "sourceRoot": "C:/r16-header-priority-20261115/source",
+    "dist": ".next-runtime-header-priority-r1",
+    "durationMs": 44266,
+    "changedFiles": [
+      {
+        "filename": "mir2-web3/apps/web/lib/scene-asset-preloader.ts",
+        "sha256": "0f1d3a0a09d9cdd25dbe1de8539ec4c814305548f9610d019cb4b51856adf93d",
+        "bytes": 7849,
+        "baseSha256": "fb0d93cc659695131f74cbd1f9c0a220f8e84904c57d02ac0bdf25b62ef951cd",
+        "inheritedFrom": "5b011e5d2fcce78883b517e5992ef23245052f84"
+      },
+      {
+        "filename": "mir2-web3/apps/web/app/components/r16-login-door.tsx",
+        "sha256": "9233ba688e2233fe05f89a4853aa5e69ac037f1d63e7aa68e36095ca08d44a2c",
+        "bytes": 2151,
+        "baseSha256": "b042f6b8f3cc6b55bf53b2382598faecfe94b6789c4f746bb03a215be7a466f8",
+        "inheritedFrom": "5b011e5d2fcce78883b517e5992ef23245052f84"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-scene-asset-preloader.mjs",
+        "sha256": "0c1aa0ce081bb7733aeb822a76aaf8c33514b986ad05c93d29a4b1751830c4bf",
+        "bytes": 10406,
+        "baseSha256": "d933b215213fb9d0376f8dbbcb41361804f495225159932044920dc7e84a17cb",
+        "inheritedFrom": "5b011e5d2fcce78883b517e5992ef23245052f84"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-r16-auth-layout.mjs",
+        "sha256": "9187eb5db8e883da78b55353684d0c3badb8fc5755393ea8fe5bcdaf0db27e5a",
+        "bytes": 45458,
+        "baseSha256": "1cd3e55dfbb6186fa2367072cffce73d7606ee4b0af3540eb9b3af7c046d66c6",
+        "inheritedFrom": "5b011e5d2fcce78883b517e5992ef23245052f84"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/bevy-runtime-initializer.ts",
+        "sha256": "15681d741f5d0e5509913a683dc719631e1e091e46d85cfeef7a9654c7b8eef4",
+        "bytes": 14775,
+        "baseSha256": "f28ebffe724f5a2357682a741b5b57ea6a0e41dbff45c8d16bc36559d971eef7",
+        "previousQualifiedSha256": "c676e10257431a2d51397a743df8f76bcc0e740e31442490e05e9c04b52b035f",
+        "scope": "bounded runtime header priority and passive transport qualification"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-initializer.mjs",
+        "sha256": "f5f5459a3b5c140a30c15857e96a406237994b94386c0eb7e5933898fb877e6c",
+        "bytes": 31187,
+        "baseSha256": "1b08b1a7423aa7ac5b43859d5a18f1d68a9db41ea1ecb1f73c6aca299fa84941",
+        "priorDraftSha256": "083b924f8ca6e4314eca9044c234d1ace3e66188073d404937eea43da3344c7b",
+        "scope": "bounded runtime header probes",
+        "inheritedFrom": "5b011e5d2fcce78883b517e5992ef23245052f84"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-finite-recovery.mjs",
+        "sha256": "c87a2661b386054b5c0060a2e71c4409046fbbe2201141b9aefbed4ffc1f10f4",
+        "bytes": 15492,
+        "baseSha256": "c9878a9194302880e847af162430888ea1c53e03538f4e81bbf4015f070f9e89",
+        "priorDraftSha256": "c87a2661b386054b5c0060a2e71c4409046fbbe2201141b9aefbed4ffc1f10f4",
+        "scope": "bounded runtime header probes",
+        "inheritedFrom": "5b011e5d2fcce78883b517e5992ef23245052f84"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/smoke-bevy-runtime-header-probes.mjs",
+        "sha256": "aa30eb56dc7547e2ffdcd71ea019a3318b85910a1f7898b4a162bd85977e17bc",
+        "bytes": 6568,
+        "baseSha256": null,
+        "priorDraftSha256": "0aa6e453244f561dada933d8055bb09af868cc480972ba2fb9722c1695da0094",
+        "scope": "bounded runtime header probes",
+        "inheritedFrom": "5b011e5d2fcce78883b517e5992ef23245052f84"
+      },
+      {
+        "filename": "mir2-web3/apps/web/app/page.tsx",
+        "sha256": "4871860cd4bfef3719d1cc678e99ad1d2509bb3f44b5f85be601e7e736d4ecba",
+        "bytes": 1206482,
+        "baseSha256": "ba62119f6e2e7cf8bb889ed7d29b151f520bad25a9b427c581fc09f509e6a748",
+        "previousQualifiedSha256": "ba62119f6e2e7cf8bb889ed7d29b151f520bad25a9b427c581fc09f509e6a748",
+        "scope": "bounded runtime header priority and passive transport qualification"
+      },
+      {
+        "filename": "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
+        "sha256": "92fc7deb19085261dbd7aafb107473263033f855b0f958d6c5b4084ba6a93e42",
+        "bytes": 73048,
+        "baseSha256": "9596b1d73b39f0454fafe27e018210054d72651185b10e6761624b2c9c591ccd",
+        "previousQualifiedSha256": "9596b1d73b39f0454fafe27e018210054d72651185b10e6761624b2c9c591ccd",
+        "scope": "bounded runtime header priority and passive transport qualification"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/runtime-header-priority.ts",
+        "sha256": "f4626abc2ad4bb523d0ea198085c38e162feb0213e2a6cf9370f5a06e55c19cb",
+        "bytes": 2777,
+        "baseSha256": null,
+        "previousQualifiedSha256": null,
+        "scope": "bounded runtime header priority and passive transport qualification"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-runtime-header-priority.mjs",
+        "sha256": "7f991c996d7c5f9bc8873fc95404d835aee9c9e064481505d157ecfb6588ad6f",
+        "bytes": 9489,
+        "baseSha256": null,
+        "previousQualifiedSha256": null,
+        "scope": "bounded runtime header priority and passive transport qualification"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/lib/r16-static-waterfall.mjs",
+        "sha256": "8e59499334a97e2b92b8a1aeeb9902d18043d50e08c388d219a02916209587f8",
+        "bytes": 8235,
+        "baseSha256": null,
+        "previousQualifiedSha256": null,
+        "scope": "bounded runtime header priority and passive transport qualification"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/lib/r16-static-transport.mjs",
+        "sha256": "ff35ad6e7638f9839713091a7d6ba61887c10c0510f557386b51b551240d5ab0",
+        "bytes": 7338,
+        "baseSha256": null,
+        "previousQualifiedSha256": null,
+        "scope": "bounded runtime header priority and passive transport qualification"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-r16-static-transport.mjs",
+        "sha256": "64cf95f53385c4bb0c434ba0757d3a7d6a22a598bd49ac0af7e9fde3cc8bf0dd",
+        "bytes": 6870,
+        "baseSha256": null,
+        "previousQualifiedSha256": null,
+        "scope": "bounded runtime header priority and passive transport qualification"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/smoke-runtime-header-priority.mjs",
+        "sha256": "54cef1603191344782bb950cde02bdee217db979570ab635235ea6e0251bf417",
+        "bytes": 9788,
+        "baseSha256": null,
+        "previousQualifiedSha256": null,
+        "scope": "bounded runtime header priority and passive transport qualification"
+      }
+    ],
+    "sourceClosureFiles": 126109,
+    "sourceClosureBytes": 919548348,
+    "archiveSha256": "9e64474aefee61821a75b8fcbc1164aeda9d180964fc265d44a792ab0d7f6b1d",
+    "provenGitArchiveEolNormalizations": 123,
+    "fixedRuntime": "bevy-0c553a754308e5b8",
+    "fixedAssets": "20261108-r16-08ec86d5105c",
+    "prebuiltRuntimeAndCoreUnmodified": true
+  },
+  "boundedChromeContract": {
+    "passed": true,
+    "browser": "157.0.8103.78",
+    "closed": {
+      "browser": true,
+      "server": true
+    },
+    "scope": "Same compiled code, actual Chrome/HTTP/WASM and actual registrar callback. A deliberately bounded three-response server demonstrates ordering only; not a public root-cause, game or Native120 qualification.",
+    "cases": [
+      {
+        "scenario": "control",
+        "completed": 113,
+        "headersMs": 4009.2999999821186,
+        "runtimeMs": 6014.799999982119,
+        "initialized": 1,
+        "answer": 42,
+        "runtimeError": null
+      },
+      {
+        "scenario": "priority",
+        "completed": 113,
+        "headersMs": 2.5,
+        "runtimeMs": 2006.5,
+        "initialized": 1,
+        "answer": 42,
+        "runtimeError": null
+      },
+      {
+        "scenario": "timeout",
+        "completed": 113,
+        "headersMs": null,
+        "runtimeMs": null,
+        "initialized": 0,
+        "answer": null,
+        "runtimeError": "AbortError"
+      },
+      {
+        "scenario": "retired",
+        "completed": 0,
+        "initialized": 0
+      }
+    ]
+  },
+  "runs": [
+    {
+      "ordinal": 1,
+      "mode": "compatibility",
+      "language": "en-US",
+      "sessions": [
+        {
+          "passed": true,
+          "nativeReadyWaitMs": 54650,
+          "fonts": [
+            {
+              "name": "NotoSansTC.ttf",
+              "bytes": 11941968,
+              "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+            },
+            {
+              "name": "NotoSansCJKsc-Regular.otf",
+              "bytes": 16437364,
+              "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+            },
+            {
+              "name": "NotoSans-Regular.ttf",
+              "bytes": 621572,
+              "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+            },
+            {
+              "name": "NotoSansDevanagari-Regular.ttf",
+              "bytes": 243520,
+              "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+            },
+            {
+              "name": "NotoSansThai-Regular.ttf",
+              "bytes": 37780,
+              "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+            },
+            {
+              "name": "NotoSansArabic-Regular.ttf",
+              "bytes": 234892,
+              "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+            }
+          ],
+          "prewarm": {
+            "requested": 113,
+            "ok": 113,
+            "failed": 0
+          },
+          "nativeQuest": "ordinary-shared-native",
+          "rightButtonsPassed": true
+        },
+        {
+          "passed": true,
+          "nativeReadyWaitMs": 1400,
+          "fonts": [
+            {
+              "name": "NotoSansTC.ttf",
+              "bytes": 11941968,
+              "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+            },
+            {
+              "name": "NotoSansCJKsc-Regular.otf",
+              "bytes": 16437364,
+              "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+            },
+            {
+              "name": "NotoSans-Regular.ttf",
+              "bytes": 621572,
+              "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+            },
+            {
+              "name": "NotoSansDevanagari-Regular.ttf",
+              "bytes": 243520,
+              "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+            },
+            {
+              "name": "NotoSansThai-Regular.ttf",
+              "bytes": 37780,
+              "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+            },
+            {
+              "name": "NotoSansArabic-Regular.ttf",
+              "bytes": 234892,
+              "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+            }
+          ],
+          "prewarm": {
+            "requested": 113,
+            "ok": 113,
+            "failed": 0
+          },
+          "nativeQuest": "ordinary-shared-native",
+          "rightButtonsPassed": true
+        }
+      ],
+      "walkRunCommands": 189,
+      "originalMoveGateMs": 8000,
+      "originalNativeGateMs": 120000,
+      "requestedDestination": {
+        "x": 324,
+        "y": 291
+      },
+      "authoritativeArrival": {
+        "x": 322,
+        "y": 293
+      },
+      "collisionRegions": 9,
+      "worldSnapshotTransport": {
+        "passed": true,
+        "gatewayKind": "merged",
+        "compressionExpected": true,
+        "sessions": [
+          {
+            "worldDeclared": true,
+            "worldSnapshots": 5,
+            "worldWireBytes": 44828,
+            "worldDecodedBytes": 242757,
+            "browserConsumption": {
+              "passed": true,
+              "version": 6,
+              "tick": 1,
+              "mapFileName": "0",
+              "entityCount": 31,
+              "rawIngressTickMatched": true,
+              "wireKind": "M2WSPGZ1"
+            }
+          },
+          {
+            "worldDeclared": true,
+            "worldSnapshots": 7,
+            "worldWireBytes": 61499,
+            "worldDecodedBytes": 342776,
+            "browserConsumption": {
+              "passed": true,
+              "version": 6,
+              "tick": 1,
+              "mapFileName": "0",
+              "entityCount": 32,
+              "rawIngressTickMatched": true,
+              "wireKind": "M2WSPGZ1"
+            }
+          }
+        ],
+        "scope": "Actual Page snapshot consumer, catalog gzip mixed ordering, existing gameplay/save gates; loopback HTTP, not public or latency-causality proof"
+      },
+      "catalogCountEachSession": 529,
+      "npcNameLayerPassed": true,
+      "workerRestartPassed": true,
+      "browserFullyRestarted": true,
+      "ordinaryLogoutAndSavePassed": true,
+      "sourceFixtureUnchanged": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "headerPriority": [
+        [
+          {
+            "name": "runtimeHeaderPriorityBackground",
+            "atMs": 55742.90000000596,
+            "epochMs": 1794675380189,
+            "detail": {
+              "generation": 1,
+              "reason": "timeout",
+              "waitedMs": 8007
+            }
+          }
+        ],
+        [
+          {
+            "name": "runtimeHeaderPriorityBackground",
+            "atMs": 19883.5,
+            "epochMs": 1794675483485,
+            "detail": {
+              "generation": 1,
+              "reason": "headers",
+              "waitedMs": 123
+            }
+          }
+        ]
+      ],
+      "diagnosticCapture": [
+        {
+          "rows": 1746,
+          "maxRows": 4096,
+          "truncated": false,
+          "droppedRows": 0,
+          "cleanupComplete": true
+        },
+        {
+          "rows": 3101,
+          "maxRows": 4096,
+          "truncated": false,
+          "droppedRows": 0,
+          "cleanupComplete": true
+        }
+      ],
+      "staticTransport": "default-static-transport.json",
+      "screenshot": {
+        "path": "default-vendor-arrival.png",
+        "sha256": "afe5b2877b11193f3290dbc7e038734402af4f4d872904bc5830905f4dbea631"
+      }
+    },
+    {
+      "ordinal": 2,
+      "mode": "webgl2",
+      "language": "zh-TW",
+      "sessions": [
+        {
+          "passed": true,
+          "nativeReadyWaitMs": 52246,
+          "fonts": [
+            {
+              "name": "NotoSansTC.ttf",
+              "bytes": 11941968,
+              "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+            },
+            {
+              "name": "NotoSansCJKsc-Regular.otf",
+              "bytes": 16437364,
+              "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+            },
+            {
+              "name": "NotoSans-Regular.ttf",
+              "bytes": 621572,
+              "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+            },
+            {
+              "name": "NotoSansDevanagari-Regular.ttf",
+              "bytes": 243520,
+              "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+            },
+            {
+              "name": "NotoSansThai-Regular.ttf",
+              "bytes": 37780,
+              "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+            },
+            {
+              "name": "NotoSansArabic-Regular.ttf",
+              "bytes": 234892,
+              "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+            }
+          ],
+          "prewarm": {
+            "requested": 113,
+            "ok": 113,
+            "failed": 0
+          },
+          "nativeQuest": "ordinary-shared-native",
+          "rightButtonsPassed": true
+        },
+        {
+          "passed": true,
+          "nativeReadyWaitMs": 1442,
+          "fonts": [
+            {
+              "name": "NotoSansTC.ttf",
+              "bytes": 11941968,
+              "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+            },
+            {
+              "name": "NotoSansCJKsc-Regular.otf",
+              "bytes": 16437364,
+              "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+            },
+            {
+              "name": "NotoSans-Regular.ttf",
+              "bytes": 621572,
+              "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+            },
+            {
+              "name": "NotoSansDevanagari-Regular.ttf",
+              "bytes": 243520,
+              "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+            },
+            {
+              "name": "NotoSansThai-Regular.ttf",
+              "bytes": 37780,
+              "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+            },
+            {
+              "name": "NotoSansArabic-Regular.ttf",
+              "bytes": 234892,
+              "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+            }
+          ],
+          "prewarm": {
+            "requested": 113,
+            "ok": 113,
+            "failed": 0
+          },
+          "nativeQuest": "ordinary-shared-native",
+          "rightButtonsPassed": true
+        }
+      ],
+      "walkRunCommands": 189,
+      "originalMoveGateMs": 8000,
+      "originalNativeGateMs": 120000,
+      "requestedDestination": {
+        "x": 324,
+        "y": 291
+      },
+      "authoritativeArrival": {
+        "x": 322,
+        "y": 293
+      },
+      "collisionRegions": 9,
+      "worldSnapshotTransport": {
+        "passed": true,
+        "gatewayKind": "merged",
+        "compressionExpected": true,
+        "sessions": [
+          {
+            "worldDeclared": true,
+            "worldSnapshots": 5,
+            "worldWireBytes": 44826,
+            "worldDecodedBytes": 242761,
+            "browserConsumption": {
+              "passed": true,
+              "version": 6,
+              "tick": 1,
+              "mapFileName": "0",
+              "entityCount": 31,
+              "rawIngressTickMatched": true,
+              "wireKind": "M2WSPGZ1"
+            }
+          },
+          {
+            "worldDeclared": true,
+            "worldSnapshots": 7,
+            "worldWireBytes": 61538,
+            "worldDecodedBytes": 342788,
+            "browserConsumption": {
+              "passed": true,
+              "version": 6,
+              "tick": 1,
+              "mapFileName": "0",
+              "entityCount": 32,
+              "rawIngressTickMatched": true,
+              "wireKind": "M2WSPGZ1"
+            }
+          }
+        ],
+        "scope": "Actual Page snapshot consumer, catalog gzip mixed ordering, existing gameplay/save gates; loopback HTTP, not public or latency-causality proof"
+      },
+      "catalogCountEachSession": 529,
+      "npcNameLayerPassed": true,
+      "workerRestartPassed": true,
+      "browserFullyRestarted": true,
+      "ordinaryLogoutAndSavePassed": true,
+      "sourceFixtureUnchanged": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "headerPriority": [
+        [
+          {
+            "name": "runtimeHeaderPriorityBackground",
+            "atMs": 55806.20000001788,
+            "epochMs": 1794675748777,
+            "detail": {
+              "generation": 1,
+              "reason": "timeout",
+              "waitedMs": 8017
+            }
+          }
+        ],
+        [
+          {
+            "name": "runtimeHeaderPriorityBackground",
+            "atMs": 19790.79999998212,
+            "epochMs": 1794675847330,
+            "detail": {
+              "generation": 1,
+              "reason": "headers",
+              "waitedMs": 111
+            }
+          }
+        ]
+      ],
+      "diagnosticCapture": [
+        {
+          "rows": 1679,
+          "maxRows": 4096,
+          "truncated": false,
+          "droppedRows": 0,
+          "cleanupComplete": true
+        },
+        {
+          "rows": 4096,
+          "maxRows": 4096,
+          "truncated": true,
+          "droppedRows": 148,
+          "cleanupComplete": true
+        }
+      ],
+      "staticTransport": "webgl2-static-transport.json",
+      "screenshot": {
+        "path": "webgl2-vendor-arrival.png",
+        "sha256": "6d5fbc4094c750576819990313b4221f446e49bae962f7850a86abc9048d2fbc"
+      }
+    }
+  ],
+  "preservedForeignWorkingFiles": 33,
+  "foreignWorkingFilesUnchanged": true,
+  "retainedFailures": {
+    "firstChromeContractFailedRetiredQueuedBackground": true,
+    "failureReclassified": false,
+    "fix": "Cancelled generation tombstone prevents queued callbacks from starting after leaving game.",
+    "sharedWarmMetadataTruncated": true,
+    "droppedMetadataRows": 148,
+    "exportInitiallyRejectedNewDiagnosticCompleteness": true
+  },
+  "diagnosticComplete": false,
+  "diagnosticScope": "Functional 8/120, six-font113, route and save gates all passed. The additional page-CDP observer recorded 4096 shared warm rows and dropped148; this metadata is explicitly incomplete. Raw receipts unchanged. Public observation will use8192, without changing product or functional gates.",
+  "publicPerformanceRetested": false,
+  "newSourceDeployed": false,
+  "public120SecondIssueClaimedFixed": false,
+  "globalParityCandidateOrAccepted": false,
+  "privateInputs": [
+    {
+      "path": "C:/r16-header-priority-20261115/build-receipt-r1.json",
+      "sha256": "bd8d6a7b9f31e7d1d9bd2ef4dcfe8308ca83bc7581d4e964ddf1b2cab8962ac4"
+    },
+    {
+      "path": "C:/r16-header-priority-20261115/next-build-r1.log",
+      "sha256": "1130969c683f083200f73dd3a4f5600b120496123e8979abce0ee5a3720e169c"
+    },
+    {
+      "path": "C:/r16-header-priority-20261115/build-inputs-r1.json",
+      "sha256": "06ec7d500692b9ab5cc2227c7a52b929a81b63cdfa62a30ac16ea533ea67a52a"
+    },
+    {
+      "path": "C:/r16-header-priority-20261115/web-closure.json",
+      "sha256": "f7981f996ce2bb5271b564a8863d272f2c4707391e8bf44c4b0751a793e699e3"
+    },
+    {
+      "path": "C:/r16-header-priority-20261115/extract-source.py",
+      "sha256": "6694b7fea3d169958e58095a46bbaa3870700c8cef0ea17810c23c10b5e05755"
+    },
+    {
+      "path": "C:/r16-header-priority-20261115/priority-tests-r1.log",
+      "sha256": "a0335d34d360c81829285bc89fbe88d1cc51aeb0c82e17039ba7ff1efd4d0a4e"
+    },
+    {
+      "path": "C:/r16-header-priority-20261115/priority-transport-tests-r2.log",
+      "sha256": "260a0f549f4a66b2037976ee1a54e5192c99d3b96bd71fee96fbd92b48da43dc"
+    },
+    {
+      "path": "C:/r16-header-priority-20261115/adjacent-tests-r3.log",
+      "sha256": "f7d42251115522cb08e328811f183fc436b0a1632562e8640aeda6d0770a1c96"
+    },
+    {
+      "path": "C:/r16-header-priority-20261115/chrome-order-r1/receipt.json",
+      "sha256": "8a7a92399da7f02cfa11a6cea49ef8e365949d00831eda7ac126ab6c154e7f83"
+    },
+    {
+      "path": "C:/r16-header-priority-20261115/chrome-order-r2/receipt.json",
+      "sha256": "67d24007b4feacb1d80d326fda0f7e02daf8842a0b180842a1b6de8c8d9e0ccd"
+    },
+    {
+      "path": "C:/r16-header-priority-20261115/game-fixture-preparation.json",
+      "sha256": "6d8ff3f27ad16fa143dac1b0a2ee4c8a3fd9a2642a0e77a2a651b5d6a5520af8"
+    },
+    {
+      "path": "C:/r16-header-priority-20261115/fixture-r1/build-receipt.json",
+      "sha256": "fbeae46d7d80b1fd5fbadfa6d1e15de38843964f2e5ad247335fadd4f2506927"
+    },
+    {
+      "path": "C:/r16-header-priority-20261115/browser-f2-r1.log",
+      "sha256": "9c5345e43920b54dfbd8e4999d80cfaad3ba77bdab807c467526a3cdd4870485"
+    },
+    {
+      "path": "C:/r16-header-priority-20261115/browser-f2-r2.log",
+      "sha256": "9ead2964bf9655e561598e001d48949502e35c6c2e8b1552dec0a38b14da6d7c"
+    },
+    {
+      "path": "C:/r16-header-priority-20261115/fixture-r1/game-full/quest-after-r1/entry-visual-receipt.json",
+      "sha256": "4df7f38cbc21f21b6970f8fcc908bc31ea80b24329bffb383bc3ffddec3d670e"
+    },
+    {
+      "path": "C:/r16-header-priority-20261115/fixture-r1/game-full/quest-after-r2/entry-visual-receipt.json",
+      "sha256": "6018ebf32a8256a343f7088c5980bdabdffd5dcc0961bc12f1e6d11b1ba5a8c1"
+    }
+  ]
+}

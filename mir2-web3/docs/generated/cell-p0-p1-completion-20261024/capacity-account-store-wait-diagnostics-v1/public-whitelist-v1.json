@@ -1,0 +1,179 @@
+{
+  "schemaVersion": 1,
+  "scope": "Explicit source diagnostics and closed Rust validation artifacts only; no protocol raw, monitor, recording, private values or binary.",
+  "publicChild": "capacity-account-store-wait-diagnostics-v1",
+  "files": [
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/formal12-account-store-diagnostics-v1/source-candidate-v1.json",
+        "bytes": 6682,
+        "sha256": "fe037243485836fae250965c710b8096dcf10e7d254d75c4533b0241569912e7"
+      },
+      "destination": "source/source-candidate-v1.json"
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/formal12-account-store-diagnostics-v1/source-baseline-and-diff-v1.json",
+        "bytes": 4129,
+        "sha256": "5222a4c594edbe2d39bf540e5aa75f250ba3b7c03bb2ff83e036e669139480e2"
+      },
+      "destination": "source/source-baseline-and-diff-v1.json"
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/formal12-account-store-diagnostics-v1/simulation-source-changes-v1.patch",
+        "bytes": 31840,
+        "sha256": "52ebbf3ae4e97bb5f4c171bd3310d0b8f79d7c66c4abcbaaba926c187d45a2fc"
+      },
+      "destination": "source/simulation-source-changes-v1.patch"
+    },
+    {
+      "source": {
+        "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/config_account_store_diagnostics.rs",
+        "bytes": 10863,
+        "sha256": "bdd0805104f396d924a6663be46166a9b2bb759c580efcb6e07b6fbf0cb970e4"
+      },
+      "destination": "source/config_account_store_diagnostics.rs.txt"
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/formal12-account-store-diagnostics-v1/format-application-v1.json",
+        "bytes": 2655,
+        "sha256": "f6cb4aad6444afa2e8bc4276245f79174deb369764e3443d9557afbd1701e5c2"
+      },
+      "destination": "source/format-application-v1.json"
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/formal12-account-store-diagnostics-v1/apply-source-v2.mjs",
+        "bytes": 17185,
+        "sha256": "1c10e76a194e64cf552b9d1515fbf690f6a7e87242c27867647aab8f0282d61f"
+      },
+      "destination": "source/historical-source-edit-v2.mjs"
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/formal12-account-store-diagnostics-v1/aggregate-functional-v1.cjs",
+        "bytes": 7021,
+        "sha256": "7ebcb451430eb837ef75d40d7791cb16c0c74b476ba6896cd9257a0ef5cc4225"
+      },
+      "destination": "verification/aggregate-functional-v1.cjs"
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/root-account-store-wait-diagnostics-functional-validation-v1.json",
+        "bytes": 12175,
+        "sha256": "1ad0420e74d363088b20dca95cebbb7c84b035e1edf5d0472a185d8bd81dea57"
+      },
+      "destination": "verification/functional-validation-v1.json"
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/formal12-account-store-diagnostics-independent-review-v1/review-v1.json",
+        "bytes": 9745,
+        "sha256": "ad473b1af8874efbb7a9772dc5f6f07c5ef0cbb676dbe8137583eec597775633"
+      },
+      "destination": "verification/independent-source-review-v1.json"
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-validation-v1/focused-execution-v1.json",
+        "bytes": 3854,
+        "sha256": "b86f6234cbfd0a73d134f0a94b0a23243b687f35bfb8e294467c49e26805f004"
+      },
+      "destination": "validation/focused-execution-v1.json"
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-validation-v1/focused-v1.log",
+        "bytes": 46679,
+        "sha256": "64aa992eb5051f43088e476e43baafee73d7849a3b3d9a29d66345cd24a3a7b9"
+      },
+      "destination": "validation/focused-v1.log"
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-validation-v1/adjacent-v1/execution-receipt-v1.json",
+        "bytes": 11980,
+        "sha256": "40f8c70b342e506ee38885bba09a0ea0dedb0258f57e4ba0693ba24d14c59512"
+      },
+      "destination": "validation/adjacent/execution-receipt-v1.json"
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-validation-v1/adjacent-v1/test-list-v1.log",
+        "bytes": 355876,
+        "sha256": "72c5a9a4c0d2b5370a1450000ec13cc245fa58a187d3f38eecc10ead9747cf36"
+      },
+      "destination": "validation/adjacent/test-list-v1.log"
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-validation-v1/adjacent-v1/case-01.log",
+        "bytes": 64859,
+        "sha256": "87b14cf2a3410d641754ebf3756c552d1d2645080a7d09127fc37a41e095305e"
+      },
+      "destination": "validation/adjacent/case-01.log"
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-validation-v1/adjacent-v1/case-02.log",
+        "bytes": 75023,
+        "sha256": "84763baa12a7e3b0e774db5499b784448cf02ad6f10acada5537fa966c0ea3db"
+      },
+      "destination": "validation/adjacent/case-02.log"
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-validation-v1/adjacent-v1/case-03.log",
+        "bytes": 47742,
+        "sha256": "04346316b00c20cb2421aa3864439feba7a44a106de616d4f88ceb4cd8833f02"
+      },
+      "destination": "validation/adjacent/case-03.log"
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-validation-v1/adjacent-v1/case-04.log",
+        "bytes": 44944,
+        "sha256": "7ebc61d6fc362cb3a8841de5779082b3d21922f87a8de720efbdebc32c3d03f9"
+      },
+      "destination": "validation/adjacent/case-04.log"
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-validation-v1/adjacent-v1/case-05.log",
+        "bytes": 44359,
+        "sha256": "91bbe7088d06aaee35d7495fdd792944570ac43084339db1ddd9402abee3a9d8"
+      },
+      "destination": "validation/adjacent/case-05.log"
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-validation-v1/adjacent-v1/case-06.log",
+        "bytes": 45694,
+        "sha256": "79b61ee1b73131225f578d0fc7b1a396b6541788c709a1815222933b7582f920"
+      },
+      "destination": "validation/adjacent/case-06.log"
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-validation-v1/rustfmt-execution-v1.json",
+        "bytes": 829,
+        "sha256": "ec0d92e81b06c96c8e2f60c661afd6fc1232c6b4e299a0432ea3f923196fbeca"
+      },
+      "destination": "validation/rustfmt-execution-v1.json"
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-validation-v1/rustfmt-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": "validation/rustfmt-v1.log"
+    }
+  ],
+  "existingSixSourcePreimagesCopied": false,
+  "baselineSourceCommit": "7644faa14402aa1bfdad8096fedfe61dc6a0a660",
+  "sourceBaselineProof": "source/source-baseline-and-diff-v1.json",
+  "newRustSourceDestinationUsesTxt": true
+}

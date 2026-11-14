@@ -1,0 +1,195 @@
+{
+  "schemaVersion": 1,
+  "synthetic": true,
+  "scope": "three-original-classes-first-v2-quest-only",
+  "mode": "resume-existing",
+  "networkAttempted": true,
+  "passed": true,
+  "expected": {
+    "profileId": "platinum_fiveclass",
+    "profileVersion": 1,
+    "bundleHash": "a7d5126c0418536e30a835667e101687a5f54700060985349205f6b93f7262da"
+  },
+  "sourcePins": {
+    "apps/web/scripts/quest-agent/protocol-observation.mjs": "d12e8d66c527c105a088781c99d538915125a5b77ad63c2b9a49e9cba0f56f17",
+    "apps/web/scripts/quest-agent/protocol-client.mjs": "cc1efb06b93984d203a388bb9f20f042240594434572339ba1ef435fc27dad8e",
+    "apps/web/scripts/quest-agent/protocol-quest-actions.mjs": "847075d616ecb4fd7a3da4742f88ddb70b929a4e7129a0acce02342d399daba8",
+    "apps/web/scripts/quest-agent/protocol-newcomer-v2.mjs": "22b0d1fab65b0fd1c47aa53a9a82825403e272a0e82efc4fac436c4e141141cc",
+    "apps/web/scripts/quest-agent/protocol-play.mjs": "f5fd90e669f039c83023f203a0332ed85fac6d8a31b4e90aef45c65d48d61314",
+    "apps/web/scripts/quest-agent/protocol-navigation.mjs": "f4296f07112265e39b3b6072d089a1e27574820ba5b22adad1f075f5c7513645",
+    "apps/web/scripts/quest-agent/protocol-rewards.mjs": "6b6e46aede50ea38463616115f85325fe0f50bd27fd09b019747fd95ba90fba4",
+    "packages/game-data/data/r16-gameplay-baseline.json": "83679d56acecfe65337bc118bcf94b1028619384e57b56ab980e2c50d39d1f0e",
+    "packages/game-data/data/generated/platinum_fiveclass_bundle.json": "3c12e13860161be681fd70f672c1a40b54d85f721cf50c5b1d1c68c15bf5e6a2",
+    "config/quest-guidance/newcomer-journey-v2.json": "59b4e1b8a0dcc9f95de7871a178f715d6ce1baefe96e263f38e5d4328d4dccf7"
+  },
+  "roles": [
+    {
+      "ordinal": 1,
+      "className": "Warrior"
+    },
+    {
+      "ordinal": 2,
+      "className": "Wizard"
+    },
+    {
+      "ordinal": 3,
+      "className": "Taoist"
+    }
+  ],
+  "firstQuest": {
+    "id": 2110001,
+    "source": "newcomer-v2",
+    "normalNpcReport": true,
+    "killsRequired": 0
+  },
+  "forbiddenCommands": [
+    "passkeyLogin",
+    "resumeSession",
+    "WorldCommand",
+    "qa",
+    "buyItem",
+    "useItem",
+    "attack",
+    "magic"
+  ],
+  "rawTracesWritten": false,
+  "completedRoles": 3,
+  "results": [
+    {
+      "ordinal": 1,
+      "className": "Warrior",
+      "synthetic": true,
+      "passed": true,
+      "realm": {
+        "profileId": "platinum_fiveclass",
+        "profileVersion": 1,
+        "bundleHash": "a7d5126c0418536e30a835667e101687a5f54700060985349205f6b93f7262da"
+      },
+      "bootstrap": "UserInformation",
+      "initialInventory": {
+        "bag": 4,
+        "belt": 0,
+        "equipped": 0
+      },
+      "movement": {
+        "worldCommands": 1,
+        "authoritativeUserLocation": true
+      },
+      "firstQuest": {
+        "questId": 2110001,
+        "v2AuthorityPresent": true,
+        "acceptAcknowledged": true,
+        "reportReady": true,
+        "uniqueFinishAcknowledged": true,
+        "rewardItemGroups": 2,
+        "exactItemRewardDelta": true,
+        "goldRewardDelta": 100
+      },
+      "firstLogoutAcknowledged": true,
+      "reloginBootstrap": "UserInformation",
+      "reloginStateMatches": true,
+      "reloginQuestCompleted": true,
+      "secondLogoutAcknowledged": true,
+      "final": {
+        "level": 2,
+        "gold": 100,
+        "experience": 0,
+        "map": "0",
+        "completedQuestId": 2110001,
+        "inventoryCount": 5,
+        "equipmentCount": 0
+      }
+    },
+    {
+      "ordinal": 2,
+      "className": "Wizard",
+      "synthetic": true,
+      "passed": true,
+      "realm": {
+        "profileId": "platinum_fiveclass",
+        "profileVersion": 1,
+        "bundleHash": "a7d5126c0418536e30a835667e101687a5f54700060985349205f6b93f7262da"
+      },
+      "bootstrap": "UserInformation",
+      "initialInventory": {
+        "bag": 4,
+        "belt": 0,
+        "equipped": 0
+      },
+      "movement": {
+        "worldCommands": 1,
+        "authoritativeUserLocation": true
+      },
+      "firstQuest": {
+        "questId": 2110001,
+        "v2AuthorityPresent": true,
+        "acceptAcknowledged": true,
+        "reportReady": true,
+        "uniqueFinishAcknowledged": true,
+        "rewardItemGroups": 3,
+        "exactItemRewardDelta": true,
+        "goldRewardDelta": 100
+      },
+      "firstLogoutAcknowledged": true,
+      "reloginBootstrap": "UserInformation",
+      "reloginStateMatches": true,
+      "reloginQuestCompleted": true,
+      "secondLogoutAcknowledged": true,
+      "final": {
+        "level": 2,
+        "gold": 100,
+        "experience": 0,
+        "map": "0",
+        "completedQuestId": 2110001,
+        "inventoryCount": 6,
+        "equipmentCount": 0
+      }
+    },
+    {
+      "ordinal": 3,
+      "className": "Taoist",
+      "synthetic": true,
+      "passed": true,
+      "realm": {
+        "profileId": "platinum_fiveclass",
+        "profileVersion": 1,
+        "bundleHash": "a7d5126c0418536e30a835667e101687a5f54700060985349205f6b93f7262da"
+      },
+      "bootstrap": "UserInformation",
+      "initialInventory": {
+        "bag": 4,
+        "belt": 0,
+        "equipped": 0
+      },
+      "movement": {
+        "worldCommands": 1,
+        "authoritativeUserLocation": true
+      },
+      "firstQuest": {
+        "questId": 2110001,
+        "v2AuthorityPresent": true,
+        "acceptAcknowledged": true,
+        "reportReady": true,
+        "uniqueFinishAcknowledged": true,
+        "rewardItemGroups": 3,
+        "exactItemRewardDelta": true,
+        "goldRewardDelta": 100
+      },
+      "firstLogoutAcknowledged": true,
+      "reloginBootstrap": "UserInformation",
+      "reloginStateMatches": true,
+      "reloginQuestCompleted": true,
+      "secondLogoutAcknowledged": true,
+      "final": {
+        "level": 2,
+        "gold": 100,
+        "experience": 0,
+        "map": "0",
+        "completedQuestId": 2110001,
+        "inventoryCount": 6,
+        "equipmentCount": 0
+      }
+    }
+  ],
+  "completedAt": "2026-11-08T16:58:31.792Z"
+}

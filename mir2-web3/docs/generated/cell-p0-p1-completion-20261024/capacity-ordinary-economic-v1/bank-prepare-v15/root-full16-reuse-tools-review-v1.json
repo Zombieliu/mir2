@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "currentVerifier": {
+    "sha256": "42c531599e9de6376621fca07b4f03d848c16a64aa64372b306a08cfe3e541ac",
+    "bytes": 15209,
+    "file": "C:/mir2-build/p01-completion-20261024/verify-full16-reuse-v7.mjs"
+  },
+  "priorVerifier": {
+    "sha256": "9a1419141bc4ebc166afa7ec8253691149542e30f6d683f25b7f30da9e4abda8",
+    "bytes": 15209,
+    "file": "C:/mir2-build/p01-completion-20261024/verify-full16-reuse-v6.mjs"
+  },
+  "onlyAllowedSiblingAndLabelsChanged": true,
+  "forwardAndInverseRawExact": true,
+  "strictQualificationGuardsChanged": false,
+  "syntaxExitCode": 0,
+  "actualProofPerformed": false
+}

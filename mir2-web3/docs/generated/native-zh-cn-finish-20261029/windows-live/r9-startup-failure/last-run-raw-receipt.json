@@ -1,0 +1,25 @@
+{
+  "kind": "original-r9-failed-startup-two-lines",
+  "sourceReceipt": {
+    "filename": "last-run.jsonl",
+    "bytes": 179,
+    "sha256": "a5108615ceef1621f22093cdabd38f833b182c06cb84b579005860b7d8114ab9",
+    "included": false
+  },
+  "rawUtf8": "{\"detail\":\"non-client payload\",\"event\":\"update-error\",\"time\":1793272399}\n{\"detail\":\"installed fallback is not valid: non-client payload\",\"event\":\"engine-error\",\"time\":1793272399}\n",
+  "utf8RoundtripSha256": "a5108615ceef1621f22093cdabd38f833b182c06cb84b579005860b7d8114ab9",
+  "actualLfCount": 2,
+  "records": [
+    {
+      "detail": "non-client payload",
+      "event": "update-error",
+      "time": 1793272399
+    },
+    {
+      "detail": "installed fallback is not valid: non-client payload",
+      "event": "engine-error",
+      "time": 1793272399
+    }
+  ],
+  "originalJsonlCopiedAsSeparateFile": false
+}

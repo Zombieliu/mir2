@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "kind": "numeron-r16-release",
+  "passed": true,
+  "domainMovePending": true,
+  "customDomainChanged": false,
+  "oldGameProjectMutatedByHelper": false,
+  "writes": [
+    {
+      "operation": "stage",
+      "site": "game"
+    }
+  ],
+  "rollbacks": [],
+  "credentialsRecorded": false,
+  "operation": "numeron-qr-stage",
+  "sourceSha": "ff957548919e9d306c11af57dad224f2178c2d0f",
+  "implementationSha": "02c1e6104b4b9fc66ea1698114f92ea922ef6b46",
+  "projects": {
+    "original": {
+      "project": "prj_Bl3ttB4PzcdCpJMYLRhzQjkdXyTz",
+      "production": "dpl_3NBhFUPKxNF4nccRnG94ZhDq1iz6",
+      "rootDirectory": "mir2-web3/apps/web",
+      "nodeVersion": "24.x"
+    },
+    "main": {
+      "project": "prj_Q14gZuvjxkfqOCExhqOrYiR2UbxA",
+      "production": "dpl_BWkLQWS8SUB3JFFvFXCenDr2ULmR",
+      "rootDirectory": null,
+      "nodeVersion": "24.x"
+    },
+    "game": {
+      "project": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+      "production": "dpl_4jjpevpspsVtf61hUCgTHiKxRatZ",
+      "rootDirectory": "mir2-web3/apps/web",
+      "nodeVersion": "26.x"
+    }
+  },
+  "sourceClosure": {
+    "base": "8e82f53fcd749e8c2f6a69cb9b911c3165de006a",
+    "assetSource": "f2de762309768b51b39438c2437c14e819df9bf7",
+    "ref": "codex/windows-player-journey",
+    "changedFiles": [
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/app/original-client-shell.tsx",
+        "sha": "83bcfc0b9cbcd3f99d2bcd7b0b372d6a8acf6693"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/apps/web/lib/generated/r16-entry-player-meta.json",
+        "sha": "3459e2d7be8904d7f53edb17da2e429de817265b"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/lib/r16-entry-scene.ts",
+        "sha": "294c22fe90fb5e5a8e30d0ec7f3e6099f73c4beb"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/package.json",
+        "sha": "01752c37bc57db080ffb65a607430899154b3c7e"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/scripts/generate-r16-entry-visuals.mjs",
+        "sha": "c25be54c5f45790bdea3dc0f3707a299e0d2f848"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/apps/web/scripts/test-r16-entry-player-readiness.mjs",
+        "sha": "147cccb6c37163d927a727d74bb94f4f89589057"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs",
+        "sha": "fbbdb76b9dc19524be57483840cbd43096a563ae"
+      }
+    ]
+  },
+  "assetPublication": {
+    "runId": "42494701555",
+    "artifactId": 13622863928,
+    "manifestSha256": "32255399aaae2dc9a133a5827252256ece782aaae5d237152ffebc2d8f272155",
+    "manifestBytes": 15716826
+  },
+  "trafficBefore": {
+    "target": "dpl_4jjpevpspsVtf61hUCgTHiKxRatZ",
+    "alias": "dpl_4jjpevpspsVtf61hUCgTHiKxRatZ"
+  },
+  "trafficAfter": {
+    "target": "dpl_4jjpevpspsVtf61hUCgTHiKxRatZ",
+    "alias": "dpl_4jjpevpspsVtf61hUCgTHiKxRatZ"
+  },
+  "candidates": {
+    "game": {
+      "id": "dpl_MEDVQnVnEgkfV4UsJMUpE67TfQFK",
+      "url": "numeron-r16-31ncy8n8v-obelisk-labs.vercel.app",
+      "project": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+      "readyState": "INITIALIZING"
+    }
+  }
+}

@@ -1,0 +1,105 @@
+{
+  "checkedAt": "2026-11-13T08:56:59.841Z",
+  "checkedBeforeAnySourceOverlayWrite": true,
+  "rootWriteSet": [
+    "mir2-web3/apps/web/lib/pinned-bootstrap-chunk.ts",
+    "mir2-web3/apps/web/lib/first-crystal-scene-request.ts",
+    "mir2-web3/apps/web/lib/r16-entry-scene.ts",
+    "mir2-web3/apps/web/lib/r16-native-localization.ts",
+    "mir2-web3/apps/web/lib/generated/r16-entry-bootstrap-chunks.ts",
+    "mir2-web3/apps/web/scripts/generate-r16-bootstrap-chunks.mjs",
+    "mir2-web3/apps/web/scripts/test-pinned-bootstrap-chunk.mjs",
+    "mir2-web3/apps/web/scripts/test-r16-native-localization.mjs",
+    "mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs",
+    "mir2-web3/apps/web/package.json"
+  ],
+  "foreignPaths": 159,
+  "unchanged": 145,
+  "externalChanges": [
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/native_candidate.rs",
+      "beforeSha256": "5918b783de2ff2094942946dda90392bf74e3cbbc0464e49801f5d10ddb2ccdf",
+      "observedSha256": "1be8f2f2d16d47b784a9e9a9d44db032bbc1fc714fc621f3d77408629ddd1ef4",
+      "unchanged": false
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/bin/seed_comparable_accounts.rs",
+      "beforeSha256": "43d0836a9155b5ffbe5455f41171c1b5bab7d9db8553defed0f71ddf509860cc",
+      "observedSha256": "132edf134eb87079455bf990f0a155dc8b56cd095a26a1181eafff9fa287b6c1",
+      "unchanged": false
+    },
+    {
+      "path": "mir2-web3/scripts/capacity/comparable-reference/crystal/Infrastructure.cs",
+      "beforeSha256": "fd5cd7aa9d026476172b1a347318385c0bb832c983a53d1d8878eaa5811b41ad",
+      "observedSha256": "1f1a6920c211819237c9a4668e0a0050bd78067152ff337f248063788f376ba0",
+      "unchanged": false
+    },
+    {
+      "path": "mir2-web3/scripts/capacity/comparable-reference/crystal/NativeActor.cs",
+      "beforeSha256": "a05b254f3dcd84188ba955e6664d5757e66809b7028b62ec307cacaeb09d1f48",
+      "observedSha256": "884fa029d84843db95d51ffad2e701507f941ec66135a390c17560225bf8ad44",
+      "unchanged": false
+    },
+    {
+      "path": "mir2-web3/scripts/capacity/comparable-reference/crystal/OfflineTests.cs",
+      "beforeSha256": "c4525866a0793f1d8962023aa91e1f17003d1986c4acb60f89db6d1cb4243f24",
+      "observedSha256": "d06c50a73bfa6afefdf065cf27d1dc76d4fa16b8bd2384223f7a082df261f692",
+      "unchanged": false
+    },
+    {
+      "path": "mir2-web3/scripts/capacity/comparable-reference/crystal/Runner.cs",
+      "beforeSha256": "70bdcef8b210ca348af5422ed84a251eafb5dee0e33b290e6b283ecf7672313a",
+      "observedSha256": "ab48f4288c7e03db09f6e6d7c15adb78fdeed804404fc9d6d9b66caaa9911222",
+      "unchanged": false
+    },
+    {
+      "path": "mir2-web3/scripts/capacity/comparable-reference/modern/driver.mjs",
+      "beforeSha256": "0d7b639a26bdea2b0cdcb50c3d5d52ea33aea7f44e2512bd556eeaa8db67e0c7",
+      "observedSha256": "01fabba55e49b2e466b1471d037d6962b70a93dcdfdef84dda97e4924136fd3e",
+      "unchanged": false
+    },
+    {
+      "path": "mir2-web3/scripts/capacity/comparable-reference/modern/driver.test.mjs",
+      "beforeSha256": "6b57156430e87084b3f1738e53b01167eabf16a6ffadb3f7cca750d762f2d399",
+      "observedSha256": "35d75d0b302a05fa46faa0069a850170ff03fc19f9f3f99b2d10b5678d6a96c4",
+      "unchanged": false
+    },
+    {
+      "path": "mir2-web3/scripts/capacity/comparable-reference/run_stage.py",
+      "beforeSha256": "8a588eff147308bb9732d023012f1c0cdb15625dd31e7d9d3712ebc3acea0d02",
+      "observedSha256": "f4d75957903a1ca68fcc36adc48cb1bb58344b2dfd0b641c2a7390680b51f755",
+      "unchanged": false
+    },
+    {
+      "path": "mir2-web3/scripts/capacity/comparable-reference/test_service_host.py",
+      "beforeSha256": "a5fa70cbebdb3b1dbe8dd311592d8c3b1f8e5191864617d2addf2242b0de6283",
+      "observedSha256": "214b59133bd618d1bc7fe700a37505dc6bbbb69789f8a1ea39938301ce3eb44d",
+      "unchanged": false
+    },
+    {
+      "path": "mir2-web3/scripts/capacity/comparable-reference/verification/test_verify_report.py",
+      "beforeSha256": "8b0ec2a4110f861eab81bccb4bba5dfdb1e9c889024626f3d6e30e10fa1ab4a5",
+      "observedSha256": "86d1ff589a8cb49a942a7bbb4173ee12d6a761e35520a52adb685c3db621be4b",
+      "unchanged": false
+    },
+    {
+      "path": "mir2-web3/scripts/capacity/comparable-reference/verification/verify_report.py",
+      "beforeSha256": "c89db92918d4eedbfc2a827f11e3a7f787f2fe7cb17ae2932602d1c69efb813a",
+      "observedSha256": "8d55c99776b005fb6166ccfc8248260d8c9392e7f768a8b3123187ae3c702d73",
+      "unchanged": false
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/effects.rs",
+      "beforeSha256": "153e3477a2ad20e66fc1c1f1a2ff652ab6728bae13f2be555c91865cab5fc4ed",
+      "observedSha256": "adc33b2398789a77a6608a978911d32c2d7667d55010ab53e842b7818c7cc176",
+      "unchanged": false
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/main.rs",
+      "beforeSha256": "d296e6ebbc9caaf70bffe45666aac85b8dfef88a7f60af652c01864ea971b16b",
+      "observedSha256": "658d7da9cc502390f2a254d46a5bfcfdbe2f3da91d60b8bf1df65bb42093e468",
+      "unchanged": false
+    }
+  ],
+  "scope": "Concurrent foreign edits observed read-only before any overlay write. They are retained as found; root writes only the disjoint Web list, and builds the clean committed Shell."
+}

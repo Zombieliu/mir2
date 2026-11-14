@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-27T12:21:50.000Z",
+  "scope": "Root final formal-v2 source integration: current1212/45 qualification, new actual full16-v2 and exact14-source proof, strict historical V6/55/Rust32, immutable W17 saved100 plus latest actual v1 traffic ledger. Pure qualification only; no bank copy, login, realm, freeze or capacity run.",
+  "expectedHead": "34036a1ae54c3a21e723cd0df36b7ab40205590b",
+  "before": {
+    "file": "C:/mir2-build/p01-completion-20261024/ordinary-economic-formal-ladder-v2/prepare-config-pending-v1.json",
+    "bytes": 11384,
+    "sha256": "ce3d109822247f5bb3a91d200c938c71031faeb8abe08a6a7158200b58428a34"
+  },
+  "after": {
+    "file": "C:/mir2-build/p01-completion-20261024/ordinary-economic-formal-ladder-v2/prepare-config-pending-v1.json",
+    "bytes": 11695,
+    "sha256": "16bce66c444630533b8f03f9647d67bcec21f960a5e124fad3505aabfc895eb4"
+  },
+  "changes": [
+    "currentFull16ReuseProof",
+    "sourceQualification.freshNodeTestsPassed",
+    "sourceQualification.qualificationScope"
+  ],
+  "strictFull16Proof": {
+    "file": "C:/mir2-build/p01-completion-20261024/ordinary-full16-reuse-proof-formal-v2.json",
+    "bytes": 73885,
+    "sha256": "1d6c58d7d733c85f90a78903982fdb71910b1273b73b2ce6c95480c12232bebd"
+  },
+  "actualFull16V2ExecutedThisWorkRound": true,
+  "rootReceipt": {
+    "file": "C:/mir2-build/p01-completion-20261024/root-capacity-preparation-validation-v19/root-focused-receipt-v1.json",
+    "bytes": 23388,
+    "sha256": "6d0063a116df95f7f7f3b9739bd9d62158da95cec859eec70ac9475e53e23ce1"
+  },
+  "sourceRuntimeCount": 33,
+  "sourceNamedCount": 45,
+  "actualNodeTests": 1212,
+  "toolCount": 11,
+  "savedCount": 100,
+  "freshAtFormalStart": false,
+  "sourceContractPassed": true,
+  "blockingFindingIds": [],
+  "eligibleForRootFreezeExecution": true,
+  "bankCopied": false,
+  "authPerformed": false,
+  "freezePerformed": false,
+  "ownedExecuted": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

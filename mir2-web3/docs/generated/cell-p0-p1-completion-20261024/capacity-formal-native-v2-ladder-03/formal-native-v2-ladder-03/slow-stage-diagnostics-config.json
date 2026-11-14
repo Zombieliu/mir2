@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "thresholdMs": 50,
+  "stageLabels": [
+    "serial_gate.zone_outbound_wait",
+    "socket_input.queue_residence",
+    "serial_gate.input_wait",
+    "session_action.execute",
+    "session_action.flush",
+    "runtime_tick.execute",
+    "runtime_tick.save_checkpoint",
+    "runtime_tick.flush",
+    "flush.responses",
+    "flush.external_state",
+    "flush.save",
+    "snapshot.build_and_send",
+    "zone_owner.in_process.execute_request",
+    "zone_owner.hosted.runtime_lock_wait",
+    "zone_owner.hosted.execute_request",
+    "zone_cadence.total",
+    "zone_cadence.gate_wait",
+    "zone_cadence.manager_tick",
+    "zone_cadence.dispatch",
+    "shared_session.predrain.monster_activation",
+    "shared_session.predrain.shared_entity_projection",
+    "shared_session.predrain.pending_lock_wait",
+    "shared_session.predrain.journey_reposition",
+    "shared_session.predrain",
+    "shared_session.inner_execute",
+    "shared_session.reconcile",
+    "shared_session.tail"
+  ],
+  "lineLimitBytes": 8192,
+  "totalLimitBytes": 33554432,
+  "writeLimitBytes": 1048576,
+  "writeHighWaterMarkBytes": 1048576,
+  "finishWaitMs": 15000,
+  "publicDataFile": "slow-stage-public.jsonl",
+  "publicStatusFile": "slow-stage-public-status.json",
+  "originalStderr": "Only original private gateway.stderr.log receives complete stderr bytes. Public projection contains only whole ASCII exact-format allowed-stage records.",
+  "fields": [
+    "observedAtMs",
+    "stage",
+    "durationMs"
+  ],
+  "clock": "observedAtMs is the launcher receive wall clock; it is not a server timestamp or exact span start/end.",
+  "failure": "Any cap, backpressure, EOF truncation, reader/writer or finish failure sets incomplete and requests normal load stop once. Wait stderr EOF and metadata finish after Gateway exit before publishing cleanup.",
+  "limitations": [
+    "Only existing GatewaySlowStage static labels and50ms-or-slower emissions are observable.",
+    "Missing rows do not prove no stall. No new instrumentation, gameplay or acceptance change."
+  ],
+  "finalSyntheticTest": {
+    "tests": 14,
+    "passed": 14,
+    "failed": 0,
+    "log": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-03\\slow-stage-public-test-v2.log",
+      "bytes": 3462,
+      "sha256": "c9be6ee159c6caaf5a7922adef4e36e0c8ac6b492cef5027dad3770228bc7494"
+    },
+    "sourcePins": [
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-03\\slow-stage-public.mjs",
+        "bytes": 7767,
+        "sha256": "2c2f72385d9c9db25237e4c98aa56375639f6a0b8f82bd2602ce04684a0b607c"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-03\\slow-stage-public.test.mjs",
+        "bytes": 10310,
+        "sha256": "d6d2bc6954d546cccc0d3273fbe9e236f381a10963a0a1d039087e74ae46e7ee"
+      }
+    ]
+  },
+  "historicalSyntheticLog": {
+    "file": "slow-stage-public-test.log",
+    "scope": "Earlier13-test pass before the independent1MiB write-buffer fixture; not claimed as current source validation."
+  }
+}

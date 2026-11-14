@@ -1,0 +1,43 @@
+{
+  "kind": "Source40 actual finite evidence read-only review",
+  "reviewer": "/root/source30_native_bundle",
+  "recordedBy": "/root",
+  "recordedAtUtc": "2026-10-08 06:03:42 UTC",
+  "result": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-hero-source40-finite-result01.json",
+    "bytes": 406234,
+    "sha256": "2e6ce24b2df867bb039482288474b5705cf76d8ed8866ab34988af102ba993aa"
+  },
+  "rawEvidence": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-hero-source40-raw-evidence01.json",
+    "bytes": 218180,
+    "sha256": "ac572362b66dcc48f9eb019291c1e1f530ad9edfbdfd984ae51c7d55effd68c9"
+  },
+  "guardRefusal": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-hero-source40-guard-refusal01.json",
+    "bytes": 2388,
+    "sha256": "3249ed1847c33377aeb3ec5c26712fa078a1b1d7655da2836474798e2f8ce236"
+  },
+  "reviewMessage": "Source40 final result limited acceptance after actual fs/crypto audit: exact result406234B/2e6ce..., raw218180B/ac572..., refusal2388B/3249... verified. All59 archived original files equal external actual bytes, including25nonce originals; five actual stdout/stderr/outer configs verified,85 pass occurrences=15+46+24,72normalized functions,16new named functions; staticcheck2 only. Strictserial checked against priorcompletion/nextprobe time; all5 PolicyB completed/exited/disposed exit0, actualGetVolumeC samples min256589996032, independently recomputed freshness uppermax67ms. Historicalexit90 rawpreserved/no nonce/tests/Csampling; fielddiagnosis explicitlyinference. Current900pin0drift; independentbeforecomparison5changed895protected. Usertsconfig/matrix/twopublicmanifests/protectedbackenddocs match. Sixdocsha match; removing exactly3652B Source40 head recovers eachbeforeSHA. Claims keep Source25 latestfullWeb, no UI/Ready/package/playability/Candidate/overallcompletion andgoalactive. No concrete blocker found; no files changed/process/tests/API executed here.",
+  "accepted": true,
+  "scope": "Only actual finite tests/static compilation/config/source/doc fidelity; not full Web integration, packages, frontend Ready or player acceptance.",
+  "actualExecutionCount": 85,
+  "normalizedFunctions": 72,
+  "newFunctions": 16,
+  "wasmStaticChecks": 2,
+  "originalArchivedFiles": 59,
+  "originalNonceFiles": 25,
+  "currentSourcePins": 900,
+  "changed": 5,
+  "protected": 895,
+  "minimumCBytes": "256589996032",
+  "freshnessUpperMaximumMs": 67,
+  "reviewerExecutedProcesses": false,
+  "reviewerChangedFiles": false,
+  "reviewerUsedWasmApi": false,
+  "goalStatus": "active",
+  "goalComplete": false,
+  "candidate100": false,
+  "overallPercentage": null,
+  "latestCompleteWeb": "Source25 Next08/Thin08"
+}

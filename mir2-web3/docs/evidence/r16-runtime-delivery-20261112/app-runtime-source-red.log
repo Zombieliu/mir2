@@ -1,0 +1,108 @@
+TAP version 13
+# Subtest: binary compilation overlaps a pending script import and canvas gates initialization
+ok 1 - binary compilation overlaps a pending script import and canvas gates initialization
+  ---
+  duration_ms: 16.08
+  type: 'test'
+  ...
+# (node:16880) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: wrong MIME and missing streaming support compile the original single response
+ok 2 - wrong MIME and missing streaming support compile the original single response
+  ---
+  duration_ms: 22.2382
+  type: 'test'
+  ...
+# Subtest: an import failure aborts the independent binary fetch
+ok 3 - an import failure aborts the independent binary fetch
+  ---
+  duration_ms: 0.6553
+  type: 'test'
+  ...
+# Subtest: unavailable or invalid binaries never initialize a runtime
+ok 4 - unavailable or invalid binaries never initialize a runtime
+  ---
+  duration_ms: 0.9071
+  type: 'test'
+  ...
+# Subtest: the existing 120-second budget cancels a stalled binary
+ok 5 - the existing 120-second budget cancels a stalled binary
+  ---
+  duration_ms: 0.6183
+  type: 'test'
+  ...
+# Subtest: a stalled script also exits after the binary has finished compiling
+ok 6 - a stalled script also exits after the binary has finished compiling
+  ---
+  duration_ms: 1.398
+  type: 'test'
+  ...
+# Subtest: actual page loader shares pending/successful work and retries a failed URL
+ok 7 - actual page loader shares pending/successful work and retries a failed URL
+  ---
+  duration_ms: 153.0564
+  type: 'test'
+  ...
+# Subtest: a valid advancing binary can finish beyond the header budget without a second GET
+ok 8 - a valid advancing binary can finish beyond the header budget without a second GET
+  ---
+  duration_ms: 1.7753
+  type: 'test'
+  ...
+# Subtest: a body without positive bytes stops at the idle boundary, including empty chunks
+ok 9 - a body without positive bytes stops at the idle boundary, including empty chunks
+  ---
+  duration_ms: 0.9108
+  type: 'test'
+  ...
+# Subtest: decoded bytes are capped before runtime initialization without trusting Content-Length
+ok 10 - decoded bytes are capped before runtime initialization without trusting Content-Length
+  ---
+  duration_ms: 0.7421
+  type: 'test'
+  ...
+# Subtest: a progressing body still has an absolute lifetime cap
+ok 11 - a progressing body still has an absolute lifetime cap
+  ---
+  duration_ms: 0.7758
+  type: 'test'
+  ...
+# Subtest: a failed pinned binary source can use its supplied same-version fallback once
+ok 12 - a failed pinned binary source can use its supplied same-version fallback once
+  ---
+  duration_ms: 0.666
+  type: 'test'
+  ...
+# Subtest: actual Page selects versioned app binary with same-package remote fallback and glue
+not ok 13 - actual Page selects versioned app binary with same-package remote fallback and glue
+  ---
+  duration_ms: 91.6523
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-runtime-initializer.mjs:169:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'https://assets.example.test/immutable-release/bevy-runtime/v/bevy-fixed/pkg-webgpu/mir2_bevy_runtime_bg.wasm'
+    - '/bevy-runtime/v/bevy-fixed/pkg-webgpu/mir2_bevy_runtime_bg.wasm'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: '/bevy-runtime/v/bevy-fixed/pkg-webgpu/mir2_bevy_runtime_bg.wasm'
+  actual: 'https://assets.example.test/immutable-release/bevy-runtime/v/bevy-fixed/pkg-webgpu/mir2_bevy_runtime_bg.wasm'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-runtime-initializer.mjs:182:12)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..13
+# tests 13
+# suites 0
+# pass 12
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 605.7923

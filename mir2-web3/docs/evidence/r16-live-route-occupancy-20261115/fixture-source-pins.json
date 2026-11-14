@@ -1,0 +1,46 @@
+{
+  "scripts": [
+    {
+      "name": "focused-driver.mjs",
+      "sha256": "88328fdd7926e5f4593947a17c4dd6c942149182dddfbc32c8e6235556ca8cae"
+    },
+    {
+      "name": "live-route-occupancy-game.mjs",
+      "sha256": "8c0c50f700761af924aaac94115da8c6e1e5a371a237229b0f990717a053cff5"
+    },
+    {
+      "name": "route-intent-gate.mjs",
+      "sha256": "118500651669f2e216be822b838fa0f62fee580194ea2736c2e3f25a68f77514"
+    },
+    {
+      "name": "route-plan-probe.mjs",
+      "sha256": "706cbc5378b68cb9328278d61b1c2de49711c84d53494d46e58f27c0f575406c"
+    },
+    {
+      "name": "profile.mjs",
+      "sha256": "ce502083b96e0cc906e8cfcd5e8c1c02348aac4184abdb1fe29afa0a4a02e159",
+      "sourcePath": "C:/r16-header-priority-20261115/fixture-r1/game-full/profile.mjs"
+    },
+    {
+      "name": "verify-prewarm.mjs",
+      "sha256": "e5bbac30271e8fdcc4ed7d5bad466bd0f16e37ee0f32ec2936e8994bdea54d3e",
+      "sourcePath": "C:/r16-runtime-header-probe-20261114/public-r1/verify-prewarm.mjs"
+    },
+    {
+      "name": "verify-original-fonts.mjs",
+      "sha256": "5ce7c7a01c76f9a3dd2a19d71c5a9a0936b5b2c9b9a3631c1c0a4a507424c86d",
+      "sourcePath": "C:/r16-runtime-header-probe-20261114/public-r1/verify-original-fonts.mjs"
+    },
+    {
+      "name": "hunt-navigation-game.mjs",
+      "sha256": "1c5a7848e899e5c4595afe031e16205df2da633728e76e22c9cc20ac59c415cf",
+      "sourcePath": "C:/r16-live-route-occupancy-20261115/fixture-r2/game-full/hunt-navigation-game.mjs"
+    }
+  ],
+  "source": "b9acf175fad0bb582f20fd76282580f179c4b0d2",
+  "newProductBuild": false,
+  "reusedQualifiedBuild": "e6ZIGltcPod5MEM7KJKr1",
+  "reusedPrivateNormallyPlayedSnapshot": true,
+  "original8And120SecondLimitsRetained": true,
+  "scope": "Focus on actual shared-Zone routing with real previously-filled asset cache; prior cold/reopen results remain dated evidence. No cold-start claim."
+}

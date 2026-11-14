@@ -1,0 +1,13 @@
+{
+  "checkedAt": "2026-11-13T11:31:22.953Z",
+  "foreignSnapshotPaths": 481,
+  "identical": 471,
+  "concurrentlyChanged": 10,
+  "concurrentlyMissing": 0,
+  "ownedPaths": 7,
+  "foreignWriteSetOverlap": 0,
+  "excludedForeignShell": true,
+  "rootIndexEmpty": true,
+  "privateSnapshotSha256": "c9da93e51be152dcf1475c6e0695708b22155aee449b8cbcd2a1e8d252021677",
+  "scope": "Only seven disjoint Web files were committed. Independently evolving Native/Windows and Shell work retained as found; no reset or restoration. Foreign contents are not exported."
+}

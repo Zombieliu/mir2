@@ -9,7 +9,7 @@ export type OriginalUiSpritePath = string | ((index: number) => string);
 
 export type CharacterTabKey = "char" | "stats1" | "stats2" | "spells";
 export type InventoryTabKey = "bag1" | "bag2" | "quest";
-export type ClientScreen = "login" | "select" | "game";
+export type ClientScreen = "login" | "openingLogin" | "select" | "game";
 
 export const ORIGINAL_UI = {
   login: {

@@ -1,0 +1,181 @@
+{
+  "schemaVersion": 1,
+  "scope": "Two Node source files only; no run acceptance or Formal13 root-cause proof.",
+  "basisCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "preimages": {
+    "schemaVersion": 1,
+    "head": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+    "files": [
+      {
+        "path": "apps/web/scripts/playtest-capacity-soak.mjs",
+        "preimage": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-v1\\preimages\\playtest-capacity-soak.mjs.txt",
+        "bytes": 149057,
+        "sha256": "bd731443c41d54a237fc0a6d83f2619d049c0226cbd7f154f67717e8fb0dcea5"
+      },
+      {
+        "path": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+        "preimage": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-v1\\preimages\\playtest-capacity-soak.test.mjs.txt",
+        "bytes": 243920,
+        "sha256": "ec388119871058883781e2cf422a417c3fb319c25d344fd3092f18da9b354966"
+      }
+    ]
+  },
+  "files": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 153586,
+      "sha256": "99914efc602be1600207ab4e2e78f960766332d3064a93307f5268c29448e037"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 258200,
+      "sha256": "0e28f856648a69053fd538d2e493c97ad046b0714381e8fdfaacb72782abe711"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    }
+  ],
+  "sourceSha256": "445325ec1b052cffffb07437c38ec0a4688741a0b9207e7895e514e8e4a7f634",
+  "otherSevenInputsUnchanged": true,
+  "inverse": {
+    "mainRawExact": true,
+    "mainRestoredSha256": "bd731443c41d54a237fc0a6d83f2619d049c0226cbd7f154f67717e8fb0dcea5",
+    "hunks": [
+      {
+        "name": "bounded hint constants",
+        "before": "",
+        "after": "const COMBAT_SCOUT_HINT_OBSERVER_LIMIT = 100;\nconst COMBAT_SCOUT_HINT_ENTITY_LIMIT = 2048;\nconst COMBAT_SCOUT_HINT_LIMIT = 4;\nconst COMBAT_SCOUT_SELECTION_ROW_LIMIT = 32;\n"
+      },
+      {
+        "name": "optional obstacle snapshot used only by hint planning",
+        "before": "function movement(client, target, map, routeAllowed) {\n  const owner = self(client), occupied = navigationObstacles(client);\n  const blocked = (reason, nextStep) => {\n    if (client.navigationAttempts) {\n      client.navigationAttemptCount++;\n      if (client.navigationAttempts.length < NAVIGATION_ATTEMPT_LIMIT) client.navigationAttempts.push({ target: lifecyclePoint(target),\n        reason, staticWalkable: protocolMapCellIsWalkable(map, target),\n        targetOccupied: occupied.some(entity => entity.x === target.x && entity.y === target.y), ...(nextStep ? { nextStep } : {}) });\n    }\n    return null;\n  };\n  const route = findProtocolWalkPath({ map, start: owner, target, dynamicObstacles: occupied, maxExpanded: 4000 });\n  if (!route) return blocked('no-path-or-expansion-limit');\n  if (routeAllowed && !route.every(routeAllowed)) return blocked('route-outside-scout-coverage-or-transfer');\n  if (route.length < 2) return blocked('already-at-target');\n  const first = route[1];\n  if ((client.snapshot.mapTransfers ?? []).some(transfer => inside(first, transfer.bounds))) return blocked('next-step-transfer', first);\n  const direction = directionOf(owner, first); if (!direction) return blocked('invalid-unit-step', first);\n  const navigation = { goal: lifecyclePoint(target), remainingSteps: route.length - 1 };\n  const wantsRun = client.context?.policy.activityMode === 'native' ? performance.now() < client.nativeRunPrimedUntil : client.movementCount % 10 === 9;\n  if (wantsRun && route.length > 2 && route[2].x - first.x === first.x - owner.x && route[2].y - first.y === first.y - owner.y &&\n      !(client.snapshot.mapTransfers ?? []).some(transfer => inside(route[2], transfer.bounds))) {\n    return { command: { type: 'run', direction }, target: route[2], first, navigation };\n  }\n  return { command: { type: 'walk', direction }, target: first, first, navigation };\n}\n",
+        "after": "function movement(client, target, map, routeAllowed, planningObstacles) {\n  const owner = self(client), occupied = planningObstacles ?? navigationObstacles(client);\n  const blocked = (reason, nextStep) => {\n    if (client.navigationAttempts) {\n      client.navigationAttemptCount++;\n      if (client.navigationAttempts.length < NAVIGATION_ATTEMPT_LIMIT) client.navigationAttempts.push({ target: lifecyclePoint(target),\n        reason, staticWalkable: protocolMapCellIsWalkable(map, target),\n        targetOccupied: occupied.some(entity => entity.x === target.x && entity.y === target.y), ...(nextStep ? { nextStep } : {}) });\n    }\n    return null;\n  };\n  const route = findProtocolWalkPath({ map, start: owner, target, dynamicObstacles: occupied, maxExpanded: 4000 });\n  if (!route) return blocked('no-path-or-expansion-limit');\n  if (routeAllowed && !route.every(routeAllowed)) return blocked('route-outside-scout-coverage-or-transfer');\n  if (route.length < 2) return blocked('already-at-target');\n  const first = route[1];\n  if ((client.snapshot.mapTransfers ?? []).some(transfer => inside(first, transfer.bounds))) return blocked('next-step-transfer', first);\n  const direction = directionOf(owner, first); if (!direction) return blocked('invalid-unit-step', first);\n  const navigation = { goal: lifecyclePoint(target), remainingSteps: route.length - 1 };\n  const wantsRun = client.context?.policy.activityMode === 'native' ? performance.now() < client.nativeRunPrimedUntil : client.movementCount % 10 === 9;\n  if (wantsRun && route.length > 2 && route[2].x - first.x === first.x - owner.x && route[2].y - first.y === first.y - owner.y &&\n      !(client.snapshot.mapTransfers ?? []).some(transfer => inside(route[2], transfer.bounds))) {\n    return { command: { type: 'run', direction }, target: route[2], first, navigation };\n  }\n  return { command: { type: 'walk', direction }, target: first, first, navigation };\n}\n"
+      },
+      {
+        "name": "fallback-first new-waypoint preference and bounded selection diagnostics",
+        "before": "function scoutCombatCoverage(client, context, now = Date.now(), coverage = activeCombatCoverage(client, context)) {\n  const cluster = client.combatCluster, owner = self(client);\n  if (!cluster?.observerHomes?.length || !coverage.entries.length || client.pending || !insideCombatCoverage(coverage, owner)) return null;\n  if (client.combatScout?.mapFileName !== String(client.snapshot.mapFileName)) client.combatScout = null;\n  if (client.combatScout && (client.combatScout.activeElapsedMs ?? 0) + now - client.combatScout.startedAt >= 20000) advanceCombatScout(client, context, 'time-budget', now);\n  const occupied = navigationObstacles(client);\n  const allowed = point => insideCombatCoverage(coverage, point) && !(client.snapshot.mapTransfers ?? []).some(transfer => inside(point, transfer.bounds));\n  const initialCursor = client.combatScout?.homeIndex ?? client.combatScoutCursor ?? 0;\n  let searches = 0;\n  searchHomes: for (let offset = 0; offset < cluster.observerHomes.length; offset++) {\n    const homeIndex = (initialCursor + offset) % cluster.observerHomes.length;\n    const binding = coverage.entries.find(entry => entry.homeIndex === homeIndex);\n    if (!binding) continue;\n    const home = binding.home;\n    // A temporarily inactive declared waypoint must not reset a different\n    // waypoint's existing finite clock, ACK count or position-loop budget.\n    if (client.combatScout && client.combatScout.homeIndex !== homeIndex) continue;\n    const goals = STEPS.map(([dx, dy]) => ({ x: home.x + dx, y: home.y + dy }))\n      .filter(goal => distance(goal, owner) > 0 && protocolMapCellIsWalkable(context.map, goal) && allowed(goal) &&\n        !occupied.some(entity => entity.x === goal.x && entity.y === goal.y))\n      .sort((a, b) => distance(a, owner) - distance(b, owner));\n    if (client.combatScout?.homeIndex === homeIndex) goals.sort((a, b) => Number(distance(b, client.combatScout.goal) === 0) - Number(distance(a, client.combatScout.goal) === 0));\n    for (const goal of goals) {\n      if (searches++ >= 4) break searchHomes;\n      const plan = movement(client, goal, context.map, allowed);\n      if (!plan) continue;\n      if (!client.combatScout || client.combatScout.homeIndex !== homeIndex) {\n        client.combatScout = { mapFileName: String(client.snapshot.mapFileName), homeIndex, goal, startedAt: now,\n          activeElapsedMs: 0, confirmedMoves: 0, lastReceiptSequence: client.sequence, visited: new Map() };\n      } else client.combatScout.goal = goal;\n      client.combatScoutCursor = homeIndex;\n      return { ...plan, scouting: true, scoutHomeIndex: homeIndex };\n    }\n  }\n  // Failed paths never become movement evidence. The next legal opportunity\n  // can consider another finite observer waypoint while normal fallback keeps\n  // its original blocked/latency/offered-load accounting.\n  client.combatScoutCursor = (initialCursor + 1) % cluster.observerHomes.length;\n  return null;\n}\n\n",
+        "after": "function combatScoutHints(client, context, coverage, initialCursor, fallbackHomeIndex, now, allowed, occupied) {\n  const hints = [], cluster = client.combatCluster, range = stableFanoutRange('attack', context.policy);\n  let truncated = cluster.observerHomes.length > COMBAT_SCOUT_HINT_OBSERVER_LIMIT;\n  for (let offset = 0; offset < Math.min(cluster.observerHomes.length, COMBAT_SCOUT_HINT_OBSERVER_LIMIT); offset++) {\n    const homeIndex = (initialCursor + offset) % cluster.observerHomes.length;\n    if (homeIndex === fallbackHomeIndex) continue;\n    const binding = coverage.entries.find(entry => entry.homeIndex === homeIndex);\n    if (!binding) continue;\n    const observer = activeGameplayOwner(binding.observer, client.snapshot.mapFileName);\n    if (!observer) continue;\n    const entities = binding.observer.snapshot.entities;\n    truncated ||= entities.length > COMBAT_SCOUT_HINT_ENTITY_LIMIT;\n    for (let index = 0; index < Math.min(entities.length, COMBAT_SCOUT_HINT_ENTITY_LIMIT); index++) {\n      const target = entities[index], point = lifecyclePoint(target), id = target?.objectId;\n      if (!Number.isInteger(id) || id <= 0 || id > 0xffffffff || !point || !Number.isInteger(point.x) || !Number.isInteger(point.y) ||\n          !ordinaryCombatMonster(target, context) || !allowed(point) || distance(observer, point) > range ||\n          (client.failedTargets.get(id)?.until ?? 0) > now ||\n          (client.chaseDeferrals?.get(id)?.mapFileName === String(client.snapshot.mapFileName) && client.chaseDeferrals.get(id).until > now) ||\n          (context.targetClaims.has(id) && context.targetClaims.get(id) !== client.label)) continue;\n      const attackTile = STEPS.map(([dx, dy]) => ({ x: point.x + dx, y: point.y + dy })).find(tile =>\n        allowed(tile) && protocolMapCellIsWalkable(context.map, tile) && distance(observer, tile) <= range &&\n        !occupied.some(entity => entity.x === tile.x && entity.y === tile.y));\n      if (!attackTile) continue;\n      // Peer-only knowledge can suggest a waypoint, never add an owner AOI\n      // entity or bypass the real two-snapshot witness at attack selection/send.\n      hints.push({ homeIndex, objectId: id, target: point, observer: lifecyclePoint(observer), attackTile });\n      break;\n    }\n    if (hints.length === COMBAT_SCOUT_HINT_LIMIT) { truncated = true; break; }\n  }\n  return { hints, truncated };\n}\n\nfunction recordCombatScoutSelection(client, context, selection, now) {\n  if (!context.writer) return;\n  let diagnostic = client.combatScoutSelectionDiagnostic;\n  if (!diagnostic || diagnostic.phase !== context.phase) diagnostic = client.combatScoutSelectionDiagnostic = { phase: context.phase, rows: 0 };\n  if (diagnostic.rows >= COMBAT_SCOUT_SELECTION_ROW_LIMIT) return;\n  diagnostic.rows++;\n  context.writer.add({ type: 'combatScoutSelection', actor: client.label, phase: context.phase, at: now,\n    ...(diagnostic.rows === COMBAT_SCOUT_SELECTION_ROW_LIMIT ? { truncated: true, rowLimit: COMBAT_SCOUT_SELECTION_ROW_LIMIT } :\n      { ...selection, truncated: false }) });\n}\n\nfunction scoutCombatCoverage(client, context, now = Date.now(), coverage = activeCombatCoverage(client, context)) {\n  const cluster = client.combatCluster, owner = self(client);\n  if (!cluster?.observerHomes?.length || !coverage.entries.length || client.pending || !insideCombatCoverage(coverage, owner)) return null;\n  if (client.combatScout?.mapFileName !== String(client.snapshot.mapFileName)) client.combatScout = null;\n  if (client.combatScout && (client.combatScout.activeElapsedMs ?? 0) + now - client.combatScout.startedAt >= 20000) advanceCombatScout(client, context, 'time-budget', now);\n  const occupied = navigationObstacles(client);\n  const allowed = point => insideCombatCoverage(coverage, point) && !(client.snapshot.mapTransfers ?? []).some(transfer => inside(point, transfer.bounds));\n  const initialCursor = client.combatScout?.homeIndex ?? client.combatScoutCursor ?? 0;\n  let searches = 0;\n  const findPlan = (homeIndex, hinted = false) => {\n    const binding = coverage.entries.find(entry => entry.homeIndex === homeIndex);\n    if (!binding) return null;\n    const home = binding.home;\n    // A temporarily inactive declared waypoint must not reset a different\n    // waypoint's existing finite clock, ACK count or position-loop budget.\n    if (client.combatScout && client.combatScout.homeIndex !== homeIndex) return null;\n    const goals = STEPS.map(([dx, dy]) => ({ x: home.x + dx, y: home.y + dy }))\n      .filter(goal => distance(goal, owner) > 0 && protocolMapCellIsWalkable(context.map, goal) && allowed(goal) &&\n        !occupied.some(entity => entity.x === goal.x && entity.y === goal.y))\n      .sort((a, b) => distance(a, owner) - distance(b, owner));\n    if (client.combatScout?.homeIndex === homeIndex) goals.sort((a, b) => Number(distance(b, client.combatScout.goal) === 0) - Number(distance(a, client.combatScout.goal) === 0));\n    for (const goal of goals) {\n      if (searches >= 4) return null;\n      searches++;\n      const plan = hinted ? movement(client, goal, context.map, allowed, occupied) : movement(client, goal, context.map, allowed);\n      if (!plan) continue;\n      return { plan, homeIndex, goal };\n    }\n    return null;\n  };\n  let fallback = null;\n  for (let offset = 0; offset < cluster.observerHomes.length && searches < 4; offset++) {\n    fallback = findPlan((initialCursor + offset) % cluster.observerHomes.length);\n    if (fallback) break;\n  }\n  if (fallback) {\n    let selected = fallback, hint = null, hintScan = null;\n    const fallbackSearches = searches;\n    if (!client.combatScout && searches < 4) {\n      hintScan = combatScoutHints(client, context, coverage, initialCursor, fallback.homeIndex, now, allowed, occupied);\n      for (const candidate of hintScan.hints) {\n        const preferred = findPlan(candidate.homeIndex, true);\n        if (preferred) { selected = preferred; hint = candidate; break; }\n        if (searches >= 4) break;\n      }\n    }\n    const { plan, homeIndex, goal } = selected;\n    if (!client.combatScout) {\n      client.combatScout = { mapFileName: String(client.snapshot.mapFileName), homeIndex, goal, startedAt: now,\n        activeElapsedMs: 0, confirmedMoves: 0, lastReceiptSequence: client.sequence, visited: new Map() };\n    } else client.combatScout.goal = goal;\n    client.combatScoutCursor = homeIndex;\n    if (hintScan?.hints.length) recordCombatScoutSelection(client, context, {\n      reason: hint ? 'observer-target-waypoint' : 'cyclic-fallback', fallbackHomeIndex: fallback.homeIndex,\n      selectedHomeIndex: homeIndex, pathSearches: searches, hintPathSearches: searches - fallbackSearches,\n      hintScanTruncated: hintScan.truncated,\n      ...(hint ? { hintTargetId: hint.objectId, hintTarget: hint.target, actualObserver: hint.observer,\n        potentialAttackTile: hint.attackTile } : {}) }, now);\n    return { ...plan, scouting: true, scoutHomeIndex: homeIndex };\n  }\n  // Failed paths never become movement evidence. The next legal opportunity\n  // can consider another finite observer waypoint while normal fallback keeps\n  // its original blocked/latency/offered-load accounting.\n  client.combatScoutCursor = (initialCursor + 1) % cluster.observerHomes.length;\n  return null;\n}\n\n"
+      }
+    ]
+  },
+  "tests": {
+    "oldPrefixBytes": 243920,
+    "oldPrefixRawExact": true,
+    "oldAssertionsAndBodiesUnmodified": true,
+    "addedTestCount": 9
+  },
+  "guardScope": {
+    "nativeCombatPlanAndActualSendRawUnchanged": true,
+    "allSourceAfterStableRangeRawUnchanged": true,
+    "scoutMovementAckFunctionRawUnchanged": true,
+    "fallbackFirst": true,
+    "maximumScoutPathCalls": 4,
+    "existingScoutHintReplanning": false,
+    "hintOnlyOrdinaryMovement": true,
+    "originalPolicyAndImmutableSixMetadataUnchanged": true
+  },
+  "diagnostics": {
+    "type": "combatScoutSelection",
+    "maximumRowsPerActorPhase": 32,
+    "retainedSelectionRows": 31,
+    "terminalTruncationMarker": true,
+    "maximumObserverOffsets": 100,
+    "maximumEntitiesPerObserver": 2048,
+    "maximumHintWaypoints": 4,
+    "acceptanceCredit": false
+  },
+  "validation": {
+    "executedBy": "capacity_baseline",
+    "focused": {
+      "command": "node --test --test-name-pattern '^observer scout preference' apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "passed": 9,
+      "failed": 0,
+      "log": {
+        "file": "C:/mir2-build/p01-completion-20261024/scout-observer-preference-focused-final-v1.log",
+        "bytes": 2753,
+        "sha256": "466425ec6d7cf724952c0867035ab65b3635083c0107b78241155414ce5fbd94"
+      }
+    },
+    "nodeChecks": [
+      {
+        "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+        "exitCode": 0
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+        "exitCode": 0
+      }
+    ],
+    "diffCheckExitCode": 0,
+    "fullNineSuiteExecutedHere": false,
+    "rootOwnsFullNineSuite": true
+  },
+  "history": {
+    "focusedV1": {
+      "passed": 7,
+      "failed": 1,
+      "log": {
+        "file": "C:/mir2-build/p01-completion-20261024/scout-observer-preference-focused-v1.log",
+        "bytes": 3600,
+        "sha256": "75305c0a7bfb215eda6eae2af404c47ce737e005c8ab89d544c92ea482b4c001"
+      },
+      "reason": "New fixture supplied an invalid pursuit without target identity/map/owner membership; original combatPlan correctly cleared it. Added a real owner-only target9199 and valid pursuit identity/map; no old assertions or production behavior altered to satisfy it."
+    },
+    "focusedV2": {
+      "passed": 8,
+      "failed": 0,
+      "log": {
+        "file": "C:/mir2-build/p01-completion-20261024/scout-observer-preference-focused-v2.log",
+        "bytes": 2466,
+        "sha256": "839d276e874b0318f69af1292036fb174c7f7c5f4393fb2cad4dec5176f130f2"
+      }
+    },
+    "focusedV3": {
+      "passed": 9,
+      "failed": 0,
+      "log": {
+        "file": "C:/mir2-build/p01-completion-20261024/scout-observer-preference-focused-v3.log",
+        "bytes": 2752,
+        "sha256": "7465179646df8319b481bd4fe7064b2c80f7abd174f20b507fc98ce1a5924adb"
+      }
+    }
+  },
+  "limitations": [
+    "Functional improvement only; actual Formal13 bad gaps do not preserve all decision-time peer snapshots, so known eligible targets during those gaps remain unproven.",
+    "Bounded scans may omit later snapshots/waypoints; the original usable fallback is retained.",
+    "Prospective peer geometry is only a movement hint, never current owner visibility, native completion, attack launch, dual-end hit or capacity acceptance.",
+    "No new realm or actual capacity test was run; original Formal13 failure remains unchanged."
+  ]
+}

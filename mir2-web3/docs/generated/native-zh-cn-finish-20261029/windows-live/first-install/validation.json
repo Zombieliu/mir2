@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "kind": "actual-first-silent-validation-install-execution-only",
+  "execution": "execution.json",
+  "compiledValidationSetupSha256": "5fd15cf92cfe4cdace0408c5f4e99897a67d2ac8e01b44c1dae71761b7d4de4c",
+  "exitCode": 0,
+  "elapsedSeconds": 260.3694329,
+  "noAutoLaunch": "no-auto-launch.json",
+  "ownedInstalledProcessesBeforeDeliberateLaunch": 0,
+  "seedSchema": 1,
+  "seedLocale": "zh-CN",
+  "economyBeforeUi": "before-installed-ui.json",
+  "creditBeforeUi": 100,
+  "goldBeforeUi": 10000,
+  "existingUsdcOrdersBeforeUi": 3,
+  "stableEconomyHashBeforeUi": "62075679239d8dd5370fc02c307c81f74d379548844ef2f061c66f10789b8a27",
+  "strictInstalledManifestVerificationPendingAtThisPhase": true,
+  "actualInstalledGuiNotYetStartedAtThisPhase": true,
+  "uninstallOrReinstallVerifiedByThisReport": false,
+  "normalInstallerActuallyInstalledByThisReport": false
+}

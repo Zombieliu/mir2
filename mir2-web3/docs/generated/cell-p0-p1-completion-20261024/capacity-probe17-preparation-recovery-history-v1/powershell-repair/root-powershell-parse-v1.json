@@ -1,0 +1,18 @@
+{
+  "parsedAt": "2026-10-25T19:29:02.0500191Z",
+  "powerShellVersion": "7.6.5",
+  "sourceScriptsExecuted": false,
+  "files": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\initialize-private.ps1",
+      "errors": 0,
+      "sha256": "12fa31e59cfc1729a8d9b332cdd2cb0f044281a1910bcd388386a479b78bc9bf"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\recover-drained-owned.ps1",
+      "errors": 0,
+      "sha256": "92345903964b600be994b59874ccd953ae3d4e70c0b88987665edcac48c31583"
+    }
+  ],
+  "passed": true
+}

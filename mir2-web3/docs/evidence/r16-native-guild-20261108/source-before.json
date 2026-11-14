@@ -1,0 +1,107 @@
+{
+  "schema": "mir2.r16.native-guild.source.v1",
+  "recordedAt": "2026-11-08T00:31:55.573Z",
+  "head": "85eecf4be8f7358504012e5045c97f8242364531",
+  "branch": "codex/windows-player-journey",
+  "pins": [
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_panel.rs",
+      "bytes": 47751,
+      "sha256WindowsBytes": "069909c188f7cfae4396e45e8c92c5d4f428214724a0c365a402cc635ba3f679",
+      "gitBlob": "e9f5f192e608f5439fa1e19cb1c118485e7b3f9a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_permission_flow_tests.rs",
+      "bytes": 20746,
+      "sha256WindowsBytes": "0668fd41e4836c2ea9423a8745e4357a44c7827db155ea92e3cf02603334dce9",
+      "gitBlob": "7400d50c96cc0d99a7c0b54dd2017d8fffe11400"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_rank_flow_tests.rs",
+      "bytes": 12825,
+      "sha256WindowsBytes": "2b4aa67322a9c6acfe3fad2a0a0bfbdaf147e9f5021cde7eb63a1463996e7581",
+      "gitBlob": "1cca0ec3d8186f33b77a2c4f6287fae9afa24768"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "bytes": 955067,
+      "sha256WindowsBytes": "bc60959060f783b5341b8619be496afaaaa36a5e0a271faa9e3030f2c1b3521d",
+      "gitBlob": "0d8dc76098039a7a838e9c07d199dc1237bcb957"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/social.rs",
+      "bytes": 88960,
+      "sha256WindowsBytes": "9f050f9d7f1aad386403d8d13a4a936ffa9ea031306c5b578238c7dee2fdd0e0",
+      "gitBlob": "4f3303ab7e554f67768a4ad45335a4c27eaafbd2"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/social_guild_pending_tests.rs",
+      "bytes": 21484,
+      "sha256WindowsBytes": "efa0d53663f5a205f894dd6c718834d26d577d2b78773b3e6231a8caf1394abb",
+      "gitBlob": "9a964d9a0761ee9054982ce1946fe022c4b4f690"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/social_guild_projection.rs",
+      "bytes": 36245,
+      "sha256WindowsBytes": "16cf5b93caafa1d7ce4fd8d39e3f36bbca6d181bc55b58411189348ff4a3db1e",
+      "gitBlob": "469e7859189849ef20fa265f51a98f1cd607ef02"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gameplay_bridge.rs",
+      "bytes": 422855,
+      "sha256WindowsBytes": "efdfc59c6515ef281713c31d3618835877e8bac60cc369f51b3214f0e9e837e4",
+      "gitBlob": "399962346b61cf9ca1674dae852cf84abb2ba20c"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway.rs",
+      "bytes": 831518,
+      "sha256WindowsBytes": "0fda45624bd7d5aed62240913c684dd0231c1654516b0db57335f8aa86378f14",
+      "gitBlob": "d8d6faaa151b15461d4092a6312cc193fbca5045"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway_social_projection_tests.rs",
+      "bytes": 3217,
+      "sha256WindowsBytes": "13592bfdbf09f93098409eb9093e7e24fcb9d2fc3a00a252c8b6d17a5e8626df",
+      "gitBlob": "0ad0e1ed38382450a87716aa48d7a54c75951024"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/guild_permission_wire_tests.rs",
+      "bytes": 6411,
+      "sha256WindowsBytes": "614cc1497aba6d94898fc651094b9d6d98e2ed40fac2fdb1b68ed472f1174ae5",
+      "gitBlob": "f0c0faa250176f7bdda85f1eccae5f358fe29caf"
+    },
+    {
+      "path": "apps/game-client/runtime/src/native_data_path_tests/guild_rank_ingest_tests.rs",
+      "bytes": 7431,
+      "sha256WindowsBytes": "c0dd2e4360861f7732b33ebc4fc8d7594b491a87d4eb3e8a755e76d3152a9f00",
+      "gitBlob": "60f8d00ba28333c5a985acadeb5174c200f1efb6"
+    }
+  ],
+  "locks": [
+    {
+      "path": "apps/game-client/client-bevy/Cargo.toml",
+      "sha256": "377510326b9fa3ca356f1c1cb57f44b061179cdda6807934bad5ec645cd3596c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/Cargo.lock",
+      "sha256": "3de2eb07fad487338b0a05042b34c1151bbf652531051416b62074ff7ab6b263"
+    },
+    {
+      "path": "apps/game-client/platform-windows/Cargo.toml",
+      "sha256": "5f65904d0fbdf4a98e02c097463ce57c4aa3424e938c3792fa90c5f7e7e88180"
+    },
+    {
+      "path": "apps/game-client/platform-windows/Cargo.lock",
+      "sha256": "1e9b8d4c7d4caf951b7b16bef72b2851b3443684fcbc66a2e905faed6825673d"
+    },
+    {
+      "path": "apps/game-client/runtime/Cargo.toml",
+      "sha256": "8aa5dc760d2ed6d142e586d250d1e107a455ece5a528950dfea910a65e70b749"
+    },
+    {
+      "path": "apps/game-client/runtime/Cargo.lock",
+      "sha256": "fa2e7b35e5c85ef8487b472bb1e5396e90fb48823f3707463a60c4c59e8933fb"
+    }
+  ],
+  "directSourcePinsOnly": true
+}

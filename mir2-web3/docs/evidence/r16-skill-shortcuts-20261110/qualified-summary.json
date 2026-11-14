@@ -1,0 +1,370 @@
+{
+  "schema": "mir2.r16.web-skills-shortcuts-summary.v1",
+  "frozenSourceHead": "870fdd4baa5ad205a91e39481d43f9a9416ecf32",
+  "shippedRuntimeUsedUnchanged": "bevy-0cd68510886134e0",
+  "originalGateway": {
+    "sha256": "4d1a18644ef69eacdae0656fff1b8f49a4af1ae97ffcf6878ada86f5dff0ae0f",
+    "verifiedSourcePins": {
+      "apps/gateway/src/routing.rs": "c298d74a67aabcc5c509997eeb83073eb95a44f9ca2f49b893a9c54b9c54c42f",
+      "apps/simulation/src/runtime/drops.rs": "9648009ba5fa7ed50cf64aaf80833360c8c4fc1877a2494d9859c7f924c86c54",
+      "apps/simulation/src/runtime/inventory.rs": "e4d4b3f92354127e90b31abfdb694c384fd66705785d820a24bbef6ea9cbc8e3",
+      "apps/simulation/src/world_runtime.rs": "ce1484e2cae8671b8d8e027188cfa50a8f9140ec6bed31dfb69a4c58b33da39e"
+    },
+    "baselineGatewaySource": "df34e3b9b4f127e8097eb8bb682c9d95983ffdf9",
+    "changedGameFilesSinceBaseline": [
+      "mir2-web3/apps/gateway/src/routing.rs",
+      "mir2-web3/apps/gateway/src/routing/tests/trade_invitation_tests.rs",
+      "mir2-web3/apps/simulation/src/runtime/inventory.rs",
+      "mir2-web3/apps/simulation/src/runtime/session.rs",
+      "mir2-web3/apps/simulation/src/runtime/session_trade_reopen_tests.rs",
+      "mir2-web3/apps/simulation/src/world_runtime.rs"
+    ]
+  },
+  "scope": {
+    "ordinaryHeadlessWebUi": true,
+    "sameLevel30FixturePerClass": true,
+    "nativeReferenceSourceReviewed": true,
+    "desktopOrNativeWindowUsed": false,
+    "nativeExecutableSkillCastValidated": false,
+    "publicDeployment": false
+  },
+  "verifiedProductionSource": "77075ec50d0e8e1df025ac7cedef943cf9c9012d03b748584cbf87c0a8e1d26e",
+  "finalTrackedFiles": {
+    "apps/web/lib/bevy-combat-input.ts": "77075ec50d0e8e1df025ac7cedef943cf9c9012d03b748584cbf87c0a8e1d26e",
+    "apps/web/scripts/test-bevy-combat-input.mjs": "80c002dbd2f833aba560c4677bdc5e9fb65a18483f7a4bf0b371b08b2d32631b",
+    "apps/web/scripts/test-spells-page-gate.mjs": "61b4b4a183a1dad2fedc5e42dde90d8e30093c5de4bc03e07e712e08103dd424"
+  },
+  "oldWarrior": {
+    "receipt": "warrior-baseline-r1/receipt.json",
+    "sha256": "c54778ef3078572a24b97e4a1abfd90c693f4d27371ba59743d3a14e079b70af",
+    "castObserved": [
+      {
+        "type": "spellToggle",
+        "spell": "HalfMoon",
+        "toggleState": 1,
+        "atMs": 23
+      },
+      {
+        "type": "spellToggle",
+        "spell": "Thrusting",
+        "toggleState": 1,
+        "atMs": 266
+      },
+      {
+        "type": "spellToggle",
+        "spell": "Thrusting",
+        "toggleState": 1,
+        "atMs": 1533
+      },
+      {
+        "type": "spellToggle",
+        "spell": "HalfMoon",
+        "toggleState": 1,
+        "atMs": 1886
+      },
+      {
+        "type": "spellToggle",
+        "spell": "HalfMoon",
+        "toggleState": 1,
+        "atMs": 3145
+      }
+    ],
+    "authoritativeCasts": [
+      {
+        "spell": "HalfMoon",
+        "canUse": true
+      },
+      {
+        "spell": "Thrusting",
+        "canUse": true
+      },
+      {
+        "spell": "Thrusting",
+        "canUse": true
+      },
+      {
+        "spell": "HalfMoon",
+        "canUse": true
+      },
+      {
+        "spell": "HalfMoon",
+        "canUse": true
+      }
+    ]
+  },
+  "warriorAckThenIncompleteSnapshots": [
+    {
+      "sequence": 708,
+      "type": "SpellToggle",
+      "spell": "HalfMoon",
+      "canUse": true,
+      "owned": true
+    },
+    {
+      "sequence": 709,
+      "type": "worldSnapshot",
+      "canUse": {
+        "Thrusting": "omitted",
+        "HalfMoon": "omitted"
+      }
+    },
+    {
+      "sequence": 711,
+      "type": "SpellToggle",
+      "spell": "Thrusting",
+      "canUse": true,
+      "owned": true
+    },
+    {
+      "sequence": 712,
+      "type": "worldSnapshot",
+      "canUse": {
+        "Thrusting": "omitted",
+        "HalfMoon": "omitted"
+      }
+    },
+    {
+      "sequence": 714,
+      "type": "SpellToggle",
+      "spell": "HalfMoon",
+      "canUse": false,
+      "owned": true
+    },
+    {
+      "sequence": 715,
+      "type": "worldSnapshot",
+      "canUse": {
+        "Thrusting": "omitted",
+        "HalfMoon": "omitted"
+      }
+    },
+    {
+      "sequence": 717,
+      "type": "SpellToggle",
+      "spell": "HalfMoon",
+      "canUse": true,
+      "owned": true
+    },
+    {
+      "sequence": 718,
+      "type": "worldSnapshot",
+      "canUse": {
+        "Thrusting": "omitted",
+        "HalfMoon": "omitted"
+      }
+    }
+  ],
+  "classes": {
+    "warrior": {
+      "receipt": "warrior-candidate-r4/receipt.json",
+      "sha256": "7afd2100b6139f74ba038779c9e703d629c957a1daaa7fc1849d223fcd950c63",
+      "fixtureUnchanged": true,
+      "normalLogouts": 2,
+      "bindings": [
+        {
+          "spell": "Thrusting",
+          "hotkey": 9
+        },
+        {
+          "spell": "HalfMoon",
+          "hotkey": 1
+        }
+      ],
+      "durableKeys": [
+        {
+          "key": "thrusting",
+          "hotkey": 9
+        },
+        {
+          "key": "halfmoon",
+          "hotkey": 1
+        }
+      ],
+      "clientActions": [
+        {
+          "type": "spellToggle",
+          "spell": "HalfMoon",
+          "toggleState": 1,
+          "atMs": 32
+        },
+        {
+          "type": "spellToggle",
+          "spell": "Thrusting",
+          "toggleState": 1,
+          "atMs": 1530
+        },
+        {
+          "type": "spellToggle",
+          "spell": "HalfMoon",
+          "toggleState": 0,
+          "atMs": 3174
+        },
+        {
+          "type": "spellToggle",
+          "spell": "HalfMoon",
+          "toggleState": 1,
+          "atMs": 4436
+        }
+      ],
+      "authoritativeResults": [
+        {
+          "spell": "HalfMoon",
+          "canUse": true
+        },
+        {
+          "spell": "Thrusting",
+          "canUse": true
+        },
+        {
+          "spell": "HalfMoon",
+          "canUse": false
+        },
+        {
+          "spell": "HalfMoon",
+          "canUse": true
+        }
+      ],
+      "freshSessionToggle": {
+        "wireState": 1,
+        "receiptCanUse": true,
+        "sameRole": true
+      },
+      "errors": []
+    },
+    "wizard": {
+      "receipt": "wizard-candidate-r3/receipt.json",
+      "sha256": "cd7302d70e2b0e22071d58281788a9908488e8ebdbdc8b2ceae3945e9c6586c0",
+      "fixtureUnchanged": true,
+      "normalLogouts": 2,
+      "bindings": [
+        {
+          "spell": "GreatFireBall",
+          "hotkey": 9
+        },
+        {
+          "spell": "FireWall",
+          "hotkey": 1
+        }
+      ],
+      "durableKeys": [
+        {
+          "key": "greatfireball",
+          "hotkey": 9
+        },
+        {
+          "key": "firewall",
+          "hotkey": 1
+        }
+      ],
+      "clientActions": [
+        {
+          "type": "magic",
+          "spell": "FireWall",
+          "targetId": 0,
+          "x": 329,
+          "y": 264,
+          "atMs": 15
+        },
+        {
+          "type": "magic",
+          "spell": "GreatFireBall",
+          "targetId": 200319,
+          "x": 321,
+          "y": 257,
+          "atMs": 1274
+        }
+      ],
+      "authoritativeResults": [
+        {
+          "packet": "ObjectMagic",
+          "spell": "FireWall",
+          "targetId": 0,
+          "playerOwned": true
+        }
+      ],
+      "freshSessionToggle": null,
+      "errors": []
+    },
+    "taoist": {
+      "receipt": "taoist-candidate-r2/receipt.json",
+      "sha256": "ba1cfc9e47d8b8571fb8f291225d5bd84b035c5cbecee27bf3c2282f3f3b8c03",
+      "fixtureUnchanged": true,
+      "normalLogouts": 2,
+      "bindings": [
+        {
+          "spell": "Healing",
+          "hotkey": 9
+        },
+        {
+          "spell": "SummonSkeleton",
+          "hotkey": 1
+        }
+      ],
+      "durableKeys": [
+        {
+          "key": "minor-heal",
+          "hotkey": 9
+        },
+        {
+          "key": "summonskeleton",
+          "hotkey": 1
+        }
+      ],
+      "clientActions": [
+        {
+          "type": "magic",
+          "spell": "SummonSkeleton",
+          "targetId": 0,
+          "x": 329,
+          "y": 264,
+          "atMs": 17
+        },
+        {
+          "type": "magic",
+          "spell": "Healing",
+          "targetId": 1000,
+          "x": 328,
+          "y": 264,
+          "atMs": 2118
+        }
+      ],
+      "authoritativeResults": [
+        {
+          "packet": "ObjectMagic",
+          "spell": "SummonSkeleton",
+          "targetId": 0,
+          "playerOwned": true
+        },
+        {
+          "packet": "ObjectMagic",
+          "spell": "Healing",
+          "targetId": 1000,
+          "playerOwned": true
+        }
+      ],
+      "freshSessionToggle": null,
+      "errors": []
+    }
+  },
+  "retainedEarlierAttempts": {
+    "warrior-candidate-r2/receipt.json": "Character close was attempted before the assignment view settled.",
+    "warrior-candidate-r3/receipt.json": "Accepted in-session toggles; the first immediate post-login F1 did not send. Final pass observes ordinary input readiness before the first press.",
+    "wizard-candidate-r2/receipt.json": "Character close was attempted before the assignment view settled.",
+    "taoist-candidate-r1/receipt.json": "SummonSkeleton cast succeeded; the selected SoulFireBall Ctrl+F1 attempt did not send. Final alternate second-bank control used Healing."
+  },
+  "remainingCoverage": [
+    "GreatFireBall produced a targeted outgoing intent in the measured Wizard run; no matching cast packet was observed.",
+    "The measured Taoist control does not qualify targeted SoulFireBall.",
+    "Warrior prepared-attack and hit cooldown differences in portable Rust were outside this Web transport/state slice."
+  ],
+  "tests": {
+    "baselineRegression": "weapon-unit-before.log",
+    "baselineAdjacent": "weapon-adjacent-baseline.log",
+    "initialCandidateAdjacent": "weapon-unit-frozen.log",
+    "qualified": "weapon-unit-qualified.log",
+    "passed": 107,
+    "failed": 0,
+    "typeCheck": "weapon-tsc-qualified.log",
+    "tscExit": 0
+  }
+}

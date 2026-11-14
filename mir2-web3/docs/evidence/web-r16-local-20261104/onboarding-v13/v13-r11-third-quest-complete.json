@@ -1,0 +1,5384 @@
+{
+  "schema": "r16-onboarding-v11-browser-smoke/1",
+  "startedAt": "2026-11-05T00:06:58.621Z",
+  "passed": true,
+  "villageFirstTwoCompleted": true,
+  "scope": {
+    "freshOrdinaryAccount": false,
+    "reusedOwnOrdinaryQaAccount": true,
+    "primaryUiOnly": true,
+    "rootPrivateFilesRead": false,
+    "rootSecretValuesPassedToBrowser": false,
+    "credentialsOnlyUsedForNormalUiFill": true,
+    "readOnlyRuntimeGetters": [
+      "getMir2QuestUiStatus",
+      "getMir2QuestWorldControlRects",
+      "getMir2NpcShopUiStatus"
+    ],
+    "mockedRoutes": false,
+    "hiddenActions": false,
+    "qaCommands": 0,
+    "saveDataEdits": false,
+    "modelCallsRequested": 0,
+    "walletOpened": false,
+    "originalOwnerOrAloOpened": false
+  },
+  "sourceHashes": {
+    "quests": "fd35732d9356fcf5aeb4c06d639261a816626a54ccaf33f8cc6d461e98c93182",
+    "journeyUi": "e52630f84ee09e3e2d3abd821db00dde01b62e7d803d18972c8fd906db38c747",
+    "questLayout": "57c00b606dd1d63cde0db984489fa3073a5afe5756092061f2edbc8c99358c92",
+    "keys": "ebfd4f283523f658d33793f604e697a5c4e4b0430fc5d63586ec8597bf31d208",
+    "bag": "10a1dd118f66e6924de84ac611fdd0f7473e255e9f5b31063027f72a411d83c7",
+    "panel": "d6436a807c81b42525aa7e74b6bb6288819ed8bf4db9cdda914e2ad58a264fd8",
+    "npcShop": "6112790ba0b9a57fb529fbbf85d25dd20c3d8b98a63884a9098267badb42c5a1",
+    "shopPaint": "b7279b5d15b7c27960afeddf8ece13b37cb58c795817f74edeec3170b63c85d6",
+    "spawns": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+  },
+  "plan": {
+    "profile": "newcomer-v2",
+    "quests": [
+      {
+        "id": 2110001,
+        "startNpcId": 3,
+        "finishNpcId": 3,
+        "gold": 100,
+        "experience": 100,
+        "kills": []
+      },
+      {
+        "id": 2110002,
+        "startNpcId": 0,
+        "finishNpcId": 0,
+        "gold": 100,
+        "experience": 200,
+        "kills": []
+      },
+      {
+        "id": 2110003,
+        "startNpcId": 0,
+        "finishNpcId": 0,
+        "gold": 150,
+        "experience": 2200,
+        "kills": [
+          {
+            "monster": "Scarecrow",
+            "monsterIndex": 39,
+            "count": 2,
+            "message": "Defeat 2 Scarecrow."
+          },
+          {
+            "monster": "RakingCat",
+            "monsterIndex": 44,
+            "count": 2,
+            "message": "Defeat 2 RakingCat."
+          }
+        ]
+      }
+    ],
+    "jane": {
+      "map": "0",
+      "x": 284,
+      "y": 606
+    },
+    "diaryKeyRequested": "KeyQ",
+    "diaryKeyFromCurrentSharedDefaults": "KeyQ",
+    "readOnlyGetters": [
+      "getMir2QuestUiStatus",
+      "getMir2QuestWorldControlRects",
+      "getMir2NpcShopUiStatus"
+    ],
+    "coldEntryWaitMs": 45000
+  },
+  "checks": [
+    {
+      "name": "town-has-no-old-tour-and-current-shared-native-quest-host",
+      "passed": true
+    },
+    {
+      "name": "server-history-retains-completed-2110001-without-reclaim",
+      "passed": true
+    },
+    {
+      "name": "server-history-retains-completed-2110002-without-reclaim",
+      "passed": true
+    },
+    {
+      "name": "2110003-two-scarecrow-two-rakingcat-real-ui-completion",
+      "passed": true
+    },
+    {
+      "name": "ordinary-relogin-retains-progress-and-ui-does-not-repeat-rewards",
+      "passed": true
+    }
+  ],
+  "phases": [
+    "ordinary-owned-qa-character-relogin",
+    "ordinary-remaining-village-hunt-2110003",
+    "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+    "ordinary-return-to-town-before-ready-quest-delivery",
+    "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+    "complete"
+  ],
+  "screenshots": [
+    "01-village-native-task-card-before-measured-readiness.png",
+    "02-fresh-village-native-task-card.png",
+    "03-before-finishQuest-2110003.png",
+    "04-village-hunt-completed.png",
+    "05-saved-progress-native-diary.png"
+  ],
+  "packetEvidence": [
+    {
+      "sequence": 13,
+      "method": "LoginSuccess",
+      "phase": "ordinary-owned-qa-character-relogin"
+    },
+    {
+      "sequence": 17,
+      "method": "StartGame",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "result": 4
+    },
+    {
+      "sequence": 22,
+      "method": "MapInformation",
+      "phase": "ordinary-owned-qa-character-relogin"
+    },
+    {
+      "sequence": 23,
+      "method": "UserInformation",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "gold": 0,
+      "hp": 30,
+      "maxHp": 30,
+      "mp": 21,
+      "maxMp": 21,
+      "objectId": 1000,
+      "direction": "Right"
+    },
+    {
+      "sequence": 445,
+      "method": "CompleteQuest",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "completedQuestIds": [
+        2110001,
+        2110002
+      ]
+    },
+    {
+      "sequence": 627,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 200325
+    },
+    {
+      "sequence": 628,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 200716
+    },
+    {
+      "sequence": 629,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206302
+    },
+    {
+      "sequence": 630,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206324
+    },
+    {
+      "sequence": 631,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206339
+    },
+    {
+      "sequence": 632,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206515
+    },
+    {
+      "sequence": 633,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206524
+    },
+    {
+      "sequence": 634,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206530
+    },
+    {
+      "sequence": 635,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206536
+    },
+    {
+      "sequence": 636,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206604
+    },
+    {
+      "sequence": 637,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206626
+    },
+    {
+      "sequence": 638,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206632
+    },
+    {
+      "sequence": 639,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206641
+    },
+    {
+      "sequence": 640,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206644
+    },
+    {
+      "sequence": 641,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206711
+    },
+    {
+      "sequence": 642,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206714
+    },
+    {
+      "sequence": 643,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 206717
+    },
+    {
+      "sequence": 644,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 271801
+    },
+    {
+      "sequence": 645,
+      "method": "ObjectHealth",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "percent": 100,
+      "objectId": 271806
+    },
+    {
+      "sequence": 702,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Up"
+    },
+    {
+      "sequence": 705,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Up"
+    },
+    {
+      "sequence": 706,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 70,
+      "objectId": 206610
+    },
+    {
+      "sequence": 709,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 711,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 713,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 717,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 721,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 723,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 727,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 729,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 732,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 734,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 736,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 738,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 741,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Up"
+    },
+    {
+      "sequence": 742,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 90,
+      "objectId": 206007
+    },
+    {
+      "sequence": 743,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 206610
+    },
+    {
+      "sequence": 746,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 750,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 753,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Up"
+    },
+    {
+      "sequence": 755,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 206013
+    },
+    {
+      "sequence": 758,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 764,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Up"
+    },
+    {
+      "sequence": 766,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Up"
+    },
+    {
+      "sequence": 768,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Up"
+    },
+    {
+      "sequence": 771,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 778,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 782,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 214501
+    },
+    {
+      "sequence": 786,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 788,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 206032
+    },
+    {
+      "sequence": 790,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Up"
+    },
+    {
+      "sequence": 793,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Up"
+    },
+    {
+      "sequence": 795,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 798,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 804,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Up"
+    },
+    {
+      "sequence": 806,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 206007
+    },
+    {
+      "sequence": 807,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 271802
+    },
+    {
+      "sequence": 809,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Up"
+    },
+    {
+      "sequence": 812,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 206026
+    },
+    {
+      "sequence": 813,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 206628
+    },
+    {
+      "sequence": 814,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 206705
+    },
+    {
+      "sequence": 818,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Up"
+    },
+    {
+      "sequence": 819,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 206117
+    },
+    {
+      "sequence": 822,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 826,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 206201
+    },
+    {
+      "sequence": 830,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 834,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 206220
+    },
+    {
+      "sequence": 836,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Up"
+    },
+    {
+      "sequence": 838,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 206208
+    },
+    {
+      "sequence": 842,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 847,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Up"
+    },
+    {
+      "sequence": 849,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 43,
+      "objectId": 206039
+    },
+    {
+      "sequence": 853,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 858,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 862,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 864,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 206509
+    },
+    {
+      "sequence": 865,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 206542
+    },
+    {
+      "sequence": 867,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 869,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 871,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 875,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 877,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 880,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Down"
+    },
+    {
+      "sequence": 883,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 886,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Down"
+    },
+    {
+      "sequence": 888,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 891,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Down"
+    },
+    {
+      "sequence": 895,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 900,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Down"
+    },
+    {
+      "sequence": 902,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 905,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Down"
+    },
+    {
+      "sequence": 908,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 911,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Down"
+    },
+    {
+      "sequence": 913,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 916,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 919,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 206129
+    },
+    {
+      "sequence": 920,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 206703
+    },
+    {
+      "sequence": 921,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 206716
+    },
+    {
+      "sequence": 923,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 925,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 206214
+    },
+    {
+      "sequence": 927,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Up"
+    },
+    {
+      "sequence": 929,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Right"
+    },
+    {
+      "sequence": 931,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 210400
+    },
+    {
+      "sequence": 934,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Up"
+    },
+    {
+      "sequence": 935,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 271802
+    },
+    {
+      "sequence": 937,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Up"
+    },
+    {
+      "sequence": 939,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 206026
+    },
+    {
+      "sequence": 940,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 206705
+    },
+    {
+      "sequence": 943,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Up"
+    },
+    {
+      "sequence": 945,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 206117
+    },
+    {
+      "sequence": 948,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Up"
+    },
+    {
+      "sequence": 950,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 206136
+    },
+    {
+      "sequence": 951,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 206208
+    },
+    {
+      "sequence": 954,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Up"
+    },
+    {
+      "sequence": 955,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 43,
+      "objectId": 206039
+    },
+    {
+      "sequence": 959,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 206227
+    },
+    {
+      "sequence": 960,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 206713
+    },
+    {
+      "sequence": 963,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Up"
+    },
+    {
+      "sequence": 968,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Up"
+    },
+    {
+      "sequence": 969,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 206640
+    },
+    {
+      "sequence": 973,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Up"
+    },
+    {
+      "sequence": 974,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 206039
+    },
+    {
+      "sequence": 975,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 206702
+    },
+    {
+      "sequence": 978,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Up"
+    },
+    {
+      "sequence": 979,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 206130
+    },
+    {
+      "sequence": 983,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Left"
+    },
+    {
+      "sequence": 990,
+      "method": "HealthChanged",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "hp": 28,
+      "mp": 21
+    },
+    {
+      "sequence": 991,
+      "method": "ObjectStruck",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "objectId": 1000,
+      "attackerId": 206032,
+      "direction": "Left"
+    },
+    {
+      "sequence": 993,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 93,
+      "objectId": 1000
+    },
+    {
+      "sequence": 995,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Left"
+    },
+    {
+      "sequence": 998,
+      "method": "ObjectStruck",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "objectId": 206032,
+      "attackerId": 1000,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1000,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 93,
+      "objectId": 206032
+    },
+    {
+      "sequence": 1004,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1006,
+      "method": "ObjectStruck",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "objectId": 206032,
+      "attackerId": 1000,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1008,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 81,
+      "objectId": 206032
+    },
+    {
+      "sequence": 1011,
+      "method": "HealthChanged",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "hp": 24,
+      "mp": 21
+    },
+    {
+      "sequence": 1012,
+      "method": "ObjectStruck",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "objectId": 1000,
+      "attackerId": 206032,
+      "direction": "Left"
+    },
+    {
+      "sequence": 1014,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 80,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1018,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1020,
+      "method": "ObjectStruck",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "objectId": 206032,
+      "attackerId": 1000,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1022,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 75,
+      "objectId": 206032
+    },
+    {
+      "sequence": 1027,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1029,
+      "method": "ObjectStruck",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "objectId": 206032,
+      "attackerId": 1000,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1031,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 65,
+      "objectId": 206032
+    },
+    {
+      "sequence": 1034,
+      "method": "HealthChanged",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "hp": 20,
+      "mp": 21
+    },
+    {
+      "sequence": 1035,
+      "method": "ObjectStruck",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "objectId": 1000,
+      "attackerId": 206032,
+      "direction": "Left"
+    },
+    {
+      "sequence": 1037,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 66,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1041,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1043,
+      "method": "ObjectStruck",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "objectId": 206032,
+      "attackerId": 1000,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1045,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 56,
+      "objectId": 206032
+    },
+    {
+      "sequence": 1050,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1052,
+      "method": "ObjectStruck",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "objectId": 206032,
+      "attackerId": 1000,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1054,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 50,
+      "objectId": 206032
+    },
+    {
+      "sequence": 1059,
+      "method": "HealthChanged",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "hp": 18,
+      "mp": 21
+    },
+    {
+      "sequence": 1060,
+      "method": "ObjectStruck",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "objectId": 1000,
+      "attackerId": 206032,
+      "direction": "Left"
+    },
+    {
+      "sequence": 1062,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 60,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1066,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1068,
+      "method": "ObjectStruck",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "objectId": 206032,
+      "attackerId": 1000,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1070,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 37,
+      "objectId": 206032
+    },
+    {
+      "sequence": 1076,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1078,
+      "method": "ObjectStruck",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "objectId": 206032,
+      "attackerId": 1000,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1080,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 31,
+      "objectId": 206032
+    },
+    {
+      "sequence": 1082,
+      "method": "HealthChanged",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "hp": 14,
+      "mp": 21
+    },
+    {
+      "sequence": 1083,
+      "method": "ObjectStruck",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "objectId": 1000,
+      "attackerId": 206032,
+      "direction": "Left"
+    },
+    {
+      "sequence": 1085,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 46,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1089,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1091,
+      "method": "ObjectStruck",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "objectId": 206032,
+      "attackerId": 1000,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1093,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 21,
+      "objectId": 206032
+    },
+    {
+      "sequence": 1096,
+      "method": "UseItem",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "success": true,
+      "uniqueId": 43122689
+    },
+    {
+      "sequence": 1098,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 80,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1099,
+      "method": "HealthChanged",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "hp": 24,
+      "mp": 21
+    },
+    {
+      "sequence": 1100,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1101,
+      "method": "HealthChanged",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "hp": 30,
+      "mp": 21
+    },
+    {
+      "sequence": 1102,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 100,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1107,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1109,
+      "method": "ObjectStruck",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "objectId": 206032,
+      "attackerId": 1000,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1111,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 9,
+      "objectId": 206032
+    },
+    {
+      "sequence": 1113,
+      "method": "HealthChanged",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "hp": 26,
+      "mp": 21
+    },
+    {
+      "sequence": 1114,
+      "method": "ObjectStruck",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "objectId": 1000,
+      "attackerId": 206032,
+      "direction": "Left"
+    },
+    {
+      "sequence": 1116,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 86,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1120,
+      "method": "UserLocation",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1122,
+      "method": "ObjectStruck",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "objectId": 206032,
+      "attackerId": 1000,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1124,
+      "method": "ObjectHealth",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "percent": 0,
+      "objectId": 206032
+    },
+    {
+      "sequence": 1125,
+      "method": "ObjectDied",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "objectId": 206032,
+      "direction": "Right"
+    },
+    {
+      "sequence": 1128,
+      "method": "ChangeQuest",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "questId": 2110003,
+      "taken": true,
+      "completed": true
+    },
+    {
+      "sequence": 1129,
+      "method": "GainExperience",
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "amount": 54
+    },
+    {
+      "sequence": 1132,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Right"
+    },
+    {
+      "sequence": 1135,
+      "method": "ObjectHealth",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "percent": 100,
+      "objectId": 210400
+    },
+    {
+      "sequence": 1136,
+      "method": "HealthChanged",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "hp": 27,
+      "mp": 21
+    },
+    {
+      "sequence": 1137,
+      "method": "ObjectHealth",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "percent": 90,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1139,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Down"
+    },
+    {
+      "sequence": 1142,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Down"
+    },
+    {
+      "sequence": 1143,
+      "method": "HealthChanged",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "hp": 28,
+      "mp": 21
+    },
+    {
+      "sequence": 1144,
+      "method": "ObjectHealth",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "percent": 93,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1147,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Down"
+    },
+    {
+      "sequence": 1149,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Down"
+    },
+    {
+      "sequence": 1153,
+      "method": "HealthChanged",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "hp": 29,
+      "mp": 21
+    },
+    {
+      "sequence": 1154,
+      "method": "ObjectHealth",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "percent": 96,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1156,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Down"
+    },
+    {
+      "sequence": 1162,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Down"
+    },
+    {
+      "sequence": 1166,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Down"
+    },
+    {
+      "sequence": 1168,
+      "method": "HealthChanged",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "hp": 30,
+      "mp": 21
+    },
+    {
+      "sequence": 1169,
+      "method": "ObjectHealth",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "percent": 100,
+      "objectId": 1000
+    },
+    {
+      "sequence": 1172,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Down"
+    },
+    {
+      "sequence": 1175,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Down"
+    },
+    {
+      "sequence": 1178,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Down"
+    },
+    {
+      "sequence": 1180,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Down"
+    },
+    {
+      "sequence": 1184,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Down"
+    },
+    {
+      "sequence": 1186,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Down"
+    },
+    {
+      "sequence": 1188,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Down"
+    },
+    {
+      "sequence": 1190,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Down"
+    },
+    {
+      "sequence": 1192,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Down"
+    },
+    {
+      "sequence": 1197,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1199,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Down"
+    },
+    {
+      "sequence": 1203,
+      "method": "ObjectHealth",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "percent": 100,
+      "objectId": 206623
+    },
+    {
+      "sequence": 1205,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1208,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1211,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1213,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1215,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1217,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1221,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1223,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Down"
+    },
+    {
+      "sequence": 1228,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Down"
+    },
+    {
+      "sequence": 1231,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1233,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1235,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1237,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1239,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1241,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1243,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1246,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1250,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1254,
+      "method": "ObjectHealth",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "percent": 100,
+      "objectId": 200325
+    },
+    {
+      "sequence": 1257,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1261,
+      "method": "ObjectHealth",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "percent": 100,
+      "objectId": 206524
+    },
+    {
+      "sequence": 1265,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1266,
+      "method": "ObjectHealth",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "percent": 100,
+      "objectId": 206644
+    },
+    {
+      "sequence": 1268,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1272,
+      "method": "ObjectHealth",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "percent": 100,
+      "objectId": 271806
+    },
+    {
+      "sequence": 1274,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Up"
+    },
+    {
+      "sequence": 1277,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1282,
+      "method": "ObjectHealth",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "percent": 100,
+      "objectId": 200716
+    },
+    {
+      "sequence": 1283,
+      "method": "ObjectHealth",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "percent": 100,
+      "objectId": 206536
+    },
+    {
+      "sequence": 1284,
+      "method": "ObjectHealth",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "percent": 100,
+      "objectId": 271801
+    },
+    {
+      "sequence": 1286,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1288,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1290,
+      "method": "ObjectHealth",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "percent": 100,
+      "objectId": 206324
+    },
+    {
+      "sequence": 1295,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1300,
+      "method": "ObjectHealth",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "percent": 100,
+      "objectId": 206530
+    },
+    {
+      "sequence": 1301,
+      "method": "ObjectHealth",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "percent": 100,
+      "objectId": 206717
+    },
+    {
+      "sequence": 1303,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1309,
+      "method": "ObjectHealth",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "percent": 100,
+      "objectId": 206302
+    },
+    {
+      "sequence": 1310,
+      "method": "ObjectHealth",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "percent": 100,
+      "objectId": 206641
+    },
+    {
+      "sequence": 1313,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1316,
+      "method": "ObjectHealth",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "percent": 100,
+      "objectId": 206626
+    },
+    {
+      "sequence": 1317,
+      "method": "ObjectHealth",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "percent": 100,
+      "objectId": 206632
+    },
+    {
+      "sequence": 1319,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1321,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1325,
+      "method": "ObjectHealth",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "percent": 100,
+      "objectId": 206515
+    },
+    {
+      "sequence": 1329,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1331,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1333,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1335,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1337,
+      "method": "ObjectHealth",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "percent": 100,
+      "objectId": 206339
+    },
+    {
+      "sequence": 1339,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Down"
+    },
+    {
+      "sequence": 1342,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1344,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1346,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1348,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1350,
+      "method": "ObjectHealth",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "percent": 100,
+      "objectId": 206711
+    },
+    {
+      "sequence": 1352,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1354,
+      "method": "ObjectHealth",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "percent": 100,
+      "objectId": 206714
+    },
+    {
+      "sequence": 1356,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1358,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1362,
+      "method": "ChangeQuest",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "questId": 2110003,
+      "taken": false,
+      "completed": true
+    },
+    {
+      "sequence": 1363,
+      "method": "CompleteQuest",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "completedQuestIds": [
+        2110001,
+        2110002,
+        2110003
+      ]
+    },
+    {
+      "sequence": 1378,
+      "method": "UserLocation",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "direction": "Left"
+    },
+    {
+      "sequence": 1379,
+      "method": "HealthChanged",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "hp": 60,
+      "mp": 21
+    },
+    {
+      "sequence": 1380,
+      "method": "HealthChanged",
+      "phase": "ordinary-return-to-town-before-ready-quest-delivery",
+      "hp": 60,
+      "mp": 35
+    },
+    {
+      "sequence": 1386,
+      "method": "LogOutSuccess",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward"
+    },
+    {
+      "sequence": 1401,
+      "method": "LoginSuccess",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward"
+    },
+    {
+      "sequence": 1405,
+      "method": "StartGame",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "result": 4
+    },
+    {
+      "sequence": 1411,
+      "method": "MapInformation",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward"
+    },
+    {
+      "sequence": 1412,
+      "method": "UserInformation",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "gold": 150,
+      "hp": 60,
+      "maxHp": 60,
+      "mp": 35,
+      "maxMp": 35,
+      "objectId": 1000,
+      "direction": "Left"
+    },
+    {
+      "sequence": 1834,
+      "method": "CompleteQuest",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "completedQuestIds": [
+        2110001,
+        2110002,
+        2110003
+      ]
+    },
+    {
+      "sequence": 2017,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 200325
+    },
+    {
+      "sequence": 2018,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 200716
+    },
+    {
+      "sequence": 2019,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 206302
+    },
+    {
+      "sequence": 2020,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 206324
+    },
+    {
+      "sequence": 2021,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 206339
+    },
+    {
+      "sequence": 2022,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 206515
+    },
+    {
+      "sequence": 2023,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 206524
+    },
+    {
+      "sequence": 2024,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 206530
+    },
+    {
+      "sequence": 2025,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 206626
+    },
+    {
+      "sequence": 2026,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 206632
+    },
+    {
+      "sequence": 2027,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 206641
+    },
+    {
+      "sequence": 2028,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 206644
+    },
+    {
+      "sequence": 2029,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 206711
+    },
+    {
+      "sequence": 2030,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 206714
+    },
+    {
+      "sequence": 2031,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 206717
+    },
+    {
+      "sequence": 2032,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 271801
+    },
+    {
+      "sequence": 2033,
+      "method": "ObjectHealth",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+      "percent": 100,
+      "objectId": 271806
+    },
+    {
+      "sequence": 2089,
+      "method": "LogOutSuccess",
+      "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward"
+    }
+  ],
+  "questOperations": [
+    {
+      "questId": 2110003,
+      "operation": "finishQuest",
+      "requestIdPresent": true,
+      "matchingAck": true,
+      "success": true,
+      "sentSequence": 1361,
+      "ackSequence": 1377,
+      "completeQuestObserved": true,
+      "questLog": [
+        {
+          "questId": 2110001,
+          "stage": "completed",
+          "current": 1,
+          "required": 1,
+          "objectives": [
+            {
+              "label": "Report to Assistant Jane",
+              "current": 1,
+              "required": 1,
+              "done": true
+            }
+          ]
+        },
+        {
+          "questId": 2110002,
+          "stage": "completed",
+          "current": 1,
+          "required": 1,
+          "objectives": [
+            {
+              "label": "Equip a weapon you can use",
+              "current": 1,
+              "required": 1,
+              "done": true
+            }
+          ]
+        },
+        {
+          "questId": 2110003,
+          "stage": "completed",
+          "current": 4,
+          "required": 4,
+          "objectives": [
+            {
+              "label": "Defeat 2 Scarecrow.",
+              "current": 2,
+              "required": 2,
+              "done": true
+            },
+            {
+              "label": "Defeat 2 RakingCat.",
+              "current": 2,
+              "required": 2,
+              "done": true
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "movement": [
+    {
+      "from": {
+        "x": 288,
+        "y": 616
+      },
+      "position": {
+        "x": 288,
+        "y": 615
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 389,
+      "sequence": 702,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 288,
+        "y": 615
+      },
+      "position": {
+        "x": 288,
+        "y": 614
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 445,
+      "sequence": 705,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 288,
+        "y": 614
+      },
+      "position": {
+        "x": 289,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 451,
+      "sequence": 709,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 289,
+        "y": 614
+      },
+      "position": {
+        "x": 290,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 453,
+      "sequence": 711,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 290,
+        "y": 614
+      },
+      "position": {
+        "x": 291,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 451,
+      "sequence": 713,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 291,
+        "y": 614
+      },
+      "position": {
+        "x": 292,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 442,
+      "sequence": 717,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 292,
+        "y": 614
+      },
+      "position": {
+        "x": 293,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 447,
+      "sequence": 721,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 293,
+        "y": 614
+      },
+      "position": {
+        "x": 294,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 443,
+      "sequence": 723,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 294,
+        "y": 614
+      },
+      "position": {
+        "x": 295,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 378,
+      "sequence": 727,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 614
+      },
+      "position": {
+        "x": 296,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 448,
+      "sequence": 729,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 614
+      },
+      "position": {
+        "x": 297,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 441,
+      "sequence": 732,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 297,
+        "y": 614
+      },
+      "position": {
+        "x": 298,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 440,
+      "sequence": 734,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 298,
+        "y": 614
+      },
+      "position": {
+        "x": 299,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 444,
+      "sequence": 736,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 299,
+        "y": 614
+      },
+      "position": {
+        "x": 300,
+        "y": 614
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 477,
+      "sequence": 738,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 300,
+        "y": 614
+      },
+      "position": {
+        "x": 300,
+        "y": 613
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 447,
+      "sequence": 741,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 300,
+        "y": 613
+      },
+      "position": {
+        "x": 301,
+        "y": 613
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 437,
+      "sequence": 746,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 301,
+        "y": 613
+      },
+      "position": {
+        "x": 302,
+        "y": 613
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 442,
+      "sequence": 750,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 302,
+        "y": 613
+      },
+      "position": {
+        "x": 302,
+        "y": 612
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 439,
+      "sequence": 753,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 302,
+        "y": 612
+      },
+      "position": {
+        "x": 303,
+        "y": 612
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 446,
+      "sequence": 758,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 303,
+        "y": 612
+      },
+      "position": {
+        "x": 303,
+        "y": 611
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 446,
+      "sequence": 764,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 303,
+        "y": 611
+      },
+      "position": {
+        "x": 303,
+        "y": 610
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 345,
+      "sequence": 766,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 303,
+        "y": 610
+      },
+      "position": {
+        "x": 303,
+        "y": 609
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 435,
+      "sequence": 768,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 303,
+        "y": 609
+      },
+      "position": {
+        "x": 304,
+        "y": 609
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 355,
+      "sequence": 771,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 304,
+        "y": 609
+      },
+      "position": {
+        "x": 305,
+        "y": 609
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 441,
+      "sequence": 778,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 305,
+        "y": 609
+      },
+      "position": {
+        "x": 306,
+        "y": 609
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 428,
+      "sequence": 786,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 306,
+        "y": 609
+      },
+      "position": {
+        "x": 306,
+        "y": 608
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 424,
+      "sequence": 790,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 306,
+        "y": 608
+      },
+      "position": {
+        "x": 306,
+        "y": 607
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 438,
+      "sequence": 793,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 306,
+        "y": 607
+      },
+      "position": {
+        "x": 307,
+        "y": 607
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 448,
+      "sequence": 795,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 307,
+        "y": 607
+      },
+      "position": {
+        "x": 308,
+        "y": 607
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 438,
+      "sequence": 798,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 308,
+        "y": 607
+      },
+      "position": {
+        "x": 308,
+        "y": 606
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 426,
+      "sequence": 804,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 308,
+        "y": 606
+      },
+      "position": {
+        "x": 308,
+        "y": 605
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 439,
+      "sequence": 809,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 308,
+        "y": 605
+      },
+      "position": {
+        "x": 308,
+        "y": 604
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 368,
+      "sequence": 818,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 308,
+        "y": 604
+      },
+      "position": {
+        "x": 309,
+        "y": 604
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 356,
+      "sequence": 822,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 309,
+        "y": 604
+      },
+      "position": {
+        "x": 310,
+        "y": 604
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 435,
+      "sequence": 830,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 310,
+        "y": 604
+      },
+      "position": {
+        "x": 310,
+        "y": 603
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 434,
+      "sequence": 836,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 310,
+        "y": 603
+      },
+      "position": {
+        "x": 311,
+        "y": 603
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 288,
+      "sequence": 842,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 311,
+        "y": 603
+      },
+      "position": {
+        "x": 311,
+        "y": 602
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 432,
+      "sequence": 847,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 311,
+        "y": 602
+      },
+      "position": {
+        "x": 312,
+        "y": 602
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 435,
+      "sequence": 853,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 312,
+        "y": 602
+      },
+      "position": {
+        "x": 313,
+        "y": 602
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 349,
+      "sequence": 858,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 313,
+        "y": 602
+      },
+      "position": {
+        "x": 314,
+        "y": 602
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 431,
+      "sequence": 862,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 314,
+        "y": 602
+      },
+      "position": {
+        "x": 315,
+        "y": 602
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 434,
+      "sequence": 867,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 315,
+        "y": 602
+      },
+      "position": {
+        "x": 316,
+        "y": 602
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 439,
+      "sequence": 869,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 316,
+        "y": 602
+      },
+      "position": {
+        "x": 317,
+        "y": 602
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 427,
+      "sequence": 871,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 317,
+        "y": 602
+      },
+      "position": {
+        "x": 318,
+        "y": 602
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 421,
+      "sequence": 875,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 318,
+        "y": 602
+      },
+      "position": {
+        "x": 319,
+        "y": 602
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 425,
+      "sequence": 877,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 319,
+        "y": 602
+      },
+      "position": {
+        "x": 319,
+        "y": 603
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 444,
+      "sequence": 880,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 319,
+        "y": 603
+      },
+      "position": {
+        "x": 320,
+        "y": 603
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 426,
+      "sequence": 883,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 320,
+        "y": 603
+      },
+      "position": {
+        "x": 320,
+        "y": 604
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 423,
+      "sequence": 886,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 320,
+        "y": 604
+      },
+      "position": {
+        "x": 321,
+        "y": 604
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 427,
+      "sequence": 888,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 321,
+        "y": 604
+      },
+      "position": {
+        "x": 321,
+        "y": 605
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 437,
+      "sequence": 891,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 321,
+        "y": 605
+      },
+      "position": {
+        "x": 322,
+        "y": 605
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 426,
+      "sequence": 895,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 322,
+        "y": 605
+      },
+      "position": {
+        "x": 322,
+        "y": 606
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 422,
+      "sequence": 900,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 322,
+        "y": 606
+      },
+      "position": {
+        "x": 323,
+        "y": 606
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 416,
+      "sequence": 902,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 323,
+        "y": 606
+      },
+      "position": {
+        "x": 323,
+        "y": 607
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 419,
+      "sequence": 905,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 323,
+        "y": 607
+      },
+      "position": {
+        "x": 324,
+        "y": 607
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 423,
+      "sequence": 908,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 324,
+        "y": 607
+      },
+      "position": {
+        "x": 324,
+        "y": 608
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 428,
+      "sequence": 911,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 324,
+        "y": 608
+      },
+      "position": {
+        "x": 325,
+        "y": 608
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 417,
+      "sequence": 913,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 325,
+        "y": 608
+      },
+      "position": {
+        "x": 326,
+        "y": 608
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 419,
+      "sequence": 916,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 326,
+        "y": 608
+      },
+      "position": {
+        "x": 327,
+        "y": 608
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 354,
+      "sequence": 923,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 327,
+        "y": 608
+      },
+      "position": {
+        "x": 327,
+        "y": 607
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 429,
+      "sequence": 927,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 327,
+        "y": 607
+      },
+      "position": {
+        "x": 328,
+        "y": 607
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 423,
+      "sequence": 929,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 328,
+        "y": 607
+      },
+      "position": {
+        "x": 328,
+        "y": 606
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 425,
+      "sequence": 934,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 328,
+        "y": 606
+      },
+      "position": {
+        "x": 328,
+        "y": 605
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 442,
+      "sequence": 937,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 328,
+        "y": 605
+      },
+      "position": {
+        "x": 328,
+        "y": 604
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 347,
+      "sequence": 943,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 328,
+        "y": 604
+      },
+      "position": {
+        "x": 328,
+        "y": 603
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 429,
+      "sequence": 948,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 328,
+        "y": 603
+      },
+      "position": {
+        "x": 328,
+        "y": 602
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 427,
+      "sequence": 954,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 328,
+        "y": 602
+      },
+      "position": {
+        "x": 328,
+        "y": 601
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 428,
+      "sequence": 963,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 328,
+        "y": 601
+      },
+      "position": {
+        "x": 328,
+        "y": 600
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 428,
+      "sequence": 968,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 328,
+        "y": 600
+      },
+      "position": {
+        "x": 328,
+        "y": 599
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 359,
+      "sequence": 973,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 328,
+        "y": 599
+      },
+      "position": {
+        "x": 328,
+        "y": 598
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 424,
+      "sequence": 978,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 328,
+        "y": 598
+      },
+      "position": {
+        "x": 327,
+        "y": 598
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 356,
+      "sequence": 983,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 327,
+        "y": 598
+      },
+      "position": {
+        "x": 328,
+        "y": 598
+      },
+      "direction": "Right",
+      "outcome": "moved",
+      "heldForMs": 539,
+      "sequence": 1132,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 328,
+        "y": 598
+      },
+      "position": {
+        "x": 328,
+        "y": 599
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 530,
+      "sequence": 1139,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 328,
+        "y": 599
+      },
+      "position": {
+        "x": 328,
+        "y": 600
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 527,
+      "sequence": 1142,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 328,
+        "y": 600
+      },
+      "position": {
+        "x": 328,
+        "y": 601
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 548,
+      "sequence": 1147,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 328,
+        "y": 601
+      },
+      "position": {
+        "x": 328,
+        "y": 602
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 405,
+      "sequence": 1149,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 328,
+        "y": 602
+      },
+      "position": {
+        "x": 328,
+        "y": 603
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 542,
+      "sequence": 1156,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 328,
+        "y": 603
+      },
+      "position": {
+        "x": 328,
+        "y": 604
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 528,
+      "sequence": 1162,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 328,
+        "y": 604
+      },
+      "position": {
+        "x": 328,
+        "y": 605
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 567,
+      "sequence": 1166,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 328,
+        "y": 605
+      },
+      "position": {
+        "x": 328,
+        "y": 606
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 532,
+      "sequence": 1172,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 328,
+        "y": 606
+      },
+      "position": {
+        "x": 328,
+        "y": 607
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 552,
+      "sequence": 1175,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 328,
+        "y": 607
+      },
+      "position": {
+        "x": 328,
+        "y": 608
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 557,
+      "sequence": 1178,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 328,
+        "y": 608
+      },
+      "position": {
+        "x": 328,
+        "y": 609
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 470,
+      "sequence": 1180,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 328,
+        "y": 609
+      },
+      "position": {
+        "x": 328,
+        "y": 610
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 790,
+      "sequence": 1184,
+      "outboundMovementCommands": 2
+    },
+    {
+      "from": {
+        "x": 328,
+        "y": 611
+      },
+      "position": {
+        "x": 328,
+        "y": 612
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 693,
+      "sequence": 1188,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 328,
+        "y": 612
+      },
+      "position": {
+        "x": 328,
+        "y": 613
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 756,
+      "sequence": 1190,
+      "outboundMovementCommands": 2
+    },
+    {
+      "from": {
+        "x": 328,
+        "y": 614
+      },
+      "position": {
+        "x": 327,
+        "y": 614
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 702,
+      "sequence": 1197,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 327,
+        "y": 614
+      },
+      "position": {
+        "x": 327,
+        "y": 615
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 650,
+      "sequence": 1199,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 327,
+        "y": 615
+      },
+      "position": {
+        "x": 326,
+        "y": 615
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 494,
+      "sequence": 1205,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 326,
+        "y": 615
+      },
+      "position": {
+        "x": 325,
+        "y": 615
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 633,
+      "sequence": 1208,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 325,
+        "y": 615
+      },
+      "position": {
+        "x": 324,
+        "y": 615
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 374,
+      "sequence": 1211,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 324,
+        "y": 615
+      },
+      "position": {
+        "x": 323,
+        "y": 615
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 442,
+      "sequence": 1213,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 323,
+        "y": 615
+      },
+      "position": {
+        "x": 322,
+        "y": 615
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 475,
+      "sequence": 1215,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 322,
+        "y": 615
+      },
+      "position": {
+        "x": 321,
+        "y": 615
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 599,
+      "sequence": 1217,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 321,
+        "y": 615
+      },
+      "position": {
+        "x": 320,
+        "y": 615
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 428,
+      "sequence": 1221,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 320,
+        "y": 615
+      },
+      "position": {
+        "x": 320,
+        "y": 616
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 444,
+      "sequence": 1223,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 320,
+        "y": 616
+      },
+      "position": {
+        "x": 320,
+        "y": 617
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 417,
+      "sequence": 1228,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 320,
+        "y": 617
+      },
+      "position": {
+        "x": 319,
+        "y": 617
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 455,
+      "sequence": 1231,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 319,
+        "y": 617
+      },
+      "position": {
+        "x": 318,
+        "y": 617
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 442,
+      "sequence": 1233,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 318,
+        "y": 617
+      },
+      "position": {
+        "x": 317,
+        "y": 617
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 521,
+      "sequence": 1235,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 317,
+        "y": 617
+      },
+      "position": {
+        "x": 316,
+        "y": 617
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 482,
+      "sequence": 1237,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 316,
+        "y": 617
+      },
+      "position": {
+        "x": 315,
+        "y": 617
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 372,
+      "sequence": 1239,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 315,
+        "y": 617
+      },
+      "position": {
+        "x": 314,
+        "y": 617
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 454,
+      "sequence": 1241,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 314,
+        "y": 617
+      },
+      "position": {
+        "x": 313,
+        "y": 617
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 382,
+      "sequence": 1243,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 313,
+        "y": 617
+      },
+      "position": {
+        "x": 312,
+        "y": 617
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 483,
+      "sequence": 1246,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 312,
+        "y": 617
+      },
+      "position": {
+        "x": 311,
+        "y": 617
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 440,
+      "sequence": 1250,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 311,
+        "y": 617
+      },
+      "position": {
+        "x": 310,
+        "y": 617
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 456,
+      "sequence": 1257,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 310,
+        "y": 617
+      },
+      "position": {
+        "x": 309,
+        "y": 617
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 485,
+      "sequence": 1265,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 309,
+        "y": 617
+      },
+      "position": {
+        "x": 308,
+        "y": 617
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 487,
+      "sequence": 1268,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 308,
+        "y": 617
+      },
+      "position": {
+        "x": 308,
+        "y": 616
+      },
+      "direction": "Up",
+      "outcome": "moved",
+      "heldForMs": 419,
+      "sequence": 1274,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 308,
+        "y": 616
+      },
+      "position": {
+        "x": 307,
+        "y": 616
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 485,
+      "sequence": 1277,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 307,
+        "y": 616
+      },
+      "position": {
+        "x": 306,
+        "y": 616
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 366,
+      "sequence": 1286,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 306,
+        "y": 616
+      },
+      "position": {
+        "x": 305,
+        "y": 616
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 324,
+      "sequence": 1288,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 305,
+        "y": 616
+      },
+      "position": {
+        "x": 304,
+        "y": 616
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 517,
+      "sequence": 1295,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 304,
+        "y": 616
+      },
+      "position": {
+        "x": 303,
+        "y": 616
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 452,
+      "sequence": 1303,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 303,
+        "y": 616
+      },
+      "position": {
+        "x": 302,
+        "y": 616
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 465,
+      "sequence": 1313,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 302,
+        "y": 616
+      },
+      "position": {
+        "x": 301,
+        "y": 616
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 434,
+      "sequence": 1319,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 301,
+        "y": 616
+      },
+      "position": {
+        "x": 300,
+        "y": 616
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 429,
+      "sequence": 1321,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 300,
+        "y": 616
+      },
+      "position": {
+        "x": 299,
+        "y": 616
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 434,
+      "sequence": 1329,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 299,
+        "y": 616
+      },
+      "position": {
+        "x": 298,
+        "y": 616
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 438,
+      "sequence": 1331,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 298,
+        "y": 616
+      },
+      "position": {
+        "x": 297,
+        "y": 616
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 423,
+      "sequence": 1333,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 297,
+        "y": 616
+      },
+      "position": {
+        "x": 296,
+        "y": 616
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 356,
+      "sequence": 1335,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 616
+      },
+      "position": {
+        "x": 296,
+        "y": 617
+      },
+      "direction": "Down",
+      "outcome": "moved",
+      "heldForMs": 437,
+      "sequence": 1339,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 296,
+        "y": 617
+      },
+      "position": {
+        "x": 295,
+        "y": 617
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 347,
+      "sequence": 1342,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 295,
+        "y": 617
+      },
+      "position": {
+        "x": 294,
+        "y": 617
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 375,
+      "sequence": 1344,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 294,
+        "y": 617
+      },
+      "position": {
+        "x": 293,
+        "y": 617
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 454,
+      "sequence": 1346,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 293,
+        "y": 617
+      },
+      "position": {
+        "x": 292,
+        "y": 617
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 440,
+      "sequence": 1348,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 292,
+        "y": 617
+      },
+      "position": {
+        "x": 291,
+        "y": 617
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 438,
+      "sequence": 1352,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 291,
+        "y": 617
+      },
+      "position": {
+        "x": 290,
+        "y": 617
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 442,
+      "sequence": 1356,
+      "outboundMovementCommands": 1
+    },
+    {
+      "from": {
+        "x": 290,
+        "y": 617
+      },
+      "position": {
+        "x": 289,
+        "y": 617
+      },
+      "direction": "Left",
+      "outcome": "moved",
+      "heldForMs": 453,
+      "sequence": 1358,
+      "outboundMovementCommands": 1
+    }
+  ],
+  "native": [
+    {
+      "name": "fresh-v2-chapter-task-card",
+      "ready": true,
+      "generation": 2,
+      "revision": 1,
+      "frame": 44,
+      "questLogOpen": false,
+      "capturesPointer": false,
+      "owner": "bevy",
+      "currentWorldContext": true,
+      "rects": [
+        {
+          "type": "navigateQuestRoute",
+          "left": 19,
+          "top": 237,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "questLocalUi",
+          "left": 19,
+          "top": 266,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "openDestinationMap",
+          "left": 19,
+          "top": 295,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "toggleSupplies",
+          "left": 19,
+          "top": 324,
+          "width": 282,
+          "height": 25
+        }
+      ],
+      "compact": null
+    }
+  ],
+  "errors": [],
+  "network": {
+    "failed": [],
+    "httpErrors": [],
+    "cancelled": [
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "9eeb5fa233df82531dffea86ffb49fa4f48ac32bcba5fb5d93a58ab367fe0e40",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "59b575174e75b5bd4afcfbd6f7f338462fb173fabd1e9572382da322fe3dffef",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "59b575174e75b5bd4afcfbd6f7f338462fb173fabd1e9572382da322fe3dffef",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+        "method": "GET",
+        "pathHash": "b5a477466acb573db09051484a348dc305a615e912e5fd4fb8cdfc59b6aa0454",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+        "method": "GET",
+        "pathHash": "9eeb5fa233df82531dffea86ffb49fa4f48ac32bcba5fb5d93a58ab367fe0e40",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+        "method": "GET",
+        "pathHash": "b5a477466acb573db09051484a348dc305a615e912e5fd4fb8cdfc59b6aa0454",
+        "successfulResponseObserved": true
+      }
+    ]
+  },
+  "console": {
+    "errorCount": 0,
+    "warningCount": 10,
+    "hashes": [
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "175c73d54d8d443a965a16a38ac036c2de536a3920f173064fd6837866b00186"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "fc1fb81d9ac94db3fb258e61715d30684b51965bb9b9bd03da1bf329b3302d3e"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "b2af117087809e2aa2bcdc1b0813cecc0268cb841226ba887f4dfb37a853b2cc"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "9465c185ec1cb161b5e154a7ead19365eed6a216c4916a07afb4747d7880287a"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "9465c185ec1cb161b5e154a7ead19365eed6a216c4916a07afb4747d7880287a"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "9465c185ec1cb161b5e154a7ead19365eed6a216c4916a07afb4747d7880287a"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "86f62de356dc780bb1fdddd69fdb77b12425d28c41cbf2eb33295626bc1503e8"
+      },
+      {
+        "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+        "name": "warning",
+        "hash": "175c73d54d8d443a965a16a38ac036c2de536a3920f173064fd6837866b00186"
+      },
+      {
+        "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+        "name": "warning",
+        "hash": "fc1fb81d9ac94db3fb258e61715d30684b51965bb9b9bd03da1bf329b3302d3e"
+      },
+      {
+        "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+        "name": "warning",
+        "hash": "b2af117087809e2aa2bcdc1b0813cecc0268cb841226ba887f4dfb37a853b2cc"
+      }
+    ]
+  },
+  "commands": {
+    "clientCapabilities": 4,
+    "setLanguage": 2,
+    "clientVersion": 2,
+    "login": 2,
+    "startGame": 2,
+    "npcPurchaseOwner": 2,
+    "keepAlive": 15,
+    "walk": 132,
+    "attack": 11,
+    "tick": 22,
+    "useItem": 1,
+    "finishQuest": 1,
+    "logOut": 2
+  },
+  "unknownCommandCount": 0,
+  "unknownTypeHashes": [],
+  "cleanup": {
+    "ordinaryLogout": true,
+    "browserClosed": true
+  },
+  "vitals": [
+    {
+      "sequence": 3,
+      "receivedAtMs": 1793837222361,
+      "method": "realmInfo",
+      "hp": null,
+      "maxHp": null,
+      "mp": null,
+      "maxMp": null,
+      "dead": false,
+      "position": null
+    },
+    {
+      "sequence": 23,
+      "receivedAtMs": 1793837231636,
+      "method": "UserInformation",
+      "hp": 30,
+      "maxHp": 30,
+      "mp": 21,
+      "maxMp": 21,
+      "dead": false,
+      "position": {
+        "x": 288,
+        "y": 616
+      }
+    },
+    {
+      "sequence": 990,
+      "receivedAtMs": 1793837332739,
+      "method": "HealthChanged",
+      "hp": 28,
+      "maxHp": 30,
+      "mp": 21,
+      "maxMp": 21,
+      "dead": false,
+      "position": {
+        "x": 327,
+        "y": 598
+      }
+    },
+    {
+      "sequence": 1011,
+      "receivedAtMs": 1793837335270,
+      "method": "HealthChanged",
+      "hp": 24,
+      "maxHp": 30,
+      "mp": 21,
+      "maxMp": 21,
+      "dead": false,
+      "position": {
+        "x": 327,
+        "y": 598
+      }
+    },
+    {
+      "sequence": 1034,
+      "receivedAtMs": 1793837337968,
+      "method": "HealthChanged",
+      "hp": 20,
+      "maxHp": 30,
+      "mp": 21,
+      "maxMp": 21,
+      "dead": false,
+      "position": {
+        "x": 327,
+        "y": 598
+      }
+    },
+    {
+      "sequence": 1059,
+      "receivedAtMs": 1793837340731,
+      "method": "HealthChanged",
+      "hp": 18,
+      "maxHp": 30,
+      "mp": 21,
+      "maxMp": 21,
+      "dead": false,
+      "position": {
+        "x": 327,
+        "y": 598
+      }
+    },
+    {
+      "sequence": 1082,
+      "receivedAtMs": 1793837343308,
+      "method": "HealthChanged",
+      "hp": 14,
+      "maxHp": 30,
+      "mp": 21,
+      "maxMp": 21,
+      "dead": false,
+      "position": {
+        "x": 327,
+        "y": 598
+      }
+    },
+    {
+      "sequence": 1099,
+      "receivedAtMs": 1793837344993,
+      "method": "HealthChanged",
+      "hp": 24,
+      "maxHp": 30,
+      "mp": 21,
+      "maxMp": 21,
+      "dead": false,
+      "position": {
+        "x": 327,
+        "y": 598
+      }
+    },
+    {
+      "sequence": 1101,
+      "receivedAtMs": 1793837345082,
+      "method": "HealthChanged",
+      "hp": 30,
+      "maxHp": 30,
+      "mp": 21,
+      "maxMp": 21,
+      "dead": false,
+      "position": {
+        "x": 327,
+        "y": 598
+      }
+    },
+    {
+      "sequence": 1113,
+      "receivedAtMs": 1793837346062,
+      "method": "HealthChanged",
+      "hp": 26,
+      "maxHp": 30,
+      "mp": 21,
+      "maxMp": 21,
+      "dead": false,
+      "position": {
+        "x": 327,
+        "y": 598
+      }
+    },
+    {
+      "sequence": 1136,
+      "receivedAtMs": 1793837349206,
+      "method": "HealthChanged",
+      "hp": 27,
+      "maxHp": 30,
+      "mp": 21,
+      "maxMp": 21,
+      "dead": false,
+      "position": {
+        "x": 328,
+        "y": 598
+      }
+    },
+    {
+      "sequence": 1143,
+      "receivedAtMs": 1793837352289,
+      "method": "HealthChanged",
+      "hp": 28,
+      "maxHp": 30,
+      "mp": 21,
+      "maxMp": 21,
+      "dead": false,
+      "position": {
+        "x": 328,
+        "y": 600
+      }
+    },
+    {
+      "sequence": 1153,
+      "receivedAtMs": 1793837355486,
+      "method": "HealthChanged",
+      "hp": 29,
+      "maxHp": 30,
+      "mp": 21,
+      "maxMp": 21,
+      "dead": false,
+      "position": {
+        "x": 328,
+        "y": 602
+      }
+    },
+    {
+      "sequence": 1168,
+      "receivedAtMs": 1793837358627,
+      "method": "HealthChanged",
+      "hp": 30,
+      "maxHp": 30,
+      "mp": 21,
+      "maxMp": 21,
+      "dead": false,
+      "position": {
+        "x": 328,
+        "y": 605
+      }
+    },
+    {
+      "sequence": 1377,
+      "receivedAtMs": 1793837435885,
+      "method": "worldSnapshot",
+      "hp": 60,
+      "maxHp": 60,
+      "mp": 35,
+      "maxMp": 35,
+      "dead": false,
+      "position": {
+        "x": 289,
+        "y": 617
+      }
+    },
+    {
+      "sequence": 1386,
+      "receivedAtMs": 1793837442933,
+      "method": "LogOutSuccess",
+      "hp": null,
+      "maxHp": null,
+      "mp": null,
+      "maxMp": null,
+      "dead": false,
+      "position": null
+    },
+    {
+      "sequence": 1412,
+      "receivedAtMs": 1793837456114,
+      "method": "UserInformation",
+      "hp": 60,
+      "maxHp": 60,
+      "mp": 35,
+      "maxMp": 35,
+      "dead": false,
+      "position": {
+        "x": 289,
+        "y": 617
+      }
+    },
+    {
+      "sequence": 2089,
+      "receivedAtMs": 1793837467613,
+      "method": "LogOutSuccess",
+      "hp": null,
+      "maxHp": null,
+      "mp": null,
+      "maxMp": null,
+      "dead": false,
+      "position": null
+    }
+  ],
+  "medicine": [
+    {
+      "before": {
+        "hp": 14,
+        "maxHp": 30,
+        "mp": 21,
+        "maxMp": 21,
+        "dead": false,
+        "position": {
+          "x": 327,
+          "y": 598
+        }
+      },
+      "after": {
+        "hp": 24,
+        "maxHp": 30,
+        "mp": 21,
+        "maxMp": 21,
+        "dead": false,
+        "position": {
+          "x": 327,
+          "y": 598
+        }
+      },
+      "smallHpMedicineBefore": 2,
+      "smallHpMedicineAfter": 1,
+      "matchingUseItemAckSequence": 1096
+    }
+  ],
+  "npcPurchaseEvidence": [
+    {
+      "sequence": 698,
+      "action": "begin",
+      "reply": "producer",
+      "completeSnapshot": true,
+      "matchingRequestAndOperation": true,
+      "bootstrapObserverNotGated": true
+    },
+    {
+      "sequence": 2085,
+      "action": "begin",
+      "reply": "producer",
+      "completeSnapshot": true,
+      "matchingRequestAndOperation": true,
+      "bootstrapObserverNotGated": true
+    }
+  ],
+  "inventoryClose": {
+    "method": "visible-native-x",
+    "shortcutRetested": false,
+    "priorUnconfirmedF9Run": "onboarding-v12-browser-r5"
+  },
+  "budgets": {
+    "maxHuntMs": 360000,
+    "maxSteps": 420
+  },
+  "resumeState": {
+    "hp": 30,
+    "maxHp": 30,
+    "mp": 21,
+    "maxMp": 21,
+    "dead": false,
+    "position": {
+      "x": 288,
+      "y": 616
+    },
+    "gold": 0,
+    "smallHpMedicine": 2,
+    "equipment": [
+      {
+        "name": "WoodenSword",
+        "slot": "weapon",
+        "durabilityCurrent": 4000,
+        "durabilityMax": 4000
+      }
+    ],
+    "bagEquipment": [],
+    "clothingInBag": [],
+    "clothingEquipped": [],
+    "hpMedicineOnBelt": [
+      {
+        "slot": 0,
+        "quantity": 2,
+        "key": "Digit1"
+      }
+    ],
+    "completedQuestIds": [
+      2110001,
+      2110002
+    ],
+    "questLog": [
+      {
+        "questId": 2110001,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Report to Assistant Jane",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110002,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Equip a weapon you can use",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110003,
+        "stage": "inProgress",
+        "current": 3,
+        "required": 4,
+        "objectives": [
+          {
+            "label": "Defeat 2 Scarecrow.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          },
+          {
+            "label": "Defeat 2 RakingCat.",
+            "current": 1,
+            "required": 2,
+            "done": false
+          }
+        ]
+      }
+    ]
+  },
+  "renderer": {
+    "expected": null,
+    "observedPublicReleases": [
+      "bevy-07bd13d63fcbbd3a"
+    ]
+  },
+  "initialNativeReadiness": [
+    {
+      "ready": true,
+      "frame": 44,
+      "generation": 2,
+      "revision": 1,
+      "rectCount": 4,
+      "worldCurrent": true,
+      "genericNativeActionsRequireNonemptyWorldRects": false
+    }
+  ],
+  "resumedCompletedQuestIds": [
+    2110001
+  ],
+  "firstQuestRewardNotReclaimed": true,
+  "thirdQuestResumedWithoutReaccept": true,
+  "resumedThirdQuest": {
+    "questId": 2110003,
+    "stage": "inProgress",
+    "current": 3,
+    "required": 4,
+    "objectives": [
+      {
+        "label": "Defeat 2 Scarecrow.",
+        "current": 2,
+        "required": 2,
+        "done": true
+      },
+      {
+        "label": "Defeat 2 RakingCat.",
+        "current": 1,
+        "required": 2,
+        "done": false
+      }
+    ]
+  },
+  "keyboardPanelChecks": [
+    {
+      "phase": "ordinary-remaining-village-hunt-2110003",
+      "visibleShopWindows": 0,
+      "nativeShop": null,
+      "bag": {
+        "active": false
+      },
+      "quest": {
+        "capturesPointer": false
+      }
+    },
+    {
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "visibleShopWindows": 0,
+      "nativeShop": null,
+      "bag": {
+        "active": false
+      },
+      "quest": {
+        "capturesPointer": false
+      }
+    }
+  ],
+  "existingSuppliesOnly": {
+    "gold": 0,
+    "hpMedicine": 2,
+    "equipment": [
+      {
+        "name": "WoodenSword",
+        "slot": "weapon"
+      }
+    ],
+    "belt": [
+      {
+        "slot": 0,
+        "quantity": 2,
+        "key": "Digit1"
+      }
+    ],
+    "newPurchases": 0
+  },
+  "clothingAtHuntStart": {
+    "inventory": [],
+    "equipment": []
+  },
+  "hunt": {
+    "required": {
+      "Scarecrow": 2,
+      "RakingCat": 2
+    },
+    "deaths": [
+      {
+        "objectId": 206032,
+        "name": "RakingCat",
+        "lastOwnHitSequence": 1122,
+        "deathSequence": 1125,
+        "assistedFinalHit": false,
+        "authoritativeQuestLog": [
+          {
+            "questId": 2110001,
+            "stage": "completed",
+            "current": 1,
+            "required": 1,
+            "objectives": [
+              {
+                "label": "Report to Assistant Jane",
+                "current": 1,
+                "required": 1,
+                "done": true
+              }
+            ]
+          },
+          {
+            "questId": 2110002,
+            "stage": "completed",
+            "current": 1,
+            "required": 1,
+            "objectives": [
+              {
+                "label": "Equip a weapon you can use",
+                "current": 1,
+                "required": 1,
+                "done": true
+              }
+            ]
+          },
+          {
+            "questId": 2110003,
+            "stage": "readyToTurnIn",
+            "current": 4,
+            "required": 4,
+            "objectives": [
+              {
+                "label": "Defeat 2 Scarecrow.",
+                "current": 2,
+                "required": 2,
+                "done": true
+              },
+              {
+                "label": "Defeat 2 RakingCat.",
+                "current": 2,
+                "required": 2,
+                "done": true
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "waypoints": [
+      {
+        "x": 313,
+        "y": 592
+      },
+      {
+        "x": 340,
+        "y": 550
+      }
+    ],
+    "targetsObserved": [
+      {
+        "position": {
+          "x": 288,
+          "y": 616
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 288,
+          "y": 615
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 288,
+          "y": 614
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 289,
+          "y": 614
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 290,
+          "y": 614
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 291,
+          "y": 614
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 292,
+          "y": 614
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 293,
+          "y": 614
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 294,
+          "y": 614
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 295,
+          "y": 614
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 296,
+          "y": 614
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 297,
+          "y": 614
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 298,
+          "y": 614
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 299,
+          "y": 614
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 300,
+          "y": 614
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 300,
+          "y": 613
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 301,
+          "y": 613
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 302,
+          "y": 613
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 302,
+          "y": 612
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 303,
+          "y": 612
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 303,
+          "y": 611
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 303,
+          "y": 610
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 303,
+          "y": 609
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 304,
+          "y": 609
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 305,
+          "y": 609
+        },
+        "hp": 30,
+        "targets": []
+      },
+      {
+        "position": {
+          "x": 306,
+          "y": 609
+        },
+        "hp": 30,
+        "targets": [
+          {
+            "objectId": 206032,
+            "name": "RakingCat",
+            "x": 322,
+            "y": 595,
+            "dead": false
+          }
+        ]
+      }
+    ],
+    "completed": true
+  },
+  "beltKeyInputs": [
+    {
+      "phase": "ordinary-safe-retreat-with-already-purchased-belt-supplies",
+      "slot": 0,
+      "chord": "Digit1",
+      "hpBefore": 14,
+      "quantityBefore": 2,
+      "visibleNpcShopWindows": 0
+    }
+  ],
+  "lastPhysicalNativeInput": {
+    "phase": "ordinary-save-relogin-exact-progress-and-no-repeat-reward",
+    "logical": {
+      "x": 493,
+      "y": 73.5
+    },
+    "css": {
+      "x": 621,
+      "y": 169.5
+    },
+    "clickCount": 1,
+    "delayMs": 80,
+    "quest": {
+      "questLocaleVersion": 1,
+      "language": "zh-CN",
+      "ready": true,
+      "error": null,
+      "capturesPointer": true,
+      "questLogOpen": true,
+      "frame": 75,
+      "generation": 2,
+      "revision": 2,
+      "openRevision": 2,
+      "hpOrb": {
+        "supported": true,
+        "ready": false,
+        "generation": 2,
+        "revision": 2,
+        "hp": null,
+        "maxHp": null,
+        "hpOnly": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "mpOrb": {
+        "supported": true,
+        "ready": false,
+        "generation": 2,
+        "revision": 2,
+        "mp": null,
+        "maxMp": null,
+        "hpOnly": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "experienceBar": {
+        "supported": false,
+        "ready": false,
+        "generation": 2,
+        "revision": 2,
+        "experience": null,
+        "maxExperience": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "weightBar": {
+        "supported": false,
+        "ready": false,
+        "generation": 2,
+        "revision": 2,
+        "currentWeight": null,
+        "maxWeight": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "hudBarDrawPlan": {
+        "version": 1,
+        "generation": 2,
+        "revision": 2,
+        "lifetime": "r1-g2-p1000",
+        "experience": {
+          "token": "e-1",
+          "sequence": 1,
+          "state": "draw",
+          "current": 198,
+          "maximum": 1200,
+          "slot": {
+            "left": 9,
+            "top": 759,
+            "width": 1004,
+            "height": 8
+          },
+          "image": "original-ui/Prguse/8.png",
+          "source": {
+            "left": 0,
+            "top": 0,
+            "width": 165,
+            "height": 8
+          },
+          "destination": {
+            "left": 9,
+            "top": 759,
+            "width": 165,
+            "height": 8
+          }
+        },
+        "weight": {
+          "token": "w-1",
+          "sequence": 1,
+          "state": "draw",
+          "current": 2,
+          "maximum": 66,
+          "slot": {
+            "left": 919,
+            "top": 719,
+            "width": 76,
+            "height": 12
+          },
+          "image": "original-ui/Prguse/76.png",
+          "source": {
+            "left": 0,
+            "top": 0,
+            "width": 2,
+            "height": 12
+          },
+          "destination": {
+            "left": 919,
+            "top": 719,
+            "width": 2,
+            "height": 12
+          }
+        }
+      }
+    },
+    "receivedSequenceBefore": 2087
+  },
+  "nativeOperationInputs": [
+    {
+      "questId": 2110003,
+      "operation": "finishQuest",
+      "screenshot": "03-before-finishQuest-2110003.png"
+    }
+  ],
+  "thirdReward": {
+    "goldDelta": 150,
+    "fencingBookDelta": 1,
+    "completeQuest": true
+  },
+  "persistence": {
+    "normalLogoutAck": true,
+    "freshLogin": true,
+    "exactAssetsRetained": true,
+    "exactProgressRetained": true,
+    "completedQuestIds": [
+      2110001,
+      2110002,
+      2110003
+    ],
+    "completedNpcRewardNotOffered": null,
+    "priorNpcRevisitEvidence": "../onboarding-v12-browser-r6/onboarding-v11-browser-proof.json",
+    "completedDiaryRewardNotOffered": true,
+    "noRepeatedRewardOnUiRevisit": true,
+    "arbitraryProtocolReplayTested": false
+  },
+  "partialSatisfied": false,
+  "focusedFirstTwoCompleted": false,
+  "incompleteReason": null,
+  "finishedAt": "2026-11-05T00:11:07.682Z",
+  "finalQuestLog": [
+    {
+      "questId": 2110001,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Report to Assistant Jane",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110002,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Equip a weapon you can use",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110003,
+      "stage": "completed",
+      "current": 4,
+      "required": 4,
+      "objectives": [
+        {
+          "label": "Defeat 2 Scarecrow.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        },
+        {
+          "label": "Defeat 2 RakingCat.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        }
+      ]
+    }
+  ],
+  "completedQuestIds": [
+    2110001,
+    2110002,
+    2110003
+  ],
+  "lastFullSnapshot": {
+    "sequence": 2090,
+    "receivedAtMs": 1793837467630,
+    "position": null,
+    "inSafeZone": false,
+    "mapFileName": null,
+    "hp": null,
+    "maxHp": null,
+    "dead": false
+  },
+  "lastUserLocation": {
+    "sequence": 1378,
+    "packet": "UserLocation",
+    "position": {
+      "x": 289,
+      "y": 617
+    },
+    "direction": "Left",
+    "connectionEpoch": 1,
+    "characterEpoch": 1,
+    "mapFileName": "0"
+  },
+  "movementSteps": 130,
+  "finalVitals": {
+    "hp": null,
+    "maxHp": null,
+    "mp": null,
+    "maxMp": null,
+    "dead": false,
+    "position": null
+  }
+}

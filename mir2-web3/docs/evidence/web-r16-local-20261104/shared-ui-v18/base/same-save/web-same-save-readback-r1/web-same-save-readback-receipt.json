@@ -1,0 +1,141 @@
+{
+  "schema": "r16-native-to-web-same-save-readback/1",
+  "passed": true,
+  "scope": {
+    "ordinaryBrowserUi": true,
+    "reusedSameOwnQaRole": true,
+    "readOnlyGameplay": true,
+    "rootNativeExitReported": true,
+    "localNativeProcessesObserved": 0,
+    "noBareWebSocketClient": true,
+    "noRuntimeActionCalls": true,
+    "noServiceOrSourceChanges": true,
+    "noModelCallsRequested": true
+  },
+  "sourceProof": "onboarding-v11-browser-proof.json",
+  "sourceProofSha256": "a4bfab7888cb4ab5a934ae86e777229e47ec3cf59a44dfbd38d82b765e78e08d",
+  "readback": {
+    "ordinaryUiLogin": true,
+    "normalStartGameObserved": true,
+    "progression": {
+      "level": 8,
+      "experience": 378,
+      "maxExperience": 1700
+    },
+    "gold": 180,
+    "mapFileName": "0",
+    "position": {
+      "x": 289,
+      "y": 616
+    },
+    "completedQuestIds": [
+      2110001,
+      2110002,
+      2110003,
+      2110004
+    ],
+    "quest5": {
+      "questId": 2110005,
+      "stage": "available",
+      "accepted": false
+    },
+    "equipment": [
+      {
+        "name": "WoodenSword",
+        "slot": "weapon",
+        "durabilityCurrent": 4000,
+        "durabilityMax": 4000
+      },
+      {
+        "name": "BaseDress(M)",
+        "slot": "armour",
+        "durabilityCurrent": 5000,
+        "durabilityMax": 5000
+      }
+    ],
+    "fencingKnown": true,
+    "hpMedicine": 0,
+    "authoritativeFullSnapshot": {
+      "sequence": 702,
+      "receivedAtMs": 1793907479346,
+      "position": {
+        "x": 289,
+        "y": 616
+      },
+      "inSafeZone": true,
+      "mapFileName": "0",
+      "hp": 69,
+      "maxHp": 69,
+      "progression": {
+        "level": 8,
+        "experience": 378,
+        "maxExperience": 1700
+      },
+      "gold": 180,
+      "dead": false
+    },
+    "authoritativeUserLocation": null
+  },
+  "commandCounts": {
+    "clientCapabilities": 2,
+    "setLanguage": 1,
+    "clientVersion": 1,
+    "login": 1,
+    "startGame": 1,
+    "npcPurchaseOwner": 1,
+    "keepAlive": 1,
+    "logOut": 1
+  },
+  "webSockets": [
+    {
+      "phase": "ordinary-owned-qa-character-relogin",
+      "endpoint": "ws://127.0.0.1:19040/ws",
+      "pathHash": "0c65a812b078db6795486113db0a40a60e82b36e6bcc9ecbaff9ac00e404f5ff",
+      "loopback": true,
+      "hasQuery": false,
+      "handshakeStatus": 101,
+      "closed": false,
+      "closeCode": null,
+      "closeFrames": []
+    }
+  ],
+  "normalLogoutAck": [
+    {
+      "sequence": 708,
+      "method": "LogOutSuccess",
+      "phase": "ordinary-web-readback-after-native-normal-save"
+    }
+  ],
+  "cleanup": {
+    "ordinaryLogout": true,
+    "browserClosed": true
+  },
+  "accountReleased": true,
+  "network": {
+    "failed": 0,
+    "httpErrors": 0,
+    "consoleErrors": 0,
+    "consoleWarnings": 7
+  },
+  "errors": [],
+  "evidence": [
+    {
+      "name": "onboarding-v11-browser-proof.json",
+      "bytes": 17414,
+      "sha256": "a4bfab7888cb4ab5a934ae86e777229e47ec3cf59a44dfbd38d82b765e78e08d"
+    },
+    {
+      "name": "01-native-to-web-authoritative-same-save.png",
+      "bytes": 1206044,
+      "sha256": "160f213036123097c74c54e82c560f3a58178d003121e2df5b1b73093bc7739c"
+    }
+  ],
+  "secretScan": {
+    "scope": "Own ordinary QA identity and public realm, Node-only exact scan; no original Owner or model-key files read",
+    "matches": 0
+  },
+  "runner": {
+    "name": "runner.executed.mjs",
+    "sha256": "9fd33f1663f4db4e5ba337c4fc1e1f44eb39da1d378fd6e7f4eb65b58a3a6a4a"
+  }
+}

@@ -1,0 +1,289 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T20:01:07.241Z",
+  "runId": "1792956759820-08151b82",
+  "scope": "Independent read-only ended small-facts cross-check only. Original report, cleanup, source inventories and actual public-verifier outputs were read; no raw/monitor/recording parse, binary hash, tests, module import or service execution.",
+  "sourceIdentity": {
+    "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+    "driverSourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+    "driverSourceSha256": "5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9",
+    "backendInputCount": 50,
+    "gatewaySha256": "dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc"
+  },
+  "evidence": {
+    "report": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\reports\\1792956759820-08151b82.report.json",
+      "bytes": 325325,
+      "sha256": "1a8b82ad6c0d6d0971382a473cbb57a4bb1e677cee00a452d195c64c4d305d60"
+    },
+    "cleanup": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\realm-cleanup.json",
+      "bytes": 6355,
+      "sha256": "e7b9a7e80c80ea0104772ce0f7ddc6b6ffda10f046742067ed58247c9f441e9d"
+    },
+    "provenance": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\report-provenance.json",
+      "bytes": 7632,
+      "sha256": "b4fc463c825621ed5953c4cd6d1e1cfca6a1df554017a04aab4aa144c539d11f"
+    },
+    "preparedSources": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\source-pins.json",
+      "bytes": 54912,
+      "sha256": "d7478820adbcf4bc3e10cad61c104f746af870816be0662c891651588a9a9b9e"
+    },
+    "admittedSources": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\source-pins-admitted-v2.json",
+      "bytes": 54109,
+      "sha256": "9315678926a2219194d5002f3283da27060c9cd12c2378be2eec9c92ddf112a8"
+    },
+    "baseCatalog": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-account-store-wait-followup-17-diagnostics\\collect-release-native-10-v2-account-store-wait-feasibility-17-public-artifact-catalog.json",
+      "bytes": 59337,
+      "sha256": "7e3c023a20a45bf2d9179a7b2a065db54b8e3a5801bcc9b64734255bd33cba9f"
+    },
+    "basePublicVerification": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-account-store-wait-followup-17-diagnostics\\public-verification.json",
+      "bytes": 7111,
+      "sha256": "3ff280044b7f5db9176eca0183e2c6b4af3040fc7c386f982dee19a119b10f6d"
+    },
+    "baseVerificationStdout": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-public-verification-stdout-v1.log",
+      "bytes": 5023,
+      "sha256": "8f5bb8891496a2cb1da96580b669eb87c2dd454144449f3d4db3ddd96617b1cf"
+    },
+    "baseVerificationStderr": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-public-verification-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "storeCatalog": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-account-store-wait-followup-17-store-diagnostics\\store-artifact-catalog.json",
+      "bytes": 5183,
+      "sha256": "d3cff5fd272830adc24fd75fd55eeb6efbc5e336384b8fbadcf47f2556f3a8a9"
+    },
+    "storePublicVerification": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-account-store-wait-followup-17-store-diagnostics\\store-public-verification.json",
+      "bytes": 1422,
+      "sha256": "579f7635b9f071e0ba21351186630d140da7b064e54efbac86603b7ea743aee9"
+    },
+    "posthocCollectorReview": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-post-collector-independent-review-v1\\review-v1.json",
+      "bytes": 3008,
+      "sha256": "984b3304d3487bc3bdc3b64551bf261fa01c94e77cd7589fc1b11e27e22e651e"
+    }
+  },
+  "checks": {
+    "fiveEssentialSourceAndPublicCopiesRawExact": true,
+    "provenanceReportRawPinExact": true,
+    "preparedAndAdmittedFilesAggregatesRecomputed": true,
+    "backendAndHistoricalDriverNamespacesSeparated": true,
+    "reportPhaseEndpointsAndAll16WindowDurationsRecomputed": true,
+    "reportWholePhaseAndWindowActivityRatesUseActualSeconds": true,
+    "sevenCleanupChecksAndSixCountersZero": true,
+    "actualBaseAndStoreVerificationOutputsConsistent": true,
+    "baseAndStoreOriginalGameVerdictPreserved": true
+  },
+  "reportFacts": {
+    "ok": true,
+    "playableCapacityAccepted": false,
+    "movementCapacityAccepted": false,
+    "combatCapacityAccepted": false,
+    "acceptedControlledActors": null,
+    "peakControlledActors": 10,
+    "highestPassedStage": 10,
+    "diagnosticCompleted": false,
+    "phases": [
+      {
+        "name": "stage-2",
+        "controlledActors": 2,
+        "configuredSeconds": 300,
+        "measuredSeconds": 300.298,
+        "windowSeconds": [
+          60.089,
+          60.09,
+          60.013,
+          60.086,
+          60.02
+        ],
+        "completed": true,
+        "passed": true,
+        "timeoutRatio": 0,
+        "correctionRatio": 0,
+        "minimumNativeCompletionRatio": 1,
+        "minimumMovementRunRatio": 0.7532467532467533,
+        "minimumMovementCellsPerMinute": 134.97075633612718,
+        "combat": null
+      },
+      {
+        "name": "stage-10",
+        "controlledActors": 10,
+        "configuredSeconds": 300,
+        "measuredSeconds": 300.276,
+        "windowSeconds": [
+          60.024,
+          60.078,
+          60.068,
+          60.091,
+          60.015
+        ],
+        "completed": true,
+        "passed": true,
+        "timeoutRatio": 0,
+        "correctionRatio": 0,
+        "minimumNativeCompletionRatio": 1,
+        "minimumMovementRunRatio": 0.8961038961038961,
+        "minimumMovementCellsPerMinute": 145.81044641965445,
+        "combat": {
+          "launchesByWindow": [
+            36,
+            31,
+            30,
+            30,
+            33
+          ],
+          "positiveHitsByWindow": [
+            36,
+            31,
+            30,
+            30,
+            33
+          ],
+          "minimumLaunchesAndHitsPerMinute": 29.95456890382919
+        }
+      },
+      {
+        "name": "soak",
+        "controlledActors": 10,
+        "configuredSeconds": 360,
+        "measuredSeconds": 360.388,
+        "windowSeconds": [
+          60.068,
+          60.086,
+          60.069,
+          60.013,
+          60.056,
+          60.096
+        ],
+        "completed": true,
+        "passed": true,
+        "timeoutRatio": 0,
+        "correctionRatio": 0,
+        "minimumNativeCompletionRatio": 1,
+        "minimumMovementRunRatio": 0.8831168831168831,
+        "minimumMovementCellsPerMinute": 144.76837060702877,
+        "combat": {
+          "launchesByWindow": [
+            34,
+            28,
+            32,
+            30,
+            28,
+            30
+          ],
+          "positiveHitsByWindow": [
+            34,
+            28,
+            32,
+            30,
+            28,
+            30
+          ],
+          "minimumLaunchesAndHitsPerMinute": 27.959924108777418
+        }
+      }
+    ],
+    "continuous": {
+      "reportedPassed": true,
+      "reportedAssessedWindows": 132,
+      "reportedFailureCount": 0,
+      "reportedShortSegments": 2,
+      "independentActionReplayPerformed": false
+    },
+    "attack": {
+      "reportedV2Requests": 351,
+      "reportedStatus": {
+        "success": 351
+      },
+      "reportedCount": 351,
+      "reportedNotLaunched": 0,
+      "reportedMaximumFromSendMs": 123.59840000001714,
+      "measuredPhaseAttacks": 342,
+      "outsideMeasuredPhases": 9,
+      "independentTypedDeadlineReplayPerformed": false
+    },
+    "memoryTrend": {
+      "samples": 20,
+      "seconds": 55.793,
+      "slopeMiBPerHour": 1.800231022476955,
+      "startMiB": 1528.3046875,
+      "endMiB": 1528.3359375,
+      "peakMiB": 1528.3359375,
+      "scope": "Retained approximately56-second tail trend only; does not prove1800-second or two-hour stability."
+    }
+  },
+  "sourceConfig": {
+    "preparedFiles": 196,
+    "preparedSha256": "ad1b57c6cad02f36ddc8640f58d5e3ce4a3dc322b492a81eea0d4b2ac1f7c00c",
+    "admittedFiles": 201,
+    "admittedSha256": "f3ab2fe05ff277d2966e5685ee0f06f67b09d04e43382ee02c7ee91b6d3e7b5b",
+    "ordinaryAccountPool": 100,
+    "charactersCreatedAtPreparation": 0,
+    "gameplayGrantsAtPreparation": 0
+  },
+  "actualProgramOutputs": {
+    "executionSource": "Root coordinator reported actual exits; public output JSONs and base stdout/stderr independently pinned here. No invented additional execution receipt.",
+    "baseCollectorExitCode": 0,
+    "baseVerifierExitCode": 0,
+    "storeCollectorExitCode": 0,
+    "storeVerifierExitCode": 0,
+    "originalCopiesVerifiedByBaseProgram": 158,
+    "raw": {
+      "rows": 41450,
+      "bytes": 30010725,
+      "sha256": "3509627e3ef36ab1c35988ca0abbff695c16077c7fd177b172672a1e507021b1",
+      "independentlyRescannedHere": false
+    },
+    "wire": {
+      "complete": true,
+      "countsMatch": true,
+      "rows": 5567
+    },
+    "store": {
+      "rows": 7,
+      "bytes": 1519,
+      "sha256": "88690b15a68d846c59eceb013f8f8746083b64e97221b9f8ea24aa8cfeb44137",
+      "diagnosticComplete": true,
+      "formatValid": true,
+      "countsMatch": true,
+      "readEnded": true,
+      "contributesToGameAcceptance": false
+    }
+  },
+  "rootIndependentOsCheck": {
+    "source": "Root actual tool stdout reported to this reviewer; no disk OS-proof artifact exists or is claimed.",
+    "checkedAtUtc": "2026-10-25T19:51:16Z",
+    "gatewayPid": 62088,
+    "monitorPid": 61104,
+    "processesAbsent": true,
+    "portsFree": [
+      17500,
+      17510
+    ],
+    "newOsQueryPerformedHere": false
+  },
+  "limits": [
+    "This is not the newly authorized ended action replay and does not re-derive132 continuous windows from actions.",
+    "Typed900ms owner/observer receipt correlation and HP event count/2s effect proof were not independently replayed here. Absence of an HP report key is not zero-dose proof.",
+    "Store data is completed-only and50ms left-censored;7 valid rows and no reproduced5s timeout do not identify or eliminate the original holder/root cause.",
+    "Only2/10 actors and360-second soak were measured;100 ordinary accounts do not mean100 concurrent actors.",
+    "Current complete probe does not confer formal capacity or P0 acceptance."
+  ],
+  "verdict": {
+    "smallEndedFactsConsistent": true,
+    "eligibleForEndedReplayBinding": true,
+    "independentActionReplayPassed": null,
+    "capacityAccepted": false,
+    "p0Accepted": false,
+    "p2Started": false
+  }
+}

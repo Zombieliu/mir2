@@ -1,0 +1,88 @@
+{
+  "utc": "2026-10-09T17:36:37.114172+00:00",
+  "readonly": true,
+  "units": "  mir2-admin-api.service                  loaded active   running Mir2 production Admin API\n  mir2-commonware-gateway.service         loaded active   running Mir2 Gate 14 Commonware control gateway\n  mir2-commonware-placement-renew.service loaded inactive dead    Renew Mir2 Commonware Home Node placement\n  mir2-commonware-projector.service       loaded active   running Mir2 Gate 14 finalized-state projector\n  mir2-commonware-reconcile.service       loaded inactive dead    Mir2 Commonware quorum-verified validator catch-up\n  mir2-commonware-validator@0.service     loaded active   running Mir2 Commonware validator 0\n  mir2-commonware-validator@1.service     loaded active   running Mir2 Commonware validator 1\n  mir2-commonware-validator@2.service     loaded active   running Mir2 Commonware validator 2\n  mir2-commonware-validator@3.service     loaded active   running Mir2 Commonware validator 3\n  mir2-debug-ingest.service               loaded active   running Mir2 Debug Snapshot Ingest\n  mir2-debug-mcp.service                  loaded active   running Mir2 Debug Remote MCP\n  mir2-gateway.service                    loaded active   running Mir2 Gateway\n\u25cf mir2-periodic-build-20261002-r2.service loaded failed   failed  /bin/bash /opt/mir2-periodic-qa-20261002/build-gateway-r2.sh\n\u25cf mir2-periodic-build-20261002-r3.service loaded failed   failed  /bin/bash /opt/mir2-periodic-qa-20261002/build-gateway-r3.sh\n\u25cf mir2-periodic-build-20261002.service    loaded failed   failed  /bin/bash /opt/mir2-periodic-qa-20261002/build-gateway.sh\n  mir2-periodic-qa-20261002.service       loaded active   running Owned periodic quest QA gateway (loopback only)\n  mir2-playtest-redis.service             loaded active   running Mir2 isolated playtest Redis cache\n  mir2-playtest.service                   loaded active   running Mir2 isolated player playtest Gateway\n  mir2-relayer.service                    loaded active   running MIR2 on-chain mine relayer (Sui events -> gateway /onchain/inject)\n  mir2-zone-ucloud.service                loaded active   running Mir2 UCloud authoritative Zone Host\n",
+  "unitFiles": "mir2-admin-api.service                  enabled   enabled\nmir2-commonware-gateway.service         enabled   enabled\nmir2-commonware-placement-renew.service static    -\nmir2-commonware-projector.service       enabled   enabled\nmir2-commonware-reconcile.service       static    -\nmir2-commonware-validator@.service      indirect  enabled\nmir2-debug-ingest.service               enabled   enabled\nmir2-debug-mcp.service                  enabled   enabled\nmir2-gateway-gate15-canary.service      disabled  enabled\nmir2-gateway.service                    enabled   enabled\nmir2-periodic-build-20261002-r2.service transient -\nmir2-periodic-build-20261002-r3.service transient -\nmir2-periodic-build-20261002.service    transient -\nmir2-periodic-qa-20261002.service       disabled  enabled\nmir2-playtest-redis.service             enabled   enabled\nmir2-playtest.service                   enabled   enabled\nmir2-relayer.service                    enabled   enabled\nmir2-zone-ucloud.service                enabled   enabled\n",
+  "health": {
+    "ok": true,
+    "http": "ready",
+    "ws": "ready",
+    "tcp_stub": "ready",
+    "gate15": null,
+    "revision": "c70436f34eabb432d769e0082c0afa23303294b0",
+    "session_cache": {
+      "configured": true,
+      "backend": "redis",
+      "ttlSeconds": 30,
+      "recordCount": 0,
+      "staleRecordCount": 0,
+      "routeLeaseCount": 0,
+      "healthy": true,
+      "lastError": null
+    },
+    "capacity": {
+      "maxWsConnections": 66,
+      "maxActiveSessions": 51,
+      "maxReconnectLeases": 51,
+      "maxLoginInFlight": 2,
+      "maxNewCharacterInFlight": 1,
+      "maxStartGameInFlight": 2,
+      "currentWsConnections": 1,
+      "currentActiveSessions": 0,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    },
+    "gameplay_events": {
+      "configured": false,
+      "sink": "none",
+      "topic": null,
+      "accepted": 0,
+      "published": 0,
+      "failed": 0,
+      "dropped": 0,
+      "lastError": null
+    },
+    "spectator": {
+      "activeViewers": 0,
+      "activeMaps": 1,
+      "recordingEnabled": false,
+      "bufferedFrames": 90,
+      "publishedFramesTotal": 345,
+      "persistedFramesTotal": 0,
+      "droppedFramesTotal": 0,
+      "recordingErrorsTotal": 0,
+      "dataDir": ".mir2-data/spectator"
+    },
+    "ai_live": {
+      "enabled": false,
+      "mode": "shadow",
+      "running": false,
+      "processedFramesTotal": 0,
+      "scoredHighlightsTotal": 0,
+      "generatedSegmentsTotal": 0,
+      "modelSuccessTotal": 0,
+      "modelFailureTotal": 0,
+      "ttsSuccessTotal": 0,
+      "ttsFailureTotal": 0,
+      "distributionSuccessTotal": 0,
+      "distributionFailureTotal": 0,
+      "distributionDeadLettersTotal": 0,
+      "queuedDistributionDeliveries": 0,
+      "discordSuccessTotal": 0,
+      "discordFailureTotal": 0,
+      "discordDeadLettersTotal": 0,
+      "persistedSegmentsTotal": 0,
+      "persistenceErrorsTotal": 0,
+      "queuedDiscordDeliveries": 0
+    },
+    "channel_identity": {
+      "backend": "postgres",
+      "durable": true,
+      "accountCount": 0,
+      "identityCount": 0
+    },
+    "identity_backend": "postgres"
+  }
+}

@@ -1,0 +1,305 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T20:50:17.451Z",
+  "runId": "1792959622496-365f0175",
+  "passed": true,
+  "method": "Independent source/destination raw byte-SHA comparisons by this archive writer, bounded JSON sensitive-key check and actual relative-link existence; no game/raw/monitor/EXE verifier rerun.",
+  "originalFiles": 18,
+  "originalBytes": 308864,
+  "inventoryBeforeThisVerification": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\README.md",
+      "bytes": 2200,
+      "sha256": "55a63080a5467fd3e9bc0669c1a59e20b02e267bd193078156828194d8aae4a9"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\execution\\formal13-base-collection-execution-v1.json",
+      "bytes": 813,
+      "sha256": "1455f843604b6a826f2e461667e1ebf6b82afdc44e6c19d19e5cde0fd3d14813"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\execution\\formal13-base-collection-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\execution\\formal13-base-collection-stdout-v1.log",
+      "bytes": 132826,
+      "sha256": "221b99478b2fd446966a3f29fff4c90f42f39be7dd215897120f9a1734dac985"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\execution\\formal13-base-verification-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\execution\\formal13-base-verification-stdout-v1.log",
+      "bytes": 5017,
+      "sha256": "ea47fbbe35c0de602731cabfa393e0ad6b6a3ef6388b17d45cd973b457cb8cfc"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\execution\\formal13-store-collection-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\execution\\formal13-store-collection-stdout-v1.log",
+      "bytes": 393,
+      "sha256": "77a89f6c51729ddd5684ce2be25c1426c372bb3e4c0c3c601729b606f0f95a78"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\execution\\formal13-store-verification-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\execution\\formal13-store-verification-stdout-v1.log",
+      "bytes": 1244,
+      "sha256": "cd7acecf0ded42bbdda38c20b29b991db8df106bb579eac55a5bc62d3ced6eef"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\facts\\formal13-actual-terminal-independent-facts-v1.json",
+      "bytes": 10026,
+      "sha256": "0db4c38c85153d170de995989451495ea853d491b3e7c11125a3909b465751f0"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\facts\\formal13-root-independent-cleanup-v1.json",
+      "bytes": 409,
+      "sha256": "1daaa6cb91e6554da86bed13a977bc2f75f59fb27f2e70b41ca4be80cff3d1e1"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\post-collector\\collect-public-current50-v2-derivation-v1.json",
+      "bytes": 2392,
+      "sha256": "a08201cea196ca8434195201a11f5f05bfc42fb277aae7f42cc5be9a6c56418f"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\post-collector\\collect-public-current50-v2.mjs",
+      "bytes": 43374,
+      "sha256": "1eb5a6e57e64e6f8ce5329bb48259508cff91a9fc0fbad5eba3ea55582eb7481"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\post-collector\\collect-public.mjs",
+      "bytes": 43271,
+      "sha256": "5131b65ae652f36442ea1fadb6cebb37da4c0fc37c9b911f8bc7a940b87ae562"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\post-collector\\review-v1.json",
+      "bytes": 6,
+      "sha256": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\post-collector\\review-v2.json",
+      "bytes": 1994,
+      "sha256": "b9973e5f2065b19a646407e326528958631f4a77b283099ff43942249b7decc1"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\public-copy-receipt-v1.json",
+      "bytes": 16379,
+      "sha256": "f3b8160131448300fa0d272ecc8ba360e38ffef9eb998de42691815007cb8e04"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\public-whitelist-v1.json",
+      "bytes": 14767,
+      "sha256": "4ab1f3a2b02b74d928934695e5356e820ef6892e9c71353158128cab95393508"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\report-analysis\\analysis-v1.json",
+      "bytes": 42280,
+      "sha256": "a71c159e87ed0fd1b88c94d69d768addd233aa589ef236369815d7e48fa8af1e"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\store-analysis\\analysis-v1.json",
+      "bytes": 24819,
+      "sha256": "8d7ff05c9f0ace2a05a00b0871fa50beeacb811c275005caebda6bfed565eaf5"
+    }
+  ],
+  "inventorySha256": "bd7b992e753dda037b093cb390c1960be6aec895c2f9c0de4247b4212a5f77df",
+  "analysisFilesBeforeThisVerification": 21,
+  "analysisFilesAfterThisVerification": 22,
+  "readmesAdded": 3,
+  "relativeLinksChecked": 27,
+  "linkChecks": [
+    {
+      "readme": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\README.md",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\facts\\formal13-actual-terminal-independent-facts-v1.json"
+    },
+    {
+      "readme": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\README.md",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\report-analysis\\analysis-v1.json"
+    },
+    {
+      "readme": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\README.md",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\facts\\formal13-root-independent-cleanup-v1.json"
+    },
+    {
+      "readme": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\README.md",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\store-analysis\\analysis-v1.json"
+    },
+    {
+      "readme": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\README.md",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\post-collector\\collect-public.mjs"
+    },
+    {
+      "readme": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\README.md",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\post-collector\\collect-public-current50-v2.mjs"
+    },
+    {
+      "readme": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\README.md",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\post-collector\\collect-public-current50-v2-derivation-v1.json"
+    },
+    {
+      "readme": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\README.md",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\post-collector\\review-v2.json"
+    },
+    {
+      "readme": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\README.md",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\execution\\formal13-base-collection-execution-v1.json"
+    },
+    {
+      "readme": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\README.md",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\post-collector\\review-v1.json"
+    },
+    {
+      "readme": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\README.md",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13\\README.md"
+    },
+    {
+      "readme": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\README.md",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13-store-diagnostics\\README.md"
+    },
+    {
+      "readme": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13\\README.md",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13\\release-native-v2-account-store-wait-ladder-13\\reports\\1792959622496-365f0175.report.json"
+    },
+    {
+      "readme": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13\\README.md",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13\\collect-formal-native-v2-account-store-wait-ladder-13-public-artifact-catalog.json"
+    },
+    {
+      "readme": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13\\README.md",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13\\public-copy-provenance.json"
+    },
+    {
+      "readme": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13\\README.md",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13\\collection-verification.json"
+    },
+    {
+      "readme": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13\\README.md",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13\\public-verification.json"
+    },
+    {
+      "readme": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13\\README.md",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13\\raw-artifact-manifest.json"
+    },
+    {
+      "readme": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13\\README.md",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\README.md"
+    },
+    {
+      "readme": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13\\README.md",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13-store-diagnostics\\README.md"
+    },
+    {
+      "readme": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13-store-diagnostics\\README.md",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13-store-diagnostics\\store-artifact-catalog.json"
+    },
+    {
+      "readme": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13-store-diagnostics\\README.md",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13-store-diagnostics\\store-copy-provenance.json"
+    },
+    {
+      "readme": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13-store-diagnostics\\README.md",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13-store-diagnostics\\store-public-verification.json"
+    },
+    {
+      "readme": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13-store-diagnostics\\README.md",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13-store-diagnostics\\store-stage-public-status.json"
+    },
+    {
+      "readme": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13-store-diagnostics\\README.md",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13-store-diagnostics\\store-stage-public.jsonl"
+    },
+    {
+      "readme": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13-store-diagnostics\\README.md",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13\\README.md"
+    },
+    {
+      "readme": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13-store-diagnostics\\README.md",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal13-native-supply-failure-analysis-v1\\README.md"
+    }
+  ],
+  "copyReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-native-supply-failure-public-archive-v1\\public-copy-receipt-v1.json",
+    "bytes": 16379,
+    "sha256": "f3b8160131448300fa0d272ecc8ba360e38ffef9eb998de42691815007cb8e04"
+  },
+  "originalGameVerdict": {
+    "reportOk": false,
+    "rawVerifierAccepted": false,
+    "capacityAccepted": false,
+    "p0Passed": false,
+    "p1EngineeringContractsPassed": true,
+    "p2Started": false,
+    "peakControlledActors": 25,
+    "highestPassedStage": 10,
+    "stages": [
+      {
+        "name": "stage-2",
+        "controlledActors": 2,
+        "seconds": 300,
+        "measuredSeconds": 300.259,
+        "completed": true,
+        "passed": true,
+        "startedAtMs": 1792959653921,
+        "endedAtMs": 1792959954180,
+        "minuteWindows": 5
+      },
+      {
+        "name": "stage-10",
+        "controlledActors": 10,
+        "seconds": 300,
+        "measuredSeconds": 300.261,
+        "completed": true,
+        "passed": true,
+        "startedAtMs": 1792960009375,
+        "endedAtMs": 1792960309636,
+        "minuteWindows": 5
+      },
+      {
+        "name": "stage-25",
+        "controlledActors": 25,
+        "seconds": 300,
+        "measuredSeconds": 300.254,
+        "completed": true,
+        "passed": false,
+        "startedAtMs": 1792960394310,
+        "endedAtMs": 1792960694564,
+        "minuteWindows": 5
+      }
+    ],
+    "windowsByPhase": {
+      "stage-2": {
+        "complete": 5,
+        "passed": 5
+      },
+      "stage-10": {
+        "complete": 5,
+        "passed": 5
+      },
+      "stage-25": {
+        "complete": 5,
+        "passed": 3
+      }
+    },
+    "unexecuted": [
+      "stage-50",
+      "stage-100",
+      "7200-second soak",
+      "save",
+      "resume",
+      "post-resume measurement"
+    ],
+    "reason": "Stage25 W3/W4 per-fighter combat launch supply; actor05 positive-hit rate also below actual-duration threshold. Stage25 218 observed attack actions all classified successful, no timeout/not-launched. All original gates remain."
+  },
+  "originalArtifactMutation": false
+}

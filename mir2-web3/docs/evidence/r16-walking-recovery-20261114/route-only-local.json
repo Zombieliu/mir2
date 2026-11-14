@@ -1,0 +1,2141 @@
+{
+  "kind": "actual-two-renderer-ordinary-rapid-target-diagnostic",
+  "productSourceCommit": "91b8fc9b4f5170cb37b6619b991707ed76a34d73",
+  "candidate": "f6e30a0ee802-walking-recovery-668d1d43",
+  "buildId": "Lgy7EhuAT0ZovaqfJlwVL",
+  "scope": "Actual ordinary isolated new-role login, original cold startup/Native/six-font/HUD113/Q gates, physical outbound/lateral/continuous return clicks, Worker restart, normal logout/File save and full process closure. No game source edits or animal stimulation.",
+  "limits": {
+    "movementProgressMs": 8000,
+    "routeEndSettleMs": 250,
+    "routePollMs": 20,
+    "additional650msWait": false
+  },
+  "conclusion": "Both render paths retained a new ordinary target submitted during movement cooldown and reached it. This supports normal rapid-target queuing without combat. It neither resolves the original R15 stall after a one-hit/retreat nor qualifies complete cold/warm walking or global parity.",
+  "r15Resolved": false,
+  "completeWalkingQualification": false,
+  "productionPromoted": false,
+  "runs": [
+    {
+      "name": "route-only-r1",
+      "mode": "compatibility",
+      "passed": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true,
+      "workerRestart": {
+        "passed": true,
+        "originalFrame": "/original-ui/Prguse/1.png",
+        "expectedSha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa",
+        "restored": {
+          "status": 200,
+          "bytes": 66374,
+          "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+        },
+        "originNetworkReads": 0,
+        "lifecycle": [
+          {
+            "versionId": "0",
+            "runningStatus": "running",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "stopping",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "stopped",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "running",
+            "status": "activated"
+          }
+        ]
+      },
+      "logout": {
+        "sentAt": 1794606389119,
+        "acknowledgedAt": 1794606391510,
+        "savedPosition": {
+          "x": 289,
+          "y": 616
+        },
+        "returnedToSelect": true,
+        "gutter": {
+          "x": 64,
+          "y": 480
+        }
+      },
+      "firstSave": {
+        "passed": true,
+        "className": "Warrior",
+        "level": 30,
+        "gold": 76360,
+        "experience": 19497,
+        "fields": [
+          "map_file_name",
+          "position",
+          "direction",
+          "gold",
+          "credit",
+          "experience",
+          "max_experience",
+          "inventory_items_json",
+          "belt_items_json",
+          "equipment_items_json",
+          "equipment_items_explicit_empty",
+          "storage_items_json",
+          "hero_inventory_items_json",
+          "hero_equipment_items_json",
+          "quest_states_json",
+          "skill_states_json"
+        ],
+        "questStateCount": 26
+      },
+      "qualification": {
+        "routeOnly": true,
+        "fullWalkingQualification": false,
+        "completeColdWarmWalking": false,
+        "oneActualSession": true,
+        "scope": "Normal new-role login, full original cold startup/Native/font/HUD113/Q, ordinary rapid ground routes, Worker restart, normal logout/File save and complete browser/process closure. No animal stimulation, forced selection or warm replay."
+      },
+      "legs": [
+        {
+          "leg": "outward",
+          "passed": true,
+          "start": {
+            "position": {
+              "x": 289,
+              "y": 616
+            },
+            "at": 1794606373898,
+            "seq": 208,
+            "source": "UserLocation"
+          },
+          "end": {
+            "position": {
+              "x": 288,
+              "y": 605
+            },
+            "at": 1794606381080,
+            "seq": 251,
+            "source": "UserLocation"
+          },
+          "clicks": [
+            {
+              "target": {
+                "x": 288,
+                "y": 605
+              },
+              "physicalPoint": {
+                "x": 584,
+                "y": 112,
+                "sceneX": 456,
+                "sceneY": 16,
+                "insideStage": true,
+                "needsActualTopElementAndHudGuard": true,
+                "pathValidated": false
+              },
+              "actualInputTiming": {
+                "clockOrigin": 1794606374958,
+                "plannedClickAt": 1794606374958,
+                "trustedDownAt": 1794606374967,
+                "trustedUpAt": 1794606374971,
+                "lastAckBeforeDown": {
+                  "at": 1794606373898,
+                  "seq": 208,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 289,
+                    "y": 616
+                  },
+                  "direction": "Right",
+                  "samePositionAsClickOwner": true
+                },
+                "ackToDownMs": 1069,
+                "ackToUpMs": 1073
+              },
+              "before": {
+                "datasetOwner": {
+                  "tag": "MAIN",
+                  "id": "",
+                  "classes": "mir-client-page "
+                },
+                "pointer": {
+                  "at": 1794606371136,
+                  "phase": "click-dispatch"
+                },
+                "host": {
+                  "self": {
+                    "x": 289,
+                    "y": 616,
+                    "direction": "Right",
+                    "dead": false
+                  },
+                  "queued": null,
+                  "lastAttempt": {
+                    "reason": "cadence",
+                    "at": 1794606341797
+                  },
+                  "controller": {
+                    "canSend": true,
+                    "sendDelayMs": 0,
+                    "blockedMs": 0,
+                    "pending": null
+                  }
+                }
+              },
+              "after": {
+                "sampledAt": 1794606375047,
+                "pointer": {
+                  "at": 1794606374971,
+                  "phase": "click-dispatch",
+                  "worldTarget": null
+                },
+                "host": {
+                  "self": {
+                    "x": 289,
+                    "y": 616,
+                    "direction": "Right",
+                    "dead": false
+                  },
+                  "queued": {
+                    "kind": "target",
+                    "ageMs": 62,
+                    "consumeAfterSend": false
+                  },
+                  "lastAttempt": {
+                    "reason": "cadence",
+                    "at": 1794606375022
+                  },
+                  "controller": {
+                    "canSend": false,
+                    "sendDelayMs": 538,
+                    "blockedMs": 0,
+                    "pending": {
+                      "from": {
+                        "x": 289,
+                        "y": 616
+                      },
+                      "to": {
+                        "x": 288,
+                        "y": 615
+                      },
+                      "ageMs": 62
+                    }
+                  }
+                }
+              },
+              "firstMovementAfterTrustedDownMs": 6,
+              "commands": [
+                {
+                  "type": "walk",
+                  "at": 1794606374973,
+                  "seq": 211,
+                  "direction": "UpLeft"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606375582,
+                  "seq": 215,
+                  "direction": "Up"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606376184,
+                  "seq": 217,
+                  "direction": "Up"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606376786,
+                  "seq": 221,
+                  "direction": "Up"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606377390,
+                  "seq": 227,
+                  "direction": "Up"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606377999,
+                  "seq": 230,
+                  "direction": "Up"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606378594,
+                  "seq": 232,
+                  "direction": "Up"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606379197,
+                  "seq": 236,
+                  "direction": "UpLeft"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606379800,
+                  "seq": 240,
+                  "direction": "Up"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606380400,
+                  "seq": 244,
+                  "direction": "UpRight"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606381000,
+                  "seq": 250,
+                  "direction": "Up"
+                }
+              ],
+              "actualUserLocations": [
+                {
+                  "at": 1794606375049,
+                  "seq": 212,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 288,
+                    "y": 615
+                  },
+                  "direction": "UpLeft",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606375583,
+                  "seq": 216,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 288,
+                    "y": 614
+                  },
+                  "direction": "Up",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606376186,
+                  "seq": 218,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 288,
+                    "y": 613
+                  },
+                  "direction": "Up",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606376829,
+                  "seq": 223,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 288,
+                    "y": 612
+                  },
+                  "direction": "Up",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606377428,
+                  "seq": 228,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 288,
+                    "y": 611
+                  },
+                  "direction": "Up",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606378032,
+                  "seq": 231,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 288,
+                    "y": 610
+                  },
+                  "direction": "Up",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606378650,
+                  "seq": 233,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 288,
+                    "y": 609
+                  },
+                  "direction": "Up",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606379246,
+                  "seq": 237,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 287,
+                    "y": 608
+                  },
+                  "direction": "UpLeft",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606379851,
+                  "seq": 241,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 287,
+                    "y": 607
+                  },
+                  "direction": "Up",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606380456,
+                  "seq": 245,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 288,
+                    "y": 606
+                  },
+                  "direction": "UpRight",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606381080,
+                  "seq": 251,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 288,
+                    "y": 605
+                  },
+                  "direction": "Up",
+                  "samePositionAsClickOwner": false
+                }
+              ],
+              "accepted": {
+                "position": {
+                  "x": 288,
+                  "y": 605
+                },
+                "at": 1794606381080,
+                "seq": 251,
+                "source": "UserLocation"
+              },
+              "changedSnapshots": 56
+            }
+          ],
+          "cleanupCommands": [],
+          "raw": {
+            "path": "C:/r16-route-only-20261114/fixture-r1/game-full/route-only-r1/route-only-outward-ordinary-ground-route.json",
+            "sha256": "35fd31dcd220b1c90882ccb7055b00145458a4177e4a3d7f53d2f616ded3e249"
+          }
+        },
+        {
+          "leg": "lateral",
+          "passed": true,
+          "start": {
+            "position": {
+              "x": 288,
+              "y": 605
+            },
+            "at": 1794606381080,
+            "seq": 251,
+            "source": "UserLocation"
+          },
+          "end": {
+            "position": {
+              "x": 287,
+              "y": 605
+            },
+            "at": 1794606381682,
+            "seq": 255,
+            "source": "UserLocation"
+          },
+          "clicks": [
+            {
+              "target": {
+                "x": 287,
+                "y": 605
+              },
+              "physicalPoint": {
+                "x": 584,
+                "y": 464,
+                "sceneX": 456,
+                "sceneY": 368,
+                "insideStage": true,
+                "needsActualTopElementAndHudGuard": true,
+                "pathValidated": false
+              },
+              "actualInputTiming": {
+                "clockOrigin": 1794606381544,
+                "plannedClickAt": 1794606381544,
+                "trustedDownAt": 1794606381551,
+                "trustedUpAt": 1794606381555,
+                "lastAckBeforeDown": {
+                  "at": 1794606381080,
+                  "seq": 251,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 288,
+                    "y": 605
+                  },
+                  "direction": "Up",
+                  "samePositionAsClickOwner": true
+                },
+                "ackToDownMs": 471,
+                "ackToUpMs": 475
+              },
+              "before": {
+                "datasetOwner": {
+                  "tag": "MAIN",
+                  "id": "",
+                  "classes": "mir-client-page "
+                },
+                "pointer": {
+                  "at": 1794606374971,
+                  "phase": "click-dispatch"
+                },
+                "host": {
+                  "self": {
+                    "x": 288,
+                    "y": 605,
+                    "direction": "Up",
+                    "dead": false
+                  },
+                  "queued": {
+                    "kind": "target",
+                    "ageMs": 6568,
+                    "consumeAfterSend": false
+                  },
+                  "lastAttempt": {
+                    "reason": "cadence",
+                    "at": 1794606381536
+                  },
+                  "controller": {
+                    "canSend": false,
+                    "sendDelayMs": 55,
+                    "blockedMs": 0,
+                    "pending": null
+                  }
+                }
+              },
+              "after": {
+                "sampledAt": 1794606381564,
+                "pointer": {
+                  "at": 1794606374971,
+                  "phase": "click-dispatch",
+                  "worldTarget": null
+                },
+                "host": {
+                  "self": {
+                    "x": 288,
+                    "y": 605,
+                    "direction": "Up",
+                    "dead": false
+                  },
+                  "queued": {
+                    "kind": "target",
+                    "ageMs": 6568,
+                    "consumeAfterSend": false
+                  },
+                  "lastAttempt": {
+                    "reason": "cadence",
+                    "at": 1794606381536
+                  },
+                  "controller": {
+                    "canSend": false,
+                    "sendDelayMs": 55,
+                    "blockedMs": 0,
+                    "pending": null
+                  }
+                }
+              },
+              "firstMovementAfterTrustedDownMs": 57,
+              "commands": [
+                {
+                  "type": "walk",
+                  "at": 1794606381608,
+                  "seq": 254,
+                  "direction": "Left"
+                }
+              ],
+              "actualUserLocations": [
+                {
+                  "at": 1794606381682,
+                  "seq": 255,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 287,
+                    "y": 605
+                  },
+                  "direction": "Left",
+                  "samePositionAsClickOwner": false
+                }
+              ],
+              "accepted": {
+                "position": {
+                  "x": 287,
+                  "y": 605
+                },
+                "at": 1794606381682,
+                "seq": 255,
+                "source": "UserLocation"
+              },
+              "changedSnapshots": 2
+            }
+          ],
+          "cleanupCommands": [],
+          "raw": {
+            "path": "C:/r16-route-only-20261114/fixture-r1/game-full/route-only-r1/route-only-lateral-ordinary-ground-route.json",
+            "sha256": "975872220019d9fc8b3feba8b068ae45d8fc456c444c2f5dcaa8854cfb3967d9"
+          }
+        },
+        {
+          "leg": "return-town",
+          "passed": true,
+          "start": {
+            "position": {
+              "x": 287,
+              "y": 605
+            },
+            "at": 1794606381682,
+            "seq": 255,
+            "source": "UserLocation"
+          },
+          "end": {
+            "position": {
+              "x": 289,
+              "y": 616
+            },
+            "at": 1794606388380,
+            "seq": 298,
+            "source": "UserLocation"
+          },
+          "clicks": [
+            {
+              "target": {
+                "x": 288,
+                "y": 612
+              },
+              "physicalPoint": {
+                "x": 680,
+                "y": 688,
+                "sceneX": 552,
+                "sceneY": 592,
+                "insideStage": true,
+                "needsActualTopElementAndHudGuard": true,
+                "pathValidated": false
+              },
+              "actualInputTiming": {
+                "clockOrigin": 1794606382177,
+                "plannedClickAt": 1794606382177,
+                "trustedDownAt": 1794606382184,
+                "trustedUpAt": 1794606382190,
+                "lastAckBeforeDown": {
+                  "at": 1794606381682,
+                  "seq": 255,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 287,
+                    "y": 605
+                  },
+                  "direction": "Left",
+                  "samePositionAsClickOwner": true
+                },
+                "ackToDownMs": 502,
+                "ackToUpMs": 508
+              },
+              "before": {
+                "datasetOwner": {
+                  "tag": "MAIN",
+                  "id": "",
+                  "classes": "mir-client-page "
+                },
+                "pointer": {
+                  "at": 1794606381555,
+                  "phase": "click-dispatch"
+                },
+                "host": {
+                  "self": {
+                    "x": 287,
+                    "y": 605,
+                    "direction": "Left",
+                    "dead": false
+                  },
+                  "queued": {
+                    "kind": "target",
+                    "ageMs": 593,
+                    "consumeAfterSend": false
+                  },
+                  "lastAttempt": {
+                    "reason": "cadence",
+                    "at": 1794606382140
+                  },
+                  "controller": {
+                    "canSend": false,
+                    "sendDelayMs": 53,
+                    "blockedMs": 0,
+                    "pending": null
+                  }
+                }
+              },
+              "after": {
+                "sampledAt": 1794606382198,
+                "pointer": {
+                  "at": 1794606381555,
+                  "phase": "click-dispatch",
+                  "worldTarget": null
+                },
+                "host": {
+                  "self": {
+                    "x": 287,
+                    "y": 605,
+                    "direction": "Left",
+                    "dead": false
+                  },
+                  "queued": {
+                    "kind": "target",
+                    "ageMs": 628,
+                    "consumeAfterSend": false
+                  },
+                  "lastAttempt": {
+                    "reason": "cadence",
+                    "at": 1794606382176
+                  },
+                  "controller": {
+                    "canSend": false,
+                    "sendDelayMs": 18,
+                    "blockedMs": 0,
+                    "pending": null
+                  }
+                }
+              },
+              "firstMovementAfterTrustedDownMs": 27,
+              "commands": [
+                {
+                  "type": "walk",
+                  "at": 1794606382211,
+                  "seq": 258,
+                  "direction": "DownRight"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606382820,
+                  "seq": 261,
+                  "direction": "DownLeft"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606383420,
+                  "seq": 268,
+                  "direction": "Down"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606384022,
+                  "seq": 274,
+                  "direction": "DownRight"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606384622,
+                  "seq": 277,
+                  "direction": "Down"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606385232,
+                  "seq": 280,
+                  "direction": "Down"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606385835,
+                  "seq": 282,
+                  "direction": "Down"
+                }
+              ],
+              "actualUserLocations": [
+                {
+                  "at": 1794606382279,
+                  "seq": 259,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 288,
+                    "y": 606
+                  },
+                  "direction": "DownRight",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606382907,
+                  "seq": 262,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 287,
+                    "y": 607
+                  },
+                  "direction": "DownLeft",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606383497,
+                  "seq": 269,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 287,
+                    "y": 608
+                  },
+                  "direction": "Down",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606384108,
+                  "seq": 275,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 288,
+                    "y": 609
+                  },
+                  "direction": "DownRight",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606384725,
+                  "seq": 278,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 288,
+                    "y": 610
+                  },
+                  "direction": "Down",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606385339,
+                  "seq": 281,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 288,
+                    "y": 611
+                  },
+                  "direction": "Down",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606385971,
+                  "seq": 284,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 288,
+                    "y": 612
+                  },
+                  "direction": "Down",
+                  "samePositionAsClickOwner": false
+                }
+              ],
+              "accepted": {
+                "position": {
+                  "x": 288,
+                  "y": 612
+                },
+                "at": 1794606385971,
+                "seq": 284,
+                "source": "UserLocation"
+              },
+              "changedSnapshots": 34
+            },
+            {
+              "target": {
+                "x": 289,
+                "y": 616
+              },
+              "physicalPoint": {
+                "x": 680,
+                "y": 592,
+                "sceneX": 552,
+                "sceneY": 496,
+                "insideStage": true,
+                "needsActualTopElementAndHudGuard": true,
+                "pathValidated": false
+              },
+              "actualInputTiming": {
+                "clockOrigin": 1794606386125,
+                "plannedClickAt": 1794606386125,
+                "trustedDownAt": 1794606386132,
+                "trustedUpAt": 1794606386136,
+                "lastAckBeforeDown": {
+                  "at": 1794606385971,
+                  "seq": 284,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 288,
+                    "y": 612
+                  },
+                  "direction": "Down",
+                  "samePositionAsClickOwner": true
+                },
+                "ackToDownMs": 161,
+                "ackToUpMs": 165
+              },
+              "before": {
+                "datasetOwner": {
+                  "tag": "MAIN",
+                  "id": "",
+                  "classes": "mir-client-page "
+                },
+                "pointer": {
+                  "at": 1794606382190,
+                  "phase": "click-dispatch"
+                },
+                "host": {
+                  "self": {
+                    "x": 288,
+                    "y": 612,
+                    "direction": "Down",
+                    "dead": false
+                  },
+                  "queued": {
+                    "kind": "target",
+                    "ageMs": 3929,
+                    "consumeAfterSend": false
+                  },
+                  "lastAttempt": {
+                    "reason": "cadence",
+                    "at": 1794606386116
+                  },
+                  "controller": {
+                    "canSend": false,
+                    "sendDelayMs": 310,
+                    "blockedMs": 0,
+                    "pending": null
+                  }
+                }
+              },
+              "after": {
+                "sampledAt": 1794606386152,
+                "pointer": {
+                  "at": 1794606386136,
+                  "phase": "click-dispatch",
+                  "worldTarget": null
+                },
+                "host": {
+                  "self": {
+                    "x": 288,
+                    "y": 612,
+                    "direction": "Down",
+                    "dead": false
+                  },
+                  "queued": {
+                    "kind": "target",
+                    "ageMs": 10,
+                    "consumeAfterSend": false
+                  },
+                  "lastAttempt": {
+                    "reason": "cadence",
+                    "at": 1794606386137
+                  },
+                  "controller": {
+                    "canSend": false,
+                    "sendDelayMs": 283,
+                    "blockedMs": 0,
+                    "pending": null
+                  }
+                }
+              },
+              "firstMovementAfterTrustedDownMs": 305,
+              "commands": [
+                {
+                  "type": "walk",
+                  "at": 1794606386437,
+                  "seq": 286,
+                  "direction": "DownRight"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606387037,
+                  "seq": 292,
+                  "direction": "Down"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606387637,
+                  "seq": 295,
+                  "direction": "Down"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606388240,
+                  "seq": 297,
+                  "direction": "Down"
+                }
+              ],
+              "actualUserLocations": [
+                {
+                  "at": 1794606386560,
+                  "seq": 287,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 289,
+                    "y": 613
+                  },
+                  "direction": "DownRight",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606387170,
+                  "seq": 293,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 289,
+                    "y": 614
+                  },
+                  "direction": "Down",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606387775,
+                  "seq": 296,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 289,
+                    "y": 615
+                  },
+                  "direction": "Down",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606388380,
+                  "seq": 298,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 289,
+                    "y": 616
+                  },
+                  "direction": "Down",
+                  "samePositionAsClickOwner": false
+                }
+              ],
+              "accepted": {
+                "position": {
+                  "x": 289,
+                  "y": 616
+                },
+                "at": 1794606388380,
+                "seq": 298,
+                "source": "UserLocation"
+              },
+              "changedSnapshots": 21
+            }
+          ],
+          "cleanupCommands": [],
+          "raw": {
+            "path": "C:/r16-route-only-20261114/fixture-r1/game-full/route-only-r1/route-only-return-town-ordinary-ground-route.json",
+            "sha256": "7f19a6a6badf21277f9ea90dc39502c1717322ba90db4aa5d0d00c75c07950d6"
+          }
+        }
+      ],
+      "receipt": {
+        "path": "C:/r16-route-only-20261114/fixture-r1/game-full/route-only-r1/entry-visual-receipt.json",
+        "sha256": "d05bc9ff5540022c96aa585fa01a19594efeba2cde64839c759ed609e4bfd3cc"
+      }
+    },
+    {
+      "name": "route-only-r2",
+      "mode": "webgl2",
+      "passed": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true,
+      "workerRestart": {
+        "passed": true,
+        "originalFrame": "/original-ui/Prguse/1.png",
+        "expectedSha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa",
+        "restored": {
+          "status": 200,
+          "bytes": 66374,
+          "sha256": "4efed8c95f0449f2ecbd2d5623f6aed0d2d6993ad7873cc41b82a59e737134fa"
+        },
+        "originNetworkReads": 0,
+        "lifecycle": [
+          {
+            "versionId": "0",
+            "runningStatus": "running",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "stopping",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "stopped",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "starting",
+            "status": "activated"
+          },
+          {
+            "versionId": "0",
+            "runningStatus": "running",
+            "status": "activated"
+          }
+        ]
+      },
+      "logout": {
+        "sentAt": 1794606700054,
+        "acknowledgedAt": 1794606702485,
+        "savedPosition": {
+          "x": 289,
+          "y": 616
+        },
+        "returnedToSelect": true,
+        "gutter": {
+          "x": 64,
+          "y": 480
+        }
+      },
+      "firstSave": {
+        "passed": true,
+        "className": "Warrior",
+        "level": 30,
+        "gold": 76360,
+        "experience": 19497,
+        "fields": [
+          "map_file_name",
+          "position",
+          "direction",
+          "gold",
+          "credit",
+          "experience",
+          "max_experience",
+          "inventory_items_json",
+          "belt_items_json",
+          "equipment_items_json",
+          "equipment_items_explicit_empty",
+          "storage_items_json",
+          "hero_inventory_items_json",
+          "hero_equipment_items_json",
+          "quest_states_json",
+          "skill_states_json"
+        ],
+        "questStateCount": 26
+      },
+      "qualification": {
+        "routeOnly": true,
+        "fullWalkingQualification": false,
+        "completeColdWarmWalking": false,
+        "oneActualSession": true,
+        "scope": "Normal new-role login, full original cold startup/Native/font/HUD113/Q, ordinary rapid ground routes, Worker restart, normal logout/File save and complete browser/process closure. No animal stimulation, forced selection or warm replay."
+      },
+      "legs": [
+        {
+          "leg": "outward",
+          "passed": true,
+          "start": {
+            "position": {
+              "x": 289,
+              "y": 616
+            },
+            "at": 1794606684886,
+            "seq": 208,
+            "source": "UserLocation"
+          },
+          "end": {
+            "position": {
+              "x": 288,
+              "y": 605
+            },
+            "at": 1794606692068,
+            "seq": 251,
+            "source": "UserLocation"
+          },
+          "clicks": [
+            {
+              "target": {
+                "x": 288,
+                "y": 605
+              },
+              "physicalPoint": {
+                "x": 584,
+                "y": 112,
+                "sceneX": 456,
+                "sceneY": 16,
+                "insideStage": true,
+                "needsActualTopElementAndHudGuard": true,
+                "pathValidated": false
+              },
+              "actualInputTiming": {
+                "clockOrigin": 1794606685933,
+                "plannedClickAt": 1794606685933,
+                "trustedDownAt": 1794606685945,
+                "trustedUpAt": 1794606685950,
+                "lastAckBeforeDown": {
+                  "at": 1794606684886,
+                  "seq": 208,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 289,
+                    "y": 616
+                  },
+                  "direction": "Right",
+                  "samePositionAsClickOwner": true
+                },
+                "ackToDownMs": 1059,
+                "ackToUpMs": 1064
+              },
+              "before": {
+                "datasetOwner": {
+                  "tag": "MAIN",
+                  "id": "",
+                  "classes": "mir-client-page "
+                },
+                "pointer": {
+                  "at": 1794606681938,
+                  "phase": "click-dispatch"
+                },
+                "host": {
+                  "self": {
+                    "x": 289,
+                    "y": 616,
+                    "direction": "Right",
+                    "dead": false
+                  },
+                  "queued": null,
+                  "lastAttempt": {
+                    "reason": "cadence",
+                    "at": 1794606654314
+                  },
+                  "controller": {
+                    "canSend": true,
+                    "sendDelayMs": 0,
+                    "blockedMs": 0,
+                    "pending": null
+                  }
+                }
+              },
+              "after": {
+                "sampledAt": 1794606686036,
+                "pointer": {
+                  "at": 1794606685950,
+                  "phase": "click-dispatch",
+                  "worldTarget": null
+                },
+                "host": {
+                  "self": {
+                    "x": 289,
+                    "y": 616,
+                    "direction": "Right",
+                    "dead": false
+                  },
+                  "queued": {
+                    "kind": "target",
+                    "ageMs": 62,
+                    "consumeAfterSend": false
+                  },
+                  "lastAttempt": {
+                    "reason": "cadence",
+                    "at": 1794606686000
+                  },
+                  "controller": {
+                    "canSend": false,
+                    "sendDelayMs": 538,
+                    "blockedMs": 0,
+                    "pending": {
+                      "from": {
+                        "x": 289,
+                        "y": 616
+                      },
+                      "to": {
+                        "x": 288,
+                        "y": 615
+                      },
+                      "ageMs": 62
+                    }
+                  }
+                }
+              },
+              "firstMovementAfterTrustedDownMs": 8,
+              "commands": [
+                {
+                  "type": "walk",
+                  "at": 1794606685953,
+                  "seq": 211,
+                  "direction": "UpLeft"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606686560,
+                  "seq": 215,
+                  "direction": "Up"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606687164,
+                  "seq": 217,
+                  "direction": "Up"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606687771,
+                  "seq": 221,
+                  "direction": "Up"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606688377,
+                  "seq": 227,
+                  "direction": "Up"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606688980,
+                  "seq": 230,
+                  "direction": "Up"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606689640,
+                  "seq": 232,
+                  "direction": "Up"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606690219,
+                  "seq": 236,
+                  "direction": "UpLeft"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606690819,
+                  "seq": 240,
+                  "direction": "Up"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606691419,
+                  "seq": 244,
+                  "direction": "UpRight"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606692018,
+                  "seq": 250,
+                  "direction": "Up"
+                }
+              ],
+              "actualUserLocations": [
+                {
+                  "at": 1794606686034,
+                  "seq": 212,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 288,
+                    "y": 615
+                  },
+                  "direction": "UpLeft",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606686563,
+                  "seq": 216,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 288,
+                    "y": 614
+                  },
+                  "direction": "Up",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606687184,
+                  "seq": 218,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 288,
+                    "y": 613
+                  },
+                  "direction": "Up",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606687773,
+                  "seq": 222,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 288,
+                    "y": 612
+                  },
+                  "direction": "Up",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606688383,
+                  "seq": 228,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 288,
+                    "y": 611
+                  },
+                  "direction": "Up",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606688985,
+                  "seq": 231,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 288,
+                    "y": 610
+                  },
+                  "direction": "Up",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606689698,
+                  "seq": 233,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 288,
+                    "y": 609
+                  },
+                  "direction": "Up",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606690223,
+                  "seq": 237,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 287,
+                    "y": 608
+                  },
+                  "direction": "UpLeft",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606690843,
+                  "seq": 241,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 287,
+                    "y": 607
+                  },
+                  "direction": "Up",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606691459,
+                  "seq": 245,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 288,
+                    "y": 606
+                  },
+                  "direction": "UpRight",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606692068,
+                  "seq": 251,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 288,
+                    "y": 605
+                  },
+                  "direction": "Up",
+                  "samePositionAsClickOwner": false
+                }
+              ],
+              "accepted": {
+                "position": {
+                  "x": 288,
+                  "y": 605
+                },
+                "at": 1794606692068,
+                "seq": 251,
+                "source": "UserLocation"
+              },
+              "changedSnapshots": 55
+            }
+          ],
+          "cleanupCommands": [],
+          "raw": {
+            "path": "C:/r16-route-only-20261114/fixture-r1/game-full/route-only-r2/route-only-outward-ordinary-ground-route.json",
+            "sha256": "a274b8dc9387ea17b9569af91ded3581eace8004b0290798a4187b31364b8e22"
+          }
+        },
+        {
+          "leg": "lateral",
+          "passed": true,
+          "start": {
+            "position": {
+              "x": 288,
+              "y": 605
+            },
+            "at": 1794606692068,
+            "seq": 251,
+            "source": "UserLocation"
+          },
+          "end": {
+            "position": {
+              "x": 287,
+              "y": 605
+            },
+            "at": 1794606692687,
+            "seq": 254,
+            "source": "UserLocation"
+          },
+          "clicks": [
+            {
+              "target": {
+                "x": 287,
+                "y": 605
+              },
+              "physicalPoint": {
+                "x": 584,
+                "y": 464,
+                "sceneX": 456,
+                "sceneY": 368,
+                "insideStage": true,
+                "needsActualTopElementAndHudGuard": true,
+                "pathValidated": false
+              },
+              "actualInputTiming": {
+                "clockOrigin": 1794606692537,
+                "plannedClickAt": 1794606692537,
+                "trustedDownAt": 1794606692545,
+                "trustedUpAt": 1794606692549,
+                "lastAckBeforeDown": {
+                  "at": 1794606692068,
+                  "seq": 251,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 288,
+                    "y": 605
+                  },
+                  "direction": "Up",
+                  "samePositionAsClickOwner": true
+                },
+                "ackToDownMs": 477,
+                "ackToUpMs": 481
+              },
+              "before": {
+                "datasetOwner": {
+                  "tag": "MAIN",
+                  "id": "",
+                  "classes": "mir-client-page "
+                },
+                "pointer": {
+                  "at": 1794606685950,
+                  "phase": "click-dispatch"
+                },
+                "host": {
+                  "self": {
+                    "x": 288,
+                    "y": 605,
+                    "direction": "Up",
+                    "dead": false
+                  },
+                  "queued": {
+                    "kind": "target",
+                    "ageMs": 6579,
+                    "consumeAfterSend": false
+                  },
+                  "lastAttempt": {
+                    "reason": "cadence",
+                    "at": 1794606692527
+                  },
+                  "controller": {
+                    "canSend": false,
+                    "sendDelayMs": 85,
+                    "blockedMs": 0,
+                    "pending": null
+                  }
+                }
+              },
+              "after": {
+                "sampledAt": 1794606692576,
+                "pointer": {
+                  "at": 1794606692549,
+                  "phase": "click-dispatch",
+                  "worldTarget": null
+                },
+                "host": {
+                  "self": {
+                    "x": 288,
+                    "y": 605,
+                    "direction": "Up",
+                    "dead": false
+                  },
+                  "queued": {
+                    "kind": "target",
+                    "ageMs": 12,
+                    "consumeAfterSend": false
+                  },
+                  "lastAttempt": {
+                    "reason": "cadence",
+                    "at": 1794606692557
+                  },
+                  "controller": {
+                    "canSend": false,
+                    "sendDelayMs": 54,
+                    "blockedMs": 0,
+                    "pending": null
+                  }
+                }
+              },
+              "firstMovementAfterTrustedDownMs": 76,
+              "commands": [
+                {
+                  "type": "walk",
+                  "at": 1794606692621,
+                  "seq": 253,
+                  "direction": "Left"
+                }
+              ],
+              "actualUserLocations": [
+                {
+                  "at": 1794606692687,
+                  "seq": 254,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 287,
+                    "y": 605
+                  },
+                  "direction": "Left",
+                  "samePositionAsClickOwner": false
+                }
+              ],
+              "accepted": {
+                "position": {
+                  "x": 287,
+                  "y": 605
+                },
+                "at": 1794606692687,
+                "seq": 254,
+                "source": "UserLocation"
+              },
+              "changedSnapshots": 3
+            }
+          ],
+          "cleanupCommands": [],
+          "raw": {
+            "path": "C:/r16-route-only-20261114/fixture-r1/game-full/route-only-r2/route-only-lateral-ordinary-ground-route.json",
+            "sha256": "482f8cf0afe46c6e7993ee38891173f55bea3335316b94c89fe96aeb8ed6d9f4"
+          }
+        },
+        {
+          "leg": "return-town",
+          "passed": true,
+          "start": {
+            "position": {
+              "x": 287,
+              "y": 605
+            },
+            "at": 1794606692687,
+            "seq": 254,
+            "source": "UserLocation"
+          },
+          "end": {
+            "position": {
+              "x": 289,
+              "y": 616
+            },
+            "at": 1794606699370,
+            "seq": 298,
+            "source": "UserLocation"
+          },
+          "clicks": [
+            {
+              "target": {
+                "x": 288,
+                "y": 612
+              },
+              "physicalPoint": {
+                "x": 680,
+                "y": 688,
+                "sceneX": 552,
+                "sceneY": 592,
+                "insideStage": true,
+                "needsActualTopElementAndHudGuard": true,
+                "pathValidated": false
+              },
+              "actualInputTiming": {
+                "clockOrigin": 1794606693121,
+                "plannedClickAt": 1794606693121,
+                "trustedDownAt": 1794606693127,
+                "trustedUpAt": 1794606693130,
+                "lastAckBeforeDown": {
+                  "at": 1794606692687,
+                  "seq": 254,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 287,
+                    "y": 605
+                  },
+                  "direction": "Left",
+                  "samePositionAsClickOwner": true
+                },
+                "ackToDownMs": 440,
+                "ackToUpMs": 443
+              },
+              "before": {
+                "datasetOwner": {
+                  "tag": "MAIN",
+                  "id": "",
+                  "classes": "mir-client-page "
+                },
+                "pointer": {
+                  "at": 1794606692549,
+                  "phase": "click-dispatch"
+                },
+                "host": {
+                  "self": {
+                    "x": 287,
+                    "y": 605,
+                    "direction": "Left",
+                    "dead": false
+                  },
+                  "queued": {
+                    "kind": "target",
+                    "ageMs": 549,
+                    "consumeAfterSend": false
+                  },
+                  "lastAttempt": {
+                    "reason": "cadence",
+                    "at": 1794606693090
+                  },
+                  "controller": {
+                    "canSend": false,
+                    "sendDelayMs": 120,
+                    "blockedMs": 0,
+                    "pending": null
+                  }
+                }
+              },
+              "after": {
+                "sampledAt": 1794606693155,
+                "pointer": {
+                  "at": 1794606693130,
+                  "phase": "click-dispatch",
+                  "worldTarget": null
+                },
+                "host": {
+                  "self": {
+                    "x": 287,
+                    "y": 605,
+                    "direction": "Left",
+                    "dead": false
+                  },
+                  "queued": {
+                    "kind": "target",
+                    "ageMs": 7,
+                    "consumeAfterSend": false
+                  },
+                  "lastAttempt": {
+                    "reason": "cadence",
+                    "at": 1794606693135
+                  },
+                  "controller": {
+                    "canSend": false,
+                    "sendDelayMs": 80,
+                    "blockedMs": 0,
+                    "pending": null
+                  }
+                }
+              },
+              "firstMovementAfterTrustedDownMs": 95,
+              "commands": [
+                {
+                  "type": "walk",
+                  "at": 1794606693222,
+                  "seq": 258,
+                  "direction": "DownRight"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606693825,
+                  "seq": 261,
+                  "direction": "DownLeft"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606694425,
+                  "seq": 268,
+                  "direction": "Down"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606695027,
+                  "seq": 274,
+                  "direction": "DownRight"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606695638,
+                  "seq": 277,
+                  "direction": "Down"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606696237,
+                  "seq": 280,
+                  "direction": "Down"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606696844,
+                  "seq": 282,
+                  "direction": "Down"
+                }
+              ],
+              "actualUserLocations": [
+                {
+                  "at": 1794606693286,
+                  "seq": 259,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 288,
+                    "y": 606
+                  },
+                  "direction": "DownRight",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606693892,
+                  "seq": 262,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 287,
+                    "y": 607
+                  },
+                  "direction": "DownLeft",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606694514,
+                  "seq": 269,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 287,
+                    "y": 608
+                  },
+                  "direction": "Down",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606695119,
+                  "seq": 275,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 288,
+                    "y": 609
+                  },
+                  "direction": "DownRight",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606695721,
+                  "seq": 278,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 288,
+                    "y": 610
+                  },
+                  "direction": "Down",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606696320,
+                  "seq": 281,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 288,
+                    "y": 611
+                  },
+                  "direction": "Down",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606696926,
+                  "seq": 283,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 288,
+                    "y": 612
+                  },
+                  "direction": "Down",
+                  "samePositionAsClickOwner": false
+                }
+              ],
+              "accepted": {
+                "position": {
+                  "x": 288,
+                  "y": 612
+                },
+                "at": 1794606696926,
+                "seq": 283,
+                "source": "UserLocation"
+              },
+              "changedSnapshots": 35
+            },
+            {
+              "target": {
+                "x": 289,
+                "y": 616
+              },
+              "physicalPoint": {
+                "x": 680,
+                "y": 592,
+                "sceneX": 552,
+                "sceneY": 496,
+                "insideStage": true,
+                "needsActualTopElementAndHudGuard": true,
+                "pathValidated": false
+              },
+              "actualInputTiming": {
+                "clockOrigin": 1794606697082,
+                "plannedClickAt": 1794606697082,
+                "trustedDownAt": 1794606697088,
+                "trustedUpAt": 1794606697098,
+                "lastAckBeforeDown": {
+                  "at": 1794606696926,
+                  "seq": 283,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 288,
+                    "y": 612
+                  },
+                  "direction": "Down",
+                  "samePositionAsClickOwner": true
+                },
+                "ackToDownMs": 162,
+                "ackToUpMs": 172
+              },
+              "before": {
+                "datasetOwner": {
+                  "tag": "MAIN",
+                  "id": "",
+                  "classes": "mir-client-page "
+                },
+                "pointer": {
+                  "at": 1794606693130,
+                  "phase": "click-dispatch"
+                },
+                "host": {
+                  "self": {
+                    "x": 288,
+                    "y": 612,
+                    "direction": "Down",
+                    "dead": false
+                  },
+                  "queued": {
+                    "kind": "target",
+                    "ageMs": 3936,
+                    "consumeAfterSend": false
+                  },
+                  "lastAttempt": {
+                    "reason": "cadence",
+                    "at": 1794606697064
+                  },
+                  "controller": {
+                    "canSend": false,
+                    "sendDelayMs": 374,
+                    "blockedMs": 0,
+                    "pending": null
+                  }
+                }
+              },
+              "after": {
+                "sampledAt": 1794606697115,
+                "pointer": {
+                  "at": 1794606697098,
+                  "phase": "click-dispatch",
+                  "worldTarget": null
+                },
+                "host": {
+                  "self": {
+                    "x": 288,
+                    "y": 612,
+                    "direction": "Down",
+                    "dead": false
+                  },
+                  "queued": {
+                    "kind": "target",
+                    "ageMs": 8,
+                    "consumeAfterSend": false
+                  },
+                  "lastAttempt": {
+                    "reason": "cadence",
+                    "at": 1794606697103
+                  },
+                  "controller": {
+                    "canSend": false,
+                    "sendDelayMs": 335,
+                    "blockedMs": 0,
+                    "pending": null
+                  }
+                }
+              },
+              "firstMovementAfterTrustedDownMs": 358,
+              "commands": [
+                {
+                  "type": "walk",
+                  "at": 1794606697446,
+                  "seq": 286,
+                  "direction": "DownRight"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606698048,
+                  "seq": 292,
+                  "direction": "Down"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606698647,
+                  "seq": 295,
+                  "direction": "Down"
+                },
+                {
+                  "type": "walk",
+                  "at": 1794606699247,
+                  "seq": 297,
+                  "direction": "Down"
+                }
+              ],
+              "actualUserLocations": [
+                {
+                  "at": 1794606697537,
+                  "seq": 287,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 289,
+                    "y": 613
+                  },
+                  "direction": "DownRight",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606698153,
+                  "seq": 293,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 289,
+                    "y": 614
+                  },
+                  "direction": "Down",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606698757,
+                  "seq": 296,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 289,
+                    "y": 615
+                  },
+                  "direction": "Down",
+                  "samePositionAsClickOwner": false
+                },
+                {
+                  "at": 1794606699370,
+                  "seq": 298,
+                  "packet": "UserLocation",
+                  "position": {
+                    "x": 289,
+                    "y": 616
+                  },
+                  "direction": "Down",
+                  "samePositionAsClickOwner": false
+                }
+              ],
+              "accepted": {
+                "position": {
+                  "x": 289,
+                  "y": 616
+                },
+                "at": 1794606699370,
+                "seq": 298,
+                "source": "UserLocation"
+              },
+              "changedSnapshots": 21
+            }
+          ],
+          "cleanupCommands": [],
+          "raw": {
+            "path": "C:/r16-route-only-20261114/fixture-r1/game-full/route-only-r2/route-only-return-town-ordinary-ground-route.json",
+            "sha256": "7290f2d7431291bbdc4cc0d12b485d1a938455d3413fa2f2574eaad5956bf0f8"
+          }
+        }
+      ],
+      "receipt": {
+        "path": "C:/r16-route-only-20261114/fixture-r1/game-full/route-only-r2/entry-visual-receipt.json",
+        "sha256": "67ca54ecf7c1b14226d63397cb9f1276ea218a10c1a54f6804204ec4061fd827"
+      }
+    }
+  ],
+  "frozenInputs": [
+    {
+      "path": "C:/r16-route-only-20261114/fixture-r1/browser-preparation-r1.json",
+      "sha256": "9e8e55c28deeca66baa1c285fa176a2c7d3d55239be56fe946cbf656ed176f71"
+    },
+    {
+      "path": "C:/r16-route-only-20261114/fixture-r1/source-inputs.json",
+      "sha256": "cbcca7feea3d1169907f5020f0819083c7ea2db6d03e84cc534e7c162d0a5fa4"
+    },
+    {
+      "path": "C:/r16-route-only-20261114/fixture-r1/build-receipt.json",
+      "sha256": "cb800d32eb8319298671b43145f92da0a4e1c110fe671faeec65233f166fdcf5"
+    },
+    {
+      "path": "C:/r16-route-only-20261114/fixture-r1/full-fixture-plan.json",
+      "sha256": "e6d8864abfb78efdee988925c1e56d7fe27f8ed83c6cea36f39c30ff8f8d79e7"
+    }
+  ]
+}

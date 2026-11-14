@@ -22,6 +22,7 @@ type TranslateFn = (
 
 type EquipmentItemLike = {
   slot: string;
+  authoritativeUniqueId?: number;
   name: string;
   durabilityCurrent: number;
   durabilityMax: number;
@@ -74,8 +75,8 @@ type SystemMenuButtonDefinition = {
   onClick?: () => void;
 };
 
-export type SystemMenuFeaturePanelKey = "creature" | "mount" | "fishing";
-export type SystemMenuSurfacePanel = SystemMenuFeaturePanelKey | SystemMenuSocialPanel;
+export type SystemMenuFeaturePanelKey = "creature" | "mount";
+export type SystemMenuSurfacePanel = SystemMenuFeaturePanelKey | SystemMenuSocialPanel | "fishing";
 
 export function SystemMenuPanel({
   t,
@@ -132,7 +133,7 @@ export function SystemMenuPanel({
   ];
   const menuButtons = allMenuButtons.filter((button) =>
     !isPlatinum176
-    || ["exit", "logout", "help", "keyboard", "friend", "group", "guild"].includes(button.key),
+    || ["exit", "logout", "help", "keyboard", "friend", "group", "guild", "fishing"].includes(button.key),
   );
   const allLateSystemButtons: Array<{ panel: SystemMenuSocialPanel; label: string }> = [
     { panel: "hero", label: t("ui.hero", [], "Hero") },
@@ -336,7 +337,7 @@ export function SystemMenuFeaturePanel({
   onClose,
 }: {
   t: TranslateFn;
-  feature: SystemMenuSurfacePanel;
+  feature: Exclude<SystemMenuSurfacePanel, "fishing">;
   playerName: string | null;
   world: DisplayWorld;
   onSendClientCommand: (command: Record<string, unknown>) => void;
@@ -347,9 +348,7 @@ export function SystemMenuFeaturePanel({
       ? t("ui.creature", [], "Creature")
       : feature === "mount"
         ? t("ui.mount", [], "Mount")
-        : feature === "fishing"
-          ? t("ui.fishing", [], "Fishing")
-          : feature === "ranking"
+        : feature === "ranking"
             ? t("ui.ranking", [], "Ranking")
             : feature === "friend"
               ? t("ui.friends", [], "Friends")
@@ -366,7 +365,7 @@ export function SystemMenuFeaturePanel({
                         : feature === "market"
                           ? t("ui.market", [], "Market")
                           : t("ui.marriage", [], "Marriage");
-  const isSocialPanel = feature !== "creature" && feature !== "mount" && feature !== "fishing";
+  const isSocialPanel = feature !== "creature" && feature !== "mount";
 
   return (
     <section
@@ -379,8 +378,6 @@ export function SystemMenuFeaturePanel({
         <CreatureSystemPanel t={t} world={world} onSendClientCommand={onSendClientCommand} />
       ) : feature === "mount" ? (
         <MountSystemPanel t={t} world={world} onSendClientCommand={onSendClientCommand} />
-      ) : feature === "fishing" ? (
-        <FishingSystemPanel t={t} onSendClientCommand={onSendClientCommand} />
       ) : (
         <SocialSystemPanel
           t={t}
@@ -491,7 +488,10 @@ function MountSystemPanel({
   onSendClientCommand: (command: Record<string, unknown>) => void;
 }) {
   const slots = ["Reins", "Bells", "Saddle", "Ribbon", "Mask"];
-  const mountItem = world.equipmentItems.find((item) => item.slot === "mount");
+  const mountItems = world.equipmentItems.filter((item) => item.slot === "mount");
+  const mountItem = mountItems.length === 1 ? mountItems[0] : undefined;
+  const mountUniqueId = mountItem?.authoritativeUniqueId;
+  const canRide = typeof mountUniqueId === "number" && Number.isSafeInteger(mountUniqueId) && mountUniqueId >= 0;
   return (
     <>
       <div className="system-feature-title">{t("ui.mount", [], "Mount")}</div>
@@ -503,7 +503,10 @@ function MountSystemPanel({
       <button
         type="button"
         className="mount-feature-ride"
-        onClick={() => onSendClientCommand({ type: "useItem", slot: 13, grid: "equipment" })}
+        disabled={!canRide}
+        onClick={() => {
+          if (canRide) onSendClientCommand({ type: "useItem", equipmentInstanceId: mountUniqueId, slot: 13, grid: "equipment" });
+        }}
       >
         {t("ui.mount", [], "Mount")}
       </button>
@@ -511,42 +514,6 @@ function MountSystemPanel({
         {slots.map((slot) => (
           <span key={slot} aria-label={slot} />
         ))}
-      </div>
-    </>
-  );
-}
-
-function FishingSystemPanel({
-  t,
-  onSendClientCommand,
-}: {
-  t: TranslateFn;
-  onSendClientCommand: (command: Record<string, unknown>) => void;
-}) {
-  const slots = ["Hook", "Float", "Bait", "Finder", "Reel"];
-  return (
-    <>
-      <div className="system-feature-title">{t("ui.fishing", [], "Fishing")}</div>
-      <div className="fishing-feature-water" />
-      <div className="fishing-feature-slots">
-        {slots.map((slot) => (
-          <span key={slot} aria-label={slot} />
-        ))}
-      </div>
-      <div className="fishing-feature-status">
-        <button type="button" onClick={() => onSendClientCommand({ type: "fishingCast", castOut: true })}>
-          {t("ui.cast", [], "Cast")}
-        </button>
-        <button type="button" onClick={() => onSendClientCommand({ type: "fishingChangeAutocast", autoCast: true })}>
-          {t("ui.auto", [], "Auto")}
-        </button>
-        <label>
-          <input
-            type="checkbox"
-            readOnly
-            onClick={() => onSendClientCommand({ type: "fishingChangeAutocast", autoCast: true })}
-          />
-        </label>
       </div>
     </>
   );

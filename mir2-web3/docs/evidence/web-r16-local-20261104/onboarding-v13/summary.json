@@ -1,0 +1,350 @@
+{
+  "schema": "mir2.r16.onboarding-v13-public-evidence.v1",
+  "copied": [
+    {
+      "sourceRelative": "onboarding-v12-package-integrity-proof.json",
+      "path": "v12-package-integrity-proof.json",
+      "bytes": 29355,
+      "sha256": "0c29f1078e3c8891ebc4de92bc7a2c93d6197562167d43fe946ddc1a6424ab75"
+    },
+    {
+      "sourceRelative": "onboarding-v13-staging-package-integrity-proof.json",
+      "path": "v13-package-integrity-proof.json",
+      "bytes": 7811,
+      "sha256": "4c9afd7f22483649c2db29aede6b923c14588bf590d5548e767af792ce2d69e1"
+    },
+    {
+      "sourceRelative": "onboarding-input-v12-runtime-preservation-proof.json",
+      "path": "v12-runtime-preservation-proof.json",
+      "bytes": 850,
+      "sha256": "4bfa347474d50b71de2252a5e72ba4eced3083ecfbf122ebcb8e283d32addb7d"
+    },
+    {
+      "sourceRelative": "onboarding-v13-runtime-preservation-proof.json",
+      "path": "v13-runtime-preservation-proof.json",
+      "bytes": 857,
+      "sha256": "f324f5a879e6f68be0acb41f7eb563e9b6ba46598e848e2a336b697204741521"
+    },
+    {
+      "sourceRelative": "onboarding-v12-original-account-preservation-proof.json",
+      "path": "original-account-preservation-proof.json",
+      "bytes": 783,
+      "sha256": "be32f864c74b963917d001ac1fa50744e0c154c4446cdb3c0429682e72dc34af"
+    },
+    {
+      "sourceRelative": "native-r16-gameplay-baseline-update-proof.json",
+      "path": "native-baseline-update-proof.json",
+      "bytes": 1795,
+      "sha256": "384e1bd201212fabde82522b45f415d0a9896adbef78c7bda04631400305cb95"
+    },
+    {
+      "sourceRelative": "r16-gameplay-baseline-tests.log",
+      "path": "baseline-tests.log",
+      "bytes": 5320,
+      "sha256": "828a6352c877c74fa0528efa9d41d9360007f87415b600bbfae5ed269083a567"
+    },
+    {
+      "sourceRelative": "r16-gameplay-baseline-adjacent-tests.log",
+      "path": "baseline-adjacent-tests.log",
+      "bytes": 6237,
+      "sha256": "b9907b6f41b5efc6ccd70f6de3b2bd180aa6bf28c84703ab0b5ae8b3a8e28e6b"
+    },
+    {
+      "sourceRelative": "onboarding-v11-source-tests.log",
+      "path": "v11-source-tests.log",
+      "bytes": 17801,
+      "sha256": "0d5ca70fadc09446d4f531ce086369eb0af178995682e6797b520de53c8a08fd"
+    },
+    {
+      "sourceRelative": "onboarding-v11-simulation-tests.log",
+      "path": "v2-simulation-tests.log",
+      "bytes": 49326,
+      "sha256": "7b0e23ee949716c2a8a723f02d8059a36b7deadf43bc511d27923e3cc631d856"
+    },
+    {
+      "sourceRelative": "onboarding-v11-legacy-persistence-tests.log",
+      "path": "legacy-persistence-tests.log",
+      "bytes": 55264,
+      "sha256": "0b602862a91318e89846c8396771543af65061f14dba3dc1dd7a232edb78b38c"
+    },
+    {
+      "sourceRelative": "onboarding-v12-focused-tests.log",
+      "path": "v12-focused-tests.log",
+      "bytes": 22716,
+      "sha256": "5cb59d4720dc9ed6c63ae391abd206bdee027068326e4e4e193ed3688242d1dd"
+    },
+    {
+      "sourceRelative": "onboarding-v13-resource-tests.log",
+      "path": "v13-resource-tests.log",
+      "bytes": 8177,
+      "sha256": "e0bad5f7753d20b390b4a32e894e3a134e54c939005f309061fe5e35e81bac40"
+    },
+    {
+      "sourceRelative": "quest-observer-red-tests.log",
+      "path": "quest-observer-red-tests.log",
+      "bytes": 14252,
+      "sha256": "dca475092d8174790db19fa1098a999d5c0aa2d2998669d05141763b74bd5946"
+    },
+    {
+      "sourceRelative": "quest-observer-green-focused-tests.log",
+      "path": "quest-observer-focused-tests.log",
+      "bytes": 10870,
+      "sha256": "417e1ac59136099f9027b581d56b3d1c6c47a8f71f3eb3bc4dd40abb7f54fc52"
+    },
+    {
+      "sourceRelative": "quest-observer-green-adjacent-tests.log",
+      "path": "quest-observer-adjacent-tests.log",
+      "bytes": 12603,
+      "sha256": "dc0c339a4b7d2d083732884dedfeb01e5a032156e9ec2de01f5d29800513cf1f"
+    },
+    {
+      "sourceRelative": "onboarding-v12-production-build.log",
+      "path": "production-build.log",
+      "bytes": 2591,
+      "sha256": "3d62730295076afb685202d4763ca67a8253b7a269fb691208ee3a67b0736355"
+    },
+    {
+      "sourceRelative": "onboarding-v12-renderer-build.log",
+      "path": "renderer-build.log",
+      "bytes": 38945,
+      "sha256": "13dcad857fb8c0970df20514708b7069b106fa3c32deb212ebc974a7827b0c5f"
+    },
+    {
+      "sourceRelative": "onboarding-v13-asset-generation.log",
+      "path": "v13-asset-generation.json",
+      "bytes": 885,
+      "sha256": "bdd5f8a699fd1ad81c8c37ca5be1fb37f9184f808baa569ce8e5d5c6e77f2084"
+    },
+    {
+      "sourceRelative": "onboarding-v13-package-build.log",
+      "path": "v13-package-build.log",
+      "bytes": 91,
+      "sha256": "e3e218fc6dcbe2beafea9b96c3593bd690345bb7c1a13c77ae40de274fefabb0"
+    },
+    {
+      "sourceRelative": "onboarding-v11-browser-r4/onboarding-v11-browser-proof.json",
+      "path": "v11-r4-pointer-regression.json",
+      "bytes": 16487,
+      "sha256": "fe513d781476d345f5a22b1a89225b41d6d5dd7fbcbcf6f7925e280312d22fa2"
+    },
+    {
+      "sourceRelative": "onboarding-v12-browser-r3/onboarding-v11-browser-proof.json",
+      "path": "v12-r3-pointer-and-first-quest.json",
+      "bytes": 30029,
+      "sha256": "76722f11c2a7990f0ef47b1a6cd13dd64bbc8d23f4a81e7c48d3bb5f34805685"
+    },
+    {
+      "sourceRelative": "onboarding-v12-browser-r5/onboarding-v11-browser-proof.json",
+      "path": "v12-r5-second-quest.json",
+      "bytes": 109780,
+      "sha256": "422fe751177498a53f617ec0e4e370cd09a98c11f2c7992d2202fb46380c4b4b"
+    },
+    {
+      "sourceRelative": "onboarding-v12-browser-r6/onboarding-v12-r6-receipt.json",
+      "path": "v12-r6-resume-revive-persistence.json",
+      "bytes": 5850,
+      "sha256": "41608112112f03eeb1261122fa6b6eff07c7ce8237c64afc7ce659ee21b73776"
+    },
+    {
+      "sourceRelative": "onboarding-v12-browser-r6/resource-misses-public.json",
+      "path": "v12-r6-resource-misses.json",
+      "bytes": 2102,
+      "sha256": "d44f989ec25ccc0e424c10832333e035c8fdd8ea5bb1f6d673ee97058d5560e4"
+    },
+    {
+      "sourceRelative": "onboarding-v12-original-alo-readonly/original-alo-readonly-complete-proof.json",
+      "path": "original-alo-readonly-proof.json",
+      "bytes": 5533,
+      "sha256": "55d5cacb283f2c8a505795991106f52edf60a98b39d67e1b950a2d735d399556"
+    },
+    {
+      "sourceRelative": "onboarding-v12-browser-r3/03-native-card-before-single-show-details-click.png",
+      "path": "native-task-card.png",
+      "bytes": 1201334,
+      "sha256": "46801b5e56a685eb0a071c29f10f90bc1e8f7141eb7db20b6e076e505b057863"
+    },
+    {
+      "sourceRelative": "onboarding-v12-browser-r3/04-native-card-pointer-opened-detail.png",
+      "path": "native-task-detail.png",
+      "bytes": 1088976,
+      "sha256": "19c641dd66b70557e8f1d999f6983bdd32612b575bcd16528948c67cb9259ecd"
+    },
+    {
+      "sourceRelative": "onboarding-v12-browser-r3/10-first-quest-kit-received.png",
+      "path": "first-quest-reward.png",
+      "bytes": 1268896,
+      "sha256": "613f0b0fca12726099d5e1255fa18bc9e1fb76c88915091d60b3c03d534d6fe6"
+    },
+    {
+      "sourceRelative": "onboarding-v12-browser-r5/05-second-quest-equipped-and-completed.png",
+      "path": "second-quest-completed.png",
+      "bytes": 1124465,
+      "sha256": "84d38e93dbc7e021b14d401ec7fbb0c48b88b477f1e16b2437088afd902a9498"
+    },
+    {
+      "sourceRelative": "onboarding-v12-browser-r6/05-saved-progress-native-diary.png",
+      "path": "saved-progress-diary.png",
+      "bytes": 1130420,
+      "sha256": "603c417ea37fc8f3e6a5654fe7d9a1d8c75f4e8ec0a759079373a892b2608f43"
+    },
+    {
+      "sourceRelative": "onboarding-v12-original-alo-readonly/r4/01-original-alo-policy.png",
+      "path": "original-alo-policy.png",
+      "bytes": 61017,
+      "sha256": "eb02fb2479184804b197f78fc835865ffda86811397323021b692af8aa77649d"
+    },
+    {
+      "sourceRelative": "onboarding-v12-original-alo-readonly/r4/02-original-alo-supply.png",
+      "path": "original-alo-supply.png",
+      "bytes": 80393,
+      "sha256": "2ce074476528953ab91142b011440bd632c4c43931589de5dca69f9bfceeef58"
+    },
+    {
+      "sourceRelative": "onboarding-v12-original-alo-readonly/r4/03-original-alo-resources.png",
+      "path": "original-alo-resources.png",
+      "bytes": 88628,
+      "sha256": "64a492d0178a0310a7dba765604e6afac419f68d037347da74dea173e530ecbd"
+    }
+  ],
+  "sourcePins": [
+    {
+      "path": "packages/game-data/data/r16-gameplay-baseline.json",
+      "bytes": 199,
+      "sha256": "83679d56acecfe65337bc118bcf94b1028619384e57b56ab980e2c50d39d1f0e"
+    },
+    {
+      "path": "packages/game-data/src/r16_gameplay_baseline.rs",
+      "bytes": 3815,
+      "sha256": "c01dae881f6cde7f2cc84df7ef307f73874c263565bdffc888a3a75fd698b457"
+    },
+    {
+      "path": "packages/tooling/scripts/generate-r16-gameplay-baseline.mjs",
+      "bytes": 3644,
+      "sha256": "7455744114e79aee603669edd2851a81877b65c8ccd5d8b661f0b4a537121d5d"
+    },
+    {
+      "path": "apps/ai-player/src/generated-gameplay-baseline.mjs",
+      "bytes": 387,
+      "sha256": "b18c4900a96ebebed9d1a43b7b770d699f641b27b8cf9f157c732ef68d98ba52"
+    },
+    {
+      "path": "apps/ai-player/scripts/local-gateway.mjs",
+      "bytes": 11559,
+      "sha256": "bfd2f8d13a182e4bc4caa727631442a5b9e21d7d9bfa1a254ee80c2efde2ed0b"
+    },
+    {
+      "path": "apps/ai-player/src/local-playtest.mjs",
+      "bytes": 12274,
+      "sha256": "bb82fc0719849d87dc6b5f370dd1557ef7da9f56c4f3d461287607cdfecb6a6b"
+    },
+    {
+      "path": "apps/web/lib/generated/r16-gameplay-baseline.json",
+      "bytes": 199,
+      "sha256": "83679d56acecfe65337bc118bcf94b1028619384e57b56ab980e2c50d39d1f0e"
+    },
+    {
+      "path": "apps/web/lib/r16-gameplay-baseline.ts",
+      "bytes": 601,
+      "sha256": "072404f4401246451a4f2310454feba82e41156b1c935dce084fcf82042bd262"
+    },
+    {
+      "path": "apps/web/lib/bevy-quest-world-controls.ts",
+      "bytes": 3105,
+      "sha256": "ce741529785c995c3d70fe142d78972c64478b5e9b25290ec3432e969a31057a"
+    },
+    {
+      "path": "apps/web/scripts/r16-playable-service-config.mjs",
+      "bytes": 10919,
+      "sha256": "d5a501c4be4c3538c1005f0884255d56d198a9f8173da94a004b5081de115718"
+    },
+    {
+      "path": "apps/web/scripts/test-r16-gameplay-baseline.mjs",
+      "bytes": 9985,
+      "sha256": "96f1ba734c5009b5652560593b02e09743c4a8947f8d04321a30fe7e5bfd7bf3"
+    },
+    {
+      "path": "apps/web/scripts/test-r16-onboarding-baseline.mjs",
+      "bytes": 12064,
+      "sha256": "7923f70171b33f46fc8418c9c3b81749db16c9fc610a4a1ae29cc0d3fad437f8"
+    },
+    {
+      "path": "apps/web/scripts/test-bevy-quest-ui.mjs",
+      "bytes": 79618,
+      "sha256": "8b56a1d18b7f7127f7abbb7f38e4af395c0c09c7b3211339bbec090ea1c693de"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_quest_ui.rs",
+      "bytes": 52958,
+      "sha256": "bf9785c14da31945111fe8f0731364fc8ef7349a95548242055893f488962917"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_quest_ui/observer_tests.rs",
+      "bytes": 12587,
+      "sha256": "cf507047acd55b9fa4196b597f3824c645d15cbb54b077662ceb1f462cc36639"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/candidate-release-profile.ps1",
+      "bytes": 48139,
+      "sha256": "92a7cd9bc3c138ef182b2126675862f3203575239613893c713c4db0b5a05280"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/package-windows-candidate.ps1",
+      "bytes": 124523,
+      "sha256": "c42d1d5a92cafe2ad59a6b94c91a25492293cfb686567ff1ee3cf1304fa50e0a"
+    },
+    {
+      "path": "apps/web/scripts/lib/r16-playable-assets.mjs",
+      "bytes": 33357,
+      "sha256": "f40ca7339eab47f26f4467a7ce430fe532c2fff64aeca55ebd8411c98c68053d"
+    },
+    {
+      "path": "apps/web/scripts/test-r16-playable-assets.mjs",
+      "bytes": 31799,
+      "sha256": "f5fc997ebc432822886777bd0df2731a6b225aea04b51788daa4a0ce29ce5cde"
+    }
+  ],
+  "sourceScope": "R16-specific leaves at evidence publication; unrelated working-tree changes are preserved. Compiled release identity is proved by the separately recorded immutable package audits.",
+  "baseline": {
+    "schema": 1,
+    "id": "r16-platinum-fiveclass-newcomer-v2",
+    "contentProfile": "platinum_fiveclass",
+    "questGuidance": "newcomer-v2",
+    "questCadence": "newcomer-v2",
+    "onboarding": "native"
+  },
+  "delivery": {
+    "origin": "http://127.0.0.1:19041",
+    "buildId": "VRH5ore7ii7q6CEqo5c0y",
+    "renderer": "bevy-07bd13d63fcbbd3a",
+    "nativeExecutableRebuilt": false
+  },
+  "budget": {
+    "preparedBytes": 683210209,
+    "limitBytes": 377487360,
+    "thinPassed": false,
+    "budgetRaised": false
+  },
+  "tests": {
+    "baseline": "18/18",
+    "baselineAdjacent": "26/26",
+    "v11Source": "70/70",
+    "v12Focused": "91/91",
+    "v13ResourcePackaging": "31/31",
+    "v2Simulation": "23/23",
+    "legacyPersistence": "3/3",
+    "rustObserverAdded": "4/4",
+    "rustPortableAdjacent": "13/14, pre-existing entity-stability assertion fails before and after repair"
+  },
+  "privacy": {
+    "copiedPrivateFiles": 0,
+    "exactQaCredentialAndIdentityMatches": 0,
+    "privateValuesUsedForBrowserSelectors": false,
+    "activeQrImagesCopied": false
+  },
+  "limits": [
+    "Quest3 cats and full first-village continuation are recorded separately and not implied by Quest1/Quest2 pass.",
+    "Full shared-WASM ten-language translation remains open.",
+    "No cross-world save migration, public deployment, capacity or human Accepted claim.",
+    "Native locked/offline host check encountered existing lock drift; no new EXE build."
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "rawFailuresNeverOverwritten": true,
+  "failures": [
+    {
+      "log": "red-simulation-01.log",
+      "sha256": "0d8ebf5f3bd120d013255b2257ca46690896f4c369ec6cda3cace909cb8b3245",
+      "kind": "real-pre-production-RED",
+      "reason": "0 passed / 6 failed on original production; ownership/return/protection/sync/cancel/leave reproduce defects"
+    },
+    {
+      "log": "green-simulation-attempt-01.log",
+      "sha256": "7fe2213fd456fda33b335f6d7aef80082d142dd8c9f387a6cfdbcedfbdd8adff",
+      "kind": "compile",
+      "reason": "LowerHex formatting attempt; no passing test claim"
+    },
+    {
+      "log": "green-simulation-attempt-03.log",
+      "sha256": "3962b08e4e63907acd60fd80e4a245c1566db29999a93bd1f6a1bb47ec3ad296",
+      "kind": "compile",
+      "reason": "Fixture misspelled experience_selection"
+    },
+    {
+      "log": "green-simulation-attempt-04.log",
+      "sha256": "f16974c7194b2ccad2b552c2682517576340fe904b1955c830bb3132a3396e94",
+      "kind": "prepared-fixture",
+      "reason": "Parallel poison HP15 expectation was wrong for original damage4; HP12 fixture repaired without formula change"
+    },
+    {
+      "log": "gateway-tests-attempt-01.log",
+      "sha256": "2f967b8d1cdfd068d7354564715e69cb37c860dc35438b181f90fb63cf6a06a5",
+      "kind": "compile",
+      "reason": "Test-only imports/packet shapes/types"
+    },
+    {
+      "log": "gateway-tests-attempt-02.log",
+      "sha256": "2e0e672931f24c5e07490c3c55548c60f4bf796208fbde19fb9aeac8e9d483ce",
+      "kind": "process-abort",
+      "reason": "Fixture compared personal vs shared object identity while holding mutex; panic poisoned it and Drop panicked; actual shared id assertion moved outside lock"
+    },
+    {
+      "log": "gateway-tests-attempt-03.log",
+      "sha256": "a9e427fbcda637959a39cb042c009b19d9da4035eb9a2a1da7b8259724bc5b20",
+      "kind": "prepared-fixture",
+      "reason": "Ordinary PickUp used monster coordinate instead of actual scattered source drop; walk exact source-born tile"
+    },
+    {
+      "log": "gateway-tests-attempt-05.log",
+      "sha256": "0580eb71a7a342dff0b70cafcf84ee2d89fe5825699ac36eb310ec2228f993cf",
+      "kind": "compile",
+      "reason": "GainedItem packet shape/item-index type in fixture"
+    },
+    {
+      "log": "gateway-tests-attempt-06.log",
+      "sha256": "afca2b79cdf892b68040ccdf0812f025a09bbd45d6953e5c2c3f32a994a68683",
+      "kind": "prepared-fixture",
+      "reason": "Seed1 produces another legitimate drop on tile; second PickUp was another item, not duplication; retained failure and source-rate seed6 single-item fixture"
+    },
+    {
+      "log": "adjacent-same-map-attempt-01.log",
+      "sha256": "991b940642138734f3db0cfc95bab747764cf592e40d9fef2353cdea363ee1fd",
+      "kind": "approved-adjacent-fixture",
+      "reason": "19 passed / 2 failed: cold restored root/online claim and erase-green-poison expectations contradict source Node lifetime"
+    },
+    {
+      "log": "simulation-checkpoint-attempt-01.log",
+      "sha256": "543d626fd97e33457b1dee6ee31ba22be9fa5df8da9ddd7d22015dff66df9827",
+      "kind": "approved-adjacent-fixture",
+      "reason": "16 passed / 1 failed: cold root equals original-live-root assertion"
+    }
+  ],
+  "originalRed": "red-simulation-01.json",
+  "sourceBeforeAdaptation": "fixture-adaptation-before/source-before.json"
+}

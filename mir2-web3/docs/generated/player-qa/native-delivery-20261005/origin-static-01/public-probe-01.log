@@ -1,0 +1,6 @@
+{"stage": "public-headers-verified", "objects": 14}
+{"stage": "public-signed-metadata-verified", "path": "DELIVERY.json", "seconds": 19.498046}
+{"stage": "public-signed-metadata-verified", "path": "DELIVERY.p7s", "seconds": 0.193567}
+{"stage": "public-artifact-sample-verified", "offset": 0, "seconds": 8.755299}
+{"stage": "public-artifact-sample-verified", "offset": 59804721, "seconds": 8.642463}
+{"passed": true, "totalInternetBytes": 9373876}

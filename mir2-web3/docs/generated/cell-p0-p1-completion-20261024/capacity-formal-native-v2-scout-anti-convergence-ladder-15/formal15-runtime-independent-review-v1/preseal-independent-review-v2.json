@@ -1,0 +1,209 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-26T00:24:53.533421+00:00",
+  "scope": "Independent bounded read-only source and metadata review of actual-bound Formal15; no target import, guard, seal, prepare, seed, game execution, test rerun, raw/monitor/trace replay or executable hash.",
+  "prepared": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\runtime-prepared-v2.json",
+    "bytes": 49520,
+    "sha256": "701176d111267435b82408b10c44ad1d46b255a929edf53dd88cf98b58b94dbf"
+  },
+  "controller": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\root-seal-and-guard-v1.mjs",
+    "bytes": 16520,
+    "sha256": "656b9d822ee22e8f68aace6c83238891a9144c655257d263182cfa003192de8d"
+  },
+  "sourceEvidence": {
+    "initialDerivation": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\template-derivation-v1.json",
+      "bytes": 105456,
+      "sha256": "091efa45b52f029a0d9c8e69a483182ee8402acc21ad106de862b64384da7e7d"
+    },
+    "actualBindingAndCollectedChildCorrection": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\actual19-binding-proof-v2.json",
+      "bytes": 9711,
+      "sha256": "d79d16636ff74e87d49bebde8781fa1f5d4103471e5663ea6407939cd8348ec0"
+    },
+    "controllerPreparation": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\root-controller-preparation-v1.json",
+      "bytes": 1365,
+      "sha256": "23d7c6bbaa64f915739af15ef00c5201c59da2c374bd9150dd990919b4a81a91"
+    },
+    "formalBinding": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\bound-formal15-binding-v1.json",
+      "bytes": 11981,
+      "sha256": "c13fe0175fe766666f6aed3410d5cafe346bbe18b9c7bab6796777229475a894"
+    },
+    "currentCollectedEvidenceConsumer": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\verify-probe19-collected-evidence.mjs",
+      "bytes": 17336,
+      "sha256": "85ea91ec6d33b2dedbda680f1127e8f59a46e4dddba97ba55bf542b6811c2fb7"
+    }
+  },
+  "rawClosure": {
+    "localFiles": 52,
+    "localBytes": 461835,
+    "sourceSha256": "869b6dcf0fc120dc2326ba39d163d86fb321415a80b4ce540c7a307dda1af231",
+    "externalFiles": 70,
+    "externalBytes": 1550718,
+    "externalSourceSha256": "c978d3ee285e46ccf7d4cf8759ac5dce37db5f8f1dd6b812adccfeac7ef7e377",
+    "allRawBytesAndHashesMatched": true,
+    "regularCanonicalNonSymlinkBaseContained": true,
+    "noPrivateBinaryOrRawDatasetEntries": true,
+    "uniquePresealFilesBeforeReview": 123,
+    "expectedFinalSealedFilesIncludingReviewAndThreeGenerated": 127,
+    "maximumFinalSealedFiles": 128,
+    "runtimeStatePathsCheckedAbsent": 15
+  },
+  "derivationChecks": {
+    "sourceRows": 37,
+    "rawExactCopies": 17,
+    "lineHunksForwardAndInverseRawExact": 94,
+    "current31OtherExecutableSourcesMatchInitialPins": true,
+    "collectedChildOnlyLiteralCorrectionInverseRawExact": true,
+    "metadataRows": 6,
+    "metadataDifferencesOnlyAllowlistedTopLevelFields": true,
+    "metadataBeforeImagesRawPinsChecked": true,
+    "jsonReserializationNotClaimedRawInverse": true,
+    "authorCurrentSyntaxRecords": 32,
+    "authorReusedUnchangedSourceRecords": 31,
+    "authorCurrentChildCorrectionNodeCheck": {
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "reviewerExecutedSyntaxOrTests": false
+  },
+  "identityChecks": {
+    "backendBuildCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+    "driverSourceCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+    "executionSourceCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+    "backendInputs": 50,
+    "backendSourceAggregate": "09081ea9b49d968574b99f444c238932045eccb0dc3f7de4b24496a932c895f7",
+    "nodeNineSourceAggregate": "3b0a0a8300744d6e0d34315f7bbab934252e1e70b124353ae7cf7a2398952df8",
+    "currentNodeFullRegressionTests": 226,
+    "rebuildPerformed": false,
+    "immutableOriginalReleaseAndHistoricalD240BuildEvidenceKept": true,
+    "wireLegacyCore6d187Wrapper28Adapter8NotCurrent226Coverage": true
+  },
+  "formalContractChecks": {
+    "originalFormalPolicyObjectEqualFormal14": true,
+    "resourceProfileScenarioPrefixAndWindowHelpersRawExactFormal14": true,
+    "measuredStages": [
+      2,
+      10,
+      25,
+      50,
+      100
+    ],
+    "stageSeconds": 300,
+    "soakControlledActors": 100,
+    "soakSeconds": 7200,
+    "resumeSamples": 5,
+    "saveSamples": 5,
+    "postResumeSeconds": 60,
+    "completeMinuteWindows": 146,
+    "wallSeconds": 18000,
+    "admissionCaps": [
+      128,
+      100,
+      100,
+      4,
+      1,
+      2
+    ],
+    "tokioWorkers": 4,
+    "slowStageThresholdMs": 50,
+    "formalAcceptanceBooleanNotForcedProbeFalse": true,
+    "failedAndPartialArchivePathsPreserved": true,
+    "originalEighteenLaunchTwelveHitAndActualElapsedGatesUnchanged": true
+  },
+  "sceneChecks": {
+    "canonicalGeometryProof": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-anti-convergence-feasibility-19\\scene-driver-compatibility-proof-v1.json",
+      "bytes": 2526,
+      "sha256": "51bfb7919a9d1108ddcf28a6ec76bd7ed128ac0be4e66f060bf2e50e85a99ea7"
+    },
+    "orderedSharedSourcePins": 54,
+    "orderedSceneSourceSha256": "2981bd5f36e6abd382ca2ae5f20e2da10a0381b46f444e623b9a5f7de46508a9",
+    "metadataOnlyReconstructionMatchedProbeProcessPreparedProvenanceAndIndependentReceipt": true,
+    "formalAndProbeTenHundredGeometryLeavesUnchanged": true,
+    "originalAStarNotReexecuted": true
+  },
+  "freshPrerequisiteChecks": {
+    "ordinaryFull16Files": 16,
+    "sixOrdinaryDriversSeparateFromNineCapacityInputs": true,
+    "opaqueTraceReferencesMatchedPriorActualPrerequisiteWithoutRehashOrParse": true,
+    "ordinaryFull16CurrentBackendDriverExecutionMatch": true,
+    "probe19RunId": "1792971941351-af013515",
+    "actualProbe19Final": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-independent-verification-v1\\final-verification.json",
+      "bytes": 455554,
+      "sha256": "7a8adbf0a67f312344acba4eedfce01d9c87eff26e5a348390e92a3beae16acc"
+    },
+    "actualProbe19SourceSeal": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-independent-verification-v1\\tool-source-frozen-v1.json",
+      "bytes": 2785,
+      "sha256": "419abe39e5b5ec71f47cbefd52a9c4e541eb9a92d86df5ea77f6504e6bd63c51"
+    },
+    "actualProbe19Execution": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-independent-verification-v1\\actual-verification-execution-receipt-v1.json",
+      "bytes": 813,
+      "sha256": "33dd7b9b83769800aab3a52fea3e4b884d4ceb194304c05684c6938f1f725d2d"
+    },
+    "actualProbe19Inputs": 14,
+    "mappedEverySealedSourceExactly": true,
+    "exitCode": 0,
+    "sourceBeforeAfterIdentical": true,
+    "strictProbeCompleteWindows": [
+      5,
+      5,
+      6
+    ],
+    "hpZeroVerifiedEventsNoDoseProof": true,
+    "wirePresentSourceValidCountsMatchUninstalledRequired": true,
+    "wireBoundedIncompleteNotNewGameGate": true,
+    "storeSummaryExactAndDoesNotAddAcceptanceCondition": true,
+    "historicalRootFactsPendingFieldPreserved": true,
+    "newPerRequest900msPacketReplayNotClaimed": true
+  },
+  "controllerChecks": {
+    "dynamicPreparedAndReviewExactRawPins": true,
+    "explicitSealAndSeparateReadonlyModes": true,
+    "presealUsesNewFull16ValidatorWithProjectRoot": true,
+    "presealReleasePinIncluded": true,
+    "noOwnFreezeDependencyCycle": true,
+    "allSourcePathsCanonicalDeduplicatedAndBaseContained": true,
+    "wxGeneratedAndFreezeOutputs": true,
+    "sourceGuardBeforePrepareAndAccountCreation": true,
+    "privateOwnerOneRecordingsOwnerPlusSystemTwoAclRestored": true,
+    "current50StateBothPowerShellEntries": true,
+    "actualRunCli": "--execute-authorized-probe --attack-results=v2"
+  },
+  "closedFindings": [
+    {
+      "id": "B1",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\verify-probe19-collected-evidence.mjs",
+      "line": 13,
+      "description": "Former collected child literal referenced Probe18; author preserved raw beforeimage and changed only the actual Probe19 child literal. One actual Node syntax check exit0 and exact reverse transformation verified.",
+      "status": "closed"
+    }
+  ],
+  "nonblockingObservations": [
+    {
+      "id": "I1",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\collect-public.mjs",
+      "line": 353,
+      "description": "Catalog free-text scope still says ladder14. Actual realm/child/catalog filenames are Formal15, the scope text is not consumed as an identity gate, and original full formal verdict checks remain. This descriptive residue does not block execution."
+    }
+  ],
+  "verdict": {
+    "preparedContractPassed": true,
+    "eligibleForSealNow": true,
+    "blockingFindingIds": []
+  },
+  "limitations": [
+    "This is source-contract eligibility only. Formal15 has not executed or passed by this review. Root retains exclusive actual seal, readonly guard, preparation and run execution.",
+    "Actual Probe19 replay and current ordinary full16 are prerequisites, not evidence that Formal15 25/50/100 or two-hour capacity passed. P0 remains false and P2 frozen.",
+    "No game raw, full16 trace, monitor dataset, private state or immutable binary was reopened by this reviewer."
+  ]
+}

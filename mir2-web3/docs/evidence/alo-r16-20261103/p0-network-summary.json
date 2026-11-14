@@ -1,0 +1,74 @@
+{
+  "schema": "mir2-companion-experience-acceptance/1",
+  "ok": true,
+  "startedAt": "2026-11-02T22:49:28.888Z",
+  "finishedAt": "2026-11-02T22:52:43.802Z",
+  "environment": "test",
+  "syntheticParticipants": true,
+  "realHumanTrial": false,
+  "paymentPerformed": false,
+  "modelEnabled": false,
+  "gatewayBinarySha256": "28ceae9f6f45392238f63cf2f539f8c23e64567d25a432a72c3a934e1cf6ead9",
+  "normalGameClientOnly": true,
+  "authenticatedPrivateRelay": true,
+  "contentProfile": "platinum_fiveclass",
+  "observedContentProfile": {
+    "profileId": "platinum_fiveclass",
+    "profileVersion": 1
+  },
+  "gameplayBaseline": {
+    "contentProfile": "platinum_fiveclass",
+    "profileVersion": 1,
+    "generationManifestSha256": "56ddd5417a09a2515fece9a36be2607282084ec89058c412d2edd7a7dcb21bc8",
+    "matchesR16Profile": true
+  },
+  "reloginSettleMs": 31000,
+  "bootstrapSettleMs": 16000,
+  "checks": [
+    "three ordinary Warriors were created, entered, saved, then reused under an exact trusted owner/actor policy",
+    "stranger sees no enrollment or memory and cannot register; its real invitation receives a server refusal without pending/group state, then the true owner immediately invites and forms a real group",
+    "the dedicated actor registers over real WS and only its exact authenticated owner receives the private archive view",
+    "authenticated owner visit/choice/teaching events are explicitly synthetic self-reports; a disabled offer rejects purchase intent",
+    "WS teaching commits policy 1→2; a stable request retry is idempotent, and stale expected versions conflict",
+    "revoke changes policy 2→3, deletion erases the teaching text and both cached exports, replay cannot revive it, new teaching produces policy 4",
+    "owner recall reaches the live controller through private WS; resume clears it without a terminal-side teaching shortcut",
+    "the owner downloads the complete immutable HMAC archive in bounded chunks; byte/hash/signature and identity/growth validate, with no runtime settings or game assets",
+    "live A blocks a different B path/port/process before any game command and blocks actual CLI import before the destination database is created",
+    "after A stops, the real CLI imports fresh B idempotently; a different Node process keeps exact identity, episodes, growth, policy 4 and separately saved server position",
+    "B accepts only its real owner, follows over ordinary movement, and on a new natural monster/drop encounter policy 4 selects support and produces observed monster damage before loot",
+    "the shared test ledger survives A/B, closes the explicit visit, counts observed unpaid activity, exports CSV with unknown costs, and keeps private memories out of ordinary observations"
+  ],
+  "commands": {
+    "companionControl": 26,
+    "companionRuntimeRegister": 3,
+    "keepAlive": 30,
+    "switchGroup": 8,
+    "addMember": 3,
+    "groupInvite": 2,
+    "logOut": 3,
+    "clientVersion": 2,
+    "login": 2,
+    "startGame": 2,
+    "changeAMode": 3,
+    "equipItem": 4,
+    "companionRuntimeReply": 23,
+    "dropItem": 1,
+    "attackDirection": 3
+  },
+  "proof": {
+    "archiveId": "180c8922-6a8f-455c-a0a6-f6ac17c3e596",
+    "finalPolicyVersion": 4,
+    "importedGrowthRevision": 5,
+    "archiveBytes": 3450,
+    "archiveSha256": "9526dd43f030ec6885357afe690f7706b241191524edddd70780bab78162d345",
+    "actorProcessChanged": true,
+    "observedCompanionStrike": true
+  },
+  "limitations": [
+    "synthetic local acceptance, no real human retention or payment",
+    "rules-only service",
+    "single local Gateway and local archive lock",
+    "existing route-lease/bootstrap settle",
+    "Native EXE visual proof is recorded separately"
+  ]
+}

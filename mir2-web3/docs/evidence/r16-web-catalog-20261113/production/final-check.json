@@ -1,0 +1,46 @@
+{
+  "checkedAt": "2026-11-12T21:49:46.447Z",
+  "source": "8654cdcb36e20e114f3e1d34cd142d0b5396638a",
+  "includesUserFeedback6997f810ed": true,
+  "origin": "https://numeron.obelisk.build",
+  "routes": [
+    {
+      "path": "/version",
+      "status": 200,
+      "bytes": 55,
+      "sha256": "edfa2154d9dd7b854c070d3b233a0247411c4c2f3dfc7fb41569fe1d4043af67"
+    },
+    {
+      "path": "/game",
+      "status": 200,
+      "bytes": 11168,
+      "sha256": "d2cc091756a11fa1f0400f6998f5cdad78fbdd102414ea4f213a8b7acf73c533"
+    },
+    {
+      "path": "/mir2-asset-worker.js",
+      "status": 200,
+      "bytes": 40071,
+      "sha256": "1725f95a0a238e2139a84a5aaad31f2d16f8476e28bf805c9a24b2557eb646e1"
+    }
+  ],
+  "workerMatchesCandidate": true,
+  "preservation": {
+    "baselineCount": 132,
+    "unchanged": 131,
+    "changedSinceReleaseSnapshot": [
+      {
+        "path": "mir2-web3/docs/evidence/gateway-equip-logout-20261112/README.md",
+        "before": "5d3d4c51d083b92d70516097b5a10993c9834a468c64b2f65288e70bd9506e32",
+        "after": "f65e323490c496d1b776739f82fc153e54cc5509c4626524146e7360c07002a2"
+      }
+    ],
+    "earlierConcurrentEdits": [
+      {
+        "file": "mir2-web3/docs/evidence/gateway-equip-logout-20261112/README.md",
+        "before": "ed41a153ba80b031ddb9c6c331ad48ac4f0c1d196ea07f3a6ec6c0443bd39335",
+        "current": "5d3d4c51d083b92d70516097b5a10993c9834a468c64b2f65288e70bd9506e32"
+      }
+    ]
+  },
+  "head": "adccb1045f701141f34a36f5f03a5fdc370ba70c"
+}

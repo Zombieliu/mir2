@@ -1,0 +1,12 @@
+{
+  "reviewedBy": "root",
+  "image": "current-e6-shared-quest.png",
+  "sourceSha256": "c3d51d5d0ffe2addc51727507dd797b6ba3334d40068a2ad9c9166fd077a4451",
+  "observed": [
+    "Shared Native Quest is drawn in traditional Chinese; local glyphs and map are visible",
+    "NPC aliases remain English and the chat candidate notice remains English",
+    "Screenshot still shows the prewarm failure/progress overlay at50/113; do not use it to claim final113/113 visual readiness"
+  ],
+  "laterFontAndPrewarmPassScope": "Later cache bodies and settled113/113 are separate JSON observations, not inferred from this earlier screenshot",
+  "noWindowsPixelParityClaim": true
+}

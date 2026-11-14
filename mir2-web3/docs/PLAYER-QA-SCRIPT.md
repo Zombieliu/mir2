@@ -4,6 +4,21 @@ Last updated: 2026-08-02
 
 Purpose: keep final human frontend validation focused. The project can be driven to **100% Candidate** automatically, then this script is used to decide whether the build becomes **100% Accepted**.
 
+## 2026-10-02 Native Combat And Three-Class Hotkeys
+
+Automated input144/sender14 and 30 unique selected Zone checks pass; this is
+not installed-client acceptance. Use the ordinary server gateway after the
+matched rollout. [Causes, retained failures and route](NATIVE-COMBAT-HOTKEY-FIX-20261002.md).
+
+- Run, select a monster during action cooldown, and confirm old run intents
+  do not resume after the attack. New chase input must still work.
+- Toggle Warrior Thrusting on/off after the shared 1 s guard and enable
+  HalfMoon independently. Check preparation skills retain their own clocks.
+- With Warrior, Wizard and Taoist, check both top-row and numpad belt 1-6,
+  item counts and effects; mouse and keyboard must identify the same item.
+- Retain chat/modal focus, ordinary nonmodal panel world input, target/MP
+  gates and cooldown validation; do not shorten clocks to pass this route.
+
 ## Mobile PWA And Browser Chrome
 
 - On iPhone, first open the hosted HTTPS player in Safari or Chrome. Confirm a

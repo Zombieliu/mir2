@@ -1,0 +1,29 @@
+{
+  "schema": "mir2.r16.forest-ui-preservation.v1",
+  "stoppedBeforeCopy": true,
+  "oldDirectoryPreserved": true,
+  "privateBackupPreserved": true,
+  "journalHistoryMovedIntact": true,
+  "backupName": "Numeron-Web-R16-20261104-before-forest-ui-v17",
+  "runtime": [
+    {
+      "directory": "private",
+      "transfer": "copied",
+      "files": 25,
+      "bytes": 650696,
+      "beforeTreeSha256": "1cdbba6dc2479effc14c68c55cbe3057509efb6e0ec4015c3ddd43f6170469e1",
+      "afterTreeSha256": "1cdbba6dc2479effc14c68c55cbe3057509efb6e0ec4015c3ddd43f6170469e1",
+      "allFilesMatched": true
+    },
+    {
+      "directory": ".mir2-data",
+      "transfer": "moved-intact",
+      "files": 45,
+      "bytes": 20155153562,
+      "beforeTreeSha256": "a07de318490d3312e3f29978e31ff4393a2ed26440ddedb0e1e84af4354ad836",
+      "afterTreeSha256": "a07de318490d3312e3f29978e31ff4393a2ed26440ddedb0e1e84af4354ad836",
+      "allFilesMatched": true
+    }
+  ],
+  "allMatched": true
+}

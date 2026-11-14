@@ -1,0 +1,95 @@
+{
+  "schema": "mir2.r16.move-cast-lightweight-runtime.v1",
+  "manifestSha256": "e15e592ca9ddd35f2755942642336820c5fffb9efe2ecf4b60e139a4dc948d50",
+  "sourceSha256": "5ef63b14578c39e5b183ade5668e5bad949c916508fa08bdcae536f7e7ce8ab7",
+  "sourceFiles": {
+    "apps/web/scripts/lib/renderer-wasm-opt.mjs": "4a75a4886bcc603b75ebeaf62813d8ac943689149af5d3a2eb60f82ee3f08ed6",
+    "apps/web/scripts/test-renderer-wasm-opt.mjs": "0853b6935c944645e236d20735f48eb70b81fa37f8f3671f026f2b4e4ee26a92"
+  },
+  "bundles": [
+    {
+      "name": "core",
+      "version": "4688b711bf9629b5b006d21e7c188bae6e4dc878ddac632c982df2434b85b499",
+      "files": {
+        "mir2_platform_web.js": {
+          "bytes": 24393,
+          "sha256": "875090fd42d891cb003f63e46aaed848ead048f322e86ad5338db9a088fa01e7"
+        },
+        "mir2_platform_web_bg.wasm": {
+          "bytes": 247982,
+          "sha256": "1db592d6bf105a7aa88563b0ba7947a214725757713819f353c3377415cab4a2"
+        }
+      }
+    },
+    {
+      "name": "presentation",
+      "version": "393cfd53c2235c51cfb1dc136ccd7a468ad584e9a6e71fe3bf13533f4a281302",
+      "files": {
+        "mir2_platform_web.js": {
+          "bytes": 24721,
+          "sha256": "8bbff9179937703b7fff70bbf3ea8136b46da027470427036a9bee11605c810c"
+        },
+        "mir2_platform_web_bg.wasm": {
+          "bytes": 261300,
+          "sha256": "b677b4eac9423037ad867f2c4efd8a1d3f78dfa0b125dffea215223e6b740501"
+        }
+      }
+    },
+    {
+      "name": "npcPurchase",
+      "version": "9d88153071248d9523b85718be6c4cf6eb3daf5791fba9e6050b7ec405e91dd8",
+      "files": {
+        "mir2_platform_web.js": {
+          "bytes": 8332,
+          "sha256": "b6a3e9848e46934dd5187120ea543da5d174bf97f1a34d63ca9be714e0b18218"
+        },
+        "mir2_platform_web_bg.wasm": {
+          "bytes": 164684,
+          "sha256": "279287cba87cab0ce2db344be00d1c3bd5bdc7fffc12e275da5837f8f917dd9d"
+        }
+      }
+    }
+  ],
+  "optimizerRuns": [
+    {
+      "label": "core",
+      "bytes": 247982,
+      "jsBytes": 24393,
+      "metadataMatched": true,
+      "binaryenSha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3"
+    },
+    {
+      "label": "presentation",
+      "bytes": 261300,
+      "jsBytes": 24721,
+      "metadataMatched": true,
+      "binaryenSha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3"
+    },
+    {
+      "label": "npc-purchase",
+      "bytes": 164684,
+      "jsBytes": 8332,
+      "metadataMatched": true,
+      "binaryenSha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3"
+    }
+  ],
+  "rejectedFirstPresentation": {
+    "actualBytes": 263179,
+    "limitExclusive": 262144,
+    "logSha256": "2194cb4cae7dcb6fc86db232f5e4646141cc2199213b87578059bbc475a819c9"
+  },
+  "regression": {
+    "rustBaseline": "73ca32b6ce7bbf44e425fe04c255b2d5edd2165fb5b568ec7827744b0c5be26f",
+    "platformWeb94": "0f0097c23af7bd632c2e1cd6e2e8b168c289cf75bfb6571675896a1e385dad3a",
+    "sharedAnimation28": "14c0777e69b7ca41b369b3c83cbdcf4f23a5a2b34806d1b5bd08912c7f458574",
+    "web70": "1e4e88e061f2bf0e97b5df553e54a68384664968bafb9e3f55a3bf18ac5afd77",
+    "optimizer41": "5d345c37c39daf4934c9a954f3cd3bba330d632faf643d87bb933a9ad6b425e0",
+    "clientCore216": "d5e24beacb9ea17329c85a9d6046f17af2e85cb3fd94758463aae807ed6d4626",
+    "stage5Adapters508": "1ccb6365737b23385a955901bfae70b4724ccbccb3ce5341ba2d61f929fe51d0",
+    "bevyBudgets": "972925e30bdc089e070ea01666f7b3ef6dc35bc1d6f2b241a3f73256edc8fed3",
+    "sceneMotion": "7950bd508a0230c524b64834015fd44ec2bbbeece32676b1e1200bca1aec785d",
+    "targetCombat": "86be5ae8116c2b8e8c93f9d6a37aac4be1a18b3532448a44ccfebbea6c07d472",
+    "sceneEffects": "bca49cc9db035fa51f153a2b31d333f17e195849e6639682b15a34703b01a9f1",
+    "strictTypeScript": true
+  }
+}

@@ -1,0 +1,159 @@
+{
+  "schema": "mir2.native-delivery.root-evidence.v1",
+  "files": [
+    {
+      "relativePath": "probe-download-speed-01.py",
+      "bytes": 3978,
+      "sha256": "965ed1c6716bf414180b63bc6aff80a52d03a79b9e6b52793197f3958ceea017"
+    },
+    {
+      "relativePath": "download-speed-probe-01.json",
+      "bytes": 8893,
+      "sha256": "3aac07cacf17f14cffe680c58a0dd638615ed92f66663de30f70ab32b405e80f"
+    },
+    {
+      "relativePath": "cloudflare-auth-read-only-03.json",
+      "bytes": 226,
+      "sha256": "349755c593dcff82cc7ffb9692110995a53873b0c08722ab2ea11ca46864491e"
+    },
+    {
+      "relativePath": "wrangler-registry-pin-01.json",
+      "bytes": 233,
+      "sha256": "658e372ac7b3b9f316d23fa58c0c5abfdc72d6da269d53d3481eaac3cb7095dc"
+    },
+    {
+      "relativePath": "r17-download-acceleration-build-01.log",
+      "bytes": 876,
+      "sha256": "73beff3d26521380a510111629159c4dfee28e649ee4bd4d765b5b6f325b8b4e"
+    },
+    {
+      "relativePath": "r17-download-acceleration-build-02.log",
+      "bytes": 1453,
+      "sha256": "0cd16cc2d439ce63e14eca2609bdef1aa7c1d93b318b2c22ff5cb77a61f62763"
+    },
+    {
+      "relativePath": "r17-download-acceleration-sign-01.log",
+      "bytes": 674,
+      "sha256": "21283d5ea27ed3e4b7cb84b381541624cc0153c0b46effa4380e52e1e5d2e3d2"
+    },
+    {
+      "relativePath": "r17-r2-publication-plan-01.log",
+      "bytes": 668,
+      "sha256": "869a3ab71409a8db8a2c49198f5d7b469252cb00197b4dce34e14c6d7ad17632"
+    },
+    {
+      "relativePath": "r17-download-acceleration-02/BUILD-DELIVERY.json",
+      "bytes": 3470,
+      "sha256": "e0bf30aad36a1d89cdeaa79e870b52fbd29e8bfb2f0efe21634a9706ad414fa8"
+    },
+    {
+      "relativePath": "r17-download-acceleration-02/DELIVERY-VERIFICATION.json",
+      "bytes": 6523,
+      "sha256": "05974b6496b33e1fe51a3ce8f6f16a53c031ec91f0b58b978efad9ca957873c1"
+    },
+    {
+      "relativePath": "r17-download-acceleration-02/SIGN-DELIVERY.json",
+      "bytes": 600,
+      "sha256": "b733b8eca497d61a84db1c9bc0d3cce46ab19a291eea47f71e55692bee8588c1"
+    },
+    {
+      "relativePath": "r17-r2-publication-01/ROOT-VERIFICATION.json",
+      "bytes": 424,
+      "sha256": "6b36134597180ad2b423c2015c05b3c48447fbd766e858c2fb0ce6f45e2565b9"
+    },
+    {
+      "relativePath": "r17-r2-publication-01/PREPARE-PUBLICATION.json",
+      "bytes": 599,
+      "sha256": "bae971a0d06c99a811e987e60a27f434ad102bf2beb8d986c8d6cdf75c5be8d4"
+    },
+    {
+      "relativePath": "real-update-r18-01.log",
+      "bytes": 3426,
+      "sha256": "d163fdf605a19efd750f2edce02cd9d69a19e2c9c9e940abc0464fbb78a4ec44"
+    },
+    {
+      "relativePath": "real-update-r18-01-execution.json",
+      "bytes": 343,
+      "sha256": "4557ef4a3313023f0613608b19566099f5a02677eafce9954f9680730d69b597"
+    },
+    {
+      "relativePath": "real-update-r18-02.log",
+      "bytes": 985,
+      "sha256": "e94ad40b76d8cd1705789a1e71219a0401905c1a1b53aa52420fa0c77111ce17"
+    },
+    {
+      "relativePath": "real-update-r18-02-execution.json",
+      "bytes": 407,
+      "sha256": "7b777851bf5e5bbdc3d2393c1ed36a0b454196f8eecd7f422dd15da94ed87511"
+    },
+    {
+      "relativePath": "real-update-r18-03.log",
+      "bytes": 543,
+      "sha256": "47352852a1ff1b539e5faeca1e7796c42c6e0477fa878cc35da1a67b98392f93"
+    },
+    {
+      "relativePath": "real-update-r18-03-execution.json",
+      "bytes": 429,
+      "sha256": "4003ed9ac0345f662aa8edb35fa35b1199c20d9c4ce8e7ec22122f5185c15fb8"
+    },
+    {
+      "relativePath": "updater-real-test-harness-01/receipt.json",
+      "bytes": 717,
+      "sha256": "3e286d46d740129f8ba197e1aa220b61ae4b550a43ff3c024c8fe566d9944664"
+    },
+    {
+      "relativePath": "updater-real-test-harness-03/before.rs",
+      "bytes": 9792,
+      "sha256": "477272185a2f130d87954ff023343c3f632a407c44ce7777571c3aac6d18a7e5"
+    },
+    {
+      "relativePath": "updater-real-test-harness-03/after.rs",
+      "bytes": 11103,
+      "sha256": "73d68d18c3f11ae3ebf5520d8f5309b3fa5e925bd4f888b0b6aa6c60ca0a348a"
+    },
+    {
+      "relativePath": "updater-real-test-harness-03/diff.patch",
+      "bytes": 4268,
+      "sha256": "622649034814a93d0d6715a6785bb8e1837508bcc2f1786eea08bb76e65a4d13"
+    },
+    {
+      "relativePath": "updater-real-test-harness-03/receipt.json",
+      "bytes": 633,
+      "sha256": "2938a189b2967cb6ebd4f00037ed4e7a888cd6668d6f0d0ee1cd2af44c215ce4"
+    },
+    {
+      "relativePath": "adapt-real-update-harness-03.py",
+      "bytes": 5002,
+      "sha256": "d6a2f041c15471cbe72e17a793d9325f5725d3895580eda4eb5e9ba6017e5982"
+    },
+    {
+      "relativePath": "prepare-real-update-fixture-r18-03.py",
+      "bytes": 2911,
+      "sha256": "1886798b7a1201382219fc5d4cd46c4918aac3d7b56f19d3093f4f5ad70513b0"
+    },
+    {
+      "relativePath": "real-update-fixture-03/report.json",
+      "bytes": 4776467,
+      "sha256": "2a4f466d2a7aaafcfca981f05912654053bc32a16dadcd1819047fbf99d4a10a"
+    }
+  ],
+  "downloadMeasurementScope": "This Windows development host only; not the other laptop or all regions",
+  "gameSourceR17": "6032ef8b3e27dd97bad0b20c8676ef9f185db64b",
+  "toolingSource": "4c60c323aed11829abae6ee5ce6e13c675a3c1c3",
+  "r17AccelerationPreparedSignedVerified": true,
+  "r17R2Published": false,
+  "r17FirstInstallCompressedBundleBytes": 620189573,
+  "r16ToR17ExePatchBytes": 25424169,
+  "r18FileLevelUpdateAndRollbackPassed": true,
+  "r18UpdateWasAcceleratorTest": false,
+  "r18Source": "321316b791120a6fe549e4006623e63333a5543f",
+  "r18ChangedPaths": 28618,
+  "r18RemovedPaths": 2,
+  "r18UniqueContentRequests": 28616,
+  "r18ActualPayloadDownloadedBytes": 342513399,
+  "r18ActualWireBytes": 374059325,
+  "r18CurrentPublicRelease": false,
+  "protectedInstallationChanged": false,
+  "productionGatewayRestarted": false,
+  "nativeOrHumanAccepted": false
+}

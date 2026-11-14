@@ -1,0 +1,32 @@
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {createRequire} from 'node:module';
+import {readFile,writeFile} from 'node:fs/promises';
+import {setTimeout as delay} from 'node:timers/promises';
+const root='D:/mir2-builds/r16-parity-20261109/social-budget-ui-r1',out=root+'/browser-r3';
+const identity=JSON.parse(await readFile('D:/mir2-builds/r16-parity-20261109/trade-cancel-ui-r1/private/ui-identities.local.json','utf8')).primary;
+const config=JSON.parse(await readFile(root+'/public-config.json','utf8')),old=JSON.parse(await readFile(out+'/proof.json','utf8'));
+const hash=v=>createHash('sha256').update(typeof v==='string'?v:JSON.stringify(v)).digest('hex');
+const expected=structuredClone(old.assetsBefore.primary),operation=old.events.find(e=>e.type==='command'&&e.command==='retrieveTradeItem');expected.inventory.find(i=>i.uidHash===old.starter.uidHash).slot=operation.to;expected.inventory.sort((a,b)=>a.slot-b.slot);
+const {chromium}=createRequire('F:/mir2-builds/web-r16-20261104/tools/package.json')('playwright');const browser=await chromium.connectOverCDP('http://127.0.0.1:19484');const page=browser.contexts()[0].pages().find(p=>p.url().startsWith(config.origin));
+const proof={schema:1,passed:false,scope:'Same original primary character through ordinary UI logout/login/select/StartGame/authoritative snapshot/final logout; no new trade.',packets:[],commands:{}};
+let snapshot=null,realmMatched=false,existingCharacterMatched=false,sameIndexSent=false,started=false;
+const cdp=await page.context().newCDPSession(page);await cdp.send('Network.enable');
+cdp.on('Network.webSocketFrameReceived',e=>{try{const v=JSON.parse(e.response.payloadData);if(v.type==='realmInfo')realmMatched=v.payload.realmId===config.realmId;if(v.packet==='LoginSuccess')existingCharacterMatched=v.payload.characters.some(c=>c.index===identity.characterIndex&&c.name===identity.characterName);if(v.packet==='StartGame')started=v.payload.result===4;if(['LogOutSuccess','StartGame'].includes(v.packet))proof.packets.push({packet:v.packet,result:v.payload.result});if(v.type==='worldSnapshot'&&started)snapshot=v.payload;}catch{}});
+cdp.on('Network.webSocketFrameSent',e=>{try{const v=JSON.parse(e.response.payloadData);proof.commands[v.type]=(proof.commands[v.type]??0)+1;if(v.type==='startGame')sameIndexSent=v.characterIndex===identity.characterIndex;}catch{}});
+const wait=async(fn,code,ms=60000)=>{const end=Date.now()+ms;while(Date.now()<end){if(await fn())return;await delay(100);}throw Error(code);};
+try{
+ await page.locator('.client-stage-frame canvas:visible').first().focus();await page.keyboard.press('Alt+KeyX');await page.locator('.select-overlay').waitFor({timeout:15000});
+ await wait(()=>proof.packets.filter(p=>p.packet==='LogOutSuccess').length===1,'FIRST_UI_LOGOUT_ACK_MISSING',5000);
+ await page.locator('.select-action.exit button').click();await page.locator('.login-input.account').waitFor({timeout:60000});
+ await page.locator('.login-input.account').fill(identity.accountId);await page.locator('.login-input.password').fill(identity.password);await page.locator('.login-button.ok button').click();await page.locator('.select-overlay').waitFor({timeout:60000});
+ await page.locator('.select-character-slot-card').filter({hasText:identity.characterName}).click();await page.locator('.select-action.start button').click();
+ await wait(()=>snapshot&&started,'NORMAL_UI_READBACK_SNAPSHOT_MISSING');await wait(async()=>{const value=await page.locator('.client-stage-frame').getAttribute('class');return value&&!value.includes('scene-assets-pending');},'READBACK_SCENE_NOT_READY',90000);
+ const economy={gold:snapshot.gold,inventory:snapshot.inventoryItems.map(i=>({uidHash:hash(String(i.uniqueId)),slot:i.slot,count:i.quantity,name:i.name})).sort((a,b)=>a.slot-b.slot),belt:snapshot.beltItems.map(i=>({uidHash:hash(String(i.uniqueId)),slot:i.slot,count:i.quantity})).sort((a,b)=>a.slot-b.slot)};
+ assert.deepEqual(economy,expected,'PRIMARY_RELOGIN_ASSETS_DIFFER');assert.equal(snapshot.stage5Systems.trade,null,'PRIMARY_RELOGIN_TRADE_NOT_NULL');assert(realmMatched&&existingCharacterMatched&&sameIndexSent,'ORDINARY_UI_CHARACTER_AUTHORITY_NOT_MATCHED');
+ await page.screenshot({path:out+'/primary-ui-relogin-verified.png',mask:[page.locator('.login-input.account,.login-input.password,[data-login-auth-field]')],maskColor:'#090909',timeout:15000});
+ Object.assign(proof,{realmMatched,existingCharacterMatched,sameIndexSent,startGameResult:4,rawSnapshotTradeNull:true,exactEconomy:true,economy,expectedCandleSlot:operation.to});
+ await page.locator('.client-stage-frame canvas:visible').first().focus();await page.keyboard.press('Alt+KeyX');await page.locator('.select-overlay').waitFor({timeout:15000});await wait(()=>proof.packets.filter(p=>p.packet==='LogOutSuccess').length===2,'FINAL_UI_LOGOUT_ACK_MISSING',5000);
+ proof.passed=true;proof.normalLogoutAcknowledgements=2;
+}catch(e){proof.error={name:e.name,hash:hash(e.message)};await writeFile(root+'/private/primary-readback-error.local.txt',String(e.stack),{flag:'wx',mode:0o600});}
+await writeFile(out+'/primary-ui-readback.json',JSON.stringify(proof,null,2),{flag:'wx'});console.log(JSON.stringify({passed:proof.passed,exactEconomy:proof.exactEconomy,normalLogoutAcknowledgements:proof.normalLogoutAcknowledgements}));process.exit(proof.passed?0:1);

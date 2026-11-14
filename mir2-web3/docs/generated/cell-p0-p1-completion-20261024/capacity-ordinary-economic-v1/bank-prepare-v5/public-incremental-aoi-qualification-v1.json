@@ -1,0 +1,306 @@
+{
+  "schemaVersion": 1,
+  "kind": "ordinary-preparation-incremental-aoi-scalar-diagnostic",
+  "runId": "1793053311312-f5756eff",
+  "scope": "V5 existing actual report, module-owned scalar samples and public recording; no replay, source change or new client command.",
+  "sources": {
+    "report": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v5\\episode\\reports\\1793053311312-f5756eff.preparation-report.json",
+      "bytes": 17249,
+      "sha256": "02a94872b9fc870bb204e4dd6852cbd059d0a7376ed4219f906cdee337842afa"
+    },
+    "samples": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v5\\episode\\reports\\1793053311312-f5756eff.preparation.jsonl",
+      "bytes": 190185,
+      "sha256": "0d70e901f8d1be3b4fa8b0c334fc86ad022bda9bd8f075e45f8344f2cf768d62"
+    },
+    "recording": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v5\\episode\\recordings\\0-498070.jsonl",
+      "bytes": 2939020,
+      "sha256": "8b061f8144fda2eac440c41b11a029edc7a95071e3cc8ddfb99e945a4773fc1b",
+      "rows": 79
+    }
+  },
+  "originalVerdict": {
+    "ok": false,
+    "error": "Navigation step guarded on 0",
+    "preparedCount": 4,
+    "cleanupComplete": true,
+    "capacityAccepted": false,
+    "p0Accepted": false
+  },
+  "failedActor": {
+    "name": "L370e2a04",
+    "characterIndex": 5,
+    "before": {
+      "sequence": 633,
+      "monotonicMs": 16281.9516,
+      "ownerId": 1000,
+      "ownerName": "L370e2a04",
+      "map": "0",
+      "x": 304,
+      "y": 613,
+      "hp": 18,
+      "maxHp": 18,
+      "inSafeZone": false,
+      "nearbyHostileCount": 0,
+      "playerPoison": null,
+      "ownerPoison": null,
+      "dazed": false,
+      "gold": 15,
+      "hpStock": 12,
+      "venison": 0,
+      "saleRemaining": null,
+      "npcId": null,
+      "buyLink": false,
+      "sellLink": false
+    },
+    "recoveryStatus": "not-needed",
+    "commands": 24,
+    "movementCommands": 23,
+    "commandCounts": {
+      "clientVersion": 1,
+      "walk": 4,
+      "run": 19
+    },
+    "commandRowsTruncated": false,
+    "elapsedMs": 15145.1713,
+    "latestClientSend": {
+      "type": "run",
+      "sendCursor": 699,
+      "sentAtMs": 30762.075
+    },
+    "lastAuthoritativeTransform": {
+      "at": 1793053341989,
+      "sequence": 701,
+      "monotonicMs": 30762.6826,
+      "map": "0",
+      "from": {
+        "x": 331,
+        "y": 592
+      },
+      "to": {
+        "x": 331,
+        "y": 590
+      },
+      "direction": "Up",
+      "ownerObjectId": 1000
+    },
+    "pathHazard": {
+      "reason": "hostile-clearance",
+      "action": "run",
+      "phase": "before-movement",
+      "radius": 8,
+      "from": {
+        "x": 331,
+        "y": 590
+      },
+      "physicalCells": [
+        {
+          "x": 331,
+          "y": 589
+        },
+        {
+          "x": 331,
+          "y": 588
+        }
+      ],
+      "blocker": {
+        "objectId": 206039,
+        "name": "RakingCat",
+        "x": 325,
+        "y": 583,
+        "hp": null,
+        "ai": 0
+      },
+      "snapshotSequence": 736,
+      "observedSnapshotSequence": 633,
+      "ownerId": 1000,
+      "ownerName": "L370e2a04",
+      "map": "0"
+    },
+    "plannerThreatMemory": {
+      "lifetimeMs": 20000,
+      "positionLimit": 2048,
+      "identityLimit": 1024,
+      "positions": 2,
+      "identities": 14,
+      "coarseFallbackCount": 0,
+      "exemptionGloballyQuarantined": false
+    }
+  },
+  "rawVersusIncremental": {
+    "beforeRawSequence": 633,
+    "beforeRawMonotonicMs": 16281.9516,
+    "latestHelperObservedRawSequence": 633,
+    "latestActualReceiptSequence": 736,
+    "sequenceAdvanceSinceRaw": 103,
+    "lastSendMinusRawMs": 14480.1234,
+    "lastOwnerMovementMinusRawMs": 14480.731,
+    "helperSawNoNewRawBetweenBeforeAndHazard": true,
+    "rawQualificationExpiryProved": false,
+    "reason": "Preparation elapsed is below20000ms. This evidence alone does not establish expiry of raw633 qualification; newly entered incremental monster metadata lacks HP/disposition and is independently excluded by the current qualifier."
+  },
+  "movementGuard": {
+    "ownerBeforeDistance": 7,
+    "physicalCells": [
+      {
+        "x": 331,
+        "y": 589,
+        "blockerChebyshevDistance": 6,
+        "closerThanCurrentOwner": true
+      },
+      {
+        "x": 331,
+        "y": 588,
+        "blockerChebyshevDistance": 6,
+        "closerThanCurrentOwner": true
+      }
+    ],
+    "guardRejectionCorrectForObservedRakingCat": true,
+    "blockedCommandDispatched": false,
+    "dispatchMeaning": "The hazard phase is before-movement; the rejected Run itself did not pass this hook."
+  },
+  "publicRecordingScalars": {
+    "ownerFrames": 58,
+    "changedScalarFrames": 24,
+    "firstOwner": {
+      "recordSequence": 21,
+      "capturedAtMs": 1793053327484,
+      "map": "0",
+      "owner": {
+        "objectId": 1000,
+        "name": "L370e2a04",
+        "x": 304,
+        "y": 613,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "spectatorInSafeZone": false,
+      "spectatorOwnerBindingConfirmed": false,
+      "blocker": null
+    },
+    "lastOwner": {
+      "recordSequence": 78,
+      "capturedAtMs": 1793053342401,
+      "map": "0",
+      "owner": {
+        "objectId": 1000,
+        "name": "L370e2a04",
+        "x": 331,
+        "y": 590,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "spectatorInSafeZone": false,
+      "spectatorOwnerBindingConfirmed": false,
+      "blocker": null
+    },
+    "lastStateChanges": [
+      {
+        "recordSequence": 69,
+        "capturedAtMs": 1793053340057,
+        "map": "0",
+        "owner": {
+          "objectId": 1000,
+          "name": "L370e2a04",
+          "x": 331,
+          "y": 596,
+          "hp": 18,
+          "maxHp": 18,
+          "dead": false
+        },
+        "spectatorInSafeZone": false,
+        "spectatorOwnerBindingConfirmed": false,
+        "blocker": null
+      },
+      {
+        "recordSequence": 72,
+        "capturedAtMs": 1793053340845,
+        "map": "0",
+        "owner": {
+          "objectId": 1000,
+          "name": "L370e2a04",
+          "x": 331,
+          "y": 594,
+          "hp": 18,
+          "maxHp": 18,
+          "dead": false
+        },
+        "spectatorInSafeZone": false,
+        "spectatorOwnerBindingConfirmed": false,
+        "blocker": null
+      },
+      {
+        "recordSequence": 74,
+        "capturedAtMs": 1793053341372,
+        "map": "0",
+        "owner": {
+          "objectId": 1000,
+          "name": "L370e2a04",
+          "x": 331,
+          "y": 592,
+          "hp": 18,
+          "maxHp": 18,
+          "dead": false
+        },
+        "spectatorInSafeZone": false,
+        "spectatorOwnerBindingConfirmed": false,
+        "blocker": null
+      },
+      {
+        "recordSequence": 77,
+        "capturedAtMs": 1793053342149,
+        "map": "0",
+        "owner": {
+          "objectId": 1000,
+          "name": "L370e2a04",
+          "x": 331,
+          "y": 590,
+          "hp": 18,
+          "maxHp": 18,
+          "dead": false
+        },
+        "spectatorInSafeZone": false,
+        "spectatorOwnerBindingConfirmed": false,
+        "blocker": null
+      }
+    ]
+  },
+  "sourceContract": {
+    "receiveOrder": [
+      "CapacityClient.observe calls super.observe",
+      "PlaytestClient applies protocol observation to current snapshot",
+      "actual received receipt is recorded",
+      "CapacityClient invokes ordinarySupplies.observe with that message and exact last receipt"
+    ],
+    "metadataLifecycle": "Incremental updates preserve unspecified fields; ObjectRemove/TeleportOut removes membership; worldSnapshot replaces it. There is no protocol20s raw-only metadata expiry.",
+    "wireObjectMonsterFields": [
+      "objectId",
+      "name",
+      "location",
+      "ai",
+      "dead",
+      "masterObjectId"
+    ],
+    "wireObjectMonsterMissing": [
+      "hp",
+      "maxHp",
+      "disposition",
+      "ownerName"
+    ],
+    "cautions": [
+      "ObjectMonster masterObjectId can change while inherited ownerName remains null.",
+      "ObjectPlayer upsert may retain a former entity kind while replacing class.",
+      "ObjectName is not folded by the current general observation switch; a planner certificate must inspect or invalidate that actual packet directly.",
+      "Do not promote missing disposition to a raw canonical-hostile observation or unknown HP to exact positive HP."
+    ]
+  },
+  "minimalSafeDirection": "Keep the existing20s shared position-trail lifetime, budgets, health and send guards. Distinguish received metadata qualification from trail lifetime: anchor a planner-only certificate in actual raw or fully checked known-normalAI0 monster-info receipts; renew only on strictly newer real ordered AOI progress while that identity remains visible and conflict-free, never repeated getters. Revoke/type-fence ObjectRemove/death/AI/name/class/master changes before any renewal; keep same-ID and capacity quarantine. Newly entered ObjectMonster needs a separately evidenced canonical-AI0 wire classifier, not blind renewal of incomplete cache records. The RakingCat outside safe geometry must remain guarded.",
+  "codeChanged": false,
+  "storeChanged": false,
+  "testsRun": false,
+  "loadRun": false
+}

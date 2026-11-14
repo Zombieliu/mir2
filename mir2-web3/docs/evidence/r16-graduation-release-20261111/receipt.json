@@ -1,0 +1,304 @@
+{
+  "schema": 1,
+  "checkedAt": "2026-11-11T07:23:01.911Z",
+  "origin": "https://numeron.obelisk.build/game",
+  "deploymentPassed": true,
+  "publicGameplayAcceptancePassed": false,
+  "source": "975a0594d77973ca6d056f5f5ab3a2932419c4ed",
+  "releasePinCommit": "90a11e745985788221a08ed6648070a7fd2a482b",
+  "branch": "codex/windows-player-journey",
+  "previousSource": "78c900ca36916e0ee70db39bf6b60fc9f916c6a6",
+  "deploymentId": "dpl_GuvynPuR78MN5YRURSsQRs8jpQTq",
+  "authenticated": {
+    "checkedAt": "2026-11-11T07:06:14.849Z",
+    "alias": {
+      "kind": "alias",
+      "alias": "numeron.obelisk.build",
+      "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+      "deploymentId": "dpl_GuvynPuR78MN5YRURSsQRs8jpQTq",
+      "redirect": null
+    },
+    "deployment": {
+      "kind": "deployment",
+      "id": "dpl_GuvynPuR78MN5YRURSsQRs8jpQTq",
+      "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+      "readyState": "READY",
+      "target": "production",
+      "source": "975a0594d77973ca6d056f5f5ab3a2932419c4ed",
+      "branch": "codex/windows-player-journey",
+      "buildDurationMs": 273305
+    }
+  },
+  "workflows": {
+    "stage": {
+      "id": "42974989633",
+      "conclusion": "success",
+      "headSha": "90a11e745985788221a08ed6648070a7fd2a482b",
+      "status": "completed"
+    },
+    "promote": {
+      "id": "42975871581",
+      "conclusion": "success",
+      "headSha": "90a11e745985788221a08ed6648070a7fd2a482b",
+      "status": "completed"
+    }
+  },
+  "checks": {
+    "releaseTests": 68,
+    "localFocusedTests": 113,
+    "localNormalLogouts": 9,
+    "localThreeClasses": true,
+    "localSharedWebgl2": true,
+    "productionAndTypeScriptBuild": true,
+    "pinnedSourceFiles": 20,
+    "protectedAndPublicAssets": 11,
+    "protectedAndPublicQrPending": true,
+    "publicRevision": true,
+    "noPromotionRollback": true,
+    "feedback6997Included": true
+  },
+  "qr": [
+    {
+      "locale": "zh-CN",
+      "passed": true,
+      "normalSystemNetwork": true,
+      "realQrMatrix": true,
+      "createAttempts": 1,
+      "pending": true,
+      "pollsAfterCancel": 0,
+      "browserClosed": true
+    },
+    {
+      "locale": "zh-TW",
+      "passed": true,
+      "normalSystemNetwork": true,
+      "realQrMatrix": true,
+      "createAttempts": 1,
+      "pending": true,
+      "pollsAfterCancel": 0,
+      "browserClosed": true
+    }
+  ],
+  "signedRuns": [
+    {
+      "run": "signed-public",
+      "overallPassed": false,
+      "rawReceiptSha256": "41d86ec6f9f001113c597b104ddf26b902d0e226e882d8ffabc023c02910fac0",
+      "failure": {
+        "phase": "ordinary-public-quest-locale",
+        "code": "AUTOMATION_FAILED"
+      },
+      "phoneConfirmationScope": "official mobile-sized PWA, disposable virtual-authenticator Testnet wallet; no physical phone camera",
+      "signedLoginConfirmed": true,
+      "loginApprovals": 1,
+      "forbiddenWalletOperations": 0,
+      "publicDns": true,
+      "customBrowserNetworkSettings": false,
+      "tlsVerificationBypass": false,
+      "oneOrdinaryQaRoleCreated": true,
+      "sceneRendered": true,
+      "movement": {
+        "attempted": true,
+        "passed": true,
+        "status": "one-authoritative-walk",
+        "from": {
+          "x": 288,
+          "y": 616
+        },
+        "to": {
+          "x": 289,
+          "y": 616,
+          "direction": "Right"
+        },
+        "geometry": {
+          "source": "sha256-pinned-local-release-reference",
+          "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325"
+        },
+        "physical": {
+          "input": "trusted-playwright-keyboard-pulse",
+          "key": "ArrowRight",
+          "atMs": 120731
+        },
+        "wire": {
+          "type": "walk",
+          "direction": "Right",
+          "atMs": 120735
+        },
+        "ack": {
+          "x": 289,
+          "y": 616,
+          "packet": "UserLocation",
+          "atMs": 120959
+        },
+        "ackWithinEightSeconds": true,
+        "rendered": {
+          "x": 289,
+          "y": 616,
+          "atMs": 121049
+        }
+      },
+      "normalLogout": {
+        "attempted": true,
+        "passed": true,
+        "returnedToSelect": true,
+        "sent": 1,
+        "acknowledged": 1
+      },
+      "returnedToSelect": true,
+      "questUi": null,
+      "sharedHud": {
+        "optional": true,
+        "passed": false,
+        "status": "not-reached"
+      },
+      "desktopBrowserClosed": true,
+      "failureDelivery": [
+        {
+          "scope": "staticStarterRegion",
+          "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+          "status": 200,
+          "requestOrdinal": 2,
+          "requestedMs": 82944,
+          "bodyCompleteMs": 84294
+        },
+        {
+          "scope": "crystalRegion",
+          "path": "/api/scene/crystal",
+          "status": 503,
+          "failure": "net::ERR_ABORTED",
+          "requestOrdinal": 5,
+          "requestedMs": 142188,
+          "failureMs": 162512
+        },
+        {
+          "scope": "crystalRegion",
+          "path": "/api/scene/crystal",
+          "status": 503,
+          "failure": "net::ERR_ABORTED",
+          "requestOrdinal": 6,
+          "requestedMs": 149345,
+          "failureMs": 162511
+        },
+        {
+          "scope": "crystalRegion",
+          "path": "/api/scene/crystal",
+          "failure": "net::ERR_ABORTED",
+          "requestOrdinal": 7,
+          "requestedMs": 156669,
+          "failureMs": 162511
+        }
+      ]
+    },
+    {
+      "run": "signed-public-r2",
+      "overallPassed": false,
+      "rawReceiptSha256": "a4ee4e4cddb3311a74910e9c377fbd338c1cc8b3f25cb915407a0d52d82efaf5",
+      "failure": {
+        "phase": "ordinary-first-playable-scene",
+        "code": "FIRST_PLAYABLE_SCENE_NOT_OBSERVED"
+      },
+      "phoneConfirmationScope": "official mobile-sized PWA, disposable virtual-authenticator Testnet wallet; no physical phone camera",
+      "signedLoginConfirmed": true,
+      "loginApprovals": 1,
+      "forbiddenWalletOperations": 0,
+      "publicDns": true,
+      "customBrowserNetworkSettings": false,
+      "tlsVerificationBypass": false,
+      "oneOrdinaryQaRoleCreated": true,
+      "sceneRendered": false,
+      "movement": {
+        "attempted": false,
+        "passed": null,
+        "status": "not-reached"
+      },
+      "normalLogout": {
+        "attempted": true,
+        "passed": true,
+        "returnedToSelect": true,
+        "sent": 1,
+        "acknowledged": 1
+      },
+      "returnedToSelect": true,
+      "questUi": {
+        "passed": false,
+        "status": "not-reached"
+      },
+      "sharedHud": {
+        "optional": true,
+        "passed": false,
+        "status": "not-reached"
+      },
+      "desktopBrowserClosed": true,
+      "failureDelivery": [
+        {
+          "scope": "staticStarterRegion",
+          "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+          "failure": "net::ERR_ABORTED",
+          "requestOrdinal": 2,
+          "requestedMs": 85919,
+          "failureMs": 97921
+        },
+        {
+          "scope": "staticStarterRegion",
+          "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+          "failure": "net::ERR_ABORTED",
+          "requestOrdinal": 5,
+          "requestedMs": 115939,
+          "failureMs": 127942
+        },
+        {
+          "scope": "crystalRegion",
+          "path": "/api/scene/crystal",
+          "status": 503,
+          "failure": "net::ERR_ABORTED",
+          "requestOrdinal": 6,
+          "requestedMs": 122913,
+          "failureMs": 129915
+        },
+        {
+          "scope": "crystalRegion",
+          "path": "/api/scene/crystal",
+          "failure": "net::ERR_ABORTED",
+          "requestOrdinal": 7,
+          "requestedMs": 130117,
+          "failureMs": 138118
+        },
+        {
+          "scope": "staticStarterRegion",
+          "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+          "requestOrdinal": 8,
+          "requestedMs": 241487
+        }
+      ]
+    }
+  ],
+  "observability": {
+    "scopedErrorAndFatalScan": "No matching runtime logs returned for this deployment in the 15-minute window ending 2026-11-11T07:08:27.815Z; not a full monitoring guarantee",
+    "drains": "Connector did not return this capability; not verified"
+  },
+  "screenshot": {
+    "filename": "public-city-after-walk.png",
+    "sha256": "154c89548c6868b9db140816559d9f02f47db2ec82bfdc063b5591822567d076",
+    "bytes": 945725,
+    "visuallyReviewed": true
+  },
+  "remaining": [
+    "public ordinary diary Q ownership and close",
+    "public cold static scene and locale transport reliability",
+    "public existing-role cold restart",
+    "current frontend full three-class 1–30 journey",
+    "shared runtime source comparison",
+    "physical phone and final human Windows acceptance"
+  ],
+  "originalWip": {
+    "unchangedFiles": 62,
+    "unchangedStatusRows": 38
+  },
+  "queuePreservation": {
+    "archive": "AGENT-TASK-QUEUE-CHECKPOINT-20261111.md",
+    "sha256": "ff0524e4e314e65e312dc794ba6cfd91a5ddb43e4253979790a8615492992de5",
+    "sourceLines": 146,
+    "uncheckedRetained": 20,
+    "currentLines": 55
+  }
+}

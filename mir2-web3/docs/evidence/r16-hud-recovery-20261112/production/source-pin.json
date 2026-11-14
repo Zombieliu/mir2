@@ -1,0 +1,143 @@
+{
+  "source": "a4f99c21115f0c558f78914c120eb1ce12028bff",
+  "base": "8ecf4ef58ed01b30b78ee08b3b24fda819fe6b20",
+  "baseline": "dpl_4w5R1XV8xoks6xx2eiJgv2KbtHYr",
+  "previousProductionSource": "c6bc815bae08fc4022d9113e61bf0a1734878cff",
+  "changes": [
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
+      "sha": "0978a7c5b7d1ab3d7897c17fedc8e2824628ad9b"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/app/page.tsx",
+      "sha": "f824ead652555d71d39a90adf4cddec3f09d1d7a"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/lib/bevy-runtime-font-prewarm.ts",
+      "sha": "b8fc5e3c53e26e39aa929901b6bc0f962523560c"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-asset-prewarm-request.mjs",
+      "sha": "6ac2e0a61249d7182336b5ebc8a31ca15fd839a8"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs",
+      "sha": "7541f4ff18f7244bb7d0d65727cd16b1ae2ff340"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/AGENT-CURRENT.md",
+      "sha": "899feb03dbaa83580b32d682b344188e0d628a8d"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+      "sha": "85c98431e95064dc0d82b7d48ba9f37a41912172"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+      "sha": "7b8baa3aa7fa07ec1a72bf47ed6a94f80cf6d319"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md",
+      "sha": "ec8178dad067d2e8a0bfda517fbf8051d9d1ff21"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-hud-recovery-20261112/README.md",
+      "sha": "f08dad8c7321546d4054900a40876904fb4b3ce4"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-hud-recovery-20261112/before-recovery-red.log",
+      "sha": "1753723c0fe8e99414fc14c774c0e5e09de25389"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-hud-recovery-20261112/build-receipt.json",
+      "sha": "391605bf9349eb76ff3b1a735273eb7d55757652"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-hud-recovery-20261112/production-build.log",
+      "sha": "199d981f409f3093de9734f891335e49440a8b01"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-hud-recovery-20261112/receipt.json",
+      "sha": "048cfde289cc15077aa8603576996973710f42a6"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-hud-recovery-20261112/tests.log",
+      "sha": "3c38f7d7a8cea3905d602149e1fdf4d62882a496"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-runtime-delivery-20261112/production/README.md",
+      "sha": "ca35aef68a6f91bcb9ec1c2bdf6bb874bac0a7fe"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-runtime-delivery-20261112/production/committed-source-binding.json",
+      "sha": "d582d61a5f569609ff295bf4f9023d3d2d4a0ecd"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-runtime-delivery-20261112/production/final-public-readback.json",
+      "sha": "573cbc38a915ecefb5dad2958ab60a9c4c723e49"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-runtime-delivery-20261112/production/promote.json",
+      "sha": "abeda526560cbcd0c9071ac0afcef5b8b462804b"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-runtime-delivery-20261112/production/promotion-readback.json",
+      "sha": "ab2187f17fb78cc3303663672626dc3a3aa65b35"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-runtime-delivery-20261112/production/public-shared-quest.png",
+      "sha": "0c13122408c96132ddb2b2e761f1935990f18be7"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-runtime-delivery-20261112/production/readback-network-attempts.json",
+      "sha": "7e05d821732cb1d703703e0e0939984769612437"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-runtime-delivery-20261112/production/receipt.json",
+      "sha": "3fb750d53ca3c01451e018831ba1950283463d02"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-runtime-delivery-20261112/production/source-pin.json",
+      "sha": "43238d64e286b9ae81c5aa8d7880e6c51586149c"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-runtime-delivery-20261112/production/stage.json",
+      "sha": "a94eeb6341ff56a4b18048d95864e1ef386f13b1"
+    }
+  ],
+  "fixedAssets": "20261108-r16-08ec86d5105c",
+  "buildReceiptSha256": "5f2cc4f8c3a2b8b3ab6c6e4bcbef9659417942c0cee28bcc2cb9c90fe08c03c2",
+  "pendingPoseExcluded": true,
+  "preservedFileCount": 65,
+  "workerBytes": 31615,
+  "workerSha256": "d86af7087c4701e020847fff0e22d9014b0deef4175d3dd81b69c48ad5688005",
+  "limits": [
+    "ordinary-network samples do not guarantee cold latency",
+    "full 1:1 and physical phone remain open"
+  ]
+}

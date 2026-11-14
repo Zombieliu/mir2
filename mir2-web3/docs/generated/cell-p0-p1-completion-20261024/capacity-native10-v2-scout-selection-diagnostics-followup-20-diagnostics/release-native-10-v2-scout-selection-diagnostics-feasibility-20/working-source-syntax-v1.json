@@ -1,0 +1,238 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-26T01:19:49.041372+00:00",
+  "scope": "Actual syntax-only checks for stable partial Probe20 sources. No import, target execution, product tests, sourceguard, seed, accounts or services. Other missing metadata remains PENDING; this is not a final source closure.",
+  "checks": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\backend-driver-source-guard.mjs",
+      "bytes": 2679,
+      "sha256": "beb01bc9f9811069d95771b010f36e101c459a3c2ae5418e622ccb3f675c7df2",
+      "kind": "node--check-only",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\collect-public.mjs",
+      "bytes": 44511,
+      "sha256": "541c90ea74bc502a62388f85b7ce964244e9831687b33cb85fe81dcf22d0d460",
+      "kind": "node--check-only",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\collect-store-public.mjs",
+      "bytes": 4715,
+      "sha256": "75246bed8e64d2c992e494a5b33450c8759829736ca950d39d1ebede94670c55",
+      "kind": "node--check-only",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\driver-binding-contract.mjs",
+      "bytes": 1623,
+      "sha256": "682b561cdd384d54da0ff489b3c9baad860125a23e79132eed94a414c88a0a03",
+      "kind": "node--check-only",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\driver-evidence-contract.mjs",
+      "bytes": 10516,
+      "sha256": "3f94f86cd7c9ba3f7faa667911f36cd18b322c39e17be79adafbdc896b2a10eb",
+      "kind": "node--check-only",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\driver-report-contract.mjs",
+      "bytes": 9785,
+      "sha256": "9d5ffc35cab3516ce7ef38af2eae9f2527a4ae17e19d679529740bf4ad978938",
+      "kind": "node--check-only",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\input-lib.mjs",
+      "bytes": 16967,
+      "sha256": "5ff2a5b7f9a668a8d67d88971a80de6e609b5c36f12f4d3dd5786113d6bf1eab",
+      "kind": "node--check-only",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\measured-phase-contract.mjs",
+      "bytes": 772,
+      "sha256": "b0977c31d9ee2345977e6af85f79beabc369d4c3e5c9448a50fa39133e0e2b39",
+      "kind": "node--check-only",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\monitor-owned.mjs",
+      "bytes": 1182,
+      "sha256": "204abfb6fa4000b9da770a8dbc128225ff3583caf9e7763dbedcf6b22d5adc72",
+      "kind": "node--check-only",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\native-chase-report-contract.mjs",
+      "bytes": 2266,
+      "sha256": "66b9ce1a39a1cfbe610d3f1a98559c67d178667319718f8baaa748a5d7d102c0",
+      "kind": "node--check-only",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\passed-probe-window-contract.mjs",
+      "bytes": 3040,
+      "sha256": "3a238991e9ee9b81b93cdcb282cdd7c718afa076ec5eb1db11ef96cbe4b15cdb",
+      "kind": "node--check-only",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\prepare-inputs.mjs",
+      "bytes": 14284,
+      "sha256": "0815df24a148097f3bd7fb64af209507adadf403e6d6aa679d3e8782c2ac8bc5",
+      "kind": "node--check-only",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\projection-build-source-lib.mjs",
+      "bytes": 174,
+      "sha256": "d07da1f1a885da5ce4bc9522469db149eb96030af51737cb3b6a16d053e1e607",
+      "kind": "node--check-only",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\request-stop.mjs",
+      "bytes": 915,
+      "sha256": "14a5c691187006ebb50798068100d47af7ed3a6c4358c29f75b6774c79ebc90f",
+      "kind": "node--check-only",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\run-owned.mjs",
+      "bytes": 21646,
+      "sha256": "8745f25048d95bd9f8d2547cb5c886c9f9be899d00e177c57d2ebacb055f4026",
+      "kind": "node--check-only",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\scene-contract.mjs",
+      "bytes": 10796,
+      "sha256": "6f91a930d2c1d05a7ca813aaff0c1e44d29289303913d470ac2a72c4211b207f",
+      "kind": "node--check-only",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\scene-driver-compatibility.mjs",
+      "bytes": 1550,
+      "sha256": "260b80faa43d6a52936097cb1587989cc7a9dc52022dc5f667b10dd3e76c0289",
+      "kind": "node--check-only",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\slow-stage-public.mjs",
+      "bytes": 10318,
+      "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c",
+      "kind": "node--check-only",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\slow-stage-row-contract.mjs",
+      "bytes": 1553,
+      "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8",
+      "kind": "node--check-only",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\store-diagnostics-contract.mjs",
+      "bytes": 2720,
+      "sha256": "c31a1c25d6a49f3c1575afaa058f8cd022f430e80c00269e7fffcf12a26e8a08",
+      "kind": "node--check-only",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\verify-full16-gate.mjs",
+      "bytes": 5651,
+      "sha256": "35e2a2f705d144711406864edda373c308855bb1e1f035230a290b0505ecc38a",
+      "kind": "node--check-only",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\verify-public.mjs",
+      "bytes": 19358,
+      "sha256": "3e5cae21a25f8dd96e8882f73fc379879b664f1e86cce686f8e42d96bb167a3d",
+      "kind": "node--check-only",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\verify-store-public.mjs",
+      "bytes": 4631,
+      "sha256": "44d24d03f820eee4f09219cd2183578df80de5f4a42fcc2f09c54b1198d00f35",
+      "kind": "node--check-only",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\wire-diagnostics-adapter.mjs",
+      "bytes": 2514,
+      "sha256": "82c5ae7432cb7b69e576e7c283e4a4ca6afe074b692342ea5a82516dd3fef164",
+      "kind": "node--check-only",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\wire-diagnostics-contract.mjs",
+      "bytes": 15767,
+      "sha256": "8d2c06f251a3b623d4ff135211046b9d039b31e9bfdad799c0cb1fd3ddfda13a",
+      "kind": "node--check-only",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "nodeChecks": 25,
+  "failed": 0,
+  "targetModulesImported": false,
+  "modeExecuted": false,
+  "eligibleForSealNow": false,
+  "capacityAccepted": false
+}

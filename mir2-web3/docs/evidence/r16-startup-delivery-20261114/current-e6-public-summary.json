@@ -1,0 +1,277 @@
+{
+  "schema": "mir2.current-production-delivery-observation.v1",
+  "scope": "New read-only current-production E6 browser diagnostic, one disposable Testnet wallet login-only sign, at most one normal QA character and one adjacent walk. No release or promotion, all original8s/15s/120s gates retained. Adds static page/Worker metadata only; no auth payload export, interception, custom proxy, DNS or TLS settings. No physical-phone or full-route claim.",
+  "expectedRevision": "e6c923b7c669cb061a7a03703f05fadd91211c97",
+  "deploymentId": "dpl_Ae3hNyFygQuSMZDesBXCZDpUECTY",
+  "passed": false,
+  "failure": {
+    "phase": "one-ordinary-adjacent-walk",
+    "code": "ORDINARY_WALK_WIRE_OR_ACK_MISSING"
+  },
+  "timing": {
+    "clockEpochMs": 1794642670820,
+    "authoritativeLoginSuccessMs": 42006,
+    "startIntentMs": 72548,
+    "startAckMs": 92347,
+    "authoritativeStarterMapMs": 92355,
+    "authoritativeSelfMs": 92355,
+    "firstPlayableObservedMs": 95636,
+    "terrainPaintVerifiedMs": 191340,
+    "sharedHudObservedMs": 219884,
+    "logoutIntentMs": 226150,
+    "logoutAckMs": 227234,
+    "manifestAttemptsBeforeStart": 1,
+    "manifestAttemptsAtOrAfterStart": 0,
+    "starterRegionRequestMs": 42011,
+    "starterRegionWireHeadersMs": 42858.903,
+    "starterRegionResponseEventMs": 42859,
+    "starterRegionBodyMs": 42945,
+    "starterRegionCommitMs": 92518,
+    "sceneSpritesReadyMs": 92549,
+    "localeRequestMs": 42011,
+    "localeBodyMs": 51135,
+    "localeReadyMs": 51162,
+    "firstPlayableFrameMs": 95558,
+    "rendererBodyMs": 190296
+  },
+  "movement": {
+    "attempted": true,
+    "passed": false,
+    "status": "attempted",
+    "from": {
+      "x": 288,
+      "y": 616
+    },
+    "to": {
+      "x": 289,
+      "y": 616,
+      "direction": "Right"
+    },
+    "authorityBinding": {
+      "connection": 1,
+      "startOrdinal": 1,
+      "seq": 21,
+      "packet": "UserInformation",
+      "atMs": 95812
+    },
+    "geometry": {
+      "source": "sha256-pinned-local-release-reference-and-complete-production-map-collision",
+      "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+      "townCollisionSha256": "f3f8734df7ead149be6005acab0dca69694434a39d20735e977bd9d95eb2b81f"
+    },
+    "physical": {
+      "input": "trusted-playwright-keyboard-pulse",
+      "key": "ArrowRight",
+      "atMs": 95812
+    },
+    "wire": {
+      "type": "walk",
+      "direction": "Right",
+      "atMs": 95815
+    },
+    "failure": {
+      "phase": "one-ordinary-adjacent-walk",
+      "code": "ORDINARY_WALK_WIRE_OR_ACK_MISSING"
+    },
+    "ack": {
+      "x": 289,
+      "y": 616,
+      "packet": "UserLocation",
+      "atMs": 157744
+    }
+  },
+  "firstWalkTransport": {
+    "websocketFrameMs": 61928,
+    "keepAlives": [
+      {
+        "sentRelativeToWalkMs": -40065,
+        "rttMs": 156
+      },
+      {
+        "sentRelativeToWalkMs": -25064,
+        "rttMs": 176
+      },
+      {
+        "sentRelativeToWalkMs": -10064,
+        "rttMs": 61017
+      },
+      {
+        "sentRelativeToWalkMs": 4935,
+        "rttMs": 57299
+      },
+      {
+        "sentRelativeToWalkMs": 19937,
+        "rttMs": 42298
+      },
+      {
+        "sentRelativeToWalkMs": 34936,
+        "rttMs": 27298
+      },
+      {
+        "sentRelativeToWalkMs": 49936,
+        "rttMs": 12299
+      },
+      {
+        "sentRelativeToWalkMs": 64935,
+        "rttMs": 149
+      },
+      {
+        "sentRelativeToWalkMs": 79935,
+        "rttMs": 146
+      },
+      {
+        "sentRelativeToWalkMs": 95069,
+        "rttMs": 155
+      },
+      {
+        "sentRelativeToWalkMs": 109939,
+        "rttMs": 157
+      },
+      {
+        "sentRelativeToWalkMs": 124942,
+        "rttMs": 162
+      }
+    ],
+    "gatewayHealthBefore": {
+      "status": 200,
+      "startedAt": 72529,
+      "finishedAt": 74132,
+      "revision": "8f3099f4a0114a7825ff61db36b548d3bfb5b3fa",
+      "complete": true,
+      "sinceInitializationMs": 9718239,
+      "successes": 1,
+      "failures": 0,
+      "count": 1,
+      "sumUs": 524
+    },
+    "gatewayHealthAfter": null,
+    "admissionCounterDelta": null
+  },
+  "protocolCounts": {
+    "gameSockets": 1,
+    "passkeyLogin": 1,
+    "loginSuccess": 1,
+    "newCharacter": 1,
+    "newCharacterSuccess": 1,
+    "startGame": 1,
+    "startGameResult": 4,
+    "walk": 1,
+    "logOut": 1,
+    "logOutSuccess": 1,
+    "unexpectedMutation": 0
+  },
+  "qrPixelsPassed": true,
+  "normalTestnetLoginOnlyApprovalCount": 1,
+  "forbiddenWalletOperationCount": 0,
+  "sharedHudPassed": true,
+  "sharedHudQuest": {
+    "passed": true,
+    "locale": "zh-TW",
+    "renderer": "ordinary-shared-native",
+    "questOpened": true,
+    "qClosed": true,
+    "owner": "bevy",
+    "package": {
+      "backend": "webgpu",
+      "packageId": "webgpu"
+    },
+    "navigation": {
+      "characterOpen": false,
+      "characterPage": "character",
+      "bagOpen": false,
+      "questOpen": false
+    },
+    "zeroWorldCommands": true,
+    "screenshot": "quest-shared-zh-TW.png"
+  },
+  "fallbackQuestPassed": true,
+  "fontCacheComplete": true,
+  "fontBodies": [
+    {
+      "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "present": true,
+      "bytes": 16437364,
+      "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansTC.ttf",
+      "present": true,
+      "bytes": 11941968,
+      "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+    },
+    {
+      "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+      "present": true,
+      "bytes": 621572,
+      "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "present": true,
+      "bytes": 243520,
+      "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "present": true,
+      "bytes": 37780,
+      "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "present": true,
+      "bytes": 234892,
+      "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+    }
+  ],
+  "prewarm": {
+    "passed": true,
+    "requested": 113,
+    "ok": 113
+  },
+  "workerRestartPassed": true,
+  "logout": {
+    "attempted": true,
+    "passed": true,
+    "returnedToSelect": true,
+    "sent": 1,
+    "acknowledged": 1
+  },
+  "desktopBrowserClosed": true,
+  "walletBrowserClosed": true,
+  "consoleErrors": 38,
+  "pageErrors": 0,
+  "assetHttpErrors": 36,
+  "failedRequests": {
+    "net::ERR_ABORTED": 556
+  },
+  "coldQualification": {
+    "nativeObservedAfterFirstFrameMs": 124326,
+    "originalLimitMs": 120000,
+    "passed": false
+  },
+  "staticObservation": {
+    "pageRows": 730,
+    "pageDropped": 0,
+    "pageErrors": 0,
+    "workerRows": 708,
+    "workerDropped": 0,
+    "workerErrors": [],
+    "workerCleanup": true,
+    "knownLimitations": [
+      "Page and Worker rows are separate layers; do not sum them as wire bytes",
+      "Public static allowlist only; auth APIs, query strings, headers and bodies excluded",
+      "Worker attachment races remain visible; not all browser traffic is claimed"
+    ]
+  },
+  "noProductionMutation": true,
+  "noRootCauseClaim": true,
+  "original715FailureRetained": true,
+  "qrPixelVerification": {
+    "valid": true,
+    "matched": 2401,
+    "total": 2401,
+    "width": 240,
+    "height": 240
+  }
+}

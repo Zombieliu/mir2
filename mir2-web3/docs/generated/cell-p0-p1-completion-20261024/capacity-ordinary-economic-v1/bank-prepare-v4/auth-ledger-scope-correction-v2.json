@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "scope": "Metadata only: correct traffic-ledger provenance; no code or actual state changed.",
+  "preimage": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\prepare-config.before-auth-scope-v1.json",
+    "bytes": 5850,
+    "sha256": "7fb69440d2af5ad4081511b02f9edad682187da282118c1b33926fbca9224183"
+  },
+  "current": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v4\\prepare-config-pending-v1.json",
+    "bytes": 6017,
+    "sha256": "f89e962d58568355c5805861fe93018c91d1226606c53fa141682dbe2f3fe964"
+  },
+  "changedField": "authOrigin.scope",
+  "before": "Complete actualV1 ledger copied unchanged. No loginNotBefore option is permitted for this existing partial bank; normal prune/wait remains authoritative.",
+  "after": "Game snapshot is exact V2 Store/pool/secrets/current-four-controls replay; the sole traffic artifact is the latest actual V3 capacity-auth-budget.json copied byte-exactly for the same100 account identities and endpoint. Preserve original25+5/901000ms accounting; no loginNotBefore override, reset or V2 traffic rollback.",
+  "hunks": [
+    {
+      "oldOffsetUtf16": 1928,
+      "newOffsetUtf16": 1928,
+      "before": "    \"scope\": \"Complete actualV1 ledger copied unchanged. No loginNotBefore option is permitted for this existing partial bank; normal prune/wait remains authoritative.\",\n",
+      "after": "    \"scope\": \"Game snapshot is exact V2 Store/pool/secrets/current-four-controls replay; the sole traffic artifact is the latest actual V3 capacity-auth-budget.json copied byte-exactly for the same100 account identities and endpoint. Preserve original25+5/901000ms accounting; no loginNotBefore override, reset or V2 traffic rollback.\",\n"
+    }
+  ],
+  "forwardRawExact": true,
+  "inverseRawExact": true,
+  "ledger": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v3\\episode\\private\\capacity-auth-budget.json",
+    "bytes": 453,
+    "sha256": "92b93d0a7b7f5959a3733e9add3b01610f68358425f6c983807cf58362f38421"
+  },
+  "gameSnapshotSource": "V2",
+  "trafficLedgerSource": "latest V3",
+  "modeExecuted": false
+}

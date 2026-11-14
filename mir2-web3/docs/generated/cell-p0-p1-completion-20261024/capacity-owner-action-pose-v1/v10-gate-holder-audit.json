@@ -1,0 +1,1175 @@
+{
+  "schemaVersion": 1,
+  "scope": "public slow-stage only; global distribution and fatal +/-15 seconds; no samples or private.stderr read",
+  "source": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v10\\episode-50\\slow-stage-public.jsonl",
+    "physicalReads": 1,
+    "bytes": 12846906,
+    "rows": 134304,
+    "sha256": "de7d3ff330f33edf26465fa76ba5315325f5c611a4dd38347ebaaa367cf90de4",
+    "malformed": [],
+    "completeCaptureStatus": "episode-50/slow-stage-public-status.json complete=true, rowsQueued=134304, bytesQueued=12846906, thresholdMs=50",
+    "timestampMeaning": "observedAtMs is launcher Date.now() at complete stderr line receive, not server span start/end; all fatal-window selection is receive-time only",
+    "schema": "socket-context-v1"
+  },
+  "schemaKeys": {
+    "observedAtMs": 134304,
+    "stage": 134304,
+    "durationMs": 134304,
+    "connection": 82338,
+    "queuedPhase": 4704,
+    "phaseElapsedMs": 4704,
+    "inputClass": 4704
+  },
+  "normalizedRows": 134304,
+  "fatalAt": 1793026898808,
+  "fatalWindow": {
+    "start": 1793026883808,
+    "end": 1793026913808,
+    "rows": 13210,
+    "byStage": {
+      "zone_owner.in_process.execute_request": {
+        "count": 2049,
+        "totalMs": 883174.0,
+        "p50Ms": 408.0,
+        "p95Ms": 988.0,
+        "p99Ms": 1388.0,
+        "maxMs": 2292.0
+      },
+      "runtime_tick.total": {
+        "count": 1722,
+        "totalMs": 808377.0,
+        "p50Ms": 429.0,
+        "p95Ms": 1008.0,
+        "p99Ms": 1388.0,
+        "maxMs": 2292.0
+      },
+      "runtime_tick.execute": {
+        "count": 1722,
+        "totalMs": 806455.0,
+        "p50Ms": 427.0,
+        "p95Ms": 1008.0,
+        "p99Ms": 1388.0,
+        "maxMs": 2292.0
+      },
+      "serial_gate.zone_outbound_wait": {
+        "count": 1812,
+        "totalMs": 688224.0,
+        "p50Ms": 338.0,
+        "p95Ms": 873.0,
+        "p99Ms": 1384.0,
+        "maxMs": 3000.0
+      },
+      "shared_session.predrain": {
+        "count": 1667,
+        "totalMs": 463185.0,
+        "p50Ms": 274.0,
+        "p95Ms": 523.0,
+        "p99Ms": 623.0,
+        "maxMs": 1235.0
+      },
+      "socket_turn.input": {
+        "count": 666,
+        "totalMs": 249174.0,
+        "p50Ms": 284.0,
+        "p95Ms": 911.0,
+        "p99Ms": 1874.0,
+        "maxMs": 3016.0
+      },
+      "session_action.execute": {
+        "count": 661,
+        "totalMs": 227831.0,
+        "p50Ms": 283.0,
+        "p95Ms": 790.0,
+        "p99Ms": 1305.0,
+        "maxMs": 1685.0
+      },
+      "socket_turn.spectator": {
+        "count": 1037,
+        "totalMs": 184815.0,
+        "p50Ms": 117.0,
+        "p95Ms": 448.0,
+        "p99Ms": 572.0,
+        "maxMs": 635.0
+      },
+      "socket_input.queue_residence": {
+        "count": 577,
+        "totalMs": 174613.0,
+        "p50Ms": 239.0,
+        "p95Ms": 740.0,
+        "p99Ms": 1107.0,
+        "maxMs": 2204.0
+      },
+      "shared_session.reconcile": {
+        "count": 732,
+        "totalMs": 137476.0,
+        "p50Ms": 130.0,
+        "p95Ms": 525.0,
+        "p99Ms": 685.0,
+        "maxMs": 854.0
+      },
+      "shared_session.inner_execute": {
+        "count": 333,
+        "totalMs": 46814.0,
+        "p50Ms": 87.0,
+        "p95Ms": 395.0,
+        "p99Ms": 437.0,
+        "maxMs": 499.0
+      },
+      "session_action.flush": {
+        "count": 46,
+        "totalMs": 13688.0,
+        "p50Ms": 205.0,
+        "p95Ms": 691.0,
+        "p99Ms": 1586.0,
+        "maxMs": 1586.0
+      },
+      "shared_session.tail": {
+        "count": 67,
+        "totalMs": 6351.0,
+        "p50Ms": 76.0,
+        "p95Ms": 190.0,
+        "p99Ms": 467.0,
+        "maxMs": 467.0
+      },
+      "zone_cadence.total": {
+        "count": 66,
+        "totalMs": 6189.0,
+        "p50Ms": 83.0,
+        "p95Ms": 151.0,
+        "p99Ms": 223.0,
+        "maxMs": 223.0
+      },
+      "flush.save": {
+        "count": 8,
+        "totalMs": 3701.0,
+        "p50Ms": 452.0,
+        "p95Ms": 803.0,
+        "p99Ms": 803.0,
+        "maxMs": 803.0
+      },
+      "snapshot.build_and_send": {
+        "count": 16,
+        "totalMs": 2608.0,
+        "p50Ms": 128.0,
+        "p95Ms": 323.0,
+        "p99Ms": 323.0,
+        "maxMs": 323.0
+      },
+      "runtime_tick.serial_gate_wait": {
+        "count": 11,
+        "totalMs": 916.0,
+        "p50Ms": 77.0,
+        "p95Ms": 118.0,
+        "p99Ms": 118.0,
+        "maxMs": 118.0
+      },
+      "flush.external_state": {
+        "count": 8,
+        "totalMs": 881.0,
+        "p50Ms": 84.0,
+        "p95Ms": 241.0,
+        "p99Ms": 241.0,
+        "maxMs": 241.0
+      },
+      "shared_session.predrain.pending_lock_wait": {
+        "count": 9,
+        "totalMs": 517.0,
+        "p50Ms": 57.0,
+        "p95Ms": 69.0,
+        "p99Ms": 69.0,
+        "maxMs": 69.0
+      },
+      "shared_session.predrain.journey_reposition": {
+        "count": 1,
+        "totalMs": 67.0,
+        "p50Ms": 67.0,
+        "p95Ms": 67.0,
+        "p99Ms": 67.0,
+        "maxMs": 67.0
+      }
+    },
+    "candidatePublicConnection16": {
+      "status": "conditional_only; registration16 to publicConnection16 strict mapping unknown",
+      "rows": 112,
+      "byStage": {
+        "serial_gate.zone_outbound_wait": {
+          "count": 29,
+          "totalMs": 21852.0,
+          "p50Ms": 528.0,
+          "p95Ms": 2170.0,
+          "p99Ms": 3000.0,
+          "maxMs": 3000.0
+        },
+        "socket_turn.input": {
+          "count": 15,
+          "totalMs": 12137.0,
+          "p50Ms": 511.0,
+          "p95Ms": 3016.0,
+          "p99Ms": 3016.0,
+          "maxMs": 3016.0
+        },
+        "runtime_tick.total": {
+          "count": 14,
+          "totalMs": 11085.0,
+          "p50Ms": 617.0,
+          "p95Ms": 1875.0,
+          "p99Ms": 1875.0,
+          "maxMs": 1875.0
+        },
+        "runtime_tick.execute": {
+          "count": 14,
+          "totalMs": 11082.0,
+          "p50Ms": 617.0,
+          "p95Ms": 1875.0,
+          "p99Ms": 1875.0,
+          "maxMs": 1875.0
+        },
+        "socket_input.queue_residence": {
+          "count": 15,
+          "totalMs": 10801.0,
+          "p50Ms": 326.0,
+          "p95Ms": 2204.0,
+          "p99Ms": 2204.0,
+          "maxMs": 2204.0
+        },
+        "session_action.execute": {
+          "count": 15,
+          "totalMs": 8529.0,
+          "p50Ms": 499.0,
+          "p95Ms": 1399.0,
+          "p99Ms": 1399.0,
+          "maxMs": 1399.0
+        },
+        "session_action.flush": {
+          "count": 4,
+          "totalMs": 2904.0,
+          "p50Ms": 593.0,
+          "p95Ms": 1586.0,
+          "p99Ms": 1586.0,
+          "maxMs": 1586.0
+        },
+        "socket_turn.spectator": {
+          "count": 6,
+          "totalMs": 1569.0,
+          "p50Ms": 149.0,
+          "p95Ms": 459.0,
+          "p99Ms": 459.0,
+          "maxMs": 459.0
+        }
+      },
+      "knownGateNeighborhood": [
+        {
+          "sourceLine": 122272,
+          "stage": "session_action.flush",
+          "durationMs": 639,
+          "connection": 16,
+          "observedAtMs": 1793026886172
+        },
+        {
+          "sourceLine": 122302,
+          "stage": "socket_turn.input",
+          "durationMs": 2058,
+          "connection": 16,
+          "observedAtMs": 1793026886207
+        },
+        {
+          "sourceLine": 122303,
+          "stage": "serial_gate.zone_outbound_wait",
+          "durationMs": 2042,
+          "connection": 16,
+          "observedAtMs": 1793026886207
+        },
+        {
+          "sourceLine": 122304,
+          "stage": "socket_input.queue_residence",
+          "durationMs": 1378,
+          "connection": 16,
+          "queuedPhase": "input",
+          "phaseElapsedMs": 680,
+          "inputClass": "move",
+          "observedAtMs": 1793026886207
+        },
+        {
+          "sourceLine": 122491,
+          "stage": "session_action.execute",
+          "durationMs": 454,
+          "connection": 16,
+          "observedAtMs": 1793026886660
+        },
+        {
+          "sourceLine": 122492,
+          "stage": "socket_turn.input",
+          "durationMs": 458,
+          "connection": 16,
+          "observedAtMs": 1793026886660
+        },
+        {
+          "sourceLine": 122493,
+          "stage": "serial_gate.zone_outbound_wait",
+          "durationMs": 454,
+          "connection": 16,
+          "observedAtMs": 1793026886660
+        },
+        {
+          "sourceLine": 122494,
+          "stage": "socket_input.queue_residence",
+          "durationMs": 321,
+          "connection": 16,
+          "queuedPhase": "input",
+          "phaseElapsedMs": 136,
+          "inputClass": "move",
+          "observedAtMs": 1793026886660
+        },
+        {
+          "sourceLine": 123302,
+          "stage": "session_action.execute",
+          "durationMs": 1172,
+          "connection": 16,
+          "observedAtMs": 1793026887876
+        },
+        {
+          "sourceLine": 123604,
+          "stage": "session_action.flush",
+          "durationMs": 593,
+          "connection": 16,
+          "observedAtMs": 1793026888468
+        },
+        {
+          "sourceLine": 123773,
+          "stage": "socket_turn.input",
+          "durationMs": 2171,
+          "connection": 16,
+          "observedAtMs": 1793026888872
+        },
+        {
+          "sourceLine": 123774,
+          "stage": "socket_input.queue_residence",
+          "durationMs": 2204,
+          "connection": 16,
+          "queuedPhase": "input",
+          "phaseElapsedMs": 9,
+          "inputClass": "other",
+          "observedAtMs": 1793026888872
+        },
+        {
+          "sourceLine": 123776,
+          "stage": "serial_gate.zone_outbound_wait",
+          "durationMs": 2170,
+          "connection": 16,
+          "observedAtMs": 1793026888872
+        }
+      ],
+      "fatalNeighborhood": [
+        {
+          "sourceLine": 127216,
+          "stage": "session_action.flush",
+          "durationMs": 1586,
+          "connection": 16,
+          "observedAtMs": 1793026895556
+        },
+        {
+          "sourceLine": 127240,
+          "stage": "socket_turn.input",
+          "durationMs": 3016,
+          "connection": 16,
+          "observedAtMs": 1793026895585
+        },
+        {
+          "sourceLine": 127241,
+          "stage": "socket_input.queue_residence",
+          "durationMs": 1823,
+          "connection": 16,
+          "queuedPhase": "input",
+          "phaseElapsedMs": 1193,
+          "inputClass": "move",
+          "observedAtMs": 1793026895585
+        },
+        {
+          "sourceLine": 127242,
+          "stage": "serial_gate.zone_outbound_wait",
+          "durationMs": 3000,
+          "connection": 16,
+          "observedAtMs": 1793026895585
+        },
+        {
+          "sourceLine": 127562,
+          "stage": "session_action.execute",
+          "durationMs": 499,
+          "connection": 16,
+          "observedAtMs": 1793026896103
+        },
+        {
+          "sourceLine": 127563,
+          "stage": "socket_turn.input",
+          "durationMs": 511,
+          "connection": 16,
+          "observedAtMs": 1793026896103
+        },
+        {
+          "sourceLine": 127564,
+          "stage": "socket_input.queue_residence",
+          "durationMs": 106,
+          "connection": 16,
+          "queuedPhase": "input",
+          "phaseElapsedMs": 405,
+          "inputClass": "other",
+          "observedAtMs": 1793026896103
+        },
+        {
+          "sourceLine": 127565,
+          "stage": "serial_gate.zone_outbound_wait",
+          "durationMs": 499,
+          "connection": 16,
+          "observedAtMs": 1793026896103
+        },
+        {
+          "sourceLine": 127650,
+          "stage": "session_action.execute",
+          "durationMs": 79,
+          "connection": 16,
+          "observedAtMs": 1793026896177
+        },
+        {
+          "sourceLine": 127651,
+          "stage": "socket_turn.input",
+          "durationMs": 80,
+          "connection": 16,
+          "observedAtMs": 1793026896177
+        },
+        {
+          "sourceLine": 127652,
+          "stage": "serial_gate.zone_outbound_wait",
+          "durationMs": 80,
+          "connection": 16,
+          "observedAtMs": 1793026896177
+        },
+        {
+          "sourceLine": 127873,
+          "stage": "runtime_tick.execute",
+          "durationMs": 545,
+          "connection": 16,
+          "observedAtMs": 1793026896737
+        },
+        {
+          "sourceLine": 127874,
+          "stage": "runtime_tick.total",
+          "durationMs": 545,
+          "connection": 16,
+          "observedAtMs": 1793026896737
+        },
+        {
+          "sourceLine": 127875,
+          "stage": "serial_gate.zone_outbound_wait",
+          "durationMs": 285,
+          "connection": 16,
+          "observedAtMs": 1793026896737
+        },
+        {
+          "sourceLine": 128085,
+          "stage": "runtime_tick.execute",
+          "durationMs": 518,
+          "connection": 16,
+          "observedAtMs": 1793026897298
+        },
+        {
+          "sourceLine": 128086,
+          "stage": "runtime_tick.total",
+          "durationMs": 518,
+          "connection": 16,
+          "observedAtMs": 1793026897298
+        },
+        {
+          "sourceLine": 128087,
+          "stage": "serial_gate.zone_outbound_wait",
+          "durationMs": 518,
+          "connection": 16,
+          "observedAtMs": 1793026897298
+        },
+        {
+          "sourceLine": 128239,
+          "stage": "socket_turn.spectator",
+          "durationMs": 149,
+          "connection": 16,
+          "observedAtMs": 1793026897446
+        },
+        {
+          "sourceLine": 128637,
+          "stage": "runtime_tick.execute",
+          "durationMs": 696,
+          "connection": 16,
+          "observedAtMs": 1793026898150
+        },
+        {
+          "sourceLine": 128639,
+          "stage": "runtime_tick.total",
+          "durationMs": 696,
+          "connection": 16,
+          "observedAtMs": 1793026898150
+        },
+        {
+          "sourceLine": 128640,
+          "stage": "serial_gate.zone_outbound_wait",
+          "durationMs": 691,
+          "connection": 16,
+          "observedAtMs": 1793026898150
+        },
+        {
+          "sourceLine": 128641,
+          "stage": "socket_input.queue_residence",
+          "durationMs": 642,
+          "connection": 16,
+          "queuedPhase": "runtime_tick",
+          "phaseElapsedMs": 53,
+          "inputClass": "move",
+          "observedAtMs": 1793026898150
+        },
+        {
+          "sourceLine": 128976,
+          "stage": "session_action.execute",
+          "durationMs": 678,
+          "connection": 16,
+          "observedAtMs": 1793026898838
+        },
+        {
+          "sourceLine": 128977,
+          "stage": "socket_turn.input",
+          "durationMs": 695,
+          "connection": 16,
+          "observedAtMs": 1793026898838
+        },
+        {
+          "sourceLine": 128978,
+          "stage": "serial_gate.zone_outbound_wait",
+          "durationMs": 679,
+          "connection": 16,
+          "observedAtMs": 1793026898838
+        },
+        {
+          "sourceLine": 129193,
+          "stage": "runtime_tick.execute",
+          "durationMs": 507,
+          "connection": 16,
+          "observedAtMs": 1793026899435
+        },
+        {
+          "sourceLine": 129194,
+          "stage": "runtime_tick.total",
+          "durationMs": 507,
+          "connection": 16,
+          "observedAtMs": 1793026899435
+        },
+        {
+          "sourceLine": 129207,
+          "stage": "serial_gate.zone_outbound_wait",
+          "durationMs": 504,
+          "connection": 16,
+          "observedAtMs": 1793026899436
+        },
+        {
+          "sourceLine": 129336,
+          "stage": "socket_turn.spectator",
+          "durationMs": 90,
+          "connection": 16,
+          "observedAtMs": 1793026899525
+        }
+      ]
+    },
+    "longestHolderStages": [
+      {
+        "sourceLine": 130372,
+        "stage": "runtime_tick.execute",
+        "durationMs": 2292.0,
+        "connection": 41,
+        "observedAtMs": 1793026903073
+      },
+      {
+        "sourceLine": 130354,
+        "stage": "runtime_tick.execute",
+        "durationMs": 2274.0,
+        "connection": 48,
+        "observedAtMs": 1793026903027
+      },
+      {
+        "sourceLine": 130334,
+        "stage": "runtime_tick.execute",
+        "durationMs": 2237.0,
+        "connection": 47,
+        "observedAtMs": 1793026902986
+      },
+      {
+        "sourceLine": 130132,
+        "stage": "runtime_tick.execute",
+        "durationMs": 2084.0,
+        "connection": 11,
+        "observedAtMs": 1793026902221
+      },
+      {
+        "sourceLine": 130090,
+        "stage": "runtime_tick.execute",
+        "durationMs": 1929.0,
+        "connection": 13,
+        "observedAtMs": 1793026902036
+      },
+      {
+        "sourceLine": 130292,
+        "stage": "runtime_tick.execute",
+        "durationMs": 1917.0,
+        "connection": 37,
+        "observedAtMs": 1793026902824
+      },
+      {
+        "sourceLine": 130077,
+        "stage": "runtime_tick.execute",
+        "durationMs": 1911.0,
+        "connection": 44,
+        "observedAtMs": 1793026902002
+      },
+      {
+        "sourceLine": 131698,
+        "stage": "runtime_tick.execute",
+        "durationMs": 1898.0,
+        "connection": 39,
+        "observedAtMs": 1793026906599
+      },
+      {
+        "sourceLine": 130263,
+        "stage": "runtime_tick.execute",
+        "durationMs": 1890.0,
+        "connection": 17,
+        "observedAtMs": 1793026902765
+      },
+      {
+        "sourceLine": 130250,
+        "stage": "runtime_tick.execute",
+        "durationMs": 1875.0,
+        "connection": 16,
+        "observedAtMs": 1793026902742
+      },
+      {
+        "sourceLine": 130482,
+        "stage": "runtime_tick.execute",
+        "durationMs": 1821.0,
+        "connection": 14,
+        "observedAtMs": 1793026903411
+      },
+      {
+        "sourceLine": 131854,
+        "stage": "runtime_tick.execute",
+        "durationMs": 1789.0,
+        "connection": 33,
+        "observedAtMs": 1793026907100
+      },
+      {
+        "sourceLine": 131217,
+        "stage": "session_action.execute",
+        "durationMs": 1685.0,
+        "connection": 8,
+        "observedAtMs": 1793026905088
+      },
+      {
+        "sourceLine": 130327,
+        "stage": "runtime_tick.execute",
+        "durationMs": 1671.0,
+        "connection": 10,
+        "observedAtMs": 1793026902964
+      },
+      {
+        "sourceLine": 127216,
+        "stage": "session_action.flush",
+        "durationMs": 1586.0,
+        "connection": 16,
+        "observedAtMs": 1793026895556
+      },
+      {
+        "sourceLine": 129704,
+        "stage": "session_action.execute",
+        "durationMs": 1576.0,
+        "connection": 4,
+        "observedAtMs": 1793026901143
+      },
+      {
+        "sourceLine": 129695,
+        "stage": "session_action.execute",
+        "durationMs": 1567.0,
+        "connection": 2,
+        "observedAtMs": 1793026901116
+      },
+      {
+        "sourceLine": 129691,
+        "stage": "session_action.execute",
+        "durationMs": 1551.0,
+        "connection": 1,
+        "observedAtMs": 1793026901104
+      },
+      {
+        "sourceLine": 130274,
+        "stage": "runtime_tick.execute",
+        "durationMs": 1477.0,
+        "connection": 33,
+        "observedAtMs": 1793026902786
+      },
+      {
+        "sourceLine": 131567,
+        "stage": "runtime_tick.execute",
+        "durationMs": 1458.0,
+        "connection": 17,
+        "observedAtMs": 1793026906146
+      },
+      {
+        "sourceLine": 131734,
+        "stage": "runtime_tick.execute",
+        "durationMs": 1456.0,
+        "connection": 29,
+        "observedAtMs": 1793026906720
+      },
+      {
+        "sourceLine": 126463,
+        "stage": "session_action.execute",
+        "durationMs": 1399.0,
+        "connection": 16,
+        "observedAtMs": 1793026893968
+      },
+      {
+        "sourceLine": 129870,
+        "stage": "runtime_tick.execute",
+        "durationMs": 1388.0,
+        "connection": 32,
+        "observedAtMs": 1793026901512
+      },
+      {
+        "sourceLine": 129880,
+        "stage": "runtime_tick.execute",
+        "durationMs": 1388.0,
+        "connection": 31,
+        "observedAtMs": 1793026901536
+      },
+      {
+        "sourceLine": 130492,
+        "stage": "runtime_tick.execute",
+        "durationMs": 1385.0,
+        "connection": 30,
+        "observedAtMs": 1793026903421
+      },
+      {
+        "sourceLine": 129675,
+        "stage": "runtime_tick.execute",
+        "durationMs": 1383.0,
+        "connection": 38,
+        "observedAtMs": 1793026900951
+      },
+      {
+        "sourceLine": 129863,
+        "stage": "runtime_tick.execute",
+        "durationMs": 1381.0,
+        "connection": 42,
+        "observedAtMs": 1793026901511
+      },
+      {
+        "sourceLine": 129859,
+        "stage": "runtime_tick.execute",
+        "durationMs": 1380.0,
+        "connection": 12,
+        "observedAtMs": 1793026901509
+      },
+      {
+        "sourceLine": 129852,
+        "stage": "runtime_tick.execute",
+        "durationMs": 1373.0,
+        "connection": 9,
+        "observedAtMs": 1793026901508
+      },
+      {
+        "sourceLine": 121912,
+        "stage": "session_action.execute",
+        "durationMs": 1371.0,
+        "connection": 16,
+        "observedAtMs": 1793026885535
+      },
+      {
+        "sourceLine": 130883,
+        "stage": "runtime_tick.execute",
+        "durationMs": 1370.0,
+        "connection": 16,
+        "observedAtMs": 1793026904191
+      },
+      {
+        "sourceLine": 130902,
+        "stage": "runtime_tick.execute",
+        "durationMs": 1343.0,
+        "connection": 28,
+        "observedAtMs": 1793026904247
+      },
+      {
+        "sourceLine": 129820,
+        "stage": "runtime_tick.execute",
+        "durationMs": 1340.0,
+        "connection": 45,
+        "observedAtMs": 1793026901461
+      },
+      {
+        "sourceLine": 129837,
+        "stage": "runtime_tick.execute",
+        "durationMs": 1337.0,
+        "connection": 46,
+        "observedAtMs": 1793026901481
+      },
+      {
+        "sourceLine": 130585,
+        "stage": "runtime_tick.execute",
+        "durationMs": 1336.0,
+        "connection": 43,
+        "observedAtMs": 1793026903685
+      },
+      {
+        "sourceLine": 129660,
+        "stage": "runtime_tick.execute",
+        "durationMs": 1329.0,
+        "connection": 49,
+        "observedAtMs": 1793026900867
+      },
+      {
+        "sourceLine": 131523,
+        "stage": "runtime_tick.execute",
+        "durationMs": 1322.0,
+        "connection": 12,
+        "observedAtMs": 1793026906007
+      },
+      {
+        "sourceLine": 129822,
+        "stage": "runtime_tick.execute",
+        "durationMs": 1319.0,
+        "connection": 20,
+        "observedAtMs": 1793026901461
+      },
+      {
+        "sourceLine": 130082,
+        "stage": "runtime_tick.execute",
+        "durationMs": 1316.0,
+        "connection": 8,
+        "observedAtMs": 1793026902012
+      },
+      {
+        "sourceLine": 130779,
+        "stage": "runtime_tick.execute",
+        "durationMs": 1314.0,
+        "connection": 27,
+        "observedAtMs": 1793026904171
+      }
+    ]
+  },
+  "globalByStage": {
+    "zone_owner.in_process.execute_request": {
+      "count": 22351,
+      "totalMs": 7091921.0,
+      "p50Ms": 305.0,
+      "p95Ms": 598.0,
+      "p99Ms": 989.0,
+      "maxMs": 3053.0
+    },
+    "runtime_tick.total": {
+      "count": 20380,
+      "totalMs": 6824982.0,
+      "p50Ms": 325.0,
+      "p95Ms": 606.0,
+      "p99Ms": 916.0,
+      "maxMs": 2292.0
+    },
+    "runtime_tick.execute": {
+      "count": 20378,
+      "totalMs": 6789631.0,
+      "p50Ms": 323.0,
+      "p95Ms": 600.0,
+      "p99Ms": 915.0,
+      "maxMs": 2292.0
+    },
+    "serial_gate.zone_outbound_wait": {
+      "count": 13529,
+      "totalMs": 4250360.0,
+      "p50Ms": 295.0,
+      "p95Ms": 612.0,
+      "p99Ms": 905.0,
+      "maxMs": 3000.0
+    },
+    "shared_session.predrain": {
+      "count": 18618,
+      "totalMs": 4181261.0,
+      "p50Ms": 206.0,
+      "p95Ms": 457.0,
+      "p99Ms": 538.0,
+      "maxMs": 1524.0
+    },
+    "socket_turn.spectator": {
+      "count": 12691,
+      "totalMs": 2102329.0,
+      "p50Ms": 123.0,
+      "p95Ms": 417.0,
+      "p99Ms": 522.0,
+      "maxMs": 760.0
+    },
+    "socket_turn.input": {
+      "count": 5166,
+      "totalMs": 1586303.0,
+      "p50Ms": 240.0,
+      "p95Ms": 676.0,
+      "p99Ms": 1216.0,
+      "maxMs": 3362.0
+    },
+    "session_action.execute": {
+      "count": 5146,
+      "totalMs": 1528184.0,
+      "p50Ms": 240.0,
+      "p95Ms": 639.0,
+      "p99Ms": 1053.0,
+      "maxMs": 3057.0
+    },
+    "socket_input.queue_residence": {
+      "count": 4704,
+      "totalMs": 1231258.0,
+      "p50Ms": 232.0,
+      "p95Ms": 556.0,
+      "p99Ms": 803.0,
+      "maxMs": 2204.0
+    },
+    "shared_session.reconcile": {
+      "count": 4951,
+      "totalMs": 586946.0,
+      "p50Ms": 86.0,
+      "p95Ms": 295.0,
+      "p99Ms": 516.0,
+      "maxMs": 1145.0
+    },
+    "shared_session.inner_execute": {
+      "count": 4389,
+      "totalMs": 508463.0,
+      "p50Ms": 82.0,
+      "p95Ms": 255.0,
+      "p99Ms": 1000.0,
+      "maxMs": 1727.0
+    },
+    "shared_session.tail": {
+      "count": 786,
+      "totalMs": 74544.0,
+      "p50Ms": 73.0,
+      "p95Ms": 199.0,
+      "p99Ms": 467.0,
+      "maxMs": 589.0
+    },
+    "zone_cadence.total": {
+      "count": 656,
+      "totalMs": 62425.0,
+      "p50Ms": 83.0,
+      "p95Ms": 176.0,
+      "p99Ms": 259.0,
+      "maxMs": 341.0
+    },
+    "session_action.flush": {
+      "count": 119,
+      "totalMs": 36576.0,
+      "p50Ms": 267.0,
+      "p95Ms": 762.0,
+      "p99Ms": 1010.0,
+      "maxMs": 1586.0
+    },
+    "runtime_tick.serial_gate_wait": {
+      "count": 218,
+      "totalMs": 26673.0,
+      "p50Ms": 103.0,
+      "p95Ms": 308.0,
+      "p99Ms": 374.0,
+      "maxMs": 396.0
+    },
+    "flush.save": {
+      "count": 41,
+      "totalMs": 12476.0,
+      "p50Ms": 243.0,
+      "p95Ms": 667.0,
+      "p99Ms": 803.0,
+      "maxMs": 803.0
+    },
+    "snapshot.build_and_send": {
+      "count": 51,
+      "totalMs": 7098.0,
+      "p50Ms": 122.0,
+      "p95Ms": 295.0,
+      "p99Ms": 323.0,
+      "maxMs": 323.0
+    },
+    "shared_session.predrain.pending_lock_wait": {
+      "count": 76,
+      "totalMs": 4861.0,
+      "p50Ms": 59.0,
+      "p95Ms": 94.0,
+      "p99Ms": 133.0,
+      "maxMs": 133.0
+    },
+    "shared_session.predrain.journey_reposition": {
+      "count": 32,
+      "totalMs": 1973.0,
+      "p50Ms": 59.0,
+      "p95Ms": 79.0,
+      "p99Ms": 90.0,
+      "maxMs": 90.0
+    },
+    "flush.external_state": {
+      "count": 15,
+      "totalMs": 1427.0,
+      "p50Ms": 84.0,
+      "p95Ms": 241.0,
+      "p99Ms": 241.0,
+      "maxMs": 241.0
+    },
+    "runtime_tick.save_checkpoint": {
+      "count": 7,
+      "totalMs": 1185.0,
+      "p50Ms": 119.0,
+      "p95Ms": 397.0,
+      "p99Ms": 397.0,
+      "maxMs": 397.0
+    }
+  },
+  "selected": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\steady-zone-outbound-slow-span-v10-analysis-v1\\v10-gate-holder-audit-v1-selected.jsonl",
+    "rows": 13210,
+    "bytes": 1631024,
+    "sha256": "fe9340b8a347679989471b4c7098a23ad7dd454f00ab86a992ad668a1b1ccdb4"
+  },
+  "sourceMapping": {
+    "registration16ToPublicConnection16": "unknown_strictly; source does not contain a joint identifier",
+    "publicCounter": {
+      "file": "apps/gateway/src/web.rs",
+      "lines": [
+        188,
+        314,
+        6230
+      ],
+      "meaning": "process-global AtomicU64 starts at 1; allocated for every diagnostic-enabled handle_socket_work before socket split/login; failed/non-admitted sockets can consume IDs"
+    },
+    "zoneCounter": {
+      "file": "apps/gateway/src/routing.rs",
+      "lines": [
+        4205,
+        5198,
+        5245,
+        10015
+      ],
+      "meaning": "shared Zone state starts at 0; every successful presence registration increments, including later viewport/bootstrap re-registration; unrelated to SocketDiagnostics counter"
+    },
+    "refresh": {
+      "file": "apps/gateway/src/web.rs",
+      "lines": [
+        5747,
+        5757,
+        7310,
+        7729
+      ],
+      "meaning": "StartGame or MapInformation/MapChanged can force registration; same public connection may acquire multiple Zone registration IDs"
+    },
+    "quiescentAdmission": {
+      "file": "C:/mir2-build/p01-completion-20261024/native-steady-single-stage-diagnostic-v10/diagnostic-capacity.mjs",
+      "lines": [
+        1665,
+        1707,
+        1718,
+        1956,
+        1959,
+        1987,
+        1990
+      ],
+      "meaning": "ordinaryLogin is awaited serially through authoritative worldSnapshot; native offers suppressed until full roster; consistent with counters aligning, but not a proof of no extra connection or registration"
+    },
+    "priorFindingsActorConnectionMeaning": "findings-v1 actorConnections are client evidence connection numbers; they are not a direct join to Gateway SocketDiagnostics",
+    "conditionalSignature": {
+      "status": "unique_association_not_exact_identity",
+      "trace": 23781,
+      "registration": 16,
+      "recipientZoneID": 50015,
+      "gateWaitUs": 2170936,
+      "estimatedServerGateUnixMs": 1793026888873.769,
+      "publicCandidatesWithinReceive5msAndFloorDuration2170": [
+        {
+          "sourceLine": 123776,
+          "stage": "serial_gate.zone_outbound_wait",
+          "durationMs": 2170,
+          "connection": 16,
+          "observedAtMs": 1793026888872
+        }
+      ]
+    },
+    "limit": "No equality is asserted solely because both IDs are 16. Timing/duration uniqueness plus serial admission is supporting association only; strict attribution of reg16 holder to public conn16 stays unknown."
+  },
+  "limits": [
+    "Public input read exactly once as raw bytes while streaming SHA256; selected/output files were reread only for local audit completion. No samples or private stderr read.",
+    "observedAtMs is launcher receive clock, not server span start/end; fatal +/-15-second selection is receive-time only.",
+    "Rows are complete threshold-crossing scopes, not all executions. Missing rows do not prove absence; stage totals overlap and do not measure exclusive wall time.",
+    "Public connection IDs and Zone registration IDs have separate allocators; strict registration16/public16 identity remains unknown.",
+    "Source read-only audit at verified HEAD 9ee502ac8ab0f4000c26c97b9c5f4bb837662a7d; no source edits, tests, builds or load launched.",
+    "The V10 result remains failed/non-measurement; this audit does not confer capacity or acceptance."
+  ],
+  "holderFinding": {
+    "global": "runtime_tick.execute dominates logged write-scope durations: 20378 rows/6789631 ms vs session_action.execute 5146/1528184 ms, session_action.flush 119/36576 ms, checkpoint 7/1185 ms. No runtime_tick.flush rows met the logging threshold.",
+    "fatalReceiveWindow": "runtime_tick.execute 1722/806455 ms, session_action.execute 661/227831 ms, session_action.flush 46/13688 ms; checkpoint 0, runtime_tick.flush 0 threshold-crossing rows.",
+    "conditionalConn16Trace23781": "If the unique signature links public16 to registration16, the 2170.936 ms read-gate wait is contemporaneous with session_action.execute 1172 ms (receive 6887876) and session_action.flush 593 ms (receive 6888468), then socket_turn.input 2171 ms ending receive 6888872; this instance points at the input write scope, not Tick/checkpoint. Receive-clock differences prevent exact subspan coverage.",
+    "conditionalConn16Fatal": "Public16 logged Tick execute 545,518,696 ms at receive 6896737/6897298/6898150 and session_action.execute 678 ms at 6898838 (fatal 6898808); strict recipient attribution remains unknown.",
+    "conclusion": "Checkpoint gate shortening is unsupported as a remedy for the observed V10 fatal window. Global dominant slow holder class is runtime_tick.execute; one known long gate has a conditional session_action association.",
+    "limits": [
+      "All counts/durations are threshold-censored completed scopes. Shared_session and Zone owner stages nest inside execute; do not add their durations.",
+      "observedAtMs is launcher receive time. Neither inferred start=receive-duration nor receive-time co-occurrence proves exact server overlap/causality.",
+      "No injection-specific slow-stage label exists; zero classified injection rows is not proof that the injection write scope never held the gate."
+    ]
+  },
+  "checkpointCandidateAudit": {
+    "candidate": "Explicit drop(_serial_execution) as first statement of web.rs:7748 empty-responses branch, before save_queue.checkpoint; no whole Tick gate relocation.",
+    "reviewStatus": "not_recommended_from_current_evidence; bounded implementation may be possible only after ordering proof/test, not approved or implemented here",
+    "preservedByNarrowChange": [
+      "Tick execute, monthly logout handling and observed bootstrap/re-registration remain under write gate.",
+      "Empty Tick responses make the existing responses_begin_zone_bootstrap predicate false and map_changed false; no direct resume rotation occurs in this branch.",
+      "Gateway Session remains the main task unique mutable owner; save stays synchronous with the original authoritative transform/vitals synchronization and persistence method."
+    ],
+    "notPurePersistence": [
+      {
+        "file": "apps/gateway/src/session.rs",
+        "line": 1040,
+        "fact": "save validates owner lease, synchronizes Zone movement transform, then invokes Zone owner save"
+      },
+      {
+        "file": "apps/gateway/src/routing.rs",
+        "line": 11346,
+        "fact": "sync_pending_zone_movement_transform applies authoritative transform, forces current Zone transform, commits personal journey reposition and may append pending owner packets"
+      },
+      {
+        "file": "apps/gateway/src/routing.rs",
+        "line": 18990,
+        "fact": "Shared runtime save repeats movement sync, settles pending vitals, then calls inner.save_active_character"
+      },
+      {
+        "file": "apps/gateway/src/routing.rs",
+        "line": 13153,
+        "fact": "settle_pending_zone_vitals_before_save drains apply_pending_zone_packets and requeues resulting owner packets"
+      },
+      {
+        "file": "apps/gateway/src/routing.rs",
+        "line": 12563,
+        "fact": "pending packet drain can settle damages/heals, kill awards, magic/journey events, ground claims; a newly consumed position change can call apply_zone_current_position_map_transfer at 12647"
+      },
+      {
+        "file": "apps/gateway/src/routing.rs",
+        "line": 11556,
+        "fact": "map transfer can execute TransferMap, return MapInformation and call sync_zone_snapshot_preserving_owner_vitals, which can alter shared presence"
+      },
+      {
+        "file": "apps/gateway/src/routing.rs",
+        "line": 4969,
+        "fact": "queue_zone_packets can enqueue owner-health FIFO presentations and directly try_push_live_zone_outbound, so save may emit/queue live effects"
+      },
+      {
+        "file": "apps/simulation/src/runtime/save.rs",
+        "line": 1136,
+        "fact": "inner persistence verifies authenticated character identity, refreshes account source CAS and commits full-save mutation through shared_guild_experience::commit_source"
+      }
+    ],
+    "orderingConcern": "Dropping the write guard also admits reader fast-path movement (web.rs:5233 try_read), plus live outbound sending, while save is settling pending movement/vitals. Empty pre-save Tick responses do not prove the save path cannot later generate MapInformation, alter presence or owner-health output. A pure disk-only claim is false; bootstrap/registration/rotation consequences of save-generated transfer require explicit proof before applying.",
+    "authoritySaveContract": "SHARED-ZONE-MVP-RULES.md requires shared Zone authority and final authoritative transform into ECS/runtime before save. The proposed narrow drop does not delete the sync calls, but retaining method calls alone does not settle packet/viewport ordering.",
+    "likelyBenefitLimit": "Only 7 global checkpoint slow rows, max 397 ms; none in fatal receive window. Even if made safe, the candidate does not address dominant execute time."
+  }
+}

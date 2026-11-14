@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "syntaxOnly": true,
+  "targetImported": false,
+  "checks": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\audit-owned-full.mjs",
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\audit-owned-full.mjs",
+        "bytes": 9481,
+        "sha256": "3f0c0d23caa445a38fe322ee9440fbfe712ae6c96a19617dbabe8382d9b00ab5"
+      },
+      "startedAt": "2026-10-25T23:29:07.703Z",
+      "endedAt": "2026-10-25T23:29:07.738Z",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\audit-owned-full.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    }
+  ],
+  "passed": true,
+  "scriptsExecutedHere": 1,
+  "reusedUnchangedChecks": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\run-owned-full.mjs",
+      "exitCode": 0,
+      "signal": null,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\projection-build-source-lib.mjs",
+      "exitCode": 0,
+      "signal": null,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\verify-inputs.mjs",
+      "exitCode": 0,
+      "signal": null,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\finalize-launcher-inputs.mjs",
+      "exitCode": 0,
+      "signal": null,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    }
+  ],
+  "previousSyntaxReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\syntax-check-v1.json",
+    "bytes": 1523,
+    "sha256": "b259289d7855ca27b1d53bd745465624256e478506152934512ae6edd845df71"
+  },
+  "coverage": "One modified audit tool checked now; four original unchanged tools reuse their actual v1 checks. Neutral support/PowerShell were not executed."
+}

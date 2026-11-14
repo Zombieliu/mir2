@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "revision": 2,
+  "preparedAt": "2026-10-26T03:51:43.571Z",
+  "parent": {
+    "file": "C:/mir2-build/p01-completion-20261024/root-scout-target-waypoint-routing-validation-v1/run-full-driver-v1.mjs",
+    "bytes": 6368,
+    "sha256": "a0ad343b35cbc41358324dd196b64ad2b6c6609fdbcdc5b99fa1249c1c9913d4"
+  },
+  "current": {
+    "file": "C:/mir2-build/p01-completion-20261024/root-scout-target-waypoint-routing-validation-v2/run-full-driver-v1.mjs",
+    "bytes": 6232,
+    "sha256": "b30fa82aec9d175a1675c9b8cb6c7802fe4b219a74c1df547ee62844c62827e9"
+  },
+  "rules": [
+    {
+      "before": "let restoredTest = test.toString('utf8'); const eol = restoredTest.includes('\\r\\n') ? '\\r\\n' : '\\n';",
+      "after": "let restoredTest = test.toString('utf8');"
+    },
+    {
+      "before": "for (const rule of [...maintenance.rules].reverse()) { const after = rule.after.replace(/\\r?\\n/g,eol), before = rule.before.replace(/\\r?\\n/g,eol); assert.equal(restoredTest.split(after).length-1,1); restoredTest=restoredTest.replace(after,before); }",
+      "after": "for (const rule of [...maintenance.rules].reverse()) { assert.equal(restoredTest.split(rule.after).length-1,1); restoredTest=restoredTest.replace(rule.after,rule.before); }"
+    }
+  ],
+  "inverseRawExact": true,
+  "firstActualFailedGuard": {
+    "exitCode": 1,
+    "stdout": {
+      "file": "C:/mir2-build/p01-completion-20261024/scout-target-waypoint-routing-full-root-stdout-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stderr": {
+      "file": "C:/mir2-build/p01-completion-20261024/scout-target-waypoint-routing-full-root-stderr-v1.log",
+      "bytes": 428,
+      "sha256": "dd0dd7e830262f6626ad8b4e8ca4ae485936c165287571516a700bd82a077fa2"
+    },
+    "fullTestsStarted": false,
+    "beforeTestOutputAbsent": true
+  },
+  "reason": "Use exact captured raw maintenance before/after strings; existing source contains mixed line endings and must not be normalized.",
+  "productSourcesChanged": false,
+  "expectedTests": 237,
+  "executionPerformed": false
+}

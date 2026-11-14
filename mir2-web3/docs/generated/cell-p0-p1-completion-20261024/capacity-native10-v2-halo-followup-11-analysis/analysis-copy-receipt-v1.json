@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "copiedAt": "2026-10-25T05:06:38.598Z",
+  "runId": "1792902924884-3b7017e1",
+  "scope": "Explicit four public derivative originals and their exact whitelist; failure and all thresholds remain unchanged. No full raw, complete recording payload, private store or binaries copied.",
+  "whitelist": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe11-combat-analysis-v1\\public-whitelist-v1.json",
+    "bytes": 1079,
+    "sha256": "2127ca613d986d5d8ff13a6b080cf7e099ab6339ece4de002059edda2e30cb69"
+  },
+  "files": [
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/probe11-combat-analysis-v1/raw-selected-v1.json",
+        "bytes": 2374615,
+        "sha256": "cbda408c566e8719e6920a7ab99e3eb6ace9113767fe49a35626a9c9c500eced"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-halo-followup-11-analysis\\combat-analysis\\raw-selected-v1.json",
+        "bytes": 2374615,
+        "sha256": "cbda408c566e8719e6920a7ab99e3eb6ace9113767fe49a35626a9c9c500eced"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/probe11-combat-analysis-v1/stage10-window-actor-matrix-v1.json",
+        "bytes": 101623,
+        "sha256": "2261d9bc73c74458455c6659db46fdccec65c7ca4b2cfa255fc91f57c412a047"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-halo-followup-11-analysis\\combat-analysis\\stage10-window-actor-matrix-v1.json",
+        "bytes": 101623,
+        "sha256": "2261d9bc73c74458455c6659db46fdccec65c7ca4b2cfa255fc91f57c412a047"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/probe11-combat-analysis-v1/gap-geometry-supply-projection-v1.json",
+        "bytes": 22066,
+        "sha256": "8bccc63249e02af874742cc8600e57e5f78f54dc6cb8b15d819264598b9421ec"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-halo-followup-11-analysis\\combat-analysis\\gap-geometry-supply-projection-v1.json",
+        "bytes": 22066,
+        "sha256": "8bccc63249e02af874742cc8600e57e5f78f54dc6cb8b15d819264598b9421ec"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/probe11-combat-analysis-v1/summary-v1.json",
+        "bytes": 16588,
+        "sha256": "ccbc718d32bc049757873e5bf86baa3b3d463609b2c48ec04e18e777374c28fd"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-halo-followup-11-analysis\\combat-analysis\\summary-v1.json",
+        "bytes": 16588,
+        "sha256": "ccbc718d32bc049757873e5bf86baa3b3d463609b2c48ec04e18e777374c28fd"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe11-combat-analysis-v1\\public-whitelist-v1.json",
+        "bytes": 1079,
+        "sha256": "2127ca613d986d5d8ff13a6b080cf7e099ab6339ece4de002059edda2e30cb69"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-halo-followup-11-analysis\\combat-analysis\\public-whitelist-v1.json",
+        "bytes": 1079,
+        "sha256": "2127ca613d986d5d8ff13a6b080cf7e099ab6339ece4de002059edda2e30cb69"
+      }
+    }
+  ],
+  "originalCopies": 5,
+  "totalOriginalBytes": 2515971,
+  "sourceTargetRawEqual": true,
+  "jsonStructuralSensitiveFieldScanPassed": true,
+  "originalCopyReceiptUnchanged": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-halo-followup-11-analysis\\public-copy-receipt.json",
+    "bytes": 8628,
+    "sha256": "66c011adb739800ba6525dd4fbb13ae5f2d153cd0e1b7572d8ce82df822ac99e"
+  },
+  "existingReadmeUnchanged": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-halo-followup-11-analysis\\README.md",
+    "bytes": 888,
+    "sha256": "31e91d795203c2af869d12d10d3584e6c0ef57e43bfa18e98f4a827cd033c87b"
+  },
+  "oldDiagnosticSubtreeModified": false,
+  "productSourcesModified": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

@@ -1,0 +1,66 @@
+{
+  "passed": true,
+  "observedAtUtc": "2026-10-29T07:26:56.490214+00:00",
+  "evidenceKind": "offline AI editorial and structural catalog validation",
+  "catalogKeys": 9769,
+  "keySetUnchanged": true,
+  "editedKeys": 873,
+  "baselineMethods": {
+    "OpenCC-1.4.2-tw2sp": 7407,
+    "existing-shared-zh-CN": 2362
+  },
+  "allPlaceholdersCommandsAndNumbersPreserved": true,
+  "semanticDistinctionChecks": {
+    "creditedVsPending": true,
+    "unknownNoDoublePayment": true,
+    "expiryNoRepayInstruction": true,
+    "creditsDistinctFromGuildPoints": true,
+    "realHornVsQuestMaterial": true,
+    "distinctLightningSpells": true,
+    "distinctSwordSkills": true,
+    "dcIsNotHealth": true,
+    "noInternalFireballLabel": true,
+    "translatedThunderboltBody": true,
+    "npcNameNotPresentation": true,
+    "literalNpcScriptPreserved": true,
+    "dynamicSlotDefinitionsPreserved": true
+  },
+  "overrideRevision": "2026-10-29-editorial-v1",
+  "contentSuggestionsIntegrated": 167,
+  "humanAccepted": false,
+  "humanReviewedKeys": 0,
+  "nativeGpuAndRealWindowsRetest": "pending integration after source freeze",
+  "runtimePlayerConversion": false,
+  "sourcePins": [
+    {
+      "path": "packages/tooling/scripts/generate-native-i18n-simplified.py",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 17874,
+      "sha256": "58ce20cf96c64c33f85f48da1b85d85ed38f5c7127f47c0c19a4c90dccb7085c"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/zh-CN-editorial-overrides.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 372613,
+      "sha256": "c1b13220eaa954df8c255a4a2c446776557666cfbfd089c09b073cb96d1a2d17"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/zh-CN.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 621287,
+      "sha256": "89f6cd57e61e8bc957bb6b5ff10b317ab2948291287f5a01cffd8bb97a89d36f"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/zh-CN-provenance.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 11924,
+      "sha256": "ae04a32c4315e5625e081f322e397925bdb47544bef24e6841accb58ac78090e"
+    }
+  ],
+  "upstreamMechanicsCaveats": [
+    "Blizzard source English describes defence while its skill-book text describes an attack; no mechanics rewrite made.",
+    "Fury source English says Accuracy while its skill-book text says attack speed; no mechanics rewrite made.",
+    "content.quest.57.description remains a translated upstream Example placeholder, not newly authored quest content.",
+    "Korean romanized proper names lacking an authoritative existing Chinese name are preserved; not invented."
+  ]
+}

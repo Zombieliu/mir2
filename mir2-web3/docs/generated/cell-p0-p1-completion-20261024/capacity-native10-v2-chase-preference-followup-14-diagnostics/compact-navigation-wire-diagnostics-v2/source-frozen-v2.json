@@ -1,0 +1,243 @@
+{
+  "schemaVersion": 2,
+  "frozenAt": "2026-10-25T06:59:06.652Z",
+  "state": "external-wrapper-v2-synthetics-passed-awaiting-independent-review-no-realm",
+  "scope": "Fixed region plus remembered non-player lifecycle and limited owner/control pending context only. No core source, scene, gate, acceptance or realm change.",
+  "currentDocumentationCommit": "4cab00893b861395b63906b1b8183a021d397cdb",
+  "coreCodeEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+  "coreDriverSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+  "coreDriverManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-native-witness-approach-driver-frozen-v1.json",
+    "bytes": 41896,
+    "sha256": "5cd1dafffa530e145828183e8b9089c6900b67760d79c3fe225f2399d904cada"
+  },
+  "coreInputs": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs",
+      "bytes": 224817,
+      "sha256": "de493f04c78bb961e2a5cfd230ce9c1e4843ec9057edf34ca055edaecaaf7c59"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    }
+  ],
+  "inspection": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-native-resume-smoke.mjs",
+      "bytes": 20058,
+      "sha256": "2020952e157f3a0a9de16b679f1681497b3d547dce50acc1ec9ef89769cdebe2"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-multiplayer-smoke.mjs",
+      "bytes": 38856,
+      "sha256": "a3ce02d111925c41e25b32a5522f0d17243cd78fab8142e92bca5eb1c45915ea"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-observation.mjs",
+      "bytes": 14376,
+      "sha256": "b69ba03e9f6ee05286d401341c6dbbe6dac4a6e5014fa6a67e9c6167c072d097"
+    }
+  ],
+  "producerBoundaries": {
+    "CapacityClient": 203,
+    "observe": 245,
+    "superObserve": 257,
+    "hintRelease": 259,
+    "send": 327,
+    "runCapacity": 1656,
+    "NativeResumeObserve": 144,
+    "PlaytestObserve": 189,
+    "applyProtocolObservation": 200,
+    "ordinaryPositionMutators": [
+      "ObjectTurn",
+      "ObjectWalk",
+      "ObjectRun",
+      "ObjectBackStep",
+      "ObjectPushed",
+      "ObjectDash",
+      "ObjectDashFail",
+      "ObjectAttack",
+      "ObjectRangeAttack",
+      "ObjectMagic",
+      "ObjectStruck"
+    ]
+  },
+  "limits": {
+    "connections": [
+      1,
+      2
+    ],
+    "map": "0",
+    "rectangle": {
+      "minX": 241,
+      "maxX": 244,
+      "minY": 594,
+      "maxY": 599
+    },
+    "rememberedIdsPerConnection": 64,
+    "nonPlayerEntitiesPerRowTotal": 32,
+    "nonPlayerEntitiesPerView": 16,
+    "pendingEventsIncludingTruncationMarker": 64,
+    "rowsPerConnectionIncludingTerminalMarker": 12000,
+    "maximumPendingWindowsPerConnection": 1,
+    "maximumHintCells": 7
+  },
+  "callback": {
+    "signature": "emit(publicRow, existingWriter)",
+    "plannedAdapter": "(row, writer) => writer.add(row)",
+    "existingBoundedWriter": true,
+    "clientOrContextPassed": false,
+    "calledAfterOriginal": true,
+    "exceptionCanStopDriver": true,
+    "originalThrowHasPriority": true,
+    "zeroOverheadOrZeroImpactClaim": false
+  },
+  "baselineManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v1\\source-frozen-v1.json",
+    "bytes": 11470,
+    "sha256": "9b6fe294b6941ee8c751d9c4491809c41e9296b04c8a084d294ffc28bf09e06c"
+  },
+  "baselineReview": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-wrapper-independent-review-v1\\review-v1.json",
+    "bytes": 10774,
+    "sha256": "46f1e40b899ae5973750bdc4ec1a18e53cbbd62f5bef092e9d46462af325fc23"
+  },
+  "prior17InputsUnchanged": true,
+  "correctionProof": {
+    "exactInverseToV1Wrapper": true,
+    "wrapperChanges": [
+      "Restrict pending fallback to owner/control rather than unrelated non-player packets.",
+      "Add the actual static settle phase enum."
+    ],
+    "allOriginal25AssertionsRetained": true,
+    "testChanges": [
+      "Add a synchronous fake-original-send hook without changing existing assertions.",
+      "Add far unremembered pending spawn/motion/remove negative fixture while preserving remembered Remove.",
+      "Add synchronous reentry pendingOpen/complete=false/no-credit causal limitation fixture.",
+      "Add the actual settle phase enum assertion."
+    ],
+    "scopeBlockerFixedBySourceAndNegativeFixture": true
+  },
+  "finalTestReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\tests-v1.json",
+    "bytes": 1711,
+    "sha256": "b4786feaae7542f73cb7f6c5a6a75cdc45df592e51a3457b2a5f4c862ec93ab9"
+  },
+  "finalTestLog": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\tests-v1.log",
+    "bytes": 7111,
+    "sha256": "1a2b03fb727ec2e1249ab18e3307fa7736b04b93b27311622afd450098e77a3b"
+  },
+  "finalTests": {
+    "tests": 28,
+    "passed": 28,
+    "failed": 0,
+    "exactBeforeAfterSource": true,
+    "fakeClassOnly": true
+  },
+  "limitations": [
+    "Static membership/position categories are a subset, not complete visibility or every owner lifecycle.",
+    "64 received-observation events include a final truncation marker; the send row is additional.",
+    "Synchronous fake inbound reentry before original send returns predates pending creation, leaving pendingOpen/complete=false and no ACK credit.",
+    "Projection, allocation and callback costs exist; callback errors can trigger existing safety stop."
+  ],
+  "files": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\README.md",
+      "bytes": 7876,
+      "sha256": "6ad7017bb924f9f9e5dde7822f796103fb32b921e01db907daeb15ccbe6fbfa6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\create-from-v1.mjs",
+      "bytes": 5182,
+      "sha256": "dc675829fa7e6bb11fb2e9767a7daba83f75cb20979f80afb93dd17a3a03d4ba"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\freeze.mjs",
+      "bytes": 6062,
+      "sha256": "a34e328a606e86a2523d3c9920702883d7633d4610e370c6ada549fa519af973"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\run-synthetic-tests.mjs",
+      "bytes": 1982,
+      "sha256": "7a89a295e77db9149147fe015dcf09f59fd9cd1f2af4ecd91cb047035262cb33"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\tests-v1.json",
+      "bytes": 1711,
+      "sha256": "b4786feaae7542f73cb7f6c5a6a75cdc45df592e51a3457b2a5f4c862ec93ab9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\tests-v1.log",
+      "bytes": 7111,
+      "sha256": "1a2b03fb727ec2e1249ab18e3307fa7736b04b93b27311622afd450098e77a3b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\v1-baseline-binding.json",
+      "bytes": 2021,
+      "sha256": "be83f33aefb41306d3b950810950d71e6b2ee43f72ab814be5348f856e753ccf"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\wrapper.mjs",
+      "bytes": 14598,
+      "sha256": "169da7ebf4d9e7227494ece8413998baee0694519011b5528f2bae250b9fe98f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\wrapper.test.mjs",
+      "bytes": 21656,
+      "sha256": "216fb7fce356fbba4ee73124014270d3e968f3c68b9cd49e6c5e6c7f297abac3"
+    }
+  ],
+  "sourceSha256": "a3d938d2b9e92d97e445ca930640ccf1c838271d827efd45d11ff970f44cab49",
+  "coreNineModified": false,
+  "backendRebuilt": false,
+  "realmAdapterCreated": false,
+  "accountsProvisioned": false,
+  "realmStarted": false,
+  "ackClassificationAdded": false,
+  "metricOrAcceptanceFieldsMutated": false,
+  "oldFailed12VerdictModified": false,
+  "formal09StillBlocked": true
+}

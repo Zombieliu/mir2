@@ -29,9 +29,26 @@ export const CRYSTAL_PLAYER_ACTION_FRAMES = {
   mountRunning: { start: 512, count: 6, skip: 0, intervalMs: 100, mountStart: 96 },
   mountStruck: { start: 560, count: 3, skip: 0, intervalMs: 100, mountStart: 144 },
   mountAttack: { start: 584, count: 6, skip: 0, intervalMs: 100, mountStart: 168 },
+  fishingCast: { start: 632, count: 8, skip: 0, intervalMs: 100 },
+  fishingWait: { start: 696, count: 6, skip: 0, intervalMs: 120 },
+  fishingReel: { start: 744, count: 8, skip: 0, intervalMs: 100 },
 } as const satisfies Record<string, CrystalPlayerActionFrame>;
 
 export type CrystalPlayerActionKey = keyof typeof CRYSTAL_PLAYER_ACTION_FRAMES;
+
+export const CRYSTAL_FISHING_PHASES = ["fishingCast", "fishingWait", "fishingReel"] as const;
+export type CrystalFishingPhase = typeof CRYSTAL_FISHING_PHASES[number];
+export const CRYSTAL_FISHING_ROD_FRAME_OFFSET = -CRYSTAL_PLAYER_ACTION_FRAMES.fishingCast.start;
+
+export function isCrystalFishingPhase(action: string): action is CrystalFishingPhase {
+  return action === "fishingCast" || action === "fishingWait" || action === "fishingReel";
+}
+
+export function crystalFishingRodLibrary(weaponLibrary?: string | null): string | null {
+  if (weaponLibrary === "CWeapon/49") return "Fishing/00";
+  if (weaponLibrary === "CWeapon/50") return "Fishing/01";
+  return null;
+}
 
 export function crystalMountedPlayerActionForPresentation(
   animationState:
@@ -42,6 +59,7 @@ export function crystalMountedPlayerActionForPresentation(
     | "struck"
     | "attackMelee"
     | "attackRange"
+    | CrystalFishingPhase
     | "dying"
     | "dead"
     | "reviving",

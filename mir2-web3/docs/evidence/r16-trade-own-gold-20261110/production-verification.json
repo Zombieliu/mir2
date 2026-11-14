@@ -1,0 +1,88 @@
+{
+  "schema": "mir2.r16.trade-own-gold-production-browser.v1",
+  "scope": "Ordinary local isolated File, two WebGPU browsers through /game",
+  "build": [
+    "next build --webpack",
+    "next start"
+  ],
+  "buildLogSha256": "addbe7b092752c44c50416513e44cf870e98537356fead01d44ce82314422d0b",
+  "sourceBase": "6c55c05aae4c215d709724ccea5bdcae3dc17702",
+  "gatewaySha256": "517328cd8d2badcf2a7fb9ae1532964435e703a40398838b540551c0a697867c",
+  "webOverlay": {
+    "app/page.tsx": "23c30db0f6fe81268c0f6c256dd9f22bbc10791c54f3fb392ea771a6e2698f6a",
+    "app/components/original-client-trade-window.tsx": "f6de8fab3eef174d64ab09bbb5a8226536ddc03d37beae6e70ec93c72f55d384",
+    "lib/group-operations.ts": "8990da258e79e83048f210da420438e0c37e0f85c0ce8f594750a6d468aed160"
+  },
+  "runtime": "bevy-81b7623f6e65d0ea",
+  "runtimeManifestSha256": "105d6db74f108c2441dbb9874b3ae3a16d738491bb56fcc2ef1e1693e471562e",
+  "browserReceiptSha256": "5a2e8a5bee2a8e11f51f84b24a3c9d215c4480ab362760a93839dd4fb6ed7d2b",
+  "diskReceiptSha256": "ff9c9f220f7adbf5e81c2c1eb95ea57481a06c6bbb1fba99e4a5bc206fc990af",
+  "shutdownReceiptSha256": "4e3a04cab6bb0ac3986ef26b5d60983b6abae3dec1f02877937155840e75294e",
+  "checks": [
+    {
+      "name": "normal-keyboard-invitation-and-visible-acceptance",
+      "phase": "settlement",
+      "mutualFacing": true,
+      "ordinaryPeerWalks": 2
+    },
+    {
+      "name": "both-ui-offers-visible-and-gold-held",
+      "primary": 863,
+      "peer": 641
+    },
+    {
+      "name": "sender-new-gold-and-both-items-kept",
+      "ownGold": 148,
+      "peerGold": 59,
+      "ownWallet": 852,
+      "peerWallet": 641,
+      "ownLockCleared": true,
+      "directWithoutExplicitUnlock": true
+    },
+    {
+      "name": "repeat-edit-observed-without-retry-on-unknown",
+      "secondButtonEnabled": true,
+      "secondModalOpened": true,
+      "secondGoldSentCount": 1,
+      "requestedAdditionalGold": 11,
+      "runtime": "bevy-81b7623f6e65d0ea",
+      "cleared": true
+    },
+    {
+      "name": "new-peer-confirmation-cannot-settle-against-stale-own-lock"
+    },
+    {
+      "name": "once-only-item-and-gold-delivery-before-terminal",
+      "primary": 900,
+      "peer": 800,
+      "total": 1700
+    },
+    {
+      "name": "same-role-ui-readback-and-no-open-trade",
+      "bothExact": true
+    }
+  ],
+  "ownTotalOffer": 159,
+  "peerTotalOffer": 59,
+  "deliveredItemCounts": [
+    1,
+    1
+  ],
+  "normalLogouts": 4,
+  "diskReadback": {
+    "primary": {
+      "gold": 900,
+      "bagItems": 4,
+      "exactBag": true,
+      "noOpenTrade": true
+    },
+    "peer": {
+      "gold": 800,
+      "bagItems": 4,
+      "exactBag": true,
+      "noOpenTrade": true
+    }
+  },
+  "fixturePreserved": true,
+  "bothServicesStopped": true
+}

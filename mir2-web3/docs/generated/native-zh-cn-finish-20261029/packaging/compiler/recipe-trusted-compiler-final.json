@@ -1,0 +1,92 @@
+{
+  "passed": true,
+  "scope": "static recipe and all trusted compiler translation message/placeholder closures",
+  "languages": [
+    {
+      "locale": "en",
+      "name": "english",
+      "messagesFile": "compiler:Default.isl",
+      "guideSha256": "c6369151097a238a8c0ea5d36604da8c5aeade3a3e1e21dc795d36c0f6f6bc7b",
+      "messages": 281,
+      "languageSha256": "f2bbf8236200fd41919ac9cfde05841066ae4194deb36d06dc9445fdef99883b"
+    },
+    {
+      "locale": "zh-CN",
+      "name": "chinesesimplified",
+      "messagesFile": "compiler:Languages\\ChineseSimplified.isl",
+      "guideSha256": "d8f3b2cb9e8c4ba009b86daaeea0f33104c0c51c17f874eb09cc0fffc74a2645",
+      "messages": 281,
+      "languageSha256": "e0b0b350e2245f3c5e65586dfe43d574f6e7f06f2261149aba284954b3fc9a8d"
+    },
+    {
+      "locale": "zh-TW",
+      "name": "chinesetraditional",
+      "messagesFile": "compiler:Languages\\ChineseTraditional.isl",
+      "guideSha256": "50b552c34448151ce0090dea956454e21ef79c706dde769ca0fb8a57fd741176",
+      "messages": 281,
+      "languageSha256": "031684fc769259291fd563338b5abe20b7753c88ab5a2976b83a80788deb8455"
+    },
+    {
+      "locale": "pt-BR",
+      "name": "brazilianportuguese",
+      "messagesFile": "compiler:Languages\\BrazilianPortuguese.isl",
+      "guideSha256": "05b67058f04bb91d69b528531a3f55af863367234db96dd8fb46ed06f3fa2dd0",
+      "messages": 281,
+      "languageSha256": "d0bddd148bf2e8ba999e0b40a6429d0711bc6476c2c5eac9c3da2b9ac88a4be4"
+    },
+    {
+      "locale": "ru",
+      "name": "russian",
+      "messagesFile": "compiler:Languages\\Russian.isl",
+      "guideSha256": "9339578c8311ae7403b8db9211a8aa15af3351d98c46c3967ec157a42d8668ec",
+      "messages": 281,
+      "languageSha256": "0def13d0a979bd3d062ef7ce960264df17f908fb62af46bb81970e2abee53919"
+    },
+    {
+      "locale": "hi",
+      "name": "hindi",
+      "messagesFile": "languages\\Hindi.isl",
+      "guideSha256": "569422857c87f30dd6afa736dae13dabcd8ec4942fcd3c31f1cf6df71b239e3d",
+      "messages": 281,
+      "languageSha256": "d61d0938acb6d5191b26a01e3cab63a16115e8adda17ff0ffe19d4a95f7d7ab2"
+    },
+    {
+      "locale": "id",
+      "name": "indonesian",
+      "messagesFile": "languages\\Indonesian.isl",
+      "guideSha256": "9a14690d1d65f0a8ed4736ce445e3bc973e7d2fc96d5356b77fa20b15345b032",
+      "messages": 281,
+      "languageSha256": "06232efff765902ddf7be78e39f1c5471b7e35f4c7c537deeb76692f3b5e208d"
+    },
+    {
+      "locale": "vi",
+      "name": "vietnamese",
+      "messagesFile": "languages\\Vietnamese.isl",
+      "guideSha256": "a5d7873e09c20dbbab18e100e0f0888ee78b1967ff3a9fc8452190a219cffd67",
+      "messages": 281,
+      "languageSha256": "aae1faddee261f5ed57ce9a3eb5deb5a042f3fca6dfb7a1e8fa83502380fe741"
+    },
+    {
+      "locale": "th",
+      "name": "thai",
+      "messagesFile": "compiler:Languages\\Thai.isl",
+      "guideSha256": "144efb528134c47b21e50c499083e6092b6caa3478646bdcc1eb967eb7b8b6a8",
+      "messages": 281,
+      "languageSha256": "57ac6d49ac482c17edf1259b995077aa250f6c1b777e6f2b21e5d498c6584f66"
+    },
+    {
+      "locale": "ar",
+      "name": "arabic",
+      "messagesFile": "compiler:Languages\\Arabic.isl",
+      "guideSha256": "ed84d4360ec11222c89d11a2bac94135fa664e833b5bdb8a6f3b5050d5bd5c4c",
+      "messages": 281,
+      "languageSha256": "5cfbd5fe899f7c8d9fe86b17168d8f54d86a367e2ad785fca8e557759aed660e"
+    }
+  ],
+  "customMessagesPerLocale": 15,
+  "recipeSha256": "49f087bef9c21ba5be66b72c03221d5b5503b6ac340ac04bf286dde55f747f31",
+  "trustedCompilerTranslationsValidated": true,
+  "installerCompiled": false,
+  "guiOrInstallationTested": false,
+  "signatureVerified": false
+}

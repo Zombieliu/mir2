@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "attempt": 2,
+  "helpers": [
+    {
+      "path": "scripts/build-bevy-runtime.mjs",
+      "bytes": 51958,
+      "sha256": "c3a750f32c25d1a351f8be285d207462c49f3a89905e219a2ce1901a8e3b20e4"
+    },
+    {
+      "path": "scripts/lib/bevy-runtime-version.mjs",
+      "bytes": 1678,
+      "sha256": "3d6e569f20778bba67a7b0741ce7cddab9d0a1046955d846d1b698d06bf09d06"
+    },
+    {
+      "path": "scripts/lib/immutable-bevy-runtime-bundle.mjs",
+      "bytes": 7591,
+      "sha256": "35bd55776262085f008b32d0adcb73f3dd17f89d070cf7a633e0d4f47b527f63"
+    },
+    {
+      "path": "scripts/lib/renderer-wasm-opt.mjs",
+      "bytes": 16044,
+      "sha256": "a168728c9a7aa447637c89de0afeca840e63916b0c1357eba849e2c5bfaab41a"
+    },
+    {
+      "path": "scripts/lib/bevy-runtime-release-files.mjs",
+      "bytes": 5216,
+      "sha256": "e2a56f18ad42990a61586962d914877a36633be4491c22beb7f7eaf63b66fb99"
+    },
+    {
+      "path": "lib/bevy-runtime-manifest.mjs",
+      "bytes": 4860,
+      "sha256": "f67118d9e09beefdf99e7f182179b1d7f993ec889b6f7f49fd8f255a9d52fb06"
+    }
+  ],
+  "toolSettings": {
+    "CARGO_BIN": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+    "RUSTUP_BIN": "C:/Users/Administrator/.cargo/bin/rustup.exe",
+    "WASM_BINDGEN_BIN": "C:/Users/Administrator/.cargo/bin/wasm-bindgen.exe",
+    "RUSTUP_TOOLCHAIN": "1.95.0",
+    "MIR2_USE_PREBUILT_BEVY_RUNTIME": "0",
+    "MIR2_BEVY_QUEST_UI": "1",
+    "MIR2_BEVY_CARGO_TARGET_ROOT": "D:/mir2-builds/web-r16-20261106/cargo-renderer",
+    "CARGO_BUILD_JOBS": "1",
+    "CARGO_INCREMENTAL": "0",
+    "CARGO_NET_OFFLINE": "true",
+    "RUSTFLAGS": "",
+    "CARGO_ENCODED_RUSTFLAGS": "",
+    "MIR2_WASM_BINDGEN_RUST_MIN_STACK": "67108864",
+    "MIR2_BEVY_WASM_OPT_BIN": "C:/mir2-build/binaryen131-integration-20261015/binaryen-version_131/bin/wasm-opt.exe",
+    "MIR2_BEVY_WASM_OPT_SHA256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3"
+  },
+  "sourceFileCount": 439,
+  "inputSourceJunctionOnly": false,
+  "externalBuilderRuntimeDirCanonicalOnly": true,
+  "outputOrdinaryDirectory": true
+}

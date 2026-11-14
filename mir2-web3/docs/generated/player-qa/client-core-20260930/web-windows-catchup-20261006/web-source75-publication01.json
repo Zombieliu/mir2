@@ -1,0 +1,95 @@
+{
+  "owner": "Root",
+  "commit": "9b3840a552a8f249092e10e741951e88a3e63b62",
+  "parent": "dadbb704124f545e6fa93329553792d2e458f90b",
+  "branch": "codex/windows-player-journey",
+  "scopeFiles": 37,
+  "codeFiles": 9,
+  "ownedDocPrefixes": 7,
+  "ownedQaLeaves": 21,
+  "allCommittedTreeEntriesMatchByteVerifiedIndex": true,
+  "codeGitFiltersOnlyCrlfToLfVerified": true,
+  "testedRawCodeUnchanged": true,
+  "foreignWorkingDocsPreserved": true,
+  "indexEmptyAfterCommit": true,
+  "commitExitCode": 0,
+  "remoteRefIndependentlyConfirmed": true,
+  "remoteVerifiedCommit": "9b3840a552a8f249092e10e741951e88a3e63b62",
+  "readOnlyHttpsRemoteCheckWithoutCredentialHelper": {
+    "chunk_id": "94d63a",
+    "wall_time_seconds": 2.3467774,
+    "exit_code": 0,
+    "original_token_count": 21,
+    "output": "9b3840a552a8f249092e10e741951e88a3e63b62\trefs/heads/codex/windows-player-journey\n"
+  },
+  "pushAttempts": [
+    {
+      "attempt": 1,
+      "chunk_id": "5cd9ee",
+      "wall_time_seconds": 0.0000088,
+      "exit_code": 1,
+      "original_token_count": 70,
+      "output": "Read from remote host ssh.github.com: Connection reset by peer\r\nclient_loop: send disconnect: Connection reset by peer\r\nsend-pack: unexpected disconnect while reading sideband packet\nfatal: sha1 file '<stdout>' write error: Broken pipe\nfatal: the remote end hung up unexpectedly\n"
+    },
+    {
+      "attempt": 2,
+      "chunk_id": "e5b23e",
+      "wall_time_seconds": 0.0000083,
+      "exit_code": 1,
+      "original_token_count": 64,
+      "output": "Connection to ssh.github.com closed by remote host.\r\nclient_loop: send disconnect: Broken pipe\r\nsend-pack: unexpected disconnect while reading sideband packet\nfatal: sha1 file '<stdout>' write error: Broken pipe\nfatal: the remote end hung up unexpectedly\n"
+    },
+    {
+      "attempt": 3,
+      "session_id": 60106,
+      "exit_code": 1,
+      "output": "Timeout, server ssh.github.com not responding.\nWriting objects:  80% (41/51), 2.02 MiB | 51.00 KiB/s\nfatal: sha1 file '<stdout>' write error: Broken pipe\nsend-pack: unexpected disconnect while reading sideband packet\nfatal: the remote end hung up unexpectedly\n",
+      "recordedFromObservedToolCompletion": true
+    },
+    {
+      "attempt": 4,
+      "initial": {
+        "chunk_id": "f251fa",
+        "wall_time_seconds": 10.0095176,
+        "session_id": 55371,
+        "original_token_count": 1377,
+        "output": "Warning: truncated output (original token count: 1377)\nTotal output lines: 5\n\nEnumerating objects: 51, done.\nCounting objects:   1% (1/51)\rCounting objects:   3% (2/51)\rCounting objects:   5% (3/51)\rCounting objects:   7% (4/51)\rCounting objects:   9% (5/51)\rCounting objects:  11% (6/51)\rCounting objects:  13% (7/51)\rCounting objects:  15% (8/51)\rCounting objects:  17% (9/51)\rCounting objects:  19% (10/51)\rCounting objects:  21% (11/51)\rCounting objects:  23% (12/51)\rCounting objects:  25% (13/51)\rCounting objects:  27% (14/51)\rCounting objects:  29% (15/51)\rCounting objects:  31% (16/51)\rCounting objects:  33% (17/51)\rCounting objects:  35% (18/51)\rCounting objects:  37% (19/51)\rCounting objects:  39% (20/51)\rCounting objects:  41% (21/51)\rCounting objects:  43% (22/51)\rCounting objects:  45% (23/51)\rCounting objects:  47% (24/51)\rCounting objects:  49% (25/51)\rCounting objects:  50% (26/51)\rCounting objects:  52% (27/51)\rCounting objects:  54% (28/51)\rCounting objects:  56% (29/51)\rCounting objects:  58% (30/51)\rCounting objects:  60% (31/51)\rCounting objects:  62% (32/51)\rCounting objects:  64% (33/51)\rCounting objects:  66% (34/51)\rCounting objects:  68% (35/51)\rCounting objects:  70% (36/51)\rCounting objects:  72% (37/51)\rCounting objects:  74% (38/51)\rCounting objects:  76% (39/51)\rCounting objects:  78% (40/51)\rCounting objects:  80% (41/51)\rCounting objects:  82% (42/51)\rCounting objects:  84% (43/51)\rCounting objects:  86% (44/51)\rCounting objects:  88% (45/51)\rCounting objects:  90% (46/51)\rCounting objects:  92% (47/51)\rCounting objects:  94% (48/51)\rCounting objects:  96% (49/51)\rCounting objects:  98% (50/51)\rCounting objects: 100% (51/51)\rCounting objects: 100% (51/51), done.\nCompressing objects:   1% (1/51)\rCompressing objects:   3% (2/51)\rCompressing objects:   5% (3/51)\rCompressing objects:   7% (4/51)\rCompressing objects:   9% (5/51)\rCompressing objects:  11% (6/51)\rCompressing objects:  13% (7/51)\rCompressing objects:  15% (8/51)\rCompressing objects:  17% (9/51)\rCompressing objects:  19% (10/51)\rCompressing objects:  21% (11/51)\rCompressing objects:  23% (12/51)\rCompressing objects:  25% (13/51)\rCompressing objects:  27% (14/51)\rCompressing objects:  29% (15/51)\rCompressing objects:  31% (16/51)\rCompressing objects:  33% (17/51)\rCompressing objects:  35% (18/51)\rCompressing objects:  37% (19/51)\rCompressing objects:  39% (20/51)\rCompressing objects:  41% (21/51)\rCompressing objects:  43% (22/51)\rCompressing objects:…177 tokens truncated…objects:  86% (44/51)\rCompressing objects:  88% (45/51)\rCompressing objects:  90% (46/51)\rCompressing objects:  92% (47/51)\rCompressing objects:  94% (48/51)\rCompressing objects:  96% (49/51)\rCompressing objects:  98% (50/51)\rCompressing objects: 100% (51/51)\rCompressing objects: 100% (51/51), done.\nWriting objects:   1% (1/51)\rWriting objects:   3% (2/51)\rWriting objects:   5% (3/51)\rWriting objects:   7% (4/51)\rWriting objects:   9% (5/51)\rWriting objects:  11% (6/51)\rWriting objects:  13% (7/51)\rWriting objects:  15% (8/51)\rWriting objects:  17% (9/51)\rWriting objects:  19% (10/51)\rWriting objects:  21% (11/51)\rWriting objects:  23% (12/51)\rWriting objects:  25% (13/51)\rWriting objects:  27% (14/51)\rWriting objects:  29% (15/51)\rWriting objects:  31% (16/51)\rWriting objects:  33% (17/51)\rWriting objects:  35% (18/51)\rWriting objects:  37% (19/51)\rWriting objects:  41% (21/51)\rWriting objects:  45% (23/51)\rWriting objects:  47% (24/51)\rWriting objects:  49% (25/51), 1.29 MiB | 2.49 MiB/s\rWriting objects:  50% (26/51), 1.29 MiB | 2.49 MiB/s\rWriting objects:  52% (27/51), 1.29 MiB | 2.49 MiB/s\rWriting objects:  54% (28/51), 1.29 MiB | 2.49 MiB/s\rWriting objects:  56% (29/51), 1.29 MiB | 2.49 MiB/s\rWriting objects:  58% (30/51), 1.29 MiB | 2.49 MiB/s\rWriting objects:  60% (31/51), 1.29 MiB | 2.49 MiB/s\rWriting objects:  62% (32/51), 1.29 MiB | 2.49 MiB/s\rWriting objects:  64% (33/51), 1.29 MiB | 2.49 MiB/s\rWriting objects:  66% (34/51), 1.29 MiB | 2.49 MiB/s\rWriting objects:  68% (35/51), 1.29 MiB | 2.49 MiB/s\rWriting objects:  70% (36/51), 1.29 MiB | 2.49 MiB/s\rWriting objects:  72% (37/51), 1.29 MiB | 2.49 MiB/s\rWriting objects:  74% (38/51), 1.29 MiB | 2.49 MiB/s\rWriting objects:  76% (39/51), 1.29 MiB | 2.49 MiB/s\rWriting objects:  78% (40/51), 1.29 MiB | 2.49 MiB/s\rWriting objects:  80% (41/51), 1.29 MiB | 2.49 MiB/s\rWriting objects:  82% (42/51), 1.29 MiB | 2.49 MiB/s\rWriting objects:  86% (44/51), 1.29 MiB | 2.49 MiB/s\rWriting objects:  88% (45/51), 1.29 MiB | 2.49 MiB/s\rWriting objects:  92% (47/51), 1.29 MiB | 2.49 MiB/s\rWriting objects:  94% (48/51), 1.29 MiB | 2.49 MiB/s\rWriting objects:  96% (49/51), 1.29 MiB | 2.49 MiB/s\rWriting objects:  98% (50/51), 1.29 MiB | 2.49 MiB/s\rWriting objects: 100% (51/51), 1.29 MiB | 2.49 MiB/s\rWriting objects: 100% (51/51), 1.87 MiB | 2.80 MiB/s, done.\nTotal 51 (delta 6), reused 0 (delta 0), pack-reused 0 (from 0)\n"
+      },
+      "completion": {
+        "chunk_id": "6f1bc4",
+        "wall_time_seconds": 0.0000107,
+        "exit_code": 1,
+        "original_token_count": 39,
+        "output": "Timeout, server ssh.github.com not responding.\r\nsend-pack: unexpected disconnect while reading sideband packet\nfatal: the remote end hung up unexpectedly\n"
+      }
+    }
+  ],
+  "fourthPushWroteAll51Objects": true,
+  "fourthPushPackMiB": 1.87,
+  "fourthPushClientFinalAcknowledgementTimedOut": true,
+  "remoteActualBranchUpdatedDespiteClientTimeout": true,
+  "forcePush": false,
+  "remoteUrlModified": false,
+  "manualRepack": false,
+  "historyRewritten": false,
+  "knownOldCorruptObject": "1ae7f886fa87573bdbb59caf0772103929fac94c",
+  "knownOldCorruptObjectRepaired": false,
+  "wholeRepositoryObjectIntegrityVerified": false,
+  "runtimeOriginalSession": 25783,
+  "runtimeOriginalCallerStillOpen": true,
+  "runtimeFinalExitAndPostguardPending": true,
+  "desktopPrepareAndNativePersistenceAccepted": true,
+  "mobileAccepted": false,
+  "otherSharedPanelsAccepted": false,
+  "goalComplete": false,
+  "acceptedCommitScopePin": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\root-approved01\\source75-commit-scope-accepted02.json",
+    "bytes": 36685,
+    "sha256": "ae7122ff2bbfe02dac39310aa855e1a8b5c07e75b4f070d00e3994d75ca2c737"
+  },
+  "workingPreservationPin": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\root-approved01\\source75-after-commit-working-preservation01.json",
+    "bytes": 731,
+    "sha256": "1fef8df3c5e305087d593f51fea5a42a8901169604d2fbf2208bfd313fb10c67"
+  }
+}

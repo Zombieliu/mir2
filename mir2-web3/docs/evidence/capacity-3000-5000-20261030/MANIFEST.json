@@ -1,0 +1,363 @@
+{
+  "schema": "mir2.capacity-3000-5000.public-evidence.v1",
+  "curatedAtUtc": "2026-10-29T20:39:15.226165+00:00",
+  "sourceGitRevision": "bb690060d599d6d224f0ca708af2e75a1d4b533c",
+  "gatewayBinarySourceRevision": "e824e520b902e5fc616dc8fbb806b3a4363a60ba",
+  "gatewayBinarySha256": "010c6627c9a18663eb56a5618c220f46f6051b88e3c944e621166072d9aef2ea",
+  "status": "static_audit_and_two_failed_two_actor_probes_only",
+  "claims": {
+    "capacity3000Passed": false,
+    "capacity5000Passed": false,
+    "combat500Passed": false,
+    "firstAttemptPassed": false,
+    "firstStage2MeasuredSeconds": 60.013,
+    "firstStage2Passed": true,
+    "firstSoakCompleted": false,
+    "nativeResumeProven": false,
+    "saveReloginProven": false,
+    "secondAttempt": "failed-no-further-retry",
+    "humanAccepted": false,
+    "secondStage2MeasuredSeconds": 60.079,
+    "secondStage2Passed": true,
+    "secondSoakMeasuredUntilAbortSeconds": 55.129,
+    "secondSoakCompleted": false,
+    "secondFirstFailedContinuousWindowTimeoutNumerator": 1,
+    "secondFirstFailedContinuousWindowActionDenominator": 80,
+    "secondNormalLogoutAcknowledged": 2,
+    "secondNativeResumeProven": false,
+    "secondSaveReloginProven": false,
+    "secondTotalRecordedLoginAttempts": 6,
+    "secondPriorFourLoginAttemptsPreserved": true,
+    "watchdogFullySuccessful": false
+  },
+  "sourceArtifacts": [
+    {
+      "file": "HOST-BASELINE.json",
+      "bytes": 13744,
+      "sha256": "87d1b4f14749a9ef30d4315ea2cdc8a5df133826fcab071611afe4d011579d6e",
+      "sourceArtifact": "capacity-5000-20261030/HOST-BASELINE.json",
+      "sourceBytes": 13744,
+      "sourceSha256": "87d1b4f14749a9ef30d4315ea2cdc8a5df133826fcab071611afe4d011579d6e",
+      "projection": "byte_identical_public_host_observation"
+    },
+    {
+      "file": "architecture-audit.md",
+      "bytes": 17704,
+      "sha256": "e7acc7271daa51ff2ade003283571d56613565f8145ef9f7285577193eeaf8e5",
+      "sourceArtifact": "capacity-5000-20261030/architecture-audit.md",
+      "sourceBytes": 23859,
+      "sourceSha256": "05a2fb58c78e719ec9cab1171e0c5039e3e2ac5d30282c76cebda143fd221e78",
+      "projection": "local_paths_replaced_and_repository_links_made_relative"
+    },
+    {
+      "file": "architecture-audit.json",
+      "bytes": 87755,
+      "sha256": "62f91fab6a5682d79e40b29d2feb00ab69b122ea8c0602a98c1489b451913047",
+      "sourceArtifact": "capacity-5000-20261030/architecture-audit.json",
+      "sourceBytes": 88501,
+      "sourceSha256": "47b33634a25b956b53c51fe0b15451d4815ccc2ee4a124414a8e18de98f187c6",
+      "projection": "repository_location_replaced_no_finding_changed"
+    },
+    {
+      "file": "benchmark-contract.md",
+      "bytes": 13996,
+      "sha256": "504349c65530f5d02afeaf83516548e30c47f318d9953013dc0153f97aea3e9a",
+      "sourceArtifact": "capacity-5000-20261030/benchmark-contract.md",
+      "sourceBytes": 14647,
+      "sourceSha256": "5cba761f9d4fa5cf66d16178f4abf0ff57ef754eb168d8207ee4911af8516fdb",
+      "projection": "local_paths_replaced_and_repository_links_made_relative"
+    },
+    {
+      "file": "benchmark-contract.json",
+      "bytes": 23258,
+      "sha256": "5410460c5057aabffb63f2550117168a6c9f571f84ec205277a12276b9f01bd9",
+      "sourceArtifact": "capacity-5000-20261030/benchmark-contract.json",
+      "sourceBytes": 23345,
+      "sourceSha256": "4f06b1faa42bd8a1921cc62cd90727ecd9f3529aeca6a5eb14c652d0699b1588",
+      "projection": "source_root_replaced_no_threshold_or_status_changed"
+    },
+    {
+      "file": "RUNTIME-SUMMARY.json",
+      "bytes": 4423,
+      "sha256": "3daaf1eca0fd9f5a6bcc0c4a0b088fc0b602e5cf37e5ac4c14f96efbe88eff06",
+      "sourceArtifact": "capacity-5000-20261030/pilot/ordinary-two/RUNTIME-SUMMARY.json",
+      "sourceBytes": 7053,
+      "sourceSha256": "e38d0cea0e5642eb2bcf0ce1bd23fe50b048f3159be69a4b4ece0bef9fa72b21",
+      "projection": "whitelisted_anonymized_summary_not_original_raw"
+    },
+    {
+      "file": "INTERRUPTION-DIAGNOSTIC.json",
+      "bytes": 3658,
+      "sha256": "8850bbb48034569860a3a50e6685ecbdc05eb6b5cfbea08a5fe8dbd81661f521",
+      "sourceArtifact": "capacity-5000-20261030/pilot/INTERRUPTION-DIAGNOSTIC.json",
+      "sourceBytes": 10066,
+      "sourceSha256": "767903a27f2eef3f770b92d16e0f9d9951c244502dc9d7146ec2e430da203eb3",
+      "projection": "whitelisted_systemd_status_and_resource_snapshot_raw_journals_removed"
+    },
+    {
+      "file": "RUNTIME-SUMMARY-R2.json",
+      "bytes": 14393,
+      "sha256": "348851f3cbafaabc9f897dc88a51d78d07ce7a8791843ecd5a589dead7e580b9",
+      "sourceArtifact": "capacity-5000-20261030/pilot/ordinary-two-r2/RUNTIME-SUMMARY.json",
+      "sourceBytes": 16523,
+      "sourceSha256": "7c1d327eae444a909d8bf3e20589f81f70d2b152941cb85f5646cadba063f3bf",
+      "projection": "whitelisted_anonymized_failed_retest_summary_not_original_raw"
+    },
+    {
+      "file": "RESOURCE-SUMMARY-R2.json",
+      "bytes": 2656,
+      "sha256": "b71d2a2a93358970ed1ca5b506a0a7844c0ecb62580494623cd51f4ce5a2c67e",
+      "sourceArtifact": "capacity-5000-20261030/pilot/ordinary-two-r2/RESOURCE-SUMMARY.json",
+      "sourceBytes": 2656,
+      "sourceSha256": "b71d2a2a93358970ed1ca5b506a0a7844c0ecb62580494623cd51f4ce5a2c67e",
+      "projection": "byte_identical_coordinator_curated_public_summary"
+    },
+    {
+      "file": "FINAL-OPERATIONS.json",
+      "bytes": 2888,
+      "sha256": "ec8eef394f58150a8222b1c8ba9490c778ccc76297658083bed2ded7aeca7a9f",
+      "sourceArtifact": "capacity-5000-20261030/pilot/FINAL-OPERATIONS.json",
+      "sourceBytes": 2888,
+      "sourceSha256": "ec8eef394f58150a8222b1c8ba9490c778ccc76297658083bed2ded7aeca7a9f",
+      "projection": "byte_identical_coordinator_curated_public_summary"
+    }
+  ],
+  "files": [
+    {
+      "file": "HOST-BASELINE.json",
+      "bytes": 13744,
+      "sha256": "87d1b4f14749a9ef30d4315ea2cdc8a5df133826fcab071611afe4d011579d6e"
+    },
+    {
+      "file": "architecture-audit.md",
+      "bytes": 17704,
+      "sha256": "e7acc7271daa51ff2ade003283571d56613565f8145ef9f7285577193eeaf8e5"
+    },
+    {
+      "file": "architecture-audit.json",
+      "bytes": 87755,
+      "sha256": "62f91fab6a5682d79e40b29d2feb00ab69b122ea8c0602a98c1489b451913047"
+    },
+    {
+      "file": "benchmark-contract.md",
+      "bytes": 13996,
+      "sha256": "504349c65530f5d02afeaf83516548e30c47f318d9953013dc0153f97aea3e9a"
+    },
+    {
+      "file": "benchmark-contract.json",
+      "bytes": 23258,
+      "sha256": "5410460c5057aabffb63f2550117168a6c9f571f84ec205277a12276b9f01bd9"
+    },
+    {
+      "file": "RUNTIME-SUMMARY.json",
+      "bytes": 4423,
+      "sha256": "3daaf1eca0fd9f5a6bcc0c4a0b088fc0b602e5cf37e5ac4c14f96efbe88eff06"
+    },
+    {
+      "file": "INTERRUPTION-DIAGNOSTIC.json",
+      "bytes": 3658,
+      "sha256": "8850bbb48034569860a3a50e6685ecbdc05eb6b5cfbea08a5fe8dbd81661f521"
+    },
+    {
+      "file": "RUNTIME-SUMMARY-R2.json",
+      "bytes": 14393,
+      "sha256": "348851f3cbafaabc9f897dc88a51d78d07ce7a8791843ecd5a589dead7e580b9"
+    },
+    {
+      "file": "RESOURCE-SUMMARY-R2.json",
+      "bytes": 2656,
+      "sha256": "b71d2a2a93358970ed1ca5b506a0a7844c0ecb62580494623cd51f4ce5a2c67e"
+    },
+    {
+      "file": "FINAL-OPERATIONS.json",
+      "bytes": 2888,
+      "sha256": "ec8eef394f58150a8222b1c8ba9490c778ccc76297658083bed2ded7aeca7a9f"
+    },
+    {
+      "file": "README.md",
+      "bytes": 5312,
+      "sha256": "68fdea2d7e1e8707c3b56eaf4068713714f009cb0a46b1e620905830f7875b92"
+    }
+  ],
+  "sourceBindingsVerified": [
+    {
+      "file": "apps/simulation/src/runtime/zone/partition.rs",
+      "sha256": "8560805a891983344d3049844d35b185fd178f7843e51306fabc83714cf4728f",
+      "encoding": "raw"
+    },
+    {
+      "file": "apps/simulation/src/runtime/zone/manager.rs",
+      "sha256": "d93c223e85d5684fac8b9826b1f47707d7968e7b535ef3e36de530965ab4605c",
+      "encoding": "raw"
+    },
+    {
+      "file": "apps/simulation/src/runtime/zone/aoi_grid.rs",
+      "sha256": "51b9fe2149598f1dd92511b8b306454e6064b2355fd9289a1d19750815834aab",
+      "encoding": "raw"
+    },
+    {
+      "file": "apps/gateway/src/routing.rs",
+      "sha256": "a29c1cfd5e23661bbe676468f18f75ce51a63d82a0455122b548d7ecf98f1a06",
+      "encoding": "raw"
+    },
+    {
+      "file": "apps/gateway/src/main.rs",
+      "sha256": "dce20a93eb75858035cf1f5ef8889de1212744ecc949e67d410dfe62c40c24b8",
+      "encoding": "raw"
+    },
+    {
+      "file": "apps/gateway/src/topology.rs",
+      "sha256": "1336ed74fe21547ef386204d53ce698af36f166e3a3e243e559d6b8ca6fc0ddb",
+      "encoding": "raw"
+    },
+    {
+      "file": "apps/gateway/src/session.rs",
+      "sha256": "53c1d8ae2f36364c929f14d70249170b72f1a57aed267cf11bc3f8cf6abec54d",
+      "encoding": "raw"
+    },
+    {
+      "file": "apps/gateway/src/bin/zone_host.rs",
+      "sha256": "d3345ce6350413094486f7e0e66388c288341ee4ef6e21a52272c4d5179988dc",
+      "encoding": "raw"
+    },
+    {
+      "file": "apps/gateway/src/zone_rpc.rs",
+      "sha256": "f284a38c43131c823626633ba463feb9f6e44fc67a3c233acf0a98f77bbcad37",
+      "encoding": "raw"
+    },
+    {
+      "file": "apps/gateway/src/control_plane.rs",
+      "sha256": "c9070a6f21645ee31ad056b13f97006f5e4595432fb25bf722d855c3bdcdcd94",
+      "encoding": "raw"
+    },
+    {
+      "file": "apps/gateway/src/gate15.rs",
+      "sha256": "8cbce042324a4eea459cd5e8e091be119352be72eb1ea3274cf500d5fd925eb7",
+      "encoding": "raw"
+    },
+    {
+      "file": "apps/gateway/src/zone_lease.rs",
+      "sha256": "ff3291248288bc2051ee89f5aaba58b7daf79faccb541e582fbfacaeaa2db4ee",
+      "encoding": "raw"
+    },
+    {
+      "file": "apps/gateway/src/hotspot.rs",
+      "sha256": "2c02a2ba852c085c5e887a8ebb6bbe4903316036e0b4167cfd8950f5aac74481",
+      "encoding": "raw"
+    },
+    {
+      "file": "apps/simulation/src/config.rs",
+      "sha256": "ee8ea174081009feefea07a94435f97815c384744e77bf79731b97d4c5a9cea0",
+      "encoding": "raw"
+    },
+    {
+      "file": "apps/gateway/src/cache.rs",
+      "sha256": "1c257d99144c51af24be254e85947a6eac2b18608ba0ba6ae904fa035f442614",
+      "encoding": "raw"
+    },
+    {
+      "file": "apps/gateway/src/web.rs",
+      "sha256": "d2532b9ac0a708752c057073958e5b20b94d37a35a9f1cc6dceb4f149fe40c8d",
+      "encoding": "raw"
+    },
+    {
+      "file": "apps/gateway/src/tcp.rs",
+      "sha256": "60d48c79bf213b4c88024575358792bd6368704f2e948ae53e4bd701b1f104fb",
+      "encoding": "raw"
+    },
+    {
+      "file": "apps/gateway/src/chat_broadcast.rs",
+      "sha256": "8eb5ee898d0da97aabe4b0b2eca284d5a78c70ed5c4fb3fa6aa325a4ad714c05",
+      "encoding": "raw"
+    },
+    {
+      "file": "apps/gateway/src/zone_metrics.rs",
+      "sha256": "37ac259c5ef95948299b16887db435f04869ab9e6ecd569d7c478df230d1e3a8",
+      "encoding": "raw"
+    },
+    {
+      "file": "docs/CELL-500-COMBAT-ACCEPTANCE.zh-CN.md",
+      "sha256": "bda7b4e794d698c8a29867cbdf1cb27074c5763792e5345de64b1b30d085d5ea",
+      "encoding": "raw"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "sha256": "5f4c85124349a484f181c599a79ad469741f9f3c31597c9a5393f39a8dd83439",
+      "encoding": "raw"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "sha256": "ad4c21ee83ed592d0542f855f2ec89f9f053aa1ce4fea7dbbd6648c6d859578a",
+      "encoding": "raw"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-pvp-stress.mjs",
+      "sha256": "a28701928adec72e401d004ad0bd5590b1a52d51ee1c275bdb03b49558bda3ca",
+      "encoding": "raw"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f",
+      "encoding": "raw"
+    },
+    {
+      "file": "apps/web/scripts/playtest-load-smoke.mjs",
+      "sha256": "3dc4d65c2e514a075e11a84799ac3f1fafbfcb8df51fefbc648dc3a3c24f7fc0",
+      "encoding": "raw"
+    },
+    {
+      "file": "docs/generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/formal-ladder-v2/README.md",
+      "sha256": "4075237a411bce922c4eb5144a5387ec4b78c6cefa412b8b4e43524742bed0b4",
+      "encoding": "raw"
+    },
+    {
+      "file": "docs/generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/formal-ladder-v2/1793103962697-3d1eda69.report.json",
+      "sha256": "250b514516ad6087444ffd79cf9f8db84c5b658ed7fa83fbed5cc79376d978aa",
+      "encoding": "raw"
+    },
+    {
+      "file": "docs/generated/cell-p0-p1-completion-20261024/capacity-hour-20261028-spectator-ack-v1/README.md",
+      "sha256": "fdfb5de7fb7b2992cf886376d073fdce8275121e3b0bb8474853b6caedd5f4f8",
+      "encoding": "raw"
+    },
+    {
+      "file": "docs/generated/cell-p0-p1-completion-20261024/capacity-hour-20261028-spectator-ack-v1/pvp-v11/reports/1793176229483-570d3dce.pvp-stress-report.json",
+      "sha256": "2c35ce3d4d60d4c5b408e5dd73757090c293a64a638925413dd65856526f6d67",
+      "encoding": "raw"
+    },
+    {
+      "file": "docs/generated/cell-p0-p1-completion-20261024/capacity-hour-20261028-spectator-ack-v1/pvp-v11/reports/1793176229483-570d3dce.pvp-stress-samples.jsonl",
+      "sha256": "269c0e80c564ac8dc7c7861166a9ceb91fe9bd753b40e65e15efaf9ed85547a5",
+      "encoding": "raw"
+    },
+    {
+      "file": "docs/SCALABILITY-AND-CAPACITY.md",
+      "sha256": "d835d4702e1275f448d0435bc931351f69d1c6afc6faa34dc2d6dc3769077348",
+      "encoding": "raw"
+    }
+  ],
+  "privacy": {
+    "rawCredentialsIncluded": false,
+    "rawAccountPoolIncluded": false,
+    "rawAuthLedgerIncluded": false,
+    "sshDetailsIncluded": false,
+    "rawSessionJournalIncluded": false,
+    "localAbsolutePathsIncluded": false,
+    "genericTransportScopeDescriptionIncluded": true
+  },
+  "authorActions": {
+    "repositoryWriteScope": "docs/evidence/capacity-3000-5000-20261030/**",
+    "sshUsed": false,
+    "newLoadExecuted": false,
+    "servicesModified": false,
+    "staged": false,
+    "committed": false,
+    "scope": "Evidence curation only; coordinator performed the actual isolated runtime and load."
+  },
+  "pending": [
+    "root-cause diagnosis for second run acknowledged-action timeouts",
+    "native resume and saved-relogin actual verification",
+    "5000 workload freeze and executable harness",
+    "large-scale actual qualification and soak"
+  ]
+}

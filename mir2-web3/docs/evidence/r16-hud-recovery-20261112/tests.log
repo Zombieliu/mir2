@@ -1,0 +1,1078 @@
+TAP version 13
+# Subtest: retiring a redundant pack preserves the published cache-namespace inventory input
+ok 1 - retiring a redundant pack preserves the published cache-namespace inventory input
+  ---
+  duration_ms: 1.4185
+  type: 'test'
+  ...
+# Subtest: low tier bounds scene prewarm and disables background packs by default
+ok 2 - low tier bounds scene prewarm and disables background packs by default
+  ---
+  duration_ms: 0.2312
+  type: 'test'
+  ...
+# Subtest: medium and high tiers preserve progressively more eager prewarming
+ok 3 - medium and high tiers preserve progressively more eager prewarming
+  ---
+  duration_ms: 0.1265
+  type: 'test'
+  ...
+# Subtest: an explicit background mode remains available for deterministic QA
+ok 4 - an explicit background mode remains available for deterministic QA
+  ---
+  duration_ms: 0.1136
+  type: 'test'
+  ...
+# Subtest: initial critical prewarm contains only the lightweight login shell
+ok 5 - initial critical prewarm contains only the lightweight login shell
+  ---
+  duration_ms: 0.2178
+  type: 'test'
+  ...
+# Subtest: deferred scene stages expose deterministic follow-up pack selections
+ok 6 - deferred scene stages expose deterministic follow-up pack selections
+  ---
+  duration_ms: 0.3951
+  type: 'test'
+  ...
+# Subtest: the UI lifecycle requests each deferred prewarm stage
+ok 7 - the UI lifecycle requests each deferred prewarm stage
+  ---
+  duration_ms: 5.2486
+  type: 'test'
+  ...
+# Subtest: only the low tier prewarms raw map frames for the DOM compatibility path
+ok 8 - only the low tier prewarms raw map frames for the DOM compatibility path
+  ---
+  duration_ms: 0.1431
+  type: 'test'
+  ...
+# Subtest: heavy map and effect metadata loaders stay behind the game screen boundary
+ok 9 - heavy map and effect metadata loaders stay behind the game screen boundary
+  ---
+  duration_ms: 2.6866
+  type: 'test'
+  ...
+# Subtest: playable cache acceptance waits for lifecycle background work to settle
+ok 10 - playable cache acceptance waits for lifecycle background work to settle
+  ---
+  duration_ms: 0.4338
+  type: 'test'
+  ...
+# Subtest: HUD recovery reads only failed URLs after worker configuration and keeps first failures
+ok 11 - HUD recovery reads only failed URLs after worker configuration and keeps first failures
+  ---
+  duration_ms: 540.8768
+  type: 'test'
+  ...
+# Subtest: recovery does not erase a failure before its replacement body reaches EOF
+ok 12 - recovery does not erase a failure before its replacement body reaches EOF
+  ---
+  duration_ms: 498.3141
+  type: 'test'
+  ...
+# Subtest: persistent HUD failures get at most one bounded recovery sweep
+ok 13 - persistent HUD failures get at most one bounded recovery sweep
+  ---
+  duration_ms: 2369.8055
+  type: 'test'
+  ...
+# Subtest: owner cancellation during the configuration refresh prevents every recovery request
+ok 14 - owner cancellation during the configuration refresh prevents every recovery request
+  ---
+  duration_ms: 484.1101
+  type: 'test'
+  ...
+# Subtest: healthy HUD and non-HUD packs do not configure or retry
+ok 15 - healthy HUD and non-HUD packs do not configure or retry
+  ---
+  duration_ms: 497.4106
+  type: 'test'
+  ...
+# Subtest: a failed configuration refresh cannot manufacture success or retain the stage forever
+ok 16 - a failed configuration refresh cannot manufacture success or retain the stage forever
+  ---
+  duration_ms: 955.2166
+  type: 'test'
+  ...
+# Subtest: canceling a recovery body preserves its attempt diagnostics and cancels its bytes
+ok 17 - canceling a recovery body preserves its attempt diagnostics and cancels its bytes
+  ---
+  duration_ms: 488.2215
+  type: 'test'
+  ...
+# Subtest: public prewarm progress waits for the complete response body
+ok 18 - public prewarm progress waits for the complete response body
+  ---
+  duration_ms: 12.0141
+  type: 'test'
+  ...
+# Subtest: a disconnected body is retried and only the final complete bytes are returned
+ok 19 - a disconnected body is retried and only the final complete bytes are returned
+  ---
+  duration_ms: 161.0805
+  type: 'test'
+  ...
+# Subtest: three broken bodies produce one failed prewarm metric and its URL
+ok 20 - three broken bodies produce one failed prewarm metric and its URL
+  ---
+  duration_ms: 478.8473
+  type: 'test'
+  ...
+# Subtest: body inactivity cancels the incomplete stream before retrying
+ok 21 - body inactivity cancels the incomplete stream before retrying
+  ---
+  duration_ms: 188.0121
+  type: 'test'
+  ...
+# Subtest: continuing chunks renew the idle deadline instead of imposing a total body deadline
+ok 22 - continuing chunks renew the idle deadline instead of imposing a total body deadline
+  ---
+  duration_ms: 374.9525
+  type: 'test'
+  ...
+# Subtest: an owner cancellation cannot turn a cancelled body prefix into success
+ok 23 - an owner cancellation cannot turn a cancelled body prefix into success
+  ---
+  duration_ms: 0.6495
+  type: 'test'
+  ...
+# Subtest: an owner cancellation during backoff prevents another request
+ok 24 - an owner cancellation during backoff prevents another request
+  ---
+  duration_ms: 31.2353
+  type: 'test'
+  ...
+# Subtest: a header timeout retires and retries the request
+ok 25 - a header timeout retires and retries the request
+  ---
+  duration_ms: 186.4573
+  type: 'test'
+  ...
+# Subtest: non-success responses are cancelled, bounded and never counted as warmed
+ok 26 - non-success responses are cancelled, bounded and never counted as warmed
+  ---
+  duration_ms: 466.7015
+  type: 'test'
+  ...
+# Subtest: oversized bodies are cancelled once without retaining or retrying their prefix
+ok 27 - oversized bodies are cancelled once without retaining or retrying their prefix
+  ---
+  duration_ms: 0.3538
+  type: 'test'
+  ...
+# Subtest: a full pack is enabled only by a verified content-addressed release capability
+ok 28 - a full pack is enabled only by a verified content-addressed release capability
+  ---
+  duration_ms: 0.8662
+  type: 'test'
+  ...
+# Subtest: a map atlas is enabled only when its verified manifest path matches its content hash
+ok 29 - a map atlas is enabled only when its verified manifest path matches its content hash
+  ---
+  duration_ms: 0.3277
+  type: 'test'
+  ...
+# Subtest: Bevy runtime URLs use an immutable version path instead of a cache-busting query
+ok 30 - Bevy runtime URLs use an immutable version path instead of a cache-busting query
+  ---
+  duration_ms: 0.3395
+  type: 'test'
+  ...
+# Subtest: R2 upload Worker paths cannot escape the configured origin
+ok 31 - R2 upload Worker paths cannot escape the configured origin
+  ---
+  duration_ms: 0.4664
+  type: 'test'
+  ...
+# Subtest: R2 upload Worker persists the private gzip representation header
+ok 32 - R2 upload Worker persists the private gzip representation header
+  ---
+  duration_ms: 13.5716
+  type: 'test'
+  ...
+# Subtest: immutable overlay releases fall back only to a pinned Mir2 release prefix
+ok 33 - immutable overlay releases fall back only to a pinned Mir2 release prefix
+  ---
+  duration_ms: 0.2433
+  type: 'test'
+  ...
+# Subtest: public asset CDN reads an overlay object first and then its pinned base
+ok 34 - public asset CDN reads an overlay object first and then its pinned base
+  ---
+  duration_ms: 3.4993
+  type: 'test'
+  ...
+# Subtest: production release and Next routing expose the pinned capability and immutable runtime
+ok 35 - production release and Next routing expose the pinned capability and immutable runtime
+  ---
+  duration_ms: 10.5681
+  type: 'test'
+  ...
+# (node:24848) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: browser-safe R2 fallback resolves before a referer-sensitive CDN
+ok 36 - browser-safe R2 fallback resolves before a referer-sensitive CDN
+  ---
+  duration_ms: 20.4334
+  type: 'test'
+  ...
+# Subtest: remote candidates are deduplicated and preserve fallback-first order
+ok 37 - remote candidates are deduplicated and preserve fallback-first order
+  ---
+  duration_ms: 0.8903
+  type: 'test'
+  ...
+# Subtest: legacy image retry query parameters collapse to one stable cache key
+ok 38 - legacy image retry query parameters collapse to one stable cache key
+  ---
+  duration_ms: 1.5239
+  type: 'test'
+  ...
+# Subtest: a cold asset streams before its background CacheStorage write completes
+ok 39 - a cold asset streams before its background CacheStorage write completes
+  ---
+  duration_ms: 3.0402
+  type: 'test'
+  ...
+# Subtest: a warm asset cache hit does not rewrite or scan CacheStorage
+ok 40 - a warm asset cache hit does not rewrite or scan CacheStorage
+  ---
+  duration_ms: 1.2076
+  type: 'test'
+  ...
+# Subtest: cache trimming is amortized across a burst of writes
+ok 41 - cache trimming is amortized across a burst of writes
+  ---
+  duration_ms: 7.087
+  type: 'test'
+  ...
+# Subtest: /api/asset-manifest returns headers and JSON while the independent cache write remains blocked
+ok 42 - /api/asset-manifest returns headers and JSON while the independent cache write remains blocked
+  ---
+  duration_ms: 3.1629
+  type: 'test'
+  ...
+# Subtest: /api/scene/crystal?map=0&x=296&y=620&assetRelease=test returns headers and JSON while the independent cache write remains blocked
+ok 43 - /api/scene/crystal?map=0&x=296&y=620&assetRelease=test returns headers and JSON while the independent cache write remains blocked
+  ---
+  duration_ms: 2.034
+  type: 'test'
+  ...
+# Subtest: a warm versioned Crystal request returns cached data and refreshes it in the background
+ok 44 - a warm versioned Crystal request returns cached data and refreshes it in the background
+  ---
+  duration_ms: 1.4129
+  type: 'test'
+  ...
+# Subtest: a Crystal reload leaves the retry to the browser without joining the worker cache path
+ok 45 - a Crystal reload leaves the retry to the browser without joining the worker cache path
+  ---
+  duration_ms: 0.6313
+  type: 'test'
+  ...
+# Subtest: asset-manifest stays network-first and uses the same key for offline fallback
+ok 46 - asset-manifest stays network-first and uses the same key for offline fallback
+  ---
+  duration_ms: 1.9096
+  type: 'test'
+  ...
+# Subtest: Crystal preserves Retry-After and the typed resource-missing 424 without cache writes
+ok 47 - Crystal preserves Retry-After and the typed resource-missing 424 without cache writes
+  ---
+  duration_ms: 1.5952
+  type: 'test'
+  ...
+# Subtest: retiring the first HUD consumer cannot cancel a coalesced prewarm body
+ok 48 - retiring the first HUD consumer cannot cancel a coalesced prewarm body
+  ---
+  duration_ms: 1.7943
+  type: 'test'
+  ...
+# Subtest: CSS and renderer consumers share one font through its unfinished body and cache fill
+ok 49 - CSS and renderer consumers share one font through its unfinished body and cache fill
+  ---
+  duration_ms: 3.4672
+  type: 'test'
+  ...
+# Subtest: one font consumer retiring does not cancel another consumer's shared download
+ok 50 - one font consumer retiring does not cancel another consumer's shared download
+  ---
+  duration_ms: 2.5228
+  type: 'test'
+  ...
+# Subtest: font fills retain separate cache namespaces across a release change
+ok 51 - font fills retain separate cache namespaces across a release change
+  ---
+  duration_ms: 1.4707
+  type: 'test'
+  ...
+# Subtest: font lookup expiry releases the retained entry without truncating either body
+ok 52 - font lookup expiry releases the retained entry without truncating either body
+  ---
+  duration_ms: 2.4827
+  type: 'test'
+  ...
+# Subtest: fonts stay in the critical cache before and after background or runtime hints
+ok 53 - fonts stay in the critical cache before and after background or runtime hints
+  ---
+  duration_ms: 0.6227
+  type: 'test'
+  ...
+# Subtest: a byte-range font read cannot join or replace a whole-font fill
+ok 54 - a byte-range font read cannot join or replace a whole-font fill
+  ---
+  duration_ms: 1.5848
+  type: 'test'
+  ...
+# Subtest: font response retention stays bounded when many distinct fonts are requested
+ok 55 - font response retention stays bounded when many distinct fonts are requested
+  ---
+  duration_ms: 6.7351
+  type: 'test'
+  ...
+# Subtest: a timed-out preferred font mirror tries the other current-release origin before the app
+ok 56 - a timed-out preferred font mirror tries the other current-release origin before the app
+  ---
+  duration_ms: 6.3203
+  type: 'test'
+  ...
+# Subtest: a stopped preferred font body is replaced by one complete current-release mirror
+ok 57 - a stopped preferred font body is replaced by one complete current-release mirror
+  ---
+  duration_ms: 1.7525
+  type: 'test'
+  ...
+# Subtest: all current font mirrors precede the app while inherited releases remain later fallbacks
+ok 58 - all current font mirrors precede the app while inherited releases remain later fallbacks
+  ---
+  duration_ms: 0.9382
+  type: 'test'
+  ...
+# Subtest: a current-release font mirror precedes a successful but slow app origin
+ok 59 - a current-release font mirror precedes a successful but slow app origin
+  ---
+  duration_ms: 0.9405
+  type: 'test'
+  ...
+# Subtest: a missing current font mirror returns to the app before inherited releases
+ok 60 - a missing current font mirror returns to the app before inherited releases
+  ---
+  duration_ms: 0.7814
+  type: 'test'
+  ...
+# Subtest: a font mirror connection failure still allows the original complete font
+ok 61 - a font mirror connection failure still allows the original complete font
+  ---
+  duration_ms: 0.8179
+  type: 'test'
+  ...
+# Subtest: font mirror headers have an eight-second bound before returning to the app
+ok 62 - font mirror headers have an eight-second bound before returning to the app
+  ---
+  duration_ms: 1.5494
+  type: 'test'
+  ...
+# Subtest: font mirror header timeout does not truncate a progressing body
+ok 63 - font mirror header timeout does not truncate a progressing body
+  ---
+  duration_ms: 3.7273
+  type: 'test'
+  ...
+# Subtest: a font mirror body that stops after a prefix returns the complete app font
+ok 64 - a font mirror body that stops after a prefix returns the complete app font
+  ---
+  duration_ms: 1.4854
+  type: 'test'
+  ...
+# Subtest: font body idle time resets on progress beyond the header and idle budgets
+ok 65 - font body idle time resets on progress beyond the header and idle budgets
+  ---
+  duration_ms: 3.4571
+  type: 'test'
+  ...
+# Subtest: an errored font body returns the complete app font instead of its prefix
+ok 66 - an errored font body returns the complete app font instead of its prefix
+  ---
+  duration_ms: 1.0726
+  type: 'test'
+  ...
+# Subtest: a completed decoded font retains its type and correct body metadata
+ok 67 - a completed decoded font retains its type and correct body metadata
+  ---
+  duration_ms: 0.8321
+  type: 'test'
+  ...
+# Subtest: empty mirror bodies return to the app
+ok 68 - empty mirror bodies return to the app
+  ---
+  duration_ms: 1.3067
+  type: 'test'
+  ...
+# Subtest: font mirror buffering is bounded before returning to the app
+ok 69 - font mirror buffering is bounded before returning to the app
+  ---
+  duration_ms: 11.2936
+  type: 'test'
+  ...
+# Subtest: empty chunks do not renew a stalled font body
+ok 70 - empty chunks do not renew a stalled font body
+  ---
+  duration_ms: 4.634
+  type: 'test'
+  ...
+# Subtest: font mirror selection works even when CacheStorage is unavailable
+ok 71 - font mirror selection works even when CacheStorage is unavailable
+  ---
+  duration_ms: 1.149
+  type: 'test'
+  ...
+# Subtest: unversioned fonts, byte ranges and images keep their app-first route
+ok 72 - unversioned fonts, byte ranges and images keep their app-first route
+  ---
+  duration_ms: 2.0649
+  type: 'test'
+  ...
+# Subtest: partial or empty mirror responses cannot replace an entire font
+ok 73 - partial or empty mirror responses cannot replace an entire font
+  ---
+  duration_ms: 1.5622
+  type: 'test'
+  ...
+# Subtest: only explicit hosted configuration opts into the current font mirror
+ok 74 - only explicit hosted configuration opts into the current font mirror
+  ---
+  duration_ms: 5.1889
+  type: 'test'
+  ...
+# Subtest: a stalled shared image header retires before page retries keep joining it
+ok 75 - a stalled shared image header retires before page retries keep joining it
+  ---
+  duration_ms: 3.3134
+  type: 'test'
+  ...
+# Subtest: each static fallback gets its own bounded header attempt
+ok 76 - each static fallback gets its own bounded header attempt
+  ---
+  duration_ms: 2.336
+  type: 'test'
+  ...
+# Subtest: an exhausted static header deadline is transient and the next read is fresh
+ok 77 - an exhausted static header deadline is transient and the next read is fresh
+  ---
+  duration_ms: 1.9784
+  type: 'test'
+  ...
+# Subtest: static header expiry never truncates an already delivered image body
+ok 78 - static header expiry never truncates an already delivered image body
+  ---
+  duration_ms: 1.6818
+  type: 'test'
+  ...
+# Subtest: optional Native display locales are independent of four-language wire and require an exact capability
+ok 79 - optional Native display locales are independent of four-language wire and require an exact capability
+  ---
+  duration_ms: 1.9364
+  type: 'test'
+  ...
+# Subtest: NPC display defers Native prose while target, input, name and disabled state remain opaque
+ok 80 - NPC display defers Native prose while target, input, name and disabled state remain opaque
+  ---
+  duration_ms: 23.0138
+  type: 'test'
+  ...
+# Subtest: 844×390 touch stage, DPR and resize project the shell's actual CSS scale
+ok 81 - 844×390 touch stage, DPR and resize project the shell's actual CSS scale
+  ---
+  duration_ms: 0.4423
+  type: 'test'
+  ...
+# Subtest: missing or inconsistent stage/canvas geometry cannot transfer UI ownership
+ok 82 - missing or inconsistent stage/canvas geometry cannot transfer UI ownership
+  ---
+  duration_ms: 0.1372
+  type: 'test'
+  ...
+# Subtest: static definitions never become available quests without an authoritative stage
+ok 83 - static definitions never become available quests without an authoritative stage
+  ---
+  duration_ms: 0.3239
+  type: 'test'
+  ...
+# Subtest: missing endpoints, source sections, counters and exact reward indices survive projection
+ok 84 - missing endpoints, source sections, counters and exact reward indices survive projection
+  ---
+  duration_ms: 0.1715
+  type: 'test'
+  ...
+# Subtest: malformed selectable rewards fail closed instead of becoming another valid choice
+ok 85 - malformed selectable rewards fail closed instead of becoming another valid choice
+  ---
+  duration_ms: 0.2438
+  type: 'test'
+  ...
+# Subtest: fixed and selectable reward previews retain their exact source through the Bevy DTO
+ok 86 - fixed and selectable reward previews retain their exact source through the Bevy DTO
+  ---
+  duration_ms: 3.1897
+  type: 'test'
+  ...
+# Subtest: NPC links retain exact wire targets, disabled state and required-input fallback
+ok 87 - NPC links retain exact wire targets, disabled state and required-input fallback
+  ---
+  duration_ms: 0.2561
+  type: 'test'
+  ...
+# Subtest: session and request sequences survive independent module loads
+ok 88 - session and request sequences survive independent module loads
+  ---
+  duration_ms: 29.7372
+  type: 'test'
+  ...
+# Subtest: old generation and malformed renderer status cannot take UI ownership
+ok 89 - old generation and malformed renderer status cannot take UI ownership
+  ---
+  duration_ms: 0.3621
+  type: 'test'
+  ...
+# Subtest: Quest world context requires a complete same-player projection and exact version capability
+ok 90 - Quest world context requires a complete same-player projection and exact version capability
+  ---
+  duration_ms: 0.9725
+  type: 'test'
+  ...
+# Subtest: the actual Page capture retires raw Quest skills for self NewMagic only on the current connection
+ok 91 - the actual Page capture retires raw Quest skills for self NewMagic only on the current connection
+  ---
+  duration_ms: 131.3251
+  type: 'test'
+  ...
+# Subtest: renderer restart, first NPC input capture and stopped-loop fallback preserve one UI owner
+ok 92 - renderer restart, first NPC input capture and stopped-loop fallback preserve one UI owner
+  ---
+  duration_ms: 96.853
+  type: 'test'
+  ...
+# Subtest: v2 Quest world preserves nullable facts, canonical IDs and unknown current map
+ok 93 - v2 Quest world preserves nullable facts, canonical IDs and unknown current map
+  ---
+  duration_ms: 0.6674
+  type: 'test'
+  ...
+# Subtest: local Quest actions require exact seven-field stamp, role and nested route payload
+ok 94 - local Quest actions require exact seven-field stamp, role and nested route payload
+  ---
+  duration_ms: 1.0426
+  type: 'test'
+  ...
+# Subtest: ordinary map packets retire same-map transitions and images never supply map authority
+ok 95 - ordinary map packets retire same-map transitions and images never supply map authority
+  ---
+  duration_ms: 1.2456
+  type: 'test'
+  ...
+# Subtest: Quest handoffs retire each lifetime dimension and attack roles keep raw life evidence
+ok 96 - Quest handoffs retire each lifetime dimension and attack roles keep raw life evidence
+  ---
+  duration_ms: 0.3423
+  type: 'test'
+  ...
+# Subtest: the shared route adapter verifies a complete JS-fake WASM response against collision and exact endpoint
+ok 97 - the shared route adapter verifies a complete JS-fake WASM response against collision and exact endpoint
+  ---
+  duration_ms: 1.3749
+  type: 'test'
+  ...
+# Subtest: NPC route targets preserve object IDs, task roles and the exact two-tile approach
+ok 98 - NPC route targets preserve object IDs, task roles and the exact two-tile approach
+  ---
+  duration_ms: 0.7235
+  type: 'test'
+  ...
+# Subtest: route execution follows bends, validates each 2/3-tile run and replans deviations
+ok 99 - route execution follows bends, validates each 2/3-tile run and replans deviations
+  ---
+  duration_ms: 0.2686
+  type: 'test'
+  ...
+# Subtest: collision cache uses injected fake chunks, reuses only complete geometry and discards partial failures
+ok 100 - collision cache uses injected fake chunks, reuses only complete geometry and discards partial failures
+  ---
+  duration_ms: 1.984
+  type: 'test'
+  ...
+# Subtest: world control reader requires actual current stamped rectangles and claims only button hits
+ok 101 - world control reader requires actual current stamped rectangles and claims only button hits
+  ---
+  duration_ms: 0.7306
+  type: 'test'
+  ...
+# Subtest: Native Quest local UI has only current measured pointer rectangles, never inferred or stale controls
+ok 102 - Native Quest local UI has only current measured pointer rectangles, never inferred or stale controls
+  ---
+  duration_ms: 0.3575
+  type: 'test'
+  ...
+# Subtest: questLocalUi never parses as an authorized world action or sends through the actual Page dispatcher
+ok 103 - questLocalUi never parses as an authorized world action or sends through the actual Page dispatcher
+  ---
+  duration_ms: 89.1211
+  type: 'test'
+  ...
+# Subtest: actual Page queued movement preserves replacement intent and retires stale Quest routes before ordinary A* or send
+ok 104 - actual Page queued movement preserves replacement intent and retires stale Quest routes before ordinary A* or send
+  ---
+  duration_ms: 97.9277
+  type: 'test'
+  ...
+# Subtest: actual Page map-image press and route ownership retire only the captured source and preserve sent movement
+ok 105 - actual Page map-image press and route ownership retire only the captured source and preserve sent movement
+  ---
+  duration_ms: 89.4215
+  type: 'test'
+  ...
+# Subtest: packaged CJK font matches its pinned upstream bytes and retains its license
+ok 106 - packaged CJK font matches its pinned upstream bytes and retains its license
+  ---
+  duration_ms: 11.9869
+  type: 'test'
+  ...
+# Subtest: Page prewarm delegation returns the real shared stage promise
+ok 107 - Page prewarm delegation returns the real shared stage promise
+  ---
+  duration_ms: 235.7529
+  type: 'test'
+  ...
+# Subtest: actual Page settles current HUD attempts before allocating runtime download bandwidth
+ok 108 - actual Page settles current HUD attempts before allocating runtime download bandwidth
+  ---
+  duration_ms: 146.4072
+  type: 'test'
+  ...
+# Subtest: actual Page overlaps fonts and binary only after foreground HUD attempts settle
+ok 109 - actual Page overlaps fonts and binary only after foreground HUD attempts settle
+  ---
+  duration_ms: 101.2033
+  type: 'test'
+  ...
+# Subtest: actual Page leaves fonts deferred before first paint and for disabled, touch, missing metadata or GPU
+ok 110 - actual Page leaves fonts deferred before first paint and for disabled, touch, missing metadata or GPU
+  ---
+  duration_ms: 466.9276
+  type: 'test'
+  ...
+# Subtest: actual retryable module failure cancels overlapping fonts and keeps the retry boundary
+ok 111 - actual retryable module failure cancels overlapping fonts and keeps the retry boundary
+  ---
+  duration_ms: 90.149
+  type: 'test'
+  ...
+# Subtest: leaving while the runtime downloads cancels fonts and prevents late boot
+ok 112 - leaving while the runtime downloads cancels fonts and prevents late boot
+  ---
+  duration_ms: 83.4457
+  type: 'test'
+  ...
+# Subtest: prewarm paths exactly cover the Native display font families
+ok 113 - prewarm paths exactly cover the Native display font families
+  ---
+  duration_ms: 1.976
+  type: 'test'
+  ...
+# Subtest: two pending font bodies bound concurrency and completion waits for full bytes
+ok 114 - two pending font bodies bound concurrency and completion waits for full bytes
+  ---
+  duration_ms: 12.3589
+  type: 'test'
+  ...
+# Subtest: leaving cancels active font bodies and never starts the queued fonts
+ok 115 - leaving cancels active font bodies and never starts the queued fonts
+  ---
+  duration_ms: 0.8565
+  type: 'test'
+  ...
+# (node:36440) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: a failed font does not withdraw the runtime or prevent warming the other families
+ok 116 - a failed font does not withdraw the runtime or prevent warming the other families
+  ---
+  duration_ms: 473.4299
+  type: 'test'
+  ...
+# Subtest: the slow CJK families do not wait behind short fallback requests
+ok 117 - the slow CJK families do not wait behind short fallback requests
+  ---
+  duration_ms: 2.396
+  type: 'test'
+  ...
+# Subtest: binary compilation overlaps a pending script import and canvas gates initialization
+ok 118 - binary compilation overlaps a pending script import and canvas gates initialization
+  ---
+  duration_ms: 22.8081
+  type: 'test'
+  ...
+# (node:43192) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: wrong MIME and missing streaming support compile the original single response
+ok 119 - wrong MIME and missing streaming support compile the original single response
+  ---
+  duration_ms: 32.0726
+  type: 'test'
+  ...
+# Subtest: an import failure aborts the independent binary fetch
+ok 120 - an import failure aborts the independent binary fetch
+  ---
+  duration_ms: 0.7804
+  type: 'test'
+  ...
+# Subtest: unavailable or invalid binaries never initialize a runtime
+ok 121 - unavailable or invalid binaries never initialize a runtime
+  ---
+  duration_ms: 1.2944
+  type: 'test'
+  ...
+# Subtest: the existing 120-second budget cancels a stalled binary
+ok 122 - the existing 120-second budget cancels a stalled binary
+  ---
+  duration_ms: 1.0496
+  type: 'test'
+  ...
+# Subtest: a stalled script also exits after the binary has finished compiling
+ok 123 - a stalled script also exits after the binary has finished compiling
+  ---
+  duration_ms: 1.5756
+  type: 'test'
+  ...
+# Subtest: actual page loader shares pending/successful work and retries a failed URL
+ok 124 - actual page loader shares pending/successful work and retries a failed URL
+  ---
+  duration_ms: 221.1343
+  type: 'test'
+  ...
+# Subtest: a valid advancing binary can finish beyond the header budget without a second GET
+ok 125 - a valid advancing binary can finish beyond the header budget without a second GET
+  ---
+  duration_ms: 2.887
+  type: 'test'
+  ...
+# Subtest: a body without positive bytes stops at the idle boundary, including empty chunks
+ok 126 - a body without positive bytes stops at the idle boundary, including empty chunks
+  ---
+  duration_ms: 1.7429
+  type: 'test'
+  ...
+# Subtest: decoded bytes are capped before runtime initialization without trusting Content-Length
+ok 127 - decoded bytes are capped before runtime initialization without trusting Content-Length
+  ---
+  duration_ms: 1.0435
+  type: 'test'
+  ...
+# Subtest: a progressing body still has an absolute lifetime cap
+ok 128 - a progressing body still has an absolute lifetime cap
+  ---
+  duration_ms: 1.206
+  type: 'test'
+  ...
+# Subtest: a failed pinned binary source can use its supplied same-version fallback once
+ok 129 - a failed pinned binary source can use its supplied same-version fallback once
+  ---
+  duration_ms: 0.8641
+  type: 'test'
+  ...
+# Subtest: actual Page selects versioned app binary with same-package remote fallback and glue
+ok 130 - actual Page selects versioned app binary with same-package remote fallback and glue
+  ---
+  duration_ms: 110.5142
+  type: 'test'
+  ...
+# Subtest: an unavailable first source yields to its fallback after8 seconds
+ok 131 - an unavailable first source yields to its fallback after8 seconds
+  ---
+  duration_ms: 1.4543
+  type: 'test'
+  ...
+# Subtest: a stalled first source body is canceled before the next binary is read
+ok 132 - a stalled first source body is canceled before the next binary is read
+  ---
+  duration_ms: 1.0204
+  type: 'test'
+  ...
+# Subtest: binary progress cannot renew a stalled script import deadline
+ok 133 - binary progress cannot renew a stalled script import deadline
+  ---
+  duration_ms: 1.5364
+  type: 'test'
+  ...
+# Subtest: a streaming compiler which never reads remains bounded
+ok 134 - a streaming compiler which never reads remains bounded
+  ---
+  duration_ms: 8.9881
+  type: 'test'
+  ...
+# Subtest: a late canvas cannot initialize an expired attempt
+ok 135 - a late canvas cannot initialize an expired attempt
+  ---
+  duration_ms: 0.7305
+  type: 'test'
+  ...
+# Subtest: a default initializer which has already started cannot be classified as a retryable download
+ok 136 - a default initializer which has already started cannot be classified as a retryable download
+  ---
+  duration_ms: 0.6844
+  type: 'test'
+  ...
+# Subtest: invalid or oversized bytes fail closed instead of consulting another source
+ok 137 - invalid or oversized bytes fail closed instead of consulting another source
+  ---
+  duration_ms: 0.772
+  type: 'test'
+  ...
+# Subtest: current declared pairs rewrite; stale versions, foreign artifacts and undeclared shared never do
+ok 138 - current declared pairs rewrite; stale versions, foreign artifacts and undeclared shared never do
+  ---
+  duration_ms: 2.0469
+  type: 'test'
+  ...
+# Subtest: complete legacy pairs are guarded by their exact version; proxy does not expose an unconditional rewrite
+ok 139 - complete legacy pairs are guarded by their exact version; proxy does not expose an unconditional rewrite
+  ---
+  duration_ms: 1.5471
+  type: 'test'
+  ...
+# Subtest: invalid metadata falls back to DOM before runtime import
+ok 140 - invalid metadata falls back to DOM before runtime import
+  ---
+  duration_ms: 1.0736
+  type: 'test'
+  ...
+# Subtest: exact shared mode selects shared GL2 only when the complete package exists
+ok 141 - exact shared mode selects shared GL2 only when the complete package exists
+  ---
+  duration_ms: 0.664
+  type: 'test'
+  ...
+# Subtest: ordinary empty query freezes the shared GL2 package while preserving GPU priority
+ok 142 - ordinary empty query freezes the shared GL2 package while preserving GPU priority
+  ---
+  duration_ms: 0.3912
+  type: 'test'
+  ...
+# Subtest: heterogeneous packages select GPU ABI1 or default and exact shared GL2 ABI1
+ok 143 - heterogeneous packages select GPU ABI1 or default and exact shared GL2 ABI1
+  ---
+  duration_ms: 0.639
+  type: 'test'
+  ...
+# Subtest: heterogeneous explicit lean fallback requires exact ABI0 getter and frozen opt-out
+ok 144 - heterogeneous explicit lean fallback requires exact ABI0 getter and frozen opt-out
+  ---
+  duration_ms: 2.4357
+  type: 'test'
+  ...
+# Subtest: explicit opt-outs and absent shared packages retain lean GL2 selection
+ok 145 - explicit opt-outs and absent shared packages retain lean GL2 selection
+  ---
+  duration_ms: 0.4213
+  type: 'test'
+  ...
+# Subtest: live startup agreement rejects relevant query changes without losing unrelated flags
+ok 146 - live startup agreement rejects relevant query changes without losing unrelated flags
+  ---
+  duration_ms: 0.428
+  type: 'test'
+  ...
+# Subtest: encoded and duplicate raw opt-ins retain ordinary package selection
+ok 147 - encoded and duplicate raw opt-ins retain ordinary package selection
+  ---
+  duration_ms: 0.2866
+  type: 'test'
+  ...
+# Subtest: legacy exact shared request is unsafe while ordinary legacy remains usable
+ok 148 - legacy exact shared request is unsafe while ordinary legacy remains usable
+  ---
+  duration_ms: 0.4381
+  type: 'test'
+  ...
+# Subtest: getter agreement checks backend, ABI, compiled primary, startup, and live query
+ok 149 - getter agreement checks backend, ABI, compiled primary, startup, and live query
+  ---
+  duration_ms: 0.8264
+  type: 'test'
+  ...
+# Subtest: legacy getter may report unknown compiled GL2 capability but cannot start shared
+ok 150 - legacy getter may report unknown compiled GL2 capability but cannot start shared
+  ---
+  duration_ms: 0.2765
+  type: 'test'
+  ...
+# Subtest: one document gate forbids a second boot even after synchronous or asynchronous failure
+ok 151 - one document gate forbids a second boot even after synchronous or asynchronous failure
+  ---
+  duration_ms: 13.802
+  type: 'test'
+  ...
+# Subtest: third URL variant preserves old positional callers and immutable package path
+ok 152 - third URL variant preserves old positional callers and immutable package path
+  ---
+  duration_ms: 0.2335
+  type: 'test'
+  ...
+# Subtest: only network failures before the Bevy boot remain retryable
+ok 153 - only network failures before the Bevy boot remain retryable
+  ---
+  duration_ms: 0.6912
+  type: 'test'
+  ...
+# Subtest: the actual page retry gate preserves the single-boot boundary
+ok 154 - the actual page retry gate preserves the single-boot boundary
+  ---
+  duration_ms: 2.719
+  type: 'test'
+  ...
+# Subtest: desktop keeps the Bevy runtime enhancement enabled
+ok 155 - desktop keeps the Bevy runtime enhancement enabled
+  ---
+  duration_ms: 0.2065
+  type: 'test'
+  ...
+# Subtest: touch-first phones and tablets use the immediately playable compatibility renderer
+ok 156 - touch-first phones and tablets use the immediately playable compatibility renderer
+  ---
+  duration_ms: 0.101
+  type: 'test'
+  ...
+# Subtest: a fine-pointer desktop with a touch screen is not misclassified as mobile
+ok 157 - a fine-pointer desktop with a touch screen is not misclassified as mobile
+  ---
+  duration_ms: 0.0618
+  type: 'test'
+  ...
+# Subtest: QA query controls override automatic device policy
+ok 158 - QA query controls override automatic device policy
+  ---
+  duration_ms: 0.0709
+  type: 'test'
+  ...
+# Subtest: network failures never trigger a second full runtime download
+ok 159 - network failures never trigger a second full runtime download
+  ---
+  duration_ms: 0.1519
+  type: 'test'
+  ...
+# Subtest: Page keeps default shared UI intent across a pre-boot failure on the same backend
+ok 160 - Page keeps default shared UI intent across a pre-boot failure on the same backend
+  ---
+  duration_ms: 6.5467
+  type: 'test'
+  ...
+# Subtest: Page failure preserves explicit disabled and mixed shared UI choices
+ok 161 - Page failure preserves explicit disabled and mixed shared UI choices
+  ---
+  duration_ms: 13.0515
+  type: 'test'
+  ...
+# Subtest: preserving Page UI intent does not turn a failed App boot into an automatic retry
+ok 162 - preserving Page UI intent does not turn a failed App boot into an automatic retry
+  ---
+  duration_ms: 4.5246
+  type: 'test'
+  ...
+# Subtest: a disposed Page attempt cannot withdraw the newer runtime or its UI choices
+ok 163 - a disposed Page attempt cannot withdraw the newer runtime or its UI choices
+  ---
+  duration_ms: 4.053
+  type: 'test'
+  ...
+# Subtest: an indeterminate wasm-bindgen initialization requires a fresh document for either backend
+ok 164 - an indeterminate wasm-bindgen initialization requires a fresh document for either backend
+  ---
+  duration_ms: 3.56
+  type: 'test'
+  ...
+# Subtest: actual movement handlers leave panel/nonmovement keys untouched before every world blocker
+ok 165 - actual movement handlers leave panel/nonmovement keys untouched before every world blocker
+  ---
+  duration_ms: 489.2461
+  type: 'test'
+  ...
+# Subtest: actual Arrow handlers retain every modal, capture, scene, identity and modifier guard
+ok 166 - actual Arrow handlers retain every modal, capture, scene, identity and modifier guard
+  ---
+  duration_ms: 61.5409
+  type: 'test'
+  ...
+# Subtest: the installed capture effect preserves Arrow edges, held cadence, Shift, diagonal and release semantics
+ok 167 - the installed capture effect preserves Arrow edges, held cadence, Shift, diagonal and release semantics
+  ---
+  duration_ms: 6.1601
+  type: 'test'
+  ...
+# Subtest: the installed effect withdraws on modal mount and dynamic parity still denies Arrow while yielding F9
+ok 168 - the installed effect withdraws on modal mount and dynamic parity still denies Arrow while yielding F9
+  ---
+  duration_ms: 35.0165
+  type: 'test'
+  ...
+# Subtest: a transient live guard at mount cannot prevent listener installation or require a prop rerender to accept a later gesture
+ok 169 - a transient live guard at mount cannot prevent listener installation or require a prop rerender to accept a later gesture
+  ---
+  duration_ms: 16.4913
+  type: 'test'
+  ...
+# Subtest: Native Quest close accepts the immediate physical Arrow while the React capture prop is still true
+ok 170 - Native Quest close accepts the immediate physical Arrow while the React capture prop is still true
+  ---
+  duration_ms: 8.3464
+  type: 'test'
+  ...
+# Subtest: an earlier capture listener committing the Q close cannot remove the same physical Arrow from dispatch
+ok 171 - an earlier capture listener committing the Q close cannot remove the same physical Arrow from dispatch
+  ---
+  duration_ms: 7.7991
+  type: 'test'
+  ...
+# Subtest: live Native Quest capture blocks a lagging false prop and cancels an already held movement
+ok 172 - live Native Quest capture blocks a lagging false prop and cancels an already held movement
+  ---
+  duration_ms: 5.0997
+  type: 'test'
+  ...
+# Subtest: unavailable, failed or legacy Quest readers retain the existing capture boundary
+ok 173 - unavailable, failed or legacy Quest readers retain the existing capture boundary
+  ---
+  duration_ms: 16.8891
+  type: 'test'
+  ...
+# Subtest: actual Page JSX forwarders keep identity across rerenders and invoke only the latest intent/stop closures
+ok 174 - actual Page JSX forwarders keep identity across rerenders and invoke only the latest intent/stop closures
+  ---
+  duration_ms: 139.9814
+  type: 'test'
+  ...
+# Subtest: 50ms Page rerenders cannot starve the real 100ms held interval and each tick reaches the latest Page closure
+ok 175 - 50ms Page rerenders cannot starve the real 100ms held interval and each tick reaches the latest Page closure
+  ---
+  duration_ms: 271.8452
+  type: 'test'
+  ...
+# Subtest: actual Page JSX Step forwarder keeps identity and preserves arguments and return values from the latest closure
+ok 176 - actual Page JSX Step forwarder keeps identity and preserves arguments and return values from the latest closure
+  ---
+  duration_ms: 91.7082
+  type: 'test'
+  ...
+# Subtest: 50ms Page renders retain the real mouse-hold interval and every 100ms Step calls the latest Page closure
+ok 177 - 50ms Page renders retain the real mouse-hold interval and every 100ms Step calls the latest Page closure
+  ---
+  duration_ms: 174.3903
+  type: 'test'
+  ...
+1..177
+# tests 177
+# suites 0
+# pass 177
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 8110.6285

@@ -1,0 +1,15 @@
+{
+  "schema": "mir2.production-private-cache.v1",
+  "startedUtc": "2026-10-08T17:29:54.8339290Z",
+  "finishedUtc": "2026-10-08T17:30:09.1553866Z",
+  "source": "E:\\mir2-player-journey\\work\\slg-production-p02b2a-20261008\\target",
+  "destination": "E:\\mir2-player-journey\\work\\slg-production-p02b2b-20261009\\target",
+  "copiedNonExecutableFiles": 2353,
+  "copiedBytes": 2285717852,
+  "skippedExecutables": 35,
+  "sourceDeleted": false,
+  "userGameClosed": false,
+  "oldExecutableExclusiveOpenSucceeded": false,
+  "oldProbeConsoleWasIncorrectlyOptimistic": true,
+  "originalGuardChanged": false
+}

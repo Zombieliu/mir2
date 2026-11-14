@@ -1,0 +1,122 @@
+{
+  "owner": "Root",
+  "scope": [
+    "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/743.png",
+    "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/744.png",
+    "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/745.png",
+    "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/746.png",
+    "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/meta.json",
+    "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/manifest.generated.json",
+    "E:/mir2-player-journey/mir2-web3/apps/web/public/original-asset-manifest.generated.json"
+  ],
+  "before": [
+    {
+      "destination": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/743.png",
+      "beforeAbsent": true
+    },
+    {
+      "destination": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/744.png",
+      "beforeAbsent": true
+    },
+    {
+      "destination": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/745.png",
+      "beforeAbsent": true
+    },
+    {
+      "destination": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/746.png",
+      "beforeAbsent": true
+    },
+    {
+      "destination": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/meta.json",
+      "before": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/meta.json",
+        "bytes": 159798,
+        "sha256": "93547fd4ae3315829166d08402da24f06d1e8d825154ccc12f6f4e8b8a467753"
+      },
+      "backup": {
+        "path": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/main-asset-write-backup01/mir2-web3/apps/web/public/original-ui/Title/meta.json",
+        "bytes": 159798,
+        "sha256": "93547fd4ae3315829166d08402da24f06d1e8d825154ccc12f6f4e8b8a467753"
+      }
+    },
+    {
+      "destination": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/manifest.generated.json",
+      "before": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/manifest.generated.json",
+        "bytes": 45314113,
+        "sha256": "bdacc08d1040290224adfa9ab1c1637873eaef02c0ceac576f3c97364d6765c8"
+      },
+      "backup": {
+        "path": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/main-asset-write-backup01/mir2-web3/apps/web/public/original-ui/manifest.generated.json",
+        "bytes": 45314113,
+        "sha256": "bdacc08d1040290224adfa9ab1c1637873eaef02c0ceac576f3c97364d6765c8"
+      }
+    },
+    {
+      "destination": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-asset-manifest.generated.json",
+      "before": {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-asset-manifest.generated.json",
+        "bytes": 7639644,
+        "sha256": "496339ab035ae1beec45b2bd8bc39d66ca4174417655b966bb8fcaf8abd6a867"
+      },
+      "backup": {
+        "path": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/main-asset-write-backup01/mir2-web3/apps/web/public/original-asset-manifest.generated.json",
+        "bytes": 7639644,
+        "sha256": "496339ab035ae1beec45b2bd8bc39d66ca4174417655b966bb8fcaf8abd6a867"
+      }
+    }
+  ],
+  "after": [
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/743.png",
+      "bytes": 2677,
+      "sha256": "0af770b4e2f2af6a2f9d60e7bd98f5c5fa6081aa8165027cee05418a436efa72"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/746.png",
+      "bytes": 1311,
+      "sha256": "3cf6104ac32fdbe4d28e4300d9856365fd330b6c61b826bbf037f46ca7588222"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/744.png",
+      "bytes": 1280,
+      "sha256": "f23598018c5d592d1c3e654cb6044ffaaeb27d736b3fad92702476953e0f1196"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/745.png",
+      "bytes": 2673,
+      "sha256": "ab5669753587e3f37396ddb8a4d7307b5447abf39c7dec37a6bbf76bc67ced41"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/Title/meta.json",
+      "bytes": 161626,
+      "sha256": "6513b3f04f3ccc67a201c1722339f76f6083973ba77ebfb940fd9a17773e5a69"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-asset-manifest.generated.json",
+      "bytes": 7641947,
+      "sha256": "4712a424a65864670a0e5af866918e17e62dfee17e4b2ba7752eaffe8b42b273"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/public/original-ui/manifest.generated.json",
+      "bytes": 45316197,
+      "sha256": "cea2c3044f370c442ab15bac3488da2c1f0c111551ef1a3f050bd7c7a2a1ed6f"
+    }
+  ],
+  "onlyTitle4NewDrawableFrames": true,
+  "old349TitleRowsPreserved": true,
+  "allOtherLibraryRowsPreserved": true,
+  "allOld41248RootEntriesPreserved": true,
+  "old9LogicalEntriesAndNew4Added": true,
+  "actualGenuineExportProof": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/root-approved01/real-title-export-actual01.json",
+    "bytes": 3347,
+    "sha256": "f20b045b2e6203d7033cf3e28b2bc57b258517145f128f152c438297414b42a7"
+  },
+  "actualFullManifestProof": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/root-approved01/full-asset-manifest-actual02.json",
+    "bytes": 1998,
+    "sha256": "0d31e54ff6db512f07239d858567a3fdec73ccae3417b610f81e8afc48c4a24c"
+  },
+  "unrelatedMainAssetsUnchanged": true
+}

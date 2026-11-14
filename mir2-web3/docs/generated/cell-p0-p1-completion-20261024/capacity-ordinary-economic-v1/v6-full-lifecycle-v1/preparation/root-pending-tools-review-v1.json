@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-v6-full-lifecycle-v1",
+  "approved": true,
+  "pendingToolsReviewed": true,
+  "reviewedAt": "2026-10-26T23:27:39.668Z",
+  "authoringReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\authoring-receipt-v1.json",
+    "bytes": 4463,
+    "sha256": "4d33c101cbde4ff94b6a49810116caa5be0132698c2f89d0242b4a8045d4f8dd"
+  },
+  "scope": "Root independently reviewed pending tools, all authoring pins, exact inverse preservation of owned runner/audit, full backend validator function, neutral verifier/ACL copies, original900second/16 ordinary assertions,14local source closure and before-write prospective strict binding. Future Root qualification and actual full16 runtime are separate gates.",
+  "evidence": {
+    "authoringPinsExact": true,
+    "ownedRunnerInverseRawExact": true,
+    "auditInverseRawExact": true,
+    "backendValidatorInverseExactIgnoringTerminalNewline": true,
+    "neutralCopiesRawExact": 2,
+    "ordinaryRegistrationsPlanned": 2,
+    "qaAndStoreEditsPlanned": false,
+    "finalizePerformed": false,
+    "freezePerformed": false,
+    "gameplayPerformed": false
+  },
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

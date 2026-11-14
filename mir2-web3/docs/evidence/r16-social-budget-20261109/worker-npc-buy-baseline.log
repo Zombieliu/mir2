@@ -1,0 +1,1795 @@
+TAP version 13
+# Subtest: Source30 durable receiver and retained facade pass strict no-emit type checking
+ok 1 - Source30 durable receiver and retained facade pass strict no-emit type checking
+  ---
+  duration_ms: 546.2793
+  type: 'test'
+  ...
+# Subtest: preview diagnostics identify existing admission gates and repeated reads have no Core or planner effects
+ok 2 - preview diagnostics identify existing admission gates and repeated reads have no Core or planner effects
+  ---
+  duration_ms: 10.0333
+  type: 'test'
+  ...
+# Subtest: preview diagnostics classify actual live and post-quote failures while preserving original short circuit calls
+ok 3 - preview diagnostics classify actual live and post-quote failures while preserving original short circuit calls
+  ---
+  duration_ms: 5.1608
+  type: 'test'
+  ...
+# Subtest: preview diagnostics clear on original success and denial quotes but never release retained economic flights
+ok 4 - preview diagnostics clear on original success and denial quotes but never release retained economic flights
+  ---
+  duration_ms: 8.9757
+  type: 'test'
+  ...
+# Subtest: preview diagnostics preserve inactive and synchronous busy rejection without changing the outer successful quote
+ok 5 - preview diagnostics preserve inactive and synchronous busy rejection without changing the outer successful quote
+  ---
+  duration_ms: 1.3719
+  type: 'test'
+  ...
+# Subtest: quote calls the actual runtime hook with exact full request and preserves Rust values
+ok 6 - quote calls the actual runtime hook with exact full request and preserves Rust values
+  ---
+  duration_ms: 0.6457
+  type: 'test'
+  ...
+# Subtest: blocked Rust quotes retain computed amounts and never create a sending proof
+ok 7 - blocked Rust quotes retain computed amounts and never create a sending proof
+  ---
+  duration_ms: 2.8298
+  type: 'test'
+  ...
+# Subtest: response and wire shapes fail closed without rounding or transport extension
+ok 8 - response and wire shapes fail closed without rounding or transport extension
+  ---
+  duration_ms: 13.4406
+  type: 'test'
+  ...
+# Subtest: caller capture must match the live snapshot before the first Rust call
+ok 9 - caller capture must match the live snapshot before the first Rust call
+  ---
+  duration_ms: 1.0068
+  type: 'test'
+  ...
+# Subtest: returned DTO and opaque token reject mutation, forgery and a foreign dispatcher
+ok 10 - returned DTO and opaque token reject mutation, forgery and a foreign dispatcher
+  ---
+  duration_ms: 4.0359
+  type: 'test'
+  ...
+# Subtest: final listener changes to every bound owner, model, raw item, wallet or layout reject the send
+ok 11 - final listener changes to every bound owner, model, raw item, wallet or layout reject the send
+  ---
+  duration_ms: 23.8036
+  type: 'test'
+  ...
+# Subtest: altered or extended mutable wire is rejected and consumes its token
+ok 12 - altered or extended mutable wire is rejected and consumes its token
+  ---
+  duration_ms: 8.1641
+  type: 'test'
+  ...
+# Subtest: runtime refusal, throw, replacement and unavailable source fail at the final claim
+ok 13 - runtime refusal, throw, replacement and unavailable source fail at the final claim
+  ---
+  duration_ms: 7.5223
+  type: 'test'
+  ...
+# Subtest: runtime mutation during preparation or final revalidation cannot authorize a stale command
+ok 14 - runtime mutation during preparation or final revalidation cannot authorize a stale command
+  ---
+  duration_ms: 2.7315
+  type: 'test'
+  ...
+# Subtest: read and Rust synchronous reentry cannot claim or prepare a second command
+ok 15 - read and Rust synchronous reentry cannot claim or prepare a second command
+  ---
+  duration_ms: 3.8717
+  type: 'test'
+  ...
+# Subtest: a recursive final listener cannot reserve a second proof before the first Core flight enters
+ok 16 - a recursive final listener cannot reserve a second proof before the first Core flight enters
+  ---
+  duration_ms: 3.8474
+  type: 'test'
+  ...
+# Subtest: spent unchanged authority stays disabled across selection, quantity, layout and source withdrawal
+ok 17 - spent unchanged authority stays disabled across selection, quantity, layout and source withdrawal
+  ---
+  duration_ms: 5.7057
+  type: 'test'
+  ...
+# Subtest: same OPEN connection keeps entered flushed and unknown blocked through every authority change and ABA
+ok 18 - same OPEN connection keeps entered flushed and unknown blocked through every authority change and ABA
+  ---
+  duration_ms: 109.9584
+  type: 'test'
+  ...
+# Subtest: an unclaimed old proof cannot revive after an observed model ABA
+ok 19 - an unclaimed old proof cannot revive after an observed model ABA
+  ---
+  duration_ms: 5.3977
+  type: 'test'
+  ...
+# Subtest: socket throw after claim retains the Core pending barrier without replaying a command
+ok 20 - socket throw after claim retains the Core pending barrier without replaying a command
+  ---
+  duration_ms: 4.8465
+  type: 'test'
+  ...
+# Subtest: non-JSON transport values are refused rather than silently coerced or invoking user callbacks
+ok 21 - non-JSON transport values are refused rather than silently coerced or invoking user callbacks
+  ---
+  duration_ms: 1.2948
+  type: 'test'
+  ...
+# Subtest: missing raw purchase rate stays null and delegates invalidRate to Rust
+ok 22 - missing raw purchase rate stays null and delegates invalidRate to Rust
+  ---
+  duration_ms: 1.1325
+  type: 'test'
+  ...
+# Subtest: actual Page quote delegates raw catalogue UID price rate and whole inventory to Rust
+ok 23 - actual Page quote delegates raw catalogue UID price rate and whole inventory to Rust
+  ---
+  duration_ms: 49.2837
+  type: 'test'
+  ...
+# Subtest: actual Page Buy callback uses one opaque proof and sendRaw claims only after the action listener
+not ok 24 - actual Page Buy callback uses one opaque proof and sendRaw claims only after the action listener
+  ---
+  duration_ms: 6.2323
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-npc-shop-buy.mjs:774:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      [
+        'prepare',
+        'planner',
+        'allows',
+        'planner',
+    -   'action',
+    -   'claim',
+    -   'planner',
+    -   'socket'
+      ]
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 'prepare'
+    1: 'planner'
+    2: 'allows'
+    3: 'planner'
+    4: 'action'
+    5: 'claim'
+    6: 'planner'
+    7: 'socket'
+  actual:
+    0: 'prepare'
+    1: 'planner'
+    2: 'allows'
+    3: 'planner'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs:783:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual Page final listener catalogue replacement rejects even a same-template selected UID
+not ok 25 - actual Page final listener catalogue replacement rejects even a same-template selected UID
+  ---
+  duration_ms: 5.1529
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-npc-shop-buy.mjs:795:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    false !== true
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs:803:46)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual Page NPC service retirement during action withdraws current source before final claim
+not ok 26 - actual Page NPC service retirement during action withdraws current source before final claim
+  ---
+  duration_ms: 2.9819
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-npc-shop-buy.mjs:809:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    1 !== 2
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 2
+  actual: 1
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs:813:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual Page synchronous action reentry is refused by the existing reserved Core flight
+not ok 27 - actual Page synchronous action reentry is refused by the existing reserved Core flight
+  ---
+  duration_ms: 2.9935
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-npc-shop-buy.mjs:821:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    0 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs:830:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual Page marker with missing raw source or rate delegates refusal without a legacy downgrade
+ok 28 - actual Page marker with missing raw source or rate delegates refusal without a legacy downgrade
+  ---
+  duration_ms: 4.6299
+  type: 'test'
+  ...
+# Subtest: actual Page unmarked legacy catalogue keeps its exact service proof and earlier quantity bound
+not ok 29 - actual Page unmarked legacy catalogue keeps its exact service proof and earlier quantity bound
+  ---
+  duration_ms: 1.1453
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-npc-shop-buy.mjs:854:1'
+  failureType: 'testCodeFailure'
+  error: 'socialBudgetRef is not defined'
+  code: 'ERR_TEST_FAILURE'
+  name: 'ReferenceError'
+  stack: |-
+    sendRaw (eval at npcPageHarness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs:731:15), <anonymous>:440:39)
+    sendNpcPurchaseAction (eval at npcPageHarness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs:731:15), <anonymous>:78:22)
+    Object.buyNpcShopItem (eval at npcPageHarness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs:731:15), <anonymous>:197:5)
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs:857:5)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual Page unmarked legacy final listener cannot send through changed catalogue service or owner
+not ok 30 - actual Page unmarked legacy final listener cannot send through changed catalogue service or owner
+  ---
+  duration_ms: 1.0776
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-npc-shop-buy.mjs:865:1'
+  failureType: 'testCodeFailure'
+  error: 'socialBudgetRef is not defined'
+  code: 'ERR_TEST_FAILURE'
+  name: 'ReferenceError'
+  stack: |-
+    sendRaw (eval at npcPageHarness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs:731:15), <anonymous>:440:39)
+    sendNpcPurchaseAction (eval at npcPageHarness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs:731:15), <anonymous>:78:22)
+    Object.buyNpcShopItem (eval at npcPageHarness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs:731:15), <anonymous>:197:5)
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs:870:36)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual Page send and sendRaw deny naked and forged buyItem commands before any event or socket
+ok 31 - actual Page send and sendRaw deny naked and forged buyItem commands before any event or socket
+  ---
+  duration_ms: 1.4058
+  type: 'test'
+  ...
+# Subtest: actual Page final listener rejects wallet owner socket and runtime changes and retains an unknown-send fence
+not ok 32 - actual Page final listener rejects wallet owner socket and runtime changes and retains an unknown-send fence
+  ---
+  duration_ms: 23.9134
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-npc-shop-buy.mjs:891:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The input did not match the regular expression /outcome is unknown/. Input:
+    
+    '[mir2] NPC purchase rejected before transport'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual: '[mir2] NPC purchase rejected before transport'
+  operator: 'match'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs:907:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual Core facade forwards all nine exact operations and retains u64 decimal precision
+ok 33 - actual Core facade forwards all nine exact operations and retains u64 decimal precision
+  ---
+  duration_ms: 0.3518
+  type: 'test'
+  ...
+# Subtest: actual Core request validators refuse getters extra fields malformed u64 and UTF8 before bridge entry
+ok 34 - actual Core request validators refuse getters extra fields malformed u64 and UTF8 before bridge entry
+  ---
+  duration_ms: 17.007
+  type: 'test'
+  ...
+# Subtest: actual Core result validator rejects noncanonical malformed contradictory or imprecise responses
+ok 35 - actual Core result validator rejects noncanonical malformed contradictory or imprecise responses
+  ---
+  duration_ms: 0.5769
+  type: 'test'
+  ...
+# Subtest: persistent document version facade survives module reevaluation without a second Core bridge
+ok 36 - persistent document version facade survives module reevaluation without a second Core bridge
+  ---
+  duration_ms: 0.5391
+  type: 'test'
+  ...
+# Subtest: missing incompatible or throwing Core capability closes ordinary Buy while legacy Page remains usable
+not ok 37 - missing incompatible or throwing Core capability closes ordinary Buy while legacy Page remains usable
+  ---
+  duration_ms: 2.1268
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-npc-shop-buy.mjs:985:1'
+  failureType: 'testCodeFailure'
+  error: 'socialBudgetRef is not defined'
+  code: 'ERR_TEST_FAILURE'
+  name: 'ReferenceError'
+  stack: |-
+    sendRaw (eval at npcPageHarness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs:731:15), <anonymous>:440:39)
+    sendNpcPurchaseAction (eval at npcPageHarness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs:731:15), <anonymous>:78:22)
+    Object.buyNpcShopItem (eval at npcPageHarness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs:731:15), <anonymous>:197:5)
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs:994:8)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: producer handoff prevents stale cleanup commands while forwarding only exact old receipts
+ok 38 - producer handoff prevents stale cleanup commands while forwarding only exact old receipts
+  ---
+  duration_ms: 0.2835
+  type: 'test'
+  ...
+# Subtest: actual facade transport identities bind current open object and retain decimal socket tickets
+ok 39 - actual facade transport identities bind current open object and retain decimal socket tickets
+  ---
+  duration_ms: 1.1587
+  type: 'test'
+  ...
+# Subtest: dispatcher requires exact body and exact socket at entry and never exposes a token on the wire
+ok 40 - dispatcher requires exact body and exact socket at entry and never exposes a token on the wire
+  ---
+  duration_ms: 4.0427
+  type: 'test'
+  ...
+# Subtest: failed bind retires only the exact unpublished token and a later manual attempt gets a new token
+ok 41 - failed bind retires only the exact unpublished token and a later manual attempt gets a new token
+  ---
+  duration_ms: 3.669
+  type: 'test'
+  ...
+# Subtest: ownerRevision invalidates a gesture proof but cannot change the entered Core authority
+ok 42 - ownerRevision invalidates a gesture proof but cannot change the entered Core authority
+  ---
+  duration_ms: 6.9792
+  type: 'test'
+  ...
+# Subtest: player object identity is required and authority changes bind the actual selected player
+ok 43 - player object identity is required and authority changes bind the actual selected player
+  ---
+  duration_ms: 2.965
+  type: 'test'
+  ...
+# Subtest: two dispatchers share one document bridge and stale dispose cannot withdraw the newer producer
+not ok 44 - two dispatchers share one document bridge and stale dispose cannot withdraw the newer producer
+  ---
+  duration_ms: 6.2694
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-npc-shop-buy.mjs:1080:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    0 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs:1089:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual Page rejected preentry listener finally submits exact Unsent and permits only a fresh manual token
+not ok 45 - actual Page rejected preentry listener finally submits exact Unsent and permits only a fresh manual token
+  ---
+  duration_ms: 6.1611
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-npc-shop-buy.mjs:1093:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    0 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs:1101:38)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual Page Core enter refusal or throw produces zero socket calls and exact final cleanup
+not ok 46 - actual Page Core enter refusal or throw produces zero socket calls and exact final cleanup
+  ---
+  duration_ms: 3.3164
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-npc-shop-buy.mjs:1105:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    0 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs:1110:12)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual Page enter is directly before socket send and all terminal receipts keep exact token ticket
+not ok 47 - actual Page enter is directly before socket send and all terminal receipts keep exact token ticket
+  ---
+  duration_ms: 3.6494
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-npc-shop-buy.mjs:1117:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+    + []
+    - [
+    -   {
+    -     count: 2,
+    -     itemIndex: 77,
+    -     panelType: 0,
+    -     type: 'buyItem'
+    -   }
+    - ]
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0:
+      type: 'buyItem'
+      itemIndex: 77
+      count: 2
+      panelType: 0
+  actual:
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs:1121:38)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual Page malformed receipt result poisons the slot without replaying an already sent purchase
+not ok 48 - actual Page malformed receipt result poisons the slot without replaying an already sent purchase
+  ---
+  duration_ms: 3.1956
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-npc-shop-buy.mjs:1132:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    0 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs:1134:38)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual NPCResponse clause synchronously retires old preentry proof before any later rendered service
+not ok 49 - actual NPCResponse clause synchronously retires old preentry proof before any later rendered service
+  ---
+  duration_ms: 4.4231
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-npc-shop-buy.mjs:1141:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + {
+    +   buyItems: [
+    +     {
+    +       count: 1,
+    +       description: 'raw catalogue',
+    +       icon: 10,
+    +       id: 77,
+    +       name: 'Potion',
+    +       price: 17.75,
+    +       purchaseRate: 0.9,
+    +       requiresGoldBuyPlan: true,
+    +       stock: -1,
+    +       tooltipSource: {
+    +         fullraw: {
+    +           unchanged: [
+    +             1,
+    +             2,
+    +             3
+    +           ]
+    +         },
+    +         info: {
+    +           index: 5,
+    +           stack_size: 20,
+    +           stats: {
+    +             min_dc: 2
+    +           }
+    +         },
+    +         userItem: {
+    +           count: 1,
+    +           is_shop_item: true,
+    +           unique_id: 77
+    +         }
+    +       }
+    +     },
+    +     {
+    +       count: 1,
+    +       description: 'raw catalogue',
+    +       icon: 10,
+    +       id: 78,
+    +       name: 'Potion',
+    +       price: 17.75,
+    +       purchaseRate: 0.9,
+    +       requiresGoldBuyPlan: true,
+    +       stock: -1,
+    +       tooltipSource: {
+    +         fullraw: {
+    +           unchanged: [
+    +             1,
+    +             2,
+    +             3
+    +           ]
+    +         },
+    +         info: {
+    +           index: 5,
+    +           stack_size: 20,
+    +           stats: {
+    +             min_dc: 2
+    +           }
+    +         },
+    +         userItem: {
+    +           count: 1,
+    +           is_shop_item: true,
+    +           unique_id: 78
+    +         }
+    +       }
+    +     }
+    +   ],
+    +   catalogRevision: 1,
+    +   hideAddedStats: false,
+    +   panelType: 0,
+    +   serviceRevision: 1,
+    +   supportsBuy: true,
+    +   supportsSell: true
+    + }
+    - null
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: ~
+  actual:
+    supportsBuy: true
+    supportsSell: true
+    serviceRevision: 1
+    catalogRevision: 1
+    panelType: 0
+    hideAddedStats: false
+    buyItems:
+      0:
+        id: 77
+        name: 'Potion'
+        price: 17.75
+        purchaseRate: 0.9
+        requiresGoldBuyPlan: true
+        count: 1
+        stock: -1
+        icon: 10
+        description: 'raw catalogue'
+        tooltipSource:
+          info:
+            index: 5
+            stack_size: 20
+            stats:
+              min_dc: 2
+          userItem:
+            unique_id: 77
+            count: 1
+            is_shop_item: true
+          fullraw:
+            unchanged:
+              0: 1
+              1: 2
+              2: 3
+      1:
+        id: 78
+        name: 'Potion'
+        price: 17.75
+        purchaseRate: 0.9
+        requiresGoldBuyPlan: true
+        count: 1
+        stock: -1
+        icon: 10
+        description: 'raw catalogue'
+        tooltipSource:
+          info:
+            index: 5
+            stack_size: 20
+            stats:
+              min_dc: 2
+          userItem:
+            unique_id: 78
+            count: 1
+            is_shop_item: true
+          fullraw:
+            unchanged:
+              0: 1
+              1: 2
+              2: 3
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs:1145:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual Page player IDs reject noncanonical zero missing fractional and unsafe raw strings
+ok 50 - actual Page player IDs reject noncanonical zero missing fractional and unsafe raw strings
+  ---
+  duration_ms: 9.6443
+  type: 'test'
+  ...
+# Subtest: temporary missing Core slot recovers with a fresh producer but cannot resurrect an old proof
+ok 51 - temporary missing Core slot recovers with a fresh producer but cannot resurrect an old proof
+  ---
+  duration_ms: 10.3936
+  type: 'test'
+  ...
+# Subtest: shared UI status reads only an already attached producer and cannot discover or observe a Core
+ok 52 - shared UI status reads only an already attached producer and cannot discover or observe a Core
+  ---
+  duration_ms: 0.7766
+  type: 'test'
+  ...
+# Subtest: shared UI status preserves canonical full-u64 data and does not manufacture receipt history
+ok 53 - shared UI status preserves canonical full-u64 data and does not manufacture receipt history
+  ---
+  duration_ms: 0.5719
+  type: 'test'
+  ...
+# Subtest: shared UI exact revision withdrawal rejects malformed and stale strings before availability
+ok 54 - shared UI exact revision withdrawal rejects malformed and stale strings before availability
+  ---
+  duration_ms: 0.6743
+  type: 'test'
+  ...
+# Subtest: shared UI withdrawal preserves Entered Flushed and Unknown rather than asserting a Buy ACK
+ok 55 - shared UI withdrawal preserves Entered Flushed and Unknown rather than asserting a Buy ACK
+  ---
+  duration_ms: 10.0391
+  type: 'test'
+  ...
+# Subtest: shared UI status and withdrawal fail closed on synchronous producer reentry without cleaning the new lease
+ok 56 - shared UI status and withdrawal fail closed on synchronous producer reentry without cleaning the new lease
+  ---
+  duration_ms: 1.8911
+  type: 'test'
+  ...
+# Subtest: shared UI availability refusal throw and mismatched post-status cannot certify withdrawal
+ok 57 - shared UI availability refusal throw and mismatched post-status cannot certify withdrawal
+  ---
+  duration_ms: 2.3812
+  type: 'test'
+  ...
+# Subtest: final shared UI beforeEntry veto or throw consumes only the unentered proof and never calls Core enter
+ok 58 - final shared UI beforeEntry veto or throw consumes only the unentered proof and never calls Core enter
+  ---
+  duration_ms: 3.7452
+  type: 'test'
+  ...
+# Subtest: last shared UI checkpoint follows all callbacks and cannot reenter or revive a consumed proof
+ok 59 - last shared UI checkpoint follows all callbacks and cannot reenter or revive a consumed proof
+  ---
+  duration_ms: 2.0732
+  type: 'test'
+  ...
+# Subtest: capacity evidence remains in the Rust request and live proof but leaves persistent authority unchanged
+ok 60 - capacity evidence remains in the Rust request and live proof but leaves persistent authority unchanged
+  ---
+  duration_ms: 2.4261
+  type: 'test'
+  ...
+# Subtest: evidence-only availability recovery presents the same authority to a held Entered or Unknown Core response
+ok 61 - evidence-only availability recovery presents the same authority to a held Entered or Unknown Core response
+  ---
+  duration_ms: 6.2908
+  type: 'test'
+  ...
+# Subtest: inventory readiness retires stale projection stages and owner replacements synchronously
+ok 62 - inventory readiness retires stale projection stages and owner replacements synchronously
+  ---
+  duration_ms: 0.1413
+  type: 'test'
+  ...
+# Subtest: canonical expiry strings survive actual WorldSnapshot Bag projection and NPC full request authority
+ok 63 - canonical expiry strings survive actual WorldSnapshot Bag projection and NPC full request authority
+  ---
+  duration_ms: 4.9775
+  type: 'test'
+  ...
+# Subtest: old unsafe expiry uses actual source while no-source null is retained through the NPC transport
+ok 64 - old unsafe expiry uses actual source while no-source null is retained through the NPC transport
+  ---
+  duration_ms: 12.6089
+  type: 'test'
+  ...
+# Subtest: expiry transport never rescues adjacent unsafe UID count or dura or grants their item authority
+ok 65 - expiry transport never rescues adjacent unsafe UID count or dura or grants their item authority
+  ---
+  duration_ms: 4.1262
+  type: 'test'
+  ...
+# Subtest: trusted socket connection is observed before complete authority availability and reserve
+ok 66 - trusted socket connection is observed before complete authority availability and reserve
+  ---
+  duration_ms: 1.3474
+  type: 'test'
+  ...
+# Subtest: public connection forgery and malformed trusted epoch fields never reach the Core bridge
+ok 67 - public connection forgery and malformed trusted epoch fields never reach the Core bridge
+  ---
+  duration_ms: 0.2779
+  type: 'test'
+  ...
+# Subtest: only entered flushed and unknown results may retain a canonical old authority revision
+ok 68 - only entered flushed and unknown results may retain a canonical old authority revision
+  ---
+  duration_ms: 0.2656
+  type: 'test'
+  ...
+# Subtest: connection refusal and unavailable old ABI1 operation cannot fall through to authority or reserve
+ok 69 - connection refusal and unavailable old ABI1 operation cannot fall through to authority or reserve
+  ---
+  duration_ms: 0.6604
+  type: 'test'
+  ...
+# Subtest: preparation read and planner socket changes cannot publish a stale or replacement-socket proof
+ok 70 - preparation read and planner socket changes cannot publish a stale or replacement-socket proof
+  ---
+  duration_ms: 3.4476
+  type: 'test'
+  ...
+# Subtest: postproof planner Core allows and final callback socket changes produce zero entry
+ok 71 - postproof planner Core allows and final callback socket changes produce zero entry
+  ---
+  duration_ms: 5.321
+  type: 'test'
+  ...
+# Subtest: same socket close reopen HMR and dual producers retain every unresolved phase
+ok 72 - same socket close reopen HMR and dual producers retain every unresolved phase
+  ---
+  duration_ms: 20.2901
+  type: 'test'
+  ...
+# Subtest: new actual socket requires fresh complete observation and a new explicit manual token
+ok 73 - new actual socket requires fresh complete observation and a new explicit manual token
+  ---
+  duration_ms: 6.6461
+  type: 'test'
+  ...
+# Subtest: returning to a known older socket refuses without any Core operation on the new flight
+ok 74 - returning to a known older socket refuses without any Core operation on the new flight
+  ---
+  duration_ms: 2.1221
+  type: 'test'
+  ...
+# Subtest: connection and Core model callbacks cannot admit an old full model on the current socket
+ok 75 - connection and Core model callbacks cannot admit an old full model on the current socket
+  ---
+  duration_ms: 1.6867
+  type: 'test'
+  ...
+# Subtest: final beforeEntry sees same-socket last-read source changes before any Core entry
+ok 76 - final beforeEntry sees same-socket last-read source changes before any Core entry
+  ---
+  duration_ms: 5.4427
+  type: 'test'
+  ...
+# Subtest: same-content old72 holder is poisoned and rejected without returning its pre-connection facade
+ok 77 - same-content old72 holder is poisoned and rejected without returning its pre-connection facade
+  ---
+  duration_ms: 0.9953
+  type: 'test'
+  ...
+# Subtest: matching connection facade contract reuses the immutable holder and socket epoch across HMR
+ok 78 - matching connection facade contract reuses the immutable holder and socket epoch across HMR
+  ---
+  duration_ms: 0.3091
+  type: 'test'
+  ...
+# Subtest: Pearl actual Page quote uses UID0 and Core scalar custody with zero Gold and no JS price
+ok 79 - Pearl actual Page quote uses UID0 and Core scalar custody with zero Gold and no JS price
+  ---
+  duration_ms: 13.212
+  type: 'test'
+  ...
+# Subtest: Pearl actual Page final claim enters the existing Core immediately before exact four-key send
+not ok 80 - Pearl actual Page final claim enters the existing Core immediately before exact four-key send
+  ---
+  duration_ms: 15.5884
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-npc-shop-buy.mjs:1779:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+    + []
+    - [
+    -   {
+    -     count: 2,
+    -     itemIndex: 0,
+    -     panelType: 0,
+    -     type: 'buyItem'
+    -   }
+    - ]
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0:
+      type: 'buyItem'
+      itemIndex: 0
+      count: 2
+      panelType: 0
+  actual:
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs:1785:62)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Pearl opaque proof brands reject Gold and legacy routes and cross-currency prepare methods
+ok 81 - Pearl opaque proof brands reject Gold and legacy routes and cross-currency prepare methods
+  ---
+  duration_ms: 25.0349
+  type: 'test'
+  ...
+# Subtest: Pearl actual Page quantity delegates 99 100 and u16 maximum and rejects absent or aliased UID
+not ok 82 - Pearl actual Page quantity delegates 99 100 and u16 maximum and rejects absent or aliased UID
+  ---
+  duration_ms: 16.3366
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-npc-shop-buy.mjs:1816:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+    + []
+    - [
+    -   {
+    -     count: 2,
+    -     itemIndex: 0,
+    -     panelType: 0,
+    -     type: 'buyItem'
+    -   }
+    - ]
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0:
+      type: 'buyItem'
+      itemIndex: 0
+      count: 2
+      panelType: 0
+  actual:
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs:1819:12)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Pearl actual Page missing or invalid wallet never admits a free host quote
+not ok 83 - Pearl actual Page missing or invalid wallet never admits a free host quote
+  ---
+  duration_ms: 25.0244
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-npc-shop-buy.mjs:1828:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+    + []
+    - [
+    -   {
+    -     count: 2,
+    -     itemIndex: 0,
+    -     panelType: 0,
+    -     type: 'buyItem'
+    -   }
+    - ]
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0:
+      type: 'buyItem'
+      itemIndex: 0
+      count: 2
+      panelType: 0
+  actual:
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs:1837:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Pearl actual Page wallet catalog and service ABA invalidate exact captured source
+ok 84 - Pearl actual Page wallet catalog and service ABA invalidate exact captured source
+  ---
+  duration_ms: 60.7927
+  type: 'test'
+  ...
+# Subtest: Pearl actual Page socket session and scene changes burn proof and cannot revive on restoration
+ok 85 - Pearl actual Page socket session and scene changes burn proof and cannot revive on restoration
+  ---
+  duration_ms: 135.8936
+  type: 'test'
+  ...
+# Subtest: Pearl actual Page fresh quote and getter replacement reject after action without legacy downgrade
+ok 86 - Pearl actual Page fresh quote and getter replacement reject after action without legacy downgrade
+  ---
+  duration_ms: 61.1664
+  type: 'test'
+  ...
+# Subtest: Pearl actual Page action and final Core entry reentrancy cannot publish a second flight
+not ok 87 - Pearl actual Page action and final Core entry reentrancy cannot publish a second flight
+  ---
+  duration_ms: 16.0167
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-npc-shop-buy.mjs:1893:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    false !== true
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs:1899:36)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Pearl entered unknown and flushed Core holds survive ordinary snapshots observe and producer replacement
+not ok 88 - Pearl entered unknown and flushed Core holds survive ordinary snapshots observe and producer replacement
+  ---
+  duration_ms: 16.0031
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-npc-shop-buy.mjs:1906:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    0 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs:1909:36)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Pearl actual Page own parcel hero and storage reservations reject before Core entry
+ok 89 - Pearl actual Page own parcel hero and storage reservations reject before Core entry
+  ---
+  duration_ms: 60.4957
+  type: 'test'
+  ...
+# Subtest: Pearl actual Page retires catalog while retaining personal wallet on service close
+ok 90 - Pearl actual Page retires catalog while retaining personal wallet on service close
+  ---
+  duration_ms: 1.3221
+  type: 'test'
+  ...
+# Subtest: Pearl actual packet wallet fence ignores old socket generation and NewCreature without amount
+ok 91 - Pearl actual packet wallet fence ignores old socket generation and NewCreature without amount
+  ---
+  duration_ms: 8.2409
+  type: 'test'
+  ...
+# Subtest: Pearl full snapshot wallet observation remains inside completed owner inventory projection
+ok 92 - Pearl full snapshot wallet observation remains inside completed owner inventory projection
+  ---
+  duration_ms: 16.1413
+  type: 'test'
+  ...
+# Subtest: Pearl actual Page foreign proof options and nested send attempts retire the outer Pearl entry
+not ok 93 - Pearl actual Page foreign proof options and nested send attempts retire the outer Pearl entry
+  ---
+  duration_ms: 16.5474
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-npc-shop-buy.mjs:2008:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    false !== true
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs:2017:36)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Pearl actual typed Goods case obtains a Core denial quote for every complete raw row before exposing UID0
+ok 94 - Pearl actual typed Goods case obtains a Core denial quote for every complete raw row before exposing UID0
+  ---
+  duration_ms: 5.6407
+  type: 'test'
+  ...
+# Subtest: Pearl actual Goods price Oracle missing malformed mismatch and getter custody failures retire all rows
+ok 95 - Pearl actual Goods price Oracle missing malformed mismatch and getter custody failures retire all rows
+  ---
+  duration_ms: 10.4277
+  type: 'test'
+  ...
+# Subtest: Pearl actual Goods case preserves a whole unfiltered catalog and refuses a bad second raw row
+ok 96 - Pearl actual Goods case preserves a whole unfiltered catalog and refuses a bad second raw row
+  ---
+  duration_ms: 2.034
+  type: 'test'
+  ...
+# Subtest: Pearl actual final checkpoint rejects facts changed by the last ledger callback after the complete read
+not ok 97 - Pearl actual final checkpoint rejects facts changed by the last ledger callback after the complete read
+  ---
+  duration_ms: 15.8874
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-npc-shop-buy.mjs:2091:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    false !== true
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs:2113:36)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Pearl reentrant rejected other command still spends send epoch and cannot revive the older proof
+not ok 98 - Pearl reentrant rejected other command still spends send epoch and cannot revive the older proof
+  ---
+  duration_ms: 16.1936
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-npc-shop-buy.mjs:2118:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    false !== true
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs:2126:34)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: Pearl actual Page quote and exact send retain an above16KiB complete structured catalog through original payload mutation
+not ok 99 - Pearl actual Page quote and exact send retain an above16KiB complete structured catalog through original payload mutation
+  ---
+  duration_ms: 85.3888
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-npc-shop-buy.mjs:2135:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+    + []
+    - [
+    -   {
+    -     count: 2,
+    -     itemIndex: 0,
+    -     panelType: 0,
+    -     type: 'buyItem'
+    -   }
+    - ]
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0:
+      type: 'buyItem'
+      itemIndex: 0
+      count: 2
+      panelType: 0
+  actual:
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs:2148:34)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: receipt_facade_document_remount_retains_one_host_and_original_operation
+ok 100 - receipt_facade_document_remount_retains_one_host_and_original_operation
+  ---
+  duration_ms: 1.3772
+  type: 'test'
+  ...
+# Subtest: receipt_facade_version_mismatch_withdraws_but_never_recreates_retained_host
+ok 101 - receipt_facade_version_mismatch_withdraws_but_never_recreates_retained_host
+  ---
+  duration_ms: 0.2327
+  type: 'test'
+  ...
+# Subtest: receipt_facade_old_cleanup_cannot_withdraw_successor_or_borrow_its_socket
+ok 102 - receipt_facade_old_cleanup_cannot_withdraw_successor_or_borrow_its_socket
+  ---
+  duration_ms: 0.2623
+  type: 'test'
+  ...
+# Subtest: receipt_facade_reconnect_tokens_remain_bound_to_original_physical_socket
+ok 103 - receipt_facade_reconnect_tokens_remain_bound_to_original_physical_socket
+  ---
+  duration_ms: 0.1655
+  type: 'test'
+  ...
+# Subtest: receipt_facade_operation_accessor_is_rejected_without_invocation
+ok 104 - receipt_facade_operation_accessor_is_rejected_without_invocation
+  ---
+  duration_ms: 0.1598
+  type: 'test'
+  ...
+# Subtest: receipt_facade_nested_nondata_and_lossy_values_never_enter_abi
+ok 105 - receipt_facade_nested_nondata_and_lossy_values_never_enter_abi
+  ---
+  duration_ms: 0.2957
+  type: 'test'
+  ...
+# Subtest: receipt_facade_nested_proxy_reentry_cannot_enter_after_producer_transition
+ok 106 - receipt_facade_nested_proxy_reentry_cannot_enter_after_producer_transition
+  ---
+  duration_ms: 0.1948
+  type: 'test'
+  ...
+# Subtest: receipt_facade_caller_cannot_supply_core_token_or_open_its_own_connection
+ok 107 - receipt_facade_caller_cannot_supply_core_token_or_open_its_own_connection
+  ---
+  duration_ms: 0.216
+  type: 'test'
+  ...
+# Subtest: receipt_facade_bound_bridge_method_survives_old_instance_method_replacement
+ok 108 - receipt_facade_bound_bridge_method_survives_old_instance_method_replacement
+  ---
+  duration_ms: 0.1171
+  type: 'test'
+  ...
+# Subtest: receipt_facade_invalid_output_poison_keeps_original_host_unavailable
+ok 109 - receipt_facade_invalid_output_poison_keeps_original_host_unavailable
+  ---
+  duration_ms: 0.1523
+  type: 'test'
+  ...
+# Subtest: receipt_facade_unavailable_abi_is_persistent_and_does_not_admit_producer
+ok 110 - receipt_facade_unavailable_abi_is_persistent_and_does_not_admit_producer
+  ---
+  duration_ms: 0.065
+  type: 'test'
+  ...
+# Subtest: receipt_facade_valid_wire_operation_retains_canonical_u64_strings_and_zero_selector
+ok 111 - receipt_facade_valid_wire_operation_retains_canonical_u64_strings_and_zero_selector
+  ---
+  duration_ms: 0.124
+  type: 'test'
+  ...
+# Subtest: Source30 raw parser rejects duplicate escaped duplicate unsafe integer and preserves canonical u64 strings
+ok 112 - Source30 raw parser rejects duplicate escaped duplicate unsafe integer and preserves canonical u64 strings
+  ---
+  duration_ms: 0.169
+  type: 'test'
+  ...
+# Subtest: Source30 numeric token boundaries reject fractional identity rounding and bounded exponent underflow
+ok 113 - Source30 numeric token boundaries reject fractional identity rounding and bounded exponent underflow
+  ---
+  duration_ms: 0.2606
+  type: 'test'
+  ...
+# Subtest: Source30 public complete economy rejects omitted partial wallets stage5 hero or actor fields
+ok 114 - Source30 public complete economy rejects omitted partial wallets stage5 hero or actor fields
+  ---
+  duration_ms: 3.4483
+  type: 'test'
+  ...
+# Subtest: Source30 actual WorldItem hero equipment and nullable u32 player weights match simulation client view
+ok 115 - Source30 actual WorldItem hero equipment and nullable u32 player weights match simulation client view
+  ---
+  duration_ms: 1.2868
+  type: 'test'
+  ...
+# Subtest: Source30 paired Begin applies frozen full source before exact complete witness
+ok 116 - Source30 paired Begin applies frozen full source before exact complete witness
+  ---
+  duration_ms: 9.1344
+  type: 'test'
+  ...
+# Subtest: Source30 partial application unsafe original integer and omitted bundle never issue complete witness
+ok 117 - Source30 partial application unsafe original integer and omitted bundle never issue complete witness
+  ---
+  duration_ms: 3.0627
+  type: 'test'
+  ...
+# Subtest: Source30 actual gold trade explicit gesture Quote Reserve Enter sends once
+ok 118 - Source30 actual gold trade explicit gesture Quote Reserve Enter sends once
+  ---
+  duration_ms: 1.7524
+  type: 'test'
+  ...
+# Subtest: Source30 actual gold buyBack explicit gesture Quote Reserve Enter sends once
+ok 119 - Source30 actual gold buyBack explicit gesture Quote Reserve Enter sends once
+  ---
+  duration_ms: 1.519
+  type: 'test'
+  ...
+# Subtest: Source30 actual gold used explicit gesture Quote Reserve Enter sends once
+ok 120 - Source30 actual gold used explicit gesture Quote Reserve Enter sends once
+  ---
+  duration_ms: 1.6144
+  type: 'test'
+  ...
+# Subtest: Source30 actual pearls trade explicit gesture Quote Reserve Enter sends once
+ok 121 - Source30 actual pearls trade explicit gesture Quote Reserve Enter sends once
+  ---
+  duration_ms: 1.8745
+  type: 'test'
+  ...
+# Subtest: Source30 quote rejects changed source currency request and stale physical owner before reserve
+ok 122 - Source30 quote rejects changed source currency request and stale physical owner before reserve
+  ---
+  duration_ms: 6.596
+  type: 'test'
+  ...
+# Subtest: Source30 Enter send exception marks original Unknown and fresh Begin queries original operation only
+ok 123 - Source30 Enter send exception marks original Unknown and fresh Begin queries original operation only
+  ---
+  duration_ms: 3.1387
+  type: 'test'
+  ...
+# Subtest: Source30 post Enter callbacks and malformed decisions retain Unknown original without Purchase or retry
+ok 124 - Source30 post Enter callbacks and malformed decisions retain Unknown original without Purchase or retry
+  ---
+  duration_ms: 16.2012
+  type: 'test'
+  ...
+# Subtest: Source30 malformed Reserve and refused Enter cancel only exact queued definitely unsent custody
+ok 125 - Source30 malformed Reserve and refused Enter cancel only exact queued definitely unsent custody
+  ---
+  duration_ms: 9.099
+  type: 'test'
+  ...
+# Subtest: Source30 old Gold barrier refuses quote without withdrawing or resetting legacy custody
+ok 126 - Source30 old Gold barrier refuses quote without withdrawing or resetting legacy custody
+  ---
+  duration_ms: 2.9923
+  type: 'test'
+  ...
+# Subtest: Source30 dispatcher malformed extra fields or accessor decisions cannot send
+ok 127 - Source30 dispatcher malformed extra fields or accessor decisions cannot send
+  ---
+  duration_ms: 0.2724
+  type: 'test'
+  ...
+# Subtest: Source30 actual Page branches raw owner before generic decoder and complete application bypasses movement overlays
+ok 128 - Source30 actual Page branches raw owner before generic decoder and complete application bypasses movement overlays
+  ---
+  duration_ms: 20.6327
+  type: 'test'
+  ...
+# Subtest: Source30 actual Pearl catalogue accepts and preserves only canonical purchase selectors
+ok 129 - Source30 actual Pearl catalogue accepts and preserves only canonical purchase selectors
+  ---
+  duration_ms: 2.6719
+  type: 'test'
+  ...
+# Subtest: Source30 terminal frame applies its entire same revision economic source before complete witness
+ok 130 - Source30 terminal frame applies its entire same revision economic source before complete witness
+  ---
+  duration_ms: 2.3017
+  type: 'test'
+  ...
+# Subtest: Source30 terminal receipt with partial snapshot preserves owner observation without complete or repeat purchase
+ok 131 - Source30 terminal receipt with partial snapshot preserves owner observation without complete or repeat purchase
+  ---
+  duration_ms: 2.5754
+  type: 'test'
+  ...
+# Subtest: Source30 actual owner Pearl projection preserves equal wallet custody and carries canonical selectors on changed balance
+ok 132 - Source30 actual owner Pearl projection preserves equal wallet custody and carries canonical selectors on changed balance
+  ---
+  duration_ms: 4.2722
+  type: 'test'
+  ...
+# Subtest: Source31 original owner numeric UID MAX and signed i64 dates project only exact declared snapshot leaves
+ok 133 - Source31 original owner numeric UID MAX and signed i64 dates project only exact declared snapshot leaves
+  ---
+  duration_ms: 0.3257
+  type: 'test'
+  ...
+# Subtest: Source31 exact owner integer projection rejects wrong paths duplicate fields fractions and integer range escapes
+ok 134 - Source31 exact owner integer projection rejects wrong paths duplicate fields fractions and integer range escapes
+  ---
+  duration_ms: 0.2358
+  type: 'test'
+  ...
+# Subtest: Source31 actual textual receipt facade preserves raw ABI snapshot and keeps control integers strict
+ok 135 - Source31 actual textual receipt facade preserves raw ABI snapshot and keeps control integers strict
+  ---
+  duration_ms: 0.4329
+  type: 'test'
+  ...
+# Subtest: Source31 raw full owner agrees with new ABI and quarantined old host before one complete witness
+ok 136 - Source31 raw full owner agrees with new ABI and quarantined old host before one complete witness
+  ---
+  duration_ms: 15.9075
+  type: 'test'
+  ...
+# Subtest: Source31 old host quarantine rejects changed receipt identity shape accessor and reflection reentry
+ok 137 - Source31 old host quarantine rejects changed receipt identity shape accessor and reflection reentry
+  ---
+  duration_ms: 9.478
+  type: 'test'
+  ...
+# Subtest: Source31 exact bag identities and capacity roster compare canonically without numeric mutation authority
+ok 138 - Source31 exact bag identities and capacity roster compare canonically without numeric mutation authority
+  ---
+  duration_ms: 1.9762
+  type: 'test'
+  ...
+# Subtest: Source31 saved mail item JSON and signed dates remain exact and reject duplicate or rounded attachments
+ok 139 - Source31 saved mail item JSON and signed dates remain exact and reject duplicate or rounded attachments
+  ---
+  duration_ms: 1.132
+  type: 'test'
+  ...
+# Subtest: Source31 Hero reads same snapshot experience and actual max pair instead of cached packet values
+ok 140 - Source31 Hero reads same snapshot experience and actual max pair instead of cached packet values
+  ---
+  duration_ms: 1.5631
+  type: 'test'
+  ...
+# Subtest: Source31 Hero canonical full UID roster remains exact and cross-grid duplicates deny the model
+ok 141 - Source31 Hero canonical full UID roster remains exact and cross-grid duplicates deny the model
+  ---
+  duration_ms: 1.0587
+  type: 'test'
+  ...
+# Subtest: Source31 complete Hero owner requires actual max pair and validates exact new shop integer leaves
+ok 142 - Source31 complete Hero owner requires actual max pair and validates exact new shop integer leaves
+  ---
+  duration_ms: 3.075
+  type: 'test'
+  ...
+# Subtest: Source31 actual Page durable full UID baseline preserves native shop with null main dialog across reads
+ok 143 - Source31 actual Page durable full UID baseline preserves native shop with null main dialog across reads
+  ---
+  duration_ms: 6.0383
+  type: 'test'
+  ...
+# Subtest: Source31 ordinary declared storage dates reuse exact signed codec and unsupported numeric source is unavailable
+ok 144 - Source31 ordinary declared storage dates reuse exact signed codec and unsupported numeric source is unavailable
+  ---
+  duration_ms: 8.8454
+  type: 'test'
+  ...
+# Subtest: Source31 actual Page owner apply refreshes Gold Pearl BuyBack Used catalog before first and second purchase
+ok 145 - Source31 actual Page owner apply refreshes Gold Pearl BuyBack Used catalog before first and second purchase
+  ---
+  duration_ms: 157.405
+  type: 'test'
+  ...
+# Subtest: Source31 actual Page catalog switches NPC and withdraws missing unknown or unsupported full source
+ok 146 - Source31 actual Page catalog switches NPC and withdraws missing unknown or unsupported full source
+  ---
+  duration_ms: 62.9404
+  type: 'test'
+  ...
+# Subtest: Source31 native display qualification rejects mismatched raw item selector profile duplicate and getter
+ok 147 - Source31 native display qualification rejects mismatched raw item selector profile duplicate and getter
+  ---
+  duration_ms: 3.9066
+  type: 'test'
+  ...
+# Subtest: Source31 real packet refresh Begin preserves entered operation and repeated owner display never loops
+ok 148 - Source31 real packet refresh Begin preserves entered operation and repeated owner display never loops
+  ---
+  duration_ms: 19.8514
+  type: 'test'
+  ...
+# Subtest: Source31 late catalog change after Quote or Enter cannot send a stale gesture and retains original Unknown
+ok 149 - Source31 late catalog change after Quote or Enter cannot send a stale gesture and retains original Unknown
+  ---
+  duration_ms: 23.1602
+  type: 'test'
+  ...
+# Subtest: Source31 packet refresh final fences reject reentrant connection change or service withdrawal
+ok 150 - Source31 packet refresh final fences reject reentrant connection change or service withdrawal
+  ---
+  duration_ms: 12.5605
+  type: 'test'
+  ...
+# Subtest: Source31 ordinary raw world preserves full UID signed dates equipment mail and native catalog before application
+ok 151 - Source31 ordinary raw world preserves full UID signed dates equipment mail and native catalog before application
+  ---
+  duration_ms: 10.3789
+  type: 'test'
+  ...
+# Subtest: Source32 actual Page positive HP MP and unrelated monster damage retain the original complete economic witness
+ok 152 - Source32 actual Page positive HP MP and unrelated monster damage retain the original complete economic witness
+  ---
+  duration_ms: 14.1742
+  type: 'test'
+  ...
+# Subtest: Source32 actual Page durable eligibility fences economic role death and real NPC source changes before quote
+ok 153 - Source32 actual Page durable eligibility fences economic role death and real NPC source changes before quote
+  ---
+  duration_ms: 163.0678
+  type: 'test'
+  ...
+# Subtest: Source32 actual Native stale HP gesture cancels and a fresh painted click sends exactly one durable quote
+ok 154 - Source32 actual Native stale HP gesture cancels and a fresh painted click sends exactly one durable quote
+  ---
+  duration_ms: 86.9676
+  type: 'test'
+  ...
+# Subtest: Source32 actual Native records the first changed-source refusal without quote or raw source diagnostics
+ok 155 - Source32 actual Native records the first changed-source refusal without quote or raw source diagnostics
+  ---
+  duration_ms: 126.2381
+  type: 'test'
+  ...
+# Subtest: Source32 actual durable quote continuation still refuses changed position economy role and death before reserve
+ok 156 - Source32 actual durable quote continuation still refuses changed position economy role and death before reserve
+  ---
+  duration_ms: 55.3386
+  type: 'test'
+  ...
+# Subtest: Source33 actual Native quote continuation survives render wrappers of the same Host only
+ok 157 - Source33 actual Native quote continuation survives render wrappers of the same Host only
+  ---
+  duration_ms: 58.264
+  type: 'test'
+  ...
+# Subtest: Source33 actual Native quote continuation rejects a replaced or cleaned up Host with a finite reason
+ok 158 - Source33 actual Native quote continuation rejects a replaced or cleaned up Host with a finite reason
+  ---
+  duration_ms: 113.947
+  type: 'test'
+  ...
+# Subtest: Source33 actual Native quote continuation records every existing UI status and proof refusal
+ok 159 - Source33 actual Native quote continuation records every existing UI status and proof refusal
+  ---
+  duration_ms: 965.0812
+  type: 'test'
+  ...
+# Subtest: Source33 actual Native same Host wrappers cannot preserve a changed socket session full witness or selection
+ok 160 - Source33 actual Native same Host wrappers cannot preserve a changed socket session full witness or selection
+  ---
+  duration_ms: 316.2124
+  type: 'test'
+  ...
+# Subtest: Source31 actual Page equal periodic source and HP XP full fallback preserve first and second buy custody
+ok 161 - Source31 actual Page equal periodic source and HP XP full fallback preserve first and second buy custody
+  ---
+  duration_ms: 245.5973
+  type: 'test'
+  ...
+# Subtest: Source31 actual Page catalog-only periodic changes switch parent and retire gestures before or after Quote Enter
+ok 162 - Source31 actual Page catalog-only periodic changes switch parent and retire gestures before or after Quote Enter
+  ---
+  duration_ms: 46.8509
+  type: 'test'
+  ...
+# Subtest: Source31 ordinary complete changes never settle retained operation or create Begin Query and missing catalog withdraws
+ok 163 - Source31 ordinary complete changes never settle retained operation or create Begin Query and missing catalog withdraws
+  ---
+  duration_ms: 17.8288
+  type: 'test'
+  ...
+# Subtest: Source31 raw marker scans every escaped duplicate top-level type and strict owner never reaches ordinary decoder
+ok 164 - Source31 raw marker scans every escaped duplicate top-level type and strict owner never reaches ordinary decoder
+  ---
+  duration_ms: 44.4647
+  type: 'test'
+  ...
+# Subtest: Source31 ordinary unsafe or duplicate world fails closed without rounded fallback or paired source replacement
+ok 165 - Source31 ordinary unsafe or duplicate world fails closed without rounded fallback or paired source replacement
+  ---
+  duration_ms: 31.7746
+  type: 'test'
+  ...
+# Subtest: Source31 exact integer consumers pass bounded strict no-emit type checking
+ok 166 - Source31 exact integer consumers pass bounded strict no-emit type checking
+  ---
+  duration_ms: 535.8152
+  type: 'test'
+  ...
+# Subtest: Source31 storage DOM decodes canonical wide i64 kind and exact epoch ticks without rounding
+ok 167 - Source31 storage DOM decodes canonical wide i64 kind and exact epoch ticks without rounding
+  ---
+  duration_ms: 7.9306
+  type: 'test'
+  ...
+# Subtest: Source35 exact storage ABI preserves signed i64 text and rejects unsafe numeric dates
+ok 168 - Source35 exact storage ABI preserves signed i64 text and rejects unsafe numeric dates
+  ---
+  duration_ms: 2.5724
+  type: 'test'
+  ...
+# Subtest: ordinary Page purchase diagnostics retain first refusal and exact transport stage
+not ok 169 - ordinary Page purchase diagnostics retain first refusal and exact transport stage
+  ---
+  duration_ms: 4.7927
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-npc-shop-buy.mjs:3325:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      {
+    +   reason: 'transportException',
+    -   reason: null,
+        route: 'gold',
+    +   stage: 'rejected'
+    -   stage: 'transportReturned'
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    route: 'gold'
+    stage: 'transportReturned'
+    reason: ~
+  actual:
+    route: 'gold'
+    stage: 'rejected'
+    reason: 'transportException'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-npc-shop-buy.mjs:3334:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: ordinary durable Page purchase reports missing adapter and catalog before quote or fallback
+ok 170 - ordinary durable Page purchase reports missing adapter and catalog before quote or fallback
+  ---
+  duration_ms: 1.6804
+  type: 'test'
+  ...
+# Subtest: actual durable client passive getter classifies first synchronous refusal without host reads
+ok 171 - actual durable client passive getter classifies first synchronous refusal without host reads
+  ---
+  duration_ms: 9.5988
+  type: 'test'
+  ...
+# Subtest: Source64 actual capability consumers preserve both declarations with Core early or late
+ok 172 - Source64 actual capability consumers preserve both declarations with Core early or late
+  ---
+  duration_ms: 20.9928
+  type: 'test'
+  ...
+# Subtest: Source64 same socket append keeps the other capability and replacement socket inherits neither
+ok 173 - Source64 same socket append keeps the other capability and replacement socket inherits neither
+  ---
+  duration_ms: 10.0109
+  type: 'test'
+  ...
+# Subtest: Source64 actual consumers mark capabilities only after successful sends
+ok 174 - Source64 actual consumers mark capabilities only after successful sends
+  ---
+  duration_ms: 19.1011
+  type: 'test'
+  ...
+# Subtest: Source64 actual socket and observer blockers preserve capability send gates
+ok 175 - Source64 actual socket and observer blockers preserve capability send gates
+  ---
+  duration_ms: 28.9716
+  type: 'test'
+  ...
+# Subtest: Source66 actual NPC activation sends once across distance two without the blocked approach
+ok 176 - Source66 actual NPC activation sends once across distance two without the blocked approach
+  ---
+  duration_ms: 0.4116
+  type: 'test'
+  ...
+# Subtest: Source66 actual NPC repeat and same-dialog guards retain their original boundaries
+ok 177 - Source66 actual NPC repeat and same-dialog guards retain their original boundaries
+  ---
+  duration_ms: 0.2084
+  type: 'test'
+  ...
+# Subtest: Source66 actual invalid and dead entity branches stop before interaction or attack
+ok 178 - Source66 actual invalid and dead entity branches stop before interaction or attack
+  ---
+  duration_ms: 0.1236
+  type: 'test'
+  ...
+# Subtest: Source66 actual monster activation keeps the existing attack path and non-NPC selection
+ok 179 - Source66 actual monster activation keeps the existing attack path and non-NPC selection
+  ---
+  duration_ms: 0.0927
+  type: 'test'
+  ...
+# Subtest: Source66 direct NPC activation retires old arrival intent without cancelling unrelated movement
+ok 180 - Source66 direct NPC activation retires old arrival intent without cancelling unrelated movement
+  ---
+  duration_ms: 0.1562
+  type: 'test'
+  ...
+1..180
+# tests 180
+# suites 0
+# pass 156
+# fail 24
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 6001.6261

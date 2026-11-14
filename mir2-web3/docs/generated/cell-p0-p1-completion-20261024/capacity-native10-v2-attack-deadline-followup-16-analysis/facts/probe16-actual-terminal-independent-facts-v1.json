@@ -1,0 +1,184 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T17:47:33.390Z",
+  "runId": "1792949214664-bea1433d",
+  "scope": "Small independent ended-facts check of actual sealed-tool execution and original public report/cleanup; no new raw, monitor, recording or executable scan.",
+  "independentVerification": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\final-verification.json",
+    "bytes": 449267,
+    "sha256": "b1d786f3ae059dba0c626a6f43f74381d4a113d15e36195295d32d668dc89fa7"
+  },
+  "actualExecution": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\actual-verification-execution-receipt-v1.json",
+    "bytes": 813,
+    "sha256": "dee8e31af98139fc471fb72d9a5931bd66331bc046ea0d263fbba2d783cf069d"
+  },
+  "toolSourceSeal": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\tool-source-frozen-v1.json",
+    "bytes": 2457,
+    "sha256": "bc2ce35c20f8ff491443da7bbbc2d7e3fffc3dc63d809b467efbc2899410f9c2"
+  },
+  "toolInputsChecked": 12,
+  "toolInputsStillMatch": true,
+  "boundedPublicPins": {
+    "report": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-attack-deadline-followup-16-diagnostics\\release-native-10-v2-attack-deadline-feasibility-16\\reports\\1792949214664-bea1433d.report.json",
+      "bytes": 326110,
+      "sha256": "5abb85ff011b75be4e4c19c22b00f90715fc5186e17e88f334787d2bb9e13285"
+    },
+    "realmCleanup": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-attack-deadline-followup-16-diagnostics\\release-native-10-v2-attack-deadline-feasibility-16\\realm-cleanup.json",
+      "bytes": 4804,
+      "sha256": "b61a2059aa105f4e29b1dab1250143994d0b47a2e92687aaad8cc52b01fc2ddc"
+    },
+    "reportProvenance": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-attack-deadline-followup-16-diagnostics\\release-native-10-v2-attack-deadline-feasibility-16\\report-provenance.json",
+      "bytes": 6601,
+      "sha256": "a7812aa3823567b9a93799598ff112fc244ea8da888b15020275ab057018346c"
+    },
+    "catalog": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-attack-deadline-followup-16-diagnostics\\collect-release-native-10-v2-attack-deadline-feasibility-16-public-artifact-catalog.json",
+      "bytes": 66036,
+      "sha256": "927ddc67b12264b3e3f32c72334867fdcc315581ba79d1e8d41787f488926b2f"
+    },
+    "publicCopy": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-attack-deadline-followup-16-diagnostics\\public-copy-provenance.json",
+      "bytes": 66751,
+      "sha256": "4f74a58b7a309478ae4bbd65ab738a5f14e7f5dde8655cf77cbf3b2d50e0c319"
+    },
+    "publicVerification": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-attack-deadline-followup-16-diagnostics\\public-verification.json",
+      "bytes": 7109,
+      "sha256": "5a5bde9c970345e78e1cd3098a0a02c3bcb89a22501ce03e5551d5bd93cf137b"
+    },
+    "collectionVerification": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-attack-deadline-followup-16-diagnostics\\collection-verification.json",
+      "bytes": 348523,
+      "sha256": "a4d2fcd9a8f7a6394dc568b88fc15fe4db88f39f25f1aca0f619048944d03083"
+    }
+  },
+  "rootCleanup": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-root-independent-cleanup-v1.json",
+    "bytes": 324,
+    "sha256": "d76863ee7e0b5f0c367ea2633bba27bd91bbd66b757d757d1efaedb7d6b4539a"
+  },
+  "identities": {
+    "backendSourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+    "backendInputs": 44,
+    "gatewaySha256": "1980b7bed58499977eb6443aa3f1bf0fabcb9e8262b490f2bc6fb74cf6f7b318",
+    "driverSourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+    "coreCodeEvidenceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+    "driverSourceSha256": "5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9",
+    "scene10Sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba",
+    "scene100Sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205",
+    "sceneSourceSha256": "e3eaf0604f0e99fde70fbbe90585f171e3a5068b6e89e1fffbaab13dafe92adf",
+    "sourceConfigSha256": "5cc5e733fb47b05694e53de6caace2cff4c519eacbbd8feae3d6dfe2f12239d2"
+  },
+  "phases": [
+    {
+      "name": "stage-2",
+      "actors": 2,
+      "configuredSeconds": 300,
+      "measuredSeconds": 300.254,
+      "completeWindows": 5,
+      "allGatesPassed": true
+    },
+    {
+      "name": "stage-10",
+      "actors": 10,
+      "configuredSeconds": 300,
+      "measuredSeconds": 300.335,
+      "completeWindows": 5,
+      "allGatesPassed": true
+    },
+    {
+      "name": "soak",
+      "actors": 10,
+      "configuredSeconds": 360,
+      "measuredSeconds": 360.338,
+      "completeWindows": 6,
+      "allGatesPassed": true
+    }
+  ],
+  "completeWindows": {
+    "count": 16,
+    "minimumActualSeconds": 60.005,
+    "counts": [
+      5,
+      5,
+      6
+    ],
+    "allTrue60Seconds": true
+  },
+  "continuous": {
+    "assessedWindows": 132,
+    "reportedFailures": 0,
+    "allPassedFlagsAndCounterReplay": true,
+    "fullMinutes": 122,
+    "finalPartialWindows": 10,
+    "under20Segments": 1,
+    "maximumTimeoutRatio": 0,
+    "maximumCorrectionRatio": 0.012987012987012988
+  },
+  "typedAttackContract": {
+    "mode": "v2",
+    "capability": "nativeAttackOutcomeV1",
+    "requests": 347,
+    "successfulActions": 347,
+    "notLaunched": 0,
+    "timeouts": 0,
+    "maximumReportedSendToCompletionMs": 159.99699999997392,
+    "originalEvidenceUpperBoundMs": 900,
+    "exactRequestAndDualEndDamageStillRequired": true,
+    "sourceContractAndReportMetricsChecked": true,
+    "perPacket900DeadlineReplayPerformedHere": false,
+    "limitation": "Raw/per-packet evidence was already checked through original driver and ended verifier; this facts check does not independently rescan every packet deadline."
+  },
+  "cleanup": {
+    "originalSevenChecksTrue": true,
+    "gatewayExit0": true,
+    "monitorExit0": true,
+    "rootProofProcessesAbsent": true,
+    "rootProofPortsFree": true,
+    "gatewayPid": 65608,
+    "monitorPid": 70448,
+    "rootOsQueriesNotRepeated": true
+  },
+  "hp": {
+    "events": 0,
+    "verifiedEventsChecked": 0,
+    "successProofChecked": false,
+    "noVerifiedDoseObserved": true,
+    "noRealDoseClaim": true
+  },
+  "wire": {
+    "rows": 5832,
+    "present": true,
+    "sourceValid": true,
+    "countsMatch": true,
+    "uninstallSucceeded": true,
+    "complete": true,
+    "notAReplacementGameGate": true
+  },
+  "rawEvidenceBoundWithoutRescan": {
+    "rows": 41378,
+    "bytes": 29749959,
+    "sha256": "a81b8b478ac1317e3bf1301a3d00d640f717a9ee4c6fe37db9861f0041915027",
+    "source": "Root actual closed raw verification and exact final-verification receipt; not another stream in this check"
+  },
+  "publicCopiesAlreadyVerified": 184,
+  "verdict": {
+    "terminalFactsPassed": true,
+    "probePassed": true,
+    "independentVerificationPassed": true,
+    "eligibleAsFormal12Prerequisite": true,
+    "capacityAccepted": false,
+    "p0Accepted": false,
+    "p2ImplementationStarted": false
+  },
+  "limitations": [
+    "Successful ten-player probe is a prerequisite only; a fresh full formal ladder and two-hour soak are still required.",
+    "No stale failed evidence is reclassified and no original gates or thresholds were modified.",
+    "HP zero-dose and wire observations are not survival/capacity claims."
+  ]
+}

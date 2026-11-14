@@ -1,0 +1,33 @@
+{
+  "gatewayInitialBuild": {
+    "observedFailure": "missing compile-time SLG-PRODUCTION-CATALOG.v0.2.json in the initial source subset",
+    "laterFix": "56 missing include_str/include_bytes dependencies copied from the same committed base; none from foreign WIP",
+    "originalToolOutputRetainedInChat": true
+  },
+  "gatewayFirstTlsTest": {
+    "logSha256": "b000ad3ad4912cd03cb6209f677a28ac52aebbc154e2410f5929ff2dd40bbb6f",
+    "passed": 34,
+    "failed": 1,
+    "actualCatalogCount": 502,
+    "wrongAssumption": 529,
+    "fix": "compare every complete legacy catalog string from the identical local fixture; retain public529 gate unchanged"
+  },
+  "firstNextBuild": {
+    "logSha256": "575b3e5e8bfc37387d963abf0004479a216b5d3a3855e8236d15edfb2a3c4e90",
+    "failure": "cross-drive node_modules junction generated ./E:/ paths",
+    "laterFix": "fresh physical source and physical dependencies; original junction preserved"
+  },
+  "rejectedCleanup": {
+    "attempt": "remove this task dependency junction",
+    "executionRejectedBeforeStart": true,
+    "reason": "blocked by policy",
+    "sameDeletionRetried": false,
+    "saferAction": "new physical workspace created, leaving the junction and its target untouched"
+  },
+  "optionalToolDownload": {
+    "cancelledOwnGhDownload": true,
+    "used": false,
+    "existingOptimizerVersion": 131,
+    "existingOptimizerSha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3"
+  }
+}

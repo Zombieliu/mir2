@@ -1,0 +1,228 @@
+{
+  "passed": false,
+  "scope": "Full local game only: actual NPC label computed name/world/drop stacking, ordinary trusted name click -> NPCResponse, close, screenshot. Long GDI bitmap cropping and physical Windows UI remain separate.",
+  "npc": {
+    "objectId": 1,
+    "name": "Teleport_Gilbert",
+    "x": 287,
+    "y": 615,
+    "hp": null,
+    "maxHp": null,
+    "dead": false,
+    "kind": "npc"
+  },
+  "layers": {
+    "label": {
+      "zIndex": "auto",
+      "pointerEvents": "auto",
+      "isolation": "auto"
+    },
+    "overlay": {
+      "zIndex": "3500000",
+      "pointerEvents": "none",
+      "isolation": "auto"
+    },
+    "world": {
+      "zIndex": "1",
+      "pointerEvents": "auto",
+      "isolation": "isolate"
+    },
+    "hitOwnLabel": false,
+    "hit": {
+      "tag": "CANVAS",
+      "id": "mir2-quest-ui-canvas",
+      "className": "shared-quest-ui-visible"
+    },
+    "hitSharedCanvas": true,
+    "rect": {
+      "x": 560,
+      "y": 393,
+      "width": 48,
+      "height": 24
+    },
+    "text": "傳送員 Gilbert",
+    "drop": {
+      "zIndex": "4000000",
+      "pointerEvents": "none",
+      "isolation": "auto"
+    }
+  },
+  "commands": [],
+  "responses": [],
+  "rawReceiptSha256": "1415853ec9fd2e12f91debe9a81122ce8662e73bfbaaa6a788841920406697cb",
+  "source": "e3d94f35ddde14372618b2bc83d2ecce961328c1",
+  "inference": "The actual pointer selected206641 while the top visible NPC label was1. Source body-before-label ordering explains this captured mismatch; NPC hp/maxHp null, deadfalse.",
+  "actualPointer": {
+    "at": 1794615547215,
+    "phase": "click-dispatch",
+    "held": true,
+    "worldTarget": {
+      "kind": "entity",
+      "objectId": "206641"
+    },
+    "hudHeld": true,
+    "bagHeld": false,
+    "heroHeld": false,
+    "storageHeld": false,
+    "layers": [
+      {
+        "tag": "CANVAS",
+        "canvas": true,
+        "classes": [
+          "shared-quest-ui-visible"
+        ],
+        "objectId": null
+      },
+      {
+        "tag": "STRONG",
+        "canvas": false,
+        "classes": [],
+        "objectId": null
+      },
+      {
+        "tag": "BUTTON",
+        "canvas": false,
+        "classes": [
+          "entity-nameplate",
+          "npc"
+        ],
+        "objectId": "1"
+      },
+      {
+        "tag": "BUTTON",
+        "canvas": false,
+        "classes": [
+          "entity-sprite-hit"
+        ],
+        "objectId": null
+      },
+      {
+        "tag": "BUTTON",
+        "canvas": false,
+        "classes": [
+          "entity-sprite-hit"
+        ],
+        "objectId": null
+      },
+      {
+        "tag": "BUTTON",
+        "canvas": false,
+        "classes": [
+          "tile-hit"
+        ],
+        "objectId": null
+      },
+      {
+        "tag": "DIV",
+        "canvas": false,
+        "classes": [
+          "game-world-composite"
+        ],
+        "objectId": null
+      },
+      {
+        "tag": "DIV",
+        "canvas": false,
+        "classes": [
+          "client-stage-frame"
+        ],
+        "objectId": null
+      },
+      {
+        "tag": "SECTION",
+        "canvas": false,
+        "classes": [
+          "mir-stage"
+        ],
+        "objectId": null
+      },
+      {
+        "tag": "MAIN",
+        "canvas": false,
+        "classes": [
+          "mir-client-page"
+        ],
+        "objectId": null
+      },
+      {
+        "tag": "BODY",
+        "canvas": false,
+        "classes": [
+          "notranslate"
+        ],
+        "objectId": null
+      },
+      {
+        "tag": "HTML",
+        "canvas": false,
+        "classes": [
+          "notranslate"
+        ],
+        "objectId": null
+      }
+    ],
+    "reason": "world-target"
+  },
+  "selected": [
+    {
+      "objectId": "206641",
+      "text": "稻草人"
+    }
+  ],
+  "trustedEvents": [
+    {
+      "phase": "npc-click",
+      "type": "pointerdown",
+      "at": 1794615547209,
+      "trusted": true,
+      "cancelable": true,
+      "button": 0,
+      "buttons": 1,
+      "pointerType": "mouse",
+      "target": {
+        "tag": "CANVAS",
+        "id": "mir2-quest-ui-canvas",
+        "classes": [
+          "shared-quest-ui-visible"
+        ]
+      },
+      "inFrame": true,
+      "x": 584,
+      "y": 405,
+      "frame": {
+        "x": 128,
+        "y": 96,
+        "width": 1024,
+        "height": 768
+      },
+      "cancelled": true
+    },
+    {
+      "phase": "npc-click",
+      "type": "pointerup",
+      "at": 1794615547215,
+      "trusted": true,
+      "cancelable": true,
+      "button": 0,
+      "buttons": 0,
+      "pointerType": "mouse",
+      "target": {
+        "tag": "CANVAS",
+        "id": "mir2-quest-ui-canvas",
+        "classes": [
+          "shared-quest-ui-visible"
+        ]
+      },
+      "inFrame": true,
+      "x": 584,
+      "y": 405,
+      "frame": {
+        "x": 128,
+        "y": 96,
+        "width": 1024,
+        "height": 768
+      },
+      "cancelled": true
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "frozenAt": "2026-10-25T02:35:42.676Z",
+  "repositoryBaselineCommit": "30ba328ad3d1b1eb46e51540cb1880d66eba3ee1",
+  "writerFiles": [
+    "apps/web/scripts/playtest-capacity-soak.mjs",
+    "apps/web/scripts/playtest-capacity-soak.test.mjs"
+  ],
+  "sourceSha256": "e26e612b9e6493d5dc7d8340c5aa5ae4a3af507bbe812303bbdaa918d1dcf000",
+  "files": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 143423,
+      "sha256": "01db0e25728208d17468f708819cd4d1f134a81c97884614da06d06525929f6d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 216821,
+      "sha256": "dbf345725668b465fd2c94472f25a224d3f0b381e6684241579026e41077950f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    }
+  ]
+}

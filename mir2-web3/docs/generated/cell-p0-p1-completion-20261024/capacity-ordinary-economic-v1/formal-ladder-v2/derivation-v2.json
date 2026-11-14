@@ -1,0 +1,509 @@
+{
+  "schemaVersion": 1,
+  "parentPackage": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1",
+  "packageId": "ordinary-economic-formal-ladder-v2",
+  "scope": "Retain the eleven reviewed tools; seven raw exact, four changed by fourteen exact literal rules. No large embedded payload generator.",
+  "toolRows": [
+    {
+      "name": "source-lib-v1.mjs",
+      "parent": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\source-lib-v1.mjs",
+        "bytes": 18471,
+        "sha256": "bdbcb65eb6027f8d0c0812ab6975b5d53beee28d133be36d8cdf75593f57ca16"
+      },
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\source-lib-v1.mjs",
+        "bytes": 18471,
+        "sha256": "bdbcb65eb6027f8d0c0812ab6975b5d53beee28d133be36d8cdf75593f57ca16"
+      },
+      "rules": [],
+      "rawExact": true,
+      "forwardExact": true,
+      "inverseExact": true
+    },
+    {
+      "name": "formal-contract-v1.mjs",
+      "parent": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\formal-contract-v1.mjs",
+        "bytes": 9160,
+        "sha256": "29ab56d6de9ddbb5fa5d0047451e0deb76a52e8b88d0bb224356183a18d7bff1"
+      },
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\formal-contract-v1.mjs",
+        "bytes": 12276,
+        "sha256": "a07b009bfd9a5c77ad9e14ec7e60ce4bd8fa2d9824dc8b8edcb04b29a1c529b5"
+      },
+      "rules": [
+        {
+          "before": "assert(driver.files.length===32&&focused.sourceRows.length===42,'Complete current32 runtime /42 named closure required');",
+          "after": "assert(driver.files.length===33&&focused.sourceRows.length===45&&c.sourceRevision.expectedRuntimeSources===33&&c.sourceRevision.expectedNamedSources===45,'Complete current33 runtime /45 named closure required; no inputs may be dropped');"
+        },
+        {
+          "before": "const basisRows=[...basis.sourceBefore].sort((a,b)=>a.path.localeCompare(b.path));eq(focused.sourceRows,basisRows,'Current named source bytes differ from accepted W17 basis; new review required');",
+          "after": "const basisRows=[...basis.sourceBefore].sort((a,b)=>a.path.localeCompare(b.path)),reviewedPaths=[\"mir2-web3/apps/web/scripts/capacity-ordinary-staging.mjs\",\"mir2-web3/apps/web/scripts/capacity-ordinary-staging.test.mjs\",\"mir2-web3/apps/web/scripts/playtest-capacity-prepare.mjs\",\"mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs\",\"mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs\",\"mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs\",\"mir2-web3/apps/web/scripts/quest-agent/test-protocol-navigation.mjs\"],changed=c.sourceRevision.expectedChangedSourceRows;assert(Array.isArray(changed)&&changed.length===7,'Exact reviewed source delta required');eq(changed.map(r=>r.path).sort(),reviewedPaths,'Only reviewed nav/main/prepare/staging source deltas are permitted');const changedMap=new Map(changed.map(r=>[r.path,r]));const added=[\"mir2-web3/apps/web/scripts/capacity-ordinary-staging.mjs\",\"mir2-web3/apps/web/scripts/capacity-ordinary-staging.test.mjs\",\"mir2-web3/apps/web/scripts/quest-agent/test-protocol-navigation.mjs\"];eq(focused.sourceRows.map(r=>r.path).sort(),[...basisRows.map(r=>r.path),...added].sort(),'Current named closure must retain every original source plus all three explicit new named inputs');for(const row of focused.sourceRows){const expected=changedMap.get(row.path)??basisRows.find(p=>p.path===row.path);assert(expected&&expected.bytes===row.bytes&&expected.sha256===row.sha256,'Current source is outside the reviewed seven-source delta: '+row.path)}assert(driver.dynamicUnexpanded.length===0,'Unexpanded dynamic execution source is not qualified');"
+        },
+        {
+          "before": "eq(f.currentBackend.sourceRows,backend.sourceRows,'Complete backend55 full16 equality differs');for(const p of Object.values(f.originalEvidence))checked(p);for(const p of f.dataPins)checked(p);",
+          "after": "eq(f.currentBackend.sourceRows,backend.sourceRows,'Complete backend55 full16 equality differs');assert(c.plannedActualFull16Directory&&same(c.plannedActualFull16Directory,path.join(path.dirname(DIRECTORY),'ordinary-v6-full-lifecycle-v2')),'New actual full16-v2 package is mandatory');for(const k of ['frozen','driver','realm','audit','report','rootOs']){const p=f.originalEvidence[k],relative=path.relative(c.plannedActualFull16Directory,path.resolve(p.file));assert(relative&&!path.isAbsolute(relative)&&!relative.split(/[\\\\/]/).includes('..'),'Old full16-v1 evidence may not qualify new navigation/staging execution')}for(const p of Object.values(f.originalEvidence))checked(p);for(const p of f.dataPins)checked(p);const actualDriver=read(f.originalEvidence.driver),audit=read(f.originalEvidence.audit);assert(actualDriver.files?.length===14&&audit.all16Passed===true&&audit.onlyOrdinarySentCommands===true&&audit.backendInputCount===55&&audit.normalExitCode===0&&audit.sixCountersZeroBeforeAndAfter===true&&audit.frozenDriverRawPinsMatched===true&&audit.firstNoLootAttemptPreserved===true&&audit.binarySha256===backend.immutableExecutable.sha256&&audit.executionSourceCommit===actualDriver.driverSourceCommit&&f.originalActualExecution===actualDriver.driverSourceCommit,'New actual full16-v2 execution/ordinary raw audit must pass before reuse');const rowShape=rows=>rows.map(p=>({path:p.path,bytes:p.bytes,sha256:p.sha256})).sort((a,b)=>a.path.localeCompare(b.path));eq(rowShape(actualDriver.files),rowShape(f.currentCompleteLocalDriver.files),'Actual new full16-v2 original14 dependency bytes differ from the current strict proof');assert(c.sourceRevision.stagingCoveredByFull16===false,'Full16 does not cover the new staging module; its current Node/actual formal gates are separate');"
+        },
+        {
+          "before": "audit.frozenDriverRawPinsMatched===true",
+          "after": "audit.frozenDriverRawPinsMatched===14"
+        }
+      ],
+      "rawExact": false,
+      "forwardExact": true,
+      "inverseExact": true
+    },
+    {
+      "name": "freeze-formal-v1.mjs",
+      "parent": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\freeze-formal-v1.mjs",
+        "bytes": 3640,
+        "sha256": "4d594a2a96d2e39135d468d836c87aa519508521071efd85d7f11d502dd6bb34"
+      },
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\freeze-formal-v1.mjs",
+        "bytes": 3640,
+        "sha256": "4d594a2a96d2e39135d468d836c87aa519508521071efd85d7f11d502dd6bb34"
+      },
+      "rules": [],
+      "rawExact": true,
+      "forwardExact": true,
+      "inverseExact": true
+    },
+    {
+      "name": "run-owned-formal-v1.mjs",
+      "parent": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\run-owned-formal-v1.mjs",
+        "bytes": 21497,
+        "sha256": "e95707e5ba9262fd57ded1032081e99de2ec28be2d728cff37758247712dae74"
+      },
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\run-owned-formal-v1.mjs",
+        "bytes": 23115,
+        "sha256": "6e1b580dfd6c25b197bb465021fc2510bf2f5af860db92b7266834d23bba69e8"
+      },
+      "rules": [
+        {
+          "before": "bankCopyReceipt.trafficLedgerSource==='ordinary-capacity-bank-prepare-v17'",
+          "after": "bankCopyReceipt.trafficLedgerSource==='ordinary-economic-formal-ladder-v1'&&bankCopyReceipt.gameSnapshotSource==='ordinary-capacity-bank-prepare-v17'&&bankCopyReceipt.isolatedSnapshotReplay===true"
+        },
+        {
+          "before": " if(driver.message?.reportPath){assert(path.resolve(driver.message.reportPath).startsWith(path.resolve(root,'reports')+path.sep),'Driver report escaped owned episode');report=JSON.parse(await fs.readFile(driver.message.reportPath,'utf8'))}",
+          "after": " if(driver.message?.reportPath){const reportsRoot=path.join(root,'reports'),reportFile=path.resolve(driver.message.reportPath),st=await fs.lstat(reportFile);assert(same(path.dirname(reportFile),reportsRoot)&&st.isFile()&&!st.isSymbolicLink()&&same(await fs.realpath(reportFile),reportFile),'Canonical report must be a regular direct child of owned reports');report=JSON.parse(await fs.readFile(reportFile,'utf8'));assert(typeof report.runId==='string'&&/^[0-9]{13}-[a-f0-9]{8}$/.test(report.runId)&&path.basename(reportFile)===report.runId+'.report.json'&&same(report.reportPath,reportFile)&&driver.message.runId===report.runId,'Canonical report runId/path differs from the owned child result');}"
+        },
+        {
+          "before": "const reportPin=report?.reportPath?pin(report.reportPath):null,canonicalPassed=report?.ok===true&&executionError===null&&cleanup.driverExit?.exitCode===0;",
+          "after": "let reportPin=null,samplesPin=null,artifactError=null;if(report){try{reportPin=pin(report.reportPath);const samplesFile=path.join(root,'reports',report.runId+'.samples.jsonl'),st=await fs.lstat(samplesFile);assert(st.isFile()&&!st.isSymbolicLink()&&same(await fs.realpath(samplesFile),samplesFile),'Canonical samples must be regular direct reports sibling');samplesPin=pin(samplesFile)}catch(error){artifactError=error.message;executionError??='Canonical report/sample artifact binding failed: '+artifactError}}const canonicalPassed=report?.ok===true&&executionError===null&&cleanup.driverExit?.exitCode===0;"
+        },
+        {
+          "before": "rawOriginalSamples:report?.samplesPath?pin(report.samplesPath):null",
+          "after": "rawOriginalSamples:samplesPin,rawReportSamplesCounter:Number.isSafeInteger(report?.samples)?report.samples:null,artifactError"
+        },
+        {
+          "before": "console.log(JSON.stringify(receipt,null,2));",
+          "after": "console.log(JSON.stringify({receipt:pin(path.join(root,'formal-episode-receipt-v1.json')),rawOriginalReport:reportPin,rawOriginalSamples:samplesPin,canonicalStandardRunPassed:canonicalPassed,rawOriginalVerdict:receipt.rawOriginalVerdict,stages:(report?.stages??[]).map(s=>({name:s.name,controlledActors:s.controlledActors,passed:s.passed,measuredSeconds:s.measuredSeconds})),cleanupComplete,cleanupRecord:receipt.cleanupRecord,publicDiagnosticsComplete:receipt.publicDiagnosticsComplete,capacityAccepted:false,p0Accepted:false}));"
+        },
+        {
+          "before": " if(driver.message?.reportPath){const reportsRoot=path.join(root,'reports'),reportFile=path.resolve(driver.message.reportPath),st=await fs.lstat(reportFile);assert(same(path.dirname(reportFile),reportsRoot)&&st.isFile()&&!st.isSymbolicLink()&&same(await fs.realpath(reportFile),reportFile),'Canonical report must be a regular direct child of owned reports');report=JSON.parse(await fs.readFile(reportFile,'utf8'));assert(typeof report.runId==='string'&&/^[0-9]{13}-[a-f0-9]{8}$/.test(report.runId)&&path.basename(reportFile)===report.runId+'.report.json'&&same(report.reportPath,reportFile)&&driver.message.runId===report.runId,'Canonical report runId/path differs from the owned child result');}",
+          "after": " if(driver.message?.reportPath){const reportsRoot=path.join(root,'reports'),reportFile=path.resolve(driver.message.reportPath),st=await fs.lstat(reportFile);assert(same(path.dirname(reportFile),reportsRoot)&&st.isFile()&&!st.isSymbolicLink()&&same(await fs.realpath(reportFile),reportFile),'Canonical report must be a regular direct child of owned reports');const candidate=JSON.parse(await fs.readFile(reportFile,'utf8'));assert(typeof candidate.runId==='string'&&/^[0-9]{13}-[a-f0-9]{8}$/.test(candidate.runId)&&path.basename(reportFile)===candidate.runId+'.report.json'&&same(candidate.reportPath,reportFile)&&driver.message.runId===candidate.runId,'Canonical report runId/path differs from the owned child result');report=candidate;}"
+        }
+      ],
+      "rawExact": false,
+      "forwardExact": true,
+      "inverseExact": true
+    },
+    {
+      "name": "owned-child-v1.mjs",
+      "parent": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\owned-child-v1.mjs",
+        "bytes": 2697,
+        "sha256": "cdd5ed67ac436716b2c7b7a7644c02da52ad0f1cd057bbb95642cf691ba37585"
+      },
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\owned-child-v1.mjs",
+        "bytes": 2722,
+        "sha256": "d1a72ee7ded41adc7285054f2029b1aa0d263186d7096657b9840d7d38d7005f"
+      },
+      "rules": [
+        {
+          "before": "summary={type:'owned-driver-finished',reportPath:report.reportPath??null",
+          "after": "summary={type:'owned-driver-finished',runId:report.runId??null,reportPath:report.reportPath??null"
+        }
+      ],
+      "rawExact": false,
+      "forwardExact": true,
+      "inverseExact": true
+    },
+    {
+      "name": "copy-source-bank-v1.mjs",
+      "parent": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\copy-source-bank-v1.mjs",
+        "bytes": 15947,
+        "sha256": "5fd390b46114896d548e84f613cec8b1c8e6704e4be228b3e4f0003c9e0683f2"
+      },
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\copy-source-bank-v1.mjs",
+        "bytes": 20932,
+        "sha256": "e3e4c08736aebadf42724dec70c6618d837bc162adc9e019bb5bded0b48a91bb"
+      },
+      "rules": [
+        {
+          "before": "export function validateSourceBank(planPin){",
+          "after": "function validateTrafficContinuation(plan) {\n const t=plan.trafficContinuation,expectedDirectory=path.join(BASE,'ordinary-economic-formal-ladder-v1','episode','private');assert(t&&t.state==='ACTUAL_FORMAL_V1_ENDED_LEDGER_ONLY'&&same(t.sourceDirectory,expectedDirectory)&&same(t.sourceLedger.file,path.join(expectedDirectory,'capacity-auth-budget.json'))&&t.windowMs===901000,'Only the fixed latest actual formal-v1 ledger may differ from W17 source');\n const ledger=JSON.parse(checked(t.sourceLedger)),old=JSON.parse(checked(t.originalW17Ledger)),receipt=JSON.parse(checked(t.sourceReceipt)),report=JSON.parse(checked(t.sourceReport)),copy=JSON.parse(checked(t.sourceCopyReceipt)),cleanup=JSON.parse(checked(t.sourceCleanup)),os=JSON.parse(checked(t.sourceIndependentCleanup)),owned=JSON.parse(checked(t.sourceOwnedProcess)),frozen=JSON.parse(checked(t.sourceFrozen));\n assert(same(t.originalW17Ledger.file,path.join(SOURCE,'capacity-auth-budget.json'))&&equalPin(plan.files.find(p=>p.relative==='capacity-auth-budget.json'),t.sourceLedger),'Fixed ledger source mapping differs');\n assert(ledger.schemaVersion===1&&ledger.endpoint==='ws://127.0.0.1:17510/ws'&&ledger.purpose==='capacity-auth-budget'&&ledger.attempts.length===11&&t.expectedAttemptCount===11&&equal(ledger.attempts,t.attempts)&&ledger.attempts.every((r,i)=>Object.keys(r).sort().join(',')==='at,kind'&&r.kind==='admission'&&Number.isSafeInteger(r.at)&&r.at>=Date.parse(report.startedAt)&&r.at<=Date.parse(report.finishedAt)&&(i===0||r.at>=ledger.attempts[i-1].at)),'Actual eleven admission records must remain exact');\n assert(old.endpoint===ledger.endpoint&&old.schemaVersion===1&&old.purpose===ledger.purpose&&old.attempts.length===7&&old.attempts.every(r=>r.at+901000<=ledger.attempts[0].at)&&t.pruningIsOriginalLoginBudgetBehavior===true,'Historical attempts may only be absent because the original901s budget expired before v1');\n assert(receipt.packageId==='ordinary-economic-formal-ladder-v1'&&receipt.cleanupComplete===true&&receipt.canonicalStandardRunPassed===false&&receipt.rawOriginalVerdict.ok===false&&receipt.capacityAccepted===false&&receipt.p0Accepted===false&&equalPin(receipt.rawOriginalReport,t.sourceReport)&&equalPin(receipt.cleanupRecord,t.sourceCleanup)&&equalPin(receipt.sourceBankCopyReceipt,t.sourceCopyReceipt),'Original formal-v1 failure and source bindings must be retained');\n assert(report.ok===false&&report.highestPassedStage===10&&report.peakControlledActors===11&&report.stages.length===2&&report.stages.every(s=>s.passed===true)&&['stage-2','stage-10'].every(n=>report.stages.some(s=>s.name===n)),'Actual failed formal-v1 traffic scope differs');\n assert(Object.keys(cleanup.checks).length===11&&Object.values(cleanup.checks).every(v=>v===true)&&cleanup.driverExit.exitCode===1&&cleanup.driverExit.signal===null&&cleanup.driverExit.error===null&&['gatewayExit','monitorExit'].every(k=>cleanup[k].exitCode===0&&cleanup[k].signal===null&&cleanup[k].error===null)&&['remainingListeners','remainingMonitorChildren','logErrors'].every(k=>Array.isArray(cleanup[k])&&cleanup[k].length===0)&&os.ownedGatewayPid===76860&&os.ownedGatewayAbsent===true&&os.portsFree===true&&os.remainingListeners.length===0&&owned.gateway.pid===76860&&frozen.packageId==='ordinary-economic-formal-ladder-v1'&&equalPin(receipt.manifestPin,t.sourceFrozen),'Ended formal-v1 normal cleanup/Root OS evidence required');\n assert(copy.actualW17CompleteSavedBankSource===true&&copy.authLedgerCopiedUnchanged===true&&copy.loginNotBeforeOverridden===false&&copy.seederInvoked===false&&copy.copies.length===11&&equalPin(copy.copies.find(r=>r.source.relative==='capacity-auth-budget.json').source,t.originalW17Ledger),'Formal-v1 originated from the same unchanged W17 ledger and identity bank');\n const names=['capacity-pool.json','recovery-mac-key.txt','identity-session-secret.txt','identity-recovery-pepper.txt','passkey-auth-secret.txt'];assert(t.identityFiles.length===5&&equal(t.identityFiles.map(p=>p.relative).sort(),names.sort()),'Exact unchanged pool/four keys required');for(const p of t.identityFiles){assert(same(p.file,path.join(expectedDirectory,p.relative)),'Traffic identity source escapes fixed v1');checked(p);const original=plan.files.find(r=>r.relative===p.relative);assert(original&&p.bytes===original.bytes&&p.sha256===original.sha256,'Traffic ledger must belong to the identical original pool/four keys')}\n return{source:t.sourceLedger,attemptCount:11,endpoint:ledger.endpoint,scope:'Unmodified latest ended traffic ledger, original runtime pruning only; no origin reset or old failure promotion'};\n}\nexport function validateSourceBank(planPin){"
+        },
+        {
+          "before": "safe(SOURCE,true);const receipt=",
+          "after": "safe(SOURCE,true);validateTrafficContinuation(plan);const receipt="
+        },
+        {
+          "before": "assert(same(p.file,path.join(SOURCE,p.relative)),'Source relative mapping changed');",
+          "after": "const fixedSource=p.relative==='capacity-auth-budget.json'?path.join(BASE,'ordinary-economic-formal-ladder-v1','episode','private',p.relative):path.join(SOURCE,p.relative);assert(same(p.file,fixedSource),'Source relative mapping changed outside the one fixed actual traffic-ledger exception');"
+        },
+        {
+          "before": "trafficLedgerSource:'ordinary-capacity-bank-prepare-v17'",
+          "after": "trafficLedgerSource:'ordinary-economic-formal-ladder-v1',gameSnapshotSource:'ordinary-capacity-bank-prepare-v17',isolatedSnapshotReplay:true"
+        },
+        {
+          "before": "trafficLedgerSource:'ordinary-economic-formal-ladder-v1',gameSnapshotSource:'ordinary-capacity-bank-prepare-v17',isolatedSnapshotReplay:true",
+          "after": "trafficLedgerSource:'ordinary-economic-formal-ladder-v1',gameSnapshotSource:'ordinary-capacity-bank-prepare-v17',isolatedSnapshotReplay:true,sourceTrafficOutcomeRetainedFalse:true,trafficAttemptCountAtSource:11"
+        }
+      ],
+      "rawExact": false,
+      "forwardExact": true,
+      "inverseExact": true
+    },
+    {
+      "name": "diagnostics/base/slow-stage-public.mjs",
+      "parent": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\diagnostics\\base\\slow-stage-public.mjs",
+        "bytes": 10318,
+        "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c"
+      },
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\diagnostics\\base\\slow-stage-public.mjs",
+        "bytes": 10318,
+        "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c"
+      },
+      "rules": [],
+      "rawExact": true,
+      "forwardExact": true,
+      "inverseExact": true
+    },
+    {
+      "name": "diagnostics/base/slow-stage-row-contract.mjs",
+      "parent": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\diagnostics\\base\\slow-stage-row-contract.mjs",
+        "bytes": 1553,
+        "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+      },
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\diagnostics\\base\\slow-stage-row-contract.mjs",
+        "bytes": 1553,
+        "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+      },
+      "rules": [],
+      "rawExact": true,
+      "forwardExact": true,
+      "inverseExact": true
+    },
+    {
+      "name": "diagnostics/store/slow-stage-public.mjs",
+      "parent": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\diagnostics\\store\\slow-stage-public.mjs",
+        "bytes": 15386,
+        "sha256": "6cde67571184692d7b89da32adb21fb2f8a228db5e0865cb9cc96bf3a34925c7"
+      },
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\diagnostics\\store\\slow-stage-public.mjs",
+        "bytes": 15386,
+        "sha256": "6cde67571184692d7b89da32adb21fb2f8a228db5e0865cb9cc96bf3a34925c7"
+      },
+      "rules": [],
+      "rawExact": true,
+      "forwardExact": true,
+      "inverseExact": true
+    },
+    {
+      "name": "diagnostics/store/account-store-public-validator.mjs",
+      "parent": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\diagnostics\\store\\account-store-public-validator.mjs",
+        "bytes": 5407,
+        "sha256": "d71add02703a84acc2d870d5c7daf96dd17e0533b2d49af0480e55dea7aea262"
+      },
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\diagnostics\\store\\account-store-public-validator.mjs",
+        "bytes": 5407,
+        "sha256": "d71add02703a84acc2d870d5c7daf96dd17e0533b2d49af0480e55dea7aea262"
+      },
+      "rules": [],
+      "rawExact": true,
+      "forwardExact": true,
+      "inverseExact": true
+    },
+    {
+      "name": "diagnostics-v1.mjs",
+      "parent": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\diagnostics-v1.mjs",
+        "bytes": 2396,
+        "sha256": "d828eefb489f18c01b2b2176df0b7d119dc5faf3495776f64178f06b387def1b"
+      },
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\diagnostics-v1.mjs",
+        "bytes": 2396,
+        "sha256": "d828eefb489f18c01b2b2176df0b7d119dc5faf3495776f64178f06b387def1b"
+      },
+      "rules": [],
+      "rawExact": true,
+      "forwardExact": true,
+      "inverseExact": true
+    }
+  ],
+  "totalLiteralRules": 16,
+  "rawCopyTools": [
+    "source-lib-v1.mjs",
+    "freeze-formal-v1.mjs",
+    "diagnostics/base/slow-stage-public.mjs",
+    "diagnostics/base/slow-stage-row-contract.mjs",
+    "diagnostics/store/slow-stage-public.mjs",
+    "diagnostics/store/account-store-public-validator.mjs",
+    "diagnostics-v1.mjs"
+  ],
+  "sourceBankChecks": [
+    {
+      "relative": "accounts.json",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\accounts.json",
+      "bytes": 1254887,
+      "sha256": "563e8f823ad52ff4285b398bd6632adcaa9ccfdf3ef894895dba8e0c692af8f0",
+      "rawExact": true,
+      "privatePayloadCopied": false
+    },
+    {
+      "relative": "capacity-pool.json",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\capacity-pool.json",
+      "bytes": 22859,
+      "sha256": "924f2a81f70153f070948f98cea8fc6187cb25772ffead1fca4c5fa670bab8a5",
+      "rawExact": true,
+      "privatePayloadCopied": false
+    },
+    {
+      "relative": "capacity-auth-budget.json",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\episode\\private\\capacity-auth-budget.json",
+      "bytes": 849,
+      "sha256": "bd803f9723a9f3c8afd80e41d435f9841cb6b7af7e9129924cd8a37f814cc94c",
+      "rawExact": true,
+      "privatePayloadCopied": false
+    },
+    {
+      "relative": "recovery-mac-key.txt",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\recovery-mac-key.txt",
+      "bytes": 64,
+      "sha256": "cefb29ae1ddf2091dfe55c66694fac08b657a859eb15a14cba0bc37dc3a5765a",
+      "rawExact": true,
+      "privatePayloadCopied": false
+    },
+    {
+      "relative": "identity-session-secret.txt",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\identity-session-secret.txt",
+      "bytes": 64,
+      "sha256": "db2809fd0970391e8bbc9b6ca80e8c4dd5d77aabad307400d0952dcdffdfc024",
+      "rawExact": true,
+      "privatePayloadCopied": false
+    },
+    {
+      "relative": "identity-recovery-pepper.txt",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\identity-recovery-pepper.txt",
+      "bytes": 64,
+      "sha256": "d7137790909ad7c7f62178f74484466941b416a0561e5211515c7081e06a077e",
+      "rawExact": true,
+      "privatePayloadCopied": false
+    },
+    {
+      "relative": "passkey-auth-secret.txt",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\passkey-auth-secret.txt",
+      "bytes": 64,
+      "sha256": "37a4307699fde5753874c037b303776d3820c25feb68b24ccd116f2b0df9ed72",
+      "rawExact": true,
+      "privatePayloadCopied": false
+    },
+    {
+      "relative": "save-recovery/.mir2-directory-durability",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\save-recovery\\.mir2-directory-durability",
+      "bytes": 29,
+      "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+      "rawExact": true,
+      "privatePayloadCopied": false
+    },
+    {
+      "relative": "save-recovery/.mir2-recovery-exclusive.lock",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\save-recovery\\.mir2-recovery-exclusive.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "rawExact": true,
+      "privatePayloadCopied": false
+    },
+    {
+      "relative": "save-recovery/.mir2-recovery-owner-v1.json",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\save-recovery\\.mir2-recovery-owner-v1.json",
+      "bytes": 340,
+      "sha256": "8ad20f7e41bd3dc9889d6bc30ab323d11531f38b35d5bd95100e9390b749686e",
+      "rawExact": true,
+      "privatePayloadCopied": false
+    },
+    {
+      "relative": "save-recovery/quarantine/.mir2-directory-durability",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\save-recovery\\quarantine\\.mir2-directory-durability",
+      "bytes": 29,
+      "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+      "rawExact": true,
+      "privatePayloadCopied": false
+    },
+    {
+      "relative": ".mir2-directory-durability",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\source-save-recovery-preserved\\.mir2-directory-durability",
+      "bytes": 29,
+      "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+      "rawExact": true,
+      "privatePayloadCopied": false
+    },
+    {
+      "relative": ".mir2-recovery-exclusive.lock",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\source-save-recovery-preserved\\.mir2-recovery-exclusive.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "rawExact": true,
+      "privatePayloadCopied": false
+    },
+    {
+      "relative": ".mir2-recovery-owner-v1.json",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\source-save-recovery-preserved\\.mir2-recovery-owner-v1.json",
+      "bytes": 340,
+      "sha256": "0a2a96a16ce5b24840781dd1cfc7a78785c5ca67f3cea1cdd017ddacf7f62c42",
+      "rawExact": true,
+      "privatePayloadCopied": false
+    },
+    {
+      "relative": "quarantine/.mir2-directory-durability",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\source-save-recovery-preserved\\quarantine\\.mir2-directory-durability",
+      "bytes": 29,
+      "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+      "rawExact": true,
+      "privatePayloadCopied": false
+    }
+  ],
+  "sourceBankCopiesPerformed": false,
+  "ledgerProvenance": {
+    "previous": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\capacity-auth-budget.json",
+      "bytes": 585,
+      "sha256": "f64074a8c907622f8306245760116592eb235cab3e590165f0022033a8f48918"
+    },
+    "latest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\episode\\private\\capacity-auth-budget.json",
+      "bytes": 849,
+      "sha256": "bd803f9723a9f3c8afd80e41d435f9841cb6b7af7e9129924cd8a37f814cc94c"
+    },
+    "originalWindowMs": 901000,
+    "originalAdmissionLimit": 25,
+    "originalVerificationLimit": 5,
+    "oldOriginalAttemptCount": 7,
+    "latestActualAttemptCount": 11,
+    "oldLatestAgeAtFirstV1AttemptMs": 2120945,
+    "scope": "Old records were already expired at v1 first admission; latest raw ledger is continued, never synthesized as a raw-byte prefix and never rewritten/reset"
+  },
+  "sharedInputsReusedWithoutCopy": {
+    "scenario": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\scenario-formal-v1.json",
+      "bytes": 3008397,
+      "sha256": "1109e64089150a39bf2b8f784604776874dd99cbabceda58c8db4e1b07bf1dca"
+    },
+    "resource": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\resource-profile-v1.json",
+      "bytes": 1965,
+      "sha256": "925ea4dcd2148ad0f844143889f869bc84e3ce133fd0e889c52adda5950387a2"
+    },
+    "route": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\quest-agent\\warrior-1-30-newcomer-v1.json",
+      "bytes": 2661153,
+      "sha256": "ba415e68f7c3724d367542320809d4b43b122845a3e1b7a9e3b998b2cedbc975"
+    },
+    "diagnosticEvidence": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\diagnostics-source-evidence-v1.json",
+      "bytes": 2764,
+      "sha256": "c57232d637cfeafbca324b238c0310713d54c371f6399cf30de8c0690d276d78"
+    }
+  },
+  "originalOptionsSemanticExact": true,
+  "originalGatewayCapsSemanticExact": true,
+  "newReviewedSourceRows": [
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 186926,
+      "sha256": "0a094e3a2a11a38e1a92a8af8be4926006e14f05a7e4153f7810b350c6ddd1f0"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 353658,
+      "sha256": "bfe917ac07e74c925a42a87419668e4d91e7dc5c31b7a7d65e7b3b6a3b7c374a"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-capacity-prepare.mjs",
+      "bytes": 38075,
+      "sha256": "3b6eb9e0d04513c0b03ca5cc880f016f5a2e72b5de76a3ec370e44fd15cd97e7"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/capacity-ordinary-staging.mjs",
+      "bytes": 3701,
+      "sha256": "d236f3e34b26cf419b1291f4892d61fcc4f23d8f5f4695936f57ab524e389196"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/capacity-ordinary-staging.test.mjs",
+      "bytes": 4050,
+      "sha256": "08efae775038b1ed2f3aab93349c1b5b43b39185fa73a4ef8a4e20eaf880fb19"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "bytes": 20548,
+      "sha256": "f4296f07112265e39b3b6072d089a1e27574820ba5b22adad1f075f5c7513645"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/test-protocol-navigation.mjs",
+      "bytes": 21187,
+      "sha256": "2f76989e0381f6de3321e6eaa5fa7e2447752863d1ce3b82abe376b1a3de6f0d"
+    }
+  ],
+  "currentBindingsRemainNull": true,
+  "modeExecuted": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "previousVersion": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\preimages-before-audit-count-fix-v1\\derivation-v1.json",
+    "bytes": 31423,
+    "sha256": "87d982a4961b73fe3393da26b9107f37fa50085a7cf4769733fb9eae5a1e2a48"
+  },
+  "schemaCorrection": {
+    "rule": {
+      "before": "audit.frozenDriverRawPinsMatched===true",
+      "after": "audit.frozenDriverRawPinsMatched===14"
+    },
+    "actualAudit": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\public\\1793102972033-ab025037.independent-audit.json",
+      "bytes": 1866,
+      "sha256": "a539d282b802ec8ef9e511cd5bcaf2a641709552fb4ec1d7e4e84cae7886009c"
+    },
+    "actualValue": 14,
+    "actualType": "number",
+    "gateThresholdUnchanged": true
+  },
+  "reportCandidateCorrection": {
+    "rule": {
+      "before": " if(driver.message?.reportPath){const reportsRoot=path.join(root,'reports'),reportFile=path.resolve(driver.message.reportPath),st=await fs.lstat(reportFile);assert(same(path.dirname(reportFile),reportsRoot)&&st.isFile()&&!st.isSymbolicLink()&&same(await fs.realpath(reportFile),reportFile),'Canonical report must be a regular direct child of owned reports');report=JSON.parse(await fs.readFile(reportFile,'utf8'));assert(typeof report.runId==='string'&&/^[0-9]{13}-[a-f0-9]{8}$/.test(report.runId)&&path.basename(reportFile)===report.runId+'.report.json'&&same(report.reportPath,reportFile)&&driver.message.runId===report.runId,'Canonical report runId/path differs from the owned child result');}",
+      "after": " if(driver.message?.reportPath){const reportsRoot=path.join(root,'reports'),reportFile=path.resolve(driver.message.reportPath),st=await fs.lstat(reportFile);assert(same(path.dirname(reportFile),reportsRoot)&&st.isFile()&&!st.isSymbolicLink()&&same(await fs.realpath(reportFile),reportFile),'Canonical report must be a regular direct child of owned reports');const candidate=JSON.parse(await fs.readFile(reportFile,'utf8'));assert(typeof candidate.runId==='string'&&/^[0-9]{13}-[a-f0-9]{8}$/.test(candidate.runId)&&path.basename(reportFile)===candidate.runId+'.report.json'&&same(candidate.reportPath,reportFile)&&driver.message.runId===candidate.runId,'Canonical report runId/path differs from the owned child result');report=candidate;}"
+    },
+    "assignmentOnlyAfterAllOriginalTupleChecks": true,
+    "rejectedCandidateRetainedAsReport": false
+  },
+  "actualFull16V2AuditObserved": true,
+  "currentFull16StrictProofBindingPending": true
+}

@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T18:58:05.460Z",
+  "scope": "Only actual metadata finalization delta after the prepared-source review; no target import/capture/build/test execution.",
+  "priorIndependentReview": {
+    "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-independent-review-v1.json",
+    "bytes": 8841,
+    "sha256": "09b81c8ff29a4398aba054c1c093cc92f83494e6c37d52633f746f7dbe0572b3"
+  },
+  "preparation": {
+    "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/prepared-v2.json",
+    "bytes": 5824,
+    "sha256": "11e52453d1c2a18fe7a76cd8f2eb00e01378ccf21cd7065fb2be8a5c1c191b31"
+  },
+  "checkedCurrentInputCount": 14,
+  "currentSourceSha256": "f9b9377e8f3c41ada98c1a04aae282f3a0278e4633cd959a9b1dde92129bb291",
+  "metadataDelta": [
+    {
+      "path": "final-source-binding-v1.json",
+      "before": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/final-source-binding-v1.json.before-actual-v2.txt",
+        "bytes": 2105,
+        "sha256": "dec3448773688cbcb3f15f23c2fff94caa0c45ab2ed477ea3404c9e0ed92813a"
+      },
+      "after": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/final-source-binding-v1.json",
+        "bytes": 2356,
+        "sha256": "46433ee760553bd30e211cc37b3f11c3cfc66ea1956af923f3ced05b605b0745"
+      }
+    },
+    {
+      "path": "required-root-binding-fields-v1.json",
+      "before": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/required-root-binding-fields-v1.json.before-actual-v2.txt",
+        "bytes": 1091,
+        "sha256": "b953cd1bcf560e50160f36ecb1996a0a601c48c2e0774b85846721f0522025c9"
+      },
+      "after": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/required-root-binding-fields-v1.json",
+        "bytes": 1132,
+        "sha256": "18f27c599638eab7e9481d4537bf7bea55239ac908558be1e3f2fb43dcb9b751"
+      }
+    },
+    {
+      "path": "README.md",
+      "before": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/README.md.before-actual-v2.txt",
+        "bytes": 2799,
+        "sha256": "8b0595b53d1861dbb66c95c9bcfe661151718dec6da960fb1c6cc6e330c3d3fd"
+      },
+      "after": {
+        "path": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/README.md",
+        "bytes": 2843,
+        "sha256": "2b8b9cf1417022dc3c24cc2803cf58adda0db7ed9ad65b0eba6c95eb393cb021"
+      }
+    }
+  ],
+  "checks": {
+    "otherElevenPreparedPinsIdentical": true,
+    "fourExecutionScriptsUnchanged": true,
+    "oldPendingThreePreimagesPreserved": true,
+    "bindingThreeFieldInverseExact": true,
+    "requiredFieldsTwoFieldInverseExact": true,
+    "newRustHeadC743": true,
+    "historicalNodeHeadD240Retained": true,
+    "actualFunctional12175ExactRef": true,
+    "actualGitCleanAuthorMetadata": true
+  },
+  "rootActualCaptureReadOnlyPin": {
+    "path": "C:/mir2-build/p01-completion-20261024/backend-source-account-store-wait-diagnostics-v1.json",
+    "bytes": 41831,
+    "sha256": "f9199f375175782b46dc0d18589cd714e2a2a75d7b8fad662af64c700d417ec5"
+  },
+  "rootActualCaptureNotExecutedByReviewer": true,
+  "limits": [
+    "Prepared prose records its preparation-time state; Root subsequently produced the separately pinned50-input manifest.",
+    "No new binary, Release, full16, capacity or P0 acceptance is asserted by this review."
+  ],
+  "verdict": {
+    "finalMetadataContractPassed": true,
+    "eligibleForRootBuild": true,
+    "blockingFindingIds": []
+  }
+}

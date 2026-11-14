@@ -1,0 +1,24 @@
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {spawn} from 'node:child_process';
+import {openSync,closeSync} from 'node:fs';
+import {readFile,writeFile} from 'node:fs/promises';
+import {join} from 'node:path';
+import {pathToFileURL} from 'node:url';
+import {setTimeout as sleep} from 'node:timers/promises';
+import readline from 'node:readline';
+const base=import.meta.dirname,repo='E:/mir2-player-journey/mir2-web3';
+const executable="D:/mir2-builds/r16-reconnect-integration-20261107/mir2-gateway-r16-reconnect.exe";
+const binaryHash=createHash('sha256').update(await readFile(executable)).digest('hex');assert.equal(binaryHash,'e519dc7a6d0eb3f399fcb20c1145bb260418ec0c13e3d7ad44327610fc987c55');
+const state=JSON.parse(await readFile(join(base,'private-qa/realm-state.local.json'),'utf8'));
+const {playableGatewayEnvironment}=await import(pathToFileURL(join(repo,'apps/web/scripts/r16-playable-service-config.mjs')));
+const {MIR2_PASSKEY_AUTH_SECRET,MIR2_PASSKEY_ALLOWED_ORIGINS,...canonical}=playableGatewayEnvironment(state,join(base,'private-data'));
+assert.equal(canonical.MIR2_GATEWAY_ALLOW_UNSAFE_LOCAL_PLAYER_COMMANDS,'0');
+const env={...canonical,MIR2_GATEWAY_TCP_ADDR:'127.0.0.1:19282',MIR2_GATEWAY_WEB_ADDR:'127.0.0.1:19252',MIR2_GATEWAY_ID:'r16-reconnect-proof',MIR2_SPECTATOR_ENABLED:'false',MIR2_SPECTATOR_RECORDING_ENABLED:'false'};
+const fd=openSync(join(base,'gateway.private.log'),'wx',0o600);let child;
+try{child=spawn(executable,[],{cwd:join(base,'realm-cwd'),env,windowsHide:true,stdio:['pipe',fd,fd]});}finally{closeSync(fd);}
+let exited=false;const ended=new Promise(resolve=>{child.once('error',()=>resolve(1));child.once('exit',code=>{exited=true;resolve(code);});});
+const input=readline.createInterface({input:process.stdin,terminal:false});const stop=()=>{if(!exited&&!child.stdin.destroyed)child.stdin.end('shutdown\n');};input.on('line',line=>{if(line.trim()==='shutdown')stop();});process.once('SIGINT',stop);
+let ready=false;for(let i=0;i<160&&!exited;i++){try{const r=await fetch('http://127.0.0.1:19252/health',{signal:AbortSignal.timeout(800)});ready=r.ok;await r.arrayBuffer();}catch{}if(ready)break;await sleep(250);}assert(ready);
+await writeFile(join(base,'gateway-ready.json'),JSON.stringify({schema:'mir2.r16.group.gateway.v1',pid:child.pid,port:19252,tcp:19282,gatewaySha256:binaryHash,unsafeLocalCommands:false,startedAt:new Date().toISOString()},null,2)+'\n',{flag:'wx'});
+console.log(JSON.stringify({ready:true,port:19252,unsafeLocalCommands:false}));const code=await ended;input.close();process.exitCode=code===0?0:1;

@@ -1,0 +1,421 @@
+{
+  "schemaVersion": 1,
+  "id": "repair-source19-finite-result01",
+  "generatedAtUtc": "2026-10-06T18:01:09.085Z",
+  "fixedWindowsBaseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "parentCommit": "7567fab152381fc2e98840a73f4462ed61dff668",
+  "scope": "Actual bounded existing Node checks and unchanged-product strict TSC result for Web NPC ordinary/special repair; no new Rust tests or runtime execution.",
+  "summary": {
+    "nodeTests": 218,
+    "nodePassed": 218,
+    "nodeFailed": 0,
+    "nodeSkipped": 0,
+    "stage5InternalGroups": 282,
+    "stage5GroupsIncludedInOneGlobalFile": true,
+    "newStage5InternalGroups": 6,
+    "strictNonincrementalTscPassed": true,
+    "rustNewExecutions": 0,
+    "confirmedSourceGapIds": [
+      "F09.NPC.REPAIR_BAG",
+      "F09.NPC.SREPAIR_BAG",
+      "F09.NPC.REPAIR_QUOTE"
+    ],
+    "globalAcceptanceDenominator": null,
+    "overallPercentage": null,
+    "playerVerification": "not-run",
+    "nextThinBuildStatus": "pending"
+  },
+  "sourceEvidence": {
+    "snapshot": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source19-node04-snapshot.json",
+      "bytes": 9739148,
+      "sha256": "7dad583d4e8806106d6c12d345d5f6548cfd9c05a8fb449fee9882e156f6e37d"
+    },
+    "sourceReview": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source19-source-review04.json",
+      "bytes": 7018,
+      "sha256": "a5df432abbec70bfefcb9cb38e91b0cd52aa7db3ec10481eb6fd9677218f3ae4"
+    },
+    "uniqueInputCount": 27389,
+    "productPins": [
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\components\\original-client-game-shop.tsx",
+        "bytes": 50755,
+        "sha256": "8897984122029a0cac6ab5722c08be9d1d01b4e796ac3756eaf151ce4e3abd83",
+        "relativePath": "apps/web/app/components/original-client-game-shop.tsx"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\components\\original-client-game-ui-scene.tsx",
+        "bytes": 33626,
+        "sha256": "74dd6d5a3fd0ce3f11627464b67ce04f638efd344d837e9ac302ab2623eee411",
+        "relativePath": "apps/web/app/components/original-client-game-ui-scene.tsx"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\components\\original-client-shell-types.ts",
+        "bytes": 17323,
+        "sha256": "5459ee5616c32b782e72c28fe221c6555b29d3af5ff834b8c41a604cff1e0ad5",
+        "relativePath": "apps/web/app/components/original-client-shell-types.ts"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\original-client-shell.tsx",
+        "bytes": 273860,
+        "sha256": "8e67ec3820cf7160742236aa009abaa313e3634053dbddad3880dde4fe600ef8",
+        "relativePath": "apps/web/app/original-client-shell.tsx"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\page.tsx",
+        "bytes": 933636,
+        "sha256": "37e5bda0df8347dd2deb39347d058e92cb27eda12b1b9bcfbe38f0f8545b9b86",
+        "relativePath": "apps/web/app/page.tsx"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\mail-parcel-gateway-adapter.ts",
+        "bytes": 6380,
+        "sha256": "1e75b7aa471836e5198b87e96adf4803d3ac60cd7db2d46b199affc147e9678c",
+        "relativePath": "apps/web/lib/mail-parcel-gateway-adapter.ts"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\npc-repair-service.ts",
+        "bytes": 15134,
+        "sha256": "4f10045c48deaf728f379ae8d767fe3ec20ddc11a61f5675dcf0ace429a0f22f",
+        "relativePath": "apps/web/lib/npc-repair-service.ts"
+      }
+    ],
+    "scriptPins": [
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-combat-input.mjs",
+        "bytes": 63126,
+        "sha256": "8d967d2aa9eec2995f25b6a9d9ee09aed13e80d01c78f78b308fbe56787c8587",
+        "relativePath": "apps/web/scripts/test-bevy-combat-input.mjs"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-quest-ui.mjs",
+        "bytes": 69505,
+        "sha256": "c35558c3df2af7f9e4faf5f5f7623b9d4a28f35540c0a0c9b8783870f1e95f3b",
+        "relativePath": "apps/web/scripts/test-bevy-quest-ui.mjs"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-client-core-build.mjs",
+        "bytes": 7145,
+        "sha256": "53df09ad1b076c2d5732c05ed92982846b0e0fe30687bcf26277cb797a96ce2c",
+        "relativePath": "apps/web/scripts/test-client-core-build.mjs"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-client-core-release-files.mjs",
+        "bytes": 20235,
+        "sha256": "13b5c6cbd0f2aea1e344438cc223bd640f6ba0b7fb3c90f6db81986f9b148372",
+        "relativePath": "apps/web/scripts/test-client-core-release-files.mjs"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-crystal-chat-history.mjs",
+        "bytes": 24226,
+        "sha256": "3198bed2ece0e1c713ba72867bac828eb7c174fb48b905fb6441de43c689703c",
+        "relativePath": "apps/web/scripts/test-crystal-chat-history.mjs"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-minimap-transform.mjs",
+        "bytes": 12428,
+        "sha256": "59263fde37122528ecde9c1e567da18df79be64b5c33b23a929838d64d66751d",
+        "relativePath": "apps/web/scripts/test-minimap-transform.mjs"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-native-keyed-map-pack.mjs",
+        "bytes": 33307,
+        "sha256": "d3165a8801b6c5a01eaf8c99f4e42105f37d0c29906cca185e1627276e21749e",
+        "relativePath": "apps/web/scripts/test-native-keyed-map-pack.mjs"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-portable-next-standalone.mjs",
+        "bytes": 37692,
+        "sha256": "658af9bbc8f0ee8cfa708afeed011209457a6b7041e5faec285fd26cedf08c7e",
+        "relativePath": "apps/web/scripts/test-portable-next-standalone.mjs"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-renderer-wasm-opt.mjs",
+        "bytes": 38308,
+        "sha256": "0fd0063ae9db00b22d3679e3c81c0cde82fceb2f302ccce6bded538180b18622",
+        "relativePath": "apps/web/scripts/test-renderer-wasm-opt.mjs"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-stage5-adapters.mjs",
+        "bytes": 334501,
+        "sha256": "637e0a56a15ace2af9ecb2ac9fc424413be615e9d5c50a058974681c6d031621",
+        "relativePath": "apps/web/scripts/test-stage5-adapters.mjs"
+      },
+      {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-storage-page-gate.mjs",
+        "bytes": 135118,
+        "sha256": "671a885befe0f2bd68b74ca788b192331764cf5869c09094ebebaf4750d0a9d8",
+        "relativePath": "apps/web/scripts/test-storage-page-gate.mjs"
+      }
+    ],
+    "rustCargoInputMembersUnchanged": 356,
+    "rustSource18Snapshot": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-presentation-rust-source18.json",
+      "bytes": 133394,
+      "sha256": "2bc95be2087f4c680f708d909daf40982cf56fbb841b24b21cbe895b1c586d15"
+    },
+    "source18FiniteResult": {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\presentation-source18-finite-result01.json",
+      "bytes": 56042,
+      "sha256": "1397ebf52a3decffc64fc3eff0c3671cf255d9d0557099ae572ac0d86e0d6f30"
+    },
+    "rustCarryQualification": "Only unchanged declared Rust/Cargo input members and previously qualified Source18 evidence are carried; no fresh Rust/Cargo/WASM execution and no sum of earlier cross-configuration executions as distinct new tests."
+  },
+  "node04": {
+    "config": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source19-node04.config.json",
+      "bytes": 4799,
+      "sha256": "34ecb2893bdad857f717a2cdbeb992e407a0bf77d9eab0ece2e9f130ccf00e44"
+    },
+    "snapshot": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source19-node04-snapshot.json",
+      "bytes": 9739148,
+      "sha256": "7dad583d4e8806106d6c12d345d5f6548cfd9c05a8fb449fee9882e156f6e37d"
+    },
+    "sourceReview": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source19-source-review04.json",
+      "bytes": 7018,
+      "sha256": "a5df432abbec70bfefcb9cb38e91b0cd52aa7db3ec10481eb6fd9677218f3ae4"
+    },
+    "stdout": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source19-node04.stdout.log",
+      "bytes": 23269,
+      "sha256": "f0fa39deda7c51e0b64ecdba3fa1c0de48b6aa17f8d63731fd14ea623f8e4dc0"
+    },
+    "stderr": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source19-node04.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "outer": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source19-node04.outer.json",
+      "bytes": 540,
+      "sha256": "26222ee5816dd5a971e36c66e4ba93e2cccd13ae1de440798e55cb74c75e1b7e"
+    },
+    "result": {
+      "owner": "Root",
+      "exitCode": 0,
+      "builderPid": 100092,
+      "kind": "Source19 NPC repair eleven existing finite source/fixture/static verification scripts",
+      "exited": true,
+      "disposed": true,
+      "elapsedMs": 9698,
+      "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-repair-source19-node04.config.json",
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "productionBuildAccepted": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    },
+    "tests": 218,
+    "passed": 218,
+    "failed": 0,
+    "skipped": 0,
+    "stage5InternalGroups": 282,
+    "internalGroupsAlreadyIncludedInOneGlobalFile": true
+  },
+  "tsc01": {
+    "config": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source19-tsc01.config.json",
+      "bytes": 3918,
+      "sha256": "9cb5274b304efca618605c7c525297787ae2368c38ba27c8ef59af3073dcfcce"
+    },
+    "outer": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source19-tsc01.outer.json",
+      "bytes": 517,
+      "sha256": "d512ce442b76894799324abebc40dccfa3fea401ddcfe2d65bac2270dd3b0cf6"
+    },
+    "stdout": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source19-tsc01.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stderr": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source19-tsc01.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "result": {
+      "owner": "Root",
+      "exitCode": 0,
+      "builderPid": 94376,
+      "kind": "Source19 NPC repair strict nonincremental TSC code-only project",
+      "exited": true,
+      "disposed": true,
+      "elapsedMs": 10762,
+      "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-repair-source19-tsc01.config.json",
+      "uiOperated": false,
+      "runtimeLaunched": false,
+      "networkUsed": false,
+      "productionBuildAccepted": false,
+      "candidateAccepted": false,
+      "goalComplete": false
+    },
+    "carryReason": "No production TS/TSX/strict code-only project compiler inputs changed since actual TSC01; subsequent three mjs fixture edits are outside include. Not a fresh TSC rerun."
+  },
+  "history": [
+    {
+      "round": 1,
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source19-node01.config.json",
+        "bytes": 4799,
+        "sha256": "99408a356a3da353c1c593f8fc4e5cced5d5f2887e2c0d920ab55ff848c37f06"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source19-node01.stdout.log",
+        "bytes": 47836,
+        "sha256": "45eecdb9e036b994ac349d1a26b225bea3bcb1f7892d3eb0acf31a1040126a69"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source19-node01.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "outer": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source19-node01.outer.json",
+        "bytes": 541,
+        "sha256": "d008e8876b56f069402d4f28275d0973d8248a9b95edf7c2089d43419f0cce11"
+      },
+      "result": {
+        "owner": "Root",
+        "exitCode": 1,
+        "builderPid": 101012,
+        "kind": "Source19 NPC repair eleven existing finite source/fixture/static verification scripts",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 10360,
+        "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-repair-source19-node01.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "counts": {
+        "tests": 218,
+        "passed": 200,
+        "failed": 18,
+        "skipped": 0
+      }
+    },
+    {
+      "round": 2,
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source19-node02.config.json",
+        "bytes": 4799,
+        "sha256": "c1ce29a15a72e5fab7f314251d59588fcc9a4991b0f973e9f4bfc68131909b0c"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source19-node02.stdout.log",
+        "bytes": 30762,
+        "sha256": "f93e2157e8f6df69adae05391ade1397702e298a4dd764fd21e970c50a3e0f7d"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source19-node02.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "outer": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source19-node02.outer.json",
+        "bytes": 540,
+        "sha256": "db32fcd9beb7c18ed6e5c4819995b6dfad8551758a33dcd9730e33c63216e70e"
+      },
+      "result": {
+        "owner": "Root",
+        "exitCode": 1,
+        "builderPid": 99956,
+        "kind": "Source19 NPC repair eleven existing finite source/fixture/static verification scripts",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 10153,
+        "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-repair-source19-node02.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "counts": {
+        "tests": 218,
+        "passed": 212,
+        "failed": 6,
+        "skipped": 0
+      }
+    },
+    {
+      "round": 3,
+      "config": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source19-node03.config.json",
+        "bytes": 4799,
+        "sha256": "c5183e8f6d1b41e7294c218340591a2279f9dbfc98a27bdfc45d67ff9e826e6f"
+      },
+      "stdout": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source19-node03.stdout.log",
+        "bytes": 48313,
+        "sha256": "72b0bc5f041cd1a77fe67b137d118f478be6ccf825c83a94ea3c275f3db141eb"
+      },
+      "stderr": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source19-node03.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "outer": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-repair-source19-node03.outer.json",
+        "bytes": 539,
+        "sha256": "6503e63bba0c41e5fa6e207b73f16827973f3200952743406040c01f4e0ad216"
+      },
+      "result": {
+        "owner": "Root",
+        "exitCode": 1,
+        "builderPid": 97832,
+        "kind": "Source19 NPC repair eleven existing finite source/fixture/static verification scripts",
+        "exited": true,
+        "disposed": true,
+        "elapsedMs": 9948,
+        "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-repair-source19-node03.config.json",
+        "uiOperated": false,
+        "runtimeLaunched": false,
+        "networkUsed": false,
+        "productionBuildAccepted": false,
+        "candidateAccepted": false,
+        "goalComplete": false
+      },
+      "counts": {
+        "tests": 218,
+        "passed": 217,
+        "failed": 1,
+        "skipped": 0
+      }
+    }
+  ],
+  "historicalMetadataCorrections": [
+    "Node01 selectedScriptPins was empty from prefix association error; original complete graph already included actual eleven scripts/config args. Current04lists all eleven with exact hashes.",
+    "SourceReview02 single testPin retained Source01 bytes while testPins carried02. Historical file remains immutable;03/04singlepin corrected.",
+    "All three actual failed executions retained; only existing fixture dependencies/AST matching corrected, product byte-identical throughout."
+  ],
+  "independentReview": {
+    "agent": "w2b_final_source_review",
+    "model": "gpt-6.1-sol",
+    "scope": "Read-only source/fixture and actual Node04/TSC01 receipts; no execution by reviewer",
+    "result": "accepted bounded source and finite evidence,0confirmedP0/P1",
+    "node04OuterSha256": "26222ee5816dd5a971e36c66e4ba93e2cccd13ae1de440798e55cb74c75e1b7e",
+    "node04StdoutSha256": "f0fa39deda7c51e0b64ecdba3fa1c0de48b6aa17f8d63731fd14ea623f8e4dc0"
+  },
+  "limits": [
+    "Only actual complete current Bag UID/slot/source and authoritative NPC rate enter shared Rust pricing. Native legitimateUID0 stays valid; null/unknown/duplicates refuse.",
+    "Same physical socket entered repair barrier persists across model/UI/owner/HMR changes; genuine current-owner ItemRepaired exact UID/u16 receipt releases. It does not prove server success before the receipt.",
+    "Existing Mail parcel protocol zero sentinel may keep real repairUID0unknown while unrelated parcel locks are pending; no backend/Mail schema change.",
+    "Web NPC repair remains DOM presentation using shared Rust quote; actual UI/player/login/save/relogin/mobile device and public delivery unverified."
+  ],
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmInstantiated": false,
+  "candidateAccepted": false,
+  "playerAccepted": false,
+  "goalComplete": false
+}

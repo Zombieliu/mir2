@@ -1,0 +1,11 @@
+file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs:526
+    if (combatActorIndices.some(index => !insideCombatCoverage(cluster, homes[index]))) throw new Error('Combat home lacks declared observer coverage');
+                                                                                              ^
+
+Error: Combat home lacks declared observer coverage
+    at file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs:526:95
+    at Array.map (<anonymous>)
+    at Module.validateNativeCombatClusters (file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs:516:32)
+    at file:///C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-scene-v1/validate-candidate.mjs:22:10
+
+Node.js v22.18.0

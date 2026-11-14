@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "source": "Source65 generation02",
+  "config": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source65-npc-gold-projection-20261011-01/root-approved01/gateway-build05-config05.json",
+    "bytes": 5544,
+    "sha256": "775c3e0fad1cbba957c9f3574cd48a16ea53f35bd459accbea662cf411ca1b81"
+  },
+  "sourceSnapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source65-npc-gold-projection-20261011-01/preparation02/source65-isolated-snapshot02.json",
+    "bytes": 520326,
+    "sha256": "d0ceb7f922b5ffdffa0c4474ff48da42c9395f7547bba25f333153b1d74ed3c5"
+  },
+  "sourceCount": 922,
+  "rootReview": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source65-npc-gold-projection-20261011-01/root-approved01/source-review03.json",
+    "bytes": 4930,
+    "sha256": "4fd92b42070da89956d9cf142d685333a194003ea9e2bb37ec24751deb57c0fb"
+  },
+  "actual": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 64408,
+    "kind": "Source65 generation02 Root accepted gateway-build05",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 72350,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source65-npc-gold-projection-20261011-01/root-approved01/gateway-build05-config05.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "guardAfter": {
+    "childPid": 66492,
+    "childStartedUtc": "/Date(1791709234438)/",
+    "childStartMs": 1087.6063000000001,
+    "completed": true,
+    "exited": true,
+    "disposed": true,
+    "exitCode": 0,
+    "exitBits": "0",
+    "completedUtc": "/Date(1791709305655)/",
+    "completionMs": 72303.1689,
+    "postChildPolicy": "B",
+    "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+  },
+  "guard": {
+    "decision": "FORWARD",
+    "thresholdBytes": "53687091200",
+    "remainingBytes": "163261575168",
+    "freshnessMs": "2000",
+    "probeTimeoutMs": "15000",
+    "postChildPolicy": "B",
+    "unchanged": true
+  },
+  "binary": {
+    "path": "C:/mir2-cross-platform-storage-20261002/rust-target/windows/debug/mir2-gateway.exe",
+    "bytes": 109079552,
+    "sha256": "9d8c545fa15217f515ad908d85a42b51ececa35ed88fc7ec5e0e4e57e5271b98"
+  },
+  "profile": "dev unoptimized + debuginfo",
+  "simulationWarnings": 84,
+  "gatewayWarnings": 8,
+  "originalCaller": {
+    "bytes": 4569,
+    "sha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383"
+  },
+  "runtimeLaunched": false,
+  "uiOperated": false,
+  "productionAccepted": false,
+  "candidate100": false,
+  "goalComplete": false
+}

@@ -1,0 +1,36 @@
+test_apply14_order_json_last_baseline_and_sources_unchanged (__main__.PublisherTests.test_apply14_order_json_last_baseline_and_sources_unchanged) ... ok
+test_approved_compressed_hash_is_not_decoded_target_proof (__main__.PublisherTests.test_approved_compressed_hash_is_not_decoded_target_proof) ... ok
+test_candidate_change_before_json_refuses_without_descriptor (__main__.PublisherTests.test_candidate_change_before_json_refuses_without_descriptor) ... ok
+test_changed_candidate_metadata_or_exe (__main__.PublisherTests.test_changed_candidate_metadata_or_exe) ... ok
+test_changed_feed_both_json_and_signature (__main__.PublisherTests.test_changed_feed_both_json_and_signature) ... ok
+test_compressed_artifact_corruption (__main__.PublisherTests.test_compressed_artifact_corruption) ... ok
+test_create_only_promotion_handles_exact_race_and_refuses_bad_race (__main__.PublisherTests.test_create_only_promotion_handles_exact_race_and_refuses_bad_race) ... ok
+test_dangling_public_delivery_symlink_refuses (__main__.PublisherTests.test_dangling_public_delivery_symlink_refuses) ... ok
+test_existing_exact_is_idempotent_no_inode_rewrite (__main__.PublisherTests.test_existing_exact_is_idempotent_no_inode_rewrite) ... ok
+test_existing_public_object_hardlink_refuses (__main__.PublisherTests.test_existing_public_object_hardlink_refuses) ... ok
+test_feed_advance_before_json_keeps_payloads_but_discovery_invisible (__main__.PublisherTests.test_feed_advance_before_json_keeps_payloads_but_discovery_invisible) ... ok
+test_feed_change_after_private_ready_but_before_first_write_refuses (__main__.PublisherTests.test_feed_change_after_private_ready_but_before_first_write_refuses) ... ok
+test_frozen_real_root_envelope_pins_parse_without_download_or_cms_execution (__main__.PublisherTests.test_frozen_real_root_envelope_pins_parse_without_download_or_cms_execution) ... ok
+test_generated_and_public_delivery_parent_symlink_refuse (__main__.PublisherTests.test_generated_and_public_delivery_parent_symlink_refuse) ... ok
+test_input_symlink_and_hardlink_refuse (__main__.PublisherTests.test_input_symlink_and_hardlink_refuse) ... ok
+test_last_artifact_conflict_refuses_before_any_public_write (__main__.PublisherTests.test_last_artifact_conflict_refuses_before_any_public_write) ... ok
+test_late_conflict_never_overwrites_object (__main__.PublisherTests.test_late_conflict_never_overwrites_object) ... ok
+test_lock_hardlink_refuses_without_content_change (__main__.PublisherTests.test_lock_hardlink_refuses_without_content_change) ... ok
+test_missing_existing_lock_is_not_created (__main__.PublisherTests.test_missing_existing_lock_is_not_created) ... ok
+test_original_descriptor_and_signature_bytes_must_match (__main__.PublisherTests.test_original_descriptor_and_signature_bytes_must_match) ... ok
+test_posix_metadata_root_owner_mode_regular_and_single_link (__main__.PublisherTests.test_posix_metadata_root_owner_mode_regular_and_single_link) ... ok
+test_preflight_real_gzip_delta_no_public_input_or_generated_writes (__main__.PublisherTests.test_preflight_real_gzip_delta_no_public_input_or_generated_writes) ... ok
+test_rename_unavailable_retains_stage_without_descriptor_visibility (__main__.PublisherTests.test_rename_unavailable_retains_stage_without_descriptor_visibility) ... ok
+test_retirement_moves_only_new_exact_descriptor_to_recorded_private_backup (__main__.PublisherTests.test_retirement_moves_only_new_exact_descriptor_to_recorded_private_backup) ... ok
+test_retirement_rejects_wrong_receipt_hash_or_replaced_descriptor (__main__.PublisherTests.test_retirement_rejects_wrong_receipt_hash_or_replaced_descriptor) ... ok
+test_retirement_second_identity_check_after_hook (__main__.PublisherTests.test_retirement_second_identity_check_after_hook) ... ok
+test_root_envelope_and_fresh_cms_have_independent_pin_and_semantic_gates (__main__.PublisherTests.test_root_envelope_and_fresh_cms_have_independent_pin_and_semantic_gates) ... ok
+test_scope_guard_and_production_cli_cannot_accept_fixture_override (__main__.PublisherTests.test_scope_guard_and_production_cli_cannot_accept_fixture_override) ... ok
+test_serialized_competing_fixture_writer_refuses (__main__.PublisherTests.test_serialized_competing_fixture_writer_refuses) ... ok
+test_signature_conflict_refuses_before_any_public_write (__main__.PublisherTests.test_signature_conflict_refuses_before_any_public_write) ... ok
+test_wrong_old_base_exe_refuses (__main__.PublisherTests.test_wrong_old_base_exe_refuses) ... ok
+
+----------------------------------------------------------------------
+Ran 31 tests in 6.497s
+
+OK

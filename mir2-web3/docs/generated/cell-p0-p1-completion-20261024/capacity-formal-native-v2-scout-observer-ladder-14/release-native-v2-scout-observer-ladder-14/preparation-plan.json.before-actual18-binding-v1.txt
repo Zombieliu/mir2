@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "state": "PENDING_FRESH_PROBE18_COLLECTED_AND_INDEPENDENT_BINDING",
+  "root": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14",
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "driverSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "executionSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "backendInputCount": 50,
+  "sourceOnly": true,
+  "freshProbe18Bound": false,
+  "rootExecutionRequired": true,
+  "accountPrepared": false,
+  "realmStarted": false,
+  "capacityAccepted": false,
+  "formalScope": {
+    "stages": [
+      2,
+      10,
+      25,
+      50,
+      100
+    ],
+    "stageSeconds": 300,
+    "soakSeconds": 7200,
+    "resumeSamples": 5,
+    "saveSamples": 5,
+    "postResumeSeconds": 60,
+    "wallSeconds": 18000,
+    "completeMinuteWindows": 146
+  },
+  "staticRiskBoundary": [
+    "100 representative scout tour886 unitsteps is historical static evidence only",
+    "Original24ACK/20s online waypoint advance budget unchanged",
+    "Conditional static120 positive hits does not prove180 launched attacks or2h supply",
+    "Historical25 failure is not retroactively passed by new source tests"
+  ],
+  "futureOrder": [
+    "Actual ended18 full PASS/raw/base+Store/independent source seal+execution/OS binding",
+    "Final consumer schema/source integration and independent QA",
+    "Root seal/readonlyguard/prepare100ordinary/explicit formal run",
+    "Ended formal game and independent Store collection/verification"
+  ],
+  "proposedEnded18SchemaNotYetValidated": true,
+  "finalExternalSourceClosureAssemblyPending": true
+}

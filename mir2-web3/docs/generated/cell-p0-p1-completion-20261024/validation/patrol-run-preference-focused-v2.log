@@ -1,0 +1,154 @@
+TAP version 13
+# Subtest: navigation coordination unions true owner receipts and bounded pending cells without replacing AOI, identities or snapshots
+ok 1 - navigation coordination unions true owner receipts and bounded pending cells without replacing AOI, identities or snapshots
+  ---
+  duration_ms: 3.1444
+  type: 'test'
+  ...
+# Subtest: navigation coordination is native-only and preserves the baseline obstacle and send path
+ok 2 - navigation coordination is native-only and preserves the baseline obstacle and send path
+  ---
+  duration_ms: 0.501
+  type: 'test'
+  ...
+# Subtest: navigation hints cover Run intermediate and diagonal corner cells with one immutable bounded entry per active connection
+ok 3 - navigation hints cover Run intermediate and diagonal corner cells with one immutable bounded entry per active connection
+  ---
+  duration_ms: 0.8505
+  type: 'test'
+  ...
+# Subtest: navigation coordination prevents two same-tick sends to one destination while preserving the blocked native opportunity
+ok 4 - navigation coordination prevents two same-tick sends to one destination while preserving the blocked native opportunity
+  ---
+  duration_ms: 2.0278
+  type: 'test'
+  ...
+# Subtest: navigation ACK cleanup cannot let an old finally delete a newer hint and close/map/death release their own entry
+ok 5 - navigation ACK cleanup cannot let an old finally delete a newer hint and close/map/death release their own entry
+  ---
+  duration_ms: 1.7119
+  type: 'test'
+  ...
+# Subtest: navigation hints release on send errors and real owner timeouts without suppressing old failure counters
+ok 6 - navigation hints release on send errors and real owner timeouts without suppressing old failure counters
+  ---
+  duration_ms: 0.6142
+  type: 'test'
+  ...
+# Subtest: navigation hints release on a same-position owner receipt while the original movement correction still fails acceptance
+ok 7 - navigation hints release on a same-position owner receipt while the original movement correction still fails acceptance
+  ---
+  duration_ms: 0.7341
+  type: 'test'
+  ...
+# Subtest: native fast patrol and normal A* both avoid controlled in-flight Run cells while leaving snapshots untouched
+ok 8 - native fast patrol and normal A* both avoid controlled in-flight Run cells while leaving snapshots untouched
+  ---
+  duration_ms: 0.9178
+  type: 'test'
+  ...
+# Subtest: native primed fallback chooses a real Run from an existing corner under two observed approximate Scarecrow arrangements
+ok 9 - native primed fallback chooses a real Run from an existing corner under two observed approximate Scarecrow arrangements
+  ---
+  duration_ms: 51.6981
+  type: 'test'
+  ...
+# Subtest: native primed fallback keeps the original first Walk when no original corner route has a legal Run
+ok 10 - native primed fallback keeps the original first Walk when no original corner route has a legal Run
+  ---
+  duration_ms: 0.8771
+  type: 'test'
+  ...
+# Subtest: native fallback does not prefer later Run routes when unprimed and leaves baseline first-path selection unchanged
+ok 11 - native fallback does not prefer later Run routes when unprimed and leaves baseline first-path selection unchanged
+  ---
+  duration_ms: 0.3196
+  type: 'test'
+  ...
+# Subtest: native fallback Run preference retains controlled-owner and pending-path obstacles without changing snapshots
+ok 12 - native fallback Run preference retains controlled-owner and pending-path obstacles without changing snapshots
+  ---
+  duration_ms: 2.8235
+  type: 'test'
+  ...
+# Subtest: native fallback Run preference retains diagonal side-cell collision checks
+ok 13 - native fallback Run preference retains diagonal side-cell collision checks
+  ---
+  duration_ms: 0.3848
+  type: 'test'
+  ...
+# Subtest: native fallback Run preference cannot enter a transfer in its first or second step
+ok 14 - native fallback Run preference cannot enter a transfer in its first or second step
+  ---
+  duration_ms: 0.634
+  type: 'test'
+  ...
+# Subtest: native fallback Run preference retains routeAllowed on the complete route to each original goal
+ok 15 - native fallback Run preference retains routeAllowed on the complete route to each original goal
+  ---
+  duration_ms: 0.2708
+  type: 'test'
+  ...
+# Subtest: native scout uses ordinary covered adjacent goals to explore another declared observer instead of circling one home
+ok 16 - native scout uses ordinary covered adjacent goals to explore another declared observer instead of circling one home
+  ---
+  duration_ms: 1.402
+  type: 'test'
+  ...
+# Subtest: native scout goal selection also excludes a controlled in-flight hint without injecting it into the fighter snapshot
+ok 17 - native scout goal selection also excludes a controlled in-flight hint without injecting it into the fighter snapshot
+  ---
+  duration_ms: 0.6992
+  type: 'test'
+  ...
+# Subtest: native scout never crosses a coverage gap, map transfer or real blocked route and performs at most four searches
+ok 18 - native scout never crosses a coverage gap, map transfer or real blocked route and performs at most four searches
+  ---
+  duration_ms: 7.678
+  type: 'test'
+  ...
+# Subtest: native scout counts only fresh real successful movement and preserves pursuit, deferral and ambiguous-attack budgets
+ok 19 - native scout counts only fresh real successful movement and preserves pursuit, deferral and ambiguous-attack budgets
+  ---
+  duration_ms: 0.3481
+  type: 'test'
+  ...
+# Subtest: native scout advances its finite waypoint on real position loops, movement budget and time budget
+ok 20 - native scout advances its finite waypoint on real position loops, movement budget and time budget
+  ---
+  duration_ms: 0.9052
+  type: 'test'
+  ...
+# Subtest: native scout yields immediately to a real witnessed combat candidate without changing native pacing or thresholds
+ok 21 - native scout yields immediately to a real witnessed combat candidate without changing native pacing or thresholds
+  ---
+  duration_ms: 0.488
+  type: 'test'
+  ...
+# Subtest: native continuous running starts with Walk, validates both Run cells, and resets after a long pause
+ok 22 - native continuous running starts with Walk, validates both Run cells, and resets after a long pause
+  ---
+  duration_ms: 0.2328
+  type: 'test'
+  ...
+# Subtest: native combat clusters cover the exact cohort and contain hunting inside declared observer footprints
+ok 23 - native combat clusters cover the exact cohort and contain hunting inside declared observer footprints
+  ---
+  duration_ms: 0.9902
+  type: 'test'
+  ...
+# Subtest: native patrol returns from the captured detour to a reachable declared corner when home is occupied
+ok 24 - native patrol returns from the captured detour to a reachable declared corner when home is occupied
+  ---
+  duration_ms: 21.6793
+  type: 'test'
+  ...
+1..24
+# tests 24
+# suites 0
+# pass 24
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 181.3885

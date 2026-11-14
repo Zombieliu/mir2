@@ -25,6 +25,9 @@ import {
   type AssetReleaseCapabilities,
 } from "../../lib/asset-release-capabilities";
 import { normalizeDeviceMemoryGiB, resolveRenderTier } from "../../lib/render-tier";
+import { canReloadAssetNamespace } from "../../lib/asset-namespace-reload";
+import { fetchPrewarmAsset, type PrewarmAttemptDiagnostic } from "../../lib/asset-prewarm-request";
+import { getRuntimeHeaderPriority } from "../../lib/runtime-header-priority";
 import { OriginalClientStagePortal } from "./original-client-stage-portal";
 
 type AssetManifest = {
@@ -95,6 +98,18 @@ type CachePrewarmMetric = {
   ok: number;
   failed: number;
   failedUrls: string[];
+  requestFailures?: (PrewarmAttemptDiagnostic & { url: string })[];
+  recovery?: {
+    initialOk: number;
+    initialFailedUrls: string[];
+    requested: number;
+    recoveredUrls: string[];
+    failedUrls: string[];
+    unattemptedUrls: string[];
+    configurationError?: string;
+    requestFailures?: (PrewarmAttemptDiagnostic & { url: string })[];
+    status: "running" | "done" | "cancelled";
+  };
   durationMs: number;
   sceneCacheHits: number;
   sceneCacheMisses: number;
@@ -247,6 +262,10 @@ export function AssetCacheRegistrar() {
   const [snapshot, setSnapshot] = useState<CacheMetricsSnapshot | null>(null);
 
   useEffect(() => {
+    // Public website and promotion pages must not prewarm the game's media packs.
+    const pathname = window.location.pathname;
+    const gameAssetPath = pathname === "/" || pathname === "/game" || pathname === "/game/" || pathname.startsWith("/qa/");
+    if (!gameAssetPath) return;
     setMounted(true);
     const params = new URLSearchParams(window.location.search);
     const debug = params.get("cacheDebug") === "1";
@@ -276,6 +295,10 @@ export function AssetCacheRegistrar() {
       (process.env.NODE_ENV === "production" ||
         params.get("prewarm") === "1" ||
         params.get("assetCache") === "1");
+    // Visible login art loads from the UI. Keep the optional pack off the
+    // production login connection unless a cache diagnostic explicitly asks for it.
+    const shouldPrewarmLogin = process.env.NODE_ENV !== "production"
+      || params.get("prewarm") === "1" || assetCacheParam === "1";
     const deviceMemoryGiB = normalizeDeviceMemoryGiB(
       (navigator as Navigator & { deviceMemory?: number }).deviceMemory,
     );
@@ -296,6 +319,7 @@ export function AssetCacheRegistrar() {
     let installedStagePrewarm: ((stage: AssetPrewarmStage) => Promise<void>) | null = null;
     let prewarmOrchestrator: AssetPrewarmOrchestrator | null = null;
     let serviceWorkerCleanup: (() => void) | null = null;
+    let reconfigureWorker: (() => Promise<void>) | null = null;
     const handleFirstPlayable = () => {
       void prewarmOrchestrator?.markFirstPlayable();
     };
@@ -328,6 +352,9 @@ export function AssetCacheRegistrar() {
           manifest,
           manifestVersion: manifest.version,
           cacheNamespace,
+          // The production build ships these same font bytes first-party.
+          // Prefer those files; retain immutable CDN mirrors for recovery.
+          fontMirrorFirst: false,
         };
         const workerStateListeners = new Map<ServiceWorker, () => void>();
         const postToWorker = (
@@ -423,6 +450,8 @@ export function AssetCacheRegistrar() {
           });
           applyConfiguredState(await configuredMessage, reason);
         };
+        const refreshForRecovery = () => sendConfiguration("hud-recovery");
+        reconfigureWorker = refreshForRecovery;
 
         const observeInstallingWorker = () => {
           const worker = registration.installing;
@@ -455,6 +484,7 @@ export function AssetCacheRegistrar() {
         registration.addEventListener("updatefound", onUpdateFound);
         navigator.serviceWorker.addEventListener("controllerchange", onControllerChange);
         serviceWorkerCleanup = () => {
+          if (reconfigureWorker === refreshForRecovery) reconfigureWorker = null;
           registration.removeEventListener("updatefound", onUpdateFound);
           navigator.serviceWorker.removeEventListener("controllerchange", onControllerChange);
           for (const [worker, listener] of workerStateListeners) {
@@ -619,7 +649,18 @@ export function AssetCacheRegistrar() {
               lane === "background" ? pack.phase === "background" : pack.phase !== "background",
             ),
           run: async (stage, lane, signal) => {
-            await prewarmAssetPacks(manifest, metrics, prewarmPolicy, stage, lane, signal);
+            if (stage === "game" && lane === "background") {
+              const started = performance.now();
+              const outcome = await getRuntimeHeaderPriority()?.wait(signal);
+              if (outcome) metrics.markMilestone("runtimeHeaderPriorityBackground", {
+                ...outcome, waitedMs: Math.round(performance.now() - started),
+              });
+              if (outcome?.reason === "cancelled" || outcome?.reason === "superseded") {
+                throw new DOMException("Prewarm stage retired", "AbortError");
+              }
+            }
+            await prewarmAssetPacks(manifest, metrics, prewarmPolicy, stage, lane, signal,
+              () => reconfigureWorker?.() ?? Promise.resolve());
             if (!disposed) setSnapshot(metrics.snapshot());
           },
         });
@@ -638,7 +679,7 @@ export function AssetCacheRegistrar() {
           void prewarmOrchestrator.markFirstPlayable();
         }
         installedStagePrewarm = (stage) => {
-          if (!shouldPrewarm) return Promise.resolve();
+          if (!shouldPrewarm || (stage === "login" && !shouldPrewarmLogin)) return Promise.resolve();
           return prewarmOrchestrator?.requestStage(stage) ?? Promise.resolve();
         };
         window.__mir2AssetCachePrewarmStage = installedStagePrewarm;
@@ -1025,9 +1066,15 @@ function maybeReloadAfterCacheNamespaceChange(cacheNamespace: string, deletedCac
 
   const reloadKey = `${CACHE_NAMESPACE_STORAGE_KEY}.reloaded.${cacheNamespace}`;
   if (readStorageValue(window.sessionStorage, reloadKey) === "1") return;
-  writeStorageValue(window.sessionStorage, reloadKey, "1");
+  if (!canReloadAssetNamespace(document)) return;
 
   window.setTimeout(() => {
+    // Configuration can settle after the player types, approves a wallet or
+    // enters the world. A late cache cleanup must never interrupt that work.
+    if (readStorageValue(window.localStorage, CACHE_NAMESPACE_STORAGE_KEY) !== cacheNamespace
+      || readStorageValue(window.sessionStorage, reloadKey) === "1"
+      || !canReloadAssetNamespace(document)) return;
+    writeStorageValue(window.sessionStorage, reloadKey, "1");
     window.location.reload();
   }, 250);
 }
@@ -1055,6 +1102,7 @@ async function prewarmAssetPacks(
   stage: AssetPrewarmStage,
   lane: AssetPrewarmLane,
   signal: AbortSignal,
+  beforeHudRecovery?: () => Promise<void>,
 ) {
   const stagePacks = selectAssetCachePacksForStage(stage, manifest.resourcePacks ?? []);
   const packs = stagePacks.filter((pack) =>
@@ -1088,6 +1136,7 @@ async function prewarmAssetPacks(
         undefined,
         includeSceneFrames,
         signal,
+        beforeHudRecovery,
       );
     }
   } catch (error) {
@@ -1135,6 +1184,7 @@ async function prewarmPack(
   existingMetric?: CachePrewarmMetric,
   includeScenes = true,
   signal?: AbortSignal,
+  beforeHudRecovery?: () => Promise<void>,
 ) {
   const startedAt = performance.now();
   const packMetric = existingMetric ?? createPrewarmMetric(pack, "running", includeScenes);
@@ -1145,13 +1195,46 @@ async function prewarmPack(
   try {
     if (signal?.aborted) throw createAbortError();
     hintAssetCacheTier(pack.urls, cacheTierForPack(pack));
-    await prewarmUrls(pack.urls, packMetric, metrics, concurrency, signal);
+    const initial = await prewarmUrls(pack.urls, packMetric, metrics, concurrency, signal);
+    if (pack.name === "hud-core" && initial.failedUrls.length > 0) {
+      if (signal?.aborted) throw createAbortError();
+      // Retry at most eight failed URLs once. Registration stays off first
+      // paint; only an already-available, bounded configuration ACK is awaited.
+      const retryUrls = initial.failedUrls.slice(0, 8);
+      const recovery: NonNullable<CachePrewarmMetric["recovery"]> = {
+        initialOk: initial.okUrls.length,
+        initialFailedUrls: [...initial.failedUrls], requested: retryUrls.length,
+        recoveredUrls: [], failedUrls: [], unattemptedUrls: initial.failedUrls.slice(8), status: "running",
+      };
+      packMetric.recovery = recovery;
+      try { await beforeHudRecovery?.(); }
+      catch (error) { recovery.configurationError = error instanceof Error ? error.name : "Error"; }
+      if (signal?.aborted) throw createAbortError();
+      const retryMetric = createPrewarmMetric({ ...pack, urls: retryUrls, scenes: [] }, "running", false);
+      recovery.requestFailures = [];
+      retryMetric.requestFailures = recovery.requestFailures;
+      const retried = await prewarmUrls(retryUrls, retryMetric, metrics, Math.min(2, concurrency), signal);
+      if (signal?.aborted) throw createAbortError();
+      const recovered = new Set(retried.okUrls);
+      // Operational full-body outcomes determine the final totals. The exposed
+      // counters and failure history are observations, never the retry queue.
+      packMetric.ok = initial.okUrls.length + recovered.size;
+      packMetric.failedUrls = initial.failedUrls.filter((url) => !recovered.has(url));
+      packMetric.failed = packMetric.failedUrls.length;
+      packMetric.requestFailures = [...(packMetric.requestFailures ?? []), ...(retryMetric.requestFailures ?? [])].slice(0, 96);
+      recovery.recoveredUrls = [...recovered]; recovery.failedUrls = [...retried.failedUrls]; recovery.status = "done";
+    }
 
     for (const scene of includeScenes ? (pack.scenes ?? []) : []) {
       if (signal?.aborted) throw createAbortError();
       let response: Response;
+      let blueprint: unknown;
       try {
-        response = await fetchWithRetry(scene.url, { cache: "force-cache", signal }, signal);
+        const result = await fetchPrewarmAsset(scene.url, { signal });
+        response = result.response;
+        if (response.ok && result.body) {
+          blueprint = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(result.body));
+        }
       } catch (error) {
         if (signal?.aborted || isAbortError(error)) throw error;
         packMetric.failed += 1;
@@ -1171,7 +1254,6 @@ async function prewarmPack(
       if (sceneCache === "hit") packMetric.sceneCacheHits += 1;
       if (sceneCache === "miss") packMetric.sceneCacheMisses += 1;
 
-      const blueprint = await response.json();
       const sceneFrameLimit = maxSceneFrames === null
         ? scene.spriteFrameLimit
         : Math.min(scene.spriteFrameLimit, maxSceneFrames);
@@ -1187,6 +1269,7 @@ async function prewarmPack(
     packMetric.status = "done";
   } catch (error) {
     if (signal?.aborted || isAbortError(error)) {
+      if (packMetric.recovery) packMetric.recovery.status = "cancelled";
       packMetric.status = "cancelled";
       throw error;
     }
@@ -1225,6 +1308,7 @@ async function prewarmUrls(
   signal?: AbortSignal,
 ) {
   const queue = [...new Set(urls)].filter(Boolean);
+  const outcomes = { okUrls: [] as string[], failedUrls: [] as string[] };
   let index = 0;
   let completedSincePublish = 0;
   let lastPublishAt = performance.now();
@@ -1235,16 +1319,23 @@ async function prewarmUrls(
       const url = queue[index];
       index += 1;
       try {
-        const response = await fetchWithRetry(url, { cache: "force-cache", signal }, signal);
-        if (response.ok) metric.ok += 1;
+        const { response, body } = await fetchPrewarmAsset(url, { signal, onAttempt: diagnostic => {
+          if (diagnostic.phase === "complete") return;
+          metric.requestFailures ??= [];
+          if (metric.requestFailures.length < 96) metric.requestFailures.push({ url, ...diagnostic });
+        } });
+        if (signal?.aborted) throw createAbortError();
+        if (response.ok && body) { metric.ok += 1; outcomes.okUrls.push(url); }
         else {
           metric.failed += 1;
           metric.failedUrls.push(url);
+          outcomes.failedUrls.push(url);
         }
       } catch (error) {
         if (signal?.aborted || isAbortError(error)) throw error;
         metric.failed += 1;
         metric.failedUrls.push(url);
+        outcomes.failedUrls.push(url);
       }
       completedSincePublish += 1;
       const now = performance.now();
@@ -1258,22 +1349,7 @@ async function prewarmUrls(
 
   await Promise.all(Array.from({ length: Math.min(concurrency, queue.length) }, worker));
   publishPrewarmProgress(metrics, "running");
-}
-
-async function fetchWithRetry(url: string, init: RequestInit, signal?: AbortSignal) {
-  let lastError: unknown;
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    if (signal?.aborted) throw createAbortError();
-    try {
-      const response = await fetch(url, init);
-      if (response.ok || attempt === 2) return response;
-    } catch (error) {
-      if (signal?.aborted || isAbortError(error)) throw error;
-      lastError = error;
-    }
-    await sleep(150 * (attempt + 1), signal);
-  }
-  throw lastError;
+  return outcomes;
 }
 
 function createAbortError() {
@@ -1843,23 +1919,6 @@ function resolveBackgroundPrewarmModeOverride(params: URLSearchParams): Backgrou
   if (configured === "off" || configured === "immediate" || configured === "afterPlayable") return configured;
   if (params.get("skipRuntime") === "1") return "immediate";
   return null;
-}
-
-function sleep(ms: number, signal?: AbortSignal) {
-  if (!signal) return new Promise<void>((resolve) => window.setTimeout(resolve, ms));
-  if (signal.aborted) return Promise.reject(createAbortError());
-  return new Promise<void>((resolve, reject) => {
-    const timer = window.setTimeout(() => {
-      signal.removeEventListener("abort", onAbort);
-      resolve();
-    }, ms);
-    const onAbort = () => {
-      window.clearTimeout(timer);
-      signal.removeEventListener("abort", onAbort);
-      reject(createAbortError());
-    };
-    signal.addEventListener("abort", onAbort, { once: true });
-  });
 }
 
 function isServiceWorkerSafeOrigin() {

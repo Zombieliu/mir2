@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 1,
+  "state": "SOURCE_PREPARED_ENDED_ONLY_NOT_EXECUTED",
+  "preparedAt": "2026-10-25T20:04:24.733Z",
+  "root": "C:/mir2-build/p01-completion-20261024/probe17-independent-verification-v1",
+  "files": [
+    {
+      "path": "verify-ended-probe17-v1.mjs",
+      "bytes": 34205,
+      "sha256": "91e33b39a79ba686d6fdadeacfa7d0a774eba791804dddad606e6a40fa6179f6"
+    },
+    {
+      "path": "probe-contract-v1.mjs",
+      "bytes": 5820,
+      "sha256": "b80bedae18b07659fb77fa02f2e581bc2879b3274245e0f27cc7a0f3e00452d4"
+    },
+    {
+      "path": "hp-proof-contract-v2.mjs",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+    },
+    {
+      "path": "expected-probe-policy-v1.json",
+      "bytes": 1008,
+      "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+    },
+    {
+      "path": "run-ended-probe17-v1.mjs",
+      "bytes": 2257,
+      "sha256": "433169eb07d542f5afff0dc77727545c60e8c6b770bd64b109ca1d190d10eb07"
+    },
+    {
+      "path": "seal-tool-source-v1.mjs",
+      "bytes": 3011,
+      "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+    },
+    {
+      "path": "derivation-v1.json",
+      "bytes": 11709,
+      "sha256": "6b24c59c2f494c09fc42cbc1ed9eb3cf8db05bd3452beca421db0c104602079c"
+    },
+    {
+      "path": "derive-verifier-v1.cjs",
+      "bytes": 8635,
+      "sha256": "377d6de698661f2f340b49e2397dc1b4e8ffc1d41505c2c439d0ce04d8e058c7"
+    }
+  ],
+  "sourceSha256": "686f773ac3fad49aa05280dfcac08fcec997b6819deb05aa9699de6037267073",
+  "syntax": [
+    {
+      "file": "verify-ended-probe17-v1.mjs",
+      "exitCode": 0,
+      "stdout": ""
+    },
+    {
+      "file": "probe-contract-v1.mjs",
+      "exitCode": 0,
+      "stdout": ""
+    },
+    {
+      "file": "hp-proof-contract-v2.mjs",
+      "exitCode": 0,
+      "stdout": ""
+    },
+    {
+      "file": "run-ended-probe17-v1.mjs",
+      "exitCode": 0,
+      "stdout": ""
+    },
+    {
+      "file": "seal-tool-source-v1.mjs",
+      "exitCode": 0,
+      "stdout": ""
+    },
+    {
+      "file": "derive-verifier-v1.cjs",
+      "exitCode": 0,
+      "stdout": ""
+    }
+  ],
+  "expectedRunId": "1792956759820-08151b82",
+  "expectedGatewayPid": 62088,
+  "expectedMonitorPid": 61104,
+  "expectedRuntime": {
+    "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+    "driverSourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+    "coreCodeEvidenceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+    "backendInputs": 50,
+    "binarySha256": "dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc",
+    "driverSourceSha256": "5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9",
+    "preparedSourceConfigSha256": "ad1b57c6cad02f36ddc8640f58d5e3ce4a3dc322b492a81eea0d4b2ac1f7c00c",
+    "admittedSourceConfigIsSeparatelyVerified": true,
+    "launcherInputs": 69,
+    "wireHistoricalCoreCodeEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3"
+  },
+  "rootActualOsReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-root-independent-cleanup-v1.json",
+    "bytes": 325,
+    "sha256": "910bc3000ad785599b31aa3eff558a1671ec0af47855b518031c5360dac050df",
+    "source": "New actual Root OS query; not a reconstruction of earlier tool stdout"
+  },
+  "coverage": {
+    "independent": [
+      "Complete raw source/projection/hash closure",
+      "Action status/cadence counters",
+      "16 actual elapsed minute windows and whole-phase assessment rates",
+      "Continuous activity counter replay",
+      "HP ten-state/verified proof counter",
+      "Wire source/terminal/actual row counts",
+      "Store companion separate source/metadata/7-row validation"
+    ],
+    "notIndependent": [
+      "Per-request typed-result and dual-positive packet matching within900ms",
+      "A repeat of the functional full16 audit",
+      "Long-duration formal memory slope or two-hour survival"
+    ],
+    "typed900OriginalContractPreserved": true,
+    "storeCompletenessContributesToGameAcceptance": false,
+    "policyChanged": false
+  },
+  "expectedResult": {
+    "file": "final-verification.json",
+    "schemaVersion": 1,
+    "verifierRevision": 2,
+    "independentVerificationPassed": "Only after Root actual ended invocation succeeds",
+    "probePassed": "Original report and original strict complete-window/continuous result, with failure preservation",
+    "capacityAccepted": false,
+    "rawVerifierAccepted": false,
+    "storeDiagnostics": "Separate diagnostic source/count/completeness object; never game acceptance"
+  },
+  "sourceSeal": {
+    "file": "tool-source-frozen-v1.json",
+    "filesAfterRootSeal": 10,
+    "includes": "Eight explicit source/derivation inputs plus this preparation and copied independent-review-v1.json",
+    "requiresReviewVerdict": {
+      "toolSourceContractPassed": true,
+      "eligibleForRootSealing": true,
+      "blockingFindingIds": []
+    }
+  },
+  "rootSealEntry": "seal-tool-source-v1.mjs --seal-reviewed-tool-source --prepared-sha256=<this rawSHA> --review-file=<actual review> --review-sha256=<actual review SHA>",
+  "rootEndedEntry": "run-ended-probe17-v1.mjs --seal-sha256=<actualtoolseal rawSHA> --verify-ended-probe17 --run=1792956759820-08151b82",
+  "trustBoundary": "Readline aggregates a complete line before checking the64MiB line cap. Only trusted frozen producer and SHA/bytes-bound ended archives are in scope; not a strict adversarial long-line memory guarantee.",
+  "actualVerificationExecuted": false,
+  "actualVerificationResult": null,
+  "toolSourceSealed": false,
+  "targetImportsExecuted": false,
+  "behaviorTestsExecuted": false,
+  "rawRunRead": false,
+  "capacityAccepted": false,
+  "privateDataRead": false,
+  "frozenProbe17SourceChanged": false
+}

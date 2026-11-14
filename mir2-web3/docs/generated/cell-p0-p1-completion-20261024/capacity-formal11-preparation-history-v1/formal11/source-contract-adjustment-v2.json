@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 2,
+  "previousPrepared": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\TEMPLATE-PREPARED-v1.json",
+    "bytes": 14778,
+    "sha256": "61559ef6fa2357787cb5c965d373ba06e3b4f72900e59ce89c00aee14d51eb1f"
+  },
+  "mutations": [
+    {
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\formal-template-contract.mjs",
+        "bytes": 992,
+        "sha256": "778bd06211aa5a57aee1862daadd7fd43c96c8638a1a053dcd82e508770587e8"
+      },
+      "preimage": "before-gate-v2/formal-template-contract.mjs.txt",
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\formal-template-contract.mjs",
+        "bytes": 992,
+        "sha256": "067ce8f26ba223f3b8bfead9b7330c6379a85bf5a277fb9d8c5d3f21c722bfc6"
+      },
+      "exactInverse": true,
+      "rules": [
+        [
+          "'./pending-formal11-binding-v1.json'",
+          "'./pending-formal11-binding-v2.json'"
+        ]
+      ]
+    },
+    {
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\verify-feasibility-gate.mjs",
+        "bytes": 19637,
+        "sha256": "2409e8778529c36551351effbb4ec73dcfe95633d017fe52588d1f60a6ff7ddc"
+      },
+      "preimage": "before-gate-v2/verify-feasibility-gate.mjs.txt",
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\verify-feasibility-gate.mjs",
+        "bytes": 19629,
+        "sha256": "efc8aaaa35593ebeeeb6101a9b37ea1eab979db7cb50bf44c1d75da082398898"
+      },
+      "exactInverse": true,
+      "rules": [
+        [
+          "Formal10 only recognizes fresh probe15 run1792912711217-e7ea81f2; no historical or later probe substitution",
+          "Formal11 only recognizes the exact future root-bound successful Probe15; no old13 or other-run substitution"
+        ],
+        [
+          "Real compact-wire probe15 run1792912711217-e7ea81f2 has not passed; a probe remains ineligible for capacity acceptance",
+          "The exact fresh personal-projection Probe15 has not passed; a probe remains ineligible for capacity acceptance"
+        ],
+        [
+          "Invalid ended13 raw diagnostic line",
+          "Invalid ended15 raw diagnostic line"
+        ]
+      ]
+    },
+    {
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\verify-probe15-collected-evidence.mjs",
+        "bytes": 13702,
+        "sha256": "867dd6752b4324776744056f6aef038b2817c613bca268f322bd021a6c58ef88"
+      },
+      "preimage": "before-gate-v2/verify-probe15-collected-evidence.mjs.txt",
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\verify-probe15-collected-evidence.mjs",
+        "bytes": 13725,
+        "sha256": "e14f8df87d60b04ac0e6864b8ff8fc0c5485f1c17bc2b5d36e6dba138cfba96c"
+      },
+      "exactInverse": true,
+      "rules": [
+        [
+          "run.backendInputCount!==41",
+          "run.backendInputCount!==44"
+        ],
+        [
+          "identity.backendInputs!==41",
+          "identity.backendInputs!==44"
+        ],
+        [
+          "independentVerifierRevision:2,independentVerifierSources",
+          "independentVerifierRevision:receipt.verifierRevision,independentVerifierSources"
+        ]
+      ]
+    }
+  ],
+  "scope": "Only explicit future binding filename, two backend44 fields, parameterized actual independent verifier revision and stale diagnostic message labels. Original strict counters/thresholds/HP proof and five-stage policy remain unchanged.",
+  "noGateOrTestsExecuted": true,
+  "capacityAccepted": false
+}

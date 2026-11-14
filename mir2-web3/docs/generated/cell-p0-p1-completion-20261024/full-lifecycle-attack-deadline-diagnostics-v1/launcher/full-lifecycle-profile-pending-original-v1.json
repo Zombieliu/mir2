@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "preparedAt": "2026-10-25T16:35:11.350Z",
+  "scope": "PENDING fresh diagnostic44-input Release ordinary two-client full16 template; no candidate HEAD/manifest/binary or new success is asserted.",
+  "releaseRecord": "C:\\mir2-build\\p01-completion-20261024\\release-attack-deadline-diagnostics-v1.json",
+  "backendSourceManifest": "C:\\mir2-build\\p01-completion-20261024\\backend-source-attack-deadline-diagnostics-v1.json",
+  "dynamicBackendInputCount": true,
+  "driverPins": [
+    {
+      "file": "apps/web/scripts/playtest-multiplayer-smoke.mjs",
+      "bytes": 38856,
+      "sha256": "a3ce02d111925c41e25b32a5522f0d17243cd78fab8142e92bca5eb1c45915ea"
+    },
+    {
+      "file": "apps/web/scripts/playtest-lifecycle.mjs",
+      "bytes": 39080,
+      "sha256": "e5dffc398590e9a4c6593257770753b7979431977fb2aba3d2e48986f3287410"
+    },
+    {
+      "file": "apps/web/scripts/playtest-catalog-transport.mjs",
+      "bytes": 3794,
+      "sha256": "a833ad9709da46145a991a8270ed5864f37a8023ea1290f44f7c17bf3589d24f"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/protocol-play.mjs",
+      "bytes": 46278,
+      "sha256": "ce01b337cb8650abccb04c2eb5783d20c76f73b92af1c9db441d89e9bbed8781"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "bytes": 18249,
+      "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/protocol-observation.mjs",
+      "bytes": 14376,
+      "sha256": "b69ba03e9f6ee05286d401341c6dbbe6dac4a6e5014fa6a67e9c6167c072d097"
+    }
+  ],
+  "toolPins": [
+    {
+      "file": "run-owned-full.mjs",
+      "bytes": 14389,
+      "sha256": "dc7050c84a6b6601af6e2d94ed7df7778872d9748e2b377006e1c69b38385fb1"
+    },
+    {
+      "file": "audit-owned-full.mjs",
+      "bytes": 9066,
+      "sha256": "d5eab83f0649c6869dd20d7c1d3e4b8d9e63b856e18fb31d40b61669f887d893"
+    },
+    {
+      "file": "frozen-audit-support.mjs",
+      "bytes": 46572,
+      "sha256": "3988052a4ba9de791dbdb887b267eced6ca8bc915fa5676228f6d70c0761f4d5"
+    },
+    {
+      "file": "initialize-fresh-private.ps1",
+      "bytes": 1643,
+      "sha256": "c3a8ddecafe8c82752d963ee3237b55b25841d9674af83ea791e67ef8a82fd77"
+    },
+    {
+      "file": "verify-inputs.mjs",
+      "bytes": 9392,
+      "sha256": "b715c67e7e0b3e764df11a885aff386b909d9f5dc81828eff89f51898660d395"
+    },
+    {
+      "file": "finalize-launcher-inputs.mjs",
+      "bytes": 2038,
+      "sha256": "df13d2a46fff49f21d147c24e4db366777ccf125338c374f1b780c7710bdc0d0"
+    },
+    {
+      "file": "projection-build-source-lib.mjs",
+      "bytes": 239,
+      "sha256": "a0cdb317c114f41ec51ba13e6682aaf77397399cfd314413d5af5b6ad304e309"
+    }
+  ],
+  "endpoint": "ws://127.0.0.1:17610/ws",
+  "tcpBind": "127.0.0.1:17600",
+  "webBind": "127.0.0.1:17610",
+  "profile": "full-lifecycle",
+  "durationSeconds": 900,
+  "ordinaryRegistrationCount": 2,
+  "nativeAttackV2DriverUsed": false,
+  "nativeAttackV2ServerReleaseExpected": true,
+  "normalPlayerGates": true,
+  "qaAdminEnabled": false,
+  "contentProfile": "platinum_176",
+  "routing": "single",
+  "accountBackend": "file",
+  "tokioWorkers": 4,
+  "capacityAccepted": false,
+  "humanFrontendAccepted": false,
+  "repository": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3",
+  "expectedBackendInputCount": 44,
+  "outputRoot": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-attack-deadline-diagnostics-v1\\public",
+  "socketDiagnosticsReleaseExpected": true,
+  "socketDiagnosticsEnabled": true,
+  "templateOnly": true,
+  "realmStarted": false,
+  "accountsCreated": 0,
+  "slowStageThresholdMs": 50,
+  "intendedBackendSourceCommit": null,
+  "intendedSourceManifestSha256": null,
+  "intendedSourceManifestFileSha256": null,
+  "intendedBinarySha256": null,
+  "externalSourceLibrary": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\attack-deadline-diagnostics-release-v1\\source-lib-v1.mjs",
+    "bytes": 16541,
+    "sha256": "9f8832afcb8ff2d0ef2f01c54679e5252e13675115c4c3a4e9d645162bad56f1"
+  },
+  "personalMonsterProjectionReleaseExpected": true
+}

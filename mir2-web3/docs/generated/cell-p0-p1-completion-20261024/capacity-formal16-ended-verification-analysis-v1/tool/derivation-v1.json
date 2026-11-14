@@ -1,0 +1,267 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-26T03:21:27.424Z",
+  "scope": "Formal15 full/failure algorithm retained, current16 identities and source pins only; pure diagnostic appendix raw reused from ended20.",
+  "basis": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-independent-verification-v1\\verify-ended-formal15-v1.mjs",
+    "bytes": 41893,
+    "sha256": "4ea12ad4e9abb3271ad3aa8a5b861df54d8670a6c22a49169f5e121671f3e77c"
+  },
+  "result": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-independent-verification-v1\\verify-ended-formal16-v1.mjs",
+    "bytes": 46382,
+    "sha256": "484aeeaea751f17fb291122fc64b6e19bd4de6826287183e18dc8064aeec5495"
+  },
+  "rules": [
+    {
+      "label": "actual identity/source substitution 1",
+      "beforeUtf8": "scout-anti-convergence-ladder-15",
+      "afterUtf8": "scout-selection-diagnostics-ladder-16",
+      "occurrences": 4
+    },
+    {
+      "label": "actual identity/source substitution 2",
+      "beforeUtf8": "formal15-independent-verification-v1",
+      "afterUtf8": "formal16-independent-verification-v1",
+      "occurrences": 1
+    },
+    {
+      "label": "actual identity/source substitution 3",
+      "beforeUtf8": "formal15-root-independent-cleanup-v1.json",
+      "afterUtf8": "formal16-root-independent-cleanup-v1.json",
+      "occurrences": 2
+    },
+    {
+      "label": "actual identity/source substitution 4",
+      "beforeUtf8": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+      "afterUtf8": "b5374083d257d375437af3de42bead159cd2b917",
+      "occurrences": 4
+    },
+    {
+      "label": "actual identity/source substitution 5",
+      "beforeUtf8": "3b0a0a8300744d6e0d34315f7bbab934252e1e70b124353ae7cf7a2398952df8",
+      "afterUtf8": "d61b7cd057e1a2a55191fe6c407b3058b5ff9205141eaf9290d16da42b028db1",
+      "occurrences": 2
+    },
+    {
+      "label": "actual identity/source substitution 6",
+      "beforeUtf8": "9d1f72da7a7bb49156285a132c2c714bd39605dd6e86e4ca0a9193d5fc3e9a32",
+      "afterUtf8": "2436c902e3b4f41ce78b53ac97006d9cc4ba5ffe79fc4c7feb197ae137a53168",
+      "occurrences": 1
+    },
+    {
+      "label": "actual identity/source substitution 7",
+      "beforeUtf8": "source.files.length,367",
+      "afterUtf8": "source.files.length,371",
+      "occurrences": 1
+    },
+    {
+      "label": "actual identity/source substitution 8",
+      "beforeUtf8": "launcher.files.length,127",
+      "afterUtf8": "launcher.files.length,128",
+      "occurrences": 1
+    },
+    {
+      "label": "actual identity/source substitution 9",
+      "beforeUtf8": "bytes:52054",
+      "afterUtf8": "bytes:52689",
+      "occurrences": 1
+    },
+    {
+      "label": "actual identity/source substitution 10",
+      "beforeUtf8": "9f2af38f22337788512700dce010f83a312b2cbdfc8877a57acdce7be46c3f65",
+      "afterUtf8": "c2b3f4f66a34c2c70eeff33bf9db13225c642278368a58d5d4debfe7b101f1c1",
+      "occurrences": 1
+    },
+    {
+      "label": "actual identity/source substitution 11",
+      "beforeUtf8": "7e0dae9fa268d7d8da801805bd7355d468652425ebfb37b3e593be481f68e405",
+      "afterUtf8": "dad57fdf4b0210c520c8706b73b52a1b38ffe3a741eb0f05eb5f4bba15180bf3",
+      "occurrences": 1
+    },
+    {
+      "label": "actual identity/source substitution 12",
+      "beforeUtf8": "actualFull226Regression:regressionPin",
+      "afterUtf8": "actualFull232Regression:regressionPin,historicalPrior226Freeze:antiPin,currentDiagnosticSourceEvidence:diagnosticDeltaEvidence",
+      "occurrences": 1
+    },
+    {
+      "label": "actual identity/source substitution 13",
+      "beforeUtf8": "frozen Node J/226 source",
+      "afterUtf8": "frozen Node K/232 source",
+      "occurrences": 1
+    },
+    {
+      "label": "K232 source chain block raw reused from actual ended20",
+      "beforeUtf8": " const freezeName='capacity-scout-anti-convergence-driver-frozen-v1.json',freezePin=await pin(BASE,freezeName);assert.equal(freezePin.bytes,9472);assert.equal(freezePin.sha256,'ed0d9783871dd74107c3ec7980574a31acf06a1ed7c5daac40f1f94e78a40182');const frozen=await read(BASE,freezeName);\n assert.equal(frozen.state,'FINAL_COMMITTED_DRIVER_SOURCE');for(const k of ['actualCodeCommit','driverSourceCommit','executionSourceCommit'])assert.equal(frozen[k],'b5374083d257d375437af3de42bead159cd2b917');for(const k of ['backendSourceCommit','backendBuildCommit'])assert.equal(frozen[k],'c743122af05faca43d9535d8c6c2a4bfb01b924f');assert.equal(frozen.sourceSha256,'d61b7cd057e1a2a55191fe6c407b3058b5ff9205141eaf9290d16da42b028db1');assert.equal(frozen.files.length,9);assert.equal(crypto.createHash('sha256').update(JSON.stringify(frozen.files)).digest('hex'),frozen.sourceSha256);assert.equal(frozen.capacityAccepted,false);\n const observerName='capacity-scout-observer-preference-driver-frozen-v1.json',observerPin=await pin(BASE,observerName);assert.equal(observerPin.bytes,9465);assert.equal(observerPin.sha256,'1cf08b52d98d557fa17ea66e336e3adbf6495cb4cb086b22bec461b713ae696e');assert.equal(frozen.priorFreeze.bytes,observerPin.bytes);assert.equal(frozen.priorFreeze.sha256,observerPin.sha256);assert.ok(samePath(frozen.priorFreeze.path,path.join(BASE,observerName)));const historicalObserver=await read(BASE,observerName);assert.equal(historicalObserver.actualCodeCommit,'3a6d8c862d03ded3133605472a8f38bc6258af52');assert.equal(historicalObserver.sourceSha256,'445325ec1b052cffffb07437c38ec0a4688741a0b9207e7895e514e8e4a7f634');\n const priorName='capacity-attack-deadline-driver-frozen-v1.json',priorPin=await pin(BASE,priorName);assert.equal(priorPin.bytes,6759);assert.equal(priorPin.sha256,'c7a4323971721eb54b574649d8c4efeea800fd08484349b5eb8d0ec0ffb11f7b');assert.equal(historicalObserver.priorFreeze.bytes,priorPin.bytes);assert.equal(historicalObserver.priorFreeze.sha256,priorPin.sha256);assert.ok(samePath(historicalObserver.priorFreeze.path,path.join(BASE,priorName)));const prior=await read(BASE,priorName);assert.equal(prior.actualCodeCommit,'d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16');assert.equal(prior.sourceSha256,'5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9');\n const declarationBasisName='capacity-native-chase-preference-driver-frozen-v1.json',declarationBasisPin=await pin(BASE,declarationBasisName);assert.equal(declarationBasisPin.bytes,19099);assert.equal(declarationBasisPin.sha256,'20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef');assert.equal(prior.priorFreeze.bytes,declarationBasisPin.bytes);assert.equal(prior.priorFreeze.sha256,declarationBasisPin.sha256);assert.ok(samePath(prior.priorFreeze.path,path.join(BASE,declarationBasisName)));const declarationBasis=await read(BASE,declarationBasisName);\n const regressionName='scout-anti-convergence-v1/root-full-driver-receipt-v1.json',regressionPin=await pin(BASE,regressionName);assert.equal(regressionPin.bytes,5113);assert.equal(regressionPin.sha256,'e487f6a3ce26d1a87d3d052282e26a1b28fbf3e63f4948e7ee8d29d1003e958a');assert.equal(frozen.fullRegression.receipt.bytes,regressionPin.bytes);assert.equal(frozen.fullRegression.receipt.sha256,regressionPin.sha256);assert.ok(samePath(frozen.fullRegression.receipt.path,path.join(BASE,regressionName)));const regression=await read(BASE,regressionName);assert.equal(regression.exitCode,0);assert.equal(regression.signal,null);assert.equal(regression.sourcePinsUnchangedAfterRun,true);assert.deepEqual(regression.sourceBefore,regression.sourceAfter);assert.deepEqual(regression.sourceBefore,frozen.files);assert.equal(regression.sourceSha256,frozen.sourceSha256);assert.deepEqual(regression.counts,{tests:226,passed:226,failed:0,cancelled:0,skipped:0,todo:0});assert.equal(frozen.fullRegression.finalSourceFullRegressionPerformed,true);assert.equal(frozen.fullRegression.sourcePinsUnchangedAfterRun,true);assert.equal(frozen.fullRegression.exactSourceSha256,frozen.sourceSha256);\n const regressionLogPin=await pin(BASE,path.relative(BASE,frozen.fullRegression.log.path)),regressionStderrPin=await pin(BASE,path.relative(BASE,frozen.fullRegression.stderr.path));assert.deepEqual(regressionLogPin,{path:safeRelative(path.relative(BASE,frozen.fullRegression.log.path)),bytes:frozen.fullRegression.log.bytes,sha256:frozen.fullRegression.log.sha256});assert.equal(regressionStderrPin.bytes,0);assert.equal(regressionStderrPin.sha256,frozen.fullRegression.stderr.sha256);const regressionText=await fs.readFile(await safeFile(BASE,regressionLogPin.path),'utf8');for(const[k,n]of[['tests',226],['pass',226],['fail',0],['cancelled',0],['skipped',0],['todo',0]])assert.ok(new RegExp('^# '+k+' '+n+'\\\\r?$','m').test(regressionText));\n",
+      "afterUtf8": " const freezeName='capacity-scout-selection-diagnostics-driver-frozen-v1.json',freezePin=await pin(BASE,freezeName);assert.equal(freezePin.bytes,12423);assert.equal(freezePin.sha256,'e3300e34d060fb23638bdc690726b6f4376f7fdeb1049aa8871ebdb4bfd628f8');const frozen=await read(BASE,freezeName);\r\n assert.equal(frozen.state,'FINAL_COMMITTED_DRIVER_SOURCE');for(const k of ['actualCodeCommit','driverSourceCommit','executionSourceCommit'])assert.equal(frozen[k],'b5374083d257d375437af3de42bead159cd2b917');for(const k of ['backendSourceCommit','backendBuildCommit'])assert.equal(frozen[k],'c743122af05faca43d9535d8c6c2a4bfb01b924f');assert.equal(frozen.sourceSha256,'d61b7cd057e1a2a55191fe6c407b3058b5ff9205141eaf9290d16da42b028db1');assert.equal(frozen.files.length,9);assert.equal(crypto.createHash('sha256').update(JSON.stringify(frozen.files)).digest('hex'),frozen.sourceSha256);assert.equal(frozen.capacityAccepted,false);\r\n const antiName='capacity-scout-anti-convergence-driver-frozen-v1.json',antiPin=await pin(BASE,antiName);assert.equal(antiPin.bytes,9472);assert.equal(antiPin.sha256,'ed0d9783871dd74107c3ec7980574a31acf06a1ed7c5daac40f1f94e78a40182');assert.equal(frozen.priorFreeze.bytes,antiPin.bytes);assert.equal(frozen.priorFreeze.sha256,antiPin.sha256);assert.ok(samePath(frozen.priorFreeze.path,path.join(BASE,antiName)));const historicalAnti=await read(BASE,antiName);assert.equal(historicalAnti.actualCodeCommit,'4fb58ade4aa95b677bb795625d01da542a84a3f7');assert.equal(historicalAnti.sourceSha256,'3b0a0a8300744d6e0d34315f7bbab934252e1e70b124353ae7cf7a2398952df8');\n const observerName='capacity-scout-observer-preference-driver-frozen-v1.json',observerPin=await pin(BASE,observerName);assert.equal(observerPin.bytes,9465);assert.equal(observerPin.sha256,'1cf08b52d98d557fa17ea66e336e3adbf6495cb4cb086b22bec461b713ae696e');assert.equal(historicalAnti.priorFreeze.bytes,observerPin.bytes);assert.equal(historicalAnti.priorFreeze.sha256,observerPin.sha256);assert.ok(samePath(historicalAnti.priorFreeze.path,path.join(BASE,observerName)));const historicalObserver=await read(BASE,observerName);assert.equal(historicalObserver.actualCodeCommit,'3a6d8c862d03ded3133605472a8f38bc6258af52');assert.equal(historicalObserver.sourceSha256,'445325ec1b052cffffb07437c38ec0a4688741a0b9207e7895e514e8e4a7f634');\n const priorName='capacity-attack-deadline-driver-frozen-v1.json',priorPin=await pin(BASE,priorName);assert.equal(priorPin.bytes,6759);assert.equal(priorPin.sha256,'c7a4323971721eb54b574649d8c4efeea800fd08484349b5eb8d0ec0ffb11f7b');assert.equal(historicalObserver.priorFreeze.bytes,priorPin.bytes);assert.equal(historicalObserver.priorFreeze.sha256,priorPin.sha256);assert.ok(samePath(historicalObserver.priorFreeze.path,path.join(BASE,priorName)));const prior=await read(BASE,priorName);assert.equal(prior.actualCodeCommit,'d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16');assert.equal(prior.sourceSha256,'5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9');\r\n const declarationBasisName='capacity-native-chase-preference-driver-frozen-v1.json',declarationBasisPin=await pin(BASE,declarationBasisName);assert.equal(declarationBasisPin.bytes,19099);assert.equal(declarationBasisPin.sha256,'20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef');assert.equal(prior.priorFreeze.bytes,declarationBasisPin.bytes);assert.equal(prior.priorFreeze.sha256,declarationBasisPin.sha256);assert.ok(samePath(prior.priorFreeze.path,path.join(BASE,declarationBasisName)));const declarationBasis=await read(BASE,declarationBasisName);\r\n const regressionName='root-scout-selection-diagnostics-validation-v1/root-full-driver-receipt-v1.json',regressionPin=await pin(BASE,regressionName);assert.equal(regressionPin.bytes,5162);assert.equal(regressionPin.sha256,'733754ea1cade189fa92c29d5a808f7b940315909605cf636d2d3bf7b51a8446');assert.equal(frozen.fullRegression.receipt.bytes,regressionPin.bytes);assert.equal(frozen.fullRegression.receipt.sha256,regressionPin.sha256);assert.ok(samePath(frozen.fullRegression.receipt.path,path.join(BASE,regressionName)));const regression=await read(BASE,regressionName);assert.equal(regression.exitCode,0);assert.equal(regression.signal,null);assert.equal(regression.sourcePinsUnchangedAfterRun,true);assert.deepEqual(regression.sourceBefore,regression.sourceAfter);assert.deepEqual(regression.sourceBefore,frozen.files);assert.equal(regression.sourceSha256,frozen.sourceSha256);assert.deepEqual(regression.counts,{tests:232,passed:232,failed:0,cancelled:0,skipped:0,todo:0});assert.equal(frozen.fullRegression.finalSourceFullRegressionPerformed,true);assert.equal(frozen.fullRegression.sourcePinsUnchangedAfterRun,true);assert.equal(frozen.fullRegression.exactSourceSha256,frozen.sourceSha256);\r\n const regressionLogPin=await pin(BASE,path.relative(BASE,frozen.fullRegression.log.path)),regressionStderrPin=await pin(BASE,path.relative(BASE,frozen.fullRegression.stderr.path));assert.deepEqual(regressionLogPin,{path:safeRelative(path.relative(BASE,frozen.fullRegression.log.path)),bytes:frozen.fullRegression.log.bytes,sha256:frozen.fullRegression.log.sha256});assert.equal(regressionStderrPin.bytes,0);assert.equal(regressionStderrPin.sha256,frozen.fullRegression.stderr.sha256);const regressionText=await fs.readFile(await safeFile(BASE,regressionLogPin.path),'utf8');for(const[k,n]of[['tests',232],['pass',232],['fail',0],['cancelled',0],['skipped',0],['todo',0]])assert.ok(new RegExp('^# '+k+' '+n+'\\\\r?$','m').test(regressionText));\r\n const diagnosticDeltaEvidence={};for(const key of ['sourcePreservation','productionMutation','sourceReview','fullRegressionReview']){const ref=frozen.diagnosticDelta?.[key];assert.ok(ref&&typeof ref.path==='string');const relative=safeRelative(path.relative(BASE,ref.path)),actual=await pin(BASE,relative);assert.equal(actual.bytes,ref.bytes);assert.equal(actual.sha256,ref.sha256);diagnosticDeltaEvidence[key]=actual;}assert.equal(frozen.focusedTests.passed,6);assert.equal(frozen.focusedTests.focusedSelectionPassed,22);assert.equal(frozen.focusedTests.includedInFull232,true);assert.equal(frozen.diagnosticDelta.onlyFixedScalarCountsAndReasons,true);assert.deepEqual(frozen.focusedTests.sourcePreservation,frozen.diagnosticDelta.sourcePreservation);assert.equal(frozen.priorTestRawPrefix.bytes,270311);assert.equal(frozen.priorTestRawPrefix.sha256,'f1ba119770bde34135e734780b04539206e859bd7b896977d4e6595555c032ef');assert.equal(frozen.priorTestRawPrefix.exact,true);\n",
+      "occurrences": 1
+    },
+    {
+      "label": "scout diagnostic helper raw reused from actual ended20",
+      "beforeUtf8": "async function verifyStoreCompanion(",
+      "afterUtf8": "// Pure diagnostic appendix: malformed or absent rows never change original game adjudication.\nfunction createScoutDiagnosticAppendix(){\n const fields=['hintCount','activeOtherWaypointCount','sharedHintCount','unsharedHintCount','hintPreferenceReason'],allowed=new Set(['insufficient-hints','no-active-other-waypoints','reordered','all-hints-shared','all-hints-unshared']);\n const summary={rows:0,detailedRows:0,truncationSentinels:0,missingFieldRows:0,invalidTypeRows:0,unknownReasonRows:0,reasonCounts:{},fieldPresence:Object.fromEntries(fields.map(k=>[k,0])),selected:[],selectedTruncated:false,observed:false,contributesToGameAcceptance:false};\n const scalar=v=>v===null||typeof v==='boolean'||(typeof v==='number'&&Number.isFinite(v))?v:typeof v==='string'?v.slice(0,80):'[non-scalar-or-missing]';\n return{observe(r,line){summary.rows++;summary.observed=true;if(r.truncated===true){summary.truncationSentinels++;if(summary.selected.length<32)summary.selected.push({line,actor:scalar(r.actor),phase:scalar(r.phase),truncated:true,rowLimit:scalar(r.rowLimit)});else summary.selectedTruncated=true;return;}summary.detailedRows++;const present=fields.every(k=>Object.hasOwn(r,k));for(const k of fields)if(Object.hasOwn(r,k))summary.fieldPresence[k]++;if(!present)summary.missingFieldRows++;const count=(v,max)=>Number.isSafeInteger(v)&&v>=0&&v<=max;const valid=count(r.hintCount,4)&&(r.activeOtherWaypointCount===null||count(r.activeOtherWaypointCount,100))&&(r.sharedHintCount===null||count(r.sharedHintCount,4))&&(r.unsharedHintCount===null||count(r.unsharedHintCount,4))&&typeof r.hintPreferenceReason==='string';if(!valid)summary.invalidTypeRows++;if(allowed.has(r.hintPreferenceReason))summary.reasonCounts[r.hintPreferenceReason]=(summary.reasonCounts[r.hintPreferenceReason]??0)+1;else summary.unknownReasonRows++;if(summary.selected.length<32)summary.selected.push({line,actor:scalar(r.actor),phase:scalar(r.phase),truncated:false,...Object.fromEntries(fields.map(k=>[k,scalar(r[k])]))});else summary.selectedTruncated=true;},summary(){return{...summary,fieldContractObserved:summary.detailedRows>0&&summary.missingFieldRows===0&&summary.invalidTypeRows===0&&summary.unknownReasonRows===0,observationScope:summary.rows?'Only bounded scalar selection diagnostics were observed; no planning success, ACK, hit, throughput or causal-improvement credit.':'No selection diagnostic rows observed; schema coverage is not established.',notIndependentlyReplayedTyped900msPackets:true};}};\n}\nasync function verifyStoreCompanion(",
+      "occurrences": 1
+    },
+    {
+      "label": "diagnostic state raw line",
+      "beforeUtf8": " const sequenceState={1:",
+      "afterUtf8": " const scoutDiagnosticAppendix=createScoutDiagnosticAppendix();\n const sequenceState={1:",
+      "occurrences": 1
+    },
+    {
+      "label": "pure diagnostic observation in original callback",
+      "beforeUtf8": "  if(r.type==='nativeResume')",
+      "afterUtf8": "  if(r.type==='combatScoutSelection')scoutDiagnosticAppendix.observe(r,line);\n  if(r.type==='nativeResume')",
+      "occurrences": 1
+    },
+    {
+      "label": "pure diagnostic result outside formal formula",
+      "beforeUtf8": "wireDiagnostics,storeDiagnostics,telemetryDeltas",
+      "afterUtf8": "wireDiagnostics,storeDiagnostics,scoutSelectionDiagnostics:scoutDiagnosticAppendix.summary(),telemetryDeltas",
+      "occurrences": 1
+    },
+    {
+      "label": "actual terminal binding applied after mechanical substitutions",
+      "beforeUtf8": "const ENDED_BINDING=Object.freeze({\"state\":\"FINAL_ACTUAL_ENDED_RUN_AND_CLEANUP_BOUND\",\"runId\":\"1792974410829-a5288349\",\"ownedPids\":[67304,59024],\"rootCleanupSha256\":\"2f560a2c82a6f3ee744f35d54e0cd79726e1c8a5a0df7499393dec7eaa5601de\",\"rootCleanupShape\":\"schema1-ownedPids-remainingArrays-observedAt-scope\",\"consumerTerminalPins\":[{\"phase\":\"base-collection\",\"exitCode\":0,\"stdout\":{\"path\":\"formal15-root-base-collection-stdout-v1.log\",\"bytes\":132864,\"sha256\":\"771d39ed7ceae3afa532ff8c349cd717472a65b65ee5662a6a6757e1960c486c\"},\"stderr\":{\"path\":\"formal15-root-base-collection-stderr-v1.log\",\"bytes\":0,\"sha256\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"}},{\"phase\":\"base-verification\",\"exitCode\":0,\"stdout\":{\"path\":\"formal15-root-base-verification-stdout-v1.log\",\"bytes\":5021,\"sha256\":\"2d14695283ed759c6df829d6754ccbbfa413cf0cf0251919f5795ee7a0841466\"},\"stderr\":{\"path\":\"formal15-root-base-verification-stderr-v1.log\",\"bytes\":0,\"sha256\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"}},{\"phase\":\"store-collection\",\"exitCode\":0,\"stdout\":{\"path\":\"formal15-root-store-collection-stdout-v1.log\",\"bytes\":396,\"sha256\":\"476a9d2f30c54f767d567d55d3e98c9693e8d43e7978f92a105a4cf99ce4caf0\"},\"stderr\":{\"path\":\"formal15-root-store-collection-stderr-v1.log\",\"bytes\":0,\"sha256\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"}},{\"phase\":\"store-verification\",\"exitCode\":0,\"stdout\":{\"path\":\"formal15-root-store-verification-stdout-v1.log\",\"bytes\":1243,\"sha256\":\"32d4c4e635eec0406b512d14a251c69b537c57f61a371521bbaa9dbe1f7bea59\"},\"stderr\":{\"path\":\"formal15-root-store-verification-stderr-v1.log\",\"bytes\":0,\"sha256\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"}}],\"rootActualFacts\":{\"path\":\"formal15-root-actual-terminal-and-consumer-facts-v1.json\",\"bytes\":7547,\"sha256\":\"ba15eabedb1ad456e464cc121a4baea38f44b887cb68ad25a94642146c4a4fd1\"},\"report\":{\"path\":\"release-native-v2-scout-selection-diagnostics-ladder-16/reports/1792974410829-a5288349.report.json\",\"bytes\":424421,\"sha256\":\"e938a814eed311b80281ffcd6cadf16e57d36c78f48a1f35ad4caf68d90355a3\"},\"admittedSourceConfigSha256\":\"5c8be7bc19d26ecf69326c19224f6f657d469099f00f606bed042a3912b40b8a\",\"admittedSourceFileCount\":372});",
+      "afterUtf8": "const ENDED_BINDING=Object.freeze({\"state\":\"FINAL_ACTUAL_ENDED_RUN_AND_CLEANUP_BOUND\",\"runId\":\"1792981760951-0079fde7\",\"ownedPids\":[65544,61512],\"rootCleanupSha256\":\"4f4badf50c3154f047949b699fcd3d86ab6eb90583c52993a06e17b484e86df5\",\"rootCleanupShape\":\"schema1-ownedPids-remainingArrays-observedAt-scope\",\"consumerTerminalPins\":[{\"phase\":\"base-collection\",\"exitCode\":0,\"stdout\":{\"path\":\"formal16-root-base-collection-stdout-v1.log\",\"bytes\":132833,\"sha256\":\"c2c050e43300a3088c0b1c628772afd17bff66d861a4f321d63b400aaf383976\"},\"stderr\":{\"path\":\"formal16-root-base-collection-stderr-v1.log\",\"bytes\":0,\"sha256\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"}},{\"phase\":\"base-verification\",\"exitCode\":0,\"stdout\":{\"path\":\"formal16-root-base-verification-stdout-v1.log\",\"bytes\":5026,\"sha256\":\"6bb47800fa7f59a012ea9eabcc20d36bb42f22a613cdd8a318ddbb4454a99c28\"},\"stderr\":{\"path\":\"formal16-root-base-verification-stderr-v1.log\",\"bytes\":0,\"sha256\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"}},{\"phase\":\"store-collection\",\"exitCode\":0,\"stdout\":{\"path\":\"formal16-root-store-collection-stdout-v1.log\",\"bytes\":402,\"sha256\":\"9e6d4ab692b25bda840b306ce038fb3a1dfe77905358f7ab11c014faf9d0c10b\"},\"stderr\":{\"path\":\"formal16-root-store-collection-stderr-v1.log\",\"bytes\":0,\"sha256\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"}},{\"phase\":\"store-verification\",\"exitCode\":0,\"stdout\":{\"path\":\"formal16-root-store-verification-stdout-v1.log\",\"bytes\":1244,\"sha256\":\"7983d05dcac60561727d4d219c8b16522b12ec334a2a142948c5e236013e7856\"},\"stderr\":{\"path\":\"formal16-root-store-verification-stderr-v1.log\",\"bytes\":0,\"sha256\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"}}],\"rootActualFacts\":{\"path\":\"formal16-root-actual-terminal-and-consumer-facts-v1.json\",\"bytes\":11336,\"sha256\":\"5eaea7bd0468160452944bb9293904fcdcef36de139f42960c7338f7f9d6f48d\"},\"report\":{\"path\":\"release-native-v2-scout-selection-diagnostics-ladder-16/reports/1792981760951-0079fde7.report.json\",\"bytes\":422257,\"sha256\":\"ee804e825a3826749286eb22bc53fe0841e774cbc4518537457fb4db888c7e1a\"},\"admittedSourceConfigSha256\":\"d9e9664b68636264f46315a88e159a5b0bdbd3deb53ee6d4093a8a2193a38c00\",\"admittedSourceFileCount\":376});",
+      "occurrences": 1
+    }
+  ],
+  "mainForwardAndInverseRawExact": true,
+  "counterAndMetricHelperBodyRawExact": true,
+  "formalPassFailureMemoryFormulaBodyRawExact": true,
+  "borrowedSource": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-independent-verification-v1\\verify-ended-probe20-v1.mjs",
+    "bytes": 44400,
+    "sha256": "335e2121bc24ad616061e829ed5e352f9658f431ef36571b1aae662eb61ad149"
+  },
+  "borrowedK232Block": {
+    "bytes": 6466,
+    "sha256": "c8b260891d06abe09506761dfa9b7799bc3615159c30a3b90c2db1d942dbc252",
+    "rawExact": true
+  },
+  "borrowedScoutAppendix": {
+    "bytes": 2490,
+    "sha256": "3ddea57cba54e50031474911138708d24613001ded99c23ea46b52779be72a8b",
+    "rawExact": true
+  },
+  "contract": {
+    "basis": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-independent-verification-v1\\formal-contract-v1.mjs",
+      "bytes": 6143,
+      "sha256": "5bfc446cae0a3da263cf74fce8078b73173da9b55619487fd9f831e36afd54aa"
+    },
+    "result": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-independent-verification-v1\\formal-contract-v1.mjs",
+      "bytes": 6143,
+      "sha256": "8b1822bd4d097a06e68c17d383b4bb5fdfbefe0db1cda0043917cfe6e374d9f9"
+    },
+    "rules": [
+      {
+        "before": "--verify-ended-formal15",
+        "after": "--verify-ended-formal16",
+        "occurrences": 1
+      },
+      {
+        "before": "ended-formal15 flag",
+        "after": "ended-formal16 flag",
+        "occurrences": 1
+      }
+    ],
+    "otherBodyRawExact": true
+  },
+  "runner": {
+    "basis": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-independent-verification-v1\\run-ended-formal15-v1.mjs",
+      "bytes": 2259,
+      "sha256": "e0488f9d726e5588f1a75dd140849d82487a3dd3df6a48a7cac268914f176fe2"
+    },
+    "result": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-independent-verification-v1\\run-ended-formal16-v1.mjs",
+      "bytes": 2259,
+      "sha256": "b5f78bd14461764fb8f58efe81aadcb6f8afdac1b9b50b1e81f5b845eda1e2fd"
+    },
+    "rules": [
+      {
+        "before": "--verify-ended-formal15",
+        "after": "--verify-ended-formal16",
+        "occurrences": 1
+      },
+      {
+        "before": "verify-ended-formal15-v1.mjs",
+        "after": "verify-ended-formal16-v1.mjs",
+        "occurrences": 1
+      }
+    ],
+    "otherBodyRawExact": true
+  },
+  "rawCopies": [
+    {
+      "basis": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-independent-verification-v1\\hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      },
+      "result": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-independent-verification-v1\\hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      },
+      "rawExact": true
+    },
+    {
+      "basis": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-independent-verification-v1\\expected-formal-policy-v1.json",
+        "bytes": 1038,
+        "sha256": "b949f19d4460da9c8a38a00a96cf785a9e9a4bba7c343af27094b5192f00921a"
+      },
+      "result": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-independent-verification-v1\\expected-formal-policy-v1.json",
+        "bytes": 1038,
+        "sha256": "b949f19d4460da9c8a38a00a96cf785a9e9a4bba7c343af27094b5192f00921a"
+      },
+      "rawExact": true
+    },
+    {
+      "basis": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-independent-verification-v1\\seal-tool-source-v1.mjs",
+        "bytes": 3011,
+        "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+      },
+      "result": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-independent-verification-v1\\seal-tool-source-v1.mjs",
+        "bytes": 3011,
+        "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+      },
+      "rawExact": true
+    }
+  ],
+  "untouchedFormalRules": {
+    "completeWindows146": true,
+    "soakSeconds7200": true,
+    "memoryRetainedBuckets1201": true,
+    "memoryBucketMs3000": true,
+    "resumeAndSave5": true,
+    "postResumeSeconds60": true,
+    "failureAndPartialNeverPromoted": true,
+    "originalCleanupVerdictNotMutated": true
+  },
+  "diagnosticAppendix": {
+    "sameExistingRawCallback": true,
+    "additionalRawScans": 0,
+    "maximumScalarTuples": 32,
+    "notAndGame": true,
+    "noPacket900ReplayAdded": true
+  },
+  "constructionHistory": {
+    "firstInMemoryAttemptFailed": true,
+    "evidence": "Tool stdout only, no saved raw log.",
+    "failure": "Inverse-string cardinality assertion for realm substitution:4 actual vs3 expected because new terminal binding already contained the replacement.",
+    "sourceFilesWrittenBeforeFailure": 0,
+    "fix": "Apply final terminal binding after mechanical identity substitutions; full reverse-cardinality and raw-equality now verified.",
+    "targetModuleImportOrExecution": false
+  },
+  "sourceImported": false,
+  "rawReplayExecuted": false
+}

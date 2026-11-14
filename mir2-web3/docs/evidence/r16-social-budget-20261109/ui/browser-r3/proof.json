@@ -1,0 +1,589 @@
+{
+  "schema": 1,
+  "passed": false,
+  "phase": "retrieve-ack-delay-ui-cancel",
+  "runtimeVersion": "bevy-0cd68510886134e0",
+  "scope": {
+    "isolatedLoopback": true,
+    "existingOrdinaryAccounts": 2,
+    "newRegistrations": 0,
+    "reusedExistingIsolatedAccounts": true,
+    "primaryPhysicalUi": true,
+    "transparentRealServerWebSocket": true,
+    "onlyMatchingItemAckDelayed": true,
+    "passiveCdpCoverage": true,
+    "noBridgeOrGameActionInvokedByDriver": true,
+    "guildMembershipNotFabricated": true,
+    "modelCalls": 0,
+    "privilegedCommands": 0
+  },
+  "checks": [
+    {
+      "name": "primary-ui-existing-character-in-real-world",
+      "passed": true,
+      "position": {
+        "x": 288,
+        "y": 616
+      },
+      "map": "0"
+    },
+    {
+      "name": "second-ordinary-player-same-realm",
+      "passed": true,
+      "adjacentInitially": true
+    },
+    {
+      "name": "ordinary-guild-window-membership-gate",
+      "passed": true,
+      "realMembership": false,
+      "mutationEditors": 0,
+      "onlyCloseButton": true,
+      "noGuildMutationCommands": true,
+      "guildRulesOnlyControllerVerified": true
+    },
+    {
+      "name": "ordinary-peer-adjacent-facing",
+      "passed": true,
+      "primaryPosition": {
+        "x": 288,
+        "y": 616
+      },
+      "peerPosition": {
+        "x": 288,
+        "y": 617
+      },
+      "peerDirection": "Up"
+    },
+    {
+      "name": "deposit-pending-cancel-real-server-restores-assets",
+      "passed": true,
+      "heldPacket": "DepositTradeItem",
+      "from": 4,
+      "to": 0,
+      "heldMs": 753,
+      "realSuccess": true,
+      "terminalUnlock": false,
+      "exactUidSlotQuantityAndGoldRestored": true,
+      "retrievalSlotMoveExpected": false,
+      "lateAckReleasedUnmodified": true,
+      "noResurrection": true,
+      "noRepeatedEconomicCommands": true
+    }
+  ],
+  "events": [
+    {
+      "at": 1794181112868,
+      "type": "command",
+      "who": "primary",
+      "command": "clientCapabilities"
+    },
+    {
+      "at": 1794181112868,
+      "type": "command",
+      "who": "primary",
+      "command": "clientCapabilities"
+    },
+    {
+      "at": 1794181114708,
+      "type": "command",
+      "who": "primary",
+      "command": "setLanguage"
+    },
+    {
+      "at": 1794181114709,
+      "type": "command",
+      "who": "primary",
+      "command": "clientVersion"
+    },
+    {
+      "at": 1794181114709,
+      "type": "command",
+      "who": "primary",
+      "command": "login"
+    },
+    {
+      "at": 1794181117853,
+      "type": "command",
+      "who": "primary",
+      "command": "startGame"
+    },
+    {
+      "at": 1794181124469,
+      "type": "server-packet",
+      "packet": "StartGame",
+      "result": 4
+    },
+    {
+      "at": 1794181124516,
+      "type": "command",
+      "who": "primary",
+      "command": "npcPurchaseOwner"
+    },
+    {
+      "at": 1794181124965,
+      "type": "server-packet",
+      "packet": "SwitchGroup"
+    },
+    {
+      "at": 1794181124984,
+      "type": "server-packet",
+      "packet": "DeleteGroup"
+    },
+    {
+      "at": 1794181124984,
+      "type": "server-packet",
+      "packet": "SwitchGroup"
+    },
+    {
+      "at": 1794181128080,
+      "type": "command",
+      "who": "primary",
+      "command": "keepAlive"
+    },
+    {
+      "at": 1794181128219,
+      "type": "command",
+      "who": "peer",
+      "command": "clientVersion"
+    },
+    {
+      "at": 1794181128230,
+      "type": "command",
+      "who": "peer",
+      "command": "login"
+    },
+    {
+      "at": 1794181128956,
+      "type": "command",
+      "who": "peer",
+      "command": "startGame"
+    },
+    {
+      "at": 1794181132087,
+      "type": "native-key",
+      "function": "Guilds",
+      "chord": "G"
+    },
+    {
+      "at": 1794181132713,
+      "type": "command",
+      "who": "peer",
+      "command": "turn"
+    },
+    {
+      "at": 1794181132750,
+      "type": "command",
+      "who": "peer",
+      "command": "tradeRequest"
+    },
+    {
+      "at": 1794181138237,
+      "type": "command",
+      "who": "peer",
+      "command": "keepAlive"
+    },
+    {
+      "at": 1794181139629,
+      "type": "server-packet",
+      "packet": "TradeRequest"
+    },
+    {
+      "at": 1794181139883,
+      "type": "command",
+      "who": "primary",
+      "command": "tradeReply"
+    },
+    {
+      "at": 1794181139921,
+      "type": "server-packet",
+      "packet": "TradeAccept"
+    },
+    {
+      "at": 1794181140573,
+      "type": "command",
+      "who": "primary",
+      "command": "depositTradeItem",
+      "from": 4,
+      "to": 0
+    },
+    {
+      "at": 1794181140697,
+      "type": "server-packet",
+      "packet": "DepositTradeItem",
+      "success": true,
+      "from": 4,
+      "to": 0
+    },
+    {
+      "at": 1794181140697,
+      "type": "real-ack-withheld",
+      "packet": "DepositTradeItem",
+      "from": 4,
+      "to": 0,
+      "success": true,
+      "rawSha256": "ba5f389087dc2b8d31c38cb0c806a7131852571d524a0811409a6e385baece65"
+    },
+    {
+      "at": 1794181140766,
+      "type": "pending-ui-before-cancel",
+      "operation": "deposit",
+      "ackWithheld": true,
+      "cancelEnabled": true,
+      "allItemControlsDisabled": true
+    },
+    {
+      "at": 1794181141217,
+      "type": "command",
+      "who": "primary",
+      "command": "tradeCancel"
+    },
+    {
+      "at": 1794181141282,
+      "type": "server-packet",
+      "packet": "TradeCancel",
+      "unlock": false
+    },
+    {
+      "at": 1794181141450,
+      "type": "held-ack-released",
+      "packet": "DepositTradeItem",
+      "rawSha256": "ba5f389087dc2b8d31c38cb0c806a7131852571d524a0811409a6e385baece65",
+      "heldForMs": 753
+    },
+    {
+      "at": 1794181142947,
+      "type": "command",
+      "who": "primary",
+      "command": "keepAlive"
+    },
+    {
+      "at": 1794181142971,
+      "type": "command",
+      "who": "peer",
+      "command": "tradeRequest"
+    },
+    {
+      "at": 1794181143122,
+      "type": "server-packet",
+      "packet": "TradeRequest"
+    },
+    {
+      "at": 1794181143447,
+      "type": "command",
+      "who": "primary",
+      "command": "tradeReply"
+    },
+    {
+      "at": 1794181143497,
+      "type": "server-packet",
+      "packet": "TradeAccept"
+    },
+    {
+      "at": 1794181143972,
+      "type": "command",
+      "who": "primary",
+      "command": "depositTradeItem",
+      "from": 4,
+      "to": 0
+    },
+    {
+      "at": 1794181144044,
+      "type": "server-packet",
+      "packet": "DepositTradeItem",
+      "success": true,
+      "from": 4,
+      "to": 0
+    },
+    {
+      "at": 1794181144656,
+      "type": "command",
+      "who": "primary",
+      "command": "retrieveTradeItem",
+      "from": 0,
+      "to": 3
+    },
+    {
+      "at": 1794181144745,
+      "type": "server-packet",
+      "packet": "RetrieveTradeItem",
+      "success": true,
+      "from": 0,
+      "to": 3
+    },
+    {
+      "at": 1794181144745,
+      "type": "real-ack-withheld",
+      "packet": "RetrieveTradeItem",
+      "from": 0,
+      "to": 3,
+      "success": true,
+      "rawSha256": "d2c742eec224411e9a62290fc755091a22ccedc5228886b03ee3393446942ec2"
+    },
+    {
+      "at": 1794181144855,
+      "type": "pending-ui-before-cancel",
+      "operation": "retrieve",
+      "ackWithheld": true,
+      "cancelEnabled": true,
+      "allItemControlsDisabled": true
+    },
+    {
+      "at": 1794181145362,
+      "type": "command",
+      "who": "primary",
+      "command": "tradeCancel"
+    },
+    {
+      "at": 1794181145426,
+      "type": "server-packet",
+      "packet": "TradeCancel",
+      "unlock": false
+    },
+    {
+      "at": 1794181148249,
+      "type": "command",
+      "who": "peer",
+      "command": "keepAlive"
+    },
+    {
+      "at": 1794181157882,
+      "type": "command",
+      "who": "primary",
+      "command": "keepAlive"
+    },
+    {
+      "at": 1794181158256,
+      "type": "command",
+      "who": "peer",
+      "command": "keepAlive"
+    },
+    {
+      "at": 1794181160770,
+      "type": "held-ack-released",
+      "packet": "RetrieveTradeItem",
+      "rawSha256": "d2c742eec224411e9a62290fc755091a22ccedc5228886b03ee3393446942ec2",
+      "heldForMs": 16025
+    }
+  ],
+  "commands": {
+    "primary": {
+      "clientCapabilities": 2,
+      "setLanguage": 1,
+      "clientVersion": 1,
+      "login": 1,
+      "startGame": 1,
+      "npcPurchaseOwner": 1,
+      "keepAlive": 3,
+      "tradeReply": 2,
+      "depositTradeItem": 2,
+      "tradeCancel": 2,
+      "retrieveTradeItem": 1
+    },
+    "peer": {
+      "clientVersion": 1,
+      "login": 1,
+      "startGame": 1,
+      "turn": 1,
+      "tradeRequest": 2,
+      "keepAlive": 3
+    }
+  },
+  "bridgeCoverage": [
+    {
+      "stage": "bootstrap",
+      "bridge": [],
+      "bridgeCalls": 0,
+      "host": [
+        {
+          "method": "receive",
+          "calls": 1
+        }
+      ]
+    },
+    {
+      "stage": "guild-window-readonly",
+      "bridge": [],
+      "bridgeCalls": 0,
+      "host": []
+    },
+    {
+      "stage": "failure",
+      "bridge": [
+        {
+          "path": "http://127.0.0.1:19482/bevy-runtime/v/bevy-0cd68510886134e0/pkg-webgpu/mir2_bevy_runtime.js",
+          "calls": 43
+        }
+      ],
+      "bridgeCalls": 43,
+      "host": [
+        {
+          "method": "receive",
+          "calls": 16
+        },
+        {
+          "method": "snapshot",
+          "calls": 5
+        },
+        {
+          "method": "reserve",
+          "calls": 7
+        },
+        {
+          "method": "validate",
+          "calls": 5
+        },
+        {
+          "method": "enter",
+          "calls": 5
+        }
+      ]
+    }
+  ],
+  "moduleResponses": [
+    {
+      "path": "/bevy-runtime/v/bevy-0cd68510886134e0/pkg-webgpu/mir2_bevy_runtime.js",
+      "status": 200,
+      "bytes": 141747,
+      "sha256": "c319fbc229c3bf23513354f342a310547fe32c2dcb9b34c8626c55c0e88d85ba",
+      "matchesFrozenRuntime": true
+    }
+  ],
+  "screenshots": [
+    "01-primary-in-town.png",
+    "03-guild-no-membership.png",
+    "deposit-pending-cancel-enabled.png",
+    "deposit-cancelled-after-old-ack.png",
+    "retrieve-pending-cancel-enabled.png",
+    "failure.png"
+  ],
+  "errors": [
+    {
+      "phase": "retrieve-ack-delay-ui-cancel",
+      "name": "Error",
+      "code": null,
+      "messageHash": "0a47e70fdf2906923c7bcded3775d6d491f08f084adc454a4704768f12fdb008",
+      "safeCode": "PEER_TRADE_NOT_CLOSED"
+    }
+  ],
+  "httpErrors": [],
+  "pageErrors": [],
+  "consoleErrors": [],
+  "groupProofReference": "browser-r2/proof.json",
+  "guildObservation": {
+    "snapshotHasObject": true,
+    "hasNonemptyGuildName": false
+  },
+  "assetsBefore": {
+    "primary": {
+      "gold": 0,
+      "inventory": [
+        {
+          "uidHash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+          "slot": 0,
+          "count": 1,
+          "name": "WoodenSword"
+        },
+        {
+          "uidHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "slot": 1,
+          "count": 1,
+          "name": "BaseDress(M)"
+        },
+        {
+          "uidHash": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+          "slot": 2,
+          "count": 1,
+          "name": "(HP)DrugSmall"
+        },
+        {
+          "uidHash": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+          "slot": 4,
+          "count": 1,
+          "name": "Candle"
+        }
+      ],
+      "belt": []
+    },
+    "peer": {
+      "gold": 0,
+      "inventory": [
+        {
+          "uidHash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+          "slot": 0,
+          "count": 1,
+          "name": "WoodenSword"
+        },
+        {
+          "uidHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "slot": 1,
+          "count": 1,
+          "name": "BaseDress(M)"
+        },
+        {
+          "uidHash": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+          "slot": 2,
+          "count": 1,
+          "name": "(HP)DrugSmall"
+        },
+        {
+          "uidHash": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+          "slot": 3,
+          "count": 1,
+          "name": "Candle"
+        }
+      ],
+      "belt": []
+    }
+  },
+  "starter": {
+    "name": "Candle",
+    "quantity": 1,
+    "uidHash": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+    "slot": 4
+  },
+  "failureUi": {
+    "screen": "game",
+    "tradeVisible": false,
+    "bagInput": "{\"active\":true,\"error\":null,\"owner\":{\"owner\":\"bevy\",\"runGeneration\":1,\"ownerRevision\":4,\"connectionGeneration\":1,\"sessionGeneration\":1},\"status\":{\"runGeneration\":1,\"connectionGeneration\":1,\"sessionGeneration\":1,\"ownerRevision\":4,\"frame\":1355,\"ready\":true,\"inputEnabled\":true,\"appliedRevision\":9,\"appliedModelRevision\":2,\"appliedPresentationRevision\":3,\"supportsBagToBelt\":true,\"appliedBeltGeometryRevision\":1,\"inputRegions\":[{\"left\":410,\"top\":86,\"width\":316,\"height\":236},{\"left\":736,\"top\":86,\"width\":122,\"height\":60}],\"diagnostics\":{\"modelVisibleItems\":4,\"treeContentComplete\":true,\"touchActionsComplete\":null,\"scopedActionCount\":null,\"expectedActionCount\":null,\"minCssHitWidth\":null,\"minCssHitHeight\":null,\"firstActionFailure\":null,\"layoutMatchesWindow\":true,\"assetsLoading\":false,\"layoutRegionCount\":2,\"sinkPresent\":true,\"treeIdentity\":{\"runGeneration\":1,\"connectionGeneration\":1,\"sessionGeneration\":1,\"ownerRevision\":4},\"treeModelRevision\":2,\"treePage\":\"bag1\",\"treeVisibleItems\":4,\"treeMatchesModel\":true,\"gridCells\":40,\"itemCells\":4,\"occupiedCells\":4,\"iconNodes\":4,\"visibleIcons\":4,\"laidOutIcons\":4,\"stackTextNodes\":1,\"visibleStackTexts\":1,\"laidOutStackTexts\":1},\"error\":null},\"diagnostic\":{\"phase\":\"active\",\"transitions\":[{\"reason\":null,\"phase\":\"active\",\"at\":32130.100000023842,\"status\":{\"runGeneration\":1,\"connectionGeneration\":1,\"sessionGeneration\":1,\"ownerRevision\":2,\"frame\":1243,\"ready\":true,\"inputEnabled\":true,\"appliedRevision\":5,\"appliedModelRevision\":1,\"appliedPresentationRevision\":3,\"supportsBagToBelt\":true,\"appliedBeltGeometryRevision\":1,\"inputRegions\":[{\"left\":410,\"top\":86,\"width\":316,\"height\":236},{\"left\":736,\"top\":86,\"width\":122,\"height\":60}],\"diagnostics\":{\"modelVisibleItems\":4,\"treeContentComplete\":true,\"touchActionsComplete\":null,\"scopedActionCount\":null,\"expectedActionCount\":null,\"minCssHitWidth\":null,\"minCssHitHeight\":null,\"firstActionFailure\":null,\"layoutMatchesWindow\":true,\"assetsLoading\":false,\"layoutRegionCount\":2,\"sinkPresent\":true,\"treeIdentity\":{\"runGeneration\":1,\"connectionGeneration\":1,\"sessionGeneration\":1,\"ownerRevision\":2},\"treeModelRevision\":1,\"treePage\":\"bag1\",\"treeVisibleItems\":4,\"treeMatchesModel\":true,\"gridCells\":40,\"itemCells\":4,\"occupiedCells\":4,\"iconNodes\":4,\"visibleIcons\":4,\"laidOutIcons\":4,\"stackTextNodes\":1,\"visibleStackTexts\":1,\"laidOutStackTexts\":1},\"error\":null}}],\"intentVerdicts\":[]},\"hudNavigation\":[{\"action\":\"openBag\",\"accepted\":true,\"fresh\":true,\"generation\":2,\"revision\":1,\"snapshotMatches\":true,\"appliedPending\":false,\"ready\":true,\"errorPresent\":false,\"navigationSourceMatches\":true,\"nativeBaseline\":true,\"navigationFresh\":true},{\"action\":\"openBag\",\"accepted\":true,\"fresh\":true,\"generation\":2,\"revision\":1,\"snapshotMatches\":true,\"appliedPending\":false,\"ready\":true,\"errorPresent\":false,\"navigationSourceMatches\":true,\"nativeBaseline\":true,\"navigationFresh\":true}]}",
+    "movement": "{\"keyboard\":{\"lastKey\":null,\"lastDispatch\":{\"reason\":\"no-held-direction\",\"source\":\"held\",\"at\":1794181160540,\"sceneInteractionReady\":true,\"bevyQuestUiCapturesPointer\":false},\"lastShortcut\":{\"at\":1794181132019,\"actions\":[\"guild\"],\"stage\":\"dispatch\",\"reason\":\"window-action\",\"accepted\":true,\"repeat\":false,\"focused\":true,\"visible\":true,\"editable\":false,\"sceneInteractionReady\":true,\"gameplayCallbackPresent\":true,\"defaultPrevented\":false,\"heroActive\":false,\"heroTransitioning\":false,\"heroWorldBlocked\":false,\"heroLeaseHeld\":false}},\"pointer\":null,\"host\":{\"connectionGeneration\":1,\"sessionGeneration\":1,\"suspended\":null,\"sceneDeferred\":false,\"lastIntent\":null,\"lastAttempt\":null,\"lastPickup\":null,\"self\":{\"x\":288,\"y\":616,\"direction\":\"Down\",\"dead\":false},\"queued\":null,\"controller\":{\"canSend\":true,\"sendDelayMs\":0,\"blockedMs\":0,\"pending\":null},\"target\":null,\"targetMapBlocked\":false,\"targetMapCell\":null,\"nearbyEntities\":[{\"objectId\":\"1\",\"kind\":\"npc\",\"x\":287,\"y\":615,\"dead\":false},{\"objectId\":\"50003\",\"kind\":\"player\",\"x\":288,\"y\":617,\"dead\":false},{\"objectId\":\"206641\",\"kind\":\"monster\",\"x\":287,\"y\":616,\"dead\":false}]}}",
+    "focus": "BODY",
+    "frameClass": "client-stage-frame "
+  },
+  "finalPrimary": {
+    "economy": {
+      "gold": 0,
+      "inventory": [
+        {
+          "uidHash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+          "slot": 0,
+          "count": 1,
+          "name": "WoodenSword"
+        },
+        {
+          "uidHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "slot": 1,
+          "count": 1,
+          "name": "BaseDress(M)"
+        },
+        {
+          "uidHash": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+          "slot": 2,
+          "count": 1,
+          "name": "(HP)DrugSmall"
+        },
+        {
+          "uidHash": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+          "slot": 3,
+          "count": 1,
+          "name": "Candle"
+        }
+      ],
+      "belt": []
+    },
+    "tradeActive": false,
+    "position": {
+      "x": 288,
+      "y": 616
+    }
+  }
+}

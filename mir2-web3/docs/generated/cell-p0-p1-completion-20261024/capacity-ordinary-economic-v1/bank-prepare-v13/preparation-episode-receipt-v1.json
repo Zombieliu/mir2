@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-capacity-bank-prepare-v13",
+  "mode": "continued-actual-v12-ordinary-bank-preparation-only",
+  "actualV12PartialBankContinuation": true,
+  "sourceW12FundingFailureRetained": true,
+  "sourceBankPlan": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\source-bank-plan-pending-v1.json",
+    "bytes": 15000,
+    "sha256": "4f2954a95869fdc7d6f727f39a8457839a2b85f303928de2b7fd87fbfb498dd5"
+  },
+  "sourceBankCopyReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\episode\\source-bank-copy-receipt-v1.json",
+    "bytes": 11184,
+    "sha256": "2028d1c757eefa2b3d72add58366efacbaf5c99495c0de6cf855c59fc00a1c88"
+  },
+  "sourceOriginalFailedVerdictRetained": true,
+  "sourcePreparedEligibilityInherited": false,
+  "sourceFirst4InventoryReuse": true,
+  "sourceFirst4InventoryReuseEvidence": {
+    "passed": true,
+    "actors": [
+      {
+        "name": "L370e2a00",
+        "characterIndex": 1,
+        "passed": true,
+        "actualCompleteModuleCommandCounts": true,
+        "freshBeforeAfter": true,
+        "beforeHpStock": 12,
+        "afterHpStock": 12,
+        "beforeSequence": 717,
+        "afterSequence": 720,
+        "noHuntingHarvestPickupSalePurchase": true,
+        "purchased": 0,
+        "soldVenison": 0,
+        "funding": null
+      },
+      {
+        "name": "L370e2a01",
+        "characterIndex": 2,
+        "passed": true,
+        "actualCompleteModuleCommandCounts": true,
+        "freshBeforeAfter": true,
+        "beforeHpStock": 12,
+        "afterHpStock": 12,
+        "beforeSequence": 682,
+        "afterSequence": 685,
+        "noHuntingHarvestPickupSalePurchase": true,
+        "purchased": 0,
+        "soldVenison": 0,
+        "funding": null
+      },
+      {
+        "name": "L370e2a02",
+        "characterIndex": 3,
+        "passed": true,
+        "actualCompleteModuleCommandCounts": true,
+        "freshBeforeAfter": true,
+        "beforeHpStock": 12,
+        "afterHpStock": 12,
+        "beforeSequence": 674,
+        "afterSequence": 677,
+        "noHuntingHarvestPickupSalePurchase": true,
+        "purchased": 0,
+        "soldVenison": 0,
+        "funding": null
+      },
+      {
+        "name": "L370e2a03",
+        "characterIndex": 4,
+        "passed": true,
+        "actualCompleteModuleCommandCounts": true,
+        "freshBeforeAfter": true,
+        "beforeHpStock": 12,
+        "afterHpStock": 12,
+        "beforeSequence": 681,
+        "afterSequence": 684,
+        "noHuntingHarvestPickupSalePurchase": true,
+        "purchased": 0,
+        "soldVenison": 0,
+        "funding": null
+      }
+    ],
+    "duplicateOrdinaryPreparationRows": 0,
+    "scope": "Actual raw ordinaryPreparation result commandCounts must exist and sum to commands; absent members mean unsent types only within that complete module-owned count object. No missing summary commandCounts is treated as zero. Fresh ordinary-login before/after stock >=12; no hunting, harvest, pickup, sale or purchase. No inherited readiness."
+  },
+  "seederInvoked": false,
+  "loginNotBeforeOverridden": false,
+  "preparationOnly": true,
+  "workerCount": 1,
+  "maxPrepared": 100,
+  "manifestPin": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\frozen-source-v1.json",
+    "bytes": 100377,
+    "sha256": "fb4afeef26907e69c8854b7680bc0a3e3e258f326b652dafe8cf8895ea9116c2"
+  },
+  "driverSourceCommit": "767cfa1535100cf38bf97cfe6d2402b5fd305c22",
+  "executionSourceCommit": "767cfa1535100cf38bf97cfe6d2402b5fd305c22",
+  "backendSourceCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+  "backendExecutable": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\bin\\mir2-gateway.exe",
+    "bytes": 87456256,
+    "sha256": "ad13d15a6fd294cae0beda04d8f91b7773a9b8390cc9c85e5a84d3e72c2567f6"
+  },
+  "backendSourcesExact": 55,
+  "newRustBuildPerformed": false,
+  "freshRustTestsPerformed": false,
+  "rawOriginalReport": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\episode\\reports\\1793076310690-5c1690ab.preparation-report.json",
+    "bytes": 103227,
+    "sha256": "2aa500a5b57ca6500b9baf44bd66b5078fa9b5bdf7cc784e41703b510713077e"
+  },
+  "rawOriginalSamples": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\episode\\reports\\1793076310690-5c1690ab.preparation.jsonl",
+    "bytes": 7560795,
+    "sha256": "5e7c7438aae57970d5af6bff3715bb09bf551515fd3bfbb41d16db555519dc61"
+  },
+  "rawOriginalVerdict": {
+    "attackResults": "v2",
+    "ok": false,
+    "error": "Navigation successful step budget exceeded (222)",
+    "preparedCount": 29,
+    "testExecution": false,
+    "ordinaryPreparationEvidenceEligible": false
+  },
+  "preparedIndexRecord": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\episode\\prepared-index-v1.json",
+    "bytes": 8417,
+    "sha256": "3f5b8b62308e82a1198c57ebb8f31ae60e819487afd495114cc18252bd18c47c"
+  },
+  "preparedIndexValid": false,
+  "progressCheckpoints": [
+    {
+      "preparedCount": 25,
+      "at": 1793076858263,
+      "normalLogouts": 25,
+      "completePoolAccountCount": 100,
+      "coldCopyPerformed": false,
+      "durableReloginVerificationPending": true,
+      "capacityAccepted": false
+    }
+  ],
+  "progressIsColdCheckpoint": false,
+  "productionPreparationEvidence": false,
+  "preparationComplete": false,
+  "executionError": null,
+  "cleanupComplete": true,
+  "cleanupRecord": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v13\\episode\\cleanup-v1.json",
+    "bytes": 1037,
+    "sha256": "6170691f81afb7e52414d37164200d9f5fa59579f80b7c5742d30d365bc6f37c"
+  },
+  "coldBankEligible": false,
+  "formalOrdinaryRelogin100Verified": false,
+  "measurementPerformed": false,
+  "gameplayEngineActivated": false,
+  "nativeResumeExercisePerformed": false,
+  "sustainableTwoHourSupplyProven": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "formalAcceptanceEligible": false
+}

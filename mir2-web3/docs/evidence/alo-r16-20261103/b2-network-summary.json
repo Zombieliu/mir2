@@ -1,0 +1,68 @@
+{
+  "schema": "mir2-alo-companion-acceptance/1",
+  "ok": true,
+  "startedAt": "2026-11-02T22:44:30.808Z",
+  "finishedAt": "2026-11-02T22:48:02.529Z",
+  "realmId": "ai-companion-f8def7a4-d460-4ef2-841d-0b0a52a6c9fc",
+  "gatewayBinarySha256": "28ceae9f6f45392238f63cf2f539f8c23e64567d25a432a72c3a934e1cf6ead9",
+  "normalClientOnly": true,
+  "modelEnabled": false,
+  "contentProfile": "platinum_fiveclass",
+  "observedContentProfile": {
+    "profileId": "platinum_fiveclass",
+    "profileVersion": 1
+  },
+  "gameplayBaseline": {
+    "contentProfile": "platinum_fiveclass",
+    "profileVersion": 1,
+    "generationManifestSha256": "56ddd5417a09a2515fece9a36be2607282084ec89058c412d2edd7a7dcb21bc8",
+    "matchesR16Profile": true
+  },
+  "memoryScope": "local-owner-feedback-and-action-episodes",
+  "checks": [
+    "two ordinary equipped Warriors entered the same Bichon Zone",
+    "a pending invitation alone is not membership; acceptance updates both authoritative rosters",
+    "ordinary companion Walk intents are visible to the human observer and close the follow distance",
+    "before feedback, the real safe collection policy walks to and picks up the ordinary candle during a confirmed party engagement",
+    "the same ordinary drop/combat conflict selects support after local-owner feedback (policy 1 -> 2)",
+    "the observer confirms the companion's real monster strike; the taught companion resumes pickup after the fight",
+    "a different Node process reloads saved character position and policy version 2 without teaching again; stale party membership is cleared",
+    "a new real monster/drop encounter after process restart still chooses support, without new teaching",
+    "owner recall causes a real ordinary walk back toward the configured Bichon safe starting position",
+    "natural field damage triggers a successful exact-UID UseItem and consumes the original owned potion",
+    "the server subsequently reports actual HP recovery after the consumed potion",
+    "the low-health companion without another available potion automatically walks back into town safety alive"
+  ],
+  "commands": {
+    "clientVersion": 3,
+    "newAccount": 2,
+    "login": 3,
+    "newCharacter": 2,
+    "startGame": 3,
+    "changeAMode": 3,
+    "equipItem": 4,
+    "keepAlive": 35,
+    "switchGroup": 4,
+    "addMember": 2,
+    "groupInvite": 2,
+    "walk": 129,
+    "dropItem": 3,
+    "attackDirection": 16,
+    "pickUpTile": 2,
+    "logOut": 3,
+    "removeItem": 1,
+    "useItem": 1
+  },
+  "retreatSnapshotRefresh": {
+    "used": true,
+    "command": "switchGroup(true), unchanged preference and roster"
+  },
+  "reloginSettleMs": 31000,
+  "bootstrapSettleMs": 16000,
+  "limitations": [
+    "single-Gateway shared party",
+    "local owner feedback control",
+    "existing route lease and bootstrap grace settle",
+    "no model planner or frontend visual acceptance"
+  ]
+}

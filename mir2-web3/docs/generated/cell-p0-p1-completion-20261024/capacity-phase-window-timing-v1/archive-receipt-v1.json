@@ -1,0 +1,341 @@
+{
+  "schemaVersion": 1,
+  "scope": "Explicit original-byte Node timing validation archive. All tests are functional; no gameplay realm or capacity accepted.",
+  "sourceSha256": "72005514809dd480a015ee5414b14f60fe6264f10e35a7b825a6dc5e35e85c82",
+  "preFinalFullPassed": 151,
+  "preFinalFullSourceSha256": "bcc53ee440624ef6831a591fb693226b7aade5a48ecbd6e502debec07d7f463b",
+  "finalRawNineFullRegressionPerformed": false,
+  "preFinalFocusedPassed": 6,
+  "finalFocusedPassed": 7,
+  "finalAdjacentPassed": 25,
+  "files": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\focused-v1.log",
+        "bytes": 1751,
+        "sha256": "f532a0c47c8f016538b8af9756c0fc4bbf314ec97eff88b8aa4fb23600dbb276"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-phase-window-timing-v1\\focused-v1.log",
+        "bytes": 1751,
+        "sha256": "f532a0c47c8f016538b8af9756c0fc4bbf314ec97eff88b8aa4fb23600dbb276"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\focused-v1-receipt.json",
+        "bytes": 1756,
+        "sha256": "40981d55ad3a022e42915baa5e85fa8c9d69859731a47bb511acf0e7dc461f1e"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-phase-window-timing-v1\\focused-v1-receipt.json",
+        "bytes": 1756,
+        "sha256": "40981d55ad3a022e42915baa5e85fa8c9d69859731a47bb511acf0e7dc461f1e"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\adjacent-v1.log",
+        "bytes": 6555,
+        "sha256": "3690863f349b1b0538f3688b22a920c0b444cf2b90c2e856037fdff1c050cd23"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-phase-window-timing-v1\\adjacent-v1.log",
+        "bytes": 6555,
+        "sha256": "3690863f349b1b0538f3688b22a920c0b444cf2b90c2e856037fdff1c050cd23"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\adjacent-v1-receipt.json",
+        "bytes": 4454,
+        "sha256": "d70eabbcedbf931d278316bff7b7c788be61981a0c492feb199d31752516aef8"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-phase-window-timing-v1\\adjacent-v1-receipt.json",
+        "bytes": 4454,
+        "sha256": "d70eabbcedbf931d278316bff7b7c788be61981a0c492feb199d31752516aef8"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\adjacent-v1-source-pins.json",
+        "bytes": 2042,
+        "sha256": "40b9d31a880ac8b432517a028b9bd52c6b625ac8f27f3fd2779a9dd356163e23"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-phase-window-timing-v1\\adjacent-v1-source-pins.json",
+        "bytes": 2042,
+        "sha256": "40b9d31a880ac8b432517a028b9bd52c6b625ac8f27f3fd2779a9dd356163e23"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\full-v1.log",
+        "bytes": 41297,
+        "sha256": "1aafd9926aef5b1b8db6831f1c18d8f391504cc50aba82250f66895b92a33897"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-phase-window-timing-v1\\full-v1.log",
+        "bytes": 41297,
+        "sha256": "1aafd9926aef5b1b8db6831f1c18d8f391504cc50aba82250f66895b92a33897"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\full-v1-receipt.json",
+        "bytes": 4502,
+        "sha256": "5cccefc8824e7bf064c3e09d912a0caf6d20bdba87e4b0156518d40125621b0f"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-phase-window-timing-v1\\full-v1-receipt.json",
+        "bytes": 4502,
+        "sha256": "5cccefc8824e7bf064c3e09d912a0caf6d20bdba87e4b0156518d40125621b0f"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\full-v1-source-pins.json",
+        "bytes": 2042,
+        "sha256": "6b6b5e6e7dc3c7a007223d84a51dbb808b95d760e889ed8634082298124de83e"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-phase-window-timing-v1\\full-v1-source-pins.json",
+        "bytes": 2042,
+        "sha256": "6b6b5e6e7dc3c7a007223d84a51dbb808b95d760e889ed8634082298124de83e"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\independent-review-v1.json",
+        "bytes": 7650,
+        "sha256": "afc5e0a372e2e36fa45f841b6dcd0c2cc5b9b286a2ea8b840778dfa0a0ca5b26"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-phase-window-timing-v1\\independent-review-v1.json",
+        "bytes": 7650,
+        "sha256": "afc5e0a372e2e36fa45f841b6dcd0c2cc5b9b286a2ea8b840778dfa0a0ca5b26"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\independent-review-final-addendum-v1.json",
+        "bytes": 8880,
+        "sha256": "fec788c3e9ea88f4a02c53c96eb9a8e7821189fd95894aa93cf4c4b01e873444"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-phase-window-timing-v1\\independent-review-final-addendum-v1.json",
+        "bytes": 8880,
+        "sha256": "fec788c3e9ea88f4a02c53c96eb9a8e7821189fd95894aa93cf4c4b01e873444"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\preimage-manifest-v1.json",
+        "bytes": 1217,
+        "sha256": "e49f56a75527c7b19484a43d65dbccdb0b677fa6313fc3cb28202969000a2056"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-phase-window-timing-v1\\preimage-manifest-v1.json",
+        "bytes": 1217,
+        "sha256": "e49f56a75527c7b19484a43d65dbccdb0b677fa6313fc3cb28202969000a2056"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\final-focused-v1.log",
+        "bytes": 2027,
+        "sha256": "e6d5b0f0f0b1bd26a0bcc0e8d76c86ff4a2e9d7402a15f44df3ddb79e6521dc8"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-phase-window-timing-v1\\final-focused-v1.log",
+        "bytes": 2027,
+        "sha256": "e6d5b0f0f0b1bd26a0bcc0e8d76c86ff4a2e9d7402a15f44df3ddb79e6521dc8"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\final-focused-v1-receipt.json",
+        "bytes": 4332,
+        "sha256": "0c36a268064adea86397ab2b64aef62c23376064accc639e7e17326f2e934b06"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-phase-window-timing-v1\\final-focused-v1-receipt.json",
+        "bytes": 4332,
+        "sha256": "0c36a268064adea86397ab2b64aef62c23376064accc639e7e17326f2e934b06"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\final-adjacent-v1.log",
+        "bytes": 6556,
+        "sha256": "a8ea941c774f35a9fe984cea909cd17ec2698bf8c03e9c3750655770ca1f0a48"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-phase-window-timing-v1\\final-adjacent-v1.log",
+        "bytes": 6556,
+        "sha256": "a8ea941c774f35a9fe984cea909cd17ec2698bf8c03e9c3750655770ca1f0a48"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\final-adjacent-v1-receipt.json",
+        "bytes": 4418,
+        "sha256": "65adbdbb0c6a458cf6641160adfb3fc546279ed78466598212eb187281d566ed"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-phase-window-timing-v1\\final-adjacent-v1-receipt.json",
+        "bytes": 4418,
+        "sha256": "65adbdbb0c6a458cf6641160adfb3fc546279ed78466598212eb187281d566ed"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\final-source-pins-v1.json",
+        "bytes": 2100,
+        "sha256": "756ed50412be324d269f7ff2d522a6e7992744c650b59c30c531f4d90b842696"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-phase-window-timing-v1\\final-source-pins-v1.json",
+        "bytes": 2100,
+        "sha256": "756ed50412be324d269f7ff2d522a6e7992744c650b59c30c531f4d90b842696"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\final-compatibility-delta-v1.json",
+        "bytes": 4029,
+        "sha256": "f414cace0cfafbbfc588b8c06eb49b9f0e4d6f6a4149eb8a24ed9faf5c894875"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-phase-window-timing-v1\\final-compatibility-delta-v1.json",
+        "bytes": 4029,
+        "sha256": "f414cace0cfafbbfc588b8c06eb49b9f0e4d6f6a4149eb8a24ed9faf5c894875"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\final-delta-preimage-v1.json",
+        "bytes": 1474,
+        "sha256": "ab21cd3221ed4d5b19418143f49ddcdf36265d83b5445a73cf39c064e90ef143"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-phase-window-timing-v1\\final-delta-preimage-v1.json",
+        "bytes": 1474,
+        "sha256": "ab21cd3221ed4d5b19418143f49ddcdf36265d83b5445a73cf39c064e90ef143"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\playtest-capacity-soak.mjs.pre-final-full.mjs.txt",
+        "bytes": 132226,
+        "sha256": "9c8d20dcac77d401ac65e3c69e37f0105db371d08e72c288fd4ccde6fe46690a"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-phase-window-timing-v1\\playtest-capacity-soak-pre-final-full.mjs.txt",
+        "bytes": 132226,
+        "sha256": "9c8d20dcac77d401ac65e3c69e37f0105db371d08e72c288fd4ccde6fe46690a"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\playtest-capacity-soak.test.mjs.pre-final-full.mjs.txt",
+        "bytes": 195516,
+        "sha256": "870c6fa95859e325042f3a42ffcfdd91a702adcf586cf171e9a36224ad23fddb"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-phase-window-timing-v1\\playtest-capacity-soak.test-pre-final-full.mjs.txt",
+        "bytes": 195516,
+        "sha256": "870c6fa95859e325042f3a42ffcfdd91a702adcf586cf171e9a36224ad23fddb"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\playtest-capacity-soak.mjs.preimage",
+        "bytes": 130681,
+        "sha256": "79d30e3994703eeef902fdd79feac1e7ce76c8b0255baecb0824f5d7d51fc4e6"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-phase-window-timing-v1\\playtest-capacity-soak-preimage.mjs.txt",
+        "bytes": 130681,
+        "sha256": "79d30e3994703eeef902fdd79feac1e7ce76c8b0255baecb0824f5d7d51fc4e6"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\playtest-capacity-soak.test.mjs.preimage",
+        "bytes": 188151,
+        "sha256": "97fb8b09087958dc8ee8f15094011e04a56e087af6bc5cfdfeee4d2fcd5554f9"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-phase-window-timing-v1\\playtest-capacity-soak.test-preimage.mjs.txt",
+        "bytes": 188151,
+        "sha256": "97fb8b09087958dc8ee8f15094011e04a56e087af6bc5cfdfeee4d2fcd5554f9"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\preimage-capture-preparation-failure-v1.json",
+        "bytes": 1263,
+        "sha256": "f7b1dc1c16d6ea2399c9ee23e927a5bf4e4ae4e2687f3dac7863d1af9a2f52ce"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-phase-window-timing-v1\\preimage-capture-preparation-failure-v1.json",
+        "bytes": 1263,
+        "sha256": "f7b1dc1c16d6ea2399c9ee23e927a5bf4e4ae4e2687f3dac7863d1af9a2f52ce"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe08-analysis\\capture-window-timing-preimage-v1.mjs",
+        "bytes": 1511,
+        "sha256": "85011a6289bd873a305ffac10a50b0176525cf84dc91c0694dc79d995ebb5c6f"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-phase-window-timing-v1\\capture-window-timing-preimage-v1.mjs.txt",
+        "bytes": 1511,
+        "sha256": "85011a6289bd873a305ffac10a50b0176525cf84dc91c0694dc79d995ebb5c6f"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe08-analysis\\capture-window-timing-preimage-v2.mjs",
+        "bytes": 1693,
+        "sha256": "b61d2501502c99948b8a32429d39fedc6fdab468201c7c584e9fdd92f9f30cfb"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-phase-window-timing-v1\\capture-window-timing-preimage-v2.mjs.txt",
+        "bytes": 1693,
+        "sha256": "b61d2501502c99948b8a32429d39fedc6fdab468201c7c584e9fdd92f9f30cfb"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-phase-window-timing-driver-frozen-v1.json",
+        "bytes": 15970,
+        "sha256": "39c163a36a713f8c2bbf500eeaff0fe095a1b3848726345745a6f26372a177c3"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-phase-window-timing-v1\\capacity-phase-window-timing-driver-frozen-v1.json",
+        "bytes": 15970,
+        "sha256": "39c163a36a713f8c2bbf500eeaff0fe095a1b3848726345745a6f26372a177c3"
+      }
+    }
+  ],
+  "topicRootFreeze": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-phase-window-timing-driver-frozen-v1.json",
+    "bytes": 15970,
+    "sha256": "39c163a36a713f8c2bbf500eeaff0fe095a1b3848726345745a6f26372a177c3"
+  },
+  "boundaries": {
+    "trackedProductFilesChangedOnly": [
+      "apps/web/scripts/playtest-capacity-soak.mjs",
+      "apps/web/scripts/playtest-capacity-soak.test.mjs"
+    ],
+    "otherSevenInputsUnchanged": true,
+    "oldFrozenManifestsUnchanged": true,
+    "readmeOrBindingsChanged": false,
+    "gitStageOrCommitPerformed": false,
+    "rawGameRecordingsOrPrivateStoresIncluded": false
+  }
+}

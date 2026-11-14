@@ -1,0 +1,678 @@
+{
+  "cases": [
+    {
+      "captures": [
+        {
+          "additiveComparison": null,
+          "file": "create-warrior-male-frame-00.png",
+          "frame": 0
+        },
+        {
+          "additiveComparison": null,
+          "file": "create-warrior-male-frame-08.png",
+          "frame": 8
+        }
+      ],
+      "class": "Warrior",
+      "gender": "Male",
+      "loopReturnedToFrame": 0,
+      "nameFocusRedrawPreservedFrame": true,
+      "redrawPreservedHalfFrameClock": true,
+      "screen": "create",
+      "validatedFrames": 16
+    },
+    {
+      "captures": [
+        {
+          "additiveComparison": null,
+          "file": "select-warrior-male-frame-00.png",
+          "frame": 0
+        },
+        {
+          "additiveComparison": null,
+          "file": "select-warrior-male-frame-08.png",
+          "frame": 8
+        }
+      ],
+      "class": "Warrior",
+      "gender": "Male",
+      "loopReturnedToFrame": 0,
+      "nameFocusRedrawPreservedFrame": true,
+      "redrawPreservedHalfFrameClock": true,
+      "screen": "select",
+      "validatedFrames": 16
+    },
+    {
+      "captures": [
+        {
+          "additiveComparison": null,
+          "file": "create-warrior-female-frame-00.png",
+          "frame": 0
+        },
+        {
+          "additiveComparison": null,
+          "file": "create-warrior-female-frame-08.png",
+          "frame": 8
+        }
+      ],
+      "class": "Warrior",
+      "gender": "Female",
+      "loopReturnedToFrame": 0,
+      "nameFocusRedrawPreservedFrame": true,
+      "redrawPreservedHalfFrameClock": true,
+      "screen": "create",
+      "validatedFrames": 16
+    },
+    {
+      "captures": [
+        {
+          "additiveComparison": null,
+          "file": "select-warrior-female-frame-00.png",
+          "frame": 0
+        },
+        {
+          "additiveComparison": null,
+          "file": "select-warrior-female-frame-08.png",
+          "frame": 8
+        }
+      ],
+      "class": "Warrior",
+      "gender": "Female",
+      "loopReturnedToFrame": 0,
+      "nameFocusRedrawPreservedFrame": true,
+      "redrawPreservedHalfFrameClock": true,
+      "screen": "select",
+      "validatedFrames": 16
+    },
+    {
+      "captures": [
+        {
+          "additiveComparison": {
+            "bodyOnlyFile": "create-wizard-male-frame-00-body-only.png",
+            "brightenedPixels": 14000,
+            "comparedRect": [
+              248,
+              160,
+              412,
+              552
+            ],
+            "darkenedPixels": 0,
+            "maxChannelDrop": 0,
+            "quantizationTolerance": 2
+          },
+          "file": "create-wizard-male-frame-00.png",
+          "frame": 0
+        },
+        {
+          "additiveComparison": {
+            "bodyOnlyFile": "create-wizard-male-frame-04-body-only.png",
+            "brightenedPixels": 19853,
+            "comparedRect": [
+              241,
+              159,
+              433,
+              557
+            ],
+            "darkenedPixels": 0,
+            "maxChannelDrop": 0,
+            "quantizationTolerance": 2
+          },
+          "file": "create-wizard-male-frame-04.png",
+          "frame": 4
+        },
+        {
+          "additiveComparison": {
+            "bodyOnlyFile": "create-wizard-male-frame-08-body-only.png",
+            "brightenedPixels": 23392,
+            "comparedRect": [
+              232,
+              157,
+              456,
+              560
+            ],
+            "darkenedPixels": 0,
+            "maxChannelDrop": 0,
+            "quantizationTolerance": 2
+          },
+          "file": "create-wizard-male-frame-08.png",
+          "frame": 8
+        },
+        {
+          "additiveComparison": {
+            "bodyOnlyFile": "create-wizard-male-frame-12-body-only.png",
+            "brightenedPixels": 20025,
+            "comparedRect": [
+              240,
+              159,
+              444,
+              561
+            ],
+            "darkenedPixels": 0,
+            "maxChannelDrop": 0,
+            "quantizationTolerance": 2
+          },
+          "file": "create-wizard-male-frame-12.png",
+          "frame": 12
+        }
+      ],
+      "class": "Wizard",
+      "gender": "Male",
+      "loopReturnedToFrame": 0,
+      "nameFocusRedrawPreservedFrame": true,
+      "redrawPreservedHalfFrameClock": true,
+      "screen": "create",
+      "validatedFrames": 16
+    },
+    {
+      "captures": [
+        {
+          "additiveComparison": {
+            "bodyOnlyFile": "select-wizard-male-frame-00-body-only.png",
+            "brightenedPixels": 14108,
+            "comparedRect": [
+              170,
+              176,
+              334,
+              568
+            ],
+            "darkenedPixels": 0,
+            "maxChannelDrop": 0,
+            "quantizationTolerance": 2
+          },
+          "file": "select-wizard-male-frame-00.png",
+          "frame": 0
+        },
+        {
+          "additiveComparison": {
+            "bodyOnlyFile": "select-wizard-male-frame-04-body-only.png",
+            "brightenedPixels": 19944,
+            "comparedRect": [
+              163,
+              175,
+              355,
+              573
+            ],
+            "darkenedPixels": 0,
+            "maxChannelDrop": 0,
+            "quantizationTolerance": 2
+          },
+          "file": "select-wizard-male-frame-04.png",
+          "frame": 4
+        },
+        {
+          "additiveComparison": {
+            "bodyOnlyFile": "select-wizard-male-frame-08-body-only.png",
+            "brightenedPixels": 23498,
+            "comparedRect": [
+              154,
+              173,
+              378,
+              576
+            ],
+            "darkenedPixels": 0,
+            "maxChannelDrop": 0,
+            "quantizationTolerance": 2
+          },
+          "file": "select-wizard-male-frame-08.png",
+          "frame": 8
+        },
+        {
+          "additiveComparison": {
+            "bodyOnlyFile": "select-wizard-male-frame-12-body-only.png",
+            "brightenedPixels": 20114,
+            "comparedRect": [
+              162,
+              175,
+              366,
+              577
+            ],
+            "darkenedPixels": 0,
+            "maxChannelDrop": 0,
+            "quantizationTolerance": 2
+          },
+          "file": "select-wizard-male-frame-12.png",
+          "frame": 12
+        }
+      ],
+      "class": "Wizard",
+      "gender": "Male",
+      "loopReturnedToFrame": 0,
+      "nameFocusRedrawPreservedFrame": true,
+      "redrawPreservedHalfFrameClock": true,
+      "screen": "select",
+      "validatedFrames": 16
+    },
+    {
+      "captures": [
+        {
+          "additiveComparison": {
+            "bodyOnlyFile": "create-wizard-female-frame-00-body-only.png",
+            "brightenedPixels": 12828,
+            "comparedRect": [
+              279,
+              185,
+              451,
+              540
+            ],
+            "darkenedPixels": 0,
+            "maxChannelDrop": 0,
+            "quantizationTolerance": 2
+          },
+          "file": "create-wizard-female-frame-00.png",
+          "frame": 0
+        },
+        {
+          "additiveComparison": {
+            "bodyOnlyFile": "create-wizard-female-frame-04-body-only.png",
+            "brightenedPixels": 14655,
+            "comparedRect": [
+              271,
+              184,
+              455,
+              541
+            ],
+            "darkenedPixels": 0,
+            "maxChannelDrop": 0,
+            "quantizationTolerance": 2
+          },
+          "file": "create-wizard-female-frame-04.png",
+          "frame": 4
+        },
+        {
+          "additiveComparison": {
+            "bodyOnlyFile": "create-wizard-female-frame-08-body-only.png",
+            "brightenedPixels": 16370,
+            "comparedRect": [
+              267,
+              183,
+              475,
+              542
+            ],
+            "darkenedPixels": 0,
+            "maxChannelDrop": 0,
+            "quantizationTolerance": 2
+          },
+          "file": "create-wizard-female-frame-08.png",
+          "frame": 8
+        },
+        {
+          "additiveComparison": {
+            "bodyOnlyFile": "create-wizard-female-frame-12-body-only.png",
+            "brightenedPixels": 15267,
+            "comparedRect": [
+              271,
+              184,
+              483,
+              542
+            ],
+            "darkenedPixels": 0,
+            "maxChannelDrop": 0,
+            "quantizationTolerance": 2
+          },
+          "file": "create-wizard-female-frame-12.png",
+          "frame": 12
+        }
+      ],
+      "class": "Wizard",
+      "gender": "Female",
+      "loopReturnedToFrame": 0,
+      "nameFocusRedrawPreservedFrame": true,
+      "redrawPreservedHalfFrameClock": true,
+      "screen": "create",
+      "validatedFrames": 16
+    },
+    {
+      "captures": [
+        {
+          "additiveComparison": {
+            "bodyOnlyFile": "select-wizard-female-frame-00-body-only.png",
+            "brightenedPixels": 12844,
+            "comparedRect": [
+              201,
+              201,
+              373,
+              556
+            ],
+            "darkenedPixels": 0,
+            "maxChannelDrop": 0,
+            "quantizationTolerance": 2
+          },
+          "file": "select-wizard-female-frame-00.png",
+          "frame": 0
+        },
+        {
+          "additiveComparison": {
+            "bodyOnlyFile": "select-wizard-female-frame-04-body-only.png",
+            "brightenedPixels": 14676,
+            "comparedRect": [
+              193,
+              200,
+              377,
+              557
+            ],
+            "darkenedPixels": 0,
+            "maxChannelDrop": 0,
+            "quantizationTolerance": 2
+          },
+          "file": "select-wizard-female-frame-04.png",
+          "frame": 4
+        },
+        {
+          "additiveComparison": {
+            "bodyOnlyFile": "select-wizard-female-frame-08-body-only.png",
+            "brightenedPixels": 16389,
+            "comparedRect": [
+              189,
+              199,
+              397,
+              558
+            ],
+            "darkenedPixels": 0,
+            "maxChannelDrop": 0,
+            "quantizationTolerance": 2
+          },
+          "file": "select-wizard-female-frame-08.png",
+          "frame": 8
+        },
+        {
+          "additiveComparison": {
+            "bodyOnlyFile": "select-wizard-female-frame-12-body-only.png",
+            "brightenedPixels": 15287,
+            "comparedRect": [
+              193,
+              200,
+              405,
+              558
+            ],
+            "darkenedPixels": 0,
+            "maxChannelDrop": 0,
+            "quantizationTolerance": 2
+          },
+          "file": "select-wizard-female-frame-12.png",
+          "frame": 12
+        }
+      ],
+      "class": "Wizard",
+      "gender": "Female",
+      "loopReturnedToFrame": 0,
+      "nameFocusRedrawPreservedFrame": true,
+      "redrawPreservedHalfFrameClock": true,
+      "screen": "select",
+      "validatedFrames": 16
+    },
+    {
+      "captures": [
+        {
+          "additiveComparison": null,
+          "file": "create-taoist-male-frame-00.png",
+          "frame": 0
+        },
+        {
+          "additiveComparison": null,
+          "file": "create-taoist-male-frame-08.png",
+          "frame": 8
+        }
+      ],
+      "class": "Taoist",
+      "gender": "Male",
+      "loopReturnedToFrame": 0,
+      "nameFocusRedrawPreservedFrame": true,
+      "redrawPreservedHalfFrameClock": true,
+      "screen": "create",
+      "validatedFrames": 16
+    },
+    {
+      "captures": [
+        {
+          "additiveComparison": null,
+          "file": "select-taoist-male-frame-00.png",
+          "frame": 0
+        },
+        {
+          "additiveComparison": null,
+          "file": "select-taoist-male-frame-08.png",
+          "frame": 8
+        }
+      ],
+      "class": "Taoist",
+      "gender": "Male",
+      "loopReturnedToFrame": 0,
+      "nameFocusRedrawPreservedFrame": true,
+      "redrawPreservedHalfFrameClock": true,
+      "screen": "select",
+      "validatedFrames": 16
+    },
+    {
+      "captures": [
+        {
+          "additiveComparison": null,
+          "file": "create-taoist-female-frame-00.png",
+          "frame": 0
+        },
+        {
+          "additiveComparison": null,
+          "file": "create-taoist-female-frame-08.png",
+          "frame": 8
+        }
+      ],
+      "class": "Taoist",
+      "gender": "Female",
+      "loopReturnedToFrame": 0,
+      "nameFocusRedrawPreservedFrame": true,
+      "redrawPreservedHalfFrameClock": true,
+      "screen": "create",
+      "validatedFrames": 16
+    },
+    {
+      "captures": [
+        {
+          "additiveComparison": null,
+          "file": "select-taoist-female-frame-00.png",
+          "frame": 0
+        },
+        {
+          "additiveComparison": null,
+          "file": "select-taoist-female-frame-08.png",
+          "frame": 8
+        }
+      ],
+      "class": "Taoist",
+      "gender": "Female",
+      "loopReturnedToFrame": 0,
+      "nameFocusRedrawPreservedFrame": true,
+      "redrawPreservedHalfFrameClock": true,
+      "screen": "select",
+      "validatedFrames": 16
+    },
+    {
+      "captures": [
+        {
+          "additiveComparison": null,
+          "file": "create-assassin-male-frame-00.png",
+          "frame": 0
+        },
+        {
+          "additiveComparison": null,
+          "file": "create-assassin-male-frame-08.png",
+          "frame": 8
+        }
+      ],
+      "class": "Assassin",
+      "gender": "Male",
+      "loopReturnedToFrame": 0,
+      "nameFocusRedrawPreservedFrame": true,
+      "redrawPreservedHalfFrameClock": true,
+      "screen": "create",
+      "validatedFrames": 16
+    },
+    {
+      "captures": [
+        {
+          "additiveComparison": null,
+          "file": "select-assassin-male-frame-00.png",
+          "frame": 0
+        },
+        {
+          "additiveComparison": null,
+          "file": "select-assassin-male-frame-08.png",
+          "frame": 8
+        }
+      ],
+      "class": "Assassin",
+      "gender": "Male",
+      "loopReturnedToFrame": 0,
+      "nameFocusRedrawPreservedFrame": true,
+      "redrawPreservedHalfFrameClock": true,
+      "screen": "select",
+      "validatedFrames": 16
+    },
+    {
+      "captures": [
+        {
+          "additiveComparison": null,
+          "file": "create-assassin-female-frame-00.png",
+          "frame": 0
+        },
+        {
+          "additiveComparison": null,
+          "file": "create-assassin-female-frame-08.png",
+          "frame": 8
+        }
+      ],
+      "class": "Assassin",
+      "gender": "Female",
+      "loopReturnedToFrame": 0,
+      "nameFocusRedrawPreservedFrame": true,
+      "redrawPreservedHalfFrameClock": true,
+      "screen": "create",
+      "validatedFrames": 16
+    },
+    {
+      "captures": [
+        {
+          "additiveComparison": null,
+          "file": "select-assassin-female-frame-00.png",
+          "frame": 0
+        },
+        {
+          "additiveComparison": null,
+          "file": "select-assassin-female-frame-08.png",
+          "frame": 8
+        }
+      ],
+      "class": "Assassin",
+      "gender": "Female",
+      "loopReturnedToFrame": 0,
+      "nameFocusRedrawPreservedFrame": true,
+      "redrawPreservedHalfFrameClock": true,
+      "screen": "select",
+      "validatedFrames": 16
+    },
+    {
+      "captures": [
+        {
+          "additiveComparison": null,
+          "file": "create-archer-male-frame-00.png",
+          "frame": 0
+        },
+        {
+          "additiveComparison": null,
+          "file": "create-archer-male-frame-08.png",
+          "frame": 8
+        }
+      ],
+      "class": "Archer",
+      "gender": "Male",
+      "loopReturnedToFrame": 0,
+      "nameFocusRedrawPreservedFrame": true,
+      "redrawPreservedHalfFrameClock": true,
+      "screen": "create",
+      "validatedFrames": 16
+    },
+    {
+      "captures": [
+        {
+          "additiveComparison": null,
+          "file": "select-archer-male-frame-00.png",
+          "frame": 0
+        },
+        {
+          "additiveComparison": null,
+          "file": "select-archer-male-frame-08.png",
+          "frame": 8
+        }
+      ],
+      "class": "Archer",
+      "gender": "Male",
+      "loopReturnedToFrame": 0,
+      "nameFocusRedrawPreservedFrame": true,
+      "redrawPreservedHalfFrameClock": true,
+      "screen": "select",
+      "validatedFrames": 16
+    },
+    {
+      "captures": [
+        {
+          "additiveComparison": null,
+          "file": "create-archer-female-frame-00.png",
+          "frame": 0
+        },
+        {
+          "additiveComparison": null,
+          "file": "create-archer-female-frame-08.png",
+          "frame": 8
+        }
+      ],
+      "class": "Archer",
+      "gender": "Female",
+      "loopReturnedToFrame": 0,
+      "nameFocusRedrawPreservedFrame": true,
+      "redrawPreservedHalfFrameClock": true,
+      "screen": "create",
+      "validatedFrames": 16
+    },
+    {
+      "captures": [
+        {
+          "additiveComparison": null,
+          "file": "select-archer-female-frame-00.png",
+          "frame": 0
+        },
+        {
+          "additiveComparison": null,
+          "file": "select-archer-female-frame-08.png",
+          "frame": 8
+        }
+      ],
+      "class": "Archer",
+      "gender": "Female",
+      "loopReturnedToFrame": 0,
+      "nameFocusRedrawPreservedFrame": true,
+      "redrawPreservedHalfFrameClock": true,
+      "screen": "select",
+      "validatedFrames": 16
+    }
+  ],
+  "classGenderSets": 10,
+  "complete": true,
+  "frameDurationMs": 250,
+  "framesPerSet": 16,
+  "interactiveCreationClasses": [
+    "Warrior",
+    "Wizard",
+    "Taoist"
+  ],
+  "kind": "offline_production_character_preview_gpu_fixture",
+  "limits": [
+    "Assassin and Archer use explicit offline model presentation; this does not make them available to create online",
+    "No keyboard/mouse input, login, reconnect, character creation or player save was exercised"
+  ],
+  "liveAcceptance": false,
+  "passed": true,
+  "screens": [
+    "create",
+    "select"
+  ],
+  "serverConnected": false,
+  "windowCreated": false
+}

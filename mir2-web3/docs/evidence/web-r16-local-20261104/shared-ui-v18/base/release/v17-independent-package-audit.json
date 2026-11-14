@@ -1,0 +1,474 @@
+{
+  "schema": "mir2.web-r16-independent-package-audit/1",
+  "passed": true,
+  "startedAt": "2026-11-05T20:02:03.600Z",
+  "artifactRoot": "F:/mir2-builds/Numeron-Web-R16-20261104-v17",
+  "previousRoot": "F:/mir2-builds/Numeron-Web-R16-20261104",
+  "manifest": {
+    "sha256": "6b6f751bb330a6eaf29e60013539baf03917f48c13f0f08bcca39b4be6fea770",
+    "bytes": 7376087,
+    "checkedFiles": 31911,
+    "checkedBytes": 928988373,
+    "recordsSha256": "c7a67f7cbbac9ce71f6301d829f532d1834767bfe485a2e39d2a38c448a58fab",
+    "allRegular": true,
+    "noSymlinksOrJunctions": true,
+    "noHardLinks": true,
+    "uniqueAncestorDirectories": 997,
+    "unchangedDuringAudit": true
+  },
+  "privateBoundary": {
+    "distributionPrivatePaths": 0,
+    "stagingPrivateFileCount": 0,
+    "stagingPrivateDirectoryCount": 1,
+    "stagingPrivateLinks": 0,
+    "privateFileBodiesRead": 0,
+    "livePrivateDirectoriesRead": 0,
+    "knownSecretPatternsMatched": 0,
+    "textFilesScanned": 2688,
+    "sensitiveBuildEnvironmentKeys": 0
+  },
+  "comparison": {
+    "liveV16ManifestSha256": "4620930b42de82f60e82fc01f0beb5b405fd082439131bd982fefddfa4268cc3",
+    "unchangedFiles": 29558,
+    "changedFiles": 111,
+    "addedFiles": 2242,
+    "removedFiles": 12,
+    "totalByteDelta": 5270939,
+    "externalRuntimeFilesUnchanged": 165,
+    "corePinsUnchanged": true,
+    "allDeltaWithinNextRendererAndFiniteAppend": true,
+    "deltaRecordsSha256": "9342f22377b8a73e3fa3478ff71b8498e66731471a1411e1556ef253c0db458b",
+    "changedNonNext": [
+      {
+        "path": "web/mir2-web3/apps/web/lib/generated/bevy_runtime_version.json",
+        "bytes": 1711,
+        "sha256": "231509755d4631f40c9ad16d04b004746099a6f7d86c96e25d6a097f274108f3"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/bevy-runtime/runtime-manifest.json",
+        "bytes": 1711,
+        "sha256": "231509755d4631f40c9ad16d04b004746099a6f7d86c96e25d6a097f274108f3"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/server.js",
+        "bytes": 14557,
+        "sha256": "968b1e327b7218a620c588582bf6ec1902b022084a2cfdc40f481b0a16617c17"
+      },
+      {
+        "path": "web/R16-PLAYABLE-ASSETS-MANIFEST.json",
+        "bytes": 4935238,
+        "sha256": "4c6837f63275261d78340213c51ebd6e9a03f3b020bdabd4108bb55e7953adb3"
+      }
+    ],
+    "addedCount": 2242
+  },
+  "finiteAssets": {
+    "manifestSha256": "4c6837f63275261d78340213c51ebd6e9a03f3b020bdabd4108bb55e7953adb3",
+    "schemaVersion": 3,
+    "files": 23286,
+    "bytes": 285908524,
+    "baseManifestSha256": "e7e13ea2aeb9cde489f6bc2a3d23927bcb72e0e4eb0a0ddfdbdc2289a7fdeb18",
+    "original21056PinsUnchanged": true,
+    "newFiles": 2230,
+    "requiredCategoryCounts": {
+      "ui": 4274,
+      "map0": 8483,
+      "map0141": 8,
+      "monsters": 2624,
+      "firstplay": 5667,
+      "forestCityNpcs": 216,
+      "forestPlayer": 832,
+      "caveMonster": 244,
+      "caveMap": 938
+    },
+    "appendScope": {
+      "id": "forest-cave-v17",
+      "maps": [
+        "D001"
+      ],
+      "npcLibraries": [
+        "NPC/04",
+        "NPC/06",
+        "NPC/08",
+        "NPC/16",
+        "NPC/25",
+        "NPC/27",
+        "NPC/52",
+        "NPC/83"
+      ],
+      "playerLibraries": [
+        "CWeapon/05"
+      ],
+      "monsterLibraries": [
+        "Monster/022"
+      ]
+    },
+    "existingValidatorPassed": true,
+    "engineeringFileLimit": 24000,
+    "baseFileLimitUnchanged": 22000,
+    "assetByteLimitUnchanged": 377487360,
+    "manifestByteLimitUnchanged": 8388608
+  },
+  "buildId": "UBmKf9syCgBkRHmahiLPf",
+  "thin360MiBGatePassed": false,
+  "finishedAt": "2026-11-05T20:11:03.454Z",
+  "expectedPins": {
+    "buildId": "UBmKf9syCgBkRHmahiLPf",
+    "renderer": "bevy-e229f62047e5a13c",
+    "finiteManifestSha256": "4c6837f63275261d78340213c51ebd6e9a03f3b020bdabd4108bb55e7953adb3",
+    "files": 31911,
+    "bytes": 928988373
+  },
+  "renderer": {
+    "passed": true,
+    "version": "bevy-e229f62047e5a13c",
+    "immutableVersionDigestVerified": true,
+    "aliasAndSavedManifestExact": true,
+    "originalBudgets": {
+      "wasmBytes": 32505856,
+      "gzipBytes": 7340032,
+      "jsBytes": 204800,
+      "gzipLevel": 9
+    },
+    "packages": [
+      {
+        "id": "webgpu",
+        "wasmBytes": 31237463,
+        "gzipBytes": 6475045,
+        "jsBytes": 141118,
+        "wasmSha256": "e48dc1ffe705487bc25a446934d0190b04285d8a02edae78109f703533521bdc",
+        "jsSha256": "10216eafd2ddcdeb0dab62c1b4dc5b0b4896eb1ebf8b8add06985f4e817ecb58",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false,
+        "importCount": 491,
+        "exportCount": 151,
+        "abiMetadataSha256": "6f1ed4ee20edc75d3a883dc4f973b0c57a29b7bd3548907a6c2b6dbddf1410fd",
+        "allV16ExportsPreserved": true,
+        "glueContainsAllImports": true,
+        "moduleCompiledOnly": true,
+        "moduleInstantiated": false,
+        "gzipLevel": 9,
+        "gzipBytesDefaultLevel6": 6530460
+      },
+      {
+        "id": "webgl2",
+        "wasmBytes": 16402208,
+        "gzipBytes": 4191958,
+        "jsBytes": 117176,
+        "wasmSha256": "44e1fe130faccba3fe53f5adb4e3aec49a5155201db43ca5e5f2ba6478a32531",
+        "jsSha256": "2e4c58270f49998063cf64b3605b412edce725f5df73254ce4bbf764b282998d",
+        "questUiAbiVersion": 0,
+        "bagUiAbiVersion": 0,
+        "primarySharedUiCompiled": false,
+        "importCount": 445,
+        "exportCount": 79,
+        "abiMetadataSha256": "1ac615d95986d0d79fd73a2a85a69bd38954640814d6b132f9619baddffabaf1",
+        "reusedUnchangedV16Wasm": true,
+        "gzipLevel": 9,
+        "gzipBytesDefaultLevel6": 4213570
+      },
+      {
+        "id": "webgl2-shared",
+        "wasmBytes": 32166041,
+        "gzipBytes": 6816261,
+        "jsBytes": 139092,
+        "wasmSha256": "2b73d94d42041ce0f6f2863e75811ff8a08cc8ed18a3ace5b7be481e1f4f7213",
+        "jsSha256": "792e256c91e98eae6d07fe53e79f2fc1adf622ffa1a29ef90bb97fb109feb0b3",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": true,
+        "importCount": 450,
+        "exportCount": 149,
+        "abiMetadataSha256": "af6e96773ae50f98815d31ff389e45744d6a44c12885d1bb087d6e88e34d0a3d",
+        "allV16ExportsPreserved": true,
+        "glueContainsAllImports": true,
+        "moduleCompiledOnly": true,
+        "moduleInstantiated": false,
+        "gzipLevel": 9,
+        "gzipBytesDefaultLevel6": 6874577
+      }
+    ],
+    "coreManifestSha256": "7e71968e1ba93c332d12312bb764b8595457ce8d6a49b35e18fcaabff627b386",
+    "coreVersion": "81dd599a887e9338a888672a19a1d5ecc4cc1b6d9b90a9bb41c61d5f8c210974",
+    "coreTripleUnchangedFromV16": true,
+    "newWasmBuilds": 0,
+    "wasmInstantiations": 0
+  },
+  "gatewayBuildBinding": {
+    "compiledRendererLiteralExact": true,
+    "compiledRendererLiteralPassedToJsonParser": true,
+    "passed": true,
+    "buildId": "UBmKf9syCgBkRHmahiLPf",
+    "expectedPublicGateway": "ws://127.0.0.1:19040/ws",
+    "standalonePublicEnvMatches": true,
+    "requiredPublicEnvMatches": true,
+    "standaloneAndRequiredEnvExact": true,
+    "standaloneConfigMatchesAfterStandardDistDirNormalization": true,
+    "actualNewPackagerGuardPassed": true,
+    "packagerGuard": "assertPreparedNextGateway",
+    "compiledManifestEnvironmentBindingsMatch": true,
+    "rendererVersion": "bevy-e229f62047e5a13c",
+    "coreVersion": "81dd599a887e9338a888672a19a1d5ecc4cc1b6d9b90a9bb41c61d5f8c210974",
+    "clientConsumption": {
+      "path": "web/mir2-web3/apps/web/.next-r16-delivery-physical-v2/static/chunks/7458-658d1e5a4a6a036d.js",
+      "bytes": 2663861,
+      "sha256": "8df2af836f39c4cb33e477bb8cd5df9a3000e1576159f53e53410b2bbf505b0e",
+      "constantBinding": "f9",
+      "constantValue": "ws://127.0.0.1:19040/ws",
+      "constantInitializer": "static URL literal .trim()",
+      "defaultResolver": "du",
+      "boundDefaultUsesConfiguredConstant": true,
+      "configuredValueIsNonemptySo7110FallbackIsNotSelected": true,
+      "webSocketConstructorConsumers": [
+        {
+          "offset": 2163389,
+          "constructor": "WebSocket",
+          "urlBinding": "a",
+          "resolver": "du",
+          "resolverCallOffset": 2163153,
+          "defaultAssignmentOffset": 2051723
+        }
+      ],
+      "usesTypeScriptSymbolResolution": true,
+      "parsedOnlyThisRelevantClientBundle": true
+    },
+    "compiledFeatures": {
+      "shopHostIdentityAndFiniteCodes": {
+        "readHostIdentity": true,
+        "uiHostChanged": true,
+        "uiStatusChanged": true,
+        "uiProofChanged": true,
+        "waitingForPaint": true
+      },
+      "entryVisibleProperty": true,
+      "entryVisibleUsesNegatedPageState": true,
+      "entryVisibleOffset": 2531838
+    },
+    "noQueryOverrideUsed": true,
+    "noNextModuleExecuted": true,
+    "noSocketOrBrowserCreated": true
+  },
+  "physicalRawCoverage": {
+    "libraries": [
+      {
+        "library": "NPC/04",
+        "metadataPinned": true,
+        "metadataKeys": [
+          "version",
+          "count",
+          "frames"
+        ],
+        "metadataEntries": 42,
+        "positiveDimensionFrames": 42,
+        "missingPhysicalRawFrames": 0,
+        "missingSample": [],
+        "packagedRawPngs": 42
+      },
+      {
+        "library": "NPC/06",
+        "metadataPinned": true,
+        "metadataKeys": [
+          "version",
+          "count",
+          "frames"
+        ],
+        "metadataEntries": 42,
+        "positiveDimensionFrames": 42,
+        "missingPhysicalRawFrames": 0,
+        "missingSample": [],
+        "packagedRawPngs": 42
+      },
+      {
+        "library": "NPC/08",
+        "metadataPinned": true,
+        "metadataKeys": [
+          "version",
+          "count",
+          "frames"
+        ],
+        "metadataEntries": 42,
+        "positiveDimensionFrames": 42,
+        "missingPhysicalRawFrames": 0,
+        "missingSample": [],
+        "packagedRawPngs": 42
+      },
+      {
+        "library": "NPC/16",
+        "metadataPinned": true,
+        "metadataKeys": [
+          "version",
+          "count",
+          "frames"
+        ],
+        "metadataEntries": 42,
+        "positiveDimensionFrames": 42,
+        "missingPhysicalRawFrames": 0,
+        "missingSample": [],
+        "packagedRawPngs": 42
+      },
+      {
+        "library": "NPC/25",
+        "metadataPinned": true,
+        "metadataKeys": [
+          "version",
+          "count",
+          "frames"
+        ],
+        "metadataEntries": 12,
+        "positiveDimensionFrames": 12,
+        "missingPhysicalRawFrames": 0,
+        "missingSample": [],
+        "packagedRawPngs": 12
+      },
+      {
+        "library": "NPC/27",
+        "metadataPinned": true,
+        "metadataKeys": [
+          "version",
+          "count",
+          "frames"
+        ],
+        "metadataEntries": 12,
+        "positiveDimensionFrames": 12,
+        "missingPhysicalRawFrames": 0,
+        "missingSample": [],
+        "packagedRawPngs": 12
+      },
+      {
+        "library": "NPC/52",
+        "metadataPinned": true,
+        "metadataKeys": [
+          "version",
+          "count",
+          "frames"
+        ],
+        "metadataEntries": 12,
+        "positiveDimensionFrames": 12,
+        "missingPhysicalRawFrames": 0,
+        "missingSample": [],
+        "packagedRawPngs": 12
+      },
+      {
+        "library": "NPC/83",
+        "metadataPinned": true,
+        "metadataKeys": [
+          "version",
+          "count",
+          "frames"
+        ],
+        "metadataEntries": 12,
+        "positiveDimensionFrames": 12,
+        "missingPhysicalRawFrames": 0,
+        "missingSample": [],
+        "packagedRawPngs": 12
+      },
+      {
+        "library": "CWeapon/05",
+        "metadataPinned": true,
+        "metadataKeys": [
+          "version",
+          "sourceLibrary",
+          "count",
+          "frameSet",
+          "frames"
+        ],
+        "metadataEntries": 832,
+        "positiveDimensionFrames": 832,
+        "missingPhysicalRawFrames": 0,
+        "missingSample": [],
+        "packagedRawPngs": 832
+      },
+      {
+        "library": "Monster/022",
+        "metadataPinned": true,
+        "metadataKeys": [
+          "version",
+          "sourceLibrary",
+          "count",
+          "frameSet",
+          "frames"
+        ],
+        "metadataEntries": 244,
+        "positiveDimensionFrames": 244,
+        "missingPhysicalRawFrames": 0,
+        "missingSample": [],
+        "packagedRawPngs": 244
+      }
+    ],
+    "caveMapKinds": {
+      "png": 938,
+      "json": 0,
+      "gz": 0,
+      "map": 0
+    }
+  },
+  "scope": "Independent read-only manifest pin, local resource closure, public build binding and staged-private boundary audit; no installation or gameplay test",
+  "thinGate": {
+    "passed": false,
+    "preparedBytesReportedByCoordinator": 691021912,
+    "limitBytes": 377487360,
+    "limitUnchanged": true,
+    "independentlyRecomputed": false,
+    "distinctFromFiniteAssetBudget": true
+  },
+  "operations": {
+    "artifactFilesChanged": 0,
+    "sourceFilesChanged": 0,
+    "privateFileBodiesRead": 0,
+    "livePrivateDirectoriesRead": 0,
+    "httpRequests": 0,
+    "webSocketSessions": 0,
+    "browsersStarted": 0,
+    "servicesStartedStoppedOrRestarted": 0,
+    "gameActions": 0,
+    "modelCalls": 0,
+    "wasmBuildOrOptimizationCommands": 0,
+    "wasmInstantiations": 0,
+    "wasmModulesCompiledOnlyForReadOnlyAbiInspection": 4
+  },
+  "failures": [],
+  "limitations": [
+    "All 31911 distribution entries were freshly verified for bytes, SHA-256, regular-file type, single-link count and non-link ancestor directories. The staged private directory was inspected only for emptiness; no private file body or live runtime directory was opened.",
+    "The 165 external runtime/launcher files, including Gateway, Actor, service, wallet/network and Node, retain live v16 pins. All three Core bundles and their metadata remain unchanged.",
+    "The schema3 forest/cave append contains exactly 2230 additional files; all original 21056 asset pins and their frozen source/category pins remain unchanged. The existing source validator, all 23286 resource-to-package pins, and complete positive-dimension raw frames for the ten scoped libraries passed.",
+    "The D001 raw tile closure has 938 PNGs and matches the frozen declared path/source hashes. Actual post-cutover map travel, NPC interaction and combat remain coordinator gameplay QA.",
+    "Renderer manifests, immutable version digest, matched glue/imports, retained v16 exports and original raw/gzip/JS budgets passed. Two changed renderer modules and their prior versions were compiled only for ABI inspection; none was instantiated, rebuilt or optimized. The unchanged WebGL2 module's ABI proof was reused.",
+    "The original gzip budget uses level 9; both level-9 sizes and the stricter observed default level-6 sizes are recorded and remain under the same cap.",
+    "Only the known relevant client bundle was parsed to bind the configured static 19040 default to its WebSocket argument and the exact new Renderer JSON literal to its JSON parser. No Next or game module was executed.",
+    "The credential finding is limited to forbidden runtime/credential paths, an empty staged private directory, known-key patterns in 2688 text files, and the build environment boundary; it does not claim to discover every possible arbitrary secret string.",
+    "Prepared thin size 691021912 bytes still exceeds the unchanged 377487360-byte gate. This distribution-integrity result does not pass thin, gameplay, complete multilingual coverage or human acceptance."
+  ],
+  "coreBundles": {
+    "unchangedFromLiveV16": true,
+    "bundles": [
+      {
+        "name": "core",
+        "version": "81dd599a887e9338a888672a19a1d5ecc4cc1b6d9b90a9bb41c61d5f8c210974",
+        "sourceSha256": "43fed2e1d71d79d57c0b8331d3eeb411b1074dc8ed6a7419d60267feca0d7f86",
+        "jsBytes": 24393,
+        "wasmBytes": 250136,
+        "unchangedFromV13": true,
+        "immutableDigestMatches": true
+      },
+      {
+        "name": "presentation",
+        "version": "08bc05f41551a7f01fd0edf3a7e639df847dad88ef605fc55b764e9bab901bbc",
+        "sourceSha256": "43fed2e1d71d79d57c0b8331d3eeb411b1074dc8ed6a7419d60267feca0d7f86",
+        "jsBytes": 24721,
+        "wasmBytes": 261983,
+        "unchangedFromV13": true,
+        "immutableDigestMatches": true
+      },
+      {
+        "name": "npcPurchase",
+        "version": "78c4de3cdd6f97897ad39c7f6e1a61a76a6f02343c0be8d570b616155a7fc58f",
+        "sourceSha256": "43fed2e1d71d79d57c0b8331d3eeb411b1074dc8ed6a7419d60267feca0d7f86",
+        "jsBytes": 8332,
+        "wasmBytes": 165791,
+        "unchangedFromV13": true,
+        "immutableDigestMatches": true
+      }
+    ]
+  }
+}

@@ -1,0 +1,240 @@
+{
+  "schemaVersion": 1,
+  "scope": "Independent W17 two-group58-history/42-complement branch derived from W16. No source edit, bank copy, finalizer, freeze, owned process or load.",
+  "parents": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\source-lib-v1.mjs",
+      "bytes": 18471,
+      "sha256": "bdbcb65eb6027f8d0c0812ab6975b5d53beee28d133be36d8cdf75593f57ca16"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\copy-source-bank-v1.mjs",
+      "bytes": 13254,
+      "sha256": "9bbf125dcded1a1e808bc804b0211e9bb973a064c5bb4edaf4a481cfbbb60a64"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\freeze-prepare-v1.mjs",
+      "bytes": 8821,
+      "sha256": "ae91d938ed4006828488a4cd08e227a84657fcdfaeade6be028b17b297457ae6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\run-owned-prepare-v1.mjs",
+      "bytes": 26491,
+      "sha256": "6cb4fe2ec2927242ea9ef4e6d301e3d7e7f3b57841cffd48eccb19abf06d1157"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\owned-child-v1.mjs",
+      "bytes": 2401,
+      "sha256": "08f7962808e5d66983766ef3ad74a284dace6ae2eeabe739a0a01445b05b08cc"
+    }
+  ],
+  "current": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\source-lib-v1.mjs",
+      "bytes": 18471,
+      "sha256": "bdbcb65eb6027f8d0c0812ab6975b5d53beee28d133be36d8cdf75593f57ca16"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\copy-source-bank-v1.mjs",
+      "bytes": 15794,
+      "sha256": "7fbbd202e3c564fbd267d20f4341db496dffe8ed08fac7b9cc39137fd770b687"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\freeze-prepare-v1.mjs",
+      "bytes": 8895,
+      "sha256": "ed3e6ddf07e85cad0db6e9d2a0c2ae3f69f20cf9e6ff2774763c7942601643db"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\run-owned-prepare-v1.mjs",
+      "bytes": 26463,
+      "sha256": "9e2b1d2a9801962b82ae3eb0b711e6ad88f5b39de36c175d596d939fbe2a448a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\owned-child-v1.mjs",
+      "bytes": 2401,
+      "sha256": "b7808473d1c9f480c3f6464cae5fefb96c34ba937abf0e1d95c45410b8aa250b"
+    }
+  ],
+  "rules": {
+    "source-lib-v1.mjs": [],
+    "copy-source-bank-v1.mjs": [
+      {
+        "label": "actualW16wholebank",
+        "before": "SOURCE=path.join(BASE,'ordinary-capacity-bank-prepare-v15','episode','private')",
+        "after": "SOURCE=path.join(BASE,'ordinary-capacity-bank-prepare-v16','episode','private')"
+      },
+      {
+        "label": "W16new16andtwohistorygroups",
+        "before": "export function validateSourceBank(planPin){const plan=JSON.parse(checked(planPin));assert(plan.schemaVersion===1&&plan.packageId===path.basename(DIRECTORY)&&plan.state==='SOURCE_PARTIAL_BANK_IDENTIFIED_NEW_RUNTIME_QUALIFICATION_PENDING'&&same(plan.sourcePrivate,SOURCE),'ActualW15 partial source bank required');safe(SOURCE,true);const receipt=JSON.parse(checked(plan.sourceReceipt)),report=JSON.parse(checked(plan.sourceReport)),cleanup=JSON.parse(checked(plan.sourceCleanup)),index=JSON.parse(checked(plan.sourcePreparedIndex));checked(plan.sourceOwnedProcess);checked(plan.sourceFrozenManifest);const independent=JSON.parse(checked(plan.sourceIndependentCleanup));assert(independent.gatewayPid===77056&&independent.gatewayPidAbsent===true&&independent.portsFree===true&&independent.listeners.length===0,'Actual W15 independent cleanup differs');\nassert(receipt.packageId==='ordinary-capacity-bank-prepare-v15'&&receipt.sourceFirst4InventoryReuse===true&&receipt.sourceOriginalFailedVerdictRetained===true&&receipt.cleanupComplete===true&&receipt.preparationComplete===false&&receipt.coldBankEligible===false&&cleanup.checks?.normalOwnedShutdown===true&&cleanup.checks?.sixCountersZero===true&&cleanup.checks?.gatewayProcessAbsent===true&&cleanup.checks?.driverProcessAbsent===true&&cleanup.checks?.monitorProcessAbsent===true&&cleanup.checks?.portsFree===true&&cleanup.checks?.postSourceUnchanged===true,'Source partial realm was not normally closed');assert(receipt.rawOriginalReport.sha256===plan.sourceReport.sha256&&receipt.rawOriginalReport.bytes===plan.sourceReport.bytes,'Original source report binding differs');\nassert(report.preparationOnly===true&&report.attackResults==='v2'&&report.testExecution===false&&report.ok===false&&report.error==='safe Deer funding capital insufficient with 1 Venison after 1 hunts and 8 attempts'&&report.preparedCount===42&&report.actorResults.length===42&&report.preparedIndex.length===42&&report.completePoolAccountCount===100&&report.completePoolPreserved===true&&report.ordinaryPreparationEvidenceEligible===false,'Historical source failure must remain originalfalse');assert(JSON.stringify(index.records)===JSON.stringify(report.preparedIndex)&&JSON.stringify(plan.sourcePreparedCharacters)===JSON.stringify(report.preparedIndex.map(r=>({name:r.name,characterIndex:r.characterIndex,map:r.map,x:r.x,y:r.y,normalLogout:r.normalLogout})))&&report.actorResults.every(r=>r.normalLogout===true&&r.after?.hpStock>=12),'Original42 prepared actors or saved index differ');assert(plan.sourceFailedCharacter.name===report.failedActor.name&&plan.sourceFailedCharacter.characterIndex===report.failedActor.characterIndex&&plan.sourceFailedCharacter.notPrepared===true&&!plan.sourcePreparedCharacters.some(r=>r.name===report.failedActor.name)&&plan.sourcePreparedEligibilityInherited===false,'Failed forty-third actor cannot become prepared evidence');assert(report.failedActor.before?.hp===18&&report.failedActor.before.maxHp===18&&report.failedActor.before.hpStock===1&&report.failedActor.before.gold===0&&report.failedActor.purchased===0&&report.failedActor.soldVenison===0&&report.failedActor.funding===null&&report.failedActor.commands===142&&report.failedActor.movementCommands===91&&report.failedActor.actualStagingReached===false,'Original W15 initial-stock/funding-capital failure scope differs');\n",
+        "after": "export function validateSourceBank(planPin){const plan=JSON.parse(checked(planPin));assert(plan.schemaVersion===1&&plan.packageId===path.basename(DIRECTORY)&&plan.state==='SOURCE_PARTIAL_BANK_IDENTIFIED_NEW_RUNTIME_QUALIFICATION_PENDING'&&same(plan.sourcePrivate,SOURCE),'ActualW16 partial source bank required');safe(SOURCE,true);const receipt=JSON.parse(checked(plan.sourceReceipt)),report=JSON.parse(checked(plan.sourceReport)),cleanup=JSON.parse(checked(plan.sourceCleanup)),index=JSON.parse(checked(plan.sourcePreparedIndex));checked(plan.sourceOwnedProcess);checked(plan.sourceFrozenManifest);const independent=JSON.parse(checked(plan.sourceIndependentCleanup));assert(independent.ownedGatewayPid===56588&&independent.ownedGatewayAbsent===true&&independent.portsFree===true&&Array.isArray(independent.remainingListeners)&&independent.remainingListeners.length===0,'Actual W16 independent cleanup differs');\nassert(receipt.packageId==='ordinary-capacity-bank-prepare-v16'&&receipt.sourceFirst4InventoryReuse===null&&receipt.sourceFirst4InventoryReuseEvidence?.performedThisRun===false&&receipt.first4FreshReusePerformedThisRun===false&&receipt.sourceOriginalFailedVerdictRetained===true&&receipt.cleanupComplete===true&&receipt.preparationComplete===false&&receipt.coldBankEligible===false&&receipt.coldContinuationBankEligible===false&&receipt.currentPartialIndexValid===true&&receipt.finalPoolIdentityValid===true&&receipt.historicalPreparedCount===42&&receipt.newPreparedCount===16&&receipt.expectedThisRun===58&&receipt.combinedSavedCount===58&&receipt.continuationProductionEvidence===false&&cleanup.checks?.normalOwnedShutdown===true&&cleanup.checks?.sixCountersZero===true&&cleanup.checks?.gatewayProcessAbsent===true&&cleanup.checks?.driverProcessAbsent===true&&cleanup.checks?.monitorProcessAbsent===true&&cleanup.checks?.portsFree===true&&cleanup.checks?.postSourceUnchanged===true,'Source partial realm was not normally closed or W16 semantics changed');assert(receipt.rawOriginalReport.sha256===plan.sourceReport.sha256&&receipt.rawOriginalReport.bytes===plan.sourceReport.bytes,'Original source report binding differs');\nassert(report.preparationOnly===true&&report.mode==='ordinary-economic-continuation-only'&&report.attackResults==='v2'&&report.testExecution===false&&report.ok===false&&report.error==='No walk path on 0 from 330,603 to 288,608'&&report.preparedCount===16&&report.newPreparedCount===16&&report.actorResults.length===16&&report.preparedIndex.length===16&&report.historicalPreparedCount===42&&report.expectedThisRun===58&&report.combinedSavedCount===58&&report.completePoolAccountCount===100&&report.completePoolPreserved===true&&report.ordinaryPreparationEvidenceEligible===false&&report.continuationPreparationEvidenceEligible===false,'Historical W16 originalfalse/new16/history42 must remain distinct');assert(JSON.stringify(index.records)===JSON.stringify(report.preparedIndex)&&report.actorResults.every(r=>r.normalLogout===true&&r.finalNormalDrainPositionMatched===true&&r.after?.hpStock>=12),'Original W16 sixteen normal saves differ');\nconst groups=plan.continuation?.evidence,equalPin=(a,b)=>a&&b&&same(a.file,b.file)&&a.bytes===b.bytes&&a.sha256===b.sha256;assert(plan.continuation?.mode==='historical-prepared-index-v1'&&groups?.length===2&&equalPin(groups[1].report,plan.sourceReport)&&equalPin(groups[1].preparedIndex,plan.sourcePreparedIndex)&&equalPin(groups[1].cleanup,plan.sourceCleanup)&&equalPin(groups[1].receipt,plan.sourceReceipt),'Exactly approved W15+W16 four-pin groups required');for(const g of groups)for(const p of Object.values(g))checked(p);const firstReport=JSON.parse(checked(groups[0].report)),firstReceipt=JSON.parse(checked(groups[0].receipt)),firstIndex=JSON.parse(checked(groups[0].preparedIndex));assert(firstReceipt.packageId==='ordinary-capacity-bank-prepare-v15'&&firstReport.ok===false&&firstReport.preparedCount===42&&firstReport.actorResults.length===42&&firstReport.preparedIndex.length===42&&JSON.stringify(firstIndex.records)===JSON.stringify(firstReport.preparedIndex)&&JSON.stringify(report.historicalEvidence)===JSON.stringify([groups[0]]),'W15 original42 and W16 ancestry differ');const combined=[...firstReport.preparedIndex,...report.preparedIndex];assert(combined.length===58&&JSON.stringify(plan.sourcePreparedCharacters)===JSON.stringify(combined.map(r=>({name:r.name,characterIndex:r.characterIndex,map:r.map,x:r.x,y:r.y,normalLogout:r.normalLogout})))&&new Set(combined.map(r=>r.name)).size===58&&new Set(combined.map(r=>r.characterIndex)).size===58&&new Set(combined.map(r=>r.map+':'+r.x+','+r.y)).size===58,'Combined58 normal-saved reservations differ');assert(plan.sourceFailedCharacter.name===report.failedActor.name&&plan.sourceFailedCharacter.characterIndex===report.failedActor.characterIndex&&plan.sourceFailedCharacter.notPrepared===true&&!plan.sourcePreparedCharacters.some(r=>r.name===report.failedActor.name)&&plan.sourcePreparedEligibilityInherited===false,'Failed ready59 cannot become prepared evidence');assert(report.failedActor.before?.hp===18&&report.failedActor.before.maxHp===18&&report.failedActor.before.hpStock===1&&report.failedActor.before.gold===0&&report.failedActor.purchased===0&&report.failedActor.soldVenison===2&&report.failedActor.goldEarned===521&&report.failedActor.goldSpent===0&&report.failedActor.funding?.collected===2&&report.failedActor.funding.hunts===2&&report.failedActor.commands===150&&report.failedActor.movementCommands===88&&report.failedActor.actualStagingReached===false&&report.failedActor.after===null&&report.failedActor.freshReadiness===null,'Original W16 failed59 public scope differs');\n"
+      },
+      {
+        "label": "priorW16controls",
+        "before": "Old W15 archive must remain in place",
+        "after": "Old W16 archive must remain in place"
+      },
+      {
+        "label": "actual59ready41registered",
+        "before": "pool.accounts.filter(a=>a.state==='ready').length===43&&pool.accounts.filter(a=>a.state==='registered').length===57",
+        "after": "pool.accounts.filter(a=>a.state==='ready').length===59&&pool.accounts.filter(a=>a.state==='registered').length===41"
+      },
+      {
+        "label": "combinedsource58notfresh",
+        "before": "sourceReadyCharacters:43,sourcePreparedCount:42",
+        "after": "sourceReadyCharacters:59,sourcePreparedCount:58,sourceNewPreparedCount:16,sourceHistoricalPreparedCount:42"
+      },
+      {
+        "label": "failed59notpromoted",
+        "before": "sourceFailedFortyThirdPromoted:false",
+        "after": "sourceFailedFiftyNinthPromoted:false"
+      },
+      {
+        "label": "latestW16traffic",
+        "before": "actualV15HistoricalPrefixContinuation:true,trafficLedgerSource:'ordinary-capacity-bank-prepare-v15'",
+        "after": "actualW16TwoGroupHistoricalContinuation:true,trafficLedgerSource:'ordinary-capacity-bank-prepare-v16'"
+      },
+      {
+        "label": "twoapprovedgroupspreflight",
+        "before": "export async function validateContinuationHistory(project,config,pool){\n assert(config.continuationMode==='historical-prepared-index-v1'&&config.historicalPreparedCount===42&&config.expectedThisRun===58&&config.options.continuation?.mode==='historical-prepared-index-v1'&&config.options.continuation.evidence?.length===1,'W16 exact42 historical/58 complement contract required');\n const plan=JSON.parse(checked(config.bankPlan)),g=config.options.continuation.evidence[0],equalPin=(a,b)=>a&&b&&same(a.file,b.file)&&a.bytes===b.bytes&&a.sha256===b.sha256;\n assert(Object.keys(g).length===4&&equalPin(g.report,plan.sourceReport)&&equalPin(g.preparedIndex,plan.sourcePreparedIndex)&&equalPin(g.cleanup,plan.sourceCleanup)&&equalPin(g.receipt,plan.sourceReceipt),'W16 four approved W15 evidence pins differ');for(const p of Object.values(g))checked(p);\n const {pathToFileURL}=await import('node:url'),api=await import(pathToFileURL(path.join(project,'apps/web/scripts/playtest-capacity-prepare.mjs'))),nav=await import(pathToFileURL(path.join(project,'apps/web/scripts/quest-agent/protocol-navigation.mjs'))),scenario=JSON.parse(checked(config.scenarioSource)),map=await nav.loadProtocolCollisionMap('0',{packagedMapRoot:path.join(project,'apps/web/lib/generated/crystal-map-pack')});\n const history=await api.validatePreparationContinuation(config.options.continuation,{pool,endpoint:config.options.endpoint,maxPrepared:100,targetHp:12,stagingPoints:scenario.preparation.stagingPoints,stagingCandidates:scenario.preparation.stagingCandidates,map});\n assert(history.historicalPreparedCount===42&&history.expectedThisRun===58&&history.historicalNotFresh===true&&JSON.stringify(history.remainingPoolIndices)===JSON.stringify(Array.from({length:58},(_,i)=>i+42))&&history.sourceOriginalVerdicts.length===1&&history.sourceOriginalVerdicts[0].ok===false,'W16 approved history/complement differs');return history;\n}\n\n",
+        "after": "export async function validateContinuationHistory(project,config,pool){\n assert(config.continuationMode==='historical-prepared-index-v1'&&config.historicalPreparedCount===58&&config.expectedThisRun===42&&config.options.continuation?.mode==='historical-prepared-index-v1'&&config.options.continuation.evidence?.length===2,'W17 exact58 historical/42 complement contract required');\n const plan=JSON.parse(checked(config.bankPlan)),groups=config.options.continuation.evidence,equalPin=(a,b)=>a&&b&&same(a.file,b.file)&&a.bytes===b.bytes&&a.sha256===b.sha256;\n assert(JSON.stringify(groups)===JSON.stringify(plan.continuation.evidence)&&Object.keys(groups[0]).length===4&&Object.keys(groups[1]).length===4&&equalPin(groups[1].report,plan.sourceReport)&&equalPin(groups[1].preparedIndex,plan.sourcePreparedIndex)&&equalPin(groups[1].cleanup,plan.sourceCleanup)&&equalPin(groups[1].receipt,plan.sourceReceipt),'W17 eight approved W15+W16 evidence pins differ');for(const g of groups)for(const p of Object.values(g))checked(p);\n const {pathToFileURL}=await import('node:url'),api=await import(pathToFileURL(path.join(project,'apps/web/scripts/playtest-capacity-prepare.mjs'))),nav=await import(pathToFileURL(path.join(project,'apps/web/scripts/quest-agent/protocol-navigation.mjs'))),scenario=JSON.parse(checked(config.scenarioSource)),map=await nav.loadProtocolCollisionMap('0',{packagedMapRoot:path.join(project,'apps/web/lib/generated/crystal-map-pack')});\n const history=await api.validatePreparationContinuation(config.options.continuation,{pool,endpoint:config.options.endpoint,maxPrepared:100,targetHp:12,stagingPoints:scenario.preparation.stagingPoints,stagingCandidates:scenario.preparation.stagingCandidates,map});\n assert(history.historicalPreparedCount===58&&history.expectedThisRun===42&&history.historicalNotFresh===true&&JSON.stringify(history.remainingPoolIndices)===JSON.stringify(Array.from({length:42},(_,i)=>i+58))&&history.sourceOriginalVerdicts.length===2&&history.sourceOriginalVerdicts.every(v=>v.ok===false),'W17 approved history/complement differs');return history;\n}\n\n"
+      }
+    ],
+    "freeze-prepare-v1.mjs": [
+      {
+        "label": "packageschema17",
+        "before": "c.schemaVersion===16",
+        "after": "c.schemaVersion===17"
+      },
+      {
+        "label": "exact58history42complement",
+        "before": "c.actualV15HistoricalPrefixContinuation===true&&c.continuationMode==='historical-prepared-index-v1'&&c.historicalPreparedCount===42&&c.expectedThisRun===58",
+        "after": "c.actualW16TwoGroupHistoricalContinuation===true&&c.continuationMode==='historical-prepared-index-v1'&&c.historicalPreparedCount===58&&c.expectedThisRun===42"
+      },
+      {
+        "label": "freezeall8historypins",
+        "before": "continuationMode:'historical-prepared-index-v1',historicalPreparedCount:42,expectedThisRun:58,continuationEvidencePins:Object.values(c.options.continuation.evidence[0])",
+        "after": "continuationMode:'historical-prepared-index-v1',historicalPreparedCount:58,expectedThisRun:42,continuationEvidencePins:c.options.continuation.evidence.flatMap(g=>Object.values(g))"
+      },
+      {
+        "label": "actualW16new16history42combined58",
+        "before": "bankSourceSummary:{controlledAccounts:100,readyCharacters:43,sourcePreparedCount:42,sourceOriginalFailure:sourceBankPlan.sourceOriginalVerdict,actualV15HistoricalPrefixContinuation:true,latestTrafficLedgerSource:'ordinary-capacity-bank-prepare-v15'",
+        "after": "bankSourceSummary:{controlledAccounts:100,readyCharacters:59,sourcePreparedCount:58,sourceNewPreparedCount:16,sourceHistoricalPreparedCount:42,sourceOriginalFailure:sourceBankPlan.sourceOriginalVerdict,actualW16TwoGroupHistoricalContinuation:true,latestTrafficLedgerSource:'ordinary-capacity-bank-prepare-v16'"
+      }
+    ],
+    "run-owned-prepare-v1.mjs": [
+      {
+        "label": "onlyW17twogroupmode",
+        "before": "config.actualV15HistoricalPrefixContinuation===true&&config.continuationMode==='historical-prepared-index-v1'&&config.historicalPreparedCount===42&&config.expectedThisRun===58",
+        "after": "config.actualW16TwoGroupHistoricalContinuation===true&&config.continuationMode==='historical-prepared-index-v1'&&config.historicalPreparedCount===58&&config.expectedThisRun===42"
+      },
+      {
+        "label": "frozen58history42expected",
+        "before": "m.historicalPreparedCount===42&&m.expectedThisRun===58",
+        "after": "m.historicalPreparedCount===58&&m.expectedThisRun===42"
+      },
+      {
+        "label": "ownedall8approvedpins",
+        "before": "JSON.stringify(Object.values(config.options.continuation.evidence[0]))",
+        "after": "JSON.stringify(config.options.continuation.evidence.flatMap(g=>Object.values(g)))"
+      },
+      {
+        "label": "actualW16wholebank",
+        "before": "bankCopyReceipt.actualV15HistoricalPrefixContinuation===true&&bankCopyReceipt.trafficLedgerSource==='ordinary-capacity-bank-prepare-v15'",
+        "after": "bankCopyReceipt.actualW16TwoGroupHistoricalContinuation===true&&bankCopyReceipt.trafficLedgerSource==='ordinary-capacity-bank-prepare-v16'"
+      },
+      {
+        "label": "honestW17intent",
+        "before": " const options={...config.options,poolFile,monitor:path.join(root,'monitor-current.json'),output:path.join(root,'reports'),scenarioFile:m.scenarioPin.file,routeFile:m.routePin.file,mapRoot:path.join(m.project,'apps/web/lib/generated/crystal-map-pack')},driverFile=path.join(privateRoot,'driver-options.json');await write(driverFile,{project:m.project,options});await write(path.join(root,'run-intent-v1.json'),{schemaVersion:1,manifestPin,options,scope:'Explicit continuation-only preparation over actualW15 complete cold Store/pool/four secrets/latest ledger/control bytes. Historical42 normal saves reserve their original saved points but are not freshly logged in or active. Only original pool indices43..100 (expected58) undergo current ordinary login/recovery/preparation/drain. Failed43 is not skipped for poolready. Original W15 false remains. No seed, stock/position edits, loginNotBefore/origin reset, inherited fresh readiness or measurement.',historicalPreparedCount:42,expectedThisRun:58,historicalNotFresh:true,first4FreshReusePerformedThisRun:false,formalAcceptanceEligible:false,capacityAccepted:false,preparationSupplyDurationClaim:false});",
+        "after": " const options={...config.options,poolFile,monitor:path.join(root,'monitor-current.json'),output:path.join(root,'reports'),scenarioFile:m.scenarioPin.file,routeFile:m.routePin.file,mapRoot:path.join(m.project,'apps/web/lib/generated/crystal-map-pack')},driverFile=path.join(privateRoot,'driver-options.json');await write(driverFile,{project:m.project,options});await write(path.join(root,'run-intent-v1.json'),{schemaVersion:1,manifestPin,options,scope:'Explicit two-group continuation over actualW16 complete cold Store/pool/four secrets/latest ledger/control bytes. W15 original42 plus W16 current16 form historical58 normal saves/notFresh. Only original pool indices59..100 (expected42) normally login/recover/prepare/save. Failedready59 remains selected. W15 and W16 originalfalse, W16 history42/new16 and first4null remain unchanged. No seed/edits/origin reset/inherited fresh readiness or measurement.',historicalPreparedCount:58,expectedThisRun:42,historicalNotFresh:true,first4FreshReusePerformedThisRun:false,formalAcceptanceEligible:false,capacityAccepted:false,preparationSupplyDurationClaim:false});"
+      },
+      {
+        "label": "currentonly42index",
+        "before": "freshThisRunOnly:true,historicalPreparedCount:42,expectedThisRun:58",
+        "after": "freshThisRunOnly:true,historicalPreparedCount:58,expectedThisRun:42"
+      },
+      {
+        "label": "original59to100offset58",
+        "before": "const currentTupleValid=(row,i)=>{const a=accounts[i+42],saved=finalAccounts?.[i+42],proof=report?.actorResults?.[i];return finalPoolIdentityValid&&a&&saved.state==='ready'&&saved.characterIndex===row.characterIndex&&row.name===a.name&&row.originalPoolIndex===i+42&&row.origin==='current-run'&&row.freshThisRun===true&&row.map==='0'&&Number.isSafeInteger(row.characterIndex)&&row.characterIndex>0&&Number.isSafeInteger(row.x)&&Number.isSafeInteger(row.y)&&candidateCells.has(row.x+','+row.y)&&row.normalLogout===true&&row.inSafeZone===true&&proof?.name===row.name&&proof.characterIndex===row.characterIndex&&proof.normalLogout===true&&proof.finalNormalDrainPositionMatched===true&&[proof.after,proof.freshReadiness].every(p=>p?.ownerName===row.name&&p.map==='0'&&p.x===row.x&&p.y===row.y&&Number.isSafeInteger(p.hpStock)&&p.hpStock>=12)&&row.sequence===proof.freshReadiness.sequence&&row.monotonicMs===proof.freshReadiness.monotonicMs};",
+        "after": "const currentTupleValid=(row,i)=>{const a=accounts[i+58],saved=finalAccounts?.[i+58],proof=report?.actorResults?.[i];return finalPoolIdentityValid&&a&&saved.state==='ready'&&saved.characterIndex===row.characterIndex&&row.name===a.name&&row.originalPoolIndex===i+58&&row.origin==='current-run'&&row.freshThisRun===true&&row.map==='0'&&Number.isSafeInteger(row.characterIndex)&&row.characterIndex>0&&Number.isSafeInteger(row.x)&&Number.isSafeInteger(row.y)&&candidateCells.has(row.x+','+row.y)&&row.normalLogout===true&&row.inSafeZone===true&&proof?.name===row.name&&proof.characterIndex===row.characterIndex&&proof.normalLogout===true&&proof.finalNormalDrainPositionMatched===true&&[proof.after,proof.freshReadiness].every(p=>p?.ownerName===row.name&&p.map==='0'&&p.x===row.x&&p.y===row.y&&Number.isSafeInteger(p.hpStock)&&p.hpStock>=12)&&row.sequence===proof.freshReadiness.sequence&&row.monotonicMs===proof.freshReadiness.monotonicMs};"
+      },
+      {
+        "label": "partial42maximum",
+        "before": "const currentPartialIndexValid=Array.isArray(preparedIndex)&&preparedIndex.length<=58&&report?.preparedCount===preparedIndex.length&&Array.isArray(report.actorResults)&&report.actorResults.length===preparedIndex.length&&preparedIndex.every(currentTupleValid)&&new Set(preparedIndex.map(r=>r.name)).size===preparedIndex.length;",
+        "after": "const currentPartialIndexValid=Array.isArray(preparedIndex)&&preparedIndex.length<=42&&report?.preparedCount===preparedIndex.length&&Array.isArray(report.actorResults)&&report.actorResults.length===preparedIndex.length&&preparedIndex.every(currentTupleValid)&&new Set(preparedIndex.map(r=>r.name)).size===preparedIndex.length;"
+      },
+      {
+        "label": "completeexact42",
+        "before": "const preparedIndexValid=currentPartialIndexValid&&preparedIndex.length===58;",
+        "after": "const preparedIndexValid=currentPartialIndexValid&&preparedIndex.length===42;"
+      },
+      {
+        "label": "combined58historycurrent42",
+        "before": "const combinedPreparedIndexPin=await write(path.join(root,'combined-saved-index-v1.json'),{schemaVersion:1,packageId:PACKAGE_ID,mode:'historical-prepared-index-v1',historicalPreparedCount:42,newPreparedCount:report?.preparedCount??0,expectedThisRun:58,historicalNotFresh:true,records:combinedRecords,completeDistinctOriginal100Saved:combinedSavedIndexValid,sourceCurrentReport:reportPin,historicalEvidence:config.options.continuation.evidence,all100FreshPreparedThisRun:false,formalOrdinaryRelogin100Verified:false,capacityAccepted:false,p0Accepted:false}).then(()=>pin(path.join(root,'combined-saved-index-v1.json')));",
+        "after": "const combinedPreparedIndexPin=await write(path.join(root,'combined-saved-index-v1.json'),{schemaVersion:1,packageId:PACKAGE_ID,mode:'historical-prepared-index-v1',historicalPreparedCount:58,newPreparedCount:report?.preparedCount??0,expectedThisRun:42,historicalNotFresh:true,records:combinedRecords,completeDistinctOriginal100Saved:combinedSavedIndexValid,sourceCurrentReport:reportPin,historicalEvidence:config.options.continuation.evidence,all100FreshPreparedThisRun:false,formalOrdinaryRelogin100Verified:false,capacityAccepted:false,p0Accepted:false}).then(()=>pin(path.join(root,'combined-saved-index-v1.json')));"
+      },
+      {
+        "label": "eligibilitycurrent42notfresh58",
+        "before": "const continuationProductionEvidence=report?.preparationOnly===true&&report?.mode==='ordinary-economic-continuation-only'&&report?.continuationMode==='historical-prepared-index-v1'&&report?.attackResults==='v2'&&report?.testExecution===false&&report?.continuationPreparationEvidenceEligible===true&&report?.ordinaryPreparationEvidenceEligible===false&&report?.historicalPreparedCount===42&&report?.expectedThisRun===58&&report?.newPreparedCount===report?.preparedCount&&report?.combinedSavedCount===42+report?.preparedCount&&JSON.stringify(report?.historicalPreparedIndex)===JSON.stringify(historyBefore.historicalPreparedIndex)&&report?.first4FreshReusePerformedThisRun===false&&report?.all100FreshPreparedThisRun===false&&report?.fullDurableReadinessVerified===false&&report?.measurementPerformed===false&&report?.cohortActivated===false&&report?.capacityAccepted===false&&report?.p0Accepted===false;",
+        "after": "const continuationProductionEvidence=report?.preparationOnly===true&&report?.mode==='ordinary-economic-continuation-only'&&report?.continuationMode==='historical-prepared-index-v1'&&report?.attackResults==='v2'&&report?.testExecution===false&&report?.continuationPreparationEvidenceEligible===true&&report?.ordinaryPreparationEvidenceEligible===false&&report?.historicalPreparedCount===58&&report?.expectedThisRun===42&&report?.newPreparedCount===report?.preparedCount&&report?.combinedSavedCount===58+report?.preparedCount&&JSON.stringify(report?.historicalPreparedIndex)===JSON.stringify(historyBefore.historicalPreparedIndex)&&report?.first4FreshReusePerformedThisRun===false&&report?.all100FreshPreparedThisRun===false&&report?.fullDurableReadinessVerified===false&&report?.measurementPerformed===false&&report?.cohortActivated===false&&report?.capacityAccepted===false&&report?.p0Accepted===false;"
+      },
+      {
+        "label": "complementexact42",
+        "before": "report?.preparedCount===58&&report?.ok===true",
+        "after": "report?.preparedCount===42&&report?.ok===true"
+      },
+      {
+        "label": "receipthistorical58current42",
+        "before": "const receipt={schemaVersion:1,packageId:PACKAGE_ID,mode:'historical-prepared-index-v1',actualV15HistoricalPrefixContinuation:true,sourceW15FundingFailureRetained:true,sourceBankPlan:m.bankSourcePlanPin,sourceBankCopyReceipt:pin(path.join(root,'source-bank-copy-receipt-v1.json')),sourceOriginalFailedVerdictRetained:true,sourcePreparedEligibilityInherited:false,sourceFirst4InventoryReuse:null,sourceFirst4InventoryReuseEvidence:{performedThisRun:false,historicalOnly:true,passed:null,scope:'Historical first4 were not logged in this run. No fresh reuse assertion is inherited.'},first4FreshReusePerformedThisRun:false,historicalPreparedCount:42,historicalNotFresh:true,newPreparedCount:report?.preparedCount??0,expectedThisRun:58,combinedSavedCount:combinedRecords.length,seederInvoked:false,loginNotBeforeOverridden:false,preparationOnly:true,workerCount:1,maxPrepared:100,manifestPin,driverSourceCommit:m.driver.driverSourceCommit,executionSourceCommit:m.driver.driverSourceCommit,backendSourceCommit:m.backend.backendSourceCommit,backendExecutable:m.backend.immutableExecutable,backendSourcesExact:55,newRustBuildPerformed:false,freshRustTestsPerformed:false,rawOriginalReport:reportPin,rawOriginalSamples:report?.samplesPath?pin(report.samplesPath):null,rawOriginalVerdict:{attackResults:report?.attackResults??null,ok:report?.ok??null,error:report?.error??null,preparedCount:report?.preparedCount??null,testExecution:report?.testExecution??null,ordinaryPreparationEvidenceEligible:report?.ordinaryPreparationEvidenceEligible??null},preparedIndexRecord:preparedIndexPin,preparedIndexValid,currentPartialIndexValid,finalPoolIdentityValid,combinedPreparedIndexRecord:combinedPreparedIndexPin,combinedSavedIndexValid,historicalEvidence:config.options.continuation.evidence,progressCheckpoints:report?.checkpoints??[],progressIsColdCheckpoint:false,productionPreparationEvidence:false,continuationProductionEvidence,selectedComplementComplete,preparationComplete:false,executionError,cleanupComplete,cleanupRecord:pin(path.join(root,'cleanup-v1.json')),coldBankEligible:false,coldContinuationBankEligible:cleanupComplete&&selectedComplementComplete,all100FreshPreparedThisRun:false,fullDurableReadinessVerified:false,formalOrdinaryRelogin100Verified:false,measurementPerformed:false,gameplayEngineActivated:false,nativeResumeExercisePerformed:false,sustainableTwoHourSupplyProven:false,capacityAccepted:false,p0Accepted:false,formalAcceptanceEligible:false};await write(path.join(root,'preparation-episode-receipt-v1.json'),receipt);console.log(JSON.stringify(receipt,null,2));process.exitCode=cleanupComplete&&selectedComplementComplete?0:1;",
+        "after": "const receipt={schemaVersion:1,packageId:PACKAGE_ID,mode:'historical-prepared-index-v1',actualW16TwoGroupHistoricalContinuation:true,sourceW15AndW16FailuresRetained:true,sourceBankPlan:m.bankSourcePlanPin,sourceBankCopyReceipt:pin(path.join(root,'source-bank-copy-receipt-v1.json')),sourceOriginalFailedVerdictRetained:true,sourcePreparedEligibilityInherited:false,sourceFirst4InventoryReuse:null,sourceFirst4InventoryReuseEvidence:{performedThisRun:false,historicalOnly:true,passed:null,scope:'Historical first4 were not logged in this run. No fresh reuse assertion is inherited.'},first4FreshReusePerformedThisRun:false,historicalPreparedCount:58,historicalNotFresh:true,newPreparedCount:report?.preparedCount??0,expectedThisRun:42,combinedSavedCount:combinedRecords.length,seederInvoked:false,loginNotBeforeOverridden:false,preparationOnly:true,workerCount:1,maxPrepared:100,manifestPin,driverSourceCommit:m.driver.driverSourceCommit,executionSourceCommit:m.driver.driverSourceCommit,backendSourceCommit:m.backend.backendSourceCommit,backendExecutable:m.backend.immutableExecutable,backendSourcesExact:55,newRustBuildPerformed:false,freshRustTestsPerformed:false,rawOriginalReport:reportPin,rawOriginalSamples:report?.samplesPath?pin(report.samplesPath):null,rawOriginalVerdict:{attackResults:report?.attackResults??null,ok:report?.ok??null,error:report?.error??null,preparedCount:report?.preparedCount??null,testExecution:report?.testExecution??null,ordinaryPreparationEvidenceEligible:report?.ordinaryPreparationEvidenceEligible??null},preparedIndexRecord:preparedIndexPin,preparedIndexValid,currentPartialIndexValid,finalPoolIdentityValid,combinedPreparedIndexRecord:combinedPreparedIndexPin,combinedSavedIndexValid,historicalEvidence:config.options.continuation.evidence,progressCheckpoints:report?.checkpoints??[],progressIsColdCheckpoint:false,productionPreparationEvidence:false,continuationProductionEvidence,selectedComplementComplete,preparationComplete:false,executionError,cleanupComplete,cleanupRecord:pin(path.join(root,'cleanup-v1.json')),coldBankEligible:false,coldContinuationBankEligible:cleanupComplete&&selectedComplementComplete,all100FreshPreparedThisRun:false,fullDurableReadinessVerified:false,formalOrdinaryRelogin100Verified:false,measurementPerformed:false,gameplayEngineActivated:false,nativeResumeExercisePerformed:false,sustainableTwoHourSupplyProven:false,capacityAccepted:false,p0Accepted:false,formalAcceptanceEligible:false};await write(path.join(root,'preparation-episode-receipt-v1.json'),receipt);console.log(JSON.stringify(receipt,null,2));process.exitCode=cleanupComplete&&selectedComplementComplete?0:1;"
+      }
+    ],
+    "owned-child-v1.mjs": [
+      {
+        "label": "progresscurrent42notfresh58",
+        "before": " else{const report=await api.runPreparationBank({...envelope.options,onProgress:value=>{const current={schemaVersion:1,preparationOnly:true,capacityAccepted:false,progressIsColdCheckpoint:false,stage:value.stage??null,preparedCount:value.preparedCount??null,newPreparedCount:value.newPreparedCount??value.preparedCount??null,expectedThisRun:58,historicalPreparedCount:42,historicalNotFresh:true,combinedSavedCount:value.combinedSavedCount??null,first4FreshReusePerformedThisRun:false,target:58,actorName:value.name??null,charIndex:value.characterIndex??null,at:value.at??Date.now()};writeFileSync(path.join(path.dirname(envelope.options.output),'preparation-current.json'),JSON.stringify(current)+'\\n',{encoding:'utf8',mode:0o600});}}),summary={type:'owned-driver-finished',reportPath:report.reportPath??null,ok:report.ok??false,error:report.error??null,preparationOnly:report.preparationOnly??false,preparedCount:report.preparedCount??null,testExecution:report.testExecution??null};console.log(JSON.stringify(summary));if(process.connected)process.send(summary);process.exitCode=report.ok?0:1}",
+        "after": " else{const report=await api.runPreparationBank({...envelope.options,onProgress:value=>{const current={schemaVersion:1,preparationOnly:true,capacityAccepted:false,progressIsColdCheckpoint:false,stage:value.stage??null,preparedCount:value.preparedCount??null,newPreparedCount:value.newPreparedCount??value.preparedCount??null,expectedThisRun:42,historicalPreparedCount:58,historicalNotFresh:true,combinedSavedCount:value.combinedSavedCount??null,first4FreshReusePerformedThisRun:false,target:42,actorName:value.name??null,charIndex:value.characterIndex??null,at:value.at??Date.now()};writeFileSync(path.join(path.dirname(envelope.options.output),'preparation-current.json'),JSON.stringify(current)+'\\n',{encoding:'utf8',mode:0o600});}}),summary={type:'owned-driver-finished',reportPath:report.reportPath??null,ok:report.ok??false,error:report.error??null,preparationOnly:report.preparationOnly??false,preparedCount:report.preparedCount??null,testExecution:report.testExecution??null};console.log(JSON.stringify(summary));if(process.connected)process.send(summary);process.exitCode=report.ok?0:1}"
+      }
+    ]
+  },
+  "forwardAndInverseRawExact": true,
+  "sourceLibWholeRawUnchanged": true,
+  "backendBindingWholeRawUnchanged": true,
+  "sourceW16": {
+    "originalFalse": true,
+    "currentNew16": 16,
+    "historical42": 42,
+    "first4": null
+  },
+  "historicalPreparedCount": 58,
+  "expectedThisRun": 42,
+  "originalPoolIndices1Based": [
+    59,
+    100
+  ],
+  "sourcePreparedEligibilityInherited": false,
+  "historyFreshThisRun": false,
+  "first4FreshReusePerformedThisRun": false,
+  "all100FreshPreparedThisRun": false,
+  "sourcePlan": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\source-bank-plan-pending-v1.json",
+    "bytes": 22082,
+    "sha256": "45183dd2e1ad548adefc023aae0e0bc732d051e22858400116abf5109dc326e2"
+  },
+  "config": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\prepare-config-pending-v1.json",
+    "bytes": 9569,
+    "sha256": "d55767b03300195a9c688609ceeabda66b537bc0ab885a8095fac440fb4ff144"
+  },
+  "binding": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\backend-release-binding-pending-v1.json",
+    "bytes": 1216,
+    "sha256": "0e68b64abdf8d4b579c42295d956117099b41be7730fd3fdfedf0c9908e64ef7"
+  },
+  "rootHistoryPreflight": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\history-supplement-v1\\actual-two-group-history-receipt-v1.json",
+    "bytes": 3471,
+    "sha256": "42d81552f82d480aac085d67ff9239e3238ad353abe833475f215eedebb4966e"
+  },
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

@@ -1,0 +1,341 @@
+{
+  "schema": "mir2.stone-frontend-sidebar-handoff.v1",
+  "created_utc": "2026-10-09T14:55:51.881361+00:00",
+  "worker": "/root/stone_ui_explore",
+  "status": "authored_handed_off_not_compiled_or_acceptance_verified",
+  "head": {
+    "commit": "12880592d68a498921c25b8bc8d4ebdebc909ed1",
+    "summary": "fix(web): package Sharp bootstrap and refresh production runtimes"
+  },
+  "scope": {
+    "product_files": [
+      "mir2-web3/apps/game-client/client-bevy/src/lib.rs",
+      "mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs",
+      "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "mir2-web3/apps/game-client/client-bevy/src/stone_workshop_ui.rs"
+    ],
+    "ownership_released": true,
+    "further_product_edits_in_followup": false,
+    "report_path": "work/slg-stonecutting-20261009/frontend-sidebar-handoff-01.json"
+  },
+  "source_files": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/lib.rs",
+      "bytes": 5038,
+      "current_sha256": "0bb26ff4298628cc47507ade4004dd70bb43f05898ef7208fedd3c78b5c516e5",
+      "immediate_pre_edit_sha256": null,
+      "preserved_immediate_pre_edit_file": null,
+      "earlier_observed_reference": {
+        "report": "work/slg-stonecutting-20261009/independent-ui-exploration-01.json",
+        "sha256": "a9b655974e1cbeb1ff2098f5c5363fa6861bdf1ba697ba94e3e14d6207b7dd88",
+        "bytes": 4945,
+        "limit": "Earlier read interval; not a captured immediate pre-edit baseline."
+      },
+      "head_reference": {
+        "commit": "12880592d68a498921c25b8bc8d4ebdebc909ed1",
+        "git_blob_oid": "d3242f970dda602152f183ee2d882bdbbfd09b72",
+        "raw_git_blob_bytes": 4944,
+        "raw_git_blob_sha256": "85aaa22b7901f7eb27575b1430ab6e8b831cf9709ab7162f1ce5f47d341a2a78",
+        "limit": "Git blob bytes, generally LF-normalized; not preserved pre-edit Windows working-file bytes."
+      }
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs",
+      "bytes": 531988,
+      "current_sha256": "8c50c1e03c660159bd6032fee5ea58c7361c2b588ad4eb982934c8baa7cfc9fd",
+      "immediate_pre_edit_sha256": null,
+      "preserved_immediate_pre_edit_file": null,
+      "earlier_observed_reference": null,
+      "head_reference": {
+        "commit": "12880592d68a498921c25b8bc8d4ebdebc909ed1",
+        "git_blob_oid": "0aa825fdeab730859a27eddde8986d60f8e90a74",
+        "raw_git_blob_bytes": 511036,
+        "raw_git_blob_sha256": "c926ca690b14814747270315868b490685d07f6cd5ac6721c3b6da629319718a",
+        "limit": "Git blob bytes, generally LF-normalized; not preserved pre-edit Windows working-file bytes."
+      }
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "bytes": 903736,
+      "current_sha256": "f7b692680fe0f16e412e9991c6eb4161b5c2b9286b455484219f9ddd883abdfc",
+      "immediate_pre_edit_sha256": null,
+      "preserved_immediate_pre_edit_file": null,
+      "earlier_observed_reference": {
+        "report": "work/slg-stonecutting-20261009/independent-ui-exploration-01.json",
+        "sha256": "2545ce7104060e3de7143983908f65165c57a881651d7e90942edc2e31e7b703",
+        "bytes": 897533,
+        "limit": "Earlier read interval; not a captured immediate pre-edit baseline."
+      },
+      "head_reference": {
+        "commit": "12880592d68a498921c25b8bc8d4ebdebc909ed1",
+        "git_blob_oid": "76e0b3b35a4478c67b1fcb91908639d1dee55be8",
+        "raw_git_blob_bytes": 874898,
+        "raw_git_blob_sha256": "6defa79eae6b0dbcc814bd5ec982f65505e002dc0b0d6f2370dc65adec198548",
+        "limit": "Git blob bytes, generally LF-normalized; not preserved pre-edit Windows working-file bytes."
+      }
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/stone_workshop_ui.rs",
+      "bytes": 11240,
+      "current_sha256": "2efbfb76ff0eab1feabbc75cf29ecc5d040c6ba1f9af2dd68b8a4eeaef9c498d",
+      "immediate_pre_edit_sha256": null,
+      "preserved_immediate_pre_edit_file": null,
+      "earlier_observed_reference": null,
+      "head_reference": {
+        "commit": "12880592d68a498921c25b8bc8d4ebdebc909ed1",
+        "exists": false,
+        "limit": "New worker-owned module; absent from HEAD."
+      }
+    }
+  ],
+  "pre_edit_baseline_limits": [
+    "No exact immediate pre-edit copies or hashes were retained for lib.rs, quest_ui.rs or overlays.rs.",
+    "Earlier observed hashes and raw HEAD blob references are explicitly separate from pre-edit working-file evidence.",
+    "Do not substitute an inferred/reconstructed baseline for original Guard evidence."
+  ],
+  "geometry": {
+    "priority": "Supplied QuestUiPresentation wins, including invalid values which fail closed.",
+    "native": "Requires actual PrimaryWindow and UiScale; logical_width/height = Window.resolution.width/height divided by UiScale, stage_css_scale = UiScale.",
+    "sidebar": "440x224 at (logical_width - 456, 16), only current recognized valid desktop workshop model with safe stage dimensions.",
+    "fallback": "Ordinary/Unknown/touch/small/missing/invalid geometry retain original modal/sheet presentation.",
+    "bag": "Current separate Bag origin retained; overlap prefers below sidebar with 8-unit gap, then left. Clamp to the actual logical stage. Restore ordinary NPC (445,0), original close origin.",
+    "input": "Existing global NPC modality, Escape/back, current enabled target validation and original SelectNpcDialog remain. No movement changes or client economy logic."
+  },
+  "test_filters": {
+    "native_combined": "workshop_",
+    "native_expected_authored_count": 8,
+    "portable_combined": "workshop_",
+    "portable_expected_authored_count": 5,
+    "model_only": "stone_workshop_ui::tests::",
+    "native_render_only": "quest_ui::tests::workshop_",
+    "native_bag_render_only": "crystal_ui::overlays::tests::workshop_bag_render_",
+    "portable_render_only": "quest_ui::mobile_layout_tests::workshop_portable_tree_uses_supplied_right_sidebar_and_keeps_touch_sheet",
+    "limit": "Filter strings only; worker did not invoke Cargo. Native and portable are separate feature builds; portable UI test requires native-ui disabled."
+  },
+  "system_render_tests": [
+    {
+      "name": "quest_ui::tests::workshop_render_uses_real_native_geometry_and_keeps_modal_current_links",
+      "exact_filter": "quest_ui::tests::workshop_render_uses_real_native_geometry_and_keeps_modal_current_links",
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs",
+      "line": 8922,
+      "feature": "native-ui",
+      "coverage": "Actual plugin renderer, PrimaryWindow/UiScale geometry and resize, full-stage blocker, actual current-link SelectNpcDialog intent, ordinary fallback and missing UiScale.",
+      "status": "written_not_run_by_worker"
+    },
+    {
+      "name": "quest_ui::tests::workshop_render_preserves_host_mobile_sheet_and_restores_ordinary_bounds",
+      "exact_filter": "quest_ui::tests::workshop_render_preserves_host_mobile_sheet_and_restores_ordinary_bounds",
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs",
+      "line": 8965,
+      "feature": "native-ui",
+      "coverage": "Actual renderer with supplied mobile/desktop geometry, Unknown Merchant/Exit fallback and invalid geometry.",
+      "status": "written_not_run_by_worker"
+    },
+    {
+      "name": "quest_ui::mobile_layout_tests::workshop_portable_tree_uses_supplied_right_sidebar_and_keeps_touch_sheet",
+      "exact_filter": "quest_ui::mobile_layout_tests::workshop_portable_tree_uses_supplied_right_sidebar_and_keeps_touch_sheet",
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs",
+      "line": 11247,
+      "feature": "portable-quest-ui without native-ui",
+      "coverage": "Existing computed_app with actual shared renderer, ComputedNode and UiGlobalTransform bounds, ordinary fallback and touch sheet.",
+      "status": "written_not_run_by_worker"
+    },
+    {
+      "name": "crystal_ui::overlays::tests::workshop_bag_render_avoids_sidebar_and_preserves_separate_user_drag",
+      "exact_filter": "crystal_ui::overlays::tests::workshop_bag_render_avoids_sidebar_and_preserves_separate_user_drag",
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "line": 17729,
+      "feature": "native-ui",
+      "coverage": "Actual sync system and OverlayInventory renderer, overlap avoidance, preserved separate drag, invalidated drag, height-only clamp, short-stage left fallback, Unknown and close origin restoration.",
+      "status": "written_not_run_by_worker"
+    },
+    {
+      "name": "crystal_ui::overlays::tests::workshop_bag_render_keeps_normal_origin_when_sidebar_is_already_separate",
+      "exact_filter": "crystal_ui::overlays::tests::workshop_bag_render_keeps_normal_origin_when_sidebar_is_already_separate",
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "line": 17778,
+      "feature": "native-ui",
+      "coverage": "Actual OverlayInventory renderer keeps normal separate Bag origin on wide stage and touch fallback.",
+      "status": "written_not_run_by_worker"
+    }
+  ],
+  "model_tests": [
+    {
+      "name": "stone_workshop_ui::tests::actual_server_model_languages_and_full_range_quotes_are_supported",
+      "exact_filter": "stone_workshop_ui::tests::actual_server_model_languages_and_full_range_quotes_are_supported",
+      "path": "mir2-web3/apps/game-client/client-bevy/src/stone_workshop_ui.rs",
+      "line": 153,
+      "feature": "native-ui or portable-quest-ui",
+      "coverage": "Four exact locales, full u64 decimal selector, seal/appraise/cut grammar and right-sidebar bounds.",
+      "status": "written_not_run_by_worker"
+    },
+    {
+      "name": "stone_workshop_ui::tests::ordinary_entry_and_unknown_result_keep_original_layout",
+      "exact_filter": "stone_workshop_ui::tests::ordinary_entry_and_unknown_result_keep_original_layout",
+      "path": "mir2-web3/apps/game-client/client-bevy/src/stone_workshop_ui.rs",
+      "line": 171,
+      "feature": "native-ui or portable-quest-ui",
+      "coverage": "A home link alone, ordinary title, Unknown Merchant/Exit and closed model keep original layout.",
+      "status": "written_not_run_by_worker"
+    },
+    {
+      "name": "stone_workshop_ui::tests::invalid_identity_footer_target_or_disabled_quote_keeps_original_layout",
+      "exact_filter": "stone_workshop_ui::tests::invalid_identity_footer_target_or_disabled_quote_keeps_original_layout",
+      "path": "mir2-web3/apps/game-client/client-bevy/src/stone_workshop_ui.rs",
+      "line": 184,
+      "feature": "native-ui or portable-quest-ui",
+      "coverage": "Invalid/missing NPC identity, malformed/overflow selector/target, mismatched footer, disabled quote and duplicate targets fail closed.",
+      "status": "written_not_run_by_worker"
+    },
+    {
+      "name": "stone_workshop_ui::tests::touch_small_scaled_invalid_or_missing_viewport_uses_original_sheet",
+      "exact_filter": "stone_workshop_ui::tests::touch_small_scaled_invalid_or_missing_viewport_uses_original_sheet",
+      "path": "mir2-web3/apps/game-client/client-bevy/src/stone_workshop_ui.rs",
+      "line": 203,
+      "feature": "native-ui or portable-quest-ui",
+      "coverage": "Touch, small logical/CSS stages, nonfinite geometry and missing presentation keep original layout.",
+      "status": "written_not_run_by_worker"
+    }
+  ],
+  "preserved_regression_filter": "crystal_ui::overlays::tests::npc_dialog_transition_moves_the_bag_and_closes_only_its_service_children",
+  "dependency_head_check": [
+    {
+      "name": "client-bevy manifest/lock",
+      "paths": [
+        "mir2-web3/apps/game-client/client-bevy/Cargo.toml",
+        "mir2-web3/apps/game-client/client-bevy/Cargo.lock"
+      ],
+      "changed_tracked_vs_head": [],
+      "untracked_nonignored": [],
+      "tracked_content_matches_head": true,
+      "limit": "Git tracked-content comparison accounts for checkout line-ending normalization; ignored build outputs are outside this source check."
+    },
+    {
+      "name": "client-core",
+      "paths": [
+        "mir2-web3/apps/game-client/client-core"
+      ],
+      "changed_tracked_vs_head": [],
+      "untracked_nonignored": [],
+      "tracked_content_matches_head": true,
+      "limit": "Git tracked-content comparison accounts for checkout line-ending normalization; ignored build outputs are outside this source check."
+    },
+    {
+      "name": "ui-core",
+      "paths": [
+        "mir2-web3/apps/game-client/ui-core"
+      ],
+      "changed_tracked_vs_head": [],
+      "untracked_nonignored": [],
+      "tracked_content_matches_head": true,
+      "limit": "Git tracked-content comparison accounts for checkout line-ending normalization; ignored build outputs are outside this source check."
+    },
+    {
+      "name": "protocol",
+      "paths": [
+        "mir2-web3/packages/protocol"
+      ],
+      "changed_tracked_vs_head": [],
+      "untracked_nonignored": [],
+      "tracked_content_matches_head": true,
+      "limit": "Git tracked-content comparison accounts for checkout line-ending normalization; ignored build outputs are outside this source check."
+    },
+    {
+      "name": "platform-windows",
+      "paths": [
+        "mir2-web3/apps/game-client/platform-windows"
+      ],
+      "changed_tracked_vs_head": [],
+      "untracked_nonignored": [],
+      "tracked_content_matches_head": true,
+      "limit": "Git tracked-content comparison accounts for checkout line-ending normalization; ignored build outputs are outside this source check."
+    },
+    {
+      "name": "platform-web",
+      "paths": [
+        "mir2-web3/apps/game-client/platform-web"
+      ],
+      "changed_tracked_vs_head": [],
+      "untracked_nonignored": [],
+      "tracked_content_matches_head": true,
+      "limit": "Git tracked-content comparison accounts for checkout line-ending normalization; ignored build outputs are outside this source check."
+    },
+    {
+      "name": "runtime",
+      "paths": [
+        "mir2-web3/apps/game-client/runtime"
+      ],
+      "changed_tracked_vs_head": [],
+      "untracked_nonignored": [],
+      "tracked_content_matches_head": true,
+      "limit": "Git tracked-content comparison accounts for checkout line-ending normalization; ignored build outputs are outside this source check."
+    },
+    {
+      "name": "client-wire",
+      "paths": [
+        "mir2-web3/apps/game-client/client-wire"
+      ],
+      "changed_tracked_vs_head": [],
+      "untracked_nonignored": [],
+      "tracked_content_matches_head": true,
+      "limit": "Git tracked-content comparison accounts for checkout line-ending normalization; ignored build outputs are outside this source check."
+    },
+    {
+      "name": "Web dependency manifest/lock",
+      "paths": [
+        "mir2-web3/apps/web/package.json",
+        "mir2-web3/apps/web/package-lock.json"
+      ],
+      "changed_tracked_vs_head": [],
+      "untracked_nonignored": [],
+      "tracked_content_matches_head": true,
+      "limit": "Git tracked-content comparison accounts for checkout line-ending normalization; ignored build outputs are outside this source check."
+    },
+    {
+      "name": "game-data (known Root dependency changes)",
+      "paths": [
+        "mir2-web3/packages/game-data"
+      ],
+      "changed_tracked_vs_head": [
+        "mir2-web3/packages/game-data/src/lib.rs"
+      ],
+      "untracked_nonignored": [
+        "mir2-web3/packages/game-data/src/stone_items.rs"
+      ],
+      "tracked_content_matches_head": false,
+      "limit": "Git tracked-content comparison accounts for checkout line-ending normalization; ignored build outputs are outside this source check."
+    }
+  ],
+  "known_changed_dependency_hashes": [
+    {
+      "path": "mir2-web3/packages/game-data/src/lib.rs",
+      "bytes": 167647,
+      "sha256": "56266851a23632b1844bea8cd9a9cd5781f2a9bed308988b39f22d74c485f614",
+      "owner": "Root existing backend stone template integration; not edited by sidebar worker"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/stone_items.rs",
+      "bytes": 1411,
+      "sha256": "bc1df14c421be8305651733529da726f7a497f18695cc8b39018abbca8c26ecf",
+      "owner": "Root existing backend stone template integration; not edited by sidebar worker"
+    }
+  ],
+  "client_bevy_tracked_changes_vs_head": [
+    "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+    "mir2-web3/apps/game-client/client-bevy/src/lib.rs",
+    "mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs"
+  ],
+  "verification": {
+    "cargo_run_by_worker": false,
+    "rustfmt_run_by_worker": false,
+    "tests_run_by_worker": false,
+    "screenshots_or_play_run_by_worker": false,
+    "diff_check": "git diff --check for the three tracked edited files exited 0; only Git CRLF-to-LF notices.",
+    "process_preflight": "Repeated checks before product mutations found no client Cargo; final handoff process check had no cargo/rustc/rustdoc process."
+  },
+  "limits": [
+    "Current hashes are the files at report creation; Root must freeze/check them again for original Guard.",
+    "Web tsconfig.json and historical untracked frontend build artifacts exist outside checked Rust source dependencies and were not modified.",
+    "No compile, screenshot, gameplay, Candidate, deployment or final frontend acceptance claim."
+  ]
+}

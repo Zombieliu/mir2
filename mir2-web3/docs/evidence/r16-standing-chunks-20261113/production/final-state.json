@@ -1,0 +1,15 @@
+{
+  "checkedAt": "2026-11-13T06:45:54.814Z",
+  "candidateSource": "440f82d4d2a7db2b44046cfbd7885680e437aa65",
+  "productionSource": "b2097fdfd13a2d8bc0acde435cd612fd83672cac",
+  "productionDeployment": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd",
+  "alias": "numeron.obelisk.build",
+  "rollbackPerformed": true,
+  "candidateRetainedAsProduction": false,
+  "productionQualificationPassed": false,
+  "candidateCodeCommitted": true,
+  "protectedFilesPreserved": 131,
+  "shellOwnedInsertions": 2,
+  "desktopRunsClosed": true,
+  "scope": "Restored the previously qualified functional deployment; its historical cold-load performance item remains open."
+}

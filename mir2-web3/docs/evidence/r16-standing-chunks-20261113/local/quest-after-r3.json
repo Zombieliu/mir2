@@ -1,0 +1,304 @@
+{
+  "run": "quest-after-r3",
+  "source": "440f82d4d2a7db2b44046cfbd7885680e437aa65",
+  "developmentBuild": false,
+  "localCandidate": "210fa4716a24-standing-chunks-7f8bb015",
+  "originalReceiptSha256": "5d65487ba003de8faa14601f4830782cc2f8f20a1efeaa8cb6a6b27ba55abd0d",
+  "passed": false,
+  "failure": {
+    "stage": "continuous-walk-with-every-PNG-over-one-second",
+    "message": "metadata cannot bypass the actual six-second absent body",
+    "readiness": {
+      "visible": true,
+      "pending": false,
+      "hasPlayer": true,
+      "hasRegion": true,
+      "ready": true,
+      "serviceWorkerControlled": true,
+      "marks": [
+        {
+          "name": "sceneAssetsReady",
+          "atMs": 330.80000001192093,
+          "epochMs": 1794546884994,
+          "sceneCache": null
+        },
+        {
+          "name": "gameplayLocaleStart",
+          "atMs": 3959.1000000089407,
+          "epochMs": 1794546888622,
+          "sceneCache": null
+        },
+        {
+          "name": "gameplayLocaleReady",
+          "atMs": 4013.1000000089407,
+          "epochMs": 1794546888676,
+          "sceneCache": null
+        },
+        {
+          "name": "startGamePacket",
+          "atMs": 14770.300000011921,
+          "epochMs": 1794546899433,
+          "sceneCache": null
+        },
+        {
+          "name": "userInformationReady",
+          "atMs": 14777.20000000298,
+          "epochMs": 1794546899440,
+          "sceneCache": null
+        },
+        {
+          "name": "sceneBlueprintStart",
+          "atMs": 15078.20000000298,
+          "epochMs": 1794546899741,
+          "sceneCache": null
+        },
+        {
+          "name": "sceneBlueprintReady",
+          "atMs": 23002.80000001192,
+          "epochMs": 1794546907666,
+          "sceneCache": "r16-entry-static"
+        },
+        {
+          "name": "sceneSpritesReady",
+          "atMs": 23034.90000000596,
+          "epochMs": 1794546907698,
+          "sceneCache": null
+        },
+        {
+          "name": "firstPlayableFrame",
+          "atMs": 29054.60000000894,
+          "epochMs": 1794546913717,
+          "sceneCache": null
+        }
+      ],
+      "applied": {
+        "mapFileName": "0.map",
+        "cellCount": 6819,
+        "spriteCount": 957,
+        "doorCellCount": 57,
+        "closedDoorCellCount": 57,
+        "regionBounds": {
+          "minX": 244,
+          "maxX": 348,
+          "minY": 580,
+          "maxY": 681
+        },
+        "playBounds": {
+          "minX": 272,
+          "maxX": 320,
+          "minY": 602,
+          "maxY": 638
+        }
+      },
+      "first": {
+        "x": 288,
+        "y": 616,
+        "map": "0"
+      }
+    }
+  },
+  "closed": {
+    "browser": true,
+    "proxy": true,
+    "next": true,
+    "gateway": true
+  },
+  "fixtureUnchanged": true,
+  "gender": "male",
+  "renderer": "compatibility",
+  "startGame": {
+    "acknowledgedAt": 1794546899435,
+    "bootstrapAt": 1794546899721,
+    "position": {
+      "x": 288,
+      "y": 616
+    },
+    "map": "0"
+  },
+  "firstPlayable": {
+    "epochMs": 1794546913717,
+    "observedAt": 1794546913724
+  },
+  "startAckToFirstPlayableMs": 14282,
+  "standingChunks": {
+    "faultInjected": true,
+    "reads": [
+      {
+        "path": "/_next/static/chunks/8276.e1c397bbd8dd7497.js",
+        "gender": "male",
+        "direction": 4,
+        "bytes": 15100,
+        "gzipBytes": 10699,
+        "sha256": "818eac72d768bfc8964b1670e29579c8ceec2813113d2dbbc1fc18e159074dfc",
+        "requestedAt": 1794546907751,
+        "headersAt": 1794546907751,
+        "status": 503,
+        "finishedAt": 1794546907751
+      },
+      {
+        "path": "/_next/static/chunks/8276.e1c397bbd8dd7497.js",
+        "gender": "male",
+        "direction": 4,
+        "bytes": 15100,
+        "gzipBytes": 10699,
+        "sha256": "818eac72d768bfc8964b1670e29579c8ceec2813113d2dbbc1fc18e159074dfc",
+        "requestedAt": 1794546912898,
+        "headersAt": 1794546912898,
+        "status": 503,
+        "finishedAt": 1794546912898
+      }
+    ]
+  },
+  "earlyPlayer": null,
+  "earlyWalks": {
+    "passed": true,
+    "firstPlayableAt": 1794546913717,
+    "rows": [
+      {
+        "key": "ArrowRight",
+        "direction": "Right",
+        "to": {
+          "x": 289,
+          "y": 616
+        },
+        "nativeHudReadyBeforeInput": false,
+        "inputAt": 1794546915933,
+        "wireAt": 1794546915940,
+        "ackAt": 1794546915949,
+        "renderedAt": 1794546915983,
+        "ackMs": 9,
+        "inputToRenderedMs": 50,
+        "rendered": {
+          "x": 289,
+          "y": 616
+        }
+      },
+      {
+        "key": "ArrowLeft",
+        "direction": "Left",
+        "to": {
+          "x": 288,
+          "y": 616
+        },
+        "nativeHudReadyBeforeInput": false,
+        "inputAt": 1794546915994,
+        "wireAt": 1794546916539,
+        "ackAt": 1794546916559,
+        "renderedAt": 1794546916582,
+        "ackMs": 20,
+        "inputToRenderedMs": 588,
+        "rendered": {
+          "x": 288,
+          "y": 616
+        }
+      }
+    ],
+    "returnedToSpawn": true
+  },
+  "continuousWalk": {
+    "startedAt": 1794546916583,
+    "rows": [
+      {
+        "step": 0,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794546917539
+      },
+      {
+        "step": 0,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794546918140
+      },
+      {
+        "step": 1,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794546918729
+      },
+      {
+        "step": 1,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794546919364
+      },
+      {
+        "step": 2,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794546919955
+      },
+      {
+        "step": 2,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794546920567
+      },
+      {
+        "step": 3,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794546921161
+      },
+      {
+        "step": 3,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794546921746
+      },
+      {
+        "step": 4,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794546922349
+      },
+      {
+        "step": 4,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794546922951
+      },
+      {
+        "step": 5,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794546923571
+      },
+      {
+        "step": 5,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794546924158
+      },
+      {
+        "step": 6,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794546924760
+      },
+      {
+        "step": 6,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794546925427
+      },
+      {
+        "step": 7,
+        "key": "ArrowRight",
+        "commands": 1,
+        "arrivedAt": 1794546926022
+      },
+      {
+        "step": 7,
+        "key": "ArrowLeft",
+        "commands": 1,
+        "arrivedAt": 1794546926626
+      }
+    ],
+    "endedAt": 1794546926626
+  },
+  "standingFaces": null,
+  "native": null,
+  "worker": null,
+  "warm": null
+}

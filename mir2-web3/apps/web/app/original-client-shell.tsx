@@ -1,4 +1,25 @@
 "use client";
+import { crystalEntityDepth, crystalEntityLayerDepth } from "../lib/crystal-world-depth";
+import { pickCrystalActor, sampleCrystalBodyPixel, warmCrystalBodyPixels, type CrystalBodyFrame } from "../lib/crystal-actor-hit";
+import { useWindowKeydown } from "../lib/use-window-keydown";
+import { installGameBrowserDefaults } from "../lib/game-browser-defaults";
+import { guildKeyboardOwnsEvent } from "../lib/r16-guild-keyboard";
+import {
+  preloadR16EntryFloor, preloadR16EntryMonsterFrames, loadR16EntryNpcsWithRecovery, preloadR16EntryObjects, loadR16EntryPlayerWithRecovery,
+  R16_ENTRY_FLOOR_BOUNDS, R16_ENTRY_FLOOR_MAP, R16_ENTRY_MONSTER_BOUNDS,
+  type R16EntryActorAssets, type R16EntrySpriteImages,
+} from "../lib/r16-entry-scene";
+import { CharacterPointerRouter } from "../lib/bevy-character-ui";
+import { SpellsPointerRouter } from "../lib/bevy-spells-ui";
+import { MailPointerRouter,type MailPointerContext,type MailPointerEdge } from "../lib/bevy-mail-ui";
+import {composeStagePoint,sameComposeAuthority,sameComposeScope,type ClipboardGesture,type ComposeProof,type ComposeTextOperation,type MailComposeHost} from "../lib/bevy-mail-text-input";
+import { containsHudRect, HudPointerRouter, type HudPointerLease } from "../lib/bevy-hud-ui";
+import type { HeroPointerContext } from "../lib/bevy-hero-host";
+import { crystalKeyNameFromBrowserEvent, matchingCrystalKeyFunctions, crystalDropViewDeadline } from "../lib/player-ui-preferences";
+import { crystalWindowShortcut, crystalSkillShortcutSlot } from "../lib/crystal-shortcut-actions";
+import { crystalCombatModeStopsDispatch } from "../lib/shared-combat-mode-keys";
+import { OriginalClientSkillBars } from "./components/original-client-skill-bars";
+import { OriginalClientCombatModeControls } from "./components/original-client-combat-mode-controls";
 
 import {
   memo,
@@ -10,6 +31,7 @@ import {
   useState,
   type CSSProperties,
   type MouseEvent,
+  type PointerEvent as ReactPointerEvent,
 } from "react";
 
 import {
@@ -19,6 +41,20 @@ import {
   type InventoryTabKey,
 } from "../lib/original-ui";
 import { createAssetResidency } from "../lib/asset-residency";
+import { BagPointerRouter } from "../lib/bevy-bag-ui";
+import { bagBeltTargetAtClientPoint, sameBagBeltGeometry, validBagBeltDropGeometry, type BagBeltCallbacks, type BagBeltButtonBinding, type BagBeltGeometry, type BagBeltGestureProof, type BagBeltRect } from "../lib/bag-belt-gesture";
+import type { NpcRepairView, NpcRepairSelection, NpcRepairDrag, NpcRepairDragGeometry } from "../lib/npc-repair-service";
+import type { WorldFishingGesture, WorldFishingPointer, WorldFishingCallbacks } from "../lib/world-fishing-input";
+import { StoragePointerRouter } from "../lib/bevy-storage-ui";
+import { storagePrepareCanvasStyle } from "../lib/bevy-storage-presentation";
+import { NpcShopPointerRouter } from "../lib/bevy-npc-shop-ui";
+import { matchesBevyHpOrbView, matchesBevyMpOrbView, readBevyHpOrbSlot } from "../lib/bevy-hp-orb";
+import { matchesBevyExperienceBarView, readBevyExperienceBarSlot } from "../lib/bevy-experience-bar";
+import { matchesBevyWeightBarView, readBevyWeightBarSlot } from "../lib/bevy-weight-bar";
+import { HudBarCanvasController } from "../lib/bevy-hud-bar-draw-plan";
+import { readBevyQuestPresentation } from "../lib/bevy-quest-ui";
+import { questWorldControlAt } from "../lib/bevy-quest-world-controls";
+import { sharedUiCanvasId } from "../lib/bevy-shared-canvas-mode";
 import { createBrowserAtlasFetcher } from "../lib/asset-residency/browser-adapters";
 import type { AtlasPagePayload, PersistentStore } from "../lib/asset-residency/types";
 import { preloadSceneAssetUrls } from "../lib/scene-asset-preloader";
@@ -39,18 +75,19 @@ import {
   type OriginalSceneSpriteLibraryMeta,
 } from "../lib/original-scene-sprite-meta";
 import {
-  buildTranslator,
   formatRuntimeMessage,
   formatRuntimePhase,
   languageLocale,
   type Mir2Language,
 } from "../lib/localization";
 import {
+  playOriginalSoundEvent,
   playOriginalSoundPath,
   setOriginalMusic,
   stopOriginalAudio,
   unlockOriginalAudio,
 } from "../lib/original-audio";
+import { FishingFeedbackPresentation, fishingBiteButtonFrame } from "../lib/world-fishing-feedback";
 import {
   LanguageSelector,
   LoginOverlay,
@@ -70,16 +107,16 @@ import type {
   SceneAssetReadiness,
 } from "./components/original-client-shell-types";
 import {
-  LOGIN_STATIC_BACKGROUND_FRAME,
-  LOGIN_TRANSITION_FRAME_MS,
   ORIGINAL_AUDIO,
   ORIGINAL_EFFECT_VOLUME,
   desiredMusicForScreen,
   entityKindLabelKey,
   selectedTargetActionLabel,
 } from "./components/original-client-shell-flow";
+import { R16LoginDoor } from "./components/r16-login-door";
 import type {
   DisplayEntity,
+  DisplaySceneEffect,
   DisplayLogLine,
   DisplayWorld,
   EntityKind,
@@ -116,7 +153,6 @@ import {
   rescueStalledSceneAssetImages,
   sceneAssetCandidateUrls,
   sceneAssetRuntimeStats,
-  viewportDepthForCell,
   viewportLayoutForStage,
   type ViewportMapSprites,
   type ViewportLayout,
@@ -141,6 +177,7 @@ import {
   entityAnimationRuntimeFromWindow,
   resolveCrystalEntityAnimationPoses,
 } from "./components/original-client-entity-animation-runtime";
+import { crystalFishingRodLibrary } from "./components/original-client-player-frames";
 import { WebGl2EntityAtlasLayer, type WebGl2EntityAtlasDebug } from "./components/webgl2-entity-atlas-layer";
 import {
   WebGl2MapAtlasLayer,
@@ -170,6 +207,16 @@ type HeldScenePointer = {
   dispatched: boolean;
   tileX?: number;
   tileY?: number;
+  worldTarget?: { kind: "entity" | "drop"; objectId: string };
+  fishingGesture?: WorldFishingGesture;
+};
+
+type WorldFishingPhysicalPointer = {
+  pointerId: number; pointerType: "mouse" | "touch"; startedAt: number; source: globalThis.PointerEvent; stage: HTMLElement;
+  hudPointer: HudPointerLease | null;
+  held: HeldScenePointer; gesture: WorldFishingGesture | null; phase: "held" | "terminal" | "retired";
+  clientX: number; clientY: number;
+  callbacks: WorldFishingCallbacks; sourceKey: string; runtime: object; geometry: string; contextGeometry: string;
 };
 
 type ChatBubbleRecord = {
@@ -478,12 +525,14 @@ function keyboardInputTargetIsEditable(target: EventTarget | null) {
 
 export function OriginalClientShell({
   language,
+  t,
   screen,
   runtimePhase,
   runtimeMessage,
   wsState,
   reconnectStatus,
   world,
+  combatModes,
   worldStore,
   selectorHud,
   player,
@@ -494,8 +543,72 @@ export function OriginalClientShell({
   viewportEntities: sourceViewportEntities,
   viewportTiles,
   sceneInteractionReady,
+  sceneAssetReleaseId = null,
+  sceneLoadingText,
+  onRetrySceneLoad,
   bevyEntityRendererReady,
   bevyRuntimeBackend,
+  webGl2SharedCanvasPrototype = false,
+  bevyHudUiReady = false,
+  bevyHudSourceGeometry = null,
+  bevyCharacterStatsReady = false,
+  bevyCharacterPageReady = false,
+  bevySpellsPageReady = false,
+  bevyMailPageReady = false,
+  getBevyMailPointerContext,
+  onBevyMailPointer,
+  bevyMailComposeReady = false,
+  bevyMailComposePending = false,
+  getBevyMailComposeBusy,
+  bevyMailTextContext,
+  onBevyMailTextEdge,
+  onBevyMailClipboard,
+  onBevyMailComposeAction,
+  onBevyMailComposePointer,
+  onBevyMailComposePointerCancel,
+  mailOpen = false,
+  onToggleMail,
+  getBevySpellsPointerContext,
+  onBevySpellsPointer,
+  getBevyCharacterPointerContext,
+  onBevyCharacterPointer,
+  readBevyHudStatus,
+  dispatchBevyHudNavigation,
+  bevyQuestUiReady = false,
+  bevyQuestUiCapturesPointer = false,
+  readBevyQuestKeyboardCapture,
+  bevyQuestWorldUiReady = false,
+  readBevyQuestWorldControls,
+  readBevyQuestWorldControlBlockers,
+  bevyHpOrb = null,
+  bevyMpOrb = null,
+  bevyExperienceBar = null,
+  bevyWeightBar = null,
+  bevyHudBarIdentity = null,
+  bevyHudBarPlans = null,
+  bevyHudBarReadLivePlans,
+  onHpOrbLocalOverlayChange,
+  bevyBagUiActive = false,
+  bevyHeroUiActive = false, bevyHeroUiTransitioning = false, bevyHeroUiToken = null, bevyHeroUiWorldBlocked = false,
+  getBevyHeroInputBlocked, getBevyHeroPointerContext, onBevyHeroPointer, onBevyHeroKey,
+  bevyNpcShopUiActive = false,
+  bevyNpcShopUiTransitioning = false,
+  getBevyNpcShopInputBlocked, getBevyNpcShopPointerContext, onBevyNpcShopPointer,
+  npcShopTab, onNpcShopTabChange,
+  bevyStorageUiActive = false,
+  bevyStorageUiTransitioning = false,
+  bevyStoragePreparePresentation = null,
+  bevyStorageOwnerRevision = 0,
+  getBevyStoragePointerContext,
+  onBevyStoragePointer,
+  bevyBagOwnerRevision = 0,
+  getBevyBagPointerContext,
+  getBevyBagPointerTransitioning,
+  onBevyBagPointer,
+  onBevyBagTouchFallback,
+  inventoryInitialDeleteMode = false,
+  onInventoryCompatibilityInteraction,
+  onQuestUiModalChange,
   bevyMapRuntimeGeneration,
   bevyMapRuntimeReady,
   bevyMapPresentedImageKeys,
@@ -510,8 +623,12 @@ export function OriginalClientShell({
   chatMessage,
   loginBusy,
   loginError,
+  loginAuth,
+  loginDoorToken,
+  onLoginDoorOpened,
   suiWallets,
   walletPickerOpen,
+  dubheQr,
   dubheWalletUrl,
   identityProvider,
   identityLinkBusy,
@@ -524,8 +641,13 @@ export function OriginalClientShell({
   activeInventoryTab,
   activeCharacterTab,
   storageServiceOpenVersion,
+  storagePasswordOpenVersion = 0,
   npcShopService,
   npcRepairService,
+  npcRepairView, onSelectNpcRepair, onConfirmNpcRepair, onToggleNpcRepairHold,
+  onBeginNpcRepairDrag, onCancelNpcRepairDrag, onDropNpcRepairDrag,
+  onBagBeltDropGeometry, onBeginBagToBeltGesture, onArmBagToBeltGesture, onBagToBeltMove, onCancelBagToBeltGesture,
+  worldFishingAnimation, onWorldFishingAnimationCommit, onBeginWorldFishingGesture, onCancelWorldFishingGesture,
   onLanguageChange,
   onAccountIdChange,
   onPasswordChange,
@@ -534,19 +656,24 @@ export function OriginalClientShell({
   onSubmitLogin,
   onPasskeyLogin,
   onWalletPickerToggle,
+  onDubheQrLogin,
+  onDubheQrCancel,
   onWalletLogin,
   onIdentityLinkPasskey,
   onIdentityLinkWallet,
   onQuickEnter,
   onResetClient,
+  onOpenAccountSecurity,
   onExitSelect,
   onSendChat,
   onRequestTrade,
   onRentExpandedStorage,
+  storageRentalPrompt, onConfirmStorageRental, onCancelStorageRental,
+  allowStageExit,
   onLogout,
-  onCreateCharacter,
+  characterCreate,
   onDeleteCharacter,
-  onUseItem,
+  onUseItem, onReadItemTooltip, onReadEquipmentItemTooltip,
   onDropItem,
   onEquipItem,
   onRemoveItem,
@@ -559,21 +686,30 @@ export function OriginalClientShell({
   onSetStoragePassword,
   onRemoveStoragePassword,
   onSellItem,
-  onBuyNpcShopItem,
+  onBuyNpcShopItem, onQuoteNpcShopItem,
   onDropGold,
   onRepairItem,
   onSpecialRepairItem,
   onCastSkill,
+  onCombatKey,onCombatPointer,onCombatCancel,onCombatUiHeld,
   onClaimMail,
   onDeleteMail,
   onBuyGameShopItem,
-  onSendClientCommand,
+  cashGameShopSource, cashGameShopPending, onConfirmCashGameShopPurchase, onReadCashGameShopItemTooltip,
+  cashPreviewSourceKey, onReadCashPreviewLayers, onTurnCashPreview,
+  chatUi, mapImageRouteSource, onMapImageRoute, onMapImageRoutePress, onMapRouteModalChange,
+  onGameShopVisibilityChange, onHeroShortcut, parityUiBlocksGameplay, parityUiWorldBlocked = false,
+  crystalKeyBindings, playerUiPreferences, questNameTargetObjectIds, dropViewHeld = false, getKeybindCaptureActive,
+  onCrystalWindowShortcut, onCrystalGameplayShortcut, onCrystalDropViewHeldChange, skillBars,
+  onSendClientCommand, fishingUi,
   onStartTutorial,
   onToggleCharacter,
   onToggleInventory,
   onToggleQuestLog,
+  onToggleOptions,
   onCloseCharacter,
   onCloseInventory,
+  onCloseStorage,
   onCloseNpcShopService,
   onCloseNpcRepairService,
   onOpenCharacterTab,
@@ -591,17 +727,37 @@ export function OriginalClientShell({
   onApproachTarget,
   onPrimaryTargetAction,
   onSelectNpcDialogTarget,
+  npcDialogLanguage,
   onSubmitNpcInput,
   onSelectCharacter,
   onEnterWorld,
+  combatInputDiagnostics,
+  npcShopInputDiagnostics,
+  npcPurchaseActionDiagnostics,
+  storageUiDiagnostics,
+  bagUiDiagnostics,
+  readMovementInputDiagnostics,
+  readBeltInputDiagnostics,
+  spellsUiDiagnostics,
   targetDistance,
   entityKindClassName,
-}: OriginalClientShellProps) {
-  // Memoize t and locale so stable references are passed to memo'd child components
-  // (GameUiScene, LoginOverlay, SelectOverlay, OriginalClientMobileControls). Without
-  // this, buildTranslator returns a new function on every render — invalidating the
-  // memo on each 30 Hz motionNow tick. Language changes only on user action (rare).
-  const t = useMemo(() => buildTranslator(language), [language]);
+}: OriginalClientShellProps & {onCombatUiHeld?: (channel:"bag"|"character"|"hud"|"spells"|"storage"|"npcShop",token:object,held:boolean)=>void;
+  combatInputDiagnostics?: string;
+  npcShopInputDiagnostics?: string;
+  npcPurchaseActionDiagnostics?: string;
+  storageUiDiagnostics?: string;
+  bagUiDiagnostics?: string;
+  readMovementInputDiagnostics?: () => unknown;
+  readBeltInputDiagnostics?: () => unknown;
+  spellsUiDiagnostics?: string;
+  bevyMailPageReady?:boolean;getBevyMailPointerContext?:()=>MailPointerContext|null;onBevyMailPointer?:(edge:MailPointerEdge)=>boolean;
+  bevyMailComposeReady?:boolean;bevyMailComposePending?:boolean;bevyMailTextContext?:ReturnType<MailComposeHost['textContext']>;
+  getBevyMailComposeBusy?:()=>number;
+  onBevyMailTextEdge?:(edge:ComposeTextOperation)=>boolean;onBevyMailClipboard?:(kind:'copy'|'cut'|'paste',gesture:ClipboardGesture)=>boolean;
+  onBevyMailComposeAction?:(action:string)=>boolean;
+  onBevyMailComposePointer?:(pointerId:number,phase:'down'|'move'|'up'|'cancel',x:number,y:number,shift:boolean)=>boolean;
+  onBevyMailComposePointerCancel?:()=>void;
+  mailOpen?:boolean;onToggleMail?:()=>void}) {
   const locale = useMemo(() => languageLocale(language), [language]);
   const clientProfile = useOriginalClientDeviceProfile();
   const runtimePhaseLabel = formatRuntimePhase(language, runtimePhase);
@@ -610,9 +766,7 @@ export function OriginalClientShell({
     () => wideMobileRequestedForClientProfile(clientProfile.layout, clientProfile.input),
     [clientProfile.input, clientProfile.layout],
   );
-  // Shown over the (black) stage while the map tiles preload after entering the world. The
-  // condition reuses sceneInteractionReady, which preloadSceneAssetUrls() flips true on
-  // success or within its 5s partial-ready timeout, so this overlay can never stick.
+  // Covers scene JSON and tile preparation after entering the world.
   const sceneLoadingLabel = t(
     "scene.loadingMap",
     [],
@@ -624,7 +778,6 @@ export function OriginalClientShell({
           ? "Carregando mapa…"
           : "Loading map…",
   );
-  const [loginTransitionFrame, setLoginTransitionFrame] = useState<number | null>(null);
   const [entityAnimationWorldSeed] = useState(createCrystalAnimationWorldSeed);
   const [sceneSpriteFrameIndex, setSceneSpriteFrameIndex] = useState(0);
   const [motionNow, setMotionNow] = useState(0);
@@ -712,19 +865,362 @@ export function OriginalClientShell({
   // shell's existing motion clock without any dedicated timer.
   const chatBubbleStateRef = useRef<Map<string, ChatBubbleRecord>>(new Map());
   const stageFrameRef = useRef<HTMLDivElement | null>(null);
+  const stageGutterPressRef = useRef<number | null>(null);
+  const stageExitDialogRef = useRef<HTMLDialogElement | null>(null);
+  const bagBeltButtonsRef = useRef<readonly BagBeltButtonBinding[] | null>(null);
+  const bagBeltGeometryRef = useRef<BagBeltGeometry | null>(null);
+  const bagBeltGeometryRevisionRef = useRef(0);
+  const bagBeltCallbacksRef = useRef<BagBeltCallbacks>({});
+  const bagBeltContextRef = useRef<{ page: InventoryTabKey; open: boolean; screen: ClientScreen; virtualWidth: number; virtualHeight: number; scale: number; repair: boolean } | null>(null);
+  type BagBeltPointerLease = { proof: BagBeltGestureProof; geometry: BagBeltGeometry; source: Readonly<ItemActionRef> | null;
+    node: HTMLElement; sourceRect: BagBeltRect; pointerId: number; pointerType: string; startedAt: number; x: number; y: number;
+    owner: "react" | "bevy"; callbacks: BagBeltCallbacks; activate?: () => void; hold?: { token: object };
+    sharedPointerCallback: typeof onBevyBagPointer; sharedContextCallback: typeof getBevyBagPointerContext };
+  const bagBeltPointerRef = useRef<BagBeltPointerLease | null>(null);
+  const bagBeltArmedSharedRef = useRef<BagBeltPointerLease | null>(null);
+  const bagBeltQuarantineRef = useRef(new Map<number, number>());
+  const bagBeltRejectedTerminalRef = useRef<{ pointerId: number; startedAt: number } | null>(null);
+  const bagBeltClickFenceRef = useRef(new Map<number, { startedAt: number; nodes: Set<HTMLElement> }>());
+  const npcRepairTargetRef = useRef<{ view: NpcRepairView; node: HTMLElement } | null>(null);
+  const npcRepairQuarantineRef = useRef(new Map<number, number>());
+  const npcRepairClickFenceRef = useRef(new Map<number, { startedAt: number; target: EventTarget | null }>());
+  type RepairPointerLease = { drag: NpcRepairDrag; view: NpcRepairView; geometry: NpcRepairDragGeometry;
+    startedAt: number; item: HTMLElement; target: HTMLElement; stage: HTMLElement;
+    cancel: typeof onCancelNpcRepairDrag; drop: typeof onDropNpcRepairDrag; hold?: { token: object } };
+  const npcRepairPointerRef = useRef<RepairPointerLease | null>(null);
+  const [npcRepairTargetSelection, setNpcRepairTargetSelection] = useState<NpcRepairSelection | null>(null);
+  const npcRepairVisibleTargetRef = useRef<NpcRepairSelection | null>(null);
+  function changeNpcRepairTarget(selection: NpcRepairSelection | null) {
+    npcRepairVisibleTargetRef.current = selection; setNpcRepairTargetSelection(selection);
+  }
+  function confirmNpcRepairTarget(selection: NpcRepairSelection): boolean {
+    const result = onConfirmNpcRepair?.(selection) === true;
+    if (npcRepairVisibleTargetRef.current === selection) changeNpcRepairTarget(null);
+    return result;
+  }
+  function openNpcRepairBagPage(tab: InventoryTabKey) {
+    const lease = npcRepairPointerRef.current;
+    if (lease) cancelNpcRepairPointer(lease);
+    onOpenInventoryTab(tab);
+  }
+  const registerNpcRepairTarget = useCallback((view: NpcRepairView, node: HTMLElement) => {
+    const binding = { view, node }; npcRepairTargetRef.current = binding;
+    const panel = node.parentElement;
+    for (const [id, record] of npcRepairClickFenceRef.current) {
+      if (!(record.target instanceof Node) || !panel?.contains(record.target)) npcRepairClickFenceRef.current.delete(id);
+    }
+    return () => {
+      if (npcRepairTargetRef.current !== binding) return;
+      npcRepairTargetRef.current = null;
+      const lease = npcRepairPointerRef.current;
+      if (lease?.target === node && lease.view.stamp === view.stamp) cancelNpcRepairPointer(lease);
+    };
+  }, []);
+  const [questLocalModalOpen, setQuestLocalModalOpenState] = useState(false);
+  const [mobileMoreOpen, setMobileMoreOpenState] = useState(false);
+  const questLocalModalRef = useRef(false), mobileMoreOpenRef = useRef(false);
+  const hpOverlayChangeRef = useRef(onHpOrbLocalOverlayChange); hpOverlayChangeRef.current = onHpOrbLocalOverlayChange;
+  function setQuestLocalModalOpen(next: boolean | ((previous: boolean) => boolean)) {
+    const open = typeof next === "function" ? next(questLocalModalRef.current) : next;
+    questLocalModalRef.current = open; hpOverlayChangeRef.current?.(open || mobileMoreOpenRef.current);
+    setQuestLocalModalOpenState(open);
+  }
+  function setMobileMoreOpen(next: boolean | ((previous: boolean) => boolean)) {
+    const open = typeof next === "function" ? next(mobileMoreOpenRef.current) : next;
+    mobileMoreOpenRef.current = open; hpOverlayChangeRef.current?.(questLocalModalRef.current || open);
+    setMobileMoreOpenState(open);
+  }
+  const [sceneHoveredObjectId, setSceneHoveredObjectId] = useState<string | null>(null);
+  const sceneHoveredObjectIdRef = useRef<string | null>(null);
+  function updateSceneCombatPointer(cursor: [number, number] | null, hovered: string | null) {
+    if (sceneHoveredObjectIdRef.current !== hovered) { sceneHoveredObjectIdRef.current = hovered; setSceneHoveredObjectId(hovered); }
+    onCombatPointer?.(cursor, hovered);
+  }
+  const sceneGroupHoverScopeRef = useRef<string | null>(null);
+  const sceneGroupHoverPointRef = useRef<{ clientX: number; clientY: number; scope: string } | null>(null);
+  const sceneGroupHoverCallbacksRef = useRef({ remember: rememberSceneGroupHoverPoint, retire: retireSceneGroupHoverPoint });
+  useLayoutEffect(() => {
+    commitSceneGroupHoverScope();
+    sceneGroupHoverCallbacksRef.current = { remember: rememberSceneGroupHoverPoint, retire: retireSceneGroupHoverPoint };
+  });
+  useEffect(installSceneGroupHoverObserver, []);
+  useLayoutEffect(() => {
+    onHpOrbLocalOverlayChange?.(questLocalModalOpen || mobileMoreOpen);
+  }, [mobileMoreOpen, onHpOrbLocalOverlayChange, questLocalModalOpen]);
+  const [hpOrbOwner, setHpOrbOwner] = useState(false);
+  const [mpOrbOwner, setMpOrbOwner] = useState(false);
+  const [experienceBarOwner, setExperienceBarOwner] = useState(false);
+  const [weightBarOwner, setWeightBarOwner] = useState(false);
+  const [experienceDrawPlanOwner, setExperienceDrawPlanOwner] = useState(false);
+  const [weightDrawPlanOwner, setWeightDrawPlanOwner] = useState(false);
+  const experienceDrawCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const weightDrawCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const hudBarControllerRef = useRef<HudBarCanvasController | null>(null);
+  if (!hudBarControllerRef.current) {
+    hudBarControllerRef.current = new HudBarCanvasController((name, owns) => {
+      const frame = stageFrameRef.current;
+      if (name === "experience") {
+        if (frame && (owns || frame.dataset.experienceBarOwner === "canvas2d")) {
+          frame.dataset.experienceBarOwner = owns ? "canvas2d" : "react";
+        }
+        setExperienceDrawPlanOwner(owns);
+      } else {
+        if (frame && (owns || frame.dataset.weightBarOwner === "canvas2d")) {
+          frame.dataset.weightBarOwner = owns ? "canvas2d" : "react";
+        }
+        setWeightDrawPlanOwner(owns);
+      }
+    });
+  }
+  useEffect(() => () => hudBarControllerRef.current?.dispose(), []);
+  useEffect(() => {
+    const onRawEdge = (event: Event) => {
+      const detail = (event as CustomEvent<{ experience?: boolean; weight?: boolean }>).detail;
+      if (detail?.experience) hudBarControllerRef.current?.withdraw("experience");
+      if (detail?.weight) hudBarControllerRef.current?.withdraw("weight");
+    };
+    window.addEventListener("mir2:hud-bar-raw-edge", onRawEdge);
+    return () => window.removeEventListener("mir2:hud-bar-raw-edge", onRawEdge);
+  }, []);
+  useLayoutEffect(() => {
+    const frame = stageFrameRef.current;
+    const image = bevyHudSourceGeometry ? null : frame?.querySelector<HTMLElement>(".main-hud-shell .hud-orb-fill.hp img") ?? null;
+    const update = () => {
+      const canvas = frame?.querySelector<HTMLCanvasElement>(`#${sharedUiCanvasId(webGl2SharedCanvasPrototype)}`) ?? null;
+      const presentation = readBevyQuestPresentation(frame, canvas, clientProfile.input === "touch");
+      const slot = bevyHudSourceGeometry ? { left: bevyHudSourceGeometry.orb.left, top: bevyHudSourceGeometry.orb.top } : readBevyHpOrbSlot(frame, image, presentation);
+      const imageMayOwn = screen === "game" && (bevyHudSourceGeometry !== null || !questLocalModalOpen && !mobileMoreOpen
+        && !bevyQuestUiCapturesPointer && !bevyBagUiActive && !bevyStorageUiActive && !bevyStorageUiTransitioning
+        && !showInventory && !showCharacter && !showQuestLog && !world.activeNpcDialog);
+      const hpOnly = (player?.classKey ?? "warrior") === "warrior" && (player?.level ?? 1) < 26;
+      setHpOrbOwner(imageMayOwn && matchesBevyHpOrbView(bevyHpOrb, slot,
+        world.playerHp ?? player?.hp ?? 0, world.playerMaxHp ?? player?.maxHp ?? 0,
+        hpOnly));
+      setMpOrbOwner(imageMayOwn && matchesBevyMpOrbView(bevyMpOrb, slot,
+        world.playerMp, world.playerMaxMp, hpOnly));
+      const experienceAnchor = bevyHudSourceGeometry ? null : frame?.querySelector<HTMLElement>(".main-hud-shell .hud-exp-bar") ?? null;
+      const experienceSlot = bevyHudSourceGeometry?.experienceBar ?? readBevyExperienceBarSlot(frame, experienceAnchor, presentation);
+      setExperienceBarOwner(imageMayOwn && matchesBevyExperienceBarView(bevyExperienceBar, experienceSlot,
+        world.playerExperience, world.playerMaxExperience, experienceAnchor));
+      const weightAnchor = bevyHudSourceGeometry ? null : frame?.querySelector<HTMLElement>(".main-hud-shell .hud-weight-bar") ?? null;
+      const weightSlot = bevyHudSourceGeometry?.weightBar ?? readBevyWeightBarSlot(frame, weightAnchor, presentation);
+      setWeightBarOwner(imageMayOwn && matchesBevyWeightBarView(bevyWeightBar, weightSlot,
+        world.currentWeight, world.maxWeight, weightAnchor));
+      hudBarControllerRef.current?.update({
+        lifetime: bevyHudBarIdentity,
+        presentation: imageMayOwn ? presentation : null,
+        readLivePlans: bevyHudBarReadLivePlans ?? (() => null),
+        experience: { canvas: experienceDrawCanvasRef.current, anchor: experienceAnchor, sourceGeometry: bevyHudSourceGeometry !== null,
+          current: world.playerExperience, maximum: world.playerMaxExperience, slot: experienceSlot,
+          readSlot: () => bevyHudSourceGeometry?.experienceBar ?? readBevyExperienceBarSlot(frame, experienceAnchor, presentation),
+          plan: imageMayOwn && bevyHudBarPlans?.lifetime === bevyHudBarIdentity
+            && (!bevyHudSourceGeometry || readBevyHudStatus?.()?.plan?.experienceSprite?.current === world.playerExperience
+              && readBevyHudStatus?.()?.plan?.experienceSprite?.maximum === world.playerMaxExperience)
+            ? bevyHudBarPlans.experience : null },
+        weight: { canvas: weightDrawCanvasRef.current, anchor: weightAnchor, sourceGeometry: bevyHudSourceGeometry !== null,
+          current: world.currentWeight, maximum: world.maxWeight, slot: weightSlot,
+          readSlot: () => bevyHudSourceGeometry?.weightBar ?? readBevyWeightBarSlot(frame, weightAnchor, presentation),
+          plan: imageMayOwn && bevyHudBarPlans?.lifetime === bevyHudBarIdentity
+            && (!bevyHudSourceGeometry || readBevyHudStatus?.()?.plan?.weightSprite?.current === world.currentWeight
+              && readBevyHudStatus?.()?.plan?.weightSprite?.maximum === world.maxWeight)
+            ? bevyHudBarPlans.weight : null },
+      });
+      if (frame?.dataset.experienceBarOwner === "canvas2d"
+        && experienceDrawCanvasRef.current?.style.visibility !== "visible") frame.dataset.experienceBarOwner = "react";
+      if (frame?.dataset.weightBarOwner === "canvas2d"
+        && weightDrawCanvasRef.current?.style.visibility !== "visible") frame.dataset.weightBarOwner = "react";
+    };
+    update();
+    if (!frame) return;
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(update);
+    observer?.observe(frame);
+    if (image) observer?.observe(image);
+    const weightAnchor = frame.querySelector<HTMLElement>(".main-hud-shell .hud-weight-bar");
+    if (weightAnchor) observer?.observe(weightAnchor);
+    const experienceAnchor = frame.querySelector<HTMLElement>(".main-hud-shell .hud-exp-bar");
+    const modelObserver = typeof MutationObserver === "undefined" ? null : new MutationObserver(update);
+    if (experienceAnchor) modelObserver?.observe(experienceAnchor, {
+      attributes: true, attributeFilter: ["data-experience", "data-max-experience"],
+    });
+    if (weightAnchor) modelObserver?.observe(weightAnchor, {
+      attributes: true, attributeFilter: ["data-current-weight", "data-max-weight"],
+    });
+    return () => { observer?.disconnect(); modelObserver?.disconnect(); };
+  }, [bevyHudSourceGeometry, bevyBagUiActive, bevyStorageUiActive, bevyStorageUiTransitioning, bevyHpOrb, bevyMpOrb, bevyExperienceBar, bevyWeightBar, bevyHudBarIdentity, bevyHudBarPlans,
+    bevyHudBarReadLivePlans,
+    bevyQuestUiCapturesPointer, clientProfile.input, mobileMoreOpen,
+    player?.classKey, player?.hp, player?.level,
+    player?.maxHp, questLocalModalOpen, screen, showCharacter, showInventory, showQuestLog,
+    stagePresentation.scale, stagePresentation.virtualHeight, stagePresentation.virtualWidth,
+    webGl2SharedCanvasPrototype, world.activeNpcDialog, world.playerHp, world.playerMaxHp,
+    world.playerMp, world.playerMaxMp, world.playerExperience, world.playerMaxExperience, world.currentWeight, world.maxWeight]);
   const heldScenePointerRef = useRef<HeldScenePointer | null>(null);
+  const scenePointerDiagnosticsRef = useRef<Record<string, unknown> | null>(null);
+  const worldFishingPhysicalRef = useRef<WorldFishingPhysicalPointer | null>(null);
+  const worldFishingTerminalRef = useRef<WorldFishingPhysicalPointer | null>(null);
+  const worldFishingPointersRef = useRef(new Map<number, globalThis.PointerEvent>());
+  const worldFishingQuarantineRef = useRef(new Set<number>());
+  const worldFishingShellRef = useRef<{ callbacks: WorldFishingCallbacks; ready: boolean; sourceKey: string;
+    runtime: object | null; geometry: string; sharedCanvasId: string;
+    sharedWorldAllowed: (x: number, y: number, pointer: HudPointerLease) => boolean;
+    projectPoint: typeof scenePointFromMouseEvent; dispatchClick: typeof dispatchSceneClickInput } | null>(null);
+  useLayoutEffect(() => {
+    const context = { callbacks: { onBeginWorldFishingGesture, onCancelWorldFishingGesture },
+      sharedCanvasId: sharedUiCanvasId(webGl2SharedCanvasPrototype),
+      sharedWorldAllowed: sceneGroupHoverWorldAllowed,
+      projectPoint: scenePointFromMouseEvent, dispatchClick: dispatchSceneClickInput,
+      ready: screen === "game" && sceneInteractionReady && !bevyQuestUiCapturesPointer && !questLocalModalOpen && !mobileMoreOpen
+        && !bevyMailComposeReady && !bevyMailComposePending,
+      sourceKey: worldFishingAnimation?.record.sourceKey ?? "", runtime: worldFishingAnimation?.runtime ?? null,
+      geometry: JSON.stringify([stagePresentation.virtualWidth, stagePresentation.virtualHeight, stagePresentation.scale]) };
+    worldFishingShellRef.current = context;
+    const lease = worldFishingPhysicalRef.current;
+    if (lease && (!context.ready || context.sourceKey !== lease.sourceKey || context.runtime !== lease.runtime
+      || context.geometry !== lease.contextGeometry || context.callbacks.onBeginWorldFishingGesture !== lease.callbacks.onBeginWorldFishingGesture
+      || context.callbacks.onCancelWorldFishingGesture !== lease.callbacks.onCancelWorldFishingGesture)) retireWorldFishingPhysical(lease);
+  });
+  const heldQuestControlPointersRef = useRef(new Set<number>());
+  const bagPointerRouterRef = useRef(new BagPointerRouter());
+  const storagePointerRouterRef = useRef(new StoragePointerRouter());
+  const npcShopPointerRouterRef = useRef(new NpcShopPointerRouter());
+  const characterPointerRouterRef = useRef(new CharacterPointerRouter());
+  const spellsPointerRouterRef=useRef(new SpellsPointerRouter());
+  const mailPointerRouterRef=useRef(new MailPointerRouter());
+  const heldComposePointerRef=useRef<number|null>(null);
+  const mailComposePointerCallbacksRef=useRef({onBevyMailComposePointer,onBevyMailComposePointerCancel});
+  mailComposePointerCallbacksRef.current={onBevyMailComposePointer,onBevyMailComposePointerCancel};
+  const mailPointerCallbacksRef=useRef({getBevyMailPointerContext,onBevyMailPointer});
+  mailPointerCallbacksRef.current={getBevyMailPointerContext,onBevyMailPointer};
+  const mailTextRef=useRef<HTMLTextAreaElement|null>(null);
+  function isCurrentMailTextTarget(target:EventTarget|null){const text=mailTextRef.current;
+    return bevyMailComposeReady&&!bevyMailComposePending&&text!==null&&target===text&&document.activeElement===text;}
+  const mailTextInputCallbacksRef=useRef({context:bevyMailTextContext,onEdge:onBevyMailTextEdge});
+  mailTextInputCallbacksRef.current={context:bevyMailTextContext,onEdge:onBevyMailTextEdge};
+  const mailCompositionIdRef=useRef(0),mailCompositionActiveRef=useRef<number|null>(null);
+  const mailCompositionEchoRef=useRef<{compositionId:number;proof:ComposeProof}|null>(null);
+  const mailDomCompositionRef=useRef<{target:'body'|'recipient'|'gold';proof:ComposeProof|null;element:HTMLTextAreaElement}|null>(null);
+  function retireMailDomComposition(){const active=mailDomCompositionRef.current;
+    const buffered=bufferedMailPromptRef.current,pending=pendingMailPromptConfirmRef.current;
+    const belongs=(entry:{proof:ComposeProof;element:HTMLTextAreaElement}|null)=>Boolean(active?.proof&&entry&&
+      entry.element===active.element&&sameComposeScope(entry.proof,active.proof)&&entry.proof.draftGeneration===active.proof.draftGeneration);
+    if(belongs(buffered)&&bufferedMailPromptRef.current===buffered)bufferedMailPromptRef.current=null;
+    if(belongs(pending)&&pendingMailPromptConfirmRef.current===pending)pendingMailPromptConfirmRef.current=null;
+    mailDomCompositionRef.current=null;mailCompositionActiveRef.current=null;mailCompositionEchoRef.current=null;mailKeyBeforeInputRef.current=null;}
+  function currentMailDomComposition(context:typeof bevyMailTextContext){const active=mailDomCompositionRef.current,proof=context?.status.proof;
+    return Boolean(active&&proof&&active.proof&&bevyMailComposeReady&&!bevyMailComposePending&&context?.status.modal&&context.status.inputEnabled&&
+      context.status.textTarget===active.target&&mailTextRef.current===active.element&&sameComposeScope(active.proof,proof)&&
+      active.proof.draftGeneration===proof.draftGeneration);}
+  const mailKeyBeforeInputRef=useRef<string|null>(null);
+  const pendingMailPromptConfirmRef=useRef<{target:'recipient'|'gold';text:string;proof:ComposeProof;element:HTMLTextAreaElement}|null>(null);
+  const bufferedMailPromptRef=useRef<{target:'recipient'|'gold';text:string;proof:ComposeProof;element:HTMLTextAreaElement}|null>(null);
+  const [mailTextInputNotice,setMailTextInputNotice]=useState<string|null>(null);
+  const [mailDomRetireKey,setMailDomRetireKey]=useState(false);
+  function handleMailNativeBeforeInput(event:Event){const target=mailTextRef.current,{context,onEdge}=mailTextInputCallbacksRef.current;
+    if(!target||event.target!==target||context?.status.textTarget!=='body')return;
+    const input=event as InputEvent,type=input.inputType;
+    if(typeof type!=='string'||!type){event.preventDefault();setMailTextInputNotice('Mail text input is unavailable; retry');return;}
+    if(input.isComposing||mailDomCompositionRef.current!==null){if(type==='insertFromComposition')event.preventDefault();return;}
+    event.preventDefault();
+    if(type==='insertFromComposition'){
+      const echo=mailCompositionEchoRef.current;mailCompositionEchoRef.current=null;
+      if(!echo||!context.status.proof||!sameComposeAuthority(echo.proof,context.status.proof)||echo.proof.sequence!==context.status.proof.sequence)
+        setMailTextInputNotice('Mail editor is updating; retry input');
+      return;
+    }
+    const duplicate=type==='insertLineBreak'||type==='insertParagraph'?'enter':
+      type==='deleteContentBackward'?'backspace':type==='deleteContentForward'?'delete':null;
+    if(duplicate&&mailKeyBeforeInputRef.current===duplicate){mailKeyBeforeInputRef.current=null;return;}
+    if(type==='insertFromPaste'||type==='deleteByCut')return;
+    const operation:ComposeTextOperation|null=
+      type==='insertText'||type==='insertReplacementText'||type==='insertFromDrop'?
+        typeof input.data==='string'?{op:'insert',text:input.data}:null:
+      type==='insertLineBreak'||type==='insertParagraph'?{op:'key',key:'enter',control:false,shift:false}:
+      type==='deleteContentBackward'?{op:'key',key:'backspace',control:false,shift:false}:
+      type==='deleteContentForward'?{op:'key',key:'delete',control:false,shift:false}:null;
+    if(!operation||!onEdge?.(operation)){setMailTextInputNotice('Mail editor is updating; retry input');return;}
+    setMailTextInputNotice(null);
+  }
+  const mailNativeBeforeInputRef=useRef(handleMailNativeBeforeInput);
+  mailNativeBeforeInputRef.current=handleMailNativeBeforeInput;
+  const [mailTextPosition,setMailTextPosition]=useState<CSSProperties|null>(null);
+  useLayoutEffect(()=>{
+    const context=bevyMailTextContext,frame=stageFrameRef.current,canvas=document.getElementById(sharedUiCanvasId(webGl2SharedCanvasPrototype));
+    if(mailDomCompositionRef.current&&!currentMailDomComposition(context)){
+      retireMailDomComposition();setMailDomRetireKey(value=>!value);return;
+    }
+    if(!bevyMailComposeReady||!context||!frame||!canvas){setMailTextPosition(null);return;}
+    const frameRect=frame.getBoundingClientRect(),canvasRect=canvas.getBoundingClientRect(),caret=context.status.caret;
+    const source=context.status.textTarget==='body'?caret??context.status.bodyViewport:
+      context.status.promptViewport;if(!source){setMailTextPosition(null);return;}
+    const scale=context.presentation.stageCssScale;
+    setMailTextPosition({position:'absolute',left:canvasRect.left-frameRect.left+source.left*scale,
+      top:canvasRect.top-frameRect.top+source.top*scale,width:Math.max(2,Math.min(8,source.width*scale)),
+      height:Math.max(16,source.height*scale),opacity:0,pointerEvents:'none',zIndex:30,padding:0,border:0,resize:'none',overflow:'hidden'});
+    const target=mailTextRef.current;
+    const value=context.status.textTarget==='body'?context.raw.body:context.status.promptText??'';
+    const buffered=bufferedMailPromptRef.current,proof=context.status.proof;
+    const keepBrowserPrompt=Boolean(buffered&&target&&buffered.element===target&&proof&&context.status.textTarget===buffered.target&&
+      sameComposeScope(buffered.proof,proof)&&buffered.proof.draftGeneration===proof.draftGeneration&&
+      (context.pendingEdges>0||proof.sequence===buffered.proof.sequence));
+    if(buffered&&!keepBrowserPrompt&&bufferedMailPromptRef.current===buffered)bufferedMailPromptRef.current=null;
+    const domComposing=currentMailDomComposition(context);
+    if(target&&!keepBrowserPrompt&&!domComposing&&target.value!==value)target.value=value;
+    const pending=pendingMailPromptConfirmRef.current;
+    if(pending&&!domComposing&&context.status.proof){
+      if(pending.element!==target||!sameComposeScope(pending.proof,context.status.proof)||
+        pending.proof.draftGeneration!==context.status.proof.draftGeneration||context.status.textTarget!==pending.target){
+        if(pendingMailPromptConfirmRef.current===pending)pendingMailPromptConfirmRef.current=null;
+      }else if(context.pendingEdges===0&&context.status.promptText===pending.text){
+        if(pendingMailPromptConfirmRef.current===pending)pendingMailPromptConfirmRef.current=null;
+        onBevyMailComposeAction?.(pending.target==='recipient'?'recipientSubmit':'goldConfirm');}
+    }
+    if(domComposing)return;
+    if(caret&&target){if(document.activeElement!==target)target.focus({preventScroll:true});
+      const start=Math.min(caret.anchorUtf16,caret.caretUtf16),end=Math.max(caret.anchorUtf16,caret.caretUtf16);
+      const direction=caret.anchorUtf16>caret.caretUtf16?'backward':'forward';
+      if(target.selectionStart!==start||target.selectionEnd!==end||target.selectionDirection!==direction)
+        target.setSelectionRange(start,end,direction);}
+    else if(context.status.textTarget!==null&&target&&document.activeElement!==target)target.focus({preventScroll:true});
+  },[bevyMailComposeReady,bevyMailTextContext,webGl2SharedCanvasPrototype,mailDomRetireKey]);
+  useLayoutEffect(()=>{const target=mailTextRef.current;if(screen!=='game'||!bevyMailComposeReady||!mailTextPosition||!target)return;
+    const listener=(event:Event)=>mailNativeBeforeInputRef.current(event);
+    target.addEventListener('beforeinput',listener);
+    return()=>target.removeEventListener('beforeinput',listener);
+  });
+  const spellsPointerCallbacksRef=useRef({getBevySpellsPointerContext,onBevySpellsPointer});
+  spellsPointerCallbacksRef.current={getBevySpellsPointerContext,onBevySpellsPointer};
+  const characterPointerCallbacksRef = useRef({ getBevyCharacterPointerContext, onBevyCharacterPointer });
+  characterPointerCallbacksRef.current = { getBevyCharacterPointerContext, onBevyCharacterPointer };
+  const hudPointerRouterRef = useRef(new HudPointerRouter());
+  type HeroPhysicalLease = { context: HeroPointerContext; pointerId: number; button: 0 | 2; x: number; y: number;
+    startedAt: number; pointerType: string; target: EventTarget | null;
+    callback: typeof onBevyHeroPointer; contextCallback: typeof getBevyHeroPointerContext };
+  const heroPointerLeaseRef = useRef<HeroPhysicalLease | null>(null);
+  const heroHoverContextRef = useRef<{ context: HeroPointerContext; pointerId: number; startedAt: number; target: EventTarget | null;
+    callback: typeof onBevyHeroPointer; contextCallback: typeof getBevyHeroPointerContext } | null>(null);
+  const heroPointerCallbacksRef = useRef({ getBevyHeroInputBlocked, getBevyHeroPointerContext, onBevyHeroPointer, onBevyHeroKey });
+  useLayoutEffect(() => { heroPointerCallbacksRef.current = { getBevyHeroInputBlocked, getBevyHeroPointerContext, onBevyHeroPointer, onBevyHeroKey }; });
+  const bagPointerCallbacksRef = useRef({ getBevyBagPointerContext, getBevyBagPointerTransitioning, onBevyBagPointer });
+  useLayoutEffect(() => { bagPointerCallbacksRef.current = { getBevyBagPointerContext, getBevyBagPointerTransitioning, onBevyBagPointer }; });
+  const npcShopPointerCallbacksRef = useRef({ getBevyNpcShopInputBlocked, getBevyNpcShopPointerContext, onBevyNpcShopPointer });
+  npcShopPointerCallbacksRef.current = { getBevyNpcShopInputBlocked, getBevyNpcShopPointerContext, onBevyNpcShopPointer };
+  const storagePointerCallbacksRef = useRef({ getBevyStoragePointerContext, onBevyStoragePointer });
+  storagePointerCallbacksRef.current = { getBevyStoragePointerContext, onBevyStoragePointer };
   const heldKeyboardMoveKeysRef = useRef<Set<KeyboardMoveDirection>>(new Set());
+  const keyboardMovementDiagnosticsRef = useRef<{ lastKey: Record<string, unknown> | null; lastDispatch: Record<string, unknown> | null; lastShortcut: Record<string, unknown> | null }>({ lastKey: null, lastDispatch: null, lastShortcut: null });
   const heldKeyboardRunModeRef = useRef(false);
   const latestMoveInputRef = useRef<{
     screen: ClientScreen;
     player: DisplayEntity | null;
     renderPlayer: DisplayEntity | null;
     playerCameraMotionOffset: ViewportOffset;
+    newMove: boolean;
   }>({
     screen,
     player,
     renderPlayer: player,
     playerCameraMotionOffset: EMPTY_VIEWPORT_OFFSET,
+    newMove: playerUiPreferences?.newMove === true,
   });
   const stageScaleStyle = useMemo(() => {
     const touchControlDeck = calculateMir2TouchControlDeck(stagePresentation);
@@ -756,15 +1252,6 @@ export function OriginalClientShell({
 
   const selectedCharacter = characters[selectedCharacterIndex] ?? null;
   const selectedPortraitFrames = selectedCharacter ? portraitFramesForCharacter(selectedCharacter) : [];
-  const loginBackgroundFrame =
-    ORIGINAL_UI.login.backgroundFrames[LOGIN_STATIC_BACKGROUND_FRAME] ?? ORIGINAL_UI.login.backgroundFrames[0];
-  const loginTransitionBackground =
-    screen !== "select" || loginTransitionFrame === null
-      ? null
-      : ORIGINAL_UI.login.backgroundFrames[
-          Math.min(loginTransitionFrame, ORIGINAL_UI.login.backgroundFrames.length - 1)
-        ] ?? loginBackgroundFrame;
-  const loginTransitionAudioActive = screen === "select" && loginTransitionFrame !== null;
 
   useEffect(() => {
     setMotionNow(Date.now());
@@ -864,10 +1351,9 @@ export function OriginalClientShell({
     viewportLayout,
   ]);
 
-  // Announce that #mir2-web3-canvas is mounted so the Bevy runtime can boot against it.
-  // This shell is lazily mounted (dynamic, ssr:false); the runtime attaches to this canvas
-  // on boot, so booting before it exists panics bevy_winit ("Cannot find element"). This
-  // mount effect runs after the canvas is committed to the DOM.
+  // Announce that both fixed canvases are mounted so the runtime can select one.
+  // This shell is lazily mounted (dynamic, ssr:false); booting before the selected
+  // canvas exists panics bevy_winit. This effect runs after both DOM commits.
   useEffect(() => {
     if (typeof window === "undefined") return;
     const w = window as Window & { __mir2BevyCanvasReady?: boolean };
@@ -887,13 +1373,27 @@ export function OriginalClientShell({
   const syncMusic = useCallback((src: string | null) => {
     setOriginalMusic(src);
   }, []);
+  const loginMusicRequested = useRef(false);
+  const loginAudioSurface = screen === "login" || screen === "openingLogin";
+  const walletQrOpen = Boolean(dubheQr);
 
   const playLoginEffect = useCallback(() => {
     playOriginalSoundPath(ORIGINAL_AUDIO.loginEffect, ORIGINAL_EFFECT_VOLUME);
   }, []);
 
   useEffect(() => {
-    const handleUserAudioGesture = () => unlockOriginalAudio();
+    const handleUserAudioGesture = (event: PointerEvent | KeyboardEvent) => {
+      if (loginAudioSurface) {
+        const walletEntry = event.target instanceof Element && event.target.closest("[data-dubhe-qr-return]");
+        if (walletQrOpen || walletEntry || (event instanceof KeyboardEvent && event.key === "F8")) return;
+        if (!loginMusicRequested.current) {
+          loginMusicRequested.current = true;
+          syncMusic(ORIGINAL_AUDIO.loginMusic);
+          return;
+        }
+      }
+      unlockOriginalAudio();
+    };
 
     window.addEventListener("pointerdown", handleUserAudioGesture, true);
     window.addEventListener("keydown", handleUserAudioGesture, true);
@@ -901,9 +1401,9 @@ export function OriginalClientShell({
     return () => {
       window.removeEventListener("pointerdown", handleUserAudioGesture, true);
       window.removeEventListener("keydown", handleUserAudioGesture, true);
-      stopOriginalAudio();
     };
-  }, []);
+  }, [loginAudioSurface, syncMusic, walletQrOpen]);
+  useEffect(() => () => stopOriginalAudio(), []);
 
   useEffect(() => {
     const previousScreen = previousScreenRef.current;
@@ -915,46 +1415,44 @@ export function OriginalClientShell({
     ) {
       entityAnimationRuntimeFromWindow()?.resetMir2EntityAnimations?.();
     }
-
-    if (previousScreen === "login" && screen === "select") {
-      setLoginTransitionFrame(0);
-      return;
-    }
-
-    if (screen !== "select") {
-      setLoginTransitionFrame(null);
-    }
   }, [screen]);
 
   useEffect(() => {
-    if (loginTransitionFrame === null) {
-      return;
-    }
+    if (!loginAudioSurface) loginMusicRequested.current = false;
+    const deferMusic = loginAudioSurface && (walletQrOpen || !loginMusicRequested.current);
+    syncMusic(deferMusic ? null : desiredMusicForScreen(screen));
+  }, [loginAudioSurface, screen, syncMusic, walletQrOpen]);
 
-    const timer = window.setTimeout(() => {
-      setLoginTransitionFrame((current) => {
-        if (current === null) {
-          return null;
-        }
-
-        const nextFrame = current + 1;
-        return nextFrame >= ORIGINAL_UI.login.backgroundFrames.length ? null : nextFrame;
-      });
-    }, LOGIN_TRANSITION_FRAME_MS);
-
-    return () => window.clearTimeout(timer);
-  }, [loginTransitionFrame]);
-
-  useEffect(() => {
-    syncMusic(desiredMusicForScreen(screen, loginTransitionAudioActive));
-  }, [loginTransitionAudioActive, screen, syncMusic]);
-
-  useEffect(() => {
-    if (loginTransitionFrame === 0) {
-      playLoginEffect();
-    }
-  }, [loginTransitionFrame, playLoginEffect]);
-
+  const combatTildeRef=useRef(false);
+  const dropViewUntilRef = useRef<number | null>(null);
+  const dropViewTimerRef = useRef<number | null>(null);
+  const dropViewCallbackRef = useRef(onCrystalDropViewHeldChange); dropViewCallbackRef.current = onCrystalDropViewHeldChange;
+  useEffect(() => () => {
+    if (dropViewTimerRef.current !== null) window.clearTimeout(dropViewTimerRef.current);
+    dropViewTimerRef.current = null; dropViewUntilRef.current = null; dropViewCallbackRef.current?.(false);
+  }, [screen, player?.objectId, bevyMapRuntimeGeneration]);
+  function revealDropView() {
+    const now = performance.now(), previous = dropViewUntilRef.current, until = crystalDropViewDeadline(previous, now);
+    if (until === null || until === previous) return;
+    dropViewUntilRef.current = until; dropViewCallbackRef.current?.(true);
+    if (dropViewTimerRef.current !== null) window.clearTimeout(dropViewTimerRef.current);
+    const expire = () => {
+      if (dropViewUntilRef.current !== until) return;
+      const remaining = until - performance.now();
+      if (remaining > 0) { dropViewTimerRef.current = window.setTimeout(expire, remaining); return; }
+      dropViewTimerRef.current = null; dropViewCallbackRef.current?.(false);
+    };
+    dropViewTimerRef.current = window.setTimeout(expire, until - now);
+  }
+  const combatCancelRef=useRef(onCombatCancel);combatCancelRef.current=onCombatCancel;
+  useEffect(()=>{
+    const down=(e:KeyboardEvent)=>{if(e.code==="Backquote")combatTildeRef.current=true;};
+    const up=(e:KeyboardEvent)=>{if(e.code==="Backquote")combatTildeRef.current=false;};
+    const pointers=new Set<number>(),pointerDown=(e:PointerEvent)=>{pointers.add(e.pointerId);if(pointers.size>1){cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;combatCancelRef.current?.();}},pointerUp=(e:PointerEvent)=>pointers.delete(e.pointerId);
+    const cancel=()=>{combatTildeRef.current=false;pointers.clear();cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;combatCancelRef.current?.();};
+    window.addEventListener("keydown",down,true);window.addEventListener("keyup",up,true);window.addEventListener("pointerdown",pointerDown,true);window.addEventListener("pointerup",pointerUp,true);window.addEventListener("pointercancel",cancel,true);window.addEventListener("blur",cancel);
+    return()=>{window.removeEventListener("keydown",down,true);window.removeEventListener("keyup",up,true);window.removeEventListener("pointerdown",pointerDown,true);window.removeEventListener("pointerup",pointerUp,true);window.removeEventListener("pointercancel",cancel,true);window.removeEventListener("blur",cancel);};
+  },[]);
   // Portrait idle animation moved into SelectOverlay so its 120ms tick re-renders
   // only that overlay, not this ~3000-line shell.
 
@@ -971,43 +1469,94 @@ export function OriginalClientShell({
   }, [screen]);
 
   useEffect(() => {
-    if (screen !== "game") {
-      return;
-    }
-
-    function suppressBrowserContextMenu(event: globalThis.MouseEvent) {
-      const target = event.target;
-      if (target instanceof Element && target.closest(".client-stage-frame")) {
-        event.preventDefault();
-      }
-    }
-
-    function suppressRightMouseDefault(event: globalThis.MouseEvent) {
-      if (event.button !== 2) {
-        return;
-      }
-
-      const target = event.target;
-      if (target instanceof Element && target.closest(".client-stage-frame")) {
-        event.preventDefault();
-      }
-    }
-
-    window.addEventListener("contextmenu", suppressBrowserContextMenu, true);
-    window.addEventListener("mousedown", suppressRightMouseDefault, true);
-
-    return () => {
-      window.removeEventListener("contextmenu", suppressBrowserContextMenu, true);
-      window.removeEventListener("mousedown", suppressRightMouseDefault, true);
-    };
+    if (screen !== "game") return;
+    return installGameBrowserDefaults(window);
   }, [screen]);
 
-  useEffect(() => {
-    if (screen !== "game") {
-      return;
-    }
-
     function handleShortcutKey(event: KeyboardEvent) {
+      if (stageExitDialogRef.current?.open) return;
+      const diagnosticKey = crystalKeyNameFromBrowserEvent(event);
+      const diagnosticActions = crystalKeyBindings && diagnosticKey ? matchingCrystalKeyFunctions(crystalKeyBindings, diagnosticKey,
+        { alt: event.altKey, ctrl: event.ctrlKey, shift: event.shiftKey, tilde: combatTildeRef.current })
+        .map(id => crystalWindowShortcut(id) ?? (/^Belt[1-8](?:Alt)?$/.test(id) ? id : null)).filter(Boolean) : [];
+      let focused: boolean | null = null, visible: boolean | null = null, editable: boolean | null = null;
+      const diagnostic = (reason: "received" | "prevented-before-shortcut" | "keybind-capture" | "document" | "npc-shop" | "storage" | "mail"
+        | "spells-modal" | "quest-modal" | "editable" | "hero-key" | "hero-block" | "meta-key" | "unmapped-key" | "window-action" | "gameplay-action", accepted?: boolean, handled?: boolean) => {
+        if (diagnosticActions.length) keyboardMovementDiagnosticsRef.current.lastShortcut = { at: Date.now(), actions: diagnosticActions,
+          stage: reason === "received" ? "received" : reason === "window-action" || reason === "gameplay-action" ? "dispatch" : "blocked", reason, accepted, handled,
+          repeat: event.repeat, focused, visible, editable, sceneInteractionReady, gameplayCallbackPresent: typeof onCrystalGameplayShortcut === "function",
+          defaultPrevented: event.defaultPrevented, heroActive: bevyHeroUiActive, heroTransitioning: bevyHeroUiTransitioning,
+          heroWorldBlocked: bevyHeroUiWorldBlocked, heroLeaseHeld: heroPointerLeaseRef.current !== null };
+      };
+      diagnostic("received");
+      // The Keybind capture listener owns propagation. Gameplay only yields.
+      if (event.defaultPrevented) { diagnostic("prevented-before-shortcut"); return; }
+      if (guildKeyboardOwnsEvent(event.target)) return;
+      if (getKeybindCaptureActive?.()) { diagnostic("keybind-capture"); return; }
+      if (!(visible = document.visibilityState === "visible") || !(focused = document.hasFocus())) { diagnostic("document"); return; }
+      if (event.target instanceof HTMLElement && event.target.closest(".original-combat-mode-controls")
+        && ["Enter", " ", "Escape", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) return;
+      if (npcShopBlocksWorldInput(false)) { diagnostic("npc-shop"); stopNpcShopWorldInput(); event.preventDefault(); return; }
+      const groupShortcut = crystalKeyBindings && diagnosticKey && matchingCrystalKeyFunctions(crystalKeyBindings, diagnosticKey,
+        { alt: event.altKey, ctrl: event.ctrlKey, shift: event.shiftKey, tilde: combatTildeRef.current }).includes("AddGroupMember");
+      if ((bevyStorageUiActive || bevyStorageUiTransitioning) && !groupShortcut) { diagnostic("storage"); event.preventDefault(); return; }
+      if(bevyMailComposeReady||bevyMailComposePending){diagnostic("mail");if(isCurrentMailTextTarget(event.target))return;event.preventDefault();return;}
+      if (spellsPointerCallbacksRef.current.getBevySpellsPointerContext?.()?.modal) { diagnostic("spells-modal"); event.preventDefault(); return; }
+      if (bevyQuestUiCapturesPointer) {
+        // The Web host owns configured shortcuts even while the shared diary
+        // captures world input. Close only the current Native diary.
+        if (!event.metaKey && diagnosticActions.includes("quests")
+          && !keyboardInputTargetIsEditable(event.target)
+          && readBevyHudStatus?.()?.navigation.questOpen === true) {
+          event.preventDefault();
+          const accepted = !event.repeat && dispatchBevyHudNavigation?.({ type: "closeQuest" }) === true;
+          diagnostic("window-action", accepted, true);
+        } else diagnostic("quest-modal");
+        return;
+      }
+      editable = keyboardInputTargetIsEditable(event.target);
+      if (editable) { diagnostic("editable"); return; }
+      if (heroPointerCallbacksRef.current.onBevyHeroKey?.({ key: event.key, code: event.code,
+        control: event.ctrlKey, shift: event.shiftKey, alt: event.altKey, meta: event.metaKey, repeat: event.repeat })) {
+        diagnostic("hero-key"); stopNpcShopWorldInput(); event.preventDefault(); return;
+      }
+      if (heroBlocksWorldInput()) { diagnostic("hero-block"); stopNpcShopWorldInput(); event.preventDefault(); return; }
+      if (crystalKeyBindings) {
+        const key = crystalKeyNameFromBrowserEvent(event);
+        if (event.metaKey || !key) { diagnostic(event.metaKey ? "meta-key" : "unmapped-key"); return; }
+        const functions = matchingCrystalKeyFunctions(crystalKeyBindings, key,
+          { alt: event.altKey, ctrl: event.ctrlKey, shift: event.shiftKey, tilde: combatTildeRef.current });
+        let handled = false;
+        for (const functionId of functions) {
+          if ((bevyStorageUiActive || bevyStorageUiTransitioning) && functionId !== "AddGroupMember") continue;
+          const action = crystalWindowShortcut(functionId);
+          if (action) {
+            handled = true;
+            if (!event.repeat) { const accepted = onCrystalWindowShortcut?.(action); diagnostic("window-action", accepted); }
+          } else if (functionId === "DropView") {
+            if (!event.repeat) revealDropView(); handled = true;
+          } else if (crystalSkillShortcutSlot(functionId) === null) {
+            if (functionId === "AddGroupMember" && (event.repeat || !refreshSceneGroupHover())) { handled = true; continue; }
+            const actionHandled = onCrystalGameplayShortcut?.(functionId, event.repeat) === true;
+            handled = actionHandled || handled;
+            if (/^Belt[1-8](?:Alt)?$/.test(functionId)) diagnostic("gameplay-action", undefined, actionHandled);
+            if (crystalCombatModeStopsDispatch(functionId)) { event.preventDefault(); return; }
+          }
+          if (npcShopBlocksWorldInput()) { diagnostic("npc-shop"); stopNpcShopWorldInput(); event.preventDefault(); return; }
+        }
+        if (bevyStorageUiActive || bevyStorageUiTransitioning) { event.preventDefault(); return; }
+        const combat = onCombatKey?.({ type: "key", key,
+          modifiers: { alt: event.altKey, ctrl: event.ctrlKey, shift: event.shiftKey, tilde: combatTildeRef.current } }, event.repeat);
+        if (handled || functions.length || combat?.handled) { event.preventDefault(); return; }
+        // A configured unbound key never falls back to a guessed spell or belt slot.
+        if (event.altKey || event.ctrlKey || event.shiftKey || isKeyboardMoveKey(event.key)) return;
+        if (selectedEntity && (event.key === " " || event.key === "Enter")) { event.preventDefault(); onPrimaryTargetAction(); }
+        return;
+      }
+      if (onHeroShortcut?.(event.key, event.ctrlKey, event.altKey || event.metaKey, event.shiftKey, event.repeat)) { event.preventDefault(); return; }
+      if (npcShopBlocksWorldInput()) { stopNpcShopWorldInput(); event.preventDefault(); return; }
+      const combat=onCombatKey?.({type:"key",key:event.key,modifiers:{alt:event.altKey,ctrl:event.ctrlKey,shift:event.shiftKey,tilde:combatTildeRef.current}},event.repeat);
+      if(combat?.handled){event.preventDefault();return;}
       if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
         return;
       }
@@ -1037,16 +1586,12 @@ export function OriginalClientShell({
       // F1–F8 cast the skill in that primary skill-bar slot. Crystal maps
       // KeybindOptions.Bar1Skill1..8 to Keys.F1..F8 (KeyBindSettings.cs:242) and
       // stores the slot in each spell's `Magic.Key` (mirrored onto `skill.hotkey`).
-      // Prefer an explicit binding; otherwise fall back to the spell's position in
-      // the known-skills list (the order shown in the character window's spell tab),
-      // so the bar is usable before any slots are explicitly assigned.
+      // Only an actual authoritative hotkey can choose a spell.
       const skillBarMatch = /^F([1-8])$/.exec(event.key);
-      if (skillBarMatch) {
+      if (skillBarMatch && !combat?.supported) {
         const slot = Number.parseInt(skillBarMatch[1], 10);
         const skill =
-          world.knownSkills.find((entry) => entry.hotkey === slot) ??
-          world.knownSkills[slot - 1] ??
-          null;
+          world.knownSkills.find((entry) => entry.hotkey === slot) ?? null;
         if (skill) {
           event.preventDefault();
           onCastSkill(skill.key);
@@ -1068,29 +1613,56 @@ export function OriginalClientShell({
       onUseItem({
         key: item.key,
         uniqueId: item.uniqueId,
+        authoritativeUniqueId: item.authoritativeUniqueId,
         slot: item.slot,
         container: item.container,
       });
     }
 
-    window.addEventListener("keydown", handleShortcutKey);
-    return () => window.removeEventListener("keydown", handleShortcutKey);
-  }, [
-    screen,
-    selectedEntity,
-    world.beltItems,
-    world.knownSkills,
-    onApproachTarget,
-    onPrimaryTargetAction,
-    onCastSkill,
-    onUseItem,
-  ]);
+  // Keep the capture subscription through UI commits so an earlier listener's
+  // update cannot remove this key from the browser's current dispatch.
+  useWindowKeydown(screen === "game" ? handleShortcutKey : null);
+
+  function npcShopBlocksWorldInput(includeParity = true): boolean {
+    return (includeParity && (parityUiBlocksGameplay?.() === true || heroBlocksWorldInput()))
+      || npcShopPointerCallbacksRef.current.getBevyNpcShopInputBlocked?.() === true;
+  }
+
+  function stopNpcShopWorldInput() {
+    heldKeyboardMoveKeysRef.current.clear(); heldKeyboardRunModeRef.current = false;
+    cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null; onViewportDirectionStop(); updateSceneCombatPointer(null, null);
+  }
+
+  function guardNpcShopGameplay<Args extends unknown[]>(callback: (...args: Args) => void): (...args: Args) => void {
+    return (...args) => { if (npcShopBlocksWorldInput()) { stopNpcShopWorldInput(); return; } callback(...args); };
+  }
+
+  function questBlocksKeyboardMovement(): boolean {
+    try { return readBevyQuestKeyboardCapture?.() ?? bevyQuestUiCapturesPointer; }
+    catch { return bevyQuestUiCapturesPointer; }
+  }
 
   function dispatchKeyboardMoveInput(source: "edge" | "held" = "held") {
+    const diagnostic = (reason: string) => { keyboardMovementDiagnosticsRef.current.lastDispatch = { reason, source, at: Date.now(), sceneInteractionReady, bevyQuestUiCapturesPointer }; };
+    diagnostic("received");
+    if (npcShopBlocksWorldInput()) { diagnostic("parity-ui-or-shop"); stopNpcShopWorldInput(); return; }
+    if (bevyStorageUiActive || bevyStorageUiTransitioning || storagePointerCallbacksRef.current.getBevyStoragePointerContext?.()) {
+      diagnostic("storage");
+      heldKeyboardMoveKeysRef.current.clear(); heldKeyboardRunModeRef.current = false; onViewportDirectionStop(); return;
+    }
+    if(bevyMailComposeReady||bevyMailComposePending){diagnostic("mail");heldKeyboardMoveKeysRef.current.clear();heldKeyboardRunModeRef.current=false;onViewportDirectionStop();return;}
+    if (spellsPointerCallbacksRef.current.getBevySpellsPointerContext?.()?.modal) {
+      diagnostic("spells-modal");
+      heldKeyboardMoveKeysRef.current.clear(); heldKeyboardRunModeRef.current = false; onViewportDirectionStop(); return;
+    }
     const latest = latestMoveInputRef.current;
-    if (latest.screen !== "game") return;
-    if (!sceneInteractionReady) return;
-    if (!latest.renderPlayer && !latest.player) return;
+    if (latest.screen !== "game") { diagnostic("screen"); return; }
+    if (questBlocksKeyboardMovement()) {
+      diagnostic("quest");
+      heldKeyboardMoveKeysRef.current.clear(); heldKeyboardRunModeRef.current = false; onViewportDirectionStop(); return;
+    }
+    if (!sceneInteractionReady) { diagnostic("scene-or-quest"); return; }
+    if (!latest.renderPlayer && !latest.player) { diagnostic("no-player"); return; }
 
     const heldKeys = heldKeyboardMoveKeysRef.current;
     let dx = 0;
@@ -1099,96 +1671,134 @@ export function OriginalClientShell({
     if (heldKeys.has("right")) dx += 1;
     if (heldKeys.has("up")) dy -= 1;
     if (heldKeys.has("down")) dy += 1;
-    if (dx === 0 && dy === 0) return;
+    if (dx === 0 && dy === 0) { diagnostic("no-held-direction"); return; }
 
     const direction = crystalDirectionFromKeyboardVector(dx, dy);
-    if (!direction) return;
+    if (!direction) { diagnostic("no-direction"); return; }
+    diagnostic("page-direction-intent");
     onViewportDirectionIntent(direction, heldKeyboardRunModeRef.current ? "run" : "walk", {
       discrete: source === "edge",
     });
   }
 
+  const keyboardMoveCallbacksRef = useRef<{
+    down: (event: KeyboardEvent) => void;
+    up: (event: KeyboardEvent) => void;
+    dispatch: () => void;
+  } | null>(null);
+  function handleKeyboardMoveDown(event: KeyboardEvent) {
+    if (stageExitDialogRef.current?.open) return;
+    if (guildKeyboardOwnsEvent(event.target)) { stopNpcShopWorldInput(); return; }
+    const diagnosticDirection = keyboardMoveDirectionForKey(event.key);
+    // This capture listener owns movement only. Panel shortcuts must reach
+    // their owner even while a window correctly blocks world movement.
+    if (!diagnosticDirection && event.key !== "Shift") return;
+    if (diagnosticDirection) keyboardMovementDiagnosticsRef.current.lastKey = { direction: diagnosticDirection,
+      at: Date.now(), defaultPrevented: event.defaultPrevented, editable: keyboardInputTargetIsEditable(event.target),
+      modifiers: event.altKey || event.ctrlKey || event.metaKey, sceneInteractionReady, reason: "received" };
+    if (event.defaultPrevented || getKeybindCaptureActive?.()) { stopNpcShopWorldInput(); return; }
+    if (npcShopBlocksWorldInput()) { stopNpcShopWorldInput(); event.preventDefault(); return; }
+    if (bevyStorageUiActive || bevyStorageUiTransitioning) { event.preventDefault(); return; }
+    if(bevyMailComposeReady||bevyMailComposePending){heldKeyboardMoveKeysRef.current.clear();heldKeyboardRunModeRef.current=false;onViewportDirectionStop();
+      if(isCurrentMailTextTarget(event.target))return;event.preventDefault();return;}
+    if (spellsPointerCallbacksRef.current.getBevySpellsPointerContext?.()?.modal) { event.preventDefault(); return; }
+    if (event.altKey || event.ctrlKey || event.metaKey || keyboardInputTargetIsEditable(event.target)) {
+      return;
+    }
+
+    if (event.key === "Shift") {
+      if (!sceneInteractionReady) {
+        return;
+      }
+      heldKeyboardRunModeRef.current = true;
+      dispatchKeyboardMoveInput("held");
+      return;
+    }
+
+    const direction = diagnosticDirection;
+    if (!direction) {
+      return;
+    }
+
+    event.preventDefault();
+    if (!sceneInteractionReady) {
+      return;
+    }
+    heldKeyboardRunModeRef.current = event.shiftKey || heldKeyboardRunModeRef.current;
+    const alreadyHeld = heldKeyboardMoveKeysRef.current.has(direction);
+    heldKeyboardMoveKeysRef.current.add(direction);
+    if (!alreadyHeld && !event.repeat) {
+      dispatchKeyboardMoveInput("edge");
+    }
+  }
+
+  function handleKeyboardMoveUp(event: KeyboardEvent) {
+    if (guildKeyboardOwnsEvent(event.target)) { stopNpcShopWorldInput(); return; }
+    const direction = keyboardMoveDirectionForKey(event.key);
+    if (!direction && event.key !== "Shift") return;
+    if (npcShopBlocksWorldInput()) { stopNpcShopWorldInput(); event.preventDefault(); return; }
+    if(bevyMailComposeReady||bevyMailComposePending){heldKeyboardMoveKeysRef.current.clear();heldKeyboardRunModeRef.current=false;onViewportDirectionStop();
+      if(isCurrentMailTextTarget(event.target))return;event.preventDefault();return;}
+    if (event.key === "Shift") {
+      heldKeyboardRunModeRef.current = false;
+      if (heldKeyboardMoveKeysRef.current.size === 0) {
+        onViewportDirectionStop();
+        return;
+      }
+      dispatchKeyboardMoveInput("held");
+      return;
+    }
+
+    if (direction) {
+      event.preventDefault();
+      heldKeyboardMoveKeysRef.current.delete(direction);
+      heldKeyboardRunModeRef.current = event.shiftKey || heldKeyboardRunModeRef.current;
+      if (heldKeyboardMoveKeysRef.current.size === 0) {
+        onViewportDirectionStop();
+        return;
+      }
+      dispatchKeyboardMoveInput("edge");
+    }
+  }
+
+  useLayoutEffect(() => {
+    keyboardMoveCallbacksRef.current = { down: handleKeyboardMoveDown, up: handleKeyboardMoveUp,
+      dispatch: () => dispatchKeyboardMoveInput("held") };
+  });
+
   useEffect(() => {
-    if (screen !== "game") {
+    if (screen !== "game" || bevyStorageUiActive || bevyStorageUiTransitioning
+      || bevyNpcShopUiActive || bevyNpcShopUiTransitioning) {
       onViewportDirectionStop();
       heldKeyboardMoveKeysRef.current.clear();
       heldKeyboardRunModeRef.current = false;
       return;
     }
-
-    function handleKeyboardMoveDown(event: KeyboardEvent) {
-      if (event.altKey || event.ctrlKey || event.metaKey || keyboardInputTargetIsEditable(event.target)) {
-        return;
-      }
-
-      if (event.key === "Shift") {
-        if (!sceneInteractionReady) {
-          return;
-        }
-        heldKeyboardRunModeRef.current = true;
-        dispatchKeyboardMoveInput("held");
-        return;
-      }
-
-      const direction = keyboardMoveDirectionForKey(event.key);
-      if (!direction) {
-        return;
-      }
-
-      event.preventDefault();
-      if (!sceneInteractionReady) {
-        return;
-      }
-      heldKeyboardRunModeRef.current = event.shiftKey || heldKeyboardRunModeRef.current;
-      const alreadyHeld = heldKeyboardMoveKeysRef.current.has(direction);
-      heldKeyboardMoveKeysRef.current.add(direction);
-      if (!alreadyHeld && !event.repeat) {
-        dispatchKeyboardMoveInput("edge");
-      }
-    }
-
-    function handleKeyboardMoveUp(event: KeyboardEvent) {
-      if (event.key === "Shift") {
-        heldKeyboardRunModeRef.current = false;
-        if (heldKeyboardMoveKeysRef.current.size === 0) {
-          onViewportDirectionStop();
-          return;
-        }
-        dispatchKeyboardMoveInput("held");
-        return;
-      }
-
-      const direction = keyboardMoveDirectionForKey(event.key);
-      if (direction) {
-        event.preventDefault();
-        heldKeyboardMoveKeysRef.current.delete(direction);
-        heldKeyboardRunModeRef.current = event.shiftKey || heldKeyboardRunModeRef.current;
-        if (heldKeyboardMoveKeysRef.current.size === 0) {
-          onViewportDirectionStop();
-          return;
-        }
-        dispatchKeyboardMoveInput("edge");
-      }
-    }
-
-    const timer = window.setInterval(() => dispatchKeyboardMoveInput("held"), CRYSTAL_MOVE_INPUT_INTERVAL_MS);
+    // A prior capture listener may synchronously commit a UI update while this
+    // same key is dispatching. Retain the subscription and call committed code.
+    const handleWindowKeyboardMoveDown = (event: KeyboardEvent) => keyboardMoveCallbacksRef.current?.down(event);
+    const handleWindowKeyboardMoveUp = (event: KeyboardEvent) => keyboardMoveCallbacksRef.current?.up(event);
+    const timer = window.setInterval(() => keyboardMoveCallbacksRef.current?.dispatch(), CRYSTAL_MOVE_INPUT_INTERVAL_MS);
     const stop = () => {
       heldKeyboardMoveKeysRef.current.clear();
       heldKeyboardRunModeRef.current = false;
       onViewportDirectionStop();
     };
 
-    window.addEventListener("keydown", handleKeyboardMoveDown);
-    window.addEventListener("keyup", handleKeyboardMoveUp);
+    // Winit consumes keyboard events at the shared Canvas target. Direction
+    // routing, like the owned shortcuts above, must run before that target;
+    // all existing modal, focus, ownership and movement guards still apply.
+    window.addEventListener("keydown", handleWindowKeyboardMoveDown, true);
+    window.addEventListener("keyup", handleWindowKeyboardMoveUp, true);
     window.addEventListener("blur", stop);
 
     return () => {
       window.clearInterval(timer);
-      window.removeEventListener("keydown", handleKeyboardMoveDown);
-      window.removeEventListener("keyup", handleKeyboardMoveUp);
+      window.removeEventListener("keydown", handleWindowKeyboardMoveDown, true);
+      window.removeEventListener("keyup", handleWindowKeyboardMoveUp, true);
       window.removeEventListener("blur", stop);
     };
-  }, [screen, sceneInteractionReady, onViewportDirectionIntent, onViewportDirectionStop]);
+  }, [screen, bevyStorageUiActive, bevyStorageUiTransitioning, bevyNpcShopUiActive, bevyNpcShopUiTransitioning, onViewportDirectionStop]);
 
   const lastMotionNowRef = useRef(0);
   useEffect(() => {
@@ -1268,6 +1878,7 @@ export function OriginalClientShell({
 
   const presentationOwnsPlayerInterpolation =
     screen === "game" &&
+    !webGl2SharedCanvasPrototype &&
     bevyEntityRendererReady &&
     bevyMapRuntimeReady &&
     Boolean(bevyRuntimeBackend) &&
@@ -1307,6 +1918,114 @@ export function OriginalClientShell({
     ],
   );
 
+  const [entryFloor, setEntryFloor] = useState<R16EntrySpriteImages | null>(null);
+  const [entryFloorPending, setEntryFloorPending] = useState(false);
+  const [entryObjects, setEntryObjects] = useState<R16EntrySpriteImages | null>(null);
+  const [entryNpcs, setEntryNpcs] = useState<R16EntryActorAssets | null>(null);
+  const entryPlayerGender = (screen === "game" ? renderPlayer?.genderKey : undefined) ?? selectedCharacter?.gender;
+  const [entryPlayerRequest, setEntryPlayerRequest] = useState<{
+    gender: typeof entryPlayerGender;
+    assets: R16EntryActorAssets | null;
+    pending: boolean;
+  } | null>(null);
+  const currentPlayerRequest = entryPlayerRequest?.gender === entryPlayerGender ? entryPlayerRequest : null;
+  const entryPlayer = currentPlayerRequest?.assets ?? null;
+  const entryPlayerPending = currentPlayerRequest?.pending === true;
+  const warmEntry = screen === "openingLogin" || screen === "select" || screen === "game";
+  const warmEntryArt = warmEntry && !sceneLoadingText && !entryFloorPending;
+
+  useEffect(() => {
+    if (!warmEntry) return;
+    const release = process.env.MIR2_PINNED_ASSET_VERSION;
+    let current = true;
+    const floor = preloadR16EntryFloor(release);
+    setEntryFloorPending(Boolean(floor));
+    void floor?.then((images) => {
+      if (!current) return;
+      setEntryFloor(images);
+      setEntryFloorPending(false);
+    });
+    return () => { current = false; };
+  }, [warmEntry]);
+
+  useEffect(() => {
+    if (!warmEntryArt) return;
+    const release = process.env.MIR2_PINNED_ASSET_VERSION;
+    let current = true;
+    const owner = new AbortController();
+    void loadR16EntryNpcsWithRecovery(release, owner.signal, setEntryNpcs);
+    for (const part of preloadR16EntryObjects(release) ?? []) {
+      void part.then((images) => {
+        if (current && images) setEntryObjects((previous) => ({ ...previous, ...images }));
+      });
+    }
+    return () => { current = false; owner.abort(); };
+  }, [warmEntryArt]);
+
+  useEffect(() => {
+    if (!warmEntry || !entryPlayerGender) return;
+    const owner = new AbortController();
+    const pending = loadR16EntryPlayerWithRecovery(
+      process.env.MIR2_PINNED_ASSET_VERSION, entryPlayerGender, owner.signal,
+      (assets) => setEntryPlayerRequest({ gender: entryPlayerGender, assets, pending: false }),
+    );
+    if (!pending) return;
+    setEntryPlayerRequest((previous) =>
+      previous?.gender === entryPlayerGender && previous.assets
+        ? previous
+        : { gender: entryPlayerGender, assets: null, pending: true },
+    );
+    return () => { owner.abort(); };
+  }, [entryPlayerGender, warmEntry]);
+  const entryMap = world.originalMapRegion?.mapFileName === R16_ENTRY_FLOOR_MAP;
+  const packedFloor = entryMap ? entryFloor : null;
+  const packedObjects = entryMap ? entryObjects : null;
+  const [entryMonsterStanding, setEntryMonsterStanding] = useState<R16EntryActorAssets | null>(null);
+  const [entryMonsterWalking, setEntryMonsterWalking] = useState<R16EntryActorAssets | null>(null);
+  const monsterBounds = R16_ENTRY_MONSTER_BOUNDS;
+  const warmEntryMonsters = screen === "game" && sceneInteractionReady && entryMap && Boolean(
+    renderPlayer && renderPlayer.x >= monsterBounds.minX && renderPlayer.x <= monsterBounds.maxX &&
+    renderPlayer.y >= monsterBounds.minY && renderPlayer.y <= monsterBounds.maxY,
+  );
+  useEffect(() => {
+    if (!warmEntryMonsters) return;
+    const release = process.env.MIR2_PINNED_ASSET_VERSION;
+    const standing = preloadR16EntryMonsterFrames(release, "standing");
+    if (!standing) return;
+    let current = true;
+    void standing.then(async (assets) => {
+      if (!current) return;
+      setEntryMonsterStanding(assets);
+      const walking = await preloadR16EntryMonsterFrames(release, "walking");
+      if (current) setEntryMonsterWalking(walking);
+    });
+    return () => { current = false; };
+  }, [warmEntryMonsters]);
+
+  const packedActors = useMemo(() => {
+    if (!entryMap) return null;
+    if (!entryPlayer && !entryNpcs && !entryMonsterStanding && !entryMonsterWalking) return null;
+    return { ...entryPlayer?.images, ...entryNpcs?.images, ...entryMonsterStanding?.images, ...entryMonsterWalking?.images };
+  }, [entryMap, entryPlayer, entryNpcs, entryMonsterStanding, entryMonsterWalking]);
+  const entryActorLibraries = useMemo(() => {
+    const libraries: Record<string, OriginalSceneSpriteLibraryMeta> = {};
+    for (const assets of [entryPlayer, entryNpcs, entryMonsterStanding, entryMonsterWalking]) {
+      if (!assets) continue;
+      for (const [key, library] of Object.entries(assets.libraries)) {
+        const frames = [...(libraries[key]?.frames ?? []), ...library.frames];
+        libraries[key] = {
+          ...library, frames,
+          frameMap: new Map(frames.map((frame) => [frame.index, frame])),
+          startupFramesOnly: true,
+        };
+      }
+    }
+    return Object.keys(libraries).length ? libraries : null;
+  }, [entryPlayer, entryNpcs, entryMonsterStanding, entryMonsterWalking]);
+  const renderSpriteLibraries = useMemo(() =>
+    entryMap && entryActorLibraries ? { ...entryActorLibraries, ...sceneSpriteLibraries } : sceneSpriteLibraries,
+  [entryMap, entryActorLibraries, sceneSpriteLibraries]);
+
   const desiredSceneSpriteLibraryKeys = useMemo(() => {
     const libraries = new Set<string>();
     if (screen !== "game") {
@@ -1321,7 +2040,10 @@ export function OriginalClientShell({
         libraries.add(normalizeSceneSpriteLibraryKey(entity.sprite.hairLibrary));
       }
       if (entity.sprite?.weaponLibrary) {
-        libraries.add(normalizeSceneSpriteLibraryKey(entity.sprite.weaponLibrary));
+        const weaponLibrary = normalizeSceneSpriteLibraryKey(entity.sprite.weaponLibrary);
+        libraries.add(weaponLibrary);
+        const fishingRod = crystalFishingRodLibrary(weaponLibrary);
+        if (fishingRod) libraries.add(fishingRod);
       }
       if (entity.sprite?.mountLibrary) {
         libraries.add(normalizeSceneSpriteLibraryKey(entity.sprite.mountLibrary));
@@ -1367,9 +2089,12 @@ export function OriginalClientShell({
       !missingSceneSpriteLibrariesRef.current.has(libraryKey),
   );
   const sceneSpriteLibrariesReady = pendingSceneSpriteLibraryKeys.length === 0;
+  const hasSceneMapRegion = Boolean(world.originalMapRegion);
 
   useEffect(() => {
-    if (screen !== "game") {
+    // Actor metadata is independent of the authoritative map. Start it after
+    // the region is installed so it does not compete with the first map read.
+    if (screen !== "game" || !hasSceneMapRegion) {
       return;
     }
 
@@ -1417,7 +2142,7 @@ export function OriginalClientShell({
           sceneSpriteLibraryInFlightRef.current.delete(libraryKey);
         });
     }
-  }, [desiredSceneSpriteLibraryKey, sceneSpriteLibraries, screen]);
+  }, [desiredSceneSpriteLibraryKey, hasSceneMapRegion, sceneSpriteLibraries, screen]);
 
   const sceneNow = motionNow;
   entityMotionSnapshotsRef.current = refreshEntityMotionSnapshots(
@@ -1462,8 +2187,9 @@ export function OriginalClientShell({
       player,
       renderPlayer,
       playerCameraMotionOffset,
+      newMove: playerUiPreferences?.newMove === true,
     };
-  }, [screen, player, renderPlayer, playerCameraMotionOffset]);
+  }, [screen, player, renderPlayer, playerCameraMotionOffset, playerUiPreferences?.newMove]);
   // Sprite *frame data* (which body/hair/weapon frame to draw) only changes on entity updates from
   // the server, sprite-library loads, or the 120ms animation tick — NOT on the 60fps motion clock.
   // Memoising it off `sceneSpriteFrameIndex` instead of `motionNow` stops every monster/NPC sprite
@@ -1471,9 +2197,9 @@ export function OriginalClientShell({
   // `motionNow` on the wrapper element). Transient attack/struck frames quantise to the 120ms tick,
   // which is imperceptible. This is the bulk of the "running is janky / NPCs flicker" fix: stable
   // sprite refs let the memoised <EntitySpriteLayers> skip its per-frame DOM restyle.
-  const viewportEntitySprites = useMemo(() => {
+  const entityAnimationInputs = useMemo(() => {
     if (!player) {
-      return [];
+      return { spriteNow: Date.now(), entities: [] };
     }
     const spriteNow = Date.now();
     const snapshots = entityMotionSnapshotsRef.current;
@@ -1503,18 +2229,54 @@ export function OriginalClientShell({
         legacyAnimationState,
       };
     });
-    const animationPoses = resolveCrystalEntityAnimationPoses({
-      runtime: entityAnimationRuntimeFromWindow(),
-      worldKey: `${world.mapFileName ?? "none"}:${player.objectId}`,
-      worldSeed: entityAnimationWorldSeed,
-      now: spriteNow,
-      entities: animationInputs.map(({ entity, legacyAnimationState, motionSnapshot }) => ({
-        entity,
-        state: legacyAnimationState,
-        motionSnapshot,
+    return { spriteNow, entities: animationInputs };
+  }, [
+    bevyLocalSelfMotion,
+    bevyMapRuntimeGeneration,
+    entityAnimationWorldSeed,
+    player,
+    sceneSpriteFrameIndex,
+    sceneSpriteLibraries,
+    viewportEntities,
+    world.mapFileName,
+  ]);
+  const committedEntityAnimationRef = useRef<{ worldKey: string; poses: ReturnType<typeof resolveCrystalEntityAnimationPoses> } | null>(null);
+  const [fishingFeedback] = useState(() => new FishingFeedbackPresentation());
+  const [fishingEffects, setFishingEffects] = useState<readonly DisplaySceneEffect[]>([]);
+  const [fishingBiteStartedAt, setFishingBiteStartedAt] = useState<number | null>(null);
+  const animationWorldKey = worldFishingAnimation?.record.sourceKey ?? `${world.mapFileName ?? "none"}:${player?.objectId ?? "none"}`;
+  useLayoutEffect(() => {
+    const context = worldFishingAnimation, runtime = context?.runtime ?? entityAnimationRuntimeFromWindow();
+    if (screen !== "game" || !player || !runtime) {
+      committedEntityAnimationRef.current = null;
+      setFishingEffects(fishingFeedback.advance(null, 0, [], {}).effects);
+      setFishingBiteStartedAt(null);
+      onWorldFishingAnimationCommit?.(null);
+      return;
+    }
+    // Advancing the shared state machine belongs to the committed tree.
+    const atMs = Date.now();
+    const poses = resolveCrystalEntityAnimationPoses({ runtime, worldKey: animationWorldKey,
+      worldSeed: entityAnimationWorldSeed, now: atMs, selfAuthority: context?.record,
+      entities: entityAnimationInputs.entities.map(({ entity, legacyAnimationState, motionSnapshot }) => ({
+        entity, state: legacyAnimationState, motionSnapshot,
       })),
     });
-
+    committedEntityAnimationRef.current = { worldKey: animationWorldKey, poses };
+    const feedback = fishingFeedback.advance(animationWorldKey, atMs, viewportEntities, poses);
+    setFishingEffects(feedback.effects);
+    setFishingBiteStartedAt(fishingFeedback.biteStartedAt);
+    for (const sound of feedback.sounds) playOriginalSoundEvent(sound);
+    if (!context) { onWorldFishingAnimationCommit?.(null); return; }
+    const token = Object.freeze({});
+    const commit = Object.freeze({ context, worldKey: animationWorldKey, worldSeed: entityAnimationWorldSeed, atMs, token });
+    onWorldFishingAnimationCommit?.(commit);
+    return () => onWorldFishingAnimationCommit?.(null, token);
+  }, [animationWorldKey, entityAnimationInputs, entityAnimationWorldSeed, fishingFeedback, onWorldFishingAnimationCommit, player, screen, viewportEntities, worldFishingAnimation]);
+  const viewportEntitySprites = useMemo(() => {
+    const spriteNow = entityAnimationInputs.spriteNow, animationInputs = entityAnimationInputs.entities;
+    const committed = committedEntityAnimationRef.current;
+    const animationPoses = committed?.worldKey === animationWorldKey ? committed.poses : {};
     return animationInputs.map(({
       entity,
       motionSnapshot,
@@ -1528,7 +2290,7 @@ export function OriginalClientShell({
         animationPose,
         sprite: buildViewportEntitySprite(
           entity,
-          sceneSpriteLibraries,
+          renderSpriteLibraries,
           sceneSpriteFrameIndex,
           spriteNow,
           animationState,
@@ -1538,16 +2300,9 @@ export function OriginalClientShell({
         ),
       };
     });
-  }, [
-    bevyLocalSelfMotion,
-    bevyMapRuntimeGeneration,
-    entityAnimationWorldSeed,
-    player,
-    sceneSpriteFrameIndex,
-    sceneSpriteLibraries,
-    viewportEntities,
-    world.mapFileName,
-  ]);
+  }, [animationWorldKey, entityAnimationInputs, renderSpriteLibraries, sceneSpriteFrameIndex]);
+  const viewportActorBodies = useMemo(() => new Map(viewportEntitySprites.map(({ entity, sprite }) =>
+    [entity.objectId, sprite?.body ?? null])), [viewportEntitySprites]);
   const viewportGroundDrops = player
     ? world.groundDrops
         .filter(
@@ -1566,18 +2321,20 @@ export function OriginalClientShell({
   const staticViewportMapSprites = useMemo(
     () =>
       renderPlayer
-        ? buildViewportMapSprites(world, renderPlayer, 0, "static", 0, viewportLayout)
+        ? buildViewportMapSprites(world, renderPlayer, 0, "static", 0, viewportLayout, { floor: packedFloor, objects: packedObjects })
         : EMPTY_VIEWPORT_MAP_SPRITES,
-    [renderPlayer?.x, renderPlayer?.y, world.originalMapRegion, viewportLayout],
+    [renderPlayer?.x, renderPlayer?.y, world.originalMapRegion, viewportLayout, packedFloor, packedObjects],
   );
   // Animated layer (multi-frame sprites only) tracks the frame index; the per-tick pass
   // skips all single-frame sprites early, so on maps without animated tiles it is ~free.
   const animatedViewportMapSprites = useMemo(
     () =>
       renderPlayer
-        ? buildViewportMapSprites(world, renderPlayer, sceneSpriteFrameIndex, "animated", 0, viewportLayout)
+        ? buildViewportMapSprites(world, renderPlayer, sceneSpriteFrameIndex, "animated", 0, viewportLayout, {
+          floor: packedFloor, objects: packedObjects,
+        })
         : EMPTY_VIEWPORT_MAP_SPRITES,
-    [renderPlayer?.x, renderPlayer?.y, sceneSpriteFrameIndex, world.originalMapRegion, viewportLayout],
+    [renderPlayer?.x, renderPlayer?.y, sceneSpriteFrameIndex, world.originalMapRegion, viewportLayout, packedFloor, packedObjects],
   );
   const viewportMapSprites = useMemo(
     () => ({
@@ -1594,13 +2351,14 @@ export function OriginalClientShell({
   // Service Worker resolves its pages through the immutable R2 release. If capability validation or
   // GPU drawing fails, mapGpuFailed/empty index force the DOM tile path — the map is never blank.
   const mapAtlasRequested = useMemo(() => {
+    if (webGl2SharedCanvasPrototype) return false;
     if (typeof window === "undefined") return false;
     const params = new URLSearchParams(window.location.search);
     if (params.get("mapAtlas") === "0") return false;
     if (params.get("mapAtlas") === "1") return true;
     if (window.localStorage.getItem("mir2-map-atlas") === "0") return false;
     return true;
-  }, []);
+  }, [webGl2SharedCanvasPrototype]);
   // Bevy-native map renderer (Stages 1-3, DEFAULT ON). The same packed map-atlas
   // tiles the DOM WebGl2MapAtlasLayer would draw are pushed into the Bevy runtime
   // and rendered in a UNIFIED y-sort band with the entities (map objects occlude
@@ -1608,6 +2366,7 @@ export function OriginalClientShell({
   // map sprites are disabled so the map is never drawn twice. Mirrors the
   // foldWebgl2ToBevy / mapAtlas flags.
   const bevyMapRequested = useMemo(() => {
+    if (webGl2SharedCanvasPrototype) return false;
     if (typeof window === "undefined") return false;
     const params = new URLSearchParams(window.location.search);
     // Stage 3: Bevy is the DEFAULT map renderer (it is already the default ENTITY
@@ -1619,7 +2378,7 @@ export function OriginalClientShell({
     if (params.get("bevyMap") === "0") return false;
     if (params.get("bevyMap") === "1") return true;
     return window.localStorage.getItem("mir2-bevy-map") !== "0";
-  }, []);
+  }, [webGl2SharedCanvasPrototype]);
   const [mapAtlasIndex, setMapAtlasIndex] = useState<MapAtlasIndex | null>(null);
   const [mapGpuFailed, setMapGpuFailed] = useState(false);
   useEffect(() => {
@@ -1790,18 +2549,20 @@ export function OriginalClientShell({
     return window.localStorage.getItem("mir2-bevy-fold-webgl2") !== "0";
   }, []);
   const hideBevyCanvasForDomEntityFallback =
-    screen === "game" &&
+    !webGl2SharedCanvasPrototype && screen === "game" &&
     ((bevyRuntimeBackend === "webgl2" && !foldWebgl2ToBevy) || domEntityFallbackRequested);
   const bevyEntityRendererSuppressed =
-    domEntityFallbackRequested || runtimePhase === "dom-only" || runtimePhase === "boot-error";
+    webGl2SharedCanvasPrototype || domEntityFallbackRequested || runtimePhase === "dom-only" || runtimePhase === "boot-error";
   const bevyEntityRendererWanted =
     screen === "game" && !bevyEntityRendererSuppressed && shouldUseBevyEntityRenderer();
   const gpuEntityRendererRuntimePending =
-    bevyEntityRendererWanted && (!bevyEntityRendererReady || !bevyRuntimeBackend);
+    bevyEntityRendererWanted && bevyMapRequested && mapAtlasUsable &&
+    (!bevyEntityRendererReady || !bevyRuntimeBackend);
   const entityRendererRequested =
     bevyEntityRendererWanted && bevyEntityRendererReady && Boolean(bevyRuntimeBackend);
   const useBevyEntityRenderer =
-    entityRendererRequested && !hideBevyCanvasForDomEntityFallback;
+    entityRendererRequested && bevyMapRequested && mapAtlasUsable &&
+    !hideBevyCanvasForDomEntityFallback;
   const bevySelfCameraActive =
     BEVY_SELF_CAMERA_REQUESTED &&
     useBevyEntityRenderer &&
@@ -1833,6 +2594,10 @@ export function OriginalClientShell({
     retainedMapTileDrawListRef.current = mapTileDrawListCandidate;
   }
   const mapTileDrawList = retainedMapTileDrawListRef.current;
+  const fallbackMapFloorTiles = useMemo(() => {
+    const objectKeys = new Set(viewportMapSprites.objects.map((sprite) => sprite.key));
+    return mapTileDrawList.filter((tile) => !objectKeys.has(tile.key));
+  }, [mapTileDrawList, viewportMapSprites.objects]);
   const standaloneMapPlan = useMemo(
     () => (mapDrawPlan ? buildStandaloneMapTiles(mapDrawPlan.uncovered, mapTileCameraOffset) : null),
     [mapDrawPlan, mapTileCameraOffset.x, mapTileCameraOffset.y],
@@ -1943,7 +2708,9 @@ export function OriginalClientShell({
   );
   const bevyEntityAtlasPolicy = shouldUseBevyEntityAtlas();
   const useWebGl2EntityAtlasRenderer =
+    !webGl2SharedCanvasPrototype &&
     entityRendererRequested &&
+    viewportMapSprites.objects.length === 0 &&
     !foldWebgl2ToBevy &&
     bevyRuntimeBackend === "webgl2" &&
     bevyEntityAtlasPolicy !== "disabled" &&
@@ -1964,7 +2731,7 @@ export function OriginalClientShell({
     // `viewportEntitySprites` also changes for animation-only frame ticks. Its complete
     // preload-frame coverage is exactly why it is intentionally not a dependency.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [useGpuEntityRenderer, useBevyEntityAtlas, viewportEntities, sceneSpriteLibraries],
+    [useGpuEntityRenderer, useBevyEntityAtlas, viewportEntities, renderSpriteLibraries],
   );
   const bevyEntityAtlasKey = useMemo(
     () =>
@@ -2023,7 +2790,7 @@ export function OriginalClientShell({
     activeBevyEntityAtlas &&
       bevyEntityAtlasSources.every((source) => Boolean(activeBevyEntityAtlas.rects[source.key])),
   );
-  const hideDomEntitySpritesForBevy =
+  const gpuEntityPixelsReady =
     useGpuEntityRenderer &&
     !webGl2EntityAtlasFailed &&
     (!useBevyEntityAtlas ||
@@ -2049,29 +2816,44 @@ export function OriginalClientShell({
     ? entityRenderState
     : disabledEntityRenderState(entityRenderState);
 
-  // Start the Bevy map pipeline as soon as the runtime and packed atlas are usable,
-  // but keep WebGL2/DOM ownership until Rust confirms a complete map sync for every
-  // atlas page required by this viewport. This overlap avoids a cold-start clear-color
-  // frame while page pixels cross the async decode -> WASM -> Bevy asset boundary.
-  const bevyMapActive =
-    bevyMapRequested && useBevyEntityRenderer && mapAtlasUsable && bevyMapRuntimeReady;
+  // A canvas has one CSS depth. A map object painted on a separate surface
+  // cannot interleave with actors by Crystal row, even when both depths are
+  // correct. Warm the Bevy world while the DOM draws both sets of sprites.
+  const bevyMapActive = useBevyEntityRenderer && bevyMapRuntimeReady;
   const requiredBevyMapAtlasPageKeys = new Set(mapTileDrawList.map((tile) => tile.atlasKey));
-  const bevyMapOwnershipActive =
+  const bevyWorldPaintActive =
     bevyMapActive &&
+    gpuEntityPixelsReady &&
+    standaloneDomFallbackSprites.objects.length === 0 &&
     Array.from(requiredBevyMapAtlasPageKeys).every((key) => bevyMapPresentedImageKeys.has(key));
+  const hideDomEntitySpritesForBevy =
+    bevyWorldPaintActive || (useWebGl2EntityAtlasRenderer && gpuEntityPixelsReady);
+  useEffect(() => {
+    if (!hideDomEntitySpritesForBevy || !sceneInteractionReady) return;
+    for (const { entity, sprite } of viewportEntitySprites) {
+      const body = sprite?.body;
+      if (entity.kind === "selfPlayer" || !body) continue;
+      const atlas = entityBodyAtlasFrame(activeBevyEntityAtlas, body);
+      if (atlas?.imageUrl && !atlas.pixels) {
+        const { imageUrl, left, top } = atlas;
+        warmCrystalBodyPixels(body, () => loadBevyEntityAtlasImage(imageUrl), { x: left, y: top });
+      }
+    }
+  }, [hideDomEntitySpritesForBevy, sceneInteractionReady, viewportEntitySprites, activeBevyEntityAtlas]);
   useEffect(() => {
     latestStandaloneMapImageSourcesRef.current = standaloneMapImageSourcesByKey;
     latestBevyMapActiveRef.current = bevyMapActive;
   }, [bevyMapActive, standaloneMapImageSourcesByKey]);
-  // DOM GPU atlas layer draws until Bevy has acknowledged the complete viewport.
-  const mapGpuActive = mapAtlasUsable && !bevyMapOwnershipActive;
-  // Cell ownership: covered atlas tiles go to Bevy/WebGL2. Atlas misses,
-  // including additive glows, stay in DOM until their standalone Bevy image is
-  // decoded and acknowledged; when Bevy is disabled the legacy fallbacks stay intact.
-  const mapDomSprites = bevyMapOwnershipActive
+  // The independent atlas canvas can still paint floor tiles below the DOM
+  // stack. While the imperative camera is active, keep that floor in the DOM
+  // too so it pans with the objects until the whole Bevy world is presented.
+  const mapGpuActive =
+    mapAtlasUsable && !bevyWorldPaintActive && !imperativeSceneMotion &&
+    fallbackMapFloorTiles.length > 0;
+  const mapDomSprites = bevyWorldPaintActive
     ? standaloneDomFallbackSprites
-    : mapGpuActive
-      ? mapDrawPlan?.uncovered ?? EMPTY_VIEWPORT_MAP_SPRITES
+    : mapGpuActive && mapDrawPlan
+      ? { floor: mapDrawPlan.uncovered.floor, objects: viewportMapSprites.objects }
       : viewportMapSprites;
   const mapDomBlendSpriteCount = countBlendMapSprites(mapDomSprites);
 
@@ -2578,7 +3360,7 @@ export function OriginalClientShell({
       window as typeof window & { __mir2BevyMapRendererDebug?: unknown }
     ).__mir2BevyMapRendererDebug = {
       requested: bevyMapRequested,
-      active: bevyMapOwnershipActive,
+      active: bevyWorldPaintActive,
       pipelineActive: bevyMapActive,
       mapGpuActive,
       atlasUsable: mapAtlasUsable,
@@ -2608,7 +3390,14 @@ export function OriginalClientShell({
   sceneAssetUrlsRef.current = useMemo(
     () =>
       collectVisibleSceneAssetUrls(viewportMapSprites, viewportEntitySprites, {
+        // Once the complete atlas is presented, the DOM sprite painter no
+        // longer consumes individual frames. Keep them while warming/fallback.
+        includeEntitySprites: !hideDomEntitySpritesForBevy || !useBevyEntityAtlas
+          || !activeBevyEntityAtlasCoversAllSources || !webGl2EntityTextureReady,
         includeEntityPreloadPaths: !hideDomEntitySpritesForBevy,
+        packedFloor,
+        packedObjects,
+        packedActors,
         viewportLayout,
       }),
     // Map/player/entity changes replace these stable inputs. Animation-only
@@ -2622,6 +3411,12 @@ export function OriginalClientShell({
       viewportEntities,
       sceneSpriteLibraries,
       hideDomEntitySpritesForBevy,
+      useBevyEntityAtlas,
+      activeBevyEntityAtlasCoversAllSources,
+      webGl2EntityTextureReady,
+      packedFloor,
+      packedObjects,
+      packedActors,
       viewportLayout,
     ],
   );
@@ -2650,8 +3445,8 @@ export function OriginalClientShell({
       const visible = new Set(sceneAssetUrlsRef.current);
       const ringUrls = Array.from(
         new Set([
-          ...ring.objects.map((sprite) => mapSpriteRenderPath(sprite.path)),
-          ...ring.floor.map((sprite) => sprite.path),
+          ...ring.objects.map((sprite) => mapSpriteRenderPath(sprite.path)).filter((path) => !packedObjects?.[path]),
+          ...ring.floor.filter((sprite) => !packedFloor?.[sprite.path]).map((sprite) => sprite.path),
         ]),
       ).filter((url) => !visible.has(url));
       if (ringUrls.length) {
@@ -2681,7 +3476,7 @@ export function OriginalClientShell({
     };
     // Re-run only on player-cell / map / screen change (not every animation tick).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [renderPlayer?.x, renderPlayer?.y, world.originalMapRegion, screen, viewportLayout]);
+  }, [renderPlayer?.x, renderPlayer?.y, world.originalMapRegion, screen, packedFloor, packedObjects, viewportLayout]);
   const [sceneAssetPreloadReadiness, setSceneAssetPreloadReadiness] =
     useState<SceneAssetReadiness | null>(null);
   // True once the safety-valve window elapses with the scene up but readiness unresolved.
@@ -2707,6 +3502,106 @@ export function OriginalClientShell({
         ].join(":")
       : `idle:${screen}`;
 
+  const playerX = renderPlayer?.x;
+  const playerY = renderPlayer?.y;
+  const { minX, minY, maxX, maxY } = R16_ENTRY_FLOOR_BOUNDS;
+  const entryViewportKey =
+    screen === "game" && !sceneInteractionReady && !mapGpuActive && !bevyWorldPaintActive &&
+    entryMap &&
+    playerX !== undefined && playerY !== undefined &&
+    playerX - ENTRY_FLOOR_RADIUS >= minX && playerX + ENTRY_FLOOR_RADIUS <= maxX &&
+    playerY - ENTRY_FLOOR_RADIUS >= minY && playerY + ENTRY_FLOOR_RADIUS <= maxY
+      ? JSON.stringify([sceneAssetReadinessKey, renderPlayer?.objectId, playerX, playerY])
+      : null;
+  const entryGroundKey = entryFloorPending || packedFloor ? entryViewportKey : null;
+  const [entryGroundReadyKey, setEntryGroundReadyKey] = useState<string | null>(null);
+  const waitingForEntryGround = entryGroundKey !== null && entryGroundReadyKey !== entryGroundKey;
+  const ownBodyLibrary = renderPlayer?.sprite?.bodyLibrary;
+  const entryPlayerKey =
+    !hideDomEntitySpritesForBevy && (entryPlayerPending || entryPlayer) && ownBodyLibrary &&
+    normalizeSceneSpriteLibraryKey(ownBodyLibrary) === "CArmour/00" ? entryViewportKey : null;
+  const [entryPlayerReadyKey, setEntryPlayerReadyKey] = useState<string | null>(null);
+  const waitingForEntryPlayer = entryPlayerKey !== null && entryPlayerReadyKey !== entryPlayerKey;
+  const preparingSceneVisuals = waitingForEntryGround || waitingForEntryPlayer;
+
+  useEffect(() => {
+    if (entryGroundKey === null) {
+      setEntryGroundReadyKey(null);
+      return;
+    }
+    const frame = stageFrameRef.current;
+    if (!waitingForEntryGround || !frame || playerX === undefined || playerY === undefined) return;
+
+    const floorKeys = new Set(staticViewportMapSprites.floor
+      .filter(sprite => sprite.kind === "back" &&
+        Math.abs(sprite.cellX - playerX) <= ENTRY_FLOOR_RADIUS &&
+        Math.abs(sprite.cellY - playerY) <= ENTRY_FLOOR_RADIUS)
+      .map(sprite => sprite.key));
+    const ready = () => setEntryGroundReadyKey(entryGroundKey);
+    if (!floorKeys.size) {
+      if (packedFloor) ready();
+      return;
+    }
+
+    let animationFrame: number | undefined;
+    const check = () => {
+      animationFrame = undefined;
+      const pending = new Set(floorKeys);
+      for (const image of frame.querySelectorAll<HTMLImageElement>("img.scene-backdrop-sprite")) {
+        if (image.complete && image.naturalWidth > 0 && image.style.visibility !== "hidden") {
+          pending.delete(image.dataset.mapSpriteKey ?? "");
+        }
+      }
+      if (!pending.size) ready();
+    };
+    const scheduleCheck = (event: Event) => {
+      const image = event.target;
+      if (image instanceof HTMLImageElement && floorKeys.has(image.dataset.mapSpriteKey ?? "")) {
+        animationFrame ??= window.requestAnimationFrame(check);
+      }
+    };
+
+    frame.addEventListener("load", scheduleCheck, true);
+    animationFrame = window.requestAnimationFrame(check);
+    // The transfer has its own deadline. Bound the wait for decoding verified images as well.
+    const decodeTimeout = packedFloor ? window.setTimeout(ready, SCENE_READINESS_SAFETY_MS) : undefined;
+    return () => {
+      frame.removeEventListener("load", scheduleCheck, true);
+      if (animationFrame !== undefined) window.cancelAnimationFrame(animationFrame);
+      window.clearTimeout(decodeTimeout);
+    };
+  }, [entryGroundKey, waitingForEntryGround, playerX, playerY, packedFloor, staticViewportMapSprites.floor]);
+
+  const playerObjectId = renderPlayer?.objectId;
+  useEffect(() => {
+    if (entryPlayerKey === null) {
+      setEntryPlayerReadyKey(null);
+      return;
+    }
+    const frame = stageFrameRef.current;
+    if (!waitingForEntryPlayer || !frame || !playerObjectId) return;
+    const selector = '.entity-sprite-stack[data-object-id="' + CSS.escape(playerObjectId) + '"] img.entity-sprite-layer.body';
+    const ready = () => setEntryPlayerReadyKey(entryPlayerKey);
+    const check = () => {
+      const image = frame.querySelector<HTMLImageElement>(selector);
+      if (image?.complete && image.naturalWidth > 0 && image.style.visibility !== "hidden") ready();
+    };
+    const onLoad = (event: Event) => {
+      if (event.target instanceof HTMLImageElement && event.target.matches(selector)) check();
+    };
+    frame.addEventListener("load", onLoad, true);
+    const animationFrame = window.requestAnimationFrame(check);
+    // A bundled frame directory enables ordinary PNG loading, but is not a
+    // verified image pack. It must wait for the actual body load above.
+    const decodeTimeout = entryPlayer && Object.keys(entryPlayer.images).length > 0
+      ? window.setTimeout(ready, SCENE_READINESS_SAFETY_MS) : undefined;
+    return () => {
+      frame.removeEventListener("load", onLoad, true);
+      window.cancelAnimationFrame(animationFrame);
+      window.clearTimeout(decodeTimeout);
+    };
+  }, [entryPlayerKey, waitingForEntryPlayer, playerObjectId, entryPlayer]);
+
   // Diagnostic: expose the scene/movement-readiness gate so an Alt+D snapshot reveals
   // exactly which factor is blocking movement (sceneInteractionReady is the actual gate
   // checked by the keyboard/click move handlers). No behavior change.
@@ -2715,6 +3610,8 @@ export function OriginalClientShell({
     (window as unknown as Record<string, unknown>).__mir2SceneGate = {
       screen,
       sceneInteractionReady,
+      waitingForEntryGround,
+      waitingForEntryPlayer,
       sceneSpriteLibrariesReady,
       pendingSceneSpriteLibraryCount: pendingSceneSpriteLibraryKeys.length,
       pendingSceneSpriteLibraryKeys: pendingSceneSpriteLibraryKeys.slice(0, 10),
@@ -2731,6 +3628,8 @@ export function OriginalClientShell({
   }, [
     screen,
     sceneInteractionReady,
+    waitingForEntryGround,
+    waitingForEntryPlayer,
     sceneSpriteLibrariesReady,
     pendingSceneSpriteLibraryKeys.length,
     desiredSceneSpriteLibraryKeys.length,
@@ -2841,7 +3740,7 @@ export function OriginalClientShell({
     return () => {
       disposed = true;
     };
-  }, [screen, sceneAssetReadinessKey, sceneSpriteLibrariesReady]);
+  }, [screen, sceneAssetReadinessKey, sceneSpriteLibrariesReady, packedFloor, packedObjects, packedActors]);
 
   // Safety-valve timer: arm when the scene is up; if readiness hasn't cleared the
   // overlay within SCENE_READINESS_SAFETY_MS, force interaction-ready (see notifier).
@@ -2874,6 +3773,11 @@ export function OriginalClientShell({
 
     if (!renderPlayer || !world.originalMapRegion) {
       notify(createSceneAssetReadiness(sceneAssetReadinessKey, false, "loading", 0));
+      return;
+    }
+
+    if (preparingSceneVisuals) {
+      notify(createSceneAssetReadiness(sceneAssetReadinessKey, false, "loading", 1));
       return;
     }
 
@@ -2955,6 +3859,7 @@ export function OriginalClientShell({
     activeBevyEntityAtlas?.key,
     webGl2EntityTextureReady,
     readinessSafetyExpired,
+    preparingSceneVisuals,
   ]);
 
   useEffect(() => {
@@ -2972,7 +3877,7 @@ export function OriginalClientShell({
     };
   }, [screen, sceneAssetReadinessKey]);
 
-  function scenePointFromMouseEvent(event: MouseEvent<HTMLElement>) {
+  function scenePointFromMouseEvent(event: { clientX: number; clientY: number; currentTarget: HTMLElement }) {
     const rect = stageFrameRef.current?.getBoundingClientRect() ?? event.currentTarget.getBoundingClientRect();
     const scaleX = stagePresentation.virtualWidth / Math.max(rect.width, 1);
     const scaleY = stagePresentation.virtualHeight / Math.max(rect.height, 1);
@@ -2980,6 +3885,167 @@ export function OriginalClientShell({
       sceneX: (event.clientX - rect.left) * scaleX,
       sceneY: (event.clientY - rect.top) * scaleY,
     };
+  }
+
+  function sceneWorldObjectTarget(clientX: number, clientY: number, compatibility = false): HeldScenePointer["worldTarget"] {
+    const frame = stageFrameRef.current;
+    if (!frame || !Number.isFinite(clientX) || !Number.isFinite(clientY)) return;
+    const layers = document.elementsFromPoint(clientX, clientY);
+    const top = layers[0];
+    // The shared canvas owns the physical pointer. Inspect its visible world
+    // underlay only after the existing surface router has admitted a world hold.
+    const onCanvas = top?.id === sharedUiCanvasId(webGl2SharedCanvasPrototype);
+    const foreground = ".game-ui-scene, .login-overlay, .select-overlay, .original-skill-bar, .original-combat-mode-controls";
+    if (!top || !frame.contains(top) || !onCanvas && !compatibility || top.closest(foreground)) return;
+    const worldMarker = ".ground-drop-marker, .entity-nameplate, .entity-sprite-hit";
+    const worldLayers = onCanvas ? layers.slice(1) : top.closest(worldMarker) ? layers : [];
+    const stacks = new Map<string, HTMLElement>();
+    let label: string | undefined;
+    for (const layer of worldLayers) {
+      if (!frame.contains(layer)) continue;
+      if (layer.closest(foreground)) break;
+      const hit = layer.closest<HTMLElement>(worldMarker);
+      if (!hit || !frame.contains(hit)) continue;
+      const target = hit.classList.contains("entity-sprite-hit")
+        ? hit.closest<HTMLElement>(".entity-sprite-stack[data-ui-interactive='true'][data-object-id]")
+        : hit;
+      if (!target || !frame.contains(target) || !target.dataset.objectId) continue;
+      if (hit.classList.contains("ground-drop-marker")) return { kind: "drop", objectId: target.dataset.objectId };
+      if (target.dataset.uiInteractive !== "true") continue;
+      if (hit.classList.contains("entity-sprite-hit")) stacks.set(target.dataset.objectId, target);
+      else label ??= target.dataset.objectId;
+    }
+    const point = scenePointFromMouseEvent({ clientX, clientY, currentTarget: frame });
+    const cell = tileFromScenePoint(point.sceneX, point.sceneY);
+    const actor = cell && pickCrystalActor(world.entities, cell, entity => {
+      const stack = stacks.get(entity.objectId), body = viewportActorBodies.get(entity.objectId);
+      if (!stack || !body) return false;
+      const stageRect = frame.getBoundingClientRect(), root = stack.getBoundingClientRect();
+      const x = Math.floor((clientX - root.left) * stagePresentation.virtualWidth / Math.max(stageRect.width, 1) - body.x);
+      const y = Math.floor((clientY - root.top) * stagePresentation.virtualHeight / Math.max(stageRect.height, 1) - body.y);
+      if (!(x >= 0 && y >= 0 && x < body.width && y < body.height)) return false;
+      const atlas = hideDomEntitySpritesForBevy ? entityBodyAtlasFrame(activeBevyEntityAtlas, body) : null;
+      if (atlas?.pixels) return atlas.pixels[4 * ((atlas.top + y) * atlas.width + atlas.left + x) + 3] > 0;
+      const image = stack.querySelector<HTMLImageElement>("img.entity-sprite-layer.body");
+      const pixel = sampleCrystalBodyPixel(body, x, y, image?.dataset.mir2OriginalSrc === body.path ? image : null);
+      if (pixel === undefined && hideDomEntitySpritesForBevy && !atlas?.imageUrl) {
+        warmCrystalBodyPixels(body, () => loadBevyEntityAtlasImage(body.path));
+      }
+      return pixel ?? entity.kind === "npc";
+    });
+    // Nameplates are painted above actor bodies; picking follows that visible order.
+    const objectId = label ?? actor?.objectId;
+    if (objectId) return { kind: "entity", objectId };
+  }
+
+  function sceneGroupHoverScope() {
+    return JSON.stringify([screen, world.mapFileName ?? null, player?.objectId ?? null, bevyMapRuntimeGeneration]);
+  }
+  function retireSceneGroupHoverPoint() {
+    sceneGroupHoverPointRef.current = null;
+    updateSceneCombatPointer(null, null);
+  }
+  function commitSceneGroupHoverScope() {
+    const scope = sceneGroupHoverScope();
+    if (sceneGroupHoverScopeRef.current !== scope) {
+      sceneGroupHoverScopeRef.current = scope;
+      retireSceneGroupHoverPoint();
+    }
+  }
+  function rememberSceneGroupHoverPoint(event: { clientX: number; clientY: number; pointerType?: string }) {
+    const frame = stageFrameRef.current, scope = sceneGroupHoverScopeRef.current;
+    if (screen !== "game" || !frame?.isConnected || !scope || scope !== sceneGroupHoverScope()
+      || event.pointerType && event.pointerType !== "mouse" || ![event.clientX, event.clientY].every(Number.isFinite)) {
+      retireSceneGroupHoverPoint(); return;
+    }
+    const rect = frame.getBoundingClientRect();
+    if (![rect.left, rect.top, rect.right, rect.bottom, rect.width, rect.height].every(Number.isFinite) || rect.width <= 0 || rect.height <= 0
+      || event.clientX < rect.left || event.clientY < rect.top || event.clientX >= rect.right || event.clientY >= rect.bottom) {
+      retireSceneGroupHoverPoint(); return;
+    }
+    sceneGroupHoverPointRef.current = { clientX: event.clientX, clientY: event.clientY, scope };
+  }
+  function installSceneGroupHoverObserver() {
+    // Capture coordinates even when a foreground window owns propagation. No input edge is dispatched here.
+    const move = (event: globalThis.PointerEvent) => sceneGroupHoverCallbacksRef.current.remember(event);
+    const retire = () => sceneGroupHoverCallbacksRef.current.retire();
+    const visibility = () => { if (document.visibilityState !== "visible") retire(); };
+    const leave = (event: globalThis.PointerEvent) => { if (event.relatedTarget === null) retire(); };
+    window.addEventListener("pointermove", move, { capture: true, passive: true });
+    window.addEventListener("pointerout", leave, { capture: true, passive: true });
+    window.addEventListener("blur", retire);
+    document.addEventListener("visibilitychange", visibility);
+    return () => {
+      window.removeEventListener("pointermove", move, true);
+      window.removeEventListener("pointerout", leave, true);
+      window.removeEventListener("blur", retire);
+      document.removeEventListener("visibilitychange", visibility);
+      sceneGroupHoverPointRef.current = null;
+    };
+  }
+  function sceneGroupHoverWorldAllowed(x: number, y: number, worldPointer?: HudPointerLease): boolean {
+    const hudRouter = hudPointerRouterRef.current;
+    if (!sceneInteractionReady || questLocalModalRef.current || mobileMoreOpenRef.current || bevyQuestUiCapturesPointer
+      || npcShopBlocksWorldInput() || heroBlocksWorldInput() || bevyMailComposeReady || bevyMailComposePending
+      || bevyStorageUiTransitioning || bevyNpcShopUiTransitioning || bagPointerRouterRef.current.held
+      || characterPointerRouterRef.current.held || spellsPointerRouterRef.current.held
+      || hudRouter.held && hudRouter.held !== worldPointer
+      || mailPointerRouterRef.current.held || storagePointerRouterRef.current.held || npcShopPointerRouterRef.current.held
+      || heroPointerLeaseRef.current || heldQuestControlPointersRef.current.size || heldComposePointerRef.current !== null
+      || bagBeltPointerRef.current || bagBeltArmedSharedRef.current || npcRepairPointerRef.current || combatUiHoldRef.current.size) return false;
+    const bag = bagPointerCallbacksRef.current.getBevyBagPointerContext?.() ?? null;
+    const character = characterPointerCallbacksRef.current.getBevyCharacterPointerContext?.() ?? null;
+    const spells = spellsPointerCallbacksRef.current.getBevySpellsPointerContext?.() ?? null;
+    const mail = mailPointerCallbacksRef.current.getBevyMailPointerContext?.() ?? null;
+    const storage = storagePointerCallbacksRef.current.getBevyStoragePointerContext?.() ?? null;
+    const npc = npcShopPointerCallbacksRef.current.getBevyNpcShopPointerContext?.() ?? null;
+    const hero = heroPointerCallbacksRef.current.getBevyHeroPointerContext?.() ?? null;
+    const hud = readBevyHudStatus?.() ?? null;
+    if (worldPointer && !hudRouter.matches(hud)) return false;
+    if (spells?.modal || mail?.modal || hud?.modal || bevyBagUiActive && !bag || bevyCharacterPageReady && !character
+      || bevySpellsPageReady && !spells || bevyMailPageReady && !mail || bevyStorageUiActive && !storage
+      || bevyNpcShopUiActive && !npc || (bevyHeroUiActive || bevyHeroUiTransitioning) && !hero || bevyHudUiReady && (!hud?.ready || !hud.plan)) return false;
+    const contains = (rect: { left: number; top: number; width: number; height: number }) => containsHudRect(rect, x, y);
+    if (bag?.inputRegions.some(contains) || character?.inputRegions.some(contains) || spells?.inputRegions.some(contains)
+      || mail?.inputRegions.some(contains) || storage?.inputRegions.some(contains) || npc?.inputRegions.some(contains)
+      || hero?.inputRegions.some(contains) || hud?.foregroundRects.some(contains)) return false;
+    if (hud?.ready && hud.plan && ([hud.plan.main, hud.plan.orb, hud.plan.experienceBar, hud.plan.weightBar].some(contains)
+      || (hud.characterStatsReady || character || spells) && contains(hud.plan.characterRect))) return false;
+    const controls = readBevyQuestWorldControlBlockers?.() ?? readBevyQuestWorldControls?.() ?? null;
+    if (controls) {
+      const frame = stageFrameRef.current, width = Number(frame?.dataset.viewportSceneWidth), height = Number(frame?.dataset.viewportSceneHeight);
+      if (![width, height].every(value => Number.isFinite(value) && value > 0)
+        || questWorldControlAt(controls, x * controls.logicalWidth / width, y * controls.logicalHeight / height)) return false;
+    }
+    return true;
+  }
+  function refreshSceneGroupHover(): boolean {
+    const physical = sceneGroupHoverPointRef.current, frame = stageFrameRef.current;
+    if (!physical || !frame?.isConnected || screen !== "game" || physical.scope !== sceneGroupHoverScope()
+      || !document.hasFocus() || document.visibilityState !== "visible") { retireSceneGroupHoverPoint(); return false; }
+    const rect = frame.getBoundingClientRect(), { clientX, clientY } = physical;
+    const top = document.elementFromPoint(clientX, clientY);
+    if (![rect.left, rect.top, rect.right, rect.bottom, rect.width, rect.height].every(Number.isFinite) || rect.width <= 0 || rect.height <= 0
+      || clientX < rect.left || clientY < rect.top || clientX >= rect.right || clientY >= rect.bottom
+      || !(top instanceof Element) || !frame.contains(top)
+      || top.closest(".game-ui-scene, .login-overlay, .select-overlay, .original-skill-bar, .original-combat-mode-controls")) {
+      updateSceneCombatPointer(null, null); return false;
+    }
+    const point = scenePointFromMouseEvent({ clientX, clientY, currentTarget: frame }), tile = tileFromScenePoint(point.sceneX, point.sceneY);
+    if (!tile || !sceneGroupHoverWorldAllowed(point.sceneX, point.sceneY)) { updateSceneCombatPointer(null, null); return false; }
+    const onCanvas = top.id === sharedUiCanvasId(webGl2SharedCanvasPrototype);
+    const object = top.closest<HTMLElement>("[data-object-id]");
+    if (!onCanvas && !object && top.closest("[data-ui-interactive='true'], button, input, textarea, select, [contenteditable='true'], [role='dialog']")) {
+      updateSceneCombatPointer(null, null); return false;
+    }
+    const target = sceneWorldObjectTarget(clientX, clientY, true)?.objectId ?? null;
+    updateSceneCombatPointer([tile.x, tile.y], target);
+    return true;
+  }
+
+  function retainSceneWorldObjectTarget(event: { clientX: number; clientY: number }, before: HeldScenePointer | null) {
+    const held = heldScenePointerRef.current;
+    if (held && held !== before && held.button === 0) held.worldTarget = sceneWorldObjectTarget(event.clientX, event.clientY);
   }
 
   function committedViewportPlayerPosition() {
@@ -3006,22 +4072,209 @@ export function OriginalClientShell({
     };
   }
 
+  function retireWorldFishingPhysical(lease = worldFishingPhysicalRef.current) {
+    if (!lease || lease.phase === "retired") return;
+    lease.phase = "retired";
+    if (worldFishingPhysicalRef.current === lease) worldFishingPhysicalRef.current = null;
+    if (worldFishingTerminalRef.current === lease) worldFishingTerminalRef.current = null;
+    if (lease.gesture) lease.callbacks.onCancelWorldFishingGesture?.(lease.gesture);
+  }
+  function cancelWorldFishingHeldPointer() {
+    const lease = worldFishingPhysicalRef.current, held = heldScenePointerRef.current;
+    if (lease && held && (lease.held === held || lease.gesture !== null && held.fishingGesture === lease.gesture)) retireWorldFishingPhysical(lease);
+  }
+  function worldFishingStageGeometry(stage: HTMLElement): string | null {
+    if (!stage.isConnected || stageFrameRef.current !== stage || document.visibilityState !== "visible" || !document.hasFocus()
+      || stage.closest("[hidden]")) return null;
+    const style = window.getComputedStyle(stage), rect = stage.getBoundingClientRect();
+    if (style.display === "none" || style.visibility !== "visible" || Number(style.opacity) === 0 || stage.getClientRects().length === 0
+      || ![rect.left, rect.top, rect.width, rect.height].every(Number.isFinite) || rect.width <= 0 || rect.height <= 0) return null;
+    const dpr = window.devicePixelRatio, scale = window.visualViewport?.scale ?? 1;
+    if (!Number.isFinite(dpr) || dpr <= 0 || !Number.isFinite(scale) || scale <= 0) return null;
+    return JSON.stringify([rect.left, rect.top, rect.width, rect.height, dpr, scale]);
+  }
+  function worldFishingPointCurrent(lease: WorldFishingPhysicalPointer) {
+    const context = worldFishingShellRef.current;
+    if (!context || ![lease.clientX, lease.clientY].every(Number.isFinite)) return null;
+    const rect = lease.stage.getBoundingClientRect();
+    if (lease.clientX < rect.left || lease.clientX >= rect.right || lease.clientY < rect.top || lease.clientY >= rect.bottom) return null;
+    const hit = document.elementFromPoint(lease.clientX, lease.clientY);
+    if (!hit || !lease.stage.contains(hit) || hit.closest(".game-ui-scene, .login-overlay, .select-overlay")) return null;
+    // Window listeners outlive renders. Use the projection committed for the
+    // current layout before consulting the shared HUD's scene regions.
+    const point = context.projectPoint({ clientX: lease.clientX, clientY: lease.clientY, currentTarget: lease.stage });
+    if (lease.hudPointer || hit.id === context.sharedCanvasId) {
+      const pointer = lease.hudPointer, router = hudPointerRouterRef.current;
+      if (!pointer || hit.id !== context.sharedCanvasId || hit !== lease.source.target || router.held !== pointer
+        || !context.sharedWorldAllowed(point.sceneX, point.sceneY, pointer) || router.held !== pointer) return null;
+    } else {
+      if (hit.closest("[data-ui-interactive='true']")) return null;
+      const bag = bagPointerCallbacksRef.current.getBevyBagPointerContext?.();
+      if (bag?.inputRegions.some(r => point.sceneX >= r.left && point.sceneY >= r.top && point.sceneX < r.left + r.width && point.sceneY < r.top + r.height)) return null;
+    }
+    return worldFishingShellRef.current === context ? point : null;
+  }
+  function updateWorldFishingPointerPosition(lease: WorldFishingPhysicalPointer, event: globalThis.PointerEvent) {
+    if (worldFishingPhysicalRef.current !== lease || lease.phase !== "held" || event.timeStamp < lease.startedAt) return;
+    lease.clientX = event.clientX; lease.clientY = event.clientY;
+    const point = worldFishingPointCurrent(lease);
+    if (!point) { retireWorldFishingPhysical(lease); return; }
+    const held = heldScenePointerRef.current;
+    if (held && (held === lease.held || held.fishingGesture === lease.gesture)) {
+      held.sceneX = point.sceneX; held.sceneY = point.sceneY;
+      // A terminal click must use that same point against the current camera.
+      held.tileX = undefined; held.tileY = undefined;
+    }
+  }
+  function worldFishingPhysicalCurrent(lease: WorldFishingPhysicalPointer): boolean {
+    const context = worldFishingShellRef.current, physical = worldFishingPhysicalRef.current === lease && lease.phase === "held",
+      terminal = worldFishingTerminalRef.current === lease && lease.phase === "terminal";
+    const held = heldScenePointerRef.current;
+    if (!context?.ready || !context.runtime || lease.phase === "retired" || !physical && !terminal
+      || context.sourceKey !== lease.sourceKey || context.runtime !== lease.runtime || context.geometry !== lease.contextGeometry
+      || context.callbacks.onBeginWorldFishingGesture !== lease.callbacks.onBeginWorldFishingGesture
+      || context.callbacks.onCancelWorldFishingGesture !== lease.callbacks.onCancelWorldFishingGesture
+      || worldFishingStageGeometry(lease.stage) !== lease.geometry || !worldFishingPointCurrent(lease)
+      || physical && (worldFishingPointersRef.current.size !== 1 || worldFishingPointersRef.current.get(lease.pointerId) !== lease.source
+        || worldFishingQuarantineRef.current.size > 0 || !held || held !== lease.held && held.fishingGesture !== lease.gesture)) {
+      retireWorldFishingPhysical(lease); return false;
+    }
+    const currentHeld = heldScenePointerRef.current;
+    const valid = lease.phase === (physical ? "held" : "terminal") && worldFishingShellRef.current === context
+      && (physical ? worldFishingPhysicalRef.current === lease && worldFishingPointersRef.current.size === 1
+        && worldFishingPointersRef.current.get(lease.pointerId) === lease.source && worldFishingQuarantineRef.current.size === 0
+        && !!currentHeld && (currentHeld === lease.held || lease.gesture !== null && currentHeld.fishingGesture === lease.gesture)
+        : worldFishingTerminalRef.current === lease);
+    if (!valid) retireWorldFishingPhysical(lease);
+    return valid;
+  }
+  function attachWorldFishingPhysical(held: HeldScenePointer, source: globalThis.PointerEvent): void {
+    const context = worldFishingShellRef.current, stage = stageFrameRef.current;
+    if (held.button !== 0 || !context?.ready || !context.runtime || !stage || !context.sourceKey || source.button !== 0 || source.isPrimary === false
+      || source.pointerType !== "mouse" && source.pointerType !== "touch" || !Number.isSafeInteger(source.pointerId) || source.pointerId < 0
+      || worldFishingQuarantineRef.current.size > 0 || worldFishingPointersRef.current.size !== 1
+      || worldFishingPointersRef.current.get(source.pointerId) !== source || heldScenePointerRef.current !== held) return;
+    const geometry = worldFishingStageGeometry(stage);
+    if (!geometry) return;
+    retireWorldFishingPhysical();
+    const hud = hudPointerRouterRef.current.held;
+    const hudPointer = source.target instanceof HTMLElement && source.target.id === context.sharedCanvasId
+      && hud?.origin === "world" && hud.pointerId === source.pointerId ? hud : null;
+    const lease: WorldFishingPhysicalPointer = { pointerId: source.pointerId, pointerType: source.pointerType, startedAt: source.timeStamp,
+      hudPointer, source, stage, held, gesture: null, phase: "held", clientX: source.clientX, clientY: source.clientY, callbacks: context.callbacks, sourceKey: context.sourceKey, runtime: context.runtime, geometry, contextGeometry: context.geometry };
+    worldFishingPhysicalRef.current = lease;
+    const pointer: WorldFishingPointer = Object.freeze({ source, stage, pointerId: source.pointerId,
+      pointerType: source.pointerType, startedAt: source.timeStamp, current: () => worldFishingPhysicalCurrent(lease) });
+    const gesture = context.callbacks.onBeginWorldFishingGesture?.(pointer) ?? null;
+    if (!gesture || worldFishingPhysicalRef.current !== lease || lease.phase !== "held" || !worldFishingPhysicalCurrent(lease)) {
+      if (gesture) context.callbacks.onCancelWorldFishingGesture?.(gesture);
+      retireWorldFishingPhysical(lease); return;
+    }
+    lease.gesture = gesture; held.fishingGesture = gesture;
+  }
+  function handleSceneWorldPointerDown(event: ReactPointerEvent<HTMLDivElement>, before: HeldScenePointer | null) {
+    const source = worldFishingPointersRef.current.get(event.pointerId), held = heldScenePointerRef.current;
+    if (!source || source !== event.nativeEvent) return;
+    if (held && held !== before) { attachWorldFishingPhysical(held, source); return; }
+    if (event.pointerType !== "touch" || event.button !== 0 || event.isPrimary === false || !worldFishingShellRef.current?.ready
+      || !(event.target instanceof HTMLElement) || event.target.closest("[data-ui-interactive='true'], .game-ui-scene, .login-overlay, .select-overlay")
+      || event.target.id === sharedUiCanvasId(webGl2SharedCanvasPrototype) || worldFishingQuarantineRef.current.size > 0
+      || worldFishingPointersRef.current.size !== 1) return;
+    event.preventDefault();
+    const point = scenePointFromMouseEvent(event), pointer: HeldScenePointer = {
+      button: 0, sceneX: point.sceneX, sceneY: point.sceneY, startedAt: Date.now(), dispatched: false,
+    };
+    heldScenePointerRef.current = pointer; attachWorldFishingPhysical(pointer, source);
+  }
+  function finishWorldFishingPhysical(lease: WorldFishingPhysicalPointer, click: boolean) {
+    if (worldFishingPhysicalRef.current !== lease || lease.phase !== "held") return;
+    const held = heldScenePointerRef.current, context = worldFishingShellRef.current;
+    const ownsHeld = held && (held === lease.held || held.fishingGesture === lease.gesture);
+    // Terminal custody is burned before any user callback; only this synchronous edge can use it.
+    worldFishingPhysicalRef.current = null; worldFishingTerminalRef.current = lease; lease.phase = "terminal";
+    if (ownsHeld) heldScenePointerRef.current = null;
+    try {
+      if (click && ownsHeld && !held.dispatched && context && worldFishingPhysicalCurrent(lease)
+        && worldFishingShellRef.current === context) context.dispatchClick(held);
+    } finally { retireWorldFishingPhysical(lease); }
+  }
+  useEffect(() => {
+    const down = (event: globalThis.PointerEvent) => {
+      const pointers = worldFishingPointersRef.current, quarantine = worldFishingQuarantineRef.current;
+      const prior = pointers.get(event.pointerId);
+      if (!Number.isSafeInteger(event.pointerId) || event.pointerId < 0 || !Number.isFinite(event.timeStamp) || event.timeStamp < 0) { retireWorldFishingPhysical(); return; }
+      if (prior && (event.timeStamp < prior.timeStamp || event === prior)) return;
+      pointers.set(event.pointerId, event);
+      if (prior || pointers.size > 1 || quarantine.size > 0) {
+        for (const id of pointers.keys()) quarantine.add(id);
+        retireWorldFishingPhysical();
+      }
+    };
+    const up = (event: globalThis.PointerEvent) => {
+      const downEvent = worldFishingPointersRef.current.get(event.pointerId);
+      if (!downEvent || event.timeStamp < downEvent.timeStamp || event.pointerType !== downEvent.pointerType) return;
+      const lease = worldFishingPhysicalRef.current;
+      if (lease && lease.pointerId === event.pointerId && event.pointerType === lease.pointerType && event.timeStamp >= lease.startedAt) {
+        updateWorldFishingPointerPosition(lease, event);
+        finishWorldFishingPhysical(lease, true);
+      }
+      worldFishingPointersRef.current.delete(event.pointerId); worldFishingQuarantineRef.current.delete(event.pointerId);
+    };
+    const move = (event: globalThis.PointerEvent) => {
+      const downEvent = worldFishingPointersRef.current.get(event.pointerId), lease = worldFishingPhysicalRef.current;
+      if (lease && downEvent === lease.source && event.pointerId === lease.pointerId && event.pointerType === lease.pointerType) updateWorldFishingPointerPosition(lease, event);
+    };
+    const cancel = (event: globalThis.PointerEvent) => {
+      const downEvent = worldFishingPointersRef.current.get(event.pointerId);
+      if (!downEvent || event.timeStamp < downEvent.timeStamp || event.pointerType !== downEvent.pointerType) return;
+      const lease = worldFishingPhysicalRef.current;
+      if (lease?.pointerId === event.pointerId && event.timeStamp >= lease.startedAt) retireWorldFishingPhysical(lease);
+      worldFishingPointersRef.current.delete(event.pointerId); worldFishingQuarantineRef.current.delete(event.pointerId);
+    };
+    const retire = () => {
+      for (const id of worldFishingPointersRef.current.keys()) worldFishingQuarantineRef.current.add(id);
+      retireWorldFishingPhysical();
+    };
+    const hidden = () => { if (document.visibilityState !== "visible") retire(); };
+    window.addEventListener("pointerdown", down, true); window.addEventListener("pointerup", up, true); window.addEventListener("pointermove", move, true);
+    window.addEventListener("pointercancel", cancel, true); window.addEventListener("blur", retire); window.addEventListener("resize", retire);
+    window.addEventListener("pagehide", retire); document.addEventListener("visibilitychange", hidden);
+    return () => {
+      window.removeEventListener("pointerdown", down, true); window.removeEventListener("pointerup", up, true); window.removeEventListener("pointermove", move, true);
+      window.removeEventListener("pointercancel", cancel, true); window.removeEventListener("blur", retire); window.removeEventListener("resize", retire);
+      window.removeEventListener("pagehide", retire); document.removeEventListener("visibilitychange", hidden);
+      retire(); worldFishingPointersRef.current.clear();
+    };
+  }, []);
+
   function dispatchSceneMoveInput(pointer: HeldScenePointer) {
+    if (npcShopBlocksWorldInput()) { stopNpcShopWorldInput(); return; }
     if (latestMoveInputRef.current.screen !== "game") return;
     if (!sceneInteractionReady) return;
+    if (pointer.worldTarget) return;
     const tile = tileFromScenePoint(pointer.sceneX, pointer.sceneY);
     if (!tile) return;
 
+    const pointerHeld = () => heldScenePointerRef.current === pointer;
     if (pointer.button === 2) {
-      onViewportDirectionStep(tile.x, tile.y, "run");
+      if (latestMoveInputRef.current.newMove) onViewportTileSecondaryAction(tile.x, tile.y);
+      else onViewportDirectionStep(tile.x, tile.y, "run", undefined, pointerHeld);
     } else {
-      onViewportDirectionStep(tile.x, tile.y, "walk");
+      onViewportDirectionStep(tile.x, tile.y, "walk", pointer.fishingGesture, pointerHeld);
     }
   }
 
   function dispatchSceneClickInput(pointer: HeldScenePointer) {
-    if (latestMoveInputRef.current.screen !== "game") return;
-    if (!sceneInteractionReady) return;
+    scenePointerDiagnosticsRef.current = { ...scenePointerDiagnosticsRef.current, at: Date.now(), phase: "click-dispatch", worldTarget: pointer.worldTarget ?? null };
+    if (npcShopBlocksWorldInput()) { scenePointerDiagnosticsRef.current.reason = "parity-ui-or-shop"; stopNpcShopWorldInput(); return; }
+    if (latestMoveInputRef.current.screen !== "game") { scenePointerDiagnosticsRef.current.reason = "screen"; return; }
+    if (!sceneInteractionReady) { scenePointerDiagnosticsRef.current.reason = "scene-assets"; return; }
+    if (pointer.button === 0 && pointer.worldTarget) {
+      scenePointerDiagnosticsRef.current.reason = "world-target";
+      if (pointer.worldTarget.kind === "drop") onPickGroundDrop(pointer.worldTarget.objectId);
+      else onActivateEntity(pointer.worldTarget.objectId);
+      return;
+    }
     const tile =
       pointer.tileX !== undefined && pointer.tileY !== undefined
         ? { x: pointer.tileX, y: pointer.tileY }
@@ -3031,25 +4284,975 @@ export function OriginalClientShell({
     if (pointer.button === 2) {
       onViewportTileSecondaryAction(tile.x, tile.y);
     } else {
-      onViewportTileClick(tile.x, tile.y);
+      onViewportTileClick(tile.x, tile.y, pointer.fishingGesture);
     }
   }
 
+  const combatUiHoldRef=useRef(new Map<"bag"|"character"|"hud"|"spells"|"storage"|"npcShop",{pointerId:number;token:object;notify:typeof onCombatUiHeld}>());
+  function beginCombatUiHold(channel:"bag"|"character"|"hud"|"spells"|"storage"|"npcShop",pointerId:number){
+    const prior=combatUiHoldRef.current.get(channel);if(prior)prior.notify?.(channel,prior.token,false);
+    const token={};combatUiHoldRef.current.set(channel,{pointerId,token,notify:onCombatUiHeld});onCombatUiHeld?.(channel,token,true);
+  }
+  function endCombatUiHold(channel:"bag"|"character"|"hud"|"spells"|"storage"|"npcShop",prior:{token:object}|undefined){
+    const held=combatUiHoldRef.current.get(channel);if(!held||held.token!==prior?.token)return;combatUiHoldRef.current.delete(channel);held.notify?.(channel,held.token,false);
+  }
+  function cancelSharedBagPointer(phase: "cancel" | "blur" = "cancel") {
+    const bagBeltLease = bagBeltPointerRef.current;
+    if (bagBeltLease?.owner === "bevy") cancelBagBeltPointer(bagBeltLease);
+    cancelBagBeltPointer(bagBeltArmedSharedRef.current);
+    const combatHold=typeof onCombatUiHeld==="function"?combatUiHoldRef.current.get("bag"):undefined;
+    const edge = bagPointerRouterRef.current.cancel(phase);
+    try { if(edge)bagPointerCallbacksRef.current.onBevyBagPointer?.(edge); }
+    finally {
+      if(combatHold)endCombatUiHold("bag",combatHold);
+      if(edge||combatHold){cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;onViewportDirectionStop();}
+    }
+  }
+
+
+  function cancelSharedSpellsPointer() {
+    const combatHold=typeof onCombatUiHeld==="function"?combatUiHoldRef.current.get("spells"):undefined;
+    const edge=spellsPointerRouterRef.current.cancel();
+    try { if(edge)spellsPointerCallbacksRef.current.onBevySpellsPointer?.(edge); }
+    finally { if(combatHold)endCombatUiHold("spells",combatHold);if(edge||combatHold){cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;onViewportDirectionStop();} }
+  }
+  function handleSharedSpellsPointer(event:{target:EventTarget|null;pointerId:number;pointerType:string;button:number;clientX:number;clientY:number;preventDefault:()=>void},phase:"down"|"move"|"up"|"cancel"):boolean {
+    const router=spellsPointerRouterRef.current,prior=router.held;
+    const context=spellsPointerCallbacksRef.current.getBevySpellsPointerContext?.()??null;
+    if(prior&&(!router.matches(context)||phase==="down"&&prior.pointerId!==event.pointerId)){event.preventDefault();cancelSharedSpellsPointer();return true;}
+    if(phase!=="down"&&!prior)return Boolean(context?.modal);
+    if(prior&&prior.pointerId!==event.pointerId){event.preventDefault();return true;}
+    const frame=stageFrameRef.current;
+    if(!frame||!context||!sceneInteractionReady||questLocalModalOpen||mobileMoreOpen||bevyQuestUiCapturesPointer){if(prior){event.preventDefault();cancelSharedSpellsPointer();return true;}return false;}
+    const point=scenePointFromMouseEvent({clientX:event.clientX,clientY:event.clientY,currentTarget:frame});
+    if(phase==="down"){
+      const onCanvas=event.target instanceof HTMLElement&&event.target.id===sharedUiCanvasId(webGl2SharedCanvasPrototype);
+      if(!onCanvas||!bevySpellsPageReady)return false;
+      if(context.modal){cancelSharedCharacterPointer();cancelSharedBagPointer();cancelSharedHudPointer();cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;onViewportDirectionStop();}
+      const bag=bagPointerCallbacksRef.current.getBevyBagPointerContext?.()??null;
+      const bagForeground=!context.modal&&bag?.inputRegions.some(r=>point.sceneX>=r.left&&point.sceneY>=r.top&&point.sceneX<r.left+r.width&&point.sceneY<r.top+r.height);
+      if(bagForeground||bagPointerRouterRef.current.held||hudPointerRouterRef.current.held||characterPointerRouterRef.current.held)return false;
+      if(event.button!==0||event.pointerType!=="mouse"&&!(event.pointerType==="touch"&&context.presentation.touch))return context.modal;
+      if(!router.contains(context,point.sceneX,point.sceneY)){if(context.modal)event.preventDefault();return context.modal;}
+      frame.focus({preventScroll:true});
+    }
+    const edge=phase==="down"?router.down(context,event.pointerId,point.sceneX,point.sceneY):router.edge(phase,event.pointerId,point.sceneX,point.sceneY);
+    if(!edge)return Boolean(prior)||context.modal;
+    if(typeof onCombatUiHeld==="function"&&phase==="down"&&router.held)beginCombatUiHold("spells",event.pointerId);
+    event.preventDefault();cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;onViewportDirectionStop();
+    const combatHold=typeof onCombatUiHeld==="function"?combatUiHoldRef.current.get("spells"):undefined;
+    const callbackLease=router.held;let accepted=false;
+    try { accepted=Boolean(spellsPointerCallbacksRef.current.onBevySpellsPointer?.(edge)); }
+    finally { if(!accepted&&router.held===callbackLease)cancelSharedSpellsPointer();if((!router.held||router.held!==callbackLease)&&combatHold)endCombatUiHold("spells",combatHold); }
+    if(phase==="down")try{(event.target as HTMLElement).setPointerCapture(event.pointerId);}catch{/* Window terminal edges also cancel. */}
+    return true;
+  }
+  function cancelSharedNpcShopPointer(phase: "cancel" | "blur" = "cancel") {
+    const router = npcShopPointerRouterRef.current, prior = router.held, sceneHold = heldScenePointerRef.current;
+    const hold = combatUiHoldRef.current.get("npcShop"), edge = router.cancel(phase);
+    try { if (edge) npcShopPointerCallbacksRef.current.onBevyNpcShopPointer?.(edge); }
+    finally {
+      if (hold) endCombatUiHold("npcShop", hold);
+      if ((edge || hold) && (!router.held || router.held === prior) && heldScenePointerRef.current === sceneHold) {
+        cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null; onViewportDirectionStop();
+      }
+    }
+  }
+
+  function handleSharedNpcShopPointer(event: Parameters<typeof handleSharedBagPointer>[0] & { stopPropagation?: () => void }, phase: "down" | "move" | "up" | "cancel"): boolean {
+    const router = npcShopPointerRouterRef.current, prior = router.held, blocked = npcShopBlocksWorldInput();
+    const context = npcShopPointerCallbacksRef.current.getBevyNpcShopPointerContext?.() ?? null;
+    if (prior && (!router.matches(context) || phase === "down" && prior.pointerId !== event.pointerId)) {
+      event.preventDefault(); event.stopPropagation?.(); cancelSharedNpcShopPointer(); return true;
+    }
+    if (prior && prior.pointerId !== event.pointerId) { event.preventDefault(); event.stopPropagation?.(); return true; }
+    const frame = stageFrameRef.current;
+    if (phase === "down" && (!blocked || !frame || !context || !sceneInteractionReady || questLocalModalOpen || mobileMoreOpen || bevyQuestUiCapturesPointer)) {
+      if (blocked) { event.preventDefault(); event.stopPropagation?.(); stopNpcShopWorldInput(); return true; }
+      return false;
+    }
+    if (phase === "down") {
+      if (!(event.target instanceof HTMLElement) || event.target.id !== sharedUiCanvasId(webGl2SharedCanvasPrototype)
+        || event.button !== 0 && event.button !== 2
+        || event.pointerType !== "mouse" && !(event.pointerType === "touch" && context!.presentation.touch)
+        || bagPointerRouterRef.current.held || storagePointerRouterRef.current.held || characterPointerRouterRef.current.held
+        || hudPointerRouterRef.current.held || spellsPointerRouterRef.current.held) {
+        event.preventDefault(); event.stopPropagation?.(); stopNpcShopWorldInput(); return true;
+      }
+      frame!.focus({ preventScroll: true }); stopNpcShopWorldInput();
+    }
+    const point = frame ? scenePointFromMouseEvent({ clientX: event.clientX, clientY: event.clientY, currentTarget: frame }) : { sceneX: 0, sceneY: 0 };
+    const edge = phase === "down" ? router.down(context!, event.pointerId, event.button as 0 | 2, point.sceneX, point.sceneY)
+      : router.edge(phase, event.pointerId, point.sceneX, point.sceneY);
+    if (!edge) { if (blocked || prior) { event.preventDefault(); event.stopPropagation?.(); return true; } return false; }
+    event.preventDefault(); event.stopPropagation?.();
+    const ownsLease = phase === "down" || Boolean(prior && edge.downSequence === prior.downSequence && edge.pointerId === prior.pointerId);
+    if (phase === "down" && edge.origin === "shop") beginCombatUiHold("npcShop", event.pointerId);
+    const lease = router.held, hold = combatUiHoldRef.current.get("npcShop"); let accepted = false;
+    try { accepted = npcShopPointerCallbacksRef.current.onBevyNpcShopPointer?.(edge) === true; }
+    finally {
+      try {
+        if (!accepted && ownsLease && lease && router.held === lease) cancelSharedNpcShopPointer();
+        else if (!accepted && ownsLease && !lease && !router.held) {
+          const cancel = router.cancelTerminal(edge);
+          if (cancel) npcShopPointerCallbacksRef.current.onBevyNpcShopPointer?.(cancel);
+        }
+      } finally {
+        if (ownsLease && (!router.held || router.held !== lease) && hold) endCombatUiHold("npcShop", hold);
+      }
+    }
+    if (accepted && phase === "down" && router.held === lease) {
+      try { (event.target as HTMLElement).setPointerCapture(event.pointerId); } catch { /* Window terminal also cancels. */ }
+    }
+    return true;
+  }
+
+  function handleSharedQuestWorldPointer(event:Parameters<typeof handleSharedBagPointer>[0],phase:"down"|"move"|"up"|"cancel") {
+    const held = heldQuestControlPointersRef.current;
+    if (held.has(event.pointerId)) {
+      event.preventDefault();
+      if (phase === "up" || phase === "cancel") held.delete(event.pointerId);
+      return true;
+    }
+    const frame = stageFrameRef.current;
+    if (phase !== "down" || !frame || screen !== "game" || !sceneInteractionReady
+      || questLocalModalOpen || mobileMoreOpen || !(event.target instanceof HTMLElement)
+      || event.target.id !== sharedUiCanvasId(webGl2SharedCanvasPrototype)) return false;
+    const point = scenePointFromMouseEvent({clientX:event.clientX,clientY:event.clientY,currentTarget:frame});
+    const hud = readBevyHudStatus?.() ?? null;
+    const bagForeground = bevyBagUiActive && bagPointerCallbacksRef.current.getBevyBagPointerContext?.()?.inputRegions.some(rect =>
+      point.sceneX >= rect.left && point.sceneY >= rect.top && point.sceneX < rect.left + rect.width && point.sceneY < rect.top + rect.height);
+    if (bagForeground && !hud?.modal && !bevyQuestUiCapturesPointer) return false;
+    const foregroundBlocksWorld = !bevyQuestUiCapturesPointer && (hud?.modal || hud?.foregroundRects.some(rect =>
+      point.sceneX >= rect.left && point.sceneY >= rect.top && point.sceneX < rect.left + rect.width && point.sceneY < rect.top + rect.height));
+    const controls = readBevyQuestWorldControlBlockers?.() ?? readBevyQuestWorldControls?.() ?? null;
+    const width = Number(frame.dataset.viewportSceneWidth), height = Number(frame.dataset.viewportSceneHeight);
+    const hudSurface = hud?.ready && hud.plan && (containsHudRect(hud.plan.main, point.sceneX, point.sceneY)
+      || hud.characterStatsReady && containsHudRect(hud.plan.characterRect, point.sceneX, point.sceneY));
+    const questBlocksWorld = bevyQuestUiCapturesPointer && !hudSurface;
+    if (!questBlocksWorld && !foregroundBlocksWorld && (!controls || !Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0
+      || !questWorldControlAt(controls, point.sceneX * controls.logicalWidth / width, point.sceneY * controls.logicalHeight / height))) return false;
+    held.add(event.pointerId);
+    // Bevy receives the ordinary pointer event; platform world routers must not consume that gesture.
+    event.preventDefault(); cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null; onViewportDirectionStop();
+    return true;
+  }
+
+  const bagBeltRect = (node: HTMLElement): BagBeltRect => { const r = node.getBoundingClientRect(); return Object.freeze([r.left, r.top, r.width, r.height]); };
+  function rememberBagBeltClick(pointerId: number, startedAt: number, node: HTMLElement) {
+    const nodes = new Set<HTMLElement>([node, ...(bagBeltGeometryRef.current?.buttons ?? [])]);
+    bagBeltClickFenceRef.current.set(pointerId, { startedAt, nodes });
+  }
+  function fenceBagBeltMouse(event: { target: EventTarget | null; type?: string; detail?: number; timeStamp: number; preventDefault(): void; stopPropagation(): void }): boolean {
+    if (event.type === "click" && event.detail === 0 || !(event.target instanceof Element)) return false;
+    const node = event.target.closest<HTMLElement>("button"); if (!node) return false;
+    const pointerId = (event as { pointerId?: number }).pointerId;
+    const records = typeof pointerId === "number" ? [[pointerId, bagBeltClickFenceRef.current.get(pointerId)] as const] : [...bagBeltClickFenceRef.current.entries()];
+    const match = records.find(([, record]) => record && record.nodes.has(node) && event.timeStamp >= record.startedAt);
+    if (!match) return false;
+    event.preventDefault(); event.stopPropagation();
+    // Keep mousedown custody through the following click and through canceled gestures.
+    if (event.type === "click") bagBeltClickFenceRef.current.delete(match[0]);
+    return true;
+  }
+  function cancelBagBeltPointer(expected = bagBeltPointerRef.current) {
+    if (!expected || bagBeltPointerRef.current !== expected && bagBeltArmedSharedRef.current !== expected) return;
+    const physical = bagBeltPointerRef.current === expected;
+    if (physical) { bagBeltPointerRef.current = null; bagBeltQuarantineRef.current.set(expected.pointerId, expected.startedAt); }
+    if (bagBeltArmedSharedRef.current === expected) bagBeltArmedSharedRef.current = null;
+    try { expected.callbacks.onCancelBagToBeltGesture?.(expected.proof); }
+    finally {
+      if (expected.hold) endCombatUiHold("bag", expected.hold);
+      try { if (expected.node.hasPointerCapture(expected.pointerId)) expected.node.releasePointerCapture(expected.pointerId); } catch { /* Custody is already retired. */ }
+    }
+  }
+  function refreshBagBeltGeometry(): BagBeltGeometry | null {
+    const context = bagBeltContextRef.current, stage = stageFrameRef.current, bindings = bagBeltButtonsRef.current;
+    let next: BagBeltGeometry | null = null;
+    if (context && context.screen === "game" && context.open && !context.repair && (context.page === "bag1" || context.page === "bag2")
+      && document.visibilityState === "visible" && document.hasFocus() && stage?.isConnected && bindings?.length === 6
+      && Number.isFinite(context.scale) && context.scale > 0 && Number.isFinite(window.devicePixelRatio) && window.devicePixelRatio > 0
+      && bindings.every(b => b.node.isConnected && stage.contains(b.node))) {
+      const stageRect = bagBeltRect(stage), buttons = bindings.map(b => b.node);
+      if (stageRect.every(Number.isFinite) && stageRect[2] > 0 && stageRect[3] > 0 && new Set(buttons).size === 6) {
+        const targets = bindings.map(b => { const r = bagBeltRect(b.node); return Object.freeze({ slot: b.slot,
+          uniqueId: b.item === null ? null : b.item.authoritativeUniqueId ?? NaN,
+          left: (r[0] - stageRect[0]) / context.scale, top: (r[1] - stageRect[1]) / context.scale,
+          width: r[2] / context.scale, height: r[3] / context.scale }); });
+        const candidate: BagBeltGeometry = { revision: Math.max(1, bagBeltGeometryRevisionRef.current), targets: Object.freeze(targets), stage,
+          stageRect, buttons: Object.freeze(buttons), scale: context.scale, virtualWidth: context.virtualWidth, virtualHeight: context.virtualHeight,
+          devicePixelRatio: window.devicePixelRatio, page: context.page };
+        if (validBagBeltDropGeometry(candidate) && targets.every(t => t.left >= 0 && t.top >= 0
+          && t.left + t.width <= context.virtualWidth && t.top + t.height <= context.virtualHeight)) next = candidate;
+      }
+    }
+    const prior = bagBeltGeometryRef.current;
+    if (sameBagBeltGeometry(prior, next)) return prior;
+    if (!prior && !next) return null;
+    cancelBagBeltPointer(); cancelBagBeltPointer(bagBeltArmedSharedRef.current);
+    if (next) next = Object.freeze({ ...next, revision: ++bagBeltGeometryRevisionRef.current });
+    bagBeltGeometryRef.current = next;
+    bagBeltCallbacksRef.current.onBagBeltDropGeometry?.(next);
+    return next;
+  }
+  const registerBeltTargets = useCallback((targets: readonly BagBeltButtonBinding[]) => {
+    const binding = Object.freeze([...targets]); bagBeltButtonsRef.current = binding; refreshBagBeltGeometry();
+    return () => { if (bagBeltButtonsRef.current === binding) { bagBeltButtonsRef.current = null; refreshBagBeltGeometry(); } };
+  }, []);
+  function bagBeltCallbacksMatch(lease: BagBeltPointerLease): boolean {
+    const current = bagBeltCallbacksRef.current;
+    return (lease.owner !== "bevy" || lease.sharedPointerCallback === bagPointerCallbacksRef.current.onBevyBagPointer
+      && lease.sharedContextCallback === bagPointerCallbacksRef.current.getBevyBagPointerContext)
+      && ["onBeginBagToBeltGesture", "onArmBagToBeltGesture", "onBagToBeltMove", "onCancelBagToBeltGesture"].every(key =>
+      current[key as keyof BagBeltCallbacks] === lease.callbacks[key as keyof BagBeltCallbacks]);
+  }
+  function beginBagBeltPointer(event: Parameters<typeof handleSharedBagPointer>[0], node: HTMLElement, source: Readonly<ItemActionRef> | null,
+    owner: "react" | "bevy", activate?: () => void): boolean {
+    if (bagBeltPointerRef.current || bagBeltQuarantineRef.current.has(event.pointerId)) return false;
+    cancelBagBeltPointer(bagBeltArmedSharedRef.current);
+    const geometry = refreshBagBeltGeometry(), callbacks = bagBeltCallbacksRef.current;
+    if (!geometry || !node.isConnected || !geometry.stage.contains(node) || event.button !== 0
+      || event.pointerType !== "mouse" && event.pointerType !== "touch") return false;
+    const sourceRect = bagBeltRect(node);
+    let proof: BagBeltGestureProof | null = null;
+    try { proof = callbacks.onBeginBagToBeltGesture?.(source, geometry, owner) ?? null; }
+    catch { event.preventDefault(); return true; }
+    if (!proof) return false;
+    const lease: BagBeltPointerLease = { proof, geometry, source, node, sourceRect, pointerId: event.pointerId,
+      pointerType: event.pointerType, startedAt: event.timeStamp, x: event.clientX, y: event.clientY, owner, callbacks: { ...callbacks }, activate,
+      sharedPointerCallback: bagPointerCallbacksRef.current.onBevyBagPointer, sharedContextCallback: bagPointerCallbacksRef.current.getBevyBagPointerContext };
+    if (bagBeltPointerRef.current || bagBeltArmedSharedRef.current || !sameBagBeltGeometry(geometry, refreshBagBeltGeometry())
+      || bagBeltGeometryRef.current?.revision !== geometry.revision || !bagBeltCallbacksMatch(lease)
+      || !node.isConnected || !sourceRect.every((n, i) => n === bagBeltRect(node)[i])) {
+      callbacks.onCancelBagToBeltGesture?.(proof); event.preventDefault(); return true;
+    }
+    bagBeltPointerRef.current = lease; rememberBagBeltClick(event.pointerId, event.timeStamp, node);
+    event.preventDefault(); cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null; onViewportDirectionStop();
+    if (owner === "react") {
+      try { node.setPointerCapture(event.pointerId); } catch { cancelBagBeltPointer(lease); return true; }
+      beginCombatUiHold("bag", event.pointerId); lease.hold = combatUiHoldRef.current.get("bag");
+    }
+    return true;
+  }
+  function beginCompatBagBeltPointer(event: ReactPointerEvent<HTMLButtonElement>, item: ItemActionRef, activate: () => void): boolean {
+    if (npcRepairService || !event.isPrimary || bevyBagUiActive || !showInventory) return false;
+    return beginBagBeltPointer(event, event.currentTarget, Object.freeze({ ...item }), "react", activate);
+  }
+  function finishBagBeltPointer(event: Parameters<typeof handleSharedBagPointer>[0], phase: "up" | "cancel"): boolean {
+    const lease = bagBeltPointerRef.current; if (!lease || lease.pointerId !== event.pointerId) return false;
+    bagBeltPointerRef.current = null; // Burn physical terminal before any synchronous Page callback.
+    if (lease.owner === "react") event.preventDefault();
+    const geometry = refreshBagBeltGeometry(), distance = Math.hypot(event.clientX - lease.x, event.clientY - lease.y) / lease.geometry.scale;
+    const current = phase === "up" && event.timeStamp >= lease.startedAt && event.pointerType === lease.pointerType
+      && sameBagBeltGeometry(lease.geometry, geometry) && lease.geometry.revision === geometry?.revision
+      && lease.node.isConnected && lease.sourceRect.every((n, i) => n === bagBeltRect(lease.node)[i]) && bagBeltCallbacksMatch(lease);
+    // A non-Belt release belongs to the original Bag Up route. Measured Belt
+    // endpoints still cancel when their actual button hit or proof is rejected.
+    const releaseInBelt = Boolean(current && geometry && distance >= 4 && geometry.targets.some(t =>
+      event.clientX >= geometry.stageRect[0] + t.left * geometry.scale
+      && event.clientX < geometry.stageRect[0] + (t.left + t.width) * geometry.scale
+      && event.clientY >= geometry.stageRect[1] + t.top * geometry.scale
+      && event.clientY < geometry.stageRect[1] + (t.top + t.height) * geometry.scale));
+    const target = current && geometry && distance >= 4 ? bagBeltTargetAtClientPoint(geometry, event.clientX, event.clientY) : null;
+    let armed = false;
+    try {
+      if (target && geometry) {
+        armed = lease.callbacks.onArmBagToBeltGesture?.(lease.proof, geometry, target,
+          Object.freeze({ clientX: event.clientX, clientY: event.clientY })) === true;
+        armed = armed && !bagBeltPointerRef.current && !bagBeltArmedSharedRef.current
+          && sameBagBeltGeometry(geometry, refreshBagBeltGeometry()) && bagBeltCallbacksMatch(lease);
+      }
+      if (phase === "up" && lease.owner === "bevy" && (!current || releaseInBelt && !armed)) bagBeltRejectedTerminalRef.current = { pointerId: lease.pointerId, startedAt: lease.startedAt };
+      if (armed && lease.owner === "bevy") bagBeltArmedSharedRef.current = lease;
+      else if (armed && lease.source && geometry && target) lease.callbacks.onBagToBeltMove?.(lease.source, target, lease.proof, geometry);
+      else if (current && lease.owner === "react" && distance < 4 && event.clientX >= lease.sourceRect[0] && event.clientX < lease.sourceRect[0] + lease.sourceRect[2]
+        && event.clientY >= lease.sourceRect[1] && event.clientY < lease.sourceRect[1] + lease.sourceRect[3]) lease.activate?.();
+    } finally {
+      try { if (lease.owner !== "bevy" || !armed) lease.callbacks.onCancelBagToBeltGesture?.(lease.proof); }
+      finally {
+        if (lease.hold) endCombatUiHold("bag", lease.hold);
+        try { if (lease.node.hasPointerCapture(event.pointerId)) lease.node.releasePointerCapture(event.pointerId); } catch { /* Already released. */ }
+      }
+    }
+    return lease.owner === "react";
+  }
+  function handleBagBeltPointer(event: Parameters<typeof handleSharedBagPointer>[0], phase: "down" | "move" | "up" | "cancel"): boolean {
+    const quarantine = bagBeltQuarantineRef.current, lease = bagBeltPointerRef.current;
+    if (quarantine.has(event.pointerId)) {
+      event.preventDefault();
+      if (phase === "down" && event.target instanceof HTMLElement) rememberBagBeltClick(event.pointerId, event.timeStamp, event.target.closest<HTMLElement>("button") ?? event.target);
+      if ((phase === "up" || phase === "cancel") && event.timeStamp >= quarantine.get(event.pointerId)!) quarantine.delete(event.pointerId);
+      return true;
+    }
+    if (!lease) return false;
+    if (event.pointerId !== lease.pointerId) {
+      if (phase === "down") {
+        cancelBagBeltPointer(lease); quarantine.set(event.pointerId, event.timeStamp);
+        if (event.target instanceof HTMLElement) rememberBagBeltClick(event.pointerId, event.timeStamp, event.target.closest<HTMLElement>("button") ?? event.target);
+        if (lease.owner === "bevy") cancelSharedBagPointer();
+      }
+      event.preventDefault(); return true;
+    }
+    if (event.timeStamp < lease.startedAt) { event.preventDefault(); return true; }
+    if (phase === "down") { cancelBagBeltPointer(lease); if (lease.owner === "bevy") cancelSharedBagPointer(); event.preventDefault(); return true; }
+    if (phase === "up" || phase === "cancel") return finishBagBeltPointer(event, phase);
+    if (lease.owner === "react") { event.preventDefault(); return true; }
+    return false;
+  }
+
+  function repairGeometry(item: HTMLElement, target: HTMLElement, pointerId: number, pointerType: "mouse" | "touch"): NpcRepairDragGeometry | null {
+    const stage = stageFrameRef.current;
+    if (!stage || !stage.isConnected || !item.isConnected || !target.isConnected || !stage.contains(item) || !stage.contains(target)
+      || activeInventoryTab !== "bag1" && activeInventoryTab !== "bag2") return null;
+    const rect = (node: HTMLElement) => { const r = node.getBoundingClientRect(); return [r.left, r.top, r.width, r.height]; };
+    return { pointerId, pointerType, page: activeInventoryTab, stage, target, item,
+      stageRect: rect(stage), targetRect: rect(target), itemRect: rect(item), virtualWidth: stagePresentation.virtualWidth,
+      virtualHeight: stagePresentation.virtualHeight, scale: stagePresentation.scale, devicePixelRatio: window.devicePixelRatio };
+  }
+
+  function cancelNpcRepairPointer(expected = npcRepairPointerRef.current) {
+    if (!expected || npcRepairPointerRef.current !== expected) return;
+    npcRepairPointerRef.current = null;
+    npcRepairQuarantineRef.current.set(expected.geometry.pointerId, expected.startedAt);
+    try { expected.cancel?.(expected.drag); }
+    finally {
+      if (expected.hold) endCombatUiHold("bag", expected.hold);
+      try { if (expected.item.hasPointerCapture(expected.geometry.pointerId)) expected.item.releasePointerCapture(expected.geometry.pointerId); } catch { /* Terminal is already retired. */ }
+    }
+  }
+
+  function beginNpcRepairPointer(event: ReactPointerEvent<HTMLButtonElement>, item: ItemActionRef) {
+    if (!npcRepairService) return;
+    event.preventDefault(); event.stopPropagation();
+    if (npcRepairPointerRef.current) {
+      cancelNpcRepairPointer(); npcRepairQuarantineRef.current.set(event.pointerId, event.timeStamp);
+      rememberNpcRepairControlClick(event); return;
+    }
+    if (!event.isPrimary || event.button !== 0 || event.pointerType !== "mouse" && event.pointerType !== "touch"
+      || npcRepairQuarantineRef.current.has(event.pointerId) || !showInventory || !npcRepairView) return;
+    const target = npcRepairTargetRef.current;
+    if (!target || target.view.stamp !== npcRepairView.stamp || target.view.source !== npcRepairView.source) return;
+    const geometry = repairGeometry(event.currentTarget, target.node, event.pointerId, event.pointerType);
+    if (!geometry) return;
+    const drag = onBeginNpcRepairDrag?.(npcRepairView, item, geometry);
+    if (!drag) return;
+    const lease: RepairPointerLease = { drag, view: npcRepairView, geometry, startedAt: event.timeStamp,
+      item: event.currentTarget, target: target.node, stage: geometry.stage as HTMLElement,
+      cancel: onCancelNpcRepairDrag, drop: onDropNpcRepairDrag };
+    npcRepairPointerRef.current = lease;
+    try { event.currentTarget.setPointerCapture(event.pointerId); }
+    catch { cancelNpcRepairPointer(lease); return; }
+    cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null; onViewportDirectionStop();
+    beginCombatUiHold("bag", event.pointerId); lease.hold = combatUiHoldRef.current.get("bag");
+    if (npcRepairPointerRef.current !== lease && lease.hold) endCombatUiHold("bag", lease.hold);
+  }
+
+  function handleNpcRepairPointer(event: Parameters<typeof handleSharedBagPointer>[0], phase: "down" | "move" | "up" | "cancel"): boolean {
+    const quarantine = npcRepairQuarantineRef.current, lease = npcRepairPointerRef.current;
+    if (quarantine.has(event.pointerId)) {
+      event.preventDefault();
+      if (phase === "down") rememberNpcRepairControlClick(event);
+      if ((phase === "up" || phase === "cancel") && event.timeStamp >= quarantine.get(event.pointerId)!) quarantine.delete(event.pointerId);
+      return true;
+    }
+    if (!lease) return false;
+    event.preventDefault();
+    if (event.pointerId !== lease.geometry.pointerId) {
+      if (phase === "down") {
+        cancelNpcRepairPointer(lease); quarantine.set(event.pointerId, event.timeStamp);
+        rememberNpcRepairControlClick(event);
+      }
+      return true;
+    }
+    if (event.timeStamp < lease.startedAt) return true;
+    if (phase === "down") { cancelNpcRepairPointer(lease); return true; }
+    if (phase === "move") return true;
+    npcRepairPointerRef.current = null; // Retire before synchronous callbacks.
+    quarantine.set(event.pointerId, lease.startedAt);
+    const target = npcRepairTargetRef.current;
+    const geometry = repairGeometry(lease.item, lease.target, event.pointerId, lease.geometry.pointerType);
+    const current = phase === "up" && event.pointerType === lease.geometry.pointerType && screen === "game" && showInventory && stageFrameRef.current === lease.stage
+      && npcRepairView?.stamp === lease.view.stamp && npcRepairView.source === lease.view.source
+      && target !== null && target.node === lease.target && target.view.stamp === lease.view.stamp;
+    const priorTarget = npcRepairVisibleTargetRef.current;
+    try {
+      const result = current && geometry ? lease.drop?.(lease.drag, geometry, event.clientX, event.clientY) : null;
+      if (!result) lease.cancel?.(lease.drag);
+      else if (npcRepairVisibleTargetRef.current === priorTarget) changeNpcRepairTarget(result.submitted ? null : result.selection);
+    } finally {
+      if (lease.hold) endCombatUiHold("bag", lease.hold);
+      try { if (lease.item.hasPointerCapture(event.pointerId)) lease.item.releasePointerCapture(event.pointerId); } catch { /* Already released. */ }
+      if (quarantine.get(event.pointerId) === lease.startedAt) quarantine.delete(event.pointerId);
+    }
+    return true;
+  }
+
+  function npcRepairControlTarget(target: EventTarget | null): HTMLButtonElement | null {
+    if (!(target instanceof Element)) return null;
+    const button = target.closest<HTMLButtonElement>("button"), panel = npcRepairTargetRef.current?.node.parentElement;
+    const wrapper = button?.parentElement;
+    return button && panel && wrapper && wrapper.parentElement === panel
+      && wrapper.hasAttribute("data-npc-repair-control") ? button : null;
+  }
+  function rememberNpcRepairControlClick(event: Parameters<typeof handleSharedBagPointer>[0]) {
+    const target = npcRepairControlTarget(event.target);
+    if (target) npcRepairClickFenceRef.current.set(event.pointerId, { startedAt: event.timeStamp, target });
+  }
+  function fenceNpcRepairClick(event: globalThis.MouseEvent) {
+    if (event.detail === 0) return; // Keyboard activation is an independent user action.
+    const target = npcRepairControlTarget(event.target);
+    if (!target) return;
+    const pointerId = (event as globalThis.MouseEvent & { pointerId?: number }).pointerId;
+    const ledger = npcRepairClickFenceRef.current;
+    const exactPointer = typeof pointerId === "number" && Number.isSafeInteger(pointerId) && pointerId >= 0;
+    const records = exactPointer ? [[pointerId!, ledger.get(pointerId!)]] as const : [...ledger.entries()];
+    const match = records.find(([, record]) => record && record.target === target && event.timeStamp >= record.startedAt);
+    if (match) {
+      ledger.delete(match[0]);
+      event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation();
+    }
+  }
+
+  function heroBlocksWorldInput(): boolean {
+    return heroPointerLeaseRef.current !== null || heroPointerCallbacksRef.current.getBevyHeroInputBlocked?.() === true;
+  }
+  function cancelSharedHeroPointer(expected = heroPointerLeaseRef.current) {
+    if (expected && heroPointerLeaseRef.current !== expected) return;
+    heroHoverContextRef.current = null;
+    if (!expected) return;
+    heroPointerLeaseRef.current = null;
+    expected.callback?.({ context: expected.context, pointerId: expected.pointerId, phase: "cancel",
+      x: expected.x, y: expected.y, button: expected.button });
+  }
+  function handleSharedHeroPointer(event: Parameters<typeof handleSharedBagPointer>[0] & { ctrlKey?: boolean; shiftKey?: boolean; timeStamp?: number; type?: string; buttons?: number }, phase: "down" | "move" | "up" | "cancel"): boolean {
+    const prior = heroPointerLeaseRef.current;
+    if (prior && prior.pointerId !== event.pointerId) {
+      if (phase === "down") { event.preventDefault(); return true; }
+      return false;
+    }
+    if (phase !== "down" && !prior) {
+      if (phase !== "move") return false;
+      const callbacks = heroPointerCallbacksRef.current, frame = stageFrameRef.current;
+      const context = callbacks.getBevyHeroPointerContext?.() ?? null;
+      if (!frame || !context?.ready || !sceneInteractionReady || questLocalModalOpen || mobileMoreOpen || bevyQuestUiCapturesPointer
+        || event.pointerType !== "mouse" || event.buttons !== 0 || typeof event.timeStamp !== "number"
+        || !Number.isFinite(event.timeStamp) || event.timeStamp < 0 || !(event.target instanceof HTMLElement)
+        || event.target.id !== sharedUiCanvasId(webGl2SharedCanvasPrototype)
+        || heldScenePointerRef.current || worldFishingPhysicalRef.current || combatUiHoldRef.current.size > 0
+        || bagBeltPointerRef.current || bagBeltArmedSharedRef.current || npcRepairPointerRef.current
+        || bagBeltQuarantineRef.current.has(event.pointerId) || npcRepairQuarantineRef.current.has(event.pointerId)
+        || heldQuestControlPointersRef.current.size > 0 || hudPointerRouterRef.current.held || bagPointerRouterRef.current.held
+        || characterPointerRouterRef.current.held || storagePointerRouterRef.current.held || npcShopPointerRouterRef.current.held
+        || spellsPointerRouterRef.current.held || mailPointerRouterRef.current.held || bevyMailComposeReady || bevyMailComposePending) {
+        heroHoverContextRef.current = null;
+        return false;
+      }
+      const point = scenePointFromMouseEvent({ clientX: event.clientX, clientY: event.clientY, currentTarget: frame });
+      const inside = context.inputRegions.some(rect => point.sceneX >= rect.left && point.sceneY >= rect.top
+        && point.sceneX < rect.left + rect.width && point.sceneY < rect.top + rect.height);
+      const hover = heroHoverContextRef.current;
+      if (!inside) {
+        heroHoverContextRef.current = null;
+        if (hover && hover.pointerId === event.pointerId && hover.target === event.target && event.timeStamp >= hover.startedAt
+          && hover.callback === callbacks.onBevyHeroPointer && hover.contextCallback === callbacks.getBevyHeroPointerContext
+          && hover.context.webLeaseToken === context.webLeaseToken && hover.context.sinkGeneration === context.sinkGeneration
+          && JSON.stringify(hover.context.stamp) === JSON.stringify(context.stamp)
+          && JSON.stringify(hover.context.presentation) === JSON.stringify(context.presentation)) {
+          hover.callback?.({ context: hover.context, pointerId: event.pointerId, phase: "move", x: point.sceneX, y: point.sceneY,
+            button: 0, control: event.ctrlKey === true, shift: event.shiftKey === true });
+        }
+        return false;
+      }
+      const accepted = callbacks.onBevyHeroPointer?.({ context, pointerId: event.pointerId, phase: "move", x: point.sceneX,
+        y: point.sceneY, button: 0, control: event.ctrlKey === true, shift: event.shiftKey === true }) === true;
+      heroHoverContextRef.current = accepted ? { context, pointerId: event.pointerId, startedAt: event.timeStamp,
+        target: event.target, callback: callbacks.onBevyHeroPointer, contextCallback: callbacks.getBevyHeroPointerContext } : null;
+      if (accepted) event.preventDefault();
+      return accepted;
+    }
+    if (typeof event.timeStamp !== "number" || !Number.isFinite(event.timeStamp) || event.timeStamp < 0
+      || prior && (event.timeStamp < prior.startedAt || event.pointerType !== prior.pointerType
+        || phase === "cancel" && event.type === "lostpointercapture" && (event.target !== prior.target
+          || prior.target instanceof HTMLElement && prior.target.hasPointerCapture?.(event.pointerId)))) {
+      if (prior) { event.preventDefault(); return true; }
+      return false;
+    }
+    if (prior && phase === "up" && event.button !== prior.button) {
+      event.preventDefault(); cancelSharedHeroPointer(prior); return true;
+    }
+    const callbacks = heroPointerCallbacksRef.current, frame = stageFrameRef.current;
+    if (prior && (phase === "down" || prior.callback !== callbacks.onBevyHeroPointer
+      || prior.contextCallback !== callbacks.getBevyHeroPointerContext)) {
+      event.preventDefault(); cancelSharedHeroPointer(prior); return true;
+    }
+    const context = prior?.context ?? callbacks.getBevyHeroPointerContext?.() ?? null;
+    if (!frame || !context || !sceneInteractionReady || questLocalModalOpen || mobileMoreOpen || bevyQuestUiCapturesPointer) {
+      if (prior) { event.preventDefault(); cancelSharedHeroPointer(prior); return true; }
+      return false;
+    }
+    const point = scenePointFromMouseEvent({ clientX: event.clientX, clientY: event.clientY, currentTarget: frame });
+    if (phase === "down") {
+      if (!(event.target instanceof HTMLElement) || event.target.id !== sharedUiCanvasId(webGl2SharedCanvasPrototype)
+        || (event.button !== 0 && event.button !== 2)
+        || event.pointerType !== "mouse" && !(event.pointerType === "touch" && context.presentation.touch)) return false;
+      const inside = context.inputRegions.some(rect => point.sceneX >= rect.left && point.sceneY >= rect.top
+        && point.sceneX < rect.left + rect.width && point.sceneY < rect.top + rect.height);
+      if (!inside) {
+        if (!heroBlocksWorldInput()) return false;
+        stopNpcShopWorldInput(); event.preventDefault(); return true;
+      }
+      if (!context.ready) { stopNpcShopWorldInput(); event.preventDefault(); return true; }
+    }
+    const lease = prior ?? { context, pointerId: event.pointerId, button: event.button as 0 | 2,
+      startedAt: event.timeStamp, pointerType: event.pointerType, target: event.target,
+      x: point.sceneX, y: point.sceneY, callback: callbacks.onBevyHeroPointer, contextCallback: callbacks.getBevyHeroPointerContext };
+    if (phase === "down") { heroHoverContextRef.current = null; heroPointerLeaseRef.current = lease; }
+    lease.x = point.sceneX; lease.y = point.sceneY;
+    // Only a newly observed physical edge reaches the host. The original context
+    // remains bound; any same-data source advance is revalidated there.
+    event.preventDefault();
+    let accepted = false;
+    try { accepted = lease.callback?.({ context: lease.context, pointerId: lease.pointerId, phase,
+      x: lease.x, y: lease.y, button: lease.button, control: event.ctrlKey === true, shift: event.shiftKey === true }) === true; }
+    finally {
+      if (heroPointerLeaseRef.current === lease && (phase === "up" || phase === "cancel")) heroPointerLeaseRef.current = null;
+      else if (!accepted && heroPointerLeaseRef.current === lease) cancelSharedHeroPointer(lease);
+    }
+    if (phase === "down" && accepted && heroPointerLeaseRef.current === lease) {
+      frame.focus({ preventScroll: true });
+      try { (event.target as HTMLElement).setPointerCapture(event.pointerId); } catch { /* Global terminal listener also clears the original lease. */ }
+      stopNpcShopWorldInput();
+    }
+    return true;
+  }
+
+  function handleSharedUiPointer(event:Parameters<typeof handleSharedBagPointer>[0],phase:"down"|"move"|"up"|"cancel"){
+    if (heroPointerLeaseRef.current && handleSharedHeroPointer(event, phase)) return;
+    if (handleNpcRepairPointer(event, phase)) return;
+    if (handleBagBeltPointer(event, phase)) return;
+    if (heldQuestControlPointersRef.current.has(event.pointerId)) { handleSharedQuestWorldPointer(event,phase); return; }
+    // A HUD button can open a modal before its pointer is released.
+    const hud = hudPointerRouterRef.current.held;
+    if ((phase === "up" || phase === "cancel") && hud?.origin === "ui" && hud.pointerId === event.pointerId) {
+      event.preventDefault();
+      cancelSharedHudPointer();
+      return;
+    }
+    // DOM controls own new gestures; existing canvas leases still receive their terminal edges.
+    if (phase === "down" && event.target instanceof HTMLElement && event.target.closest(".original-skill-bar, .original-combat-mode-controls")) return;
+    if(handleSharedNpcShopPointer(event,phase))return;
+    if(handleSharedComposePointer(event,phase))return;
+    if(handleSharedMailPointer(event,phase))return;
+    if(handleSharedStoragePointer(event,phase))return;
+    if(handleSharedSpellsPointer(event,phase))return;
+    if(handleSharedHeroPointer(event,phase))return;
+    if (phase === "down" && bagPointerCallbacksRef.current.getBevyBagPointerTransitioning?.()) {
+      event.preventDefault();
+      return;
+    }
+    handleSharedBagPointer(event,phase);
+  }
+
+  function cancelSharedStoragePointer(phase: "cancel" | "blur" = "cancel") {
+    const router = storagePointerRouterRef.current, prior = router.held;
+    const sceneHold = heldScenePointerRef.current;
+    const hold = combatUiHoldRef.current.get("storage"), edge = router.cancel(phase);
+    try { if (edge) storagePointerCallbacksRef.current.onBevyStoragePointer?.(edge); }
+    finally {
+      if (hold) endCombatUiHold("storage", hold);
+      if ((edge || hold) && (!router.held || router.held === prior) && heldScenePointerRef.current === sceneHold) {
+        cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null; onViewportDirectionStop();
+      }
+    }
+  }
+
+  function handleSharedStoragePointer(event: Parameters<typeof handleSharedBagPointer>[0], phase: "down" | "move" | "up" | "cancel"): boolean {
+    const router = storagePointerRouterRef.current, prior = router.held;
+    const context = storagePointerCallbacksRef.current.getBevyStoragePointerContext?.() ?? null;
+    if (prior && (!router.matches(context) || phase === "down" && prior.pointerId !== event.pointerId)) {
+      event.preventDefault(); cancelSharedStoragePointer(); return true;
+    }
+    if (phase !== "down" && !prior) return false;
+    if (prior && prior.pointerId !== event.pointerId) { event.preventDefault(); return true; }
+    const frame = stageFrameRef.current;
+    if (!frame || !context || !sceneInteractionReady || questLocalModalOpen || mobileMoreOpen || bevyQuestUiCapturesPointer) {
+      if (prior) { event.preventDefault(); cancelSharedStoragePointer(); return true; }
+      if (bevyStorageUiTransitioning && phase === "down") { event.preventDefault(); return true; }
+      return false;
+    }
+    const point = scenePointFromMouseEvent({ clientX: event.clientX, clientY: event.clientY, currentTarget: frame });
+    if (phase === "down") {
+      if (!(event.target instanceof HTMLElement) || event.target.id !== sharedUiCanvasId(webGl2SharedCanvasPrototype) || !bevyStorageUiActive) return false;
+      if ((event.button !== 0 && event.button !== 2) || event.pointerType !== "mouse" && !(event.pointerType === "touch" && context.presentation.touch)) return false;
+      if (bagPointerRouterRef.current.held || characterPointerRouterRef.current.held || hudPointerRouterRef.current.held || spellsPointerRouterRef.current.held) return false;
+      frame.focus({ preventScroll: true });
+    }
+    const edge = phase === "down" ? router.down(context, event.pointerId, event.button as 0 | 2, point.sceneX, point.sceneY)
+      : router.edge(phase, event.pointerId, point.sceneX, point.sceneY);
+    if (!edge) return Boolean(prior);
+    if (phase === "down" && edge.origin === "storage") beginCombatUiHold("storage", event.pointerId);
+    event.preventDefault();
+    const lease = router.held, hold = combatUiHoldRef.current.get("storage"), sceneHold = heldScenePointerRef.current; let accepted = false;
+    try { accepted = storagePointerCallbacksRef.current.onBevyStoragePointer?.(edge) === true; }
+    finally {
+      if (!accepted && router.held === lease) cancelSharedStoragePointer();
+      if ((!router.held || router.held !== lease) && hold) endCombatUiHold("storage", hold);
+    }
+    if (!accepted) return true;
+    if (router.held && router.held !== lease || heldScenePointerRef.current !== sceneHold) return true;
+    if (phase === "down") {
+      try { (event.target as HTMLElement).setPointerCapture(event.pointerId); } catch { /* Window release is also routed. */ }
+      heldScenePointerRef.current = edge.origin === "world" && (event.pointerType === "mouse" || event.pointerType === "touch")
+        ? { button: edge.button, sceneX: edge.x, sceneY: edge.y, startedAt: Date.now(), dispatched: false } : null;
+      if (edge.origin === "storage") onViewportDirectionStop();
+    } else if (phase === "move" && edge.origin === "world" && heldScenePointerRef.current) {
+      heldScenePointerRef.current.sceneX = edge.x; heldScenePointerRef.current.sceneY = edge.y;
+    } else if (phase === "up") { if (edge.origin === "world") stopHeldScenePointer(); else cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null; onViewportDirectionStop(); }
+    else if (phase === "cancel") { cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null; onViewportDirectionStop(); }
+    return true;
+  }
+  function cancelSharedComposePointer(){if(heldComposePointerRef.current!==null){heldComposePointerRef.current=null;
+    mailComposePointerCallbacksRef.current.onBevyMailComposePointerCancel?.();cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;onViewportDirectionStop();}}
+  function handleSharedComposePointer(event:Parameters<typeof handleSharedBagPointer>[0],phase:'down'|'move'|'up'|'cancel'):boolean{
+    const held=heldComposePointerRef.current,context=bevyMailTextContext;
+    if(phase==='cancel'){if(held!==null){event.preventDefault();cancelSharedComposePointer();return true;}return false;}
+    if(phase!=='down'&&held===null)return false;
+    if(held!==null&&held!==event.pointerId){event.preventDefault();if(phase==='down')cancelSharedComposePointer();return true;}
+    const canvas=document.getElementById(sharedUiCanvasId(webGl2SharedCanvasPrototype));
+    if(!canvas||!context||!bevyMailComposeReady||!context.status.modal||!sceneInteractionReady||questLocalModalOpen||mobileMoreOpen){
+      if(held!==null){event.preventDefault();cancelSharedComposePointer();return true;}
+      if(bevyMailComposePending&&phase==='down'){event.preventDefault();return true;}return false;
+    }
+    if((getBevyMailComposeBusy?.()??context.pendingEdges)>0){if(held!==null)cancelSharedComposePointer();event.preventDefault();return true;}
+    const rect=canvas.getBoundingClientRect();if(rect.width<=0||rect.height<=0){if(held!==null)cancelSharedComposePointer();return false;}
+    const point=composeStagePoint(rect,context.presentation,event.clientX,event.clientY);
+    if(!point){if(held!==null)cancelSharedComposePointer();return false;}
+    const {x,y}=point;
+    if(phase==='down'){
+      if(!(event.target instanceof HTMLElement)||event.target.id!==canvas.id)return false;
+      event.preventDefault();
+      if(event.button!==0||event.pointerType!=='mouse'&&!(event.pointerType==='touch'&&context.presentation.touch))return true;
+      if(!context.status.inputRegions.some(r=>x>=r.left&&y>=r.top&&x<r.left+r.width&&y<r.top+r.height))return true;
+      cancelSharedMailPointer();cancelSharedSpellsPointer();cancelSharedCharacterPointer();cancelSharedBagPointer();cancelSharedHudPointer();
+    }
+    const accepted=mailComposePointerCallbacksRef.current.onBevyMailComposePointer?.(event.pointerId,phase,x,y,event.shiftKey===true)??false;
+    event.preventDefault();cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;onViewportDirectionStop();
+    if(phase==='down'&&accepted){heldComposePointerRef.current=event.pointerId;
+      try{(event.target as HTMLElement).setPointerCapture(event.pointerId);}catch{/* Window terminal edge also cancels. */}}
+    if(phase==='up'||!accepted)heldComposePointerRef.current=null;
+    return true;
+  }
+  function cancelSharedMailPointer(){const edge=mailPointerRouterRef.current.cancel();if(edge){mailPointerCallbacksRef.current.onBevyMailPointer?.(edge);cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;onViewportDirectionStop();}}
+  function handleSharedMailPointer(event:Parameters<typeof handleSharedBagPointer>[0],phase:"down"|"move"|"up"|"cancel"):boolean{
+    const router=mailPointerRouterRef.current,prior=router.held,context=mailPointerCallbacksRef.current.getBevyMailPointerContext?.()??null;
+    if(prior&&(!router.matches(context)||phase==="down"&&prior.pointerId!==event.pointerId)){event.preventDefault();cancelSharedMailPointer();return true;}
+    if(phase!=="down"&&!prior)return false;if(prior&&prior.pointerId!==event.pointerId){event.preventDefault();return true;}
+    const frame=stageFrameRef.current;
+    if(!frame||!context||!sceneInteractionReady||questLocalModalOpen||mobileMoreOpen||bevyQuestUiCapturesPointer){if(prior){event.preventDefault();cancelSharedMailPointer();return true;}return false;}
+    const point=scenePointFromMouseEvent({clientX:event.clientX,clientY:event.clientY,currentTarget:frame});
+    if(phase==="down"){
+      const canvas=event.target instanceof HTMLElement&&event.target.id===sharedUiCanvasId(webGl2SharedCanvasPrototype);
+      if(!canvas||!bevyMailPageReady)return false;
+      if(!router.contains(context,point.sceneX,point.sceneY)){if(context.modal){event.preventDefault();return true;}return false;}
+      if(event.button!==0||event.pointerType!=="mouse"&&!(event.pointerType==="touch"&&context.presentation.touch))return false;
+      cancelSharedSpellsPointer();cancelSharedCharacterPointer();cancelSharedBagPointer();cancelSharedHudPointer();frame.focus({preventScroll:true});
+    }
+    const edge=phase==="down"?router.down(context,event.pointerId,point.sceneX,point.sceneY):router.edge(phase,event.pointerId,point.sceneX,point.sceneY);
+    if(!edge)return Boolean(prior)||context.modal;
+    event.preventDefault();cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;onViewportDirectionStop();const lease=router.held;let accepted=false;
+    try{accepted=Boolean(mailPointerCallbacksRef.current.onBevyMailPointer?.(edge));}finally{if(!accepted&&router.held===lease)cancelSharedMailPointer();}
+    if(phase==="down")try{(event.target as HTMLElement).setPointerCapture(event.pointerId);}catch{/* Window listeners own the terminal. */}return true;
+  }
+  function cancelSharedCharacterPointer() {
+    const combatHold=typeof onCombatUiHeld==="function"?combatUiHoldRef.current.get("character"):undefined;
+    const edge = characterPointerRouterRef.current.cancel();
+    try { if(edge)characterPointerCallbacksRef.current.onBevyCharacterPointer?.(edge); }
+    finally { if(combatHold)endCombatUiHold("character",combatHold);if(edge||combatHold){cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;onViewportDirectionStop();} }
+  }
+  function handleSharedCharacterPointer(event: {
+    target: EventTarget | null; pointerId: number; pointerType: string; button: number;
+    clientX: number; clientY: number; preventDefault: () => void;
+  }, phase: "down" | "move" | "up" | "cancel"): boolean {
+    const router = characterPointerRouterRef.current, prior = router.held;
+    const context = characterPointerCallbacksRef.current.getBevyCharacterPointerContext?.() ?? null;
+    if (prior && (!router.matches(context) || phase === "down" && prior.pointerId !== event.pointerId)) {
+      event.preventDefault(); cancelSharedCharacterPointer(); return true;
+    }
+    if (phase !== "down" && !prior) return false;
+    if (prior && prior.pointerId !== event.pointerId) { event.preventDefault(); return true; }
+    const frame = stageFrameRef.current;
+    if (!frame || !context || !sceneInteractionReady || questLocalModalOpen || mobileMoreOpen || bevyQuestUiCapturesPointer) {
+      if (prior) { event.preventDefault(); cancelSharedCharacterPointer(); return true; } return false;
+    }
+    const point = scenePointFromMouseEvent({ clientX:event.clientX, clientY:event.clientY, currentTarget:frame });
+    if (phase === "down") {
+      const onCanvas = event.target instanceof HTMLElement && event.target.id === sharedUiCanvasId(webGl2SharedCanvasPrototype);
+      const bag = bagPointerCallbacksRef.current.getBevyBagPointerContext?.() ?? null;
+      const bagForeground = bag?.inputRegions.some(r => point.sceneX >= r.left && point.sceneY >= r.top && point.sceneX < r.left+r.width && point.sceneY < r.top+r.height);
+      if (!onCanvas || !bevyCharacterPageReady || bagForeground || bagPointerRouterRef.current.held || hudPointerRouterRef.current.held
+        || !router.contains(context,point.sceneX,point.sceneY) || ![0,2].includes(event.button)
+        || event.pointerType !== "mouse" && !(event.pointerType === "touch" && context.presentation.touch)) return false;
+      frame.focus({preventScroll:true});
+    }
+    const edge = phase === "down" ? router.down(context,event.pointerId,event.button as 0|2,point.sceneX,point.sceneY)
+      : router.edge(phase,event.pointerId,point.sceneX,point.sceneY);
+    if (!edge) return Boolean(prior);
+    if(typeof onCombatUiHeld==="function"&&phase==="down"&&router.held)beginCombatUiHold("character",event.pointerId);
+    event.preventDefault(); cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null; onViewportDirectionStop();
+    const combatHold=typeof onCombatUiHeld==="function"?combatUiHoldRef.current.get("character"):undefined;
+    const callbackLease=router.held;let accepted=false;
+    try { accepted=Boolean(characterPointerCallbacksRef.current.onBevyCharacterPointer?.(edge)); }
+    finally { if(!accepted&&router.held===callbackLease)cancelSharedCharacterPointer();if((!router.held||router.held!==callbackLease)&&combatHold)endCombatUiHold("character",combatHold); }
+    if (phase === "down") try { (event.target as HTMLElement).setPointerCapture(event.pointerId); } catch { /* Window terminal edges also cancel. */ }
+    return true;
+  }
+
+  function cancelSharedHudPointer() {
+    const combatHold=typeof onCombatUiHeld==="function"?combatUiHoldRef.current.get("hud"):undefined;
+    const prior=hudPointerRouterRef.current.cancel();
+    if(combatHold)endCombatUiHold("hud",combatHold);
+    if(!prior&&!combatHold)return;
+    cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null; onViewportDirectionStop();
+  }
+  function handleSharedHudPointer(event: {
+    target: EventTarget | null; pointerId: number; pointerType: string; button: number;
+    clientX: number; clientY: number; preventDefault: () => void;
+  }, phase: "down" | "move" | "up" | "cancel") {
+    const router = hudPointerRouterRef.current, prior = router.held;
+    const onCanvas = event.target instanceof HTMLElement && event.target.id === sharedUiCanvasId(webGl2SharedCanvasPrototype);
+    if (phase === "down" && (!onCanvas || !bevyHudUiReady || bagPointerRouterRef.current.held)) return false;
+    if (phase !== "down" && (!prior || prior.pointerId !== event.pointerId)) return false;
+    const rawStatus = readBevyHudStatus?.() ?? null;
+    const characterContext = characterPointerCallbacksRef.current.getBevyCharacterPointerContext?.() ?? null;
+    const spellsContext=spellsPointerCallbacksRef.current.getBevySpellsPointerContext?.()??null;
+    const status = rawStatus && (characterContext||spellsContext) ? { ...rawStatus, characterStatsReady: true } : rawStatus;
+    if (prior && !router.matches(status)) { cancelSharedHudPointer(); return true; }
+    const frame = stageFrameRef.current;
+    if (!frame || !status || !sceneInteractionReady) { cancelSharedHudPointer(); return false; }
+    const point = scenePointFromMouseEvent({ clientX: event.clientX, clientY: event.clientY, currentTarget: frame });
+    const bag = bagPointerCallbacksRef.current.getBevyBagPointerContext?.() ?? null;
+    if (phase === "down" && bevyBagUiActive && !bag) { event.preventDefault(); return true; }
+    const bagForeground = bag?.inputRegions.some(rect =>
+      point.sceneX >= rect.left && point.sceneY >= rect.top && point.sceneX < rect.left + rect.width && point.sceneY < rect.top + rect.height) ?? false;
+    const lease = phase === "down" ? router.down(status, event.pointerId, point.sceneX, point.sceneY,
+      bagForeground || questLocalModalOpen || mobileMoreOpen) : prior;
+    if (!lease) return false;
+    if(typeof onCombatUiHeld==="function"&&phase==="down"&&lease.origin==="ui")beginCombatUiHold("hud",event.pointerId);
+    event.preventDefault();
+    if (phase === "down") {
+      frame.focus({ preventScroll: true });
+      try { (event.target as HTMLElement).setPointerCapture(event.pointerId); } catch { /* window up/cancel also releases */ }
+      heldScenePointerRef.current = lease.origin === "world"
+        ? { button: event.button === 2 ? 2 : 0, sceneX: point.sceneX, sceneY: point.sceneY, startedAt: Date.now(), dispatched: false } : null;
+      if (lease.origin === "ui" && event.button === 0 && lease.action) {
+        if (typeof lease.action !== "string") dispatchBevyHudNavigation?.(lease.action);
+        else if (lease.action === "character" || lease.action === "bag" || lease.action === "quest") dispatchBevyHudNavigation?.({ type: lease.action });
+        else if (lease.action === "skill") dispatchBevyHudNavigation?.({ type: "selectCharacterPage", page: "spells" });
+        else if (lease.action === "option") onToggleOptions?.();
+        else window.dispatchEvent(new CustomEvent("mir2:hud-host-action", { detail: lease.action }));
+      }
+    } else if (phase === "move" && lease.origin === "world" && heldScenePointerRef.current) {
+      heldScenePointerRef.current.sceneX = point.sceneX; heldScenePointerRef.current.sceneY = point.sceneY;
+    } else if (phase === "up") {
+      if (lease.origin === "world") stopHeldScenePointer();
+      cancelSharedHudPointer();
+    } else if (phase === "cancel") cancelSharedHudPointer();
+    return true;
+  }
+
+  function handleSharedBagPointer(event: {
+    target: EventTarget | null; pointerId: number; pointerType: string; button: number; timeStamp: number;
+    clientX: number; clientY: number; shiftKey?:boolean; isPrimary?: boolean; preventDefault: () => void;
+  }, phase: "down" | "move" | "up" | "cancel") {
+    if (handleSharedCharacterPointer(event, phase)) return;
+    if (handleSharedQuestWorldPointer(event, phase)) return;
+    if (handleSharedHudPointer(event, phase)) return;
+    const router = bagPointerRouterRef.current;
+    const onCanvas = event.target instanceof HTMLElement
+      && event.target.id === sharedUiCanvasId(webGl2SharedCanvasPrototype);
+    const wasHeld = router.held;
+    if (phase === "down" && (!onCanvas || !bevyBagUiActive)) return;
+    if (phase === "down") cancelBagBeltPointer(bagBeltArmedSharedRef.current);
+    if (phase === "move" && !wasHeld) return;
+    const context = bagPointerCallbacksRef.current.getBevyBagPointerContext?.() ?? null;
+    if (wasHeld && !router.matches(context)) cancelSharedBagPointer();
+    const frame = stageFrameRef.current;
+    if (!frame) { cancelSharedBagPointer(); return; }
+    const point = scenePointFromMouseEvent({ clientX: event.clientX, clientY: event.clientY, currentTarget: frame });
+    if (phase === "down") {
+      if (event.pointerType !== "mouse" && (event.pointerType !== "touch" || !context?.presentation.touch)) {
+        onBevyBagTouchFallback?.(); return;
+      }
+      if (!context || !sceneInteractionReady || bevyQuestUiCapturesPointer
+        || (event.button !== 0 && event.button !== 2)) return;
+      // A second finger belongs to this foreground surface until it lifts.
+      // It must neither replace the first lease nor become a world gesture.
+      if (event.pointerType === "touch") event.preventDefault();
+      if (router.held) return;
+      frame.focus({ preventScroll: true });
+    }
+    const rejectedTerminal = bagBeltRejectedTerminalRef.current;
+    const cancelTerminal = phase === "up" && rejectedTerminal?.pointerId === event.pointerId && event.timeStamp >= rejectedTerminal.startedAt;
+    if (cancelTerminal) bagBeltRejectedTerminalRef.current = null;
+    const edge = phase === "down" && context
+      ? router.down(context, event.pointerId, event.button as 0 | 2, point.sceneX, point.sceneY)
+      : router.edge(phase === "down" || cancelTerminal ? "cancel" : phase, event.pointerId, point.sceneX, point.sceneY);
+    if (!edge) return;
+    if (phase === "down" && edge.origin === "bag" && event.button === 0 && event.isPrimary !== false
+      && context?.beltDropGeometry && bagBeltGeometryRef.current?.revision === context.beltDropGeometry.revision) {
+      beginBagBeltPointer(event, event.target as HTMLElement, null, "bevy");
+    }
+    if(typeof onCombatUiHeld==="function"&&phase==="down"&&edge.origin==="bag")beginCombatUiHold("bag",event.pointerId);
+    event.preventDefault();
+    const ownsHeld = phase === "down" || wasHeld?.pointerId === event.pointerId;
+    const combatHold=typeof onCombatUiHeld==="function"?combatUiHoldRef.current.get("bag"):undefined;
+    const callbackLease=router.held;let accepted=false;
+    try { accepted=Boolean(bagPointerCallbacksRef.current.onBevyBagPointer?.(edge)); }
+    finally { if(!accepted&&ownsHeld&&router.held===callbackLease)cancelSharedBagPointer();if((!router.held||router.held!==callbackLease)&&combatHold)endCombatUiHold("bag",combatHold); }
+    if(!accepted){cancelBagBeltPointer(bagBeltArmedSharedRef.current);if(ownsHeld){cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;onViewportDirectionStop();}return;}
+    if (phase !== "down" && (!wasHeld || wasHeld.pointerId !== event.pointerId)) return;
+    // Both owners see the same ordered edge, but only its down-origin owner
+    // may act. In particular a world drag entering the painted bag stays world.
+    if (phase === "down") {
+      try { (event.target as HTMLElement).setPointerCapture(event.pointerId); } catch { /* Window release still cancels. */ }
+      heldScenePointerRef.current = edge.origin === "world" && (event.pointerType === "mouse" || event.pointerType === "touch")
+        ? { button: edge.button, sceneX: edge.x, sceneY: edge.y, startedAt: Date.now(), dispatched: false } : null;
+    } else if (edge.origin === "world" && phase === "move" && heldScenePointerRef.current) {
+      heldScenePointerRef.current.sceneX = edge.x;
+      heldScenePointerRef.current.sceneY = edge.y;
+    } else if (phase === "up") {
+      if (edge.origin === "world" && event.pointerType === "mouse") stopHeldScenePointer();
+      else cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;
+      onViewportDirectionStop();
+    } else if (phase === "cancel") {
+      cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;
+      onViewportDirectionStop();
+    }
+  }
+
+  const sharedBagPointerHandlerRef = useRef(handleSharedUiPointer);
+  // Native window release listeners must use the geometry from the committed
+  // DOM, not a concurrent render that has not updated the stage yet.
+  useLayoutEffect(() => {
+    const callbacks: BagBeltCallbacks = { onBagBeltDropGeometry, onBeginBagToBeltGesture, onArmBagToBeltGesture, onBagToBeltMove, onCancelBagToBeltGesture };
+    const prior = bagBeltCallbacksRef.current;
+    const physical = bagBeltPointerRef.current, armed = bagBeltArmedSharedRef.current;
+    bagBeltCallbacksRef.current = callbacks;
+    bagBeltContextRef.current = { page: activeInventoryTab, open: showInventory, screen, repair: npcRepairService !== null,
+      virtualWidth: stagePresentation.virtualWidth, virtualHeight: stagePresentation.virtualHeight, scale: stagePresentation.scale };
+    if (physical && !bagBeltCallbacksMatch(physical)) cancelBagBeltPointer(physical);
+    if (armed && !bagBeltCallbacksMatch(armed)) cancelBagBeltPointer(armed);
+    const geometry = refreshBagBeltGeometry();
+    if (prior.onBagBeltDropGeometry !== callbacks.onBagBeltDropGeometry && geometry) callbacks.onBagBeltDropGeometry?.(geometry);
+    sharedBagPointerHandlerRef.current = handleSharedUiPointer;
+  });
+  useLayoutEffect(() => {
+    const repairLease = npcRepairPointerRef.current;
+    if (repairLease) cancelNpcRepairPointer(repairLease);
+    cancelBagBeltPointer(); cancelBagBeltPointer(bagBeltArmedSharedRef.current);
+    cancelSharedHeroPointer();
+    cancelSharedNpcShopPointer();
+    cancelSharedStoragePointer();
+    cancelSharedComposePointer();
+    cancelSharedMailPointer();
+    cancelSharedHudPointer();
+    cancelSharedCharacterPointer();
+    cancelSharedSpellsPointer();
+    if (bevyBagOwnerRevision === 0 && !bevyBagUiActive && !bevyStorageUiActive && !bevyStorageUiTransitioning
+      && !bevyNpcShopUiActive && !bevyNpcShopUiTransitioning) return;
+    cancelSharedBagPointer();
+    // The preceding owner may have started an ordinary world mouse hold
+    // before the shared canvas became interactive.
+    cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;
+    onViewportDirectionStop();
+  }, [bevyHeroUiToken, npcRepairView?.stamp, npcRepairService, showInventory, activeInventoryTab, bevyMailPageReady,bevyMailComposeReady,bevyMailComposePending,mailOpen,bevySpellsPageReady, showCharacter, activeCharacterTab, bevyCharacterPageReady, bevyHudUiReady, bevyMapRuntimeGeneration, screen, player?.objectId, bevyBagOwnerRevision, bevyBagUiActive, bevyStorageOwnerRevision, bevyStorageUiActive, bevyStorageUiTransitioning, bevyNpcShopUiActive, bevyNpcShopUiTransitioning, stagePresentation.virtualWidth, stagePresentation.virtualHeight, stagePresentation.scale]);
+  useEffect(() => {
+    const down = (event: globalThis.PointerEvent) => {
+      if (!bagBeltPointerRef.current && !bagBeltQuarantineRef.current.has(event.pointerId)) {
+        cancelBagBeltPointer(bagBeltArmedSharedRef.current);
+        const ledger = bagBeltClickFenceRef.current, node = event.target instanceof Element ? event.target.closest<HTMLElement>("button") : null;
+        ledger.delete(event.pointerId);
+        for (const [id, record] of ledger) if (node && record.nodes.has(node) && !bagBeltQuarantineRef.current.has(id)) ledger.delete(id);
+      }
+      if (bagBeltPointerRef.current || bagBeltQuarantineRef.current.has(event.pointerId)) sharedBagPointerHandlerRef.current(event, "down");
+      if (!npcRepairPointerRef.current && !npcRepairQuarantineRef.current.has(event.pointerId)) {
+        const ledger = npcRepairClickFenceRef.current, control = npcRepairControlTarget(event.target);
+        ledger.delete(event.pointerId);
+        for (const [id, record] of ledger) {
+          if (control && record.target === control && !npcRepairQuarantineRef.current.has(id)) ledger.delete(id);
+        }
+      }
+      if (npcRepairPointerRef.current || npcRepairQuarantineRef.current.has(event.pointerId)) sharedBagPointerHandlerRef.current(event, "down");
+    };
+    const click = (event: globalThis.MouseEvent) => { if (fenceBagBeltMouse(event)) event.stopImmediatePropagation(); else fenceNpcRepairClick(event); };
+    const mousedown = (event: globalThis.MouseEvent) => { if (fenceBagBeltMouse(event)) event.stopImmediatePropagation(); };
+    const up = (event: globalThis.PointerEvent) => sharedBagPointerHandlerRef.current(event, "up");
+    const cancel = (event: globalThis.PointerEvent) => sharedBagPointerHandlerRef.current(event, "cancel");
+    const blur = () => { cancelSharedHeroPointer(); cancelBagBeltPointer(); cancelBagBeltPointer(bagBeltArmedSharedRef.current); cancelNpcRepairPointer(); heldQuestControlPointersRef.current.clear(); cancelSharedNpcShopPointer("blur"); cancelSharedStoragePointer("blur"); cancelSharedComposePointer();cancelSharedMailPointer();cancelSharedSpellsPointer();cancelSharedCharacterPointer(); cancelSharedBagPointer("blur"); cancelSharedHudPointer(); };
+    const resize = () => { cancelSharedHeroPointer(); cancelBagBeltPointer(); cancelBagBeltPointer(bagBeltArmedSharedRef.current); cancelNpcRepairPointer(); heldQuestControlPointersRef.current.clear(); cancelSharedNpcShopPointer(); cancelSharedStoragePointer(); cancelSharedComposePointer();cancelSharedMailPointer();cancelSharedSpellsPointer();cancelSharedCharacterPointer(); cancelSharedBagPointer(); cancelSharedHudPointer(); };
+    const hidden = () => { if (document.visibilityState === "hidden") { cancelSharedHeroPointer(); cancelBagBeltPointer(); cancelBagBeltPointer(bagBeltArmedSharedRef.current); cancelNpcRepairPointer(); } };
+    const pagehide = () => { cancelSharedHeroPointer(); cancelBagBeltPointer(); cancelBagBeltPointer(bagBeltArmedSharedRef.current); cancelNpcRepairPointer(); };
+    window.addEventListener("pointerdown", down, true);
+    window.addEventListener("click", click, true);
+    window.addEventListener("mousedown", mousedown, true);
+    window.addEventListener("pointerup", up, true);
+    window.addEventListener("pointercancel", cancel, true);
+    window.addEventListener("blur", blur);
+    window.addEventListener("resize", resize);
+    document.addEventListener("visibilitychange", hidden);
+    window.addEventListener("pagehide", pagehide);
+    return () => {
+      window.removeEventListener("pointerdown", down, true);
+      window.removeEventListener("click", click, true);
+      window.removeEventListener("mousedown", mousedown, true);
+      window.removeEventListener("pointerup", up, true);
+      window.removeEventListener("pointercancel", cancel, true);
+      window.removeEventListener("blur", blur);
+      window.removeEventListener("resize", resize);
+      document.removeEventListener("visibilitychange", hidden);
+      window.removeEventListener("pagehide", pagehide);
+      cancelBagBeltPointer(); cancelBagBeltPointer(bagBeltArmedSharedRef.current);
+      bagBeltButtonsRef.current = null;
+      if (bagBeltGeometryRef.current) { bagBeltGeometryRef.current = null; bagBeltCallbacksRef.current.onBagBeltDropGeometry?.(null); }
+      cancelNpcRepairPointer();
+      heldQuestControlPointersRef.current.clear();
+      cancelSharedHeroPointer();
+      cancelSharedNpcShopPointer();
+      cancelSharedStoragePointer();
+      cancelSharedComposePointer();
+      cancelSharedSpellsPointer();
+      cancelSharedMailPointer();
+      cancelSharedCharacterPointer();
+      cancelSharedBagPointer();
+      cancelSharedHudPointer();
+    };
+  }, []);
+
+  function isSharedBagCompatibilityMouse(event: MouseEvent<HTMLElement>) {
+    if (npcShopBlocksWorldInput() || npcShopPointerRouterRef.current.held) return true;
+    if (bagPointerCallbacksRef.current.getBevyBagPointerTransitioning?.()) return true;
+    return Boolean(heroPointerLeaseRef.current)||Boolean(storagePointerRouterRef.current.held)||bevyMailComposeReady||bevyMailComposePending||Boolean(mailPointerRouterRef.current.held)||Boolean(characterPointerRouterRef.current.held) || Boolean(hudPointerRouterRef.current.held) || Boolean(bagPointerRouterRef.current.held)
+      || (event.target instanceof HTMLElement
+        && event.target.id === sharedUiCanvasId(webGl2SharedCanvasPrototype));
+  }
+
   function handleScenePointerAction(event: MouseEvent<HTMLDivElement>) {
-    if (screen !== "game" || !player || !sceneInteractionReady) {
+    if (npcShopBlocksWorldInput()) { event.preventDefault(); stopNpcShopWorldInput(); return; }
+    if (isSharedBagCompatibilityMouse(event)) return;
+    if (screen !== "game" || !player || !sceneInteractionReady || bevyQuestUiCapturesPointer) {
+      cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;
       return;
     }
 
+    if (event.button !== 0 && event.button !== 2) return;
     const target = event.target;
-    if (
-      target instanceof HTMLElement &&
-      target.closest("[data-ui-interactive='true'], .game-ui-scene, .login-overlay, .select-overlay")
-    ) {
-      return;
-    }
-
-    if (event.button !== 0 && event.button !== 2) {
-      return;
+    if (target instanceof HTMLElement) {
+      if (target.closest(".game-ui-scene, .login-overlay, .select-overlay")) return;
+      const interactive = target.closest("[data-ui-interactive='true']");
+      // In the compatibility view these DOM markers own primary activation,
+      // while secondary still steers using the terrain underneath them.
+      if (interactive && !interactive.matches(".ground-drop-marker[data-object-id], .entity-nameplate[data-object-id], .entity-sprite-stack[data-object-id]")) return;
+      if (event.button === 0 && interactive?.matches(".ground-drop-marker, .entity-nameplate")) return;
     }
 
     event.preventDefault();
@@ -3060,40 +5263,56 @@ export function OriginalClientShell({
       sceneY: point.sceneY,
       startedAt: Date.now(),
       dispatched: false,
+      // A compatibility mousedown follows pointerdown on this same canvas.
+      // Keep primary marker identity even when a label is offset from its tile.
+      worldTarget: event.button === 0 ? sceneWorldObjectTarget(event.clientX, event.clientY, true) : undefined,
     };
     heldScenePointerRef.current = pointer;
+    const sources = [...worldFishingPointersRef.current.values()].filter(source => source.pointerType === "mouse"
+      && source.button === 0 && source.target === event.target && event.timeStamp >= source.timeStamp);
+    if (sources.length === 1) attachWorldFishingPhysical(pointer, sources[0]);
   }
 
   function handleScenePointerMove(event: MouseEvent<HTMLDivElement>) {
+    if (npcShopBlocksWorldInput()) { event.preventDefault(); stopNpcShopWorldInput(); return; }
+    rememberSceneGroupHoverPoint(event);
+    refreshSceneGroupHover();
+    if (isSharedBagCompatibilityMouse(event)) return;
+    if (bevyQuestUiCapturesPointer) { cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null; return; }
     const held = heldScenePointerRef.current;
       if (!held || screen !== "game" || !sceneInteractionReady) {
         return;
       }
 
     const point = scenePointFromMouseEvent(event);
-    heldScenePointerRef.current = {
-      ...held,
-      sceneX: point.sceneX,
-      sceneY: point.sceneY,
-    };
+    held.sceneX = point.sceneX;
+    held.sceneY = point.sceneY;
   }
 
-  function stopHeldScenePointer() {
+  function stopHeldScenePointer(event?: { timeStamp: number }) {
+    const physical = worldFishingPhysicalRef.current;
+    if (physical) {
+      if (event && event.timeStamp < physical.startedAt) return;
+      finishWorldFishingPhysical(physical, true); return;
+    }
+    if (npcShopBlocksWorldInput()) { stopNpcShopWorldInput(); return; }
     const held = heldScenePointerRef.current;
-    heldScenePointerRef.current = null;
-    if (!held || held.dispatched) return;
+    cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;
+    if (!held || held.dispatched || bevyQuestUiCapturesPointer) return;
     dispatchSceneClickInput(held);
   }
 
   useEffect(() => {
-    if (screen !== "game") {
-      heldScenePointerRef.current = null;
+    if (screen !== "game" || bevyQuestUiCapturesPointer) {
+      cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;
       return;
     }
 
     const timer = window.setInterval(() => {
+      if (npcShopBlocksWorldInput()) { stopNpcShopWorldInput(); return; }
       const held = heldScenePointerRef.current;
       if (!held) return;
+      if (held.worldTarget) return;
       if (!held.dispatched && Date.now() - held.startedAt < CRYSTAL_MOVE_INPUT_INTERVAL_MS) {
         return;
       }
@@ -3101,19 +5320,27 @@ export function OriginalClientShell({
       dispatchSceneMoveInput(held);
     }, CRYSTAL_MOVE_INPUT_INTERVAL_MS);
 
-    const stop = () => {
-      heldScenePointerRef.current = null;
+    const stop = (event?: Event) => {
+      const physical = worldFishingPhysicalRef.current;
+      if (event?.type === "mouseup" && physical && event.timeStamp < physical.startedAt) return;
+      cancelWorldFishingHeldPointer(); heldScenePointerRef.current = null;
       onViewportDirectionStop();
     };
+    const hide = () => { if (document.visibilityState !== "visible") stop(); };
     window.addEventListener("mouseup", stop);
     window.addEventListener("blur", stop);
+    window.addEventListener("pagehide", stop);
+    document.addEventListener("visibilitychange", hide);
 
     return () => {
       window.clearInterval(timer);
       window.removeEventListener("mouseup", stop);
       window.removeEventListener("blur", stop);
+      window.removeEventListener("pagehide", stop);
+      document.removeEventListener("visibilitychange", hide);
+      stop();
     };
-  }, [screen, sceneInteractionReady, onViewportDirectionStep, onViewportDirectionStop]);
+  }, [screen, sceneInteractionReady, bevyQuestUiCapturesPointer, onViewportDirectionStep, onViewportDirectionStop]);
 
   // Normal play uses the stage-level coordinate handlers. Keep the 1,155-button
   // hit grid only for legacy QA scripts that still query per-tile aria labels.
@@ -3136,6 +5363,7 @@ export function OriginalClientShell({
             }}
             data-ui-interactive="true"
             onMouseDown={(event) => {
+              if (npcShopBlocksWorldInput()) { event.preventDefault(); event.stopPropagation(); stopNpcShopWorldInput(); return; }
               if (event.button !== 0 && event.button !== 2) {
                 return;
               }
@@ -3161,14 +5389,12 @@ export function OriginalClientShell({
               }
             }}
             onMouseMove={(event) => {
+              if (npcShopBlocksWorldInput()) { event.preventDefault(); stopNpcShopWorldInput(); return; }
               const held = heldScenePointerRef.current;
               if (!held) return;
               const point = scenePointFromMouseEvent(event);
-              heldScenePointerRef.current = {
-                ...held,
-                sceneX: point.sceneX,
-                sceneY: point.sceneY,
-              };
+              held.sceneX = point.sceneX;
+              held.sceneY = point.sceneY;
             }}
             onMouseUp={stopHeldScenePointer}
             onClick={(event) => {
@@ -3192,14 +5418,48 @@ export function OriginalClientShell({
     <main
       className={`mir-client-page ${clientProfile.layout === "touch" && clientProfile.input === "touch" ? "force-mobile-controls" : ""}`}
       data-layout-profile={clientProfile.layout}
+      data-combat-input-status={combatInputDiagnostics}
+      data-npc-shop-input-status={npcShopInputDiagnostics}
+      data-npc-purchase-action-status={npcPurchaseActionDiagnostics}
+      data-storage-ui-status={storageUiDiagnostics}
+      data-bag-input-status={bagUiDiagnostics}
+      data-movement-input-status={JSON.stringify({ keyboard: keyboardMovementDiagnosticsRef.current, pointer: scenePointerDiagnosticsRef.current, host: readMovementInputDiagnostics?.() ?? null })}
+      data-belt-input-status={JSON.stringify({ keyboard: keyboardMovementDiagnosticsRef.current.lastShortcut, host: readBeltInputDiagnostics?.() ?? null })}
+      data-spells-ui-status={spellsUiDiagnostics}
       data-input-profile={clientProfile.input}
+      data-shared-touch-quest-open={
+        screen === "game" && clientProfile.input === "touch" && bevyQuestUiReady && bevyQuestUiCapturesPointer
+          ? "true" : undefined
+      }
+      data-shared-touch-bag-open={
+        screen === "game" && clientProfile.input === "touch" && bevyBagUiActive ? "true" : undefined
+      }
       data-gamepad-family={clientProfile.gamepad.family}
       data-client-screen={screen}
       data-wide-mobile={stagePresentation.wideMobile ? "true" : "false"}
+      data-webgl2-shared-canvas-mode={webGl2SharedCanvasPrototype ? "primary" : undefined}
+      data-shared-ui-surface={sharedUiCanvasId(webGl2SharedCanvasPrototype)}
       style={stageScaleStyle}
     >
       <section
         className="mir-stage"
+        onPointerDownCapture={(event) => {
+          stageGutterPressRef.current = allowStageExit && event.isPrimary && event.button === 0 && event.target === event.currentTarget
+            ? event.pointerId : null;
+        }}
+        onPointerCancelCapture={() => { stageGutterPressRef.current = null; }}
+        onPointerUpCapture={(event) => {
+          const fromGutter = stageGutterPressRef.current === event.pointerId;
+          stageGutterPressRef.current = null;
+          const dialog = stageExitDialogRef.current;
+          if (!allowStageExit || !fromGutter || event.target !== event.currentTarget || !dialog || dialog.open) return;
+          const frame = stageFrameRef.current?.getBoundingClientRect();
+          if (!frame || (event.clientX >= frame.left && event.clientX < frame.right &&
+              event.clientY >= frame.top && event.clientY < frame.bottom)) return;
+          event.preventDefault();
+          event.stopPropagation();
+          dialog.showModal();
+        }}
         style={
           {
             "--mir-stage-letterbox-image":
@@ -3221,9 +5481,31 @@ export function OriginalClientShell({
           data-viewport-cell-height={VIEWPORT_CELL_HEIGHT}
           data-viewport-scene-width={stagePresentation.virtualWidth}
           data-viewport-scene-height={stagePresentation.virtualHeight}
+          data-quest-ui-owner={bevyQuestUiReady ? "bevy" : "react"}
+          data-bag-ui-owner={bevyBagUiActive ? "bevy" : "react"}
+          data-hp-orb-owner={hpOrbOwner ? "bevy" : "react"}
+          data-mp-orb-owner={mpOrbOwner ? "bevy" : "react"}
+          data-experience-bar-owner={experienceDrawPlanOwner ? "canvas2d" : experienceBarOwner ? "bevy" : "react"}
+          data-weight-bar-owner={weightDrawPlanOwner ? "canvas2d" : weightBarOwner ? "bevy" : "react"}
+          data-bag-owner-revision={bevyBagOwnerRevision}
+          onPointerDownCapture={(event: ReactPointerEvent<HTMLDivElement>) => {
+             const before = heldScenePointerRef.current; handleSharedUiPointer(event, "down");
+             retainSceneWorldObjectTarget(event, before); handleSceneWorldPointerDown(event, before);
+             if (screen === "game") scenePointerDiagnosticsRef.current = { at: Date.now(), phase: "pointerdown",
+               held: !!heldScenePointerRef.current, worldTarget: heldScenePointerRef.current?.worldTarget ?? null,
+               hudHeld: !!hudPointerRouterRef.current.held, bagHeld: !!bagPointerRouterRef.current.held,
+               heroHeld: !!heroPointerLeaseRef.current, storageHeld: !!storagePointerRouterRef.current.held,
+               layers: document.elementsFromPoint(event.clientX, event.clientY).slice(0, 14).map(element => ({
+                 tag: element.tagName, canvas: element.id === sharedUiCanvasId(webGl2SharedCanvasPrototype),
+                 classes: [...element.classList].slice(0, 6), objectId: element.getAttribute("data-object-id") })) };
+           }}
+          onPointerMoveCapture={(event: ReactPointerEvent<HTMLDivElement>) => handleSharedUiPointer(event, "move")}
+          onLostPointerCapture={(event: ReactPointerEvent<HTMLDivElement>) => handleSharedUiPointer(event, "cancel")}
+          onWheelCapture={event=>{if(bevyMailComposeReady&&bevyMailTextContext?.status.modal){event.preventDefault();
+            onBevyMailTextEdge?.({op:'wheel',upwardPixels:-event.deltaY});}else if(bevyMailComposePending)event.preventDefault();}}
           tabIndex={-1}
           onMouseDownCapture={(event) => {
-            if (screen === "game") {
+            if (screen === "game"&&!bevyMailComposeReady&&!bevyMailComposePending) {
               stageFrameRef.current?.focus({ preventScroll: true });
             }
             if (screen === "game" && event.button === 2) {
@@ -3232,7 +5514,8 @@ export function OriginalClientShell({
           }}
           onMouseDown={handleScenePointerAction}
           onMouseMove={handleScenePointerMove}
-          onMouseUp={stopHeldScenePointer}
+          onMouseUp={(event) => { if (!isSharedBagCompatibilityMouse(event)) stopHeldScenePointer(event); }}
+          onMouseLeave={retireSceneGroupHoverPoint}
           onContextMenuCapture={(event) => {
             if (screen === "game") {
               event.preventDefault();
@@ -3263,15 +5546,8 @@ export function OriginalClientShell({
               </picture>
             </div>
           ) : null}
-          {loginTransitionBackground ? (
-            <div className="client-scene-overlay login-transition-overlay" aria-hidden="true">
-              <img
-                className="client-scene-background"
-                src={loginTransitionBackground}
-                alt=""
-                draggable={false}
-              />
-            </div>
+          {screen === "openingLogin" && loginDoorToken !== null ? (
+            <R16LoginDoor key={loginDoorToken} token={loginDoorToken} onStart={playLoginEffect} onOpened={onLoginDoorOpened} />
           ) : null}
           <div
             className={`game-world-composite ${screen === "game" ? "" : "inactive"}`}
@@ -3280,14 +5556,15 @@ export function OriginalClientShell({
             {showSyntheticScene ? <div className="game-scene-underlay" /> : null}
             <canvas
               id="mir2-web3-canvas"
-              className={hideBevyCanvasForDomEntityFallback ? "bevy-canvas-hidden" : undefined}
+              className={webGl2SharedCanvasPrototype || hideBevyCanvasForDomEntityFallback ||
+                (screen === "game" && !bevyWorldPaintActive) ? "bevy-canvas-hidden" : undefined}
             />
             <WebGl2MapAtlasLayer
               enabled={mapGpuActive}
               stageWidth={stagePresentation.virtualWidth}
               stageHeight={stagePresentation.virtualHeight}
               index={mapAtlasIndex}
-              tiles={mapTileDrawList}
+              tiles={fallbackMapFloorTiles}
               onDebugChange={handleMapAtlasDebug}
             />
             <WebGl2EntityAtlasLayer
@@ -3304,6 +5581,7 @@ export function OriginalClientShell({
                 world={world}
                 player={renderPlayer ?? player}
                 floorSprites={mapDomSprites.floor}
+                packedFloor={packedFloor}
                 cameraOffset={effectiveCameraOffset}
                 viewportLayout={viewportLayout}
                 imperativeCamera={imperativeSceneMotion}
@@ -3315,12 +5593,17 @@ export function OriginalClientShell({
 
             <OriginalClientSceneVisualLayers
               screen={screen}
+              assetReleaseId={sceneAssetReleaseId}
               t={t}
               world={world}
+              fishingEffects={fishingEffects}
+              warmFishingEffects={sceneInteractionReady && desiredSceneSpriteLibraryKeys.some(key => key.startsWith("Fishing/"))}
               player={renderPlayer ?? player}
               selectedEntity={selectedEntity}
               viewportGroundDrops={viewportGroundDrops}
               viewportMapSprites={mapDomSprites}
+              packedObjects={packedObjects}
+              packedActors={packedActors}
               viewportEntitySprites={viewportEntitySprites}
               viewportProjectiles={viewportProjectiles}
               viewportDepthPlayer={viewportDepthPlayer}
@@ -3332,6 +5615,12 @@ export function OriginalClientShell({
               registerEntityEl={sceneMotionDriver.registerEntityEl}
               sceneSpriteFrameIndex={sceneSpriteFrameIndex}
               useBevyEntityRenderer={hideDomEntitySpritesForBevy}
+              nameView={playerUiPreferences?.nameView ?? true}
+              hoveredObjectId={sceneHoveredObjectId}
+              questTargetObjectIds={questNameTargetObjectIds}
+              dropView={(playerUiPreferences?.dropView ?? true) || dropViewHeld}
+              hpView={playerUiPreferences?.hpView ?? true}
+              effectsEnabled={playerUiPreferences?.effect ?? true}
               entityKindClassName={entityKindClassName}
               onPickGroundDrop={onPickGroundDrop}
               onActivateEntity={onActivateEntity}
@@ -3352,10 +5641,132 @@ export function OriginalClientShell({
             registerEntityEl={sceneMotionDriver.registerEntityEl}
             chatBubbles={sceneChatBubbles}
             damageFloaters={world.damageFloaters}
+            hpView={playerUiPreferences?.hpView ?? true}
             targetActionLabel={selectedTargetReadoutLabel}
             entityKindClassName={entityKindClassName}
             viewportLayout={viewportLayout}
           />
+          {screen === "game" && skillBars ? <OriginalClientSkillBars {...skillBars}
+            inputBlocked={skillBars.inputBlocked || !sceneInteractionReady || questLocalModalOpen || mobileMoreOpen}
+            onCastSlot={lease => {
+              if (!skillBars.onCastSlot || !sceneInteractionReady || questLocalModalRef.current || mobileMoreOpenRef.current) return;
+              const point = lease.cursor;
+              const tile = point ? tileFromScenePoint(point[0] * stagePresentation.virtualWidth / 1024, point[1] * stagePresentation.virtualHeight / 768) : null;
+              if (point && !tile) return;
+              skillBars.onCastSlot(lease, tile ? [tile.x, tile.y] : null);
+            }} /> : null}
+          <canvas ref={experienceDrawCanvasRef} className="hud-bar-draw-plan hud-bar-draw-plan-experience"
+            width={1004} height={8} aria-hidden="true" tabIndex={-1} />
+          <canvas ref={weightDrawCanvasRef} className="hud-bar-draw-plan hud-bar-draw-plan-weight"
+            width={76} height={12} aria-hidden="true" tabIndex={-1} />
+          <canvas
+            id="mir2-quest-ui-canvas"
+            className={(bevyHeroUiActive || bevyHeroUiTransitioning || bevyMailPageReady || bevyCharacterPageReady || bevySpellsPageReady || bevyHudUiReady || bevyQuestUiReady || bevyBagUiActive || bevyNpcShopUiActive || bevyNpcShopUiTransitioning || bevyStorageUiActive || bevyStorageUiTransitioning || hpOrbOwner || mpOrbOwner || experienceBarOwner || weightBarOwner) && screen === "game" ? "shared-quest-ui-visible" : undefined}
+            data-ui-interactive={bevyHeroUiActive || bevyHeroUiTransitioning || bevyMailPageReady || bevyCharacterPageReady || bevySpellsPageReady || bevyQuestUiCapturesPointer || bevyQuestWorldUiReady || bevyBagUiActive || bevyNpcShopUiActive || bevyNpcShopUiTransitioning || bevyStorageUiActive || bevyStorageUiTransitioning || bevyHudUiReady ? "true" : undefined}
+            style={{ ...storagePrepareCanvasStyle(bevyStoragePreparePresentation, sharedUiCanvasId(webGl2SharedCanvasPrototype)), pointerEvents: (bevyHeroUiActive || bevyHeroUiTransitioning || bevyMailPageReady || bevyCharacterPageReady || bevySpellsPageReady || bevyQuestUiCapturesPointer || bevyQuestWorldUiReady || bevyBagUiActive || bevyNpcShopUiActive || bevyNpcShopUiTransitioning || bevyStorageUiActive || bevyStorageUiTransitioning || bevyHudUiReady) ? "auto" : "none" }}
+            aria-label="Shared game windows"
+            tabIndex={-1}
+          />
+          {screen==='game'&&bevyMailComposeReady&&bevyMailTextContext&&mailTextPosition?<textarea
+            key={JSON.stringify([bevyMailTextContext.status.proof?.owner,bevyMailTextContext.status.proof?.incarnation,
+              bevyMailTextContext.status.proof?.draftEpoch,bevyMailTextContext.status.proof?.focusGeneration,
+              bevyMailTextContext.status.proof?.presentationRevision,bevyMailTextContext.status.proof?.layoutRevision,
+              bevyMailTextContext.status.textTarget,bevyMailTextContext.status.modal,bevyMailTextContext.status.inputEnabled,
+              mailDomRetireKey])}
+            ref={mailTextRef} aria-label={bevyMailTextContext.status.textTarget==='body'?'Mail message':'Mail prompt'} autoComplete="off" spellCheck={false}
+            data-mail-text-adapter="shared" style={mailTextPosition} defaultValue={bevyMailTextContext.status.textTarget==='body'?bevyMailTextContext.raw.body:bevyMailTextContext.status.promptText??''}
+            onChange={()=>{/* Rust or the existing Page prompt owner accepts input. */}}
+            onFocus={event=>{if(event.currentTarget===mailTextRef.current&&bevyMailTextContext.status.textTarget==='body')onBevyMailTextEdge?.({op:'focus',focused:true});}}
+            onBlur={event=>{if(mailDomCompositionRef.current?.element===event.currentTarget)retireMailDomComposition();
+              if(event.currentTarget===mailTextRef.current&&bevyMailTextContext.status.textTarget==='body')onBevyMailTextEdge?.({op:'focus',focused:false});}}
+            onKeyDown={event=>{
+              if(event.currentTarget!==mailTextRef.current)return;
+              if(mailDomCompositionRef.current!==null||event.nativeEvent.isComposing||event.nativeEvent.keyCode===229)return;
+              const target=bevyMailTextContext.status.textTarget;
+              if(target==='recipient'||target==='gold'){
+                if(event.key==='Enter'){event.preventDefault();const text=event.currentTarget.value,proof=bevyMailTextContext.status.proof;
+                  if(proof&&(bevyMailTextContext.status.promptText!==text||bevyMailTextContext.pendingEdges>0)){
+                    const pending={target,text,proof,element:event.currentTarget};pendingMailPromptConfirmRef.current=pending;
+                    if(bevyMailTextContext.pendingEdges===0&&!onBevyMailTextEdge?.({op:'promptReplace',target,text})&&
+                      pendingMailPromptConfirmRef.current===pending)pendingMailPromptConfirmRef.current=null;
+                  }else onBevyMailComposeAction?.(target==='recipient'?'recipientSubmit':'goldConfirm');}
+                else if(event.key==='Escape'){event.preventDefault();onBevyMailComposeAction?.(target==='recipient'?'recipientCancel':'goldCancel');}
+                return;
+              }
+              const key=event.key==='ArrowLeft'?'left':event.key==='ArrowRight'?'right':event.key==='ArrowUp'?'up':event.key==='ArrowDown'?'down':
+                event.key==='Home'?'home':event.key==='End'?'end':event.key==='Backspace'?'backspace':event.key==='Delete'?'delete':event.key==='Enter'?'enter':
+                (event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='a'?'selectAll':null;
+              if(key){event.preventDefault();mailKeyBeforeInputRef.current=key;
+                queueMicrotask(()=>{if(mailKeyBeforeInputRef.current===key)mailKeyBeforeInputRef.current=null;});
+                onBevyMailTextEdge?.({op:'key',key,control:event.ctrlKey||event.metaKey,shift:event.shiftKey});}
+            }}
+            onInput={event=>{if(event.currentTarget!==mailTextRef.current||mailDomCompositionRef.current!==null||
+              (event.nativeEvent as InputEvent).isComposing)return;
+              const target=bevyMailTextContext.status.textTarget;
+              if(target==='recipient'||target==='gold'){
+                const proof=bevyMailTextContext.status.proof,text=event.currentTarget.value;
+                const buffered=bufferedMailPromptRef.current;
+                const sameBuffered=Boolean(buffered&&buffered.element===event.currentTarget&&buffered.target===target&&proof&&
+                  sameComposeScope(buffered.proof,proof)&&buffered.proof.draftGeneration===proof.draftGeneration);
+                if(buffered&&!sameBuffered&&bufferedMailPromptRef.current===buffered)bufferedMailPromptRef.current=null;
+                if(sameBuffered&&buffered?.text===text)return;
+                const next=proof?{target,text,proof,element:event.currentTarget}:null;
+                if(next)bufferedMailPromptRef.current=next;
+                if(!onBevyMailTextEdge?.({op:'promptReplace',target,text})&&bufferedMailPromptRef.current===next)
+                  bufferedMailPromptRef.current=null;
+              }}}
+            onCompositionStart={event=>{if(event.currentTarget!==mailTextRef.current)return;
+              const target=bevyMailTextContext.status.textTarget,proof=bevyMailTextContext.status.proof;
+              if(target===null)return;
+              const prior=mailDomCompositionRef.current;
+              if(prior?.element===event.currentTarget&&prior.target===target&&prior.proof&&proof&&
+                sameComposeScope(prior.proof,proof)&&prior.proof.draftGeneration===proof.draftGeneration)return;
+              if(prior)retireMailDomComposition();
+              pendingMailPromptConfirmRef.current=null;mailKeyBeforeInputRef.current=null;
+              mailDomCompositionRef.current={target,proof,element:event.currentTarget};
+              if(target!=='body')return;
+              if(mailCompositionIdRef.current>=Number.MAX_SAFE_INTEGER){setMailTextInputNotice('Mail editor is updating; retry input');return;}
+              const id=++mailCompositionIdRef.current;mailCompositionActiveRef.current=id;mailCompositionEchoRef.current=null;
+              onBevyMailTextEdge?.({op:'imeStart',compositionId:id});}}
+            onCompositionUpdate={event=>{const id=mailCompositionActiveRef.current;if(event.currentTarget===mailDomCompositionRef.current?.element&&
+              currentMailDomComposition(bevyMailTextContext)&&bevyMailTextContext.status.textTarget==='body'&&id!==null)
+              onBevyMailTextEdge?.({op:'imePreview',compositionId:id,text:event.data,cursorUtf16:[event.data.length,event.data.length]});}}
+            onCompositionEnd={event=>{const active=mailDomCompositionRef.current,id=mailCompositionActiveRef.current;
+              if(!active||active.element!==event.currentTarget)return;
+              const current=currentMailDomComposition(bevyMailTextContext);
+              mailDomCompositionRef.current=null;mailCompositionActiveRef.current=null;
+              if(!current)return;
+              if(active?.target==='recipient'||active?.target==='gold'){
+                const target=active.target,text=event.currentTarget.value,proof=bevyMailTextContext.status.proof;
+                const next=proof?{target,text,proof,element:event.currentTarget}:null;
+                if(next)bufferedMailPromptRef.current=next;
+                if(!onBevyMailTextEdge?.({op:'promptReplace',target,text})){
+                  if(bufferedMailPromptRef.current===next)bufferedMailPromptRef.current=null;
+                  setMailTextInputNotice('Mail editor is updating; retry input');}
+                return;
+              }
+              if(id!==null&&active?.target==='body'){
+                const proof=bevyMailTextContext.status.proof;
+                if(onBevyMailTextEdge?.({op:'imeCommit',compositionId:id,text:event.data})&&proof)mailCompositionEchoRef.current={compositionId:id,proof};
+                else setMailTextInputNotice('Mail editor is updating; retry input');}}}
+            onSelect={event=>{if(event.currentTarget!==mailTextRef.current||mailDomCompositionRef.current!==null||
+              (event.nativeEvent as InputEvent).isComposing)return;
+              const current=bevyMailTextContext.status.caret,target=event.currentTarget;
+              const anchor=target.selectionDirection==='backward'?target.selectionEnd:target.selectionStart;
+              const caret=target.selectionDirection==='backward'?target.selectionStart:target.selectionEnd;
+              if(bevyMailTextContext.status.textTarget==='body'&&current&&(anchor!==current.anchorUtf16||caret!==current.caretUtf16))
+                onBevyMailTextEdge?.({op:'selection',anchorUtf16:anchor,caretUtf16:caret});}}
+            onCopy={event=>{if(bevyMailTextContext.status.textTarget!=='body')return;if(!onBevyMailClipboard?.('copy',{setData:(format,text)=>event.clipboardData.setData(format,text),
+              getData:format=>event.clipboardData.getData(format),preventDefault:()=>event.preventDefault()}))event.preventDefault();}}
+            onCut={event=>{if(bevyMailTextContext.status.textTarget!=='body')return;if(!onBevyMailClipboard?.('cut',{setData:(format,text)=>event.clipboardData.setData(format,text),
+              getData:format=>event.clipboardData.getData(format),preventDefault:()=>event.preventDefault()}))event.preventDefault();}}
+            onPaste={event=>{if(bevyMailTextContext.status.textTarget!=='body')return;if(!onBevyMailClipboard?.('paste',{setData:(format,text)=>event.clipboardData.setData(format,text),
+              getData:format=>{if(!Array.from(event.clipboardData.types).includes(format))throw Error('Synchronous clipboard text unavailable');
+                return event.clipboardData.getData(format);},preventDefault:()=>event.preventDefault()}))event.preventDefault();}}
+          />:null}
+          {screen==='game'&&(bevyMailComposePending||bevyMailTextContext?.pendingEdges)?<div role="status" className="mail-shared-loading">
+            {bevyMailComposePending?'Mail editor is loading…':'Applying mail edit…'}</div>:null}
+          {screen==='game'&&bevyMailComposeReady&&mailTextInputNotice?<div role="alert" className="mail-shared-loading">{mailTextInputNotice}</div>:null}
           {screen === "login" ? (
             <LoginOverlay
               language={language}
@@ -3367,8 +5778,10 @@ export function OriginalClientShell({
               password={password}
               loginBusy={loginBusy}
               loginError={loginError}
+              loginAuth={loginAuth}
               suiWallets={suiWallets}
               walletPickerOpen={walletPickerOpen}
+              dubheQr={dubheQr}
               dubheWalletUrl={dubheWalletUrl}
               onLanguageChange={onLanguageChange}
               onAccountIdChange={onAccountIdChange}
@@ -3378,8 +5791,11 @@ export function OriginalClientShell({
               onPasskeyLogin={onPasskeyLogin}
               onWalletPickerToggle={onWalletPickerToggle}
               onWalletLogin={onWalletLogin}
+              onDubheQrLogin={onDubheQrLogin}
+              onDubheQrCancel={onDubheQrCancel}
               onQuickEnter={onQuickEnter}
               onResetClient={onResetClient}
+              onOpenAccountSecurity={onOpenAccountSecurity}
             />
           ) : null}
           {screen === "select" ? (
@@ -3397,12 +5813,16 @@ export function OriginalClientShell({
               onLanguageChange={onLanguageChange}
               onSelectCharacter={onSelectCharacter}
               onEnterWorld={onEnterWorld}
-              onCreateCharacter={onCreateCharacter}
+              characterCreate={characterCreate}
               onDeleteCharacter={onDeleteCharacter}
               onIdentityLinkPasskey={onIdentityLinkPasskey}
               onIdentityLinkWallet={onIdentityLinkWallet}
               onExit={onExitSelect}
+              onOpenAccountSecurity={onOpenAccountSecurity}
             />
+          ) : null}
+          {screen === "game" && combatModes && !bevyQuestUiCapturesPointer && !showQuestLog ? (
+            <OriginalClientCombatModeControls {...combatModes} inSafeZone={world.inSafeZone} />
           ) : null}
           {screen === "game"
             ? (() => {
@@ -3415,32 +5835,61 @@ export function OriginalClientShell({
                   player,
                   logs,
                   chatMessage,
+                  chatUi, mapImageRouteSource, onMapImageRoute, onMapImageRoutePress, onMapRouteModalChange,
                   showInventory,
                   showCharacter,
                   showQuestLog,
+                  sharedQuestUiActive: bevyQuestUiReady,
+                  sharedQuestWorldUiActive: bevyQuestWorldUiReady,
+                  sharedBagUiActive: bevyBagUiActive,
+                  sharedStorageUiActive: bevyStorageUiActive || bevyStorageUiTransitioning,
+                  sharedHudUiActive: bevyHudUiReady,
+                  sharedHudPlan: bevyHudUiReady ? readBevyHudStatus?.()?.plan ?? null : null,
+                  experienceSpriteOwned: experienceDrawPlanOwner || experienceBarOwner,
+                  weightSpriteOwned: weightDrawPlanOwner || weightBarOwner,
+                  sharedCharacterStatsActive: bevyCharacterStatsReady || bevyCharacterPageReady || bevySpellsPageReady,
+                  inventoryInitialDeleteMode,
+                  onInventoryCompatibilityInteraction,
+                  onQuestUiModalChange,
+                  onHpOrbModalChange: setQuestLocalModalOpen,
+                  hpView: playerUiPreferences?.hpView ?? true,
                   activeInventoryTab,
                   activeCharacterTab,
                   storageServiceOpenVersion,
+                  storagePasswordOpenVersion,
                   npcShopService,
                   npcRepairService,
+                  npcRepairView, onSelectNpcRepair, onConfirmNpcRepair: confirmNpcRepairTarget,
+                  onToggleNpcRepairHold,
+                  npcRepairTargetSelection: npcRepairTargetSelection?.stamp === npcRepairView?.stamp ? npcRepairTargetSelection : null,
+                  onRegisterNpcRepairTarget: registerNpcRepairTarget,
+                  onNpcRepairBagPointerDown: beginNpcRepairPointer,
+                  onBagBeltPointerDown: beginCompatBagBeltPointer,
+                  onRegisterBeltTargets: registerBeltTargets,
+                  onFenceBeltMouse: fenceBagBeltMouse,
                   defaultChatExpanded: clientProfile.layout !== "touch",
                   onChatMessageChange,
                   onSendChat,
                   onRequestTrade,
                   onRentExpandedStorage,
+                  storageRentalPrompt, onConfirmStorageRental, onCancelStorageRental,
                   onLogout,
                   onToggleCharacter,
                   onToggleInventory,
                   onToggleQuestLog,
+                  onToggleOptions,
                   onCloseCharacter,
                   onCloseInventory,
+                  onCloseStorage,
+                  bevyNpcShopUiActive, bevyNpcShopUiTransitioning, getBevyNpcShopInputBlocked, npcShopTab, onNpcShopTabChange,
                   onCloseNpcShopService,
                   onCloseNpcRepairService,
                   onOpenCharacterTab,
-                  onOpenInventoryTab,
+                  onOpenInventoryTab: openNpcRepairBagPage,
                   onSelectNpcDialogTarget,
+                  npcDialogLanguage,
                   onSubmitNpcInput,
-                  onUseItem,
+                  onUseItem, onReadItemTooltip, onReadEquipmentItemTooltip,
                   onDropItem,
                   onEquipItem,
                   onRemoveItem,
@@ -3453,15 +5902,24 @@ export function OriginalClientShell({
                   onSetStoragePassword,
                   onRemoveStoragePassword,
                   onSellItem,
-                  onBuyNpcShopItem,
+                  onBuyNpcShopItem, onQuoteNpcShopItem,
                   onDropGold,
                   onRepairItem,
                   onSpecialRepairItem,
                   onCastSkill,
                   onClaimMail,
+                  mailOpen,
+                  onToggleMail,
                   onDeleteMail,
                   onBuyGameShopItem,
+                  cashGameShopSource, cashGameShopPending, onConfirmCashGameShopPurchase, onReadCashGameShopItemTooltip,
+                  cashPreviewSourceKey, onReadCashPreviewLayers, onTurnCashPreview, onGameShopVisibilityChange,
                   onSendClientCommand,
+                  fishingUi: fishingUi && { ...fishingUi,
+                    biteAnimation: fishingBiteStartedAt === null ? undefined : {
+                      startedAt: fishingBiteStartedAt,
+                      frame: fishingBiteButtonFrame(motionNow, fishingBiteStartedAt),
+                    } },
                   inputProfile: clientProfile.input,
                   gamepadFamily: clientProfile.gamepad.family,
                   onStartTutorial: () =>
@@ -3508,13 +5966,39 @@ export function OriginalClientShell({
               entityRenderState.enabled &&
               entityRenderState.entities.length === 0 &&
               !readinessSafetyExpired)) ? (
-            <div className="scene-loading-overlay" role="status" aria-live="polite">
-              <span className="scene-loading-spinner" aria-hidden="true" />
-              <span className="scene-loading-text">{sceneLoadingLabel}</span>
+            <div className="scene-loading-overlay">
+              {onRetrySceneLoad ? <>
+                <span className="scene-loading-text" role="alert">{sceneLoadingText ?? t("ui.sceneLoadUnavailable", [], "The map could not be loaded.")}</span>
+                <button type="button" className="scene-loading-retry" onClick={onRetrySceneLoad}>
+                  {t("ui.retry", [], "Retry")}
+                </button>
+              </> : <>
+                <span className="scene-loading-spinner" aria-hidden="true" />
+                <span className="scene-loading-text" role="status">{sceneLoadingText ?? sceneLoadingLabel}</span>
+              </>}
             </div>
           ) : null}
         </div>
       </section>
+      {allowStageExit ? (
+        <dialog ref={stageExitDialogRef} className="r16-stage-exit-dialog" aria-labelledby="r16-stage-exit-question"
+          onKeyDownCapture={(event) => {
+            if (event.key !== "Escape" || event.nativeEvent.isComposing) return;
+            event.preventDefault();
+            event.stopPropagation();
+            event.currentTarget.close();
+          }}>
+          <p id="r16-stage-exit-question">{t("ui.confirmReturnToCharacterSelect", [], "Leave this character and return to character selection?")}</p>
+          <div className="r16-stage-exit-actions">
+            <button type="button" onClick={() => stageExitDialogRef.current?.close()}>{t("shell.cancel", [], "Cancel")}</button>
+            <button type="button" onClick={() => {
+              if (!stageExitDialogRef.current?.open) return;
+              stageExitDialogRef.current.close();
+              onLogout();
+            }}>{t("shell.ok", [], "OK")}</button>
+          </div>
+        </dialog>
+      ) : null}
       {clientProfile.layout === "tv" && clientProfile.input === "gamepad" && screen !== "game" ? (
         <div className="mir-gamepad-hint" role="status">
           {t(
@@ -3525,40 +6009,42 @@ export function OriginalClientShell({
         </div>
       ) : null}
       <OriginalClientMobileControls
-        enabled={screen === "game" && sceneInteractionReady}
+        enabled={screen === "game" && sceneInteractionReady && !bevyQuestUiCapturesPointer && !bevyBagUiActive && !bevyStorageUiActive && !bevyStorageUiTransitioning && !bevyNpcShopUiActive && !bevyNpcShopUiTransitioning && !parityUiWorldBlocked && !bevyHeroUiWorldBlocked && !npcShopBlocksWorldInput(false)}
         forceVisible={clientProfile.layout === "touch" && clientProfile.input === "touch"}
         t={t}
         world={world}
         player={player}
         selectedEntity={selectedEntity}
-        onDirectionIntent={onViewportDirectionIntent}
+        onDirectionIntent={guardNpcShopGameplay(onViewportDirectionIntent)}
         onDirectionStop={onViewportDirectionStop}
-        onPrimaryTargetAction={onPrimaryTargetAction}
-        onApproachTarget={onApproachTarget}
-        onPickGroundDrop={onPickGroundDrop}
-        onToggleInventory={onToggleInventory}
-        onToggleCharacter={onToggleCharacter}
-        onCastSkill={onCastSkill}
-        onUseItem={onUseItem}
+        onPrimaryTargetAction={guardNpcShopGameplay(onPrimaryTargetAction)}
+        onApproachTarget={guardNpcShopGameplay(onApproachTarget)}
+        onPickGroundDrop={guardNpcShopGameplay(onPickGroundDrop)}
+        onToggleInventory={guardNpcShopGameplay(onToggleInventory)}
+        onToggleCharacter={guardNpcShopGameplay(onToggleCharacter)}
+        onToggleQuestLog={guardNpcShopGameplay(onToggleQuestLog)}
+        onSecondaryOpenChange={(open) => { if (!open || !npcShopBlocksWorldInput()) setMobileMoreOpen(open); }}
+        onCastSkill={guardNpcShopGameplay(onCastSkill)}
+        onUseItem={guardNpcShopGameplay(onUseItem)}
       />
       <OriginalClientGamepadControls
-        enabled={clientProfile.input === "gamepad"}
+        enabled={clientProfile.input === "gamepad" && !bevyNpcShopUiActive && !bevyNpcShopUiTransitioning && !parityUiWorldBlocked && !bevyHeroUiWorldBlocked && !npcShopBlocksWorldInput(false)}
         t={t}
         expectedProfile={clientProfile.gamepad}
         screen={screen}
-        gameplayReady={screen === "game" && sceneInteractionReady}
+        gameplayReady={screen === "game" && sceneInteractionReady && !bevyQuestUiCapturesPointer && !bevyNpcShopUiActive && !bevyNpcShopUiTransitioning && !parityUiWorldBlocked && !bevyHeroUiWorldBlocked && !npcShopBlocksWorldInput(false)}
         stageRootRef={stageFrameRef}
         world={world}
         player={player}
-        onDirectionIntent={onViewportDirectionIntent}
+        onDirectionIntent={guardNpcShopGameplay(onViewportDirectionIntent)}
         onDirectionStop={onViewportDirectionStop}
-        onPrimaryTargetAction={onPrimaryTargetAction}
-        onApproachTarget={onApproachTarget}
-        onPickGroundDrop={onPickGroundDrop}
-        onToggleInventory={onToggleInventory}
-        onToggleCharacter={onToggleCharacter}
-        onCastSkill={onCastSkill}
-        onUseItem={onUseItem}
+        onPrimaryTargetAction={guardNpcShopGameplay(onPrimaryTargetAction)}
+        onApproachTarget={guardNpcShopGameplay(onApproachTarget)}
+        onPickGroundDrop={guardNpcShopGameplay(onPickGroundDrop)}
+        onToggleInventory={guardNpcShopGameplay(onToggleInventory)}
+        onToggleCharacter={guardNpcShopGameplay(onToggleCharacter)}
+        onCastSkill={guardNpcShopGameplay(onCastSkill)}
+        onUseItem={guardNpcShopGameplay(onUseItem)}
       />
     </main>
   );
@@ -3658,6 +6144,7 @@ const SCENE_INTERACTION_MIN_PRELOADED_URLS = 24;
 // libraries ready" gate may never settle; without this bound the overlay can hang
 // forever while the world is already drawn behind it. Remaining assets keep loading.
 const SCENE_READINESS_SAFETY_MS = 3000;
+const ENTRY_FLOOR_RADIUS = 4;
 const EMPTY_MAP_TILE_DRAW_LIST: MapTileDraw[] = [];
 const EMPTY_STANDALONE_MAP_TILE_DRAW_LIST: MapStandaloneTileDraw[] = [];
 const EMPTY_STANDALONE_MAP_IMAGE_SOURCES: MapStandaloneTileImageSource[] = [];
@@ -3793,7 +6280,14 @@ function collectVisibleSceneAssetUrls(
       preloadPaths?: string[];
     } | null;
   }>,
-  options: { includeEntityPreloadPaths?: boolean; viewportLayout?: ViewportLayout } = {},
+  options: {
+    includeEntitySprites?: boolean;
+    includeEntityPreloadPaths?: boolean;
+    packedFloor?: R16EntrySpriteImages | null;
+    packedObjects?: R16EntrySpriteImages | null;
+    packedActors?: R16EntrySpriteImages | null;
+    viewportLayout?: ViewportLayout;
+  } = {},
 ) {
   const viewportLayout = options.viewportLayout ?? viewportLayoutForStage();
   const sceneCenterX = viewportLayout.stageWidth / 2;
@@ -3803,8 +6297,8 @@ function collectVisibleSceneAssetUrls(
       ...sprite,
       path: mapSpriteRenderPath(sprite.path),
       preloadPriority: 0,
-    })),
-    ...viewportMapSprites.floor.map((sprite) => ({
+    })).filter((sprite) => !options.packedObjects?.[sprite.path]),
+    ...viewportMapSprites.floor.filter((sprite) => !options.packedFloor?.[sprite.path]).map((sprite) => ({
       ...sprite,
       path: sprite.path,
       preloadPriority: sceneMapSpritePreloadPriority(sprite.kind),
@@ -3825,14 +6319,14 @@ function collectVisibleSceneAssetUrls(
     .map((sprite) => sprite.path);
   const entityUrls: string[] = [];
   const addEntityUrl = (url: string | null | undefined) => {
-    if (!url || entityUrls.includes(url)) {
+    if (!url || options.packedActors?.[url] || entityUrls.includes(url)) {
       return false;
     }
     entityUrls.push(url);
     return true;
   };
 
-  for (const { sprite } of viewportEntitySprites) {
+  for (const { sprite } of options.includeEntitySprites === false ? [] : viewportEntitySprites) {
     if (!sprite) continue;
 
     addEntityUrl(sprite.body?.path);
@@ -4256,7 +6750,9 @@ function buildBevyEntityRenderState({
       viewportLayout.entityLeftOrigin + entity.dx * VIEWPORT_CELL_WIDTH + cameraOffset.x + entityMotionOffset.x;
       const rootTop =
         viewportLayout.entityTopOrigin + entity.dy * VIEWPORT_CELL_HEIGHT + cameraOffset.y + entityMotionOffset.y;
-      const depth = viewportDepthForCell(entity.x, entity.y, viewportDepthPlayer, 64);
+      const depth = crystalEntityDepth(
+        entity, viewportDepthPlayer, entityMotionSnapshots[entity.objectId], motionNow,
+      );
       const layers = sprite
         ? [
             // Crystal draws the mount first, beneath every other layer (`DrawMount`).
@@ -4265,7 +6761,7 @@ function buildBevyEntityRenderState({
             ...(sprite.body ? [{ layer: sprite.body, role: "body", index: 0 }] : []),
             ...(sprite.hair ? [{ layer: sprite.hair, role: "hair", index: 0 }] : []),
             ...sprite.frontWeapons.map((layer, index) => ({ layer, role: "frontWeapon", index })),
-          ].map(({ layer, role, index }, order) => {
+          ].map(({ layer, role, index }) => {
             const atlasRectKey = bevyEntityAtlasRectKey(layer.path, layer.width, layer.height);
             const atlasRect = atlas?.rects[atlasRectKey];
             // Route the layer to the page its frame lives on (multi-page); for
@@ -4284,7 +6780,7 @@ function buildBevyEntityRenderState({
               top: rootTop + layer.y,
               width: layer.width,
               height: layer.height,
-              z: depth * 10 + order,
+              z: crystalEntityLayerDepth(depth.sortZ, role),
               opacity: entity.dead ? 0.45 : 1,
             };
           })
@@ -4296,6 +6792,7 @@ function buildBevyEntityRenderState({
         isSelf: isPlayer,
         gridX: entity.x,
         gridY: entity.y,
+        ...depth,
         ...(interpMotion
           ? {
               motionFromX: interpMotion.fromX,
@@ -4354,6 +6851,15 @@ function collectBevyEntityAtlasSources(
 
 function bevyEntityAtlasRectKey(path: string, width: number, height: number) {
   return `${path}|${Math.max(1, Math.ceil(width))}x${Math.max(1, Math.ceil(height))}`;
+}
+
+function entityBodyAtlasFrame(atlas: BevyEntityAtlasSnapshot | null, body: CrystalBodyFrame) {
+  const rect = atlas?.rects[bevyEntityAtlasRectKey(body.path, body.width, body.height)];
+  if (!atlas || !rect || rect.width !== body.width || rect.height !== body.height) return null;
+  const page = atlas.pages?.length ? atlas.pages[rect.pageIndex ?? 0] : atlas;
+  if (!page || rect.x < 0 || rect.y < 0 || rect.x + rect.width > page.width || rect.y + rect.height > page.height) return null;
+  const pixels = page.pixels?.length === page.width * page.height * 4 ? page.pixels : undefined;
+  return { pixels, imageUrl: page.imageUrl, width: page.width, left: rect.x, top: rect.y };
 }
 
 function bevyEntityAtlasKeyForSources(sources: BevyEntityAtlasSource[]) {

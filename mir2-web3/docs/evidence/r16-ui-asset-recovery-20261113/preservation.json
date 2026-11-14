@@ -1,0 +1,12 @@
+{
+  "checkedAt": "2026-11-13T00:11:11.681505+00:00",
+  "unchanged": 131,
+  "protected": 132,
+  "externalChangesNotEditedByThisTask": [
+    {
+      "path": "mir2-web3/docs/evidence/gateway-equip-logout-20261112/README.md",
+      "beforeSha256": "27056e1a96ab346bd4cdb7b570bfa38b65d0216284dc22f16c9d58edbee04a12",
+      "observedSha256": "21435cf0dc8230b80d199424a4282e8d0265275bc717b312772f142caea15ef7"
+    }
+  ]
+}

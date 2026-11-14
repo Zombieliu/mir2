@@ -1,0 +1,96 @@
+{
+  "schema": "mir2.web-r16-public-evidence-supplement-mapping/1",
+  "sourceRoot": "F:/mir2-builds/web-r16-20261104",
+  "baseArchive": {
+    "files": 45,
+    "bytes": 2105667,
+    "mappingFile": "mapping.json",
+    "mappingSha256": "223ef0a9cb7fc58c68197ec574723e3c47a36cc91fa8aec9b4580cb023a5fb09",
+    "validationFile": "validation.json",
+    "validationSha256": "11adbc258e2cda555d44711eace610e26d589742054ebb8c4c8d33370b60ca87",
+    "allPinsVerified": true,
+    "unchanged": true
+  },
+  "files": [
+    {
+      "source": "display-v16-skills-browser-r1/display-v16-skills-browser-proof.json",
+      "target": "supplement/display-v16-skills-browser-r1/display-v16-skills-browser-proof.json",
+      "role": "sealed-sanitized-scoped-language-proof",
+      "bytes": 31968,
+      "sha256": "17085615545fe9669966434c4e6433e70a7081a5f5413a1baa51030ae870e765",
+      "type": "scanned-text"
+    },
+    {
+      "source": "display-v16-skills-browser-r1/01-quest-diary-zh-CN.png",
+      "target": "supplement/display-v16-skills-browser-r1/01-quest-diary-zh-CN.png",
+      "role": "coordinator-viewed-masked-crop",
+      "bytes": 105158,
+      "sha256": "c72dcc9e97f0ffa1a9f6dafc48f5d7eb16d08f4ee9875c149847312ac33b4c5a",
+      "type": "approved-png"
+    },
+    {
+      "source": "display-v16-skills-browser-r1/02-skills-body-zh-CN.png",
+      "target": "supplement/display-v16-skills-browser-r1/02-skills-body-zh-CN.png",
+      "role": "coordinator-viewed-masked-crop",
+      "bytes": 69127,
+      "sha256": "ead3b7d7b1a387894370fb02b3529039152b388a2ea2946ecfa1ab78b4ddd204",
+      "type": "approved-png"
+    },
+    {
+      "source": "display-v16-skills-browser-r1/03-quest-diary-hi.png",
+      "target": "supplement/display-v16-skills-browser-r1/03-quest-diary-hi.png",
+      "role": "coordinator-viewed-masked-crop",
+      "bytes": 104683,
+      "sha256": "c1d05f1aca750c91befbdf822bdbc904aab526490d14180402da295e5a34cd12",
+      "type": "approved-png"
+    },
+    {
+      "source": "display-v16-skills-browser-r1/04-skills-body-hi.png",
+      "target": "supplement/display-v16-skills-browser-r1/04-skills-body-hi.png",
+      "role": "coordinator-viewed-masked-crop",
+      "bytes": 68946,
+      "sha256": "e0ff8eed9daad43cb489947f197b8277e65cd9e1a4ec72556e9693cb3e612b89",
+      "type": "approved-png"
+    },
+    {
+      "source": "display-v16-skills-browser-r2/display-v16-skills-browser-proof.json",
+      "target": "supplement/display-v16-skills-browser-r2/display-v16-skills-browser-proof.json",
+      "role": "sealed-sanitized-scoped-language-proof",
+      "bytes": 25049,
+      "sha256": "2995c212bb40421765d647ff6b97acc9ea7301ffdf4adcd951ce42c6c693bb36",
+      "type": "scanned-text"
+    },
+    {
+      "source": "display-v16-skills-browser-r2/01-quest-diary-ar.png",
+      "target": "supplement/display-v16-skills-browser-r2/01-quest-diary-ar.png",
+      "role": "coordinator-viewed-masked-crop",
+      "bytes": 103677,
+      "sha256": "3acf1023fda66a414637674ae92c5c6fe5c2110591e446a4a3152a364ddb2012",
+      "type": "approved-png"
+    },
+    {
+      "source": "display-v16-skills-browser-r2/02-skills-body-ar.png",
+      "target": "supplement/display-v16-skills-browser-r2/02-skills-body-ar.png",
+      "role": "coordinator-viewed-masked-crop",
+      "bytes": 68810,
+      "sha256": "c98e30157fe08a67fa999f2c1638d3c30a9bbd44790ba8c7ab3f1d0f5c2911e1",
+      "type": "approved-png"
+    },
+    {
+      "source": "display-v16-quest4-r2/quest4-belt-persisted-gear-partial-receipt.json",
+      "target": "supplement/display-v16-quest4-r2/quest4-belt-persisted-gear-partial-receipt.json",
+      "role": "sealed-potion-and-persisted-gear-partial",
+      "bytes": 18893,
+      "sha256": "1297f3d664eafedfc6586a6544f7973e73124d6c6768e76be0ea38c54bf7fe24",
+      "type": "scanned-text"
+    },
+    {
+      "source": "display-v16-quest4-r3/quest4-normal-revive-eight-neighbour-partial-receipt.json",
+      "target": "supplement/display-v16-quest4-r3/quest4-normal-revive-eight-neighbour-partial-receipt.json",
+      "role": "sealed-normal-revive-and-eight-neighbour-partial",
+      "bytes": 12532,
+      "sha256": "8075b38fbe22a1d609dee8ba7ac30d1e9e61754c5f6b588f59215e146dfb9031",
+      "type": "scanned-text"
+    }
+  ]
+}

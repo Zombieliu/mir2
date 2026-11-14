@@ -1,0 +1,189 @@
+{
+  "schema": "mir2.r16.web-skill-shortcuts.v1",
+  "passed": false,
+  "sourceHead": "870fdd4baa5ad205a91e39481d43f9a9416ecf32",
+  "scope": {
+    "isolatedFileWorld": true,
+    "ordinaryHeadlessWebUi": true,
+    "nativeProductionTransport": false,
+    "nativeRenderer": false,
+    "nativeWindow": false,
+    "copiedLevel30Fixture": true,
+    "production": false
+  },
+  "gateway": {
+    "sha256": "4d1a18644ef69eacdae0656fff1b8f49a4af1ae97ffcf6878ada86f5dff0ae0f",
+    "verifiedSourcePins": {
+      "apps/gateway/src/routing.rs": "c298d74a67aabcc5c509997eeb83073eb95a44f9ca2f49b893a9c54b9c54c42f",
+      "apps/simulation/src/runtime/drops.rs": "9648009ba5fa7ed50cf64aaf80833360c8c4fc1877a2494d9859c7f924c86c54",
+      "apps/simulation/src/runtime/inventory.rs": "e4d4b3f92354127e90b31abfdb694c384fd66705785d820a24bbef6ea9cbc8e3",
+      "apps/simulation/src/world_runtime.rs": "ce1484e2cae8671b8d8e027188cfa50a8f9140ec6bed31dfb69a4c58b33da39e"
+    },
+    "baselineGatewaySource": "df34e3b9b4f127e8097eb8bb682c9d95983ffdf9",
+    "changedGameFilesSinceBaseline": [
+      "mir2-web3/apps/gateway/src/routing.rs",
+      "mir2-web3/apps/gateway/src/routing/tests/trade_invitation_tests.rs",
+      "mir2-web3/apps/simulation/src/runtime/inventory.rs",
+      "mir2-web3/apps/simulation/src/runtime/session.rs",
+      "mir2-web3/apps/simulation/src/runtime/session_trade_reopen_tests.rs",
+      "mir2-web3/apps/simulation/src/world_runtime.rs"
+    ]
+  },
+  "fixture": {
+    "sha256": "b054480795febab34176ec35b2ee8e4ee858ba6cf79ffc20ee37bae660671c8a",
+    "class": "Wizard",
+    "originalOrdinaryBindingVerified": true,
+    "unchanged": true,
+    "isolatedStoreChanged": true
+  },
+  "stages": [
+    "reserve-private-loopback",
+    "prepare-frozen-web-source",
+    "web-ordinary-entry",
+    "ordinary-F11-bind-FireWall",
+    "ordinary-F11-bind-GreatFireBall"
+  ],
+  "browsers": [
+    {
+      "tag": "web-cast",
+      "received": {
+        "Connected": 1,
+        "ClientVersion": 1,
+        "LoginSuccess": 1,
+        "KeepAlive": 2,
+        "StartGame": 1,
+        "Chat": 1,
+        "UpdateNotice": 1,
+        "NewItemInfo": 151,
+        "MapInformation": 1,
+        "UserInformation": 1,
+        "NewQuestInfo": 200,
+        "NewRecipeInfo": 79,
+        "CompleteQuest": 1,
+        "ReceiveMail": 1,
+        "FriendUpdate": 1,
+        "GameShopInfo": 105,
+        "BaseStatsInfo": 1,
+        "ObjectSpell": 92,
+        "ObjectMonster": 7,
+        "ObjectNpc": 15,
+        "TimeOfDay": 1,
+        "ChangeAMode": 1,
+        "ChangePMode": 1,
+        "SwitchGroup": 2,
+        "DefaultNPC": 1,
+        "GuildBuffList": 3,
+        "NPCUpdate": 5,
+        "NPCResponse": 4,
+        "MentorUpdate": 2,
+        "LoverUpdate": 1,
+        "GuildStatus": 2,
+        "GuildMemberChange": 2,
+        "ObjectGuildNameChanged": 1,
+        "DeleteGroup": 1
+      },
+      "sent": {
+        "clientCapabilities": 2,
+        "setLanguage": 1,
+        "clientVersion": 1,
+        "login": 1,
+        "startGame": 1,
+        "keepAlive": 2,
+        "npcPurchaseOwner": 1,
+        "magicKey": 2
+      }
+    }
+  ],
+  "errors": [],
+  "web": {
+    "runtimeVersion": "bevy-0cd68510886134e0",
+    "sourcePageSha256": "b4918778aa2698b07fb8a80abc312cf179ddc6f41e1d9a1c01e10f90bf26baba",
+    "mode": "candidate",
+    "changedSource": {
+      "lib/bevy-combat-input.ts": "77075ec50d0e8e1df025ac7cedef943cf9c9012d03b748584cbf87c0a8e1d26e",
+      "scripts/test-bevy-combat-input.mjs": "df14fcb6ae65a0ec073936a27a55ffa70c364114f58c9862bb8d0833befe2525"
+    }
+  },
+  "initialSkills": [
+    {
+      "spell": "FireBall",
+      "key": "fireball",
+      "hotkey": 0,
+      "icon": 0,
+      "castKind": "target",
+      "mpCost": 3,
+      "delayMs": 1800
+    },
+    {
+      "spell": "GreatFireBall",
+      "key": "greatfireball",
+      "hotkey": 0,
+      "icon": 4,
+      "castKind": "target",
+      "mpCost": 5,
+      "delayMs": 1800
+    },
+    {
+      "spell": "FireWall",
+      "key": "firewall",
+      "hotkey": 0,
+      "icon": 21,
+      "castKind": "ground",
+      "mpCost": 30,
+      "delayMs": 1800
+    },
+    {
+      "spell": "Lightning",
+      "key": "lightning",
+      "hotkey": 0,
+      "icon": 9,
+      "castKind": "direction",
+      "mpCost": 38,
+      "delayMs": 1800
+    }
+  ],
+  "ordinary": [
+    {
+      "op": "F11 bind",
+      "spell": "FireWall",
+      "slot": 1,
+      "source": "content.magic.FireWall.description",
+      "wire": [
+        "magicKey"
+      ],
+      "readBack": true
+    }
+  ],
+  "initialUI": {
+    "hudNavigation": {
+      "characterOpen": false,
+      "characterPage": "character",
+      "bagOpen": false,
+      "questOpen": false
+    },
+    "combat": {
+      "frame": 15,
+      "identity": {
+        "connectionGeneration": 1,
+        "controllerRun": 2,
+        "ownerRevision": 1,
+        "playerObjectId": 1000,
+        "sessionGeneration": 1
+      },
+      "map": "0",
+      "modelRevision": 5,
+      "ready": true,
+      "revision": 5,
+      "version": 1
+    }
+  },
+  "failure": {
+    "message": "ordinary-skills-not-closed",
+    "messageSha256": "7332e0d3943bd40580f1c6be6265a68b84b625138ea4de6715040ed9cf1f9ac0",
+    "stage": "ordinary-F11-bind-GreatFireBall"
+  },
+  "stopped": {
+    "gateway": true,
+    "next": true
+  }
+}

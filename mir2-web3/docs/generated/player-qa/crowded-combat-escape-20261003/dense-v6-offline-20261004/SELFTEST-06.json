@@ -1,0 +1,164 @@
+{
+  "schema": "mir2.dense-fixture-pure-selftest.v6",
+  "createdUtc": "2026-10-04T11:19:32.848329+00:00",
+  "nodeClassifierTestsPassed": 29,
+  "nodeTransferTestsPassed": 10,
+  "nodeDeadEffectTestsPassed": 16,
+  "nodeDeathAttributionTestsPassed": 19,
+  "pythonFileAndWrapperTestsPassed": 14,
+  "gatewayProcessesStarted": 0,
+  "livePlayerStoresTouched": false,
+  "shortLivedPythonGuardTestChildrenOnly": true,
+  "syntheticReceiptTestsAreGameplayAcceptance": false,
+  "commands": [
+    {
+      "command": [
+        "node",
+        "--test",
+        "tests/observation.test.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "TAP version 13\n# Subtest: Seven distinct aimed real hostile cycles and positive owner hits qualify; all acceptance flags remain false\nok 1 - Seven distinct aimed real hostile cycles and positive owner hits qualify; all acceptance flags remain false\n  ---\n  duration_ms: 2.2782\n  type: 'test'\n  ...\n# Subtest: Two attackers repeated 20 times never count as seven\nok 2 - Two attackers repeated 20 times never count as seven\n  ---\n  duration_ms: 0.3819\n  type: 'test'\n  ...\n# Subtest: Seven Miss/zero damages, no exact HP loss, wrong facing or neutral AI fail qualification\nok 3 - Seven Miss/zero damages, no exact HP loss, wrong facing or neutral AI fail qualification\n  ---\n  duration_ms: 0.4664\n  type: 'test'\n  ...\n# Subtest: A live monster or static wall in either run cell removes legal exit; no walk-through\nok 4 - A live monster or static wall in either run cell removes legal exit; no walk-through\n  ---\n  duration_ms: 0.1533\n  type: 'test'\n  ...\n# Subtest: Delayed owner Struck is a visual receipt, not authority correction\nok 5 - Delayed owner Struck is a visual receipt, not authority correction\n  ---\n  duration_ms: 0.3368\n  type: 'test'\n  ...\n# Subtest: ACK bound retains late failure, incoming damage and old-position corrections\nok 6 - ACK bound retains late failure, incoming damage and old-position corrections\n  ---\n  duration_ms: 0.4033\n  type: 'test'\n  ...\n# Subtest: An escape with no incoming positive owner hit during pending wait stays inconclusive\nok 7 - An escape with no incoming positive owner hit during pending wait stays inconclusive\n  ---\n  duration_ms: 0.207\n  type: 'test'\n  ...\n# Subtest: Full 5-second stop collects snapshots and fails a drift at the end, without dropping failure\nok 8 - Full 5-second stop collects snapshots and fails a drift at the end, without dropping failure\n  ---\n  duration_ms: 0.3059\n  type: 'test'\n  ...\n# Subtest: Held stop allows at most one existing pending step then 5 seconds stable, rejects queued steps and late receipt\nok 9 - Held stop allows at most one existing pending step then 5 seconds stable, rejects queued steps and late receipt\n  ---\n  duration_ms: 0.4139\n  type: 'test'\n  ...\n# Subtest: Seven adjacent monsters do not prove full surround; eight and ordinary rejection are separate\nok 10 - Seven adjacent monsters do not prove full surround; eight and ordinary rejection are separate\n  ---\n  duration_ms: 0.5551\n  type: 'test'\n  ...\n# Subtest: Rounded zero percent or fabricated death without positive owner hit is not actual death lifecycle\nok 11 - Rounded zero percent or fabricated death without positive owner hit is not actual death lifecycle\n  ---\n  duration_ms: 0.2149\n  type: 'test'\n  ...\n# Subtest: Actual death blocks later movement/attack/eligible cast; a committed cast after dead inputs fails\nok 12 - Actual death blocks later movement/attack/eligible cast; a committed cast after dead inputs fails\n  ---\n  duration_ms: 1.3796\n  type: 'test'\n  ...\n# Subtest: Actual committed cast requires accepted ACK plus MP spend; effects after escape retained\nok 13 - Actual committed cast requires accepted ACK plus MP spend; effects after escape retained\n  ---\n  duration_ms: 0.6707\n  type: 'test'\n  ...\n# Subtest: Premature repeated cast uses real MP/cast receipts; second accepted cast or spend fails\nok 14 - Premature repeated cast uses real MP/cast receipts; second accepted cast or spend fails\n  ---\n  duration_ms: 0.5103\n  type: 'test'\n  ...\n# Subtest: Secrets are recursively redacted in nested errors and packet payloads without discarding failure\nok 15 - Secrets are recursively redacted in nested errors and packet payloads without discarding failure\n  ---\n  duration_ms: 0.3019\n  type: 'test'\n  ...\n# Subtest: Only explicit absolute receipt provenance can mark HP/MP exact; unknown and percentage zero stay unknown\nok 16 - Only explicit absolute receipt provenance can mark HP/MP exact; unknown and percentage zero stay unknown\n  ---\n  duration_ms: 0.4569\n  type: 'test'\n  ...\n# Subtest: Unknown/percentage HP decreases cannot qualify seven real owner hits\nok 17 - Unknown/percentage HP decreases cannot qualify seven real owner hits\n  ---\n  duration_ms: 0.6503\n  type: 'test'\n  ...\n# Subtest: Closed trial window and actual owner reject future/foreign death, ACK and cast receipt contamination\nok 18 - Closed trial window and actual owner reject future/foreign death, ACK and cast receipt contamination\n  ---\n  duration_ms: 0.3401\n  type: 'test'\n  ...\n# Subtest: Wrong spell receipts or mismatched actual Magic input cannot qualify the requested cast\nok 19 - Wrong spell receipts or mismatched actual Magic input cannot qualify the requested cast\n  ---\n  duration_ms: 0.198\n  type: 'test'\n  ...\n# Subtest: ObjectMagic cast=false or absent cast is preparation, not a committed requested spell pair\nok 20 - ObjectMagic cast=false or absent cast is preparation, not a committed requested spell pair\n  ---\n  duration_ms: 0.0994\n  type: 'test'\n  ...\n# Subtest: First paired cast and actual absolute MP spend must share the closed commitment window\nok 21 - First paired cast and actual absolute MP spend must share the closed commitment window\n  ---\n  duration_ms: 0.1188\n  type: 'test'\n  ...\n# Subtest: Early recast cannot pass from another first spell, preparation-only pair, or later MP spend\nok 22 - Early recast cannot pass from another first spell, preparation-only pair, or later MP spend\n  ---\n  duration_ms: 0.2354\n  type: 'test'\n  ...\n# Subtest: Early recast matches actual second spell and separates cast=false from an accepted cast\nok 23 - Early recast matches actual second spell and separates cast=false from an accepted cast\n  ---\n  duration_ms: 0.1078\n  type: 'test'\n  ...\n# Subtest: Owner Death or exact zero HP inside early-recast waiting is failure, never successful cooldown denial\nok 24 - Owner Death or exact zero HP inside early-recast waiting is failure, never successful cooldown denial\n  ---\n  duration_ms: 0.1516\n  type: 'test'\n  ...\n# Subtest: Unknown/percent zero and future/foreign death do not fabricate an early-recast failure\nok 25 - Unknown/percent zero and future/foreign death do not fabricate an early-recast failure\n  ---\n  duration_ms: 0.0812\n  type: 'test'\n  ...\n# Subtest: Dead caster cannot claim a barrier from absent, dead, distant or wrong-kind targets or wrong coordinates\nok 26 - Dead caster cannot claim a barrier from absent, dead, distant or wrong-kind targets or wrong coordinates\n  ---\n  duration_ms: 0.6814\n  type: 'test'\n  ...\n# Subtest: Dead caster needs actual known MP cost, sufficient absolute MP, learned spell and matching Magic input\nok 27 - Dead caster needs actual known MP cost, sufficient absolute MP, learned spell and matching Magic input\n  ---\n  duration_ms: 0.5809\n  type: 'test'\n  ...\n# Subtest: Dead Healing has an otherwise-valid self target; Warrior cast is explicitly not applicable\nok 28 - Dead Healing has an otherwise-valid self target; Warrior cast is explicitly not applicable\n  ---\n  duration_ms: 0.2206\n  type: 'test'\n  ...\n# Subtest: Dead cast eligibility cannot be borrowed from a future or another owner snapshot\nok 29 - Dead cast eligibility cannot be borrowed from a future or another owner snapshot\n  ---\n  duration_ms: 0.155\n  type: 'test'\n  ...\n1..29\n# tests 29\n# suites 0\n# pass 29\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 83.6458\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "node",
+        "--test",
+        "tests/dead-effects.test.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "TAP version 13\n# Subtest: known spell without ACK still fails on explicit absolute owner MP spend, including exact R17 Wizard/Taoist pattern\nok 1 - known spell without ACK still fails on explicit absolute owner MP spend, including exact R17 Wizard/Taoist pattern\n  ---\n  duration_ms: 2.5606\n  type: 'test'\n  ...\n# Subtest: victim-only target damage without independent owner evidence stays inconclusive and never gives a passed caster barrier\nok 2 - victim-only target damage without independent owner evidence stays inconclusive and never gives a passed caster barrier\n  ---\n  duration_ms: 0.2916\n  type: 'test'\n  ...\n# Subtest: material consumption keeps exact cross-grid UID totals and fails without cast ACK\nok 3 - material consumption keeps exact cross-grid UID totals and fails without cast ACK\n  ---\n  duration_ms: 0.3581\n  type: 'test'\n  ...\n# Subtest: HP rise with Dead=true stays inconclusive; actual owner-life/facing mutation fails without cast ACK\nok 4 - HP rise with Dead=true stays inconclusive; actual owner-life/facing mutation fails without cast ACK\n  ---\n  duration_ms: 0.6386\n  type: 'test'\n  ...\n# Subtest: unknown or percentage-only post-input MP cannot produce a passed cast-death proof\nok 5 - unknown or percentage-only post-input MP cannot produce a passed cast-death proof\n  ---\n  duration_ms: 0.438\n  type: 'test'\n  ...\n# Subtest: missing/invalid input, learned cost or target cannot borrow effects or create a passed barrier\nok 6 - missing/invalid input, learned cost or target cannot borrow effects or create a passed barrier\n  ---\n  duration_ms: 0.3076\n  type: 'test'\n  ...\n# Subtest: closed trial owner gate excludes foreign, future, before-input and wrong-target effects\nok 7 - closed trial owner gate excludes foreign, future, before-input and wrong-target effects\n  ---\n  duration_ms: 0.2221\n  type: 'test'\n  ...\n# Subtest: delayed previously committed projectile damage does not relabel a new dead Magic as executed\nok 8 - delayed previously committed projectile damage does not relabel a new dead Magic as executed\n  ---\n  duration_ms: 0.2194\n  type: 'test'\n  ...\n# Subtest: wrong-spell or cast=false receipts are excluded from committed cast proof, with no false passed barrier from wrong spell\nok 9 - wrong-spell or cast=false receipts are excluded from committed cast proof, with no false passed barrier from wrong spell\n  ---\n  duration_ms: 0.5172\n  type: 'test'\n  ...\n# Subtest: invalid or partial material observations cannot be called unchanged or manufacture consumption\nok 10 - invalid or partial material observations cannot be called unchanged or manufacture consumption\n  ---\n  duration_ms: 0.4691\n  type: 'test'\n  ...\n# Subtest: another actor committed before this dead input makes victim-only target damage unattributed, not this owner spell proof\nok 11 - another actor committed before this dead input makes victim-only target damage unattributed, not this owner spell proof\n  ---\n  duration_ms: 0.5746\n  type: 'test'\n  ...\n# Subtest: cached owner state cannot borrow another payload owner MP or positive HP/facing as authority\nok 12 - cached owner state cannot borrow another payload owner MP or positive HP/facing as authority\n  ---\n  duration_ms: 0.1499\n  type: 'test'\n  ...\n# Subtest: terminal cached or percentage zero without an absolute owner HP payload cannot pass death rejection\nok 13 - terminal cached or percentage zero without an absolute owner HP payload cannot pass death rejection\n  ---\n  duration_ms: 0.2777\n  type: 'test'\n  ...\n# Subtest: a later actual MP debit after an observed MP increase still fails, while future debit stays outside this case\nok 14 - a later actual MP debit after an observed MP increase still fails, while future debit stays outside this case\n  ---\n  duration_ms: 0.1441\n  type: 'test'\n  ...\n# Subtest: material unknown/unsafe identities cannot fabricate a debit or rejection pass; explicit identity zero is kept\nok 15 - material unknown/unsafe identities cannot fabricate a debit or rejection pass; explicit identity zero is kept\n  ---\n  duration_ms: 0.3241\n  type: 'test'\n  ...\n# Subtest: committed owner actions before requested Magic fail generic death, without borrowing them as that spell commitment\nok 16 - committed owner actions before requested Magic fail generic death, without borrowing them as that spell commitment\n  ---\n  duration_ms: 0.1166\n  type: 'test'\n  ...\n1..16\n# tests 16\n# suites 0\n# pass 16\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 64.4512\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "node",
+        "--test",
+        "tests/death-attribution.test.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "TAP version 13\n# Subtest: no observed other skill is not positive owner attribution for a victim-only target hit\nok 1 - no observed other skill is not positive owner attribution for a victim-only target hit\n  ---\n  duration_ms: 2.3506\n  type: 'test'\n  ...\n# Subtest: a different player physical attack needs no ObjectMagic and cannot be turned into this owner Magic\nok 2 - a different player physical attack needs no ObjectMagic and cannot be turned into this owner Magic\n  ---\n  duration_ms: 0.4092\n  type: 'test'\n  ...\n# Subtest: periodic poison, environment and unobserved projectile sources are observationally indistinguishable in victim-only packets\nok 3 - periodic poison, environment and unobserved projectile sources are observationally indistinguishable in victim-only packets\n  ---\n  duration_ms: 0.5004\n  type: 'test'\n  ...\n# Subtest: actual v4-style dead Attack then dead Magic at one target cannot attribute its single hit to either input\nok 4 - actual v4-style dead Attack then dead Magic at one target cannot attribute its single hit to either input\n  ---\n  duration_ms: 0.2181\n  type: 'test'\n  ...\n# Subtest: observed prior projectile and foreign magic contexts remain raw attribution candidates, never rejection proof\nok 5 - observed prior projectile and foreign magic contexts remain raw attribution candidates, never rejection proof\n  ---\n  duration_ms: 0.4904\n  type: 'test'\n  ...\n# Subtest: incoming damage to the Healing self-target is not proof of forbidden self Healing\nok 6 - incoming damage to the Healing self-target is not proof of forbidden self Healing\n  ---\n  duration_ms: 0.2491\n  type: 'test'\n  ...\n# Subtest: actual absolute owner MP debit still fails despite target attribution uncertainty or foreign cast context\nok 7 - actual absolute owner MP debit still fails despite target attribution uncertainty or foreign cast context\n  ---\n  duration_ms: 0.393\n  type: 'test'\n  ...\n# Subtest: independent material debit or a real matching true cast still fails with victim-only target effects\nok 8 - independent material debit or a real matching true cast still fails with victim-only target effects\n  ---\n  duration_ms: 0.2746\n  type: 'test'\n  ...\n# Subtest: source LevelUp HealthChanged before LevelChanged with Dead=true is a possible refill, not alive or a rejection pass\nok 9 - source LevelUp HealthChanged before LevelChanged with Dead=true is a possible refill, not alive or a rejection pass\n  ---\n  duration_ms: 0.3788\n  type: 'test'\n  ...\n# Subtest: LevelChanged before refill has the same conservative conclusion without an invented packet-order gate\nok 10 - LevelChanged before refill has the same conservative conclusion without an invented packet-order gate\n  ---\n  duration_ms: 0.3421\n  type: 'test'\n  ...\n# Subtest: HP rise alone with Dead=true or unknown life state cannot identify Healing or revival\nok 11 - HP rise alone with Dead=true or unknown life state cannot identify Healing or revival\n  ---\n  duration_ms: 0.3016\n  type: 'test'\n  ...\n# Subtest: future, stale and foreign LevelChanged cannot supply an owner refill exception or acceptance\nok 12 - future, stale and foreign LevelChanged cannot supply an owner refill exception or acceptance\n  ---\n  duration_ms: 0.4467\n  type: 'test'\n  ...\n# Subtest: level refill cannot erase a later real absolute MP debit after an observed MP increase\nok 13 - level refill cannot erase a later real absolute MP debit after an observed MP increase\n  ---\n  duration_ms: 0.1707\n  type: 'test'\n  ...\n# Subtest: LevelChanged does not excuse actual Dead=false, Revived or authoritative movement/facing\nok 14 - LevelChanged does not excuse actual Dead=false, Revived or authoritative movement/facing\n  ---\n  duration_ms: 0.3633\n  type: 'test'\n  ...\n# Subtest: foreign HealthChanged objectId must not borrow an owner cached absolute MP provenance\nok 15 - foreign HealthChanged objectId must not borrow an owner cached absolute MP provenance\n  ---\n  duration_ms: 0.118\n  type: 'test'\n  ...\n# Subtest: foreign HealthChanged cannot supply missing owner MP coverage or invent a mana failure\nok 16 - foreign HealthChanged cannot supply missing owner MP coverage or invent a mana failure\n  ---\n  duration_ms: 0.1181\n  type: 'test'\n  ...\n# Subtest: normal owned HealthChanged with no objectId or exact current owner still proves a real forbidden debit\nok 17 - normal owned HealthChanged with no objectId or exact current owner still proves a real forbidden debit\n  ---\n  duration_ms: 0.17\n  type: 'test'\n  ...\n# Subtest: missing or invalid actual learned Magic prerequisites cannot turn ambiguous HP/damage into a caster result\nok 18 - missing or invalid actual learned Magic prerequisites cannot turn ambiguous HP/damage into a caster result\n  ---\n  duration_ms: 0.2439\n  type: 'test'\n  ...\n# Subtest: uncertain attribution, source refill or independent failures never change global acceptance flags\nok 19 - uncertain attribution, source refill or independent failures never change global acceptance flags\n  ---\n  duration_ms: 0.4605\n  type: 'test'\n  ...\n1..19\n# tests 19\n# suites 0\n# pass 19\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 64.5946\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "node",
+        "--test",
+        "tests/transfer.test.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "TAP version 13\n# Subtest: nearest unreachable known entrance retains walls and selects a second legal reachable entrance\nok 1 - nearest unreachable known entrance retains walls and selects a second legal reachable entrance\n  ---\n  duration_ms: 2.9249\n  type: 'test'\n  ...\n# Subtest: all known entrances unreachable remains blocked without fabricated routes\nok 2 - all known entrances unreachable remains blocked without fabricated routes\n  ---\n  duration_ms: 1.0951\n  type: 'test'\n  ...\n# Subtest: forged candidate source or destination is rejected on continuation even with a forged live row\nok 3 - forged candidate source or destination is rejected on continuation even with a forged live row\n  ---\n  duration_ms: 1.0643\n  type: 'test'\n  ...\n# Subtest: wrong current map or collision map cannot reuse transfer override\nok 4 - wrong current map or collision map cannot reuse transfer override\n  ---\n  duration_ms: 0.5667\n  type: 'test'\n  ...\n# Subtest: NeedMove and NeedHole source records are rejected even when advertised live\nok 5 - NeedMove and NeedHole source records are rejected even when advertised live\n  ---\n  duration_ms: 0.1937\n  type: 'test'\n  ...\n# Subtest: missing or stale live candidate does not authorize a source entrance override\nok 6 - missing or stale live candidate does not authorize a source entrance override\n  ---\n  duration_ms: 0.494\n  type: 'test'\n  ...\n# Subtest: pending map snapshot and changed owner invalidate a previously selected entrance\nok 7 - pending map snapshot and changed owner invalidate a previously selected entrance\n  ---\n  duration_ms: 0.4945\n  type: 'test'\n  ...\n# Subtest: wrong live source map, key, target, bounds or destination rejects canonical candidate\nok 8 - wrong live source map, key, target, bounds or destination rejects canonical candidate\n  ---\n  duration_ms: 0.2095\n  type: 'test'\n  ...\n# Subtest: live actor occupying the reachable entrance or sole approach cannot be walked through\nok 9 - live actor occupying the reachable entrance or sole approach cannot be walked through\n  ---\n  duration_ms: 0.9436\n  type: 'test'\n  ...\n# Subtest: original map0 book doorway reproduces nearest single-entrance failure and finds legal alternate\nok 10 - original map0 book doorway reproduces nearest single-entrance failure and finds legal alternate\n  ---\n  duration_ms: 227.9804\n  type: 'test'\n  ...\n1..10\n# tests 10\n# suites 0\n# pass 10\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 291.281\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python.exe",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "test_capability_rejects_unowned_object_and_wrong_binary (test_seed.SeedTests.test_capability_rejects_unowned_object_and_wrong_binary) ... ok\r\ntest_collection_uid_guard_has_no_legacy_alias_or_slot_fallback (test_seed.SeedTests.test_collection_uid_guard_has_no_legacy_alias_or_slot_fallback) ... ok\r\ntest_duplicate_real_uids_across_inventory_belt_and_equipment_are_refused (test_seed.SeedTests.test_duplicate_real_uids_across_inventory_belt_and_equipment_are_refused) ... ok\r\ntest_exact_collection_uid_fields_accept_some_zero_and_u64_max_without_rewriting (test_seed.SeedTests.test_exact_collection_uid_fields_accept_some_zero_and_u64_max_without_rewriting) ... ok\r\ntest_hardlinked_store_and_symlink_ancestor_are_refused (test_seed.SeedTests.test_hardlinked_store_and_symlink_ancestor_are_refused) ... ok\r\ntest_owned_process_must_stop_zero_path_and_expected_hash_are_guarded (test_seed.SeedTests.test_owned_process_must_stop_zero_path_and_expected_hash_are_guarded) ... ok\r\ntest_recursive_diff_refuses_added_schema_fields_and_items (test_seed.SeedTests.test_recursive_diff_refuses_added_schema_fields_and_items) ... ok\r\ntest_schema_live_account_gm_item_uid_and_baseline_guards (test_seed.SeedTests.test_schema_live_account_gm_item_uid_and_baseline_guards) ... ok\r\ntest_source_vitals_exp_bounded_wallet_and_coherent_revisions (test_seed.SeedTests.test_source_vitals_exp_bounded_wallet_and_coherent_revisions) ... ok\r\ntest_travel_writes_only_map_transform_revision_preserves_uid_bind_hp_skills (test_seed.SeedTests.test_travel_writes_only_map_transform_revision_preserves_uid_bind_hp_skills) ... ok\r\ntest_uid_rejects_bool_string_null_missing_negative_float_and_u64_overflow (test_seed.SeedTests.test_uid_rejects_bool_string_null_missing_negative_float_and_u64_overflow) ... ok\r\ntest_all_false_acceptance_flags (test_wrapper.WrapperTests.test_all_false_acceptance_flags) ... ok\r\ntest_dangerous_inherited_mir2_flags_are_cleared_and_listeners_are_loopback_file (test_wrapper.WrapperTests.test_dangerous_inherited_mir2_flags_are_cleared_and_listeners_are_loopback_file) ... ok\r\ntest_missing_capacity_is_unknown_not_zero (test_wrapper.WrapperTests.test_missing_capacity_is_unknown_not_zero) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 14 tests in 1.079s\r\n\r\nOK\r\n"
+    },
+    {
+      "command": [
+        "node",
+        "--check",
+        "dense_network_driver.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "node",
+        "--check",
+        "dense_observation.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "node",
+        "--check",
+        "ordinary_transfer.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "node",
+        "--check",
+        "reclassify_actual_v4.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "node",
+        "dense_network_driver.mjs",
+        "--plan-staging"
+      ],
+      "exitCode": 0,
+      "stdout": "{\"map\":\"D021\",\"title\":\"WoomaTempleEntrance\",\"x\":59,\"y\":56,\"corridor\":[{\"x\":59,\"y\":55},{\"x\":59,\"y\":54},{\"x\":59,\"y\":53}],\"staticWalkable\":true,\"sourceValidated\":true,\"mapGzipSha256\":\"5e283984b31ee993c8d1157402f50d7e9d4984d8be92db49388c1e024e257ca2\",\"liveOccupancyVerified\":false,\"preparedTravel\":true}\n",
+      "stderr": ""
+    }
+  ],
+  "fullP1Accepted": false,
+  "nativeInputAccepted": false,
+  "nativeVisualAccepted": false,
+  "humanAccepted": false,
+  "ordinaryProgressionAccepted": false,
+  "loadAccepted": false,
+  "retainedOfflineEvidence": [
+    {
+      "relativePath": "RED-V5-PROTOTYPES-01.log",
+      "bytes": 6351,
+      "sha256": "602b3cd7315cc5893e801d8b8d5213576aa0e8a14e8bb5bd0ce43a258445b26a"
+    },
+    {
+      "relativePath": "RED-V5-ATTRIBUTION-01.log",
+      "bytes": 18675,
+      "sha256": "939f3d6fc3b3734b1f7d2e0e65f060094c3f8b2203bf384993e97e88037922e1"
+    },
+    {
+      "relativePath": "RED-V5-01.json",
+      "bytes": 1440,
+      "sha256": "8788965f82b096876793bff2c76c2de56b6d09bc47a4fe70c325272d72733508"
+    },
+    {
+      "relativePath": "GREEN-V6-PROTOTYPES-01.log",
+      "bytes": 4481,
+      "sha256": "1bc409cf49503eed4e58a7b16686746bd40c5ecd8be888c8404ce3ebf44f7c0e"
+    },
+    {
+      "relativePath": "GREEN-V6-ATTRIBUTION-01.log",
+      "bytes": 5144,
+      "sha256": "5d7d47b9735707855ca4cf0a41ba46171861c3a9e98033ceb785c4ed427fb3ed"
+    },
+    {
+      "relativePath": "RED-GREEN-06.json",
+      "bytes": 2838,
+      "sha256": "9344a29ce00e393177a215d057f94ddb15632d29383ac1adc38dedc71dc694b0"
+    },
+    {
+      "relativePath": "ACTUAL-V4-RECLASSIFIED-02.json",
+      "bytes": 334701,
+      "sha256": "de8d6b9dc24c00994b9713f64a1e33066bca6b69034914669b6f8f52b4248fc1"
+    }
+  ]
+}

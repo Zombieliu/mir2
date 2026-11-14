@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "args": [
+    "--test",
+    "apps/web/scripts/playtest-capacity-soak.test.mjs",
+    "apps/web/scripts/playtest-capacity-observability.test.mjs",
+    "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+    "apps/web/scripts/playtest-capacity-telemetry.test.mjs"
+  ],
+  "node": "v22.18.0",
+  "startedAtMs": 1792900086119,
+  "elapsedMs": 310605,
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "sourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+  "sourceSha256After": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+  "sourcePinsUnchangedAfterRun": true,
+  "sourcePins": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 224817,
+      "sha256": "de493f04c78bb961e2a5cfd230ce9c1e4843ec9057edf34ca055edaecaaf7c59"
+    }
+  ],
+  "exactSourceManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\full-v1-source-pins.json",
+    "bytes": 1796,
+    "sha256": "299f8abc13e8fb24aa5a18e7c67ad8ac19b8110a460d48de3d11bf77f3e5c67f"
+  },
+  "log": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\full-v1.log",
+    "bytes": 50385,
+    "sha256": "0b583d1989be3aaa1d8336dc97c9387fe0542b3eea751a87ef7706254a4976f7"
+  },
+  "counts": {
+    "tests": 187,
+    "pass": 187,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0
+  }
+}

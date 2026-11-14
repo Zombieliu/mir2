@@ -1,0 +1,1038 @@
+{
+  "schema": "mir2.r16.postcast-browser-verified.v1",
+  "comparisonSha256": "08b12b95c9cac0c093bdca2ac046de84d61a29d634fefcbd8ed54db4a14034b0",
+  "candidate": [
+    {
+      "tag": "final-shared-r2",
+      "receiptSha256": "91a51c9b6933dbb6d84f0cd7524845b29757eed963b32aa3ffb78d9234183872",
+      "base": "09e50e7fe0dd4047ea6eb2d5a1344e2a95f12617",
+      "productOverlay": {
+        "app/components/original-client-entity-animation-runtime.ts": "a96246d9c51e811af32419687739e35dad4dc0926ab9512c00b8769e4e62f3bc",
+        "app/original-client-shell.tsx": "50ee4a0285749806cb8a9467a539c04debaeb44f86e0b12c77bd8896af08e7b5"
+      },
+      "sources": {
+        "app/page.tsx": "233f7b8b5120d3e67bff944317af14289bb34d23aa9580ee45ea07cdae605d30",
+        "app/original-client-shell.tsx": "72d262f4cea9aff1a67aedc086e91cf247916659c0011ea0d97127137006277d",
+        "app/components/original-client-entity-animation-runtime.ts": "81d405140bb9f8759e40435cea9a9f0c0d0ccf88ceb7bcdd1ea111acd169e46c",
+        "app/components/original-client-scene-visual-layers.tsx": "c13a415ba69744fa7eb832755d34ea1ae096a4e206b416c03cd2a58c279fb744",
+        "app/components/original-client-scene-motion.ts": "40a5eb1fef9ad3c85b343058e340886452e10502d404220f6a6e7140d594f887",
+        "app/components/original-client-scene-rendering.tsx": "69b977941e92704ecf14027855d8366d071f6fef4145ddc7c53d6820e4d53da8",
+        "lib/world-fishing-source.ts": "ee24569a0ae5946397fff550784e7ef5a2e0bc62abb93a981bf3136a4c18c2f4",
+        "lib/r16-targeted-projectiles.ts": "4fef9947719cecb83db992bf41a70a3fbe8d023f12b23c64afa314e7792ef69e",
+        "lib/generated/bevy_runtime_version.json": "fceed58ba19d24a92ac8bf27258c9443f5e1126c32c5e4be7aa5860820cbc27b",
+        "lib/generated/client_core_runtime.json": "e15e592ca9ddd35f2755942642336820c5fffb9efe2ecf4b60e139a4dc948d50"
+      },
+      "diagnosticTap": {
+        "file": "app/components/original-client-entity-animation-runtime.ts",
+        "originalSha256": "a96246d9c51e811af32419687739e35dad4dc0926ab9512c00b8769e4e62f3bc",
+        "scratchSha256": "1422f38dd47b2964a933f37e259191c6f67cc236b9523db53383554e7a487dc6",
+        "instrumentationSha256": "cd618b4d3aeae2257c260e174a165dc2c6c9fa76ced0b36965017fb55f44f2da",
+        "advancesRuntime": false
+      },
+      "renderer": {
+        "backend": "webgl2",
+        "packageId": "webgl2-shared",
+        "booted": true,
+        "entityEnabled": false
+      },
+      "runtime": {
+        "bevy": "bevy-535f8e7a3b0707cb",
+        "bevyManifestSha256": "bee8e9c2a1891189ddaae46920759cc70156535b5e0a58759a80782612d9d65b",
+        "clientCore": {
+          "manifestSha256": "7db42b475aa372719ef4b74addc9153f27ab797e760dc6af10f36eaa71a3c6a6",
+          "presentation": "3ff6ec0dc63b458998d975312df2134136390f1e081b80764d651d4c3e697a93",
+          "sourceSha256": "da13922a1d56c48793abb312357b20d9ad5a6fd51992214f9509443852587c24",
+          "files": [
+            {
+              "section": "core",
+              "version": "f5ef7ac2517b54f5b757abaf5f0b60d67e778dac728a3034f0a27bc59d89ff10",
+              "name": "mir2_platform_web.js",
+              "sha256": "875090fd42d891cb003f63e46aaed848ead048f322e86ad5338db9a088fa01e7",
+              "bytes": 24393
+            },
+            {
+              "section": "core",
+              "version": "f5ef7ac2517b54f5b757abaf5f0b60d67e778dac728a3034f0a27bc59d89ff10",
+              "name": "mir2_platform_web_bg.wasm",
+              "sha256": "f05926c9eaf2bbd99c083f5087b61b6d6c290e238b693f6539a0096e2e96fb98",
+              "bytes": 247359
+            },
+            {
+              "section": "presentation",
+              "version": "3ff6ec0dc63b458998d975312df2134136390f1e081b80764d651d4c3e697a93",
+              "name": "mir2_platform_web.js",
+              "sha256": "8bbff9179937703b7fff70bbf3ea8136b46da027470427036a9bee11605c810c",
+              "bytes": 24721
+            },
+            {
+              "section": "presentation",
+              "version": "3ff6ec0dc63b458998d975312df2134136390f1e081b80764d651d4c3e697a93",
+              "name": "mir2_platform_web_bg.wasm",
+              "sha256": "0836ec2d40bb41a7b554557edd2a021cabbd06838c186372f974b85705fb107e",
+              "bytes": 261876
+            },
+            {
+              "section": "npcPurchase",
+              "version": "4fc17fc598d3461ab0cbd31580c9dffce3cf05ba6313ef19fc6628e55d61a9f1",
+              "name": "mir2_platform_web.js",
+              "sha256": "b6a3e9848e46934dd5187120ea543da5d174bf97f1a34d63ca9be714e0b18218",
+              "bytes": 8332
+            },
+            {
+              "section": "npcPurchase",
+              "version": "4fc17fc598d3461ab0cbd31580c9dffce3cf05ba6313ef19fc6628e55d61a9f1",
+              "name": "mir2_platform_web_bg.wasm",
+              "sha256": "a85623cef01a803cae3a35226b4ae3c4f517cd8ef2f5c42331cd4b0e0c02298a",
+              "bytes": 164095
+            }
+          ]
+        },
+        "loadedPresentation": [
+          {
+            "event": "response",
+            "at": 1794268729365,
+            "path": "/client-core/3ff6ec0dc63b458998d975312df2134136390f1e081b80764d651d4c3e697a93/mir2_platform_web.js",
+            "status": 200
+          },
+          {
+            "event": "response",
+            "at": 1794268729368,
+            "path": "/client-core/3ff6ec0dc63b458998d975312df2134136390f1e081b80764d651d4c3e697a93/mir2_platform_web_bg.wasm",
+            "status": 200
+          }
+        ]
+      },
+      "actor": {
+        "fixtureSha256": "3645dc2efd9f49333a57780250ad9092469a92fc995ab8defbe434ba0e64beab",
+        "fixtureUnchanged": true,
+        "normalLogout": true,
+        "freshLogin": true,
+        "diskSkill": {
+          "hotkey": 9,
+          "level": 0,
+          "experience": 474
+        },
+        "initialAmmo": 43,
+        "finalAmmo": 41
+      },
+      "cast": {
+        "target": "Hen",
+        "range": 7,
+        "hit": 5,
+        "realAuthority": {
+          "action": "spell",
+          "direction": "DownLeft",
+          "sourceRevision": 22,
+          "continuityRevision": 9,
+          "bridgeEpoch": 1,
+          "lastNowMs": 1794268761608,
+          "incarnation": 1
+        },
+        "sourceRevision": 22,
+        "evidenceRevision": 1
+      },
+      "walk": {
+        "from": [
+          300,
+          267
+        ],
+        "to": [
+          301,
+          267
+        ],
+        "requestSequence": 804,
+        "ackSequence": 805,
+        "commandToAckMs": 18,
+        "laterCastCommandsDuringObservation": 0,
+        "visualMotionStartedMs": -13,
+        "visualMotionExpiresMs": 587,
+        "sourceAckObservedMs": 17,
+        "oldSpellDeliveriesAfterAck": 0,
+        "retentionDeliveriesAfterAck": 19,
+        "ghostSpellAfterAck": null,
+        "firstStandingAuthorityAfterMotionMs": 686,
+        "returningAuthority": {
+          "action": "standing",
+          "direction": "Right",
+          "sourceRevision": 24,
+          "continuityRevision": 9,
+          "bridgeEpoch": 1,
+          "lastNowMs": 1794268764460,
+          "incarnation": 1
+        },
+        "transitions": [
+          {
+            "afterAckMs": -212,
+            "legacy": "standing",
+            "input": "spell",
+            "sameSpellToken": true,
+            "retainsConsumedSpell": false,
+            "inputKnown": true,
+            "sourceRevision": 23,
+            "body": "standing",
+            "queue": 0,
+            "authority": {
+              "action": "standing",
+              "direction": "Down",
+              "sourceRevision": 23,
+              "continuityRevision": 9,
+              "bridgeEpoch": 1,
+              "lastNowMs": 1794268763562,
+              "incarnation": 1
+            },
+            "atMovedTile": false
+          },
+          {
+            "afterAckMs": 17,
+            "legacy": "walking",
+            "input": "walking",
+            "sameSpellToken": false,
+            "retainsConsumedSpell": true,
+            "inputKnown": true,
+            "sourceRevision": 24,
+            "body": "walking",
+            "queue": 0,
+            "authority": {
+              "action": "walking",
+              "direction": "Right",
+              "sourceRevision": 24,
+              "continuityRevision": 9,
+              "bridgeEpoch": 1,
+              "lastNowMs": 1794268763791,
+              "incarnation": 1
+            },
+            "atMovedTile": true
+          },
+          {
+            "afterAckMs": 588,
+            "legacy": "walking",
+            "input": "standing",
+            "sameSpellToken": false,
+            "retainsConsumedSpell": true,
+            "inputKnown": true,
+            "sourceRevision": 24,
+            "body": "walking",
+            "queue": 0,
+            "authority": {
+              "action": "walking",
+              "direction": "Right",
+              "sourceRevision": 24,
+              "continuityRevision": 9,
+              "bridgeEpoch": 1,
+              "lastNowMs": 1794268764362,
+              "incarnation": 1
+            },
+            "atMovedTile": true
+          },
+          {
+            "afterAckMs": 686,
+            "legacy": "standing",
+            "input": "standing",
+            "sameSpellToken": false,
+            "retainsConsumedSpell": true,
+            "inputKnown": true,
+            "sourceRevision": 24,
+            "body": "standing",
+            "queue": 0,
+            "authority": {
+              "action": "standing",
+              "direction": "Right",
+              "sourceRevision": 24,
+              "continuityRevision": 9,
+              "bridgeEpoch": 1,
+              "lastNowMs": 1794268764460,
+              "incarnation": 1
+            },
+            "atMovedTile": true
+          }
+        ],
+        "frames": [
+          {
+            "afterAckMs": 1,
+            "action": "standing",
+            "frame": "2",
+            "asset": "/original-ui/CArmour/05/18.png"
+          },
+          {
+            "afterAckMs": 140,
+            "action": "walking",
+            "frame": "0",
+            "asset": "/original-ui/CArmour/05/44.png"
+          },
+          {
+            "afterAckMs": 796,
+            "action": "standing",
+            "frame": "0",
+            "asset": "/original-ui/CArmour/05/8.png"
+          }
+        ]
+      },
+      "secondCast": {
+        "searchMoves": [
+          {
+            "from": [
+              301,
+              267
+            ],
+            "to": [
+              300,
+              267
+            ],
+            "seq": 810,
+            "at": 1794268766044
+          },
+          {
+            "from": [
+              300,
+              267
+            ],
+            "to": [
+              299,
+              267
+            ],
+            "seq": 812,
+            "at": 1794268766638
+          },
+          {
+            "from": [
+              299,
+              267
+            ],
+            "to": [
+              298,
+              267
+            ],
+            "seq": 815,
+            "at": 1794268767249
+          },
+          {
+            "from": [
+              298,
+              267
+            ],
+            "to": [
+              296,
+              267
+            ],
+            "seq": 819,
+            "at": 1794268767951
+          },
+          {
+            "from": [
+              295,
+              267
+            ],
+            "to": [
+              293,
+              269
+            ],
+            "seq": 827,
+            "at": 1794268769114
+          },
+          {
+            "from": [
+              293,
+              269
+            ],
+            "to": [
+              291,
+              271
+            ],
+            "seq": 830,
+            "at": 1794268769793
+          },
+          {
+            "from": [
+              291,
+              271
+            ],
+            "to": [
+              289,
+              273
+            ],
+            "seq": 834,
+            "at": 1794268770377
+          },
+          {
+            "from": [
+              289,
+              273
+            ],
+            "to": [
+              288,
+              274
+            ],
+            "seq": 838,
+            "at": 1794268771106
+          },
+          {
+            "from": [
+              288,
+              274
+            ],
+            "to": [
+              288,
+              275
+            ],
+            "seq": 841,
+            "at": 1794268771681
+          },
+          {
+            "from": [
+              288,
+              275
+            ],
+            "to": [
+              286,
+              277
+            ],
+            "seq": 843,
+            "at": 1794268772304
+          }
+        ],
+        "target": {
+          "id": 200202,
+          "name": "Hen",
+          "range": 7
+        },
+        "command": {
+          "seq": 844,
+          "at": 1794268772944
+        },
+        "accepted": {
+          "seq": 850,
+          "at": 1794268773357
+        },
+        "hit": {
+          "seq": 853,
+          "at": 1794268773975,
+          "damage": 5
+        },
+        "firstKnownSpell": {
+          "at": 1794268773390,
+          "token": "world-fishing-source:1:action:2:attack:1794268773354:spell",
+          "pose": {
+            "objectId": "1000",
+            "incarnation": 1,
+            "animationState": "attackRange",
+            "action": "spell",
+            "direction": "DownLeft",
+            "logicalFrameIndex": 0,
+            "queueDepth": 0
+          },
+          "authority": {
+            "action": "spell",
+            "direction": "DownLeft",
+            "sourceRevision": 37,
+            "continuityRevision": 11,
+            "bridgeEpoch": 1,
+            "lastNowMs": 1794268773390,
+            "incarnation": 1
+          }
+        },
+        "firstLoadedBody": "/original-ui/CArmour/05/326.png",
+        "from": {
+          "skill": {
+            "hotkey": 9,
+            "level": 0,
+            "experience": 473
+          },
+          "mp": 257,
+          "equippedAmulets": 42
+        },
+        "after": {
+          "skill": {
+            "hotkey": 9,
+            "level": 0,
+            "experience": 474
+          },
+          "mp": 254,
+          "equippedAmulets": 41
+        }
+      },
+      "secondCastDiagnostic": {
+        "targetId": 200202,
+        "acceptedSequence": 850,
+        "hitSequence": 853,
+        "authoritativeEvidenceRevisions": [
+          2
+        ],
+        "newTokenFound": true,
+        "loadoutAfter": {
+          "skill": {
+            "hotkey": 9,
+            "level": 0,
+            "experience": 474
+          },
+          "mp": 254,
+          "equippedAmulets": 41
+        }
+      },
+      "preSecondCastMotion": {
+        "movements": 10,
+        "returnedToOriginalCastTile": {
+          "to": [
+            300,
+            267
+          ],
+          "ackSequence": 810,
+          "at": 1794268766044,
+          "body": "walking",
+          "retained": true
+        },
+        "originalSpellTokenDeliveries": 0,
+        "spellPoseFrames": 0
+      },
+      "images": [
+        {
+          "phase": "caster-spell",
+          "file": "caster-spell.jpg",
+          "sha256": "c8c4e91beb9618bcaaefdd220c92431f6b4d6a5365dcad0030999faee5cb0669",
+          "sampleOffsetMs": 5
+        },
+        {
+          "phase": "damage-number",
+          "file": "damage-number.jpg",
+          "sha256": "665be60296c41243332f684f5ac4adba784f2dfdb641cc791e29530a002b0e0b",
+          "sampleOffsetMs": -10
+        },
+        {
+          "phase": "postcast-walk",
+          "file": "postcast-walk.jpg",
+          "sha256": "4e1773cdba7affa375c75719e7b4c13af1fd82c76bbc4c31bce000f79c56aa50",
+          "sampleOffsetMs": 15
+        },
+        {
+          "phase": "projectile",
+          "file": "projectile-baseline.jpg",
+          "sha256": "665be60296c41243332f684f5ac4adba784f2dfdb641cc791e29530a002b0e0b",
+          "sampleOffsetMs": -10
+        },
+        {
+          "phase": "impact",
+          "file": "impact-baseline.jpg",
+          "sha256": "e484a1db626d1db51c0a1102bf5796485b7f0fcbc822ac92713f8a923f091229",
+          "sampleOffsetMs": -7
+        }
+      ]
+    },
+    {
+      "tag": "final-webgpu-r3",
+      "receiptSha256": "e985065de09150d8eb70bc1e9186a214ddbba7f1735e728a9e0f044d0b78c339",
+      "base": "09e50e7fe0dd4047ea6eb2d5a1344e2a95f12617",
+      "productOverlay": {
+        "app/components/original-client-entity-animation-runtime.ts": "a96246d9c51e811af32419687739e35dad4dc0926ab9512c00b8769e4e62f3bc",
+        "app/original-client-shell.tsx": "50ee4a0285749806cb8a9467a539c04debaeb44f86e0b12c77bd8896af08e7b5"
+      },
+      "sources": {
+        "app/page.tsx": "233f7b8b5120d3e67bff944317af14289bb34d23aa9580ee45ea07cdae605d30",
+        "app/original-client-shell.tsx": "72d262f4cea9aff1a67aedc086e91cf247916659c0011ea0d97127137006277d",
+        "app/components/original-client-entity-animation-runtime.ts": "81d405140bb9f8759e40435cea9a9f0c0d0ccf88ceb7bcdd1ea111acd169e46c",
+        "app/components/original-client-scene-visual-layers.tsx": "c13a415ba69744fa7eb832755d34ea1ae096a4e206b416c03cd2a58c279fb744",
+        "app/components/original-client-scene-motion.ts": "40a5eb1fef9ad3c85b343058e340886452e10502d404220f6a6e7140d594f887",
+        "app/components/original-client-scene-rendering.tsx": "69b977941e92704ecf14027855d8366d071f6fef4145ddc7c53d6820e4d53da8",
+        "lib/world-fishing-source.ts": "ee24569a0ae5946397fff550784e7ef5a2e0bc62abb93a981bf3136a4c18c2f4",
+        "lib/r16-targeted-projectiles.ts": "4fef9947719cecb83db992bf41a70a3fbe8d023f12b23c64afa314e7792ef69e",
+        "lib/generated/bevy_runtime_version.json": "fceed58ba19d24a92ac8bf27258c9443f5e1126c32c5e4be7aa5860820cbc27b",
+        "lib/generated/client_core_runtime.json": "e15e592ca9ddd35f2755942642336820c5fffb9efe2ecf4b60e139a4dc948d50"
+      },
+      "diagnosticTap": {
+        "file": "app/components/original-client-entity-animation-runtime.ts",
+        "originalSha256": "a96246d9c51e811af32419687739e35dad4dc0926ab9512c00b8769e4e62f3bc",
+        "scratchSha256": "1422f38dd47b2964a933f37e259191c6f67cc236b9523db53383554e7a487dc6",
+        "instrumentationSha256": "cd618b4d3aeae2257c260e174a165dc2c6c9fa76ced0b36965017fb55f44f2da",
+        "advancesRuntime": false
+      },
+      "renderer": {
+        "backend": "webgpu",
+        "packageId": "webgpu",
+        "booted": true,
+        "entityEnabled": false
+      },
+      "runtime": {
+        "bevy": "bevy-535f8e7a3b0707cb",
+        "bevyManifestSha256": "bee8e9c2a1891189ddaae46920759cc70156535b5e0a58759a80782612d9d65b",
+        "clientCore": {
+          "manifestSha256": "7db42b475aa372719ef4b74addc9153f27ab797e760dc6af10f36eaa71a3c6a6",
+          "presentation": "3ff6ec0dc63b458998d975312df2134136390f1e081b80764d651d4c3e697a93",
+          "sourceSha256": "da13922a1d56c48793abb312357b20d9ad5a6fd51992214f9509443852587c24",
+          "files": [
+            {
+              "section": "core",
+              "version": "f5ef7ac2517b54f5b757abaf5f0b60d67e778dac728a3034f0a27bc59d89ff10",
+              "name": "mir2_platform_web.js",
+              "sha256": "875090fd42d891cb003f63e46aaed848ead048f322e86ad5338db9a088fa01e7",
+              "bytes": 24393
+            },
+            {
+              "section": "core",
+              "version": "f5ef7ac2517b54f5b757abaf5f0b60d67e778dac728a3034f0a27bc59d89ff10",
+              "name": "mir2_platform_web_bg.wasm",
+              "sha256": "f05926c9eaf2bbd99c083f5087b61b6d6c290e238b693f6539a0096e2e96fb98",
+              "bytes": 247359
+            },
+            {
+              "section": "presentation",
+              "version": "3ff6ec0dc63b458998d975312df2134136390f1e081b80764d651d4c3e697a93",
+              "name": "mir2_platform_web.js",
+              "sha256": "8bbff9179937703b7fff70bbf3ea8136b46da027470427036a9bee11605c810c",
+              "bytes": 24721
+            },
+            {
+              "section": "presentation",
+              "version": "3ff6ec0dc63b458998d975312df2134136390f1e081b80764d651d4c3e697a93",
+              "name": "mir2_platform_web_bg.wasm",
+              "sha256": "0836ec2d40bb41a7b554557edd2a021cabbd06838c186372f974b85705fb107e",
+              "bytes": 261876
+            },
+            {
+              "section": "npcPurchase",
+              "version": "4fc17fc598d3461ab0cbd31580c9dffce3cf05ba6313ef19fc6628e55d61a9f1",
+              "name": "mir2_platform_web.js",
+              "sha256": "b6a3e9848e46934dd5187120ea543da5d174bf97f1a34d63ca9be714e0b18218",
+              "bytes": 8332
+            },
+            {
+              "section": "npcPurchase",
+              "version": "4fc17fc598d3461ab0cbd31580c9dffce3cf05ba6313ef19fc6628e55d61a9f1",
+              "name": "mir2_platform_web_bg.wasm",
+              "sha256": "a85623cef01a803cae3a35226b4ae3c4f517cd8ef2f5c42331cd4b0e0c02298a",
+              "bytes": 164095
+            }
+          ]
+        },
+        "loadedPresentation": [
+          {
+            "event": "response",
+            "at": 1794268908100,
+            "path": "/client-core/3ff6ec0dc63b458998d975312df2134136390f1e081b80764d651d4c3e697a93/mir2_platform_web.js",
+            "status": 200
+          },
+          {
+            "event": "response",
+            "at": 1794268908104,
+            "path": "/client-core/3ff6ec0dc63b458998d975312df2134136390f1e081b80764d651d4c3e697a93/mir2_platform_web_bg.wasm",
+            "status": 200
+          }
+        ]
+      },
+      "actor": {
+        "fixtureSha256": "3645dc2efd9f49333a57780250ad9092469a92fc995ab8defbe434ba0e64beab",
+        "fixtureUnchanged": true,
+        "normalLogout": true,
+        "freshLogin": true,
+        "diskSkill": {
+          "hotkey": 9,
+          "level": 0,
+          "experience": 476
+        },
+        "initialAmmo": 43,
+        "finalAmmo": 41
+      },
+      "cast": {
+        "target": "Hen",
+        "range": 7,
+        "hit": 5,
+        "realAuthority": {
+          "action": "spell",
+          "direction": "DownLeft",
+          "sourceRevision": 23,
+          "continuityRevision": 9,
+          "bridgeEpoch": 1,
+          "lastNowMs": 1794268940325,
+          "incarnation": 1
+        },
+        "sourceRevision": 23,
+        "evidenceRevision": 1
+      },
+      "walk": {
+        "from": [
+          300,
+          267
+        ],
+        "to": [
+          301,
+          267
+        ],
+        "requestSequence": 807,
+        "ackSequence": 808,
+        "commandToAckMs": 17,
+        "laterCastCommandsDuringObservation": 0,
+        "visualMotionStartedMs": -30,
+        "visualMotionExpiresMs": 570,
+        "sourceAckObservedMs": 85,
+        "oldSpellDeliveriesAfterAck": 0,
+        "retentionDeliveriesAfterAck": 21,
+        "ghostSpellAfterAck": null,
+        "firstStandingAuthorityAfterMotionMs": 774,
+        "returningAuthority": {
+          "action": "standing",
+          "direction": "Right",
+          "sourceRevision": 25,
+          "continuityRevision": 9,
+          "bridgeEpoch": 1,
+          "lastNowMs": 1794268943264,
+          "incarnation": 1
+        },
+        "transitions": [
+          {
+            "afterAckMs": -127,
+            "legacy": "standing",
+            "input": "spell",
+            "sameSpellToken": true,
+            "retainsConsumedSpell": false,
+            "inputKnown": true,
+            "sourceRevision": 24,
+            "body": "standing",
+            "queue": 0,
+            "authority": {
+              "action": "standing",
+              "direction": "Down",
+              "sourceRevision": 24,
+              "continuityRevision": 9,
+              "bridgeEpoch": 1,
+              "lastNowMs": 1794268942363,
+              "incarnation": 1
+            },
+            "atMovedTile": false
+          },
+          {
+            "afterAckMs": 85,
+            "legacy": "walking",
+            "input": "walking",
+            "sameSpellToken": false,
+            "retainsConsumedSpell": true,
+            "inputKnown": false,
+            "sourceRevision": 24,
+            "body": "walking",
+            "queue": 0,
+            "authority": null,
+            "atMovedTile": true
+          },
+          {
+            "afterAckMs": 91,
+            "legacy": "walking",
+            "input": "walking",
+            "sameSpellToken": false,
+            "retainsConsumedSpell": true,
+            "inputKnown": true,
+            "sourceRevision": 25,
+            "body": "walking",
+            "queue": 0,
+            "authority": {
+              "action": "walking",
+              "direction": "Right",
+              "sourceRevision": 25,
+              "continuityRevision": 9,
+              "bridgeEpoch": 1,
+              "lastNowMs": 1794268942581,
+              "incarnation": 1
+            },
+            "atMovedTile": true
+          },
+          {
+            "afterAckMs": 642,
+            "legacy": "standing",
+            "input": "standing",
+            "sameSpellToken": false,
+            "retainsConsumedSpell": true,
+            "inputKnown": true,
+            "sourceRevision": 25,
+            "body": "walking",
+            "queue": 0,
+            "authority": {
+              "action": "walking",
+              "direction": "Right",
+              "sourceRevision": 25,
+              "continuityRevision": 9,
+              "bridgeEpoch": 1,
+              "lastNowMs": 1794268943132,
+              "incarnation": 1
+            },
+            "atMovedTile": true
+          },
+          {
+            "afterAckMs": 774,
+            "legacy": "standing",
+            "input": "standing",
+            "sameSpellToken": false,
+            "retainsConsumedSpell": true,
+            "inputKnown": true,
+            "sourceRevision": 25,
+            "body": "standing",
+            "queue": 0,
+            "authority": {
+              "action": "standing",
+              "direction": "Right",
+              "sourceRevision": 25,
+              "continuityRevision": 9,
+              "bridgeEpoch": 1,
+              "lastNowMs": 1794268943264,
+              "incarnation": 1
+            },
+            "atMovedTile": true
+          }
+        ],
+        "frames": [
+          {
+            "afterAckMs": 1,
+            "action": "standing",
+            "frame": "2",
+            "asset": "/original-ui/CArmour/05/18.png"
+          },
+          {
+            "afterAckMs": 120,
+            "action": "walking",
+            "frame": "0",
+            "asset": "/original-ui/CArmour/05/44.png"
+          },
+          {
+            "afterAckMs": 902,
+            "action": "standing",
+            "frame": "0",
+            "asset": "/original-ui/CArmour/05/8.png"
+          }
+        ]
+      },
+      "secondCast": {
+        "searchMoves": [
+          {
+            "from": [
+              301,
+              267
+            ],
+            "to": [
+              300,
+              267
+            ],
+            "seq": 812,
+            "at": 1794268944621
+          },
+          {
+            "from": [
+              300,
+              267
+            ],
+            "to": [
+              298,
+              269
+            ],
+            "seq": 815,
+            "at": 1794268945275
+          },
+          {
+            "from": [
+              298,
+              269
+            ],
+            "to": [
+              296,
+              271
+            ],
+            "seq": 818,
+            "at": 1794268945991
+          },
+          {
+            "from": [
+              296,
+              271
+            ],
+            "to": [
+              294,
+              273
+            ],
+            "seq": 822,
+            "at": 1794268946614
+          },
+          {
+            "from": [
+              294,
+              273
+            ],
+            "to": [
+              292,
+              275
+            ],
+            "seq": 828,
+            "at": 1794268947336
+          },
+          {
+            "from": [
+              292,
+              275
+            ],
+            "to": [
+              290,
+              277
+            ],
+            "seq": 832,
+            "at": 1794268947932
+          },
+          {
+            "from": [
+              290,
+              277
+            ],
+            "to": [
+              288,
+              279
+            ],
+            "seq": 834,
+            "at": 1794268948563
+          },
+          {
+            "from": [
+              288,
+              279
+            ],
+            "to": [
+              286,
+              281
+            ],
+            "seq": 836,
+            "at": 1794268949191
+          }
+        ],
+        "target": {
+          "id": 200202,
+          "name": "Hen",
+          "range": 7
+        },
+        "command": {
+          "seq": 839,
+          "at": 1794268949825
+        },
+        "accepted": {
+          "seq": 845,
+          "at": 1794268950231
+        },
+        "hit": {
+          "seq": 848,
+          "at": 1794268950802,
+          "damage": 5
+        },
+        "firstKnownSpell": {
+          "at": 1794268950270,
+          "token": "world-fishing-source:1:action:2:attack:1794268950229:spell",
+          "pose": {
+            "objectId": "1000",
+            "incarnation": 1,
+            "animationState": "attackRange",
+            "action": "spell",
+            "direction": "UpLeft",
+            "logicalFrameIndex": 0,
+            "queueDepth": 0
+          },
+          "authority": {
+            "action": "spell",
+            "direction": "UpLeft",
+            "sourceRevision": 35,
+            "continuityRevision": 11,
+            "bridgeEpoch": 1,
+            "lastNowMs": 1794268950270,
+            "incarnation": 1
+          }
+        },
+        "firstLoadedBody": "/original-ui/CArmour/05/338.png",
+        "from": {
+          "skill": {
+            "hotkey": 9,
+            "level": 0,
+            "experience": 473
+          },
+          "mp": 257,
+          "equippedAmulets": 42
+        },
+        "after": {
+          "skill": {
+            "hotkey": 9,
+            "level": 0,
+            "experience": 476
+          },
+          "mp": 254,
+          "equippedAmulets": 41
+        }
+      },
+      "secondCastDiagnostic": {
+        "targetId": 200202,
+        "acceptedSequence": 845,
+        "hitSequence": 848,
+        "authoritativeEvidenceRevisions": [
+          2
+        ],
+        "newTokenFound": true,
+        "loadoutAfter": {
+          "skill": {
+            "hotkey": 9,
+            "level": 0,
+            "experience": 476
+          },
+          "mp": 254,
+          "equippedAmulets": 41
+        }
+      },
+      "preSecondCastMotion": {
+        "movements": 8,
+        "returnedToOriginalCastTile": {
+          "to": [
+            300,
+            267
+          ],
+          "ackSequence": 812,
+          "at": 1794268944621,
+          "body": "walking",
+          "retained": true
+        },
+        "originalSpellTokenDeliveries": 0,
+        "spellPoseFrames": 0
+      },
+      "images": [
+        {
+          "phase": "caster-spell",
+          "file": "caster-spell.jpg",
+          "sha256": "3e0862d8509c81988d5c2fdb3f67a37dab1d2718191aeaf3d1e1ee516f4ba8ec",
+          "sampleOffsetMs": 11
+        },
+        {
+          "phase": "damage-number",
+          "file": "damage-number.jpg",
+          "sha256": "09fa4f93e0408efa3e34f9ec32acd65e607a0a4f4010e26baeed2a57609a7495",
+          "sampleOffsetMs": 9
+        },
+        {
+          "phase": "postcast-walk",
+          "file": "postcast-walk.jpg",
+          "sha256": "280b4a2d5adc9d32cc3cc361872cc7e6300977703877d13f8496e58f1f083d43",
+          "sampleOffsetMs": 17
+        },
+        {
+          "phase": "postcast-standing",
+          "file": "postcast-standing.jpg",
+          "sha256": "b7203e50f22b50c782d9f13ec5c33d69b855d8e7f97b454c5bcadc823bf4d837",
+          "sampleOffsetMs": -4
+        },
+        {
+          "phase": "projectile",
+          "file": "projectile-baseline.jpg",
+          "sha256": "9f9387eac50b337886ce43a4ef7b0441d0eedb954b1b95f7bba6b40677e7eb71",
+          "sampleOffsetMs": -15
+        },
+        {
+          "phase": "impact",
+          "file": "impact-baseline.jpg",
+          "sha256": "2b2f01aba8c2371c870daf236c0bbb39b51a34f456337cf1bcf9f41669cb0224",
+          "sampleOffsetMs": -1
+        }
+      ]
+    }
+  ],
+  "retainedNegative": {
+    "run": "final-webgpu-r2",
+    "receiptSha256": "a103991c58f3a4f6697508c9c937f0befa87a6c7f6c53490d634269568035388",
+    "reason": "ordinary-second-target-field-route-unavailable"
+  },
+  "screenshot": {
+    "file": "postcast-walk.jpg",
+    "sha256": "4e1773cdba7affa375c75719e7b4c13af1fd82c76bbc4c31bce000f79c56aa50"
+  }
+}

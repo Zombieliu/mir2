@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "runId": "1793116142548-79a0e9ae",
+  "reportPath": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-probe-v1\\reports\\1793116142548-79a0e9ae.pvp-report.json",
+  "samplesPath": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-probe-v1\\reports\\1793116142548-79a0e9ae.pvp-samples.jsonl",
+  "startedAt": "2026-10-27T15:49:02.549Z",
+  "mode": "two-client-ordinary-pvp-functional-probe",
+  "durationSeconds": 30,
+  "durationIsMaximumBudget": true,
+  "indices": [
+    0,
+    1
+  ],
+  "attackResults": "legacy",
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "cleanupErrors": [],
+  "checks": {},
+  "ok": false,
+  "error": "Ambiguous HP658 identity",
+  "finishedAt": "2026-10-27T15:49:07.568Z",
+  "exerciseElapsedMs": null,
+  "totalElapsedMs": 5019
+}

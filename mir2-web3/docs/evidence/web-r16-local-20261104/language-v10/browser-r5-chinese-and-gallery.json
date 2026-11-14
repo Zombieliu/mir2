@@ -1,0 +1,553 @@
+{
+  "schema": "r16-language-browser-smoke/1",
+  "startedAt": "2026-11-04T09:13:28.629Z",
+  "passed": true,
+  "scope": {
+    "realUi": true,
+    "originalOrdinaryOwner": true,
+    "credentialSource": "friendly/private/world/state.local.json",
+    "walletOpened": false,
+    "privateQrCaptured": false,
+    "gameDataEdited": false,
+    "lessonsSent": 0,
+    "economicCommands": 0,
+    "modelInstructionsSent": 0,
+    "fullNativeWasmTenLanguageClaim": false
+  },
+  "phases": [
+    "local-public-expectations-and-private-owner",
+    "fresh-zh-CN-login",
+    "original-owner-ordinary-login-and-selection-languages",
+    "chinese-original-owner-cold-entry",
+    "ordinary-owner-card-selection",
+    "ordinary-owner-startgame-click",
+    "ordinary-owner-startgame-screen-ack",
+    "chinese-original-alo-read-only-records",
+    "alo-entry-ready-zh-CN",
+    "alo-entry-real-click-zh-CN",
+    "alo-dialog-open-ack-zh-CN",
+    "alo-private-view-read-ack-zh-CN",
+    "alo-policy-tab-real-click-zh-CN",
+    "alo-chinese-policy-visible-copy",
+    "alo-chinese-policy-safe-screenshot",
+    "alo-chinese-supply-tab",
+    "alo-chinese-resources-tab",
+    "final-ordinary-logout-chinese",
+    "clear-input-public-language-screenshots",
+    "complete"
+  ],
+  "checks": [
+    {
+      "name": "ten-complete-browser-dictionaries",
+      "passed": true,
+      "evidence": "previous-public-proof"
+    },
+    {
+      "name": "fresh-browser-zh-CN-default-and-native-menu-order-font-geometry",
+      "passed": true,
+      "evidence": "previous-public-proof"
+    },
+    {
+      "name": "all-ten-login-wallet-title-and-browser-settings-ui",
+      "passed": true,
+      "evidence": "previous-public-proof"
+    },
+    {
+      "name": "russian-preference-persists-through-real-reload",
+      "passed": true,
+      "evidence": "previous-public-proof"
+    },
+    {
+      "name": "fresh-browser-zh-HK-defaults-to-zh-TW",
+      "passed": true,
+      "evidence": "previous-public-proof"
+    },
+    {
+      "name": "russian-presentation-native-bag-group-and-companion-with-legal-wire-fallback",
+      "passed": true,
+      "evidence": "previous-public-proof"
+    },
+    {
+      "name": "original-owner-login-and-opaque-character-names-retained",
+      "passed": true
+    },
+    {
+      "name": "chinese-original-alo-policy-habits-resources-and-supply-records",
+      "passed": true
+    },
+    {
+      "name": "ordinary-logout-and-chinese-preference-restored",
+      "passed": true
+    }
+  ],
+  "languages": [
+    {
+      "language": "zh-CN",
+      "nativeLoginCaptions": true,
+      "walletEntryTitle": true,
+      "browserSettingsCaptions": true,
+      "dictionaryComplete": true
+    },
+    {
+      "language": "zh-TW",
+      "nativeLoginCaptions": true,
+      "walletEntryTitle": true,
+      "browserSettingsCaptions": true,
+      "dictionaryComplete": true
+    },
+    {
+      "language": "en",
+      "nativeLoginCaptions": true,
+      "walletEntryTitle": true,
+      "browserSettingsCaptions": true,
+      "dictionaryComplete": true
+    },
+    {
+      "language": "pt-BR",
+      "nativeLoginCaptions": true,
+      "walletEntryTitle": true,
+      "browserSettingsCaptions": true,
+      "dictionaryComplete": true
+    },
+    {
+      "language": "ru",
+      "nativeLoginCaptions": true,
+      "walletEntryTitle": true,
+      "browserSettingsCaptions": true,
+      "dictionaryComplete": true
+    },
+    {
+      "language": "hi",
+      "nativeLoginCaptions": true,
+      "walletEntryTitle": true,
+      "browserSettingsCaptions": true,
+      "dictionaryComplete": true
+    },
+    {
+      "language": "id",
+      "nativeLoginCaptions": true,
+      "walletEntryTitle": true,
+      "browserSettingsCaptions": true,
+      "dictionaryComplete": true
+    },
+    {
+      "language": "vi",
+      "nativeLoginCaptions": true,
+      "walletEntryTitle": true,
+      "browserSettingsCaptions": true,
+      "dictionaryComplete": true
+    },
+    {
+      "language": "th",
+      "nativeLoginCaptions": true,
+      "walletEntryTitle": true,
+      "browserSettingsCaptions": true,
+      "dictionaryComplete": true
+    },
+    {
+      "language": "ar",
+      "nativeLoginCaptions": true,
+      "walletEntryTitle": true,
+      "browserSettingsCaptions": true,
+      "dictionaryComplete": true
+    }
+  ],
+  "screenshots": [
+    "01-original-character-selection-zh-CN.png",
+    "02-alo-policy-zh-CN.png",
+    "03-alo-original-supply-zh-CN.png",
+    "04-alo-resources-zh-CN.png",
+    "05-final-chinese-logged-out.png",
+    "06-clear-native-ten-language-menu.png",
+    "07-clear-browser-settings-zh-CN.png",
+    "08-clear-browser-settings-hi.png",
+    "09-clear-browser-settings-ar.png"
+  ],
+  "errors": [],
+  "network": {
+    "failed": [],
+    "httpErrors": [],
+    "cancelled": [
+      {
+        "phase": "original-owner-ordinary-login-and-selection-languages",
+        "method": "GET",
+        "status": "cancelled",
+        "pathHash": "9eeb5fa233df82531dffea86ffb49fa4f48ac32bcba5fb5d93a58ab367fe0e40",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "original-owner-ordinary-login-and-selection-languages",
+        "method": "GET",
+        "status": "cancelled",
+        "pathHash": "59b575174e75b5bd4afcfbd6f7f338462fb173fabd1e9572382da322fe3dffef",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "final-ordinary-logout-chinese",
+        "method": "GET",
+        "status": "cancelled",
+        "pathHash": "b5a477466acb573db09051484a348dc305a615e912e5fd4fb8cdfc59b6aa0454",
+        "successfulResponseObserved": true
+      }
+    ],
+    "abortedDuringClose": 0
+  },
+  "console": {
+    "errorCount": 0,
+    "warningCount": 7,
+    "hashes": [
+      {
+        "phase": "alo-entry-ready-zh-CN",
+        "name": "warning",
+        "hash": "175c73d54d8d443a965a16a38ac036c2de536a3920f173064fd6837866b00186"
+      },
+      {
+        "phase": "alo-entry-ready-zh-CN",
+        "name": "warning",
+        "hash": "99f3b02ca9688a7b0ca534a10950444a19d6a3fb66c56cf03e095381e940700b"
+      },
+      {
+        "phase": "alo-entry-ready-zh-CN",
+        "name": "warning",
+        "hash": "cfc4b91612bb30f328c0191d3f05418ad94740347fc645ea8266e0f78016b5e1"
+      },
+      {
+        "phase": "alo-entry-ready-zh-CN",
+        "name": "warning",
+        "hash": "840919c1fbb9cef809b14a6b843b82a209835bda73082a186ab077e0bd830eaf"
+      },
+      {
+        "phase": "alo-entry-real-click-zh-CN",
+        "name": "warning",
+        "hash": "840919c1fbb9cef809b14a6b843b82a209835bda73082a186ab077e0bd830eaf"
+      },
+      {
+        "phase": "alo-entry-real-click-zh-CN",
+        "name": "warning",
+        "hash": "840919c1fbb9cef809b14a6b843b82a209835bda73082a186ab077e0bd830eaf"
+      },
+      {
+        "phase": "alo-entry-real-click-zh-CN",
+        "name": "warning",
+        "hash": "2c3b005966c94a5f6bb0c8cea07b63c9948ce9a3590a4821a62206b9db1fc940"
+      }
+    ]
+  },
+  "commands": {
+    "setLanguage": 4,
+    "login": 1,
+    "startGame": 1,
+    "companionControl": 5,
+    "logOut": 1
+  },
+  "companionReadCounts": {
+    "list": 1,
+    "view": 4
+  },
+  "wireLanguages": [
+    "zh-CN",
+    "en"
+  ],
+  "unknownCommandCount": 5,
+  "runtimeWindows": [
+    {
+      "language": "ru",
+      "window": "bag",
+      "active": true,
+      "ready": true,
+      "inputEnabled": true,
+      "ownerPresent": true,
+      "hostError": false,
+      "nativeError": false,
+      "revisionMatches": false,
+      "fullTranslationClaim": false
+    },
+    {
+      "language": "ru",
+      "window": "group",
+      "visible": true,
+      "fullTranslationClaim": false
+    }
+  ],
+  "hostErrors": [],
+  "packetStatuses": [
+    {
+      "phase": "original-owner-ordinary-login-and-selection-languages",
+      "method": "LoginSuccess",
+      "sequence": 8
+    },
+    {
+      "phase": "ordinary-owner-startgame-screen-ack",
+      "method": "StartGame",
+      "sequence": 11,
+      "status": 4
+    },
+    {
+      "phase": "ordinary-owner-startgame-screen-ack",
+      "method": "MapInformation",
+      "sequence": 17
+    },
+    {
+      "phase": "ordinary-owner-startgame-screen-ack",
+      "method": "UserInformation",
+      "sequence": 18
+    },
+    {
+      "phase": "final-ordinary-logout-chinese",
+      "method": "LogOutSuccess",
+      "sequence": 673
+    }
+  ],
+  "cleanup": {
+    "browserClosed": true,
+    "ordinaryLogout": true,
+    "chineseRestored": true
+  },
+  "source": {
+    "nativeCatalogSha256": "e8d8bf99c8e109a0e6e5fc028ec8ce97b6d927c47c8edbf329fe2ba7bc17c259",
+    "browserDictionarySha256": "66bff4eb7ecca9c3115333f1920648e78ab149e8ba31cb1442954e34dcc47a2f",
+    "browserDictionaryLanguages": 10,
+    "browserDictionaryEntries": 32
+  },
+  "previousEvidence": {
+    "directory": "language-v10-browser-r4",
+    "proofSha256": "fb9412321b234a4dbaf1fe098564671b42e3ebd9c198c4f40d5da8b59b37bf94",
+    "runPassed": false,
+    "successfulChecks": [
+      "ten-complete-browser-dictionaries",
+      "fresh-browser-zh-CN-default-and-native-menu-order-font-geometry",
+      "all-ten-login-wallet-title-and-browser-settings-ui",
+      "russian-preference-persists-through-real-reload",
+      "fresh-browser-zh-HK-defaults-to-zh-TW",
+      "russian-presentation-native-bag-group-and-companion-with-legal-wire-fallback"
+    ],
+    "screenshotCount": 6
+  },
+  "menu": {
+    "root": {
+      "x": 900,
+      "y": 823,
+      "width": 240,
+      "height": 29
+    },
+    "rootLogicalWidth": 240,
+    "menu": {
+      "x": 900,
+      "y": 517,
+      "width": 240,
+      "height": 302
+    },
+    "toggle": {
+      "x": 900,
+      "y": 823,
+      "width": 240,
+      "height": 29
+    },
+    "viewport": {
+      "width": 1280,
+      "height": 960
+    },
+    "buttons": [
+      {
+        "code": "zh-CN",
+        "label": "简体中文",
+        "pressed": true,
+        "rect": {
+          "x": 905,
+          "y": 522,
+          "width": 230,
+          "height": 27
+        },
+        "fontFamily": "\"Noto Sans CJK SC\", sans-serif",
+        "fontSize": "13px",
+        "fits": true
+      },
+      {
+        "code": "zh-TW",
+        "label": "繁體中文",
+        "pressed": false,
+        "rect": {
+          "x": 905,
+          "y": 551,
+          "width": 230,
+          "height": 27
+        },
+        "fontFamily": "\"Noto Sans TC\", sans-serif",
+        "fontSize": "13px",
+        "fits": true
+      },
+      {
+        "code": "en",
+        "label": "English",
+        "pressed": false,
+        "rect": {
+          "x": 905,
+          "y": 580,
+          "width": 230,
+          "height": 25
+        },
+        "fontFamily": "\"Noto Sans\", sans-serif",
+        "fontSize": "13px",
+        "fits": true
+      },
+      {
+        "code": "pt-BR",
+        "label": "Português (Brasil)",
+        "pressed": false,
+        "rect": {
+          "x": 905,
+          "y": 607,
+          "width": 230,
+          "height": 25
+        },
+        "fontFamily": "\"Noto Sans\", sans-serif",
+        "fontSize": "13px",
+        "fits": true
+      },
+      {
+        "code": "ru",
+        "label": "Русский",
+        "pressed": false,
+        "rect": {
+          "x": 905,
+          "y": 634,
+          "width": 230,
+          "height": 25
+        },
+        "fontFamily": "\"Noto Sans\", sans-serif",
+        "fontSize": "13px",
+        "fits": true
+      },
+      {
+        "code": "hi",
+        "label": "हिन्दी",
+        "pressed": false,
+        "rect": {
+          "x": 905,
+          "y": 661,
+          "width": 230,
+          "height": 27
+        },
+        "fontFamily": "\"Noto Sans Devanagari\", sans-serif",
+        "fontSize": "13px",
+        "fits": true
+      },
+      {
+        "code": "id",
+        "label": "Bahasa Indonesia",
+        "pressed": false,
+        "rect": {
+          "x": 905,
+          "y": 690,
+          "width": 230,
+          "height": 25
+        },
+        "fontFamily": "\"Noto Sans\", sans-serif",
+        "fontSize": "13px",
+        "fits": true
+      },
+      {
+        "code": "vi",
+        "label": "Tiếng Việt",
+        "pressed": false,
+        "rect": {
+          "x": 905,
+          "y": 717,
+          "width": 230,
+          "height": 25
+        },
+        "fontFamily": "\"Noto Sans\", sans-serif",
+        "fontSize": "13px",
+        "fits": true
+      },
+      {
+        "code": "th",
+        "label": "ไทย",
+        "pressed": false,
+        "rect": {
+          "x": 905,
+          "y": 744,
+          "width": 230,
+          "height": 30
+        },
+        "fontFamily": "\"Noto Sans Thai\", sans-serif",
+        "fontSize": "13px",
+        "fits": true
+      },
+      {
+        "code": "ar",
+        "label": "العربية",
+        "pressed": false,
+        "rect": {
+          "x": 905,
+          "y": 776,
+          "width": 230,
+          "height": 38
+        },
+        "fontFamily": "\"Noto Sans Arabic\", sans-serif",
+        "fontSize": "13px",
+        "fits": true
+      }
+    ]
+  },
+  "entryReadiness": [
+    {
+      "phase": "ordinary-owner-startgame-screen-ack",
+      "screen": "select",
+      "sceneAssetsPending": false,
+      "gameCanvasVisible": false,
+      "documentVisible": true
+    },
+    {
+      "phase": "ordinary-owner-startgame-screen-ack",
+      "screen": "select",
+      "sceneAssetsPending": false,
+      "gameCanvasVisible": false,
+      "documentVisible": true
+    },
+    {
+      "phase": "ordinary-owner-startgame-screen-ack",
+      "screen": "game",
+      "sceneAssetsPending": true,
+      "gameCanvasVisible": true,
+      "documentVisible": true
+    },
+    {
+      "phase": "ordinary-owner-startgame-screen-ack",
+      "screen": "game",
+      "sceneAssetsPending": true,
+      "gameCanvasVisible": true,
+      "documentVisible": true
+    },
+    {
+      "phase": "ordinary-owner-startgame-screen-ack",
+      "screen": "game",
+      "sceneAssetsPending": false,
+      "gameCanvasVisible": true,
+      "documentVisible": true
+    }
+  ],
+  "alo": {
+    "sameArchive": true,
+    "sameResident": true,
+    "sameRealm": true,
+    "sameWorld": true,
+    "originalActorCharacter": true,
+    "policyVersion": 2,
+    "habitsEnabledCount": 3,
+    "resourcesKnown": true,
+    "gold": 10,
+    "hpPotionCount": 2,
+    "supplyCompleted": true,
+    "supplyReceiptKnown": true,
+    "supplyChargedGold": 40,
+    "supplyAcquiredQuantity": 1,
+    "supplyReturned": true,
+    "feedbackCount": 0,
+    "episodeCount": 20,
+    "originalRecordsUnchanged": true,
+    "modelCallCounterKnown": true,
+    "modelCallCounterUnchanged": true
+  },
+  "finishedAt": "2026-11-04T09:14:00.392Z"
+}

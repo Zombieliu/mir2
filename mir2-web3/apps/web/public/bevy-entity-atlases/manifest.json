@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "kind": "mir2-bevy-entity-atlas-manifest",
-  "generatedAt": "2026-08-27T13:18:44.044Z",
+  "generatedAt": "2026-09-20T16:23:49.593Z",
   "atlases": [
     {
       "key": "starter-bichon-base",
@@ -136076,10 +136076,2275 @@
       "contentHash": "6db74a8130230b71e02b3cba9ffb4c311de495b89257a025fd0d9e3392ebf8e2",
       "category": "entities",
       "padding": 1
+    },
+    {
+      "key": "hooking-cat",
+      "label": "Entity atlas: hooking-cat",
+      "width": 512,
+      "height": 4096,
+      "sourceCount": 224,
+      "imageBytes": 630040,
+      "rgbaBytes": 8388608,
+      "roots": [
+        "Monster/006"
+      ],
+      "imageUrl": "/bevy-entity-atlases/hooking-cat.png",
+      "sha256": "2102df985c82359a4d9bfee382c734996c25692e08669dc38173f6b81b436173",
+      "pages": [
+        {
+          "imageUrl": "/bevy-entity-atlases/hooking-cat.png",
+          "width": 512,
+          "height": 4096,
+          "imageBytes": 630040,
+          "sha256": "2102df985c82359a4d9bfee382c734996c25692e08669dc38173f6b81b436173"
+        }
+      ],
+      "rects": [
+        {
+          "key": "/original-ui/Monster/006/0.png|64x56",
+          "x": 1,
+          "y": 2672,
+          "width": 64,
+          "height": 56,
+          "pageIndex": 0,
+          "offsetX": 2,
+          "offsetY": -33
+        },
+        {
+          "key": "/original-ui/Monster/006/1.png|64x56",
+          "x": 66,
+          "y": 2672,
+          "width": 64,
+          "height": 56,
+          "pageIndex": 0,
+          "offsetX": 2,
+          "offsetY": -33
+        },
+        {
+          "key": "/original-ui/Monster/006/10.png|56x64",
+          "x": 379,
+          "y": 2119,
+          "width": 56,
+          "height": 64,
+          "pageIndex": 0,
+          "offsetX": 19,
+          "offsetY": -29
+        },
+        {
+          "key": "/original-ui/Monster/006/100.png|88x92",
+          "x": 110,
+          "y": 522,
+          "width": 88,
+          "height": 92,
+          "pageIndex": 0,
+          "offsetX": -15,
+          "offsetY": -56
+        },
+        {
+          "key": "/original-ui/Monster/006/101.png|100x76",
+          "x": 394,
+          "y": 1125,
+          "width": 100,
+          "height": 76,
+          "pageIndex": 0,
+          "offsetX": 6,
+          "offsetY": -43
+        },
+        {
+          "key": "/original-ui/Monster/006/102.png|68x80",
+          "x": 329,
+          "y": 1044,
+          "width": 68,
+          "height": 80,
+          "pageIndex": 0,
+          "offsetX": 2,
+          "offsetY": -50
+        },
+        {
+          "key": "/original-ui/Monster/006/103.png|76x64",
+          "x": 1,
+          "y": 2054,
+          "width": 76,
+          "height": 64,
+          "pageIndex": 0,
+          "offsetX": 4,
+          "offsetY": -30
+        },
+        {
+          "key": "/original-ui/Monster/006/104.png|88x60",
+          "x": 397,
+          "y": 2249,
+          "width": 88,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": -25,
+          "offsetY": -24
+        },
+        {
+          "key": "/original-ui/Monster/006/105.png|64x72",
+          "x": 224,
+          "y": 1433,
+          "width": 64,
+          "height": 72,
+          "pageIndex": 0,
+          "offsetX": -14,
+          "offsetY": -32
+        },
+        {
+          "key": "/original-ui/Monster/006/106.png|72x108",
+          "x": 82,
+          "y": 114,
+          "width": 72,
+          "height": 108,
+          "pageIndex": 0,
+          "offsetX": -10,
+          "offsetY": -65
+        },
+        {
+          "key": "/original-ui/Monster/006/107.png|88x76",
+          "x": 1,
+          "y": 1206,
+          "width": 88,
+          "height": 76,
+          "pageIndex": 0,
+          "offsetX": 0,
+          "offsetY": -37
+        },
+        {
+          "key": "/original-ui/Monster/006/108.png|88x76",
+          "x": 90,
+          "y": 1206,
+          "width": 88,
+          "height": 76,
+          "pageIndex": 0,
+          "offsetX": 4,
+          "offsetY": -40
+        },
+        {
+          "key": "/original-ui/Monster/006/109.png|64x72",
+          "x": 289,
+          "y": 1433,
+          "width": 64,
+          "height": 72,
+          "pageIndex": 0,
+          "offsetX": 6,
+          "offsetY": -24
+        },
+        {
+          "key": "/original-ui/Monster/006/11.png|52x64",
+          "x": 58,
+          "y": 2184,
+          "width": 52,
+          "height": 64,
+          "pageIndex": 0,
+          "offsetX": 19,
+          "offsetY": -29
+        },
+        {
+          "key": "/original-ui/Monster/006/110.png|68x68",
+          "x": 147,
+          "y": 1786,
+          "width": 68,
+          "height": 68,
+          "pageIndex": 0,
+          "offsetX": -18,
+          "offsetY": -30
+        },
+        {
+          "key": "/original-ui/Monster/006/111.png|64x80",
+          "x": 1,
+          "y": 1125,
+          "width": 64,
+          "height": 80,
+          "pageIndex": 0,
+          "offsetX": -6,
+          "offsetY": -46
+        },
+        {
+          "key": "/original-ui/Monster/006/112.png|80x104",
+          "x": 1,
+          "y": 223,
+          "width": 80,
+          "height": 104,
+          "pageIndex": 0,
+          "offsetX": -6,
+          "offsetY": -69
+        },
+        {
+          "key": "/original-ui/Monster/006/113.png|92x80",
+          "x": 417,
+          "y": 963,
+          "width": 92,
+          "height": 80,
+          "pageIndex": 0,
+          "offsetX": -15,
+          "offsetY": -46
+        },
+        {
+          "key": "/original-ui/Monster/006/114.png|92x68",
+          "x": 195,
+          "y": 1648,
+          "width": 92,
+          "height": 68,
+          "pageIndex": 0,
+          "offsetX": 2,
+          "offsetY": -29
+        },
+        {
+          "key": "/original-ui/Monster/006/115.png|64x68",
+          "x": 423,
+          "y": 1786,
+          "width": 64,
+          "height": 68,
+          "pageIndex": 0,
+          "offsetX": -2,
+          "offsetY": -25
+        },
+        {
+          "key": "/original-ui/Monster/006/116.png|56x64",
+          "x": 436,
+          "y": 2119,
+          "width": 56,
+          "height": 64,
+          "pageIndex": 0,
+          "offsetX": -4,
+          "offsetY": -33
+        },
+        {
+          "key": "/original-ui/Monster/006/117.png|80x76",
+          "x": 353,
+          "y": 1206,
+          "width": 80,
+          "height": 76,
+          "pageIndex": 0,
+          "offsetX": -9,
+          "offsetY": -50
+        },
+        {
+          "key": "/original-ui/Monster/006/118.png|108x96",
+          "x": 235,
+          "y": 328,
+          "width": 108,
+          "height": 96,
+          "pageIndex": 0,
+          "offsetX": -13,
+          "offsetY": -67
+        },
+        {
+          "key": "/original-ui/Monster/006/119.png|80x104",
+          "x": 82,
+          "y": 223,
+          "width": 80,
+          "height": 104,
+          "pageIndex": 0,
+          "offsetX": -19,
+          "offsetY": -65
+        },
+        {
+          "key": "/original-ui/Monster/006/12.png|52x72",
+          "x": 419,
+          "y": 1433,
+          "width": 52,
+          "height": 72,
+          "pageIndex": 0,
+          "offsetX": 11,
+          "offsetY": -24
+        },
+        {
+          "key": "/original-ui/Monster/006/120.png|72x72",
+          "x": 78,
+          "y": 1433,
+          "width": 72,
+          "height": 72,
+          "pageIndex": 0,
+          "offsetX": 0,
+          "offsetY": -34
+        },
+        {
+          "key": "/original-ui/Monster/006/121.png|72x68",
+          "x": 159,
+          "y": 1717,
+          "width": 72,
+          "height": 68,
+          "pageIndex": 0,
+          "offsetX": -20,
+          "offsetY": -31
+        },
+        {
+          "key": "/original-ui/Monster/006/122.png|72x60",
+          "x": 155,
+          "y": 2371,
+          "width": 72,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": -5,
+          "offsetY": -33
+        },
+        {
+          "key": "/original-ui/Monster/006/123.png|80x64",
+          "x": 268,
+          "y": 1989,
+          "width": 80,
+          "height": 64,
+          "pageIndex": 0,
+          "offsetX": 4,
+          "offsetY": -41
+        },
+        {
+          "key": "/original-ui/Monster/006/124.png|108x80",
+          "x": 1,
+          "y": 963,
+          "width": 108,
+          "height": 80,
+          "pageIndex": 0,
+          "offsetX": -4,
+          "offsetY": -58
+        },
+        {
+          "key": "/original-ui/Monster/006/125.png|68x112",
+          "x": 86,
+          "y": 1,
+          "width": 68,
+          "height": 112,
+          "pageIndex": 0,
+          "offsetX": -8,
+          "offsetY": -81
+        },
+        {
+          "key": "/original-ui/Monster/006/126.png|60x80",
+          "x": 66,
+          "y": 1125,
+          "width": 60,
+          "height": 80,
+          "pageIndex": 0,
+          "offsetX": -5,
+          "offsetY": -39
+        },
+        {
+          "key": "/original-ui/Monster/006/127.png|68x64",
+          "x": 151,
+          "y": 2054,
+          "width": 68,
+          "height": 64,
+          "pageIndex": 0,
+          "offsetX": -16,
+          "offsetY": -33
+        },
+        {
+          "key": "/original-ui/Monster/006/128.png|100x68",
+          "x": 336,
+          "y": 1579,
+          "width": 100,
+          "height": 68,
+          "pageIndex": 0,
+          "offsetX": -1,
+          "offsetY": -41
+        },
+        {
+          "key": "/original-ui/Monster/006/129.png|76x60",
+          "x": 256,
+          "y": 2310,
+          "width": 76,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": -3,
+          "offsetY": -33
+        },
+        {
+          "key": "/original-ui/Monster/006/13.png|52x72",
+          "x": 1,
+          "y": 1506,
+          "width": 52,
+          "height": 72,
+          "pageIndex": 0,
+          "offsetX": 12,
+          "offsetY": -24
+        },
+        {
+          "key": "/original-ui/Monster/006/130.png|100x60",
+          "x": 1,
+          "y": 2249,
+          "width": 100,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": 4,
+          "offsetY": -30
+        },
+        {
+          "key": "/original-ui/Monster/006/131.png|80x52",
+          "x": 152,
+          "y": 2786,
+          "width": 80,
+          "height": 52,
+          "pageIndex": 0,
+          "offsetX": 10,
+          "offsetY": -27
+        },
+        {
+          "key": "/original-ui/Monster/006/132.png|72x68",
+          "x": 232,
+          "y": 1717,
+          "width": 72,
+          "height": 68,
+          "pageIndex": 0,
+          "offsetX": 9,
+          "offsetY": -24
+        },
+        {
+          "key": "/original-ui/Monster/006/133.png|68x68",
+          "x": 216,
+          "y": 1786,
+          "width": 68,
+          "height": 68,
+          "pageIndex": 0,
+          "offsetX": 14,
+          "offsetY": -27
+        },
+        {
+          "key": "/original-ui/Monster/006/134.png|72x76",
+          "x": 82,
+          "y": 1283,
+          "width": 72,
+          "height": 76,
+          "pageIndex": 0,
+          "offsetX": 3,
+          "offsetY": -25
+        },
+        {
+          "key": "/original-ui/Monster/006/135.png|56x76",
+          "x": 155,
+          "y": 1283,
+          "width": 56,
+          "height": 76,
+          "pageIndex": 0,
+          "offsetX": 10,
+          "offsetY": -24
+        },
+        {
+          "key": "/original-ui/Monster/006/136.png|84x60",
+          "x": 90,
+          "y": 2310,
+          "width": 84,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": -20,
+          "offsetY": -25
+        },
+        {
+          "key": "/original-ui/Monster/006/137.png|72x68",
+          "x": 305,
+          "y": 1717,
+          "width": 72,
+          "height": 68,
+          "pageIndex": 0,
+          "offsetX": -9,
+          "offsetY": -19
+        },
+        {
+          "key": "/original-ui/Monster/006/138.png|88x68",
+          "x": 288,
+          "y": 1648,
+          "width": 88,
+          "height": 68,
+          "pageIndex": 0,
+          "offsetX": -26,
+          "offsetY": -31
+        },
+        {
+          "key": "/original-ui/Monster/006/139.png|84x64",
+          "x": 183,
+          "y": 1989,
+          "width": 84,
+          "height": 64,
+          "pageIndex": 0,
+          "offsetX": -28,
+          "offsetY": -24
+        },
+        {
+          "key": "/original-ui/Monster/006/14.png|52x72",
+          "x": 54,
+          "y": 1506,
+          "width": 52,
+          "height": 72,
+          "pageIndex": 0,
+          "offsetX": 12,
+          "offsetY": -23
+        },
+        {
+          "key": "/original-ui/Monster/006/140.png|64x84",
+          "x": 414,
+          "y": 793,
+          "width": 64,
+          "height": 84,
+          "pageIndex": 0,
+          "offsetX": -6,
+          "offsetY": -50
+        },
+        {
+          "key": "/original-ui/Monster/006/141.png|64x64",
+          "x": 220,
+          "y": 2054,
+          "width": 64,
+          "height": 64,
+          "pageIndex": 0,
+          "offsetX": -19,
+          "offsetY": -28
+        },
+        {
+          "key": "/original-ui/Monster/006/142.png|76x84",
+          "x": 337,
+          "y": 793,
+          "width": 76,
+          "height": 84,
+          "pageIndex": 0,
+          "offsetX": -11,
+          "offsetY": -54
+        },
+        {
+          "key": "/original-ui/Monster/006/143.png|64x64",
+          "x": 285,
+          "y": 2054,
+          "width": 64,
+          "height": 64,
+          "pageIndex": 0,
+          "offsetX": -7,
+          "offsetY": -37
+        },
+        {
+          "key": "/original-ui/Monster/006/144.png|96x68",
+          "x": 1,
+          "y": 1648,
+          "width": 96,
+          "height": 68,
+          "pageIndex": 0,
+          "offsetX": -1,
+          "offsetY": -42
+        },
+        {
+          "key": "/original-ui/Monster/006/145.png|108x68",
+          "x": 122,
+          "y": 1579,
+          "width": 108,
+          "height": 68,
+          "pageIndex": 0,
+          "offsetX": -12,
+          "offsetY": -43
+        },
+        {
+          "key": "/original-ui/Monster/006/146.png|108x96",
+          "x": 344,
+          "y": 328,
+          "width": 108,
+          "height": 96,
+          "pageIndex": 0,
+          "offsetX": -3,
+          "offsetY": -59
+        },
+        {
+          "key": "/original-ui/Monster/006/147.png|120x104",
+          "x": 155,
+          "y": 114,
+          "width": 120,
+          "height": 104,
+          "pageIndex": 0,
+          "offsetX": -9,
+          "offsetY": -66
+        },
+        {
+          "key": "/original-ui/Monster/006/148.png|112x96",
+          "x": 122,
+          "y": 328,
+          "width": 112,
+          "height": 96,
+          "pageIndex": 0,
+          "offsetX": -4,
+          "offsetY": -58
+        },
+        {
+          "key": "/original-ui/Monster/006/149.png|100x88",
+          "x": 223,
+          "y": 615,
+          "width": 100,
+          "height": 88,
+          "pageIndex": 0,
+          "offsetX": -13,
+          "offsetY": -40
+        },
+        {
+          "key": "/original-ui/Monster/006/15.png|52x72",
+          "x": 107,
+          "y": 1506,
+          "width": 52,
+          "height": 72,
+          "pageIndex": 0,
+          "offsetX": 12,
+          "offsetY": -24
+        },
+        {
+          "key": "/original-ui/Monster/006/150.png|92x64",
+          "x": 1,
+          "y": 1989,
+          "width": 92,
+          "height": 64,
+          "pageIndex": 0,
+          "offsetX": -22,
+          "offsetY": -12
+        },
+        {
+          "key": "/original-ui/Monster/006/151.png|104x68",
+          "x": 231,
+          "y": 1579,
+          "width": 104,
+          "height": 68,
+          "pageIndex": 0,
+          "offsetX": -23,
+          "offsetY": -25
+        },
+        {
+          "key": "/original-ui/Monster/006/152.png|100x64",
+          "x": 340,
+          "y": 1924,
+          "width": 100,
+          "height": 64,
+          "pageIndex": 0,
+          "offsetX": -18,
+          "offsetY": -20
+        },
+        {
+          "key": "/original-ui/Monster/006/153.png|100x56",
+          "x": 265,
+          "y": 2554,
+          "width": 100,
+          "height": 56,
+          "pageIndex": 0,
+          "offsetX": -23,
+          "offsetY": -12
+        },
+        {
+          "key": "/original-ui/Monster/006/154.png|100x60",
+          "x": 102,
+          "y": 2249,
+          "width": 100,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": 4,
+          "offsetY": -30
+        },
+        {
+          "key": "/original-ui/Monster/006/155.png|108x84",
+          "x": 324,
+          "y": 704,
+          "width": 108,
+          "height": 84,
+          "pageIndex": 0,
+          "offsetX": -5,
+          "offsetY": -55
+        },
+        {
+          "key": "/original-ui/Monster/006/156.png|116x80",
+          "x": 252,
+          "y": 878,
+          "width": 116,
+          "height": 80,
+          "pageIndex": 0,
+          "offsetX": -6,
+          "offsetY": -45
+        },
+        {
+          "key": "/original-ui/Monster/006/157.png|132x92",
+          "x": 345,
+          "y": 425,
+          "width": 132,
+          "height": 92,
+          "pageIndex": 0,
+          "offsetX": -11,
+          "offsetY": -47
+        },
+        {
+          "key": "/original-ui/Monster/006/158.png|124x80",
+          "x": 127,
+          "y": 878,
+          "width": 124,
+          "height": 80,
+          "pageIndex": 0,
+          "offsetX": -9,
+          "offsetY": -37
+        },
+        {
+          "key": "/original-ui/Monster/006/159.png|124x72",
+          "x": 212,
+          "y": 1283,
+          "width": 124,
+          "height": 72,
+          "pageIndex": 0,
+          "offsetX": -24,
+          "offsetY": -20
+        },
+        {
+          "key": "/original-ui/Monster/006/16.png|64x64",
+          "x": 350,
+          "y": 2054,
+          "width": 64,
+          "height": 64,
+          "pageIndex": 0,
+          "offsetX": 0,
+          "offsetY": -18
+        },
+        {
+          "key": "/original-ui/Monster/006/160.png|108x60",
+          "x": 319,
+          "y": 2184,
+          "width": 108,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": -31,
+          "offsetY": -5
+        },
+        {
+          "key": "/original-ui/Monster/006/161.png|128x68",
+          "x": 319,
+          "y": 1506,
+          "width": 128,
+          "height": 68,
+          "pageIndex": 0,
+          "offsetX": -32,
+          "offsetY": -13
+        },
+        {
+          "key": "/original-ui/Monster/006/162.png|120x64",
+          "x": 274,
+          "y": 1855,
+          "width": 120,
+          "height": 64,
+          "pageIndex": 0,
+          "offsetX": -29,
+          "offsetY": -9
+        },
+        {
+          "key": "/original-ui/Monster/006/163.png|116x64",
+          "x": 395,
+          "y": 1855,
+          "width": 116,
+          "height": 64,
+          "pageIndex": 0,
+          "offsetX": -31,
+          "offsetY": -10
+        },
+        {
+          "key": "/original-ui/Monster/006/164.png|72x68",
+          "x": 378,
+          "y": 1717,
+          "width": 72,
+          "height": 68,
+          "pageIndex": 0,
+          "offsetX": 9,
+          "offsetY": -24
+        },
+        {
+          "key": "/original-ui/Monster/006/165.png|80x108",
+          "x": 1,
+          "y": 114,
+          "width": 80,
+          "height": 108,
+          "pageIndex": 0,
+          "offsetX": 4,
+          "offsetY": -65
+        },
+        {
+          "key": "/original-ui/Monster/006/166.png|96x96",
+          "x": 1,
+          "y": 425,
+          "width": 96,
+          "height": 96,
+          "pageIndex": 0,
+          "offsetX": -8,
+          "offsetY": -53
+        },
+        {
+          "key": "/original-ui/Monster/006/167.png|120x96",
+          "x": 1,
+          "y": 328,
+          "width": 120,
+          "height": 96,
+          "pageIndex": 0,
+          "offsetX": -13,
+          "offsetY": -56
+        },
+        {
+          "key": "/original-ui/Monster/006/168.png|104x80",
+          "x": 110,
+          "y": 963,
+          "width": 104,
+          "height": 80,
+          "pageIndex": 0,
+          "offsetX": -8,
+          "offsetY": -42
+        },
+        {
+          "key": "/original-ui/Monster/006/169.png|104x76",
+          "x": 184,
+          "y": 1125,
+          "width": 104,
+          "height": 76,
+          "pageIndex": 0,
+          "offsetX": -20,
+          "offsetY": -31
+        },
+        {
+          "key": "/original-ui/Monster/006/17.png|64x64",
+          "x": 415,
+          "y": 2054,
+          "width": 64,
+          "height": 64,
+          "pageIndex": 0,
+          "offsetX": 0,
+          "offsetY": -18
+        },
+        {
+          "key": "/original-ui/Monster/006/170.png|88x60",
+          "x": 1,
+          "y": 2310,
+          "width": 88,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": -23,
+          "offsetY": -13
+        },
+        {
+          "key": "/original-ui/Monster/006/171.png|88x72",
+          "x": 94,
+          "y": 1360,
+          "width": 88,
+          "height": 72,
+          "pageIndex": 0,
+          "offsetX": -15,
+          "offsetY": -21
+        },
+        {
+          "key": "/original-ui/Monster/006/172.png|84x72",
+          "x": 272,
+          "y": 1360,
+          "width": 84,
+          "height": 72,
+          "pageIndex": 0,
+          "offsetX": -12,
+          "offsetY": -22
+        },
+        {
+          "key": "/original-ui/Monster/006/173.png|76x68",
+          "x": 82,
+          "y": 1717,
+          "width": 76,
+          "height": 68,
+          "pageIndex": 0,
+          "offsetX": -13,
+          "offsetY": -15
+        },
+        {
+          "key": "/original-ui/Monster/006/174.png|72x72",
+          "x": 151,
+          "y": 1433,
+          "width": 72,
+          "height": 72,
+          "pageIndex": 0,
+          "offsetX": 3,
+          "offsetY": -25
+        },
+        {
+          "key": "/original-ui/Monster/006/175.png|84x112",
+          "x": 1,
+          "y": 1,
+          "width": 84,
+          "height": 112,
+          "pageIndex": 0,
+          "offsetX": -1,
+          "offsetY": -61
+        },
+        {
+          "key": "/original-ui/Monster/006/176.png|80x96",
+          "x": 183,
+          "y": 425,
+          "width": 80,
+          "height": 96,
+          "pageIndex": 0,
+          "offsetX": -9,
+          "offsetY": -54
+        },
+        {
+          "key": "/original-ui/Monster/006/177.png|92x104",
+          "x": 276,
+          "y": 114,
+          "width": 92,
+          "height": 104,
+          "pageIndex": 0,
+          "offsetX": -20,
+          "offsetY": -59
+        },
+        {
+          "key": "/original-ui/Monster/006/178.png|80x88",
+          "x": 1,
+          "y": 704,
+          "width": 80,
+          "height": 88,
+          "pageIndex": 0,
+          "offsetX": -17,
+          "offsetY": -46
+        },
+        {
+          "key": "/original-ui/Monster/006/179.png|84x92",
+          "x": 288,
+          "y": 522,
+          "width": 84,
+          "height": 92,
+          "pageIndex": 0,
+          "offsetX": -28,
+          "offsetY": -38
+        },
+        {
+          "key": "/original-ui/Monster/006/18.png|64x64",
+          "x": 1,
+          "y": 2119,
+          "width": 64,
+          "height": 64,
+          "pageIndex": 0,
+          "offsetX": 0,
+          "offsetY": -18
+        },
+        {
+          "key": "/original-ui/Monster/006/180.png|84x72",
+          "x": 357,
+          "y": 1360,
+          "width": 84,
+          "height": 72,
+          "pageIndex": 0,
+          "offsetX": -32,
+          "offsetY": -20
+        },
+        {
+          "key": "/original-ui/Monster/006/181.png|84x88",
+          "x": 413,
+          "y": 615,
+          "width": 84,
+          "height": 88,
+          "pageIndex": 0,
+          "offsetX": -28,
+          "offsetY": -29
+        },
+        {
+          "key": "/original-ui/Monster/006/182.png|84x84",
+          "x": 90,
+          "y": 793,
+          "width": 84,
+          "height": 84,
+          "pageIndex": 0,
+          "offsetX": -28,
+          "offsetY": -28
+        },
+        {
+          "key": "/original-ui/Monster/006/183.png|80x80",
+          "x": 175,
+          "y": 1044,
+          "width": 80,
+          "height": 80,
+          "pageIndex": 0,
+          "offsetX": -26,
+          "offsetY": -20
+        },
+        {
+          "key": "/original-ui/Monster/006/184.png|80x60",
+          "x": 175,
+          "y": 2310,
+          "width": 80,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": -16,
+          "offsetY": -25
+        },
+        {
+          "key": "/original-ui/Monster/006/185.png|116x88",
+          "x": 1,
+          "y": 615,
+          "width": 116,
+          "height": 88,
+          "pageIndex": 0,
+          "offsetX": -16,
+          "offsetY": -48
+        },
+        {
+          "key": "/original-ui/Monster/006/186.png|104x76",
+          "x": 289,
+          "y": 1125,
+          "width": 104,
+          "height": 76,
+          "pageIndex": 0,
+          "offsetX": -16,
+          "offsetY": -47
+        },
+        {
+          "key": "/original-ui/Monster/006/187.png|108x92",
+          "x": 1,
+          "y": 522,
+          "width": 108,
+          "height": 92,
+          "pageIndex": 0,
+          "offsetX": -16,
+          "offsetY": -58
+        },
+        {
+          "key": "/original-ui/Monster/006/188.png|96x72",
+          "x": 337,
+          "y": 1283,
+          "width": 96,
+          "height": 72,
+          "pageIndex": 0,
+          "offsetX": -16,
+          "offsetY": -38
+        },
+        {
+          "key": "/original-ui/Monster/006/189.png|92x72",
+          "x": 1,
+          "y": 1360,
+          "width": 92,
+          "height": 72,
+          "pageIndex": 0,
+          "offsetX": -16,
+          "offsetY": -29
+        },
+        {
+          "key": "/original-ui/Monster/006/19.png|64x64",
+          "x": 66,
+          "y": 2119,
+          "width": 64,
+          "height": 64,
+          "pageIndex": 0,
+          "offsetX": 0,
+          "offsetY": -18
+        },
+        {
+          "key": "/original-ui/Monster/006/190.png|88x64",
+          "x": 94,
+          "y": 1989,
+          "width": 88,
+          "height": 64,
+          "pageIndex": 0,
+          "offsetX": -16,
+          "offsetY": -21
+        },
+        {
+          "key": "/original-ui/Monster/006/191.png|96x68",
+          "x": 98,
+          "y": 1648,
+          "width": 96,
+          "height": 68,
+          "pageIndex": 0,
+          "offsetX": -22,
+          "offsetY": -21
+        },
+        {
+          "key": "/original-ui/Monster/006/192.png|96x60",
+          "x": 203,
+          "y": 2249,
+          "width": 96,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": -24,
+          "offsetY": -16
+        },
+        {
+          "key": "/original-ui/Monster/006/193.png|96x60",
+          "x": 300,
+          "y": 2249,
+          "width": 96,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": -24,
+          "offsetY": -16
+        },
+        {
+          "key": "/original-ui/Monster/006/194.png|84x68",
+          "x": 377,
+          "y": 1648,
+          "width": 84,
+          "height": 68,
+          "pageIndex": 0,
+          "offsetX": -23,
+          "offsetY": -31
+        },
+        {
+          "key": "/original-ui/Monster/006/195.png|120x84",
+          "x": 82,
+          "y": 704,
+          "width": 120,
+          "height": 84,
+          "pageIndex": 0,
+          "offsetX": -25,
+          "offsetY": -58
+        },
+        {
+          "key": "/original-ui/Monster/006/196.png|104x88",
+          "x": 118,
+          "y": 615,
+          "width": 104,
+          "height": 88,
+          "pageIndex": 0,
+          "offsetX": -18,
+          "offsetY": -57
+        },
+        {
+          "key": "/original-ui/Monster/006/197.png|120x84",
+          "x": 203,
+          "y": 704,
+          "width": 120,
+          "height": 84,
+          "pageIndex": 0,
+          "offsetX": -22,
+          "offsetY": -61
+        },
+        {
+          "key": "/original-ui/Monster/006/198.png|104x80",
+          "x": 215,
+          "y": 963,
+          "width": 104,
+          "height": 80,
+          "pageIndex": 0,
+          "offsetX": -20,
+          "offsetY": -49
+        },
+        {
+          "key": "/original-ui/Monster/006/199.png|116x64",
+          "x": 1,
+          "y": 1924,
+          "width": 116,
+          "height": 64,
+          "pageIndex": 0,
+          "offsetX": -30,
+          "offsetY": -34
+        },
+        {
+          "key": "/original-ui/Monster/006/2.png|60x56",
+          "x": 391,
+          "y": 2672,
+          "width": 60,
+          "height": 56,
+          "pageIndex": 0,
+          "offsetX": 3,
+          "offsetY": -33
+        },
+        {
+          "key": "/original-ui/Monster/006/20.png|76x60",
+          "x": 333,
+          "y": 2310,
+          "width": 76,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": -20,
+          "offsetY": -24
+        },
+        {
+          "key": "/original-ui/Monster/006/200.png|104x64",
+          "x": 235,
+          "y": 1924,
+          "width": 104,
+          "height": 64,
+          "pageIndex": 0,
+          "offsetX": -25,
+          "offsetY": -26
+        },
+        {
+          "key": "/original-ui/Monster/006/201.png|120x68",
+          "x": 1,
+          "y": 1579,
+          "width": 120,
+          "height": 68,
+          "pageIndex": 0,
+          "offsetX": -33,
+          "offsetY": -32
+        },
+        {
+          "key": "/original-ui/Monster/006/202.png|116x64",
+          "x": 118,
+          "y": 1924,
+          "width": 116,
+          "height": 64,
+          "pageIndex": 0,
+          "offsetX": -32,
+          "offsetY": -27
+        },
+        {
+          "key": "/original-ui/Monster/006/203.png|112x56",
+          "x": 152,
+          "y": 2554,
+          "width": 112,
+          "height": 56,
+          "pageIndex": 0,
+          "offsetX": -33,
+          "offsetY": -20
+        },
+        {
+          "key": "/original-ui/Monster/006/204.png|64x84",
+          "x": 1,
+          "y": 878,
+          "width": 64,
+          "height": 84,
+          "pageIndex": 0,
+          "offsetX": -7,
+          "offsetY": -48
+        },
+        {
+          "key": "/original-ui/Monster/006/205.png|84x92",
+          "x": 373,
+          "y": 522,
+          "width": 84,
+          "height": 92,
+          "pageIndex": 0,
+          "offsetX": -11,
+          "offsetY": -59
+        },
+        {
+          "key": "/original-ui/Monster/006/206.png|84x96",
+          "x": 98,
+          "y": 425,
+          "width": 84,
+          "height": 96,
+          "pageIndex": 0,
+          "offsetX": -1,
+          "offsetY": -68
+        },
+        {
+          "key": "/original-ui/Monster/006/207.png|112x100",
+          "x": 163,
+          "y": 223,
+          "width": 112,
+          "height": 100,
+          "pageIndex": 0,
+          "offsetX": -12,
+          "offsetY": -65
+        },
+        {
+          "key": "/original-ui/Monster/006/208.png|80x96",
+          "x": 264,
+          "y": 425,
+          "width": 80,
+          "height": 96,
+          "pageIndex": 0,
+          "offsetX": -3,
+          "offsetY": -66
+        },
+        {
+          "key": "/original-ui/Monster/006/209.png|96x80",
+          "x": 320,
+          "y": 963,
+          "width": 96,
+          "height": 80,
+          "pageIndex": 0,
+          "offsetX": -15,
+          "offsetY": -39
+        },
+        {
+          "key": "/original-ui/Monster/006/21.png|72x60",
+          "x": 228,
+          "y": 2371,
+          "width": 72,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": -20,
+          "offsetY": -24
+        },
+        {
+          "key": "/original-ui/Monster/006/210.png|84x76",
+          "x": 268,
+          "y": 1206,
+          "width": 84,
+          "height": 76,
+          "pageIndex": 0,
+          "offsetX": -11,
+          "offsetY": -23
+        },
+        {
+          "key": "/original-ui/Monster/006/211.png|84x80",
+          "x": 90,
+          "y": 1044,
+          "width": 84,
+          "height": 80,
+          "pageIndex": 0,
+          "offsetX": -16,
+          "offsetY": -30
+        },
+        {
+          "key": "/original-ui/Monster/006/212.png|80x76",
+          "x": 1,
+          "y": 1283,
+          "width": 80,
+          "height": 76,
+          "pageIndex": 0,
+          "offsetX": -14,
+          "offsetY": -29
+        },
+        {
+          "key": "/original-ui/Monster/006/213.png|76x72",
+          "x": 1,
+          "y": 1433,
+          "width": 76,
+          "height": 72,
+          "pageIndex": 0,
+          "offsetX": -12,
+          "offsetY": -20
+        },
+        {
+          "key": "/original-ui/Monster/006/214.png|72x80",
+          "x": 256,
+          "y": 1044,
+          "width": 72,
+          "height": 80,
+          "pageIndex": 0,
+          "offsetX": -11,
+          "offsetY": -53
+        },
+        {
+          "key": "/original-ui/Monster/006/215.png|88x84",
+          "x": 1,
+          "y": 793,
+          "width": 88,
+          "height": 84,
+          "pageIndex": 0,
+          "offsetX": 2,
+          "offsetY": -53
+        },
+        {
+          "key": "/original-ui/Monster/006/216.png|92x104",
+          "x": 369,
+          "y": 114,
+          "width": 92,
+          "height": 104,
+          "pageIndex": 0,
+          "offsetX": 3,
+          "offsetY": -69
+        },
+        {
+          "key": "/original-ui/Monster/006/217.png|100x108",
+          "x": 155,
+          "y": 1,
+          "width": 100,
+          "height": 108,
+          "pageIndex": 0,
+          "offsetX": 7,
+          "offsetY": -73
+        },
+        {
+          "key": "/original-ui/Monster/006/218.png|92x108",
+          "x": 357,
+          "y": 1,
+          "width": 92,
+          "height": 108,
+          "pageIndex": 0,
+          "offsetX": -1,
+          "offsetY": -70
+        },
+        {
+          "key": "/original-ui/Monster/006/219.png|80x100",
+          "x": 385,
+          "y": 223,
+          "width": 80,
+          "height": 100,
+          "pageIndex": 0,
+          "offsetX": 6,
+          "offsetY": -48
+        },
+        {
+          "key": "/original-ui/Monster/006/22.png|76x60",
+          "x": 410,
+          "y": 2310,
+          "width": 76,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": -21,
+          "offsetY": -23
+        },
+        {
+          "key": "/original-ui/Monster/006/220.png|88x80",
+          "x": 1,
+          "y": 1044,
+          "width": 88,
+          "height": 80,
+          "pageIndex": 0,
+          "offsetX": -6,
+          "offsetY": -22
+        },
+        {
+          "key": "/original-ui/Monster/006/221.png|88x92",
+          "x": 199,
+          "y": 522,
+          "width": 88,
+          "height": 92,
+          "pageIndex": 0,
+          "offsetX": -3,
+          "offsetY": -38
+        },
+        {
+          "key": "/original-ui/Monster/006/222.png|88x88",
+          "x": 324,
+          "y": 615,
+          "width": 88,
+          "height": 88,
+          "pageIndex": 0,
+          "offsetX": -5,
+          "offsetY": -34
+        },
+        {
+          "key": "/original-ui/Monster/006/223.png|80x84",
+          "x": 175,
+          "y": 793,
+          "width": 80,
+          "height": 84,
+          "pageIndex": 0,
+          "offsetX": -4,
+          "offsetY": -26
+        },
+        {
+          "key": "/original-ui/Monster/006/23.png|76x60",
+          "x": 1,
+          "y": 2371,
+          "width": 76,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": -20,
+          "offsetY": -24
+        },
+        {
+          "key": "/original-ui/Monster/006/24.png|60x64",
+          "x": 196,
+          "y": 2119,
+          "width": 60,
+          "height": 64,
+          "pageIndex": 0,
+          "offsetX": -15,
+          "offsetY": -29
+        },
+        {
+          "key": "/original-ui/Monster/006/25.png|60x60",
+          "x": 261,
+          "y": 2432,
+          "width": 60,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": -16,
+          "offsetY": -29
+        },
+        {
+          "key": "/original-ui/Monster/006/26.png|60x60",
+          "x": 322,
+          "y": 2432,
+          "width": 60,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": -17,
+          "offsetY": -29
+        },
+        {
+          "key": "/original-ui/Monster/006/27.png|60x60",
+          "x": 383,
+          "y": 2432,
+          "width": 60,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": -16,
+          "offsetY": -29
+        },
+        {
+          "key": "/original-ui/Monster/006/28.png|56x56",
+          "x": 184,
+          "y": 2729,
+          "width": 56,
+          "height": 56,
+          "pageIndex": 0,
+          "offsetX": -2,
+          "offsetY": -31
+        },
+        {
+          "key": "/original-ui/Monster/006/29.png|56x56",
+          "x": 241,
+          "y": 2729,
+          "width": 56,
+          "height": 56,
+          "pageIndex": 0,
+          "offsetX": -2,
+          "offsetY": -31
+        },
+        {
+          "key": "/original-ui/Monster/006/3.png|64x56",
+          "x": 131,
+          "y": 2672,
+          "width": 64,
+          "height": 56,
+          "pageIndex": 0,
+          "offsetX": 2,
+          "offsetY": -33
+        },
+        {
+          "key": "/original-ui/Monster/006/30.png|56x56",
+          "x": 298,
+          "y": 2729,
+          "width": 56,
+          "height": 56,
+          "pageIndex": 0,
+          "offsetX": -1,
+          "offsetY": -31
+        },
+        {
+          "key": "/original-ui/Monster/006/31.png|56x56",
+          "x": 355,
+          "y": 2729,
+          "width": 56,
+          "height": 56,
+          "pageIndex": 0,
+          "offsetX": -2,
+          "offsetY": -31
+        },
+        {
+          "key": "/original-ui/Monster/006/32.png|60x60",
+          "x": 444,
+          "y": 2432,
+          "width": 60,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": 5,
+          "offsetY": -31
+        },
+        {
+          "key": "/original-ui/Monster/006/33.png|60x60",
+          "x": 1,
+          "y": 2493,
+          "width": 60,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": 5,
+          "offsetY": -31
+        },
+        {
+          "key": "/original-ui/Monster/006/34.png|60x56",
+          "x": 1,
+          "y": 2729,
+          "width": 60,
+          "height": 56,
+          "pageIndex": 0,
+          "offsetX": 3,
+          "offsetY": -32
+        },
+        {
+          "key": "/original-ui/Monster/006/35.png|64x60",
+          "x": 447,
+          "y": 2371,
+          "width": 64,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": 1,
+          "offsetY": -31
+        },
+        {
+          "key": "/original-ui/Monster/006/36.png|60x60",
+          "x": 62,
+          "y": 2493,
+          "width": 60,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": 3,
+          "offsetY": -31
+        },
+        {
+          "key": "/original-ui/Monster/006/37.png|60x56",
+          "x": 62,
+          "y": 2729,
+          "width": 60,
+          "height": 56,
+          "pageIndex": 0,
+          "offsetX": 4,
+          "offsetY": -32
+        },
+        {
+          "key": "/original-ui/Monster/006/38.png|52x60",
+          "x": 298,
+          "y": 2493,
+          "width": 52,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": 10,
+          "offsetY": -29
+        },
+        {
+          "key": "/original-ui/Monster/006/39.png|52x60",
+          "x": 351,
+          "y": 2493,
+          "width": 52,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": 11,
+          "offsetY": -29
+        },
+        {
+          "key": "/original-ui/Monster/006/4.png|64x56",
+          "x": 196,
+          "y": 2672,
+          "width": 64,
+          "height": 56,
+          "pageIndex": 0,
+          "offsetX": 12,
+          "offsetY": -31
+        },
+        {
+          "key": "/original-ui/Monster/006/40.png|64x60",
+          "x": 1,
+          "y": 2432,
+          "width": 64,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": 8,
+          "offsetY": -31
+        },
+        {
+          "key": "/original-ui/Monster/006/41.png|72x60",
+          "x": 301,
+          "y": 2371,
+          "width": 72,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": 3,
+          "offsetY": -30
+        },
+        {
+          "key": "/original-ui/Monster/006/42.png|60x60",
+          "x": 123,
+          "y": 2493,
+          "width": 60,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": 7,
+          "offsetY": -30
+        },
+        {
+          "key": "/original-ui/Monster/006/43.png|52x60",
+          "x": 404,
+          "y": 2493,
+          "width": 52,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": 12,
+          "offsetY": -30
+        },
+        {
+          "key": "/original-ui/Monster/006/44.png|56x68",
+          "x": 1,
+          "y": 1855,
+          "width": 56,
+          "height": 68,
+          "pageIndex": 0,
+          "offsetX": 9,
+          "offsetY": -28
+        },
+        {
+          "key": "/original-ui/Monster/006/45.png|52x68",
+          "x": 172,
+          "y": 1855,
+          "width": 52,
+          "height": 68,
+          "pageIndex": 0,
+          "offsetX": 10,
+          "offsetY": -28
+        },
+        {
+          "key": "/original-ui/Monster/006/46.png|48x64",
+          "x": 270,
+          "y": 2184,
+          "width": 48,
+          "height": 64,
+          "pageIndex": 0,
+          "offsetX": 16,
+          "offsetY": -29
+        },
+        {
+          "key": "/original-ui/Monster/006/47.png|64x60",
+          "x": 66,
+          "y": 2432,
+          "width": 64,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": 9,
+          "offsetY": -28
+        },
+        {
+          "key": "/original-ui/Monster/006/48.png|52x64",
+          "x": 111,
+          "y": 2184,
+          "width": 52,
+          "height": 64,
+          "pageIndex": 0,
+          "offsetX": 11,
+          "offsetY": -29
+        },
+        {
+          "key": "/original-ui/Monster/006/49.png|48x68",
+          "x": 225,
+          "y": 1855,
+          "width": 48,
+          "height": 68,
+          "pageIndex": 0,
+          "offsetX": 15,
+          "offsetY": -29
+        },
+        {
+          "key": "/original-ui/Monster/006/5.png|64x56",
+          "x": 261,
+          "y": 2672,
+          "width": 64,
+          "height": 56,
+          "pageIndex": 0,
+          "offsetX": 12,
+          "offsetY": -30
+        },
+        {
+          "key": "/original-ui/Monster/006/50.png|60x64",
+          "x": 257,
+          "y": 2119,
+          "width": 60,
+          "height": 64,
+          "pageIndex": 0,
+          "offsetX": 4,
+          "offsetY": -23
+        },
+        {
+          "key": "/original-ui/Monster/006/51.png|56x68",
+          "x": 58,
+          "y": 1855,
+          "width": 56,
+          "height": 68,
+          "pageIndex": 0,
+          "offsetX": 6,
+          "offsetY": -23
+        },
+        {
+          "key": "/original-ui/Monster/006/52.png|52x72",
+          "x": 160,
+          "y": 1506,
+          "width": 52,
+          "height": 72,
+          "pageIndex": 0,
+          "offsetX": 10,
+          "offsetY": -25
+        },
+        {
+          "key": "/original-ui/Monster/006/53.png|52x72",
+          "x": 213,
+          "y": 1506,
+          "width": 52,
+          "height": 72,
+          "pageIndex": 0,
+          "offsetX": 10,
+          "offsetY": -24
+        },
+        {
+          "key": "/original-ui/Monster/006/54.png|52x72",
+          "x": 266,
+          "y": 1506,
+          "width": 52,
+          "height": 72,
+          "pageIndex": 0,
+          "offsetX": 10,
+          "offsetY": -25
+        },
+        {
+          "key": "/original-ui/Monster/006/55.png|56x68",
+          "x": 115,
+          "y": 1855,
+          "width": 56,
+          "height": 68,
+          "pageIndex": 0,
+          "offsetX": 6,
+          "offsetY": -25
+        },
+        {
+          "key": "/original-ui/Monster/006/56.png|68x52",
+          "x": 233,
+          "y": 2786,
+          "width": 68,
+          "height": 52,
+          "pageIndex": 0,
+          "offsetX": -5,
+          "offsetY": -18
+        },
+        {
+          "key": "/original-ui/Monster/006/57.png|68x56",
+          "x": 147,
+          "y": 2615,
+          "width": 68,
+          "height": 56,
+          "pageIndex": 0,
+          "offsetX": -4,
+          "offsetY": -19
+        },
+        {
+          "key": "/original-ui/Monster/006/58.png|64x64",
+          "x": 131,
+          "y": 2119,
+          "width": 64,
+          "height": 64,
+          "pageIndex": 0,
+          "offsetX": 1,
+          "offsetY": -20
+        },
+        {
+          "key": "/original-ui/Monster/006/59.png|60x64",
+          "x": 318,
+          "y": 2119,
+          "width": 60,
+          "height": 64,
+          "pageIndex": 0,
+          "offsetX": 4,
+          "offsetY": -18
+        },
+        {
+          "key": "/original-ui/Monster/006/6.png|68x56",
+          "x": 216,
+          "y": 2615,
+          "width": 68,
+          "height": 56,
+          "pageIndex": 0,
+          "offsetX": 12,
+          "offsetY": -30
+        },
+        {
+          "key": "/original-ui/Monster/006/60.png|64x60",
+          "x": 131,
+          "y": 2432,
+          "width": 64,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": 1,
+          "offsetY": -19
+        },
+        {
+          "key": "/original-ui/Monster/006/61.png|68x56",
+          "x": 285,
+          "y": 2615,
+          "width": 68,
+          "height": 56,
+          "pageIndex": 0,
+          "offsetX": -4,
+          "offsetY": -20
+        },
+        {
+          "key": "/original-ui/Monster/006/62.png|60x56",
+          "x": 123,
+          "y": 2729,
+          "width": 60,
+          "height": 56,
+          "pageIndex": 0,
+          "offsetX": -8,
+          "offsetY": -24
+        },
+        {
+          "key": "/original-ui/Monster/006/63.png|68x56",
+          "x": 354,
+          "y": 2615,
+          "width": 68,
+          "height": 56,
+          "pageIndex": 0,
+          "offsetX": -12,
+          "offsetY": -25
+        },
+        {
+          "key": "/original-ui/Monster/006/64.png|72x56",
+          "x": 1,
+          "y": 2615,
+          "width": 72,
+          "height": 56,
+          "pageIndex": 0,
+          "offsetX": -16,
+          "offsetY": -25
+        },
+        {
+          "key": "/original-ui/Monster/006/65.png|76x56",
+          "x": 366,
+          "y": 2554,
+          "width": 76,
+          "height": 56,
+          "pageIndex": 0,
+          "offsetX": -19,
+          "offsetY": -23
+        },
+        {
+          "key": "/original-ui/Monster/006/66.png|72x56",
+          "x": 74,
+          "y": 2615,
+          "width": 72,
+          "height": 56,
+          "pageIndex": 0,
+          "offsetX": -14,
+          "offsetY": -24
+        },
+        {
+          "key": "/original-ui/Monster/006/67.png|68x56",
+          "x": 423,
+          "y": 2615,
+          "width": 68,
+          "height": 56,
+          "pageIndex": 0,
+          "offsetX": -11,
+          "offsetY": -25
+        },
+        {
+          "key": "/original-ui/Monster/006/68.png|44x56",
+          "x": 107,
+          "y": 2786,
+          "width": 44,
+          "height": 56,
+          "pageIndex": 0,
+          "offsetX": 3,
+          "offsetY": -28
+        },
+        {
+          "key": "/original-ui/Monster/006/69.png|48x60",
+          "x": 54,
+          "y": 2554,
+          "width": 48,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": -2,
+          "offsetY": -29
+        },
+        {
+          "key": "/original-ui/Monster/006/7.png|64x56",
+          "x": 326,
+          "y": 2672,
+          "width": 64,
+          "height": 56,
+          "pageIndex": 0,
+          "offsetX": 12,
+          "offsetY": -31
+        },
+        {
+          "key": "/original-ui/Monster/006/70.png|56x64",
+          "x": 1,
+          "y": 2184,
+          "width": 56,
+          "height": 64,
+          "pageIndex": 0,
+          "offsetX": -11,
+          "offsetY": -30
+        },
+        {
+          "key": "/original-ui/Monster/006/71.png|64x60",
+          "x": 196,
+          "y": 2432,
+          "width": 64,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": -17,
+          "offsetY": -28
+        },
+        {
+          "key": "/original-ui/Monster/006/72.png|56x60",
+          "x": 184,
+          "y": 2493,
+          "width": 56,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": -9,
+          "offsetY": -29
+        },
+        {
+          "key": "/original-ui/Monster/006/73.png|48x60",
+          "x": 103,
+          "y": 2554,
+          "width": 48,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": 0,
+          "offsetY": -30
+        },
+        {
+          "key": "/original-ui/Monster/006/74.png|56x60",
+          "x": 241,
+          "y": 2493,
+          "width": 56,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": 1,
+          "offsetY": -29
+        },
+        {
+          "key": "/original-ui/Monster/006/75.png|56x56",
+          "x": 412,
+          "y": 2729,
+          "width": 56,
+          "height": 56,
+          "pageIndex": 0,
+          "offsetX": 3,
+          "offsetY": -29
+        },
+        {
+          "key": "/original-ui/Monster/006/76.png|52x60",
+          "x": 457,
+          "y": 2493,
+          "width": 52,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": 5,
+          "offsetY": -30
+        },
+        {
+          "key": "/original-ui/Monster/006/77.png|52x60",
+          "x": 1,
+          "y": 2554,
+          "width": 52,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": 1,
+          "offsetY": -28
+        },
+        {
+          "key": "/original-ui/Monster/006/78.png|48x56",
+          "x": 58,
+          "y": 2786,
+          "width": 48,
+          "height": 56,
+          "pageIndex": 0,
+          "offsetX": 5,
+          "offsetY": -29
+        },
+        {
+          "key": "/original-ui/Monster/006/79.png|56x56",
+          "x": 1,
+          "y": 2786,
+          "width": 56,
+          "height": 56,
+          "pageIndex": 0,
+          "offsetX": 2,
+          "offsetY": -30
+        },
+        {
+          "key": "/original-ui/Monster/006/8.png|52x64",
+          "x": 164,
+          "y": 2184,
+          "width": 52,
+          "height": 64,
+          "pageIndex": 0,
+          "offsetX": 19,
+          "offsetY": -29
+        },
+        {
+          "key": "/original-ui/Monster/006/80.png|80x64",
+          "x": 349,
+          "y": 1989,
+          "width": 80,
+          "height": 64,
+          "pageIndex": 0,
+          "offsetX": 4,
+          "offsetY": -33
+        },
+        {
+          "key": "/original-ui/Monster/006/81.png|80x64",
+          "x": 430,
+          "y": 1989,
+          "width": 80,
+          "height": 64,
+          "pageIndex": 0,
+          "offsetX": 13,
+          "offsetY": -28
+        },
+        {
+          "key": "/original-ui/Monster/006/82.png|88x76",
+          "x": 179,
+          "y": 1206,
+          "width": 88,
+          "height": 76,
+          "pageIndex": 0,
+          "offsetX": 10,
+          "offsetY": -49
+        },
+        {
+          "key": "/original-ui/Monster/006/83.png|100x108",
+          "x": 256,
+          "y": 1,
+          "width": 100,
+          "height": 108,
+          "pageIndex": 0,
+          "offsetX": -12,
+          "offsetY": -83
+        },
+        {
+          "key": "/original-ui/Monster/006/84.png|80x68",
+          "x": 1,
+          "y": 1717,
+          "width": 80,
+          "height": 68,
+          "pageIndex": 0,
+          "offsetX": -15,
+          "offsetY": -39
+        },
+        {
+          "key": "/original-ui/Monster/006/85.png|72x68",
+          "x": 1,
+          "y": 1786,
+          "width": 72,
+          "height": 68,
+          "pageIndex": 0,
+          "offsetX": -7,
+          "offsetY": -38
+        },
+        {
+          "key": "/original-ui/Monster/006/86.png|64x72",
+          "x": 354,
+          "y": 1433,
+          "width": 64,
+          "height": 72,
+          "pageIndex": 0,
+          "offsetX": 16,
+          "offsetY": -31
+        },
+        {
+          "key": "/original-ui/Monster/006/87.png|68x68",
+          "x": 285,
+          "y": 1786,
+          "width": 68,
+          "height": 68,
+          "pageIndex": 0,
+          "offsetX": 10,
+          "offsetY": -26
+        },
+        {
+          "key": "/original-ui/Monster/006/88.png|60x84",
+          "x": 66,
+          "y": 878,
+          "width": 60,
+          "height": 84,
+          "pageIndex": 0,
+          "offsetX": 16,
+          "offsetY": -45
+        },
+        {
+          "key": "/original-ui/Monster/006/89.png|108x100",
+          "x": 276,
+          "y": 223,
+          "width": 108,
+          "height": 100,
+          "pageIndex": 0,
+          "offsetX": 0,
+          "offsetY": -70
+        },
+        {
+          "key": "/original-ui/Monster/006/9.png|52x64",
+          "x": 217,
+          "y": 2184,
+          "width": 52,
+          "height": 64,
+          "pageIndex": 0,
+          "offsetX": 19,
+          "offsetY": -29
+        },
+        {
+          "key": "/original-ui/Monster/006/90.png|88x72",
+          "x": 183,
+          "y": 1360,
+          "width": 88,
+          "height": 72,
+          "pageIndex": 0,
+          "offsetX": -16,
+          "offsetY": -40
+        },
+        {
+          "key": "/original-ui/Monster/006/91.png|68x68",
+          "x": 354,
+          "y": 1786,
+          "width": 68,
+          "height": 68,
+          "pageIndex": 0,
+          "offsetX": 1,
+          "offsetY": -36
+        },
+        {
+          "key": "/original-ui/Monster/006/92.png|56x80",
+          "x": 127,
+          "y": 1125,
+          "width": 56,
+          "height": 80,
+          "pageIndex": 0,
+          "offsetX": 11,
+          "offsetY": -28
+        },
+        {
+          "key": "/original-ui/Monster/006/93.png|72x60",
+          "x": 374,
+          "y": 2371,
+          "width": 72,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": -5,
+          "offsetY": -21
+        },
+        {
+          "key": "/original-ui/Monster/006/94.png|80x84",
+          "x": 256,
+          "y": 793,
+          "width": 80,
+          "height": 84,
+          "pageIndex": 0,
+          "offsetX": 1,
+          "offsetY": -47
+        },
+        {
+          "key": "/original-ui/Monster/006/95.png|112x80",
+          "x": 369,
+          "y": 878,
+          "width": 112,
+          "height": 80,
+          "pageIndex": 0,
+          "offsetX": 12,
+          "offsetY": -51
+        },
+        {
+          "key": "/original-ui/Monster/006/96.png|68x80",
+          "x": 398,
+          "y": 1044,
+          "width": 68,
+          "height": 80,
+          "pageIndex": 0,
+          "offsetX": 3,
+          "offsetY": -48
+        },
+        {
+          "key": "/original-ui/Monster/006/97.png|76x60",
+          "x": 78,
+          "y": 2371,
+          "width": 76,
+          "height": 60,
+          "pageIndex": 0,
+          "offsetX": 10,
+          "offsetY": -33
+        },
+        {
+          "key": "/original-ui/Monster/006/98.png|72x68",
+          "x": 74,
+          "y": 1786,
+          "width": 72,
+          "height": 68,
+          "pageIndex": 0,
+          "offsetX": -7,
+          "offsetY": -22
+        },
+        {
+          "key": "/original-ui/Monster/006/99.png|72x64",
+          "x": 78,
+          "y": 2054,
+          "width": 72,
+          "height": 64,
+          "pageIndex": 0,
+          "offsetX": -13,
+          "offsetY": -24
+        }
+      ]
     }
   ],
   "stats": {
-    "sourceCount": 10482,
+    "sourceCount": 10706,
     "roots": [
       "CArmour/00",
       "CHair/00",
@@ -136097,12 +138362,12 @@
       "Monster/007",
       "Monster/010",
       "Monster/012",
-      "Monster/139"
+      "Monster/139",
+      "Monster/006"
     ],
-    "imageBytes": 13249890,
-    "rgbaBytes": 117440512,
-    "pageCount": 7,
-    "durationMs": 214452
+    "imageBytes": 13879930,
+    "rgbaBytes": 125829120,
+    "pageCount": 8
   },
   "pipeline": {
     "version": "0.3.0",

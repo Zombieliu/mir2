@@ -1,0 +1,103 @@
+{
+  "schema": "mir2.updater.release-preview-root-review.v1",
+  "passed": true,
+  "updaterRevision": "48454bba7623694ca7432613af52bee28e83970e",
+  "gameCandidate": "WN-CANDIDATE-20261004-invited-17",
+  "gameRevision": "6032ef8b3e27dd97bad0b20c8676ef9f185db64b",
+  "previewSequence": 13,
+  "sourceBeforeAfterAndCurrentExact": true,
+  "commands": {
+    "authority-local-status-01": {
+      "exitCode": 1,
+      "elapsedSeconds": 3.218686999985948
+    },
+    "bootstrap-model-01": {
+      "exitCode": 0,
+      "elapsedSeconds": 3.721841599995969
+    },
+    "build-bootstrap-01": {
+      "exitCode": 0,
+      "elapsedSeconds": 364.2421897999884
+    },
+    "build-engine-01": {
+      "exitCode": 0,
+      "elapsedSeconds": 22.190877499990165
+    },
+    "build-profile-01": {
+      "exitCode": 0,
+      "elapsedSeconds": 20.98261020000791
+    },
+    "build-receipt-audit-01": {
+      "exitCode": 0,
+      "elapsedSeconds": 6.02835700000287
+    },
+    "cms-integration-01": {
+      "exitCode": 0,
+      "elapsedSeconds": 0.4115975000022445
+    },
+    "crypto-fixtures-01": {
+      "exitCode": 0,
+      "elapsedSeconds": 0.5098108999955002
+    },
+    "discovery-integration-01": {
+      "exitCode": 0,
+      "elapsedSeconds": 0.4099461000005249
+    },
+    "prepare-profile-01": {
+      "exitCode": 0,
+      "elapsedSeconds": 0.2074873999808915
+    },
+    "prepared-repair-01": {
+      "exitCode": 1,
+      "elapsedSeconds": 351.81340080001974
+    },
+    "profile-lock-01": {
+      "exitCode": 0,
+      "elapsedSeconds": 0.20699639999656938
+    },
+    "receipt-state-audit-01": {
+      "exitCode": 0,
+      "elapsedSeconds": 49.78123999998206
+    },
+    "verify-engine-01": {
+      "exitCode": 0,
+      "elapsedSeconds": 0.6107308000209741
+    }
+  },
+  "matchedRegistryPackages": 85,
+  "artifacts": {
+    "C:\\mir2-playtest-releases\\20261004-native-r18\\updater-resume-release-root-01\\bootstrap\\artifacts\\Numeron-Legend-of-Rebirth-20261005-r17-Bootstrap.exe": {
+      "bytes": 27496643,
+      "sha256": "6175bd72f273c2f00d96117183fc1bf4d1f987c15455a1064e4f0e975ca70af5"
+    },
+    "C:\\mir2-playtest-releases\\20261004-native-r18\\updater-resume-release-root-01\\artifacts\\engine-release\\Mir2Updater.exe": {
+      "bytes": 1859072,
+      "sha256": "50f99917916f10e8e8f7e906de1d6e1fa7edb9a735f0ce95873bf5d196d426cf"
+    },
+    "C:\\mir2-playtest-releases\\20261004-native-r18\\updater-resume-release-root-01\\artifacts\\bundle\\Mir2Launcher.exe": {
+      "bytes": 389120,
+      "sha256": "e478321dcdcd107669d544defd9fc3318e2b50bd26dca4fccc042a84ef69635d"
+    }
+  },
+  "originalRepairCommandPassed": false,
+  "additiveAuditPassed": true,
+  "publicFeedPublished": false,
+  "publicFeedKnownSequence": 12,
+  "freshInstallVerified": false,
+  "publicHttpsResumeVerified": false,
+  "publicSpeedVerified": false,
+  "cloudflareEffectiveAuthorization": false,
+  "oldBootstrapFirstInstallUsesOldEngine": true,
+  "newBootstrapEmbedsCurrentEngine": true,
+  "previewMustNotBeGivenAsWorkingPublicInstaller": true,
+  "productionGameOrGatewayChanged": false,
+  "gameLaunched": false,
+  "humanAccepted": false,
+  "originalCanonicalCandidateScope": "historical immutable R17 verifier; not current broader map-scope acceptance",
+  "signedFixtureTestsAdded": 2,
+  "remainingExistingSignedLibraryFixturesNotRun": 2,
+  "structuralBootstrapTests": 39,
+  "preparedRepairIsWarmCache": true,
+  "artifactInstallerArchived": false,
+  "additiveRejectionFingerprintScope": "2066 explicitly selected paths, not whole installation or AppData"
+}

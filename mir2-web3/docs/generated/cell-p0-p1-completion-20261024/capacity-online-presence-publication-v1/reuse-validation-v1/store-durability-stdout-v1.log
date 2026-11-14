@@ -1,0 +1,7 @@
+
+running 2 tests
+test config::config_account_store_durability_tests::post_rename_unknown_keeps_live_old_and_freezes_all_shared_writers ... ok
+test config::config_account_store_durability_tests::pre_rename_failure_keeps_live_and_disk_old_but_allows_a_later_write ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 2954 filtered out; finished in 0.13s
+

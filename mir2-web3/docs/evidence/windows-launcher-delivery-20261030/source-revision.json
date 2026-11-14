@@ -1,0 +1,7 @@
+{
+  "SourceRevision": "677e2ab56704660c4e93c14a1d29945f82b55f3e",
+  "Baseline": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+  "Branch": "codex/windows-launcher-delivery-v2",
+  "SourceClean": true,
+  "Scope": "launcher, updater, installer and ten player guides; game Candidate unchanged"
+}

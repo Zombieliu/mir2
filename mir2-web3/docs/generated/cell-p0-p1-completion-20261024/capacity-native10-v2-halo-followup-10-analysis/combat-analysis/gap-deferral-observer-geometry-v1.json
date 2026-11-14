@@ -1,0 +1,706 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792898022018-efb7a76a",
+  "rawPin": {
+    "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-halo-feasibility-10/reports/1792898022018-efb7a76a.samples.jsonl",
+    "bytes": 13028051,
+    "sha256": "79510b349b2f1c70092fcad4bbc5ed79b76f14a4ceb3811b02704ff11e786b68",
+    "rows": 21101
+  },
+  "scope": "Current controlled movement observers latest real owner-receipt positions at original deferral row; geometry only, not complete per-decision observer AOI content.",
+  "deferrals": [
+    {
+      "rawLine": 16677,
+      "at": 1792898631905,
+      "targetId": 206513,
+      "owner": {
+        "x": 274,
+        "y": 661
+      },
+      "target": {
+        "x": 274,
+        "y": 662
+      },
+      "reason": "route-loop",
+      "confirmedMoves": 8,
+      "pursuitMs": 5269,
+      "peers": [
+        {
+          "actor": "L25081f06",
+          "ownerReceipt": {
+            "x": 265,
+            "y": 654,
+            "map": "0",
+            "at": 1792898631567,
+            "sequence": 6097,
+            "source": "UserLocation",
+            "rawLine": 16657
+          },
+          "ageMs": 338,
+          "distanceOwner": 9,
+          "distanceTarget": 9,
+          "maxSeparation": 9,
+          "passesSixCellGeometry": false
+        },
+        {
+          "actor": "L25081f07",
+          "ownerReceipt": {
+            "x": 273,
+            "y": 672,
+            "map": "0",
+            "at": 1792898631351,
+            "sequence": 4645,
+            "source": "UserLocation",
+            "rawLine": 16647
+          },
+          "ageMs": 554,
+          "distanceOwner": 11,
+          "distanceTarget": 10,
+          "maxSeparation": 11,
+          "passesSixCellGeometry": false
+        },
+        {
+          "actor": "L25081f08",
+          "ownerReceipt": {
+            "x": 277,
+            "y": 672,
+            "map": "0",
+            "at": 1792898631005,
+            "sequence": 3275,
+            "source": "UserLocation",
+            "rawLine": 16633
+          },
+          "ageMs": 900,
+          "distanceOwner": 11,
+          "distanceTarget": 10,
+          "maxSeparation": 11,
+          "passesSixCellGeometry": false
+        },
+        {
+          "actor": "L25081f09",
+          "ownerReceipt": {
+            "x": 261,
+            "y": 650,
+            "map": "0",
+            "at": 1792898631444,
+            "sequence": 5160,
+            "source": "UserLocation",
+            "rawLine": 16653
+          },
+          "ageMs": 461,
+          "distanceOwner": 13,
+          "distanceTarget": 13,
+          "maxSeparation": 13,
+          "passesSixCellGeometry": false
+        },
+        {
+          "actor": "L25081f03",
+          "ownerReceipt": {
+            "x": 259,
+            "y": 665,
+            "map": "0",
+            "at": 1792898631719,
+            "sequence": 5964,
+            "source": "UserLocation",
+            "rawLine": 16666
+          },
+          "ageMs": 186,
+          "distanceOwner": 15,
+          "distanceTarget": 15,
+          "maxSeparation": 15,
+          "passesSixCellGeometry": false
+        },
+        {
+          "actor": "L25081f01",
+          "ownerReceipt": {
+            "x": 256,
+            "y": 669,
+            "map": "0",
+            "at": 1792898631346,
+            "sequence": 8769,
+            "source": "UserLocation",
+            "rawLine": 16644
+          },
+          "ageMs": 559,
+          "distanceOwner": 18,
+          "distanceTarget": 18,
+          "maxSeparation": 18,
+          "passesSixCellGeometry": false
+        },
+        {
+          "actor": "L25081f02",
+          "ownerReceipt": {
+            "x": 255,
+            "y": 663,
+            "map": "0",
+            "at": 1792898631689,
+            "sequence": 6051,
+            "source": "UserLocation",
+            "rawLine": 16661
+          },
+          "ageMs": 216,
+          "distanceOwner": 19,
+          "distanceTarget": 19,
+          "maxSeparation": 19,
+          "passesSixCellGeometry": false
+        },
+        {
+          "actor": "L25081f04",
+          "ownerReceipt": {
+            "x": 255,
+            "y": 651,
+            "map": "0",
+            "at": 1792898631563,
+            "sequence": 6415,
+            "source": "UserLocation",
+            "rawLine": 16656
+          },
+          "ageMs": 342,
+          "distanceOwner": 19,
+          "distanceTarget": 19,
+          "maxSeparation": 19,
+          "passesSixCellGeometry": false
+        },
+        {
+          "actor": "L25081f00",
+          "ownerReceipt": {
+            "x": 254,
+            "y": 669,
+            "map": "0",
+            "at": 1792898631813,
+            "sequence": 6899,
+            "source": "UserLocation",
+            "rawLine": 16673
+          },
+          "ageMs": 92,
+          "distanceOwner": 20,
+          "distanceTarget": 20,
+          "maxSeparation": 20,
+          "passesSixCellGeometry": false
+        }
+      ],
+      "geometryEligibleCount": 0
+    },
+    {
+      "rawLine": 17103,
+      "at": 1792898640153,
+      "targetId": 206704,
+      "owner": {
+        "x": 282,
+        "y": 663
+      },
+      "target": {
+        "x": 282,
+        "y": 662
+      },
+      "reason": "route-loop",
+      "confirmedMoves": 11,
+      "pursuitMs": 7530,
+      "peers": [
+        {
+          "actor": "L25081f07",
+          "ownerReceipt": {
+            "x": 273,
+            "y": 670,
+            "map": "0",
+            "at": 1792898639595,
+            "sequence": 4758,
+            "source": "UserLocation",
+            "rawLine": 17070
+          },
+          "ageMs": 558,
+          "distanceOwner": 9,
+          "distanceTarget": 9,
+          "maxSeparation": 9,
+          "passesSixCellGeometry": false
+        },
+        {
+          "actor": "L25081f08",
+          "ownerReceipt": {
+            "x": 276,
+            "y": 671,
+            "map": "0",
+            "at": 1792898640004,
+            "sequence": 3356,
+            "source": "UserLocation",
+            "rawLine": 17095
+          },
+          "ageMs": 149,
+          "distanceOwner": 8,
+          "distanceTarget": 9,
+          "maxSeparation": 9,
+          "passesSixCellGeometry": false
+        },
+        {
+          "actor": "L25081f06",
+          "ownerReceipt": {
+            "x": 267,
+            "y": 654,
+            "map": "0",
+            "at": 1792898639811,
+            "sequence": 6317,
+            "source": "UserLocation",
+            "rawLine": 17083
+          },
+          "ageMs": 342,
+          "distanceOwner": 15,
+          "distanceTarget": 15,
+          "maxSeparation": 15,
+          "passesSixCellGeometry": false
+        },
+        {
+          "actor": "L25081f09",
+          "ownerReceipt": {
+            "x": 259,
+            "y": 653,
+            "map": "0",
+            "at": 1792898639689,
+            "sequence": 5295,
+            "source": "UserLocation",
+            "rawLine": 17077
+          },
+          "ageMs": 464,
+          "distanceOwner": 23,
+          "distanceTarget": 23,
+          "maxSeparation": 23,
+          "passesSixCellGeometry": false
+        },
+        {
+          "actor": "L25081f03",
+          "ownerReceipt": {
+            "x": 257,
+            "y": 665,
+            "map": "0",
+            "at": 1792898639969,
+            "sequence": 6124,
+            "source": "UserLocation",
+            "rawLine": 17092
+          },
+          "ageMs": 184,
+          "distanceOwner": 25,
+          "distanceTarget": 25,
+          "maxSeparation": 25,
+          "passesSixCellGeometry": false
+        },
+        {
+          "actor": "L25081f01",
+          "ownerReceipt": {
+            "x": 256,
+            "y": 672,
+            "map": "0",
+            "at": 1792898639595,
+            "sequence": 8878,
+            "source": "UserLocation",
+            "rawLine": 17067
+          },
+          "ageMs": 558,
+          "distanceOwner": 26,
+          "distanceTarget": 26,
+          "maxSeparation": 26,
+          "passesSixCellGeometry": false
+        },
+        {
+          "actor": "L25081f02",
+          "ownerReceipt": {
+            "x": 255,
+            "y": 666,
+            "map": "0",
+            "at": 1792898639937,
+            "sequence": 6178,
+            "source": "UserLocation",
+            "rawLine": 17089
+          },
+          "ageMs": 216,
+          "distanceOwner": 27,
+          "distanceTarget": 27,
+          "maxSeparation": 27,
+          "passesSixCellGeometry": false
+        },
+        {
+          "actor": "L25081f00",
+          "ownerReceipt": {
+            "x": 253,
+            "y": 673,
+            "map": "0",
+            "at": 1792898640063,
+            "sequence": 6993,
+            "source": "UserLocation",
+            "rawLine": 17099
+          },
+          "ageMs": 90,
+          "distanceOwner": 29,
+          "distanceTarget": 29,
+          "maxSeparation": 29,
+          "passesSixCellGeometry": false
+        },
+        {
+          "actor": "L25081f04",
+          "ownerReceipt": {
+            "x": 253,
+            "y": 655,
+            "map": "0",
+            "at": 1792898639811,
+            "sequence": 6581,
+            "source": "UserLocation",
+            "rawLine": 17081
+          },
+          "ageMs": 342,
+          "distanceOwner": 29,
+          "distanceTarget": 29,
+          "maxSeparation": 29,
+          "passesSixCellGeometry": false
+        }
+      ],
+      "geometryEligibleCount": 0
+    },
+    {
+      "rawLine": 17346,
+      "at": 1792898644648,
+      "targetId": 206507,
+      "owner": {
+        "x": 283,
+        "y": 665
+      },
+      "target": {
+        "x": 283,
+        "y": 666
+      },
+      "reason": "route-loop",
+      "confirmedMoves": 6,
+      "pursuitMs": 3772,
+      "peers": [
+        {
+          "actor": "L25081f08",
+          "ownerReceipt": {
+            "x": 278,
+            "y": 673,
+            "map": "0",
+            "at": 1792898644525,
+            "sequence": 3396,
+            "source": "UserLocation",
+            "rawLine": 17331
+          },
+          "ageMs": 123,
+          "distanceOwner": 8,
+          "distanceTarget": 7,
+          "maxSeparation": 8,
+          "passesSixCellGeometry": false
+        },
+        {
+          "actor": "L25081f07",
+          "ownerReceipt": {
+            "x": 273,
+            "y": 670,
+            "map": "0",
+            "at": 1792898644117,
+            "sequence": 4814,
+            "source": "UserLocation",
+            "rawLine": 17303
+          },
+          "ageMs": 531,
+          "distanceOwner": 10,
+          "distanceTarget": 10,
+          "maxSeparation": 10,
+          "passesSixCellGeometry": false
+        },
+        {
+          "actor": "L25081f06",
+          "ownerReceipt": {
+            "x": 267,
+            "y": 654,
+            "map": "0",
+            "at": 1792898644303,
+            "sequence": 6433,
+            "source": "UserLocation",
+            "rawLine": 17320
+          },
+          "ageMs": 345,
+          "distanceOwner": 16,
+          "distanceTarget": 16,
+          "maxSeparation": 16,
+          "passesSixCellGeometry": false
+        },
+        {
+          "actor": "L25081f09",
+          "ownerReceipt": {
+            "x": 259,
+            "y": 653,
+            "map": "0",
+            "at": 1792898644180,
+            "sequence": 5383,
+            "source": "UserLocation",
+            "rawLine": 17310
+          },
+          "ageMs": 468,
+          "distanceOwner": 24,
+          "distanceTarget": 24,
+          "maxSeparation": 24,
+          "passesSixCellGeometry": false
+        },
+        {
+          "actor": "L25081f01",
+          "ownerReceipt": {
+            "x": 257,
+            "y": 668,
+            "map": "0",
+            "at": 1792898644085,
+            "sequence": 8945,
+            "source": "UserLocation",
+            "rawLine": 17300
+          },
+          "ageMs": 563,
+          "distanceOwner": 26,
+          "distanceTarget": 26,
+          "maxSeparation": 26,
+          "passesSixCellGeometry": false
+        },
+        {
+          "actor": "L25081f03",
+          "ownerReceipt": {
+            "x": 256,
+            "y": 663,
+            "map": "0",
+            "at": 1792898644459,
+            "sequence": 6203,
+            "source": "UserLocation",
+            "rawLine": 17328
+          },
+          "ageMs": 189,
+          "distanceOwner": 27,
+          "distanceTarget": 27,
+          "maxSeparation": 27,
+          "passesSixCellGeometry": false
+        },
+        {
+          "actor": "L25081f00",
+          "ownerReceipt": {
+            "x": 255,
+            "y": 671,
+            "map": "0",
+            "at": 1792898644585,
+            "sequence": 7047,
+            "source": "UserLocation",
+            "rawLine": 17335
+          },
+          "ageMs": 63,
+          "distanceOwner": 28,
+          "distanceTarget": 28,
+          "maxSeparation": 28,
+          "passesSixCellGeometry": false
+        },
+        {
+          "actor": "L25081f02",
+          "ownerReceipt": {
+            "x": 255,
+            "y": 666,
+            "map": "0",
+            "at": 1792898644428,
+            "sequence": 6270,
+            "source": "UserLocation",
+            "rawLine": 17325
+          },
+          "ageMs": 220,
+          "distanceOwner": 28,
+          "distanceTarget": 28,
+          "maxSeparation": 28,
+          "passesSixCellGeometry": false
+        },
+        {
+          "actor": "L25081f04",
+          "ownerReceipt": {
+            "x": 255,
+            "y": 653,
+            "map": "0",
+            "at": 1792898644302,
+            "sequence": 6656,
+            "source": "UserLocation",
+            "rawLine": 17317
+          },
+          "ageMs": 346,
+          "distanceOwner": 28,
+          "distanceTarget": 28,
+          "maxSeparation": 28,
+          "passesSixCellGeometry": false
+        }
+      ],
+      "geometryEligibleCount": 0
+    },
+    {
+      "rawLine": 17534,
+      "at": 1792898648392,
+      "targetId": 206715,
+      "owner": {
+        "x": 285,
+        "y": 665
+      },
+      "target": {
+        "x": 284,
+        "y": 665
+      },
+      "reason": "no-progress",
+      "confirmedMoves": 5,
+      "pursuitMs": 3026,
+      "peers": [
+        {
+          "actor": "L25081f08",
+          "ownerReceipt": {
+            "x": 276,
+            "y": 671,
+            "map": "0",
+            "at": 1792898648268,
+            "sequence": 3431,
+            "source": "UserLocation",
+            "rawLine": 17525
+          },
+          "ageMs": 124,
+          "distanceOwner": 9,
+          "distanceTarget": 8,
+          "maxSeparation": 9,
+          "passesSixCellGeometry": false
+        },
+        {
+          "actor": "L25081f07",
+          "ownerReceipt": {
+            "x": 273,
+            "y": 672,
+            "map": "0",
+            "at": 1792898647864,
+            "sequence": 4863,
+            "source": "UserLocation",
+            "rawLine": 17504
+          },
+          "ageMs": 528,
+          "distanceOwner": 12,
+          "distanceTarget": 11,
+          "maxSeparation": 12,
+          "passesSixCellGeometry": false
+        },
+        {
+          "actor": "L25081f06",
+          "ownerReceipt": {
+            "x": 265,
+            "y": 654,
+            "map": "0",
+            "at": 1792898648049,
+            "sequence": 6526,
+            "source": "UserLocation",
+            "rawLine": 17514
+          },
+          "ageMs": 343,
+          "distanceOwner": 20,
+          "distanceTarget": 19,
+          "maxSeparation": 20,
+          "passesSixCellGeometry": false
+        },
+        {
+          "actor": "L25081f03",
+          "ownerReceipt": {
+            "x": 260,
+            "y": 665,
+            "map": "0",
+            "at": 1792898648237,
+            "sequence": 6260,
+            "source": "UserLocation",
+            "rawLine": 17521
+          },
+          "ageMs": 155,
+          "distanceOwner": 25,
+          "distanceTarget": 24,
+          "maxSeparation": 25,
+          "passesSixCellGeometry": false
+        },
+        {
+          "actor": "L25081f01",
+          "ownerReceipt": {
+            "x": 259,
+            "y": 668,
+            "map": "0",
+            "at": 1792898647831,
+            "sequence": 9026,
+            "source": "UserLocation",
+            "rawLine": 17501
+          },
+          "ageMs": 561,
+          "distanceOwner": 26,
+          "distanceTarget": 25,
+          "maxSeparation": 26,
+          "passesSixCellGeometry": false
+        },
+        {
+          "actor": "L25081f09",
+          "ownerReceipt": {
+            "x": 259,
+            "y": 651,
+            "map": "0",
+            "at": 1792898647926,
+            "sequence": 5460,
+            "source": "UserLocation",
+            "rawLine": 17510
+          },
+          "ageMs": 466,
+          "distanceOwner": 26,
+          "distanceTarget": 25,
+          "maxSeparation": 26,
+          "passesSixCellGeometry": false
+        },
+        {
+          "actor": "L25081f02",
+          "ownerReceipt": {
+            "x": 255,
+            "y": 664,
+            "map": "0",
+            "at": 1792898648173,
+            "sequence": 6347,
+            "source": "UserLocation",
+            "rawLine": 17518
+          },
+          "ageMs": 219,
+          "distanceOwner": 30,
+          "distanceTarget": 29,
+          "maxSeparation": 30,
+          "passesSixCellGeometry": false
+        },
+        {
+          "actor": "L25081f04",
+          "ownerReceipt": {
+            "x": 254,
+            "y": 655,
+            "map": "0",
+            "at": 1792898648049,
+            "sequence": 6727,
+            "source": "UserLocation",
+            "rawLine": 17513
+          },
+          "ageMs": 343,
+          "distanceOwner": 31,
+          "distanceTarget": 30,
+          "maxSeparation": 31,
+          "passesSixCellGeometry": false
+        },
+        {
+          "actor": "L25081f00",
+          "ownerReceipt": {
+            "x": 251,
+            "y": 669,
+            "map": "0",
+            "at": 1792898648329,
+            "sequence": 7089,
+            "source": "UserLocation",
+            "rawLine": 17530
+          },
+          "ageMs": 63,
+          "distanceOwner": 34,
+          "distanceTarget": 33,
+          "maxSeparation": 34,
+          "passesSixCellGeometry": false
+        }
+      ],
+      "geometryEligibleCount": 0
+    }
+  ],
+  "limits": [
+    "No full observer target/attacker membership stream was preserved for every decision.",
+    "A missing six-cell geometry candidate suffices to fail the new witness geometry at that receipt state, but a passing candidate alone would not prove both objects visible.",
+    "Positions here use each actor own normalized1000 namespace, keyed by actor; no cross-client objectId equality is used."
+  ]
+}

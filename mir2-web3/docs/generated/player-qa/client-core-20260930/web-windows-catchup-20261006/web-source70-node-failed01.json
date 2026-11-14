@@ -1,0 +1,53 @@
+{
+  "owner": "Root",
+  "kind": "Actual original six-script Node01 incomplete isolated dependency closure",
+  "closed": true,
+  "outer": {
+    "owner": "Root",
+    "exitCode": 1,
+    "builderPid": 81848,
+    "kind": "Source70 actual original six-script Node regression",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 17217,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source70-scene-release-cache-20261011-01/root-approved01/node-tests01-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source70-scene-release-cache-20261011-01\\root-approved01\\node-tests01-config.json",
+    "bytes": 5421,
+    "sha256": "90543d1dbc73eaf2269b850c0737557708706c771a72aa07b2957877de15fb73"
+  },
+  "snapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source70-scene-release-cache-20261011-01\\node-preparation01\\source70-node-input-snapshot01.json",
+    "bytes": 66476,
+    "sha256": "142c6e5826654b4229a1f3adebc85ab268cff3624ee9f23f9ce3241b98b15c12"
+  },
+  "tests": 267,
+  "passed": 265,
+  "failed": 2,
+  "skipped": 0,
+  "cancelled": 0,
+  "todo": 0,
+  "sceneTests": 10,
+  "sceneTestsPassed": 10,
+  "customStage5Groups": 506,
+  "customStage5GroupsAreNotAdditionalNodeTests": true,
+  "stderrBytes": 0,
+  "cause": "Original strict ts.createProgram checks lacked TypeScript standard declarations and transitive world-model type inputs in the92-leaf mirror. Actual required omitted closure61files; no product regression conclusion is derived from this failed preparation.",
+  "failedTests": [
+    "Source30 durable receiver and retained facade pass strict no-emit type checking",
+    "Source31 exact integer consumers pass bounded strict no-emit type checking"
+  ],
+  "originalAssertionsPreserved": true,
+  "retryPlan": "Run unchanged six scripts in independently accepted full strict Next source mirror",
+  "postSourceAndToolGuardSucceeded": true,
+  "productionBuildAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

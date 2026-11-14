@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "profileId": "formal-native-local-host-32g-24logical-7200s",
+  "realm": "isolated",
+  "resourceLimitsEnforcedByMonitor": false,
+  "hostLogicalProcessors": 32,
+  "maxPrivateBytes": 34359738368,
+  "maxWorkingSetBytes": 42949672960,
+  "minHostFreeBytes": 8589934592,
+  "maxCpuCores": 24,
+  "maxIoBytesPerSecond": 536870912,
+  "maxIoOperationsPerSecond": 100000,
+  "sustainedSamples": 3,
+  "environment": {
+    "cpuLimit": "SOFT stop=24 logical CPU equivalents (75% of32 logical CPUs; host has24 physical cores), with4 Tokio workers; no hard quota/affinity; OS anddriver reserve, not hardware maximum",
+    "memoryLimit": "SOFT private32GiB/working set40GiB stop; minOSfree8GiB; installed64GiB differs from actual OSusable68463349760bytes; no hard quota, not hardware maximum",
+    "storage": "Local Windows scratch File store; unthrottled disk; process IO includes file/device IO",
+    "database": "Whole raw-copy of the actual ordinary-earned W17 File bank; no seeding/grants/store edits; PostgreSQL not exercised",
+    "network": "Literal loopback; no external NIC throughput, PPS, retransmission or cloud bandwidth certificate",
+    "tls": "Plain WS/HTTP on loopback only; TLS not exercised",
+    "failureDomain": "One development host; no failover, N+1, power/disk failure scope"
+  },
+  "gatewayTelemetryRequired": true,
+  "selectionReason": "Selected before any formal run for user requested current physical host; preserves earlier4GiB/8CPU diagnostic profiles byte-for-byte; no latency/combat/native/memory-slope acceptance threshold changed",
+  "hostInstalledMemoryBytes": 68719476736,
+  "hostOsUsableMemoryBytes": 68463349760,
+  "preparationBankReuse": true,
+  "thresholdsUnchangedFrom": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-target-waypoint-routing-ladder-17\\resource-profile.json",
+    "bytes": 1630,
+    "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+  }
+}

@@ -1,0 +1,269 @@
+{
+  "schemaVersion": 1,
+  "frozenAt": "2026-10-26T01:16:29.943Z",
+  "state": "FINAL_COMMITTED_DRIVER_SOURCE",
+  "actualCodeCommit": "b5374083d257d375437af3de42bead159cd2b917",
+  "driverSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+  "executionSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "backendBuildCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "rustBackendModified": false,
+  "rustBackendChangeScope": "Current H has no Rust/Cargo delta from actual c743 build. Runtime guard independently checks all50 raw/GitLF inputs and full closure before reuse.",
+  "sourceSha256": "d61b7cd057e1a2a55191fe6c407b3058b5ff9205141eaf9290d16da42b028db1",
+  "files": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 156391,
+      "sha256": "158aaaba83967153fc8f764895c9bce823993732618be934636654cc4401f0d2"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 278248,
+      "sha256": "7cf64c8b28a7b57381dc4beaa5fa01e2d77378fa977e869205b1dc941893b68a"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    }
+  ],
+  "gitSourceBindings": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "rawBytes": 37930,
+      "rawSha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc",
+      "driverSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+      "gitAttributeFilteredObject": "e74f78a20cd51a66460ee03a8ba23903fecbab4c",
+      "committedGitObject": "e74f78a20cd51a66460ee03a8ba23903fecbab4c"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "rawBytes": 156391,
+      "rawSha256": "158aaaba83967153fc8f764895c9bce823993732618be934636654cc4401f0d2",
+      "driverSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+      "gitAttributeFilteredObject": "1135f879e1c1d716018823c03689cd67ebc1e25f",
+      "committedGitObject": "1135f879e1c1d716018823c03689cd67ebc1e25f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "rawBytes": 278248,
+      "rawSha256": "7cf64c8b28a7b57381dc4beaa5fa01e2d77378fa977e869205b1dc941893b68a",
+      "driverSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+      "gitAttributeFilteredObject": "574dc8afbf86c6b854bc230f768e44e3fb97da31",
+      "committedGitObject": "574dc8afbf86c6b854bc230f768e44e3fb97da31"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "rawBytes": 4447,
+      "rawSha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7",
+      "driverSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+      "gitAttributeFilteredObject": "f9ac9210e43da18e85ce75f70f92bf5bafae42db",
+      "committedGitObject": "f9ac9210e43da18e85ce75f70f92bf5bafae42db"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "rawBytes": 5228,
+      "rawSha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d",
+      "driverSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+      "gitAttributeFilteredObject": "217fd903024bc89a860ecd2e1c4c80b20753537b",
+      "committedGitObject": "217fd903024bc89a860ecd2e1c4c80b20753537b"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "rawBytes": 21246,
+      "rawSha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f",
+      "driverSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+      "gitAttributeFilteredObject": "a65227bec58442cd2865455730899c220d67964b",
+      "committedGitObject": "a65227bec58442cd2865455730899c220d67964b"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "rawBytes": 10882,
+      "rawSha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8",
+      "driverSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+      "gitAttributeFilteredObject": "85f3c977ead3a05a175d523b6556446de7d426c8",
+      "committedGitObject": "85f3c977ead3a05a175d523b6556446de7d426c8"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "rawBytes": 6548,
+      "rawSha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964",
+      "driverSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+      "gitAttributeFilteredObject": "01b929db555e7442044386689dc05bcd3d4b20e0",
+      "committedGitObject": "01b929db555e7442044386689dc05bcd3d4b20e0"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "rawBytes": 6277,
+      "rawSha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974",
+      "driverSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+      "gitAttributeFilteredObject": "7174c2d58d947ed8f9bbf78f42c2c1526e7b94f0",
+      "committedGitObject": "7174c2d58d947ed8f9bbf78f42c2c1526e7b94f0"
+    }
+  ],
+  "otherSevenInputsUnchanged": true,
+  "priorFreeze": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\capacity-scout-anti-convergence-driver-frozen-v1.json",
+    "bytes": 9472,
+    "sha256": "ed0d9783871dd74107c3ec7980574a31acf06a1ed7c5daac40f1f94e78a40182"
+  },
+  "priorTestRawPrefix": {
+    "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+    "bytes": 270311,
+    "sha256": "f1ba119770bde34135e734780b04539206e859bd7b896977d4e6595555c032ef",
+    "exact": true
+  },
+  "backendSourceManifest": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\backend-source-account-store-wait-diagnostics-v1.json",
+    "bytes": 41831,
+    "sha256": "f9199f375175782b46dc0d18589cd714e2a2a75d7b8fad662af64c700d417ec5"
+  },
+  "releaseRecord": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\release-account-store-wait-diagnostics-v1.json",
+    "bytes": 3343,
+    "sha256": "8a8228a97e4ea2005f3e47839868ba2a90615028e1c7da573130f8663c15c9fc"
+  },
+  "fullRegression": {
+    "passed": 232,
+    "failed": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0,
+    "finalSourceFullRegressionPerformed": true,
+    "sourcePinsUnchangedAfterRun": true,
+    "exactSourceSha256": "d61b7cd057e1a2a55191fe6c407b3058b5ff9205141eaf9290d16da42b028db1",
+    "receipt": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\root-scout-selection-diagnostics-validation-v1\\root-full-driver-receipt-v1.json",
+      "bytes": 5162,
+      "sha256": "733754ea1cade189fa92c29d5a808f7b940315909605cf636d2d3bf7b51a8446"
+    },
+    "log": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\root-scout-selection-diagnostics-validation-v1\\root-full-driver-v1.stdout.log",
+      "bytes": 62597,
+      "sha256": "95277742a021f3c8a59eebda46e33022cb221011c2017bd5278c6dff63bf1444"
+    },
+    "stderr": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\root-scout-selection-diagnostics-validation-v1\\root-full-driver-v1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "focusedTests": {
+    "passed": 6,
+    "focusedSelectionPassed": 22,
+    "includedInFull232": true,
+    "sourcePreservation": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-decision-diagnostics-v1\\source-preservation-and-focused-receipt-v1.json",
+      "bytes": 6798,
+      "sha256": "37a687b66c9db85c0ceb0c2c567b54ed3394d362a0bd0244589ccfa6f1ab9fc5"
+    },
+    "red": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-decision-diagnostics-v1\\focused-red-execution-v1.json",
+      "bytes": 4660,
+      "sha256": "8b752fa6ea7f5f9581b4a6ea5a83089920ff163f9e281dd0707a305d447e684e"
+    },
+    "green": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-decision-diagnostics-v1\\focused-green-execution-v1.json",
+      "bytes": 4755,
+      "sha256": "1c8e50cdcce7c48bfb3ed2d485d728061266e33f86419c5cde7b5c7fcb66bf08"
+    }
+  },
+  "sourceReview": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-decision-diagnostics-independent-review-v1.json",
+    "bytes": 4886,
+    "sha256": "6ceacd48f90475d750d3f2b43241d4c51593681a69a7bc633dd1f4193e99a8b0"
+  },
+  "fullRegressionReview": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-decision-diagnostics-independent-review-v1\\full-regression-addendum-v1.json",
+    "bytes": 3712,
+    "sha256": "4c6c4abcf14d20451e740439a417939384e06ee5db02941cd6e72812b1a517e2"
+  },
+  "finalSourceBinding": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-driver-binding-v1\\final-source-binding-v1.json",
+    "bytes": 2540,
+    "sha256": "27c76c36b8a425c2562f21b3a0a9895db6ea898655e9c8872714148b5a64d78b"
+  },
+  "diagnosticDelta": {
+    "sourcePreservation": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-decision-diagnostics-v1\\source-preservation-and-focused-receipt-v1.json",
+      "bytes": 6798,
+      "sha256": "37a687b66c9db85c0ceb0c2c567b54ed3394d362a0bd0244589ccfa6f1ab9fc5"
+    },
+    "productionMutation": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-decision-diagnostics-v1\\production-mutation-v1.json",
+      "bytes": 3246,
+      "sha256": "d520eeb564accde06d8353cd8e5be0ff066071b523c011dcc6288e1a3a0a511e"
+    },
+    "priorRawPreimages": {
+      "main": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-decision-diagnostics-v1\\preimages\\playtest-capacity-soak.mjs.txt",
+        "bytes": 155475,
+        "sha256": "6c2f4e3dfcbc38465a13cf05c8c8945fdb4fe7c99acaea43dfad493fb77696d8"
+      },
+      "test": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-decision-diagnostics-v1\\preimages\\playtest-capacity-soak.test.mjs.txt",
+        "bytes": 270311,
+        "sha256": "f1ba119770bde34135e734780b04539206e859bd7b896977d4e6595555c032ef"
+      }
+    },
+    "sourceReview": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-decision-diagnostics-independent-review-v1.json",
+      "bytes": 4886,
+      "sha256": "6ceacd48f90475d750d3f2b43241d4c51593681a69a7bc633dd1f4193e99a8b0"
+    },
+    "fullRegressionReview": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-decision-diagnostics-independent-review-v1\\full-regression-addendum-v1.json",
+      "bytes": 3712,
+      "sha256": "4c6c4abcf14d20451e740439a417939384e06ee5db02941cd6e72812b1a517e2"
+    },
+    "onlyFixedScalarCountsAndReasons": true
+  },
+  "diagnosticsOnly": true,
+  "plannerBehaviorChanged": false,
+  "backendSourceVerification": {
+    "inputCount": 50,
+    "rawAndGitLfMatchOriginalC": true,
+    "ignoredInclusiveUntrackedBackendCount": 0,
+    "originalFourNoneProofsPreservedByExactCSource": true
+  },
+  "freezeBuilder": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-driver-binding-v1\\freeze-committed-driver-v1.mjs",
+    "bytes": 16018,
+    "sha256": "0d77f015fbce415d5581e054b0eb0eeb7a59ab7267cfd93fb703af99fa0e2267"
+  },
+  "originalPolicyUnchanged": true,
+  "functionalVerificationOnly": true,
+  "capacityAccepted": false,
+  "realCapacityRunPerformedByThisFreeze": false,
+  "p2ImplementationPermitted": false
+}

@@ -459,6 +459,8 @@ try {
     }
 
     $manifestJson = $manifest | ConvertTo-Json -Depth 12
+    # Match the repository's JSON LF contract, independent of the PowerShell host.
+    $manifestJson = $manifestJson.Replace("`r`n", "`n")
     $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
     [System.IO.File]::WriteAllText((Join-Path $stagePath 'manifest.json'), $manifestJson + "`n", $utf8NoBom)
     [System.IO.File]::WriteAllText((Join-Path $stagePath $script:MarkerName), $script:MarkerContents, [System.Text.Encoding]::ASCII)

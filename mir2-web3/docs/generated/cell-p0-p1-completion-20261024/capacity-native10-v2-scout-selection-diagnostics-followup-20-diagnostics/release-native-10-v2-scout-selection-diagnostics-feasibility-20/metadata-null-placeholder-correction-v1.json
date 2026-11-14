@@ -1,0 +1,264 @@
+{
+  "schemaVersion": 1,
+  "correctedAt": "2026-10-26T01:40:50.984330+00:00",
+  "scope": "Authoritative metadata evidence correction only. Original proof8258B is retained unchanged. Its .get-based changed-key comparison omitted five deletions of null placeholders in four rows; the old otherTopLevelValuesSemanticExact claims are superseded by the complete key-presence-aware rows below. Actual bound documents, every source module/controller, thresholds and execution state are unchanged.",
+  "correctedOriginalProof": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\actual-metadata-binding-v1.json",
+    "bytes": 8258,
+    "sha256": "575142a1b90c4d2595bb0fe2d1064e900a0b0cf2c8bb3320b4423954ae34b5a4"
+  },
+  "completeMetadataChanges": [
+    {
+      "document": "current-driver-binding.json",
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\current-driver-binding.json.before-actual-full16-v1.txt",
+        "bytes": 2842,
+        "sha256": "a2926f99e9d1d5494fe15acd215f07fc51674f054ee9a33b91aa3f0823997759"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\current-driver-binding.json",
+        "bytes": 2845,
+        "sha256": "9d63bebc0bb2b1bf1c9cf697a8b99944be7af2a429f2fe649b2d1b50826c1325"
+      },
+      "completeChangedTopLevelFields": [
+        "state"
+      ],
+      "deletedTopLevelFields": [],
+      "addedTopLevelFields": [],
+      "omittedNullPlaceholderDeletionsFromOriginalProof": [],
+      "allValuesOutsideCompleteChangeListSemanticExact": true
+    },
+    {
+      "document": "candidate-release-binding.json",
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\candidate-release-binding.json.before-actual-full16-v1.txt",
+        "bytes": 2204,
+        "sha256": "a31d1dcc7290d991c20514e2a98fc4ba6b33cb0bd9ad408b319434bf1383c32e"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\candidate-release-binding.json",
+        "bytes": 11994,
+        "sha256": "432f3d48db82509cadb7d1c6c4b42745eff5aecaacebde14be15489afc58131c"
+      },
+      "completeChangedTopLevelFields": [
+        "full16",
+        "state"
+      ],
+      "deletedTopLevelFields": [],
+      "addedTopLevelFields": [],
+      "omittedNullPlaceholderDeletionsFromOriginalProof": [],
+      "allValuesOutsideCompleteChangeListSemanticExact": true
+    },
+    {
+      "document": "backend-library-binding.json",
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\backend-library-binding.json.before-actual-full16-v1.txt",
+        "bytes": 1392,
+        "sha256": "a1ae0850f973b7c166f6a6f044ee0c4fe3eff93a2005ff7bc6beed20074936ac"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\backend-library-binding.json",
+        "bytes": 1839,
+        "sha256": "dbb630453ae18709c487e81849592299d9086050dc3a8566414483a4a486c28f"
+      },
+      "completeChangedTopLevelFields": [
+        "runtimeGuardExecution",
+        "runtimeGuardStdout"
+      ],
+      "deletedTopLevelFields": [],
+      "addedTopLevelFields": [],
+      "omittedNullPlaceholderDeletionsFromOriginalProof": [],
+      "allValuesOutsideCompleteChangeListSemanticExact": true
+    },
+    {
+      "document": "launcher-source-prepared-v1.json",
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\launcher-source-prepared-v1.json.before-actual-full16-v1.txt",
+        "bytes": 890,
+        "sha256": "e0a53f8e4e00ccc316f86f8304d0bd473e0eb1e768ca813c76ba868bf6c7ded8"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\launcher-source-prepared-v1.json",
+        "bytes": 1511,
+        "sha256": "e9591e1f6c5c4e668b15ea5165d1dad034a93a29067d8058ffff1e52128e10e1"
+      },
+      "completeChangedTopLevelFields": [
+        "accountsCreated",
+        "accountsProvisioned",
+        "actualInputsBound",
+        "document",
+        "driverFrozen",
+        "freshFull16",
+        "full16",
+        "guardExecuted",
+        "moduleImported",
+        "sourceFreezeNotSealed",
+        "state"
+      ],
+      "deletedTopLevelFields": [
+        "accountsProvisioned",
+        "driverFrozen",
+        "freshFull16",
+        "guardExecuted",
+        "moduleImported"
+      ],
+      "addedTopLevelFields": [
+        "accountsCreated",
+        "actualInputsBound",
+        "document",
+        "full16",
+        "sourceFreezeNotSealed"
+      ],
+      "omittedNullPlaceholderDeletionsFromOriginalProof": [
+        "freshFull16"
+      ],
+      "allValuesOutsideCompleteChangeListSemanticExact": true
+    },
+    {
+      "document": "final-inputs-approved.json",
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\final-inputs-approved.json.before-actual-full16-v1.txt",
+        "bytes": 890,
+        "sha256": "e0a53f8e4e00ccc316f86f8304d0bd473e0eb1e768ca813c76ba868bf6c7ded8"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\final-inputs-approved.json",
+        "bytes": 1505,
+        "sha256": "a483cbb4100977f65130807d64945766ddd36c220f597da39356fd5e3f087cbd"
+      },
+      "completeChangedTopLevelFields": [
+        "accountsCreated",
+        "accountsProvisioned",
+        "actualInputsBound",
+        "document",
+        "driverFrozen",
+        "freshFull16",
+        "full16",
+        "guardExecuted",
+        "moduleImported",
+        "sourceFreezeNotSealed",
+        "state"
+      ],
+      "deletedTopLevelFields": [
+        "accountsProvisioned",
+        "driverFrozen",
+        "freshFull16",
+        "guardExecuted",
+        "moduleImported"
+      ],
+      "addedTopLevelFields": [
+        "accountsCreated",
+        "actualInputsBound",
+        "document",
+        "full16",
+        "sourceFreezeNotSealed"
+      ],
+      "omittedNullPlaceholderDeletionsFromOriginalProof": [
+        "freshFull16"
+      ],
+      "allValuesOutsideCompleteChangeListSemanticExact": true
+    },
+    {
+      "document": "static-preparation-verification.json",
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\static-preparation-verification.json.before-actual-full16-v1.txt",
+        "bytes": 890,
+        "sha256": "e0a53f8e4e00ccc316f86f8304d0bd473e0eb1e768ca813c76ba868bf6c7ded8"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\static-preparation-verification.json",
+        "bytes": 1515,
+        "sha256": "efafaf050d519d6fca85317595d866a55011665e7f661d9eaefa2eb352c24325"
+      },
+      "completeChangedTopLevelFields": [
+        "accountsCreated",
+        "accountsProvisioned",
+        "actualInputsBound",
+        "document",
+        "driverFrozen",
+        "freshFull16",
+        "full16",
+        "guardExecuted",
+        "moduleImported",
+        "sourceFreezeNotSealed",
+        "state"
+      ],
+      "deletedTopLevelFields": [
+        "accountsProvisioned",
+        "driverFrozen",
+        "freshFull16",
+        "guardExecuted",
+        "moduleImported"
+      ],
+      "addedTopLevelFields": [
+        "accountsCreated",
+        "actualInputsBound",
+        "document",
+        "full16",
+        "sourceFreezeNotSealed"
+      ],
+      "omittedNullPlaceholderDeletionsFromOriginalProof": [
+        "freshFull16"
+      ],
+      "allValuesOutsideCompleteChangeListSemanticExact": true
+    },
+    {
+      "document": "preparation-plan.json",
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\preparation-plan.json.before-actual-full16-v1.txt",
+        "bytes": 1180,
+        "sha256": "43236c5f69b6564b3e725a6ffbb973000991d8c93faa5c561bf0048cd36b1268"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\preparation-plan.json",
+        "bytes": 1500,
+        "sha256": "da62d6f97162271fb1ddff75f5fd21c92fcb52a8dc6dab2f8a27340cc9e0bb9a"
+      },
+      "completeChangedTopLevelFields": [
+        "actualInputsBound",
+        "actualProbeResult",
+        "canonicalGeometryProof",
+        "document",
+        "freshFull16",
+        "full16",
+        "guardExecuted",
+        "maximumControlledActors",
+        "moduleImported",
+        "ordinaryAccountPoolSize",
+        "policy",
+        "sourceFreezeNotSealed",
+        "state"
+      ],
+      "deletedTopLevelFields": [
+        "actualProbeResult",
+        "canonicalGeometryProof",
+        "freshFull16",
+        "guardExecuted",
+        "maximumControlledActors",
+        "moduleImported",
+        "ordinaryAccountPoolSize",
+        "policy"
+      ],
+      "addedTopLevelFields": [
+        "actualInputsBound",
+        "document",
+        "full16",
+        "sourceFreezeNotSealed"
+      ],
+      "omittedNullPlaceholderDeletionsFromOriginalProof": [
+        "actualProbeResult",
+        "freshFull16"
+      ],
+      "allValuesOutsideCompleteChangeListSemanticExact": true
+    }
+  ],
+  "newChangesToPreviouslyBoundDocuments": 0,
+  "deletedNullPlaceholdersAreNotQualificationBypasses": {
+    "freshFull16": "The old null placeholder was replaced by the actual full16 object/reference and the candidate still strictly requires passed K full16.",
+    "actualProbeResult": "Only an unconsumed null placeholder was deleted from preparation-plan; Probe20 result remains unknown, capacityAccepted=false and mode/realm have not executed."
+  },
+  "actualSourceOrControllerChanged": false,
+  "actualModeExecuted": false,
+  "newProbeResultKnown": false,
+  "capacityAccepted": false
+}

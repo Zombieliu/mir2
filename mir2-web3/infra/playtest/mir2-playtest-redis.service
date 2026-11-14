@@ -1,0 +1,37 @@
+[Unit]
+Description=Mir2 isolated playtest Redis cache
+After=network.target
+StartLimitIntervalSec=300
+StartLimitBurst=3
+
+[Service]
+Type=simple
+User=mir2-playtest
+Group=mir2-playtest
+ExecStart=/usr/bin/redis-server /etc/mir2-playtest/redis.conf
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=30
+UMask=0077
+LimitNOFILE=4096
+MemoryAccounting=true
+MemoryMax=256M
+MemorySwapMax=0
+CPUWeight=25
+IOWeight=25
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+ReadWritePaths=/var/lib/mir2-playtest/redis
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=mir2-playtest-redis
+
+[Install]
+WantedBy=multi-user.target

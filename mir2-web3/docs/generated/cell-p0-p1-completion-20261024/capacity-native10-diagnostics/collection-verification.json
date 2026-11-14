@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-24T17:03:52.708Z",
+  "method": "File-only raw-byte/SHA/redaction/JSONL streaming checks plus frozen verifyTopic API preview; no test suite, build, service or gameplay executed.",
+  "collectionFilesBeforeThisRecord": 36,
+  "collectionFilesIncludingThisRecord": 37,
+  "catalogAllowlistedPublicFiles": 31,
+  "copiedOriginalPublicFiles": 32,
+  "copiedOriginalPublicBytes": 236707,
+  "allOriginalCopiesByteEqual": true,
+  "currentBackendClosureRejected": true,
+  "currentClosureReason": "The spectator repair adds a backend input outside the old32-file frozen manifest; the old full16 proof is selected only with the explicit historical38194647 commit.",
+  "historicalBackendCommit": "38194647a59bc356259e442b3f837e8c231e279d",
+  "preview": {
+    "indexExternal": "C:\\mir2-build\\p01-completion-20261024\\evidence-preview-native10-index.json",
+    "result": {
+      "files": 136,
+      "frozenBackendFiles": 32,
+      "historicalBackendPins": 32,
+      "fullRuns": 1,
+      "failedReportsPreserved": 0,
+      "capacityReports": 8,
+      "capacityAccepted": 0,
+      "archivedFiles": 8,
+      "archivedRows": 25287,
+      "archivedMonitorRows": 837,
+      "invalidMonitorRows": 422
+    },
+    "rootIndexCreated": false,
+    "snapshotExcludesThisLaterVerificationRecord": true
+  },
+  "redaction": {
+    "unredactedSensitiveJsonFieldCount": 0,
+    "launcherPasswordLiterals": 0,
+    "launcherLongHexLiteralsMatchPublicBinaryPin": true,
+    "rawJsonlFieldsCheckedByFrozenVerifier": true,
+    "scope": "Field/literal inspection of allowlisted public material only; configured secret values and private files were never read."
+  },
+  "cleanup": [
+    {
+      "path": "capacity-native10-diagnostics/release-native-10-feasibility-01/realm-cleanup.json",
+      "counterSource": "explicit original capacity fields",
+      "allSixRecordedZero": true
+    },
+    {
+      "path": "capacity-native10-diagnostics/release-native-10-feasibility-02/realm-cleanup.json",
+      "counterSource": "explicit original capacity fields",
+      "allSixRecordedZero": true
+    }
+  ],
+  "externalRawManifest": {
+    "path": "capacity-native10-diagnostics/raw-artifact-manifest.json",
+    "sha256": "66c7d562ff9952c11b42502336598b8c2bf44aba62517b64f8d9d6913c95648e"
+  },
+  "standaloneMonitorScope": "Two original resource-monitor histories remain external and were fully SHA/size/JSONL-checked during collection. Their pins remain in the original catalog/diagnostic-summary; the frozen verifyTopic archive schema consumes the actual driver capacity samples, not standalone monitor kinds.",
+  "capacityAccepted": 0,
+  "limitations": [
+    "Preflight01 rejected requested10 before Login and has no capacity report; none was fabricated.",
+    "Attempt02 admitted9 driver actors; monitor briefly observed10 active sessions during an in-flight start. No measured stage or soak completed.",
+    "Process IO guard was the original100000 summed operations/s for3consecutive samples; dominated by tiny writes, not physical disk IOPS or proof of hardware saturation.",
+    "All input original bytes, including BOMs and line endings, are preserved. Standalone monitor histories remain external and are collection-verified; raw-artifact-manifest binds the actual02 driver samples for verifyTopic.",
+    "Static scenario/source readiness and test logs are diagnostics, never proof that the actual10-player workload or capacity passed.",
+    "Recorded cleanup is process/connection scope; it is not a global ghost-free proof."
+  ]
+}

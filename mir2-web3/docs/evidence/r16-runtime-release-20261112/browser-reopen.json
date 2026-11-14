@@ -1,0 +1,248 @@
+{
+  "kind": "r16-owned-persistent-browser-reopen",
+  "passed": true,
+  "source": "007c14c6fd4d618a6b90c5b0f64e60b510818baa",
+  "verifiedBuild": {
+    "head": "007c14c6fd4d618a6b90c5b0f64e60b510818baa",
+    "candidate": "ab50fd2cbfb8-r16-runtime-readiness-79d2acc4",
+    "sourceFiles": 23,
+    "artifactMatchesCommittedCode": true,
+    "buildId": "tbrTdxuK_lO0gjqW2pagN"
+  },
+  "scope": "Production Web build, default WebGPU, private normal-password Gateway/File, normal system Chrome network. Not public wallet acceptance or a full three-class journey.",
+  "path": "/game",
+  "browserLocale": "zh-TW",
+  "newRoleLevel": 1,
+  "networkInterception": false,
+  "tlsBypass": false,
+  "externalNetworkSettingsChanged": false,
+  "manualCachePrefill": false,
+  "firstRunFreshProfile": true,
+  "cold": {
+    "passed": true,
+    "nativeReadyWaitMs": 70730,
+    "originalReadyBudgetMs": 120000,
+    "native": {
+      "backend": "webgpu",
+      "packageId": "webgpu",
+      "hudReady": true,
+      "questReady": true
+    },
+    "authoritativeStart": {
+      "x": 288,
+      "y": 616
+    },
+    "originalFontBodies": [
+      {
+        "name": "NotoSansTC.ttf",
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+      },
+      {
+        "name": "NotoSansCJKsc-Regular.otf",
+        "bytes": 16437364,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+      },
+      {
+        "name": "NotoSans-Regular.ttf",
+        "bytes": 621572,
+        "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      },
+      {
+        "name": "NotoSansDevanagari-Regular.ttf",
+        "bytes": 243520,
+        "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+      },
+      {
+        "name": "NotoSansThai-Regular.ttf",
+        "bytes": 37780,
+        "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+      },
+      {
+        "name": "NotoSansArabic-Regular.ttf",
+        "bytes": 234892,
+        "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+      }
+    ],
+    "quest": {
+      "passed": true,
+      "locale": "zh-TW",
+      "renderer": "ordinary-shared-native",
+      "questOpened": true,
+      "qClosed": true,
+      "owner": "bevy",
+      "package": {
+        "backend": "webgpu",
+        "packageId": "webgpu"
+      },
+      "navigation": {
+        "characterOpen": false,
+        "characterPage": "character",
+        "bagOpen": false,
+        "questOpen": false
+      },
+      "zeroWorldCommands": true,
+      "screenshot": "quest-available-zh-TW.png"
+    },
+    "finalTile": {
+      "x": 289,
+      "y": 616
+    },
+    "logout": {
+      "savedPosition": {
+        "x": 289,
+        "y": 616
+      },
+      "returnedToSelect": true
+    }
+  },
+  "browserRestart": {
+    "firstProcessCount": 8,
+    "allFirstProcessesExited": true,
+    "persistedProfileExists": true,
+    "secondProcessCount": 8
+  },
+  "warm": {
+    "passed": true,
+    "nativeReadyWaitMs": 1422,
+    "originalReadyBudgetMs": 120000,
+    "native": {
+      "backend": "webgpu",
+      "packageId": "webgpu",
+      "hudReady": true,
+      "questReady": true
+    },
+    "authoritativeStart": {
+      "position": {
+        "x": 289,
+        "y": 616
+      },
+      "characterIndex": 2
+    },
+    "originalFontBodies": [
+      {
+        "name": "NotoSansTC.ttf",
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+      },
+      {
+        "name": "NotoSansCJKsc-Regular.otf",
+        "bytes": 16437364,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+      },
+      {
+        "name": "NotoSans-Regular.ttf",
+        "bytes": 621572,
+        "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      },
+      {
+        "name": "NotoSansDevanagari-Regular.ttf",
+        "bytes": 243520,
+        "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+      },
+      {
+        "name": "NotoSansThai-Regular.ttf",
+        "bytes": 37780,
+        "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+      },
+      {
+        "name": "NotoSansArabic-Regular.ttf",
+        "bytes": 234892,
+        "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+      }
+    ],
+    "quest": {
+      "passed": true,
+      "locale": "zh-TW",
+      "renderer": "ordinary-shared-native",
+      "questOpened": true,
+      "qClosed": true,
+      "owner": "bevy",
+      "package": {
+        "backend": "webgpu",
+        "packageId": "webgpu"
+      },
+      "navigation": {
+        "characterOpen": false,
+        "characterPage": "character",
+        "bagOpen": false,
+        "questOpen": false
+      },
+      "zeroWorldCommands": true,
+      "screenshot": "quest-available-zh-TW.png"
+    },
+    "finalTile": {
+      "x": 288,
+      "y": 616
+    },
+    "logout": {
+      "savedPosition": {
+        "x": 288,
+        "y": 616
+      },
+      "returnedToSelect": true
+    },
+    "loginKind": "normal-password",
+    "beforeStartFonts": {
+      "assetVersion": "20261108-r16-08ec86d5105c",
+      "cacheNamespace": "20261108-r16-08ec86d5105c-64aff88ac6ca",
+      "rows": [
+        {
+          "name": "NotoSansCJKsc-Regular.otf",
+          "present": true,
+          "contentLength": "16437364"
+        },
+        {
+          "name": "NotoSansTC.ttf",
+          "present": true,
+          "contentLength": "11941968"
+        },
+        {
+          "name": "NotoSans-Regular.ttf",
+          "present": true,
+          "contentLength": "621572"
+        },
+        {
+          "name": "NotoSansDevanagari-Regular.ttf",
+          "present": true,
+          "contentLength": "243520"
+        },
+        {
+          "name": "NotoSansThai-Regular.ttf",
+          "present": true,
+          "contentLength": "37780"
+        },
+        {
+          "name": "NotoSansArabic-Regular.ttf",
+          "present": true,
+          "contentLength": "234892"
+        }
+      ]
+    },
+    "runtimeTransfers": [
+      {
+        "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgpu/mir2_bevy_runtime.js",
+        "fromDiskCache": true,
+        "cacheEvent": false,
+        "encodedBytes": 0,
+        "decodedBytes": 141747
+      },
+      {
+        "path": "/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-84ef836460a84e03/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "fromDiskCache": true,
+        "cacheEvent": false,
+        "encodedBytes": 0,
+        "decodedBytes": 31441753
+      }
+    ],
+    "saved": true
+  },
+  "fixtureUnchanged": true,
+  "closed": {
+    "browser": true,
+    "proxy": true,
+    "next": true,
+    "gateway": true
+  },
+  "priorColdFailuresRetained": true
+}

@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "checkpoint": "native-ui-parity-20260903-map-relocation",
+  "recordedAt": "2026-09-03T14:37:39.6868458+08:00",
+  "baseRevision": "6296e27415be7e27c3b6ed201745506c6114f58d",
+  "branch": "codex/windows-player-journey",
+  "sourceFiles": [
+    {
+      "path": "apps/game-client/platform-windows/src/assets.rs",
+      "sha256": "72339654d576eb3e3f995574e9fb3aceb5f2489c2a9d52bc53c95320c881f515"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/map_parser.rs",
+      "sha256": "0f4ff32db586e05c11543dad5f04fb0cfc7aa02bbcb3cd5610edb4f1856cde19"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/main.rs",
+      "sha256": "2137d9ed126047727958ca815d4e674ea86c3212ebbd1e85f13e43964f457a3b"
+    }
+  ],
+  "executable": {
+    "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-trade-completion-windows-340f7ca3b1f44af6a6ae18576bb183e1\\debug\\mir2-platform-windows.exe",
+    "sha256": "6ffaa4332c7ddc87e139b9ed7651a855b6d8301ddb10080c6a2ffe1c1ef7dcb0",
+    "size": 88811520
+  },
+  "testExecutableSha256": "78fd43f73be4c9dd6941b2acaf4d9174fc85a2c0bdb53630b6a269a25de47501",
+  "mapLayoutSha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5",
+  "accountStoreSha256": "54158d3e08af4e8ac2822e61244f6e245cd1c7ae1b4d4c2cff8a64a496f8e05b",
+  "gateway": {
+    "ok": true,
+    "http": "ready",
+    "ws": "ready",
+    "currentWsConnections": 1,
+    "currentActiveSessions": 0
+  },
+  "codeCommitted": false,
+  "codePushed": false,
+  "resourceRouting": {
+    "executableAssetEntry": "mir2-assets junction beside the executable",
+    "assetEntryTarget": "apps/web/public",
+    "fullPackStorage": "F:\\mir2-r2-fullcrystal\\20260730-fullcrystal-f71b89aa-gzip1\\generated\\crystal-packs\\full",
+    "fullPackProjectLink": "apps/web/public/generated/crystal-packs/full",
+    "developmentMapLayout": "apps/web/lib/generated/crystal-map-pack/0.map.gz",
+    "originalFailure": "The Windows junction alias was joined to ../lib before resolving its physical target; no map file existed at that installation-relative path.",
+    "correction": "Prefer packaged map directories; canonicalize the asset root before using its physical sibling lib directory."
+  },
+  "verification": {
+    "assetPathFocused": {
+      "passed": 6,
+      "failed": 0,
+      "includesRealWindowsJunction": true
+    },
+    "reportedCoordinate": {
+      "map": "0",
+      "x": 302,
+      "y": 634,
+      "atlasTiles": 607,
+      "standaloneTiles": 242,
+      "localImageReferences": 221,
+      "missingLocalImages": 0
+    },
+    "nativeFullSerial": {
+      "passed": 537,
+      "failed": 0,
+      "ignored": 0,
+      "cwd": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-map-relocation-fix-a3372d45038b4a8987ba13fa8ae4f692",
+      "assetRoot": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-trade-completion-windows-340f7ca3b1f44af6a6ae18576bb183e1\\debug\\mir2-assets",
+      "log": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-map-relocation-fix-a3372d45038b4a8987ba13fa8ae4f692\\native-tests-serial.log"
+    },
+    "initialParallelRun": {
+      "passed": 534,
+      "failed": 3,
+      "log": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-map-relocation-fix-a3372d45038b4a8987ba13fa8ae4f692\\native-tests.log",
+      "failedTests": [
+        "gateway::tests::exact_receipt_then_semantic_invalid_is_quarantined_and_consumed_once_by_full_plugins",
+        "gateway::tests::outer_terminal_pending_without_receipt_still_becomes_unknown",
+        "gateway::tests::outer_terminal_transitions_preserve_and_apply_exact_receipt_to_all_owners"
+      ],
+      "diagnosis": "Consistent with process-global native ingestion queue replacement across host tests; serial rerun passes. Test isolation was not changed or claimed fixed."
+    },
+    "build": {
+      "exitCode": 0,
+      "durationSeconds": 26.47,
+      "log": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-map-relocation-fix-a3372d45038b4a8987ba13fa8ae4f692\\native-build.log"
+    },
+    "formattingPassed": true,
+    "diffCheckPassed": true
+  },
+  "preservation": {
+    "resourceFilesEdited": false,
+    "resourceCopiesMade": false,
+    "newResourceJunctionsCreated": false,
+    "accountStoreEdited": false,
+    "mapLayoutHashUnchanged": true,
+    "accountStoreHashUnchangedBeforeManualLogin": true,
+    "previousExeBackup": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-map-relocation-fix-a3372d45038b4a8987ba13fa8ae4f692\\mir2-platform-windows-before-map-fix.exe",
+    "previousExeSha256": "7b714ed856aa6d8d989ae7b60ee8d70dc8e9a7bc86129e83fc4c08e18ee81775",
+    "gatewayRestarted": false
+  },
+  "gui": {
+    "userResumedComputerUse": true,
+    "processId": 307044,
+    "windowId": 34016448,
+    "observedScreen": "login",
+    "authenticationPerformedByAgent": false,
+    "inGameVisualVerified": false,
+    "reason": "Manual user login is required by the computer-use skill; world render verification is not replaced by the login screenshot."
+  },
+  "acceptance": {
+    "visualAccepted": false,
+    "accepted": false,
+    "globalParityPercent": null,
+    "openBacklogIds": 33
+  }
+}

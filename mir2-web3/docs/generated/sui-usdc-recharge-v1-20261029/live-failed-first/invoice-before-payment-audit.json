@@ -1,0 +1,115 @@
+{
+  "evidenceKind": "independent read-only real Testnet invoice audit",
+  "databaseObservedAtUtc": "2026-10-28T20:12:01.374Z",
+  "chainObservationCompletedAtUtc": "2026-10-28T20:12:05.601Z",
+  "genesisDigest": "69WiPg3DAQiwdxfncX6wYQ2siKwAe6L9BZthQea3JNMD",
+  "checks": {
+    "exactOneUsdc": true,
+    "oneCreatedInvoice": true,
+    "creationVerified": true,
+    "oneGasReservation": true,
+    "totalReservationWithinSetupPlan": true,
+    "ledgerDomainMatches": true
+  },
+  "passed": true,
+  "order": {
+    "id": "usdc_cbd800894b0f0a8ba60438f6ef93c04ecfde30212e9559eae47878ff9e26eae2",
+    "state": "invoiceBound",
+    "credits": 100,
+    "creditOrigin": "test",
+    "payer": "0x960b3560bd7fca54874692cf2706d248af9ec69963743faa261fb1497ed97a33",
+    "amountMicros": "1000000",
+    "expiresAtMs": "1793218700546",
+    "frozenHash": "0x441d29f92a0afda734cd496da5b7030d9d4cac9a180b5728441e3aa450c5e5d8",
+    "invoiceId": "0x28e2702a79a1a313f5b5e07fefb3db19097bb14b7059cba6b179ddcfd70396ee",
+    "gameReceiptPresent": false
+  },
+  "created": {
+    "state": "created",
+    "invoiceId": "0x28e2702a79a1a313f5b5e07fefb3db19097bb14b7059cba6b179ddcfd70396ee",
+    "digest": "7X3c28NTZuPC58qv6vCw6P83qKQgsepEfGe12cvGfKVs",
+    "checkpoint": "400276065"
+  },
+  "invoice": {
+    "state": "unpaid",
+    "invoiceId": "0x28e2702a79a1a313f5b5e07fefb3db19097bb14b7059cba6b179ddcfd70396ee",
+    "expiresAtMs": "1793218700546",
+    "checkpoint": "400276065"
+  },
+  "creationTransaction": {
+    "digest": "7X3c28NTZuPC58qv6vCw6P83qKQgsepEfGe12cvGfKVs",
+    "checkpoint": "400276065",
+    "success": true,
+    "gasUsed": {
+      "computationCost": "1000000",
+      "storageCost": "5373200",
+      "storageRebate": "1557844",
+      "nonRefundableStorageFee": "156"
+    },
+    "gasMist": "4815356"
+  },
+  "balances": [
+    {
+      "role": "buyer",
+      "owner": "0x960b3560bd7fca54874692cf2706d248af9ec69963743faa261fb1497ed97a33",
+      "usdcMicros": "20000000",
+      "suiMist": "1000000000"
+    },
+    {
+      "role": "merchant",
+      "owner": "0x98d549368a71c12ac7dcab5e9dcdb6d5610267dc566a60423ad45c279c7917f1",
+      "usdcMicros": "0",
+      "suiMist": "964634045"
+    }
+  ],
+  "budgets": {
+    "setupMaximumMist": "200000000",
+    "setupRows": [
+      {
+        "step": "publish",
+        "digest": "FtKCEtQ1svaVnhwBnHDxUycUeKvE24tBnoRSQzQLWbc",
+        "maximumMist": "100000000"
+      },
+      {
+        "step": "config",
+        "digest": "H6FpxHS28e5hVG1yn3sp3JpWuSep3euBpsvSGCp6rUBA",
+        "maximumMist": "20000000"
+      },
+      {
+        "step": "enable",
+        "digest": "ACnGsVdEaUjuz6cBSEQJYLrDsHywiCiVgT3CmWZwXHz9",
+        "maximumMist": "20000000"
+      }
+    ],
+    "invoiceRows": [
+      {
+        "digest": "7X3c28NTZuPC58qv6vCw6P83qKQgsepEfGe12cvGfKVs",
+        "maximumMist": "50000000"
+      }
+    ],
+    "reservedSetupMist": "140000000",
+    "reservedInvoiceMist": "50000000",
+    "totalReservedMist": "190000000",
+    "playerPaymentBudgetSeparateMist": "50000000"
+  },
+  "allGameOrders": [
+    {
+      "id": "usdc_28eee27795d35d6fae66536be320af4952fb0edcae6140144e526601e28b63f8",
+      "state": "prepared",
+      "payerBound": false,
+      "issuerBytesPrepared": false,
+      "invoiceId": null,
+      "receiptPresent": false
+    },
+    {
+      "id": "usdc_cbd800894b0f0a8ba60438f6ef93c04ecfde30212e9559eae47878ff9e26eae2",
+      "state": "invoiceBound",
+      "payerBound": true,
+      "issuerBytesPrepared": true,
+      "invoiceId": "0x28e2702a79a1a313f5b5e07fefb3db19097bb14b7059cba6b179ddcfd70396ee",
+      "receiptPresent": false
+    }
+  ],
+  "atomicAcrossDatabaseAndChain": false,
+  "noKeysSignaturesOrCapabilityIncluded": true
+}

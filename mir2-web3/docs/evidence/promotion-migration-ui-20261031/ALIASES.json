@@ -1,0 +1,13 @@
+{
+  "observedAtUtc": "2026-10-30T20:25:29.6502622Z",
+  "projectId": "prj_Bl3ttB4PzcdCpJMYLRhzQjkdXyTz",
+  "sourceSha": "80379d6efd2a561ade89ce3d6ac941f6dfd9265d",
+  "deploymentId": "dpl_7TbvV2JywL4vmCEYME318oJnjahc",
+  "aliases": [
+    "mir2.obelisk.build",
+    "mir2-web3-web.vercel.app"
+  ],
+  "matchingBothAliases": true,
+  "evidenceSource": "authenticated Vercel alias listing",
+  "writesPerformed": false
+}

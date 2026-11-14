@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-26T21:58:44.593Z",
+  "finishedAt": "2026-10-26T22:00:44.398Z",
+  "command": [
+    "rustup",
+    "run",
+    "1.95.0",
+    "cargo",
+    "build",
+    "--locked",
+    "--offline",
+    "--release",
+    "--jobs",
+    "4",
+    "-p",
+    "mir2-gateway",
+    "--bin",
+    "mir2-gateway"
+  ],
+  "cwd": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3",
+  "targetDirectory": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\target",
+  "environment": {
+    "CARGO_TARGET_DIR": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\target",
+    "CARGO_BUILD_JOBS": "4",
+    "VSCMD_ARG_TGT_ARCH": "x64",
+    "VSCMD_VER": "17.14.13"
+  },
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "sourceBefore": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\source-before-v6.json",
+    "bytes": 39576,
+    "sha256": "3c261ab1743ad288c031b3822be1a5b85d519e061d2de9932a7b02f303b5b20e"
+  },
+  "sourceAfter": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\source-after-v6.json",
+    "bytes": 39576,
+    "sha256": "3c261ab1743ad288c031b3822be1a5b85d519e061d2de9932a7b02f303b5b20e"
+  },
+  "sourceUnchanged": true,
+  "sourceCaptureError": null,
+  "stdout": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\build-stdout-v6.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\build-stderr-v6.log",
+    "bytes": 55884,
+    "sha256": "6a24907ee7bfe06b5ed0b2f2be1779d9918214ce9895414067fbbfceacad28b6"
+  },
+  "immutableRelease": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\bin\\mir2-gateway.exe",
+    "bytes": 87456256,
+    "sha256": "ad13d15a6fd294cae0beda04d8f91b7773a9b8390cc9c85e5a84d3e72c2567f6"
+  },
+  "actualBuildOutput": {
+    "file": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\target\\release\\mir2-gateway.exe",
+    "bytes": 87456256,
+    "sha256": "ad13d15a6fd294cae0beda04d8f91b7773a9b8390cc9c85e5a84d3e72c2567f6"
+  },
+  "sealError": null
+}

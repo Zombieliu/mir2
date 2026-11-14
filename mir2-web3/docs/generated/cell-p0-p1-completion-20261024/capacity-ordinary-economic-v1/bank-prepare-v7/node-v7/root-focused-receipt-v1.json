@@ -1,0 +1,404 @@
+{
+  "schemaVersion": 1,
+  "scope": "Fresh selected complete preparation/protection suites and adjacent ordinary economy/navigation suites and protocol observations on32 named inputs. The previous828 full-tool check on ee06 is historical; unchanged main suites are not freshly reexecuted here. Static runtime imports separately frozen; no real gameplay/capacity/P0 acceptance.",
+  "expectedHead": "39fdac91a7bac0ff8dabde2613342b95f01fe468",
+  "startedAt": "2026-10-26T22:51:12.343Z",
+  "endedAt": "2026-10-26T22:51:24.929Z",
+  "sourceBefore": [
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 184755,
+      "sha256": "af012dffe96038333cfe32357149c4447d4d3d34bd409338e546be0466a0268f"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 340341,
+      "sha256": "3b255e8c2c811690c7623d14ea14d0bba5dd386a08c69556f39b944fffedf638"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 41727,
+      "sha256": "5f4c85124349a484f181c599a79ad469741f9f3c31597c9a5393f39a8dd83439"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-capacity-policy.test.mjs",
+      "bytes": 7406,
+      "sha256": "2df5f38dea8ac342d163d4ea8db0dbb95270dff316589f52e777014d46cf0aca"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 14462,
+      "sha256": "217c9cdfca29839f0121d0c09e110a891dc034eb46d98678cb66aebe00a44c51"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 20428,
+      "sha256": "31804a1f8de6fbe7de4033889d081379248fc4f43aad35b38f3402ff289c2fa5"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/capacity-ordinary-supplies.mjs",
+      "bytes": 53387,
+      "sha256": "9bde0958794d59b8d42bd6f8759b0e8e4aeb27b55c3985ce392c7222690edda6"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/capacity-ordinary-supplies.test.mjs",
+      "bytes": 98797,
+      "sha256": "2d999a6bf6881d7da0f14242889e9c5ded6620bf12ceecd60bacce89c0f65545"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/capacity-ordinary-protection.mjs",
+      "bytes": 7510,
+      "sha256": "5771297b83b379fd300883bf17ec71a32b594c5a38f757f3abafbeadebc67e87"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/capacity-ordinary-protection.test.mjs",
+      "bytes": 10871,
+      "sha256": "c462660bffcfac8f1adb6d107c8e1305dde2cb69ec7267f50ed71b2222d0f5ec"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-capacity-prepare.mjs",
+      "bytes": 24135,
+      "sha256": "2a4d1ce3fdfd809767ca8bd077db6d640eb803d127a51dfe0b39c9c1f41671f9"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-capacity-prepare.test.mjs",
+      "bytes": 24247,
+      "sha256": "72fa482144f80d88334591873dcf0f37e4b030cb9cff9491ddc8787ff45f1471"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-multiplayer-smoke.mjs",
+      "bytes": 38923,
+      "sha256": "91b8910eba50507302d689c05f5dc5e6fe2a2346f3fe05199c03a8ad1b507c53"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-native-resume-smoke.mjs",
+      "bytes": 20058,
+      "sha256": "2020952e157f3a0a9de16b679f1681497b3d547dce50acc1ec9ef89769cdebe2"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-load-smoke.mjs",
+      "bytes": 38588,
+      "sha256": "3dc4d65c2e514a075e11a84799ac3f1fafbfcb8df51fefbc648dc3a3c24f7fc0"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-catalog-transport.mjs",
+      "bytes": 3794,
+      "sha256": "a833ad9709da46145a991a8270ed5864f37a8023ea1290f44f7c17bf3589d24f"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-funding.mjs",
+      "bytes": 22646,
+      "sha256": "85a02cda1fb75e05d816c74bc9124da6b2e8d108b893795892a647c475473f70"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/test-protocol-funding.mjs",
+      "bytes": 27838,
+      "sha256": "1692bb34d7f9bded6ece75139e6bf2da48b1e5fad763c6938508f61930120d52"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-play.mjs",
+      "bytes": 46278,
+      "sha256": "ce01b337cb8650abccb04c2eb5783d20c76f73b92af1c9db441d89e9bbed8781"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/test-protocol-play.mjs",
+      "bytes": 61727,
+      "sha256": "ec12d10147940fb5ceb42fa6bd334f62e6ddf6a5ee798a7ff33b9184c5f1bdf8"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-combat.mjs",
+      "bytes": 168449,
+      "sha256": "e7cbdb98a5a00c06109b96035902e036f2b0a77f1307b5b80167f71b7010a14c"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/test-protocol-combat.mjs",
+      "bytes": 320101,
+      "sha256": "5abbbc4e1384cabc1dfc8410b5c31467aeae5386e347f3c8bde20e845e30f42f"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-supplies.mjs",
+      "bytes": 79734,
+      "sha256": "0b1fd8478ac1a007a7185654dc407f68fa27f866d0fd174c45740af48d0c1fc1"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/test-protocol-supplies.mjs",
+      "bytes": 76171,
+      "sha256": "27407e727b4b06f0389593cc67e2193895b0b6fadd5465ddf80710a5b8f74481"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "bytes": 19998,
+      "sha256": "896323515674920237ecbf62829ac5354a9ca01d49d10f5968d57499f42a61f2"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-observation.mjs",
+      "bytes": 14738,
+      "sha256": "d12e8d66c527c105a088781c99d538915125a5b77ad63c2b9a49e9cba0f56f17"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/test-protocol-observation.mjs",
+      "bytes": 22513,
+      "sha256": "4fe117f3ec511262f38cb63fcb392f4b889c71ae79036803809fed9f4aea41c6"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-loadout.mjs",
+      "bytes": 33042,
+      "sha256": "43479cb8d2fe7f4d3feefff13d0a2b4291112d3971629bfc07ae3bfee28f14f2"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 184755,
+      "sha256": "af012dffe96038333cfe32357149c4447d4d3d34bd409338e546be0466a0268f"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 340341,
+      "sha256": "3b255e8c2c811690c7623d14ea14d0bba5dd386a08c69556f39b944fffedf638"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 41727,
+      "sha256": "5f4c85124349a484f181c599a79ad469741f9f3c31597c9a5393f39a8dd83439"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-capacity-policy.test.mjs",
+      "bytes": 7406,
+      "sha256": "2df5f38dea8ac342d163d4ea8db0dbb95270dff316589f52e777014d46cf0aca"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 14462,
+      "sha256": "217c9cdfca29839f0121d0c09e110a891dc034eb46d98678cb66aebe00a44c51"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 20428,
+      "sha256": "31804a1f8de6fbe7de4033889d081379248fc4f43aad35b38f3402ff289c2fa5"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/capacity-ordinary-supplies.mjs",
+      "bytes": 53387,
+      "sha256": "9bde0958794d59b8d42bd6f8759b0e8e4aeb27b55c3985ce392c7222690edda6"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/capacity-ordinary-supplies.test.mjs",
+      "bytes": 98797,
+      "sha256": "2d999a6bf6881d7da0f14242889e9c5ded6620bf12ceecd60bacce89c0f65545"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/capacity-ordinary-protection.mjs",
+      "bytes": 7510,
+      "sha256": "5771297b83b379fd300883bf17ec71a32b594c5a38f757f3abafbeadebc67e87"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/capacity-ordinary-protection.test.mjs",
+      "bytes": 10871,
+      "sha256": "c462660bffcfac8f1adb6d107c8e1305dde2cb69ec7267f50ed71b2222d0f5ec"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-capacity-prepare.mjs",
+      "bytes": 24135,
+      "sha256": "2a4d1ce3fdfd809767ca8bd077db6d640eb803d127a51dfe0b39c9c1f41671f9"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-capacity-prepare.test.mjs",
+      "bytes": 24247,
+      "sha256": "72fa482144f80d88334591873dcf0f37e4b030cb9cff9491ddc8787ff45f1471"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-multiplayer-smoke.mjs",
+      "bytes": 38923,
+      "sha256": "91b8910eba50507302d689c05f5dc5e6fe2a2346f3fe05199c03a8ad1b507c53"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-native-resume-smoke.mjs",
+      "bytes": 20058,
+      "sha256": "2020952e157f3a0a9de16b679f1681497b3d547dce50acc1ec9ef89769cdebe2"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-load-smoke.mjs",
+      "bytes": 38588,
+      "sha256": "3dc4d65c2e514a075e11a84799ac3f1fafbfcb8df51fefbc648dc3a3c24f7fc0"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-catalog-transport.mjs",
+      "bytes": 3794,
+      "sha256": "a833ad9709da46145a991a8270ed5864f37a8023ea1290f44f7c17bf3589d24f"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-funding.mjs",
+      "bytes": 22646,
+      "sha256": "85a02cda1fb75e05d816c74bc9124da6b2e8d108b893795892a647c475473f70"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/test-protocol-funding.mjs",
+      "bytes": 27838,
+      "sha256": "1692bb34d7f9bded6ece75139e6bf2da48b1e5fad763c6938508f61930120d52"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-play.mjs",
+      "bytes": 46278,
+      "sha256": "ce01b337cb8650abccb04c2eb5783d20c76f73b92af1c9db441d89e9bbed8781"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/test-protocol-play.mjs",
+      "bytes": 61727,
+      "sha256": "ec12d10147940fb5ceb42fa6bd334f62e6ddf6a5ee798a7ff33b9184c5f1bdf8"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-combat.mjs",
+      "bytes": 168449,
+      "sha256": "e7cbdb98a5a00c06109b96035902e036f2b0a77f1307b5b80167f71b7010a14c"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/test-protocol-combat.mjs",
+      "bytes": 320101,
+      "sha256": "5abbbc4e1384cabc1dfc8410b5c31467aeae5386e347f3c8bde20e845e30f42f"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-supplies.mjs",
+      "bytes": 79734,
+      "sha256": "0b1fd8478ac1a007a7185654dc407f68fa27f866d0fd174c45740af48d0c1fc1"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/test-protocol-supplies.mjs",
+      "bytes": 76171,
+      "sha256": "27407e727b4b06f0389593cc67e2193895b0b6fadd5465ddf80710a5b8f74481"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "bytes": 19998,
+      "sha256": "896323515674920237ecbf62829ac5354a9ca01d49d10f5968d57499f42a61f2"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-observation.mjs",
+      "bytes": 14738,
+      "sha256": "d12e8d66c527c105a088781c99d538915125a5b77ad63c2b9a49e9cba0f56f17"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/test-protocol-observation.mjs",
+      "bytes": 22513,
+      "sha256": "4fe117f3ec511262f38cb63fcb392f4b889c71ae79036803809fed9f4aea41c6"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-loadout.mjs",
+      "bytes": 33042,
+      "sha256": "43479cb8d2fe7f4d3feefff13d0a2b4291112d3971629bfc07ae3bfee28f14f2"
+    }
+  ],
+  "sourceUnchanged": true,
+  "checks": [
+    {
+      "name": "complete-preparation-and-protected-navigation",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--test",
+        "apps/web/scripts/capacity-ordinary-supplies.test.mjs",
+        "apps/web/scripts/capacity-ordinary-protection.test.mjs",
+        "apps/web/scripts/playtest-capacity-prepare.test.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 11864,
+      "summary": {
+        "tests": 244,
+        "pass": 244,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v7\\complete-preparation-and-protected-navigation.stdout.log",
+        "bytes": 47944,
+        "sha256": "8807cde6b65415efc32533a641e5f68f9073556a8c9986526870ba80b908dafd"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v7\\complete-preparation-and-protected-navigation.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "ordinary-economy-and-navigation-dependencies",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--test",
+        "apps/web/scripts/quest-agent/test-protocol-funding.mjs",
+        "apps/web/scripts/quest-agent/test-protocol-play.mjs",
+        "apps/web/scripts/quest-agent/test-protocol-combat.mjs",
+        "apps/web/scripts/quest-agent/test-protocol-supplies.mjs",
+        "apps/web/scripts/quest-agent/test-protocol-observation.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 384,
+      "summary": {
+        "tests": 325,
+        "pass": 325,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v7\\ordinary-economy-and-navigation-dependencies.stdout.log",
+        "bytes": 74666,
+        "sha256": "261ec5851c58262e80b7ef44d50a23975c20b15f0966112c5e29bd8e86b9bc44"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v7\\ordinary-economy-and-navigation-dependencies.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "allSelectedTestsPassed": true,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "realCapacityRunPerformed": false
+}

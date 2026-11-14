@@ -1,0 +1,132 @@
+{
+  "schema": "mir2.delivery-tcp-window-observation.v1",
+  "inputSha256": "e99242a8a1c02d35fc7f0b4fe8b1cdc40743b18cd6f06804e87cfd82d2e6f9cd",
+  "inputBytes": 572056,
+  "source": "committed cloud_tcp_readonly.py without changes",
+  "terminal": {
+    "schema": "mir2.cloud-tcp-readonly.v1",
+    "kind": "localTerminal",
+    "sampledAt": 1794642921461,
+    "reason": "local_stop_file",
+    "sampleCount": 137,
+    "coverageFirstSampledAt": 1794642649311,
+    "coverageLastSampledAt": 1794642921378,
+    "coverageFromCampaignStartClaimed": false,
+    "diagnosticComplete": false,
+    "remoteExitStatus": null,
+    "remoteExitStatusReceived": false,
+    "remoteTerminalObserved": false,
+    "remoteTerminalReason": null,
+    "hostKeyVerifiedBeforeAuthentication": true,
+    "hostKeyPin": "SHA256:6M4ouOk6QvFj1qIEmjj9/LOa8/enGiqZ/n+m7JHo7q8",
+    "pinsSha256": "5096772aa5bee04c191492f7f46a1b9a3bc5afadac9d9744b45cb574aae4ba13",
+    "collectorSourceSha256": "1b523c7786c4c4eb8bbde574967984e442be226fe81e53418d878f1dfa6edbf3",
+    "remoteSourceSha256": "dd3c65467c7377ec8fb6c880cfff6520f629a29f877a151bc37666271708b54f",
+    "stderrBytes": 0,
+    "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "rawStderrExported": false,
+    "credentialsPersisted": false,
+    "remoteStdinPasswordBytesSent": 0,
+    "remoteFilesWritten": false,
+    "serviceOperations": [],
+    "networkSettingsChanged": false,
+    "clientFuseOutput": false,
+    "samplingIntervalSeconds": 2,
+    "maxSeconds": 600
+  },
+  "allSampleCount": 137,
+  "samplesWithAllOptionalMetrics": 31,
+  "sampledIdentityPins": {
+    "schema": "mir2.cloud-tcp-readonly-pins.v1",
+    "templateOnly": false,
+    "rootReviewedIdentityPins": true,
+    "target": {
+      "pid": 1193390,
+      "startTicks": 1552270986,
+      "invocationId": "391ec99506d8426d88a3cb457535fb0b",
+      "revision": "8f3099f4a0114a7825ff61db36b548d3bfb5b3fa"
+    },
+    "caddy": {
+      "pid": 2107428,
+      "startTicks": 623826457
+    },
+    "provenance": {
+      "statusReceiptSha256": "d59c946098fa8c83bf018f0fb49d4bb7177c2b794fa77b521a5977d52dd2a84d",
+      "statusSourceSha256": "e377563a4002ffad62f6d901507877e3a053b97c2873862bde97d9933635467b"
+    }
+  },
+  "clientMovementEpochWindowMs": [
+    1794642766635,
+    1794642828564
+  ],
+  "selectedEpochWindowPaddingMs": 5000,
+  "selectedSampleCount": 36,
+  "selectionUsesUncalibratedClientEpoch": true,
+  "exactCrossClockLatencyInferred": false,
+  "actorOrAckSocketIdentityBound": false,
+  "public443Flows": [
+    {
+      "socketId": "134760f2bc893516913c7d98b54369033abeaf5209357eb3c94bb0e4e4b9230a",
+      "samples": 25,
+      "firstSampleAtMs": 1794642763334,
+      "lastSampleAtMs": 1794642811360,
+      "maxSendQBytes": 0,
+      "maxRtoMs": 238,
+      "minObservedRetransTotal": null,
+      "maxObservedRetransTotal": null
+    },
+    {
+      "socketId": "9a81fa563c68f3e5c1e45470bf0e28d1a7141ca1dd84d25b6fb12942f35f6e58",
+      "samples": 10,
+      "firstSampleAtMs": 1794642763334,
+      "lastSampleAtMs": 1794642781381,
+      "maxSendQBytes": 1560,
+      "maxRtoMs": 2240,
+      "minObservedRetransTotal": 8,
+      "maxObservedRetransTotal": 13
+    },
+    {
+      "socketId": "e3eda96fc6fa52cad7facaf40d950adcaafb24982fc9b0c1338a9acfac7e2edd",
+      "samples": 36,
+      "firstSampleAtMs": 1794642763334,
+      "lastSampleAtMs": 1794642833367,
+      "maxSendQBytes": 0,
+      "maxRtoMs": 240,
+      "minObservedRetransTotal": null,
+      "maxObservedRetransTotal": null
+    },
+    {
+      "socketId": "5c801f3fb1ecf13af6b5b2fd48a6136b33efa262b2e3a6c53801f6991a638e89",
+      "samples": 3,
+      "firstSampleAtMs": 1794642781381,
+      "lastSampleAtMs": 1794642785352,
+      "maxSendQBytes": 2523,
+      "maxRtoMs": 1128,
+      "minObservedRetransTotal": 5,
+      "maxObservedRetransTotal": 7
+    },
+    {
+      "socketId": "865fc7f79c84ea9356d8d4e7607fb438b57978547ca28455a9f901cb8699888f",
+      "samples": 26,
+      "firstSampleAtMs": 1794642783336,
+      "lastSampleAtMs": 1794642833367,
+      "maxSendQBytes": 0,
+      "maxRtoMs": 1184,
+      "minObservedRetransTotal": 3,
+      "maxObservedRetransTotal": 12
+    },
+    {
+      "socketId": "de7b4b003787fd4a82af3635cc8d2af3948da16170be1d1fa7169d3940ebc0d9",
+      "samples": 3,
+      "firstSampleAtMs": 1794642783336,
+      "lastSampleAtMs": 1794642787356,
+      "maxSendQBytes": 1577,
+      "maxRtoMs": 1204,
+      "minObservedRetransTotal": 3,
+      "maxObservedRetransTotal": 4
+    }
+  ],
+  "interpretation": "Some observed public TCP flows show nonzero retransmissions and queued bytes. Missing optional fields remain null, not zero. Other cohost traffic and distinct HTTP health connections are included; this does not identify the game socket or prove the root cause.",
+  "serviceOperations": [],
+  "networkSettingsChanged": false
+}

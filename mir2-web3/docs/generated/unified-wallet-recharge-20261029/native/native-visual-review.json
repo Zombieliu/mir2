@@ -1,0 +1,70 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T15:53:22.464335+00:00",
+  "producerReceipt": {
+    "filename": "native-visual-review.json",
+    "bytes": 2847,
+    "sha256": "45fe11128385efb8bae13e01e93cf5eb84a008b95c361dd6e669a4708cf91928"
+  },
+  "producerReport": {
+    "reviewedAtUtc": "2026-10-29T14:30:28.129600+00:00",
+    "reviewer": "Codex UI integration agent using view_image; AI visual review",
+    "humanAccepted": false,
+    "liveAcceptance": false,
+    "sampleCount": 10,
+    "findings": [
+      "No observed missing glyph or overlapping text in sampled views.",
+      "Three recharge tabs remain visible; monthly owned-card name is localized and its decimal UID is retained.",
+      "Disabled USDC new sales retain the existing order reopen route.",
+      "Opaque player name retains traditional characters and literal placeholder-like text.",
+      "Quest counter is localized; bag fixture shows the canonical Simplified Chinese item name.",
+      "Procurement fixture remains its existing Traditional Chinese custom renderer, not a claim of a new full Simplified Chinese procurement UI.",
+      "Wallet QR is a reserved .invalid offline fixture; no phone approval, login or payment.",
+      "English Guild main-window independent GDI comparison passed without pixel byte differences for tested labels."
+    ],
+    "files": [
+      {
+        "path": "native-gpu-billing/zh-CN-monthly-1024x768.png",
+        "sha256": "a8f9480ad63d129a55f092b515cec8082d3245b86b0cf510b635a2f0023043a9"
+      },
+      {
+        "path": "native-gpu-billing/zh-CN-usdc-disabled-1024x768.png",
+        "sha256": "8d4f3163ca1ea2da4004eda895a18d9c2b1959f8850d33bb3ced93b89c79ac31"
+      },
+      {
+        "path": "native-gpu-sc-gameplay/zh-CN-npc-opaque-name-1024x768.png",
+        "sha256": "11f120304ade1ab440961399a4c06fa72171a3e8f79b458fa0f0e86cdc27f685"
+      },
+      {
+        "path": "native-gpu-sc-gameplay/zh-CN-quest-diary-detail-1024x768.png",
+        "sha256": "6b21a45e06c5c32486aee0dc72172ac24b7102923e65d4eb5d8760809a2eb432"
+      },
+      {
+        "path": "native-gpu-sc-gameplay/zh-CN-bag-item-tooltip-1024x768.png",
+        "sha256": "7c2594d4c1c1f42f6d0062e2e8fd0f5184bad52f65256a716da96f9525c265e3"
+      },
+      {
+        "path": "native-gpu-procurement/procurement-delivery-confirm-1024x768.png",
+        "sha256": "50116294479302dbbee7137761f827d94f2256c469d35c8cc05ae41d9546e451"
+      },
+      {
+        "path": "native-gpu-guild-gdi/guild-main-window-english-1024x768.png",
+        "sha256": "f7c5b144411e41df694ad1b6cddfb03ad2301b677fdf88423bfbe08bb40cd43a"
+      },
+      {
+        "path": "native-gpu-wallet/05-wallet-pending-zh-CN-all-locales-offscreen-fixture.png",
+        "sha256": "1553b507e0a5f7da4f0ddd74068a402a69d6bd0202f9c205fbd00f592b7ee86e"
+      },
+      {
+        "path": "native-gpu-wallet/14-wallet-pending-ar-all-locales-offscreen-fixture.png",
+        "sha256": "f404e0ea0c9e673a27fec709f5d3323091064ce2bb808d942da93df5be829778"
+      },
+      {
+        "path": "native-gpu-wallet/01-wallet-entry-en-offscreen-fixture.png",
+        "sha256": "a8a8c3622347ba969992aea149a106a122312483853325e5109fba8c35df2893"
+      }
+    ]
+  },
+  "phase": "initial integrated snapshot; historical relative to final1875 Game; no stale source pins treated as current"
+}

@@ -1,0 +1,39 @@
+{
+  "revision": "e7cbab02f030ae50b28031ca0237d630eccb7c03",
+  "locale": "zh-TW",
+  "origin": "https://numeron.obelisk.build",
+  "plainGamePath": "/game",
+  "normalSystemNetwork": true,
+  "desktopChromeHeadless": true,
+  "noInterception": true,
+  "scope": "Unsigned real create, pending status and normal in-game Cancel only.",
+  "checks": {
+    "exactRevision": true,
+    "nativeBrowserLocale": true,
+    "noSplitLocaleRequestsBeforeAuth": true,
+    "localizedTitle": true,
+    "firstPartyLink": true,
+    "renderedQr": true,
+    "sameIntentPending": true,
+    "localizedPending": true,
+    "normalCancel": true,
+    "pollingStopped": true,
+    "remainedLogin": true
+  },
+  "passed": true,
+  "chromeVersion": "157.0.8103.78",
+  "htmlLanguage": "zh-TW",
+  "renderedQr": {
+    "valid": true,
+    "width": 240,
+    "height": 240,
+    "matched": 2401,
+    "total": 2401
+  },
+  "pollsAfterCancel": 0,
+  "createAttempts": 1,
+  "validCreateBodies": 1,
+  "browserClosed": true,
+  "rawReceiptSha256": "ae11999d9fe950c31b3f00684406a21326b5a18ebe034e3b44e5c2e2ca14a0ea",
+  "sensitiveFlowDetailsOmitted": true
+}

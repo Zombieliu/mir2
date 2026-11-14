@@ -1,0 +1,163 @@
+{
+  "schema": 1,
+  "passed": true,
+  "scope": "Five system phrases; no player/rank drafts, permissions, requests or gameplay behavior changed. No GUI, service, platform check, executable build or distribution.",
+  "humanLinguisticAcceptance": false,
+  "writeSet": [
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "sha256": "29186002f958ffc084691aafa2594cf895792262f7c7f7e21015414a33f6eb07",
+      "bytes": 959204
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/game.json",
+      "sha256": "796127bf494ee354626f85cf25d2b4cdb68a633585481325b6adfaa7019f54be",
+      "bytes": 44478
+    },
+    {
+      "path": "packages/tooling/data/native-i18n/expansion/ui-overrides.json",
+      "sha256": "704d32ec417845c02e4060d35e8029f9de1eb59ef295ccd7f321a6f3a504235e",
+      "bytes": 575843
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/ru.json",
+      "sha256": "0760f45dc217f8aacf9ee0506a18407afcd50234733df0970ded8d3642662376",
+      "bytes": 895750
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/hi.json",
+      "sha256": "53a5267ceda25831c616ebea8040357783c49013eb7fc100a34ea988566c6759",
+      "bytes": 1067190
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/id.json",
+      "sha256": "3daf140a32aa9273e11350a647b8c5d25df2ebefa8ff367df5da064af1e75b5d",
+      "bytes": 652627
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/vi.json",
+      "sha256": "c39c8c32c8374731b94e6dd0b2907f0376a44fc5c678a7dbadbdb3d3fd4d87cb",
+      "bytes": 729260
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/th.json",
+      "sha256": "a703fed4c3c4e6f01e760f1da7c4a2f11bc3da32f61ef3199d807410a9689f6f",
+      "bytes": 1041623
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/ar.json",
+      "sha256": "f57f06e88d12a35efa5d82e4ff91cfa8d7ef81242dd385ac7d4e204621ab17fd",
+      "bytes": 774821
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/provenance.json",
+      "sha256": "fa189ab99ff7a71dcd2c21d4fdbd0221b498b2b6f56a7e2ce190a01dbd901d5f",
+      "bytes": 69525
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/zh-CN.json",
+      "sha256": "33a8372065605d060590bdd433fbe4c8c7c03e7c8ce201a3107fae574c6e7097",
+      "bytes": 632236
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/zh-CN-provenance.json",
+      "sha256": "5c9a4cbd1609fdadddc0979dbecdb466848bc670f05f4fc16d433d52394cfd3e",
+      "bytes": 12256
+    },
+    {
+      "path": "apps/web/lib/generated/r16-native-localization.json",
+      "sha256": "944f1639e3ac7822ddba4c81a6b2bd5416aef3ded46be35a9e5f75a2f37271ea",
+      "bytes": 6303071
+    },
+    {
+      "path": "packages/game-data/data/generated/portable-native-i18n.json",
+      "sha256": "1c6f48a5e09577b4c01a1f674d990bd355e5adbb12c14b7925a16f8b74fa0c00",
+      "bytes": 1188489
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/validation-report.json",
+      "sha256": "300c08f6b26beb69c4d4be91cbad60929720c5798131d4f9cfc4527d5470a106",
+      "bytes": 977400
+    },
+    {
+      "path": "apps/web/scripts/test-r16-native-localization.mjs",
+      "sha256": "71920d5384bc7f2334106f89cfb6639359305c56300100058e456393989252a6",
+      "bytes": 13262
+    },
+    {
+      "path": "apps/web/scripts/test-portable-native-localization.mjs",
+      "sha256": "9823d47ff3eafa9dd579125aa17fd410578962630c4abcafd90385e151cf6086",
+      "bytes": 3455
+    },
+    {
+      "path": "packages/tooling/scripts/native-i18n.test.mjs",
+      "sha256": "9cb81f7eab3670b7d510d302c8faac5fb5f483136f095523b3eb4228218fbf01",
+      "bytes": 15373
+    }
+  ],
+  "checks": {
+    "node": {
+      "passed": 28,
+      "failed": 0
+    },
+    "nativeI18n": {
+      "passed": 23,
+      "failed": 0,
+      "preexistingExplicitVisualIgnored": 4
+    },
+    "nativeGuildRank": {
+      "passed": 20,
+      "failed": 0
+    },
+    "generators": [
+      "six-locale expansion verification",
+      "OpenCC 1.4.2 simplified --check",
+      "full Native/Web projection --check",
+      "portable projection --check"
+    ],
+    "baseCatalogVerifier": {
+      "errors": 0,
+      "unclassifiedIdenticalValues": 0
+    }
+  },
+  "logs": [
+    {
+      "path": "D:\\mir2-builds\\r16-guild-ranks-20261108\\guild-system-i18n-node-tests.log",
+      "sha256": "f39253a76ec540cc73045ca3533258e05a83c42fea3cea26b66210133f38741a",
+      "bytes": 7562
+    },
+    {
+      "path": "D:\\mir2-builds\\r16-guild-ranks-20261108\\guild-system-i18n-native-tests.log",
+      "sha256": "8a4f0e0d7e250e79cdf385cc11b130a71a8eecb20cbcf6cbf943ddf446b85948",
+      "bytes": 31331
+    },
+    {
+      "path": "D:\\mir2-builds\\r16-guild-ranks-20261108\\guild-system-i18n-guild-rank-tests.log",
+      "sha256": "e29ef5499ef91c6ff2c540ab9a639c7c61d1415c7890eb34ee0bfa0662836284",
+      "bytes": 30593
+    },
+    {
+      "path": "D:\\mir2-builds\\r16-guild-ranks-20261108\\guild-system-i18n-catalog-validation.log",
+      "sha256": "a859cbbb7739c90fa10d4fe22ed70dd25d9deec5b251e98acbac47aaccf51e3b",
+      "bytes": 367
+    }
+  ],
+  "oldRowsUnchangedProof": {
+    "path": "D:\\mir2-builds\\r16-guild-ranks-20261108\\guild-system-i18n-preservation-proof.json",
+    "sha256": "e82e6a520c0fedea719e355561c22ed046399362ea4862942eda94b8fcd80f47"
+  },
+  "regenerationBoundary": {
+    "baseDraft": "C:/mir2-build/i18n-expansion-drafts-v2",
+    "currentDraft": "D:\\mir2-builds\\r16-guild-ranks-20261108\\guild-i18n-drafts",
+    "inputSupplementsPerLocale": 38,
+    "purpose": "Only missing external draft values copied from accepted current overlays; all existing runtime catalog rows byte-value-equivalent. Reviewed overrides for five prior V2 keys plus client.Progress id/vi synchronized to current overlay values to prevent stale generator regressions.",
+    "reviewKeysSynchronized": [
+      "quest.2110015.description",
+      "quest.practice.copy.44",
+      "quest.practice.copy.62",
+      "quest.practice.copy.69",
+      "quest.supply.materials",
+      "client.Progress"
+    ]
+  }
+}

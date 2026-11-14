@@ -1,0 +1,126 @@
+{
+  "schema": "mir2.stone-runtime-authored.v1",
+  "createdUtc": "2026-10-09T13:17:41.960709+00:00",
+  "files": [
+    {
+      "path": "mir2-web3/packages/production/src/lib.rs",
+      "length": 1815,
+      "sha256": "a54d9cf7bf37ee70eb78b2b63fe1f7cc8dff4591757977e67fcc929cdb29cb9a"
+    },
+    {
+      "path": "mir2-web3/packages/production/src/stones.rs",
+      "length": 40474,
+      "sha256": "321b1b600491dc80a3929292ee38f6ef46b5d40847ef4c5cb7939e9afa4ee16d"
+    },
+    {
+      "path": "mir2-web3/packages/production/src/stones_tests.rs",
+      "length": 35603,
+      "sha256": "5c042a8f58ed1c39d508c380b5af3b2720e442a20876367104c4cdc7c829616c"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/lib.rs",
+      "length": 167647,
+      "sha256": "56266851a23632b1844bea8cd9a9cd5781f2a9bed308988b39f22d74c485f614"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/stone_items.rs",
+      "length": 1411,
+      "sha256": "bc1df14c421be8305651733529da726f7a497f18695cc8b39018abbca8c26ecf"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/lib.rs",
+      "length": 5688,
+      "sha256": "78608bfa1a62ac948c7c95917b74484cf1049664fc0a1c4fb8a557817beedeb4"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config.rs",
+      "length": 307328,
+      "sha256": "17973453ceead087130818235cc9b4b14f7902ba941ca904f3cb9c029c794b51"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_stones.rs",
+      "length": 5815,
+      "sha256": "9bf888e5832e281122af85c4da181105e6352b56f6a3133faafb97eeca9dbc10"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_refresh_fail_closed_tests.rs",
+      "length": 66456,
+      "sha256": "8ac35adc4b806ac325452c85b15dbc3f0c6057412b64b69f8f581881f53f995f"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/db_projection.rs",
+      "length": 33102,
+      "sha256": "f529ff63f9d924cac8dded9c313c78075d0aa47ebf905b706f80c3e43941fc73"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/mod.rs",
+      "length": 7304,
+      "sha256": "d4453339a478199834c134a51f4a6af92e296fb6ec15de1bf5cd1ff625db3cc5"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/stones.rs",
+      "length": 18442,
+      "sha256": "6465bd1d6e6643322d41eeb460a32504d4100928e19797b22766c2e32d833cdb"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/stones_tests.rs",
+      "length": 14673,
+      "sha256": "49391a39f2781996e3069a52a5dd0adce9497cc8f40f5911b3126a24cbbd408a"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/stone_npc.rs",
+      "length": 45776,
+      "sha256": "d4289e45148d1273fcde1af7c04c89635183dee9c3d7e93269d0a1e9b00eb5d2"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/items.rs",
+      "length": 166344,
+      "sha256": "2f146768fe307ee7b193dee488e97e72c2d4efa6c168b1c0cced128d2bff8abe"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/equipment.rs",
+      "length": 109625,
+      "sha256": "d8eca2841cdee48d96827b24bcdaf0b11caf898c4cc8ade61070530f6a0711a4"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/inventory.rs",
+      "length": 194505,
+      "sha256": "ec310e2dfe6e48044b889703b1f99077b863205a3b2ac463cd8fb915a64eb2c8"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/stage5.rs",
+      "length": 225907,
+      "sha256": "668756cdb0286bdf83a48cdb3937806677121cc22de8a8480681e99bd2eff1aa"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/tests.rs",
+      "length": 2432828,
+      "sha256": "256efb20539d3e77401c45264eaaa66babd879b48fd507030206994be4abc3a0"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/npc.rs",
+      "length": 51932,
+      "sha256": "55d2fd0b60b7c4609a5c0dc1f17d4b33c79e5198e830bce3d55713921e561b0c"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/npc_script.rs",
+      "length": 126077,
+      "sha256": "413ae3e944405a249766840333dc40cbb89d754f68b23e44395a20b554b90aeb"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/session.rs",
+      "length": 90601,
+      "sha256": "c9421eae5f30dbc86e7267adba18ed2be20b7bbaea4071d9a1c6d81b25075e97"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/drops.rs",
+      "length": 173645,
+      "sha256": "a5774df3c52ef4ceabbde9d9b16b04ccadd8c0d37d1ce50834c9550ea49bdfcc"
+    },
+    {
+      "path": "mir2-web3/infra/postgres/migrations/0015_sealed_stone_authority.sql",
+      "length": 518,
+      "sha256": "15c1411da25828dd228d60c4551e090391342125235ec1c3f3ddc3098ab50f62"
+    }
+  ]
+}

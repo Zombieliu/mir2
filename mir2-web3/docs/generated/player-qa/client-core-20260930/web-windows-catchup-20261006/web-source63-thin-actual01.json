@@ -1,0 +1,64 @@
+{
+  "owner": "Root",
+  "kind": "Source63 original Thin actual accepted",
+  "actual": {
+    "exitCode": 0,
+    "exited": true,
+    "disposed": true,
+    "callerExitCode": 0,
+    "builderPid": 56812,
+    "elapsedMs": 24043,
+    "package": {
+      "exists": true,
+      "bytes": 374017544,
+      "files": 7331,
+      "directories": 778,
+      "links": 0
+    },
+    "capBytes": 377487360
+  },
+  "input": {
+    "config": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source63-npc-shop-last-action-20261011-01/root-approved01/thin-build01-config.json",
+      "bytes": 5424,
+      "sha256": "281ff2449de2639e7ec857d0b3b084345baf41d01fb2ae77a31c71734ac802ae"
+    },
+    "snapshot": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source63-npc-shop-last-action-20261011-01\\thin-preparation01\\full-snapshot.json",
+      "bytes": 21157576,
+      "sha256": "017360950bf3e5ec111d9867f4b704600868562a99c2bd3f6b4c4b2b01c406b6"
+    },
+    "fullPrePostSourceCount": 55331,
+    "differences": 0,
+    "freshNftClosure": true,
+    "strictNextAccepted": true
+  },
+  "outputs": {
+    "stdout": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source63-npc-shop-last-action-20261011-01/thin-build01/stdout.log",
+      "bytes": 27894,
+      "sha256": "771513824f005241c9abb7da20301c57f37ab6a54f2f789e65eb69194237b0e9"
+    },
+    "stderr": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source63-npc-shop-last-action-20261011-01/thin-build01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "outer": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source63-npc-shop-last-action-20261011-01/thin-build01/outer.json",
+      "bytes": 516,
+      "sha256": "1c2c0f99850593be4247027022ae736c92ec47afae00d5d8b376fc9f3eb36b4a"
+    },
+    "report": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source63-npc-shop-last-action-20261011-01/thin-build01/size-report.json",
+      "bytes": 27894,
+      "sha256": "771513824f005241c9abb7da20301c57f37ab6a54f2f789e65eb69194237b0e9"
+    }
+  },
+  "scope": "Package build accepted; actual runtime purchase and save/relogin still pending; original optional dependency warnings retained.",
+  "thinBuildAccepted": true,
+  "runtimeLaunched": false,
+  "uiPurchaseAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

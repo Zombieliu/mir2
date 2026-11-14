@@ -1,0 +1,21 @@
+{
+  "recordedAt": "2026-09-15T11:25:17.882Z",
+  "tests": {
+    "passed": 610,
+    "failed": 0,
+    "logSha256": "F19F8A6262FE4E2D5D28DAC49DC1CD54C5B849311BCA6C122B651610A3EFA234"
+  },
+  "journeyUnitProgress": {
+    "completed": 148,
+    "required": 177,
+    "mandatoryCompleted": 139,
+    "mandatoryRequired": 165,
+    "milestonesCompleted": 9,
+    "milestonesRequired": 12
+  },
+  "gatewayRevision": "R54",
+  "wizardRunnerRevision": "R115",
+  "taoistRunnerRevision": "R104",
+  "visualAccepted": false,
+  "completeActivePlayTimingAccepted": false
+}

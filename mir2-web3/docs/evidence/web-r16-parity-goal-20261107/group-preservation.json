@@ -1,0 +1,186 @@
+{
+  "schema": "mir2.r16.group.preservation.v1",
+  "createdAt": "2026-11-07T15:15:32.754Z",
+  "immutableBaseline": true,
+  "sourceSnapshotSha256": "2511a547161224a47757e2a8ec95f4463d15c4a6208bbe8be3f81ac6deabfa27",
+  "allBaselineAccountsRetained": true,
+  "baselineAccountCount": 2,
+  "afterAccountCount": 4,
+  "accountsAddedByOrdinaryRegistration": 2,
+  "accountFields": [
+    {
+      "isTestOwner": false,
+      "metadataEqual": true,
+      "differingFieldNames": []
+    },
+    {
+      "isTestOwner": true,
+      "metadataEqual": true,
+      "differingFieldNames": []
+    }
+  ],
+  "roles": [
+    {
+      "role": "unrelated-baseline-role",
+      "level": 7,
+      "metadataEqual": true,
+      "protectedFields": {
+        "character": true,
+        "experience": true,
+        "max_experience": true,
+        "gold": true,
+        "credit": true,
+        "city_currencies": true,
+        "inventory_capacity": true,
+        "inventory_items_json": true,
+        "belt_items_json": true,
+        "equipment_items_json": true,
+        "equipment_items_explicit_empty": true,
+        "storage_items_json": true,
+        "hero_inventory_items_json": true,
+        "hero_equipment_items_json": true,
+        "hero_inventory_capacity": true,
+        "hero_inventory_legacy_40": true,
+        "hero_vitals": true,
+        "hero_registry_attachment": true,
+        "quest_states_json": true,
+        "skill_states_json": true,
+        "npc_flag_states_json": true,
+        "npc_saved_values_json": true,
+        "npc_purchase_journal": true,
+        "guild_experience_journal": true,
+        "item_rental_records_json": true,
+        "has_rented_item": true
+      },
+      "all26ProtectedEqual": true,
+      "transformEqual": true,
+      "baselineTransform": {
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "direction": "Down"
+      },
+      "currentTransform": {
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "direction": "Down"
+      },
+      "saveFieldCount": 40,
+      "differingFields": [],
+      "stage5DifferingKeys": []
+    },
+    {
+      "role": "original-level30-role",
+      "level": 30,
+      "metadataEqual": true,
+      "protectedFields": {
+        "character": true,
+        "experience": true,
+        "max_experience": true,
+        "gold": true,
+        "credit": true,
+        "city_currencies": true,
+        "inventory_capacity": true,
+        "inventory_items_json": true,
+        "belt_items_json": true,
+        "equipment_items_json": true,
+        "equipment_items_explicit_empty": true,
+        "storage_items_json": true,
+        "hero_inventory_items_json": true,
+        "hero_equipment_items_json": true,
+        "hero_inventory_capacity": true,
+        "hero_inventory_legacy_40": true,
+        "hero_vitals": true,
+        "hero_registry_attachment": true,
+        "quest_states_json": true,
+        "skill_states_json": true,
+        "npc_flag_states_json": true,
+        "npc_saved_values_json": true,
+        "npc_purchase_journal": true,
+        "guild_experience_journal": true,
+        "item_rental_records_json": true,
+        "has_rented_item": true
+      },
+      "all26ProtectedEqual": true,
+      "transformEqual": true,
+      "baselineTransform": {
+        "position": {
+          "x": 328,
+          "y": 264
+        },
+        "direction": "DownLeft"
+      },
+      "currentTransform": {
+        "position": {
+          "x": 328,
+          "y": 264
+        },
+        "direction": "DownLeft"
+      },
+      "saveFieldCount": 44,
+      "differingFields": [],
+      "stage5DifferingKeys": []
+    },
+    {
+      "role": "ordinary-level1-test-role",
+      "level": 1,
+      "metadataEqual": true,
+      "protectedFields": {
+        "character": true,
+        "experience": true,
+        "max_experience": true,
+        "gold": true,
+        "credit": true,
+        "city_currencies": true,
+        "inventory_capacity": true,
+        "inventory_items_json": true,
+        "belt_items_json": true,
+        "equipment_items_json": true,
+        "equipment_items_explicit_empty": true,
+        "storage_items_json": true,
+        "hero_inventory_items_json": true,
+        "hero_equipment_items_json": true,
+        "hero_inventory_capacity": true,
+        "hero_inventory_legacy_40": true,
+        "hero_vitals": true,
+        "hero_registry_attachment": true,
+        "quest_states_json": true,
+        "skill_states_json": true,
+        "npc_flag_states_json": true,
+        "npc_saved_values_json": true,
+        "npc_purchase_journal": true,
+        "guild_experience_journal": true,
+        "item_rental_records_json": true,
+        "has_rented_item": true
+      },
+      "all26ProtectedEqual": true,
+      "transformEqual": false,
+      "baselineTransform": {
+        "position": {
+          "x": 288,
+          "y": 616
+        },
+        "direction": "Down"
+      },
+      "currentTransform": {
+        "position": {
+          "x": 287,
+          "y": 617
+        },
+        "direction": "Down"
+      },
+      "saveFieldCount": 43,
+      "differingFields": [
+        "default_npc_events",
+        "revision",
+        "position"
+      ],
+      "stage5DifferingKeys": []
+    }
+  ],
+  "originalLiveFileBytesClaimedUnchanged": false,
+  "originalThreeGatewayFilesUsedReadOnly": true
+}

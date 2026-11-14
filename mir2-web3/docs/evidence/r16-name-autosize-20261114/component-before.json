@@ -1,0 +1,164 @@
+{
+  "passed": true,
+  "phase": "before",
+  "scope": "Actual full scene visual-layers component with controlled entities and no world state/server. Physical transparent shared-canvas clicks use the actual source sceneWorldObjectTarget; actor and cell branches are unavailable in this label-only fixture. Not full-game or shared GPU rendering acceptance.",
+  "rows": [
+    {
+      "objectId": "jane",
+      "button": {
+        "x": 336,
+        "y": 334,
+        "width": 48,
+        "height": 15
+      },
+      "children": [
+        {
+          "tag": "SPAN",
+          "text": "Assistant Jane",
+          "colour": "rgba(0, 0, 0, 0)",
+          "bounds": {
+            "x": 336,
+            "y": 334,
+            "width": 50,
+            "height": 15
+          },
+          "gdi": "entity-assistant-jane",
+          "image": {
+            "src": "/original-ui/gdi-text/images/entity-assistant-jane.png",
+            "naturalWidth": 50,
+            "naturalHeight": 15
+          }
+        }
+      ]
+    },
+    {
+      "objectId": "ruben",
+      "button": {
+        "x": 528,
+        "y": 329,
+        "width": 48,
+        "height": 32
+      },
+      "children": [
+        {
+          "tag": "SPAN",
+          "text": "Merchant Ruben",
+          "colour": "rgba(0, 0, 0, 0)",
+          "bounds": {
+            "x": 528,
+            "y": 329,
+            "width": 54,
+            "height": 32
+          },
+          "gdi": "entity-merchant-ruben-multiline",
+          "image": {
+            "src": "/original-ui/gdi-text/images/entity-merchant-ruben-multiline.png",
+            "naturalWidth": 54,
+            "naturalHeight": 32
+          }
+        }
+      ]
+    },
+    {
+      "objectId": "fallback",
+      "button": {
+        "x": 336,
+        "y": 430,
+        "width": 48,
+        "height": 84
+      },
+      "children": [
+        {
+          "tag": "STRONG",
+          "text": "Long NPC Name Without A Packed GDI Image",
+          "colour": "rgb(0, 255, 0)",
+          "bounds": {
+            "x": 336,
+            "y": 430,
+            "width": 48,
+            "height": 84
+          },
+          "gdi": null,
+          "image": null
+        }
+      ]
+    },
+    {
+      "objectId": "three-lines",
+      "button": {
+        "x": 528,
+        "y": 516,
+        "width": 48,
+        "height": 84
+      },
+      "children": [
+        {
+          "tag": "STRONG",
+          "text": "Very Long Title",
+          "colour": "rgb(0, 255, 0)",
+          "bounds": {
+            "x": 528,
+            "y": 516,
+            "width": 48,
+            "height": 24
+          },
+          "gdi": null,
+          "image": null
+        },
+        {
+          "tag": "STRONG",
+          "text": "Second Long Line",
+          "colour": "rgb(255, 255, 255)",
+          "bounds": {
+            "x": 528,
+            "y": 540,
+            "width": 48,
+            "height": 36
+          },
+          "gdi": null,
+          "image": null
+        },
+        {
+          "tag": "STRONG",
+          "text": "Third Line",
+          "colour": "rgb(255, 255, 255)",
+          "bounds": {
+            "x": 528,
+            "y": 576,
+            "width": 48,
+            "height": 24
+          },
+          "gdi": null,
+          "image": null
+        }
+      ]
+    }
+  ],
+  "sourcePins": [
+    {
+      "path": "app/components/original-client-scene-visual-layers.tsx",
+      "sha256": "8365cdd41569c95329ad509b581e6bb64b2af757afeffcd9d1c6cfe766b4dbab"
+    },
+    {
+      "path": "app/components/original-client-scene-rendering.tsx",
+      "sha256": "1008f840eca9c29d3dedc6f926547ff2bab65d17d2bf6854c42521189a2fab35"
+    },
+    {
+      "path": "app/components/crystal-gdi-text.tsx",
+      "sha256": "c925a922c86a9eeeca0a9504d8f6689f84a74a3c477bf3315855d6377e4835b4"
+    },
+    {
+      "path": "app/globals.css",
+      "sha256": "de93c78177e4e23a775ac8ae73805967e6ab598dcbd9b60df2f542956a58e4cd"
+    },
+    {
+      "path": "public/original-ui/gdi-text/manifest.json",
+      "sha256": "96a25dc099622f5ab382d67bf1ed66814a826d28316476b374db62d2d73e5460"
+    }
+  ],
+  "shellPickerSha256": "42b1618ef54ae0c5d669d9a2d860f322ed755c06b6662fbb022e76e149f27265",
+  "pageErrors": [],
+  "requestErrors": [],
+  "browserClosed": true,
+  "serverClosed": true
+}

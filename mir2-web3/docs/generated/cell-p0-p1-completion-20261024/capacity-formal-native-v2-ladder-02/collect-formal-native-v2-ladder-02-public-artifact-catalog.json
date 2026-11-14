@@ -1,0 +1,417 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-24T20:03:52.641Z",
+  "archiveRoot": "C:/mir2-build/p01-completion-20261024",
+  "scope": "Independent explicit public allowlist for authentic formal standard native ladder02. Original partial/failure/pass report bytes are retained; strict frozen verifier plus authentic normal cleanup adjudicates formal acceptance. No private store, secret, EXE or recording payload copied.",
+  "files": [
+    {
+      "path": "formal-native-v2-ladder-02/gateway-build-pin.json",
+      "bytes": 1296,
+      "sha256": "9b0efba15495ee1b31e1eba86eca5e143e7dc7418ebfef300251f982b0b8c77f",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-02/source-pins.json",
+      "bytes": 24307,
+      "sha256": "92ab09805ff4dafb76aecc7e2bd8bd143ac26d37ac1e0ba0ef03122c730c9bb1",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-02/source-pins-admitted-v2.json",
+      "bytes": 24669,
+      "sha256": "e1e2d2d0f374d134a972e5c4651b6d8f4d77251c92a4485a9379fc52e5e8f422",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-02/realm-process.json",
+      "bytes": 1148,
+      "sha256": "70d09793d3b0874933651e2f0b84580e5cadc00df1ca31a6bffb16121e0537fc",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-02/realm-cleanup.json",
+      "bytes": 2178,
+      "sha256": "6620dc8e7e44ec19f103d780b5b36db4539f6cee3c582274d964e9a6c9899882",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-02/resource-profile.json",
+      "bytes": 1630,
+      "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-02/run-options.json",
+      "bytes": 3068,
+      "sha256": "e1527c9aa14b3ee1deb60d3202e4a0b9bbc3e7b616a357bf81f6bfd7c3b92d87",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-02/run-options-admitted-v2.json",
+      "bytes": 3579,
+      "sha256": "343361b6a4edbdacdce1bc57093aec221f001bffc246d186bce8ebc8f92d1207",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-02/scenario.json",
+      "bytes": 5844,
+      "sha256": "7d0bed4a61c5e62d61b55456d87706da135712161a42987fffbd5d452dfb3402",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-02/provisioning.json",
+      "bytes": 332,
+      "sha256": "754c451d51b23e06e8f4e755eede64937e542c7fd046e75510f5d038e8a3975e",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-02/spectator-health-before.json",
+      "bytes": 641,
+      "sha256": "dcca2d01bbcbad33fb769c80c0372b75891c1f178d0443ff31bb9f18b2da7e8a",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-02/monitor-options.json",
+      "bytes": 645,
+      "sha256": "eb9ef41693b4b2d475b3f6ba03cb8af326ea9f9db733d14f3c7754a4bfbf0172",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-02/monitor-process.json",
+      "bytes": 223,
+      "sha256": "8b281d4fbbcb3a87d053fe9227a01a5c2e6608b96d4848fd0be366d309701bb6",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-02/launcher-source-frozen-v1.json",
+      "bytes": 2355,
+      "sha256": "c697bbeba40db903dc5c7afd452c4c1f1b3daf33422014af2c845ee300bd45e1",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-02/preparation-plan.json",
+      "bytes": 5171,
+      "sha256": "e1bdddce7fccb0d4309a1fcb1a70099a094f3e9beaeba569e6963a24080f38d2",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-02/report-provenance.json",
+      "bytes": 1506,
+      "sha256": "b337f420ec1bf89003975c219176bc01eae957fc281abb6bb108e686ee43fdd5",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-02/feasibility-gate.json",
+      "bytes": 3803,
+      "sha256": "a20191a7ac49e1c775915f130a9bdd2465afb5171cfeb37d00b1aeb75a12d942",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-02/static-preparation-verification.json",
+      "bytes": 1080,
+      "sha256": "75455eeba20249fe4143204bdd2894e6ab9acdc070cbfb27600f5d9d504acf2f",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-02/scenario-prefix-readiness.json",
+      "bytes": 1851,
+      "sha256": "7a1e4fc52f39680c7c53f37898bb75eda742437a9173880c44c2848272677794",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-02/initialize-private.ps1",
+      "bytes": 1941,
+      "sha256": "4deff086a5f53aaad191bcfd7e99de8e23c297fc6e1a121852a3fc13c1cf390e",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-02/input-lib.mjs",
+      "bytes": 13776,
+      "sha256": "dc865126c27b3b8da895b915f5d9e7c9e6c74aa887bc8e46613b476de27c70c6",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-02/prepare-inputs.mjs",
+      "bytes": 11053,
+      "sha256": "34a9dd9389896e023974420892649ad09f0a2464aa4678b1ef2bbeb4b73ae832",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-02/run-owned.mjs",
+      "bytes": 16294,
+      "sha256": "2e28fa5fe23077097615e93c835f862400abf455228141752b5665f461ad1285",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-02/verify-feasibility-gate.mjs",
+      "bytes": 12529,
+      "sha256": "ebab305c5b50500e381966e92de42892d5ff154f0bd42924ad20a033617675a9",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-02/monitor-owned.mjs",
+      "bytes": 1082,
+      "sha256": "f2d56c3eb26182251b6c8cc69c2274e5708d4e633c17bc4abb1414ed81c66c47",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-02/request-stop.mjs",
+      "bytes": 815,
+      "sha256": "13c6a9aee3cc0845344ebd0ebb5aa43a62da8b1629daf0fd77e7bb6d9b89d639",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-02/recover-drained-owned.ps1",
+      "bytes": 2910,
+      "sha256": "443b47eb1988c982ffafb3b228e0aafff06734e1542d8219054d5c35ce408735",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-02/reports/1792871143682-f3d8c161.report.json",
+      "bytes": 209270,
+      "sha256": "2a546805d6febe580db7f0a33da4e23a1fc11c8bc9dd7af428b5cb1487f570e2",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-02/launcher-syntax-check.log",
+      "bytes": 335,
+      "sha256": "e0a058aeb7186273bd763c30b48739c477c49e31c2f9b1743b88de9626d7c14e",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-02/run-command.log",
+      "bytes": 2682,
+      "sha256": "6f0cf22b241edcbf40cdb7c93adc267e48f3764e32b73546e443a121ea05f948",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-02/spectator-health-after.json",
+      "bytes": 649,
+      "sha256": "89c45efc6cc2dbc4172fecc6d562b86baf122ab8409d1600786278df30ab39cd",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-attack-v2.json",
+      "bytes": 1139,
+      "sha256": "d27ff7ef91c979d7884aa99047c27a820d845850d63786ea30fd88d786eb197f",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "backend-source-native-attack-v2.json",
+      "bytes": 11716,
+      "sha256": "94c7ee1b121fac0634212989638d7c451e8ce89343b3bf23a9d940d7365f289d",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "capacity-movement-coordination-driver-frozen-v1.json",
+      "bytes": 7765,
+      "sha256": "61273b4e6aed7ceb3c8cbb04324d0892a560ae7f0bc2de4edfc22d3e13266853",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "capacity-movement-coordination-full-regression-source-pins-v2.json",
+      "bytes": 2042,
+      "sha256": "01d742234ba76f3cdf2bdbf6710da3f16f4101f62ed6aad1939da06348154e9f",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "collect-formal-native-v2-ladder-02-recordings-metadata.json",
+      "bytes": 1638,
+      "sha256": "a03991d197a8bb364ef256c137c73768993c6056692e3cedcb7a2a8b8295809d",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "collect-formal-native-v2-ladder-02-monitor-endpoints.json",
+      "bytes": 4699,
+      "sha256": "d5964d6d1393993e9dc7c90b6aa24acc84fbded3df7d33df54d5949b3e7381f0",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-02-collection-tools/collect-public.mjs",
+      "bytes": 33099,
+      "sha256": "ccebd24e30f1b361f7ec8d66ff92b2b554228c3409d1f899b0f6322891202546",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal-native-v2-ladder-02-collection-tools/verify-public.mjs",
+      "bytes": 12668,
+      "sha256": "597158dfb7b9375a68fe2e2a52570e6efa5e4514088281697afbdc87b537bfef",
+      "classification": "explicit-public-original"
+    }
+  ],
+  "externalArchives": [
+    {
+      "path": "formal-native-v2-ladder-02/reports/1792871143682-f3d8c161.samples.jsonl",
+      "bytes": 23491464,
+      "sha256": "a392e3ea07cec4a5d39ade40988d6675afdb7ce1d3486741b51a946e0bcc8b8e",
+      "kind": "capacity-samples-jsonl",
+      "copyToRepository": false
+    },
+    {
+      "path": "formal-native-v2-ladder-02/monitor-history.jsonl",
+      "bytes": 4335811,
+      "sha256": "42f233ea4acfb1cf163fef7e8a0a544628ce57bc2e3d29ea3a7b75b560982cab",
+      "rows": 478,
+      "kind": "resource-monitor-history-jsonl",
+      "copyToRepository": false
+    },
+    {
+      "path": "formal-native-v2-ladder-02/recordings/0-498019.jsonl",
+      "bytes": 178301905,
+      "sha256": "e35e8b05d3fbf6e0eec951b4818739da9912a0644d5c85b3b49c211b5bb5dbd8",
+      "frames": 3232,
+      "kind": "spectator-recording-jsonl",
+      "copyToRepository": false
+    },
+    {
+      "path": "formal-native-v2-ladder-02/recordings/0-498020.jsonl",
+      "bytes": 86095987,
+      "sha256": "1e8dd681d96afae9cdf6c7e64bd0820dbd429ac4d888024e9103ed1a5ec09a97",
+      "frames": 593,
+      "kind": "spectator-recording-jsonl",
+      "copyToRepository": false
+    }
+  ],
+  "run": {
+    "runId": "1792871143682-f3d8c161",
+    "sourceCommit": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+    "backendSourceCommit": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+    "driverSourceCommit": "c42f860e0544f0687a5ccf5ddaccad4daecc8acc",
+    "driverSourceSha256": "35868583cbacd7215bf3eadee0e8d6781ed1abe4f21bc40c0c0255d24797faae",
+    "originalBackendReleaseReused": true,
+    "reportOk": false,
+    "driverPlayableCapacityAccepted": false,
+    "rawVerifierAccepted": false,
+    "normalOwnedCleanup": true,
+    "navigationCoordination": {
+      "scope": "Native tool-local conservative union of original AOI obstacles, active controlled owner receipts and one in-flight movement hint per connection; never authoritative occupancy, snapshots or AOI.",
+      "maximumHintCellsPerConnection": 7,
+      "blockedOpportunityRule": "A conflicting prepared move is still an offered navigation-blocked/native opportunity; original cadence, completion and correction gates remain."
+    },
+    "gatewaySha256": "855b4ba3c80ccb99b4128a9ee1170bc56ad51fcbaf022d5269f0b6662986c61f",
+    "backendInputCount": 39,
+    "realGameplayAttempt": true,
+    "report": "formal-native-v2-ladder-02/reports/1792871143682-f3d8c161.report.json",
+    "raw": "formal-native-v2-ladder-02/reports/1792871143682-f3d8c161.samples.jsonl",
+    "peakControlledActors": 25,
+    "highestPassedStage": 10,
+    "phaseWindows": [
+      {
+        "name": "bootstrap-2",
+        "kind": "bootstrap",
+        "targetActors": 2,
+        "startedAtMs": 1792871143727,
+        "endedAtMs": 1792871180251,
+        "completed": true
+      },
+      {
+        "name": "stage-2",
+        "kind": "measurement",
+        "targetActors": 2,
+        "startedAtMs": 1792871180251,
+        "endedAtMs": 1792871480279,
+        "completed": true
+      },
+      {
+        "name": "bootstrap-10",
+        "kind": "bootstrap",
+        "targetActors": 10,
+        "startedAtMs": 1792871480280,
+        "endedAtMs": 1792871545227,
+        "completed": true
+      },
+      {
+        "name": "stage-10",
+        "kind": "measurement",
+        "targetActors": 10,
+        "startedAtMs": 1792871545227,
+        "endedAtMs": 1792871845255,
+        "completed": true
+      },
+      {
+        "name": "bootstrap-25",
+        "kind": "bootstrap",
+        "targetActors": 25,
+        "startedAtMs": 1792871845257,
+        "endedAtMs": 1792871934189,
+        "completed": true
+      },
+      {
+        "name": "stage-25",
+        "kind": "measurement",
+        "targetActors": 25,
+        "startedAtMs": 1792871934189,
+        "endedAtMs": 1792872154905,
+        "completed": false
+      }
+    ],
+    "stages": [
+      {
+        "name": "stage-2",
+        "controlledActors": 2,
+        "seconds": 300,
+        "completed": true,
+        "passed": true,
+        "startedAtMs": 1792871180251,
+        "endedAtMs": 1792871480279,
+        "minuteWindows": 5
+      },
+      {
+        "name": "stage-10",
+        "controlledActors": 10,
+        "seconds": 300,
+        "completed": true,
+        "passed": true,
+        "startedAtMs": 1792871545227,
+        "endedAtMs": 1792871845255,
+        "minuteWindows": 5
+      }
+    ],
+    "soakIntervalSeconds": null,
+    "soakCompleted": false,
+    "completed60SecondSoakWindows": 0,
+    "passed60SecondSoakWindows": 0,
+    "windowsByPhase": {
+      "stage-2": {
+        "complete": 5,
+        "passed": 5
+      },
+      "stage-10": {
+        "complete": 5,
+        "passed": 5
+      },
+      "stage-25": {
+        "complete": 3,
+        "passed": 2
+      }
+    },
+    "capacityAccepted": false,
+    "formalRunStarted": true,
+    "failureWindow": {
+      "actor": "L7324bd04",
+      "phases": [
+        "stage-25"
+      ],
+      "seconds": 60.00409270000004,
+      "role": "movement",
+      "successfulMoves": 76,
+      "correctedMoves": 0,
+      "offeredMoves": 77,
+      "timeoutRatio": 0,
+      "launchedAttacks": 0,
+      "positiveHits": 0,
+      "damage": 0
+    },
+    "allSixCleanupCountersZero": true,
+    "allOwnedProcessesStopped": true,
+    "normalGatewayExit": 0,
+    "normalMonitorExit": 0
+  },
+  "limitations": [
+    "Failure-window counters, if any, belong only to the recorded first failing continuous window, not the entire run.",
+    "Formal policy remains five300s measured cohorts2/10/25/50/100 plus7200s soak, original five resumes, post-resume60s/100 observation, five saves and all original latency/error/activity gates. Partial runs and shorter windows never substitute for full scope.",
+    "Typed Launched proves only this command launched a swing. The original driver still requires paired positive damage/health evidence for a hit.",
+    "The first/last monitor projection is a summary. Full raw monitor bytes and spectator payloads remain external and independently SHA-bound.",
+    "This File/loopback single-host formal profile does not certify production storage/RPO, TLS/NIC bandwidth, frontend acceptance or Cell scheduling."
+  ]
+}

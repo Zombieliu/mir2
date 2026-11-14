@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "state": "ACTUAL_BOUND_UNSEALED_NOT_EXECUTED",
+  "root": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13",
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "driverSourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "backendInputCount": 50,
+  "formalPolicyDonor": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12",
+  "sourceOnly": true,
+  "freshProbe17Bound": true,
+  "rootExecutionRequired": true,
+  "accountPrepared": false,
+  "realmStarted": false,
+  "capacityAccepted": false,
+  "staticRiskBoundary": [
+    "100-player representative scout tour886 unit steps",
+    "Original24ACK/20s online advancement",
+    "Conditional static120 positive hits does not guarantee180 launched attacks or2h supply",
+    "Historical25 stall remains unresolved; new backend is not a formal capacity result"
+  ],
+  "futureOrder": [
+    "Narrow source contract/consumer final integration and independent readonly review",
+    "Root seal and readonlyguard",
+    "Root prepare100ordinary empty accounts then explicit formal run",
+    "Ended game collection/verification, then independent Store companion collection/verification"
+  ],
+  "actualProbe17Binding": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\bound-formal13-binding-v1.json",
+    "bytes": 19457,
+    "sha256": "e208e8f2825f4217cc336df6dc2f74ae81617188d24fb9d42c8278058e7196a0"
+  }
+}

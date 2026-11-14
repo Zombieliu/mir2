@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T12:36:22.957Z",
+  "scope": "Exact b84d five-file preimage comparison of the viewport overflow personal-health expectation; final candidate restored in finally.",
+  "baselineCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+  "states": [
+    {
+      "path": "mir2-web3/apps/gateway/src/routing.rs",
+      "bytes": 1389827,
+      "sha256": "9135f2f3a019b04c1bb6ffe3717f730c65632df4e642702057bfbf7a699564de",
+      "oldFile": "probe14-personal-projection-fix-v1/preimages/routing.rs.txt",
+      "oldSha": "a0e3a19ad1184efd87a632118a98a65c975ca12d2adfda95b2f9e4a6138eff49",
+      "oldBytes": 1388304
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/tests/personal_monster_projection_tests.rs",
+      "bytes": 30917,
+      "sha256": "7d474f50150108175bd96268c2f22270f916bbfdefc8a47e5f4fd0c249ffc0fc",
+      "oldFile": "probe14-personal-projection-fix-v1/preimages/personal_monster_projection_tests.rs.txt",
+      "oldSha": "dc5d0862501b588263f1a187628af6a1e00ec30a268d000e73feebb8aa42f722",
+      "oldBytes": 12555
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "bytes": 749298,
+      "sha256": "d19840e87e6b2e718303d90d02a03e8c1c4941e069f0b168d9d253644950f3b6",
+      "oldFile": "probe14-personal-projection-fix-v1/preimages/zone-runtime.rs.txt",
+      "oldSha": "4f4eaa4519e745c0bd376f33ef76b86c88ad1c1015fd42bb53ef3a159ce320a8",
+      "oldBytes": 748912
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/tests/live_aoi_order_tests.rs",
+      "bytes": 27740,
+      "sha256": "addfedf29cd0c36b2865df2e40b07b1c91cd10130a981d9d5f55447ab94c85af",
+      "oldFile": "probe14-adjacent-fixture-repair-v1/live_aoi_order_tests.rs.before.txt",
+      "oldSha": "95da0e53b5c0ec844c85a383b327e07130a41d2aa09846272720dfe63874f7d3",
+      "oldBytes": 26272
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/tests/pending_zone_aoi_tests.rs",
+      "bytes": 13491,
+      "sha256": "01a11394c304296aefc450eb128a18a358c3e854c25e6627a2b3ff4484d14716",
+      "oldFile": "probe14-adjacent-fixture-repair-v1/pending_zone_aoi_tests.rs.before.txt",
+      "oldSha": "83d1bd558fad894ebeb7862de11eaf81b71f442d7bb57b11ebc2acefb3fa1267",
+      "oldBytes": 12970
+    }
+  ],
+  "actualExit": {
+    "code": 101,
+    "signal": null
+  },
+  "runError": null,
+  "restorationError": null,
+  "candidateRestoredExactly": true,
+  "log": {
+    "path": "C:/mir2-build/p01-completion-20261024/probe14-personal-projection-baseline-overflow-v1.log",
+    "bytes": 112334,
+    "sha256": "b6dea121e332a97da12c9e1f1fb2ef9b14f413920115508568769b9f14f1acd0"
+  },
+  "capacityAccepted": false
+}

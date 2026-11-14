@@ -1,0 +1,8 @@
+{
+  "deployment": "dpl_46u3rSTnfvPrDpzCka6qUBmMhwed",
+  "state": "READY",
+  "source": "440f82d4d2a7db2b44046cfbd7885680e437aa65",
+  "project": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+  "target": "production",
+  "checkedAt": "2026-11-13T06:10:44.812Z"
+}

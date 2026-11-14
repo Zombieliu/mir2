@@ -1,0 +1,1237 @@
+{
+  "trace": {
+    "fileName": "Taoist.2026-09-15T22-01-35-089Z.trace.jsonl",
+    "bytes": 38559037,
+    "sha256": "b08469ad86c74f35086fbcb0714a4225f03cc85b53a78b43efb77b1815d46875",
+    "lastSequence": 16702,
+    "closed": true
+  },
+  "secondPriest": {
+    "objectId": 339510,
+    "death": {
+      "event": {
+        "sequence": 3817,
+        "at": "2026-09-15T22:07:44.511Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "ObjectDied",
+        "payload": {
+          "objectId": 339510,
+          "targetId": null,
+          "percent": null,
+          "damage": null,
+          "success": null,
+          "uniqueId": null,
+          "grid": null,
+          "hp": null,
+          "mp": null
+        }
+      },
+      "folded": {
+        "mapFileName": "D2031",
+        "playerObjectId": 1000,
+        "exactPlayerHp": 180,
+        "playerMaxHp": 180,
+        "exactPlayerMp": 76,
+        "playerMaxMp": 184,
+        "self": {
+          "objectId": 1000,
+          "class": "Taoist",
+          "dead": false,
+          "hp": 180,
+          "maxHp": 180,
+          "x": 65,
+          "y": 154
+        },
+        "q89CursedPriest": {
+          "current": 1,
+          "required": 3
+        },
+        "held": {
+          "mpDrug": 4,
+          "items": [
+            {
+              "uniqueId": 163,
+              "name": "Amulet",
+              "quantity": 2
+            },
+            {
+              "uniqueId": 164,
+              "name": "Amulet",
+              "quantity": 24
+            },
+            {
+              "uniqueId": 166,
+              "name": "(MP)DrugSmall",
+              "quantity": 4
+            }
+          ]
+        }
+      }
+    },
+    "questProgress": {
+      "event": {
+        "sequence": 3822,
+        "at": "2026-09-15T22:07:44.579Z",
+        "direction": "received",
+        "type": "worldSnapshot",
+        "packet": null,
+        "payload": {
+          "objectId": null,
+          "targetId": null,
+          "percent": null,
+          "damage": null,
+          "success": null,
+          "uniqueId": null,
+          "grid": null,
+          "hp": null,
+          "mp": null
+        }
+      },
+      "folded": {
+        "mapFileName": "D2031",
+        "playerObjectId": 1000,
+        "exactPlayerHp": 180,
+        "playerMaxHp": 180,
+        "exactPlayerMp": 76,
+        "playerMaxMp": 184,
+        "self": {
+          "objectId": 1000,
+          "class": "Taoist",
+          "dead": false,
+          "hp": 180,
+          "maxHp": 180,
+          "x": 65,
+          "y": 154
+        },
+        "q89CursedPriest": {
+          "current": 2,
+          "required": 3
+        },
+        "held": {
+          "mpDrug": 4,
+          "items": [
+            {
+              "uniqueId": 163,
+              "name": "Amulet",
+              "quantity": 2
+            },
+            {
+              "uniqueId": 164,
+              "name": "Amulet",
+              "quantity": 24
+            },
+            {
+              "uniqueId": 166,
+              "name": "(MP)DrugSmall",
+              "quantity": 4
+            }
+          ]
+        }
+      }
+    }
+  },
+  "preR134RetreatRecovery": {
+    "relevantSequence": 9236,
+    "event": {
+      "event": {
+        "sequence": 9236,
+        "at": "2026-09-15T22:16:17.191Z",
+        "direction": "diagnostic",
+        "type": "livingEvasiveRecoveryTimeoutRetry",
+        "packet": null,
+        "payload": {
+          "objectId": null,
+          "targetId": null,
+          "percent": null,
+          "damage": null,
+          "success": null,
+          "uniqueId": null,
+          "grid": null,
+          "hp": null,
+          "mp": null
+        }
+      },
+      "folded": {
+        "mapFileName": "D2031",
+        "playerObjectId": 1000,
+        "exactPlayerHp": 84,
+        "playerMaxHp": 180,
+        "exactPlayerMp": 1,
+        "playerMaxMp": 184,
+        "self": {
+          "objectId": 1000,
+          "class": "Taoist",
+          "dead": false,
+          "hp": 84,
+          "maxHp": 180,
+          "x": 209,
+          "y": 101
+        },
+        "q89CursedPriest": {
+          "current": 2,
+          "required": 3
+        },
+        "held": {
+          "mpDrug": 4,
+          "items": [
+            {
+              "uniqueId": 163,
+              "name": "Amulet",
+              "quantity": 2
+            },
+            {
+              "uniqueId": 164,
+              "name": "Amulet",
+              "quantity": 24
+            },
+            {
+              "uniqueId": 166,
+              "name": "(MP)DrugSmall",
+              "quantity": 4
+            }
+          ]
+        }
+      }
+    },
+    "context": [
+      {
+        "event": {
+          "sequence": 9228,
+          "at": "2026-09-15T22:16:16.612Z",
+          "direction": "received",
+          "type": "packet",
+          "packet": "DamageIndicator",
+          "payload": {
+            "objectId": 1000,
+            "targetId": null,
+            "percent": null,
+            "damage": 15,
+            "success": null,
+            "uniqueId": null,
+            "grid": null,
+            "hp": null,
+            "mp": null
+          }
+        },
+        "folded": {
+          "mapFileName": "D2031",
+          "playerObjectId": 1000,
+          "exactPlayerHp": 39,
+          "playerMaxHp": 180,
+          "exactPlayerMp": 1,
+          "playerMaxMp": 184,
+          "self": {
+            "objectId": 1000,
+            "class": "Taoist",
+            "dead": false,
+            "hp": 39,
+            "maxHp": 180,
+            "x": 209,
+            "y": 98
+          },
+          "q89CursedPriest": {
+            "current": 2,
+            "required": 3
+          },
+          "held": {
+            "mpDrug": 4,
+            "items": [
+              {
+                "uniqueId": 163,
+                "name": "Amulet",
+                "quantity": 2
+              },
+              {
+                "uniqueId": 164,
+                "name": "Amulet",
+                "quantity": 24
+              },
+              {
+                "uniqueId": 166,
+                "name": "(MP)DrugSmall",
+                "quantity": 4
+              }
+            ]
+          }
+        }
+      },
+      {
+        "event": {
+          "sequence": 9229,
+          "at": "2026-09-15T22:16:16.612Z",
+          "direction": "sent",
+          "type": "clientVersion",
+          "packet": null,
+          "payload": {
+            "objectId": null,
+            "targetId": null,
+            "percent": null,
+            "damage": null,
+            "success": null,
+            "uniqueId": null,
+            "grid": null,
+            "hp": null,
+            "mp": null
+          }
+        },
+        "folded": {
+          "mapFileName": "D2031",
+          "playerObjectId": 1000,
+          "exactPlayerHp": 39,
+          "playerMaxHp": 180,
+          "exactPlayerMp": 1,
+          "playerMaxMp": 184,
+          "self": {
+            "objectId": 1000,
+            "class": "Taoist",
+            "dead": false,
+            "hp": 39,
+            "maxHp": 180,
+            "x": 209,
+            "y": 98
+          },
+          "q89CursedPriest": {
+            "current": 2,
+            "required": 3
+          },
+          "held": {
+            "mpDrug": 4,
+            "items": [
+              {
+                "uniqueId": 163,
+                "name": "Amulet",
+                "quantity": 2
+              },
+              {
+                "uniqueId": 164,
+                "name": "Amulet",
+                "quantity": 24
+              },
+              {
+                "uniqueId": 166,
+                "name": "(MP)DrugSmall",
+                "quantity": 4
+              }
+            ]
+          }
+        }
+      },
+      {
+        "event": {
+          "sequence": 9230,
+          "at": "2026-09-15T22:16:16.612Z",
+          "direction": "received",
+          "type": "packet",
+          "packet": "ObjectHealth",
+          "payload": {
+            "objectId": 1000,
+            "targetId": null,
+            "percent": 46,
+            "damage": null,
+            "success": null,
+            "uniqueId": null,
+            "grid": null,
+            "hp": null,
+            "mp": null
+          }
+        },
+        "folded": {
+          "mapFileName": "D2031",
+          "playerObjectId": 1000,
+          "exactPlayerHp": 39,
+          "playerMaxHp": 180,
+          "exactPlayerMp": 1,
+          "playerMaxMp": 184,
+          "self": {
+            "objectId": 1000,
+            "class": "Taoist",
+            "dead": false,
+            "hp": 39,
+            "maxHp": 180,
+            "x": 209,
+            "y": 98
+          },
+          "q89CursedPriest": {
+            "current": 2,
+            "required": 3
+          },
+          "held": {
+            "mpDrug": 4,
+            "items": [
+              {
+                "uniqueId": 163,
+                "name": "Amulet",
+                "quantity": 2
+              },
+              {
+                "uniqueId": 164,
+                "name": "Amulet",
+                "quantity": 24
+              },
+              {
+                "uniqueId": 166,
+                "name": "(MP)DrugSmall",
+                "quantity": 4
+              }
+            ]
+          }
+        }
+      },
+      {
+        "event": {
+          "sequence": 9231,
+          "at": "2026-09-15T22:16:16.612Z",
+          "direction": "received",
+          "type": "packet",
+          "packet": "ObjectHealth",
+          "payload": {
+            "objectId": 341700,
+            "targetId": null,
+            "percent": 100,
+            "damage": null,
+            "success": null,
+            "uniqueId": null,
+            "grid": null,
+            "hp": null,
+            "mp": null
+          }
+        },
+        "folded": {
+          "mapFileName": "D2031",
+          "playerObjectId": 1000,
+          "exactPlayerHp": 39,
+          "playerMaxHp": 180,
+          "exactPlayerMp": 1,
+          "playerMaxMp": 184,
+          "self": {
+            "objectId": 1000,
+            "class": "Taoist",
+            "dead": false,
+            "hp": 39,
+            "maxHp": 180,
+            "x": 209,
+            "y": 98
+          },
+          "q89CursedPriest": {
+            "current": 2,
+            "required": 3
+          },
+          "held": {
+            "mpDrug": 4,
+            "items": [
+              {
+                "uniqueId": 163,
+                "name": "Amulet",
+                "quantity": 2
+              },
+              {
+                "uniqueId": 164,
+                "name": "Amulet",
+                "quantity": 24
+              },
+              {
+                "uniqueId": 166,
+                "name": "(MP)DrugSmall",
+                "quantity": 4
+              }
+            ]
+          }
+        }
+      },
+      {
+        "event": {
+          "sequence": 9232,
+          "at": "2026-09-15T22:16:16.613Z",
+          "direction": "received",
+          "type": "packet",
+          "packet": "ClientVersion",
+          "payload": {
+            "objectId": null,
+            "targetId": null,
+            "percent": null,
+            "damage": null,
+            "success": null,
+            "uniqueId": null,
+            "grid": null,
+            "hp": null,
+            "mp": null
+          }
+        },
+        "folded": {
+          "mapFileName": "D2031",
+          "playerObjectId": 1000,
+          "exactPlayerHp": 39,
+          "playerMaxHp": 180,
+          "exactPlayerMp": 1,
+          "playerMaxMp": 184,
+          "self": {
+            "objectId": 1000,
+            "class": "Taoist",
+            "dead": false,
+            "hp": 39,
+            "maxHp": 180,
+            "x": 209,
+            "y": 98
+          },
+          "q89CursedPriest": {
+            "current": 2,
+            "required": 3
+          },
+          "held": {
+            "mpDrug": 4,
+            "items": [
+              {
+                "uniqueId": 163,
+                "name": "Amulet",
+                "quantity": 2
+              },
+              {
+                "uniqueId": 164,
+                "name": "Amulet",
+                "quantity": 24
+              },
+              {
+                "uniqueId": 166,
+                "name": "(MP)DrugSmall",
+                "quantity": 4
+              }
+            ]
+          }
+        }
+      },
+      {
+        "event": {
+          "sequence": 9233,
+          "at": "2026-09-15T22:16:16.679Z",
+          "direction": "received",
+          "type": "worldSnapshot",
+          "packet": null,
+          "payload": {
+            "objectId": null,
+            "targetId": null,
+            "percent": null,
+            "damage": null,
+            "success": null,
+            "uniqueId": null,
+            "grid": null,
+            "hp": null,
+            "mp": null
+          }
+        },
+        "folded": {
+          "mapFileName": "D2031",
+          "playerObjectId": 1000,
+          "exactPlayerHp": 84,
+          "playerMaxHp": 180,
+          "exactPlayerMp": 1,
+          "playerMaxMp": 184,
+          "self": {
+            "objectId": 1000,
+            "class": "Taoist",
+            "dead": false,
+            "hp": 84,
+            "maxHp": 180,
+            "x": 209,
+            "y": 100
+          },
+          "q89CursedPriest": {
+            "current": 2,
+            "required": 3
+          },
+          "held": {
+            "mpDrug": 4,
+            "items": [
+              {
+                "uniqueId": 163,
+                "name": "Amulet",
+                "quantity": 2
+              },
+              {
+                "uniqueId": 164,
+                "name": "Amulet",
+                "quantity": 24
+              },
+              {
+                "uniqueId": 166,
+                "name": "(MP)DrugSmall",
+                "quantity": 4
+              }
+            ]
+          }
+        }
+      },
+      {
+        "event": {
+          "sequence": 9234,
+          "at": "2026-09-15T22:16:16.867Z",
+          "direction": "sent",
+          "type": "walk",
+          "packet": null,
+          "payload": {
+            "objectId": null,
+            "targetId": null,
+            "percent": null,
+            "damage": null,
+            "success": null,
+            "uniqueId": null,
+            "grid": null,
+            "hp": null,
+            "mp": null
+          }
+        },
+        "folded": {
+          "mapFileName": "D2031",
+          "playerObjectId": 1000,
+          "exactPlayerHp": 84,
+          "playerMaxHp": 180,
+          "exactPlayerMp": 1,
+          "playerMaxMp": 184,
+          "self": {
+            "objectId": 1000,
+            "class": "Taoist",
+            "dead": false,
+            "hp": 84,
+            "maxHp": 180,
+            "x": 209,
+            "y": 100
+          },
+          "q89CursedPriest": {
+            "current": 2,
+            "required": 3
+          },
+          "held": {
+            "mpDrug": 4,
+            "items": [
+              {
+                "uniqueId": 163,
+                "name": "Amulet",
+                "quantity": 2
+              },
+              {
+                "uniqueId": 164,
+                "name": "Amulet",
+                "quantity": 24
+              },
+              {
+                "uniqueId": 166,
+                "name": "(MP)DrugSmall",
+                "quantity": 4
+              }
+            ]
+          }
+        }
+      },
+      {
+        "event": {
+          "sequence": 9235,
+          "at": "2026-09-15T22:16:17.166Z",
+          "direction": "received",
+          "type": "packet",
+          "packet": "UserLocation",
+          "payload": {
+            "objectId": null,
+            "targetId": null,
+            "percent": null,
+            "damage": null,
+            "success": null,
+            "uniqueId": null,
+            "grid": null,
+            "hp": null,
+            "mp": null
+          }
+        },
+        "folded": {
+          "mapFileName": "D2031",
+          "playerObjectId": 1000,
+          "exactPlayerHp": 84,
+          "playerMaxHp": 180,
+          "exactPlayerMp": 1,
+          "playerMaxMp": 184,
+          "self": {
+            "objectId": 1000,
+            "class": "Taoist",
+            "dead": false,
+            "hp": 84,
+            "maxHp": 180,
+            "x": 209,
+            "y": 101
+          },
+          "q89CursedPriest": {
+            "current": 2,
+            "required": 3
+          },
+          "held": {
+            "mpDrug": 4,
+            "items": [
+              {
+                "uniqueId": 163,
+                "name": "Amulet",
+                "quantity": 2
+              },
+              {
+                "uniqueId": 164,
+                "name": "Amulet",
+                "quantity": 24
+              },
+              {
+                "uniqueId": 166,
+                "name": "(MP)DrugSmall",
+                "quantity": 4
+              }
+            ]
+          }
+        }
+      },
+      {
+        "event": {
+          "sequence": 9236,
+          "at": "2026-09-15T22:16:17.191Z",
+          "direction": "diagnostic",
+          "type": "livingEvasiveRecoveryTimeoutRetry",
+          "packet": null,
+          "payload": {
+            "objectId": null,
+            "targetId": null,
+            "percent": null,
+            "damage": null,
+            "success": null,
+            "uniqueId": null,
+            "grid": null,
+            "hp": null,
+            "mp": null
+          }
+        },
+        "folded": {
+          "mapFileName": "D2031",
+          "playerObjectId": 1000,
+          "exactPlayerHp": 84,
+          "playerMaxHp": 180,
+          "exactPlayerMp": 1,
+          "playerMaxMp": 184,
+          "self": {
+            "objectId": 1000,
+            "class": "Taoist",
+            "dead": false,
+            "hp": 84,
+            "maxHp": 180,
+            "x": 209,
+            "y": 101
+          },
+          "q89CursedPriest": {
+            "current": 2,
+            "required": 3
+          },
+          "held": {
+            "mpDrug": 4,
+            "items": [
+              {
+                "uniqueId": 163,
+                "name": "Amulet",
+                "quantity": 2
+              },
+              {
+                "uniqueId": 164,
+                "name": "Amulet",
+                "quantity": 24
+              },
+              {
+                "uniqueId": 166,
+                "name": "(MP)DrugSmall",
+                "quantity": 4
+              }
+            ]
+          }
+        }
+      },
+      {
+        "event": {
+          "sequence": 9237,
+          "at": "2026-09-15T22:16:17.489Z",
+          "direction": "received",
+          "type": "packet",
+          "packet": "ObjectWalk",
+          "payload": {
+            "objectId": 342300,
+            "targetId": null,
+            "percent": null,
+            "damage": null,
+            "success": null,
+            "uniqueId": null,
+            "grid": null,
+            "hp": null,
+            "mp": null
+          }
+        },
+        "folded": {
+          "mapFileName": "D2031",
+          "playerObjectId": 1000,
+          "exactPlayerHp": 84,
+          "playerMaxHp": 180,
+          "exactPlayerMp": 1,
+          "playerMaxMp": 184,
+          "self": {
+            "objectId": 1000,
+            "class": "Taoist",
+            "dead": false,
+            "hp": 84,
+            "maxHp": 180,
+            "x": 209,
+            "y": 101
+          },
+          "q89CursedPriest": {
+            "current": 2,
+            "required": 3
+          },
+          "held": {
+            "mpDrug": 4,
+            "items": [
+              {
+                "uniqueId": 163,
+                "name": "Amulet",
+                "quantity": 2
+              },
+              {
+                "uniqueId": 164,
+                "name": "Amulet",
+                "quantity": 24
+              },
+              {
+                "uniqueId": 166,
+                "name": "(MP)DrugSmall",
+                "quantity": 4
+              }
+            ]
+          }
+        }
+      },
+      {
+        "event": {
+          "sequence": 9238,
+          "at": "2026-09-15T22:16:17.528Z",
+          "direction": "sent",
+          "type": "run",
+          "packet": null,
+          "payload": {
+            "objectId": null,
+            "targetId": null,
+            "percent": null,
+            "damage": null,
+            "success": null,
+            "uniqueId": null,
+            "grid": null,
+            "hp": null,
+            "mp": null
+          }
+        },
+        "folded": {
+          "mapFileName": "D2031",
+          "playerObjectId": 1000,
+          "exactPlayerHp": 84,
+          "playerMaxHp": 180,
+          "exactPlayerMp": 1,
+          "playerMaxMp": 184,
+          "self": {
+            "objectId": 1000,
+            "class": "Taoist",
+            "dead": false,
+            "hp": 84,
+            "maxHp": 180,
+            "x": 209,
+            "y": 101
+          },
+          "q89CursedPriest": {
+            "current": 2,
+            "required": 3
+          },
+          "held": {
+            "mpDrug": 4,
+            "items": [
+              {
+                "uniqueId": 163,
+                "name": "Amulet",
+                "quantity": 2
+              },
+              {
+                "uniqueId": 164,
+                "name": "Amulet",
+                "quantity": 24
+              },
+              {
+                "uniqueId": 166,
+                "name": "(MP)DrugSmall",
+                "quantity": 4
+              }
+            ]
+          }
+        }
+      },
+      {
+        "event": {
+          "sequence": 9239,
+          "at": "2026-09-15T22:16:17.828Z",
+          "direction": "received",
+          "type": "packet",
+          "packet": "UserLocation",
+          "payload": {
+            "objectId": null,
+            "targetId": null,
+            "percent": null,
+            "damage": null,
+            "success": null,
+            "uniqueId": null,
+            "grid": null,
+            "hp": null,
+            "mp": null
+          }
+        },
+        "folded": {
+          "mapFileName": "D2031",
+          "playerObjectId": 1000,
+          "exactPlayerHp": 84,
+          "playerMaxHp": 180,
+          "exactPlayerMp": 1,
+          "playerMaxMp": 184,
+          "self": {
+            "objectId": 1000,
+            "class": "Taoist",
+            "dead": false,
+            "hp": 84,
+            "maxHp": 180,
+            "x": 211,
+            "y": 103
+          },
+          "q89CursedPriest": {
+            "current": 2,
+            "required": 3
+          },
+          "held": {
+            "mpDrug": 4,
+            "items": [
+              {
+                "uniqueId": 163,
+                "name": "Amulet",
+                "quantity": 2
+              },
+              {
+                "uniqueId": 164,
+                "name": "Amulet",
+                "quantity": 24
+              },
+              {
+                "uniqueId": 166,
+                "name": "(MP)DrugSmall",
+                "quantity": 4
+              }
+            ]
+          }
+        }
+      },
+      {
+        "event": {
+          "sequence": 9240,
+          "at": "2026-09-15T22:16:18.169Z",
+          "direction": "received",
+          "type": "packet",
+          "packet": "ObjectMonster",
+          "payload": {
+            "objectId": 339907,
+            "targetId": null,
+            "percent": null,
+            "damage": null,
+            "success": null,
+            "uniqueId": null,
+            "grid": null,
+            "hp": null,
+            "mp": null
+          }
+        },
+        "folded": {
+          "mapFileName": "D2031",
+          "playerObjectId": 1000,
+          "exactPlayerHp": 84,
+          "playerMaxHp": 180,
+          "exactPlayerMp": 1,
+          "playerMaxMp": 184,
+          "self": {
+            "objectId": 1000,
+            "class": "Taoist",
+            "dead": false,
+            "hp": 84,
+            "maxHp": 180,
+            "x": 211,
+            "y": 103
+          },
+          "q89CursedPriest": {
+            "current": 2,
+            "required": 3
+          },
+          "held": {
+            "mpDrug": 4,
+            "items": [
+              {
+                "uniqueId": 163,
+                "name": "Amulet",
+                "quantity": 2
+              },
+              {
+                "uniqueId": 164,
+                "name": "Amulet",
+                "quantity": 24
+              },
+              {
+                "uniqueId": 166,
+                "name": "(MP)DrugSmall",
+                "quantity": 4
+              }
+            ]
+          }
+        }
+      },
+      {
+        "event": {
+          "sequence": 9241,
+          "at": "2026-09-15T22:16:18.169Z",
+          "direction": "received",
+          "type": "packet",
+          "packet": "ObjectHealth",
+          "payload": {
+            "objectId": 338705,
+            "targetId": null,
+            "percent": 100,
+            "damage": null,
+            "success": null,
+            "uniqueId": null,
+            "grid": null,
+            "hp": null,
+            "mp": null
+          }
+        },
+        "folded": {
+          "mapFileName": "D2031",
+          "playerObjectId": 1000,
+          "exactPlayerHp": 84,
+          "playerMaxHp": 180,
+          "exactPlayerMp": 1,
+          "playerMaxMp": 184,
+          "self": {
+            "objectId": 1000,
+            "class": "Taoist",
+            "dead": false,
+            "hp": 84,
+            "maxHp": 180,
+            "x": 211,
+            "y": 103
+          },
+          "q89CursedPriest": {
+            "current": 2,
+            "required": 3
+          },
+          "held": {
+            "mpDrug": 4,
+            "items": [
+              {
+                "uniqueId": 163,
+                "name": "Amulet",
+                "quantity": 2
+              },
+              {
+                "uniqueId": 164,
+                "name": "Amulet",
+                "quantity": 24
+              },
+              {
+                "uniqueId": 166,
+                "name": "(MP)DrugSmall",
+                "quantity": 4
+              }
+            ]
+          }
+        }
+      },
+      {
+        "event": {
+          "sequence": 9242,
+          "at": "2026-09-15T22:16:18.169Z",
+          "direction": "received",
+          "type": "packet",
+          "packet": "ObjectHealth",
+          "payload": {
+            "objectId": 339110,
+            "targetId": null,
+            "percent": 100,
+            "damage": null,
+            "success": null,
+            "uniqueId": null,
+            "grid": null,
+            "hp": null,
+            "mp": null
+          }
+        },
+        "folded": {
+          "mapFileName": "D2031",
+          "playerObjectId": 1000,
+          "exactPlayerHp": 84,
+          "playerMaxHp": 180,
+          "exactPlayerMp": 1,
+          "playerMaxMp": 184,
+          "self": {
+            "objectId": 1000,
+            "class": "Taoist",
+            "dead": false,
+            "hp": 84,
+            "maxHp": 180,
+            "x": 211,
+            "y": 103
+          },
+          "q89CursedPriest": {
+            "current": 2,
+            "required": 3
+          },
+          "held": {
+            "mpDrug": 4,
+            "items": [
+              {
+                "uniqueId": 163,
+                "name": "Amulet",
+                "quantity": 2
+              },
+              {
+                "uniqueId": 164,
+                "name": "Amulet",
+                "quantity": 24
+              },
+              {
+                "uniqueId": 166,
+                "name": "(MP)DrugSmall",
+                "quantity": 4
+              }
+            ]
+          }
+        }
+      },
+      {
+        "event": {
+          "sequence": 9243,
+          "at": "2026-09-15T22:16:18.169Z",
+          "direction": "received",
+          "type": "packet",
+          "packet": "ObjectRemove",
+          "payload": {
+            "objectId": 339106,
+            "targetId": null,
+            "percent": null,
+            "damage": null,
+            "success": null,
+            "uniqueId": null,
+            "grid": null,
+            "hp": null,
+            "mp": null
+          }
+        },
+        "folded": {
+          "mapFileName": "D2031",
+          "playerObjectId": 1000,
+          "exactPlayerHp": 84,
+          "playerMaxHp": 180,
+          "exactPlayerMp": 1,
+          "playerMaxMp": 184,
+          "self": {
+            "objectId": 1000,
+            "class": "Taoist",
+            "dead": false,
+            "hp": 84,
+            "maxHp": 180,
+            "x": 211,
+            "y": 103
+          },
+          "q89CursedPriest": {
+            "current": 2,
+            "required": 3
+          },
+          "held": {
+            "mpDrug": 4,
+            "items": [
+              {
+                "uniqueId": 163,
+                "name": "Amulet",
+                "quantity": 2
+              },
+              {
+                "uniqueId": 164,
+                "name": "Amulet",
+                "quantity": 24
+              },
+              {
+                "uniqueId": 166,
+                "name": "(MP)DrugSmall",
+                "quantity": 4
+              }
+            ]
+          }
+        }
+      },
+      {
+        "event": {
+          "sequence": 9244,
+          "at": "2026-09-15T22:16:18.190Z",
+          "direction": "sent",
+          "type": "run",
+          "packet": null,
+          "payload": {
+            "objectId": null,
+            "targetId": null,
+            "percent": null,
+            "damage": null,
+            "success": null,
+            "uniqueId": null,
+            "grid": null,
+            "hp": null,
+            "mp": null
+          }
+        },
+        "folded": {
+          "mapFileName": "D2031",
+          "playerObjectId": 1000,
+          "exactPlayerHp": 84,
+          "playerMaxHp": 180,
+          "exactPlayerMp": 1,
+          "playerMaxMp": 184,
+          "self": {
+            "objectId": 1000,
+            "class": "Taoist",
+            "dead": false,
+            "hp": 84,
+            "maxHp": 180,
+            "x": 211,
+            "y": 103
+          },
+          "q89CursedPriest": {
+            "current": 2,
+            "required": 3
+          },
+          "held": {
+            "mpDrug": 4,
+            "items": [
+              {
+                "uniqueId": 163,
+                "name": "Amulet",
+                "quantity": 2
+              },
+              {
+                "uniqueId": 164,
+                "name": "Amulet",
+                "quantity": 24
+              },
+              {
+                "uniqueId": 166,
+                "name": "(MP)DrugSmall",
+                "quantity": 4
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

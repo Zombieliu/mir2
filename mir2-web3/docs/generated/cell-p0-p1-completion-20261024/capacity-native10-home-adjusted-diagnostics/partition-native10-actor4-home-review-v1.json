@@ -1,0 +1,179 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-24T17:19:15.801Z",
+  "accepted": false,
+  "staticOnly": true,
+  "originalScenario": "C:/mir2-build/p01-completion-20261024/release-native-10-feasibility-03/scenario.json",
+  "baseline": {
+    "home": {
+      "x": 252,
+      "y": 645
+    },
+    "targets": 31,
+    "actorFrames": 331,
+    "stage10Moves": 38,
+    "lastFrameOccupants": [
+      {
+        "objectId": 206537,
+        "name": "Deer",
+        "kind": "monster",
+        "x": 252,
+        "y": 647
+      },
+      {
+        "objectId": 206602,
+        "name": "Scarecrow",
+        "kind": "monster",
+        "x": 253,
+        "y": 645
+      },
+      {
+        "objectId": 206614,
+        "name": "Scarecrow",
+        "kind": "monster",
+        "x": 254,
+        "y": 646
+      },
+      {
+        "objectId": 206620,
+        "name": "Scarecrow",
+        "kind": "monster",
+        "x": 254,
+        "y": 647
+      }
+    ]
+  },
+  "limitations": [
+    "Recorded geometry is from the original layout. Monsters can pursue an alternative home; historical low occupancy is not an acceptance proof.",
+    "Candidate static initial Scarecrow pursuit uses actual 8x6 targeting rectangle, not manifest view7. Deer flee/wander and live spawns still matter.",
+    "Only actor4 home changes; original two target names, patrolSpan2, original target identities, no-transfer bootstrap4000, active nine-observer closure and combat home are preserved."
+  ],
+  "candidates": [
+    {
+      "home": {
+        "x": 246,
+        "y": 646
+      },
+      "initialScarecrowAggro": [
+        {
+          "name": "Scarecrow",
+          "x": 251,
+          "y": 649
+        }
+      ],
+      "recordedFootprintBlockedFrames": 0,
+      "recordedWideBlockedFrames": 46,
+      "staticOpen7x7": 37,
+      "originalDistance": 6,
+      "bootstrapSteps": 57,
+      "retainedOriginalTargets": 31,
+      "totalTwoNameTargets": 32,
+      "connectedObservers": 9
+    },
+    {
+      "home": {
+        "x": 239,
+        "y": 643
+      },
+      "initialScarecrowAggro": [
+        {
+          "name": "Scarecrow",
+          "x": 237,
+          "y": 647
+        }
+      ],
+      "recordedFootprintBlockedFrames": 0,
+      "recordedWideBlockedFrames": 295,
+      "staticOpen7x7": 46,
+      "originalDistance": 13,
+      "bootstrapSteps": 54,
+      "retainedOriginalTargets": 31,
+      "totalTwoNameTargets": 32,
+      "connectedObservers": 9
+    },
+    {
+      "home": {
+        "x": 239,
+        "y": 642
+      },
+      "initialScarecrowAggro": [
+        {
+          "name": "Scarecrow",
+          "x": 237,
+          "y": 647
+        }
+      ],
+      "recordedFootprintBlockedFrames": 0,
+      "recordedWideBlockedFrames": 295,
+      "staticOpen7x7": 45,
+      "originalDistance": 13,
+      "bootstrapSteps": 54,
+      "retainedOriginalTargets": 31,
+      "totalTwoNameTargets": 32,
+      "connectedObservers": 9
+    },
+    {
+      "home": {
+        "x": 240,
+        "y": 643
+      },
+      "initialScarecrowAggro": [
+        {
+          "name": "Scarecrow",
+          "x": 237,
+          "y": 647
+        }
+      ],
+      "recordedFootprintBlockedFrames": 0,
+      "recordedWideBlockedFrames": 295,
+      "staticOpen7x7": 43,
+      "originalDistance": 12,
+      "bootstrapSteps": 54,
+      "retainedOriginalTargets": 31,
+      "totalTwoNameTargets": 32,
+      "connectedObservers": 9
+    },
+    {
+      "home": {
+        "x": 240,
+        "y": 642
+      },
+      "initialScarecrowAggro": [
+        {
+          "name": "Scarecrow",
+          "x": 237,
+          "y": 647
+        }
+      ],
+      "recordedFootprintBlockedFrames": 0,
+      "recordedWideBlockedFrames": 295,
+      "staticOpen7x7": 42,
+      "originalDistance": 12,
+      "bootstrapSteps": 53,
+      "retainedOriginalTargets": 31,
+      "totalTwoNameTargets": 32,
+      "connectedObservers": 9
+    },
+    {
+      "home": {
+        "x": 240,
+        "y": 641
+      },
+      "initialScarecrowAggro": [
+        {
+          "name": "Scarecrow",
+          "x": 237,
+          "y": 647
+        }
+      ],
+      "recordedFootprintBlockedFrames": 0,
+      "recordedWideBlockedFrames": 295,
+      "staticOpen7x7": 41,
+      "originalDistance": 12,
+      "bootstrapSteps": 53,
+      "retainedOriginalTargets": 31,
+      "totalTwoNameTargets": 32,
+      "connectedObservers": 9
+    }
+  ]
+}

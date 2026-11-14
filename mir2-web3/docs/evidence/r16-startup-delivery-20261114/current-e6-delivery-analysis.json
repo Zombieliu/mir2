@@ -1,0 +1,280 @@
+{
+  "schema": "mir2.startup-delivery-analysis.v1",
+  "source": "e6c923b7c669cb061a7a03703f05fadd91211c97",
+  "movement": {
+    "wireAtMs": 95815,
+    "ackAtMs": 157744,
+    "durationMs": 61929,
+    "originalEightSecondPassed": false,
+    "websocketFrameMs": 61928
+  },
+  "aggregateAdmission": {
+    "observed": true,
+    "actionIdentityBound": false,
+    "exactPlayerExecutionLatencyProven": false,
+    "sameRevisionAndMonotonicCounters": true,
+    "before": {
+      "status": 200,
+      "startedAt": 94599,
+      "finishedAt": 94752,
+      "revision": "8f3099f4a0114a7825ff61db36b548d3bfb5b3fa",
+      "complete": true,
+      "sinceInitializationMs": 9739538,
+      "count": 1,
+      "sumUs": 524
+    },
+    "after": {
+      "status": 200,
+      "startedAt": 96606,
+      "finishedAt": 96667,
+      "revision": "8f3099f4a0114a7825ff61db36b548d3bfb5b3fa",
+      "complete": true,
+      "sinceInitializationMs": 9741454,
+      "count": 2,
+      "sumUs": 1198
+    },
+    "countDelta": 1,
+    "sumUsDelta": 674,
+    "observedAfterSendByMs": 852,
+    "limitation": "No instance ID, player ID or command ID is present in these aggregate samples."
+  },
+  "browser": {
+    "observed": true,
+    "mainThreadCauseExcluded": false,
+    "pageEpochOffsetMs": 1234.60009765625,
+    "callbackCoverage": true,
+    "callbacks": [
+      {
+        "observedAtMs": 93424,
+        "browserAtMs": 93423.80009767413,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 95424,
+        "browserAtMs": 95423.90009766817,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 97424,
+        "browserAtMs": 97424.20009768009,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 99424,
+        "browserAtMs": 99424.30009767413,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 101424,
+        "browserAtMs": 101424.40009766817,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 103425,
+        "browserAtMs": 103425.00009766221,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 105425,
+        "browserAtMs": 105424.90009766817,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 107425,
+        "browserAtMs": 107425.10009765625,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 109426,
+        "browserAtMs": 109425.30009767413,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 111423,
+        "browserAtMs": 111422.20009768009,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 113423,
+        "browserAtMs": 113423.00009766221,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 115422,
+        "browserAtMs": 115421.90009766817,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 117423,
+        "browserAtMs": 117422.40009766817,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 119424,
+        "browserAtMs": 119423.30009767413,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 121423,
+        "browserAtMs": 121422.50009766221,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 123423,
+        "browserAtMs": 123422.80009767413,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 125423,
+        "browserAtMs": 125422.80009767413,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 127424,
+        "browserAtMs": 127423.10009765625,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 129423,
+        "browserAtMs": 129422.70009768009,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 131422,
+        "browserAtMs": 131421.80009767413,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 133424,
+        "browserAtMs": 133423.7000976801,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 135424,
+        "browserAtMs": 135424.0000976622,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 137425,
+        "browserAtMs": 137424.2000976801,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 139424,
+        "browserAtMs": 139423.0000976622,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 141425,
+        "browserAtMs": 141424.60009765625,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 143423,
+        "browserAtMs": 143422.7000976801,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 145425,
+        "browserAtMs": 145424.90009766817,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 147426,
+        "browserAtMs": 147425.2000976801,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 149424,
+        "browserAtMs": 149423.2000976801,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 151426,
+        "browserAtMs": 151425.7000976801,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 153422,
+        "browserAtMs": 153421.7000976801,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 155422,
+        "browserAtMs": 155422.0000976622,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 157422,
+        "browserAtMs": 157422.10009765625,
+        "booted": false,
+        "bootAttempted": false
+      },
+      {
+        "observedAtMs": 159422,
+        "browserAtMs": 159422.0000976622,
+        "booted": false,
+        "bootAttempted": false
+      }
+    ],
+    "maxObservedCallbackGapMs": 2002,
+    "longTasksInWindow": [],
+    "driftsInWindow": [],
+    "fullObservedTaskMaxMs": 202,
+    "taskCollectorMayBeCapped": false,
+    "driftCollectorMayBeCapped": false,
+    "limitation": "Recorded callbacks and task observations are evidence, not a complete renderer exclusion."
+  },
+  "server": {
+    "observed": false,
+    "exactCrossClockLatencyInferred": false,
+    "ackEgressBound": false
+  },
+  "rootCauseProven": false,
+  "inputs": [
+    {
+      "name": "receipt",
+      "bytes": 76608,
+      "sha256": "ddac561bf296da91c41026828aac4e3887883bda456e4e1cfb8b4b1db0be540e"
+    },
+    {
+      "name": "startupProbe",
+      "bytes": 144952,
+      "sha256": "5ae696a0d2aade35b1083d8982d8e388f2181accc169798c8e19b9363db0f7de"
+    }
+  ],
+  "producerSha256": "e51dad87ae47e1c32a2ae470552f702dcebf637fdf6d3fce6b0611391d8c1d2f",
+  "analyzerSha256": "d657e65c885be4f4ef9317d1aa4b2140c9db9d96d5913e6a453a57a89c7532b6"
+}

@@ -1,0 +1,30 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T17:02:45.245932+00:00",
+  "producerReceipt": {
+    "filename": "unified-installer-final-gate-admission.json",
+    "bytes": 986,
+    "sha256": "78390a628bec0c7cba12122b884594df21a1784ff25b0de233d07b08d747a392"
+  },
+  "producerReport": {
+    "schema": "mir2.unified.installer-final-gate-admission.v1",
+    "recordedAtUtc": "2026-10-29T16:59:50.1087448Z",
+    "passed": true,
+    "gameSourceRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+    "engineSourceRevision": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+    "sequence": 2026102911,
+    "finalRecheckPending": false,
+    "producerPackagePending": false,
+    "frozenSignedFeedMatchesFinalMetadata": true,
+    "finalTargetedReceiptSha256": "6AAFDBC14D3D687D63DBA0A116AF0A11321FEDF4A01916C7E71C2CBD41981F7A",
+    "feedSha256": "91663F8B4BF8EE013FDBE3F39DAEEA172C7A6589FDB98182E7E1C09DFB4C82F3",
+    "localInstallerCompilationAllowed": true,
+    "installationOrGuiByThisAgentAllowed": false,
+    "publicDeploymentAllowed": false,
+    "originalPendingReceiptsUnchanged": true,
+    "outerDuplicateWrapperPassed": false,
+    "finalProof": "Original real producer full PASS plus separately completed final targeted receipt; interrupted duplicate wrapper is not reported as exit0."
+  },
+  "phase": "Later explicit admission supersedes pending state for installer consumption; original updater pending receipts remain unchanged; not proof of compiled or installed Setup"
+}

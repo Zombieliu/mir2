@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "scope": "Stable partition of at most four existing peer-only hints by another active same-map scout declared waypoint; no distance sort,new claim,path call,ACK or authority.",
+  "before": {
+    "bytes": 153586,
+    "sha256": "99914efc602be1600207ab4e2e78f960766332d3064a93307f5268c29448e037"
+  },
+  "after": {
+    "bytes": 155475,
+    "sha256": "6c2f4e3dfcbc38465a13cf05c8c8945fdb4fe7c99acaea43dfad493fb77696d8"
+  },
+  "hunks": [
+    {
+      "before": "function combatScoutHints(client, context, coverage, initialCursor, fallbackHomeIndex, now, allowed, occupied) {",
+      "after": "function preferUnsharedScoutWaypoints(client, context, hints, now) {\n  if (hints.length < 2) return hints;\n  const mapName = client.snapshot.mapFileName, otherWaypoints = new Set();\n  for (let index = 0; index < Math.min(context.clients.length, 100); index++) {\n    const other = context.clients[index], scout = other.combatScout;\n    if (other === client || other.role !== 'combat' || !activeGameplayOwner(other, mapName) || !scout ||\n        scout.mapFileName !== mapName || !Number.isFinite(scout.startedAt) || scout.startedAt > now ||\n        !Number.isFinite(scout.activeElapsedMs ?? 0) || (scout.activeElapsedMs ?? 0) < 0 ||\n        !Number.isInteger(scout.confirmedMoves) || scout.confirmedMoves < 0 || scout.confirmedMoves >= 24 ||\n        (scout.activeElapsedMs ?? 0) + now - scout.startedAt >= 20000 || !Number.isInteger(scout.homeIndex)) continue;\n    const home = other.combatCluster?.observerHomes?.[scout.homeIndex];\n    if (home && Number.isInteger(home.x) && Number.isInteger(home.y)) otherWaypoints.add(home.x + ',' + home.y);\n  }\n  if (!otherWaypoints.size) return hints;\n  const unshared = [], shared = [];\n  for (const hint of hints) {\n    const home = client.combatCluster.observerHomes[hint.homeIndex];\n    (otherWaypoints.has(home.x + ',' + home.y) ? shared : unshared).push(hint);\n  }\n  // A local home index is not a cross-cluster identity. These are same-map\n  // declared waypoint coordinates, only a planning preference, never a claim.\n  // Preserve original order when no usable distinction exists.\n  return unshared.length && shared.length ? [...unshared, ...shared] : hints;\n}\n\nfunction combatScoutHints(client, context, coverage, initialCursor, fallbackHomeIndex, now, allowed, occupied) {"
+    },
+    {
+      "before": "      for (const candidate of hintScan.hints) {",
+      "after": "      const preferredHints = preferUnsharedScoutWaypoints(client, context, hintScan.hints, now);\n      hintScan.hintOrderChangedByActiveScoutPreference = preferredHints !== hintScan.hints;\n      for (const candidate of preferredHints) {"
+    },
+    {
+      "before": "      hintScanTruncated: hintScan.truncated,",
+      "after": "      hintScanTruncated: hintScan.truncated, hintOrderChangedByActiveScoutPreference: hintScan.hintOrderChangedByActiveScoutPreference,"
+    }
+  ],
+  "inverseRawExact": true,
+  "originalFallbackAndBudgetsPreserved": true,
+  "metadataSixUnchangedByExactInverse": true
+}

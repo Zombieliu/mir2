@@ -1,0 +1,1116 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-24T16:19:46.331Z",
+  "capacityAccepted": false,
+  "formalRunStarted": false,
+  "source": {
+    "report": "C:/mir2-build/p01-completion-20261024/release-accessibility-5-01/native-5-gate-02/reports/1792857141547-1233ee1e.report.json",
+    "reportSha256": "940bd6b2e769c62a11726c2038d7882ea472e2dde9000354dfd296829aea9f32",
+    "samples": "C:/mir2-build/p01-completion-20261024/release-accessibility-5-01/native-5-gate-02/reports/1792857141547-1233ee1e.samples.jsonl",
+    "samplesBytes": 4826788,
+    "samplesSha256": "bbdb0fc44a7bad1796f16471a3a5d8d5ee25b249e7c470bef149927a64a98868"
+  },
+  "scope": "Postprocessing frozen failed probe raw and a later ordinary same-actor snapshot only; no service, gameplay or test run.",
+  "limitations": [
+    "Action at is recorded client action-start time, not an exact server death tick; healthPercent0 and later positive damage are observations. No per-monster ObjectDied/ObjectRemove/Revive stream was captured.",
+    "Window branch counts group action-start times and may differ at boundaries from assessment completion counts. The fixed report gates are authoritative.",
+    "Public density counts include dead monsters and are independent observer sampled maxima. Per-window live/fully reachable population was NOT measured.",
+    "Post-run matrix is one player after all four observers drained. Planned observer geometry is reused only for static coverage; it cannot prove prior live five-player occupancy or earlier window supply."
+  ],
+  "soak": {
+    "startedAtMs": 1792857193217,
+    "endedAtMs": 1792857553234,
+    "passed": false,
+    "activity": [
+      {
+        "attacks": 98,
+        "hits": 97,
+        "damage": 283
+      }
+    ]
+  },
+  "windowDiagnostics": [
+    {
+      "index": 1,
+      "recordedApproxStartAtMs": 1792857193217,
+      "recordedApproxEndAtMs": 1792857253239,
+      "recordedGate": {
+        "attacks": 31,
+        "hits": 31,
+        "passed": true
+      },
+      "branchCountsByActionStartWallTime": {
+        "attack": 31,
+        "scoutMovement": 0,
+        "chaseMovement": 16,
+        "fallbackMovement": 0,
+        "turn": 3,
+        "other": 11
+      },
+      "successfulMovementCount": 16,
+      "uniqueMovementLandings": 16,
+      "bounds": {
+        "minX": 251,
+        "maxX": 273,
+        "minY": 658,
+        "maxY": 668
+      },
+      "scoutHomes": [],
+      "liveMonsterCensus": null,
+      "allVisibleTargetReachabilityCensus": null
+    },
+    {
+      "index": 2,
+      "recordedApproxStartAtMs": 1792857253239,
+      "recordedApproxEndAtMs": 1792857313316,
+      "recordedGate": {
+        "attacks": 23,
+        "hits": 23,
+        "passed": true
+      },
+      "branchCountsByActionStartWallTime": {
+        "attack": 23,
+        "scoutMovement": 8,
+        "chaseMovement": 25,
+        "fallbackMovement": 0,
+        "turn": 3,
+        "other": 10
+      },
+      "successfulMovementCount": 33,
+      "uniqueMovementLandings": 33,
+      "bounds": {
+        "minX": 253,
+        "maxX": 273,
+        "minY": 664,
+        "maxY": 676
+      },
+      "scoutHomes": [
+        0,
+        1,
+        2
+      ],
+      "liveMonsterCensus": null,
+      "allVisibleTargetReachabilityCensus": null
+    },
+    {
+      "index": 3,
+      "recordedApproxStartAtMs": 1792857313316,
+      "recordedApproxEndAtMs": 1792857373295,
+      "recordedGate": {
+        "attacks": 8,
+        "hits": 8,
+        "passed": false
+      },
+      "branchCountsByActionStartWallTime": {
+        "attack": 8,
+        "scoutMovement": 60,
+        "chaseMovement": 2,
+        "fallbackMovement": 0,
+        "turn": 1,
+        "other": 10
+      },
+      "successfulMovementCount": 62,
+      "uniqueMovementLandings": 35,
+      "bounds": {
+        "minX": 253,
+        "maxX": 275,
+        "minY": 666,
+        "maxY": 676
+      },
+      "scoutHomes": [
+        3,
+        0,
+        1,
+        2
+      ],
+      "liveMonsterCensus": null,
+      "allVisibleTargetReachabilityCensus": null
+    },
+    {
+      "index": 4,
+      "recordedApproxStartAtMs": 1792857373295,
+      "recordedApproxEndAtMs": 1792857433275,
+      "recordedGate": {
+        "attacks": 0,
+        "hits": 0,
+        "passed": false
+      },
+      "branchCountsByActionStartWallTime": {
+        "attack": 0,
+        "scoutMovement": 69,
+        "chaseMovement": 10,
+        "fallbackMovement": 0,
+        "turn": 0,
+        "other": 8
+      },
+      "successfulMovementCount": 79,
+      "uniqueMovementLandings": 43,
+      "bounds": {
+        "minX": 253,
+        "maxX": 266,
+        "minY": 654,
+        "maxY": 674
+      },
+      "scoutHomes": [
+        3,
+        0,
+        1,
+        2
+      ],
+      "liveMonsterCensus": null,
+      "allVisibleTargetReachabilityCensus": null
+    },
+    {
+      "index": 5,
+      "recordedApproxStartAtMs": 1792857433275,
+      "recordedApproxEndAtMs": 1792857493289,
+      "recordedGate": {
+        "attacks": 17,
+        "hits": 17,
+        "passed": false
+      },
+      "branchCountsByActionStartWallTime": {
+        "attack": 17,
+        "scoutMovement": 28,
+        "chaseMovement": 17,
+        "fallbackMovement": 0,
+        "turn": 1,
+        "other": 10
+      },
+      "successfulMovementCount": 45,
+      "uniqueMovementLandings": 33,
+      "bounds": {
+        "minX": 250,
+        "maxX": 265,
+        "minY": 666,
+        "maxY": 674
+      },
+      "scoutHomes": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "liveMonsterCensus": null,
+      "allVisibleTargetReachabilityCensus": null
+    },
+    {
+      "index": 6,
+      "recordedApproxStartAtMs": 1792857493289,
+      "recordedApproxEndAtMs": 1792857553233,
+      "recordedGate": {
+        "attacks": 19,
+        "hits": 18,
+        "passed": true
+      },
+      "branchCountsByActionStartWallTime": {
+        "attack": 19,
+        "scoutMovement": 8,
+        "chaseMovement": 34,
+        "fallbackMovement": 0,
+        "turn": 1,
+        "other": 10
+      },
+      "successfulMovementCount": 42,
+      "uniqueMovementLandings": 38,
+      "bounds": {
+        "minX": 254,
+        "maxX": 273,
+        "minY": 659,
+        "maxY": 672
+      },
+      "scoutHomes": [
+        3,
+        0
+      ],
+      "liveMonsterCensus": null,
+      "allVisibleTargetReachabilityCensus": null
+    }
+  ],
+  "longestPositiveHitGap": {
+    "fromPositiveDamageAt": 1792857325914,
+    "toPositiveDamageAt": 1792857440493,
+    "durationMs": 114579,
+    "successfulMoves": 146,
+    "scoutAdvances": 26,
+    "chaseMoves": [
+      {
+        "at": 1792857407440,
+        "targetId": 206712,
+        "actual": {
+          "x": 259,
+          "y": 670
+        }
+      },
+      {
+        "at": 1792857408189,
+        "targetId": 206712,
+        "actual": {
+          "x": 259,
+          "y": 668
+        }
+      },
+      {
+        "at": 1792857408937,
+        "targetId": 206712,
+        "actual": {
+          "x": 259,
+          "y": 666
+        }
+      },
+      {
+        "at": 1792857409685,
+        "targetId": 206712,
+        "actual": {
+          "x": 259,
+          "y": 664
+        }
+      },
+      {
+        "at": 1792857410433,
+        "targetId": 206712,
+        "actual": {
+          "x": 259,
+          "y": 662
+        }
+      },
+      {
+        "at": 1792857411182,
+        "targetId": 206712,
+        "actual": {
+          "x": 259,
+          "y": 661
+        }
+      },
+      {
+        "at": 1792857411962,
+        "targetId": 206712,
+        "actual": {
+          "x": 261,
+          "y": 659
+        }
+      },
+      {
+        "at": 1792857412710,
+        "targetId": 206712,
+        "actual": {
+          "x": 263,
+          "y": 657
+        }
+      },
+      {
+        "at": 1792857413458,
+        "targetId": 206712,
+        "actual": {
+          "x": 265,
+          "y": 655
+        }
+      },
+      {
+        "at": 1792857414206,
+        "targetId": 206712,
+        "actual": {
+          "x": 266,
+          "y": 654
+        }
+      },
+      {
+        "at": 1792857437452,
+        "targetId": 206501,
+        "actual": {
+          "x": 253,
+          "y": 670
+        }
+      },
+      {
+        "at": 1792857438201,
+        "targetId": 206501,
+        "actual": {
+          "x": 251,
+          "y": 670
+        }
+      },
+      {
+        "at": 1792857438949,
+        "targetId": 206501,
+        "actual": {
+          "x": 250,
+          "y": 669
+        }
+      }
+    ]
+  },
+  "quarantinedTargets": [
+    {
+      "at": 1792857521499,
+      "targetId": 206513,
+      "status": "miss"
+    }
+  ],
+  "monsterObservations": [
+    {
+      "objectId": 206642,
+      "name": "Scarecrow",
+      "ruleIndex": 66,
+      "delayMinutes": 5,
+      "corpseExpiryMs": null,
+      "attacks": 13,
+      "positiveHits": 13,
+      "totalDamage": 40,
+      "lastPosition": {
+        "x": 265,
+        "y": 666
+      },
+      "healthZeroObservations": [
+        {
+          "sharedHealthZeroObservedAt": 1792857168610,
+          "ruleDeathPlusDueApproxAt": 1792857468610,
+          "firstLaterOwnSnapshotAliveCandidateChaseAt": 1792857468963,
+          "firstLaterPositiveDamageAt": 1792857472795,
+          "healthZeroToFirstPositiveDamageMs": 304185,
+          "exactObjectDiedAt": null,
+          "exactObjectRemoveAt": null,
+          "exactRespawnAt": null
+        },
+        {
+          "sharedHealthZeroObservedAt": 1792857481085,
+          "ruleDeathPlusDueApproxAt": 1792857781085,
+          "firstLaterOwnSnapshotAliveCandidateChaseAt": null,
+          "firstLaterPositiveDamageAt": null,
+          "healthZeroToFirstPositiveDamageMs": null,
+          "exactObjectDiedAt": null,
+          "exactObjectRemoveAt": null,
+          "exactRespawnAt": null
+        }
+      ]
+    },
+    {
+      "objectId": 206639,
+      "name": "Scarecrow",
+      "ruleIndex": 66,
+      "delayMinutes": 5,
+      "corpseExpiryMs": null,
+      "attacks": 14,
+      "positiveHits": 14,
+      "totalDamage": 40,
+      "lastPosition": {
+        "x": 253,
+        "y": 672
+      },
+      "healthZeroObservations": [
+        {
+          "sharedHealthZeroObservedAt": 1792857180681,
+          "ruleDeathPlusDueApproxAt": 1792857480681,
+          "firstLaterOwnSnapshotAliveCandidateChaseAt": 1792857482457,
+          "firstLaterPositiveDamageAt": 1792857489284,
+          "healthZeroToFirstPositiveDamageMs": 308603,
+          "exactObjectDiedAt": null,
+          "exactObjectRemoveAt": null,
+          "exactRespawnAt": null
+        },
+        {
+          "sharedHealthZeroObservedAt": 1792857498385,
+          "ruleDeathPlusDueApproxAt": 1792857798385,
+          "firstLaterOwnSnapshotAliveCandidateChaseAt": null,
+          "firstLaterPositiveDamageAt": null,
+          "healthZeroToFirstPositiveDamageMs": null,
+          "exactObjectDiedAt": null,
+          "exactObjectRemoveAt": null,
+          "exactRespawnAt": null
+        }
+      ]
+    },
+    {
+      "objectId": 206501,
+      "name": "Deer",
+      "ruleIndex": 65,
+      "delayMinutes": 4,
+      "corpseExpiryMs": 180000,
+      "attacks": 16,
+      "positiveHits": 16,
+      "totalDamage": 50,
+      "lastPosition": {
+        "x": 249,
+        "y": 670
+      },
+      "healthZeroObservations": [
+        {
+          "sharedHealthZeroObservedAt": 1792857197104,
+          "ruleDeathPlusDueApproxAt": 1792857437104,
+          "firstLaterOwnSnapshotAliveCandidateChaseAt": 1792857437452,
+          "firstLaterPositiveDamageAt": 1792857440493,
+          "healthZeroToFirstPositiveDamageMs": 243389,
+          "exactObjectDiedAt": null,
+          "exactObjectRemoveAt": null,
+          "exactRespawnAt": null
+        },
+        {
+          "sharedHealthZeroObservedAt": 1792857448903,
+          "ruleDeathPlusDueApproxAt": 1792857688903,
+          "firstLaterOwnSnapshotAliveCandidateChaseAt": null,
+          "firstLaterPositiveDamageAt": null,
+          "healthZeroToFirstPositiveDamageMs": null,
+          "exactObjectDiedAt": null,
+          "exactObjectRemoveAt": null,
+          "exactRespawnAt": null
+        }
+      ]
+    },
+    {
+      "objectId": 206648,
+      "name": "Scarecrow",
+      "ruleIndex": 66,
+      "delayMinutes": 5,
+      "corpseExpiryMs": null,
+      "attacks": 14,
+      "positiveHits": 14,
+      "totalDamage": 40,
+      "lastPosition": {
+        "x": 257,
+        "y": 664
+      },
+      "healthZeroObservations": [
+        {
+          "sharedHealthZeroObservedAt": 1792857211292,
+          "ruleDeathPlusDueApproxAt": 1792857511292,
+          "firstLaterOwnSnapshotAliveCandidateChaseAt": 1792857524242,
+          "firstLaterPositiveDamageAt": 1792857531081,
+          "healthZeroToFirstPositiveDamageMs": 319789,
+          "exactObjectDiedAt": null,
+          "exactObjectRemoveAt": null,
+          "exactRespawnAt": null
+        },
+        {
+          "sharedHealthZeroObservedAt": 1792857538010,
+          "ruleDeathPlusDueApproxAt": 1792857838010,
+          "firstLaterOwnSnapshotAliveCandidateChaseAt": null,
+          "firstLaterPositiveDamageAt": null,
+          "healthZeroToFirstPositiveDamageMs": null,
+          "exactObjectDiedAt": null,
+          "exactObjectRemoveAt": null,
+          "exactRespawnAt": null
+        }
+      ]
+    },
+    {
+      "objectId": 206712,
+      "name": "Deer",
+      "ruleIndex": 67,
+      "delayMinutes": 3,
+      "corpseExpiryMs": 180000,
+      "attacks": 8,
+      "positiveHits": 8,
+      "totalDamage": 25,
+      "lastPosition": {
+        "x": 261,
+        "y": 657
+      },
+      "healthZeroObservations": [
+        {
+          "sharedHealthZeroObservedAt": 1792857226906,
+          "ruleDeathPlusDueApproxAt": 1792857406906,
+          "firstLaterOwnSnapshotAliveCandidateChaseAt": 1792857407440,
+          "firstLaterPositiveDamageAt": null,
+          "healthZeroToFirstPositiveDamageMs": null,
+          "exactObjectDiedAt": null,
+          "exactObjectRemoveAt": null,
+          "exactRespawnAt": null
+        }
+      ]
+    },
+    {
+      "objectId": 206504,
+      "name": "Deer",
+      "ruleIndex": 65,
+      "delayMinutes": 4,
+      "corpseExpiryMs": 180000,
+      "attacks": 17,
+      "positiveHits": 17,
+      "totalDamage": 50,
+      "lastPosition": {
+        "x": 268,
+        "y": 668
+      },
+      "healthZeroObservations": [
+        {
+          "sharedHealthZeroObservedAt": 1792857244684,
+          "ruleDeathPlusDueApproxAt": 1792857484684,
+          "firstLaterOwnSnapshotAliveCandidateChaseAt": 1792857499724,
+          "firstLaterPositiveDamageAt": 1792857506608,
+          "healthZeroToFirstPositiveDamageMs": 261924,
+          "exactObjectDiedAt": null,
+          "exactObjectRemoveAt": null,
+          "exactRespawnAt": null
+        },
+        {
+          "sharedHealthZeroObservedAt": 1792857516296,
+          "ruleDeathPlusDueApproxAt": 1792857756296,
+          "firstLaterOwnSnapshotAliveCandidateChaseAt": null,
+          "firstLaterPositiveDamageAt": null,
+          "healthZeroToFirstPositiveDamageMs": null,
+          "exactObjectDiedAt": null,
+          "exactObjectRemoveAt": null,
+          "exactRespawnAt": null
+        }
+      ]
+    },
+    {
+      "objectId": 206513,
+      "name": "Deer",
+      "ruleIndex": 65,
+      "delayMinutes": 4,
+      "corpseExpiryMs": 180000,
+      "attacks": 9,
+      "positiveHits": 8,
+      "totalDamage": 25,
+      "lastPosition": {
+        "x": 274,
+        "y": 662
+      },
+      "healthZeroObservations": [
+        {
+          "sharedHealthZeroObservedAt": 1792857258883,
+          "ruleDeathPlusDueApproxAt": 1792857498883,
+          "firstLaterOwnSnapshotAliveCandidateChaseAt": 1792857517636,
+          "firstLaterPositiveDamageAt": null,
+          "healthZeroToFirstPositiveDamageMs": null,
+          "exactObjectDiedAt": null,
+          "exactObjectRemoveAt": null,
+          "exactRespawnAt": null
+        }
+      ]
+    },
+    {
+      "objectId": 206645,
+      "name": "Scarecrow",
+      "ruleIndex": 66,
+      "delayMinutes": 5,
+      "corpseExpiryMs": null,
+      "attacks": 6,
+      "positiveHits": 6,
+      "totalDamage": 20,
+      "lastPosition": {
+        "x": 274,
+        "y": 663
+      },
+      "healthZeroObservations": [
+        {
+          "sharedHealthZeroObservedAt": 1792857267996,
+          "ruleDeathPlusDueApproxAt": 1792857567996,
+          "firstLaterOwnSnapshotAliveCandidateChaseAt": null,
+          "firstLaterPositiveDamageAt": null,
+          "healthZeroToFirstPositiveDamageMs": null,
+          "exactObjectDiedAt": null,
+          "exactObjectRemoveAt": null,
+          "exactRespawnAt": null
+        }
+      ]
+    },
+    {
+      "objectId": 206624,
+      "name": "Scarecrow",
+      "ruleIndex": 66,
+      "delayMinutes": 5,
+      "corpseExpiryMs": null,
+      "attacks": 7,
+      "positiveHits": 7,
+      "totalDamage": 20,
+      "lastPosition": {
+        "x": 266,
+        "y": 677
+      },
+      "healthZeroObservations": [
+        {
+          "sharedHealthZeroObservedAt": 1792857285201,
+          "ruleDeathPlusDueApproxAt": 1792857585201,
+          "firstLaterOwnSnapshotAliveCandidateChaseAt": null,
+          "firstLaterPositiveDamageAt": null,
+          "healthZeroToFirstPositiveDamageMs": null,
+          "exactObjectDiedAt": null,
+          "exactObjectRemoveAt": null,
+          "exactRespawnAt": null
+        }
+      ]
+    },
+    {
+      "objectId": 206525,
+      "name": "Deer",
+      "ruleIndex": 65,
+      "delayMinutes": 4,
+      "corpseExpiryMs": 180000,
+      "attacks": 5,
+      "positiveHits": 5,
+      "totalDamage": 10,
+      "lastPosition": {
+        "x": 255,
+        "y": 677
+      },
+      "healthZeroObservations": [
+        {
+          "sharedHealthZeroObservedAt": 1792857301194,
+          "ruleDeathPlusDueApproxAt": 1792857541194,
+          "firstLaterOwnSnapshotAliveCandidateChaseAt": 1792857541530,
+          "firstLaterPositiveDamageAt": null,
+          "healthZeroToFirstPositiveDamageMs": null,
+          "exactObjectDiedAt": null,
+          "exactObjectRemoveAt": null,
+          "exactRespawnAt": null
+        }
+      ]
+    },
+    {
+      "objectId": 206627,
+      "name": "Scarecrow",
+      "ruleIndex": 66,
+      "delayMinutes": 5,
+      "corpseExpiryMs": null,
+      "attacks": 8,
+      "positiveHits": 8,
+      "totalDamage": 20,
+      "lastPosition": {
+        "x": 276,
+        "y": 675
+      },
+      "healthZeroObservations": [
+        {
+          "sharedHealthZeroObservedAt": 1792857325914,
+          "ruleDeathPlusDueApproxAt": 1792857625914,
+          "firstLaterOwnSnapshotAliveCandidateChaseAt": null,
+          "firstLaterPositiveDamageAt": null,
+          "healthZeroToFirstPositiveDamageMs": null,
+          "exactObjectDiedAt": null,
+          "exactObjectRemoveAt": null,
+          "exactRespawnAt": null
+        }
+      ]
+    }
+  ],
+  "postRunSnapshot": {
+    "file": "C:/mir2-build/p01-completion-20261024/release-accessibility-5-01/postgate-02-public-snapshot.json",
+    "at": "2026-10-24T16:00:44.586Z",
+    "owner": {
+      "x": 255,
+      "y": 672,
+      "hp": 44,
+      "dead": false
+    },
+    "dead": 4,
+    "alive": 3,
+    "aliveAttackAccessibility": [
+      {
+        "objectId": 206513,
+        "name": "Deer",
+        "x": 256,
+        "y": 667,
+        "hp": 21,
+        "quarantinedByThisRun": true,
+        "targetCovered": true,
+        "destinations": [
+          {
+            "goal": {
+              "x": 256,
+              "y": 666
+            },
+            "staticWalkable": true,
+            "occupied": false,
+            "covered": true,
+            "routeFound": true,
+            "routeSteps": 7,
+            "first": {
+              "x": 255,
+              "y": 671
+            },
+            "wholeRouteCovered": true,
+            "wholeRouteAvoidsTransfer": true
+          },
+          {
+            "goal": {
+              "x": 257,
+              "y": 666
+            },
+            "staticWalkable": true,
+            "occupied": false,
+            "covered": true,
+            "routeFound": true,
+            "routeSteps": 6,
+            "first": {
+              "x": 255,
+              "y": 671
+            },
+            "wholeRouteCovered": true,
+            "wholeRouteAvoidsTransfer": true
+          },
+          {
+            "goal": {
+              "x": 257,
+              "y": 667
+            },
+            "staticWalkable": true,
+            "occupied": false,
+            "covered": true,
+            "routeFound": true,
+            "routeSteps": 5,
+            "first": {
+              "x": 255,
+              "y": 671
+            },
+            "wholeRouteCovered": true,
+            "wholeRouteAvoidsTransfer": true
+          },
+          {
+            "goal": {
+              "x": 257,
+              "y": 668
+            },
+            "staticWalkable": true,
+            "occupied": false,
+            "covered": true,
+            "routeFound": true,
+            "routeSteps": 4,
+            "first": {
+              "x": 255,
+              "y": 671
+            },
+            "wholeRouteCovered": true,
+            "wholeRouteAvoidsTransfer": true
+          },
+          {
+            "goal": {
+              "x": 256,
+              "y": 668
+            },
+            "staticWalkable": true,
+            "occupied": false,
+            "covered": true,
+            "routeFound": true,
+            "routeSteps": 4,
+            "first": {
+              "x": 255,
+              "y": 671
+            },
+            "wholeRouteCovered": true,
+            "wholeRouteAvoidsTransfer": true
+          },
+          {
+            "goal": {
+              "x": 255,
+              "y": 668
+            },
+            "staticWalkable": true,
+            "occupied": false,
+            "covered": true,
+            "routeFound": true,
+            "routeSteps": 4,
+            "first": {
+              "x": 255,
+              "y": 671
+            },
+            "wholeRouteCovered": true,
+            "wholeRouteAvoidsTransfer": true
+          },
+          {
+            "goal": {
+              "x": 255,
+              "y": 667
+            },
+            "staticWalkable": true,
+            "occupied": false,
+            "covered": true,
+            "routeFound": true,
+            "routeSteps": 5,
+            "first": {
+              "x": 255,
+              "y": 671
+            },
+            "wholeRouteCovered": true,
+            "wholeRouteAvoidsTransfer": true
+          },
+          {
+            "goal": {
+              "x": 255,
+              "y": 666
+            },
+            "staticWalkable": true,
+            "occupied": false,
+            "covered": true,
+            "routeFound": true,
+            "routeSteps": 6,
+            "first": {
+              "x": 255,
+              "y": 671
+            },
+            "wholeRouteCovered": true,
+            "wholeRouteAvoidsTransfer": true
+          }
+        ]
+      },
+      {
+        "objectId": 206522,
+        "name": "Deer",
+        "x": 241,
+        "y": 657,
+        "hp": 25,
+        "quarantinedByThisRun": false,
+        "targetCovered": false,
+        "destinations": [
+          {
+            "goal": {
+              "x": 241,
+              "y": 656
+            },
+            "staticWalkable": true,
+            "occupied": false,
+            "covered": false,
+            "routeFound": false,
+            "routeSteps": null,
+            "first": null,
+            "wholeRouteCovered": false,
+            "wholeRouteAvoidsTransfer": false
+          },
+          {
+            "goal": {
+              "x": 242,
+              "y": 656
+            },
+            "staticWalkable": true,
+            "occupied": false,
+            "covered": false,
+            "routeFound": false,
+            "routeSteps": null,
+            "first": null,
+            "wholeRouteCovered": false,
+            "wholeRouteAvoidsTransfer": false
+          },
+          {
+            "goal": {
+              "x": 242,
+              "y": 657
+            },
+            "staticWalkable": true,
+            "occupied": false,
+            "covered": false,
+            "routeFound": false,
+            "routeSteps": null,
+            "first": null,
+            "wholeRouteCovered": false,
+            "wholeRouteAvoidsTransfer": false
+          },
+          {
+            "goal": {
+              "x": 242,
+              "y": 658
+            },
+            "staticWalkable": true,
+            "occupied": false,
+            "covered": false,
+            "routeFound": false,
+            "routeSteps": null,
+            "first": null,
+            "wholeRouteCovered": false,
+            "wholeRouteAvoidsTransfer": false
+          },
+          {
+            "goal": {
+              "x": 241,
+              "y": 658
+            },
+            "staticWalkable": true,
+            "occupied": false,
+            "covered": false,
+            "routeFound": false,
+            "routeSteps": null,
+            "first": null,
+            "wholeRouteCovered": false,
+            "wholeRouteAvoidsTransfer": false
+          },
+          {
+            "goal": {
+              "x": 240,
+              "y": 658
+            },
+            "staticWalkable": true,
+            "occupied": false,
+            "covered": false,
+            "routeFound": false,
+            "routeSteps": null,
+            "first": null,
+            "wholeRouteCovered": false,
+            "wholeRouteAvoidsTransfer": false
+          },
+          {
+            "goal": {
+              "x": 240,
+              "y": 657
+            },
+            "staticWalkable": true,
+            "occupied": false,
+            "covered": false,
+            "routeFound": false,
+            "routeSteps": null,
+            "first": null,
+            "wholeRouteCovered": false,
+            "wholeRouteAvoidsTransfer": false
+          },
+          {
+            "goal": {
+              "x": 240,
+              "y": 656
+            },
+            "staticWalkable": true,
+            "occupied": false,
+            "covered": false,
+            "routeFound": false,
+            "routeSteps": null,
+            "first": null,
+            "wholeRouteCovered": false,
+            "wholeRouteAvoidsTransfer": false
+          }
+        ]
+      },
+      {
+        "objectId": 206624,
+        "name": "Scarecrow",
+        "x": 259,
+        "y": 682,
+        "hp": 20,
+        "quarantinedByThisRun": false,
+        "targetCovered": true,
+        "destinations": [
+          {
+            "goal": {
+              "x": 259,
+              "y": 681
+            },
+            "staticWalkable": true,
+            "occupied": false,
+            "covered": true,
+            "routeFound": true,
+            "routeSteps": 11,
+            "first": {
+              "x": 255,
+              "y": 673
+            },
+            "wholeRouteCovered": true,
+            "wholeRouteAvoidsTransfer": true
+          },
+          {
+            "goal": {
+              "x": 260,
+              "y": 681
+            },
+            "staticWalkable": true,
+            "occupied": false,
+            "covered": true,
+            "routeFound": true,
+            "routeSteps": 12,
+            "first": {
+              "x": 255,
+              "y": 673
+            },
+            "wholeRouteCovered": true,
+            "wholeRouteAvoidsTransfer": true
+          },
+          {
+            "goal": {
+              "x": 260,
+              "y": 682
+            },
+            "staticWalkable": true,
+            "occupied": false,
+            "covered": true,
+            "routeFound": true,
+            "routeSteps": 13,
+            "first": {
+              "x": 255,
+              "y": 673
+            },
+            "wholeRouteCovered": true,
+            "wholeRouteAvoidsTransfer": true
+          },
+          {
+            "goal": {
+              "x": 260,
+              "y": 683
+            },
+            "staticWalkable": true,
+            "occupied": false,
+            "covered": true,
+            "routeFound": true,
+            "routeSteps": 14,
+            "first": {
+              "x": 255,
+              "y": 673
+            },
+            "wholeRouteCovered": true,
+            "wholeRouteAvoidsTransfer": true
+          },
+          {
+            "goal": {
+              "x": 259,
+              "y": 683
+            },
+            "staticWalkable": true,
+            "occupied": false,
+            "covered": true,
+            "routeFound": true,
+            "routeSteps": 15,
+            "first": {
+              "x": 255,
+              "y": 673
+            },
+            "wholeRouteCovered": true,
+            "wholeRouteAvoidsTransfer": true
+          },
+          {
+            "goal": {
+              "x": 258,
+              "y": 683
+            },
+            "staticWalkable": false,
+            "occupied": false,
+            "covered": true,
+            "routeFound": false,
+            "routeSteps": null,
+            "first": null,
+            "wholeRouteCovered": false,
+            "wholeRouteAvoidsTransfer": false
+          },
+          {
+            "goal": {
+              "x": 258,
+              "y": 682
+            },
+            "staticWalkable": true,
+            "occupied": false,
+            "covered": true,
+            "routeFound": true,
+            "routeSteps": 10,
+            "first": {
+              "x": 255,
+              "y": 673
+            },
+            "wholeRouteCovered": true,
+            "wholeRouteAvoidsTransfer": true
+          },
+          {
+            "goal": {
+              "x": 258,
+              "y": 681
+            },
+            "staticWalkable": true,
+            "occupied": false,
+            "covered": true,
+            "routeFound": true,
+            "routeSteps": 10,
+            "first": {
+              "x": 255,
+              "y": 673
+            },
+            "wholeRouteCovered": true,
+            "wholeRouteAvoidsTransfer": true
+          }
+        ]
+      }
+    ]
+  }
+}

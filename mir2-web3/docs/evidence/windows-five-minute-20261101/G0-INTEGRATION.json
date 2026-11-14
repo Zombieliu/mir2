@@ -1,0 +1,22 @@
+{
+  "schema": "mir2.five-minute.g0-integration.v1",
+  "observedUtc": "2026-11-01T15:33:52.142677+00:00",
+  "status": "active-not-accepted",
+  "sourceFilesCheckedAgainstFinalGameInputs": 12,
+  "sourceUnchangedSinceFinalGameChecks": true,
+  "libraryTestExecutionsPassed": 19,
+  "gameTestExecutionsPassed": 38,
+  "gameCargoCheckPassed": true,
+  "realFullResourceRepackPassed": true,
+  "logicalResourcesPreserved": 255063,
+  "uniquePayloadsVerified": 247477,
+  "actualFirstPlayTracePerformed": false,
+  "partialMountOrProgressiveRuntimeImplemented": false,
+  "globalRegional300sAcceptance": false,
+  "newSignedReleaseProduced": false,
+  "publicDeploymentChanged": false,
+  "canonicalCommitOrPushPerformed": false,
+  "productChoice": "explicit user approval: complete first-play assets before play; remaining assets may download in background",
+  "nextIndependentWork": "Collect authenticated diagnostic Game traces while implementing signed progressive asset availability and bounded download contracts.",
+  "productChoiceConfirmedUtc": "2026-11-01T16:13:44.709210+00:00"
+}

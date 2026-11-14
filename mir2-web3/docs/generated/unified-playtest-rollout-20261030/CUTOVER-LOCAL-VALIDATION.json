@@ -1,0 +1,16 @@
+{
+  "canaryAdmissionTemplateSha256": "5ac26ff3863c57baf98f392dbff652173fa9d70acfd656a4d8d6849c146520a4",
+  "controlTemplateSha256": "5d29200913d1b1e83f8b9b5e2f225f6edcb6a61c161f3b5c215c79f406292ea1",
+  "correction": "Root actual read-only systemctl output has repeated EnvironmentFiles rows; aggregate them in manager order, reject repeated scalar attributes, retain exact three-layer order admission.",
+  "helperSha256": "69a1fda3f291349c824ee762f461c5d4f30b1ead034d149b9b36f5a4315578be",
+  "migrationFixtureStarted": false,
+  "passed": true,
+  "preparedOnly": true,
+  "productionDatabaseTouched": false,
+  "pythonAstPassed": true,
+  "remoteServicesChanged": false,
+  "schema": "mir2.unified.cutover-prepared-validation.v2",
+  "sshUsed": false,
+  "testOutput": "test_all_six_empty_admitted (__main__.Admission.test_all_six_empty_admitted) ... ok\ntest_any_nonzero_or_missing_counter_rejected (__main__.Admission.test_any_nonzero_or_missing_counter_rejected) ... ok\ntest_duplicate_scalar_property_is_rejected (__main__.Admission.test_duplicate_scalar_property_is_rejected) ... ok\ntest_exact_environment_order_parser (__main__.Admission.test_exact_environment_order_parser) ... ok\ntest_non_postgres_or_unhealthy_redis_rejected (__main__.Admission.test_non_postgres_or_unhealthy_redis_rejected) ... ok\ntest_real_three_repeated_environment_properties_preserve_order (__main__.Admission.test_real_three_repeated_environment_properties_preserve_order) ... ok\ntest_stop_and_activate_intents_refuse_before_any_service_action (__main__.Admission.test_stop_and_activate_intents_refuse_before_any_service_action) ... ok\ntest_unsupported_service_refused_without_command (__main__.Admission.test_unsupported_service_refused_without_command) ... ok\ntest_archive_escape_rejected_without_extraction (__main__.ArchiveClosure.test_archive_escape_rejected_without_extraction) ... ok\ntest_extra_empty_directory_rejected (__main__.ArchiveClosure.test_extra_empty_directory_rejected) ... ok\ntest_extra_regular_file_rejected (__main__.ArchiveClosure.test_extra_regular_file_rejected) ... ok\ntest_full_stream_files_and_empty_directories (__main__.ArchiveClosure.test_full_stream_files_and_empty_directories) ... ok\ntest_same_size_modified_file_rejected (__main__.ArchiveClosure.test_same_size_modified_file_rejected) ... ok\n\n----------------------------------------------------------------------\nRan 13 tests in 0.020s\n\nOK\n",
+  "tests": 13
+}

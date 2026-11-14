@@ -1,0 +1,548 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T00:14:47.977Z",
+  "archiveRoot": "C:/mir2-build/p01-completion-20261024",
+  "scope": "Independent explicit public allowlist for authentic non-accepting ordinary native socket-context probe08. Original partial/failure/pass report bytes are retained; strict frozen verifier plus authentic normal cleanup adjudicates formal acceptance. No private store, secret, EXE or recording payload copied.",
+  "files": [
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/gateway-build-pin.json",
+      "bytes": 1331,
+      "sha256": "4cbd9019ab3b8445e8cadd23a87f32798f8fb470d97bb935bb1b7df00d07cbff",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/source-pins.json",
+      "bytes": 26036,
+      "sha256": "3348179c9ed3f8d3475f906b9664c0070e03488df53f563365a1aa0e2ad552af",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/source-pins-admitted-v2.json",
+      "bytes": 26470,
+      "sha256": "c3cc35d297cbb65e26e0c709827f7c0bda9682581934241bdbdd126ae9e3e078",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/realm-process.json",
+      "bytes": 1531,
+      "sha256": "a15524d6a24e4f16e0cf96aade0d6bfbe7c268f1cd2df406e1bd9259296c1f59",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/realm-cleanup.json",
+      "bytes": 3157,
+      "sha256": "c45fd70ade72a04fab4f73608dcc5442c35a3eb173e0c099fab4d98fb09ff76b",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/slow-stage-public.jsonl",
+      "bytes": 8753,
+      "sha256": "9049e3ab2928fbe19860d7f9ebb85841771bf71cfaf8fbcf28c0811b6cf58f29",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/slow-stage-public-status.json",
+      "bytes": 1012,
+      "sha256": "94c085ee6f99b8fb3f0b3d9d5047299fe42923a8eed7c2e6431b1935e47aca46",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/slow-stage-diagnostics-config.json",
+      "bytes": 3963,
+      "sha256": "0e6b211a78c02fdf94a415a5a3ea7ecd8b7cdc9fdf0a6e25a746a75a59f2d885",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/slow-stage-public.mjs",
+      "bytes": 10186,
+      "sha256": "c2a137084f2166cbae603f721c6dde7322790c8dc2e05c2b8d59b79d7a58619f",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/slow-stage-public.test.mjs",
+      "bytes": 20681,
+      "sha256": "3315da0fe78985e95fc5b68f0f61689bee4bfc7c7108ebe6de8d8fcb5a1e0309",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/synthetic-tests-v1.log",
+      "bytes": 6131,
+      "sha256": "f9a3757f968410a1e60ce48abcc9296c5a4014407e418608974034db1c67449b",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/slow-stage-helper-freeze-v1.json",
+      "bytes": 4235,
+      "sha256": "875ecbb07a386d339fc2e5f78f62dd9804dde7a5ad93a6114c01c34a3fd2b29d",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/slow-stage-schema-contract.json",
+      "bytes": 7923,
+      "sha256": "a566d2357976ce4ec0a14c92da2e8f1490e724c527dcb757be46e3c6642ea6f6",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/legacy14-original.mjs.txt",
+      "bytes": 10310,
+      "sha256": "d6d2bc6954d546cccc0d3273fbe9e236f381a10963a0a1d039087e74ae46e7ee",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/candidate-release-binding.json",
+      "bytes": 5752,
+      "sha256": "0311072f81ec38c0317e64edc1d0225cd9cf651608b7598a5f948290e6c76981",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/full16-gate.json",
+      "bytes": 4772,
+      "sha256": "cc0268133c65abecc9bb15d57f382d6d90706ea9f1feda6947857ddf503dd93d",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/slow-stage-row-contract.mjs",
+      "bytes": 1553,
+      "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/verify-full16-gate.mjs",
+      "bytes": 4660,
+      "sha256": "32455188735a191a4c6635b2d4342ef0ffb46d6afb4917c8906301f37e3e0d0c",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/socket-build-source-lib.mjs",
+      "bytes": 10176,
+      "sha256": "267bc8e45eb16ced1e7a0888d3855b4f3b00f36fbe0e61643802b8c832105298",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/resource-profile.json",
+      "bytes": 1194,
+      "sha256": "a5e9012823bd816dedc3c40b13988618f3a18e69b3dd19edc4534a199a778ac3",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/run-options.json",
+      "bytes": 2807,
+      "sha256": "b42168f14860b0eeb0d17ae75999a5289b3541853db5c3998a84420f901597de",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/run-options-admitted-v2.json",
+      "bytes": 3417,
+      "sha256": "f7fe8dcbfd39c1fec58e93f834188c424a7ee0da7fb402d2aa989d6f2001f2fb",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/scenario.json",
+      "bytes": 1362,
+      "sha256": "701a2a3e30c1b963653af1a767f5af290e15fef207a7359cc90492cf5e496921",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/provisioning.json",
+      "bytes": 330,
+      "sha256": "8e6998c671da917a36c0b8ce511ab62da153b4f79c087543822c4db2a1c171b4",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/spectator-health-before.json",
+      "bytes": 657,
+      "sha256": "9a331bd31ad6129f5abe6a658904f2c5a3c6512286e03ac7f3b90751c86a50e8",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/monitor-options.json",
+      "bytes": 708,
+      "sha256": "6dccae4923ca73b966abba5b25d9a57934c3f535e5a6ad4d4a36ee94da372c34",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/monitor-process.json",
+      "bytes": 223,
+      "sha256": "b8e0d88c0d84397314ee42c9aa2609c1bb3b445b16d427d1d04f823000c14e44",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/launcher-source-frozen-v1.json",
+      "bytes": 12087,
+      "sha256": "d8d5cc9fe8edef50b24eea94793414099c481261dee39c1b71b18fae5c9daee1",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/launcher-source-prepared-v1.json",
+      "bytes": 931,
+      "sha256": "fcf7be99d7720eb3c61c1e6936eddfdd52126c366f531869051c6ffed364ea56",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/driver-report-contract.mjs",
+      "bytes": 4413,
+      "sha256": "befb77c30991ac39e1029e985f0676526754a5cb8eabf93081bdc25b200639f2",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/preparation-plan.json",
+      "bytes": 2831,
+      "sha256": "bc67871adbd534a94306cea5758c5a8a301aafe5923b4b574a24745e4a8e3887",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/report-provenance.json",
+      "bytes": 2066,
+      "sha256": "76a845388d6f64015962550c96015a6264ecd9451794a07f8b5f797f320e5ff7",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/static-preparation-verification.json",
+      "bytes": 536,
+      "sha256": "800b1ac4d8bfac85ca872d0b656793ad31defc4f29a2ed55b794d7e514026ac3",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/source-guard-readonly-verification.json",
+      "bytes": 1260,
+      "sha256": "63be536384225f895243a1d3a771d52475ce4b251ba77eb8fd0024b911e50dfe",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/initialize-private.ps1",
+      "bytes": 1941,
+      "sha256": "4deff086a5f53aaad191bcfd7e99de8e23c297fc6e1a121852a3fc13c1cf390e",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/input-lib.mjs",
+      "bytes": 14016,
+      "sha256": "4ac6313d91b37fdd4647f1c5c47b7fab0bbdcee62588ec186c7e5df220a3a249",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/prepare-inputs.mjs",
+      "bytes": 10835,
+      "sha256": "f1ece6d11a93535b5077e75609d456428134a833256c8b6abb351460852e1369",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/run-owned.mjs",
+      "bytes": 17440,
+      "sha256": "7f8b40fd70ba23c509a68b6675726af6ca13d467c857a2478b75d08883e7e42d",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/monitor-owned.mjs",
+      "bytes": 1082,
+      "sha256": "f2d56c3eb26182251b6c8cc69c2274e5708d4e633c17bc4abb1414ed81c66c47",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/request-stop.mjs",
+      "bytes": 815,
+      "sha256": "13c6a9aee3cc0845344ebd0ebb5aa43a62da8b1629daf0fd77e7bb6d9b89d639",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/recover-drained-owned.ps1",
+      "bytes": 2910,
+      "sha256": "443b47eb1988c982ffafb3b228e0aafff06734e1542d8219054d5c35ce408735",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/reports/1792885245847-0368d2eb.report.json",
+      "bytes": 192768,
+      "sha256": "04ad88bdd4fd34a29b6b8326f68960619e0b137b6aee2eba7252a9d2866e547a",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/launcher-syntax-check.log",
+      "bytes": 1707,
+      "sha256": "b5ff2a9917a1fbca9a723f016eb70fd18d47fbd9fb7b6d01233c86c941409573",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/run-command.log",
+      "bytes": 1880,
+      "sha256": "e5ff50cbb599392f24366769924793f91756af5047a54500e3c939599e915cca",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/spectator-health-after.json",
+      "bytes": 665,
+      "sha256": "62412820c7cc631634ec7af20691c2beb9c78c8f8338292152300097b3b65384",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-socket-diagnostics-v1.json",
+      "bytes": 1920,
+      "sha256": "cdcf7ec17ffbdb7ef1a8c529deaf8d8dd957d16a8129315390760e910a4b9c3f",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "backend-source-socket-diagnostics-v1.json",
+      "bytes": 14000,
+      "sha256": "4da9d4dac73773bae041c98b641874a9ad4427217c1b36bb453f1a014ad7b058",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "socket-diagnostics-v1-build-receipt.json",
+      "bytes": 2095,
+      "sha256": "36181ed0755c44bafd676f44bda8a33c72f958777660fb649686f0119478eabd",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "capacity-patrol-run-preference-driver-frozen-v1.json",
+      "bytes": 6826,
+      "sha256": "48e6b2c2dae7e82d26d2a0e95d408b863557530e363a79e4a07c2e77c21f172d",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "collect-release-native-10-v2-socket-feasibility-08-recordings-metadata.json",
+      "bytes": 1234,
+      "sha256": "9b932dea6e6857d2d08581be566f74c27e51dc9de99d24ee765550afa299c4cd",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "collect-release-native-10-v2-socket-feasibility-08-monitor-endpoints.json",
+      "bytes": 4705,
+      "sha256": "929071633a9fef8febf39154212e77137293f4874028f02a88fe3fafe46a6b77",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/collect-public-v2.mjs",
+      "bytes": 37685,
+      "sha256": "3a2c911ed512d5fc2da7d13bd209a134220447e4de98c47be121499528ccfc53",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/verify-public-v2.mjs",
+      "bytes": 16012,
+      "sha256": "ae93ff8c25ab189217d1623e084751643c95a68fd5dcf410822f59dab88748f6",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/collector-posthoc-revision-v2.json",
+      "bytes": 3514,
+      "sha256": "402faecbe42152b2346c9cc723de76166acc8ff331f4117b4ab24a2ce21d6207",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "collect-native10-08-frozen-attempt-v1.log",
+      "bytes": 490,
+      "sha256": "e1252c35b32e6d41915e6a958d83533e434e4cdb9a76f3b45b8720fef018f549",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal05-expected08-rejection-v1.json",
+      "bytes": 1020,
+      "sha256": "4cbcaeff3e76bb5f0fb0c58940dcfc3d3704b87630fb513777004f90611666e4",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/collect-public.mjs",
+      "bytes": 37369,
+      "sha256": "2c7c80bd3e5fa431449510f3f0620788cc0eb8bf8af38ff996dba9bd2ce011f5",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/verify-public.mjs",
+      "bytes": 16012,
+      "sha256": "af19ee103dae59a15bbffae3080b2cb3e613673b8a8e0fadffe4e9c1b48327cf",
+      "classification": "explicit-public-original"
+    }
+  ],
+  "externalArchives": [
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/reports/1792885245847-0368d2eb.samples.jsonl",
+      "bytes": 17808660,
+      "sha256": "a42c137132dd966434a46e735dafdd9fd53dd63d6f97983c06ea7f265b4286dc",
+      "kind": "capacity-samples-jsonl",
+      "copyToRepository": false
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/monitor-history.jsonl",
+      "bytes": 4773507,
+      "sha256": "97e9d96589331e77c2f4df6c3e32750e76fd4b0c51de2a4614aae83103f6e872",
+      "rows": 533,
+      "kind": "resource-monitor-history-jsonl",
+      "copyToRepository": false
+    },
+    {
+      "path": "release-native-10-v2-socket-feasibility-08/recordings/0-498023.jsonl",
+      "bytes": 177479226,
+      "sha256": "78ea85efd7989d60c1c50966d96ab99b14667b41e05f2f6736661356bf02e20b",
+      "frames": 3990,
+      "kind": "spectator-recording-jsonl",
+      "copyToRepository": false
+    }
+  ],
+  "run": {
+    "runId": "1792885245847-0368d2eb",
+    "sourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+    "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+    "driverSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+    "driverSourceSha256": "8c29818d96fc7d0974d248fe7b4f140812385216cc98b04a0712fecfe25385b7",
+    "socketDiagnosticsReleaseUsed": true,
+    "reportOk": false,
+    "driverPlayableCapacityAccepted": false,
+    "rawVerifierAccepted": false,
+    "normalProcessCleanup": true,
+    "diagnosticsComplete": true,
+    "slowStageMetadata": {
+      "rows": 98,
+      "bytes": 8753,
+      "sha256": "9049e3ab2928fbe19860d7f9ebb85841771bf71cfaf8fbcf28c0811b6cf58f29",
+      "status": {
+        "schemaVersion": 1,
+        "complete": true,
+        "reasons": [],
+        "stopRequested": false,
+        "stderrEnded": true,
+        "writerFinished": true,
+        "rowsQueued": 98,
+        "bytesQueued": 8753,
+        "maxBufferedLineBytes": 109,
+        "lineLimitBytes": 8192,
+        "totalLimitBytes": 33554432,
+        "writeLimitBytes": 1048576,
+        "writeHighWaterMarkBytes": 1048576,
+        "maxQueuedWriteBytes": 354,
+        "scope": "Only complete ASCII exact-format lines from the frozen static GatewaySlowStage label/phase/class allowlists. observedAtMs is the launcher receive clock, not server span start/end. connection is an opaque diagnostic counter, never identity or an action/request ID; queuedPhase and phaseElapsedMs were sampled when the input was queued. Queued counts alone do not prove durable output when incomplete. Existing50ms logging is left-censored; missing rows do not prove absence of a stall.",
+        "thresholdMs": 50,
+        "dataFile": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-socket-feasibility-08\\slow-stage-public.jsonl"
+      }
+    },
+    "normalOwnedCleanup": true,
+    "navigationCoordination": {
+      "scope": "Native tool-local conservative union of original AOI obstacles, active controlled owner receipts and one in-flight movement hint per connection; never authoritative occupancy, snapshots or AOI.",
+      "maximumHintCellsPerConnection": 7,
+      "blockedOpportunityRule": "A conflicting prepared move is still an offered navigation-blocked/native opportunity; original cadence, completion and correction gates remain."
+    },
+    "nativePatrolPlanning": {
+      "scope": "Native primed patrol fallback only; original fast path and at most four existing corner targets remain.",
+      "maximumFallbackCornerTargets": 4,
+      "pathExpansionLimit": 4000,
+      "selectionRule": "Prefer the first existing collision-aware path with two legal collinear Run steps; otherwise retain the original first Walk.",
+      "primingRule": "Only while native Run priming is active; original cadence, transfer/coverage checks and offered-opportunity accounting remain."
+    },
+    "gatewaySha256": "a43078b05e70b480f948fee505e23d2757ce1ae20fdc1f22b2348df46ee7125d",
+    "backendInputCount": 41,
+    "realGameplayAttempt": true,
+    "report": "release-native-10-v2-socket-feasibility-08/reports/1792885245847-0368d2eb.report.json",
+    "raw": "release-native-10-v2-socket-feasibility-08/reports/1792885245847-0368d2eb.samples.jsonl",
+    "peakControlledActors": 10,
+    "highestPassedStage": 10,
+    "phaseWindows": [
+      {
+        "name": "bootstrap-2",
+        "kind": "bootstrap",
+        "targetActors": 2,
+        "startedAtMs": 1792885245885,
+        "endedAtMs": 1792885282779,
+        "completed": true
+      },
+      {
+        "name": "stage-2",
+        "kind": "measurement",
+        "targetActors": 2,
+        "startedAtMs": 1792885282779,
+        "endedAtMs": 1792885582861,
+        "completed": true
+      },
+      {
+        "name": "bootstrap-10",
+        "kind": "bootstrap",
+        "targetActors": 10,
+        "startedAtMs": 1792885582862,
+        "endedAtMs": 1792885650847,
+        "completed": true
+      },
+      {
+        "name": "stage-10",
+        "kind": "measurement",
+        "targetActors": 10,
+        "startedAtMs": 1792885650847,
+        "endedAtMs": 1792885950901,
+        "completed": true
+      },
+      {
+        "name": "soak",
+        "kind": "measurement",
+        "targetActors": 10,
+        "startedAtMs": 1792885950902,
+        "endedAtMs": 1792886308140,
+        "completed": false
+      }
+    ],
+    "stages": [
+      {
+        "name": "stage-2",
+        "controlledActors": 2,
+        "seconds": 300,
+        "completed": true,
+        "passed": true,
+        "startedAtMs": 1792885282779,
+        "endedAtMs": 1792885582861,
+        "minuteWindows": 5
+      },
+      {
+        "name": "stage-10",
+        "controlledActors": 10,
+        "seconds": 300,
+        "completed": true,
+        "passed": true,
+        "startedAtMs": 1792885650847,
+        "endedAtMs": 1792885950901,
+        "minuteWindows": 5
+      }
+    ],
+    "soakIntervalSeconds": 357.238,
+    "soakCompleted": false,
+    "completed60SecondSoakWindows": 5,
+    "passed60SecondSoakWindows": 5,
+    "windowsByPhase": {
+      "stage-2": {
+        "complete": 5,
+        "passed": 5
+      },
+      "stage-10": {
+        "complete": 5,
+        "passed": 5
+      },
+      "soak": {
+        "complete": 5,
+        "passed": 5
+      }
+    },
+    "capacityAccepted": false,
+    "formalRunStarted": false,
+    "failureWindow": {
+      "actor": "La5189302",
+      "phases": [
+        "soak"
+      ],
+      "seconds": 60.00411259999999,
+      "role": "movement",
+      "successfulMoves": 65,
+      "correctedMoves": 0,
+      "offeredMoves": 77,
+      "timeoutRatio": 0,
+      "launchedAttacks": 0,
+      "positiveHits": 0,
+      "damage": 0
+    },
+    "allSixCleanupCountersZero": true,
+    "allOwnedProcessesStopped": true,
+    "normalGatewayExit": 0,
+    "normalMonitorExit": 0
+  },
+  "limitations": [
+    "Failure-window counters, if any, belong only to the recorded first failing continuous window, not the entire run.",
+    "Independent probe policy is measured2/10 cohorts each300s plus360s soak,0resume/0save and original gates. Passing requires5/5/6 complete windows; probe never becomes formal acceptance.",
+    "Typed Launched proves only this command launched a swing. The original driver still requires paired positive damage/health evidence for a hit.",
+    "The first/last monitor projection is a summary. Full raw monitor bytes and spectator payloads remain external and independently SHA-bound.",
+    "This File/loopback single-host formal profile does not certify production storage/RPO, TLS/NIC bandwidth, frontend acceptance or Cell scheduling."
+  ]
+}

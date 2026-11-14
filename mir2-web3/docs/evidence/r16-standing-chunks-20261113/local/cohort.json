@@ -1,0 +1,114 @@
+{
+  "source": "440f82d4d2a7db2b44046cfbd7885680e437aa65",
+  "finalCandidate": "210fa4716a24-standing-chunks-7f8bb015",
+  "finalPassingColdAndClosedProfileWarmRuns": [
+    "quest-after-r2",
+    "quest-after-r4",
+    "quest-after-r8"
+  ],
+  "finalSessions": 6,
+  "developmentPassingRun": "quest-after-r1",
+  "retainedFailures": [
+    "quest-after-r3",
+    "quest-after-r5",
+    "quest-after-r6",
+    "quest-after-r7"
+  ],
+  "controlledNetworkOnly": true,
+  "originalWalkBudgetMs": 8000,
+  "originalNativeBudgetMs": 120000,
+  "notAWanBenchmark": true,
+  "scriptHashes": {
+    "entry-player-probe.mjs": "7440b8191578dda59a3f0e2a09027a4ef9a6c642284ed5f7033a8ac34b0a4b46",
+    "invoke.mjs": "7031b4fbfcbd27a47bf09318ecfd090eb11e89888c682359a2f8e9e434618a64",
+    "profile.mjs": "3c40d2cb928b0799a4f59b7d621997f2e906572473591a45fe990a5f88b32930",
+    "run.mjs": "160222e960c3c754ea7a2374bcadc22d16ea74b394a62ec29986b4953c383590",
+    "standing-faces.mjs": "8e540be8d184c3161330c8224e9472750b882d59136193b2a917ff30032fd044",
+    "ui-asset-fault.mjs": "e8a9dd4454943ffd49cea4f533d4e0bb5692e431f83888c5d9b2e740444c0b51",
+    "verify-prewarm-session.mjs": "3697ec461c04213bcced2353717f078677fc79655942a1f4b3ec95ed3a866c7c",
+    "verify-public-quest.mjs": "de936cdbf673495831ade8d2989ec2fa189cadbbf578362e44741d85e9de3730",
+    "verify-scene-state-body.mjs": "67a8fc372c7a24ff37e84f33eec0922cba67bbd46fceff63aafded79d2393a1c"
+  },
+  "runs": [
+    {
+      "run": "quest-after-r1",
+      "passed": true,
+      "developmentBuild": true,
+      "gender": "male",
+      "source": "440f82d4d2a7db2b44046cfbd7885680e437aa65",
+      "localCandidate": "210fa4716a24-standing-chunks-de646772",
+      "originalReceiptSha256": "bd0a339e7de42a1f40b34cf8ea8c15d4f7a187a8431d915e0601c8de0108ed6c",
+      "detail": "local/quest-after-r1.json"
+    },
+    {
+      "run": "quest-after-r2",
+      "passed": true,
+      "developmentBuild": false,
+      "gender": "female",
+      "source": "440f82d4d2a7db2b44046cfbd7885680e437aa65",
+      "localCandidate": "210fa4716a24-standing-chunks-7f8bb015",
+      "originalReceiptSha256": "d6480b695d94ddc0bbcf312809bffad823ddbda10aa0b5c9a1e05320552beee2",
+      "detail": "local/quest-after-r2.json"
+    },
+    {
+      "run": "quest-after-r3",
+      "passed": false,
+      "developmentBuild": false,
+      "gender": "male",
+      "source": "440f82d4d2a7db2b44046cfbd7885680e437aa65",
+      "localCandidate": "210fa4716a24-standing-chunks-7f8bb015",
+      "originalReceiptSha256": "5d65487ba003de8faa14601f4830782cc2f8f20a1efeaa8cb6a6b27ba55abd0d",
+      "detail": "local/quest-after-r3.json"
+    },
+    {
+      "run": "quest-after-r4",
+      "passed": true,
+      "developmentBuild": false,
+      "gender": "male",
+      "source": "440f82d4d2a7db2b44046cfbd7885680e437aa65",
+      "localCandidate": "210fa4716a24-standing-chunks-7f8bb015",
+      "originalReceiptSha256": "fc939ddd9cdb7fe2569fb7c358fbfb9017b267a1453ed2e373bb827ab71f2567",
+      "detail": "local/quest-after-r4.json"
+    },
+    {
+      "run": "quest-after-r5",
+      "passed": false,
+      "developmentBuild": false,
+      "gender": "male",
+      "source": "440f82d4d2a7db2b44046cfbd7885680e437aa65",
+      "localCandidate": "210fa4716a24-standing-chunks-7f8bb015",
+      "originalReceiptSha256": "6a50a634b0957ade52ac344717d6fe2d487581b401f10fb1a956f4c2671aeedf",
+      "detail": "local/quest-after-r5.json"
+    },
+    {
+      "run": "quest-after-r6",
+      "passed": false,
+      "developmentBuild": false,
+      "gender": "male",
+      "source": "440f82d4d2a7db2b44046cfbd7885680e437aa65",
+      "localCandidate": "210fa4716a24-standing-chunks-7f8bb015",
+      "originalReceiptSha256": "006ef1725f1edb996fa4b1fb5dddce04242483326655417a084520e3dee15994",
+      "detail": "local/quest-after-r6.json"
+    },
+    {
+      "run": "quest-after-r7",
+      "passed": false,
+      "developmentBuild": false,
+      "gender": "male",
+      "source": "440f82d4d2a7db2b44046cfbd7885680e437aa65",
+      "localCandidate": "210fa4716a24-standing-chunks-7f8bb015",
+      "originalReceiptSha256": "511c98df15ffe86d910241ebcac1a3f22e224c73a3406927c936cc21466d16cd",
+      "detail": "local/quest-after-r7.json"
+    },
+    {
+      "run": "quest-after-r8",
+      "passed": true,
+      "developmentBuild": false,
+      "gender": "male",
+      "source": "440f82d4d2a7db2b44046cfbd7885680e437aa65",
+      "localCandidate": "210fa4716a24-standing-chunks-7f8bb015",
+      "originalReceiptSha256": "4908b71250b9ff184ea70017e155095b89efdc80bc6006b37723f9813f39a01f",
+      "detail": "local/quest-after-r8.json"
+    }
+  ]
+}

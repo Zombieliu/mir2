@@ -1,0 +1,17 @@
+# BEGIN NUMERON RECHARGE WEB V1
+handle /recharge {
+    redir * /recharge/ 308
+}
+handle_path /recharge/* {
+    root * /srv/mir2-recharge/current
+    header {
+        Cache-Control "no-store"
+        Referrer-Policy "no-referrer"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+        Content-Security-Policy "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self' wss://165.154.65.136.sslip.io/playtest/ws; font-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'"
+    }
+    file_server
+}
+# END NUMERON RECHARGE WEB V1

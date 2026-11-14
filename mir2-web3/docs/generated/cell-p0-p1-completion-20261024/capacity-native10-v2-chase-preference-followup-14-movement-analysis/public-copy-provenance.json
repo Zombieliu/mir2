@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "collectedAt": "2026-10-25T10:54:00.113Z",
+  "runId": "1792923531277-bc2bda2e",
+  "child": "capacity-native10-v2-chase-preference-followup-14-movement-analysis",
+  "hashMode": "raw-bytes",
+  "copies": [
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe14-movement-correction-analysis-v1\\analyze-closed-raw-v1.mjs",
+      "target": "analyze-closed-raw-v1.mjs",
+      "bytes": 9396,
+      "sha256": "6213bdfa472c9543436e131aa64d023642241cb74fc4406d32156664b2b5edd0"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe14-movement-correction-analysis-v1\\analyze-closed-raw-v2.mjs",
+      "target": "analyze-closed-raw-v2.mjs",
+      "bytes": 9974,
+      "sha256": "6170049e636149c2e0923738fc3cc984e43ea2dfbfb40c3377d3ce1a528aa73a"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe14-movement-correction-analysis-v1\\prepare-analysis-v2.mjs",
+      "target": "prepare-analysis-v2.mjs",
+      "bytes": 3190,
+      "sha256": "f38a39c0bc976371bbce5878b49515f49b6c7fc47f08c3c0ec78ec927769df2b"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe14-movement-correction-analysis-v1\\analysis-tool-revision-v2.json",
+      "target": "analysis-tool-revision-v2.json",
+      "bytes": 2702,
+      "sha256": "2b8a012c7903d5b27196c61a12e1077bbdcf1c83b70f8105bb14e06b73aeb10b"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe14-movement-correction-analysis-v1\\selected-corrections-v2.json",
+      "target": "selected-corrections-v2.json",
+      "bytes": 1289764,
+      "sha256": "382b8e153e7247f21f6c3bfbed6c9ed684c85625fd237af701b69c62732defcb"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe14-movement-correction-analysis-v1\\summary-v2.json",
+      "target": "summary-v2.json",
+      "bytes": 14064,
+      "sha256": "e4fdf21f188e4d26a66d6c7eca15ab254f8aa7097c5d9b738d58fe790ac5a13b"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe14-movement-correction-analysis-v1\\derive-bounded-causality-v1.mjs",
+      "target": "derive-bounded-causality-v1.mjs",
+      "bytes": 4868,
+      "sha256": "bf4187a173f0471f5ae860ab4690891cb1061d36de8ca25c7b74e714778e425f"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe14-movement-correction-analysis-v1\\bounded-causality-v1.json",
+      "target": "bounded-causality-v1.json",
+      "bytes": 101371,
+      "sha256": "322d6f23998979a4da170062d2e854328d11e7900863d4829264361ba109c5b3"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe14-movement-correction-analysis-v1\\verification-v1.json",
+      "target": "verification-v1.json",
+      "bytes": 1275,
+      "sha256": "ff5d7da25a429d8c9186dcfc2d3b01a120d97d6267d15224413b9331e52d7032"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe14-movement-correction-analysis-v1\\README.md",
+      "target": "README.md",
+      "bytes": 1587,
+      "sha256": "ab20aa30c9f2d60f04a200809198b36a077e0b45a3736645eec6e8894c81a438"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe14-movement-correction-analysis-v1\\finalize-public-whitelist-v1.mjs",
+      "target": "finalize-public-whitelist-v1.mjs",
+      "bytes": 3797,
+      "sha256": "c947fee34d880d22bc21794d3ed6ce4cdfb9eee036772ac864cdef7a97f958c6"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe14-movement-correction-analysis-v1\\public-whitelist-v1.json",
+      "target": "public-whitelist-v1.json",
+      "bytes": 3092,
+      "sha256": "eb87edf6d5cf9028589224ede2d6837f27ba7c9fc0cd1249c85eaac53a15826f"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe14-movement-source-review-v1\\source-review-v1.json",
+      "target": "source-review/source-review-v1.json",
+      "bytes": 9331,
+      "sha256": "01a71b922194bd872511813161c556cb1de22b48a5fc0af44e56102a2f49a160"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe14-movement-source-review-v1\\actual-failure-cross-reference-v1.json",
+      "target": "source-review/actual-failure-cross-reference-v1.json",
+      "bytes": 4272,
+      "sha256": "36e7ad18c7f52bb2be9ab39fda4c5141b9735730938ffd5f47d16c5d1ef62cef"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe14-movement-source-review-v1\\owner-wire-cache-evidence-v1.json",
+      "target": "source-review/owner-wire-cache-evidence-v1.json",
+      "bytes": 10448,
+      "sha256": "0f806679f5dcacf41d0528598aedb7f64da3abb183764c081588b936594c3d92"
+    }
+  ],
+  "originalSourceCopiesByteEqual": true,
+  "copyCount": 15,
+  "copiedBytes": 1469131,
+  "facts": {
+    "wholeStageCorrectedMoves": 5,
+    "failedContinuousWindowCorrectedMoves": 4,
+    "totalAnalysisRawFullReads": 2,
+    "firstParserCountAssertionFailurePreserved": true,
+    "originalReportOk": false,
+    "capacityAccepted": false
+  },
+  "interpretation": "Protocol/cache anomalies and matching client send/receipt cursors are preserved. A simultaneous authoritative occupancy census or server rejection cause is not established.",
+  "noPrivateDataBinaryRawOrSpectatorPayloadCopied": true,
+  "existingTopicsModified": false,
+  "sourceOrThresholdChanged": false
+}

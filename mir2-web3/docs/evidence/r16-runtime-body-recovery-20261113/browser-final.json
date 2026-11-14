@@ -1,0 +1,533 @@
+{
+  "passed": true,
+  "scope": "actual Chrome, loopback HTTP faults and actual WASM compilation; no game, account or production performance qualification",
+  "sourceSha256": "840e4d54295ad0c045dedd93a3dab4519cb52a86857ede5327d26ef44eadecb3",
+  "policySourceSha256": "f9b7458625ca7eb010bc64503b301f7b6ab9fefc1c0aa2436c5edd70f700a8f1",
+  "closed": {
+    "browser": true,
+    "server": true
+  },
+  "chromeVersion": "157.0.8103.78",
+  "cases": [
+    {
+      "scenario": "reset",
+      "elapsedMs": 251,
+      "imports": 1,
+      "canvases": 1,
+      "initialized": 1,
+      "answer": 42,
+      "errorName": null,
+      "priorRequestsAborted": true,
+      "requests": [
+        "/reset/app.wasm",
+        "/reset/mirror.wasm",
+        "/reset/mirror.wasm"
+      ],
+      "events": [
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "failed",
+          "phase": "body",
+          "bytes": 4,
+          "status": 200,
+          "reason": "network",
+          "retryable": true
+        },
+        {
+          "attempt": 2,
+          "sourceIndex": 1,
+          "retry": false,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 2,
+          "sourceIndex": 1,
+          "retry": false,
+          "state": "failed",
+          "phase": "body",
+          "bytes": 4,
+          "status": 200,
+          "reason": "network",
+          "retryable": true
+        },
+        {
+          "attempt": 3,
+          "sourceIndex": 1,
+          "retry": true,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 3,
+          "sourceIndex": 1,
+          "retry": true,
+          "state": "completed",
+          "phase": "compile",
+          "bytes": 39,
+          "status": 200
+        }
+      ],
+      "pageEntryRetry": null,
+      "alternateBackendRetry": null
+    },
+    {
+      "scenario": "idle",
+      "elapsedMs": 15006,
+      "imports": 1,
+      "canvases": 1,
+      "initialized": 1,
+      "answer": 42,
+      "errorName": null,
+      "priorRequestsAborted": true,
+      "requests": [
+        "/idle/app.wasm",
+        "/idle/mirror.wasm",
+        "/idle/mirror.wasm"
+      ],
+      "events": [
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "failed",
+          "phase": "headers",
+          "bytes": 0,
+          "status": 503,
+          "reason": "http",
+          "retryable": true
+        },
+        {
+          "attempt": 2,
+          "sourceIndex": 1,
+          "retry": false,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 2,
+          "sourceIndex": 1,
+          "retry": false,
+          "state": "failed",
+          "phase": "body",
+          "bytes": 4,
+          "status": 200,
+          "reason": "body-idle",
+          "retryable": true
+        },
+        {
+          "attempt": 3,
+          "sourceIndex": 1,
+          "retry": true,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 3,
+          "sourceIndex": 1,
+          "retry": true,
+          "state": "completed",
+          "phase": "compile",
+          "bytes": 39,
+          "status": 200
+        }
+      ],
+      "pageEntryRetry": null,
+      "alternateBackendRetry": null
+    },
+    {
+      "scenario": "exhausted",
+      "elapsedMs": 3,
+      "imports": 1,
+      "canvases": 0,
+      "initialized": 0,
+      "answer": null,
+      "errorName": "TypeError",
+      "priorRequestsAborted": true,
+      "requests": [
+        "/exhausted/app.wasm",
+        "/exhausted/mirror.wasm",
+        "/exhausted/mirror.wasm"
+      ],
+      "events": [
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "failed",
+          "phase": "headers",
+          "bytes": 0,
+          "status": 503,
+          "reason": "http",
+          "retryable": true
+        },
+        {
+          "attempt": 2,
+          "sourceIndex": 1,
+          "retry": false,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 2,
+          "sourceIndex": 1,
+          "retry": false,
+          "state": "failed",
+          "phase": "headers",
+          "bytes": 0,
+          "status": 503,
+          "reason": "http",
+          "retryable": true
+        },
+        {
+          "attempt": 3,
+          "sourceIndex": 1,
+          "retry": true,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 3,
+          "sourceIndex": 1,
+          "retry": true,
+          "state": "failed",
+          "phase": "headers",
+          "bytes": 0,
+          "status": 503,
+          "reason": "http",
+          "retryable": true
+        }
+      ],
+      "pageEntryRetry": true,
+      "alternateBackendRetry": false
+    },
+    {
+      "scenario": "permanent",
+      "elapsedMs": 2,
+      "imports": 1,
+      "canvases": 0,
+      "initialized": 0,
+      "answer": null,
+      "errorName": "TypeError",
+      "priorRequestsAborted": null,
+      "requests": [
+        "/permanent/app.wasm",
+        "/permanent/mirror.wasm"
+      ],
+      "events": [
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "failed",
+          "phase": "headers",
+          "bytes": 0,
+          "status": 404,
+          "reason": "http",
+          "retryable": false
+        },
+        {
+          "attempt": 2,
+          "sourceIndex": 1,
+          "retry": false,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 2,
+          "sourceIndex": 1,
+          "retry": false,
+          "state": "failed",
+          "phase": "headers",
+          "bytes": 0,
+          "status": 404,
+          "reason": "http",
+          "retryable": false
+        }
+      ],
+      "pageEntryRetry": true,
+      "alternateBackendRetry": false
+    },
+    {
+      "scenario": "invalid",
+      "elapsedMs": 2,
+      "imports": 1,
+      "canvases": 0,
+      "initialized": 0,
+      "answer": null,
+      "errorName": "CompileError",
+      "priorRequestsAborted": null,
+      "requests": [
+        "/invalid/app.wasm",
+        "/invalid/mirror.wasm"
+      ],
+      "events": [
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "failed",
+          "phase": "headers",
+          "bytes": 0,
+          "status": 503,
+          "reason": "http",
+          "retryable": true
+        },
+        {
+          "attempt": 2,
+          "sourceIndex": 1,
+          "retry": false,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 2,
+          "sourceIndex": 1,
+          "retry": false,
+          "state": "failed",
+          "phase": "compile",
+          "bytes": 15,
+          "status": 200,
+          "reason": "invalid-binary",
+          "retryable": false
+        }
+      ],
+      "pageEntryRetry": false,
+      "alternateBackendRetry": false
+    },
+    {
+      "scenario": "oversized",
+      "elapsedMs": 1,
+      "imports": 1,
+      "canvases": 0,
+      "initialized": 0,
+      "answer": null,
+      "errorName": "RangeError",
+      "priorRequestsAborted": null,
+      "requests": [
+        "/oversized/app.wasm",
+        "/oversized/mirror.wasm"
+      ],
+      "events": [
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "failed",
+          "phase": "headers",
+          "bytes": 0,
+          "status": 503,
+          "reason": "http",
+          "retryable": true
+        },
+        {
+          "attempt": 2,
+          "sourceIndex": 1,
+          "retry": false,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 2,
+          "sourceIndex": 1,
+          "retry": false,
+          "state": "failed",
+          "phase": "body",
+          "bytes": 39,
+          "status": 200,
+          "reason": "byte-limit",
+          "retryable": false
+        }
+      ],
+      "pageEntryRetry": false,
+      "alternateBackendRetry": false
+    }
+  ],
+  "requests": [
+    {
+      "scenario": "reset",
+      "mirror": "app",
+      "count": 1,
+      "at": 1794522223247,
+      "status": 200,
+      "partialBytes": 4
+    },
+    {
+      "scenario": "reset",
+      "mirror": "mirror",
+      "count": 1,
+      "at": 1794522223371,
+      "status": 200,
+      "partialBytes": 4
+    },
+    {
+      "scenario": "reset",
+      "mirror": "mirror",
+      "count": 2,
+      "at": 1794522223496,
+      "status": 200
+    },
+    {
+      "scenario": "idle",
+      "mirror": "app",
+      "count": 1,
+      "at": 1794522223497,
+      "status": 503
+    },
+    {
+      "scenario": "idle",
+      "mirror": "mirror",
+      "count": 1,
+      "at": 1794522223499,
+      "status": 200,
+      "partialBytes": 4
+    },
+    {
+      "scenario": "idle",
+      "mirror": "mirror",
+      "count": 2,
+      "at": 1794522238502,
+      "status": 200
+    },
+    {
+      "scenario": "exhausted",
+      "mirror": "app",
+      "count": 1,
+      "at": 1794522238504,
+      "status": 503
+    },
+    {
+      "scenario": "exhausted",
+      "mirror": "mirror",
+      "count": 1,
+      "at": 1794522238505,
+      "status": 503
+    },
+    {
+      "scenario": "exhausted",
+      "mirror": "mirror",
+      "count": 2,
+      "at": 1794522238506,
+      "status": 503
+    },
+    {
+      "scenario": "permanent",
+      "mirror": "app",
+      "count": 1,
+      "at": 1794522238507,
+      "status": 404
+    },
+    {
+      "scenario": "permanent",
+      "mirror": "mirror",
+      "count": 1,
+      "at": 1794522238507,
+      "status": 404
+    },
+    {
+      "scenario": "invalid",
+      "mirror": "app",
+      "count": 1,
+      "at": 1794522238508,
+      "status": 503
+    },
+    {
+      "scenario": "invalid",
+      "mirror": "mirror",
+      "count": 1,
+      "at": 1794522238509,
+      "status": 200
+    },
+    {
+      "scenario": "oversized",
+      "mirror": "app",
+      "count": 1,
+      "at": 1794522238510,
+      "status": 503
+    },
+    {
+      "scenario": "oversized",
+      "mirror": "mirror",
+      "count": 1,
+      "at": 1794522238511,
+      "status": 200
+    }
+  ],
+  "retiredBodies": [
+    {
+      "scenario": "reset",
+      "mirror": "app",
+      "at": 1794522223370
+    },
+    {
+      "scenario": "reset",
+      "mirror": "mirror",
+      "at": 1794522223494
+    },
+    {
+      "scenario": "idle",
+      "mirror": "mirror",
+      "at": 1794522238502
+    }
+  ],
+  "pageErrors": []
+}

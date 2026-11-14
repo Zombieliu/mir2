@@ -1,0 +1,647 @@
+{
+  "schemaVersion": 1,
+  "runId": "1793047839765-82a5e52b",
+  "scope": "Public bounded health-guard evidence; no replay or capacity acceptance",
+  "sources": {
+    "report": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v2\\episode\\reports\\1793047839765-82a5e52b.preparation-report.json",
+      "bytes": 12866,
+      "sha256": "07e47a4aa30335776e9f35a6e11f3249a64c2a30ceb6572e24230dea1ab8238f"
+    },
+    "preparationSamples": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v2\\episode\\reports\\1793047839765-82a5e52b.preparation.jsonl",
+      "bytes": 1385678,
+      "sha256": "535bab6c44ae77d09f5669fb11823f5b491c6c8399d8cca77c0b9dfdafd8b143"
+    },
+    "sharedRecording": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v2\\episode\\recordings\\0-498068.jsonl",
+      "bytes": 39040756,
+      "sha256": "a725f9964f9135bdcee58400133e72a5916cbb5dd5775783e3725730ef874ca9",
+      "rows": 1029
+    },
+    "extractionScript": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v2\\extract-public-health-guard-evidence-v1.mjs",
+      "bytes": 6851,
+      "sha256": "d818813c4faa6ae27dc13440e8adb878c578633dac331ca581daa7d1ae88e764"
+    }
+  },
+  "originalVerdict": {
+    "ok": false,
+    "preparedCount": 4,
+    "error": "ordinary supplies: owner/map/health changed"
+  },
+  "failedActor": {
+    "name": "L370e2a04",
+    "characterIndex": 5,
+    "before": {
+      "sequence": 687,
+      "monotonicMs": 129869.381,
+      "ownerId": 1000,
+      "ownerName": "L370e2a04",
+      "map": "0",
+      "x": 288,
+      "y": 616,
+      "hp": 18,
+      "maxHp": 18,
+      "hpStock": 1,
+      "gold": 0,
+      "venison": 0,
+      "inSafeZone": true,
+      "nearbyHostileCount": 3,
+      "playerPoison": null,
+      "ownerPoison": null,
+      "dazed": false
+    },
+    "commands": 125,
+    "movementCommands": 77,
+    "commandCounts": {
+      "clientVersion": 1,
+      "interact": 1,
+      "selectNpcDialog": 1,
+      "run": 20,
+      "walk": 57,
+      "attackV2": 33,
+      "harvest": 12
+    },
+    "purchased": 0,
+    "soldVenison": 0,
+    "funding": null
+  },
+  "observedIdentityMapKeys": [
+    "1000/L370e2a04/0"
+  ],
+  "observedMaxHpValues": [
+    18
+  ],
+  "observedLevelValues": [
+    1
+  ],
+  "hpFrames": [
+    {
+      "recordSequence": 425,
+      "capturedAtMs": 1793047968547,
+      "ownerId": 1000,
+      "ownerName": "L370e2a04",
+      "map": "0",
+      "x": 288,
+      "y": 616,
+      "hp": 18,
+      "maxHp": 18,
+      "level": 1,
+      "dead": false,
+      "inSafeZone": true,
+      "nearbyMonsters": [
+        {
+          "objectId": 206641,
+          "name": "Scarecrow",
+          "x": 287,
+          "y": 616,
+          "hp": 20,
+          "dead": false,
+          "disposition": "hostile",
+          "distance": 1
+        },
+        {
+          "objectId": 206644,
+          "name": "Scarecrow",
+          "x": 293,
+          "y": 614,
+          "hp": 20,
+          "dead": false,
+          "disposition": "hostile",
+          "distance": 5
+        },
+        {
+          "objectId": 206632,
+          "name": "Scarecrow",
+          "x": 286,
+          "y": 623,
+          "hp": 20,
+          "dead": false,
+          "disposition": "hostile",
+          "distance": 7
+        }
+      ]
+    },
+    {
+      "recordSequence": 824,
+      "capturedAtMs": 1793048078697,
+      "ownerId": 1000,
+      "ownerName": "L370e2a04",
+      "map": "0",
+      "x": 300,
+      "y": 592,
+      "hp": 17,
+      "maxHp": 18,
+      "level": 1,
+      "dead": false,
+      "inSafeZone": false,
+      "nearbyMonsters": [
+        {
+          "objectId": 206007,
+          "name": "RakingCat",
+          "x": 299,
+          "y": 592,
+          "hp": 32,
+          "dead": false,
+          "disposition": "hostile",
+          "distance": 1
+        },
+        {
+          "objectId": 206013,
+          "name": "RakingCat",
+          "x": 299,
+          "y": 594,
+          "hp": 32,
+          "dead": false,
+          "disposition": "hostile",
+          "distance": 2
+        },
+        {
+          "objectId": 206628,
+          "name": "Scarecrow",
+          "x": 302,
+          "y": 592,
+          "hp": 20,
+          "dead": false,
+          "disposition": "hostile",
+          "distance": 2
+        },
+        {
+          "objectId": 206610,
+          "name": "Scarecrow",
+          "x": 298,
+          "y": 595,
+          "hp": 20,
+          "dead": false,
+          "disposition": "hostile",
+          "distance": 3
+        },
+        {
+          "objectId": 206020,
+          "name": "RakingCat",
+          "x": 307,
+          "y": 584,
+          "hp": 32,
+          "dead": false,
+          "disposition": "hostile",
+          "distance": 8
+        }
+      ]
+    },
+    {
+      "recordSequence": 836,
+      "capturedAtMs": 1793048082075,
+      "ownerId": 1000,
+      "ownerName": "L370e2a04",
+      "map": "0",
+      "x": 303,
+      "y": 589,
+      "hp": 18,
+      "maxHp": 18,
+      "level": 1,
+      "dead": false,
+      "inSafeZone": false,
+      "nearbyMonsters": [
+        {
+          "objectId": 206628,
+          "name": "Scarecrow",
+          "x": 303,
+          "y": 590,
+          "hp": 20,
+          "dead": false,
+          "disposition": "hostile",
+          "distance": 1
+        },
+        {
+          "objectId": 206007,
+          "name": "RakingCat",
+          "x": 301,
+          "y": 590,
+          "hp": 32,
+          "dead": false,
+          "disposition": "hostile",
+          "distance": 2
+        },
+        {
+          "objectId": 206013,
+          "name": "RakingCat",
+          "x": 301,
+          "y": 592,
+          "hp": 32,
+          "dead": false,
+          "disposition": "hostile",
+          "distance": 3
+        },
+        {
+          "objectId": 206610,
+          "name": "Scarecrow",
+          "x": 300,
+          "y": 593,
+          "hp": 20,
+          "dead": false,
+          "disposition": "hostile",
+          "distance": 4
+        },
+        {
+          "objectId": 206020,
+          "name": "RakingCat",
+          "x": 307,
+          "y": 584,
+          "hp": 32,
+          "dead": false,
+          "disposition": "hostile",
+          "distance": 5
+        },
+        {
+          "objectId": 206111,
+          "name": "HookingCat",
+          "x": 308,
+          "y": 583,
+          "hp": 30,
+          "dead": false,
+          "disposition": "hostile",
+          "distance": 6
+        }
+      ]
+    },
+    {
+      "recordSequence": 986,
+      "capturedAtMs": 1793048125407,
+      "ownerId": 1000,
+      "ownerName": "L370e2a04",
+      "map": "0",
+      "x": 340,
+      "y": 598,
+      "hp": 16,
+      "maxHp": 18,
+      "level": 1,
+      "dead": false,
+      "inSafeZone": false,
+      "nearbyMonsters": [
+        {
+          "objectId": 206129,
+          "name": "HookingCat",
+          "x": 340,
+          "y": 599,
+          "hp": 30,
+          "dead": false,
+          "disposition": "hostile",
+          "distance": 1
+        },
+        {
+          "objectId": 206214,
+          "name": "Deer",
+          "x": 343,
+          "y": 592,
+          "hp": 25,
+          "dead": false,
+          "disposition": "neutral",
+          "distance": 6
+        }
+      ]
+    },
+    {
+      "recordSequence": 995,
+      "capturedAtMs": 1793048127958,
+      "ownerId": 1000,
+      "ownerName": "L370e2a04",
+      "map": "0",
+      "x": 343,
+      "y": 595,
+      "hp": 17,
+      "maxHp": 18,
+      "level": 1,
+      "dead": false,
+      "inSafeZone": false,
+      "nearbyMonsters": [
+        {
+          "objectId": 206129,
+          "name": "HookingCat",
+          "x": 341,
+          "y": 598,
+          "hp": 30,
+          "dead": false,
+          "disposition": "hostile",
+          "distance": 3
+        },
+        {
+          "objectId": 206214,
+          "name": "Deer",
+          "x": 343,
+          "y": 592,
+          "hp": 25,
+          "dead": false,
+          "disposition": "neutral",
+          "distance": 3
+        },
+        {
+          "objectId": 206136,
+          "name": "HookingCat",
+          "x": 339,
+          "y": 587,
+          "hp": 30,
+          "dead": false,
+          "disposition": "hostile",
+          "distance": 8
+        }
+      ]
+    },
+    {
+      "recordSequence": 1007,
+      "capturedAtMs": 1793048131074,
+      "ownerId": 1000,
+      "ownerName": "L370e2a04",
+      "map": "0",
+      "x": 343,
+      "y": 593,
+      "hp": 18,
+      "maxHp": 18,
+      "level": 1,
+      "dead": false,
+      "inSafeZone": false,
+      "nearbyMonsters": [
+        {
+          "objectId": 206214,
+          "name": "Deer",
+          "x": 343,
+          "y": 592,
+          "hp": 25,
+          "dead": false,
+          "disposition": "neutral",
+          "distance": 1
+        },
+        {
+          "objectId": 206129,
+          "name": "HookingCat",
+          "x": 343,
+          "y": 596,
+          "hp": 30,
+          "dead": false,
+          "disposition": "hostile",
+          "distance": 3
+        },
+        {
+          "objectId": 206136,
+          "name": "HookingCat",
+          "x": 340,
+          "y": 588,
+          "hp": 30,
+          "dead": false,
+          "disposition": "hostile",
+          "distance": 5
+        }
+      ]
+    },
+    {
+      "recordSequence": 1018,
+      "capturedAtMs": 1793048134408,
+      "ownerId": 1000,
+      "ownerName": "L370e2a04",
+      "map": "0",
+      "x": 343,
+      "y": 593,
+      "hp": 16,
+      "maxHp": 18,
+      "level": 1,
+      "dead": false,
+      "inSafeZone": false,
+      "nearbyMonsters": [
+        {
+          "objectId": 206129,
+          "name": "HookingCat",
+          "x": 343,
+          "y": 594,
+          "hp": 30,
+          "dead": false,
+          "disposition": "hostile",
+          "distance": 1
+        },
+        {
+          "objectId": 206214,
+          "name": "Deer",
+          "x": 343,
+          "y": 592,
+          "hp": 22,
+          "dead": false,
+          "disposition": "neutral",
+          "distance": 1
+        },
+        {
+          "objectId": 206136,
+          "name": "HookingCat",
+          "x": 342,
+          "y": 590,
+          "hp": 30,
+          "dead": false,
+          "disposition": "hostile",
+          "distance": 3
+        }
+      ]
+    },
+    {
+      "recordSequence": 1020,
+      "capturedAtMs": 1793048135156,
+      "ownerId": 1000,
+      "ownerName": "L370e2a04",
+      "map": "0",
+      "x": 343,
+      "y": 593,
+      "hp": 15,
+      "maxHp": 18,
+      "level": 1,
+      "dead": false,
+      "inSafeZone": false,
+      "nearbyMonsters": [
+        {
+          "objectId": 206129,
+          "name": "HookingCat",
+          "x": 343,
+          "y": 594,
+          "hp": 30,
+          "dead": false,
+          "disposition": "hostile",
+          "distance": 1
+        },
+        {
+          "objectId": 206214,
+          "name": "Deer",
+          "x": 343,
+          "y": 592,
+          "hp": 22,
+          "dead": false,
+          "disposition": "neutral",
+          "distance": 1
+        },
+        {
+          "objectId": 206136,
+          "name": "HookingCat",
+          "x": 343,
+          "y": 591,
+          "hp": 30,
+          "dead": false,
+          "disposition": "hostile",
+          "distance": 2
+        }
+      ]
+    },
+    {
+      "recordSequence": 1029,
+      "capturedAtMs": 1793048137743,
+      "ownerId": 1000,
+      "ownerName": "L370e2a04",
+      "map": "0",
+      "x": 343,
+      "y": 593,
+      "hp": 12,
+      "maxHp": 18,
+      "level": 1,
+      "dead": false,
+      "inSafeZone": false,
+      "nearbyMonsters": [
+        {
+          "objectId": 206129,
+          "name": "HookingCat",
+          "x": 343,
+          "y": 594,
+          "hp": 30,
+          "dead": false,
+          "disposition": "hostile",
+          "distance": 1
+        },
+        {
+          "objectId": 206214,
+          "name": "Deer",
+          "x": 343,
+          "y": 592,
+          "hp": 18,
+          "dead": false,
+          "disposition": "neutral",
+          "distance": 1
+        },
+        {
+          "objectId": 206136,
+          "name": "HookingCat",
+          "x": 343,
+          "y": 591,
+          "hp": 30,
+          "dead": false,
+          "disposition": "hostile",
+          "distance": 2
+        }
+      ]
+    }
+  ],
+  "healthEvents": [
+    {
+      "recordSequence": 986,
+      "capturedAtMs": 1793048125407,
+      "eventAtMs": 1793048125142,
+      "eventSequence": null,
+      "from": 18,
+      "to": 16
+    },
+    {
+      "recordSequence": 995,
+      "capturedAtMs": 1793048127958,
+      "eventAtMs": 1793048127958,
+      "eventSequence": null,
+      "from": 16,
+      "to": 17
+    },
+    {
+      "recordSequence": 1007,
+      "capturedAtMs": 1793048131074,
+      "eventAtMs": 1793048131074,
+      "eventSequence": null,
+      "from": 17,
+      "to": 18
+    },
+    {
+      "recordSequence": 1018,
+      "capturedAtMs": 1793048134408,
+      "eventAtMs": 1793048134156,
+      "eventSequence": null,
+      "from": 18,
+      "to": 16
+    },
+    {
+      "recordSequence": 1020,
+      "capturedAtMs": 1793048135156,
+      "eventAtMs": 1793048134907,
+      "eventSequence": null,
+      "from": 16,
+      "to": 15
+    },
+    {
+      "recordSequence": 1029,
+      "capturedAtMs": 1793048137743,
+      "eventAtMs": 1793048137743,
+      "eventSequence": null,
+      "from": 15,
+      "to": 12
+    }
+  ],
+  "timing": {
+    "failedPreparationSampleAtMs": 1793048137897,
+    "reportFinishedAtMs": 1793048138273,
+    "reportFinishMinusFailureSampleMs": 376,
+    "finalRecordedHealthAtMs": 1793048137743,
+    "failureSampleMinusFinalHealthMs": 154,
+    "reportFailedActorElapsedMs": 169273.65149999998,
+    "sampleElapsedMs": 169273.25790000003,
+    "reportMinusSampleElapsedMs": 0.39359999995213,
+    "eventCaptureLagMs": [
+      265,
+      0,
+      0,
+      252,
+      249,
+      0
+    ]
+  },
+  "healthBranch": {
+    "originalMinimumRatio": 0.7,
+    "lastRecordedHp": 12,
+    "maxHp": 18,
+    "ratio": 0.6666666666666666,
+    "guardUsesConservativePercentWhenNewer": true,
+    "exactClientGuardValueNotRetained": true
+  },
+  "targetLossDiagnostics": [
+    {
+      "name": "L370e2a00",
+      "count": 0,
+      "truncated": false
+    },
+    {
+      "name": "L370e2a01",
+      "count": 0,
+      "truncated": false
+    },
+    {
+      "name": "L370e2a02",
+      "count": 0,
+      "truncated": false
+    },
+    {
+      "name": "L370e2a03",
+      "count": 0,
+      "truncated": false
+    },
+    {
+      "name": "L370e2a04",
+      "count": 0,
+      "truncated": false
+    }
+  ],
+  "limits": [
+    "The shared recording proves exact world HP changes, not the exact percentage-derived client guard scalar.",
+    "Health events provide no attacker ID. Nearby HookingCat and damage are aligned evidence, not identification of the exact damage source.",
+    "Shared spectator inventory and gold are not used to infer held stock or earned funds; funding=null means the funding call did not return.",
+    "No owner/name/map/maxHP/level change was observed. This is bounded failure evidence, not death or capacity acceptance.",
+    "Recording events have no independent event sequence; recordSequence identifies their actual containing frame. Capture time can lag event time."
+  ],
+  "capacityAccepted": false,
+  "codeChanged": false
+}

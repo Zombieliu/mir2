@@ -1,0 +1,1906 @@
+{
+  "base": "63977fd7e102682ce3fe08f9223a127f7bd6250a",
+  "localPackages": [
+    {
+      "name": "mir2-bevy-runtime",
+      "root": "mir2-web3/apps/game-client/runtime"
+    },
+    {
+      "name": "mir2-client-bevy",
+      "root": "mir2-web3/apps/game-client/client-bevy"
+    },
+    {
+      "name": "mir2-client-core",
+      "root": "mir2-web3/apps/game-client/client-core"
+    },
+    {
+      "name": "mir2-game-data",
+      "root": "mir2-web3/packages/game-data"
+    },
+    {
+      "name": "mir2-protocol",
+      "root": "mir2-web3/packages/protocol"
+    },
+    {
+      "name": "mir2-ui-core",
+      "root": "mir2-web3/apps/game-client/ui-core"
+    }
+  ],
+  "files": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/Cargo.lock",
+      "sha256": "3de2eb07fad487338b0a05042b34c1151bbf652531051416b62074ff7ab6b263"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/Cargo.toml",
+      "sha256": "377510326b9fa3ca356f1c1cb57f44b061179cdda6807934bad5ec645cd3596c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/examples/font_atlas_probe.rs",
+      "sha256": "1e01eadcf5ac2d64de34399dbbc5b88ff80d19c97d39ab466e7d097017284a82"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/audio.rs",
+      "sha256": "b961b2b26c9b582c77ca363e5d0d60a1256db68d672009db0a8fd0ca5e3ce415"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/bag_ui.rs",
+      "sha256": "c9b79aa02c0fd943955e58fcd8cb0558fd47fd129f30619dcf516ec77ca29ee0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/big_map.rs",
+      "sha256": "cbeb7885b150a287e55e7b13f483bb83b6505863cb860883af5d416cffe98a20"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/big_map_geometry.rs",
+      "sha256": "e34f4900608a157441ff9ba3760c689fa617a42e8e10007c0e37876598afe2dc"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/character.rs",
+      "sha256": "a88338e21f6f26c59f5f91c5501eda3a7740d646159f221745b9ab74d241fb50"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/chat.rs",
+      "sha256": "42cad272298ee37a5605c0d582bc299317762e76ce9d6e40c98f39029d58dc7f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/chat_settings_effects.rs",
+      "sha256": "04357156a342fef53328b49e72e18c860c64f400f8ba498fabc77d5ad6f4ad8b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/combat_input.rs",
+      "sha256": "0da1b3192067931ad746aff7d1bd3c1c02ec2090581f0a9b46b2900e676c8e86"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/combat_input_tests.rs",
+      "sha256": "0a873bcb002e9426c87ba1c46ed9dae3038bf7c7c0fd580b185b2704419f4de9"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/companion.rs",
+      "sha256": "ee51a09c60893983c39218c871f05bd95d575997f82c6601ed894a5b88cb5ca3"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/amount_input.rs",
+      "sha256": "2446d51f4340280ed7c7534290b230b2de7a71a7ea33ac185cb6693a78f03172"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/assets.rs",
+      "sha256": "dce72c5010735d60c531250bb3f20534b26651ea2a4698d94187b7105fcf8b64"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/bag_paint.rs",
+      "sha256": "cf58947f87f977eaab18c29268fb78f315fd829c9ed366dba89e1079795ef6b3"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/big_map_coordinates.rs",
+      "sha256": "a3e951f895b500d876ce15a1b75bde026f0454837faeb7835ec532e28add50b6"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/big_map_coordinates_tests.rs",
+      "sha256": "1b71977b7c33c5b3ba5e969f21413cd3cc929e4c9608872db33d60b03e8b9eaf"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/big_map_npc_navigation_tests.rs",
+      "sha256": "9ac429fa5f8444105e59fd7e5e4b2c57ea8557cc63c84cc900e250f84ff43458"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/change_password.rs",
+      "sha256": "c8f223ed07ad7a58f01116ff696282f802650934370031a1182808c56c3c434f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/character_materials.rs",
+      "sha256": "67f377a018cf795c5e9051d7ffd155d3d3b5a1e2d03700cf39c47b861b7a3f91"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/character_page.rs",
+      "sha256": "295eeb5b95da2a4c2f39a577072097d5c238a4ac5e0de2e933b47ee6d004aaf2"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/character_page_tests.rs",
+      "sha256": "70fa9085774fdd40dc1fca51021680f208f57200d471fa3292d30373a99ed5f0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/character_stats.rs",
+      "sha256": "8563b962df0f9f8d6b2f4c4a44e68d7bfe8b6f9204d722b24f6f6e80fdb59ddf"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/character_stats_portable.rs",
+      "sha256": "cb68373ac7f9887a29828513d505eb2a6280d9bfa1f0da57e7ea2052bbb8219a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/character_stats_portable_caption_tests.rs",
+      "sha256": "bbca2cd8a12b5a4e4df7f5dac64349fb685c01439d4a24b8b7a9999c5b7b8513"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/character_stats_portable_fonts_tests.rs",
+      "sha256": "cf0036147b77e37ea833c9cd16b570e647c7966d037ec8169a449302c54ead2f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/chat.rs",
+      "sha256": "aa8950363a02ac6f39b0dad8c36869dcb2d602e3e5d3f6dbbe365c79bdb44382"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/combat_mode_keys.rs",
+      "sha256": "aa767df49c6f7cfc38e6e5557f9a3ef8d5e1efeecf1d079437a713fcf3e2fd93"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/companion.rs",
+      "sha256": "388c99aea4b74134c5b575747ec73dcfa9be76f5050556ca635b744894cdfcbd"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/companion/learning_supply.rs",
+      "sha256": "a36d6f701cfee2bf6a64e0a53d1821d70ae643fd409d53e14e7d27be2ff3dff4"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/companion/life.rs",
+      "sha256": "603c419123de9b8d609d92d122d6ecfd820ef738eb52dbf93e1c761d2d1c76d9"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/creature_dialog.rs",
+      "sha256": "e5ebfda4f3e01fd414f1736bf19225f1ab4b994678150f418adbd8e6e37a7e86"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/creature_dialog_render.rs",
+      "sha256": "295a5cf8f7c7d4a476afc5f5f570777762808383b15cc9a8f9a7c9aa0c9868eb"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/creature_dialog_tests.rs",
+      "sha256": "27583b21b786a7ee8f85ee1a3161bb894e4f109456c1d2d82a898771029cec38"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/crystal_additive_ui.wgsl",
+      "sha256": "5aee01a57baaaa797c6c0cff093e18a547561f464bb861e35074ee35343f7a65"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/equipment_creature_frames.json",
+      "sha256": "85f11ac54f47fd5a2fb9d036d5abfa3696b028335e70a214fe54907ebf1d6087"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/equipment_creature_host.rs",
+      "sha256": "83b85c5c5f111df16dd0931fd62e11830753cd2b01579a14466729926abd1d46"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/equipment_storage_tests.rs",
+      "sha256": "a760e200a0a6024764c07ec8a13dadd95cd90aa67494a2779de86c5a5f628e77"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/friend_dialog.rs",
+      "sha256": "77c0432500a103547d0d2034efd90b096cd0a160a10ca7725f6c86ced4e6f0e8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/friend_dialog_host.rs",
+      "sha256": "344502384864da33c8e29b022f1f7e0a59cfe0e022b660a2306a3f5541b5c05e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/friend_dialog_render.rs",
+      "sha256": "2733c461c37776fad8e802e41b351a8caa504a109283b05ddc0fc72c62b1266b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/friend_dialog_tests.rs",
+      "sha256": "079c90665f29881c932261d569f23daef7e96654473a818178fa2843fb34d015"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/friend_text_editor.rs",
+      "sha256": "d883fb09df661f9ab197f6c444821d6ed5df88bd5be4e1530a4a69685dbfb28d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/friend_text_editor_tests.rs",
+      "sha256": "c8d037635dab159243428f95b1f6a5e7fc5b3d50e5d8443cc751ef80f0101c0d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_dialog.rs",
+      "sha256": "346c4fdd9c5d2c56699cba2de4491ca98fc7e234a34f89bd00e9f27e610f1037"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/group_dialog.rs",
+      "sha256": "b1f4e80020ff83ae59a24e658d3feda21ae8f52047a0f92f3f04251946f0e09f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_buff_dialog.rs",
+      "sha256": "99525afbafb8affd057dc9752763386f7238895a0839de4f3ae6ed3bf8911a65"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_buff_dialog_tests.rs",
+      "sha256": "94198f0805ef0d67155ec489fc7aa7488987cfb9f730226b29fcfa2350d77e98"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_panel.rs",
+      "sha256": "8a7c5d881a4cdb960438a223f677b9ee9bf2dd6e835b2c34d418d4fdfb2c8c86"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_pending_eviction_tests.rs",
+      "sha256": "9a1229ed63a8281f3ff637e516ba27d09c13e3378ba7afa32b466acb3ded9cbb"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_permission_flow_tests.rs",
+      "sha256": "e9756a2c62f014087f68fc4a3cbb68e033e1b670cfee11a0dc5b07e8e48692f3"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_pixel_text.rs",
+      "sha256": "dd29832e9918e6ce9ba26f4e04443c134b54aa6bef009addee6509c9f3f1ab3d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_pixel_text_view.rs",
+      "sha256": "0d5d809f5e426660f4a74aaed5594682e3404e4d30d644a7137a9625452d076f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_rank_flow_tests.rs",
+      "sha256": "2b4aa67322a9c6acfe3fad2a0a0bfbdaf147e9f5021cde7eb63a1463996e7581"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_storage.rs",
+      "sha256": "2b9b27155a33db4e8058fa2e0b94d8caa5dadc815357ff9af9fc02cd5f3ec6a4"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_storage_tests.rs",
+      "sha256": "b76c722fa58f4bedf0cd57cb46bd09a1d6665686e8790bb5210617c6c8e4edce"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_assign_dialog.rs",
+      "sha256": "b4935dc36d12f48b563457149db579c668fde070e84e262c204b05556ea401d6"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_buff_hud.rs",
+      "sha256": "1bc4ad1314ccfecc06cce93142391d05d1449713020bcb37ec4e071b54361606"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_buff_hud_tests.rs",
+      "sha256": "501b39d47e14d8bad22f9442889a94e0b4ccb30f16930573b3af42683b367a66"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_cross_inventory.rs",
+      "sha256": "097c70a23a681f732ebd2ee21e9e697729b493d3c08f514b61e45524577e959f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_cross_inventory_tests.rs",
+      "sha256": "2b0634dcd27a4a428fc250138a12c1d69b94a7a03a26638dfc76dc8a42339117"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_dialog.rs",
+      "sha256": "181713ba533c4eb92bb3be983a67b550e03236073f665143db18fcd64f72026b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_dialog_geometry.rs",
+      "sha256": "0d16e2066edc2edaf633cfd10c9d7f46f50986125b1f31bb1419e5066fb3b0d6"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_dialog_host.rs",
+      "sha256": "ec972c2f53f6b4d4f690a3e39de954a91fdfdab8ea7fada95f3d9e8ce10ca9e0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_dialog_render.rs",
+      "sha256": "c4c2a3d683553b2bd024bbf03ff0c58755808fed20f28be9609eb2666b8bfa3a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_item_use.rs",
+      "sha256": "d42d750b7e7955cd0d3878cfad2824ae7cd3821753b6ce008760d3e0f096b31f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_item_use_tests.rs",
+      "sha256": "466ed3dfa5176a5cda58dfa3fc7fad9f7da5a5f4ca2444eb311f9a9f82c92117"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_pointer_settings.rs",
+      "sha256": "c1ff409f274b58ab5c80b93a5772f2f14fbd47cc83ef4770be9cb9d77193b3db"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hud.rs",
+      "sha256": "131fd4e0db3eac42977174e8457f07ce3ecaae06a66271abf4dac2c84c5818b8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hud_art.rs",
+      "sha256": "a42e184063a86a04c534645e3c6d26375747d0ac673d9169102a7227339c35cf"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hud_bar.rs",
+      "sha256": "18850cad9b755d21a8805f3bde1c19938031053c1329795f6229cad6ba36a3c3"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hud_item_image_tests.rs",
+      "sha256": "be8f0f978d6d33f95ab1c7c98e0223d04047c488d0a7e565766daa5843f26293"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hud_layout.rs",
+      "sha256": "4f39f2ee85295085115f960020a0aa1eabad234bbeae65ca9379340111c26cbd"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hud_orb.rs",
+      "sha256": "a1a05bede2bbffc408be649bd8b6ab7ab90cca3864b0cadca12c927142078703"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hud_portable.rs",
+      "sha256": "a2ba43a9c1a2a42a2967acff346049e742802bb7472824ed90faac4f6270cb46"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hud_reference.rs",
+      "sha256": "0c50cf894dd9bebc33a85534d00acf2b6a1d99aac9b69cce594d53b7c688484f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/item_image.rs",
+      "sha256": "862fe97112959676346d06bfea9ae3f67e0ab451b619f81a5cd344490c630512"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/item_tooltip.rs",
+      "sha256": "fbf1b5efab583c84e40f42d1f8ccef324dd80ba5a8a45945d9adce930cb7f6e1"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/keyboard_defaults.json",
+      "sha256": "ebfd4f283523f658d33793f604e697a5c4e4b0430fc5d63586ec8597bf31d208"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/keyboard_dialog.rs",
+      "sha256": "b1dc4b27efa32781eb47f0436691cac2824959038e01ee5923195cad9909c153"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/keyboard_dialog_host.rs",
+      "sha256": "46f85f80a5303b50ed48fcf89aaa0cd5526cbe178aece1c262b56d9e92823bc9"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/keyboard_dialog_render.rs",
+      "sha256": "454325de28cc47301c8e4fbd2e247d5e6ea7a354a699f1b1cebeac2f0e2cef05"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/keyboard_dialog_tests.rs",
+      "sha256": "b2eba78cc674f4a039606bc1551d22ba20d895b73cd8a2aa571ffbf25edf3ebf"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/leave_game_dialog.rs",
+      "sha256": "7e1d2d74ed1e53dc4636f125cff77ea908a7a76f28957feb2b5fe1d2ae41cead"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/leave_game_input_tests.rs",
+      "sha256": "d43815d47d9c73bd678852e80f3be0ff828834648ac8c6fefcbf9d72761d1339"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/local_keyboard_ui.rs",
+      "sha256": "f235a96e71ee6a873703e33879bd51c7cb7b35280f29d0ea9a132ed53da9e07e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/localized_help.rs",
+      "sha256": "1ddb8b3d1d4824631ac1b6caf2758e5e77baf407899469930b24f6d757adcc52"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/login.rs",
+      "sha256": "097c6ee55bc5e8de2dfb0a668140c30863966585aa5a8fc35f8869bdfc134de8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_compose_drag.rs",
+      "sha256": "d290c785f44667f361b60381e3d9c69bd94f298d42ad7448fb27392b343fe050"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_compose_input_tests.rs",
+      "sha256": "28a0295ff81adca550b2d5524df02e3deb94e79e9efcba70568138ccd9e8c6de"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_compose_shared.rs",
+      "sha256": "bf64bc8984f5b40f06861db6e769a733af5ca7ce8f8324add0189366c8d3154d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_compose_tests.rs",
+      "sha256": "9382c8f1f37aec6ad3253f11b383d3a4b1630f8c0237e6e81ad190c2d15154f1"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_delete_tests.rs",
+      "sha256": "c257aba303f38700235fe4d07dd0aea94b2b3f37ba17e2e5d170d8d538f78a2d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_editor.rs",
+      "sha256": "ad1052374004e28b344241c70610d3e087e442dca29cb2b325aaf4f70200381d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_editor_tests.rs",
+      "sha256": "cfefe8e2d882982ceaea0326c6235ca8febf81d7ef3901d11ce3f8f632e5f64f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_feedback_tests.rs",
+      "sha256": "c134b544b27abde4b7d4d154b2931fd9d169ec55bf5fd97c91110cf77ab1d586"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_list.rs",
+      "sha256": "8698469c3c7007438af3554e21defc9a6d3737790b2ffaf75aba8716048018f8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_page_shared.rs",
+      "sha256": "f5654e67fd7a5da1d722ea8078789b5a604402d7fa7a222aca5c45386ddd7922"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_parcel.rs",
+      "sha256": "8c67c2b337d7b0d2dde8f895fe554c2dc63943a0ee9cf6da8c9044b5ce7ed7f2"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_parcel_tests.rs",
+      "sha256": "988b9672faa5d8609c8e1eee0faf57dd66a3c527c7eaa8c41b0dcbd0e558b667"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_reader_drag.rs",
+      "sha256": "97461fd55a379060f339acba8564e4075650623626a90612e74d0dead663ad3d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_reader_tests.rs",
+      "sha256": "2793ce741de49f276294516ade0e06aca3a4678adfdbf5d2bf6f88811157fae6"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_text_adapter.rs",
+      "sha256": "fb497377a303ae874e64680ae1823b6077188992aec430dcdc4b1e09c2e97c85"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_text_adapter_tests.rs",
+      "sha256": "082000adf8d7d7ab762d1d3b8a85aa57cdee6371f79dc4420defcfdd64e5ff43"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/metrics.rs",
+      "sha256": "257bed6875d9767837e344923a7d21faa956823dfbbe6b4a9ce08f13d01f9fe7"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/minimap.rs",
+      "sha256": "ac54aee1debc3370d47498c6eb0748c4924a2f444e06a9662251f0c28561da14"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mod.rs",
+      "sha256": "91f4292b99fea1e8aa640866fe313af06f045571f8efd76ff6e9ed62f464eba4"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mount_fishing_dialog.rs",
+      "sha256": "ca92c08135cce13f936594d5b223837557d14e58f59d91ec407287ea880060bb"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mount_fishing_render.rs",
+      "sha256": "115b677a6312f7d74fd5b3529913f09b4cc81f28c9c3509199fb6abaf0d1e0ab"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mount_fishing_tests.rs",
+      "sha256": "dc06c55dc1002511b32182c27ea2d5a6bb751f161e01c1c65e776dc79970996d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/native_i18n_game_visual_tests.rs",
+      "sha256": "dc66fd18496f52bcbc413ec514826aee310160fe5c406bbd3a51f77743512170"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/native_inventory_double_click.rs",
+      "sha256": "1d6ac5f788ca616a57602e9955521dbf683077324f9cfd418bef48af5ef58f7f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/nonmodal_input_tests.rs",
+      "sha256": "7c287db57d50f8c0237bfe14192c6eebca809474de842314305d09acf19d64b1"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/notice.rs",
+      "sha256": "63aa5f1398ffd1044197a346e8b21be471956d3ff7f2744353a9a444cc01e30c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/npc_item_quote.rs",
+      "sha256": "2db26253870a7ccf9a68a1faaf1e2276a8ceae3be4e10d658137372e03ad3c58"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/npc_item_service.rs",
+      "sha256": "e34b95362a18b833e889c07bb0817794fd9bf28c0cb0a8e30590bc72a3f65d6e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/npc_shop_layout_tests.rs",
+      "sha256": "6e509446d6065678fe52bf4b67e54ce991f6316d9e855ddcf7da44a0f825153d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/npc_shop_scroll.rs",
+      "sha256": "b82866388894296627445cf881eff169c423ba9fde7f85b18140c8b7748a7fe5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/npc_shop_scroll_tests.rs",
+      "sha256": "3137061bf4ef23d5a9c4e5a10a78ae790ce21da7d5bb3ba9a39625764e9de09b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/npc_shop_visibility_tests.rs",
+      "sha256": "11b7e09141de0bbd97d5c200bd181b21d9b5b0e5ed33bec8f42835198c241e80"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/options_volume.rs",
+      "sha256": "f094a7d5dc436b5340b4a635e819799f5c2d72da3a110f185713d8d862fbc2b8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/options_volume_tests.rs",
+      "sha256": "b9f62345e1b945d31c457bb71e6cb7f1272fd0afee937244a6f302ab09b9eec7"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "sha256": "55993e9e2ac3ac2908da32974facdfd93677f45c9ef3a5f39385f02868838cb6"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays_portable.rs",
+      "sha256": "d1ba70ba2b6ad8a4c7ff13f43ae516d2dea271c35aa6f03f89c1aa2066b75ca4"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/panel_layouts.rs",
+      "sha256": "d6436a807c81b42525aa7e74b6bb6288819ed8bf4db9cdda914e2ad58a264fd8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/panel_navigation.rs",
+      "sha256": "6e003eba04b7f2b24639b20f1e2731f8d7b6658f25071235b7d1df1f9a7e7a2a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/pc_login.rs",
+      "sha256": "376eb2ab5b5dfc56a5b09c867cc9b27b9f56d10d5c092e8174e9f11b0f3e4e4c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/player_inspect.rs",
+      "sha256": "c2c56972872c9d1b9ec1dc1daec2c01138c2a3d02fce7c2565cf25b5b8e1f068"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/preview_data.rs",
+      "sha256": "12a98e580bfbd8cf6ad47f083ad7c5977f857a6d71e0d82e238780c833560a05"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/primary_item_image_tests.rs",
+      "sha256": "f4d289d829c81d30d111ba739e1898c60c8bdfa8f1bd957a01b5de31adc2fe29"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/quest_targets.rs",
+      "sha256": "d88f3537ac65f3326f8d0dc139ce792f61196cb2f8b88e79e86d254c1192286a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/r16_guild_layout.rs",
+      "sha256": "ae51ef161541a7943bb47fe878729c376a6734b36069ba25b545677cf95de78e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/ranking_dialog.rs",
+      "sha256": "5ed3faf76346d436fc3c19332cf85e26cc90d8a4885be20167d190b912c067c2"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/ranking_dialog_tests.rs",
+      "sha256": "a42c830afd707be17129704d822c75efeb5c30d1b8ac414b0db12e3ee4a97f52"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/reference_menu_art.rs",
+      "sha256": "77e263b1f4a2c7a297fad3c5ff9e780c4a5193facd49a5eababe521d86f866e0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/refine_dialog.rs",
+      "sha256": "e8957cb457eaa81f6298e4af1bdb9291ecb04467d7b66b7d37a5e71e2de93701"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/refine_dialog_host.rs",
+      "sha256": "1677ea86f6d4efee85c380bb211a5c5f991f5ddcef82efc6b5edb7574a2a7404"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/refine_dialog_render.rs",
+      "sha256": "f04807acc2f8561c3018afd699a3523d4ca58883a546c88b5ceeeed119a174f8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/refine_dialog_tests.rs",
+      "sha256": "8494d04b0649ccf6b5783a64c8ba33a808a7200ecda66a542c704d76ebea2a7b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/select.rs",
+      "sha256": "a00bfd829ea2af7a17d3463d31343834857ffe7ace3779d576607c000ae678a8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/shared_hud.rs",
+      "sha256": "1c58b37dc8615a48aefd86a0410fc3486f695ed1c6d56fa5bfc172b822320bed"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/shop_paint.rs",
+      "sha256": "b7279b5d15b7c27960afeddf8ece13b37cb58c795817f74edeec3170b63c85d6"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/shop_paint_tests.rs",
+      "sha256": "f7fa79ca12c24e60caf46d75f07b5dcc9a3c084ca7dfa2c373021d11ae4f059c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/skill_assign_dialog.rs",
+      "sha256": "45fd18a4889b65aa3c23981857e06310fb28a632c489d7b85ec1b4e41dc8cff6"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/skill_bars.rs",
+      "sha256": "fd7f640af6bbdf24b1d803998de73fcbd7b8a1b625ab788457450de76de569c8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/skill_bars_host.rs",
+      "sha256": "de7850c2baf567ffb803d2842480b42022ea26338124d29a088e1f0610413415"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/skill_page.rs",
+      "sha256": "83ccd86855a2295db400773516b9cc18568bf64794178b5c1206b8f0f82987b5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/skill_page_shared.rs",
+      "sha256": "81464c466b31abc2f2f36d8695d9b7984220aa2d8b93fac78b5833e0e10cc41d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/skill_page_shared_tests.rs",
+      "sha256": "472cc32c18ae0841a3512d17df9649990773560376da6b17213b9c30abbd4aa8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/social_bond_dialog.rs",
+      "sha256": "bd558f66051fca453081e37f1e806f9f5a910e0cf658b63854bfd9f22e533e15"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/social_bond_dialog_host.rs",
+      "sha256": "bf8bd1a8d9074c9fb480b81227762d257dfaf73cc271526b9a1b42bb7caed23b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/social_bond_dialog_render.rs",
+      "sha256": "4d05faf4fd648cf266a8acd4d07e931f5816f3e5600b22f1c2330f0972ee48ec"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/social_bond_dialog_tests.rs",
+      "sha256": "90bc64734e7c75dcce9b6a59962b80a7938cf188a604d5bf1932d8bcf8fedff0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/spec.rs",
+      "sha256": "f82abfcc3f4b222224027c4004b0441273caf771f150ea8002e57f8bfc336b55"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/status_hud.rs",
+      "sha256": "f2821907c77c95818a89d854a40bcf373b64bbb4a5a1333f079a7fb24e5ca712"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/status_hud_source.json",
+      "sha256": "474897b243e24fe81762af9cb208fa131f4f2a1f4741028f7c7063c2a7fbb0c3"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/status_hud_tests.rs",
+      "sha256": "98c4ddd5528254bdbb78f396b0614b68090382812cf108548d345d1e7536b148"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/storage_drag_tests.rs",
+      "sha256": "0f23cc4588fd8f25a60055cb5e27edc8670b4d463ee76bfc7531abae2852e695"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/storage_paint.rs",
+      "sha256": "7dd88df1cc9ac8a3b62dbbee34a1eff5540378e1015d0353137f5a1528819b72"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/storage_paint_tests.rs",
+      "sha256": "b8d0241d2767f6b249da8304d06dc948c82b2c8d4860e4a07ec0d03996ded788"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/storage_password.rs",
+      "sha256": "e0988f17e76dd152696f95a6b37802d61ae3225dd4e192fba4de2cebc2a1e6ac"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/storage_password_tests.rs",
+      "sha256": "8ee77fe06ff6035d54fe86a914588291a520daa814b7a19a282ebbc27063a516"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/storage_rental_tests.rs",
+      "sha256": "1ea8bd836c3a45a67a009022bc6b616fa2a01d43f3694a754e975b96c6957855"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/text_input.rs",
+      "sha256": "504a8de2da51765e27c6240bade4df6d8f290ec73908a1e9e10d610e749665c0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/text_input_tests.rs",
+      "sha256": "0d41b9e146db66d37a4147348873a2833b763f4d396f1f4805e0e5de91712335"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/trade_dialog.rs",
+      "sha256": "8928f4eb856abc7e6654d2225adbc775b622fdccc7b1e248c96c083ce6f66840"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/trade_dialog_tests.rs",
+      "sha256": "e3f21672c31ee84fc79c59e958ec17f387d0b91e0318b38b792401fd4f9ea616"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/trade_item_input.rs",
+      "sha256": "d3022d83e31e199decccabc24db4601cf4560c8276663dc92a54a1e3a3326d98"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/trade_item_tests.rs",
+      "sha256": "093ec8546f3d4a7a531811648725ac3ab2d8cba696964fb69f3d5515220b35a1"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/typography.rs",
+      "sha256": "db609fc84041d74c0d90bbf191d34a2a306968720422063a40e0ab53c222fd33"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/widget.rs",
+      "sha256": "404f2eb52933f9bdf2cf341845704cbdb9fa33aa2d539c4b9091de1d81725c69"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/entities.rs",
+      "sha256": "da2c85d305d97ad03dadef22f7eb4211ec69ec4948abe4a43d91a079e694cd2c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/game_shop.rs",
+      "sha256": "83eec3c71d0cb53de483deacb42af69ba00e352f53cf8ae901055ca0dc94a03a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/graduation_tests.rs",
+      "sha256": "c095718c5ceeac064b11dec911bc9d8ad8d648223cc5a7d3dde46bb9fa0faa09"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/hero_action_basis.rs",
+      "sha256": "01e7d466de1c6cb32467cfe8405254e9df6a71371ee5222191a1db7592b2481b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/hero_ingress.rs",
+      "sha256": "64a6c051e8643af6122804138dcf91c2b588ecd1b4fdafcfbda2638ac0bdf45e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/hero_model.rs",
+      "sha256": "6548c6363a33cc56e9b4bd49f852ec016fcc4ae98a0b71b0e640fee8ba725b1b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/hero_source_witness.rs",
+      "sha256": "b049b2532fad43150fc6d96804247700ff6102dc45d008ef7ced9eb2aae9cae8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/hud.rs",
+      "sha256": "b23c5f5b19b4b02b5aec27cb8f4b1440d8a9822748a69e91500933cab41704a9"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/inventory.rs",
+      "sha256": "80becbf9826855c02c6f39a0b289b87ba37c3112a498b3908d750ae8a065e62a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/lib.rs",
+      "sha256": "aa1c28d0ed01e4813c0c0766bc52afb7ad4b95e3e92fa74a9789efcd55510dba"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/mail.rs",
+      "sha256": "92a1fc76d42d57b961a670482d58d7495b41f7fba7129b1efd409f0523c047e9"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/mail_service.rs",
+      "sha256": "175df3b99471b7925709c1bfe9bca1120ecce029998478e31a11b840efd06e2d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/map.rs",
+      "sha256": "7613359832b2cb3985d58528ac97599112ed6891e51435f13defda8678a0eb51"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_billing.rs",
+      "sha256": "368a8a572aabd37eb10c113803548f34e632e9393c9167846230aa1365f12b6a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_display.rs",
+      "sha256": "46631d5454a6e90a7a974c7a7fe94823a50f39af7245b84d00554b2312573641"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_i18n.rs",
+      "sha256": "a2a1d3fde571d7fdefa0cb05323c7b3d94486826e772c11db80828b27fd2f2a4"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_i18n_visual_tests.rs",
+      "sha256": "0997239a945b8b2c67011320f5d3f0d1418667a9ccbe99e8bd1bce94e4f19b32"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_login_locale.rs",
+      "sha256": "e44cd0d7631bdec13472d39b08771e05930b27da4385a6f249c63ee75f942090"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_monthly_card.rs",
+      "sha256": "801752573883f21348b6a4ac4585d3a8413a07989ee154b2d5a4b1191a4097b2"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_procurement.rs",
+      "sha256": "4437b87005fb9e5d930b804936f8f891ffc6666ec7a32fabb3b0e38bd60fef09"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_shell.rs",
+      "sha256": "bb7645d9454d6b8a933c9389ab3992630b0e028c704203ec800ca9758d9964fe"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_shell_preview_visual_tests.rs",
+      "sha256": "2e5bc9c56c3c989d6308801f3ec46505f2f6a3d30ed3073110df28170920c9cb"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs",
+      "sha256": "06b30f7ed7a2007236a76b813d7a6209117bf9f478daba651f11b799904b2b55"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_wallet_login.rs",
+      "sha256": "379be5a6986d17b48b5f5a057900c94ccfcd16d8cd178a8fe5c823bb0df13e42"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/newcomer_v2_guidance_tests.rs",
+      "sha256": "d770d6ef22ef0af72df9c8a6dc093c991f1be3e69926a177c753d9befacfe1ea"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/npc_gold_buy_attempt.rs",
+      "sha256": "10f769b5e45039c4f3e31221ae6615614d463fc622620f49b71a7f2a8f11de40"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/npc_shop_buy.rs",
+      "sha256": "d5a2282bda80cb464d9e2581429578c7f32154b2909a868cd8e7b7f4899b1605"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/npc_shop_buy_tests.rs",
+      "sha256": "a2caee299b79e563c804eedc4f383d62cb3fa9232ce6420b707fa9404bb231e4"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/npc_shop_ui.rs",
+      "sha256": "e1f6d14f632699a45a0a12a8e6105843ea159b37f0103ed91e260b416d3b0bd5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/npc_shop_ui_tests.rs",
+      "sha256": "cc59fcd3a0c8ea4a19ba17ad6c80350bc02931398dfe21162a8d8a8365d0746e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/options_effects.rs",
+      "sha256": "d086e5faa0c6e20a659da1fe5b35636a374021135d97ea84300b9279a8901a7a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/pending_operations.rs",
+      "sha256": "b5c387017ba34ec2a1c291c9306d9f4eeb6836f3c171a96b7bc03cc3e721bfbb"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/periodic_quest_ui_tests.rs",
+      "sha256": "18d5ef6b60c464c7f571fe5f13abadedc4aa437706ce743c666ca55927458b85"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/player_text.rs",
+      "sha256": "08d8495af6861e36e93055112f4c7aab5fbf7b95abd55b89e8cdffaae3afa6a5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/portable_bag_ui.rs",
+      "sha256": "10a1dd118f66e6924de84ac611fdd0f7473e255e9f5b31063027f72a411d83c7"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/portable_character_ui.rs",
+      "sha256": "ff1dff6df4cb8d624b0c82817f89fabac9965bdac2f54a6616cce8181af6b62f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/portable_character_ui_tests.rs",
+      "sha256": "e02a7386e939a1196224848dc69cde6bbbdf50532a3346867f1f702639c607fe"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/portable_experience_bar_ui.rs",
+      "sha256": "6e835c5d6bcb62db12204888014dfcdfa55db2687825f28e23386fe06ebe6796"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/portable_hero_ui.rs",
+      "sha256": "75ed32984741c914d4ad62f81fbfe2663346846803719471f0332e3dae3423b3"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/portable_hp_orb_ui.rs",
+      "sha256": "b9db3c33937fe182125070ec8bf2e4db7823356ca88c791db885881365354733"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/portable_hud_bar_draw_plan.rs",
+      "sha256": "8f7ef2a307289e479a3696e79e25c05ce6022e44be4da075fff54f6d7d893d2a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/portable_mail_ui.rs",
+      "sha256": "1b86007446fe9268b1e38050af39572cba864c0ce7a443e877a4c40fd3266b28"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/portable_native_i18n.rs",
+      "sha256": "94312b228d106f9127db538d78362feaaaba46f7a330ec9521cb06bcb81b1787"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/portable_npc_shop_ui.rs",
+      "sha256": "6112790ba0b9a57fb529fbbf85d25dd20c3d8b98a63884a9098267badb42c5a1"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/portable_npc_shop_ui_tests.rs",
+      "sha256": "15e83bc402a5a359116f283c48d1d4f7220ed6f916cd7b6249215f264356b09b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/portable_quest_ui.rs",
+      "sha256": "ff1eb654b0030276c4c5dc1412eeeda138ac425fa3a42129986b3aef2b5b0cdb"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/portable_quest_ui/observer_tests.rs",
+      "sha256": "cf507047acd55b9fa4196b597f3824c645d15cbb54b077662ceb1f462cc36639"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/portable_spells_ui.rs",
+      "sha256": "bb7e92252053592a268375e62a665cb71be2d5083d91407415a67cb7f6d6b82c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/portable_spells_ui_tests.rs",
+      "sha256": "fc76b76d9a8dd4e69d5524cbd16a85f238cf9f949544861bfbedce62089983e6"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/portable_storage_ui.rs",
+      "sha256": "534d968d44541499d3abbe706d36b6bdfe9b54a6027817d6795ad0dd8d6d29bd"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/portable_weight_bar_ui.rs",
+      "sha256": "700a492ee2e8de661aa2026f66a71fe19a8d1973db396b75e79f10c7f7444c02"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_destination.rs",
+      "sha256": "4022b78804cbcb65793879e423049fb26634df00008811b3e96019fd4443d08d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_guidance.rs",
+      "sha256": "202a7faa12f0d2e635512570fb05616ee29900275f0d0f9341e758745b787c2c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_hunt_regions.rs",
+      "sha256": "8858e395268dd5cdf70655984ae44c164ac16a637d9b9e87efc9bff2d962e161"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_intents.rs",
+      "sha256": "ed0efd24c4202aa12d34a7ba9d7a75fe354e3c69311398ef859cc58a3741d57f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_journey.rs",
+      "sha256": "d6b96d589386d39081d41b67db5ef6748f0c11ecff0e3489cc49f6fd9ed29b61"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_model.rs",
+      "sha256": "3d99a0b1d67615d08c0281e5eca180eee9e16462fc368d77a0996e44511b0798"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_multi_guidance.rs",
+      "sha256": "a022e53fd75d5e2a6ca0d5002b86402c7712a026fd7a19692a42dedcfe1649c0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_multilingual_visual_tests.rs",
+      "sha256": "5b0e4dad5b079f72b3f153e33b1c17405f5aa856c933d0cba81304433d2aee0b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_nonmodal_input_tests.rs",
+      "sha256": "d2ad9c40d84983faddee466363b1670255d0a7d2f84634e3df2c2860db345f25"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_practice.rs",
+      "sha256": "79d084e604e3ab9aa2bf86f6d1ccd5a52c1e9b6dfc3bcfc4229e0c03ca09157f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_presentation_text.rs",
+      "sha256": "b74d78feb411f8f7c5c7437968efd9f78448402579ac9b22815055f58c91af8d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_route.rs",
+      "sha256": "b4876ec4b953d9e899ad45626585d37f2e3cb6242ef939c8fa9ccf484f30fb39"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_route_search.rs",
+      "sha256": "879b0634c0a76d4f88a0dff03da3103f81e556b49b8a06c28ff8a9e9a58dca45"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_supplies.rs",
+      "sha256": "38281dc11669fedef7904d08c6057a64b7f2bfce429e6e1a9f27652b32ecabaf"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_supplies_fiveclass_tests.rs",
+      "sha256": "60d55027337424f1ca81ce3ca27cfad7a032cbf108df393e1623f51dfa856aa3"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_supply_visual_tests.rs",
+      "sha256": "345fde2e267f781f8a16f063150d38544711783e43a252a038fa221d7fb2a659"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_turn_in.rs",
+      "sha256": "bcccb7f6b4e1148cb7199d12cdc18eccd44f64d9ac3a31f892e29046cdb45f02"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs",
+      "sha256": "a07818a33e778410c617449a1c35892da315a3c05cf617d4112d5ea6f2ed7214"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_ui_caption_tests.rs",
+      "sha256": "3ecc7dfdee4f7f43abe5f5b4986fff5ff64e5ffd064412f9d1a39c3f7f27b1ce"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_ui_display_tests.rs",
+      "sha256": "218f648b8563c4436791f107bd53d25adb7542ebab54d6e9f9489f7e44f18589"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_ui_footer_caption_tests.rs",
+      "sha256": "aa0e7ce8280c13a6055e6e7e092cd599d41fcebceca1581fa37caa5406e91805"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/read_model.rs",
+      "sha256": "f570ee71ed883051062e385a745eb6b00dfc6973136878cc50c2b519af7a1373"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/shop.rs",
+      "sha256": "4766ee8c2b7afc4abe18cd80c7b5b0928c90559179984c1e57db331b180731e8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/skill_binding_persistence.rs",
+      "sha256": "ee7edd097d1f2208a6a746a1d1c84bcaa096d02a5008411734dd3122bba27357"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/skill_binding_ui.rs",
+      "sha256": "5d73ec6765b3df04ad357686d6abe2d10910e0e3cad628d5dd7ce4156322bbd5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/skill_model.rs",
+      "sha256": "5fa5f240863db2cc5664ffd0907f652c82eebf0d9277319c6f93f16cf0439c02"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/skill_page_state.rs",
+      "sha256": "e3b8de1d31507bb34e6bf37d3765d8a778f33980956e2dcd7bd59f3f0e142b3a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/skill_page_state_tests.rs",
+      "sha256": "68b5ec253f88d5d4deac53c7c3e43a94a60f661bff1267921a8af6f3b0991548"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/social.rs",
+      "sha256": "cc2a0165b74e71949a64002e7b9acfaa92f21857b8aa5368f4122e3e2aa4c1e3"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/social_guild_pending_tests.rs",
+      "sha256": "9cbb5e8998715c7e21e8a29233caa0c4f70cac5d69e2b9ae133d3b0bf2b1caec"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/social_guild_projection.rs",
+      "sha256": "16cf5b93caafa1d7ce4fd8d39e3f36bbca6d181bc55b58411189348ff4a3db1e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/social_guild_rank_tests.rs",
+      "sha256": "72ebf67e41020b1f9a8800fe4e36a036f939762d3835ddbf46d32c77c4f8bbdd"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/social_operation_budget.rs",
+      "sha256": "5c239cbe2932ec70a1aea1ac31d5e3ed8c5d856c926db4dc36f95d0340aef201"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/social_operation_budget_tests.rs",
+      "sha256": "81f7fc8c9eb26d6ef332f2c5d790afb0c0d5aea6ab8d28606adff37b7a15128f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/social_trade_projection.rs",
+      "sha256": "7f9c559b7c18a34fb4442119b1356084018a41734713bab3a58a4e4a25fcaa97"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/social_trade_projection_tests.rs",
+      "sha256": "02e72845acdfc2eb4e3c42b1db3c346cdd2f11ceef44861ac090efc923b268ea"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/social_trade_tests.rs",
+      "sha256": "5ad3148fda7f25ea47b1754ebcbfdad9c8fb5b54ba7106bd550ecf2fc6b832c6"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/stone_workshop_ui.rs",
+      "sha256": "2efbfb76ff0eab1feabbc75cf29ecc5d040c6ba1f9af2dd68b8a4eeaef9c498d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/storage.rs",
+      "sha256": "927c0771967aab045b87242e02af13c6683feeff5582c397f413c0b227effc9b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/storage_interaction.rs",
+      "sha256": "7980643295198bfa1ff356a42b8a999ceaa2faadf0b8823c367a1390ed2cfc8e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/test-fixtures/original-item-true-sizes.json",
+      "sha256": "a36ff048c8cd50628f40c9f7613ea63c3a65b59a58c6eec894ba7d0925df70e2"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/tests/fixtures/web-bag-projection.json",
+      "sha256": "c3f608f1e9e938059b9f3dcf88151b8292f3d466cd2fc8e2a2837751ab9e59a7"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/tests/quest_presentation_locale.rs",
+      "sha256": "7e1027af55b6762f5f02726b5eb889f8343501005867c6155932c812a3f5a1ae"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/tests/shared_hud_navigation.rs",
+      "sha256": "722eb8688dc9a1daca679c629d8a6d50664c3744f39f180514fd78327a749808"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/tests/web_bag_projection.rs",
+      "sha256": "3c88742e625dbcbe9b7eb50c2f92b5b23e2b5e32ed69c6ea00ceeb2bb07bc54d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-core/Cargo.lock",
+      "sha256": "55d34e3a9050a26360e9fb635a52c248752efc9557b1339bf9ce9afc94e6d8a8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-core/Cargo.toml",
+      "sha256": "ecc48174c912f769b5974fe27e428de84e730d489129c2f5fdc27ea38800eb4a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-core/src/auth_ui.rs",
+      "sha256": "52d61788cec439af1564269fc270bdfee16e792170ffea1970fa445fadf32622"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-core/src/cash_preview.rs",
+      "sha256": "5e5d07ccf650f92413379d68536670280cda32e1ed04b6f141ec05ef6bd6e8fd"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-core/src/chat_ui.rs",
+      "sha256": "5fc58219341418a8c663497a4a1a0441163a130214f06fd3792b9bf1b6307168"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-core/src/clock.rs",
+      "sha256": "5a972dba7de1aab6092cedb654939c54f5a5a7493e99809057ad93995c1eabd5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-core/src/entity_animation.rs",
+      "sha256": "9b3fd4a9f74bac3113bb02d0cc278dce8c65f0571f0facf6b942ad06d1623e2c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-core/src/equipment_pending.rs",
+      "sha256": "b7bbaeb24d61a1b74973f77b91f5240e38555291cdc5aee717272355cfff2b3a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-core/src/fishing_click.rs",
+      "sha256": "479c34270b538e773b31ebacf71d81d950211435ab3fd779c63daa0a4c08ccd7"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-core/src/intent.rs",
+      "sha256": "b2d24c18624cf6359eac00387805d99fd75d75ea45ba759ff2f07b2b95fcfdd2"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-core/src/interpolation.rs",
+      "sha256": "919b78ff7663066713c74c53af5be2483a8c06660c1fe8d45ab4fd9500ac7753"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-core/src/item_names.rs",
+      "sha256": "43e8479124e6ab6adfbaada3b214a088710de7b2f49d8d369a8b2e2eda2ad330"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-core/src/item_tooltip.rs",
+      "sha256": "0496131e32d2536b7330bf487dd4f68f7a4af10b8f1107161e27356dc81a9a04"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-core/src/item_tooltip_types.rs",
+      "sha256": "046a7d721dda11ed62c0ac579a9772ad37732e510c3131cb333e5581833b1963"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-core/src/lib.rs",
+      "sha256": "10202f0bd4db1008ff07cc86c06e2c1cc96d07acc4b86fea5c54d778c31ebdd3"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-core/src/mail_compose.rs",
+      "sha256": "ca4cd917da422f623132d261384cca07a48ab046ec3c321021d339a1fce9cc31"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-core/src/mail_parcel.rs",
+      "sha256": "5e40c7c2ed652c5dbf8d5bee79cd3fa10ceefe2282187d6a7eb76d0f7f1c4d25"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-core/src/map_route.rs",
+      "sha256": "96654530f2d8e76ad654ff582cc96d9ee915a5399e26a6312c5a33cda8f3a6b6"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-core/src/motion.rs",
+      "sha256": "ad5d6bef1ef144ea6173f36ef5d89ea54c51954c00629fec46e7e1450d7c9d66"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-core/src/npc_gold_buy_attempt.rs",
+      "sha256": "6edd4bd07153a940f68bdb465eb0ee923e5216908506437b22ccf4df64d74025"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-core/src/npc_gold_buy_attempt_tests.rs",
+      "sha256": "906ebdbc2aca2520a5524f4207c679ef6a0f8343a9315e587222b78cff7db173"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-core/src/npc_pearl_buy.rs",
+      "sha256": "26df6d94035049ded08ddac24b224938da614f23457fb961cb404a7ea88c92a7"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-core/src/npc_purchase_host.rs",
+      "sha256": "18fe6cc5266ab9ed0c5b1a6820dd045209b2db7ca4a4ff991ae4966d16a3f4dc"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-core/src/npc_purchase_receipt.rs",
+      "sha256": "90a81047017581290ca23d0c6bd42264b59461954052f133f394d86a22c59dee"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-core/src/npc_repair_quote.rs",
+      "sha256": "18bc85d3ffece369c8bb1a84ff9b76234b5246806108b390bf9d8487d0715f10"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-core/src/ordered_map.rs",
+      "sha256": "a8d80e3a02cc43748565749fbf604baf8b3475780b2aa96ad745151534786732"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-core/src/quest.rs",
+      "sha256": "99d9edff9b59c644e83d822945d7c3c577786397e738172a50246f10baca42c6"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-core/src/ranking_inspect.rs",
+      "sha256": "21d25b988e34ddb4cf2e5d4dba405cc8474dcc2a0ce0471609667e8758c77cd6"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-core/src/reconciliation.rs",
+      "sha256": "f91301ab67276f825d684a95d51a7031799b597a2e1a2a71c455104e6bb37867"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/Cargo.lock",
+      "sha256": "bf09b850a8ddecc936931f1d6339d0789b1440644dd8cee48824feed0cabcae7"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/Cargo.toml",
+      "sha256": "8aa5dc760d2ed6d142e586d250d1e107a455ece5a528950dfea910a65e70b749"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/examples/tile_seam_probe.rs",
+      "sha256": "a9bf1c0d41d34a868b809c9fc72b0e1f1b0d99c03b472a3df27250c922c6784f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/rust-toolchain.toml",
+      "sha256": "2502bc508cb09537bb43e98698911ccc2109aa947b3beba56f535119fd750cf6"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/additive_material.rs",
+      "sha256": "478ebde3f15e1d1cfda49f32a18e1cbda6a6da87de183c0e085057939708e464"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/additive_material_gpu_tests.rs",
+      "sha256": "79ccebe5d0dd38a515795dcf13e9eec1b4393c8d9584b1853b58841045d13af9"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/bag_ui_host.rs",
+      "sha256": "d310ff24301b682a33bd7c4937078be41934a00b346ebd6144018a382ce5cbb8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/capture_context.rs",
+      "sha256": "00754168779eda8591989226d9985c0fc2ce5b02a687dbd19b7aeccba7604ab5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/character_ui_host.rs",
+      "sha256": "35c8c2294de5301e68be961cc0a9fad747005df56cf3688c46e9b0db866e8070"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/character_ui_host_tests.rs",
+      "sha256": "07011de04cdb4e1ae0b93f66b8d6d02729f39e2d62b8ba4c9204633ddc82221b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/combat_input_host.rs",
+      "sha256": "9241935cbbb43ce597e9aa52b5ff891affef907cc87b8b7a054684235e845055"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/combat_input_host_tests.rs",
+      "sha256": "250c4f55c842ba0734548708839bb1b663f7c966e3daf54112ee4a498ffc374f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/combat_modes_host.rs",
+      "sha256": "0456b7121187ac17145cc10173726ba46f0921bdea2bc7b1697bc934e72aeaa3"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/crystal_additive_material.wgsl",
+      "sha256": "bf65c023b73f01a3544674aa023f7bb8b6e52e19dba78e5f2dbb55c8e99fb969"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/crystal_multiply_material.wgsl",
+      "sha256": "e350e3712c1e767ae6e0b33690db497f516ba97fa7a73021297344ca3d9c58a7"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/entity_animation.rs",
+      "sha256": "380d310bf2d761159915dd820142a671cfd460f45bed4ee5e33f305c68ffb9e4"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/entity_animation_bridge.rs",
+      "sha256": "74b7fc12e7354bfdfef49f0ce7bd100e01de259e57d2e39af208e25cd3b106e0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/fallback_hierarchy_tests.rs",
+      "sha256": "754e5fd395941d82f98402483f05092dd7e87b0d3a657ebfa850b3352ad99316"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/hero_ui_host.rs",
+      "sha256": "3fe28472573370422519a694754f562ac60ae1344e90cbab7cb000495046e366"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/hud_ui_host.rs",
+      "sha256": "7c18d302dfb48a83154df8fbe0558d16c7b3f8b60ea98f8d02da387d1a4bcc48"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/interpolation.rs",
+      "sha256": "d31c211204e35750913bb2c252f60af30edb6227fac4d9e59e6f2b9ced41abb6"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/item_tooltip_query.rs",
+      "sha256": "87c64581ef533d6977a4aee25782ae8e61e66afeede0a5b63990dfc1aefe939c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/lib.rs",
+      "sha256": "30c4a6c4c5ba43167e0dd9da142d2e53aa23b4c213c8912e06986d698d9e3905"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/lighting.rs",
+      "sha256": "537a9316c5f63e82b623cff8fbc0bd6c67df24e07cc614c0b52ac2ffcbf1fc33"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/local_motion.rs",
+      "sha256": "1a65024ad71611068dd574e767b592eb6dd499ccfa0324926294565c23fc8b32"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/mail_service_runtime_tests.rs",
+      "sha256": "952787c9cdd94645fd2bdab4a23d3246e47871e156adbe8cf6d6dc1ab360aeb3"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/mail_ui_host.rs",
+      "sha256": "0a012d978b69e22e9d590a76bcb3fd0fa3f228c4e88fc49873bcc9cdf347fc22"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/mail_ui_host_tests.rs",
+      "sha256": "bcf7add8d6fb2cad05d9fdb9e74f34d72efce1e7e18af369d5e49f4eedd999b5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/motion.rs",
+      "sha256": "dbd6051812a14738e356eac9a151cdb5dfab760da0bb4dd12da7857032948e52"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/movement_shadow.rs",
+      "sha256": "ca24171396c5566ce0a4ce510763590a3fbf680d3811bc512e8f8e961521a369"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/native_data_path_tests/guild_rank_ingest_tests.rs",
+      "sha256": "2c58fa68e47340d100701380815f0119d5e0e868b896770f4daf160659365f73"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/native_data_path_tests/npc_shop_ingest_sequence_tests.rs",
+      "sha256": "ef9379494aae4a526d19261262f476f4ce98d7319e53c265da9b5178d2a2460b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/native_ingest.rs",
+      "sha256": "948153a29b4bdd83400605d412c79f4f80a703f44b5a76cba9e14edcc9618694"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/native_ingest_wasm.rs",
+      "sha256": "1c051d3073474730c28d5cbea6bba04253ef4ab7b09b4269a037809b7068711b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/npc_purchase_economy.rs",
+      "sha256": "7acca0c567537ca7ae2a071fc332f2d8432b28d84e3ac971ae938e59fed88426"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/npc_shop_ui_host.rs",
+      "sha256": "e60f90e6d2d92d15b66b7ae6ef04872508a9bf4c01d37eae09141c41df48fb6a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/npc_shop_ui_host_tests.rs",
+      "sha256": "820214c3e6301d3adc943a8d575ac1b9aabf28cc2760fd6af39e14a539941f68"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/portable_ui_asset_recovery.rs",
+      "sha256": "834b32f24e959c8bd2f4a04309dbb083a98f46e767f22c1f0fac1be1cfef325e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/portable_ui_asset_recovery_io_tests.rs",
+      "sha256": "ff5ea4f7b42eb069d2a84ec9957244ebefac1f78a1b47f844b906447c8e63d3b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/portable_ui_asset_recovery_tests.rs",
+      "sha256": "2eeb90de3df8c514cf497838939fedcd440888750bff581cf0abcf7913d27f90"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/portable_ui_fonts.rs",
+      "sha256": "d297b159192d4313d71ab175c4de52aa4ca67151b2b6bf5290ab6ff35ba25ba0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/portable_ui_fonts_tests.rs",
+      "sha256": "f93255555f27e4c282e89deaf2e8a89e60fcbdb6918f6c2623618a608d61cd74"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/presentation_pose.rs",
+      "sha256": "9d28250412fabd3890626d58cc2492982a21fdbc4fa988222e27198786ac984b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/quest_route_plan.rs",
+      "sha256": "abc72b163154a3f49150ac1e1558ee74a5053ce81441a789103a10df0610220c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/quest_ui_asset_recovery_tests.rs",
+      "sha256": "25a33008b071bbc3dad6f01c82a10b7524b82911a4b46386848ca1bd1f023967"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/quest_ui_host.rs",
+      "sha256": "7065c7c16cf82cd91dcd66e1a0198b0c74408b2f9dba2ad3128fa6d548c84bf6"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/quest_ui_host_display_tests.rs",
+      "sha256": "defc230bf6ee1ab8e2565207c04883962a4b8732ea7f37903acf4806e82ecb98"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/remote_motion.rs",
+      "sha256": "7c29f8b13ee55dd5d0ee4c90b23c955e388a335ef5552792813ae692196b9458"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/render_diagnostics.rs",
+      "sha256": "645245e4474dc4ad4cb171cb7840008476cdc5a32ffe8e6671581f43185d48e4"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/runtime_ui_capabilities.rs",
+      "sha256": "4c0e0db030507ebd8103792a6aade175b450842ed4d2cacf1d41c7080389c4e2"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/skill_bar_query.rs",
+      "sha256": "b5fed74cb7781006f50d6aef2ae5875b8808554bb013bbb9a1bd07640fc13506"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/social_budget_host.rs",
+      "sha256": "92cfc40408b96b11be16ce7f3dc0b20f82d79859357847cd1315c1ef33e50962"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/social_budget_host_tests.rs",
+      "sha256": "cfb330fd75a8bfb22464055f146ba0bc98bfcdef01701f4f43b0c183223d3373"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/spells_ui_host.rs",
+      "sha256": "9ab231becfd2c80dc3da20fb0cfedd77b5d6421cdeea5d03d1cba6be064f35d3"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/spells_ui_host_tests.rs",
+      "sha256": "a62d0f691db3f50687275d9523d9bdf56bffea8a30ef8af6fcba72188d6f0f56"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/storage_ui_host.rs",
+      "sha256": "77f8c82f28f21a6df29ccb9d03e3ca908f7cf062e2dc158c76fc86823d585e56"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/storage_ui_host_tests.rs",
+      "sha256": "9591091d6e0a2076eaae2e7b47ed1b0f0f00ce233d40343dc06f3da3d718935d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/webgl2_shared_ui.rs",
+      "sha256": "c7f19a68d7a4c5253daead98d853ebc1803e45ea2f58db96a73875c5b8eea1a7"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/tests/shared_hud_ingest.rs",
+      "sha256": "995aeae5f73ea2e49c6b93e3bb3fede97b3727bb860fd08aeb1f7a4b5df38212"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/ui-core/Cargo.toml",
+      "sha256": "781a69888a9a50d5d2b1a8a490871c53076cb1269fcf57265f47992574a08a30"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/ui-core/src/action.rs",
+      "sha256": "74ae40956b3055afe3b79c30539d0afed4b226f1a9c3c2b806b191f667f5bdcd"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/ui-core/src/effect.rs",
+      "sha256": "10398598e768a6d21d79e11c3ab6c9db4e8394bedf8af3803dbfdfd503f34944"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/ui-core/src/game_shop.rs",
+      "sha256": "90bd7b60a361c4183aac0bbc6dcaf3e63ceec333ff6e7ad8fd608529358ec8b6"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/ui-core/src/lib.rs",
+      "sha256": "fa2548bb42f386f8b01084f143d8865d2ad61a09696cb965a7345106f326093b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/ui-core/src/reducer.rs",
+      "sha256": "cd259efbd513314b34411ebdc1bd2d344fb796902c43b38a3a3530fcc052fe1a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/ui-core/src/registry.rs",
+      "sha256": "50b97009ee2e0f27e985e695d4e98886d8171597293d33c976ce9a9c57aff543"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/ui-core/src/state.rs",
+      "sha256": "a9a62c22642181123b0d7e072f4236df6ad21fb9761b08fd1a0679ebb455d5fa"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/ui-core/src/storage.rs",
+      "sha256": "8b080cde6b3321d77b2d0f0865c6b196d0241ee4a546ca50e6f6a7edb9fafce0"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/Cargo.toml",
+      "sha256": "e69823755b2f5f4818f76754a47db6e6911180463d0e20ba26dc2ccacc7b1091"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/README.md",
+      "sha256": "e4167d2c11fccd22f68edac92602931af6a9cf928a8e2649db3040b69cfe6b38"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/content_profiles/platinum_176.json",
+      "sha256": "7ee7a6de1c253e8ba3831e3455d6ba0c59bc9dc00ef90841947d5ec58989395d"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/content_profiles/platinum_fiveclass.json",
+      "sha256": "9fc2d6875c78691f7e34650eae8e8df868690a1ee6e5960becc113cae0e9d4ac"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_base_stats_packet_manifest.json",
+      "sha256": "6edbf2e942e8742914c79d7aa05e4adb840c61dc83e3591714a4db32fd0293c4"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_buff_manifest.json",
+      "sha256": "3d59abc5c4cccb2323d66113fd9550e770a3257ea5ce4d7e7a8889757674162b"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_creature_settings.json",
+      "sha256": "cf098d6df97e50217f212fc13873964a096c156611835f2d5654668db8da7297"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_default_npc_scripts.json",
+      "sha256": "dc1fd97565b69b189165c9fe84708bfb2145a9ee1fa677b2338c9b903b0b1197"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_drop_manifest.json",
+      "sha256": "c10f5b1ac39cefe1c5b7c0ec5779547cf5b0901eaece680b7049d9dda56c1cf7"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_game_shop_packet_manifest.json",
+      "sha256": "ff5bce2f32b0013f3ccd2705fdf7e4a93de89e1c8a6ea1ee58050e52f4124571"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_guild_buff_packet_manifest.json",
+      "sha256": "21a00a9feabb53542cee7f05fe65f93463eede949c56cf6e4feffea8464dd94b"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_guild_settings.json",
+      "sha256": "e1a16a6b08ba033fb8cfdf91a1e175e15b6d4ae8223baca06e7b90a112e2c1d4"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_hero_settings.json",
+      "sha256": "1cd6aea695708bca17dd66e535477854fb332a744155ea472919dffc1e964754"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_item_manifest.json",
+      "sha256": "b0d48ada978d8a062e993fe0425b6a724672aeea354a3b7b4508fb4c161658b7"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_magic_manifest.json",
+      "sha256": "ccbb31513c006860790a4c374b3f788665902cfa3fffe810695199882860153d"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_map_event_manifest.json",
+      "sha256": "d68823dfff2a1cfc00afc7bf4d369bb20a025ad9af5acb89a75d571f4709ba29"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_mining_manifest.json",
+      "sha256": "e0b316ed8172ac1f0d3f1577fc06df126682563ff019612e7cd4663eccff3c28"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_monster_ai_summary.json",
+      "sha256": "12e82908bdf696b49e7193cfb1288ccf63663e8269c4e3a59b57c31648530e79"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_monster_manifest.json",
+      "sha256": "5961fe9f220cb8440833af746f4c53fd1c728803979b19dbd867f10fc3027cec"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_npc_command_summary.json",
+      "sha256": "49ebaa25650a2e2088693d4200ebac0f7ed9a9b81a6cd6246cdd75375ea73414"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_npc_info_manifest.json",
+      "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_npc_manifest.json",
+      "sha256": "7ff29f221c39e5d16b7ebdc7efcde5090daf7ff3daacf6b2b1552b5b36429e93"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_quest_packet_manifest.json",
+      "sha256": "13d6f3fd94fd9e865ab60c9f2ea50585053bd2050bff021a0379f1ed0948e0d6"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_random_item_stats_manifest.json",
+      "sha256": "74ecdd5c5d3df8f04c34f9f4df3d3a9171ef85002ba395535b4fbe948dcaa449"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_recipe_packet_manifest.json",
+      "sha256": "53699a4fc96fd9df015e4e5a4d72fcea644a59ccb8643d32604726ea678019e5"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_respawn_manifest.json",
+      "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_starter_map_collision.json",
+      "sha256": "38ac56c53ce6c9ba0e1849e7750fd48636754f4e33113c63b19b6a61d8f3f690"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/crystal_starter_map_region.json",
+      "sha256": "bae0c90db111891cea45abb8cc27b33eb77899811e04f486569bdb681c7c8a25"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/localization_bundle.json",
+      "sha256": "cca64cebcb5566cb777ac56fa32e3a471020b78a3db64da017a23324c87efec6"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/platinum_176_bundle.json",
+      "sha256": "69d8ee8d6b3875da92f4e2787c4d0fa50184639c6de2d312fdaa0db18d936ea6"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/platinum_fiveclass_bundle.json",
+      "sha256": "3c12e13860161be681fd70f672c1a40b54d85f721cf50c5b1d1c68c15bf5e6a2"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/portable-native-i18n.json",
+      "sha256": "1c6f48a5e09577b4c01a1f674d990bd355e5adbb12c14b7925a16f8b74fa0c00"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/generated/quest_presentation_text.rs",
+      "sha256": "9105cfb8e464aed1572f85b24bfc37e55b3ac33379c548827b25279b62428ac2"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/i18n-overrides.json",
+      "sha256": "80c4fc361a8c5d073abc139a8626b6050c380bc8c7af65692849f2d5e7fd0658"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/native-i18n/common.json",
+      "sha256": "9bcf22b9f4ea1b6f7f514a7b0176cb6ab896d98c9e6ce75aba0d4d3c93d2d19d"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/native-i18n/conquest.json",
+      "sha256": "1006ae4929e762440828d0b447defe3d763ff0436bb186ed540c5d6bf9f2549c"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/native-i18n/content-coverage.json",
+      "sha256": "97bce38a6c089cd4aebcc6f41aa4164f72f67eff905ee6cec72f26da9805076a"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/native-i18n/content.json",
+      "sha256": "142e05e9e628be47c45eec257c8616f6e7f5c485588de8a0b25f36fc406222d1"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/native-i18n/extra/ar.json",
+      "sha256": "f57f06e88d12a35efa5d82e4ff91cfa8d7ef81242dd385ac7d4e204621ab17fd"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/native-i18n/extra/hi.json",
+      "sha256": "53a5267ceda25831c616ebea8040357783c49013eb7fc100a34ea988566c6759"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/native-i18n/extra/id.json",
+      "sha256": "3daf140a32aa9273e11350a647b8c5d25df2ebefa8ff367df5da064af1e75b5d"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/native-i18n/extra/provenance.json",
+      "sha256": "fa189ab99ff7a71dcd2c21d4fdbd0221b498b2b6f56a7e2ce190a01dbd901d5f"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/native-i18n/extra/ru.json",
+      "sha256": "0760f45dc217f8aacf9ee0506a18407afcd50234733df0970ded8d3642662376"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/native-i18n/extra/th.json",
+      "sha256": "a703fed4c3c4e6f01e760f1da7c4a2f11bc3da32f61ef3199d807410a9689f6f"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/native-i18n/extra/vi.json",
+      "sha256": "c39c8c32c8374731b94e6dd0b2907f0376a44fc5c678a7dbadbdb3d3fd4d87cb"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/native-i18n/extra/zh-CN-editorial-overrides.json",
+      "sha256": "c1b13220eaa954df8c255a4a2c446776557666cfbfd089c09b073cb96d1a2d17"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/native-i18n/extra/zh-CN-provenance.json",
+      "sha256": "5c9a4cbd1609fdadddc0979dbecdb466848bc670f05f4fc16d433d52394cfd3e"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/native-i18n/extra/zh-CN.json",
+      "sha256": "33a8372065605d060590bdd433fbe4c8c7c03e7c8ce201a3107fae574c6e7097"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/native-i18n/game.json",
+      "sha256": "796127bf494ee354626f85cf25d2b4cdb68a633585481325b6adfaa7019f54be"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/native-i18n/help.json",
+      "sha256": "5ce6fa52b935f528424c3963dc16c5e430387d3be2dac6d70d0701cf834b3b9e"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/native-i18n/npc-menu-coverage.json",
+      "sha256": "5d611484cab36b02b4ec9ddd307dc9a4cc8c114e99a01dab8ffcde00f0be77f3"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/native-i18n/npc-menus.json",
+      "sha256": "fa9de6316a85177479bddf4f01c4010524f172f542df336b379548dd8f62f0d3"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/native-i18n/npc-prose.json",
+      "sha256": "f19aa36581483663d2895abc8868b6196eee34ccb57179f1fe40b693053dd894"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/native-i18n/periodic.json",
+      "sha256": "a6ade91e8ae348ed47336c851faa0e9ec41900178f779572f22c6ef5a6c76757"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/native-i18n/procurement.json",
+      "sha256": "ca954bb3f3a210c66371901a696c07212a310a3f19ef66f7a1466012cd5ad878"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/native-i18n/quest.json",
+      "sha256": "47a5beaa6feb4277b33a8617b55966a56eec2856b80000d34083ee6e23f9a5d1"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/native-i18n/shell.json",
+      "sha256": "52ace631cb335840532fcfec6a37b144b829950e25bd5e909e69b1ec5af6d3b1"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/native-i18n/validation-report.json",
+      "sha256": "300c08f6b26beb69c4d4be91cbad60929720c5798131d4f9cfc4527d5470a106"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/native-i18n/wallet.json",
+      "sha256": "ac7bb305751c7cd82b5b14909b2c0cd4071c10e4925bfae1c8219254c236ec64"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/r16-gameplay-baseline.json",
+      "sha256": "83679d56acecfe65337bc118bcf94b1028619384e57b56ab980e2c50d39d1f0e"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/r16-guild-layout.json",
+      "sha256": "f9047ceb849fde263730f1a0a0fef9b08f3891d7343ec1c79743adfa4d3f9ae7"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/starter_scene.json",
+      "sha256": "f06c92e72843f7c8bfd8f78aeb1714098107a184f4012a3f86649620ab5451f7"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/data/starter_server_data.json",
+      "sha256": "d4349ff4e2d2753d0be95de27341a8a9bb59ea04d3062868b03c7e1d80f72e4d"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/crystal_creature_settings.rs",
+      "sha256": "6ead34f9056a38921d6397048f85ed1f3ffdc31f7b8ab5e9e28b8ee466928c95"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/crystal_guild_settings.rs",
+      "sha256": "19bbf36fb8812162a7853b66f4efb2dbe747394eac39aa5df4c8dd019585cd38"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/crystal_hero_settings.rs",
+      "sha256": "011c406f296ddbb53b0e777bfaa34122a3686583cf7180b70e0a2c784eb244a2"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/crystal_item_image.rs",
+      "sha256": "b57acb109955d4157ec352fa8b0ec4f5de083e9021828a67e1e54501cc23993e"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/crystal_map_events.rs",
+      "sha256": "6a627807f49eafda4e44a3b53541e48131bec13046ae60a0079ae353ba1754b8"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/crystal_mining.rs",
+      "sha256": "25dd31d764a38332d0748f881dadc85f44f5160e68a27108cd0bd6ce5d9f8057"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/crystal_npc_goods.rs",
+      "sha256": "c123145dc0c0558045876c079f0ea76a66492080a51e07e6967b1222504c67d9"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/fiveclass_tests.rs",
+      "sha256": "316f81295c60ba30b543a0060e398b76549e59f7f722dd38a46c9e7bebdbe854"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/lib.rs",
+      "sha256": "05673f30787960f70ba5cb83fec65471a41973bdcc7ab04b7ce89520e2a6de46"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/periodic_quests.rs",
+      "sha256": "fe4715f86ec6a18fa11b70c72a6067740b9b90ad3c65b97cca411b06162aa50f"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/r16_gameplay_baseline.rs",
+      "sha256": "c01dae881f6cde7f2cc84df7ef307f73874c263565bdffc888a3a75fd698b457"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/stone_items.rs",
+      "sha256": "bc1df14c421be8305651733529da726f7a497f18695cc8b39018abbca8c26ecf"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/tests/classic_native_resource_scope.rs",
+      "sha256": "ab0ee96815f13c5bf4c02a14320e29b12d16bc26df316b51ffcc5861ed492f95"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/tests/platinum_176_content_loop.rs",
+      "sha256": "e2a293de0d2547efd7d430c4221aa0b3596cb7567d84191e5ba3b432e018315a"
+    },
+    {
+      "path": "mir2-web3/packages/protocol/Cargo.toml",
+      "sha256": "ad3953fa0212edbc3c1c8b334fbfc3516284fa11a249bd94845a86954e3cbb6d"
+    },
+    {
+      "path": "mir2-web3/packages/protocol/README.md",
+      "sha256": "dec65834509f7102a2170e9aa681dc7f2f31d14ee2196b468f2e605b58d65083"
+    },
+    {
+      "path": "mir2-web3/packages/protocol/crystal-mvp-v1.json",
+      "sha256": "6dbb3af8f20dd13a7812fce28be77ae7d877f6aa5c74e30ddf61bd9a78a610c0"
+    },
+    {
+      "path": "mir2-web3/packages/protocol/crystal-mvp-v1.md",
+      "sha256": "d6d03ab5b935f17a9274741af434b2f6030edb692712a45a167b3d761cc77fc4"
+    },
+    {
+      "path": "mir2-web3/packages/protocol/src/catalog_envelope.rs",
+      "sha256": "51bfec5c8b146996d15ddf3422f91298d61074685febfe618904b0b0cff1200e"
+    },
+    {
+      "path": "mir2-web3/packages/protocol/src/catalog_transport.rs",
+      "sha256": "cd6f73582d2774805e66ca9898a8f2b96e829d8bce648e6ddf983d13f485689d"
+    },
+    {
+      "path": "mir2-web3/packages/protocol/src/error.rs",
+      "sha256": "a7e13c9abbdf35f98e830a62355f9dd082e6c95a66a887f4e7c4d3d90bf9a6ba"
+    },
+    {
+      "path": "mir2-web3/packages/protocol/src/frame.rs",
+      "sha256": "ba0ac651251624b4595711dc3d0fbc70ab57428b21d0997bd418a0fc1d49c7ad"
+    },
+    {
+      "path": "mir2-web3/packages/protocol/src/ids.rs",
+      "sha256": "930259a2f29d2dd7c09f77d861ab5db1477629d75b31b2ca59d2479dd8efb126"
+    },
+    {
+      "path": "mir2-web3/packages/protocol/src/io.rs",
+      "sha256": "e80ef0c9a01c5c185469cab988ef7e257a5de6638fe5326360d36fe1ca766046"
+    },
+    {
+      "path": "mir2-web3/packages/protocol/src/item_image.rs",
+      "sha256": "09fc26d058b62409a1ca99acdbd717b59a8ab21f956244fa60e82a7fa51b7a72"
+    },
+    {
+      "path": "mir2-web3/packages/protocol/src/lib.rs",
+      "sha256": "977fe5096a3352a661b32d9a3c5f68a404dec5fc67ad463586734922f048c317"
+    },
+    {
+      "path": "mir2-web3/packages/protocol/src/packets.rs",
+      "sha256": "6397a43b3a4c2376cfcf8b6a7d0811d2ff9dd6e3da9ca84dc07d8854675beec7"
+    },
+    {
+      "path": "mir2-web3/packages/protocol/src/procurement.rs",
+      "sha256": "685cd01dae73439069cf54e0ebd7df7059ceb97a9106872b001a8ce727ce1e08"
+    },
+    {
+      "path": "mir2-web3/packages/protocol/src/trace.rs",
+      "sha256": "1d2fcb0f5eaff134e5693e9497461587de8dfd9e0aa893184f5ca156541f3c89"
+    },
+    {
+      "path": "mir2-web3/packages/protocol/src/types.rs",
+      "sha256": "cf18d6c3c7066acb9d82edc35ad49548adb858d925c489410c614efc0882d0fb"
+    },
+    {
+      "path": "mir2-web3/packages/protocol/tests/catalog_envelopes.rs",
+      "sha256": "8d7c71e1b0a07297508d982fb923ba73f1f5160d04144d26f3f4399b9e4ded6d"
+    },
+    {
+      "path": "mir2-web3/packages/protocol/tests/codec.rs",
+      "sha256": "82b4121dddce796729baa6aed3de0b925c1ab1eb8735d9e641e9f0e86e581443"
+    }
+  ],
+  "ownedOverlays": [
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/portable_ui_fonts.rs",
+      "sha256": "d297b159192d4313d71ab175c4de52aa4ca67151b2b6bf5290ab6ff35ba25ba0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/portable_ui_asset_recovery.rs",
+      "sha256": "834b32f24e959c8bd2f4a04309dbb083a98f46e767f22c1f0fac1be1cfef325e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/portable_ui_asset_recovery_tests.rs",
+      "sha256": "2eeb90de3df8c514cf497838939fedcd440888750bff581cf0abcf7913d27f90"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/portable_ui_asset_recovery_io_tests.rs",
+      "sha256": "ff5ea4f7b42eb069d2a84ec9957244ebefac1f78a1b47f844b906447c8e63d3b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/portable_ui_fonts_tests.rs",
+      "sha256": "f93255555f27e4c282e89deaf2e8a89e60fcbdb6918f6c2623618a608d61cd74"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/hud_ui_host.rs",
+      "sha256": "7c18d302dfb48a83154df8fbe0558d16c7b3f8b60ea98f8d02da387d1a4bcc48"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/quest_ui_host.rs",
+      "sha256": "7065c7c16cf82cd91dcd66e1a0198b0c74408b2f9dba2ad3128fa6d548c84bf6"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/quest_ui_asset_recovery_tests.rs",
+      "sha256": "25a33008b071bbc3dad6f01c82a10b7524b82911a4b46386848ca1bd1f023967"
+    }
+  ],
+  "sourceArchiveSha256": "995458ccb096d9d682d3c0d67324e0a9962e0856f49647c17fa3875dbe52db00"
+}

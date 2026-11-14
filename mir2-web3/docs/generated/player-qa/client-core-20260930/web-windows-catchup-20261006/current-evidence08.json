@@ -1,0 +1,176 @@
+{
+  "schemaVersion": 1,
+  "kind": "Source22 current Bag-to-Belt source/CPU/static-build evidence index08",
+  "generatedAtUtc": "2026-10-06T22:43:18.378Z",
+  "parentCommit": "229ae772d7bd3acdb1b21ef3e8005bf817a393d4",
+  "baselineWindows": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "artifacts": {
+    "matrix": {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix08.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\feature-matrix08.json",
+      "bytes": 3019610,
+      "sha256": "9e5577449d9b0a495dd5358d3a60b3b057b15c414e5921294d5d35c565132236"
+    },
+    "finiteResult": {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/bag-belt-source22-finite-result01.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\bag-belt-source22-finite-result01.json",
+      "bytes": 75003,
+      "sha256": "a51fdd3412a2365cd12835fc2295ab2ffb75f0f6aef5dcdc3154c051a25dade2"
+    },
+    "actionChainReview": {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/bag-belt-source22-action-chain-review01.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\bag-belt-source22-action-chain-review01.json",
+      "bytes": 38726,
+      "sha256": "93d43c966a822bedb6ff3365b46d0d48be7da03e16f25eaa20dd8405f2289695"
+    },
+    "combinedBuildResult": {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/bag-belt-source22-combined-build-result01.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\bag-belt-source22-combined-build-result01.json",
+      "bytes": 86529,
+      "sha256": "8e4649437b842443fad614b610bad11764cf7fbcaf5a7e6ecab26f8a9d21b6b6"
+    }
+  },
+  "currentDocs": [
+    {
+      "relativePath": "docs/AGENT-ORCHESTRATION.md",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\AGENT-ORCHESTRATION.md",
+      "bytes": 231160,
+      "sha256": "7d5cbe8073288210410a0b1b51e1559121209620a93da56e2b05c066f336887c"
+    },
+    {
+      "relativePath": "docs/AGENT-TASK-QUEUE.md",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\AGENT-TASK-QUEUE.md",
+      "bytes": 842197,
+      "sha256": "1905e82314149a70c9a49eec6b45f9f988be53b152cc294ea934a7071f168204"
+    },
+    {
+      "relativePath": "docs/CROSS-PLATFORM-CLIENT-GOAL.md",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\CROSS-PLATFORM-CLIENT-GOAL.md",
+      "bytes": 168487,
+      "sha256": "ab7fc4ce4822f150c69c450221d657e8cc9edd79476ef28af08a14048e1ac577"
+    },
+    {
+      "relativePath": "docs/CRYSTAL-1TO1-ROADMAP.md",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\CRYSTAL-1TO1-ROADMAP.md",
+      "bytes": 959884,
+      "sha256": "383291bc51b697dfdafce68ac4b764012a7d24c03236024f9cf975df6426b700"
+    },
+    {
+      "relativePath": "docs/FRONTEND-1TO1-GAPS.md",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\FRONTEND-1TO1-GAPS.md",
+      "bytes": 583721,
+      "sha256": "8aab2c1017897e3e186d0c06d1d2839259ab5e2929d6f80c5205067699d2ed0a"
+    },
+    {
+      "relativePath": "docs/WEB-WINDOWS-CATCHUP-GOAL-20261006.md",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\WEB-WINDOWS-CATCHUP-GOAL-20261006.md",
+      "bytes": 41977,
+      "sha256": "237c307f3af7798f2e722c1b4f1ee8874008a66d2bea31c44620f0adf3ffe109"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\README.md",
+      "bytes": 31730,
+      "sha256": "300bdf3bab9add75d80ff52649a7d3a083632c976a1d14dd658d33cd2e13e3a9"
+    },
+    {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix08.md",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\feature-matrix08.md",
+      "bytes": 39603,
+      "sha256": "23898de9fbd510b7387710df77635b97bb701f4445ea43f85a8d960892c98ef3"
+    }
+  ],
+  "summary": {
+    "changedSourceCandidateRecords": [
+      "F05.belt.move-from-bag"
+    ],
+    "currentSourceCategories": {
+      "shared": 103,
+      "legacy": 203,
+      "open": 3,
+      "common limitation": 8
+    },
+    "original317OrderedIds": true,
+    "other316WholeRowsPreserved": true,
+    "all317PlayerRows": "not-run",
+    "originalAuditAndNativeFieldsRetained": true,
+    "originalRawCountsRetained": true,
+    "nodeTests": 218,
+    "nodePassed": 218,
+    "nodeFailed": 0,
+    "nodeSkipped": 0,
+    "stage5InternalGroups": 318,
+    "stage5IncludedInOneGlobalTest": true,
+    "newStage5Groups": 19,
+    "rustSelectedCrossConfigurationPasses": 230,
+    "rustOriginalIgnored": 3,
+    "newRustDistinct": 21,
+    "strictNonincrementalTscPassed": true,
+    "coreBuilt": true,
+    "puiBuilt": true,
+    "nativeBuilt": true,
+    "threeRenderersBuilt": true,
+    "nextBuilt": true,
+    "thinBuilt": true,
+    "sourceAndStaticBuildClosed": true,
+    "actualUiAndPlayerAccepted": false,
+    "overallPercentage": null,
+    "currentNamedFixtureRowAssociations": 273,
+    "currentUniqueNamedFixtureDeclarations": 140,
+    "currentRowDeduplicatedAssociations": 272,
+    "retainedSafeKeyOverlayRowDuplicate": 1,
+    "actualFiveBuildJobsPassed": true,
+    "actualCargoGuardCalls": 15,
+    "strictlySerialCargo": true,
+    "candidate100": false,
+    "completeAcceptanceDenominator": false,
+    "goalStatus": "active"
+  },
+  "independentReview": {
+    "reviewer": "/root/w2b_final_source_review",
+    "sourceAndOriginalFixtureInverseAccepted": true,
+    "finiteCpuAndAllCurrentStaticPackagesAccepted": true,
+    "narrowedPerFixtureEvidenceScopeAccepted": true,
+    "confirmedProductOrBuildBlockers": 0,
+    "confirmedEvidenceScopeBlockers": 0,
+    "finalMdAndIndexReview": "pending at this data index creation; subsequent reviewer read does not mutate this frozen creation-time statement",
+    "executions": 0,
+    "writes": 0
+  },
+  "preservation": {
+    "matrix07": {
+      "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix07.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\feature-matrix07.json",
+      "bytes": 2953626,
+      "sha256": "08d5092c02336e92e577cad535b273758b6e754c9adbf68d1b762dd63ccc52df"
+    },
+    "source21Published": "229ae772d7bd3acdb1b21ef3e8005bf817a393d4",
+    "other316WholeRowsPreserved": true,
+    "original317OrderedIdsPreserved": true,
+    "allOriginalAuditAndNativeFieldsPreserved": true,
+    "rawCountsPreserved": true,
+    "allPlayerVerificationNotRun": true,
+    "sevenHistoricalMdBodiesPreservedAsSuffix": true,
+    "priorScopeDraftsRetainedExternally": true,
+    "source22HistoricalFailuresAndPreparedNotRunRetained": true
+  },
+  "remainingSourceGapIds": [
+    "F02.world.fishing-click",
+    "F09.NPC.PEARL",
+    "F11.RANKING.INSPECT"
+  ],
+  "nextPriority": "Source23 real primary-world-click fishing, including trustworthy common local pose and raw transform facts; thenPearl/RankingInspect. W6 real UI/player/save/relogin/mobile remainsnot-run under userrestriction.",
+  "sourcePublication": {
+    "previousSource21ActuallyPublished": "229ae772d7bd3acdb1b21ef3e8005bf817a393d4",
+    "currentSource22": "commit/push pending at index creation; Root will verify and report actual commit and HTTPSremote branchhead after scoped staging. No frozen index self-reference/circularcommit claim."
+  },
+  "limits": "317 bounded audited records are not full acceptance denominator. New checked shared Core planner and actual defaultsharedBevy/CompatDOM drag handlers do not upgrade whole legacy DOMBelt painter or prove actualscreen/socket/player behavior. Nopercent/playable/Candidate100/goalcomplete from source,finiteorstaticbuild. This data-writing pass executes no products/tests; prior actualRoot executions documented by finite/currentbuild receipts. Only exact metadata allowances, one old04 generatedTSroutes input outsideNFT/package, historical231JSONtokenbytepair carry andunchanged44warningmultiset qualification apply.",
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmInstantiated": false,
+  "candidateAccepted": false,
+  "playerAccepted": false,
+  "goalComplete": false,
+  "writerProductOrTestExecutions": 0
+}

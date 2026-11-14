@@ -1,0 +1,22 @@
+{
+  "realm": "isolated",
+  "endpoint": "ws://127.0.0.1:17510/ws",
+  "profile": "probe",
+  "activityMode": "native",
+  "stages": "10",
+  "stageSeconds": 30,
+  "soakSeconds": 360,
+  "combatActors": 1,
+  "resumeSamples": 0,
+  "saveSamples": 0,
+  "wallSeconds": 1800,
+  "scenarioFile": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\scenario.json",
+  "scope": "Fresh ordinary ten-player coordinated-navigation V2 feasibility probe, not formal capacity acceptance. Original04 scene bytes and all30s/360s/native18/12/50%Run/900ms/1%timeout/5%correction/resource guards retained. Current active-observer coverage, bounded packet trace and explicit typed attack results remain; only controlled ordinary navigation hints and coherent owner position references are new. This does not change server occupancy, timing, acceptance or damage proof.",
+  "attackResults": "v2",
+  "loginNotBefore": "2026-10-24T19:36:25.495Z",
+  "repositoryCommit": "c42f860e0544f0687a5ccf5ddaccad4daecc8acc",
+  "backendSourceCommit": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+  "driverSourceCommit": "c42f860e0544f0687a5ccf5ddaccad4daecc8acc",
+  "admissionLedgerScope": "Fresh File realm; zero prior Login; persistent original auth ledger and serialized ordinary NewCharacter; no limiter changes",
+  "spectatorDataDir": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\recordings"
+}

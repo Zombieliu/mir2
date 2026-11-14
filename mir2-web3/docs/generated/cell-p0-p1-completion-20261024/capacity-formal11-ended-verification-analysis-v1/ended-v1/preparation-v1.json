@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "state": "SOURCE_PREPARED_ENDED_ONLY_NOT_EXECUTED",
+  "preparedAt": "2026-10-25T15:40:15.295Z",
+  "root": "C:/mir2-build/p01-completion-20261024/formal11-independent-verification-v1",
+  "files": [
+    {
+      "path": "verify-ended-formal11-v1.mjs",
+      "bytes": 29032,
+      "sha256": "6d4dbe1fb92027ea514c70b5d59055fbd89b73e345ebb774105ef69297aae69e"
+    },
+    {
+      "path": "formal-contract-v1.mjs",
+      "bytes": 6103,
+      "sha256": "0f0dcf7daacdc19b9e5397b80ce836f4f3e3bd274b8ca4f32513e8aee6798152"
+    },
+    {
+      "path": "hp-proof-contract-v2.mjs",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+    },
+    {
+      "path": "expected-formal-policy-v1.json",
+      "bytes": 1038,
+      "sha256": "b949f19d4460da9c8a38a00a96cf785a9e9a4bba7c343af27094b5192f00921a"
+    },
+    {
+      "path": "run-ended-formal11-v1.mjs",
+      "bytes": 2259,
+      "sha256": "1ae5f984f247e5341dca5302165a2444cfba17e1cb980db8a6a6440c290a27c7"
+    },
+    {
+      "path": "seal-tool-source-v1.mjs",
+      "bytes": 3011,
+      "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+    },
+    {
+      "path": "derivation-proof-v1.json",
+      "bytes": 11358,
+      "sha256": "6e185c890c696eab45365ed44e094a4deb2f5cd9f81dd69db08b25974e2ba9fb"
+    }
+  ],
+  "sourceSha256": "3ae42bc3e5e60a3818dc7bc0bf0ab0949cd9be6e903a92b87724b8a6e9805eb7",
+  "syntax": {
+    "nodeCheckPassed": 5,
+    "checks": [
+      {
+        "file": "verify-ended-formal11-v1.mjs",
+        "exitCode": 0,
+        "stderr": ""
+      },
+      {
+        "file": "formal-contract-v1.mjs",
+        "exitCode": 0,
+        "stderr": ""
+      },
+      {
+        "file": "hp-proof-contract-v2.mjs",
+        "exitCode": 0,
+        "stderr": ""
+      },
+      {
+        "file": "run-ended-formal11-v1.mjs",
+        "exitCode": 0,
+        "stderr": ""
+      },
+      {
+        "file": "seal-tool-source-v1.mjs",
+        "exitCode": 0,
+        "stderr": ""
+      }
+    ],
+    "targetImportsExecuted": false,
+    "rawRunRead": false,
+    "behaviorTestsExecuted": false
+  },
+  "expectedRunId": "1792942371568-1e322224",
+  "expectedGatewayPid": 58172,
+  "expectedMonitorPid": 69080,
+  "expectedRuntime": {
+    "root": "C:/mir2-build/p01-completion-20261024/release-native-v2-personal-projection-ladder-11",
+    "publicChild": "capacity-formal-native-v2-personal-projection-ladder-11",
+    "backendSourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+    "driverSourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+    "backendInputs": 44,
+    "binarySha256": "d8791cceeed00fdb7019d1201aad19f06005790162df1b459a8cacac96f68756",
+    "coreCodeEvidenceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+    "driverSourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+    "wireHistoricalCoreCodeEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+    "sourceConfigSha256": "edab91a9dd170c19c601ea6c260480657a85f51a7929d09f7a6df7208b6343dd",
+    "launcherSourceManifest": {
+      "bytes": 35724,
+      "sha256": "7e78691a3dcb22fdb053e3b028cadeb0aef1b03c7af06f31981e2cd58c09b048",
+      "files": 79,
+      "sourceSha256": "e82cfbdc8b5bf9c240b343d2c04b6a99d7fa90b9377056df7a8430d5f56da4df"
+    }
+  },
+  "expectedResult": {
+    "file": "final-verification.json",
+    "schemaVersion": 1,
+    "verifierRevision": 2,
+    "independentVerificationPassed": "true only after actual closed raw/public/source/cleanup verification",
+    "formalRunPassed": "Actual original report+seven completed measurement phases+146 true >=60s windows+all original activity/ratio/resume/save/memory gates; false/partial is legitimate",
+    "capacityAccepted": "original frozen rawVerifierAccepted AND formalRunPassed AND normalOwnedCleanup; root P0/production acceptance separately unadjudicated",
+    "rawVerifierAccepted": "actual frozen generic verifier result, never a preparation assertion",
+    "formalPreconditionOnly": false,
+    "pins": "relative path/bytes/sha256 under actual public child/external evidence base, plus exact historical Node evidence pin",
+    "metadata": "six exact immutable declarations from final db4e Node source evidence",
+    "hp": "ten-status count dictionary; verifiedEventsChecked n / successProofChecked(n>0) / noVerifiedDoseObserved(n===0)",
+    "wireDiagnostics": "present/sourceValid/countsMatch/uninstallSucceeded separate from bounded complete; exact3key sourceIdentity and fullSourceIdentity historical6d",
+    "phaseChecks": [
+      "stage-2/300/5",
+      "stage-10/300/5",
+      "stage-25/300/5",
+      "stage-50/300/5",
+      "stage-100/300/5",
+      "soak/7200/120",
+      "post-resume-observation/60/1"
+    ],
+    "nativeResumeSamples": 5,
+    "savedVerificationSamples": 5,
+    "memoryRule": "Original >=1800s retained trend duration, 300s warmup policy, <=32MiB/hr; actual suffix arithmetic with recorded cutoff limitation unchanged"
+  },
+  "sourceSeal": {
+    "file": "tool-source-frozen-v1.json",
+    "filesShape": "{path:relative-local-source-name,bytes,sha256}",
+    "filesAfterRootSeal": 9,
+    "requiresReviewVerdict": {
+      "toolSourceContractPassed": true,
+      "eligibleForRootSealing": true,
+      "blockingFindingIds": []
+    }
+  },
+  "rootCommands": {
+    "seal": "node \"C:/mir2-build/p01-completion-20261024/formal11-independent-verification-v1/seal-tool-source-v1.mjs\" --seal-reviewed-tool-source --prepared-sha256=<this-file-SHA> --review-file=<actual-independent-review-ABS> --review-sha256=<actual-review-SHA>",
+    "executeAfterEndedAndCollected": "node \"C:/mir2-build/p01-completion-20261024/formal11-independent-verification-v1/run-ended-formal11-v1.mjs\" --seal-sha256=<actual-tool-seal-SHA> --verify-ended-formal11 --run=1792942371568-1e322224"
+  },
+  "rootCleanupExpected": "C:/mir2-build/p01-completion-20261024/formal11-root-independent-cleanup-v1.json",
+  "actualRunRead": false,
+  "toolSealed": false,
+  "actualVerificationExecuted": false,
+  "rootDecidesExecution": true,
+  "sourceOrSceneChanged": false,
+  "originalPolicyRawUnchanged": true,
+  "limitations": [
+    "Frozen trusted producer archives are original SHA/bytes bound; original readline full-line allocation precedes its64MiB limit check.",
+    "Diagnostic truncation/eviction or missing trace cannot prove object absence and does not grant ACK/gameplay credit.",
+    "Zero HP verified events cannot prove an actual dose, continuous HP coverage, long-term healing economics or natural survival.",
+    "This tool does not start a realm, prepare accounts, read private stores or replay recording payloads.",
+    "No source full suite was rerun for this external mechanical derivation; syntax only."
+  ]
+}

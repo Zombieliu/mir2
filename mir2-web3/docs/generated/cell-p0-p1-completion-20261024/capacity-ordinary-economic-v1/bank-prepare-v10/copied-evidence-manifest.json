@@ -1,0 +1,994 @@
+{
+  "schemaVersion": 1,
+  "scope": "Actual W10 continuation of whole actual W9 cold bank/latest W9 ledger without reset. Original preparation failure retained. Public description is extracted only from actual W10 report/module/Root receipt. No CCU measurement or W11 draft.",
+  "driverSourceCommit": "238b647e19a741e355f3412c7b06ee257a15c808",
+  "executionSourceCommit": "238b647e19a741e355f3412c7b06ee257a15c808",
+  "backendSourceCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+  "actualRootFreshSelectedJsTestsPassed": 677,
+  "actualRootCheckCounts": [
+    {
+      "name": "complete-preparation-and-protected-navigation",
+      "tests": 294,
+      "pass": 294,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    {
+      "name": "ordinary-economy-and-navigation-dependencies",
+      "tests": 328,
+      "pass": 328,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    {
+      "name": "ordinary-full-lifecycle-driver-units",
+      "tests": 55,
+      "pass": 55,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    }
+  ],
+  "rootNamedValidationSourceCount": 42,
+  "runtimeStaticLocalJsSourceCount": 32,
+  "backendInputs": 55,
+  "reusedRustTestsPassed": 32,
+  "newRustBuildPerformed": false,
+  "freshRustTestsPerformed": false,
+  "immutableExecutableRecordOnly": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\bin\\mir2-gateway.exe",
+    "bytes": 87456256,
+    "sha256": "ad13d15a6fd294cae0beda04d8f91b7773a9b8390cc9c85e5a84d3e72c2567f6"
+  },
+  "immutableExecutableReadOrCopied": false,
+  "full16": {
+    "all16ReusedAfterCompleteDependencyEquality": true,
+    "completeLocalSources": 14,
+    "originalActualExecution": "d9ec9d2094ee058bfa909b05bbcf45dcf4a28b39",
+    "newHEAD": "238b647e19a741e355f3412c7b06ee257a15c808",
+    "freshFull16Performed": false,
+    "v1SchemaFailurePreserved": true,
+    "v1ProofProduced": false,
+    "v2Proof": {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full16-reuse-proof-v10.json",
+      "file": "full16-reuse/ordinary-full16-reuse-proof-v10.json",
+      "bytes": 71965,
+      "sha256": "87ec6afb1106aa0f37e021d788727a7e09da74be3a5295a59a3412411400e697"
+    }
+  },
+  "originalRunPassed": false,
+  "originalError": "safe Deer funding holds 2/3 Venison after 2 hunts and 8 attempts",
+  "preparedCount": 7,
+  "targetPrepared": 100,
+  "sourceFirst4InventoryReuse": true,
+  "preparedActors": [
+    {
+      "name": "L370e2a00",
+      "characterIndex": 1,
+      "before": {
+        "sequence": 720,
+        "monotonicMs": 2392.8992,
+        "ownerId": 1000,
+        "ownerName": "L370e2a00",
+        "map": "0",
+        "x": 288,
+        "y": 615,
+        "hp": 24,
+        "maxHp": 24,
+        "hpStock": 12,
+        "gold": 75,
+        "venison": 1,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 723,
+        "monotonicMs": 2423.2564,
+        "ownerId": 1000,
+        "ownerName": "L370e2a00",
+        "map": "0",
+        "x": 288,
+        "y": 615,
+        "hp": 24,
+        "maxHp": 24,
+        "hpStock": 12,
+        "gold": 75,
+        "venison": 1,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "currentNearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 0,
+      "soldVenison": 0,
+      "funding": null,
+      "commands": 2,
+      "movementCommands": 0,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a01",
+      "characterIndex": 2,
+      "before": {
+        "sequence": 685,
+        "monotonicMs": 5860.6461,
+        "ownerId": 1000,
+        "ownerName": "L370e2a01",
+        "map": "0",
+        "x": 289,
+        "y": 616,
+        "hp": 24,
+        "maxHp": 24,
+        "hpStock": 12,
+        "gold": 1,
+        "venison": 1,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 688,
+        "monotonicMs": 5892.9028,
+        "ownerId": 1000,
+        "ownerName": "L370e2a01",
+        "map": "0",
+        "x": 289,
+        "y": 616,
+        "hp": 24,
+        "maxHp": 24,
+        "hpStock": 12,
+        "gold": 1,
+        "venison": 1,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "currentNearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 0,
+      "soldVenison": 0,
+      "funding": null,
+      "commands": 2,
+      "movementCommands": 0,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a02",
+      "characterIndex": 3,
+      "before": {
+        "sequence": 677,
+        "monotonicMs": 9372.107,
+        "ownerId": 1000,
+        "ownerName": "L370e2a02",
+        "map": "0",
+        "x": 288,
+        "y": 617,
+        "hp": 24,
+        "maxHp": 24,
+        "hpStock": 12,
+        "gold": 98,
+        "venison": 1,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 680,
+        "monotonicMs": 9404.1473,
+        "ownerId": 1000,
+        "ownerName": "L370e2a02",
+        "map": "0",
+        "x": 288,
+        "y": 617,
+        "hp": 24,
+        "maxHp": 24,
+        "hpStock": 12,
+        "gold": 98,
+        "venison": 1,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "currentNearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 0,
+      "soldVenison": 0,
+      "funding": null,
+      "commands": 2,
+      "movementCommands": 0,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a03",
+      "characterIndex": 4,
+      "before": {
+        "sequence": 684,
+        "monotonicMs": 12872.2063,
+        "ownerId": 1000,
+        "ownerName": "L370e2a03",
+        "map": "0",
+        "x": 289,
+        "y": 615,
+        "hp": 24,
+        "maxHp": 24,
+        "hpStock": 12,
+        "gold": 200,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 687,
+        "monotonicMs": 12903.5578,
+        "ownerId": 1000,
+        "ownerName": "L370e2a03",
+        "map": "0",
+        "x": 289,
+        "y": 615,
+        "hp": 24,
+        "maxHp": 24,
+        "hpStock": 12,
+        "gold": 200,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "currentNearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 0,
+      "soldVenison": 0,
+      "funding": null,
+      "commands": 2,
+      "movementCommands": 0,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a04",
+      "characterIndex": 5,
+      "before": {
+        "sequence": 618,
+        "monotonicMs": 16348.9953,
+        "ownerId": 1000,
+        "ownerName": "L370e2a04",
+        "map": "0",
+        "x": 330,
+        "y": 605,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 15,
+        "venison": 0,
+        "inSafeZone": false,
+        "nearbyHostileCount": 0,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 786,
+        "monotonicMs": 36825.5744,
+        "ownerId": 1000,
+        "ownerName": "L370e2a04",
+        "map": "0",
+        "x": 289,
+        "y": 617,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 15,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "currentNearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 0,
+      "soldVenison": 0,
+      "funding": null,
+      "commands": 35,
+      "movementCommands": 32,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a05",
+      "characterIndex": 6,
+      "before": {
+        "sequence": 693,
+        "monotonicMs": 41597.6246,
+        "ownerId": 1000,
+        "ownerName": "L370e2a05",
+        "map": "0",
+        "x": 288,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 1,
+        "gold": 0,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 1246,
+        "monotonicMs": 187940.4204,
+        "ownerId": 1000,
+        "ownerName": "L370e2a05",
+        "map": "0",
+        "x": 287,
+        "y": 617,
+        "hp": 24,
+        "maxHp": 24,
+        "hpStock": 12,
+        "gold": 75,
+        "venison": 1,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "currentNearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 11,
+      "soldVenison": 2,
+      "funding": {
+        "method": "DeerVenison",
+        "collected": 3,
+        "hunts": 3
+      },
+      "commands": 85,
+      "movementCommands": 26,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    },
+    {
+      "name": "L370e2a06",
+      "characterIndex": 7,
+      "before": {
+        "sequence": 692,
+        "monotonicMs": 192724.5799,
+        "ownerId": 1000,
+        "ownerName": "L370e2a06",
+        "map": "0",
+        "x": 288,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 1,
+        "gold": 0,
+        "venison": 0,
+        "inSafeZone": true,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      },
+      "after": {
+        "sequence": 1254,
+        "monotonicMs": 340491.3895,
+        "ownerId": 1000,
+        "ownerName": "L370e2a06",
+        "map": "0",
+        "x": 288,
+        "y": 614,
+        "hp": 24,
+        "maxHp": 24,
+        "hpStock": 12,
+        "gold": 55,
+        "venison": 1,
+        "inSafeZone": true,
+        "nearbyHostileCount": 2,
+        "currentNearbyHostileCount": 2,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false,
+        "actualStagingReached": true,
+        "stagingProtection": "authoritative-safe-zone-normal-monsters"
+      },
+      "purchased": 11,
+      "soldVenison": 2,
+      "funding": {
+        "method": "DeerVenison",
+        "collected": 3,
+        "hunts": 3
+      },
+      "commands": 87,
+      "movementCommands": 28,
+      "normalLogout": true,
+      "finalNormalDrainPositionMatched": true
+    }
+  ],
+  "fifthReturn": {
+    "name": "L370e2a04",
+    "before": {
+      "sequence": 618,
+      "monotonicMs": 16348.9953,
+      "ownerId": 1000,
+      "ownerName": "L370e2a04",
+      "map": "0",
+      "x": 330,
+      "y": 605,
+      "hp": 18,
+      "maxHp": 18,
+      "hpStock": 12,
+      "gold": 15,
+      "venison": 0,
+      "inSafeZone": false,
+      "nearbyHostileCount": 0,
+      "playerPoison": null,
+      "ownerPoison": null,
+      "dazed": false
+    },
+    "after": {
+      "sequence": 786,
+      "monotonicMs": 36825.5744,
+      "ownerId": 1000,
+      "ownerName": "L370e2a04",
+      "map": "0",
+      "x": 289,
+      "y": 617,
+      "hp": 18,
+      "maxHp": 18,
+      "hpStock": 12,
+      "gold": 15,
+      "venison": 0,
+      "inSafeZone": true,
+      "nearbyHostileCount": 3,
+      "currentNearbyHostileCount": 3,
+      "playerPoison": null,
+      "ownerPoison": null,
+      "dazed": false,
+      "actualStagingReached": true,
+      "stagingProtection": "authoritative-safe-zone-normal-monsters"
+    },
+    "commands": 35,
+    "movementCommands": 32,
+    "commandCounts": {
+      "clientVersion": 3,
+      "run": 19,
+      "walk": 13
+    },
+    "pathHazardCount": 0,
+    "pathReplanCount": 0
+  },
+  "failedEighth": {
+    "name": "L370e2a07",
+    "characterIndex": 8,
+    "before": {
+      "sequence": 693,
+      "monotonicMs": 345242.3238,
+      "ownerId": 1000,
+      "ownerName": "L370e2a07",
+      "map": "0",
+      "x": 288,
+      "y": 616,
+      "hp": 18,
+      "maxHp": 18,
+      "hpStock": 1,
+      "gold": 0,
+      "venison": 0,
+      "inSafeZone": true,
+      "nearbyHostileCount": 3,
+      "playerPoison": null,
+      "ownerPoison": null,
+      "dazed": false
+    },
+    "after": null,
+    "freshReadiness": null,
+    "originalFailedSummaryNormalLogout": false,
+    "commands": 45,
+    "movementCommands": 11,
+    "commandCounts": {
+      "clientVersion": 1,
+      "interact": 1,
+      "selectNpcDialog": 1,
+      "run": 7,
+      "walk": 4,
+      "attackV2": 19,
+      "harvest": 12
+    },
+    "elapsedMs": 92212.20149999997,
+    "purchased": 0,
+    "soldVenison": 0,
+    "funding": null,
+    "proofs": [],
+    "fundingTargetRejectionCount": 6,
+    "fundingTargetRejections": [
+      {
+        "action": "attack",
+        "targetId": 206302,
+        "phase": "selection",
+        "reason": "hostile-near-deer",
+        "targetKind": "monster",
+        "targetName": "Deer",
+        "targetDead": false,
+        "targetHp": 25,
+        "targetIdType": "number",
+        "matches": 1,
+        "blocker": {
+          "objectId": 206641,
+          "name": "Scarecrow",
+          "x": 287,
+          "y": 616,
+          "hp": 20,
+          "ai": 0
+        },
+        "snapshotSequence": 701,
+        "observedSnapshotSequence": 701,
+        "observedSnapshotMonotonicMs": 346235.27,
+        "ownerId": 1000,
+        "ownerName": "L370e2a07",
+        "map": "0"
+      },
+      {
+        "action": "attack",
+        "targetId": 206515,
+        "phase": "selection",
+        "reason": "hostile-near-deer",
+        "targetKind": "monster",
+        "targetName": "Deer",
+        "targetDead": false,
+        "targetHp": 25,
+        "targetIdType": "number",
+        "matches": 1,
+        "blocker": {
+          "objectId": 206641,
+          "name": "Scarecrow",
+          "x": 287,
+          "y": 616,
+          "hp": 20,
+          "ai": 0
+        },
+        "snapshotSequence": 701,
+        "observedSnapshotSequence": 701,
+        "observedSnapshotMonotonicMs": 346235.27,
+        "ownerId": 1000,
+        "ownerName": "L370e2a07",
+        "map": "0"
+      },
+      {
+        "action": "attack",
+        "targetId": 206320,
+        "phase": "selection",
+        "reason": "hostile-near-deer",
+        "targetKind": "monster",
+        "targetName": "Deer",
+        "targetDead": false,
+        "targetHp": 25,
+        "targetIdType": "number",
+        "matches": 1,
+        "blocker": {
+          "objectId": 206604,
+          "name": "Scarecrow",
+          "x": 275,
+          "y": 600,
+          "hp": 20,
+          "ai": 0
+        },
+        "snapshotSequence": 987,
+        "observedSnapshotSequence": 987,
+        "observedSnapshotMonotonicMs": 437426.6387,
+        "ownerId": 1000,
+        "ownerName": "L370e2a07",
+        "map": "0"
+      },
+      {
+        "action": "attack",
+        "targetId": 206711,
+        "phase": "selection",
+        "reason": "hostile-near-deer",
+        "targetKind": "monster",
+        "targetName": "Deer",
+        "targetDead": false,
+        "targetHp": 25,
+        "targetIdType": "number",
+        "matches": 1,
+        "blocker": {
+          "objectId": 206604,
+          "name": "Scarecrow",
+          "x": 275,
+          "y": 600,
+          "hp": 20,
+          "ai": 0
+        },
+        "snapshotSequence": 987,
+        "observedSnapshotSequence": 987,
+        "observedSnapshotMonotonicMs": 437426.6387,
+        "ownerId": 1000,
+        "ownerName": "L370e2a07",
+        "map": "0"
+      },
+      {
+        "action": "attack",
+        "targetId": 206316,
+        "phase": "selection",
+        "reason": "hostile-near-deer",
+        "targetKind": "monster",
+        "targetName": "Deer",
+        "targetDead": false,
+        "targetHp": 25,
+        "targetIdType": "number",
+        "matches": 1,
+        "blocker": {
+          "objectId": 206619,
+          "name": "Scarecrow",
+          "x": 273,
+          "y": 593,
+          "hp": 20,
+          "ai": 0
+        },
+        "snapshotSequence": 987,
+        "observedSnapshotSequence": 987,
+        "observedSnapshotMonotonicMs": 437426.6387,
+        "ownerId": 1000,
+        "ownerName": "L370e2a07",
+        "map": "0"
+      },
+      {
+        "action": "attack",
+        "targetId": 206545,
+        "phase": "selection",
+        "reason": "hostile-near-deer",
+        "targetKind": "monster",
+        "targetName": "Deer",
+        "targetDead": false,
+        "targetHp": 25,
+        "targetIdType": "number",
+        "matches": 1,
+        "blocker": {
+          "objectId": 206604,
+          "name": "Scarecrow",
+          "x": 275,
+          "y": 600,
+          "hp": 20,
+          "ai": 0
+        },
+        "snapshotSequence": 987,
+        "observedSnapshotSequence": 987,
+        "observedSnapshotMonotonicMs": 437426.6387,
+        "ownerId": 1000,
+        "ownerName": "L370e2a07",
+        "map": "0"
+      }
+    ],
+    "pathHazardCount": 0,
+    "pathReplanCount": 0,
+    "finalPublicTransform": {
+      "objectId": 1000,
+      "name": "L370e2a07",
+      "x": 287,
+      "y": 604
+    },
+    "ordinaryLogoutAction": {
+      "type": "preparationAction",
+      "phase": "preparation",
+      "at": 1793059733092,
+      "actor": "L370e2a07",
+      "kind": "logOut",
+      "status": "success",
+      "latencyMs": 312.01459999999497
+    },
+    "limits": "Original error reports2of3 Venison/2hunts/8attempts; funding result remains null. No exact final cold Store HP/stock extraction and no unique root cause claimed."
+  },
+  "normalCleanupComplete": true,
+  "coldBankEligible": false,
+  "measurementPerformed": false,
+  "measuredCcuAcceptancePerformed": false,
+  "sustainableTwoHourSupplyProven": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "privacy": "Explicit44 public text originals only. Complete current Store/pool/four secrets/latest ledger remain untouched in their original external private directory; no private bodies, recovery journals, raw Gateway logs, full recordings or EXE enter this archive.",
+  "rawByteVerification": {
+    "destinationExact": true,
+    "sourcesUnchangedDuringCopy": true,
+    "actualRootRawLogPinsMatched": true
+  },
+  "copies": [
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\source-lib-v1.mjs",
+      "file": "source-lib-v1.mjs",
+      "bytes": 18471,
+      "sha256": "bdbcb65eb6027f8d0c0812ab6975b5d53beee28d133be36d8cdf75593f57ca16"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\copy-source-bank-v1.mjs",
+      "file": "copy-source-bank-v1.mjs",
+      "bytes": 11109,
+      "sha256": "0e77e83ad14838d13a78dc4b35b67527d779b7b4cac58c113710078e996daee2"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\freeze-prepare-v1.mjs",
+      "file": "freeze-prepare-v1.mjs",
+      "bytes": 8144,
+      "sha256": "503e47ab57825b826d5db1756e03ba217ab69dd736aa7465034016add0684227"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\run-owned-prepare-v1.mjs",
+      "file": "run-owned-prepare-v1.mjs",
+      "bytes": 25123,
+      "sha256": "d30bd53c3e6a03c839ac547579e120820bb56c82f523fbdb65e538e786a555ca"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\owned-child-v1.mjs",
+      "file": "owned-child-v1.mjs",
+      "bytes": 2201,
+      "sha256": "7845fc2e212bb15b0e036e33753c9e155a9d2152c15098f9ab001dd1f9b74375"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\prepare-config-pending-v1.json",
+      "file": "prepare-config-pending-v1.json",
+      "bytes": 7318,
+      "sha256": "a5fff042d17e342154d144339f6c70958ee6d3112c7cc2c2dc9d3cf357e37fbb"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\source-bank-plan-pending-v1.json",
+      "file": "source-bank-plan-pending-v1.json",
+      "bytes": 16577,
+      "sha256": "76dd4c56b196d6aa3d85ea9f12341d6a5329f7de3eaf4d4325a19ecbc2a7f6e0"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\backend-release-binding-pending-v1.json",
+      "file": "backend-release-binding-pending-v1.json",
+      "bytes": 1513,
+      "sha256": "18a1a943fc3396d67fee78690f8ea3f260788be333fb002097eba19b135782b9"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\root-final-binding-receipt-v1.json",
+      "file": "root-final-binding-receipt-v1.json",
+      "bytes": 2350,
+      "sha256": "ffb107ffb153de3b64ac7ea216b6dffc8a6e1fc64a3b9858537ca50c0fbc8257"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\frozen-source-v1.json",
+      "file": "frozen-source-v1.json",
+      "bytes": 97599,
+      "sha256": "8bf6cea20d2060fdca404297a00d7862b38247fdc65b35af8e0f50d9e0036a4e"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\derivation-v1.json",
+      "file": "derivation-v1.json",
+      "bytes": 38578,
+      "sha256": "292b80d61d4f62a1c114a35dbaa6fd7678f9c2c2caa72c6dc6acc60dbcd44469"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\syntax-checks-v1.json",
+      "file": "syntax-checks-v1.json",
+      "bytes": 3289,
+      "sha256": "35f0c9c432d0cecf7fff651210cf6c753daee177a421b9d3d054f2bc83f72b68"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\preparation-v1.json",
+      "file": "preparation-v1.json",
+      "bytes": 6749,
+      "sha256": "8934ef3076bb859d774f81b1572021e95acc95c9cb1d4ca1944966a2c00caa5c"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\prepare-config-before-root-final-v1.json",
+      "file": "prepare-config-before-root-final-v1.json",
+      "bytes": 6993,
+      "sha256": "758cc8c11df8fddf0243f8916aa6b8eaa02da638cacd4bde6bd25755dd8fbf4b"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\backend-release-binding-before-root-final-v1.json",
+      "file": "backend-release-binding-before-root-final-v1.json",
+      "bytes": 1216,
+      "sha256": "0e68b64abdf8d4b579c42295d956117099b41be7730fd3fdfedf0c9908e64ef7"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\root-pending-tools-review-v1.json",
+      "file": "root-pending-tools-review-v1.json",
+      "bytes": 4103,
+      "sha256": "6ad6b4dcb3b10e8a931eefbdbc77dc6c308c55588eada68d854615b3dc318827"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\source-readonly-review-v1.json",
+      "file": "source-readonly-review-v1.json",
+      "bytes": 2283,
+      "sha256": "8d71a7885a836119d79f628a70d5194f177fd9080bd1cd9e8334775e9fde68bf"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\source-bank-copy-receipt-v1.json",
+      "file": "source-bank-copy-receipt-v1.json",
+      "bytes": 8702,
+      "sha256": "0430b635eeb00b4f191f7d102da39363b21e9de320b1b60f9897ad3c1782f7d4"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\preparation-episode-receipt-v1.json",
+      "file": "preparation-episode-receipt-v1.json",
+      "bytes": 5867,
+      "sha256": "9244128ab88b971ee49883c767ee49470175c881981ee08bdb3fc23821829771"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\prepared-index-v1.json",
+      "file": "prepared-index-v1.json",
+      "bytes": 2419,
+      "sha256": "d4af274a99077f85086599b8ea50ca7d1b0d85ecf9c83cf252342939e1824d51"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\cleanup-v1.json",
+      "file": "cleanup-v1.json",
+      "bytes": 1037,
+      "sha256": "5f39b7a144573461c5960fcdcd4b0bd9373373c616cd19f21b35c90fb31a0920"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\owned-process-v1.json",
+      "file": "owned-process-v1.json",
+      "bytes": 742,
+      "sha256": "6ef976aa61dd711296f5a206b8da16b71041bf07c59f4a34764ffca4a829c364"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\health-before-v1.json",
+      "file": "health-before-v1.json",
+      "bytes": 1122,
+      "sha256": "ce6ebb816037de0eb62614ad6ed5cab7cefd6ff64a44c805e6f6298fbed1da07"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\health-after-v1.json",
+      "file": "health-after-v1.json",
+      "bytes": 476,
+      "sha256": "459a32763f646dedcb09d4895080f4e83863ac5dd578559df5fd2ff94215cdb0"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\run-intent-v1.json",
+      "file": "run-intent-v1.json",
+      "bytes": 1967,
+      "sha256": "e511a0f2d7112a7919e237ae81fa8d27ab9882709bf047357fd3fe3411e8cc04"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\root-independent-cleanup-v1.json",
+      "file": "root-independent-cleanup-v1.json",
+      "bytes": 203,
+      "sha256": "19a86ddbbc4db5192fddf5759f7bfe67a827810f6292de9e49b2a4da2bd9f564"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\reports\\1793059295383-3bd423ad.preparation-report.json",
+      "file": "1793059295383-3bd423ad.preparation-report.json",
+      "bytes": 27965,
+      "sha256": "86a8672faedd7c7d4b16406bd18d2251b7636f5a2c8b703e0dc99d8898471863"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v10\\episode\\reports\\1793059295383-3bd423ad.preparation.jsonl",
+      "file": "1793059295383-3bd423ad.preparation.jsonl",
+      "bytes": 2291588,
+      "sha256": "ead6e69e4fc02a1459e1897caccc8188efa4b4a77ca528e987855bf137434b44"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v10\\root-focused-receipt-v1.json",
+      "file": "node-v10/root-focused-receipt-v1.json",
+      "bytes": 20865,
+      "sha256": "6928417377a8bac62421f50095ea9dc71fc29e050d817cf7b3e5ac70d3c50193"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v10\\complete-preparation-and-protected-navigation.stdout.log",
+      "file": "node-v10/complete-preparation-and-protected-navigation.stdout.log",
+      "bytes": 56941,
+      "sha256": "d35bfab7956cf0cc750b04d5ee5e87b1ba22823ef7cd721b8f6cb4711242e182"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v10\\complete-preparation-and-protected-navigation.stderr.log",
+      "file": "node-v10/complete-preparation-and-protected-navigation.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v10\\ordinary-economy-and-navigation-dependencies.stdout.log",
+      "file": "node-v10/ordinary-economy-and-navigation-dependencies.stdout.log",
+      "bytes": 75528,
+      "sha256": "a38a013d4258dcc12bf9661e2cc4348bacd517d2c89d59706bc4cd0b4f805f11"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v10\\ordinary-economy-and-navigation-dependencies.stderr.log",
+      "file": "node-v10/ordinary-economy-and-navigation-dependencies.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v10\\ordinary-full-lifecycle-driver-units.stdout.log",
+      "file": "node-v10/ordinary-full-lifecycle-driver-units.stdout.log",
+      "bytes": 13223,
+      "sha256": "6be79a3a2b27255c3eccd1de6398420ed017ba7af4b41c418aceeb39a6eb9e58"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v10\\ordinary-full-lifecycle-driver-units.stderr.log",
+      "file": "node-v10/ordinary-full-lifecycle-driver-units.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-runner-v10.mjs",
+      "file": "node-v10/root-validation-runner-v10.mjs",
+      "bytes": 6328,
+      "sha256": "7fe86be6b3afa2ba5639591c9c224bc1145ac7f899af01fea73073792a2a0962"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\finalize-ordinary-bank-binding-v9.mjs",
+      "file": "root-finalizers/finalize-ordinary-bank-binding-v9.mjs",
+      "bytes": 4541,
+      "sha256": "94fa8e75a50c92c2fec95d62b2a6cdfd8bce6f19ba227c27464f384925a26500"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full16-reuse-proof-v10.json",
+      "file": "full16-reuse/ordinary-full16-reuse-proof-v10.json",
+      "bytes": 71965,
+      "sha256": "87ec6afb1106aa0f37e021d788727a7e09da74be3a5295a59a3412411400e697"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\verify-full16-reuse-v1.mjs",
+      "file": "full16-reuse/verify-full16-reuse-v1.mjs",
+      "bytes": 14910,
+      "sha256": "5c07e1c5451c6ba5156b1609156dbeabfef4ca5254e81580ff985782f7183349"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\verify-full16-reuse-v1.syntax-v1.json",
+      "file": "full16-reuse/verify-full16-reuse-v1.syntax-v1.json",
+      "bytes": 573,
+      "sha256": "6fc2d8a677f656c102b6cd218ccab5d2c9a6d136a81c000e04c6e472fff9c4e2"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\verify-full16-reuse-v2.mjs",
+      "file": "full16-reuse/verify-full16-reuse-v2.mjs",
+      "bytes": 14895,
+      "sha256": "de9644d39dc1f3ca53ca392f4d5f6629d146c00ead2a3bdafdbece5663db93ae"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\verify-full16-reuse-v2.syntax-v1.json",
+      "file": "full16-reuse/verify-full16-reuse-v2.syntax-v1.json",
+      "bytes": 668,
+      "sha256": "a7b4f3669f7bb31af5c0d1283abec2e3fcc0f9883772dd90741eb6297d6c6d5c"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\full16-reuse-proof-schema-error-v1.json",
+      "file": "full16-reuse/full16-reuse-proof-schema-error-v1.json",
+      "bytes": 666,
+      "sha256": "e01d05a07975fce1d70130bf32e7855d03cdf4b6a8fad4fd88c9e6c28a459df2"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\archive-ordinary-capacity-bank-prepare-v10.mjs",
+      "file": "archive-evidence-v10.mjs",
+      "bytes": 15591,
+      "sha256": "1c4627e91aa44fcecc2d3038d42c532a4aef421f49acd6bbcebb6564562e46a1"
+    }
+  ]
+}

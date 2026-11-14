@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {readFile,writeFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {spawn} from 'node:child_process';
+const [mode,runName,gender='male']=process.argv.slice(2);assert(['compatibility','webgl2'].includes(mode));assert(['male','female'].includes(gender));assert(/^quest-after-r[1-9][0-9]*$/.test(runName));
+const root='C:/r16-first-playable-gap-20261113',bytes=await readFile(root+'/build-receipt-r2.json'),receipt=JSON.parse(bytes);assert.equal(receipt.status.code,0);
+const scene=JSON.parse(await readFile(receipt.sourceRoot+'/mir2-web3/apps/web/lib/generated/r16-entry-scene.json'));
+const sha=createHash('sha256').update(bytes).digest('hex');
+await writeFile(root+'/game-full/'+runName+'-invocation.json',JSON.stringify({mode,runName,gender,candidate:receipt.candidate,buildReceiptSha256:sha},null,2)+'\n',{flag:'wx'});
+const child=spawn(process.execPath,[root+'/game-full/run.mjs',runName,receipt.candidate,sha,scene.path,scene.sha256],{cwd:'E:/mir2-player-journey',windowsHide:true,stdio:'inherit',env:{...process.env,R16_QA_MODE:mode,R16_QA_GENDER:gender,R16_QA_CLASS:'Warrior',R16_FONT_CASE:'candidate',R16_CONTROLLED_RUNTIME_FAULT:''}});
+process.exitCode=await new Promise((resolve,reject)=>{child.once('error',reject);child.once('exit',code=>resolve(code??1));});

@@ -1,0 +1,20 @@
+[
+  {
+    "name": "forward-check",
+    "exitCode": 0,
+    "cwd": "C:\\mir2-playtest-releases\\20261004-native-r18\\p3-local-life-review-fix-01\\patch-check-forward-01",
+    "core.autocrlf": false
+  },
+  {
+    "name": "forward-apply",
+    "exitCode": 0,
+    "cwd": "C:\\mir2-playtest-releases\\20261004-native-r18\\p3-local-life-review-fix-01\\patch-check-forward-01",
+    "core.autocrlf": false
+  },
+  {
+    "name": "reverse-check",
+    "exitCode": 0,
+    "cwd": "C:\\mir2-playtest-releases\\20261004-native-r18\\p3-local-life-review-fix-01\\patch-check-forward-01",
+    "core.autocrlf": false
+  }
+]

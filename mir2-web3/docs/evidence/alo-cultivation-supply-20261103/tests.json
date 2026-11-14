@@ -1,0 +1,582 @@
+{
+  "schema": "mir2-alo-cultivation-test-evidence/1",
+  "recordedAtUtc": "2026-11-03T12:19:15.084Z",
+  "collectionMethod": "Read-only review and byte-for-byte copy of existing selected logs and safe public receipts; this collection did not rerun tests, gameplay, processes or model/API calls.",
+  "groups": [
+    {
+      "id": "node-final",
+      "title": "Node all tests",
+      "scope": "Node logic, store, model-proposal and cold-shop regressions; not Windows UI or human acceptance",
+      "primaryResult": {
+        "tests": 310,
+        "passed": 310,
+        "failed": 0,
+        "skipped": 0
+      },
+      "log": {
+        "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\node-cold-shop-final.log",
+        "publishedPath": "logs/node-cold-shop-final.log",
+        "sha256": "482fc57c3c3c02958594076598e67b89de26b5dd88b730e8619cb512356c9054",
+        "bytes": 77115
+      },
+      "resultLines": [
+        "# tests 310",
+        "# pass 310",
+        "# fail 0",
+        "# skipped 0"
+      ]
+    },
+    {
+      "id": "gateway-companion-final",
+      "title": "Gateway companion selection",
+      "scope": "Companion relay, supply journal and actual route selection; not a new player trial",
+      "primaryResult": {
+        "status": "ok",
+        "passed": 78,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 1583,
+        "durationSeconds": 11.65
+      },
+      "targetResults": [
+        {
+          "status": "ok",
+          "passed": 78,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 1583,
+          "durationSeconds": 11.65
+        }
+      ],
+      "log": {
+        "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\gateway-companion-final-6.log",
+        "publishedPath": "logs/gateway-companion-final-6.log",
+        "sha256": "7e534639451be7542e3b48d7168cb8cd0def58d59311434ff3b9467ae549dcca",
+        "bytes": 68054
+      },
+      "resultLines": [
+        "test result: ok. 78 passed; 0 failed; 0 ignored; 0 measured; 1583 filtered out; finished in 11.65s"
+      ]
+    },
+    {
+      "id": "simulation-bounded",
+      "title": "Simulation bounded purchase",
+      "scope": "Bounded economic transaction tests",
+      "primaryResult": {
+        "status": "ok",
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 3358,
+        "durationSeconds": 3.34
+      },
+      "targetResults": [
+        {
+          "status": "ok",
+          "passed": 6,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 3358,
+          "durationSeconds": 3.34
+        }
+      ],
+      "log": {
+        "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\simulation-bounded-final.txt",
+        "publishedPath": "logs/simulation-bounded-final.txt",
+        "sha256": "85ee37fc28c8b094266ca62aeaab1c4c72da4bf3cb27185a919a23b911873358",
+        "bytes": 45456
+      },
+      "resultLines": [
+        "test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 3358 filtered out; finished in 3.34s"
+      ]
+    },
+    {
+      "id": "simulation-transaction",
+      "title": "Simulation transaction",
+      "scope": "Durable NPC purchase transaction tests",
+      "primaryResult": {
+        "status": "ok",
+        "passed": 37,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 3327,
+        "durationSeconds": 37.17
+      },
+      "targetResults": [
+        {
+          "status": "ok",
+          "passed": 37,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 3327,
+          "durationSeconds": 37.17
+        }
+      ],
+      "log": {
+        "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\simulation-transaction-final.txt",
+        "publishedPath": "logs/simulation-transaction-final.txt",
+        "sha256": "f7c1761ed8b45f67dc53c2596332f253dcecbd35bfd258a1eafc14fb3f22cea0",
+        "bytes": 50354
+      },
+      "resultLines": [
+        "test result: ok. 37 passed; 0 failed; 0 ignored; 0 measured; 3327 filtered out; finished in 37.17s"
+      ]
+    },
+    {
+      "id": "simulation-wire",
+      "title": "Simulation owner wire",
+      "scope": "NPC owner wire boundary tests",
+      "primaryResult": {
+        "status": "ok",
+        "passed": 11,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 3353,
+        "durationSeconds": 0.01
+      },
+      "targetResults": [
+        {
+          "status": "ok",
+          "passed": 11,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 3353,
+          "durationSeconds": 0.01
+        }
+      ],
+      "log": {
+        "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\simulation-owner-wire-final.txt",
+        "publishedPath": "logs/simulation-owner-wire-final.txt",
+        "sha256": "a1af7aca4bbf61b77c7ab75e48234a10aa025ddf0e0214511d3e7622c59f90cf",
+        "bytes": 45642
+      },
+      "resultLines": [
+        "test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 3353 filtered out; finished in 0.01s"
+      ]
+    },
+    {
+      "id": "bevy-ui",
+      "title": "Bevy companion UI",
+      "scope": "Selected Bevy companion UI logic tests; overlaps the controls selection",
+      "primaryResult": {
+        "status": "ok",
+        "passed": 24,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 1684,
+        "durationSeconds": 0.19
+      },
+      "targetResults": [
+        {
+          "status": "ok",
+          "passed": 24,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 1684,
+          "durationSeconds": 0.19
+        },
+        {
+          "status": "ok",
+          "passed": 0,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 6,
+          "durationSeconds": 0
+        },
+        {
+          "status": "ok",
+          "passed": 0,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 6,
+          "durationSeconds": 0
+        },
+        {
+          "status": "ok",
+          "passed": 0,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 4,
+          "durationSeconds": 0
+        }
+      ],
+      "log": {
+        "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\ui-companion-tests.log",
+        "publishedPath": "logs/ui-companion-tests.log",
+        "sha256": "38b543d2155115c9f250f736dcb658d7109c41ac7491131e1a71564bc5d6ff4a",
+        "bytes": 55143
+      },
+      "resultLines": [
+        "test result: ok. 24 passed; 0 failed; 0 ignored; 0 measured; 1684 filtered out; finished in 0.19s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "id": "bevy-controls",
+      "title": "Bevy companion controls",
+      "scope": "Selected companion controls/UI logic tests; overlaps the UI selection",
+      "primaryResult": {
+        "status": "ok",
+        "passed": 38,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 1670,
+        "durationSeconds": 0.18
+      },
+      "targetResults": [
+        {
+          "status": "ok",
+          "passed": 38,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 1670,
+          "durationSeconds": 0.18
+        },
+        {
+          "status": "ok",
+          "passed": 0,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 6,
+          "durationSeconds": 0
+        },
+        {
+          "status": "ok",
+          "passed": 0,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 6,
+          "durationSeconds": 0
+        },
+        {
+          "status": "ok",
+          "passed": 0,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 4,
+          "durationSeconds": 0
+        }
+      ],
+      "log": {
+        "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\ui-companion-control-tests.log",
+        "publishedPath": "logs/ui-companion-control-tests.log",
+        "sha256": "c2053e8fdd4b8a62c6e91a1e41ffdf76208b26ba8588fdf29403cee12088dd70",
+        "bytes": 44944
+      },
+      "resultLines": [
+        "test result: ok. 38 passed; 0 failed; 0 ignored; 0 measured; 1670 filtered out; finished in 0.18s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "id": "windows-companion",
+      "title": "Windows companion bridge",
+      "scope": "Windows companion/IME/export bridge tests; not manual frontend acceptance",
+      "primaryResult": {
+        "status": "ok",
+        "passed": 13,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filteredOut": 1228,
+        "durationSeconds": 0.07
+      },
+      "targetResults": [
+        {
+          "status": "ok",
+          "passed": 13,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 1228,
+          "durationSeconds": 0.07
+        }
+      ],
+      "log": {
+        "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\windows-companion-tests.log",
+        "publishedPath": "logs/windows-companion-tests.log",
+        "sha256": "543eb948ad8a4fcb27c95ccbaec67f9da1703fdce9a24c4adc8a960cbb8e695c",
+        "bytes": 48761
+      },
+      "resultLines": [
+        "test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 1228 filtered out; finished in 0.07s"
+      ]
+    }
+  ],
+  "aggregation": {
+    "total": null,
+    "reason": "Counts remain per recorded selection. Different groups and snapshots can overlap; no combined pass count or parity percentage is asserted.",
+    "bevyUiVsControls": {
+      "uiCount": 24,
+      "controlsCount": 38,
+      "sharedTestNames": 23,
+      "summedCountReported": false,
+      "note": "The 23 shared names are measured from these two logs. They are not used to infer a single combined run or unique global coverage."
+    }
+  },
+  "artifacts": [
+    {
+      "role": "new-native-build",
+      "sourcePath": "F:/mir2-builds/canonical-companion-native/debug/mir2-platform-windows.exe",
+      "sha256": "e7e5b7baacbb0300c73d1525fc7b70b3cec365dd1b7d5f2b8be277cf39cfeaab",
+      "bytes": 151734272,
+      "lastWrittenAtUtc": "2026-11-03T09:57:11.827Z",
+      "qualification": "Read-only hash of the build artifact at evidence review; this is not a completed bundle or an installed-baseline hash."
+    },
+    {
+      "role": "new-gateway-build",
+      "sourcePath": "F:/mir2-builds/canonical-companion-gateway/debug/mir2-gateway.exe",
+      "sha256": "cd35f1f8cba5c2d6602dc344421b25db613c4c82061fdf6f34b1946df914a3d7",
+      "bytes": 143067648,
+      "lastWrittenAtUtc": "2026-11-03T10:51:52.220Z",
+      "qualification": "Read-only hash of the build artifact at evidence review; this is not a completed bundle or an installed-baseline hash."
+    }
+  ],
+  "recordedPriorArtifactHashes": {
+    "frozenR16Native": "ff590f072b0f112f1bd6392ed87cd00d232f86d10299b04c24989d2f47bf70c7",
+    "rulesAdjacentOldGateway": "165eba1719866912d2b7da28ad430164bd1a9a8ef704fe976400d0b232dccc7b",
+    "note": "The rules-adjacent result explicitly uses the previously verified R16 Gateway. It is not acceptance of the new Gateway above."
+  },
+  "evidenceScopes": {
+    "frozenR16Windows": {
+      "file": "baseline-replay-outcome.json",
+      "modelCalls": 0,
+      "newUiAcceptance": false
+    },
+    "rulesAdjacent": {
+      "file": "rules-adjacent-once-outcome.json",
+      "modelCalls": 0,
+      "newGatewayAcceptance": false
+    },
+    "newGatewaySupply": {
+      "review": "supply-live-reviewed.json",
+      "actualSummary": "supply-acceptance-summary.json",
+      "modelCalls": 0,
+      "humanTrial": false,
+      "knownFault": "A real committed method result was deliberately dropped, then a different Node process queried the original operation. This is not a real network-failure or Gateway-restart test."
+    },
+    "teachingModelUi": {
+      "source": "model-ui/teaching-ui-outcome.json",
+      "screenshots": [
+        "model-ui/01-model-proposal-before-confirm.jpg",
+        "model-ui/02-model-teaching-confirmed-v2.jpg",
+        "model-ui/03-model-partial-false-preview.jpg",
+        "model-ui/04-cancel-keeps-habits-v2.jpg",
+        "model-ui/05-supply-budget-confirmation.jpg",
+        "model-ui/06-restarted-model-memory-v2.jpg"
+      ],
+      "actualCompletedCalls": 2,
+      "model": "gpt-6-luna",
+      "inputTokens": 2232,
+      "outputTokens": 249,
+      "previewAndConfirmVerified": true,
+      "partialFalsePreviewAndCancellationVerified": true,
+      "falseValueCommitted": false,
+      "restart": {
+        "oldPid": 59820,
+        "newPid": 56204,
+        "differentProcess": true,
+        "archiveId": "3b663035-5b4b-419c-b6da-e6fe033c417f",
+        "policyVersion": 2,
+        "habits": {
+          "assistBeforeLoot": true,
+          "lootOnlyAfterCombat": true,
+          "askBeforeLeaving": true
+        },
+        "modelCallsUnchanged": true
+      },
+      "supplyUi": "Budget confirmation was previewed then cancelled; no authorization or purchase is claimed from this GUI step.",
+      "newModelWorldGameplayAfterTeachingNotClaimed": true,
+      "bundle": "pending root delivery and verification"
+    }
+  },
+  "publishedFiles": [
+    {
+      "path": "baseline-replay-outcome.json",
+      "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\baseline-replay-outcome.json",
+      "sha256": "c0e10e0c983982c9c0f0b1e1c4abedd2752ee5430093dcc54686192f13da4542",
+      "bytes": 23006
+    },
+    {
+      "path": "baseline-replay-notes.md",
+      "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\baseline-replay-notes.md",
+      "sha256": "1d93173372e252f4fe5fd3a69d476da88e407c8e8342c79fc1cb33598b468c96",
+      "bytes": 3777
+    },
+    {
+      "path": "01-baseline-untrained.jpg",
+      "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\01-baseline-untrained.jpg",
+      "sha256": "8e2bb2eafb83e1f16f85ec506e30d772b82f13bada6fc254c458abdb1ab5b061",
+      "bytes": 171429
+    },
+    {
+      "path": "02-before-teaching-loot-during-combat.jpg",
+      "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\02-before-teaching-loot-during-combat.jpg",
+      "sha256": "66e159c8197938c7512486149e4c8c58cb2a2b5d4261815b318041bf82c534db",
+      "bytes": 313342
+    },
+    {
+      "path": "03-preset-teaching-saved-v2.jpg",
+      "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\03-preset-teaching-saved-v2.jpg",
+      "sha256": "7ab8d573cba39ceeecbfcedb0cf12972c45b7f0a3aff0186c5b3d85c1c3e76df",
+      "bytes": 172915
+    },
+    {
+      "path": "04-after-teaching-support.jpg",
+      "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\04-after-teaching-support.jpg",
+      "sha256": "131d99ceb203ca7d780a695ada14e01972acfcfddf9301a5324c2f144416c5ee",
+      "bytes": 314888
+    },
+    {
+      "path": "05-after-combat-loot.jpg",
+      "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\05-after-combat-loot.jpg",
+      "sha256": "868dccd7833c8c314b56d62b34feea679d9809200b92a30d654b07b32f87e220",
+      "bytes": 315014
+    },
+    {
+      "path": "06-restarted-same-archive-v2.jpg",
+      "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\06-restarted-same-archive-v2.jpg",
+      "sha256": "8ef0f37362150d0dc75f14cea344518dffc821f1ce832e17262ebd3b6e9248ff",
+      "bytes": 172913
+    },
+    {
+      "path": "07-restarted-adventure.jpg",
+      "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\07-restarted-adventure.jpg",
+      "sha256": "55c57cfc8eb5cb95c5f57adfa3a67376a0323331d3f42a18b6b962c11ffbc1a9",
+      "bytes": 312469
+    },
+    {
+      "path": "rules-adjacent-once-outcome.json",
+      "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\private\\rules-adjacent-once\\outcome.json",
+      "sha256": "d6315b78f60d45bbf6f0bfc80ef9aca003faa217fc3993584e907a4488359756",
+      "bytes": 6209
+    },
+    {
+      "path": "supply-live-reviewed.json",
+      "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\supply-live-reviewed.json",
+      "sha256": "21e8a1fe1ab07f90d000b4df65a72d5e62f94965bcfa059e9000db94682aece7",
+      "bytes": 6860
+    },
+    {
+      "path": "supply-acceptance-summary.json",
+      "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\private-fixtures\\experience-68440d7c-437e-45bf-b90d-760e608c1fe7\\supply-acceptance-summary.json",
+      "sha256": "40e17baf55590d83cb0dbb271f86c849745a1bf1e6af8b54052898bcc8b843c6",
+      "bytes": 11757
+    },
+    {
+      "path": "logs/node-cold-shop-final.log",
+      "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\node-cold-shop-final.log",
+      "sha256": "482fc57c3c3c02958594076598e67b89de26b5dd88b730e8619cb512356c9054",
+      "bytes": 77115
+    },
+    {
+      "path": "logs/gateway-companion-final-6.log",
+      "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\gateway-companion-final-6.log",
+      "sha256": "7e534639451be7542e3b48d7168cb8cd0def58d59311434ff3b9467ae549dcca",
+      "bytes": 68054
+    },
+    {
+      "path": "logs/simulation-bounded-final.txt",
+      "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\simulation-bounded-final.txt",
+      "sha256": "85ee37fc28c8b094266ca62aeaab1c4c72da4bf3cb27185a919a23b911873358",
+      "bytes": 45456
+    },
+    {
+      "path": "logs/simulation-transaction-final.txt",
+      "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\simulation-transaction-final.txt",
+      "sha256": "f7c1761ed8b45f67dc53c2596332f253dcecbd35bfd258a1eafc14fb3f22cea0",
+      "bytes": 50354
+    },
+    {
+      "path": "logs/simulation-owner-wire-final.txt",
+      "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\simulation-owner-wire-final.txt",
+      "sha256": "a1af7aca4bbf61b77c7ab75e48234a10aa025ddf0e0214511d3e7622c59f90cf",
+      "bytes": 45642
+    },
+    {
+      "path": "logs/ui-companion-tests.log",
+      "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\ui-companion-tests.log",
+      "sha256": "38b543d2155115c9f250f736dcb658d7109c41ac7491131e1a71564bc5d6ff4a",
+      "bytes": 55143
+    },
+    {
+      "path": "logs/ui-companion-control-tests.log",
+      "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\ui-companion-control-tests.log",
+      "sha256": "c2053e8fdd4b8a62c6e91a1e41ffdf76208b26ba8588fdf29403cee12088dd70",
+      "bytes": 44944
+    },
+    {
+      "path": "logs/windows-companion-tests.log",
+      "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\windows-companion-tests.log",
+      "sha256": "543eb948ad8a4fcb27c95ccbaec67f9da1703fdce9a24c4adc8a960cbb8e695c",
+      "bytes": 48761
+    },
+    {
+      "path": "model-ui/teaching-ui-outcome.json",
+      "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\teaching-native\\tn-bd32b0ab13694848\\teaching-ui-outcome.json",
+      "sha256": "c655b3bdb9e350719e44eca502d7ed640451db3d0177aea4c27c059a9b324a14",
+      "bytes": 2626
+    },
+    {
+      "path": "model-ui/01-model-proposal-before-confirm.jpg",
+      "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\teaching-native\\tn-bd32b0ab13694848\\01-model-proposal-before-confirm.jpg",
+      "sha256": "a2a58e042505f9787f6a1b885792824a8bf6b2744d6af1f415a1ff1bae2ec2ba",
+      "bytes": 186140
+    },
+    {
+      "path": "model-ui/02-model-teaching-confirmed-v2.jpg",
+      "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\teaching-native\\tn-bd32b0ab13694848\\02-model-teaching-confirmed-v2.jpg",
+      "sha256": "124eed8674f89e0ad3a09bf5cbf43c36adf171cc9c9bbbd7c68e3f448f6fc0e2",
+      "bytes": 180687
+    },
+    {
+      "path": "model-ui/03-model-partial-false-preview.jpg",
+      "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\teaching-native\\tn-bd32b0ab13694848\\03-model-partial-false-preview.jpg",
+      "sha256": "2195ad08fe7b026294d4df9b8212e3958792bc2324a8399e2f617f7977763b32",
+      "bytes": 179515
+    },
+    {
+      "path": "model-ui/04-cancel-keeps-habits-v2.jpg",
+      "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\teaching-native\\tn-bd32b0ab13694848\\04-cancel-keeps-habits-v2.jpg",
+      "sha256": "3c069aa6666691318081f1ad5b148a8f7a3fb24c61e0e6ff777a3882795f9631",
+      "bytes": 174053
+    },
+    {
+      "path": "model-ui/05-supply-budget-confirmation.jpg",
+      "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\teaching-native\\tn-bd32b0ab13694848\\05-supply-budget-confirmation.jpg",
+      "sha256": "ae7e3cbbda0c76957edd46fc47b5c88266b6475b1202236c2ccb48339076cc8b",
+      "bytes": 161052
+    },
+    {
+      "path": "model-ui/06-restarted-model-memory-v2.jpg",
+      "sourcePath": "F:\\mir2-builds\\alo-cultivation-20261103\\teaching-native\\tn-bd32b0ab13694848\\06-restarted-model-memory-v2.jpg",
+      "sha256": "616ed6d0b7278c920e261be469a69e17a9ddd1355b222a52eb88ee1fb8537fb1",
+      "bytes": 169631
+    }
+  ],
+  "manifestScope": "Copied baseline, rules/supply summaries, model UI summary/screenshots and selected test logs; later bundle qualification is separate.",
+  "exclusions": "No original user state, credentials, private server configuration, signing/MAC keys, SQLite databases, full character archives or executable artifacts were copied.",
+  "updatedAtUtc": "2026-11-03T13:06:07.577Z"
+}

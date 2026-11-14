@@ -40,15 +40,15 @@ export const ASSET_CACHE_PACKS: AssetCachePack[] = [
     ]),
   },
   {
+    // Keep this inventory record byte-stable for existing asset-cache
+    // namespaces. The stage selector retires its redundant showcase requests;
+    // OriginalClientShell owns active-viewport and player-centred ring loading.
     name: "bichon-spawn",
     label: "Bichon spawn scene",
     priority: 15,
     stage: "game",
     phase: "background",
     cacheTier: "background",
-    // Prewarm the packed entity atlas and the actual production Bichon entry footprint.
-    // StartGame currently places Scout near 398,333, so warming the old login
-    // showcase center still left the first playable scene to cold-load.
     urls: [
       "/original-ui/MMap/0.png",
       "/bevy-entity-atlases/manifest.json",
@@ -116,7 +116,9 @@ export function selectAssetCachePacksForStage(
   packs: readonly AssetCachePack[] = ASSET_CACHE_PACKS,
 ): AssetCachePack[] {
   return packs
-    .filter((pack) => pack.stage === stage)
+    // Scene loading follows the actual world/player, including saved positions
+    // and other maps. Do not warm the retired Scout showcase or its static atlas.
+    .filter((pack) => pack.stage === stage && pack.name !== "bichon-spawn")
     .sort((left, right) => left.priority - right.priority);
 }
 

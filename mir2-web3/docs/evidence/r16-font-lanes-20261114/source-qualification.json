@@ -1,0 +1,37 @@
+{
+  "passed": true,
+  "source": "6ae96fa6017d511255ac46216c034594b6fe500f",
+  "checked": 2773,
+  "publicGdiInputs": 12,
+  "publicWorkerInputs": 1,
+  "unexpectedDifferences": 0,
+  "transforms": [
+    {
+      "filename": "mir2-web3/apps/web/lib/generated/bevy_runtime_version.json",
+      "kind": "fixed published bevy-0c553a754308e5b8 manifest",
+      "sha256": "36bdaa0116064c9b41cf8f54a547e53319011180e2275e1c5549e2ed7a33041b"
+    }
+  ],
+  "build": {
+    "candidate": "6ae96fa6017d-font-lanes-7b6cbfcb",
+    "id": "og1FaBw6WVLshiPDpJG5y",
+    "dist": ".next-font-lanes-r1",
+    "durationMs": 35898,
+    "receiptSha256": "70551d638c7fd892a81bbc475eac0b0f37bc05b55d6cc5fd08e275b4315af083"
+  },
+  "sourceInputsSha256": "831876917d2023a1a4ab594245fda0338fca4ac0596422c2d718a15f1aa5bb8a",
+  "fixedAsset": "20261108-r16-08ec86d5105c",
+  "fixedRuntime": "bevy-0c553a754308e5b8",
+  "scope": "Fresh physical source and dependencies. All tracked non-public Web inputs, twelve GDI inputs, Worker and shared keyboard are byte-bound to committed 6ae96fa601; one declared fixed published runtime manifest transform. Foreign Shell/Native WIP excluded.",
+  "browserQualification": "separate",
+  "buildStatus": {
+    "code": 0,
+    "signal": null
+  },
+  "buildWorker": {
+    "path": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+    "bytes": 43171,
+    "sha256": "3b07de456c113135d2d37248893a707ce98179b419429fe6d58c18981b510dba"
+  },
+  "originalBuildReceiptSha256": "70551d638c7fd892a81bbc475eac0b0f37bc05b55d6cc5fd08e275b4315af083"
+}

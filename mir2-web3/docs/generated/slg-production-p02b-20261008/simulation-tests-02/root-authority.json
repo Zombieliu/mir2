@@ -1,0 +1,10 @@
+{
+  "owner": "Root",
+  "allowRealCargo": "true",
+  "guardExeSha": "2025bdd29ff4df3d9f772ba7f0d44856243204909b6185cb2ab184dfcd0ab82e",
+  "guardSourceSha": "f1eeaaf4bddf13e8e3bae1379100095c4b22fa91c6d6696ad30bd218f9516689",
+  "sourceSnapshotSha": "02442e0db1e9945706b553dcf9e829f6b2d0634543daba6147e8d1c7bdca8c70",
+  "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+  "probeSha": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab",
+  "independentShimReviewAccepted": "true"
+}

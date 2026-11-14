@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T17:39:26.624589+00:00",
+  "producerReceipt": {
+    "filename": "packed-local-health-evidence-run1/PRECONDITIONS.json",
+    "bytes": 431,
+    "sha256": "a1a73e3e8e1fb7971f6d3bf8946e65164d10a39aec2c42cff3b04b95597334ed"
+  },
+  "sanitizedProducerFields": {
+    "controlSha256": "C6D7A36B9E34755A90E36DADDD9076E640D5FDAD3B6906341C6C48782A5AEF66",
+    "engineSourceRevision": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+    "gameSourceRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+    "legacySeedSequence": 2026102911,
+    "localFixture": true,
+    "networkRequests": 0,
+    "noPublicFeedOverride": true,
+    "versionSha256": "51AFE182412B0CD7DABEB23228F3CCE354D82DB9694062FA40FAB1166397308A"
+  },
+  "attemptNonceRawValuesOmitted": true,
+  "rawGameStdoutStderrNeverCopied": true,
+  "phase": "Actual production-library local apply/real child proof; not a synthetic ready fixture"
+}

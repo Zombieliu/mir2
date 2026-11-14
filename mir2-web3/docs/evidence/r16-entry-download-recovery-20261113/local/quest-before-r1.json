@@ -1,0 +1,27 @@
+{
+  "run": "quest-before-r1",
+  "source": null,
+  "renderer": "compatibility",
+  "passed": false,
+  "originalReceiptSha256": "357f1a8ff213ac1fbeabd49543fc3f0e230ff60ebd6b1b77121b4934e8bc7de1",
+  "failure": {
+    "stage": "pin-exact-build-and-copy-private-fixture",
+    "message": "mir2-web3/apps/web/app/page.tsx\n+ actual - expected\n\n+ 'ed60899e3e1dd65aac35de651ced1eaca831014006adbe624e498726455b2259'\n- 'd82fe7611a8c4e065bd3cc773e7eccca86470a6f395c2dd37e6e601f0fddb4a3'\n"
+  },
+  "closed": {
+    "browser": true,
+    "proxy": true,
+    "next": true,
+    "gateway": true
+  },
+  "fixtureUnchanged": false,
+  "sameEntryRecoveryPassed": false,
+  "npcRecovery": {
+    "reads": []
+  },
+  "runtimeAttempts": [],
+  "native": null,
+  "worker": null,
+  "warm": null,
+  "scope": "Source guard stopped before fixture; no product outcome."
+}

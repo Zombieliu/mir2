@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "files": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "preimage": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\playtest-capacity-soak.mjs.preimage",
+      "bytes": 130681,
+      "sha256": "79d30e3994703eeef902fdd79feac1e7ce76c8b0255baecb0824f5d7d51fc4e6",
+      "gitLfBytes": 130681,
+      "gitLfSha256": "79d30e3994703eeef902fdd79feac1e7ce76c8b0255baecb0824f5d7d51fc4e6",
+      "rawNormalizedMatchesGit": true
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "preimage": "C:\\mir2-build\\p01-completion-20261024\\phase-window-timing-v1\\playtest-capacity-soak.test.mjs.preimage",
+      "bytes": 188151,
+      "sha256": "97fb8b09087958dc8ee8f15094011e04a56e087af6bc5cfdfeee4d2fcd5554f9",
+      "gitLfBytes": 188151,
+      "gitLfSha256": "97fb8b09087958dc8ee8f15094011e04a56e087af6bc5cfdfeee4d2fcd5554f9",
+      "rawNormalizedMatchesGit": true
+    }
+  ],
+  "preimageCapturePreparationFailure": "v1 git show lacked ./ relative path, exited128 before writing any preimage. v2 uses HEAD:./file from project subdirectory; no source was edited."
+}

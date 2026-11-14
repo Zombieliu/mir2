@@ -1,0 +1,174 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T17:30:57.007Z",
+  "passed": true,
+  "sourceCount": 23,
+  "sourceBytes": 139879,
+  "sourceDestinationRawPinsMatched": true,
+  "preVerificationFileCount": 26,
+  "finalFileCount": 27,
+  "inventory": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-probe16-preparation-recovery-v1\\control-history\\root-controller-preparation-v1.json",
+      "bytes": 2754,
+      "sha256": "bd02c0a78d55ffc9b930bbbc850cbdf2927610d22b3d73f7cc5d096a4008cda9",
+      "relative": "control-history/root-controller-preparation-v1.json"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-probe16-preparation-recovery-v1\\control-history\\root-controller-v2-exact-inverse-proof.json",
+      "bytes": 1866,
+      "sha256": "62a2c6f5c07c725e44fda09c446481c2df5b8ea761c49b28ff3dc541bb6c10d0",
+      "relative": "control-history/root-controller-v2-exact-inverse-proof.json"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-probe16-preparation-recovery-v1\\control-history\\ROOT-CONTROLLER.md",
+      "bytes": 2791,
+      "sha256": "8ada64ee067d9542c0bbfee680b0bce7ab6140fc2be985f3dba00424554bfc6f",
+      "relative": "control-history/ROOT-CONTROLLER.md"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-probe16-preparation-recovery-v1\\control-history\\root-seal-and-guard-v1.mjs",
+      "bytes": 13330,
+      "sha256": "f7ae46ba51a62ce378ee786cd8d92a96bc8802a61ed0036fb80d69cdeec47060",
+      "relative": "control-history/root-seal-and-guard-v1.mjs"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-probe16-preparation-recovery-v1\\execution\\probe16-root-resume-source-pins-actual-v1.log",
+      "bytes": 3356,
+      "sha256": "458d1c61a62cb128b8add3b703d2ca91862c7aba4ad078c00d936fd0e52adda2",
+      "relative": "execution/probe16-root-resume-source-pins-actual-v1.log"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-probe16-preparation-recovery-v1\\execution\\probe16-root-resume-source-pins-actual-v2.log",
+      "bytes": 952,
+      "sha256": "8ec52550e54813057a840d4a8fbeb9dd4d6b7c08b061e6952eb816aeb3449089",
+      "relative": "execution/probe16-root-resume-source-pins-actual-v2.log"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-probe16-preparation-recovery-v1\\execution\\root-prepare-actual-v1.log",
+      "bytes": 924,
+      "sha256": "5f76607cbfb3371018ba1a7df418bf200e6f3697674b437c3309d002d7e9eb84",
+      "relative": "execution/root-prepare-actual-v1.log"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-probe16-preparation-recovery-v1\\execution\\root-resume-probe16-source-pins-execution-v1.json",
+      "bytes": 1900,
+      "sha256": "7510b470cfc1e62b15d8a5f8b7d8c5af41b69e20449e93eecb1371a37d62835b",
+      "relative": "execution/root-resume-probe16-source-pins-execution-v1.json"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-probe16-preparation-recovery-v1\\execution\\root-resume-probe16-source-pins-partial-state-v1.json",
+      "bytes": 4095,
+      "sha256": "29b082ab472060a624b04d160b20b1c01ecc06dfebe86d178b55506ab23c0ffc",
+      "relative": "execution/root-resume-probe16-source-pins-partial-state-v1.json"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-probe16-preparation-recovery-v1\\execution\\root-seal-attempt-v1-observed-tool-result.json",
+      "bytes": 1728,
+      "sha256": "5c1500e5f2a62b94faa2e2120cd11cd78c3d6b25901a60fc2f016a49da3b4777",
+      "relative": "execution/root-seal-attempt-v1-observed-tool-result.json"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-probe16-preparation-recovery-v1\\execution\\root-seal-attempt-v2.actual.log",
+      "bytes": 346,
+      "sha256": "8bbb15c8c26075c6fa4ec9efac66e79ea8663d9d3ad7729d0c8381e0a7ff7810",
+      "relative": "execution/root-seal-attempt-v2.actual.log"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-probe16-preparation-recovery-v1\\execution\\root-source-guard-v2.actual.log",
+      "bytes": 325,
+      "sha256": "7a6abf2c4cfc7dff6864800f30a7683c7d0594293e93a9f98b0b48bda3690469",
+      "relative": "execution/root-source-guard-v2.actual.log"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-probe16-preparation-recovery-v1\\public-copy-receipt-v1.json",
+      "bytes": 15890,
+      "sha256": "b798d16c3fdabba8a64a9deb09a14d62ca84592c35aaea6a5ef0edec8475daba",
+      "relative": "public-copy-receipt-v1.json"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-probe16-preparation-recovery-v1\\public-whitelist-v1.json",
+      "bytes": 12297,
+      "sha256": "af909d135ac3ab5d388824a83abcb6697a7a3ad073f8900e11ae1b4d934353cf",
+      "relative": "public-whitelist-v1.json"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-probe16-preparation-recovery-v1\\README.md",
+      "bytes": 2974,
+      "sha256": "1864e4b029f29daab44e9f57d9bf899064542ac1ce15e71c1f6f42411e52f732",
+      "relative": "README.md"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-probe16-preparation-recovery-v1\\resume\\root-resume-probe16-source-pins-v1.mjs",
+      "bytes": 18269,
+      "sha256": "2fe4b3d258b62afcd977815d5e53854b89f51cf29ff2655500aec378c55b2b30",
+      "relative": "resume/root-resume-probe16-source-pins-v1.mjs"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-probe16-preparation-recovery-v1\\resume\\root-resume-probe16-source-pins-v2-inverse-proof.json",
+      "bytes": 1552,
+      "sha256": "e9b12c789f1eaa76e2aa73f64a00e3571d89ac4211de28e97101de557530f22d",
+      "relative": "resume/root-resume-probe16-source-pins-v2-inverse-proof.json"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-probe16-preparation-recovery-v1\\resume\\root-resume-probe16-source-pins-v2.mjs",
+      "bytes": 18298,
+      "sha256": "9256c6881e9da04087e481320e8563c6f7ca35debb36d115b2447d3e8057d104",
+      "relative": "resume/root-resume-probe16-source-pins-v2.mjs"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-probe16-preparation-recovery-v1\\resume\\root-resume-probe16-source-pins-v3-inverse-proof.json",
+      "bytes": 5470,
+      "sha256": "4cd238ade8e464462dd39441889837d9f3c0cbc99e5a9d271137c73c71bae7d8",
+      "relative": "resume/root-resume-probe16-source-pins-v3-inverse-proof.json"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-probe16-preparation-recovery-v1\\resume\\root-resume-probe16-source-pins-v3.mjs",
+      "bytes": 18943,
+      "sha256": "587e954260768c9f6f54340ca741ae8d96fe7889c22d0bceabe49ec4ecfa82bd",
+      "relative": "resume/root-resume-probe16-source-pins-v3.mjs"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-probe16-preparation-recovery-v1\\review\\initial-findings-v1.json",
+      "bytes": 2272,
+      "sha256": "d567fe1a05697d7e650bb35b8d985c0405fa0b8271c04384e5374cc97479a239",
+      "relative": "review/initial-findings-v1.json"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-probe16-preparation-recovery-v1\\review\\preseal-independent-review-v2.json",
+      "bytes": 8077,
+      "sha256": "04ce576a8282d65d18b2f6599d15e64a5225b4f32f3a3401581fba5944750816",
+      "relative": "review/preseal-independent-review-v2.json"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-probe16-preparation-recovery-v1\\review\\resume-source-pins-independent-review-v1.json",
+      "bytes": 3685,
+      "sha256": "8247bd2cbd194b4dd7e2a19a738c80d7963c7ad0d0ffb61b8774a304973138c3",
+      "relative": "review/resume-source-pins-independent-review-v1.json"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-probe16-preparation-recovery-v1\\review\\resume-source-pins-independent-review-v2.json",
+      "bytes": 4963,
+      "sha256": "7cfbbdf0c2e56ae507982415cb3ab4c5a21ddcc0dc24c7ce2f80899ad342ab45",
+      "relative": "review/resume-source-pins-independent-review-v2.json"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-probe16-preparation-recovery-v1\\syntax\\probe16-missing-syntax-artifact-actual-v1.json",
+      "bytes": 20969,
+      "sha256": "48e9b7ef38f902ea11f19f82c1865e963542fbc500312b75d67b2b7b338fbce4",
+      "relative": "syntax/probe16-missing-syntax-artifact-actual-v1.json"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-probe16-preparation-recovery-v1\\syntax\\root-probe16-syntax-artifact-v1.mjs",
+      "bytes": 3014,
+      "sha256": "3453dbf9bd481ef363d92606f11ef5faadc4dedcd11497480a8fe672ac86c2a9",
+      "relative": "syntax/root-probe16-syntax-artifact-v1.mjs"
+    }
+  ],
+  "readmeRelativeLinks": 8,
+  "allLinksExist": true,
+  "privateValuesRead": false,
+  "activeRunLogsOrReportsRead": false,
+  "newProbeResultKnown": false,
+  "capacityAccepted": false
+}

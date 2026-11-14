@@ -1,0 +1,166 @@
+TAP version 13
+# Subtest: gateway paths accept exact named/legacy arguments and reject duplicate or malformed options
+ok 1 - gateway paths accept exact named/legacy arguments and reject duplicate or malformed options
+  ---
+  duration_ms: 0.7483
+  type: 'test'
+  ...
+# Subtest: binary discovery stays in canonical build directories; a missing explicit binary never falls back
+ok 2 - binary discovery stays in canonical build directories; a missing explicit binary never falls back
+  ---
+  duration_ms: 6.6439
+  type: 'test'
+  ...
+# Subtest: local child environment omits inherited production/database/admin/model settings
+ok 3 - local child environment omits inherited production/database/admin/model settings
+  ---
+  duration_ms: 0.5923
+  type: 'test'
+  ...
+# Subtest: native fixture exposes explicit binary/resource paths and opt-in ordinary login only
+ok 4 - native fixture exposes explicit binary/resource paths and opt-in ordinary login only
+  ---
+  duration_ms: 0.2711
+  type: 'test'
+  ...
+# Subtest: trusted R16 metadata anchors are exact SHA-256 values
+ok 5 - trusted R16 metadata anchors are exact SHA-256 values
+  ---
+  duration_ms: 0.1504
+  type: 'test'
+  ...
+# Subtest: resource closure rejects path traversal, drive paths, aliases and missing startup resources
+ok 6 - resource closure rejects path traversal, drive paths, aliases and missing startup resources
+  ---
+  duration_ms: 0.5946
+  type: 'test'
+  ...
+# Subtest: resource validation detects same-size corruption and rejects out-of-root reads
+ok 7 - resource validation detects same-size corruption and rejects out-of-root reads
+  ---
+  duration_ms: 3.6264
+  type: 'test'
+  ...
+# Subtest: assembly refuses unverified resources and refuses overlap with the original R16 package
+ok 8 - assembly refuses unverified resources and refuses overlap with the original R16 package
+  ---
+  duration_ms: 1.3801
+  type: 'test'
+  ...
+# Subtest: a junction cannot turn the new fixture destination into an R16 source write
+ok 9 - a junction cannot turn the new fixture destination into an R16 source write
+  ---
+  duration_ms: 2.2919
+  type: 'test'
+  ...
+# Subtest: an existing destination is never merged or overwritten
+ok 10 - an existing destination is never merged or overwritten
+  ---
+  duration_ms: 5.2817
+  type: 'test'
+  ...
+# Subtest: owned gateway shutdown writes the real stdin line and concurrent close is idempotent
+ok 11 - owned gateway shutdown writes the real stdin line and concurrent close is idempotent
+  ---
+  duration_ms: 41.4181
+  type: 'test'
+  ...
+# Subtest: an owned child with no stdin closes within the fallback bound
+ok 12 - an owned child with no stdin closes within the fallback bound
+  ---
+  duration_ms: 35.1555
+  type: 'test'
+  ...
+# Subtest: an unresponsive owned child gets the graceful window before the bounded fallback
+ok 13 - an unresponsive owned child gets the graceful window before the bounded fallback
+  ---
+  duration_ms: 142.4982
+  type: 'test'
+  ...
+# Subtest: already exited children and absent handles are safe to close repeatedly
+ok 14 - already exited children and absent handles are safe to close repeatedly
+  ---
+  duration_ms: 34.9828
+  type: 'test'
+  ...
+# Subtest: field approach skips a walkable but isolated nearest destination
+ok 15 - field approach skips a walkable but isolated nearest destination
+  ---
+  duration_ms: 1.1851
+  type: 'test'
+  ...
+# Subtest: field setup does not turn a safe or occupied destination into a legal path
+ok 16 - field setup does not turn a safe or occupied destination into a legal path
+  ---
+  duration_ms: 0.1254
+  type: 'test'
+  ...
+# Subtest: retreat travel budget accounts for a real collision detour and has a fixed occupancy allowance
+ok 17 - retreat travel budget accounts for a real collision detour and has a fixed occupancy allowance
+  ---
+  duration_ms: 0.218
+  type: 'test'
+  ...
+# Subtest: retreat fixture rejects unreachable or overlong paths instead of waiting indefinitely
+ok 18 - retreat fixture rejects unreachable or overlong paths instead of waiting indefinitely
+  ---
+  duration_ms: 0.2905
+  type: 'test'
+  ...
+# Subtest: private supply key is generated independently once and reused for the fixed world
+ok 19 - private supply key is generated independently once and reused for the fixed world
+  ---
+  duration_ms: 12.1602
+  type: 'test'
+  ...
+# Subtest: a missing key with any surviving journal publication artifact fails without generating a replacement
+ok 20 - a missing key with any surviving journal publication artifact fails without generating a replacement
+  ---
+  duration_ms: 7.6167
+  type: 'test'
+  ...
+# Subtest: corrupt or mismatched private configuration is retained byte for byte
+ok 21 - corrupt or mismatched private configuration is retained byte for byte
+  ---
+  duration_ms: 13.3338
+  type: 'test'
+  ...
+# Subtest: gateway-only supply secrets do not enter actor/native inherited environments
+ok 22 - gateway-only supply secrets do not enter actor/native inherited environments
+  ---
+  duration_ms: 0.243
+  type: 'test'
+  ...
+# Subtest: explicit private output roots contain both fresh outputs and reused account stores
+ok 23 - explicit private output roots contain both fresh outputs and reused account stores
+  ---
+  duration_ms: 3.5775
+  type: 'test'
+  ...
+# Subtest: a different explicit root and malformed reuse cannot broaden the selected boundary
+ok 24 - a different explicit root and malformed reuse cannot broaden the selected boundary
+  ---
+  duration_ms: 2.4396
+  type: 'test'
+  ...
+# Subtest: junctions cannot redirect reuse, key configuration, or directory creation outside its root
+ok 25 - junctions cannot redirect reuse, key configuration, or directory creation outside its root
+  ---
+  duration_ms: 2.957
+  type: 'test'
+  ...
+# Subtest: an explicit test root rejects an existing foreign local state before trying a gateway
+ok 26 - an explicit test root rejects an existing foreign local state before trying a gateway
+  ---
+  duration_ms: 3.4868
+  type: 'test'
+  ...
+1..26
+# tests 26
+# suites 0
+# pass 26
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 334.1268

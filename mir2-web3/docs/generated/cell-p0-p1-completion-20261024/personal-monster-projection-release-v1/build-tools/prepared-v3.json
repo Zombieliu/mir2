@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 3,
+  "preparedAt": "2026-10-25T12:27:29.954Z",
+  "state": "PREPARED_ONLY_FIVE_SOURCE_PINS_FINAL_COMMIT_AND_REAL_VALIDATION_PENDING",
+  "files": [
+    {
+      "file": "source-lib-v3.mjs",
+      "bytes": 15618,
+      "sha256": "ffd87a222e5f04d1f61c29ee71bc69144cc90f696decf5c5aacc821817ba80fb"
+    },
+    {
+      "file": "pin-build-source-v3.mjs",
+      "bytes": 997,
+      "sha256": "40c56afaaf0ff528d5c7300c93b7aa0167672ed561ef914a4bd211300e5d3538"
+    },
+    {
+      "file": "build-release-v3.mjs",
+      "bytes": 4895,
+      "sha256": "055254f856a71d1ffc7d0e98fc4657bc29782a7b78c534bcf31f6d58726f6642"
+    },
+    {
+      "file": "capture-release-v3.mjs",
+      "bytes": 3379,
+      "sha256": "ae76760c0d328982e1d52858e1fae408835188419522dd0881ddb681c74920b4"
+    },
+    {
+      "file": "final-source-binding-v3.json",
+      "bytes": 456,
+      "sha256": "9ff720ea5c429b52dc52aa43fc401e131a77edc6905a5c25c8950afc97f3a6c2"
+    },
+    {
+      "file": "entrypoint-derivation-v3.json",
+      "bytes": 10460,
+      "sha256": "b14b5fbb9b290b2ca2a655451fcfea07f49ba4f1a344f443d8f1845b81fd19ca"
+    },
+    {
+      "file": "README-prepared-v3.md",
+      "bytes": 2336,
+      "sha256": "42eb4390b46cafbec29cdd58869fae4202d5a05ad73b07636abc0eea6a642777"
+    },
+    {
+      "file": "prepare-entrypoints-v3.mjs",
+      "bytes": 11330,
+      "sha256": "f17f96fe5b9c81818f738b5a09c823f68c8ecfba6fa6363fc197dd0458375a66"
+    }
+  ],
+  "aggregateSha256": "de0e5f95f74f2dd9b7e6af8885890f4d5970b737e820f60c5f20ef7691a48927",
+  "originalV1V2FilesUnchanged": true,
+  "originalFilePins": [
+    {
+      "file": "prepared-v1.json",
+      "bytes": 2376,
+      "sha256": "e281f731a462d1968afe2347a9ed15e3bee35d9d2038aadb7b157a67566829a3"
+    },
+    {
+      "file": "source-lib.mjs",
+      "bytes": 12850,
+      "sha256": "ed8ffede99d38b3256f8215dfe4ceb1dbabdec572d5535c69674fd02925ccc33"
+    },
+    {
+      "file": "pin-build-source-v1.mjs",
+      "bytes": 955,
+      "sha256": "fee0915bdb7c460d5d106a7cb3713d28ed27c8ee279c8bb4b1ebfcf54ae003c4"
+    },
+    {
+      "file": "build-release-v1.mjs",
+      "bytes": 4892,
+      "sha256": "115ef3398bc344912c6ade71b798b9773ec89648075d20fb53fa4adab4044826"
+    },
+    {
+      "file": "capture-release-v1.mjs",
+      "bytes": 3365,
+      "sha256": "dbe5a398be4f21312df30479cacee898034b49f3637fc0ce9ee83a554943558c"
+    },
+    {
+      "file": "final-source-binding.json",
+      "bytes": 405,
+      "sha256": "aec4c4b0de3bcd90bd06921320e87c5e9716bbb69022e91ff57933ccada5f35e"
+    },
+    {
+      "file": "README.md",
+      "bytes": 3784,
+      "sha256": "f7839e2dfe69ccc5f3da01627c09681ebb89fa7656d47c83e7fad9b4e00ba6b0"
+    },
+    {
+      "file": "prepare-build-entrypoints-v1.mjs",
+      "bytes": 4768,
+      "sha256": "ccb7fbea9df4f7c5daa15f187fe7cd38b8d9b3e8d638526341326a43d49efd05"
+    },
+    {
+      "file": "entrypoint-derivation-v1.json",
+      "bytes": 4862,
+      "sha256": "91d11e8d5a73938b1c5d356029e9659991fa7304c00f790c891e28e74cdab46c"
+    },
+    {
+      "file": "prepare-metadata-v1.mjs",
+      "bytes": 2181,
+      "sha256": "de8a4433f279a1b046e683dd1b0ce5f9193998f937286600d039003d8c399773"
+    },
+    {
+      "file": "prepared-v2.json",
+      "bytes": 3051,
+      "sha256": "58142663cdeebcea69f4227f1976b198647558e32b280009a84ab6d4fc6a7f9d"
+    },
+    {
+      "file": "source-lib-v2.mjs",
+      "bytes": 15258,
+      "sha256": "d1c096039ad478f07469c8926160a95efb1d81582aac9bba708c6f1eae65bc5a"
+    },
+    {
+      "file": "pin-build-source-v2.mjs",
+      "bytes": 958,
+      "sha256": "e29ca61e0aba9287a33bbbe867652eb14b83e29713dccf7e473612dc7c13a7ee"
+    },
+    {
+      "file": "build-release-v2.mjs",
+      "bytes": 4895,
+      "sha256": "8ca8274f6d17f5a2c3d2764d0ac040b2ce2dc4d9ea215b065b2cf57c49b488cc"
+    },
+    {
+      "file": "capture-release-v2.mjs",
+      "bytes": 3368,
+      "sha256": "b53a948a730965823745ac41a3ea847c539dbd4e434e682382e5a96d97841d3d"
+    },
+    {
+      "file": "final-source-binding-v2.json",
+      "bytes": 405,
+      "sha256": "aec4c4b0de3bcd90bd06921320e87c5e9716bbb69022e91ff57933ccada5f35e"
+    },
+    {
+      "file": "README-prepared-v2.md",
+      "bytes": 2550,
+      "sha256": "2cc85bbd5cb3eeab455cf661fdf8d51a9d3a508df50a8ad388046e35705e5209"
+    },
+    {
+      "file": "source-lib-before-v2.mjs.txt",
+      "bytes": 12850,
+      "sha256": "ed8ffede99d38b3256f8215dfe4ceb1dbabdec572d5535c69674fd02925ccc33"
+    },
+    {
+      "file": "prepare-receipt-binding-v2.mjs",
+      "bytes": 7892,
+      "sha256": "cf306c0afb5f17fd65aea3864568fd864405f26ffa9e6d24d04c9454e078476f"
+    },
+    {
+      "file": "receipt-binding-mutation-v2.json",
+      "bytes": 6849,
+      "sha256": "144b4aa17462d3bc6194d9e7d5147d7b638f2d3f231025bfa1a695dce25f1404"
+    },
+    {
+      "file": "prepare-metadata-v2.mjs",
+      "bytes": 2750,
+      "sha256": "fa0d89783c1401a76a5d558cda1886fb818f140684d7644d96d66ef462e39f18"
+    }
+  ],
+  "sourceInputCount": 44,
+  "rustInputs": 39,
+  "cargoInputs": 5,
+  "allowedDeltaCount": 5,
+  "otherOriginal41RawGitInputsUnchangedRequired": 39,
+  "rootFunctionalValidationReferenceSchema": {
+    "path": "absolute external JSON receipt path; actual value pending",
+    "bytes": null,
+    "sha256": null
+  },
+  "referencedReceiptSchema": {
+    "schemaVersion": 1,
+    "sourcePins": "Exactly the same five {path,bytes,sha256} raw source pins as final-source-binding-v3.json",
+    "checks": {
+      "rustFocusedPassed": "true from actual evidence",
+      "adjacentPassed": "true from actual evidence",
+      "rustfmtPassed": "true from actual evidence"
+    }
+  },
+  "syntaxChecks": {
+    "passed": 4,
+    "scope": "node --check only; no helper import or execution"
+  },
+  "sourceCaptured": false,
+  "headBound": false,
+  "guardExecuted": false,
+  "testsRun": false,
+  "cargoOrRustupRun": false,
+  "releaseCaptured": false,
+  "freshFull16Claimed": false,
+  "capacityAccepted": false
+}

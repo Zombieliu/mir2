@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T16:58:21.603Z",
+  "scope": "Initial read-only review of unsealed runtime v1. No gate/guard/prepare/collect/test/realm execution.",
+  "preparation": {
+    "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/runtime-prepared-v1.json",
+    "bytes": 25462,
+    "sha256": "0ca9d2c3cc6ee8b285a9b0014a4b60bc5593b0fc723586ad73ae9f0a4b86a94b"
+  },
+  "blockingFindings": [
+    {
+      "id": "F1",
+      "file": "run-owned.mjs",
+      "line": 55,
+      "observed": "processRecord.slowStageHelperSha256 still c2a137084f2166cbae603f721c6dde7322790c8dc2e05c2b8d59b79d7a58619f",
+      "expected": "The actually imported and input-lib-pinned10318-byte helper is8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c",
+      "impact": "Future public run metadata would attribute the updated five-scoped-label capture to the old helper. Correct identity before sealing; do not change producer, policy or evidence window.",
+      "affectedSourcePin": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\run-owned.mjs",
+        "bytes": 19729,
+        "sha256": "ebc82bd9191aa8737d6ebca58e55d35e85a70ba1e30fb9683a2c6a92ad55bd6b"
+      }
+    }
+  ],
+  "nonblockingCorrections": [
+    {
+      "file": "collect-public.mjs",
+      "line": 347,
+      "observed": "newdriver200",
+      "expected": "newdriver210",
+      "scope": "Truthful count label only."
+    }
+  ],
+  "otherStaticBoundariesReviewed": [
+    "current6759 freeze uses real same-source210 plus Root8/fmt1, not historical13/200",
+    "prior19099 supplies only six metadata objects, rechecked against current literal source",
+    "top-level COREd240 distinct from historical wire6d namespace",
+    "original compact scene and2/10x300+360 resource/policy/caps maintained",
+    "corrected bounded16 minute schema and probe capacityAccepted=false maintained",
+    "new16 collector/catalog names and fixed public path guards reviewed"
+  ],
+  "verdict": {
+    "presealContractPassed": false,
+    "eligibleForSealNow": false,
+    "blockingFindingIds": [
+      "F1"
+    ],
+    "capacityAccepted": false,
+    "p0Passed": false,
+    "p2ImplementationPermitted": false
+  }
+}

@@ -1,0 +1,630 @@
+TAP version 13
+# Subtest: ABI/model validation keeps UID0, exact capacities, duplicate and source authority boundaries
+ok 1 - ABI/model validation keeps UID0, exact capacities, duplicate and source authority boundaries
+  ---
+  duration_ms: 2.7605
+  type: 'test'
+  ...
+# Subtest: two-phase ownership waits through several slow frames for exact enabled echo
+ok 2 - two-phase ownership waits through several slow frames for exact enabled echo
+  ---
+  duration_ms: 0.7637
+  type: 'test'
+  ...
+# Subtest: old owner/model/sequence intents are refused without upgrading their token
+ok 3 - old owner/model/sequence intents are refused without upgrading their token
+  ---
+  duration_ms: 1.0513
+  type: 'test'
+  ...
+# Subtest: an advancing renderer with an unapplied handoff cannot strand React input in transition
+ok 4 - an advancing renderer with an unapplied handoff cannot strand React input in transition
+  ---
+  duration_ms: 1.042
+  type: 'test'
+  ...
+# Subtest: frame watchdog checks synchronously at sink/send, then a new frame can restore ownership
+ok 5 - frame watchdog checks synchronously at sink/send, then a new frame can restore ownership
+  ---
+  duration_ms: 0.5047
+  type: 'test'
+  ...
+# Subtest: missing ABI, invalid layout, touch, focus/visibility eligibility and invalid models keep React
+ok 6 - missing ABI, invalid layout, touch, focus/visibility eligibility and invalid models keep React
+  ---
+  duration_ms: 1.0194
+  type: 'test'
+  ...
+# Subtest: wide touch geometry alone enters ABI1 while portrait, letterbox and short stages stay compatible
+ok 7 - wide touch geometry alone enters ABI1 while portrait, letterbox and short stages stay compatible
+  ---
+  duration_ms: 0.4964
+  type: 'test'
+  ...
+# Subtest: session, resize and restart invalidate prior callbacks while pending flags survive handoff
+ok 8 - session, resize and restart invalidate prior callbacks while pending flags survive handoff
+  ---
+  duration_ms: 2.6378
+  type: 'test'
+  ...
+# Subtest: pointer down origin survives crossing the bag, including same-frame pulse
+ok 9 - pointer down origin survives crossing the bag, including same-frame pulse
+  ---
+  duration_ms: 0.7186
+  type: 'test'
+  ...
+# Subtest: Belt-capable production router sends only strict pointer fields and retains local drop geometry
+ok 10 - Belt-capable production router sends only strict pointer fields and retains local drop geometry
+  ---
+  duration_ms: 1.7363
+  type: 'test'
+  ...
+# Subtest: blur or owner handoff permits a fresh reused pointerId even when the old up never arrives
+ok 11 - blur or owner handoff permits a fresh reused pointerId even when the old up never arrives
+  ---
+  duration_ms: 0.6117
+  type: 'test'
+  ...
+# Subtest: NPC server-attested alias gate preserves ordinary Bag and validates each listed carried root exactly once
+ok 12 - NPC server-attested alias gate preserves ordinary Bag and validates each listed carried root exactly once
+  ---
+  duration_ms: 0.3456
+  type: 'test'
+  ...
+# Subtest: real Host accepts a single already-painted Native intent after positive HP/MP changes before the next poll
+ok 13 - real Host accepts a single already-painted Native intent after positive HP/MP changes before the next poll
+  ---
+  duration_ms: 1.55
+  type: 'test'
+  ...
+# Subtest: real Host retains the current model gate while a positive-resource display snapshot is waiting for Native echo
+ok 14 - real Host retains the current model gate while a positive-resource display snapshot is waiting for Native echo
+  ---
+  duration_ms: 0.8178
+  type: 'test'
+  ...
+# Subtest: life/mana known-positive boundaries and all material player, inventory, identity and layout changes reject old Native intents
+ok 15 - life/mana known-positive boundaries and all material player, inventory, identity and layout changes reject old Native intents
+  ---
+  duration_ms: 11.5207
+  type: 'test'
+  ...
+# Subtest: intent verdict diagnostics are bounded, private-data-free, read-only and never invoke another runtime getter
+ok 16 - intent verdict diagnostics are bounded, private-data-free, read-only and never invoke another runtime getter
+  ---
+  duration_ms: 0.9982
+  type: 'test'
+  ...
+# Subtest: positive resource updates preserve Page reservation rejection without replay after its block clears
+ok 17 - positive resource updates preserve Page reservation rejection without replay after its block clears
+  ---
+  duration_ms: 0.4275
+  type: 'test'
+  ...
+# Subtest: malformed and retired sink evidence cannot retain raw payload or grant an item action
+ok 18 - malformed and retired sink evidence cannot retain raw payload or grant an item action
+  ---
+  duration_ms: 0.3709
+  type: 'test'
+  ...
+# Subtest: independent capability is exact, old bundle and lean retain compatibility
+ok 19 - independent capability is exact, old bundle and lean retain compatibility
+  ---
+  duration_ms: 26.9203
+  type: 'test'
+  ...
+# Subtest: HUD geometry chooses owner before movement, foreground priority and crossing drags
+ok 20 - HUD geometry chooses owner before movement, foreground priority and crossing drags
+  ---
+  duration_ms: 0.6635
+  type: 'test'
+  ...
+# Subtest: hook ready loss/null/throw/HMR withdraws captured runtime using last valid snapshot
+ok 21 - hook ready loss/null/throw/HMR withdraws captured runtime using last valid snapshot
+  ---
+  duration_ms: 35.6241
+  type: 'test'
+  ...
+# Subtest: cold Page Q diary survives a HUD tick before React commits and the first Native projection
+ok 22 - cold Page Q diary survives a HUD tick before React commits and the first Native projection
+  ---
+  duration_ms: 269.0447
+  type: 'test'
+  ...
+# Subtest: cold Page Bag survives a HUD tick before React commits and the first Native projection
+ok 23 - cold Page Bag survives a HUD tick before React commits and the first Native projection
+  ---
+  duration_ms: 135.0545
+  type: 'test'
+  ...
+# Subtest: cold Page Character survives a HUD tick before React commits and the first Native projection
+ok 24 - cold Page Character survives a HUD tick before React commits and the first Native projection
+  ---
+  duration_ms: 94.2476
+  type: 'test'
+  ...
+# Subtest: cold Page Character Skills tab survives a HUD tick before React commits and the first Native projection
+ok 25 - cold Page Character Skills tab survives a HUD tick before React commits and the first Native projection
+  ---
+  duration_ms: 95.5821
+  type: 'test'
+  ...
+# Subtest: actual hook opens Bag once during dirty HP and again during a pending cosmetic ingest without relaxing readCurrent
+ok 26 - actual hook opens Bag once during dirty HP and again during a pending cosmetic ingest without relaxing readCurrent
+  ---
+  duration_ms: 11.8064
+  type: 'test'
+  ...
+# Subtest: a native ready baseline must first be fully ingested for this hook owner
+ok 27 - a native ready baseline must first be fully ingested for this hook owner
+  ---
+  duration_ms: 10.3511
+  type: 'test'
+  ...
+# Subtest: a new runtime generation cannot inherit its predecessor's ready baseline before its fresh ingest
+ok 28 - a new runtime generation cannot inherit its predecessor's ready baseline before its fresh ingest
+  ---
+  duration_ms: 7.1588
+  type: 'test'
+  ...
+# Subtest: pending source identity/realm/world/context/scene must ingest a new revision even with the same HUD projection
+ok 29 - pending source identity/realm/world/context/scene must ingest a new revision even with the same HUD projection
+  ---
+  duration_ms: 40.7355
+  type: 'test'
+  ...
+# Subtest: pending layout, explicit navigation and player identity changes cannot borrow the cosmetic baseline
+ok 30 - pending layout, explicit navigation and player identity changes cannot borrow the cosmetic baseline
+  ---
+  duration_ms: 64.9225
+  type: 'test'
+  ...
+# Subtest: hidden, inactive, absent player/source, unknown capability, native loss/error and expired/regressed frame reject
+ok 31 - hidden, inactive, absent player/source, unknown capability, native loss/error and expired/regressed frame reject
+  ---
+  duration_ms: 81.5452
+  type: 'test'
+  ...
+# Subtest: Native false/throw is final, diagnostics stay bounded and cleanup cannot authorize or replay
+ok 32 - Native false/throw is final, diagnostics stay bounded and cleanup cannot authorize or replay
+  ---
+  duration_ms: 15.0626
+  type: 'test'
+  ...
+# Subtest: source/runtime/visibility/capability or cleanup changes while reading Native are rechecked before the single dispatch
+ok 33 - source/runtime/visibility/capability or cleanup changes while reading Native are rechecked before the single dispatch
+  ---
+  duration_ms: 39.3573
+  type: 'test'
+  ...
+# Subtest: actual shell handler keeps uncovered HUD available with Bag/Quest open and preserves foreground/world routes
+ok 34 - actual shell handler keeps uncovered HUD available with Bag/Quest open and preserves foreground/world routes
+  ---
+  duration_ms: 39.5473
+  type: 'test'
+  ...
+# {"fixture":"actual-source TypeScript transpile + controlled hook seams","compilerPath":"F:\\\\r16-6997-rollout-20261110\\\\source\\\\mir2-web3\\\\apps\\\\web\\\\node_modules\\\\typescript\\\\lib\\\\typescript.js","compilerRealPath":"F:\\\\r16-6997-rollout-20261110\\\\source\\\\mir2-web3\\\\apps\\\\web\\\\node_modules\\\\typescript\\\\lib\\\\typescript.js","bytes":9112572,"sha256":"3ae902c92cc44dace175c0e69e13a4b0899f6983c6121d76b9ab8dd5795e7675","version":"5.9.3"}
+# {"actualUsedSources":[{"actualPath":"/E:/r16-quest-text-20261111/build/mir2-web3/apps/web/lib/quest-action-policy.ts","realPath":"E:\\\\r16-quest-text-20261111\\\\build\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\quest-action-policy.ts","bytes":5467,"sha256":"5a8042d691109178c59cecdab3d5bb7c6a6c955049fa05a44519218e2c2e0570"},{"actualPath":"/E:/r16-quest-text-20261111/build/mir2-web3/apps/web/lib/world-model/item-identity.ts","realPath":"E:\\\\r16-quest-text-20261111\\\\build\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\world-model\\\\item-identity.ts","bytes":8874,"sha256":"955d61e3f08d0d5a512bd50ca31dec6238ee0b0c21dde450ddfda794c20ac431"},{"actualPath":"/E:/r16-quest-text-20261111/build/mir2-web3/apps/web/lib/bevy-bag-model.ts","realPath":"E:\\\\r16-quest-text-20261111\\\\build\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\bevy-bag-model.ts","bytes":17534,"sha256":"7d9df5bd7c8161f2080e782f2a9d10c4fd853107c1578562dd1810d69112db47"},{"actualPath":"/E:/r16-quest-text-20261111/build/mir2-web3/apps/web/lib/bevy-quest-world-context.ts","realPath":"E:\\\\r16-quest-text-20261111\\\\build\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\bevy-quest-world-context.ts","bytes":14646,"sha256":"ab8e5ee6c040d401557f96ef0d9816b083bfafaa75d5f96466c73e28e0a860d5"},{"actualPath":"/E:/r16-quest-text-20261111/build/mir2-web3/apps/web/lib/first-crystal-scene-request.ts","realPath":"E:\\\\r16-quest-text-20261111\\\\build\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\first-crystal-scene-request.ts","bytes":5136,"sha256":"29e09e257f23b9d7132c23f69654de7354d5bf329ca881440f8bbce7a33b0617"},{"actualPath":"/E:/r16-quest-text-20261111/build/mir2-web3/apps/web/lib/r16-native-localization.ts","realPath":"E:\\\\r16-quest-text-20261111\\\\build\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\r16-native-localization.ts","bytes":15929,"sha256":"2143237def846e61951ec6465be564f1e0cf6a0f29e7be10d123bace41b2fc3e"},{"actualPath":"/E:/r16-quest-text-20261111/build/mir2-web3/apps/web/lib/bevy-quest-ui.ts","realPath":"E:\\\\r16-quest-text-20261111\\\\build\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\bevy-quest-ui.ts","bytes":16324,"sha256":"1b94c42c228bbd0a757dd1c91f3771f9c70de07d595db31e9960e46ad83f832c"},{"actualPath":"/E:/r16-quest-text-20261111/build/mir2-web3/apps/web/lib/bevy-hp-orb.ts","realPath":"E:\\\\r16-quest-text-20261111\\\\build\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\bevy-hp-orb.ts","bytes":8881,"sha256":"12ccf1c06876e8edc964f60500c36992916f6b4aeec113020aabe84980bcb149"},{"actualPath":"/E:/r16-quest-text-20261111/build/mir2-web3/apps/web/lib/bevy-experience-bar.ts","realPath":"E:\\\\r16-quest-text-20261111\\\\build\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\bevy-experience-bar.ts","bytes":8912,"sha256":"ecbdce984cd9a2bab67e702052de22ca4cb5d7585f6981c73874d38a6456b687"},{"actualPath":"/E:/r16-quest-text-20261111/build/mir2-web3/apps/web/lib/bevy-weight-bar.ts","realPath":"E:\\\\r16-quest-text-20261111\\\\build\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\bevy-weight-bar.ts","bytes":9645,"sha256":"60b356b14ebf720c7496d6c9a73e22050b67d648e57edd72da13e508f2732576"},{"actualPath":"/E:/r16-quest-text-20261111/build/mir2-web3/apps/web/lib/bevy-hud-bar-draw-plan.ts","realPath":"E:\\\\r16-quest-text-20261111\\\\build\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\bevy-hud-bar-draw-plan.ts","bytes":20639,"sha256":"1edbebaa847964a2d7b182f257debb9a12f940334a95d7c14b8de834df44083f"},{"actualPath":"/E:/r16-quest-text-20261111/build/mir2-web3/apps/web/lib/bevy-quest-world-actions.ts","realPath":"E:\\\\r16-quest-text-20261111\\\\build\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\bevy-quest-world-actions.ts","bytes":4179,"sha256":"9c3c33b42efda96d1b9cc8704f489c648ed6a9b604d7aff9cd6966ad5748f554"},{"actualPath":"/E:/r16-quest-text-20261111/build/mir2-web3/apps/web/lib/bevy-quest-world-controls.ts","realPath":"E:\\\\r16-quest-text-20261111\\\\build\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\bevy-quest-world-controls.ts","bytes":3105,"sha256":"ce741529785c995c3d70fe142d78972c64478b5e9b25290ec3432e969a31057a"},{"actualPath":"/E:/r16-quest-text-20261111/build/mir2-web3/apps/web/lib/use-bevy-quest-ui.ts","realPath":"E:\\\\r16-quest-text-20261111\\\\build\\\\mir2-web3\\\\apps\\\\web\\\\lib\\\\use-bevy-quest-ui.ts","bytes":27372,"sha256":"afc8fbfab5b45ba4d6dcd6f128423e2707ea82072052a0698b20418d49789b84"}]}
+# Subtest: exact capability probes independently of initial readiness; malformed v1 status fails closed
+ok 35 - exact capability probes independently of initial readiness; malformed v1 status fails closed
+  ---
+  duration_ms: 1.3551
+  type: 'test'
+  ...
+# Subtest: real hook requires live language and its newest revision before polling or input acknowledgement
+ok 36 - real hook requires live language and its newest revision before polling or input acknowledgement
+  ---
+  duration_ms: 200.1571
+  type: 'test'
+  ...
+# Subtest: older and unknown capability keep omitted DTO and their existing readiness shape
+ok 37 - older and unknown capability keep omitted DTO and their existing readiness shape
+  ---
+  duration_ms: 416.5446
+  type: 'test'
+  ...
+# Subtest: actual used source bindings are disclosed
+ok 38 - actual used source bindings are disclosed
+  ---
+  duration_ms: 0.1982
+  type: 'test'
+  ...
+# Subtest: optional Native display locales are independent of four-language wire and require an exact capability
+ok 39 - optional Native display locales are independent of four-language wire and require an exact capability
+  ---
+  duration_ms: 2.0382
+  type: 'test'
+  ...
+# Subtest: NPC display defers Native prose while target, input, name and disabled state remain opaque
+ok 40 - NPC display defers Native prose while target, input, name and disabled state remain opaque
+  ---
+  duration_ms: 25.5083
+  type: 'test'
+  ...
+# Subtest: 844×390 touch stage, DPR and resize project the shell's actual CSS scale
+ok 41 - 844×390 touch stage, DPR and resize project the shell's actual CSS scale
+  ---
+  duration_ms: 0.3872
+  type: 'test'
+  ...
+# Subtest: missing or inconsistent stage/canvas geometry cannot transfer UI ownership
+ok 42 - missing or inconsistent stage/canvas geometry cannot transfer UI ownership
+  ---
+  duration_ms: 0.1285
+  type: 'test'
+  ...
+# Subtest: static definitions never become available quests without an authoritative stage
+ok 43 - static definitions never become available quests without an authoritative stage
+  ---
+  duration_ms: 0.3105
+  type: 'test'
+  ...
+# Subtest: missing endpoints, source sections, counters and exact reward indices survive projection
+ok 44 - missing endpoints, source sections, counters and exact reward indices survive projection
+  ---
+  duration_ms: 0.1656
+  type: 'test'
+  ...
+# Subtest: malformed selectable rewards fail closed instead of becoming another valid choice
+ok 45 - malformed selectable rewards fail closed instead of becoming another valid choice
+  ---
+  duration_ms: 0.233
+  type: 'test'
+  ...
+# Subtest: fixed and selectable reward previews retain their exact source through the Bevy DTO
+ok 46 - fixed and selectable reward previews retain their exact source through the Bevy DTO
+  ---
+  duration_ms: 3.4131
+  type: 'test'
+  ...
+# Subtest: NPC links retain exact wire targets, disabled state and required-input fallback
+ok 47 - NPC links retain exact wire targets, disabled state and required-input fallback
+  ---
+  duration_ms: 0.2661
+  type: 'test'
+  ...
+# Subtest: session and request sequences survive independent module loads
+ok 48 - session and request sequences survive independent module loads
+  ---
+  duration_ms: 26.0377
+  type: 'test'
+  ...
+# Subtest: old generation and malformed renderer status cannot take UI ownership
+ok 49 - old generation and malformed renderer status cannot take UI ownership
+  ---
+  duration_ms: 0.3451
+  type: 'test'
+  ...
+# Subtest: Quest world context requires a complete same-player projection and exact version capability
+ok 50 - Quest world context requires a complete same-player projection and exact version capability
+  ---
+  duration_ms: 0.9877
+  type: 'test'
+  ...
+# Subtest: the actual Page capture retires raw Quest skills for self NewMagic only on the current connection
+ok 51 - the actual Page capture retires raw Quest skills for self NewMagic only on the current connection
+  ---
+  duration_ms: 129.4037
+  type: 'test'
+  ...
+# Subtest: renderer restart, first NPC input capture and stopped-loop fallback preserve one UI owner
+ok 52 - renderer restart, first NPC input capture and stopped-loop fallback preserve one UI owner
+  ---
+  duration_ms: 100.6815
+  type: 'test'
+  ...
+# Subtest: v2 Quest world preserves nullable facts, canonical IDs and unknown current map
+ok 53 - v2 Quest world preserves nullable facts, canonical IDs and unknown current map
+  ---
+  duration_ms: 0.6694
+  type: 'test'
+  ...
+# Subtest: local Quest actions require exact seven-field stamp, role and nested route payload
+ok 54 - local Quest actions require exact seven-field stamp, role and nested route payload
+  ---
+  duration_ms: 0.9071
+  type: 'test'
+  ...
+# Subtest: ordinary map packets retire same-map transitions and images never supply map authority
+ok 55 - ordinary map packets retire same-map transitions and images never supply map authority
+  ---
+  duration_ms: 0.2048
+  type: 'test'
+  ...
+# Subtest: Quest handoffs retire each lifetime dimension and attack roles keep raw life evidence
+ok 56 - Quest handoffs retire each lifetime dimension and attack roles keep raw life evidence
+  ---
+  duration_ms: 0.1908
+  type: 'test'
+  ...
+# Subtest: the shared route adapter verifies a complete JS-fake WASM response against collision and exact endpoint
+ok 57 - the shared route adapter verifies a complete JS-fake WASM response against collision and exact endpoint
+  ---
+  duration_ms: 1.1493
+  type: 'test'
+  ...
+# Subtest: NPC route targets preserve object IDs, task roles and the exact two-tile approach
+ok 58 - NPC route targets preserve object IDs, task roles and the exact two-tile approach
+  ---
+  duration_ms: 0.7314
+  type: 'test'
+  ...
+# Subtest: route execution follows bends, validates each 2/3-tile run and replans deviations
+ok 59 - route execution follows bends, validates each 2/3-tile run and replans deviations
+  ---
+  duration_ms: 0.2262
+  type: 'test'
+  ...
+# Subtest: collision cache uses injected fake chunks, reuses only complete geometry and discards partial failures
+ok 60 - collision cache uses injected fake chunks, reuses only complete geometry and discards partial failures
+  ---
+  duration_ms: 2.2447
+  type: 'test'
+  ...
+# Subtest: world control reader requires actual current stamped rectangles and claims only button hits
+ok 61 - world control reader requires actual current stamped rectangles and claims only button hits
+  ---
+  duration_ms: 0.735
+  type: 'test'
+  ...
+# Subtest: Native Quest local UI has only current measured pointer rectangles, never inferred or stale controls
+ok 62 - Native Quest local UI has only current measured pointer rectangles, never inferred or stale controls
+  ---
+  duration_ms: 0.3598
+  type: 'test'
+  ...
+# Subtest: questLocalUi never parses as an authorized world action or sends through the actual Page dispatcher
+ok 63 - questLocalUi never parses as an authorized world action or sends through the actual Page dispatcher
+  ---
+  duration_ms: 95.4886
+  type: 'test'
+  ...
+# Subtest: actual Page queued movement preserves replacement intent and retires stale Quest routes before ordinary A* or send
+ok 64 - actual Page queued movement preserves replacement intent and retires stale Quest routes before ordinary A* or send
+  ---
+  duration_ms: 90.2045
+  type: 'test'
+  ...
+# Subtest: actual Page map-image press and route ownership retire only the captured source and preserve sent movement
+ok 65 - actual Page map-image press and route ownership retire only the captured source and preserve sent movement
+  ---
+  duration_ms: 95.5705
+  type: 'test'
+  ...
+# Subtest: packaged CJK font matches its pinned upstream bytes and retains its license
+ok 66 - packaged CJK font matches its pinned upstream bytes and retains its license
+  ---
+  duration_ms: 12.2875
+  type: 'test'
+  ...
+# Subtest: invalid metadata falls back to DOM before runtime import
+ok 67 - invalid metadata falls back to DOM before runtime import
+  ---
+  duration_ms: 1.3514
+  type: 'test'
+  ...
+# Subtest: exact shared mode selects shared GL2 only when the complete package exists
+ok 68 - exact shared mode selects shared GL2 only when the complete package exists
+  ---
+  duration_ms: 0.7369
+  type: 'test'
+  ...
+# Subtest: ordinary empty query freezes the shared GL2 package while preserving GPU priority
+ok 69 - ordinary empty query freezes the shared GL2 package while preserving GPU priority
+  ---
+  duration_ms: 0.6001
+  type: 'test'
+  ...
+# Subtest: heterogeneous packages select GPU ABI1 or default and exact shared GL2 ABI1
+ok 70 - heterogeneous packages select GPU ABI1 or default and exact shared GL2 ABI1
+  ---
+  duration_ms: 1.7842
+  type: 'test'
+  ...
+# Subtest: heterogeneous explicit lean fallback requires exact ABI0 getter and frozen opt-out
+ok 71 - heterogeneous explicit lean fallback requires exact ABI0 getter and frozen opt-out
+  ---
+  duration_ms: 1.3245
+  type: 'test'
+  ...
+# Subtest: explicit opt-outs and absent shared packages retain lean GL2 selection
+ok 72 - explicit opt-outs and absent shared packages retain lean GL2 selection
+  ---
+  duration_ms: 0.335
+  type: 'test'
+  ...
+# Subtest: live startup agreement rejects relevant query changes without losing unrelated flags
+ok 73 - live startup agreement rejects relevant query changes without losing unrelated flags
+  ---
+  duration_ms: 0.4065
+  type: 'test'
+  ...
+# Subtest: encoded and duplicate raw opt-ins retain ordinary package selection
+ok 74 - encoded and duplicate raw opt-ins retain ordinary package selection
+  ---
+  duration_ms: 0.2853
+  type: 'test'
+  ...
+# Subtest: legacy exact shared request is unsafe while ordinary legacy remains usable
+ok 75 - legacy exact shared request is unsafe while ordinary legacy remains usable
+  ---
+  duration_ms: 0.4132
+  type: 'test'
+  ...
+# Subtest: getter agreement checks backend, ABI, compiled primary, startup, and live query
+ok 76 - getter agreement checks backend, ABI, compiled primary, startup, and live query
+  ---
+  duration_ms: 0.7425
+  type: 'test'
+  ...
+# Subtest: legacy getter may report unknown compiled GL2 capability but cannot start shared
+ok 77 - legacy getter may report unknown compiled GL2 capability but cannot start shared
+  ---
+  duration_ms: 0.191
+  type: 'test'
+  ...
+# Subtest: one document gate forbids a second boot even after synchronous or asynchronous failure
+ok 78 - one document gate forbids a second boot even after synchronous or asynchronous failure
+  ---
+  duration_ms: 18.0626
+  type: 'test'
+  ...
+# Subtest: third URL variant preserves old positional callers and immutable package path
+ok 79 - third URL variant preserves old positional callers and immutable package path
+  ---
+  duration_ms: 0.3096
+  type: 'test'
+  ...
+# Subtest: only network failures before the Bevy boot remain retryable
+ok 80 - only network failures before the Bevy boot remain retryable
+  ---
+  duration_ms: 0.7832
+  type: 'test'
+  ...
+# Subtest: the actual page retry gate preserves the single-boot boundary
+ok 81 - the actual page retry gate preserves the single-boot boundary
+  ---
+  duration_ms: 4.0906
+  type: 'test'
+  ...
+# Subtest: desktop keeps the Bevy runtime enhancement enabled
+ok 82 - desktop keeps the Bevy runtime enhancement enabled
+  ---
+  duration_ms: 0.2176
+  type: 'test'
+  ...
+# Subtest: touch-first phones and tablets use the immediately playable compatibility renderer
+ok 83 - touch-first phones and tablets use the immediately playable compatibility renderer
+  ---
+  duration_ms: 0.1063
+  type: 'test'
+  ...
+# Subtest: a fine-pointer desktop with a touch screen is not misclassified as mobile
+ok 84 - a fine-pointer desktop with a touch screen is not misclassified as mobile
+  ---
+  duration_ms: 0.0693
+  type: 'test'
+  ...
+# Subtest: QA query controls override automatic device policy
+ok 85 - QA query controls override automatic device policy
+  ---
+  duration_ms: 0.0779
+  type: 'test'
+  ...
+# Subtest: network failures never trigger a second full runtime download
+ok 86 - network failures never trigger a second full runtime download
+  ---
+  duration_ms: 0.164
+  type: 'test'
+  ...
+# Subtest: Page keeps default shared UI intent across a pre-boot failure on the same backend
+ok 87 - Page keeps default shared UI intent across a pre-boot failure on the same backend
+  ---
+  duration_ms: 9.3551
+  type: 'test'
+  ...
+# Subtest: Page failure preserves explicit disabled and mixed shared UI choices
+ok 88 - Page failure preserves explicit disabled and mixed shared UI choices
+  ---
+  duration_ms: 16.0287
+  type: 'test'
+  ...
+# Subtest: preserving Page UI intent does not turn a failed App boot into an automatic retry
+ok 89 - preserving Page UI intent does not turn a failed App boot into an automatic retry
+  ---
+  duration_ms: 3.428
+  type: 'test'
+  ...
+# Subtest: a disposed Page attempt cannot withdraw the newer runtime or its UI choices
+ok 90 - a disposed Page attempt cannot withdraw the newer runtime or its UI choices
+  ---
+  duration_ms: 3.8684
+  type: 'test'
+  ...
+# Subtest: actual movement handlers leave panel/nonmovement keys untouched before every world blocker
+ok 91 - actual movement handlers leave panel/nonmovement keys untouched before every world blocker
+  ---
+  duration_ms: 509.7985
+  type: 'test'
+  ...
+# Subtest: actual Arrow handlers retain every modal, capture, scene, identity and modifier guard
+ok 92 - actual Arrow handlers retain every modal, capture, scene, identity and modifier guard
+  ---
+  duration_ms: 61.4198
+  type: 'test'
+  ...
+# Subtest: the installed capture effect preserves Arrow edges, held cadence, Shift, diagonal and release semantics
+ok 93 - the installed capture effect preserves Arrow edges, held cadence, Shift, diagonal and release semantics
+  ---
+  duration_ms: 8.3849
+  type: 'test'
+  ...
+# Subtest: the installed effect withdraws on modal mount and dynamic parity still denies Arrow while yielding F9
+ok 94 - the installed effect withdraws on modal mount and dynamic parity still denies Arrow while yielding F9
+  ---
+  duration_ms: 34.0015
+  type: 'test'
+  ...
+# Subtest: a transient live guard at mount cannot prevent listener installation or require a prop rerender to accept a later gesture
+ok 95 - a transient live guard at mount cannot prevent listener installation or require a prop rerender to accept a later gesture
+  ---
+  duration_ms: 20.1818
+  type: 'test'
+  ...
+# Subtest: Native Quest close accepts the immediate physical Arrow while the React capture prop is still true
+ok 96 - Native Quest close accepts the immediate physical Arrow while the React capture prop is still true
+  ---
+  duration_ms: 7.1804
+  type: 'test'
+  ...
+# Subtest: an earlier capture listener committing the Q close cannot remove the same physical Arrow from dispatch
+ok 97 - an earlier capture listener committing the Q close cannot remove the same physical Arrow from dispatch
+  ---
+  duration_ms: 8.0095
+  type: 'test'
+  ...
+# Subtest: live Native Quest capture blocks a lagging false prop and cancels an already held movement
+ok 98 - live Native Quest capture blocks a lagging false prop and cancels an already held movement
+  ---
+  duration_ms: 5.7138
+  type: 'test'
+  ...
+# Subtest: unavailable, failed or legacy Quest readers retain the existing capture boundary
+ok 99 - unavailable, failed or legacy Quest readers retain the existing capture boundary
+  ---
+  duration_ms: 18.1393
+  type: 'test'
+  ...
+# Subtest: actual Page JSX forwarders keep identity across rerenders and invoke only the latest intent/stop closures
+ok 100 - actual Page JSX forwarders keep identity across rerenders and invoke only the latest intent/stop closures
+  ---
+  duration_ms: 131.1641
+  type: 'test'
+  ...
+# Subtest: 50ms Page rerenders cannot starve the real 100ms held interval and each tick reaches the latest Page closure
+ok 101 - 50ms Page rerenders cannot starve the real 100ms held interval and each tick reaches the latest Page closure
+  ---
+  duration_ms: 253.7699
+  type: 'test'
+  ...
+# Subtest: actual Page JSX Step forwarder keeps identity and preserves arguments and return values from the latest closure
+ok 102 - actual Page JSX Step forwarder keeps identity and preserves arguments and return values from the latest closure
+  ---
+  duration_ms: 93.6988
+  type: 'test'
+  ...
+# Subtest: 50ms Page renders retain the real mouse-hold interval and every 100ms Step calls the latest Page closure
+ok 103 - 50ms Page renders retain the real mouse-hold interval and every 100ms Step calls the latest Page closure
+  ---
+  duration_ms: 181.0517
+  type: 'test'
+  ...
+1..103
+# tests 103
+# suites 0
+# pass 103
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1820.7061

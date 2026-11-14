@@ -1,0 +1,137 @@
+{
+  "passed": true,
+  "kind": "bounded-monthly-card-system-label-delta",
+  "observedAtUtc": "2026-10-29T07:51:57.250710+00:00",
+  "sourceFilesChanged": [
+    "apps/game-client/client-bevy/src/native_billing.rs"
+  ],
+  "sourceLedger": "input-ledger.json",
+  "sourceLedgerFiles": 534,
+  "sourceLedgerSha256": "aed1739e0a0490febca13e900e0d541027b91b353b76eb44e5a2f4641f8c717e",
+  "frozenInputsUnchangedAfterBuild": true,
+  "canonicalGatewayLabel": "30-day account access",
+  "exactAliases": [
+    "",
+    "30-day account access",
+    "Monthly Card",
+    "MonthlyCard30Days"
+  ],
+  "localizationKey": "billing.monthlyCardItemName",
+  "unknownLabelsPreserved": true,
+  "uidAndActionIdentityPreserved": true,
+  "protocolAndServerUnchanged": true,
+  "focused": {
+    "suite": "native_billing",
+    "passed": 20,
+    "failed": 0,
+    "ignored": 1,
+    "ignoredBillingGpuExecutedSeparately": true,
+    "log": "native-billing-final.log",
+    "logSha256": "77840b43a814b72fb02058e1fbadbf36ac9853ed2f86a02e934e64c1eff9caf5",
+    "logReceipt": {
+      "filename": "native-billing-final.log",
+      "bytes": 29778,
+      "sha256": "77840b43a814b72fb02058e1fbadbf36ac9853ed2f86a02e934e64c1eff9caf5",
+      "included": false
+    },
+    "resultLines": [
+      "test native_billing::ui::tests::billing_windows_gpu_three_routes_and_channel_states ... ignored, explicit offline Windows GPU evidence; no server, wallet signing or chain payment",
+      "test native_billing::ui::tests::checkout_is_bound_to_current_account_character_and_request ... ok",
+      "test native_billing::ui::tests::definitive_purchase_errors_are_specific_and_require_current_correlation ... ok",
+      "test native_billing::ui::tests::hidden_pages_cannot_purchase_or_change_pagination ... ok",
+      "test native_billing::ui::tests::keyboard_page_selection_does_not_execute_old_mouse_purchase ... ok",
+      "test native_billing::ui::tests::monthly_purchase_and_owned_activation_are_independent_of_recharge_channels ... ok",
+      "test native_billing::ui::tests::owned_monthly_card_names_localize_exact_aliases_and_keep_identity ... ok",
+      "test native_billing::ui::tests::panel_opening_enter_is_consumed_and_close_fences_world_input ... ok",
+      "test native_billing::ui::tests::pending_navigation_is_blocked_and_retry_returns_to_original_route ... ok",
+      "test native_billing::ui::tests::purchase_reply_refreshes_status_and_disabled_status_cannot_purchase ... ok",
+      "test native_billing::ui::tests::refresh_never_settles_an_unconfirmed_purchase ... ok",
+      "test native_billing::ui::tests::rejected_purchase_allows_an_intentional_new_offer ... ok",
+      "test native_billing::ui::tests::three_routes_remain_visible_without_sales_and_selecting_is_explicit ... ok",
+      "test native_billing::ui::tests::timeout_retry_preserves_order_and_ignores_late_original_url ... ok",
+      "test native_billing::ui::tests::uncertain_server_commit_retries_the_same_order ... ok",
+      "test native_billing::ui::tests::unique_ids_remain_canonical_strings ... ok",
+      "test native_billing::ui::tests::usdc_checkout_requires_local_origin_and_retries_the_same_order ... ok",
+      "test native_billing::ui::tests::usdc_refresh_only_reads_pending_order_status ... ok",
+      "test native_billing::ui::tests::usdc_relogin_reopens_frozen_order_when_new_sales_are_disabled ... ok",
+      "test native_billing::ui::tests::usdc_status_is_optional_for_existing_stripe_servers ... ok",
+      "test native_billing::ui::tests::usdc_wire_requires_canonical_amounts_testnet_and_known_states ... ok",
+      "test result: ok. 20 passed; 0 failed; 1 ignored; 0 measured; 1592 filtered out; finished in 0.33s"
+    ]
+  },
+  "gpu": {
+    "testPassed": 1,
+    "captures": 39,
+    "locales": [
+      "en",
+      "zh-TW",
+      "zh-CN"
+    ],
+    "monthlyScenarios": 9,
+    "report": "../mock-monthly-card-label-fix/billing-entry-native-gpu.json",
+    "reportSha256": "73772c067a19608282d3ee4720416f9646541fd28f170caedd82cc274923161a",
+    "missingGlyphs": 0,
+    "overflowingTextNodes": 0,
+    "outsideViewportNodes": 0,
+    "liveAcceptance": false
+  },
+  "build": {
+    "profile": "incremental-debug-ui-only",
+    "cleanReleaseAttestation": false,
+    "executable": "C:\\mir2-build\\native-zh-cn-finish-20261029\\monthly-card-label-fix\\bin-ui\\mir2-platform-windows.exe",
+    "bytes": 149413376,
+    "sha256": "05482ef64a0ed1558ba607d8312bfeec0b6ddb39c49653150db488e79a2fec05",
+    "log": "native-ui-build.log",
+    "logSha256": "c23383a7695875dda1fc9d33ce3e16aa7e2d428ea7238520f70b4ea12f658e77",
+    "logReceipt": {
+      "filename": "native-ui-build.log",
+      "bytes": 60147,
+      "sha256": "c23383a7695875dda1fc9d33ce3e16aa7e2d428ea7238520f70b4ea12f658e77",
+      "included": false
+    },
+    "binaryIncluded": false
+  },
+  "contractSourcePins": [
+    {
+      "path": "apps/gateway/src/web_billing.rs",
+      "sha256Raw": "513aaa84fbba210d1aa76bc245789b7fcadc967830cae360e03e6704650534ff"
+    },
+    {
+      "path": "apps/simulation/src/runtime/billing_monthly_card.rs",
+      "sha256Raw": "010eb21edcebb6b6dfa2d91e5e8a9ceef08ac0320628f9ad42b808edd18834e6"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_i18n.rs",
+      "sha256Raw": "40f3f61411f7fc6c7c7bda6c95d4d7b6758fb51296e7c8a25badca12bef0b3bd"
+    }
+  ],
+  "previousStageValidation": "../ui-debug-validation.json",
+  "coverageLimits": [
+    "Only billing tests/GPU and the debug UI binary were refreshed in this phase; prior unrelated i18n/player/display/gameplay evidence stays in its recorded phase.",
+    "Previous focused display GPU remains ignored; the separately run gameplay GPU is a different test.",
+    "No live monthly-card purchase/activation, new payment, account change, Docker, backend change or production deployment was performed."
+  ],
+  "humanAccepted": false,
+  "sourceSummaryReceipt": {
+    "filename": "native-ui-validation-summary.json",
+    "bytes": 3006,
+    "sha256": "1ea19c56f6c411637c64a8e398111fc4f2645d00ae1ed6d49741aa495d9c287b",
+    "included": false
+  },
+  "sourceLedgerCanonicalFilesSha256": "aed1739e0a0490febca13e900e0d541027b91b353b76eb44e5a2f4641f8c717e",
+  "sourceLedgerRawFileSha256": "64ff0ef384d32d974c59cea3335fa93c52e0f4b691f8016fb45cd488be0db033",
+  "curatorVerifiedRawInputs": 534,
+  "changedFromPrior534FileLedger": [
+    "apps/game-client/client-bevy/src/native_billing.rs"
+  ],
+  "curatorVisualReview": {
+    "path": "../mock-monthly-card-label-fix/zh-CN-both-disabled-monthly-1024x768.png",
+    "opened": true,
+    "observed": [
+      "30 天月卡",
+      "maximum u64 card UID remains complete",
+      "激活 action visible"
+    ],
+    "liveAcceptance": false
+  }
+}

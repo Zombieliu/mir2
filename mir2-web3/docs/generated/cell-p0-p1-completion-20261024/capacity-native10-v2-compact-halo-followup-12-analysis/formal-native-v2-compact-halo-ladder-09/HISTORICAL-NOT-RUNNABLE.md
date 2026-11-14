@@ -1,0 +1,3 @@
+This unsealed template is tied only to compact12 run `1792908575146-40a66fff`, which failed continuous movement before stage2 completed. It creates no capacity acceptance and cannot prepare accounts or start a realm. No later probe may be substituted.
+
+The preserved formal workload is five300s stages,7200s soak, five resumes/five saves and the original60s post-resume observation. Resource guards remain24 logical CPU equivalents,32GiB private bytes and40GiB working set, with original admission caps and thresholds. The compact span2 scene, static886-step tour and24ACK/20s boundary do not prove180 launches/minute or two-hour supply; the historical stage25 stall remains unresolved.

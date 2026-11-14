@@ -1,0 +1,50 @@
+{
+  "source": "91b8fc9b4f5170cb37b6619b991707ed76a34d73",
+  "deployment": "dpl_44ctBTrdq2T5fb91EjrUEt6B3GUk",
+  "baseline": "dpl_3eNPP4uaj3nT3HsAMhJUUoXpN4Dh",
+  "runName": "walking-compiled-recovery-authority-r2",
+  "changedFiles": {
+    "run.mjs": {
+      "before": "da310aae6aea6393ca3730c935bc73f301d0fe1ec10308269d81cc8db1ae752b",
+      "after": "43ad21eb1f78c33b3267bde6e5bd163f5a3e4c4d0fb7698a26e40ce594305d1a"
+    },
+    "desktop-qr-city-direct-cdp.mjs": {
+      "before": "9d858bb8d1593241cf0f8785114ad22c2f14f52e47debd71b943892f72ac1617",
+      "after": "6b26c13ee6374dce2fcf663ddd5661333dff32fd47744bb6b29cb02f60811bf5"
+    },
+    "scene-gate.mjs": {
+      "before": "2318440b78fef60734fc2737910643bf5b5e1d09991e55c42401655385219068",
+      "after": "9c0a4db4d7fa43b66826645362629ec32b13c01560e8bd2c36962d58f1830b5a"
+    }
+  },
+  "originalStepProof": {
+    "sha256": "b693ca3950685cda6323f1de17dce4f3c234cbd5442e981b90297491be2bce92",
+    "newSha256": "b204fdf0ad344a5cf3eeecb2553297cf19555d4cc2c962f2c3188522f52c828e",
+    "beforeSource": "frozen first public candidate44 driver; canonical initial gate remains",
+    "afterSource": "same-role/current UserLocation authority and exact current-camera/complete Town collision, one ordinary pulse only"
+  },
+  "preserved": {
+    "canonicalInitialGate": true,
+    "originalStaticSha": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+    "movement8s": true,
+    "native120s": true,
+    "resources": true,
+    "phoneOfficialTestnetLoginOnly": true,
+    "atMostOneWalk": true
+  },
+  "originalObserversUnchanged": [
+    {
+      "name": "terrain-observation.mjs",
+      "sha256": "90ab5e328f6a93713b6ee797545632fd8a47f5897d72d7009b175aa331845f45"
+    },
+    {
+      "name": "bootstrap-chunk-observation.mjs",
+      "sha256": "28138d86a82c0030421845d8b198fc2d010ae0ffc5b1f486480dddb36c41bf37"
+    },
+    {
+      "name": "frame-metadata.mjs",
+      "sha256": "779634248a24da426b82402289065e317c1cc479acc6db54619a1820ce250825"
+    }
+  ],
+  "interpretation": "Only new private QA prerequisites changed. Original first public candidate44 failure remains false. Initial canonical role spawn is mandatory; differing current spawn requires later accepted UserLocation on the same owner/start/socket. No claim about why the server position changed."
+}

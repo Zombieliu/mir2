@@ -1,0 +1,33 @@
+import fs from 'node:fs/promises';import path from 'node:path';import assert from 'node:assert/strict';
+import {base,read,sha,samePath} from './input-lib.mjs';import {DRIVER_BINDING,assertFinalDriverBinding} from './driver-binding-contract.mjs';
+const normalize=p=>({file:p?.file??p?.path,bytes:p?.bytes,sha256:p?.sha256});
+const prior219={file:path.join(base,'capacity-attack-deadline-driver-frozen-v1.json'),bytes:6759,sha256:'c7a4323971721eb54b574649d8c4efeea800fd08484349b5eb8d0ec0ffb11f7b'};
+const metadataBasis={file:path.join(base,'capacity-native-chase-preference-driver-frozen-v1.json'),bytes:19099,sha256:'20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef'};
+async function exact(ref,expected){const p=normalize(ref);assert.ok(samePath(p.file,expected.file));assert.equal(p.bytes,expected.bytes);assert.equal(p.sha256,expected.sha256);const b=await fs.readFile(p.file);assert.equal(b.length,p.bytes);assert.equal(sha(b),p.sha256);return JSON.parse(b);}
+export async function getDriverDeclarationBasis(frozen){
+ const prior=await exact(frozen.priorFreeze,prior219);assert.equal(prior.actualCodeCommit,'d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16');assert.equal(prior.sourceSha256,'5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9');
+ const basis=await exact(prior.priorFreeze,metadataBasis);assert.equal(basis.actualCodeCommit,'b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd');
+ for(const key of ['navigationCoordination','nativePatrolPlanning','measurementClock','nativeHpMaintenance','nativeAttackWitness','nativeChasePreference'])assert.ok(basis[key]&&typeof basis[key]==='object');return basis;
+}
+export async function verifyDriverEvidenceBasis(frozen,assertPin){
+ assertFinalDriverBinding();assert.equal(frozen.schemaVersion,1);assert.equal(frozen.state,'FINAL_COMMITTED_DRIVER_SOURCE');
+ for(const key of ['actualCodeCommit','driverSourceCommit','executionSourceCommit'])assert.equal(frozen[key],DRIVER_BINDING.executionSourceCommit);
+ for(const key of ['backendSourceCommit','backendBuildCommit'])assert.equal(frozen[key],DRIVER_BINDING.backendSourceCommit);
+ assert.equal(frozen.files?.length,9);assert.equal(frozen.sourceSha256,DRIVER_BINDING.driverSourceSha256);assert.equal(sha(JSON.stringify(frozen.files)),frozen.sourceSha256);assert.equal(frozen.capacityAccepted,false);assert.equal(frozen.otherSevenInputsUnchanged,true);
+ const pins=[],seen=new Set(),add=async ref=>{const p=normalize(ref);assert.ok(p&&typeof p.file==='string'&&path.isAbsolute(p.file));const real=await fs.realpath(p.file),relative=path.relative(await fs.realpath(base),real);assert.ok(relative&&!path.isAbsolute(relative)&&!relative.split(/[\\/]/).some(x=>x==='..'||/^(private|store|recordings|bin)$/i.test(x))&&samePath(real,p.file));await assertPin(p);if(!seen.has(real.toLowerCase())){seen.add(real.toLowerCase());pins.push(p);}return p;};
+ const full=frozen.fullRegression;for(const [key,value] of Object.entries({passed:219,failed:0,cancelled:0,skipped:0,todo:0,finalSourceFullRegressionPerformed:true,sourcePinsUnchangedAfterRun:true,exactSourceSha256:frozen.sourceSha256}))assert.equal(full[key],value);
+ assert.deepEqual(DRIVER_BINDING.currentEvidence,[{tests:219,receipt:normalize(full.receipt),log:normalize(full.log),stderr:normalize(full.stderr)}]);
+ for(const key of ['receipt','log','stderr'])await add(full[key]);const actual=await read(normalize(full.receipt).file);
+ assert.equal(actual.exitCode,0);assert.equal(actual.signal,null);assert.equal(actual.sourcePinsUnchangedAfterRun,true);assert.equal(actual.sourceSha256,frozen.sourceSha256);
+ assert.deepEqual(actual.counts,{tests:219,passed:219,failed:0,cancelled:0,skipped:0,todo:0});
+ for(const s of [actual.sourceBefore,actual.sourceAfter]){assert.deepEqual(s,frozen.files);assert.equal(sha(JSON.stringify(s)),frozen.sourceSha256);}assert.deepEqual(actual.sourceBefore,actual.sourceAfter);
+ assert.deepEqual(normalize(actual.log),normalize(full.log));assert.deepEqual(normalize(actual.stderr),normalize(full.stderr));assert.equal(normalize(full.stderr).bytes,0);
+ const text=await fs.readFile(normalize(full.log).file,'utf8');for(const [k,n] of [['tests',219],['pass',219],['fail',0],['cancelled',0],['skipped',0],['todo',0]])assert.ok(new RegExp('^# '+k+' '+n+'\\r?$','m').test(text));
+ await add(prior219);await add(metadataBasis);await getDriverDeclarationBasis(frozen);
+ const proof={file:path.join(base,'scout-observer-preference-v1/source-preservation-and-focused-receipt-v1.json'),bytes:21049,sha256:'5177c156deabecce26c37cc4104e36ff7b22352ebf26c6b77478a4bb23fa5684'};
+ await add(proof);const preservation=await read(proof.file);assert.deepEqual(preservation.files,frozen.files);assert.equal(preservation.otherSevenInputsUnchanged,true);assert.equal(preservation.tests.oldPrefixRawExact,true);assert.equal(preservation.tests.oldPrefixBytes,243920);assert.equal(preservation.tests.addedTestCount,9);assert.equal(preservation.inverse.mainRawExact,true);
+ for(const p of preservation.preimages.files)await add({file:p.preimage,bytes:p.bytes,sha256:p.sha256});
+ await add({file:path.join(base,'scout-observer-preference-independent-review-v1/review-v1.json'),bytes:7980,sha256:'2ff103a69374fa6860616d566d3a22b488c3e5ebe77b000cd019b8cff9afbfbc'});
+ await add({file:path.join(base,'scout-observer-preference-independent-review-v1/full-regression-addendum-v1.json'),bytes:3152,sha256:'281d5faacadc10c0df2f476b9c5ed2b9ce50ddfaf4dc5e37979c4624dc08af6a'});
+ return {schemaVersion:1,scope:'Actual current Node219 exact raw nine sources and before/after arrays/log/receipt; nine new focused cases are included in219. Historical Node210/d240 is a prior basis, not a new execution or Rust validation.',exactSourceSha256:frozen.sourceSha256,fullRegressionPerformedOnFinalSource:true,fullPassed:219,original900msBoundaryPreserved:true,capacityAccepted:false,pins};
+}

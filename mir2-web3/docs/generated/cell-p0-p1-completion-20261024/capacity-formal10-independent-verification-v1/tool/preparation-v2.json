@@ -1,0 +1,202 @@
+{
+  "schemaVersion": 1,
+  "preparedAt": "2026-10-25T08:25:02.554Z",
+  "status": "PREPARED_NOT_EXECUTED",
+  "expectedActualRunId": "1792915219265-d3bcff63",
+  "expectedPreparedSourceConfigSha256": "3c49fdaddd4d59b2ac0cb8159b50e52ecd2a2edc746b773623f40a038d06c162",
+  "actualRunRead": false,
+  "actualGameVerifierExecuted": false,
+  "productOrFrozenSourcesChanged": false,
+  "phaseContract": {
+    "actors": [
+      2,
+      10,
+      25,
+      50,
+      100
+    ],
+    "stageSeconds": 300,
+    "soakSeconds": 7200,
+    "postResumeSeconds": 60,
+    "completeMinuteWindows": 146,
+    "nativeResumeSamples": 5,
+    "savedVerificationSamples": 5,
+    "memoryMinimumSeconds": 1800,
+    "memoryWarmupSeconds": 300,
+    "memorySlopeMiBPerHour": 32
+  },
+  "toolManifest": {
+    "path": "tool-source-frozen-v2.json",
+    "bytes": 7620,
+    "sha256": "4a25cfdb34ad60f1f40e0cce28db3d4dda8743f965e2ebde23aa06b14c3e9a4e"
+  },
+  "sourceInputs": 36,
+  "sourceReferences": [
+    {
+      "path": "probe13-independent-verification-v1/verify-ended-probe13-v2.mjs",
+      "bytes": 22979,
+      "sha256": "803ecb952cc18854dda6c39726a5aa0401f956e878d878fc50b5c5bb207c3575"
+    },
+    {
+      "path": "probe13-independent-verification-v1/hp-proof-contract-v2.mjs",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+    },
+    {
+      "path": "probe13-independent-verification-v1/hp-proof-v2-selfcheck-receipt.json",
+      "bytes": 3595,
+      "sha256": "10c80885160b9d5b1d46e21fa038dc2bd9acd0b9197e7ba61985a190baa73b78"
+    },
+    {
+      "path": "compact-wire-formal10-preseal-input-check-v6.json",
+      "bytes": 26339,
+      "sha256": "de146199a73f1be24c5c1a7ce241fead3b92126455d7096c0f5fcd6c02376163"
+    },
+    {
+      "path": "formal-native-v2-compact-wire-ladder-10/launcher-source-frozen-v1.json",
+      "bytes": 23133,
+      "sha256": "c4b83227e99e9a3b131e3ea80d77afb6afde0c128de7b179c383f451be023724"
+    },
+    {
+      "path": "formal-native-v2-compact-wire-ladder-10/phase-window-contract.mjs",
+      "bytes": 3442,
+      "sha256": "f62c44c11d415a6a277c1259b047adf04d823c553b75b4d36b74f47de9d82ea7"
+    }
+  ],
+  "synthetic": {
+    "schemaVersion": 1,
+    "passed": true,
+    "cases": 18,
+    "checks": [
+      {
+        "name": "formal exact146 >=60 windows and actual nominal fields",
+        "passed": true
+      },
+      {
+        "name": "one59.999second window rejected",
+        "passed": true
+      },
+      {
+        "name": "missing final soak window rejected",
+        "passed": true
+      },
+      {
+        "name": "post resume stage60 cannot be omitted",
+        "passed": true
+      },
+      {
+        "name": "noncontiguous actual clock rejected",
+        "passed": true
+      },
+      {
+        "name": "configured policy cannot lower attack rate",
+        "passed": true
+      },
+      {
+        "name": "all5 native resume and5saved states mandatory",
+        "passed": true
+      },
+      {
+        "name": "memory original1800 duration and32 slope boundary",
+        "passed": true
+      },
+      {
+        "name": "explicit ended identity required before verifier IO",
+        "passed": true
+      },
+      {
+        "name": "retained memory arithmetic uses actual timestamps",
+        "passed": true
+      },
+      {
+        "name": "histogram differences derive profile quantiles not lifetime maxima",
+        "passed": true
+      },
+      {
+        "name": "zero overflow and discarded histogram quantiles unknown",
+        "passed": true
+      },
+      {
+        "name": "histogram counter rollback rejected",
+        "passed": true
+      },
+      {
+        "name": "phase telemetry inside edges explicit and never server hardgate",
+        "passed": true
+      },
+      {
+        "name": "corrected movement remains failure at4of77 and V2 notLaunched not credit",
+        "passed": true
+      },
+      {
+        "name": "whole phase rate replay code uses measuredSeconds with no nominal fallback override",
+        "passed": true
+      },
+      {
+        "name": "permetricstatusdictionary rejects129th key andlongprototypevalues",
+        "passed": true
+      },
+      {
+        "name": "rootcleanup exactrunPIDandactualemptyobservations required",
+        "passed": true
+      }
+    ],
+    "actualRunRead": false,
+    "productTestsExecuted": false,
+    "actualGameVerifierExecuted": false,
+    "capacityAccepted": false
+  },
+  "command": "node \"C:\\mir2-build\\p01-completion-20261024\\formal10-independent-verification-v1/run-ended-formal10-v3.mjs\" --seal-sha256=4a25cfdb34ad60f1f40e0cce28db3d4dda8743f965e2ebde23aa06b14c3e9a4e --verify-ended-formal10 --run=1792915219265-d3bcff63",
+  "requires": "Root authorization after ended run, normal owned cleanup and completed public collection; absent report/rootcleanup/public archive fails closed before final receipt.",
+  "outputFiles": [
+    "final-verification.json",
+    "actual-verification.log",
+    "actual-verification-execution-receipt-v1.json"
+  ],
+  "limitations": [
+    "Original13 final raw bytes remain untouched. Its old independent whole-phase activity/native rate calculation used nominal300/300/360, so that particular independent rate replay is not actual-duration exact; raw/report full assessments, raw counters, true16minute boundaries and continuous counter replay remain byte-bound. No supplementary13 raw scan performed while formal is live.",
+    "Newformal whole-phase activity/native replay uses measuredSeconds. Raw assessment equality and frozen original verifier gates remain mandatory. Latency receipts are verified through original bounded report/raw assessment and pinned collector/verifier, not newly synthesized packets.",
+    "Server histogram differences cover only inside-phase sample pairs with explicit omitted edges/zero/overflow/partial knowledge; proposed35/50/150ms budgets are not newly imposed hardgates and no metric is relabeled ingress-to-outbound.",
+    "Original ring retains at most1201×3s monitor buckets, about1hour of a2hour soak. Exact reported regression arithmetic is replayed from its retained suffix; initialMemoryAt is not in raw, so precise warmup cutoff cannot independently be proven.",
+    "HP zero-event dictionary is legal and proves no real dose; even verified raw scalar proofs cannot independently reconstruct unrecorded originalquantity/sendMono/cursor. No sustained2hour survival guarantee.",
+    "Wire diagnostic truncation/eviction is independently reported and does not create a gameplay acceptance gate or ACK/damage credit.",
+    "Independent formal game pass is not production or P0 architecture acceptance; root adjudicates remaining scope and P2 authorization.",
+    "Trust boundary accepted by root: input is frozen producer evidence and rawSHA/bytes-bound. Existing readline aggregates each line before its64MiB length check; this is not an absolute adversarial oversized-line memory guarantee. No new gameplay gate follows."
+  ],
+  "privateDataRead": false,
+  "supersedesPreparation": {
+    "path": "preparation-v1.json",
+    "bytes": 6453,
+    "sha256": "b781aee660516587580ed16f93849aa18fb91fd5d6190075a2c146624109eb27"
+  },
+  "finalVerifier": {
+    "path": "verify-ended-formal10-v4.mjs",
+    "bytes": 28111,
+    "sha256": "f5cc63dc6587e50673ac984c541390f0a415f4fb19e7371d957c43dbac0747c7"
+  },
+  "finalContract": {
+    "path": "formal-contract-v2.mjs",
+    "bytes": 6103,
+    "sha256": "5aa9f0057bacf899270b14619d0168148c07323f97065aff8c56bf14cf227b4c"
+  },
+  "entrypoint": {
+    "path": "run-ended-formal10-v3.mjs",
+    "bytes": 2410,
+    "sha256": "f4051f68adefddb18f60346874e9d353d83a3b2d5d7a31dcd91b41d32a9acba2"
+  },
+  "failedPreservation": {
+    "enabled": true,
+    "full146AssertionOnlyWhenOriginalReportOk": true,
+    "doesNotPromoteActualPartialOrFailedRun": true,
+    "rootReportedActualOutcome": "2and10completepassed;25completefailed; no50/100/7200soak. Not independently verified by this preparation."
+  },
+  "staticReviewRepairs": [
+    "v3 fixed per-kindstatus map bound/prototype keys and fixed string bounds.",
+    "v4 reads and checks independent actualrootcleanup run/PIDs70212/68764, trueflags/emptyarrays/schema, rather than only hashing it."
+  ],
+  "notAdoptedExploration": {
+    "verifier": "verify-ended-formal10-v5.mjs",
+    "sha256": "dc16c31fa6af07bbfda54fe1709e47025cf6c785270335a8210feeb3106bd435",
+    "description": "Incremental reader+22purechecks existed before root decided to retain trusted-archive v4 scope. Files remain external; not finalexecution input, not actualrun verification, not adopted."
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "sourceSha256": "1e0c68054dcf47597f2584830aeb6ebea3b213222b98dd69c82beba33c5440c7",
+  "fixture": "exact committed 32c59bb8f2 Page handlers with synthetic accepted transport and current owner packet pose time",
+  "cases": [
+    {
+      "kind": "attack",
+      "hitMs": 1386,
+      "authoritativePoseUntil": 1600,
+      "existingMoveDeadline": 2386,
+      "attempted": [
+        {
+          "at": 1599,
+          "sent": false
+        },
+        {
+          "at": 1600,
+          "sent": false
+        },
+        {
+          "at": 2385,
+          "sent": false
+        },
+        {
+          "at": 2386,
+          "sent": true
+        }
+      ],
+      "sent": [
+        {
+          "type": "attack",
+          "at": 1000
+        },
+        {
+          "type": "walk",
+          "at": 2386
+        }
+      ]
+    },
+    {
+      "kind": "magic",
+      "hitMs": 0,
+      "authoritativePoseUntil": 1600,
+      "existingMoveDeadline": 1000,
+      "attempted": [
+        {
+          "at": 1001,
+          "sent": true
+        }
+      ],
+      "sent": [
+        {
+          "type": "magic",
+          "at": 1000
+        },
+        {
+          "type": "walk",
+          "at": 1001
+        }
+      ]
+    }
+  ]
+}

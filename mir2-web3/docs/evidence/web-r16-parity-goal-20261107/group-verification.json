@@ -1,0 +1,475 @@
+{
+  "schema": "mir2.r16.group.verification.v1",
+  "createdAt": "2026-11-07T15:20:42.262Z",
+  "branch": "codex/windows-player-journey",
+  "baseRevision": "c404bde8a5190534f6bc83ec8a4fe78fffc8cb50",
+  "priority": "Code, protocol, headless browser and build verification; no desktop/window control",
+  "sourcePins": {
+    "apps/web/app/page.tsx": "2e9a1cf1e10b911d587483e11e01cfdcffdb3452dfec4b76171fc7998df119f2",
+    "apps/web/app/original-client-shell.tsx": "33e3e82f00bd9f2960ed70b89dc93e1ad4f9761b21b62dd6ce209b67b07cf521",
+    "apps/web/app/components/original-client-group-window.tsx": "95230d7ee5f10b82b1e829670a0b17fd51cfd349b5244ef2a35db5c4aed91cd7",
+    "apps/web/lib/group-operations.ts": "08fce78a67fef84c380bb4084aa052bfb86f7e9957f2104fbe1b9440ecc2c8ea",
+    "apps/web/lib/stage5-window-adapters.ts": "b1a2ad8270db7e6e9f5f206a754e12f6ca577eb48934851a09abb73c299318a5",
+    "apps/web/lib/use-window-keydown.ts": "8149b087c0fa1ec32b04224bfc8dc5f1b4389fd0a93fed123580f6ef294be7ce",
+    "apps/web/scripts/test-group-operations.mjs": "f1742722d6ad2ff116c101d3dd372be03b00ce85f27ba28fc3d9748177c33f85",
+    "apps/web/scripts/test-r16-group-hover.mjs": "a812b20a97d8658560a8188d8948397b67e844351fde764d7c0d2ef14fc27fdf",
+    "apps/web/scripts/test-r16-social-windows.mjs": "05116ed0109d8f9124dd45a0f948980ab51b55727cb133292880e7d0fffe3760",
+    "apps/web/scripts/test-storage-page-gate.mjs": "84384522c2dfa8f12bf6c7d4ed60fd6285a3ba7b4831aaa1b71e9f0f03040719",
+    "apps/web/scripts/test-stage5-adapters.mjs": "0afaefadd63b629b6e1e613076d6d1a406f50619506844a4d62f0147648aeecb",
+    "apps/web/scripts/test-r16-companion-page-host.mjs": "3ce22834ff6e7c830a48c0d2d42d3dd1f55447624f4d2f0b03b67c5c08a55488",
+    "apps/web/scripts/test-bevy-combat-input.mjs": "0d1cce3568b750ee30108d67cdf9ddd7faeb8eee0adf6ccd25441d38304b368a",
+    "apps/game-client/client-bevy/src/crystal_ui/group_dialog.rs": "b1f4e80020ff83ae59a24e658d3feda21ae8f52047a0f92f3f04251946f0e09f",
+    "apps/game-client/client-bevy/src/social.rs": "f2770f4e3fe99fe64ca3d2dc98b8372dbc6ae51f5c88844b4d6f220d2d25566a",
+    "apps/game-client/platform-windows/src/keyboard_world_actions.rs": "d65a9d0a6dcdbeed767548db0b27ab4a763c6a754925b08ee80f21b14d72ce85",
+    "apps/gateway/src/shared_groups.rs": "78323de4170c2e483cbb85fd140f519f0e2360869ac3dfbcf833cc9f507bc433",
+    "apps/gateway/src/web.rs": "07ec58c60cfcfccb0dff67cb76456aa808dccf68f2be0a412ea5774e0eabe0a9",
+    "apps/gateway/src/web_transport.rs": "dc8c7ac981d937e252b9d9f9b0ab3f4563215deb652a4c15444bf96df536d496",
+    "apps/gateway/src/routing.rs": "b746a18cb6e460e95c6abf84f5bf434faf243c772cf8b5f68db0dc5d7d273ab9"
+  },
+  "webSourceAndDevStagingMatched": true,
+  "temporaryProductProbes": false,
+  "tests": {
+    "node": {
+      "passed": 296,
+      "failed": 0,
+      "skipped": 0,
+      "log": "group-node-qualified.log"
+    },
+    "stage5": {
+      "groups": 507,
+      "failed": 0,
+      "log": "group-stage5-qualified.log"
+    },
+    "typeScript": {
+      "passed": true,
+      "scope": "Copied app/lib, limited source config, no production build",
+      "log": "group-typescript.log"
+    },
+    "nativeGui": false,
+    "fullWorkspaceOrReleaseBuild": false
+  },
+  "runtime": {
+    "gatewaySha256": "3dd4f2b5c053f0d35c0ba172130a5731eb8944afd4b78e7605c03a9271fcad3e",
+    "gatewayHistoricalSourcePinsComplete": false,
+    "gatewayContainsObservedClosePersistResumeLifecycle": true,
+    "renderer": "bevy-db5e53a91f4d11de",
+    "snapshotCopy": true,
+    "ordinaryPlayerProtocol": true,
+    "unsafeLocalPlayerCommands": false,
+    "adminOrTeleport": false,
+    "modelCalls": 0
+  },
+  "qualifiedBrowserCases": [
+    {
+      "backend": "webgl2-shared",
+      "file": "group-browser-webgl.json",
+      "scope": "Ordinary direct WebSocket; target refuses while sender off, bag/editor block, hover B with selected A, exact Add without Switch/duplicate, actual accepted group and removal, two logout/reentry, zero movement/combat/items",
+      "passed": true
+    },
+    {
+      "backend": "webgpu",
+      "file": "group-browser-webgpu.json",
+      "scope": "Ordinary direct WebSocket; target refuses while sender off, bag/editor block, hover B with selected A, exact Add without Switch/duplicate, actual accepted group and removal, two logout/reentry, zero movement/combat/items",
+      "passed": true
+    }
+  ],
+  "groupSemantics": {
+    "hoverNotSelection": true,
+    "hiddenSelfDeadAndAbsentTargetsRejected": true,
+    "currentUiGeometryAndHeldInputsBlock": true,
+    "noOrdinaryPreSwitch": true,
+    "explicitSwitchRetained": true,
+    "allowCheckboxUsesAuthoritativePreference": true,
+    "leaderCapacityOwnerCheckedAtFinalSend": true,
+    "namedAckNotOptimistic": true,
+    "unknownSendRetainedNoAutomaticReplay": true,
+    "mapChangePreservesPending": true,
+    "confirmedStartGameAndSessionRetirementClearPending": true,
+    "groupQueueLimit": 8,
+    "nativeAllSocialBudgetParity": false
+  },
+  "preservation": {
+    "schema": "mir2.r16.group.preservation.v1",
+    "createdAt": "2026-11-07T15:15:32.754Z",
+    "immutableBaseline": true,
+    "sourceSnapshotSha256": "2511a547161224a47757e2a8ec95f4463d15c4a6208bbe8be3f81ac6deabfa27",
+    "allBaselineAccountsRetained": true,
+    "baselineAccountCount": 2,
+    "afterAccountCount": 4,
+    "accountsAddedByOrdinaryRegistration": 2,
+    "accountFields": [
+      {
+        "isTestOwner": false,
+        "metadataEqual": true,
+        "differingFieldNames": []
+      },
+      {
+        "isTestOwner": true,
+        "metadataEqual": true,
+        "differingFieldNames": []
+      }
+    ],
+    "roles": [
+      {
+        "role": "unrelated-baseline-role",
+        "level": 7,
+        "metadataEqual": true,
+        "protectedFields": {
+          "character": true,
+          "experience": true,
+          "max_experience": true,
+          "gold": true,
+          "credit": true,
+          "city_currencies": true,
+          "inventory_capacity": true,
+          "inventory_items_json": true,
+          "belt_items_json": true,
+          "equipment_items_json": true,
+          "equipment_items_explicit_empty": true,
+          "storage_items_json": true,
+          "hero_inventory_items_json": true,
+          "hero_equipment_items_json": true,
+          "hero_inventory_capacity": true,
+          "hero_inventory_legacy_40": true,
+          "hero_vitals": true,
+          "hero_registry_attachment": true,
+          "quest_states_json": true,
+          "skill_states_json": true,
+          "npc_flag_states_json": true,
+          "npc_saved_values_json": true,
+          "npc_purchase_journal": true,
+          "guild_experience_journal": true,
+          "item_rental_records_json": true,
+          "has_rented_item": true
+        },
+        "all26ProtectedEqual": true,
+        "transformEqual": true,
+        "baselineTransform": {
+          "position": {
+            "x": 0,
+            "y": 0
+          },
+          "direction": "Down"
+        },
+        "currentTransform": {
+          "position": {
+            "x": 0,
+            "y": 0
+          },
+          "direction": "Down"
+        },
+        "saveFieldCount": 40,
+        "differingFields": [],
+        "stage5DifferingKeys": []
+      },
+      {
+        "role": "original-level30-role",
+        "level": 30,
+        "metadataEqual": true,
+        "protectedFields": {
+          "character": true,
+          "experience": true,
+          "max_experience": true,
+          "gold": true,
+          "credit": true,
+          "city_currencies": true,
+          "inventory_capacity": true,
+          "inventory_items_json": true,
+          "belt_items_json": true,
+          "equipment_items_json": true,
+          "equipment_items_explicit_empty": true,
+          "storage_items_json": true,
+          "hero_inventory_items_json": true,
+          "hero_equipment_items_json": true,
+          "hero_inventory_capacity": true,
+          "hero_inventory_legacy_40": true,
+          "hero_vitals": true,
+          "hero_registry_attachment": true,
+          "quest_states_json": true,
+          "skill_states_json": true,
+          "npc_flag_states_json": true,
+          "npc_saved_values_json": true,
+          "npc_purchase_journal": true,
+          "guild_experience_journal": true,
+          "item_rental_records_json": true,
+          "has_rented_item": true
+        },
+        "all26ProtectedEqual": true,
+        "transformEqual": true,
+        "baselineTransform": {
+          "position": {
+            "x": 328,
+            "y": 264
+          },
+          "direction": "DownLeft"
+        },
+        "currentTransform": {
+          "position": {
+            "x": 328,
+            "y": 264
+          },
+          "direction": "DownLeft"
+        },
+        "saveFieldCount": 44,
+        "differingFields": [],
+        "stage5DifferingKeys": []
+      },
+      {
+        "role": "ordinary-level1-test-role",
+        "level": 1,
+        "metadataEqual": true,
+        "protectedFields": {
+          "character": true,
+          "experience": true,
+          "max_experience": true,
+          "gold": true,
+          "credit": true,
+          "city_currencies": true,
+          "inventory_capacity": true,
+          "inventory_items_json": true,
+          "belt_items_json": true,
+          "equipment_items_json": true,
+          "equipment_items_explicit_empty": true,
+          "storage_items_json": true,
+          "hero_inventory_items_json": true,
+          "hero_equipment_items_json": true,
+          "hero_inventory_capacity": true,
+          "hero_inventory_legacy_40": true,
+          "hero_vitals": true,
+          "hero_registry_attachment": true,
+          "quest_states_json": true,
+          "skill_states_json": true,
+          "npc_flag_states_json": true,
+          "npc_saved_values_json": true,
+          "npc_purchase_journal": true,
+          "guild_experience_journal": true,
+          "item_rental_records_json": true,
+          "has_rented_item": true
+        },
+        "all26ProtectedEqual": true,
+        "transformEqual": false,
+        "baselineTransform": {
+          "position": {
+            "x": 288,
+            "y": 616
+          },
+          "direction": "Down"
+        },
+        "currentTransform": {
+          "position": {
+            "x": 287,
+            "y": 617
+          },
+          "direction": "Down"
+        },
+        "saveFieldCount": 43,
+        "differingFields": [
+          "default_npc_events",
+          "revision",
+          "position"
+        ],
+        "stage5DifferingKeys": []
+      }
+    ],
+    "originalLiveFileBytesClaimedUnchanged": false,
+    "originalThreeGatewayFilesUsedReadOnly": true
+  },
+  "cleanup": {
+    "schema": "mir2.r16.group.cleanup.v1",
+    "timeUtc": "2026-11-07T15:18:23.6153963Z",
+    "ownedPortsClosed": [
+      19250,
+      19280,
+      19351
+    ],
+    "originalListeners": [
+      {
+        "LocalPort": 19235,
+        "OwningProcess": 129280
+      },
+      {
+        "LocalPort": 19232,
+        "OwningProcess": 128444
+      },
+      {
+        "LocalPort": 19231,
+        "OwningProcess": 126788
+      }
+    ],
+    "originalInstalledExeSha256": "d930618bc7cc461a4d03507a68fb28c0b15af6200de8f00946c463929f67d638",
+    "originalInstalledExePreserved": true,
+    "desktopControlUsed": false,
+    "published": false,
+    "ownServicesGracefullyStopped": true
+  },
+  "earlierRuns": [
+    {
+      "file": "group-script-initial-failed.json",
+      "qualifying": false,
+      "reason": "Harness used unsupported East/West direction vocabulary before any browser session; fixed to installed GatewayClient Right/Left"
+    },
+    {
+      "file": "group-script-retry1-failed.json",
+      "qualifying": false,
+      "reason": "Same harness direction error; ordinary created peer retained and reused"
+    },
+    {
+      "file": "group-reconnect-invalid-close-first.json",
+      "qualifying": false,
+      "reason": "Playwright routed server.close(1001) is invalid for browser WebSocket.close and the error is swallowed; the page kept sending keepAlive"
+    },
+    {
+      "file": "group-reconnect-invalid-close-second.json",
+      "qualifying": false,
+      "reason": "Same invalid native close code, plus mock page close; cannot qualify physical transport cleanup"
+    },
+    {
+      "file": "group-reconnect-valid-close-failed.json",
+      "qualifying": false,
+      "reason": "Legal3001 closed the real old transport. New authenticated StartGame arrived while old save was still running7442ms; route lease rejected before resume.retain. Remains an open product race"
+    }
+  ],
+  "openWork": [
+    {
+      "priority": "P0",
+      "scope": "Gateway automatic resume during slow disconnect persistence",
+      "evidence": "group-resume-sanitized-log.json",
+      "status": "not fixed; no lease/admission weakening",
+      "next": "Register a same-account/character + old-route-owner + teardown-generation completion signal before teardown awaits. Wait outside serial_execution_gate/world/cache/store locks, then revalidate auth/current connection and take the saved session once. Save/journal/failure/cancel must not signal Ready."
+    },
+    {
+      "scope": "Group refusal and silent rate-limit pending resolution",
+      "status": "Native has no named failure ACK; do not invent a timeout or retry in Web"
+    },
+    {
+      "scope": "Shared Native social queue budget",
+      "status": "This adapter limits the group subqueue8; global cross-social8 is not yet matched"
+    },
+    {
+      "scope": "ObjectHidden visual rendering",
+      "status": "Group targeting rejects current hidden IDs, full hidden-rendering parity is not claimed"
+    },
+    {
+      "scope": "Actual Windows/cross-client, trade, Alo, release/cold-cache/size, human acceptance",
+      "status": "Remain open; desktop input deferred"
+    }
+  ],
+  "candidate100": false,
+  "humanAccepted": false,
+  "published": false,
+  "unrelatedWorkingTreePreserved": true,
+  "artifactPins": {
+    "group-browser-webgl.json": {
+      "sha256": "4d3445151c2dfa2f60fe1b4469ad68c810eb0e8a8edb511067e105a321392de8",
+      "bytes": 161747
+    },
+    "group-webgl-refused-invite.png": {
+      "sha256": "9f8bc07baa2087c6ce2226a5a2a8fe3ca602b821d1da602e3bcdee10fb338015",
+      "bytes": 1387516
+    },
+    "group-webgl-bag-blocked.png": {
+      "sha256": "54b82b5778fd40122f8966fe6f62164fabb76e069127ad883dbc5b76de9cfb23",
+      "bytes": 1335808
+    },
+    "group-webgl-party-established.png": {
+      "sha256": "a453b74f8ee9b8489ff304f1e14c29a20b68d45d037273da58a7b99bb137ec4a",
+      "bytes": 1385460
+    },
+    "group-browser-webgpu.json": {
+      "sha256": "568835d9ccbbdee8847976c2d679dcbb7f978ea4167a8b8955b640852f26994b",
+      "bytes": 162042
+    },
+    "group-webgpu-refused-invite.png": {
+      "sha256": "74c6c94ab8f15c9907a6e83129c01433808b949a94d9435783c9884451585f01",
+      "bytes": 1391991
+    },
+    "group-webgpu-bag-blocked.png": {
+      "sha256": "cf70af153e02ded4ee013e248f58134a9e5aeb49bab01a191683cb9280729dac",
+      "bytes": 1334979
+    },
+    "group-webgpu-party-established.png": {
+      "sha256": "8120f1500d142ed27585435e0cd41de7814e460c3e8133ddb1c7b84f5b4ca10f",
+      "bytes": 1382933
+    },
+    "group-node-qualified.log": {
+      "sha256": "dc0837a74b596887329a1ec7de1041db3028e8efb14e539e33a22fd22960bccc",
+      "bytes": 32386
+    },
+    "group-stage5-qualified.log": {
+      "sha256": "cf7b210b65431f5de202cff413967c4e90c1c676506d0a612ee259d7f54f799b",
+      "bytes": 42
+    },
+    "group-typescript.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "group-source-initial.json": {
+      "sha256": "95057ac0f3bbd7f7f82cf1a93be3db697303d9a58527728265572aaabbdc2332",
+      "bytes": 912
+    },
+    "group-source-current.json": {
+      "sha256": "711d765559b908db8a5a4d75e900eb58b6297da653b3341d4bd02aa1785d72f7",
+      "bytes": 723
+    },
+    "group-preservation.json": {
+      "sha256": "9072710d4d595d6bef79092158757876558fe7331fba5367544cdb85a84eca07",
+      "bytes": 5281
+    },
+    "group-cleanup.json": {
+      "sha256": "860da0fd0405402b88dd7e50e5a5daaee5454161dc110fc512c4f67025d2134e",
+      "bytes": 648
+    },
+    "group-resume-sanitized-log.json": {
+      "sha256": "157d04471dd006b0e70e58842e6e5528af4750eafc611418ea3afc7a8235b6f7",
+      "bytes": 22199
+    },
+    "group-script-initial-failed.json": {
+      "sha256": "cdb5e095e3b88aec0bd93ab12279983b2eb9b1d50f033eeb486650921c588e8c",
+      "bytes": 896
+    },
+    "group-script-retry1-failed.json": {
+      "sha256": "140b5c7744f929e77f1c3e6e91180da0fc9fd22b71fb8c2c0e9de7314fb6e4ef",
+      "bytes": 896
+    },
+    "group-reconnect-invalid-close-first.json": {
+      "sha256": "afdb599e7739588d74deae861689f6e2cf8b0546216f1343b0ed5ec86f07a514",
+      "bytes": 83055
+    },
+    "group-reconnect-invalid-close-second.json": {
+      "sha256": "da845b631c376e9ef1d5597c244e69c65cff13a990221428e433b2c6070ed412",
+      "bytes": 81497
+    },
+    "group-reconnect-valid-close-failed.json": {
+      "sha256": "b08eeceb947eeb28454f7cebd8b0aeda7145777ef421934eeb83731ad11f56ee",
+      "bytes": 81497
+    },
+    "group-tools/prepare.mjs": {
+      "sha256": "3a009c41c597187780fd54cdd867db4930cab8ae5c610c81827aa4df5fdb24ab",
+      "bytes": 4679
+    },
+    "group-tools/sync-source.mjs": {
+      "sha256": "a3e3a9629d934f29cf4ab2c2110a6ccee66638ef0828106b6d68fd38653fbccd",
+      "bytes": 1030
+    },
+    "group-tools/launch-realm.mjs": {
+      "sha256": "9141843516e2c9bc1ed8108d9e4d84e3115d8fbf1edbf5ed204f8e6f707342de",
+      "bytes": 2616
+    },
+    "group-tools/launch-web.mjs": {
+      "sha256": "1c7ff0ed36b1bb40eca18ccb94e5ff78d0ac8e836392a9a647df6fb73b3f2b7f",
+      "bytes": 1415
+    },
+    "group-tools/browser.mjs": {
+      "sha256": "9d0f0637db1456b5decd7425d0ee8e8c70a22cbe4fed8ef2efc58a7f4df2439c",
+      "bytes": 17766
+    },
+    "group-tools/preservation.mjs": {
+      "sha256": "623dda197ed153ee63a8555fa75e0c391c72424bbb187d49a5b02705ab7259f8",
+      "bytes": 3786
+    },
+    "group-tools/read-resume-log.mjs": {
+      "sha256": "a5480964790c09673b3581c4bd1e59ba5b022d8e10b59f19d4a712f556c96f68",
+      "bytes": 1431
+    }
+  }
+}

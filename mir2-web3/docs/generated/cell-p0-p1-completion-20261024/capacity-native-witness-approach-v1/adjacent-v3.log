@@ -1,0 +1,538 @@
+TAP version 13
+# Subtest: native HP maintenance verifies ordinary inventory UID consumption without inventing healing or activity
+ok 1 - native HP maintenance verifies ordinary inventory UID consumption without inventing healing or activity
+  ---
+  duration_ms: 4.5763
+  type: 'test'
+  ...
+# Subtest: native HP maintenance verifies ordinary belt UID consumption without inventing healing or activity
+ok 2 - native HP maintenance verifies ordinary belt UID consumption without inventing healing or activity
+  ---
+  duration_ms: 0.456
+  type: 'test'
+  ...
+# Subtest: native HP maintenance requires the matching successful ACK as well as a fresh exact HP increase
+ok 3 - native HP maintenance requires the matching successful ACK as well as a fresh exact HP increase
+  ---
+  duration_ms: 0.4267
+  type: 'test'
+  ...
+# Subtest: native HP maintenance rejected cannot credit recovery and fails closed
+ok 4 - native HP maintenance rejected cannot credit recovery and fails closed
+  ---
+  duration_ms: 0.534
+  type: 'test'
+  ...
+# Subtest: native HP maintenance wrong-uid cannot credit recovery and fails closed
+ok 5 - native HP maintenance wrong-uid cannot credit recovery and fails closed
+  ---
+  duration_ms: 0.3896
+  type: 'test'
+  ...
+# Subtest: native HP maintenance wrong-grid cannot credit recovery and fails closed
+ok 6 - native HP maintenance wrong-grid cannot credit recovery and fails closed
+  ---
+  duration_ms: 0.2648
+  type: 'test'
+  ...
+# Subtest: native HP maintenance ack-only cannot credit recovery and fails closed
+ok 7 - native HP maintenance ack-only cannot credit recovery and fails closed
+  ---
+  duration_ms: 0.6331
+  type: 'test'
+  ...
+# Subtest: native HP maintenance effect-only cannot credit recovery and fails closed
+ok 8 - native HP maintenance effect-only cannot credit recovery and fails closed
+  ---
+  duration_ms: 0.3125
+  type: 'test'
+  ...
+# Subtest: native HP maintenance incomplete-inventory cannot credit recovery and fails closed
+ok 9 - native HP maintenance incomplete-inventory cannot credit recovery and fails closed
+  ---
+  duration_ms: 0.5073
+  type: 'test'
+  ...
+# Subtest: native HP maintenance late-proof cannot credit recovery and fails closed
+ok 10 - native HP maintenance late-proof cannot credit recovery and fails closed
+  ---
+  duration_ms: 0.3994
+  type: 'test'
+  ...
+# Subtest: native HP maintenance keeps unknown health, missing supplies and exhausted command budget bounded and never sends MP
+ok 11 - native HP maintenance keeps unknown health, missing supplies and exhausted command budget bounded and never sends MP
+  ---
+  duration_ms: 0.6796
+  type: 'test'
+  ...
+# Subtest: native HP pending evidence does not pause native movement and drain captures the existing dose
+ok 12 - native HP pending evidence does not pause native movement and drain captures the existing dose
+  ---
+  duration_ms: 28.4616
+  type: 'test'
+  ...
+# Subtest: native post-strike same-target chase starts once at a real send and again obeys nonprogress limits
+ok 13 - native post-strike same-target chase starts once at a real send and again obeys nonprogress limits
+  ---
+  duration_ms: 4.405
+  type: 'test'
+  ...
+# Subtest: native post-strike segment retains the original movement-budget boundary
+ok 14 - native post-strike segment retains the original movement-budget boundary
+  ---
+  duration_ms: 0.7438
+  type: 'test'
+  ...
+# Subtest: native post-strike segment retains the original time-budget boundary
+ok 15 - native post-strike segment retains the original time-budget boundary
+  ---
+  duration_ms: 0.6748
+  type: 'test'
+  ...
+# Subtest: native post-strike segment retains the original route-loop boundary
+ok 16 - native post-strike segment retains the original route-loop boundary
+  ---
+  duration_ms: 0.6156
+  type: 'test'
+  ...
+# Subtest: native post-strike planning, pending work, budget gaps, navigation rejection and failed sends never reset a chase
+ok 17 - native post-strike planning, pending work, budget gaps, navigation rejection and failed sends never reset a chase
+  ---
+  duration_ms: 3.001
+  type: 'test'
+  ...
+# Subtest: native attack witness skips the first AOI-edge peer and requires both real objects on a nearby living connection
+ok 18 - native attack witness skips the first AOI-edge peer and requires both real objects on a nearby living connection
+  ---
+  duration_ms: 0.9279
+  type: 'test'
+  ...
+# Subtest: native attack witness uses nearest eligible peer with original order on equal separation
+ok 19 - native attack witness uses nearest eligible peer with original order on equal separation
+  ---
+  duration_ms: 0.2353
+  type: 'test'
+  ...
+# Subtest: native attack witness is reselected with its current namespace and cursor immediately before the real send
+ok 20 - native attack witness is reselected with its current namespace and cursor immediately before the real send
+  ---
+  duration_ms: 0.9442
+  type: 'test'
+  ...
+# Subtest: native attack witness loss before send retains the original incomplete opportunity without a fake attack
+ok 21 - native attack witness loss before send retains the original incomplete opportunity without a fake attack
+  ---
+  duration_ms: 33.0379
+  type: 'test'
+  ...
+# Subtest: native initial no-witness selection can use another genuinely witnessed adjacent target
+ok 22 - native initial no-witness selection can use another genuinely witnessed adjacent target
+  ---
+  duration_ms: 0.4096
+  type: 'test'
+  ...
+# Subtest: native initial no-witness target with no approach route retains the original bounded scout fallback
+ok 23 - native initial no-witness target with no approach route retains the original bounded scout fallback
+  ---
+  duration_ms: 0.5367
+  type: 'test'
+  ...
+# Subtest: native witnessed approach avoids the probe10 unobservable 206513 neighbour loop
+ok 24 - native witnessed approach avoids the probe10 unobservable 206513 neighbour loop
+  ---
+  duration_ms: 1.2799
+  type: 'test'
+  ...
+# Subtest: native witnessed approach avoids the probe10 unobservable 206704 neighbour loop
+ok 25 - native witnessed approach avoids the probe10 unobservable 206704 neighbour loop
+  ---
+  duration_ms: 0.9924
+  type: 'test'
+  ...
+# Subtest: native witnessed approach avoids the probe10 unobservable 206507 neighbour loop
+ok 26 - native witnessed approach avoids the probe10 unobservable 206507 neighbour loop
+  ---
+  duration_ms: 0.9487
+  type: 'test'
+  ...
+# Subtest: native witnessed approach avoids the probe10 unobservable 206715 neighbour loop
+ok 27 - native witnessed approach avoids the probe10 unobservable 206715 neighbour loop
+  ---
+  duration_ms: 0.9381
+  type: 'test'
+  ...
+# Subtest: native witnessed approach skips cheap ineligible targets before the original four path-target limit
+ok 28 - native witnessed approach skips cheap ineligible targets before the original four path-target limit
+  ---
+  duration_ms: 0.3934
+  type: 'test'
+  ...
+# Subtest: native witnessed approach rejects a not-ready observer without replacing real membership with distance
+ok 29 - native witnessed approach rejects a not-ready observer without replacing real membership with distance
+  ---
+  duration_ms: 0.1881
+  type: 'test'
+  ...
+# Subtest: native witnessed approach rejects a dead observer without replacing real membership with distance
+ok 30 - native witnessed approach rejects a dead observer without replacing real membership with distance
+  ---
+  duration_ms: 0.196
+  type: 'test'
+  ...
+# Subtest: native witnessed approach rejects a wrong-map observer without replacing real membership with distance
+ok 31 - native witnessed approach rejects a wrong-map observer without replacing real membership with distance
+  ---
+  duration_ms: 0.1213
+  type: 'test'
+  ...
+# Subtest: native witnessed approach rejects a missing-attacker observer without replacing real membership with distance
+ok 32 - native witnessed approach rejects a missing-attacker observer without replacing real membership with distance
+  ---
+  duration_ms: 0.1281
+  type: 'test'
+  ...
+# Subtest: native witnessed approach rejects a missing-target observer without replacing real membership with distance
+ok 33 - native witnessed approach rejects a missing-target observer without replacing real membership with distance
+  ---
+  duration_ms: 0.111
+  type: 'test'
+  ...
+# Subtest: native witnessed approach retains the original four path targets and eight adjacent destinations
+ok 34 - native witnessed approach retains the original four path targets and eight adjacent destinations
+  ---
+  duration_ms: 101.9385
+  type: 'test'
+  ...
+# Subtest: native witnessed approach metadata is immutable and does not start gameplay without its original monitor
+ok 35 - native witnessed approach metadata is immutable and does not start gameplay without its original monitor
+  ---
+  duration_ms: 7.377
+  type: 'test'
+  ...
+# Subtest: navigation coordination unions true owner receipts and bounded pending cells without replacing AOI, identities or snapshots
+ok 36 - navigation coordination unions true owner receipts and bounded pending cells without replacing AOI, identities or snapshots
+  ---
+  duration_ms: 0.8205
+  type: 'test'
+  ...
+# Subtest: navigation coordination is native-only and preserves the baseline obstacle and send path
+ok 37 - navigation coordination is native-only and preserves the baseline obstacle and send path
+  ---
+  duration_ms: 0.1958
+  type: 'test'
+  ...
+# Subtest: navigation hints cover Run intermediate and diagonal corner cells with one immutable bounded entry per active connection
+ok 38 - navigation hints cover Run intermediate and diagonal corner cells with one immutable bounded entry per active connection
+  ---
+  duration_ms: 0.2541
+  type: 'test'
+  ...
+# Subtest: navigation coordination prevents two same-tick sends to one destination while preserving the blocked native opportunity
+ok 39 - navigation coordination prevents two same-tick sends to one destination while preserving the blocked native opportunity
+  ---
+  duration_ms: 1.091
+  type: 'test'
+  ...
+# Subtest: navigation ACK cleanup cannot let an old finally delete a newer hint and close/map/death release their own entry
+ok 40 - navigation ACK cleanup cannot let an old finally delete a newer hint and close/map/death release their own entry
+  ---
+  duration_ms: 0.6353
+  type: 'test'
+  ...
+# Subtest: navigation hints release on send errors and real owner timeouts without suppressing old failure counters
+ok 41 - navigation hints release on send errors and real owner timeouts without suppressing old failure counters
+  ---
+  duration_ms: 0.4147
+  type: 'test'
+  ...
+# Subtest: navigation hints release on a same-position owner receipt while the original movement correction still fails acceptance
+ok 42 - navigation hints release on a same-position owner receipt while the original movement correction still fails acceptance
+  ---
+  duration_ms: 0.498
+  type: 'test'
+  ...
+# Subtest: native fast patrol and normal A* both avoid controlled in-flight Run cells while leaving snapshots untouched
+ok 43 - native fast patrol and normal A* both avoid controlled in-flight Run cells while leaving snapshots untouched
+  ---
+  duration_ms: 0.2873
+  type: 'test'
+  ...
+# Subtest: native primed fallback chooses a real Run from an existing corner under two observed approximate Scarecrow arrangements
+ok 44 - native primed fallback chooses a real Run from an existing corner under two observed approximate Scarecrow arrangements
+  ---
+  duration_ms: 40.4327
+  type: 'test'
+  ...
+# Subtest: native primed fallback keeps the original first Walk when no original corner route has a legal Run
+ok 45 - native primed fallback keeps the original first Walk when no original corner route has a legal Run
+  ---
+  duration_ms: 0.4802
+  type: 'test'
+  ...
+# Subtest: native fallback does not prefer later Run routes when unprimed and leaves baseline first-path selection unchanged
+ok 46 - native fallback does not prefer later Run routes when unprimed and leaves baseline first-path selection unchanged
+  ---
+  duration_ms: 0.1893
+  type: 'test'
+  ...
+# Subtest: native fallback Run preference retains controlled-owner and pending-path obstacles without changing snapshots
+ok 47 - native fallback Run preference retains controlled-owner and pending-path obstacles without changing snapshots
+  ---
+  duration_ms: 1.1073
+  type: 'test'
+  ...
+# Subtest: native fallback Run preference retains diagonal side-cell collision checks
+ok 48 - native fallback Run preference retains diagonal side-cell collision checks
+  ---
+  duration_ms: 0.2256
+  type: 'test'
+  ...
+# Subtest: native fallback Run preference cannot enter a transfer in its first or second step
+ok 49 - native fallback Run preference cannot enter a transfer in its first or second step
+  ---
+  duration_ms: 0.3716
+  type: 'test'
+  ...
+# Subtest: native fallback Run preference retains routeAllowed on the complete route to each original goal
+ok 50 - native fallback Run preference retains routeAllowed on the complete route to each original goal
+  ---
+  duration_ms: 0.2294
+  type: 'test'
+  ...
+# Subtest: attackResultV2 matching rejects wrong IDs, malformed versions/results and conflicting cache replays
+ok 51 - attackResultV2 matching rejects wrong IDs, malformed versions/results and conflicting cache replays
+  ---
+  duration_ms: 0.2518
+  type: 'test'
+  ...
+# Subtest: V2 admission measurements keep legacy counters unchanged and never dilute movement corrections or credit unlaunched damage
+ok 52 - V2 admission measurements keep legacy counters unchanged and never dilute movement corrections or credit unlaunched damage
+  ---
+  duration_ms: 1.1199
+  type: 'test'
+  ...
+# Subtest: active observer coverage binds only declared living movement clients and never borrows a future home
+ok 53 - active observer coverage binds only declared living movement clients and never borrows a future home
+  ---
+  duration_ms: 1.9427
+  type: 'test'
+  ...
+# Subtest: temporary observer coverage loss and restore do not wash a live pursuit movement budget
+ok 54 - temporary observer coverage loss and restore do not wash a live pursuit movement budget
+  ---
+  duration_ms: 0.7788
+  type: 'test'
+  ...
+# Subtest: pending attack diagnostics retain same-position receipts, exclude unrelated data and cap packets without changing outcomes
+ok 55 - pending attack diagnostics retain same-position receipts, exclude unrelated data and cap packets without changing outcomes
+  ---
+  duration_ms: 0.8833
+  type: 'test'
+  ...
+# Subtest: pending attack packet subscriptions are removed after synchronous send failure and transport close
+ok 56 - pending attack packet subscriptions are removed after synchronous send failure and transport close
+  ---
+  duration_ms: 0.7518
+  type: 'test'
+  ...
+# Subtest: native scout uses ordinary covered adjacent goals to explore another declared observer instead of circling one home
+ok 57 - native scout uses ordinary covered adjacent goals to explore another declared observer instead of circling one home
+  ---
+  duration_ms: 0.3929
+  type: 'test'
+  ...
+# Subtest: native scout goal selection also excludes a controlled in-flight hint without injecting it into the fighter snapshot
+ok 58 - native scout goal selection also excludes a controlled in-flight hint without injecting it into the fighter snapshot
+  ---
+  duration_ms: 0.4088
+  type: 'test'
+  ...
+# Subtest: native scout never crosses a coverage gap, map transfer or real blocked route and performs at most four searches
+ok 59 - native scout never crosses a coverage gap, map transfer or real blocked route and performs at most four searches
+  ---
+  duration_ms: 3.8059
+  type: 'test'
+  ...
+# Subtest: native scout counts only fresh real successful movement and preserves pursuit, deferral and ambiguous-attack budgets
+ok 60 - native scout counts only fresh real successful movement and preserves pursuit, deferral and ambiguous-attack budgets
+  ---
+  duration_ms: 0.2451
+  type: 'test'
+  ...
+# Subtest: native scout advances its finite waypoint on real position loops, movement budget and time budget
+ok 61 - native scout advances its finite waypoint on real position loops, movement budget and time budget
+  ---
+  duration_ms: 0.4728
+  type: 'test'
+  ...
+# Subtest: native scout yields immediately to a real witnessed combat candidate without changing native pacing or thresholds
+ok 62 - native scout yields immediately to a real witnessed combat candidate without changing native pacing or thresholds
+  ---
+  duration_ms: 0.2413
+  type: 'test'
+  ...
+# Subtest: native hunt prioritizes a legal adjacent target visible to both peers over an unwitnessed nearer candidate
+ok 63 - native hunt prioritizes a legal adjacent target visible to both peers over an unwitnessed nearer candidate
+  ---
+  duration_ms: 0.1164
+  type: 'test'
+  ...
+# Subtest: native hunt keeps its selected reachable target when another nonadjacent monster becomes nearer
+ok 64 - native hunt keeps its selected reachable target when another nonadjacent monster becomes nearer
+  ---
+  duration_ms: 0.2594
+  type: 'test'
+  ...
+# Subtest: native hunt follows confirmed A* detour progress even while Chebyshev distance initially increases
+ok 65 - native hunt follows confirmed A* detour progress even while Chebyshev distance initially increases
+  ---
+  duration_ms: 1.2591
+  type: 'test'
+  ...
+# Subtest: native hunt does not credit a newly planned route when the target moves during each authoritative step
+ok 66 - native hunt does not credit a newly planned route when the target moves during each authoritative step
+  ---
+  duration_ms: 0.4502
+  type: 'test'
+  ...
+# Subtest: native hunt cannot turn real blocking corrections into detour progress or successful movement evidence
+ok 67 - native hunt cannot turn real blocking corrections into detour progress or successful movement evidence
+  ---
+  duration_ms: 4.5114
+  type: 'test'
+  ...
+# Subtest: native hunt defers an authoritative position loop even when replanned routes claim progress
+ok 68 - native hunt defers an authoritative position loop even when replanned routes claim progress
+  ---
+  duration_ms: 0.2433
+  type: 'test'
+  ...
+# Subtest: native hunt retains confirmed loop evidence across genuinely blocked replans and ordinary fallback patrol ACKs
+ok 69 - native hunt retains confirmed loop evidence across genuinely blocked replans and ordinary fallback patrol ACKs
+  ---
+  duration_ms: 89.0878
+  type: 'test'
+  ...
+# Subtest: native hunt keeps finite movement and time budgets despite continually decreasing replanned route lengths
+ok 70 - native hunt keeps finite movement and time budgets despite continually decreasing replanned route lengths
+  ---
+  duration_ms: 0.4602
+  type: 'test'
+  ...
+# Subtest: native hunt resume preserves consumed pursuit budgets without charging offline time or sharing mutable route history
+ok 71 - native hunt resume preserves consumed pursuit budgets without charging offline time or sharing mutable route history
+  ---
+  duration_ms: 0.2327
+  type: 'test'
+  ...
+# Subtest: native hunt defers a repeatedly escaping unattacked target for30s then selects another without touching attack quarantine
+ok 72 - native hunt defers a repeatedly escaping unattacked target for30s then selects another without touching attack quarantine
+  ---
+  duration_ms: 0.544
+  type: 'test'
+  ...
+# Subtest: native hunt time threshold requires repeated actual movement and never counts plans, duplicate receipts or corrected steps
+ok 73 - native hunt time threshold requires repeated actual movement and never counts plans, duplicate receipts or corrected steps
+  ---
+  duration_ms: 1.1027
+  type: 'test'
+  ...
+# Subtest: native hunt distance improvement resets futile-chase evidence and already attacked pursuits never enter the temporary deferral map
+ok 74 - native hunt distance improvement resets futile-chase evidence and already attacked pursuits never enter the temporary deferral map
+  ---
+  duration_ms: 0.6512
+  type: 'test'
+  ...
+# Subtest: native hunt movement hook keeps all corrected and successful actions in the original denominator
+ok 75 - native hunt movement hook keeps all corrected and successful actions in the original denominator
+  ---
+  duration_ms: 1.7375
+  type: 'test'
+  ...
+# Subtest: native hunt drops dead, missing, friendly, claimed and unreachable targets without laundering failed attack identities
+ok 76 - native hunt drops dead, missing, friendly, claimed and unreachable targets without laundering failed attack identities
+  ---
+  duration_ms: 23.534
+  type: 'test'
+  ...
+# Subtest: native hunt deferrals stay bounded and resume rebases only pursuit timing while retaining quarantine and map resets
+ok 77 - native hunt deferrals stay bounded and resume rebases only pursuit timing while retaining quarantine and map resets
+  ---
+  duration_ms: 0.9281
+  type: 'test'
+  ...
+# Subtest: native timing follows authoritative level, attack speed and slow while preserving the 550/600ms difference
+ok 78 - native timing follows authoritative level, attack speed and slow while preserving the 550/600ms difference
+  ---
+  duration_ms: 0.1748
+  type: 'test'
+  ...
+# Subtest: native attack pacing uses the real sparse WorldSnapshot zero-stat contract without guessing absent or malformed blocks
+ok 79 - native attack pacing uses the real sparse WorldSnapshot zero-stat contract without guessing absent or malformed blocks
+  ---
+  duration_ms: 0.2533
+  type: 'test'
+  ...
+# Subtest: native calendar never catches up by violating elapsed cooldown after jitter or a stall
+ok 80 - native calendar never catches up by violating elapsed cooldown after jitter or a stall
+  ---
+  duration_ms: 0.0523
+  type: 'test'
+  ...
+# Subtest: native evidence waiting cannot be hidden as reduced offered load or mislabeled busy
+ok 81 - native evidence waiting cannot be hidden as reduced offered load or mislabeled busy
+  ---
+  duration_ms: 0.1526
+  type: 'test'
+  ...
+# Subtest: native combat walks the real village-to-forest route before hunting, without requiring an observer to arrive
+ok 82 - native combat walks the real village-to-forest route before hunting, without requiring an observer to arrive
+  ---
+  duration_ms: 77.1354
+  type: 'test'
+  ...
+# Subtest: native pending evidence is recorded separately and never sends another attack into an ambiguous hit window
+ok 83 - native pending evidence is recorded separately and never sends another attack into an ambiguous hit window
+  ---
+  duration_ms: 0.3671
+  type: 'test'
+  ...
+# Subtest: planned disconnect waits existing observer obligations while newly offered peer actions keep running
+ok 84 - planned disconnect waits existing observer obligations while newly offered peer actions keep running
+  ---
+  duration_ms: 0.2105
+  type: 'test'
+  ...
+# Subtest: drain includes observer evidence created by the captured owner acknowledgement
+ok 85 - drain includes observer evidence created by the captured owner acknowledgement
+  ---
+  duration_ms: 0.1537
+  type: 'test'
+  ...
+# Subtest: fanout latency geometry accounts for simultaneous runs without shrinking the complete AOI denominator
+ok 86 - fanout latency geometry accounts for simultaneous runs without shrinking the complete AOI denominator
+  ---
+  duration_ms: 0.2846
+  type: 'test'
+  ...
+# Subtest: real hit correlation accepts either packet order, rejects another attacker, zero damage and divergent shared HP
+ok 87 - real hit correlation accepts either packet order, rejects another attacker, zero damage and divergent shared HP
+  ---
+  duration_ms: 0.2173
+  type: 'test'
+  ...
+# Subtest: shared combat requires this strike's finite post-damage HP, never old AOI health or unrelated death
+ok 88 - shared combat requires this strike's finite post-damage HP, never old AOI health or unrelated death
+  ---
+  duration_ms: 0.182
+  type: 'test'
+  ...
+1..88
+# tests 88
+# suites 0
+# pass 88
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 540.5462

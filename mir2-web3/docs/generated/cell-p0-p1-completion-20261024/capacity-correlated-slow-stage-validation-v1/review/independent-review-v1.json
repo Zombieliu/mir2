@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T16:21:40.731Z",
+  "scope": "Read-only review of five existing diagnostic slow-stage contexts and one pure formatting fixture. Reviewer ran no Rust, Node tests, services or build.",
+  "sourceBefore": {
+    "file": "C:/mir2-build/p01-completion-20261024/formal11-correlated-slow-stage-validation-v1/web-before-v1.rs.txt",
+    "bytes": 855687,
+    "sha256": "769186e87e166a7ba0fbb971463c8e0ae2b4dd119292798badee3b8e28522dd6"
+  },
+  "sourceAfter": {
+    "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/gateway/src/web.rs",
+    "bytes": 857503,
+    "sha256": "41d81bf7cdc6c0aaacbbd11aee12425b27b8a4c27a02b5a0d0915351fb811e40"
+  },
+  "mutationProof": {
+    "file": "C:/mir2-build/p01-completion-20261024/formal11-correlated-slow-stage-validation-v1/mutation-v1.json",
+    "bytes": 3929,
+    "sha256": "d7d30e40bd93bb683b9c9cb9988796e346d5f9f259c93e3c983ed11127b53ddb"
+  },
+  "findings": [],
+  "review": {
+    "rawInverse": "Six declared inverse replacements actually restore the complete previous 855687-byte raw web.rs (769186e87e166a7ba0fbb971463c8e0ae2b4dd119292798badee3b8e28522dd6). Existing tests and all unrelated product bytes are unchanged.",
+    "productBoundary": "Exactly five GatewaySlowStage::start calls become for_socket with the existing connection diagnostics. The same existing span starts, lexical guards/drop scope and operation order remain; no move, attack, receipt, flush/save, auth, threshold or scheduling change is introduced.",
+    "implementation": "Existing for_socket first creates the same start/threshold state, then adds an optional diagnostic context; None emits the legacy line. These stages append only opaque numeric connection, with no queued fields or identity/payload.",
+    "newFixture": "The new table fixture checks all five labels against two distinct opaque IDs 17/18, exact legacy formatting with None, equal thresholds, and absent queued context.",
+    "integrationBoundary": "Existing frozen strict slow-stage consumer must not be modified in place. A new collector/parser source must explicitly allow these five already-existing labels in scoped format before a new diagnostic load. A fresh backend44 manifest and Release must include this changed web.rs; old d879 is not evidence for the new diagnostic source.",
+    "actualTests": "The author was running the authorized focused Rust filter separately; this static receipt does not certify its result or a new Release."
+  },
+  "verdict": {
+    "sourceContractPassed": true,
+    "blockingFindingIds": [],
+    "eligibleForRootFocusedVerification": true,
+    "actualTestResultCertified": false,
+    "capacityAccepted": false,
+    "p0Passed": false,
+    "p2ImplementationPermitted": false
+  }
+}

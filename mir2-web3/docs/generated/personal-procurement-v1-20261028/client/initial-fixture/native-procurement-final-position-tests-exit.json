@@ -1,0 +1,7 @@
+{
+  "finishedAtUtc": "2026-10-28T12:53:41.2582114Z",
+  "command": "cargo +1.95.0 test --locked --offline --manifest-path apps/game-client/client-bevy/Cargo.toml --features native-ui --lib procurement --target-dir C:/mir2-build/guild-pixel-parity-20261028/target-native -- --include-ignored --nocapture --test-threads=1",
+  "startedAtUtc": "2026-10-28T12:53:18.5311813Z",
+  "exitCode": 0,
+  "evidenceKind": "native logic and offline production GPU renderer; final confirmation button layout"
+}

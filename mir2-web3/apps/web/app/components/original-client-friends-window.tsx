@@ -14,6 +14,8 @@ type TranslateFn = (
 /** A single friend / blocked entry. */
 export type FriendEntry = {
   name: string;
+  /** Actual ClientFriend character index, never a displayed row number. */
+  index?: number;
   online?: boolean;
   memo?: string;
   /** Human-readable last-seen string for offline friends (Crystal LastLogin). */
@@ -46,6 +48,7 @@ export type FriendsWindowProps = {
   onMail?: (name: string) => void;
   /** Edit/save a memo note for the selected friend. */
   onEditMemo?: (name: string, memo: string) => void;
+  onRefresh?: () => void;
   onClose: () => void;
 };
 
@@ -65,6 +68,7 @@ export function FriendsWindow({
   onWhisper,
   onMail,
   onEditMemo,
+  onRefresh,
   onClose,
 }: FriendsWindowProps) {
   const [tab, setTab] = useState<FriendsTab>("friends");
@@ -354,6 +358,15 @@ export function FriendsWindow({
           {tab === "friends" ? t("ui.friendAdd", [], "Add") : t("ui.friendBlock", [], "Block")}
         </button>
       </form>
+      <button
+        type="button"
+        data-friends-refresh
+        disabled={!onRefresh}
+        onClick={() => onRefresh?.()}
+        style={{ ...style.refresh, ...(!onRefresh ? style.actionButtonDisabled : null) }}
+      >
+        {t("ui.refresh", [], "Refresh")}
+      </button>
     </section>
   );
 }
@@ -369,7 +382,7 @@ const style: Record<string, CSSProperties> = {
     left: 250,
     top: 5,
     width: FRAME.width,
-    height: FRAME.height,
+    height: FRAME.height + 52,
     zIndex: 29,
     color: "#f0eee8",
     fontSize: 12,
@@ -519,4 +532,10 @@ const style: Record<string, CSSProperties> = {
     cursor: "pointer",
   },
   actionButtonDisabled: { opacity: 0.45, cursor: "default" },
+  refresh: {
+    position: "absolute", left: 12, top: FRAME.height, width: 288, minHeight: 44,
+    border: "1px solid rgba(190, 157, 99, 0.56)",
+    background: "linear-gradient(180deg, rgba(95, 53, 24, 0.95), rgba(45, 23, 12, 0.95))",
+    color: "#f4dcaf", fontSize: 12, fontFamily: "inherit", cursor: "pointer",
+  },
 };

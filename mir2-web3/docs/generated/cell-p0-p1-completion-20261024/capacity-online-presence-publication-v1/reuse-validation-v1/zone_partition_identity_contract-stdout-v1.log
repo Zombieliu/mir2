@@ -1,0 +1,13 @@
+
+running 8 tests
+test actual_owner_death_revive_and_fresh_join_reject_delayed_old_life ... ok
+test cold_world_bytes_cannot_reconstitute_a_current_life_reference ... ok
+test equal_legacy_zone_keys_on_distinct_lines_have_distinct_global_identities ... ok
+test every_new_versioned_reference_rejects_a_future_schema ... ok
+test foreign_world_reused_object_and_unknown_effect_schema_fail_closed ... ok
+test routing_and_fencing_changes_do_not_make_a_new_business_effect ... ok
+test same_action_cannot_replay_different_damage_target_life_or_due_time ... ok
+test server_sequences_round_trip_and_exhaustion_never_recycles_an_action ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+

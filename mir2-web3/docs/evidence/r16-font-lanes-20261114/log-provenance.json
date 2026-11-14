@@ -1,0 +1,36 @@
+{
+  "logs": [
+    {
+      "name": "before-tests.txt",
+      "originalBytes": 2842,
+      "originalSha256": "3d2a7e90b39ebb470279bce9173a09c2a58e32971f6dd31ea3b8f50d2f8a7ce4",
+      "normalizedBytes": 2818,
+      "normalizedSha256": "b53ca8e8a5e96acbac5573934380d4c45d752c95de500ed745e00d32936f4382",
+      "conversion": "UTF8 text CRLF to LF and trailing whitespace only"
+    },
+    {
+      "name": "after-tests.txt",
+      "originalBytes": 23929,
+      "originalSha256": "4ee6db802780cc72b63a7943f2197b18cc82d37d3515f934d9182defe2ebd76c",
+      "normalizedBytes": 23929,
+      "normalizedSha256": "4ee6db802780cc72b63a7943f2197b18cc82d37d3515f934d9182defe2ebd76c",
+      "conversion": "UTF8 text CRLF to LF and trailing whitespace only"
+    },
+    {
+      "name": "adjacent-tests.txt",
+      "originalBytes": 5802,
+      "originalSha256": "36dd48222f57fcd677cffcfa50b008bbce4cbe1ff167d46fad9e565b31ff7460",
+      "normalizedBytes": 5802,
+      "normalizedSha256": "36dd48222f57fcd677cffcfa50b008bbce4cbe1ff167d46fad9e565b31ff7460",
+      "conversion": "UTF8 text CRLF to LF and trailing whitespace only"
+    },
+    {
+      "name": "release-tests.txt",
+      "originalBytes": 16499,
+      "originalSha256": "fed161acbafeaf05ef1a1cf66f8548c7ec6a254a7980df33b1edf12349cadf03",
+      "normalizedBytes": 16499,
+      "normalizedSha256": "fed161acbafeaf05ef1a1cf66f8548c7ec6a254a7980df33b1edf12349cadf03",
+      "conversion": "UTF8 text CRLF to LF and trailing whitespace only"
+    }
+  ]
+}

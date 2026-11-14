@@ -1,0 +1,38 @@
+{
+  "schema": "mir2.five-minute.g0-resource-profile-checks.v1",
+  "observedUtc": "2026-11-01T14:58:58.429765+00:00",
+  "passed": true,
+  "testExecution": "actual Windows Rust1.95.0",
+  "command": "cargo +1.95.0 test --locked --manifest-path mir2-web3/apps/game-client/resource-pack/Cargo.toml",
+  "newProfileTestsPassed": 4,
+  "existingResourcePackRegressionTestsPassed": 8,
+  "ignored": 0,
+  "sourcePins": [
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\resource-pack\\src\\lib.rs",
+      "bytes": 34674,
+      "sha256": "c4ed87266709a2e44ce4ea9147f33bedf960d2413a4778fe0b8818f92d9fe56a"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\resource-pack\\src\\read_profile.rs",
+      "bytes": 2936,
+      "sha256": "fcddd1264c3ed9093a75e1dc24f83ec0edf5af96bb332ec382ea9b03f043f61f"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\resource-pack\\tests\\read_profile.rs",
+      "bytes": 4095,
+      "sha256": "16d232bd0af2df31daff4bb4f33c620e91363ed5ffe5451c9ee25905cdf4b83d"
+    }
+  ],
+  "log": {
+    "localPath": "E:\\mir2-release\\windows-five-minute-20261101\\resource-profile-tests.log",
+    "bytes": 2827,
+    "sha256": "352e5b7dd7a8a488bdcf4c7bed7cf9a8f022d31d15d079d18edf7c8fd5ae87da"
+  },
+  "defaultProfilingEnabled": false,
+  "allPacksStillRequiredByOpen": true,
+  "codeCommittedOrPublished": false,
+  "gameCaptureIntegrationTested": false,
+  "realPlayableTracePerformed": false,
+  "fiveMinuteAcceptance": false
+}

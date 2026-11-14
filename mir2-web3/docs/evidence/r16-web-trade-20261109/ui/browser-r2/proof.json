@@ -1,0 +1,275 @@
+{
+  "schema": 1,
+  "passed": false,
+  "phase": "deposit-ack-delay-ui-cancel",
+  "scope": {
+    "isolatedLoopback": true,
+    "freshOrdinaryAccounts": 2,
+    "primaryPhysicalUi": true,
+    "transparentRealServerWebSocket": true,
+    "onlyMatchingItemAckDelayed": true,
+    "modelCalls": 0,
+    "privilegedCommands": 0
+  },
+  "checks": [
+    {
+      "name": "primary-ordinary-ui-registration",
+      "passed": true,
+      "result": 8
+    },
+    {
+      "name": "primary-ui-new-character-in-real-world",
+      "passed": true,
+      "position": {
+        "x": 288,
+        "y": 616
+      },
+      "map": "0"
+    },
+    {
+      "name": "second-ordinary-player-same-realm",
+      "passed": true,
+      "adjacentInitially": true
+    },
+    {
+      "name": "ordinary-peer-adjacent-facing",
+      "passed": true,
+      "primaryPosition": {
+        "x": 288,
+        "y": 616
+      },
+      "peerPosition": {
+        "x": 287,
+        "y": 617
+      },
+      "peerDirection": "UpRight"
+    }
+  ],
+  "events": [
+    {
+      "at": 1794170039215,
+      "type": "command",
+      "who": "primary",
+      "command": "clientCapabilities"
+    },
+    {
+      "at": 1794170039215,
+      "type": "command",
+      "who": "primary",
+      "command": "clientCapabilities"
+    },
+    {
+      "at": 1794170041182,
+      "type": "command",
+      "who": "primary",
+      "command": "setLanguage"
+    },
+    {
+      "at": 1794170041182,
+      "type": "command",
+      "who": "primary",
+      "command": "clientVersion"
+    },
+    {
+      "at": 1794170041182,
+      "type": "command",
+      "who": "primary",
+      "command": "newAccount"
+    },
+    {
+      "at": 1794170041718,
+      "type": "server-packet",
+      "packet": "NewAccount",
+      "result": 8
+    },
+    {
+      "at": 1794170041825,
+      "type": "command",
+      "who": "primary",
+      "command": "clientCapabilities"
+    },
+    {
+      "at": 1794170041825,
+      "type": "command",
+      "who": "primary",
+      "command": "clientCapabilities"
+    },
+    {
+      "at": 1794170043654,
+      "type": "command",
+      "who": "primary",
+      "command": "setLanguage"
+    },
+    {
+      "at": 1794170043655,
+      "type": "command",
+      "who": "primary",
+      "command": "clientVersion"
+    },
+    {
+      "at": 1794170043655,
+      "type": "command",
+      "who": "primary",
+      "command": "login"
+    },
+    {
+      "at": 1794170046797,
+      "type": "command",
+      "who": "primary",
+      "command": "newCharacter"
+    },
+    {
+      "at": 1794170046824,
+      "type": "server-packet",
+      "packet": "NewCharacterSuccess"
+    },
+    {
+      "at": 1794170046918,
+      "type": "command",
+      "who": "primary",
+      "command": "startGame"
+    },
+    {
+      "at": 1794170053697,
+      "type": "server-packet",
+      "packet": "StartGame",
+      "result": 4
+    },
+    {
+      "at": 1794170053727,
+      "type": "command",
+      "who": "primary",
+      "command": "npcPurchaseOwner"
+    },
+    {
+      "at": 1794170056836,
+      "type": "command",
+      "who": "primary",
+      "command": "keepAlive"
+    },
+    {
+      "at": 1794170058100,
+      "type": "command",
+      "who": "peer",
+      "command": "clientVersion"
+    },
+    {
+      "at": 1794170058114,
+      "type": "command",
+      "who": "peer",
+      "command": "newAccount"
+    },
+    {
+      "at": 1794170058382,
+      "type": "command",
+      "who": "peer",
+      "command": "login"
+    },
+    {
+      "at": 1794170059112,
+      "type": "command",
+      "who": "peer",
+      "command": "newCharacter"
+    },
+    {
+      "at": 1794170059137,
+      "type": "command",
+      "who": "peer",
+      "command": "startGame"
+    },
+    {
+      "at": 1794170065925,
+      "type": "command",
+      "who": "peer",
+      "command": "turn"
+    }
+  ],
+  "commands": {
+    "primary": {
+      "clientCapabilities": 4,
+      "setLanguage": 2,
+      "clientVersion": 2,
+      "newAccount": 1,
+      "login": 1,
+      "newCharacter": 1,
+      "startGame": 1,
+      "npcPurchaseOwner": 1,
+      "keepAlive": 1
+    },
+    "peer": {
+      "clientVersion": 1,
+      "newAccount": 1,
+      "login": 1,
+      "newCharacter": 1,
+      "startGame": 1,
+      "turn": 1
+    }
+  },
+  "screenshots": [
+    "01-primary-in-town.png",
+    "failure.png"
+  ],
+  "errors": [
+    {
+      "phase": "deposit-ack-delay-ui-cancel",
+      "name": "Error",
+      "code": null,
+      "messageHash": "566671c9d9b0a6d95e9eee00e184fd824d0b0a14ed995c0fb6179ec81b9b23b8",
+      "safeCode": null
+    }
+  ],
+  "httpErrors": [],
+  "pageErrors": [],
+  "consoleErrors": [],
+  "starter": {
+    "name": "Candle",
+    "quantity": 1,
+    "uidHash": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+    "slot": 3
+  },
+  "failureUi": {
+    "screen": "game",
+    "tradeVisible": false,
+    "bagInput": "{\"active\":false,\"error\":null,\"owner\":{\"owner\":\"react\",\"runGeneration\":1,\"ownerRevision\":1,\"connectionGeneration\":2,\"sessionGeneration\":1},\"status\":{\"runGeneration\":1,\"connectionGeneration\":2,\"sessionGeneration\":1,\"ownerRevision\":1,\"frame\":18,\"ready\":false,\"inputEnabled\":false,\"appliedRevision\":1,\"appliedModelRevision\":1,\"appliedPresentationRevision\":1,\"supportsBagToBelt\":true,\"appliedBeltGeometryRevision\":0,\"inputRegions\":[],\"diagnostics\":{\"modelVisibleItems\":4,\"treeContentComplete\":false,\"touchActionsComplete\":null,\"scopedActionCount\":null,\"expectedActionCount\":null,\"minCssHitWidth\":null,\"minCssHitHeight\":null,\"firstActionFailure\":null,\"layoutMatchesWindow\":true,\"assetsLoading\":true,\"layoutRegionCount\":0,\"sinkPresent\":true,\"treeIdentity\":null,\"treeModelRevision\":null,\"treePage\":null,\"treeVisibleItems\":null,\"treeMatchesModel\":false,\"gridCells\":0,\"itemCells\":0,\"occupiedCells\":0,\"iconNodes\":0,\"visibleIcons\":0,\"laidOutIcons\":0,\"stackTextNodes\":0,\"visibleStackTexts\":0,\"laidOutStackTexts\":0},\"error\":null},\"diagnostic\":{\"phase\":\"prepare\",\"transitions\":[],\"intentVerdicts\":[]},\"hudNavigation\":[]}",
+    "movement": "{\"keyboard\":{\"lastKey\":null,\"lastDispatch\":{\"reason\":\"no-held-direction\",\"source\":\"held\",\"at\":1794170065846,\"sceneInteractionReady\":true,\"bevyQuestUiCapturesPointer\":false},\"lastShortcut\":null},\"pointer\":null,\"host\":{\"connectionGeneration\":2,\"sessionGeneration\":1,\"suspended\":null,\"sceneDeferred\":false,\"lastIntent\":null,\"lastAttempt\":null,\"lastPickup\":null,\"self\":{\"x\":288,\"y\":616,\"direction\":\"Down\",\"dead\":false},\"queued\":null,\"controller\":{\"canSend\":true,\"sendDelayMs\":0,\"blockedMs\":0,\"pending\":null},\"target\":null,\"targetMapBlocked\":false,\"targetMapCell\":null,\"nearbyEntities\":[{\"objectId\":\"1\",\"kind\":\"npc\",\"x\":287,\"y\":615,\"dead\":false},{\"objectId\":\"206641\",\"kind\":\"monster\",\"x\":287,\"y\":616,\"dead\":false}]}}",
+    "focus": "CANVAS",
+    "frameClass": "client-stage-frame "
+  },
+  "finalPrimary": {
+    "economy": {
+      "gold": 0,
+      "inventory": [
+        {
+          "uidHash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+          "slot": 0,
+          "count": 1,
+          "name": "WoodenSword"
+        },
+        {
+          "uidHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "slot": 1,
+          "count": 1,
+          "name": "BaseDress(M)"
+        },
+        {
+          "uidHash": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+          "slot": 2,
+          "count": 1,
+          "name": "(HP)DrugSmall"
+        },
+        {
+          "uidHash": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+          "slot": 3,
+          "count": 1,
+          "name": "Candle"
+        }
+      ],
+      "belt": []
+    },
+    "tradeActive": false,
+    "position": {
+      "x": 288,
+      "y": 616
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "sourceExecutable": "C:\\mir2-build\\p01-completion-20261024\\account-store-wait-diagnostics-release-v1\\bin\\mir2-gateway.exe",
+  "ownedExecutable": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-anti-convergence-feasibility-19\\bin\\mir2-gateway.exe",
+  "sha256": "dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc",
+  "bytes": 87396864,
+  "sourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "executionSourceCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+  "driverSourceCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+  "baseCommit": "68f810b442321ae66360a2be18e31dc309efdaf7",
+  "sourceManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\backend-source-account-store-wait-diagnostics-v1.json",
+    "bytes": 41831,
+    "sha256": "f9199f375175782b46dc0d18589cd714e2a2a75d7b8fad662af64c700d417ec5",
+    "sourceManifestSha256": "09081ea9b49d968574b99f444c238932045eccb0dc3f7de4b24496a932c895f7",
+    "inputs": 50
+  },
+  "releaseRecord": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-account-store-wait-diagnostics-v1.json",
+    "bytes": 3343,
+    "sha256": "8a8228a97e4ea2005f3e47839868ba2a90615028e1c7da573130f8663c15c9fc"
+  },
+  "copiedAtUtc": "2026-10-25T23:44:36.797Z",
+  "sourceInputsVerifiedBeforeLaunch": true,
+  "capacityAccepted": false,
+  "formalRunStarted": false
+}

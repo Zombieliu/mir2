@@ -1,0 +1,38 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T17:39:26.624589+00:00",
+  "producerReceipt": {
+    "filename": "windows-live/evidence/first-login-process-chain.json",
+    "bytes": 1035,
+    "sha256": "112b2715e8e4949e16708f6002954caa51cceb89ca83d216601df3305ee67ed6"
+  },
+  "producerReport": {
+    "schema": "mir2.unified.installed-launch-chain.v1",
+    "phase": "first-login",
+    "launcherPid": 85456,
+    "launcherArguments": [],
+    "processes": [
+      {
+        "pid": 86048,
+        "parentPid": 85456,
+        "name": "engine-C7B2A2091222563780C11DBF31544FD889491F5E15DD0C702820BCECBEE7CEDB.exe",
+        "exe": "F:\\mir2-build\\unified-20261029\\installed-validation\\.update\\engine-C7B2A2091222563780C11DBF31544FD889491F5E15DD0C702820BCECBEE7CEDB.exe",
+        "sha256": "C7B2A2091222563780C11DBF31544FD889491F5E15DD0C702820BCECBEE7CEDB"
+      },
+      {
+        "pid": 59628,
+        "parentPid": 86048,
+        "name": "mir2-platform-windows.exe",
+        "exe": "F:\\mir2-build\\unified-20261029\\installed-validation\\game\\mir2-platform-windows.exe",
+        "sha256": "85879BFEB1B44D4C759E6A338338BB58A383B7701F886D1090A96B6267F00C6F"
+      }
+    ],
+    "observedUtc": "2026-10-29T17:10:04.7759803+00:00",
+    "loggedIn": false,
+    "phoneWalletSigningPerformed": false,
+    "isolatedProfile": true,
+    "assetRootOverride": false
+  },
+  "phase": "Independent actual runtime or read-only observation; no source/test/build rerun by curator"
+}

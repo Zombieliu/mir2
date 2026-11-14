@@ -1,0 +1,20 @@
+{
+  "name": "installed-sc-monthly-card",
+  "capturedAtUtc": "2026-10-29T17:13:14.057Z",
+  "window": {
+    "app": "process:F:\\mir2-build\\unified-20261029\\installed-validation\\game\\mir2-platform-windows.exe",
+    "id": 4788964,
+    "title": "numeron-legend of rebirth"
+  },
+  "files": [
+    {
+      "path": "C:/mir2-build/unified-20261029/windows-live/screenshots/installed-sc-monthly-card-0.jpg",
+      "sha256": "18cf9fb116fb3a581913e3343b5d0a3ee75ef753f8486fce0d5e937a6b5b67a9",
+      "bytes": 86957,
+      "width": 1026,
+      "height": 800,
+      "screenshotId": "screenshot-0",
+      "unmodified": true
+    }
+  ]
+}

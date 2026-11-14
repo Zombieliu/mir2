@@ -1,0 +1,16 @@
+{
+  "path": "E:/mir2-player-journey/work/native-play-acceptance-20261010/screenshots/008-r23-locale-en.jpg",
+  "purpose": "English login labels and display controls render without visible clipping; no authentication or game-text acceptance.",
+  "observedWindow": {
+    "app": "process:D:\\Mir2Invite\\game\\mir2-platform-windows.exe",
+    "id": 18419886,
+    "title": "numeron-legend of rebirth"
+  },
+  "screenshotId": "screenshot-0",
+  "width": 1026,
+  "height": 800,
+  "mime": "image/jpeg",
+  "bytes": 318658,
+  "sha256": "e03a7825fa95b832998bc11e27faf99f16856e1d474da02d5b5fc2929c4b581b",
+  "recordedUtc": "2026-10-09T18:29:10.186Z"
+}

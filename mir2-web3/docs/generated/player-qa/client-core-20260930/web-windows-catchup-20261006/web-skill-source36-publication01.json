@@ -1,0 +1,300 @@
+{
+  "owner": "Root",
+  "kind": "Source36 actual scoped Git commit/push and independent same-repository remote head proof",
+  "createdAtUtc": "2026-10-08T00:57:12.346Z",
+  "commit": "04d8780054e0fdfb66a5783679953ccc11c342b1",
+  "parent": "e068bbe9e0c5397255598edde7528d472fd6f08d",
+  "title": "Validate native learned skill checkpoint contents",
+  "commitResult": {
+    "chunk_id": "9267c9",
+    "wall_time_seconds": 0.4024906,
+    "exit_code": 0,
+    "original_token_count": 146,
+    "output": "[codex/windows-player-journey 04d8780054] Validate native learned skill checkpoint contents\n 15 files changed, 2848 insertions(+), 127 deletions(-)\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-skill-source36-finite-result02.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-skill-source36-raw-evidence01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-storage-source35-publication01.json\n"
+  },
+  "commitLog": {
+    "chunk_id": "fe4341",
+    "wall_time_seconds": 0.1535633,
+    "exit_code": 0,
+    "original_token_count": 33,
+    "output": "04d8780054e0fdfb66a5783679953ccc11c342b1\ne068bbe9e0c5397255598edde7528d472fd6f08d\nValidate native learned skill checkpoint contents\n"
+  },
+  "pushAttempts": [
+    {
+      "chunk_id": "d904e4",
+      "wall_time_seconds": 0.0000064,
+      "exit_code": 1,
+      "original_token_count": 39,
+      "output": "Connection to github.com closed by remote host.\r\nsend-pack: unexpected disconnect while reading sideband packet\nfatal: the remote end hung up unexpectedly\n"
+    },
+    {
+      "chunk_id": "025d94",
+      "wall_time_seconds": 0.0000065,
+      "exit_code": 0,
+      "original_token_count": 27,
+      "output": "To https://github.com/Zombieliu/mir2.git\n   e068bbe9e0..04d8780054  HEAD -> codex/windows-player-journey\n"
+    }
+  ],
+  "sshRemoteReadFailure": {
+    "chunk_id": "8e4220",
+    "wall_time_seconds": 5.1599606,
+    "exit_code": 1,
+    "original_token_count": 43,
+    "output": "Connection closed by 198.18.0.132 port 22\r\nfatal: Could not read from remote repository.\n\nPlease make sure you have the correct access rights\nand the repository exists.\n"
+  },
+  "httpsBeforePush": {
+    "chunk_id": "95d811",
+    "wall_time_seconds": 3.5481841,
+    "exit_code": 0,
+    "original_token_count": 21,
+    "output": "e068bbe9e0c5397255598edde7528d472fd6f08d\trefs/heads/codex/windows-player-journey\n"
+  },
+  "httpsRemote": {
+    "chunk_id": "f53cd2",
+    "wall_time_seconds": 6.6394153,
+    "exit_code": 0,
+    "original_token_count": 21,
+    "output": "04d8780054e0fdfb66a5783679953ccc11c342b1\trefs/heads/codex/windows-player-journey\n"
+  },
+  "treeResult": {
+    "chunk_id": "d5ff0d",
+    "wall_time_seconds": 0.1520776,
+    "exit_code": 0,
+    "original_token_count": 605,
+    "output": ":100644 100644 f488f84409a8a156b075159d7179e46b50786442 5b0e63c8845eed442b9f9ceee8fb9b82cc93a43f M\tmir2-web3/apps/game-client/client-bevy/src/skill_model.rs\n:100644 100644 8a7fc1687243808da0ab13fed4267859db70345f 03bebd6cc20cefc34c3055037903b4578697921f M\tmir2-web3/apps/game-client/platform-windows/src/gameplay_bridge.rs\n:100644 100644 dcb8f72ff74713778246dd07e97de75803580e7a 5c0a53b9e20456e35c8f291079b041b38478df16 M\tmir2-web3/apps/game-client/platform-windows/src/gateway.rs\n:100644 100644 a9800ddfd87e9f315eaa8ad72bf30a237e5b1b59 4fdf131806d20d051bd1810887b03dd8ec558f97 M\tmir2-web3/apps/game-client/runtime/src/npc_purchase_economy.rs\n:100644 100644 5d200559e70624f8bb23620c54b98a241dadc156 7109ecea294ed99ed4bf488bd0686bb7f0db01c9 M\tmir2-web3/docs/AGENT-ORCHESTRATION.md\n:100644 100644 8c09188aebb5bd387cb584002b3b7d8e4c2658e0 2d9d229bece75f97bd6b81248467578fd87f9eb4 M\tmir2-web3/docs/AGENT-TASK-QUEUE.md\n:100644 100644 2403a75be37f8e4f4da030e68c515f7b881e9ee9 ac65df3de8180ed464f99f4c2526e980e4ab0098 M\tmir2-web3/docs/BACKEND-1TO1-PROGRESS.md\n:100644 100644 1100d7c77e9109c233661b786513c1925fc3991e 8e4c824dcf88697a3c0a0f828172030313ae34fc M\tmir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md\n:100644 100644 220b4eb470be17ade22c68464189adf7b27d72db d1f2f704fa8f762183e449e7fdc89bb9e06f15c7 M\tmir2-web3/docs/CRYSTAL-SERVER-PARITY.md\n:100644 100644 93f5ffece5a0e8915bf83bc97f60cddc82b9f8a2 2df5694c8e752ba97b144b25ad303145a3c598c6 M\tmir2-web3/docs/FRONTEND-1TO1-GAPS.md\n:100644 100644 ce1890ae986eb3aeaf6e7a929c46f45fbb8825d0 639d79529dc402c48ae7e989500e2e41965c1302 M\tmir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md\n:100644 100644 4e028de0b2f9e65f5ba020fceeaf2c8c0e9e7e5d 1d059825ca16a64c575887c4903bc20bf8e451e5 M\tmir2-web3/docs/PLAYER-QA-PLAYTHROUGH.md\n:000000 100644 0000000000000000000000000000000000000000 92ef5d55e27e4ad60e14a27c8dd053f9f604b409 A\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-skill-source36-finite-result02.json\n:000000 100644 0000000000000000000000000000000000000000 ecdb61299f66c160784d660a51aa0d0931f58504 A\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-skill-source36-raw-evidence01.json\n:000000 100644 0000000000000000000000000000000000000000 ba8b5e45932abdacc2936be2acd521bbdaceb098 A\tmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-storage-source35-publication01.json\n"
+  },
+  "worktree": {
+    "chunk_id": "ca869f",
+    "wall_time_seconds": 0.160926,
+    "exit_code": 0,
+    "original_token_count": 7,
+    "output": " M apps/web/tsconfig.json\n"
+  },
+  "sameRepositoryHttps": "https://github.com/Zombieliu/mir2.git",
+  "branch": "codex/windows-player-journey",
+  "actualScopedBlobCount": 15,
+  "actualScopedBlobs": [
+    {
+      "gitPath": "mir2-web3/apps/game-client/client-bevy/src/skill_model.rs",
+      "blobSha1": "5b0e63c8845eed442b9f9ceee8fb9b82cc93a43f"
+    },
+    {
+      "gitPath": "mir2-web3/apps/game-client/platform-windows/src/gameplay_bridge.rs",
+      "blobSha1": "03bebd6cc20cefc34c3055037903b4578697921f"
+    },
+    {
+      "gitPath": "mir2-web3/apps/game-client/platform-windows/src/gateway.rs",
+      "blobSha1": "5c0a53b9e20456e35c8f291079b041b38478df16"
+    },
+    {
+      "gitPath": "mir2-web3/apps/game-client/runtime/src/npc_purchase_economy.rs",
+      "blobSha1": "4fdf131806d20d051bd1810887b03dd8ec558f97"
+    },
+    {
+      "gitPath": "mir2-web3/docs/AGENT-ORCHESTRATION.md",
+      "blobSha1": "7109ecea294ed99ed4bf488bd0686bb7f0db01c9"
+    },
+    {
+      "gitPath": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+      "blobSha1": "2d9d229bece75f97bd6b81248467578fd87f9eb4"
+    },
+    {
+      "gitPath": "mir2-web3/docs/BACKEND-1TO1-PROGRESS.md",
+      "blobSha1": "ac65df3de8180ed464f99f4c2526e980e4ab0098"
+    },
+    {
+      "gitPath": "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
+      "blobSha1": "8e4c824dcf88697a3c0a0f828172030313ae34fc"
+    },
+    {
+      "gitPath": "mir2-web3/docs/CRYSTAL-SERVER-PARITY.md",
+      "blobSha1": "d1f2f704fa8f762183e449e7fdc89bb9e06f15c7"
+    },
+    {
+      "gitPath": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+      "blobSha1": "2df5694c8e752ba97b144b25ad303145a3c598c6"
+    },
+    {
+      "gitPath": "mir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md",
+      "blobSha1": "639d79529dc402c48ae7e989500e2e41965c1302"
+    },
+    {
+      "gitPath": "mir2-web3/docs/PLAYER-QA-PLAYTHROUGH.md",
+      "blobSha1": "1d059825ca16a64c575887c4903bc20bf8e451e5"
+    },
+    {
+      "gitPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-skill-source36-finite-result02.json",
+      "blobSha1": "92ef5d55e27e4ad60e14a27c8dd053f9f604b409"
+    },
+    {
+      "gitPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-skill-source36-raw-evidence01.json",
+      "blobSha1": "ecdb61299f66c160784d660a51aa0d0931f58504"
+    },
+    {
+      "gitPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-storage-source35-publication01.json",
+      "blobSha1": "ba8b5e45932abdacc2936be2acd521bbdaceb098"
+    }
+  ],
+  "expectedWorkingTreePins": [
+    {
+      "gitPath": "mir2-web3/apps/game-client/runtime/src/npc_purchase_economy.rs",
+      "workingTree": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\npc_purchase_economy.rs",
+        "bytes": 127787,
+        "sha256": "fa2131b6c1d9dfd5cf487a1d5ce636b5a150cbb0c61573d357c7cdfcceb00b39"
+      },
+      "expectedNormalizedBlobSha1": "4fdf131806d20d051bd1810887b03dd8ec558f97"
+    },
+    {
+      "gitPath": "mir2-web3/apps/game-client/platform-windows/src/gateway.rs",
+      "workingTree": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\gateway.rs",
+        "bytes": 682126,
+        "sha256": "85ed511ea167847757293eff4c7151a512b259879d844e3df2c6e1ba72ecdbfb"
+      },
+      "expectedNormalizedBlobSha1": "5c0a53b9e20456e35c8f291079b041b38478df16"
+    },
+    {
+      "gitPath": "mir2-web3/apps/game-client/client-bevy/src/skill_model.rs",
+      "workingTree": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\skill_model.rs",
+        "bytes": 30919,
+        "sha256": "534e43debc36e62e302495cf1b99f05d947547c520b99b0a8eab5c9ec7cbc348"
+      },
+      "expectedNormalizedBlobSha1": "5b0e63c8845eed442b9f9ceee8fb9b82cc93a43f"
+    },
+    {
+      "gitPath": "mir2-web3/apps/game-client/platform-windows/src/gameplay_bridge.rs",
+      "workingTree": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\gameplay_bridge.rs",
+        "bytes": 361046,
+        "sha256": "f21c79324c19046cb423407d2856a0ea3ec5bbb4e53062633b4236cab327b58b"
+      },
+      "expectedNormalizedBlobSha1": "03bebd6cc20cefc34c3055037903b4578697921f"
+    },
+    {
+      "gitPath": "mir2-web3/docs/AGENT-ORCHESTRATION.md",
+      "workingTree": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\AGENT-ORCHESTRATION.md",
+        "bytes": 278531,
+        "sha256": "3dbe320493670345505312f3b1f564318fdaf7feed6741e21a5587af7bf70ab0"
+      },
+      "expectedNormalizedBlobSha1": "7109ecea294ed99ed4bf488bd0686bb7f0db01c9"
+    },
+    {
+      "gitPath": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+      "workingTree": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\AGENT-TASK-QUEUE.md",
+        "bytes": 896651,
+        "sha256": "8eb2cd56ec03d513e9a52b3cd0e96bb743cd81471e510e454b9e014d9f827a57"
+      },
+      "expectedNormalizedBlobSha1": "2d9d229bece75f97bd6b81248467578fd87f9eb4"
+    },
+    {
+      "gitPath": "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
+      "workingTree": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\CRYSTAL-1TO1-ROADMAP.md",
+        "bytes": 1016417,
+        "sha256": "1021ca8ba3f1b60da9b9e128f9e05717f1b5c6a0d858d0e1641d7c484bb232ea"
+      },
+      "expectedNormalizedBlobSha1": "8e4c824dcf88697a3c0a0f828172030313ae34fc"
+    },
+    {
+      "gitPath": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+      "workingTree": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\FRONTEND-1TO1-GAPS.md",
+        "bytes": 638176,
+        "sha256": "fe35371d1a6ac11a8884812f93492551ee1c49be9c769404c73e265ff919dcab"
+      },
+      "expectedNormalizedBlobSha1": "2df5694c8e752ba97b144b25ad303145a3c598c6"
+    },
+    {
+      "gitPath": "mir2-web3/docs/PLAYER-QA-PLAYTHROUGH.md",
+      "workingTree": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\PLAYER-QA-PLAYTHROUGH.md",
+        "bytes": 33504,
+        "sha256": "2241ce70cfd7b7c1c317fa5387923352588f90c841c8b74d2f6e1ebc3e39098d"
+      },
+      "expectedNormalizedBlobSha1": "1d059825ca16a64c575887c4903bc20bf8e451e5"
+    },
+    {
+      "gitPath": "mir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md",
+      "workingTree": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\NATIVE-WINDOWS-PLAYER-QA.md",
+        "bytes": 52528,
+        "sha256": "db4e6d8fbbe966371c2ad8047d29f7f1c0284360a9745ed03e67b9a17dcb40d3"
+      },
+      "expectedNormalizedBlobSha1": "639d79529dc402c48ae7e989500e2e41965c1302"
+    },
+    {
+      "gitPath": "mir2-web3/docs/BACKEND-1TO1-PROGRESS.md",
+      "workingTree": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\BACKEND-1TO1-PROGRESS.md",
+        "bytes": 557280,
+        "sha256": "7040825462a0abbfdcfd2bb95638bced9ac3e1db9864b62875e2dc2c061eb0ac"
+      },
+      "expectedNormalizedBlobSha1": "ac65df3de8180ed464f99f4c2526e980e4ab0098"
+    },
+    {
+      "gitPath": "mir2-web3/docs/CRYSTAL-SERVER-PARITY.md",
+      "workingTree": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\CRYSTAL-SERVER-PARITY.md",
+        "bytes": 499809,
+        "sha256": "233be1cc3442cab2f1b8a9c70d22cf5c7aea6f958189cf06d56c710736e15c50"
+      },
+      "expectedNormalizedBlobSha1": "d1f2f704fa8f762183e449e7fdc89bb9e06f15c7"
+    },
+    {
+      "gitPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-skill-source36-finite-result02.json",
+      "workingTree": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-skill-source36-finite-result02.json",
+        "bytes": 72463,
+        "sha256": "e4a4af8345fccb2d8c8587c420da255e53ec5c6fb00000ca977c64ce4aa11403"
+      },
+      "expectedNormalizedBlobSha1": "92ef5d55e27e4ad60e14a27c8dd053f9f604b409"
+    },
+    {
+      "gitPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-skill-source36-raw-evidence01.json",
+      "workingTree": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-skill-source36-raw-evidence01.json",
+        "bytes": 7668513,
+        "sha256": "195ed983a6a57ff1522c31d53acfdc767d2c247857c2f0f3f70efc4ad63a0a84"
+      },
+      "expectedNormalizedBlobSha1": "ecdb61299f66c160784d660a51aa0d0931f58504"
+    },
+    {
+      "gitPath": "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-storage-source35-publication01.json",
+      "workingTree": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-storage-source35-publication01.json",
+        "bytes": 9953,
+        "sha256": "4df4824cc93f5ed982c634621aede9baeddd81d03574b71862c40e6c340df9c9"
+      },
+      "expectedNormalizedBlobSha1": "ba8b5e45932abdacc2936be2acd521bbdaceb098"
+    }
+  ],
+  "finiteResult": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-skill-source36-finite-result02.json",
+    "bytes": 72463,
+    "sha256": "e4a4af8345fccb2d8c8587c420da255e53ec5c6fb00000ca977c64ce4aa11403"
+  },
+  "rawEvidence": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-skill-source36-raw-evidence01.json",
+    "bytes": 7668513,
+    "sha256": "195ed983a6a57ff1522c31d53acfdc767d2c247857c2f0f3f70efc4ad63a0a84"
+  },
+  "userTsconfigExcludedAndPreserved": true,
+  "sshOriginConfigUnchanged": true,
+  "transportQualification": "Initial SSH push and read failed with remote disconnect; noninteractive HTTPS to exact same repository independently read old head, normal nonforced push succeeded, separate final read proves new head. No auth prompts/UI or remote/global config mutation.",
+  "noForceOrRewrite": true,
+  "gitNetworkUsed": true,
+  "gameNetworkUsed": false,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "wasmApiUsed": false,
+  "fullProductionBuildAccepted": false,
+  "candidateAccepted": false,
+  "candidate100": false,
+  "overallPercentage": null,
+  "goalComplete": false,
+  "goalStatus": "active"
+}

@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "runId": "1793022270692-c6a6acd4",
+  "scope": "One full binary streaming pass of new V8 samples only; no repository writes, tests, load runs, old raw or account files.",
+  "raw": {
+    "path": "C:/mir2-build/p01-completion-20261024/native-steady-single-stage-diagnostic-v8/episode-50/reports/1793022270692-c6a6acd4.samples.jsonl",
+    "sha256": "39a91196a69940fc9c3dd5b3c66e03b232483dedfb144e3fc328d7dcd58fb4bd",
+    "lines": 9054,
+    "fullReadPasses": 1
+  },
+  "fatal": {
+    "at": 1793022502314,
+    "sourceLine": 7723,
+    "reason": "ghost",
+    "observer": "L8782481c",
+    "owner": "L87824815",
+    "expectedPairs": 2376,
+    "observedPairs": 2374,
+    "activeOwners": 50
+  },
+  "traceTarget": {
+    "recipientZoneID": 50048,
+    "recipientActor": "L8782481c",
+    "recipientConnection": 49,
+    "peerZoneObjectID": 50041,
+    "peerActor": "L87824815",
+    "peerConnection": 42,
+    "personalSelfObjectID": 1000,
+    "mappingEvidenceSourceLines": [
+      7338,
+      7768
+    ]
+  },
+  "facts": [
+    {
+      "sourceLines": [
+        7122,
+        7242
+      ],
+      "detail": "Before exit owner ACK position (297,616), observer last received self (282,617): Chebyshev distance15."
+    },
+    {
+      "sourceLines": [
+        7335,
+        7338
+      ],
+      "at": 1793022500546,
+      "detail": "Owner UserLocation receipt changes (297,616) to (299,616); same timestamp owner receives ObjectRemove for observer Zone50048. Reverse projection-before records observer at (282,615), whereas observer local self remains (282,617). Both observer positions give Chebyshev distance17 > range16."
+    },
+    {
+      "sourceLines": [
+        7524,
+        7723,
+        7725
+      ],
+      "detail": "Coverage poll at1793022501309 has no issues; at1793022502314 records this ghost. These are sampled facts; no per-pair grace timer start event is recorded."
+    },
+    {
+      "sourceLines": [
+        7663
+      ],
+      "detail": "Observer run target (282,615), sentAt monotonic244195.1136, times out at1793022501908 with latency2008.9537ms."
+    },
+    {
+      "sourceLines": [
+        7767,
+        7768
+      ],
+      "detail": "During drain observer finally receives UserLocation (282,617)->(282,615) at1793022502640 (mono246936.1815), then ObjectRemove peer50041 at1793022502641 (mono246936.7611). Remove beforePresent=true and afterPresent=false; cached peer before removal is stale (297,616)."
+    }
+  ],
+  "derived": {
+    "distanceMetric": "Chebyshev=max(abs(dx),abs(dy)); range16",
+    "outOfRangeFirstOwnerReceiptAt": 1793022500546,
+    "finalRemoveReceiptAt": 1793022502641,
+    "outOfRangeReceiptToRemoveWallMs": 2095,
+    "reverseRemoveToForwardRemoveMonotonicMs": 2093.3578,
+    "fatalToRemoveWallMs": 327,
+    "observerMovementSendToLateUserLocationMonotonicMs": 2741.0679,
+    "observerLateUserLocationAfterTimeoutWallMs": 732,
+    "lastCleanCoverageToFatalWallMs": 1005
+  },
+  "inferencesAndLimits": [
+    "The first clean coverage poll after visible exit is2501309 and fatal follows1005ms later, compatible with nominal1000ms grace counting from a poll. Timer start is inference, not a recorded event; do not equate grace age with2095ms receipt delay.",
+    "Delayed recipient UserLocation and ObjectRemove are recorded and point to recipient50048 for enqueue/gate/send tracing. Current samples do not locate the delay among queueing, gate admission, send/flush or client processing.",
+    "Reverse projection seeing observer target (282,615) by2500546 precedes its own late UserLocation at2502640. This is recorded projection evidence; precise authoritative execution time is not recorded.",
+    "No capacity or acceptance result follows from a failed bootstrap with stages empty."
+  ],
+  "selection": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\steady-outbound-batch-v8-aoi-analysis-v1\\selected.jsonl",
+    "rows": 2511,
+    "rule": "All raw records with a top-level epoch timestamp >=1793022495475, all coverage/error category records, plus retained lifecycle key representatives. Includes all relevant selfTransform/action/ownerACK and paired lifecycle receipts in final approximately7seconds and drain. Source lines point to original raw; selected is not another raw read.",
+    "sha256": "5c067a1e907d840e4316ec0b214d46dc242f8419d2cfcfd4a7ac77e9588220c2"
+  },
+  "nextTrace": "recipientZoneID=50048, peerZoneObjectID=50041; correlate delayed owner UserLocation and peer ObjectRemove across enqueue, gate, send and flush; no blind tuning."
+}

@@ -1,0 +1,12 @@
+{
+  "sourceAccepted": true,
+  "independentReviewAccepted": true,
+  "sourceSnapshot": {
+    "sha256": "3474d731df10c00d4320d049696e42fbbf417920ab5a5156fe72d7d8eba3fb3b"
+  },
+  "independentSourceReview": {
+    "sha256": "ed2911914f36441fe5a376022c4372cf61f253ff297dfff389d9a51444b4a8b3",
+    "path": "E:\\mir2-player-journey\\work\\slg-production-p02b2a-20261008\\independent-source-review-01.json"
+  },
+  "scope": "Controlled batch template grants and real quest/carry/mining/fishing paths. Remaining issuers, census, Postgres, live gateway, UI and installers are not accepted."
+}

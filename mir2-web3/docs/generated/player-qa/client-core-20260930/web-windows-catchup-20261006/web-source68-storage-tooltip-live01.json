@@ -1,0 +1,65 @@
+{
+  "kind": "Source68 actual normal browser warehouse tooltip and save relogin QA",
+  "origin": "http://127.0.0.1:19205/",
+  "normalLogin": true,
+  "normalStartGame": true,
+  "warehouse": "0140",
+  "normalAccess": true,
+  "store": {
+    "bagBefore": 5,
+    "bagAfter": 4,
+    "storageBefore": 0,
+    "storageAfter": 1,
+    "goldUnchanged": 180
+  },
+  "hover": {
+    "durabilityDisplay": "8/8",
+    "rawDurabilityUnmodified": 8000,
+    "visible": true,
+    "completePassiveObservation": true,
+    "outgoingFrameCount": 0,
+    "screenshot": "web-source68-storage-tooltip-hover01.png"
+  },
+  "focus": {
+    "method": "Normal Shift key to actual storage card",
+    "focused": true,
+    "hovered": false,
+    "durabilityDisplay": "8/8",
+    "completePassiveObservation": true,
+    "outgoingFrameCount": 0,
+    "screenshot": "web-source68-storage-tooltip-focus01.png"
+  },
+  "cleanup": {
+    "page2RemovedCard": true,
+    "page2OutgoingFrameCount": 0,
+    "page1TooltipHidden": true,
+    "blurTooltipHidden": true,
+    "closeRemovedStorageCards": true
+  },
+  "separateObservations": {
+    "tabMirHotkeyOutgoingPacket": "pickUpTile",
+    "firstTakeBackAttemptOnDifferentBagTabHadNoMutation": true
+  },
+  "takeBack": {
+    "normalBag1Reselection": true,
+    "incomingAcknowledgement": "TakeBackItemV2",
+    "success": true,
+    "bagAfter": 5,
+    "storageAfter": 0,
+    "goldUnchanged": 180
+  },
+  "saveRelogin": {
+    "normalAltX": true,
+    "normalLogin": true,
+    "normalStartGame": true,
+    "normalAccess": true,
+    "bagCount": 5,
+    "storageCount": 0,
+    "gold": 180,
+    "screenshot": "web-source68-storage-relogin01.png"
+  },
+  "candidateAccepted": false,
+  "humanAccepted": false,
+  "overallPercentage": null,
+  "goalComplete": false
+}

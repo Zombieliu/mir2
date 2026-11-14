@@ -1,0 +1,552 @@
+{
+  "schema": "r16-v16-quest4-normal-revive-and-eight-neighbour-receipt/1",
+  "passed": false,
+  "scopedRecoveryAndPersistencePassed": true,
+  "sourceProof": "onboarding-v11-browser-proof.json",
+  "sourceProofSha256": "250b6d7604595c2c3a0ffe71b4a9621d876fb5557773d04a2a76f02e2129748e",
+  "adjacentRescue": {
+    "observationBudgetMs": 45000,
+    "initial": {
+      "hp": 0,
+      "maxHp": 60,
+      "mp": 35,
+      "maxMp": 35,
+      "dead": true,
+      "position": {
+        "x": 267,
+        "y": 532
+      }
+    },
+    "neighboursBefore": [
+      {
+        "direction": "Up",
+        "tile": {
+          "x": 267,
+          "y": 531
+        },
+        "staticBlocked": false,
+        "entities": [
+          {
+            "objectId": 206609,
+            "kind": "monster",
+            "monster": "Scarecrow",
+            "hp": 20
+          }
+        ]
+      },
+      {
+        "direction": "UpRight",
+        "tile": {
+          "x": 268,
+          "y": 531
+        },
+        "staticBlocked": false,
+        "entities": [
+          {
+            "objectId": 206604,
+            "kind": "monster",
+            "monster": "Scarecrow",
+            "hp": 20
+          }
+        ]
+      },
+      {
+        "direction": "Right",
+        "tile": {
+          "x": 268,
+          "y": 532
+        },
+        "staticBlocked": false,
+        "entities": [
+          {
+            "objectId": 206643,
+            "kind": "monster",
+            "monster": "Scarecrow",
+            "hp": 20
+          }
+        ]
+      },
+      {
+        "direction": "DownRight",
+        "tile": {
+          "x": 268,
+          "y": 533
+        },
+        "staticBlocked": false,
+        "entities": [
+          {
+            "objectId": 206619,
+            "kind": "monster",
+            "monster": "Scarecrow",
+            "hp": 20
+          }
+        ]
+      },
+      {
+        "direction": "Down",
+        "tile": {
+          "x": 267,
+          "y": 533
+        },
+        "staticBlocked": false,
+        "entities": [
+          {
+            "objectId": 206631,
+            "kind": "monster",
+            "monster": "Scarecrow",
+            "hp": 20
+          }
+        ]
+      },
+      {
+        "direction": "DownLeft",
+        "tile": {
+          "x": 266,
+          "y": 533
+        },
+        "staticBlocked": false,
+        "entities": []
+      },
+      {
+        "direction": "Left",
+        "tile": {
+          "x": 266,
+          "y": 532
+        },
+        "staticBlocked": false,
+        "entities": [
+          {
+            "objectId": 205637,
+            "kind": "monster",
+            "monster": "Oma",
+            "hp": 23
+          }
+        ]
+      },
+      {
+        "direction": "UpLeft",
+        "tile": {
+          "x": 266,
+          "y": 531
+        },
+        "staticBlocked": false,
+        "entities": []
+      }
+    ],
+    "physicalAttacks": [],
+    "noPurchasesOrEquipmentReplay": true,
+    "afterCombat": {
+      "hp": 0,
+      "maxHp": 60,
+      "mp": 35,
+      "maxMp": 35,
+      "dead": true,
+      "position": {
+        "x": 267,
+        "y": 532
+      }
+    },
+    "questLog": [
+      {
+        "questId": 2110001,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Report to Assistant Jane",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110002,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Equip a weapon you can use",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110003,
+        "stage": "completed",
+        "current": 4,
+        "required": 4,
+        "objectives": [
+          {
+            "label": "Defeat 2 Scarecrow.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          },
+          {
+            "label": "Defeat 2 RakingCat.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110004,
+        "stage": "inProgress",
+        "current": 1,
+        "required": 3,
+        "objectives": [
+          {
+            "label": "Defeat 2 Oma.",
+            "current": 0,
+            "required": 2,
+            "done": false
+          },
+          {
+            "label": "Complete your class practice",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      }
+    ],
+    "normalDeathObserved": true,
+    "afterNormalRevive": {
+      "hp": 60,
+      "maxHp": 60,
+      "mp": 35,
+      "maxMp": 35,
+      "dead": false,
+      "position": {
+        "x": 288,
+        "y": 616
+      }
+    },
+    "neighboursAfter": [
+      {
+        "direction": "Up",
+        "tile": {
+          "x": 288,
+          "y": 615
+        },
+        "staticBlocked": false,
+        "entities": []
+      },
+      {
+        "direction": "UpRight",
+        "tile": {
+          "x": 289,
+          "y": 615
+        },
+        "staticBlocked": false,
+        "entities": []
+      },
+      {
+        "direction": "Right",
+        "tile": {
+          "x": 289,
+          "y": 616
+        },
+        "staticBlocked": false,
+        "entities": []
+      },
+      {
+        "direction": "DownRight",
+        "tile": {
+          "x": 289,
+          "y": 617
+        },
+        "staticBlocked": false,
+        "entities": []
+      },
+      {
+        "direction": "Down",
+        "tile": {
+          "x": 288,
+          "y": 617
+        },
+        "staticBlocked": false,
+        "entities": []
+      },
+      {
+        "direction": "DownLeft",
+        "tile": {
+          "x": 287,
+          "y": 617
+        },
+        "staticBlocked": false,
+        "entities": []
+      },
+      {
+        "direction": "Left",
+        "tile": {
+          "x": 287,
+          "y": 616
+        },
+        "staticBlocked": false,
+        "entities": [
+          {
+            "objectId": 206641,
+            "kind": "monster",
+            "monster": "Scarecrow",
+            "hp": 20
+          }
+        ]
+      },
+      {
+        "direction": "UpLeft",
+        "tile": {
+          "x": 287,
+          "y": 615
+        },
+        "staticBlocked": false,
+        "entities": [
+          {
+            "objectId": 1,
+            "kind": "npc",
+            "hp": null
+          }
+        ]
+      }
+    ]
+  },
+  "normalRevive": {
+    "normalUi": true,
+    "oneCommand": true,
+    "matchingRevivedObserved": true,
+    "before": {
+      "hp": 0,
+      "maxHp": 60,
+      "mp": 35,
+      "maxMp": 35,
+      "dead": true,
+      "position": {
+        "x": 267,
+        "y": 532
+      }
+    },
+    "after": {
+      "hp": 60,
+      "maxHp": 60,
+      "mp": 35,
+      "maxMp": 35,
+      "dead": false,
+      "position": {
+        "x": 288,
+        "y": 616
+      }
+    },
+    "goldBefore": 30,
+    "goldAfter": 30,
+    "smallHpMedicineBefore": 0,
+    "smallHpMedicineAfter": 0,
+    "retainedQuestLog": [
+      {
+        "questId": 2110001,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Report to Assistant Jane",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110002,
+        "stage": "completed",
+        "current": 1,
+        "required": 1,
+        "objectives": [
+          {
+            "label": "Equip a weapon you can use",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110003,
+        "stage": "completed",
+        "current": 4,
+        "required": 4,
+        "objectives": [
+          {
+            "label": "Defeat 2 Scarecrow.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          },
+          {
+            "label": "Defeat 2 RakingCat.",
+            "current": 2,
+            "required": 2,
+            "done": true
+          }
+        ]
+      },
+      {
+        "questId": 2110004,
+        "stage": "inProgress",
+        "current": 1,
+        "required": 3,
+        "objectives": [
+          {
+            "label": "Defeat 2 Oma.",
+            "current": 0,
+            "required": 2,
+            "done": false
+          },
+          {
+            "label": "Complete your class practice",
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      }
+    ]
+  },
+  "persistence": {
+    "normalLogoutAck": true,
+    "freshLogin": true,
+    "exactAssetsRetained": true,
+    "exactProgressRetained": true,
+    "completedQuestIds": [
+      2110001,
+      2110002,
+      2110003
+    ],
+    "learnedFencingBeforeLogout": true,
+    "learnedFencingAfterRelogin": true,
+    "completedNpcRewardNotOffered": null,
+    "priorNpcRevisitEvidence": "../onboarding-v12-browser-r6/onboarding-v11-browser-proof.json",
+    "completedDiaryRewardNotOffered": true,
+    "noRepeatedRewardOnUiRevisit": true,
+    "arbitraryProtocolReplayTested": false
+  },
+  "explicitLimits": {
+    "diagonalMovementExperimentPerformed": false,
+    "meleeRescueExperimentPerformed": false,
+    "reason": "The player was alive at the first login observation but already dead when the rescue phase began. No movement or attack was sent. Two west diagonal cells were observed free; cardinal no-path was not a game-wide impasse.",
+    "quest4Completed": false
+  },
+  "retainedQuest4": {
+    "questId": 2110004,
+    "stage": "inProgress",
+    "current": 1,
+    "required": 3,
+    "objectives": [
+      {
+        "label": "Defeat 2 Oma.",
+        "current": 0,
+        "required": 2,
+        "done": false
+      },
+      {
+        "label": "Complete your class practice",
+        "current": 1,
+        "required": 1,
+        "done": true
+      }
+    ]
+  },
+  "commandCounts": {
+    "clientCapabilities": 4,
+    "setLanguage": 2,
+    "clientVersion": 2,
+    "login": 2,
+    "startGame": 2,
+    "keepAlive": 4,
+    "npcPurchaseOwner": 2,
+    "townRevive": 1,
+    "logOut": 2
+  },
+  "cleanup": {
+    "ordinaryLogout": true,
+    "browserClosed": true
+  },
+  "network": {
+    "failed": 0,
+    "httpErrors": 0,
+    "consoleErrors": 0
+  },
+  "scope": {
+    "freshOrdinaryAccount": false,
+    "reusedOwnOrdinaryQaAccount": true,
+    "primaryUiOnly": true,
+    "rootPrivateFilesRead": false,
+    "rootSecretValuesPassedToBrowser": false,
+    "credentialsOnlyUsedForNormalUiFill": true,
+    "readOnlyRuntimeGetters": [
+      "getMir2QuestUiStatus",
+      "getMir2QuestWorldControlRects",
+      "getMir2NpcShopUiStatus",
+      "getMir2HudUiStatus"
+    ],
+    "mockedRoutes": false,
+    "hiddenActions": false,
+    "qaCommands": 0,
+    "saveDataEdits": false,
+    "modelCallsRequested": 0,
+    "walletOpened": false,
+    "originalOwnerOrAloOpened": false,
+    "trustedKeyObservation": "game-screen-Digit1-keydown-up-only",
+    "stageFourOnly": true,
+    "adjacentRescueOnly": true
+  },
+  "evidence": [
+    {
+      "name": "onboarding-v11-browser-proof.json",
+      "bytes": 52684,
+      "sha256": "250b6d7604595c2c3a0ffe71b4a9621d876fb5557773d04a2a76f02e2129748e"
+    },
+    {
+      "name": "01-village-native-task-card-before-measured-readiness.png",
+      "bytes": 1201037,
+      "sha256": "ad117804dea6c0e8bbb94f0a49d944497b76b7efb112eb1ba9dc1bf858474220"
+    },
+    {
+      "name": "02-fresh-village-native-task-card.png",
+      "bytes": 1200812,
+      "sha256": "67a7dda6ff01606163a51a8cd8b052153c9970875283d485f533083c9625f6be"
+    },
+    {
+      "name": "03-adjacent-rescue-current-eight-neighbours.png",
+      "bytes": 977446,
+      "sha256": "60802b88755e3f66d93ef983b65f103d9d6016d8c771a831eb077c8d7d27dc83"
+    },
+    {
+      "name": "04-saved-death-before-normal-town-revive.png",
+      "bytes": 977446,
+      "sha256": "60802b88755e3f66d93ef983b65f103d9d6016d8c771a831eb077c8d7d27dc83"
+    },
+    {
+      "name": "05-adjacent-rescue-after-normal-action.png",
+      "bytes": 1136648,
+      "sha256": "e3527b535d94326c863721684abb06cf2e24582123a0fbc40f092944a337e40b"
+    },
+    {
+      "name": "06-saved-progress-native-diary.png",
+      "bytes": 1152250,
+      "sha256": "edf3cc6f82bd9e1eda42f296841acf06a19e35f682db4da16665e661dea3a6ff"
+    }
+  ],
+  "secretScan": {
+    "ownQaAndRealmMatches": 0
+  },
+  "runner": {
+    "name": "runner.executed.mjs",
+    "sha256": "b8805ae9979ba84effea9118fd1591e1566c9b3926a716406a0169ba9b0c448f"
+  }
+}

@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "reviewKind": "bounded-read-only-source-review",
+  "createdAt": "2026-10-25T10:37:55.5649281Z",
+  "sourceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+  "sourcePins": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 148409,
+      "sha256": "1cf9da1746db1b23d00b13cf9dd65c14ac72c155bd558621bf7767d4e6376f3f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 238892,
+      "sha256": "5c6efc9a49a45550d4c4aed25a5083dc1afaf3e146da33ffd9c372f8902d66db"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "bytes": 18249,
+      "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/protocol-observation.mjs",
+      "bytes": 14376,
+      "sha256": "b69ba03e9f6ee05286d401341c6dbbe6dac4a6e5014fa6a67e9c6167c072d097"
+    },
+    {
+      "file": "apps/web/scripts/playtest-multiplayer-smoke.mjs",
+      "bytes": 38856,
+      "sha256": "a3ce02d111925c41e25b32a5522f0d17243cd78fab8142e92bca5eb1c45915ea"
+    },
+    {
+      "file": "apps/web/scripts/playtest-native-resume-smoke.mjs",
+      "bytes": 20058,
+      "sha256": "2020952e157f3a0a9de16b679f1681497b3d547dce50acc1ec9ef89769cdebe2"
+    }
+  ],
+  "scope": {
+    "included": [
+      "native temporary refused-Walk cells",
+      "Run first/end/corner checks and immediate pre-send recheck",
+      "actual snapshot monster filtering and public fold",
+      "movement receipt classification and unchanged correction accounting"
+    ],
+    "excluded": [
+      "actual full raw/monitor/recording scan",
+      "server refusal attribution from merged spectator",
+      "product or fixture edits",
+      "tests/builds/realm execution"
+    ],
+    "actualProbe": "1792923531277-bc2bda2e",
+    "observedFailureSource": "Parent-reported only: partial stage2 272.682s, continuous actor L8baceb00 ~60.182s with 4 corrected of 77 moves (2 Run,2 Walk), not independently replayed in this receipt"
+  },
+  "conclusions": [
+    {
+      "id": "S1",
+      "title": "Temporary avoidance only follows an unchanged-owner Walk",
+      "references": [
+        "playtest-capacity-soak.mjs:33-34",
+        "playtest-capacity-soak.mjs:597-620"
+      ],
+      "detail": "Only native Walk with actual==captured origin and a one-cell first step adds that single destination to rejectedWalkCells. Expiry is performance.now()+3000ms; entries are removed on expiry or map mismatch at the next lookup. Refreshing a key moves it to the newest position; at most16 entries survive. A corrected movement-role Walk advances the four-corner cursor. A Run correction adds no guessed blocker because the public correction does not identify which of two cells failed."
+    },
+    {
+      "id": "S2",
+      "title": "Visible obstacle selection includes all living monster families",
+      "references": [
+        "playtest-capacity-soak.mjs:662-676"
+      ],
+      "detail": "The base obstacle list is every snapshot entity with objectId != actual local owner ID and !entity.dead, followed by temporary refused Walk cells. It does not filter by monsterNames, weak monster type, AI, hostility, friendliness, hidden state, attack witness distance or combat eligibility. Dead bodies are excluded. Native planning unions active same-map controlled peers and their current connection navigation hints; own ID1000 is excluded by client identity, not shared object ID across receivers. This is a conservative local cache/hint set, not authoritative occupancy."
+    },
+    {
+      "id": "S3",
+      "title": "Both Run cells and diagonal side cells are checked",
+      "references": [
+        "playtest-capacity-soak.mjs:645-660",
+        "playtest-capacity-soak.mjs:678-697",
+        "playtest-capacity-soak.mjs:700-776",
+        "protocol-navigation.mjs:186-247",
+        "protocol-navigation.mjs:376-392"
+      ],
+      "detail": "Ordinary A* has original4000 expansion limit, blocks occupied cells including the destination, and checks both cardinal side cells for each diagonal. A Run is selected only when the first two path steps are collinear, with transfer guards. The patrol fast path independently checks first/end/static/live obstacles and four diagonal side cells. Immediately before actual send, native navigationPlanIsClear validates current origin/direction/one-or-two-step shape and every first/end/side cell against the current obstacle union; conflicts stay navigation-blocked opportunities. No new bypass of a visible Run intermediate or end cell was found."
+    },
+    {
+      "id": "S4",
+      "title": "Monster cache freshness has explicit replace/update/remove semantics",
+      "references": [
+        "protocol-observation.mjs:29-59",
+        "protocol-observation.mjs:201-224",
+        "protocol-observation.mjs:249-276",
+        "protocol-observation.mjs:313-338",
+        "protocol-observation.mjs:372-380",
+        "playtest-multiplayer-smoke.mjs:189-196",
+        "playtest-capacity-soak.mjs:246-270"
+      ],
+      "detail": "A worldSnapshot clones and replaces the entire observed view. ObjectMonster/NewMonsterInfo upsert by object ID. Existing monster movement/attack packets update coordinates; an unknown movement object is not invented. ObjectRemove/TeleportOut deletes the ID; ObjectDied marks dead/zero health and ObjectRevived clears dead for an existing ID. CapacityClient calls the original fold first and does not add a monster-pruning filter. Whether a relevant ID was removed/replaced/unknown before a specific failed send must be shown from the owner connection wire stream; another session merged spectator view cannot prove this."
+    },
+    {
+      "id": "S5",
+      "title": "Correction rows and temporary avoidance cannot remove failed attempts",
+      "references": [
+        "playtest-capacity-soak.mjs:1243-1308",
+        "playtest-capacity-soak.mjs:1342-1374",
+        "playtest-capacity-soak-core.mjs:229-245",
+        "playtest-capacity-soak-core.mjs:317-348"
+      ],
+      "detail": "After the actual send, the first received UserLocation after the send cursor/monotonic timestamp supplies the movement receipt. Matching the full target is success; Run also accepts the genuine first step as success. Other coordinates remain corrected. Correction occupants are read after this receipt and may be later than the server decision. One diagnostic row per uninterrupted correction streak is deduplication only: every corrected action still enters the original movement denominator and gets no native completed credit. Success clears the streak; the5 percent gate is unchanged."
+    },
+    {
+      "id": "S6",
+      "title": "Remaining causality limits are not proof of a product defect",
+      "references": [
+        "playtest-capacity-soak.mjs:1243-1295",
+        "playtest-multiplayer-smoke.mjs:201-205",
+        "playtest-multiplayer-smoke.mjs:223-242"
+      ],
+      "detail": "Movement has no request correlation ID or typed refusal reason; freshness alone cannot independently disambiguate an exceptionally late prior UserLocation. Current synchronous planning/pre-send checks cannot prevent a later authoritative monster move or guarantee the cached object population is complete. The failure must retain its original classification until owner wire chronology proves a specific mismatch. No inferred collider, reservation, cadence rejection or shared-Zone server bug is claimed."
+    }
+  ],
+  "existingFixtureInspection": {
+    "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+    "inspectedLines": [
+      "603-645: seven-cell hints/controlled owner continuation",
+      "1655-1682: unchanged Walk avoids single destination until expiry",
+      "1684-1714: Run does not invent blocker,16-entry cap,all21 corrections retained"
+    ],
+    "executionPerformed": false,
+    "historical200ResultReexecuted": false
+  },
+  "boundedNextEvidence": [
+    "For each corrected send, use the already-authorized diagnostic wrapper row sequence to compare actual command direction/origin/first/end with owner cache before and after send/receive. Derive direction from origin-to-first, not action.direction (the latter is ACK direction).",
+    "For a specific nearby monster ID, retain original owner spawn/upsert, move, death/revive, remove and full-snapshot replacement sequence. Determine if the ID was known and alive at send before proposing a cache/planner change.",
+    "Check the preceding own movement already had a receipt and whether any timeout could leave an older UserLocation pending before diagnosing a late ACK. Do not replace a missing refusal reason with occupancy guessed from a later or merged snapshot."
+  ],
+  "verdict": {
+    "sourceReviewCompleted": true,
+    "confirmedProductBug": false,
+    "failureRootCauseEstablished": false,
+    "thresholdChangeJustified": false,
+    "sourceChangeProposedNow": false,
+    "capacityAccepted": false,
+    "p0Passed": false,
+    "eligibleForP2": false
+  }
+}

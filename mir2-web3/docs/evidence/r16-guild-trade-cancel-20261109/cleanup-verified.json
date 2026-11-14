@@ -1,0 +1,56 @@
+{
+  "atUtc": "2026-11-09T03:08:59.3546775Z",
+  "checkedRuns": [
+    {
+      "name": "baseline",
+      "gatewayPid": 175824,
+      "webPid": 176796,
+      "shutdownRecorded": true,
+      "originalFixtureUnchanged": true,
+      "exactPageCopy": true
+    },
+    {
+      "name": "candidate",
+      "gatewayPid": 175808,
+      "webPid": 157752,
+      "shutdownRecorded": true,
+      "originalFixtureUnchanged": true,
+      "exactPageCopy": true
+    },
+    {
+      "name": "candidate-complete",
+      "gatewayPid": 175264,
+      "webPid": 184556,
+      "shutdownRecorded": true,
+      "originalFixtureUnchanged": true,
+      "exactPageCopy": true
+    },
+    {
+      "name": "candidate-final",
+      "gatewayPid": 181484,
+      "webPid": 185608,
+      "shutdownRecorded": true,
+      "originalFixtureUnchanged": true,
+      "exactPageCopy": true
+    },
+    {
+      "name": "candidate-snapshot",
+      "gatewayPid": 185460,
+      "webPid": 184816,
+      "shutdownRecorded": true,
+      "originalFixtureUnchanged": true,
+      "exactPageCopy": true
+    },
+    {
+      "name": "candidate-verify",
+      "gatewayPid": 180172,
+      "webPid": 185108,
+      "shutdownRecorded": true,
+      "originalFixtureUnchanged": true,
+      "exactPageCopy": true
+    }
+  ],
+  "originalFixtureSha256": "e6e9c8b184ca4818634e0b179f4866a18e9cb28cef109d525ea5be5b8444a314",
+  "listeners": [],
+  "ownedProcesses": []
+}

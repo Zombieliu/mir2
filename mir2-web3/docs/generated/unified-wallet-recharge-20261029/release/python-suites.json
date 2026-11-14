@@ -1,0 +1,79 @@
+{
+  "passed": true,
+  "suites": [
+    {
+      "script": "test-archive-update-release.py",
+      "exitCode": 0,
+      "tests": 35,
+      "skipped": 3,
+      "seconds": 2.354,
+      "log": "release-test-archive-update-release-v5.log",
+      "logSha256": "407fc6351b61e16e5476c38d36afdb59b6c591baa64e44ce31ef1414033e449c"
+    },
+    {
+      "script": "test-bootstrap-installer.py",
+      "exitCode": 0,
+      "tests": 80,
+      "skipped": 0,
+      "seconds": 28.655,
+      "log": "release-test-bootstrap-installer-v5.log",
+      "logSha256": "94b00981625ad175c5da0a9cb75576244d0213b7b92a2be17da27ef53562c3fe"
+    },
+    {
+      "script": "test-native-delivery.py",
+      "exitCode": 0,
+      "tests": 10,
+      "skipped": 0,
+      "seconds": 0.819,
+      "log": "release-test-native-delivery-v5.log",
+      "logSha256": "d36810c8cef043677d8b0a475d809efa4431fd272a04e5f95a704f78e03f736a"
+    },
+    {
+      "script": "test-prepare-native-publication.py",
+      "exitCode": 0,
+      "tests": 11,
+      "skipped": 0,
+      "seconds": 5.906,
+      "log": "release-test-prepare-native-publication-v5.log",
+      "logSha256": "7b38fb9958d4dd63e119060c08117a45fdf0eb4f98f8d5d6ca1ff2ccc5072825"
+    },
+    {
+      "script": "test-prepare-packed-generation.py",
+      "exitCode": 0,
+      "tests": 12,
+      "skipped": 0,
+      "seconds": 7.918,
+      "log": "release-test-prepare-packed-generation-v5.log",
+      "logSha256": "4a57aa1f8e89469393715a063f382c2ea18c75fc64545a5311e26bf510e9cb5a"
+    },
+    {
+      "script": "test-publish-native-r2.py",
+      "exitCode": 0,
+      "tests": 23,
+      "skipped": 0,
+      "seconds": 3.738,
+      "log": "release-test-publish-native-r2-v5.log",
+      "logSha256": "0a799d99a727467fe1a12d08efd751f82404f9bfb1ed6825220470e573c6605e"
+    },
+    {
+      "script": "test-unified-release-compatibility.py",
+      "exitCode": 0,
+      "tests": 3,
+      "skipped": 0,
+      "seconds": 0.089,
+      "log": "release-test-unified-release-compatibility-v5.log",
+      "logSha256": "a3195d95fbfca026fb772f2c919d3a61f0d51b295df47d5b4da9ddf4ae2b5415"
+    },
+    {
+      "script": "test-verify-native-delivery.py",
+      "exitCode": 0,
+      "tests": 12,
+      "skipped": 0,
+      "seconds": 210.11,
+      "log": "release-test-verify-native-delivery-v5.log",
+      "logSha256": "f8df54cca99c264fe6ae4f2caaf44d4c7be522a9fb5f2b5eb935ca80b3baae02"
+    }
+  ],
+  "noPublicFeedPublication": true,
+  "scope": "Unit/source/Mock filesystem tests; not fresh signed release or actual installer"
+}

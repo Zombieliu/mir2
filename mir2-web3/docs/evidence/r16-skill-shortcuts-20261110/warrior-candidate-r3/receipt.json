@@ -1,0 +1,379 @@
+{
+  "schema": "mir2.r16.web-skill-shortcuts.v1",
+  "passed": false,
+  "sourceHead": "870fdd4baa5ad205a91e39481d43f9a9416ecf32",
+  "scope": {
+    "isolatedFileWorld": true,
+    "ordinaryHeadlessWebUi": true,
+    "nativeProductionTransport": false,
+    "nativeRenderer": false,
+    "nativeWindow": false,
+    "copiedLevel30Fixture": true,
+    "production": false
+  },
+  "gateway": {
+    "sha256": "4d1a18644ef69eacdae0656fff1b8f49a4af1ae97ffcf6878ada86f5dff0ae0f",
+    "verifiedSourcePins": {
+      "apps/gateway/src/routing.rs": "c298d74a67aabcc5c509997eeb83073eb95a44f9ca2f49b893a9c54b9c54c42f",
+      "apps/simulation/src/runtime/drops.rs": "9648009ba5fa7ed50cf64aaf80833360c8c4fc1877a2494d9859c7f924c86c54",
+      "apps/simulation/src/runtime/inventory.rs": "e4d4b3f92354127e90b31abfdb694c384fd66705785d820a24bbef6ea9cbc8e3",
+      "apps/simulation/src/world_runtime.rs": "ce1484e2cae8671b8d8e027188cfa50a8f9140ec6bed31dfb69a4c58b33da39e"
+    },
+    "baselineGatewaySource": "df34e3b9b4f127e8097eb8bb682c9d95983ffdf9",
+    "changedGameFilesSinceBaseline": [
+      "mir2-web3/apps/gateway/src/routing.rs",
+      "mir2-web3/apps/gateway/src/routing/tests/trade_invitation_tests.rs",
+      "mir2-web3/apps/simulation/src/runtime/inventory.rs",
+      "mir2-web3/apps/simulation/src/runtime/session.rs",
+      "mir2-web3/apps/simulation/src/runtime/session_trade_reopen_tests.rs",
+      "mir2-web3/apps/simulation/src/world_runtime.rs"
+    ]
+  },
+  "fixture": {
+    "sha256": "ee63f1fd891d8987dced0c73bb0be8e595da732a937aae3b04032a50cf1a1666",
+    "class": "Warrior",
+    "originalOrdinaryBindingVerified": true,
+    "unchanged": true,
+    "isolatedStoreChanged": true
+  },
+  "stages": [
+    "reserve-private-loopback",
+    "prepare-frozen-web-source",
+    "web-ordinary-entry",
+    "ordinary-F11-bind-HalfMoon",
+    "ordinary-F11-bind-Thrusting",
+    "ordinary-combat-shortcuts",
+    "fresh-browser-retained-keys"
+  ],
+  "browsers": [
+    {
+      "tag": "web-cast",
+      "received": {
+        "Connected": 1,
+        "ClientVersion": 1,
+        "LoginSuccess": 1,
+        "StartGame": 1,
+        "Chat": 1,
+        "UpdateNotice": 1,
+        "NewItemInfo": 149,
+        "MapInformation": 1,
+        "UserInformation": 1,
+        "NewQuestInfo": 200,
+        "NewRecipeInfo": 79,
+        "CompleteQuest": 1,
+        "ReceiveMail": 1,
+        "FriendUpdate": 1,
+        "GameShopInfo": 105,
+        "BaseStatsInfo": 1,
+        "ObjectSpell": 92,
+        "ObjectMonster": 7,
+        "ObjectNpc": 15,
+        "TimeOfDay": 1,
+        "ChangeAMode": 1,
+        "ChangePMode": 1,
+        "SwitchGroup": 2,
+        "DefaultNPC": 1,
+        "GuildBuffList": 3,
+        "NPCUpdate": 5,
+        "NPCResponse": 4,
+        "MentorUpdate": 2,
+        "LoverUpdate": 1,
+        "GuildStatus": 2,
+        "GuildMemberChange": 2,
+        "ObjectGuildNameChanged": 1,
+        "DeleteGroup": 1,
+        "KeepAlive": 1,
+        "SpellToggle": 4,
+        "LogOutSuccess": 1
+      },
+      "sent": {
+        "clientCapabilities": 2,
+        "setLanguage": 1,
+        "clientVersion": 1,
+        "login": 1,
+        "startGame": 1,
+        "npcPurchaseOwner": 1,
+        "keepAlive": 1,
+        "magicKey": 2,
+        "spellToggle": 4,
+        "logOut": 1
+      }
+    },
+    {
+      "tag": "fresh-readback",
+      "received": {
+        "Connected": 1,
+        "ClientVersion": 1,
+        "LoginSuccess": 1,
+        "StartGame": 1,
+        "Chat": 1,
+        "UpdateNotice": 1,
+        "NewItemInfo": 149,
+        "MapInformation": 1,
+        "UserInformation": 1,
+        "NewQuestInfo": 200,
+        "NewRecipeInfo": 79,
+        "CompleteQuest": 1,
+        "ReceiveMail": 1,
+        "FriendUpdate": 1,
+        "GameShopInfo": 105,
+        "BaseStatsInfo": 1,
+        "ObjectSpell": 92,
+        "ObjectMonster": 7,
+        "ObjectNpc": 21,
+        "TimeOfDay": 1,
+        "ChangeAMode": 1,
+        "ChangePMode": 1,
+        "SwitchGroup": 2,
+        "DefaultNPC": 1,
+        "GuildBuffList": 3,
+        "NPCUpdate": 4,
+        "NPCResponse": 4,
+        "MentorUpdate": 2,
+        "LoverUpdate": 1,
+        "GuildStatus": 2,
+        "GuildMemberChange": 2,
+        "ObjectGuildNameChanged": 1,
+        "DeleteGroup": 1,
+        "KeepAlive": 3
+      },
+      "sent": {
+        "clientCapabilities": 2,
+        "setLanguage": 1,
+        "clientVersion": 1,
+        "login": 1,
+        "startGame": 1,
+        "npcPurchaseOwner": 1,
+        "keepAlive": 3
+      }
+    }
+  ],
+  "errors": [],
+  "web": {
+    "runtimeVersion": "bevy-0cd68510886134e0",
+    "sourcePageSha256": "b4918778aa2698b07fb8a80abc312cf179ddc6f41e1d9a1c01e10f90bf26baba",
+    "mode": "candidate",
+    "changedSource": {
+      "lib/bevy-combat-input.ts": "77075ec50d0e8e1df025ac7cedef943cf9c9012d03b748584cbf87c0a8e1d26e",
+      "scripts/test-bevy-combat-input.mjs": "df14fcb6ae65a0ec073936a27a55ffa70c364114f58c9862bb8d0833befe2525"
+    }
+  },
+  "initialSkills": [
+    {
+      "spell": "Fencing",
+      "key": "fencing",
+      "hotkey": 0,
+      "icon": 2,
+      "castKind": "passive",
+      "mpCost": 0,
+      "delayMs": 1800
+    },
+    {
+      "spell": "Slaying",
+      "key": "slaying",
+      "hotkey": 0,
+      "icon": 6,
+      "castKind": "passive",
+      "mpCost": 0,
+      "delayMs": 1800
+    },
+    {
+      "spell": "Thrusting",
+      "key": "thrusting",
+      "hotkey": 0,
+      "icon": 11,
+      "castKind": "toggle",
+      "mpCost": 0,
+      "delayMs": 1800
+    },
+    {
+      "spell": "HalfMoon",
+      "key": "halfmoon",
+      "hotkey": 0,
+      "icon": 24,
+      "castKind": "toggle",
+      "mpCost": 3,
+      "delayMs": 1800
+    }
+  ],
+  "ordinary": [
+    {
+      "op": "F11 bind",
+      "spell": "HalfMoon",
+      "slot": 1,
+      "source": "content.magic.HalfMoon.description",
+      "wire": [
+        "magicKey"
+      ],
+      "readBack": true
+    },
+    {
+      "op": "F11 bind",
+      "spell": "Thrusting",
+      "slot": 9,
+      "source": "content.magic.Thrusting.description",
+      "wire": [
+        "magicKey"
+      ],
+      "readBack": true
+    }
+  ],
+  "initialUI": {
+    "hudNavigation": {
+      "characterOpen": false,
+      "characterPage": "character",
+      "bagOpen": false,
+      "questOpen": false
+    },
+    "combat": {
+      "frame": 15,
+      "identity": {
+        "connectionGeneration": 1,
+        "controllerRun": 2,
+        "ownerRevision": 1,
+        "playerObjectId": 1000,
+        "sessionGeneration": 1
+      },
+      "map": "0",
+      "modelRevision": 4,
+      "ready": true,
+      "revision": 4,
+      "version": 1
+    }
+  },
+  "spellPress": [
+    0,
+    141,
+    1426,
+    1802,
+    3063,
+    4325
+  ],
+  "initialToggleCanUse": true,
+  "castObserved": [
+    {
+      "type": "spellToggle",
+      "spell": "HalfMoon",
+      "toggleState": 1,
+      "atMs": 28
+    },
+    {
+      "type": "spellToggle",
+      "spell": "Thrusting",
+      "toggleState": 1,
+      "atMs": 1448
+    },
+    {
+      "type": "spellToggle",
+      "spell": "HalfMoon",
+      "toggleState": 0,
+      "atMs": 3068
+    },
+    {
+      "type": "spellToggle",
+      "spell": "HalfMoon",
+      "toggleState": 1,
+      "atMs": 4333
+    }
+  ],
+  "authoritativeCasts": [
+    {
+      "spell": "HalfMoon",
+      "canUse": true
+    },
+    {
+      "spell": "Thrusting",
+      "canUse": true
+    },
+    {
+      "spell": "HalfMoon",
+      "canUse": false
+    },
+    {
+      "spell": "HalfMoon",
+      "canUse": true
+    }
+  ],
+  "toggleFrames": [
+    {
+      "sequence": 708,
+      "type": "SpellToggle",
+      "spell": "HalfMoon",
+      "canUse": true,
+      "owned": true
+    },
+    {
+      "sequence": 709,
+      "type": "worldSnapshot",
+      "canUse": {
+        "Thrusting": "omitted",
+        "HalfMoon": "omitted"
+      }
+    },
+    {
+      "sequence": 711,
+      "type": "SpellToggle",
+      "spell": "Thrusting",
+      "canUse": true,
+      "owned": true
+    },
+    {
+      "sequence": 712,
+      "type": "worldSnapshot",
+      "canUse": {
+        "Thrusting": "omitted",
+        "HalfMoon": "omitted"
+      }
+    },
+    {
+      "sequence": 714,
+      "type": "SpellToggle",
+      "spell": "HalfMoon",
+      "canUse": false,
+      "owned": true
+    },
+    {
+      "sequence": 715,
+      "type": "worldSnapshot",
+      "canUse": {
+        "Thrusting": "omitted",
+        "HalfMoon": "omitted"
+      }
+    },
+    {
+      "sequence": 717,
+      "type": "SpellToggle",
+      "spell": "HalfMoon",
+      "canUse": true,
+      "owned": true
+    },
+    {
+      "sequence": 718,
+      "type": "worldSnapshot",
+      "canUse": {
+        "Thrusting": "omitted",
+        "HalfMoon": "omitted"
+      }
+    }
+  ],
+  "normalLogout": true,
+  "freshReadback": [
+    {
+      "spell": "Thrusting",
+      "hotkey": 9
+    },
+    {
+      "spell": "HalfMoon",
+      "hotkey": 1
+    }
+  ],
+  "failure": {
+    "message": "fresh-readback-SpellToggle",
+    "messageSha256": "31e12dd3f98eab014f4fd15d67251f3c25366fb7ebc60e51574e63fe4ab430b9",
+    "stage": "fresh-browser-retained-keys"
+  },
+  "stopped": {
+    "gateway": true,
+    "next": true
+  }
+}

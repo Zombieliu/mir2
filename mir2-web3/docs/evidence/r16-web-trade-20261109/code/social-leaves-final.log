@@ -1,0 +1,196 @@
+TAP version 13
+# Subtest: normal player React sources cannot wire generic stage5 commands or debug-transfer UI
+ok 1 - normal player React sources cannot wire generic stage5 commands or debug-transfer UI
+  ---
+  duration_ms: 70.9003
+  type: 'test'
+  ...
+# Subtest: actual window and control rectangles match independent native R16 definitions
+ok 2 - actual window and control rectangles match independent native R16 definitions
+  ---
+  duration_ms: 4.9133
+  type: 'test'
+  ...
+# Subtest: trade slots use column-major locations without changing their protocol IDs
+ok 3 - trade slots use column-major locations without changing their protocol IDs
+  ---
+  duration_ms: 0.165
+  type: 'test'
+  ...
+# Subtest: source window/button art is present, including both independent trade backgrounds
+ok 4 - source window/button art is present, including both independent trade backgrounds
+  ---
+  duration_ms: 15.6494
+  type: 'test'
+  ...
+# Subtest: group add/remove open real name dialogs and submit only the entered name
+ok 5 - group add/remove open real name dialogs and submit only the entered name
+  ---
+  duration_ms: 1.5079
+  type: 'test'
+  ...
+# Subtest: group name editor retains the entered draft after a definite local send rejection
+ok 6 - group name editor retains the entered draft after a definite local send rejection
+  ---
+  duration_ms: 0.6346
+  type: 'test'
+  ...
+# Subtest: non-leaders and a full party cannot dispatch a new add through the visible UI
+ok 7 - non-leaders and a full party cannot dispatch a new add through the visible UI
+  ---
+  duration_ms: 0.2723
+  type: 'test'
+  ...
+# Subtest: group replies keep the captured invitation epoch and preserve the real allow-invites callback
+ok 8 - group replies keep the captured invitation epoch and preserve the real allow-invites callback
+  ---
+  duration_ms: 0.3545
+  type: 'test'
+  ...
+# Subtest: real bag selection deposits the same UID into a selected column-major protocol slot
+ok 9 - real bag selection deposits the same UID into a selected column-major protocol slot
+  ---
+  duration_ms: 14.5029
+  type: 'test'
+  ...
+# Subtest: offer retrieval keeps both original slot identities and stale/pending sources cannot edit
+ok 10 - offer retrieval keeps both original slot identities and stale/pending sources cannot edit
+  ---
+  duration_ms: 0.9572
+  type: 'test'
+  ...
+# Subtest: gold entry dispatches only on confirmation and drops a stale owner/source prompt
+ok 11 - gold entry dispatches only on confirmation and drops a stale owner/source prompt
+  ---
+  duration_ms: 1.6075
+  type: 'test'
+  ...
+# Subtest: locked/pending/unknown-partner controls preserve the original confirm/unlock/cancel gates
+ok 12 - locked/pending/unknown-partner controls preserve the original confirm/unlock/cancel gates
+  ---
+  duration_ms: 0.2579
+  type: 'test'
+  ...
+# Subtest: incoming trade uses a separate modal and waits for the real host state to open windows
+ok 13 - incoming trade uses a separate modal and waits for the real host state to open windows
+  ---
+  duration_ms: 0.1793
+  type: 'test'
+  ...
+# Subtest: actual native button uses 520/521/522 for unlocked, locked and pressed confirm states
+ok 14 - actual native button uses 520/521/522 for unlocked, locked and pressed confirm states
+  ---
+  duration_ms: 0.1793
+  type: 'test'
+  ...
+# Subtest: modal consumes Enter/Escape, ignores IME/repeat and cycles Tab inside the dialog
+ok 15 - modal consumes Enter/Escape, ignores IME/repeat and cycles Tab inside the dialog
+  ---
+  duration_ms: 0.2739
+  type: 'test'
+  ...
+# Subtest: modal focuses its real field and restores the prior connected element on close
+ok 16 - modal focuses its real field and restores the prior connected element on close
+  ---
+  duration_ms: 0.1055
+  type: 'test'
+  ...
+# Subtest: independent window drag respects stage scaling and clamps the complete panel
+ok 17 - independent window drag respects stage scaling and clamps the complete panel
+  ---
+  duration_ms: 0.3051
+  type: 'test'
+  ...
+# Subtest: rename emits one ordinary type3 preserving the exact Native UTF16 name
+ok 18 - rename emits one ordinary type3 preserving the exact Native UTF16 name
+  ---
+  duration_ms: 1.0079
+  type: 'test'
+  ...
+# Subtest: rename rejects non-u8 identity and names outside Native 3..20 UTF16/backslash rule
+ok 19 - rename rejects non-u8 identity and names outside Native 3..20 UTF16/backslash rule
+  ---
+  duration_ms: 0.1095
+  type: 'test'
+  ...
+# Subtest: each exact permission key emits a single ordinary type5 for that checkbox only
+ok 20 - each exact permission key emits a single ordinary type5 for that checkbox only
+  ---
+  duration_ms: 0.3675
+  type: 'test'
+  ...
+# Subtest: actual checkbox submits once immediately, stays server-owned, and never submits rename
+ok 21 - actual checkbox submits once immediately, stays server-owned, and never submits rename
+  ---
+  duration_ms: 0.8121
+  type: 'test'
+  ...
+# Subtest: actual Save renames only and retains the untrimmed draft on local rejection and option receipt
+ok 22 - actual Save renames only and retains the untrimmed draft on local rejection and option receipt
+  ---
+  duration_ms: 0.3703
+  type: 'test'
+  ...
+# Subtest: actual Enter saves the exact untrimmed draft once and never submits any checkbox
+ok 23 - actual Enter saves the exact untrimmed draft once and never submits any checkbox
+  ---
+  duration_ms: 0.2991
+  type: 'test'
+  ...
+# Subtest: actual composing and keyCode229 Enter/Escape neither save nor clear/blur the draft
+ok 24 - actual composing and keyCode229 Enter/Escape neither save nor clear/blur the draft
+  ---
+  duration_ms: 0.315
+  type: 'test'
+  ...
+# Subtest: actual Escape clears the Native draft and blurs, retains the cleared dirty value and sends nothing
+ok 25 - actual Escape clears the Native draft and blurs, retains the cleared dirty value and sends nothing
+  ---
+  duration_ms: 0.2395
+  type: 'test'
+  ...
+# Subtest: actual Enter retains the Save validity and Host rename/authority barriers
+ok 26 - actual Enter retains the Save validity and Host rename/authority barriers
+  ---
+  duration_ms: 0.6726
+  type: 'test'
+  ...
+# Subtest: actual dirty draft survives external same-rank names and options until an exact authoritative echo
+ok 27 - actual dirty draft survives external same-rank names and options until an exact authoritative echo
+  ---
+  duration_ms: 0.4088
+  type: 'test'
+  ...
+# Subtest: actual pristine editor follows authoritative names; local send success alone never clears dirty
+ok 28 - actual pristine editor follows authoritative names; local send success alone never clears dirty
+  ---
+  duration_ms: 0.2722
+  type: 'test'
+  ...
+# Subtest: Host rename and option barriers are independent and generate no hidden action
+ok 29 - Host rename and option barriers are independent and generate no hidden action
+  ---
+  duration_ms: 0.1889
+  type: 'test'
+  ...
+# Subtest: missing callbacks or invalid rank/name cannot invoke a fallback or a batch
+ok 30 - missing callbacks or invalid rank/name cannot invoke a fallback or a batch
+  ---
+  duration_ms: 0.3836
+  type: 'test'
+  ...
+# Subtest: ExtraWindows forwards the independent callbacks and Host barriers without the old batch prop
+ok 31 - ExtraWindows forwards the independent callbacks and Host barriers without the old batch prop
+  ---
+  duration_ms: 3.0319
+  type: 'test'
+  ...
+1..31
+# tests 31
+# suites 0
+# pass 31
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 454.8201

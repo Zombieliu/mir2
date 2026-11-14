@@ -1,0 +1,301 @@
+{
+  "schema": "mir2.r16.guild-ranks.verification.v1",
+  "recordedAt": "2026-11-07T22:24:57.870Z",
+  "branch": "codex/windows-player-journey",
+  "parent": "068fd0bd35688fc78190d9d9cd96056ac5d28091",
+  "productChange": "Four selected-state border values use the same complete border property as their base style; no guild/gameplay/server authority changes after checkpoint.",
+  "sourcePins": [
+    {
+      "path": "apps/web/app/page.tsx",
+      "sha256WindowsBytes": "fc538357264fbf9bd89553d41b32804bdcd4390b30e22c7876539ff124812f5c",
+      "gitBlob": "8571b6af18ff550e551cd67948cfbe9f7e078d5d"
+    },
+    {
+      "path": "apps/web/app/components/original-client-guild-window.tsx",
+      "sha256WindowsBytes": "21d9e67f37c55969ac0df69f6fb40ea6c6e7f4223a3ca7218886c8a0f93cb2d8",
+      "gitBlob": "cd1d1fa16fdb7497119c579132b4d189b164e7a0"
+    },
+    {
+      "path": "apps/web/app/components/original-client-extra-windows.tsx",
+      "sha256WindowsBytes": "9520987aeaa00b7630ece550de29547275abe42e0c36915813c3b38f98fc68b3",
+      "gitBlob": "9b226ea7707b4048338b27229097ccfad27eb109"
+    },
+    {
+      "path": "apps/web/lib/social-parity-actions.ts",
+      "sha256WindowsBytes": "c768dfcdbb1a7dd7c7b70609bca8d5bde8b10300d476917f718ec7dcbe8747a1",
+      "gitBlob": "6fdcb5c7a4a3b0af395a405ae1d3e1717536220a"
+    },
+    {
+      "path": "apps/web/lib/guild-rank-operations.ts",
+      "sha256WindowsBytes": "35fc9787dfedaf48f722c84fe902611632e77e3a6e75612a83ded0c56eb3c3f9",
+      "gitBlob": "d9e95363fc20363bd67067acc0307931870cd4d0"
+    },
+    {
+      "path": "apps/web/lib/guild-rank-projection.ts",
+      "sha256WindowsBytes": "a99fc44667181f75321fe12d4b2cde221613acf6aec4c90ba9abd9e83918c476",
+      "gitBlob": "a632b899f505fb9b4ab8f9af146e773849534911"
+    },
+    {
+      "path": "apps/web/app/original-client-shell.tsx",
+      "sha256WindowsBytes": "33e3e82f00bd9f2960ed70b89dc93e1ad4f9761b21b62dd6ce209b67b07cf521",
+      "gitBlob": "72c43852d20212a4bba6fc76c746a33af8db013d"
+    },
+    {
+      "path": "apps/web/lib/use-window-keydown.ts",
+      "sha256WindowsBytes": "8149b087c0fa1ec32b04224bfc8dc5f1b4389fd0a93fed123580f6ef294be7ce",
+      "gitBlob": "b0264085cf3d0f2de635f6aec01c2f2684f80962"
+    }
+  ],
+  "runtimeVersion": "bevy-a46905128c316656",
+  "runtimeFiles": [
+    {
+      "path": "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js",
+      "sha256": "10216eafd2ddcdeb0dab62c1b4dc5b0b4896eb1ebf8b8add06985f4e817ecb58",
+      "immutable": "public/bevy-runtime-releases/bevy-a46905128c316656/pkg-webgpu/mir2_bevy_runtime.js"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "sha256": "2ae03a75e72d96412dc25fbbe054c9405bcedc8ce020dbfc06d0aaa3adee249d",
+      "immutable": "public/bevy-runtime-releases/bevy-a46905128c316656/pkg-webgpu/mir2_bevy_runtime_bg.wasm"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js",
+      "sha256": "2e4c58270f49998063cf64b3605b412edce725f5df73254ce4bbf764b282998d",
+      "immutable": "public/bevy-runtime-releases/bevy-a46905128c316656/pkg-webgl2/mir2_bevy_runtime.js"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+      "sha256": "44e1fe130faccba3fe53f5adb4e3aec49a5155201db43ca5e5f2ba6478a32531",
+      "immutable": "public/bevy-runtime-releases/bevy-a46905128c316656/pkg-webgl2/mir2_bevy_runtime_bg.wasm"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime.js",
+      "sha256": "792e256c91e98eae6d07fe53e79f2fc1adf622ffa1a29ef90bb97fb109feb0b3",
+      "immutable": "public/bevy-runtime-releases/bevy-a46905128c316656/pkg-webgl2-shared/mir2_bevy_runtime.js"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+      "sha256": "c591c3ef00c758ed7915e4f9490540baf8d531e49dc481831ef8caa1ac28caf2",
+      "immutable": "public/bevy-runtime-releases/bevy-a46905128c316656/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm"
+    }
+  ],
+  "browser": [
+    {
+      "backend": "webgl2-shared",
+      "assertions": 12,
+      "commandCount": 44,
+      "guildEdits": 5,
+      "fullRosterReads": 5,
+      "worldGameplayCommands": 0,
+      "pageErrors": 0,
+      "consoleErrors": 0,
+      "networkErrors": 0
+    },
+    {
+      "backend": "webgpu",
+      "assertions": 12,
+      "commandCount": 39,
+      "guildEdits": 5,
+      "fullRosterReads": 5,
+      "worldGameplayCommands": 0,
+      "pageErrors": 0,
+      "consoleErrors": 0,
+      "networkErrors": 0
+    }
+  ],
+  "tests": {
+    "freshFocused": 39,
+    "freshTypecheckExitCode": 0,
+    "priorCheckpointPageTests": 94,
+    "priorCheckpointAdapterGroups": 507,
+    "priorResultsRerun": false,
+    "priorEvidence": "../r16-guild-rank-checkpoint-20261108/verification.json",
+    "testCountsNotSummed": true
+  },
+  "preservation": {
+    "roles": 5,
+    "comparisons": 130,
+    "exactEqual": 129,
+    "emptyPurchaseJournalInitialized": 1,
+    "purchaseReceiptsAdded": 0,
+    "allGrowthAndAssetsEqual": true,
+    "allTransformsEqual": true,
+    "explanation": "Ordinary npcPurchaseOwner Begin initializes a missing server-bound empty journal. Existing journals remain exact; strict checker initially reported the initialization and its original comparison report is retained."
+  },
+  "files": [
+    {
+      "path": "webgl-browser.json",
+      "bytes": 537290,
+      "sha256": "25224c3d056f954355da5efc02d642eb1bf1d3e2a7eab66351338abf5c77f04b"
+    },
+    {
+      "path": "webgl-owner-permissions-draft-retained.png",
+      "bytes": 914904,
+      "sha256": "f2b28c64071c1acbbcc6bc47c1bb01226b2241f2ed7d71a1b80e7dd520ae94db"
+    },
+    {
+      "path": "webgl-officer-hierarchy-and-authoritative-options.png",
+      "bytes": 925728,
+      "sha256": "d6ec765cb13f47d93086f4a709a6138b4bd0f2fc725df48b68c87baa67a2bd38"
+    },
+    {
+      "path": "webgl-owner-final-persisted-ranks.png",
+      "bytes": 917557,
+      "sha256": "c8a28b338c95a57028264a3e6b2d9d0396e5283b6da53b276bb1a162a4c3e4cf"
+    },
+    {
+      "path": "webgpu-browser.json",
+      "bytes": 536003,
+      "sha256": "b62aed28e62809447947bcfb9dc990edfe7ddfbb31ae8ae5a0111e0fdfc7720a"
+    },
+    {
+      "path": "webgpu-owner-permissions-draft-retained.png",
+      "bytes": 916616,
+      "sha256": "00f743447ff1f6eabdf4a8493127887ce076300146f3c6c58e92c132f3c56e6c"
+    },
+    {
+      "path": "webgpu-officer-hierarchy-and-authoritative-options.png",
+      "bytes": 928898,
+      "sha256": "f26065bbb7809ae1de88b076f3fd0af6f2d5a5ddbf9e0d12146feb79391dbdd0"
+    },
+    {
+      "path": "webgpu-owner-final-persisted-ranks.png",
+      "bytes": 915202,
+      "sha256": "44b9c9a16e36728a569ba7f15a58866aebe861fec97519ffee7e976963a41c7c"
+    },
+    {
+      "path": "webgpu-owner-members-after-deltas.png",
+      "bytes": 918895,
+      "sha256": "3bcbc9ad6107e9265be1cb2170f9ec37bd02942e49ebdfafa5da7da125cb6125"
+    },
+    {
+      "path": "source-before-style.json",
+      "bytes": 3593,
+      "sha256": "a570016f9364ec41e659bd3b5abdf1b39586f89be45a9597369da13745010811"
+    },
+    {
+      "path": "source-final.json",
+      "bytes": 3979,
+      "sha256": "99e24f3ad7adec126769bd6db96a72ab9fef11767da55f906b6aef413b7bcf5e"
+    },
+    {
+      "path": "fixture-qualification.json",
+      "bytes": 587,
+      "sha256": "b690774ac8df4605cba72059b06a75a2f12aed30e353e9d7c9c8e6e9fbc94e6d"
+    },
+    {
+      "path": "preservation.json",
+      "bytes": 8183,
+      "sha256": "95256f52bc409c0229a69dfecbbea19394575159563a708fc05a50b0834f63cf"
+    },
+    {
+      "path": "preservation-first-differences.json",
+      "bytes": 797,
+      "sha256": "c4ff3655d2474b60ca99c68b941a3358d82e3a5e0bfaefb87e682f40d31d85eb"
+    },
+    {
+      "path": "cleanup.json",
+      "bytes": 1015,
+      "sha256": "fff09d6bbf52a7f5b0cc5ca8db74884c33dae6b50759f94c422d378755611980"
+    },
+    {
+      "path": "focused-tests.log",
+      "bytes": 9382,
+      "sha256": "49446db1c62b70a245783b1e8118c9df15b63e9c05d299d29c07ac17090b4a91"
+    },
+    {
+      "path": "typecheck.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "typecheck-result.json",
+      "bytes": 112,
+      "sha256": "f2e251f0084f67b98f934ea1e427d4f56d052804c9172dffaf46cf2c32ca5361"
+    },
+    {
+      "path": "invalid-fixture-browser.json",
+      "bytes": 1305,
+      "sha256": "4842cd8cb26314c0220fe94745e8e4c0dfc65df5cb86c0b51b5a92dd179b7161"
+    },
+    {
+      "path": "first-qualified-browser-failed.json",
+      "bytes": 18122,
+      "sha256": "1b161c235c2599bf1eabdb395e8a57f5da2c48ba171835b9b926ff656fafecd5"
+    },
+    {
+      "path": "diagnostic-browser-failed.json",
+      "bytes": 538609,
+      "sha256": "3b5448fcfb3495328df81c1b3e651b4cee2dc5d650fcaee87542678537287655"
+    },
+    {
+      "path": "first-owner-unexpected-login.png",
+      "bytes": 1721519,
+      "sha256": "ff090914977464a2371cb705c31d62560c46137cf27efdcfb8198e51cf72ded6"
+    },
+    {
+      "path": "before-style-conflict.png",
+      "bytes": 917148,
+      "sha256": "c39a43df2750016eae9f3757344ffa0290dce9b0d7abe92db8adc45e88a14534"
+    },
+    {
+      "path": "tools/browser.mjs",
+      "bytes": 17780,
+      "sha256": "f98c2ac1905afa68d2db9eab11ee535bafe63883f457e5e5da58eafb0d4e153b"
+    },
+    {
+      "path": "tools/preservation.mjs",
+      "bytes": 6387,
+      "sha256": "e2b2822548a17d9a44dfd5ce99636934bdbf745d390b5903a9e5111e29fa025f"
+    },
+    {
+      "path": "tools/preservation-first-strict.mjs",
+      "bytes": 5000,
+      "sha256": "b37f0224300498f13d7ed8fb98053eb1f89cd8ea00bc7191fb38ca4f4efef6b5"
+    },
+    {
+      "path": "tools/qualify-fixture.mjs",
+      "bytes": 2126,
+      "sha256": "b154e9309cbe1935d7d49ce85a3c54da1bc6835b9885a3cc7189516a284b79cf"
+    },
+    {
+      "path": "tools/finalize-browser-source.mjs",
+      "bytes": 3698,
+      "sha256": "31e34a9cc7a652af200b054e314824916337fc624a547032a25251b2ae4edb01"
+    },
+    {
+      "path": "tools/update-browser-source.mjs",
+      "bytes": 1808,
+      "sha256": "75268c6c6084cd6132fbb8cc618856d18e93ce9ef1a346c65a710c2f40fe1061"
+    },
+    {
+      "path": "failures.json",
+      "bytes": 1447,
+      "sha256": "e08ffdf0a1989b886dff4c0d0d1ed67c479389b8be8707ad8afc526912d6bf14"
+    }
+  ],
+  "scope": {
+    "realAuthenticatedUi": true,
+    "realFileAuthority": true,
+    "realGuildPackets": true,
+    "noSyntheticGamePackets": true,
+    "controlledPrestartupGuildFixture": true,
+    "guildCreationViaGameplayClaimed": false,
+    "rendererSourceManifestAnd12MutableImmutableHashesVerified": true,
+    "directFrontendPinsOnly": true,
+    "desktopControlled": false,
+    "modelCalled": false,
+    "publicDeployment": false,
+    "originalPlayableEntryReplaced": false,
+    "candidate100": false,
+    "accepted": false
+  },
+  "open": [
+    "First owner unexpected-login cold-entry failure cause",
+    "Native non-7 guild delta and changeType ACK compatibility",
+    "Common social pending budget and reliable failure ACK",
+    "Native guild member display cap versus shared capacity",
+    "Guild pixel layout, remaining multilingual text and remaining input edges",
+    "Windows desktop, cross-client, full release and final human acceptance"
+  ]
+}

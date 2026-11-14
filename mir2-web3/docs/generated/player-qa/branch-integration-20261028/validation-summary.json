@@ -1,0 +1,213 @@
+{
+  "recordedAt": "2026-10-28T11:21:10.844Z",
+  "status": "validated_with_focused_reruns",
+  "noWholeProjectCoveragePercentage": true,
+  "fullSuiteRuns": {
+    "simulation": {
+      "log": "simulation-lib-verified.log",
+      "status": "FAILED",
+      "passed": 2908,
+      "failed": 1,
+      "ignored": 23,
+      "resolution": "Only refine fixture changed; all 33 refine tests passed after fresh compilation."
+    },
+    "gateway": {
+      "log": "gateway-lib-final.log",
+      "status": "FAILED",
+      "passed": 1163,
+      "failed": 2,
+      "ignored": 20,
+      "resolution": "Only viewport FIFO fixtures changed; all 14 live AOI tests passed after fresh compilation."
+    }
+  },
+  "successfulRuns": [
+    {
+      "log": "native-unit-all.log",
+      "results": [
+        {
+          "status": "ok",
+          "passed": 1173,
+          "failed": 0,
+          "ignored": 8
+        }
+      ]
+    },
+    {
+      "log": "shared-ui-unit-all.log",
+      "results": [
+        {
+          "status": "ok",
+          "passed": 1592,
+          "failed": 0,
+          "ignored": 14
+        }
+      ]
+    },
+    {
+      "log": "native-gpu.log",
+      "results": [
+        {
+          "status": "ok",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        }
+      ]
+    },
+    {
+      "log": "production-unit.log",
+      "results": [
+        {
+          "status": "ok",
+          "passed": 19,
+          "failed": 0,
+          "ignored": 0
+        }
+      ]
+    },
+    {
+      "log": "user-item-uid-file.log",
+      "results": [
+        {
+          "status": "ok",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "status": "ok",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "status": "ok",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "status": "ok",
+          "passed": 18,
+          "failed": 0,
+          "ignored": 0
+        }
+      ]
+    },
+    {
+      "log": "simulation-refine-verified.log",
+      "results": [
+        {
+          "status": "ok",
+          "passed": 33,
+          "failed": 0,
+          "ignored": 0
+        }
+      ]
+    },
+    {
+      "log": "gateway-live-aoi-verified.log",
+      "results": [
+        {
+          "status": "ok",
+          "passed": 14,
+          "failed": 0,
+          "ignored": 0
+        }
+      ]
+    },
+    {
+      "log": "monster-movement-thrusting-final03.log",
+      "results": [
+        {
+          "status": "ok",
+          "passed": 7,
+          "failed": 0,
+          "ignored": 0
+        },
+        {
+          "status": "ok",
+          "passed": 10,
+          "failed": 0,
+          "ignored": 0
+        }
+      ]
+    }
+  ],
+  "successfulIntegrationBinaries": {
+    "log": "simulation-integrations.log",
+    "results": [
+      {
+        "status": "ok",
+        "passed": 27,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "status": "ok",
+        "passed": 8,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "status": "ok",
+        "passed": 24,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "status": "ok",
+        "passed": 8,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "status": "ok",
+        "passed": 29,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "status": "ok",
+        "passed": 209,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "status": "ok",
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0
+      }
+    ]
+  },
+  "movementIntegrationResolution": {
+    "log": "monster-movement-thrusting-final03.log",
+    "results": [
+      {
+        "status": "ok",
+        "passed": 7,
+        "failed": 0,
+        "ignored": 0
+      },
+      {
+        "status": "ok",
+        "passed": 10,
+        "failed": 0,
+        "ignored": 0
+      }
+    ]
+  },
+  "web": {
+    "tests": 100,
+    "failed": 0,
+    "typecheckPassed": true
+  },
+  "portableFeatureCheckPassed": true,
+  "buildAndLaunch": "merged-build-and-launch.json",
+  "liveSmoke": "live-wallet-smoke.json",
+  "launcherChecks": "service-launcher-checks.json",
+  "postgresExternalDatabaseTestsRun": false,
+  "dockerUsedForThisRestart": false,
+  "mobileSignatureAndFrontendAcceptanceNotCertified": true
+}

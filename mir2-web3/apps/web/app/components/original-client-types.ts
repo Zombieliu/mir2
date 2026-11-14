@@ -1,4 +1,5 @@
 import type { OriginalMapRegion } from "../../lib/scene-types";
+import type { ProjectileState, WorldState } from "../../lib/world-model/types";
 
 export type EntityKind = "selfPlayer" | "player" | "monster" | "npc";
 export type ItemContainer = "bag1" | "bag2" | "quest" | "belt" | "storage";
@@ -54,6 +55,9 @@ export type EntitySpriteAnimationState =
   | "running"
   | "attackMelee"
   | "attackRange"
+  | "fishingCast"
+  | "fishingWait"
+  | "fishingReel"
   | "struck"
   | "dying"
   | "dead"
@@ -70,6 +74,9 @@ export type CrystalEntityAnimationAction =
   | "attack4"
   | "attackRange1"
   | "spell"
+  | "fishingCast"
+  | "fishingWait"
+  | "fishingReel"
   | "struck"
   | "die"
   | "dead"
@@ -83,6 +90,7 @@ export type CrystalEntityAnimationPose = {
   direction: string;
   logicalFrameIndex: number;
   queueDepth: number;
+  fishingStartedAtMs?: number;
 };
 
 export type EntityMotionSnapshot = {
@@ -90,6 +98,9 @@ export type EntityMotionSnapshot = {
   fromY: number;
   toX: number;
   toY: number;
+  // Authoritative source cell, independent of a fractional mid-glide fromX/Y.
+  sortX?: number;
+  sortY?: number;
   animationState: EntitySpriteAnimationState;
   frameCount?: number;
   startedAt: number;
@@ -114,6 +125,9 @@ export type DisplayEntity = {
   nameColourArgb?: number;
   dead?: boolean;
   sneaking?: boolean;
+  fishing?: boolean | null;
+  fishingFeedback?: import("../../lib/world-fishing-feedback").FishingFeedback;
+  fishingEdges?: readonly import("../../lib/world-fishing-feedback").FishingAnimationEdge[];
   sprite?: EntitySprite | null;
   questIds?: number[];
   bigMapIcon?: number;
@@ -145,32 +159,9 @@ export type PredictedPlayerMotion = {
   movementFrameCount?: number;
 };
 
-export type DisplayProjectile = {
-  key: string;
-  attackerId: string;
-  targetId: string;
-  spellOrEffect?: string | number;
-  fromX: number;
-  fromY: number;
-  toX: number;
-  toY: number;
-  startedAt: number;
-  travelEndsAt?: number;
-  expiresAt: number;
-};
+export type DisplayProjectile = ProjectileState;
 
-export type DisplaySceneEffect = {
-  key: string;
-  source: "spell" | "attackOverlay" | "actorEffect" | "objectSpell" | "map" | "object";
-  spellOrEffect: string | number;
-  objectId?: string;
-  x: number;
-  y: number;
-  direction: number;
-  value: number;
-  startedAt: number;
-  expiresAt: number;
-};
+export type DisplaySceneEffect = import("../../lib/world-model/types").SceneEffectState;
 
 // One floating combat number anchored over a struck object — Crystal's `Damage`
 // (GameScene.DamageIndicator): white over monsters, red over players, plus Miss/Crit.
@@ -209,6 +200,7 @@ export type DisplayItem = {
   name: string;
   icon: number;
   uniqueId: number;
+  authoritativeUniqueId?: number;
   slot: number;
   container: ItemContainer;
   quantity: number;
@@ -219,13 +211,14 @@ export type DisplayItem = {
   equipSlot?: EquipmentSlot | null;
 };
 
-export type ItemActionRef = Pick<DisplayItem, "key" | "uniqueId" | "slot" | "container">;
-export type EquipmentActionRef = Pick<DisplayEquipmentItem, "slot">;
-export type MoveItemRef = Pick<DisplayItem, "uniqueId" | "slot" | "container">;
+export type ItemActionRef = Pick<DisplayItem, "key" | "uniqueId" | "authoritativeUniqueId" | "slot" | "container">;
+export type EquipmentActionRef = Pick<DisplayEquipmentItem, "slot" | "authoritativeUniqueId">;
+export type MoveItemRef = Pick<DisplayItem, "uniqueId" | "slot" | "container" | "authoritativeUniqueId">;
 export type MergeItemRef = Pick<DisplayItem, "uniqueId" | "slot" | "container">;
 
 export type DisplayEquipmentItem = {
   slot: EquipmentSlot;
+  authoritativeUniqueId?: number;
   name: string;
   icon: number;
   description: string;
@@ -293,12 +286,26 @@ export type DisplayNpcShopGood = {
   name: string;
   icon: number;
   price: number;
+  /** Positive ordinary-gold scope; incomplete raw remains read-only. */
+  requiresGoldBuyPlan?: boolean;
+  /** Pearl offers also require shared admission, using their personal wallet. */
+  requiresPearlBuyPlan?: boolean;
+  /** Complete packet carrier; price is display-only and rate remains raw. */
+  tooltipSource?: unknown;
+  purchaseRate?: number;
+  stock?: number;
   count?: number;
   grade?: "common" | "rare" | "heroic" | "legendary" | "mythical";
   description?: string;
 };
 
 export type DisplayNpcShopService = {
+  /** Local service/catalog clocks, never server purchase receipts. */
+  serviceRevision: number;
+  catalogRevision: number;
+  currency?: "gold" | "pearls";
+  pearlBalance?: number | null;
+  hideAddedStats: boolean;
   npcName: string;
   panelType: number;
   buyItems: DisplayNpcShopGood[];
@@ -357,8 +364,8 @@ export type DisplayWorld = {
   hasStoragePassword: boolean;
   requireStoragePassword: boolean;
   storageSessionUnlocked: boolean;
-  storagePasswordLastSetBinaryDatetime: number;
-  expandedStorageExpiryTimeBinaryDatetime: number;
+  storagePasswordLastSetBinaryDatetime: WorldState["storagePasswordLastSetBinaryDatetime"];
+  expandedStorageExpiryTimeBinaryDatetime: WorldState["expandedStorageExpiryTimeBinaryDatetime"];
   worldTick: number;
   sceneView: {
     center: { x: number; y: number };

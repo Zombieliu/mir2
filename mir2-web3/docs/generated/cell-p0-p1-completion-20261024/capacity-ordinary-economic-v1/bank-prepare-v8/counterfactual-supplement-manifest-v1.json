@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "kind": "single-public-offline-counterfactual-supplement",
+  "subject": "Offline exact2140-forbidden counterfactual; not W9 live preparation or capacity acceptance",
+  "originalW8ArchiveManifest": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-ordinary-economic-v1\\bank-prepare-v8\\copied-evidence-manifest.json",
+    "bytes": 16959,
+    "sha256": "a7f3f9c85228091ace9d0044a5c8de6a4cb78f9501c64d535bbfe0cb407982f4"
+  },
+  "copies": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v8\\public-exact-no-path-counterfactual-v1.json",
+        "bytes": 27460,
+        "sha256": "e09a66cc128a1fa8679e4d1ff78a638a59fd192e7e8b5f03f7498cbf841c6290"
+      },
+      "file": "public-exact-no-path-counterfactual-v1.json",
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-ordinary-economic-v1\\bank-prepare-v8\\public-exact-no-path-counterfactual-v1.json",
+        "bytes": 27460,
+        "sha256": "e09a66cc128a1fa8679e4d1ff78a638a59fd192e7e8b5f03f7498cbf841c6290"
+      },
+      "rawByteExact": true,
+      "sourceUnchangedAfterCopy": true
+    }
+  ],
+  "copiedFiles": 1,
+  "copiedBytes": 27460,
+  "actualOfflineInputs": {
+    "explicitForbiddenTotal": 2140,
+    "sharedMemoryPositions": 16,
+    "ownMirrorPositions": 17,
+    "allowedIDs": [
+      206008,
+      206013,
+      206026,
+      206032,
+      206033,
+      206039,
+      206105,
+      206117,
+      206124,
+      206129,
+      206130,
+      206136,
+      206610,
+      206623,
+      206644
+    ],
+    "unknownCoarseMemory": 0,
+    "globalQuarantine": 0,
+    "occupancyTotal": 26,
+    "transferPointTotal": 69
+  },
+  "actualNoPathCase": {
+    "label": "actual17-exact-reconstruction",
+    "retainedPositions": 17,
+    "forbiddenCells": 2140,
+    "hasPath": false
+  },
+  "naturalExpiryCounterfactual": {
+    "label": "closed206013-and206610-natural-expiry",
+    "hasPath": true,
+    "steps": 73,
+    "originalClosedTrails": [
+      {
+        "objectId": 206610,
+        "name": "scarecrow",
+        "x": 300,
+        "y": 597,
+        "remainingMs": 2581,
+        "allowed": true,
+        "currentlyVisible": false
+      },
+      {
+        "objectId": 206013,
+        "name": "rakingcat",
+        "x": 301,
+        "y": 596,
+        "remainingMs": 2549,
+        "allowed": true,
+        "currentlyVisible": false
+      }
+    ],
+    "scope": "Offline original-expiry simulation only. No live cache cleared, TTL refreshed, unsafe movement sent or path executed; live AI may change before a retry."
+  },
+  "interpretation": "No unsafe movement was sent. Known normal-AI0 outside-zone historical halos jointly sealed the current route. Only their existing natural expiry may remove them; no cache clearing or premature exemption is justified. Live AI may change before retry.",
+  "old36RawOriginalsModified": false,
+  "originalManifestModified": false,
+  "originalW8FailureRetained": true,
+  "W9LivePass": false,
+  "newCodeQualification": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "testsRun": false,
+  "loadRun": false,
+  "privatePayloadCopied": false
+}

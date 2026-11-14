@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sourceExecutable": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-release-v1\\bin\\mir2-gateway.exe",
+  "ownedExecutable": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\bin\\mir2-gateway.exe",
+  "sha256": "d8791cceeed00fdb7019d1201aad19f06005790162df1b459a8cacac96f68756",
+  "bytes": 87363072,
+  "sourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+  "backendSourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+  "driverSourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+  "baseCommit": "68f810b442321ae66360a2be18e31dc309efdaf7",
+  "sourceManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\backend-source-personal-monster-projection-v1.json",
+    "bytes": 32926,
+    "sha256": "151869b76d13202e3c6557f908b5adc5643d1b0579cd7d4961cf0458c71cec52",
+    "sourceManifestSha256": "6276d11a740e956cf8e3d316362a49900f1c761d9ffcdfd462cb7394056f7828",
+    "inputs": 44
+  },
+  "releaseRecord": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-personal-monster-projection-v1.json",
+    "bytes": 2376,
+    "sha256": "613b82935c45e476ad1ba32e2592e562e14ea6997062fc9f12b9de02bb770121"
+  },
+  "copiedAtUtc": "2026-10-25T15:31:06.627Z",
+  "sourceInputsVerifiedBeforeLaunch": true,
+  "capacityAccepted": false,
+  "formalRunStarted": false
+}

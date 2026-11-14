@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "scope": "This full16 copy is covered by the shared new Release/full16 provenance and explicit whitelist; originals remain byte-exact.",
+  "copyProvenance": {
+    "file": "../release-attack-deadline-diagnostics-v1/public-copy-provenance-v1.json",
+    "bytes": 51103,
+    "sha256": "50e50a7221e316b7aee7c624243f405c590d47ce9aa4d2717b885311b69083fa"
+  },
+  "capacityAccepted": false
+}

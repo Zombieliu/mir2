@@ -1,0 +1,114 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T15:53:22.464335+00:00",
+  "producerReceipt": {
+    "filename": "backend-adjacent-test-results-v3.json",
+    "bytes": 3625,
+    "sha256": "2dd9a657e7d59c8e898ed486c5384815c9601a281373385ec27282a444261ac2"
+  },
+  "producerReport": [
+    {
+      "name": "production",
+      "exitCode": 0,
+      "elapsedSeconds": 10.2954113,
+      "log": "C:\\mir2-build\\unified-20261029\\backend-test-production-v3.log",
+      "results": [
+        "test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 3033 filtered out; finished in 9.93s"
+      ]
+    },
+    {
+      "name": "stones",
+      "exitCode": 0,
+      "elapsedSeconds": 250.4617664,
+      "log": "C:\\mir2-build\\unified-20261029\\backend-test-stones-v3.log",
+      "results": [
+        "test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 3037 filtered out; finished in 250.11s"
+      ]
+    },
+    {
+      "name": "gateway-identity",
+      "exitCode": 0,
+      "elapsedSeconds": 185.8562281,
+      "log": "C:\\mir2-build\\unified-20261029\\backend-test-gateway-identity-v3.log",
+      "results": [
+        "test result: ok. 47 passed; 0 failed; 0 ignored; 0 measured; 1271 filtered out; finished in 17.88s"
+      ]
+    },
+    {
+      "name": "gateway-auth",
+      "exitCode": 0,
+      "elapsedSeconds": 0.4528584,
+      "log": "C:\\mir2-build\\unified-20261029\\backend-test-gateway-auth-v3.log",
+      "results": [
+        "test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 1308 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "name": "gateway-usdc",
+      "exitCode": 0,
+      "elapsedSeconds": 1.3210724,
+      "log": "C:\\mir2-build\\unified-20261029\\backend-test-gateway-usdc-v3.log",
+      "results": [
+        "test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 1306 filtered out; finished in 0.89s"
+      ]
+    },
+    {
+      "name": "gateway-procurement-worker",
+      "exitCode": 0,
+      "elapsedSeconds": 210.4864653,
+      "log": "C:\\mir2-build\\unified-20261029\\backend-test-gateway-procurement-worker-v3.log",
+      "results": [
+        "test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1307 filtered out; finished in 210.06s"
+      ]
+    },
+    {
+      "name": "guild-kill-source",
+      "exitCode": 0,
+      "elapsedSeconds": 2.8097376,
+      "log": "C:\\mir2-build\\unified-20261029\\backend-test-guild-kill-source-v3.log",
+      "results": [
+        "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1316 filtered out; finished in 2.37s"
+      ]
+    },
+    {
+      "name": "live-aoi",
+      "exitCode": 0,
+      "elapsedSeconds": 0.4972552,
+      "log": "C:\\mir2-build\\unified-20261029\\backend-test-live-aoi-v3.log",
+      "results": [
+        "test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 1304 filtered out; finished in 0.10s"
+      ]
+    },
+    {
+      "name": "pending-aoi",
+      "exitCode": 0,
+      "elapsedSeconds": 1.5556168,
+      "log": "C:\\mir2-build\\unified-20261029\\backend-test-pending-aoi-v3.log",
+      "results": [
+        "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1316 filtered out; finished in 1.17s"
+      ]
+    },
+    {
+      "name": "attack-binding",
+      "exitCode": 0,
+      "elapsedSeconds": 1.2417497,
+      "log": "C:\\mir2-build\\unified-20261029\\backend-test-attack-binding-v3.log",
+      "results": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1317 filtered out; finished in 0.81s"
+      ]
+    },
+    {
+      "name": "protocol",
+      "exitCode": 0,
+      "elapsedSeconds": 21.5342649,
+      "log": "C:\\mir2-build\\unified-20261029\\backend-test-protocol-v3.log",
+      "results": [
+        "test result: ok. 41 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s",
+        "test result: ok. 34 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+      ]
+    }
+  ],
+  "phase": "producer focused test rows; no counts added to aggregate twice"
+}

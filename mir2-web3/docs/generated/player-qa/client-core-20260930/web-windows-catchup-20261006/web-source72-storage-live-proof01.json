@@ -1,0 +1,137 @@
+{
+  "schema": "mir2.web.storage.live-qa.source72.v1",
+  "dateBeijing": "2026-10-12",
+  "scope": "Normal local Source72 browser warehouse compatibility flow; finite diagnostics only",
+  "sourceCode": [
+    {
+      "path": "mir2-web3/apps/web/lib/bevy-storage-ui.ts",
+      "bytes": 24602,
+      "sha256": "b4080270c6261b65e4825d8088f68f1e5d4610b22f3c465250d5cf747f9e0ece"
+    },
+    {
+      "path": "mir2-web3/apps/web/app/components/original-client-inventory-window.tsx",
+      "bytes": 54378,
+      "sha256": "47f5c779c15380b082d080adf88b745a0fe9fdf89278f53474f2ef54be167680"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-bevy-storage-ui.mjs",
+      "bytes": 65929,
+      "sha256": "0b41f3a8db888e6902aff0def94b7900e031df189aadfcb923fbb1f39fb08ce5"
+    }
+  ],
+  "beforeCompatibility": {
+    "diagnostic": {
+      "owner": "react",
+      "phase": "prepare",
+      "reason": "controlsNotReady"
+    },
+    "sceneWidth": 1024,
+    "sceneHeight": 768,
+    "inventoryCards": 5,
+    "storageCards": 0,
+    "storageSlots": 80,
+    "viewportInsufficientCandidateSupported": false,
+    "firstFailedRustReadyBranchKnown": false
+  },
+  "takeBackFix": {
+    "bag1Retained": true,
+    "bag1BeforeCards": 5,
+    "bag1AfterCards": 5,
+    "questBeforeCards": 0,
+    "questLogBefore": true,
+    "questReturnedToBag1": true,
+    "questAfterCards": 5,
+    "questLogAfter": false,
+    "inventoryCapacity": 40,
+    "unlockedBag2ActualTest": false,
+    "unlockedBag2Limit": "Current normal character exposes 40 slots; no unlock or QA command performed"
+  },
+  "normalDeposit": {
+    "itemName": "Candle",
+    "inventoryCards": 4,
+    "storageCards": 1,
+    "gold": 180,
+    "diagnostic": {
+      "owner": "react",
+      "phase": "inactive",
+      "reason": "compatibility"
+    }
+  },
+  "normalWithdrawal": {
+    "itemName": "Candle",
+    "inventoryCards": 5,
+    "storageCards": 0,
+    "gold": 180,
+    "questLog": false,
+    "targetInventorySlot": 2,
+    "manualBag1CorrectionRequired": false
+  },
+  "normalSaveLogout": {
+    "action": "Alt+x",
+    "loginFormVisible": true,
+    "warehouseVisible": false,
+    "ordinaryCacheRetainingReload": true
+  },
+  "reloginPending": false,
+  "screenshots": [
+    {
+      "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source72-storage-first-open01.png",
+      "bytes": 63254,
+      "sha256": "e06b390a1ee295f65c6fc204afb4cd911457f5f57e92bf35fbeab786d033a71c"
+    },
+    {
+      "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source72-storage-takeback01.png",
+      "bytes": 63431,
+      "sha256": "e2d42c5931df16b7dbc63f6857a251522d89265bf521ab83a0ed86664d1cd453"
+    },
+    {
+      "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source72-storage-relogin01.png",
+      "bytes": 64746,
+      "sha256": "febb21893f8573fdbfbec708642bb6c445fb4f93abd4f52a298db36302b63ef4"
+    }
+  ],
+  "limitations": {
+    "sharedStorageOwnershipAccepted": false,
+    "partialSharedPaintCleared": false,
+    "allPanelsAccepted": false,
+    "mobileDeviceAccepted": false,
+    "wholeParityPercentage": null,
+    "candidate100": false,
+    "finalHumanAccepted": false,
+    "goalStatus": "active",
+    "runtimeCallerFinalExitPending": true
+  },
+  "normalRelogin": {
+    "ordinaryExistingCredentialsLogin": true,
+    "startGame": true,
+    "npcAccess": true,
+    "inventoryCards": 5,
+    "storageCards": 0,
+    "gold": 180,
+    "questLog": false,
+    "bag1Visible": true,
+    "sceneWidth": 1024,
+    "sceneHeight": 768,
+    "diagnostic": {
+      "owner": "react",
+      "phase": "prepare",
+      "reason": "controlsNotReady"
+    },
+    "beforeCompatibilityInteraction": true
+  },
+  "completion": {
+    "takeBackCompatibilityBugFixPassed": true,
+    "normalDepositWithdrawalSaveReloginPassed": true,
+    "finiteFirstRefusalStillControlsNotReady": true,
+    "viewportInsufficientCandidateRefutedForObservedScene": true,
+    "goalContinues": true
+  },
+  "hudWitnessAfterNormalReloginBeforeCompatibility": {
+    "sharedHudWitnessSelector": ".hud-passive-compat",
+    "sharedHudWitnessPresent": true,
+    "fallbackHudSelector": ".main-hud-shell",
+    "fallbackHudShellPresent": false,
+    "meaning": "Existing full shared HUD ready branch is present; finite positive witness only, not a new runtime getter or identification of the storage first failing gate",
+    "actualStorageTreeGateKnown": false
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "verified": true,
+  "checkedPids": [
+    185364,
+    169008,
+    182568,
+    182396,
+    174940,
+    178204
+  ],
+  "checkedPorts": [
+    19711,
+    19712,
+    19713,
+    54515,
+    54516,
+    52338,
+    52339
+  ],
+  "listeners": [],
+  "scopedProcesses": [],
+  "browserLaunchers": 2,
+  "independentWireLaunches": 2
+}

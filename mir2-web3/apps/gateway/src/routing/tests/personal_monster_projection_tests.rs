@@ -1,0 +1,795 @@
+use super::*;
+
+fn live_unowned_monster_count(packets: &[ServerPacket], object_id: u32) -> usize {
+    packets
+        .iter()
+        .filter(|packet| {
+            matches!(
+                packet,
+                ServerPacket::ObjectMonster { info }
+                    if info.object_id == object_id
+                        && info.master_object_id == 0
+                        && !info.dead
+            )
+        })
+        .count()
+}
+
+#[test]
+fn harvested_zone_corpse_blocks_reactivated_personal_live_projection_until_zone_revive() {
+    let shared = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+    let mut runtime = shared_session_runtime(shared.clone());
+    runtime.inner =
+        InProcessWorldRuntime::new(GatewayConfig::default().with_crystal_world_runtime());
+    start_new_runtime(
+        &mut runtime,
+        "personal-corpse-projection",
+        "CorpseProjection",
+    );
+
+    let native_ids = shared
+        .lock()
+        .expect("shared state should lock")
+        .zone_manager
+        .native_monster_snapshots(&ZoneKey::for_map("0"))
+        .into_iter()
+        .map(|monster| monster.object_id)
+        .collect::<BTreeSet<_>>();
+    let target = runtime
+        .inner
+        .world_snapshot()
+        .entities
+        .into_iter()
+        .find(|entity| {
+            entity.kind == WorldEntityKind::Monster
+                && native_ids.contains(&entity.object_id)
+                && matches!(entity.ai, Some(2 | 4))
+                && !entity.dead
+                && entity.hp.is_some_and(|hp| hp > 0)
+                && runtime
+                    .inner
+                    .zone_monster_spawn_snapshot(entity.object_id)
+                    .is_some_and(|spawn| spawn.respawn.is_some())
+        })
+        .expect("the real Crystal starter scene should expose a scheduled harvestable monster");
+    let object_id = target.object_id;
+    let session_id = runtime
+        .current_zone_session_id()
+        .expect("started runtime should own a Zone session");
+    let key = runtime
+        .current_presence_key()
+        .expect("presence should exist");
+    assert!(shared
+        .lock()
+        .expect("shared state should lock")
+        .zone_manager
+        .zone(&ZoneKey::for_map("0"))
+        .is_some_and(|zone| zone.retains_object_id(object_id)));
+
+    let died = ServerPacket::ObjectDied {
+        info: ObjectDiedInfo {
+            object_id,
+            location: Point {
+                x: target.x,
+                y: target.y,
+            },
+            direction: target.direction,
+            kind: 0,
+        },
+    };
+    let harvested = ServerPacket::ObjectHarvested {
+        movement: ObjectMovement {
+            object_id,
+            position: Point {
+                x: target.x,
+                y: target.y,
+            },
+            direction: target.direction,
+        },
+    };
+    // A personal ObjectDied packet is deliberately not allowed to kill a
+    // Zone-native monster. Drive the death through the authoritative Zone
+    // attack path before applying the personal harvest acknowledgement.
+    let death_now_ms = shared_gateway_now_ms();
+    {
+        let mut state = shared.lock().expect("shared state should lock");
+        let mut outbounds = state.zone_manager.handle(ZoneCommand::SyncPlayerTransform {
+            session_id: session_id.clone(),
+            position: Point {
+                x: target.x,
+                y: target.y,
+            },
+            direction: target.direction,
+        });
+        outbounds.extend(
+            state
+                .zone_manager
+                .handle(ZoneCommand::UpdatePlayerCombatStats {
+                    session_id: session_id.clone(),
+                    stats: mir2_simulation::ZonePlayerCombatStats {
+                        min_dc: 10_000,
+                        max_dc: 10_000,
+                        accuracy: 100,
+                        ..Default::default()
+                    },
+                }),
+        );
+        outbounds.extend(
+            state
+                .zone_manager
+                .handle(ZoneCommand::sync_player_combat_state(
+                    session_id.clone(),
+                    MirClass::Warrior,
+                    true,
+                    false,
+                    true,
+                    false,
+                    false,
+                    false,
+                )),
+        );
+        outbounds.extend(state.zone_manager.handle(ZoneCommand::PlayerAttackObject {
+            session_id: session_id.clone(),
+            object_id,
+            direction: target.direction,
+            spell: 0,
+            level: 0,
+            attack_type: 0,
+            damage: 10_000,
+            now_ms: death_now_ms,
+        }));
+        outbounds.extend(state.zone_manager.tick_all(death_now_ms));
+        let (death_packets, ..) = state.dispatch_zone_outbounds(outbounds, Some(&key));
+        assert!(death_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectDied { info } if info.object_id == object_id
+        )));
+
+        let outbounds = state
+            .zone_manager
+            .handle(ZoneCommand::BroadcastSharedObjectPackets {
+                session_id: session_id.clone(),
+                local_self_object_id: runtime.local_self_object_id(),
+                packets: vec![harvested.clone()],
+                now_ms: death_now_ms.saturating_add(1),
+            });
+        let _ = state.dispatch_zone_outbounds(outbounds, Some(&key));
+    }
+    let lifecycle = vec![died, harvested];
+    runtime
+        .inner
+        .apply_shared_monster_lifecycle_packets(&lifecycle);
+    assert!(shared
+        .lock()
+        .expect("shared state should lock")
+        .zone_manager
+        .native_monster_snapshots(&ZoneKey::for_map("0"))
+        .iter()
+        .any(|monster| monster.object_id == object_id && monster.dead));
+    runtime
+        .inner
+        .execute(WorldCommand::ClientPacket(ClientPacket::KeepAlive {
+            time: 10,
+        }))
+        .expect("the personal scene should observe the mirrored corpse");
+
+    // Leaving the private activation ring despawns the mirrored corpse. Since
+    // the personal spawn table deliberately has no respawn authority, returning
+    // can materialise its dormant slot alive. This is the exact lossy projection
+    // that must remain private while the Zone retains the harvested corpse.
+    let far = Point {
+        x: target.x.saturating_add(64),
+        y: target.y,
+    };
+    runtime
+        .inner
+        .force_authoritative_player_transform(far, MirDirection::Left);
+    runtime.inner.reconcile_current_map_monster_activation();
+    assert!(!runtime
+        .inner
+        .world_snapshot()
+        .entities
+        .iter()
+        .any(|entity| entity.object_id == object_id));
+    runtime
+        .inner
+        .execute(WorldCommand::ClientPacket(ClientPacket::KeepAlive {
+            time: 11,
+        }))
+        .expect("the personal scene should observe the corpse leaving its activation ring");
+    runtime.inner.force_authoritative_player_transform(
+        Point {
+            x: target.x.saturating_add(1),
+            y: target.y,
+        },
+        MirDirection::Left,
+    );
+    runtime.inner.reconcile_current_map_monster_activation();
+    assert!(runtime
+        .inner
+        .world_snapshot()
+        .entities
+        .iter()
+        .any(|entity| {
+            entity.object_id == object_id && !entity.dead && entity.hp.is_some_and(|hp| hp > 0)
+        }));
+
+    let raw_personal = runtime
+        .inner
+        .execute(WorldCommand::ClientPacket(ClientPacket::KeepAlive {
+            time: 12,
+        }))
+        .expect("the personal compatibility runtime should project its reactivated slot");
+    assert_eq!(
+        live_unowned_monster_count(&raw_personal, object_id),
+        1,
+        "the fixture must reproduce the raw personal live ghost before testing the Gateway filter"
+    );
+    let mut directly_filtered = raw_personal;
+    runtime.suppress_personal_retained_monster_projections(&mut directly_filtered);
+    assert_eq!(live_unowned_monster_count(&directly_filtered, object_id), 0);
+
+    // Reset the personal scene boundary and reproduce the same activation once
+    // more through the normal Gateway execute path.
+    runtime.inner.force_authoritative_player_transform(
+        Point {
+            x: target.x.saturating_add(64),
+            y: target.y,
+        },
+        MirDirection::Left,
+    );
+    runtime.inner.reconcile_current_map_monster_activation();
+    runtime
+        .inner
+        .execute(WorldCommand::ClientPacket(ClientPacket::KeepAlive {
+            time: 2,
+        }))
+        .expect("the personal scene should observe the object leaving");
+    runtime.inner.force_authoritative_player_transform(
+        Point {
+            x: target.x.saturating_add(1),
+            y: target.y,
+        },
+        MirDirection::Left,
+    );
+    runtime.inner.reconcile_current_map_monster_activation();
+
+    let filtered = runtime
+        .execute(WorldCommand::ClientPacket(ClientPacket::KeepAlive {
+            time: 3,
+        }))
+        .expect("normal serialized execution should succeed");
+    assert_eq!(
+        live_unowned_monster_count(&filtered, object_id),
+        0,
+        "a personal reactivation must not publish a live ghost over the retained Zone corpse"
+    );
+
+    let premature = runtime.apply_pending_zone_packets();
+    assert!(
+        !premature.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectRevived { info } if info.object_id == object_id
+        ) || matches!(
+            packet,
+            ServerPacket::ObjectMonster { info }
+                if info.object_id == object_id && !info.dead
+        )),
+        "a positive personal slot must not revive the authoritative Zone corpse"
+    );
+    assert!(shared
+        .lock()
+        .expect("shared state should lock")
+        .zone_manager
+        .native_monster_snapshots(&ZoneKey::for_map("0"))
+        .iter()
+        .any(|monster| monster.object_id == object_id && monster.dead));
+
+    let (authoritative_revive, post_deadline_native) = {
+        let mut state = shared.lock().expect("shared state should lock");
+        let outbounds = state
+            .zone_manager
+            .tick_all(death_now_ms.saturating_add(86_400_000));
+        let (packets, ..) = state.dispatch_zone_outbounds(outbounds, Some(&key));
+        let native = state
+            .zone_manager
+            .native_monster_snapshots(&ZoneKey::for_map("0"))
+            .into_iter()
+            .find(|monster| monster.object_id == object_id);
+        (packets, native)
+    };
+    assert!(authoritative_revive.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectRevived { info } if info.object_id == object_id
+    )), "the scheduled Zone respawn must publish ObjectRevived after its deadline; packets={authoritative_revive:?}, native={post_deadline_native:?}");
+}
+
+#[test]
+fn projection_filter_preserves_owner_pet_and_unadmitted_initial_monster() {
+    let shared = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+    let mut runtime = shared_session_runtime(shared);
+    start_demo_runtime(&mut runtime);
+    let retained_id = runtime
+        .inner
+        .world_snapshot()
+        .entities
+        .iter()
+        .find(|entity| entity.kind == WorldEntityKind::Monster)
+        .map(|entity| entity.object_id)
+        .expect("starter scene should expose a retained monster");
+    let retained = runtime
+        .inner
+        .zone_monster_spawn_snapshot(retained_id)
+        .map(|spawn| zone_monster_spawn_packet(&spawn))
+        .expect("retained monster should produce a projection");
+    let mut pet = retained.clone();
+    if let ServerPacket::ObjectMonster { info } = &mut pet {
+        info.master_object_id = runtime.local_self_object_id().unwrap_or(1);
+    }
+    let unadmitted_id = retained_id.saturating_add(9_000_000);
+    let mut unadmitted = retained.clone();
+    if let ServerPacket::ObjectMonster { info } = &mut unadmitted {
+        info.object_id = unadmitted_id;
+    }
+    let mut packets = vec![retained, pet, unadmitted];
+
+    runtime.suppress_personal_retained_monster_projections(&mut packets);
+
+    assert_eq!(live_unowned_monster_count(&packets, retained_id), 0);
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ObjectMonster { info }
+            if info.object_id == retained_id && info.master_object_id != 0
+    )));
+    assert_eq!(live_unowned_monster_count(&packets, unadmitted_id), 1);
+}
+
+// A real personal Crystal visibility diff must not override an already-live
+// native Zone object merely because the owner crossed the private data ring.
+// The fixture retains the canonical Scarecrow spawn in the personal ECS, then
+// installs its current native position independently, as an ordinary shared
+// monster can wander away from that spawn while the private mirror stays old.
+const JOURNEY_SCARECROW_ID: u32 = 206_613;
+
+#[derive(Clone, Copy)]
+enum PersonalJourneyPath {
+    Immediate,
+    Predrain,
+    Checkpoint,
+}
+
+struct PersonalJourneyProjectionFixture {
+    runtime: SharedInProcessZoneSessionRuntime,
+    shared: Arc<Mutex<SharedInProcessZoneState>>,
+    key: ZonePresenceKey,
+    session: SessionId,
+    origin: Point,
+    destination: Point,
+    native_position: Point,
+    entering: bool,
+}
+
+impl PersonalJourneyProjectionFixture {
+    fn new(entering: bool) -> Self {
+        let shared = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(shared.clone());
+        runtime.inner =
+            InProcessWorldRuntime::new(GatewayConfig::default().with_crystal_world_runtime());
+        start_new_runtime(&mut runtime, "journey-native-view", "JourneyNative");
+        let origin = Point {
+            x: if entering { 241 } else { 242 },
+            y: 596,
+        };
+        let destination = Point {
+            x: if entering { 242 } else { 241 },
+            y: 596,
+        };
+        let native_position = Point { x: 243, y: 598 };
+        runtime
+            .inner
+            .force_authoritative_player_transform(Point { x: 242, y: 596 }, MirDirection::Right);
+        runtime.inner.reconcile_current_map_monster_activation();
+        let private = runtime
+            .inner
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .find(|entity| entity.object_id == JOURNEY_SCARECROW_ID)
+            .expect("the real Crystal activation ring must contain Scarecrow 206613");
+        assert_eq!(private.name, "Scarecrow");
+        assert_eq!((private.x, private.y), (258, 596));
+        let mut spawn = runtime
+            .inner
+            .zone_monster_spawn_snapshot(JOURNEY_SCARECROW_ID)
+            .expect("the real private Scarecrow must have a native spawn projection");
+        spawn.position = native_position.clone();
+        // Activation is real at the inside boundary. Then prime an actual
+        // private viewport exit when the entering case starts one cell outside;
+        // do not assume that an outside activation query materializes this slot.
+        runtime.inner.commit_zone_journey_reposition();
+        runtime
+            .inner
+            .force_authoritative_player_transform(origin.clone(), MirDirection::Right);
+        runtime.inner.commit_zone_journey_reposition();
+        let key = runtime.current_presence_key().unwrap();
+        let session = runtime.current_zone_session_id().unwrap();
+        let mut join = runtime
+            .inner
+            .active_zone_join_snapshot(session.as_str())
+            .unwrap();
+        assert_eq!(join.position, origin);
+        {
+            // Use the existing test-only open Zone seam, not a client teleport
+            // or forged owner packet. The personal runtime and its real spawn
+            // table remain unchanged; only the authoritative Zone pose differs.
+            let mut state = shared.lock().unwrap();
+            join.object_id = state.players[&key].zone_object_id;
+            state.zone_manager = ZoneManager::new();
+            assert!(state
+                .zone_manager
+                .install_empty_zone(ZoneRuntime::new_with_collision(
+                    ZoneKey::for_map("0"),
+                    ZoneCollision::unbounded(),
+                ),));
+            state.maps.clear();
+            state.pending_zone_packets.clear();
+            state.pending_zone_transforms.clear();
+            state.zone_manager.handle(ZoneCommand::Join(join));
+            state.update_player_transform(&key, origin.clone(), MirDirection::Right);
+            let out = state.zone_manager.handle(ZoneCommand::SpawnMonster {
+                session_id: session.clone(),
+                monster: spawn,
+                now_ms: 0,
+            });
+            let (packets, ..) = state.dispatch_zone_outbounds(out, Some(&key));
+            assert!(packets.iter().any(|packet| matches!(packet,
+                ServerPacket::ObjectMonster { info }
+                    if info.object_id == JOURNEY_SCARECROW_ID
+                        && info.location == native_position)));
+            state.sync_map_layer(
+                "0".into(),
+                vec![private],
+                BTreeSet::new(),
+                Vec::new(),
+                BTreeSet::new(),
+            );
+        }
+        // Prime the actual personal visible-object set at the starting side of
+        // the 16-cell data ring. This does not publish or invent an owner ACK.
+        runtime.inner.commit_zone_journey_reposition();
+        Self {
+            runtime,
+            shared,
+            key,
+            session,
+            origin,
+            destination,
+            native_position,
+            entering,
+        }
+    }
+
+    fn prove_actual_personal_diff(&mut self) {
+        self.runtime
+            .inner
+            .force_authoritative_player_transform(self.destination.clone(), MirDirection::Right);
+        let personal = self.runtime.inner.commit_zone_journey_reposition();
+        if self.entering {
+            assert!(
+                personal.iter().any(|packet| matches!(packet,
+                ServerPacket::ObjectMonster { info }
+                    if info.object_id == JOURNEY_SCARECROW_ID
+                        && info.master_object_id == 0
+                        && info.location == (Point { x: 258, y: 596 }))),
+                "the fixture must reproduce an actual stale personal spawn before testing Gateway"
+            );
+        } else {
+            assert!(personal.iter().any(|packet| matches!(packet,
+                ServerPacket::ObjectRemove { object_id }
+                    if *object_id == JOURNEY_SCARECROW_ID)),
+                "the fixture must reproduce an actual personal viewport remove before testing Gateway");
+        }
+        self.runtime
+            .inner
+            .force_authoritative_player_transform(self.origin.clone(), MirDirection::Right);
+        self.runtime.inner.commit_zone_journey_reposition();
+    }
+
+    fn queue_real_zone_walk(&mut self) {
+        let direction = if self.entering {
+            MirDirection::Right
+        } else {
+            MirDirection::Left
+        };
+        let mut state = self.shared.lock().unwrap();
+        let mut out = state.zone_manager.handle(ZoneCommand::Walk {
+            session_id: self.session.clone(),
+            direction,
+            seq: 1,
+            now_ms: 1_000,
+        });
+        out.extend(state.zone_manager.handle(ZoneCommand::TickPlayerMovement {
+            session_id: self.session.clone(),
+            now_ms: 1_000,
+        }));
+        state.dispatch_zone_outbounds(out, None);
+        assert_eq!(
+            state
+                .zone_manager
+                .player_transform(&self.session)
+                .unwrap()
+                .0,
+            self.destination,
+            "the ordinary Zone walk must genuinely reach the boundary"
+        );
+        assert!(state.pending_zone_transforms.contains_key(&self.key));
+    }
+
+    fn exercise(&mut self, path: PersonalJourneyPath) -> Vec<ServerPacket> {
+        match path {
+            PersonalJourneyPath::Immediate => self
+                .runtime
+                .execute(WorldCommand::ClientPacket(ClientPacket::Walk {
+                    direction: if self.entering {
+                        MirDirection::Right
+                    } else {
+                        MirDirection::Left
+                    },
+                }))
+                .expect("the ordinary Gateway movement path should execute"),
+            PersonalJourneyPath::Predrain => {
+                self.queue_real_zone_walk();
+                self.runtime.apply_pending_zone_packets()
+            }
+            PersonalJourneyPath::Checkpoint => {
+                self.queue_real_zone_walk();
+                self.runtime
+                    .sync_pending_zone_movement_transform()
+                    .expect("the same pre-save movement synchronization must succeed");
+                self.runtime.apply_pending_zone_packets()
+            }
+        }
+    }
+
+    fn assert_owner_and_authority(&self, packets: &[ServerPacket]) {
+        assert_eq!(
+            self.runtime.inner.local_player_position(),
+            Some(self.destination.clone())
+        );
+        let state = self.shared.lock().unwrap();
+        let native = state
+            .zone_manager
+            .native_monster_snapshots(&ZoneKey::for_map("0"))
+            .into_iter()
+            .find(|monster| monster.object_id == JOURNEY_SCARECROW_ID)
+            .expect("a private visibility diff must not delete the native monster");
+        assert_eq!(native.position, self.native_position);
+        assert!(!native.dead && native.hp > 0);
+        assert_eq!(
+            state
+                .zone_manager
+                .player_has_visible_object(&self.session, JOURNEY_SCARECROW_ID),
+            Some(true),
+            "this owner must still have authoritative Zone visibility"
+        );
+        assert!(state.shared_entity_allows_action("0", JOURNEY_SCARECROW_ID));
+        drop(state);
+        assert!(
+            packets.iter().any(|packet| matches!(packet,
+            ServerPacket::UserLocation { location } if location.position == self.destination)),
+            "the real successful movement receipt must be preserved"
+        );
+        assert!(
+            !packets.iter().any(|packet| matches!(packet,
+            ServerPacket::ObjectMonster { info }
+                if info.object_id == JOURNEY_SCARECROW_ID
+                    && info.location != self.native_position)),
+            "a stale personal spawn must never replace the native owner projection"
+        );
+        assert!(!packets.iter().any(|packet| matches!(packet,
+            ServerPacket::ObjectRemove { object_id }
+                if *object_id == JOURNEY_SCARECROW_ID)),
+            "a personal data-ring remove must not hide a retained Zone-visible monster from its owner");
+    }
+}
+
+fn assert_personal_journey_boundary(path: PersonalJourneyPath, entering: bool) {
+    let mut fixture = PersonalJourneyProjectionFixture::new(entering);
+    fixture.prove_actual_personal_diff();
+    let owner_packets = fixture.exercise(path);
+    fixture.assert_owner_and_authority(&owner_packets);
+}
+
+#[test]
+fn personal_journey_immediate_spawn_keeps_native_owner_position() {
+    assert_personal_journey_boundary(PersonalJourneyPath::Immediate, true);
+}
+
+#[test]
+fn personal_journey_immediate_remove_keeps_zone_visible_owner_monster() {
+    assert_personal_journey_boundary(PersonalJourneyPath::Immediate, false);
+}
+
+#[test]
+fn personal_journey_predrain_spawn_keeps_native_owner_position() {
+    assert_personal_journey_boundary(PersonalJourneyPath::Predrain, true);
+}
+
+#[test]
+fn personal_journey_predrain_remove_keeps_zone_visible_owner_monster() {
+    assert_personal_journey_boundary(PersonalJourneyPath::Predrain, false);
+}
+
+#[test]
+fn personal_journey_checkpoint_spawn_keeps_native_owner_position() {
+    assert_personal_journey_boundary(PersonalJourneyPath::Checkpoint, true);
+}
+
+#[test]
+fn personal_journey_checkpoint_remove_keeps_zone_visible_owner_monster() {
+    assert_personal_journey_boundary(PersonalJourneyPath::Checkpoint, false);
+}
+
+#[test]
+fn personal_journey_remove_filter_reads_actual_owned_unowned_and_unknown_state() {
+    let fixture = PersonalJourneyProjectionFixture::new(false);
+    let mut join = fixture
+        .runtime
+        .inner
+        .active_zone_join_snapshot(fixture.session.as_str())
+        .unwrap();
+    // Build a genuine native owned summon using the existing Zone spell path.
+    // Its ownership must come from the Zone, not a packet's claimed master ID.
+    join.class = MirClass::Taoist;
+    join.level = 40;
+    join.hp = 1_000;
+    join.max_hp = 1_000;
+    join.mp = 1_000;
+    join.chat_profile.in_safe_zone = false;
+    let unknown = 9_999_613;
+    let (pet, has_native_pet, unowned, owned, absent) = {
+        let mut state = fixture.shared.lock().unwrap();
+        join.object_id = state.players[&fixture.key].zone_object_id;
+        let owner = join.object_id;
+        state.zone_manager.handle(ZoneCommand::Leave {
+            session_id: fixture.session.clone(),
+        });
+        state.zone_manager.handle(ZoneCommand::Join(join));
+        state
+            .zone_manager
+            .handle(ZoneCommand::sync_player_combat_state(
+                fixture.session.clone(),
+                MirClass::Taoist,
+                true,
+                false,
+                false,
+                false,
+                false,
+                false,
+            ));
+        let mut out = state.zone_manager.handle(ZoneCommand::PlayerCastMagic {
+            session_id: fixture.session.clone(),
+            object_id: 0,
+            spell: Spell::SummonSkeleton,
+            direction: MirDirection::Right,
+            target: Point { x: 243, y: 596 },
+            cast: true,
+            level: 2,
+            damage: 0,
+            mp_cost: 7,
+            cooldown_ms: 1_000,
+            now_ms: 10,
+        });
+        out.extend(state.zone_manager.tick_all(510));
+        let (packets, ..) = state.dispatch_zone_outbounds(out, Some(&fixture.key));
+        let pet = packets.iter().find_map(|packet| match packet {
+            ServerPacket::ObjectMonster { info } if info.master_object_id == owner => {
+                Some(info.object_id)
+            }
+            _ => None,
+        });
+        let zone = state.zone_manager.zone(&ZoneKey::for_map("0")).unwrap();
+        (
+            pet,
+            pet.is_some_and(|id| zone.has_native_monster(id)),
+            zone.native_monster_is_unowned(JOURNEY_SCARECROW_ID),
+            pet.and_then(|id| zone.native_monster_is_unowned(id)),
+            zone.native_monster_is_unowned(unknown),
+        )
+    };
+    assert!(
+        has_native_pet,
+        "owned summons really share the native monster table"
+    );
+    assert_eq!(unowned, Some(true));
+    assert_eq!(owned, Some(false));
+    assert_eq!(absent, None);
+    let pet = pet.expect("the real native summon must have a public monster receipt");
+    let mut personal = vec![
+        ServerPacket::ObjectRemove {
+            object_id: JOURNEY_SCARECROW_ID,
+        },
+        ServerPacket::ObjectRemove { object_id: pet },
+        ServerPacket::ObjectRemove { object_id: unknown },
+    ];
+    fixture
+        .runtime
+        .suppress_personal_zone_journey_projections(&mut personal);
+    assert_eq!(personal.len(), 2);
+    assert!(personal.iter().any(|packet| matches!(packet,
+        ServerPacket::ObjectRemove { object_id } if *object_id == pet)));
+    assert!(personal.iter().any(|packet| matches!(packet,
+        ServerPacket::ObjectRemove { object_id } if *object_id == unknown)));
+}
+
+#[test]
+fn personal_journey_filter_preserves_true_zone_aoi_leave_and_reentry() {
+    let mut fixture = PersonalJourneyProjectionFixture::new(false);
+    {
+        let mut state = fixture.shared.lock().unwrap();
+        let out = state.zone_manager.handle(ZoneCommand::SyncPlayerTransform {
+            session_id: fixture.session.clone(),
+            position: Point { x: 400, y: 596 },
+            direction: MirDirection::Left,
+        });
+        state.dispatch_zone_outbounds(out, None);
+    }
+    let removed = fixture.runtime.apply_pending_zone_packets();
+    assert!(
+        removed.iter().any(|packet| matches!(packet,
+        ServerPacket::ObjectRemove { object_id } if *object_id == JOURNEY_SCARECROW_ID)),
+        "a genuine Zone AOI departure must survive merging the filtered personal journey output"
+    );
+    {
+        let mut state = fixture.shared.lock().unwrap();
+        let out = state.zone_manager.handle(ZoneCommand::SyncPlayerTransform {
+            session_id: fixture.session.clone(),
+            position: fixture.origin.clone(),
+            direction: MirDirection::Right,
+        });
+        state.dispatch_zone_outbounds(out, None);
+    }
+    let returned = fixture.runtime.apply_pending_zone_packets();
+    assert!(
+        returned.iter().any(|packet| matches!(packet,
+        ServerPacket::ObjectMonster { info }
+            if info.object_id == JOURNEY_SCARECROW_ID
+                && info.location == fixture.native_position)),
+        "the real canonical Zone spawn must survive native reentry"
+    );
+    assert!(!returned.iter().any(|packet| matches!(packet,
+        ServerPacket::ObjectMonster { info }
+            if info.object_id == JOURNEY_SCARECROW_ID
+                && info.location != fixture.native_position)));
+    assert!(!returned.iter().any(|packet| matches!(packet,
+        ServerPacket::ObjectRemove { object_id } if *object_id == JOURNEY_SCARECROW_ID)));
+}
+
+#[test]
+fn personal_journey_generic_filter_preserves_authoritative_aoi_remove() {
+    let fixture = PersonalJourneyProjectionFixture::new(false);
+    let mut authoritative = {
+        let mut state = fixture.shared.lock().unwrap();
+        let out = state.zone_manager.handle(ZoneCommand::SyncPlayerTransform {
+            session_id: fixture.session.clone(),
+            position: Point { x: 400, y: 596 },
+            direction: MirDirection::Left,
+        });
+        state.dispatch_zone_outbounds(out, Some(&fixture.key)).0
+    };
+    assert!(
+        authoritative.iter().any(|packet| matches!(packet,
+        ServerPacket::ObjectRemove { object_id } if *object_id == JOURNEY_SCARECROW_ID)),
+        "the fixture must first produce the real authoritative AOI removal"
+    );
+    // This existing generic helper also receives actual Zone command results.
+    // Only the separate pure-personal journey boundary may suppress removes.
+    fixture
+        .runtime
+        .suppress_personal_retained_monster_projections(&mut authoritative);
+    assert!(
+        authoritative.iter().any(|packet| matches!(packet,
+        ServerPacket::ObjectRemove { object_id } if *object_id == JOURNEY_SCARECROW_ID)),
+        "generic mixed-origin results must retain the genuine Zone AOI removal"
+    );
+}

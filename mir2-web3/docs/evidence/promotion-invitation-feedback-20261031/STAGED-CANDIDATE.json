@@ -1,0 +1,14 @@
+{
+  "sourceSha": "3d8f81752fc21400622808a5d00a871b47047ed5",
+  "gameWebsite": {
+    "id": "dpl_9yLef9wXkWDovACg9atHU1W1uBSx",
+    "url": "mir2-web3-9i1cakpy0-obelisk-labs.vercel.app",
+    "readyState": "INITIALIZING",
+    "target": "production",
+    "project": "prj_Bl3ttB4PzcdCpJMYLRhzQjkdXyTz",
+    "root": "mir2-web3/apps/web",
+    "sha": "3d8f81752fc21400622808a5d00a871b47047ed5"
+  },
+  "webBaseline": "dpl_2ekBnauSAihEAWLFguLcHKrs7kx3",
+  "marketingBaseline": "dpl_7krVTQSx5Wj9Ht8Sd5KF5o9d3F97"
+}

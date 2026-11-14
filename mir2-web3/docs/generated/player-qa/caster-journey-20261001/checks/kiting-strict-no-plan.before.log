@@ -1,0 +1,28 @@
+✖ strict no-plan kite reports typed target metadata for the existing recovery path (13.3211ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 218.7055
+
+✖ failing tests:
+
+test at apps\web\scripts\quest-agent\test-protocol-kiting.mjs:607:1
+✖ strict no-plan kite reports typed target metadata for the existing recovery path (13.3211ms)
+  AssertionError [ERR_ASSERTION]: strict no-plan failure must enter the combat loop's existing safety recovery
+      at Object.<anonymous> (file:///C:/Users/Administrator/.codex/worktrees/capacity-transport/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/test-protocol-kiting.mjs:633:12)
+      at expectedException (node:assert:498:17)
+      at expectsError (node:assert:621:3)
+      at Function.rejects (node:assert:686:3)
+      at async TestContext.<anonymous> (file:///C:/Users/Administrator/.codex/worktrees/capacity-transport/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/test-protocol-kiting.mjs:632:3)
+      at async Test.run (node:internal/test_runner/test:1054:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '=='
+  }

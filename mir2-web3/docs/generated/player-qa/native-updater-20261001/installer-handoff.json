@@ -1,0 +1,32 @@
+{
+  "schema": "mir2.native-r7.installer-handoff.v1",
+  "candidate": "WN-CANDIDATE-20261001-invited-07",
+  "sourceRevision": "fefd18370a947848d4f2f86ee3468ea4251fe011",
+  "setupFile": "Numeron-Legend-of-Rebirth-20261001-r7-Setup.exe",
+  "setupSizeBytes": 603522410,
+  "setupSha256": "A34C2A300585ED66877BA238D84A5C082D85C7C86AF24F85E8D47F9794B30D97",
+  "setupPath": "C:/mir2-playtest-releases/20261001-native-r7/Numeron-Legend-of-Rebirth-20261001-r7-Setup.exe",
+  "gameExeSha256": "5FCECA70D29286208C17E271B07C91EADB2D1D331F97C3B6120CE4A8681B4C68",
+  "isccExitCode": 0,
+  "compilerSha256": "D06EBD38F38E3CEE60A3C50CC45BD449D77E0BC6A5CABC607EA9886808E4DE1A",
+  "compilerPublisher": "Pyrsys B.V.",
+  "vcRuntimeSha256": "843068991DAAA1F73AD9F6239BCE4D0F6A07A51F18C37EA2A867E9BECA71295C",
+  "gamePayloadFiles": 123035,
+  "updaterSupplementalFiles": 9,
+  "installerLanguages": [
+    "en",
+    "zh-TW",
+    "pt-BR",
+    "ru",
+    "hi",
+    "id",
+    "vi",
+    "th",
+    "ar"
+  ],
+  "publicAuthenticode": "NotSigned",
+  "actualUserInstallerExecuted": false,
+  "affectedLaptopAccepted": false,
+  "sourceAndBuildImmutable": true,
+  "liveHttpsTest": "passed; real native launcher r6-to-r7, second check zero downloads"
+}

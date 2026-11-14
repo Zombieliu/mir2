@@ -1,0 +1,35 @@
+{
+  "scope": "Source78 authenticated physical Spells bootstrap only",
+  "rows": [
+    {
+      "relativePath": "apps/web/app/page.tsx",
+      "before": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\page.tsx",
+        "bytes": 1098961,
+        "sha256": "d8ba35f9427d41837622c7f685ae6426ed13f65d6b0b8972974f53416ec96e74"
+      },
+      "after": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\bootstrap-repair01\\after\\apps\\web\\app\\page.tsx",
+        "bytes": 1099365,
+        "sha256": "cbd8de41a129c5f50549d22da364fa91bf483300d3d4c1ca89099f85ffbcfe07"
+      }
+    },
+    {
+      "relativePath": "apps/web/scripts/test-spells-raw-ingress.mjs",
+      "before": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-spells-raw-ingress.mjs",
+        "bytes": 8030,
+        "sha256": "9dd3d943b6ed7e1cbab52eacb272510485fcf815e309afb2083ca3ea23b123aa"
+      },
+      "after": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\bootstrap-repair01\\after\\apps\\web\\scripts\\test-spells-raw-ingress.mjs",
+        "bytes": 16039,
+        "sha256": "ee4599f61e5610256d0af071c0a61754fc3db52de7ddfe36399520c51d294e2b"
+      }
+    }
+  ],
+  "cacheOwnerRetag": false,
+  "ackCaptureChanged": false,
+  "sendGatesChanged": false,
+  "hostOrHookChangedByThisRepair": false
+}

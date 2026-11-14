@@ -1,0 +1,50 @@
+test_account_verify_literal_fixed_path_and_no_user_fallback (__main__.ProbeTests.test_account_verify_literal_fixed_path_and_no_user_fallback) ... FAIL
+test_active_and_known_bucket_two_gets_only_success_never_claims_write (__main__.ProbeTests.test_active_and_known_bucket_two_gets_only_success_never_claims_write) ... ok
+test_actual_transport_close_failure_is_error_and_stops_second_request (__main__.ProbeTests.test_actual_transport_close_failure_is_error_and_stops_second_request) ... ok
+test_actual_transport_http_redirect_or_auth_failure_does_not_read_body (__main__.ProbeTests.test_actual_transport_http_redirect_or_auth_failure_does_not_read_body) ... ok
+test_actual_transport_non_json_or_encoded_body_refuses_before_read (__main__.ProbeTests.test_actual_transport_non_json_or_encoded_body_refuses_before_read) ... ok
+test_actual_transport_read_bound_handles_64k_and_denies_over_64k (__main__.ProbeTests.test_actual_transport_read_bound_handles_64k_and_denies_over_64k) ... ok
+test_actual_transport_request_response_read_failures_sanitized_and_closed (__main__.ProbeTests.test_actual_transport_request_response_read_failures_sanitized_and_closed) ... ok
+test_arbitrary_transport_exception_strings_never_emitted (__main__.ProbeTests.test_arbitrary_transport_exception_strings_never_emitted) ... ok
+test_bad_argument_with_mock_secret_does_not_echo (__main__.ProbeTests.test_bad_argument_with_mock_secret_does_not_echo) ... ok
+test_bucket_close_failure_keeps_active_but_denies_readable_success (__main__.ProbeTests.test_bucket_close_failure_keeps_active_but_denies_readable_success) ... ok
+test_cli_auth_failures_exit2_safe_summary_and_receipt (__main__.ProbeTests.test_cli_auth_failures_exit2_safe_summary_and_receipt) ... ok
+test_disabled_expired_and_unknown_status_never_bucket_request (__main__.ProbeTests.test_disabled_expired_and_unknown_status_never_bucket_request) ... ok
+test_environment_lookup_exception_never_emits_exception_or_input (__main__.ProbeTests.test_environment_lookup_exception_never_emits_exception_or_input) ... ok
+test_existing_file_no_overwrite_and_no_http (__main__.ProbeTests.test_existing_file_no_overwrite_and_no_http) ... ok
+test_first_step_http_failure_does_not_fetch_second (__main__.ProbeTests.test_first_step_http_failure_does_not_fetch_second) ... ok
+test_malformed_non_json_utf8_duplicate_and_nonfinite_refuse (__main__.ProbeTests.test_malformed_non_json_utf8_duplicate_and_nonfinite_refuse) ... ok
+test_missing_parent_or_path_traversal_receipt_error_no_http (__main__.ProbeTests.test_missing_parent_or_path_traversal_receipt_error_no_http) ... ok
+test_missing_token_or_account_and_wrong_account_before_http (__main__.ProbeTests.test_missing_token_or_account_and_wrong_account_before_http) ... ok
+test_oversized_body_stops_before_second_request (__main__.ProbeTests.test_oversized_body_stops_before_second_request) ... ok
+test_real_transport_construction_is_fixed_verified_no_proxy_get_no_body (__main__.ProbeTests.test_real_transport_construction_is_fixed_verified_no_proxy_get_no_body) ... ok
+test_real_transport_refuses_any_other_path_before_connection (__main__.ProbeTests.test_real_transport_refuses_any_other_path_before_connection) ... ok
+test_receipt_parent_symlink_refuses_without_creating_target (__main__.ProbeTests.test_receipt_parent_symlink_refuses_without_creating_target) ... ok
+test_receipt_symlink_hardlink_or_directory_no_overwrite_no_http (__main__.ProbeTests.test_receipt_symlink_hardlink_or_directory_no_overwrite_no_http) ... ok
+test_receipt_write_error_exception_text_redacted_exit2 (__main__.ProbeTests.test_receipt_write_error_exception_text_redacted_exit2) ... ok
+test_redirect_never_followed_on_either_step (__main__.ProbeTests.test_redirect_never_followed_on_either_step) ... ok
+test_schema_and_api_success_must_be_real_boolean (__main__.ProbeTests.test_schema_and_api_success_must_be_real_boolean) ... ok
+test_second_step_denied_preserves_active_but_unreadable (__main__.ProbeTests.test_second_step_denied_preserves_active_but_unreadable) ... ok
+test_status_not_boolean_or_outside_real_http_range (__main__.ProbeTests.test_status_not_boolean_or_outside_real_http_range) ... ok
+test_success_cli_zero_and_fresh_regular_safe_receipt (__main__.ProbeTests.test_success_cli_zero_and_fresh_regular_safe_receipt) ... ok
+test_tls_policy_must_keep_required_certificate_and_hostname (__main__.ProbeTests.test_tls_policy_must_keep_required_certificate_and_hostname) ... ok
+test_token_header_injection_or_invalid_token_before_http (__main__.ProbeTests.test_token_header_injection_or_invalid_token_before_http) ... ok
+test_wrong_or_missing_bucket_name_refuses_exact_scope (__main__.ProbeTests.test_wrong_or_missing_bucket_name_refuses_exact_scope) ... ok
+
+======================================================================
+FAIL: test_account_verify_literal_fixed_path_and_no_user_fallback (__main__.ProbeTests.test_account_verify_literal_fixed_path_and_no_user_fallback)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\mir2-playtest-releases\20261004-native-r18\native-ci-account-auth-probe-worker-01\test_cloudflare_read_authority_probe.py", line 134, in test_account_verify_literal_fixed_path_and_no_user_fallback
+    self.assertEqual(P.VERIFY_PATH, literal_verify)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '/client/v4/user/tokens/verify' != '/client/v4/accounts/85bf64d86ea9221e172d26feba9fd47e/tokens/verify'
+- /client/v4/user/tokens/verify
++ /client/v4/accounts/85bf64d86ea9221e172d26feba9fd47e/tokens/verify
+
+
+----------------------------------------------------------------------
+Ran 32 tests in 0.042s
+
+FAILED (failures=1)
+RAW_RECEIPT=C:\mir2-playtest-releases\20261004-native-r18\native-ci-account-auth-probe-worker-01\TEST-RECEIPT-1791153742646789500.json

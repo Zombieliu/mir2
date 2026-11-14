@@ -1,0 +1,61 @@
+{
+  "owner": "Root",
+  "kind": "Source72 original caller actual local Web startup with accepted full copies",
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source72-storage-takeback-20261012-01\\root-approved01\\web-start01-config.json",
+    "bytes": 2918,
+    "sha256": "5c5831569437983adf93f326c16201b4fecb5cd2f2253b64d7f5f51f240c230c"
+  },
+  "snapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source72-storage-takeback-20261012-01/runtime-preparation01/runtime-snapshot01.json",
+    "bytes": 2832069,
+    "sha256": "7940f4a63e9d50276b4c9f5dbfa0724afa34077b329def389961dae48ca2e1ad"
+  },
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source72-storage-takeback-20261012-01\\root-approved01\\runtime-source-review01.json",
+    "bytes": 6773,
+    "sha256": "144f650d213509b2fd87574fbec2f47c12503e1436741f51ecd2611131da1d25"
+  },
+  "thinActualProof": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source72-thin-actual02.json",
+    "bytes": 2953,
+    "sha256": "b592edb64ddce14f7727b5d5f35e18234b60b93d661ced36b7e352628c19d660"
+  },
+  "originalCallerBytes": 4569,
+  "originalCallerSha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383",
+  "ordinaryRuntime": {
+    "files": 4182,
+    "directoriesIncludingRoot": 517,
+    "bytes": 285115179,
+    "links": 0
+  },
+  "preSourceGuardPassed": true,
+  "ownedProcess": {
+    "childPid": 78328,
+    "parentPid": 58264,
+    "originalSession": 84422,
+    "executableAndServerArgumentVerified": true,
+    "parentOriginalConfigVerified": true,
+    "webListenPort": 19205,
+    "running": true,
+    "exited": false,
+    "disposed": false,
+    "originalCallerClosed": false,
+    "postSourceGuardPending": true
+  },
+  "gateway65": {
+    "retained": true,
+    "pid": 66300,
+    "ports": [
+      19100,
+      19110
+    ]
+  },
+  "entry": "http://127.0.0.1:19205/",
+  "privateConfigRestored": false,
+  "activeLogsRead": false,
+  "cacheCleared": false,
+  "normalUiProofSeparate": true,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

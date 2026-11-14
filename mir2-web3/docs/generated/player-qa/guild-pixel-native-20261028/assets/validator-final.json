@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "reason": "One new424 check raises original41 to42; original failed execution43/0 preserved, no source pixel mismatch.",
+  "exitCode": 0,
+  "signal": null,
+  "frameCount": 42,
+  "mismatchCount": 0,
+  "frame424": {
+    "index": 424,
+    "width": 260,
+    "height": 22,
+    "x": 0,
+    "y": 0,
+    "pngSha256": "8143accb57ff42aae2c8a757e76f32a0e229603240c433d92015d25f50f4253d",
+    "rgbaSha256": "3bd107c31ce9cad9b5a91b4731aca16a899a835c25ea432f235c601a8d8d83f3",
+    "exactRgba": true,
+    "metadata": true,
+    "sourceTrueSize": null
+  },
+  "validator": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\verify-guild-storage-assets.mjs",
+    "bytes": 5116,
+    "sha256": "ce360698e3f7cb762e30a8810f4aee5b532f59bee1900e0fe1cae5fa84707ebe"
+  },
+  "inverseRestoresOriginalValidatorRaw": true
+}

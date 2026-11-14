@@ -1,0 +1,35 @@
+
+running 30 tests
+test native_ingest::tests::native_npc_economy_queue_barrier_prevents_later_typed_models_overtaking ... ok
+test native_ingest::tests::native_npc_economy_queue_bundle_is_protected_under_snapshot_and_ack_pressure ... ok
+test native_ingest::tests::native_npc_economy_queue_byte_limit_rejects_whole_bundle_without_ack ... ok
+test native_ingest::tests::native_npc_economy_queue_data_and_scene_reset_drop_bundle_without_completion ... ok
+test native_ingest::tests::native_npc_economy_queue_drop_retires_queued_custody_gracefully ... ok
+test native_ingest::tests::native_npc_economy_queue_later_receipt_reserve_waits_for_barrier ... ok
+test native_ingest::tests::native_npc_economy_queue_reserved_cost_materialization_obeys_exact_byte_cap ... ok
+test npc_purchase_economy::tests::native_npc_economy_all_models_predecode_before_any_mutation ... ok
+test npc_purchase_economy::tests::native_npc_economy_bounded_completion_refuses_mutation_when_full ... ok
+test npc_purchase_economy::tests::native_npc_economy_complete_apply_publishes_original_tuple_and_lossless_domains ... ok
+test npc_purchase_economy::tests::native_npc_economy_duplicate_and_escaped_duplicate_are_rejected ... ok
+test npc_purchase_economy::tests::native_npc_economy_item_metadata_mismatch_rejects_before_application ... ok
+test npc_purchase_economy::tests::native_npc_economy_mandatory_source_domains_cannot_use_defaults ... ok
+test npc_purchase_economy::tests::native_npc_economy_missing_public_hero_city_and_character_domains_never_apply ... ok
+test npc_purchase_economy::tests::native_npc_economy_old_revision_and_equal_revision_conflict_never_mutate ... ok
+test npc_purchase_economy::tests::native_npc_economy_partial_wrong_actor_scope_and_max_rejected ... ok
+test npc_purchase_economy::tests::native_npc_economy_public_fingerprint_does_not_invent_private_checkpoint_fields ... ok
+test npc_purchase_economy::tests::native_npc_economy_real_item_vectors_reject_null_missing_slot_and_unknown_container ... ok
+test npc_purchase_economy::tests::native_npc_economy_reset_clears_source_and_retires_old_ack ... ok
+test npc_purchase_economy::tests::native_npc_economy_retirement_fences_prepared_bundle ... ok
+test npc_purchase_economy::tests::native_npc_economy_revision_history_survives_reset_and_fresh_binding ... ok
+test npc_purchase_economy::tests::native_npc_economy_same_revision_changed_gold_conflicts ... ok
+test npc_purchase_economy::tests::native_npc_economy_same_revision_changed_inventory_conflicts ... ok
+test npc_purchase_economy::tests::native_npc_economy_same_revision_changed_mail_conflicts ... ok
+test npc_purchase_economy::tests::native_npc_economy_same_revision_changed_pearls_conflicts ... ok
+test npc_purchase_economy::tests::native_npc_economy_same_revision_movement_tick_and_model_epochs_refresh ... ok
+test npc_purchase_economy::tests::native_npc_economy_same_revision_refine_clock_refresh_retains_original_source ... ok
+test npc_purchase_economy::tests::native_npc_economy_sparse_named_equipment_uses_crystal_slots ... ok
+test npc_purchase_economy::tests::native_npc_economy_uid_zero_belt_and_equipment_are_complete ... ok
+test npc_purchase_economy::tests::native_npc_economy_wallet_xp_level_capacity_and_storage_mismatch_rejected ... ok
+
+test result: ok. 30 passed; 0 failed; 0 ignored; 0 measured; 302 filtered out; finished in 0.13s
+

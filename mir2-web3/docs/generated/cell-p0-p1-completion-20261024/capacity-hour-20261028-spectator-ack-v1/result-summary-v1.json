@@ -1,0 +1,55 @@
+{
+  "userHour": {
+    "startedAt": "2026-10-28T07:42:10Z",
+    "deadline": "2026-10-28T08:42:10Z"
+  },
+  "spectatorProjection": {
+    "actualRustChecks": 18,
+    "freshFullLifecycle": 16,
+    "captureAndRecordingPreserved": true
+  },
+  "pvpV10": {
+    "diagnosticDeliveryTrace": false,
+    "diagnosticSlowStage": false,
+    "admission25Ms": 74731,
+    "totalElapsedMs": 231999,
+    "completedStages": 0,
+    "failureCategory": "attack-outcome-not-received-by2s",
+    "actorIndex": 18,
+    "requestId": "126",
+    "lastObservedRequestId": "125",
+    "normalLogouts": 25,
+    "gatewayExit": 0,
+    "postgresExit": 0
+  },
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "p2Started": false,
+  "attackAckChange": {
+    "requiredPersistenceAndAuthorityChecksPreserved": true,
+    "worldSnapshotSentAfterCorrelatedAck": true,
+    "routeRefreshRemainsOriginalBestEffort": true,
+    "actualSelectedRustChecks": 39,
+    "freshFullLifecycle": 16
+  },
+  "pvpV11": {
+    "admission25Ms": 65756,
+    "totalElapsedMs": 273530,
+    "completedStages": 0,
+    "wholeRunIncludingAdmission": {
+      "requests": 4454,
+      "launched": 4434,
+      "positive": 2821,
+      "correlatedOutcomeTimeouts": 0
+    },
+    "stopReason": "one-hour user budget; monitor drain at08:35UTC",
+    "measurementQualified": false,
+    "positiveWitnessLatencyStillFailed": true,
+    "normalLogouts": 25,
+    "gatewayExit": 0,
+    "postgresExit": 0,
+    "cleanupComplete": true
+  },
+  "finishedWorkAt": "2026-10-28T08:36:24.897Z",
+  "higherTiersAndTwoHourSoak": "not measured"
+}

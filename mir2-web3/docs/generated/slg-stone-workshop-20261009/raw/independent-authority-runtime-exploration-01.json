@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "/root/production_review",
+  "reviewedAtUtc": "2026-10-09T12:46:52.3351075+00:00",
+  "scope": "Interim bounded read-only authority/runtime and task-owned C-cache exploration, before source freeze",
+  "acceptedForFocusedTests": false,
+  "acceptanceReason": "Final runtime source and tests are not frozen; this is an exploration, not a source permit.",
+  "noCargoRun": true,
+  "noGuardRun": true,
+  "noProbeRun": true,
+  "noUiRun": true,
+  "noProductEdits": true,
+  "noDeletesOrMoves": true,
+  "readSourcePins": [
+    {
+      "path": "mir2-web3/apps/simulation/src/config_stones.rs",
+      "sha256": "e9106bd4c4df571d94ccda1ed7a9b09038a0570ebb0a271783c71f3f7da6a458",
+      "length": 5362,
+      "lastWriteTimeUtc": "2026-10-09T12:37:50.9027468Z"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config.rs",
+      "sha256": "6289acd0e82bb251443a4576614754769daf95a9fa01185962e18513c6f3304e",
+      "length": 306858,
+      "lastWriteTimeUtc": "2026-10-09T12:40:22.2094088Z"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/stones.rs",
+      "sha256": "6465bd1d6e6643322d41eeb460a32504d4100928e19797b22766c2e32d833cdb",
+      "length": 18442,
+      "lastWriteTimeUtc": "2026-10-09T12:37:50.9032493Z"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/stone_npc.rs",
+      "sha256": "d4289e45148d1273fcde1af7c04c89635183dee9c3d7e93269d0a1e9b00eb5d2",
+      "length": 45776,
+      "lastWriteTimeUtc": "2026-10-09T12:19:11.0410820Z"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/items.rs",
+      "sha256": "2f146768fe307ee7b193dee488e97e72c2d4efa6c168b1c0cced128d2bff8abe",
+      "length": 166344,
+      "lastWriteTimeUtc": "2026-10-09T11:44:20.7741634Z"
+    }
+  ],
+  "positiveFindings": [
+    "Runtime stages inventory clone; preserves the physical UID and full bind/soul-bound/shop/GM provenance for one-to-one template reclassification; no fresh UserItem issuance.",
+    "Runtime commits the staged raw/output carrier, gold and next global registry under a single fixed account/serial transaction, checking registry equality and durable character revision plus NPC actor incarnation.",
+    "PostgreSQL registry singleton FOR UPDATE/CAS and account writes occur inside the same transaction; network-unknown stone commit classifies as shared write freeze. File uncertain rename/directory-sync outcome reuses the shared File authority freeze.",
+    "Public views expose grade/table/fees/possibilities and only coarse appraisal clue; ItemState carries serial reference only, not hidden outcome or seed; normal UserItem conversion excludes the server registry.",
+    "Exact registry request replay is owner account plus persisted character incarnation, evaluated before current possession and gold. Transfers use current possession holder rather than retaining mint owner as permanent authorization.",
+    "Outgoing packet carrier conversion has been moved before commit in the latest runtime source."
+  ],
+  "pendingRootFixes": [
+    "refresh_sealed_stone_authority method was absent in the observed config read and is already being implemented by Root.",
+    "Repository stone version receipt checks and FullRestore preservation of locked repository stone version are already scheduled Root fixes; not accepted as complete.",
+    "runtime/stones_tests.rs was absent during the bounded reads while runtime uses cfg(test) include; a final permit must bind the actual authored tests."
+  ],
+  "integrationLimits": [
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/stone_npc.rs",
+      "lines": "490-510",
+      "finding": "NPC handler requires current view and current command before runtime exact replay. After successful inventory/revision change, an old action fails the current gate or no longer appears in the active links. Runtime direct replay proof is not an actual NPC original-receipt recovery route.",
+      "recommendation": "Keep original link authentication and reject new stale actions; add a separately authenticated read-only original operation query/reconciliation seam if actual NPC replay/recovery is claimed."
+    },
+    {
+      "path": "mir2-web3/packages/production/src/stones.rs",
+      "finding": "Global registry caps 1024 records and retains all spent history; archival is not implemented.",
+      "recommendation": "Retain the fail-closed limit in focused testing; public sustained use requires durable partition/archive plus irreversible spent and receipt preservation."
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config.rs",
+      "finding": "Default all-issuer UID authority/census and private outcome lifecycle across unsupported custody routes remain outside this reclassification proof.",
+      "recommendation": "Do not claim global UID rollout, all shared/PG custody, public gateway/UI or installer acceptance. Ordinary full ItemState custody preserves serial, but ground UserItem-only payload must be tested or blocked for stone carriers."
+    }
+  ],
+  "cacheEvidence": {
+    "cargoTargets": "Current stone and prior B2b/B2c helper paths all resolve to E:/mir2-player-journey/work/<phase>/target",
+    "ownedLargeCCachesFound": [],
+    "checkedParentDirectories": [
+      "C:/mir2-build",
+      "C:/codex-targets",
+      "C:/mir2-cross-platform-storage-20261002"
+    ],
+    "scopeFilter": "Only direct directory names matching production/slg/stonecut; no recursive foreign Source50 read",
+    "ownedTempDirectoryPrefix": "C:/Users/Administrator/AppData/Local/Temp/mir2-production-p02-*",
+    "ownerProof": "production_tests.rs lines111-113 creates these exact fixture prefix paths",
+    "tempDirectoryCount": 99,
+    "tempFileCount": 412,
+    "tempTotalBytes": 1400973,
+    "recommendation": "The small account/UID fault fixtures can be archived to E with byte verification and path mapping, but are evidence rather than disposable build cache and reclaim only 1.34 MiB. No verified task-owned multi-GiB C cache was found; do not remove shared dependencies, tools, guard/probe or foreign Source50 artifacts."
+  }
+}

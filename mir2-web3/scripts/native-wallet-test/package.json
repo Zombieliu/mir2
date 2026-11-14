@@ -1,0 +1,13 @@
+{
+  "name": "mir2-native-wallet-test-runtime",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Isolated proxy support for the local Windows wallet login test service.",
+  "engines": {
+    "node": ">=20.18.1"
+  },
+  "dependencies": {
+    "undici": "7.30.1"
+  }
+}

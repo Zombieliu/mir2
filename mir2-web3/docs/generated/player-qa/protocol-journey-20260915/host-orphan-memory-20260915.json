@@ -1,0 +1,29 @@
+{
+  "action": "stop verified orphan OneDrive sync service",
+  "before": {
+    "at": "2026-09-15T12:40:25.6690091+08:00",
+    "processId": 45612,
+    "processName": "OneDrive.Sync.Service",
+    "path": "C:\\Users\\Administrator\\AppData\\Local\\Microsoft\\OneDrive\\26.158.0816.0003\\OneDrive.Sync.Service.exe",
+    "parentId": 44720,
+    "privateBytes": 135124103168,
+    "workingSetBytes": 386871296,
+    "os": {
+      "TotalVisibleMemorySize": 66858740,
+      "FreePhysicalMemory": 46682116,
+      "TotalVirtualMemorySize": 193873744,
+      "FreeVirtualMemory": 37234368
+    }
+  },
+  "after": {
+    "at": "2026-09-15T12:40:25.8413918+08:00",
+    "processStillExists": false,
+    "os": {
+      "TotalVisibleMemorySize": 66858740,
+      "FreePhysicalMemory": 46767060,
+      "TotalVirtualMemorySize": 193873744,
+      "FreeVirtualMemory": 48418824
+    }
+  },
+  "historicalNativeOomCauseProven": false
+}

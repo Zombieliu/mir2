@@ -1,0 +1,36 @@
+{
+  "argv": [
+    "C:/Users/Administrator/.cargo/bin/cargo.exe",
+    "+1.95.0",
+    "test",
+    "--offline",
+    "--locked",
+    "--jobs",
+    "2",
+    "--target-dir",
+    "C:/mir2-build/native-updater-progress-root-20261005",
+    "--lib",
+    "delta_base_mismatch_and_bad_patch_fall_back_without_touching_live_base",
+    "--",
+    "--nocapture"
+  ],
+  "cwd": "C:\\Users\\Administrator\\.codex\\worktrees\\crowded-combat-control\\mir2-player-journey\\mir2-web3\\apps\\game-client\\windows-updater",
+  "startedUtc": "2026-10-05T00:42:10.675738+00:00",
+  "pid": 50228,
+  "exitCode": 0,
+  "elapsedSeconds": 0.3058859000157099,
+  "minimumCFreeBytes": 169778204672,
+  "networkRequested": false,
+  "ownedTemp": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-progress-root-01\\owned-temp",
+  "processExited": true,
+  "stdout": {
+    "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-progress-root-01\\commands\\delta-fallback-root-01.stdout.log",
+    "bytes": 221,
+    "sha256": "a68dc818131e10c9696cf8ee340482cd694ddc4dc16275cd084b8601aa283a58"
+  },
+  "stderr": {
+    "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-progress-root-01\\commands\\delta-fallback-root-01.stderr.log",
+    "bytes": 214,
+    "sha256": "d41dfb2477ee30d78721d6b999c29481864a60aab72e519096673caeef6e38d2"
+  }
+}

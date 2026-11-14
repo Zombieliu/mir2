@@ -1,0 +1,63 @@
+{
+  "schema": "mir2.r9.publication-evidence-index.v1",
+  "createdUtc": "2026-10-01T19:01:20.458427+00:00",
+  "sourceRevision": "180b01d46f35a5e97f4c60ee2ae033c7b53717e5",
+  "sequence": 5,
+  "files": [
+    {
+      "path": "publish-process.json",
+      "bytes": 304,
+      "sha256": "5AB098C572688BB03D68DBFAE06C4D6F2E7CA7F0DB70D9F16C54EB6EF450692A"
+    },
+    {
+      "path": "publish-r9.ps1",
+      "bytes": 2847,
+      "sha256": "C68E3C3583918F9B36199D99D2C12CE2BE6B5E20E7792E80F057D963A9754B33"
+    },
+    {
+      "path": "public-https-publication-report.json",
+      "bytes": 909,
+      "sha256": "07611C823BFF78F34E2B7658F72F03C9EBF73726946B6B225D8224CCEE6A98E7"
+    },
+    {
+      "path": "deployment/deploy-plan.json",
+      "bytes": 2053,
+      "sha256": "3C1A258CEBFD95EA4B94ED7EFAD26CE823DC1B65F5920246189B75A4581D4394"
+    },
+    {
+      "path": "deployment/deploy-preflight.sh",
+      "bytes": 294,
+      "sha256": "5FAD87D30FA841620A9AA11A8DC3542C63B9F29F20212BBFE55136A7E713CA9F"
+    },
+    {
+      "path": "deployment/deploy-create-stage.sh",
+      "bytes": 264,
+      "sha256": "0F3EE497CDE5AF97F5DF05C498BF74E099510BCD3E45DBBD1D0AD27262C06BCA"
+    },
+    {
+      "path": "deployment/deploy-apply.sh",
+      "bytes": 2438,
+      "sha256": "D09458D9E76F48A94E84EA9F47470EC0930C96CDAD1A61DBCBAFE70800A6549F"
+    },
+    {
+      "path": "deployment/preflight.log",
+      "bytes": 1042,
+      "sha256": "433C2F72FCE894779CA31BC356403729614C0DFDDBDBCF6E2AD962AF1187B82B"
+    },
+    {
+      "path": "deployment/create-stage.log",
+      "bytes": 84,
+      "sha256": "B3873A4B2006C2C877E86DB6C8FBD5B244E4C88E37CF1CF112990C14CF3F0CC3"
+    },
+    {
+      "path": "deployment/upload.log",
+      "bytes": 34,
+      "sha256": "84E861C7C869C8E598075603D72D40B8CF5AD0FCB9982CBC0829B9402D0FCF95"
+    },
+    {
+      "path": "deployment/apply.log",
+      "bytes": 2584,
+      "sha256": "7C77ED43A98967BC2B88B5D790E029C7E235C893EFC70A9C9A3FB8755A65F15D"
+    }
+  ]
+}

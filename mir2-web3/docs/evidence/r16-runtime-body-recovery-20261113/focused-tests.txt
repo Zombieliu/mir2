@@ -1,0 +1,524 @@
+TAP version 13
+# Subtest: Page prewarm delegation returns the real shared stage promise
+ok 1 - Page prewarm delegation returns the real shared stage promise
+  ---
+  duration_ms: 208.3201
+  type: 'test'
+  ...
+# Subtest: actual Page starts independent fonts and runtime while the HUD stage is still pending
+ok 2 - actual Page starts independent fonts and runtime while the HUD stage is still pending
+  ---
+  duration_ms: 120.4457
+  type: 'test'
+  ...
+# Subtest: actual Page retains the HUD request while overlapping fonts and binary after first paint
+ok 3 - actual Page retains the HUD request while overlapping fonts and binary after first paint
+  ---
+  duration_ms: 89.1104
+  type: 'test'
+  ...
+# Subtest: a failed independent HUD stage cannot withdraw an already ready runtime
+ok 4 - a failed independent HUD stage cannot withdraw an already ready runtime
+  ---
+  duration_ms: 83.8467
+  type: 'test'
+  ...
+# Subtest: leaving before the HUD stage settles cancels independent fonts and fences late diagnostics and boot
+ok 5 - leaving before the HUD stage settles cancels independent fonts and fences late diagnostics and boot
+  ---
+  duration_ms: 83.255
+  type: 'test'
+  ...
+# Subtest: actual Page leaves fonts deferred before first paint and for disabled, touch, missing metadata or GPU
+ok 6 - actual Page leaves fonts deferred before first paint and for disabled, touch, missing metadata or GPU
+  ---
+  duration_ms: 424.5117
+  type: 'test'
+  ...
+# Subtest: actual retryable module failure cancels overlapping fonts and keeps the retry boundary
+ok 7 - actual retryable module failure cancels overlapping fonts and keeps the retry boundary
+  ---
+  duration_ms: 78.1371
+  type: 'test'
+  ...
+# Subtest: leaving while the runtime downloads cancels fonts and prevents late boot
+ok 8 - leaving while the runtime downloads cancels fonts and prevents late boot
+  ---
+  duration_ms: 79.9226
+  type: 'test'
+  ...
+# Subtest: prewarm paths exactly cover the Native display font families
+ok 9 - prewarm paths exactly cover the Native display font families
+  ---
+  duration_ms: 1.3401
+  type: 'test'
+  ...
+# Subtest: two pending font bodies bound concurrency and completion waits for full bytes
+ok 10 - two pending font bodies bound concurrency and completion waits for full bytes
+  ---
+  duration_ms: 12.6582
+  type: 'test'
+  ...
+# Subtest: leaving cancels active font bodies and never starts the queued fonts
+ok 11 - leaving cancels active font bodies and never starts the queued fonts
+  ---
+  duration_ms: 0.792
+  type: 'test'
+  ...
+# (node:43688) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: a failed font does not withdraw the runtime or prevent warming the other families
+ok 12 - a failed font does not withdraw the runtime or prevent warming the other families
+  ---
+  duration_ms: 477.5822
+  type: 'test'
+  ...
+# Subtest: the slow CJK families do not wait behind short fallback requests
+ok 13 - the slow CJK families do not wait behind short fallback requests
+  ---
+  duration_ms: 2.7488
+  type: 'test'
+  ...
+# Subtest: binary compilation overlaps a pending script import and canvas gates initialization
+ok 14 - binary compilation overlaps a pending script import and canvas gates initialization
+  ---
+  duration_ms: 21.2112
+  type: 'test'
+  ...
+# (node:32588) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: wrong MIME and missing streaming support compile the original single response
+ok 15 - wrong MIME and missing streaming support compile the original single response
+  ---
+  duration_ms: 35.4647
+  type: 'test'
+  ...
+# Subtest: an import failure aborts the independent binary fetch
+ok 16 - an import failure aborts the independent binary fetch
+  ---
+  duration_ms: 1.3507
+  type: 'test'
+  ...
+# Subtest: unavailable or invalid binaries never initialize a runtime
+ok 17 - unavailable or invalid binaries never initialize a runtime
+  ---
+  duration_ms: 1.3522
+  type: 'test'
+  ...
+# Subtest: the existing 120-second budget cancels a stalled binary
+ok 18 - the existing 120-second budget cancels a stalled binary
+  ---
+  duration_ms: 1.6336
+  type: 'test'
+  ...
+# Subtest: a stalled script also exits after the binary has finished compiling
+ok 19 - a stalled script also exits after the binary has finished compiling
+  ---
+  duration_ms: 4.0505
+  type: 'test'
+  ...
+# Subtest: actual page loader shares pending/successful work and retries a failed URL
+ok 20 - actual page loader shares pending/successful work and retries a failed URL
+  ---
+  duration_ms: 193.8121
+  type: 'test'
+  ...
+# Subtest: a valid advancing binary can finish beyond the header budget without a second GET
+ok 21 - a valid advancing binary can finish beyond the header budget without a second GET
+  ---
+  duration_ms: 1.7787
+  type: 'test'
+  ...
+# Subtest: a body without positive bytes stops at the idle boundary, including empty chunks
+ok 22 - a body without positive bytes stops at the idle boundary, including empty chunks
+  ---
+  duration_ms: 1.2281
+  type: 'test'
+  ...
+# Subtest: decoded bytes are capped before runtime initialization without trusting Content-Length
+ok 23 - decoded bytes are capped before runtime initialization without trusting Content-Length
+  ---
+  duration_ms: 0.8195
+  type: 'test'
+  ...
+# Subtest: a progressing body still has an absolute lifetime cap
+ok 24 - a progressing body still has an absolute lifetime cap
+  ---
+  duration_ms: 0.7892
+  type: 'test'
+  ...
+# Subtest: a failed pinned binary source can use its supplied same-version fallback once
+ok 25 - a failed pinned binary source can use its supplied same-version fallback once
+  ---
+  duration_ms: 0.6781
+  type: 'test'
+  ...
+# Subtest: actual Page selects versioned app binary with same-package remote fallback and glue
+ok 26 - actual Page selects versioned app binary with same-package remote fallback and glue
+  ---
+  duration_ms: 92.9605
+  type: 'test'
+  ...
+# Subtest: an unavailable first source yields to its fallback after8 seconds
+ok 27 - an unavailable first source yields to its fallback after8 seconds
+  ---
+  duration_ms: 1.4444
+  type: 'test'
+  ...
+# Subtest: a stalled first source body is canceled before the next binary is read
+ok 28 - a stalled first source body is canceled before the next binary is read
+  ---
+  duration_ms: 0.8436
+  type: 'test'
+  ...
+# Subtest: binary progress cannot renew a stalled script import deadline
+ok 29 - binary progress cannot renew a stalled script import deadline
+  ---
+  duration_ms: 0.9305
+  type: 'test'
+  ...
+# Subtest: a streaming compiler which never reads remains bounded
+ok 30 - a streaming compiler which never reads remains bounded
+  ---
+  duration_ms: 10.5921
+  type: 'test'
+  ...
+# Subtest: a late canvas cannot initialize an expired attempt
+ok 31 - a late canvas cannot initialize an expired attempt
+  ---
+  duration_ms: 1.0644
+  type: 'test'
+  ...
+# Subtest: a default initializer which has already started cannot be classified as a retryable download
+ok 32 - a default initializer which has already started cannot be classified as a retryable download
+  ---
+  duration_ms: 0.8815
+  type: 'test'
+  ...
+# Subtest: invalid or oversized bytes fail closed instead of consulting another source
+ok 33 - invalid or oversized bytes fail closed instead of consulting another source
+  ---
+  duration_ms: 0.9801
+  type: 'test'
+  ...
+# Subtest: two interrupted pinned bodies recover once before a single glue initialization
+ok 34 - two interrupted pinned bodies recover once before a single glue initialization
+  ---
+  duration_ms: 1.5105
+  type: 'test'
+  ...
+# Subtest: a stalled last mirror is canceled at the unchanged idle boundary before its one retry
+ok 35 - a stalled last mirror is canceled at the unchanged idle boundary before its one retry
+  ---
+  duration_ms: 0.8884
+  type: 'test'
+  ...
+# Subtest: transient exhaustion remains bounded and permanent responses do not add retries
+ok 36 - transient exhaustion remains bounded and permanent responses do not add retries
+  ---
+  duration_ms: 0.7963
+  type: 'test'
+  ...
+# Subtest: invalid or oversized last-mirror bytes cannot turn an earlier transient failure into a retry
+ok 37 - invalid or oversized last-mirror bytes cannot turn an earlier transient failure into a retry
+  ---
+  duration_ms: 0.8019
+  type: 'test'
+  ...
+# Subtest: the original final header deadline is terminal even after an earlier retryable failure
+ok 38 - the original final header deadline is terminal even after an earlier retryable failure
+  ---
+  duration_ms: 0.871
+  type: 'test'
+  ...
+# Subtest: a diagnostic callback cannot fail or repeat initialization
+ok 39 - a diagnostic callback cannot fail or repeat initialization
+  ---
+  duration_ms: 0.4867
+  type: 'test'
+  ...
+# Subtest: a browser compiler wrapping an over-limit stream as a network error cannot authorize a retry
+ok 40 - a browser compiler wrapping an over-limit stream as a network error cannot authorize a retry
+  ---
+  duration_ms: 7.5653
+  type: 'test'
+  ...
+# Subtest: invalid metadata falls back to DOM before runtime import
+ok 41 - invalid metadata falls back to DOM before runtime import
+  ---
+  duration_ms: 1.0515
+  type: 'test'
+  ...
+# Subtest: exact shared mode selects shared GL2 only when the complete package exists
+ok 42 - exact shared mode selects shared GL2 only when the complete package exists
+  ---
+  duration_ms: 0.5936
+  type: 'test'
+  ...
+# Subtest: ordinary empty query freezes the shared GL2 package while preserving GPU priority
+ok 43 - ordinary empty query freezes the shared GL2 package while preserving GPU priority
+  ---
+  duration_ms: 0.3561
+  type: 'test'
+  ...
+# Subtest: heterogeneous packages select GPU ABI1 or default and exact shared GL2 ABI1
+ok 44 - heterogeneous packages select GPU ABI1 or default and exact shared GL2 ABI1
+  ---
+  duration_ms: 1.758
+  type: 'test'
+  ...
+# Subtest: heterogeneous explicit lean fallback requires exact ABI0 getter and frozen opt-out
+ok 45 - heterogeneous explicit lean fallback requires exact ABI0 getter and frozen opt-out
+  ---
+  duration_ms: 1.4717
+  type: 'test'
+  ...
+# Subtest: explicit opt-outs and absent shared packages retain lean GL2 selection
+ok 46 - explicit opt-outs and absent shared packages retain lean GL2 selection
+  ---
+  duration_ms: 0.3407
+  type: 'test'
+  ...
+# Subtest: live startup agreement rejects relevant query changes without losing unrelated flags
+ok 47 - live startup agreement rejects relevant query changes without losing unrelated flags
+  ---
+  duration_ms: 0.4038
+  type: 'test'
+  ...
+# Subtest: encoded and duplicate raw opt-ins retain ordinary package selection
+ok 48 - encoded and duplicate raw opt-ins retain ordinary package selection
+  ---
+  duration_ms: 0.2693
+  type: 'test'
+  ...
+# Subtest: legacy exact shared request is unsafe while ordinary legacy remains usable
+ok 49 - legacy exact shared request is unsafe while ordinary legacy remains usable
+  ---
+  duration_ms: 0.4025
+  type: 'test'
+  ...
+# Subtest: getter agreement checks backend, ABI, compiled primary, startup, and live query
+ok 50 - getter agreement checks backend, ABI, compiled primary, startup, and live query
+  ---
+  duration_ms: 0.8407
+  type: 'test'
+  ...
+# Subtest: legacy getter may report unknown compiled GL2 capability but cannot start shared
+ok 51 - legacy getter may report unknown compiled GL2 capability but cannot start shared
+  ---
+  duration_ms: 0.2849
+  type: 'test'
+  ...
+# Subtest: one document gate forbids a second boot even after synchronous or asynchronous failure
+ok 52 - one document gate forbids a second boot even after synchronous or asynchronous failure
+  ---
+  duration_ms: 16.0088
+  type: 'test'
+  ...
+# Subtest: third URL variant preserves old positional callers and immutable package path
+ok 53 - third URL variant preserves old positional callers and immutable package path
+  ---
+  duration_ms: 0.365
+  type: 'test'
+  ...
+# Subtest: only network failures before the Bevy boot remain retryable
+ok 54 - only network failures before the Bevy boot remain retryable
+  ---
+  duration_ms: 0.6774
+  type: 'test'
+  ...
+# Subtest: the actual page retry gate preserves the single-boot boundary
+ok 55 - the actual page retry gate preserves the single-boot boundary
+  ---
+  duration_ms: 2.6585
+  type: 'test'
+  ...
+# Subtest: desktop keeps the Bevy runtime enhancement enabled
+ok 56 - desktop keeps the Bevy runtime enhancement enabled
+  ---
+  duration_ms: 0.2156
+  type: 'test'
+  ...
+# Subtest: touch-first phones and tablets use the immediately playable compatibility renderer
+ok 57 - touch-first phones and tablets use the immediately playable compatibility renderer
+  ---
+  duration_ms: 0.105
+  type: 'test'
+  ...
+# Subtest: a fine-pointer desktop with a touch screen is not misclassified as mobile
+ok 58 - a fine-pointer desktop with a touch screen is not misclassified as mobile
+  ---
+  duration_ms: 0.0703
+  type: 'test'
+  ...
+# Subtest: QA query controls override automatic device policy
+ok 59 - QA query controls override automatic device policy
+  ---
+  duration_ms: 0.0771
+  type: 'test'
+  ...
+# Subtest: network failures never trigger an alternate-backend runtime download
+ok 60 - network failures never trigger an alternate-backend runtime download
+  ---
+  duration_ms: 0.1639
+  type: 'test'
+  ...
+# Subtest: rejected binary bytes cannot authorize a download retry or another backend even with network-like messages
+ok 61 - rejected binary bytes cannot authorize a download retry or another backend even with network-like messages
+  ---
+  duration_ms: 0.0878
+  type: 'test'
+  ...
+# Subtest: Page keeps default shared UI intent across a pre-boot failure on the same backend
+ok 62 - Page keeps default shared UI intent across a pre-boot failure on the same backend
+  ---
+  duration_ms: 6.0755
+  type: 'test'
+  ...
+# Subtest: Page failure preserves explicit disabled and mixed shared UI choices
+ok 63 - Page failure preserves explicit disabled and mixed shared UI choices
+  ---
+  duration_ms: 12.6886
+  type: 'test'
+  ...
+# Subtest: preserving Page UI intent does not turn a failed App boot into an automatic retry
+ok 64 - preserving Page UI intent does not turn a failed App boot into an automatic retry
+  ---
+  duration_ms: 2.6009
+  type: 'test'
+  ...
+# Subtest: a disposed Page attempt cannot withdraw the newer runtime or its UI choices
+ok 65 - a disposed Page attempt cannot withdraw the newer runtime or its UI choices
+  ---
+  duration_ms: 4.0409
+  type: 'test'
+  ...
+# Subtest: an indeterminate wasm-bindgen initialization requires a fresh document for either backend
+ok 66 - an indeterminate wasm-bindgen initialization requires a fresh document for either backend
+  ---
+  duration_ms: 2.7547
+  type: 'test'
+  ...
+# Subtest: actual WASM ABI and small renderer-independent payload
+ok 67 - actual WASM ABI and small renderer-independent payload
+  ---
+  duration_ms: 0.9946
+  type: 'test'
+  ...
+# Subtest: actual Ranking Inspect ABI is provided by Core with the same guarded admission
+ok 68 - actual Ranking Inspect ABI is provided by Core with the same guarded admission
+  ---
+  duration_ms: 3.4806
+  type: 'test'
+  ...
+# Subtest: packaged Presentation plays an ordered reel and recast from one packet projection
+ok 69 - packaged Presentation plays an ordered reel and recast from one packet projection
+  ---
+  duration_ms: 6.9799
+  type: 'test'
+  ...
+# Subtest: actual V2 N2 endpoints allow diary accept and authoritative ready finish
+ok 70 - actual V2 N2 endpoints allow diary accept and authoritative ready finish
+  ---
+  duration_ms: 1.096
+  type: 'test'
+  ...
+# Subtest: missing endpoints, wrong profile and malformed metadata never invent diary actions
+ok 71 - missing endpoints, wrong profile and malformed metadata never invent diary actions
+  ---
+  duration_ms: 0.57
+  type: 'test'
+  ...
+# Subtest: ordinary NPC uses current object id and offer, independently of template index
+ok 72 - ordinary NPC uses current object id and offer, independently of template index
+  ---
+  duration_ms: 0.1932
+  type: 'test'
+  ...
+# Subtest: pending and sparse reward selection guards remain active with an open NPC
+ok 73 - pending and sparse reward selection guards remain active with an open NPC
+  ---
+  duration_ms: 0.198
+  type: 'test'
+  ...
+# Subtest: actual read-only Cash Preview layer and turn exports move together to Core
+ok 74 - actual read-only Cash Preview layer and turn exports move together to Core
+  ---
+  duration_ms: 2.0082
+  type: 'test'
+  ...
+# Subtest: actual Presentation v2 observes queued body blockers without exposing them to the v1 reader
+ok 75 - actual Presentation v2 observes queued body blockers without exposing them to the v1 reader
+  ---
+  duration_ms: 2.5488
+  type: 'test'
+  ...
+# Subtest: actual isolated Rust WASM preserves original catalog text under unchanged package budgets
+ok 76 - actual isolated Rust WASM preserves original catalog text under unchanged package budgets
+  ---
+  duration_ms: 8.475
+  type: 'test'
+  ...
+# Subtest: actual Rust codec rejects malformed gzip and a noncatalog second envelope before returning any text
+ok 77 - actual Rust codec rejects malformed gzip and a noncatalog second envelope before returning any text
+  ---
+  duration_ms: 3.852
+  type: 'test'
+  ...
+# Subtest: wire limit is checked before the wasm-bindgen input copy
+ok 78 - wire limit is checked before the wasm-bindgen input copy
+  ---
+  duration_ms: 0.2655
+  type: 'test'
+  ...
+# Subtest: mixed Text and real binary catalogs remain synchronous and in physical-frame order
+ok 79 - mixed Text and real binary catalogs remain synchronous and in physical-frame order
+  ---
+  duration_ms: 0.392
+  type: 'test'
+  ...
+# Subtest: invalid or unnegotiated binary poisons only that physical connection and never partially applies a batch
+ok 80 - invalid or unnegotiated binary poisons only that physical connection and never partially applies a batch
+  ---
+  duration_ms: 0.485
+  type: 'test'
+  ...
+# Subtest: retired connection and mid-batch replacement cannot deliver stale catalog entries
+ok 81 - retired connection and mid-batch replacement cannot deliver stale catalog entries
+  ---
+  duration_ms: 0.3988
+  type: 'test'
+  ...
+# Subtest: actual Page capability replacement retains catalog with receipts and attack declarations
+ok 82 - actual Page capability replacement retains catalog with receipts and attack declarations
+  ---
+  duration_ms: 27.9676
+  type: 'test'
+  ...
+# Subtest: actual Page does not negotiate after failed send or carry a decoder onto a replacement socket
+ok 83 - actual Page does not negotiate after failed send or carry a decoder onto a replacement socket
+  ---
+  duration_ms: 22.3156
+  type: 'test'
+  ...
+# Subtest: actual Page closes invalid binary, fences later Text and preserves the ordinary hero/raw handler
+ok 84 - actual Page closes invalid binary, fences later Text and preserves the ordinary hero/raw handler
+  ---
+  duration_ms: 32.4411
+  type: 'test'
+  ...
+# Subtest: catalog descriptor shares source identity and original independent policy budget
+ok 85 - catalog descriptor shares source identity and original independent policy budget
+  ---
+  duration_ms: 0.9344
+  type: 'test'
+  ...
+1..85
+# tests 85
+# suites 0
+# pass 85
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2008.9563

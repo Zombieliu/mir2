@@ -1,0 +1,77 @@
+{
+  "kind": "NPC-name-layer-root-agent-component-visual-review",
+  "sourceBase": "91b8fc9b4f5170cb37b6619b991707ed76a34d73",
+  "reviewedAt": "2026-11-13T23:20:42.057Z",
+  "reviewer": "root agent using local view_image",
+  "humanAccepted": false,
+  "finding": "Before screenshot hides the short Chinese name behind the opaque real NPC body. After screenshot shows both 守卫 characters clearly over that same body; position, image and relevant input styles are unchanged.",
+  "structuralSmokePassed": true,
+  "localVisualReviewPassed": true,
+  "fullGameVerified": false,
+  "autoSizeGdiVerified": false,
+  "published": false,
+  "limits": "Only a real-CSS/PNG DOM component paint comparison. Does not establish full gameplay, NPC click priority, all camera positions/maps or complete label sizing. Assistant Jane79px versus fixed50px remains open. Public source91b does not include this CSS patch.",
+  "artifacts": [
+    {
+      "file": "source-audit.json",
+      "sha256": "2deaa0d6c35cd8a684b5f325f2b271b682182c33cb2827c2954fffcd453508ed",
+      "rawSource": {
+        "path": "C:/r16-walking-recovery-20261114/npc-name-source-audit.json",
+        "sha256": "2deaa0d6c35cd8a684b5f325f2b271b682182c33cb2827c2954fffcd453508ed"
+      },
+      "serialization": "UTF8 LF; raw source hash retained separately"
+    },
+    {
+      "file": "component-receipt.json",
+      "sha256": "d979546f0ddf86201cdeff7132b63beea97fdc52cceec22fbb1db9e6687f673b",
+      "rawSource": {
+        "path": "C:/r16-npc-name-layer-20261114/smoke-r1/receipt.json",
+        "sha256": "d979546f0ddf86201cdeff7132b63beea97fdc52cceec22fbb1db9e6687f673b"
+      },
+      "serialization": "UTF8 LF; raw source hash retained separately"
+    },
+    {
+      "file": "component-inputs.json",
+      "sha256": "ce473f78b55b14613a0507c3d941f3c6ac80c7483221136f6f40b8077c104d0d",
+      "rawSource": {
+        "path": "C:/r16-npc-name-layer-20261114/inputs.json",
+        "sha256": "7f29648628fef5fa9c3f3a0c03d6e5964ac2d9f3c5b72e1fa7e3a870313e0182"
+      },
+      "serialization": "UTF8 LF; raw source hash retained separately"
+    },
+    {
+      "file": "depth-before.log",
+      "sha256": "602fe54eca47fdde9f56b0b52a277ec40e3d62a74a163ab62327489fc02bcf40",
+      "rawSource": {
+        "path": "C:/r16-walking-recovery-20261114/npc-name-depth-before-r2.log",
+        "sha256": "363496ae8219bdfc346fe18b878a593c8c908874abc4cc81dc92edb5fa011515"
+      },
+      "serialization": "UTF8 LF; raw source hash retained separately"
+    },
+    {
+      "file": "depth-after.log",
+      "sha256": "ee4eac3e69728c2ecda389edbcd3a6aa6a81b1c4dd15f68c9485903395f5f12c",
+      "rawSource": {
+        "path": "C:/r16-walking-recovery-20261114/npc-name-depth-after-r2.log",
+        "sha256": "85098fac7920861de621a1e074f6c629752472d31b5a8b4b53cffdeeac742f07"
+      },
+      "serialization": "UTF8 LF; raw source hash retained separately"
+    },
+    {
+      "file": "before.png",
+      "sha256": "43db50cb5d7a21ff3ba1cd33f12e0723fb6d9ba689562fa6b316c35543bfe041",
+      "rawSource": {
+        "path": "C:/r16-npc-name-layer-20261114/smoke-r1/before.png",
+        "sha256": "43db50cb5d7a21ff3ba1cd33f12e0723fb6d9ba689562fa6b316c35543bfe041"
+      }
+    },
+    {
+      "file": "after.png",
+      "sha256": "f6484b5b0d210cd3a79bede67183d3ea45472fe2664c2fd0e414e24c8853df85",
+      "rawSource": {
+        "path": "C:/r16-npc-name-layer-20261114/smoke-r1/after.png",
+        "sha256": "f6484b5b0d210cd3a79bede67183d3ea45472fe2664c2fd0e414e24c8853df85"
+      }
+    }
+  ]
+}

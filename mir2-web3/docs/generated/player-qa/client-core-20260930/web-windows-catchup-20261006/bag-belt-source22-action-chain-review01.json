@@ -1,0 +1,903 @@
+{
+  "schemaVersion": 1,
+  "id": "bag-belt-source22-action-chain-review01",
+  "generatedAtUtc": "2026-10-06T22:35:17.009Z",
+  "parentCommit": "229ae772d7bd3acdb1b21ef3e8005bf817a393d4",
+  "fixedWindowsBaseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "finiteResult": {
+    "relativePath": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/bag-belt-source22-finite-result01.json",
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\bag-belt-source22-finite-result01.json",
+    "bytes": 75003,
+    "sha256": "a51fdd3412a2365cd12835fc2295ab2ffb75f0f6aef5dcdc3154c051a25dade2"
+  },
+  "products": [
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\overlays.rs",
+      "bytes": 897533,
+      "sha256": "2545ce7104060e3de7143983908f65165c57a881651d7e90942edc2e31e7b703",
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\inventory.rs",
+      "bytes": 32107,
+      "sha256": "f748995a9b28afff30ab6dba356de8155bba95c3e76047b1fecf9d1504c40af4",
+      "relativePath": "apps/game-client/client-bevy/src/inventory.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\portable_bag_ui.rs",
+      "bytes": 131082,
+      "sha256": "711306f13b98ab711df3a6f128e45016acb72cd9931e74b5f9a7ffee41baa36b",
+      "relativePath": "apps/game-client/client-bevy/src/portable_bag_ui.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\intent.rs",
+      "bytes": 7513,
+      "sha256": "adeec3ffbab3ddee1399e73280682dd120201bdb591a2505264bf5c5df8b8a1f",
+      "relativePath": "apps/game-client/client-core/src/intent.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\lib.rs",
+      "bytes": 1288,
+      "sha256": "d3c5ac8c8060d2b37bdec94eb4c2401d1853c2de228dbe0828cf4db41f0065b8",
+      "relativePath": "apps/game-client/platform-web/src/lib.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\bag_ui_host.rs",
+      "bytes": 51366,
+      "sha256": "7aa523c8761cdfdb5feb8235654775cd28b5ed89306b1cb229451c851fbfb489",
+      "relativePath": "apps/game-client/runtime/src/bag_ui_host.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\character_ui_host.rs",
+      "bytes": 18887,
+      "sha256": "35c8c2294de5301e68be961cc0a9fad747005df56cf3688c46e9b0db866e8070",
+      "relativePath": "apps/game-client/runtime/src/character_ui_host.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\bag_to_belt.rs",
+      "bytes": 8601,
+      "sha256": "c5acd2e6580c7e20605e388439550be0bc6db416c010a504dffb7d36d4836682",
+      "relativePath": "apps/game-client/platform-web/src/bag_to_belt.rs"
+    },
+    {
+      "relativePath": "apps/web/app/page.tsx",
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/app/page.tsx",
+      "bytes": 965712,
+      "sha256": "25250c88735634b404e119e6510134f4421226e2bfb27ebffefdc10dd2e1d065"
+    },
+    {
+      "relativePath": "apps/web/lib/bag-belt-move-dispatcher.ts",
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/lib/bag-belt-move-dispatcher.ts",
+      "bytes": 8587,
+      "sha256": "44988e16ef0aaf7385cf7208209cbd5ac72cf9c603f3ba7d7e15f30af3d9a4b2"
+    },
+    {
+      "relativePath": "apps/web/lib/bag-belt-gesture.ts",
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/lib/bag-belt-gesture.ts",
+      "bytes": 6192,
+      "sha256": "e4ac06538c5f70128d222fbd04fb37212b0c743f286fb74fd463e256b985e6f2"
+    },
+    {
+      "relativePath": "apps/web/lib/mail-parcel-gateway-adapter.ts",
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/lib/mail-parcel-gateway-adapter.ts",
+      "bytes": 7314,
+      "sha256": "3d5645b2bd669fbf02e6eaaae174648534efcac768ebb918441be9c29f52f9d4"
+    },
+    {
+      "relativePath": "apps/web/lib/client-presentation-runtime.ts",
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/lib/client-presentation-runtime.ts",
+      "bytes": 20091,
+      "sha256": "4ce1a9b324ce7d8c18dbe59628fb87d7fc46d8243622cce420ce737e2cbca44a"
+    },
+    {
+      "relativePath": "apps/web/lib/client-core-runtime.ts",
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/lib/client-core-runtime.ts",
+      "bytes": 39675,
+      "sha256": "350ceef43718d5ead4d197b5918110dcbe9c60a84898a524614bd348dff520ac"
+    },
+    {
+      "relativePath": "apps/web/lib/bevy-bag-ui.ts",
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/lib/bevy-bag-ui.ts",
+      "bytes": 24475,
+      "sha256": "ec998cdc9d396324ba4c57262bcc843a4b1559365aa9a713c43c8a73582134de"
+    },
+    {
+      "relativePath": "apps/web/app/original-client-shell.tsx",
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/app/original-client-shell.tsx",
+      "bytes": 302906,
+      "sha256": "10d9cfe51a3df371c457431d00bab468f0f1129d110549bb1c7c688ceb60c6c9"
+    },
+    {
+      "relativePath": "apps/web/app/components/original-client-shell-types.ts",
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/app/components/original-client-shell-types.ts",
+      "bytes": 18058,
+      "sha256": "243316b4c53500bdbb5cf6786e24ef17ba6512c17cdfe74decfa7339f3bd51f3"
+    },
+    {
+      "relativePath": "apps/web/app/components/original-client-game-ui-scene.tsx",
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/app/components/original-client-game-ui-scene.tsx",
+      "bytes": 35424,
+      "sha256": "d354274a83ddcf4ee08932c73148ef97439543551bf5b80895d7584a402b495a"
+    },
+    {
+      "relativePath": "apps/web/app/components/original-client-inventory-window.tsx",
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/app/components/original-client-inventory-window.tsx",
+      "bytes": 53353,
+      "sha256": "2fca43896b9091d78631e022d0e38d8ec858a616015330cb032438ae0fa0b586"
+    },
+    {
+      "relativePath": "apps/web/app/components/original-client-panels.tsx",
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/app/components/original-client-panels.tsx",
+      "bytes": 39399,
+      "sha256": "9c9435097b43fe3cbdab420b3ee4dc445d7577b28c6a4eccaebe468cef730d32"
+    }
+  ],
+  "reviewer": "/root/w2b_final_source_review",
+  "readOnly": true,
+  "executionsByReviewer": 0,
+  "conclusion": "Independent final source, original test inverse and actual finite/static artifact review accepted with0 confirmedP0/P1/P2. Only F05.belt.move-from-bag candidate source actionchain closed; actual players notrun.",
+  "originalRecords": [
+    {
+      "id": "F05.belt.move-from-bag",
+      "originalAudit": {
+        "file": "w0-f01-f06-source-audit01.json",
+        "rowId": "F05.belt.move-from-bag",
+        "implementationStatus": "open",
+        "record": {
+          "id": "F05.belt.move-from-bag",
+          "parentFamily": "F05",
+          "playerBehavior": "背包drag落真实腰带槽含空槽",
+          "nativeBaseline": {
+            "controlOrAction": {
+              "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+              "line": 6054,
+              "excerpt": "} else if let Some(belt_slot) = belt_slot_at_cursor(belt, cursor) {",
+              "blobSha1": "37f340a576f31370d1ad9ecad374425cf5d2ec22"
+            },
+            "registration": {
+              "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+              "line": 3875,
+              "excerpt": "impl Plugin for Mir2CrystalOverlayPlugin {",
+              "blobSha1": "37f340a576f31370d1ad9ecad374425cf5d2ec22"
+            },
+            "registrationScope": "Overlay plugin build and reachable control/consumer were inspected; full root Mir2Client plugin installation is a carried baseline dependency, not re-opened this bounded pass.",
+            "outbound": {
+              "kind": "actual Native command enum/serialization",
+              "command": "EquipSlotItem",
+              "path": "apps/game-client/platform-windows/src/native_protocol.rs",
+              "line": 621,
+              "excerpt": "Self::EquipSlotItem { .. } => \"equipSlotItem\",",
+              "blobSha1": "5c55e2a5ea5d49f7697c19e65c655229178a0e19"
+            }
+          },
+          "currentWeb": {
+            "entryOrConsumer": {
+              "path": "apps/web/app/components/original-client-panels.tsx",
+              "line": 449,
+              "excerpt": "className=\"belt-slot\"",
+              "sha256": "73820baef8b48222c137643472f1f5946655daa58e9285d4b2cd4acae3ab1679"
+            }
+          },
+          "implementationStatus": "open",
+          "finiteTest": {
+            "status": "unknown"
+          },
+          "source09BuildCoverage": {
+            "web": "Root recorded Next02 + strict TSC build-only; current path is source evidence, not exercised UI",
+            "sharedRenderer": "React/legacy or missing path; build does not establish behavioral equality",
+            "native": "Root recorded Native09 build-only; fixed baseline anchors are independently read from Git"
+          },
+          "unverifiedPlayerFlow": "Fresh authenticated Windows/Web player interaction, real outbound/ACK, relogin/save and touch/device flow have not been run in this audit.",
+          "notes": "Generic Web move protocol exists, but no reachable BeltDialog target handler/chooser; shared Bag target maps only bag1/bag2."
+        }
+      },
+      "native": {
+        "revision": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+        "primarySourceAnchor": {
+          "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+          "line": 6054,
+          "excerpt": "} else if let Some(belt_slot) = belt_slot_at_cursor(belt, cursor) {",
+          "blobSha1": "37f340a576f31370d1ad9ecad374425cf5d2ec22",
+          "role": "source declaration/action/consumer candidate; see qualification"
+        },
+        "controlChainStatus": "source anchored candidate; full registered-control → host → outbound chain not certified by matrix",
+        "controlChainClosed": false,
+        "outbound": {
+          "kind": "actual Native command enum/serialization",
+          "command": "EquipSlotItem",
+          "path": "apps/game-client/platform-windows/src/native_protocol.rs",
+          "line": 621,
+          "excerpt": "Self::EquipSlotItem { .. } => \"equipSlotItem\",",
+          "blobSha1": "5c55e2a5ea5d49f7697c19e65c655229178a0e19"
+        },
+        "registrationEvidence": {
+          "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+          "line": 3875,
+          "excerpt": "impl Plugin for Mir2CrystalOverlayPlugin {",
+          "blobSha1": "37f340a576f31370d1ad9ecad374425cf5d2ec22"
+        },
+        "sourceChainQualification": "Overlay plugin build and reachable control/consumer were inspected; full root Mir2Client plugin installation is a carried baseline dependency, not re-opened this bounded pass."
+      },
+      "historicalRecordsRetained": true
+    }
+  ],
+  "nativeEvidence": [
+    {
+      "id": "F05.belt.move-from-bag",
+      "baseline": {
+        "revision": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+        "primarySourceAnchor": {
+          "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+          "line": 6054,
+          "excerpt": "} else if let Some(belt_slot) = belt_slot_at_cursor(belt, cursor) {",
+          "blobSha1": "37f340a576f31370d1ad9ecad374425cf5d2ec22",
+          "role": "source declaration/action/consumer candidate; see qualification"
+        },
+        "controlChainStatus": "source anchored candidate; full registered-control → host → outbound chain not certified by matrix",
+        "controlChainClosed": false,
+        "outbound": {
+          "kind": "actual Native command enum/serialization",
+          "command": "EquipSlotItem",
+          "path": "apps/game-client/platform-windows/src/native_protocol.rs",
+          "line": 621,
+          "excerpt": "Self::EquipSlotItem { .. } => \"equipSlotItem\",",
+          "blobSha1": "5c55e2a5ea5d49f7697c19e65c655229178a0e19"
+        },
+        "registrationEvidence": {
+          "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+          "line": 3875,
+          "excerpt": "impl Plugin for Mir2CrystalOverlayPlugin {",
+          "blobSha1": "37f340a576f31370d1ad9ecad374425cf5d2ec22"
+        },
+        "sourceChainQualification": "Overlay plugin build and reachable control/consumer were inspected; full root Mir2Client plugin installation is a carried baseline dependency, not re-opened this bounded pass."
+      },
+      "currentCorrection": {
+        "priorCommand": "EquipSlotItem",
+        "actualCommand": "MoveItem",
+        "grid": "belt",
+        "from": "globalBagSlot + 6",
+        "to": "0..5",
+        "historicalAuditAndNativeFieldsRetained": true,
+        "currentNativeWrapper": {
+          "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+          "anchors": [
+            4508,
+            4514,
+            5067,
+            6067
+          ]
+        },
+        "actualNativeProtocol": {
+          "path": "apps/game-client/platform-windows/src/native_protocol.rs",
+          "anchors": [
+            336,
+            674,
+            1819
+          ],
+          "pin": {
+            "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\native_protocol.rs",
+            "bytes": 82980,
+            "sha256": "b258df7ca548a7e104f5a9a17328083a856dc943269471eace8dbad02894aad8"
+          }
+        },
+        "qualification": "Append correction to previously misidentified outbound, preserve fixed baseline evidence verbatim; current Native adapters use shared checked planner without changing original two gestures."
+      },
+      "qualification": "Fixed Native registration/control-chain source qualification carried unchanged; current two concrete drag handlers, originalHUDfrom8/to0 regression and sharedCorePlanner inspected and actually compiled. No newNative UI run."
+    }
+  ],
+  "sharedCore": {
+    "planner": {
+      "path": "apps/game-client/client-core/src/intent.rs",
+      "anchors": [
+        15,
+        25,
+        47
+      ]
+    },
+    "capacity": "Canonical raw capacities46,54,58,62,66,70,74,78,82,86 include6 Belt slots. Native invalid capacity normalizes to46; strict sharedplanner rejects noncanonicalraw values. Global Bag2 first40 mapsraw46; maxraw85 atcap86. Web safenumber UID includes0, Native fullu64.",
+    "optionalPui": {
+      "path": "apps/game-client/platform-web/src/bag_to_belt.rs",
+      "anchors": [
+        14,
+        41
+      ],
+      "abi": 1,
+      "inputBoundUtf8Bytes": 4096,
+      "duplicateUnknownFieldsRejected": true,
+      "missingCapabilityFailsNewActionWithoutBreakingNormalCore": true
+    }
+  },
+  "webEvidence": [
+    {
+      "path": "apps/game-client/client-bevy/src/portable_bag_ui.rs",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\portable_bag_ui.rs",
+        "bytes": 131082,
+        "sha256": "711306f13b98ab711df3a6f128e45016acb72cd9931e74b5f9a7ffee41baa36b"
+      },
+      "matches": [
+        {
+          "needle": "MoveToBelt",
+          "anchors": [
+            {
+              "line": 188,
+              "excerpt": "MoveToBelt { source: BagSelection, target_slot: u8, target_unique_id: Option<u64>,"
+            },
+            {
+              "line": 1157,
+              "excerpt": "Some(BagUiIntentKind::MoveToBelt { source, target_slot: target.slot,"
+            },
+            {
+              "line": 2321,
+              "excerpt": "assert_eq!(intents[0].kind, BagUiIntentKind::MoveToBelt {"
+            },
+            {
+              "line": 2416,
+              "excerpt": "[BagUiIntent { kind: BagUiIntentKind::MoveToBelt { .. }, .. }]), \"{case}: fresh explicit gesture remains usable\");"
+            },
+            {
+              "line": 2439,
+              "excerpt": "[BagUiIntent { kind: BagUiIntentKind::MoveToBelt { .. }, .. }]));"
+            },
+            {
+              "line": 2463,
+              "excerpt": "kind: BagUiIntentKind::MoveToBelt { target_slot: 0, .. }, .."
+            }
+          ]
+        },
+        {
+          "needle": "belt_drop_geometry",
+          "anchors": [
+            {
+              "line": 117,
+              "excerpt": "pub belt_drop_geometry: Option<BagBeltDropGeometry>,"
+            },
+            {
+              "line": 1060,
+              "excerpt": "belt_geometry: model.belt_drop_geometry.clone(),"
+            },
+            {
+              "line": 1062,
+              "excerpt": "retired_belt_targets: model.belt_drop_geometry.as_ref().map(|geometry|"
+            },
+            {
+              "line": 1134,
+              "excerpt": "let Some(geometry) = model.belt_drop_geometry.as_ref() else { return false; };"
+            },
+            {
+              "line": 1151,
+              "excerpt": "let geometry = model.belt_drop_geometry.as_ref()?;"
+            },
+            {
+              "line": 2275,
+              "excerpt": "read.belt_drop_geometry = Some(BagBeltDropGeometry {"
+            }
+          ]
+        },
+        {
+          "needle": "BagToBelt",
+          "anchors": []
+        }
+      ]
+    },
+    {
+      "path": "apps/game-client/runtime/src/bag_ui_host.rs",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\bag_ui_host.rs",
+        "bytes": 51366,
+        "sha256": "7aa523c8761cdfdb5feb8235654775cd28b5ed89306b1cb229451c851fbfb489"
+      },
+      "matches": [
+        {
+          "needle": "supports_bag_to_belt",
+          "anchors": [
+            {
+              "line": 303,
+              "excerpt": "supports_bag_to_belt: bool,"
+            },
+            {
+              "line": 357,
+              "excerpt": "applied_presentation_revision: 0, supports_bag_to_belt: true,"
+            }
+          ]
+        },
+        {
+          "needle": "moveToBelt",
+          "anchors": [
+            {
+              "line": 730,
+              "excerpt": "object.insert(\"type\".to_owned(), json!(\"moveToBelt\"));"
+            },
+            {
+              "line": 1117,
+              "excerpt": "\"type\":\"moveToBelt\",\"source\":{\"container\":0,\"slot\":40,\"uniqueId\":0},"
+            }
+          ]
+        },
+        {
+          "needle": "beltDropGeometry",
+          "anchors": [
+            {
+              "line": 165,
+              "excerpt": "if let Some(geometry) = root.get(\"beltDropGeometry\").filter(|value| !value.is_null()) {"
+            },
+            {
+              "line": 1039,
+              "excerpt": "snapshot[\"beltDropGeometry\"] = json!({"
+            },
+            {
+              "line": 1057,
+              "excerpt": "empty[\"beltDropGeometry\"][\"targets\"][5][\"uniqueId\"] = serde_json::Value::Null;"
+            },
+            {
+              "line": 1060,
+              "excerpt": "missing[\"beltDropGeometry\"][\"targets\"][5].as_object_mut().unwrap().remove(\"uniqueId\");"
+            },
+            {
+              "line": 1071,
+              "excerpt": "\"five\" => { snapshot[\"beltDropGeometry\"][\"targets\"].as_array_mut().unwrap().pop(); },"
+            },
+            {
+              "line": 1073,
+              "excerpt": "let target = snapshot[\"beltDropGeometry\"][\"targets\"][0].clone();"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "apps/web/app/page.tsx",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\page.tsx",
+        "bytes": 965712,
+        "sha256": "25250c88735634b404e119e6510134f4421226e2bfb27ebffefdc10dd2e1d065"
+      },
+      "matches": [
+        {
+          "needle": "beginBagToBeltGesture",
+          "anchors": [
+            {
+              "line": 2234,
+              "excerpt": "onBagBeltDropGeometry: receiveBagBeltDropGeometry, onBeginBagToBeltGesture: beginBagToBeltGesture,"
+            },
+            {
+              "line": 8538,
+              "excerpt": "function beginBagToBeltGesture(source: Readonly<ItemCommandRef> | null, geometry: BagBeltGeometry,"
+            }
+          ]
+        },
+        {
+          "needle": "submitBagToBeltMove",
+          "anchors": [
+            {
+              "line": 2235,
+              "excerpt": "onArmBagToBeltGesture: armBagToBeltGesture, onBagToBeltMove: submitBagToBeltMove,"
+            },
+            {
+              "line": 8622,
+              "excerpt": "function submitBagToBeltMove(item: Readonly<ItemCommandRef>, target: BagBeltDropTarget,"
+            },
+            {
+              "line": 11410,
+              "excerpt": "return { accepted: submitBagToBeltMove(item, intent.target, proof, record.geometry) };"
+            }
+          ]
+        },
+        {
+          "needle": "bagBeltSocketEntry",
+          "anchors": []
+        },
+        {
+          "needle": "receiveBagBeltDropGeometry",
+          "anchors": [
+            {
+              "line": 2234,
+              "excerpt": "onBagBeltDropGeometry: receiveBagBeltDropGeometry, onBeginBagToBeltGesture: beginBagToBeltGesture,"
+            },
+            {
+              "line": 8481,
+              "excerpt": "function receiveBagBeltDropGeometry(geometry: BagBeltGeometry | null) {"
+            }
+          ]
+        },
+        {
+          "needle": "observeBagBeltInventorySnapshot",
+          "anchors": [
+            {
+              "line": 8463,
+              "excerpt": "function observeBagBeltInventorySnapshot(snapshot: GatewayWorldSnapshot, connectionGeneration: number,"
+            },
+            {
+              "line": 12208,
+              "excerpt": "observeBagBeltInventorySnapshot(snapshot, connectionGeneration, beforeInventorySnapshot);"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "apps/web/app/original-client-shell.tsx",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\original-client-shell.tsx",
+        "bytes": 302906,
+        "sha256": "10d9cfe51a3df371c457431d00bab468f0f1129d110549bb1c7c688ceb60c6c9"
+      },
+      "matches": [
+        {
+          "needle": "registerBeltTargets",
+          "anchors": [
+            {
+              "line": 3750,
+              "excerpt": "const registerBeltTargets = useCallback((targets: readonly BagBeltButtonBinding[]) => {"
+            },
+            {
+              "line": 4928,
+              "excerpt": "onRegisterBeltTargets: registerBeltTargets,"
+            }
+          ]
+        },
+        {
+          "needle": "beginBagBeltPointer",
+          "anchors": [
+            {
+              "line": 3761,
+              "excerpt": "function beginBagBeltPointer(event: Parameters<typeof handleSharedBagPointer>[0], node: HTMLElement, source: Readonly<ItemActionRef> | null,"
+            },
+            {
+              "line": 3791,
+              "excerpt": "return beginBagBeltPointer(event, event.currentTarget, Object.freeze({ ...item }), \"react\", activate);"
+            },
+            {
+              "line": 4220,
+              "excerpt": "beginBagBeltPointer(event, event.target as HTMLElement, null, \"bevy\");"
+            }
+          ]
+        },
+        {
+          "needle": "finishBagBeltPointer",
+          "anchors": [
+            {
+              "line": 3793,
+              "excerpt": "function finishBagBeltPointer(event: Parameters<typeof handleSharedBagPointer>[0], phase: \"up\" | \"cancel\"): boolean {"
+            },
+            {
+              "line": 3843,
+              "excerpt": "if (phase === \"up\" || phase === \"cancel\") return finishBagBeltPointer(event, phase);"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "apps/web/app/components/original-client-panels.tsx",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\components\\original-client-panels.tsx",
+        "bytes": 39399,
+        "sha256": "9c9435097b43fe3cbdab420b3ee4dc445d7577b28c6a4eccaebe468cef730d32"
+      },
+      "matches": [
+        {
+          "needle": "beltBindingKey",
+          "anchors": [
+            {
+              "line": 550,
+              "excerpt": "const beltBindingKey = JSON.stringify(Array.from({ length: 6 }, (_, slot) => {"
+            },
+            {
+              "line": 561,
+              "excerpt": "}, [beltBindingKey, vertical, onRegisterBeltTargets]);"
+            }
+          ]
+        },
+        {
+          "needle": "registerBeltTargets",
+          "anchors": []
+        }
+      ]
+    },
+    {
+      "path": "apps/web/lib/bag-belt-move-dispatcher.ts",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\bag-belt-move-dispatcher.ts",
+        "bytes": 8587,
+        "sha256": "44988e16ef0aaf7385cf7208209cbd5ac72cf9c603f3ba7d7e15f30af3d9a4b2"
+      },
+      "matches": [
+        {
+          "needle": "export class",
+          "anchors": [
+            {
+              "line": 17,
+              "excerpt": "export class BagBeltMoveDispatcher {"
+            }
+          ]
+        },
+        {
+          "needle": "acknowledge",
+          "anchors": [
+            {
+              "line": 10,
+              "excerpt": "entered: boolean; acknowledged: boolean; observed: boolean };"
+            },
+            {
+              "line": 67,
+              "excerpt": "sourceSlot, uniqueId, targetUniqueId, snapshotVersion, entered: false, acknowledged: false, observed: false };"
+            },
+            {
+              "line": 94,
+              "excerpt": "acknowledge(owner: BagBeltMoveOwner, payload: Record<string, unknown>): boolean {"
+            },
+            {
+              "line": 102,
+              "excerpt": "flight.acknowledged = true;"
+            },
+            {
+              "line": 125,
+              "excerpt": "if (!flight.acknowledged || !flight.observed) return false;"
+            }
+          ]
+        },
+        {
+          "needle": "observeInventory",
+          "anchors": []
+        },
+        {
+          "needle": "enter(",
+          "anchors": [
+            {
+              "line": 81,
+              "excerpt": "enter(proof: BagBeltMoveReservation, owner: BagBeltMoveOwner, command: Record<string, unknown>): boolean {"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "apps/web/lib/bag-belt-gesture.ts",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\bag-belt-gesture.ts",
+        "bytes": 6192,
+        "sha256": "e4ac06538c5f70128d222fbd04fb37212b0c743f286fb74fd463e256b985e6f2"
+      },
+      "matches": [
+        {
+          "needle": "bagBeltTargetAtClientPoint",
+          "anchors": [
+            {
+              "line": 45,
+              "excerpt": "export function bagBeltTargetAtClientPoint(geometry: BagBeltGeometry, x: number, y: number): BagBeltDropTarget | null {"
+            },
+            {
+              "line": 63,
+              "excerpt": "const actual = bagBeltTargetAtClientPoint(geometry, point.clientX, point.clientY);"
+            }
+          ]
+        },
+        {
+          "needle": "bagBeltReleasePointIsCurrent",
+          "anchors": [
+            {
+              "line": 60,
+              "excerpt": "export function bagBeltReleasePointIsCurrent(geometry: BagBeltGeometry, target: BagBeltDropTarget,"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "apps/web/lib/mail-parcel-gateway-adapter.ts",
+      "pin": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\mail-parcel-gateway-adapter.ts",
+        "bytes": 7314,
+        "sha256": "3d5645b2bd669fbf02e6eaaae174648534efcac768ebb918441be9c29f52f9d4"
+      },
+      "matches": [
+        {
+          "needle": "projectMailItemMutationSnapshot",
+          "anchors": [
+            {
+              "line": 26,
+              "excerpt": "export function projectMailItemMutationSnapshot(raw:unknown):MailParcelSnapshot|null {"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "intentAndCustody": "CompatDOM captured actual source card and sharedBevy actual Rust Down/Up emit through retained opaque source-null Page lease. Six actual Belt buttons including empty are registered aftercommit with semantic binding key. Terminal burns beforecallback,4 logical px drag; secondpointer quarantinesboth, compatclick fenced, stale/invalid interval retiresoldproof, old cleanup cannot delete successor. Exactrelease hit tests actual elementFromPoint current visible enabled target and source/page/scale/DPR/current owner/layout before and after Core call. No force-compat shortcut.",
+  "sendAndAck": "Core returns rawfrom+6 plan; Web freezes exact four-key MoveItem gridbelt/from/to command. All Core getter/read calls complete before final actual parity/mail/social/storage gates; final opaqueproof checked and dispatcher.enter immediately adjacent actualsocket.send. Samephysicalconnection entered/unknown blocks source UID andoccupiedtarget UID0 plusbothcells; no expiry/retry/owner or equivalentlayout release. ExactMoveItem grid/from/to/success sameowner ACK hasnoUID; failure releases,success additionally requiresnewerfull raw occupiedexchange or emptytarget snapshot in eitherorder.",
+  "mail": "Separate pure raw item-mutation snapshot preservesknown0 while originalparcel positiveID/sentinel contract unchanged. Belt decoder resolvesraw0..5 targets and≥6 globalBag sources inclBag2+40; threeactualPage mail gates useit.",
+  "finiteFixtureGroups": [
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5351,
+      "declaration": "Bag-to-Belt optional PUI forwards UID zero and Bag2 capacity without JS index planning",
+      "rows": [
+        "F05.belt.move-from-bag"
+      ],
+      "coveredAspect": "Actual optional PUI facade forwards UID0 and Bag2 capacity to an ABI-shaped mock; no WASM, Page or Shell execution."
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5369,
+      "declaration": "Bag-to-Belt optional PUI rejects malformed results and reentrant ABI getter replacement",
+      "rows": [
+        "F05.belt.move-from-bag"
+      ],
+      "coveredAspect": "Actual optional PUI facade rejects malformed ABI-shaped responses and reentrant getter replacement in memory; no WASM execution."
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5395,
+      "declaration": "Bag-to-Belt dispatcher protects UID zero both identities and empty destination cells",
+      "rows": [
+        "F05.belt.move-from-bag"
+      ],
+      "coveredAspect": "Actual dispatcher memory calls reserve both UID0 identities and source/target cells, including empty targets."
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5408,
+      "declaration": "Bag-to-Belt dispatcher entered transport throw stays blocked without owner layout or timeout release",
+      "rows": [
+        "F05.belt.move-from-bag"
+      ],
+      "coveredAspect": "Actual dispatcher memory calls retain entered unknown outcomes across owner/layout/timeout changes and reject replay."
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5419,
+      "declaration": "Bag-to-Belt exact ACK ignores wrong tuple session and physical connection",
+      "rows": [
+        "F05.belt.move-from-bag"
+      ],
+      "coveredAspect": "Actual dispatcher memory ACK calls reject wrong grid/from/to/session/physical connection tuples."
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5428,
+      "declaration": "Bag-to-Belt success requires exact ACK and newer complete empty or occupied exchange in either order",
+      "rows": [
+        "F05.belt.move-from-bag"
+      ],
+      "coveredAspect": "Actual dispatcher memory ACK/layout observations require exact newer complete empty or occupied exchange in either order."
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5441,
+      "declaration": "Mail actual Belt decoder resolves from six and global Bag2 forty and protects both touched cells",
+      "rows": [
+        "F05.belt.move-from-bag"
+      ],
+      "coveredAspect": "Actual mail decoder memory calls resolve raw Belt/globalBag2 indices and protect both touched cells."
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5471,
+      "declaration": "Bag-to-Belt geometry requires six actual painted unobscured targets and exact release point",
+      "rows": [
+        "F05.belt.move-from-bag"
+      ],
+      "coveredAspect": "Actual geometry helper memory calls check six painted targets, elementFromPoint and exact release point under explicit DOM mocks."
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5487,
+      "declaration": "Bag-to-Belt geometry rejects DPR hidden node identity and measured rect changes",
+      "rows": [
+        "F05.belt.move-from-bag"
+      ],
+      "coveredAspect": "Actual geometry helper memory calls reject changed DPR, hidden/disabled/stale node identities and rectangles."
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5499,
+      "declaration": "Belt actual layout effect retains equivalent bindings and registers all six empty or occupied buttons",
+      "rows": [
+        "F05.belt.move-from-bag"
+      ],
+      "coveredAspect": "Actual Belt component AST/effect fixture retains equivalent semantic bindings and registers six empty/occupied buttons."
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5529,
+      "declaration": "Bag-to-Belt actual Shell terminal burns before callback keeps four pixel threshold and fences compatibility clicks",
+      "rows": [
+        "F05.belt.move-from-bag"
+      ],
+      "coveredAspect": "Actual Shell extracted gesture functions in memory burn terminal before callback, enforce4 logicalpx and fence compatibility clicks."
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5570,
+      "declaration": "Bag-to-Belt actual Shell second pointer quarantines through terminal without successor cleanup erasure",
+      "rows": [
+        "F05.belt.move-from-bag"
+      ],
+      "coveredAspect": "Actual Shell extracted gesture functions in memory quarantine second pointers and preserve successor cleanup ownership."
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5643,
+      "declaration": "Bag-to-Belt Page actual UID zero Bag2 gesture sends exactly four keys once and retains transport throw barrier",
+      "rows": [
+        "F05.belt.move-from-bag"
+      ],
+      "coveredAspect": "Actual Page extracted final send slice in memory sends exact4keys once for raw UID0/Bag2 and retains entered transport-throw barrier."
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5655,
+      "declaration": "Bag-to-Belt Page final entry rechecks reentrant owner source geometry mail and actual mutation gates",
+      "rows": [
+        "F05.belt.move-from-bag"
+      ],
+      "coveredAspect": "Actual Page extracted final send slice in memory rejects reentrant owner/source/geometry/mail/mutation changes."
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5677,
+      "declaration": "Bag-to-Belt Page final Core getter reentry cannot add mail social or storage ownership after last gate",
+      "rows": [
+        "F05.belt.move-from-bag"
+      ],
+      "coveredAspect": "Actual Page extracted final send slice in memory performs final Core getter before actual mail/social/storage lock checks."
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5691,
+      "declaration": "Bag-to-Belt Page actual complete snapshot observation and exact ACK release occupied exchange in both orders",
+      "rows": [
+        "F05.belt.move-from-bag"
+      ],
+      "coveredAspect": "Actual Page snapshot/ACK functions in memory release occupied exchange only after exact ACK and newer full layout in either order."
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5708,
+      "declaration": "Mail actual item mutation projection preserves known UID zero while parcel attachment sentinel remains null",
+      "rows": [
+        "F05.belt.move-from-bag"
+      ],
+      "coveredAspect": "Actual item mutation projection memory calls preserve UID0 while original parcel attachment sentinel remainsnull."
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5731,
+      "declaration": "Bag-to-Belt Page uses actual zero preserving projection under unrelated mail locks for empty and occupied Belt",
+      "rows": [
+        "F05.belt.move-from-bag"
+      ],
+      "coveredAspect": "Actual Page extracted send slice in memory uses UID0-preserving raw projection under unrelated mail locks for empty/occupied targets."
+    },
+    {
+      "path": "apps/web/scripts/test-stage5-adapters.mjs",
+      "line": 5743,
+      "declaration": "Bag-to-Belt Page rejects duplicate global UID zero and missing raw source despite display identity",
+      "rows": [
+        "F05.belt.move-from-bag"
+      ],
+      "coveredAspect": "Actual Page source resolver/send slice in memory rejects duplicate global UID0 and absent raw source despite displayed identity."
+    }
+  ],
+  "matrixQualification": "Only F05.belt.move-from-bag open→legacy/sourceCandidate closed after final source/finite/static acceptance; sharedplanner and sharedBevy Bag interaction do not promote entireDOM Belt host toshared painter.",
+  "nextWork": [
+    "F02.world.fishing-click",
+    "F09.NPC.PEARL",
+    "F11.RANKING.INSPECT"
+  ],
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-bag-belt-source22-node03-source-review.json",
+    "bytes": 19655,
+    "sha256": "8fdd63e0c1209590217e829c7811b469346b578667b3b4be9d43336b8c7d27f7"
+  },
+  "limitations": "ActualGUI, browser/native/WASM, transport/game/save/relogin/mobile/player100Candidate notrun; source closure is bounded, no whole parity%.",
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmInstantiated": false,
+  "candidateAccepted": false,
+  "playerAccepted": false,
+  "goalComplete": false,
+  "finiteGroupsScopeQualification": "The19 declarations jointly cover the bounded planner/dispatcher/geometry/Shell/Page/mail source action chain; each coveredAspect below is only its individual actual CPU fixture scope. All use explicit in-memory ABI/DOM/source-extraction mocks, no actual browser/WASM/server/player proof."
+}

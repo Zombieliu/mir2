@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "manifestPin": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\frozen-source-v1.json",
+    "bytes": 79506,
+    "sha256": "259afb207fbdd7bea946b172cb2db9d773e683f28ec1ee570e1f1d855814b410"
+  },
+  "options": {
+    "realm": "isolated",
+    "endpoint": "ws://127.0.0.1:17510/ws",
+    "profile": "probe",
+    "activityMode": "native",
+    "stages": "2",
+    "stageSeconds": 30,
+    "soakSeconds": 30,
+    "wallSeconds": 3600,
+    "combatActors": 1,
+    "resumeSamples": 0,
+    "saveSamples": 0,
+    "movementIntervalMs": 750,
+    "layout": "dispersed",
+    "attackResults": "v2",
+    "preparationProfile": "ordinary-economic-v1",
+    "preparationHpTarget": 12,
+    "accountsFile": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\episode\\private\\capacity-pool.json",
+    "monitor": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\episode\\monitor-current.json",
+    "output": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\episode\\reports",
+    "scenarioFile": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v4\\scenario-v1.json",
+    "mapRoot": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack",
+    "loginNotBefore": "2026-10-26T19:36:10.694Z"
+  },
+  "scope": "A fresh owned Gateway reuses an exclusively copied V3 ordinarily earned two-character bank. Original ready names/indices, complete auth ledger and server ordinary login limits remain active; no zero-character claim, seeder or gameplay grant.",
+  "formalAcceptanceEligible": false,
+  "capacityAccepted": false,
+  "preparationSupplyDurationClaim": false
+}

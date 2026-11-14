@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-28T08:28:47.485Z",
+  "newCluster": true,
+  "backend": "PostgreSQL16.15 SourceOfTruth",
+  "importedAndExactlyReadbackAccounts": 500,
+  "importerReuse": true,
+  "importer": {
+    "file": "C:/mir2-build/cell-preproduction-p0-p1-20261024/target/release/examples/capacity_pvp_fixture_import.exe",
+    "bytes": 7460352,
+    "sha256": "075a473ddca78a5703332575d5152d4c2503e98c07c967bfb99636897cec6308"
+  },
+  "fixture": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v11\\fixture\\private\\accounts.json",
+    "bytes": 8644278,
+    "sha256": "2003245029239cbb324ec675c05277448438e26aeda6b55a3bf973faf5deaea5"
+  },
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

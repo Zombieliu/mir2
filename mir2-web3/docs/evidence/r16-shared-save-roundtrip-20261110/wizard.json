@@ -1,0 +1,249 @@
+{
+  "schema": "mir2.r16.web-native-shared-save.v1",
+  "passed": true,
+  "sourceHead": "df34e3b9b4f127e8097eb8bb682c9d95983ffdf9",
+  "scope": {
+    "isolatedFileWorld": true,
+    "ordinaryHeadlessWebUi": true,
+    "nativeProductionTransport": true,
+    "nativeRenderer": false,
+    "nativeWindow": false,
+    "copiedLevel30Fixture": true,
+    "production": false
+  },
+  "gateway": {
+    "sha256": "4d1a18644ef69eacdae0656fff1b8f49a4af1ae97ffcf6878ada86f5dff0ae0f",
+    "verifiedSourcePins": {
+      "apps/gateway/src/routing.rs": "c298d74a67aabcc5c509997eeb83073eb95a44f9ca2f49b893a9c54b9c54c42f",
+      "apps/simulation/src/runtime/drops.rs": "9648009ba5fa7ed50cf64aaf80833360c8c4fc1877a2494d9859c7f924c86c54",
+      "apps/simulation/src/runtime/inventory.rs": "e4d4b3f92354127e90b31abfdb694c384fd66705785d820a24bbef6ea9cbc8e3",
+      "apps/simulation/src/world_runtime.rs": "ce1484e2cae8671b8d8e027188cfa50a8f9140ec6bed31dfb69a4c58b33da39e"
+    }
+  },
+  "fixture": {
+    "sha256": "b054480795febab34176ec35b2ee8e4ee858ba6cf79ffc20ee37bae660671c8a",
+    "class": "Wizard",
+    "originalOrdinaryBindingVerified": true,
+    "unchanged": true,
+    "isolatedStoreChanged": true
+  },
+  "stages": [
+    "reserve-private-loopback",
+    "prepare-frozen-web-source",
+    "web-normal-entry-and-movement",
+    "native-real-transport-entry-walk-and-logout",
+    "web-fresh-login-native-write-readback"
+  ],
+  "browsers": [
+    {
+      "tag": "web-write",
+      "received": {
+        "Connected": 1,
+        "ClientVersion": 1,
+        "LoginSuccess": 1,
+        "StartGame": 1,
+        "Chat": 1,
+        "UpdateNotice": 1,
+        "NewItemInfo": 151,
+        "MapInformation": 1,
+        "UserInformation": 1,
+        "NewQuestInfo": 200,
+        "NewRecipeInfo": 79,
+        "CompleteQuest": 1,
+        "ReceiveMail": 1,
+        "FriendUpdate": 1,
+        "GameShopInfo": 105,
+        "BaseStatsInfo": 1,
+        "ObjectSpell": 92,
+        "ObjectMonster": 7,
+        "ObjectNpc": 21,
+        "TimeOfDay": 1,
+        "ChangeAMode": 1,
+        "ChangePMode": 1,
+        "SwitchGroup": 2,
+        "DefaultNPC": 1,
+        "GuildBuffList": 2,
+        "NPCUpdate": 5,
+        "NPCResponse": 4,
+        "MentorUpdate": 1,
+        "LoverUpdate": 1,
+        "GuildStatus": 1,
+        "GuildMemberChange": 1,
+        "ObjectGuildNameChanged": 1,
+        "DeleteGroup": 1,
+        "KeepAlive": 1,
+        "UserLocation": 1,
+        "LogOutSuccess": 1
+      },
+      "sent": {
+        "clientCapabilities": 2,
+        "setLanguage": 1,
+        "clientVersion": 1,
+        "login": 1,
+        "startGame": 1,
+        "npcPurchaseOwner": 1,
+        "keepAlive": 1,
+        "walk": 1,
+        "logOut": 1
+      }
+    },
+    {
+      "tag": "web-readback",
+      "received": {
+        "Connected": 1,
+        "ClientVersion": 1,
+        "LoginSuccess": 1,
+        "StartGame": 1,
+        "Chat": 1,
+        "UpdateNotice": 1,
+        "NewItemInfo": 151,
+        "MapInformation": 1,
+        "UserInformation": 1,
+        "NewQuestInfo": 200,
+        "NewRecipeInfo": 79,
+        "CompleteQuest": 1,
+        "ReceiveMail": 1,
+        "FriendUpdate": 1,
+        "GameShopInfo": 105,
+        "BaseStatsInfo": 1,
+        "ObjectSpell": 92,
+        "ObjectNpc": 18,
+        "ObjectMonster": 6,
+        "TimeOfDay": 1,
+        "ChangeAMode": 1,
+        "ChangePMode": 1,
+        "SwitchGroup": 2,
+        "DefaultNPC": 1,
+        "GuildBuffList": 2,
+        "NPCUpdate": 4,
+        "NPCResponse": 4,
+        "MentorUpdate": 1,
+        "LoverUpdate": 1,
+        "GuildStatus": 1,
+        "GuildMemberChange": 1,
+        "ObjectGuildNameChanged": 1,
+        "DeleteGroup": 1,
+        "KeepAlive": 1,
+        "LogOutSuccess": 1
+      },
+      "sent": {
+        "clientCapabilities": 2,
+        "setLanguage": 1,
+        "clientVersion": 1,
+        "login": 1,
+        "startGame": 1,
+        "npcPurchaseOwner": 1,
+        "logOut": 1,
+        "keepAlive": 1
+      }
+    }
+  ],
+  "errors": [],
+  "web": {
+    "runtimeVersion": "bevy-0cd68510886134e0",
+    "sourcePageSha256": "b4918778aa2698b07fb8a80abc312cf179ddc6f41e1d9a1c01e10f90bf26baba"
+  },
+  "webMove": {
+    "before": [
+      328,
+      264
+    ],
+    "after": [
+      329,
+      264
+    ],
+    "packet": "UserLocation",
+    "logout": true
+  },
+  "native": {
+    "sha256": "40d56867fa5b97914e16c8a673aa758c179afb65767a5105c08f368ccf839f38",
+    "transportSourceSha256": "0fda45624bd7d5aed62240913c684dd0231c1654516b0db57335f8aa86378f14",
+    "isolatedDriverSha256": "d2567166e35bf35b07e612a8df3246fde8c2163e5508e35c2e0e6558f39e647e",
+    "entryRead": {
+      "position": [
+        329,
+        264
+      ],
+      "gold": 75960,
+      "experience": 16221,
+      "level": 30,
+      "completedQuestCount": 26,
+      "matchingWebSave": true
+    },
+    "movement": {
+      "direction": "Right",
+      "packet": "UserLocation",
+      "position": [
+        330,
+        264
+      ]
+    },
+    "wire": [
+      "LoginSuccess",
+      "StartGame(4)",
+      "PlayerBootstrapped",
+      "UserLocation",
+      "LogOutSuccess"
+    ],
+    "shutdown": true
+  },
+  "webReturn": {
+    "position": [
+      330,
+      264
+    ],
+    "direction": "right",
+    "gold": 75960,
+    "experience": 16221,
+    "level": 30,
+    "completedQuestCount": 26,
+    "personalStateHashes": {
+      "inventoryItems": "11553d722d51213b92c181d4937677c23da4533d62a6d8c39d95ecfe6f6c0243",
+      "equipmentItems": "dfdf8b4aa53026e72d8a750141fb8e9cb9803a9768b7913022961e23af86f6f1",
+      "beltItems": "5c90aa937cddf25c2486613cfef008c1b0e4154c59a4e54aebc82a3eca1469d9",
+      "knownSkills": "fb7439858a31a1e2c0f9bf5bc24dd9ab9a5fdee197bff5904fe692031739ab0f",
+      "questLog": "ebda9dffdd437b15bdc5eacf4471079616c64d42d164f4d90067f7afd0992644"
+    },
+    "counts": {
+      "inventoryItems": 9,
+      "equipmentItems": 3,
+      "beltItems": 4,
+      "knownSkills": 4,
+      "questLog": 63
+    },
+    "freshBrowserContext": true,
+    "sameRole": true,
+    "logout": true
+  },
+  "stopped": {
+    "gateway": true,
+    "next": true
+  },
+  "disk": {
+    "samePositionDirectionAndPersonalState": true,
+    "retainedFields": [
+      "map_file_name",
+      "map_title",
+      "bind_point",
+      "gold",
+      "credit",
+      "experience",
+      "max_experience",
+      "inventory_capacity",
+      "inventory_items_json",
+      "belt_items_json",
+      "storage_items_json",
+      "equipment_items_json",
+      "quest_states_json",
+      "skill_states_json"
+    ],
+    "initialFixtureSha256": "b054480795febab34176ec35b2ee8e4ee858ba6cf79ffc20ee37bae660671c8a",
+    "isolatedFileSha256": "dd945d1870ed154b319581141ec26af0412496653295cbd5fb9e785c88b35db8",
+    "normalShutdown": true
+  },
+  "evidenceInputs": {
+    "rawReceiptSha256": "b17db8990ddf8af92ee3db7b77310ea72d41393b7830bf04731929dbc42aa460",
+    "testDriverSourceSha256": "bcc0c8bbe0b0366e825c618472b5a6e5accc7398b124a5a9aac702ef9edb6b08",
+    "nativeBuildLogSha256": "36a1222530ea424ad3db4735bd4e529bb1c10277b20afad3d329527c473078e4"
+  }
+}

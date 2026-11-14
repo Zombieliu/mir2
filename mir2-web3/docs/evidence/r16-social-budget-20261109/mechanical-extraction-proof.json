@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "passed": true,
+  "head": "9e76c17bc34e3bf49a8f015aa0e403870dd9e4b0",
+  "functionBodyExactAfterVisibilityAndLineEndingNormalization": true,
+  "originalPlatformTestBodyBytesExact": true,
+  "originalFunctionSha256": "f28db9483ef6d679f62c1a8b28238b1ce13b2c0e43d981f1eaac00f691fc6d28",
+  "sharedFunctionSha256": "f28db9483ef6d679f62c1a8b28238b1ce13b2c0e43d981f1eaac00f691fc6d28",
+  "originalTestsSha256": "eacb5b2a62e0020340aac094c77fd8717612dbc09ebd1df0cba52c2d94b8dfdb",
+  "wrapperTestsSha256": "eacb5b2a62e0020340aac094c77fd8717612dbc09ebd1df0cba52c2d94b8dfdb"
+}

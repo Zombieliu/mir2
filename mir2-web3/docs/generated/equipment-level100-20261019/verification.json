@@ -1,0 +1,141 @@
+{
+  "schema": "mir2-equipment-level100-verification/1",
+  "verifiedAt": "2026-10-18T16:41:42.328820+00:00",
+  "auditInputsChecked": 860,
+  "auditInputDrift": [],
+  "candidatePositionsValidated": 820,
+  "previewSheetsValidated": 3,
+  "previewCellsValidated": 105,
+  "assassinStandingUsesActualAlternateBody": true,
+  "pythonRegressionTestsPassed": 10,
+  "gameplayOrBuildExecuted": false,
+  "runtimeCapChanged": false,
+  "slgEnabled": false,
+  "newDocumentLinksBroken": [],
+  "ownedFileTrailingWhitespace": [],
+  "artifacts": [
+    {
+      "path": "docs/generated/equipment-level100-20261019/armour-female-40-100.png",
+      "sha256": "c4c3e24b3b4eb175e1acc2449a027dc20dbb5a113e17d989d82f01ff1d5d5a45",
+      "bytes": 272272
+    },
+    {
+      "path": "docs/generated/equipment-level100-20261019/armour-male-40-100.png",
+      "sha256": "2eb53f19dbcd68d54e9c86d62f7605314fe5160f4c341e6f27e5dedd41f5694c",
+      "bytes": 284003
+    },
+    {
+      "path": "docs/generated/equipment-level100-20261019/candidate-allocation.json",
+      "sha256": "bc40a687d0ab08dfb1623796e5aef3e0610d3de01f16f38e24b9e5e88e330476",
+      "bytes": 626038
+    },
+    {
+      "path": "docs/generated/equipment-level100-20261019/inventory.json",
+      "sha256": "d8e3ab8263a2ad7af40ae9174787ba8416390e6db74c1025ccd3ec4263498dec",
+      "bytes": 4471937
+    },
+    {
+      "path": "docs/generated/equipment-level100-20261019/library-reserve.json",
+      "sha256": "153ecf4a5a0140fe6f100122a84ef855f98afa5d4eab4e232b4f1463c88e4fd9",
+      "bytes": 142801
+    },
+    {
+      "path": "docs/generated/equipment-level100-20261019/motion-coverage.json",
+      "sha256": "67f3bbcf08d5449b111994c2bc26daccc31bc8ae7f8b69647d6c423da9e04813",
+      "bytes": 5514799
+    },
+    {
+      "path": "docs/generated/equipment-level100-20261019/motion-gaps.json",
+      "sha256": "bab375d5a0d32a1b8aa6f5a972348d2cdd2f0ababd658d75ed3abf1433a497ca",
+      "bytes": 10649
+    },
+    {
+      "path": "docs/generated/equipment-level100-20261019/page-verification.json",
+      "sha256": "d183271949f96e7ae1fc27301e9aaacf83687a4b514289548004571596398f0b",
+      "bytes": 169971
+    },
+    {
+      "path": "docs/generated/equipment-level100-20261019/preview-appearance-groups.json",
+      "sha256": "c65ec527128a984cd64731f1ca5b138278d2b3a61dc2b35494d541c5ee417f08",
+      "bytes": 17130
+    },
+    {
+      "path": "docs/generated/equipment-level100-20261019/preview-manifest.json",
+      "sha256": "c4cf6deeb31ebe9aa3878867054a487bf5701c6d7b27122fa6c42830505d3cb2",
+      "bytes": 83413
+    },
+    {
+      "path": "docs/generated/equipment-level100-20261019/source-pins.json",
+      "sha256": "47b26df1d7a10456b3c963b1257e8701a522e4dc0b16e489a2132f1ca8c252ce",
+      "bytes": 209003
+    },
+    {
+      "path": "docs/generated/equipment-level100-20261019/summary.json",
+      "sha256": "74bd3bde3089bf884baa51b14b7f0dca016a994de6846a7f18d9f0902a89b21c",
+      "bytes": 23658
+    },
+    {
+      "path": "docs/generated/equipment-level100-20261019/weapon-male-40-100.png",
+      "sha256": "26fc85efbfe306c413ec87f531cd9cab5fc592233496b6ae59cdcce2a645432a",
+      "bytes": 233544
+    }
+  ],
+  "toolsAndNewReports": [
+    {
+      "path": "scripts/audit-equipment-level100.py",
+      "sha256": "d5de290db0d768acca53101af20b20705c5f4c036a811f2ea11fa926cd244167"
+    },
+    {
+      "path": "scripts/test-equipment-level100-audit.py",
+      "sha256": "82f650b578e103413d7bf24fe0e1e4682539ccad42bf1c78111f5328bba9bb91"
+    },
+    {
+      "path": "scripts/render-equipment-audit-preview.py",
+      "sha256": "ba60ec9728f43486f8fcecf53dd55068e060a2a0115c63040861d89fe7079b3f"
+    },
+    {
+      "path": "docs/LEVEL100-SLG-PROGRESSION.zh-CN.md",
+      "sha256": "117d0774cd4f10f5f11a8d6b993c1058b4418cfbe6b6c828796bec713e2d2e45"
+    },
+    {
+      "path": "docs/EQUIPMENT-LEVEL100-SLG-AUDIT-20261019.zh-CN.md",
+      "sha256": "3b2b98dae1ac6e798c66e0937336abfcfa33f341a51200034975fea37038b6be"
+    }
+  ],
+  "finalFrameStatuses": {
+    "ok": 216243,
+    "frame_out_of_range": 1
+  },
+  "finalMotionBindingsChecked": 592,
+  "manualPreviewHashesUnchangedAfterSupplement": true,
+  "editedDocuments": [
+    {
+      "path": "docs/LEVEL100-SLG-PROGRESSION.zh-CN.md",
+      "sha256": "117d0774cd4f10f5f11a8d6b993c1058b4418cfbe6b6c828796bec713e2d2e45"
+    },
+    {
+      "path": "docs/EQUIPMENT-LEVEL100-SLG-AUDIT-20261019.zh-CN.md",
+      "sha256": "3b2b98dae1ac6e798c66e0937336abfcfa33f341a51200034975fea37038b6be"
+    },
+    {
+      "path": "docs/SLG-PRODUCTION-TERRITORY-DESIGN.zh-CN.md",
+      "sha256": "5d7e63a1f2671a19f884a41e63679df0759f7010fe1eaa011c3467b56b2d6357"
+    },
+    {
+      "path": "docs/SLG-CRAFTING-DESIGN.zh-CN.md",
+      "sha256": "8273944d7210c3185c3c2bbbd2a2ec159e6d6d6752bbae0c46ef5b575025a893"
+    },
+    {
+      "path": "docs/SLG-PRODUCTION-IMPLEMENTATION.zh-CN.md",
+      "sha256": "903a7f2c8dbc19637a5feb62e1a88a6651bfa989b152cdacc7b50318660a9376"
+    },
+    {
+      "path": "docs/AGENT-TASK-QUEUE.md",
+      "sha256": "0c4483fe2da06c7496fa1d69b180a78e8d5d44fbd3150824b2468196b94db2ec"
+    },
+    {
+      "path": "docs/CRYSTAL-1TO1-ROADMAP.md",
+      "sha256": "4cd6d0ce87b36eb3ce8b91c122f79aa1186f5b912288eb0236edcd14816d9e15"
+    }
+  ]
+}

@@ -1,0 +1,301 @@
+{
+  "scope": "Exact production 3682477, clean default Chrome, official mobile-size Testnet wallet, one ordinary signed login and one right step.",
+  "revision": "3682477690000060fca9ae54e89ca16f775c2c43",
+  "releaseControl": "e730db9ba8da35225bd7d8e08ad94c00a32eb4ed",
+  "deployment": "dpl_DLX6Yy9yY1EmVsJ6Egnj5dt2jzqL",
+  "rollback": "dpl_4B5Xddi3VTE4jczh2BUxxoqGAWuY",
+  "stageRun": 42898641874,
+  "promotionRun": 42900096821,
+  "protectedQr": {
+    "relay": "https://relay.dubhe.obelisk.build",
+    "wallet": "https://wallet.dubhe.obelisk.build",
+    "pending": true
+  },
+  "publicQr": {
+    "relay": "https://relay.dubhe.obelisk.build",
+    "wallet": "https://wallet.dubhe.obelisk.build",
+    "pending": true
+  },
+  "ordinaryBrowserQr": [
+    {
+      "locale": "zh-CN",
+      "qr": true,
+      "pending": true,
+      "cancel": true,
+      "pollsAfterCancel": 0,
+      "sha256": "706a9fcce33ffd371d42009f236290c022be5868be6f6975b38e2953bbd8be88"
+    },
+    {
+      "locale": "zh-TW",
+      "qr": true,
+      "pending": true,
+      "cancel": true,
+      "pollsAfterCancel": 0,
+      "sha256": "5406635513705ad4398dc0307baac679616fa42075a1f69b849d66110681daa0"
+    }
+  ],
+  "assets": {
+    "scene": {
+      "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+      "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+      "bytes": 458475
+    },
+    "floor": {
+      "path": "/bootstrap/r16-floor/e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d.json",
+      "sha256": "e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d",
+      "bytes": 439896
+    },
+    "objects": {
+      "path": "/bootstrap/r16-visuals/79d26b7b9f3d03e679305b8e9e0982312825ef2fffdec50d976ce930e152e4fe.json",
+      "sha256": "79d26b7b9f3d03e679305b8e9e0982312825ef2fffdec50d976ce930e152e4fe",
+      "bytes": 1185944
+    },
+    "actors": {
+      "path": "/bootstrap/r16-visuals/1427115a4db370cd3efdf21e10c156a772410250b131ac6b907948b72cba8895.json",
+      "sha256": "1427115a4db370cd3efdf21e10c156a772410250b131ac6b907948b72cba8895",
+      "bytes": 885989
+    }
+  },
+  "signedBrowser": {
+    "passed": true,
+    "firstPlayableAfterAckMs": 3275,
+    "startAckAfterLoginMs": 34017,
+    "staticScene": true,
+    "oneLoginSignature": true,
+    "walletOutOfScope": 0,
+    "firstVisual": {
+      "name": "first-playable",
+      "afterAckMs": 3399,
+      "floor": 221,
+      "floorPacked": 221,
+      "floorVisible": 221,
+      "objects": 39,
+      "objectsVisible": 39,
+      "packedObjects": 39,
+      "keyedObjects": 37,
+      "self": 1,
+      "packedSelf": 1,
+      "selfSource": "game/original-ui/CArmour/00/17.png",
+      "npcs": 8,
+      "packedNpcs": 8,
+      "monsters": 0,
+      "pixelRegions": 24
+    },
+    "afterWalk": {
+      "name": "after-walk",
+      "afterAckMs": 3747,
+      "floor": 221,
+      "floorPacked": 221,
+      "floorVisible": 221,
+      "objects": 39,
+      "objectsVisible": 39,
+      "packedObjects": 39,
+      "keyedObjects": 37,
+      "self": 1,
+      "packedSelf": 1,
+      "selfSource": "game/original-ui/CArmour/00/44.png",
+      "npcs": 8,
+      "packedNpcs": 8,
+      "monsters": 0,
+      "pixelRegions": 24
+    },
+    "protocol": {
+      "gameSockets": 1,
+      "passkeyLogin": 1,
+      "loginSuccess": 1,
+      "newCharacter": 1,
+      "newCharacterSuccess": 1,
+      "startGame": 1,
+      "startGameResult": 4,
+      "walk": 1,
+      "logOut": 1,
+      "logOutSuccess": 1,
+      "unexpectedMutation": 0
+    },
+    "movement": {
+      "x": 289,
+      "y": 616,
+      "direction": "Right"
+    },
+    "logout": true,
+    "returnedToSelect": true,
+    "samples": [
+      {
+        "name": "first-playable",
+        "afterAckMs": 3399,
+        "floor": 221,
+        "floorPacked": 221,
+        "floorVisible": 221,
+        "objects": 39,
+        "objectsVisible": 39,
+        "packedObjects": 39,
+        "keyedObjects": 37,
+        "self": 1,
+        "packedSelf": 1,
+        "selfSource": "game/original-ui/CArmour/00/17.png",
+        "npcs": 8,
+        "packedNpcs": 8,
+        "monsters": 0,
+        "pixelRegions": 24
+      },
+      {
+        "name": "after-walk",
+        "afterAckMs": 3747,
+        "floor": 221,
+        "floorPacked": 221,
+        "floorVisible": 221,
+        "objects": 39,
+        "objectsVisible": 39,
+        "packedObjects": 39,
+        "keyedObjects": 37,
+        "self": 1,
+        "packedSelf": 1,
+        "selfSource": "game/original-ui/CArmour/00/44.png",
+        "npcs": 8,
+        "packedNpcs": 8,
+        "monsters": 0,
+        "pixelRegions": 24
+      },
+      {
+        "name": "first-painted-candidate",
+        "afterAckMs": 3921,
+        "floor": 243,
+        "floorPacked": 243,
+        "floorVisible": 243,
+        "objects": 40,
+        "objectsVisible": 40,
+        "packedObjects": 40,
+        "keyedObjects": 38,
+        "self": 1,
+        "packedSelf": 1,
+        "selfSource": "game/original-ui/CArmour/00/45.png",
+        "npcs": 8,
+        "packedNpcs": 8,
+        "monsters": 0,
+        "pixelRegions": 24
+      },
+      {
+        "name": "post-move-6000",
+        "afterAckMs": 9967,
+        "floor": 243,
+        "floorPacked": 243,
+        "floorVisible": 243,
+        "objects": 40,
+        "objectsVisible": 40,
+        "packedObjects": 40,
+        "keyedObjects": 38,
+        "self": 1,
+        "packedSelf": 1,
+        "selfSource": "game/original-ui/CArmour/00/11.png",
+        "npcs": 8,
+        "packedNpcs": 8,
+        "monsters": 0,
+        "pixelRegions": 24
+      },
+      {
+        "name": "runtime-body-delivered",
+        "afterAckMs": 19321,
+        "floor": 243,
+        "floorPacked": 243,
+        "floorVisible": 243,
+        "objects": 40,
+        "objectsVisible": 40,
+        "packedObjects": 40,
+        "keyedObjects": 38,
+        "self": 1,
+        "packedSelf": 1,
+        "selfSource": "game/original-ui/CArmour/00/9.png",
+        "npcs": 8,
+        "packedNpcs": 8,
+        "monsters": 0,
+        "pixelRegions": 24
+      },
+      {
+        "name": "terrain-window-end",
+        "afterAckMs": 19851,
+        "floor": 243,
+        "floorPacked": 243,
+        "floorVisible": 243,
+        "objects": 40,
+        "objectsVisible": 40,
+        "packedObjects": 40,
+        "keyedObjects": 38,
+        "self": 1,
+        "packedSelf": 1,
+        "selfSource": "game/original-ui/CArmour/00/10.png",
+        "npcs": 8,
+        "packedNpcs": 8,
+        "monsters": 0,
+        "pixelRegions": 24
+      }
+    ],
+    "assets": [
+      {
+        "path": "/bootstrap/r16-visuals/1427115a4db370cd3efdf21e10c156a772410250b131ac6b907948b72cba8895.json",
+        "kind": "entry-actors",
+        "priority": "High",
+        "bytes": 885989,
+        "wireBytes": 588942,
+        "requestedAfterLoginMs": 5,
+        "transferMs": 10064,
+        "deliveredBeforeStartAckMs": 23948
+      },
+      {
+        "path": "/bootstrap/r16-visuals/79d26b7b9f3d03e679305b8e9e0982312825ef2fffdec50d976ce930e152e4fe.json",
+        "kind": "entry-objects",
+        "priority": "Low",
+        "bytes": 1185944,
+        "wireBytes": 877644,
+        "requestedAfterLoginMs": 6,
+        "transferMs": 15065,
+        "deliveredBeforeStartAckMs": 18946
+      }
+    ],
+    "originalActors": {
+      "sameOriginPngAtLastSample": {
+        "total": 234,
+        "distinct": 64,
+        "headers": 0,
+        "good": 0,
+        "failures": 194,
+        "non200": 0,
+        "pendingHeaders": 40,
+        "pendingBodies": 0
+      },
+      "monsterMetadataPaths": [
+        {
+          "path": "/original-ui/Monster/000/meta.json",
+          "status": 200,
+          "finished": true
+        },
+        {
+          "path": "/original-ui/Monster/003/meta.json",
+          "status": 200,
+          "finished": true
+        },
+        {
+          "path": "/original-ui/Monster/004/meta.json",
+          "status": 200,
+          "finished": true
+        },
+        {
+          "path": "/original-ui/Monster/005/meta.json",
+          "status": 200,
+          "finished": true
+        },
+        {
+          "path": "/original-ui/Monster/139/meta.json",
+          "status": 200,
+          "finished": true
+        }
+      ]
+    }
+  },
+  "hashes": {
+    "release": "cf423376c74fb405a9d8aec8bf004562353b304545af30dc436878ca29b6dc7f",
+    "stage": "5fe74a4514789f6d22c9c0e25efd019e037fe5d9fac2056e86a3435e3bdcc53c",
+    "browser": "c81b0235dc34e5c8d0fcf356dcbf1a72c8eb30c1420aa8edb9f64f2cdd0c8e28",
+    "network": "43f63d42b10225f9e0ba0d15b3dc865c595c719a3754f5b70b2d1aa194238231",
+    "firstPicture": "47653b6ccc293a6874c6eba1d0dff405de7fe1902c3ab2acf056f60e08844c38"
+  }
+}

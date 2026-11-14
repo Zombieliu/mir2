@@ -1,0 +1,90 @@
+{
+  "owner": "Root",
+  "kind": "Source30 finite web01",
+  "repo": "E:\\mir2-player-journey\\mir2-web3",
+  "cwd": "E:\\mir2-player-journey\\mir2-web3\\apps\\web",
+  "args": [
+    "--test",
+    "--test-concurrency=1",
+    "--test-reporter=spec",
+    "scripts/test-bevy-npc-shop-buy.mjs"
+  ],
+  "snapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source30-web02-snapshot.json",
+    "bytes": 46123,
+    "sha256": "8926aa9e33fb75960b9c4b4b4b509e4b2c98e0db53f5394e1ce2e37aff04fd1f"
+  },
+  "guard": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-shared-quest-heading-locale-01\\cargo-per-call-guard-implementation01\\CargoGuard.exe",
+    "bytes": 37376,
+    "sha256": "2025bdd29ff4df3d9f772ba7f0d44856243204909b6185cb2ab184dfcd0ab82e"
+  },
+  "executable": {
+    "path": "C:/Program Files/nodejs/node.exe",
+    "bytes": 85202416,
+    "sha256": "c22d1c59a1f767a1ed0178445a027f2257d318c55430fc819d48f269586822b7"
+  },
+  "tools": [
+    {
+      "path": "C:\\Program Files\\nodejs\\node.exe",
+      "bytes": 85202416,
+      "sha256": "c22d1c59a1f767a1ed0178445a027f2257d318c55430fc819d48f269586822b7"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\node_modules\\typescript\\lib\\typescript.js",
+      "bytes": 9111680,
+      "sha256": "e5f1f6b3e82228a89873cc7b941b2465185e839c0692860f83e3e63e53f94c2b"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\node_modules\\typescript\\package.json",
+      "bytes": 3620,
+      "sha256": "5a0bb7f286c4b3f1413a42c05f902311b161f70e5f52d9da10490443bfd595a3"
+    }
+  ],
+  "environment": {
+    "SystemRoot": "C:/Windows",
+    "windir": "C:/Windows",
+    "SystemDrive": "C:",
+    "ComSpec": "C:/Windows/System32/cmd.exe",
+    "PATHEXT": ".COM;.EXE;.BAT;.CMD",
+    "TEMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+    "TMP": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01",
+    "USERPROFILE": "C:/Users/Administrator",
+    "APPDATA": "C:/Users/Administrator/AppData/Roaming",
+    "LOCALAPPDATA": "C:/Users/Administrator/AppData/Local",
+    "NUMBER_OF_PROCESSORS": "1",
+    "Path": "C:/Users/Administrator/.rustup/toolchains/1.95.0-x86_64-pc-windows-msvc/bin;C:/Windows/System32;C:/Windows/System32/WindowsPowerShell/v1.0",
+    "MIR2_SKIP_RUSTUP_TARGET_CHECK": "1",
+    "MIR2_WASM_BINDGEN_ATTEMPTS": "1",
+    "NODE_ENV": "production",
+    "NEXT_TELEMETRY_DISABLED": "1",
+    "VERCEL": "0",
+    "MIR2_NEXT_DIST_DIR": ".next-web-windows-catchup-20261007-01",
+    "MIR2_NEXT_STANDALONE": "1",
+    "MIR2_USE_PREBUILT_CLIENT_CORE": "1",
+    "MIR2_USE_PREBUILT_BEVY_RUNTIME": "1",
+    "MIR2_WEB_QUEST_UI": "1",
+    "NEXT_PUBLIC_MIR2_GATEWAY_WS_URL": "ws://127.0.0.1:19110/ws",
+    "NEXT_PUBLIC_MIR2_ASSET_BASE_URL": "",
+    "MIR2_ORIGINAL_ASSET_MANIFEST_MODE": "filesystem",
+    "MIR2_CLIENT_CORE_WASM_OPT_BIN": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-mail-combined-build-01/binaryen131-tool01/bin/wasm-opt.exe",
+    "MIR2_CLIENT_CORE_WASM_OPT_SHA256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3"
+  },
+  "stdoutPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source30-web01.stdout.log",
+  "stderrPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source30-web01.stderr.log",
+  "outerPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source30-web01.outer.json",
+  "buildOnly": false,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmInstantiated": false,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "finiteMemoryOnly": true,
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source30-web02-review.json",
+    "bytes": 1519,
+    "sha256": "a3a079e75ba820e779dceb0344c8e29deef687fd90e458f1d31ffe033640b10b"
+  },
+  "deferredChecks": "Full project dependencies absent; local installed official compiler5.9.2 API pinned for existing finite fixture and two-module strict no-emit type check. No full project TSC or matching candidate build accepted."
+}

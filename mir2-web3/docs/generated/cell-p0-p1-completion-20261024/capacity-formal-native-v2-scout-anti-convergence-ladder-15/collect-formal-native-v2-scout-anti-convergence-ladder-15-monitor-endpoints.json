@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792974410829-a5288349",
+  "scope": "Whitelisted first/last public resource samples and original stop terminal when present. Full monitor raw remains external; normal cleanup is adjudicated separately.",
+  "source": {
+    "path": "release-native-v2-scout-anti-convergence-ladder-15/monitor-history.jsonl",
+    "bytes": 4961096,
+    "sha256": "6fd4715ca051b955b4a3b5009e85ed643c95b2b20e705ba76e7e7cf7890ec7d8",
+    "rows": 547
+  },
+  "monitorRows": 545,
+  "monitorStoppedRows": 1,
+  "firstMonitor": {
+    "sampledAt": 1792974410633,
+    "stop": false,
+    "reason": null,
+    "gatewayTelemetryAvailable": true,
+    "process": {
+      "pid": 67304,
+      "creationTimeMs": 1792974401290,
+      "rawCounters": {
+        "readBytes": 174857280,
+        "writeBytes": 124599,
+        "otherIoBytes": 96388,
+        "readOperations": 42,
+        "writeOperations": 36,
+        "otherIoOperations": 2464
+      },
+      "rates": null
+    },
+    "memory": {
+      "currentBytes": 5246976,
+      "definition": "Win32_Process.PrivatePageCount committed private bytes; working set separately recorded",
+      "workingSetBytes": 21823488
+    },
+    "health": {
+      "currentWsConnections": 0,
+      "currentActiveSessions": 0,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0,
+      "maxWsConnections": 128,
+      "maxActiveSessions": 100,
+      "maxReconnectLeases": 100,
+      "maxLoginInFlight": 4,
+      "maxNewCharacterInFlight": 1,
+      "maxStartGameInFlight": 2
+    },
+    "zoneMetrics": {
+      "version": 2,
+      "complete": true,
+      "sinceInitializationMs": 8806
+    }
+  },
+  "lastMonitor": {
+    "sampledAt": 1792975483870,
+    "stop": false,
+    "reason": null,
+    "gatewayTelemetryAvailable": true,
+    "process": {
+      "pid": 67304,
+      "creationTimeMs": 1792974401290,
+      "rawCounters": {
+        "readBytes": 209434948,
+        "writeBytes": 391325596,
+        "otherIoBytes": 4373286,
+        "readOperations": 4952,
+        "writeOperations": 12357,
+        "otherIoOperations": 222347
+      },
+      "rates": {
+        "cpuCores": 2.4481903817550816,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 3311079.8215171047,
+        "otherIoBytesPerSecond": 7353.495290034705,
+        "ioOperationsPerSecond": 2210.7089737233514
+      }
+    },
+    "memory": {
+      "currentBytes": 1959944192,
+      "definition": "Win32_Process.PrivatePageCount committed private bytes; working set separately recorded",
+      "workingSetBytes": 1987997696
+    },
+    "health": {
+      "currentWsConnections": 1,
+      "currentActiveSessions": 1,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0,
+      "maxWsConnections": 128,
+      "maxActiveSessions": 100,
+      "maxReconnectLeases": 100,
+      "maxLoginInFlight": 4,
+      "maxNewCharacterInFlight": 1,
+      "maxStartGameInFlight": 2
+    },
+    "zoneMetrics": {
+      "version": 2,
+      "complete": true,
+      "sinceInitializationMs": 1081987
+    }
+  },
+  "terminalMonitor": {
+    "sampledAt": 1792975484845,
+    "stop": true,
+    "reason": "Operator requested load drain",
+    "gatewayTelemetryAvailable": true,
+    "process": {
+      "pid": 67304,
+      "creationTimeMs": 1792974401290,
+      "rawCounters": {
+        "readBytes": 209434948,
+        "writeBytes": 391325596,
+        "otherIoBytes": 4373286,
+        "readOperations": 4952,
+        "writeOperations": 12357,
+        "otherIoOperations": 222347
+      },
+      "rates": {
+        "cpuCores": 2.4481903817550816,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 3311079.8215171047,
+        "otherIoBytesPerSecond": 7353.495290034705,
+        "ioOperationsPerSecond": 2210.7089737233514
+      }
+    },
+    "memory": {
+      "currentBytes": 1959944192,
+      "definition": "Win32_Process.PrivatePageCount committed private bytes; working set separately recorded",
+      "workingSetBytes": 1987997696
+    },
+    "health": {
+      "currentWsConnections": 1,
+      "currentActiveSessions": 1,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0,
+      "maxWsConnections": 128,
+      "maxActiveSessions": 100,
+      "maxReconnectLeases": 100,
+      "maxLoginInFlight": 4,
+      "maxNewCharacterInFlight": 1,
+      "maxStartGameInFlight": 2
+    },
+    "zoneMetrics": {
+      "version": 2,
+      "complete": true,
+      "sinceInitializationMs": 1081987
+    }
+  },
+  "monitorTerminalMatchesCleanup": true,
+  "normalOwnedCleanup": true,
+  "capacityAccepted": false
+}

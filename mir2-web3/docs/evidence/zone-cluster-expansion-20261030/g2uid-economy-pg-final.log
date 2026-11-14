@@ -1,0 +1,18 @@
+    Finished `test` profile [unoptimized] target(s) in 0.34s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+
+running 12 tests
+test economy::zone_fence_pg_tests::economy_zone_fence_fixture_and_wrong_database_binding_reject_before_connect ... ok
+test economy::zone_fence_pg_tests::economy_zone_fence_permissionless_service_rejects_forged_context_without_store_connection ... ok
+test economy::zone_fence_pg_tests::economy_zone_fence_postgres_actual_service_gold_claim_uses_runtime_permit_and_denies_stale_owner ... ok
+test economy::zone_fence_pg_tests::economy_zone_fence_postgres_bootstrap_gold_item_skill_and_trade_with_current_owner ... ok
+test economy::zone_fence_pg_tests::economy_zone_fence_postgres_commit_unknown_freezes_no_receipt_retry_but_old_receipt_stays_readable ... ok
+test economy::zone_fence_pg_tests::economy_zone_fence_postgres_lease_lock_survives_until_actual_commit ... ok
+test economy::zone_fence_pg_tests::economy_zone_fence_postgres_prepared_kill_source_ledger_replay_relogin_and_stale_owner ... ok
+test economy::zone_fence_pg_tests::economy_zone_fence_postgres_prepared_kill_unknown_freezes_source_and_absent_receipt_retry ... ok
+test economy::zone_fence_pg_tests::economy_zone_fence_postgres_runtime_trade_override_requires_permit_and_has_no_legacy_fallback ... ok
+test economy::zone_fence_pg_tests::economy_zone_fence_postgres_runtime_trade_unknown_none_receipt_never_retries_publication ... ok
+test economy::zone_fence_pg_tests::economy_zone_fence_postgres_stale_owner_token_expiry_missing_lease_and_schema_write_nothing ... ok
+test economy::zone_fence_pg_tests::economy_zone_fence_postgres_terminated_commit_backend_rolls_back_every_asset_and_receipt ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 1548 filtered out; finished in 40.62s

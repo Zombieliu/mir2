@@ -1,0 +1,89 @@
+{
+  "projectedReport": {
+    "candidate": {
+      "channel": "invited",
+      "feedSha256": "fff8f4232fa7531979100bd194fbbf33e5f41b6d185d1cc7423ea8f2cc8a210e",
+      "platform": "windows-x64",
+      "schema": "mir2.windows.r2-channel.v1",
+      "sequence": 31,
+      "signatureSha256": "a82f3fed65868cc475380339ac3904d552d9079bc27c7faeb17c2b0e0c7c4948",
+      "sourceRevision": "29a187a272acb4129e3de2cd37e6bbdf62bf11e3"
+    },
+    "downloadScope": "packed",
+    "executionHost": {
+      "playerNetworkThroughputMeasured": false,
+      "playerSlaProven": false
+    },
+    "failure": {
+      "code": "remote_http_rejected_or_outcome_unknown"
+    },
+    "finishedUtc": "2026-10-29T09:32:21.510869+00:00",
+    "fiveMinuteAcceptance": false,
+    "internalFeedVerifiedObjects": [
+      {
+        "directPublicPath": false,
+        "sha256": "fff8f4232fa7531979100bd194fbbf33e5f41b6d185d1cc7423ea8f2cc8a210e",
+        "size": 567,
+        "verifiedVia": "fixed-authenticated-publisher"
+      },
+      {
+        "directPublicPath": false,
+        "sha256": "a82f3fed65868cc475380339ac3904d552d9079bc27c7faeb17c2b0e0c7c4948",
+        "size": 1614,
+        "verifiedVia": "fixed-authenticated-publisher"
+      }
+    ],
+    "mode": "stage",
+    "notRepresentativeOfPlayerThroughput": true,
+    "passed": false,
+    "planSha256": "f990de0c1236508c6cdb85280008e44697f2a2266c797518852e0d771d1a9b93",
+    "pointerAttempted": false,
+    "pointerChanged": false,
+    "remoteSecretFilesCreated": false,
+    "resumedObjects": [
+      "generations/1e35573b0c0e5986501f646ef5552a9578dfde59f67be7f8687e012e7cb9f861/GENERATION.json",
+      "generations/1e35573b0c0e5986501f646ef5552a9578dfde59f67be7f8687e012e7cb9f861/GENERATION.p7s",
+      "generations/1e35573b0c0e5986501f646ef5552a9578dfde59f67be7f8687e012e7cb9f861/catalog.json",
+      "generations/1e35573b0c0e5986501f646ef5552a9578dfde59f67be7f8687e012e7cb9f861/mir2-client.toml"
+    ],
+    "schema": "mir2.windows.packed-r2-publication-receipt.v1",
+    "startedUtc": "2026-10-29T09:26:05.195068+00:00",
+    "transport": "fixed-expiring-packed-worker-over-strict-ssh-v1",
+    "uploadedObjects": [],
+    "verifiedObjects": [
+      {
+        "sha256": "fff8f4232fa7531979100bd194fbbf33e5f41b6d185d1cc7423ea8f2cc8a210e",
+        "size": 567
+      },
+      {
+        "sha256": "a82f3fed65868cc475380339ac3904d552d9079bc27c7faeb17c2b0e0c7c4948",
+        "size": 1614
+      },
+      {
+        "path": "generations/1e35573b0c0e5986501f646ef5552a9578dfde59f67be7f8687e012e7cb9f861/GENERATION.json",
+        "sha256": "1e35573b0c0e5986501f646ef5552a9578dfde59f67be7f8687e012e7cb9f861",
+        "size": 6803
+      },
+      {
+        "path": "generations/1e35573b0c0e5986501f646ef5552a9578dfde59f67be7f8687e012e7cb9f861/GENERATION.p7s",
+        "sha256": "0788876a20ce811654e742b0bf33fe07166a6d79739d60ba8f7ed442a84af147",
+        "size": 1614
+      },
+      {
+        "path": "generations/1e35573b0c0e5986501f646ef5552a9578dfde59f67be7f8687e012e7cb9f861/catalog.json",
+        "sha256": "708511179a1a5ebf64326c029abef8db728e9da0e95366dbf914300c723f476f",
+        "size": 68664916
+      },
+      {
+        "path": "generations/1e35573b0c0e5986501f646ef5552a9578dfde59f67be7f8687e012e7cb9f861/mir2-client.toml",
+        "sha256": "33ae7e2cf643c43b3bab9b8839998f00051447baf40002ecfb5b19cb3a0a4e13",
+        "size": 345
+      }
+    ]
+  },
+  "projectionBoundary": "Explicit fields only; raw log/body/attempt/env/argv/private config excluded.",
+  "role": "packed31-r2-stage-persistent",
+  "schema": "mir2.evidence.public-projection.v1",
+  "sourceSha256": "BA10FD7D072116FB571543662A78C948DEA4F9B7B11D9548F94270591E35FF79",
+  "sourceSize": 4026
+}

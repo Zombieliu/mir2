@@ -1,0 +1,137 @@
+{
+  "schema": "mir2.native-r17-importer-external-delivery.v1",
+  "frozenUtc": "2026-10-04T22:56:13.755407+00:00",
+  "baseRevision": "d1f7dcec0213815b6f3bdcd33eff4d9d1c2774dc",
+  "baseIndexSha256": "353a1d7420659f4c12a3a7dc654351382ec8f7dd7a1c795237777e9372a05dfe",
+  "approvedSourceFiles": [
+    {
+      "externalPath": "src/index.ts",
+      "repositoryPath": "mir2-web3/infra/cloudflare/mir2-r2-bulk-upload/src/index.ts",
+      "size": 3291,
+      "sha256": "7aa43b7c6cffe6ff271fcd7199ed8be95bd30783dc5b72809d57688fadcd1f40"
+    },
+    {
+      "externalPath": "src/native-r17-publication.mjs",
+      "repositoryPath": "mir2-web3/infra/cloudflare/mir2-r2-bulk-upload/src/native-r17-publication.mjs",
+      "size": 23298,
+      "sha256": "55a158a819feba4cb991682ef2dcc2c6aa7b4b1b6a22315e2d197cdcf1d9d400"
+    },
+    {
+      "externalPath": "src/native-r17-publication-plan.json",
+      "repositoryPath": "mir2-web3/infra/cloudflare/mir2-r2-bulk-upload/src/native-r17-publication-plan.json",
+      "size": 42463,
+      "sha256": "4a7eda51fd375b64a250faa8d1709f8b611af8d60172aabf7c1032b864e490fc"
+    },
+    {
+      "externalPath": "test/native-r17-publication.test.mjs",
+      "repositoryPath": "mir2-web3/infra/cloudflare/mir2-r2-bulk-upload/test/native-r17-publication.test.mjs",
+      "size": 32904,
+      "sha256": "cb0053d02cdf18b09bec3150678d46f41169cda8157e12016ce7691fc26a5a3d"
+    }
+  ],
+  "indexPatch": {
+    "path": "INDEX-ONLY.patch",
+    "size": 1168,
+    "sha256": "69c05035e25c2d23a19c2861b334ca15a8bb0370d4488a9c2af970a37bf9b4db"
+  },
+  "completePatch": {
+    "path": "APPROVED-WORKER.patch",
+    "size": 102105,
+    "sha256": "d2f12a81dd319253bdbf23dcf16186db28e0e31e5fa00c88dc0df6072f0da3ee"
+  },
+  "nativeDefinitionCanonicalSha256": "1786ca53c2ef03e142419feefa3184070bfacd570c1b3a9495f79e3c50eb3929",
+  "originalPlanSha256": "04bdb9d5f891bba38752e4ba4029db2d638dc7f4674d494ce0c6b5ab354f3b87",
+  "originalRootAttestationSha256": "6b36134597180ad2b423c2015c05b3c48447fbd766e858c2fb0ce6f45e2565b9",
+  "objectCount": 36,
+  "totalObjectBytes": 817657896,
+  "objectsSha256": "f38a692a4ba200177f4358c9f3d1566f97fadb32cf408c072cb1f8b8bb03d4f0",
+  "rootFreshOriginProofCopy": {
+    "path": "evidence/root-HTTPS-36-SOURCE-VERIFICATION-01.json",
+    "size": 18160,
+    "sha256": "41a4a69eb37d15254006b48d6da93010c9703e38bfc9cfefe4f486710060051e"
+  },
+  "rootProofBoundary": "loopback TLS full bytes plus source feed recheck, no Internet throughput/CDN/R2 proof",
+  "actualNodeAttempts": [
+    {
+      "tag": "red-01",
+      "exitCode": 1,
+      "tests": 3,
+      "pass": 1,
+      "fail": 2,
+      "cancelled": 0,
+      "skipped": 0,
+      "receiptSha256": "2d598f05fa9511efbf2e964682672a3d850d4ad86772561c7ccb3d38959ddbae",
+      "stdoutSha256": "be333055eaaa57eee31cea5bf298194dff3a66880b1dfe5d57d8ab20a5773de6",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "tag": "green-attempt-01",
+      "exitCode": 1,
+      "tests": 106,
+      "pass": 104,
+      "fail": 2,
+      "cancelled": 0,
+      "skipped": 0,
+      "receiptSha256": "fc753ae444c21c56943e1538194238a005338cd3a35edbc26d22701bc5f9e19e",
+      "stdoutSha256": "23adc3b6bce1fe1fcff128d6b541096abc5acd493331213b3622e6e95d30d735",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "tag": "green-focused-02",
+      "exitCode": 0,
+      "tests": 6,
+      "pass": 6,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "receiptSha256": "874570b288323b56c3ddf529f450955a17550ea40d981bab626e4b32151b4b70",
+      "stdoutSha256": "ce61979f4d4ca9aec1a36e850fa4f69b3a73b00fa9085afa0f67a3d68125f4a5",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "tag": "green-full-03",
+      "exitCode": 0,
+      "tests": 107,
+      "pass": 107,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "receiptSha256": "8430b73f0d36b470c4ee5f8b6e7c068af4aea1232a33033ee943d6509dcea52c",
+      "stdoutSha256": "1231609a60347a9791ab17b5df4000a751ba69bc9127df6bcd250a903772d391",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "tag": "green-self-contained-04",
+      "exitCode": 0,
+      "tests": 107,
+      "pass": 107,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "receiptSha256": "b5bbeacc463f8e4368c927295ec8ff4ce306fd6545ecb2755c1bf89b5f027a7e",
+      "stdoutSha256": "d7ba676dfa18c1891dd9867ea13525a1d9a72ed233d18a485f6dffa367d7cb69",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "latestOfflinePassCount": 107,
+  "nativeR2Acceptance": false,
+  "cmsReverified": false,
+  "credentialValuesRead": false,
+  "cloudflareAuthValidated": false,
+  "networkCallsByWriter": false,
+  "repoModified": false,
+  "workflowModified": false,
+  "dependenciesModified": false,
+  "deployment": false,
+  "gitMutation": false,
+  "priorProofModified": false,
+  "scope": "only NEW external four-source implementation and evidence",
+  "remaining": [
+    "root independent security/source integration",
+    "opaque CI account/token/bearer permission probe",
+    "actual Workers streamed checksum/conditional R2 import",
+    "all36 public full SHA stage",
+    "explicit promote and public alias pair verification",
+    "issued-library partial raw404 origin repair and laptop acceptance"
+  ]
+}

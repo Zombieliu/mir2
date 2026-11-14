@@ -1,0 +1,32 @@
+{
+  "kind": "current-production-observation-not-promotion",
+  "preparationSha256": "cab0bca022da0f1657310548f1cf7cc97d4206e2254d2f7bc8aa32aa840651f8",
+  "previousPreparationSha256": "f6d665fce6f5250cf50aca8b6e6b167545c37d241c533555d766df65064a1656",
+  "frozen22Helpers": {
+    "run.mjs": "6ea00550ef95cd7e02076751c4f575ed029b0b920aedc2c03cc12d10269b93ef",
+    "desktop-qr-city-direct-cdp.mjs": "de32dce00662c7d8845b8bba24acb6897f60c00c92f1df147fc6300ce15b2f05",
+    "scene-gate.mjs": "d632ee9e6cf7b8920f79938d5133d6c97ae000f7697f37410cfcbcc61490cd2d",
+    "mobile-wallet-public.mjs": "7289dafefc9d68efd06198f04d3f27679eca88745c8104ec432896ec88902bb4",
+    "coordinated-approval-step.mjs": "d1517f42b9b89025b46a50a73818d4c13ad228dcb7f0d7e61e8e5ade908c1d45",
+    "passive-approval-round.mjs": "a0b9c0c5685421940ec922366db6af4d6c2dbd01debec60227988c7ec27e90b4",
+    "classify-wallet-request.mjs": "ab34b854c2847ba041a63ebfd50df3b5cca95673731d243cbd2a9d6d4a52ea25",
+    "handoff.mjs": "2aae21d569d3c339ba190e9184b650de1647ef902b802bbc6aa85c676566918f",
+    "verify-rendered-qr.mjs": "bdf0db36bf23fc6a2efb43bb2e741b7926c12176cdda6dee2b7fc24153f418ef",
+    "terrain-observation.mjs": "90ab5e328f6a93713b6ee797545632fd8a47f5897d72d7009b175aa331845f45",
+    "verify-public-quest.mjs": "db07bef80fb1ea49fe6e679fe53d0e7011ea20b3feddd259edca79e0ef389fdf",
+    "perf-probe.mjs": "6b9c77dcd75a9cb59cd0715c47f4e72eeb16f5710edb82edc474ede0a0e62542",
+    "verify-shared-quest.mjs": "d584dd70091f9861f532385f4a31cf5c5e7a34a14776f6cd14dcfc2ee4ec6a8b",
+    "verify-prewarm.mjs": "e5bbac30271e8fdcc4ed7d5bad466bd0f16e37ee0f32ec2936e8994bdea54d3e",
+    "frame-metadata.mjs": "779634248a24da426b82402289065e317c1cc479acc6db54619a1820ce250825",
+    "handoff-time.mjs": "6dc1d58a2d8101bf1f7272b73cc4a23691b58fd2a3b243d2dc28c5f5b05e85d7",
+    "verify-worker-restart.mjs": "fd678683ec19b582324937df06ab4a22624cd7e57ae032d90e823b742911e203",
+    "worker-font-network.mjs": "767fadc087773203b9381c9a1efa271e8d2bac108ccfc75064d5da02743005b0",
+    "verify-original-fonts.mjs": "5ce7c7a01c76f9a3dd2a19d71c5a9a0936b5b2c9b9a3631c1c0a4a507424c86d",
+    "bootstrap-chunk-observation.mjs": "28138d86a82c0030421845d8b198fc2d010ae0ffc5b1f486480dddb36c41bf37",
+    "observe-static-delivery.mjs": "6f87238b42fd2a8afc8b46ca6590b1ab792faee35752038a0bc4bab027751e5f",
+    "worker-static-network.mjs": "461c41d9b4e17efceda2998cab05e1f21c99f10b0ce3af01a18bfe0a79862d44"
+  },
+  "sourceClosureAllSixVerifiedAtProductionRevision": true,
+  "beforeMappingSha256": "184bd8e41f6740cb6384e038ffd40f632e149e766581195a137f91a9d18985ff",
+  "sourceScope": "New read-only current-production E6 browser diagnostic, one disposable Testnet wallet login-only sign, at most one normal QA character and one adjacent walk. No release or promotion, all original8s/15s/120s gates retained. Adds static page/Worker metadata only; no auth payload export, interception, custom proxy, DNS or TLS settings. No physical-phone or full-route claim."
+}

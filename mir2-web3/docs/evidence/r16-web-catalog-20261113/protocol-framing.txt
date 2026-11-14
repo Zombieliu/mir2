@@ -1,0 +1,29 @@
+   Compiling proc-macro2 v1.0.106
+   Compiling unicode-ident v1.0.24
+   Compiling quote v1.0.45
+   Compiling serde_core v1.0.228
+   Compiling crc32fast v1.5.0
+   Compiling zmij v1.0.21
+   Compiling serde v1.0.228
+   Compiling cfg-if v1.0.4
+   Compiling simd-adler32 v0.3.9
+   Compiling adler2 v2.0.1
+   Compiling serde_json v1.0.149
+   Compiling memchr v2.8.0
+   Compiling itoa v1.0.18
+   Compiling miniz_oxide v0.8.9
+   Compiling flate2 v1.1.9
+   Compiling syn v2.0.117
+   Compiling serde_derive v1.0.228
+   Compiling mir2-protocol v0.1.0 (E:\mir2-player-journey\mir2-web3\packages\protocol)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.48s
+     Running unittests src\lib.rs (C:/r16-web-catalog-20261113/target-protocol\debug\deps\mir2_protocol-f0a31f8edb366e77.exe)
+
+running 5 tests
+test catalog_transport::tests::catalog_encoder_rejects_empty_count_entries_and_decoded_overflow ... ok
+test catalog_transport::tests::catalog_node_generated_utf8_fixture_and_rust_reencoding ... ok
+test catalog_transport::tests::catalog_decoder_rejects_all_truncations_crc_multi_member_and_trailing_bytes ... ok
+test catalog_transport::tests::catalog_round_trip_preserves_exact_utf8_order_and_boundaries ... ok
+test catalog_transport::tests::catalog_decoder_rejects_forged_headers_invalid_utf8_and_body_lengths ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 41 filtered out; finished in 0.01s

@@ -1,0 +1,290 @@
+{
+  "schema": "mir2.r16.web-native-shared-save.v1",
+  "passed": false,
+  "sourceHead": "df34e3b9b4f127e8097eb8bb682c9d95983ffdf9",
+  "scope": {
+    "isolatedFileWorld": true,
+    "ordinaryHeadlessWebUi": true,
+    "nativeProductionTransport": true,
+    "nativeRenderer": false,
+    "nativeWindow": false,
+    "copiedLevel30Fixture": true,
+    "production": false
+  },
+  "gateway": {
+    "sha256": "4d1a18644ef69eacdae0656fff1b8f49a4af1ae97ffcf6878ada86f5dff0ae0f",
+    "verifiedSourcePins": {
+      "apps/gateway/src/routing.rs": "c298d74a67aabcc5c509997eeb83073eb95a44f9ca2f49b893a9c54b9c54c42f",
+      "apps/simulation/src/runtime/drops.rs": "9648009ba5fa7ed50cf64aaf80833360c8c4fc1877a2494d9859c7f924c86c54",
+      "apps/simulation/src/runtime/inventory.rs": "e4d4b3f92354127e90b31abfdb694c384fd66705785d820a24bbef6ea9cbc8e3",
+      "apps/simulation/src/world_runtime.rs": "ce1484e2cae8671b8d8e027188cfa50a8f9140ec6bed31dfb69a4c58b33da39e"
+    }
+  },
+  "fixture": {
+    "sha256": "3645dc2efd9f49333a57780250ad9092469a92fc995ab8defbe434ba0e64beab",
+    "class": "Taoist",
+    "originalOrdinaryBindingVerified": true,
+    "unchanged": true,
+    "isolatedStoreChanged": true
+  },
+  "stages": [
+    "reserve-private-loopback",
+    "prepare-frozen-web-source",
+    "web-normal-entry-and-movement",
+    "native-real-transport-entry-walk-and-logout",
+    "web-fresh-login-native-write-readback"
+  ],
+  "browsers": [
+    {
+      "tag": "web-write",
+      "received": {
+        "Connected": 1,
+        "ClientVersion": 1,
+        "LoginSuccess": 1,
+        "StartGame": 1,
+        "Chat": 1,
+        "UpdateNotice": 1,
+        "NewItemInfo": 152,
+        "MapInformation": 1,
+        "UserInformation": 1,
+        "NewQuestInfo": 200,
+        "NewRecipeInfo": 79,
+        "CompleteQuest": 1,
+        "ReceiveMail": 1,
+        "FriendUpdate": 1,
+        "GameShopInfo": 105,
+        "BaseStatsInfo": 1,
+        "ObjectSpell": 92,
+        "ObjectMonster": 9,
+        "ObjectNpc": 21,
+        "TimeOfDay": 1,
+        "ChangeAMode": 1,
+        "ChangePMode": 1,
+        "SwitchGroup": 2,
+        "DefaultNPC": 1,
+        "GuildBuffList": 2,
+        "NPCUpdate": 5,
+        "NPCResponse": 4,
+        "MentorUpdate": 1,
+        "LoverUpdate": 1,
+        "GuildStatus": 1,
+        "GuildMemberChange": 1,
+        "ObjectGuildNameChanged": 1,
+        "ObjectHealth": 1,
+        "DeleteGroup": 1,
+        "KeepAlive": 1,
+        "UserLocation": 1,
+        "LogOutSuccess": 1
+      },
+      "sent": {
+        "clientCapabilities": 2,
+        "setLanguage": 1,
+        "clientVersion": 1,
+        "login": 1,
+        "startGame": 1,
+        "npcPurchaseOwner": 1,
+        "keepAlive": 1,
+        "walk": 1,
+        "logOut": 1
+      }
+    },
+    {
+      "tag": "web-readback",
+      "received": {
+        "Connected": 1,
+        "ClientVersion": 1,
+        "LoginSuccess": 1,
+        "StartGame": 1,
+        "Chat": 1,
+        "UpdateNotice": 1,
+        "NewItemInfo": 152,
+        "MapInformation": 1,
+        "UserInformation": 1,
+        "NewQuestInfo": 200,
+        "NewRecipeInfo": 79,
+        "CompleteQuest": 1,
+        "ReceiveMail": 1,
+        "FriendUpdate": 1,
+        "GameShopInfo": 105,
+        "BaseStatsInfo": 1,
+        "ObjectSpell": 92,
+        "ObjectNpc": 18,
+        "ObjectMonster": 8,
+        "TimeOfDay": 1,
+        "ChangeAMode": 1,
+        "ChangePMode": 1,
+        "SwitchGroup": 2,
+        "DefaultNPC": 1,
+        "GuildBuffList": 2,
+        "NPCUpdate": 4,
+        "NPCResponse": 4,
+        "MentorUpdate": 1,
+        "LoverUpdate": 1,
+        "GuildStatus": 1,
+        "GuildMemberChange": 1,
+        "ObjectGuildNameChanged": 1,
+        "ObjectHealth": 1,
+        "DeleteGroup": 1,
+        "KeepAlive": 1,
+        "LogOutSuccess": 1
+      },
+      "sent": {
+        "clientCapabilities": 2,
+        "setLanguage": 1,
+        "clientVersion": 1,
+        "login": 1,
+        "startGame": 1,
+        "npcPurchaseOwner": 1,
+        "logOut": 1,
+        "keepAlive": 1
+      }
+    }
+  ],
+  "errors": [
+    {
+      "kind": "http",
+      "code": 404,
+      "path": "/original-ui/CWeapon/11/meta.json"
+    },
+    {
+      "kind": "console",
+      "hash": "377ab8b4b5e86078109682c970bd4bbb24606becc5d12a775b80b84e922bbad6"
+    },
+    {
+      "kind": "http",
+      "code": 503,
+      "path": "/api/original-ui-meta"
+    },
+    {
+      "kind": "console",
+      "hash": "38ae154bfd5213d25ac2b9abd4998485afaa74c53ca2e7ac6eb5d2e037dcc650"
+    },
+    {
+      "kind": "http",
+      "code": 404,
+      "path": "/original-ui/CWeapon/11/meta.json"
+    },
+    {
+      "kind": "console",
+      "hash": "377ab8b4b5e86078109682c970bd4bbb24606becc5d12a775b80b84e922bbad6"
+    },
+    {
+      "kind": "http",
+      "code": 503,
+      "path": "/api/original-ui-meta"
+    },
+    {
+      "kind": "console",
+      "hash": "38ae154bfd5213d25ac2b9abd4998485afaa74c53ca2e7ac6eb5d2e037dcc650"
+    }
+  ],
+  "web": {
+    "runtimeVersion": "bevy-0cd68510886134e0",
+    "sourcePageSha256": "b4918778aa2698b07fb8a80abc312cf179ddc6f41e1d9a1c01e10f90bf26baba"
+  },
+  "webMove": {
+    "before": [
+      328,
+      264
+    ],
+    "after": [
+      329,
+      264
+    ],
+    "packet": "UserLocation",
+    "logout": true
+  },
+  "native": {
+    "sha256": "40d56867fa5b97914e16c8a673aa758c179afb65767a5105c08f368ccf839f38",
+    "transportSourceSha256": "0fda45624bd7d5aed62240913c684dd0231c1654516b0db57335f8aa86378f14",
+    "isolatedDriverSha256": "d2567166e35bf35b07e612a8df3246fde8c2163e5508e35c2e0e6558f39e647e",
+    "entryRead": {
+      "position": [
+        329,
+        264
+      ],
+      "gold": 53295,
+      "experience": 18263,
+      "level": 30,
+      "completedQuestCount": 26,
+      "matchingWebSave": true
+    },
+    "movement": {
+      "direction": "Right",
+      "packet": "UserLocation",
+      "position": [
+        330,
+        264
+      ]
+    },
+    "wire": [
+      "LoginSuccess",
+      "StartGame(4)",
+      "PlayerBootstrapped",
+      "UserLocation",
+      "LogOutSuccess"
+    ],
+    "shutdown": true
+  },
+  "webReturn": {
+    "position": [
+      330,
+      264
+    ],
+    "direction": "right",
+    "gold": 53295,
+    "experience": 18263,
+    "level": 30,
+    "completedQuestCount": 26,
+    "personalStateHashes": {
+      "inventoryItems": "c8f36e0765013192c3e6599ee596f902b26e72d5c9de103e1fc9e3c70310972b",
+      "equipmentItems": "2d7c1680e2f1e68487c0364f8acb777abf34ae088ff8a53e944a776976ce0cb4",
+      "beltItems": "328bd48a813018e254690d0531e6419569eaa551e07889287db5a35c03bff103",
+      "knownSkills": "e79a4516e58192937cb532e074966410c0149d20b52e4e7f2f3fdaef6d8cf182",
+      "questLog": "005696b8c50b04c59ab4ad78c411e0e4d956bf1822f9c2a9d58618ec0830308a"
+    },
+    "counts": {
+      "inventoryItems": 12,
+      "equipmentItems": 4,
+      "beltItems": 6,
+      "knownSkills": 5,
+      "questLog": 63
+    },
+    "freshBrowserContext": true,
+    "sameRole": true,
+    "logout": true
+  },
+  "stopped": {
+    "gateway": true,
+    "next": true
+  },
+  "saveHandoffPassed": true,
+  "cleanBrowserAssetGatePassed": false,
+  "disk": {
+    "samePositionDirectionAndPersonalState": true,
+    "retainedFields": [
+      "map_file_name",
+      "map_title",
+      "bind_point",
+      "gold",
+      "credit",
+      "experience",
+      "max_experience",
+      "inventory_capacity",
+      "inventory_items_json",
+      "belt_items_json",
+      "storage_items_json",
+      "equipment_items_json",
+      "quest_states_json",
+      "skill_states_json"
+    ],
+    "initialFixtureSha256": "3645dc2efd9f49333a57780250ad9092469a92fc995ab8defbe434ba0e64beab",
+    "isolatedFileSha256": "9039df23e238d42d1cf15487eb61e93bd559fc91af5add119fb20917d329de90",
+    "normalShutdown": true
+  },
+  "evidenceInputs": {
+    "rawReceiptSha256": "6644fe6777760c953a41bde2d2d2b1e76225256f7434a9fb3698609fd0f30d17",
+    "testDriverSourceSha256": "bcc0c8bbe0b0366e825c618472b5a6e5accc7398b124a5a9aac702ef9edb6b08",
+    "nativeBuildLogSha256": "36a1222530ea424ad3db4735bd4e529bb1c10277b20afad3d329527c473078e4"
+  }
+}

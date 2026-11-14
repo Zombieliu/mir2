@@ -1,0 +1,44 @@
+{
+  "schema": "mir2.r16.creation-constraints-verification.v1",
+  "branch": "codex/windows-player-journey",
+  "head": "c404bde8a5190534f6bc83ec8a4fe78fffc8cb50",
+  "gatewaySha256": "3dd4f2b5c053f0d35c0ba172130a5731eb8944afd4b78e7605c03a9271fcad3e",
+  "scope": "Current worktree with local changes, loopback File and native PostgreSQL 17.11, no production data",
+  "results": {
+    "FileAndPostgres": 2,
+    "securityLifecycle": 21,
+    "failedFileWrite": 1,
+    "classicAndFiveClassCreation": 2,
+    "windowsPacketDispatch": 1,
+    "nativeCreateReducerAndInput": 3,
+    "webRegression": 54,
+    "typeScriptPassed": true
+  },
+  "concurrentCases": [
+    "case-variant name exactly one success and result 5",
+    "distinct names distinct character indices",
+    "last slot exactly one success and result 4",
+    "normal deletion releases the name even with a stale PG cache"
+  ],
+  "legacyCases": [
+    "old five-role roster and pre-existing duplicate names read back",
+    "old fifth role enters game through ordinary protocol",
+    "fixture level and gold preserved"
+  ],
+  "browserFirst": "exact reject and retry cases passed, StartGame ACK exceeded the 12s wait",
+  "browserRepeat": "same Gateway binary, full flow with 90s StartGame wait",
+  "nativeBuild": "canonical source, external manifests and offline lock resolution for platform test",
+  "sourcePins": {
+    "apps/simulation/src/config/character_creation.rs": "4f379fe8ae8a0b7ccba3aeb77402a6134ecf0894cfecfeddfb0e1dd213b7eb61",
+    "apps/simulation/src/config.rs": "8eb2a5e4bf10eae73ee7ea51822fe9867fccc374842e102d4deb31f1a18d0b2c",
+    "apps/simulation/src/runtime/save.rs": "7dd8dd4e23050cbecb19879053ade7e6e2c6c2d8bb8681390a31211b35bc9d6e",
+    "apps/simulation/src/runtime/packets.rs": "b81c9113590e6de73bdf6f57c362812b60b7f663b4cca5d3fbb004f55e3fff57",
+    "apps/simulation/tests/r16_character_creation.rs": "7057bd30ebe486de4e34002787dfe585496e65c5b460884803a7eabb83e4058e",
+    "apps/game-client/client-bevy/src/native_shell.rs": "bb7645d9454d6b8a933c9389ab3992630b0e028c704203ec800ca9758d9964fe",
+    "apps/game-client/client-bevy/src/native_shell_ui.rs": "a527966349a0936a24a331bc3b8533c8642fb7dd4fbbcda2bcff8c1aac27deb9",
+    "apps/game-client/client-bevy/src/crystal_ui/select.rs": "a00bfd829ea2af7a17d3463d31343834857ffe7ace3779d576607c000ae678a8",
+    "apps/game-client/platform-windows/src/gateway.rs": "c29ea4c4ce0998087b71fd8d147c52fdee8272fa589ad4ba2e4ddcae3d60b37e",
+    "apps/web/app/page.tsx": "4f925f4f1aec663cf06791520b04ce1ae31da3f6c2f6882682d30b992c3617c7",
+    "apps/web/app/components/original-client-overlays.tsx": "333f7e512794534a240d7bc668e53301a3b581116445a5119f03192ddb61c3f2"
+  }
+}

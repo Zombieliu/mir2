@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-10-25T11:46:53.570Z",
+  "sourceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+  "sourcePins": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\routing.rs",
+      "bytes": 1389827,
+      "sha256": "9135f2f3a019b04c1bb6ffe3717f730c65632df4e642702057bfbf7a699564de"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\routing\\tests\\personal_monster_projection_tests.rs",
+      "bytes": 30640,
+      "sha256": "fe507e961403679b3b92f23986dff3f53bb52a5c528fae251dd2f7ec546197f0"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime.rs",
+      "bytes": 749298,
+      "sha256": "d19840e87e6b2e718303d90d02a03e8c1c4941e069f0b168d9d253644950f3b6"
+    }
+  ],
+  "preimagePins": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\preimages\\routing.rs.txt",
+      "bytes": 1388304,
+      "sha256": "a0e3a19ad1184efd87a632118a98a65c975ca12d2adfda95b2f9e4a6138eff49"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\preimages\\personal_monster_projection_tests.rs.txt",
+      "bytes": 12555,
+      "sha256": "dc5d0862501b588263f1a187628af6a1e00ec30a268d000e73feebb8aa42f722"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\preimages\\zone-runtime.rs.txt",
+      "bytes": 748912,
+      "sha256": "4f4eaa4519e745c0bd376f33ef76b86c88ad1c1015fd42bb53ef3a159ce320a8"
+    }
+  ],
+  "mainInverseRules": [
+    {
+      "label": "three pure reposition boundary callsites",
+      "occurrences": 3
+    },
+    {
+      "label": "pure journey-state merge hook",
+      "occurrences": 1
+    },
+    {
+      "label": "remove only the two new pure journey helper functions",
+      "occurrences": 1
+    }
+  ],
+  "mainInverseLfExactHistoricalGit": true,
+  "genericHelperLfExactHistorical": true,
+  "genericHelperBytes": 1209,
+  "newOwnershipQuery": {
+    "bytes": 386,
+    "sha256": "6099a8247b3343fc4aeef5be299d06ed4f8df1bae6903cce7711abb973108e1f",
+    "readonly": true,
+    "fields": [
+      "owner_session_id",
+      "master_object_id",
+      "owner_player_object_id"
+    ],
+    "noNewStateOrSerializationOrRandomness": true
+  },
+  "runtimeInverseLfExactHistoricalGit": true,
+  "testOriginalPrefixBytes": 12555,
+  "testOriginalPrefixRawExact": true,
+  "allOriginalTestsAndAssertionsRawPreserved": true,
+  "newTests": [
+    "personal_journey_immediate_spawn_keeps_native_owner_position",
+    "personal_journey_immediate_remove_keeps_zone_visible_owner_monster",
+    "personal_journey_predrain_spawn_keeps_native_owner_position",
+    "personal_journey_predrain_remove_keeps_zone_visible_owner_monster",
+    "personal_journey_checkpoint_spawn_keeps_native_owner_position",
+    "personal_journey_checkpoint_remove_keeps_zone_visible_owner_monster",
+    "personal_journey_remove_filter_reads_actual_owned_unowned_and_unknown_state",
+    "personal_journey_filter_preserves_true_zone_aoi_leave_and_reentry",
+    "personal_journey_generic_filter_preserves_authoritative_aoi_remove"
+  ],
+  "patch": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\candidate-three-file-diff-v1.patch",
+    "bytes": 24661,
+    "sha256": "ce07e87b3ad0bf1b9d7116ae4de9bd20b78242e7dc707a1816f36982348cc6f2"
+  },
+  "semantics": "Remove filtering is confined to pure personal journey outputs before merging; the original generic helper is exactly preserved. Original Zone AOI/removal/retirement and owned or unknown actors are not newly filtered by the generic boundary.",
+  "validation": {
+    "rootReportedRedV3": {
+      "targetFailures": 6,
+      "setupFailures": 0,
+      "abort": false
+    },
+    "rootReportedFirstGreen": {
+      "passed": 8,
+      "failed": 0,
+      "notFinalCandidate": true
+    },
+    "rootReportedGenericBoundaryRed": {
+      "targetFailures": 1,
+      "setupFailures": 0
+    },
+    "finalFocusedAndAdjacent": "pending root actual execution",
+    "testsRunByThisScript": false,
+    "realmStarted": false
+  },
+  "scope": "This source inverse does not certify a new Release, fresh gameplay probe, formal capacity, P0 or P2 acceptance."
+}

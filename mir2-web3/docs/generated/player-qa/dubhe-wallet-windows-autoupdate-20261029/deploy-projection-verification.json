@@ -1,0 +1,31 @@
+{
+  "schema": "mir2.static-update-exact-legacy-projection-verification.v1",
+  "checkedUtc": "2026-10-28T19:33:44.507921+00:00",
+  "passed": true,
+  "deployTestsPassed": 25,
+  "projectionCandidatePaths": 17,
+  "frozenDeliveryPaths": 18,
+  "diagnosedProjectionPaths": 35,
+  "projectionMatchesRemoteReadOnlyDiagnostic": true,
+  "existingFrozen18PathSizeHashValuesUnchanged": true,
+  "negativePerFileMutations": 105,
+  "fullAndFullPlusDeliveryStillAccepted": true,
+  "existingReleaseFilesWrittenOrRemovedByVerifier": false,
+  "candidateOrEngineSignatureChanged": false,
+  "serverOperationsPerformed": false,
+  "cloudflareOperationsPerformed": false,
+  "sourceFiles": [
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/scripts/deploy-server-release.py",
+      "sha256": "395791C74846505A344ADF31F0DA3F1028F897C02DE9646FD15A6403D13269B2"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/scripts/deploy-script-tests.py",
+      "sha256": "9C7B4D0ACE2394904A8B0DB871D7CC5EF52F292F9658E40FF17A5112E74DBDB2"
+    }
+  ],
+  "focusedLogSha256": "fe8c10278246964d2b3fe2c6fa21c8cfdd3f1372a7848137d277bbf5de5130c2",
+  "diffFile": "deploy-projection.patch",
+  "diffSha256": "f3684ca7d68be57a682e7797a239ccb230d4a2f4fcc3d58ba52c04dd9dba6370",
+  "diffCheckPassed": true
+}

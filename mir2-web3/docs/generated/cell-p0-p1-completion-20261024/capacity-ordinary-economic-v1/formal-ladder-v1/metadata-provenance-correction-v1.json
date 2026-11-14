@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "kind": "METADATA_PROVENANCE_ONLY_CORRECTION",
+  "before": {
+    "preparation": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\preparation-v1.json",
+      "bytes": 12691,
+      "sha256": "5f597dc3fcf219c6ab9948a87263456c803b4485827a89f4e78b60194041bd06"
+    },
+    "readme": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\README-pending-v1.md",
+      "bytes": 6579,
+      "sha256": "0eded2632d75f3c528511727102d53f5fe4911018facc9a2eabab9abf625d1d5"
+    }
+  },
+  "preservedExclusiveCopies": {
+    "preparation": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\preparation-before-provenance-correction-v1.json",
+      "bytes": 12691,
+      "sha256": "5f597dc3fcf219c6ab9948a87263456c803b4485827a89f4e78b60194041bd06"
+    },
+    "readme": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\README-before-provenance-correction-v1.md",
+      "bytes": 6579,
+      "sha256": "0eded2632d75f3c528511727102d53f5fe4911018facc9a2eabab9abf625d1d5"
+    }
+  },
+  "defect": "preparation-v1.previousReadme used the active README path with historical bytes/hash; that old byte observation was not saved under a separate raw preimage",
+  "correction": "New preparation-v2 represents it as observedPath/observedBytes/observedSha256 with currentlyCheckableAtObservedPath=false, not an active {file,bytes,sha256} pin; latestReadmePin is the current actual README",
+  "unchanged": [
+    "all 11 runtime tool sources",
+    "formal contract",
+    "config",
+    "bank plan",
+    "derivation",
+    "active README",
+    "preparation-v1"
+  ],
+  "newPreparationBasename": "preparation-v2.json",
+  "runtimeBehaviorChanged": false,
+  "sourceQualificationPerformed": false,
+  "freezePerformed": false,
+  "loadStarted": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

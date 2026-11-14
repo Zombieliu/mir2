@@ -1,0 +1,271 @@
+{
+  "schema": "mir2.r16.targeted-spells-verification.v1",
+  "build": {
+    "schema": "mir2.r16.targeted-spell-gateway-candidate.v1",
+    "baseCommit": "dbc82b9ca0ae0531fb600a80a8d3d238841b0f87",
+    "crystalReference": "92b4ce4ab488b11e65f63d3ad22de2e1f25ec08d",
+    "gatewaySha256": "68287cb59058786dcdac6420a7ead59f997933cfa744e09f36d891696ecfdaa7",
+    "routingSourceSha256": "1b318a3b61323a8ada5c3a6a2f92c58daf7f601594229ff15dcff6577cac8b36",
+    "zoneSourceSha256": "2580b4f9ca5fef670539131f73fec8aa1db407613cb5b620e03a4f96a653c6df",
+    "zoneTestSha256": "dfe154a8c01aba2006c67c41608660cf1ce49e9942c8c2a8352a956a4ade4ac5",
+    "changedFiles": {
+      "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs": {
+        "baselineGitBlob": "f73401736489145fc08219af452e868531b5ed97",
+        "sourceSha256": "2580b4f9ca5fef670539131f73fec8aa1db407613cb5b620e03a4f96a653c6df"
+      },
+      "mir2-web3/apps/simulation/src/runtime/zone/runtime/player_magic_cooldown_tests.rs": {
+        "baselineGitBlob": "c32291475de4db83eed702b94c73e68a52fc04d0",
+        "sourceSha256": "dfe154a8c01aba2006c67c41608660cf1ce49e9942c8c2a8352a956a4ade4ac5"
+      }
+    },
+    "verifiedCommittedSourceBlobs": 1507,
+    "archiveLineEndingOnlyFiles": 107,
+    "profile": "Rust 1.95 dev debug=0; locked offline; isolated target",
+    "testLogs": [
+      "zone-soulfire-red-r4.log",
+      "zone-soulfire-green.log",
+      "zone-soulfire-adjacent.log",
+      "gateway-soulfire-build.log"
+    ]
+  },
+  "scope": {
+    "isolatedFileGateway": true,
+    "normalHeadlessBrowser": true,
+    "copiedLevel30FixturePerClass": true,
+    "nativeReferenceSourceReviewed": true,
+    "nativeWindowTested": false,
+    "production": false
+  },
+  "baseline": {
+    "wizard": {
+      "file": "wizard-field-r2/receipt.json",
+      "sha256": "2414f38d9ad660d155a1153019764f56a8707a995a9b9c0d7b07a203d8ddef4f",
+      "accepted": {
+        "objectId": 1000,
+        "targetId": 200203,
+        "name": "Hen",
+        "origin": {
+          "x": 300,
+          "y": 267
+        },
+        "target": {
+          "x": 297,
+          "y": 274
+        },
+        "range": 7,
+        "atMs": 494,
+        "sequence": 769
+      },
+      "hit": {
+        "attackerVerified": true,
+        "hitMs": 7,
+        "death": true,
+        "targetHealth": [
+          0
+        ],
+        "projectile": true,
+        "damage": 5
+      }
+    },
+    "taoist": {
+      "file": "taoist-field-r2/receipt.json",
+      "sha256": "ddfea1e3dd71c1779fafe19afa954d2d05e9ff31eab0001fe1ba96a2ab79d6b5",
+      "livingNeutralTargetId": 200203,
+      "ordinaryWireAttempts": 8,
+      "acceptedCasts": 0,
+      "equippedAmulets": 43
+    }
+  },
+  "classes": {
+    "wizard": {
+      "file": "wizard-zone-candidate-r1/receipt.json",
+      "sha256": "c9a0fa734666126a7fda2da35835b3959e492398f78816448375f00122243c7f",
+      "spell": "GreatFireBall",
+      "ordinaryBind": [
+        {
+          "op": "F11 bind",
+          "spell": "GreatFireBall",
+          "slot": 9,
+          "source": "content.magic.GreatFireBall.description",
+          "wire": [
+            "magicKey"
+          ],
+          "readBack": true
+        }
+      ],
+      "position": {
+        "objectId": 1000,
+        "targetId": 200203,
+        "name": "Hen",
+        "origin": {
+          "x": 300,
+          "y": 267
+        },
+        "target": {
+          "x": 297,
+          "y": 274
+        },
+        "range": 7,
+        "atMs": 456,
+        "sequence": 765
+      },
+      "hit": {
+        "attackerVerified": true,
+        "hitMs": 8,
+        "death": true,
+        "targetHealth": [
+          0
+        ],
+        "projectile": true,
+        "damage": 5
+      },
+      "mp": [
+        541,
+        536
+      ],
+      "beforeSkill": {
+        "hotkey": 9,
+        "level": 0,
+        "experience": 501
+      },
+      "afterSkill": {
+        "hotkey": 9,
+        "level": 0,
+        "experience": 503
+      },
+      "freshReadback": {
+        "skill": {
+          "hotkey": 9,
+          "level": 0,
+          "experience": 503
+        },
+        "mp": 536,
+        "equippedAmulets": 0
+      },
+      "diskSkill": {
+        "hotkey": 9,
+        "level": 0,
+        "experience": 503
+      },
+      "normalLogouts": 2,
+      "fixtureUnchanged": true,
+      "errors": [],
+      "movementIntents": 15,
+      "measuredCrystalProjectileBudgetMs": 850
+    },
+    "taoist": {
+      "file": "taoist-zone-candidate-r1/receipt.json",
+      "sha256": "b42811dba92ba9c67577ff3debc3af29b5f8e205b9a4ed8de0a0f6ea91b96e6e",
+      "spell": "SoulFireBall",
+      "ordinaryBind": [
+        {
+          "op": "F11 bind",
+          "spell": "SoulFireBall",
+          "slot": 9,
+          "source": "content.magic.SoulFireBall.description",
+          "wire": [
+            "magicKey"
+          ],
+          "readBack": true
+        }
+      ],
+      "position": {
+        "objectId": 1000,
+        "targetId": 200203,
+        "name": "Hen",
+        "origin": {
+          "x": 300,
+          "y": 267
+        },
+        "target": {
+          "x": 297,
+          "y": 274
+        },
+        "range": 7,
+        "atMs": 433,
+        "sequence": 792
+      },
+      "hit": {
+        "attackerVerified": true,
+        "hitMs": 11,
+        "death": true,
+        "targetHealth": [
+          0
+        ],
+        "projectile": true,
+        "damage": 5
+      },
+      "mp": [
+        260,
+        257
+      ],
+      "beforeSkill": {
+        "hotkey": 9,
+        "level": 0,
+        "experience": 470
+      },
+      "afterSkill": {
+        "hotkey": 9,
+        "level": 0,
+        "experience": 471
+      },
+      "freshReadback": {
+        "skill": {
+          "hotkey": 9,
+          "level": 0,
+          "experience": 471
+        },
+        "mp": 257,
+        "equippedAmulets": 42
+      },
+      "diskSkill": {
+        "hotkey": 9,
+        "level": 0,
+        "experience": 471
+      },
+      "normalLogouts": 2,
+      "fixtureUnchanged": true,
+      "errors": [],
+      "movementIntents": 17,
+      "measuredCrystalProjectileBudgetMs": 850,
+      "reagent": {
+        "rejectedPet": {
+          "ordinaryTargetId": 1000000,
+          "masterId": 1000,
+          "attackMode": "Peace",
+          "countBefore": 43,
+          "noDeletePacket": true,
+          "noAcceptedCast": true,
+          "countAfter": 43
+        },
+        "acceptedStack": [
+          43,
+          42
+        ],
+        "deletePacketCount": 1,
+        "restoredStack": 42,
+        "disk": 42
+      }
+    }
+  },
+  "tests": {
+    "totalPassed": 88,
+    "logs": {
+      "zone-soulfire-green.log": 4,
+      "zone-soulfire-adjacent.log": 9,
+      "zone-action-boundary-adjacent.log": 8,
+      "zone-owned-pet-adjacent.log": 52,
+      "zone-player-cadence-adjacent.log": 15
+    },
+    "red": "zone-soulfire-red-r4.log"
+  },
+  "retainedExploration": {
+    "wizard-first-r1/receipt.json": "Royal_Archer was a poor positive-damage/practice subject.",
+    "taoist-first-r1/receipt.json": "Harness confused legacy save count with Web quantity before cast.",
+    "taoist-first-r2/receipt.json": "Own pet and high-armour guard were not qualifying targets.",
+    "wizard-field-r1/receipt.json": "Initial southeast route entered WeaponStore.",
+    "taoist-field-r1/receipt.json": "Initial southeast route entered WeaponStore.",
+    "wizard-cadence-r1/receipt.json": "No early targeted wire command was emitted after the primer. This attempt does not independently identify why the historical first cast was rejected."
+  },
+  "remaining": "Shared authoritative projectile resolution runs before the pinned Crystal distance-derived 500+50ms per tile. Preserve separate timing work; this candidate qualifies target/reagent admission and durable progress."
+}

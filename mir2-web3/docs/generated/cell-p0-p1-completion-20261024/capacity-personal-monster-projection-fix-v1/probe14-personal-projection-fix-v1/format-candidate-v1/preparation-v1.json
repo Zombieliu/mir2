@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "preparedAt": "2026-10-25T11:59:42.4471210Z",
+  "state": "EXTERNAL_FORMAT_CANDIDATE_ONLY_NOT_APPLIED",
+  "source": {
+    "sha256": "fe507e961403679b3b92f23986dff3f53bb52a5c528fae251dd2f7ec546197f0",
+    "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/gateway/src/routing/tests/personal_monster_projection_tests.rs",
+    "bytes": 30640
+  },
+  "candidate": {
+    "sha256": "7d474f50150108175bd96268c2f22270f916bbfdefc8a47e5f4fd0c249ffc0fc",
+    "file": "C:/mir2-build/p01-completion-20261024/probe14-personal-projection-fix-v1/format-candidate-v1/personal_monster_projection_tests.rs",
+    "bytes": 30917
+  },
+  "formatter": "rustup run 1.95.0 rustfmt --edition 2021",
+  "twoIndependentExternalFormatterOutputsByteEqual": true,
+  "formatterExit": 0,
+  "externalCandidateRustfmtCheckExit": 0,
+  "original12555BytePrefixRawExact": true,
+  "sourceNotChangedByPreparation": true,
+  "productTestsOrCargoRun": false,
+  "previousAttempt": {
+    "receiptWritten": false,
+    "nonWhitespaceCodepointsExact": false,
+    "reason": "A whitespace-stripped character comparison is stricter than rustfmt, which also normalizes optional trailing commas. That guard failed; no pass or source mutation was made."
+  },
+  "root37FileRustfmtStatus": "actual initial check failed; final37-file check not run by this tool",
+  "rootAdjacent186": "ongoing or root-controlled; no verdict inferred",
+  "candidateApplied": false
+}

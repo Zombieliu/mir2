@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T10:47:20.081Z",
+  "runId": "1792923531277-bc2bda2e",
+  "independentEndedReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-independent-verification-v1\\final-verification.json",
+    "bytes": 160745,
+    "sha256": "51767fdb36d7d8f146b7bb366f7bd58fdcbff3c92e19b318f72673fa613139a7"
+  },
+  "sourceRaw": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-chase-preference-feasibility-14\\reports\\1792923531277-bc2bda2e.samples.jsonl",
+    "bytes": 5219958,
+    "rows": 4314,
+    "sha256": "0ebbc11aab62b1db86436117268037002f9687031e32d3e26527e6011feca1c1"
+  },
+  "fullStageCorrections": 5,
+  "failedContinuousWindowCorrections": 4,
+  "allCorrectedRowsExactAgainstIndependentReplay": true,
+  "allFivePriorOwnerReceiptsAlreadyArrived": true,
+  "boundedConnection1WireEvents": 29,
+  "spectatorPayloadRead": false,
+  "privateDataRead": false,
+  "totalAnalysisRawFullReads": 2,
+  "interpretation": "Exact client command/cursor/packet/cache correspondence. Authority rejection reasons and simultaneous occupancy are absent; no client-filter or server-authority bug is declared.",
+  "originalReportOk": false,
+  "capacityAccepted": false,
+  "sourceOrSceneOrThresholdChanged": false
+}

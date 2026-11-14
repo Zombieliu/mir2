@@ -1,0 +1,163 @@
+{
+  "schema": "mir2.wallet.public-release-verification.v2",
+  "verifiedUnix": 1793223013,
+  "passed": true,
+  "checks": [
+    {
+      "url": "https://assets.mir2.obelisk.build/client-updates/latest.json",
+      "status": 200,
+      "sha256": "cfc78a45e30c8079857cffb2bf6c02c8266a1c9c85fef4022368b43e8d11317c",
+      "headPassed": true,
+      "noStore": true
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/client-updates/latest.p7s",
+      "status": 200,
+      "sha256": "a59383d661f1b16ce18a62f47ec6c78c3a3ccabf462a5fc2637dfe036211712a",
+      "headPassed": true,
+      "noStore": true
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/client-updates/releases/updater-C8241025681123CE-s23/Mir2Updater.exe",
+      "status": 200,
+      "sha256": "c8241025681123ce3e9b24f3e78aac17577b24833395f7bb2644b8905aafc5de",
+      "engineMatchesPlan": true
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/client-updates/latest.json",
+      "method": "POST",
+      "status": 405,
+      "writeBlocked": true
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/client-updates/feed-current/latest.json",
+      "status": 404,
+      "privatePathBlocked": true
+    },
+    {
+      "url": "https://165.154.65.136.sslip.io/client-updates/latest.json",
+      "status": 200,
+      "sha256": "cfc78a45e30c8079857cffb2bf6c02c8266a1c9c85fef4022368b43e8d11317c",
+      "headPassed": true,
+      "noStore": true
+    },
+    {
+      "url": "https://165.154.65.136.sslip.io/client-updates/latest.p7s",
+      "status": 200,
+      "sha256": "a59383d661f1b16ce18a62f47ec6c78c3a3ccabf462a5fc2637dfe036211712a",
+      "headPassed": true,
+      "noStore": true
+    },
+    {
+      "url": "https://165.154.65.136.sslip.io/client-updates/releases/updater-C8241025681123CE-s23/Mir2Updater.exe",
+      "status": 200,
+      "sha256": "c8241025681123ce3e9b24f3e78aac17577b24833395f7bb2644b8905aafc5de",
+      "engineMatchesPlan": true
+    },
+    {
+      "url": "https://165.154.65.136.sslip.io/client-updates/latest.json",
+      "method": "POST",
+      "status": 405,
+      "writeBlocked": true
+    },
+    {
+      "url": "https://165.154.65.136.sslip.io/client-updates/feed-current/latest.json",
+      "status": 404,
+      "privatePathBlocked": true
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/client-updates/five-class/latest.json",
+      "status": 200,
+      "sha256": "0c7c9626271c98d478a48ce79dca92f31436b84ad20b6c2db4462d65b4de8a91",
+      "headPassed": true,
+      "noStore": true
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/client-updates/five-class/latest.p7s",
+      "status": 200,
+      "sha256": "e691787d7ad8e69f7936573527c7a8650d4b5701aa46d6f9ae2f66cb098e90b6",
+      "headPassed": true,
+      "noStore": true
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/client-updates/five-class/releases/updater-C8241025681123CE-s24/Mir2Updater.exe",
+      "status": 200,
+      "sha256": "c8241025681123ce3e9b24f3e78aac17577b24833395f7bb2644b8905aafc5de",
+      "engineMatchesPlan": true
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/client-updates/five-class/releases/game-WN-CANDIDATE-20261029-wallet-28/mir2-client.toml",
+      "sha256": "33ae7e2cf643c43b3bab9b8839998f00051447baf40002ecfb5b19cb3a0a4e13",
+      "explicitWalletOrigin": true,
+      "creationClasses": [
+        "Warrior",
+        "Wizard",
+        "Taoist"
+      ]
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/client-updates/five-class/releases/game-WN-CANDIDATE-20261029-wallet-28/mir2-platform-windows.exe",
+      "rangeStatus": 206,
+      "prefixMatchesCandidate": true
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/client-updates/five-class/latest.json",
+      "method": "POST",
+      "status": 405,
+      "writeBlocked": true
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/client-updates/five-class/feed-current/latest.json",
+      "status": 404,
+      "privatePathBlocked": true
+    },
+    {
+      "url": "https://165.154.65.136.sslip.io/client-updates/five-class/latest.json",
+      "status": 200,
+      "sha256": "0c7c9626271c98d478a48ce79dca92f31436b84ad20b6c2db4462d65b4de8a91",
+      "headPassed": true,
+      "noStore": true
+    },
+    {
+      "url": "https://165.154.65.136.sslip.io/client-updates/five-class/latest.p7s",
+      "status": 200,
+      "sha256": "e691787d7ad8e69f7936573527c7a8650d4b5701aa46d6f9ae2f66cb098e90b6",
+      "headPassed": true,
+      "noStore": true
+    },
+    {
+      "url": "https://165.154.65.136.sslip.io/client-updates/five-class/releases/updater-C8241025681123CE-s24/Mir2Updater.exe",
+      "status": 200,
+      "sha256": "c8241025681123ce3e9b24f3e78aac17577b24833395f7bb2644b8905aafc5de",
+      "engineMatchesPlan": true
+    },
+    {
+      "url": "https://165.154.65.136.sslip.io/client-updates/five-class/releases/game-WN-CANDIDATE-20261029-wallet-28/mir2-client.toml",
+      "sha256": "33ae7e2cf643c43b3bab9b8839998f00051447baf40002ecfb5b19cb3a0a4e13",
+      "explicitWalletOrigin": true,
+      "creationClasses": [
+        "Warrior",
+        "Wizard",
+        "Taoist"
+      ]
+    },
+    {
+      "url": "https://165.154.65.136.sslip.io/client-updates/five-class/releases/game-WN-CANDIDATE-20261029-wallet-28/mir2-platform-windows.exe",
+      "rangeStatus": 206,
+      "prefixMatchesCandidate": true
+    },
+    {
+      "url": "https://165.154.65.136.sslip.io/client-updates/five-class/latest.json",
+      "method": "POST",
+      "status": 405,
+      "writeBlocked": true
+    },
+    {
+      "url": "https://165.154.65.136.sslip.io/client-updates/five-class/feed-current/latest.json",
+      "status": 404,
+      "privatePathBlocked": true
+    }
+  ],
+  "phoneWalletSignatureTested": false,
+  "dockerStarted": false
+}

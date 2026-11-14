@@ -1,0 +1,17 @@
+# Keep raw evidence bytes; recognize CRLF without suppressing whitespace checks.
+* -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+# Raw Cargo/Node receipts include blank diagnostic lines; retain their bytes.
+validation/*.log whitespace=-blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+# Original Node assertion failures include padded blank diagnostic lines.
+capacity-native-survival-pursuit-witness-v1/focused-v4.log whitespace=-blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+capacity-native-survival-pursuit-witness-v1/full-v1.log whitespace=-blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+capacity-native-witness-approach-v1/adjacent-v1.log whitespace=-blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+capacity-native-witness-approach-v1/adjacent-v2.log whitespace=-blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+# Recorded PowerShell launchers include a final blank line.
+**/start-release-native-10-feasibility-*.ps1 whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+# Keep the exact padded blank lines in these original failed Node receipts.
+capacity-native-chase-preference-validation-v1/native-chase-preference-tests-v1/focused-green-v1.log whitespace=-blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+capacity-native-chase-preference-validation-v1/native-chase-preference-verification-v1/old-red-v1.log whitespace=-blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+capacity-native-navigation-wire-diagnostics-v1/blocked-v1/tests-v1-failed.log whitespace=-blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+# Preserve the literal blank context line in this archived source diff.
+capacity-personal-monster-projection-fix-v1/probe14-personal-projection-fix-v1/candidate-three-file-diff-v1.patch whitespace=-blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

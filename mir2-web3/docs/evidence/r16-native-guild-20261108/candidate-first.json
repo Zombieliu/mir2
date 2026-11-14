@@ -1,0 +1,10 @@
+{
+  "recordedAt": "2026-11-08T01:06:42.116Z",
+  "sha256": "09db79eded50267e2c83a2a8017307362de4b91430934914895b6e15024b74c3",
+  "bytes": 135185408,
+  "path": "D:\\mir2-builds\\r16-native-guild-20261108/candidate-first/mir2-platform-windows.exe",
+  "sourcePins": 12,
+  "recordedPinsStable": true,
+  "qualified": false,
+  "reason": "Read dispatch rejection and pending-intent eviction gaps found during review; retained as superseded preliminary build, not installed or executed."
+}

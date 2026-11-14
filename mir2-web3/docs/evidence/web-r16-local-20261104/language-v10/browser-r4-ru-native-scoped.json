@@ -1,0 +1,680 @@
+{
+  "schema": "r16-language-browser-smoke/1",
+  "startedAt": "2026-11-04T09:06:03.769Z",
+  "passed": false,
+  "scope": {
+    "realUi": true,
+    "originalOrdinaryOwner": true,
+    "credentialSource": "friendly/private/world/state.local.json",
+    "walletOpened": false,
+    "privateQrCaptured": false,
+    "gameDataEdited": false,
+    "lessonsSent": 0,
+    "economicCommands": 0,
+    "modelInstructionsSent": 0,
+    "fullNativeWasmTenLanguageClaim": false
+  },
+  "phases": [
+    "local-public-expectations-and-private-owner",
+    "fresh-zh-CN-login",
+    "original-owner-ordinary-login-and-selection-languages",
+    "russian-presentation-real-city-native-windows",
+    "ordinary-owner-card-selection",
+    "ordinary-owner-startgame-click",
+    "ordinary-owner-startgame-screen-ack",
+    "ordinary-logout-and-chinese-return",
+    "ordinary-owner-card-selection",
+    "ordinary-owner-startgame-click",
+    "ordinary-owner-startgame-screen-ack",
+    "chinese-original-alo-read-only-records"
+  ],
+  "checks": [
+    {
+      "name": "ten-complete-browser-dictionaries",
+      "passed": true,
+      "evidence": "previous-public-proof"
+    },
+    {
+      "name": "fresh-browser-zh-CN-default-and-native-menu-order-font-geometry",
+      "passed": true,
+      "evidence": "previous-public-proof"
+    },
+    {
+      "name": "all-ten-login-wallet-title-and-browser-settings-ui",
+      "passed": true,
+      "evidence": "previous-public-proof"
+    },
+    {
+      "name": "russian-preference-persists-through-real-reload",
+      "passed": true,
+      "evidence": "previous-public-proof"
+    },
+    {
+      "name": "fresh-browser-zh-HK-defaults-to-zh-TW",
+      "passed": true,
+      "evidence": "previous-public-proof"
+    },
+    {
+      "name": "original-owner-login-and-opaque-character-names-retained",
+      "passed": true
+    },
+    {
+      "name": "russian-presentation-native-bag-group-and-companion-with-legal-wire-fallback",
+      "passed": true
+    }
+  ],
+  "languages": [
+    {
+      "language": "zh-CN",
+      "nativeLoginCaptions": true,
+      "walletEntryTitle": true,
+      "browserSettingsCaptions": true,
+      "dictionaryComplete": true
+    },
+    {
+      "language": "zh-TW",
+      "nativeLoginCaptions": true,
+      "walletEntryTitle": true,
+      "browserSettingsCaptions": true,
+      "dictionaryComplete": true
+    },
+    {
+      "language": "en",
+      "nativeLoginCaptions": true,
+      "walletEntryTitle": true,
+      "browserSettingsCaptions": true,
+      "dictionaryComplete": true
+    },
+    {
+      "language": "pt-BR",
+      "nativeLoginCaptions": true,
+      "walletEntryTitle": true,
+      "browserSettingsCaptions": true,
+      "dictionaryComplete": true
+    },
+    {
+      "language": "ru",
+      "nativeLoginCaptions": true,
+      "walletEntryTitle": true,
+      "browserSettingsCaptions": true,
+      "dictionaryComplete": true
+    },
+    {
+      "language": "hi",
+      "nativeLoginCaptions": true,
+      "walletEntryTitle": true,
+      "browserSettingsCaptions": true,
+      "dictionaryComplete": true
+    },
+    {
+      "language": "id",
+      "nativeLoginCaptions": true,
+      "walletEntryTitle": true,
+      "browserSettingsCaptions": true,
+      "dictionaryComplete": true
+    },
+    {
+      "language": "vi",
+      "nativeLoginCaptions": true,
+      "walletEntryTitle": true,
+      "browserSettingsCaptions": true,
+      "dictionaryComplete": true
+    },
+    {
+      "language": "th",
+      "nativeLoginCaptions": true,
+      "walletEntryTitle": true,
+      "browserSettingsCaptions": true,
+      "dictionaryComplete": true
+    },
+    {
+      "language": "ar",
+      "nativeLoginCaptions": true,
+      "walletEntryTitle": true,
+      "browserSettingsCaptions": true,
+      "dictionaryComplete": true
+    }
+  ],
+  "screenshots": [
+    "01-original-character-selection-ru.png",
+    "02-original-character-selection-zh-CN.png",
+    "03-original-character-selection-ru.png",
+    "04-native-bag-ru.png",
+    "05-group-ru.png",
+    "06-failure-safe-masked.png"
+  ],
+  "errors": [
+    {
+      "phase": "chinese-original-alo-read-only-records",
+      "name": "TimeoutError",
+      "hash": "261292641ae4a3f2af4bf8970e50eca52e0a764b5bc7995b22ec0ee61b09f455"
+    },
+    {
+      "phase": "chinese-original-alo-read-only-records",
+      "name": "TimeoutError",
+      "hash": "b560b9c45f8f78a15e40ceb49004de9618346a9e4ec58307913ebd67f9663599"
+    }
+  ],
+  "network": {
+    "failed": [],
+    "httpErrors": [],
+    "cancelled": [
+      {
+        "phase": "original-owner-ordinary-login-and-selection-languages",
+        "method": "GET",
+        "status": "cancelled",
+        "pathHash": "9eeb5fa233df82531dffea86ffb49fa4f48ac32bcba5fb5d93a58ab367fe0e40"
+      },
+      {
+        "phase": "original-owner-ordinary-login-and-selection-languages",
+        "method": "GET",
+        "status": "cancelled",
+        "pathHash": "59b575174e75b5bd4afcfbd6f7f338462fb173fabd1e9572382da322fe3dffef"
+      },
+      {
+        "phase": "original-owner-ordinary-login-and-selection-languages",
+        "method": "GET",
+        "status": "cancelled",
+        "pathHash": "59b575174e75b5bd4afcfbd6f7f338462fb173fabd1e9572382da322fe3dffef"
+      },
+      {
+        "phase": "ordinary-owner-startgame-screen-ack",
+        "method": "GET",
+        "status": "cancelled",
+        "pathHash": "ef521e08fc07410e5f9eac267b4f68c2bfe61cda1a8b6a99f3c3466e0ecaec38"
+      },
+      {
+        "phase": "ordinary-owner-startgame-screen-ack",
+        "method": "GET",
+        "status": "cancelled",
+        "pathHash": "12c1a44174eff7aeed9f913487f5375450e4802b8befa496107761b4c0cbd38f"
+      },
+      {
+        "phase": "ordinary-owner-startgame-screen-ack",
+        "method": "GET",
+        "status": "cancelled",
+        "pathHash": "a79e794574a03231f32735b615e2b612758662ef4ac8b870899fd3f27b40745a"
+      },
+      {
+        "phase": "ordinary-owner-startgame-screen-ack",
+        "method": "GET",
+        "status": "cancelled",
+        "pathHash": "505e7550049d5beca27d0023a1917df9f7b7320e9fb1b6d9f96a5d93eef42158"
+      },
+      {
+        "phase": "ordinary-owner-startgame-screen-ack",
+        "method": "GET",
+        "status": "cancelled",
+        "pathHash": "48a2d258fc5260425a8c6afcb7be59be588a5c8c2b61c136cd5e8ff3f15c36aa"
+      },
+      {
+        "phase": "ordinary-owner-startgame-screen-ack",
+        "method": "GET",
+        "status": "cancelled",
+        "pathHash": "7bb841dae5936f727fd37f47cc91f145351f3ac57b2c1a1a7018b3075ab9561f"
+      },
+      {
+        "phase": "ordinary-owner-startgame-screen-ack",
+        "method": "GET",
+        "status": "cancelled",
+        "pathHash": "d0fdccdf769bc268ac3f501b8f12cd526f55bb113f592e71b0bff4c48d7e8c5f"
+      },
+      {
+        "phase": "ordinary-owner-startgame-screen-ack",
+        "method": "GET",
+        "status": "cancelled",
+        "pathHash": "158c74a11794980089cee9205cefb05d3b89cec76240f01008a535590174c205"
+      },
+      {
+        "phase": "ordinary-owner-startgame-screen-ack",
+        "method": "GET",
+        "status": "cancelled",
+        "pathHash": "d2e8f476cddc2193f99a39f469f478467a79b6b76f6ede3af64055ea52570ddd"
+      },
+      {
+        "phase": "ordinary-owner-startgame-screen-ack",
+        "method": "GET",
+        "status": "cancelled",
+        "pathHash": "a63dca74c7308fb78ec91ee278687dcec5482360e21c64876258ff8d0a7316d1"
+      },
+      {
+        "phase": "ordinary-owner-startgame-screen-ack",
+        "method": "GET",
+        "status": "cancelled",
+        "pathHash": "ed168fbf1560be0cfb323455b45b387b298d9dcb5f4441964f39c65e418036e5"
+      },
+      {
+        "phase": "ordinary-logout-and-chinese-return",
+        "method": "GET",
+        "status": "cancelled",
+        "pathHash": "b5a477466acb573db09051484a348dc305a615e912e5fd4fb8cdfc59b6aa0454"
+      },
+      {
+        "phase": "ordinary-logout-and-chinese-return",
+        "method": "GET",
+        "status": "cancelled",
+        "pathHash": "9eeb5fa233df82531dffea86ffb49fa4f48ac32bcba5fb5d93a58ab367fe0e40"
+      }
+    ],
+    "abortedDuringClose": 0
+  },
+  "console": {
+    "errorCount": 0,
+    "warningCount": 7,
+    "hashes": [
+      {
+        "phase": "ordinary-owner-startgame-screen-ack",
+        "name": "warning",
+        "hash": "175c73d54d8d443a965a16a38ac036c2de536a3920f173064fd6837866b00186"
+      },
+      {
+        "phase": "ordinary-owner-startgame-screen-ack",
+        "name": "warning",
+        "hash": "e674caa289265d523a78c429ba7778a9a6601a6398cb2e4e70bb0b49a7ba064f"
+      },
+      {
+        "phase": "ordinary-owner-startgame-screen-ack",
+        "name": "warning",
+        "hash": "0cc875bea0055cf740b52c16420d55e3700d9a48426631e3919278c401a285cb"
+      },
+      {
+        "phase": "ordinary-owner-startgame-screen-ack",
+        "name": "warning",
+        "hash": "f24ee91ab0ebf5089dde1bb7932d4d3cf293a15f495630a1977f58ff1aad76f4"
+      },
+      {
+        "phase": "ordinary-owner-startgame-screen-ack",
+        "name": "warning",
+        "hash": "f24ee91ab0ebf5089dde1bb7932d4d3cf293a15f495630a1977f58ff1aad76f4"
+      },
+      {
+        "phase": "ordinary-owner-startgame-screen-ack",
+        "name": "warning",
+        "hash": "f24ee91ab0ebf5089dde1bb7932d4d3cf293a15f495630a1977f58ff1aad76f4"
+      },
+      {
+        "phase": "ordinary-owner-startgame-screen-ack",
+        "name": "warning",
+        "hash": "13a71c4c067e8fd3ad4441dc5e37f59c6e2857090b69075024727cbe94b97758"
+      }
+    ]
+  },
+  "commands": {
+    "setLanguage": 5,
+    "login": 2,
+    "startGame": 2,
+    "companionControl": 2
+  },
+  "companionReadCounts": {
+    "list": 1,
+    "view": 1
+  },
+  "wireLanguages": [
+    "en",
+    "zh-CN"
+  ],
+  "unknownCommandCount": 12,
+  "runtimeWindows": [
+    {
+      "language": "ru",
+      "window": "bag",
+      "active": true,
+      "ready": true,
+      "inputEnabled": true,
+      "ownerPresent": true,
+      "hostError": false,
+      "nativeError": false,
+      "revisionMatches": false,
+      "fullTranslationClaim": false
+    },
+    {
+      "language": "ru",
+      "window": "group",
+      "visible": true,
+      "fullTranslationClaim": false
+    }
+  ],
+  "hostErrors": [],
+  "packetStatuses": [
+    {
+      "phase": "original-owner-ordinary-login-and-selection-languages",
+      "method": "LoginSuccess",
+      "sequence": 8
+    },
+    {
+      "phase": "ordinary-owner-startgame-screen-ack",
+      "method": "StartGame",
+      "sequence": 13,
+      "status": 4
+    },
+    {
+      "phase": "ordinary-owner-startgame-screen-ack",
+      "method": "MapInformation",
+      "sequence": 19
+    },
+    {
+      "phase": "ordinary-owner-startgame-screen-ack",
+      "method": "UserInformation",
+      "sequence": 20
+    },
+    {
+      "phase": "ordinary-logout-and-chinese-return",
+      "method": "LogOutSuccess",
+      "sequence": 672
+    },
+    {
+      "phase": "ordinary-logout-and-chinese-return",
+      "method": "LoginSuccess",
+      "sequence": 683
+    },
+    {
+      "phase": "ordinary-owner-startgame-screen-ack",
+      "method": "StartGame",
+      "sequence": 687,
+      "status": 4
+    },
+    {
+      "phase": "ordinary-owner-startgame-screen-ack",
+      "method": "MapInformation",
+      "sequence": 693
+    },
+    {
+      "phase": "ordinary-owner-startgame-screen-ack",
+      "method": "UserInformation",
+      "sequence": 694
+    }
+  ],
+  "cleanup": {
+    "browserClosed": true,
+    "ordinaryLogout": false,
+    "chineseRestored": false
+  },
+  "source": {
+    "nativeCatalogSha256": "e8d8bf99c8e109a0e6e5fc028ec8ce97b6d927c47c8edbf329fe2ba7bc17c259",
+    "browserDictionarySha256": "66bff4eb7ecca9c3115333f1920648e78ab149e8ba31cb1442954e34dcc47a2f",
+    "browserDictionaryLanguages": 10,
+    "browserDictionaryEntries": 32
+  },
+  "previousEvidence": {
+    "directory": "language-v10-browser-r3",
+    "proofSha256": "19917973d27d8ad0f7d8d9f64365aa09a44cf22a71b97f0e97f9890764ea10bf",
+    "runPassed": false,
+    "successfulChecks": [
+      "ten-complete-browser-dictionaries",
+      "fresh-browser-zh-CN-default-and-native-menu-order-font-geometry",
+      "all-ten-login-wallet-title-and-browser-settings-ui",
+      "russian-preference-persists-through-real-reload",
+      "fresh-browser-zh-HK-defaults-to-zh-TW"
+    ],
+    "screenshotCount": 17
+  },
+  "menu": {
+    "root": {
+      "x": 900,
+      "y": 823,
+      "width": 240,
+      "height": 29
+    },
+    "rootLogicalWidth": 240,
+    "menu": {
+      "x": 900,
+      "y": 517,
+      "width": 240,
+      "height": 302
+    },
+    "toggle": {
+      "x": 900,
+      "y": 823,
+      "width": 240,
+      "height": 29
+    },
+    "viewport": {
+      "width": 1280,
+      "height": 960
+    },
+    "buttons": [
+      {
+        "code": "zh-CN",
+        "label": "简体中文",
+        "pressed": true,
+        "rect": {
+          "x": 905,
+          "y": 522,
+          "width": 230,
+          "height": 27
+        },
+        "fontFamily": "\"Noto Sans CJK SC\", sans-serif",
+        "fontSize": "13px",
+        "fits": true
+      },
+      {
+        "code": "zh-TW",
+        "label": "繁體中文",
+        "pressed": false,
+        "rect": {
+          "x": 905,
+          "y": 551,
+          "width": 230,
+          "height": 27
+        },
+        "fontFamily": "\"Noto Sans TC\", sans-serif",
+        "fontSize": "13px",
+        "fits": true
+      },
+      {
+        "code": "en",
+        "label": "English",
+        "pressed": false,
+        "rect": {
+          "x": 905,
+          "y": 580,
+          "width": 230,
+          "height": 25
+        },
+        "fontFamily": "\"Noto Sans\", sans-serif",
+        "fontSize": "13px",
+        "fits": true
+      },
+      {
+        "code": "pt-BR",
+        "label": "Português (Brasil)",
+        "pressed": false,
+        "rect": {
+          "x": 905,
+          "y": 607,
+          "width": 230,
+          "height": 25
+        },
+        "fontFamily": "\"Noto Sans\", sans-serif",
+        "fontSize": "13px",
+        "fits": true
+      },
+      {
+        "code": "ru",
+        "label": "Русский",
+        "pressed": false,
+        "rect": {
+          "x": 905,
+          "y": 634,
+          "width": 230,
+          "height": 25
+        },
+        "fontFamily": "\"Noto Sans\", sans-serif",
+        "fontSize": "13px",
+        "fits": true
+      },
+      {
+        "code": "hi",
+        "label": "हिन्दी",
+        "pressed": false,
+        "rect": {
+          "x": 905,
+          "y": 661,
+          "width": 230,
+          "height": 27
+        },
+        "fontFamily": "\"Noto Sans Devanagari\", sans-serif",
+        "fontSize": "13px",
+        "fits": true
+      },
+      {
+        "code": "id",
+        "label": "Bahasa Indonesia",
+        "pressed": false,
+        "rect": {
+          "x": 905,
+          "y": 690,
+          "width": 230,
+          "height": 25
+        },
+        "fontFamily": "\"Noto Sans\", sans-serif",
+        "fontSize": "13px",
+        "fits": true
+      },
+      {
+        "code": "vi",
+        "label": "Tiếng Việt",
+        "pressed": false,
+        "rect": {
+          "x": 905,
+          "y": 717,
+          "width": 230,
+          "height": 25
+        },
+        "fontFamily": "\"Noto Sans\", sans-serif",
+        "fontSize": "13px",
+        "fits": true
+      },
+      {
+        "code": "th",
+        "label": "ไทย",
+        "pressed": false,
+        "rect": {
+          "x": 905,
+          "y": 744,
+          "width": 230,
+          "height": 30
+        },
+        "fontFamily": "\"Noto Sans Thai\", sans-serif",
+        "fontSize": "13px",
+        "fits": true
+      },
+      {
+        "code": "ar",
+        "label": "العربية",
+        "pressed": false,
+        "rect": {
+          "x": 905,
+          "y": 776,
+          "width": 230,
+          "height": 38
+        },
+        "fontFamily": "\"Noto Sans Arabic\", sans-serif",
+        "fontSize": "13px",
+        "fits": true
+      }
+    ]
+  },
+  "entryReadiness": [
+    {
+      "phase": "ordinary-owner-startgame-screen-ack",
+      "screen": "select",
+      "sceneAssetsPending": false,
+      "gameCanvasVisible": false,
+      "documentVisible": true
+    },
+    {
+      "phase": "ordinary-owner-startgame-screen-ack",
+      "screen": "select",
+      "sceneAssetsPending": false,
+      "gameCanvasVisible": false,
+      "documentVisible": true
+    },
+    {
+      "phase": "ordinary-owner-startgame-screen-ack",
+      "screen": "game",
+      "sceneAssetsPending": true,
+      "gameCanvasVisible": true,
+      "documentVisible": true
+    },
+    {
+      "phase": "ordinary-owner-startgame-screen-ack",
+      "screen": "game",
+      "sceneAssetsPending": true,
+      "gameCanvasVisible": true,
+      "documentVisible": true
+    },
+    {
+      "phase": "ordinary-owner-startgame-screen-ack",
+      "screen": "game",
+      "sceneAssetsPending": true,
+      "gameCanvasVisible": true,
+      "documentVisible": true
+    },
+    {
+      "phase": "ordinary-owner-startgame-screen-ack",
+      "screen": "game",
+      "sceneAssetsPending": true,
+      "gameCanvasVisible": true,
+      "documentVisible": true
+    },
+    {
+      "phase": "ordinary-owner-startgame-screen-ack",
+      "screen": "game",
+      "sceneAssetsPending": false,
+      "gameCanvasVisible": true,
+      "documentVisible": true
+    },
+    {
+      "phase": "ordinary-owner-startgame-screen-ack",
+      "screen": "select",
+      "sceneAssetsPending": false,
+      "gameCanvasVisible": false,
+      "documentVisible": true
+    },
+    {
+      "phase": "ordinary-owner-startgame-screen-ack",
+      "screen": "select",
+      "sceneAssetsPending": false,
+      "gameCanvasVisible": false,
+      "documentVisible": true
+    },
+    {
+      "phase": "ordinary-owner-startgame-screen-ack",
+      "screen": "select",
+      "sceneAssetsPending": false,
+      "gameCanvasVisible": false,
+      "documentVisible": true
+    },
+    {
+      "phase": "ordinary-owner-startgame-screen-ack",
+      "screen": "game",
+      "sceneAssetsPending": false,
+      "gameCanvasVisible": true,
+      "documentVisible": true
+    }
+  ],
+  "alo": {
+    "sameArchive": true,
+    "sameResident": true,
+    "sameRealm": true,
+    "sameWorld": true,
+    "originalActorCharacter": true,
+    "policyVersion": 2,
+    "habitsEnabledCount": 3,
+    "resourcesKnown": true,
+    "gold": 10,
+    "hpPotionCount": 2,
+    "supplyCompleted": true,
+    "supplyReceiptKnown": true,
+    "supplyChargedGold": 40,
+    "supplyAcquiredQuantity": 1,
+    "supplyReturned": true,
+    "feedbackCount": 0,
+    "episodeCount": 20,
+    "originalRecordsUnchanged": true,
+    "modelCallCounterKnown": true,
+    "modelCallCounterUnchanged": true
+  },
+  "finishedAt": "2026-11-04T09:07:43.656Z"
+}

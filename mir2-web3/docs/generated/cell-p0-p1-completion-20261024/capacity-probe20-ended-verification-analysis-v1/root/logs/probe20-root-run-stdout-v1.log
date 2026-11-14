@@ -1,0 +1,14 @@
+{"phase":"owned-native-scout-anti-convergence-probe19-ready","pid":66264,"monitorPid":64532,"sha256":"dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc","sourceCommit":"c743122af05faca43d9535d8c6c2a4bfb01b924f","backendSourceCommit":"c743122af05faca43d9535d8c6c2a4bfb01b924f","executionSourceCommit":"b5374083d257d375437af3de42bead159cd2b917","driverSourceCommit":"b5374083d257d375437af3de42bead159cd2b917","explicitAttackResults":"v2","endpoint":"ws://127.0.0.1:17510/ws"}
+{"stage":"admitted","controlledActors":1,"target":2}
+{"stage":"admitted","controlledActors":2,"target":2}
+{"stage":"stage-2","passed":true}
+{"stage":"admitted","controlledActors":3,"target":10}
+{"stage":"admitted","controlledActors":4,"target":10}
+{"stage":"admitted","controlledActors":5,"target":10}
+{"stage":"admitted","controlledActors":6,"target":10}
+{"stage":"admitted","controlledActors":7,"target":10}
+{"stage":"admitted","controlledActors":8,"target":10}
+{"stage":"admitted","controlledActors":9,"target":10}
+{"stage":"admitted","controlledActors":10,"target":10}
+{"stage":"stage-10","passed":true}
+{"phase":"finished","root":"C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\","report":{"reportPath":"C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-selection-diagnostics-feasibility-20\\reports\\1792979329578-cf62e25d.report.json","runId":"1792979329578-cf62e25d","backendSourceCommit":"c743122af05faca43d9535d8c6c2a4bfb01b924f","executionSourceCommit":"b5374083d257d375437af3de42bead159cd2b917","driverSourceCommit":"b5374083d257d375437af3de42bead159cd2b917","ok":true,"playableCapacityAccepted":false},"cleanupComplete":true,"checks":{"sixCountersZero":true,"monitorTerminalPreserved":true,"monitorStoppedBeforeGateway":true,"monitorExitZero":true,"normalOwnedShutdown":true,"processAbsent":true,"portsFree":true},"capacityAccepted":false,"capacityAcceptanceAdjudicated":false,"formalStarted":false}

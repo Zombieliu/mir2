@@ -1,0 +1,44 @@
+{
+  "passed": false,
+  "kind": "r9-installed-normal-launcher-path-rejected-before-game-start",
+  "releaseSequence": 2026102909,
+  "gameSourceRevision": "24216899acd4301d8c3b1eff08b825f4896cc410",
+  "updaterSourceRevision": "11d8a75ba72e626a287630c3a8a4b6c6278d0647",
+  "installerCompiled": true,
+  "silentInstallationExitCode": 0,
+  "installedIdentityVerification": {
+    "path": "installed-identity-verification.json",
+    "sourceReceipt": {
+      "filename": "installer-first.json",
+      "bytes": 1061,
+      "sha256": "eddbc6a664cffec9d04dee6b04d9032f8ebdc0dac524f2b587e5e1a3c3d5039b",
+      "included": false
+    },
+    "passed": true,
+    "gameFiles": 255027,
+    "updaterFiles": 9,
+    "normalInstallationAndPersonalPreferencesUnchanged": true
+  },
+  "attemptedPath": "installed Launcher with no arguments -> installed trusted Updater",
+  "observedError": "installed fallback is not valid: non-client payload",
+  "gameStarted": false,
+  "screenshot": {
+    "path": "first-updater-rejected-payload.png",
+    "sourceReceipt": {
+      "filename": "first-updater-rejected-payload.png",
+      "bytes": 9669,
+      "sha256": "38f62307bbc7b7b63ce27612c5ee7fd72b3bcc5f79fb257e9edbfa75cea6ad5a",
+      "included": false
+    },
+    "sidecar": "first-updater-rejected-payload.png.json",
+    "curatorOpenedImage": true,
+    "observedTitle": "更新失败",
+    "imageKind": "actual native Windows capture"
+  },
+  "lastRunReceipt": "last-run-raw-receipt.json",
+  "rootCauseIdentifiedByCoordinator": "Rust updater and Python archive exact allowlists lagged five new Simplified Chinese documentation/license/source files. The installed Game files were intact; normal startup rejected their payload policy.",
+  "r9DeliverableAccepted": false,
+  "r10UpdaterAndInstallersPending": true,
+  "game242CandidateToBeReusedWithoutRebuild": true,
+  "productionDeployment": false
+}

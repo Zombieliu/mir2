@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T19:20:41.811Z",
+  "prepared": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\runtime-prepared-v2.json",
+    "bytes": 31015,
+    "sha256": "cafad350d557a62587d119d6a131eb1cd0ed6496287172b1038933f4f1871ccc"
+  },
+  "controller": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\root-seal-and-guard-v1.mjs",
+    "bytes": 13790,
+    "sha256": "3071738e03d5955a1dc7149dabd899fefa6d04ba4a0885f08c52863a50dc216c"
+  },
+  "scope": "Final bounded read-only Probe17 active-source, dual-dataset, strict50/fresh-full16 and controller-schema review. No target import/gate/mode, syntax/test repeat, private/raw/recording/exe read, seed or realm execution.",
+  "closure": {
+    "localFiles": 51,
+    "localSha256": "3bae3c27c0f6501cc32e762e0a7f3e8684f3deaa3308294c533aa4dfae6c2dc0",
+    "externalStableInputs": 12,
+    "externalSha256": "1a9237651207a039340b9088be3808f5307256a3f2f200633ba8a77c69623438",
+    "allActualRawPinsMatch": true,
+    "controllerSupportPinMatches": true,
+    "expectedSealedUniqueFiles": 69
+  },
+  "checks": {
+    "freshC743FiftyInputReleaseAndFull16Bound": true,
+    "historicalNodeDriverD240FiveBa210KeptSeparate": true,
+    "currentCheckoutExpectedHeadC743": true,
+    "base803387AndThreeFourSevenConsumerRawPreserved": true,
+    "storeOnlySecondDatasetTenKeysIndependent": true,
+    "storeFixedOriginAndBeforeAfterPinsClosed": true,
+    "storeCompletenessNotAddedToOriginalGameCleanupConjunction": true,
+    "ordinaryPool100ButOnlyStage2And10Active": true,
+    "originalPolicyScenarioResourceRawPreserved": true,
+    "originalCaps241010412Tokio4Slow50Preserved": true,
+    "prepareSyntaxArtifactCheckedBeforeLockSeed": true,
+    "postSeederPrivateOneRecordingTwoAclReadOnlyExactSidContract": true,
+    "controllerProjectArgumentAndDynamicPreparedReviewRefsCorrect": true,
+    "preparedV2RealTwentyNineSyntaxArrayAndRequiredFlagsMatchController": true,
+    "allRuntimeAndSealOutputsAbsentAtReview": true
+  },
+  "resolvedFindings": [
+    {
+      "id": "NAMESPACE",
+      "resolution": "driverSourceCommit now remains d240. Backend/current checkout and requireFrozen expectedHead remain c743. No new Node210 execution is claimed."
+    },
+    {
+      "id": "STORE_ORIGIN",
+      "resolution": "Second-dataset verifier now constrains original Store files and base game references to fixed public locations and rechecks source/destination/base pins after streaming."
+    },
+    {
+      "id": "B2",
+      "resolution": "Original prepared-v1 remains. Only new prepared-v2 normalizes actual29 syntax entries and adds already-proved policyScenarioResourceUnchanged/rootExecutionRequired flags; unchanged code/controller now consume its actual schema."
+    }
+  ],
+  "existingEvidence": {
+    "syntaxChecks": 29,
+    "syntaxLog": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\launcher-syntax-check.log",
+      "bytes": 9741,
+      "sha256": "aea96852e609145c54cebc2f82cffbcec0a02824256e12ce20a62afee53cfeb6"
+    },
+    "syntaxExecutedByReviewer": false,
+    "storeHelperReview": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-slow-stage-independent-review-v1\\review-v1.json",
+      "bytes": 6459,
+      "sha256": "54a9c1a27336537d0232b6f8b76ac18f92ef76f8064899b2a253f78d68eefb68"
+    },
+    "releaseStreamHashReview": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-wait-diagnostics-release-v1\\actual-source-release-independent-review-v1.json",
+      "bytes": 2841,
+      "sha256": "d30b70166aba33c4e141aebecb4c8a28fb09546e6a4fc2aedf6de42aaed995eb"
+    },
+    "freshFull16Prerequisite": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\full16-actual-prerequisite-v1.json",
+      "bytes": 4677,
+      "sha256": "644597aa08abc083d7d0108ee6361b898991a2527b39feb494efdfd3b6aaba46"
+    },
+    "namespaceProof": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\driver-backend-namespace-adjustment-v1.json",
+      "bytes": 7450,
+      "sha256": "f66f40b5ff02cde80e6cb563d159f9ad3182db039f9e21b9d1f75842fe800d8c"
+    }
+  },
+  "limitations": [
+    "This is source/preseal eligibility only. Root must actually seal, run read-only guard, prepare100 and execute the fresh probe separately.",
+    "Store timing is diagnostic only: completed/thresholded rows and queued-versus-file validation cannot prove an ongoing holder absent or create gameplay/ACK/capacity credit.",
+    "No Probe17 outcome, formal100 capacity, P0 acceptance or P2 implementation is certified. Root full16 OS check was reported as actual tool stdout without an independent disk proof; no proof file is fabricated."
+  ],
+  "verdict": {
+    "preparedContractPassed": true,
+    "eligibleForSealNow": true,
+    "blockingFindingIds": [],
+    "probe17Executed": false,
+    "capacityAccepted": false,
+    "p0Accepted": false,
+    "p2Started": false
+  }
+}

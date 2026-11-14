@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T18:54:46.884Z",
+  "scope": "Independent bounded static source, byte-provenance and existing synthetic-evidence review. No target import, synthetic/product test execution, production edit, Cargo, raw stderr/monitor/exe read, account operation or realm.",
+  "sourceFreeze": {
+    "file": "C:/mir2-build/p01-completion-20261024/account-store-slow-stage-diagnostics-v1/source-freeze-v1.json",
+    "bytes": 4628,
+    "sha256": "632e875bd2d56299009411d6d22ee8912eed3f15c3d26f8b95466be2bd22f9cb"
+  },
+  "helper": {
+    "file": "C:/mir2-build/p01-completion-20261024/account-store-slow-stage-diagnostics-v1/slow-stage-public.mjs",
+    "bytes": 15386,
+    "sha256": "6cde67571184692d7b89da32adb21fb2f8a228db5e0865cb9cc96bf3a34925c7"
+  },
+  "validator": {
+    "file": "C:/mir2-build/p01-completion-20261024/account-store-slow-stage-diagnostics-v1/account-store-public-validator.mjs",
+    "bytes": 5407,
+    "sha256": "d71add02703a84acc2d870d5c7daf96dd17e0533b2d49af0480e55dea7aea262"
+  },
+  "verifiedClosure": {
+    "files": 17,
+    "aggregateMethod": "SHA256(JSON.stringify(ordered files))",
+    "sha256": "8db992f5b7246f585d0158a914e616bbf9397421b66d92f27b350444b1939c8c",
+    "allActualRawPinsMatch": true
+  },
+  "derivation": [
+    {
+      "proof": {
+        "file": "C:/mir2-build/p01-completion-20261024/account-store-slow-stage-diagnostics-v1/store-only-derivation-proof-v2.json",
+        "bytes": 3134,
+        "sha256": "9b22e53e8b5eee8a6d103a3e9a50ea2806d666522aaed99b853da60630013e3e"
+      },
+      "ruleCount": 7,
+      "reverseReconstructedRawBytes": true
+    },
+    {
+      "proof": {
+        "file": "C:/mir2-build/p01-completion-20261024/account-store-slow-stage-diagnostics-v1/derivation-proof-v1.json",
+        "bytes": 9782,
+        "sha256": "9f62edce19e59965bd571c2479da0f9acf8f4e71c1bc35a1dd32835452931f91"
+      },
+      "ruleCount": 3,
+      "reverseReconstructedRawBytes": true
+    }
+  ],
+  "legacy": {
+    "base": {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/slow-stage-public.mjs",
+      "bytes": 10318,
+      "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c"
+    },
+    "originalThirtyTests": {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/slow-stage-public.test.mjs",
+      "bytes": 22894,
+      "sha256": "a0f10c9d721404378e8b5bc56070425393fdf82af21588bbf70de2c274af76ae"
+    },
+    "rawTestCopyExact": true,
+    "legacyParserAndSharedIoRecoveredByExactInverse": true,
+    "existingFrozenConsumerNotChanged": true
+  },
+  "findings": [
+    {
+      "id": "S1",
+      "severity": "information",
+      "conclusion": "No blocking finding. Production storeOnly is an explicit boolean, defaults false, and true emits only the new Store dataset. Integration plan retains the original 803387 base capture and old 3/4/7 consumers unchanged; separate wx output/status/source bindings are required."
+    },
+    {
+      "id": "S2",
+      "severity": "information",
+      "conclusion": "Only fourteen fixed stages, five fixed operations and ten exact public keys survive. Canonical ASCII wire numeric strings and safe nonnegative integer public numbers are checked; traceId and samples must be positive. Extra/partial/reordered/unknown targeted account_store rows request stop once and mark capture incomplete without copying text, private values or error strings."
+    },
+    {
+      "id": "S3",
+      "severity": "information",
+      "conclusion": "BigInt range comparisons avoid unsafe Number multiplication/subtraction. Independently floored microsecond endpoints can differ from floored elapsed microseconds by one: inclusive durationMs*1000+1000 and totalUs+1 accommodate the producer rounding boundary. Max single duration, aggregate total and nested spans remain distinct."
+    },
+    {
+      "id": "S4",
+      "severity": "information",
+      "conclusion": "Unchanged shared capture limits remain 8KiB line, 1MiB queued write, 32MiB total, 15s finish. Capture termination waits for actual stderr end and writer finish. Separate captures have separate allocations/write work and ceilings; no zero-overhead claim is made."
+    },
+    {
+      "id": "S5",
+      "severity": "information",
+      "conclusion": "Independent validator keeps one fixed line buffer and bounded fixed stage/operation counters, streams SHA/byte/row counts, rejects malformed rows/status and compares queued counts with actual ended bytes. A short/read-failed digest covers only consumed bytes. Legitimate incomplete captures remain incomplete even when their persisted row grammar is valid."
+    }
+  ],
+  "limitations": [
+    "Only completed thresholded records emit after guard release. Missing/zero rows cannot rule out an ongoing holder, identify a lock holder or establish absence of a stall.",
+    "Trace is a process-local opaque counter, not an account, connection or durable event identity. observedAtMs is receiver time; startedUnixMs is producer wall time.",
+    "Capture/validator completeness supplies diagnostic evidence only. It grants no ACK, game completion or capacity acceptance. New runtime integration, backend Release and fresh run are not validated here.",
+    "Existing 51/51 synthetic execution was performed by the author, not rerun by this reviewer."
+  ],
+  "existingSyntheticEvidence": {
+    "receipt": {
+      "file": "C:/mir2-build/p01-completion-20261024/account-store-slow-stage-diagnostics-v1/synthetic-execution-v2.json",
+      "bytes": 4453,
+      "sha256": "16246e4ae2b4a8b33a0c3019eb84550eb24b77e2e01be19d5b65dc375e45a674"
+    },
+    "log": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-slow-stage-diagnostics-v1\\synthetic-tests-v2.log",
+      "bytes": 12763,
+      "sha256": "2db1b159a75358f0e54909c0fe9b4ef08a4247fa1847350527b03f915d260a09"
+    },
+    "counts": {
+      "tests": 51,
+      "pass": 51,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "duration_ms": 147.5975
+    },
+    "tapFooterVerified": true,
+    "sourceBeforeAfterPinsMatchCurrent": true,
+    "syntaxChecks": 5,
+    "testsExecutedByReviewer": false
+  },
+  "verdict": {
+    "helperContractPassed": true,
+    "independentDatasetContractPassed": true,
+    "noBlockingFinding": true,
+    "blockingFindingIds": [],
+    "eligibleForFutureExplicitIntegration": true,
+    "gameOrCapacityAccepted": false
+  }
+}

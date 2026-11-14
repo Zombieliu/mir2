@@ -1,0 +1,12 @@
+{
+  "requestedAtUtc": "2026-10-08T11:48:03.7319823Z",
+  "ref": "codex/classic-r22-publication-20261008",
+  "source": "e7850e9aef9ea038907bee621f331f3286c1ac9b",
+  "operation": "promote",
+  "sequence": 17,
+  "stageRunId": 37739769708,
+  "stageReceiptSha256": "0a8b88330fd302af8a9cff7d0fe98234c35993e9188e7ad14405f1e7fcc7d73f",
+  "gatewayApplyConfirmed": true,
+  "originFeed17Confirmed": true,
+  "humanWheelAccepted": false
+}

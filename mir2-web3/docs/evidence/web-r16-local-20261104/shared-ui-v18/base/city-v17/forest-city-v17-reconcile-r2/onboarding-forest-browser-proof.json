@@ -1,0 +1,701 @@
+{
+  "schema": "r16-city-purchase-read-only-reconciliation/1",
+  "startedAt": "2026-11-05T21:05:53.727Z",
+  "passed": true,
+  "villageFirstTwoCompleted": false,
+  "scope": {
+    "freshOrdinaryAccount": false,
+    "reusedOwnOrdinaryQaAccount": true,
+    "primaryUiOnly": true,
+    "rootPrivateFilesRead": false,
+    "rootSecretValuesPassedToBrowser": false,
+    "credentialsOnlyUsedForNormalUiFill": true,
+    "readOnlyRuntimeGetters": [
+      "getMir2QuestUiStatus",
+      "getMir2QuestWorldControlRects",
+      "getMir2NpcShopUiStatus",
+      "getMir2HudUiStatus"
+    ],
+    "mockedRoutes": false,
+    "hiddenActions": false,
+    "qaCommands": 0,
+    "saveDataEdits": false,
+    "modelCallsRequested": 0,
+    "walletOpened": false,
+    "originalOwnerOrAloOpened": false,
+    "trustedKeyObservation": "game-screen-Digit1-keydown-up-only",
+    "readOnlyReconciliationOnly": true,
+    "originalCityRunRemainsFailed": true
+  },
+  "sourceHashes": {
+    "quests": "fd35732d9356fcf5aeb4c06d639261a816626a54ccaf33f8cc6d461e98c93182",
+    "journeyUi": "e52630f84ee09e3e2d3abd821db00dde01b62e7d803d18972c8fd906db38c747",
+    "questLayout": "f3a795d5ef0fce991ff061c6c37a5df991487addfa15e327cd3c41f6f36d6800",
+    "keys": "ebfd4f283523f658d33793f604e697a5c4e4b0430fc5d63586ec8597bf31d208",
+    "bag": "10a1dd118f66e6924de84ac611fdd0f7473e255e9f5b31063027f72a411d83c7",
+    "panel": "d6436a807c81b42525aa7e74b6bb6288819ed8bf4db9cdda914e2ad58a264fd8",
+    "npcShop": "6112790ba0b9a57fb529fbbf85d25dd20c3d8b98a63884a9098267badb42c5a1",
+    "shopPaint": "b7279b5d15b7c27960afeddf8ece13b37cb58c795817f74edeec3170b63c85d6",
+    "spawns": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2",
+    "leveling": "f873b9be24c3d6e151d7eee614ad1a805492dc2cbb8a28514279035e39e9eed6",
+    "questBridge": "1b94c42c228bbd0a757dd1c91f3771f9c70de07d595db31e9960e46ad83f832c",
+    "questActionPolicy": "5a8042d691109178c59cecdab3d5bb7c6a6c955049fa05a44519218e2c2e0570",
+    "nativeLocalization": "712f58b1f747d371dd511dadb7f5d3d76c5c91b4341bd7da96cfe1a1efdaad57",
+    "nativeLocalizationData": "d42c1568e3a6fa2798f30038f7a553f4fb4cb3f04abfb44672dc9cab37185938"
+  },
+  "plan": {
+    "profile": "newcomer-v2",
+    "scope": "forest q5-8 plus growth15; q9 real D001 entry; no q10-12 completion claim",
+    "segment": "city",
+    "quests": [
+      {
+        "id": 2110005,
+        "minLevel": 8,
+        "startNpcId": 0,
+        "finishNpcId": 0,
+        "gold": 200,
+        "experience": 1700,
+        "kills": [],
+        "flags": [
+          {
+            "number": 2210051,
+            "message": "Reach a Bichon safe area",
+            "kind": "serverEvent",
+            "conditions": [
+              "bichonSafeArrival"
+            ]
+          }
+        ]
+      },
+      {
+        "id": 2110006,
+        "minLevel": 9,
+        "startNpcId": 0,
+        "finishNpcId": 0,
+        "gold": 300,
+        "experience": 8500,
+        "kills": [],
+        "flags": [
+          {
+            "number": 2210061,
+            "message": "Buy a small HP or MP potion from a normal shop",
+            "kind": "serverEvent",
+            "conditions": [
+              "ordinaryBasicPotionBought"
+            ]
+          }
+        ]
+      }
+    ],
+    "finalReloginCheck": false,
+    "ordinaryLogoutEachSegment": true,
+    "jane": {
+      "map": "0",
+      "x": 284,
+      "y": 606
+    },
+    "diaryKeyRequested": "KeyQ",
+    "diaryKeyFromCurrentSharedDefaults": "KeyQ",
+    "readOnlyGetters": [
+      "getMir2QuestUiStatus",
+      "getMir2QuestWorldControlRects",
+      "getMir2NpcShopUiStatus",
+      "getMir2HudUiStatus"
+    ],
+    "coldEntryWaitMs": 45000
+  },
+  "checks": [
+    {
+      "name": "town-has-no-old-tour-and-current-shared-native-quest-host",
+      "passed": true
+    }
+  ],
+  "phases": [
+    "ordinary-owned-qa-character-relogin",
+    "q6-read-only-normal-login-reconciliation",
+    "read-only-reconciliation-complete"
+  ],
+  "screenshots": [
+    "01-city-native-task-card-before-measured-readiness.png",
+    "02-fresh-city-native-task-card.png",
+    "03-q6-read-only-reconcile-after-confirmed-purchase.png"
+  ],
+  "packetEvidence": [
+    {
+      "sequence": 13,
+      "method": "LoginSuccess",
+      "phase": "ordinary-owned-qa-character-relogin"
+    },
+    {
+      "sequence": 17,
+      "method": "StartGame",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "result": 4
+    },
+    {
+      "sequence": 23,
+      "method": "MapInformation",
+      "phase": "ordinary-owned-qa-character-relogin"
+    },
+    {
+      "sequence": 24,
+      "method": "UserInformation",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "gold": 180,
+      "hp": 78,
+      "maxHp": 78,
+      "mp": 42,
+      "maxMp": 42,
+      "objectId": 1000,
+      "direction": "Left"
+    },
+    {
+      "sequence": 446,
+      "method": "CompleteQuest",
+      "phase": "ordinary-owned-qa-character-relogin",
+      "completedQuestIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004,
+        2110005
+      ]
+    },
+    {
+      "sequence": 607,
+      "method": "LogOutSuccess",
+      "phase": "q6-read-only-normal-login-reconciliation"
+    }
+  ],
+  "questOperations": [],
+  "movement": [],
+  "native": [
+    {
+      "name": "fresh-v2-chapter-task-card",
+      "ready": true,
+      "generation": 2,
+      "revision": 1,
+      "frame": 44,
+      "questLogOpen": false,
+      "capturesPointer": false,
+      "owner": "bevy",
+      "currentWorldContext": true,
+      "rects": [
+        {
+          "type": "questLocalUi",
+          "left": 19,
+          "top": 233,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "openDestinationMap",
+          "left": 19,
+          "top": 262,
+          "width": 282,
+          "height": 25
+        },
+        {
+          "type": "toggleSupplies",
+          "left": 19,
+          "top": 291,
+          "width": 282,
+          "height": 25
+        }
+      ],
+      "compact": null
+    }
+  ],
+  "errors": [],
+  "network": {
+    "failed": [],
+    "httpErrors": [],
+    "cancelled": [
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "9eeb5fa233df82531dffea86ffb49fa4f48ac32bcba5fb5d93a58ab367fe0e40",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "method": "GET",
+        "pathHash": "59b575174e75b5bd4afcfbd6f7f338462fb173fabd1e9572382da322fe3dffef",
+        "successfulResponseObserved": true
+      },
+      {
+        "phase": "q6-read-only-normal-login-reconciliation",
+        "method": "GET",
+        "pathHash": "b5a477466acb573db09051484a348dc305a615e912e5fd4fb8cdfc59b6aa0454",
+        "successfulResponseObserved": true
+      }
+    ]
+  },
+  "webSockets": [
+    {
+      "phase": "ordinary-owned-qa-character-relogin",
+      "endpoint": "ws://127.0.0.1:19040/ws",
+      "pathHash": "0c65a812b078db6795486113db0a40a60e82b36e6bcc9ecbaff9ac00e404f5ff",
+      "loopback": true,
+      "hasQuery": false,
+      "handshakeStatus": 101,
+      "closed": false,
+      "closeCode": null,
+      "closeFrames": []
+    }
+  ],
+  "console": {
+    "errorCount": 0,
+    "warningCount": 7,
+    "hashes": [
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "175c73d54d8d443a965a16a38ac036c2de536a3920f173064fd6837866b00186"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "0955cb48d91208b71bd73f2afa45446e2bd65b0cc4015f9e56b892ff07ed1028"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "082ae0a26b18d237dea436332b088164e5771a006b3b6c3cc771a003b20460be"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "aa6e1f596b9d562bd79bbb2af5d4cfd6083c63eb3100d017c24f8010343be5a4"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "aa6e1f596b9d562bd79bbb2af5d4cfd6083c63eb3100d017c24f8010343be5a4"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "aa6e1f596b9d562bd79bbb2af5d4cfd6083c63eb3100d017c24f8010343be5a4"
+      },
+      {
+        "phase": "ordinary-owned-qa-character-relogin",
+        "name": "warning",
+        "hash": "cf71f37cb33a7f5d844ed63cf61ce0aedb11932cd215a0107a27764515423450"
+      }
+    ]
+  },
+  "commands": {
+    "clientCapabilities": 2,
+    "setLanguage": 1,
+    "clientVersion": 1,
+    "login": 1,
+    "startGame": 1,
+    "npcPurchaseOwner": 1,
+    "keepAlive": 1,
+    "logOut": 1
+  },
+  "unknownCommandCount": 0,
+  "unknownTypeHashes": [],
+  "cleanup": {
+    "ordinaryLogout": true,
+    "browserClosed": true
+  },
+  "vitals": [
+    {
+      "sequence": 3,
+      "receivedAtMs": 1793912757539,
+      "method": "realmInfo",
+      "hp": null,
+      "maxHp": null,
+      "mp": null,
+      "maxMp": null,
+      "dead": false,
+      "position": null
+    },
+    {
+      "sequence": 24,
+      "receivedAtMs": 1793912766941,
+      "method": "UserInformation",
+      "hp": 78,
+      "maxHp": 78,
+      "mp": 42,
+      "maxMp": 42,
+      "dead": false,
+      "position": {
+        "x": 325,
+        "y": 290
+      }
+    },
+    {
+      "sequence": 607,
+      "receivedAtMs": 1793912782561,
+      "method": "LogOutSuccess",
+      "hp": null,
+      "maxHp": null,
+      "mp": null,
+      "maxMp": null,
+      "dead": false,
+      "position": null
+    }
+  ],
+  "medicine": [],
+  "trustedBeltKeyEvents": [],
+  "npcPurchaseEvidence": [
+    {
+      "sequence": 603,
+      "action": "begin",
+      "reply": "producer",
+      "completeSnapshot": true,
+      "matchingRequestAndOperation": true,
+      "bootstrapObserverNotGated": true
+    }
+  ],
+  "inventoryClose": {
+    "method": "visible-native-x",
+    "shortcutRetested": false,
+    "priorUnconfirmedF9Run": "onboarding-v12-browser-r5"
+  },
+  "budgets": {
+    "maxHuntMs": 900000,
+    "maxSteps": 3000
+  },
+  "publicMapSceneResponses": [
+    {
+      "phase": "ordinary-owned-qa-character-relogin",
+      "map": "0",
+      "missing": 0,
+      "sourceSprites": 949
+    },
+    {
+      "phase": "ordinary-owned-qa-character-relogin",
+      "map": "0",
+      "missing": 0,
+      "sourceSprites": 768
+    }
+  ],
+  "renderer": {
+    "expected": "bevy-e229f62047e5a13c",
+    "observedPublicReleases": [
+      "bevy-e229f62047e5a13c"
+    ]
+  },
+  "initialNativeReadiness": [
+    {
+      "ready": true,
+      "frame": 44,
+      "generation": 2,
+      "revision": 1,
+      "rectCount": 3,
+      "worldCurrent": true,
+      "genericNativeActionsRequireNonemptyWorldRects": false
+    }
+  ],
+  "cityPurchaseReconciliation": {
+    "q5Completed": true,
+    "q6Completed": false,
+    "q6": {
+      "questId": 2110006,
+      "stage": "inProgress",
+      "current": 0,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Buy a small HP or MP potion from a normal shop",
+          "current": 0,
+          "required": 1,
+          "done": false
+        }
+      ]
+    },
+    "gold": 180,
+    "medicine": 5,
+    "hp": 78,
+    "maxHp": 78,
+    "mp": 42,
+    "maxMp": 42,
+    "dead": false,
+    "position": {
+      "x": 325,
+      "y": 290
+    },
+    "progression": {
+      "level": 9,
+      "experience": 378,
+      "maxExperience": 2500
+    },
+    "ordinaryEconomicActionsSent": 0
+  },
+  "lastPhysicalNativeInput": {
+    "phase": "q6-read-only-normal-login-reconciliation",
+    "logical": {
+      "x": 493,
+      "y": 73.5
+    },
+    "css": {
+      "x": 621,
+      "y": 169.5
+    },
+    "clickCount": 1,
+    "delayMs": 80,
+    "quest": {
+      "questLocaleVersion": 1,
+      "language": "zh-CN",
+      "displayLocaleVersion": 1,
+      "displayLanguage": "zh-CN",
+      "ready": true,
+      "error": null,
+      "capturesPointer": true,
+      "questLogOpen": true,
+      "frame": 121,
+      "generation": 2,
+      "revision": 2,
+      "openRevision": 2,
+      "hpOrb": {
+        "supported": true,
+        "ready": false,
+        "generation": 2,
+        "revision": 2,
+        "hp": null,
+        "maxHp": null,
+        "hpOnly": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "mpOrb": {
+        "supported": true,
+        "ready": false,
+        "generation": 2,
+        "revision": 2,
+        "mp": null,
+        "maxMp": null,
+        "hpOnly": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "experienceBar": {
+        "supported": false,
+        "ready": false,
+        "generation": 2,
+        "revision": 2,
+        "experience": null,
+        "maxExperience": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "weightBar": {
+        "supported": false,
+        "ready": false,
+        "generation": 2,
+        "revision": 2,
+        "currentWeight": null,
+        "maxWeight": null,
+        "slot": null,
+        "image": null,
+        "source": null,
+        "destination": null,
+        "layout": null
+      },
+      "hudBarDrawPlan": {
+        "version": 1,
+        "generation": 2,
+        "revision": 2,
+        "lifetime": "r1-g2-p1000",
+        "experience": {
+          "token": "e-1",
+          "sequence": 1,
+          "state": "draw",
+          "current": 378,
+          "maximum": 2500,
+          "slot": {
+            "left": 9,
+            "top": 759,
+            "width": 1004,
+            "height": 8
+          },
+          "image": "original-ui/Prguse/8.png",
+          "source": {
+            "left": 0,
+            "top": 0,
+            "width": 151,
+            "height": 8
+          },
+          "destination": {
+            "left": 9,
+            "top": 759,
+            "width": 151,
+            "height": 8
+          }
+        },
+        "weight": {
+          "token": "w-1",
+          "sequence": 1,
+          "state": "draw",
+          "current": 6,
+          "maximum": 77,
+          "slot": {
+            "left": 919,
+            "top": 719,
+            "width": 76,
+            "height": 12
+          },
+          "image": "original-ui/Prguse/76.png",
+          "source": {
+            "left": 0,
+            "top": 0,
+            "width": 5,
+            "height": 12
+          },
+          "destination": {
+            "left": 919,
+            "top": 719,
+            "width": 5,
+            "height": 12
+          }
+        }
+      }
+    },
+    "receivedSequenceBefore": 605
+  },
+  "finishedAt": "2026-11-05T21:06:22.717Z",
+  "finalQuestLog": [
+    {
+      "questId": 2110001,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Report to Assistant Jane",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110002,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Equip a weapon you can use",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110003,
+      "stage": "completed",
+      "current": 4,
+      "required": 4,
+      "objectives": [
+        {
+          "label": "Defeat 2 Scarecrow.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        },
+        {
+          "label": "Defeat 2 RakingCat.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110004,
+      "stage": "completed",
+      "current": 3,
+      "required": 3,
+      "objectives": [
+        {
+          "label": "Defeat 2 Oma.",
+          "current": 2,
+          "required": 2,
+          "done": true
+        },
+        {
+          "label": "Complete your class practice",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110005,
+      "stage": "completed",
+      "current": 1,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Reach a Bichon safe area",
+          "current": 1,
+          "required": 1,
+          "done": true
+        }
+      ]
+    },
+    {
+      "questId": 2110006,
+      "stage": "inProgress",
+      "current": 0,
+      "required": 1,
+      "objectives": [
+        {
+          "label": "Buy a small HP or MP potion from a normal shop",
+          "current": 0,
+          "required": 1,
+          "done": false
+        }
+      ]
+    }
+  ],
+  "completedQuestIds": [
+    2110001,
+    2110002,
+    2110003,
+    2110004,
+    2110005
+  ],
+  "lastFullSnapshot": {
+    "sequence": 608,
+    "receivedAtMs": 1793912782581,
+    "position": null,
+    "inSafeZone": false,
+    "mapFileName": null,
+    "hp": null,
+    "maxHp": null,
+    "progression": {
+      "level": null,
+      "experience": 378,
+      "maxExperience": 2500
+    },
+    "gold": 180,
+    "dead": false
+  },
+  "lastUserLocation": null,
+  "movementSteps": 0,
+  "finalVitals": {
+    "hp": null,
+    "maxHp": null,
+    "mp": null,
+    "maxMp": null,
+    "dead": false,
+    "position": null
+  }
+}

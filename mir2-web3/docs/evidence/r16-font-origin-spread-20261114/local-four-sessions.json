@@ -1,0 +1,358 @@
+{
+  "passed": true,
+  "source": "7140aae96c41986968aadf040436e0ab396e1fdb",
+  "localSessions": 4,
+  "sessions": [
+    {
+      "run": "quest-after-r1",
+      "mode": "compatibility",
+      "language": "en-US",
+      "passed": true,
+      "cold": {
+        "passed": true,
+        "nativeReadyWaitMs": 54562,
+        "originalNativeLimitMs": 120000,
+        "prewarmSummary": {
+          "requested": 113,
+          "ok": 113,
+          "failed": 0
+        },
+        "diaryPassed": true,
+        "diaryLocale": "en-US",
+        "fontCache": [
+          {
+            "name": "NotoSansTC.ttf",
+            "bytes": 11941968,
+            "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+          },
+          {
+            "name": "NotoSansCJKsc-Regular.otf",
+            "bytes": 16437364,
+            "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+          },
+          {
+            "name": "NotoSans-Regular.ttf",
+            "bytes": 621572,
+            "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+          },
+          {
+            "name": "NotoSansDevanagari-Regular.ttf",
+            "bytes": 243520,
+            "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+          },
+          {
+            "name": "NotoSansThai-Regular.ttf",
+            "bytes": 37780,
+            "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+          },
+          {
+            "name": "NotoSansArabic-Regular.ttf",
+            "bytes": 234892,
+            "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+          }
+        ]
+      },
+      "warm": {
+        "passed": true,
+        "nativeReadyWaitMs": 1254,
+        "originalNativeLimitMs": 120000,
+        "prewarmSummary": {
+          "requested": 113,
+          "ok": 113,
+          "failed": 0
+        },
+        "diaryPassed": true,
+        "diaryLocale": "en-US",
+        "fontCache": [
+          {
+            "name": "NotoSansTC.ttf",
+            "bytes": 11941968,
+            "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+          },
+          {
+            "name": "NotoSansCJKsc-Regular.otf",
+            "bytes": 16437364,
+            "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+          },
+          {
+            "name": "NotoSans-Regular.ttf",
+            "bytes": 621572,
+            "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+          },
+          {
+            "name": "NotoSansDevanagari-Regular.ttf",
+            "bytes": 243520,
+            "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+          },
+          {
+            "name": "NotoSansThai-Regular.ttf",
+            "bytes": 37780,
+            "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+          },
+          {
+            "name": "NotoSansArabic-Regular.ttf",
+            "bytes": 234892,
+            "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+          }
+        ]
+      },
+      "firstPartyFontRecovery": {
+        "passed": true,
+        "fullSixFontCacheChecked": true,
+        "noPartialPrefixCached": true,
+        "scope": "real HTTP app body prefix then15s no positive bytes, complete pinned CDN replacement, existing six-font SHA checks and original120s Native gate"
+      },
+      "workerRestartPassed": true,
+      "npc": {
+        "passed": true,
+        "objectId": 1,
+        "sameIdNormalInteract": true,
+        "nativeXClosed": true
+      },
+      "route": {
+        "passed": true,
+        "locale": {
+          "code": "en",
+          "dictionarySha256": "e181fdd0d787a136209b86097c0e655237cf475563bebfdb67dee7243a7e4aa4"
+        },
+        "start": {
+          "x": 288,
+          "y": 616
+        },
+        "huntFinal": {
+          "x": 288,
+          "y": 616
+        },
+        "zeroStepHunt": true,
+        "vendorDestination": {
+          "x": 324,
+          "y": 291
+        },
+        "vendorFinal": {
+          "x": 322,
+          "y": 293
+        },
+        "moveCommands": 189,
+        "originalProgressLimitMs": 8000
+      },
+      "sameRoleReopen": {
+        "passed": true,
+        "allFirstBrowserProcessesExited": true,
+        "coldSavedPosition": {
+          "x": 289,
+          "y": 616
+        },
+        "warmAuthoritativeStart": {
+          "x": 289,
+          "y": 616
+        }
+      },
+      "normalLogout": {
+        "cold": {
+          "returnedToSelect": true,
+          "savedPosition": {
+            "x": 289,
+            "y": 616
+          }
+        },
+        "warm": {
+          "returnedToSelect": true,
+          "savedPosition": {
+            "x": 322,
+            "y": 293
+          }
+        }
+      },
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "protectedGraduateFixture": {
+        "unchanged": true,
+        "level": 30,
+        "scope": "Existing protected fixture preservation, not a fresh three-class 1-to-30 run"
+      },
+      "originalReceiptSha256": "3439c854d420203a853f284290295e3669b4ce069f927cbfd2f9ba7122ebaa16"
+    },
+    {
+      "run": "quest-after-r2",
+      "mode": "webgl2",
+      "language": "zh-TW",
+      "passed": true,
+      "cold": {
+        "passed": true,
+        "nativeReadyWaitMs": 52171,
+        "originalNativeLimitMs": 120000,
+        "prewarmSummary": {
+          "requested": 113,
+          "ok": 113,
+          "failed": 0
+        },
+        "diaryPassed": true,
+        "diaryLocale": "zh-TW",
+        "fontCache": [
+          {
+            "name": "NotoSansTC.ttf",
+            "bytes": 11941968,
+            "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+          },
+          {
+            "name": "NotoSansCJKsc-Regular.otf",
+            "bytes": 16437364,
+            "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+          },
+          {
+            "name": "NotoSans-Regular.ttf",
+            "bytes": 621572,
+            "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+          },
+          {
+            "name": "NotoSansDevanagari-Regular.ttf",
+            "bytes": 243520,
+            "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+          },
+          {
+            "name": "NotoSansThai-Regular.ttf",
+            "bytes": 37780,
+            "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+          },
+          {
+            "name": "NotoSansArabic-Regular.ttf",
+            "bytes": 234892,
+            "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+          }
+        ]
+      },
+      "warm": {
+        "passed": true,
+        "nativeReadyWaitMs": 1281,
+        "originalNativeLimitMs": 120000,
+        "prewarmSummary": {
+          "requested": 113,
+          "ok": 113,
+          "failed": 0
+        },
+        "diaryPassed": true,
+        "diaryLocale": "zh-TW",
+        "fontCache": [
+          {
+            "name": "NotoSansTC.ttf",
+            "bytes": 11941968,
+            "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+          },
+          {
+            "name": "NotoSansCJKsc-Regular.otf",
+            "bytes": 16437364,
+            "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+          },
+          {
+            "name": "NotoSans-Regular.ttf",
+            "bytes": 621572,
+            "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+          },
+          {
+            "name": "NotoSansDevanagari-Regular.ttf",
+            "bytes": 243520,
+            "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+          },
+          {
+            "name": "NotoSansThai-Regular.ttf",
+            "bytes": 37780,
+            "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+          },
+          {
+            "name": "NotoSansArabic-Regular.ttf",
+            "bytes": 234892,
+            "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+          }
+        ]
+      },
+      "firstPartyFontRecovery": {
+        "passed": true,
+        "fullSixFontCacheChecked": true,
+        "noPartialPrefixCached": true,
+        "scope": "real HTTP app body prefix then15s no positive bytes, complete pinned CDN replacement, existing six-font SHA checks and original120s Native gate"
+      },
+      "workerRestartPassed": true,
+      "npc": {
+        "passed": true,
+        "objectId": 1,
+        "sameIdNormalInteract": true,
+        "nativeXClosed": true
+      },
+      "route": {
+        "passed": true,
+        "locale": {
+          "code": "zh-TW",
+          "dictionarySha256": "e181fdd0d787a136209b86097c0e655237cf475563bebfdb67dee7243a7e4aa4"
+        },
+        "start": {
+          "x": 288,
+          "y": 616
+        },
+        "huntFinal": {
+          "x": 288,
+          "y": 616
+        },
+        "zeroStepHunt": true,
+        "vendorDestination": {
+          "x": 324,
+          "y": 291
+        },
+        "vendorFinal": {
+          "x": 322,
+          "y": 293
+        },
+        "moveCommands": 189,
+        "originalProgressLimitMs": 8000
+      },
+      "sameRoleReopen": {
+        "passed": true,
+        "allFirstBrowserProcessesExited": true,
+        "coldSavedPosition": {
+          "x": 289,
+          "y": 616
+        },
+        "warmAuthoritativeStart": {
+          "x": 289,
+          "y": 616
+        }
+      },
+      "normalLogout": {
+        "cold": {
+          "returnedToSelect": true,
+          "savedPosition": {
+            "x": 289,
+            "y": 616
+          }
+        },
+        "warm": {
+          "returnedToSelect": true,
+          "savedPosition": {
+            "x": 322,
+            "y": 293
+          }
+        }
+      },
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "protectedGraduateFixture": {
+        "unchanged": true,
+        "level": 30,
+        "scope": "Existing protected fixture preservation, not a fresh three-class 1-to-30 run"
+      },
+      "originalReceiptSha256": "d5f81c5b0c1a4416600d5aa6a4323d7efd06244ee4751b14597b87e595fa79a8"
+    }
+  ],
+  "preparationSha256": "cf23cd1bd5f8e8f3c5a534997a89f5ed93340120e1a83a39fc6eea39e8b5e37c",
+  "sourceQualificationSha256": "8e4f3707f5c57bc58d7536e218d64c7fc983c0f52504e4d4909335c257bf0c42",
+  "scope": "Fresh physical, exact committed Web source, controlled loopback resources and fixed QA Gateway. Four ordinary cold/warm sessions, default English and shared WebGL2 TC. Original fonts, Native120s, movement8s, normal NPC/X/route/logout/save and complete browser closure. Not public WAN/QR, physical phones/Windows, all GPU/map/skill routes, fresh three-class level30 or human acceptance.",
+  "humanAccepted": false,
+  "productionPublished": false
+}

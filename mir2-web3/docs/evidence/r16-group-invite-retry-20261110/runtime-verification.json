@@ -1,0 +1,106 @@
+{
+  "schema": "mir2.r16.group-retry-runtime.v1",
+  "sourceBase": "62acffcba483df433c6ac3a28836f8c1106b917e",
+  "inputs": {
+    "apps/web/app/page.tsx": "233f7b8b5120d3e67bff944317af14289bb34d23aa9580ee45ea07cdae605d30",
+    "apps/web/lib/group-operations.ts": "53453d1487e45521860faa1a7b4ceb665ea69117b74e9881dd484e5fbad88d33",
+    "apps/game-client/client-bevy/src/social_operation_budget.rs": "5c239cbe2932ec70a1aea1ac31d5e3ed8c5d856c926db4dc36f95d0340aef201",
+    "apps/game-client/runtime/src/lib.rs": "30c4a6c4c5ba43167e0dd9da142d2e53aa23b4c213c8912e06986d698d9e3905"
+  },
+  "version": "bevy-22790e9223ec130f",
+  "manifestSha256": "68fb2a35cf983f9a380ebb995e03f3a065f89d1c74d8390ba53bd12925385f00",
+  "logSha256": "794c1edf3497ff48557766cf413a00f7027cd233fee486fb4abfb2dc21f6ce75",
+  "packages": [
+    {
+      "id": "webgpu",
+      "backend": "webgpu",
+      "packageDir": "pkg-webgpu",
+      "questUiAbiVersion": 1,
+      "bagUiAbiVersion": 1,
+      "primarySharedUiCompiled": false
+    },
+    {
+      "id": "webgl2",
+      "backend": "webgl2",
+      "packageDir": "pkg-webgl2",
+      "questUiAbiVersion": 0,
+      "bagUiAbiVersion": 0,
+      "primarySharedUiCompiled": false
+    },
+    {
+      "id": "webgl2-shared",
+      "backend": "webgl2",
+      "packageDir": "pkg-webgl2-shared",
+      "questUiAbiVersion": 1,
+      "bagUiAbiVersion": 1,
+      "primarySharedUiCompiled": true
+    }
+  ],
+  "files": [
+    {
+      "path": "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js",
+      "sha256": "85a4b444b21ad82ef9cdd0368abb91dcb38455e25ef985475c657404276be2de",
+      "bytes": 141747,
+      "directAndImmutableMatch": true
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "sha256": "b00cc61be19a51ea09631b685a2b38349216d1fec2557d056242f049bf0321ac",
+      "bytes": 31440962,
+      "directAndImmutableMatch": true
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js",
+      "sha256": "2c18b5168f4a5210f4879c06e7373807a6dedb3a81137fdc28080191bc0f5aa5",
+      "bytes": 117805,
+      "directAndImmutableMatch": true
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+      "sha256": "fb2db3ac1eac5fddf9b38b62761d95107c0ccc6a75fe080e985fc05431f2d8ad",
+      "bytes": 16604772,
+      "directAndImmutableMatch": true
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime.js",
+      "sha256": "5047d0480da50ae948caa807d2f3765ea7500c5064eace3f6491bbd94e12630c",
+      "bytes": 139721,
+      "directAndImmutableMatch": true
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+      "sha256": "7ec10492422a792f50a9f65496502181ae91b9af93c42b096c16d05aca71c82a",
+      "bytes": 32368516,
+      "directAndImmutableMatch": true
+    }
+  ],
+  "budgets": [
+    {
+      "packageId": "webgpu",
+      "binaryenVersion": "wasm-opt version 131 (version_131)",
+      "binaryenSha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3",
+      "wasmBytes": 31440962,
+      "gzipBytes": 6594664,
+      "jsBytes": 141747,
+      "metadataMatched": true
+    },
+    {
+      "packageId": "webgl2",
+      "binaryenVersion": "wasm-opt version 131 (version_131)",
+      "binaryenSha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3",
+      "wasmBytes": 16604772,
+      "gzipBytes": 4274774,
+      "jsBytes": 117805,
+      "metadataMatched": true
+    },
+    {
+      "packageId": "webgl2-shared",
+      "binaryenVersion": "wasm-opt version 131 (version_131)",
+      "binaryenSha256": "a3e857e565f18773e24cb3d81d00baa70cee9be24efe775e1960565fea5e65b3",
+      "wasmBytes": 32368516,
+      "gzipBytes": 6932052,
+      "jsBytes": 139721,
+      "metadataMatched": true
+    }
+  ]
+}

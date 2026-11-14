@@ -1,0 +1,161 @@
+{
+  "schema": "mir2.r16.web-native-shared-save-three-classes.v1",
+  "passed": true,
+  "scope": "Each class used a fresh copy of its graduated v22 File save. Real headless Web UI and the compiled Windows production WebSocket transport with a scratch headless driver. Native rendering and desktop interaction are outside the run.",
+  "sourceHead": "df34e3b9b4f127e8097eb8bb682c9d95983ffdf9",
+  "gatewaySha256": "4d1a18644ef69eacdae0656fff1b8f49a4af1ae97ffcf6878ada86f5dff0ae0f",
+  "webPageSha256": "b4918778aa2698b07fb8a80abc312cf179ddc6f41e1d9a1c01e10f90bf26baba",
+  "nativeProbeSha256": "40d56867fa5b97914e16c8a673aa758c179afb65767a5105c08f368ccf839f38",
+  "nativeTransportSourceSha256": "0fda45624bd7d5aed62240913c684dd0231c1654516b0db57335f8aa86378f14",
+  "normalLogouts": 9,
+  "completedQuestRows": 78,
+  "browserErrors": 0,
+  "allIsolatedServicesStopped": true,
+  "classes": [
+    {
+      "className": "Warrior",
+      "level": 30,
+      "completedQuestCount": 26,
+      "gold": 76360,
+      "experience": 19497,
+      "coordinates": [
+        [
+          328,
+          264
+        ],
+        [
+          329,
+          264
+        ],
+        [
+          330,
+          264
+        ]
+      ],
+      "finalDirection": "right",
+      "normalLogouts": 3,
+      "sourceFixtureSha256": "ee63f1fd891d8987dced0c73bb0be8e595da732a937aae3b04032a50cf1a1666",
+      "finalIsolatedStoreSha256": "ae0d19f9cf507460d00187b7ad2adfbbbcfd6b3c73fa6c033fb88c638e7df633",
+      "evidenceSha256": "9571c6cc60977e2c70d4feb572225c4daf75f27cc35a04ddab934853a0dd0015",
+      "retainedDiskFields": [
+        "map_file_name",
+        "map_title",
+        "bind_point",
+        "gold",
+        "credit",
+        "experience",
+        "max_experience",
+        "inventory_capacity",
+        "inventory_items_json",
+        "belt_items_json",
+        "storage_items_json",
+        "equipment_items_json",
+        "quest_states_json",
+        "skill_states_json"
+      ],
+      "originalUnchanged": true,
+      "nativeReadMatchesWebSave": true,
+      "freshWebReadMatchesNativeSave": true,
+      "assetOverlay": null
+    },
+    {
+      "className": "Wizard",
+      "level": 30,
+      "completedQuestCount": 26,
+      "gold": 75960,
+      "experience": 16221,
+      "coordinates": [
+        [
+          328,
+          264
+        ],
+        [
+          329,
+          264
+        ],
+        [
+          330,
+          264
+        ]
+      ],
+      "finalDirection": "right",
+      "normalLogouts": 3,
+      "sourceFixtureSha256": "b054480795febab34176ec35b2ee8e4ee858ba6cf79ffc20ee37bae660671c8a",
+      "finalIsolatedStoreSha256": "dd945d1870ed154b319581141ec26af0412496653295cbd5fb9e785c88b35db8",
+      "evidenceSha256": "af08d7482e49d47b5af88db7764700801c6012329067f24bdb899cb691d572e0",
+      "retainedDiskFields": [
+        "map_file_name",
+        "map_title",
+        "bind_point",
+        "gold",
+        "credit",
+        "experience",
+        "max_experience",
+        "inventory_capacity",
+        "inventory_items_json",
+        "belt_items_json",
+        "storage_items_json",
+        "equipment_items_json",
+        "quest_states_json",
+        "skill_states_json"
+      ],
+      "originalUnchanged": true,
+      "nativeReadMatchesWebSave": true,
+      "freshWebReadMatchesNativeSave": true,
+      "assetOverlay": null
+    },
+    {
+      "className": "Taoist",
+      "level": 30,
+      "completedQuestCount": 26,
+      "gold": 53295,
+      "experience": 18263,
+      "coordinates": [
+        [
+          328,
+          264
+        ],
+        [
+          329,
+          264
+        ],
+        [
+          330,
+          264
+        ]
+      ],
+      "finalDirection": "right",
+      "normalLogouts": 3,
+      "sourceFixtureSha256": "3645dc2efd9f49333a57780250ad9092469a92fc995ab8defbe434ba0e64beab",
+      "finalIsolatedStoreSha256": "5357842f59630c81010435d72b8b11d2cfc0595c43cf0bb68e853eb55fbcffa3",
+      "evidenceSha256": "4d50e74e8eb622e7d7b400bd1d84b28ac7713995f74a57b67dbfc7bfc2cadd61",
+      "retainedDiskFields": [
+        "map_file_name",
+        "map_title",
+        "bind_point",
+        "gold",
+        "credit",
+        "experience",
+        "max_experience",
+        "inventory_capacity",
+        "inventory_items_json",
+        "belt_items_json",
+        "storage_items_json",
+        "equipment_items_json",
+        "quest_states_json",
+        "skill_states_json"
+      ],
+      "originalUnchanged": true,
+      "nativeReadMatchesWebSave": true,
+      "freshWebReadMatchesNativeSave": true,
+      "assetOverlay": {
+        "path": "original-ui/CWeapon/11",
+        "files": 833,
+        "pinListSha256": "1ff784a56511b09ee1473e06e426f151f869f056dae3ca627ce56f31f60c90a6",
+        "sourceRelease": "20261108-r16-08ec86d5105c",
+        "matchesPreviousV22Package": true,
+        "onlyInIsolatedPublic": true
+      }
+    }
+  ]
+}

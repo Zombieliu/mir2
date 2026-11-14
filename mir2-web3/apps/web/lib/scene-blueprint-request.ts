@@ -4,6 +4,7 @@ export type CrystalSceneBlueprintRequest = {
   centerY: number | null;
   width: number | null;
   height: number | null;
+  assetReleaseId?: string;
 };
 
 export type NormalizedCrystalSceneBlueprintRequest = {
@@ -12,6 +13,7 @@ export type NormalizedCrystalSceneBlueprintRequest = {
   centerY: number;
   width: number;
   height: number;
+  assetReleaseId?: string;
 };
 
 // Bump whenever the serialized SceneBlueprint shape changes. Door interaction
@@ -37,6 +39,7 @@ export function normalizeCrystalSceneBlueprintRequest(
     centerY: chunkY * SCENE_BLUEPRINT_CHUNK_HEIGHT + Math.floor(SCENE_BLUEPRINT_CHUNK_HEIGHT / 2),
     width: bucketDimension(request.width, SCENE_BLUEPRINT_WIDTH_BUCKET),
     height: bucketDimension(request.height, SCENE_BLUEPRINT_HEIGHT_BUCKET),
+    ...(request.assetReleaseId !== undefined ? { assetReleaseId: requireSceneAssetReleaseId(request.assetReleaseId) } : {}),
   };
 }
 
@@ -49,6 +52,7 @@ export function createCrystalSceneBlueprintRequestKey(
   const chunkY = Math.floor(normalized.centerY / SCENE_BLUEPRINT_CHUNK_HEIGHT);
   return [
     SCENE_BLUEPRINT_SCHEMA_VERSION,
+    ...(normalized.assetReleaseId ? [`asset${encodeURIComponent(normalized.assetReleaseId)}`] : []),
     encodeURIComponent(normalized.mapFileName),
     `cx${chunkX}`,
     `cy${chunkY}`,
@@ -65,6 +69,7 @@ export function createCrystalSceneBlueprintRequestUrl(
   const normalized = normalizeCrystalSceneBlueprintRequest(request);
   const params = new URLSearchParams({
     v: SCENE_BLUEPRINT_SCHEMA_VERSION,
+    ...(normalized.assetReleaseId ? { assetRelease: normalized.assetReleaseId } : {}),
     map: normalized.mapFileName,
     x: String(normalized.centerX),
     y: String(normalized.centerY),
@@ -72,6 +77,15 @@ export function createCrystalSceneBlueprintRequestUrl(
     height: String(normalized.height),
   });
   return `${pathname}?${params.toString()}`;
+}
+
+export function isCrystalSceneAssetReleaseId(value: unknown): value is string {
+  return typeof value === "string" && /^[a-zA-Z0-9._-]{1,80}$/.test(value);
+}
+
+function requireSceneAssetReleaseId(value: string) {
+  if (!isCrystalSceneAssetReleaseId(value)) throw new Error("Scene asset release is unavailable");
+  return value;
 }
 
 function normalizeMapFileName(mapFileName: string | null) {

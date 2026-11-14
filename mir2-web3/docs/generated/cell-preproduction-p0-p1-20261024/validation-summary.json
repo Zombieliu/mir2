@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-10-24T12:59:26.5077179Z",
+  "phaseStatus": "P0/P1 partial",
+  "humanAccepted": false,
+  "productionReady": false,
+  "upstreamBase": "e11c32fb15ca4cf18d933768b8e70866cd089f26",
+  "checkpoint": "0a2a3200529684dd09c7b3ffaeea0a842b533f49",
+  "branch": "codex/cell-preproduction-p0-p1-20261024",
+  "toolchain": {
+    "nativeUi": "Bevy 0.19 native-ui cargo check",
+    "rust": "1.95.0-x86_64-pc-windows-msvc",
+    "next": "16.4.1 pinned npm ci",
+    "node": "v22.18.0"
+  },
+  "p0": {
+    "focusedDeathRevive": {
+      "observerAtSpawn": false,
+      "scope": "Separate same-realm ordinary protocol continuation; does not rewrite the earlier full run",
+      "passed": 7,
+      "report": "protocol-death-revive-focused/1792845858629-b969ae9c.report.json"
+    },
+    "capacityAccepted": false,
+    "multiHostAccepted": false,
+    "nativeResume": {
+      "ok": true,
+      "includesNativeUi": false,
+      "passed": 9,
+      "report": "protocol-native-resume/1792845120462-edfccab1.report.json",
+      "includesServerRestart": false
+    },
+    "clientUiAccepted": false,
+    "fullLifecycle": {
+      "ok": false,
+      "passed": 14,
+      "report": "protocol-full-lifecycle/1792844742353-ccf6fb6e.report.json",
+      "notRun": [
+        "playerDeath",
+        "townRevive"
+      ],
+      "fullLifecyclePassed": false
+    }
+  },
+  "p1": {
+    "runtimeCheckpointVersion": 7,
+    "partitionPerLogicalZone": 1,
+    "dynamicSplitMergeImplemented": false,
+    "stableCrossPartitionActionIdentityImplemented": false,
+    "directory": "derived from live zones; domain-free ambiguous lookup rejects",
+    "partitionId": 0,
+    "cellSideTiles": 64,
+    "multiMachineSchedulingImplemented": false,
+    "managerCheckpointVersion": 3,
+    "topologyRevision": 1,
+    "effectOwnerRefVersion": 1
+  },
+  "accountSchema": {
+    "version": 10,
+    "stoneMigration": "0017_sealed_stone_authority.sql",
+    "postgresProductionMigrationTested": false,
+    "ambiguousNonemptyLegacyStoneData": "fail closed",
+    "upgradeAndFailClosedTests": 3
+  },
+  "focusedResults": {
+    "gatewayAdjacentFirstRunPassed": 71,
+    "schemaAndExactDropUid": 14,
+    "productionCrate": 38,
+    "economicFirstRunPassed": 101,
+    "gatewayAdjacentRepaired": 2,
+    "gatewayPersistence": 5,
+    "stoneEconomicReloadStrengthened": 1,
+    "clientUiSourceFixtures": 265,
+    "partitionFeature": 8,
+    "defaultPartition": 6,
+    "sharedZone": 209,
+    "securityLifecycle": 21,
+    "economicInitialFailures": 2,
+    "economicRepaired": 2,
+    "activities": 27,
+    "defaultDeath": 2,
+    "gatewayPartition": 7,
+    "sharedDeathFeature": 5,
+    "playtestRunnerFixtures": 149,
+    "portableFixturesMissingArtifactFailures": 2,
+    "portableFixturesPassed": 32,
+    "sharedPlayerDamageSettlement": 11,
+    "deadExperienceChain": 3
+  },
+  "checks": {
+    "nativeUi": "passed",
+    "dynamicCellCombat": "not_run",
+    "fiftyOrHundredPlayerSteadyState": "not_run",
+    "postgresFaultInjection": "not_run",
+    "webTypegenAndTypescript": "passed with pinned Next16.4.1",
+    "workspaceAllTargets": "passed after real development sidecar preparation, no crate excluded",
+    "fullPortablePackage": "not passed: standalone Sharp and generated map-atlas absent"
+  },
+  "commandBasis": [
+    "cargo +1.95.0 test --locked --offline -p mir2-production",
+    "cargo +1.95.0 test --locked --offline -p mir2-simulation --features test-support --test shared_zone --test shared_player_death_zone --test zone_partition_contract -- --test-threads=1",
+    "cargo +1.95.0 test --locked --offline -p mir2-simulation --test activities -- --test-threads=1",
+    "cargo +1.95.0 check --workspace --all-targets --locked --offline",
+    "cargo +1.95.0 check --locked --offline --manifest-path apps/game-client/client-bevy/Cargo.toml --features native-ui",
+    "node --no-global-search-paths --test scripts/playtest-multiplayer-smoke.test.mjs scripts/playtest-lifecycle.test.mjs scripts/playtest-native-resume-smoke.test.mjs scripts/playtest-load-smoke.test.mjs scripts/playtest-catalog-transport.test.mjs scripts/playtest-capacity-soak.test.mjs",
+    "node --test scripts/test-portable-next-standalone.mjs",
+    "git -c gc.auto=0 -c maintenance.auto=false fsck --full --strict --no-dangling"
+  ],
+  "logIndex": "log-index.json",
+  "countingNote": "Overlapping/default/feature reruns are separate gates, not an aggregate unique-test or whole-project coverage percentage."
+}

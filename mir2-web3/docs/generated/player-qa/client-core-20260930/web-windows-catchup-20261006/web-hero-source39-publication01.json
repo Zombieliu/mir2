@@ -1,0 +1,125 @@
+{
+  "kind": "source39-actual-git-publication",
+  "recordedAtUtc": "2026-10-08T04:29:56.017Z",
+  "branch": "codex/windows-player-journey",
+  "commit": "4b922c51fc8a0c3b873c6a95209561c893d59bee",
+  "parent": "38a079e9b2a126c8d2ddcd325badbc8fdac1d09d",
+  "localCommitted": true,
+  "remoteSynced": true,
+  "independentRemoteHead": "4b922c51fc8a0c3b873c6a95209561c893d59bee",
+  "remote": "git@github.com:Zombieliu/mir2.git",
+  "remoteConfigChanged": false,
+  "forcePush": false,
+  "commitRead": {
+    "chunk_id": "f10646",
+    "wall_time_seconds": 0.112198,
+    "exit_code": 0,
+    "original_token_count": 11,
+    "output": "4b922c51fc8a0c3b873c6a95209561c893d59bee\n"
+  },
+  "pushStart": {
+    "chunk_id": "94cd5f",
+    "wall_time_seconds": 10.0085444,
+    "session_id": 99592,
+    "original_token_count": 0,
+    "output": ""
+  },
+  "pushPolls": [
+    {
+      "key": "s39PushActualPoll",
+      "actual": {
+        "chunk_id": "774dd3",
+        "wall_time_seconds": 5.0024563,
+        "session_id": 99592,
+        "original_token_count": 0,
+        "output": ""
+      }
+    },
+    {
+      "key": "s39PushActualPoll2",
+      "actual": {
+        "chunk_id": "f4cf66",
+        "wall_time_seconds": 5.0157197,
+        "session_id": 99592,
+        "original_token_count": 0,
+        "output": ""
+      }
+    },
+    {
+      "key": "s39PushActualPoll3",
+      "actual": {
+        "chunk_id": "35b3fe",
+        "wall_time_seconds": 5.0065712,
+        "session_id": 99592,
+        "original_token_count": 0,
+        "output": ""
+      }
+    },
+    {
+      "key": "s39PushActualPoll4",
+      "actual": {
+        "chunk_id": "6579f5",
+        "wall_time_seconds": 5.0054139,
+        "session_id": 99592,
+        "original_token_count": 0,
+        "output": ""
+      }
+    },
+    {
+      "key": "s39PushActualPoll5",
+      "actual": {
+        "chunk_id": "3731a0",
+        "wall_time_seconds": 14.8198794,
+        "exit_code": 0,
+        "original_token_count": 25,
+        "output": "To github.com:Zombieliu/mir2.git\n   6116c2e640..4b922c51fc  HEAD -> codex/windows-player-journey\n"
+      }
+    }
+  ],
+  "remoteReadStart": {
+    "status": "fulfilled",
+    "value": {
+      "chunk_id": "26dccf",
+      "wall_time_seconds": 10.0105553,
+      "session_id": 51976,
+      "original_token_count": 0,
+      "output": ""
+    }
+  },
+  "remoteReadCompletion": {
+    "chunk_id": "a2ca7f",
+    "wall_time_seconds": 0.0000075,
+    "exit_code": 0,
+    "original_token_count": 21,
+    "output": "4b922c51fc8a0c3b873c6a95209561c893d59bee\trefs/heads/codex/windows-player-journey\n"
+  },
+  "trackedStatus": {
+    "status": "fulfilled",
+    "value": {
+      "chunk_id": "30b53d",
+      "wall_time_seconds": 0.1970435,
+      "exit_code": 0,
+      "original_token_count": 7,
+      "output": " M apps/web/tsconfig.json\n"
+    }
+  },
+  "scope": {
+    "productFiles": 11,
+    "documentationFiles": 8,
+    "ordinaryQaJsonFiles": 6,
+    "total": 25,
+    "userTsconfigExcluded": true
+  },
+  "productionPackageAccepted": false,
+  "playerVerified": false,
+  "goalComplete": false,
+  "candidate100": false,
+  "goalStatus": "active",
+  "overallPercentage": null,
+  "qualification": "Git source publication only. Latest complete accepted Web package remains Source25 and excludes Source26–39; Runtime/Page Hero integration and actual game-loop verification remain unfinished. User tsconfig remains an unrelated unstaged modification.",
+  "finalFiniteResult": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source39-finite-result01.json",
+    "bytes": 381503,
+    "sha256": "6d9284e17c10bfa0be790e064477e6ca9447ab981a4593d1724629e369a1b4b3"
+  }
+}

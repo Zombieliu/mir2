@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "frozenAt": "2026-10-25T07:58:42.732Z",
+  "state": "final-source-bound-not-executed",
+  "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "backendInputCount": 41,
+  "backendRebuilt": false,
+  "driverSourceCommit": "4cab00893b861395b63906b1b8183a021d397cdb",
+  "coreCodeEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+  "driverSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+  "sceneProfile": "ordinary-native-span2-five-by-five-static-halo-v1",
+  "patrolSpan": 2,
+  "sceneStaticCodeEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+  "wireDiagnostics": {
+    "version": "v2",
+    "manifest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\source-frozen-v2.json",
+      "bytes": 10830,
+      "sha256": "4ca6eee4f0ef9b2046bb5f56531ceec6eb2e1958141d0b7325cdb47de28e8ce3"
+    },
+    "review": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-wrapper-independent-review-v1\\review-v2.json",
+      "bytes": 6809,
+      "sha256": "4cda8f7ec69f710090cc3c4999cb847a8bf620bba6f2573978fe9245ddc50603"
+    },
+    "sourceSha256": "a3d938d2b9e92d97e445ca930640ccf1c838271d827efd45d11ff970f44cab49",
+    "driverSourceCommit": "4cab00893b861395b63906b1b8183a021d397cdb",
+    "coreCodeEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+    "coreDriverSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+    "wrapperTests": 28,
+    "core187CoversWrapper": false,
+    "terminalFile": "compact-navigation-wire-terminal.json",
+    "terminalOutsideRaw": true,
+    "existingWriter": {
+      "defaultMaxBufferedBytes": 4194304,
+      "addMayRecordFailureAndReturn": true,
+      "durableRowsRequireRawCrosscheck": true
+    }
+  },
+  "coreFunctionalEvidenceCoversWrapper": false,
+  "wrapperUnitTests": 28,
+  "adapterUnitTests": 8,
+  "actualAdmissionCaps": [
+    128,
+    100,
+    100,
+    4,
+    1,
+    2
+  ],
+  "tokioWorkers": 4,
+  "slowStageThresholdMs": 50,
+  "presealReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-formal10-preseal-input-check-v6.json",
+    "bytes": 26339,
+    "sha256": "de146199a73f1be24c5c1a7ce241fead3b92126455d7096c0f5fcd6c02376163"
+  },
+  "independentReview": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-formal10-independent-review-v1\\preseal-independent-review-v6.json",
+    "bytes": 13622,
+    "sha256": "7ffcc26c9f16d8cfac313c1742db39bd1c1f5c4342364ff5462323c927a1c8b8"
+  },
+  "executionPrerequisites": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-formal10-execution-prerequisites-v5.json",
+    "bytes": 9818,
+    "sha256": "77c4ffa11dba05e93a8e4ec3df397d6d723bbb06451680b0e67b1c5fc1445073"
+  },
+  "rootSealExecutor": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\seal-compact-wire-formal10-v6.mjs",
+    "bytes": 8008,
+    "sha256": "f41409bf89547f8d7500f9ac2eb34a85e8a2d075419361fe1d24e0b7fcd9e471"
+  },
+  "sourceConfigNotYet": true,
+  "accountsProvisioned": false,
+  "realmStarted": false,
+  "capacityAccepted": false,
+  "sourceSha256": "377b206576d506dfd396f718030b833c78398a2f827792225e5f334d58992972",
+  "verifiedAt": "2026-10-25T07:58:50.900Z",
+  "passed": true,
+  "readOnly": true,
+  "backendSourceUnchangedSinceBuild": true,
+  "rebuildPerformed": false,
+  "backendSourceAggregate": "57ea1cde0ab22a03a50d1e9c7e20fdcd8a2060d1cb7922a2ad2cee91e55f5d96",
+  "binary": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v1\\bin\\mir2-gateway.exe",
+    "bytes": 87370240,
+    "sha256": "a43078b05e70b480f948fee505e23d2757ce1ae20fdc1f22b2348df46ee7125d"
+  },
+  "full16RunId": "1792884517374-04264602",
+  "driverClosurePins": 124,
+  "wireSourcePins": 11,
+  "sceneSourceSha256": "4854eb58f6468ad4f8092dd375dc5363f42071470f92be4219a14df1321b163f",
+  "sceneStaticEvidenceNotRerun": true,
+  "prepareEntryPointInvoked": false,
+  "runEntryPointInvoked": false
+}

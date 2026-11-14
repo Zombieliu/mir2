@@ -1,0 +1,339 @@
+{
+  "owner": "Root",
+  "kind": "Source77 verified ordinary native Shop and starter Character round",
+  "parentCommit": "e20b1f4556f18f74cc8b65fbb6ef2b8da04e98a1",
+  "goalStatus": "active",
+  "candidate100": false,
+  "overallProgressPercent": null,
+  "scope": {
+    "ownedCode": [
+      {
+        "path": "apps/web/scripts/lib/portable-next-standalone.mjs",
+        "bytes": 63917,
+        "sha256": "903dc27909a5a43155ccacfb84dd114e8d1eab49fdaaea5142fe0ab7795a9bc8"
+      },
+      {
+        "path": "apps/web/scripts/test-portable-next-standalone.mjs",
+        "bytes": 95989,
+        "sha256": "22ef9cb1ccbc5dac56f7fdebcc1b4a52ebada58ae4bd1531a24c19f2b3341f0d"
+      },
+      {
+        "path": "apps/web/app/components/original-client-game-ui-scene.tsx",
+        "bytes": 35590,
+        "sha256": "ff234383953efe949ef01637f5782d421c246544247e305ee866ff5213e8af89"
+      },
+      {
+        "path": "apps/web/app/globals.css",
+        "bytes": 132129,
+        "sha256": "67b519fb0947e87830e5a3c0100f36beb4c74cedfa2003c6d26dab5030878639"
+      }
+    ],
+    "newGenuinePngs": 709,
+    "newPngBytes": 881070,
+    "itemPngs": 704,
+    "stateItemPngs": 5,
+    "totalGenuineSelectedUiPngs": 857,
+    "totalSelectorPaths": 860,
+    "legacyNonexistentFallbacks": 3,
+    "catalog": {
+      "referencedFirstTradeSections": 131,
+      "sectionsWithValidGoods": 128,
+      "validGoods": 2239,
+      "unresolvedEntries": 421
+    },
+    "starterCoverage": "five classes and two genders from ordinary NewCharacter starter definitions",
+    "selectionNotSpecificToQaAccount": true
+  },
+  "actualValidation": {
+    "nodeTests": 107,
+    "portableTests": 34,
+    "totalTests": 141,
+    "failures": 0,
+    "skipped": 0,
+    "firstPortableFailureRetained": true,
+    "firstFailureReason": "test conflated 131 referenced Trade sections with 128 sections containing valid goods; repaired assertions retain all union and genuine-copy gates and classify all three exclusions",
+    "strictNextClosed0": true,
+    "typeScriptPassed": true,
+    "staticPages": 13,
+    "allOriginalSourceGuardsReturned": true,
+    "originalCaller": "unchanged4569B"
+  },
+  "package": {
+    "files": 5260,
+    "bytes": 313459797,
+    "capBytes": 377487360,
+    "compiledNextLeaves": 222,
+    "uiJsonFiles": 229,
+    "coreFiles": 6,
+    "activeCoreBundles": 3,
+    "finiteMapFiles": 116,
+    "sourceByteDifferences": 0,
+    "nftFiles": 61,
+    "nftTargetRows": 130518,
+    "unknownNftTargets": 0,
+    "warningCount": 59,
+    "newWarningsComparedWithSource76": 0,
+    "oldCompiledApplicationCopied": false,
+    "actualGeneratedManifestHash": "25bad8b7d3ef5a77ad201341decaac6c3c0f652c372c13a7fd9cdd3b78463c68",
+    "actualManifestAssets": 17674,
+    "excludedSourceOnlyTestNeighbor": "Items/2.png",
+    "remoteFullMediaClosureAccepted": false
+  },
+  "ordinaryBrowser": {
+    "proof": "web-source77-source77-ordinary-browser-result01.json",
+    "sharedNpcShopActive": true,
+    "shopErrorPresent": false,
+    "sevenScottIconsVisible": true,
+    "oneCandleBuy": {
+      "goldBefore": 180,
+      "goldAfter": 170,
+      "quantity": 1,
+      "receipt": "You gained an item."
+    },
+    "inventoryDeltaNotInvented": true,
+    "starterCharacterNative": true,
+    "stats1Native": true,
+    "stats2Native": true,
+    "minimapOverlapFixedDuringNativeCharacter": true,
+    "nativeHeaderCloseAndMinimapRestorationPassed": true,
+    "compatNamePointerEventsNoneObserved": true,
+    "emptySpellsNative": false,
+    "emptySpellsCompatFallbackObserved": true,
+    "spellsRefusalCauseNotEstablished": true,
+    "ordinarySaveLogoutAndReloginPassed": true,
+    "persistedGold": 170,
+    "persistedMap": "Bichon Province",
+    "persistedPosition": [
+      290,
+      611
+    ],
+    "sameVisiblePostPurchaseInventoryIconsAfterRelogin": true,
+    "viewport": [
+      460,
+      780
+    ],
+    "viewportOverrideUsed": false,
+    "cdpUsed": false,
+    "privateRuntimeReadsUsed": false,
+    "adminOrTeleportUsed": false,
+    "credentialsRecorded": false,
+    "loginScreenshotsRetained": false
+  },
+  "remaining": [
+    "Source77 empty Spells shared host readiness refusal; fixed skins already selected, no dynamic art required for empty bindings",
+    "NPC stacked-item native amount confirmation OK/Cancel/Escape with preserved selection and existing command custody",
+    "Nonstarter equipment and nonempty skill icons/binding",
+    "Bag2, remaining panel parity, mobile/touch and prepare/HUD gaps",
+    "Final human frontend and overall Candidate100 acceptance"
+  ],
+  "boundaries": {
+    "gatewayChanged": false,
+    "rustOrAbiChanged": false,
+    "foreignMainTsconfig": {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\tsconfig.json",
+      "bytes": 4932,
+      "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+    },
+    "foreignWorkingDocsPreserved": true,
+    "backendParityIncreaseNotClaimed": true
+  },
+  "evidence": [
+    {
+      "name": "web-source77-source77-finite-png-approval01.json",
+      "bytes": 290283,
+      "sha256": "405106eaeca858f7612574a1b1c7008f39f45c7b707a880650c43220d458d61a"
+    },
+    {
+      "name": "web-source77-source77-genuine-assets-copy01.json",
+      "bytes": 438717,
+      "sha256": "61ce34ac970bfcf37925557512157d60e71bf9747917bcf4bba1c304a2c61180"
+    },
+    {
+      "name": "web-source77-source77-code-review02.json",
+      "bytes": 10161,
+      "sha256": "0953cf544e5e3d7f7f421e99d283239e972f529285578e6b9e41af79494c8e6c"
+    },
+    {
+      "name": "web-source77-source77-manifest-generation-final-actual01.json",
+      "bytes": 3531,
+      "sha256": "669c0c78f1a16c1499e82602d1624d339883a66cd2251508aa884626eac7f05c"
+    },
+    {
+      "name": "web-source77-source77-node-actual01.json",
+      "bytes": 2205,
+      "sha256": "3992e00b16115aef0c334773e946363bb8a658335fc7b6c5680ba9bdb3e8a184"
+    },
+    {
+      "name": "web-source77-source77-next-actual01.json",
+      "bytes": 2852,
+      "sha256": "755bdf7ed0498c7588106eb2e6e10a18a8c5f5d79a05b79af0a92e84e377d0c1"
+    },
+    {
+      "name": "web-source77-source77-portable-first-failure01.json",
+      "bytes": 3614,
+      "sha256": "e43d6c94311a446be0beacbb6ddeb239a5e142dc069e87d3dd0fab67d6b47f94"
+    },
+    {
+      "name": "web-source77-source77-portable-actual01.json",
+      "bytes": 3177,
+      "sha256": "85ca20e7b1dd8412d747d0ba3f6474a45dca5dfd33dd7d5234173d1fd2aab579"
+    },
+    {
+      "name": "web-source77-source77-thin-actual01.json",
+      "bytes": 200390,
+      "sha256": "8eb8e73827628f4fc9321233ef8b2a838c72f2a5d3b229d745712079a46cc153"
+    },
+    {
+      "name": "web-source77-source77-full-input-acceptance02.json",
+      "bytes": 1844,
+      "sha256": "d99502ff7c14c845b8e2a8c741435162c8b4af59503fbeb05769e3c4dd99c351"
+    },
+    {
+      "name": "web-source77-source77-runtime-start-actual01.json",
+      "bytes": 1491,
+      "sha256": "41e222442213c8b993b66b450dc33b4fc4ed015d5482c86b222508eec8fea570"
+    },
+    {
+      "name": "web-source77-source76-owned-web-closure01.json",
+      "bytes": 1877,
+      "sha256": "1f003ab9410e74ca57953e1fdeaf40862c264d64ec1b1471115ac327a880ea11"
+    },
+    {
+      "name": "web-source77-portable-statistics-repair01.json",
+      "bytes": 4174,
+      "sha256": "74ebb932d8db495a83cdcffa4e985ff6e71e385ae72b305f24e99aef85c09473"
+    },
+    {
+      "name": "web-source77-npm-copy-result01.json",
+      "bytes": 3419,
+      "sha256": "36133937954e79f9bdaab9e47f31e7559e365bcbbd712ade54a8ac2e04f565ac"
+    },
+    {
+      "name": "web-source77-thin-report-actual01.json",
+      "bytes": 83262,
+      "sha256": "622712745e785ed05579b96921f055ba8777246a9991ad6102162c392b530c85"
+    },
+    {
+      "name": "web-source77-node-actual01.stdout.txt",
+      "bytes": 27250,
+      "sha256": "4d063d2855f987c7caff1bb87f1e29b26ed6a816f9ea5185da8317739e9ca305"
+    },
+    {
+      "name": "web-source77-next-actual01.stdout.txt",
+      "bytes": 2026,
+      "sha256": "cf89419942eafd67ad2e30f1a3143487527dbd4265f05a75fe1c3756c529f342"
+    },
+    {
+      "name": "web-source77-portable-actual01.stdout.txt",
+      "bytes": 8871,
+      "sha256": "318db40ca27530237c41fb92f41d8302e1968d0e3a9ae6b84d849d25ddaccf04"
+    },
+    {
+      "name": "web-source77-portable-first-failure01.stdout.txt",
+      "bytes": 9641,
+      "sha256": "9a246648aa6a18f72e3689dec288d2595e561fbc4a7d9f60f1a0c0d8838da4ac"
+    },
+    {
+      "name": "web-source77-source76-ordinary-logout01.json",
+      "bytes": 659,
+      "sha256": "a4e5af396bc1d1269d0f7998de9c35dc615abc4162c3a6e126312125de30e53c"
+    },
+    {
+      "name": "web-source77-source77-bag-after-candle-buy01.png",
+      "bytes": 66818,
+      "sha256": "10a1ff70c08f70f9ed908b717eca7c6d1f2b5c3caa825b39b279feebb33ed496"
+    },
+    {
+      "name": "web-source77-source77-bag-after-save-relogin01.png",
+      "bytes": 68045,
+      "sha256": "9230c7663df64c01ae41f95f9ab3f2a4457f138878bf0cf840817a5b7f36a674"
+    },
+    {
+      "name": "web-source77-source77-character-char-first01.png",
+      "bytes": 65773,
+      "sha256": "f30b05cd229cc943318a1ca641b2923eb4098850f5cac22a666c187679c7a142"
+    },
+    {
+      "name": "web-source77-source77-character-fallback-close-minimap01.png",
+      "bytes": 69360,
+      "sha256": "95076e673bc91a354834f323931bddcdcab1a92403b0f7f4a97081cc10834287"
+    },
+    {
+      "name": "web-source77-source77-character-native-close-after01.png",
+      "bytes": 69416,
+      "sha256": "b6afea8a6d73dbbcae49c805f3357bd892ff55da232337578736f85f9b42c44d"
+    },
+    {
+      "name": "web-source77-source77-character-native-close-before01.png",
+      "bytes": 65044,
+      "sha256": "2987a2049718b62f590298de947b313b43fa39d3de838be434e199e6ce3bfb60"
+    },
+    {
+      "name": "web-source77-source77-character-reopen-spells01.png",
+      "bytes": 65095,
+      "sha256": "3eede16b6b33b8739e0f9b5658ca167c1af7c589c5775209c38998c0108e6551"
+    },
+    {
+      "name": "web-source77-source77-character-spells-empty01.png",
+      "bytes": 64359,
+      "sha256": "9c6221a6f631f56ef89c346bbe702dc2c059e2eacb3dd926ff165cf148a608d3"
+    },
+    {
+      "name": "web-source77-source77-character-spells-stable02.png",
+      "bytes": 64360,
+      "sha256": "59c596f259772c4fdee6c220a391ac28b5f82cc9bc2bdcdfb2940ce473880e5e"
+    },
+    {
+      "name": "web-source77-source77-character-stats1-01.png",
+      "bytes": 65574,
+      "sha256": "5624d6915899310e23256a25b8e078bf5a0176d54aedfcb6144cc7fc9feff51a"
+    },
+    {
+      "name": "web-source77-source77-character-stats2-01.png",
+      "bytes": 66027,
+      "sha256": "4c977b28136d894ae2753867c37060df060b1e5b006d90b064bea3415dff22c5"
+    },
+    {
+      "name": "web-source77-source77-game-after-login01.png",
+      "bytes": 69725,
+      "sha256": "d170f6901c7bc7c7cc78464badcba2a12793f66747dc8fa9e7d2b7d10def5c9c"
+    },
+    {
+      "name": "web-source77-source77-game-after-save-relogin01.png",
+      "bytes": 66195,
+      "sha256": "87beebd56de2d8312560fd398bca7f39c3b7f5e80e47c8cd42840b972491b557"
+    },
+    {
+      "name": "web-source77-source77-ordinary-browser-result01.json",
+      "bytes": 3104,
+      "sha256": "f291ff3349b9360f274ae8c3d79e5b13b4edd6dfc3153b838328366fd2f438a1"
+    },
+    {
+      "name": "web-source77-source77-ordinary-logout01.json",
+      "bytes": 357,
+      "sha256": "2191b40f3c8ffa5c4694a5c08750f10fa4cd07ff16b97363fcf935d2960079b3"
+    },
+    {
+      "name": "web-source77-source77-scott-candle-buy-first01.png",
+      "bytes": 67462,
+      "sha256": "22fa01c2189f455643e96c3febc4168c4d134acbc3f1b1bb300779c5bff43365"
+    },
+    {
+      "name": "web-source77-source77-scott-candle-buy-result01.png",
+      "bytes": 67599,
+      "sha256": "b18c77edea20abb897be95b4a0ea5bca9e14795019d3c5b947d66aa1ecdd9bfa"
+    },
+    {
+      "name": "web-source77-source77-scott-candle-selected01.png",
+      "bytes": 67475,
+      "sha256": "6c9fe7b224185509dec307c93336d3999aaf381cb98315b01805ec579e5a6909"
+    },
+    {
+      "name": "web-source77-source77-scott-shop-first01.png",
+      "bytes": 67303,
+      "sha256": "b31563c7f573d6af2c1bcce5179343ad11366f0e4697b22859033d715c559be7"
+    }
+  ],
+  "source76Publication": "web-source76-publication01.json",
+  "goalComplete": false
+}

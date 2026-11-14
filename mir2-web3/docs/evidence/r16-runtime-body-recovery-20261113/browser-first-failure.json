@@ -1,0 +1,413 @@
+{
+  "passed": false,
+  "scope": "actual Chrome, loopback HTTP faults and actual WASM compilation; no game, account or production performance qualification",
+  "sourceSha256": "13f1de5c0b4f0594c6acf01beeaf97baf163cc736590317837917b44225424fc",
+  "closed": {
+    "browser": true,
+    "server": true
+  },
+  "chromeVersion": "157.0.8103.78",
+  "cases": [
+    {
+      "scenario": "reset",
+      "elapsedMs": 246,
+      "imports": 1,
+      "canvases": 1,
+      "initialized": 1,
+      "answer": 42,
+      "errorName": null,
+      "priorRequestsAborted": true,
+      "requests": [
+        "/reset/app.wasm",
+        "/reset/mirror.wasm",
+        "/reset/mirror.wasm"
+      ],
+      "events": [
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "failed",
+          "phase": "body",
+          "bytes": 4,
+          "status": 200,
+          "reason": "network",
+          "retryable": true
+        },
+        {
+          "attempt": 2,
+          "sourceIndex": 1,
+          "retry": false,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 2,
+          "sourceIndex": 1,
+          "retry": false,
+          "state": "failed",
+          "phase": "body",
+          "bytes": 4,
+          "status": 200,
+          "reason": "network",
+          "retryable": true
+        },
+        {
+          "attempt": 3,
+          "sourceIndex": 1,
+          "retry": true,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 3,
+          "sourceIndex": 1,
+          "retry": true,
+          "state": "completed",
+          "phase": "compile",
+          "bytes": 39,
+          "status": 200
+        }
+      ]
+    },
+    {
+      "scenario": "idle",
+      "elapsedMs": 15011,
+      "imports": 1,
+      "canvases": 1,
+      "initialized": 1,
+      "answer": 42,
+      "errorName": null,
+      "priorRequestsAborted": true,
+      "requests": [
+        "/idle/app.wasm",
+        "/idle/mirror.wasm",
+        "/idle/mirror.wasm"
+      ],
+      "events": [
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "failed",
+          "phase": "headers",
+          "bytes": 0,
+          "status": 503,
+          "reason": "http",
+          "retryable": true
+        },
+        {
+          "attempt": 2,
+          "sourceIndex": 1,
+          "retry": false,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 2,
+          "sourceIndex": 1,
+          "retry": false,
+          "state": "failed",
+          "phase": "body",
+          "bytes": 4,
+          "status": 200,
+          "reason": "body-idle",
+          "retryable": true
+        },
+        {
+          "attempt": 3,
+          "sourceIndex": 1,
+          "retry": true,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 3,
+          "sourceIndex": 1,
+          "retry": true,
+          "state": "completed",
+          "phase": "compile",
+          "bytes": 39,
+          "status": 200
+        }
+      ]
+    },
+    {
+      "scenario": "exhausted",
+      "elapsedMs": 2,
+      "imports": 1,
+      "canvases": 0,
+      "initialized": 0,
+      "answer": null,
+      "errorName": "TypeError",
+      "priorRequestsAborted": true,
+      "requests": [
+        "/exhausted/app.wasm",
+        "/exhausted/mirror.wasm",
+        "/exhausted/mirror.wasm"
+      ],
+      "events": [
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "failed",
+          "phase": "headers",
+          "bytes": 0,
+          "status": 503,
+          "reason": "http",
+          "retryable": true
+        },
+        {
+          "attempt": 2,
+          "sourceIndex": 1,
+          "retry": false,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 2,
+          "sourceIndex": 1,
+          "retry": false,
+          "state": "failed",
+          "phase": "headers",
+          "bytes": 0,
+          "status": 503,
+          "reason": "http",
+          "retryable": true
+        },
+        {
+          "attempt": 3,
+          "sourceIndex": 1,
+          "retry": true,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 3,
+          "sourceIndex": 1,
+          "retry": true,
+          "state": "failed",
+          "phase": "headers",
+          "bytes": 0,
+          "status": 503,
+          "reason": "http",
+          "retryable": true
+        }
+      ]
+    },
+    {
+      "scenario": "permanent",
+      "elapsedMs": 3,
+      "imports": 1,
+      "canvases": 0,
+      "initialized": 0,
+      "answer": null,
+      "errorName": "TypeError",
+      "priorRequestsAborted": null,
+      "requests": [
+        "/permanent/app.wasm",
+        "/permanent/mirror.wasm"
+      ],
+      "events": [
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "failed",
+          "phase": "headers",
+          "bytes": 0,
+          "status": 404,
+          "reason": "http",
+          "retryable": false
+        },
+        {
+          "attempt": 2,
+          "sourceIndex": 1,
+          "retry": false,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 2,
+          "sourceIndex": 1,
+          "retry": false,
+          "state": "failed",
+          "phase": "headers",
+          "bytes": 0,
+          "status": 404,
+          "reason": "http",
+          "retryable": false
+        }
+      ]
+    },
+    {
+      "scenario": "invalid",
+      "elapsedMs": 1,
+      "imports": 1,
+      "canvases": 0,
+      "initialized": 0,
+      "answer": null,
+      "errorName": "CompileError",
+      "priorRequestsAborted": null,
+      "requests": [
+        "/invalid/app.wasm",
+        "/invalid/mirror.wasm"
+      ],
+      "events": [
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "failed",
+          "phase": "headers",
+          "bytes": 0,
+          "status": 503,
+          "reason": "http",
+          "retryable": true
+        },
+        {
+          "attempt": 2,
+          "sourceIndex": 1,
+          "retry": false,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 2,
+          "sourceIndex": 1,
+          "retry": false,
+          "state": "failed",
+          "phase": "compile",
+          "bytes": 15,
+          "status": 200,
+          "reason": "invalid-binary",
+          "retryable": false
+        }
+      ]
+    },
+    {
+      "scenario": "oversized",
+      "elapsedMs": 3,
+      "imports": 1,
+      "canvases": 0,
+      "initialized": 0,
+      "answer": null,
+      "errorName": "TypeError",
+      "priorRequestsAborted": true,
+      "requests": [
+        "/oversized/app.wasm",
+        "/oversized/mirror.wasm",
+        "/oversized/mirror.wasm"
+      ],
+      "events": [
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "failed",
+          "phase": "headers",
+          "bytes": 0,
+          "status": 503,
+          "reason": "http",
+          "retryable": true
+        },
+        {
+          "attempt": 2,
+          "sourceIndex": 1,
+          "retry": false,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 2,
+          "sourceIndex": 1,
+          "retry": false,
+          "state": "failed",
+          "phase": "body",
+          "bytes": 39,
+          "status": 200,
+          "reason": "network",
+          "retryable": true
+        },
+        {
+          "attempt": 3,
+          "sourceIndex": 1,
+          "retry": true,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 3,
+          "sourceIndex": 1,
+          "retry": true,
+          "state": "failed",
+          "phase": "body",
+          "bytes": 39,
+          "status": 200,
+          "reason": "network",
+          "retryable": true
+        }
+      ]
+    }
+  ],
+  "failure": "Expected values to be strictly equal:\n\n3 !== 2\n"
+}

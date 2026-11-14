@@ -1,0 +1,14 @@
+[
+  {
+    "path": "C:/mir2-playtest-releases/20260929/installer-build/tools/InnoSetup7/ISCC.exe",
+    "sha256": "D06EBD38F38E3CEE60A3C50CC45BD449D77E0BC6A5CABC607EA9886808E4DE1A",
+    "status": "Valid",
+    "publisher": "CN=Pyrsys B.V., O=Pyrsys B.V., S=Noord-Holland, C=NL"
+  },
+  {
+    "path": "C:/mir2-playtest-releases/20260930-ui-r6/installer-build/tools/vc_redist.x64.exe",
+    "sha256": "843068991DAAA1F73AD9F6239BCE4D0F6A07A51F18C37EA2A867E9BECA71295C",
+    "status": "Valid",
+    "publisher": "CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US"
+  }
+]

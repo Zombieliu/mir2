@@ -1,0 +1,247 @@
+{
+  "schema": "mir2.publication-clock-real-pg-readonly.v1",
+  "readOnly": true,
+  "sourceSha": "050950f5b9773a36901861a1a95c18b8058793a5",
+  "helperSourceSha256": "b963397275fff2f9f7bdfbaf346893daf202ac84b2fb3113af43f00afeb59e53",
+  "publicationSourceSha256": "0ef7c6c46d133a29732c3cd26c07f0e89b3d718c8012214997b78ae2895744b2",
+  "pubRowsAstSha256": "003d6e628c44e9c810f7e0c0d296a44347b2fe26f2d8bf1f985a7dcfd3d5874a",
+  "observedAtUtc": "2026-10-30T14:04:06.344761+00:00",
+  "databases": [
+    {
+      "databaseLabel": "original",
+      "waitSeconds": 11.368,
+      "watermarkReset": true,
+      "businessCountsAndHashesEqual": true,
+      "retainedTables": 53,
+      "counts": {
+        "accounts": 120,
+        "admin_activities": 0,
+        "admin_approvals": 0,
+        "admin_audit_records": 0,
+        "admin_commands": 0,
+        "admin_daily_report_deliveries": 0,
+        "admin_daily_report_events": 0,
+        "admin_daily_report_runs": 0,
+        "admin_daily_reports": 0,
+        "admin_market_price_feeds": 0,
+        "admin_operators": 0,
+        "admin_outbox": 0,
+        "admin_system_mail_receipts": 0,
+        "admin_trade_graph_edges": 0,
+        "admin_zone_runtime_records": 0,
+        "auction_listings": 0,
+        "character_items": 215,
+        "character_mail": 8,
+        "character_npc_state": 0,
+        "character_saves": 36,
+        "character_state": 36,
+        "characters": 36,
+        "game_economy_balances": 0,
+        "game_economy_bootstraps": 0,
+        "game_economy_ground_drop_projections": 0,
+        "game_economy_inbox": 0,
+        "game_economy_outbox": 0,
+        "game_economy_reconciliation_runs": 0,
+        "game_economy_trade_projections": 0,
+        "game_economy_transactions": 0,
+        "game_shop_global_stock": 1,
+        "identity_audit_events": 460,
+        "identity_credentials": 33,
+        "identity_recovery_codes": 0,
+        "identity_sessions": 413,
+        "mir2_channel_identity_bindings": 1,
+        "mir2_player_identity_accounts": 1,
+        "schema_migrations": 19,
+        "sealed_stone_authority": 1,
+        "shared_conquests": 1,
+        "shared_guild_clock": 1,
+        "shared_guild_members": 0,
+        "shared_guilds": 0,
+        "shared_hero_allocator": 1,
+        "shared_heroes": 0,
+        "sui_usdc_active_creation": 0,
+        "sui_usdc_invoice_receipts": 0,
+        "sui_usdc_payment_receipts": 0,
+        "world_director_audit": 0,
+        "world_director_control_state": 0,
+        "zone_owner_leases": 0,
+        "_billing": 4,
+        "_historicalOrders": 13
+      },
+      "clockBusiness": {
+        "shared_conquests": {
+          "count": 1,
+          "sha256": "f498d4e76eff4baf592e6973c7fee1694e0200872ea934cda6ddf1f871776538"
+        },
+        "shared_guild_clock": {
+          "count": 1,
+          "sha256": "3d56938291d690db4ccb55155533bee4afcfede0c54ee46da2fe16553d8f8bc5"
+        }
+      },
+      "metadataProgress": {
+        "shared_conquests": {
+          "rows": 1,
+          "allCountersNondecreasing": true,
+          "ownerChanges": 0,
+          "leaseShapeChanges": 0,
+          "generationDeltaRange": [
+            0,
+            0
+          ],
+          "cursorDeltaRange": [
+            10019,
+            10019
+          ],
+          "storeDeltaRange": [
+            1,
+            1
+          ],
+          "revisionDeltaRange": [
+            1,
+            1
+          ],
+          "updatedForwardRows": 1
+        },
+        "shared_guild_clock": {
+          "rows": 1,
+          "allCountersNondecreasing": true,
+          "ownerChanges": 0,
+          "leaseShapeChanges": 0,
+          "generationDeltaRange": [
+            0,
+            0
+          ],
+          "cursorDeltaRange": [
+            60049,
+            60049
+          ],
+          "storeDeltaRange": [
+            1,
+            1
+          ],
+          "updatedForwardRows": 1
+        }
+      },
+      "clockWatermarkGuardPassed": true
+    },
+    {
+      "databaseLabel": "clone",
+      "waitSeconds": 11.406,
+      "watermarkReset": true,
+      "businessCountsAndHashesEqual": true,
+      "retainedTables": 53,
+      "counts": {
+        "accounts": 120,
+        "admin_activities": 0,
+        "admin_approvals": 0,
+        "admin_audit_records": 0,
+        "admin_commands": 0,
+        "admin_daily_report_deliveries": 0,
+        "admin_daily_report_events": 0,
+        "admin_daily_report_runs": 0,
+        "admin_daily_reports": 0,
+        "admin_market_price_feeds": 0,
+        "admin_operators": 0,
+        "admin_outbox": 0,
+        "admin_system_mail_receipts": 0,
+        "admin_trade_graph_edges": 0,
+        "admin_zone_runtime_records": 0,
+        "auction_listings": 0,
+        "character_items": 215,
+        "character_mail": 8,
+        "character_npc_state": 0,
+        "character_saves": 36,
+        "character_state": 36,
+        "characters": 36,
+        "game_economy_balances": 0,
+        "game_economy_bootstraps": 0,
+        "game_economy_ground_drop_projections": 0,
+        "game_economy_inbox": 0,
+        "game_economy_outbox": 0,
+        "game_economy_reconciliation_runs": 0,
+        "game_economy_trade_projections": 0,
+        "game_economy_transactions": 0,
+        "game_shop_global_stock": 1,
+        "identity_audit_events": 460,
+        "identity_credentials": 33,
+        "identity_recovery_codes": 0,
+        "identity_sessions": 413,
+        "mir2_channel_identity_bindings": 1,
+        "mir2_player_identity_accounts": 1,
+        "schema_migrations": 26,
+        "sealed_stone_authority": 1,
+        "shared_conquests": 1,
+        "shared_guild_clock": 1,
+        "shared_guild_members": 0,
+        "shared_guilds": 0,
+        "shared_hero_allocator": 1,
+        "shared_heroes": 0,
+        "sui_usdc_active_creation": 0,
+        "sui_usdc_invoice_receipts": 0,
+        "sui_usdc_payment_receipts": 0,
+        "world_director_audit": 0,
+        "world_director_control_state": 0,
+        "zone_owner_leases": 0,
+        "_billing": 4,
+        "_historicalOrders": 13
+      },
+      "clockBusiness": {
+        "shared_conquests": {
+          "count": 1,
+          "sha256": "f498d4e76eff4baf592e6973c7fee1694e0200872ea934cda6ddf1f871776538"
+        },
+        "shared_guild_clock": {
+          "count": 1,
+          "sha256": "3d56938291d690db4ccb55155533bee4afcfede0c54ee46da2fe16553d8f8bc5"
+        }
+      },
+      "metadataProgress": {
+        "shared_conquests": {
+          "rows": 1,
+          "allCountersNondecreasing": true,
+          "ownerChanges": 0,
+          "leaseShapeChanges": 0,
+          "generationDeltaRange": [
+            0,
+            0
+          ],
+          "cursorDeltaRange": [
+            0,
+            0
+          ],
+          "storeDeltaRange": [
+            0,
+            0
+          ],
+          "revisionDeltaRange": [
+            0,
+            0
+          ],
+          "updatedForwardRows": 0
+        },
+        "shared_guild_clock": {
+          "rows": 1,
+          "allCountersNondecreasing": true,
+          "ownerChanges": 0,
+          "leaseShapeChanges": 0,
+          "generationDeltaRange": [
+            0,
+            0
+          ],
+          "cursorDeltaRange": [
+            0,
+            0
+          ],
+          "storeDeltaRange": [
+            0,
+            0
+          ],
+          "updatedForwardRows": 0
+        }
+      },
+      "clockWatermarkGuardPassed": true
+    }
+  ],
+  "passed": true,
+  "completedAtUtc": "2026-10-30T14:04:29.921695+00:00"
+}

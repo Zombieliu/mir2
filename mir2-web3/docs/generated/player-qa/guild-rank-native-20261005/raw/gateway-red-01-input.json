@@ -1,0 +1,38 @@
+{
+  "name": "gateway-red-01",
+  "root": "C:/Users/Administrator/.codex/worktrees/gn/mir2-player-journey/mir2-web3",
+  "command": [
+    "cargo",
+    "+1.95.0",
+    "test",
+    "--manifest-path",
+    "Cargo.toml",
+    "--offline",
+    "--locked",
+    "--jobs",
+    "2",
+    "-p",
+    "mir2-gateway",
+    "--test",
+    "shared_guild_rank_terminal",
+    "--",
+    "--nocapture"
+  ],
+  "target_dir": "C:/mir2-build/gateway-tests-r51",
+  "source_before_sha256": {
+    "apps/game-client/client-bevy/src/social.rs": "2e8c486734b50588ab6f262ed17781841cefe71cae7a2556e1a281fa95ffe5a6",
+    "apps/game-client/client-bevy/src/social_guild_rank_tests.rs": "48d6d5b13e2b02fd2245b6244803c2791474365b9f75eac00a7a67e54e0ea8c0",
+    "apps/game-client/client-bevy/src/crystal_ui/guild_panel.rs": "389f34ef22da0d9a0c299f906d3b7bc39b85b3be5f1bb4165cd23a41c4fd22af",
+    "apps/game-client/client-bevy/src/crystal_ui/guild_rank_flow_tests.rs": "1a655d91ffd17c14700016082111582e697c44343fed533fee9ffd97650ae7a7",
+    "apps/game-client/client-bevy/src/crystal_ui/overlays.rs": "b4e776c016acffd97950bd5adebd3cbd75ce885b092ec073c63232716d90698a",
+    "apps/game-client/platform-windows/src/gameplay_bridge.rs": "8466f4595778f58caab6decf0aa7e609336e2709a015b420f6a0859794dc4ea3",
+    "apps/game-client/runtime/src/lib.rs": "0e43a30835e76d2ec1dcb29bf12ca4565d04822a9ef916178ce0518156fbb2e1",
+    "apps/game-client/runtime/src/native_ingest.rs": "3b7d5784174e19bfddf8b880b358ef668e92230305ff932e4f918b5745bbbbb7",
+    "apps/gateway/src/routing.rs": "938bb54d16ce8c6028eeb1164dd2509c5f3887a49c3bd9e262ceab8b67fa949f",
+    "apps/gateway/tests/shared_guild_rank_terminal.rs": "9a2365897db54dbd7cff3163134e01d70f48175b24494297ab1a28f514f1f5df",
+    "apps/gateway/src/shared_guilds.rs": "b51a93a339fae841813a67cb3782218ed75e9003869e5c2e2723d622a99afe22",
+    "apps/simulation/src/runtime/shared_guilds.rs": "a2ed1cc11013cd1763d7e885557f4739d1caca31a1897abc9f26f6e3ff050356",
+    "apps/simulation/src/runtime/shared_guild_management.rs": "1e3beec2699b3ae5c8b7a9d87af0bc4df20c3cb926f88387ff14e054764f0a26"
+  },
+  "started_utc": "2026-10-04T16:53:09.616708+00:00"
+}

@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-10-24T18:45:05.547Z",
+  "scope": "Unit/integration engineering validation only. No capacity, GUI, distributed migration, or production acceptance is inferred.",
+  "productionRulesChanged": false,
+  "legacyAttackDispatchRetained": true,
+  "newProtocolOptIn": true,
+  "results": [
+    {
+      "file": "validation/p01-typed-attack-focused-01.log",
+      "bytes": 66455,
+      "sha256": "b1b4ed40c7f4be29242efd1e6f7176a5e2a7f94e6e9572b657df1b44496639d3",
+      "result": {
+        "status": "aborted-without-summary"
+      },
+      "scope": "Failed fixture preparation: invalid canonical manager root caused a poisoned-lock abort. Production root validation was retained."
+    },
+    {
+      "file": "validation/p01-typed-attack-focused-02.log",
+      "bytes": 59438,
+      "sha256": "dd109541865d4deef5500d238459e699c3878e54f001d59aff40a68eb8a7719e",
+      "result": {
+        "status": "FAILED",
+        "passed": 26,
+        "failed": 2,
+        "ignored": 0,
+        "seconds": 13.69
+      },
+      "scope": "Two new RPC preflight tests failed. Fixed explicit authentication before network or hosted Session creation."
+    },
+    {
+      "file": "validation/p01-typed-attack-regression-03.log",
+      "bytes": 64082,
+      "sha256": "5f1cb695edbee99f596e58c2758671e62598695931bc5b000d009c8349ce8560",
+      "result": {
+        "status": "FAILED",
+        "passed": 46,
+        "failed": 1,
+        "ignored": 1,
+        "seconds": 88.62
+      },
+      "scope": "Typed protocol tests passed, inherited range-routing fixture failed. Original failure retained."
+    },
+    {
+      "file": "validation/p01-legacy-range-reproduce-01.log",
+      "bytes": 55190,
+      "sha256": "112fac2fb6bd0edf76b694cb670b563526fd0591a4426edf32775dbf851e3663",
+      "result": {
+        "status": "FAILED",
+        "passed": 0,
+        "failed": 1,
+        "ignored": 0,
+        "seconds": 2.47
+      },
+      "scope": "Single-test reproduction of inherited range fixture failure."
+    },
+    {
+      "file": "validation/p01-legacy-range-fixture-fixed-02.log",
+      "bytes": 55335,
+      "sha256": "68e67fa1c08169a280c1f6c97349a4092e1a2ce058d7ebeb2dee7718ce738580",
+      "result": {
+        "status": "FAILED",
+        "passed": 0,
+        "failed": 1,
+        "ignored": 0,
+        "seconds": 2.46
+      },
+      "scope": "First fixture correction remained insufficient; failure retained."
+    },
+    {
+      "file": "validation/p01-legacy-range-diagnostic-03.log",
+      "bytes": 59757,
+      "sha256": "3a2884836130a05d8921161f4ce2f0f8d20ac4313a36bdfefb5cca438b5a338d",
+      "result": {
+        "status": "FAILED",
+        "passed": 0,
+        "failed": 1,
+        "ignored": 0,
+        "seconds": 2.46
+      },
+      "scope": "Diagnostics showed actual authoritative distance eight, delayed impact not reached; target HP unchanged."
+    },
+    {
+      "file": "validation/p01-legacy-range-diagnostic-04.log",
+      "bytes": 55321,
+      "sha256": "e2742fb75df84d47cd64584c734107f8260ea57f3293e6b4bc0a4d920138110c",
+      "result": {
+        "status": "FAILED",
+        "passed": 0,
+        "failed": 1,
+        "ignored": 0,
+        "seconds": 2.21
+      },
+      "scope": "Setup assertion correctly rejected a collision-corrected placement before attack."
+    },
+    {
+      "file": "validation/p01-legacy-range-diagnostic-05.log",
+      "bytes": 60017,
+      "sha256": "73e73d6d9b4ec225908a32b18aec9c5de85d6b9619adca614fb606a5652f04c6",
+      "result": {
+        "status": "ok",
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 2.39
+      },
+      "scope": "Final fixture uses accepted shared placement, guaranteed Focus hit and real 700ms due time; original assertions retained."
+    },
+    {
+      "file": "validation/p01-typed-attack-and-adjacent-final-04.log",
+      "bytes": 107145,
+      "sha256": "60f9b53ae28c7b64cc0147e823901a9474f56b2196180bb6a8a8d731484aacc4",
+      "result": {
+        "status": "ok",
+        "passed": 157,
+        "failed": 0,
+        "ignored": 2,
+        "seconds": 407.14
+      },
+      "scope": "Final frozen-source integration: new typed protocol plus original adjacent recovery, handoff, economy, movement and owner regressions."
+    }
+  ],
+  "fixtureRepair": "Only the inherited range test setup changed: learned Focus, actual accepted shared Zone position at distance three, and existing cadence at impact due time. One actual attack; no production clock, damage rule or retry-until-hit change.",
+  "nodeDriverValidation": "capacity-attack-v2-driver-frozen-v1.json",
+  "rustfmtValidation": "validation/p01-native-attack-v2-rustfmt-check.json"
+}

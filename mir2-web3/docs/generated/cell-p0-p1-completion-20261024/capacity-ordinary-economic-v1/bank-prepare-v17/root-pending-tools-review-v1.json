@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-27T09:24:55.603Z",
+  "scope": "Root independent W17 raw pins and exact inverse rules; immutable source-lib/backend contract; W16 whole11 original bytes; two actual W15/W16 history groups with58 notFresh/42 complement and unchanged original100 limits.",
+  "preparation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\preparation-v1.json",
+    "bytes": 4014,
+    "sha256": "aca1b1771883709fe839d6ada86dbf746e5fdbfc7e76f94d1db00ae76aba91e4"
+  },
+  "metadataPins": 8,
+  "rules": [
+    {
+      "name": "source-lib-v1.mjs",
+      "count": 0,
+      "forwardAndInverseRawExact": true,
+      "parent": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\source-lib-v1.mjs",
+        "bytes": 18471,
+        "sha256": "bdbcb65eb6027f8d0c0812ab6975b5d53beee28d133be36d8cdf75593f57ca16"
+      },
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\source-lib-v1.mjs",
+        "bytes": 18471,
+        "sha256": "bdbcb65eb6027f8d0c0812ab6975b5d53beee28d133be36d8cdf75593f57ca16"
+      }
+    },
+    {
+      "name": "copy-source-bank-v1.mjs",
+      "count": 8,
+      "forwardAndInverseRawExact": true,
+      "parent": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\copy-source-bank-v1.mjs",
+        "bytes": 13254,
+        "sha256": "9bbf125dcded1a1e808bc804b0211e9bb973a064c5bb4edaf4a481cfbbb60a64"
+      },
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\copy-source-bank-v1.mjs",
+        "bytes": 15794,
+        "sha256": "7fbbd202e3c564fbd267d20f4341db496dffe8ed08fac7b9cc39137fd770b687"
+      }
+    },
+    {
+      "name": "freeze-prepare-v1.mjs",
+      "count": 4,
+      "forwardAndInverseRawExact": true,
+      "parent": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\freeze-prepare-v1.mjs",
+        "bytes": 8821,
+        "sha256": "ae91d938ed4006828488a4cd08e227a84657fcdfaeade6be028b17b297457ae6"
+      },
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\freeze-prepare-v1.mjs",
+        "bytes": 8895,
+        "sha256": "ed3e6ddf07e85cad0db6e9d2a0c2ae3f69f20cf9e6ff2774763c7942601643db"
+      }
+    },
+    {
+      "name": "run-owned-prepare-v1.mjs",
+      "count": 13,
+      "forwardAndInverseRawExact": true,
+      "parent": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\run-owned-prepare-v1.mjs",
+        "bytes": 26491,
+        "sha256": "6cb4fe2ec2927242ea9ef4e6d301e3d7e7f3b57841cffd48eccb19abf06d1157"
+      },
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\run-owned-prepare-v1.mjs",
+        "bytes": 26463,
+        "sha256": "9e2b1d2a9801962b82ae3eb0b711e6ad88f5b39de36c175d596d939fbe2a448a"
+      }
+    },
+    {
+      "name": "owned-child-v1.mjs",
+      "count": 1,
+      "forwardAndInverseRawExact": true,
+      "parent": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\owned-child-v1.mjs",
+        "bytes": 2401,
+        "sha256": "08f7962808e5d66983766ef3ad74a284dace6ae2eeabe739a0a01445b05b08cc"
+      },
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\owned-child-v1.mjs",
+        "bytes": 2401,
+        "sha256": "b7808473d1c9f480c3f6464cae5fefb96c34ba937abf0e1d95c45410b8aa250b"
+      }
+    }
+  ],
+  "source11Files": 11,
+  "source11Bytes": 788794,
+  "priorControlFiles": 4,
+  "sourcePublicPins": 7,
+  "continuationGroups": 2,
+  "continuationPins": 8,
+  "historicalPreparedCount": 58,
+  "expectedThisRun": 42,
+  "sourceOriginalVerdictRetained": true,
+  "sourceFirst4InventoryReuse": null,
+  "sourcePreparedEligibilityInherited": false,
+  "rootReviewPassed": true,
+  "runtimeExecuted": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

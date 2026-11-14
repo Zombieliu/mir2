@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T11:46:53.576Z",
+  "state": "DRAFT_PUBLIC_ALLOWLIST_PENDING_FINAL_ROOT_EXECUTION_RECEIPTS",
+  "sourcePins": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\routing.rs",
+      "bytes": 1389827,
+      "sha256": "9135f2f3a019b04c1bb6ffe3717f730c65632df4e642702057bfbf7a699564de"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\routing\\tests\\personal_monster_projection_tests.rs",
+      "bytes": 30640,
+      "sha256": "fe507e961403679b3b92f23986dff3f53bb52a5c528fae251dd2f7ec546197f0"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime.rs",
+      "bytes": 749298,
+      "sha256": "d19840e87e6b2e718303d90d02a03e8c1c4941e069f0b168d9d253644950f3b6"
+    }
+  ],
+  "existingPublicInputs": [
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\capture-preimages-v1.mjs",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\capture-preimages-v1.mjs",
+      "bytes": 1396,
+      "sha256": "687cf329eab8d3355b26ea9dc570830c9f24b897c7b01cf528094ebb8db9ce9d"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\preimages\\routing.rs.txt",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\preimages\\routing.rs.txt",
+      "bytes": 1388304,
+      "sha256": "a0e3a19ad1184efd87a632118a98a65c975ca12d2adfda95b2f9e4a6138eff49"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\preimages\\personal_monster_projection_tests.rs.txt",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\preimages\\personal_monster_projection_tests.rs.txt",
+      "bytes": 12555,
+      "sha256": "dc5d0862501b588263f1a187628af6a1e00ec30a268d000e73feebb8aa42f722"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\preimages\\zone-runtime.rs.txt",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\preimages\\zone-runtime.rs.txt",
+      "bytes": 748912,
+      "sha256": "4f4eaa4519e745c0bd376f33ef76b86c88ad1c1015fd42bb53ef3a159ce320a8"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\preimages\\manifest-v1.json",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\preimages\\manifest-v1.json",
+      "bytes": 834,
+      "sha256": "b69eb52524f551464be60b3b3196087da8fc66b9c275584312e616abf9606192"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\personal-journey-regressions-v1.rs.txt",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\personal-journey-regressions-v1.rs.txt",
+      "bytes": 11004,
+      "sha256": "0194412e1cb40eb205b3a9356f20c68be61689b77ccf068f5633b6c9439dee8f"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\personal-monster-tests-red-v1.rs.txt",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\personal-monster-tests-red-v1.rs.txt",
+      "bytes": 23559,
+      "sha256": "60fbf7fe473ca07c9a75205f525acc2fa9098c7f96db41d046a080699ac89d8f"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\personal-monster-tests-red-v2.rs.txt",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\personal-monster-tests-red-v2.rs.txt",
+      "bytes": 23580,
+      "sha256": "fd2d1add5413c5e3e7d5527b0c8bc56bba847a4eb9dbc537cbcdbf9b7acb2306"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\personal-monster-tests-red-v3.rs.txt",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\personal-monster-tests-red-v3.rs.txt",
+      "bytes": 24063,
+      "sha256": "640669e25796e64e5c89aae262c2d11bc810638242d905826d24dd79c7c01c33"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\personal-monster-tests-green-v1.rs.txt",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\personal-monster-tests-green-v1.rs.txt",
+      "bytes": 29377,
+      "sha256": "2ba6f26830318530896bb59b3e21af120572c14ca90784441f2323cb5d738e95"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\personal-monster-tests-generic-red-v1.rs.txt",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\personal-monster-tests-generic-red-v1.rs.txt",
+      "bytes": 30644,
+      "sha256": "467d8fceec5b24413d6cb21a3a6f4d0afe2778408f8c1e1b614a235787a497cc"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\routing-green-v1.rs.txt",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\routing-green-v1.rs.txt",
+      "bytes": 1388904,
+      "sha256": "7b6d3bea242f16aedf123033436b394e7fdbfe17bf85504f12d8ffe28f91b583"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\capture-candidate-proof-v1.mjs",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\capture-candidate-proof-v1.mjs",
+      "bytes": 7696,
+      "sha256": "2cfd9ebfc70437dd99e5713c40c0194853c5c690592cdbb118494dd5e9708eb9"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\candidate-three-file-diff-v1.patch",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\candidate-three-file-diff-v1.patch",
+      "bytes": 24661,
+      "sha256": "ce07e87b3ad0bf1b9d7116ae4de9bd20b78242e7dc707a1816f36982348cc6f2"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\candidate-source-preservation-v1.json",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\candidate-source-preservation-v1.json",
+      "bytes": 4477,
+      "sha256": "5c87e0a9c704b0cce8a129b8e0077745485651dd493e5139bc52b432ced82b2f"
+    }
+  ],
+  "pendingExecutionInputs": [
+    "probe14-personal-journey-red-v1.log",
+    "probe14-personal-journey-red-v2.log",
+    "probe14-personal-journey-red-v3.log",
+    "probe14-personal-journey-green-v1.log",
+    "probe14-personal-journey-generic-red-v1.log",
+    "final focused9 actual log/receipt",
+    "adjacent195 actual log/receipt",
+    "rustfmt37 actual log/receipt",
+    "root-red-execution-receipt-v1.json"
+  ],
+  "historicalRunNotes": [
+    "red-v1 compiled then aborted on the first expected assertion while a state lock was held; it is not six target failures.",
+    "red-v2 had three target Remove failures and three entering-fixture setup failures.",
+    "red-v3 had six target failures after real personal diffs and native visibility/movement preconditions passed.",
+    "the initial green8 is pre-final because a subsequent genuine-Zone generic Remove test exposed overbroad filtering; that red and the original candidate source remain preserved."
+  ],
+  "neverCopy": [
+    "private account or credential data",
+    "account store",
+    "binary payloads",
+    "protocol raw samples or monitor histories",
+    "recording payloads"
+  ],
+  "archiveNotExecuted": true,
+  "capacityAccepted": false
+}

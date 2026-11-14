@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-25T06:29:48.501Z",
+  "method": "Actual historical09 verifyRelease barrier check; separately sealed compact12 verifyRelease read-only backend binding + new09 collectDriverInputs + new09 verifyFeasibilityGate invocation. No formal freeze was generated, no prepare entry point or service process was invoked.",
+  "command": [
+    "node",
+    "C:\\mir2-build\\p01-completion-20261024\\check-compact-formal09-failed12-gate-v1.mjs"
+  ],
+  "exitCode": 0,
+  "accepted": false,
+  "sourceBindingVerified": true,
+  "borrowedBackendBinding": {
+    "inputLib": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-compact-halo-feasibility-12\\input-lib.mjs",
+      "bytes": 14677,
+      "sha256": "cc4ff27c65fa1b325ddc518b6229914faaadd8f4ef1092d1e0d11900df31228d"
+    },
+    "launcherFreeze": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-compact-halo-feasibility-12\\launcher-source-frozen-v1.json",
+      "bytes": 14571,
+      "sha256": "dbb6962a08d9d970ccfb16d1c9e915ea950893af4cef24d9dd417a0c4cb876fb"
+    },
+    "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+    "driverSourceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+    "reason": "The historical formal09 verifyRelease is intentionally blocked and cannot be represented as a successful execution preflight."
+  },
+  "historicalBarrier": "Historical formal09 is blocked: required compact12 run1792908575146-40a66fff failed; no preparation, accounts or realm is authorized. Later probes cannot replace this gate.",
+  "actualError": {
+    "name": "Error",
+    "message": "Real compact probe12 run1792908575146-40a66fff has not passed; a probe remains ineligible for capacity acceptance"
+  },
+  "expectedFailedReportRejection": true,
+  "rejectedBecauseFailedProbeNotSourceSchema": true,
+  "report": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-compact-halo-feasibility-12\\reports\\1792908575146-40a66fff.report.json",
+    "bytes": 25325,
+    "sha256": "7325e575a4a0d219ffb7b24729509e90b14aba3b578942336135be6d8be889c8"
+  },
+  "runId": "1792908575146-40a66fff",
+  "reportOk": false,
+  "reportError": "Continuous activity window failed, regardless of the measured stage",
+  "reportPlayableCapacityAccepted": false,
+  "cleanup": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-compact-halo-feasibility-12\\realm-cleanup.json",
+    "bytes": 3175,
+    "sha256": "db01c973949c4b0ed43314eb7a9d94ac5a417eafdb2a2053dd60a9a906a194cc"
+  },
+  "allSevenCleanupChecksTrue": true,
+  "independentVerification": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe12-independent-verification-v1\\final-verification.json",
+    "bytes": 124145,
+    "sha256": "acbc8d169409420fece19f5376037ea6b61405a249f5e63434803dcae364755e"
+  },
+  "independentVerificationPassed": true,
+  "independentProbePassed": false,
+  "gate": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\verify-feasibility-gate.mjs",
+    "bytes": 18868,
+    "sha256": "0ab03879f5aee813fcacdea6b649563a0fedfd6f605cdce29910ccaef252f095"
+  },
+  "successOnlyCollectedEvidenceContract": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\verify-probe12-collected-evidence.mjs",
+    "bytes": 9501,
+    "sha256": "39bb17239df585f65579822bdc1e0114461aef0ff2a727658b4a6fb3e82185da"
+  },
+  "successOnlyCollectedEvidenceContractExecuted": false,
+  "before": [
+    {
+      "name": "launcher-source-frozen-v1.json",
+      "absent": true
+    },
+    {
+      "name": "private",
+      "absent": true
+    },
+    {
+      "name": "bin",
+      "absent": true
+    },
+    {
+      "name": "reports",
+      "absent": true
+    },
+    {
+      "name": "recordings",
+      "absent": true
+    },
+    {
+      "name": "preparation.lock",
+      "absent": true
+    },
+    {
+      "name": "execution.lock",
+      "absent": true
+    },
+    {
+      "name": "source-pins.json",
+      "absent": true
+    }
+  ],
+  "after": [
+    {
+      "name": "launcher-source-frozen-v1.json",
+      "absent": true
+    },
+    {
+      "name": "private",
+      "absent": true
+    },
+    {
+      "name": "bin",
+      "absent": true
+    },
+    {
+      "name": "reports",
+      "absent": true
+    },
+    {
+      "name": "recordings",
+      "absent": true
+    },
+    {
+      "name": "preparation.lock",
+      "absent": true
+    },
+    {
+      "name": "execution.lock",
+      "absent": true
+    },
+    {
+      "name": "source-pins.json",
+      "absent": true
+    }
+  ],
+  "permanentlyUnsealedHistoricalTemplate": true,
+  "formalPrepared": false,
+  "sourceConfigNotCreated": true,
+  "accountsProvisioned": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

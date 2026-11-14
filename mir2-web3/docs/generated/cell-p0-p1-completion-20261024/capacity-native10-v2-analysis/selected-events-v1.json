@@ -1,0 +1,1994 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792867932194-8f125fe4",
+  "raw": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-feasibility-05\\reports\\1792867932194-8f125fe4.samples.jsonl",
+    "bytes": 6526962,
+    "sha256": "0af342b13ce094882af03b8ff2b57b7adb1ab57c613fbb41ee0a765b09043d06"
+  },
+  "scope": "Bounded original public action/own-UserLocation/correction rows for actors4/5 around the two corrections, preserving raw line positions.",
+  "selectedAtRangeMs": [
+    1792868208330,
+    1792868219823
+  ],
+  "selectedEvents": [
+    {
+      "rawLine": 9266,
+      "type": "selfTransform",
+      "actor": "Ldd155c04",
+      "connection": 5,
+      "at": 1792868208791,
+      "sequence": 3528,
+      "monotonicMs": 289967.8465,
+      "phase": "soak",
+      "source": "UserLocation",
+      "mapFileName": "0",
+      "wire": {
+        "x": 246,
+        "y": 648,
+        "direction": "Down"
+      },
+      "before": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 246,
+          "y": 646
+        },
+        "direction": "Up"
+      },
+      "after": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 246,
+          "y": 648
+        },
+        "direction": "Down"
+      }
+    },
+    {
+      "rawLine": 9267,
+      "type": "selfTransform",
+      "actor": "Ldd155c05",
+      "connection": 6,
+      "at": 1792868208791,
+      "sequence": 3874,
+      "monotonicMs": 289967.9483,
+      "phase": "soak",
+      "source": "UserLocation",
+      "mapFileName": "0",
+      "wire": {
+        "x": 241,
+        "y": 638,
+        "direction": "Right"
+      },
+      "before": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 239,
+          "y": 638
+        },
+        "direction": "Right"
+      },
+      "after": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 241,
+          "y": 638
+        },
+        "direction": "Right"
+      }
+    },
+    {
+      "rawLine": 9269,
+      "type": "action",
+      "at": 1792868208820,
+      "phase": "soak",
+      "actor": "Ldd155c04",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 289952.1617,
+      "sentAtMs": 289965.5504,
+      "plannedTarget": {
+        "x": 246,
+        "y": 648
+      },
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "actual": {
+        "x": 246,
+        "y": 648
+      },
+      "direction": "Down",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 2.2960999999777414,
+      "plannedLatencyMs": 15.684799999988172
+    },
+    {
+      "rawLine": 9270,
+      "type": "action",
+      "at": 1792868208820,
+      "phase": "soak",
+      "actor": "Ldd155c05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 289962.19039999996,
+      "sentAtMs": 289967.5006,
+      "plannedTarget": {
+        "x": 241,
+        "y": 638
+      },
+      "hunting": "Scarecrow",
+      "chaseTargetId": 206602,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 260,
+        "y": 670
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 241,
+        "y": 638
+      },
+      "direction": "Right",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.44769999996060506,
+      "plannedLatencyMs": 5.757900000025984
+    },
+    {
+      "rawLine": 9293,
+      "type": "selfTransform",
+      "actor": "Ldd155c04",
+      "connection": 5,
+      "at": 1792868209535,
+      "sequence": 3534,
+      "monotonicMs": 290712.439,
+      "phase": "soak",
+      "source": "UserLocation",
+      "mapFileName": "0",
+      "wire": {
+        "x": 248,
+        "y": 648,
+        "direction": "Right"
+      },
+      "before": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 246,
+          "y": 648
+        },
+        "direction": "Down"
+      },
+      "after": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 248,
+          "y": 648
+        },
+        "direction": "Right"
+      }
+    },
+    {
+      "rawLine": 9294,
+      "type": "action",
+      "at": 1792868209566,
+      "phase": "soak",
+      "actor": "Ldd155c04",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 290702.1617,
+      "sentAtMs": 290711.8372,
+      "plannedTarget": {
+        "x": 248,
+        "y": 648
+      },
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "actual": {
+        "x": 248,
+        "y": 648
+      },
+      "direction": "Right",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.6018000000040047,
+      "plannedLatencyMs": 10.277300000016112
+    },
+    {
+      "rawLine": 9297,
+      "type": "selfTransform",
+      "actor": "Ldd155c05",
+      "connection": 6,
+      "at": 1792868209568,
+      "sequence": 3886,
+      "monotonicMs": 290744.8456,
+      "phase": "soak",
+      "source": "UserLocation",
+      "mapFileName": "0",
+      "wire": {
+        "x": 243,
+        "y": 640,
+        "direction": "DownRight"
+      },
+      "before": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 241,
+          "y": 638
+        },
+        "direction": "Right"
+      },
+      "after": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 243,
+          "y": 640
+        },
+        "direction": "DownRight"
+      }
+    },
+    {
+      "rawLine": 9298,
+      "type": "action",
+      "at": 1792868209597,
+      "phase": "soak",
+      "actor": "Ldd155c05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 290712.19039999996,
+      "sentAtMs": 290744.2716,
+      "plannedTarget": {
+        "x": 243,
+        "y": 640
+      },
+      "hunting": "Scarecrow",
+      "chaseTargetId": 206602,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 260,
+        "y": 670
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 243,
+        "y": 640
+      },
+      "direction": "DownRight",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.5740000000223517,
+      "plannedLatencyMs": 32.65520000003744
+    },
+    {
+      "rawLine": 9319,
+      "type": "selfTransform",
+      "actor": "Ldd155c04",
+      "connection": 5,
+      "at": 1792868210284,
+      "sequence": 3544,
+      "monotonicMs": 291460.6751,
+      "phase": "soak",
+      "source": "UserLocation",
+      "mapFileName": "0",
+      "wire": {
+        "x": 246,
+        "y": 648,
+        "direction": "Left"
+      },
+      "before": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 248,
+          "y": 648
+        },
+        "direction": "Right"
+      },
+      "after": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 246,
+          "y": 648
+        },
+        "direction": "Left"
+      }
+    },
+    {
+      "rawLine": 9321,
+      "type": "action",
+      "at": 1792868210313,
+      "phase": "soak",
+      "actor": "Ldd155c04",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 291452.1617,
+      "sentAtMs": 291458.7051,
+      "plannedTarget": {
+        "x": 246,
+        "y": 648
+      },
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "actual": {
+        "x": 246,
+        "y": 648
+      },
+      "direction": "Left",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 1.9699999999720603,
+      "plannedLatencyMs": 8.513399999996182
+    },
+    {
+      "rawLine": 9323,
+      "type": "selfTransform",
+      "actor": "Ldd155c05",
+      "connection": 6,
+      "at": 1792868210315,
+      "sequence": 3898,
+      "monotonicMs": 291492.1727,
+      "phase": "soak",
+      "source": "UserLocation",
+      "mapFileName": "0",
+      "wire": {
+        "x": 245,
+        "y": 640,
+        "direction": "Right"
+      },
+      "before": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 243,
+          "y": 640
+        },
+        "direction": "DownRight"
+      },
+      "after": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 245,
+          "y": 640
+        },
+        "direction": "Right"
+      }
+    },
+    {
+      "rawLine": 9324,
+      "type": "action",
+      "at": 1792868210344,
+      "phase": "soak",
+      "actor": "Ldd155c05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 291462.19039999996,
+      "sentAtMs": 291491.5169,
+      "plannedTarget": {
+        "x": 245,
+        "y": 640
+      },
+      "hunting": "Scarecrow",
+      "chaseTargetId": 206602,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 260,
+        "y": 670
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 245,
+        "y": 640
+      },
+      "direction": "Right",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.65580000000773,
+      "plannedLatencyMs": 29.98230000003241
+    },
+    {
+      "rawLine": 9344,
+      "type": "selfTransform",
+      "actor": "Ldd155c04",
+      "connection": 5,
+      "at": 1792868211029,
+      "sequence": 3554,
+      "monotonicMs": 292205.9303,
+      "phase": "soak",
+      "source": "UserLocation",
+      "mapFileName": "0",
+      "wire": {
+        "x": 248,
+        "y": 648,
+        "direction": "Right"
+      },
+      "before": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 246,
+          "y": 648
+        },
+        "direction": "Left"
+      },
+      "after": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 248,
+          "y": 648
+        },
+        "direction": "Right"
+      }
+    },
+    {
+      "rawLine": 9346,
+      "type": "action",
+      "at": 1792868211058,
+      "phase": "soak",
+      "actor": "Ldd155c04",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 292202.1617,
+      "sentAtMs": 292203.9704,
+      "plannedTarget": {
+        "x": 248,
+        "y": 648
+      },
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "actual": {
+        "x": 248,
+        "y": 648
+      },
+      "direction": "Right",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 1.959900000016205,
+      "plannedLatencyMs": 3.7686000000103377
+    },
+    {
+      "rawLine": 9348,
+      "type": "selfTransform",
+      "actor": "Ldd155c05",
+      "connection": 6,
+      "at": 1792868211061,
+      "sequence": 3908,
+      "monotonicMs": 292237.6456,
+      "phase": "soak",
+      "source": "UserLocation",
+      "mapFileName": "0",
+      "wire": {
+        "x": 246,
+        "y": 640,
+        "direction": "Right"
+      },
+      "before": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 245,
+          "y": 640
+        },
+        "direction": "Right"
+      },
+      "after": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 246,
+          "y": 640
+        },
+        "direction": "Right"
+      }
+    },
+    {
+      "rawLine": 9349,
+      "type": "action",
+      "at": 1792868211089,
+      "phase": "soak",
+      "actor": "Ldd155c05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 292212.19039999996,
+      "sentAtMs": 292237.2472,
+      "plannedTarget": {
+        "x": 246,
+        "y": 640
+      },
+      "hunting": "Scarecrow",
+      "chaseTargetId": 206602,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 260,
+        "y": 670
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 246,
+        "y": 640
+      },
+      "direction": "Right",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 0.3984000000054948,
+      "plannedLatencyMs": 25.455200000025798
+    },
+    {
+      "rawLine": 9374,
+      "type": "selfTransform",
+      "actor": "Ldd155c04",
+      "connection": 5,
+      "at": 1792868211806,
+      "sequence": 3565,
+      "monotonicMs": 292982.9328,
+      "phase": "soak",
+      "source": "UserLocation",
+      "mapFileName": "0",
+      "wire": {
+        "x": 248,
+        "y": 646,
+        "direction": "Up"
+      },
+      "before": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 248,
+          "y": 648
+        },
+        "direction": "Right"
+      },
+      "after": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 248,
+          "y": 646
+        },
+        "direction": "Up"
+      }
+    },
+    {
+      "rawLine": 9375,
+      "type": "selfTransform",
+      "actor": "Ldd155c05",
+      "connection": 6,
+      "at": 1792868211806,
+      "sequence": 3912,
+      "monotonicMs": 292983.2982,
+      "phase": "soak",
+      "source": "UserLocation",
+      "mapFileName": "0",
+      "wire": {
+        "x": 248,
+        "y": 642,
+        "direction": "DownRight"
+      },
+      "before": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 246,
+          "y": 640
+        },
+        "direction": "Right"
+      },
+      "after": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 248,
+          "y": 642
+        },
+        "direction": "DownRight"
+      }
+    },
+    {
+      "rawLine": 9376,
+      "type": "action",
+      "at": 1792868211836,
+      "phase": "soak",
+      "actor": "Ldd155c04",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 292952.1617,
+      "sentAtMs": 292981.3555,
+      "plannedTarget": {
+        "x": 248,
+        "y": 646
+      },
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "actual": {
+        "x": 248,
+        "y": 646
+      },
+      "direction": "Up",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 1.5773000000044703,
+      "plannedLatencyMs": 30.771100000012666
+    },
+    {
+      "rawLine": 9377,
+      "type": "action",
+      "at": 1792868211836,
+      "phase": "soak",
+      "actor": "Ldd155c05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 292962.19039999996,
+      "sentAtMs": 292982.7235,
+      "plannedTarget": {
+        "x": 248,
+        "y": 642
+      },
+      "hunting": "Scarecrow",
+      "chaseTargetId": 206602,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 260,
+        "y": 670
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 248,
+        "y": 642
+      },
+      "direction": "DownRight",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.5746999999973923,
+      "plannedLatencyMs": 21.10780000005616
+    },
+    {
+      "rawLine": 9397,
+      "type": "action",
+      "at": 1792868212489,
+      "phase": "soak",
+      "actor": "Ldd155c04",
+      "kind": "rtt",
+      "status": "success",
+      "latencyMs": 0.28379999997559935
+    },
+    {
+      "rawLine": 9400,
+      "type": "selfTransform",
+      "actor": "Ldd155c04",
+      "connection": 5,
+      "at": 1792868212554,
+      "sequence": 3572,
+      "monotonicMs": 293730.6659,
+      "phase": "soak",
+      "source": "UserLocation",
+      "mapFileName": "0",
+      "wire": {
+        "x": 248,
+        "y": 648,
+        "direction": "Down"
+      },
+      "before": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 248,
+          "y": 646
+        },
+        "direction": "Up"
+      },
+      "after": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 248,
+          "y": 648
+        },
+        "direction": "Down"
+      }
+    },
+    {
+      "rawLine": 9401,
+      "type": "selfTransform",
+      "actor": "Ldd155c05",
+      "connection": 6,
+      "at": 1792868212555,
+      "sequence": 3924,
+      "monotonicMs": 293731.5326,
+      "phase": "soak",
+      "source": "UserLocation",
+      "mapFileName": "0",
+      "wire": {
+        "x": 248,
+        "y": 644,
+        "direction": "Down"
+      },
+      "before": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 248,
+          "y": 642
+        },
+        "direction": "DownRight"
+      },
+      "after": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 248,
+          "y": 644
+        },
+        "direction": "Down"
+      }
+    },
+    {
+      "rawLine": 9402,
+      "type": "action",
+      "at": 1792868212583,
+      "phase": "soak",
+      "actor": "Ldd155c04",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 293702.1617,
+      "sentAtMs": 293728.8225,
+      "plannedTarget": {
+        "x": 248,
+        "y": 648
+      },
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "actual": {
+        "x": 248,
+        "y": 648
+      },
+      "direction": "Down",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 1.8434000000124797,
+      "plannedLatencyMs": 28.504200000024866
+    },
+    {
+      "rawLine": 9404,
+      "type": "action",
+      "at": 1792868212583,
+      "phase": "soak",
+      "actor": "Ldd155c05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 293712.19039999996,
+      "sentAtMs": 293730.4244,
+      "plannedTarget": {
+        "x": 248,
+        "y": 644
+      },
+      "hunting": "Scarecrow",
+      "chaseTargetId": 206602,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 260,
+        "y": 670
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 248,
+        "y": 644
+      },
+      "direction": "Down",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 1.1081999999587424,
+      "plannedLatencyMs": 19.34220000001369
+    },
+    {
+      "rawLine": 9425,
+      "type": "selfTransform",
+      "actor": "Ldd155c04",
+      "connection": 5,
+      "at": 1792868213300,
+      "sequence": 3577,
+      "monotonicMs": 294477.4638,
+      "phase": "soak",
+      "source": "UserLocation",
+      "mapFileName": "0",
+      "wire": {
+        "x": 248,
+        "y": 646,
+        "direction": "Up"
+      },
+      "before": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 248,
+          "y": 648
+        },
+        "direction": "Down"
+      },
+      "after": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 248,
+          "y": 646
+        },
+        "direction": "Up"
+      }
+    },
+    {
+      "rawLine": 9426,
+      "type": "action",
+      "at": 1792868213329,
+      "phase": "soak",
+      "actor": "Ldd155c04",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 294452.1617,
+      "sentAtMs": 294475.7812,
+      "plannedTarget": {
+        "x": 248,
+        "y": 646
+      },
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "actual": {
+        "x": 248,
+        "y": 646
+      },
+      "direction": "Up",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 1.6826000000000931,
+      "plannedLatencyMs": 25.302100000029895
+    },
+    {
+      "rawLine": 9428,
+      "type": "movementCorrection",
+      "actor": "Ldd155c05",
+      "connection": 6,
+      "at": 1792868213330,
+      "monotonicMs": 294477.501,
+      "sequence": 3929,
+      "phase": "soak",
+      "kind": "run",
+      "mapFileName": "0",
+      "origin": {
+        "x": 248,
+        "y": 644
+      },
+      "first": {
+        "x": 248,
+        "y": 645
+      },
+      "target": {
+        "x": 248,
+        "y": 646
+      },
+      "actual": {
+        "x": 248,
+        "y": 644
+      },
+      "ownHp": 30,
+      "temporaryAvoidance": null,
+      "nearbyOccupants": [
+        {
+          "objectId": 50004,
+          "kind": "player",
+          "x": 248,
+          "y": 646,
+          "dead": false,
+          "hidden": false
+        },
+        {
+          "objectId": 206537,
+          "kind": "monster",
+          "x": 252,
+          "y": 647,
+          "dead": false,
+          "hidden": false
+        },
+        {
+          "objectId": 206602,
+          "kind": "monster",
+          "x": 247,
+          "y": 648,
+          "dead": false,
+          "hidden": false
+        },
+        {
+          "objectId": 206620,
+          "kind": "monster",
+          "x": 245,
+          "y": 640,
+          "dead": true,
+          "hidden": false
+        },
+        {
+          "objectId": 206614,
+          "kind": "monster",
+          "x": 245,
+          "y": 639,
+          "dead": true,
+          "hidden": false
+        },
+        {
+          "objectId": 206709,
+          "kind": "monster",
+          "x": 250,
+          "y": 638,
+          "dead": false,
+          "hidden": false
+        }
+      ],
+      "nearbyOccupantCount": 6,
+      "occupantsTruncated": false
+    },
+    {
+      "rawLine": 9429,
+      "type": "action",
+      "at": 1792868213330,
+      "phase": "soak",
+      "actor": "Ldd155c05",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 294462.19039999996,
+      "sentAtMs": 294477.1457,
+      "plannedTarget": {
+        "x": 248,
+        "y": 646
+      },
+      "hunting": "Scarecrow",
+      "chaseTargetId": 206602,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 260,
+        "y": 670
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 248,
+        "y": 644
+      },
+      "direction": "Down",
+      "movedCells": 0,
+      "status": "corrected",
+      "latencyMs": 0.3552999999956228,
+      "plannedLatencyMs": 15.31060000002617
+    },
+    {
+      "rawLine": 9453,
+      "type": "selfTransform",
+      "actor": "Ldd155c04",
+      "connection": 5,
+      "at": 1792868214052,
+      "sequence": 3581,
+      "monotonicMs": 295228.7264,
+      "phase": "soak",
+      "source": "UserLocation",
+      "mapFileName": "0",
+      "wire": {
+        "x": 246,
+        "y": 646,
+        "direction": "Left"
+      },
+      "before": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 248,
+          "y": 646
+        },
+        "direction": "Up"
+      },
+      "after": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 246,
+          "y": 646
+        },
+        "direction": "Left"
+      }
+    },
+    {
+      "rawLine": 9454,
+      "type": "selfTransform",
+      "actor": "Ldd155c05",
+      "connection": 6,
+      "at": 1792868214052,
+      "sequence": 3934,
+      "monotonicMs": 295228.9909,
+      "phase": "soak",
+      "source": "UserLocation",
+      "mapFileName": "0",
+      "wire": {
+        "x": 249,
+        "y": 645,
+        "direction": "DownRight"
+      },
+      "before": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 248,
+          "y": 644
+        },
+        "direction": "Down"
+      },
+      "after": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 249,
+          "y": 645
+        },
+        "direction": "DownRight"
+      }
+    },
+    {
+      "rawLine": 9455,
+      "type": "action",
+      "at": 1792868214076,
+      "phase": "soak",
+      "actor": "Ldd155c04",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 295202.1617,
+      "sentAtMs": 295221.7575,
+      "plannedTarget": {
+        "x": 246,
+        "y": 646
+      },
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "actual": {
+        "x": 246,
+        "y": 646
+      },
+      "direction": "Left",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 6.968899999978021,
+      "plannedLatencyMs": 26.56469999998808
+    },
+    {
+      "rawLine": 9457,
+      "type": "action",
+      "at": 1792868214076,
+      "phase": "soak",
+      "actor": "Ldd155c05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 295212.19039999996,
+      "sentAtMs": 295228.3623,
+      "plannedTarget": {
+        "x": 249,
+        "y": 645
+      },
+      "hunting": "Scarecrow",
+      "chaseTargetId": 206602,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 260,
+        "y": 670
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 249,
+        "y": 645
+      },
+      "direction": "DownRight",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 0.6285999999963678,
+      "plannedLatencyMs": 16.800500000012107
+    },
+    {
+      "rawLine": 9481,
+      "type": "selfTransform",
+      "actor": "Ldd155c04",
+      "connection": 5,
+      "at": 1792868214794,
+      "sequence": 3590,
+      "monotonicMs": 295970.7569,
+      "phase": "soak",
+      "source": "UserLocation",
+      "mapFileName": "0",
+      "wire": {
+        "x": 248,
+        "y": 646,
+        "direction": "Right"
+      },
+      "before": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 246,
+          "y": 646
+        },
+        "direction": "Left"
+      },
+      "after": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 248,
+          "y": 646
+        },
+        "direction": "Right"
+      }
+    },
+    {
+      "rawLine": 9482,
+      "type": "action",
+      "at": 1792868214823,
+      "phase": "soak",
+      "actor": "Ldd155c04",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 295952.1617,
+      "sentAtMs": 295968.6479,
+      "plannedTarget": {
+        "x": 248,
+        "y": 646
+      },
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "actual": {
+        "x": 248,
+        "y": 646
+      },
+      "direction": "Right",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 2.1089999999967404,
+      "plannedLatencyMs": 18.59519999998156
+    },
+    {
+      "rawLine": 9484,
+      "type": "movementCorrection",
+      "actor": "Ldd155c05",
+      "connection": 6,
+      "at": 1792868214823,
+      "monotonicMs": 295970.7002,
+      "sequence": 3938,
+      "phase": "soak",
+      "kind": "walk",
+      "mapFileName": "0",
+      "origin": {
+        "x": 249,
+        "y": 645
+      },
+      "first": {
+        "x": 248,
+        "y": 646
+      },
+      "target": {
+        "x": 248,
+        "y": 646
+      },
+      "actual": {
+        "x": 249,
+        "y": 645
+      },
+      "ownHp": 30,
+      "temporaryAvoidance": {
+        "x": 248,
+        "y": 646,
+        "ttlMs": 3000
+      },
+      "nearbyOccupants": [
+        {
+          "objectId": 50004,
+          "kind": "player",
+          "x": 248,
+          "y": 646,
+          "dead": false,
+          "hidden": false
+        },
+        {
+          "objectId": 206602,
+          "kind": "monster",
+          "x": 248,
+          "y": 647,
+          "dead": false,
+          "hidden": false
+        },
+        {
+          "objectId": 206537,
+          "kind": "monster",
+          "x": 252,
+          "y": 647,
+          "dead": false,
+          "hidden": false
+        },
+        {
+          "objectId": 206620,
+          "kind": "monster",
+          "x": 245,
+          "y": 640,
+          "dead": true,
+          "hidden": false
+        },
+        {
+          "objectId": 206614,
+          "kind": "monster",
+          "x": 245,
+          "y": 639,
+          "dead": true,
+          "hidden": false
+        }
+      ],
+      "nearbyOccupantCount": 5,
+      "occupantsTruncated": false
+    },
+    {
+      "rawLine": 9485,
+      "type": "action",
+      "at": 1792868214823,
+      "phase": "soak",
+      "actor": "Ldd155c05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 295962.19039999996,
+      "sentAtMs": 295970.2003,
+      "plannedTarget": {
+        "x": 248,
+        "y": 646
+      },
+      "hunting": "Scarecrow",
+      "chaseTargetId": 206602,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 260,
+        "y": 670
+      },
+      "initialCombatTransit": false,
+      "temporaryAvoidance": {
+        "x": 248,
+        "y": 646,
+        "ttlMs": 3000
+      },
+      "actual": {
+        "x": 249,
+        "y": 645
+      },
+      "direction": "DownRight",
+      "movedCells": 0,
+      "status": "corrected",
+      "latencyMs": 0.49989999999525025,
+      "plannedLatencyMs": 8.509800000058021
+    },
+    {
+      "rawLine": 9510,
+      "type": "selfTransform",
+      "actor": "Ldd155c04",
+      "connection": 5,
+      "at": 1792868215545,
+      "sequence": 3599,
+      "monotonicMs": 296722.347,
+      "phase": "soak",
+      "source": "UserLocation",
+      "mapFileName": "0",
+      "wire": {
+        "x": 246,
+        "y": 646,
+        "direction": "Left"
+      },
+      "before": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 248,
+          "y": 646
+        },
+        "direction": "Right"
+      },
+      "after": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 246,
+          "y": 646
+        },
+        "direction": "Left"
+      }
+    },
+    {
+      "rawLine": 9511,
+      "type": "selfTransform",
+      "actor": "Ldd155c05",
+      "connection": 6,
+      "at": 1792868215546,
+      "sequence": 3943,
+      "monotonicMs": 296722.8026,
+      "phase": "soak",
+      "source": "UserLocation",
+      "mapFileName": "0",
+      "wire": {
+        "x": 249,
+        "y": 646,
+        "direction": "Down"
+      },
+      "before": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 249,
+          "y": 645
+        },
+        "direction": "DownRight"
+      },
+      "after": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 249,
+          "y": 646
+        },
+        "direction": "Down"
+      }
+    },
+    {
+      "rawLine": 9513,
+      "type": "action",
+      "at": 1792868215558,
+      "phase": "soak",
+      "actor": "Ldd155c04",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 296702.1617,
+      "sentAtMs": 296715.3682,
+      "plannedTarget": {
+        "x": 246,
+        "y": 646
+      },
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "actual": {
+        "x": 246,
+        "y": 646
+      },
+      "direction": "Left",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 6.978799999982584,
+      "plannedLatencyMs": 20.18530000001192
+    },
+    {
+      "rawLine": 9515,
+      "type": "action",
+      "at": 1792868215569,
+      "phase": "soak",
+      "actor": "Ldd155c05",
+      "kind": "walk",
+      "plannedGameplay": true,
+      "scheduledAtMs": 296712.19039999996,
+      "sentAtMs": 296721.4238,
+      "plannedTarget": {
+        "x": 249,
+        "y": 646
+      },
+      "hunting": "Scarecrow",
+      "chaseTargetId": 206602,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 260,
+        "y": 670
+      },
+      "initialCombatTransit": false,
+      "actual": {
+        "x": 249,
+        "y": 646
+      },
+      "direction": "Down",
+      "movedCells": 1,
+      "status": "success",
+      "latencyMs": 1.3788000000058673,
+      "plannedLatencyMs": 10.612200000032317
+    },
+    {
+      "rawLine": 9537,
+      "type": "selfTransform",
+      "actor": "Ldd155c04",
+      "connection": 5,
+      "at": 1792868216285,
+      "sequence": 3609,
+      "monotonicMs": 297461.9843,
+      "phase": "soak",
+      "source": "UserLocation",
+      "mapFileName": "0",
+      "wire": {
+        "x": 248,
+        "y": 646,
+        "direction": "Right"
+      },
+      "before": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 246,
+          "y": 646
+        },
+        "direction": "Left"
+      },
+      "after": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 248,
+          "y": 646
+        },
+        "direction": "Right"
+      }
+    },
+    {
+      "rawLine": 9539,
+      "type": "action",
+      "at": 1792868216316,
+      "phase": "soak",
+      "actor": "Ldd155c04",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 297452.1617,
+      "sentAtMs": 297461.1666,
+      "plannedTarget": {
+        "x": 248,
+        "y": 646
+      },
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "actual": {
+        "x": 248,
+        "y": 646
+      },
+      "direction": "Right",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.8177000000141561,
+      "plannedLatencyMs": 9.822600000014063
+    },
+    {
+      "rawLine": 9542,
+      "type": "action",
+      "at": 1792868216347,
+      "phase": "soak",
+      "actor": "Ldd155c05",
+      "kind": "turn",
+      "plannedGameplay": true,
+      "scheduledAtMs": 297462.19039999996,
+      "sentAtMs": 297493.3277,
+      "hunting": "Scarecrow",
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 350,
+        "pacingKnown": true
+      },
+      "declaredHome": {
+        "x": 260,
+        "y": 670
+      },
+      "initialCombatTransit": false,
+      "status": "success",
+      "latencyMs": 0.45600000000558794,
+      "plannedLatencyMs": 31.593300000065938
+    },
+    {
+      "rawLine": 9555,
+      "type": "action",
+      "at": 1792868216658,
+      "phase": "soak",
+      "actor": "Ldd155c05",
+      "kind": "rtt",
+      "status": "success",
+      "latencyMs": 0.503000000026077
+    },
+    {
+      "rawLine": 9562,
+      "type": "selfTransform",
+      "actor": "Ldd155c04",
+      "connection": 5,
+      "at": 1792868217032,
+      "sequence": 3619,
+      "monotonicMs": 298209.1281,
+      "phase": "soak",
+      "source": "UserLocation",
+      "mapFileName": "0",
+      "wire": {
+        "x": 246,
+        "y": 646,
+        "direction": "Left"
+      },
+      "before": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 248,
+          "y": 646
+        },
+        "direction": "Right"
+      },
+      "after": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 246,
+          "y": 646
+        },
+        "direction": "Left"
+      }
+    },
+    {
+      "rawLine": 9564,
+      "type": "action",
+      "at": 1792868217062,
+      "phase": "soak",
+      "actor": "Ldd155c04",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 298202.1617,
+      "sentAtMs": 298208.4328,
+      "plannedTarget": {
+        "x": 246,
+        "y": 646
+      },
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "actual": {
+        "x": 246,
+        "y": 646
+      },
+      "direction": "Left",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.6952999999630265,
+      "plannedLatencyMs": 6.9663999999756925
+    },
+    {
+      "rawLine": 9570,
+      "type": "action",
+      "at": 1792868217187,
+      "phase": "soak",
+      "actor": "Ldd155c05",
+      "kind": "attack",
+      "plannedGameplay": true,
+      "scheduledAtMs": 298212.19039999996,
+      "sentAtMs": 298239.8947,
+      "targetId": 206602,
+      "hunting": "Scarecrow",
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 1408,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 1408,
+        "cooldownMs": 1358,
+        "pacingKnown": true,
+        "nativeAttackMs": 1358,
+        "zoneAttackFloorMs": 600,
+        "level": 3,
+        "attackSpeed": 0,
+        "statBlockPresent": true,
+        "statCount": 24,
+        "attackSpeedSource": "authoritative-sparse-zero"
+      },
+      "declaredHome": {
+        "x": 260,
+        "y": 670
+      },
+      "initialCombatTransit": false,
+      "targetPosition": {
+        "x": 248,
+        "y": 647
+      },
+      "attackResults": "v2",
+      "requestId": "104",
+      "attackRequestSent": true,
+      "attackResult": "launched",
+      "status": "success",
+      "latencyMs": 94.43670000002021,
+      "plannedLatencyMs": 122.14100000006147,
+      "damage": 4,
+      "sharedHealthVerified": true,
+      "healthPercent": 80
+    },
+    {
+      "rawLine": 9588,
+      "type": "selfTransform",
+      "actor": "Ldd155c04",
+      "connection": 5,
+      "at": 1792868217779,
+      "sequence": 3632,
+      "monotonicMs": 298956.0217,
+      "phase": "soak",
+      "source": "UserLocation",
+      "mapFileName": "0",
+      "wire": {
+        "x": 248,
+        "y": 646,
+        "direction": "Right"
+      },
+      "before": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 246,
+          "y": 646
+        },
+        "direction": "Left"
+      },
+      "after": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 248,
+          "y": 646
+        },
+        "direction": "Right"
+      }
+    },
+    {
+      "rawLine": 9590,
+      "type": "action",
+      "at": 1792868217809,
+      "phase": "soak",
+      "actor": "Ldd155c04",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 298952.1617,
+      "sentAtMs": 298955.3009,
+      "plannedTarget": {
+        "x": 248,
+        "y": 646
+      },
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "actual": {
+        "x": 248,
+        "y": 646
+      },
+      "direction": "Right",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.7208000000100583,
+      "plannedLatencyMs": 3.85999999998603
+    },
+    {
+      "rawLine": 9615,
+      "type": "selfTransform",
+      "actor": "Ldd155c04",
+      "connection": 5,
+      "at": 1792868218526,
+      "sequence": 3643,
+      "monotonicMs": 299703.4731,
+      "phase": "soak",
+      "source": "UserLocation",
+      "mapFileName": "0",
+      "wire": {
+        "x": 246,
+        "y": 646,
+        "direction": "Left"
+      },
+      "before": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 248,
+          "y": 646
+        },
+        "direction": "Right"
+      },
+      "after": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 246,
+          "y": 646
+        },
+        "direction": "Left"
+      }
+    },
+    {
+      "rawLine": 9617,
+      "type": "action",
+      "at": 1792868218556,
+      "phase": "soak",
+      "actor": "Ldd155c04",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 299702.1617,
+      "sentAtMs": 299702.652,
+      "plannedTarget": {
+        "x": 246,
+        "y": 646
+      },
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "actual": {
+        "x": 246,
+        "y": 646
+      },
+      "direction": "Left",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.8211000000010245,
+      "plannedLatencyMs": 1.3114000000059605
+    },
+    {
+      "rawLine": 9620,
+      "type": "action",
+      "at": 1792868218587,
+      "phase": "soak",
+      "actor": "Ldd155c05",
+      "kind": "attack",
+      "plannedGameplay": true,
+      "scheduledAtMs": 299620.19039999996,
+      "sentAtMs": 299640.4576,
+      "targetId": 206602,
+      "hunting": "Scarecrow",
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 1408,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 1408,
+        "cooldownMs": 1358,
+        "pacingKnown": true,
+        "nativeAttackMs": 1358,
+        "zoneAttackFloorMs": 600,
+        "level": 3,
+        "attackSpeed": 0,
+        "statBlockPresent": true,
+        "statCount": 24,
+        "attackSpeedSource": "authoritative-sparse-zero"
+      },
+      "declaredHome": {
+        "x": 260,
+        "y": 670
+      },
+      "initialCombatTransit": false,
+      "targetPosition": {
+        "x": 248,
+        "y": 647
+      },
+      "attackResults": "v2",
+      "requestId": "105",
+      "attackRequestSent": true,
+      "attackResult": "launched",
+      "status": "success",
+      "latencyMs": 96.85169999999925,
+      "plannedLatencyMs": 117.11890000005951,
+      "damage": 3,
+      "sharedHealthVerified": true,
+      "healthPercent": 65
+    },
+    {
+      "rawLine": 9645,
+      "type": "selfTransform",
+      "actor": "Ldd155c04",
+      "connection": 5,
+      "at": 1792868219304,
+      "sequence": 3654,
+      "monotonicMs": 300481.1893,
+      "phase": "soak",
+      "source": "UserLocation",
+      "mapFileName": "0",
+      "wire": {
+        "x": 248,
+        "y": 646,
+        "direction": "Right"
+      },
+      "before": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 246,
+          "y": 646
+        },
+        "direction": "Left"
+      },
+      "after": {
+        "playerObjectId": 1000,
+        "position": {
+          "x": 248,
+          "y": 646
+        },
+        "direction": "Right"
+      }
+    },
+    {
+      "rawLine": 9646,
+      "type": "action",
+      "at": 1792868219334,
+      "phase": "soak",
+      "actor": "Ldd155c04",
+      "kind": "run",
+      "plannedGameplay": true,
+      "scheduledAtMs": 300452.1617,
+      "sentAtMs": 300480.6139,
+      "plannedTarget": {
+        "x": 248,
+        "y": 646
+      },
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "cadence": {
+        "intervalMs": 750,
+        "cooldownMs": 600,
+        "pacingKnown": true
+      },
+      "actual": {
+        "x": 248,
+        "y": 646
+      },
+      "direction": "Right",
+      "movedCells": 2,
+      "status": "success",
+      "latencyMs": 0.5754000000306405,
+      "plannedLatencyMs": 29.02760000003036
+    }
+  ],
+  "precedingAttack": {
+    "rawLine": 9145,
+    "requestId": "103",
+    "endedAtWallMs": 1792868205273,
+    "target": {
+      "objectId": 206549,
+      "x": 237,
+      "y": 637,
+      "dead": false,
+      "hp": 6,
+      "maxHp": 25
+    },
+    "ownerUserLocations": [
+      {
+        "receiver": "owner",
+        "sequence": 3840,
+        "monotonicMs": 286341.1165,
+        "atMs": 1792868205164,
+        "packet": "UserLocation",
+        "payload": {
+          "x": 237,
+          "y": 638,
+          "direction": "Up"
+        }
+      }
+    ]
+  },
+  "nextAttack": {
+    "rawLine": 9571,
+    "requestId": "104",
+    "sentAtWallMs": 1792868217063,
+    "target": {
+      "objectId": 206602,
+      "x": 248,
+      "y": 647,
+      "dead": false,
+      "hp": 20,
+      "maxHp": 20
+    },
+    "outcome": "success"
+  },
+  "fighterRefreshOrLifecycleOverlap": []
+}

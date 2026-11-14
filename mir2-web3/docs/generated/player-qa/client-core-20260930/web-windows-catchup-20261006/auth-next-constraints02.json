@@ -1,0 +1,18 @@
+{
+  "kind": "Root current-phase constraints on read-only auth proposal",
+  "proposal": "auth-shared-plan01.json",
+  "status": "planned, no auth implementation or execution in this spouse round",
+  "authorization": "User goal authorizes Root code work and existing guarded builds; explorer no-build statements only concern its own read-only assignment.",
+  "verification": "Use pure Rust/native shell regressions, platform-web compilation, existing Node source/AST/bridge fixtures and strict TSC. Current phase forbids WASM Instance/instantiate/validate/API runtime tests and UI/HTTP/account requests; the proposed Node actual-WASM test must not be run.",
+  "security": "Root frontier reasoning leads and verifies. Keep Gateway authentication/rate limits; do not fallback to demo or raw account passkey login. Pre-auth lease uses physical socket/generation/form epoch/kind; close retires presentation but cannot erase an unresolved same-socket operation barrier or allow a stale response to settle a successor.",
+  "size": "Current Core 259539 B / hard limit262144; only2605 B headroom. Preserve caps; measure and optimize shared pure code rather than copying rules into JS or weakening production gates.",
+  "knownResultMismatches": [
+    "NewAccount: Page treats only result 8 as success and labels every other result disabled; Native distinguishes result 7 already-exists, other codes and absent result (Windows gateway 5756-5766).",
+    "ChangePassword: Page page.tsx:13918-13925 marks result 1 as success; Native maps result 6 as success and result 0-5/other distinctly at native_shell.rs:1418-1459. Gateway web serializer at web.rs:10025-10029 passes result through unchanged. This is a confirmed result-projection mismatch to resolve before claiming parity.",
+    "ChangePasswordBanned: Page logs the reason but omits expiryBinaryDatetime; Native displays optional expiry at native_shell.rs:1462-1474."
+  ],
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmInstantiated": false
+}

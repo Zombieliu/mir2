@@ -1,0 +1,59 @@
+{
+  "manifestPath": "D:/mir2-builds/forest-quest-driver-20261106/r16-playable-assets-v17.json",
+  "manifestSha256": "4c6837f63275261d78340213c51ebd6e9a03f3b020bdabd4108bb55e7953adb3",
+  "files": 23286,
+  "bytes": 285908524,
+  "validManifestAccepted": true,
+  "checks": [
+    {
+      "name": "baseManifest",
+      "rejected": true
+    },
+    {
+      "name": "oldFileHash",
+      "rejected": true
+    },
+    {
+      "name": "oldSourcePin",
+      "rejected": true
+    },
+    {
+      "name": "newSourcePin",
+      "rejected": true
+    },
+    {
+      "name": "missingCityFrame",
+      "rejected": true
+    },
+    {
+      "name": "missingSwordFrame",
+      "rejected": true
+    },
+    {
+      "name": "missingSkeletonFrame",
+      "rejected": true
+    },
+    {
+      "name": "missingMapFrame",
+      "rejected": true
+    },
+    {
+      "name": "extraScopeField",
+      "rejected": true
+    },
+    {
+      "name": "extraMap",
+      "rejected": true
+    },
+    {
+      "name": "extraSourcePin",
+      "rejected": true
+    },
+    {
+      "name": "legacyScopeUpgrade",
+      "rejected": true
+    }
+  ],
+  "failures": 0,
+  "physicalVerificationLog": "v17-assets-physical-verification.log"
+}

@@ -1,0 +1,2077 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792898022018-efb7a76a",
+  "pins": {
+    "raw": {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-halo-feasibility-10/reports/1792898022018-efb7a76a.samples.jsonl",
+      "bytes": 13028051,
+      "sha256": "79510b349b2f1c70092fcad4bbc5ed79b76f14a4ceb3811b02704ff11e786b68",
+      "rows": 21101
+    },
+    "report": {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-halo-feasibility-10/reports/1792898022018-efb7a76a.report.json",
+      "bytes": 189046,
+      "sha256": "cf8b864372f5c402aea8544c8a3987ffbcdca876b7ad978d47ab8d91ee56a48c"
+    },
+    "sourcePins": {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-halo-feasibility-10/source-pins.json",
+      "bytes": 40923,
+      "sha256": "f43e5327e06b5d5fd45bd4ff6354fe72cda0a5427f25ab09729b84c12dd6c7c4"
+    }
+  },
+  "scope": "Actual movement origins from the last own receipt before the send; inferred first straight step is not an A* expansion or complete dynamic-obstacle trace.",
+  "fromRequest": "82",
+  "toRequest": "83",
+  "sentGapMs": 49427.721699999995,
+  "successfulMoves": 62,
+  "scoutMoves": 15,
+  "chaseMoves": 47,
+  "moves": [
+    {
+      "line": 15315,
+      "at": 1792898607913,
+      "sentAtMs": 598231.0683,
+      "kind": "walk",
+      "origin": {
+        "x": 254,
+        "y": 670
+      },
+      "originEvidence": {
+        "rawLine": 14752,
+        "sequence": 4255,
+        "at": 1792898597274,
+        "monotonicMs": 587613.2461
+      },
+      "plannedTarget": {
+        "x": 254,
+        "y": 669
+      },
+      "actual": {
+        "x": 254,
+        "y": 669
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 254,
+        "y": 669
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "scouting": true,
+      "scoutHomeIndex": 2,
+      "movedCells": 1
+    },
+    {
+      "line": 15360,
+      "at": 1792898608664,
+      "sentAtMs": 598982.4962,
+      "kind": "run",
+      "origin": {
+        "x": 254,
+        "y": 669
+      },
+      "originEvidence": {
+        "rawLine": 15314,
+        "sequence": 4427,
+        "at": 1792898607897,
+        "monotonicMs": 598236.4668
+      },
+      "plannedTarget": {
+        "x": 254,
+        "y": 667
+      },
+      "actual": {
+        "x": 254,
+        "y": 667
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 254,
+        "y": 668
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "scouting": true,
+      "scoutHomeIndex": 2,
+      "movedCells": 2
+    },
+    {
+      "line": 15403,
+      "at": 1792898609408,
+      "sentAtMs": 599726.751,
+      "kind": "walk",
+      "origin": {
+        "x": 254,
+        "y": 667
+      },
+      "originEvidence": {
+        "rawLine": 15359,
+        "sequence": 4441,
+        "at": 1792898608645,
+        "monotonicMs": 598983.9091
+      },
+      "plannedTarget": {
+        "x": 254,
+        "y": 666
+      },
+      "actual": {
+        "x": 254,
+        "y": 666
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 254,
+        "y": 666
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "scouting": true,
+      "scoutHomeIndex": 2,
+      "movedCells": 1
+    },
+    {
+      "line": 15450,
+      "at": 1792898610172,
+      "sentAtMs": 600479.4146,
+      "kind": "run",
+      "origin": {
+        "x": 254,
+        "y": 666
+      },
+      "originEvidence": {
+        "rawLine": 15402,
+        "sequence": 4454,
+        "at": 1792898609389,
+        "monotonicMs": 599728.2328
+      },
+      "plannedTarget": {
+        "x": 252,
+        "y": 664
+      },
+      "actual": {
+        "x": 252,
+        "y": 664
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 253,
+        "y": 665
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "scouting": true,
+      "scoutHomeIndex": 2,
+      "movedCells": 2
+    },
+    {
+      "line": 15495,
+      "at": 1792898610899,
+      "sentAtMs": 601217.0728,
+      "kind": "walk",
+      "origin": {
+        "x": 252,
+        "y": 664
+      },
+      "originEvidence": {
+        "rawLine": 15448,
+        "sequence": 4470,
+        "at": 1792898610147,
+        "monotonicMs": 600486.343
+      },
+      "plannedTarget": {
+        "x": 252,
+        "y": 663
+      },
+      "actual": {
+        "x": 252,
+        "y": 663
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 252,
+        "y": 663
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206534,
+      "scouting": false,
+      "movedCells": 1
+    },
+    {
+      "line": 15530,
+      "at": 1792898611661,
+      "sentAtMs": 601966.8197,
+      "kind": "run",
+      "origin": {
+        "x": 252,
+        "y": 663
+      },
+      "originEvidence": {
+        "rawLine": 15494,
+        "sequence": 4483,
+        "at": 1792898610879,
+        "monotonicMs": 601217.9618
+      },
+      "plannedTarget": {
+        "x": 254,
+        "y": 663
+      },
+      "actual": {
+        "x": 254,
+        "y": 663
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 253,
+        "y": 663
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "scouting": true,
+      "scoutHomeIndex": 3,
+      "movedCells": 2
+    },
+    {
+      "line": 15569,
+      "at": 1792898612409,
+      "sentAtMs": 602713.3417,
+      "kind": "walk",
+      "origin": {
+        "x": 254,
+        "y": 663
+      },
+      "originEvidence": {
+        "rawLine": 15529,
+        "sequence": 4499,
+        "at": 1792898611629,
+        "monotonicMs": 601967.9929
+      },
+      "plannedTarget": {
+        "x": 255,
+        "y": 662
+      },
+      "actual": {
+        "x": 255,
+        "y": 662
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 255,
+        "y": 662
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "scouting": true,
+      "scoutHomeIndex": 3,
+      "movedCells": 1
+    },
+    {
+      "line": 15604,
+      "at": 1792898613185,
+      "sentAtMs": 603488.944,
+      "kind": "run",
+      "origin": {
+        "x": 255,
+        "y": 662
+      },
+      "originEvidence": {
+        "rawLine": 15565,
+        "sequence": 4512,
+        "at": 1792898612376,
+        "monotonicMs": 602715.2217
+      },
+      "plannedTarget": {
+        "x": 255,
+        "y": 660
+      },
+      "actual": {
+        "x": 255,
+        "y": 660
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 255,
+        "y": 661
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "scouting": true,
+      "scoutHomeIndex": 4,
+      "movedCells": 2
+    },
+    {
+      "line": 15648,
+      "at": 1792898613890,
+      "sentAtMs": 604208.1537,
+      "kind": "run",
+      "origin": {
+        "x": 255,
+        "y": 660
+      },
+      "originEvidence": {
+        "rawLine": 15603,
+        "sequence": 4524,
+        "at": 1792898613151,
+        "monotonicMs": 603490.0592
+      },
+      "plannedTarget": {
+        "x": 255,
+        "y": 658
+      },
+      "actual": {
+        "x": 255,
+        "y": 658
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 255,
+        "y": 659
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "scouting": true,
+      "scoutHomeIndex": 4,
+      "movedCells": 2
+    },
+    {
+      "line": 15689,
+      "at": 1792898614682,
+      "sentAtMs": 604985.9456,
+      "kind": "run",
+      "origin": {
+        "x": 255,
+        "y": 658
+      },
+      "originEvidence": {
+        "rawLine": 15647,
+        "sequence": 4540,
+        "at": 1792898613870,
+        "monotonicMs": 604208.8371
+      },
+      "plannedTarget": {
+        "x": 255,
+        "y": 656
+      },
+      "actual": {
+        "x": 255,
+        "y": 656
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 255,
+        "y": 657
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "scouting": true,
+      "scoutHomeIndex": 4,
+      "movedCells": 2
+    },
+    {
+      "line": 15738,
+      "at": 1792898615415,
+      "sentAtMs": 605733.8017,
+      "kind": "walk",
+      "origin": {
+        "x": 255,
+        "y": 656
+      },
+      "originEvidence": {
+        "rawLine": 15688,
+        "sequence": 4550,
+        "at": 1792898614648,
+        "monotonicMs": 604987.1426
+      },
+      "plannedTarget": {
+        "x": 255,
+        "y": 655
+      },
+      "actual": {
+        "x": 255,
+        "y": 655
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 255,
+        "y": 655
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "scouting": true,
+      "scoutHomeIndex": 4,
+      "movedCells": 1
+    },
+    {
+      "line": 15782,
+      "at": 1792898616164,
+      "sentAtMs": 606482.1016,
+      "kind": "run",
+      "origin": {
+        "x": 255,
+        "y": 655
+      },
+      "originEvidence": {
+        "rawLine": 15737,
+        "sequence": 4561,
+        "at": 1792898615396,
+        "monotonicMs": 605735.083
+      },
+      "plannedTarget": {
+        "x": 253,
+        "y": 653
+      },
+      "actual": {
+        "x": 253,
+        "y": 653
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 254,
+        "y": 654
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "scouting": true,
+      "scoutHomeIndex": 4,
+      "movedCells": 2
+    },
+    {
+      "line": 15833,
+      "at": 1792898616918,
+      "sentAtMs": 607235.9116,
+      "kind": "walk",
+      "origin": {
+        "x": 253,
+        "y": 653
+      },
+      "originEvidence": {
+        "rawLine": 15779,
+        "sequence": 4574,
+        "at": 1792898616144,
+        "monotonicMs": 606482.8585
+      },
+      "plannedTarget": {
+        "x": 252,
+        "y": 652
+      },
+      "actual": {
+        "x": 252,
+        "y": 652
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 252,
+        "y": 652
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "scouting": true,
+      "scoutHomeIndex": 4,
+      "movedCells": 1
+    },
+    {
+      "line": 15874,
+      "at": 1792898617661,
+      "sentAtMs": 607979.0595,
+      "kind": "run",
+      "origin": {
+        "x": 252,
+        "y": 652
+      },
+      "originEvidence": {
+        "rawLine": 15830,
+        "sequence": 4609,
+        "at": 1792898616898,
+        "monotonicMs": 607237.0831
+      },
+      "plannedTarget": {
+        "x": 254,
+        "y": 652
+      },
+      "actual": {
+        "x": 254,
+        "y": 652
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 253,
+        "y": 652
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "scouting": true,
+      "scoutHomeIndex": 5,
+      "movedCells": 2
+    },
+    {
+      "line": 15922,
+      "at": 1792898618411,
+      "sentAtMs": 608729.5558,
+      "kind": "run",
+      "origin": {
+        "x": 254,
+        "y": 652
+      },
+      "originEvidence": {
+        "rawLine": 15873,
+        "sequence": 4620,
+        "at": 1792898617641,
+        "monotonicMs": 607980.0968
+      },
+      "plannedTarget": {
+        "x": 256,
+        "y": 652
+      },
+      "actual": {
+        "x": 256,
+        "y": 652
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 255,
+        "y": 652
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "scouting": true,
+      "scoutHomeIndex": 5,
+      "movedCells": 2
+    },
+    {
+      "line": 15998,
+      "at": 1792898619904,
+      "sentAtMs": 610223.5408,
+      "kind": "walk",
+      "origin": {
+        "x": 256,
+        "y": 652
+      },
+      "originEvidence": {
+        "rawLine": 15921,
+        "sequence": 4631,
+        "at": 1792898618391,
+        "monotonicMs": 608730.724
+      },
+      "plannedTarget": {
+        "x": 257,
+        "y": 652
+      },
+      "actual": {
+        "x": 257,
+        "y": 652
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 257,
+        "y": 652
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "scouting": true,
+      "scoutHomeIndex": 5,
+      "movedCells": 1
+    },
+    {
+      "line": 16037,
+      "at": 1792898620668,
+      "sentAtMs": 610973.5054,
+      "kind": "run",
+      "origin": {
+        "x": 257,
+        "y": 652
+      },
+      "originEvidence": {
+        "rawLine": 15997,
+        "sequence": 4648,
+        "at": 1792898619885,
+        "monotonicMs": 610224.1262
+      },
+      "plannedTarget": {
+        "x": 259,
+        "y": 652
+      },
+      "actual": {
+        "x": 259,
+        "y": 652
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 258,
+        "y": 652
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206528,
+      "scouting": false,
+      "movedCells": 2
+    },
+    {
+      "line": 16077,
+      "at": 1792898621402,
+      "sentAtMs": 611711.0303,
+      "kind": "run",
+      "origin": {
+        "x": 259,
+        "y": 652
+      },
+      "originEvidence": {
+        "rawLine": 16036,
+        "sequence": 4657,
+        "at": 1792898620635,
+        "monotonicMs": 610974.5956
+      },
+      "plannedTarget": {
+        "x": 261,
+        "y": 652
+      },
+      "actual": {
+        "x": 261,
+        "y": 652
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 260,
+        "y": 652
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206528,
+      "scouting": false,
+      "movedCells": 2
+    },
+    {
+      "line": 16111,
+      "at": 1792898622149,
+      "sentAtMs": 612458.4919,
+      "kind": "run",
+      "origin": {
+        "x": 261,
+        "y": 652
+      },
+      "originEvidence": {
+        "rawLine": 16076,
+        "sequence": 4671,
+        "at": 1792898621372,
+        "monotonicMs": 611711.5446
+      },
+      "plannedTarget": {
+        "x": 263,
+        "y": 652
+      },
+      "actual": {
+        "x": 263,
+        "y": 652
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 262,
+        "y": 652
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206528,
+      "scouting": false,
+      "movedCells": 2
+    },
+    {
+      "line": 16155,
+      "at": 1792898622900,
+      "sentAtMs": 613208.9909,
+      "kind": "run",
+      "origin": {
+        "x": 263,
+        "y": 652
+      },
+      "originEvidence": {
+        "rawLine": 16110,
+        "sequence": 4678,
+        "at": 1792898622120,
+        "monotonicMs": 612458.9186
+      },
+      "plannedTarget": {
+        "x": 265,
+        "y": 652
+      },
+      "actual": {
+        "x": 265,
+        "y": 652
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 264,
+        "y": 652
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206528,
+      "scouting": false,
+      "movedCells": 2
+    },
+    {
+      "line": 16190,
+      "at": 1792898623644,
+      "sentAtMs": 613954.5229,
+      "kind": "run",
+      "origin": {
+        "x": 265,
+        "y": 652
+      },
+      "originEvidence": {
+        "rawLine": 16154,
+        "sequence": 4686,
+        "at": 1792898622870,
+        "monotonicMs": 613209.4839
+      },
+      "plannedTarget": {
+        "x": 267,
+        "y": 652
+      },
+      "actual": {
+        "x": 267,
+        "y": 652
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 266,
+        "y": 652
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206528,
+      "scouting": false,
+      "movedCells": 2
+    },
+    {
+      "line": 16230,
+      "at": 1792898624392,
+      "sentAtMs": 614701.2458,
+      "kind": "run",
+      "origin": {
+        "x": 267,
+        "y": 652
+      },
+      "originEvidence": {
+        "rawLine": 16189,
+        "sequence": 4694,
+        "at": 1792898623616,
+        "monotonicMs": 613955.1619
+      },
+      "plannedTarget": {
+        "x": 269,
+        "y": 652
+      },
+      "actual": {
+        "x": 269,
+        "y": 652
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 268,
+        "y": 652
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206528,
+      "scouting": false,
+      "movedCells": 2
+    },
+    {
+      "line": 16281,
+      "at": 1792898625141,
+      "sentAtMs": 615449.3136,
+      "kind": "walk",
+      "origin": {
+        "x": 269,
+        "y": 652
+      },
+      "originEvidence": {
+        "rawLine": 16226,
+        "sequence": 4712,
+        "at": 1792898624363,
+        "monotonicMs": 614701.9194
+      },
+      "plannedTarget": {
+        "x": 270,
+        "y": 652
+      },
+      "actual": {
+        "x": 270,
+        "y": 652
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 270,
+        "y": 652
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206528,
+      "scouting": false,
+      "movedCells": 1
+    },
+    {
+      "line": 16332,
+      "at": 1792898625890,
+      "sentAtMs": 616200.3966,
+      "kind": "run",
+      "origin": {
+        "x": 270,
+        "y": 652
+      },
+      "originEvidence": {
+        "rawLine": 16277,
+        "sequence": 4729,
+        "at": 1792898625111,
+        "monotonicMs": 615450.0309
+      },
+      "plannedTarget": {
+        "x": 272,
+        "y": 654
+      },
+      "actual": {
+        "x": 272,
+        "y": 654
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 271,
+        "y": 653
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206528,
+      "scouting": false,
+      "movedCells": 2
+    },
+    {
+      "line": 16382,
+      "at": 1792898626666,
+      "sentAtMs": 616975.7906,
+      "kind": "run",
+      "origin": {
+        "x": 272,
+        "y": 654
+      },
+      "originEvidence": {
+        "rawLine": 16322,
+        "sequence": 4741,
+        "at": 1792898625862,
+        "monotonicMs": 616201.2459
+      },
+      "plannedTarget": {
+        "x": 272,
+        "y": 656
+      },
+      "actual": {
+        "x": 272,
+        "y": 656
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 272,
+        "y": 655
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206513,
+      "scouting": false,
+      "movedCells": 2
+    },
+    {
+      "line": 16424,
+      "at": 1792898627417,
+      "sentAtMs": 617725.8727,
+      "kind": "run",
+      "origin": {
+        "x": 272,
+        "y": 656
+      },
+      "originEvidence": {
+        "rawLine": 16380,
+        "sequence": 4766,
+        "at": 1792898626637,
+        "monotonicMs": 616976.5774
+      },
+      "plannedTarget": {
+        "x": 272,
+        "y": 658
+      },
+      "actual": {
+        "x": 272,
+        "y": 658
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 272,
+        "y": 657
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206513,
+      "scouting": false,
+      "movedCells": 2
+    },
+    {
+      "line": 16462,
+      "at": 1792898628170,
+      "sentAtMs": 618477.967,
+      "kind": "walk",
+      "origin": {
+        "x": 272,
+        "y": 658
+      },
+      "originEvidence": {
+        "rawLine": 16423,
+        "sequence": 4777,
+        "at": 1792898627387,
+        "monotonicMs": 617726.3957
+      },
+      "plannedTarget": {
+        "x": 272,
+        "y": 659
+      },
+      "actual": {
+        "x": 272,
+        "y": 659
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 272,
+        "y": 659
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206513,
+      "scouting": false,
+      "movedCells": 1
+    },
+    {
+      "line": 16506,
+      "at": 1792898628916,
+      "sentAtMs": 619225.3858,
+      "kind": "run",
+      "origin": {
+        "x": 272,
+        "y": 659
+      },
+      "originEvidence": {
+        "rawLine": 16461,
+        "sequence": 4787,
+        "at": 1792898628139,
+        "monotonicMs": 618478.7868
+      },
+      "plannedTarget": {
+        "x": 274,
+        "y": 661
+      },
+      "actual": {
+        "x": 274,
+        "y": 661
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 273,
+        "y": 660
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206513,
+      "scouting": false,
+      "movedCells": 2
+    },
+    {
+      "line": 16551,
+      "at": 1792898629665,
+      "sentAtMs": 619975.3799,
+      "kind": "walk",
+      "origin": {
+        "x": 274,
+        "y": 661
+      },
+      "originEvidence": {
+        "rawLine": 16504,
+        "sequence": 4796,
+        "at": 1792898628887,
+        "monotonicMs": 619225.9945
+      },
+      "plannedTarget": {
+        "x": 275,
+        "y": 661
+      },
+      "actual": {
+        "x": 275,
+        "y": 661
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 275,
+        "y": 661
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206513,
+      "scouting": false,
+      "movedCells": 1
+    },
+    {
+      "line": 16602,
+      "at": 1792898630413,
+      "sentAtMs": 620722.1832,
+      "kind": "walk",
+      "origin": {
+        "x": 275,
+        "y": 661
+      },
+      "originEvidence": {
+        "rawLine": 16550,
+        "sequence": 4808,
+        "at": 1792898629637,
+        "monotonicMs": 619976.0386
+      },
+      "plannedTarget": {
+        "x": 274,
+        "y": 661
+      },
+      "actual": {
+        "x": 274,
+        "y": 661
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 274,
+        "y": 661
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206513,
+      "scouting": false,
+      "movedCells": 1
+    },
+    {
+      "line": 16641,
+      "at": 1792898631161,
+      "sentAtMs": 621470.0281,
+      "kind": "walk",
+      "origin": {
+        "x": 274,
+        "y": 661
+      },
+      "originEvidence": {
+        "rawLine": 16601,
+        "sequence": 4819,
+        "at": 1792898630383,
+        "monotonicMs": 620722.6747
+      },
+      "plannedTarget": {
+        "x": 275,
+        "y": 661
+      },
+      "actual": {
+        "x": 275,
+        "y": 661
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 275,
+        "y": 661
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206513,
+      "scouting": false,
+      "movedCells": 1
+    },
+    {
+      "line": 16678,
+      "at": 1792898631905,
+      "sentAtMs": 622214.9634,
+      "kind": "walk",
+      "origin": {
+        "x": 275,
+        "y": 661
+      },
+      "originEvidence": {
+        "rawLine": 16640,
+        "sequence": 4831,
+        "at": 1792898631131,
+        "monotonicMs": 621470.6081
+      },
+      "plannedTarget": {
+        "x": 274,
+        "y": 661
+      },
+      "actual": {
+        "x": 274,
+        "y": 661
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 274,
+        "y": 661
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206513,
+      "scouting": false,
+      "movedCells": 1
+    },
+    {
+      "line": 16716,
+      "at": 1792898632652,
+      "sentAtMs": 622962.1753,
+      "kind": "run",
+      "origin": {
+        "x": 274,
+        "y": 661
+      },
+      "originEvidence": {
+        "rawLine": 16676,
+        "sequence": 4843,
+        "at": 1792898631876,
+        "monotonicMs": 622215.5349
+      },
+      "plannedTarget": {
+        "x": 276,
+        "y": 661
+      },
+      "actual": {
+        "x": 276,
+        "y": 661
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 275,
+        "y": 661
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206704,
+      "scouting": false,
+      "movedCells": 2
+    },
+    {
+      "line": 16749,
+      "at": 1792898633397,
+      "sentAtMs": 623706.4183,
+      "kind": "run",
+      "origin": {
+        "x": 276,
+        "y": 661
+      },
+      "originEvidence": {
+        "rawLine": 16715,
+        "sequence": 4856,
+        "at": 1792898632624,
+        "monotonicMs": 622963.7294
+      },
+      "plannedTarget": {
+        "x": 278,
+        "y": 661
+      },
+      "actual": {
+        "x": 278,
+        "y": 661
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 277,
+        "y": 661
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206704,
+      "scouting": false,
+      "movedCells": 2
+    },
+    {
+      "line": 16788,
+      "at": 1792898634139,
+      "sentAtMs": 624449.155,
+      "kind": "walk",
+      "origin": {
+        "x": 278,
+        "y": 661
+      },
+      "originEvidence": {
+        "rawLine": 16748,
+        "sequence": 4870,
+        "at": 1792898633368,
+        "monotonicMs": 623706.9981
+      },
+      "plannedTarget": {
+        "x": 279,
+        "y": 661
+      },
+      "actual": {
+        "x": 279,
+        "y": 661
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 279,
+        "y": 661
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206704,
+      "scouting": false,
+      "movedCells": 1
+    },
+    {
+      "line": 16829,
+      "at": 1792898634888,
+      "sentAtMs": 625198.1378,
+      "kind": "run",
+      "origin": {
+        "x": 279,
+        "y": 661
+      },
+      "originEvidence": {
+        "rawLine": 16787,
+        "sequence": 4881,
+        "at": 1792898634110,
+        "monotonicMs": 624449.5662
+      },
+      "plannedTarget": {
+        "x": 281,
+        "y": 663
+      },
+      "actual": {
+        "x": 281,
+        "y": 663
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 280,
+        "y": 662
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206704,
+      "scouting": false,
+      "movedCells": 2
+    },
+    {
+      "line": 16864,
+      "at": 1792898635666,
+      "sentAtMs": 625982.4766,
+      "kind": "walk",
+      "origin": {
+        "x": 281,
+        "y": 663
+      },
+      "originEvidence": {
+        "rawLine": 16828,
+        "sequence": 4888,
+        "at": 1792898634860,
+        "monotonicMs": 625198.878
+      },
+      "plannedTarget": {
+        "x": 281,
+        "y": 662
+      },
+      "actual": {
+        "x": 281,
+        "y": 662
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 281,
+        "y": 662
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206704,
+      "scouting": false,
+      "movedCells": 1
+    },
+    {
+      "line": 16902,
+      "at": 1792898636415,
+      "sentAtMs": 626729.0456,
+      "kind": "walk",
+      "origin": {
+        "x": 281,
+        "y": 662
+      },
+      "originEvidence": {
+        "rawLine": 16863,
+        "sequence": 4896,
+        "at": 1792898635644,
+        "monotonicMs": 625983.0545
+      },
+      "plannedTarget": {
+        "x": 281,
+        "y": 663
+      },
+      "actual": {
+        "x": 281,
+        "y": 663
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 281,
+        "y": 663
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206704,
+      "scouting": false,
+      "movedCells": 1
+    },
+    {
+      "line": 16939,
+      "at": 1792898637164,
+      "sentAtMs": 627475.2094,
+      "kind": "walk",
+      "origin": {
+        "x": 281,
+        "y": 663
+      },
+      "originEvidence": {
+        "rawLine": 16901,
+        "sequence": 4902,
+        "at": 1792898636390,
+        "monotonicMs": 626729.5678
+      },
+      "plannedTarget": {
+        "x": 282,
+        "y": 663
+      },
+      "actual": {
+        "x": 282,
+        "y": 663
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 282,
+        "y": 663
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206704,
+      "scouting": false,
+      "movedCells": 1
+    },
+    {
+      "line": 16976,
+      "at": 1792898637913,
+      "sentAtMs": 628229.655,
+      "kind": "walk",
+      "origin": {
+        "x": 282,
+        "y": 663
+      },
+      "originEvidence": {
+        "rawLine": 16938,
+        "sequence": 4909,
+        "at": 1792898637136,
+        "monotonicMs": 627475.6697
+      },
+      "plannedTarget": {
+        "x": 283,
+        "y": 663
+      },
+      "actual": {
+        "x": 283,
+        "y": 663
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 283,
+        "y": 663
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206704,
+      "scouting": false,
+      "movedCells": 1
+    },
+    {
+      "line": 17024,
+      "at": 1792898638665,
+      "sentAtMs": 628984.5158,
+      "kind": "walk",
+      "origin": {
+        "x": 283,
+        "y": 663
+      },
+      "originEvidence": {
+        "rawLine": 16975,
+        "sequence": 4914,
+        "at": 1792898637892,
+        "monotonicMs": 628231.004
+      },
+      "plannedTarget": {
+        "x": 282,
+        "y": 663
+      },
+      "actual": {
+        "x": 282,
+        "y": 663
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 282,
+        "y": 663
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206704,
+      "scouting": false,
+      "movedCells": 1
+    },
+    {
+      "line": 17066,
+      "at": 1792898639412,
+      "sentAtMs": 629728.546,
+      "kind": "walk",
+      "origin": {
+        "x": 282,
+        "y": 663
+      },
+      "originEvidence": {
+        "rawLine": 17023,
+        "sequence": 4922,
+        "at": 1792898638647,
+        "monotonicMs": 628985.981
+      },
+      "plannedTarget": {
+        "x": 283,
+        "y": 663
+      },
+      "actual": {
+        "x": 283,
+        "y": 663
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 283,
+        "y": 663
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206704,
+      "scouting": false,
+      "movedCells": 1
+    },
+    {
+      "line": 17104,
+      "at": 1792898640153,
+      "sentAtMs": 630469.2275,
+      "kind": "walk",
+      "origin": {
+        "x": 283,
+        "y": 663
+      },
+      "originEvidence": {
+        "rawLine": 17065,
+        "sequence": 4928,
+        "at": 1792898639390,
+        "monotonicMs": 629729.0197
+      },
+      "plannedTarget": {
+        "x": 282,
+        "y": 663
+      },
+      "actual": {
+        "x": 282,
+        "y": 663
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 282,
+        "y": 663
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206704,
+      "scouting": false,
+      "movedCells": 1
+    },
+    {
+      "line": 17140,
+      "at": 1792898640906,
+      "sentAtMs": 631215.0394,
+      "kind": "walk",
+      "origin": {
+        "x": 282,
+        "y": 663
+      },
+      "originEvidence": {
+        "rawLine": 17102,
+        "sequence": 4936,
+        "at": 1792898640130,
+        "monotonicMs": 630469.7352
+      },
+      "plannedTarget": {
+        "x": 282,
+        "y": 664
+      },
+      "actual": {
+        "x": 282,
+        "y": 664
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 282,
+        "y": 664
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206507,
+      "scouting": false,
+      "movedCells": 1
+    },
+    {
+      "line": 17177,
+      "at": 1792898641653,
+      "sentAtMs": 631962.6021,
+      "kind": "walk",
+      "origin": {
+        "x": 282,
+        "y": 664
+      },
+      "originEvidence": {
+        "rawLine": 17139,
+        "sequence": 4943,
+        "at": 1792898640876,
+        "monotonicMs": 631215.6316
+      },
+      "plannedTarget": {
+        "x": 283,
+        "y": 665
+      },
+      "actual": {
+        "x": 283,
+        "y": 665
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 283,
+        "y": 665
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206507,
+      "scouting": false,
+      "movedCells": 1
+    },
+    {
+      "line": 17216,
+      "at": 1792898642403,
+      "sentAtMs": 632714.6319,
+      "kind": "walk",
+      "origin": {
+        "x": 283,
+        "y": 665
+      },
+      "originEvidence": {
+        "rawLine": 17176,
+        "sequence": 4951,
+        "at": 1792898641624,
+        "monotonicMs": 631963.3119
+      },
+      "plannedTarget": {
+        "x": 284,
+        "y": 665
+      },
+      "actual": {
+        "x": 284,
+        "y": 665
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 284,
+        "y": 665
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206507,
+      "scouting": false,
+      "movedCells": 1
+    },
+    {
+      "line": 17259,
+      "at": 1792898643149,
+      "sentAtMs": 633459.8316,
+      "kind": "walk",
+      "origin": {
+        "x": 284,
+        "y": 665
+      },
+      "originEvidence": {
+        "rawLine": 17215,
+        "sequence": 4958,
+        "at": 1792898642376,
+        "monotonicMs": 632715.1815
+      },
+      "plannedTarget": {
+        "x": 283,
+        "y": 665
+      },
+      "actual": {
+        "x": 283,
+        "y": 665
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 283,
+        "y": 665
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206507,
+      "scouting": false,
+      "movedCells": 1
+    },
+    {
+      "line": 17298,
+      "at": 1792898643891,
+      "sentAtMs": 634209.6559,
+      "kind": "walk",
+      "origin": {
+        "x": 283,
+        "y": 665
+      },
+      "originEvidence": {
+        "rawLine": 17257,
+        "sequence": 4966,
+        "at": 1792898643121,
+        "monotonicMs": 633460.648
+      },
+      "plannedTarget": {
+        "x": 284,
+        "y": 665
+      },
+      "actual": {
+        "x": 284,
+        "y": 665
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 284,
+        "y": 665
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206507,
+      "scouting": false,
+      "movedCells": 1
+    },
+    {
+      "line": 17347,
+      "at": 1792898644648,
+      "sentAtMs": 634958.9867,
+      "kind": "walk",
+      "origin": {
+        "x": 284,
+        "y": 665
+      },
+      "originEvidence": {
+        "rawLine": 17297,
+        "sequence": 4973,
+        "at": 1792898643889,
+        "monotonicMs": 634228.6253
+      },
+      "plannedTarget": {
+        "x": 283,
+        "y": 665
+      },
+      "actual": {
+        "x": 283,
+        "y": 665
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 283,
+        "y": 665
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206507,
+      "scouting": false,
+      "movedCells": 1
+    },
+    {
+      "line": 17389,
+      "at": 1792898645395,
+      "sentAtMs": 635705.856,
+      "kind": "walk",
+      "origin": {
+        "x": 283,
+        "y": 665
+      },
+      "originEvidence": {
+        "rawLine": 17343,
+        "sequence": 4981,
+        "at": 1792898644620,
+        "monotonicMs": 634959.6615
+      },
+      "plannedTarget": {
+        "x": 284,
+        "y": 665
+      },
+      "actual": {
+        "x": 284,
+        "y": 665
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 284,
+        "y": 665
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206715,
+      "scouting": false,
+      "movedCells": 1
+    },
+    {
+      "line": 17425,
+      "at": 1792898646149,
+      "sentAtMs": 636464.7455,
+      "kind": "walk",
+      "origin": {
+        "x": 284,
+        "y": 665
+      },
+      "originEvidence": {
+        "rawLine": 17388,
+        "sequence": 4991,
+        "at": 1792898645368,
+        "monotonicMs": 635707.1355
+      },
+      "plannedTarget": {
+        "x": 284,
+        "y": 666
+      },
+      "actual": {
+        "x": 284,
+        "y": 666
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 284,
+        "y": 666
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206715,
+      "scouting": false,
+      "movedCells": 1
+    },
+    {
+      "line": 17459,
+      "at": 1792898646896,
+      "sentAtMs": 637205.6029,
+      "kind": "walk",
+      "origin": {
+        "x": 284,
+        "y": 666
+      },
+      "originEvidence": {
+        "rawLine": 17424,
+        "sequence": 4997,
+        "at": 1792898646126,
+        "monotonicMs": 636465.3832
+      },
+      "plannedTarget": {
+        "x": 285,
+        "y": 665
+      },
+      "actual": {
+        "x": 285,
+        "y": 665
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 285,
+        "y": 665
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206715,
+      "scouting": false,
+      "movedCells": 1
+    },
+    {
+      "line": 17500,
+      "at": 1792898647641,
+      "sentAtMs": 637953.4577,
+      "kind": "walk",
+      "origin": {
+        "x": 285,
+        "y": 665
+      },
+      "originEvidence": {
+        "rawLine": 17458,
+        "sequence": 5004,
+        "at": 1792898646867,
+        "monotonicMs": 637206.4948
+      },
+      "plannedTarget": {
+        "x": 285,
+        "y": 666
+      },
+      "actual": {
+        "x": 285,
+        "y": 666
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 285,
+        "y": 666
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206715,
+      "scouting": false,
+      "movedCells": 1
+    },
+    {
+      "line": 17535,
+      "at": 1792898648392,
+      "sentAtMs": 638702.5934,
+      "kind": "walk",
+      "origin": {
+        "x": 285,
+        "y": 666
+      },
+      "originEvidence": {
+        "rawLine": 17499,
+        "sequence": 5013,
+        "at": 1792898647615,
+        "monotonicMs": 637953.9217
+      },
+      "plannedTarget": {
+        "x": 285,
+        "y": 665
+      },
+      "actual": {
+        "x": 285,
+        "y": 665
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 285,
+        "y": 665
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206715,
+      "scouting": false,
+      "movedCells": 1
+    },
+    {
+      "line": 17578,
+      "at": 1792898649140,
+      "sentAtMs": 639450.9202,
+      "kind": "run",
+      "origin": {
+        "x": 285,
+        "y": 665
+      },
+      "originEvidence": {
+        "rawLine": 17533,
+        "sequence": 5018,
+        "at": 1792898648364,
+        "monotonicMs": 638703.0237
+      },
+      "plannedTarget": {
+        "x": 283,
+        "y": 665
+      },
+      "actual": {
+        "x": 283,
+        "y": 665
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 284,
+        "y": 665
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206645,
+      "scouting": false,
+      "movedCells": 2
+    },
+    {
+      "line": 17660,
+      "at": 1792898650663,
+      "sentAtMs": 640972.128,
+      "kind": "walk",
+      "origin": {
+        "x": 283,
+        "y": 665
+      },
+      "originEvidence": {
+        "rawLine": 17576,
+        "sequence": 5025,
+        "at": 1792898649112,
+        "monotonicMs": 639451.6355
+      },
+      "plannedTarget": {
+        "x": 282,
+        "y": 665
+      },
+      "actual": {
+        "x": 282,
+        "y": 665
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 282,
+        "y": 665
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206645,
+      "scouting": false,
+      "movedCells": 1
+    },
+    {
+      "line": 17701,
+      "at": 1792898651411,
+      "sentAtMs": 641719.6988,
+      "kind": "run",
+      "origin": {
+        "x": 282,
+        "y": 665
+      },
+      "originEvidence": {
+        "rawLine": 17659,
+        "sequence": 5046,
+        "at": 1792898650633,
+        "monotonicMs": 640972.719
+      },
+      "plannedTarget": {
+        "x": 280,
+        "y": 665
+      },
+      "actual": {
+        "x": 280,
+        "y": 665
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 281,
+        "y": 665
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206645,
+      "scouting": false,
+      "movedCells": 2
+    },
+    {
+      "line": 17746,
+      "at": 1792898652160,
+      "sentAtMs": 642470.1622,
+      "kind": "run",
+      "origin": {
+        "x": 280,
+        "y": 665
+      },
+      "originEvidence": {
+        "rawLine": 17698,
+        "sequence": 5054,
+        "at": 1792898651381,
+        "monotonicMs": 641720.5958
+      },
+      "plannedTarget": {
+        "x": 278,
+        "y": 665
+      },
+      "actual": {
+        "x": 278,
+        "y": 665
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 279,
+        "y": 665
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206645,
+      "scouting": false,
+      "movedCells": 2
+    },
+    {
+      "line": 17781,
+      "at": 1792898652907,
+      "sentAtMs": 643217.9687,
+      "kind": "run",
+      "origin": {
+        "x": 278,
+        "y": 665
+      },
+      "originEvidence": {
+        "rawLine": 17745,
+        "sequence": 5061,
+        "at": 1792898652131,
+        "monotonicMs": 642470.6708
+      },
+      "plannedTarget": {
+        "x": 276,
+        "y": 665
+      },
+      "actual": {
+        "x": 276,
+        "y": 665
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 277,
+        "y": 665
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206645,
+      "scouting": false,
+      "movedCells": 2
+    },
+    {
+      "line": 17827,
+      "at": 1792898653655,
+      "sentAtMs": 643966.1721,
+      "kind": "run",
+      "origin": {
+        "x": 276,
+        "y": 665
+      },
+      "originEvidence": {
+        "rawLine": 17778,
+        "sequence": 5069,
+        "at": 1792898652879,
+        "monotonicMs": 643218.4973
+      },
+      "plannedTarget": {
+        "x": 274,
+        "y": 667
+      },
+      "actual": {
+        "x": 274,
+        "y": 667
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 275,
+        "y": 666
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206645,
+      "scouting": false,
+      "movedCells": 2
+    },
+    {
+      "line": 17867,
+      "at": 1792898654414,
+      "sentAtMs": 644722.4962,
+      "kind": "run",
+      "origin": {
+        "x": 274,
+        "y": 667
+      },
+      "originEvidence": {
+        "rawLine": 17825,
+        "sequence": 5081,
+        "at": 1792898653628,
+        "monotonicMs": 643966.8742
+      },
+      "plannedTarget": {
+        "x": 272,
+        "y": 669
+      },
+      "actual": {
+        "x": 272,
+        "y": 669
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 273,
+        "y": 668
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206645,
+      "scouting": false,
+      "movedCells": 2
+    },
+    {
+      "line": 17918,
+      "at": 1792898655160,
+      "sentAtMs": 645470.903,
+      "kind": "walk",
+      "origin": {
+        "x": 272,
+        "y": 669
+      },
+      "originEvidence": {
+        "rawLine": 17864,
+        "sequence": 5102,
+        "at": 1792898654384,
+        "monotonicMs": 644723.0047
+      },
+      "plannedTarget": {
+        "x": 271,
+        "y": 670
+      },
+      "actual": {
+        "x": 271,
+        "y": 670
+      },
+      "firstStraightStepInferredFromSuccess": {
+        "x": 271,
+        "y": 670
+      },
+      "firstStepIsAStarTrace": false,
+      "status": "success",
+      "chaseTargetId": 206645,
+      "scouting": false,
+      "movedCells": 1
+    }
+  ]
+}

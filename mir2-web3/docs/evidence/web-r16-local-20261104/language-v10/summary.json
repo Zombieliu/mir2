@@ -1,0 +1,223 @@
+{
+  "schema": "mir2.r16.language-delivery.v1",
+  "passed": true,
+  "origin": "http://127.0.0.1:19041",
+  "buildId": "zk9hlA8LYTLrEX-WIO7SK",
+  "branch": "codex/windows-player-journey",
+  "existingWorkPreserved": true,
+  "scopes": {
+    "tenLocaleLoginAndSettings": "browser-r3-ten-locale-scoped.json: named positive checks only; overall failed waiting for cold StartGame",
+    "russianNativeBagAndGroup": "browser-r4-ru-native-scoped.json: named positive checks only; overall failed before second companion UI",
+    "chineseAloAndLogout": "browser-r6-final.json: current steps, prior checks explicitly referenced",
+    "clearLoginGallery": "browser-r5-chinese-and-gallery.json"
+  },
+  "native": {
+    "localeOrder": [
+      "zh-CN",
+      "zh-TW",
+      "en",
+      "pt-BR",
+      "ru",
+      "hi",
+      "id",
+      "vi",
+      "th",
+      "ar"
+    ],
+    "keys": 9902,
+    "sourcePins": 20,
+    "slotExceptionsPreserved": 8,
+    "browserKeysPerLocale": 32,
+    "fontsAdded": 9,
+    "licensesAdded": 5
+  },
+  "nodeChecks": [
+    {
+      "suite": "language/auth/wallet/Quest",
+      "passed": 65,
+      "failed": 0
+    },
+    {
+      "suite": "PWA/input/social/companion",
+      "passed": 62,
+      "failed": 0
+    },
+    {
+      "suite": "bounded assets/fonts",
+      "passed": 19,
+      "failed": 0
+    }
+  ],
+  "release": {
+    "files": 29657,
+    "bytes": 920318539,
+    "manifestSha256": "7cb80da52a2445a71f0706157e60a23b21e71366544f769716c9c9c61a261e43",
+    "independentIntegrity": "package-integrity-proof.json",
+    "preparedBytes": 682352660,
+    "thinBudgetBytes": 377487360,
+    "thinBudgetPassed": false,
+    "fullLocalPackage": true,
+    "webJsCssRebuilt": true,
+    "wasmChanged": false,
+    "oldGatewayActorWalletNetworkModulesChanged": false
+  },
+  "alo": {
+    "sameArchive": true,
+    "sameResident": true,
+    "sameRealm": true,
+    "sameWorld": true,
+    "originalActorCharacter": true,
+    "policyVersion": 2,
+    "habitsEnabledCount": 3,
+    "resourcesKnown": true,
+    "gold": 10,
+    "hpPotionCount": 2,
+    "supplyCompleted": true,
+    "supplyReceiptKnown": true,
+    "supplyChargedGold": 40,
+    "supplyAcquiredQuantity": 1,
+    "supplyReturned": true,
+    "feedbackCount": 0,
+    "episodeCount": 20,
+    "originalRecordsUnchanged": true,
+    "modelCallCounterKnown": true,
+    "modelCallCounterUnchanged": true
+  },
+  "cleanup": {
+    "browserClosed": true,
+    "ordinaryLogout": true,
+    "chineseRestored": true
+  },
+  "qaMaskSafety": {
+    "currentRun": "r6",
+    "nodeOnlyRootSecretValuesPassedToBrowserSelectors": false,
+    "priorRunSafetyClaimInherited": false,
+    "earlierLocalQaSelectorMistakeDocumented": true
+  },
+  "fullNativeWasmTenLanguageClaim": false,
+  "globalParityClaim": false,
+  "humanAcceptanceClaim": false,
+  "publicDeployment": false,
+  "pins": [
+    {
+      "file": "build-source-pins.json",
+      "bytes": 3835,
+      "sha256": "f91764c5334689d2ae2342a29c45d253a8bf5a4eb9c2e699c8a3f2669c112047",
+      "source": "language-v10-build-source-pins.json"
+    },
+    {
+      "file": "package-integrity-proof.json",
+      "bytes": 49601,
+      "sha256": "4989c003c09bf23e15c001b82174d33145d13af33048ff7dcbe887dcda0612ce",
+      "source": "language-v10-package-integrity-proof.json"
+    },
+    {
+      "file": "runtime-preservation-proof.json",
+      "bytes": 833,
+      "sha256": "3dcc21c91754bc8f4cad1b5f1fa1f0ce7eb7e712326e48bce5c35f1f76b990f2",
+      "source": "language-v10-runtime-preservation-proof.json"
+    },
+    {
+      "file": "focused-tests.log",
+      "bytes": 19156,
+      "sha256": "8bd8dde260ab008a5f95f938d67388e82fdb871b52dc5551008be344f4628b3b",
+      "source": "language-v10-focused-tests-final.log"
+    },
+    {
+      "file": "adjacent-tests.log",
+      "bytes": 15510,
+      "sha256": "6d97a794d9a5324299f6e747e61cbf267ca7bd679ae335cc87ed9b0d9931e2a3",
+      "source": "language-v10-adjacent-tests.log"
+    },
+    {
+      "file": "production-build.log",
+      "bytes": 2588,
+      "sha256": "74adfb9b29878c5bb037af960ec2e43aa001718f63e3d3938395233e320969a0",
+      "source": "language-v10-production-build.log"
+    },
+    {
+      "file": "browser-r3-ten-locale-scoped.json",
+      "bytes": 9812,
+      "sha256": "19917973d27d8ad0f7d8d9f64365aa09a44cf22a71b97f0e97f9890764ea10bf",
+      "source": "language-v10-browser-r3/language-v10-browser-proof.json"
+    },
+    {
+      "file": "browser-r4-ru-native-scoped.json",
+      "bytes": 18481,
+      "sha256": "fb9412321b234a4dbaf1fe098564671b42e3ebd9c198c4f40d5da8b59b37bf94",
+      "source": "language-v10-browser-r4/language-v10-browser-proof.json"
+    },
+    {
+      "file": "browser-r5-chinese-and-gallery.json",
+      "bytes": 14422,
+      "sha256": "299a638be954f2314d07daef78398816cb072e941935f7ee149f75ce2ce2bfdd",
+      "source": "language-v10-browser-r5/language-v10-browser-proof.json"
+    },
+    {
+      "file": "browser-r6-final.json",
+      "bytes": 18038,
+      "sha256": "974bba5aaa48062d6070aab4d7bd4cf4e6c26782804fdf99bb2aa9229e8fa109",
+      "source": "language-v10-browser-r6/language-v10-browser-proof.json"
+    },
+    {
+      "file": "r6-executed-browser-smoke.mjs",
+      "bytes": 44812,
+      "sha256": "22de42e61cc5da4801d6e0b2e616a43b1fb5f26623a2f85b0675ff657a7cba1f",
+      "source": "language-v10-browser-r6/executed-language-v10-browser-smoke.mjs"
+    },
+    {
+      "file": "ten-language-menu.png",
+      "bytes": 1558756,
+      "sha256": "786b37772dc3e60c2fd0c8bff1eb80d52b0b4d343270f88b8c0c84bf5c59e5f5",
+      "source": "language-v10-browser-r5/06-clear-native-ten-language-menu.png"
+    },
+    {
+      "file": "browser-settings-zh-CN.png",
+      "bytes": 1493993,
+      "sha256": "3efeadb538e82b176c85a93acab4d6b4b6069b56162cb0e5f97f05dbcdd6b25d",
+      "source": "language-v10-browser-r5/07-clear-browser-settings-zh-CN.png"
+    },
+    {
+      "file": "browser-settings-hi.png",
+      "bytes": 1482666,
+      "sha256": "e3ae22c635af64f8a320a6da89b3753dcde554f938bb4681353ecb56b7229744",
+      "source": "language-v10-browser-r5/08-clear-browser-settings-hi.png"
+    },
+    {
+      "file": "browser-settings-ar.png",
+      "bytes": 1453286,
+      "sha256": "570a5aa4d534f61d4033f6c2c674755298f9a31d3a7b62fe8398a39e34497821",
+      "source": "language-v10-browser-r5/09-clear-browser-settings-ar.png"
+    },
+    {
+      "file": "native-bag-ru.png",
+      "bytes": 1319937,
+      "sha256": "a71f3a4f7091b11df18d3a00e923c0f848ad572d02443d31af09f4589b034713",
+      "source": "language-v10-browser-r4/04-native-bag-ru.png"
+    },
+    {
+      "file": "group-ru.png",
+      "bytes": 1387473,
+      "sha256": "ab7ebda52d9914433e2e02412140482f63d9d8f156c322c67735cd49ec929dce",
+      "source": "language-v10-browser-r4/05-group-ru.png"
+    },
+    {
+      "file": "alo-policy-zh-CN.png",
+      "bytes": 71226,
+      "sha256": "b8c441cf041362f48d40f28fc96decebf3de41076ad973de571baae73879c465",
+      "source": "language-v10-browser-r6/02-alo-policy-zh-CN.png"
+    },
+    {
+      "file": "alo-original-supply-zh-CN.png",
+      "bytes": 91650,
+      "sha256": "37ddc8a0a20d37ad0ffba7f4798e036abec207df29c68e020322c53dda5154ee",
+      "source": "language-v10-browser-r6/03-alo-original-supply-zh-CN.png"
+    },
+    {
+      "file": "alo-resources-zh-CN.png",
+      "bytes": 96160,
+      "sha256": "2c4f11917f1cc8ac04b164aa6b56972e870ab657e119a62cbbaa0e5f732f7abb",
+      "source": "language-v10-browser-r6/04-alo-resources-zh-CN.png"
+    }
+  ]
+}

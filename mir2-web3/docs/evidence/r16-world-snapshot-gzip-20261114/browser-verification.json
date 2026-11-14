@@ -1,0 +1,478 @@
+{
+  "schema": "mir2.r16.world-snapshot-gzip.full-browser.v1",
+  "sourceRevision": "199a294130f386a245e86d3c1d81f731d7d7277b",
+  "buildLabel": "40d1662f83a5-world-snapshot-gzip-candidate",
+  "buildId": "KQ7eN1Lo2uNQhIxqKTlt7",
+  "buildDist": ".next-world-snapshot-gzip-browser-r1",
+  "renderer": "bevy-0c553a754308e5b8",
+  "assetRelease": "20261108-r16-08ec86d5105c",
+  "localFullGamePassed": true,
+  "physicalBrowserSessions": 4,
+  "transport": {
+    "negotiatedFrames": 24,
+    "originalTextBytes": 1171080,
+    "compressedMessagePayloadBytes": 212715,
+    "reductionFraction": 0.8183599754073163,
+    "excludesWsTlsAndOtherTraffic": true,
+    "preNegotiationTextSnapshotCount": 4
+  },
+  "results": [
+    {
+      "runOrdinal": 4,
+      "className": "Warrior",
+      "gender": "male",
+      "mode": "compatibility",
+      "language": "en-US",
+      "passed": true,
+      "publicAuth": false,
+      "isolatedGateway": true,
+      "sessions": [
+        {
+          "nativeReadyWaitMs": 54578,
+          "prewarm": {
+            "requested": 113,
+            "ok": 113,
+            "failed": 0
+          },
+          "fonts": [
+            {
+              "name": "NotoSansTC.ttf",
+              "bytes": 11941968,
+              "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+            },
+            {
+              "name": "NotoSansCJKsc-Regular.otf",
+              "bytes": 16437364,
+              "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+            },
+            {
+              "name": "NotoSans-Regular.ttf",
+              "bytes": 621572,
+              "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+            },
+            {
+              "name": "NotoSansDevanagari-Regular.ttf",
+              "bytes": 243520,
+              "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+            },
+            {
+              "name": "NotoSansThai-Regular.ttf",
+              "bytes": 37780,
+              "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+            },
+            {
+              "name": "NotoSansArabic-Regular.ttf",
+              "bytes": 234892,
+              "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+            }
+          ],
+          "rightButtonGamePassed": true,
+          "questWindowPassed": true
+        },
+        {
+          "nativeReadyWaitMs": 1336,
+          "prewarm": {
+            "requested": 113,
+            "ok": 113,
+            "failed": 0
+          },
+          "fonts": [
+            {
+              "name": "NotoSansTC.ttf",
+              "bytes": 11941968,
+              "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+            },
+            {
+              "name": "NotoSansCJKsc-Regular.otf",
+              "bytes": 16437364,
+              "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+            },
+            {
+              "name": "NotoSans-Regular.ttf",
+              "bytes": 621572,
+              "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+            },
+            {
+              "name": "NotoSansDevanagari-Regular.ttf",
+              "bytes": 243520,
+              "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+            },
+            {
+              "name": "NotoSansThai-Regular.ttf",
+              "bytes": 37780,
+              "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+            },
+            {
+              "name": "NotoSansArabic-Regular.ttf",
+              "bytes": 234892,
+              "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+            }
+          ],
+          "rightButtonGamePassed": true,
+          "questWindowPassed": true
+        }
+      ],
+      "snapshots": [
+        {
+          "worldDeclared": true,
+          "worldSnapshots": 5,
+          "worldWireBytes": 44832,
+          "worldDecodedBytes": 242757,
+          "browserConsumption": {
+            "passed": true,
+            "version": 6,
+            "tick": 1,
+            "mapFileName": "0",
+            "entityCount": 31,
+            "rawIngressTickMatched": true
+          }
+        },
+        {
+          "worldDeclared": true,
+          "worldSnapshots": 7,
+          "worldWireBytes": 61506,
+          "worldDecodedBytes": 342775,
+          "browserConsumption": {
+            "passed": true,
+            "version": 6,
+            "tick": 1,
+            "mapFileName": "0",
+            "entityCount": 32,
+            "rawIngressTickMatched": true
+          }
+        }
+      ],
+      "catalog": [
+        {
+          "decodedEnvelopes": 529,
+          "counts": {
+            "NewItemInfo": 145,
+            "NewQuestInfo": 200,
+            "NewRecipeInfo": 79,
+            "GameShopInfo": 105
+          },
+          "binaryFrames": 10,
+          "messagePayloadBytes": 80368,
+          "decodedTextBytes": 633535
+        },
+        {
+          "decodedEnvelopes": 529,
+          "counts": {
+            "NewItemInfo": 145,
+            "NewQuestInfo": 200,
+            "NewRecipeInfo": 79,
+            "GameShopInfo": 105
+          },
+          "binaryFrames": 10,
+          "messagePayloadBytes": 80368,
+          "decodedTextBytes": 633535
+        }
+      ],
+      "preNegotiationTextSnapshots": [
+        [
+          {
+            "bytes": 51672,
+            "tick": 0,
+            "mapFileName": null
+          }
+        ],
+        [
+          {
+            "bytes": 51672,
+            "tick": 0,
+            "mapFileName": null
+          }
+        ]
+      ],
+      "navigation": {
+        "huntingZeroStepPassed": true,
+        "huntingTarget": {
+          "x": 270,
+          "y": 625
+        },
+        "destination": {
+          "x": 324,
+          "y": 291
+        },
+        "final": {
+          "x": 322,
+          "y": 293
+        },
+        "walkRunCommands": 189,
+        "movementWireSpanMs": 114186,
+        "firstAuthoritativeMovementAt": 1794650620285,
+        "collisionChunks": 9,
+        "collisionPeakConcurrent": 4,
+        "everyProgressWithinEightSecondGate": true,
+        "stoppedAtDestination": true
+      },
+      "earlyWalkAckMs": [
+        15,
+        21
+      ],
+      "workerRestartPassed": true,
+      "browserRestartPassed": true,
+      "coldAndWarmAuthoritySaved": true,
+      "fixtureUnchanged": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "controlledRecovery": {
+        "passed": true,
+        "initialFailures": 3,
+        "firstSuccessfulAttempt": 4,
+        "successfulBytes": 31452436,
+        "successfulSha256": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e"
+      },
+      "original8sAnd120sGatesUnchanged": true,
+      "screenshots": [
+        {
+          "path": "default-en-quest.png",
+          "bytes": 1349396,
+          "sha256": "267043a78590462cc6250115a7ffde254230cd913df452ef2d53480f8611af35"
+        },
+        {
+          "path": "default-en-vendor-arrival.png",
+          "bytes": 1397638,
+          "sha256": "8a025f113df6a5ccd9660411faea6e4bd8727c2086ba4512414404696c34f4ea"
+        }
+      ]
+    },
+    {
+      "runOrdinal": 5,
+      "className": "Warrior",
+      "gender": "female",
+      "mode": "webgl2",
+      "language": "zh-TW",
+      "passed": true,
+      "publicAuth": false,
+      "isolatedGateway": true,
+      "sessions": [
+        {
+          "nativeReadyWaitMs": 52239,
+          "prewarm": {
+            "requested": 113,
+            "ok": 113,
+            "failed": 0
+          },
+          "fonts": [
+            {
+              "name": "NotoSansTC.ttf",
+              "bytes": 11941968,
+              "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+            },
+            {
+              "name": "NotoSansCJKsc-Regular.otf",
+              "bytes": 16437364,
+              "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+            },
+            {
+              "name": "NotoSans-Regular.ttf",
+              "bytes": 621572,
+              "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+            },
+            {
+              "name": "NotoSansDevanagari-Regular.ttf",
+              "bytes": 243520,
+              "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+            },
+            {
+              "name": "NotoSansThai-Regular.ttf",
+              "bytes": 37780,
+              "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+            },
+            {
+              "name": "NotoSansArabic-Regular.ttf",
+              "bytes": 234892,
+              "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+            }
+          ],
+          "rightButtonGamePassed": true,
+          "questWindowPassed": true
+        },
+        {
+          "nativeReadyWaitMs": 1296,
+          "prewarm": {
+            "requested": 113,
+            "ok": 113,
+            "failed": 0
+          },
+          "fonts": [
+            {
+              "name": "NotoSansTC.ttf",
+              "bytes": 11941968,
+              "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+            },
+            {
+              "name": "NotoSansCJKsc-Regular.otf",
+              "bytes": 16437364,
+              "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+            },
+            {
+              "name": "NotoSans-Regular.ttf",
+              "bytes": 621572,
+              "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+            },
+            {
+              "name": "NotoSansDevanagari-Regular.ttf",
+              "bytes": 243520,
+              "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+            },
+            {
+              "name": "NotoSansThai-Regular.ttf",
+              "bytes": 37780,
+              "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+            },
+            {
+              "name": "NotoSansArabic-Regular.ttf",
+              "bytes": 234892,
+              "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+            }
+          ],
+          "rightButtonGamePassed": true,
+          "questWindowPassed": true
+        }
+      ],
+      "snapshots": [
+        {
+          "worldDeclared": true,
+          "worldSnapshots": 5,
+          "worldWireBytes": 44832,
+          "worldDecodedBytes": 242761,
+          "browserConsumption": {
+            "passed": true,
+            "version": 6,
+            "tick": 1,
+            "mapFileName": "0",
+            "entityCount": 31,
+            "rawIngressTickMatched": true
+          }
+        },
+        {
+          "worldDeclared": true,
+          "worldSnapshots": 7,
+          "worldWireBytes": 61545,
+          "worldDecodedBytes": 342787,
+          "browserConsumption": {
+            "passed": true,
+            "version": 6,
+            "tick": 1,
+            "mapFileName": "0",
+            "entityCount": 32,
+            "rawIngressTickMatched": true
+          }
+        }
+      ],
+      "catalog": [
+        {
+          "decodedEnvelopes": 529,
+          "counts": {
+            "NewItemInfo": 145,
+            "NewQuestInfo": 200,
+            "NewRecipeInfo": 79,
+            "GameShopInfo": 105
+          },
+          "binaryFrames": 10,
+          "messagePayloadBytes": 80375,
+          "decodedTextBytes": 633535
+        },
+        {
+          "decodedEnvelopes": 529,
+          "counts": {
+            "NewItemInfo": 145,
+            "NewQuestInfo": 200,
+            "NewRecipeInfo": 79,
+            "GameShopInfo": 105
+          },
+          "binaryFrames": 10,
+          "messagePayloadBytes": 80375,
+          "decodedTextBytes": 633535
+        }
+      ],
+      "preNegotiationTextSnapshots": [
+        [
+          {
+            "bytes": 51672,
+            "tick": 0,
+            "mapFileName": null
+          }
+        ],
+        [
+          {
+            "bytes": 51672,
+            "tick": 0,
+            "mapFileName": null
+          }
+        ]
+      ],
+      "navigation": {
+        "huntingZeroStepPassed": true,
+        "huntingTarget": {
+          "x": 270,
+          "y": 625
+        },
+        "destination": {
+          "x": 324,
+          "y": 291
+        },
+        "final": {
+          "x": 322,
+          "y": 293
+        },
+        "walkRunCommands": 189,
+        "movementWireSpanMs": 113936,
+        "firstAuthoritativeMovementAt": 1794650978031,
+        "collisionChunks": 9,
+        "collisionPeakConcurrent": 4,
+        "everyProgressWithinEightSecondGate": true,
+        "stoppedAtDestination": true
+      },
+      "earlyWalkAckMs": [
+        56,
+        22
+      ],
+      "workerRestartPassed": true,
+      "browserRestartPassed": true,
+      "coldAndWarmAuthoritySaved": true,
+      "fixtureUnchanged": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "controlledRecovery": {
+        "passed": true,
+        "initialFailures": 3,
+        "firstSuccessfulAttempt": 4,
+        "successfulBytes": 32378001,
+        "successfulSha256": "5f8b82ab48665cd20e8c45ce0da0f221a6919dfab07aca43fea7fd312f34c185"
+      },
+      "original8sAnd120sGatesUnchanged": true,
+      "screenshots": [
+        {
+          "path": "webgl2-tc-quest.png",
+          "bytes": 1350715,
+          "sha256": "e5180dc5f927b8a819fd87c6da7e0529c89fed950c1df784ca3bb72a37f14b62"
+        },
+        {
+          "path": "webgl2-tc-vendor-arrival.png",
+          "bytes": 1423361,
+          "sha256": "62331d508fbcf96b2441de6c6b1126373f7b63193297b70762f7875fcaf718cb"
+        }
+      ]
+    }
+  ],
+  "fullLegacyServerBrowserPassed": false,
+  "publicDeploymentPerformed": false,
+  "publicAuthOrColdLoadingOrAckLatencyFixedClaimed": false,
+  "threeClassesFreshOneToThirtyClaimed": false,
+  "wholeParityCandidateOrAccepted": false,
+  "retainedVisualGaps": [
+    "English screenshot retains Chinese attack-mode and gold-budget labels; full localization parity remains open."
+  ],
+  "rawInputsFile": "browser-inputs-manifest.json"
+}

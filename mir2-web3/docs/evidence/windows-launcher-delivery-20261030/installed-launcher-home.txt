@@ -1,0 +1,13 @@
+Window: "Numeron - Legend of Rebirth · 游戏更新", App: engine-604B046F90E6BCEA2EF2576A7BFA8BCECE57F0E383A2BC415EDC3A088A477CDE.exe.
+	0 窗口 Numeron - Legend of Rebirth · 游戏更新 Secondary Actions: Raise
+		1 文本 准备就绪 Secondary Actions: Raise ID: 103
+		2 文本 暂时无法检查更新，可稍后重试。 可直接启动目前版本，稍后再更新。 Secondary Actions: Raise ID: 106
+		3 文本 Secondary Actions: Raise ID: 107
+		4 按钮 退出 Secondary Actions: Raise ID: 101
+		5 按钮 开始游戏 Secondary Actions: Raise ID: 105
+		6 按钮 查看更新 Secondary Actions: Raise ID: 110
+		7 文本 目前安装版本 Secondary Actions: Raise ID: 112
+		8 文本 WN-CANDIDATE-20261029-unified-11 Secondary Actions: Raise ID: 111
+		9 按钮 最小化 Secondary Actions: Raise ID: 113
+
+The focused UI element is 0 窗口 Numeron - Legend of Rebirth · 游戏更新 Secondary Actions: Raise.

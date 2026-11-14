@@ -1,0 +1,493 @@
+{
+  "scope": "Exact production f905, default headless desktop Chrome, official mobile-size Testnet wallet, one signed login and one real walk",
+  "deployment": "dpl_4B5Xddi3VTE4jczh2BUxxoqGAWuY",
+  "revision": "f90543561677ac7ba432077c461f58e5d407e4d8",
+  "releaseControl": "c65bd916d3b4644e06c37c5334e0c097243d4108",
+  "rollback": "dpl_CTtGa2akJGg1tZtgVqC2BAWX9Z7w",
+  "stageRun": 42889037760,
+  "promotionRun": 42890332451,
+  "canaries": {
+    "candidate": {
+      "relay": "https://relay.dubhe.obelisk.build",
+      "wallet": "https://wallet.dubhe.obelisk.build",
+      "pending": true
+    },
+    "production": {
+      "relay": "https://relay.dubhe.obelisk.build",
+      "wallet": "https://wallet.dubhe.obelisk.build",
+      "pending": true
+    }
+  },
+  "assets": {
+    "scene": {
+      "path": "/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json",
+      "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+      "bytes": 458475
+    },
+    "floor": {
+      "path": "/bootstrap/r16-floor/e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d.json",
+      "sha256": "e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d",
+      "bytes": 439896
+    }
+  },
+  "browser": {
+    "passed": true,
+    "failure": null,
+    "realQr": true,
+    "oneLoginSignature": true,
+    "noUnexpectedWalletOperations": true,
+    "protocol": {
+      "gameSockets": 1,
+      "passkeyLogin": 1,
+      "loginSuccess": 1,
+      "newCharacter": 1,
+      "newCharacterSuccess": 1,
+      "startGame": 1,
+      "startGameResult": 4,
+      "walk": 1,
+      "logOut": 1,
+      "logOutSuccess": 1,
+      "unexpectedMutation": 0
+    },
+    "staticScene": true,
+    "firstPlayableAfterAckMs": 3296,
+    "packedPixelSamplePassed": true,
+    "firstPackedFrameAfterAckMs": 3894,
+    "firstPlayable": {
+      "packedFloor": 219,
+      "visibleFloor": 221,
+      "objects": 0,
+      "complexRegions": 24
+    },
+    "movement": {
+      "passed": true,
+      "from": {
+        "x": 288,
+        "y": 616
+      },
+      "to": {
+        "x": 289,
+        "y": 616,
+        "direction": "Right"
+      }
+    },
+    "afterWalk": {
+      "packedFloor": 219,
+      "visibleFloor": 221,
+      "objects": 0,
+      "complexRegions": 24
+    },
+    "runtimeAfterStartAckMs": 10902,
+    "logout": true,
+    "backToSelect": true
+  },
+  "packageRows": [
+    {
+      "path": "/bootstrap/r16-floor/e4977afa3640bec9d8043ae32d794f92385a309fb4fa68cf407fe575016ce90d.json",
+      "kind": "entry-floor",
+      "lane": "game-origin",
+      "queryless": true,
+      "requestMs": 43539,
+      "initiator": "script",
+      "priority": "High",
+      "bytes": 439896,
+      "redirected": false,
+      "status": 200,
+      "mime": "application/json",
+      "headersAfterMs": 1887,
+      "fromServiceWorker": false,
+      "fromDiskCache": false,
+      "protocol": "h2",
+      "cache": "DYNAMIC",
+      "vercelCache": "MISS",
+      "cors": "wildcard",
+      "lastDataAfterMs": 3821,
+      "finishAfterMs": 3821,
+      "wireBytes": 297507,
+      "afterLoginMs": 5,
+      "requestBeforeStartAckMs": 34042,
+      "completedBeforeStartAckMs": 30221
+    }
+  ],
+  "samples": [
+    {
+      "label": "first-playable",
+      "afterStartAckMs": 3300,
+      "afterLoginMs": 37347,
+      "pictureSha256": "5103787bdc9c5cef052acd7306819cee874459627e07a6d1251cffa07fe77118",
+      "decodedFloor": 221,
+      "visibleFloor": 221,
+      "packedFloor": 219,
+      "decodedObjects": 0,
+      "visibleObjects": 39,
+      "bevyOwnsMap": false,
+      "workerControlled": true,
+      "complexRegions": 24,
+      "floorRequests": {
+        "game-origin": {
+          "total": 1,
+          "distinct": 1,
+          "headers": 0,
+          "good": 0,
+          "failures": 0,
+          "non200": 0,
+          "pendingHeaders": 1,
+          "pendingBodies": 0
+        },
+        "release-cdn": {
+          "total": 0,
+          "distinct": 0,
+          "headers": 0,
+          "good": 0,
+          "failures": 0,
+          "non200": 0,
+          "pendingHeaders": 0,
+          "pendingBodies": 0
+        }
+      },
+      "objectsRequests": {
+        "game-origin": {
+          "total": 99,
+          "distinct": 99,
+          "headers": 0,
+          "good": 0,
+          "failures": 0,
+          "non200": 0,
+          "pendingHeaders": 99,
+          "pendingBodies": 0
+        },
+        "release-cdn": {
+          "total": 0,
+          "distinct": 0,
+          "headers": 0,
+          "good": 0,
+          "failures": 0,
+          "non200": 0,
+          "pendingHeaders": 0,
+          "pendingBodies": 0
+        }
+      },
+      "firstBodyRuntime": false
+    },
+    {
+      "label": "after-walk",
+      "afterStartAckMs": 3751,
+      "afterLoginMs": 37798,
+      "pictureSha256": "d6983b36d01bec0054d31e785afa388d0276ae07ca30d8456af19944cff43fd6",
+      "decodedFloor": 221,
+      "visibleFloor": 221,
+      "packedFloor": 219,
+      "decodedObjects": 0,
+      "visibleObjects": 39,
+      "bevyOwnsMap": false,
+      "workerControlled": true,
+      "complexRegions": 24,
+      "floorRequests": {
+        "game-origin": {
+          "total": 1,
+          "distinct": 1,
+          "headers": 0,
+          "good": 0,
+          "failures": 0,
+          "non200": 0,
+          "pendingHeaders": 1,
+          "pendingBodies": 0
+        },
+        "release-cdn": {
+          "total": 0,
+          "distinct": 0,
+          "headers": 0,
+          "good": 0,
+          "failures": 0,
+          "non200": 0,
+          "pendingHeaders": 0,
+          "pendingBodies": 0
+        }
+      },
+      "objectsRequests": {
+        "game-origin": {
+          "total": 104,
+          "distinct": 104,
+          "headers": 0,
+          "good": 0,
+          "failures": 0,
+          "non200": 0,
+          "pendingHeaders": 104,
+          "pendingBodies": 0
+        },
+        "release-cdn": {
+          "total": 0,
+          "distinct": 0,
+          "headers": 0,
+          "good": 0,
+          "failures": 0,
+          "non200": 0,
+          "pendingHeaders": 0,
+          "pendingBodies": 0
+        }
+      },
+      "firstBodyRuntime": false
+    },
+    {
+      "label": "first-painted-candidate",
+      "afterStartAckMs": 3894,
+      "afterLoginMs": 37941,
+      "pictureSha256": "5664fdcff2a0ee3cd27866d7fb4ef28d478418ddf8c4417ea57d25a9f22c2220",
+      "decodedFloor": 243,
+      "visibleFloor": 243,
+      "packedFloor": 239,
+      "decodedObjects": 0,
+      "visibleObjects": 40,
+      "bevyOwnsMap": false,
+      "workerControlled": true,
+      "complexRegions": 24,
+      "floorRequests": {
+        "game-origin": {
+          "total": 1,
+          "distinct": 1,
+          "headers": 0,
+          "good": 0,
+          "failures": 0,
+          "non200": 0,
+          "pendingHeaders": 1,
+          "pendingBodies": 0
+        },
+        "release-cdn": {
+          "total": 0,
+          "distinct": 0,
+          "headers": 0,
+          "good": 0,
+          "failures": 0,
+          "non200": 0,
+          "pendingHeaders": 0,
+          "pendingBodies": 0
+        }
+      },
+      "objectsRequests": {
+        "game-origin": {
+          "total": 104,
+          "distinct": 104,
+          "headers": 0,
+          "good": 0,
+          "failures": 0,
+          "non200": 0,
+          "pendingHeaders": 104,
+          "pendingBodies": 0
+        },
+        "release-cdn": {
+          "total": 0,
+          "distinct": 0,
+          "headers": 0,
+          "good": 0,
+          "failures": 0,
+          "non200": 0,
+          "pendingHeaders": 0,
+          "pendingBodies": 0
+        }
+      },
+      "firstBodyRuntime": false
+    },
+    {
+      "label": "post-move-6000",
+      "afterStartAckMs": 9938,
+      "afterLoginMs": 43985,
+      "pictureSha256": "4985a3125918e745486124f6d1d27b5c04f3a34169ca4ca1290c3d20a42183b1",
+      "decodedFloor": 243,
+      "visibleFloor": 243,
+      "packedFloor": 239,
+      "decodedObjects": 0,
+      "visibleObjects": 40,
+      "bevyOwnsMap": false,
+      "workerControlled": true,
+      "complexRegions": 24,
+      "floorRequests": {
+        "game-origin": {
+          "total": 1,
+          "distinct": 1,
+          "headers": 0,
+          "good": 0,
+          "failures": 0,
+          "non200": 0,
+          "pendingHeaders": 1,
+          "pendingBodies": 0
+        },
+        "release-cdn": {
+          "total": 0,
+          "distinct": 0,
+          "headers": 0,
+          "good": 0,
+          "failures": 0,
+          "non200": 0,
+          "pendingHeaders": 0,
+          "pendingBodies": 0
+        }
+      },
+      "objectsRequests": {
+        "game-origin": {
+          "total": 106,
+          "distinct": 106,
+          "headers": 0,
+          "good": 0,
+          "failures": 0,
+          "non200": 0,
+          "pendingHeaders": 106,
+          "pendingBodies": 0
+        },
+        "release-cdn": {
+          "total": 0,
+          "distinct": 0,
+          "headers": 0,
+          "good": 0,
+          "failures": 0,
+          "non200": 0,
+          "pendingHeaders": 0,
+          "pendingBodies": 0
+        }
+      },
+      "firstBodyRuntime": false
+    },
+    {
+      "label": "runtime-body-delivered",
+      "afterStartAckMs": 11404,
+      "afterLoginMs": 45451,
+      "pictureSha256": "25055be397e80036042fe7fc3888d35f38f7e73845996147e1170a87e135b0f1",
+      "decodedFloor": 243,
+      "visibleFloor": 243,
+      "packedFloor": 239,
+      "decodedObjects": 0,
+      "visibleObjects": 40,
+      "bevyOwnsMap": false,
+      "workerControlled": true,
+      "complexRegions": 24,
+      "floorRequests": {
+        "game-origin": {
+          "total": 1,
+          "distinct": 1,
+          "headers": 0,
+          "good": 0,
+          "failures": 0,
+          "non200": 0,
+          "pendingHeaders": 1,
+          "pendingBodies": 0
+        },
+        "release-cdn": {
+          "total": 0,
+          "distinct": 0,
+          "headers": 0,
+          "good": 0,
+          "failures": 0,
+          "non200": 0,
+          "pendingHeaders": 0,
+          "pendingBodies": 0
+        }
+      },
+      "objectsRequests": {
+        "game-origin": {
+          "total": 106,
+          "distinct": 106,
+          "headers": 0,
+          "good": 0,
+          "failures": 0,
+          "non200": 0,
+          "pendingHeaders": 106,
+          "pendingBodies": 0
+        },
+        "release-cdn": {
+          "total": 0,
+          "distinct": 0,
+          "headers": 0,
+          "good": 0,
+          "failures": 0,
+          "non200": 0,
+          "pendingHeaders": 0,
+          "pendingBodies": 0
+        }
+      },
+      "firstBodyRuntime": true
+    },
+    {
+      "label": "terrain-window-end",
+      "afterStartAckMs": 11995,
+      "afterLoginMs": 46042,
+      "pictureSha256": "25055be397e80036042fe7fc3888d35f38f7e73845996147e1170a87e135b0f1",
+      "decodedFloor": 243,
+      "visibleFloor": 243,
+      "packedFloor": 239,
+      "decodedObjects": 0,
+      "visibleObjects": 40,
+      "bevyOwnsMap": false,
+      "workerControlled": true,
+      "complexRegions": 24,
+      "floorRequests": {
+        "game-origin": {
+          "total": 1,
+          "distinct": 1,
+          "headers": 0,
+          "good": 0,
+          "failures": 0,
+          "non200": 0,
+          "pendingHeaders": 1,
+          "pendingBodies": 0
+        },
+        "release-cdn": {
+          "total": 0,
+          "distinct": 0,
+          "headers": 0,
+          "good": 0,
+          "failures": 0,
+          "non200": 0,
+          "pendingHeaders": 0,
+          "pendingBodies": 0
+        }
+      },
+      "objectsRequests": {
+        "game-origin": {
+          "total": 108,
+          "distinct": 108,
+          "headers": 0,
+          "good": 0,
+          "failures": 0,
+          "non200": 0,
+          "pendingHeaders": 108,
+          "pendingBodies": 0
+        },
+        "release-cdn": {
+          "total": 0,
+          "distinct": 0,
+          "headers": 0,
+          "good": 0,
+          "failures": 0,
+          "non200": 0,
+          "pendingHeaders": 0,
+          "pendingBodies": 0
+        }
+      },
+      "firstBodyRuntime": true
+    }
+  ],
+  "hashes": {
+    "stage": "6353d6599152991bb340d65127124fd31f641e4c626dd135b4224c558863a2e6",
+    "promotion": "0888a6e70a13c55e5f3102f90600d87184f3b7f2ee88d2566939b8118d586d77",
+    "browser": "5d979104a95b40dcec33cb3c6407a20f51a4456d5355b5f1108d97a800cecbe5",
+    "trace": "3d6a54e4048a174da63ee51c4fc4af1b45b517070d139c7d05e0b77127692506",
+    "approval": "af3e6cd4099d315a4be2dc613fa98633d491af3e5193c32844868a356e0a6efa"
+  },
+  "ordinaryBrowserQr": [
+    {
+      "locale": "zh-CN",
+      "realQr": true,
+      "pending": true,
+      "cancel": true,
+      "pollsAfterCancel": 0,
+      "sourceSha256": "4e7d5645711ede7098a1975cf80a4940ef6d4b577d4ddc738ff1a939bc1b19f9"
+    },
+    {
+      "locale": "zh-TW",
+      "realQr": true,
+      "pending": true,
+      "cancel": true,
+      "pollsAfterCancel": 0,
+      "sourceSha256": "df8bc21cda2d9f5f0fa9b946609fd0391c22d90b183e5f22ea84debd93e2277f"
+    }
+  ]
+}

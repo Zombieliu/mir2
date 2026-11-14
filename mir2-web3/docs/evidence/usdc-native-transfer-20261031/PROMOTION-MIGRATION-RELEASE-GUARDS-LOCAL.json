@@ -1,0 +1,13 @@
+{
+  "schema": "mir2.migration-release.pure-fixtures.v1",
+  "passed": true,
+  "testsExecuted": 16,
+  "failures": 0,
+  "errors": 0,
+  "remoteCalls": 0,
+  "postgresWrites": 0,
+  "serviceActions": 0,
+  "linuxNoFollowSystemCallVerified": false,
+  "archiveInstallUsesLocalExclusiveWriteTransportSpy": true,
+  "sourceSha256": "3fe9fc4932912f4cd353d69e1856b1a95bb2376680df4b8f6c700ce6954dbb21"
+}

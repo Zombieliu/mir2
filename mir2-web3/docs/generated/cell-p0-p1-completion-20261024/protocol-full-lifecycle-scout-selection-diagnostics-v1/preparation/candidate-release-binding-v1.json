@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "state": "PENDING_ROOT_REVIEWED_RUNTIME_REUSE",
+  "sourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "backendInputCount": 50,
+  "backendSourceManifest": {
+    "path": "C:/mir2-build/p01-completion-20261024/backend-source-account-store-wait-diagnostics-v1.json",
+    "bytes": 41831,
+    "sha256": "f9199f375175782b46dc0d18589cd714e2a2a75d7b8fad662af64c700d417ec5"
+  },
+  "releaseRecord": {
+    "path": "C:/mir2-build/p01-completion-20261024/release-account-store-wait-diagnostics-v1.json",
+    "bytes": 3343,
+    "sha256": "8a8228a97e4ea2005f3e47839868ba2a90615028e1c7da573130f8663c15c9fc"
+  },
+  "binary": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\account-store-wait-diagnostics-release-v1\\bin\\mir2-gateway.exe",
+    "bytes": 87396864,
+    "sha256": "dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc"
+  },
+  "buildReceipt": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\account-store-wait-diagnostics-v1-build-receipt.json",
+    "bytes": 2453,
+    "sha256": "146df0a5be29ddacf114f0574ef0cf0500666d23ffbae3dfa533eaf229263936"
+  },
+  "buildLog": {
+    "path": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\p0-account-store-wait-diagnostics-v1-release-build.log",
+    "bytes": 56033,
+    "sha256": "64e6c04e66681b8486cd29bd401faaec7d7cdd7fad61f3395b2defa7b9f0e864"
+  },
+  "rootFunctionalValidation": {
+    "path": "C:/mir2-build/p01-completion-20261024/root-account-store-wait-diagnostics-functional-validation-v1.json",
+    "bytes": 12175,
+    "sha256": "1ad0420e74d363088b20dca95cebbb7c84b035e1edf5d0472a185d8bd81dea57"
+  },
+  "reason": "Actual clean K/Node232 freeze and reviewed runtime adapter/final binding with Root actual readonly guard exit0 are bound. Immutable backend C743/50/dae1 is unchanged; new K ordinary full16 and audit are not yet executed. No historical J349/351/341 result substitutes.",
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "executionSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+  "driverSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+  "driverSourceSha256": "d61b7cd057e1a2a55191fe6c407b3058b5ff9205141eaf9290d16da42b028db1",
+  "runtimeBinding": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-v1\\current-execution-binding-v1.json",
+    "bytes": 1429,
+    "sha256": "1886e56e3e3846000932d053c727c21c893393cb6be35e844ee880a2a711b506"
+  },
+  "readonlyRuntimeGuard": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-runtime-readonly-guard-stdout-v1.log",
+    "bytes": 513,
+    "sha256": "d124d042a9c6385f29d649fa0d5d4c60a95a4ba731e89858effebc86e0fddd75"
+  },
+  "currentDriverFrozen": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\capacity-scout-selection-diagnostics-driver-frozen-v1.json",
+    "bytes": 12423,
+    "sha256": "e3300e34d060fb23638bdc690726b6f4376f7fdeb1049aa8871ebdb4bfd628f8"
+  },
+  "currentNodeRegression": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\root-scout-selection-diagnostics-validation-v1\\root-full-driver-receipt-v1.json",
+    "bytes": 5162,
+    "sha256": "733754ea1cade189fa92c29d5a808f7b940315909605cf636d2d3bf7b51a8446"
+  },
+  "expectedNodeRegressionTests": 232,
+  "actualNodeRegressionPassed": 232
+}

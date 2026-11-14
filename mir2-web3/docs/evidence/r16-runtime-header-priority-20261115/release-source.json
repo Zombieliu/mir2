@@ -1,0 +1,357 @@
+{
+  "source": "b9acf175fad0bb582f20fd76282580f179c4b0d2",
+  "releaseClosureBase": "1995a556f7f5e1d4e63e0d5d47cbf3e9ee109826",
+  "qualifiedBuildBase": "9244ce3dd7cd2129a70e650be1430e971b6c96ab",
+  "inheritedFrontendAncestor": "5b011e5d2fcce78883b517e5992ef23245052f84",
+  "commits": [
+    "b9acf175fad0bb582f20fd76282580f179c4b0d2"
+  ],
+  "files": [
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
+      "sha": "aebc9eaae9dd312eae9f2c2d4c600484282830e8"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/app/page.tsx",
+      "sha": "e2a05ed5320612d87d7053f278d41fc94718c11f"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/lib/bevy-runtime-initializer.ts",
+      "sha": "766c73059d7db02c71b6f0319a5d9c5430db7566"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/lib/runtime-header-priority.ts",
+      "sha": "57618d47a3d25f75526805e2bd05fcc6438f4f91"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/scripts/lib/r16-static-transport.mjs",
+      "sha": "04301bd5c70261080db6e224fdfa4842a798df64"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/lib/r16-static-waterfall.mjs",
+      "sha": "7697be12556c5c2a35bdcc235e50af7d72c06054"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/scripts/smoke-runtime-header-priority.mjs",
+      "sha": "0c0a01c06afdf8b431ae956e64746c1c8e5ebf33"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/scripts/test-r16-static-transport.mjs",
+      "sha": "9010f05fffa7871ea24d0daaf9778815ec3d3974"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/scripts/test-runtime-header-priority.mjs",
+      "sha": "4a8c6985eab7ffecfdd66d08465301a75b87d539"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/AGENT-CURRENT.md",
+      "sha": "c6ebe493ff8e9534a9b7b70d1ea4359865f02bdc"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+      "sha": "0d9bbbe733a2a18eecfa3ca94a69adedffcc90d0"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+      "sha": "c49a48c039b42ae879e0b3025e1bae6a212f3aaf"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/README.md",
+      "sha": "f87322804685cb229b8f89e95d49e56a94f250db"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/chrome-order-failed-r1.json",
+      "sha": "1d6ec5efb791bb94e3965f7566b28299ccd1c860"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/chrome-order-passed-r2.json",
+      "sha": "076cd0be4b2123ab7020ae961fd5b155f3cdc6dd"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/default-static-transport.json",
+      "sha": "5268543c29658050fca0b820d3ae8ad10301d7b0"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/default-vendor-arrival.png",
+      "sha": "a0257ad5540bdd6ddd0e25b454bdf96a88429a2e"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/foreign-preservation.json",
+      "sha": "f59eef2f30a90e1bf35f7467f89ce6b5209b6020"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/game-fixture-preparation.json",
+      "sha": "cacf3ce9c04bbb4eed7015a0d3af7065d2463ac1"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/qualification.json",
+      "sha": "bb319f3d8439725dac66ea81275c4beb3cfa6995"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/webgl2-static-transport.json",
+      "sha": "1ca8110359e2a87f4dae73869dd10901208346d8"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/webgl2-vendor-arrival.png",
+      "sha": "91cd5d6b8c2e1b157d76a0a96cd1b4f61c7eac39"
+    }
+  ],
+  "frontendBindings": [
+    {
+      "filename": "mir2-web3/apps/web/lib/scene-asset-preloader.ts",
+      "localBuiltSha256": "0f1d3a0a09d9cdd25dbe1de8539ec4c814305548f9610d019cb4b51856adf93d",
+      "committedSha256": "0f1d3a0a09d9cdd25dbe1de8539ec4c814305548f9610d019cb4b51856adf93d",
+      "eolOnly": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/components/r16-login-door.tsx",
+      "localBuiltSha256": "9233ba688e2233fe05f89a4853aa5e69ac037f1d63e7aa68e36095ca08d44a2c",
+      "committedSha256": "9233ba688e2233fe05f89a4853aa5e69ac037f1d63e7aa68e36095ca08d44a2c",
+      "eolOnly": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-scene-asset-preloader.mjs",
+      "localBuiltSha256": "0c1aa0ce081bb7733aeb822a76aaf8c33514b986ad05c93d29a4b1751830c4bf",
+      "committedSha256": "0c1aa0ce081bb7733aeb822a76aaf8c33514b986ad05c93d29a4b1751830c4bf",
+      "eolOnly": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-auth-layout.mjs",
+      "localBuiltSha256": "9187eb5db8e883da78b55353684d0c3badb8fc5755393ea8fe5bcdaf0db27e5a",
+      "committedSha256": "9187eb5db8e883da78b55353684d0c3badb8fc5755393ea8fe5bcdaf0db27e5a",
+      "eolOnly": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/bevy-runtime-initializer.ts",
+      "localBuiltSha256": "15681d741f5d0e5509913a683dc719631e1e091e46d85cfeef7a9654c7b8eef4",
+      "committedSha256": "15681d741f5d0e5509913a683dc719631e1e091e46d85cfeef7a9654c7b8eef4",
+      "eolOnly": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-initializer.mjs",
+      "localBuiltSha256": "f5f5459a3b5c140a30c15857e96a406237994b94386c0eb7e5933898fb877e6c",
+      "committedSha256": "f5f5459a3b5c140a30c15857e96a406237994b94386c0eb7e5933898fb877e6c",
+      "eolOnly": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-finite-recovery.mjs",
+      "localBuiltSha256": "c87a2661b386054b5c0060a2e71c4409046fbbe2201141b9aefbed4ffc1f10f4",
+      "committedSha256": "c87a2661b386054b5c0060a2e71c4409046fbbe2201141b9aefbed4ffc1f10f4",
+      "eolOnly": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/smoke-bevy-runtime-header-probes.mjs",
+      "localBuiltSha256": "aa30eb56dc7547e2ffdcd71ea019a3318b85910a1f7898b4a162bd85977e17bc",
+      "committedSha256": "aa30eb56dc7547e2ffdcd71ea019a3318b85910a1f7898b4a162bd85977e17bc",
+      "eolOnly": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/page.tsx",
+      "localBuiltSha256": "4871860cd4bfef3719d1cc678e99ad1d2509bb3f44b5f85be601e7e736d4ecba",
+      "committedSha256": "4871860cd4bfef3719d1cc678e99ad1d2509bb3f44b5f85be601e7e736d4ecba",
+      "eolOnly": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
+      "localBuiltSha256": "92fc7deb19085261dbd7aafb107473263033f855b0f958d6c5b4084ba6a93e42",
+      "committedSha256": "92fc7deb19085261dbd7aafb107473263033f855b0f958d6c5b4084ba6a93e42",
+      "eolOnly": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/runtime-header-priority.ts",
+      "localBuiltSha256": "f4626abc2ad4bb523d0ea198085c38e162feb0213e2a6cf9370f5a06e55c19cb",
+      "committedSha256": "f4626abc2ad4bb523d0ea198085c38e162feb0213e2a6cf9370f5a06e55c19cb",
+      "eolOnly": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-runtime-header-priority.mjs",
+      "localBuiltSha256": "7f991c996d7c5f9bc8873fc95404d835aee9c9e064481505d157ecfb6588ad6f",
+      "committedSha256": "7f991c996d7c5f9bc8873fc95404d835aee9c9e064481505d157ecfb6588ad6f",
+      "eolOnly": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/lib/r16-static-waterfall.mjs",
+      "localBuiltSha256": "8e59499334a97e2b92b8a1aeeb9902d18043d50e08c388d219a02916209587f8",
+      "committedSha256": "8e59499334a97e2b92b8a1aeeb9902d18043d50e08c388d219a02916209587f8",
+      "eolOnly": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/lib/r16-static-transport.mjs",
+      "localBuiltSha256": "ff35ad6e7638f9839713091a7d6ba61887c10c0510f557386b51b551240d5ab0",
+      "committedSha256": "ff35ad6e7638f9839713091a7d6ba61887c10c0510f557386b51b551240d5ab0",
+      "eolOnly": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-static-transport.mjs",
+      "localBuiltSha256": "64cf95f53385c4bb0c434ba0757d3a7d6a22a598bd49ac0af7e9fde3cc8bf0dd",
+      "committedSha256": "64cf95f53385c4bb0c434ba0757d3a7d6a22a598bd49ac0af7e9fde3cc8bf0dd",
+      "eolOnly": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/smoke-runtime-header-priority.mjs",
+      "localBuiltSha256": "54cef1603191344782bb950cde02bdee217db979570ab635235ea6e0251bf417",
+      "committedSha256": "54cef1603191344782bb950cde02bdee217db979570ab635235ea6e0251bf417",
+      "eolOnly": false
+    }
+  ],
+  "productionFrontendDelta": [
+    "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
+    "mir2-web3/apps/web/app/page.tsx",
+    "mir2-web3/apps/web/lib/bevy-runtime-initializer.ts",
+    "mir2-web3/apps/web/lib/runtime-header-priority.ts"
+  ],
+  "separateBackendChangesNotQualifiedOrDeployed": true,
+  "localQualificationSha256": "06c6e7c8398cd6e138e8582c0b6787a0dde0e80747a180d4ddc6439d9e2aa268",
+  "baseline": "dpl_Ae3hNyFygQuSMZDesBXCZDpUECTY",
+  "fixedAssets": "20261108-r16-08ec86d5105c",
+  "fixedRuntime": "bevy-0c553a754308e5b8",
+  "independentRemoteCompare": {
+    "checkedAt": "2026-11-14T17:10:47.666Z",
+    "transport": "independent connected GitHub compare API",
+    "base": "1995a556f7f5e1d4e63e0d5d47cbf3e9ee109826",
+    "totalCommits": 1,
+    "commits": [
+      "b9acf175fad0bb582f20fd76282580f179c4b0d2"
+    ],
+    "files": [
+      {
+        "filename": "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
+        "status": "modified",
+        "sha": "aebc9eaae9dd312eae9f2c2d4c600484282830e8"
+      },
+      {
+        "filename": "mir2-web3/apps/web/app/page.tsx",
+        "status": "modified",
+        "sha": "e2a05ed5320612d87d7053f278d41fc94718c11f"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/bevy-runtime-initializer.ts",
+        "status": "modified",
+        "sha": "766c73059d7db02c71b6f0319a5d9c5430db7566"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/runtime-header-priority.ts",
+        "status": "added",
+        "sha": "57618d47a3d25f75526805e2bd05fcc6438f4f91"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/lib/r16-static-transport.mjs",
+        "status": "added",
+        "sha": "04301bd5c70261080db6e224fdfa4842a798df64"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/lib/r16-static-waterfall.mjs",
+        "status": "modified",
+        "sha": "7697be12556c5c2a35bdcc235e50af7d72c06054"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/smoke-runtime-header-priority.mjs",
+        "status": "added",
+        "sha": "0c0a01c06afdf8b431ae956e64746c1c8e5ebf33"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-r16-static-transport.mjs",
+        "status": "added",
+        "sha": "9010f05fffa7871ea24d0daaf9778815ec3d3974"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-runtime-header-priority.mjs",
+        "status": "added",
+        "sha": "4a8c6985eab7ffecfdd66d08465301a75b87d539"
+      },
+      {
+        "filename": "mir2-web3/docs/AGENT-CURRENT.md",
+        "status": "modified",
+        "sha": "c6ebe493ff8e9534a9b7b70d1ea4359865f02bdc"
+      },
+      {
+        "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+        "status": "modified",
+        "sha": "0d9bbbe733a2a18eecfa3ca94a69adedffcc90d0"
+      },
+      {
+        "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+        "status": "modified",
+        "sha": "c49a48c039b42ae879e0b3025e1bae6a212f3aaf"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/README.md",
+        "status": "added",
+        "sha": "f87322804685cb229b8f89e95d49e56a94f250db"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/chrome-order-failed-r1.json",
+        "status": "added",
+        "sha": "1d6ec5efb791bb94e3965f7566b28299ccd1c860"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/chrome-order-passed-r2.json",
+        "status": "added",
+        "sha": "076cd0be4b2123ab7020ae961fd5b155f3cdc6dd"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/default-static-transport.json",
+        "status": "added",
+        "sha": "5268543c29658050fca0b820d3ae8ad10301d7b0"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/default-vendor-arrival.png",
+        "status": "added",
+        "sha": "a0257ad5540bdd6ddd0e25b454bdf96a88429a2e"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/foreign-preservation.json",
+        "status": "added",
+        "sha": "f59eef2f30a90e1bf35f7467f89ce6b5209b6020"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/game-fixture-preparation.json",
+        "status": "added",
+        "sha": "cacf3ce9c04bbb4eed7015a0d3af7065d2463ac1"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/qualification.json",
+        "status": "added",
+        "sha": "bb319f3d8439725dac66ea81275c4beb3cfa6995"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/webgl2-static-transport.json",
+        "status": "added",
+        "sha": "1ca8110359e2a87f4dae73869dd10901208346d8"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/webgl2-vendor-arrival.png",
+        "status": "added",
+        "sha": "91cd5d6b8c2e1b157d76a0a96cd1b4f61c7eac39"
+      }
+    ]
+  },
+  "releaseChecks": {
+    "releaseAndEntry": 57,
+    "domainAndProxy": 24,
+    "ingress": 2,
+    "failed": 0
+  }
+}

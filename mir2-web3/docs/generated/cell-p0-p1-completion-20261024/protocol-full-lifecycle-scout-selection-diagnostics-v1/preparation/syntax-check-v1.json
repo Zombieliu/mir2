@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "scope": "Only Node --check of five derived tools. No module import, target mode or product test. Two exact-copy neutral/PowerShell tools retain prior raw bytes.",
+  "checks": [
+    {
+      "file": "run-owned-full.mjs",
+      "input": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\run-owned-full.mjs",
+        "bytes": 14516,
+        "sha256": "07940d612fe14044235d6ee1cba2a763ec4206da2f8eeaa48770eadaa5e013e7"
+      },
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\run-owned-full.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "file": "audit-owned-full.mjs",
+      "input": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\audit-owned-full.mjs",
+        "bytes": 9491,
+        "sha256": "278309304f6b929499c19367028ee109432b59a886c2476b81c911b9a9f87422"
+      },
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\audit-owned-full.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "file": "verify-inputs.mjs",
+      "input": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\verify-inputs.mjs",
+        "bytes": 14340,
+        "sha256": "a421f94c8e86bd94745b57d883cb47613179eaac27d1eb53ed59baefe2ae115b"
+      },
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\verify-inputs.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "file": "finalize-launcher-inputs.mjs",
+      "input": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\finalize-launcher-inputs.mjs",
+        "bytes": 2418,
+        "sha256": "4561c3f6a5c3965b0adb6ac50b003db6e513a8830220e6c1c13fd8e576d791ad"
+      },
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\finalize-launcher-inputs.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    },
+    {
+      "file": "projection-build-source-lib.mjs",
+      "input": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\projection-build-source-lib.mjs",
+        "bytes": 225,
+        "sha256": "3902723a32143dca49fdeb242cc6c8234c0a11fc7668a5c214871e888ea0b6a1"
+      },
+      "args": [
+        "--check",
+        "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\projection-build-source-lib.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "sourceBeforeAfterIdentical": true
+    }
+  ],
+  "passed": true,
+  "targetImported": false,
+  "modeExecuted": false
+}

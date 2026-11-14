@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T16:48:17.257Z",
+  "actualCodeCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "driverSourceSha256": "5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9",
+  "historicalStaticCodeCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+  "historicalMain": {
+    "file": "C:/mir2-build/p01-completion-20261024/native-chase-preference-main-before-v1.mjs.txt",
+    "bytes": 144416,
+    "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+  },
+  "currentMain": {
+    "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+    "bytes": 149057,
+    "sha256": "bd731443c41d54a237fc0a6d83f2619d049c0226cbd7f154f67717e8fb0dcea5"
+  },
+  "driverFreeze": {
+    "file": "C:/mir2-build/p01-completion-20261024/capacity-attack-deadline-driver-frozen-v1.json",
+    "bytes": 6759,
+    "sha256": "c7a4323971721eb54b574649d8c4efeea800fd08484349b5eb8d0ec0ffb11f7b"
+  },
+  "priorCompatibilityProof": {
+    "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-personal-projection-feasibility-15/scene-driver-compatibility-proof-v1.json",
+    "bytes": 1936,
+    "sha256": "de4e8d981233d0fb5422a7d5469ed6c905d3632f5161a19b5b74384d3eb21059"
+  },
+  "wholeMainReverseRawExact": false,
+  "wholeMainReverseProofAttempted": false,
+  "geometryFunctionsExact": true,
+  "geometryFunctions": {
+    "validateNativeExplicitHomes": {
+      "bytes": 3186,
+      "sha256": "644a4305de903c0451ff0faec2e2df4942f40739d06df9f03e727e03346d3f05",
+      "rawBytes": 3186,
+      "rawSha256": "644a4305de903c0451ff0faec2e2df4942f40739d06df9f03e727e03346d3f05",
+      "oldAndNewExact": true,
+      "rawAndNormalizedBodyExact": true
+    },
+    "validateNativeCombatClusters": {
+      "bytes": 1815,
+      "sha256": "b9e09ba7aa3d58bf3c9aec9da776076599b41baefb68568c04b9d268dbc39443",
+      "rawBytes": 1815,
+      "rawSha256": "b9e09ba7aa3d58bf3c9aec9da776076599b41baefb68568c04b9d268dbc39443",
+      "oldAndNewExact": true,
+      "rawAndNormalizedBodyExact": true
+    },
+    "insideCombatCoverage": {
+      "bytes": 287,
+      "sha256": "9f5b5a85a555e8c8bd2ef0473422ec656ccd4dca66d03e9ef9759a30a65784e1",
+      "rawBytes": 287,
+      "rawSha256": "9f5b5a85a555e8c8bd2ef0473422ec656ccd4dca66d03e9ef9759a30a65784e1",
+      "oldAndNewExact": true,
+      "rawAndNormalizedBodyExact": true
+    }
+  },
+  "originalAStarReexecuted": false,
+  "oldSceneValidationChanged": false,
+  "oldAStarAndConditionalSupplyRemainsHistorical": true,
+  "moduleDerivation": {
+    "source": {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-personal-projection-feasibility-15/scene-driver-compatibility.mjs",
+      "bytes": 1472,
+      "sha256": "2aa24f721bf4a3a545cb1a440f122d384b299ddc67925ddb240d2442e9f81193"
+    },
+    "target": {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/scene-driver-compatibility.mjs",
+      "bytes": 1550,
+      "sha256": "260b80faa43d6a52936097cb1587989cc7a9dc52022dc5f667b10dd3e76c0289"
+    },
+    "rules": [
+      {
+        "from": "assert.equal(proof.wholeMainReverseRawExact,true);",
+        "to": "assert.equal(proof.geometryFunctionsExact,true);assert.equal(proof.wholeMainReverseRawExact,false);"
+      },
+      {
+        "from": "const pins=[p,proof.historicalMain,proof.currentMain,proof.mutationProof];",
+        "to": "const pins=[p,proof.historicalMain,proof.currentMain,proof.priorCompatibilityProof,proof.driverFreeze];"
+      }
+    ],
+    "exactModuleRawInverse": true
+  },
+  "nodeSyntaxExitCode": 0,
+  "scope": "Only the three exact unchanged geometry export bodies are compared to historical2251. Prior whole-main eight-rule proof is historical metadata only: its obsolete currentMain1cf9 path is not dereferenced or asserted against newbd731. No pathfinding, map traversal, validation run, role, layout or workload is rerun or changed.",
+  "sourceOrSceneChanged": false,
+  "runtimeOrProductImportsExecuted": false
+}

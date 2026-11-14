@@ -1,0 +1,304 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T23:12:28.577Z",
+  "state": "EXPLICIT_RAW_COPY_COMPLETE",
+  "publicChild": "capacity-scout-anti-convergence-driver-v1",
+  "publicDirectory": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-anti-convergence-driver-v1",
+  "whitelist": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\public-whitelist-v3.json",
+    "bytes": 10274,
+    "sha256": "e01836732a4ab83199672929ffa7e1f5a03d51ad6cb526a15334b2bf731e34fc"
+  },
+  "priorDraftPreserved": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\public-whitelist-draft-v1.json",
+    "bytes": 7409,
+    "sha256": "9d8a869f21948346f2bd9a0ab62e8db0499db79ac7f131630798bf9113c8db67"
+  },
+  "priorV2Preserved": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\public-whitelist-v2.json",
+    "bytes": 9832,
+    "sha256": "910736405bc96cb5e00e57595bd582d9cd57198364ef9cec563c9d351ac26f2b"
+  },
+  "copyCount": 19,
+  "totalSourceBytes": 529728,
+  "files": [
+    {
+      "source": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+        "bytes": 155475,
+        "sha256": "6c2f4e3dfcbc38465a13cf05c8c8945fdb4fe7c99acaea43dfad493fb77696d8"
+      },
+      "destination": {
+        "path": "source/playtest-capacity-soak.mjs",
+        "bytes": 155475,
+        "sha256": "6c2f4e3dfcbc38465a13cf05c8c8945fdb4fe7c99acaea43dfad493fb77696d8"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs",
+        "bytes": 270311,
+        "sha256": "f1ba119770bde34135e734780b04539206e859bd7b896977d4e6595555c032ef"
+      },
+      "destination": {
+        "path": "source/playtest-capacity-soak.test.mjs",
+        "bytes": 270311,
+        "sha256": "f1ba119770bde34135e734780b04539206e859bd7b896977d4e6595555c032ef"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\baseline-nine-inputs-v1.json",
+        "bytes": 2375,
+        "sha256": "287f4d745eae9582d31f49360d7a90bf76334e1f141d6119be33573d698719ca"
+      },
+      "destination": {
+        "path": "evidence/baseline-nine-inputs-v1.json",
+        "bytes": 2375,
+        "sha256": "287f4d745eae9582d31f49360d7a90bf76334e1f141d6119be33573d698719ca"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\production-mutation-v1.json",
+        "bytes": 3057,
+        "sha256": "de8a3c6c059c1775039f8ce0f04327a430334aaddc72eed3c5513b844328866d"
+      },
+      "destination": {
+        "path": "evidence/production-mutation-v1.json",
+        "bytes": 3057,
+        "sha256": "de8a3c6c059c1775039f8ce0f04327a430334aaddc72eed3c5513b844328866d"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\source-preservation-and-focused-receipt-v1.json",
+        "bytes": 8316,
+        "sha256": "892f65a3de4d255451e686aff53384bba5a1a998a153537c2b89f314543926f3"
+      },
+      "destination": {
+        "path": "evidence/source-preservation-and-focused-receipt-v1.json",
+        "bytes": 8316,
+        "sha256": "892f65a3de4d255451e686aff53384bba5a1a998a153537c2b89f314543926f3"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\focused-red-execution-v1.json",
+        "bytes": 1386,
+        "sha256": "052e4688bdcc7ccab30bec21463ea1584bf9d7f12ece575710acb21e31a1082b"
+      },
+      "destination": {
+        "path": "evidence/focused-red-execution-v1.json",
+        "bytes": 1386,
+        "sha256": "052e4688bdcc7ccab30bec21463ea1584bf9d7f12ece575710acb21e31a1082b"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\focused-red-v1.stdout.log",
+        "bytes": 1219,
+        "sha256": "2b3a65d264d9218eaad5838f1d4e051bab57f5cabe1668db438cce016bfa80ed"
+      },
+      "destination": {
+        "path": "evidence/focused-red-v1.stdout.log",
+        "bytes": 1219,
+        "sha256": "2b3a65d264d9218eaad5838f1d4e051bab57f5cabe1668db438cce016bfa80ed"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\focused-red-v1.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": {
+        "path": "evidence/focused-red-v1.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\focused-green-execution-v1.json",
+        "bytes": 4603,
+        "sha256": "cabe331b979c15692e5673fef90f5538b9ed000fc9f76275286a23dd942e1b9b"
+      },
+      "destination": {
+        "path": "evidence/focused-green-execution-v1.json",
+        "bytes": 4603,
+        "sha256": "cabe331b979c15692e5673fef90f5538b9ed000fc9f76275286a23dd942e1b9b"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\focused-green-v1.stdout.log",
+        "bytes": 2154,
+        "sha256": "c8a8c9bf7329b58e78f8ef946d8a388e6b262548df9c1841a3bc306e242acfbb"
+      },
+      "destination": {
+        "path": "evidence/focused-green-v1.stdout.log",
+        "bytes": 2154,
+        "sha256": "c8a8c9bf7329b58e78f8ef946d8a388e6b262548df9c1841a3bc306e242acfbb"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\focused-green-v1.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": {
+        "path": "evidence/focused-green-v1.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\syntax-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": {
+        "path": "evidence/syntax-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\diff-check-v1.log",
+        "bytes": 146,
+        "sha256": "ea9f1b6885e41071899b399fccb93a506c92ac0069a8ea31b4aa0585f0dd22ee"
+      },
+      "destination": {
+        "path": "evidence/diff-check-v1.log",
+        "bytes": 146,
+        "sha256": "ea9f1b6885e41071899b399fccb93a506c92ac0069a8ea31b4aa0585f0dd22ee"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\root-full-driver-receipt-v1.json",
+        "bytes": 5113,
+        "sha256": "e487f6a3ce26d1a87d3d052282e26a1b28fbf3e63f4948e7ee8d29d1003e958a"
+      },
+      "destination": {
+        "path": "evidence/root-full-driver-receipt-v1.json",
+        "bytes": 5113,
+        "sha256": "e487f6a3ce26d1a87d3d052282e26a1b28fbf3e63f4948e7ee8d29d1003e958a"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\root-full-driver-v1.stdout.log",
+        "bytes": 60940,
+        "sha256": "a1537754ffa171d088ece189a7d4f6ba741d203e08a62b947c9ecc63ca8d5592"
+      },
+      "destination": {
+        "path": "evidence/root-full-driver-v1.stdout.log",
+        "bytes": 60940,
+        "sha256": "a1537754ffa171d088ece189a7d4f6ba741d203e08a62b947c9ecc63ca8d5592"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\root-full-driver-v1.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": {
+        "path": "evidence/root-full-driver-v1.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\root-run-full-driver-v1.mjs",
+        "bytes": 4189,
+        "sha256": "98bb0e1ba643f1d25ecf3613d1e864e8f68d10427e1ec71cd83ce4c85e5b03b5"
+      },
+      "destination": {
+        "path": "evidence/root-run-full-driver-v1.mjs",
+        "bytes": 4189,
+        "sha256": "98bb0e1ba643f1d25ecf3613d1e864e8f68d10427e1ec71cd83ce4c85e5b03b5"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-independent-review-v1\\review-v1.json",
+        "bytes": 6236,
+        "sha256": "5e81a1aac4757a406fda264b2099faaf641df2a7b9f4100c488f2b0e3f27f9d7"
+      },
+      "destination": {
+        "path": "independent-review/review-v1.json",
+        "bytes": 6236,
+        "sha256": "5e81a1aac4757a406fda264b2099faaf641df2a7b9f4100c488f2b0e3f27f9d7"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-independent-review-v1\\full-regression-addendum-v1.json",
+        "bytes": 4208,
+        "sha256": "daaf19ba490a5bd7cc0b59ff094731d20e74009a4ef52e6bf7ad07e276e02296"
+      },
+      "destination": {
+        "path": "independent-review/full-regression-addendum-v1.json",
+        "bytes": 4208,
+        "sha256": "daaf19ba490a5bd7cc0b59ff094731d20e74009a4ef52e6bf7ad07e276e02296"
+      }
+    }
+  ],
+  "allSourcesPrechecked": true,
+  "allSourcesUnchangedAfterCopy": true,
+  "allDestinationByteSHAReadBackMatched": true,
+  "copyMode": "COPYFILE_EXCL",
+  "canonicalSourceAndTopicTargetContainmentChecked": true,
+  "unchangedSevenAndOldLargePreimagesCopied": false,
+  "referenceOnlyNotCopied": {
+    "oldMain": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\preimages\\playtest-capacity-soak.mjs.txt",
+      "bytes": 153586,
+      "sha256": "99914efc602be1600207ab4e2e78f960766332d3064a93307f5268c29448e037"
+    },
+    "oldTest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\preimages\\playtest-capacity-soak.test.mjs.txt",
+      "bytes": 258200,
+      "sha256": "0e28f856648a69053fd538d2e493c97ad046b0714381e8fdfaacb72782abe711"
+    },
+    "otherSeven": "Exact raw pins in baseline-nine-inputs-v1.json and source-preservation proof; no unchanged source copies.",
+    "historicalSourceChild": "capacity-scout-observer-preference-driver-v1",
+    "redIntermediateTestSource": {
+      "bytes": 261077,
+      "sha256": "14bb246417da0f7c75e733f094e9a50a54136f8a5d950b9816663d9de335da03",
+      "prefixOfFinalTestRawExact": true,
+      "copySeparateLargeIntermediateSource": false
+    }
+  },
+  "readme": {
+    "path": "README.md",
+    "bytes": 4023,
+    "sha256": "f7eeb5c137e391f717273fc4de48897615fdd0c3e603f4a2df42a158f5149fdf",
+    "sourcePreview": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-v1\\README-preview-v3.md",
+      "bytes": 4023,
+      "sha256": "f7eeb5c137e391f717273fc4de48897615fdd0c3e603f4a2df42a158f5149fdf"
+    },
+    "relativeLinkCount": 13,
+    "allRelativeLinksExist": true
+  },
+  "fullRegressionPassed": 226,
+  "focusedIncludedIn226": true,
+  "fullSourceSha256": "3b0a0a8300744d6e0d34315f7bbab934252e1e70b124353ae7cf7a2398952df8",
+  "diffCheckExitZeroDoesNotMeanEmptyLog": true,
+  "diffCheckLogBytes": 146,
+  "testsRerunForArchive": false,
+  "newFreezeOrReleaseClaimed": false,
+  "realCapacityRetested": false,
+  "capacityAccepted": false,
+  "p0Passed": false,
+  "p2Started": false,
+  "repoRootDocsModifiedHere": false
+}

@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T17:58:50.818Z",
+  "verdict": {
+    "preparedMetadataConsistent": true,
+    "blockingFindingIds": []
+  },
+  "scope": "Lightweight actual seal/guard/preparation metadata consistency only. No current runtime verdict, active raw, monitor, recording, private account contents or executable payload read.",
+  "pins": {
+    "seal": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\launcher-source-frozen-v1.json",
+      "bytes": 43855,
+      "sha256": "5e7aff7fe51751094bcd6c699c32ec8986bd80b8212561e0edb5811e5060face"
+    },
+    "guard": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\source-guard-readonly-verification.json",
+      "bytes": 6725,
+      "sha256": "dc2fdd8f0ef1740cf8702efe0025d4d41f2f23c6333f38278741a630d68fae50"
+    },
+    "sourcePins": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\source-pins.json",
+      "bytes": 161706,
+      "sha256": "3f7e4d56c376b9d7f45d3329ea13379f17e55108a5e719c7e42fea812dbe841b"
+    },
+    "provisioning": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\provisioning.json",
+      "bytes": 332,
+      "sha256": "754c451d51b23e06e8f4e755eede64937e542c7fd046e75510f5d038e8a3975e"
+    }
+  },
+  "identities": {
+    "executionCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+    "backendInputs": 44,
+    "backendAggregate": "13e5156025198b7c96eabad8f326138554de913abd98199da59888b23bdbe5f2",
+    "binarySha256": "1980b7bed58499977eb6443aa3f1bf0fabcb9e8262b490f2bc6fb74cf6f7b318",
+    "driverSourceSha256": "5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9",
+    "sourceConfigSha256": "0e8cd1d740ac7705aae678ebb5edabc274e2957562754455fdb5182ba5c72336",
+    "sceneStaticCodeEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+    "wireHistoricalCoreCodeEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3"
+  },
+  "counts": {
+    "sealedUniqueInputs": 108,
+    "sourcePinArrayEntries": 365,
+    "driverNineMetadataEntriesMatched": 9,
+    "ordinaryAccountsCreated": 100,
+    "charactersCreated": 0,
+    "gameplayGrants": 0
+  },
+  "sealAndGuardReferencedByPreparedSourcePins": true,
+  "canonicalSourceAggregatesMatch": true,
+  "freshProbePreconditionRun": "1792949214664-bea1433d",
+  "preparationRealmStartedFalseIsHistoricalField": true,
+  "currentFormalRunStatus": "Root reported running; not independently inspected or adjudicated here",
+  "binaryOrNodeRehashed": false,
+  "activeRawRead": false,
+  "targetImported": false,
+  "testsOrGuardExecuted": false,
+  "runtimeOrTrackedModified": false,
+  "capacityAccepted": false
+}

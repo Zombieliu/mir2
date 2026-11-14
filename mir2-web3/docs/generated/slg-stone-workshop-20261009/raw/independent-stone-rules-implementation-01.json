@@ -1,0 +1,218 @@
+{
+  "schemaVersion": 1,
+  "task": "sealed raw-stone pure production rules",
+  "worker": "/root/stone_ui_explore",
+  "completedAtUtc": "2026-10-09 11:42:20 UTC",
+  "status": "handoff-ready; tests not run",
+  "writeScope": [
+    "mir2-web3/packages/production/src/stones.rs",
+    "mir2-web3/packages/production/src/stones_tests.rs"
+  ],
+  "fileHashesSha256": [
+    {
+      "path": "mir2-web3/packages/production/src/stones.rs",
+      "hash": "321b1b600491dc80a3929292ee38f6ef46b5d40847ef4c5cb7939e9afa4ee16d"
+    },
+    {
+      "path": "mir2-web3/packages/production/src/stones_tests.rs",
+      "hash": "5c042a8f58ed1c39d508c380b5af3b2720e442a20876367104c4cdc7c829616c"
+    }
+  ],
+  "rules": {
+    "catalogVersion": 1,
+    "orderedRealOutputs": [
+      {
+        "material": "Copper",
+        "templateId": 824,
+        "weight": 4,
+        "quantity": 1
+      },
+      {
+        "material": "Silver",
+        "templateId": 826,
+        "weight": 4,
+        "quantity": 1
+      },
+      {
+        "material": "JadeCrystal",
+        "templateId": 904,
+        "weight": 5,
+        "quantity": 1
+      },
+      {
+        "material": "BraveryGem",
+        "templateId": 734,
+        "weight": 1,
+        "quantity": 1
+      },
+      {
+        "material": "MagicGem",
+        "templateId": 735,
+        "weight": 1,
+        "quantity": 1
+      },
+      {
+        "material": "SoulGem",
+        "templateId": 736,
+        "weight": 1,
+        "quantity": 1
+      }
+    ],
+    "grades": [
+      {
+        "grade": "Rough",
+        "probabilitiesBasisPoints": [
+          8000,
+          1000,
+          800,
+          100,
+          50,
+          50
+        ],
+        "appraisalGold": 100,
+        "cuttingGold": 1500,
+        "workshopSourceTemplateId": 824
+      },
+      {
+        "grade": "Fine",
+        "probabilitiesBasisPoints": [
+          4000,
+          3500,
+          2000,
+          200,
+          200,
+          100
+        ],
+        "appraisalGold": 250,
+        "cuttingGold": 2500,
+        "workshopSourceTemplateId": 826
+      },
+      {
+        "grade": "Precious",
+        "probabilitiesBasisPoints": [
+          1000,
+          4000,
+          3000,
+          700,
+          700,
+          600
+        ],
+        "appraisalGold": 500,
+        "cuttingGold": 3500,
+        "workshopSourceTemplateId": 827
+      }
+    ],
+    "appraisal": "Metallic for Copper/Silver; Crystalline for JadeCrystal and all three gems. No exact hidden result in appraisal or public view.",
+    "mintOutcome": "One server-supplied uniform u16 roll 0..9999 at original mint; no CSPRNG, seed or roll stored in the pure module.",
+    "catalogFreeze": "Record freezes version, full grade rule, SHA256 fingerprint, fees and actual result. Valid future catalogs affect only new mints."
+  },
+  "api": [
+    {
+      "symbol": "StoneMintRequest",
+      "ref": "mir2-web3/packages/production/src/stones.rs:265",
+      "note": "Trusted owner/request_id, independently reserved serial, physical carrier_uid, source_template_id, raw_template_id/raw_weight, grade/binding, versioned stable server source. Not a client command."
+    },
+    {
+      "symbol": "StoneRecord",
+      "ref": "mir2-web3/packages/production/src/stones.rs:312",
+      "note": "Private immutable mint/outcome/rule; getters for serial/carrier_uid/owner (creation provenance)/mint_request/grade/revision/lifecycle/templates/weight/catalog/binding; private_output remains server-only."
+    },
+    {
+      "symbol": "PublicStone",
+      "ref": "mir2-web3/packages/production/src/stones.rs:367",
+      "note": "Opaque uid (physical) and serial (registry) selectors are exact strings per Root decision; includes grade/lifecycle/revision/catalog/fees/public probabilities and only post-appraisal coarse clue; no private outcome, seed, source, provenance or binding fields."
+    },
+    {
+      "symbol": "StoneContext/StonePossession",
+      "ref": "mir2-web3/packages/production/src/stones.rs:399",
+      "note": "Current authenticated owner incarnation plus actual Bag-root holder/carrier/serial/template/weight/count/slot/binding/eligibility/lock witness. Mint owner does not restrict a legitimate transferred current holder."
+    },
+    {
+      "symbol": "PreparedStone",
+      "ref": "mir2-web3/packages/production/src/stones.rs:500",
+      "note": "Expected registry/inventory/stone revisions, candidate next registry, exact gold debit, optional consumed serial/carrier and real output/receipt. Receipts are not durable until the external atomic authority commits."
+    },
+    {
+      "symbol": "StoneRegistry records and snapshots",
+      "ref": "mir2-web3/packages/production/src/stones.rs:541",
+      "note": "revision,last_serial,next_serial,len,is_empty,record(serial),records() iterator of &StoneRecord values,private_snapshot() Vec. No delete method; consumed records retained."
+    },
+    {
+      "symbol": "StoneRegistry::mint_request",
+      "ref": "mir2-web3/packages/production/src/stones.rs:557",
+      "note": "Original server mint inputs by actor incarnation/request ID; use original reserved serial when assembling exact mint retry. Cross-operation reuse conflicts."
+    },
+    {
+      "symbol": "StoneRegistry::prepare_mint",
+      "ref": "mir2-web3/packages/production/src/stones.rs:613",
+      "note": "Exact request replay precedes new catalog/roll validation and returns original mint record. Global source identity conflicts and live physical carrier duplication reject. Consumed carrier can be reused by distinct new resource source/serial."
+    },
+    {
+      "symbol": "StoneRegistry::prepare",
+      "ref": "mir2-web3/packages/production/src/stones.rs:658",
+      "note": "Exact committed action request replay precedes current possession/gold/space/revision. New action checks auth/current possession/revision/gold and cut capacity/weight; cut only once. Flags including unknown signed bitset bits retained."
+    },
+    {
+      "symbol": "StoneRegistry::restore/validate_successor",
+      "ref": "mir2-web3/packages/production/src/stones.rs:739",
+      "note": "Strict bounded decimal-string private JSON and journal replay. Successor must preserve exact original history prefix, fixed outcomes/fees/source/requests and all tombstones. Structural restore does not authenticate server issuance."
+    }
+  ],
+  "bounds": {
+    "recordsIncludingPermanentTombstones": 1024,
+    "historyEntries": 3072,
+    "checkpointBytes": 16777216,
+    "catalogBytes": 65536,
+    "bagCells": 80,
+    "catalogFeeMax": 10000000,
+    "futureCatalogQuantityMax": 16,
+    "requestAndSourceEventTokenBytes": 128,
+    "behaviorAtRecordCap": "New mint fails closed; history capacity is reserved for existing appraisal/cut. No eviction.",
+    "currentV1Capacity": "Every result is stack_size1 quantity1. A full Bag can replace its consumed source root in the same freed slot; weight can still refuse."
+  },
+  "verification": {
+    "cargoExecutedByWorker": false,
+    "testsExecutedByWorker": false,
+    "testsStatus": "not-run; Root owns library exports, Cargo process, durability/runtime/transport/UI verification",
+    "meaningfulUnitTestsAuthored": 19,
+    "cases": [
+      "All 10000 uniform rolls per grade and every cumulative interval endpoint against literal expected counts",
+      "Exact canonical v1 and invalid template/probability/fee/quantity/catalog data, clue-conditioned nominal NPC price/2 expectation gate",
+      "Independent registry serial/carrier UID, original source/request retry, global source and active carrier conflicts, request bounds",
+      "Public equality across distinct sealed private outcomes, coarse-only appraisal for metals and crystals/gems, no saved seed/roll",
+      "Frozen fees/result after valid changed future catalog, trusted save/reload and subsequent appraisal/cut",
+      "Current transferred holder and changed incarnation authorization; original mint owner remains provenance",
+      "All binding bits and soul-bound ID preserved on real output receipt",
+      "Missing/forged/mismatched/duplicate/locked/ineligible Bag witnesses and invalid capacities",
+      "Original appraisal/cut receipt after reload/reconnect even with no money or possession; authenticated actor scope",
+      "Cross-operation request conflicts, stale revision, second appraisal/cut refusal and permanent tombstones",
+      "Gold shortage, weight shortage, underflow/overflow and uncommitted plan cannot mutate original registry",
+      "Full Bag single replacement and bounded future multiple-root capacity refusal",
+      "Consumed carrier reuse with new source/serial does not reactivate old serial",
+      "Forged records/rules/deliveries/receipts/history/revisions, duplicate records, unknown fields, noncanonical decimal/numeric UIDs and missing tombstones",
+      "Structurally valid complete history/result rewrite rejected against prior durable successor authority",
+      "Exact u64::MAX UID/serial roundtrip and allocator overflow, JSON byte/schema bounds",
+      "Max-sized registry keeps permanent records and reserves remaining action journal capacity"
+    ],
+    "staticChecks": "Manual source/API review, rg test count and stale-helper check, final source SHA256.",
+    "formattingAttempt": {
+      "command": "rustfmt --edition 2021 [two assigned files]",
+      "exitCode": 1,
+      "diagnostics": "none",
+      "changedFiles": false,
+      "limitation": "Formatting success and Rust parse/compile not established."
+    }
+  },
+  "integrationRequirements": [
+    "Root must wire stones module/exports; worker did not modify lib.rs or other product/docs.",
+    "Root must prove workshop source is one eligible real physical Bag ore, reclassify it to the selected real raw template with same UserItem UID, and generate CSPRNG uniform roll only for fresh mint.",
+    "ItemState carries only registry reference; private frozen outcome stays in authoritative private StoneRegistry.",
+    "Public selectors remain opaque. Incoming command must resolve actual holder possession and cannot supply trusted context, owner incarnation, source, roll, fee or hidden outcome.",
+    "Persist registry plus profile inventory/gold, debit/output and operation receipts through one globally scoped File/PG compare-and-swap transaction; receipts only after committed authority.",
+    "Global source event IDs must be uniquely namespaced by server (tokens permit ASCII alphanumeric, underscore and hyphen). Actor request IDs are incarnation scoped across mint/appraise/cut.",
+    "records() is an iterator of record values, not a BTreeMap; consumers collect records().map(|record|record.serial()).",
+    "Only v1 quantity1 is shipped; any future multiquantity policy still requires authority support for complete real physical output construction and UID allocation.",
+    "Package checkpoint structural consistency alone cannot authenticate whole-history issuance: validate_successor against prior trusted authority and fresh-mint source authorization are required.",
+    "Runtime movement/input behavior, current web/native UI, screenshots and transactional reconnect races remain Root verification scope."
+  ]
+}

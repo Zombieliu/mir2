@@ -1,0 +1,53 @@
+{
+  "verifiedAt": "2026-10-24T12:33:18.109276+00:00",
+  "knownPrivateValuesChecked": 12,
+  "knownPrivateValueMatches": 0,
+  "unredactedPrivateFieldMatches": 0,
+  "files": [
+    {
+      "file": "1792844890863-cf239893-original.trace.jsonl",
+      "bytes": 687119,
+      "sha256": "71a3e8eda408e5eec05725da30e6e516339212472ceb2afb3a46be9be5fea27c"
+    },
+    {
+      "file": "1792844890863-cf239893-resumed.trace.jsonl",
+      "bytes": 3563,
+      "sha256": "aebac9e70eddee5357e80b779f98bc9a93a583e3855dc41790233cc4b4a8ebaa"
+    },
+    {
+      "file": "1792844890863-cf239893.report.json",
+      "bytes": 3105,
+      "sha256": "23148ff43b9696df77145485cb385ca4ace2a4fe0d06d44f9c645cf8a523da43"
+    },
+    {
+      "file": "1792845120462-edfccab1-original.trace.jsonl",
+      "bytes": 686900,
+      "sha256": "8f38b73e081409bf6aa00a542d52160df8b75fbcd07bb216548499877d698a44"
+    },
+    {
+      "file": "1792845120462-edfccab1-replay.trace.jsonl",
+      "bytes": 4777,
+      "sha256": "a57d4bc55132c3322513d705fe27e89340aad9a4317fabcfcf51a5748f41ac8f"
+    },
+    {
+      "file": "1792845120462-edfccab1-resumed.trace.jsonl",
+      "bytes": 7524,
+      "sha256": "13ac656ed1d246d7273acc6807a15e4f4b18ef55abd818115a6a2127d9fb05d2"
+    },
+    {
+      "file": "1792845120462-edfccab1.report.json",
+      "bytes": 15201,
+      "sha256": "855e2ea5aa070bcc1af3032d04ec3ca81efbdd35281dfa6c5a7a448d8302ea64"
+    },
+    {
+      "file": "1792845120462-edfccab1.runner-source-pins.json",
+      "bytes": 405,
+      "sha256": "05eeb4cdd4a6dc33650143b07c0696e5e628718955f6c260640018958772132d"
+    },
+    {
+      "file": "run-index.json",
+      "bytes": 2296,
+      "sha256": "09b7f3f995c092e29691b1dfd0a6a9187c2496d208e2bff68e654a4b82cb6dc6"
+    }
+  ]
+}

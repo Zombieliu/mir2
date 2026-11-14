@@ -1,0 +1,272 @@
+import entryScene from "./generated/r16-entry-scene.json";
+import entryFloor from "./generated/r16-entry-floor.json";
+import entryVisuals from "./generated/r16-entry-visuals.json";
+import entryPlayerMetadata from "./generated/r16-entry-player-meta.json";
+import { fetchBootstrapResponse, PINNED_BOOTSTRAP_HEADER_TIMEOUT_MS, shouldRetryBootstrapResponse, isRetryableBootstrapReadFailure } from "./first-crystal-scene-request";
+import { readR16EntrySceneChunk, readR16EntryFloorChunk, readR16EntryMonsterWalkingChunk } from "./generated/r16-entry-bootstrap-chunks";
+import type { OriginalSceneSpriteLibraryMeta } from "./original-scene-sprite-meta";
+import {
+  createCrystalSceneBlueprintRequestKey,
+  SCENE_BLUEPRINT_SCHEMA_VERSION,
+  type NormalizedCrystalSceneBlueprintRequest,
+} from "./scene-blueprint-request";
+import type { SceneBlueprint } from "./scene-types";
+
+const entryKey = createCrystalSceneBlueprintRequestKey({
+  ...entryScene.request,
+  assetReleaseId: entryScene.assetReleaseId,
+});
+const ENTRY_GRACE_MS = 2_500;
+let entryLoad: Promise<SceneBlueprint | null> | null = null;
+
+export type R16EntrySpriteImages = Readonly<Partial<Record<string, string>>>;
+export type R16EntryActorAssets = {
+  libraries: Readonly<Record<string, Omit<OriginalSceneSpriteLibraryMeta, "frameMap" | "startupFramesOnly">>>;
+  images: R16EntrySpriteImages;
+};
+export const R16_ENTRY_FLOOR_MAP = entryFloor.mapFileName;
+export const R16_ENTRY_FLOOR_BOUNDS = entryFloor.bounds;
+export const R16_ENTRY_MONSTER_BOUNDS = entryVisuals.monsterBounds;
+let floorLoad: Promise<R16EntrySpriteImages | null> | null = null;
+type EntryAssetPin = { path: string; bytes: number; sha256: string };
+type EntryPlayerGender = keyof typeof entryVisuals.players;
+type EntryMonsterAction = "standing" | "walking";
+const objectLoads = new Map<string, Promise<R16EntrySpriteImages | null>>();
+const actorLoads = new Map<string, Promise<R16EntryActorAssets | null>>();
+const playerDirectories = new Map<EntryPlayerGender, R16EntryActorAssets>();
+const playerPublications = new WeakMap<R16EntryActorAssets, R16EntryActorAssets>();
+const transientVisualFailures = new WeakSet<Promise<unknown>>();
+const VISUAL_BODY_TIMEOUT_MS = 45_000;
+const VISUAL_RECOVERY_DELAY_MS = 1_000;
+
+export function preloadR16EntryScene(pinnedRelease?: string): Promise<SceneBlueprint | null> | null {
+  if (pinnedRelease !== entryScene.assetReleaseId || entryScene.schemaVersion !== SCENE_BLUEPRINT_SCHEMA_VERSION ||
+      !globalThis.crypto?.subtle) return null;
+  entryLoad ??= loadProgressiveEntryJson<SceneBlueprint>(entryScene, "high").catch((error) => {
+    if (!isRetryableBootstrapReadFailure(error)) throw error;
+    return readR16EntrySceneChunk();
+  }).catch(() => null).then((blueprint) => {
+    if (!blueprint) entryLoad = null;
+    return blueprint;
+  });
+  return entryLoad;
+}
+
+export function preloadR16EntryFloor(pinnedRelease?: string): Promise<R16EntrySpriteImages | null> | null {
+  if (pinnedRelease !== entryFloor.assetReleaseId || entryFloor.assetReleaseId !== entryScene.assetReleaseId ||
+      entryFloor.sceneSha256 !== entryScene.sha256 || !globalThis.crypto?.subtle) return null;
+  floorLoad ??= loadProgressiveEntryJson<R16EntrySpriteImages>(entryFloor, "high").catch((error) => {
+    if (!isRetryableBootstrapReadFailure(error)) throw error;
+    return readR16EntryFloorChunk();
+  }).catch(() => null).then((images) => {
+    if (!images) floorLoad = null;
+    return images;
+  });
+  return floorLoad;
+}
+
+async function loadProgressiveEntryJson<T>(
+  asset: EntryAssetPin,
+  priority?: RequestPriority,
+  bodyTimeoutMs?: number,
+  cache: RequestCache = "force-cache",
+): Promise<T | null> {
+  const { response, body } = await fetchBootstrapResponse(
+    asset.path,
+    { cache, headerTimeoutMs: PINNED_BOOTSTRAP_HEADER_TIMEOUT_MS, bodyByteLimit: asset.bytes, bodyTimeoutMs },
+    response => response.arrayBuffer(),
+    (path, options) => fetch(path, { ...options, credentials: "omit", redirect: "error", priority }),
+  );
+  if (shouldRetryBootstrapResponse(response)) {
+    // Both bounded HTTP attempts failed transiently. Preserve this distinction
+    // from a definitive HTTP response or a rejected byte/hash verification.
+    throw new TypeError(`Pinned bootstrap response is temporarily unavailable (HTTP ${response.status})`);
+  }
+  return response.ok && body ? decodePinnedEntryJson<T>(asset, body) : null;
+}
+
+function entryVisualsMatch(pinnedRelease?: string) {
+  return pinnedRelease === entryVisuals.assetReleaseId && entryVisuals.assetReleaseId === entryScene.assetReleaseId &&
+    entryVisuals.sceneSha256 === entryScene.sha256 && entryVisuals.mapFileName === R16_ENTRY_FLOOR_MAP &&
+    Boolean(globalThis.crypto?.subtle);
+}
+
+function preloadVisual<T>(
+  asset: EntryAssetPin,
+  loads: Map<string, Promise<T | null>>,
+  priority?: RequestPriority,
+  cache: RequestCache = "force-cache",
+  compiledFallback?: () => Promise<T>,
+): Promise<T | null> {
+  const cached = loads.get(asset.path);
+  if (cached) return cached;
+  const pending: Promise<T | null> = loadProgressiveEntryJson<T>(asset, priority, VISUAL_BODY_TIMEOUT_MS, cache).catch((error) => {
+    // Only exhausted transport failures may use an independently verified chunk.
+    // Definitive responses and rejected complete bytes do not grant a fallback.
+    if (compiledFallback && isRetryableBootstrapReadFailure(error)) return compiledFallback();
+    throw error;
+  }).catch((error) => {
+    if (error instanceof TypeError || (error instanceof DOMException &&
+        (error.name === "TimeoutError" || error.name === "AbortError"))) {
+      transientVisualFailures.add(pending);
+    }
+    return null;
+  }).then((data) => {
+    if (!data) loads.delete(asset.path);
+    return data;
+  });
+  loads.set(asset.path, pending);
+  return pending;
+}
+
+export function preloadR16EntryObjects(pinnedRelease?: string) {
+  if (!entryVisualsMatch(pinnedRelease)) return null;
+  return entryVisuals.objectParts.map(part => preloadVisual(part, objectLoads, "low"));
+}
+
+export function preloadR16EntryPlayer(pinnedRelease: string | undefined, gender: EntryPlayerGender) {
+  if (!entryVisualsMatch(pinnedRelease)) return null;
+  return preloadVisual(entryVisuals.players[gender], actorLoads, "high");
+}
+
+function readEntryPlayerMetadata(gender: EntryPlayerGender): R16EntryActorAssets | null {
+  const metadata = entryPlayerMetadata.players[gender];
+  if (entryPlayerMetadata.schemaVersion !== 2 || entryPlayerMetadata.assetReleaseId !== entryVisuals.assetReleaseId ||
+      entryPlayerMetadata.sceneSha256 !== entryVisuals.sceneSha256 ||
+      metadata.sourceSha256 !== entryVisuals.players[gender].sha256) return null;
+  let directory = playerDirectories.get(gender);
+  if (!directory) {
+    directory = { libraries: Object.fromEntries(Object.entries(metadata.libraries).map(([key, library]) => [key, {
+      ...library,
+      frames: library.frames.map(([index, width, height, x, y, shadowX, shadowY]) => ({
+        index, width, height, x, y, shadowX, shadowY, path: "/original-ui/" + key + "/" + index + ".png", maskPath: null,
+      })),
+    }])), images: {} };
+    playerDirectories.set(gender, directory);
+  }
+  return directory;
+}
+
+function publishEntryPlayer(assets: R16EntryActorAssets, directory: R16EntryActorAssets | null) {
+  if (!directory) return assets;
+  let published = playerPublications.get(assets);
+  if (!published) {
+    // The image pack contains only standing/walking frames. Its completion must
+    // not replace the full action directory with that smaller subset.
+    published = { libraries: directory.libraries, images: assets.images };
+    playerPublications.set(assets, published);
+  }
+  return published;
+}
+
+function waitToRecoverVisual(owner: AbortSignal): Promise<void> {
+  return new Promise((resolve) => {
+    const finish = () => {
+      clearTimeout(timer);
+      owner.removeEventListener("abort", finish);
+      resolve();
+    };
+    const timer = setTimeout(finish, VISUAL_RECOVERY_DELAY_MS);
+    owner.addEventListener("abort", finish, { once: true });
+    if (owner.aborted) finish();
+  });
+}
+
+/** Expose pinned frame metadata immediately; recover the complete image pack in the background. */
+export function loadR16EntryPlayerWithRecovery(
+  pinnedRelease: string | undefined,
+  gender: EntryPlayerGender,
+  owner: AbortSignal,
+  onSettled: (assets: R16EntryActorAssets | null) => void,
+): Promise<void> | null {
+  if (owner.aborted) return null;
+  const first = preloadR16EntryPlayer(pinnedRelease, gender);
+  if (!first) return null;
+  return (async () => {
+    // Metadata is tiny and bundled with the client. The renderer can request
+    // the actual standing/walking PNG now, even if the full pack or remote
+    // library index stalls. Its existing decoded-body gate still owns readiness.
+    const metadata = readEntryPlayerMetadata(gender);
+    if (metadata) onSettled(metadata);
+    const assets = await first;
+    if (owner.aborted) return;
+    if (assets) onSettled(publishEntryPlayer(assets, metadata));
+    else if (!metadata) onSettled(null);
+    if (assets || !transientVisualFailures.has(first)) return;
+
+    // Keep usable metadata and the ordinary image path during recovery. Retry only
+    // once after backing off; changing role or leaving the game cancels the observer.
+    await waitToRecoverVisual(owner);
+    if (owner.aborted) return;
+    const recovered = await preloadVisual(entryVisuals.players[gender], actorLoads, "high", "reload");
+    if (!owner.aborted && recovered) onSettled(publishEntryPlayer(recovered, metadata));
+  })();
+}
+
+export function preloadR16EntryNpcs(pinnedRelease?: string) {
+  if (!entryVisualsMatch(pinnedRelease)) return null;
+  return preloadVisual(entryVisuals.npcs, actorLoads, "high");
+}
+
+/** Recover town actors once after a transient pack failure, while ordinary PNGs remain available. */
+export function loadR16EntryNpcsWithRecovery(
+  pinnedRelease: string | undefined,
+  owner: AbortSignal,
+  onSettled: (assets: R16EntryActorAssets | null) => void,
+): Promise<void> | null {
+  if (owner.aborted) return null;
+  const first = preloadR16EntryNpcs(pinnedRelease);
+  if (!first) return null;
+  return (async () => {
+    const assets = await first;
+    if (owner.aborted) return;
+    onSettled(assets);
+    if (assets || !transientVisualFailures.has(first)) return;
+    await waitToRecoverVisual(owner);
+    if (owner.aborted) return;
+    const recovered = await preloadVisual(entryVisuals.npcs, actorLoads, "high", "reload");
+    if (!owner.aborted && recovered) onSettled(recovered);
+  })();
+}
+
+export function preloadR16EntryMonsterFrames(pinnedRelease: string | undefined, action: EntryMonsterAction) {
+  if (!entryVisualsMatch(pinnedRelease)) return null;
+  const asset = action === "standing" ? entryVisuals.monsterStanding : entryVisuals.monsterWalking;
+  return preloadVisual(asset, actorLoads, action === "walking" ? "low" : undefined, "force-cache",
+    action === "walking" ? readR16EntryMonsterWalkingChunk : undefined);
+}
+
+async function decodePinnedEntryJson<T>(
+  asset: { bytes: number; sha256: string },
+  bytes: ArrayBuffer,
+): Promise<T | null> {
+  if (bytes.byteLength !== asset.bytes) return null;
+  const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", bytes));
+  const sha256 = Array.from(digest, (byte) => byte.toString(16).padStart(2, "0")).join("");
+  if (sha256 !== asset.sha256) return null;
+  return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes)) as T;
+}
+
+export function readR16EntryScene(
+  request: NormalizedCrystalSceneBlueprintRequest,
+  pinnedRelease: string | undefined,
+  owner: AbortSignal,
+  options?: { untilSettled: boolean },
+): Promise<SceneBlueprint | null> | null {
+  if (owner.aborted || request.assetReleaseId !== entryScene.assetReleaseId ||
+      createCrystalSceneBlueprintRequestKey(request) !== entryKey) return null;
+  const pending = preloadR16EntryScene(pinnedRelease);
+  if (!pending) return null;
+
+  // A slow optional preload must leave the ordinary map route available.
+  const wait = options?.untilSettled ? owner : AbortSignal.any([owner, AbortSignal.timeout(ENTRY_GRACE_MS)]);
+  if (wait.aborted) return null;
+  return new Promise((resolve) => {
+    const stop = () => resolve(null);
+    wait.addEventListener("abort", stop, { once: true });
+    void pending.then((blueprint) => {
+      wait.removeEventListener("abort", stop);
+      resolve(wait.aborted ? null : blueprint);
+    });
+  });
+}

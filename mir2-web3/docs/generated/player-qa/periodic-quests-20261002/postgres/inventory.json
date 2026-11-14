@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "scope": "live isolated PostgreSQL proof; no kill/timing/production claim",
+  "files": [
+    {
+      "path": "periodic-postgres-r2-list.log",
+      "sha256": "2291a0371e61ff5aa9140da7a0a1558e6212f2d3f2286ccde1e77cbe1f850ef9",
+      "bytes": 115
+    },
+    {
+      "path": "periodic-postgres-r2-windows-result.json",
+      "sha256": "db3350c156be8677d00734861720dfaf72271ae31c63af4caa11a008df87be71",
+      "bytes": 2881
+    },
+    {
+      "path": "periodic-postgres-r2-windows.log",
+      "sha256": "544ebf0901b4a2e6bfc1bf9ee9b5563d4c4df0251056a99d687e6769b4b8afae",
+      "bytes": 1205
+    },
+    {
+      "path": "pg-r1-resource-interrupted-worker-v1.json",
+      "sha256": "d6ad63e93ae66c2dcdfec594f69cdc25e9bd8c142f45097030ce8d95c4236fa2",
+      "bytes": 1754
+    },
+    {
+      "path": "pg-r1-root-resource-stop.json",
+      "sha256": "ac88d0dfdd305a5aca3a4a16d47727564d445c8f411f56082e1f47c56e05942c",
+      "bytes": 407
+    },
+    {
+      "path": "README.md",
+      "sha256": "d3308f3364640006b90016ab7c9a5be8eae75395b2bd153054c3b732c4a83471",
+      "bytes": 1723
+    },
+    {
+      "path": "root-review.json",
+      "sha256": "9b4a65f6a49b9c3a5da30dab988fb3b39b02fcce2e5f8ec74d76b43c38cc1f55",
+      "bytes": 1163
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+TAP version 13
+# Subtest: native witnessed approach avoids the probe10 unobservable 206513 neighbour loop
+ok 1 - native witnessed approach avoids the probe10 unobservable 206513 neighbour loop
+  ---
+  duration_ms: 5.1174
+  type: 'test'
+  ...
+# Subtest: native witnessed approach avoids the probe10 unobservable 206704 neighbour loop
+ok 2 - native witnessed approach avoids the probe10 unobservable 206704 neighbour loop
+  ---
+  duration_ms: 1.1596
+  type: 'test'
+  ...
+# Subtest: native witnessed approach avoids the probe10 unobservable 206507 neighbour loop
+ok 3 - native witnessed approach avoids the probe10 unobservable 206507 neighbour loop
+  ---
+  duration_ms: 0.9972
+  type: 'test'
+  ...
+# Subtest: native witnessed approach avoids the probe10 unobservable 206715 neighbour loop
+ok 4 - native witnessed approach avoids the probe10 unobservable 206715 neighbour loop
+  ---
+  duration_ms: 0.9788
+  type: 'test'
+  ...
+# Subtest: native witnessed approach skips cheap ineligible targets before the original four path-target limit
+ok 5 - native witnessed approach skips cheap ineligible targets before the original four path-target limit
+  ---
+  duration_ms: 0.6566
+  type: 'test'
+  ...
+# Subtest: native witnessed approach rejects a not-ready observer without replacing real membership with distance
+ok 6 - native witnessed approach rejects a not-ready observer without replacing real membership with distance
+  ---
+  duration_ms: 0.5068
+  type: 'test'
+  ...
+# Subtest: native witnessed approach rejects a dead observer without replacing real membership with distance
+ok 7 - native witnessed approach rejects a dead observer without replacing real membership with distance
+  ---
+  duration_ms: 0.2986
+  type: 'test'
+  ...
+# Subtest: native witnessed approach rejects a wrong-map observer without replacing real membership with distance
+ok 8 - native witnessed approach rejects a wrong-map observer without replacing real membership with distance
+  ---
+  duration_ms: 0.1716
+  type: 'test'
+  ...
+# Subtest: native witnessed approach rejects a missing-attacker observer without replacing real membership with distance
+ok 9 - native witnessed approach rejects a missing-attacker observer without replacing real membership with distance
+  ---
+  duration_ms: 0.5143
+  type: 'test'
+  ...
+# Subtest: native witnessed approach rejects a missing-target observer without replacing real membership with distance
+ok 10 - native witnessed approach rejects a missing-target observer without replacing real membership with distance
+  ---
+  duration_ms: 0.3249
+  type: 'test'
+  ...
+# Subtest: native witnessed approach retains the original four path targets and eight adjacent destinations
+ok 11 - native witnessed approach retains the original four path targets and eight adjacent destinations
+  ---
+  duration_ms: 97.6905
+  type: 'test'
+  ...
+# Subtest: native witnessed approach metadata is immutable and does not start gameplay without its original monitor
+ok 12 - native witnessed approach metadata is immutable and does not start gameplay without its original monitor
+  ---
+  duration_ms: 10.1928
+  type: 'test'
+  ...
+1..12
+# tests 12
+# suites 0
+# pass 12
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 208.1189

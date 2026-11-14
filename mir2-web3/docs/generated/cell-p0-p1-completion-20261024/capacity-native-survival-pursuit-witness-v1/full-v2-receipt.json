@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--test",
+    "apps/web/scripts/playtest-capacity-soak.test.mjs",
+    "apps/web/scripts/playtest-capacity-observability.test.mjs",
+    "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+    "apps/web/scripts/playtest-capacity-telemetry.test.mjs"
+  ],
+  "startedAtMs": 1792896319604,
+  "finishedAtMs": 1792896630263,
+  "elapsedMs": 310659,
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "counts": {
+    "tests": 175,
+    "pass": 175,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "duration_ms": 310623.9312
+  },
+  "sourceSha256": "c7928e91e0528132c470ad1d87ffd63656eb59b2ce35b602b5e84f4603434298",
+  "exactSourceManifest": {
+    "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/full-v2-source-pins.json",
+    "bytes": 2042,
+    "sha256": "7fb9311df8f33895bda027ce5b8eaec532659ed28492f5f2a9b357830b92e7b9"
+  },
+  "sourcePinsUnchangedAfterRun": true,
+  "sourceSha256After": "c7928e91e0528132c470ad1d87ffd63656eb59b2ce35b602b5e84f4603434298",
+  "log": {
+    "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/full-v2.log",
+    "bytes": 47276,
+    "sha256": "c0335bb31c428a1dd7233eab77397db345a6647b3153c6ff7d8c24c0c715cab6"
+  },
+  "scope": "Functional Node regression with synthetic loopback fixtures only; no real gateway realm or capacity acceptance"
+}

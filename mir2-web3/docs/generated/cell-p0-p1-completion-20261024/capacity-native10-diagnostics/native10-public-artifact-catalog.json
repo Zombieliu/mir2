@@ -1,0 +1,279 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-24T16:47:41.125Z",
+  "scope": "Explicit public-only evidence whitelist for ten-actor preparation rejection and first actual ten-actor feasibility attempt; no capacity acceptance or hardware ceiling claim.",
+  "archiveRoot": "C:/mir2-build/p01-completion-20261024",
+  "files": [
+    {
+      "path": "capacity-probe10-source-frozen.json",
+      "bytes": 2516,
+      "sha256": "2635ee67e0bcfb82b829a538b864691e10dc5249ef6080d9a175cf0454e9852e",
+      "classification": "public-evidence-whitelist"
+    },
+    {
+      "path": "capacity-probe10-boundary-focused-tests.log",
+      "bytes": 616,
+      "sha256": "11dc643f5b306bd90dc99617966ef056ccbada51595ad6ec94ddbe2ac23700b4",
+      "classification": "public-evidence-whitelist"
+    },
+    {
+      "path": "capacity-probe10-boundary-complete-tests.log",
+      "bytes": 30718,
+      "sha256": "98a1a690a06a239f7441195244b25cdf5df9e56e18b06a85996fb5b8b0e22308",
+      "classification": "public-evidence-whitelist"
+    },
+    {
+      "path": "native-10-candidate-static-readiness-v1.json",
+      "bytes": 3793,
+      "sha256": "65b67ea904b9654dac8ac892feae1c33d1a12107dfac9944d05299d77be6ec2b",
+      "classification": "public-evidence-whitelist"
+    },
+    {
+      "path": "native-10-io-guard-diagnostics-v2.json",
+      "bytes": 118820,
+      "sha256": "44bff493770454209dae3ef5c530ce6184c7cb227632a76edafb9e61690d5d21",
+      "classification": "public-evidence-whitelist"
+    },
+    {
+      "path": "canonical-spawn-mirror-crosscheck.json",
+      "bytes": 3945,
+      "sha256": "54567a1166bac91e404789bcfe75fdddb257f6d65af7d2a436e1955f159827bd",
+      "classification": "public-evidence-whitelist"
+    },
+    {
+      "path": "release-native-10-feasibility-01/gateway-build-pin.json",
+      "bytes": 618,
+      "sha256": "e2c03d4cf52005de19844d228c2495694a773d999c91519ad2d3673767ff9739",
+      "classification": "public-evidence-whitelist"
+    },
+    {
+      "path": "release-native-10-feasibility-01/realm-process.json",
+      "bytes": 793,
+      "sha256": "74849761dc1fbc40649aad4c99461a829ff046bbae1f99371264a9f53b78a00f",
+      "classification": "public-evidence-whitelist"
+    },
+    {
+      "path": "release-native-10-feasibility-01/provisioning.json",
+      "bytes": 282,
+      "sha256": "556fdd5acc451cc628c3eb506cbf6295bdfb05506e217caabdb0169bf1042fc4",
+      "classification": "public-evidence-whitelist"
+    },
+    {
+      "path": "release-native-10-feasibility-01/scenario.json",
+      "bytes": 1176,
+      "sha256": "33e20d0ba000003398e3cac5a09be7859b739b0d10ba17544160a0ca86a69450",
+      "classification": "public-evidence-whitelist"
+    },
+    {
+      "path": "release-native-10-feasibility-01/resource-profile.json",
+      "bytes": 1179,
+      "sha256": "1aa9590dde0267289ef2e0190ded88a8a30588459bccbf0865007e843ee278ae",
+      "classification": "public-evidence-whitelist"
+    },
+    {
+      "path": "release-native-10-feasibility-01/run-options.json",
+      "bytes": 645,
+      "sha256": "e686ef1efd705dd137aecd90e899ed9ff58c9e71c9dca80ce0a89be178817eb3",
+      "classification": "public-evidence-whitelist"
+    },
+    {
+      "path": "release-native-10-feasibility-01/run-options-admitted-v2.json",
+      "bytes": 890,
+      "sha256": "3ea06604705c4393e554dd1d236cc9b9dad10d76db459940426c013bd8b2b30d",
+      "classification": "public-evidence-whitelist"
+    },
+    {
+      "path": "release-native-10-feasibility-01/source-pins.json",
+      "bytes": 4306,
+      "sha256": "dcdf669b250ee39d49b20ae3e5541bc8b78caefb135c7fbe0f199fb4c0ad7b88",
+      "classification": "public-evidence-whitelist"
+    },
+    {
+      "path": "release-native-10-feasibility-01/source-pins-launcher-v2.json",
+      "bytes": 4787,
+      "sha256": "4962cee05e0d7d7acf67b653643ffcefe1d226ff712a12f845759e71bbc45b2a",
+      "classification": "public-evidence-whitelist"
+    },
+    {
+      "path": "release-native-10-feasibility-01/source-pins-admitted-v3.json",
+      "bytes": 5022,
+      "sha256": "09a65b5eb2b79116a0eaae2f5a9f5c627d5948ba9d9e79ef874bbe39e0f746a5",
+      "classification": "public-evidence-whitelist"
+    },
+    {
+      "path": "release-native-10-feasibility-01/preflight-probe-limit-rejection.json",
+      "bytes": 1074,
+      "sha256": "2adf6a603c117507c704565fe4b943e0347af71044d70e59a9e57238cedf3c89",
+      "classification": "public-evidence-whitelist"
+    },
+    {
+      "path": "release-native-10-feasibility-01/realm-cleanup.json",
+      "bytes": 1040,
+      "sha256": "5362481d6b8cfdefbb8dcde7e8afa20758237c48d7b2c252d18ab9a61db718ba",
+      "classification": "public-evidence-whitelist"
+    },
+    {
+      "path": "release-native-10-feasibility-02/gateway-build-pin.json",
+      "bytes": 618,
+      "sha256": "fb141a28f1b502a9cd4f274ea7763ba2f83d3747c50aa3d812c9b236fadaa615",
+      "classification": "public-evidence-whitelist"
+    },
+    {
+      "path": "release-native-10-feasibility-02/realm-process.json",
+      "bytes": 793,
+      "sha256": "323bfa1fa65e4471d228b196cd600081a68083bd455b5737eb10c4125360175f",
+      "classification": "public-evidence-whitelist"
+    },
+    {
+      "path": "release-native-10-feasibility-02/provisioning.json",
+      "bytes": 282,
+      "sha256": "556fdd5acc451cc628c3eb506cbf6295bdfb05506e217caabdb0169bf1042fc4",
+      "classification": "public-evidence-whitelist"
+    },
+    {
+      "path": "release-native-10-feasibility-02/scenario.json",
+      "bytes": 1176,
+      "sha256": "33e20d0ba000003398e3cac5a09be7859b739b0d10ba17544160a0ca86a69450",
+      "classification": "public-evidence-whitelist"
+    },
+    {
+      "path": "release-native-10-feasibility-02/resource-profile.json",
+      "bytes": 1179,
+      "sha256": "9379e369bb2630a398e2fb1f678202a4c9d4929a916b5d7ef4a8c9aa98297715",
+      "classification": "public-evidence-whitelist"
+    },
+    {
+      "path": "release-native-10-feasibility-02/run-options.json",
+      "bytes": 699,
+      "sha256": "0a97a6825c42056904b57d7aaf7c19016c7f1ab409572943a7f1d74137260f14",
+      "classification": "public-evidence-whitelist"
+    },
+    {
+      "path": "release-native-10-feasibility-02/run-options-admitted-v2.json",
+      "bytes": 1020,
+      "sha256": "4ebf928590d8e4e9ec7e621ed7edfd479217b67fe947b667d7ebe9a079de07bf",
+      "classification": "public-evidence-whitelist"
+    },
+    {
+      "path": "release-native-10-feasibility-02/source-pins.json",
+      "bytes": 4360,
+      "sha256": "ce4651ce5f3d9dbd472c3d815a02604dc59ed03548727a7268db676e4be87700",
+      "classification": "public-evidence-whitelist"
+    },
+    {
+      "path": "release-native-10-feasibility-02/source-pins-checkpoint-v2.json",
+      "bytes": 5700,
+      "sha256": "934c1137d64b1ea1e4580986984ee47832ca97c7f9726006a726d658d63dc26c",
+      "classification": "public-evidence-whitelist"
+    },
+    {
+      "path": "release-native-10-feasibility-02/realm-cleanup.json",
+      "bytes": 1094,
+      "sha256": "5760821e053db6db8dfb7ebb143d96ce3fcf855f207e0b6112686c6ed165c443",
+      "classification": "public-evidence-whitelist"
+    },
+    {
+      "path": "release-native-10-feasibility-02/reports/1792859765238-d670d739.report.json",
+      "bytes": 18669,
+      "sha256": "1de11b8e97a1dcd81996ce3422516cd2909336b979a5a22b7aec989a6eb39a2e",
+      "classification": "public-evidence-whitelist"
+    },
+    {
+      "path": "start-release-native-10-feasibility-01.ps1",
+      "bytes": 3873,
+      "sha256": "0e5a8984217a239c1110af87652da3b47aa30ee04ab7dcb5fbbfa3ff9b3fa124",
+      "classification": "public-evidence-whitelist"
+    },
+    {
+      "path": "start-release-native-10-feasibility-02.ps1",
+      "bytes": 3873,
+      "sha256": "f34e3a3bf69d980c3fcac7fc582cb68721ff39368e2f53a4565cb3b9e688b7e4",
+      "classification": "public-evidence-whitelist"
+    }
+  ],
+  "externalArchives": [
+    {
+      "path": "release-native-10-feasibility-01/monitor-history.jsonl",
+      "bytes": 212271,
+      "sha256": "a3da1fc6e23eef5e4e3895c70bbb561b314d493cff7261f91305cc0af8bff499",
+      "kind": "resource-monitor-history-jsonl",
+      "copyToRepository": false
+    },
+    {
+      "path": "release-native-10-feasibility-02/monitor-history.jsonl",
+      "bytes": 250241,
+      "sha256": "90150df9844c0ef4bb8480dd3b64c902c8b48bea12e6ac76a41b32cfbb9675b1",
+      "kind": "resource-monitor-history-jsonl",
+      "copyToRepository": false
+    },
+    {
+      "path": "release-native-10-feasibility-02/reports/1792859765238-d670d739.samples.jsonl",
+      "bytes": 544296,
+      "sha256": "4d2be353fc0059ed28e6d43b6adb0a8913b0b4678a75e1f436c1d031d70fc74e",
+      "kind": "capacity-samples-jsonl",
+      "copyToRepository": false
+    }
+  ],
+  "attempts": [
+    {
+      "id": "native10-preflight-cap5",
+      "realm": "release-native-10-feasibility-01",
+      "realGameplayAttempt": false,
+      "loginRequests": 0,
+      "charactersCreated": 0,
+      "error": "Original frozen probe actor limit5 rejected requested10 before gameplay",
+      "capacityAccepted": false,
+      "formalRunStarted": false
+    },
+    {
+      "id": "1792859765238-d670d739",
+      "realm": "release-native-10-feasibility-02",
+      "realGameplayAttempt": true,
+      "report": "release-native-10-feasibility-02/reports/1792859765238-d670d739.report.json",
+      "raw": "release-native-10-feasibility-02/reports/1792859765238-d670d739.samples.jsonl",
+      "phase": "bootstrap-10",
+      "phaseCompleted": false,
+      "measuredStageCount": 0,
+      "measuredSoakSeconds": 0,
+      "driverPeakAdmitted": 9,
+      "monitorPeakActive": 10,
+      "stop": "Original process total IO operation rate >100000/s for3consecutive samples; write-dominated, not disk IOPS or machine exhaustion",
+      "capacityAccepted": false,
+      "formalRunStarted": false,
+      "cleanupErrors": []
+    }
+  ],
+  "runtimeToolHistory": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "repositoryCommit": "68f810b442321ae66360a2be18e31dc309efdaf7",
+      "bytes": 36587,
+      "sha256": "57ed24a66b065a758694b3bef7d99ce54ae6081d9d1b6e09672d8bc93dd522d4",
+      "probeActorLimit": 5
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "repositoryCommit": "38194647a59bc356259e442b3f837e8c231e279d",
+      "bytes": 36588,
+      "sha256": "1e067f87fd9cbb2a2c370823ccca1d3c6046b23e45e7c5e6108d5d883f347bcc",
+      "probeActorLimit": 10
+    }
+  ],
+  "actualAttemptRepositoryCommit": "38194647a59bc356259e442b3f837e8c231e279d",
+  "backendHistory": {
+    "immutableExecutableSha256": "99bca561822a2d02bd4a012546c228923f3f34e6612612085d6caed9f82ee50d",
+    "executableBytes": 87100416,
+    "sourcePin": "C:/mir2-build/p01-completion-20261024/backend-source-frozen.json",
+    "sourceHistoryCommit": "38194647a59bc356259e442b3f837e8c231e279d",
+    "authority": "Root verified32historical backend inputs against commit3819 before sole actual10 attempt; source/build inputs retained unchanged"
+  },
+  "excluded": [
+    "all private directories",
+    "account pool/passwords/account store/auth ledger/save recovery",
+    "raw executable bytes",
+    "default shared spectator recordings",
+    "private gateway stdout/stderr"
+  ],
+  "allOwnedRealmsStopped": true,
+  "allMonitorsStopped": true
+}

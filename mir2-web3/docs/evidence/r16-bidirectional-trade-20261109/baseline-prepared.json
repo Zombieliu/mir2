@@ -1,0 +1,542 @@
+{
+  "schema": 1,
+  "scope": "two normal WebGPU UI contexts, isolated File, wire passthrough",
+  "sourceHead": "e30af0be4376880186fe534ffdef5bdfc237b8f7",
+  "pageSha256": "3e10b49b825bed93e00597b1e78de0966599762b9cb1a709210b1c8e4aed58d5",
+  "gatewaySha256": "60dbb6b2ad9df5165dc1472dc64c7c0281e6094a1c1208c161dfccf35f5ea974",
+  "runtime": "bevy-0cd68510886134e0",
+  "passed": false,
+  "checks": [
+    {
+      "name": "normal-keyboard-invitation-and-visible-acceptance",
+      "mutualFacing": true,
+      "ordinaryPeerWalks": 2
+    },
+    {
+      "name": "both-ui-offers-visible-and-gold-held",
+      "primary": 863,
+      "peer": 641
+    }
+  ],
+  "screenshots": [
+    {
+      "role": "primary",
+      "file": "primary-offers-before-confirm.png",
+      "sha256": "7b24b72bbae328d3e8a698f0e39d41f9f6e7b5ebea6bcd1a1b40d45723e414c4"
+    },
+    {
+      "role": "peer",
+      "file": "peer-offers-before-confirm.png",
+      "sha256": "9ff18218fc39505398f2666569792e6ccd2bef615073b311d36ca1f676741615"
+    },
+    {
+      "role": "primary",
+      "file": "primary-failure.png",
+      "sha256": "715152b1c70f5e345392ff6953b87bfa513016613220051af81052116352f26a"
+    },
+    {
+      "role": "peer",
+      "file": "peer-failure.png",
+      "sha256": "1c4a31cb6504dc9270737c28616a5d9e3969298f412259bf7d4647309bd6a0be"
+    }
+  ],
+  "errors": [],
+  "modules": [
+    {
+      "role": "primary",
+      "path": "/bevy-runtime/v/bevy-0cd68510886134e0/pkg-webgpu/mir2_bevy_runtime.js",
+      "sha256": "c319fbc229c3bf23513354f342a310547fe32c2dcb9b34c8626c55c0e88d85ba",
+      "pinned": true
+    },
+    {
+      "role": "peer",
+      "path": "/bevy-runtime/v/bevy-0cd68510886134e0/pkg-webgpu/mir2_bevy_runtime.js",
+      "sha256": "c319fbc229c3bf23513354f342a310547fe32c2dcb9b34c8626c55c0e88d85ba",
+      "pinned": true
+    }
+  ],
+  "trace": [
+    {
+      "order": 1,
+      "role": "primary",
+      "phase": "normal-ui-logins",
+      "packet": "StartGame",
+      "result": 4,
+      "sha256": "06e6badbacdc6d753f5bf036f6b4a99b9136ef5cb2c542433730bf6e935bc8e8"
+    },
+    {
+      "order": 2,
+      "role": "peer",
+      "phase": "normal-ui-logins",
+      "packet": "StartGame",
+      "result": 4,
+      "sha256": "06e6badbacdc6d753f5bf036f6b4a99b9136ef5cb2c542433730bf6e935bc8e8"
+    },
+    {
+      "order": 3,
+      "role": "peer",
+      "phase": "settlement",
+      "command": {
+        "type": "walk",
+        "direction": "Down"
+      }
+    },
+    {
+      "order": 4,
+      "role": "primary",
+      "phase": "settlement",
+      "packet": "ObjectWalk",
+      "sha256": "2baf7e9ace2eb4d346edf287eed2f235a0a75829d7e7c338fb62b110a6377668",
+      "direction": "Down"
+    },
+    {
+      "order": 5,
+      "role": "peer",
+      "phase": "settlement",
+      "packet": "UserLocation",
+      "sha256": "4ab2f82e545aa1028da103a3826f95b68a040f5e743158cdd7f4a7f228a8c857",
+      "direction": "Down"
+    },
+    {
+      "order": 6,
+      "role": "peer",
+      "phase": "settlement",
+      "command": {
+        "type": "walk",
+        "direction": "Up"
+      }
+    },
+    {
+      "order": 7,
+      "role": "primary",
+      "phase": "settlement",
+      "packet": "ObjectWalk",
+      "sha256": "b9d54c024ccb00ea3fed56e02ae18f1c5da9ff3482892a6e2ffa6afae604dd68",
+      "direction": "Up"
+    },
+    {
+      "order": 8,
+      "role": "peer",
+      "phase": "settlement",
+      "packet": "UserLocation",
+      "sha256": "7ee040d22c4b8fd7d9b5b85f7338bfc28f240e0a240c4eee0e887958270b1183",
+      "direction": "Up"
+    },
+    {
+      "order": 9,
+      "role": "peer",
+      "phase": "settlement",
+      "command": {
+        "type": "tradeRequest"
+      }
+    },
+    {
+      "order": 10,
+      "role": "peer",
+      "phase": "settlement",
+      "snapshot": true,
+      "gold": 700,
+      "tick": 4,
+      "trade": null,
+      "economyHash": "9da1639faf35f5d2ae9a465781c8f54ee3a02095230be8904f88d1e3d41443e6"
+    },
+    {
+      "order": 11,
+      "role": "primary",
+      "phase": "settlement",
+      "packet": "TradeRequest",
+      "sha256": "2349271a32f5afcc9e948ffd0e5d5a7a2f6120736be9c66d51f3004ad1e7aecd"
+    },
+    {
+      "order": 12,
+      "role": "primary",
+      "phase": "settlement",
+      "command": {
+        "type": "tradeReply",
+        "acceptInvite": true
+      }
+    },
+    {
+      "order": 13,
+      "role": "primary",
+      "phase": "settlement",
+      "packet": "TradeAccept",
+      "sha256": "47e9bea19c4eb4c706748ce314ab85853d1f304e3a76cdd336aebf3cb4da9156"
+    },
+    {
+      "order": 14,
+      "role": "primary",
+      "phase": "settlement",
+      "snapshot": true,
+      "gold": 1000,
+      "tick": 18,
+      "trade": {
+        "prepared": false,
+        "locked": false,
+        "offeredGold": 0
+      },
+      "economyHash": "2c494ea678c6072ee73ada9d472a6cfaeb6ffd82cf75f883fae22b538cc3698f"
+    },
+    {
+      "order": 15,
+      "role": "peer",
+      "phase": "settlement",
+      "packet": "TradeAccept",
+      "sha256": "ff7c91bb8e9f088cdedf3dc58f6ef3dcb20f242629f62c2939877ab3b81665c0"
+    },
+    {
+      "order": 16,
+      "role": "peer",
+      "phase": "settlement",
+      "snapshot": true,
+      "gold": 700,
+      "tick": 7,
+      "trade": {
+        "prepared": false,
+        "locked": false,
+        "offeredGold": 0
+      },
+      "economyHash": "9da1639faf35f5d2ae9a465781c8f54ee3a02095230be8904f88d1e3d41443e6"
+    },
+    {
+      "order": 17,
+      "role": "primary",
+      "phase": "settlement",
+      "command": {
+        "type": "depositTradeItem",
+        "from": 3,
+        "to": 0
+      }
+    },
+    {
+      "order": 18,
+      "role": "primary",
+      "phase": "settlement",
+      "packet": "DepositTradeItem",
+      "from": 3,
+      "to": 0,
+      "success": true,
+      "sha256": "d103ad27c30c59d178abdf2f418408584eb48a504a75aae07332ddb796b845bf",
+      "wire": "{\"packet\":\"DepositTradeItem\",\"payload\":{\"from\":3,\"success\":true,\"to\":0},\"type\":\"packet\"}"
+    },
+    {
+      "order": 19,
+      "role": "peer",
+      "phase": "settlement",
+      "packet": "TradeItem",
+      "sha256": "efb22b6b4ea50f3fa435a0fccd87d44561eec5509b539d1bd0bb88ae57e0cf53",
+      "items": [
+        {
+          "itemIndex": 722,
+          "uidHash": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "order": 20,
+      "role": "peer",
+      "phase": "settlement",
+      "snapshot": true,
+      "gold": 700,
+      "tick": 10,
+      "trade": {
+        "prepared": false,
+        "locked": false,
+        "offeredGold": 0
+      },
+      "economyHash": "9da1639faf35f5d2ae9a465781c8f54ee3a02095230be8904f88d1e3d41443e6"
+    },
+    {
+      "order": 21,
+      "role": "primary",
+      "phase": "settlement",
+      "snapshot": true,
+      "gold": 1000,
+      "tick": 60,
+      "trade": {
+        "prepared": false,
+        "locked": false,
+        "offeredGold": 0
+      },
+      "economyHash": "2c494ea678c6072ee73ada9d472a6cfaeb6ffd82cf75f883fae22b538cc3698f"
+    },
+    {
+      "order": 22,
+      "role": "peer",
+      "phase": "settlement",
+      "command": {
+        "type": "depositTradeItem",
+        "from": 0,
+        "to": 0
+      }
+    },
+    {
+      "order": 23,
+      "role": "peer",
+      "phase": "settlement",
+      "packet": "DepositTradeItem",
+      "from": 0,
+      "to": 0,
+      "success": true,
+      "sha256": "c358b159bd4fec01fae490d781e8dc0f38d1137bf51b6397fe956e4faa083c44",
+      "wire": "{\"packet\":\"DepositTradeItem\",\"payload\":{\"from\":0,\"success\":true,\"to\":0},\"type\":\"packet\"}"
+    },
+    {
+      "order": 24,
+      "role": "peer",
+      "phase": "settlement",
+      "snapshot": true,
+      "gold": 700,
+      "tick": 12,
+      "trade": {
+        "prepared": false,
+        "locked": false,
+        "offeredGold": 0
+      },
+      "economyHash": "9da1639faf35f5d2ae9a465781c8f54ee3a02095230be8904f88d1e3d41443e6"
+    },
+    {
+      "order": 25,
+      "role": "primary",
+      "phase": "settlement",
+      "packet": "TradeItem",
+      "sha256": "93e255e006c69cf2541cb29ff266cd0ed1d6f073612eba409d35b550092f5517",
+      "items": [
+        {
+          "itemIndex": 221,
+          "uidHash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "order": 26,
+      "role": "primary",
+      "phase": "settlement",
+      "snapshot": true,
+      "gold": 1000,
+      "tick": 65,
+      "trade": {
+        "prepared": false,
+        "locked": false,
+        "offeredGold": 0
+      },
+      "economyHash": "2c494ea678c6072ee73ada9d472a6cfaeb6ffd82cf75f883fae22b538cc3698f"
+    },
+    {
+      "order": 27,
+      "role": "primary",
+      "phase": "settlement",
+      "command": {
+        "type": "tradeGold",
+        "amount": 137
+      }
+    },
+    {
+      "order": 28,
+      "role": "primary",
+      "phase": "settlement",
+      "packet": "LoseGold",
+      "gold": 137,
+      "sha256": "b16899d2063806cd372cfb272a47c966bbc70a9f5c493b29dbf8b427d4a6db62",
+      "wire": "{\"packet\":\"LoseGold\",\"payload\":{\"gold\":137},\"type\":\"packet\"}"
+    },
+    {
+      "order": 29,
+      "role": "primary",
+      "phase": "settlement",
+      "snapshot": true,
+      "gold": 863,
+      "tick": 67,
+      "trade": {
+        "prepared": false,
+        "locked": false,
+        "offeredGold": 137
+      },
+      "economyHash": "9fc66a5536276c3f8893ffb2ac3c8e4f22c081c929d55a9849d009f944528527"
+    },
+    {
+      "order": 30,
+      "role": "peer",
+      "phase": "settlement",
+      "packet": "TradeGold",
+      "amount": 137,
+      "sha256": "af473741d9c76d874de0e93cd5c01335708e349fff4b8cf17465db20ee9ab5bc",
+      "wire": "{\"packet\":\"TradeGold\",\"payload\":{\"amount\":137,\"partnerGold\":137},\"type\":\"packet\"}"
+    },
+    {
+      "order": 31,
+      "role": "peer",
+      "phase": "settlement",
+      "snapshot": true,
+      "gold": 700,
+      "tick": 18,
+      "trade": {
+        "prepared": false,
+        "locked": false,
+        "offeredGold": 0
+      },
+      "economyHash": "9da1639faf35f5d2ae9a465781c8f54ee3a02095230be8904f88d1e3d41443e6"
+    },
+    {
+      "order": 32,
+      "role": "peer",
+      "phase": "settlement",
+      "command": {
+        "type": "tradeGold",
+        "amount": 59
+      }
+    },
+    {
+      "order": 33,
+      "role": "peer",
+      "phase": "settlement",
+      "packet": "LoseGold",
+      "gold": 59,
+      "sha256": "2003de8e622e4e233b0cc0c2407a7d53f556461bd3d07ac4344450206ec6034a",
+      "wire": "{\"packet\":\"LoseGold\",\"payload\":{\"gold\":59},\"type\":\"packet\"}"
+    },
+    {
+      "order": 34,
+      "role": "peer",
+      "phase": "settlement",
+      "snapshot": true,
+      "gold": 641,
+      "tick": 20,
+      "trade": {
+        "prepared": false,
+        "locked": false,
+        "offeredGold": 59
+      },
+      "economyHash": "42529fbbab61a5cfc3ed9e7dffad3e36c8db6c68a8b103e12aea76c49ea40086"
+    },
+    {
+      "order": 35,
+      "role": "primary",
+      "phase": "settlement",
+      "packet": "TradeGold",
+      "amount": 59,
+      "sha256": "0b35e01af6b316929b71b9f6f6afd3d6f1d6e46720d13aac1f6f80f19d96023b",
+      "wire": "{\"packet\":\"TradeGold\",\"payload\":{\"amount\":59,\"partnerGold\":59},\"type\":\"packet\"}"
+    },
+    {
+      "order": 36,
+      "role": "primary",
+      "phase": "settlement",
+      "snapshot": true,
+      "gold": 863,
+      "tick": 70,
+      "trade": {
+        "prepared": false,
+        "locked": false,
+        "offeredGold": 137
+      },
+      "economyHash": "9fc66a5536276c3f8893ffb2ac3c8e4f22c081c929d55a9849d009f944528527"
+    },
+    {
+      "order": 37,
+      "role": "primary",
+      "phase": "settlement",
+      "command": {
+        "type": "tradeConfirm",
+        "locked": true
+      }
+    },
+    {
+      "order": 38,
+      "role": "primary",
+      "phase": "settlement",
+      "snapshot": true,
+      "gold": 863,
+      "tick": 73,
+      "trade": {
+        "prepared": true,
+        "locked": true,
+        "offeredGold": 137
+      },
+      "economyHash": "8b6c6c2ddce960b09edb8a3b81923e71c2d9d46137677c2c850e13cfaa4e7a29"
+    }
+  ],
+  "assetsBefore": {
+    "primary": {
+      "gold": 1000,
+      "bag": [
+        {
+          "slot": 0,
+          "uidHash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-221"
+        },
+        {
+          "slot": 1,
+          "uidHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-317"
+        },
+        {
+          "slot": 2,
+          "uidHash": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-658"
+        },
+        {
+          "slot": 3,
+          "uidHash": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        }
+      ],
+      "belt": [],
+      "equipment": []
+    },
+    "peer": {
+      "gold": 700,
+      "bag": [
+        {
+          "slot": 0,
+          "uidHash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-221"
+        },
+        {
+          "slot": 1,
+          "uidHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-317"
+        },
+        {
+          "slot": 2,
+          "uidHash": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-658"
+        },
+        {
+          "slot": 3,
+          "uidHash": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+          "quantity": 1,
+          "container": "bag1",
+          "key": "crystal-item-722"
+        }
+      ],
+      "belt": [],
+      "equipment": []
+    }
+  },
+  "failure": {
+    "phase": "settlement",
+    "name": "Error",
+    "code": null,
+    "messageHash": "0bd1f966e60b255ba602c1693ef1652104c5d892676d8bf1476efc6855dda736",
+    "safeCode": "FIRST_CONFIRM_NOT_VISIBLE"
+  },
+  "browserClosed": true,
+  "phase": "settlement"
+}

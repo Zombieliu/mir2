@@ -1,0 +1,15 @@
+import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';import {spawn}from'node:child_process';
+const base='C:/mir2-build/p01-completion-20261024',dir=base+'/shared-experience-parse-cache-c-baseline-control-v1',project='C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3',file=project+'/apps/simulation/src/runtime/shared_experience_profile.rs';
+const baseline=JSON.parse(fs.readFileSync(base+'/backend-source-account-store-wait-diagnostics-v1.json','utf8')),preimage=base+'/shared-experience-authority-parse-cache-v1/shared_experience_profile.rs.before-cache-v1.txt';
+const hash=b=>crypto.createHash('sha256').update(b).digest('hex'),pin=f=>{const b=fs.readFileSync(f);return{file:f,bytes:b.length,sha256:hash(b)};};
+const candidate=fs.readFileSync(file),old=fs.readFileSync(preimage),expected=baseline.files.find(x=>x.path.endsWith('/shared_experience_profile.rs'));
+if(hash(old)!==expected.sha256||old.length!==expected.bytes)throw Error('Old raw is not the actual C backend input');
+fs.writeFileSync(dir+'/candidate-preserved-v1.rs.txt',candidate,{flag:'wx'});
+const args=['run','1.95.0','cargo','test','--locked','--offline','--jobs','4','-p','mir2-gateway','--lib','guild_kill_source_','--','--nocapture','--test-threads=1'];
+const stdout=dir+'/control-stdout-v1.log',stderr=dir+'/control-stderr-v1.log';let result,error=null,controlExact=false;
+const startedAt=new Date().toISOString();try{
+ fs.writeFileSync(file,old);controlExact=baseline.files.every(x=>{const b=fs.readFileSync(path.join(path.dirname(project),x.path));return b.length===x.bytes&&hash(b)===x.sha256;});if(!controlExact)throw Error('Not all50 exact C inputs');
+ const out=fs.openSync(stdout,'wx'),err=fs.openSync(stderr,'wx');try{const child=spawn('C:/Users/Administrator/.cargo/bin/rustup.exe',args,{cwd:project,windowsHide:true,stdio:['ignore',out,err]});result=await new Promise(resolve=>{child.once('error',e=>resolve({exitCode:null,signal:null,error:String(e)}));child.once('exit',(code,signal)=>resolve({exitCode:code,signal,error:null}));});}finally{fs.closeSync(out);fs.closeSync(err);}
+}catch(e){error=String(e);}finally{fs.writeFileSync(file,candidate);}
+const text=fs.existsSync(stdout)?fs.readFileSync(stdout,'utf8'):'';
+const receipt={schemaVersion:1,startedAt,endedAt:new Date().toISOString(),command:['rustup',...args],baselineBackendCommit:baseline.sourceCommit,all50ControlInputsExactC:controlExact,result,error,candidateRestoredExactly:fs.readFileSync(file).equals(candidate),candidateRestoredPin:pin(file),preimage:pin(preimage),logs:[stdout,stderr].filter(x=>fs.existsSync(x)).map(pin),testSummary:text.match(/test result: .+/g),capacityAcceptance:false};fs.writeFileSync(dir+'/actual-control-receipt-v1.json',JSON.stringify(receipt,null,2)+'\n',{flag:'wx'});console.log(JSON.stringify(receipt));process.exitCode=error||!receipt.candidateRestoredExactly?1:0;

@@ -1,0 +1,6741 @@
+{
+  "credentialsRedacted": true,
+  "duringRunOfflineReplenishmentAllowed": false,
+  "fixtureCount": 27,
+  "fixtureFrozenBeforeRun": true,
+  "initialMap": "0",
+  "initialPosition": {
+    "x": 335,
+    "y": 267
+  },
+  "kind": "offline-owned-level-equipment",
+  "measurementFixtureCount": 24,
+  "naturalProgression": false,
+  "onlineConnections": 0,
+  "ordinaryTimedCompletion": false,
+  "preparation": "Canonical unenhanced catalog items; ordinary EquipItem and UseItem(book) packets validated offline; skills rank zero; zero quest task counts or claims; no summoned pets, guild, mentor, EXP buff or GM privileges.",
+  "profile": "platinum-176",
+  "questProfile": "newcomer-v2",
+  "receipts": [
+    {
+      "carriedWeights": {
+        "bag": 56,
+        "hand": 10,
+        "wear": 16
+      },
+      "characterIndex": 1001,
+      "className": "Warrior",
+      "completedClaims": 0,
+      "gmLevel": 0,
+      "hp": 89,
+      "initialBagSlots": 5,
+      "initialGold": 20000,
+      "initialLevel": 10,
+      "inventoryCatalogValue": 20520,
+      "items": [
+        {
+          "catalogValue": 1100,
+          "itemIndex": 226,
+          "kind": "equipment",
+          "name": "IronSword",
+          "quantity": 1,
+          "slotIndex": 0,
+          "unenhanced": true,
+          "unitCatalogPrice": 1100
+        },
+        {
+          "catalogValue": 120,
+          "itemIndex": 317,
+          "kind": "equipment",
+          "name": "BaseDress(M)",
+          "quantity": 1,
+          "slotIndex": 1,
+          "unenhanced": true,
+          "unitCatalogPrice": 120
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 534,
+          "kind": "equipment",
+          "name": "GoldNecklace",
+          "quantity": 1,
+          "slotIndex": 4,
+          "unenhanced": true,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 900,
+          "itemIndex": 407,
+          "kind": "equipment",
+          "name": "HornRing",
+          "quantity": 1,
+          "slotIndex": 7,
+          "unenhanced": true,
+          "unitCatalogPrice": 900
+        },
+        {
+          "catalogValue": 900,
+          "itemIndex": 407,
+          "kind": "equipment",
+          "name": "HornRing",
+          "quantity": 1,
+          "slotIndex": 8,
+          "unenhanced": true,
+          "unitCatalogPrice": 900
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 480,
+          "kind": "equipment",
+          "name": "SteelBracelet",
+          "quantity": 1,
+          "slotIndex": 5,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 480,
+          "kind": "equipment",
+          "name": "SteelBracelet",
+          "quantity": 1,
+          "slotIndex": 6,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 595,
+          "kind": "equipment",
+          "name": "BronzeHelmet",
+          "quantity": 1,
+          "slotIndex": 2,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 612,
+          "kind": "equipment",
+          "name": "LeatherBelt",
+          "quantity": 1,
+          "slotIndex": 10,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 620,
+          "kind": "equipment",
+          "name": "LowShoes",
+          "quantity": 1,
+          "slotIndex": 11,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 973,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Fencing",
+          "quantity": 1,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 1600,
+          "itemIndex": 658,
+          "kind": "supply",
+          "name": "(HP)DrugSmall",
+          "offlineGranted": true,
+          "quantity": 40,
+          "unitCatalogPrice": 40
+        },
+        {
+          "catalogValue": 400,
+          "itemIndex": 659,
+          "kind": "supply",
+          "name": "(MP)DrugSmall",
+          "offlineGranted": true,
+          "quantity": 10,
+          "unitCatalogPrice": 40
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 719,
+          "kind": "supply",
+          "name": "TownTeleport",
+          "offlineGranted": true,
+          "quantity": 1,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 717,
+          "kind": "supply",
+          "name": "RandomTeleport",
+          "offlineGranted": true,
+          "quantity": 5,
+          "unitCatalogPrice": 100
+        }
+      ],
+      "maxHp": 89,
+      "maxMp": 46,
+      "mp": 46,
+      "offlineProvisioning": true,
+      "omittedOptionalEquipment": [],
+      "preSummonedPets": 0,
+      "purchaseGoldDebited": 0,
+      "saveSha256": "180ab155ce8538b443c2e09a97765dcdcff3e57930a6c6ae7e4d847c102fee76",
+      "scenarioId": "measure-Warrior-10",
+      "skills": [
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 0,
+          "rank": 0,
+          "spell": "Fencing"
+        }
+      ],
+      "taskCounters": 0,
+      "weightCapacities": {
+        "bag": 83,
+        "hand": 19,
+        "wear": 20
+      }
+    },
+    {
+      "carriedWeights": {
+        "bag": 56,
+        "hand": 13,
+        "wear": 19
+      },
+      "characterIndex": 1002,
+      "className": "Warrior",
+      "completedClaims": 0,
+      "gmLevel": 0,
+      "hp": 135,
+      "initialBagSlots": 5,
+      "initialGold": 20000,
+      "initialLevel": 14,
+      "inventoryCatalogValue": 25000,
+      "items": [
+        {
+          "catalogValue": 1500,
+          "itemIndex": 227,
+          "kind": "equipment",
+          "name": "BronzeAxe",
+          "quantity": 1,
+          "slotIndex": 0,
+          "unenhanced": true,
+          "unitCatalogPrice": 1500
+        },
+        {
+          "catalogValue": 2500,
+          "itemIndex": 319,
+          "kind": "equipment",
+          "name": "LightArmour(M)",
+          "quantity": 1,
+          "slotIndex": 1,
+          "unenhanced": true,
+          "unitCatalogPrice": 2500
+        },
+        {
+          "catalogValue": 1200,
+          "itemIndex": 536,
+          "kind": "equipment",
+          "name": "BlackNecklace",
+          "quantity": 1,
+          "slotIndex": 4,
+          "unenhanced": true,
+          "unitCatalogPrice": 1200
+        },
+        {
+          "catalogValue": 900,
+          "itemIndex": 407,
+          "kind": "equipment",
+          "name": "HornRing",
+          "quantity": 1,
+          "slotIndex": 7,
+          "unenhanced": true,
+          "unitCatalogPrice": 900
+        },
+        {
+          "catalogValue": 900,
+          "itemIndex": 407,
+          "kind": "equipment",
+          "name": "HornRing",
+          "quantity": 1,
+          "slotIndex": 8,
+          "unenhanced": true,
+          "unitCatalogPrice": 900
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 480,
+          "kind": "equipment",
+          "name": "SteelBracelet",
+          "quantity": 1,
+          "slotIndex": 5,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 480,
+          "kind": "equipment",
+          "name": "SteelBracelet",
+          "quantity": 1,
+          "slotIndex": 6,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 596,
+          "kind": "equipment",
+          "name": "MagicHelmet",
+          "quantity": 1,
+          "slotIndex": 2,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 612,
+          "kind": "equipment",
+          "name": "LeatherBelt",
+          "quantity": 1,
+          "slotIndex": 10,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 620,
+          "kind": "equipment",
+          "name": "LowShoes",
+          "quantity": 1,
+          "slotIndex": 11,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 973,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Fencing",
+          "quantity": 1,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 1600,
+          "itemIndex": 658,
+          "kind": "supply",
+          "name": "(HP)DrugSmall",
+          "offlineGranted": true,
+          "quantity": 40,
+          "unitCatalogPrice": 40
+        },
+        {
+          "catalogValue": 400,
+          "itemIndex": 659,
+          "kind": "supply",
+          "name": "(MP)DrugSmall",
+          "offlineGranted": true,
+          "quantity": 10,
+          "unitCatalogPrice": 40
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 719,
+          "kind": "supply",
+          "name": "TownTeleport",
+          "offlineGranted": true,
+          "quantity": 1,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 717,
+          "kind": "supply",
+          "name": "RandomTeleport",
+          "offlineGranted": true,
+          "quantity": 5,
+          "unitCatalogPrice": 100
+        }
+      ],
+      "maxHp": 135,
+      "maxMp": 60,
+      "mp": 60,
+      "offlineProvisioning": true,
+      "omittedOptionalEquipment": [],
+      "preSummonedPets": 0,
+      "purchaseGoldDebited": 0,
+      "saveSha256": "cb7cd39ab6204580a3edf44bbcaf53a4dc1023639295568ba3097aa3f420b2e7",
+      "scenarioId": "measure-Warrior-14",
+      "skills": [
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 0,
+          "rank": 0,
+          "spell": "Fencing"
+        }
+      ],
+      "taskCounters": 0,
+      "weightCapacities": {
+        "bag": 115,
+        "hand": 27,
+        "wear": 24
+      }
+    },
+    {
+      "carriedWeights": {
+        "bag": 86,
+        "hand": 13,
+        "wear": 19
+      },
+      "characterIndex": 1003,
+      "className": "Warrior",
+      "completedClaims": 0,
+      "gmLevel": 0,
+      "hp": 149,
+      "initialBagSlots": 5,
+      "initialGold": 50000,
+      "initialLevel": 15,
+      "inventoryCatalogValue": 32400,
+      "items": [
+        {
+          "catalogValue": 1500,
+          "itemIndex": 227,
+          "kind": "equipment",
+          "name": "BronzeAxe",
+          "quantity": 1,
+          "slotIndex": 0,
+          "unenhanced": true,
+          "unitCatalogPrice": 1500
+        },
+        {
+          "catalogValue": 2500,
+          "itemIndex": 319,
+          "kind": "equipment",
+          "name": "LightArmour(M)",
+          "quantity": 1,
+          "slotIndex": 1,
+          "unenhanced": true,
+          "unitCatalogPrice": 2500
+        },
+        {
+          "catalogValue": 1200,
+          "itemIndex": 536,
+          "kind": "equipment",
+          "name": "BlackNecklace",
+          "quantity": 1,
+          "slotIndex": 4,
+          "unenhanced": true,
+          "unitCatalogPrice": 1200
+        },
+        {
+          "catalogValue": 900,
+          "itemIndex": 407,
+          "kind": "equipment",
+          "name": "HornRing",
+          "quantity": 1,
+          "slotIndex": 7,
+          "unenhanced": true,
+          "unitCatalogPrice": 900
+        },
+        {
+          "catalogValue": 900,
+          "itemIndex": 407,
+          "kind": "equipment",
+          "name": "HornRing",
+          "quantity": 1,
+          "slotIndex": 8,
+          "unenhanced": true,
+          "unitCatalogPrice": 900
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 480,
+          "kind": "equipment",
+          "name": "SteelBracelet",
+          "quantity": 1,
+          "slotIndex": 5,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 480,
+          "kind": "equipment",
+          "name": "SteelBracelet",
+          "quantity": 1,
+          "slotIndex": 6,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 596,
+          "kind": "equipment",
+          "name": "MagicHelmet",
+          "quantity": 1,
+          "slotIndex": 2,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 612,
+          "kind": "equipment",
+          "name": "LeatherBelt",
+          "quantity": 1,
+          "slotIndex": 10,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 620,
+          "kind": "equipment",
+          "name": "LowShoes",
+          "quantity": 1,
+          "slotIndex": 11,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 973,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Fencing",
+          "quantity": 1,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 974,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Slaying",
+          "quantity": 1,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 3300,
+          "itemIndex": 660,
+          "kind": "supply",
+          "name": "(HP)DrugMedium",
+          "offlineGranted": true,
+          "quantity": 30,
+          "unitCatalogPrice": 110
+        },
+        {
+          "catalogValue": 1100,
+          "itemIndex": 661,
+          "kind": "supply",
+          "name": "(MP)DrugMedium",
+          "offlineGranted": true,
+          "quantity": 10,
+          "unitCatalogPrice": 110
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 719,
+          "kind": "supply",
+          "name": "TownTeleport",
+          "offlineGranted": true,
+          "quantity": 1,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 717,
+          "kind": "supply",
+          "name": "RandomTeleport",
+          "offlineGranted": true,
+          "quantity": 5,
+          "unitCatalogPrice": 100
+        }
+      ],
+      "maxHp": 149,
+      "maxMp": 63,
+      "mp": 63,
+      "offlineProvisioning": true,
+      "omittedOptionalEquipment": [],
+      "preSummonedPets": 0,
+      "purchaseGoldDebited": 0,
+      "saveSha256": "2620c66c7d9cae676163a3dbb8fe9afd2c595c5bf7d85ce04c7cac429b34b969",
+      "scenarioId": "measure-Warrior-15",
+      "skills": [
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 0,
+          "rank": 0,
+          "spell": "Fencing"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 1,
+          "mpCost": 0,
+          "rank": 0,
+          "spell": "Slaying"
+        }
+      ],
+      "taskCounters": 0,
+      "weightCapacities": {
+        "bag": 125,
+        "hand": 29,
+        "wear": 26
+      }
+    },
+    {
+      "carriedWeights": {
+        "bag": 86,
+        "hand": 40,
+        "wear": 38
+      },
+      "characterIndex": 1004,
+      "className": "Warrior",
+      "completedClaims": 0,
+      "gmLevel": 0,
+      "hp": 294,
+      "initialBagSlots": 5,
+      "initialGold": 50000,
+      "initialLevel": 24,
+      "inventoryCatalogValue": 57000,
+      "items": [
+        {
+          "catalogValue": 10000,
+          "itemIndex": 240,
+          "kind": "equipment",
+          "name": "PowerAxe",
+          "quantity": 1,
+          "slotIndex": 0,
+          "unenhanced": true,
+          "unitCatalogPrice": 10000
+        },
+        {
+          "catalogValue": 10000,
+          "itemIndex": 323,
+          "kind": "equipment",
+          "name": "HeavyArmour(M)",
+          "quantity": 1,
+          "slotIndex": 1,
+          "unenhanced": true,
+          "unitCatalogPrice": 10000
+        },
+        {
+          "catalogValue": 1200,
+          "itemIndex": 536,
+          "kind": "equipment",
+          "name": "BlackNecklace",
+          "quantity": 1,
+          "slotIndex": 4,
+          "unenhanced": true,
+          "unitCatalogPrice": 1200
+        },
+        {
+          "catalogValue": 1200,
+          "itemIndex": 410,
+          "kind": "equipment",
+          "name": "BlueRing",
+          "quantity": 1,
+          "slotIndex": 7,
+          "unenhanced": true,
+          "unitCatalogPrice": 1200
+        },
+        {
+          "catalogValue": 1200,
+          "itemIndex": 410,
+          "kind": "equipment",
+          "name": "BlueRing",
+          "quantity": 1,
+          "slotIndex": 8,
+          "unenhanced": true,
+          "unitCatalogPrice": 1200
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 483,
+          "kind": "equipment",
+          "name": "HardGlove",
+          "quantity": 1,
+          "slotIndex": 5,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 483,
+          "kind": "equipment",
+          "name": "HardGlove",
+          "quantity": 1,
+          "slotIndex": 6,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 596,
+          "kind": "equipment",
+          "name": "MagicHelmet",
+          "quantity": 1,
+          "slotIndex": 2,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 612,
+          "kind": "equipment",
+          "name": "LeatherBelt",
+          "quantity": 1,
+          "slotIndex": 10,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 620,
+          "kind": "equipment",
+          "name": "LowShoes",
+          "quantity": 1,
+          "slotIndex": 11,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 973,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Fencing",
+          "quantity": 1,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 974,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Slaying",
+          "quantity": 1,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 8000,
+          "itemIndex": 975,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Thrusting",
+          "quantity": 1,
+          "unitCatalogPrice": 8000
+        },
+        {
+          "catalogValue": 3300,
+          "itemIndex": 660,
+          "kind": "supply",
+          "name": "(HP)DrugMedium",
+          "offlineGranted": true,
+          "quantity": 30,
+          "unitCatalogPrice": 110
+        },
+        {
+          "catalogValue": 1100,
+          "itemIndex": 661,
+          "kind": "supply",
+          "name": "(MP)DrugMedium",
+          "offlineGranted": true,
+          "quantity": 10,
+          "unitCatalogPrice": 110
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 719,
+          "kind": "supply",
+          "name": "TownTeleport",
+          "offlineGranted": true,
+          "quantity": 1,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 717,
+          "kind": "supply",
+          "name": "RandomTeleport",
+          "offlineGranted": true,
+          "quantity": 5,
+          "unitCatalogPrice": 100
+        }
+      ],
+      "maxHp": 294,
+      "maxMp": 95,
+      "mp": 95,
+      "offlineProvisioning": true,
+      "omittedOptionalEquipment": [],
+      "preSummonedPets": 0,
+      "purchaseGoldDebited": 0,
+      "saveSha256": "f0c9234a82df59a00131957cf384752c79a05ce77e2f4b2b1bbf4a3142ff414e",
+      "scenarioId": "measure-Warrior-24",
+      "skills": [
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 0,
+          "rank": 0,
+          "spell": "Fencing"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 1,
+          "mpCost": 0,
+          "rank": 0,
+          "spell": "Slaying"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 2,
+          "mpCost": 0,
+          "rank": 0,
+          "spell": "Thrusting"
+        }
+      ],
+      "taskCounters": 0,
+      "weightCapacities": {
+        "bag": 242,
+        "hand": 56,
+        "wear": 43
+      }
+    },
+    {
+      "carriedWeights": {
+        "bag": 162,
+        "hand": 20,
+        "wear": 38
+      },
+      "characterIndex": 1005,
+      "className": "Warrior",
+      "completedClaims": 0,
+      "gmLevel": 0,
+      "hp": 314,
+      "initialBagSlots": 5,
+      "initialGold": 120000,
+      "initialLevel": 25,
+      "inventoryCatalogValue": 80950,
+      "items": [
+        {
+          "catalogValue": 8000,
+          "itemIndex": 241,
+          "kind": "equipment",
+          "name": "PurifierSword",
+          "quantity": 1,
+          "slotIndex": 0,
+          "unenhanced": true,
+          "unitCatalogPrice": 8000
+        },
+        {
+          "catalogValue": 10000,
+          "itemIndex": 323,
+          "kind": "equipment",
+          "name": "HeavyArmour(M)",
+          "quantity": 1,
+          "slotIndex": 1,
+          "unenhanced": true,
+          "unitCatalogPrice": 10000
+        },
+        {
+          "catalogValue": 1200,
+          "itemIndex": 536,
+          "kind": "equipment",
+          "name": "BlackNecklace",
+          "quantity": 1,
+          "slotIndex": 4,
+          "unenhanced": true,
+          "unitCatalogPrice": 1200
+        },
+        {
+          "catalogValue": 10000,
+          "itemIndex": 420,
+          "kind": "equipment",
+          "name": "CoralRing",
+          "quantity": 1,
+          "slotIndex": 7,
+          "unenhanced": true,
+          "unitCatalogPrice": 10000
+        },
+        {
+          "catalogValue": 10000,
+          "itemIndex": 420,
+          "kind": "equipment",
+          "name": "CoralRing",
+          "quantity": 1,
+          "slotIndex": 8,
+          "unenhanced": true,
+          "unitCatalogPrice": 10000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 483,
+          "kind": "equipment",
+          "name": "HardGlove",
+          "quantity": 1,
+          "slotIndex": 5,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 483,
+          "kind": "equipment",
+          "name": "HardGlove",
+          "quantity": 1,
+          "slotIndex": 6,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 596,
+          "kind": "equipment",
+          "name": "MagicHelmet",
+          "quantity": 1,
+          "slotIndex": 2,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 612,
+          "kind": "equipment",
+          "name": "LeatherBelt",
+          "quantity": 1,
+          "slotIndex": 10,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 620,
+          "kind": "equipment",
+          "name": "LowShoes",
+          "quantity": 1,
+          "slotIndex": 11,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 973,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Fencing",
+          "quantity": 1,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 974,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Slaying",
+          "quantity": 1,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 8000,
+          "itemIndex": 975,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Thrusting",
+          "quantity": 1,
+          "unitCatalogPrice": 8000
+        },
+        {
+          "catalogValue": 9000,
+          "itemIndex": 662,
+          "kind": "supply",
+          "name": "(HP)DrugLarge",
+          "offlineGranted": true,
+          "quantity": 40,
+          "unitCatalogPrice": 225
+        },
+        {
+          "catalogValue": 2250,
+          "itemIndex": 663,
+          "kind": "supply",
+          "name": "(MP)DrugLarge",
+          "offlineGranted": true,
+          "quantity": 10,
+          "unitCatalogPrice": 225
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 719,
+          "kind": "supply",
+          "name": "TownTeleport",
+          "offlineGranted": true,
+          "quantity": 2,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 717,
+          "kind": "supply",
+          "name": "RandomTeleport",
+          "offlineGranted": true,
+          "quantity": 10,
+          "unitCatalogPrice": 100
+        }
+      ],
+      "maxHp": 314,
+      "maxMp": 98,
+      "mp": 98,
+      "offlineProvisioning": true,
+      "omittedOptionalEquipment": [],
+      "preSummonedPets": 0,
+      "purchaseGoldDebited": 0,
+      "saveSha256": "9540aa693ae4a75e9b2ff46d4ed2043f0539d3a33121f0aa7673ff28e7ba8854",
+      "scenarioId": "measure-Warrior-25",
+      "skills": [
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 0,
+          "rank": 0,
+          "spell": "Fencing"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 1,
+          "mpCost": 0,
+          "rank": 0,
+          "spell": "Slaying"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 2,
+          "mpCost": 0,
+          "rank": 0,
+          "spell": "Thrusting"
+        }
+      ],
+      "taskCounters": 0,
+      "weightCapacities": {
+        "bag": 258,
+        "hand": 60,
+        "wear": 46
+      }
+    },
+    {
+      "carriedWeights": {
+        "bag": 162,
+        "hand": 80,
+        "wear": 66
+      },
+      "characterIndex": 1006,
+      "className": "Warrior",
+      "completedClaims": 0,
+      "gmLevel": 0,
+      "hp": 513,
+      "initialBagSlots": 5,
+      "initialGold": 120000,
+      "initialLevel": 34,
+      "inventoryCatalogValue": 165950,
+      "items": [
+        {
+          "catalogValue": 50000,
+          "itemIndex": 244,
+          "kind": "equipment",
+          "name": "JudgementMace",
+          "quantity": 1,
+          "slotIndex": 0,
+          "unenhanced": true,
+          "unitCatalogPrice": 50000
+        },
+        {
+          "catalogValue": 20000,
+          "itemIndex": 333,
+          "kind": "equipment",
+          "name": "IronArmour(M)",
+          "quantity": 1,
+          "slotIndex": 1,
+          "unenhanced": true,
+          "unitCatalogPrice": 20000
+        },
+        {
+          "catalogValue": 1200,
+          "itemIndex": 536,
+          "kind": "equipment",
+          "name": "BlackNecklace",
+          "quantity": 1,
+          "slotIndex": 4,
+          "unenhanced": true,
+          "unitCatalogPrice": 1200
+        },
+        {
+          "catalogValue": 10000,
+          "itemIndex": 420,
+          "kind": "equipment",
+          "name": "CoralRing",
+          "quantity": 1,
+          "slotIndex": 7,
+          "unenhanced": true,
+          "unitCatalogPrice": 10000
+        },
+        {
+          "catalogValue": 10000,
+          "itemIndex": 420,
+          "kind": "equipment",
+          "name": "CoralRing",
+          "quantity": 1,
+          "slotIndex": 8,
+          "unenhanced": true,
+          "unitCatalogPrice": 10000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 483,
+          "kind": "equipment",
+          "name": "HardGlove",
+          "quantity": 1,
+          "slotIndex": 5,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 483,
+          "kind": "equipment",
+          "name": "HardGlove",
+          "quantity": 1,
+          "slotIndex": 6,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 596,
+          "kind": "equipment",
+          "name": "MagicHelmet",
+          "quantity": 1,
+          "slotIndex": 2,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 612,
+          "kind": "equipment",
+          "name": "LeatherBelt",
+          "quantity": 1,
+          "slotIndex": 10,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 620,
+          "kind": "equipment",
+          "name": "LowShoes",
+          "quantity": 1,
+          "slotIndex": 11,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 973,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Fencing",
+          "quantity": 1,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 974,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Slaying",
+          "quantity": 1,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 8000,
+          "itemIndex": 975,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Thrusting",
+          "quantity": 1,
+          "unitCatalogPrice": 8000
+        },
+        {
+          "catalogValue": 15000,
+          "itemIndex": 976,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "HalfMoon",
+          "quantity": 1,
+          "unitCatalogPrice": 15000
+        },
+        {
+          "catalogValue": 18000,
+          "itemIndex": 977,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "ShoulderDash",
+          "quantity": 1,
+          "unitCatalogPrice": 18000
+        },
+        {
+          "catalogValue": 9000,
+          "itemIndex": 662,
+          "kind": "supply",
+          "name": "(HP)DrugLarge",
+          "offlineGranted": true,
+          "quantity": 40,
+          "unitCatalogPrice": 225
+        },
+        {
+          "catalogValue": 2250,
+          "itemIndex": 663,
+          "kind": "supply",
+          "name": "(MP)DrugLarge",
+          "offlineGranted": true,
+          "quantity": 10,
+          "unitCatalogPrice": 225
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 719,
+          "kind": "supply",
+          "name": "TownTeleport",
+          "offlineGranted": true,
+          "quantity": 2,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 717,
+          "kind": "supply",
+          "name": "RandomTeleport",
+          "offlineGranted": true,
+          "quantity": 10,
+          "unitCatalogPrice": 100
+        }
+      ],
+      "maxHp": 513,
+      "maxMp": 130,
+      "mp": 130,
+      "offlineProvisioning": true,
+      "omittedOptionalEquipment": [],
+      "preSummonedPets": 0,
+      "purchaseGoldDebited": 0,
+      "saveSha256": "908c48280a9ac7dca5fe94511401e21c211382b01cd77045c46589fb22333812",
+      "scenarioId": "measure-Warrior-34",
+      "skills": [
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 0,
+          "rank": 0,
+          "spell": "Fencing"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 1,
+          "mpCost": 0,
+          "rank": 0,
+          "spell": "Slaying"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 2,
+          "mpCost": 0,
+          "rank": 0,
+          "spell": "Thrusting"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 3,
+          "mpCost": 3,
+          "rank": 0,
+          "spell": "HalfMoon"
+        },
+        {
+          "delayMs": 2500,
+          "hotkey": 0,
+          "mpCost": 4,
+          "rank": 0,
+          "spell": "ShoulderDash"
+        }
+      ],
+      "taskCounters": 0,
+      "weightCapacities": {
+        "bag": 435,
+        "hand": 100,
+        "wear": 72
+      }
+    },
+    {
+      "carriedWeights": {
+        "bag": 312,
+        "hand": 80,
+        "wear": 66
+      },
+      "characterIndex": 1007,
+      "className": "Warrior",
+      "completedClaims": 0,
+      "gmLevel": 0,
+      "hp": 539,
+      "initialBagSlots": 7,
+      "initialGold": 200000,
+      "initialLevel": 35,
+      "inventoryCatalogValue": 197200,
+      "items": [
+        {
+          "catalogValue": 50000,
+          "itemIndex": 244,
+          "kind": "equipment",
+          "name": "JudgementMace",
+          "quantity": 1,
+          "slotIndex": 0,
+          "unenhanced": true,
+          "unitCatalogPrice": 50000
+        },
+        {
+          "catalogValue": 20000,
+          "itemIndex": 333,
+          "kind": "equipment",
+          "name": "IronArmour(M)",
+          "quantity": 1,
+          "slotIndex": 1,
+          "unenhanced": true,
+          "unitCatalogPrice": 20000
+        },
+        {
+          "catalogValue": 1200,
+          "itemIndex": 536,
+          "kind": "equipment",
+          "name": "BlackNecklace",
+          "quantity": 1,
+          "slotIndex": 4,
+          "unenhanced": true,
+          "unitCatalogPrice": 1200
+        },
+        {
+          "catalogValue": 10000,
+          "itemIndex": 420,
+          "kind": "equipment",
+          "name": "CoralRing",
+          "quantity": 1,
+          "slotIndex": 7,
+          "unenhanced": true,
+          "unitCatalogPrice": 10000
+        },
+        {
+          "catalogValue": 10000,
+          "itemIndex": 420,
+          "kind": "equipment",
+          "name": "CoralRing",
+          "quantity": 1,
+          "slotIndex": 8,
+          "unenhanced": true,
+          "unitCatalogPrice": 10000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 483,
+          "kind": "equipment",
+          "name": "HardGlove",
+          "quantity": 1,
+          "slotIndex": 5,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 483,
+          "kind": "equipment",
+          "name": "HardGlove",
+          "quantity": 1,
+          "slotIndex": 6,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 596,
+          "kind": "equipment",
+          "name": "MagicHelmet",
+          "quantity": 1,
+          "slotIndex": 2,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 612,
+          "kind": "equipment",
+          "name": "LeatherBelt",
+          "quantity": 1,
+          "slotIndex": 10,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 620,
+          "kind": "equipment",
+          "name": "LowShoes",
+          "quantity": 1,
+          "slotIndex": 11,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 973,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Fencing",
+          "quantity": 1,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 974,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Slaying",
+          "quantity": 1,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 8000,
+          "itemIndex": 975,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Thrusting",
+          "quantity": 1,
+          "unitCatalogPrice": 8000
+        },
+        {
+          "catalogValue": 15000,
+          "itemIndex": 976,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "HalfMoon",
+          "quantity": 1,
+          "unitCatalogPrice": 15000
+        },
+        {
+          "catalogValue": 18000,
+          "itemIndex": 977,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "ShoulderDash",
+          "quantity": 1,
+          "unitCatalogPrice": 18000
+        },
+        {
+          "catalogValue": 20000,
+          "itemIndex": 980,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "FlamingSword",
+          "quantity": 1,
+          "unitCatalogPrice": 20000
+        },
+        {
+          "catalogValue": 18000,
+          "itemIndex": 662,
+          "kind": "supply",
+          "name": "(HP)DrugLarge",
+          "offlineGranted": true,
+          "quantity": 80,
+          "unitCatalogPrice": 225
+        },
+        {
+          "catalogValue": 4500,
+          "itemIndex": 663,
+          "kind": "supply",
+          "name": "(MP)DrugLarge",
+          "offlineGranted": true,
+          "quantity": 20,
+          "unitCatalogPrice": 225
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 719,
+          "kind": "supply",
+          "name": "TownTeleport",
+          "offlineGranted": true,
+          "quantity": 2,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 717,
+          "kind": "supply",
+          "name": "RandomTeleport",
+          "offlineGranted": true,
+          "quantity": 10,
+          "unitCatalogPrice": 100
+        }
+      ],
+      "maxHp": 539,
+      "maxMp": 133,
+      "mp": 133,
+      "offlineProvisioning": true,
+      "omittedOptionalEquipment": [],
+      "preSummonedPets": 0,
+      "purchaseGoldDebited": 0,
+      "saveSha256": "2f2af6be82cd71b1bf7bd89d594001200500049ac7ba9adbb0c08fdf5ac610a8",
+      "scenarioId": "measure-Warrior-35",
+      "skills": [
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 0,
+          "rank": 0,
+          "spell": "Fencing"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 1,
+          "mpCost": 0,
+          "rank": 0,
+          "spell": "Slaying"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 2,
+          "mpCost": 0,
+          "rank": 0,
+          "spell": "Thrusting"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 3,
+          "mpCost": 3,
+          "rank": 0,
+          "spell": "HalfMoon"
+        },
+        {
+          "delayMs": 2500,
+          "hotkey": 0,
+          "mpCost": 4,
+          "rank": 0,
+          "spell": "ShoulderDash"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 4,
+          "mpCost": 7,
+          "rank": 0,
+          "spell": "FlamingSword"
+        }
+      ],
+      "taskCounters": 0,
+      "weightCapacities": {
+        "bag": 458,
+        "hand": 106,
+        "wear": 76
+      }
+    },
+    {
+      "carriedWeights": {
+        "bag": 312,
+        "hand": 92,
+        "wear": 77
+      },
+      "characterIndex": 1008,
+      "className": "Warrior",
+      "completedClaims": 0,
+      "gmLevel": 0,
+      "hp": 989,
+      "initialBagSlots": 7,
+      "initialGold": 200000,
+      "initialLevel": 50,
+      "inventoryCatalogValue": 232200,
+      "items": [
+        {
+          "catalogValue": 75000,
+          "itemIndex": 248,
+          "kind": "equipment",
+          "name": "DragonSlayer",
+          "quantity": 1,
+          "slotIndex": 0,
+          "unenhanced": true,
+          "unitCatalogPrice": 75000
+        },
+        {
+          "catalogValue": 30000,
+          "itemIndex": 343,
+          "kind": "equipment",
+          "name": "SteelArmour(M)",
+          "quantity": 1,
+          "slotIndex": 1,
+          "unenhanced": true,
+          "unitCatalogPrice": 30000
+        },
+        {
+          "catalogValue": 1200,
+          "itemIndex": 536,
+          "kind": "equipment",
+          "name": "BlackNecklace",
+          "quantity": 1,
+          "slotIndex": 4,
+          "unenhanced": true,
+          "unitCatalogPrice": 1200
+        },
+        {
+          "catalogValue": 10000,
+          "itemIndex": 420,
+          "kind": "equipment",
+          "name": "CoralRing",
+          "quantity": 1,
+          "slotIndex": 7,
+          "unenhanced": true,
+          "unitCatalogPrice": 10000
+        },
+        {
+          "catalogValue": 10000,
+          "itemIndex": 420,
+          "kind": "equipment",
+          "name": "CoralRing",
+          "quantity": 1,
+          "slotIndex": 8,
+          "unenhanced": true,
+          "unitCatalogPrice": 10000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 483,
+          "kind": "equipment",
+          "name": "HardGlove",
+          "quantity": 1,
+          "slotIndex": 5,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 483,
+          "kind": "equipment",
+          "name": "HardGlove",
+          "quantity": 1,
+          "slotIndex": 6,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 596,
+          "kind": "equipment",
+          "name": "MagicHelmet",
+          "quantity": 1,
+          "slotIndex": 2,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 612,
+          "kind": "equipment",
+          "name": "LeatherBelt",
+          "quantity": 1,
+          "slotIndex": 10,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 620,
+          "kind": "equipment",
+          "name": "LowShoes",
+          "quantity": 1,
+          "slotIndex": 11,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 973,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Fencing",
+          "quantity": 1,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 974,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Slaying",
+          "quantity": 1,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 8000,
+          "itemIndex": 975,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Thrusting",
+          "quantity": 1,
+          "unitCatalogPrice": 8000
+        },
+        {
+          "catalogValue": 15000,
+          "itemIndex": 976,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "HalfMoon",
+          "quantity": 1,
+          "unitCatalogPrice": 15000
+        },
+        {
+          "catalogValue": 18000,
+          "itemIndex": 977,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "ShoulderDash",
+          "quantity": 1,
+          "unitCatalogPrice": 18000
+        },
+        {
+          "catalogValue": 20000,
+          "itemIndex": 980,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "FlamingSword",
+          "quantity": 1,
+          "unitCatalogPrice": 20000
+        },
+        {
+          "catalogValue": 18000,
+          "itemIndex": 662,
+          "kind": "supply",
+          "name": "(HP)DrugLarge",
+          "offlineGranted": true,
+          "quantity": 80,
+          "unitCatalogPrice": 225
+        },
+        {
+          "catalogValue": 4500,
+          "itemIndex": 663,
+          "kind": "supply",
+          "name": "(MP)DrugLarge",
+          "offlineGranted": true,
+          "quantity": 20,
+          "unitCatalogPrice": 225
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 719,
+          "kind": "supply",
+          "name": "TownTeleport",
+          "offlineGranted": true,
+          "quantity": 2,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 717,
+          "kind": "supply",
+          "name": "RandomTeleport",
+          "offlineGranted": true,
+          "quantity": 10,
+          "unitCatalogPrice": 100
+        }
+      ],
+      "maxHp": 989,
+      "maxMp": 186,
+      "mp": 186,
+      "offlineProvisioning": true,
+      "omittedOptionalEquipment": [],
+      "preSummonedPets": 0,
+      "purchaseGoldDebited": 0,
+      "saveSha256": "0b3a8fa9ce37adc8edf66bbfe8142747e02e9606c06c349bbfb8ada3b0bbf213",
+      "scenarioId": "measure-Warrior-50",
+      "skills": [
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 0,
+          "rank": 0,
+          "spell": "Fencing"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 1,
+          "mpCost": 0,
+          "rank": 0,
+          "spell": "Slaying"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 2,
+          "mpCost": 0,
+          "rank": 0,
+          "spell": "Thrusting"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 3,
+          "mpCost": 3,
+          "rank": 0,
+          "spell": "HalfMoon"
+        },
+        {
+          "delayMs": 2500,
+          "hotkey": 0,
+          "mpCost": 4,
+          "rank": 0,
+          "spell": "ShoulderDash"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 4,
+          "mpCost": 7,
+          "rank": 0,
+          "spell": "FlamingSword"
+        }
+      ],
+      "taskCounters": 0,
+      "weightCapacities": {
+        "bag": 883,
+        "hand": 204,
+        "wear": 140
+      }
+    },
+    {
+      "carriedWeights": {
+        "bag": 56,
+        "hand": 10,
+        "wear": 16
+      },
+      "characterIndex": 1009,
+      "className": "Warrior",
+      "completedClaims": 0,
+      "gmLevel": 0,
+      "hp": 89,
+      "initialBagSlots": 5,
+      "initialGold": 20000,
+      "initialLevel": 10,
+      "inventoryCatalogValue": 20520,
+      "items": [
+        {
+          "catalogValue": 1100,
+          "itemIndex": 226,
+          "kind": "equipment",
+          "name": "IronSword",
+          "quantity": 1,
+          "slotIndex": 0,
+          "unenhanced": true,
+          "unitCatalogPrice": 1100
+        },
+        {
+          "catalogValue": 120,
+          "itemIndex": 317,
+          "kind": "equipment",
+          "name": "BaseDress(M)",
+          "quantity": 1,
+          "slotIndex": 1,
+          "unenhanced": true,
+          "unitCatalogPrice": 120
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 534,
+          "kind": "equipment",
+          "name": "GoldNecklace",
+          "quantity": 1,
+          "slotIndex": 4,
+          "unenhanced": true,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 900,
+          "itemIndex": 407,
+          "kind": "equipment",
+          "name": "HornRing",
+          "quantity": 1,
+          "slotIndex": 7,
+          "unenhanced": true,
+          "unitCatalogPrice": 900
+        },
+        {
+          "catalogValue": 900,
+          "itemIndex": 407,
+          "kind": "equipment",
+          "name": "HornRing",
+          "quantity": 1,
+          "slotIndex": 8,
+          "unenhanced": true,
+          "unitCatalogPrice": 900
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 480,
+          "kind": "equipment",
+          "name": "SteelBracelet",
+          "quantity": 1,
+          "slotIndex": 5,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 480,
+          "kind": "equipment",
+          "name": "SteelBracelet",
+          "quantity": 1,
+          "slotIndex": 6,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 595,
+          "kind": "equipment",
+          "name": "BronzeHelmet",
+          "quantity": 1,
+          "slotIndex": 2,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 612,
+          "kind": "equipment",
+          "name": "LeatherBelt",
+          "quantity": 1,
+          "slotIndex": 10,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 620,
+          "kind": "equipment",
+          "name": "LowShoes",
+          "quantity": 1,
+          "slotIndex": 11,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 973,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Fencing",
+          "quantity": 1,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 1600,
+          "itemIndex": 658,
+          "kind": "supply",
+          "name": "(HP)DrugSmall",
+          "offlineGranted": true,
+          "quantity": 40,
+          "unitCatalogPrice": 40
+        },
+        {
+          "catalogValue": 400,
+          "itemIndex": 659,
+          "kind": "supply",
+          "name": "(MP)DrugSmall",
+          "offlineGranted": true,
+          "quantity": 10,
+          "unitCatalogPrice": 40
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 719,
+          "kind": "supply",
+          "name": "TownTeleport",
+          "offlineGranted": true,
+          "quantity": 1,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 717,
+          "kind": "supply",
+          "name": "RandomTeleport",
+          "offlineGranted": true,
+          "quantity": 5,
+          "unitCatalogPrice": 100
+        }
+      ],
+      "maxHp": 89,
+      "maxMp": 46,
+      "mp": 46,
+      "offlineProvisioning": true,
+      "omittedOptionalEquipment": [],
+      "preSummonedPets": 0,
+      "purchaseGoldDebited": 0,
+      "saveSha256": "81fe3f6a4419007e50e3da8bb41b89e3c7895141c134ca87cdf592f1bac5470c",
+      "scenarioId": "smoke-Warrior-10",
+      "skills": [
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 0,
+          "rank": 0,
+          "spell": "Fencing"
+        }
+      ],
+      "taskCounters": 0,
+      "weightCapacities": {
+        "bag": 83,
+        "hand": 19,
+        "wear": 20
+      }
+    },
+    {
+      "carriedWeights": {
+        "bag": 56,
+        "hand": 7,
+        "wear": 16
+      },
+      "characterIndex": 1010,
+      "className": "Wizard",
+      "completedClaims": 0,
+      "gmLevel": 0,
+      "hp": 38,
+      "initialBagSlots": 5,
+      "initialGold": 20000,
+      "initialLevel": 10,
+      "inventoryCatalogValue": 22620,
+      "items": [
+        {
+          "catalogValue": 4000,
+          "itemIndex": 223,
+          "kind": "equipment",
+          "name": "EbonySword",
+          "quantity": 1,
+          "slotIndex": 0,
+          "unenhanced": true,
+          "unitCatalogPrice": 4000
+        },
+        {
+          "catalogValue": 120,
+          "itemIndex": 317,
+          "kind": "equipment",
+          "name": "BaseDress(M)",
+          "quantity": 1,
+          "slotIndex": 1,
+          "unenhanced": true,
+          "unitCatalogPrice": 120
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 534,
+          "kind": "equipment",
+          "name": "GoldNecklace",
+          "quantity": 1,
+          "slotIndex": 4,
+          "unenhanced": true,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 405,
+          "kind": "equipment",
+          "name": "HexagonalRing",
+          "quantity": 1,
+          "slotIndex": 7,
+          "unenhanced": true,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 405,
+          "kind": "equipment",
+          "name": "HexagonalRing",
+          "quantity": 1,
+          "slotIndex": 8,
+          "unenhanced": true,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 480,
+          "kind": "equipment",
+          "name": "SteelBracelet",
+          "quantity": 1,
+          "slotIndex": 5,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 480,
+          "kind": "equipment",
+          "name": "SteelBracelet",
+          "quantity": 1,
+          "slotIndex": 6,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 595,
+          "kind": "equipment",
+          "name": "BronzeHelmet",
+          "quantity": 1,
+          "slotIndex": 2,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 612,
+          "kind": "equipment",
+          "name": "LeatherBelt",
+          "quantity": 1,
+          "slotIndex": 10,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 620,
+          "kind": "equipment",
+          "name": "LowShoes",
+          "quantity": 1,
+          "slotIndex": 11,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 990,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "FireBall",
+          "quantity": 1,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 800,
+          "itemIndex": 658,
+          "kind": "supply",
+          "name": "(HP)DrugSmall",
+          "offlineGranted": true,
+          "quantity": 20,
+          "unitCatalogPrice": 40
+        },
+        {
+          "catalogValue": 1200,
+          "itemIndex": 659,
+          "kind": "supply",
+          "name": "(MP)DrugSmall",
+          "offlineGranted": true,
+          "quantity": 30,
+          "unitCatalogPrice": 40
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 719,
+          "kind": "supply",
+          "name": "TownTeleport",
+          "offlineGranted": true,
+          "quantity": 1,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 717,
+          "kind": "supply",
+          "name": "RandomTeleport",
+          "offlineGranted": true,
+          "quantity": 5,
+          "unitCatalogPrice": 100
+        }
+      ],
+      "maxHp": 38,
+      "maxMp": 101,
+      "mp": 101,
+      "offlineProvisioning": true,
+      "omittedOptionalEquipment": [],
+      "preSummonedPets": 0,
+      "purchaseGoldDebited": 0,
+      "saveSha256": "64aa0f87c27de502310d5e65ad1f1f1fb55dcbaefa234ca305aa58715bff0463",
+      "scenarioId": "measure-Wizard-10",
+      "skills": [
+        {
+          "delayMs": 1800,
+          "hotkey": 1,
+          "mpCost": 3,
+          "rank": 0,
+          "spell": "FireBall"
+        }
+      ],
+      "taskCounters": 0,
+      "weightCapacities": {
+        "bag": 70,
+        "hand": 13,
+        "wear": 16
+      }
+    },
+    {
+      "carriedWeights": {
+        "bag": 56,
+        "hand": 7,
+        "wear": 15
+      },
+      "characterIndex": 1011,
+      "className": "Wizard",
+      "completedClaims": 0,
+      "gmLevel": 0,
+      "hp": 52,
+      "initialBagSlots": 5,
+      "initialGold": 20000,
+      "initialLevel": 14,
+      "inventoryCatalogValue": 26700,
+      "items": [
+        {
+          "catalogValue": 4000,
+          "itemIndex": 223,
+          "kind": "equipment",
+          "name": "EbonySword",
+          "quantity": 1,
+          "slotIndex": 0,
+          "unenhanced": true,
+          "unitCatalogPrice": 4000
+        },
+        {
+          "catalogValue": 2500,
+          "itemIndex": 319,
+          "kind": "equipment",
+          "name": "LightArmour(M)",
+          "quantity": 1,
+          "slotIndex": 1,
+          "unenhanced": true,
+          "unitCatalogPrice": 2500
+        },
+        {
+          "catalogValue": 1200,
+          "itemIndex": 537,
+          "kind": "equipment",
+          "name": "EbonyNecklace",
+          "quantity": 1,
+          "slotIndex": 4,
+          "unenhanced": true,
+          "unitCatalogPrice": 1200
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 405,
+          "kind": "equipment",
+          "name": "HexagonalRing",
+          "quantity": 1,
+          "slotIndex": 7,
+          "unenhanced": true,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 405,
+          "kind": "equipment",
+          "name": "HexagonalRing",
+          "quantity": 1,
+          "slotIndex": 8,
+          "unenhanced": true,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 480,
+          "kind": "equipment",
+          "name": "SteelBracelet",
+          "quantity": 1,
+          "slotIndex": 5,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 480,
+          "kind": "equipment",
+          "name": "SteelBracelet",
+          "quantity": 1,
+          "slotIndex": 6,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 612,
+          "kind": "equipment",
+          "name": "LeatherBelt",
+          "quantity": 1,
+          "slotIndex": 10,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 620,
+          "kind": "equipment",
+          "name": "LowShoes",
+          "quantity": 1,
+          "slotIndex": 11,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 990,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "FireBall",
+          "quantity": 1,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 991,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Repulsion",
+          "quantity": 1,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 800,
+          "itemIndex": 658,
+          "kind": "supply",
+          "name": "(HP)DrugSmall",
+          "offlineGranted": true,
+          "quantity": 20,
+          "unitCatalogPrice": 40
+        },
+        {
+          "catalogValue": 1200,
+          "itemIndex": 659,
+          "kind": "supply",
+          "name": "(MP)DrugSmall",
+          "offlineGranted": true,
+          "quantity": 30,
+          "unitCatalogPrice": 40
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 719,
+          "kind": "supply",
+          "name": "TownTeleport",
+          "offlineGranted": true,
+          "quantity": 1,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 717,
+          "kind": "supply",
+          "name": "RandomTeleport",
+          "offlineGranted": true,
+          "quantity": 5,
+          "unitCatalogPrice": 100
+        }
+      ],
+      "maxHp": 52,
+      "maxMp": 160,
+      "mp": 160,
+      "offlineProvisioning": true,
+      "omittedOptionalEquipment": [
+        {
+          "name": "MagicHelmet",
+          "reason": "canonical hand/wear capacity"
+        }
+      ],
+      "preSummonedPets": 0,
+      "purchaseGoldDebited": 0,
+      "saveSha256": "07b9b8a3c35b6eec5bd8bb0e0fb03c66cf7e6d255183cec2ed3dedb641b21b5d",
+      "scenarioId": "measure-Wizard-14",
+      "skills": [
+        {
+          "delayMs": 1800,
+          "hotkey": 1,
+          "mpCost": 3,
+          "rank": 0,
+          "spell": "FireBall"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 2,
+          "rank": 0,
+          "spell": "Repulsion"
+        }
+      ],
+      "taskCounters": 0,
+      "weightCapacities": {
+        "bag": 89,
+        "hand": 14,
+        "wear": 16
+      }
+    },
+    {
+      "carriedWeights": {
+        "bag": 80,
+        "hand": 12,
+        "wear": 17
+      },
+      "characterIndex": 1012,
+      "className": "Wizard",
+      "completedClaims": 0,
+      "gmLevel": 0,
+      "hp": 56,
+      "initialBagSlots": 5,
+      "initialGold": 50000,
+      "initialLevel": 15,
+      "inventoryCatalogValue": 33770,
+      "items": [
+        {
+          "catalogValue": 4000,
+          "itemIndex": 254,
+          "kind": "equipment",
+          "name": "Trident",
+          "quantity": 1,
+          "slotIndex": 0,
+          "unenhanced": true,
+          "unitCatalogPrice": 4000
+        },
+        {
+          "catalogValue": 2500,
+          "itemIndex": 319,
+          "kind": "equipment",
+          "name": "LightArmour(M)",
+          "quantity": 1,
+          "slotIndex": 1,
+          "unenhanced": true,
+          "unitCatalogPrice": 2500
+        },
+        {
+          "catalogValue": 1200,
+          "itemIndex": 537,
+          "kind": "equipment",
+          "name": "EbonyNecklace",
+          "quantity": 1,
+          "slotIndex": 4,
+          "unenhanced": true,
+          "unitCatalogPrice": 1200
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 405,
+          "kind": "equipment",
+          "name": "HexagonalRing",
+          "quantity": 1,
+          "slotIndex": 7,
+          "unenhanced": true,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 405,
+          "kind": "equipment",
+          "name": "HexagonalRing",
+          "quantity": 1,
+          "slotIndex": 8,
+          "unenhanced": true,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 480,
+          "kind": "equipment",
+          "name": "SteelBracelet",
+          "quantity": 1,
+          "slotIndex": 5,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 480,
+          "kind": "equipment",
+          "name": "SteelBracelet",
+          "quantity": 1,
+          "slotIndex": 6,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 596,
+          "kind": "equipment",
+          "name": "MagicHelmet",
+          "quantity": 1,
+          "slotIndex": 2,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 990,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "FireBall",
+          "quantity": 1,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 991,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Repulsion",
+          "quantity": 1,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 993,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "GreatFireBall",
+          "quantity": 1,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 1320,
+          "itemIndex": 660,
+          "kind": "supply",
+          "name": "(HP)DrugMedium",
+          "offlineGranted": true,
+          "quantity": 12,
+          "unitCatalogPrice": 110
+        },
+        {
+          "catalogValue": 2750,
+          "itemIndex": 661,
+          "kind": "supply",
+          "name": "(MP)DrugMedium",
+          "offlineGranted": true,
+          "quantity": 25,
+          "unitCatalogPrice": 110
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 719,
+          "kind": "supply",
+          "name": "TownTeleport",
+          "offlineGranted": true,
+          "quantity": 1,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 717,
+          "kind": "supply",
+          "name": "RandomTeleport",
+          "offlineGranted": true,
+          "quantity": 5,
+          "unitCatalogPrice": 100
+        }
+      ],
+      "maxHp": 56,
+      "maxMp": 178,
+      "mp": 178,
+      "offlineProvisioning": true,
+      "omittedOptionalEquipment": [
+        {
+          "name": "LeatherBelt",
+          "reason": "canonical hand/wear capacity"
+        },
+        {
+          "name": "LowShoes",
+          "reason": "canonical hand/wear capacity"
+        }
+      ],
+      "preSummonedPets": 0,
+      "purchaseGoldDebited": 0,
+      "saveSha256": "592dcf78e2daa24c057099ba2f6b34a28e4ddcf9c7bc30656f268c4c117b7c93",
+      "scenarioId": "measure-Wizard-15",
+      "skills": [
+        {
+          "delayMs": 1800,
+          "hotkey": 1,
+          "mpCost": 3,
+          "rank": 0,
+          "spell": "FireBall"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 2,
+          "rank": 0,
+          "spell": "Repulsion"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 2,
+          "mpCost": 5,
+          "rank": 0,
+          "spell": "GreatFireBall"
+        }
+      ],
+      "taskCounters": 0,
+      "weightCapacities": {
+        "bag": 95,
+        "hand": 14,
+        "wear": 17
+      }
+    },
+    {
+      "carriedWeights": {
+        "bag": 80,
+        "hand": 12,
+        "wear": 19
+      },
+      "characterIndex": 1013,
+      "className": "Wizard",
+      "completedClaims": 0,
+      "gmLevel": 0,
+      "hp": 95,
+      "initialBagSlots": 5,
+      "initialGold": 50000,
+      "initialLevel": 24,
+      "inventoryCatalogValue": 79270,
+      "items": [
+        {
+          "catalogValue": 4000,
+          "itemIndex": 254,
+          "kind": "equipment",
+          "name": "Trident",
+          "quantity": 1,
+          "slotIndex": 0,
+          "unenhanced": true,
+          "unitCatalogPrice": 4000
+        },
+        {
+          "catalogValue": 10000,
+          "itemIndex": 325,
+          "kind": "equipment",
+          "name": "MagicRobe(M)",
+          "quantity": 1,
+          "slotIndex": 1,
+          "unenhanced": true,
+          "unitCatalogPrice": 10000
+        },
+        {
+          "catalogValue": 1200,
+          "itemIndex": 537,
+          "kind": "equipment",
+          "name": "EbonyNecklace",
+          "quantity": 1,
+          "slotIndex": 4,
+          "unenhanced": true,
+          "unitCatalogPrice": 1200
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 414,
+          "kind": "equipment",
+          "name": "SerpentEyeRing",
+          "quantity": 1,
+          "slotIndex": 7,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 414,
+          "kind": "equipment",
+          "name": "SerpentEyeRing",
+          "quantity": 1,
+          "slotIndex": 8,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 484,
+          "kind": "equipment",
+          "name": "MagicBracelet",
+          "quantity": 1,
+          "slotIndex": 5,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 484,
+          "kind": "equipment",
+          "name": "MagicBracelet",
+          "quantity": 1,
+          "slotIndex": 6,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 612,
+          "kind": "equipment",
+          "name": "LeatherBelt",
+          "quantity": 1,
+          "slotIndex": 10,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 620,
+          "kind": "equipment",
+          "name": "LowShoes",
+          "quantity": 1,
+          "slotIndex": 11,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 990,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "FireBall",
+          "quantity": 1,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 991,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Repulsion",
+          "quantity": 1,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 993,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "GreatFireBall",
+          "quantity": 1,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 8000,
+          "itemIndex": 995,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "ThunderBolt",
+          "quantity": 1,
+          "unitCatalogPrice": 8000
+        },
+        {
+          "catalogValue": 12000,
+          "itemIndex": 997,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "FireBang",
+          "quantity": 1,
+          "unitCatalogPrice": 12000
+        },
+        {
+          "catalogValue": 15000,
+          "itemIndex": 998,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "FireWall",
+          "quantity": 1,
+          "unitCatalogPrice": 15000
+        },
+        {
+          "catalogValue": 1320,
+          "itemIndex": 660,
+          "kind": "supply",
+          "name": "(HP)DrugMedium",
+          "offlineGranted": true,
+          "quantity": 12,
+          "unitCatalogPrice": 110
+        },
+        {
+          "catalogValue": 2750,
+          "itemIndex": 661,
+          "kind": "supply",
+          "name": "(MP)DrugMedium",
+          "offlineGranted": true,
+          "quantity": 25,
+          "unitCatalogPrice": 110
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 719,
+          "kind": "supply",
+          "name": "TownTeleport",
+          "offlineGranted": true,
+          "quantity": 1,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 717,
+          "kind": "supply",
+          "name": "RandomTeleport",
+          "offlineGranted": true,
+          "quantity": 5,
+          "unitCatalogPrice": 100
+        }
+      ],
+      "maxHp": 95,
+      "maxMp": 372,
+      "mp": 372,
+      "offlineProvisioning": true,
+      "omittedOptionalEquipment": [
+        {
+          "name": "MagicHelmet",
+          "reason": "canonical hand/wear capacity"
+        }
+      ],
+      "preSummonedPets": 0,
+      "purchaseGoldDebited": 0,
+      "saveSha256": "4f3faf3d3c9a6c6aa53c8757fdcf61b3671c17ff4d3ab727bbe33c1d32784135",
+      "scenarioId": "measure-Wizard-24",
+      "skills": [
+        {
+          "delayMs": 1800,
+          "hotkey": 1,
+          "mpCost": 3,
+          "rank": 0,
+          "spell": "FireBall"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 2,
+          "rank": 0,
+          "spell": "Repulsion"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 2,
+          "mpCost": 5,
+          "rank": 0,
+          "spell": "GreatFireBall"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 9,
+          "rank": 0,
+          "spell": "ThunderBolt"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 5,
+          "mpCost": 14,
+          "rank": 0,
+          "spell": "FireBang"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 6,
+          "mpCost": 30,
+          "rank": 0,
+          "spell": "FireWall"
+        }
+      ],
+      "taskCounters": 0,
+      "weightCapacities": {
+        "bag": 165,
+        "hand": 18,
+        "wear": 20
+      }
+    },
+    {
+      "carriedWeights": {
+        "bag": 147,
+        "hand": 12,
+        "wear": 21
+      },
+      "characterIndex": 1014,
+      "className": "Wizard",
+      "completedClaims": 0,
+      "gmLevel": 0,
+      "hp": 100,
+      "initialBagSlots": 5,
+      "initialGold": 120000,
+      "initialLevel": 25,
+      "inventoryCatalogValue": 86825,
+      "items": [
+        {
+          "catalogValue": 4000,
+          "itemIndex": 254,
+          "kind": "equipment",
+          "name": "Trident",
+          "quantity": 1,
+          "slotIndex": 0,
+          "unenhanced": true,
+          "unitCatalogPrice": 4000
+        },
+        {
+          "catalogValue": 10000,
+          "itemIndex": 325,
+          "kind": "equipment",
+          "name": "MagicRobe(M)",
+          "quantity": 1,
+          "slotIndex": 1,
+          "unenhanced": true,
+          "unitCatalogPrice": 10000
+        },
+        {
+          "catalogValue": 1200,
+          "itemIndex": 537,
+          "kind": "equipment",
+          "name": "EbonyNecklace",
+          "quantity": 1,
+          "slotIndex": 4,
+          "unenhanced": true,
+          "unitCatalogPrice": 1200
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 414,
+          "kind": "equipment",
+          "name": "SerpentEyeRing",
+          "quantity": 1,
+          "slotIndex": 7,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 414,
+          "kind": "equipment",
+          "name": "SerpentEyeRing",
+          "quantity": 1,
+          "slotIndex": 8,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 484,
+          "kind": "equipment",
+          "name": "MagicBracelet",
+          "quantity": 1,
+          "slotIndex": 5,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 484,
+          "kind": "equipment",
+          "name": "MagicBracelet",
+          "quantity": 1,
+          "slotIndex": 6,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 596,
+          "kind": "equipment",
+          "name": "MagicHelmet",
+          "quantity": 1,
+          "slotIndex": 2,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 990,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "FireBall",
+          "quantity": 1,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 991,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Repulsion",
+          "quantity": 1,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 993,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "GreatFireBall",
+          "quantity": 1,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 8000,
+          "itemIndex": 995,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "ThunderBolt",
+          "quantity": 1,
+          "unitCatalogPrice": 8000
+        },
+        {
+          "catalogValue": 12000,
+          "itemIndex": 997,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "FireBang",
+          "quantity": 1,
+          "unitCatalogPrice": 12000
+        },
+        {
+          "catalogValue": 15000,
+          "itemIndex": 998,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "FireWall",
+          "quantity": 1,
+          "unitCatalogPrice": 15000
+        },
+        {
+          "catalogValue": 3375,
+          "itemIndex": 662,
+          "kind": "supply",
+          "name": "(HP)DrugLarge",
+          "offlineGranted": true,
+          "quantity": 15,
+          "unitCatalogPrice": 225
+        },
+        {
+          "catalogValue": 6750,
+          "itemIndex": 663,
+          "kind": "supply",
+          "name": "(MP)DrugLarge",
+          "offlineGranted": true,
+          "quantity": 30,
+          "unitCatalogPrice": 225
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 719,
+          "kind": "supply",
+          "name": "TownTeleport",
+          "offlineGranted": true,
+          "quantity": 2,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 717,
+          "kind": "supply",
+          "name": "RandomTeleport",
+          "offlineGranted": true,
+          "quantity": 10,
+          "unitCatalogPrice": 100
+        }
+      ],
+      "maxHp": 100,
+      "maxMp": 398,
+      "mp": 398,
+      "offlineProvisioning": true,
+      "omittedOptionalEquipment": [
+        {
+          "name": "LeatherBelt",
+          "reason": "canonical hand/wear capacity"
+        },
+        {
+          "name": "LowShoes",
+          "reason": "canonical hand/wear capacity"
+        }
+      ],
+      "preSummonedPets": 0,
+      "purchaseGoldDebited": 0,
+      "saveSha256": "120692dfae81e5829e2084fed852bfcd9b9aeee6de6edc5eff4f2d0a231da46f",
+      "scenarioId": "measure-Wizard-25",
+      "skills": [
+        {
+          "delayMs": 1800,
+          "hotkey": 1,
+          "mpCost": 3,
+          "rank": 0,
+          "spell": "FireBall"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 2,
+          "rank": 0,
+          "spell": "Repulsion"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 2,
+          "mpCost": 5,
+          "rank": 0,
+          "spell": "GreatFireBall"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 9,
+          "rank": 0,
+          "spell": "ThunderBolt"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 5,
+          "mpCost": 14,
+          "rank": 0,
+          "spell": "FireBang"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 6,
+          "mpCost": 30,
+          "rank": 0,
+          "spell": "FireWall"
+        }
+      ],
+      "taskCounters": 0,
+      "weightCapacities": {
+        "bag": 175,
+        "hand": 18,
+        "wear": 21
+      }
+    },
+    {
+      "carriedWeights": {
+        "bag": 147,
+        "hand": 20,
+        "wear": 26
+      },
+      "characterIndex": 1015,
+      "className": "Wizard",
+      "completedClaims": 0,
+      "gmLevel": 0,
+      "hp": 152,
+      "initialBagSlots": 5,
+      "initialGold": 120000,
+      "initialLevel": 34,
+      "inventoryCatalogValue": 190825,
+      "items": [
+        {
+          "catalogValue": 50000,
+          "itemIndex": 259,
+          "kind": "equipment",
+          "name": "WarMageStaff",
+          "quantity": 1,
+          "slotIndex": 0,
+          "unenhanced": true,
+          "unitCatalogPrice": 50000
+        },
+        {
+          "catalogValue": 20000,
+          "itemIndex": 335,
+          "kind": "equipment",
+          "name": "WizardRobe(M)",
+          "quantity": 1,
+          "slotIndex": 1,
+          "unenhanced": true,
+          "unitCatalogPrice": 20000
+        },
+        {
+          "catalogValue": 1200,
+          "itemIndex": 537,
+          "kind": "equipment",
+          "name": "EbonyNecklace",
+          "quantity": 1,
+          "slotIndex": 4,
+          "unenhanced": true,
+          "unitCatalogPrice": 1200
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 414,
+          "kind": "equipment",
+          "name": "SerpentEyeRing",
+          "quantity": 1,
+          "slotIndex": 7,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 414,
+          "kind": "equipment",
+          "name": "SerpentEyeRing",
+          "quantity": 1,
+          "slotIndex": 8,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 484,
+          "kind": "equipment",
+          "name": "MagicBracelet",
+          "quantity": 1,
+          "slotIndex": 5,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 484,
+          "kind": "equipment",
+          "name": "MagicBracelet",
+          "quantity": 1,
+          "slotIndex": 6,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 596,
+          "kind": "equipment",
+          "name": "MagicHelmet",
+          "quantity": 1,
+          "slotIndex": 2,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 612,
+          "kind": "equipment",
+          "name": "LeatherBelt",
+          "quantity": 1,
+          "slotIndex": 10,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 990,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "FireBall",
+          "quantity": 1,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 991,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Repulsion",
+          "quantity": 1,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 993,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "GreatFireBall",
+          "quantity": 1,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 8000,
+          "itemIndex": 995,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "ThunderBolt",
+          "quantity": 1,
+          "unitCatalogPrice": 8000
+        },
+        {
+          "catalogValue": 12000,
+          "itemIndex": 997,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "FireBang",
+          "quantity": 1,
+          "unitCatalogPrice": 12000
+        },
+        {
+          "catalogValue": 15000,
+          "itemIndex": 998,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "FireWall",
+          "quantity": 1,
+          "unitCatalogPrice": 15000
+        },
+        {
+          "catalogValue": 12000,
+          "itemIndex": 999,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Lightning",
+          "quantity": 1,
+          "unitCatalogPrice": 12000
+        },
+        {
+          "catalogValue": 35000,
+          "itemIndex": 1002,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "MagicShield",
+          "quantity": 1,
+          "unitCatalogPrice": 35000
+        },
+        {
+          "catalogValue": 3375,
+          "itemIndex": 662,
+          "kind": "supply",
+          "name": "(HP)DrugLarge",
+          "offlineGranted": true,
+          "quantity": 15,
+          "unitCatalogPrice": 225
+        },
+        {
+          "catalogValue": 6750,
+          "itemIndex": 663,
+          "kind": "supply",
+          "name": "(MP)DrugLarge",
+          "offlineGranted": true,
+          "quantity": 30,
+          "unitCatalogPrice": 225
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 719,
+          "kind": "supply",
+          "name": "TownTeleport",
+          "offlineGranted": true,
+          "quantity": 2,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 717,
+          "kind": "supply",
+          "name": "RandomTeleport",
+          "offlineGranted": true,
+          "quantity": 10,
+          "unitCatalogPrice": 100
+        }
+      ],
+      "maxHp": 152,
+      "maxMp": 671,
+      "mp": 671,
+      "offlineProvisioning": true,
+      "omittedOptionalEquipment": [
+        {
+          "name": "LowShoes",
+          "reason": "canonical hand/wear capacity"
+        }
+      ],
+      "preSummonedPets": 0,
+      "purchaseGoldDebited": 0,
+      "saveSha256": "8f4708a42cc0cb0a9ad7e52d7ca9e2d0d6f077fd7881361eb944e1716a98b384",
+      "scenarioId": "measure-Wizard-34",
+      "skills": [
+        {
+          "delayMs": 1800,
+          "hotkey": 1,
+          "mpCost": 3,
+          "rank": 0,
+          "spell": "FireBall"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 2,
+          "rank": 0,
+          "spell": "Repulsion"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 2,
+          "mpCost": 5,
+          "rank": 0,
+          "spell": "GreatFireBall"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 9,
+          "rank": 0,
+          "spell": "ThunderBolt"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 5,
+          "mpCost": 14,
+          "rank": 0,
+          "spell": "FireBang"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 6,
+          "mpCost": 30,
+          "rank": 0,
+          "spell": "FireWall"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 3,
+          "mpCost": 38,
+          "rank": 0,
+          "spell": "Lightning"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 4,
+          "mpCost": 35,
+          "rank": 0,
+          "spell": "MagicShield"
+        }
+      ],
+      "taskCounters": 0,
+      "weightCapacities": {
+        "bag": 281,
+        "hand": 24,
+        "wear": 26
+      }
+    },
+    {
+      "carriedWeights": {
+        "bag": 282,
+        "hand": 20,
+        "wear": 27
+      },
+      "characterIndex": 1016,
+      "className": "Wizard",
+      "completedClaims": 0,
+      "gmLevel": 0,
+      "hp": 158,
+      "initialBagSlots": 7,
+      "initialGold": 200000,
+      "initialLevel": 35,
+      "inventoryCatalogValue": 221950,
+      "items": [
+        {
+          "catalogValue": 50000,
+          "itemIndex": 259,
+          "kind": "equipment",
+          "name": "WarMageStaff",
+          "quantity": 1,
+          "slotIndex": 0,
+          "unenhanced": true,
+          "unitCatalogPrice": 50000
+        },
+        {
+          "catalogValue": 20000,
+          "itemIndex": 335,
+          "kind": "equipment",
+          "name": "WizardRobe(M)",
+          "quantity": 1,
+          "slotIndex": 1,
+          "unenhanced": true,
+          "unitCatalogPrice": 20000
+        },
+        {
+          "catalogValue": 1200,
+          "itemIndex": 537,
+          "kind": "equipment",
+          "name": "EbonyNecklace",
+          "quantity": 1,
+          "slotIndex": 4,
+          "unenhanced": true,
+          "unitCatalogPrice": 1200
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 414,
+          "kind": "equipment",
+          "name": "SerpentEyeRing",
+          "quantity": 1,
+          "slotIndex": 7,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 414,
+          "kind": "equipment",
+          "name": "SerpentEyeRing",
+          "quantity": 1,
+          "slotIndex": 8,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 484,
+          "kind": "equipment",
+          "name": "MagicBracelet",
+          "quantity": 1,
+          "slotIndex": 5,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 484,
+          "kind": "equipment",
+          "name": "MagicBracelet",
+          "quantity": 1,
+          "slotIndex": 6,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 596,
+          "kind": "equipment",
+          "name": "MagicHelmet",
+          "quantity": 1,
+          "slotIndex": 2,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 612,
+          "kind": "equipment",
+          "name": "LeatherBelt",
+          "quantity": 1,
+          "slotIndex": 10,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 620,
+          "kind": "equipment",
+          "name": "LowShoes",
+          "quantity": 1,
+          "slotIndex": 11,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 990,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "FireBall",
+          "quantity": 1,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 991,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Repulsion",
+          "quantity": 1,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 993,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "GreatFireBall",
+          "quantity": 1,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 8000,
+          "itemIndex": 995,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "ThunderBolt",
+          "quantity": 1,
+          "unitCatalogPrice": 8000
+        },
+        {
+          "catalogValue": 12000,
+          "itemIndex": 997,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "FireBang",
+          "quantity": 1,
+          "unitCatalogPrice": 12000
+        },
+        {
+          "catalogValue": 15000,
+          "itemIndex": 998,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "FireWall",
+          "quantity": 1,
+          "unitCatalogPrice": 15000
+        },
+        {
+          "catalogValue": 12000,
+          "itemIndex": 999,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Lightning",
+          "quantity": 1,
+          "unitCatalogPrice": 12000
+        },
+        {
+          "catalogValue": 35000,
+          "itemIndex": 1002,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "MagicShield",
+          "quantity": 1,
+          "unitCatalogPrice": 35000
+        },
+        {
+          "catalogValue": 20000,
+          "itemIndex": 1005,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "IceStorm",
+          "quantity": 1,
+          "unitCatalogPrice": 20000
+        },
+        {
+          "catalogValue": 6750,
+          "itemIndex": 662,
+          "kind": "supply",
+          "name": "(HP)DrugLarge",
+          "offlineGranted": true,
+          "quantity": 30,
+          "unitCatalogPrice": 225
+        },
+        {
+          "catalogValue": 13500,
+          "itemIndex": 663,
+          "kind": "supply",
+          "name": "(MP)DrugLarge",
+          "offlineGranted": true,
+          "quantity": 60,
+          "unitCatalogPrice": 225
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 719,
+          "kind": "supply",
+          "name": "TownTeleport",
+          "offlineGranted": true,
+          "quantity": 2,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 717,
+          "kind": "supply",
+          "name": "RandomTeleport",
+          "offlineGranted": true,
+          "quantity": 10,
+          "unitCatalogPrice": 100
+        }
+      ],
+      "maxHp": 158,
+      "maxMp": 706,
+      "mp": 706,
+      "offlineProvisioning": true,
+      "omittedOptionalEquipment": [],
+      "preSummonedPets": 0,
+      "purchaseGoldDebited": 0,
+      "saveSha256": "ed6f660b852df0ac41684bc1b1a9bc14df7ca2cd8c0145809080367b265daa63",
+      "scenarioId": "measure-Wizard-35",
+      "skills": [
+        {
+          "delayMs": 1800,
+          "hotkey": 1,
+          "mpCost": 3,
+          "rank": 0,
+          "spell": "FireBall"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 2,
+          "rank": 0,
+          "spell": "Repulsion"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 2,
+          "mpCost": 5,
+          "rank": 0,
+          "spell": "GreatFireBall"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 9,
+          "rank": 0,
+          "spell": "ThunderBolt"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 5,
+          "mpCost": 14,
+          "rank": 0,
+          "spell": "FireBang"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 6,
+          "mpCost": 30,
+          "rank": 0,
+          "spell": "FireWall"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 3,
+          "mpCost": 38,
+          "rank": 0,
+          "spell": "Lightning"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 4,
+          "mpCost": 35,
+          "rank": 0,
+          "spell": "MagicShield"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 33,
+          "rank": 0,
+          "spell": "IceStorm"
+        }
+      ],
+      "taskCounters": 0,
+      "weightCapacities": {
+        "bag": 295,
+        "hand": 25,
+        "wear": 27
+      }
+    },
+    {
+      "carriedWeights": {
+        "bag": 282,
+        "hand": 26,
+        "wear": 30
+      },
+      "characterIndex": 1017,
+      "className": "Wizard",
+      "completedClaims": 0,
+      "gmLevel": 0,
+      "hp": 270,
+      "initialBagSlots": 7,
+      "initialGold": 200000,
+      "initialLevel": 50,
+      "inventoryCatalogValue": 256950,
+      "items": [
+        {
+          "catalogValue": 75000,
+          "itemIndex": 262,
+          "kind": "equipment",
+          "name": "DragonStaff",
+          "quantity": 1,
+          "slotIndex": 0,
+          "unenhanced": true,
+          "unitCatalogPrice": 75000
+        },
+        {
+          "catalogValue": 30000,
+          "itemIndex": 345,
+          "kind": "equipment",
+          "name": "DragonRobe(M)",
+          "quantity": 1,
+          "slotIndex": 1,
+          "unenhanced": true,
+          "unitCatalogPrice": 30000
+        },
+        {
+          "catalogValue": 1200,
+          "itemIndex": 537,
+          "kind": "equipment",
+          "name": "EbonyNecklace",
+          "quantity": 1,
+          "slotIndex": 4,
+          "unenhanced": true,
+          "unitCatalogPrice": 1200
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 414,
+          "kind": "equipment",
+          "name": "SerpentEyeRing",
+          "quantity": 1,
+          "slotIndex": 7,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 414,
+          "kind": "equipment",
+          "name": "SerpentEyeRing",
+          "quantity": 1,
+          "slotIndex": 8,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 484,
+          "kind": "equipment",
+          "name": "MagicBracelet",
+          "quantity": 1,
+          "slotIndex": 5,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 484,
+          "kind": "equipment",
+          "name": "MagicBracelet",
+          "quantity": 1,
+          "slotIndex": 6,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 596,
+          "kind": "equipment",
+          "name": "MagicHelmet",
+          "quantity": 1,
+          "slotIndex": 2,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 612,
+          "kind": "equipment",
+          "name": "LeatherBelt",
+          "quantity": 1,
+          "slotIndex": 10,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 620,
+          "kind": "equipment",
+          "name": "LowShoes",
+          "quantity": 1,
+          "slotIndex": 11,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 990,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "FireBall",
+          "quantity": 1,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 991,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Repulsion",
+          "quantity": 1,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 993,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "GreatFireBall",
+          "quantity": 1,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 8000,
+          "itemIndex": 995,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "ThunderBolt",
+          "quantity": 1,
+          "unitCatalogPrice": 8000
+        },
+        {
+          "catalogValue": 12000,
+          "itemIndex": 997,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "FireBang",
+          "quantity": 1,
+          "unitCatalogPrice": 12000
+        },
+        {
+          "catalogValue": 15000,
+          "itemIndex": 998,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "FireWall",
+          "quantity": 1,
+          "unitCatalogPrice": 15000
+        },
+        {
+          "catalogValue": 12000,
+          "itemIndex": 999,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Lightning",
+          "quantity": 1,
+          "unitCatalogPrice": 12000
+        },
+        {
+          "catalogValue": 35000,
+          "itemIndex": 1002,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "MagicShield",
+          "quantity": 1,
+          "unitCatalogPrice": 35000
+        },
+        {
+          "catalogValue": 20000,
+          "itemIndex": 1005,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "IceStorm",
+          "quantity": 1,
+          "unitCatalogPrice": 20000
+        },
+        {
+          "catalogValue": 6750,
+          "itemIndex": 662,
+          "kind": "supply",
+          "name": "(HP)DrugLarge",
+          "offlineGranted": true,
+          "quantity": 30,
+          "unitCatalogPrice": 225
+        },
+        {
+          "catalogValue": 13500,
+          "itemIndex": 663,
+          "kind": "supply",
+          "name": "(MP)DrugLarge",
+          "offlineGranted": true,
+          "quantity": 60,
+          "unitCatalogPrice": 225
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 719,
+          "kind": "supply",
+          "name": "TownTeleport",
+          "offlineGranted": true,
+          "quantity": 2,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 717,
+          "kind": "supply",
+          "name": "RandomTeleport",
+          "offlineGranted": true,
+          "quantity": 10,
+          "unitCatalogPrice": 100
+        }
+      ],
+      "maxHp": 270,
+      "maxMp": 1333,
+      "mp": 1333,
+      "offlineProvisioning": true,
+      "omittedOptionalEquipment": [],
+      "preSummonedPets": 0,
+      "purchaseGoldDebited": 0,
+      "saveSha256": "8edc4d8a71cd59e8d236e8598ae41ad1e0aceb0b2f0bf843a2a290772dfce0a5",
+      "scenarioId": "measure-Wizard-50",
+      "skills": [
+        {
+          "delayMs": 1800,
+          "hotkey": 1,
+          "mpCost": 3,
+          "rank": 0,
+          "spell": "FireBall"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 2,
+          "rank": 0,
+          "spell": "Repulsion"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 2,
+          "mpCost": 5,
+          "rank": 0,
+          "spell": "GreatFireBall"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 9,
+          "rank": 0,
+          "spell": "ThunderBolt"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 5,
+          "mpCost": 14,
+          "rank": 0,
+          "spell": "FireBang"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 6,
+          "mpCost": 30,
+          "rank": 0,
+          "spell": "FireWall"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 3,
+          "mpCost": 38,
+          "rank": 0,
+          "spell": "Lightning"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 4,
+          "mpCost": 35,
+          "rank": 0,
+          "spell": "MagicShield"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 33,
+          "rank": 0,
+          "spell": "IceStorm"
+        }
+      ],
+      "taskCounters": 0,
+      "weightCapacities": {
+        "bag": 550,
+        "hand": 39,
+        "wear": 40
+      }
+    },
+    {
+      "carriedWeights": {
+        "bag": 56,
+        "hand": 7,
+        "wear": 16
+      },
+      "characterIndex": 1018,
+      "className": "Wizard",
+      "completedClaims": 0,
+      "gmLevel": 0,
+      "hp": 38,
+      "initialBagSlots": 5,
+      "initialGold": 20000,
+      "initialLevel": 10,
+      "inventoryCatalogValue": 22620,
+      "items": [
+        {
+          "catalogValue": 4000,
+          "itemIndex": 223,
+          "kind": "equipment",
+          "name": "EbonySword",
+          "quantity": 1,
+          "slotIndex": 0,
+          "unenhanced": true,
+          "unitCatalogPrice": 4000
+        },
+        {
+          "catalogValue": 120,
+          "itemIndex": 317,
+          "kind": "equipment",
+          "name": "BaseDress(M)",
+          "quantity": 1,
+          "slotIndex": 1,
+          "unenhanced": true,
+          "unitCatalogPrice": 120
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 534,
+          "kind": "equipment",
+          "name": "GoldNecklace",
+          "quantity": 1,
+          "slotIndex": 4,
+          "unenhanced": true,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 405,
+          "kind": "equipment",
+          "name": "HexagonalRing",
+          "quantity": 1,
+          "slotIndex": 7,
+          "unenhanced": true,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 405,
+          "kind": "equipment",
+          "name": "HexagonalRing",
+          "quantity": 1,
+          "slotIndex": 8,
+          "unenhanced": true,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 480,
+          "kind": "equipment",
+          "name": "SteelBracelet",
+          "quantity": 1,
+          "slotIndex": 5,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 480,
+          "kind": "equipment",
+          "name": "SteelBracelet",
+          "quantity": 1,
+          "slotIndex": 6,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 595,
+          "kind": "equipment",
+          "name": "BronzeHelmet",
+          "quantity": 1,
+          "slotIndex": 2,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 612,
+          "kind": "equipment",
+          "name": "LeatherBelt",
+          "quantity": 1,
+          "slotIndex": 10,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 620,
+          "kind": "equipment",
+          "name": "LowShoes",
+          "quantity": 1,
+          "slotIndex": 11,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 990,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "FireBall",
+          "quantity": 1,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 800,
+          "itemIndex": 658,
+          "kind": "supply",
+          "name": "(HP)DrugSmall",
+          "offlineGranted": true,
+          "quantity": 20,
+          "unitCatalogPrice": 40
+        },
+        {
+          "catalogValue": 1200,
+          "itemIndex": 659,
+          "kind": "supply",
+          "name": "(MP)DrugSmall",
+          "offlineGranted": true,
+          "quantity": 30,
+          "unitCatalogPrice": 40
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 719,
+          "kind": "supply",
+          "name": "TownTeleport",
+          "offlineGranted": true,
+          "quantity": 1,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 717,
+          "kind": "supply",
+          "name": "RandomTeleport",
+          "offlineGranted": true,
+          "quantity": 5,
+          "unitCatalogPrice": 100
+        }
+      ],
+      "maxHp": 38,
+      "maxMp": 101,
+      "mp": 101,
+      "offlineProvisioning": true,
+      "omittedOptionalEquipment": [],
+      "preSummonedPets": 0,
+      "purchaseGoldDebited": 0,
+      "saveSha256": "edef8701e8f8da3d52caef4409f285b7a3defc75dff0d6e4c47db8a7e50ea312",
+      "scenarioId": "smoke-Wizard-10",
+      "skills": [
+        {
+          "delayMs": 1800,
+          "hotkey": 1,
+          "mpCost": 3,
+          "rank": 0,
+          "spell": "FireBall"
+        }
+      ],
+      "taskCounters": 0,
+      "weightCapacities": {
+        "bag": 70,
+        "hand": 13,
+        "wear": 16
+      }
+    },
+    {
+      "carriedWeights": {
+        "bag": 56,
+        "hand": 7,
+        "wear": 16
+      },
+      "characterIndex": 1019,
+      "className": "Taoist",
+      "completedClaims": 0,
+      "gmLevel": 0,
+      "hp": 55,
+      "initialBagSlots": 5,
+      "initialGold": 20000,
+      "initialLevel": 10,
+      "inventoryCatalogValue": 23520,
+      "items": [
+        {
+          "catalogValue": 4000,
+          "itemIndex": 223,
+          "kind": "equipment",
+          "name": "EbonySword",
+          "quantity": 1,
+          "slotIndex": 0,
+          "unenhanced": true,
+          "unitCatalogPrice": 4000
+        },
+        {
+          "catalogValue": 120,
+          "itemIndex": 317,
+          "kind": "equipment",
+          "name": "BaseDress(M)",
+          "quantity": 1,
+          "slotIndex": 1,
+          "unenhanced": true,
+          "unitCatalogPrice": 120
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 534,
+          "kind": "equipment",
+          "name": "GoldNecklace",
+          "quantity": 1,
+          "slotIndex": 4,
+          "unenhanced": true,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 406,
+          "kind": "equipment",
+          "name": "GlassRing",
+          "quantity": 1,
+          "slotIndex": 7,
+          "unenhanced": true,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 406,
+          "kind": "equipment",
+          "name": "GlassRing",
+          "quantity": 1,
+          "slotIndex": 8,
+          "unenhanced": true,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 480,
+          "kind": "equipment",
+          "name": "SteelBracelet",
+          "quantity": 1,
+          "slotIndex": 5,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 480,
+          "kind": "equipment",
+          "name": "SteelBracelet",
+          "quantity": 1,
+          "slotIndex": 6,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 595,
+          "kind": "equipment",
+          "name": "BronzeHelmet",
+          "quantity": 1,
+          "slotIndex": 2,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 612,
+          "kind": "equipment",
+          "name": "LeatherBelt",
+          "quantity": 1,
+          "slotIndex": 10,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 620,
+          "kind": "equipment",
+          "name": "LowShoes",
+          "quantity": 1,
+          "slotIndex": 11,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 1016,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Healing",
+          "quantity": 1,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 900,
+          "itemIndex": 1017,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "SpiritSword",
+          "quantity": 1,
+          "unitCatalogPrice": 900
+        },
+        {
+          "catalogValue": 1200,
+          "itemIndex": 658,
+          "kind": "supply",
+          "name": "(HP)DrugSmall",
+          "offlineGranted": true,
+          "quantity": 30,
+          "unitCatalogPrice": 40
+        },
+        {
+          "catalogValue": 800,
+          "itemIndex": 659,
+          "kind": "supply",
+          "name": "(MP)DrugSmall",
+          "offlineGranted": true,
+          "quantity": 20,
+          "unitCatalogPrice": 40
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 719,
+          "kind": "supply",
+          "name": "TownTeleport",
+          "offlineGranted": true,
+          "quantity": 1,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 717,
+          "kind": "supply",
+          "name": "RandomTeleport",
+          "offlineGranted": true,
+          "quantity": 5,
+          "unitCatalogPrice": 100
+        }
+      ],
+      "maxHp": 55,
+      "maxMp": 40,
+      "mp": 40,
+      "offlineProvisioning": true,
+      "omittedOptionalEquipment": [],
+      "preSummonedPets": 0,
+      "purchaseGoldDebited": 0,
+      "saveSha256": "e58beabe411f3a31f6bfeda7d1b02de7ccc1f8c37eebf2fcf53939233d907f8d",
+      "scenarioId": "measure-Taoist-10",
+      "skills": [
+        {
+          "delayMs": 1800,
+          "hotkey": 1,
+          "mpCost": 3,
+          "rank": 0,
+          "spell": "Healing"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 0,
+          "rank": 0,
+          "spell": "SpiritSword"
+        }
+      ],
+      "taskCounters": 0,
+      "weightCapacities": {
+        "bag": 75,
+        "hand": 14,
+        "wear": 17
+      }
+    },
+    {
+      "carriedWeights": {
+        "bag": 57,
+        "hand": 7,
+        "wear": 18
+      },
+      "characterIndex": 1020,
+      "className": "Taoist",
+      "completedClaims": 0,
+      "gmLevel": 0,
+      "hp": 81,
+      "initialBagSlots": 6,
+      "initialGold": 20000,
+      "initialLevel": 14,
+      "inventoryCatalogValue": 31800,
+      "items": [
+        {
+          "catalogValue": 4000,
+          "itemIndex": 223,
+          "kind": "equipment",
+          "name": "EbonySword",
+          "quantity": 1,
+          "slotIndex": 0,
+          "unenhanced": true,
+          "unitCatalogPrice": 4000
+        },
+        {
+          "catalogValue": 2500,
+          "itemIndex": 319,
+          "kind": "equipment",
+          "name": "LightArmour(M)",
+          "quantity": 1,
+          "slotIndex": 1,
+          "unenhanced": true,
+          "unitCatalogPrice": 2500
+        },
+        {
+          "catalogValue": 1200,
+          "itemIndex": 538,
+          "kind": "equipment",
+          "name": "YellowNecklace",
+          "quantity": 1,
+          "slotIndex": 4,
+          "unenhanced": true,
+          "unitCatalogPrice": 1200
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 406,
+          "kind": "equipment",
+          "name": "GlassRing",
+          "quantity": 1,
+          "slotIndex": 7,
+          "unenhanced": true,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 406,
+          "kind": "equipment",
+          "name": "GlassRing",
+          "quantity": 1,
+          "slotIndex": 8,
+          "unenhanced": true,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 480,
+          "kind": "equipment",
+          "name": "SteelBracelet",
+          "quantity": 1,
+          "slotIndex": 5,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 480,
+          "kind": "equipment",
+          "name": "SteelBracelet",
+          "quantity": 1,
+          "slotIndex": 6,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 596,
+          "kind": "equipment",
+          "name": "MagicHelmet",
+          "quantity": 1,
+          "slotIndex": 2,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 1016,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Healing",
+          "quantity": 1,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 900,
+          "itemIndex": 1017,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "SpiritSword",
+          "quantity": 1,
+          "unitCatalogPrice": 900
+        },
+        {
+          "catalogValue": 3000,
+          "itemIndex": 1018,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Poisoning",
+          "quantity": 1,
+          "unitCatalogPrice": 3000
+        },
+        {
+          "catalogValue": 1200,
+          "itemIndex": 658,
+          "kind": "supply",
+          "name": "(HP)DrugSmall",
+          "offlineGranted": true,
+          "quantity": 30,
+          "unitCatalogPrice": 40
+        },
+        {
+          "catalogValue": 800,
+          "itemIndex": 659,
+          "kind": "supply",
+          "name": "(MP)DrugSmall",
+          "offlineGranted": true,
+          "quantity": 20,
+          "unitCatalogPrice": 40
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 719,
+          "kind": "supply",
+          "name": "TownTeleport",
+          "offlineGranted": true,
+          "quantity": 1,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 717,
+          "kind": "supply",
+          "name": "RandomTeleport",
+          "offlineGranted": true,
+          "quantity": 5,
+          "unitCatalogPrice": 100
+        },
+        {
+          "catalogValue": 1600,
+          "itemIndex": 710,
+          "kind": "supply",
+          "name": "GreenPoison",
+          "offlineGranted": true,
+          "quantity": 40,
+          "unitCatalogPrice": 40
+        },
+        {
+          "catalogValue": 1600,
+          "itemIndex": 711,
+          "kind": "supply",
+          "name": "RedPoison",
+          "offlineGranted": true,
+          "quantity": 40,
+          "unitCatalogPrice": 40
+        }
+      ],
+      "maxHp": 81,
+      "maxMp": 66,
+      "mp": 66,
+      "offlineProvisioning": true,
+      "omittedOptionalEquipment": [
+        {
+          "name": "LeatherBelt",
+          "reason": "canonical hand/wear capacity"
+        },
+        {
+          "name": "LowShoes",
+          "reason": "canonical hand/wear capacity"
+        }
+      ],
+      "preSummonedPets": 0,
+      "purchaseGoldDebited": 0,
+      "saveSha256": "ad2b643a2c01119e6a376520f6566116a26f7aef76d13b3c425e04f888bddbdb",
+      "scenarioId": "measure-Taoist-14",
+      "skills": [
+        {
+          "delayMs": 1800,
+          "hotkey": 1,
+          "mpCost": 3,
+          "rank": 0,
+          "spell": "Healing"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 0,
+          "rank": 0,
+          "spell": "SpiritSword"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 4,
+          "mpCost": 2,
+          "rank": 0,
+          "spell": "Poisoning"
+        }
+      ],
+      "taskCounters": 0,
+      "weightCapacities": {
+        "bag": 99,
+        "hand": 16,
+        "wear": 18
+      }
+    },
+    {
+      "carriedWeights": {
+        "bag": 87,
+        "hand": 16,
+        "wear": 19
+      },
+      "characterIndex": 1021,
+      "className": "Taoist",
+      "completedClaims": 0,
+      "gmLevel": 0,
+      "hp": 89,
+      "initialBagSlots": 5,
+      "initialGold": 50000,
+      "initialLevel": 15,
+      "inventoryCatalogValue": 35200,
+      "items": [
+        {
+          "catalogValue": 4000,
+          "itemIndex": 268,
+          "kind": "equipment",
+          "name": "Scimitar",
+          "quantity": 1,
+          "slotIndex": 0,
+          "unenhanced": true,
+          "unitCatalogPrice": 4000
+        },
+        {
+          "catalogValue": 2500,
+          "itemIndex": 319,
+          "kind": "equipment",
+          "name": "LightArmour(M)",
+          "quantity": 1,
+          "slotIndex": 1,
+          "unenhanced": true,
+          "unitCatalogPrice": 2500
+        },
+        {
+          "catalogValue": 1200,
+          "itemIndex": 538,
+          "kind": "equipment",
+          "name": "YellowNecklace",
+          "quantity": 1,
+          "slotIndex": 4,
+          "unenhanced": true,
+          "unitCatalogPrice": 1200
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 406,
+          "kind": "equipment",
+          "name": "GlassRing",
+          "quantity": 1,
+          "slotIndex": 7,
+          "unenhanced": true,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 406,
+          "kind": "equipment",
+          "name": "GlassRing",
+          "quantity": 1,
+          "slotIndex": 8,
+          "unenhanced": true,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 480,
+          "kind": "equipment",
+          "name": "SteelBracelet",
+          "quantity": 1,
+          "slotIndex": 5,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 480,
+          "kind": "equipment",
+          "name": "SteelBracelet",
+          "quantity": 1,
+          "slotIndex": 6,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 596,
+          "kind": "equipment",
+          "name": "MagicHelmet",
+          "quantity": 1,
+          "slotIndex": 2,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 612,
+          "kind": "equipment",
+          "name": "LeatherBelt",
+          "quantity": 1,
+          "slotIndex": 10,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 1016,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Healing",
+          "quantity": 1,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 900,
+          "itemIndex": 1017,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "SpiritSword",
+          "quantity": 1,
+          "unitCatalogPrice": 900
+        },
+        {
+          "catalogValue": 3000,
+          "itemIndex": 1018,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Poisoning",
+          "quantity": 1,
+          "unitCatalogPrice": 3000
+        },
+        {
+          "catalogValue": 2200,
+          "itemIndex": 660,
+          "kind": "supply",
+          "name": "(HP)DrugMedium",
+          "offlineGranted": true,
+          "quantity": 20,
+          "unitCatalogPrice": 110
+        },
+        {
+          "catalogValue": 2200,
+          "itemIndex": 661,
+          "kind": "supply",
+          "name": "(MP)DrugMedium",
+          "offlineGranted": true,
+          "quantity": 20,
+          "unitCatalogPrice": 110
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 719,
+          "kind": "supply",
+          "name": "TownTeleport",
+          "offlineGranted": true,
+          "quantity": 1,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 717,
+          "kind": "supply",
+          "name": "RandomTeleport",
+          "offlineGranted": true,
+          "quantity": 5,
+          "unitCatalogPrice": 100
+        },
+        {
+          "catalogValue": 1600,
+          "itemIndex": 710,
+          "kind": "supply",
+          "name": "GreenPoison",
+          "offlineGranted": true,
+          "quantity": 40,
+          "unitCatalogPrice": 40
+        },
+        {
+          "catalogValue": 1600,
+          "itemIndex": 711,
+          "kind": "supply",
+          "name": "RedPoison",
+          "offlineGranted": true,
+          "quantity": 40,
+          "unitCatalogPrice": 40
+        }
+      ],
+      "maxHp": 89,
+      "maxMp": 74,
+      "mp": 74,
+      "offlineProvisioning": true,
+      "omittedOptionalEquipment": [
+        {
+          "name": "LowShoes",
+          "reason": "canonical hand/wear capacity"
+        }
+      ],
+      "preSummonedPets": 0,
+      "purchaseGoldDebited": 0,
+      "saveSha256": "e32c72dea180c64c74bea5243f21763afe9cef27e2f121c8f1cadaf4f75c93e9",
+      "scenarioId": "measure-Taoist-15",
+      "skills": [
+        {
+          "delayMs": 1800,
+          "hotkey": 1,
+          "mpCost": 3,
+          "rank": 0,
+          "spell": "Healing"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 0,
+          "rank": 0,
+          "spell": "SpiritSword"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 4,
+          "mpCost": 2,
+          "rank": 0,
+          "spell": "Poisoning"
+        }
+      ],
+      "taskCounters": 0,
+      "weightCapacities": {
+        "bag": 106,
+        "hand": 17,
+        "wear": 19
+      }
+    },
+    {
+      "carriedWeights": {
+        "bag": 88,
+        "hand": 16,
+        "wear": 26
+      },
+      "characterIndex": 1022,
+      "className": "Taoist",
+      "completedClaims": 0,
+      "gmLevel": 0,
+      "hp": 170,
+      "initialBagSlots": 6,
+      "initialGold": 50000,
+      "initialLevel": 24,
+      "inventoryCatalogValue": 89700,
+      "items": [
+        {
+          "catalogValue": 4000,
+          "itemIndex": 268,
+          "kind": "equipment",
+          "name": "Scimitar",
+          "quantity": 1,
+          "slotIndex": 0,
+          "unenhanced": true,
+          "unitCatalogPrice": 4000
+        },
+        {
+          "catalogValue": 10000,
+          "itemIndex": 327,
+          "kind": "equipment",
+          "name": "SoulArmour(M)",
+          "quantity": 1,
+          "slotIndex": 1,
+          "unenhanced": true,
+          "unitCatalogPrice": 10000
+        },
+        {
+          "catalogValue": 1200,
+          "itemIndex": 538,
+          "kind": "equipment",
+          "name": "YellowNecklace",
+          "quantity": 1,
+          "slotIndex": 4,
+          "unenhanced": true,
+          "unitCatalogPrice": 1200
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 415,
+          "kind": "equipment",
+          "name": "PearlRing",
+          "quantity": 1,
+          "slotIndex": 7,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 415,
+          "kind": "equipment",
+          "name": "PearlRing",
+          "quantity": 1,
+          "slotIndex": 8,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 484,
+          "kind": "equipment",
+          "name": "MagicBracelet",
+          "quantity": 1,
+          "slotIndex": 5,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 484,
+          "kind": "equipment",
+          "name": "MagicBracelet",
+          "quantity": 1,
+          "slotIndex": 6,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 596,
+          "kind": "equipment",
+          "name": "MagicHelmet",
+          "quantity": 1,
+          "slotIndex": 2,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 612,
+          "kind": "equipment",
+          "name": "LeatherBelt",
+          "quantity": 1,
+          "slotIndex": 10,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 1016,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Healing",
+          "quantity": 1,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 900,
+          "itemIndex": 1017,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "SpiritSword",
+          "quantity": 1,
+          "unitCatalogPrice": 900
+        },
+        {
+          "catalogValue": 3000,
+          "itemIndex": 1018,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Poisoning",
+          "quantity": 1,
+          "unitCatalogPrice": 3000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 1019,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "SoulFireBall",
+          "quantity": 1,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 9000,
+          "itemIndex": 1020,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "SummonSkeleton",
+          "quantity": 1,
+          "unitCatalogPrice": 9000
+        },
+        {
+          "catalogValue": 10000,
+          "itemIndex": 1021,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Hiding",
+          "quantity": 1,
+          "unitCatalogPrice": 10000
+        },
+        {
+          "catalogValue": 15000,
+          "itemIndex": 1023,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "SoulShield",
+          "quantity": 1,
+          "unitCatalogPrice": 15000
+        },
+        {
+          "catalogValue": 2200,
+          "itemIndex": 660,
+          "kind": "supply",
+          "name": "(HP)DrugMedium",
+          "offlineGranted": true,
+          "quantity": 20,
+          "unitCatalogPrice": 110
+        },
+        {
+          "catalogValue": 2200,
+          "itemIndex": 661,
+          "kind": "supply",
+          "name": "(MP)DrugMedium",
+          "offlineGranted": true,
+          "quantity": 20,
+          "unitCatalogPrice": 110
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 719,
+          "kind": "supply",
+          "name": "TownTeleport",
+          "offlineGranted": true,
+          "quantity": 1,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 717,
+          "kind": "supply",
+          "name": "RandomTeleport",
+          "offlineGranted": true,
+          "quantity": 5,
+          "unitCatalogPrice": 100
+        },
+        {
+          "catalogValue": 1600,
+          "itemIndex": 710,
+          "kind": "supply",
+          "name": "GreenPoison",
+          "offlineGranted": true,
+          "quantity": 40,
+          "unitCatalogPrice": 40
+        },
+        {
+          "catalogValue": 1600,
+          "itemIndex": 711,
+          "kind": "supply",
+          "name": "RedPoison",
+          "offlineGranted": true,
+          "quantity": 40,
+          "unitCatalogPrice": 40
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 712,
+          "kind": "supply",
+          "name": "Amulet",
+          "offlineGranted": true,
+          "quantity": 200,
+          "unitCatalogPrice": 25
+        }
+      ],
+      "maxHp": 170,
+      "maxMp": 171,
+      "mp": 171,
+      "offlineProvisioning": true,
+      "omittedOptionalEquipment": [
+        {
+          "name": "LowShoes",
+          "reason": "canonical hand/wear capacity"
+        }
+      ],
+      "preSummonedPets": 0,
+      "purchaseGoldDebited": 0,
+      "saveSha256": "04960d57fe6545b3b139ea2d5a92203ba8bf35d82cf8b6c190ee0f8418b6cee7",
+      "scenarioId": "measure-Taoist-24",
+      "skills": [
+        {
+          "delayMs": 1800,
+          "hotkey": 1,
+          "mpCost": 3,
+          "rank": 0,
+          "spell": "Healing"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 0,
+          "rank": 0,
+          "spell": "SpiritSword"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 4,
+          "mpCost": 2,
+          "rank": 0,
+          "spell": "Poisoning"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 2,
+          "mpCost": 3,
+          "rank": 0,
+          "spell": "SoulFireBall"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 3,
+          "mpCost": 12,
+          "rank": 0,
+          "spell": "SummonSkeleton"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 1,
+          "rank": 0,
+          "spell": "Hiding"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 2,
+          "rank": 0,
+          "spell": "SoulShield"
+        }
+      ],
+      "taskCounters": 0,
+      "weightCapacities": {
+        "bag": 194,
+        "hand": 25,
+        "wear": 26
+      }
+    },
+    {
+      "carriedWeights": {
+        "bag": 194,
+        "hand": 16,
+        "wear": 27
+      },
+      "characterIndex": 1023,
+      "className": "Taoist",
+      "completedClaims": 0,
+      "gmLevel": 0,
+      "hp": 180,
+      "initialBagSlots": 8,
+      "initialGold": 120000,
+      "initialLevel": 25,
+      "inventoryCatalogValue": 116300,
+      "items": [
+        {
+          "catalogValue": 4000,
+          "itemIndex": 268,
+          "kind": "equipment",
+          "name": "Scimitar",
+          "quantity": 1,
+          "slotIndex": 0,
+          "unenhanced": true,
+          "unitCatalogPrice": 4000
+        },
+        {
+          "catalogValue": 10000,
+          "itemIndex": 327,
+          "kind": "equipment",
+          "name": "SoulArmour(M)",
+          "quantity": 1,
+          "slotIndex": 1,
+          "unenhanced": true,
+          "unitCatalogPrice": 10000
+        },
+        {
+          "catalogValue": 1200,
+          "itemIndex": 538,
+          "kind": "equipment",
+          "name": "YellowNecklace",
+          "quantity": 1,
+          "slotIndex": 4,
+          "unenhanced": true,
+          "unitCatalogPrice": 1200
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 415,
+          "kind": "equipment",
+          "name": "PearlRing",
+          "quantity": 1,
+          "slotIndex": 7,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 415,
+          "kind": "equipment",
+          "name": "PearlRing",
+          "quantity": 1,
+          "slotIndex": 8,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 484,
+          "kind": "equipment",
+          "name": "MagicBracelet",
+          "quantity": 1,
+          "slotIndex": 5,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 484,
+          "kind": "equipment",
+          "name": "MagicBracelet",
+          "quantity": 1,
+          "slotIndex": 6,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 596,
+          "kind": "equipment",
+          "name": "MagicHelmet",
+          "quantity": 1,
+          "slotIndex": 2,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 612,
+          "kind": "equipment",
+          "name": "LeatherBelt",
+          "quantity": 1,
+          "slotIndex": 10,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 620,
+          "kind": "equipment",
+          "name": "LowShoes",
+          "quantity": 1,
+          "slotIndex": 11,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 1016,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Healing",
+          "quantity": 1,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 900,
+          "itemIndex": 1017,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "SpiritSword",
+          "quantity": 1,
+          "unitCatalogPrice": 900
+        },
+        {
+          "catalogValue": 3000,
+          "itemIndex": 1018,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Poisoning",
+          "quantity": 1,
+          "unitCatalogPrice": 3000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 1019,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "SoulFireBall",
+          "quantity": 1,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 9000,
+          "itemIndex": 1020,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "SummonSkeleton",
+          "quantity": 1,
+          "unitCatalogPrice": 9000
+        },
+        {
+          "catalogValue": 10000,
+          "itemIndex": 1021,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Hiding",
+          "quantity": 1,
+          "unitCatalogPrice": 10000
+        },
+        {
+          "catalogValue": 15000,
+          "itemIndex": 1023,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "SoulShield",
+          "quantity": 1,
+          "unitCatalogPrice": 15000
+        },
+        {
+          "catalogValue": 15000,
+          "itemIndex": 1025,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "BlessedArmour",
+          "quantity": 1,
+          "unitCatalogPrice": 15000
+        },
+        {
+          "catalogValue": 6750,
+          "itemIndex": 662,
+          "kind": "supply",
+          "name": "(HP)DrugLarge",
+          "offlineGranted": true,
+          "quantity": 30,
+          "unitCatalogPrice": 225
+        },
+        {
+          "catalogValue": 6750,
+          "itemIndex": 663,
+          "kind": "supply",
+          "name": "(MP)DrugLarge",
+          "offlineGranted": true,
+          "quantity": 30,
+          "unitCatalogPrice": 225
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 719,
+          "kind": "supply",
+          "name": "TownTeleport",
+          "offlineGranted": true,
+          "quantity": 2,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 717,
+          "kind": "supply",
+          "name": "RandomTeleport",
+          "offlineGranted": true,
+          "quantity": 10,
+          "unitCatalogPrice": 100
+        },
+        {
+          "catalogValue": 1600,
+          "itemIndex": 710,
+          "kind": "supply",
+          "name": "GreenPoison",
+          "offlineGranted": true,
+          "quantity": 40,
+          "unitCatalogPrice": 40
+        },
+        {
+          "catalogValue": 1600,
+          "itemIndex": 711,
+          "kind": "supply",
+          "name": "RedPoison",
+          "offlineGranted": true,
+          "quantity": 40,
+          "unitCatalogPrice": 40
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 712,
+          "kind": "supply",
+          "name": "Amulet",
+          "offlineGranted": true,
+          "quantity": 200,
+          "unitCatalogPrice": 25
+        }
+      ],
+      "maxHp": 180,
+      "maxMp": 184,
+      "mp": 184,
+      "offlineProvisioning": true,
+      "omittedOptionalEquipment": [],
+      "preSummonedPets": 0,
+      "purchaseGoldDebited": 0,
+      "saveSha256": "58e5e6d8aaef1003a31c9a9636a741202f49f967bfdcc1e75295a8ea0e6eed79",
+      "scenarioId": "measure-Taoist-25",
+      "skills": [
+        {
+          "delayMs": 1800,
+          "hotkey": 1,
+          "mpCost": 3,
+          "rank": 0,
+          "spell": "Healing"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 0,
+          "rank": 0,
+          "spell": "SpiritSword"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 4,
+          "mpCost": 2,
+          "rank": 0,
+          "spell": "Poisoning"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 2,
+          "mpCost": 3,
+          "rank": 0,
+          "spell": "SoulFireBall"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 3,
+          "mpCost": 12,
+          "rank": 0,
+          "spell": "SummonSkeleton"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 1,
+          "rank": 0,
+          "spell": "Hiding"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 2,
+          "rank": 0,
+          "spell": "SoulShield"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 2,
+          "rank": 0,
+          "spell": "BlessedArmour"
+        }
+      ],
+      "taskCounters": 0,
+      "weightCapacities": {
+        "bag": 206,
+        "hand": 26,
+        "wear": 27
+      }
+    },
+    {
+      "carriedWeights": {
+        "bag": 194,
+        "hand": 15,
+        "wear": 38
+      },
+      "characterIndex": 1024,
+      "className": "Taoist",
+      "completedClaims": 0,
+      "gmLevel": 0,
+      "hp": 291,
+      "initialBagSlots": 8,
+      "initialGold": 120000,
+      "initialLevel": 34,
+      "inventoryCatalogValue": 162300,
+      "items": [
+        {
+          "catalogValue": 40000,
+          "itemIndex": 272,
+          "kind": "equipment",
+          "name": "SoulSpringWand",
+          "quantity": 1,
+          "slotIndex": 0,
+          "unenhanced": true,
+          "unitCatalogPrice": 40000
+        },
+        {
+          "catalogValue": 20000,
+          "itemIndex": 337,
+          "kind": "equipment",
+          "name": "PearlArmour(M)",
+          "quantity": 1,
+          "slotIndex": 1,
+          "unenhanced": true,
+          "unitCatalogPrice": 20000
+        },
+        {
+          "catalogValue": 1200,
+          "itemIndex": 538,
+          "kind": "equipment",
+          "name": "YellowNecklace",
+          "quantity": 1,
+          "slotIndex": 4,
+          "unenhanced": true,
+          "unitCatalogPrice": 1200
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 415,
+          "kind": "equipment",
+          "name": "PearlRing",
+          "quantity": 1,
+          "slotIndex": 7,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 415,
+          "kind": "equipment",
+          "name": "PearlRing",
+          "quantity": 1,
+          "slotIndex": 8,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 484,
+          "kind": "equipment",
+          "name": "MagicBracelet",
+          "quantity": 1,
+          "slotIndex": 5,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 484,
+          "kind": "equipment",
+          "name": "MagicBracelet",
+          "quantity": 1,
+          "slotIndex": 6,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 596,
+          "kind": "equipment",
+          "name": "MagicHelmet",
+          "quantity": 1,
+          "slotIndex": 2,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 612,
+          "kind": "equipment",
+          "name": "LeatherBelt",
+          "quantity": 1,
+          "slotIndex": 10,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 620,
+          "kind": "equipment",
+          "name": "LowShoes",
+          "quantity": 1,
+          "slotIndex": 11,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 1016,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Healing",
+          "quantity": 1,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 900,
+          "itemIndex": 1017,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "SpiritSword",
+          "quantity": 1,
+          "unitCatalogPrice": 900
+        },
+        {
+          "catalogValue": 3000,
+          "itemIndex": 1018,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Poisoning",
+          "quantity": 1,
+          "unitCatalogPrice": 3000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 1019,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "SoulFireBall",
+          "quantity": 1,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 9000,
+          "itemIndex": 1020,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "SummonSkeleton",
+          "quantity": 1,
+          "unitCatalogPrice": 9000
+        },
+        {
+          "catalogValue": 10000,
+          "itemIndex": 1021,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Hiding",
+          "quantity": 1,
+          "unitCatalogPrice": 10000
+        },
+        {
+          "catalogValue": 15000,
+          "itemIndex": 1023,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "SoulShield",
+          "quantity": 1,
+          "unitCatalogPrice": 15000
+        },
+        {
+          "catalogValue": 15000,
+          "itemIndex": 1025,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "BlessedArmour",
+          "quantity": 1,
+          "unitCatalogPrice": 15000
+        },
+        {
+          "catalogValue": 6750,
+          "itemIndex": 662,
+          "kind": "supply",
+          "name": "(HP)DrugLarge",
+          "offlineGranted": true,
+          "quantity": 30,
+          "unitCatalogPrice": 225
+        },
+        {
+          "catalogValue": 6750,
+          "itemIndex": 663,
+          "kind": "supply",
+          "name": "(MP)DrugLarge",
+          "offlineGranted": true,
+          "quantity": 30,
+          "unitCatalogPrice": 225
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 719,
+          "kind": "supply",
+          "name": "TownTeleport",
+          "offlineGranted": true,
+          "quantity": 2,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 717,
+          "kind": "supply",
+          "name": "RandomTeleport",
+          "offlineGranted": true,
+          "quantity": 10,
+          "unitCatalogPrice": 100
+        },
+        {
+          "catalogValue": 1600,
+          "itemIndex": 710,
+          "kind": "supply",
+          "name": "GreenPoison",
+          "offlineGranted": true,
+          "quantity": 40,
+          "unitCatalogPrice": 40
+        },
+        {
+          "catalogValue": 1600,
+          "itemIndex": 711,
+          "kind": "supply",
+          "name": "RedPoison",
+          "offlineGranted": true,
+          "quantity": 40,
+          "unitCatalogPrice": 40
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 712,
+          "kind": "supply",
+          "name": "Amulet",
+          "offlineGranted": true,
+          "quantity": 200,
+          "unitCatalogPrice": 25
+        }
+      ],
+      "maxHp": 291,
+      "maxMp": 330,
+      "mp": 330,
+      "offlineProvisioning": true,
+      "omittedOptionalEquipment": [],
+      "preSummonedPets": 0,
+      "purchaseGoldDebited": 0,
+      "saveSha256": "53c1d5feb403e051e4735fb7a1e4b674705d9fbf7d10b9d127b8af80dfc3e036",
+      "scenarioId": "measure-Taoist-34",
+      "skills": [
+        {
+          "delayMs": 1800,
+          "hotkey": 1,
+          "mpCost": 3,
+          "rank": 0,
+          "spell": "Healing"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 0,
+          "rank": 0,
+          "spell": "SpiritSword"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 4,
+          "mpCost": 2,
+          "rank": 0,
+          "spell": "Poisoning"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 2,
+          "mpCost": 3,
+          "rank": 0,
+          "spell": "SoulFireBall"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 3,
+          "mpCost": 12,
+          "rank": 0,
+          "spell": "SummonSkeleton"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 1,
+          "rank": 0,
+          "spell": "Hiding"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 2,
+          "rank": 0,
+          "spell": "SoulShield"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 2,
+          "rank": 0,
+          "spell": "BlessedArmour"
+        }
+      ],
+      "taskCounters": 0,
+      "weightCapacities": {
+        "bag": 339,
+        "hand": 39,
+        "wear": 38
+      }
+    },
+    {
+      "carriedWeights": {
+        "bag": 344,
+        "hand": 15,
+        "wear": 38
+      },
+      "characterIndex": 1025,
+      "className": "Taoist",
+      "completedClaims": 0,
+      "gmLevel": 0,
+      "hp": 305,
+      "initialBagSlots": 10,
+      "initialGold": 200000,
+      "initialLevel": 35,
+      "inventoryCatalogValue": 193550,
+      "items": [
+        {
+          "catalogValue": 40000,
+          "itemIndex": 272,
+          "kind": "equipment",
+          "name": "SoulSpringWand",
+          "quantity": 1,
+          "slotIndex": 0,
+          "unenhanced": true,
+          "unitCatalogPrice": 40000
+        },
+        {
+          "catalogValue": 20000,
+          "itemIndex": 337,
+          "kind": "equipment",
+          "name": "PearlArmour(M)",
+          "quantity": 1,
+          "slotIndex": 1,
+          "unenhanced": true,
+          "unitCatalogPrice": 20000
+        },
+        {
+          "catalogValue": 1200,
+          "itemIndex": 538,
+          "kind": "equipment",
+          "name": "YellowNecklace",
+          "quantity": 1,
+          "slotIndex": 4,
+          "unenhanced": true,
+          "unitCatalogPrice": 1200
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 415,
+          "kind": "equipment",
+          "name": "PearlRing",
+          "quantity": 1,
+          "slotIndex": 7,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 415,
+          "kind": "equipment",
+          "name": "PearlRing",
+          "quantity": 1,
+          "slotIndex": 8,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 484,
+          "kind": "equipment",
+          "name": "MagicBracelet",
+          "quantity": 1,
+          "slotIndex": 5,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 484,
+          "kind": "equipment",
+          "name": "MagicBracelet",
+          "quantity": 1,
+          "slotIndex": 6,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 596,
+          "kind": "equipment",
+          "name": "MagicHelmet",
+          "quantity": 1,
+          "slotIndex": 2,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 612,
+          "kind": "equipment",
+          "name": "LeatherBelt",
+          "quantity": 1,
+          "slotIndex": 10,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 620,
+          "kind": "equipment",
+          "name": "LowShoes",
+          "quantity": 1,
+          "slotIndex": 11,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 1016,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Healing",
+          "quantity": 1,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 900,
+          "itemIndex": 1017,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "SpiritSword",
+          "quantity": 1,
+          "unitCatalogPrice": 900
+        },
+        {
+          "catalogValue": 3000,
+          "itemIndex": 1018,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Poisoning",
+          "quantity": 1,
+          "unitCatalogPrice": 3000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 1019,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "SoulFireBall",
+          "quantity": 1,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 9000,
+          "itemIndex": 1020,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "SummonSkeleton",
+          "quantity": 1,
+          "unitCatalogPrice": 9000
+        },
+        {
+          "catalogValue": 10000,
+          "itemIndex": 1021,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Hiding",
+          "quantity": 1,
+          "unitCatalogPrice": 10000
+        },
+        {
+          "catalogValue": 15000,
+          "itemIndex": 1023,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "SoulShield",
+          "quantity": 1,
+          "unitCatalogPrice": 15000
+        },
+        {
+          "catalogValue": 15000,
+          "itemIndex": 1025,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "BlessedArmour",
+          "quantity": 1,
+          "unitCatalogPrice": 15000
+        },
+        {
+          "catalogValue": 20000,
+          "itemIndex": 1032,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "SummonShinsu",
+          "quantity": 1,
+          "unitCatalogPrice": 20000
+        },
+        {
+          "catalogValue": 9000,
+          "itemIndex": 662,
+          "kind": "supply",
+          "name": "(HP)DrugLarge",
+          "offlineGranted": true,
+          "quantity": 40,
+          "unitCatalogPrice": 225
+        },
+        {
+          "catalogValue": 15750,
+          "itemIndex": 663,
+          "kind": "supply",
+          "name": "(MP)DrugLarge",
+          "offlineGranted": true,
+          "quantity": 70,
+          "unitCatalogPrice": 225
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 719,
+          "kind": "supply",
+          "name": "TownTeleport",
+          "offlineGranted": true,
+          "quantity": 2,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 717,
+          "kind": "supply",
+          "name": "RandomTeleport",
+          "offlineGranted": true,
+          "quantity": 10,
+          "unitCatalogPrice": 100
+        },
+        {
+          "catalogValue": 1600,
+          "itemIndex": 710,
+          "kind": "supply",
+          "name": "GreenPoison",
+          "offlineGranted": true,
+          "quantity": 40,
+          "unitCatalogPrice": 40
+        },
+        {
+          "catalogValue": 1600,
+          "itemIndex": 711,
+          "kind": "supply",
+          "name": "RedPoison",
+          "offlineGranted": true,
+          "quantity": 40,
+          "unitCatalogPrice": 40
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 712,
+          "kind": "supply",
+          "name": "Amulet",
+          "offlineGranted": true,
+          "quantity": 200,
+          "unitCatalogPrice": 25
+        }
+      ],
+      "maxHp": 305,
+      "maxMp": 349,
+      "mp": 349,
+      "offlineProvisioning": true,
+      "omittedOptionalEquipment": [],
+      "preSummonedPets": 0,
+      "purchaseGoldDebited": 0,
+      "saveSha256": "3219c69d107beb3377864ca82d887af2ffc62d4a86fd29f16101e907eea355a3",
+      "scenarioId": "measure-Taoist-35",
+      "skills": [
+        {
+          "delayMs": 1800,
+          "hotkey": 1,
+          "mpCost": 3,
+          "rank": 0,
+          "spell": "Healing"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 0,
+          "rank": 0,
+          "spell": "SpiritSword"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 4,
+          "mpCost": 2,
+          "rank": 0,
+          "spell": "Poisoning"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 2,
+          "mpCost": 3,
+          "rank": 0,
+          "spell": "SoulFireBall"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 3,
+          "mpCost": 12,
+          "rank": 0,
+          "spell": "SummonSkeleton"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 1,
+          "rank": 0,
+          "spell": "Hiding"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 2,
+          "rank": 0,
+          "spell": "SoulShield"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 2,
+          "rank": 0,
+          "spell": "BlessedArmour"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 5,
+          "mpCost": 28,
+          "rank": 0,
+          "spell": "SummonShinsu"
+        }
+      ],
+      "taskCounters": 0,
+      "weightCapacities": {
+        "bag": 356,
+        "hand": 41,
+        "wear": 39
+      }
+    },
+    {
+      "carriedWeights": {
+        "bag": 344,
+        "hand": 40,
+        "wear": 45
+      },
+      "characterIndex": 1026,
+      "className": "Taoist",
+      "completedClaims": 0,
+      "gmLevel": 0,
+      "hp": 555,
+      "initialBagSlots": 10,
+      "initialGold": 200000,
+      "initialLevel": 50,
+      "inventoryCatalogValue": 238550,
+      "items": [
+        {
+          "catalogValue": 75000,
+          "itemIndex": 275,
+          "kind": "equipment",
+          "name": "SoulSabre",
+          "quantity": 1,
+          "slotIndex": 0,
+          "unenhanced": true,
+          "unitCatalogPrice": 75000
+        },
+        {
+          "catalogValue": 30000,
+          "itemIndex": 347,
+          "kind": "equipment",
+          "name": "TitanArmour(M)",
+          "quantity": 1,
+          "slotIndex": 1,
+          "unenhanced": true,
+          "unitCatalogPrice": 30000
+        },
+        {
+          "catalogValue": 1200,
+          "itemIndex": 538,
+          "kind": "equipment",
+          "name": "YellowNecklace",
+          "quantity": 1,
+          "slotIndex": 4,
+          "unenhanced": true,
+          "unitCatalogPrice": 1200
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 415,
+          "kind": "equipment",
+          "name": "PearlRing",
+          "quantity": 1,
+          "slotIndex": 7,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 415,
+          "kind": "equipment",
+          "name": "PearlRing",
+          "quantity": 1,
+          "slotIndex": 8,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 484,
+          "kind": "equipment",
+          "name": "MagicBracelet",
+          "quantity": 1,
+          "slotIndex": 5,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 484,
+          "kind": "equipment",
+          "name": "MagicBracelet",
+          "quantity": 1,
+          "slotIndex": 6,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 596,
+          "kind": "equipment",
+          "name": "MagicHelmet",
+          "quantity": 1,
+          "slotIndex": 2,
+          "unenhanced": true,
+          "unitCatalogPrice": 2000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 612,
+          "kind": "equipment",
+          "name": "LeatherBelt",
+          "quantity": 1,
+          "slotIndex": 10,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 620,
+          "kind": "equipment",
+          "name": "LowShoes",
+          "quantity": 1,
+          "slotIndex": 11,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 1016,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Healing",
+          "quantity": 1,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 900,
+          "itemIndex": 1017,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "SpiritSword",
+          "quantity": 1,
+          "unitCatalogPrice": 900
+        },
+        {
+          "catalogValue": 3000,
+          "itemIndex": 1018,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Poisoning",
+          "quantity": 1,
+          "unitCatalogPrice": 3000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 1019,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "SoulFireBall",
+          "quantity": 1,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 9000,
+          "itemIndex": 1020,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "SummonSkeleton",
+          "quantity": 1,
+          "unitCatalogPrice": 9000
+        },
+        {
+          "catalogValue": 10000,
+          "itemIndex": 1021,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Hiding",
+          "quantity": 1,
+          "unitCatalogPrice": 10000
+        },
+        {
+          "catalogValue": 15000,
+          "itemIndex": 1023,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "SoulShield",
+          "quantity": 1,
+          "unitCatalogPrice": 15000
+        },
+        {
+          "catalogValue": 15000,
+          "itemIndex": 1025,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "BlessedArmour",
+          "quantity": 1,
+          "unitCatalogPrice": 15000
+        },
+        {
+          "catalogValue": 20000,
+          "itemIndex": 1032,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "SummonShinsu",
+          "quantity": 1,
+          "unitCatalogPrice": 20000
+        },
+        {
+          "catalogValue": 9000,
+          "itemIndex": 662,
+          "kind": "supply",
+          "name": "(HP)DrugLarge",
+          "offlineGranted": true,
+          "quantity": 40,
+          "unitCatalogPrice": 225
+        },
+        {
+          "catalogValue": 15750,
+          "itemIndex": 663,
+          "kind": "supply",
+          "name": "(MP)DrugLarge",
+          "offlineGranted": true,
+          "quantity": 70,
+          "unitCatalogPrice": 225
+        },
+        {
+          "catalogValue": 2000,
+          "itemIndex": 719,
+          "kind": "supply",
+          "name": "TownTeleport",
+          "offlineGranted": true,
+          "quantity": 2,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 717,
+          "kind": "supply",
+          "name": "RandomTeleport",
+          "offlineGranted": true,
+          "quantity": 10,
+          "unitCatalogPrice": 100
+        },
+        {
+          "catalogValue": 1600,
+          "itemIndex": 710,
+          "kind": "supply",
+          "name": "GreenPoison",
+          "offlineGranted": true,
+          "quantity": 40,
+          "unitCatalogPrice": 40
+        },
+        {
+          "catalogValue": 1600,
+          "itemIndex": 711,
+          "kind": "supply",
+          "name": "RedPoison",
+          "offlineGranted": true,
+          "quantity": 40,
+          "unitCatalogPrice": 40
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 712,
+          "kind": "supply",
+          "name": "Amulet",
+          "offlineGranted": true,
+          "quantity": 200,
+          "unitCatalogPrice": 25
+        }
+      ],
+      "maxHp": 555,
+      "maxMp": 700,
+      "mp": 700,
+      "offlineProvisioning": true,
+      "omittedOptionalEquipment": [],
+      "preSummonedPets": 0,
+      "purchaseGoldDebited": 0,
+      "saveSha256": "0ba52fba1443b83cc8fd39c890d918768d810ecc06bd97d2244f3968f155b1c5",
+      "scenarioId": "measure-Taoist-50",
+      "skills": [
+        {
+          "delayMs": 1800,
+          "hotkey": 1,
+          "mpCost": 3,
+          "rank": 0,
+          "spell": "Healing"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 0,
+          "rank": 0,
+          "spell": "SpiritSword"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 4,
+          "mpCost": 2,
+          "rank": 0,
+          "spell": "Poisoning"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 2,
+          "mpCost": 3,
+          "rank": 0,
+          "spell": "SoulFireBall"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 3,
+          "mpCost": 12,
+          "rank": 0,
+          "spell": "SummonSkeleton"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 1,
+          "rank": 0,
+          "spell": "Hiding"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 2,
+          "rank": 0,
+          "spell": "SoulShield"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 2,
+          "rank": 0,
+          "spell": "BlessedArmour"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 5,
+          "mpCost": 28,
+          "rank": 0,
+          "spell": "SummonShinsu"
+        }
+      ],
+      "taskCounters": 0,
+      "weightCapacities": {
+        "bag": 675,
+        "hand": 71,
+        "wear": 65
+      }
+    },
+    {
+      "carriedWeights": {
+        "bag": 56,
+        "hand": 7,
+        "wear": 16
+      },
+      "characterIndex": 1027,
+      "className": "Taoist",
+      "completedClaims": 0,
+      "gmLevel": 0,
+      "hp": 55,
+      "initialBagSlots": 5,
+      "initialGold": 20000,
+      "initialLevel": 10,
+      "inventoryCatalogValue": 23520,
+      "items": [
+        {
+          "catalogValue": 4000,
+          "itemIndex": 223,
+          "kind": "equipment",
+          "name": "EbonySword",
+          "quantity": 1,
+          "slotIndex": 0,
+          "unenhanced": true,
+          "unitCatalogPrice": 4000
+        },
+        {
+          "catalogValue": 120,
+          "itemIndex": 317,
+          "kind": "equipment",
+          "name": "BaseDress(M)",
+          "quantity": 1,
+          "slotIndex": 1,
+          "unenhanced": true,
+          "unitCatalogPrice": 120
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 534,
+          "kind": "equipment",
+          "name": "GoldNecklace",
+          "quantity": 1,
+          "slotIndex": 4,
+          "unenhanced": true,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 406,
+          "kind": "equipment",
+          "name": "GlassRing",
+          "quantity": 1,
+          "slotIndex": 7,
+          "unenhanced": true,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 406,
+          "kind": "equipment",
+          "name": "GlassRing",
+          "quantity": 1,
+          "slotIndex": 8,
+          "unenhanced": true,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 480,
+          "kind": "equipment",
+          "name": "SteelBracelet",
+          "quantity": 1,
+          "slotIndex": 5,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 5000,
+          "itemIndex": 480,
+          "kind": "equipment",
+          "name": "SteelBracelet",
+          "quantity": 1,
+          "slotIndex": 6,
+          "unenhanced": true,
+          "unitCatalogPrice": 5000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 595,
+          "kind": "equipment",
+          "name": "BronzeHelmet",
+          "quantity": 1,
+          "slotIndex": 2,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 612,
+          "kind": "equipment",
+          "name": "LeatherBelt",
+          "quantity": 1,
+          "slotIndex": 10,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 620,
+          "kind": "equipment",
+          "name": "LowShoes",
+          "quantity": 1,
+          "slotIndex": 11,
+          "unenhanced": true,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 1016,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "Healing",
+          "quantity": 1,
+          "unitCatalogPrice": 500
+        },
+        {
+          "catalogValue": 900,
+          "itemIndex": 1017,
+          "kind": "skillBook",
+          "learnedRank": 0,
+          "name": "SpiritSword",
+          "quantity": 1,
+          "unitCatalogPrice": 900
+        },
+        {
+          "catalogValue": 1200,
+          "itemIndex": 658,
+          "kind": "supply",
+          "name": "(HP)DrugSmall",
+          "offlineGranted": true,
+          "quantity": 30,
+          "unitCatalogPrice": 40
+        },
+        {
+          "catalogValue": 800,
+          "itemIndex": 659,
+          "kind": "supply",
+          "name": "(MP)DrugSmall",
+          "offlineGranted": true,
+          "quantity": 20,
+          "unitCatalogPrice": 40
+        },
+        {
+          "catalogValue": 1000,
+          "itemIndex": 719,
+          "kind": "supply",
+          "name": "TownTeleport",
+          "offlineGranted": true,
+          "quantity": 1,
+          "unitCatalogPrice": 1000
+        },
+        {
+          "catalogValue": 500,
+          "itemIndex": 717,
+          "kind": "supply",
+          "name": "RandomTeleport",
+          "offlineGranted": true,
+          "quantity": 5,
+          "unitCatalogPrice": 100
+        }
+      ],
+      "maxHp": 55,
+      "maxMp": 40,
+      "mp": 40,
+      "offlineProvisioning": true,
+      "omittedOptionalEquipment": [],
+      "preSummonedPets": 0,
+      "purchaseGoldDebited": 0,
+      "saveSha256": "c0161c25b4680b85e18e91a8cc2c1ae4ed26d4d31238cfad2a4ab4c853ed753b",
+      "scenarioId": "smoke-Taoist-10",
+      "skills": [
+        {
+          "delayMs": 1800,
+          "hotkey": 1,
+          "mpCost": 3,
+          "rank": 0,
+          "spell": "Healing"
+        },
+        {
+          "delayMs": 1800,
+          "hotkey": 0,
+          "mpCost": 0,
+          "rank": 0,
+          "spell": "SpiritSword"
+        }
+      ],
+      "taskCounters": 0,
+      "weightCapacities": {
+        "bag": 75,
+        "hand": 14,
+        "wear": 17
+      }
+    }
+  ],
+  "schema": 1,
+  "smokeFixtureCount": 3,
+  "source": "apps/simulation/examples/seed_periodic_qa.rs",
+  "sourceSha256": "06336ad1a8a79067a5213b50d2a3f0771640712e3c1be104684bb9e0aa6fb6f0",
+  "storeSha256": "55a801711d130acbe1bfaddde9d845d69cc1792083bacc8a27030f23befe7e23",
+  "timeZone": "UTC+8"
+}

@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
 import { SpriteButton } from "./original-client-overlays";
+import type { MailDraftState, MailOutcome } from "../../lib/bevy-mail-ui";
+import type { MailMessageDecision,MailParcelState } from "../../lib/client-core-runtime";
 
 type TranslateFn = (
   key: string,
@@ -40,6 +42,8 @@ export type MailMessageSummary = {
   date?: string;
   /** Optional locked flag (parcel cannot be claimed yet) — renders a badge. */
   locked?: boolean;
+  canReply?: boolean;
+  contentKey?: string;
 };
 
 /** Payload the compose form emits; consumed by an optional `onSendMail`. */
@@ -51,6 +55,8 @@ export type MailComposeDraft = {
   gold?: number;
   /** Item references to attach (names or ids the host can resolve). */
   items?: string[];
+  attachmentUniqueIds?:number[];
+  stamped?:boolean;
 };
 
 export type MailWindowProps = {
@@ -71,9 +77,20 @@ export type MailWindowProps = {
   /** Delete a message from the inbox. */
   onDeleteMail?: (mailId: number) => void;
   /** Send a newly composed letter / parcel. */
-  onSendMail?: (draft: MailComposeDraft) => void;
+  onSendMail?: (draft: MailComposeDraft) => MailOutcome;
+  composeState?: {draft:MailDraftState|null;pending:boolean;notice:string|null};
+  onDraftChange?: (draft:MailDraftState)=>void;
+  normalizeMessage?: (message:string)=>MailMessageDecision;
+  parcelState?:MailParcelState|null;
+  parcelItems?:Array<{uniqueId:number|null;name:string;quantity:number}>;
+  onParcelAction?:(action:'attach'|'detach'|'stamp'|'review',value?:number)=>void;
   onClose: () => void;
+  presentation?: MailPresentation;
+  onPresentationChange?: (next: MailPresentation) => void;
 };
+
+export type MailPresentation = {key:string;view:"inbox"|"read"|"compose";selectedId:number|null;
+  contentKey:string|null;recipient:string;subject?:string;readDispatched:boolean};
 
 const FRAME = ORIGINAL_UI.mail;
 const ICONS = ORIGINAL_UI.mail.icons;
@@ -119,69 +136,71 @@ export function MailWindow({
   onClaimAttachment,
   onDeleteMail,
   onSendMail,
+  composeState,
+  onDraftChange,
+  normalizeMessage,
+  parcelState,
+  parcelItems,
+  onParcelAction,
   onClose,
+  presentation,
+  onPresentationChange,
 }: MailWindowProps) {
   const entries = useMemo(
     () => (mail ?? []).filter((message) => !message.deleted),
     [mail],
   );
 
-  const [view, setView] = useState<MailView>("inbox");
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [localView, setLocalView] = useState<MailView>("inbox");
+  const [localSelectedId, setLocalSelectedId] = useState<number | null>(null);
+  const selectedId=presentation?.selectedId??localSelectedId;
+  const requestedView=presentation?.view??localView;
+  // Controlled handoff is applied on the first render; no effect may select another mail.
+  const validSelection=entries.some(m=>m.id===selectedId&&(!presentation?.contentKey||m.contentKey===presentation.contentKey));
+  const view=requestedView==="read"&&!validSelection?"inbox":requestedView;
+  const setView=(next:MailView)=>{if(composeState?.pending)return;setLocalView(next);if(presentation)onPresentationChange?.({...presentation,view:next,readDispatched:next==="inbox"?false:presentation.readDispatched});};
 
   // Compose form state.
-  const [composeTo, setComposeTo] = useState("");
-  const [composeSubject, setComposeSubject] = useState("");
-  const [composeBody, setComposeBody] = useState("");
-  const [composeGold, setComposeGold] = useState("");
-  const [composeItems, setComposeItems] = useState<string[]>([]);
+  const [localDraft,setLocalDraft]=useState<MailDraftState>({to:presentation?.recipient??"",subject:presentation?.subject??"",body:"",goldText:"",items:[]});
+  const draft=composeState?.draft??localDraft;
+  const {to:composeTo,subject:composeSubject,body:composeBody,goldText:composeGold,items:composeItems}=draft;
+  function saveDraft(next:MailDraftState){if(composeState?.pending)return;setLocalDraft(next);onDraftChange?.(next);}
 
   const selected = useMemo(
-    () => entries.find((entry) => entry.id !== undefined && entry.id === selectedId) ?? null,
-    [entries, selectedId],
+    () => entries.find((entry) => entry.id !== undefined && entry.id === selectedId&&(!presentation?.contentKey||entry.contentKey===presentation.contentKey)) ?? null,
+    [entries, selectedId, presentation?.contentKey],
   );
-
-  // Keep the selection valid as the inbox changes; fall back to the first item.
-  useEffect(() => {
-    if (view !== "compose" && selected === null && entries.length > 0) {
-      const first = entries.find((entry) => entry.id !== undefined);
-      setSelectedId(first?.id ?? null);
-    }
-  }, [entries, selected, view]);
 
   const unreadCount = entries.filter(isUnread).length;
 
   function openMessage(message: MailMessageSummary) {
     if (message.id === undefined) return;
-    setSelectedId(message.id);
-    setView("read");
-    if (isUnread(message)) {
+    setLocalSelectedId(message.id);
+    if (isUnread(message)&&!(presentation?.view==="read"&&presentation.readDispatched&&presentation.selectedId===message.id&&presentation.contentKey===message.contentKey)) {
       onOpen?.(message.id);
     }
+    if(presentation)onPresentationChange?.({...presentation,view:"read",selectedId:message.id,contentKey:message.contentKey??null,readDispatched:false});
+    else setLocalView("read");
   }
 
   function startCompose(replyTo?: MailMessageSummary) {
-    setComposeTo(replyTo ? senderName(replyTo) : "");
-    setComposeSubject(replyTo?.subject ? `RE: ${replyTo.subject}` : "");
-    setComposeBody("");
-    setComposeGold("");
-    setComposeItems([]);
-    setView("compose");
+    if(composeState?.pending)return;
+    saveDraft({to:replyTo?senderName(replyTo):"",subject:replyTo?.subject?`RE: ${replyTo.subject}`:"",body:"",goldText:"",items:[]});
+    if(presentation)onPresentationChange?.({...presentation,view:"compose",recipient:replyTo?senderName(replyTo):"",subject:replyTo?.subject?`RE: ${replyTo.subject}`:""});
+    else setLocalView("compose");
   }
 
   function submitCompose() {
-    if (!onSendMail) return;
-    const to = composeTo.trim();
-    if (!to) return;
-    const parsedGold = Number.parseInt(composeGold, 10);
+    if (!onSendMail||composeState?.pending) return;
+    const parsedGold = composeGold.trim()===""?0:Number(composeGold);
     onSendMail({
-      to,
-      subject: composeSubject.trim(),
+      to:composeTo,
+      subject: composeSubject,
       body: composeBody,
-      gold: Number.isFinite(parsedGold) && parsedGold > 0 ? parsedGold : undefined,
+      gold: parsedGold,
       items: composeItems.length ? composeItems : undefined,
+      ...(parcelState?{attachmentUniqueIds:[...parcelState.attachmentUniqueIds],stamped:parcelState.stamped}:{}),
     });
-    setView("inbox");
   }
 
   const composeValid = composeTo.trim().length > 0;
@@ -197,7 +216,7 @@ export function MailWindow({
       <img style={style.title} src={FRAME.title} alt="" draggable={false} />
       <div style={style.titleText}>{t("client.Mail", [], "Mail")}</div>
       <div style={style.close}>
-        <SpriteButton sprite={FRAME.closeButton} label={t("ui.close", [], "Close")} onClick={onClose} />
+        <SpriteButton sprite={FRAME.closeButton} label={t("ui.close", [], "Close")} onClick={()=>{if(!composeState?.pending)onClose();}} />
       </div>
 
       {/* Sub-view tabs ----------------------------------------------------- */}
@@ -205,6 +224,7 @@ export function MailWindow({
         <button
           type="button"
           style={tabStyle(view === "inbox")}
+          disabled={composeState?.pending}
           onClick={() => setView("inbox")}
         >
           {`${t("ui.mailInbox", [], "Inbox")}${unreadCount ? ` (${unreadCount})` : ""}`}
@@ -212,7 +232,7 @@ export function MailWindow({
         <button
           type="button"
           style={{ ...tabStyle(view === "compose"), ...(!onSendMail ? style.disabled : null) }}
-          disabled={!onSendMail}
+          disabled={!onSendMail||composeState?.pending}
           title={!onSendMail ? t("ui.mailSendDisabled", [], "Sending is unavailable.") : undefined}
           onClick={() => startCompose()}
         >
@@ -225,7 +245,7 @@ export function MailWindow({
           t={t}
           entries={entries}
           selectedId={selectedId}
-          onSelect={(id) => setSelectedId(id)}
+          onSelect={(id) => {setLocalSelectedId(id);if(presentation)onPresentationChange?.({...presentation,selectedId:id,contentKey:entries.find(m=>m.id===id)?.contentKey??null,readDispatched:false});}}
           onOpen={openMessage}
           onClaim={onClaimAttachment}
           onDelete={onDeleteMail}
@@ -238,7 +258,7 @@ export function MailWindow({
           message={selected}
           onClaim={onClaimAttachment}
           onDelete={onDeleteMail}
-          onReply={onSendMail ? () => selected && startCompose(selected) : undefined}
+          onReply={onSendMail && selected?.canReply ? () => selected && startCompose(selected) : undefined}
           onBack={() => setView("inbox")}
         />
       ) : null}
@@ -253,17 +273,18 @@ export function MailWindow({
           gold={gold}
           attachableItems={attachableItems}
           selectedItems={composeItems}
-          canSend={Boolean(onSendMail) && composeValid}
+          canSend={Boolean(onSendMail) && composeValid&&!composeState?.pending}
           sendEnabled={Boolean(onSendMail)}
-          onToChange={setComposeTo}
-          onSubjectChange={setComposeSubject}
-          onBodyChange={setComposeBody}
-          onGoldChange={setComposeGold}
-          onToggleItem={(key) =>
-            setComposeItems((current) =>
-              current.includes(key) ? current.filter((entry) => entry !== key) : [...current, key],
-            )
-          }
+          pending={composeState?.pending??false}
+          parcelState={parcelState}
+          parcelItems={parcelItems}
+          onParcelAction={onParcelAction}
+          notice={composeState?.notice??parcelState?.notice??null}
+          onToChange={to=>saveDraft({...draft,to})}
+          onSubjectChange={subject=>saveDraft({...draft,subject})}
+          onBodyChange={body=>{if(!normalizeMessage){saveDraft({...draft,body});return;}const result=normalizeMessage(body);if(result.ok)saveDraft({...draft,body:result.message});}}
+          onGoldChange={goldText=>saveDraft({...draft,goldText})}
+          onToggleItem={key=>saveDraft({...draft,items:composeItems.includes(key)?composeItems.filter(entry=>entry!==key):[...composeItems,key]})}
           onSubmit={submitCompose}
           onCancel={() => setView("inbox")}
         />
@@ -530,6 +551,11 @@ function MailComposeForm({
   selectedItems,
   canSend,
   sendEnabled,
+  pending,
+  notice,
+  parcelState,
+  parcelItems,
+  onParcelAction,
   onToChange,
   onSubjectChange,
   onBodyChange,
@@ -548,6 +574,11 @@ function MailComposeForm({
   selectedItems: string[];
   canSend: boolean;
   sendEnabled: boolean;
+  pending:boolean;
+  notice:string|null;
+  parcelState?:MailParcelState|null;
+  parcelItems?:Array<{uniqueId:number|null;name:string;quantity:number}>;
+  onParcelAction?:(action:'attach'|'detach'|'stamp'|'review',value?:number)=>void;
   onToChange: (value: string) => void;
   onSubjectChange: (value: string) => void;
   onBodyChange: (value: string) => void;
@@ -564,6 +595,8 @@ function MailComposeForm({
         if (canSend) onSubmit();
       }}
     >
+      {notice?<div role="status">{notice}</div>:null}
+      <fieldset disabled={pending} style={{border:0,padding:0,margin:0,minWidth:0}}>
       <label style={style.field}>
         <span style={style.fieldLabel}>{t("ui.mailRecipient", [], "Recipient")}</span>
         <input
@@ -594,7 +627,6 @@ function MailComposeForm({
           style={style.textarea}
           value={body}
           rows={5}
-          maxLength={300}
           onChange={(event) => onBodyChange(event.target.value)}
         />
       </label>
@@ -633,6 +665,13 @@ function MailComposeForm({
         </div>
       ) : null}
 
+      {onParcelAction?<div>
+        <button type="button" onClick={()=>onParcelAction('stamp')}>{parcelState?.stamped?'Remove stamp':'Use stamp'}</button>
+        <span> Postage: {parcelState?.postage??'waiting for server'}</span>
+        <div>{Array.from({length:5},(_,slot)=>{const id=parcelState?.attachmentUniqueIds[slot];return <button key={slot} type="button" disabled={!id||slot>=(parcelState?.slotLimit??1)} onClick={()=>onParcelAction('detach',slot)}>{id?`UID ${id}`:`Slot ${slot+1}`}</button>;})}</div>
+        <div>{parcelItems?.map((item,index)=><button key={item.uniqueId??`display-${index}`} type="button" disabled={item.uniqueId===null||Boolean(parcelState?.attachmentUniqueIds.includes(item.uniqueId))} onClick={()=>{if(item.uniqueId!==null)onParcelAction('attach',item.uniqueId);}}>{item.name} ×{item.quantity}</button>)}</div>
+        {parcelState?.reviewRequired?<button type="button" onClick={()=>onParcelAction('review')}>Review parcel changes</button>:null}
+      </div>:null}
       <div style={style.composeActions}>
         <button
           type="submit"
@@ -646,6 +685,7 @@ function MailComposeForm({
           {t("ui.cancel", [], "Cancel")}
         </button>
       </div>
+      </fieldset>
     </form>
   );
 }

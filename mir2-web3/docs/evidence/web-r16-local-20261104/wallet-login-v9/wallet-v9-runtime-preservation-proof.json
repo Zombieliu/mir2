@@ -1,0 +1,25 @@
+{
+  "schema": "mir2.r16.wallet-fix-preservation.v1",
+  "stoppedBeforeCopy": true,
+  "oldDirectoryPreserved": true,
+  "backupName": "Numeron-Web-R16-20261104-before-wallet-network-v9",
+  "runtime": [
+    {
+      "directory": "private",
+      "files": 24,
+      "bytes": 407332,
+      "beforeTreeSha256": "f27ea9e199d25ae823297c3e967c0b8de149f1659f078ea74fdcd02da8bd890a",
+      "afterTreeSha256": "f27ea9e199d25ae823297c3e967c0b8de149f1659f078ea74fdcd02da8bd890a",
+      "allFilesMatched": true
+    },
+    {
+      "directory": ".mir2-data",
+      "files": 8,
+      "bytes": 3037969125,
+      "beforeTreeSha256": "040ac3701e2df73c69243a3def4179abf7f12b9bf02c765cfd53ff9676ebe26a",
+      "afterTreeSha256": "040ac3701e2df73c69243a3def4179abf7f12b9bf02c765cfd53ff9676ebe26a",
+      "allFilesMatched": true
+    }
+  ],
+  "allMatched": true
+}

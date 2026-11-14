@@ -1,0 +1,31 @@
+    Finished `test` profile [unoptimized] target(s) in 0.27s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_simulation-bf869c08515da9c3.exe)
+
+running 25 tests
+test runtime::zone::runtime::checkpoint::combat_random_checkpoint_tests::every_legacy_version_authenticates_its_original_root_then_mints_a_new_stream ... ok
+test runtime::zone::runtime::checkpoint::combat_random_checkpoint_tests::v8_checkpoint_and_live_fork_continue_the_exact_random_suffix ... ok
+test runtime::zone::runtime::checkpoint::combat_random_checkpoint_tests::v8_root_authenticates_seed_and_position_and_requires_supported_complete_state ... ok
+test runtime::zone::runtime::checkpoint::player_drop_checkpoint_tests::player_drop_checkpoint_v9_commits_identity_registry_and_requires_complete_custody ... ok
+test runtime::zone::runtime::checkpoint::player_drop_checkpoint_tests::player_drop_legacy_v8_strips_all_forward_custody_even_malformed_and_preserves_random_cursor ... ok
+test runtime::zone::runtime::checkpoint::player_drop_checkpoint_tests::player_drop_old_checkpoint_cannot_revive_a_canonically_consumed_effect ... ok
+test runtime::zone::runtime::checkpoint::tests::checkpoint_state_root_authenticates_removed_object_tombstones ... ok
+test runtime::zone::runtime::checkpoint::tests::complete_zone_checkpoint_rejects_valid_json_with_changed_state ... ok
+test runtime::zone::runtime::checkpoint::tests::complete_zone_checkpoint_restores_authoritative_and_derived_state ... ok
+test runtime::zone::runtime::checkpoint::tests::exact_ground_drop_identity_is_checkpointed_and_state_root_protected ... ok
+test runtime::zone::runtime::checkpoint::tests::ground_drop_authority_allocators_fail_closed_at_u64_exhaustion ... ok
+test runtime::zone::runtime::checkpoint::tests::legacy_checkpoint_missing_monster_disposition_fails_closed ... ok
+test runtime::zone::runtime::checkpoint::tests::legacy_v1_ground_drop_fixture_rebuilds_authority_from_legacy_payload_only ... ok
+test runtime::zone::runtime::checkpoint::tests::legacy_v1_restore_ignores_injected_v2_ground_drop_authority_fields ... ok
+test runtime::zone::runtime::checkpoint::tests::legacy_v2_checkpoint_verifies_old_root_then_reanchors_pending_ticket_key ... ok
+test runtime::zone::runtime::checkpoint::tests::legacy_v3_checkpoint_ignores_forward_respawn_and_live_sync_rehydrates_policy ... ok
+test runtime::zone::runtime::checkpoint::tests::legacy_v3_dead_monster_policy_hydration_never_revives_immediately ... ok
+test runtime::zone::runtime::checkpoint::tests::legacy_v5_authenticates_original_item_before_ignoring_unbound_forward_owner_fields ... ok
+test runtime::zone::runtime::checkpoint::tests::legacy_v6_retains_authenticated_custody_and_discards_unbound_mining ... ok
+test runtime::zone::runtime::checkpoint::tests::mining_schema_seven_round_trip_and_integrity ... ok
+test runtime::zone::runtime::checkpoint::tests::new_online_metadata_is_integrity_bound_but_cold_decode_never_grants_authority ... ok
+test runtime::zone::runtime::checkpoint::tests::online_player_receives_world_event_monster_spawn_packet ... ok
+test runtime::zone::runtime::checkpoint::tests::verified_world_checkpoint_keeps_v2_ground_drop_authority_validation ... ok
+test runtime::zone::runtime::checkpoint::tests::verified_world_checkpoint_reanchors_a_module_dependent_state_root ... ok
+test runtime::zone::runtime::checkpoint::tests::world_event_monster_without_player_is_authoritative_and_checkpointed ... ok
+
+test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 3112 filtered out; finished in 0.74s

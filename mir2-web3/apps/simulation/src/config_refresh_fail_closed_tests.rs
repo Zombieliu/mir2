@@ -163,6 +163,18 @@ fn postgres_deleted_account_cannot_be_recreated_by_stale_save() {
         next_character_index: 1,
         game_shop_global_purchases: BTreeMap::new(),
         accounts,
+        shared_guilds: BTreeMap::new(),
+        sealed_stones: Default::default(),
+        source_stone_version: None,
+        shared_heroes: BTreeMap::new(),
+        hero_id_high_watermark: 0,
+        source_hero_versions: BTreeMap::new(),
+        source_hero_allocator_version: None,
+        guild_clock: None,
+        source_guild_clock_version: None,
+        source_guild_versions: BTreeMap::new(),
+        shared_conquests: BTreeMap::new(),
+        source_conquest_versions: BTreeMap::new(),
         source_account_versions: BTreeMap::new(),
         source_save_versions: BTreeMap::new(),
         source_game_shop_global_version: None,
@@ -204,6 +216,18 @@ fn authoritative_test_store(accounts: BTreeMap<String, AccountRecord>) -> Accoun
         next_character_index: 0,
         game_shop_global_purchases: BTreeMap::new(),
         accounts,
+        shared_guilds: BTreeMap::new(),
+        sealed_stones: Default::default(),
+        source_stone_version: None,
+        shared_heroes: BTreeMap::new(),
+        hero_id_high_watermark: 0,
+        source_hero_versions: BTreeMap::new(),
+        source_hero_allocator_version: None,
+        guild_clock: None,
+        source_guild_clock_version: None,
+        source_guild_versions: BTreeMap::new(),
+        shared_conquests: BTreeMap::new(),
+        source_conquest_versions: BTreeMap::new(),
         source_account_versions: BTreeMap::new(),
         source_save_versions: BTreeMap::new(),
         source_game_shop_global_version: None,
@@ -360,7 +384,15 @@ fn development_file_fixture_still_supplies_demo_account() {
         config.account_store_database_mode,
         AccountStoreDatabaseMode::Mirror
     );
-    assert_eq!(config.account_store_path.as_deref(), Some(path.as_path()));
+    assert_eq!(
+        config.account_store_path.as_deref(),
+        Some(
+            std::fs::canonicalize(path.parent().unwrap())
+                .unwrap()
+                .join(path.file_name().unwrap())
+                .as_path()
+        )
+    );
 }
 fn source_of_truth_test_config(accounts: BTreeMap<String, AccountRecord>) -> SimulationConfig {
     source_of_truth_test_config_with_store(authoritative_test_store(accounts))
@@ -378,6 +410,7 @@ fn source_of_truth_test_config_with_store(store: AccountStore) -> SimulationConf
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct AccountStoreAuditSnapshot {
     json: Vec<u8>,
+    source_guild_versions: BTreeMap<String, i64>,
     source_account_versions: BTreeMap<String, i64>,
     source_save_versions: BTreeMap<String, BTreeMap<i32, i64>>,
     source_game_shop_global_version: Option<i64>,
@@ -388,6 +421,7 @@ fn account_store_audit_snapshot(config: &SimulationConfig) -> AccountStoreAuditS
     let store = config.account_store.lock().unwrap();
     AccountStoreAuditSnapshot {
         json: serde_json::to_vec(&*store).unwrap(),
+        source_guild_versions: store.source_guild_versions.clone(),
         source_account_versions: store.source_account_versions.clone(),
         source_save_versions: store.source_save_versions.clone(),
         source_game_shop_global_version: store.source_game_shop_global_version,
@@ -855,12 +889,212 @@ fn alpha_repository_probe_outcome(
     global_version: Option<i64>,
 ) -> AccountStoreRepositorySave {
     AccountStoreRepositorySave {
+        clock: None,
+        stones: None,
+        guild_versions: BTreeMap::new(),
+        conquest_versions: BTreeMap::new(),
+        heroes: Default::default(),
         account_versions: BTreeMap::from([("alpha".to_string(), account_version)]),
         save_versions: BTreeMap::from([("alpha".to_string(), BTreeMap::from([(1, save_version)]))]),
         game_shop_global_version: global_version,
     }
 }
 
+#[test]
+fn account_scope_equal_records_skip_fingerprints_in_both_validation_passes() {
+    let mut config = source_of_truth_test_config_with_store(versioned_two_account_store());
+    config.account_store_database_url = Some(VALID_POSTGRES_ACCOUNT_STORE_URL.to_string());
+    config.inject_account_store_repository_writer_probe(Ok(alpha_repository_probe_outcome(
+        12, 102, None,
+    )));
+    let beta_before = config.account_store.lock().unwrap().accounts["beta"].clone();
+    ACCOUNT_SCOPE_VALIDATION_COUNTS.with(|counts| counts.set((0, 0)));
+
+    config
+        .commit_account_store_transaction(&["alpha".to_string()], |store| {
+            store.accounts.get_mut("alpha").unwrap().password = "authorized update".to_string();
+            Ok(())
+        })
+        .unwrap();
+
+    assert_eq!(
+        ACCOUNT_SCOPE_VALIDATION_COUNTS.with(|counts| counts.get()),
+        (2, 0)
+    );
+    assert_eq!(
+        config.account_store_repository_writer_probe_invocations(),
+        1
+    );
+    let store = config.account_store.lock().unwrap();
+    assert_eq!(store.accounts["alpha"].password, "authorized update");
+    assert_eq!(store.accounts["beta"], beta_before);
+    assert_eq!(store.source_account_versions.get("alpha"), Some(&12));
+}
+
+#[test]
+fn account_scope_unequal_records_fingerprint_and_reject_before_persistence() {
+    for (change, account_id, expected_fingerprints) in [
+        ("nested-save", "beta", 2),
+        ("insert", "gamma", 1),
+        ("delete", "beta", 1),
+    ] {
+        let mut config = source_of_truth_test_config_with_store(versioned_two_account_store());
+        config.account_store_database_url = Some(VALID_POSTGRES_ACCOUNT_STORE_URL.to_string());
+        config.inject_account_store_repository_writer_probe(Ok(alpha_repository_probe_outcome(
+            12, 102, None,
+        )));
+        let before = account_store_audit_snapshot(&config);
+        ACCOUNT_SCOPE_VALIDATION_COUNTS.with(|counts| counts.set((0, 0)));
+
+        let error = config
+            .commit_account_store_transaction(&["alpha".to_string()], |store| {
+                store.accounts.get_mut("alpha").unwrap().password = "must roll back".to_string();
+                match change {
+                    "nested-save" => {
+                        store
+                            .accounts
+                            .get_mut("beta")
+                            .unwrap()
+                            .saves
+                            .get_mut(&2)
+                            .unwrap()
+                            .gold += 1;
+                    }
+                    "insert" => {
+                        store.accounts.insert(
+                            "gamma".to_string(),
+                            AccountRecord::new(test_character(3, "Gamma")),
+                        );
+                    }
+                    "delete" => {
+                        store.accounts.remove("beta");
+                    }
+                    _ => unreachable!(),
+                }
+                Ok(())
+            })
+            .unwrap_err();
+
+        assert!(error.contains(&format!(
+            "account {account_id} changed outside the authorized scope"
+        )));
+        assert_eq!(
+            ACCOUNT_SCOPE_VALIDATION_COUNTS.with(|counts| counts.get()),
+            (1, expected_fingerprints),
+            "{change} must use the original JSON fallback"
+        );
+        assert_eq!(
+            config.account_store_repository_writer_probe_invocations(),
+            0
+        );
+        assert_eq!(account_store_audit_snapshot(&config), before);
+    }
+}
+
+#[test]
+fn account_scope_equal_records_still_reject_source_metadata_changes() {
+    let mut config = source_of_truth_test_config_with_store(versioned_two_account_store());
+    config.account_store_database_url = Some(VALID_POSTGRES_ACCOUNT_STORE_URL.to_string());
+    config.inject_account_store_repository_writer_probe(Ok(alpha_repository_probe_outcome(
+        12, 102, None,
+    )));
+    let before = account_store_audit_snapshot(&config);
+    ACCOUNT_SCOPE_VALIDATION_COUNTS.with(|counts| counts.set((0, 0)));
+
+    let error = config
+        .commit_account_store_transaction(&["alpha".to_string()], |store| {
+            store
+                .source_account_versions
+                .insert("alpha".to_string(), 999);
+            Ok(())
+        })
+        .unwrap_err();
+
+    assert!(error.contains("protected source metadata source_account_versions"));
+    assert_eq!(
+        ACCOUNT_SCOPE_VALIDATION_COUNTS.with(|counts| counts.get()),
+        (1, 0)
+    );
+    assert_eq!(
+        config.account_store_repository_writer_probe_invocations(),
+        0
+    );
+    assert_eq!(account_store_audit_snapshot(&config), before);
+}
+
+#[test]
+fn account_record_equal_clone_serializes_scalar_map_and_tagged_boundaries() {
+    let mut account = AccountRecord::new(test_character(i32::MIN, "Unicode \u{96ea}\n\0"));
+    account.storage_size = u16::MAX;
+    account.expanded_storage_expiry_time_binary_datetime = i64::MIN;
+    account.ban_until_ms = Some(u64::MAX);
+    account.gm_level = u8::MAX;
+    account
+        .character_last_access_binary_datetimes
+        .insert(i32::MIN, i64::MAX);
+    let save = account.saves.get_mut(&i32::MIN).unwrap();
+    save.revision = u64::MAX;
+    save.experience = i64::MIN;
+    save.max_experience = i64::MAX;
+    save.gold = u32::MAX;
+    save.position = Point {
+        x: i32::MIN,
+        y: i32::MAX,
+    };
+    save.stage5_systems_json = Some("opaque malformed JSON remains a string".to_string());
+    save.default_npc_events
+        .pending
+        .push(crate::QueuedDefaultNpcEvent {
+            sequence: u64::MAX,
+            event: crate::DefaultNpcEvent::MapCoord {
+                map_file_name: "tagged struct".to_string(),
+                position: Point {
+                    x: i32::MIN,
+                    y: i32::MAX,
+                },
+            },
+            enter_map: None,
+        });
+    save.guild_experience_journal.kill_outcomes.insert(
+        "tagged struct".to_string(),
+        guild_experience::GuildExperienceKillOutcome::Credited {
+            guild_amount: u32::MAX,
+        },
+    );
+    save.guild_experience_journal.kill_outcomes.insert(
+        "tagged unit".to_string(),
+        guild_experience::GuildExperienceKillOutcome::NoGuild,
+    );
+    let mut ledger = crate::billing::BillingLedger::default();
+    ledger.provenance.monthly_items.insert(
+        u64::MAX,
+        crate::billing_provenance::MonthlyCreditAllocation {
+            unique_id: u64::MAX,
+            owner_account_id: "owner".to_string(),
+            payer_account_id: "payer".to_string(),
+            character_index: i32::MIN,
+            credit_price: u32::MAX,
+            issued_at_ms: u64::MAX,
+            gift: false,
+            parts: Vec::new(),
+        },
+    );
+    account.billing = Some(ledger);
+    let equal = account.clone();
+
+    // This fixture exercises representation, not business-valid admission.
+    assert_eq!(account, equal);
+    assert_eq!(
+        serde_json::to_vec(&account).unwrap(),
+        serde_json::to_vec(&equal).unwrap()
+    );
+    let value = serde_json::to_value(&account).unwrap();
+    assert_eq!(value, serde_json::to_value(&equal).unwrap());
+    assert_eq!(
+        value["billing"]["provenance"]["monthlyItems"][u64::MAX.to_string()]["uniqueId"],
+        u64::MAX
+    );
+}
 #[test]
 fn account_scope_guard_skips_repository_probe_and_canonical_commit_writes_once() {
     let mut config = source_of_truth_test_config_with_store(versioned_two_account_store());
@@ -1010,7 +1244,7 @@ fn account_scoped_commit_rejects_scope_escape_before_any_file_write() {
     let original = versioned_two_account_store();
     let beta_password = original.accounts.get("beta").unwrap().password.clone();
     let mut config = SimulationConfig::default().with_account_store_path(path.clone());
-    config.account_store = Arc::new(Mutex::new(original));
+    *config.account_store.lock().unwrap() = original;
     config.account_store_database_mode = AccountStoreDatabaseMode::Mirror;
     config
         .save_account_store()

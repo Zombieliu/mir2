@@ -1,0 +1,100 @@
+[
+  {
+    "file": "apps/simulation/src/runtime/zone/mod.rs",
+    "frozenSha256": "f0a639fa95bdcf11a0b45c8b08abfcc5e38029a62da8c50e62f95d0e193b5118",
+    "actualSha256": "f0a639fa95bdcf11a0b45c8b08abfcc5e38029a62da8c50e62f95d0e193b5118",
+    "unchanged": true,
+    "authorizedFollowUp": false
+  },
+  {
+    "file": "apps/simulation/src/runtime/zone/online_identity.rs",
+    "frozenSha256": "8fc962e0c7d270081576b37477619596efedc1b7663730c9620c79b389c54e03",
+    "actualSha256": "8fc962e0c7d270081576b37477619596efedc1b7663730c9620c79b389c54e03",
+    "unchanged": true,
+    "authorizedFollowUp": false
+  },
+  {
+    "file": "apps/simulation/src/runtime/zone/types.rs",
+    "frozenSha256": "3d0cb53c0da4144da4e7b6969a7442c6934ef0e5833646ea8c0f95407bfb3bd6",
+    "actualSha256": "3d0cb53c0da4144da4e7b6969a7442c6934ef0e5833646ea8c0f95407bfb3bd6",
+    "unchanged": true,
+    "authorizedFollowUp": false
+  },
+  {
+    "file": "apps/simulation/src/runtime/zone/manager.rs",
+    "frozenSha256": "887b6d75e4ea513828075693e32f11c5f9c34adeb9311cf61880dd052ed56e70",
+    "actualSha256": "887b6d75e4ea513828075693e32f11c5f9c34adeb9311cf61880dd052ed56e70",
+    "unchanged": true,
+    "authorizedFollowUp": false
+  },
+  {
+    "file": "apps/simulation/src/runtime/zone/runtime/experience_ownership.rs",
+    "frozenSha256": "c3b12a1a0685266554b911727b9c1d7c9dbc0ba1ded4818c667951f530ed5ec5",
+    "actualSha256": "e8602ca303ea9b8a963602cd4a53901e323106b9f3c8f1068879f1d28c330f14",
+    "unchanged": false,
+    "authorizedFollowUp": true
+  },
+  {
+    "file": "apps/simulation/src/runtime/zone/runtime.rs",
+    "frozenSha256": "9ab2f4cb3d138be9347b17efafe7bde654f66ab4eff95e4ea2181a7f67712fb3",
+    "actualSha256": "9ab2f4cb3d138be9347b17efafe7bde654f66ab4eff95e4ea2181a7f67712fb3",
+    "unchanged": true,
+    "authorizedFollowUp": false
+  },
+  {
+    "file": "apps/simulation/src/runtime/zone/runtime/ground_ownership.rs",
+    "frozenSha256": "ba03d424261d54c132bf8a097e46a1b0f556c69ec572cdc2997ad3c520aa0ef8",
+    "actualSha256": "ba03d424261d54c132bf8a097e46a1b0f556c69ec572cdc2997ad3c520aa0ef8",
+    "unchanged": true,
+    "authorizedFollowUp": false
+  },
+  {
+    "file": "apps/simulation/src/runtime/zone/runtime/checkpoint.rs",
+    "frozenSha256": "5c3cdd2f93b10c6052a157da2354a14e3e1f49388cf6310d0e8690d642f512f4",
+    "actualSha256": "5c3cdd2f93b10c6052a157da2354a14e3e1f49388cf6310d0e8690d642f512f4",
+    "unchanged": true,
+    "authorizedFollowUp": false
+  },
+  {
+    "file": "apps/simulation/src/runtime/drops.rs",
+    "frozenSha256": "8c1adf2f6956376e407ed2f09a917bfcba0108cc97d7f7c02671499c26524851",
+    "actualSha256": "8c1adf2f6956376e407ed2f09a917bfcba0108cc97d7f7c02671499c26524851",
+    "unchanged": true,
+    "authorizedFollowUp": false
+  },
+  {
+    "file": "apps/gateway/src/routing.rs",
+    "frozenSha256": "bb838c99429da46e9bd4e051bd86daaeb0e88bb385cc67fe0c9875c9e631d931",
+    "actualSha256": "bb838c99429da46e9bd4e051bd86daaeb0e88bb385cc67fe0c9875c9e631d931",
+    "unchanged": true,
+    "authorizedFollowUp": false
+  },
+  {
+    "file": "apps/simulation/tests/shared_cross_map_drop_lifecycle.rs",
+    "frozenSha256": "40b35a2b11141247d49062d770c809143afc8baf9eab7f187ad210941cafe0cf",
+    "actualSha256": "40b35a2b11141247d49062d770c809143afc8baf9eab7f187ad210941cafe0cf",
+    "unchanged": true,
+    "authorizedFollowUp": false
+  },
+  {
+    "file": "apps/gateway/src/routing/tests/cross_map_drop_lifecycle_tests.rs",
+    "frozenSha256": "31cf61152aa5835255332fd979c2490cdbbd4d671935cc65e46ddb50dbb30a7b",
+    "actualSha256": "31cf61152aa5835255332fd979c2490cdbbd4d671935cc65e46ddb50dbb30a7b",
+    "unchanged": true,
+    "authorizedFollowUp": false
+  },
+  {
+    "file": "docs/CROSS-MAP-DROP-LIFECYCLE-20261004.md",
+    "frozenSha256": "cc0404b896f020a3055d627945a3f0abd94ea1f62192831dbad25c40ca74f5c5",
+    "actualSha256": "cc0404b896f020a3055d627945a3f0abd94ea1f62192831dbad25c40ca74f5c5",
+    "unchanged": true,
+    "authorizedFollowUp": false
+  },
+  {
+    "file": "apps/simulation/tests/shared_monster_ownership.rs",
+    "frozenSha256": "7571f60473f04fdbf247364613df4ef18e6071ca8f6389ce012589c204564c33",
+    "actualSha256": "7571f60473f04fdbf247364613df4ef18e6071ca8f6389ce012589c204564c33",
+    "unchanged": true,
+    "authorizedFollowUp": false
+  }
+]

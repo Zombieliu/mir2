@@ -1,0 +1,114 @@
+{
+  "phase": "verified",
+  "publicOnly": true,
+  "privateLogsCopied": false,
+  "rawNativeScreenshotCopied": false,
+  "privateIdentityMatches": 0,
+  "knownSecretPatternMatches": 0,
+  "files": 17,
+  "bytes": 9166908,
+  "entries": [
+    {
+      "path": "footer-v18/01-quest-diary-ru.png",
+      "source": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v18-footer-r1/01-quest-diary-ru.png",
+      "bytes": 105464,
+      "sha256": "57c698fa47066e98da48724a5f2c1b78443cec78fe931eb63e23396ce8c86af9"
+    },
+    {
+      "path": "footer-v18/02-quest-footer-ru.png",
+      "source": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v18-footer-r1/02-quest-footer-ru.png",
+      "bytes": 20063,
+      "sha256": "794d451b94a63446516055d600cffc1202a023e9c4d778bd273df3100b6812ee"
+    },
+    {
+      "path": "footer-v18/03-adjacent-fencing-hover-ru.png",
+      "source": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v18-footer-r1/03-adjacent-fencing-hover-ru.png",
+      "bytes": 1017563,
+      "sha256": "60425f14d986893b5cca8cee0ad9443994c1b074c859ef3e40befdb882bfd9ed"
+    },
+    {
+      "path": "footer-v18/04-quest-diary-id.png",
+      "source": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v18-footer-r1/04-quest-diary-id.png",
+      "bytes": 103396,
+      "sha256": "4961c125a472200093a5a464d56bc075002457d936213a4749275bb10dd47a78"
+    },
+    {
+      "path": "footer-v18/05-quest-footer-id.png",
+      "source": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v18-footer-r1/05-quest-footer-id.png",
+      "bytes": 19567,
+      "sha256": "1ab35f187ba4820eefc054ad8776ca38672a31ab8195de094e45e72be1912e95"
+    },
+    {
+      "path": "footer-v18/display-v18-footer-browser-proof.json",
+      "source": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v18-footer-r1/display-v18-footer-browser-proof.json",
+      "bytes": 48909,
+      "sha256": "40db7b92e280d40f44cecc89511537a3edd3c9512e2cf1eee2ede911e6eaf78a"
+    },
+    {
+      "path": "footer-v18/v18-footer-scoped-receipt.json",
+      "source": "D:/mir2-builds/web-r16-20261106/ui-evidence/display-v18-footer-r1/v18-footer-scoped-receipt.json",
+      "bytes": 4173,
+      "sha256": "776556c28d9c47edc7da7af38aa350e402e45ce82b81cca5e2225948f4df1610"
+    },
+    {
+      "path": "journey/forest-city-v18-q6-reconciliation.json",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-city-v18-q6-evidence-reconciliation.json",
+      "bytes": 2077,
+      "sha256": "849e61bea1f4db65aeccddc5e0f0a589c9c37eb00b655c59d8c797bb7ca2c531"
+    },
+    {
+      "path": "journey/forest-city-v18-r1/01-current-native-task-card-before-measured-readiness.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-city-v18-r1/01-current-native-task-card-before-measured-readiness.png",
+      "bytes": 1218862,
+      "sha256": "4459a393bba5ff471d9c2a2029b812c5922dbfd706d7bb8048b36132c37fccc0"
+    },
+    {
+      "path": "journey/forest-city-v18-r1/02-fresh-v2-native-task-card.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-city-v18-r1/02-fresh-v2-native-task-card.png",
+      "bytes": 1218965,
+      "sha256": "36ac8ebcc6b7aba82771d63c0e6ca460c55fa5bdd10de24b9a65ce2c776eb9e2"
+    },
+    {
+      "path": "journey/forest-city-v18-r1/03-ordinary-merchant-before-buy-link.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-city-v18-r1/03-ordinary-merchant-before-buy-link.png",
+      "bytes": 1115136,
+      "sha256": "58e3836cbc111603941bda70a7c5a21f645301b9fb08b9a6da9588ad1ecd602f"
+    },
+    {
+      "path": "journey/forest-city-v18-r1/04-ordinary-merchant-before-real-gold-purchase.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-city-v18-r1/04-ordinary-merchant-before-real-gold-purchase.png",
+      "bytes": 1122959,
+      "sha256": "7ba29b095769b006122daa4872166a8f0325a6a760eaf9b7965f3e4e401187ad"
+    },
+    {
+      "path": "journey/forest-city-v18-r1/05-before-finishQuest-2110006.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-city-v18-r1/05-before-finishQuest-2110006.png",
+      "bytes": 1073924,
+      "sha256": "c491bf3e0f99cb953be4a6176541c43d1410665dae56154e9794d9f38ac4d255"
+    },
+    {
+      "path": "journey/forest-city-v18-r1/06-next-quest-2110006-completed.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-city-v18-r1/06-next-quest-2110006-completed.png",
+      "bytes": 1088432,
+      "sha256": "24313be88137797590a323758dc32312e2b3e877e39c0ac95fbe9c6dc3fde532"
+    },
+    {
+      "path": "journey/forest-city-v18-r1/07-segment-complete-before-normal-logout.png",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-city-v18-r1/07-segment-complete-before-normal-logout.png",
+      "bytes": 955036,
+      "sha256": "1eb7dab32571d57655a0a3840ec2c5444295329246990518103801c8d428c160"
+    },
+    {
+      "path": "journey/forest-city-v18-r1/onboarding-forest-browser-proof.json",
+      "source": "D:/mir2-builds/forest-quest-driver-20261106/forest-city-v18-r1/onboarding-forest-browser-proof.json",
+      "bytes": 51416,
+      "sha256": "35865a82d8985b538cd239766a32e115897c6ef381df539f8aa75ac25200065e"
+    },
+    {
+      "path": "release/v18-data-preservation.json",
+      "source": "D:/mir2-builds/web-r16-20261106/v18-runtime-preservation-proof.json",
+      "bytes": 966,
+      "sha256": "c647adb169055ecf37650225fd1cc4e00da127e91ebe839c2d5f1bac27717718"
+    }
+  ]
+}

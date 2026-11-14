@@ -1,0 +1,169 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T18:38:03.372Z",
+  "scope": "Independent read-only review of seven diagnostic-only Simulation source files; not test execution or capacity validation",
+  "candidate": {
+    "file": "C:/mir2-build/p01-completion-20261024/formal12-account-store-diagnostics-v1/source-candidate-v1.json",
+    "bytes": 6682,
+    "sha256": "fe037243485836fae250965c710b8096dcf10e7d254d75c4533b0241569912e7"
+  },
+  "baselineCommit": "7644faa14402aa1bfdad8096fedfe61dc6a0a660",
+  "sourcePins": [
+    {
+      "path": "apps/simulation/src/config_account_store_diagnostics.rs",
+      "bytes": 10863,
+      "sha256": "bdd0805104f396d924a6663be46166a9b2bb759c580efcb6e07b6fbf0cb970e4"
+    },
+    {
+      "path": "apps/simulation/src/lib.rs",
+      "bytes": 7191,
+      "sha256": "0724307baaf0ca81c7a55e3ab0300e28b40f2fb376f06a389a84548f7fa910c3"
+    },
+    {
+      "path": "apps/simulation/src/config.rs",
+      "bytes": 347044,
+      "sha256": "df3eceebeb434b817e32ebc9bb4c2901257f5e4199901252ec18234a5260b07d"
+    },
+    {
+      "path": "apps/simulation/src/config_file_authority.rs",
+      "bytes": 24828,
+      "sha256": "ba3d5318241173429abe5b73c836e1a2a8082fef11a1d42c768f1438ea73deff"
+    },
+    {
+      "path": "apps/simulation/src/config_shared_guilds.rs",
+      "bytes": 53319,
+      "sha256": "e73b5c6b095f84447f99d41d0cc5f2952d208655dd81c9555cee49e2ebe36bd0"
+    },
+    {
+      "path": "apps/simulation/src/config_guild_clock_driver.rs",
+      "bytes": 22968,
+      "sha256": "5b5e41dde7a38eb8f1eae3893dc54c085aa13716fd6624cad5738d3c5016b8b8"
+    },
+    {
+      "path": "apps/simulation/src/runtime/shared_experience_profile.rs",
+      "bytes": 76309,
+      "sha256": "8a6cbcb3cb1177111e8700c279583f730f8d26d475b121a316e270b7a1a8ceab"
+    }
+  ],
+  "sourceSha256": "c0df8fc3dc4ed5f411788002d2b7f157fe752d2aaff4e4ee5e8bcd5155cb21f5",
+  "verdict": {
+    "sourceContractReviewPassed": true,
+    "blockingFindingIds": [],
+    "eligibleForRootFocusedAndAdjacentValidation": true,
+    "businessOrCapacityAcceptanceGranted": false
+  },
+  "independentlyChecked": {
+    "sevenCurrentRawPins": true,
+    "sixBaselineRawPreimages": true,
+    "sixBaselinePreimagesMatchCommittedGitFilteredBlobs": true,
+    "changedExistingSimulationFilesExactlySix": true,
+    "newPrivateDiagnosticsModule": true,
+    "fullSevenCodeDiffRead": true,
+    "reviewerExecutedCargoOrTests": false,
+    "reviewerModifiedSource": false
+  },
+  "dropScopeReview": [
+    {
+      "operation": "experience_admission",
+      "fact": "Outer Record precedes writable checks, Store wait and actual Store guard. The held span only writes scalar cells. FnOnce admission callback remains exactly once and inside the original Store guard. On second writable-check failure, callback failure, normal return or unwind, inner spans/Store guard leave before Record emits."
+    },
+    {
+      "operation": "guild_lookup",
+      "fact": "Record precedes first writable check and Store acquisition; clone/lookup result is built while original Store guard remains held, then guard drops before Record output."
+    },
+    {
+      "operation": "save",
+      "fact": "Record precedes persist mutex. Initial Store clone retains the original lexical block; Store-held span ends scalar-only before that real guard drops. File/marker variants borrow the outer Record; record output happens after later scopes and persist guard. SourceOfTruth final live-version update is original and is not separately timed."
+    },
+    {
+      "operation": "transaction",
+      "fact": "Record precedes persist and Store guards. Original transaction/post callbacks, serialization validation, File/PG ordering, rollback/compensation and final live-image publication retain original order. All returning failures leave PublicationGuard and real guards before outer Record output."
+    },
+    {
+      "operation": "guild_clock",
+      "fact": "Record precedes driver, persist and Store guards. Inner spans record only scalars. All early returns, PostgreSQL join/error branches, File publication/compensation, retained lease and live Store publication remain in original sequence. Gateway immediate first attempt,10s completed-attempt wait and30s lease are untouched."
+    },
+    {
+      "operation": "FileAuthority borrowed variants",
+      "fact": "No inner Record is constructed. Existing public methods call private diagnostic variants with None. settle(self) completes its normal settled flag or its failure Drop/freeze before returning to the outer config caller; only later does outer Record emit. Marker/write-state guards retain original scopes, including write-state held during settlement sync."
+    }
+  ],
+  "moduleReview": {
+    "operationCount": 5,
+    "operations": [
+      "experience_admission",
+      "guild_lookup",
+      "save",
+      "transaction",
+      "guild_clock"
+    ],
+    "stageCount": 14,
+    "stages": [
+      "account_store.writable_wait",
+      "account_store.persist_wait",
+      "account_store.store_wait",
+      "account_store.store_held",
+      "account_store.file_writer_wait",
+      "account_store.serialize",
+      "account_store.temp_write_sync",
+      "account_store.atomic_replace",
+      "account_store.marker_wait",
+      "account_store.marker_state_wait",
+      "account_store.marker_begin_sync",
+      "account_store.marker_settle_sync",
+      "account_store.driver_wait",
+      "account_store.driver_held"
+    ],
+    "storage": "Fixed14 Cell<Sample> slots only when active; each Sample count/total/max/maxStart; scalar capture never does I/O.",
+    "threshold": "Existing MIR2_GATEWAY_SLOW_STAGE_MS positive-u64 threshold, default disabled; emits completed stage maximum >= threshold.",
+    "disabledScope": "Disabled Span does not read Instant or update a counter/format/output. Record::new still reads its OnceLock and may initialize environment storage once; no zero-cost/allocation-free startup claim.",
+    "emission": "Only outer Record Drop formats at most14 completed-span lines. stderr write Result is ignored, avoiding a new broken-pipe panic from this logger.",
+    "publicValues": "Only fixed labels plus an independent process-local numeric trace counter, wall-clock sample and monotonic elapsed/count scalars. No account/session/actor/name/item/path/error/payload is supplied.",
+    "grammar": "[gateway-slow-stage] stage=<14-fixed-label> duration_ms=<u64> operation=<5-fixed-label> trace_id=<u64> started_unix_ms=<u64> max_start_us=<u64> max_end_us=<u64> samples=<u64> total_us=<u64>",
+    "durationMeaning": "duration_ms is the maximum completed span in that stage, total_us is the sum of completed spans; max_start_us/max_end_us are relative to record start, not packet timestamps. Emission time may be later after business locks release.",
+    "newFieldsAllJsSafeProven": false,
+    "traceLifetime": "Atomic u64 fetch_add counter is not proven saturating or globally unique over an unbounded process lifetime; no actual new run or extreme numeric case was validated."
+  },
+  "sourceCompatibility": {
+    "originalPublicLowLevelApisDelegateNone": true,
+    "existingGuardsAndBusinessStatementsOrderPreserved": true,
+    "transactionBoundaryAndFailClosedSemanticsUnchangedByInspection": true,
+    "callbacksReorderedOrRepeated": false,
+    "accountSourceOrProtocolSchemaChanged": false,
+    "queueCapTimeoutsAndGameplayThresholdsChanged": false,
+    "originalAtomicReplaceRetryAndDurabilityPreserved": true
+  },
+  "testsRead": {
+    "newUnitTests": 3,
+    "scope": [
+      "disabled and inclusive50ms threshold",
+      "fixed-slot format/public scalar fields",
+      "generic business Mutex guard released before emit on normal return and explicit error return"
+    ],
+    "limits": "Reviewer read tests only; actual compilation/focused/adjacent/fmt results are Root-owned and must be separately bound. The3 new tests are not a fresh proof of every actual FileAuthority transaction or capacity behavior."
+  },
+  "mechanicalEvidence": {
+    "authorProof": "source-candidate-v1 claims strict forward replay plus original-format preservation. Reviewer read that claim and inspected actual diff; reviewer did not execute the mutation script/formatter or mislabel it as an independently executed inverse.",
+    "rawVsGit": "Six preserved raw preimages were SHA/byte checked, then git hash-object --path filtering compared to the six baseline commit blobs; working tree bytes were not normalized."
+  },
+  "futureCollectionRequirements": {
+    "oldStrictThreeFourSevenFieldParserSupportsNewRows": false,
+    "newNineFieldGrammarConsumerRequiredBeforeClaimingNewCapture": true,
+    "fixedEnumsCanonicalNumbersAndUnknownFieldRejectionMustBeValidatedSeparately": true,
+    "unsafeNumericRowsMustNotBeRoundedOrPromoted": true,
+    "newDiagnosticRowsAreNotAckOrGameCredit": true
+  },
+  "limitations": [
+    "Completed-span diagnostics cannot identify an unfinished blocked operation until it leaves the measured scope. Missing rows do not exclude a wait.",
+    "The targeted caller set includes current guild-clock File path; prepared_kill/item_identity and other original low-level API callers still use None and are not fully covered.",
+    "This is instrumentation only; the actual Formal12 Store/write-state/IO holder remains unknown. No deadlock, collision or CPU-capacity root cause is established.",
+    "New Release/source closure and fresh lifecycle/capacity checks must bind changed code; old1980 executable and prior full210/full16 do not validate these new diagnostic source files."
+  ],
+  "rootOwnsActualTests": true,
+  "actualProductTestsExecuted": false,
+  "privateOrRawOrExecutableRead": false,
+  "sourceOrSceneModifiedByReviewer": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "p2ImplementationStarted": false
+}

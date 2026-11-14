@@ -1,0 +1,10 @@
+{
+  "originalResultRetained": true,
+  "originalSameLinePassedNames": 912,
+  "actualLibtestPassed": 941,
+  "actualBlockParsedPassedNames": 941,
+  "actualIgnored": 7,
+  "testRunRepeated": false,
+  "reason": "--nocapture prints 29 successful test statuses on later lines; the original same-line name collector undercounted. The actual libtest summary and 948 complete blocks agree.",
+  "sourceLogSha256": "837ef8aca692abcefe77c7f6045bb91e75514651a10b02a1810be8028b319e1f"
+}

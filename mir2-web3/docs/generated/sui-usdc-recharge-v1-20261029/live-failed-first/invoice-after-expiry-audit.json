@@ -1,0 +1,33 @@
+{
+  "kind": "read-only post-expiry Testnet observation",
+  "observedAtUtc": "2026-10-28T20:24:41.367Z",
+  "orderId": "usdc_cbd800894b0f0a8ba60438f6ef93c04ecfde30212e9559eae47878ff9e26eae2",
+  "state": "invoiceBound",
+  "expiresAtUtc": "2026-10-28T20:18:20.546Z",
+  "expiredAtObservation": true,
+  "invoice": {
+    "state": "unpaid",
+    "invoiceId": "0x28e2702a79a1a313f5b5e07fefb3db19097bb14b7059cba6b179ddcfd70396ee",
+    "expiresAtMs": "1793218700546",
+    "checkpoint": "400276065"
+  },
+  "gameReceiptPresent": false,
+  "paymentHintPresent": false,
+  "paymentPrepared": false,
+  "paymentBudgetLedgerPresent": false,
+  "balances": [
+    {
+      "role": "buyer",
+      "owner": "0x960b3560bd7fca54874692cf2706d248af9ec69963743faa261fb1497ed97a33",
+      "usdcMicros": "19990000",
+      "suiMist": "997677468"
+    },
+    {
+      "role": "merchant",
+      "owner": "0x98d549368a71c12ac7dcab5e9dcdb6d5610267dc566a60423ad45c279c7917f1",
+      "usdcMicros": "0",
+      "suiMist": "964634045"
+    }
+  ],
+  "notes": "No signing or broadcasting. DB and chain observations are not atomic."
+}

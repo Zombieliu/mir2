@@ -1,0 +1,11 @@
+{
+  "sourceRoot": "C:\\r16-ui-asset-recovery-20261113\\source",
+  "baselineBuildReceiptSha256": "bdb199cc3d26e90b974471a02ddb62b4e69f97a71efa3af94d3429fb73a47a24",
+  "oldInputFilesVerified": 25,
+  "candidateInputsBackedUp": 12,
+  "excludedAdditionalTestFiles": [
+    "mir2-web3/apps/web/scripts/test-r16-entry-npc-recovery.mjs",
+    "mir2-web3/apps/web/scripts/test-bevy-runtime-finite-recovery.mjs",
+    "mir2-web3/apps/web/scripts/test-bevy-runtime-module-owner.mjs"
+  ]
+}

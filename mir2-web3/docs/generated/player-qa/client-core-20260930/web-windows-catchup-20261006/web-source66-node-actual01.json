@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "source": "Source66",
+  "config": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source66-npc-visible-range-20261011-01/root-approved01/node-tests01-config.json",
+    "bytes": 5166,
+    "sha256": "f2a05d7dac665bbe0434e98aea5f0944583f0ca25794b70be2a3ed4771361f8f"
+  },
+  "sourceSnapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source66-npc-visible-range-20261011-01/preparation/source66-isolated-source-snapshot01.json",
+    "bytes": 13615874,
+    "sha256": "4412c6bd4c7c2094ea10858458f9875e5cb8203d9ab7c7103f89b1f70c4d7126"
+  },
+  "fullDeclaredInputs": 19585,
+  "rootReview": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source66-npc-visible-range-20261011-01/root-approved01/source-review01.json",
+    "bytes": 6225,
+    "sha256": "609d3f2c0da58b602d1e3d894a9e7368682c81a34359987ec1a1819a6b83fd92"
+  },
+  "actual": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 64352,
+    "kind": "Source66 Root accepted node-tests01",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 12949,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source66-npc-visible-range-20261011-01/root-approved01/node-tests01-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "counts": {
+    "passed": 208,
+    "failed": 0,
+    "cancelled": 0,
+    "skipped": 0
+  },
+  "source64OriginalTestsUnchanged": 203,
+  "newActualPageConsumerTests": [
+    "Source66 actual NPC activation sends once across distance two without the blocked approach",
+    "Source66 actual NPC repeat and same-dialog guards retain their original boundaries",
+    "Source66 actual invalid and dead entity branches stop before interaction or attack",
+    "Source66 actual monster activation keeps the existing attack path and non-NPC selection",
+    "Source66 direct NPC activation retires old arrival intent without cancelling unrelated movement"
+  ],
+  "stdoutPin": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source66-npc-visible-range-20261011-01/node-tests01/stdout.log",
+    "bytes": 53727,
+    "sha256": "c53c3727a663e3b32764e6fd5d61be2301edf7dcb99232eb708b0302d5e68541"
+  },
+  "stderrPin": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source66-npc-visible-range-20261011-01/node-tests01/stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "originalCaller": {
+    "bodyBytes": 4569,
+    "bodySha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383"
+  },
+  "normalNpcActivationDirect": true,
+  "serverGatesChanged": false,
+  "productUiOperated": false,
+  "productionAccepted": false,
+  "candidate100": false,
+  "goalComplete": false
+}

@@ -1,0 +1,13 @@
+{
+  "source": "715078944ac7a84a61b6d64901b80568a8e8d63b",
+  "candidateVersion": "WN-CANDIDATE-20261001-invited-09",
+  "startedUtc": "2026-10-01T16:12:37.971525+00:00",
+  "pid": 116948,
+  "complete": true,
+  "success": false,
+  "testsStarted": false,
+  "publicPublished": false,
+  "phase": "stopped-before-test",
+  "error": "Release pipeline failed: ADS enumeration unavailable for C:\\Users\\Administrator\\.codex\\worktrees\\native-shop-lifecycle-r9\\mir2-player-journey\\mir2-web3\\dist\\.r9.staging-4f00443c798c4d198a76d3c21e3d7ac8\\mir2-assets\\generated\\native-map-keyed\\manifest.00c973d4ce3f48b514e63d4d2bf12966c15e32f20bd954ac8fbe45ea11f784ad.json: \u7cfb\u7edf\u627e\u4e0d\u5230\u6307\u5b9a\u7684\u8def\u5f84\u3002",
+  "finishedUtc": "2026-10-01T16:14:17.978291+00:00"
+}

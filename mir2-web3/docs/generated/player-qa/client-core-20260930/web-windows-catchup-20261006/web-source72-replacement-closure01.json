@@ -1,0 +1,65 @@
+{
+  "owner": "Root",
+  "kind": "Source72 normal save/logout and exact-owned Web replacement closure",
+  "previousWebPid": 78328,
+  "previousParentPid": 58264,
+  "port": 19205,
+  "serverArgumentAndPublicConfigVerifiedBeforeStop": true,
+  "normalLogoutLoginVisibleBeforeStop": true,
+  "protectedProcessIdsTouched": false,
+  "closedOuter": {
+    "owner": "Root",
+    "exitCode": -1,
+    "builderPid": 78328,
+    "kind": "Source72 actual original caller local Web takeback and finite Storage diagnostics",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 7698925,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source72-storage-takeback-20261012-01/root-approved01/web-start01-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "closedLogPins": [
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source72-storage-takeback-20261012-01/runtime-start01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source72-storage-takeback-20261012-01/runtime-start01/outer.json",
+      "bytes": 543,
+      "sha256": "bdaea1bcbdddfba35b3ebe201aab59df117d7c5197f1da50f87f2a35e81e2a2b"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source72-storage-takeback-20261012-01/runtime-start01/stdout.log",
+      "bytes": 117,
+      "sha256": "274297c61c29155ff784e9ab9cbe5cf1e002c600d7d2045746d64c76c1997de5"
+    }
+  ],
+  "unchangedOriginalCaller": true,
+  "originalSession": 84422,
+  "originalCallerClosed": true,
+  "originalCallerExit": -1,
+  "originalCallerPostguardCompleted": true,
+  "inputsPostguardCount": 4182,
+  "gatewayUnchanged": true,
+  "newWebPid": 84876,
+  "newParentPid": 55916,
+  "newPort": 19205,
+  "newStartConfig": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source73-warehouse-local-skins-20261012-01/root-approved01/web-start01-config.json",
+    "bytes": 3006,
+    "sha256": "3991ef8fae4161f3577962b07b6a28d84570f55e10fd4fa642da14eb1ba8f3df"
+  },
+  "newOriginalSession": 55613,
+  "newOriginalCallerOpen": true,
+  "newFinalExitAndPostguardPending": true,
+  "privateGatewayConfigRead": false,
+  "activeProductLogsRead": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

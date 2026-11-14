@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "copiedAt": "2026-10-25T18:16:24.242Z",
+  "scope": "Explicit movement owner-timeout evidence and final source-only reviews; no full raw/monitor/recording/executable/private payload. Original failure and all source files remain unchanged.",
+  "sourceCount": 8,
+  "copiedBytes": 153207,
+  "copies": [
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal12-movement-rejection-analysis-v1\\analyze-v1.mjs",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-movement-owner-timeout-analysis-v1\\analysis\\analyze-v1.mjs",
+      "relative": "analysis/analyze-v1.mjs",
+      "bytes": 11571,
+      "sha256": "25c63e05668acb44ade621d9df6fd585fd8859138abde74d3309fabf0d76dee1",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal12-movement-rejection-analysis-v1\\selected-public-evidence-v1.json",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-movement-owner-timeout-analysis-v1\\analysis\\selected-public-evidence-v1.json",
+      "relative": "analysis/selected-public-evidence-v1.json",
+      "bytes": 70065,
+      "sha256": "87172a39e9a2cdbf46f54305a26c840c492a56b6051c933ab24df7b30fee11e9",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal12-movement-rejection-analysis-v1\\slow-monitor-correlation-v1.json",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-movement-owner-timeout-analysis-v1\\analysis\\slow-monitor-correlation-v1.json",
+      "relative": "analysis/slow-monitor-correlation-v1.json",
+      "bytes": 24478,
+      "sha256": "77b7448a2eb334ca388ff6cac1e91958e7ef86edb4e6a2f030139996409f1b19",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal12-movement-rejection-analysis-v1\\summary-v1.json",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-movement-owner-timeout-analysis-v1\\analysis\\summary-v1.json",
+      "relative": "analysis/summary-v1.json",
+      "bytes": 21871,
+      "sha256": "428d120c06c5b88d15c62b848db149b3d9211bb2b9f0c9c90cb00a638a941cc8",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal12-movement-rejection-analysis-v1\\wording-clarification-v2.json",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-movement-owner-timeout-analysis-v1\\analysis\\wording-clarification-v2.json",
+      "relative": "analysis/wording-clarification-v2.json",
+      "bytes": 1791,
+      "sha256": "b6318fa3984d387644eda8b9b0e74b55721c1c0ea3174129998d99a7922851d0",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal12-movement-rejection-analysis-v1\\public-whitelist-v2.json",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-movement-owner-timeout-analysis-v1\\analysis\\public-whitelist-v2.json",
+      "relative": "analysis/public-whitelist-v2.json",
+      "bytes": 1850,
+      "sha256": "14a359c12af0683deeeee46016bfec6daa07cf18927d8a985b3795c4b36a998f",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal12-movement-owner-wait-source-review-v1\\source-review-v1.json",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-movement-owner-timeout-analysis-v1\\source-review\\source-review-v1.json",
+      "relative": "source-review/source-review-v1.json",
+      "bytes": 9064,
+      "sha256": "b34eef666cf491189180ac5187d452b1a10c5f9012026cff6662d3318e7989e4",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal12-movement-owner-wait-source-review-v1\\source-review-v2.json",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-movement-owner-timeout-analysis-v1\\source-review\\source-review-v2.json",
+      "relative": "source-review/source-review-v2.json",
+      "bytes": 12517,
+      "sha256": "143646e754e28004ab36558d95b972f49ad34a3f531e60108c3ceb31eff07a01",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    }
+  ],
+  "whitelist": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-movement-owner-timeout-public-archive-v1\\public-whitelist-v1.json",
+    "bytes": 4368,
+    "sha256": "5df684be68d7eb65078cdc95c19999a4dc8ba081705750099c864badeeed4ea6"
+  },
+  "archiveHelper": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-movement-owner-timeout-public-archive-v1\\copy-public.mjs",
+    "bytes": 8602,
+    "sha256": "6c314facf6a9c768b881b8051c742d2f9a9964c4e0358f533ac91d55bae0e184"
+  },
+  "excludedCurrentRuntimeClosure": true,
+  "activeRunLogsOrReportsRead": false,
+  "privateValuesRead": false,
+  "sourceOrRuntimeModified": false,
+  "formalResultKnown": true,
+  "formalRunPassed": false,
+  "formalFailed": true,
+  "rootCauseEstablished": false,
+  "exactStoreHolderEstablished": false,
+  "capacityAccepted": false
+}

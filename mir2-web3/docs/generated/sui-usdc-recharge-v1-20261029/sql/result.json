@@ -1,0 +1,132 @@
+{
+  "passed": true,
+  "runtime": "PGlite 0.5.13 PostgreSQL WASM, not native PostgreSQL or multi-connection concurrency",
+  "version": "PostgreSQL 18.6 (PGlite 0.5.13) on wasm32-unknown-emscripten, compiled by emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 6.0.5 (1db513782be24469589d7cb8a1f1834e9a33f271), 32-bit",
+  "migrationSha256": "0aa353ae9dfe0f782be9c424a83603ad832f82a211a832847e2aac385b277222",
+  "results": [
+    {
+      "name": "migration compiles PL/pgSQL and creates two permanent authority registries",
+      "passed": true
+    },
+    {
+      "name": "final invoice binding is registered atomically with its account snapshot",
+      "passed": true
+    },
+    {
+      "name": "exact invoice update is idempotent",
+      "passed": true
+    },
+    {
+      "name": "invoice cannot be copied into another account",
+      "passed": true
+    },
+    {
+      "name": "older writer cannot drop the billing authority",
+      "passed": true
+    },
+    {
+      "name": "account deletion is blocked after any USDC order exists",
+      "passed": true
+    },
+    {
+      "name": "frozen amount cannot change after quotation",
+      "passed": true
+    },
+    {
+      "name": "payer cannot change after authorization",
+      "passed": true
+    },
+    {
+      "name": "prepared bytes cannot be replaced after a timeout",
+      "passed": true
+    },
+    {
+      "name": "confirmed invoice cannot be rebound",
+      "passed": true
+    },
+    {
+      "name": "wrong payment network is rejected before receipt registration",
+      "passed": true
+    },
+    {
+      "name": "wrong payment merchant is rejected before receipt registration",
+      "passed": true
+    },
+    {
+      "name": "wrong payment amount is rejected before receipt registration",
+      "passed": true
+    },
+    {
+      "name": "pre-invoice checkpoint and late payment are rejected",
+      "passed": true
+    },
+    {
+      "name": "database failure after chain receipt registration rolls back registry and account together",
+      "passed": true
+    },
+    {
+      "name": "paid pending and permanent event receipt commit together",
+      "passed": true
+    },
+    {
+      "name": "duplicate payment callback cannot register a second receipt",
+      "passed": true
+    },
+    {
+      "name": "payment event digest cannot be rewritten",
+      "passed": true
+    },
+    {
+      "name": "same digest event cannot credit another invoice/order",
+      "passed": true
+    },
+    {
+      "name": "separate event sequence can identify a distinct independently bound invoice",
+      "passed": true
+    },
+    {
+      "name": "applied wallet receipt is immutable",
+      "passed": true
+    },
+    {
+      "name": "migration reapplication preserves registered events and snapshots",
+      "passed": true
+    },
+    {
+      "name": "persisting prepared sponsor bytes acquires durable network/config creation fence",
+      "passed": true
+    },
+    {
+      "name": "a different account cannot persist another same-config creation before first finality",
+      "passed": true
+    },
+    {
+      "name": "worker lease expiry or clearing cannot release the prepared transaction fence",
+      "passed": true
+    },
+    {
+      "name": "unknown and invoice mismatch review retain sponsor creation authority",
+      "passed": true
+    },
+    {
+      "name": "finalized creation failure releases only the matching owner fence",
+      "passed": true
+    },
+    {
+      "name": "old confirmed invoice updates cannot release another order active creation",
+      "passed": true
+    },
+    {
+      "name": "confirmed creation checkpoint releases sponsor fence atomically with invoice receipt",
+      "passed": true
+    },
+    {
+      "name": "creation fences backfill and migration rerun remain idempotent",
+      "passed": true
+    },
+    {
+      "name": "later database failure rolls back prepared-byte snapshot and active creation fence together",
+      "passed": true
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "state": "PENDING_FRESH44_SOURCE_AND_RELEASE",
+  "sourceCommit": null,
+  "backendInputCount": 44,
+  "backendSourceManifest": null,
+  "releaseRecord": null,
+  "binary": null,
+  "buildReceipt": null,
+  "buildLog": null,
+  "rootFunctionalValidation": null,
+  "reason": "Root must provide actual committed source and a fresh successful Release first. No historical a430/855b executable or old41/42 source proof can satisfy this template. No finalization, provisioning or runtime is authorized by preparation."
+}

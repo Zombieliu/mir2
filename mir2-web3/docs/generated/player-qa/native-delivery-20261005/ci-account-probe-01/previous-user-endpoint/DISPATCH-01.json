@@ -1,0 +1,24 @@
+{
+  "schema": "mir2.native-ci-auth-probe-dispatch.v1",
+  "command": [
+    "gh",
+    "workflow",
+    "run",
+    "web-assets-r2-release.yml",
+    "--repo",
+    "Zombieliu/mir2",
+    "--ref",
+    "codex/crowded-combat-control-20261003",
+    "-f",
+    "native_delivery_operation=probe"
+  ],
+  "startedUtc": "2026-10-04T22:26:14.698721+00:00",
+  "elapsedSeconds": 2.356193700019503,
+  "exitCode": 0,
+  "head": "25ecb38f6ca9273304ba0f663e8533de71c51a74",
+  "selectedCommittedWorkflowSha256": "b5f868f0636960b131244835888823ed4ee284f249e78a428166219a19ce2931",
+  "onlyReadOnlyProbeRequested": true,
+  "webFlagsRequested": false,
+  "productionDeploymentRequested": false,
+  "credentialsExported": false
+}

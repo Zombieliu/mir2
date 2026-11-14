@@ -1,0 +1,197 @@
+{
+  "schemaVersion": 1,
+  "scope": "Reuse actual14 partial-safe/counter/actualelapsed/HP/wire verifier; identity changes only, same policy, no product or15 frozen runtime source modified.",
+  "mutations": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-independent-verification-v1\\verify-ended-probe14-v1.mjs",
+        "bytes": 27982,
+        "sha256": "66486662f9be4eccccc0015ddbd3040ae5dc4b44125d1b4fe99c3a70e5222d29"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe15-independent-verification-v1\\verify-ended-probe15-v1.mjs",
+        "bytes": 28031,
+        "sha256": "eedc2a98058cfca8ffaf1120d8e8f5b8518ff595e1ef250309845475f0063704"
+      },
+      "rules": [
+        {
+          "from": "release-native-10-v2-chase-preference-feasibility-14",
+          "to": "release-native-10-v2-personal-projection-feasibility-15",
+          "count": 1
+        },
+        {
+          "from": "capacity-native10-v2-chase-preference-followup-14-diagnostics",
+          "to": "capacity-native10-v2-personal-projection-followup-15-diagnostics",
+          "count": 1
+        },
+        {
+          "from": "path.join(BASE,'probe14-independent-verification-v1')",
+          "to": "path.join(BASE,'probe15-independent-verification-v1')",
+          "count": 1
+        },
+        {
+          "from": "probe14-root-independent-cleanup-v1.json",
+          "to": "probe15-root-independent-cleanup-v1.json",
+          "count": 2
+        },
+        {
+          "from": "assert.equal(report.runId,RUN);",
+          "to": "assert.equal(RUN,'1792937158876-b61ec943');assert.equal(report.runId,RUN);",
+          "count": 1
+        },
+        {
+          "from": "assert.equal(catalog.run.backendSourceCommit,'46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b');",
+          "to": "assert.equal(catalog.run.backendSourceCommit,'5c2e713863d3e9556a92f856b11df2396c73b137');",
+          "count": 1
+        },
+        {
+          "from": "assert.equal(catalog.run.driverSourceCommit,'b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd');",
+          "to": "assert.equal(catalog.run.driverSourceCommit,'5c2e713863d3e9556a92f856b11df2396c73b137');",
+          "count": 1
+        },
+        {
+          "from": "a43078b05e70b480f948fee505e23d2757ce1ae20fdc1f22b2348df46ee7125d",
+          "to": "d8791cceeed00fdb7019d1201aad19f06005790162df1b459a8cacac96f68756",
+          "count": 1
+        },
+        {
+          "from": "assert.equal(catalog.run.backendInputCount,41)",
+          "to": "assert.equal(catalog.run.backendInputCount,44)",
+          "count": 1
+        },
+        {
+          "from": "backendInputs:41",
+          "to": "backendInputs:44",
+          "count": 1
+        },
+        {
+          "from": "bfdaf0110da83d9e89699b13d02f421ed2f66c903d987e498dbeea09d9881cd6",
+          "to": "7bb9aeaaf29fbf0aa0f051b70a3388fa06877cf65ed3b2f64957a77a1e595022",
+          "count": 1
+        },
+        {
+          "from": "assert.equal(launcher.files.length,73)",
+          "to": "assert.equal(launcher.files.length,80)",
+          "count": 1
+        },
+        {
+          "from": "bytes:19769",
+          "to": "bytes:21939",
+          "count": 1
+        },
+        {
+          "from": "0d994e2c1d097de3b732543f06c3cf9787dcc56b1c3b74fa497b4b2c2cca65d7",
+          "to": "0ceaf9d7c051d9e56fc2b94103b53c21eb11b8b60760e9e718475e17ce60e473",
+          "count": 1
+        },
+        {
+          "from": "original fresh14 probe",
+          "to": "original fresh15 probe",
+          "count": 1
+        }
+      ],
+      "exactRawInverse": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-independent-verification-v1\\probe-contract-v1.mjs",
+        "bytes": 5820,
+        "sha256": "55dab5ae7ea97da1e26514dc4d8e730b53a92945e76a409a1ff4d67489fe4ae4"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe15-independent-verification-v1\\probe-contract-v1.mjs",
+        "bytes": 5820,
+        "sha256": "9a1843d910cbe4503859bd00d7c9fec77217d2229db9e31d0c9fe5ef005f278b"
+      },
+      "rules": [
+        {
+          "from": "--verify-ended-probe14",
+          "to": "--verify-ended-probe15",
+          "count": 1
+        },
+        {
+          "from": "ended-probe14 flag",
+          "to": "ended-probe15 flag",
+          "count": 1
+        },
+        {
+          "from": "value.gatewayPid,48796",
+          "to": "value.gatewayPid,63108",
+          "count": 1
+        },
+        {
+          "from": "value.monitorPid,62296",
+          "to": "value.monitorPid,58736",
+          "count": 1
+        }
+      ],
+      "exactRawInverse": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-independent-verification-v1\\run-ended-probe14-v1.mjs",
+        "bytes": 2257,
+        "sha256": "d5624b5ca5cbe4a5cd9497bab379716027576567a5a7b78d453ac3feb7e5fe8a"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe15-independent-verification-v1\\run-ended-probe15-v1.mjs",
+        "bytes": 2257,
+        "sha256": "3c5731662e415db08e7a97add7f2bef7b98dd5ce317a41ce488d3f87a12827b7"
+      },
+      "rules": [
+        {
+          "from": "--verify-ended-probe14",
+          "to": "--verify-ended-probe15",
+          "count": 1
+        },
+        {
+          "from": "verify-ended-probe14-v1.mjs",
+          "to": "verify-ended-probe15-v1.mjs",
+          "count": 1
+        }
+      ],
+      "exactRawInverse": true
+    }
+  ],
+  "copies": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-independent-verification-v1\\hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe15-independent-verification-v1\\hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      },
+      "rawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-independent-verification-v1\\expected-probe-policy-v1.json",
+        "bytes": 1008,
+        "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe15-independent-verification-v1\\expected-probe-policy-v1.json",
+        "bytes": 1008,
+        "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+      },
+      "rawExact": true
+    }
+  ],
+  "expectedRunId": "1792937158876-b61ec943",
+  "gatewayPid": 63108,
+  "monitorPid": 58736,
+  "sourceConfigSha256": "7bb9aeaaf29fbf0aa0f051b70a3388fa06877cf65ed3b2f64957a77a1e595022",
+  "newBackend": {
+    "sourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+    "inputs": 44,
+    "binarySha256": "d8791cceeed00fdb7019d1201aad19f06005790162df1b459a8cacac96f68756"
+  },
+  "nodeCodeEvidenceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+  "historicalWireCodeEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+  "liveRawRead": false,
+  "actualVerificationExecuted": false
+}

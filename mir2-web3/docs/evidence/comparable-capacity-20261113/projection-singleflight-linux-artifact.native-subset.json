@@ -1,0 +1,116 @@
+{
+  "schema": "mir2.projection-linux-artifact-native-subset.root-review.v1",
+  "recordedAtUtc": "2026-11-14T16:50:42.209695+00:00",
+  "sourceRevision": "47e6bb7f3266dda9b8067c1bf7692d017e8e221e",
+  "integrationCommit": "6024d8ffc095dd3a149ddb2b12bd3fce4cc4245c",
+  "runId": 43613343285,
+  "nativeJobId": 132502966243,
+  "nativeSubsetAudit": {
+    "schema": "mir2.projection-native-artifact-binding-audit.v1",
+    "nativeArtifactChecksPassed": true,
+    "fullCandidateVerificationPassed": false,
+    "fullVerifierExecuted": false,
+    "unboundBypassed": false,
+    "sourceRevision": "47e6bb7f3266dda9b8067c1bf7692d017e8e221e",
+    "integrationCommit": "6024d8ffc095dd3a149ddb2b12bd3fce4cc4245c",
+    "runId": 43613343285,
+    "nativeJobId": 132502966243,
+    "wholeWorkflowConclusion": "success",
+    "artifacts": {
+      "gateway": {
+        "id": 14121564074,
+        "path": "gateway-artifact.zip",
+        "name": "mir2-playtest-wallet-gateway-linux-x64-47e6bb7f3266dda9b8067c1bf7692d017e8e221e",
+        "bytes": 84744725,
+        "sha256": "d309d13cce49eb3863facc840129a55a1d5927bb7f90b12e0d46820c1b411578"
+      },
+      "nativeEvidence": {
+        "id": 14121394778,
+        "path": "native-evidence-artifact.zip",
+        "name": "mir2-playtest-wallet-build-evidence-47e6bb7f3266dda9b8067c1bf7692d017e8e221e",
+        "bytes": 99795,
+        "sha256": "4f934f03986066d1b65096e125a3cfcfefea23012d1a6b4958c2f2e69524a99e"
+      }
+    },
+    "binarySha256": "d966c8c0314673eaf2fb9598c6aae164c40d152bf4a2ba19180064ce3adea1c2",
+    "binarySizeBytes": 103858400,
+    "packageSha256": "8bbc475c826f817582b302063b91b1d9da565ab24a1d297e83c4b4fdf3443fb7",
+    "releaseManifestSha256": "cc4091b7a26412bde394ed2866340b2599aaa1a969e3027b2605d2e59979daf6",
+    "artifactDirectory": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\projection-singleflight-linux-artifact-root-review-v1\\native-audit\\release",
+    "startupReceiptSha256": "dbe1da2e89b7a5661407826cef7ff9381a7ba0dbad1077580e35237768747f45",
+    "gatewayExitCode": 0,
+    "redisExitCode": 0,
+    "nativeRequiredGates": [
+      "activities_postgres",
+      "billing_postgres",
+      "gateway-package",
+      "gateway-postgres-startup",
+      "linux-release-security",
+      "monthly_card_postgres",
+      "schema_union"
+    ],
+    "gateReceiptSha256": "e58d02d42c1012a9ecfde83a6424c49c6a8aa5243660f47c14da6f0b1e7198ad",
+    "mapManifestSha256": "aea7982e6bea87c70bc19ef4cdb85791686984ada56d5d2039d9f0d3e1b79433",
+    "maps": {
+      "fileCount": 1620,
+      "totalFileBytes": 42111309,
+      "allGitArtifactBytesMatch": true,
+      "freshLiveMapMatchNotProven": true
+    },
+    "sourceInputManifestSha256": "fcb250b092221e39d4523f018e75361ecd78e675c83beba99832b0f258a84d1e",
+    "frozenUnboundVerifierSha256": "ba3a0caaa68d7add7b458eb3e90ea6380525346e51ae610177719920e794152f",
+    "remainingMandatoryEvidence": [
+      "fresh current-fd3 complete map proof and reader SHA",
+      "actual current-fd3 PID/start/invocation identity",
+      "Root review/new immutable full binding"
+    ],
+    "earlierCiFailuresRetained": [
+      43607145500,
+      43612459430
+    ],
+    "deploymentApproved": false,
+    "capacityQualified": false
+  },
+  "rootActualAnalysisJob": {
+    "schema": "mir2.comparable.rust-check-job.v2",
+    "command": [
+      "C:\\Python313\\python.exe",
+      "-B",
+      "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\projection-singleflight-linux-artifact-root-review-v1\\audit_native_artifact.py"
+    ],
+    "fixedDayForTestsOnly": false,
+    "actualExitCode": 0,
+    "wrapperExitCode": 0,
+    "elapsedSeconds": 3.0491463000071235,
+    "liveSampleCount": 3,
+    "peakCommitBytes": 61624320,
+    "requestedLimits": {
+      "logicalCpus": 4,
+      "hostLogicalCpus": 32,
+      "affinityMaskHex": "0xf0",
+      "jobCommitLimitBytes": 4294967296,
+      "cpuRatePer10000": 1250
+    },
+    "finalLimits": {
+      "affinityMaskHex": "0xf0",
+      "jobCommitLimitBytes": 4294967296,
+      "cpuRatePer10000": 1250,
+      "cpuControlFlags": 5,
+      "limitFlags": 8720
+    },
+    "rootWallExpired": false,
+    "rootSampleFailed": false,
+    "normalDrainSeconds": 180,
+    "normalDrainDeadlineExceeded": false,
+    "normalDrainSamples": 1,
+    "allOwnedMembersExited": true,
+    "killAppliedByClose": false
+  },
+  "rootUsedUnchangedAuditorSource": true,
+  "rootAuditorSourceSha256": "23889f31c0c0a13615666cd51adce2732539a938fc24e3a22e631dd522ebe501",
+  "rootAuditReceiptSha256": "24046f6aa553a7827af397026c917a1e36cb2d1f73d1270afe77ef6cad2a004e",
+  "fullCandidateVerificationPassed": false,
+  "freshCurrentFd3ProofStillMissing": true,
+  "capacityQualified": false,
+  "anyRemoteActionPerformed": false
+}

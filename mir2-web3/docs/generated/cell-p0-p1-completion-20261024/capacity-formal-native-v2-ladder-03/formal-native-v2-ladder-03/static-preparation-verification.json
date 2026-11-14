@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-24T20:22:30.460Z",
+  "exactOriginalFiles": [
+    "scenario.json",
+    "resource-profile.json",
+    "scenario-prefix-readiness.json",
+    "input-lib.mjs",
+    "verify-feasibility-gate.mjs",
+    "initialize-private.ps1",
+    "monitor-owned.mjs",
+    "request-stop.mjs",
+    "recover-drained-owned.ps1"
+  ],
+  "originalPolicyExact": true,
+  "environmentChangesOnly": [
+    "fresh gateway identity03",
+    "existing MIR2_GATEWAY_SLOW_STAGE_MS=50"
+  ],
+  "backendCommit": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+  "driverCommit": "c42f860e0544f0687a5ccf5ddaccad4daecc8acc",
+  "backendOrDriverModified": false,
+  "syntheticTest": {
+    "tests": 14,
+    "pass": 14,
+    "fail": 0,
+    "log": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-03\\slow-stage-public-test-v2.log",
+      "bytes": 3462,
+      "sha256": "c9be6ee159c6caaf5a7922adef4e36e0c8ac6b492cef5027dad3770228bc7494"
+    },
+    "sources": [
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-03\\slow-stage-public.mjs",
+        "bytes": 7767,
+        "sha256": "2c2f72385d9c9db25237e4c98aa56375639f6a0b8f82bd2602ce04684a0b607c"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-03\\slow-stage-public.test.mjs",
+        "bytes": 10310,
+        "sha256": "d6d2bc6954d546cccc0d3273fbe9e236f381a10963a0a1d039087e74ae46e7ee"
+      }
+    ]
+  },
+  "productModulesImported": false,
+  "helperOnlyImported": true,
+  "prepareExecuted": false,
+  "seederExecuted": false,
+  "realmStarted": false,
+  "syntaxPending": false,
+  "readonlyQAPending": true,
+  "syntax": {
+    "node": 10,
+    "powershell": 2,
+    "passed": true,
+    "log": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-03\\launcher-syntax-check.log",
+      "bytes": 425,
+      "sha256": "f781b2640720b09001e4c96705559456b6dfdb422177704a6fb7409f3ebca836"
+    }
+  },
+  "sourceSha256": "0198993ba09a6a5f581691f6d9bbbfd1aca8d301b090677fa6ad29e2a468e14c"
+}

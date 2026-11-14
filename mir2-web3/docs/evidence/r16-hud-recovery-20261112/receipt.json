@@ -1,0 +1,32 @@
+{
+  "kind": "bounded-HUD-failed-only-recovery",
+  "sourceBase": "7033a012bf39c3d8bd742874c3273ff9eacfd422",
+  "candidate": "7033a012bf39-hud-recovery-b26c3e87",
+  "buildReceiptSha256": "5f2cc4f8c3a2b8b3ab6c6e4bcbef9659417942c0cee28bcc2cb9c90fe08c03c2",
+  "tests": {
+    "passed": 177,
+    "failed": 0,
+    "duplicateRunsNotAdded": true
+  },
+  "preservedOriginalFiles": 65,
+  "recovery": {
+    "maxUrls": 8,
+    "maxConcurrency": 2,
+    "maxAdditionalSweeps": 1,
+    "existingFetchAttemptsPerUrl": 3,
+    "configurationAckMs": 750,
+    "requiresCompleteBody": true,
+    "keepsInitialHistory": true
+  },
+  "sourceIntegration": {
+    "parent": "7033a012bf39c3d8bd742874c3273ff9eacfd422",
+    "prior": "fc1f2768a3fdfe1002e16eee894c4b38f47a640c",
+    "frontendOrClientDeltaBetweenParents": false,
+    "gatewayDeployment": false
+  },
+  "limits": [
+    "public113/113 must be reverified after rollout",
+    "previousc6 game/visual/native scopes passed but108/113 prewarm retained separately",
+    "120s Native cold QA and global1:1 remain open"
+  ]
+}

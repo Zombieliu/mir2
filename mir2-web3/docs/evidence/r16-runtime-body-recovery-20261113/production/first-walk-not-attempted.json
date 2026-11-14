@@ -1,0 +1,14 @@
+{
+  "movement": {
+    "attempted": false,
+    "passed": false,
+    "status": "skipped-known-adjacent-tile-unavailable",
+    "failure": {
+      "phase": "one-ordinary-adjacent-walk",
+      "code": "ORDINARY_WALK_NOT_VERIFIED"
+    }
+  },
+  "protocolWalks": 0,
+  "originalGateMs": 8000,
+  "note": "Frozen runner did not select its known safe adjacent target. No movement request was sent; this does not establish a movement regression or a pass."
+}

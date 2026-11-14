@@ -116,6 +116,16 @@ pub struct MapModel {
     /// this value to select its day/dawn/evening/night indicator.
     #[serde(default)]
     pub time_of_day_light_setting: Option<u8>,
+    /// Authoritative `MapInformation.MiniMap` index. Zero/absent means this
+    /// map has no exported minimap image.
+    #[serde(default)]
+    pub mini_map_index: Option<u16>,
+    /// Dimensions decoded from the current Crystal map file. The minimap uses
+    /// them with the loaded MMap image dimensions to crop around the player.
+    #[serde(default)]
+    pub map_width: Option<u16>,
+    #[serde(default)]
+    pub map_height: Option<u16>,
 }
 
 impl MapModel {

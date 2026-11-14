@@ -1,0 +1,17 @@
+    Finished `test` profile [unoptimized] target(s) in 0.34s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+
+running 7 tests
+test economy::tests::gateway_ground_projection_save_failure_rolls_back_then_retries_once ... ok
+[gateway-zone-live] owner_location result=no_record account=CrossRetry character_index=1
+[gateway-zone-live] owner_location result=no_record account=CrossRetry character_index=1
+test routing::tests::cross_map_drop_lifecycle_tests::known_reward_save_failure_keeps_source_epoch_for_one_exact_retry ... ok
+test routing::tests::dead_experience_chain_tests::dead_poison_known_save_failure_preserves_life_then_retry_and_duplicate ... ok
+test routing::tests::mining_tests::mining_save_failure_rolls_back_exact_item_uid_tool_and_shared_stone ... ok
+gateway lifecycle session_id=gateway-73824-1793370884804-1 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-73824-1793370884804-1 stage=session.close phase=end elapsed_ms=0
+test session::save_fail_closed_tests::gateway_save_failure_reaches_caller_after_authoritative_transform_sync ... ok
+test web::web_save_fail_closed_tests::debounced_save_failure_keeps_dirty_until_successful_retry ... ok
+test web::web_save_fail_closed_tests::forced_save_failure_marks_clean_queue_dirty_and_retry_clears_it ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1472 filtered out; finished in 24.28s

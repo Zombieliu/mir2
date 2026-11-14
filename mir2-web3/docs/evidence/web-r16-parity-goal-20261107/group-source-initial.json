@@ -1,0 +1,16 @@
+{
+  "schema": "mir2.r16.group.source.v1",
+  "pins": {
+    "app/page.tsx": "67708577f70cd22cd44076441c9a99a0f253aa4039c539b045122d2fb39ba2d0",
+    "app/original-client-shell.tsx": "33e3e82f00bd9f2960ed70b89dc93e1ad4f9761b21b62dd6ce209b67b07cf521",
+    "app/components/original-client-group-window.tsx": "95230d7ee5f10b82b1e829670a0b17fd51cfd349b5244ef2a35db5c4aed91cd7",
+    "lib/group-operations.ts": "08fce78a67fef84c380bb4084aa052bfb86f7e9957f2104fbe1b9440ecc2c8ea",
+    "lib/use-window-keydown.ts": "8149b087c0fa1ec32b04224bfc8dc5f1b4389fd0a93fed123580f6ef294be7ce"
+  },
+  "renderer": "bevy-db5e53a91f4d11de",
+  "rendererManifestSha256": "a2724425d1e6820e7b0c0d20a599dd6d14b6f6cde2b8b53b4bb94db7cd7af4f2",
+  "sourceAccountSha256": "2511a547161224a47757e2a8ec95f4463d15c4a6208bbe8be3f81ac6deabfa27",
+  "copiedFiles": 2118,
+  "usesPreservedOrdinaryLevel1Role": true,
+  "createdAt": "2026-11-07T13:51:18.956Z"
+}

@@ -1,0 +1,73 @@
+{
+  "passed": true,
+  "kind": "new-topic-manifest-tool-isolated-index-blob-checks",
+  "checks": [
+    {
+      "name": "unstaged-evidence-rejected",
+      "passed": true,
+      "expectedSuccess": false,
+      "actualExitCode": 1
+    },
+    {
+      "name": "matching-artifact-and-source-index-blobs-accepted",
+      "passed": true,
+      "expectedSuccess": true,
+      "actualExitCode": 0
+    },
+    {
+      "name": "staged-artifact-content-mismatch-rejected",
+      "passed": true,
+      "expectedSuccess": false,
+      "actualExitCode": 1
+    },
+    {
+      "name": "staged-normalized-source-mismatch-rejected",
+      "passed": true,
+      "expectedSuccess": false,
+      "actualExitCode": 1
+    },
+    {
+      "name": "staged-raw-source-mismatch-rejected",
+      "passed": true,
+      "expectedSuccess": false,
+      "actualExitCode": 1
+    },
+    {
+      "name": "source-crlf-to-lf-normalization-preserved",
+      "passed": true,
+      "expectedSuccess": true,
+      "actualExitCode": 0
+    },
+    {
+      "name": "staged-manifest-raw-mismatch-rejected",
+      "passed": true,
+      "expectedSuccess": false,
+      "actualExitCode": 1
+    },
+    {
+      "name": "extra-indexed-topic-file-rejected",
+      "passed": true,
+      "expectedSuccess": false,
+      "actualExitCode": 1
+    },
+    {
+      "name": "pending-completion-guard-still-rejects",
+      "passed": true,
+      "expectedSuccess": false,
+      "actualExitCode": 1
+    },
+    {
+      "name": "final-fixture-index-still-matches",
+      "passed": true,
+      "expectedSuccess": true,
+      "actualExitCode": 0
+    }
+  ],
+  "checkCount": 10,
+  "toolPath": "generate-manifest.mjs",
+  "toolSha256Raw": "e5504c4c77637c18c7ab9636fc95639b3786e15cb6dc8e6652dd0d43fd244a66",
+  "fixtureWasSeparateTemporaryGitRepository": true,
+  "userRepositoryIndexChanged": false,
+  "finalEvidenceManifestFrozen": false,
+  "gameOrInstallerTestsPerformed": false
+}

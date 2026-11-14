@@ -1,0 +1,40 @@
+{
+  "passed": true,
+  "kind": "fresh-owned-gutter-map-seed-only",
+  "inputProof": "map-atlas-input-provenance.json",
+  "outputProof": "fresh-base-map-atlas-output.json",
+  "inputManifestReceipt": {
+    "filename": "map-atlas-input-files.json",
+    "bytes": 3625474,
+    "sha256": "c31c94472cbc767b6656b31e360a60e40e6d66fe4c73c70bb1a6768fc5029dc1",
+    "included": false
+  },
+  "fullInputManifestIncluded": false,
+  "builderLogReceipt": {
+    "filename": "fresh-base-map-atlas-build.log",
+    "bytes": 2229,
+    "sha256": "3ce3c8fdd219de8f3e49c624a44681b8e461de8369306aad18fc133ab8b4c3c1",
+    "included": false
+  },
+  "pixelAuditLogReceipt": {
+    "filename": "fresh-base-map-atlas-gutter-audit.log",
+    "bytes": 294,
+    "sha256": "16df0a91ab9586f06f4676e1a66eaf26d90435f673196e3dafae606e62450462",
+    "included": false
+  },
+  "pixelAuditResultLines": [
+    "{",
+    "  \"passed\": true,",
+    "  \"manifestSha256\": \"5c20ccafe6a9b2be09f50c6b6b6dbee91715ccd321792acaafbce7f822812fe5\",",
+    "  \"pages\": 79,",
+    "  \"frames\": 2952,",
+    "  \"sourcePixelsPreserved\": 13148168,",
+    "  \"edgeAndCornerPixelsVerified\": 783028,",
+    "  \"sourceImagesModified\": false,",
+    "  \"liveVisualAccepted\": false",
+    "}"
+  ],
+  "historicalCacheCopied": false,
+  "full209MapCandidateCoveragePassedByThisReport": false,
+  "sourceImagesModified": false
+}

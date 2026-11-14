@@ -1,0 +1,9 @@
+# Fresh Release and ordinary full lifecycle
+
+The [raw-copy receipt](../personal-monster-projection-release-full16-archive-receipt-v1.json) binds 48 originals, 3,746,281 bytes, including the independent build and functional records. Backend commit `5c2e713863d3e9556a92f856b11df2396c73b137` has 44 explicit inputs; the Release executable SHA-256 is `d8791cceeed00fdb7019d1201aad19f06005790162df1b459a8cacac96f68756`.
+
+The [actual build receipt](receipts/personal-monster-projection-v1-build-receipt.json) records Rust 1.95, locked/offline Release, four jobs, exit 0 and unchanged source before/after. Source and build records are [separate immutable files](../release-personal-monster-projection-v1.json); archived build tools retain their external paths and are evidence copies.
+
+The [independent protocol audit](../protocol-full-lifecycle-personal-monster-projection-v1/1792934538996-4d1caf58.independent-audit.json) confirms all 16 checks in one fresh ordinary two-account run, with 354 ordinary sent commands, mutual visibility, shared combat/kill/drop, unique pickup, actual death/revive, map round trip and logout/relogin persistence. The first no-loot attempt remains in the same raw report and traces. All six connection counters were zero before and after, and normal exit passed; [root OS verification](receipts/personal-projection-full16-root-independent-cleanup-v1.json) confirms PID 62884 absent and ports 17600/17610 released.
+
+The [independent final-facts review](receipts/personal-monster-projection-full16-final-independent-facts-v1.json) cross-checks public terminal records; it does not replace the raw protocol audit. No binaries, private accounts, secret values or recording payloads are included. This is functional protocol evidence. Capacity, native GUI, human acceptance, multi-host operation and fixed Cell implementation remain outside this result.

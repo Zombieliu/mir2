@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T13:27:26.6335280Z",
+  "realmStamp": "1792934538996-4d1caf58",
+  "gatewayPid": 62884,
+  "gatewayPidAbsent": true,
+  "ports": [
+    17600,
+    17610
+  ],
+  "listeningPorts": [],
+  "clean": true,
+  "capacityAccepted": false
+}

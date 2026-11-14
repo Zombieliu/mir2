@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "state": "controller-prepared-not-executed",
+  "controller": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\root-seal-and-guard-v1.mjs",
+    "bytes": 13790,
+    "sha256": "3071738e03d5955a1dc7149dabd899fefa6d04ba4a0885f08c52863a50dc216c"
+  },
+  "syntax": {
+    "exitCode": 0,
+    "scripts": 29,
+    "log": {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-account-store-wait-feasibility-17/launcher-syntax-check.log",
+      "bytes": 9741,
+      "sha256": "aea96852e609145c54cebc2f82cffbcec0a02824256e12ce20a62afee53cfeb6"
+    }
+  },
+  "supportInputs": [
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/verify-inputs.mjs",
+      "bytes": 9407,
+      "sha256": "5960387fcf51d6d4b3be202839861727fcc44209a7eda9e8460804f080d9f8bd"
+    }
+  ],
+  "noModeExecuted": true,
+  "noTestOrProvisioningOrRealmEntry": true
+}

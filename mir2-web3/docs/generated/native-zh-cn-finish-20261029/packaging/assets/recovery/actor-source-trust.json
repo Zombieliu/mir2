@@ -1,0 +1,15 @@
+{
+  "schema": "mir2.windows.actor-source-trust.v1",
+  "passed": true,
+  "sourceRoot": "D:/Mir2Invite/game",
+  "candidate": "WN-CANDIDATE-20261011-invited-25",
+  "sourceRevision": "d917de1ff4988e2d9fc7ca58f958cb5c80861fdf",
+  "cmsSignatureValid": true,
+  "codeSigningEku": true,
+  "signingKeySha256": "6C70C777B27D50949370D494B4B25798200FBDD5C171BAEEAA94D7E289900F3E",
+  "statementSha256": "60405C35155AEDFF69FA87B42212780BF5A02D9E668FCCA567F3A45DCA7ACF10",
+  "packageManifestSha256": "8F50807C9171B28D77424A113C2A55A8AB5DCDD507E3051222C49863E2EFC748",
+  "versionSha256": "481DA3F3EE5AFAB88A9B20F2DEB5A70E359B859C53671D9099B6213E5748FBAB",
+  "copyExecuted": false,
+  "scope": "Authenticate old installed Candidate metadata for exact Monster/049 cache bootstrap only; no source image/metadata generation, no launch/sign/key/trust-store changes"
+}

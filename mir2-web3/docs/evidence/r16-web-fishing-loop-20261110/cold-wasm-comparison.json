@@ -1,0 +1,639 @@
+{
+  "schema": "mir2.r16.fishing-cold-abi.v1",
+  "evidence": [
+    {
+      "label": "baseline",
+      "manifestSha256": "7db42b475aa372719ef4b74addc9153f27ab797e760dc6af10f36eaa71a3c6a6",
+      "presentation": "3ff6ec0dc63b458998d975312df2134136390f1e081b80764d651d4c3e697a93",
+      "wasmSha256": "0836ec2d40bb41a7b554557edd2a021cabbd06838c186372f974b85705fb107e",
+      "runs": [
+        {
+          "mode": "late-idle",
+          "expected": false,
+          "frames": [
+            {
+              "name": "first-visual-only",
+              "nowMs": 1000,
+              "pose": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "DownLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": false
+              }
+            },
+            {
+              "name": "aligned-complete",
+              "nowMs": 1060,
+              "pose": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "DownLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": false
+              }
+            }
+          ]
+        },
+        {
+          "mode": "pending-source",
+          "expected": false,
+          "frames": [
+            {
+              "name": "unaligned",
+              "nowMs": 1000,
+              "pose": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "DownLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": false
+              }
+            },
+            {
+              "name": "aligned-complete",
+              "nowMs": 1060,
+              "pose": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "DownLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": false
+              }
+            }
+          ]
+        },
+        {
+          "mode": "turn-gap",
+          "expected": false,
+          "frames": [
+            {
+              "name": "confirmed-bootstrap",
+              "nowMs": 1000,
+              "pose": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "UpLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": true,
+                "worldKey": "test-turn-gap",
+                "objectId": "1000",
+                "actionSourceKey": "fishing-cold:turn-gap",
+                "sourceRevision": 1,
+                "continuityRevision": 1,
+                "bridgeEpoch": 1,
+                "incarnation": 1,
+                "lastNowMs": 1000,
+                "action": "standing",
+                "direction": "UpLeft"
+              }
+            },
+            {
+              "name": "optimistic-turn-with-mask",
+              "nowMs": 1030,
+              "pose": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "DownLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": false
+              }
+            },
+            {
+              "name": "aligned-complete",
+              "nowMs": 1060,
+              "pose": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "DownLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": false
+              }
+            }
+          ]
+        },
+        {
+          "mode": "visible-cast",
+          "expected": false,
+          "frames": [
+            {
+              "name": "visual-cast",
+              "nowMs": 1000,
+              "pose": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "attackRange",
+                "action": "spell",
+                "direction": "DownLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": false
+              }
+            },
+            {
+              "name": "aligned-complete",
+              "nowMs": 1060,
+              "pose": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "attackRange",
+                "action": "spell",
+                "direction": "DownLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": false
+              }
+            }
+          ]
+        },
+        {
+          "mode": "ambiguous",
+          "expected": false,
+          "frames": [
+            {
+              "name": "ambiguous",
+              "nowMs": 1000,
+              "pose": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "DownLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": false
+              }
+            },
+            {
+              "name": "aligned-complete",
+              "nowMs": 1060,
+              "pose": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "DownLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": false
+              }
+            }
+          ]
+        },
+        {
+          "mode": "retired",
+          "expected": false,
+          "frames": [
+            {
+              "name": "initial",
+              "nowMs": 1000,
+              "pose": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "DownLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": true,
+                "worldKey": "test-retired",
+                "objectId": "1000",
+                "actionSourceKey": "fishing-cold:retired",
+                "sourceRevision": 1,
+                "continuityRevision": 1,
+                "bridgeEpoch": 1,
+                "incarnation": 1,
+                "lastNowMs": 1000,
+                "action": "standing",
+                "direction": "DownLeft"
+              }
+            },
+            {
+              "name": "retired",
+              "nowMs": 1030,
+              "pose": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "DownLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": false
+              }
+            },
+            {
+              "name": "aligned-complete",
+              "nowMs": 1060,
+              "pose": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "DownLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": false
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "candidate",
+      "manifestSha256": "45c0e696e88e0d11a23ade70c62df8d6507cf1e13b8d30e110d668afcc04fcef",
+      "presentation": "1289900361a48f8126831e6da7518a8d0f7209ba4e540e258f2be7651031edb1",
+      "wasmSha256": "f282837894a62fe685bbf6774a71d955fa2cfd1f5b7c12f9109cdebb6108cade",
+      "runs": [
+        {
+          "mode": "late-idle",
+          "expected": true,
+          "frames": [
+            {
+              "name": "first-visual-only",
+              "nowMs": 1000,
+              "pose": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "DownLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": false
+              }
+            },
+            {
+              "name": "aligned-complete",
+              "nowMs": 1060,
+              "pose": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "DownLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": true,
+                "worldKey": "test-late-idle",
+                "objectId": "1000",
+                "actionSourceKey": "fishing-cold:late-idle",
+                "sourceRevision": 3,
+                "continuityRevision": 1,
+                "bridgeEpoch": 1,
+                "incarnation": 1,
+                "lastNowMs": 1060,
+                "action": "standing",
+                "direction": "DownLeft"
+              }
+            }
+          ]
+        },
+        {
+          "mode": "pending-source",
+          "expected": true,
+          "frames": [
+            {
+              "name": "unaligned",
+              "nowMs": 1000,
+              "pose": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "DownLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": false
+              }
+            },
+            {
+              "name": "aligned-complete",
+              "nowMs": 1060,
+              "pose": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "DownLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": true,
+                "worldKey": "test-pending-source",
+                "objectId": "1000",
+                "actionSourceKey": "fishing-cold:pending-source",
+                "sourceRevision": 3,
+                "continuityRevision": 1,
+                "bridgeEpoch": 1,
+                "incarnation": 1,
+                "lastNowMs": 1060,
+                "action": "standing",
+                "direction": "DownLeft"
+              }
+            }
+          ]
+        },
+        {
+          "mode": "turn-gap",
+          "expected": true,
+          "frames": [
+            {
+              "name": "confirmed-bootstrap",
+              "nowMs": 1000,
+              "pose": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "UpLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": true,
+                "worldKey": "test-turn-gap",
+                "objectId": "1000",
+                "actionSourceKey": "fishing-cold:turn-gap",
+                "sourceRevision": 1,
+                "continuityRevision": 1,
+                "bridgeEpoch": 1,
+                "incarnation": 1,
+                "lastNowMs": 1000,
+                "action": "standing",
+                "direction": "UpLeft"
+              }
+            },
+            {
+              "name": "optimistic-turn-with-mask",
+              "nowMs": 1030,
+              "pose": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "DownLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": false
+              }
+            },
+            {
+              "name": "aligned-complete",
+              "nowMs": 1060,
+              "pose": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "DownLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": true,
+                "worldKey": "test-turn-gap",
+                "objectId": "1000",
+                "actionSourceKey": "fishing-cold:turn-gap",
+                "sourceRevision": 3,
+                "continuityRevision": 1,
+                "bridgeEpoch": 1,
+                "incarnation": 1,
+                "lastNowMs": 1060,
+                "action": "standing",
+                "direction": "DownLeft"
+              }
+            }
+          ]
+        },
+        {
+          "mode": "visible-cast",
+          "expected": false,
+          "frames": [
+            {
+              "name": "visual-cast",
+              "nowMs": 1000,
+              "pose": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "attackRange",
+                "action": "spell",
+                "direction": "DownLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": false
+              }
+            },
+            {
+              "name": "aligned-complete",
+              "nowMs": 1060,
+              "pose": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "attackRange",
+                "action": "spell",
+                "direction": "DownLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": false
+              }
+            }
+          ]
+        },
+        {
+          "mode": "ambiguous",
+          "expected": false,
+          "frames": [
+            {
+              "name": "ambiguous",
+              "nowMs": 1000,
+              "pose": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "DownLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": false
+              }
+            },
+            {
+              "name": "aligned-complete",
+              "nowMs": 1060,
+              "pose": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "DownLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": false
+              }
+            }
+          ]
+        },
+        {
+          "mode": "retired",
+          "expected": false,
+          "frames": [
+            {
+              "name": "initial",
+              "nowMs": 1000,
+              "pose": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "DownLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": true,
+                "worldKey": "test-retired",
+                "objectId": "1000",
+                "actionSourceKey": "fishing-cold:retired",
+                "sourceRevision": 1,
+                "continuityRevision": 1,
+                "bridgeEpoch": 1,
+                "incarnation": 1,
+                "lastNowMs": 1000,
+                "action": "standing",
+                "direction": "DownLeft"
+              }
+            },
+            {
+              "name": "retired",
+              "nowMs": 1030,
+              "pose": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "DownLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": false
+              }
+            },
+            {
+              "name": "aligned-complete",
+              "nowMs": 1060,
+              "pose": {
+                "objectId": "1000",
+                "incarnation": 1,
+                "animationState": "standing",
+                "action": "standing",
+                "direction": "DownLeft",
+                "logicalFrameIndex": 0,
+                "queueDepth": 0
+              },
+              "peek": {
+                "version": 1,
+                "known": false
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

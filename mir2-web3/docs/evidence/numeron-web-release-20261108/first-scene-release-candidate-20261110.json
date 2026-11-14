@@ -1,0 +1,223 @@
+{
+  "publicGame": "https://numeron.obelisk.build/game",
+  "publicRevision": "a23cc382af1c66cd7ffeea794fd62fe7cba7e96a",
+  "liveColdUnsignedQr": {
+    "zh-cn": {
+      "receiptSha256": "74c3dc9d45fb6cbf26423aa9c0dc4dea0de3104312c4d900797e8d4c9572b687",
+      "revision": "a23cc382af1c66cd7ffeea794fd62fe7cba7e96a",
+      "actualCode": true,
+      "createStatus": 200,
+      "pendingPoll": true,
+      "cancelled": true,
+      "pendingAtClick": 12
+    },
+    "zh-tw": {
+      "receiptSha256": "5f3d0a756a43245c4e9048d2f437b6513af35eee5a038912a6db53325f42c2d8",
+      "revision": "a23cc382af1c66cd7ffeea794fd62fe7cba7e96a",
+      "actualCode": true,
+      "createStatus": 200,
+      "pendingPoll": true,
+      "cancelled": true,
+      "pendingAtClick": 11
+    }
+  },
+  "release": {
+    "candidate": "c52ea9abb63cc016a736c856e4d9d5db3c0abb90",
+    "parent": "a23cc382af1c66cd7ffeea794fd62fe7cba7e96a",
+    "ref": "codex/numeron-map-entry-recovery",
+    "baseDeployment": "dpl_AiB7qfnhdVkeEVKCJv3YXeW6m2cf",
+    "sourceDiff": [
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/app/components/original-client-shell-types.ts",
+        "sha": "bea32fe102b5563f1a66c69d8d2f27934235a424"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/app/globals.css",
+        "sha": "9b9d68843d4d74b67e6233416e9ccee31086ade3"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/app/original-client-shell.tsx",
+        "sha": "113a02905dec6fc60c187afdbd01c08a01e4574a"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/app/page.tsx",
+        "sha": "0924ba75a8e572940aa9bfcef3591aadfb8cb3f4"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/lib/asset-release-capabilities.ts",
+        "sha": "20e20e60ffd1d726dcca3b82699c2e9704d43600"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/apps/web/lib/first-crystal-scene-request.ts",
+        "sha": "a8686b0349bb73502568f81c0e470aec53137a76"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/lib/r16-browser-localization.ts",
+        "sha": "d21a3ff78f642a6c86d70537ef3963240501a7ee"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/package.json",
+        "sha": "cf1f49fa62d66046eec33455e8c91c78ff539b46"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+        "sha": "c145bd575a01cf667304430c20ce5357b3e10953"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/scripts/test-asset-worker-fallback.mjs",
+        "sha": "c1c35a47aa7e0629eeb6d9b524d3809a59427c8c"
+      },
+      {
+        "status": "added",
+        "filename": "mir2-web3/apps/web/scripts/test-first-crystal-scene-request.mjs",
+        "sha": "6eef72c5560e98bef381b09cc59b5b56ccbc9abc"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/scripts/test-r16-browser-localization.mjs",
+        "sha": "e098fbb2fba61249f8a62f6d13e2d06a5d77a39b"
+      },
+      {
+        "status": "modified",
+        "filename": "mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs",
+        "sha": "4e11b7061aa2b8444cef936c77fe18382d6296c1"
+      }
+    ],
+    "controlCommit": "0a7d9e3993447cd51c0ffca1b114e4d31d2ae139",
+    "planSha256": "4ab8708103c0a4b2e73c815d3b8ba744073b2df848628504447a291c08ed0d1b",
+    "buildReceiptSha256": "549e520db7588a434ebc1156776a26996e8a1e10c8103fae551a94d5141be887",
+    "buildId": "Vf7O7dbF586F-HuEFTOTO",
+    "fixedAssetRelease": "20261108-r16-08ec86d5105c",
+    "assetPublication": {
+      "source": "f2de762309768b51b39438c2437c14e819df9bf7",
+      "run": 42494701555,
+      "artifact": 13622863928
+    },
+    "guardTests": 71,
+    "sourceGateResults": [
+      {
+        "name": "asset-delivery",
+        "status": 0,
+        "reportedSubtests": [
+          9,
+          4,
+          5,
+          3,
+          20,
+          8,
+          11,
+          7
+        ],
+        "reportedTotal": 67
+      },
+      {
+        "name": "dubhe-wallet",
+        "status": 0,
+        "reportedSubtests": [
+          21
+        ],
+        "reportedTotal": 21
+      },
+      {
+        "name": "audio-system",
+        "status": 0,
+        "reportedSubtests": [],
+        "reportedTotal": 0
+      },
+      {
+        "name": "map-render-and-r16-localization",
+        "status": 0,
+        "reportedSubtests": [
+          17
+        ],
+        "reportedTotal": 17
+      }
+    ],
+    "candidateOnly": true
+  },
+  "chromeRecovery": {
+    "automatic": {
+      "receiptSha256": "a8c5b6433b99770f6dfaad385f88cad88f0a4d9e9bd346d156abb75e0f16a803",
+      "roleTile": {
+        "x": 342,
+        "y": 244
+      },
+      "gameStart": 4,
+      "scope": "Local ordinary Chrome and isolated File, with deliberate delays to genuine upstream 200 response bodies",
+      "recovery": {
+        "manifest": {
+          "url": "/api/asset-manifest",
+          "automaticRetryMs": 8203.292,
+          "headersThroughWorkerMs": 2.029,
+          "sameKey": true,
+          "firstManuallyReleased": false
+        },
+        "crystal": {
+          "url": "/api/scene/crystal?v=2026-08-14-v7-door-interaction&assetRelease=20261108-r16-08ec86d5105c&map=0&x=344&y=246&width=56&height=72",
+          "automaticRetryMs": 8201.981,
+          "headersThroughWorkerMs": 1.293,
+          "sameKey": true,
+          "firstManuallyReleased": false
+        }
+      },
+      "logout": {
+        "sent": 624,
+        "ack": 625,
+        "position": {
+          "x": 342,
+          "y": 244
+        },
+        "direction": "UpLeft"
+      }
+    },
+    "manual": {
+      "receiptSha256": "5fd7ef20fb1a096ed114f599ea130aaf0328fc7a2ae17ace493f0410ef6b64a2",
+      "roleTile": {
+        "x": 342,
+        "y": 244
+      },
+      "gameStart": 4,
+      "scope": "Local ordinary Chrome and isolated File, with deliberate delays to genuine upstream 200 response bodies",
+      "recovery": {
+        "crystal": {
+          "url": "/api/scene/crystal?v=2026-08-14-v7-door-interaction&assetRelease=20261108-r16-08ec86d5105c&map=0&x=344&y=246&width=56&height=72",
+          "automaticRetryMs": 8193.32,
+          "headersThroughWorkerMs": 1.503,
+          "sameKey": true,
+          "firstManuallyReleased": false
+        },
+        "localizedRetry": {
+          "shownAt": 1794281197602.599,
+          "label": "重试",
+          "failedAttempts": 2,
+          "clickedAt": 1794281197787.837,
+          "requestAt": 1794281197808.947,
+          "requestAfterButtonMs": 21.11
+        }
+      },
+      "logout": {
+        "sent": 624,
+        "ack": 625,
+        "position": {
+          "x": 342,
+          "y": 244
+        },
+        "direction": "UpLeft"
+      }
+    }
+  },
+  "remaining": {
+    "production": "The secret-bearing GitHub Actions job has no protected branch or required environment review. The existing Vercel connector does not expose non-assigning stage with matching injected environment.",
+    "signedQa": "Existing live signed receipts are retained. The previous virtual authenticator was ephemeral; a new authorized Testnet or physical phone session is needed for a signed retest of the new deployment."
+  }
+}

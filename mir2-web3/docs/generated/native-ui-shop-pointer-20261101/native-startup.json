@@ -1,0 +1,21 @@
+{
+  "schema": "mir2.native-ui.shop-pointer.startup.v1",
+  "version": "WN-CANDIDATE-20261101-ui-14",
+  "sourceRevision": "1e06de683a2a6aa8779a464bcf08e35d4508bbde",
+  "capturedAtUtc": "2026-10-31T20:11:12.039Z",
+  "window": {
+    "app": "process:C:\\m2ui1101\\mir2-web3\\dist\\mir2-windows-candidate\\WN-CANDIDATE-20261101-ui-14\\mir2-platform-windows.exe",
+    "id": 4001882,
+    "title": "numeron-legend of rebirth"
+  },
+  "screenshot": {
+    "file": "E:/mir2-release/windows-ui-shop-pointer-20261101/native-login-01.jpg",
+    "sha256": "d1eb2db21e3e6fc7d25e8b3f399abfadc46a836304016efa27b9e1b1d356a9b9",
+    "width": 1026,
+    "height": 800
+  },
+  "observed": "Real Windows client opened at Simplified Chinese login; Dubhe Wallet F8 entry visible",
+  "loginAttempted": false,
+  "gameplayPurchaseAttempted": false,
+  "fullGameplayAccepted": false
+}

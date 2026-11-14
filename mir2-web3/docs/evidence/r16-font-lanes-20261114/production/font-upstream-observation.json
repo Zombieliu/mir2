@@ -1,0 +1,378 @@
+{
+  "schema": 1,
+  "passed": false,
+  "scope": "Passive existing failed cohort worker Network events only; no interception, targets not paused, no additional public fetch",
+  "source": "6ae96fa6017d511255ac46216c034594b6fe500f",
+  "fontsPresent": 0,
+  "fontsExpected": 6,
+  "droppedRequests": 0,
+  "observerErrors": [
+    {
+      "code": "WORKER_FONT_CDP_COMMAND_TIMEOUT",
+      "method": "Network.enable"
+    }
+  ],
+  "rows": [
+    {
+      "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+      "requestAtMs": 106815,
+      "status": null,
+      "headersAtMs": null,
+      "finishedAtMs": 113828,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "durationMs": 7013
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansTC.ttf",
+      "requestAtMs": 113827,
+      "status": null,
+      "headersAtMs": null,
+      "finishedAtMs": 120829,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "durationMs": 7002
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSansTC.ttf",
+      "requestAtMs": 120829,
+      "status": null,
+      "headersAtMs": null,
+      "finishedAtMs": 127832,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "durationMs": 7003
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260730-fullcrystal-f71b89aa-gzip1/original-ui/fonts/NotoSansTC.ttf",
+      "requestAtMs": 127831,
+      "status": null,
+      "headersAtMs": null,
+      "finishedAtMs": 134832,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "durationMs": 7001
+    },
+    {
+      "url": "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSansTC.ttf",
+      "requestAtMs": 134832,
+      "status": null,
+      "headersAtMs": null,
+      "finishedAtMs": 141834,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "durationMs": 7002
+    },
+    {
+      "url": "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260730-fullcrystal-f71b89aa-gzip1/original-ui/fonts/NotoSansTC.ttf",
+      "requestAtMs": 141834,
+      "status": null,
+      "headersAtMs": null,
+      "finishedAtMs": 148836,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "durationMs": 7002
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansTC.ttf",
+      "requestAtMs": 148835,
+      "status": null,
+      "headersAtMs": null,
+      "finishedAtMs": 155836,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "durationMs": 7001
+    },
+    {
+      "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "requestAtMs": 259413,
+      "status": null,
+      "headersAtMs": null,
+      "finishedAtMs": 266415,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "durationMs": 7002
+    },
+    {
+      "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+      "requestAtMs": 259414,
+      "status": 200,
+      "headersAtMs": 259535,
+      "finishedAtMs": 292806,
+      "encodedBodyBytes": 6298746,
+      "netError": "net::ERR_ABORTED",
+      "durationMs": 33392
+    },
+    {
+      "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSans-Regular.ttf",
+      "requestAtMs": 266415,
+      "status": null,
+      "headersAtMs": null,
+      "finishedAtMs": 273415,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "durationMs": 7000
+    },
+    {
+      "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "requestAtMs": 273415,
+      "status": null,
+      "headersAtMs": null,
+      "finishedAtMs": 280417,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "durationMs": 7002
+    },
+    {
+      "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "requestAtMs": 280417,
+      "status": null,
+      "headersAtMs": null,
+      "finishedAtMs": 287417,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "durationMs": 7000
+    },
+    {
+      "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "requestAtMs": 287417,
+      "status": null,
+      "headersAtMs": null,
+      "finishedAtMs": 294419,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "durationMs": 7002
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "requestAtMs": 292805,
+      "status": 200,
+      "headersAtMs": 292938,
+      "finishedAtMs": 354214,
+      "encodedBodyBytes": 10111063,
+      "netError": "net::ERR_ABORTED",
+      "durationMs": 61409
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSans-Regular.ttf",
+      "requestAtMs": 294418,
+      "status": null,
+      "headersAtMs": null,
+      "finishedAtMs": 301418,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "durationMs": 7000
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "requestAtMs": 301419,
+      "status": null,
+      "headersAtMs": null,
+      "finishedAtMs": 308421,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "durationMs": 7002
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "requestAtMs": 308420,
+      "status": null,
+      "headersAtMs": null,
+      "finishedAtMs": 315421,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "durationMs": 7001
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansTC.ttf",
+      "requestAtMs": 315421,
+      "status": null,
+      "headersAtMs": null,
+      "finishedAtMs": 322422,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "durationMs": 7001
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "requestAtMs": 322422,
+      "status": null,
+      "headersAtMs": null,
+      "finishedAtMs": 329422,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "durationMs": 7000
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSans-Regular.ttf",
+      "requestAtMs": 329422,
+      "status": null,
+      "headersAtMs": null,
+      "finishedAtMs": 336422,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "durationMs": 7000
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "requestAtMs": 336422,
+      "status": null,
+      "headersAtMs": null,
+      "finishedAtMs": 343423,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "durationMs": 7001
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "requestAtMs": 343422,
+      "status": null,
+      "headersAtMs": null,
+      "finishedAtMs": 350424,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "durationMs": 7002
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSansTC.ttf",
+      "requestAtMs": 350424,
+      "status": null,
+      "headersAtMs": null,
+      "finishedAtMs": 357425,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "durationMs": 7001
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "requestAtMs": 354213,
+      "status": null,
+      "headersAtMs": null,
+      "finishedAtMs": 361215,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "durationMs": 7002
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260730-fullcrystal-f71b89aa-gzip1/original-ui/fonts/NotoSans-Regular.ttf",
+      "requestAtMs": 357425,
+      "status": null,
+      "headersAtMs": null,
+      "finishedAtMs": 364427,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "durationMs": 7002
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260730-fullcrystal-f71b89aa-gzip1/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "requestAtMs": 361215,
+      "status": null,
+      "headersAtMs": null,
+      "finishedAtMs": 368215,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "durationMs": 7000
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260730-fullcrystal-f71b89aa-gzip1/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "requestAtMs": 364426,
+      "status": null,
+      "headersAtMs": null,
+      "finishedAtMs": 371427,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "durationMs": 7001
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "requestAtMs": 368215,
+      "status": null,
+      "headersAtMs": null,
+      "finishedAtMs": 375216,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "durationMs": 7001
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260730-fullcrystal-f71b89aa-gzip1/original-ui/fonts/NotoSansTC.ttf",
+      "requestAtMs": 371428,
+      "status": null,
+      "headersAtMs": null,
+      "finishedAtMs": 378429,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "durationMs": 7001
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260730-fullcrystal-f71b89aa-gzip1/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "requestAtMs": 375216,
+      "status": null,
+      "headersAtMs": null,
+      "finishedAtMs": 382217,
+      "encodedBodyBytes": 0,
+      "netError": "net::ERR_ABORTED",
+      "durationMs": 7001
+    },
+    {
+      "url": "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSans-Regular.ttf",
+      "requestAtMs": 378428,
+      "status": 404,
+      "headersAtMs": 378740,
+      "finishedAtMs": 378819,
+      "encodedBodyBytes": 27150,
+      "netError": null,
+      "durationMs": 391
+    },
+    {
+      "url": "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "requestAtMs": 378740,
+      "status": 404,
+      "headersAtMs": 379229,
+      "finishedAtMs": 379388,
+      "encodedBodyBytes": 27150,
+      "netError": null,
+      "durationMs": 648
+    },
+    {
+      "url": "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "requestAtMs": 379230,
+      "status": 404,
+      "headersAtMs": 379496,
+      "finishedAtMs": 379538,
+      "encodedBodyBytes": 27150,
+      "netError": null,
+      "durationMs": 308
+    },
+    {
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260730-fullcrystal-f71b89aa-gzip1/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "requestAtMs": 379495,
+      "status": null,
+      "headersAtMs": null,
+      "finishedAtMs": null,
+      "encodedBodyBytes": 0,
+      "netError": null,
+      "durationMs": null
+    },
+    {
+      "url": "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260818-main-97887dcd/original-ui/fonts/NotoSansTC.ttf",
+      "requestAtMs": 382217,
+      "status": 404,
+      "headersAtMs": 382634,
+      "finishedAtMs": null,
+      "encodedBodyBytes": 16088,
+      "netError": null,
+      "durationMs": null
+    },
+    {
+      "url": "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260730-fullcrystal-f71b89aa-gzip1/original-ui/fonts/NotoSans-Regular.ttf",
+      "requestAtMs": 382634,
+      "status": null,
+      "headersAtMs": null,
+      "finishedAtMs": null,
+      "encodedBodyBytes": 0,
+      "netError": null,
+      "durationMs": null
+    }
+  ],
+  "conclusion": "Two complete-font lanes were insufficient for the public failure. One complete map and one ordinary move remain separate successes; headers still exhaust7s and large bodies stop. This does not establish the upstream/proxy/cache/scheduling root cause."
+}

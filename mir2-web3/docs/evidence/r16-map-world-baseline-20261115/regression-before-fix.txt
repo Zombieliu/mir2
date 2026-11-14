@@ -1,0 +1,192 @@
+TAP version 13
+# Subtest: map read waits for projection, then stops when a complete new-scene baseline arrives
+ok 1 - map read waits for projection, then stops when a complete new-scene baseline arrives
+  ---
+  duration_ms: 0.8705
+  type: 'test'
+  ...
+# Subtest: an already complete new-scene baseline requires no duplicate request
+ok 2 - an already complete new-scene baseline requires no duplicate request
+  ---
+  duration_ms: 0.5113
+  type: 'test'
+  ...
+# Subtest: pending map read is retired after socket
+ok 3 - pending map read is retired after socket
+  ---
+  duration_ms: 0.1486
+  type: 'test'
+  ...
+# Subtest: pending map read is retired after connection
+ok 4 - pending map read is retired after connection
+  ---
+  duration_ms: 0.1419
+  type: 'test'
+  ...
+# Subtest: pending map read is retired after session
+ok 5 - pending map read is retired after session
+  ---
+  duration_ms: 0.0693
+  type: 'test'
+  ...
+# Subtest: pending map read is retired after scene
+ok 6 - pending map read is retired after scene
+  ---
+  duration_ms: 0.1196
+  type: 'test'
+  ...
+# Subtest: pending map read is retired after map
+ok 7 - pending map read is retired after map
+  ---
+  duration_ms: 0.1412
+  type: 'test'
+  ...
+# Subtest: pending map read is retired after player
+ok 8 - pending map read is retired after player
+  ---
+  duration_ms: 0.0646
+  type: 'test'
+  ...
+# Subtest: pending map read is retired after logout
+ok 9 - pending map read is retired after logout
+  ---
+  duration_ms: 0.2
+  type: 'test'
+  ...
+# Subtest: missing or incomplete snapshots have at most three read-only attempts
+ok 10 - missing or incomplete snapshots have at most three read-only attempts
+  ---
+  duration_ms: 0.3286
+  type: 'test'
+  ...
+# Subtest: transport throws are bounded and disposing a pending read cancels its timer
+ok 11 - transport throws are bounded and disposing a pending read cancels its timer
+  ---
+  duration_ms: 0.172
+  type: 'test'
+  ...
+# Subtest: a newer map replaces every pending read of the old scene
+ok 12 - a newer map replaces every pending read of the old scene
+  ---
+  duration_ms: 0.1787
+  type: 'test'
+  ...
+# Subtest: actual Page: ordinary map transfer retires navigation and requests its missing personal baseline
+not ok 13 - actual Page: ordinary map transfer retires navigation and requests its missing personal baseline
+  ---
+  duration_ms: 4.5396
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-map-world-baseline-refresh.mjs:50:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+    + []
+    - [
+    -   {
+    -     type: 'clientVersion'
+    -   }
+    - ]
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0:
+      type: 'clientVersion'
+  actual:
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-map-world-baseline-refresh.mjs:51:181)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual Page: initial StartGame map does not request another bootstrap
+ok 14 - actual Page: initial StartGame map does not request another bootstrap
+  ---
+  duration_ms: 2.295
+  type: 'test'
+  ...
+# Subtest: actual Page: unchanged MapInformation preserves the current goal without a refresh
+ok 15 - actual Page: unchanged MapInformation preserves the current goal without a refresh
+  ---
+  duration_ms: 2.1079
+  type: 'test'
+  ...
+# Subtest: actual Page: same-map MapChanged still retires the scene and reads a fresh baseline
+not ok 16 - actual Page: same-map MapChanged still retires the scene and reads a fresh baseline
+  ---
+  duration_ms: 1.9063
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-map-world-baseline-refresh.mjs:56:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    0 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-map-world-baseline-refresh.mjs:56:206)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual Page: a second map replaces pending refresh before the first read
+not ok 17 - actual Page: a second map replaces pending refresh before the first read
+  ---
+  duration_ms: 3.4636
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-map-world-baseline-refresh.mjs:57:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    0 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-map-world-baseline-refresh.mjs:57:156)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual Page: an old connection map packet cannot request a new baseline
+ok 18 - actual Page: an old connection map packet cannot request a new baseline
+  ---
+  duration_ms: 1.8105
+  type: 'test'
+  ...
+# Subtest: actual Page: logout before dispatch sends no read on the selection screen
+ok 19 - actual Page: logout before dispatch sends no read on the selection screen
+  ---
+  duration_ms: 1.7696
+  type: 'test'
+  ...
+1..19
+# tests 19
+# suites 0
+# pass 16
+# fail 3
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 622.2059

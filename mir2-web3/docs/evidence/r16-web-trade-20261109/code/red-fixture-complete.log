@@ -1,0 +1,154 @@
+TAP version 13
+# Subtest: actual Page Trade cancel permits one request during deposit or retrieve pending without releasing the item barrier
+not ok 1 - actual Page Trade cancel permits one request during deposit or retrieve pending without releasing the item barrier
+  ---
+  duration_ms: 99.827
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-storage-page-gate.mjs:674:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    depositTrade
+    
+    false !== true
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-storage-page-gate.mjs:682:12)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.start (node:internal/test_runner/test:944:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+  ...
+# Subtest: actual Page Trade cancel unknown socket result is spent while a definitely unsent cancellation can retry
+not ok 2 - actual Page Trade cancel unknown socket result is spent while a definitely unsent cancellation can retry
+  ---
+  duration_ms: 4.6223
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-storage-page-gate.mjs:696:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-storage-page-gate.mjs:699:62)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: actual Page Trade cancel retains exact owner scene map exchange and DTO guards before the final socket entry
+ok 3 - actual Page Trade cancel retains exact owner scene map exchange and DTO guards before the final socket entry
+  ---
+  duration_ms: 22.0815
+  type: 'test'
+  ...
+# Subtest: actual Page Trade cancel resists synchronous event and socket reentry and withdraws an unentered item send
+not ok 4 - actual Page Trade cancel resists synchronous event and socket reentry and withdraws an unentered item send
+  ---
+  duration_ms: 4.2447
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-storage-page-gate.mjs:752:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    an item reserved before reentrant cancellation cannot enter afterward
+    + actual - expected
+    
+    + []
+    - [
+    -   {
+    -     type: 'tradeCancel'
+    -   }
+    - ]
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0:
+      type: 'tradeCancel'
+  actual:
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-storage-page-gate.mjs:765:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual Page Trade terminal packets retire only their current exchange item and late item ACKs cannot resurrect it
+not ok 5 - actual Page Trade terminal packets retire only their current exchange item and late item ACKs cannot resurrect it
+  ---
+  duration_ms: 1.6938
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-storage-page-gate.mjs:769:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    TradeConfirm
+    + actual - expected
+    
+    + {
+    +   acked: false,
+    +   entered: true,
+    +   proof: {
+    +     beforeSnapshotRevision: 2,
+    +     from: 43,
+    +     kind: 'depositTrade',
+    +     localSourceKey: '[3,5,1,3,"D001",2,{"ok":true,"items":[{"slot":3,"uniqueId":11,"name":"same display name","icon":1,"count":1},{"slot":43,"uniqueId":22,"name":"same display name","icon":1,"count":1},{"slot":7,"uniqueId":33,"name":"same display name","icon":1,"count":1}],"capacity":48,"emptySlots":[0,1,2,4,5,6,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,44,45,46,47]},{"partner":"Partner","settlementNonce":"nonce","offeredGold":0,"accepted":true,"locked":false,"escrowPrepared":false,"completed":false,"offeredSlots":{},"offeredUniqueIds":{}}]',
+    +     ownCharacterIndex: 7,
+    +     owner: {
+    +       connectionGeneration: 3,
+    +       mapFileName: 'D001',
+    +       playerObjectId: 3,
+    +       sceneRevision: 1,
+    +       sessionGeneration: 5,
+    +       socket: {
+    +         readyState: 1,
+    +         send: [Function: send]
+    +       }
+    +     },
+    +     surface: 'trade',
+    +     to: 5,
+    +     uniqueId: 22
+    +   },
+    +   snapshotRevision: null,
+    +   success: null
+    + }
+    - null
+    
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Subtest: actual Page Trade cancel terminal rejects foreign owners and stale exchanges and never retires Guild custody
+ok 6 - actual Page Trade cancel terminal rejects foreign owners and stale exchanges and never retires Guild custody
+  ---
+  duration_ms: 12.8305
+  type: 'test'
+  ...
+# Subtest: actual Page Trade cancel spent custody retires with the actual session and cannot authorize an old lease
+ok 7 - actual Page Trade cancel spent custody retires with the actual session and cannot authorize an old lease
+  ---
+  duration_ms: 1.5683
+  type: 'test'
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 3
+# fail 4
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 897.5925

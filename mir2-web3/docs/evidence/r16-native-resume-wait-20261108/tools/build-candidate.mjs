@@ -1,0 +1,23 @@
+import assert from 'node:assert/strict';
+import {spawn} from 'node:child_process';
+import {readFile,writeFile,copyFile,open,constants} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+const base=import.meta.dirname,root='E:/mir2-player-journey/mir2-web3';
+const target='D:/mir2-builds/web-newcomer-30-20261107/cargo-gateway-fresh';
+const expected=JSON.parse(await readFile(base+'/qualified-before.json','utf8'));
+const sha=b=>createHash('sha256').update(b).digest('hex');
+for(const [file,pin]of Object.entries(expected.pins))assert.equal(sha(await readFile(root+'/'+file)),pin,file);
+const args=['+1.95.0','build','-p','mir2-gateway','--bin','mir2-gateway','--offline','--locked','--target-dir',target];
+const log=await open(base+'/candidate-build.log','wx');let child;
+try{child=spawn('cargo',args,{cwd:root,windowsHide:true,stdio:['ignore',log.fd,log.fd]});}finally{await log.close();}
+const exitCode=await new Promise(resolve=>{child.once('error',()=>resolve(1));child.once('exit',resolve);});
+console.log(JSON.stringify({buildExitCode:exitCode,profile:'dev/debug'}));
+assert.equal(exitCode,0);
+for(const [file,pin]of Object.entries(expected.pins))assert.equal(sha(await readFile(root+'/'+file)),pin,file);
+const exe=base+'/mir2-gateway-r16-native-resume.exe';
+await copyFile(target+'/debug/mir2-gateway.exe',exe,constants.COPYFILE_EXCL);
+await copyFile(target+'/debug/mir2-gateway.d',base+'/candidate-build.d',constants.COPYFILE_EXCL);
+const bytes=await readFile(exe);
+const result={schema:'mir2.r16.native-resume.candidate.v1',createdAt:new Date().toISOString(),head:expected.head,sourcePins:expected.pins,sourceStableBeforeAndAfter:true,fullReleaseSourceClosurePinned:false,command:['cargo',...args],exitCode,file:exe,sha256:sha(bytes),bytes:bytes.length,profile:'dev/debug',releaseBuild:false,publicDeploy:false};
+await writeFile(base+'/candidate-build.json',JSON.stringify(result,null,2)+'\n',{flag:'wx'});
+console.log(JSON.stringify({candidate:exe,sha256:result.sha256,bytes:result.bytes,sourceStable:true}));

@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "source": "Source78",
+  "worker": "worker-code01",
+  "parentCommit": "ead9311a37edf6ba71ac7633726a1d01b0d5df0a",
+  "scope": "Only the four listed Web Host/hook/test source leaves",
+  "files": [
+    {
+      "path": "apps/web/lib/bevy-spells-ui.ts",
+      "before": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\before\\apps\\web\\lib\\bevy-spells-ui.ts",
+        "bytes": 19788,
+        "sha256": "c3f3154862728b7ff48ef958beb562323938e2b7c518f73b321ce2f443abd108"
+      },
+      "after": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\after\\apps\\web\\lib\\bevy-spells-ui.ts",
+        "bytes": 22960,
+        "sha256": "f77f586c3f291ed5e019eedbfe549780d0b56ebef459eeb0f05ed9bdf3f76ee3"
+      },
+      "mainMatchesAfter": true,
+      "changes": [
+        "Adds finite SpellsDiagnosticReason and SpellsIneligibleReason types, typed optional onDiagnostic callback, and optional input ineligibleReason.",
+        "Expands the existing early tick guard into identical ordered short circuit guard statements with finite refusal codes; remembers the existing constructor supports result solely to classify unsupported setup.",
+        "Reuses the existing second runtime status result as appliedStatus for unchanged readiness qualification, without another clock/status/capabilities read.",
+        "Observational classification emits only ready/reason and a whitelist auxiliary inputReason when eligible is false; catches diagnostic observer exceptions.",
+        "Manual withdraw and stop retain original state callback, disabled snapshot send, revision, owner, and sink cleanup semantics while reporting finite withdrawal/stop codes. Overflow, failed setter and host exceptions use finite codes.",
+        "qualify, allows, pointerContext, identity, PointerRouter and request/pending send admission bodies remain byte-identical to before. No guessed baseline retag or resource expansion."
+      ]
+    },
+    {
+      "path": "apps/web/lib/use-bevy-spells-ui.ts",
+      "before": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\before\\apps\\web\\lib\\use-bevy-spells-ui.ts",
+        "bytes": 2823,
+        "sha256": "780e587c8d87bb50cc280e29b90d9a1467e03c723e58cbf4719bf6e1f0dbec94"
+      },
+      "after": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\after\\apps\\web\\lib\\use-bevy-spells-ui.ts",
+        "bytes": 3383,
+        "sha256": "7359f97831c9cffd3a8c2ad55e314aa1992376218720edf50643876db974c4c6"
+      },
+      "mainMatchesAfter": true,
+      "changes": [
+        "Returns diagnostic alongside unchanged ready and action API.",
+        "Receives onDiagnostic on the existing captured-host lifecycle, guards live state, dedupes ready/reason/inputReason via functional state update.",
+        "Initial unrequested/absent-runtime and setup failure lifecycle emits finite diagnostics without runtime reads.",
+        "Preserves existing one metadata fetch, one interval, readBaseline path, cancellation and cleanup ordering; retired cleanup cannot update component diagnostic."
+      ]
+    },
+    {
+      "path": "apps/web/scripts/test-bevy-spells-ui.mjs",
+      "before": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\before\\apps\\web\\scripts\\test-bevy-spells-ui.mjs",
+        "bytes": 12404,
+        "sha256": "68ef1d3e4304c39eeda5e105517eef8f0a7ff6145043ffe3f17221bf80631a29"
+      },
+      "after": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\after\\apps\\web\\scripts\\test-bevy-spells-ui.mjs",
+        "bytes": 23504,
+        "sha256": "fa08a4f8a32853c91ad1770571d539469dcba15bf71e627f5c73d3d8c8cbe0b2"
+      },
+      "mainMatchesAfter": true,
+      "changes": [
+        "Preserves all existing tests verbatim and appends real Host regression source.",
+        "Adds empty learned baselines with both null and empty frame metadata requiring correct fresh echo; rejects incorrect applied revisions, stale echoes, forged empty-skill intents and ownerRevision drift without retagging.",
+        "Covers absent rawOwner, finite status/early/lifecycle refusals, sanitization of all twelve auxiliary input codes, first gate precedence, optional/throwing callback runtime and clock call counts.",
+        "Asserts preserved pending send-time tuple and burned request watermark across diagnostic withdrawal/stop and ACK settling.",
+        "Tests are source only and were not executed, imported, transpiled or checked with any product runner by this worker."
+      ]
+    },
+    {
+      "path": "apps/web/scripts/test-use-bevy-spells-ui.mjs",
+      "before": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\before\\apps\\web\\scripts\\test-use-bevy-spells-ui.mjs",
+        "bytes": 2790,
+        "sha256": "27efb2dd14c35fde07264019ecd22ce7b940b369a3bbc3c4214d57016059edae"
+      },
+      "after": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\worker-code01\\after\\apps\\web\\scripts\\test-use-bevy-spells-ui.mjs",
+        "bytes": 6853,
+        "sha256": "453ed021dad819efbd845e5e359b98074085a3daf1c6e221b42c98dcc96a9afd"
+      },
+      "mainMatchesAfter": true,
+      "changes": [
+        "Retains original two tests; extends mock state recording and Host diagnostic callbacks.",
+        "Adds lifecycle value dedupe, auxiliary reason changes, no extra reads/fetches/intervals, no retired cleanup or late metadata callback state updates.",
+        "Adds unrequested/absent runtime diagnostics and static integration checks for existing onDiagnostic lifecycle and no status/capability reader.",
+        "Tests are source only and were not executed, imported, transpiled or checked with any product runner by this worker."
+      ]
+    }
+  ],
+  "sourceOnlyReview": {
+    "qualifyUnchanged": true,
+    "allowsPointerContextIdentityUnchanged": true,
+    "pointerRouterUnchanged": true,
+    "secondStatusReadReused": true,
+    "noAddedRuntimeClockCapabilitiesRead": true,
+    "noDiagnosticAuthority": true
+  },
+  "execution": {
+    "testsRun": false,
+    "productBuildRun": false,
+    "productImportRun": false,
+    "transpileRun": false,
+    "networkBrowserRun": false,
+    "gitCommitRun": false,
+    "progressDocumentsChanged": false,
+    "deletionCompressionRun": false,
+    "note": "Worker used only filesystem/data reads, rg, source writes and hashing. Root owns original caller test/build/GUI/publication execution."
+  },
+  "mainWriteOwnershipReleased": true,
+  "firstOrdinaryGuiRefusalEstablished": false,
+  "note": "Read-only diagnostics only; no guessed assets, force-ready, owner retag, Rust/ABI/gateway, Page/Shell/type/progress changes."
+}

@@ -17,6 +17,7 @@ use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use base64::Engine as _;
 use futures_util::{SinkExt, StreamExt};
 use mir2_game_data::crystal_item_by_index;
+use mir2_protocol::catalog_transport::CATALOG_GZIP_CAPABILITY;
 use mir2_protocol::{
     crystal_stat_label, packet_payload_hex, server_packet_display_name,
     server_packet_raw_display_name, ClientAuction, ClientFriend, ClientIntelligentCreature,
@@ -33,9 +34,7 @@ use rand::RngCore;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use tokio::net::TcpListener;
-use tokio::sync::{
-    mpsc, Mutex as AsyncMutex, OwnedSemaphorePermit, RwLock as AsyncRwLock, Semaphore,
-};
+use tokio::sync::{mpsc, OwnedSemaphorePermit, RwLock as AsyncRwLock, Semaphore};
 use tokio::task::JoinHandle;
 use tokio::time::MissedTickBehavior;
 
@@ -69,7 +68,9 @@ use crate::resume::{
     ResumeCredential, ResumeCredentialRegistry, ResumeFamilyId, ResumeIssueContext,
     NATIVE_RESUME_PROTOCOL, RESUME_CREDENTIAL_ROTATION_MS,
 };
-use crate::routing::{SharedZoneLiveOutbound, ZoneLiveOutboundRegistration};
+use crate::routing::{
+    SharedZoneLiveOutbound, SharedZoneLiveOutboundSender, ZoneLiveOutboundRegistration,
+};
 use crate::session::{
     catch_gateway_panic, GatewayTeardownPersistenceOutcome, GatewayZoneMovementIngress,
 };
@@ -79,12 +80,37 @@ use crate::tcp::chat_broadcast::{
 };
 use crate::{GatewayConfig, GatewaySession, ZoneRegistry, ZoneTopology};
 
+mod catalog_transport;
+mod world_snapshot_transport;
+
 type WebSocketSender = futures_util::stream::SplitSink<WebSocket, Message>;
-type SharedWebSocketSender = Arc<AsyncMutex<WebSocketSender>>;
+type SharedWebSocketSender = Arc<transport::SocketSender<WebSocketSender>>;
+#[path = "web_activities.rs"]
+mod activities;
+#[path = "web_billing.rs"]
+mod billing;
+#[path = "web_promotions.rs"]
+mod promotions;
+#[path = "web_monthly_card.rs"]
+mod monthly_card;
+#[path = "web_packet_batch.rs"]
+mod packet_batch;
+#[path = "web_procurement.rs"]
+mod procurement;
+#[path = "web_transport.rs"]
+mod transport;
+#[path = "web_reconnect_handoff.rs"]
+mod reconnect_handoff;
+use reconnect_handoff::{HandoffBinding, HandoffRegistry, HandoffToken};
+#[path = "web_native_resume_handoff.rs"]
+mod native_resume_handoff;
+use native_resume_handoff::{prepare_native_resume_handoff, CompletedNativeResumeHandoff};
+type SocketReconnectBinding = Option<(GatewaySessionCacheKey, HandoffBinding)>;
 type WebSocketReceiver = futures_util::stream::SplitStream<WebSocket>;
 type SharedZoneMovementIngressSlot = Arc<RwLock<Option<GatewayZoneMovementIngress>>>;
 type SharedSerialExecutionGate = Arc<AsyncRwLock<()>>;
 const LIVE_ZONE_OUTBOUND_CAPACITY: usize = 256;
+const OWNER_LOCATION_OUTBOUND_CAPACITY: usize = 8;
 const SOCKET_INPUT_CAPACITY: usize = 256;
 const WEBSOCKET_MAX_FRAME_BYTES: usize = 64 * 1024;
 const WEBSOCKET_MAX_MESSAGE_BYTES: usize = WEBSOCKET_MAX_FRAME_BYTES;
@@ -94,18 +120,459 @@ const DEFAULT_PRODUCTION_MAX_ACTIVE_SESSIONS: usize = 512;
 const DEFAULT_PRODUCTION_MAX_RECONNECT_LEASES: usize = 512;
 const DEFAULT_MAX_PERSISTENCE_SESSION_TASKS: usize = 2_048;
 static WEB_PERSISTENCE_SESSION_ADMISSION: OnceLock<Arc<Semaphore>> = OnceLock::new();
+static GATEWAY_SLOW_STAGE_THRESHOLD: OnceLock<Option<Duration>> = OnceLock::new();
 const AUTH_REVISION_BLOCKED: u64 = u64::MAX;
 const NATIVE_GAME_SHOP_RECEIPT_PROTOCOL: &str = "nativeGameShopReceiptV1";
+const NATIVE_GAME_SHOP_GIFT_RECEIPT_PROTOCOL: &str = "nativeGameShopGiftReceiptV1";
+
+/// Native bridge receipt metadata; the original C.MagicKey packet is unchanged.
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct SkillKeyRequest {
+    request_id: u64,
+    spell: String,
+    key: u8,
+    old_key: u8,
+}
+
+impl SkillKeyRequest {
+    fn from_command(command: &BrowserCommand) -> Option<Self> {
+        let BrowserCommand::MagicKey {
+            spell,
+            key,
+            old_key,
+            request_id: Some(request_id),
+        } = command
+        else {
+            return None;
+        };
+        Some(Self {
+            request_id: *request_id,
+            spell: spell.clone(),
+            key: *key,
+            old_key: *old_key,
+        })
+    }
+
+    fn receipt(&self, payload: &Value, processed_in_world: bool) -> Value {
+        let (skills, key_field) = if self.key > 16 || self.old_key > 16 {
+            (payload.pointer("/stage5Systems/heroLearnedMagics"), "key")
+        } else {
+            (payload.get("knownSkills"), "hotkey")
+        };
+        let accepted = processed_in_world
+            && skills.and_then(Value::as_array).is_some_and(|skills| {
+                skills.iter().any(|skill| {
+                    skill
+                        .get("spell")
+                        .and_then(Value::as_str)
+                        .and_then(|spell| parse_spell_name(spell).ok())
+                        .is_some_and(|spell| Some(spell) == parse_spell_name(&self.spell).ok())
+                        && skill.get(key_field).and_then(Value::as_u64) == Some(u64::from(self.key))
+                })
+            });
+        json!({"requestId": self.request_id, "spell": self.spell, "key": self.key,
+            "oldKey": self.old_key, "accepted": accepted})
+    }
+}
+
+enum CompanionSocketCommand {
+    Control(crate::companion_relay::OwnerRequest),
+    Register(crate::companion_relay::RuntimeRegister),
+    Reply(crate::companion_relay::RuntimeReply),
+}
 
 enum ParsedSocketInput {
+    Companion(CompanionSocketCommand),
     Action {
         action: SessionAction,
         quest_operation_request: Option<QuestOperationRequest>,
+        skill_key_request: Option<SkillKeyRequest>,
     },
     ClientCapabilities(Vec<String>),
+    AttackV2(crate::attack_protocol::AttackV2Request),
+    NpcPurchaseOwner(mir2_client_wire::ClientRequest),
     ResumeSession(ResumeCredential),
     ResumeRejected,
+    SkillKeyRejected {
+        request: SkillKeyRequest,
+        error: String,
+    },
     ProtocolError(String),
+}
+
+const SOCKET_DIAGNOSTIC_MAX_SAFE_INTEGER: u64 = 9_007_199_254_740_991;
+const SOCKET_DIAGNOSTIC_PHASE_BITS: u32 = 8;
+const SOCKET_DIAGNOSTIC_MAX_START_US: u64 = u64::MAX >> SOCKET_DIAGNOSTIC_PHASE_BITS;
+static NEXT_SOCKET_DIAGNOSTIC_ID: AtomicU64 = AtomicU64::new(1);
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[repr(u8)]
+enum SocketDiagnosticPhase {
+    SelectWait = 1,
+    Input,
+    InputGate,
+    InputOwnerHeartbeat,
+    Chat,
+    Injection,
+    Spectator,
+    AiLive,
+    RuntimeTick,
+    IdentityCache,
+    IdentityDatabase,
+    ResumeCredential,
+    OwnerHeartbeat,
+    TickGate,
+    Preflight,
+}
+
+impl SocketDiagnosticPhase {
+    fn label(self) -> &'static str {
+        match self {
+            Self::SelectWait => "select_wait",
+            Self::Input => "input",
+            Self::InputGate => "input_gate",
+            Self::InputOwnerHeartbeat => "input_owner_heartbeat",
+            Self::Chat => "chat",
+            Self::Injection => "injection",
+            Self::Spectator => "spectator",
+            Self::AiLive => "ai_live",
+            Self::RuntimeTick => "runtime_tick",
+            Self::IdentityCache => "identity_cache",
+            Self::IdentityDatabase => "identity_database",
+            Self::ResumeCredential => "resume_credential",
+            Self::OwnerHeartbeat => "owner_heartbeat",
+            Self::TickGate => "tick_gate",
+            Self::Preflight => "preflight",
+        }
+    }
+
+    fn unpack(value: u64) -> Option<Self> {
+        match value & 0xff {
+            1 => Some(Self::SelectWait),
+            2 => Some(Self::Input),
+            3 => Some(Self::InputGate),
+            4 => Some(Self::InputOwnerHeartbeat),
+            5 => Some(Self::Chat),
+            6 => Some(Self::Injection),
+            7 => Some(Self::Spectator),
+            8 => Some(Self::AiLive),
+            9 => Some(Self::RuntimeTick),
+            10 => Some(Self::IdentityCache),
+            11 => Some(Self::IdentityDatabase),
+            12 => Some(Self::ResumeCredential),
+            13 => Some(Self::OwnerHeartbeat),
+            14 => Some(Self::TickGate),
+            15 => Some(Self::Preflight),
+            _ => None,
+        }
+    }
+
+    fn pack(self, start_us: u64) -> Option<u64> {
+        (start_us <= SOCKET_DIAGNOSTIC_MAX_START_US)
+            .then(|| (start_us << SOCKET_DIAGNOSTIC_PHASE_BITS) | u64::from(self as u8))
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum SocketDiagnosticInputClass {
+    Move,
+    AttackV2,
+    Other,
+}
+
+impl SocketDiagnosticInputClass {
+    fn for_input(input: &ParsedSocketInput) -> Self {
+        match input {
+            ParsedSocketInput::AttackV2(_) => Self::AttackV2,
+            ParsedSocketInput::Action {
+                action:
+                    SessionAction::Packet(
+                        ClientPacket::Walk { .. }
+                        | ClientPacket::Run { .. }
+                        | ClientPacket::Turn { .. },
+                    ),
+                ..
+            } => Self::Move,
+            _ => Self::Other,
+        }
+    }
+
+    fn label(self) -> &'static str {
+        match self {
+            Self::Move => "move",
+            Self::AttackV2 => "attack_v2",
+            Self::Other => "other",
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct SocketQueuedDiagnostic {
+    phase: SocketDiagnosticPhase,
+    phase_elapsed_ms: u64,
+    input_class: SocketDiagnosticInputClass,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct SocketSlowContext {
+    connection: u64,
+    queued: Option<SocketQueuedDiagnostic>,
+}
+
+struct SocketDiagnosticState {
+    connection: u64,
+    origin: Instant,
+    // One main-task writer and reader-task snapshots. Phase and start must be
+    // one atomic value; two independent atomics would allow a torn observation.
+    phase_and_start: AtomicU64,
+    input_gate_binding: AtomicU64,
+    input_gate_bound_once: AtomicBool,
+    input_gate_active_registration: OnceLock<Arc<AtomicU64>>,
+    decoded_ordinal: AtomicU64,
+}
+
+type SocketDiagnostics = Option<Arc<SocketDiagnosticState>>;
+
+// Opt-in causal diagnostics only. No payloads, accounts, names, or new gameplay state.
+const INPUT_GATE_TRACE_ROW_BUDGET: u64 = 32_768;
+fn input_gate_trace_ids() -> Option<[u32; 2]> {
+    static IDS: OnceLock<Option<[u32; 2]>> = OnceLock::new();
+    *IDS.get_or_init(|| parse_input_gate_trace_ids(
+        env::var("MIR2_GATEWAY_INPUT_GATE_TRACE").ok().as_deref(),
+        env::var("MIR2_GATEWAY_ZONE_DELIVERY_TRACE").ok().as_deref(),
+        env::var("MIR2_GATEWAY_ZONE_DELIVERY_TRACE_RECIPIENTS").ok().as_deref()))
+}
+fn parse_input_gate_trace_ids(flag: Option<&str>, delivery: Option<&str>, raw: Option<&str>) -> Option<[u32; 2]> {
+    if flag != Some("1") || delivery != Some("1") { return None; }
+    let mut ids = raw?.split(',');
+    let first = ids.next()?.trim().parse::<u32>().ok()?;
+    let second = ids.next()?.trim().parse::<u32>().ok()?;
+    if ids.next().is_some() || first == 0 || second == 0 || first == second { return None; }
+    Some([first.min(second), first.max(second)])
+}
+pub(crate) fn input_gate_trace_requested() -> bool {
+    static ENABLED: OnceLock<bool> = OnceLock::new();
+    *ENABLED.get_or_init(|| env::var("MIR2_GATEWAY_INPUT_GATE_TRACE").as_deref() == Ok("1"))
+}
+fn input_gate_trace_selected(id: u32) -> bool { input_gate_trace_ids().is_some_and(|ids| ids.contains(&id)) }
+#[derive(Clone, Copy)]
+pub(super) struct InputGateTraceContext {
+    connection: u64, registration: u64, recipient: u32, ordinal: u64,
+    kind: &'static str, direction: u8, server_trace: u64, frame_first: u64, frame_count: usize,
+    producer_unix_ms: u128, producer_elapsed_us: u128,
+}
+#[derive(Clone, Copy)]
+struct InputGateTraceClock { unix_ms: u128, mono_us: u128 }
+fn input_gate_trace_clock() -> Option<InputGateTraceClock> {
+    static ORIGIN: OnceLock<Instant> = OnceLock::new();
+    let origin = ORIGIN.get_or_init(Instant::now);
+    Some(InputGateTraceClock { unix_ms: std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).ok()?.as_millis(),
+        mono_us: origin.elapsed().as_micros() })
+}
+fn input_gate_trace_record(ctx: InputGateTraceContext, stage: &str, start: InputGateTraceClock,
+    end: InputGateTraceClock, duration_us: u128) {
+    static ROWS: AtomicU64 = AtomicU64::new(0);
+    static EXHAUSTED: AtomicBool = AtomicBool::new(false);
+    if ROWS.fetch_update(Ordering::Relaxed, Ordering::Relaxed, |n| (n < INPUT_GATE_TRACE_ROW_BUDGET).then_some(n + 1)).is_err() {
+        if !EXHAUSTED.swap(true, Ordering::Relaxed) {
+            use std::io::Write;
+            let _ = writeln!(std::io::stderr().lock(), "[gateway-input-gate-trace] stage=budget_exhausted complete=0 limit={INPUT_GATE_TRACE_ROW_BUDGET}");
+        }
+        return;
+    }
+    use std::io::Write;
+    let _ = writeln!(std::io::stderr().lock(),
+        "[gateway-input-gate-trace] stage={stage} connection={} registration={} recipientZoneID={} inputOrdinal={} kind={} direction={} directionKnown={} serverTraceID={} frameFirst={} frameCount={} frameKnown={} sourceStartUnixMs={} sourceEndUnixMs={} sourceStartMonoUs={} sourceEndMonoUs={} durationUs={duration_us} producerKnown={} producerUnixMs={} producerElapsedUs={}",
+        ctx.connection, ctx.registration, ctx.recipient, ctx.ordinal, ctx.kind, ctx.direction,
+        u8::from(ctx.direction != u8::MAX), ctx.server_trace, ctx.frame_first, ctx.frame_count,
+        u8::from(ctx.frame_first != 0), start.unix_ms, end.unix_ms, start.mono_us, end.mono_us, u8::from(ctx.producer_unix_ms != 0), ctx.producer_unix_ms, ctx.producer_elapsed_us);
+}
+pub(super) struct InputGateTraceSpan {
+    context: InputGateTraceContext, stage: &'static str, started: Instant, clock: InputGateTraceClock, minimum_us: u128,
+}
+impl InputGateTraceSpan {
+    pub(super) fn start(context: Option<InputGateTraceContext>, stage: &'static str, minimum_ms: u64) -> Option<Self> {
+        Some(Self { context: context?, stage, started: Instant::now(), clock: input_gate_trace_clock()?, minimum_us: u128::from(minimum_ms) * 1_000 })
+    }
+    pub(super) fn frames(&mut self, first: u64, count: usize) { self.context.frame_first = first; self.context.frame_count = count; }
+}
+impl Drop for InputGateTraceSpan {
+    fn drop(&mut self) {
+        let elapsed = self.started.elapsed().as_micros();
+        if elapsed < self.minimum_us { return; }
+        if let Some(end) = input_gate_trace_clock() { input_gate_trace_record(self.context, self.stage, self.clock, end, elapsed); }
+    }
+}
+fn input_gate_socket_context(diagnostics: &SocketDiagnostics, ordinal: u64,
+    kind: &'static str, direction: u8) -> Option<InputGateTraceContext> {
+    let state = diagnostics.as_ref()?; let packed = state.input_gate_binding.load(Ordering::Acquire);
+    let recipient = packed as u32; let registration = packed >> 32;
+    if registration == 0 || state.input_gate_active_registration.get()?.load(Ordering::Acquire) != registration
+        || !input_gate_trace_selected(recipient) || ordinal >= SOCKET_DIAGNOSTIC_MAX_SAFE_INTEGER { return None; }
+    Some(InputGateTraceContext { connection: state.connection, registration, recipient, ordinal, kind, direction,
+        server_trace: 0, frame_first: 0, frame_count: 0, producer_unix_ms: 0, producer_elapsed_us: 0 })
+}
+// A Close can follow Logout/Leave, when no current Zone registration remains.
+// This context proves only that this anonymous WS once had a validated selected binding.
+fn input_gate_lifecycle_context(diagnostics: &SocketDiagnostics) -> Option<InputGateTraceContext> {
+    let state = diagnostics.as_ref()?;
+    if input_gate_trace_ids().is_none() || !state.input_gate_bound_once.load(Ordering::Acquire) { return None; }
+    Some(InputGateTraceContext { connection: state.connection, registration: 0, recipient: 0, ordinal: 0,
+        kind: "connection_lifecycle", direction: u8::MAX, server_trace: 0, frame_first: 0, frame_count: 0,
+        producer_unix_ms: 0, producer_elapsed_us: 0 })
+}
+
+fn input_gate_action_context(diagnostics: &SocketDiagnostics, action: &SessionAction, ordinal: u64) -> Option<InputGateTraceContext> {
+    let (kind, direction) = match action {
+        SessionAction::Packet(ClientPacket::Walk { direction }) => ("walk", *direction as u8),
+        SessionAction::Packet(ClientPacket::Run { direction }) => ("run", *direction as u8),
+        SessionAction::Packet(ClientPacket::Turn { direction }) => ("turn", *direction as u8),
+        SessionAction::Packet(ClientPacket::Chat { .. }) => ("chat", u8::MAX),
+        _ => ("other", u8::MAX),
+    };
+    input_gate_socket_context(diagnostics, ordinal, kind, direction)
+}
+fn input_gate_queued_context(diagnostics: &SocketDiagnostics, input: &QueuedSocketInput) -> Option<InputGateTraceContext> {
+    match input.input.as_ref()? {
+        ParsedSocketInput::Action { action, .. } => input_gate_action_context(diagnostics, action, input.input_gate_ordinal),
+        _ => None,
+    }
+}
+fn bind_input_gate_trace(diagnostics: &SocketDiagnostics, identity: (u64, u64, u32)) -> Option<InputGateTraceContext> {
+    let (server_trace, registration, recipient) = identity;
+    if !input_gate_trace_selected(recipient) { return None; }
+    let registration32 = u32::try_from(registration).ok()?;
+    if registration32 == 0 { return None; }
+    let state = diagnostics.as_ref()?;
+    let packed = (u64::from(registration32) << 32) | u64::from(recipient);
+    let changed = state.input_gate_binding.swap(packed, Ordering::AcqRel) != packed;
+    let mut context = input_gate_socket_context(diagnostics, 0, "delivery", u8::MAX)?;
+    state.input_gate_bound_once.store(true, Ordering::Release);
+    context.server_trace = server_trace;
+    if changed { drop(InputGateTraceSpan::start(Some(context), "bind", 0)); }
+    Some(context)
+}
+pub(crate) fn input_gate_delivery_event(stage: &str, identity: (u64, u64, u32), producer_unix_ms: u128,
+    elapsed: Duration) {
+    let (server_trace, registration, recipient) = identity;
+    if !input_gate_trace_selected(recipient) { return; }
+    let Some(now) = input_gate_trace_clock() else { return; };
+    // A point on the source clock. producerUnixMs/elapsed remain the existing producer span.
+    let ctx = InputGateTraceContext { connection: 0, registration, recipient, ordinal: 0,
+        kind: "delivery", direction: u8::MAX, server_trace, frame_first: 0, frame_count: 0,
+        producer_unix_ms, producer_elapsed_us: elapsed.as_micros() };
+    // No source UTC is reconstructed by subtracting elapsed from observation time.
+    input_gate_trace_record(ctx, stage, now, now, 0);
+}
+
+
+fn allocate_socket_diagnostics(enabled: bool, counter: &AtomicU64) -> SocketDiagnostics {
+    if !enabled {
+        return None;
+    }
+    let connection = counter
+        .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |next| {
+            (next != 0 && next <= SOCKET_DIAGNOSTIC_MAX_SAFE_INTEGER).then(|| next + 1)
+        })
+        .ok()?;
+    if input_gate_trace_ids().is_some() { let _ = input_gate_trace_clock(); }
+    Some(Arc::new(SocketDiagnosticState {
+        connection,
+        origin: Instant::now(),
+        phase_and_start: AtomicU64::new(SocketDiagnosticPhase::SelectWait.pack(0)?),
+        input_gate_binding: AtomicU64::new(0),
+        input_gate_bound_once: AtomicBool::new(false),
+        input_gate_active_registration: OnceLock::new(),
+        decoded_ordinal: AtomicU64::new(0),
+    }))
+}
+
+impl SocketDiagnosticState {
+    fn now_us(&self) -> Option<u64> {
+        let now = u64::try_from(self.origin.elapsed().as_micros()).ok()?;
+        (now <= SOCKET_DIAGNOSTIC_MAX_START_US).then_some(now)
+    }
+
+    fn context(&self) -> SocketSlowContext {
+        SocketSlowContext {
+            connection: self.connection,
+            queued: None,
+        }
+    }
+
+    fn queued_context(&self, input: &ParsedSocketInput) -> Option<SocketSlowContext> {
+        let packed = self.phase_and_start.load(Ordering::Acquire);
+        // Read the clock after the atomic so a newer phase cannot be paired
+        // with an older observation time. Overflow omits context, never wraps.
+        let now_us = self.now_us()?;
+        self.context_from_snapshot(packed, now_us, SocketDiagnosticInputClass::for_input(input))
+    }
+
+    fn context_from_snapshot(
+        &self,
+        packed: u64,
+        now_us: u64,
+        input_class: SocketDiagnosticInputClass,
+    ) -> Option<SocketSlowContext> {
+        if now_us > SOCKET_DIAGNOSTIC_MAX_START_US {
+            return None;
+        }
+        let phase = SocketDiagnosticPhase::unpack(packed)?;
+        let elapsed_us = now_us.checked_sub(packed >> SOCKET_DIAGNOSTIC_PHASE_BITS)?;
+        Some(SocketSlowContext {
+            connection: self.connection,
+            queued: Some(SocketQueuedDiagnostic {
+                phase,
+                phase_elapsed_ms: elapsed_us / 1_000,
+                input_class,
+            }),
+        })
+    }
+}
+
+struct SocketDiagnosticPhaseGuard {
+    state: Arc<SocketDiagnosticState>,
+    previous: u64,
+    slow_stage: Option<GatewaySlowStage>,
+}
+
+impl SocketDiagnosticPhaseGuard {
+    fn enter(
+        diagnostics: &SocketDiagnostics,
+        phase: SocketDiagnosticPhase,
+        label: Option<&'static str>,
+    ) -> Option<Self> {
+        let state = diagnostics.as_ref()?;
+        let packed = phase.pack(state.now_us()?)?;
+        let previous = state.phase_and_start.swap(packed, Ordering::AcqRel);
+        Some(Self {
+            state: Arc::clone(state),
+            previous,
+            slow_stage: label.map(|label| GatewaySlowStage::for_socket(label, diagnostics)),
+        })
+    }
+}
+
+impl Drop for SocketDiagnosticPhaseGuard {
+    fn drop(&mut self) {
+        // Include any synchronous slow-log write in the observed phase until
+        // it really finishes. Child scopes retain the parent's original start.
+        drop(self.slow_stage.take());
+        let restored = if SocketDiagnosticPhase::unpack(self.previous)
+            == Some(SocketDiagnosticPhase::SelectWait)
+        {
+            self.state
+                .now_us()
+                .and_then(|now| SocketDiagnosticPhase::SelectWait.pack(now))
+                .unwrap_or(0)
+        } else {
+            self.previous
+        };
+        self.state
+            .phase_and_start
+            .store(restored, Ordering::Release);
+    }
 }
 
 struct PendingSerialAction {
@@ -127,6 +594,10 @@ impl Drop for PendingSerialAction {
 
 struct QueuedSocketInput {
     input: Option<ParsedSocketInput>,
+    queued_at: Instant,
+    received_at: Instant,
+    diagnostic_context: Option<SocketSlowContext>,
+    input_gate_ordinal: u64,
     _pending: PendingSerialAction,
     _buffered_bytes: OwnedSemaphorePermit,
 }
@@ -136,9 +607,24 @@ impl QueuedSocketInput {
         input: ParsedSocketInput,
         pending_count: Arc<AtomicUsize>,
         buffered_bytes: OwnedSemaphorePermit,
+        received_at: Instant,
+        diagnostics: &SocketDiagnostics,
     ) -> Self {
+        let diagnostic_context = diagnostics
+            .as_ref()
+            .and_then(|state| state.queued_context(&input));
+        let input_gate_ordinal = diagnostics.as_ref().map(|s| s.decoded_ordinal.load(Ordering::Relaxed)).unwrap_or(0);
+        let submit_trace = match &input {
+            ParsedSocketInput::Action { action, .. } => input_gate_action_context(diagnostics, action, input_gate_ordinal),
+            _ => None,
+        };
+        drop(InputGateTraceSpan::start(submit_trace, "input_queue_submit", 0));
         Self {
             input: Some(input),
+            queued_at: Instant::now(),
+            received_at,
+            diagnostic_context,
+            input_gate_ordinal,
             _pending: PendingSerialAction::new(pending_count),
             _buffered_bytes: buffered_bytes,
         }
@@ -149,6 +635,86 @@ impl QueuedSocketInput {
             .take()
             .expect("queued socket input should only be consumed once")
     }
+}
+
+#[must_use]
+pub(crate) struct GatewaySlowStage {
+    label: &'static str,
+    started_at: Instant,
+    threshold: Option<Duration>,
+    context: Option<SocketSlowContext>,
+}
+
+impl GatewaySlowStage {
+    pub(crate) fn start(label: &'static str) -> Self {
+        Self::since(label, Instant::now())
+    }
+
+    fn since(label: &'static str, started_at: Instant) -> Self {
+        Self {
+            label,
+            started_at,
+            threshold: gateway_slow_stage_threshold(),
+            context: None,
+        }
+    }
+
+    fn for_socket(label: &'static str, diagnostics: &SocketDiagnostics) -> Self {
+        let mut stage = Self::start(label);
+        stage.context = diagnostics.as_ref().map(|state| state.context());
+        stage
+    }
+
+    fn log_line(&self, elapsed: Duration) -> String {
+        let mut line = format!(
+            "[gateway-slow-stage] stage={} duration_ms={}",
+            self.label,
+            elapsed.as_millis()
+        );
+        let context = self.context.filter(|context| {
+            self.label != "socket_input.queue_residence" || context.queued.is_some()
+        });
+        if let Some(context) = context {
+            line.push_str(&format!(" connection={}", context.connection));
+            if let Some(queued) = context
+                .queued
+                .filter(|_| self.label == "socket_input.queue_residence")
+            {
+                line.push_str(&format!(
+                    " queued_phase={} phase_elapsed_ms={} input_class={}",
+                    queued.phase.label(),
+                    queued.phase_elapsed_ms,
+                    queued.input_class.label()
+                ));
+            }
+        }
+        line
+    }
+}
+
+impl Drop for GatewaySlowStage {
+    fn drop(&mut self) {
+        let Some(threshold) = self.threshold else {
+            return;
+        };
+        let elapsed = self.started_at.elapsed();
+        if elapsed >= threshold {
+            eprintln!("{}", self.log_line(elapsed));
+        }
+    }
+}
+
+fn parse_gateway_slow_stage_threshold(value: Option<&str>) -> Option<Duration> {
+    value
+        .and_then(|value| value.trim().parse::<u64>().ok())
+        .filter(|milliseconds| *milliseconds > 0)
+        .map(Duration::from_millis)
+}
+
+fn gateway_slow_stage_threshold() -> Option<Duration> {
+    *GATEWAY_SLOW_STAGE_THRESHOLD.get_or_init(|| {
+        parse_gateway_slow_stage_threshold(env::var("MIR2_GATEWAY_SLOW_STAGE_MS").ok().as_deref())
+    })
 }
 
 enum SocketInbound {
@@ -188,11 +754,13 @@ struct WebState {
     capacity: Arc<GatewayCapacityState>,
     gameplay_event_sink: Option<SharedGameplayEventSink>,
     identity: Arc<IdentityService>,
+    auth_rate_limit_policy: AuthRateLimitPolicy,
     /// On-chain command injection registry (M4, WF-5) — routes Relayer commands to live sessions.
     injector: crate::inject::LiveSessionInjector,
     spectator: SpectatorHub,
     ai_live: AiLiveHub,
     channel_identity: ChannelIdentityRegistry,
+    companions: Option<crate::companion_relay::CompanionRelay>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -537,6 +1105,7 @@ impl Drop for GatewayCapacityPermit {
 #[derive(Debug, Default)]
 struct ReconnectSessionStore {
     state: Mutex<ReconnectSessionState>,
+    handoffs: Arc<HandoffRegistry>,
 }
 
 #[derive(Debug, Default)]
@@ -555,7 +1124,14 @@ struct ReconnectSessionLease {
     active_session_permit: Option<GatewayCapacityPermit>,
     _reconnect_lease_permit: GatewayCapacityPermit,
     resume_family_id: Option<ResumeFamilyId>,
+    handoff_token: Option<HandoffToken>,
     expires_at: Instant,
+}
+
+#[derive(Clone)]
+struct HandoffAuthorization {
+    identity: VerifiedIdentitySession,
+    revision: ResumeAuthRevision,
 }
 
 #[derive(Debug)]
@@ -570,6 +1146,7 @@ enum ReconnectSessionCommitError {
     LeaseExpired,
     CredentialUnavailable,
     AuthorizationRevisionChanged,
+    TransportEnded,
 }
 
 /// Reversible, single-owner lease reservation for native resume preparation.
@@ -663,12 +1240,15 @@ struct NativeGameShopRequest {
     g_index: i32,
     quantity: u8,
     price_type: i32,
+    recipient_name: Option<String>,
 }
 
 #[derive(Debug, Default)]
 struct NativeGameShopConnectionState {
     opted_in: bool,
+    gift_opted_in: bool,
     pending: Option<NativeGameShopRequest>,
+    gift_requests: HashMap<(String, i32, String), NativeGameShopRequest>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -690,6 +1270,46 @@ struct NativeGameShopHandlerDispatch {
 }
 
 impl NativeGameShopConnectionState {
+    /// A repeated client envelope must retain its original server nonce.
+    /// Bind it to the authenticated payer as well as the complete gift tuple;
+    /// Source still verifies the permanent receipt before any economic write.
+    fn bind_gift_request(
+        &mut self,
+        mut request: NativeGameShopRequest,
+        account_id: &str,
+        character_index: i32,
+    ) -> Result<NativeGameShopRequest, Value> {
+        let key = (
+            account_id.to_owned(),
+            character_index,
+            request.request_id.clone(),
+        );
+        if let Some(original) = self.gift_requests.get(&key) {
+            request
+                .server_idempotency_key
+                .clone_from(&original.server_idempotency_key);
+            return if &request == original {
+                Ok(request)
+            } else {
+                Err(native_game_shop_failure_event(
+                    &request,
+                    "invalidRequest",
+                    None,
+                ))
+            };
+        }
+        // Never evict a used key and silently turn its retry into a new gift.
+        if self.gift_requests.len() >= 1024 {
+            return Err(native_game_shop_failure_event(
+                &request,
+                "giftUnavailable",
+                None,
+            ));
+        }
+        self.gift_requests.insert(key, request.clone());
+        Ok(request)
+    }
+
     fn reserve(&mut self, request: NativeGameShopRequest) -> Result<(), Value> {
         if self.pending.is_some() {
             return Err(native_game_shop_failure_event(
@@ -727,6 +1347,10 @@ fn finish_native_game_shop_pre_execution_receipt(
 struct NativeClientCapabilities {
     native_resume_v1: bool,
     native_game_shop_receipt_v1: bool,
+    native_game_shop_gift_receipt_v1: bool,
+    server_catalog_gzip_v1: bool,
+    server_world_snapshot_gzip_v1: bool,
+    durable_npc_purchase_owner_v1: bool,
 }
 
 impl NativeResumeConnectionState {
@@ -1084,6 +1708,7 @@ impl ReconnectSessionStore {
         self.begin_identity_session_revocations([identity_session_id.to_string()])
     }
 
+    #[cfg(test)]
     fn store(
         &self,
         key: GatewaySessionCacheKey,
@@ -1093,6 +1718,20 @@ impl ReconnectSessionStore {
         resume_family_id: Option<ResumeFamilyId>,
         ttl: Duration,
     ) {
+        self.store_with_handoff(key, session, active_session_permit, reconnect_lease_permit, resume_family_id, ttl, None);
+    }
+
+    fn store_with_handoff(
+        &self,
+        key: GatewaySessionCacheKey,
+        session: GatewaySession,
+        active_session_permit: Option<GatewayCapacityPermit>,
+        reconnect_lease_permit: GatewayCapacityPermit,
+        resume_family_id: Option<ResumeFamilyId>,
+        ttl: Duration,
+        handoff_binding: Option<HandoffBinding>,
+    ) {
+        let handoff_token = handoff_binding.as_ref().map(HandoffBinding::token);
         let expires_at = Instant::now() + ttl.max(Duration::from_millis(1));
         let mut state = self
             .state
@@ -1106,12 +1745,16 @@ impl ReconnectSessionStore {
                 active_session_permit,
                 _reconnect_lease_permit: reconnect_lease_permit,
                 resume_family_id,
+                handoff_token,
                 expires_at,
             },
         );
         if let Some(family_id) = replaced.and_then(|lease| lease.resume_family_id) {
             state.credentials.revoke_family(&family_id);
         }
+        // Complete before releasing the store commit lock. A restore cannot bind
+        // the next physical socket while the old registry entry is still present.
+        if let Some(binding) = handoff_binding { binding.ready(); }
     }
 
     fn take(&self, key: &GatewaySessionCacheKey) -> Option<ReconnectSessionRestore> {
@@ -1131,6 +1774,43 @@ impl ReconnectSessionStore {
             session: lease.session,
             active_session_permit: lease.active_session_permit,
         })
+    }
+
+    fn capture_handoff_authorization(&self, verified: &VerifiedIdentitySession, now_ms: u64) -> Option<HandoffAuthorization> {
+        let state = self.state.lock().ok()?;
+        if verified.expires_at_ms <= now_ms
+            || Self::auth_revocation_in_progress_locked(&state, &verified.account_id, &verified.session_id)
+            || Self::auth_revision_blocked_locked(&state, &verified.account_id, &verified.session_id) { return None; }
+        Some(HandoffAuthorization { identity: verified.clone(),
+            revision: Self::auth_revision_locked(&state, &verified.account_id, &verified.session_id) })
+    }
+
+    fn handoff_authorization_current(&self, authorization: &HandoffAuthorization, now_ms: u64) -> bool {
+        let Ok(state) = self.state.lock() else { return false; };
+        let verified = &authorization.identity;
+        verified.expires_at_ms > now_ms
+            && !Self::auth_revocation_in_progress_locked(&state, &verified.account_id, &verified.session_id)
+            && !Self::auth_revision_blocked_locked(&state, &verified.account_id, &verified.session_id)
+            && Self::auth_revision_locked(&state, &verified.account_id, &verified.session_id) == authorization.revision
+    }
+
+    /// The wait notification grants nothing. Consume only the same saved teardown,
+    /// while the authorization revision and one-use lease share this commit lock.
+    fn take_after_handoff(&self, key: &GatewaySessionCacheKey, token: &HandoffToken,
+        authorization: &HandoffAuthorization, now_ms: u64) -> Option<ReconnectSessionRestore> {
+        let mut state = self.state.lock().ok()?;
+        let verified = &authorization.identity;
+        if key.account_id != verified.account_id || verified.expires_at_ms <= now_ms
+            || Self::auth_revocation_in_progress_locked(&state, &verified.account_id, &verified.session_id)
+            || Self::auth_revision_blocked_locked(&state, &verified.account_id, &verified.session_id)
+            || Self::auth_revision_locked(&state, &verified.account_id, &verified.session_id) != authorization.revision { return None; }
+        Self::purge_expired_locked(&mut state);
+        let lease = state.sessions.get(key)?;
+        if lease.expires_at <= Instant::now() || lease.session.session_id() != token.owner()
+            || !lease.handoff_token.as_ref().is_some_and(|saved| saved.same(token)) { return None; }
+        let lease = state.sessions.remove(key)?;
+        if let Some(family_id) = lease.resume_family_id.as_ref() { state.credentials.revoke_family(family_id); }
+        Some(ReconnectSessionRestore { session: lease.session, active_session_permit: lease.active_session_permit })
     }
 
     fn issue_resume_credential(
@@ -1186,6 +1866,16 @@ impl ReconnectSessionStore {
         expected: &ResumeBinding,
         now_ms: u64,
     ) -> Option<ReconnectSessionReservation<'a>> {
+        self.reserve_by_credential_after_handoff(credential, expected, now_ms, None)
+    }
+
+    fn reserve_by_credential_after_handoff<'a>(
+        &'a self,
+        credential: &ResumeCredential,
+        expected: &ResumeBinding,
+        now_ms: u64,
+        handoff: Option<&CompletedNativeResumeHandoff>,
+    ) -> Option<ReconnectSessionReservation<'a>> {
         let mut state = self
             .state
             .lock()
@@ -1202,6 +1892,7 @@ impl ReconnectSessionStore {
             || active_identity.account_id != expected.account_id
             || active_identity.character_index != expected.character_index
             || lease.resume_family_id.as_ref() != Some(&expected.family_id)
+            || handoff.is_some_and(|handoff| !handoff.matches_lease(expected, lease))
         {
             return None;
         }
@@ -1242,9 +1933,19 @@ impl ReconnectSessionStore {
 
     fn commit_resume(
         &self,
+        reservation: ReconnectSessionReservation<'_>,
+        credential: &ResumeCredential,
+        now_ms: u64,
+    ) -> Result<(ReconnectSessionRestore, ResumeBinding), ReconnectSessionCommitError> {
+        self.commit_resume_if_live(reservation, credential, now_ms, || true)
+    }
+
+    fn commit_resume_if_live(
+        &self,
         mut reservation: ReconnectSessionReservation<'_>,
         credential: &ResumeCredential,
         now_ms: u64,
+        transport_is_live: impl FnOnce() -> bool,
     ) -> Result<(ReconnectSessionRestore, ResumeBinding), ReconnectSessionCommitError> {
         if !std::ptr::eq(self, reservation.store) {
             reservation.discard_and_revoke();
@@ -1298,6 +1999,16 @@ impl ReconnectSessionStore {
             drop(stale_lease);
             return Err(ReconnectSessionCommitError::AuthorizationRevisionChanged);
         }
+        if !transport_is_live() {
+            // This socket stopped before commit. Restore the exact reservation
+            // through the existing rollback checks without consuming its family.
+            drop(state);
+            drop(reservation);
+            return Err(ReconnectSessionCommitError::TransportEnded);
+        }
+        // The locked purge protects mutex contention. Refresh again here so
+        // scheduling after that purge cannot consume a now-expired credential.
+        let now_ms = gateway_unix_ms().max(now_ms);
         let Some(binding) =
             state
                 .credentials
@@ -1458,11 +2169,41 @@ impl ReconnectSessionStore {
 #[derive(Debug, Deserialize)]
 #[serde(tag = "type", rename_all = "camelCase")]
 enum BrowserCommand {
+    CompanionControl(crate::companion_relay::OwnerRequest),
+    CompanionRuntimeRegister(crate::companion_relay::RuntimeRegister),
+    CompanionRuntimeReply(crate::companion_relay::RuntimeReply),
+    Procurement(mir2_protocol::procurement::ProcurementRequest),
+    BillingStatus(billing::StatusRequest),
+    BillingCheckout(billing::CheckoutRequest),
+    BillingUsdcCheckout(billing::CheckoutRequest),
+    BillingBuyMonthlyCard(billing::BuyRequest),
+    BillingActivateMonthlyCard(billing::ActivateRequest),
+    MonthlyCardStatus,
+    RedeemMonthlyCard {
+        code: monthly_card::RedeemCode,
+        #[serde(rename = "requestId")]
+        request_id: u64,
+    },
     ClientVersion,
+    AttackV2 {
+        #[serde(rename = "protocolVersion")]
+        protocol_version: u16,
+        #[serde(rename = "requestId")]
+        request_id: String,
+        #[serde(rename = "objectId")]
+        object_id: u32,
+    },
     ClientCapabilities {
         capabilities: Vec<String>,
     },
     ResumeSession(NativeResumeRequest),
+    NpcPurchaseOwner {
+        #[serde(rename = "protocolVersion")]
+        protocol_version: u16,
+        #[serde(rename = "requestId")]
+        request_id: mir2_client_wire::U64,
+        action: mir2_client_wire::Action,
+    },
     Disconnect,
     TownRevive,
     Login {
@@ -1621,6 +2362,16 @@ enum BrowserCommand {
         grid: String,
         to: i32,
     },
+    EquipSlotItem {
+        #[serde(alias = "uniqueId")]
+        unique_id: u64,
+        grid: String,
+        #[serde(alias = "gridTo")]
+        grid_to: String,
+        #[serde(alias = "toUniqueId")]
+        to_unique_id: u64,
+        to: i32,
+    },
     RemoveSlotItem {
         #[serde(alias = "uniqueId")]
         unique_id: u64,
@@ -1723,6 +2474,17 @@ enum BrowserCommand {
         #[serde(alias = "priceType")]
         price_type: i32,
     },
+    GameShopGift {
+        #[serde(alias = "requestId")]
+        request_id: String,
+        #[serde(alias = "gIndex")]
+        g_index: i32,
+        quantity: u8,
+        #[serde(alias = "priceType")]
+        price_type: i32,
+        #[serde(alias = "recipientName")]
+        recipient_name: String,
+    },
     RepairItem {
         #[serde(alias = "uniqueId")]
         unique_id: u64,
@@ -1740,6 +2502,8 @@ enum BrowserCommand {
         key: u8,
         #[serde(alias = "oldKey", default)]
         old_key: u8,
+        #[serde(alias = "requestId", default)]
+        request_id: Option<u64>,
     },
     Magic {
         #[serde(alias = "objectId", default)]
@@ -1771,7 +2535,7 @@ enum BrowserCommand {
     },
     // Crystal `C.SetAutoPotValue` (Shared/ClientPackets.cs:1221). Sets the
     // hero auto-potion HP/MP trigger percentage. `stat` is the Crystal `Stat`
-    // byte (0 = HP, otherwise MP), matching MirConnection.SetAutoPotValue.
+    // byte (12 = HP, 13 = MP), matching PlayerObject.SetAutoPotValue.
     SetAutoPotValue {
         stat: u8,
         value: u32,
@@ -1863,6 +2627,10 @@ enum BrowserCommand {
     },
     AllowMentor,
     CancelMentor,
+    GuildBuffUpdate {
+        action: u8,
+        id: i32,
+    },
     DepositTradeItem {
         from: i32,
         to: i32,
@@ -1965,6 +2733,12 @@ enum BrowserCommand {
         rank_index: i32,
         #[serde(alias = "onlineOnly", default)]
         online_only: bool,
+    },
+    Inspect {
+        #[serde(alias = "objectId")]
+        object_id: u32,
+        ranking: bool,
+        hero: bool,
     },
     GetRentedItems,
     ItemRentalRequest,
@@ -2109,12 +2883,26 @@ enum QaControlAction {
 
 #[derive(Debug, Clone)]
 enum SessionAction {
+    Procurement(mir2_protocol::procurement::ProcurementRequest),
+    Billing(billing::Request),
+    MonthlyCardStatus,
+    RedeemMonthlyCard {
+        code: monthly_card::RedeemCode,
+        request_id: u64,
+    },
     Packet(ClientPacket),
     GameShopBuy {
         request_id: Option<String>,
         g_index: i32,
         quantity: u8,
         price_type: i32,
+    },
+    GameShopGift {
+        request_id: String,
+        g_index: i32,
+        quantity: u8,
+        price_type: i32,
+        recipient_name: String,
     },
     PasskeyLogin {
         account_id: String,
@@ -2165,6 +2953,26 @@ enum SessionAction {
         language: String,
     },
     Tick,
+}
+
+fn request_metrics_class(action: &SessionAction) -> crate::zone_metrics::RequestClass {
+    match action {
+        SessionAction::Packet(
+            ClientPacket::Walk { .. } | ClientPacket::Run { .. } | ClientPacket::Turn { .. },
+        ) => crate::zone_metrics::RequestClass::MovementAdmission,
+        SessionAction::PasskeyLogin { .. }
+        | SessionAction::Packet(
+            ClientPacket::NewAccount { .. }
+            | ClientPacket::ChangePassword { .. }
+            | ClientPacket::Login { .. }
+            | ClientPacket::NewCharacter { .. }
+            | ClientPacket::DeleteCharacter { .. }
+            | ClientPacket::StartGame { .. }
+            | ClientPacket::LogOut
+            | ClientPacket::Disconnect,
+        ) => crate::zone_metrics::RequestClass::Lifecycle,
+        _ => crate::zone_metrics::RequestClass::Immediate,
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -2236,6 +3044,9 @@ struct HealthResponse {
     ai_live: crate::ai_live::AiLiveMetrics,
     channel_identity: ChannelIdentityRegistryStatus,
     identity_backend: &'static str,
+    zone_metrics: crate::zone_metrics::ZoneMetricsSnapshot,
+    #[serde(rename = "loadTestLogin", skip_serializing_if = "Option::is_none")]
+    load_test_login: Option<LoadTestLoginHealth>,
 }
 
 #[derive(Debug, Serialize)]
@@ -2442,6 +3253,43 @@ pub async fn run_web_gateway(
     config: GatewayConfig,
     chat_hub: ChatBroadcastHub,
 ) -> io::Result<()> {
+    let topology = ZoneTopology::from_env()
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+    let factory = topology.runtime_factory();
+    let registry = Arc::new(ZoneRegistry::with_router_and_owner_lease_authority(
+        topology.default_zone_id().clone(),
+        factory.clone(),
+        topology.router(),
+        crate::zone_lease::default_zone_owner_lease_authority_from_env(),
+    ));
+    let _conquest = crate::conquest_clock::ConquestClockService::start(config.clone(), factory)?;
+    run_web_gateway_with_zone_registry(addr, config, chat_hub, registry).await
+}
+
+pub async fn run_web_gateway_with_zone_registry(
+    addr: &str,
+    config: GatewayConfig,
+    chat_hub: ChatBroadcastHub,
+    zone_registry: Arc<ZoneRegistry>,
+) -> io::Result<()> {
+    serve_web_gateway_with_zone_registry(
+        TcpListener::bind(addr).await?,
+        config,
+        chat_hub,
+        zone_registry,
+    )
+    .await
+}
+
+/// Pre-bound production handler used by isolated socket acceptances.
+pub async fn serve_web_gateway_with_zone_registry(
+    listener: TcpListener,
+    config: GatewayConfig,
+    chat_hub: ChatBroadcastHub,
+    zone_registry: Arc<ZoneRegistry>,
+) -> io::Result<()> {
+    let auth_rate_limit_policy = AuthRateLimitPolicy::from_environment(listener.local_addr()?)
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
     // Activated Crystal world: host every map full-size in the shared zone so
     // players roam all of Bichon (and reach every transfer), not just the
     // starter slice. Empty maps stay dormant regardless.
@@ -2465,8 +3313,6 @@ pub async fn run_web_gateway(
             recovery.replayed, recovery.already_committed, recovery.quarantined
         );
     }
-    let topology = ZoneTopology::from_env()
-        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
     let spectator = SpectatorHub::from_env();
     let ai_live = AiLiveHub::from_env()
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
@@ -2479,13 +3325,21 @@ pub async fn run_web_gateway(
         IdentityService::from_env(identity_database_url)
     })
     .await?;
+    let companions = crate::companion_relay::CompanionRelay::from_env()
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+    if let Some(relay) = &companions {
+        zone_registry.configure_companion_owner_fences(relay.policy())
+            .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+        if let Some(ledger) = relay.supply_ledger() {
+            let projection = ledger.lock().map_err(|_| io::Error::new(io::ErrorKind::Other, "Life authority unavailable."))?.projection_handle();
+            zone_registry.configure_companion_life_projection(relay.policy(), projection)
+                .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+        }
+    }
     let state = WebState {
         config: Arc::new(config),
         deploy_revision: deploy_revision_from_env(),
-        zone_registry: Arc::new(
-            topology
-                .zone_registry(crate::zone_lease::default_zone_owner_lease_authority_from_env()),
-        ),
+        zone_registry,
         chat_hub,
         session_cache: gateway_session_cache_from_env()
             .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?,
@@ -2493,10 +3347,12 @@ pub async fn run_web_gateway(
         capacity: Arc::new(GatewayCapacityState::from_env()),
         gameplay_event_sink: default_gameplay_event_sink_from_env(),
         identity: Arc::new(identity),
+        auth_rate_limit_policy,
         injector: crate::inject::LiveSessionInjector::default(),
         spectator,
         ai_live,
         channel_identity,
+        companions,
     };
 
     let app = Router::new()
@@ -2559,14 +3415,18 @@ pub async fn run_web_gateway(
             post(ai_distribution_heartbeat),
         )
         .route("/ai-live/audio/{clip}", get(ai_live_audio))
+        .merge(monthly_card::router())
+        .merge(billing::router())
+        .merge(promotions::router())
+        .merge(activities::router())
         .route("/ws", get(ws_upgrade))
         .with_state(state);
 
-    let listener = TcpListener::bind(addr).await?;
+    let addr = listener.local_addr()?;
     eprintln!("mir2-gateway web listening on http://{addr}");
 
     axum::serve(
-        listener,
+        transport::low_latency_listener(listener),
         app.into_make_service_with_connect_info::<SocketAddr>(),
     )
     .await
@@ -2644,6 +3504,8 @@ async fn health(State(state): State<WebState>) -> Json<HealthResponse> {
         ai_live: state.ai_live.metrics(),
         channel_identity: channel_identity_status,
         identity_backend: state.identity.backend_label(),
+        zone_metrics: crate::zone_metrics::snapshot(),
+        load_test_login: state.auth_rate_limit_policy.test_only_health(),
     })
 }
 
@@ -3318,12 +4180,13 @@ async fn identity_recover_account(
         account_id: request.account_id.clone(),
         action: AuthSecurityAction::Recovery,
     };
-    enforce_auth_rate_limits(
+    enforce_auth_rate_limits_with_policy(
         state.session_cache.as_ref(),
         &state.identity,
         &peer_address,
         &user_agent,
         &context,
+        state.auth_rate_limit_policy,
     )
     .map_err(|_| identity_unauthorized("account recovery could not be completed"))?;
     mir2_simulation::validate_commercial_identity_credentials(
@@ -4412,42 +5275,86 @@ async fn handle_socket(
     peer_address: String,
     user_agent: String,
 ) {
-    let realm_info = realm_info_event(state.config.as_ref());
-    let mut session = new_gateway_session_for_web(&state);
+    let realm_info = companion_realm_info(realm_info_event(state.config.as_ref()),
+        state.companions.as_ref(), state.zone_registry.supports_shared_groups());
+    let admission_state = state.clone();
+    let admission =
+        tokio::task::spawn_blocking(move || new_gateway_session_for_web(&admission_state))
+            .await
+            .unwrap_or_else(|_| Err("zone owner admission task failed".into()));
+    let mut session = match admission {
+        Ok(session) => session,
+        Err(_) => {
+            // No runtime or live admission exists yet. Reject this connection
+            // without panicking a task or falling back to a local world.
+            let mut socket = socket;
+            let _ = tokio::time::timeout(
+                Duration::from_secs(1),
+                socket.send(Message::Close(Some(axum::extract::ws::CloseFrame {
+                    code: 1013,
+                    reason: "World coordination temporarily unavailable".into(),
+                }))),
+            )
+            .await;
+            return;
+        }
+    };
+    let session_id = session.session_id().to_owned();
+    let _lifecycle = crate::session::GatewayLifecycleStage::start(&session_id, "connection.work");
     let mut active_session_permit: Option<GatewayCapacityPermit> = None;
     let mut save_queue = WebSessionSaveQueue::new(GatewaySaveQueueConfig::from_env());
     let mut route_refresh = WebSessionRouteRefresh::new(GatewayRouteRefreshConfig::from_env());
     let mut native_resume = NativeResumeConnectionState::new();
-    let mut explicit_world_leave_completed = false;
-    handle_socket_inner(
-        socket,
-        &mut session,
-        Arc::clone(&state.session_cache),
-        Arc::clone(&state.reconnect_sessions),
-        Arc::clone(&state.capacity),
-        Arc::clone(&state.identity),
-        &mut active_session_permit,
-        &mut save_queue,
-        &mut route_refresh,
-        &mut native_resume,
-        &mut explicit_world_leave_completed,
-        state.injector.clone(),
-        realm_info,
-        state.chat_hub.clone(),
-        state.spectator.clone(),
-        state.ai_live.clone(),
-        tcp_peer_ip,
-        peer_address,
-        user_agent,
-    )
-    .await;
-    if explicit_world_leave_completed {
+    let mut explicit_world_leave = ExplicitWorldLeaveState::default();
+    // Kept outside the cancelable transport future, so every return fences pending controls.
+    let mut companion_admission = None;
+    let reconnect_binding = {
+        let _stage = crate::session::GatewayLifecycleStage::start(&session_id, "transport.work");
+        handle_socket_inner(
+            socket,
+            &mut session,
+            Arc::clone(&state.session_cache),
+            Arc::clone(&state.reconnect_sessions),
+            Arc::clone(&state.capacity),
+            Arc::clone(&state.identity),
+            state.auth_rate_limit_policy,
+            &mut active_session_permit,
+            &mut save_queue,
+            &mut route_refresh,
+            &mut native_resume,
+            &mut explicit_world_leave,
+            state.companions.clone(),
+            &mut companion_admission,
+            state.injector.clone(),
+            realm_info,
+            state.chat_hub.clone(),
+            state.spectator.clone(),
+            state.ai_live.clone(),
+            tcp_peer_ip,
+            peer_address,
+            user_agent,
+        )
+        .await
+    };
+    if let (Some(hub), Some(admission)) = (&state.companions, companion_admission.take()) {
+        hub.detach(&admission.id).await;
+    }
+    if explicit_world_leave.completed {
         native_resume.disable_and_revoke(state.reconnect_sessions.as_ref());
-        let _ = remove_owned_session_cache(state.session_cache.as_ref(), &session);
+        // LogOut has already cleared active_identity. Keep the original owner
+        // captured before execution so cache failures can still be retried.
+        let _stage = crate::session::GatewayLifecycleStage::start(&session_id, "explicit.release");
+        if let Err(error) = tokio::task::block_in_place(|| {
+            explicit_world_leave.retry_release(state.session_cache.as_ref())
+        }) {
+            eprintln!("completed explicit leave route release retry failed: {error}");
+        }
         return;
     }
-    let persistence_outcome =
-        persist_web_session_before_teardown(&mut session, &mut save_queue).await;
+    let persistence_outcome = {
+        let _stage = crate::session::GatewayLifecycleStage::start(&session_id, "persist");
+        persist_web_session_before_teardown(&mut session, &mut save_queue).await
+    };
     let recovery_account_id = tokio::task::block_in_place(|| {
         session
             .active_identity()
@@ -4466,6 +5373,7 @@ async fn handle_socket(
         return;
     }
     let release_result = tokio::task::block_in_place(|| {
+        let _stage = crate::session::GatewayLifecycleStage::start(&session_id, "resume.thaw");
         catch_gateway_panic("web release saved teardown fence for resume", || {
             session.release_teardown_for_resume()
         })
@@ -4478,6 +5386,7 @@ async fn handle_socket(
         return;
     }
     if let Some(key) = session_cache_key(&session) {
+        let _stage = crate::session::GatewayLifecycleStage::start(&session_id, "resume.retain");
         let grace_seconds = reconnect_grace_ttl_seconds();
         if let Err(error) = refresh_session_cache_with_route_lease(
             state.session_cache.as_ref(),
@@ -4507,7 +5416,7 @@ async fn handle_socket(
         };
         let log_account_id = key.account_id.clone();
         let log_character_index = key.character_index;
-        state.reconnect_sessions.store(
+        state.reconnect_sessions.store_with_handoff(
             key,
             session,
             active_session_permit.take(),
@@ -4517,6 +5426,7 @@ async fn handle_socket(
                 .then_some(native_resume.family_id)
                 .flatten(),
             Duration::from_secs(grace_seconds),
+            reconnect_binding.map(|(_, binding)| binding),
         );
         schedule_reconnect_session_purge(
             Arc::clone(&state.reconnect_sessions),
@@ -4631,12 +5541,16 @@ fn zone_movement_packet_for_action(action: &SessionAction) -> Option<ClientPacke
 
 async fn try_handle_zone_movement_from_reader(
     action: &SessionAction,
+    received_at: Instant,
     sender: &SharedWebSocketSender,
     movement_ingress: &SharedZoneMovementIngressSlot,
     serial_execution_gate: &SharedSerialExecutionGate,
+    movement_drain: &Arc<transport::MovementDrain>,
     authenticated: bool,
     pending_serial_actions: usize,
+    input_trace: Option<InputGateTraceContext>,
 ) -> Result<bool, String> {
+    let _trace = InputGateTraceSpan::start(input_trace, "reader_fast", 0);
     if !authenticated || pending_serial_actions != 0 {
         return Ok(false);
     }
@@ -4654,12 +5568,37 @@ async fn try_handle_zone_movement_from_reader(
         return Ok(false);
     };
     let move_log = move_log_for_action(action);
-    let execution = tokio::task::spawn_blocking(move || ingress.try_execute(packet))
-        .await
-        .map_err(|error| format!("zone movement ingress task failed: {error}"))??;
+    let Some(call) = movement_drain.begin() else {
+        return Err("socket movement ingress has ended".to_string());
+    };
+    let execution = match tokio::task::spawn_blocking(move || {
+        let _call = call;
+        ingress.try_execute(packet)
+    })
+    .await
+    {
+        Ok(Ok(execution)) => execution,
+        result => {
+            crate::zone_metrics::record_request(
+                crate::zone_metrics::RequestClass::MovementAdmission,
+                received_at.elapsed(),
+                false,
+            );
+            return Err(match result {
+                Ok(Err(error)) => error,
+                Err(error) => format!("zone movement ingress task failed: {error}"),
+                Ok(Ok(_)) => unreachable!(),
+            });
+        }
+    };
     let Some(execution) = execution else {
         return Ok(false);
     };
+    crate::zone_metrics::record_request(
+        crate::zone_metrics::RequestClass::MovementAdmission,
+        received_at.elapsed(),
+        true,
+    );
     let responses = execution.packets;
     log_move_action(move_log, &responses);
     for packet in responses {
@@ -4670,27 +5609,431 @@ async fn try_handle_zone_movement_from_reader(
     Ok(true)
 }
 
+// Passive outbound block diagnostics: owned helper/sender region starts here.
+const ZONE_OUTBOUND_BLOCK_THRESHOLD: Duration = Duration::from_millis(50);
+
+fn zone_outbound_block_enabled_value(value: Option<&str>) -> bool {
+    value == Some("1")
+}
+
+fn zone_outbound_block_trace_enabled() -> bool {
+    static ENABLED: OnceLock<bool> = OnceLock::new();
+    *ENABLED.get_or_init(|| {
+        zone_outbound_block_enabled_value(
+            std::env::var("MIR2_GATEWAY_ZONE_DELIVERY_TRACE")
+                .ok()
+                .as_deref(),
+        )
+    })
+}
+
+#[derive(Clone, Copy)]
+enum ZoneOutboundBlockKind {
+    OwnerHealth,
+    UserLocation,
+    ObjectPlayer,
+    ObjectRemove,
+    Other,
+}
+
+impl ZoneOutboundBlockKind {
+    fn for_packet(packet: &ServerPacket) -> Self {
+        match packet {
+            ServerPacket::UserLocation { .. } => Self::UserLocation,
+            ServerPacket::ObjectPlayer { .. } => Self::ObjectPlayer,
+            ServerPacket::ObjectRemove { .. } => Self::ObjectRemove,
+            _ => Self::Other,
+        }
+    }
+
+    fn label(self) -> &'static str {
+        match self {
+            Self::OwnerHealth => "OwnerHealth",
+            Self::UserLocation => "UserLocation",
+            Self::ObjectPlayer => "ObjectPlayer",
+            Self::ObjectRemove => "ObjectRemove",
+            Self::Other => "Other",
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
+enum ZoneOutboundBlockLane {
+    Owner,
+    Normal,
+}
+
+impl ZoneOutboundBlockLane {
+    fn label(self) -> &'static str {
+        match self {
+            Self::Owner => "owner",
+            Self::Normal => "normal",
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
+enum ZoneOutboundBlockStage {
+    ReadGate,
+    HealthSchedule,
+    HealthRun,
+    HealthAwait,
+    Send,
+    CompletionToPop,
+}
+
+impl ZoneOutboundBlockStage {
+    fn label(self) -> &'static str {
+        match self {
+            Self::ReadGate => "read_gate",
+            Self::HealthSchedule => "health_schedule",
+            Self::HealthRun => "health_run",
+            Self::HealthAwait => "health_await",
+            Self::Send => "send",
+            Self::CompletionToPop => "completion_to_pop",
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
+struct ZoneOutboundBlockContext {
+    registration: u64,
+    batch_id: u64,
+    batch_index: usize,
+    kind: ZoneOutboundBlockKind,
+    lane: ZoneOutboundBlockLane,
+    normal_depth: usize,
+    owner_depth: usize,
+}
+
+impl ZoneOutboundBlockContext {
+    fn line(
+        self,
+        stage: ZoneOutboundBlockStage,
+        elapsed: Duration,
+        recorded_unix_ms: u128,
+    ) -> Option<String> {
+        if elapsed < ZONE_OUTBOUND_BLOCK_THRESHOLD {
+            return None;
+        }
+        Some(format!(
+            "[gateway-zone-outbound-block] stage={} registration={} batchID={} batchIndex={} kind={} lane={} normalDepth={} ownerDepth={} elapsedUs={} recordedUnixMs={recorded_unix_ms}",
+            stage.label(), self.registration, self.batch_id, self.batch_index,
+            self.kind.label(), self.lane.label(), self.normal_depth, self.owner_depth,
+            elapsed.as_micros(),
+        ))
+    }
+
+    fn emit(self, stage: ZoneOutboundBlockStage, elapsed: Duration) {
+        if elapsed < ZONE_OUTBOUND_BLOCK_THRESHOLD {
+            return;
+        }
+        let recorded_unix_ms = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_millis();
+        if let Some(line) = self.line(stage, elapsed, recorded_unix_ms) {
+            eprintln!("{line}");
+        }
+    }
+}
+
+// Delaying these two completed spans until packet materialization lets the
+// context classify ObjectPlayer/ObjectRemove without inspecting private payloads.
+// Terminal packets that never materialize retain their pre-send classification.
+struct ZoneOutboundBlockPacketTrace<'a> {
+    context: ZoneOutboundBlockContext,
+    gate_wait: Option<Duration>,
+    completion_to_pop: Option<Duration>,
+    completed_at: &'a mut Option<Instant>,
+}
+
+impl Drop for ZoneOutboundBlockPacketTrace<'_> {
+    fn drop(&mut self) {
+        // Include diagnostic I/O in the next completion-to-pop interval.
+        *self.completed_at = Some(Instant::now());
+        if let Some(elapsed) = self.gate_wait {
+            self.context.emit(ZoneOutboundBlockStage::ReadGate, elapsed);
+        }
+        if let Some(elapsed) = self.completion_to_pop {
+            // This includes normal idle receive waits and diagnostic I/O, so
+            // it is not by itself evidence of backlog or network delay.
+            // A writer blocking the next read gate is measured separately.
+            self.context
+                .emit(ZoneOutboundBlockStage::CompletionToPop, elapsed);
+        }
+    }
+}
+
+const ZONE_OUTBOUND_BATCH_MAX: usize = 32;
+const ZONE_OUTBOUND_BATCH_BUDGET: Duration = Duration::from_millis(2);
+
 fn spawn_zone_outbound_sender(
-    mut receiver: mpsc::Receiver<SharedZoneLiveOutbound>,
+    receiver: mpsc::Receiver<SharedZoneLiveOutbound>,
+    owner_location_receiver: mpsc::Receiver<SharedZoneLiveOutbound>,
     sender: SharedWebSocketSender,
     serial_execution_gate: SharedSerialExecutionGate,
     active_registration_id: Arc<AtomicU64>,
+    failure_signal: tokio::sync::watch::Sender<u64>,
+    diagnostics: SocketDiagnostics,
 ) -> ZoneOutboundSenderTask {
+    spawn_zone_outbound_sender_with_clock(
+        receiver,
+        owner_location_receiver,
+        sender,
+        serial_execution_gate,
+        active_registration_id,
+        failure_signal,
+        diagnostics,
+        Instant::now,
+    )
+}
+
+fn spawn_zone_outbound_sender_with_clock(
+    mut receiver: mpsc::Receiver<SharedZoneLiveOutbound>,
+    mut owner_location_receiver: mpsc::Receiver<SharedZoneLiveOutbound>,
+    sender: SharedWebSocketSender,
+    serial_execution_gate: SharedSerialExecutionGate,
+    active_registration_id: Arc<AtomicU64>,
+    failure_signal: tokio::sync::watch::Sender<u64>,
+    diagnostics: SocketDiagnostics,
+    now: impl Fn() -> Instant + Send + 'static,
+) -> ZoneOutboundSenderTask {
+    use crate::routing::ZoneDeliveryTraceStage as TraceStage;
+
+    let block_trace_enabled = zone_outbound_block_trace_enabled() && !input_gate_trace_requested();
     let handle = tokio::spawn(async move {
-        while let Some(outbound) = receiver.recv().await {
-            let registration_id = outbound.registration_id();
-            if active_registration_id.load(Ordering::Acquire) != registration_id {
-                continue;
-            }
+        let mut previous_completed_at: Option<Instant> = None;
+        let mut batch_id = 0_u64;
+        loop {
+            let (outbound, lane) = tokio::select! {
+                biased;
+                outbound = owner_location_receiver.recv() => match outbound {
+                    Some(outbound) => (outbound, ZoneOutboundBlockLane::Owner),
+                    None => match receiver.recv().await {
+                        Some(outbound) => (outbound, ZoneOutboundBlockLane::Normal),
+                        None => return,
+                    },
+                },
+                outbound = receiver.recv() => match outbound {
+                    Some(outbound) => (outbound, ZoneOutboundBlockLane::Normal),
+                    None => match owner_location_receiver.recv().await {
+                        Some(outbound) => (outbound, ZoneOutboundBlockLane::Owner),
+                        None => return,
+                    },
+                },
+            };
+            let first_block_pop = block_trace_enabled.then(|| {
+                let popped_at = Instant::now();
+                batch_id = batch_id.wrapping_add(1);
+                let kind = if outbound.owner_health().is_some() {
+                    ZoneOutboundBlockKind::OwnerHealth
+                } else if outbound.is_owner_location() {
+                    ZoneOutboundBlockKind::UserLocation
+                } else {
+                    ZoneOutboundBlockKind::Other
+                };
+                (
+                    ZoneOutboundBlockContext {
+                        registration: outbound.registration_id(),
+                        batch_id,
+                        batch_index: 0,
+                        kind,
+                        lane,
+                        normal_depth: receiver.len(),
+                        owner_depth: owner_location_receiver.len(),
+                    },
+                    popped_at,
+                )
+            });
+            let first_trace = outbound.delivery_trace();
+            let first_dequeued_at = first_trace.as_ref().map(|trace| {
+                let at = Instant::now();
+                trace.emit(TraceStage::Dequeue, Some(at), None);
+                at
+            });
+            // A cadence may enqueue the first new-epoch ACK between registration
+            // preparation and activation while bootstrap holds the write gate.
+            // Judge the epoch only after bootstrap/activation has completed.
+            let serial_gate_wait =
+                GatewaySlowStage::for_socket("serial_gate.zone_outbound_wait", &diagnostics);
+            let block_gate_started_at = block_trace_enabled.then(Instant::now);
             let _serial_execution = serial_execution_gate.read().await;
-            if active_registration_id.load(Ordering::Acquire) != registration_id {
-                continue;
-            }
-            if send_server_packet(&sender, &outbound.into_packet())
-                .await
-                .is_err()
-            {
-                return;
+            let batch_started_at = now();
+            let first_block_gate_wait = block_gate_started_at.map(|at| at.elapsed());
+            let first_gate_acquired_at = first_trace.as_ref().map(|trace| {
+                let at = Instant::now();
+                trace.emit(TraceStage::Gate, first_dequeued_at, Some(at));
+                at
+            });
+            drop(serial_gate_wait);
+            // Bootstrap wait is not batch work. Keep the in-hand first packet
+            // in its original order, even if an owner ACK arrived while waiting.
+            let mut first_outbound = Some((
+                outbound,
+                first_trace,
+                first_dequeued_at,
+                first_gate_acquired_at,
+                first_block_pop
+                    .map(|(context, popped_at)| (context, popped_at, first_block_gate_wait)),
+            ));
+            for batch_index in 0..ZONE_OUTBOUND_BATCH_MAX {
+                if batch_index > 0
+                    && now().duration_since(batch_started_at) >= ZONE_OUTBOUND_BATCH_BUDGET
+                {
+                    break;
+                }
+                let (outbound, trace, dequeued_at, gate_acquired_at, block_pop) =
+                    if let Some(first) = first_outbound.take() {
+                        first
+                    } else {
+                        // Never await another packet while holding the read guard.
+                        // Recheck owner priority at every pop; normal remains FIFO.
+                        match owner_location_receiver
+                            .try_recv()
+                            .map(|outbound| (outbound, ZoneOutboundBlockLane::Owner))
+                            .or_else(|_| {
+                                receiver
+                                    .try_recv()
+                                    .map(|outbound| (outbound, ZoneOutboundBlockLane::Normal))
+                            }) {
+                            Ok((outbound, lane)) => {
+                                let block_pop = block_trace_enabled.then(|| {
+                                    let popped_at = Instant::now();
+                                    let kind = if outbound.owner_health().is_some() {
+                                        ZoneOutboundBlockKind::OwnerHealth
+                                    } else if outbound.is_owner_location() {
+                                        ZoneOutboundBlockKind::UserLocation
+                                    } else {
+                                        ZoneOutboundBlockKind::Other
+                                    };
+                                    (
+                                        ZoneOutboundBlockContext {
+                                            registration: outbound.registration_id(),
+                                            batch_id,
+                                            batch_index,
+                                            kind,
+                                            lane,
+                                            normal_depth: receiver.len(),
+                                            owner_depth: owner_location_receiver.len(),
+                                        },
+                                        popped_at,
+                                        None,
+                                    )
+                                });
+                                let trace = outbound.delivery_trace();
+                                let at = trace.as_ref().map(|trace| {
+                                    let at = Instant::now();
+                                    trace.emit(TraceStage::Dequeue, Some(at), None);
+                                    trace.emit(TraceStage::Gate, Some(at), Some(at));
+                                    at
+                                });
+                                (outbound, trace, at, at, block_pop)
+                            }
+                            Err(_) => break,
+                        }
+                    };
+                let mut block_trace = block_pop.map(|(context, popped_at, gate_wait)| {
+                    let completion_to_pop =
+                        previous_completed_at.map(|at| popped_at.saturating_duration_since(at));
+                    ZoneOutboundBlockPacketTrace {
+                        context,
+                        gate_wait,
+                        completion_to_pop,
+                        completed_at: &mut previous_completed_at,
+                    }
+                });
+                let trace_stage = |stage| {
+                    if let Some(trace) = &trace {
+                        trace.emit(stage, dequeued_at, gate_acquired_at);
+                    }
+                };
+                // Stale and empty-health packets count toward both limits too.
+                let registration_id = outbound.registration_id();
+                if active_registration_id.load(Ordering::Acquire) != registration_id {
+                    trace_stage(TraceStage::Stale);
+                    if outbound.is_owner_location() {
+                        eprintln!(
+                            "[gateway-zone-live] owner_location result=stale_after_gate registration_id={registration_id} active_registration_id={}",
+                            active_registration_id.load(Ordering::Acquire)
+                        );
+                    }
+                    continue;
+                }
+                if outbound.is_overloaded() {
+                    trace_stage(TraceStage::Overload);
+                    failure_signal.send_replace(registration_id);
+                    return;
+                }
+                // Both health proofs and stable owner pins can become stale
+                // while a frame waits behind the final send gate. Their IO
+                // validation belongs off the async network executor.
+                let packet = if outbound.requires_send_validation() {
+                    let health_span = block_trace
+                        .as_ref()
+                        .map(|trace| (trace.context, Instant::now()));
+                    let health_result = tokio::task::spawn_blocking(move || {
+                        let health_run = health_span.map(|(context, submitted_at)| {
+                            let started_at = Instant::now();
+                            context.emit(
+                                ZoneOutboundBlockStage::HealthSchedule,
+                                started_at.saturating_duration_since(submitted_at),
+                            );
+                            (context, Instant::now())
+                        });
+                        let result = outbound.claim_for_send();
+                        if let Some((context, started_at)) = health_run {
+                            context.emit(ZoneOutboundBlockStage::HealthRun, started_at.elapsed());
+                        }
+                        result
+                    })
+                    .await;
+                    if let Some((context, submitted_at)) = health_span {
+                        context.emit(ZoneOutboundBlockStage::HealthAwait, submitted_at.elapsed());
+                    }
+                    match health_result {
+                        Ok(Ok(Some(packet))) => packet,
+                        Ok(Ok(None)) => {
+                            trace_stage(TraceStage::HealthEmpty);
+                            continue;
+                        }
+                        _ => {
+                            if active_registration_id.load(Ordering::Acquire) != registration_id {
+                                trace_stage(TraceStage::Stale);
+                                continue;
+                            }
+                            trace_stage(TraceStage::HealthError);
+                            failure_signal.send_replace(registration_id);
+                            return;
+                        }
+                    }
+                } else {
+                    outbound.into_packet()
+                };
+                if let Some(trace) = block_trace.as_mut() {
+                    if !matches!(trace.context.kind, ZoneOutboundBlockKind::OwnerHealth) {
+                        trace.context.kind = ZoneOutboundBlockKind::for_packet(&packet);
+                    }
+                }
+                if active_registration_id.load(Ordering::Acquire) != registration_id {
+                    trace_stage(TraceStage::Stale);
+                    continue;
+                }
+                let input_gate_delivery = trace.as_ref().and_then(|t| bind_input_gate_trace(&diagnostics, t.input_gate_identity()));
+                trace_stage(TraceStage::Send);
+                let send_span = block_trace
+                    .as_ref()
+                    .map(|trace| (trace.context, Instant::now()));
+                let send_result = send_server_packet_traced(&sender, &packet, input_gate_delivery).await;
+                if let Some((context, started_at)) = send_span {
+                    context.emit(ZoneOutboundBlockStage::Send, started_at.elapsed());
+                }
+                if send_result.is_err() {
+                    trace_stage(TraceStage::SendError);
+                    failure_signal.send_replace(registration_id);
+                    return;
+                }
+                trace_stage(TraceStage::Sent);
             }
         }
     });
@@ -4699,7 +6042,7 @@ fn spawn_zone_outbound_sender(
 
 fn register_zone_live_outbound(
     session: &GatewaySession,
-    sender: &mpsc::Sender<SharedZoneLiveOutbound>,
+    sender: &SharedZoneLiveOutboundSender,
     active_registration_id: &AtomicU64,
 ) -> Result<Option<Box<dyn ZoneLiveOutboundRegistration>>, String> {
     active_registration_id.store(0, Ordering::Release);
@@ -4710,7 +6053,7 @@ fn register_zone_live_outbound(
 
 fn prepare_zone_live_outbound(
     session: &GatewaySession,
-    sender: &mpsc::Sender<SharedZoneLiveOutbound>,
+    sender: &SharedZoneLiveOutboundSender,
 ) -> Result<Option<Box<dyn ZoneLiveOutboundRegistration>>, String> {
     session.register_zone_live_outbound(sender.clone())
 }
@@ -4730,21 +6073,54 @@ fn activate_zone_live_outbound(
     }
 }
 
+fn responses_begin_zone_bootstrap(responses: &[ServerPacket]) -> bool {
+    responses.iter().any(|packet| {
+        matches!(
+            packet,
+            ServerPacket::MapInformation { .. } | ServerPacket::MapChanged { .. }
+        )
+    })
+}
+
+// Caller holds the serialized execution write gate until the bootstrap packets
+// are flushed. In particular a Tick can finish a previously queued portal step.
+fn refresh_zone_live_outbound(
+    session: &GatewaySession,
+    authenticated: bool,
+    force_registration: bool,
+    movement_ingress: &SharedZoneMovementIngressSlot,
+    sender: &SharedZoneLiveOutboundSender,
+    active_registration_id: &AtomicU64,
+    registration: &mut Option<Box<dyn ZoneLiveOutboundRegistration>>,
+) -> Result<(), String> {
+    *movement_ingress
+        .write()
+        .map_err(|_| "zone movement ingress slot was poisoned".to_string())? =
+        session.zone_movement_ingress();
+    if !authenticated || session.active_identity().is_none() {
+        active_registration_id.store(0, Ordering::Release);
+        *registration = None;
+    } else if registration.is_none() || force_registration {
+        *registration = register_zone_live_outbound(session, sender, active_registration_id)?;
+    }
+    Ok(())
+}
+
 fn invalid_browser_command_input(message: &str, error: &serde_json::Error) -> ParsedSocketInput {
-    let recognized_resume = serde_json::from_str::<Value>(message)
+    let recognized_type = serde_json::from_str::<Value>(message)
         .ok()
         .and_then(|value| {
             value
                 .get("type")
                 .and_then(Value::as_str)
                 .map(str::to_string)
-        })
-        .as_deref()
-        == Some("resumeSession");
-    if recognized_resume {
-        ParsedSocketInput::ResumeRejected
-    } else {
-        ParsedSocketInput::ProtocolError(format!("invalid command: {error}"))
+        });
+    match recognized_type.as_deref() {
+        Some("companionControl" | "companionRuntimeRegister" | "companionRuntimeReply") =>
+            ParsedSocketInput::ProtocolError("invalid companion control request".into()),
+        Some("resumeSession") => ParsedSocketInput::ResumeRejected,
+        Some("attackV2") => ParsedSocketInput::ProtocolError("invalid attackV2 request".into()),
+        _ => ParsedSocketInput::ProtocolError(format!("invalid command: {error}")),
     }
 }
 
@@ -4754,6 +6130,10 @@ fn spawn_socket_reader(
     movement_ingress: SharedZoneMovementIngressSlot,
     serial_execution_gate: SharedSerialExecutionGate,
     authenticated: Arc<AtomicBool>,
+    terminal: transport::TransportSignal,
+    movement_drain: Arc<transport::MovementDrain>,
+    session_id: String,
+    diagnostics: SocketDiagnostics,
 ) -> (
     mpsc::Receiver<SocketInbound>,
     SocketReaderTask,
@@ -4769,21 +6149,33 @@ fn spawn_socket_reader(
     let reader_pending_count = Arc::clone(&pending_count);
     let reader_buffered_bytes = Arc::clone(&buffered_bytes);
     let handle = tokio::spawn(async move {
+        let _reader_lifetime = transport::ReaderLifetime(terminal.clone());
         loop {
             let message = match receiver.next().await {
                 Some(Ok(Message::Text(text))) => text,
-                Some(Ok(Message::Close(_))) | None => {
-                    let _ = input_tx.send(SocketInbound::Closed).await;
+                Some(Ok(Message::Close(_))) => {
+                    drop(InputGateTraceSpan::start(input_gate_lifecycle_context(&diagnostics), "reader_peer_close", 0));
+                    if let Err(error) = sender.flush_peer_close_reply().await {
+                        eprintln!("web peer Close reply flush failed: {error} session_id={session_id}");
+                    }
+                    terminal.end(transport::TransportEnd::Closed);
+                    let _ = input_tx.try_send(SocketInbound::Closed);
+                    return;
+                }
+                None => {
+                    terminal.end(transport::TransportEnd::Closed);
+                    let _ = input_tx.try_send(SocketInbound::Closed);
                     return;
                 }
                 Some(Ok(_)) => continue,
                 Some(Err(error)) => {
-                    let _ = input_tx
-                        .send(SocketInbound::ReadError(error.to_string()))
-                        .await;
+                    eprintln!("web receive error: {error} session_id={session_id}");
+                    terminal.end(transport::TransportEnd::ReadError);
+                    let _ = input_tx.try_send(SocketInbound::ReadError(error.to_string()));
                     return;
                 }
             };
+            let received_at = Instant::now();
             if message.len() > WEBSOCKET_MAX_MESSAGE_BYTES {
                 return;
             }
@@ -4803,6 +6195,8 @@ fn spawn_socket_reader(
                             invalid_browser_command_input(&message, &error),
                             Arc::clone(&reader_pending_count),
                             message_permit,
+                            received_at,
+                            &diagnostics,
                         )))
                         .await
                         .is_err()
@@ -4812,13 +6206,77 @@ fn spawn_socket_reader(
                     continue;
                 }
             };
+            // Count every successfully decoded BrowserCommand before any KA/native/owner split.
+            // KA consumes an ordinal but has no input diagnostic row.
+            if input_gate_trace_ids().is_some() {
+                if let Some(state) = diagnostics.as_ref() {
+                    let _ = state.decoded_ordinal.fetch_update(Ordering::Relaxed, Ordering::Relaxed,
+                        |n| (n < SOCKET_DIAGNOSTIC_MAX_SAFE_INTEGER).then_some(n + 1));
+                }
+            }
+            let command = match companion_browser_command(command) {
+                Ok(command) => command,
+                Err(command) => {
+                    if input_tx.send(SocketInbound::Queued(QueuedSocketInput::new(
+                        ParsedSocketInput::Companion(command), Arc::clone(&reader_pending_count),
+                        message_permit, received_at, &diagnostics,
+                    ))).await.is_err() { return; }
+                    continue;
+                }
+            };
             let command = match command {
+                BrowserCommand::AttackV2 { .. } => {
+                    let parsed = match crate::attack_protocol::parse_attack_v2(&message) {
+                        Ok(request) => ParsedSocketInput::AttackV2(request),
+                        Err(error) => ParsedSocketInput::ProtocolError(error),
+                    };
+                    if input_tx
+                        .send(SocketInbound::Queued(QueuedSocketInput::new(
+                            parsed,
+                            Arc::clone(&reader_pending_count),
+                            message_permit,
+                            received_at,
+                            &diagnostics,
+                        )))
+                        .await
+                        .is_err()
+                    {
+                        return;
+                    }
+                    continue;
+                }
+                BrowserCommand::NpcPurchaseOwner { .. } => {
+                    // Reparse the original bytes with duplicate/unknown-field
+                    // rejection; never dispatch a Value-normalized request.
+                    let parsed = match mir2_client_wire::parse_client_request(&message) {
+                        Ok(request) => ParsedSocketInput::NpcPurchaseOwner(request),
+                        Err(_) => ParsedSocketInput::ProtocolError(
+                            "invalid durable NPC purchase request".to_owned(),
+                        ),
+                    };
+                    if input_tx
+                        .send(SocketInbound::Queued(QueuedSocketInput::new(
+                            parsed,
+                            Arc::clone(&reader_pending_count),
+                            message_permit,
+                            received_at,
+                            &diagnostics,
+                        )))
+                        .await
+                        .is_err()
+                    {
+                        return;
+                    }
+                    continue;
+                }
                 BrowserCommand::ClientCapabilities { capabilities } => {
                     if input_tx
                         .send(SocketInbound::Queued(QueuedSocketInput::new(
                             ParsedSocketInput::ClientCapabilities(capabilities),
                             Arc::clone(&reader_pending_count),
                             message_permit,
+                            received_at,
+                            &diagnostics,
                         )))
                         .await
                         .is_err()
@@ -4833,6 +6291,8 @@ fn spawn_socket_reader(
                             ParsedSocketInput::ResumeSession(request.credential),
                             Arc::clone(&reader_pending_count),
                             message_permit,
+                            received_at,
+                            &diagnostics,
                         )))
                         .await
                         .is_err()
@@ -4852,6 +6312,8 @@ fn spawn_socket_reader(
                                 ParsedSocketInput::ProtocolError(error),
                                 Arc::clone(&reader_pending_count),
                                 message_permit,
+                                received_at,
+                                &diagnostics,
                             )))
                             .await
                             .is_err()
@@ -4861,14 +6323,21 @@ fn spawn_socket_reader(
                         continue;
                     }
                 };
+            let skill_key_request = SkillKeyRequest::from_command(&command);
             let action = match browser_command_to_action(command) {
                 Ok(action) => action,
                 Err(error) => {
+                    let input = match skill_key_request {
+                        Some(request) => ParsedSocketInput::SkillKeyRejected { request, error },
+                        None => ParsedSocketInput::ProtocolError(error),
+                    };
                     if input_tx
                         .send(SocketInbound::Queued(QueuedSocketInput::new(
-                            ParsedSocketInput::ProtocolError(error),
+                            input,
                             Arc::clone(&reader_pending_count),
                             message_permit,
+                            received_at,
+                            &diagnostics,
                         )))
                         .await
                         .is_err()
@@ -4887,13 +6356,19 @@ fn spawn_socket_reader(
                 }
                 continue;
             }
+            let input_trace = diagnostics.as_ref().and_then(|s| input_gate_action_context(
+                &diagnostics, &action, s.decoded_ordinal.load(Ordering::Relaxed)));
+            drop(InputGateTraceSpan::start(input_trace, "reader_dispatch", 0));
             match try_handle_zone_movement_from_reader(
                 &action,
+                received_at,
                 &sender,
                 &movement_ingress,
                 &serial_execution_gate,
+                &movement_drain,
                 authenticated.load(Ordering::Acquire),
                 reader_pending_count.load(Ordering::Acquire),
+                input_trace,
             )
             .await
             {
@@ -4905,6 +6380,8 @@ fn spawn_socket_reader(
                             ParsedSocketInput::ProtocolError(error),
                             Arc::clone(&reader_pending_count),
                             message_permit,
+                            received_at,
+                            &diagnostics,
                         )))
                         .await
                         .is_err()
@@ -4919,9 +6396,12 @@ fn spawn_socket_reader(
                     ParsedSocketInput::Action {
                         action,
                         quest_operation_request,
+                        skill_key_request,
                     },
                     Arc::clone(&reader_pending_count),
                     message_permit,
+                    received_at,
+                    &diagnostics,
                 )))
                 .await
                 .is_err()
@@ -4933,19 +6413,36 @@ fn spawn_socket_reader(
     (input_rx, SocketReaderTask { handle }, pending_count)
 }
 
-fn new_gateway_session_for_web(state: &WebState) -> GatewaySession {
+fn new_gateway_session_for_web(state: &WebState) -> Result<GatewaySession, String> {
     let mut session = match &state.gameplay_event_sink {
-        Some(sink) => GatewaySession::new_with_zone_registry_and_event_sink(
+        Some(sink) => GatewaySession::try_new_with_zone_registry_and_event_sink(
             (*state.config).clone(),
             &state.zone_registry,
             Arc::clone(sink),
         ),
-        None => {
-            GatewaySession::new_with_zone_registry((*state.config).clone(), &state.zone_registry)
-        }
-    };
+        None => GatewaySession::try_new_with_zone_registry(
+            (*state.config).clone(),
+            &state.zone_registry,
+        ),
+    }?;
     session.configure_zone_owner_heartbeat(gateway_zone_owner_heartbeat_interval_ms(), 0);
-    session
+    Ok(session)
+}
+
+fn publish_spectator_frame_if_enabled(
+    spectator: &SpectatorHub,
+    snapshot: impl FnOnce() -> Option<mir2_simulation::WorldSnapshot>,
+) -> Result<Option<SpectatorFrame>, String> {
+    // Keep snapshot construction lazy: a disabled spectator must not clone the
+    // personal world or acquire the shared Zone lock on every capture interval.
+    if !spectator.config().enabled {
+        return Ok(None);
+    }
+    let Some(snapshot) = snapshot() else {
+        return Ok(None);
+    };
+    let _publish_stage = GatewaySlowStage::start("spectator.publish");
+    spectator.publish(&snapshot)
 }
 
 // `_injection_registration` is an RAII Drop-guard; reassigning it (to re-register on
@@ -4958,11 +6455,14 @@ async fn handle_socket_inner(
     reconnect_sessions: Arc<ReconnectSessionStore>,
     capacity: Arc<GatewayCapacityState>,
     identity: Arc<IdentityService>,
+    auth_rate_limit_policy: AuthRateLimitPolicy,
     active_session_permit: &mut Option<GatewayCapacityPermit>,
     save_queue: &mut WebSessionSaveQueue,
     route_refresh: &mut WebSessionRouteRefresh,
     native_resume: &mut NativeResumeConnectionState,
-    explicit_world_leave_completed: &mut bool,
+    explicit_world_leave: &mut ExplicitWorldLeaveState,
+    companions: Option<crate::companion_relay::CompanionRelay>,
+    companion_admission: &mut Option<crate::companion_relay::Admission>,
     injector: crate::inject::LiveSessionInjector,
     realm_info: Value,
     chat_hub: ChatBroadcastHub,
@@ -4971,12 +6471,150 @@ async fn handle_socket_inner(
     tcp_peer_ip: IpAddr,
     peer_address: String,
     user_agent: String,
+) -> SocketReconnectBinding {
+    let session_id = session.session_id().to_owned();
+    let (overload_tx, overload_rx) = tokio::sync::watch::channel(0);
+    let active_registration_id = Arc::new(AtomicU64::new(0));
+    let terminal = transport::TransportSignal::new();
+    let movement_drain = Arc::new(transport::MovementDrain::default());
+    let mut reconnect_binding = None;
+    let work = handle_socket_work(
+        socket,
+        session,
+        session_cache,
+        reconnect_sessions,
+        capacity,
+        identity,
+        auth_rate_limit_policy,
+        active_session_permit,
+        save_queue,
+        route_refresh,
+        native_resume,
+        explicit_world_leave,
+        companions,
+        companion_admission,
+        injector,
+        realm_info,
+        chat_hub,
+        spectator,
+        ai_live,
+        tcp_peer_ip,
+        peer_address,
+        user_agent,
+        overload_tx,
+        Arc::clone(&active_registration_id),
+        terminal.clone(),
+        Arc::clone(&movement_drain),
+        &mut reconnect_binding,
+    );
+    if let Err(reason) =
+        run_until_transport_end(work, overload_rx, active_registration_id, terminal.clone()).await
+    {
+        // Dropping work aborts both socket workers and releases every socket
+        // half, even when a network send is pending forever. No protocol
+        // LogOut/Disconnect is fabricated: handle_socket keeps its ordinary
+        // abnormal teardown, authoritative save and native resume credential.
+        terminal.end(reason);
+        eprintln!("web transport ended session_id={session_id} reason={reason:?}");
+    }
+    terminal.end(transport::TransportEnd::ReaderStopped);
+    let _stage = crate::session::GatewayLifecycleStage::start(&session_id, "movement.drain");
+    movement_drain.close_and_wait().await;
+    reconnect_binding
+}
+
+async fn run_until_transport_end<T>(
+    work: impl std::future::Future<Output = T>,
+    overloads: tokio::sync::watch::Receiver<u64>,
+    active_registration_id: Arc<AtomicU64>,
+    terminal: transport::TransportSignal,
+) -> Result<T, transport::TransportEnd> {
+    tokio::select! {
+        biased;
+        reason = transport::wait_for_end(terminal.subscribe()) => Err(reason),
+        reason = async {
+            let registration_id = wait_for_active_zone_overload(overloads, active_registration_id).await;
+            let reason = transport::TransportEnd::ZoneOverload(registration_id);
+            terminal.end(reason);
+            terminal.reason().unwrap_or(reason)
+        } => Err(reason),
+        // A reader can latch Close on another executor between the watch poll
+        // and the work poll. Preserve that first cause even if a sender then
+        // immediately returns BrokenPipe and work completes in this poll.
+        result = work => match terminal.reason() {
+            Some(reason) => Err(reason),
+            None => Ok(result),
+        },
+    }
+}
+
+async fn wait_for_active_zone_overload(
+    mut overloads: tokio::sync::watch::Receiver<u64>,
+    active_registration_id: Arc<AtomicU64>,
+) -> u64 {
+    loop {
+        let reported = *overloads.borrow_and_update();
+        let active = active_registration_id.load(Ordering::Acquire);
+        if reported != 0 && reported == active {
+            return reported;
+        }
+        // A just-prepared registration can signal before activation. Only
+        // this short handoff needs polling; idle sockets await the watch.
+        let changed = if reported > active {
+            match tokio::time::timeout(Duration::from_millis(50), overloads.changed()).await {
+                Ok(result) => result,
+                Err(_) => continue,
+            }
+        } else {
+            overloads.changed().await
+        };
+        if changed.is_err() {
+            return std::future::pending().await;
+        }
+    }
+}
+
+#[allow(unused_assignments)]
+async fn handle_socket_work(
+    socket: WebSocket,
+    session: &mut GatewaySession,
+    session_cache: SharedGatewaySessionCache,
+    reconnect_sessions: Arc<ReconnectSessionStore>,
+    capacity: Arc<GatewayCapacityState>,
+    identity: Arc<IdentityService>,
+    auth_rate_limit_policy: AuthRateLimitPolicy,
+    active_session_permit: &mut Option<GatewayCapacityPermit>,
+    save_queue: &mut WebSessionSaveQueue,
+    route_refresh: &mut WebSessionRouteRefresh,
+    native_resume: &mut NativeResumeConnectionState,
+    explicit_world_leave: &mut ExplicitWorldLeaveState,
+    companions: Option<crate::companion_relay::CompanionRelay>,
+    companion_admission: &mut Option<crate::companion_relay::Admission>,
+    injector: crate::inject::LiveSessionInjector,
+    realm_info: Value,
+    chat_hub: ChatBroadcastHub,
+    spectator: SpectatorHub,
+    ai_live: AiLiveHub,
+    tcp_peer_ip: IpAddr,
+    peer_address: String,
+    user_agent: String,
+    overload_tx: tokio::sync::watch::Sender<u64>,
+    active_zone_outbound_registration_id: Arc<AtomicU64>,
+    terminal: transport::TransportSignal,
+    movement_drain: Arc<transport::MovementDrain>,
+    reconnect_binding: &mut SocketReconnectBinding,
 ) {
+    let diagnostics = allocate_socket_diagnostics(
+        gateway_slow_stage_threshold().is_some() || input_gate_trace_ids().is_some(),
+        &NEXT_SOCKET_DIAGNOSTIC_ID,
+    );
+    if input_gate_trace_ids().is_some() {
+        if let Some(state) = diagnostics.as_ref() { let _ = state.input_gate_active_registration.set(Arc::clone(&active_zone_outbound_registration_id)); }
+    }
     let (sender, receiver) = socket.split();
-    let sender = Arc::new(AsyncMutex::new(sender));
+    let sender = Arc::new(transport::SocketSender::new(sender, terminal.clone())
+        .with_input_gate_diagnostics(diagnostics.clone()));
     if sender
-        .lock()
-        .await
         .send(Message::Text(realm_info.to_string().into()))
         .await
         .is_err()
@@ -4985,6 +6623,11 @@ async fn handle_socket_inner(
     }
     let mut runtime_tick = tokio::time::interval(gateway_runtime_tick_interval());
     runtime_tick.set_missed_tick_behavior(MissedTickBehavior::Delay);
+    let monthly_access_enabled = session
+        .monthly_card_config()
+        .is_ok_and(|config| config.monthly_card_policy.required);
+    let mut monthly_access_tick = tokio::time::interval(Duration::from_secs(1));
+    monthly_access_tick.set_missed_tick_behavior(MissedTickBehavior::Delay);
     let mut spectator_publish_tick = tokio::time::interval(Duration::from_millis(
         spectator.config().capture_interval_ms,
     ));
@@ -5001,6 +6644,9 @@ async fn handle_socket_inner(
     let mut authenticated_account_id: Option<String> = None;
     let mut active_identity_session: Option<VerifiedIdentitySession> = None;
     let mut native_game_shop = NativeGameShopConnectionState::default();
+    let mut npc_purchase = crate::npc_purchase_browser::BrowserNpcPurchaseConnection::default();
+    let mut native_attack = crate::attack_protocol::AttackV2Connection::default();
+    let mut server_catalog_gzip_v1 = false;
     let mut first_post_resume_identity_check_pending = false;
     let mut last_identity_revocation_check = Instant::now();
     let mut last_identity_database_check = Instant::now();
@@ -5044,29 +6690,76 @@ async fn handle_socket_inner(
     let movement_ingress = Arc::new(RwLock::new(initial_movement_ingress));
     let serial_execution_gate = Arc::new(AsyncRwLock::new(()));
     let socket_authenticated = Arc::new(AtomicBool::new(authenticated));
+    let billing_generation = Arc::new(AtomicU64::new(0));
+    let _billing_socket_fence = billing::socket_fence(
+        Arc::clone(&socket_authenticated),
+        Arc::clone(&billing_generation),
+    );
     let (zone_outbound_tx, zone_outbound_rx) = mpsc::channel(LIVE_ZONE_OUTBOUND_CAPACITY);
-    let active_zone_outbound_registration_id = Arc::new(AtomicU64::new(0));
+    let (owner_location_outbound_tx, owner_location_outbound_rx) =
+        mpsc::channel(OWNER_LOCATION_OUTBOUND_CAPACITY);
+    let zone_outbound_sender =
+        SharedZoneLiveOutboundSender::new(zone_outbound_tx, owner_location_outbound_tx)
+            .with_overload_signal(overload_tx.clone());
     let _zone_outbound_sender_task = spawn_zone_outbound_sender(
         zone_outbound_rx,
+        owner_location_outbound_rx,
         Arc::clone(&sender),
         Arc::clone(&serial_execution_gate),
         Arc::clone(&active_zone_outbound_registration_id),
+        overload_tx,
+        diagnostics.clone(),
     );
     let mut _zone_live_outbound_registration: Option<Box<dyn ZoneLiveOutboundRegistration>> = None;
     let mut chat_presence: Option<ChatPresence> = None;
+    let (companion_tx, mut companion_rx) = mpsc::channel::<crate::companion_relay::RelayDelivery>(crate::companion_relay::OUTPUT_CAPACITY);
     let (mut socket_inputs, _socket_reader_task, pending_socket_actions) = spawn_socket_reader(
         receiver,
         Arc::clone(&sender),
         Arc::clone(&movement_ingress),
         Arc::clone(&serial_execution_gate),
         Arc::clone(&socket_authenticated),
+        terminal.clone(),
+        movement_drain,
+        session.session_id().to_owned(),
+        diagnostics.clone(),
     );
 
     loop {
         tokio::select! {
             biased;
 
+            Some(delivery) = companion_rx.recv(), if companions.is_some() => {
+                let _serial_execution = serial_execution_gate.write().await;
+                let hub = companions.as_ref().expect("companion branch enabled");
+                let authorized = tokio::task::block_in_place(|| {
+                    companion_socket_is_authorized(session, authenticated, authenticated_account_id.as_deref(),
+                        active_identity_session.as_ref(), session_cache.as_ref(), &identity)
+                });
+                if !authorized || companion_admission.as_ref() != Some(&delivery.recipient)
+                    || !companion_admission_matches(&delivery.recipient, session, authenticated, active_identity_session.as_ref()) {
+                    hub.detach(&delivery.recipient.id).await;
+                    continue;
+                }
+                if let Some(owner) = &delivery.authorizing_owner {
+                    let owner_verified = VerifiedIdentitySession {
+                        account_id: owner.character.account_id.clone(),
+                        session_id: owner.identity_session_id.clone(), expires_at_ms: owner.expires_at_ms,
+                    };
+                    if !tokio::task::block_in_place(|| native_resume_identity_is_active(
+                        session_cache.as_ref(), &identity, &owner_verified, gateway_unix_ms())) {
+                        hub.detach(&owner.id).await;
+                        continue;
+                    }
+                }
+                if !hub.delivery_is_current(&delivery).await { continue; }
+                if send_companion_event(&sender, delivery.event).await.is_err() { return; }
+            }
+
             socket_input = socket_inputs.recv() => {
+                let _input_turn = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::Input, Some("socket_turn.input"),
+                );
                 let mut queued_input = match socket_input {
                     Some(SocketInbound::Queued(input)) => input,
                     Some(SocketInbound::Closed) | None => return,
@@ -5075,7 +6768,27 @@ async fn handle_socket_inner(
                         return;
                     }
                 };
-                let _serial_execution = serial_execution_gate.write().await;
+                let input_trace = input_gate_queued_context(&diagnostics, &queued_input);
+                drop(InputGateTraceSpan::start(input_trace, "input_dequeue", 0));
+                let mut queue_stage = GatewaySlowStage::since(
+                    "socket_input.queue_residence",
+                    queued_input.queued_at,
+                );
+                queue_stage.context = queued_input.diagnostic_context;
+                drop(queue_stage);
+                let input_gate_phase = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::InputGate, None,
+                );
+                let serial_gate_wait = GatewaySlowStage::for_socket("serial_gate.input_wait", &diagnostics);
+                let input_trace_wait = InputGateTraceSpan::start(input_trace, "input_write_gate", 0);
+                let mut _serial_execution = serial_execution_gate.write().await;
+                drop(input_trace_wait);
+                drop(serial_gate_wait);
+                drop(input_gate_phase);
+                let input_owner_heartbeat = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::InputOwnerHeartbeat,
+                    Some("socket_turn.input_owner_heartbeat"),
+                );
                 if let Err(error) = catch_gateway_panic("web zone owner command heartbeat", || {
                     tokio::task::block_in_place(|| session.renew_zone_owner_lease_if_due())
                 })
@@ -5084,9 +6797,75 @@ async fn handle_socket_inner(
                     let _ = send_error_message(&sender, &error).await;
                     continue;
                 }
+                drop(input_owner_heartbeat);
                 let parsed_input = queued_input.take_input();
-                let (mut action, quest_operation_request) = match parsed_input {
+                let parsed_input = match parsed_input {
+                    ParsedSocketInput::Companion(command) => {
+                        let first_identity_valid = tokio::task::block_in_place(|| {
+                            enforce_first_post_resume_action_identity(
+                                &mut first_post_resume_identity_check_pending,
+                                reconnect_sessions.as_ref(), native_resume, session_cache.as_ref(),
+                                &identity, session, authenticated_account_id.as_deref(),
+                                active_identity_session.as_ref(), gateway_unix_ms(),
+                            )
+                        });
+                        if !first_identity_valid {
+                            socket_authenticated.store(false, Ordering::Release);
+                            let _ = send_resume_rejected(&sender).await;
+                            return;
+                        }
+                        let authorized = tokio::task::block_in_place(|| {
+                            companion_socket_is_authorized(session, authenticated, authenticated_account_id.as_deref(),
+                                active_identity_session.as_ref(), session_cache.as_ref(), &identity)
+                        });
+                        if !authorized || companions.is_none() {
+                            if let (Some(hub), Some(old)) = (&companions, companion_admission.take()) {
+                                hub.detach(&old.id).await;
+                            }
+                            let event = companion_rejection(&command, crate::companion_relay::ReplyStatus::Denied);
+                            if send_companion_event(&sender, event).await.is_err() { return; }
+                            continue;
+                        }
+                        socket_authenticated.store(authenticated, Ordering::Release);
+                        let hub = companions.as_ref().expect("checked companion feature");
+                        if ensure_companion_admission(hub, companion_admission, session,
+                            active_identity_session.as_ref().expect("authorized identity"), &companion_tx).await.is_err() {
+                            let event = companion_rejection(&command, crate::companion_relay::ReplyStatus::Error);
+                            if send_companion_event(&sender, event).await.is_err() { return; }
+                            continue;
+                        }
+                        let admission_id = &companion_admission.as_ref().expect("attached admission").id;
+                        let result = match command {
+                            CompanionSocketCommand::Control(request) => {
+                                let anchor = if matches!(request.operation, crate::companion_relay::Operation::AuthorizeSupply | crate::companion_relay::Operation::RequestLifeSupply) {
+                                    let snapshot = tokio::task::block_in_place(|| session.world_snapshot());
+                                    snapshot.player_object_id.and_then(|id| snapshot.entities.iter().find(|entity| entity.object_id == id))
+                                        .map(|entity| crate::companion_relay::SupplyAnchor {
+                                            map_file_name: snapshot.map_file_name.clone().unwrap_or_default(),
+                                            point: crate::companion_supply::SupplyPoint { x: entity.x, y: entity.y },
+                                        })
+                                } else { None };
+                                hub.control_at(admission_id, request, anchor).await
+                            }
+                            CompanionSocketCommand::Register(request) => hub.register(admission_id, request).await,
+                            CompanionSocketCommand::Reply(reply) => hub.reply(admission_id, reply).await,
+                        };
+                        if result.is_err() {
+                            // The Hub may have accepted a request before its acknowledgement was lost.
+                            // Closing fences this admission; never automatically replay a mutation.
+                            return;
+                        }
+                        continue;
+                    }
+                    other => other,
+                };
+                let mut npc_purchase_request = None;
+                let mut native_attack_request = None;
+                let (action, quest_operation_request, skill_key_request) = match parsed_input {
+                    ParsedSocketInput::Companion(_) => unreachable!("handled dedicated private control input"),
                     ParsedSocketInput::ClientCapabilities(capabilities) => {
+                        let attack_capability_requested = capabilities.iter()
+                            .any(|capability| capability == "nativeAttackOutcomeV1");
                         match validate_native_client_capabilities(&capabilities) {
                             Ok(capabilities) => {
                                 if native_resume.opted_in && !capabilities.native_resume_v1 {
@@ -5098,9 +6877,17 @@ async fn handle_socket_inner(
                                 native_resume.opted_in = capabilities.native_resume_v1;
                                 native_game_shop.opted_in =
                                     capabilities.native_game_shop_receipt_v1;
-                                if !native_game_shop.opted_in {
+                                server_catalog_gzip_v1 = capabilities.server_catalog_gzip_v1;
+                                sender.set_world_snapshot_gzip(capabilities.server_world_snapshot_gzip_v1);
+                                npc_purchase.set_opted_in(capabilities.durable_npc_purchase_owner_v1);
+                                native_game_shop.gift_opted_in = capabilities.native_game_shop_gift_receipt_v1;
+                                if !native_game_shop.opted_in && !native_game_shop.gift_opted_in {
                                     native_game_shop.pending = None;
                                 }
+                                if attack_capability_requested && sender.send(Message::Text(json!({
+                                    "type":"attackCapabilitiesV2", "protocolVersion":2,
+                                    "capability":"nativeAttackOutcomeV1", "supported":true, "scope":"connection",
+                                }).to_string().into())).await.is_err() { return; }
                             }
                             Err(error) => {
                                 if send_error_message(&sender, &error).await.is_err() {
@@ -5116,14 +6903,54 @@ async fn handle_socket_inner(
                             && !authenticated
                             && active_session_permit.is_none()
                             && tokio::task::block_in_place(|| session.active_identity()).is_none();
+                        let mut completed_handoff = None;
+                        if eligible {
+                            let pending = tokio::task::block_in_place(|| prepare_native_resume_handoff(
+                                reconnect_sessions.as_ref(), session_cache.as_ref(), &identity,
+                                &credential, gateway_unix_ms(),
+                            ));
+                            let pending = match pending {
+                                Ok(pending) => pending,
+                                Err(_) => {
+                                    if send_resume_rejected(&sender).await.is_err() { return; }
+                                    continue;
+                                }
+                            };
+                            if let Some(pending) = pending {
+                                // Teardown's movement drain and save must make
+                                // progress without this connection's writer gate.
+                                drop(_serial_execution);
+                                let completed = {
+                                    let _stage = crate::session::GatewayLifecycleStage::start(
+                                        session.session_id(), "native_resume.handoff.wait",
+                                    );
+                                    pending.wait().await
+                                };
+                                _serial_execution = serial_execution_gate.write().await;
+                                let still_eligible = native_resume.opted_in
+                                    && native_resume.resume_allowed && !authenticated
+                                    && active_session_permit.is_none() && !terminal.ended()
+                                    && tokio::task::block_in_place(|| session.active_identity()).is_none();
+                                let Ok(completed) = completed else {
+                                    if send_resume_rejected(&sender).await.is_err() { return; }
+                                    continue;
+                                };
+                                if !still_eligible {
+                                    if send_resume_rejected(&sender).await.is_err() { return; }
+                                    continue;
+                                }
+                                completed_handoff = Some(completed);
+                            }
+                        }
                         let prepared = if eligible {
                             tokio::task::block_in_place(|| {
-                                validate_and_prepare_native_resume(
+                                validate_and_prepare_native_resume_with_handoff(
                                     reconnect_sessions.as_ref(),
                                     session_cache.as_ref(),
                                     &identity,
                                     &credential,
                                     gateway_unix_ms(),
+                                    completed_handoff.as_ref(),
                                     |reserved_session| {
                                         route_refresh
                                             .maybe_refresh(
@@ -5137,7 +6964,7 @@ async fn handle_socket_inner(
                                     |reserved_session| {
                                         prepare_zone_live_outbound(
                                             reserved_session,
-                                            &zone_outbound_tx,
+                                            &zone_outbound_sender,
                                         )
                                     },
                                 )
@@ -5158,7 +6985,7 @@ async fn handle_socket_inner(
                             }
                         };
                         let committed = tokio::task::block_in_place(|| {
-                            revalidate_and_commit_prepared_native_resume(
+                            revalidate_and_commit_prepared_native_resume_if_live(
                                 reconnect_sessions.as_ref(),
                                 session_cache.as_ref(),
                                 &identity,
@@ -5167,6 +6994,7 @@ async fn handle_socket_inner(
                                 verified,
                                 prepared_zone_registration,
                                 gateway_unix_ms(),
+                                &terminal,
                             )
                         });
                         let Ok((restored, binding, verified, prepared_zone_registration)) =
@@ -5180,6 +7008,9 @@ async fn handle_socket_inner(
 
                         *session = restored.session;
                         *active_session_permit = restored.active_session_permit;
+                        if tokio::task::block_in_place(|| synchronize_socket_reconnect_binding(
+                            session, reconnect_sessions.as_ref(), terminal.clone(), reconnect_binding,
+                        )).is_err() { return; }
                         authenticated = true;
                         authenticated_account_id = Some(binding.account_id.clone());
                         active_identity_session = Some(verified);
@@ -5248,10 +7079,27 @@ async fn handle_socket_inner(
                         }
                         continue;
                     }
+                    ParsedSocketInput::NpcPurchaseOwner(request) => {
+                        npc_purchase_request = Some(request);
+                        (None, None, None)
+                    }
+                    ParsedSocketInput::AttackV2(request) => {
+                        let object_id = request.object_id;
+                        native_attack_request = Some(request);
+                        (Some(SessionAction::Attack { object_id }), None, None)
+                    }
                     ParsedSocketInput::Action {
                         action,
                         quest_operation_request,
-                    } => (action, quest_operation_request),
+                        skill_key_request,
+                    } => (Some(action), quest_operation_request, skill_key_request),
+                    ParsedSocketInput::SkillKeyRejected { request, error } => {
+                        if send_world_snapshot_with_skill_ack(&sender, session, Some(&request), false).await.is_err()
+                            || send_error_message(&sender, &error).await.is_err() {
+                            return;
+                        }
+                        continue;
+                    }
                     ParsedSocketInput::ProtocolError(error) => {
                         if send_error_message(&sender, &error).await.is_err() {
                             return;
@@ -5280,22 +7128,118 @@ async fn handle_socket_inner(
                 if !first_post_resume_identity_check_pending {
                     socket_authenticated.store(authenticated, Ordering::Release);
                 }
-                let native_game_shop_request = if native_game_shop.opted_in {
+                if let Some(request) = native_attack_request.as_ref() {
+                    let prepared = catch_gateway_panic("attackV2 authorization", || {
+                        tokio::task::block_in_place(|| {
+                            let identity_valid = authenticated && active_identity_session.as_ref()
+                                .zip(authenticated_account_id.as_deref())
+                                .is_some_and(|(verified, account_id)| verified.account_id == account_id
+                                    && native_resume_identity_is_active(session_cache.as_ref(), &identity, verified, gateway_unix_ms()));
+                            let actor = if identity_valid { session.active_identity().filter(|actor|
+                                Some(actor.account_id.as_str()) == authenticated_account_id.as_deref()) } else { None };
+                            native_attack.prepare(request, identity_valid, actor.as_ref())
+                        })
+                    });
+                    match prepared {
+                        Ok(crate::attack_protocol::PreparedAttack::Execute) => {}
+                        Ok(crate::attack_protocol::PreparedAttack::Reply(frame)) => {
+                            let unknown = frame["result"] == "unknown";
+                            if sender.send(Message::Text(frame.to_string().into())).await.is_err() || unknown { return; }
+                            continue;
+                        }
+                        Err(_) => return,
+                    }
+                }
+                if let Some(request) = npc_purchase_request {
+                    let dispatch = tokio::task::block_in_place(|| {
+                        let identity_valid = authenticated && active_identity_session.as_ref()
+                            .zip(authenticated_account_id.as_deref())
+                            .is_some_and(|(verified, account_id)| verified.account_id == account_id
+                                && native_resume_identity_is_active(
+                                    session_cache.as_ref(), &identity, verified, gateway_unix_ms()));
+                        let qualified_admission = companion_admission.as_ref().filter(|admission| companion_admission_matches(
+                            admission, session, identity_valid, active_identity_session.as_ref()));
+                        crate::npc_purchase_browser::execute_companion_npc_purchase(
+                            session, &mut npc_purchase, authenticated_account_id.as_deref(),
+                            identity_valid, &request, companions.as_ref(),
+                            qualified_admission, gateway_unix_ms(),
+                        )
+                    });
+                    let dispatch = match dispatch {
+                        Ok(dispatch) => dispatch,
+                        Err(error) => {
+                            // No replacement ID, ordinary BuyItem or re-read
+                            // snapshot may conceal an uncertain mutation.
+                            eprintln!("durable NPC response unavailable: {error}");
+                            return;
+                        }
+                    };
+                    if send_npc_purchase_dispatch(sender.as_ref(), &dispatch).await.is_err() {
+                        return;
+                    }
+                    continue;
+                }
+                let Some(mut action) = action else { continue; };
+                if matches!(&action, SessionAction::Packet(ClientPacket::Login { .. } | ClientPacket::LogOut | ClientPacket::Disconnect) | SessionAction::PasskeyLogin { .. }) {
+                    billing_generation.fetch_add(1, Ordering::AcqRel);
+                }
+                if let SessionAction::Procurement(request) = &action {
+                    if procurement::socket_action(session, &identity,
+                        active_identity_session.as_ref(), authenticated,
+                        authenticated_account_id.as_deref(), request,
+                        &sender, &session_cache).await.is_err() { return; }
+                    continue;
+                }
+                if let SessionAction::Billing(request) = &action {
+                    if let Err(error) = billing::socket_action(session, Arc::clone(&identity),
+                        active_identity_session.as_ref(), authenticated, authenticated_account_id.as_deref(),
+                        request.clone(), Arc::clone(&sender), Arc::clone(&session_cache),
+                        Arc::clone(&socket_authenticated), Arc::clone(&billing_generation)).await {
+                        let reply = billing::error_reply(request, error);
+                        if sender.send(Message::Text(reply.to_string().into())).await.is_err() { return; }
+                    }
+                    continue;
+                }
+                if matches!(&action, SessionAction::MonthlyCardStatus | SessionAction::RedeemMonthlyCard { .. }) {
+                    let reply = tokio::task::block_in_place(|| monthly_card::socket_reply(
+                        session, &identity, active_identity_session.as_ref(), authenticated,
+                        authenticated_account_id.as_deref(), &action,
+                    ));
+                    if sender.send(Message::Text(reply.to_string().into())).await.is_err() { return; }
+                    continue;
+                }
+                let native_game_shop_request = if native_game_shop.opted_in || matches!(&action, SessionAction::GameShopGift { .. }) {
                     match native_game_shop_request_from_action(&action) {
-                        Some(Ok(request)) => {
+                        Some(Ok(mut request)) => {
+                            let in_game_identity = tokio::task::block_in_place(|| session.active_identity());
+                            if request.recipient_name.is_some() && authenticated && native_game_shop.gift_opted_in {
+                                if let Some(identity) = &in_game_identity {
+                                    request = match native_game_shop.bind_gift_request(
+                                        request, &identity.account_id, identity.character_index,
+                                    ) {
+                                        Ok(request) => request,
+                                        Err(receipt) => {
+                                            if send_native_game_shop_receipt(&sender, &receipt).await.is_err() { return; }
+                                            continue;
+                                        }
+                                    };
+                                }
+                            }
                             if let Err(receipt) = native_game_shop.reserve(request.clone()) {
                                 if send_native_game_shop_receipt(&sender, &receipt).await.is_err() {
                                     return;
                                 }
                                 continue;
                             }
-                            let in_game = tokio::task::block_in_place(|| {
-                                session.active_identity().is_some()
-                            });
+                            let in_game = in_game_identity.is_some();
                             let typed_outcome_supported = authenticated
                                 && in_game
                                 && tokio::task::block_in_place(|| {
-                                    session.supports_typed_game_shop_purchase_outcome()
+                                    if request.recipient_name.is_some() {
+                                        native_game_shop.gift_opted_in && session.supports_native_game_shop_gifts()
+                                    } else {
+                                        session.supports_typed_game_shop_purchase_outcome()
+                                    }
                                 });
                             if let Some(receipt) = native_game_shop_pre_execution_failure(
                                 &request,
@@ -5332,21 +7276,31 @@ async fn handle_socket_inner(
                     &action,
                     SessionAction::Packet(ClientPacket::StartGame { .. })
                 );
-                let leaves_world = is_explicit_session_leave_action(&action);
+                let leaves_world = is_explicit_session_leave_action(&action)
+                    || session.monthly_card_expiry_pending(authenticated_account_id.as_deref());
+                let disconnects = matches!(&action, SessionAction::Packet(ClientPacket::Disconnect));
+                let leaving_route = leaves_world.then(|| {
+                    tokio::task::block_in_place(|| OwnedSessionRoute::capture(session))
+                }).flatten();
 
                 let should_send_snapshot_by_action = should_send_world_snapshot_for_action(&action);
                 let low_latency_action = is_low_latency_action(&action);
                 let should_queue_save_by_action = should_queue_save_for_action(&action);
                 let runtime_tick_defer_duration = runtime_tick_defer_duration_for_action(&action);
+                let fishing_cast_out = matches!(
+                    &action,
+                    SessionAction::Packet(ClientPacket::FishingCast { cast_out: true })
+                );
                 let mut login_account_id = login_account_id_for_action(&action).map(str::to_string);
                 let mut login_identity_context = login_identity_context_for_action(&action);
                 if let Some(context) = auth_security_context_for_action(&action) {
-                    if let Err(error) = enforce_auth_rate_limits(
+                    if let Err(error) = enforce_auth_rate_limits_with_policy(
                         session_cache.as_ref(),
                         &identity,
                         &peer_address,
                         &user_agent,
                         &context,
+                        auth_rate_limit_policy,
                     ) {
                         let _ = send_error_message(&sender, &error).await;
                         continue;
@@ -5363,6 +7317,8 @@ async fn handle_socket_inner(
                     continue;
                 }
                 let start_game_character_index = start_game_character_index_for_action(&action);
+                let mut restored_from_reconnect = false;
+                let mut restored_handoff_authorization = None;
                 if let (true, Some(account_id), Some(character_index)) = (
                     authenticated,
                     authenticated_account_id.as_deref(),
@@ -5372,10 +7328,65 @@ async fn handle_socket_inner(
                         account_id: account_id.to_string(),
                         character_index,
                     };
-                    if let Some(restored) = reconnect_sessions.take(&key) {
+                    // A published live binding can be waited on only after its
+                    // real transport ended. Never infer teardown from a busy lease.
+                    let handoff_waiter = if tokio::task::block_in_place(|| session.active_identity()).is_none() {
+                        tokio::task::block_in_place(|| session_cache.get(&key))
+                            .and_then(|record| record.route_lease_owner)
+                            .and_then(|owner| reconnect_sessions.handoffs.waiter(&key, &owner))
+                    } else { None };
+                    let mut waited_authorization = None;
+                    if let Some(waiter) = handoff_waiter {
+                        let authorization = active_identity_session.as_ref()
+                            .filter(|verified| verified.account_id == key.account_id)
+                            .and_then(|verified| reconnect_sessions.capture_handoff_authorization(verified, gateway_unix_ms()));
+                        let Some(authorization) = authorization else {
+                            socket_authenticated.store(false, Ordering::Release);
+                            let _ = send_error_message(&sender, "Connection recovery unavailable. Please sign in again.").await;
+                            return;
+                        };
+                        let token = waiter.token();
+                        // Movement drain and persistence need other owner work to
+                        // run. No session/world/cache/store gate crosses this wait.
+                        drop(_serial_execution);
+                        let completed = {
+                            let _stage = crate::session::GatewayLifecycleStage::start(session.session_id(), "resume.handoff.wait");
+                            tokio::time::timeout(Duration::from_secs(30), waiter.wait()).await
+                        };
+                        _serial_execution = serial_execution_gate.write().await;
+                        let identity_current = authenticated
+                            && authenticated_account_id.as_deref() == Some(authorization.identity.account_id.as_str())
+                            && active_identity_session.as_ref() == Some(&authorization.identity)
+                            && terminal.reason().is_none()
+                            && tokio::task::block_in_place(|| native_resume_identity_is_active(
+                                session_cache.as_ref(), &identity, &authorization.identity, gateway_unix_ms()));
+                        if !matches!(&completed, Ok(Ok(ready)) if ready.same(&token)) || !identity_current {
+                            socket_authenticated.store(false, Ordering::Release);
+                            let _ = send_error_message(&sender, "Connection recovery unavailable. Please sign in again.").await;
+                            return;
+                        }
+                        waited_authorization = Some((authorization, token));
+                    }
+                    let restored = if let Some((authorization, token)) = waited_authorization.as_ref() {
+                        let restored = reconnect_sessions.take_after_handoff(&key, token, authorization, gateway_unix_ms());
+                        if restored.is_none() {
+                            // A competing restore, changed authorization or old
+                            // notification cannot fall through to a cold login.
+                            socket_authenticated.store(false, Ordering::Release);
+                            let _ = send_error_message(&sender, "Connection recovery unavailable. Please sign in again.").await;
+                            return;
+                        }
+                        restored
+                    } else { reconnect_sessions.take(&key) };
+                    if let Some(restored) = restored {
                         let restored_session_id = restored.session.session_id().to_string();
                         *session = restored.session;
                         *active_session_permit = restored.active_session_permit;
+                        if tokio::task::block_in_place(|| synchronize_socket_reconnect_binding(
+                            session, reconnect_sessions.as_ref(), terminal.clone(), reconnect_binding,
+                        )).is_err() { return; }
+                        restored_handoff_authorization = waited_authorization.map(|(authorization, _)| authorization);
+                        restored_from_reconnect = true;
                         eprintln!(
                             "web reconnect grace restored session {restored_session_id} for {}/{}",
                             key.account_id, key.character_index
@@ -5511,11 +7522,19 @@ async fn handle_socket_inner(
                     {
                         Ok(permit) => Some(permit),
                         Err(error) => {
+                            if !tokio::task::block_in_place(|| handoff_identity_still_current(
+                                restored_handoff_authorization.as_ref(), reconnect_sessions.as_ref(),
+                                authenticated, authenticated_account_id.as_deref(), active_identity_session.as_ref(),
+                                session_cache.as_ref(), &identity, gateway_unix_ms(),
+                            )) { socket_authenticated.store(false, Ordering::Release); let _ = send_error_message(&sender, "Connection recovery unavailable. Please sign in again.").await; return; }
                             release_pending_start_game_route_lease(
                                 session_cache.as_ref(),
                                 session,
                                 pending_start_game_route_lease.as_ref(),
                             );
+                            if send_world_snapshot_with_skill_ack(&sender, session, skill_key_request.as_ref(), false).await.is_err() {
+                                return;
+                            }
                             if let Some(request) = quest_operation_request.as_ref() {
                                 let nack = quest_operation_ack_for_responses(request, &[]);
                                 if send_world_snapshot_with_quest_ack(
@@ -5535,6 +7554,13 @@ async fn handle_socket_inner(
                     },
                     None => None,
                 };
+                // Capacity admission may itself await. Re-read shared identity
+                // authority after that final wait, before bootstrap or error snapshots.
+                if !tokio::task::block_in_place(|| handoff_identity_still_current(
+                    restored_handoff_authorization.as_ref(), reconnect_sessions.as_ref(),
+                    authenticated, authenticated_account_id.as_deref(), active_identity_session.as_ref(),
+                    session_cache.as_ref(), &identity, gateway_unix_ms(),
+                )) { socket_authenticated.store(false, Ordering::Release); let _ = send_error_message(&sender, "Connection recovery unavailable. Please sign in again.").await; return; }
                 let mut pending_active_session_permit = None;
                 if start_game_character_index.is_some()
                     && tokio::task::block_in_place(|| session.active_identity()).is_none()
@@ -5553,12 +7579,38 @@ async fn handle_socket_inner(
                         }
                     }
                 }
+                let skill_key_permitted = match &action {
+                    SessionAction::Packet(ClientPacket::MagicKey { spell, key, old_key }) =>
+                        tokio::task::block_in_place(|| session.supports_magic_key_assignment(*spell, *key, *old_key)),
+                    _ => false,
+                };
+                let request_class = request_metrics_class(&action);
+                let mut native_attack_admission = None;
+                let mut native_attack_error = None;
                 let execution_result = match catch_gateway_panic("web session action", || {
+                    let _trace = InputGateTraceSpan::start(input_trace, "input_execute", 0);
+                    let _slow_stage = GatewaySlowStage::for_socket("session_action.execute", &diagnostics);
                     tokio::task::block_in_place(|| {
-                        if let Some(request) = native_game_shop_request.as_ref() {
+                        if let Some(request) = native_attack_request.as_ref() {
+                            match session.execute_production_attack_requiring_typed_outcome(request.object_id, authenticated) {
+                                Ok(result) => {
+                                    native_attack_admission = Some(result.admission);
+                                    Ok((result.execution.packets, None))
+                                }
+                                Err(error) => {
+                                    let detail = error.to_string(); native_attack_error = Some(error); Err(detail)
+                                }
+                            }
+                        } else if let Some(request) = native_game_shop_request.as_ref() {
                             execute_native_game_shop_handler_seam(session, request).map(|dispatch| {
                                 (dispatch.normal_packets, Some(dispatch.post_execution))
                             })
+                        } else if restored_from_reconnect && authenticated {
+                            session.replay_retained_start_game_bootstrap(
+                                authenticated_account_id.as_deref().unwrap_or_default(),
+                                start_game_character_index.ok_or_else(|| "retained bootstrap requires StartGame".to_string())?,
+                                restored_from_reconnect,
+                            ).map(|packets| (packets, None))
                         } else {
                             execute_session_action(
                                 session,
@@ -5570,13 +7622,23 @@ async fn handle_socket_inner(
                         }
                     })
                 }) {
-                    Ok(Ok(execution)) => execution,
+                    Ok(Ok(execution)) => {
+                        crate::zone_metrics::record_request(request_class, queued_input.received_at.elapsed(), true);
+                        execution
+                    },
                     Ok(Err(error)) => {
+                        crate::zone_metrics::record_request(request_class, queued_input.received_at.elapsed(), false);
                         release_pending_start_game_route_lease(
                             session_cache.as_ref(),
                             session,
                             pending_start_game_route_lease.as_ref(),
                         );
+                        if let Some(request) = native_attack_request.as_ref() {
+                            let error = native_attack_error.take().unwrap_or_else(|| mir2_simulation::NativeAttackError::Unknown(error));
+                            let frame = crate::attack_protocol::error_frame(request, &error);
+                            let _ = sender.send(Message::Text(frame.to_string().into())).await;
+                            return;
+                        }
                         if native_game_shop_request.is_some() {
                             eprintln!(
                                 "native GameShop execution failed with unknown commit state; closing socket: {error}"
@@ -5584,6 +7646,9 @@ async fn handle_socket_inner(
                             return;
                         }
                         eprintln!("web session action rejected; internal detail: {error}");
+                        if send_world_snapshot_with_skill_ack(&sender, session, skill_key_request.as_ref(), false).await.is_err() {
+                            return;
+                        }
                         if let Some(request) = quest_operation_request.as_ref() {
                             let nack = quest_operation_ack_for_responses(request, &[]);
                             if send_world_snapshot_with_quest_ack(
@@ -5606,11 +7671,18 @@ async fn handle_socket_inner(
                         continue;
                     }
                     Err(error) => {
+                        crate::zone_metrics::record_request(request_class, queued_input.received_at.elapsed(), false);
                         release_pending_start_game_route_lease(
                             session_cache.as_ref(),
                             session,
                             pending_start_game_route_lease.as_ref(),
                         );
+                        if let Some(request) = native_attack_request.as_ref() {
+                            let frame = crate::attack_protocol::error_frame(request,
+                                &mir2_simulation::NativeAttackError::Unknown("execution panicked".into()));
+                            let _ = sender.send(Message::Text(frame.to_string().into())).await;
+                            return;
+                        }
                         if native_game_shop_request.is_some() {
                             eprintln!(
                                 "native GameShop execution panicked with unknown commit state; closing socket without receipt: {error}"
@@ -5618,6 +7690,9 @@ async fn handle_socket_inner(
                             return;
                         }
                         eprintln!("web session action panicked; internal detail: {error}");
+                        if send_world_snapshot_with_skill_ack(&sender, session, skill_key_request.as_ref(), false).await.is_err() {
+                            return;
+                        }
                         if let Some(request) = quest_operation_request.as_ref() {
                             let nack = quest_operation_ack_for_responses(request, &[]);
                             if send_world_snapshot_with_quest_ack(
@@ -5641,10 +7716,41 @@ async fn handle_socket_inner(
                     }
                 };
                 let (responses, native_game_shop_post_execution) = execution_result;
+                let runtime_tick_defer_duration = runtime_tick_defer_duration.or_else(|| {
+                    runtime_tick_wake_for_fishing_cast(fishing_cast_out, &responses)
+                });
+                if (starts_game || leaves_world) && tokio::task::block_in_place(|| {
+                    synchronize_socket_reconnect_binding(session, reconnect_sessions.as_ref(), terminal.clone(), reconnect_binding)
+                }).is_err() { return; }
                 if leaves_world {
-                    *explicit_world_leave_completed = true;
-                    native_resume.disable_and_revoke(reconnect_sessions.as_ref());
-                    active_session_permit.take();
+                    let release = tokio::task::block_in_place(|| explicit_world_leave.finish(
+                        session_cache.as_ref(), session, leaving_route, &responses,
+                        &background_route_refresh_record,
+                    ));
+                    if explicit_world_leave.completed {
+                        native_resume.disable_and_revoke(reconnect_sessions.as_ref());
+                        active_session_permit.take();
+                    }
+                    if let Err(error) = release {
+                        eprintln!("completed explicit leave route release failed: {error}");
+                        let _ = send_fixed_error_event(
+                            &sender,
+                            "routeReleaseUnavailable",
+                            "Your character was saved and logged out, but immediate re-entry is temporarily unavailable.",
+                        ).await;
+                        return;
+                    }
+                    if disconnects && explicit_world_leave.completed {
+                        // Crystal Disconnect retains its private identity for
+                        // teardown, unlike LogOut. Do not refresh that departed
+                        // identity or re-register it after releasing its lease.
+                        for packet in &responses {
+                            if send_server_packet(&sender, packet).await.is_err() {
+                                return;
+                            }
+                        }
+                        return;
+                    }
                 }
                 let quest_operation_ack = quest_operation_request
                     .as_ref()
@@ -5669,7 +7775,7 @@ async fn handle_socket_inner(
                 )
                 .await
                 {
-                    if native_game_shop_request.is_some() {
+                    if native_game_shop_request.is_some() || native_attack_request.is_some() {
                         eprintln!(
                             "native GameShop post-execution identity finalization failed; closing without receipt: {error}"
                         );
@@ -5695,7 +7801,10 @@ async fn handle_socket_inner(
                 }
                 let active_identity =
                     tokio::task::block_in_place(|| session.active_identity());
-                if leaves_world || active_identity.is_none() {
+                if starts_game && active_identity.is_some() {
+                    *explicit_world_leave = ExplicitWorldLeaveState::default();
+                }
+                if explicit_world_leave.completed || active_identity.is_none() {
                     chat_presence = None;
                 }
                 drop(action_capacity_permit);
@@ -5709,6 +7818,9 @@ async fn handle_socket_inner(
                 if pending_active_session_permit.is_some() && active_identity.is_some() {
                     *active_session_permit = pending_active_session_permit.take();
                 }
+                // A denied StartGame must release its reservation before any
+                // socket flush can block on a slow reader.
+                drop(pending_active_session_permit.take());
                 let force_route_refresh = start_game_character_index.is_some();
                 let next_authenticated = update_authenticated_state(authenticated, &responses);
                 if !authenticated && !next_authenticated {
@@ -5798,66 +7910,98 @@ async fn handle_socket_inner(
                     _injection_registration = None;
                 }
                 authenticated = next_authenticated;
+                detach_changed_companion_admission(&companions, companion_admission, session,
+                    authenticated, active_identity_session.as_ref()).await;
+                let send_monthly_status = authenticated && (login_identity_context.is_some() || starts_game || responses.iter().any(|p| matches!(p, ServerPacket::LogOutSuccess { .. })));
                 socket_authenticated.store(authenticated, Ordering::Release);
-                let next_movement_ingress = session.zone_movement_ingress();
-                *movement_ingress
-                    .write()
-                    .expect("zone movement ingress slot should not be poisoned") =
-                    next_movement_ingress.clone();
-                let next_zone_live_outbound_registration = if authenticated {
-                    match tokio::task::block_in_place(|| {
-                        register_zone_live_outbound(
-                            session,
-                            &zone_outbound_tx,
-                            active_zone_outbound_registration_id.as_ref(),
-                        )
-                    }) {
-                        Ok(registration) => registration,
-                        Err(error) => {
-                            if native_game_shop_request.is_some() {
-                                eprintln!(
-                                    "native GameShop post-execution Zone registration failed; closing without receipt: {error}"
-                                );
-                                return;
-                            }
-                            let _ = send_error_message(&sender, &error).await;
-                            return;
-                        }
-                    }
-                } else {
-                    active_zone_outbound_registration_id.store(0, Ordering::Release);
-                    None
-                };
-                _zone_live_outbound_registration = next_zone_live_outbound_registration;
-
-                if let Err(error) = flush_session_updates(
-                    &sender,
-                    session,
-                    session_cache.as_ref(),
-                    save_queue,
-                    route_refresh,
-                    responses,
-                    quest_operation_ack.as_ref(),
-                    should_send_snapshot_by_action,
-                    low_latency_action,
-                    should_queue_save_by_action,
-                    force_route_refresh,
-                )
-                .await
-                {
-                    if native_game_shop_request.is_some() {
+                // Keep the live registration stable for the lifetime of one
+                // viewport. MapInformation is the ordinary portal/scroll
+                // bootstrap too; it invalidates the old routing registration.
+                if let Err(error) = tokio::task::block_in_place(|| {
+                    refresh_zone_live_outbound(
+                        session,
+                        authenticated,
+                        starts_game || responses_begin_zone_bootstrap(&responses),
+                        &movement_ingress,
+                        &zone_outbound_sender,
+                        active_zone_outbound_registration_id.as_ref(),
+                        &mut _zone_live_outbound_registration,
+                    )
+                }) {
+                    if native_game_shop_request.is_some() || native_attack_request.is_some() {
                         eprintln!(
-                            "native GameShop post-execution flush failed; closing without receipt: {error}"
+                            "native GameShop post-execution Zone registration failed; closing without receipt: {error}"
                         );
                         return;
                     }
-                    eprintln!("web session state flush failed; internal detail: {error}");
-                    let _ = send_fixed_error_event(
+                    let _ = send_error_message(&sender, &error).await;
+                    return;
+                }
+
+                let flush_result = {
+                    let _trace = InputGateTraceSpan::start(input_trace, "input_flush", 0);
+                    let _slow_stage = GatewaySlowStage::for_socket("session_action.flush", &diagnostics);
+                    if native_attack_request.is_some() {
+                        flush_session_updates_with_deferred_snapshot(
                         &sender,
-                        "stateSyncUnavailable",
-                        "Player state synchronization is temporarily unavailable.",
+                        session,
+                        session_cache.as_ref(),
+                        save_queue,
+                        route_refresh,
+                        responses,
+                        server_catalog_gzip_v1,
+                        quest_operation_ack.as_ref(),
+                        should_send_snapshot_by_action,
+                        low_latency_action,
+                        should_queue_save_by_action,
+                        force_route_refresh,
+                        true,
                     )
-                    .await;
+                    .await
+                    } else {
+                        flush_session_updates(
+                            &sender,
+                            session,
+                            session_cache.as_ref(),
+                            save_queue,
+                            route_refresh,
+                            responses,
+                            server_catalog_gzip_v1,
+                            quest_operation_ack.as_ref(),
+                            should_send_snapshot_by_action,
+                            low_latency_action,
+                            should_queue_save_by_action,
+                            force_route_refresh,
+                        )
+                        .await
+                        .map(|_| false)
+                    }
+                };
+                let pending_attack_snapshot = match flush_result {
+                    Ok(pending_snapshot) => pending_snapshot,
+                    Err(error) => {
+                        if native_game_shop_request.is_some() || native_attack_request.is_some() {
+                            eprintln!(
+                                "native GameShop post-execution flush failed; closing without receipt: {error}"
+                            );
+                            return;
+                        }
+                        eprintln!("web session state flush failed; internal detail: {error}");
+                        let _ = send_fixed_error_event(
+                            &sender,
+                            "stateSyncUnavailable",
+                            "Player state synchronization is temporarily unavailable.",
+                        )
+                        .await;
+                        return;
+                    }
+                };
+                if send_monthly_status {
+                    if let Some(account) = authenticated_account_id.as_deref() {
+                        if monthly_card::send_status(&sender, session, account).await.is_err() { return; }
+                    }
+                }
+                if send_world_snapshot_with_skill_ack(&sender, session, skill_key_request.as_ref(), skill_key_permitted).await.is_err() {
                     return;
                 }
                 if let (Some(request), Some(receipt)) = (
@@ -5900,12 +8044,30 @@ async fn handle_socket_inner(
                         session,
                     );
                 }
+                if let Some(request) = native_attack_request.as_ref() {
+                    let Some(admission) = native_attack_admission else { return; };
+                    let frame = tokio::task::block_in_place(|| {
+                        native_attack.complete(request, admission, session.active_identity().as_ref())
+                    });
+                    let Ok(frame) = frame else { return; };
+                    if sender.send(Message::Text(frame.to_string().into())).await.is_err() { return; }
+                    if pending_attack_snapshot
+                        && send_world_snapshot_with_quest_ack(
+                            &sender, session, quest_operation_ack.as_ref(),
+                        ).await.is_err()
+                    {
+                        return;
+                    }
+                }
                 if let Some(duration) = runtime_tick_defer_duration {
                     runtime_tick_deferred_until = Instant::now() + duration;
                     runtime_tick.reset_after(duration);
                 }
             }
             broadcast = recv_optional_chat(&mut chat_presence) => {
+                let _chat_turn = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::Chat, Some("socket_turn.chat"),
+                );
                 match broadcast {
                     Ok(packet) => {
                         if send_server_packet(&sender, &packet).await.is_err() {
@@ -5919,6 +8081,9 @@ async fn handle_socket_inner(
                 }
             }
             maybe_injection = inject_rx.recv() => {
+                let _injection_turn = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::Injection, Some("socket_turn.injection"),
+                );
                 let Some(crate::inject::InjectionMessage { command, reply }) = maybe_injection else {
                     continue;
                 };
@@ -5944,6 +8109,22 @@ async fn handle_socket_inner(
                 };
                 let map_changed = responses_require_resume_rotation(&responses);
                 let packet_count = responses.len();
+                if responses_begin_zone_bootstrap(&responses) {
+                    if let Err(error) = tokio::task::block_in_place(|| {
+                        refresh_zone_live_outbound(
+                            session,
+                            authenticated,
+                            true,
+                            &movement_ingress,
+                            &zone_outbound_sender,
+                            active_zone_outbound_registration_id.as_ref(),
+                            &mut _zone_live_outbound_registration,
+                        )
+                    }) {
+                        let _ = send_error_message(&sender, &error).await;
+                        return;
+                    }
+                }
                 if let Err(error) = flush_session_updates(
                     &sender,
                     session,
@@ -5951,6 +8132,7 @@ async fn handle_socket_inner(
                     save_queue,
                     route_refresh,
                     responses,
+                    server_catalog_gzip_v1,
                     None,
                     true,
                     false,
@@ -5981,16 +8163,26 @@ async fn handle_socket_inner(
                 }
                 let _ = reply.send(crate::inject::InjectionOutcome { packet_count });
             }
-            _ = spectator_publish_tick.tick() => {
-                if tokio::task::block_in_place(|| session.active_identity()).is_none() {
-                    continue;
-                }
-                let snapshot = tokio::task::block_in_place(|| session.world_snapshot());
-                if let Err(error) = spectator.publish(&snapshot) {
+            _ = spectator_publish_tick.tick(), if spectator.config().enabled => {
+                let _spectator_turn = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::Spectator, Some("socket_turn.spectator"),
+                );
+                let result = tokio::task::block_in_place(|| {
+                    publish_spectator_frame_if_enabled(&spectator, || {
+                        let _snapshot_stage = GatewaySlowStage::for_socket(
+                            "spectator.snapshot", &diagnostics,
+                        );
+                        session.active_identity().map(|_| session.spectator_world_snapshot())
+                    })
+                });
+                if let Err(error) = result {
                     eprintln!("spectator frame publish skipped: {error}");
                 }
             }
             _ = ai_live_tick.tick(), if authenticated => {
+                let _ai_live_turn = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::AiLive, Some("socket_turn.ai_live"),
+                );
                 let status = ai_live.status();
                 let game_overlay_ready = status.distribution.channels.iter().any(|channel| {
                     channel.channel
@@ -6011,10 +8203,7 @@ async fn handle_socket_inner(
                     && latest_segment_id.is_some()
                     && latest_segment_id != last_ai_live_segment_id
                 {
-                    if sender
-                        .lock()
-                        .await
-                        .send(Message::Text(
+                    if sender.send(Message::Text(
                             json!({
                                 "type": "aiLiveStatus",
                                 "payload": status
@@ -6030,7 +8219,16 @@ async fn handle_socket_inner(
                     last_ai_live_segment_id = latest_segment_id;
                 }
             }
-            _ = runtime_tick.tick() => {
+            fishing_tick = async {
+                tokio::select! {
+                    _ = crate::fishing_clock::wait_for_fishing_tick(session.next_fishing_wake()) => true,
+                    _ = runtime_tick.tick() => false,
+                    _ = monthly_access_tick.tick(), if monthly_access_enabled && active_session_permit.is_some() => false,
+                }
+            } => {
+                let _runtime_tick_turn = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::RuntimeTick, Some("runtime_tick.total"),
+                );
                 let now = Instant::now();
                 if authenticated
                     && now.duration_since(last_identity_revocation_check) >= Duration::from_secs(5)
@@ -6044,7 +8242,14 @@ async fn handle_socket_inner(
                         let _ = send_error_message(&sender, "identity session expired").await;
                         return;
                     }
-                    match session_cache.identity_session_is_revoked(&verified.session_id) {
+                    let identity_revocation = {
+                        let _identity_cache = SocketDiagnosticPhaseGuard::enter(
+                            &diagnostics, SocketDiagnosticPhase::IdentityCache,
+                            Some("runtime_tick.identity_cache"),
+                        );
+                        session_cache.identity_session_is_revoked(&verified.session_id)
+                    };
+                    match identity_revocation {
                         Ok(false) => {}
                         Ok(true) => {
                             let _ = send_error_message(&sender, "identity session was revoked").await;
@@ -6063,9 +8268,14 @@ async fn handle_socket_inner(
                         >= Duration::from_secs(60)
                     {
                         last_identity_database_check = now;
+                        let identity_database = SocketDiagnosticPhaseGuard::enter(
+                            &diagnostics, SocketDiagnosticPhase::IdentityDatabase,
+                            Some("runtime_tick.identity_database"),
+                        );
                         let database_check = tokio::task::block_in_place(|| {
                             identity.touch_session(verified)
                         });
+                        drop(identity_database);
                         if let Err(error) = database_check {
                             let _ = send_error_message(
                                 &sender,
@@ -6076,6 +8286,10 @@ async fn handle_socket_inner(
                         }
                     }
                 }
+                let resume_credential = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::ResumeCredential,
+                    Some("runtime_tick.resume_credential"),
+                );
                 if maybe_issue_native_resume_credential(
                     &sender,
                     reconnect_sessions.as_ref(),
@@ -6092,19 +8306,52 @@ async fn handle_socket_inner(
                 {
                     return;
                 }
+                drop(resume_credential);
+                let owner_heartbeat = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::OwnerHeartbeat,
+                    Some("runtime_tick.owner_heartbeat"),
+                );
                 if let Err(error) = catch_gateway_panic("web zone owner heartbeat", || {
                     tokio::task::block_in_place(|| session.renew_zone_owner_lease_if_due())
                 }).and_then(|result| result.map(|_| ())) {
                     let _ = send_error_message(&sender, &error).await;
                     return;
                 }
-                if now < runtime_tick_deferred_until {
+                drop(owner_heartbeat);
+                let preflight = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::Preflight, Some("runtime_tick.preflight"),
+                );
+                let monthly_expiry_pending = session.monthly_card_expiry_pending(authenticated_account_id.as_deref());
+                if !fishing_tick && now < runtime_tick_deferred_until && !monthly_expiry_pending
+                    && !session.has_pending_shared_personal_work() {
                     continue;
                 }
+                drop(preflight);
+                // Tick can complete a queued portal movement and rebuild the
+                // viewport. Serialize its bootstrap/re-registration/flush just
+                // like a player action so live ACKs cannot precede the landing.
+                let tick_trace = input_gate_socket_context(&diagnostics, 0, "tick", u8::MAX);
+                let tick_trace_wait = InputGateTraceSpan::start(tick_trace, "tick_write_gate", 20);
+                let tick_gate_phase = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::TickGate,
+                    Some("runtime_tick.serial_gate_wait"),
+                );
+                let _serial_execution = serial_execution_gate.write().await;
+                drop(tick_trace_wait);
+                drop(tick_gate_phase);
+                let monthly_expiry_route = monthly_expiry_pending
+                    .then(|| tokio::task::block_in_place(|| OwnedSessionRoute::capture(session))).flatten();
                 let responses = match catch_gateway_panic("web session tick", || {
+                    let _trace = InputGateTraceSpan::start(tick_trace, "tick_execute", 20);
+                    let _slow_stage = GatewaySlowStage::for_socket("runtime_tick.execute", &diagnostics);
                     tokio::task::block_in_place(|| {
+                        let command = if fishing_tick {
+                            WorldCommand::TickFishing
+                        } else {
+                            WorldCommand::Tick
+                        };
                         session
-                            .execute_with_outcome(WorldCommand::Tick)
+                            .execute_with_outcome(command)
                             .map(|execution| execution.packets)
                     })
                 })
@@ -6112,6 +8359,9 @@ async fn handle_socket_inner(
                     Ok(responses) => responses,
                     Err(error) => {
                         if crate::gate15::health().is_some() {
+                            if fishing_tick {
+                                session.defer_fishing_wake(Instant::now());
+                            }
                             eprintln!(
                                 "Gate 15 transient Zone tick failure; keeping player socket for placement recovery: {error}"
                             );
@@ -6121,38 +8371,88 @@ async fn handle_socket_inner(
                         return;
                     }
                 };
+                detach_changed_companion_admission(&companions, companion_admission, session,
+                    authenticated, active_identity_session.as_ref()).await;
+                let monthly_logged_out = monthly_expiry_route.is_some()
+                    && responses.iter().any(|packet| matches!(packet, ServerPacket::LogOutSuccess { .. }));
+                if monthly_logged_out {
+                    let release = tokio::task::block_in_place(|| explicit_world_leave.finish(
+                        session_cache.as_ref(), session, monthly_expiry_route, &responses,
+                        &background_route_refresh_record,
+                    ));
+                    if let Err(error) = release { let _ = send_error_message(&sender, &error).await; return; }
+                    native_resume.disable_and_revoke(reconnect_sessions.as_ref());
+                    active_session_permit.take(); chat_presence = None;
+                    if tokio::task::block_in_place(|| refresh_zone_live_outbound(session, authenticated, true,
+                        &movement_ingress, &zone_outbound_sender, active_zone_outbound_registration_id.as_ref(),
+                        &mut _zone_live_outbound_registration)).is_err() { return; }
+                }
                 let map_changed = responses_require_resume_rotation(&responses);
-                if responses.is_empty() {
-                    if let Err(error) = save_queue.checkpoint(now, || {
-                        tokio::task::block_in_place(|| {
-                            catch_gateway_panic("web save_active_character", || {
-                                session.save_active_character()
-                            })
-                            .and_then(|result| result)
-                        })
+                if responses_begin_zone_bootstrap(&responses) {
+                    if let Err(error) = tokio::task::block_in_place(|| {
+                        refresh_zone_live_outbound(
+                            session,
+                            authenticated,
+                            true,
+                            &movement_ingress,
+                            &zone_outbound_sender,
+                            active_zone_outbound_registration_id.as_ref(),
+                            &mut _zone_live_outbound_registration,
+                        )
                     }) {
+                        let _ = send_error_message(&sender, &error).await;
+                        return;
+                    }
+                }
+                if responses.is_empty() {
+                    if let Err(error) = send_companion_safety_snapshot_if_changed(&sender, session).await {
+                        let _ = send_error_message(&sender, &error).await;
+                        return;
+                    }
+                    let checkpoint_result = {
+                        let _slow_stage = GatewaySlowStage::for_socket("runtime_tick.save_checkpoint", &diagnostics);
+                        save_queue.checkpoint(now, || {
+                            tokio::task::block_in_place(|| {
+                                catch_gateway_panic("web save_active_character", || {
+                                    session.save_active_character()
+                                })
+                                .and_then(|result| result)
+                            })
+                        })
+                    };
+                    if let Err(error) = checkpoint_result {
                         let _ = send_error_message(&sender, &error).await;
                         return;
                     }
                     continue;
                 }
-                if let Err(error) = flush_session_updates(
-                    &sender,
-                    session,
-                    session_cache.as_ref(),
-                    save_queue,
-                    route_refresh,
-                    responses,
-                    None,
-                    false,
-                    true,
-                    false,
-                    false,
-                )
-                .await
-                {
+                let flush_result = {
+                    let _trace = InputGateTraceSpan::start(tick_trace, "tick_flush", 20);
+                    let _slow_stage = GatewaySlowStage::for_socket("runtime_tick.flush", &diagnostics);
+                    flush_session_updates(
+                        &sender,
+                        session,
+                        session_cache.as_ref(),
+                        save_queue,
+                        route_refresh,
+                        responses,
+                        server_catalog_gzip_v1,
+                        None,
+                        false,
+                        true,
+                        false,
+                        false,
+                    )
+                    .await
+                };
+                if let Err(error) = flush_result {
                     let _ = send_error_message(&sender, &error).await;
                     return;
+                }
+                if monthly_logged_out {
+                    if let Some(account) = authenticated_account_id.as_deref() {
+                        if monthly_card::send_status(&sender, session, account).await.is_err() { return; }
+                    }
                 }
                 if map_changed
                     && maybe_issue_native_resume_credential(
@@ -6171,9 +8471,11 @@ async fn handle_socket_inner(
                 {
                     return;
                 }
-                runtime_tick_deferred_until =
-                    Instant::now() + gateway_runtime_tick_input_wake_grace();
-                runtime_tick.reset_after(gateway_runtime_tick_input_wake_grace());
+                if !fishing_tick {
+                    runtime_tick_deferred_until =
+                        Instant::now() + gateway_runtime_tick_input_wake_grace();
+                    runtime_tick.reset_after(gateway_runtime_tick_input_wake_grace());
+                }
             }
         }
     }
@@ -6248,55 +8550,106 @@ async fn flush_session_updates(
     save_queue: &mut WebSessionSaveQueue,
     route_refresh: &mut WebSessionRouteRefresh,
     responses: Vec<ServerPacket>,
+    server_catalog_gzip_v1: bool,
     quest_operation_ack: Option<&QuestOperationAck>,
     should_send_snapshot_by_action: bool,
     low_latency_action: bool,
     should_queue_save_by_action: bool,
     force_route_refresh: bool,
 ) -> Result<(), String> {
-    let response_requires_snapshot = responses_require_world_snapshot(&responses);
+    flush_session_updates_with_deferred_snapshot(
+        sender,
+        session,
+        session_cache,
+        save_queue,
+        route_refresh,
+        responses,
+        server_catalog_gzip_v1,
+        quest_operation_ack,
+        should_send_snapshot_by_action,
+        low_latency_action,
+        should_queue_save_by_action,
+        force_route_refresh,
+        false,
+    )
+    .await
+    .map(|_| ())
+}
 
-    for response in responses {
-        send_server_packet(sender, &response)
-            .await
-            .map_err(|error| error.to_string())?;
+async fn flush_session_updates_with_deferred_snapshot(
+    sender: &SharedWebSocketSender,
+    session: &mut GatewaySession,
+    session_cache: &dyn crate::cache::GatewaySessionCache,
+    save_queue: &mut WebSessionSaveQueue,
+    route_refresh: &mut WebSessionRouteRefresh,
+    responses: Vec<ServerPacket>,
+    server_catalog_gzip_v1: bool,
+    quest_operation_ack: Option<&QuestOperationAck>,
+    should_send_snapshot_by_action: bool,
+    low_latency_action: bool,
+    should_queue_save_by_action: bool,
+    force_route_refresh: bool,
+    defer_snapshot: bool,
+) -> Result<bool, String> {
+    let response_requires_snapshot = responses_require_world_snapshot(&responses);
+    let low_latency_response_requires_snapshot =
+        low_latency_responses_require_world_snapshot(&responses);
+
+    {
+        let _slow_stage = GatewaySlowStage::start("flush.responses");
+        catalog_transport::send_session_packets(sender, &responses, server_catalog_gzip_v1).await?;
     }
+    drop(responses);
 
     if low_latency_action {
-        return Ok(());
+        // Calendar/kill progress and committed player progression are folded
+        // from the authoritative snapshot by the native client. Keep ordinary
+        // movement and world deltas on the packet-only fast path.
+        let low_latency_response_requires_snapshot = low_latency_response_requires_snapshot
+            || companion_safety_snapshot_pending(session)?;
+        if low_latency_response_requires_snapshot && !defer_snapshot {
+            send_world_snapshot_with_quest_ack(sender, session, quest_operation_ack).await?;
+        }
+        return Ok(defer_snapshot && low_latency_response_requires_snapshot);
     }
 
-    let external_state_changed =
-        tokio::task::block_in_place(|| refresh_external_session_state(session))?;
+    let external_state_changed = {
+        let _slow_stage = GatewaySlowStage::start("flush.external_state");
+        tokio::task::block_in_place(|| refresh_external_session_state(session))?
+    };
     let should_send_snapshot =
         should_send_snapshot_by_action || response_requires_snapshot || external_state_changed;
 
-    if should_send_snapshot {
+    if should_send_snapshot && !defer_snapshot {
         send_world_snapshot_with_quest_ack(sender, session, quest_operation_ack).await?;
     }
 
-    if !low_latency_action
-        && should_queue_save_by_action
-        && tokio::task::block_in_place(|| session.active_identity()).is_some()
-    {
-        save_queue.request_save(Instant::now(), || {
-            tokio::task::block_in_place(|| {
-                catch_gateway_panic("web save_active_character", || {
-                    session.save_active_character()
+    let save_result = {
+        let _slow_stage = GatewaySlowStage::start("flush.save");
+        if !low_latency_action
+            && should_queue_save_by_action
+            && tokio::task::block_in_place(|| session.active_identity()).is_some()
+        {
+            save_queue.request_save(Instant::now(), || {
+                tokio::task::block_in_place(|| {
+                    catch_gateway_panic("web save_active_character", || {
+                        session.save_active_character()
+                    })
+                    .and_then(|result| result)
                 })
-                .and_then(|result| result)
             })
-        })?;
-    } else {
-        save_queue.checkpoint(Instant::now(), || {
-            tokio::task::block_in_place(|| {
-                catch_gateway_panic("web save_active_character", || {
-                    session.save_active_character()
+        } else {
+            save_queue.checkpoint(Instant::now(), || {
+                tokio::task::block_in_place(|| {
+                    catch_gateway_panic("web save_active_character", || {
+                        session.save_active_character()
+                    })
+                    .and_then(|result| result)
                 })
-                .and_then(|result| result)
             })
-        })?;
-    }
+        }
+    };
+    save_result?;
 
     if let Err(error) = tokio::task::block_in_place(|| {
         route_refresh.maybe_refresh(session_cache, session, Instant::now(), force_route_refresh)
@@ -6304,7 +8657,9 @@ async fn flush_session_updates(
         eprintln!("web session route lease refresh skipped: {error}");
     }
 
-    Ok(())
+    // The caller may publish its correlated receipt only after these original
+    // persistence and route-refresh steps, then send this presentation snapshot.
+    Ok(defer_snapshot && should_send_snapshot)
 }
 
 fn route_lease_ttl_seconds() -> u64 {
@@ -6402,16 +8757,47 @@ fn runtime_tick_defer_duration_for_action(action: &SessionAction) -> Option<Dura
         SessionAction::Packet(ClientPacket::StartGame { .. }) => {
             Some(gateway_runtime_tick_bootstrap_grace())
         }
-        // Active input should wake the runtime tick loop, otherwise a queued
-        // Crystal movement retry can inherit StartGame's bootstrap grace. Keep
-        // a tiny batching window so follow-up input wins races against heavy
-        // world ticks on the same WebSocket task.
+        // Active movement, combat and item use must wake the runtime tick loop.
+        // Otherwise an action immediately after StartGame can leave resolved
+        // Zone damage or a consumed potion's personal restoration queued for
+        // the full bootstrap grace, even while KeepAlive acknowledges. Retain
+        // the small input batching window before the ordinary session drain.
         SessionAction::MoveTo { .. }
+        | SessionAction::Attack { .. }
+        | SessionAction::CastSkill { .. }
+        | SessionAction::UseItem { .. }
         | SessionAction::Packet(
-            ClientPacket::Walk { .. } | ClientPacket::Run { .. } | ClientPacket::Turn { .. },
+            ClientPacket::Walk { .. }
+            | ClientPacket::Run { .. }
+            | ClientPacket::Turn { .. }
+            | ClientPacket::Attack { .. }
+            | ClientPacket::RangeAttack { .. }
+            | ClientPacket::Magic { .. }
+            | ClientPacket::UseItem { .. },
         ) => Some(gateway_runtime_tick_input_wake_grace()),
         _ => None,
     }
+}
+
+fn runtime_tick_wake_for_fishing_cast(
+    fishing_cast_out: bool,
+    responses: &[ServerPacket],
+) -> Option<Duration> {
+    // A successful cast starts progress on the personal runtime. Its direct
+    // acknowledgement releases the idle bootstrap delay before the first tick.
+    (fishing_cast_out
+        && responses.iter().any(|packet| {
+            matches!(
+                packet,
+                ServerPacket::FishingUpdate {
+                    fishing: true,
+                    progress_percent: 0,
+                    found_fish: false,
+                    ..
+                }
+            )
+        }))
+    .then(gateway_runtime_tick_input_wake_grace)
 }
 
 fn positive_usize_env(name: &str) -> Option<usize> {
@@ -6500,6 +8886,102 @@ fn auth_security_context_for_action(action: &SessionAction) -> Option<AuthSecuri
     }
 }
 
+// An explicit, immutable startup policy for isolated loopback load experiments.
+// Normal authentication, all other buckets and successful-login clearing stay unchanged.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+struct AuthRateLimitPolicy {
+    load_test_login_peer_limit: Option<u64>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct LoadTestLoginHealth {
+    test_only: bool,
+    login_peer_limit: u64,
+    login_device_limit: u64,
+    window_seconds: u64,
+}
+
+impl AuthRateLimitPolicy {
+    fn from_environment(actual_web_addr: SocketAddr) -> Result<Self, String> {
+        let raw = match env::var("MIR2_GATEWAY_LOAD_TEST_LOGIN_PEER_LIMIT") {
+            Ok(raw) => raw,
+            Err(env::VarError::NotPresent) => return Ok(Self::default()),
+            Err(env::VarError::NotUnicode(_)) => {
+                return Err(
+                    "MIR2_GATEWAY_LOAD_TEST_LOGIN_PEER_LIMIT must be an integer in 30..=1024"
+                        .into(),
+                );
+            }
+        };
+        Self::from_values(
+            Some(&raw),
+            env::var("MIR2_RUNTIME_ENV").ok().as_deref(),
+            env::var("MIR2_GATEWAY_WEB_ADDR").ok().as_deref(),
+            env::var("MIR2_GATEWAY_TCP_ADDR").ok().as_deref(),
+            actual_web_addr,
+            gateway_prod_like_env(),
+        )
+    }
+
+    fn from_values(
+        raw_limit: Option<&str>,
+        runtime_env: Option<&str>,
+        web_addr: Option<&str>,
+        tcp_addr: Option<&str>,
+        actual_web_addr: SocketAddr,
+        prod_like: bool,
+    ) -> Result<Self, String> {
+        let Some(raw) = raw_limit else {
+            return Ok(Self::default());
+        };
+        let limit = raw
+            .parse::<u64>()
+            .ok()
+            .filter(|limit| {
+                !raw.is_empty()
+                    && raw.bytes().all(|byte| byte.is_ascii_digit())
+                    && (30..=1024).contains(limit)
+            })
+            .ok_or("MIR2_GATEWAY_LOAD_TEST_LOGIN_PEER_LIMIT must be an integer in 30..=1024")?;
+        if runtime_env != Some("development") || prod_like {
+            return Err("MIR2_GATEWAY_LOAD_TEST_LOGIN_PEER_LIMIT requires MIR2_RUNTIME_ENV=development without production/staging environment aliases".into());
+        }
+        let parse_loopback = |raw: Option<&str>| {
+            raw.and_then(|value| value.parse::<SocketAddr>().ok())
+                .filter(|addr| addr.ip().is_loopback())
+                .ok_or("MIR2_GATEWAY_LOAD_TEST_LOGIN_PEER_LIMIT requires explicit IP loopback MIR2_GATEWAY_WEB_ADDR and MIR2_GATEWAY_TCP_ADDR")
+        };
+        let configured_web = parse_loopback(web_addr)?;
+        parse_loopback(tcp_addr)?;
+        if !actual_web_addr.ip().is_loopback()
+            || configured_web.ip() != actual_web_addr.ip()
+            || (configured_web.port() != 0 && configured_web.port() != actual_web_addr.port())
+        {
+            return Err("MIR2_GATEWAY_LOAD_TEST_LOGIN_PEER_LIMIT requires the actual Web listener to match its configured loopback address".into());
+        }
+        Ok(Self {
+            load_test_login_peer_limit: Some(limit),
+        })
+    }
+
+    fn login_peer_limit(self) -> u64 {
+        self.load_test_login_peer_limit.unwrap_or(30)
+    }
+
+    fn test_only_health(self) -> Option<LoadTestLoginHealth> {
+        self.load_test_login_peer_limit
+            .map(|limit| LoadTestLoginHealth {
+                test_only: true,
+                login_peer_limit: limit,
+                login_device_limit: limit,
+                window_seconds: 900,
+            })
+    }
+}
+
+// Keep existing default-policy auth tests on their original five-argument API.
+#[cfg(test)]
 fn enforce_auth_rate_limits(
     cache: &dyn crate::cache::GatewaySessionCache,
     identity: &IdentityService,
@@ -6507,8 +8989,30 @@ fn enforce_auth_rate_limits(
     user_agent: &str,
     context: &AuthSecurityContext,
 ) -> Result<(), String> {
+    enforce_auth_rate_limits_with_policy(
+        cache,
+        identity,
+        peer_address,
+        user_agent,
+        context,
+        AuthRateLimitPolicy::default(),
+    )
+}
+
+fn enforce_auth_rate_limits_with_policy(
+    cache: &dyn crate::cache::GatewaySessionCache,
+    identity: &IdentityService,
+    peer_address: &str,
+    user_agent: &str,
+    context: &AuthSecurityContext,
+    policy: AuthRateLimitPolicy,
+) -> Result<(), String> {
     let peer = identity.peer_fingerprint(peer_address)?;
-    let device = identity.peer_fingerprint(&format!("device:{}", user_agent.trim()))?;
+    // User-Agent is caller supplied, not a device identity. Scope this
+    // supplementary bucket to the already trusted peer so native clients
+    // sharing an empty/common UA do not become one global registration user.
+    // The independent peer, account and pair limits remain authoritative.
+    let device = identity.peer_fingerprint(&format!("device:{peer}:{}", user_agent.trim()))?;
     let account = context.account_id.trim().to_ascii_lowercase();
     if account.is_empty() || account.len() > 160 {
         return Err("invalid authentication request".to_string());
@@ -6516,8 +9020,16 @@ fn enforce_auth_rate_limits(
     let policies: Vec<(String, u64, u64)> = match context.action {
         AuthSecurityAction::Login => vec![
             (format!("login:pair:{peer}:{account}"), 8, 15 * 60),
-            (format!("login:peer:{peer}"), 30, 15 * 60),
-            (format!("login:device:{device}"), 30, 15 * 60),
+            (
+                format!("login:peer:{peer}"),
+                policy.login_peer_limit(),
+                15 * 60,
+            ),
+            (
+                format!("login:device:{device}"),
+                policy.login_peer_limit(),
+                15 * 60,
+            ),
             (format!("login:account:{account}"), 50, 15 * 60),
         ],
         AuthSecurityAction::Registration => vec![
@@ -6597,11 +9109,104 @@ fn is_explicit_session_leave_action(action: &SessionAction) -> bool {
     )
 }
 
+#[derive(Debug, Clone)]
+struct OwnedSessionRoute {
+    key: GatewaySessionCacheKey,
+    owner: String,
+    character_name: String,
+}
+
+impl OwnedSessionRoute {
+    fn capture(session: &GatewaySession) -> Option<Self> {
+        let identity = session.active_identity()?;
+        Some(Self {
+            key: GatewaySessionCacheKey {
+                account_id: identity.account_id,
+                character_index: identity.character_index,
+            },
+            owner: session.session_id().to_string(),
+            character_name: identity.character_name,
+        })
+    }
+}
+
+#[derive(Debug, Default)]
+struct ExplicitWorldLeaveState {
+    completed: bool,
+    pending_route: Option<OwnedSessionRoute>,
+}
+
+impl ExplicitWorldLeaveState {
+    fn finish(
+        &mut self,
+        cache: &dyn crate::cache::GatewaySessionCache,
+        session: &GatewaySession,
+        captured: Option<OwnedSessionRoute>,
+        responses: &[ServerPacket],
+        refresh_record: &SharedBackgroundRouteRefreshRecord,
+    ) -> Result<bool, String> {
+        let disconnected = responses
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Disconnect { reason: 0 }));
+        let logged_out = session.active_identity().is_none()
+            && responses
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::LogOutSuccess { .. }));
+        if (!disconnected && !logged_out)
+            || responses
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::LogOutFailed))
+        {
+            return Ok(false);
+        }
+        // Saving/Leaving has succeeded. A cache outage does not put this
+        // character back in-world or make it eligible for native resume.
+        self.completed = true;
+        self.pending_route = captured;
+        *refresh_record
+            .lock()
+            .expect("background route refresh record lock should not be poisoned") = None;
+        self.retry_release(cache)?;
+        Ok(true)
+    }
+
+    fn retry_release(
+        &mut self,
+        cache: &dyn crate::cache::GatewaySessionCache,
+    ) -> Result<(), String> {
+        if let Some(route) = self.pending_route.as_ref() {
+            cache.release_owned_session_route(&route.key, &route.owner, &route.character_name)?;
+            self.pending_route = None;
+        }
+        Ok(())
+    }
+}
+
 fn keep_alive_time_for_action(action: &SessionAction) -> Option<i64> {
     match action {
         SessionAction::Packet(ClientPacket::KeepAlive { time }) => Some(*time),
         _ => None,
     }
+}
+
+fn synchronize_socket_reconnect_binding(
+    session: &GatewaySession,
+    reconnect_sessions: &ReconnectSessionStore,
+    terminal: transport::TransportSignal,
+    binding: &mut SocketReconnectBinding,
+) -> Result<(), &'static str> {
+    let Some(key) = session_cache_key(session) else {
+        binding.take();
+        return Ok(());
+    };
+    if binding.as_ref().is_some_and(|(current, guard)| {
+        current == &key && guard.token().owner() == session.session_id()
+    }) { return Ok(()); }
+    binding.take();
+    let guard = reconnect_sessions.handoffs.bind(key.clone(), session.session_id().to_owned(), terminal)
+        .ok_or("socket reconnect binding is unavailable")?;
+    *binding = Some((key, guard));
+    Ok(())
 }
 
 fn try_acquire_start_game_route_lease(
@@ -6719,6 +9324,7 @@ fn execute_session_action(
         && matches!(
             &action,
             SessionAction::GameShopBuy { .. }
+                | SessionAction::GameShopGift { .. }
                 | SessionAction::Packet(ClientPacket::GameShopBuy { .. })
         )
     {
@@ -6736,6 +9342,9 @@ fn execute_session_action(
         return execute_production_session_action(session, action, authenticated, move_log);
     }
     match action {
+        SessionAction::GameShopGift { .. } => {
+            Err("GameShop gifting requires the dedicated native receipt capability".into())
+        }
         SessionAction::Packet(packet) => {
             let responses = session.try_handle_packet(packet)?;
             log_move_action(move_log, &responses);
@@ -6777,6 +9386,12 @@ fn execute_session_action(
         SessionAction::QaControl { token, action } => {
             execute_qa_control_action(session, &token, action)
         }
+        SessionAction::Procurement(_)
+        | SessionAction::Billing(_)
+        | SessionAction::MonthlyCardStatus
+        | SessionAction::RedeemMonthlyCard { .. } => {
+            Err("account purchases require the authenticated socket seam".into())
+        }
         SessionAction::SetLanguage { language } => session.set_language(&language).map(|_| vec![]),
         SessionAction::Tick => Ok(session.tick()),
     }
@@ -6792,6 +9407,7 @@ fn execute_production_session_action(
         && matches!(
             &action,
             SessionAction::GameShopBuy { .. }
+                | SessionAction::GameShopGift { .. }
                 | SessionAction::Packet(ClientPacket::GameShopBuy { .. })
         )
     {
@@ -6799,6 +9415,9 @@ fn execute_production_session_action(
     }
     let zone_owner_lease = session.zone_owner_lease().clone();
     let execution = match action {
+        SessionAction::GameShopGift { .. } => {
+            return Err("GameShop gifting requires the dedicated native receipt capability".into())
+        }
         SessionAction::Packet(packet) => {
             if let ClientPacket::Login {
                 account_id,
@@ -6906,6 +9525,12 @@ fn execute_production_session_action(
             )?,
         SessionAction::QaControl { .. } => {
             return Err("QA control is not allowed on the production player path".to_string());
+        }
+        SessionAction::Procurement(_)
+        | SessionAction::Billing(_)
+        | SessionAction::MonthlyCardStatus
+        | SessionAction::RedeemMonthlyCard { .. } => {
+            return Err("account purchases require the authenticated socket seam".into())
         }
         SessionAction::SetLanguage { language } => session
             .execute_production_player_command_with_zone_owner_lease(
@@ -7175,7 +9800,13 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
         BrowserCommand::ClientVersion => Ok(SessionAction::Packet(ClientPacket::ClientVersion {
             version_hash: Vec::new(),
         })),
-        BrowserCommand::ClientCapabilities { .. } | BrowserCommand::ResumeSession(_) => Err(
+        BrowserCommand::CompanionControl(_)
+        | BrowserCommand::CompanionRuntimeRegister(_)
+        | BrowserCommand::CompanionRuntimeReply(_)
+        | BrowserCommand::ClientCapabilities { .. }
+        | BrowserCommand::ResumeSession(_)
+        | BrowserCommand::AttackV2 { .. }
+        | BrowserCommand::NpcPurchaseOwner { .. } => Err(
             "native resume control commands must be handled before gameplay dispatch".to_string(),
         ),
         BrowserCommand::Disconnect => Ok(SessionAction::Packet(ClientPacket::Disconnect)),
@@ -7368,6 +9999,19 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
             unique_id,
             to,
         })),
+        BrowserCommand::EquipSlotItem {
+            unique_id,
+            grid,
+            grid_to,
+            to_unique_id,
+            to,
+        } => Ok(SessionAction::Packet(ClientPacket::EquipSlotItem {
+            grid: parse_grid(&grid)?,
+            unique_id,
+            to,
+            grid_to: parse_grid(&grid_to)?,
+            to_unique_id,
+        })),
         BrowserCommand::RemoveSlotItem {
             unique_id,
             grid,
@@ -7520,6 +10164,19 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
             quantity,
             price_type,
         }),
+        BrowserCommand::GameShopGift {
+            request_id,
+            g_index,
+            quantity,
+            price_type,
+            recipient_name,
+        } => Ok(SessionAction::GameShopGift {
+            request_id,
+            g_index,
+            quantity,
+            price_type,
+            recipient_name,
+        }),
         BrowserCommand::RepairItem { unique_id } => {
             Ok(SessionAction::Packet(ClientPacket::RepairItem {
                 unique_id,
@@ -7539,6 +10196,7 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
             spell,
             key,
             old_key,
+            request_id: _,
         } => Ok(SessionAction::Packet(ClientPacket::MagicKey {
             spell: parse_spell_name(&spell)?,
             key,
@@ -7672,6 +10330,15 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
         }
         BrowserCommand::AllowMentor => Ok(SessionAction::Packet(ClientPacket::AllowMentor)),
         BrowserCommand::CancelMentor => Ok(SessionAction::Packet(ClientPacket::CancelMentor)),
+        BrowserCommand::GuildBuffUpdate { action, id } => {
+            if action > 2 {
+                return Err("unsupported guild buff action".to_owned());
+            }
+            Ok(SessionAction::Packet(ClientPacket::GuildBuffUpdate {
+                action,
+                id,
+            }))
+        }
         BrowserCommand::DepositTradeItem { from, to } => {
             Ok(SessionAction::Packet(ClientPacket::DepositTradeItem {
                 from,
@@ -7805,6 +10472,20 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
             rank_index,
             online_only,
         })),
+        BrowserCommand::Inspect {
+            object_id,
+            ranking,
+            hero,
+        } => {
+            if !ranking || hero {
+                return Err("only ranked player inspection is supported".to_string());
+            }
+            Ok(SessionAction::Packet(ClientPacket::Inspect {
+                object_id,
+                ranking,
+                hero,
+            }))
+        }
         BrowserCommand::GetRentedItems => Ok(SessionAction::Packet(ClientPacket::GetRentedItems)),
         BrowserCommand::ItemRentalRequest => {
             Ok(SessionAction::Packet(ClientPacket::ItemRentalRequest))
@@ -7945,6 +10626,26 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
         BrowserCommand::QaControl { token, action } => {
             Ok(SessionAction::QaControl { token, action })
         }
+        BrowserCommand::Procurement(request) => Ok(SessionAction::Procurement(request)),
+        BrowserCommand::BillingStatus(request) => {
+            Ok(SessionAction::Billing(billing::Request::Status(request)))
+        }
+        BrowserCommand::BillingCheckout(request) => {
+            Ok(SessionAction::Billing(billing::Request::Checkout(request)))
+        }
+        BrowserCommand::BillingUsdcCheckout(request) => Ok(SessionAction::Billing(
+            billing::Request::UsdcCheckout(request),
+        )),
+        BrowserCommand::BillingBuyMonthlyCard(request) => {
+            Ok(SessionAction::Billing(billing::Request::Buy(request)))
+        }
+        BrowserCommand::BillingActivateMonthlyCard(request) => {
+            Ok(SessionAction::Billing(billing::Request::Activate(request)))
+        }
+        BrowserCommand::MonthlyCardStatus => Ok(SessionAction::MonthlyCardStatus),
+        BrowserCommand::RedeemMonthlyCard { code, request_id } => {
+            Ok(SessionAction::RedeemMonthlyCard { code, request_id })
+        }
         BrowserCommand::SetLanguage { language } => Ok(SessionAction::SetLanguage { language }),
         BrowserCommand::Tick => Ok(SessionAction::Tick),
         BrowserCommand::LogOut => Ok(SessionAction::Packet(ClientPacket::LogOut)),
@@ -8060,16 +10761,19 @@ fn quest_operation_ack_for_responses(
             request_id: request_id.clone(),
             quest_index: *quest_index,
             selected_item_index: *selected_item_index,
-            success: responses.iter().any(|packet| match packet {
-                ServerPacket::CompleteQuest { completed_quests } => {
-                    completed_quests.contains(quest_index)
-                }
-                ServerPacket::ChangeQuest {
-                    quest_id,
-                    completed: true,
-                    ..
-                } => quest_id == quest_index,
-                _ => false,
+            // A completed-list refresh can precede an unrelated action at a
+            // day boundary. It is not a receipt for this Finish request.
+            // Both permanent and repeatable successful hand-ins emit an exact
+            // Remove; repeatable deliberately carries completed=false.
+            success: responses.iter().any(|packet| {
+                matches!(packet,
+                    ServerPacket::ChangeQuest {
+                        quest_id,
+                        taken: false,
+                        quest_state: 2,
+                        ..
+                    } if quest_id == quest_index
+                )
             }),
         },
         QuestOperationRequest::AbandonQuest {
@@ -8106,8 +10810,52 @@ fn is_low_latency_action(action: &SessionAction) -> bool {
     )
 }
 
-fn responses_require_world_snapshot(responses: &[ServerPacket]) -> bool {
+fn responses_change_quest_state(responses: &[ServerPacket]) -> bool {
     responses.iter().any(|packet| {
+        matches!(
+            packet,
+            ServerPacket::ChangeQuest { .. } | ServerPacket::CompleteQuest { .. }
+        )
+    })
+}
+
+fn responses_change_player_progression(responses: &[ServerPacket]) -> bool {
+    responses.iter().any(|packet| {
+        matches!(
+            packet,
+            ServerPacket::GainExperience { .. } | ServerPacket::LevelChanged { .. }
+        )
+    })
+}
+
+fn responses_change_trade_state(responses: &[ServerPacket]) -> bool {
+    responses.iter().any(|packet| matches!(packet,
+        ServerPacket::TradeAccept { .. } | ServerPacket::TradeGold { .. } |
+        ServerPacket::TradeItem { .. } | ServerPacket::TradeConfirm | ServerPacket::TradeCancel { .. }))
+}
+
+fn responses_change_fishing_inventory(responses: &[ServerPacket]) -> bool {
+    // The current Web and Native equipment views read the authoritative rod
+    // and its children from snapshots. Progress alone needs only its packet.
+    responses.iter().any(|packet| matches!(packet, ServerPacket::FishingUpdate { .. }))
+        && responses.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::DuraChanged { .. }
+                | ServerPacket::DeleteItem { .. }
+                | ServerPacket::GainedItem { .. }
+                | ServerPacket::GainedGold { .. }
+        ))
+}
+
+fn low_latency_responses_require_world_snapshot(responses: &[ServerPacket]) -> bool {
+    responses_change_quest_state(responses)
+        || responses_change_player_progression(responses)
+        || responses_change_trade_state(responses)
+        || responses_change_fishing_inventory(responses)
+}
+
+fn responses_require_world_snapshot(responses: &[ServerPacket]) -> bool {
+    responses_change_trade_state(responses) || responses.iter().any(|packet| {
         matches!(
             packet,
             ServerPacket::StartGame { .. }
@@ -8117,6 +10865,10 @@ fn responses_require_world_snapshot(responses: &[ServerPacket]) -> bool {
                 | ServerPacket::ObjectHealth { .. }
                 | ServerPacket::ObjectHide { .. }
                 | ServerPacket::ObjectShow { .. }
+                // Native quest state is folded from the snapshot. A calendar
+                // reset can occur on Tick/KeepAlive without another UI action.
+                | ServerPacket::ChangeQuest { .. }
+                | ServerPacket::CompleteQuest { .. }
         )
     })
 }
@@ -8134,16 +10886,72 @@ async fn send_world_snapshot(
     send_world_snapshot_with_quest_ack(sender, session, None).await
 }
 
+async fn send_companion_safety_snapshot_if_changed(
+    sender: &SharedWebSocketSender,
+    session: &GatewaySession,
+) -> Result<(), String> {
+    if companion_safety_snapshot_pending(session)? {
+        send_world_snapshot(sender, session).await?;
+    }
+    Ok(())
+}
+
+fn companion_safety_snapshot_pending(session: &GatewaySession) -> Result<bool, String> {
+    // Keep ordinary sockets on their existing async packet-only path: even
+    // entering Tokio's blocking region is unnecessary for non-Actors.
+    if !session.observes_companion_safety()? { return Ok(false); }
+    tokio::task::block_in_place(|| session.companion_safety_snapshot_pending())
+}
+
 async fn send_world_snapshot_with_quest_ack(
     sender: &SharedWebSocketSender,
     session: &GatewaySession,
     quest_operation_ack: Option<&QuestOperationAck>,
 ) -> Result<(), String> {
+    send_world_snapshot_with_receipts(sender, session, quest_operation_ack, None).await
+}
+
+async fn send_world_snapshot_with_skill_ack(
+    sender: &SharedWebSocketSender,
+    session: &GatewaySession,
+    request: Option<&SkillKeyRequest>,
+    processed: bool,
+) -> Result<(), String> {
+    let Some(request) = request else {
+        return Ok(());
+    };
+    let in_world = processed && tokio::task::block_in_place(|| session.active_identity().is_some());
+    send_world_snapshot_with_receipts(sender, session, None, Some((request, in_world))).await
+}
+
+async fn send_world_snapshot_with_receipts(
+    sender: &SharedWebSocketSender,
+    session: &GatewaySession,
+    quest_operation_ack: Option<&QuestOperationAck>,
+    skill_key_ack: Option<(&SkillKeyRequest, bool)>,
+) -> Result<(), String> {
+    let _slow_stage = GatewaySlowStage::start("snapshot.build_and_send");
     let snapshot = catch_gateway_panic("web world_snapshot", || {
         tokio::task::block_in_place(|| session.world_snapshot())
     })?;
+    let companion_safety_stamp = if session.observes_companion_safety()? { tokio::task::block_in_place(|| {
+        session.companion_safety_snapshot_stamp(Some(&snapshot))
+    })? } else { None };
     let mut payload =
         serde_json::to_value(snapshot.client_view()).map_err(|error| error.to_string())?;
+    if let Some(id) = session.zone_movement_ingress().and_then(|ingress| ingress.player_object_id()) {
+        if let Some(object) = payload.as_object_mut() {
+            object.insert("selfZoneObjectId".into(), json!(id));
+        }
+    }
+    project_known_skill_icons(&mut payload);
+    if let Some((request, processed)) = skill_key_ack {
+        let ack = request.receipt(&payload, processed);
+        payload
+            .as_object_mut()
+            .ok_or_else(|| "world snapshot must serialize as a JSON object".to_string())?
+            .insert("skillKeyAck".into(), ack);
+    }
     if let Some(ack) = quest_operation_ack {
         let object = payload
             .as_object_mut()
@@ -8154,18 +10962,191 @@ async fn send_world_snapshot_with_quest_ack(
         );
     }
     sender
-        .lock()
-        .await
-        .send(Message::Text(
+        .send_world_snapshot(
             json!({
                 "type": "worldSnapshot",
                 "payload": payload
             })
-            .to_string()
-            .into(),
-        ))
+            .to_string(),
+        )
         .await
-        .map_err(|error| error.to_string())
+        .map_err(|error| error.to_string())?;
+    session.note_companion_safety_snapshot_sent(companion_safety_stamp)
+}
+
+fn project_known_skill_icons(payload: &mut Value) {
+    let Some(skills) = payload.get_mut("knownSkills").and_then(Value::as_array_mut) else {
+        return;
+    };
+    for skill in skills {
+        let definition = skill
+            .get("spell")
+            .and_then(Value::as_str)
+            .and_then(mir2_game_data::crystal_magic_by_spell);
+        let (Some(definition), Some(record)) = (definition, skill.as_object_mut()) else {
+            continue;
+        };
+        // Explicit wire metadata wins, including icon zero and localized names.
+        // `name` may still be a starter alias, so keep the authoritative name separate.
+        record
+            .entry("icon")
+            .or_insert_with(|| json!(definition.icon));
+        record
+            .entry("magicName")
+            .or_insert_with(|| json!(definition.name));
+    }
+}
+
+fn companion_browser_command(
+    command: BrowserCommand,
+) -> Result<BrowserCommand, CompanionSocketCommand> {
+    match command {
+        BrowserCommand::CompanionControl(request) => Err(CompanionSocketCommand::Control(request)),
+        BrowserCommand::CompanionRuntimeRegister(request) => {
+            Err(CompanionSocketCommand::Register(request))
+        }
+        BrowserCommand::CompanionRuntimeReply(reply) => Err(CompanionSocketCommand::Reply(reply)),
+        other => Ok(other),
+    }
+}
+
+fn companion_rejection(
+    command: &CompanionSocketCommand,
+    status: crate::companion_relay::ReplyStatus,
+) -> Value {
+    let (request_id, resident, operation) = match command {
+        CompanionSocketCommand::Control(request) => (
+            &request.request_id,
+            request.resident_id.as_deref(),
+            serde_json::to_value(request.operation).ok(),
+        ),
+        CompanionSocketCommand::Register(request) => (
+            &request.request_id,
+            Some(request.resident_id.as_str()),
+            Some(json!("register")),
+        ),
+        CompanionSocketCommand::Reply(reply) => (&reply.request_id, None, Some(json!("reply"))),
+    };
+    let request_id = if crate::companion_relay::valid_ref(request_id) {
+        request_id.as_str()
+    } else {
+        "invalid-request"
+    };
+    crate::companion_relay::result_event(
+        request_id,
+        resident.filter(|id| crate::companion_relay::valid_ref(id)),
+        operation
+            .as_ref()
+            .and_then(Value::as_str)
+            .unwrap_or("invalid"),
+        status,
+        json!({}),
+    )
+}
+
+async fn send_companion_event(
+    sender: &SharedWebSocketSender,
+    event: Value,
+) -> Result<(), axum::Error> {
+    sender
+        .send(Message::Text(event.to_string().into()))
+        .await
+}
+
+fn companion_socket_is_authorized(
+    session: &GatewaySession,
+    authenticated: bool,
+    account_id: Option<&str>,
+    verified: Option<&VerifiedIdentitySession>,
+    cache: &dyn crate::cache::GatewaySessionCache,
+    identity: &IdentityService,
+) -> bool {
+    let (Some(active), Some(verified)) = (session.active_identity(), verified) else {
+        return false;
+    };
+    authenticated
+        && account_id == Some(active.account_id.as_str())
+        && verified.account_id == active.account_id
+        && native_resume_identity_is_active(cache, identity, verified, gateway_unix_ms())
+}
+
+fn companion_admission_matches(
+    admission: &crate::companion_relay::Admission,
+    session: &GatewaySession,
+    authenticated: bool,
+    verified: Option<&VerifiedIdentitySession>,
+) -> bool {
+    let (Some(active), Some(verified)) = (session.active_identity(), verified) else {
+        return false;
+    };
+    authenticated
+        && verified.expires_at_ms > gateway_unix_ms()
+        && admission.character.account_id == active.account_id
+        && admission.character.character_index == active.character_index
+        && verified.account_id == active.account_id
+        && admission.identity_session_id == verified.session_id
+        && admission.expires_at_ms == verified.expires_at_ms
+}
+
+async fn ensure_companion_admission(
+    hub: &crate::companion_relay::CompanionRelay,
+    registered: &mut Option<crate::companion_relay::Admission>,
+    session: &GatewaySession,
+    verified: &VerifiedIdentitySession,
+    sender: &mpsc::Sender<crate::companion_relay::RelayDelivery>,
+) -> Result<(), String> {
+    if registered
+        .as_ref()
+        .is_some_and(|old| companion_admission_matches(old, session, true, Some(verified)))
+    {
+        return Ok(());
+    }
+    if let Some(old) = registered.take() {
+        hub.detach(&old.id).await;
+    }
+    let active = session
+        .active_identity()
+        .ok_or("Companion control requires an active character.")?;
+    let mut nonce = [0_u8; 24];
+    OsRng.fill_bytes(&mut nonce);
+    let admission = crate::companion_relay::Admission {
+        id: format!("companion:{}", URL_SAFE_NO_PAD.encode(nonce)),
+        character: crate::companion_relay::CharacterBinding {
+            account_id: active.account_id,
+            character_index: active.character_index,
+        },
+        identity_session_id: verified.session_id.clone(),
+        expires_at_ms: verified.expires_at_ms,
+    };
+    hub.attach(admission.clone(), sender.clone()).await?;
+    *registered = Some(admission);
+    Ok(())
+}
+
+async fn detach_changed_companion_admission(
+    hub: &Option<crate::companion_relay::CompanionRelay>,
+    registered: &mut Option<crate::companion_relay::Admission>,
+    session: &GatewaySession,
+    authenticated: bool,
+    verified: Option<&VerifiedIdentitySession>,
+) {
+    if registered
+        .as_ref()
+        .is_some_and(|old| !companion_admission_matches(old, session, authenticated, verified))
+    {
+        if let (Some(hub), Some(old)) = (hub, registered.take()) {
+            hub.detach(&old.id).await;
+        }
+    }
+}
+
+fn companion_realm_info(mut event: Value, relay: Option<&crate::companion_relay::CompanionRelay>, shared_groups: bool) -> Value {
+    event["payload"]["features"]["sharedParty"] = json!(shared_groups);
+    event["payload"]["features"]["companionControl"] = json!(relay.is_some());
+    if let Some(relay) = relay {
+        event["payload"]["worldEpoch"] = json!(relay.policy().world_epoch);
+    }
+    event
 }
 
 fn realm_info_event(config: &GatewayConfig) -> Value {
@@ -8197,28 +11178,61 @@ fn realm_info_event(config: &GatewayConfig) -> Value {
     })
 }
 
+/// Publish only this owner turn: its ordinary deltas precede a complete
+/// snapshot/authority pair. A receipt without that pair keeps the original
+/// frame-first order; neither path rereads Session or changes packet contents.
+async fn send_npc_purchase_dispatch<S>(
+    sender: &transport::SocketSender<S>,
+    dispatch: &crate::npc_purchase_browser::BrowserNpcPurchaseDispatch,
+) -> Result<(), String>
+where
+    S: futures_util::Sink<Message, Error = axum::Error> + Unpin,
+{
+    // Complete encoding must succeed before any ordinary packet is published.
+    let encoded = mir2_client_wire::encode_server_frame(&dispatch.frame)
+        .map_err(|error| error.to_string())?;
+    let owner = Message::Text(encoded.into());
+    let complete_pair = dispatch.frame.snapshot.is_some() && dispatch.frame.authority.is_some();
+    let (before, after) = if complete_pair {
+        (None, Some(owner))
+    } else {
+        (Some(owner), None)
+    };
+    let packets = dispatch
+        .packets
+        .iter()
+        .map(|packet| Message::Text(server_packet_to_event(packet).to_string().into()));
+    for message in before.into_iter().chain(packets).chain(after) {
+        sender
+            .send(message)
+            .await
+            .map_err(|error| error.to_string())?;
+    }
+    Ok(())
+}
+
 async fn send_server_packet(
     sender: &SharedWebSocketSender,
     packet: &ServerPacket,
 ) -> Result<(), axum::Error> {
-    sender
-        .lock()
-        .await
-        .send(Message::Text(
-            server_packet_to_event(packet).to_string().into(),
-        ))
-        .await
+    let trace = matches!(packet, ServerPacket::UserLocation { .. }).then(|| sender.input_gate_context()).flatten();
+    send_server_packet_traced(sender, packet, trace).await
+}
+
+async fn send_server_packet_traced(sender: &SharedWebSocketSender, packet: &ServerPacket,
+    trace: Option<InputGateTraceContext>) -> Result<(), axum::Error> {
+    let encoded = {
+        let _trace = InputGateTraceSpan::start(trace, "encode", 0);
+        server_packet_to_event(packet).to_string()
+    };
+    sender.send_traced(Message::Text(encoded.into()), trace).await
 }
 
 async fn send_native_game_shop_receipt(
     sender: &SharedWebSocketSender,
     receipt: &Value,
 ) -> Result<(), axum::Error> {
-    sender
-        .lock()
-        .await
-        .send(Message::Text(receipt.to_string().into()))
-        .await
+    sender.send(Message::Text(receipt.to_string().into())).await
 }
 
 fn validate_native_game_shop_request_id(request_id: &str) -> bool {
@@ -8231,25 +11245,57 @@ fn validate_native_game_shop_request_id(request_id: &str) -> bool {
 fn native_game_shop_request_from_action(
     action: &SessionAction,
 ) -> Option<Result<NativeGameShopRequest, String>> {
-    let SessionAction::GameShopBuy {
-        request_id,
-        g_index,
-        quantity,
-        price_type,
-    } = action
-    else {
-        return None;
+    let (request_id, g_index, quantity, price_type, recipient_name) = match action {
+        SessionAction::GameShopBuy {
+            request_id,
+            g_index,
+            quantity,
+            price_type,
+        } => (
+            request_id.as_deref(),
+            *g_index,
+            *quantity,
+            *price_type,
+            None,
+        ),
+        SessionAction::GameShopGift {
+            request_id,
+            g_index,
+            quantity,
+            price_type,
+            recipient_name,
+        } => {
+            if recipient_name != recipient_name.trim()
+                || recipient_name.len() > 45
+                || !(3..=15).contains(&recipient_name.chars().count())
+                || !recipient_name.chars().all(|c| {
+                    c.is_ascii_alphanumeric() || c == '_' || ('\u{4e00}'..='\u{9fa5}').contains(&c)
+                })
+                || *price_type != 0
+            {
+                return Some(Err("invalid gift recipient or payment currency".into()));
+            }
+            (
+                Some(request_id.as_str()),
+                *g_index,
+                *quantity,
+                *price_type,
+                Some(recipient_name.clone()),
+            )
+        }
+        _ => return None,
     };
-    Some(match request_id.as_deref() {
+    Some(match request_id {
         Some(request_id) if validate_native_game_shop_request_id(request_id) => {
             let mut idempotency_bytes = [0_u8; 32];
             OsRng.fill_bytes(&mut idempotency_bytes);
             Ok(NativeGameShopRequest {
                 request_id: request_id.to_string(),
                 server_idempotency_key: URL_SAFE_NO_PAD.encode(idempotency_bytes),
-                g_index: *g_index,
-                quantity: *quantity,
-                price_type: *price_type,
+                g_index,
+                quantity,
+                price_type,
+                recipient_name,
             })
         }
         _ => Err("native GameShop purchase requires a valid requestId".to_string()),
@@ -8263,7 +11309,7 @@ fn native_game_shop_failure_event(
 ) -> Value {
     let mut event = json!({
         "type": "gameShopReceipt",
-        "protocol": NATIVE_GAME_SHOP_RECEIPT_PROTOCOL,
+        "protocol": if request.recipient_name.is_some() { NATIVE_GAME_SHOP_GIFT_RECEIPT_PROTOCOL } else { NATIVE_GAME_SHOP_RECEIPT_PROTOCOL },
         "requestId": request.request_id,
         "success": false,
         "gIndex": request.g_index,
@@ -8271,6 +11317,9 @@ fn native_game_shop_failure_event(
         "priceType": request.price_type,
         "code": code,
     });
+    if let Some(name) = &request.recipient_name {
+        event["recipientName"] = json!(name);
+    }
     if code == "stockUnavailable" {
         if let Some(new_stock_level) = new_stock_level {
             event["newStockLevel"] = json!(new_stock_level);
@@ -8291,7 +11340,11 @@ fn native_game_shop_pre_execution_failure(
     if !typed_outcome_supported {
         return Some(native_game_shop_failure_event(
             request,
-            "commitFailed",
+            if request.recipient_name.is_some() {
+                "giftUnavailable"
+            } else {
+                "commitFailed"
+            },
             None,
         ));
     }
@@ -8309,6 +11362,9 @@ fn native_game_shop_failure_code(failure: GameShopPurchaseFailure) -> &'static s
         GameShopPurchaseFailure::StockUnavailable => "stockUnavailable",
         GameShopPurchaseFailure::InsufficientCurrency => "insufficientCurrency",
         GameShopPurchaseFailure::MailFull => "mailFull",
+        GameShopPurchaseFailure::RecipientUnavailable => "recipientUnavailable",
+        GameShopPurchaseFailure::SelfGiftUnavailable => "selfGiftUnavailable",
+        GameShopPurchaseFailure::GiftUnavailable => "giftUnavailable",
         GameShopPurchaseFailure::CommitFailed => "commitFailed",
     }
 }
@@ -8332,7 +11388,7 @@ fn native_game_shop_receipt_event(
         }
         let mut event = json!({
             "type": "gameShopReceipt",
-            "protocol": NATIVE_GAME_SHOP_RECEIPT_PROTOCOL,
+            "protocol": if request.recipient_name.is_some() { NATIVE_GAME_SHOP_GIFT_RECEIPT_PROTOCOL } else { NATIVE_GAME_SHOP_RECEIPT_PROTOCOL },
             "requestId": request.request_id,
             "success": true,
             "gIndex": request.g_index,
@@ -8340,6 +11396,9 @@ fn native_game_shop_receipt_event(
             "priceType": request.price_type,
             "mailId": mail_id,
         });
+        if let Some(name) = &request.recipient_name {
+            event["recipientName"] = json!(name);
+        }
         if let Some(new_stock_level) = outcome.new_stock_level {
             event["newStockLevel"] = json!(new_stock_level);
         }
@@ -8389,20 +11448,29 @@ fn execute_native_game_shop_handler_seam(
     let identity = session
         .active_identity()
         .ok_or_else(|| "native GameShop purchase has no active identity".to_string())?;
+    let purchase = NativeGameShopPurchaseRequest {
+        protocol_version: NATIVE_GAME_SHOP_PURCHASE_PROTOCOL_V2,
+        server_idempotency_key: request.server_idempotency_key.clone(),
+        gateway_session_id: session.session_id().to_string(),
+        account_id: identity.account_id,
+        character_index: identity.character_index,
+        client_request_id: request.request_id.clone(),
+        g_index: request.g_index,
+        quantity: request.quantity,
+        price_type: request.price_type,
+    };
+    let command = match &request.recipient_name {
+        Some(name) => {
+            WorldCommand::NativeGameShopGift(mir2_simulation::NativeGameShopGiftRequest {
+                purchase,
+                recipient_name: name.clone(),
+            })
+        }
+        None => WorldCommand::NativeGameShopPurchase(purchase),
+    };
     let execution = session
         .execute_production_player_command_requiring_typed_game_shop_purchase_outcome(
-            true,
-            WorldCommand::NativeGameShopPurchase(NativeGameShopPurchaseRequest {
-                protocol_version: NATIVE_GAME_SHOP_PURCHASE_PROTOCOL_V2,
-                server_idempotency_key: request.server_idempotency_key.clone(),
-                gateway_session_id: session.session_id().to_string(),
-                account_id: identity.account_id,
-                character_index: identity.character_index,
-                client_request_id: request.request_id.clone(),
-                g_index: request.g_index,
-                quantity: request.quantity,
-                price_type: request.price_type,
-            }),
+            true, command,
         )?;
     Ok(NativeGameShopHandlerDispatch {
         post_execution: native_game_shop_post_execution(
@@ -8418,8 +11486,6 @@ async fn send_error_message(
     message: &str,
 ) -> Result<(), axum::Error> {
     sender
-        .lock()
-        .await
         .send(Message::Text(
             json!({
                 "type": "error",
@@ -8461,8 +11527,6 @@ async fn send_session_action_error(
     leaves_world: bool,
 ) -> Result<(), axum::Error> {
     sender
-        .lock()
-        .await
         .send(Message::Text(
             session_action_error_event(is_login, leaves_world)
                 .to_string()
@@ -8477,8 +11541,6 @@ async fn send_fixed_error_event(
     message: &'static str,
 ) -> Result<(), axum::Error> {
     sender
-        .lock()
-        .await
         .send(Message::Text(
             json!({
                 "type": "error",
@@ -8493,8 +11555,6 @@ async fn send_fixed_error_event(
 
 async fn send_resume_rejected(sender: &SharedWebSocketSender) -> Result<(), axum::Error> {
     sender
-        .lock()
-        .await
         .send(Message::Text(resume_rejected_event().to_string().into()))
         .await
 }
@@ -8511,8 +11571,6 @@ async fn send_resume_credential(
     issued: &IssuedResumeCredential,
 ) -> Result<(), axum::Error> {
     sender
-        .lock()
-        .await
         .send(Message::Text(
             resume_credential_event(issued).to_string().into(),
         ))
@@ -8535,8 +11593,6 @@ async fn send_session_resumed(
     generation: u64,
 ) -> Result<(), axum::Error> {
     sender
-        .lock()
-        .await
         .send(Message::Text(
             session_resumed_event(character_index, generation)
                 .to_string()
@@ -8578,6 +11634,18 @@ fn validate_native_client_capabilities(
         native_game_shop_receipt_v1: capabilities
             .iter()
             .any(|capability| capability == NATIVE_GAME_SHOP_RECEIPT_PROTOCOL),
+        native_game_shop_gift_receipt_v1: capabilities
+            .iter()
+            .any(|capability| capability == NATIVE_GAME_SHOP_GIFT_RECEIPT_PROTOCOL),
+        server_catalog_gzip_v1: capabilities
+            .iter()
+            .any(|capability| capability == CATALOG_GZIP_CAPABILITY),
+        server_world_snapshot_gzip_v1: capabilities
+            .iter()
+            .any(|capability| capability == mir2_protocol::world_snapshot_transport::WORLD_SNAPSHOT_GZIP_CAPABILITY),
+        durable_npc_purchase_owner_v1: capabilities
+            .iter()
+            .any(|capability| capability == mir2_client_wire::NPC_PURCHASE_OWNER_CAPABILITY),
     })
 }
 
@@ -8592,6 +11660,24 @@ enum NativeResumePrepareError {
 enum NativeResumeCommitError {
     IdentityUnavailable,
     Unavailable,
+}
+
+fn handoff_identity_still_current(
+    authorization: Option<&HandoffAuthorization>,
+    store: &ReconnectSessionStore,
+    authenticated: bool,
+    account_id: Option<&str>,
+    current_identity: Option<&VerifiedIdentitySession>,
+    cache: &dyn crate::cache::GatewaySessionCache,
+    identity: &IdentityService,
+    now_ms: u64,
+) -> bool {
+    let Some(authorization) = authorization else { return true; };
+    authenticated && account_id == Some(authorization.identity.account_id.as_str())
+        && current_identity == Some(&authorization.identity)
+        && store.handoff_authorization_current(authorization, now_ms)
+        && native_resume_identity_is_active(cache, identity, &authorization.identity, now_ms)
+        && store.handoff_authorization_current(authorization, gateway_unix_ms())
 }
 
 fn native_resume_identity_is_active(
@@ -8635,6 +11721,25 @@ fn validate_and_prepare_native_resume<'a, PreparedZone>(
     ),
     NativeResumePrepareError,
 > {
+    validate_and_prepare_native_resume_with_handoff(
+        reconnect_sessions, session_cache, identity, credential, now_ms, None,
+        prepare_route, prepare_zone,
+    )
+}
+
+fn validate_and_prepare_native_resume_with_handoff<'a, PreparedZone>(
+    reconnect_sessions: &'a ReconnectSessionStore,
+    session_cache: &dyn crate::cache::GatewaySessionCache,
+    identity: &IdentityService,
+    credential: &ResumeCredential,
+    now_ms: u64,
+    handoff: Option<&CompletedNativeResumeHandoff>,
+    prepare_route: impl FnOnce(&GatewaySession) -> Result<(), String>,
+    prepare_zone: impl FnOnce(&GatewaySession) -> Result<PreparedZone, String>,
+) -> Result<
+    (ReconnectSessionReservation<'a>, VerifiedIdentitySession, PreparedZone),
+    NativeResumePrepareError,
+> {
     let binding = reconnect_sessions
         .resume_binding(credential, now_ms)
         .ok_or(NativeResumePrepareError::Unavailable)?;
@@ -8647,14 +11752,53 @@ fn validate_and_prepare_native_resume<'a, PreparedZone>(
         return Err(NativeResumePrepareError::Unavailable);
     }
     let reservation = reconnect_sessions
-        .reserve_by_credential(credential, &binding, now_ms)
+        .reserve_by_credential_after_handoff(credential, &binding, now_ms, handoff)
         .ok_or(NativeResumePrepareError::Unavailable)?;
+    if !native_resume_monthly_card_is_active(reservation.session(), &binding.account_id, now_ms) {
+        reservation.discard_and_revoke();
+        return Err(NativeResumePrepareError::Unavailable);
+    }
     prepare_route(reservation.session()).map_err(NativeResumePrepareError::Route)?;
     let prepared_zone =
         prepare_zone(reservation.session()).map_err(NativeResumePrepareError::Zone)?;
     Ok((reservation, verified, prepared_zone))
 }
 
+fn revalidate_and_commit_prepared_native_resume_if_live<PreparedZone>(
+    reconnect_sessions: &ReconnectSessionStore,
+    session_cache: &dyn crate::cache::GatewaySessionCache,
+    identity: &IdentityService,
+    reservation: ReconnectSessionReservation<'_>,
+    credential: &ResumeCredential,
+    verified: VerifiedIdentitySession,
+    prepared_zone: PreparedZone,
+    now_ms: u64,
+    terminal: &transport::TransportSignal,
+) -> Result<
+    (
+        ReconnectSessionRestore,
+        ResumeBinding,
+        VerifiedIdentitySession,
+        PreparedZone,
+    ),
+    NativeResumeCommitError,
+> {
+    revalidate_and_commit_prepared_native_resume_with_hooks_and_transport(
+        reconnect_sessions,
+        session_cache,
+        identity,
+        reservation,
+        credential,
+        verified,
+        prepared_zone,
+        now_ms,
+        || {},
+        || {},
+        || !terminal.ended(),
+    )
+}
+
+#[cfg(test)]
 fn revalidate_and_commit_prepared_native_resume<PreparedZone>(
     reconnect_sessions: &ReconnectSessionStore,
     session_cache: &dyn crate::cache::GatewaySessionCache,
@@ -8665,24 +11809,12 @@ fn revalidate_and_commit_prepared_native_resume<PreparedZone>(
     prepared_zone: PreparedZone,
     now_ms: u64,
 ) -> Result<
-    (
-        ReconnectSessionRestore,
-        ResumeBinding,
-        VerifiedIdentitySession,
-        PreparedZone,
-    ),
+    (ReconnectSessionRestore, ResumeBinding, VerifiedIdentitySession, PreparedZone),
     NativeResumeCommitError,
 > {
-    revalidate_and_commit_prepared_native_resume_with_fence_hook(
-        reconnect_sessions,
-        session_cache,
-        identity,
-        reservation,
-        credential,
-        verified,
-        prepared_zone,
-        now_ms,
-        || {},
+    revalidate_and_commit_prepared_native_resume_with_hooks(
+        reconnect_sessions, session_cache, identity, reservation, credential,
+        verified, prepared_zone, now_ms, || {}, || {},
     )
 }
 
@@ -8739,7 +11871,35 @@ fn revalidate_and_commit_prepared_native_resume_with_hooks<PreparedZone>(
     ),
     NativeResumeCommitError,
 > {
-    if !native_resume_identity_is_active(session_cache, identity, &verified, now_ms) {
+    revalidate_and_commit_prepared_native_resume_with_hooks_and_transport(
+        reconnect_sessions, session_cache, identity, reservation, credential,
+        verified, prepared_zone, now_ms, before_commit, after_local_commit, || true,
+    )
+}
+
+fn revalidate_and_commit_prepared_native_resume_with_hooks_and_transport<PreparedZone>(
+    reconnect_sessions: &ReconnectSessionStore,
+    session_cache: &dyn crate::cache::GatewaySessionCache,
+    identity: &IdentityService,
+    reservation: ReconnectSessionReservation<'_>,
+    credential: &ResumeCredential,
+    verified: VerifiedIdentitySession,
+    prepared_zone: PreparedZone,
+    now_ms: u64,
+    before_commit: impl FnOnce(),
+    after_local_commit: impl FnOnce(),
+    transport_is_live: impl FnOnce() -> bool,
+) -> Result<
+    (ReconnectSessionRestore, ResumeBinding, VerifiedIdentitySession, PreparedZone),
+    NativeResumeCommitError,
+> {
+    if !native_resume_identity_is_active(session_cache, identity, &verified, now_ms)
+        || !native_resume_monthly_card_is_active(
+            reservation.session(),
+            &verified.account_id,
+            now_ms,
+        )
+    {
         // Identity revocation is terminal for this credential family. The
         // prepared Zone value drops normally, while the reservation explicitly
         // discards its unusable lease and releases both capacity permits.
@@ -8751,7 +11911,9 @@ fn revalidate_and_commit_prepared_native_resume_with_hooks<PreparedZone>(
     // a no-op; the auth revision check and consume still occur under the same
     // reconnect-store mutex.
     before_commit();
-    let (restore, binding) = match reconnect_sessions.commit_resume(reservation, credential, now_ms)
+    let (restore, binding) = match reconnect_sessions.commit_resume_if_live(
+        reservation, credential, now_ms, transport_is_live,
+    )
     {
         Ok(committed) => committed,
         Err(ReconnectSessionCommitError::AuthorizationRevisionChanged) => {
@@ -8760,7 +11922,8 @@ fn revalidate_and_commit_prepared_native_resume_with_hooks<PreparedZone>(
         Err(
             ReconnectSessionCommitError::ForeignReservation
             | ReconnectSessionCommitError::LeaseExpired
-            | ReconnectSessionCommitError::CredentialUnavailable,
+            | ReconnectSessionCommitError::CredentialUnavailable
+            | ReconnectSessionCommitError::TransportEnded,
         ) => return Err(NativeResumeCommitError::Unavailable),
     };
     after_local_commit();
@@ -8775,12 +11938,29 @@ fn revalidate_and_commit_prepared_native_resume_with_hooks<PreparedZone>(
         identity,
         &verified,
         gateway_unix_ms().max(now_ms),
+    ) || !native_resume_monthly_card_is_active(
+        &restore.session,
+        &verified.account_id,
+        gateway_unix_ms().max(now_ms),
     ) {
         drop(prepared_zone);
         drop(restore);
         return Err(NativeResumeCommitError::IdentityUnavailable);
     }
     Ok((restore, binding, verified, prepared_zone))
+}
+
+fn native_resume_monthly_card_is_active(
+    session: &GatewaySession,
+    account: &str,
+    now_ms: u64,
+) -> bool {
+    session.monthly_card_config().is_ok_and(|config| {
+        !config.monthly_card_policy.required
+            || config
+                .refresh_monthly_card_status(account, now_ms)
+                .is_ok_and(|status| status.can_enter_game)
+    })
 }
 
 fn enforce_first_post_resume_action_identity(
@@ -8909,8 +12089,6 @@ async fn send_identity_session_grant(
     grant: &crate::identity::IdentitySessionGrant,
 ) -> Result<(), axum::Error> {
     sender
-        .lock()
-        .await
         .send(Message::Text(
             json!({
                 "type": "identitySession",
@@ -8992,40 +12170,11 @@ fn user_item_summary_json(item: &UserItem) -> Value {
 /// its item database before drawing the shop. The web client needs the same
 /// name/icon/unit-price join at the gateway boundary.
 fn npc_goods_item_json(item: &UserItem, rate: f32) -> Value {
-    let mut entry = serde_json::to_value(item)
-        .ok()
-        .and_then(|value| value.as_object().cloned())
-        .unwrap_or_default();
-    entry.insert("id".into(), json!(item.unique_id));
-    entry.insert("uniqueId".into(), json!(item.unique_id));
-    entry.insert("itemIndex".into(), json!(item.item_index));
-    entry.insert("count".into(), json!(item.count));
-
-    if let Some(template) = crystal_item_by_index(item.item_index) {
-        entry.insert("name".into(), json!(template.name));
-        entry.insert("icon".into(), json!(template.image));
-        entry.insert(
-            "price".into(),
-            json!(((template.price as f32) * rate).floor() as u32),
-        );
-        entry.insert("grade".into(), json!(template.grade));
-        if let Some(description) = template.tooltip.filter(|value| !value.trim().is_empty()) {
-            entry.insert("description".into(), json!(description));
-        }
-    } else {
-        entry.insert("name".into(), json!(format!("Item #{}", item.item_index)));
-        entry.insert("icon".into(), json!(0));
-        entry.insert("price".into(), json!(0));
-    }
-    Value::Object(entry)
+    mir2_game_data::crystal_npc_goods_item_json(item, rate)
 }
 
 fn npc_goods_list_json(list: &[UserItem], rate: f32) -> Value {
-    Value::Array(
-        list.iter()
-            .map(|item| npc_goods_item_json(item, rate))
-            .collect(),
-    )
+    mir2_game_data::crystal_npc_goods_list_json(list, rate)
 }
 
 /// Maps a `Vec<Option<UserItem>>` trade payload into the contract item array,
@@ -9231,8 +12380,15 @@ fn quest_time_limit_label(time_limit_in_seconds: i32) -> Option<String> {
 }
 
 fn monster_packet_sprite(image: u16) -> Value {
+    // Crystal MonsterObject uses Libraries.Pets for its distinct 10000..10014
+    // image family. These are not Monster/10000 atlas pages.
+    let body_library = if (10_000..=10_014).contains(&image) {
+        format!("Pet/{:02}", image - 10_000)
+    } else {
+        format!("Monster/{image:03}")
+    };
     json!({
-        "bodyLibrary": format!("Monster/{image:03}"),
+        "bodyLibrary": body_library,
         "hairLibrary": null,
         "weaponLibrary": null,
         "weaponLibrarySecondary": null,
@@ -9253,6 +12409,27 @@ fn monster_packet_sprite(image: u16) -> Value {
 
 fn server_packet_to_event(packet: &ServerPacket) -> Value {
     match packet {
+        ServerPacket::PlayerInspect { info } => {
+            let mut projected = json!(info);
+            projected["equipment"] = Value::Array(
+                info.equipment
+                    .iter()
+                    .map(|slot| {
+                        slot.as_ref().map_or(Value::Null, |item| {
+                            // Inspect keeps all fourteen physical positions. The same
+                            // Crystal template join supplies the actual item image and
+                            // full tooltip carrier; shop pricing is not an Inspect fact.
+                            let mut projected_item = npc_goods_item_json(item, 1.0);
+                            if let Some(fields) = projected_item.as_object_mut() {
+                                fields.remove("price");
+                            }
+                            projected_item
+                        })
+                    })
+                    .collect(),
+            );
+            json!({ "type": "packet", "packet": "PlayerInspect", "payload": { "info": projected } })
+        }
         ServerPacket::Raw { packet_id, payload } => {
             let packet_name = server_packet_raw_display_name(*packet_id);
             json!({
@@ -9394,7 +12571,8 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                         "name": character.name,
                         "level": character.level,
                         "class": format!("{:?}", character.class),
-                        "gender": format!("{:?}", character.gender)
+                        "gender": format!("{:?}", character.gender),
+                        "lastAccessBinaryDatetime": character.last_access_binary_datetime.to_string()
                     })
                 }).collect::<Vec<_>>()
             }
@@ -9418,7 +12596,8 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                     "name": char_info.name,
                     "level": char_info.level,
                     "class": format!("{:?}", char_info.class),
-                    "gender": format!("{:?}", char_info.gender)
+                    "gender": format!("{:?}", char_info.gender),
+                    "lastAccessBinaryDatetime": char_info.last_access_binary_datetime.to_string()
                 }
             }
         }),
@@ -9693,6 +12872,19 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "rate": rate,
                 "panelType": panel_type,
                 "hideAddedStats": hide_added_stats
+            }
+        }),
+        ServerPacket::NPCPearlGoods {
+            list,
+            rate,
+            panel_type,
+        } => json!({
+            "type": "packet",
+            "packet": "NPCPearlGoods",
+            "payload": {
+                "list": npc_goods_list_json(list, *rate),
+                "rate": rate,
+                "panelType": panel_type
             }
         }),
         ServerPacket::NPCSell => json!({
@@ -10176,6 +13368,15 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "to": to,
                 "success": success
             }
+        }),
+        ServerPacket::EquipSlotItem {
+            grid,
+            unique_id,
+            to,
+            grid_to,
+            success,
+        } => json!({
+            "type":"packet", "packet":"EquipSlotItem", "payload": { "grid":format!("{:?}",grid), "uniqueId":unique_id, "to":to, "gridTo":format!("{:?}",grid_to), "success":success }
         }),
         ServerPacket::RemoveSlotItem {
             grid,
@@ -10661,6 +13862,11 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "percent": info.percent,
                 "expire": info.expire
             }
+        }),
+        ServerPacket::ObjectPoisoned { object_id, poison } => json!({
+            "type": "packet",
+            "packet": "ObjectPoisoned",
+            "payload": { "objectId": object_id, "poison": poison }
         }),
         ServerPacket::ObjectMana { info } => json!({
             "type": "packet",
@@ -11369,6 +14575,7 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
             "type": "packet",
             "packet": "FriendUpdate",
             "payload": {
+                "friendRecords": friends,
                 "friends": friends
                     .iter()
                     .filter(|friend| !friend.blocked)
@@ -11636,6 +14843,7 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
             if !info.group.is_empty() {
                 payload.insert("group".into(), json!(info.group));
             }
+            payload.insert("minLevelNeeded".into(), json!(info.min_level_needed));
             if !info.description.is_empty() {
                 payload.insert("descriptionLines".into(), json!(info.description));
             }
@@ -11648,6 +14856,18 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                             .map(|line| quest_objective_json(line))
                             .collect(),
                     ),
+                );
+            }
+            if !info.return_description.is_empty() {
+                payload.insert(
+                    "returnDescriptionLines".into(),
+                    json!(info.return_description),
+                );
+            }
+            if !info.completion_description.is_empty() {
+                payload.insert(
+                    "completionDescriptionLines".into(),
+                    json!(info.completion_description),
                 );
             }
             if let Some(rewards) = quest_rewards_json(info) {
@@ -11723,7 +14943,8 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                         "name": character.name,
                         "level": character.level,
                         "class": format!("{:?}", character.class),
-                        "gender": format!("{:?}", character.gender)
+                        "gender": format!("{:?}", character.gender),
+                        "lastAccessBinaryDatetime": character.last_access_binary_datetime.to_string()
                     })
                 }).collect::<Vec<_>>()
             }
@@ -11818,7 +15039,70 @@ fn movement_json(
 mod web_save_fail_closed_tests;
 
 #[cfg(test)]
+#[path = "web_explicit_leave_route_tests.rs"]
+mod web_explicit_leave_route_tests;
+
+#[cfg(test)]
+#[path = "web_auth_peer_bucket_tests.rs"]
+mod web_auth_peer_bucket_tests;
+
+#[cfg(test)]
+#[path = "web_live_overflow_tests.rs"]
+mod web_live_overflow_tests;
+
+#[cfg(test)]
+#[path = "web_game_shop_gift_tests.rs"]
+mod game_shop_gift_tests;
+
+#[cfg(test)]
+#[path = "web_transport_close_tests.rs"]
+mod web_transport_close_tests;
+
+#[cfg(test)]
+#[path = "web_peer_close_ack_tests.rs"]
+mod web_peer_close_ack_tests;
+
+#[cfg(test)]
+#[path = "web_reconnect_handoff_store_tests.rs"]
+mod web_reconnect_handoff_store_tests;
+
+#[cfg(test)]
+#[path = "web_reconnect_persistence_wait_tests.rs"]
+mod web_reconnect_persistence_wait_tests;
+
+#[cfg(test)]
+#[path = "web_native_resume_handoff_tests.rs"]
+mod web_native_resume_handoff_tests;
+
+#[cfg(test)]
+#[path = "web_native_resume_handoff_ws_tests.rs"]
+mod web_native_resume_handoff_ws_tests;
+
+#[cfg(test)]
 mod tests {
+    #[test]
+    fn input_gate_selector_requires_both_literal_flags() {
+        for flag in [None, Some("0"), Some("true"), Some(" 1 ")] {
+            assert_eq!(super::parse_input_gate_trace_ids(flag, Some("1"), Some("1,2")), None);
+            assert_eq!(super::parse_input_gate_trace_ids(Some("1"), flag, Some("1,2")), None);
+        }
+        assert_eq!(super::parse_input_gate_trace_ids(Some("1"), Some("1"), Some("1,2")), Some([1, 2]));
+    }
+    #[test]
+    fn input_gate_selector_requires_exactly_two_distinct_entries() {
+        for raw in [None, Some("1"), Some("1,1"), Some("1,2,2"), Some("1,2,3"), Some("1,2,")] {
+            assert_eq!(super::parse_input_gate_trace_ids(Some("1"), Some("1"), raw), None);
+        }
+        assert_eq!(super::parse_input_gate_trace_ids(Some("1"), Some("1"), Some("2, 1")), Some([1, 2]));
+    }
+    #[test]
+    fn input_gate_selector_requires_positive_u32_bounds() {
+        for raw in ["0,2", "1,0", "-1,2", "1,4294967296", "bad,2", ",2"] {
+            assert_eq!(super::parse_input_gate_trace_ids(Some("1"), Some("1"), Some(raw)), None);
+        }
+        assert_eq!(super::parse_input_gate_trace_ids(Some("1"), Some("1"), Some("4294967295,1")), Some([1, u32::MAX]));
+    }
+
     use super::{
         realm_info_event, responses_require_world_snapshot, should_send_world_snapshot_for_action,
         BrowserCommand, QaControlAction, SessionAction,
@@ -11853,6 +15137,80 @@ mod tests {
     use tokio_tungstenite::{MaybeTlsStream, WebSocketStream};
 
     static ENV_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
+
+    include!("web_monthly_card_tests.rs");
+    include!("web_mining_tests.rs");
+
+    fn snapshot_test_spectator(enabled: bool) -> crate::spectator::SpectatorHub {
+        crate::spectator::SpectatorHub::new(crate::spectator::SpectatorConfig {
+            enabled,
+            recording_enabled: false,
+            public_enabled: true,
+            public_maps: vec!["0".to_string()],
+            director_token: None,
+            capture_interval_ms: 250,
+            public_delay_ms: 30_000,
+            max_delay_ms: 120_000,
+            ring_frames: 40,
+            max_entities: 128,
+            replay_limit: 100,
+            retention_hours: 1,
+            entity_stale_ms: 15_000,
+            data_dir: std::env::temp_dir().join("mir2-disabled-spectator-snapshot-test"),
+        })
+    }
+
+    #[test]
+    fn spectator_snapshot_disabled_never_constructs_world_or_publishes() {
+        let spectator = snapshot_test_spectator(false);
+        let mut snapshot_calls = 0;
+        for _ in 0..400 {
+            let frame = super::publish_spectator_frame_if_enabled(&spectator, || {
+                snapshot_calls += 1;
+                panic!("disabled spectator must not enter the snapshot closure")
+            })
+            .expect("disabled capture succeeds without work");
+            assert!(frame.is_none());
+        }
+        assert_eq!(snapshot_calls, 0);
+        assert_eq!(spectator.metrics().published_frames_total, 0);
+        assert_eq!(spectator.metrics().active_maps, 0);
+    }
+
+    #[test]
+    fn spectator_snapshot_enabled_keeps_publishing_and_private_redaction() {
+        let spectator = snapshot_test_spectator(true);
+        let mut session = mir2_simulation::SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        });
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let mut snapshot_calls = 0;
+        let frame = super::publish_spectator_frame_if_enabled(&spectator, || {
+            snapshot_calls += 1;
+            Some(session.spectator_world_snapshot())
+        })
+        .expect("enabled spectator should publish")
+        .expect("first active snapshot should produce a frame");
+        assert_eq!(snapshot_calls, 1);
+        assert_eq!(spectator.metrics().published_frames_total, 1);
+        assert_eq!(frame.world["mapFileName"], "0");
+        assert_eq!(frame.world["inventoryItems"], json!([]));
+        assert_eq!(frame.world["questLog"], json!([]));
+        assert!(!frame.targets().is_empty());
+    }
+
+    #[test]
+    fn spectator_snapshot_enabled_without_active_identity_does_not_publish() {
+        let spectator = snapshot_test_spectator(true);
+        assert!(
+            super::publish_spectator_frame_if_enabled(&spectator, || None)
+                .expect("inactive session should be skipped")
+                .is_none()
+        );
+        assert_eq!(spectator.metrics().published_frames_total, 0);
+    }
 
     struct TestEnvRestoreGuard {
         previous: Vec<(String, Option<std::ffi::OsString>)>,
@@ -11912,6 +15270,533 @@ mod tests {
         event["type"] == "packet" && event["packet"] == packet
     }
 
+    mod npc_purchase_dispatch_tests {
+        use super::*;
+        use crate::npc_purchase_browser::{
+            execute_browser_npc_purchase, BrowserNpcPurchaseConnection, BrowserNpcPurchaseDispatch,
+        };
+        use crate::routing::{InMemoryZoneOwnerLeaseAuthority, ZoneId, ZoneOwnerLeaseAuthority};
+        use mir2_client_wire::{
+            Action, ClientRequest, FailureState, Operation, ServerFrame, ServerReply, U64,
+        };
+        use mir2_simulation::{InProcessWorldRuntime, VisibleNpcRecord};
+        use std::pin::Pin;
+        use std::task::{Context, Poll};
+
+        #[derive(Default)]
+        struct RecordingSink {
+            messages: Vec<axum::extract::ws::Message>,
+            attempts: usize,
+            fail_at: Option<usize>,
+        }
+        impl futures_util::Sink<axum::extract::ws::Message> for RecordingSink {
+            type Error = axum::Error;
+            fn poll_ready(
+                self: Pin<&mut Self>,
+                _: &mut Context<'_>,
+            ) -> Poll<Result<(), Self::Error>> {
+                Poll::Ready(Ok(()))
+            }
+            fn start_send(
+                mut self: Pin<&mut Self>,
+                message: axum::extract::ws::Message,
+            ) -> Result<(), Self::Error> {
+                let attempt = self.attempts;
+                self.attempts += 1;
+                if self.fail_at == Some(attempt) {
+                    return Err(axum::Error::new(std::io::Error::other(
+                        "injected NPC dispatch send failure",
+                    )));
+                }
+                self.messages.push(message);
+                Ok(())
+            }
+            fn poll_flush(
+                self: Pin<&mut Self>,
+                _: &mut Context<'_>,
+            ) -> Poll<Result<(), Self::Error>> {
+                Poll::Ready(Ok(()))
+            }
+            fn poll_close(
+                self: Pin<&mut Self>,
+                _: &mut Context<'_>,
+            ) -> Poll<Result<(), Self::Error>> {
+                Poll::Ready(Ok(()))
+            }
+        }
+        fn recording_sender(
+            sink: RecordingSink,
+        ) -> super::super::transport::SocketSender<RecordingSink> {
+            super::super::transport::SocketSender::new(
+                sink,
+                super::super::transport::TransportSignal::new(),
+            )
+        }
+        fn events(sink: &RecordingSink) -> Vec<Value> {
+            sink.messages
+                .iter()
+                .map(|message| {
+                    let axum::extract::ws::Message::Text(text) = message else {
+                        panic!("text dispatch only")
+                    };
+                    serde_json::from_str(text.as_str()).unwrap()
+                })
+                .collect()
+        }
+        fn external(id: u64, action: Action) -> ClientRequest {
+            let request = ClientRequest::new(U64::new(id), action).unwrap();
+            mir2_client_wire::parse_client_request(
+                &mir2_client_wire::encode_client_request(&request).unwrap(),
+            )
+            .unwrap()
+        }
+        // Real owner receipts and projections from an isolated File authority,
+        // using the checked-in Scott script and actual Candle catalog price.
+        // No active/private account file, environment mutation or listener.
+        fn actual_candle_purchase() -> (
+            BrowserNpcPurchaseDispatch,
+            BrowserNpcPurchaseDispatch,
+            Vec<BrowserNpcPurchaseDispatch>,
+        ) {
+            use std::io::Write;
+            static SEQUENCE: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+            let temporary = std::env::temp_dir()
+                .canonicalize()
+                .expect("guarded TEMP exists");
+            let timestamp = SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_nanos();
+            let sequence = SEQUENCE.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            let directory =
+                temporary.join(format!("mir2-npc-dispatch-order-{timestamp}-{sequence}"));
+            assert!(directory.starts_with(&temporary));
+            std::fs::create_dir(&directory).expect("fresh owned test directory");
+            let path = directory.join("accounts.json");
+            let mut config = SimulationConfig::default();
+            assert!(
+                config.account_store_path.is_none() && config.account_store_database_url.is_none()
+            );
+            config.save_recovery_dir = None;
+            config.visible_monsters.clear();
+            config.map_hazards.clear();
+            config.visible_npcs.clear();
+            config.visible_npcs.push(VisibleNpcRecord {
+                object_id: 4991,
+                name: "Merchant_Scott".into(),
+                image: 3,
+                colour_argb: -1,
+                position: Point {
+                    x: config.spawn.x + 1,
+                    y: config.spawn.y,
+                },
+                direction: MirDirection::Left,
+                quest_ids: vec![],
+                script_key: Some("BichonProvince/BorderVillage/Pedlar".into()),
+            });
+            {
+                let mut store = config.account_store.lock().unwrap();
+                let save = store
+                    .accounts
+                    .get_mut("demo")
+                    .unwrap()
+                    .saves
+                    .get_mut(&0)
+                    .unwrap();
+                save.position = config.spawn.clone();
+                save.gold = 200;
+                save.inventory_capacity = 86;
+                save.inventory_items_json.clear();
+                save.belt_items_json.clear();
+                save.equipment_items_json.clear();
+                save.equipment_items_explicit_empty = true;
+            }
+            let bytes = serde_json::to_vec(&*config.account_store.lock().unwrap()).unwrap();
+            let mut file = std::fs::OpenOptions::new()
+                .write(true)
+                .create_new(true)
+                .open(&path)
+                .unwrap();
+            file.write_all(&bytes).unwrap();
+            drop(file);
+            config = config.with_account_store_path(&path);
+            // As in the File-owner route fixture, bootstrap the personal runtime
+            // before wrapping it in the owner seam. This constructor has no
+            // routing context for GatewaySession's standard-login recovery.
+            let mut runtime: mir2_simulation::ZoneRuntimeHandle =
+                Box::new(InProcessWorldRuntime::new(config));
+            let login = runtime
+                .execute(mir2_simulation::WorldCommand::ClientPacket(
+                    ClientPacket::Login {
+                        account_id: "demo".into(),
+                        password: "demo".into(),
+                    },
+                ))
+                .unwrap();
+            assert!(login
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+            runtime
+                .execute(mir2_simulation::WorldCommand::ClientPacket(
+                    ClientPacket::StartGame { character_index: 0 },
+                ))
+                .unwrap();
+            assert_eq!(runtime.active_identity().unwrap().character_index, 0);
+            runtime
+                .execute(mir2_simulation::WorldCommand::Interact { object_id: 4991 })
+                .unwrap();
+            let goods = runtime
+                .execute(mir2_simulation::WorldCommand::SelectNpcDialog {
+                    target: "@BuySell".into(),
+                })
+                .unwrap();
+            let selector = goods
+                .iter()
+                .find_map(|packet| match packet {
+                    ServerPacket::NPCGoods { list, .. } => list
+                        .iter()
+                        .find(|item| item.item_index == 722)
+                        .map(|item| item.unique_id),
+                    _ => None,
+                })
+                .expect("actual Scott Candle selector");
+            runtime.save_active_character().unwrap();
+            let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+            let zone = ZoneId::primary();
+            let lease = authority.owner_lease(&zone);
+            let mut session = crate::GatewaySession::with_routed_world_runtime_and_owner_authority(
+                zone,
+                lease,
+                Some(authority),
+                runtime,
+            );
+            assert_eq!(session.world_snapshot().gold, 200);
+            let mut state = BrowserNpcPurchaseConnection::default();
+            state.set_opted_in(true);
+            let began = execute_browser_npc_purchase(
+                &mut session,
+                &mut state,
+                Some("demo"),
+                true,
+                &external(1, Action::Begin),
+            )
+            .unwrap();
+            let ServerReply::Producer { producer } = &began.frame.reply else {
+                panic!("actual Begin")
+            };
+            let quoted = execute_browser_npc_purchase(
+                &mut session,
+                &mut state,
+                Some("demo"),
+                true,
+                &external(
+                    2,
+                    Action::Quote {
+                        request: mir2_client_wire::PurchaseRequest::new(U64::new(selector), 1, 0)
+                            .unwrap(),
+                    },
+                ),
+            )
+            .unwrap();
+            let ServerReply::Quote { intent } = &quoted.frame.reply else {
+                panic!("actual Quote")
+            };
+            let operation = Operation {
+                actor: producer.actor,
+                request_scope: producer.producer_scope,
+                sequence: U64::new(1),
+                intent: intent.clone(),
+            };
+            let absent = execute_browser_npc_purchase(
+                &mut session,
+                &mut state,
+                Some("demo"),
+                true,
+                &external(
+                    3,
+                    Action::Query {
+                        operation: operation.clone(),
+                    },
+                ),
+            )
+            .unwrap();
+            assert_eq!(absent.frame.reply, ServerReply::Recovery { receipt: None });
+            let request = external(
+                4,
+                Action::Purchase {
+                    operation: operation.clone(),
+                },
+            );
+            let purchased = execute_browser_npc_purchase(
+                &mut session,
+                &mut state,
+                Some("demo"),
+                true,
+                &request,
+            )
+            .unwrap();
+            purchased.frame.validate_for_request(&request).unwrap();
+            let ServerReply::Purchase {
+                receipt,
+                replayed: false,
+            } = &purchased.frame.reply
+            else {
+                panic!("genuine committed purchase")
+            };
+            assert!(matches!(
+                &receipt.entry.outcome,
+                mir2_client_wire::Outcome::Committed {
+                    charged: 10,
+                    admitted_count: 1,
+                    currency: mir2_client_wire::Currency::Gold,
+                    source: mir2_client_wire::Source::Trade,
+                    ..
+                }
+            ));
+            assert_eq!(purchased.frame.snapshot.as_ref().unwrap()["gold"], 190);
+            assert_eq!(
+                purchased
+                    .packets
+                    .iter()
+                    .filter(|packet| matches!(packet, ServerPacket::LoseGold { gold: 10 }))
+                    .count(),
+                1
+            );
+            assert!(purchased
+                .packets
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::GainedItem { .. })));
+            let saved = std::fs::read(&path).unwrap();
+            let replay = execute_browser_npc_purchase(
+                &mut session,
+                &mut state,
+                Some("demo"),
+                true,
+                &external(
+                    5,
+                    Action::Purchase {
+                        operation: operation.clone(),
+                    },
+                ),
+            )
+            .unwrap();
+            assert_eq!(
+                replay.frame.reply,
+                ServerReply::Purchase {
+                    receipt: receipt.clone(),
+                    replayed: true
+                }
+            );
+            let recovered = execute_browser_npc_purchase(
+                &mut session,
+                &mut state,
+                Some("demo"),
+                true,
+                &external(6, Action::Query { operation }),
+            )
+            .unwrap();
+            assert_eq!(
+                recovered.frame.reply,
+                ServerReply::Recovery {
+                    receipt: Some(receipt.clone())
+                }
+            );
+            assert_eq!(std::fs::read(&path).unwrap(), saved);
+            (purchased, replay, vec![began, quoted, absent, recovered])
+        }
+
+        #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+        async fn npc_purchase_dispatch_complete_owner_pair_finishes_actual_gold_once() {
+            let (dispatch, _, _) = tokio::task::block_in_place(actual_candle_purchase);
+            let sender = recording_sender(RecordingSink::default());
+            super::super::send_npc_purchase_dispatch(&sender, &dispatch)
+                .await
+                .unwrap();
+            let sink = sender.lock_for_test().await;
+            let observed = events(&sink);
+            let packets: Vec<_> = dispatch
+                .packets
+                .iter()
+                .map(super::super::server_packet_to_event)
+                .collect();
+            assert_eq!(
+                &observed[..packets.len()],
+                packets.as_slice(),
+                "all original packets retain content and order"
+            );
+            let encoded = mir2_client_wire::encode_server_frame(&dispatch.frame).unwrap();
+            let axum::extract::ws::Message::Text(last) = sink.messages.last().unwrap() else {
+                panic!("owner text frame")
+            };
+            assert!(
+                last.as_str() == encoded,
+                "original owner frame finishes dispatch"
+            );
+            assert_eq!(observed.len(), packets.len() + 1);
+            assert!(observed
+                .iter()
+                .any(|event| test_packet(event, "GainedItem")));
+            let mut displayed_gold = 200;
+            for event in &observed {
+                if test_packet(event, "LoseGold") {
+                    displayed_gold -= event["payload"]["gold"].as_u64().unwrap();
+                } else if event["type"] == "npcPurchaseOwner" {
+                    displayed_gold = event["snapshot"]["gold"].as_u64().unwrap();
+                }
+            }
+            assert_eq!(
+                displayed_gold, 190,
+                "delta followed by its authoritative projection charges once"
+            );
+        }
+
+        #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+        async fn npc_purchase_dispatch_missing_pair_keeps_failure_and_receipt_first() {
+            let (original, _, _) = tokio::task::block_in_place(actual_candle_purchase);
+            let receipt = original.frame.reply.receipt().unwrap().clone();
+            for state in [
+                FailureState::BeforeExecution,
+                FailureState::Unknown,
+                FailureState::PostCommit,
+            ] {
+                let known = (state == FailureState::PostCommit).then(|| receipt.clone());
+                let dispatch = BrowserNpcPurchaseDispatch {
+                    frame: ServerFrame::new(
+                        original.frame.request_id,
+                        ServerReply::Failure {
+                            state,
+                            receipt: known,
+                        },
+                        None,
+                        None,
+                    )
+                    .unwrap(),
+                    packets: original.packets.clone(),
+                };
+                let sender = recording_sender(RecordingSink::default());
+                super::super::send_npc_purchase_dispatch(&sender, &dispatch)
+                    .await
+                    .unwrap();
+                let sink = sender.lock_for_test().await;
+                let observed = events(&sink);
+                assert!(
+                    observed[0] == serde_json::to_value(&dispatch.frame).unwrap(),
+                    "original failure frame precedes packets"
+                );
+                assert!(observed[0]["snapshot"].is_null() && observed[0]["authority"].is_null());
+                let packets: Vec<_> = dispatch
+                    .packets
+                    .iter()
+                    .map(super::super::server_packet_to_event)
+                    .collect();
+                assert_eq!(&observed[1..], packets.as_slice());
+                assert_eq!(observed.len(), packets.len() + 1);
+            }
+        }
+
+        #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+        async fn npc_purchase_dispatch_packet_free_control_and_replay_emit_only_original_frame() {
+            let (_, replay, mut controls) = tokio::task::block_in_place(actual_candle_purchase);
+            controls.push(replay);
+            for dispatch in controls {
+                assert!(dispatch.packets.is_empty());
+                let sender = recording_sender(RecordingSink::default());
+                super::super::send_npc_purchase_dispatch(&sender, &dispatch)
+                    .await
+                    .unwrap();
+                let sink = sender.lock_for_test().await;
+                assert_eq!(sink.attempts, 1);
+                assert!(
+                    events(&sink) == vec![serde_json::to_value(&dispatch.frame).unwrap()],
+                    "packet-free dispatch preserves original owner frame"
+                );
+            }
+        }
+
+        #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+        async fn npc_purchase_dispatch_encode_failure_publishes_nothing() {
+            let (original, _, _) = tokio::task::block_in_place(actual_candle_purchase);
+            for malformed in 0..3 {
+                let mut dispatch = BrowserNpcPurchaseDispatch {
+                    frame: original.frame.clone(),
+                    packets: original.packets.clone(),
+                };
+                match malformed {
+                    0 => dispatch.frame.request_id = U64::new(0),
+                    1 => dispatch.frame.authority = None,
+                    _ => {
+                        dispatch.frame.snapshot.as_mut().unwrap()["mapTitle"] =
+                            Value::String("x".repeat(mir2_client_wire::MAX_SERVER_FRAME_BYTES));
+                    }
+                }
+                assert!(mir2_client_wire::encode_server_frame(&dispatch.frame).is_err());
+                let sender = recording_sender(RecordingSink::default());
+                assert!(super::super::send_npc_purchase_dispatch(&sender, &dispatch)
+                    .await
+                    .is_err());
+                let sink = sender.lock_for_test().await;
+                assert_eq!(sink.attempts, 0);
+                assert!(sink.messages.is_empty());
+            }
+        }
+
+        #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+        async fn npc_purchase_dispatch_send_failure_stops_before_later_messages() {
+            let (dispatch, _, _) = tokio::task::block_in_place(actual_candle_purchase);
+            let packets: Vec<_> = dispatch
+                .packets
+                .iter()
+                .map(super::super::server_packet_to_event)
+                .collect();
+            assert!(!packets.is_empty());
+            for fail_at in 0..=packets.len() {
+                let sender = recording_sender(RecordingSink {
+                    fail_at: Some(fail_at),
+                    ..Default::default()
+                });
+                assert!(super::super::send_npc_purchase_dispatch(&sender, &dispatch)
+                    .await
+                    .is_err());
+                let sink = sender.lock_for_test().await;
+                assert_eq!(sink.attempts, fail_at + 1);
+                assert_eq!(events(&sink).as_slice(), &packets[..fail_at]);
+                assert!(!events(&sink)
+                    .iter()
+                    .any(|event| event["type"] == "npcPurchaseOwner"));
+            }
+            let missing = BrowserNpcPurchaseDispatch {
+                frame: ServerFrame::new(
+                    dispatch.frame.request_id,
+                    ServerReply::Failure {
+                        state: FailureState::PostCommit,
+                        receipt: dispatch.frame.reply.receipt().cloned(),
+                    },
+                    None,
+                    None,
+                )
+                .unwrap(),
+                packets: dispatch.packets,
+            };
+            let mut frame_first = vec![serde_json::to_value(&missing.frame).unwrap()];
+            frame_first.extend(packets);
+            for fail_at in 0..frame_first.len() {
+                let sender = recording_sender(RecordingSink {
+                    fail_at: Some(fail_at),
+                    ..Default::default()
+                });
+                assert!(super::super::send_npc_purchase_dispatch(&sender, &missing)
+                    .await
+                    .is_err());
+                let sink = sender.lock_for_test().await;
+                assert_eq!(sink.attempts, fail_at + 1);
+                assert!(
+                    events(&sink).as_slice() == &frame_first[..fail_at],
+                    "frame-first send failure preserves original prefix"
+                );
+            }
+        }
+    }
+
     #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
     async fn blocking_component_initializer_supports_sync_clients_with_own_runtime() {
         let value = super::run_blocking_component_initializer("test sync client", || {
@@ -11935,7 +15820,7 @@ mod tests {
         assert_eq!(event["type"], "realmInfo");
         assert_eq!(event["payload"]["schema"], "mir2-realm-handshake/1");
         assert_eq!(event["payload"]["profileId"], "platinum_176");
-        assert_eq!(event["payload"]["profileVersion"], 25);
+        assert_eq!(event["payload"]["profileVersion"], 27);
         assert_eq!(event["payload"]["acceptanceLevel"], 50);
         assert_eq!(
             event["payload"]["ratePolicy"]["monsterExperienceTiers"][0]["multiplier"],
@@ -11967,6 +15852,7 @@ mod tests {
             delay_ms: 500,
             cast_time_ms: 0,
             cooldown_remaining_ticks: 0,
+            cooldown_remaining_ms: Some(275),
         };
 
         let frame = json!({
@@ -11977,6 +15863,17 @@ mod tests {
         });
         assert_eq!(frame["payload"]["knownSkills"][0]["mpCost"], 7);
         assert!(frame["payload"]["knownSkills"][0].get("mp_cost").is_none());
+        assert_eq!(
+            frame["payload"]["knownSkills"][0]["cooldownRemainingMs"],
+            275
+        );
+        let mut legacy = frame["payload"]["knownSkills"][0].clone();
+        legacy
+            .as_object_mut()
+            .unwrap()
+            .remove("cooldownRemainingMs");
+        let decoded: mir2_simulation::SkillSnapshot = serde_json::from_value(legacy).unwrap();
+        assert_eq!(decoded.cooldown_remaining_ms, None);
     }
 
     #[test]
@@ -11991,6 +15888,64 @@ mod tests {
         let replay = super::consume_channel_subject_proof(&cache, &proof)
             .expect_err("the same channel proof must not be accepted twice");
         assert_eq!(replay.0, axum::http::StatusCode::UNAUTHORIZED);
+    }
+
+    #[test]
+    fn npc_purchase_reader_raw_envelope_cannot_fallback_to_generic_buy_item() {
+        let valid = r#"{"type":"npcPurchaseOwner","protocolVersion":1,"requestId":"1","action":{"kind":"begin"}}"#;
+        let command = serde_json::from_str::<BrowserCommand>(valid).unwrap();
+        assert!(matches!(command, BrowserCommand::NpcPurchaseOwner { .. }));
+        assert!(super::browser_command_to_action(command).is_err());
+        mir2_client_wire::parse_client_request(valid).unwrap();
+        for malformed in [
+            r#"{"type":"npcPurchaseOwner","type":"buyItem","itemIndex":0,"count":1,"panelType":0}"#,
+            r#"{"type":"buyItem","ty\u0070e":"npcPurchaseOwner","protocolVersion":1,"requestId":"1","action":{"kind":"begin"}}"#,
+        ] {
+            assert!(serde_json::from_str::<BrowserCommand>(malformed).is_err());
+        }
+        for malformed in [
+            valid.replace(r#""requestId":"1""#, r#""requestId":"1","requestId":"2""#),
+            valid.replace(r#""kind":"begin""#, r#""kind":"begin","kind":"begin""#),
+            valid.replace(r#""requestId":"1""#, r#""requestId":"1","admin":true"#),
+        ] {
+            assert!(mir2_client_wire::parse_client_request(&malformed).is_err());
+        }
+        let capability = super::validate_native_client_capabilities(&[
+            mir2_client_wire::NPC_PURCHASE_OWNER_CAPABILITY.to_owned(),
+        ])
+        .unwrap();
+        assert!(capability.durable_npc_purchase_owner_v1);
+        assert!(
+            !super::validate_native_client_capabilities(&[])
+                .unwrap()
+                .durable_npc_purchase_owner_v1
+        );
+    }
+
+    #[test]
+    fn npc_purchase_goods_selector_is_canonical_before_any_number_conversion() {
+        for selector in [0, 9_007_199_254_740_991, 9_007_199_254_740_993, u64::MAX] {
+            let item = sample_user_item(selector, 1);
+            for packet in [
+                ServerPacket::NPCGoods {
+                    list: vec![item.clone()],
+                    rate: 1.0,
+                    panel_type: 0,
+                    hide_added_stats: false,
+                },
+                ServerPacket::NPCPearlGoods {
+                    list: vec![item.clone()],
+                    rate: 1.0,
+                    panel_type: 0,
+                },
+            ] {
+                let event = super::server_packet_to_event(&packet);
+                let row = &event["payload"]["list"][0];
+                assert_eq!(row["purchaseItemIndex"], selector.to_string());
+                assert_eq!(row["uniqueId"].as_u64(), Some(selector));
+                assert_eq!(row["unique_id"].as_u64(), Some(selector));
+            }
+        }
     }
 
     fn sample_user_item(unique_id: u64, count: u16) -> UserItem {
@@ -12059,6 +16014,112 @@ mod tests {
         let observed = with_env_var(NAME, Some("recovered"), || std::env::var(NAME).unwrap());
         assert_eq!(observed, "recovered");
         assert_eq!(std::env::var_os(NAME), previous);
+    }
+
+    #[test]
+    fn attack_v2_socket_tag_cannot_fall_back_to_legacy_gameplay_dispatch() {
+        let raw = r#"{"type":"attackV2","protocolVersion":2,"requestId":"1","objectId":7}"#;
+        let command: super::BrowserCommand = serde_json::from_str(raw).unwrap();
+        assert!(super::browser_command_to_action(command).is_err());
+        assert_eq!(
+            crate::attack_protocol::parse_attack_v2(raw)
+                .unwrap()
+                .object_id,
+            7
+        );
+        for raw in [
+            r#"{"type":"attackV2","type":"attack","protocolVersion":2,"requestId":"1","objectId":7}"#,
+            r#"{"type":"attack","type":"attackV2","protocolVersion":2,"requestId":"1","objectId":7}"#,
+        ] {
+            assert!(serde_json::from_str::<super::BrowserCommand>(raw).is_err());
+        }
+        let legacy: super::BrowserCommand =
+            serde_json::from_str(r#"{"type":"attack","objectId":7}"#).unwrap();
+        assert!(matches!(
+            super::browser_command_to_action(legacy).unwrap(),
+            super::SessionAction::Attack { object_id: 7 }
+        ));
+    }
+
+    #[test]
+    fn attack_v2_socket_reparses_original_bytes_and_rejects_unknown_fields() {
+        let raw = r#"{"type":"attackV2","protocolVersion":2,"requestId":"1","objectId":7,"moveTo":{"x":1,"y":2}}"#;
+        assert!(matches!(
+            serde_json::from_str::<super::BrowserCommand>(raw).unwrap(),
+            super::BrowserCommand::AttackV2 { .. }
+        ));
+        assert!(crate::attack_protocol::parse_attack_v2(raw).is_err());
+    }
+
+    #[test]
+    fn creature_world_sprite_uses_original_pet_family_for_all_fifteen_images() {
+        for pet_type in 0_u16..15 {
+            let sprite = super::monster_packet_sprite(10_000 + pet_type);
+            assert_eq!(sprite["bodyLibrary"], format!("Pet/{pet_type:02}"));
+            assert_eq!(sprite["frameBaseOffset"], 0);
+        }
+        assert_eq!(
+            super::monster_packet_sprite(5)["bodyLibrary"],
+            "Monster/005"
+        );
+        assert_eq!(
+            super::monster_packet_sprite(9_999)["bodyLibrary"],
+            "Monster/9999"
+        );
+        assert_eq!(
+            super::monster_packet_sprite(10_015)["bodyLibrary"],
+            "Monster/10015"
+        );
+    }
+
+    #[test]
+    fn guild_buff_menu_commands_preserve_source_actions_and_server_ids() {
+        for action in 0_u8..=2 {
+            let command = serde_json::from_value::<BrowserCommand>(serde_json::json!({
+                "type": "guildBuffUpdate", "action": action, "id": 50,
+            }))
+            .unwrap();
+            assert!(matches!(super::browser_command_to_action(command).unwrap(),
+                SessionAction::Packet(ClientPacket::GuildBuffUpdate { action: a, id: 50 }) if a == action));
+        }
+        assert!(
+            super::browser_command_to_action(BrowserCommand::GuildBuffUpdate { action: 3, id: 50 })
+                .is_err()
+        );
+    }
+
+    #[test]
+    fn skill_icons_use_server_spell_definition_and_preserve_explicit_zero() {
+        let definition = mir2_game_data::crystal_magic_by_spell("FireBall").unwrap();
+        let mut payload = json!({"knownSkills": [
+            {"key": "unrelated-runtime-key", "spell": "FireBall"},
+            {"spell": "FireBall", "icon": 0},
+            {"spell": "FireBall", "icon": 201},
+            {"spell": "UnknownServerSpell"},
+            {"key": "basic-attack", "spell": null}
+        ]});
+        super::project_known_skill_icons(&mut payload);
+        assert_eq!(payload["knownSkills"][0]["icon"], json!(definition.icon));
+        assert_eq!(payload["knownSkills"][1]["icon"], json!(0));
+        assert_eq!(payload["knownSkills"][2]["icon"], json!(201));
+        assert!(payload["knownSkills"][3].get("icon").is_none());
+        assert!(payload["knownSkills"][4].get("icon").is_none());
+    }
+
+    #[test]
+    fn skill_names_use_magic_definition_without_overwriting_server_names() {
+        let mut payload = json!({"knownSkills": [
+            {"spell":"Fury", "name":"Battle Focus", "icon":0},
+            {"spell":"Healing", "name":"Minor Heal"},
+            {"spell":"Fury", "magicName":"定制怒气"},
+            {"spell":"UnknownServerSpell", "name":"Custom skill"}
+        ]});
+        super::project_known_skill_icons(&mut payload);
+        assert_eq!(payload["knownSkills"][0]["magicName"], "Fury");
+        assert_eq!(payload["knownSkills"][0]["icon"], 0);
+        assert_eq!(payload["knownSkills"][1]["magicName"], "Healing");
+        assert_eq!(payload["knownSkills"][2]["magicName"], "定制怒气");
+        assert!(payload["knownSkills"][3].get("magicName").is_none());
     }
 
     fn sample_intelligent_creature(slot_index: i32) -> ClientIntelligentCreature {
@@ -12228,6 +16289,7 @@ mod tests {
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
             gameplay_event_sink: None,
             identity: Arc::new(crate::identity::IdentityService::local_for_tests()),
+            auth_rate_limit_policy: super::AuthRateLimitPolicy::default(),
             injector: crate::inject::LiveSessionInjector::default(),
             spectator: crate::spectator::SpectatorHub::from_env(),
             ai_live: crate::ai_live::AiLiveHub::new(
@@ -12237,6 +16299,7 @@ mod tests {
             )
             .expect("test AI live hub"),
             channel_identity: crate::ChannelIdentityRegistry::in_memory(),
+            companions: None,
         };
 
         let Json(receipt) = super::admin_system_mail(
@@ -12290,6 +16353,7 @@ mod tests {
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
             gameplay_event_sink: Some(shared_event_sink),
             identity: Arc::new(crate::identity::IdentityService::local_for_tests()),
+            auth_rate_limit_policy: super::AuthRateLimitPolicy::default(),
             injector: crate::inject::LiveSessionInjector::default(),
             spectator: crate::spectator::SpectatorHub::from_env(),
             ai_live: crate::ai_live::AiLiveHub::new(
@@ -12299,6 +16363,7 @@ mod tests {
             )
             .expect("test AI live hub"),
             channel_identity: crate::ChannelIdentityRegistry::in_memory(),
+            companions: None,
         };
 
         let Json(response) = super::health(State(state)).await;
@@ -12381,6 +16446,7 @@ mod tests {
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
             gameplay_event_sink: None,
             identity: Arc::new(crate::identity::IdentityService::local_for_tests()),
+            auth_rate_limit_policy: super::AuthRateLimitPolicy::default(),
             injector: crate::inject::LiveSessionInjector::default(),
             spectator: crate::spectator::SpectatorHub::from_env(),
             ai_live: crate::ai_live::AiLiveHub::new(
@@ -12390,6 +16456,7 @@ mod tests {
             )
             .expect("test AI live hub"),
             channel_identity: crate::ChannelIdentityRegistry::in_memory(),
+            companions: None,
         };
 
         let Json(sessions) = super::admin_sessions(State(state.clone())).await;
@@ -12444,6 +16511,139 @@ mod tests {
         .expect_err("dev gateway should not execute stop");
         assert_eq!(stop_error.0, axum::http::StatusCode::CONFLICT);
     }
+
+    #[test]
+    fn companion_control_frames_are_strict_and_never_become_world_actions() {
+        for input in [
+            json!({"type":"companionControl","requestId":"req-1","operation":"list","payload":{}}),
+            json!({"type":"companionRuntimeRegister","requestId":"reg-1","residentId":"alo","archiveId":"archive-1"}),
+            json!({"type":"companionRuntimeReply","requestId":"cr:abc","generation":1,"status":"ok","result":{}}),
+        ] {
+            let command: BrowserCommand = serde_json::from_value(input.clone()).unwrap();
+            assert!(super::companion_browser_command(command).is_err());
+            let command: BrowserCommand = serde_json::from_value(input.clone()).unwrap();
+            assert!(super::browser_command_to_action(command).is_err());
+            let mut forged = input;
+            forged["accountId"] = json!("someone-else");
+            assert!(serde_json::from_value::<BrowserCommand>(forged).is_err());
+        }
+    }
+
+    #[test]
+    fn companion_control_requires_current_verified_authentication_and_active_character() {
+        let session = demo_game_session();
+        let identity = crate::identity::IdentityService::local_for_tests();
+        let grant = identity
+            .issue_session("demo", "password", "demo", "127.0.0.1", "companion-test")
+            .unwrap();
+        let verified = identity.verify_session_token(&grant.token).unwrap();
+        let cache = crate::InMemoryGatewaySessionCache::default();
+        assert!(super::companion_socket_is_authorized(
+            &session,
+            true,
+            Some("demo"),
+            Some(&verified),
+            &cache,
+            &identity
+        ));
+        assert!(!super::companion_socket_is_authorized(
+            &session,
+            false,
+            Some("demo"),
+            Some(&verified),
+            &cache,
+            &identity
+        ));
+        assert!(!super::companion_socket_is_authorized(
+            &session,
+            true,
+            Some("foreign"),
+            Some(&verified),
+            &cache,
+            &identity
+        ));
+        assert!(!super::companion_socket_is_authorized(
+            &crate::GatewaySession::new(SimulationConfig::default()),
+            true,
+            Some("demo"),
+            Some(&verified),
+            &cache,
+            &identity
+        ));
+        identity
+            .revoke_session(&verified, &verified.session_id, "test")
+            .unwrap();
+        assert!(!super::companion_socket_is_authorized(
+            &session,
+            true,
+            Some("demo"),
+            Some(&verified),
+            &cache,
+            &identity
+        ));
+    }
+
+    #[tokio::test]
+    async fn companion_control_logout_restart_fences_same_character_old_admission() {
+        use crate::companion_relay::{CharacterBinding, CompanionPolicy, CompanionRelay};
+        let policy = CompanionPolicy {
+            schema_version: 1,
+            realm_id: "trial".into(),
+            world_epoch: "epoch-1".into(),
+            enrollments: vec![],
+        };
+        let hub = CompanionRelay::new(policy);
+        let mut session = demo_game_session();
+        let verified = crate::identity::VerifiedIdentitySession {
+            account_id: "demo".into(),
+            session_id: "verified-test".into(),
+            expires_at_ms: super::gateway_unix_ms() + 60_000,
+        };
+        let (sender, _receiver) =
+            tokio::sync::mpsc::channel(crate::companion_relay::OUTPUT_CAPACITY);
+        let mut registered = None;
+        super::ensure_companion_admission(&hub, &mut registered, &session, &verified, &sender)
+            .await
+            .unwrap();
+        let old = registered.clone().unwrap();
+        assert_eq!(
+            old.character,
+            CharacterBinding {
+                account_id: "demo".into(),
+                character_index: 0
+            }
+        );
+        session.try_handle_packet(ClientPacket::LogOut).unwrap();
+        super::detach_changed_companion_admission(
+            &Some(hub.clone()),
+            &mut registered,
+            &session,
+            true,
+            Some(&verified),
+        )
+        .await;
+        assert!(registered.is_none());
+        session
+            .try_handle_packet(ClientPacket::StartGame { character_index: 0 })
+            .unwrap();
+        super::ensure_companion_admission(&hub, &mut registered, &session, &verified, &sender)
+            .await
+            .unwrap();
+        assert_ne!(registered.as_ref().unwrap().id, old.id);
+        let delayed = crate::companion_relay::RelayDelivery {
+            recipient: old,
+            authorizing_owner: None,
+            event: json!({"type":"companionResult","payload":{}}),
+        };
+        assert!(!hub.delivery_is_current(&delayed).await);
+        let realm = super::companion_realm_info(json!({"payload":{"features":{}}}), Some(&hub), true);
+        assert_eq!(realm["payload"]["worldEpoch"], "epoch-1");
+        assert_eq!(realm["payload"]["features"]["companionControl"], true);
+        let disabled = super::companion_realm_info(json!({"payload":{"features":{}}}), None, false);
+        assert!(disabled["payload"].get("worldEpoch").is_none());
+        assert_eq!(disabled["payload"]["features"]["companionControl"], false);
+    }
+
 
     #[test]
     fn admin_session_trace_requires_configured_gateway_operator_token() {
@@ -12634,6 +16834,171 @@ mod tests {
     }
 
     #[test]
+    fn quest_finish_ack_accepts_repeatable_remove_but_not_completed_list_refresh() {
+        let command = BrowserCommand::FinishQuest {
+            request_id: Some("repeatable-142".to_owned()),
+            quest_index: 142,
+            selected_item_index: -1,
+        };
+        let request = super::quest_operation_request_for_browser_command(&command)
+            .unwrap()
+            .unwrap();
+        let remove = |quest_id, completed, taken, quest_state| ServerPacket::ChangeQuest {
+            quest_id,
+            completed,
+            taken,
+            quest_state,
+            task_list: Vec::new(),
+            new: false,
+            track_quest: false,
+        };
+        let success = |packets: Vec<ServerPacket>| {
+            serde_json::to_value(super::quest_operation_ack_for_responses(&request, &packets))
+                .unwrap()["success"]
+                == true
+        };
+        assert!(success(vec![remove(142, false, false, 2)]));
+        assert!(success(vec![remove(142, true, false, 2)]));
+        assert!(!success(vec![remove(141, false, false, 2)]));
+        assert!(!success(vec![remove(142, false, true, 1)]));
+        assert!(!success(vec![ServerPacket::CompleteQuest {
+            completed_quests: vec![142]
+        }]));
+        assert!(!success(Vec::new()));
+    }
+
+    #[test]
+    fn quest_calendar_changes_force_snapshot_even_on_idle_actions() {
+        assert!(!should_send_world_snapshot_for_action(&SessionAction::Tick));
+        assert!(!should_send_world_snapshot_for_action(
+            &SessionAction::Packet(ClientPacket::KeepAlive { time: 0 },)
+        ));
+        assert!(!responses_require_world_snapshot(&[]));
+        assert!(!super::responses_change_quest_state(&[]));
+        assert!(!super::responses_change_quest_state(&[
+            ServerPacket::ObjectShow { object_id: 42 }
+        ]));
+        assert!(super::responses_change_quest_state(&[
+            ServerPacket::CompleteQuest {
+                completed_quests: vec![]
+            }
+        ]));
+        assert!(super::responses_change_quest_state(&[
+            ServerPacket::ChangeQuest {
+                quest_id: 2_100_004,
+                completed: false,
+                taken: true,
+                quest_state: 1,
+                task_list: vec![],
+                new: false,
+                track_quest: false,
+            }
+        ]));
+        assert!(responses_require_world_snapshot(&[
+            ServerPacket::CompleteQuest {
+                completed_quests: vec![],
+            }
+        ]));
+        assert!(responses_require_world_snapshot(&[
+            ServerPacket::ChangeQuest {
+                quest_id: 2_100_004,
+                completed: false,
+                taken: true,
+                quest_state: 1,
+                task_list: vec!["Completed daily commissions: 0/2".to_owned()],
+                new: false,
+                track_quest: false,
+            }
+        ]));
+    }
+
+    #[test]
+    fn shared_trade_observer_receives_complete_owner_state_while_idle() {
+        for packet in [
+            ServerPacket::TradeAccept { name: "Owner".into() },
+            ServerPacket::TradeGold { amount: 50 },
+            ServerPacket::TradeItem { trade_items: Vec::new() },
+            ServerPacket::TradeConfirm,
+            ServerPacket::TradeCancel { unlock: false },
+        ] {
+            let responses = vec![packet];
+            assert!(super::responses_require_world_snapshot(&responses));
+            assert!(super::low_latency_responses_require_world_snapshot(&responses));
+        }
+        assert!(!super::low_latency_responses_require_world_snapshot(&[ServerPacket::TradeRequest { name: "Owner".into() }]));
+        assert!(!super::low_latency_responses_require_world_snapshot(&[ServerPacket::KeepAlive { time: 0 }]));
+    }
+
+    #[test]
+    fn low_latency_xp_only_kill_and_level_up_force_authoritative_snapshot() {
+        let xp_only_kill = [ServerPacket::GainExperience { amount: 18 }];
+        assert!(super::responses_change_player_progression(&xp_only_kill));
+        assert!(super::low_latency_responses_require_world_snapshot(
+            &xp_only_kill
+        ));
+
+        let level_up = [
+            ServerPacket::GainExperience { amount: 18 },
+            ServerPacket::LevelChanged {
+                level: 2,
+                experience: 0,
+                max_experience: 500,
+            },
+        ];
+        assert!(super::responses_change_player_progression(&level_up));
+        assert!(super::low_latency_responses_require_world_snapshot(
+            &level_up
+        ));
+    }
+
+    #[test]
+    fn low_latency_unchanged_tick_keeps_packet_only_fast_path() {
+        assert!(!super::low_latency_responses_require_world_snapshot(&[]));
+        assert!(!super::low_latency_responses_require_world_snapshot(&[
+            ServerPacket::ObjectHealth {
+                info: mir2_protocol::ObjectHealthInfo {
+                    object_id: 42,
+                    percent: 75,
+                    expire: 0,
+                },
+            },
+        ]));
+    }
+
+    #[test]
+    fn fishing_timer_projects_tackle_changes_without_snapshotting_progress() {
+        let progress = ServerPacket::FishingUpdate {
+            object_id: 42,
+            fishing: true,
+            progress_percent: 16,
+            chance_percent: 38,
+            fishing_point: Point { x: 339, y: 247 },
+            found_fish: true,
+        };
+        let wear = ServerPacket::DuraChanged { unique_id: 99, current_dura: 0 };
+        assert!(!super::low_latency_responses_require_world_snapshot(
+            std::slice::from_ref(&progress),
+        ));
+        assert!(!super::low_latency_responses_require_world_snapshot(
+            std::slice::from_ref(&wear),
+        ));
+        assert!(super::low_latency_responses_require_world_snapshot(&[
+            progress.clone(), wear,
+        ]));
+        assert!(super::low_latency_responses_require_world_snapshot(&[
+            ServerPacket::DeleteItem { unique_id: 99, count: 1 }, progress,
+        ]));
+    }
+
+    #[tokio::test(flavor = "current_thread")]
+    async fn ordinary_companion_safety_fast_path_never_enters_blocking_region() {
+        // block_in_place panics in a current-thread runtime. This exercises
+        // the actual web predicate and proves its ordinary-player early exit.
+        let session = demo_game_session();
+        assert!(!super::companion_safety_snapshot_pending(&session).unwrap());
+    }
+
+    #[test]
     fn quest_request_ids_reject_malformed_values_and_preserve_legacy_web_commands() {
         for request_id in [
             "".to_owned(),
@@ -12804,6 +17169,36 @@ mod tests {
     }
 
     #[test]
+    fn character_roster_events_preserve_crystal_last_access_ticks() {
+        let character = || SelectInfo {
+            index: 7,
+            name: "LastSeenHero".to_string(),
+            level: 12,
+            class: MirClass::Warrior,
+            gender: MirGender::Male,
+            last_access_binary_datetime: -8584918932854775808,
+        };
+
+        let login = super::server_packet_to_event(&ServerPacket::LoginSuccess {
+            characters: vec![character()],
+        });
+        let logout = super::server_packet_to_event(&ServerPacket::LogOutSuccess {
+            characters: vec![character()],
+        });
+        let created = super::server_packet_to_event(&ServerPacket::NewCharacterSuccess {
+            char_info: character(),
+        });
+
+        for value in [
+            &login["payload"]["characters"][0],
+            &logout["payload"]["characters"][0],
+            &created["payload"]["character"],
+        ] {
+            assert_eq!(value["lastAccessBinaryDatetime"], "-8584918932854775808");
+        }
+    }
+
+    #[test]
     fn raw_server_events_expose_copyable_payload_fields() {
         let raw = super::server_packet_to_event(&ServerPacket::Raw {
             packet_id: ServerPacketId::TimeOfDay,
@@ -12962,6 +17357,20 @@ mod tests {
     }
 
     #[test]
+    fn object_poisoned_event_preserves_actor_and_full_mask() {
+        for poison in [0, 1, u16::MAX] {
+            let event = super::server_packet_to_event(&ServerPacket::ObjectPoisoned {
+                object_id: 2001,
+                poison,
+            });
+            assert_eq!(event["packet"], "ObjectPoisoned");
+            assert_eq!(event["payload"]["objectId"], 2001);
+            assert_eq!(event["payload"]["poison"], poison);
+            assert!(event["payload"].get("ownerId").is_none());
+        }
+    }
+
+    #[test]
     fn combine_item_server_event_exposes_crystal_payload_fields() {
         let packet = super::server_packet_to_event(&ServerPacket::CombineItem {
             grid: MirGridType::Inventory,
@@ -12998,6 +17407,32 @@ mod tests {
         assert_eq!(goods["payload"]["list"][0]["icon"], 398);
         assert_eq!(goods["payload"]["list"][0]["price"], 50);
         assert_eq!(goods["payload"]["list"][0]["item_index"], 658);
+        let source = &goods["payload"]["list"][0]["tooltipSource"];
+        assert_eq!(source["info"]["item_index"], 658);
+        assert_eq!(source["info"]["price"], 40);
+        assert_eq!(source["userItem"]["unique_id"], 43_122_689_u64);
+        assert_eq!(
+            source["userItem"]["item_index"],
+            source["info"]["item_index"]
+        );
+        assert_eq!(source["userItem"]["count"], 1);
+        assert!(source["socketInfos"].is_array());
+
+        let mut pearl_item = sample_user_item(43_122_689, 1);
+        pearl_item.item_index = 658;
+        let pearls = super::server_packet_to_event(&ServerPacket::NPCPearlGoods {
+            list: vec![pearl_item],
+            rate: 1.25,
+            panel_type: 3,
+        });
+        assert_eq!(pearls["packet"], "NPCPearlGoods");
+        assert_eq!(pearls["payload"]["list"], goods["payload"]["list"]);
+        assert_eq!(pearls["payload"]["rate"], goods["payload"]["rate"]);
+        assert_eq!(
+            pearls["payload"]["panelType"],
+            goods["payload"]["panelType"]
+        );
+        assert!(pearls["payload"].get("hideAddedStats").is_none());
 
         let repair = super::server_packet_to_event(&ServerPacket::NPCRepair { rate: 1.5 });
         assert_eq!(repair["packet"], "NPCRepair");
@@ -13014,6 +17449,126 @@ mod tests {
         let craft = super::server_packet_to_event(&ServerPacket::CraftItem { success: false });
         assert_eq!(craft["packet"], "CraftItem");
         assert_eq!(craft["payload"]["success"], false);
+    }
+
+    #[test]
+    fn npc_gold_expiry_gained_item_event_serializes_exact_signed_decimal() {
+        for ticks in [
+            3_155_378_975_999_999_999_i64,
+            7_767_064_994_427_387_903,
+            i64::MIN,
+            i64::MAX,
+        ] {
+            let mut item = sample_user_item(77, 1);
+            item.expire_info = Some(mir2_protocol::UserItemExpireInfo {
+                expiry_binary_datetime: ticks,
+            });
+            let frame =
+                super::server_packet_to_event(&ServerPacket::GainedItem { item: item.clone() });
+            let text = serde_json::to_string(&frame).unwrap();
+            let parsed: Value = serde_json::from_str(&text).unwrap();
+            assert_eq!(parsed["type"], "packet");
+            assert_eq!(parsed["packet"], "GainedItem");
+            assert_eq!(
+                parsed["payload"]["item"]["expire_info"]["expiry_binary_datetime"],
+                ticks.to_string()
+            );
+            assert_eq!(
+                serde_json::from_value::<UserItem>(parsed["payload"]["item"].clone()).unwrap(),
+                item
+            );
+        }
+    }
+
+    #[test]
+    fn npc_gold_expiry_world_snapshot_carrier_keeps_exact_date_json() {
+        let mut session = mir2_simulation::SimulationSession::new(Default::default());
+        session.handle_packet(ClientPacket::Login {
+            account_id: "demo".into(),
+            password: "demo".into(),
+        });
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        for expiry in [3_155_378_975_999_999_999_i64, 7_767_064_994_427_387_903] {
+            let mut snapshot = session.world_snapshot();
+            let row = snapshot
+                .inventory_items
+                .iter_mut()
+                .find(|row| {
+                    row.tooltip_source
+                        .as_ref()
+                        .is_some_and(|source| source.user_item.is_some())
+                })
+                .expect("actual in-memory starter snapshot supplies owned raw carrier");
+            let slot = row.slot;
+            let unique_id = row.unique_id;
+            row.tooltip_source
+                .as_mut()
+                .unwrap()
+                .user_item
+                .as_mut()
+                .unwrap()
+                .expire_info = Some(mir2_protocol::UserItemExpireInfo {
+                expiry_binary_datetime: expiry,
+            });
+            // Same typed WorldSnapshot JSON serializer as the production sender;
+            // no socket or live gateway is run by this finite projection test.
+            let text =
+                serde_json::to_string(&json!({"type":"worldSnapshot","payload":snapshot})).unwrap();
+            let frame: Value = serde_json::from_str(&text).unwrap();
+            let raw = frame["payload"]["inventoryItems"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|row| row["slot"] == slot && row["uniqueId"] == unique_id)
+                .unwrap();
+            let user = &raw["tooltipSource"]["userItem"];
+            assert_eq!(
+                user["expire_info"]["expiry_binary_datetime"],
+                expiry.to_string()
+            );
+            assert_eq!(
+                serde_json::from_value::<UserItem>(user.clone())
+                    .unwrap()
+                    .expire_info
+                    .unwrap()
+                    .expiry_binary_datetime,
+                expiry
+            );
+        }
+    }
+
+    #[test]
+    fn npc_goods_stack_images_follow_live_count_and_keep_raw_user_item() {
+        for (index, count, image) in [
+            (710, 49, 3673),
+            (710, 50, 3674),
+            (710, 100, 2960),
+            (710, 150, 3675),
+            (711, 49, 3670),
+            (711, 50, 3671),
+            (711, 100, 2961),
+            (711, 150, 3672),
+            (712, 199, 3660),
+            (712, 200, 3661),
+            (712, 300, 3662),
+            (714, 5, 277),
+        ] {
+            let mut item = sample_user_item(71_001, count);
+            item.item_index = index;
+            let before = serde_json::to_value(&item).unwrap();
+            let event = super::server_packet_to_event(&ServerPacket::NPCGoods {
+                list: vec![item],
+                rate: 1.0,
+                panel_type: 0,
+                hide_added_stats: false,
+            });
+            let good = &event["payload"]["list"][0];
+            assert_eq!(good["icon"], image);
+            assert_eq!(good["count"], count);
+            for (key, value) in before.as_object().unwrap() {
+                assert_eq!(&good[key], value, "raw UserItem field {key}");
+            }
+        }
     }
 
     #[test]
@@ -13177,6 +17732,34 @@ mod tests {
             }
             _ => panic!("unexpected action"),
         }
+    }
+
+    #[test]
+    fn equip_slot_item_menu_bridge_retains_target_and_exact_failure_identity() {
+        for (name, target) in [
+            ("mount", mir2_protocol::MirGridType::Mount),
+            ("fishing", mir2_protocol::MirGridType::Fishing),
+        ] {
+            let command: BrowserCommand = serde_json::from_value(serde_json::json!({"type":"equipSlotItem","uniqueId":42,"grid":"inventory","to":3,"gridTo":name,"toUniqueId":987})).unwrap();
+            let action = super::browser_command_to_action(command).unwrap();
+            assert!(
+                matches!(action, SessionAction::Packet(ClientPacket::EquipSlotItem { grid:mir2_protocol::MirGridType::Inventory, unique_id:42, to:3, grid_to, to_unique_id:987 }) if grid_to==target)
+            );
+            let ack = super::server_packet_to_event(&ServerPacket::EquipSlotItem {
+                grid: mir2_protocol::MirGridType::Inventory,
+                unique_id: 42,
+                to: 3,
+                grid_to: target,
+                success: false,
+            });
+            assert_eq!(ack["packet"], "EquipSlotItem");
+            assert_eq!(
+                ack["payload"],
+                serde_json::json!({"grid":"Inventory","uniqueId":42,"to":3,"gridTo":format!("{target:?}"),"success":false})
+            );
+        }
+        let invalid: BrowserCommand=serde_json::from_value(serde_json::json!({"type":"equipSlotItem","uniqueId":42,"grid":"inventory","to":3,"gridTo":"madeUpGrid","toUniqueId":987})).unwrap();
+        assert!(super::browser_command_to_action(invalid).is_err());
     }
 
     #[test]
@@ -13416,6 +17999,7 @@ mod tests {
             g_index: 31,
             quantity: 1,
             price_type: 1,
+            recipient_name: None,
         };
         let second = super::NativeGameShopRequest {
             request_id: "gs-second".to_string(),
@@ -13423,10 +18007,13 @@ mod tests {
             g_index: 32,
             quantity: 2,
             price_type: 0,
+            recipient_name: None,
         };
         let mut state = super::NativeGameShopConnectionState {
             opted_in: true,
             pending: None,
+            gift_opted_in: false,
+            gift_requests: Default::default(),
         };
         state
             .reserve(first.clone())
@@ -13449,6 +18036,7 @@ mod tests {
             g_index: 31,
             quantity: 1,
             price_type: 1,
+            recipient_name: None,
         };
         let success = mir2_simulation::GameShopPurchaseOutcome {
             success: true,
@@ -13569,6 +18157,7 @@ mod tests {
             g_index: 31,
             quantity: 1,
             price_type: 1,
+            recipient_name: None,
         };
         for (authenticated, in_game) in [(false, false), (false, true), (true, false)] {
             let receipt = super::native_game_shop_pre_execution_failure(
@@ -13599,10 +18188,13 @@ mod tests {
             g_index: 31,
             quantity: 1,
             price_type: 1,
+            recipient_name: None,
         };
         let mut state = super::NativeGameShopConnectionState {
             opted_in: true,
             pending: None,
+            gift_opted_in: false,
+            gift_requests: Default::default(),
         };
         state.reserve(request.clone()).unwrap();
 
@@ -13777,6 +18369,7 @@ mod tests {
                     g_index,
                     quantity,
                     price_type,
+                    recipient_name: None,
                 },
                 code,
             );
@@ -13792,6 +18385,7 @@ mod tests {
                 g_index: 31,
                 quantity: 1,
                 price_type: 1,
+                recipient_name: None,
             },
             "insufficientCurrency",
         );
@@ -13799,6 +18393,7 @@ mod tests {
         let mut full_systems = Stage5SystemsState::default();
         full_systems.mail = (1..=100)
             .map(|id| Stage5MailMessage {
+                attachment_origin: mir2_simulation::Stage5MailAttachmentOrigin::LegacyUnknown,
                 id,
                 delivery_nonce: format!("native-shop-full-{id}"),
                 from: "System".to_string(),
@@ -13829,6 +18424,7 @@ mod tests {
                 g_index: 31,
                 quantity: 1,
                 price_type: 1,
+                recipient_name: None,
             },
             "mailFull",
         );
@@ -13957,6 +18553,8 @@ mod tests {
         let mut native_state = super::NativeGameShopConnectionState {
             opted_in: capabilities.native_game_shop_receipt_v1,
             pending: None,
+            gift_opted_in: false,
+            gift_requests: Default::default(),
         };
         let browser_command = serde_json::from_str::<BrowserCommand>(
             r#"{"type":"gameShopBuy","requestId":"gs-e2e-0001","gIndex":31,"quantity":1,"priceType":1}"#,
@@ -14154,6 +18752,7 @@ mod tests {
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
             gameplay_event_sink: None,
             identity: Arc::new(crate::identity::IdentityService::local_for_tests()),
+            auth_rate_limit_policy: super::AuthRateLimitPolicy::default(),
             injector: crate::inject::LiveSessionInjector::default(),
             spectator: crate::spectator::SpectatorHub::from_env(),
             ai_live: crate::ai_live::AiLiveHub::new(
@@ -14161,6 +18760,7 @@ mod tests {
             )
             .expect("test AI live hub"),
             channel_identity: crate::ChannelIdentityRegistry::in_memory(),
+            companions: None,
         };
         let app = axum::Router::new()
             .route("/ws", axum::routing::get(super::ws_upgrade))
@@ -14490,6 +19090,7 @@ mod tests {
             capacity: Arc::clone(&capacity),
             gameplay_event_sink: None,
             identity: Arc::new(crate::identity::IdentityService::local_for_tests()),
+            auth_rate_limit_policy: super::AuthRateLimitPolicy::default(),
             injector: crate::inject::LiveSessionInjector::default(),
             spectator: crate::spectator::SpectatorHub::from_env(),
             ai_live: crate::ai_live::AiLiveHub::new(
@@ -14497,6 +19098,7 @@ mod tests {
             )
             .expect("test AI live hub"),
             channel_identity: crate::ChannelIdentityRegistry::in_memory(),
+            companions: None,
         };
         let app = axum::Router::new()
             .route("/ws", axum::routing::get(super::ws_upgrade))
@@ -14929,6 +19531,55 @@ mod tests {
     }
 
     #[test]
+    fn skill_key_receipt_tracks_processed_request_and_authoritative_assignment() {
+        let command: BrowserCommand = serde_json::from_value(serde_json::json!({
+            "type":"magicKey", "spell":"Fury", "key":16, "oldKey":5, "requestId":42
+        }))
+        .unwrap();
+        let request = super::SkillKeyRequest::from_command(&command).unwrap();
+        let assigned = serde_json::json!({"knownSkills":[{"spell":"Fury","hotkey":16}]});
+        let receipt = request.receipt(&assigned, true);
+        assert_eq!(
+            receipt,
+            serde_json::json!({"requestId":42,"spell":"Fury","key":16,"oldKey":5,"accepted":true})
+        );
+        // Matching state is not proof that a rejected/unqueued request ran.
+        assert_eq!(request.receipt(&assigned, false)["accepted"], false);
+        assert_eq!(
+            request.receipt(
+                &serde_json::json!({"knownSkills":[{"spell":"Fury","hotkey":5}]}),
+                true
+            )["accepted"],
+            false
+        );
+        assert_eq!(
+            request.receipt(&serde_json::json!({"knownSkills":[]}), true)["accepted"],
+            false
+        );
+        let action = super::browser_command_to_action(command).unwrap();
+        assert!(matches!(
+            action,
+            SessionAction::Packet(ClientPacket::MagicKey {
+                spell: Spell::Fury,
+                key: 16,
+                old_key: 5
+            })
+        ));
+        let legacy: BrowserCommand =
+            serde_json::from_value(serde_json::json!({"type":"magicKey","spell":"Fury","key":0}))
+                .unwrap();
+        assert!(super::SkillKeyRequest::from_command(&legacy).is_none());
+        let clear_hero = super::SkillKeyRequest {
+            request_id: 43,
+            spell: "Fury".into(),
+            key: 0,
+            old_key: 17,
+        };
+        let hero = serde_json::json!({"knownSkills":[{"spell":"Fury","hotkey":17}],"stage5Systems":{"heroLearnedMagics":[{"spell":"Fury","key":0}]}});
+        assert_eq!(clear_hero.receipt(&hero, true)["accepted"], true);
+    }
+
+    #[test]
     fn magic_commands_map_to_crystal_protocol_packets() {
         let key_command = serde_json::from_str::<BrowserCommand>(
             r#"{"type":"magicKey","spell":"Fury","key":5,"oldKey":0}"#,
@@ -15349,6 +20000,7 @@ mod tests {
         assert_eq!(info["payload"]["id"], 1001);
         assert_eq!(info["payload"]["name"], "Field Wasp");
         assert_eq!(info["payload"]["group"], "Starter");
+        assert_eq!(info["payload"]["minLevelNeeded"], 1);
         assert_eq!(
             info["payload"]["descriptionLines"][0],
             "Help the town guard."
@@ -15359,6 +20011,14 @@ mod tests {
         );
         assert_eq!(info["payload"]["objectives"][0]["current"], 0);
         assert_eq!(info["payload"]["objectives"][0]["required"], 3);
+        assert_eq!(
+            info["payload"]["returnDescriptionLines"][0],
+            "Return to the guard."
+        );
+        assert_eq!(
+            info["payload"]["completionDescriptionLines"][0],
+            "Good work."
+        );
         assert_eq!(info["payload"]["rewards"]["gold"], 500);
         assert_eq!(info["payload"]["rewards"]["experience"], 1_200);
         assert_eq!(
@@ -15513,12 +20173,15 @@ mod tests {
     #[test]
     fn hero_and_world_control_commands_map_to_crystal_protocol_packets() {
         let auto_pot_value = serde_json::from_str::<BrowserCommand>(
-            r#"{"type":"setAutoPotValue","stat":0,"value":80}"#,
+            r#"{"type":"setAutoPotValue","stat":12,"value":80}"#,
         )
         .expect("set auto pot value command should deserialize");
         assert!(matches!(
             super::browser_command_to_action(auto_pot_value).expect("auto pot value maps"),
-            SessionAction::Packet(ClientPacket::SetAutoPotValue { stat: 0, value: 80 })
+            SessionAction::Packet(ClientPacket::SetAutoPotValue {
+                stat: 12,
+                value: 80
+            })
         ));
 
         let auto_pot_item = serde_json::from_str::<BrowserCommand>(
@@ -16003,6 +20666,88 @@ mod tests {
     }
 
     #[test]
+    fn ranking_inspect_browser_command_preserves_zero_id_and_requires_literal_namespace_flags() {
+        let command = serde_json::from_str::<BrowserCommand>(
+            r#"{"type":"inspect","objectId":0,"ranking":true,"hero":false}"#,
+        )
+        .unwrap();
+        assert!(matches!(
+            super::browser_command_to_action(command).unwrap(),
+            SessionAction::Packet(ClientPacket::Inspect {
+                object_id: 0,
+                ranking: true,
+                hero: false
+            })
+        ));
+        for raw in [
+            r#"{"type":"inspect","objectId":0,"ranking":false,"hero":false}"#,
+            r#"{"type":"inspect","objectId":0,"ranking":true,"hero":true}"#,
+        ] {
+            assert!(super::browser_command_to_action(
+                serde_json::from_str::<BrowserCommand>(raw).unwrap()
+            )
+            .is_err());
+        }
+        for raw in [
+            r#"{"type":"inspect","objectId":-1,"ranking":true,"hero":false}"#,
+            r#"{"type":"inspect","objectId":0.5,"ranking":true,"hero":false}"#,
+            r#"{"type":"inspect","objectId":4294967296,"ranking":true,"hero":false}"#,
+            r#"{"type":"inspect","objectId":0,"ranking":true}"#,
+        ] {
+            assert!(serde_json::from_str::<BrowserCommand>(raw).is_err());
+        }
+    }
+
+    #[test]
+    fn ranking_inspect_event_preserves_target_fourteen_slots_uid_zero_and_actual_tooltip_carrier() {
+        let mut item = sample_user_item(0, 2);
+        item.item_index = 11;
+        let mut socket = sample_user_item(9, 1);
+        socket.item_index = 658;
+        item.slots = vec![None, Some(socket.clone())];
+        let mut equipment = vec![None; 14];
+        equipment[9] = Some(item.clone());
+        let info = mir2_protocol::PlayerInspectInfo {
+            name: "Target".into(),
+            guild_name: "Guild".into(),
+            guild_rank: "Member".into(),
+            equipment,
+            class: MirClass::Taoist,
+            gender: MirGender::Female,
+            hair: 7,
+            level: 28,
+            lover_name: "CurrentPartner".into(),
+            allow_observe: false,
+            is_hero: false,
+        };
+        let event = super::server_packet_to_event(&ServerPacket::PlayerInspect { info });
+        assert_eq!(event["packet"], "PlayerInspect");
+        let projected = &event["payload"]["info"];
+        assert_eq!(projected["name"], "Target");
+        assert_eq!(projected["isHero"], false);
+        assert_eq!(projected["class"], "Taoist");
+        assert_eq!(projected["guildName"], "Guild");
+        assert_eq!(projected["loverName"], "CurrentPartner");
+        assert_eq!(projected["equipment"].as_array().unwrap().len(), 14);
+        assert!(projected["equipment"][0].is_null());
+        let row = &projected["equipment"][9];
+        assert_eq!(row["unique_id"], 0);
+        assert_eq!(row["item_index"], 11);
+        assert!(row.get("price").is_none());
+        assert_eq!(
+            row["tooltipSource"]["userItem"],
+            serde_json::to_value(item).unwrap()
+        );
+        assert!(row["tooltipSource"]["userItem"]["slots"][0].is_null());
+        assert_eq!(
+            row["tooltipSource"]["userItem"]["slots"][1],
+            serde_json::to_value(socket).unwrap()
+        );
+        assert!(row["tooltipSource"]["socketInfos"][0].is_null());
+        assert_eq!(row["tooltipSource"]["socketInfos"][1]["item_index"], 658);
+    }
+
+    #[test]
     fn mail_friend_packets_are_exposed_as_browser_events() {
         let receive = super::server_packet_to_event(&ServerPacket::ReceiveMail {
             mail: vec![ClientMail {
@@ -16049,6 +20794,13 @@ mod tests {
             ],
         });
         assert_eq!(friends["packet"], "FriendUpdate");
+        let native: Vec<ClientFriend> =
+            serde_json::from_value(friends["payload"]["friendRecords"].clone())
+                .expect("native roster preserves typed identity");
+        assert_eq!(native.len(), 2);
+        assert_eq!(native[0].index, 42);
+        assert_eq!(native[1].index, 43);
+        assert!(native[1].blocked);
         // Roster is split: non-blocked entries in `friends`, blocked in `blocked`.
         assert_eq!(friends["payload"]["friends"][0]["name"], "Blade");
         assert_eq!(friends["payload"]["friends"][0]["online"], true);
@@ -16068,6 +20820,7 @@ mod tests {
             }],
         });
         assert!(no_memo["payload"]["friends"][0].get("memo").is_none());
+        assert_eq!(no_memo["payload"]["friendRecords"][0]["memo"], "");
     }
 
     #[test]
@@ -16265,12 +21018,15 @@ mod tests {
                 super::ParsedSocketInput::Action {
                     action: SessionAction::Tick,
                     quest_operation_request: None,
+                    skill_key_request: None,
                 },
                 std::sync::Arc::clone(&pending),
                 bytes
                     .clone()
                     .try_acquire_owned()
                     .expect("test input byte permit should be available"),
+                std::time::Instant::now(),
+                &None,
             );
             assert_eq!(pending.load(std::sync::atomic::Ordering::Acquire), 1);
             assert_eq!(bytes.available_permits(), 0);
@@ -16279,6 +21035,7 @@ mod tests {
                 super::ParsedSocketInput::Action {
                     action: SessionAction::Tick,
                     quest_operation_request: None,
+                    skill_key_request: None,
                 }
             ));
             assert_eq!(pending.load(std::sync::atomic::Ordering::Acquire), 1);
@@ -16314,7 +21071,7 @@ mod tests {
     }
 
     #[test]
-    fn runtime_tick_defers_after_bootstrap_but_not_player_movement() {
+    fn runtime_tick_defers_after_bootstrap_but_wakes_for_player_input() {
         assert!(
             super::runtime_tick_defer_duration_for_action(&SessionAction::Packet(
                 ClientPacket::StartGame { character_index: 0 },
@@ -16345,6 +21102,36 @@ mod tests {
             )),
             Some(std::time::Duration::from_millis(75))
         );
+        for action in [
+            SessionAction::Attack { object_id: 42 },
+            SessionAction::CastSkill {
+                key: "battle-focus".to_string(),
+            },
+            SessionAction::Packet(ClientPacket::Attack {
+                direction: MirDirection::Right,
+                spell: Spell::Thrusting,
+            }),
+            SessionAction::Packet(ClientPacket::RangeAttack {
+                direction: MirDirection::Right,
+                location: Point { x: 10, y: 10 },
+                target_id: 42,
+                target_location: Point { x: 11, y: 10 },
+            }),
+            SessionAction::Packet(ClientPacket::Magic {
+                object_id: 1_000,
+                spell: Spell::FireBall,
+                direction: MirDirection::Right,
+                target_id: 42,
+                location: Point { x: 11, y: 10 },
+                spell_target_lock: true,
+            }),
+        ] {
+            assert_eq!(
+                super::runtime_tick_defer_duration_for_action(&action),
+                Some(std::time::Duration::from_millis(75)),
+                "combat input must drain the native Zone hit promptly: {action:?}"
+            );
+        }
         assert!(
             super::runtime_tick_defer_duration_for_action(&SessionAction::Packet(
                 ClientPacket::Chat {
@@ -16353,6 +21140,409 @@ mod tests {
                 },
             ))
             .is_none()
+        );
+    }
+
+    #[test]
+    fn runtime_tick_item_use_wakes_pending_personal_restoration_after_bootstrap() {
+        let bootstrap = SessionAction::Packet(ClientPacket::StartGame { character_index: 0 });
+        assert_eq!(
+            super::runtime_tick_defer_duration_for_action(&bootstrap),
+            Some(super::gateway_runtime_tick_bootstrap_grace())
+        );
+        // Both ordinary browser forms must wake the same loop that advances
+        // queued potion restoration; the item-use ACK does not heal by itself.
+        for value in [
+            json!({ "type": "useItem", "uniqueId": 1024, "grid": "inventory" }),
+            json!({ "type": "useItem", "key": "red-potion" }),
+        ] {
+            let command = serde_json::from_value::<BrowserCommand>(value)
+                .expect("ordinary item use must deserialize");
+            let action = super::browser_command_to_action(command)
+                .expect("ordinary item use must map to its existing session action");
+            assert_eq!(
+                super::runtime_tick_defer_duration_for_action(&action),
+                Some(super::gateway_runtime_tick_input_wake_grace()),
+                "item use must release the bootstrap wait: {action:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn runtime_tick_wakes_only_after_a_successful_fishing_cast() {
+        let accepted = ServerPacket::FishingUpdate {
+            object_id: 1_001,
+            fishing: true,
+            progress_percent: 0,
+            chance_percent: 12,
+            fishing_point: Point { x: 331, y: 270 },
+            found_fish: false,
+        };
+        assert_eq!(
+            super::runtime_tick_wake_for_fishing_cast(true, std::slice::from_ref(&accepted)),
+            Some(super::gateway_runtime_tick_input_wake_grace())
+        );
+        assert_eq!(super::runtime_tick_wake_for_fishing_cast(true, &[]), None);
+        assert_eq!(
+            super::runtime_tick_wake_for_fishing_cast(false, &[accepted]),
+            None
+        );
+        assert_eq!(
+            super::runtime_tick_wake_for_fishing_cast(
+                true,
+                &[ServerPacket::FishingUpdate {
+                    object_id: 1_001,
+                    fishing: true,
+                    progress_percent: 25,
+                    chance_percent: 12,
+                    fishing_point: Point { x: 331, y: 270 },
+                    found_fish: false,
+                }],
+            ),
+            None
+        );
+    }
+
+    #[test]
+    fn runtime_tick_refresh_and_keep_alive_preserve_the_idle_bootstrap_wait() {
+        for value in [
+            json!({ "type": "clientVersion" }),
+            json!({ "type": "keepAlive", "time": 12345 }),
+        ] {
+            let command = serde_json::from_value::<BrowserCommand>(value)
+                .expect("ordinary observation command must deserialize");
+            let action = super::browser_command_to_action(command)
+                .expect("ordinary observation command must map");
+            assert_eq!(
+                super::runtime_tick_defer_duration_for_action(&action),
+                None,
+                "observation alone must not wake the runtime tick: {action:?}"
+            );
+        }
+    }
+
+    mod socket_diagnostics_tests {
+        use super::super::{
+            allocate_socket_diagnostics, GatewaySlowStage, ParsedSocketInput, QueuedSocketInput,
+            SessionAction, SocketDiagnosticInputClass as InputClass,
+            SocketDiagnosticPhase as Phase, SocketDiagnosticPhaseGuard, SocketSlowContext,
+            SOCKET_DIAGNOSTIC_MAX_SAFE_INTEGER, SOCKET_DIAGNOSTIC_MAX_START_US,
+        };
+        use mir2_protocol::{ClientPacket, MirDirection};
+        use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
+        use std::sync::{Arc, Barrier};
+        use std::time::{Duration, Instant};
+
+        fn stage(context: Option<SocketSlowContext>) -> GatewaySlowStage {
+            GatewaySlowStage {
+                label: "socket_input.queue_residence",
+                started_at: Instant::now(),
+                threshold: None,
+                context,
+            }
+        }
+
+        #[test]
+        fn disabled_and_exhausted_ids_have_no_state_or_counter_wrap() {
+            let disabled = AtomicU64::new(7);
+            assert!(allocate_socket_diagnostics(false, &disabled).is_none());
+            assert_eq!(disabled.load(Ordering::Relaxed), 7);
+            assert!(SocketDiagnosticPhaseGuard::enter(
+                &None,
+                Phase::Input,
+                Some("socket_turn.input")
+            )
+            .is_none());
+
+            let counter = AtomicU64::new(SOCKET_DIAGNOSTIC_MAX_SAFE_INTEGER);
+            let last = allocate_socket_diagnostics(true, &counter).unwrap();
+            assert_eq!(last.connection, SOCKET_DIAGNOSTIC_MAX_SAFE_INTEGER);
+            assert_eq!(
+                counter.load(Ordering::Relaxed),
+                SOCKET_DIAGNOSTIC_MAX_SAFE_INTEGER + 1
+            );
+            for _ in 0..3 {
+                assert!(allocate_socket_diagnostics(true, &counter).is_none());
+                assert_eq!(
+                    counter.load(Ordering::Relaxed),
+                    SOCKET_DIAGNOSTIC_MAX_SAFE_INTEGER + 1
+                );
+            }
+            assert!(allocate_socket_diagnostics(true, &AtomicU64::new(0)).is_none());
+        }
+
+        #[test]
+        fn legacy_and_scoped_log_grammar_are_exact_and_safe() {
+            assert_eq!(
+                stage(None).log_line(Duration::from_millis(53)),
+                "[gateway-slow-stage] stage=socket_input.queue_residence duration_ms=53"
+            );
+            let mut scoped = stage(Some(SocketSlowContext {
+                connection: 17,
+                queued: None,
+            }));
+            scoped.label = "serial_gate.input_wait";
+            assert_eq!(
+                scoped.log_line(Duration::from_millis(53)),
+                "[gateway-slow-stage] stage=serial_gate.input_wait duration_ms=53 connection=17"
+            );
+            assert_eq!(
+                stage(Some(SocketSlowContext {
+                    connection: 17,
+                    queued: None
+                }))
+                .log_line(Duration::from_millis(53)),
+                "[gateway-slow-stage] stage=socket_input.queue_residence duration_ms=53"
+            );
+            let state = allocate_socket_diagnostics(true, &AtomicU64::new(17)).unwrap();
+            let context = state
+                .context_from_snapshot(
+                    Phase::Spectator.pack(10_000).unwrap(),
+                    65_999,
+                    InputClass::AttackV2,
+                )
+                .unwrap();
+            assert_eq!(stage(Some(context)).log_line(Duration::from_millis(3356)),
+                "[gateway-slow-stage] stage=socket_input.queue_residence duration_ms=3356 connection=17 queued_phase=spectator phase_elapsed_ms=55 input_class=attack_v2");
+            assert!(SOCKET_DIAGNOSTIC_MAX_START_US / 1000 < SOCKET_DIAGNOSTIC_MAX_SAFE_INTEGER);
+        }
+
+        #[test]
+        fn execution_flush_and_tick_stages_distinguish_connections_without_payload() {
+            let counter = AtomicU64::new(17);
+            let first = allocate_socket_diagnostics(true, &counter);
+            let second = allocate_socket_diagnostics(true, &counter);
+            let elapsed = Duration::from_millis(53);
+            for label in [
+                "session_action.execute",
+                "session_action.flush",
+                "runtime_tick.execute",
+                "runtime_tick.save_checkpoint",
+                "runtime_tick.flush",
+            ] {
+                let first_stage = GatewaySlowStage::for_socket(label, &first);
+                let second_stage = GatewaySlowStage::for_socket(label, &second);
+                let disabled = GatewaySlowStage::for_socket(label, &None);
+                assert_eq!(
+                    first_stage.log_line(elapsed),
+                    format!("[gateway-slow-stage] stage={label} duration_ms=53 connection=17")
+                );
+                assert_eq!(
+                    second_stage.log_line(elapsed),
+                    format!("[gateway-slow-stage] stage={label} duration_ms=53 connection=18")
+                );
+                assert_eq!(
+                    disabled.log_line(elapsed),
+                    format!("[gateway-slow-stage] stage={label} duration_ms=53")
+                );
+                assert_eq!(first_stage.threshold, disabled.threshold);
+                assert_eq!(second_stage.threshold, disabled.threshold);
+                assert!(first_stage.context.as_ref().unwrap().queued.is_none());
+                assert!(second_stage.context.as_ref().unwrap().queued.is_none());
+            }
+        }
+
+        #[test]
+        fn packed_phase_boundaries_omit_invalid_or_overflowed_observations() {
+            let state = allocate_socket_diagnostics(true, &AtomicU64::new(1)).unwrap();
+            for phase in [
+                Phase::SelectWait,
+                Phase::Input,
+                Phase::InputGate,
+                Phase::InputOwnerHeartbeat,
+                Phase::Chat,
+                Phase::Injection,
+                Phase::Spectator,
+                Phase::AiLive,
+                Phase::RuntimeTick,
+                Phase::IdentityCache,
+                Phase::IdentityDatabase,
+                Phase::ResumeCredential,
+                Phase::OwnerHeartbeat,
+                Phase::TickGate,
+                Phase::Preflight,
+            ] {
+                let packed = phase.pack(SOCKET_DIAGNOSTIC_MAX_START_US).unwrap();
+                assert_eq!(Phase::unpack(packed), Some(phase));
+                let context = state
+                    .context_from_snapshot(
+                        packed,
+                        SOCKET_DIAGNOSTIC_MAX_START_US,
+                        InputClass::Other,
+                    )
+                    .unwrap();
+                assert_eq!(context.queued.unwrap().phase_elapsed_ms, 0);
+            }
+            assert!(Phase::Input
+                .pack(SOCKET_DIAGNOSTIC_MAX_START_US + 1)
+                .is_none());
+            assert!(state
+                .context_from_snapshot(0, 0, InputClass::Other)
+                .is_none());
+            assert!(state
+                .context_from_snapshot(Phase::Input.pack(10).unwrap(), 9, InputClass::Other)
+                .is_none());
+            assert!(state
+                .context_from_snapshot(
+                    Phase::Input.pack(0).unwrap(),
+                    SOCKET_DIAGNOSTIC_MAX_START_US + 1,
+                    InputClass::Other
+                )
+                .is_none());
+        }
+
+        #[test]
+        fn atomic_snapshots_never_pair_one_phase_with_another_start() {
+            let state = allocate_socket_diagnostics(true, &AtomicU64::new(1)).unwrap();
+            let input = Phase::Input.pack(1000).unwrap();
+            let spectator = Phase::Spectator.pack(2000).unwrap();
+            state.phase_and_start.store(input, Ordering::Release);
+            let barrier = Arc::new(Barrier::new(2));
+            let writer_state = Arc::clone(&state);
+            let writer_barrier = Arc::clone(&barrier);
+            let writer = std::thread::spawn(move || {
+                writer_barrier.wait();
+                for i in 0..10_000 {
+                    writer_state.phase_and_start.store(
+                        if i % 2 == 0 { input } else { spectator },
+                        Ordering::Release,
+                    );
+                }
+            });
+            barrier.wait();
+            for _ in 0..10_000 {
+                let packed = state.phase_and_start.load(Ordering::Acquire);
+                let queued = state
+                    .context_from_snapshot(packed, 4000, InputClass::Other)
+                    .unwrap()
+                    .queued
+                    .unwrap();
+                assert!(matches!(
+                    (queued.phase, queued.phase_elapsed_ms),
+                    (Phase::Input, 3) | (Phase::Spectator, 2)
+                ));
+            }
+            writer.join().unwrap();
+        }
+
+        #[test]
+        fn nested_and_early_exit_phases_restore_parent_then_select_idle() {
+            let diagnostics = allocate_socket_diagnostics(true, &AtomicU64::new(1));
+            let state = diagnostics.as_ref().unwrap();
+            {
+                let _turn =
+                    SocketDiagnosticPhaseGuard::enter(&diagnostics, Phase::RuntimeTick, None);
+                let parent = state.phase_and_start.load(Ordering::Acquire);
+                for _ in 0..2 {
+                    let _child =
+                        SocketDiagnosticPhaseGuard::enter(&diagnostics, Phase::Preflight, None);
+                    assert_eq!(
+                        Phase::unpack(state.phase_and_start.load(Ordering::Acquire)),
+                        Some(Phase::Preflight)
+                    );
+                    continue;
+                }
+                assert_eq!(state.phase_and_start.load(Ordering::Acquire), parent);
+                fn early_return(diagnostics: &super::super::SocketDiagnostics) {
+                    let _child =
+                        SocketDiagnosticPhaseGuard::enter(diagnostics, Phase::IdentityCache, None);
+                }
+                early_return(&diagnostics);
+                assert_eq!(state.phase_and_start.load(Ordering::Acquire), parent);
+            }
+            assert_eq!(
+                Phase::unpack(state.phase_and_start.load(Ordering::Acquire)),
+                Some(Phase::SelectWait)
+            );
+        }
+
+        #[test]
+        fn queued_input_preserves_enqueue_phase_and_serial_lifetime_without_payload() {
+            let diagnostics = allocate_socket_diagnostics(true, &AtomicU64::new(17));
+            let state = diagnostics.as_ref().unwrap();
+            let pending = Arc::new(AtomicUsize::new(0));
+            let bytes = Arc::new(tokio::sync::Semaphore::new(1));
+            let queued;
+            {
+                let _spectator =
+                    SocketDiagnosticPhaseGuard::enter(&diagnostics, Phase::Spectator, None);
+                queued = QueuedSocketInput::new(
+                    ParsedSocketInput::ProtocolError("must-not-appear-in-diagnostics".to_owned()),
+                    Arc::clone(&pending),
+                    Arc::clone(&bytes).try_acquire_owned().unwrap(),
+                    Instant::now(),
+                    &diagnostics,
+                );
+            }
+            let _input = SocketDiagnosticPhaseGuard::enter(&diagnostics, Phase::Input, None);
+            assert_eq!(
+                Phase::unpack(state.phase_and_start.load(Ordering::Acquire)),
+                Some(Phase::Input)
+            );
+            let context = queued.diagnostic_context.unwrap();
+            assert_eq!(context.queued.unwrap().phase, Phase::Spectator);
+            assert_eq!(context.queued.unwrap().input_class, InputClass::Other);
+            let line = stage(Some(context)).log_line(Duration::from_millis(60));
+            assert!(line.ends_with(" input_class=other"));
+            assert!(!line.contains("must-not-appear"));
+            assert_eq!(pending.load(Ordering::Acquire), 1);
+            assert_eq!(bytes.available_permits(), 0);
+            drop(queued);
+            assert_eq!(pending.load(Ordering::Acquire), 0);
+            assert_eq!(bytes.available_permits(), 1);
+        }
+
+        #[test]
+        fn input_class_uses_only_static_command_variants() {
+            let attack = crate::attack_protocol::parse_attack_v2(
+                r#"{"type":"attackV2","protocolVersion":2,"requestId":"12345","objectId":7654321}"#,
+            )
+            .unwrap();
+            assert_eq!(
+                InputClass::for_input(&ParsedSocketInput::AttackV2(attack)),
+                InputClass::AttackV2
+            );
+            for packet in [
+                ClientPacket::Walk {
+                    direction: MirDirection::Up,
+                },
+                ClientPacket::Run {
+                    direction: MirDirection::Down,
+                },
+                ClientPacket::Turn {
+                    direction: MirDirection::Left,
+                },
+            ] {
+                assert_eq!(
+                    InputClass::for_input(&ParsedSocketInput::Action {
+                        action: SessionAction::Packet(packet),
+                        quest_operation_request: None,
+                        skill_key_request: None,
+                    }),
+                    InputClass::Move
+                );
+            }
+            assert_eq!(
+                InputClass::for_input(&ParsedSocketInput::ClientCapabilities(vec![
+                    "not-logged".into()
+                ])),
+                InputClass::Other
+            );
+        }
+    }
+
+    #[test]
+    fn slow_stage_threshold_accepts_only_positive_milliseconds() {
+        assert_eq!(super::parse_gateway_slow_stage_threshold(None), None);
+        assert_eq!(super::parse_gateway_slow_stage_threshold(Some("")), None);
+        assert_eq!(super::parse_gateway_slow_stage_threshold(Some("0")), None);
+        assert_eq!(
+            super::parse_gateway_slow_stage_threshold(Some("nope")),
+            None
+        );
+        assert_eq!(
+            super::parse_gateway_slow_stage_threshold(Some(" 25 ")),
+            Some(std::time::Duration::from_millis(25))
         );
     }
 
@@ -16793,7 +21983,7 @@ mod tests {
         assert_eq!(capacity.status().current_active_sessions, 1);
         assert_eq!(capacity.status().current_reconnect_leases, 1);
 
-        let restored = store
+        let mut restored = store
             .take(&key)
             .expect("stored reconnect session should be restored within grace");
         assert_eq!(restored.session.session_id(), session_id);
@@ -16808,6 +21998,37 @@ mod tests {
         assert!(restored.active_session_permit.is_some());
         assert_eq!(store.len(), 0);
         assert_eq!(capacity.status().current_reconnect_leases, 0);
+
+        let before = serde_json::to_value(restored.session.world_snapshot()).unwrap();
+        let packets = restored
+            .session
+            .replay_retained_start_game_bootstrap("demo", key.character_index, true)
+            .expect("authenticated retained StartGame must replay metadata");
+        assert!(matches!(
+            packets.first(),
+            Some(ServerPacket::StartGame { result: 4, .. })
+        ));
+        assert_eq!(
+            packets
+                .iter()
+                .filter(|packet| matches!(packet, ServerPacket::GameShopInfo { .. }))
+                .count(),
+            105
+        );
+        assert_eq!(
+            serde_json::to_value(restored.session.world_snapshot()).unwrap(),
+            before
+        );
+        assert!(
+            store.take(&key).is_none(),
+            "reconnect custody is consumed once"
+        );
+        assert!(restored
+            .session
+            .handle_packet(ClientPacket::StartGame {
+                character_index: key.character_index
+            })
+            .is_empty());
 
         drop(restored);
         assert_eq!(capacity.status().current_active_sessions, 0);
@@ -16842,6 +22063,7 @@ mod tests {
                     active_session_permit: Some(active_session_permit),
                     _reconnect_lease_permit: reconnect_lease_permit,
                     resume_family_id: None,
+                    handoff_token: None,
                     expires_at: std::time::Instant::now() - std::time::Duration::from_secs(1),
                 },
             );
@@ -18792,7 +24014,7 @@ mod tests {
                     object_id: 2005,
                     location: Point { x: 292, y: 616 },
                     direction: MirDirection::Right,
-                    kind: 2,
+                    kind: 0,
                 },
             },
             ServerPacket::ObjectHarvest {
@@ -18807,7 +24029,7 @@ mod tests {
                     object_id: 2004,
                     location: Point { x: 290, y: 618 },
                     direction: MirDirection::Up,
-                    kind: 1,
+                    kind: 0,
                 },
             },
             ServerPacket::ObjectHarvested {
@@ -19163,5 +24385,298 @@ mod tests {
         ];
 
         assert!(responses_require_world_snapshot(&responses));
+    }
+}
+
+#[cfg(test)]
+mod load_test_login_policy_tests {
+    use super::{AuthRateLimitPolicy, AuthSecurityAction, AuthSecurityContext};
+    use crate::cache::{GatewaySessionCache, InMemoryGatewaySessionCache};
+    use crate::identity::IdentityService;
+    use std::net::SocketAddr;
+
+    fn parse(raw: Option<&str>) -> Result<AuthRateLimitPolicy, String> {
+        AuthRateLimitPolicy::from_values(
+            raw,
+            Some("development"),
+            Some("127.0.0.1:17510"),
+            Some("127.0.0.1:17500"),
+            "127.0.0.1:17510".parse().unwrap(),
+            false,
+        )
+    }
+
+    #[test]
+    fn default_login_policy_preserves_thirty_and_omits_test_health() {
+        let policy = AuthRateLimitPolicy::from_values(
+            None,
+            Some("production"),
+            Some("0.0.0.0:7010"),
+            None,
+            "0.0.0.0:7010".parse().unwrap(),
+            true,
+        )
+        .unwrap();
+        assert_eq!(policy, AuthRateLimitPolicy::default());
+        assert_eq!(policy.login_peer_limit(), 30);
+        assert!(policy.test_only_health().is_none());
+    }
+
+    #[test]
+    fn explicit_login_limit_has_exact_bounds_and_integer_syntax() {
+        for limit in [30, 500, 1024] {
+            assert_eq!(
+                parse(Some(&limit.to_string())).unwrap().login_peer_limit(),
+                limit
+            );
+        }
+        for raw in [
+            "",
+            "0",
+            "29",
+            "1025",
+            "-1",
+            "+500",
+            "500.0",
+            "NaN",
+            " 500",
+            "500 ",
+            "18446744073709551616",
+        ] {
+            assert!(parse(Some(raw)).is_err(), "must reject {raw:?}");
+        }
+        let health =
+            serde_json::to_value(parse(Some("500")).unwrap().test_only_health().unwrap()).unwrap();
+        assert_eq!(
+            health,
+            serde_json::json!({
+                "testOnly": true, "loginPeerLimit": 500, "loginDeviceLimit": 500, "windowSeconds": 900
+            })
+        );
+    }
+
+    #[test]
+    fn explicit_login_limit_rejects_non_development_and_conflicting_aliases() {
+        for runtime in [
+            None,
+            Some("production"),
+            Some("staging"),
+            Some("test"),
+            Some("Development"),
+        ] {
+            assert!(AuthRateLimitPolicy::from_values(
+                Some("500"),
+                runtime,
+                Some("127.0.0.1:17510"),
+                Some("127.0.0.1:17500"),
+                "127.0.0.1:17510".parse().unwrap(),
+                false,
+            )
+            .is_err());
+        }
+        assert!(AuthRateLimitPolicy::from_values(
+            Some("500"),
+            Some("development"),
+            Some("127.0.0.1:17510"),
+            Some("127.0.0.1:17500"),
+            "127.0.0.1:17510".parse().unwrap(),
+            true,
+        )
+        .is_err());
+    }
+
+    #[test]
+    fn explicit_login_limit_requires_both_literal_loopback_addresses_and_actual_web_match() {
+        for address in [
+            None,
+            Some("0.0.0.0:17510"),
+            Some("[::]:17510"),
+            Some("192.0.2.1:17510"),
+            Some("localhost:17510"),
+            Some("not-an-address"),
+        ] {
+            for (web, tcp) in [
+                (address, Some("127.0.0.1:17500")),
+                (Some("127.0.0.1:17510"), address),
+            ] {
+                assert!(AuthRateLimitPolicy::from_values(
+                    Some("500"),
+                    Some("development"),
+                    web,
+                    tcp,
+                    "127.0.0.1:17510".parse().unwrap(),
+                    false,
+                )
+                .is_err());
+            }
+        }
+        for actual in ["0.0.0.0:17510", "127.0.0.1:17511", "[::1]:17510"] {
+            assert!(AuthRateLimitPolicy::from_values(
+                Some("500"),
+                Some("development"),
+                Some("127.0.0.1:17510"),
+                Some("127.0.0.1:17500"),
+                actual.parse().unwrap(),
+                false,
+            )
+            .is_err());
+        }
+        for (configured, actual) in [
+            ("[::1]:17510", "[::1]:17510"),
+            ("127.0.0.1:0", "127.0.0.1:17510"),
+        ] {
+            assert!(AuthRateLimitPolicy::from_values(
+                Some("500"),
+                Some("development"),
+                Some(configured),
+                Some("[::1]:17500"),
+                actual.parse::<SocketAddr>().unwrap(),
+                false,
+            )
+            .is_ok());
+        }
+    }
+
+    fn enforce(
+        cache: &InMemoryGatewaySessionCache,
+        identity: &IdentityService,
+        policy: AuthRateLimitPolicy,
+        action: AuthSecurityAction,
+        peer: &str,
+        account: &str,
+    ) -> Result<(), String> {
+        super::enforce_auth_rate_limits_with_policy(
+            cache,
+            identity,
+            peer,
+            "shared-test-agent",
+            &AuthSecurityContext {
+                account_id: account.to_owned(),
+                action,
+            },
+            policy,
+        )
+    }
+
+    #[test]
+    fn real_enforcement_uses_only_the_explicit_login_peer_and_device_limit() {
+        let identity = IdentityService::local_for_tests();
+        for (policy, allowed) in [
+            (AuthRateLimitPolicy::default(), 30),
+            (parse(Some("500")).unwrap(), 500),
+        ] {
+            let cache = InMemoryGatewaySessionCache::default();
+            for index in 0..=allowed {
+                let result = enforce(
+                    &cache,
+                    &identity,
+                    policy,
+                    AuthSecurityAction::Login,
+                    "127.0.0.1",
+                    &format!("load-player-{index}"),
+                );
+                assert_eq!(
+                    result.is_ok(),
+                    index < allowed,
+                    "peer attempt {} of {allowed}",
+                    index + 1
+                );
+            }
+        }
+        // Seed only the independent device bucket so the peer bucket cannot
+        // hide an accidental unchanged device limit or an omitted device gate.
+        let peer = identity.peer_fingerprint("127.0.0.1").unwrap();
+        let device = identity
+            .peer_fingerprint(&format!("device:{peer}:shared-test-agent"))
+            .unwrap();
+        for (policy, prior_attempts, expected) in [
+            (AuthRateLimitPolicy::default(), 30, false),
+            (parse(Some("500")).unwrap(), 30, true),
+            (parse(Some("500")).unwrap(), 500, false),
+        ] {
+            let cache = InMemoryGatewaySessionCache::default();
+            for _ in 0..prior_attempts {
+                cache
+                    .record_auth_attempt(&format!("login:device:{device}"), 900)
+                    .unwrap();
+            }
+            assert_eq!(
+                enforce(
+                    &cache,
+                    &identity,
+                    policy,
+                    AuthSecurityAction::Login,
+                    "127.0.0.1",
+                    "device-only-test"
+                )
+                .is_ok(),
+                expected
+            );
+        }
+    }
+
+    #[test]
+    fn real_enforcement_retains_login_pair_eight_and_account_fifty() {
+        let identity = IdentityService::local_for_tests();
+        let policy = parse(Some("1024")).unwrap();
+        let cache = InMemoryGatewaySessionCache::default();
+        for index in 0..9 {
+            assert_eq!(
+                enforce(
+                    &cache,
+                    &identity,
+                    policy,
+                    AuthSecurityAction::Login,
+                    "127.0.0.1",
+                    "same-account"
+                )
+                .is_ok(),
+                index < 8
+            );
+        }
+        let cache = InMemoryGatewaySessionCache::default();
+        for index in 0..51 {
+            assert_eq!(
+                enforce(
+                    &cache,
+                    &identity,
+                    policy,
+                    AuthSecurityAction::Login,
+                    &format!("127.0.1.{}", index + 1),
+                    "same-account"
+                )
+                .is_ok(),
+                index < 50
+            );
+        }
+    }
+
+    #[test]
+    fn real_enforcement_does_not_relax_registration_recovery_or_password_change() {
+        let identity = IdentityService::local_for_tests();
+        for (action, allowed) in [
+            (AuthSecurityAction::Registration, 5),
+            (AuthSecurityAction::PasswordChange, 10),
+            (AuthSecurityAction::Recovery, 10),
+        ] {
+            for policy in [AuthRateLimitPolicy::default(), parse(Some("1024")).unwrap()] {
+                let cache = InMemoryGatewaySessionCache::default();
+                for index in 0..=allowed {
+                    assert_eq!(
+                        enforce(
+                            &cache,
+                            &identity,
+                            policy,
+                            action,
+                            "127.0.0.1",
+                            &format!("account-{index}")
+                        )
+                        .is_ok(),
+                        index < allowed,
+                        "{action:?}"
+                    );
+                }
+            }
+        }
     }
 }

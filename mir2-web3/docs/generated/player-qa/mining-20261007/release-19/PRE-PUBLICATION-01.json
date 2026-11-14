@@ -1,0 +1,177 @@
+{
+  "schema": "mir2.mining.r19.prepublication.v1",
+  "gameSource": "2b04e82c4f42b22f895f5f95b5bd79a8147eacdf",
+  "engineSource": "b4390ee4c987bbf000ba1d95761151e39fc0d54f",
+  "candidate": "WN-CANDIDATE-20261007-invited-19",
+  "signedSequence": 15,
+  "linuxReleaseRun": 37527432355,
+  "linuxReleaseRunPassed": true,
+  "windowsExeSha256": "3abc0c7b74af234d797705ac9ce32a68abefac70bf43095093a353c81145f297",
+  "bootstrapSha256": "ea1e4b3cbccd9a79cf042d9e0d1d08bcd4e016006df0e3d9f021c9c034d46e03",
+  "full209MapClosurePassed": true,
+  "sourceRulesChangedForQa": false,
+  "trustedSyntheticQaAccounts": true,
+  "naturalJourneyAccepted": false,
+  "combinedThreeClassMiningPhasePassed": false,
+  "classWitnesses": {
+    "Warrior": [
+      "normal-mining-13/Warrior.report.json",
+      "normal-relogin-15/Warrior.report.json"
+    ],
+    "Wizard": [
+      "normal-mining-10/Wizard.report.json",
+      "normal-recovery-13/Wizard.report.json"
+    ],
+    "Taoist": [
+      "normal-mining-10/Taoist.report.json",
+      "normal-recovery-12/Taoist.report.json"
+    ]
+  },
+  "nativeClass": "Wizard",
+  "nativeMouseMineRequests": 2,
+  "nativeMineEffectResolved": true,
+  "nativeRightClickMoveConfirmed": true,
+  "sustainedHeldMouseAccepted": false,
+  "humanAudibleAcceptance": false,
+  "rootWorkerRegressionPassed": 414,
+  "rootWorkerSkipped": 0,
+  "workerPythonPassed": 75,
+  "windowsSigintPassed": true,
+  "gnuTimeoutPendingLinuxCi": true,
+  "publicFeedSequenceAtFreeze": 14,
+  "publicGatewayAtFreeze": "6032ef8b3e27dd97bad0b20c8676ef9f185db64b",
+  "candidatePublished": false,
+  "broaderGoalComplete": false,
+  "files": [
+    {
+      "path": "bootstrap-03/BUILD-BOOTSTRAP.json",
+      "bytes": 1783,
+      "sha256": "0bbc35752a4e6cbfbaab3122976fdfa6413281ff39e1763224d3ffaf599f53bf"
+    },
+    {
+      "path": "publication-01/ROOT-VERIFICATION.json",
+      "bytes": 424,
+      "sha256": "099702223680a43d63fb500740763e8b8f67442c6fcd414b6d5f178293d7d7a3"
+    },
+    {
+      "path": "publication-01/PUBLICATION-PLAN.json",
+      "bytes": 15343,
+      "sha256": "852b474af0f9c7a5512b1ea1b3d9d2c957cc512dec95e366b8907052641c2356"
+    },
+    {
+      "path": "delivery-01/SIGN-DELIVERY.json",
+      "bytes": 600,
+      "sha256": "a11526025a65f9f5d719dd1157efc29c6a97b99564c27404b774b1300b38506d"
+    },
+    {
+      "path": "delivery-01/DELIVERY-VERIFICATION.json",
+      "bytes": 8051,
+      "sha256": "bead47e30df1042aa98dc9d1fd48e0bf6e0322a704bf2054d4aa38817f25c932"
+    },
+    {
+      "path": "operators-01/OPERATOR-RECIPES.json",
+      "bytes": 828,
+      "sha256": "e9613561ff8dc93a0aac4434428f4458886a63f3cd5cdd42dda530cb16494fb9"
+    },
+    {
+      "path": "server-ci-01/authenticated-run-final.json",
+      "bytes": 11922,
+      "sha256": "c53c8a6fb5a0558ad4059f91aa328135d134f6ae4993372b121f5216e6900fbe"
+    },
+    {
+      "path": "native-run-01/bag-silver.png",
+      "bytes": 295017,
+      "sha256": "c2dd606050df03fd04e6a8fa02ae20e871be0110c0a4ee7126cf2c680542af6c"
+    },
+    {
+      "path": "native-run-01/equipped-pickaxe.png",
+      "bytes": 288974,
+      "sha256": "edaf91284bacbd7bebf5feb1505200fb310c501e4bba9f305c1bf508d5008540"
+    },
+    {
+      "path": "native-run-02/mouse-mine-pose.png",
+      "bytes": 199076,
+      "sha256": "dacd2eb6c7585891d82d7dcb3c5dafb9e84e5354f1044e267be2bd4bbc91933f"
+    },
+    {
+      "path": "native-run-02/right-click-left-wall.png",
+      "bytes": 198825,
+      "sha256": "b3b9cd1eac680a401bb849dcb2a773e31eb40893a0bd50fc54462a14d6c5a812"
+    },
+    {
+      "path": "native-run-02/movement.jsonl",
+      "bytes": 3816,
+      "sha256": "3e98fa9233d2393b6b62510965f979bb12f16013d05bea78846fa3d4b7adbac4"
+    },
+    {
+      "path": "normal-mining-13/Warrior.report.json",
+      "bytes": 2850,
+      "sha256": "51456268e10276804023bc8460bef22f7cd176210a45f5e2512799fe837c82a3"
+    },
+    {
+      "path": "normal-relogin-15/Warrior.report.json",
+      "bytes": 1599,
+      "sha256": "b221d13e02fa19c6cfa2a856d7fa9178f3841ad7aaec07e22a4593acdc267ab7"
+    },
+    {
+      "path": "normal-mining-10/Wizard.report.json",
+      "bytes": 2619,
+      "sha256": "4de0455d20bc3e4bced85ee819ad5792e9a282d7dfcca845aceb8fca78a34d88"
+    },
+    {
+      "path": "normal-recovery-13/Wizard.report.json",
+      "bytes": 2104,
+      "sha256": "345defb9ecc536ded5831fa7614bea3540e01c1b6fb64469ee47631f88956537"
+    },
+    {
+      "path": "normal-mining-10/Taoist.report.json",
+      "bytes": 2469,
+      "sha256": "abbe19ea818d249610b45ec4026e9100ff9b304712e9e31f77c9d33e2b78f9da"
+    },
+    {
+      "path": "normal-recovery-12/Taoist.report.json",
+      "bytes": 2079,
+      "sha256": "c108c66ec911bb214598b4d99451b4dad0e0e607f5bda4bf0e83774cc207d1f9"
+    },
+    {
+      "path": "raw/mining-r19-package-20261007-04.log",
+      "bytes": 44463,
+      "sha256": "5acfd13335ba6a35d7f4e975575dcbf0636bf9435d943d61227ddc6af9525406"
+    },
+    {
+      "path": "raw/mining-r19-independent-verify-20261007.log",
+      "bytes": 404,
+      "sha256": "c8a3f30ff0f284e329a7e2aaab41f5ce19218e8272a8e3580a5b71ca8f279d05"
+    },
+    {
+      "path": "raw/mining-r19-bootstrap03-20261007.log",
+      "bytes": 1785,
+      "sha256": "2457d788c12d9d086d4756ab396dbf800852f08d5dbd18fff85a8697a8495869"
+    },
+    {
+      "path": "raw/mining-r19-root-worker-check-20261007.log",
+      "bytes": 87520,
+      "sha256": "244f107413e8a36def87b13d648fbe4015808b1decb68867b2a9feb72fa43671"
+    },
+    {
+      "path": "raw/mining-r19-worker-dry-run-20261007.log",
+      "bytes": 326,
+      "sha256": "c7ff7820c2fc8de0b5468db6bf7cd840401e3fce63be1442232f4cd792aab76d"
+    },
+    {
+      "path": "raw/mining-r19-recovery14-20261007.log",
+      "bytes": 153,
+      "sha256": "dc33f5bd1d7288909064a2aa8d1c5336995dd66f938778fa2c31ef578c23d4ae"
+    },
+    {
+      "path": "raw/mining-r19-mining13-20261007.log",
+      "bytes": 145,
+      "sha256": "b7d20d5acc604500a6dddebbd37f1f335204cb085bde7f3b4e2951ee2c2d218b"
+    },
+    {
+      "path": "raw/mining-r19-relogin15-20261007.log",
+      "bytes": 114,
+      "sha256": "2997ce4b01bfcc65aee7316c40b5654a6b790d080688154fa51526edd94442de"
+    }
+  ]
+}

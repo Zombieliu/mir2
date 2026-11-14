@@ -1,0 +1,272 @@
+{
+  "schema": "mir2.public-wire-cost-A7-vs6024.v1",
+  "samePlan": {
+    "sha256": "a2cafb513d9329ba1744c65ee8803e06cfc2bf96755da9e285a147a894ffd2f9",
+    "scenario": "dense-movement-chat",
+    "population": 100,
+    "level": 40,
+    "durationMs": 300000,
+    "offeredActions": 16000,
+    "perActorPerMinute": {
+      "walk": 30,
+      "chat": 2
+    },
+    "allMessageRateKnown": false,
+    "serverBudget": {
+      "logicalCpus": 4,
+      "jobCommitLimitBytes": 8589934592
+    },
+    "separateInjectorBudget": {
+      "logicalCpus": 8,
+      "jobCommitLimitBytes": 4294967296
+    },
+    "limitsAreCapsNotReservedCores": true
+  },
+  "cases": [
+    {
+      "case": "originalA7",
+      "sourceRevision": null,
+      "binarySha256": null,
+      "reportSha256": "a055033b785c5c11c7f29ec93509484b3ee79738db878effd34e0a588db83f29",
+      "actualControllerDriverServerExitCodes": [
+        0,
+        0,
+        0
+      ],
+      "allNormallyClosedNoKill": true,
+      "strictMeasurementPassed": true,
+      "offered": 16000,
+      "completed": 16000,
+      "timeouts": 0,
+      "notSent": 0,
+      "passedWindows": 500,
+      "totalWindows": 500,
+      "measurementStartedAtUtc": "2026-11-13T12:43:29.7865971+00:00",
+      "steadyClientTxBytes": 295540,
+      "steadyClientRxBytes": 32947221,
+      "meanClientTxMbps": 0.007881066666666667,
+      "meanClientRxMbps": 0.8785925600000001,
+      "applicationCounterScope": "native application frames including 4-byte frame header; excludes TCP/IP and link overhead",
+      "counterWindowMethod": "cumulative completed WriteAsync bytes and complete frame reads; in-flight partial operations are not counted until completion; each counter read is bracketed by readStartedAtMs/counterAtMs",
+      "counterSampleStartDeviationMs": {
+        "min": 2.0033999979496,
+        "max": 2.0419999957084656
+      },
+      "counterSampleEndDeviationMs": {
+        "min": 4.533999994397163,
+        "max": 4.550899997353554
+      },
+      "scheduledActions": {
+        "walk": {
+          "offered": 15000,
+          "sent": 15000,
+          "passed": 15000,
+          "timedOut": 0,
+          "notSent": 0
+        },
+        "chat": {
+          "offered": 1000,
+          "sent": 1000,
+          "passed": 1000,
+          "timedOut": 0,
+          "notSent": 0
+        }
+      }
+    },
+    {
+      "case": "modern6024",
+      "sourceRevision": "6024d8ffc095dd3a149ddb2b12bd3fce4cc4245c",
+      "binarySha256": "c155bb789e3c37bb4b9ed5b003c74dacef68e13240cdd9a364703945d1393e51",
+      "reportSha256": "7df529f719ad8569f1f4ddd4f0dc8920c658ec8c314ebd64523be0fb91c019af",
+      "actualControllerDriverServerExitCodes": [
+        1,
+        1,
+        0
+      ],
+      "allNormallyClosedNoKill": true,
+      "strictMeasurementPassed": false,
+      "offered": 16000,
+      "completed": 15398,
+      "timeouts": 71,
+      "notSent": 531,
+      "passedWindows": 159,
+      "totalWindows": 500,
+      "measurementStartedAtUtc": "2026-11-14T16:16:06.015Z",
+      "steadyClientTxBytes": 1166334,
+      "steadyClientRxBytes": 187202034,
+      "meanClientTxMbps": 0.031102240000000003,
+      "meanClientRxMbps": 4.99205424,
+      "applicationCounterScope": "JSON WebSocket payload bytes submitted/received; excludes WS framing/control/TCP/IP; no deflate",
+      "counterWindowMethod": "per-frame epoch<=atMs<epoch+durationMs",
+      "counterSampleStartDeviationMs": {
+        "min": 7.139200000092387,
+        "max": 7.20230000000447
+      },
+      "counterSampleEndDeviationMs": {
+        "min": 2.2864000000990927,
+        "max": 2.3256999999284744
+      },
+      "scheduledActions": {
+        "walk": {
+          "offered": 15000,
+          "sent": 14710,
+          "passed": 14639,
+          "timedOut": 71,
+          "notSent": 290
+        },
+        "chat": {
+          "offered": 1000,
+          "sent": 759,
+          "passed": 759,
+          "timedOut": 0,
+          "notSent": 241
+        }
+      }
+    }
+  ],
+  "descriptiveComparison": {
+    "clientRxPayloadRatioModernOverOriginal": 5.681876295424127,
+    "clientTxCounterRatioModernOverOriginal": 3.9464505650673343,
+    "interpretation": "Descriptive aggregate application-counter ratio for these two 300s runs only. Different encodings/header scopes and unequal completed work; not per-action overhead, NIC capacity, bandwidth saturation or a CCU ratio."
+  },
+  "sourceIdentity": {
+    "originalGitRevisionAndPhysicalBinaryShaUnknownInThisAudit": true,
+    "originalServerLibraryShaFromReady": "8104a1cb313efbe58e68fa2229472c9b3335f2ee75e107b435309a116a7bce62",
+    "originalSharedLibraryShaFromReady": "fb90224b1ddd836b0bcfc959ddd29a715cc28f8b14552224e5f5a93f87936c25",
+    "originalPhysicalDllRehashedHere": false,
+    "originalSourceLockSha256": "0fd77aafdcc1eaf8b1392e4af708652fec8b5fa14845a00cfcf5073b781ebc7b",
+    "modernSdk7ManifestSha256": "3fbe7649ff36946c4e7979307ee8e1d0b7dd223987b287e3b1d4582a846a9e50",
+    "counterAnchors": [
+      {
+        "engine": "originalA7",
+        "sourceFile": "ApplicationTraffic.cs",
+        "sha256": "01cc75fa0a9933dddec76aa4c48b54c20b50e21d47b1c3f41ab11c8d9b22a891",
+        "lineRanges": [
+          [
+            8,
+            27
+          ]
+        ]
+      },
+      {
+        "engine": "originalA7",
+        "sourceFile": "NativeActor.cs",
+        "sha256": "ff87e3cbcfc537a05a6253d72db18b5f9009bf941a866dc32b6d4a741ee4facc",
+        "lineRanges": [
+          [
+            79,
+            84
+          ],
+          [
+            130,
+            154
+          ],
+          [
+            203,
+            216
+          ]
+        ]
+      },
+      {
+        "engine": "originalA7",
+        "sourceFile": "Runner.cs",
+        "sha256": "38bfa12a3bf51b605a2f450710e81a0bcde67e7a8094d9706e651b66bc5fca6d",
+        "lineRanges": [
+          [
+            300,
+            307
+          ],
+          [
+            334,
+            346
+          ],
+          [
+            413,
+            427
+          ]
+        ]
+      },
+      {
+        "engine": "modernSDK7",
+        "sourceFile": "driver.mjs",
+        "sha256": "4e481d4f7b61cd70865f9f14a9746066943807599581705377910b6607e1e865",
+        "lineRanges": [
+          [
+            48,
+            100
+          ],
+          [
+            110,
+            142
+          ],
+          [
+            525,
+            549
+          ],
+          [
+            614,
+            614
+          ]
+        ]
+      },
+      {
+        "engine": "modernSDK7",
+        "sourceFile": "contract.mjs",
+        "sha256": "697184f0af3ee6540f30863279af8488ac90454fe706f041f6d6c9c7c1fe1357",
+        "lineRanges": [
+          [
+            124,
+            150
+          ],
+          [
+            179,
+            202
+          ]
+        ]
+      }
+    ]
+  },
+  "counterBoundaries": {
+    "perTypeObservedCountsOrBytes": null,
+    "keepAliveAndSnapshotsIncludedInAggregateButNotPartitioned": true,
+    "modernTxIsSubmissionBeforeWsSendNotDeliveryAck": true,
+    "modernRxIsSuccessfulDecodedTextCallbackNotServerEmissionTime": true,
+    "allLifecycleBootstrapGearFreshCleanupBytesExcludedFromSteadyComparison": true,
+    "nativeFourByteFrameHeaderIncluded": true,
+    "modernWsTcpIpTlsControlOverheadExcluded": true,
+    "perMessageDeflate": false,
+    "jsonlSizeUsedAsTraffic": false,
+    "tcpNicBytesOrRetransmissionsRead": false,
+    "bandwidthSaturationProven": false,
+    "ratioIsNotPerActionOverheadOrCcuRatio": true
+  },
+  "units": {
+    "Mbps": "decimal megabits/second",
+    "MBps": "decimal megabytes/second",
+    "30MbpsInMBps": 3.75,
+    "30MBpsInMbps": 240,
+    "userProvidedBandwidthText": "30MBPS",
+    "bandwidthContractVerified": false,
+    "provisionedMbps": null
+  },
+  "interpretationZh": "同一百人移动/聊天计划下，原版A7通过，本次6024未通过且实际发送较少。RX约5.68倍只是两个既定窗口的应用层计数描述，编码和帧头范围不同，不能当作每动作成本、网卡流量、带宽饱和或容量比例；也不能与历史千人攻击工作负载等同。51是准入配置，不是硬件上限。",
+  "sourceAudit": {
+    "evidence": "comparable-wire-cost-audit-v1/ANALYSIS.json",
+    "bytes": 17823,
+    "sha256": "62f35ccfea5a592aae0a910274408cba79574d945c6ded359920b1b482ab7d71"
+  },
+  "sourceCounterAnchors": {
+    "evidence": "comparable-wire-cost-audit-v1/SOURCE-ANCHORS.json",
+    "bytes": 2461,
+    "sha256": "9c9300cb140cf914767f435bc6660c7cbfa4972cac34741c42b59308bb2287fa"
+  },
+  "sourceValidation": {
+    "evidence": "comparable-wire-cost-audit-v1/VALIDATION.json",
+    "bytes": 1750,
+    "sha256": "caa154a2895e237d3ab0eb3f374c70c33cad8d49316708d6368365aa515e0fa0"
+  },
+  "boundedDerivationOnly": true,
+  "largeRawReportOrEventRead": false,
+  "capacityQualified": false,
+  "productionStackQualified": false
+}

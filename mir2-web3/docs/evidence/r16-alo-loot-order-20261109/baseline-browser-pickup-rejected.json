@@ -1,0 +1,447 @@
+{
+  "schema": "mir2-r16-alo-teaching-order/1",
+  "localOnly": true,
+  "modelProvider": "rules",
+  "baseCommit": "8a2c47b44ec5b82f3866cfd84b93a271fd9b1f8a",
+  "gatewaySourceCommit": "ac6817dbf95ab1e5d1e98f78a9dd88b6885a8731",
+  "gatewaySha256": "60dbb6b2ad9df5165dc1472dc64c7c0281e6094a1c1208c161dfccf35f5ea974",
+  "runtimeVersion": "bevy-0cd68510886134e0",
+  "source": {
+    "apps/web/lib/r16-companion-client.ts": "108ae5fa740d7f22b1e0fed1194ad2c3bf9c8a07c11c9d63842d31c11cd45ec5",
+    "apps/web/app/components/r16-companion-window.tsx": "a08aba77f1dbd822ae5b420bb78098509c0c259b360032fbb52c8c32032198b4",
+    "apps/web/app/page.tsx": "34ded65e6850714bd5d246d9b2914c79d99edfd12cbc6443f91a3cfd4584282b"
+  },
+  "phases": [
+    "reserve-own-loopback",
+    "prepare-independent-next-source",
+    "ordinary-new-file-store-provisioning",
+    "actual-headless-web-start",
+    "owner-browser-login-select-enter",
+    "start-v1-browser-and-ordinary-party",
+    "v1-natural-deer-and-held-source",
+    "v1-move-ordinary-candle-holder-near-party",
+    "v1-outside-safe-zone-natural-target",
+    "v1-candle-holder-and-alo-in-range",
+    "v1-owner-first-hit-then-source-drop",
+    "v1-observe-exact-pickup-and-death"
+  ],
+  "events": [
+    {
+      "operation": "view",
+      "status": "ok"
+    }
+  ],
+  "pageErrors": [],
+  "startGameAcks": [
+    4
+  ],
+  "stopped": {
+    "actorSaved": true,
+    "next": true,
+    "gateway": true
+  },
+  "baseline": {
+    "version": 1,
+    "partyHabits": [
+      false,
+      false,
+      false
+    ],
+    "feedback": 0
+  },
+  "fieldTrails": [
+    [
+      {
+        "x": 288,
+        "y": 616,
+        "safe": true,
+        "candidates": 5,
+        "closest": 12,
+        "route": null,
+        "waypoint": 0
+      },
+      {
+        "x": 288,
+        "y": 611,
+        "safe": true,
+        "candidates": 6,
+        "closest": 7,
+        "route": null,
+        "waypoint": 0
+      },
+      {
+        "x": 287,
+        "y": 607,
+        "safe": true,
+        "candidates": 7,
+        "closest": 3,
+        "route": null,
+        "waypoint": 0
+      },
+      {
+        "x": 287,
+        "y": 602,
+        "safe": true,
+        "candidates": 8,
+        "closest": 1,
+        "route": null,
+        "waypoint": 0
+      },
+      {
+        "x": 290,
+        "y": 600,
+        "safe": true,
+        "candidates": 7,
+        "closest": 1,
+        "route": null,
+        "waypoint": 1
+      },
+      {
+        "x": 287,
+        "y": 602,
+        "safe": true,
+        "candidates": 8,
+        "closest": 1,
+        "route": null,
+        "waypoint": 2
+      },
+      {
+        "x": 287,
+        "y": 607,
+        "safe": true,
+        "candidates": 7,
+        "closest": 3,
+        "route": null,
+        "waypoint": 2
+      },
+      {
+        "x": 282,
+        "y": 607,
+        "safe": true,
+        "candidates": 8,
+        "closest": 6,
+        "route": null,
+        "waypoint": 2
+      },
+      {
+        "x": 280,
+        "y": 604,
+        "safe": true,
+        "candidates": 9,
+        "closest": 7,
+        "route": null,
+        "waypoint": 2
+      },
+      {
+        "x": 281,
+        "y": 600,
+        "safe": true,
+        "candidates": 9,
+        "closest": 4,
+        "route": null,
+        "waypoint": 2
+      },
+      {
+        "x": 281,
+        "y": 599,
+        "safe": false,
+        "candidates": 8,
+        "closest": 3,
+        "route": {
+          "x": 280,
+          "y": 597
+        },
+        "waypoint": 3
+      }
+    ]
+  ],
+  "rounds": [
+    {
+      "version": 1,
+      "monster": "Deer",
+      "pre": {
+        "ownerHealth": 17,
+        "ownerMaxHp": 18,
+        "actorHealth": 18,
+        "actorMaxHp": 18,
+        "candleCount": 1,
+        "actorToSource": 2,
+        "ownerToTarget": 1,
+        "helperToOwner": 3,
+        "owner": {
+          "x": 281,
+          "y": 597
+        },
+        "actor": {
+          "x": 280,
+          "y": 598
+        },
+        "source": {
+          "x": 281,
+          "y": 600
+        },
+        "deer": {
+          "x": 281,
+          "y": 596
+        }
+      },
+      "sourceDropAck": true,
+      "sourceCountBefore": 1,
+      "sourceCountAfter": 0,
+      "actorToDropAtReceipt": 2,
+      "dropDelayMs": 353,
+      "sourceDropRoundTripMs": 13,
+      "ownerHitOrder": 99,
+      "groundOrder": 102,
+      "deathOrder": 126,
+      "gainOrder": null,
+      "sameItemUid": null,
+      "dropRemovedOrder": 107,
+      "actorHits": [
+        117,
+        118,
+        121,
+        122,
+        124,
+        125
+      ],
+      "decisions": [
+        {
+          "order": 100,
+          "kind": "attack",
+          "policyVersion": 1,
+          "reason": "assist-confirmed-party-engagement",
+          "target": "deer"
+        },
+        {
+          "order": 104,
+          "kind": "loot",
+          "policyVersion": 1,
+          "reason": "collect-observed-allowed-drop",
+          "target": "candle"
+        },
+        {
+          "order": 112,
+          "kind": "attack",
+          "policyVersion": 1,
+          "reason": "assist-confirmed-party-engagement",
+          "target": "deer"
+        },
+        {
+          "order": 120,
+          "kind": "attack",
+          "policyVersion": 1,
+          "reason": "defend-confirmed-engagement",
+          "target": "deer"
+        }
+      ],
+      "grantedItemCount": null,
+      "groundSeenAlive": true,
+      "deathConfirmed": true
+    }
+  ],
+  "failureObservation": {
+    "actorRunning": true,
+    "actorSample": {
+      "partySize": 2,
+      "allowGroup": true,
+      "map": "0",
+      "ready": true,
+      "hp": 16,
+      "maxHp": 18
+    },
+    "decisions": [
+      {
+        "kind": "follow",
+        "version": 1,
+        "reason": "stay-with-party-leader"
+      },
+      {
+        "kind": "wait",
+        "version": 1,
+        "reason": "near-party-leader"
+      },
+      {
+        "kind": "follow",
+        "version": 1,
+        "reason": "stay-with-party-leader"
+      },
+      {
+        "kind": "wait",
+        "version": 1,
+        "reason": "near-party-leader"
+      },
+      {
+        "kind": "follow",
+        "version": 1,
+        "reason": "stay-with-party-leader"
+      },
+      {
+        "kind": "wait",
+        "version": 1,
+        "reason": "near-party-leader"
+      },
+      {
+        "kind": "attack",
+        "version": 1,
+        "reason": "assist-confirmed-party-engagement"
+      },
+      {
+        "kind": "attack",
+        "version": 1,
+        "reason": "defend-confirmed-engagement"
+      },
+      {
+        "kind": "wait",
+        "version": 1,
+        "reason": "near-party-leader"
+      },
+      {
+        "kind": "attack",
+        "version": 1,
+        "reason": "assist-confirmed-party-engagement"
+      },
+      {
+        "kind": "loot",
+        "version": 1,
+        "reason": "collect-observed-allowed-drop"
+      },
+      {
+        "kind": "attack",
+        "version": 1,
+        "reason": "assist-confirmed-party-engagement"
+      },
+      {
+        "kind": "attack",
+        "version": 1,
+        "reason": "defend-confirmed-engagement"
+      },
+      {
+        "kind": "wait",
+        "version": 1,
+        "reason": "near-party-leader"
+      }
+    ]
+  },
+  "result": "failed",
+  "error": {
+    "name": "AssertionError",
+    "code": "ERR_ASSERTION",
+    "messageSha256": "c5e155f93419b0e58eadc355b7f0d95fd9ff9229388c5eb8a0d179c6ebc3ed79",
+    "line": "405"
+  },
+  "partyTrace": [
+    {
+      "source": "browser-receive",
+      "packet": "SwitchGroup",
+      "authoritativeMembers": 0
+    },
+    {
+      "source": "browser-receive",
+      "packet": "DeleteGroup",
+      "authoritativeMembers": 0
+    },
+    {
+      "source": "browser-receive",
+      "packet": "SwitchGroup",
+      "authoritativeMembers": 0
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "SwitchGroup",
+      "authoritativeMembers": 0,
+      "allowsGroup": false
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "DeleteGroup",
+      "authoritativeMembers": 0,
+      "allowsGroup": false
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "SwitchGroup",
+      "authoritativeMembers": 0,
+      "allowsGroup": true
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "SwitchGroup",
+      "authoritativeMembers": 0,
+      "allowsGroup": true
+    },
+    {
+      "source": "browser-send",
+      "command": "switchGroup"
+    },
+    {
+      "source": "browser-send",
+      "command": "addMember",
+      "targetMatches": true
+    },
+    {
+      "source": "browser-receive",
+      "packet": "SwitchGroup",
+      "authoritativeMembers": 0
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "GroupInvite",
+      "authoritativeMembers": 0,
+      "allowsGroup": true
+    },
+    {
+      "source": "browser-receive",
+      "packet": "SwitchGroup",
+      "authoritativeMembers": 0
+    },
+    {
+      "source": "browser-receive",
+      "packet": "AddMember",
+      "authoritativeMembers": 1
+    },
+    {
+      "source": "browser-receive",
+      "packet": "AddMember",
+      "authoritativeMembers": 2
+    },
+    {
+      "source": "browser-receive",
+      "packet": "GroupMemberInfo",
+      "authoritativeMembers": 2
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "AddMember",
+      "authoritativeMembers": 1,
+      "allowsGroup": true
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "AddMember",
+      "authoritativeMembers": 2,
+      "allowsGroup": true
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "GroupMemberInfo",
+      "authoritativeMembers": 2,
+      "allowsGroup": true
+    },
+    {
+      "source": "actor",
+      "type": "actorParty",
+      "packet": "DeleteGroup",
+      "authoritativeMembers": 0,
+      "allowsGroup": true
+    }
+  ]
+}

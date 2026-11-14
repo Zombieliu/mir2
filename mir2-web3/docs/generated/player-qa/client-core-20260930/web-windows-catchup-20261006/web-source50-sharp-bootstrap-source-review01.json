@@ -1,0 +1,596 @@
+{
+  "schemaVersion": 1,
+  "owner": "source30_native_client",
+  "kind": "Source50 limited read-only Sharp 0.35 CJS bootstrap compatibility and Next producer boundary review",
+  "observedAtUtc": "2026-10-09T00:26:13.785Z",
+  "reviewMethod": "Builtin fs/path/crypto/assert ordinary data reads, hashes, and pure text comparison only. No product/helper imports or evaluation; no CLI, native/CJS/WASM execution, process/PID queries, network, UI, private inputs, locks, dependency edits, old output mutation.",
+  "originalFailure": {
+    "reportedByRoot": "Original full Thin builder exited1/exited/disposed at original portable helper497: @img/sharp-win32-x640.35.3 exports ./sharp.node points to ./index.cjs, original predicate required export suffix.node.",
+    "failureExecutionReviewedHere": false,
+    "underlyingCurrentMetadataIndependentlyRead": true
+  },
+  "source": {
+    "before": {
+      "bytes": 31410,
+      "sha256": "6b296f46b17b25890b56259cc7308165f1cb52a4f781042a12ff25d778ec853e"
+    },
+    "after": {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/scripts/lib/portable-next-standalone.mjs",
+      "bytes": 32248,
+      "sha256": "6beb3caf195f5296e8d92e4aa23123e146fc612e0c55e50e9180d5f7cfb749cc"
+    },
+    "onlyChangedBlock": {
+      "startLine": 491,
+      "endLine": 516,
+      "source": "    if (name === binaryName) {\n      const exportedBinary = metadata.exports?.[\"./sharp.node\"];\n      if (typeof exportedBinary !== \"string\" || !exportedBinary.startsWith(\"./\") ||\n          !included.has(segmentsOf(exportedBinary.slice(2)).join(\"/\")) ||\n          !included.has(\"versions.json\")) {\n        throw new Error(`Sharp target binary or version metadata missing: ${name}`);\n      }\n      let nativeBinary = exportedBinary;\n      if (exportedBinary.endsWith(\".cjs\")) {\n        const bootstrapPath = path.join(packageRoot, ...segmentsOf(exportedBinary.slice(2)));\n        if (exportedBinary !== \"./index.cjs\" || (await fs.lstat(bootstrapPath)).size > 4096) {\n          throw new Error(`Unrecognized Sharp native bootstrap: ${name}`);\n        }\n        const bootstrap = await fs.readFile(bootstrapPath, \"utf8\");\n        const match = /^\\s*module\\.exports\\s*=\\s*require\\(([\"'])(\\.\\/[A-Za-z0-9_./-]+\\.node)\\1\\);?\\s*$/.exec(bootstrap);\n        if (!match) throw new Error(`Unrecognized Sharp native bootstrap: ${name}`);\n        nativeBinary = match[2];\n      }\n      if (!nativeBinary.endsWith(\".node\") ||\n          !included.has(segmentsOf(nativeBinary.slice(2)).join(\"/\"))) {\n        throw new Error(`Sharp target binary or version metadata missing: ${name}`);\n      }\n      if (process.platform === \"win32\" && ![...included].some((file) => file.endsWith(\".dll\"))) {\n        throw new Error(`Sharp Windows package lacks libvips DLLs: ${name}`);\n      }\n    }\n"
+    },
+    "inverseRestoresEntireOriginalBytes": true,
+    "otherHelperBodyUnchanged": true,
+    "existingFiniteTestFile": {
+      "path": "E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-portable-next-standalone.mjs",
+      "bytes": 37692,
+      "sha256": "658af9bbc8f0ee8cfa708afeed011209457a6b7041e5faec285fd26cedf08c7e"
+    },
+    "existingTestSourceUnchanged": true,
+    "testsExecuted": false
+  },
+  "compatibility": {
+    "legacy": "Direct relative.node export still checked via safe segments and included full regular-file inventory, plus versions/LICENSE/DLL requirements.",
+    "new": "Only exported ./index.cjs is allowed. Package-root bootstrap lstat size must be<=4096. Entire source must match the one-statement anchored module.exports=require(quoted canonical ASCII ./...node) grammar. No require/eval of bootstrap. Terminal target passes segmentsOf and existing included-membership checks.",
+    "pathSemantics": "Root-only index.cjs guarantees parsed relative require target and runtime CJS directory agree; nested CJS entry rejected. ASCII grammar excludes backslash/escaped/encoded string interpretations. segmentsOf rejects empty/dot/dotdot/NUL/absolute/drive segments.",
+    "requirementsPreserved": [
+      "targetPlatform platform+arch binding",
+      "Sharp optional dependency exact native package name/version",
+      "full physical recursive closure with rejected links/specials",
+      "requireInside and actual realpath containment",
+      "package.json and LICENSE",
+      "versions.json",
+      "terminal .node regular source included",
+      "Windows package DLL presence",
+      "COPYFILE_EXCL and complete dependency copy",
+      "copied required module/native export/versions resolve inside destination",
+      "portable audit and source hash gates",
+      "original360MiB Thin budget"
+    ],
+    "limitQualification": "4096 limit is inspected from source lstat before read; review does not claim atomic resistance to concurrent mutation beyond existing frozen input/pre-post source gates.",
+    "blockers": []
+  },
+  "actualNativeSource": {
+    "packageName": "@img/sharp-win32-x64",
+    "version": "0.35.3",
+    "exportedSharpNode": "./index.cjs",
+    "bootstrapText": "module.exports = require('./lib/sharp-win32-x64-0.35.3.node');",
+    "terminalTarget": "./lib/sharp-win32-x64-0.35.3.node",
+    "vipsVersion": "8.18.3",
+    "fullSharpAndNativeLeafCount": 55,
+    "all55CurrentBytePinsEqualPriorActualSource31": true,
+    "all55Pins": [
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/dist/channel.cjs",
+        "bytes": 5383,
+        "sha256": "7445567e8001f4be3126374e4c17e282777ed14c718acca875c91bec69a2d7a1",
+        "relativePath": "apps/web/node_modules/sharp/dist/channel.cjs"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/dist/channel.mjs",
+        "bytes": 5376,
+        "sha256": "6067b0ba5ebcc9682a01d0b450a12b54849a95c8ed017f8485bddb5fd0b9db91",
+        "relativePath": "apps/web/node_modules/sharp/dist/channel.mjs"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/dist/colour.cjs",
+        "bytes": 5622,
+        "sha256": "da760186e75d4fd8b6da0a617ecf122deec2fa6d95fdcc194bbee0cb1c5e4605",
+        "relativePath": "apps/web/node_modules/sharp/dist/colour.cjs"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/dist/colour.mjs",
+        "bytes": 5610,
+        "sha256": "760e7fa8161432a9cc97f0a3d9f3e0b757e66089c967e6b36f3131c9fdafa1b5",
+        "relativePath": "apps/web/node_modules/sharp/dist/colour.mjs"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/dist/composite.cjs",
+        "bytes": 9079,
+        "sha256": "154e7abc45fe5b801b859e4254df4b6e850ada205e76620ab363ac3fa62f4bff",
+        "relativePath": "apps/web/node_modules/sharp/dist/composite.cjs"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/dist/composite.mjs",
+        "bytes": 9072,
+        "sha256": "f8182845a85a72836f69aab3119eb371115caa5054f8892f4424a046076fbad1",
+        "relativePath": "apps/web/node_modules/sharp/dist/composite.mjs"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/dist/constructor.cjs",
+        "bytes": 20355,
+        "sha256": "51186c3f1813d5f8e03cad3e7176d2f30ee234ae9ad44a5bd5b363e1e2afbad6",
+        "relativePath": "apps/web/node_modules/sharp/dist/constructor.cjs"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/dist/constructor.mjs",
+        "bytes": 20331,
+        "sha256": "2420fe1860b5bcc88de73ca43adae7d2410c37ff23adf4ef87e3ec922e5bf9d3",
+        "relativePath": "apps/web/node_modules/sharp/dist/constructor.mjs"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/dist/index.cjs",
+        "bytes": 620,
+        "sha256": "d69f275bc49fcd2a6188b26b35c986d4db32a1b008653fef88adb4598688232a",
+        "relativePath": "apps/web/node_modules/sharp/dist/index.cjs"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/dist/index.d.cts",
+        "bytes": 92777,
+        "sha256": "fcf133b0bfa94dfb32d7345f4ee9b7caf12b36daaa9f522921eeb496a7b148bd",
+        "relativePath": "apps/web/node_modules/sharp/dist/index.d.cts"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/dist/index.d.mts",
+        "bytes": 87878,
+        "sha256": "854e50b93090b3f8fd6e355b074e1d24dce1ae0240f1ce46563e35fea210a6d5",
+        "relativePath": "apps/web/node_modules/sharp/dist/index.d.mts"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/dist/index.mjs",
+        "bytes": 573,
+        "sha256": "0e8f955c68a1b0bccf0ba5343c924dbfa6a46a76a0d491ec27fe6b328311363e",
+        "relativePath": "apps/web/node_modules/sharp/dist/index.mjs"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/dist/input.cjs",
+        "bytes": 33642,
+        "sha256": "2d176ab860bef11d340deb223fb4097fcaaf245adcb1d97672c094ce8db6c93c",
+        "relativePath": "apps/web/node_modules/sharp/dist/input.cjs"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/dist/input.mjs",
+        "bytes": 33630,
+        "sha256": "c134801d22ca82b1cf56e21e3468592585e29b093cbd7c7663608d2baf93308e",
+        "relativePath": "apps/web/node_modules/sharp/dist/input.mjs"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/dist/is.cjs",
+        "bytes": 2932,
+        "sha256": "3fd05ca6f6cd762c0c2279545e6114623d708f49851b3d23b8396c621455ccc8",
+        "relativePath": "apps/web/node_modules/sharp/dist/is.cjs"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/dist/is.mjs",
+        "bytes": 2930,
+        "sha256": "d87220e2c4ce04202290fdfd78105a65d32adce3fead64aaaaca15cfe324f95d",
+        "relativePath": "apps/web/node_modules/sharp/dist/is.mjs"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/dist/libvips.cjs",
+        "bytes": 5833,
+        "sha256": "3419f6cb4303feaf4a76abe122ce1caf5dc755f9f17fa013afd5561827b61062",
+        "relativePath": "apps/web/node_modules/sharp/dist/libvips.cjs"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/dist/libvips.mjs",
+        "bytes": 5828,
+        "sha256": "d9984601b0aafe44c393b29ce4b0712b1c40890c3d740d4fda49842a4ea5873d",
+        "relativePath": "apps/web/node_modules/sharp/dist/libvips.mjs"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/dist/operation.cjs",
+        "bytes": 32677,
+        "sha256": "1323fc9832edfdf3dfd0fc815e1ff3be658042be7b86e100da829368359c00e9",
+        "relativePath": "apps/web/node_modules/sharp/dist/operation.cjs"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/dist/operation.mjs",
+        "bytes": 32670,
+        "sha256": "e2b633c5bd433ac533e87bf06f25e1476040b6bfce23d8351cc82edb53f42779",
+        "relativePath": "apps/web/node_modules/sharp/dist/operation.mjs"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/dist/output.cjs",
+        "bytes": 65461,
+        "sha256": "8513d17af275dd14c4688775ffea675d15d54b7ec4089c112ab05f499c5d2b45",
+        "relativePath": "apps/web/node_modules/sharp/dist/output.cjs"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/dist/output.mjs",
+        "bytes": 65444,
+        "sha256": "883de62d95f56a78f7b5d5255f49f1e4fccdc34978075f1364850028618b39c2",
+        "relativePath": "apps/web/node_modules/sharp/dist/output.mjs"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/dist/resize.cjs",
+        "bytes": 22600,
+        "sha256": "4d68e693946d09f1c9c5caa6933b290e67a3d3d503ef0f65501cce000855912a",
+        "relativePath": "apps/web/node_modules/sharp/dist/resize.cjs"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/dist/resize.mjs",
+        "bytes": 22593,
+        "sha256": "2ae5700b1eb481d08586f43a289e79b68eaa2be0e6e7a4c42a8918201ea0610e",
+        "relativePath": "apps/web/node_modules/sharp/dist/resize.mjs"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/dist/sharp.cjs",
+        "bytes": 6199,
+        "sha256": "4fc05edeae66ea8207332f7c03045856e43f371a848401a01491ff15e77d839f",
+        "relativePath": "apps/web/node_modules/sharp/dist/sharp.cjs"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/dist/sharp.mjs",
+        "bytes": 6294,
+        "sha256": "994230859dcfa1235dee5bf612069d14844153b997cf7309deb2ea0012ec5419",
+        "relativePath": "apps/web/node_modules/sharp/dist/sharp.mjs"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/dist/utility.cjs",
+        "bytes": 9786,
+        "sha256": "0f7a14858dfa8ebd01b2c6c2272297f7a34c4af3d84f0c0b926146c49a2655b1",
+        "relativePath": "apps/web/node_modules/sharp/dist/utility.cjs"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/dist/utility.mjs",
+        "bytes": 9862,
+        "sha256": "761566e165bc1fc90bc6dd67a3b560c1a63e6cfe98009b726d35288606d629b9",
+        "relativePath": "apps/web/node_modules/sharp/dist/utility.mjs"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/install/build.js",
+        "bytes": 860,
+        "sha256": "fea92e0d55cce8692413c479021173aa1512304e1b849039949cbee9d6ceb1de",
+        "relativePath": "apps/web/node_modules/sharp/install/build.js"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/lib/index.d.ts",
+        "bytes": 92777,
+        "sha256": "fcf133b0bfa94dfb32d7345f4ee9b7caf12b36daaa9f522921eeb496a7b148bd",
+        "relativePath": "apps/web/node_modules/sharp/lib/index.d.ts"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/LICENSE",
+        "bytes": 10273,
+        "sha256": "73ba74dfaa520b49a401b5d21459a8523a146f3b7518a833eea5efa85130bf68",
+        "relativePath": "apps/web/node_modules/sharp/LICENSE"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/package.json",
+        "bytes": 8120,
+        "sha256": "0f3a7e7eb4f22978dfde46e6c7c6ecf3b86b43e33c3d366de88b334b4610c3ff",
+        "relativePath": "apps/web/node_modules/sharp/package.json"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/README.md",
+        "bytes": 3162,
+        "sha256": "89772961fcf195b976573874555f2902bfe04a3e57be61af261ac65ce9348735",
+        "relativePath": "apps/web/node_modules/sharp/README.md"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/src/binding.gyp",
+        "bytes": 10805,
+        "sha256": "9d0a43b5db5db4e6a4a662ff059d8bf30e57ea403d2e207fc408a8c6aa0ab8c8",
+        "relativePath": "apps/web/node_modules/sharp/src/binding.gyp"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/src/common.cc",
+        "bytes": 41350,
+        "sha256": "fb4f9cb3ee5114a8310c156f921d7089b6ed9c127c998d91d7aa151fee3699a8",
+        "relativePath": "apps/web/node_modules/sharp/src/common.cc"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/src/common.h",
+        "bytes": 10988,
+        "sha256": "ae63afe0934198f55e88de544410bbe0c1e763b9bddfad094485efa37cf6319a",
+        "relativePath": "apps/web/node_modules/sharp/src/common.h"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/src/metadata.cc",
+        "bytes": 15320,
+        "sha256": "a127c134c9e537db9c63962ff1aa1d0762a8d517d746a844e6b43b299e11a581",
+        "relativePath": "apps/web/node_modules/sharp/src/metadata.cc"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/src/metadata.h",
+        "bytes": 1878,
+        "sha256": "5e02c25ec821a525b0caf31161b1e8675ff32cfd098c17cda0b888440362b057",
+        "relativePath": "apps/web/node_modules/sharp/src/metadata.h"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/src/operations.cc",
+        "bytes": 17412,
+        "sha256": "a61e6545cde7d2f2ae508b4eceeeec9db9ef711211d5cba1ed470f9325f914fb",
+        "relativePath": "apps/web/node_modules/sharp/src/operations.cc"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/src/operations.h",
+        "bytes": 3625,
+        "sha256": "6f41d329634471dff8e093d12e38ff356293079e2aeecc5b922fc23ba99799e6",
+        "relativePath": "apps/web/node_modules/sharp/src/operations.h"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/src/pipeline.cc",
+        "bytes": 90883,
+        "sha256": "76010d19804f37f2231f3d705afdd0937ac593663797780a36c06c3952cd6571",
+        "relativePath": "apps/web/node_modules/sharp/src/pipeline.cc"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/src/pipeline.h",
+        "bytes": 10131,
+        "sha256": "e09c3dbd873071a373e6d95679b470a6fe1be5fc2ef781b00fd87958b5ab5e98",
+        "relativePath": "apps/web/node_modules/sharp/src/pipeline.h"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/src/sharp.cc",
+        "bytes": 1529,
+        "sha256": "9f407b50bb2d02e5eb711b769f05d3e6659028430e055c4271e5ab1593f5a257",
+        "relativePath": "apps/web/node_modules/sharp/src/sharp.cc"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/src/stats.cc",
+        "bytes": 6756,
+        "sha256": "72f8f2ad0e4315951c88b115511eb96741fd0479385ed094141f7bd254739791",
+        "relativePath": "apps/web/node_modules/sharp/src/stats.cc"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/src/stats.h",
+        "bytes": 1267,
+        "sha256": "db854f0c3c4a0db1751021ed676413c6d5ca00becc08bdc13258b29047450b8c",
+        "relativePath": "apps/web/node_modules/sharp/src/stats.h"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/src/utilities.cc",
+        "bytes": 9532,
+        "sha256": "694195a5f2aa7e4ef50aa7a97c0381d8a858a6b3a437997e17b972aff093a493",
+        "relativePath": "apps/web/node_modules/sharp/src/utilities.cc"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/sharp/src/utilities.h",
+        "bytes": 741,
+        "sha256": "0b126ab63cf1aedf8e71e6cb8179899d3ef02c46419100e847b2ca4284b8901b",
+        "relativePath": "apps/web/node_modules/sharp/src/utilities.h"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/@img/sharp-win32-x64/index.cjs",
+        "bytes": 62,
+        "sha256": "2170c4832cba7406da236fe659451a07080c84b38611a15c031d3cc748c3061a",
+        "relativePath": "apps/web/node_modules/@img/sharp-win32-x64/index.cjs"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/@img/sharp-win32-x64/lib/libvips-42.dll",
+        "bytes": 18406400,
+        "sha256": "6d8ec83a826a1b46ef25a670501fd186475568dd3e48893cb4f756d0f2f428d8",
+        "relativePath": "apps/web/node_modules/@img/sharp-win32-x64/lib/libvips-42.dll"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/@img/sharp-win32-x64/lib/libvips-cpp-8.18.3.dll",
+        "bytes": 333312,
+        "sha256": "d6eb3395e6f7799c9e2c997aba38068f1ab0684dc08a853013dbe528649306b9",
+        "relativePath": "apps/web/node_modules/@img/sharp-win32-x64/lib/libvips-cpp-8.18.3.dll"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/@img/sharp-win32-x64/lib/sharp-win32-x64-0.35.3.node",
+        "bytes": 442368,
+        "sha256": "45dbb968dff27a1e8d8870d2a34e6f5418fa2a1a4fe27a7ed13ab2fb3f895468",
+        "relativePath": "apps/web/node_modules/@img/sharp-win32-x64/lib/sharp-win32-x64-0.35.3.node"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/@img/sharp-win32-x64/LICENSE",
+        "bytes": 10464,
+        "sha256": "dc1f5d2d43c5531dfe0acaf4e950ea5dbe3e61e1850cf0e983bda7efc10d6693",
+        "relativePath": "apps/web/node_modules/@img/sharp-win32-x64/LICENSE"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/@img/sharp-win32-x64/package.json",
+        "bytes": 888,
+        "sha256": "230a4c229515fba8160b12804155435c41e84fa8392793e966f7292648e04299",
+        "relativePath": "apps/web/node_modules/@img/sharp-win32-x64/package.json"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/@img/sharp-win32-x64/README.md",
+        "bytes": 4913,
+        "sha256": "280e7d164420cfc1a1b192a582bf53e3dba97b86a5c3575f878b674ad1d41e13",
+        "relativePath": "apps/web/node_modules/@img/sharp-win32-x64/README.md"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/node_modules/@img/sharp-win32-x64/versions.json",
+        "bytes": 600,
+        "sha256": "5155cd67e4f2e5df99e26d2919458a21dbb8236eca2ca632d896dd49ba9c42fc",
+        "relativePath": "apps/web/node_modules/@img/sharp-win32-x64/versions.json"
+      }
+    ],
+    "dependenciesChangedByReviewer": false,
+    "no0345RestoreOrMixedFiles": true
+  },
+  "nextProductionBoundary": {
+    "consumerPins": [
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/next.config.ts",
+        "bytes": 13454,
+        "sha256": "9df1068e2257c21a2bc2063e160e61121ab4cb662b95ba21484c68b0d783846c"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/lib/standalone-full-pack-tracing.ts",
+        "bytes": 9634,
+        "sha256": "cf6542e5bc0ed4f8e04448e4ff12b81ae29d95cb9c75869d01493a2996cc3619"
+      },
+      {
+        "path": "E:/mir2-player-journey/mir2-web3/apps/web/scripts/build-thin-client.mjs",
+        "bytes": 17160,
+        "sha256": "3421180c5e023de2d38991b1052ed5d5f54cdde70ab4703c9ff36fbdc660affb"
+      }
+    ],
+    "anchors": [
+      {
+        "path": "apps/web/next.config.ts",
+        "lines": [
+          5,
+          169,
+          171,
+          172,
+          173
+        ],
+        "meaning": "Production hook imports and calls rewriteStandaloneFullPackTrace from TS helper."
+      },
+      {
+        "path": "apps/web/lib/standalone-full-pack-tracing.ts",
+        "lines": [
+          1,
+          2,
+          3,
+          118
+        ],
+        "meaning": "Actual hook helper imports builtin modules only; no portable dependency."
+      },
+      {
+        "path": "apps/web/scripts/build-thin-client.mjs",
+        "lines": [
+          14,
+          124,
+          125,
+          126,
+          127,
+          128
+        ],
+        "meaning": "Actual product consumer of portable materialization is original Thin builder."
+      },
+      {
+        "path": "apps/web/scripts/lib/portable-next-standalone.mjs",
+        "lines": [
+          608
+        ],
+        "meaning": "Materialization calls collectSharpNativePackages in same module; downstream pack operation."
+      }
+    ],
+    "searchedSourceRoots": [
+      "apps/web/lib .ts/.tsx/.mjs excluding generated",
+      "apps/web/scripts .ts/.tsx/.mjs",
+      "apps/web/next.config.ts"
+    ],
+    "references": [
+      {
+        "file": "apps/web/scripts/build-thin-client.mjs",
+        "line": 12,
+        "text": "  materializeStandaloneDependencies,"
+      },
+      {
+        "file": "apps/web/scripts/build-thin-client.mjs",
+        "line": 14,
+        "text": "} from \"./lib/portable-next-standalone.mjs\";"
+      },
+      {
+        "file": "apps/web/scripts/build-thin-client.mjs",
+        "line": 124,
+        "text": "  dependencyStats = await materializeStandaloneDependencies({"
+      },
+      {
+        "file": "apps/web/scripts/lib/portable-next-standalone.mjs",
+        "line": 416,
+        "text": "export async function collectSharpNativePackages(dependencyRoot) {"
+      },
+      {
+        "file": "apps/web/scripts/lib/portable-next-standalone.mjs",
+        "line": 508,
+        "text": "export async function materializeStandaloneDependencies({"
+      },
+      {
+        "file": "apps/web/scripts/lib/portable-next-standalone.mjs",
+        "line": 594,
+        "text": "  const nativeClosure = await collectSharpNativePackages(dependencyRoot);"
+      },
+      {
+        "file": "apps/web/scripts/test-bevy-runtime-build-identity.mjs",
+        "line": 111,
+        "text": "  const thin = readFileSync(new URL(\"./build-thin-client.mjs\", import.meta.url), \"utf8\");"
+      },
+      {
+        "file": "apps/web/scripts/test-client-core-release-files.mjs",
+        "line": 9,
+        "text": "import { copyPortableStandalone, copySelectedPublic, selectThinPublicEntry } from \"./lib/portable-next-standalone.mjs\";"
+      },
+      {
+        "file": "apps/web/scripts/test-portable-next-standalone.mjs",
+        "line": 10,
+        "text": "  copySelectedPublic, copyVerifiedRequiredServerFiles, materializeStandaloneDependencies,"
+      },
+      {
+        "file": "apps/web/scripts/test-portable-next-standalone.mjs",
+        "line": 11,
+        "text": "  selectThinPublicEntry, selectMapAtlasClosure, compactJsonWhitespace, collectSharpNativePackages,"
+      },
+      {
+        "file": "apps/web/scripts/test-portable-next-standalone.mjs",
+        "line": 12,
+        "text": "} from \"./lib/portable-next-standalone.mjs\";"
+      },
+      {
+        "file": "apps/web/scripts/test-portable-next-standalone.mjs",
+        "line": 195,
+        "text": "  const stats = await materializeStandaloneDependencies({"
+      },
+      {
+        "file": "apps/web/scripts/test-portable-next-standalone.mjs",
+        "line": 251,
+        "text": "  const closure = await collectSharpNativePackages(root);"
+      },
+      {
+        "file": "apps/web/scripts/test-portable-next-standalone.mjs",
+        "line": 272,
+        "text": "  await assert.rejects(collectSharpNativePackages(dependency), /binary or version metadata missing/);"
+      },
+      {
+        "file": "apps/web/scripts/test-portable-next-standalone.mjs",
+        "line": 276,
+        "text": "  await assert.rejects(collectSharpNativePackages(dependency), /binary or version metadata missing/);"
+      },
+      {
+        "file": "apps/web/scripts/test-portable-next-standalone.mjs",
+        "line": 281,
+        "text": "  await assert.rejects(collectSharpNativePackages(dependency), /Missing target Sharp native package/);"
+      },
+      {
+        "file": "apps/web/scripts/test-portable-next-standalone.mjs",
+        "line": 286,
+        "text": "    await assert.rejects(collectSharpNativePackages(dependency), /Linked Sharp native entry/);"
+      },
+      {
+        "file": "apps/web/scripts/test-portable-next-standalone.mjs",
+        "line": 298,
+        "text": "    await assert.rejects(collectSharpNativePackages(escape), /not a real directory/);"
+      },
+      {
+        "file": "apps/web/scripts/test-portable-next-standalone.mjs",
+        "line": 306,
+        "text": "  await assert.rejects(collectSharpNativePackages(missing), /Missing target Sharp native package/);"
+      },
+      {
+        "file": "apps/web/scripts/test-portable-next-standalone.mjs",
+        "line": 323,
+        "text": "  await assert.rejects(materializeStandaloneDependencies({ sourceAppRoot: sourceApp,"
+      },
+      {
+        "file": "apps/web/scripts/test-portable-next-standalone.mjs",
+        "line": 351,
+        "text": "  const stats = await materializeStandaloneDependencies({ sourceAppRoot: sourceApp,"
+      }
+    ],
+    "actualNextCompileHookConsumesPortableHelper": false,
+    "nextRebuildRequiredByThisConsumerChange": false,
+    "scopeQualification": "The portable helper belongs to original broad Next .sources declaration even though it is not a Next compilation consumer. Original Source49 Next caller/pre-post interval and its actual outputs/NFT remain historical exact evidence. Do not edit those records or claim the old full scope matches current. Fresh Source50 Thin source declaration must carry original Next output/NFT pins and explicit old/new Thin-only helper provenance; it must hash actual current helper and complete current inputs. No implicit broad current source acceptance is issued here."
+  },
+  "validationStillRequired": {
+    "freshOriginalFullThinBuilder": true,
+    "collectThenMaterializeAndFullNativeClosureAndPortableChecks": true,
+    "currentFullThinInputFreeze": true,
+    "actualCompleteOldNextOutputAndNftPins": true,
+    "actualNewOutputDirectoryAndNoOld08Mutation": true,
+    "sourcePrePostStable": true,
+    "remainingMetadataIdentityByteBudgetGatesUnchanged": true,
+    "malformedNegativeCasesNotExecuted": true,
+    "preparedOrReadyOrUiNotAccepted": true
+  },
+  "limitedSourceReviewAccepted": true,
+  "thinBuildAccepted": false,
+  "nextNewBuildClaimed": false,
+  "fullWebAccepted": false,
+  "candidateAccepted": false,
+  "playableAccepted": false,
+  "goalComplete": false
+}

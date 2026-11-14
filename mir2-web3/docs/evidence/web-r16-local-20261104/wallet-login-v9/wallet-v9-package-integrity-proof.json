@@ -1,0 +1,715 @@
+{
+  "schema": "mir2.r16.final-package-integrity-proof/1",
+  "startedAt": "2026-11-04T07:43:32.219Z",
+  "artifactRoot": "F:/mir2-builds/Numeron-Web-R16-20261104",
+  "scope": "Wallet-v9 manifest-listed distribution integrity and read-only network/packager source review. Compares the public v7 backup manifest: only two service/config modules changed and two network modules were added; all prior prepared Next JS/WASM/assets remain unchanged. No private or .mir2-data directory enumeration/reads, environment proxy values, credentials, browser, HTTP/QR sessions, login, WS, service lifecycle or model operation. Public launcher-config is only an opaque manifest-listed hash input, never parsed.",
+  "passed": true,
+  "failures": [],
+  "manifest": {
+    "path": "package-manifest.json",
+    "sha256": "bcaa0de531823758f1e5eb8a5d86d2c6f4c745b1904acb545566e8e96a9749bb",
+    "bytes": 6856471,
+    "createdAt": "2026-11-04T07:18:03.561Z",
+    "declaredFiles": 29642,
+    "declaredFileBytes": 886885915,
+    "nodeVersion": "22.18.0",
+    "undiciVersion": "7.30.1",
+    "manifestSelfAndPrivateExcludedFromByteSum": true
+  },
+  "sensitivePathAudit": {
+    "passed": true,
+    "rejectedSensitiveEntries": 0,
+    "privateDirectoriesEnumerated": 0,
+    "privateFilesOpened": 0,
+    "benignLibraryFeature": {
+      "path": "web/mir2-web3/apps/web/node_modules/caniuse-lite/data/features/credential-management.js",
+      "reason": "caniuse-lite Credential Management API browser support data; not credential contents."
+    },
+    "normalPasswordRouteCode": "Three manifest-listed compiled JS leaves under api/promotions/auth/password are source code, not password data."
+  },
+  "listedFileIntegrity": {
+    "passed": true,
+    "checkedFiles": 29642,
+    "checkedBytes": 886885915,
+    "allRegularFiles": true,
+    "noSymlinksOrJunctions": true,
+    "noHardLinks": true,
+    "ancestorDirectoriesCheckedWithoutEnumeration": 996,
+    "checkedRecordsSha256": "fbb023a8a6a3716f5149b9f2011fcc9c0935a33d974fd18dac6b0b03842179b4"
+  },
+  "compiledPins": {
+    "passed": true,
+    "buildId": "kH3yQjxYAuzF2nvUWQtzS",
+    "distDir": ".next-r16-delivery-physical-v2",
+    "nextRequiredServerFilesSha256": "48a386024ce4208e9fc309ac8f90977ebf0794ccbc2f7676e08f6e519f9717cf",
+    "tripleCoreCompiledEqualsGenerated": true,
+    "coreBundles": [
+      {
+        "name": "core",
+        "version": "81dd599a887e9338a888672a19a1d5ecc4cc1b6d9b90a9bb41c61d5f8c210974",
+        "sourceSha256": "43fed2e1d71d79d57c0b8331d3eeb411b1074dc8ed6a7419d60267feca0d7f86",
+        "files": [
+          {
+            "path": "web/mir2-web3/apps/web/public/client-core/81dd599a887e9338a888672a19a1d5ecc4cc1b6d9b90a9bb41c61d5f8c210974/mir2_platform_web.js",
+            "bytes": 24393,
+            "sha256": "875090fd42d891cb003f63e46aaed848ead048f322e86ad5338db9a088fa01e7"
+          },
+          {
+            "path": "web/mir2-web3/apps/web/public/client-core/81dd599a887e9338a888672a19a1d5ecc4cc1b6d9b90a9bb41c61d5f8c210974/mir2_platform_web_bg.wasm",
+            "bytes": 250136,
+            "sha256": "c8f6c8e30166807aadab41321efdcb9bc86e13a657ffa14b5adf6889f6913bc0"
+          }
+        ],
+        "immutableVersionMatched": true
+      },
+      {
+        "name": "presentation",
+        "version": "08bc05f41551a7f01fd0edf3a7e639df847dad88ef605fc55b764e9bab901bbc",
+        "sourceSha256": "43fed2e1d71d79d57c0b8331d3eeb411b1074dc8ed6a7419d60267feca0d7f86",
+        "files": [
+          {
+            "path": "web/mir2-web3/apps/web/public/client-core/08bc05f41551a7f01fd0edf3a7e639df847dad88ef605fc55b764e9bab901bbc/mir2_platform_web.js",
+            "bytes": 24721,
+            "sha256": "8bbff9179937703b7fff70bbf3ea8136b46da027470427036a9bee11605c810c"
+          },
+          {
+            "path": "web/mir2-web3/apps/web/public/client-core/08bc05f41551a7f01fd0edf3a7e639df847dad88ef605fc55b764e9bab901bbc/mir2_platform_web_bg.wasm",
+            "bytes": 261983,
+            "sha256": "a65ce72e278cbb31999922dafe629c0b1c57ce0e9be3bc8c859de7012798e0da"
+          }
+        ],
+        "immutableVersionMatched": true
+      },
+      {
+        "name": "npcPurchase",
+        "version": "78c4de3cdd6f97897ad39c7f6e1a61a76a6f02343c0be8d570b616155a7fc58f",
+        "sourceSha256": "43fed2e1d71d79d57c0b8331d3eeb411b1074dc8ed6a7419d60267feca0d7f86",
+        "files": [
+          {
+            "path": "web/mir2-web3/apps/web/public/client-core/78c4de3cdd6f97897ad39c7f6e1a61a76a6f02343c0be8d570b616155a7fc58f/mir2_platform_web.js",
+            "bytes": 8332,
+            "sha256": "b6a3e9848e46934dd5187120ea543da5d174bf97f1a34d63ca9be714e0b18218"
+          },
+          {
+            "path": "web/mir2-web3/apps/web/public/client-core/78c4de3cdd6f97897ad39c7f6e1a61a76a6f02343c0be8d570b616155a7fc58f/mir2_platform_web_bg.wasm",
+            "bytes": 165791,
+            "sha256": "cdf685efc345dc45b389463947a1685c9632888e85f062d3fe14dba4f0c973dc"
+          }
+        ],
+        "immutableVersionMatched": true
+      }
+    ],
+    "rendererCompiledEqualsGeneratedAndSavedManifests": true,
+    "rendererVersion": "bevy-ebebc42dff6639fb",
+    "rendererImmutableCapabilitiesVersionMatched": true,
+    "rendererPackages": [
+      {
+        "id": "webgl2",
+        "backend": "webgl2",
+        "packageDir": "pkg-webgl2",
+        "questUiAbiVersion": 0,
+        "bagUiAbiVersion": 0,
+        "primarySharedUiCompiled": false
+      },
+      {
+        "id": "webgl2-shared",
+        "backend": "webgl2",
+        "packageDir": "pkg-webgl2-shared",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": true
+      },
+      {
+        "id": "webgpu",
+        "backend": "webgpu",
+        "packageDir": "pkg-webgpu",
+        "questUiAbiVersion": 1,
+        "bagUiAbiVersion": 1,
+        "primarySharedUiCompiled": false
+      }
+    ],
+    "rendererFiles": [
+      {
+        "path": "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-ebebc42dff6639fb/pkg-webgpu/mir2_bevy_runtime.js",
+        "bytes": 141118,
+        "sha256": "afa9d0d67e6fcc05bef3f506a5b3cb6d8e42becd28e65e63f3dd1c1e3653bf5e"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-ebebc42dff6639fb/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "bytes": 29947465,
+        "sha256": "494101bd32bf92f8df5829d8b4879ecf61503b088709c2eb3534c2211296d79f"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-ebebc42dff6639fb/pkg-webgl2/mir2_bevy_runtime.js",
+        "bytes": 117176,
+        "sha256": "2e4c58270f49998063cf64b3605b412edce725f5df73254ce4bbf764b282998d"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-ebebc42dff6639fb/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
+        "bytes": 16402082,
+        "sha256": "105f6bb1f8965fe0273dc8b25569b4b377fb308fa795cb4c091e2020766730a5"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-ebebc42dff6639fb/pkg-webgl2-shared/mir2_bevy_runtime.js",
+        "bytes": 139092,
+        "sha256": "5498a896f7968937053dc5fc8b9d7cfb729484c75918bcac1ef8231fdec4fdff"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/bevy-runtime-releases/bevy-ebebc42dff6639fb/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+        "bytes": 30876146,
+        "sha256": "29350a0ab88768a53c79d39eb7a7a36ab89d5e0d0bd5e989a81baea6552e1112"
+      }
+    ]
+  },
+  "r16Closure": {
+    "passed": true,
+    "manifestPath": "web/R16-PLAYABLE-ASSETS-MANIFEST.json",
+    "manifestSha256": "c0eb872342c2040256df8e55c31b14c803ad435de03b3d8b98c77f18b0688b90",
+    "profileId": "platinum_fiveclass",
+    "maps": [
+      "0",
+      "0141"
+    ],
+    "files": 21019,
+    "bytes": 266020592,
+    "requiredCategoryCounts": {
+      "ui": 4260,
+      "map0": 8483,
+      "map0141": 8,
+      "monsters": 2624,
+      "firstplay": 5644
+    },
+    "allListedAndHashed": true,
+    "uiScope": "common",
+    "resourceManifestBytes": 4454825,
+    "finiteBudget": {
+      "files": 22000,
+      "bytes": 377487360,
+      "manifestBytes": 8388608,
+      "passed": true,
+      "engineeringChange": {
+        "previousFileCountCap": 20000,
+        "currentFileCountCap": 22000,
+        "explicitlyAuthorized": true,
+        "assetByteCapChanged": false,
+        "manifestByteCapChanged": false,
+        "thinAndWasmBudgetsChanged": false
+      }
+    },
+    "oldV3Retained": {
+      "passed": true,
+      "referenceManifestSha256": "b8ab7aa87ff3959347b93f3e2d2cbe4beb35a58826408efc4d3fbb4e58ce52fa",
+      "files": 19959,
+      "bytes": 261605355,
+      "allByteAndShaPinsUnchanged": true,
+      "directlyComparedEveryV3Record": true
+    },
+    "oldV2Retained": {
+      "passed": true,
+      "files": 9468,
+      "bytes": 153042158,
+      "sourceManifestSha256": "f5ec1d9a7d09f76c56a45cb944edf15166ecf4bacb0d29857a5db1d3dbbf5a5e",
+      "method": "The v5 audit directly proved every v2 pin in old v3; this v7 audit directly proves every old v3 pin in expanded resource manifest v5.",
+      "referenceProof": "F:/mir2-builds/web-r16-20261104/final-package-integrity-complete-v5-proof.json",
+      "referenceProofSha256": "8a76fe3adc851a13930e8aca13daefaa57e52de5791a0008a7e71d9fe45b8446",
+      "oldV2ReferenceReadThisAudit": false
+    },
+    "rawPhysicalMonsterPngs": {
+      "files": 2602,
+      "libraries": 13,
+      "libraryCounts": {
+        "Monster/000": 128,
+        "Monster/003": 232,
+        "Monster/004": 232,
+        "Monster/005": 234,
+        "Monster/006": 224,
+        "Monster/007": 448,
+        "Monster/009": 224,
+        "Monster/010": 164,
+        "Monster/011": 176,
+        "Monster/012": 224,
+        "Monster/013": 22,
+        "Monster/014": 22,
+        "Monster/139": 272
+      },
+      "allManifestListedAndFreshlyHashed": true
+    }
+  },
+  "walletRuntimeOnlyComparison": {
+    "passed": true,
+    "previousPackageManifestSha256": "f27eee2abd6beab6bbf42fbec057ae77d43d602d5d625460550153fdac478cf4",
+    "previousFiles": 29640,
+    "currentFiles": 29642,
+    "removedFiles": 0,
+    "unchangedPriorFilePins": 29638,
+    "changed": [
+      {
+        "path": "apps/web/scripts/r16-playable-service-config.mjs",
+        "previousBytes": 9584,
+        "currentBytes": 10724,
+        "sha256": "ae18b26a07cbc5aa822ffcd0a184ca61a78c7d2af1116b4bc750d0102358b20a"
+      },
+      {
+        "path": "apps/web/scripts/r16-playable-service.mjs",
+        "previousBytes": 23700,
+        "currentBytes": 23919,
+        "sha256": "aa4a0d2322ba7f32859d8f24fd704276ce51c77056112da3e55cc7b85b0b490e"
+      }
+    ],
+    "added": [
+      {
+        "path": "apps/ai-player/src/relay-http-transport.mjs",
+        "bytes": 8774,
+        "sha256": "8819087da437fd02cc1c92756d1c534ea9f53f2e5ac80b672b9b9e6e8fec270c"
+      },
+      {
+        "path": "apps/web/scripts/r16-next-network.mjs",
+        "bytes": 1158,
+        "sha256": "55eb234ea69029e3783af73a1796af97e52a3a3df96af86acfa515c9b4b91770"
+      }
+    ],
+    "totalDistributionByteDelta": 11291,
+    "unchangedPreparedWebFiles": 29478,
+    "allPriorNextClientJsWasmAssetsAndResourceManifestPinsUnchanged": true,
+    "gatewayAndNodeBinaryPinsUnchanged": true
+  },
+  "networkAndPackagerSourceReview": {
+    "schema": "mir2.r16.wallet-v9-network-source-review/1",
+    "packageManifestSha256": "bcaa0de531823758f1e5eb8a5d86d2c6f4c745b1904acb545566e8e96a9749bb",
+    "reviewMode": "Read-only source/AST review. No network module was imported or factory invoked; proxy environment values and keys were not read.",
+    "blockingFindings": [],
+    "reviewedSources": [
+      {
+        "path": "apps/ai-player/src/relay-http-transport.mjs",
+        "bytes": 8774,
+        "sha256": "8819087da437fd02cc1c92756d1c534ea9f53f2e5ac80b672b9b9e6e8fec270c"
+      },
+      {
+        "path": "apps/web/scripts/r16-next-network.mjs",
+        "bytes": 1158,
+        "sha256": "55eb234ea69029e3783af73a1796af97e52a3a3df96af86acfa515c9b4b91770"
+      },
+      {
+        "path": "apps/web/scripts/r16-playable-service-config.mjs",
+        "bytes": 10724,
+        "sha256": "ae18b26a07cbc5aa822ffcd0a184ca61a78c7d2af1116b4bc750d0102358b20a"
+      },
+      {
+        "path": "apps/web/scripts/r16-playable-service.mjs",
+        "bytes": 23919,
+        "sha256": "aa4a0d2322ba7f32859d8f24fd704276ce51c77056112da3e55cc7b85b0b490e"
+      }
+    ],
+    "packager": {
+      "path": "apps/web/scripts/package-r16-playable-service.mjs",
+      "sha256": "ba852954107de502c743bfbaedaa211c58f9a6df6ebd1eee2eb6489c7f48ffc4",
+      "parser": "TypeScript AST, JavaScript mode",
+      "actualCollectorMatchesIndependentGraph": true,
+      "syntheticInMemoryProbes": 4,
+      "preloadFlagsAndImportLookingStringsIgnored": true,
+      "literalExportDependencyCollected": true,
+      "computedImportRejected": true,
+      "unknownBareDependencyRejected": true,
+      "temporaryFilesCreated": 0
+    },
+    "closure": {
+      "entrypoints": [
+        "apps/web/scripts/r16-next-network.mjs",
+        "apps/web/scripts/r16-playable-service.mjs"
+      ],
+      "modules": [
+        "apps/ai-player/src/archive-guard.mjs",
+        "apps/ai-player/src/companion-controller.mjs",
+        "apps/ai-player/src/companion-policy.mjs",
+        "apps/ai-player/src/companion-runtime-service.mjs",
+        "apps/ai-player/src/experience/experience-ledger.mjs",
+        "apps/ai-player/src/gateway-client.mjs",
+        "apps/ai-player/src/gifts/gift-controller.mjs",
+        "apps/ai-player/src/life/life-controller.mjs",
+        "apps/ai-player/src/life/life-store.mjs",
+        "apps/ai-player/src/life/resources.mjs",
+        "apps/ai-player/src/local-model-settings.mjs",
+        "apps/ai-player/src/local-supply-server-config.mjs",
+        "apps/ai-player/src/lossless-json.mjs",
+        "apps/ai-player/src/memory/archive-codec.mjs",
+        "apps/ai-player/src/memory/companion-store.mjs",
+        "apps/ai-player/src/model-runtime-environment.mjs",
+        "apps/ai-player/src/model/companion-model-runtime.mjs",
+        "apps/ai-player/src/model/http-transport.mjs",
+        "apps/ai-player/src/model/life-plan.mjs",
+        "apps/ai-player/src/model/memory-context.mjs",
+        "apps/ai-player/src/model/openai-client.mjs",
+        "apps/ai-player/src/model/plan.mjs",
+        "apps/ai-player/src/model/teaching-plan.mjs",
+        "apps/ai-player/src/observation.mjs",
+        "apps/ai-player/src/relay-http-transport.mjs",
+        "apps/ai-player/src/resident-actor.mjs",
+        "apps/ai-player/src/skills/conversation.mjs",
+        "apps/ai-player/src/skills/navigation.mjs",
+        "apps/ai-player/src/supply/purchase-wire.mjs",
+        "apps/ai-player/src/supply/supply-controller.mjs",
+        "apps/ai-player/src/supply/supply-store.mjs",
+        "apps/web/scripts/quest-agent/policy.mjs",
+        "apps/web/scripts/r16-next-network.mjs",
+        "apps/web/scripts/r16-playable-service-config.mjs",
+        "apps/web/scripts/r16-playable-service.mjs"
+      ],
+      "edges": [
+        {
+          "from": "apps/web/scripts/r16-playable-service.mjs",
+          "to": "apps/web/scripts/r16-playable-service-config.mjs"
+        },
+        {
+          "from": "apps/web/scripts/r16-playable-service.mjs",
+          "to": "apps/ai-player/src/resident-actor.mjs"
+        },
+        {
+          "from": "apps/web/scripts/r16-playable-service.mjs",
+          "to": "apps/ai-player/src/local-model-settings.mjs"
+        },
+        {
+          "from": "apps/web/scripts/r16-playable-service.mjs",
+          "to": "apps/ai-player/src/model-runtime-environment.mjs"
+        },
+        {
+          "from": "apps/web/scripts/r16-playable-service.mjs",
+          "to": "apps/ai-player/src/local-supply-server-config.mjs"
+        },
+        {
+          "from": "apps/web/scripts/r16-playable-service.mjs",
+          "to": "apps/ai-player/src/gateway-client.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/gateway-client.mjs",
+          "to": "apps/ai-player/src/lossless-json.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/gateway-client.mjs",
+          "to": "apps/ai-player/src/observation.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/gateway-client.mjs",
+          "to": "apps/ai-player/src/skills/conversation.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/gateway-client.mjs",
+          "to": "apps/ai-player/src/supply/purchase-wire.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/supply/purchase-wire.mjs",
+          "to": "apps/ai-player/src/lossless-json.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/resident-actor.mjs",
+          "to": "apps/ai-player/src/gateway-client.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/resident-actor.mjs",
+          "to": "apps/ai-player/src/companion-controller.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/resident-actor.mjs",
+          "to": "apps/ai-player/src/archive-guard.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/resident-actor.mjs",
+          "to": "apps/ai-player/src/companion-runtime-service.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/resident-actor.mjs",
+          "to": "apps/ai-player/src/supply/supply-controller.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/resident-actor.mjs",
+          "to": "apps/ai-player/src/life/life-controller.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/resident-actor.mjs",
+          "to": "apps/ai-player/src/gifts/gift-controller.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/resident-actor.mjs",
+          "to": "apps/ai-player/src/memory/companion-store.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/memory/companion-store.mjs",
+          "to": "apps/ai-player/src/memory/archive-codec.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/life/life-controller.mjs",
+          "to": "apps/ai-player/src/life/life-store.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/life/life-controller.mjs",
+          "to": "apps/ai-player/src/life/resources.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/life/life-controller.mjs",
+          "to": "apps/ai-player/src/supply/purchase-wire.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/life/life-controller.mjs",
+          "to": "apps/ai-player/src/supply/supply-controller.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/supply/supply-controller.mjs",
+          "to": "apps/ai-player/src/skills/navigation.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/supply/supply-controller.mjs",
+          "to": "apps/ai-player/src/supply/purchase-wire.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/supply/supply-controller.mjs",
+          "to": "apps/ai-player/src/supply/supply-store.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/skills/navigation.mjs",
+          "to": "apps/web/scripts/quest-agent/policy.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/companion-runtime-service.mjs",
+          "to": "apps/ai-player/src/experience/experience-ledger.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/companion-runtime-service.mjs",
+          "to": "apps/ai-player/src/model/companion-model-runtime.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/companion-runtime-service.mjs",
+          "to": "apps/ai-player/src/model/openai-client.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/model/openai-client.mjs",
+          "to": "apps/ai-player/src/model/http-transport.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/model/companion-model-runtime.mjs",
+          "to": "apps/ai-player/src/model/memory-context.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/model/companion-model-runtime.mjs",
+          "to": "apps/ai-player/src/model/openai-client.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/model/companion-model-runtime.mjs",
+          "to": "apps/ai-player/src/model/plan.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/model/companion-model-runtime.mjs",
+          "to": "apps/ai-player/src/model/teaching-plan.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/model/companion-model-runtime.mjs",
+          "to": "apps/ai-player/src/memory/archive-codec.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/model/companion-model-runtime.mjs",
+          "to": "apps/ai-player/src/model/life-plan.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/model/companion-model-runtime.mjs",
+          "to": "apps/ai-player/src/life/resources.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/model/life-plan.mjs",
+          "to": "apps/ai-player/src/model/openai-client.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/model/teaching-plan.mjs",
+          "to": "apps/ai-player/src/model/openai-client.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/model/teaching-plan.mjs",
+          "to": "apps/ai-player/src/memory/companion-store.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/model/plan.mjs",
+          "to": "apps/ai-player/src/model/openai-client.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/model/memory-context.mjs",
+          "to": "apps/ai-player/src/memory/archive-codec.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/companion-controller.mjs",
+          "to": "apps/ai-player/src/companion-policy.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/companion-controller.mjs",
+          "to": "apps/ai-player/src/skills/navigation.mjs"
+        },
+        {
+          "from": "apps/ai-player/src/companion-controller.mjs",
+          "to": "apps/ai-player/src/life/resources.mjs"
+        },
+        {
+          "from": "apps/web/scripts/r16-next-network.mjs",
+          "to": "apps/ai-player/src/relay-http-transport.mjs"
+        }
+      ],
+      "externalImports": [
+        "node:child_process",
+        "node:crypto",
+        "node:events",
+        "node:fs",
+        "node:fs/promises",
+        "node:net",
+        "node:path",
+        "node:perf_hooks",
+        "node:readline",
+        "node:sqlite",
+        "node:timers/promises",
+        "node:tls",
+        "node:url",
+        "node:zlib",
+        "undici"
+      ],
+      "closedRuntimeModules": 35,
+      "commonJsRequireEvalOrCreateRequireCalls": 0,
+      "allSourceBytesMatchDistributionManifest": true
+    },
+    "networkReview": {
+      "explicitOwnPreloadOnly": true,
+      "nativeNonRelayInputInitAndPromisePreserved": true,
+      "fixedOrigin": "https://dubhe-connect-relay.zombiesliu.workers.dev",
+      "allowedPaths": "/sessions or /sessions/[A-Za-z0-9_-]{1,256}",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "redirects": "error",
+      "callerDispatcherOverriddenByOwnedAgent": true,
+      "globalDispatcherReconfigured": false,
+      "tls": {
+        "ca": "default + system union",
+        "rejectUnauthorized": true,
+        "hostnameVerification": true,
+        "minVersion": "TLSv1.2"
+      },
+      "proxyPolicy": "Only explicit lowercase/uppercase proxy/no_proxy fields are snapshotted; empty strings prevent later environment fallback.",
+      "errorPolicy": "Fixed message/code plus allowlisted category; no original cause/proxy value retained.",
+      "signatureOriginNonceTtlVerification": "Existing Next/Gateway proof validation unchanged; no verifier bypass in transport.",
+      "durableWalletRegistryConfigured": true,
+      "masterOrModelSecretForwardedToNext": false
+    },
+    "operations": {
+      "privateDirectoriesEnumerated": 0,
+      "privateFilesOpened": 0,
+      "environmentProxyValuesObserved": 0,
+      "networkRequests": 0,
+      "relaySessionsCreated": 0,
+      "browserOrServiceOperations": 0,
+      "sourceOrArtifactWrites": 0
+    },
+    "boundToFreshlyVerifiedManifest": true
+  },
+  "supplementalAssets": {
+    "passed": true,
+    "legacyFiles": 14,
+    "legacyBytes": 58636,
+    "legacyAssets": [
+      {
+        "path": "web/mir2-web3/apps/web/public/original-ui/Prguse/544.png",
+        "bytes": 190,
+        "sha256": "be05f447b96694a5edec1cd9314b3fed1b40a0d320e35a33d043a4c576e2c9fd"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/original-ui/Prguse/983.png",
+        "bytes": 469,
+        "sha256": "47bf0c5fea5f11299a49ca2f700ac01cd98920d5c0b766a9147db9c87eb8fc59"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/original-ui/Prguse/984.png",
+        "bytes": 482,
+        "sha256": "f9f967a2f66283c6cfd7572a527963dbadb80676725436344e133044b003173f"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/original-ui/Prguse/985.png",
+        "bytes": 469,
+        "sha256": "d6d3c7fe2cc9a432a2e6c7f4e039ad0e244c3f458782a5ea77334410e5ea6df4"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/original-ui/Prguse/986.png",
+        "bytes": 486,
+        "sha256": "f3ae75e6be631c2fa4aee4a0bf996fa90cdc7ac20a8aac4e54315fb85a64b9f9"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/original-ui/Prguse/987.png",
+        "bytes": 500,
+        "sha256": "fb9637a4aa1217cb471b3b3f7b771d765eb6bf25707470b0d6f9692eb12843fa"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/original-ui/Prguse/988.png",
+        "bytes": 522,
+        "sha256": "5da8a9aa995e1417aeb767ce9b12fa7243f6d2b01152bc7e1989dbeeb26688be"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/original-ui/Prguse/1085.png",
+        "bytes": 416,
+        "sha256": "39036f3fe6e2aee093abce696f0ec05107f7f3746d0bfffba83b111613318614"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/original-ui/Prguse/1086.png",
+        "bytes": 428,
+        "sha256": "61f03404fe44ad488602d46c7aad7c2e6903472bf81c2923ff59da60f8163ec9"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/original-ui/Prguse/1087.png",
+        "bytes": 462,
+        "sha256": "b332cf36d050247bf465da6f7a4fe626434a267fb6128d53a3c40febafffd3e0"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/original-ui/Prguse/1088.png",
+        "bytes": 457,
+        "sha256": "35fc94f4d0bf71832876a071a1822f3f19da6a60844c0d41554cff75bc9ad03b"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/original-ui/CArmour/00/18.png",
+        "bytes": 2446,
+        "sha256": "54fe54a03cbe7c0f18466cee8a29a6317bafdf15aa26f2202da398e81de002be"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/original-ui/CHair/00/18.png",
+        "bytes": 201,
+        "sha256": "dd50601957cf5c79fe658a360196134043b72c2b22b9d86bd13aef30cf9f5a90"
+      },
+      {
+        "path": "web/mir2-web3/apps/web/public/original-ui/Sound/52.wav",
+        "bytes": 51108,
+        "sha256": "f9fe56d615ff9182336c8c32a6f6f680a9f12b188ed9472fba9b062ccfeea56e"
+      }
+    ],
+    "sound52CrystalSourcePinMatched": true,
+    "audio": {
+      "files": 148,
+      "bytes": 39969924,
+      "policy": "Every declared audio file is checked against the wallet-v9 distribution manifest exact size/SHA. No canonical public or sidecar source tree is read; all audio pins remain byte-identical to resource v7."
+    }
+  },
+  "priorStaticMissHttpEvidence": {
+    "reused": true,
+    "previouslyVerifiedPaths": 424,
+    "referenceProof": "F:/mir2-builds/web-r16-20261104/final-package-integrity-complete-v5-proof.json",
+    "referenceProofSha256": "8a76fe3adc851a13930e8aca13daefaa57e52de5791a0008a7e71d9fe45b8446",
+    "originalV3PinsPreservedAsSubset": true,
+    "httpRecheckedThisAudit": false
+  },
+  "publicHttp": {
+    "performed": false,
+    "requests": 0,
+    "relaySessionsCreated": 0,
+    "loginOrWebSocketRequests": 0,
+    "reason": "Root owns final browser QR create/cancel and original-account relogin. No HTTP or additional relay session was requested for this read-only source/integrity audit."
+  },
+  "manifestUnchangedAfterAudit": true,
+  "finishedAt": "2026-11-04T07:43:35.874Z",
+  "limitations": [
+    "Integrity, compiled pins and declared public local assets only; continuous UI QA remains separate.",
+    "No private world/account/permission/model state was inspected or asserted.",
+    "The original 360 MiB thin-package size gate remains unchanged; this integrity proof does not replace that gate."
+  ],
+  "auditVersion": "wallet-v9",
+  "overallUiPassed": false,
+  "uiAcceptanceStatus": "Separate live player full-flow QA is in progress; this proof does not assert UI, model, save/restart or human acceptance."
+}

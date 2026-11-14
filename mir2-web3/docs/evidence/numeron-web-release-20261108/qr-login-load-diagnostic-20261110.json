@@ -1,0 +1,208 @@
+{
+  "schema": 1,
+  "liveRevision": "83eadf4f96c81bcf26d6e98c41b3a58761c48ea2",
+  "ordinaryGameComparison": {
+    "sha256": "1576fd449cd88f7b3e31e08c398b45346ecd8aa8e47f452d0e8446680d53e6ac",
+    "results": {
+      "cold": {
+        "clickMs": 25209,
+        "quietAchieved": null,
+        "pendingByType": {
+          "Fetch": 10,
+          "Image": 9,
+          "Font": 1,
+          "Media": 1
+        },
+        "prewarmTitleFetchCount": 8,
+        "pendingGetCount": 21,
+        "post": [
+          {
+            "headersAfterMs": null,
+            "firstBodyByteAfterMs": null,
+            "abortAfterMs": 20002,
+            "status": null,
+            "protocol": null,
+            "peer": null,
+            "sameReusedConnection": null,
+            "fromServiceWorker": null,
+            "initialPriority": "High",
+            "concurrentGetCountAtStart": 21
+          },
+          {
+            "headersAfterMs": null,
+            "firstBodyByteAfterMs": null,
+            "abortAfterMs": 20000,
+            "status": null,
+            "protocol": null,
+            "peer": null,
+            "sameReusedConnection": null,
+            "fromServiceWorker": null,
+            "initialPriority": "High",
+            "concurrentGetCountAtStart": 11
+          }
+        ]
+      },
+      "settled": {
+        "clickMs": 87792,
+        "quietAchieved": false,
+        "pendingByType": {
+          "Font": 1,
+          "Media": 1,
+          "Fetch": 8,
+          "Script": 1
+        },
+        "prewarmTitleFetchCount": 8,
+        "pendingGetCount": 11,
+        "post": [
+          {
+            "headersAfterMs": null,
+            "firstBodyByteAfterMs": null,
+            "abortAfterMs": 20001,
+            "status": null,
+            "protocol": null,
+            "peer": null,
+            "sameReusedConnection": null,
+            "fromServiceWorker": null,
+            "initialPriority": "High",
+            "concurrentGetCountAtStart": 11
+          },
+          {
+            "headersAfterMs": null,
+            "firstBodyByteAfterMs": null,
+            "abortAfterMs": 20002,
+            "status": null,
+            "protocol": null,
+            "peer": null,
+            "sameReusedConnection": null,
+            "fromServiceWorker": null,
+            "initialPriority": "High",
+            "concurrentGetCountAtStart": 11
+          }
+        ]
+      },
+      "prewarm-off": {
+        "clickMs": 33959,
+        "quietAchieved": null,
+        "pendingByType": {
+          "Fetch": 1,
+          "Image": 9,
+          "Font": 1,
+          "Media": 1
+        },
+        "prewarmTitleFetchCount": 0,
+        "pendingGetCount": 12,
+        "post": [
+          {
+            "headersAfterMs": 1482,
+            "firstBodyByteAfterMs": null,
+            "abortAfterMs": 20000,
+            "status": 200,
+            "protocol": "h2",
+            "peer": "127.0.0.1:7897",
+            "sameReusedConnection": true,
+            "fromServiceWorker": false,
+            "initialPriority": "High",
+            "concurrentGetCountAtStart": 12
+          },
+          {
+            "headersAfterMs": 13680,
+            "firstBodyByteAfterMs": null,
+            "abortAfterMs": 20001,
+            "status": 200,
+            "protocol": "h2",
+            "peer": "127.0.0.1:7897",
+            "sameReusedConnection": true,
+            "fromServiceWorker": false,
+            "initialPriority": "High",
+            "concurrentGetCountAtStart": 12
+          }
+        ]
+      }
+    }
+  },
+  "quietPageComparison": {
+    "sha256": "bb7b9d11f5076ba8dd39eef0934f1700883f370259ffb85b9c1ef71fc5008308",
+    "results": {
+      "system-h2": {
+        "status": true,
+        "httpStatus": 200,
+        "headersMs": 568,
+        "bodyCompleteMs": 569,
+        "fullyRead": true,
+        "bodyBytes": 1320,
+        "firstPartySessionShape": true,
+        "protocol": "h2"
+      },
+      "system-http1": {
+        "status": true,
+        "httpStatus": 200,
+        "headersMs": 759,
+        "bodyCompleteMs": 759,
+        "fullyRead": true,
+        "bodyBytes": 1320,
+        "firstPartySessionShape": true,
+        "protocol": "http/1.1"
+      }
+    }
+  },
+  "gameAssetDiagnostics": {
+    "removeOnlyLoginMusic": {
+      "sha256": "a2b12dd3b371718097ceaa9641b4c1fb8d4880d455b46fb72411d438245c720b",
+      "passed": false,
+      "qrVisible": false,
+      "pending": false,
+      "assetsSuppressedByDiagnostic": [
+        "Login2.wav"
+      ],
+      "pendingGetsAtClick": 11,
+      "posts": [
+        {
+          "route": "create",
+          "status": 200,
+          "bodyCompleteMs": 6698,
+          "abortMs": null
+        },
+        {
+          "route": "poll",
+          "status": null,
+          "bodyCompleteMs": null,
+          "abortMs": 12003
+        },
+        {
+          "route": "poll",
+          "status": null,
+          "bodyCompleteMs": null,
+          "abortMs": 12002
+        }
+      ]
+    },
+    "removeFontAndMusic": {
+      "sha256": "6a1636ec4db886e3b5ab7a718365d3add1d7dd7f1e4931fc54caddecd6ba64cb",
+      "passed": true,
+      "qrVisible": true,
+      "pending": true,
+      "assetsSuppressedByDiagnostic": [
+        "NotoSansCJKsc-Regular.otf",
+        "Login2.wav"
+      ],
+      "pendingGetsAtClick": 11,
+      "posts": [
+        {
+          "route": "create",
+          "status": 200,
+          "bodyCompleteMs": 5198,
+          "abortMs": null
+        },
+        {
+          "route": "poll",
+          "status": 200,
+          "bodyCompleteMs": 1523,
+          "abortMs": null
+        }
+      ]
+    }
+  },
+  "networkSettingsChanged": false,
+  "productionDeploymentsChanged": false,
+  "approvalAttempted": false
+}

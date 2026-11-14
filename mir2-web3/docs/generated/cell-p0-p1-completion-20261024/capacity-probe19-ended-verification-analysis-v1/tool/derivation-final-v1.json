@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "state": "FINAL_ACTUAL_ENDED_IDENTITY_SOURCE_ONLY_NOT_EXECUTED",
+  "draft": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-independent-verification-v1\\verify-ended-probe19-draft-v1.mjs",
+    "bytes": 37467,
+    "sha256": "83f6d9d606645b6307ac88c0a092f4bd9114b13509785d2c37c6e3b15f923360"
+  },
+  "final": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-independent-verification-v1\\verify-ended-probe19-v1.mjs",
+    "bytes": 39544,
+    "sha256": "b0d40fcccb6ea67b5d29537c2b7d79ccb712ec3b14e171366bb3ec6d72c68768"
+  },
+  "rules": [
+    {
+      "at": 765,
+      "before": "const ENDED_BINDING=Object.freeze({state:'PENDING_ACTUAL_ENDED_RUN_CLEANUP_AND_CONSUMERS',runId:null,ownedPids:null,rootCleanupSha256:null,consumerTerminalPins:null});",
+      "after": "const ENDED_BINDING=Object.freeze({\"state\":\"FINAL_ACTUAL_ENDED_RUN_AND_CLEANUP_BOUND\",\"runId\":\"1792971941351-af013515\",\"ownedPids\":[67440,62240],\"rootCleanupSha256\":\"fffd285c3a20d7596fd0cc365bc0aef55b9d145812387a539e4e9727144f913f\",\"consumerTerminalPins\":[{\"phase\":\"base-collection\",\"exitCode\":0,\"stdout\":{\"path\":\"probe19-root-base-collection-stdout-v1.log\",\"bytes\":110685,\"sha256\":\"5c8a7e588c486049f44f43d75e89aee5770335319fcb42f9cba63f8ff1ddba51\"},\"stderr\":{\"path\":\"probe19-root-base-collection-stderr-v1.log\",\"bytes\":0,\"sha256\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"}},{\"phase\":\"base-verification\",\"exitCode\":0,\"stdout\":{\"path\":\"probe19-root-base-verification-stdout-v1.log\",\"bytes\":5028,\"sha256\":\"f602c7c5f37c01d9ca031a49b7ccb3f1406b8b171943c9b1f5283067bb7e712b\"},\"stderr\":{\"path\":\"probe19-root-base-verification-stderr-v1.log\",\"bytes\":0,\"sha256\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"}},{\"phase\":\"store-collection\",\"exitCode\":0,\"stdout\":{\"path\":\"probe19-root-store-collection-stdout-v1.log\",\"bytes\":392,\"sha256\":\"354b8857993ac7ca6e813994592e87625d287ff0f3e7ad361e55ed68b65724ce\"},\"stderr\":{\"path\":\"probe19-root-store-collection-stderr-v1.log\",\"bytes\":0,\"sha256\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"}},{\"phase\":\"store-verification\",\"exitCode\":0,\"stdout\":{\"path\":\"probe19-root-store-verification-stdout-v1.log\",\"bytes\":1241,\"sha256\":\"f72375905a1f04d9a05bd949377dbcc3edc12b49b9a80845c0dcc412504fbb46\"},\"stderr\":{\"path\":\"probe19-root-store-verification-stderr-v1.log\",\"bytes\":0,\"sha256\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"}}]});"
+    },
+    {
+      "at": 15229,
+      "before": "assert.ok(ENDED_BINDING.consumerTerminalPins);",
+      "after": "assert.ok(Array.isArray(ENDED_BINDING.consumerTerminalPins)&&ENDED_BINDING.consumerTerminalPins.length===4);const consumerTerminalEvidence={};for(const terminal of ENDED_BINDING.consumerTerminalPins){assert.equal(terminal.exitCode,0);assert.ok(['base-collection','base-verification','store-collection','store-verification'].includes(terminal.phase)&&!Object.hasOwn(consumerTerminalEvidence,terminal.phase));const checked={exitCode:0};for(const stream of['stdout','stderr']){const ref=terminal[stream];assert.deepEqual(await pin(BASE,ref.path),ref);checked[stream]=ref;}consumerTerminalEvidence[terminal.phase]=checked;}"
+    },
+    {
+      "at": 38824,
+      "before": "privateDataRead:false,sourceOrSceneChanged:false",
+      "after": "consumerTerminalEvidence,privateDataRead:false,sourceOrSceneChanged:false"
+    },
+    {
+      "at": 38646,
+      "before": "original fresh18 probe",
+      "after": "original fresh19 probe"
+    }
+  ],
+  "rawInverseToDraftExact": true,
+  "draftToOriginal18Proof": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-independent-verification-v1\\derivation-draft-v1.json",
+    "bytes": 24262,
+    "sha256": "7bf664866e8fb724b3c8c97a2dab15b1b15580a1e444c150491312a99e4519b9"
+  },
+  "actualIdentity": {
+    "state": "FINAL_ACTUAL_ENDED_RUN_AND_CLEANUP_BOUND",
+    "runId": "1792971941351-af013515",
+    "ownedPids": [
+      67440,
+      62240
+    ],
+    "rootCleanupSha256": "fffd285c3a20d7596fd0cc365bc0aef55b9d145812387a539e4e9727144f913f",
+    "consumerTerminalPins": [
+      {
+        "phase": "base-collection",
+        "exitCode": 0,
+        "stdout": {
+          "path": "probe19-root-base-collection-stdout-v1.log",
+          "bytes": 110685,
+          "sha256": "5c8a7e588c486049f44f43d75e89aee5770335319fcb42f9cba63f8ff1ddba51"
+        },
+        "stderr": {
+          "path": "probe19-root-base-collection-stderr-v1.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "phase": "base-verification",
+        "exitCode": 0,
+        "stdout": {
+          "path": "probe19-root-base-verification-stdout-v1.log",
+          "bytes": 5028,
+          "sha256": "f602c7c5f37c01d9ca031a49b7ccb3f1406b8b171943c9b1f5283067bb7e712b"
+        },
+        "stderr": {
+          "path": "probe19-root-base-verification-stderr-v1.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "phase": "store-collection",
+        "exitCode": 0,
+        "stdout": {
+          "path": "probe19-root-store-collection-stdout-v1.log",
+          "bytes": 392,
+          "sha256": "354b8857993ac7ca6e813994592e87625d287ff0f3e7ad361e55ed68b65724ce"
+        },
+        "stderr": {
+          "path": "probe19-root-store-collection-stderr-v1.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "phase": "store-verification",
+        "exitCode": 0,
+        "stdout": {
+          "path": "probe19-root-store-verification-stdout-v1.log",
+          "bytes": 1241,
+          "sha256": "f72375905a1f04d9a05bd949377dbcc3edc12b49b9a80845c0dcc412504fbb46"
+        },
+        "stderr": {
+          "path": "probe19-root-store-verification-stderr-v1.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    ]
+  },
+  "rootCleanup": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-root-independent-cleanup-v1.json",
+    "bytes": 327,
+    "sha256": "fffd285c3a20d7596fd0cc365bc0aef55b9d145812387a539e4e9727144f913f"
+  },
+  "rootExecutionAuthority": "Root actual terminal messages: run session9166 CLOSED0; sequential four consumers session60163 CLOSED0/all exit0. Eight existing raw stdout/stderr files are pinned; no per-command wrapper execution receipt is fabricated.",
+  "algorithmScope": "Original18 action/native/whole-phase actual elapsed/full5-5-6/continuous/HP/policy/monitor/telemetry/Store logic unchanged. New prerequisites only pin actual Root closed-command logs; no typed900 packet matching replay or capacity credit added.",
+  "completedVsPartialContinuousNotPrefilled": true,
+  "runDataReadHere": false,
+  "toolSealedHere": false,
+  "replayExecutedHere": false,
+  "rootActualProducerFacts": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-root-actual-terminal-and-consumer-facts-v1.json",
+    "bytes": 8316,
+    "sha256": "e2e9629496fbef2cdc5ae5bee8fede6a05fe9834a1866fc1aa6372e4bbaf47d5"
+  },
+  "rootProducerFactsPreservedHistoricalPendingScope": "The original independentWindowAdjudicationPending flag describes its actual earlier point in time; this source preparation does not rewrite it or claim completed independent replay."
+}

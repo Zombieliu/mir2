@@ -1,0 +1,44 @@
+{
+  "audit": {
+    "accounts": 125,
+    "accountsSeeded": 0,
+    "allPersistedFieldsRetained": true,
+    "characterSaves": 38,
+    "characters": 38,
+    "cloneOnly": true,
+    "expectedMigrations": 28,
+    "financialRowsWritten": 0,
+    "migrationsAppliedTwice": true,
+    "originalRowsPreserved": true,
+    "originalRowsSha256": "1e6a606736b0acd9a5c14c2ee3dd4938c455bc2133e70f923e80accdff903075",
+    "typedRowsWithEmptyDefaultNormalization": 0,
+    "walletProofHttpReplayRequired": true
+  },
+  "databases": [
+    "mir2_promotion_windows_acceptance_66b470c23f08",
+    "mir2_promotion_windows_acceptance_1b483b753a72"
+  ],
+  "memberConfirmationPerformed": false,
+  "noOriginalWrites": true,
+  "preview": {
+    "eligibilityAnchorMs": 1793381130814,
+    "leaderDisplayName": "Wallet 0x8ced5e\u20262f02",
+    "movesAccountsOrMoney": false,
+    "policy": "numeron-legacy-windows-invitation-test-v1",
+    "requiresMemberConfirmation": true,
+    "snapshotSha256": "ba7ac394fcb1bce43ad02ddf37c0157f0cf439aaa0665f86e366b9fa0b488d71",
+    "sourceCampaignId": "numeron-playtest-20261029",
+    "sourceConfirmedAtMs": 1793351088394,
+    "status": "ready_for_member_confirmation_preparation",
+    "targetCampaignId": "numeron-windows-playtest-20261030",
+    "targetLeaderAccountSha256": "12691db5723c0d8a153c2e1a8b766d3870ba635d42da6b4b692ef20667554100",
+    "targetMemberAccountSha256": "9a77de96eec3fd17b4d3462623fb2dfda485b65916545affea781b757654cd85",
+    "targetTermsVersion": "numeron-windows-playtest-20261030-v1",
+    "verifiedPaymentCount": 1
+  },
+  "schema": "mir2.promotion-attribution-migration.clone-preview.v1",
+  "scopeSha256": "b4386e3ff730f4901d036ba40074e9509593483d122703367a9610192a76ee4b",
+  "snapshotSha256": "ba7ac394fcb1bce43ad02ddf37c0157f0cf439aaa0665f86e366b9fa0b488d71",
+  "sourceSha": "173332a004c01312802a67042ff7800a04893134",
+  "status": "awaiting_coordinator_preview_review"
+}

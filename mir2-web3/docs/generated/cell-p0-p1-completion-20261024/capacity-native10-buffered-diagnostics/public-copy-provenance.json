@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-24T17:20:28.552Z",
+  "hashMode": "raw-bytes",
+  "scope": "Explicit allowlist original public files plus catalog. Copies preserve all original bytes; raw histories/recordings remain external. No private/store/ledger/account pool/EXE/recording payload copied.",
+  "files": [
+    {
+      "path": "capacity-native10-buffered-diagnostics/release-native-10-feasibility-03/gateway-build-pin.json",
+      "source": "release-native-10-feasibility-03/gateway-build-pin.json",
+      "bytes": 618,
+      "sha256": "9ac3ae026e5fdca6be77b70fcfd67ea7317c9615eee5ac0ea0fb166ca177eabf"
+    },
+    {
+      "path": "capacity-native10-buffered-diagnostics/release-native-10-feasibility-03/gateway-build-pin-source-v2.json",
+      "source": "release-native-10-feasibility-03/gateway-build-pin-source-v2.json",
+      "bytes": 1121,
+      "sha256": "72e4c814515e2bb699099147ffd7cb5eb7e010bbbc317450f2ca654fadab29b9"
+    },
+    {
+      "path": "capacity-native10-buffered-diagnostics/release-native-10-feasibility-03/source-pins.json",
+      "source": "release-native-10-feasibility-03/source-pins.json",
+      "bytes": 4416,
+      "sha256": "4d2bd42f7424c94e895a1ecefea0adec2fd165c2cfa3d5b8285ba87932310e3e"
+    },
+    {
+      "path": "capacity-native10-buffered-diagnostics/release-native-10-feasibility-03/source-pins-checkpoint-v2.json",
+      "source": "release-native-10-feasibility-03/source-pins-checkpoint-v2.json",
+      "bytes": 6935,
+      "sha256": "a922b0ce83c03032798a7b26a714ee709a40fd3d92a3cad5029c7dacc7290a55"
+    },
+    {
+      "path": "capacity-native10-buffered-diagnostics/release-native-10-feasibility-03/realm-process.json",
+      "source": "release-native-10-feasibility-03/realm-process.json",
+      "bytes": 1122,
+      "sha256": "bfbd13823e4bb0a09b825d2a0bb7916616c2fdcfb685b8fdf8454106a3a6d5b1"
+    },
+    {
+      "path": "capacity-native10-buffered-diagnostics/release-native-10-feasibility-03/realm-cleanup.json",
+      "source": "release-native-10-feasibility-03/realm-cleanup.json",
+      "bytes": 1253,
+      "sha256": "2f18af76c972996aea1a2734d477f6e32f70cb34d616cd1efbd6cde7626477c8"
+    },
+    {
+      "path": "capacity-native10-buffered-diagnostics/release-native-10-feasibility-03/resource-profile.json",
+      "source": "release-native-10-feasibility-03/resource-profile.json",
+      "bytes": 1179,
+      "sha256": "b020b5c655fae0c22c8c4c8c06f59e1d01c3a5b17bbad9d74291f840da4ebdb6"
+    },
+    {
+      "path": "capacity-native10-buffered-diagnostics/release-native-10-feasibility-03/run-options.json",
+      "source": "release-native-10-feasibility-03/run-options.json",
+      "bytes": 736,
+      "sha256": "3ea0dafa687ee0c6971d90de0903f420b97cb0cea7ae913b48ccba3097bbb855"
+    },
+    {
+      "path": "capacity-native10-buffered-diagnostics/release-native-10-feasibility-03/run-options-admitted-v2.json",
+      "source": "release-native-10-feasibility-03/run-options-admitted-v2.json",
+      "bytes": 1123,
+      "sha256": "fbeed6c160e9f51cef205160687255a57661f162eee65e1bbec4741cc6f56b92"
+    },
+    {
+      "path": "capacity-native10-buffered-diagnostics/release-native-10-feasibility-03/scenario.json",
+      "source": "release-native-10-feasibility-03/scenario.json",
+      "bytes": 1176,
+      "sha256": "33e20d0ba000003398e3cac5a09be7859b739b0d10ba17544160a0ca86a69450"
+    },
+    {
+      "path": "capacity-native10-buffered-diagnostics/release-native-10-feasibility-03/provisioning.json",
+      "source": "release-native-10-feasibility-03/provisioning.json",
+      "bytes": 282,
+      "sha256": "556fdd5acc451cc628c3eb506cbf6295bdfb05506e217caabdb0169bf1042fc4"
+    },
+    {
+      "path": "capacity-native10-buffered-diagnostics/release-native-10-feasibility-03/spectator-health-before.json",
+      "source": "release-native-10-feasibility-03/spectator-health-before.json",
+      "bytes": 739,
+      "sha256": "7bdef8ae45342f9896123dc1e63dbb844d44d4596c70ca1edc041ae4f856e343"
+    },
+    {
+      "path": "capacity-native10-buffered-diagnostics/release-native-10-feasibility-03/spectator-health-after.json",
+      "source": "release-native-10-feasibility-03/spectator-health-after.json",
+      "bytes": 744,
+      "sha256": "f0c46df21c7dc383df80f29517f76c5bf989b219a38e4faaf5ca050f9e8f0509"
+    },
+    {
+      "path": "capacity-native10-buffered-diagnostics/release-native-10-feasibility-03/spectator-recordings-summary.json",
+      "source": "release-native-10-feasibility-03/spectator-recordings-summary.json",
+      "bytes": 1009,
+      "sha256": "bb90a2e2452f84b3013f00f28390b0a5bdb63b675e7a07995c8bb66e9a1a1f46"
+    },
+    {
+      "path": "capacity-native10-buffered-diagnostics/release-native-10-feasibility-03/reports/1792861674728-9774b6b8.report.json",
+      "source": "release-native-10-feasibility-03/reports/1792861674728-9774b6b8.report.json",
+      "bytes": 42964,
+      "sha256": "0116dcf8453eebc35aa8599ae8270b68c472cfa9eee03afc9178fa968547c224"
+    },
+    {
+      "path": "capacity-native10-buffered-diagnostics/native-10-buffered-io-diagnostics-v1.json",
+      "source": "native-10-buffered-io-diagnostics-v1.json",
+      "bytes": 69393,
+      "sha256": "363fefd3cc359347f322709b570dfe25e7b2928d0fa6ad4d77dc0835891ff319"
+    },
+    {
+      "path": "capacity-native10-buffered-diagnostics/start-release-native-10-feasibility-03.ps1",
+      "source": "start-release-native-10-feasibility-03.ps1",
+      "bytes": 4158,
+      "sha256": "84f38d567d8fc23d4135af65675ca82a17575b24558f3dde1845009203bec440"
+    },
+    {
+      "path": "capacity-native10-buffered-diagnostics/capture-native10-03-spectator-health.mjs",
+      "source": "capture-native10-03-spectator-health.mjs",
+      "bytes": 1733,
+      "sha256": "bc9ad93bb765cb5f756d81e6ccb2f63c93621c5666d6d4923555e0cd6d7cb49a"
+    },
+    {
+      "path": "capacity-native10-buffered-diagnostics/summarize-native10-03-spectator-recordings.mjs",
+      "source": "summarize-native10-03-spectator-recordings.mjs",
+      "bytes": 3417,
+      "sha256": "918e0a0e3e37311287cf1430eb485167cae10e71087e94148c376cde2559f673"
+    },
+    {
+      "path": "capacity-native10-buffered-diagnostics/native10-buffered-public-artifact-catalog.json",
+      "source": "native10-buffered-public-artifact-catalog.json",
+      "bytes": 7213,
+      "sha256": "8376b04c6b7e2c2299781c3080ce277aad0b948e025d7f1f918fb1d07f78fb7f"
+    }
+  ],
+  "allOriginalCopiesByteEqual": true
+}

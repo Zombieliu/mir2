@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-25T21:27:19.897Z",
+  "checks": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\run-owned-full.mjs",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "reusedExactUnchangedSource": true
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\audit-owned-full.mjs",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "reusedExactUnchangedSource": true
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\frozen-audit-support.mjs",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "reusedExactUnchangedSource": true
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\verify-inputs.mjs",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "newCheck": true
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\finalize-launcher-inputs.mjs",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "reusedExactUnchangedSource": true
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\projection-build-source-lib.mjs",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "reusedExactUnchangedSource": true
+    }
+  ],
+  "powershell": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\initialize-fresh-private.ps1",
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": "",
+    "parseOnly": true,
+    "reusedExactUnchangedSource": true
+  },
+  "passed": true,
+  "actualNewNodeChecks": 1,
+  "otherUnchangedNodeChecksReused": 5,
+  "modulesImported": false,
+  "actualModesExecuted": false,
+  "priorSyntax": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\syntax-check-v1.json",
+    "bytes": 1653,
+    "sha256": "0d48e4dd3d8a2d7068b2ee2e6543933ba792ca6b581fc0125cc98a085c559df5"
+  }
+}

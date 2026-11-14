@@ -1,0 +1,160 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T02:23:21.572Z",
+  "scope": "Explicit public-only posthoc evidence copy. Historical sources are raw-pinned artifacts; the current working driver is intentionally not treated as historical source.",
+  "historicalBackendCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "historicalDriverCommit": "30ba328ad3d1b1eb46e51540cb1880d66eba3ee1",
+  "files": [
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe09-death-analysis\\selected-events-v1.json",
+      "target": "capacity-native10-v2-halo-analysis/selected-events-v1.json",
+      "bytes": 293598,
+      "sha256": "40c77dd1f91cc4426e4b9da372c1701e3c723d69f6795a67e86f683265e4fff7"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe09-death-analysis\\spectator-three-frame-projection-v1.json",
+      "target": "capacity-native10-v2-halo-analysis/spectator-three-frame-projection-v1.json",
+      "bytes": 14926,
+      "sha256": "07f231626e3683f3b98b058b1f374efd75465d4fce0552943b8094a62d728163"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe09-death-analysis\\spectator-three-frame-projection-v2.json",
+      "target": "capacity-native10-v2-halo-analysis/spectator-three-frame-projection-v2.json",
+      "bytes": 17690,
+      "sha256": "b1a25ffbd9a8f5c410c76f52995a939cdca36a0363d33f0ff35676c7fa9f6556"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe09-death-analysis\\request49-witness-loss-v1.json",
+      "target": "capacity-native10-v2-halo-analysis/request49-witness-loss-v1.json",
+      "bytes": 7778,
+      "sha256": "1596d9217b6028c18725f56df96bba859094b55839194da609ac0c81aa4674bb"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe09-death-analysis\\summary-v1.json",
+      "target": "capacity-native10-v2-halo-analysis/summary-v1.json",
+      "bytes": 19950,
+      "sha256": "7d21d92d74e40d8d5199580cf14a95a73e93cb522f5a69e74188ec332f75a90d"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\analyze-probe09-death-v1.mjs",
+      "target": "capacity-native10-v2-halo-analysis/analyze-probe09-death-v1.mjs",
+      "bytes": 8066,
+      "sha256": "23eb1644237b618acf2cc09ce7bb674b14da6572079d09e9fed2b901b36d1580"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\finalize-probe09-death-analysis-v1.mjs",
+      "target": "capacity-native10-v2-halo-analysis/finalize-probe09-death-analysis-v1.mjs",
+      "bytes": 12669,
+      "sha256": "334991928a3d0f27d4f4c1404e7a562a099a9b1c398d5acbb270e43d5729fe6d"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe09-death-analysis\\request49-observer-geometry-v1.json",
+      "target": "capacity-native10-v2-halo-analysis/request49-observer-geometry-v1.json",
+      "bytes": 10065,
+      "sha256": "3799b3d9adbdf644fd1d3da9a885136103efcfbdaaa9dafcbed536d5b1ecdc1d"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe09-death-analysis\\poststrike-pursuit-budget-gap-v1.json",
+      "target": "capacity-native10-v2-halo-analysis/poststrike-pursuit-budget-gap-v1.json",
+      "bytes": 28223,
+      "sha256": "b92b5432ded9e034e1403871f09e3097c520b461fc2b7117ddfde08990743a0f"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe09-death-analysis\\public-whitelist-v1.json",
+      "target": "capacity-native10-v2-halo-analysis/public-whitelist-v1.json",
+      "bytes": 1741,
+      "sha256": "4b1db9db06d23732331646399380b96760ddf3dfdfa646c488332062ba0bf5a1"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe09-death-analysis\\public-whitelist-v2.json",
+      "target": "capacity-native10-v2-halo-analysis/public-whitelist-v2.json",
+      "bytes": 2457,
+      "sha256": "7eda3207afedc65d902fd92b57d8fd4165e81721eb1d8f2d57ec19826480041c"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe09-root-independent-cleanup-v1.json",
+      "target": "capacity-native10-v2-halo-analysis/probe09-root-independent-cleanup-v1.json",
+      "bytes": 559,
+      "sha256": "e3b88c16e4902213cceb2c8549c9b3ae25b4ccd24891bc2c08147536e28c84a8"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal06-expected09-rejection-v1.json",
+      "target": "capacity-native10-v2-halo-analysis/formal06-expected09-rejection-v1.json",
+      "bytes": 1190,
+      "sha256": "52ec8fad7c1980795bbb232b52575e40457d3e9715ed8cb9e91bca31d759bb9e"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe09-postrun-bindings-v1.json",
+      "target": "capacity-native10-v2-halo-analysis/probe09-postrun-bindings-v1.json",
+      "bytes": 3769,
+      "sha256": "8c6b00eb95aa0793e643f1a96db2a9f084c19c04fe7be5ad6f307e732c607533"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe09-actor05-public-resource-scan-v1.json",
+      "target": "capacity-native10-v2-halo-analysis/probe09-actor05-public-resource-scan-v1.json",
+      "bytes": 12779,
+      "sha256": "7f790debb814d56d42acc3dd01ad204a280ab38e5ead7500bac6eda60d012420"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe09-actor05-starter-resource-facts-v1.json",
+      "target": "capacity-native10-v2-halo-analysis/probe09-actor05-starter-resource-facts-v1.json",
+      "bytes": 7616,
+      "sha256": "685ec84de9c5c5013c0ea15c897b2e36d0d41324acd900becf1bdf5a12855bb1"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\halo-natural-progression-risk-v1.json",
+      "target": "capacity-native10-v2-halo-analysis/halo-natural-progression-risk-v1.json",
+      "bytes": 29992,
+      "sha256": "f3ced78fdd459c027ec95c0f98f4c2fec0adbe6f95aa180f30b17f02bef96da7"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\halo-natural-progression-risk-summary-v2.json",
+      "target": "capacity-native10-v2-halo-analysis/halo-natural-progression-risk-summary-v2.json",
+      "bytes": 14916,
+      "sha256": "a60506cfbee21423c91f2469594f2daacc87aa01ab500a2f24737cce73ccfae5"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span4-halo-static-validation-v2.json",
+      "target": "capacity-span4-halo-scene-v1/partition-span4-halo-static-validation-v2.json",
+      "bytes": 420058,
+      "sha256": "462f11fe28b7c42096256c525c2282bb80813e461efaf7f1bbeb9748adc18fae"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\partition-span4-halo-static-readiness-v2.json",
+      "target": "capacity-span4-halo-scene-v1/partition-span4-halo-static-readiness-v2.json",
+      "bytes": 17944,
+      "sha256": "6bd5c05fa4b9474c5d5f77935b126ff3a7c47accac9909dd25d18c6267749284"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\rebind-halo-static-v2.mjs",
+      "target": "capacity-span4-halo-scene-v1/rebind-halo-static-v2.mjs",
+      "bytes": 6815,
+      "sha256": "05c9f30aeb655289c753c846402e91955a87e9d8a214b13b33418f2dec2620e4"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\phase-window-checkpoint-push-verification-v1.json",
+      "target": "validation/phase-window-checkpoint-push-verification-v1.json",
+      "bytes": 640,
+      "sha256": "201ec6b590df697500a1aedb2dc391ca8870126afdfbc03220c7c9cf89bba9e4"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-phase-window-checkpoint-preview-verification-v1.json",
+      "target": "validation/root-phase-window-checkpoint-preview-verification-v1.json",
+      "bytes": 456,
+      "sha256": "3fbc1283c8d6410b5ae039d212c6ef16df63b9532972d4e86926dbe318a6bcc5"
+    }
+  ],
+  "originalCopiesByteEqual": true,
+  "originalCopies": 23,
+  "publicJsonFilesStructurallyChecked": 20,
+  "originalFailedVerdictPreserved": true,
+  "privateValuesReadOrClaimedChecked": false,
+  "rawJsonlOrRecordingPayloadCopied": false,
+  "existingFilesModified": false,
+  "rootReadmeOrBindingsChanged": false,
+  "finalIndexCreated": false,
+  "currentTreeSourceGuardRun": false,
+  "cimReprobed": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

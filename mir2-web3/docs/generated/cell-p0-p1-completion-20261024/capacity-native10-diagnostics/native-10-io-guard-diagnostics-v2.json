@@ -1,0 +1,4155 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-24T16:41:22.418Z",
+  "supersedes": "native-10-io-guard-diagnostics.json used outer monitor wall denominator; this revision reconstructs the actual OS denominator used by the original guard",
+  "scope": "Frozen original process-total-I/O guard failure during ordinary10 bootstrap; no stage/soak measured. Process totals include file/network/device operations; NOT physical disk IOPS and not hardware exhaustion.",
+  "source": {
+    "repositoryCommit": "38194647a59bc356259e442b3f837e8c231e279d",
+    "gatewayPid": 45172,
+    "report": "C:/mir2-build/p01-completion-20261024/release-native-10-feasibility-02/reports/1792859765238-d670d739.report.json",
+    "reportSha256": "1de11b8e97a1dcd81996ce3422516cd2909336b979a5a22b7aec989a6eb39a2e",
+    "samples": "C:/mir2-build/p01-completion-20261024/release-native-10-feasibility-02/reports/1792859765238-d670d739.samples.jsonl",
+    "samplesBytes": 544296,
+    "samplesSha256": "4d2be353fc0059ed28e6d43b6adb0a8913b0b4678a75e1f436c1d031d70fc74e",
+    "monitorHistory": "C:/mir2-build/p01-completion-20261024/release-native-10-feasibility-02/monitor-history.jsonl",
+    "monitorHistoryBytes": 250241,
+    "monitorHistorySha256": "90150df9844c0ef4bb8480dd3b64c902c8b48bea12e6ac76a41b32cfbb9675b1"
+  },
+  "verdict": {
+    "reportOk": false,
+    "safetyStopped": true,
+    "error": "Monitor requested drain: ioOperations exceeded the frozen resource envelope for 3 consecutive samples",
+    "measuredStages": 0,
+    "phaseWindows": [
+      {
+        "name": "bootstrap-10",
+        "kind": "bootstrap",
+        "targetActors": 10,
+        "startedAtMs": 1792859765288,
+        "endedAtMs": 1792859804134,
+        "completed": false
+      }
+    ],
+    "peakControlledActors": 9,
+    "peakServerActive": 9,
+    "capacityAccepted": false,
+    "formalRunStarted": false,
+    "cleanupErrors": []
+  },
+  "guard": {
+    "definition": "(delta ReadOperationCount + delta WriteOperationCount + delta OtherOperationCount)/delta OS sampledAt seconds; Win32_Process cumulative counters; all original thresholds unchanged",
+    "limitPerSecond": 100000,
+    "consecutiveSamples": 3,
+    "onlyIOGuardExceeded": true
+  },
+  "sampleCount": 27,
+  "overLimitSamples": [
+    {
+      "fromAtMs": 1792859797403,
+      "toAtMs": 1792859799484,
+      "toAt": "2026-10-24T16:36:39.484Z",
+      "seconds": 2.082,
+      "monitorWallDeltaSeconds": 2.081,
+      "timingScope": "OS deltaSeconds reconstructed from raw total-operation delta / recorded exact total-operation rate, independently cross-checked against stored write-byte rate; absolute timestamps are monitor wall, because raw OS sampledAt was not retained",
+      "recordedTotalOperationsPerSecond": 101986.07108549472,
+      "phase": "bootstrap-10",
+      "stop": false,
+      "reason": null,
+      "delta": {
+        "readOperations": 26,
+        "writeOperations": 210709,
+        "otherOperations": 1600,
+        "totalOperations": 212335,
+        "readBytes": 4420,
+        "writeBytes": 575710,
+        "otherBytes": 61054
+      },
+      "rates": {
+        "readOperationsPerSecond": 12.487992315081653,
+        "writeOperationsPerSecond": 101205.09125840539,
+        "otherOperationsPerSecond": 768.4918347742556,
+        "totalOperationsPerSecond": 101986.07108549472,
+        "readBytesPerSecond": 2122.958693563881,
+        "writeBytesPerSecond": 276517.77137367916,
+        "otherBytesPerSecond": 29324.687800192125,
+        "totalMiBPerSecond": 0.2936987093614914,
+        "writeBytesPerWriteOperation": 2.7322515886839196,
+        "cpuLogicalEquivalents": 0.37512007684918347
+      },
+      "memory": {
+        "privateBytes": 171589632,
+        "workingSetBytes": 223707136,
+        "hostFreeBytes": 35998175232
+      },
+      "handles": 168,
+      "threads": 13,
+      "health": {
+        "currentWsConnections": 9,
+        "currentActiveSessions": 9,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 1,
+        "maxWsConnections": 24,
+        "maxActiveSessions": 10,
+        "maxReconnectLeases": 10,
+        "maxLoginInFlight": 4,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2
+      },
+      "actionStartCounts": {
+        "walk": 7,
+        "run": 13,
+        "login": 1,
+        "chat": 1,
+        "peerChat": 1,
+        "newCharacter": 1,
+        "rtt": 1
+      },
+      "actions": [
+        {
+          "at": 1792859797646,
+          "actor": "Lc499d701",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859797646,
+          "actor": "Lc499d705",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859797708,
+          "actor": "Lc499d707",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859797739,
+          "actor": "Lc499d703",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859797920,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859797941,
+          "actor": "Lc499d708",
+          "kind": "login",
+          "status": "success"
+        },
+        {
+          "at": 1792859798050,
+          "actor": "Lc499d702",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859798050,
+          "actor": "Lc499d704",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859798144,
+          "actor": "Lc499d706",
+          "kind": "chat",
+          "status": "success"
+        },
+        {
+          "at": 1792859798144,
+          "actor": "Lc499d706",
+          "kind": "peerChat",
+          "status": "success"
+        },
+        {
+          "at": 1792859798393,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859798393,
+          "actor": "Lc499d705",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859798455,
+          "actor": "Lc499d707",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859798517,
+          "actor": "Lc499d703",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859798599,
+          "actor": "Lc499d708",
+          "kind": "newCharacter",
+          "status": "success"
+        },
+        {
+          "at": 1792859798672,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859798790,
+          "actor": "Lc499d702",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859798791,
+          "actor": "Lc499d704",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859798890,
+          "actor": "Lc499d706",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859798922,
+          "actor": "Lc499d704",
+          "kind": "rtt",
+          "status": "success"
+        },
+        {
+          "at": 1792859799139,
+          "actor": "Lc499d701",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859799140,
+          "actor": "Lc499d705",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859799202,
+          "actor": "Lc499d707",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859799264,
+          "actor": "Lc499d703",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859799451,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        }
+      ]
+    },
+    {
+      "fromAtMs": 1792859799484,
+      "toAtMs": 1792859801566,
+      "toAt": "2026-10-24T16:36:41.566Z",
+      "seconds": 2.081,
+      "monitorWallDeltaSeconds": 2.082,
+      "timingScope": "OS deltaSeconds reconstructed from raw total-operation delta / recorded exact total-operation rate, independently cross-checked against stored write-byte rate; absolute timestamps are monitor wall, because raw OS sampledAt was not retained",
+      "recordedTotalOperationsPerSecond": 102721.76838058626,
+      "phase": "bootstrap-10",
+      "stop": false,
+      "reason": null,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 213338,
+        "otherOperations": 426,
+        "totalOperations": 213764,
+        "readBytes": 0,
+        "writeBytes": 926097,
+        "otherBytes": 5664
+      },
+      "rates": {
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 102517.05910619894,
+        "otherOperationsPerSecond": 204.7092743873138,
+        "totalOperationsPerSecond": 102721.76838058626,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 445024.98798654496,
+        "otherBytesPerSecond": 2721.7683805862566,
+        "totalMiBPerSecond": 0.4270045818015396,
+        "writeBytesPerWriteOperation": 4.340984728459065,
+        "cpuLogicalEquivalents": 0.9235944257568477
+      },
+      "memory": {
+        "privateBytes": 180592640,
+        "workingSetBytes": 232570880,
+        "hostFreeBytes": 35991265280
+      },
+      "handles": 168,
+      "threads": 13,
+      "health": {
+        "currentWsConnections": 9,
+        "currentActiveSessions": 9,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0,
+        "maxWsConnections": 24,
+        "maxActiveSessions": 10,
+        "maxReconnectLeases": 10,
+        "maxLoginInFlight": 4,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2
+      },
+      "actionStartCounts": {
+        "walk": 5,
+        "run": 19,
+        "startGame": 1,
+        "bootstrap": 1,
+        "rtt": 2
+      },
+      "actions": [
+        {
+          "at": 1792859799545,
+          "actor": "Lc499d704",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859799576,
+          "actor": "Lc499d702",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859799639,
+          "actor": "Lc499d706",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859799887,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859799887,
+          "actor": "Lc499d705",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859799949,
+          "actor": "Lc499d707",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859800010,
+          "actor": "Lc499d703",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859800033,
+          "actor": "Lc499d708",
+          "kind": "startGame",
+          "status": "success"
+        },
+        {
+          "at": 1792859800033,
+          "actor": "Lc499d708",
+          "kind": "bootstrap",
+          "status": "success"
+        },
+        {
+          "at": 1792859800168,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859800307,
+          "actor": "Lc499d702",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859800307,
+          "actor": "Lc499d704",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859800400,
+          "actor": "Lc499d706",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859800618,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859800650,
+          "actor": "Lc499d705",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859800712,
+          "actor": "Lc499d707",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859800742,
+          "actor": "Lc499d702",
+          "kind": "rtt",
+          "status": "success"
+        },
+        {
+          "at": 1792859800743,
+          "actor": "Lc499d703",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859800929,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859800993,
+          "actor": "Lc499d708",
+          "kind": "walk",
+          "status": "budget-gap"
+        },
+        {
+          "at": 1792859801054,
+          "actor": "Lc499d702",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859801054,
+          "actor": "Lc499d704",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859801147,
+          "actor": "Lc499d706",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859801178,
+          "actor": "Lc499d707",
+          "kind": "rtt",
+          "status": "success"
+        },
+        {
+          "at": 1792859801396,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859801396,
+          "actor": "Lc499d705",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859801458,
+          "actor": "Lc499d707",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859801489,
+          "actor": "Lc499d703",
+          "kind": "run",
+          "status": "success"
+        }
+      ]
+    },
+    {
+      "fromAtMs": 1792859801566,
+      "toAtMs": 1792859803695,
+      "toAt": "2026-10-24T16:36:43.695Z",
+      "seconds": 2.13,
+      "monitorWallDeltaSeconds": 2.129,
+      "timingScope": "OS deltaSeconds reconstructed from raw total-operation delta / recorded exact total-operation rate, independently cross-checked against stored write-byte rate; absolute timestamps are monitor wall, because raw OS sampledAt was not retained",
+      "recordedTotalOperationsPerSecond": 102452.58215962442,
+      "phase": "bootstrap-10",
+      "stop": true,
+      "reason": "ioOperations exceeded the frozen resource envelope for 3 consecutive samples",
+      "delta": {
+        "readOperations": 26,
+        "writeOperations": 216589,
+        "otherOperations": 1609,
+        "totalOperations": 218224,
+        "readBytes": 4420,
+        "writeBytes": 591864,
+        "otherBytes": 61214
+      },
+      "rates": {
+        "readOperationsPerSecond": 12.206572769953052,
+        "writeOperationsPerSecond": 101684.9765258216,
+        "otherOperationsPerSecond": 755.3990610328639,
+        "totalOperationsPerSecond": 102452.58215962442,
+        "readBytesPerSecond": 2075.1173708920187,
+        "writeBytesPerSecond": 277870.42253521126,
+        "otherBytesPerSecond": 28738.967136150237,
+        "totalMiBPerSecond": 0.29438448623872143,
+        "writeBytesPerWriteOperation": 2.7326595533475846,
+        "cpuLogicalEquivalents": 0.4990610328638498
+      },
+      "memory": {
+        "privateBytes": 188993536,
+        "workingSetBytes": 240893952,
+        "hostFreeBytes": 35929481216
+      },
+      "handles": 172,
+      "threads": 14,
+      "health": {
+        "currentWsConnections": 10,
+        "currentActiveSessions": 10,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 1,
+        "maxWsConnections": 24,
+        "maxActiveSessions": 10,
+        "maxReconnectLeases": 10,
+        "maxLoginInFlight": 4,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2
+      },
+      "actionStartCounts": {
+        "run": 17,
+        "walk": 7,
+        "chat": 1,
+        "peerChat": 1,
+        "login": 1,
+        "rtt": 2,
+        "newCharacter": 1
+      },
+      "actions": [
+        {
+          "at": 1792859801665,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859801769,
+          "actor": "Lc499d708",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859801800,
+          "actor": "Lc499d702",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859801800,
+          "actor": "Lc499d704",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859801893,
+          "actor": "Lc499d706",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859802143,
+          "actor": "Lc499d701",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859802143,
+          "actor": "Lc499d705",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859802205,
+          "actor": "Lc499d707",
+          "kind": "chat",
+          "status": "success"
+        },
+        {
+          "at": 1792859802205,
+          "actor": "Lc499d707",
+          "kind": "peerChat",
+          "status": "success"
+        },
+        {
+          "at": 1792859802267,
+          "actor": "Lc499d703",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859802422,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859802516,
+          "actor": "Lc499d709",
+          "kind": "login",
+          "status": "success"
+        },
+        {
+          "at": 1792859802547,
+          "actor": "Lc499d702",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859802547,
+          "actor": "Lc499d704",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859802547,
+          "actor": "Lc499d708",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859802640,
+          "actor": "Lc499d706",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859802889,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859802890,
+          "actor": "Lc499d705",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859802952,
+          "actor": "Lc499d705",
+          "kind": "rtt",
+          "status": "success"
+        },
+        {
+          "at": 1792859802952,
+          "actor": "Lc499d707",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859803014,
+          "actor": "Lc499d703",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859803169,
+          "actor": "Lc499d709",
+          "kind": "newCharacter",
+          "status": "success"
+        },
+        {
+          "at": 1792859803200,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859803231,
+          "actor": "Lc499d700",
+          "kind": "rtt",
+          "status": "success"
+        },
+        {
+          "at": 1792859803294,
+          "actor": "Lc499d704",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859803294,
+          "actor": "Lc499d708",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859803325,
+          "actor": "Lc499d702",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859803387,
+          "actor": "Lc499d706",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859803636,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859803667,
+          "actor": "Lc499d705",
+          "kind": "walk",
+          "status": "success"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "maxCpuLogicalEquivalents": 0.9235944257568477,
+    "maxPrivateBytes": 188993536,
+    "maxWorkingSetBytes": 240893952,
+    "minHostFreeBytes": 35842342912,
+    "maxTotalMiBPerSecond": 9.944340466997135,
+    "maxHandles": 172,
+    "maxThreads": 14,
+    "firstCounters": {
+      "readBytes": 174212994,
+      "writeBytes": 72755,
+      "otherIoBytes": 93642,
+      "readOperations": 41,
+      "writeOperations": 48,
+      "otherIoOperations": 2639
+    },
+    "lastCounters": {
+      "readBytes": 208724362,
+      "writeBytes": 9085405,
+      "otherIoBytes": 741866,
+      "readOperations": 4561,
+      "writeOperations": 2567144,
+      "otherIoOperations": 21898
+    }
+  },
+  "allSampleTransitions": [
+    {
+      "fromAtMs": 1792859749361,
+      "toAtMs": 1792859751507,
+      "toAt": "2026-10-24T16:35:51.507Z",
+      "seconds": 2.21,
+      "monitorWallDeltaSeconds": 2.146,
+      "timingScope": "OS deltaSeconds reconstructed from raw total-operation delta / recorded exact total-operation rate, independently cross-checked against stored write-byte rate; absolute timestamps are monitor wall, because raw OS sampledAt was not retained",
+      "recordedTotalOperationsPerSecond": 5.882352941176471,
+      "phase": "bootstrap-10",
+      "stop": false,
+      "reason": null,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 0,
+        "otherOperations": 13,
+        "totalOperations": 13,
+        "readBytes": 0,
+        "writeBytes": 0,
+        "otherBytes": 212
+      },
+      "rates": {
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 0,
+        "otherOperationsPerSecond": 5.882352941176471,
+        "totalOperationsPerSecond": 5.882352941176471,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 0,
+        "otherBytesPerSecond": 95.92760180995475,
+        "totalMiBPerSecond": 0.00009148369008059955,
+        "writeBytesPerWriteOperation": null,
+        "cpuLogicalEquivalents": 0
+      },
+      "memory": {
+        "privateBytes": 5693440,
+        "workingSetBytes": 21889024,
+        "hostFreeBytes": 35984789504
+      },
+      "handles": 141,
+      "threads": 11,
+      "health": {
+        "currentWsConnections": 0,
+        "currentActiveSessions": 0,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0,
+        "maxWsConnections": 24,
+        "maxActiveSessions": 10,
+        "maxReconnectLeases": 10,
+        "maxLoginInFlight": 4,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2
+      },
+      "actionStartCounts": {},
+      "actions": []
+    },
+    {
+      "fromAtMs": 1792859751507,
+      "toAtMs": 1792859753628,
+      "toAt": "2026-10-24T16:35:53.628Z",
+      "seconds": 2.122,
+      "monitorWallDeltaSeconds": 2.121,
+      "timingScope": "OS deltaSeconds reconstructed from raw total-operation delta / recorded exact total-operation rate, independently cross-checked against stored write-byte rate; absolute timestamps are monitor wall, because raw OS sampledAt was not retained",
+      "recordedTotalOperationsPerSecond": 0.942507068803016,
+      "phase": "bootstrap-10",
+      "stop": false,
+      "reason": null,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 0,
+        "otherOperations": 2,
+        "totalOperations": 2,
+        "readBytes": 0,
+        "writeBytes": 0,
+        "otherBytes": 64
+      },
+      "rates": {
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 0,
+        "otherOperationsPerSecond": 0.942507068803016,
+        "totalOperationsPerSecond": 0.942507068803016,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 0,
+        "otherBytesPerSecond": 30.160226201696513,
+        "totalMiBPerSecond": 0.000028763033105560792,
+        "writeBytesPerWriteOperation": null,
+        "cpuLogicalEquivalents": 0
+      },
+      "memory": {
+        "privateBytes": 5693440,
+        "workingSetBytes": 21889024,
+        "hostFreeBytes": 35960606720
+      },
+      "handles": 141,
+      "threads": 11,
+      "health": {
+        "currentWsConnections": 0,
+        "currentActiveSessions": 0,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0,
+        "maxWsConnections": 24,
+        "maxActiveSessions": 10,
+        "maxReconnectLeases": 10,
+        "maxLoginInFlight": 4,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2
+      },
+      "actionStartCounts": {},
+      "actions": []
+    },
+    {
+      "fromAtMs": 1792859753628,
+      "toAtMs": 1792859755743,
+      "toAt": "2026-10-24T16:35:55.743Z",
+      "seconds": 2.115,
+      "monitorWallDeltaSeconds": 2.115,
+      "timingScope": "OS deltaSeconds reconstructed from raw total-operation delta / recorded exact total-operation rate, independently cross-checked against stored write-byte rate; absolute timestamps are monitor wall, because raw OS sampledAt was not retained",
+      "recordedTotalOperationsPerSecond": 46.335697399527184,
+      "phase": "bootstrap-10",
+      "stop": false,
+      "reason": null,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 6,
+        "otherOperations": 92,
+        "totalOperations": 98,
+        "readBytes": 0,
+        "writeBytes": 25468,
+        "otherBytes": 968
+      },
+      "rates": {
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 2.836879432624113,
+        "otherOperationsPerSecond": 43.49881796690307,
+        "totalOperationsPerSecond": 46.335697399527184,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 12041.607565011818,
+        "otherBytesPerSecond": 457.6832151300236,
+        "totalMiBPerSecond": 0.011920252590314715,
+        "writeBytesPerWriteOperation": 4244.666666666667,
+        "cpuLogicalEquivalents": 0
+      },
+      "memory": {
+        "privateBytes": 5595136,
+        "workingSetBytes": 21860352,
+        "hostFreeBytes": 35972706304
+      },
+      "handles": 141,
+      "threads": 8,
+      "health": {
+        "currentWsConnections": 0,
+        "currentActiveSessions": 0,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0,
+        "maxWsConnections": 24,
+        "maxActiveSessions": 10,
+        "maxReconnectLeases": 10,
+        "maxLoginInFlight": 4,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2
+      },
+      "actionStartCounts": {},
+      "actions": []
+    },
+    {
+      "fromAtMs": 1792859755743,
+      "toAtMs": 1792859757865,
+      "toAt": "2026-10-24T16:35:57.865Z",
+      "seconds": 2.122,
+      "monitorWallDeltaSeconds": 2.122,
+      "timingScope": "OS deltaSeconds reconstructed from raw total-operation delta / recorded exact total-operation rate, independently cross-checked against stored write-byte rate; absolute timestamps are monitor wall, because raw OS sampledAt was not retained",
+      "recordedTotalOperationsPerSecond": 0.942507068803016,
+      "phase": "bootstrap-10",
+      "stop": false,
+      "reason": null,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 0,
+        "otherOperations": 2,
+        "totalOperations": 2,
+        "readBytes": 0,
+        "writeBytes": 0,
+        "otherBytes": 64
+      },
+      "rates": {
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 0,
+        "otherOperationsPerSecond": 0.942507068803016,
+        "totalOperationsPerSecond": 0.942507068803016,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 0,
+        "otherBytesPerSecond": 30.160226201696513,
+        "totalMiBPerSecond": 0.000028763033105560792,
+        "writeBytesPerWriteOperation": null,
+        "cpuLogicalEquivalents": 0
+      },
+      "memory": {
+        "privateBytes": 5595136,
+        "workingSetBytes": 21860352,
+        "hostFreeBytes": 36059934720
+      },
+      "handles": 141,
+      "threads": 8,
+      "health": {
+        "currentWsConnections": 0,
+        "currentActiveSessions": 0,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0,
+        "maxWsConnections": 24,
+        "maxActiveSessions": 10,
+        "maxReconnectLeases": 10,
+        "maxLoginInFlight": 4,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2
+      },
+      "actionStartCounts": {},
+      "actions": []
+    },
+    {
+      "fromAtMs": 1792859757865,
+      "toAtMs": 1792859759989,
+      "toAt": "2026-10-24T16:35:59.989Z",
+      "seconds": 2.123,
+      "monitorWallDeltaSeconds": 2.124,
+      "timingScope": "OS deltaSeconds reconstructed from raw total-operation delta / recorded exact total-operation rate, independently cross-checked against stored write-byte rate; absolute timestamps are monitor wall, because raw OS sampledAt was not retained",
+      "recordedTotalOperationsPerSecond": 0.9420631182289212,
+      "phase": "bootstrap-10",
+      "stop": false,
+      "reason": null,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 0,
+        "otherOperations": 2,
+        "totalOperations": 2,
+        "readBytes": 0,
+        "writeBytes": 0,
+        "otherBytes": 64
+      },
+      "rates": {
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 0,
+        "otherOperationsPerSecond": 0.9420631182289212,
+        "totalOperationsPerSecond": 0.9420631182289212,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 0,
+        "otherBytesPerSecond": 30.146019783325478,
+        "totalMiBPerSecond": 0.000028749484809232214,
+        "writeBytesPerWriteOperation": null,
+        "cpuLogicalEquivalents": 0
+      },
+      "memory": {
+        "privateBytes": 5595136,
+        "workingSetBytes": 21860352,
+        "hostFreeBytes": 36217581568
+      },
+      "handles": 141,
+      "threads": 8,
+      "health": {
+        "currentWsConnections": 0,
+        "currentActiveSessions": 0,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0,
+        "maxWsConnections": 24,
+        "maxActiveSessions": 10,
+        "maxReconnectLeases": 10,
+        "maxLoginInFlight": 4,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2
+      },
+      "actionStartCounts": {},
+      "actions": []
+    },
+    {
+      "fromAtMs": 1792859759989,
+      "toAtMs": 1792859762111,
+      "toAt": "2026-10-24T16:36:02.111Z",
+      "seconds": 2.123,
+      "monitorWallDeltaSeconds": 2.122,
+      "timingScope": "OS deltaSeconds reconstructed from raw total-operation delta / recorded exact total-operation rate, independently cross-checked against stored write-byte rate; absolute timestamps are monitor wall, because raw OS sampledAt was not retained",
+      "recordedTotalOperationsPerSecond": 0.9420631182289212,
+      "phase": "bootstrap-10",
+      "stop": false,
+      "reason": null,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 0,
+        "otherOperations": 2,
+        "totalOperations": 2,
+        "readBytes": 0,
+        "writeBytes": 0,
+        "otherBytes": 64
+      },
+      "rates": {
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 0,
+        "otherOperationsPerSecond": 0.9420631182289212,
+        "totalOperationsPerSecond": 0.9420631182289212,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 0,
+        "otherBytesPerSecond": 30.146019783325478,
+        "totalMiBPerSecond": 0.000028749484809232214,
+        "writeBytesPerWriteOperation": null,
+        "cpuLogicalEquivalents": 0
+      },
+      "memory": {
+        "privateBytes": 5595136,
+        "workingSetBytes": 21860352,
+        "hostFreeBytes": 36256948224
+      },
+      "handles": 141,
+      "threads": 8,
+      "health": {
+        "currentWsConnections": 0,
+        "currentActiveSessions": 0,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0,
+        "maxWsConnections": 24,
+        "maxActiveSessions": 10,
+        "maxReconnectLeases": 10,
+        "maxLoginInFlight": 4,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2
+      },
+      "actionStartCounts": {},
+      "actions": []
+    },
+    {
+      "fromAtMs": 1792859762111,
+      "toAtMs": 1792859764193,
+      "toAt": "2026-10-24T16:36:04.193Z",
+      "seconds": 2.082,
+      "monitorWallDeltaSeconds": 2.082,
+      "timingScope": "OS deltaSeconds reconstructed from raw total-operation delta / recorded exact total-operation rate, independently cross-checked against stored write-byte rate; absolute timestamps are monitor wall, because raw OS sampledAt was not retained",
+      "recordedTotalOperationsPerSecond": 0.9606147934678195,
+      "phase": "bootstrap-10",
+      "stop": false,
+      "reason": null,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 0,
+        "otherOperations": 2,
+        "totalOperations": 2,
+        "readBytes": 0,
+        "writeBytes": 0,
+        "otherBytes": 64
+      },
+      "rates": {
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 0,
+        "otherOperationsPerSecond": 0.9606147934678195,
+        "totalOperationsPerSecond": 0.9606147934678195,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 0,
+        "otherBytesPerSecond": 30.739673390970225,
+        "totalMiBPerSecond": 0.000029315637007684922,
+        "writeBytesPerWriteOperation": null,
+        "cpuLogicalEquivalents": 0
+      },
+      "memory": {
+        "privateBytes": 5595136,
+        "workingSetBytes": 21860352,
+        "hostFreeBytes": 36253126656
+      },
+      "handles": 141,
+      "threads": 8,
+      "health": {
+        "currentWsConnections": 0,
+        "currentActiveSessions": 0,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0,
+        "maxWsConnections": 24,
+        "maxActiveSessions": 10,
+        "maxReconnectLeases": 10,
+        "maxLoginInFlight": 4,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2
+      },
+      "actionStartCounts": {},
+      "actions": []
+    },
+    {
+      "fromAtMs": 1792859764193,
+      "toAtMs": 1792859766276,
+      "toAt": "2026-10-24T16:36:06.276Z",
+      "seconds": 2.082,
+      "monitorWallDeltaSeconds": 2.083,
+      "timingScope": "OS deltaSeconds reconstructed from raw total-operation delta / recorded exact total-operation rate, independently cross-checked against stored write-byte rate; absolute timestamps are monitor wall, because raw OS sampledAt was not retained",
+      "recordedTotalOperationsPerSecond": 805.4755043227666,
+      "phase": "bootstrap-10",
+      "stop": false,
+      "reason": null,
+      "delta": {
+        "readOperations": 1557,
+        "writeOperations": 6,
+        "otherOperations": 114,
+        "totalOperations": 1677,
+        "readBytes": 12740008,
+        "writeBytes": 25468,
+        "otherBytes": 1340
+      },
+      "rates": {
+        "readOperationsPerSecond": 747.8386167146974,
+        "writeOperationsPerSecond": 2.8818443804034586,
+        "otherOperationsPerSecond": 54.75504322766571,
+        "totalOperationsPerSecond": 805.4755043227666,
+        "readBytesPerSecond": 6119120.076849184,
+        "writeBytesPerSecond": 12232.468780019213,
+        "otherBytesPerSecond": 643.611911623439,
+        "totalMiBPerSecond": 5.847927243748499,
+        "writeBytesPerWriteOperation": 4244.666666666667,
+        "cpuLogicalEquivalents": 0.037463976945244955
+      },
+      "memory": {
+        "privateBytes": 11149312,
+        "workingSetBytes": 30310400,
+        "hostFreeBytes": 36151422976
+      },
+      "handles": 142,
+      "threads": 9,
+      "health": {
+        "currentWsConnections": 1,
+        "currentActiveSessions": 0,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0,
+        "maxWsConnections": 24,
+        "maxActiveSessions": 10,
+        "maxReconnectLeases": 10,
+        "maxLoginInFlight": 4,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2
+      },
+      "actionStartCounts": {
+        "login": 1
+      },
+      "actions": [
+        {
+          "at": 1792859765854,
+          "actor": "Lc499d700",
+          "kind": "login",
+          "status": "success"
+        }
+      ]
+    },
+    {
+      "fromAtMs": 1792859766276,
+      "toAtMs": 1792859768367,
+      "toAt": "2026-10-24T16:36:08.367Z",
+      "seconds": 2.092,
+      "monitorWallDeltaSeconds": 2.091,
+      "timingScope": "OS deltaSeconds reconstructed from raw total-operation delta / recorded exact total-operation rate, independently cross-checked against stored write-byte rate; absolute timestamps are monitor wall, because raw OS sampledAt was not retained",
+      "recordedTotalOperationsPerSecond": 2105.6405353728487,
+      "phase": "bootstrap-10",
+      "stop": false,
+      "reason": null,
+      "delta": {
+        "readOperations": 2729,
+        "writeOperations": 15,
+        "otherOperations": 1661,
+        "totalOperations": 4405,
+        "readBytes": 21731580,
+        "writeBytes": 20232,
+        "otherBytes": 62302
+      },
+      "rates": {
+        "readOperationsPerSecond": 1304.493307839388,
+        "writeOperationsPerSecond": 7.1701720841300185,
+        "otherOperationsPerSecond": 793.9770554493308,
+        "totalOperationsPerSecond": 2105.6405353728487,
+        "readBytesPerSecond": 10387944.550669216,
+        "writeBytesPerSecond": 9671.12810707457,
+        "otherBytesPerSecond": 29781.070745697896,
+        "totalMiBPerSecond": 9.944340466997135,
+        "writeBytesPerWriteOperation": 1348.8,
+        "cpuLogicalEquivalents": 0.5004780114722753
+      },
+      "memory": {
+        "privateBytes": 35696640,
+        "workingSetBytes": 61616128,
+        "hostFreeBytes": 36011827200
+      },
+      "handles": 147,
+      "threads": 10,
+      "health": {
+        "currentWsConnections": 1,
+        "currentActiveSessions": 1,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0,
+        "maxWsConnections": 24,
+        "maxActiveSessions": 10,
+        "maxReconnectLeases": 10,
+        "maxLoginInFlight": 4,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2
+      },
+      "actionStartCounts": {
+        "newCharacter": 1,
+        "startGame": 1,
+        "bootstrap": 1
+      },
+      "actions": [
+        {
+          "at": 1792859766366,
+          "actor": "Lc499d700",
+          "kind": "newCharacter",
+          "status": "success"
+        },
+        {
+          "at": 1792859768025,
+          "actor": "Lc499d700",
+          "kind": "startGame",
+          "status": "success"
+        },
+        {
+          "at": 1792859768025,
+          "actor": "Lc499d700",
+          "kind": "bootstrap",
+          "status": "success"
+        }
+      ]
+    },
+    {
+      "fromAtMs": 1792859768367,
+      "toAtMs": 1792859770436,
+      "toAt": "2026-10-24T16:36:10.436Z",
+      "seconds": 2.069,
+      "monitorWallDeltaSeconds": 2.069,
+      "timingScope": "OS deltaSeconds reconstructed from raw total-operation delta / recorded exact total-operation rate, independently cross-checked against stored write-byte rate; absolute timestamps are monitor wall, because raw OS sampledAt was not retained",
+      "recordedTotalOperationsPerSecond": 40909.13484775254,
+      "phase": "bootstrap-10",
+      "stop": false,
+      "reason": null,
+      "delta": {
+        "readOperations": 26,
+        "writeOperations": 82991,
+        "otherOperations": 1624,
+        "totalOperations": 84641,
+        "readBytes": 4420,
+        "writeBytes": 260100,
+        "otherBytes": 59930
+      },
+      "rates": {
+        "readOperationsPerSecond": 12.566457225712906,
+        "writeOperationsPerSecond": 40111.64813919768,
+        "otherOperationsPerSecond": 784.9202513291445,
+        "totalOperationsPerSecond": 40909.13484775254,
+        "readBytesPerSecond": 2136.297728371194,
+        "writeBytesPerSecond": 125712.90478492026,
+        "otherBytesPerSecond": 28965.683905268244,
+        "totalMiBPerSecond": 0.14955032960754366,
+        "writeBytesPerWriteOperation": 3.1340747791929244,
+        "cpuLogicalEquivalents": 0.5509908168197196
+      },
+      "memory": {
+        "privateBytes": 74223616,
+        "workingSetBytes": 127234048,
+        "hostFreeBytes": 35913306112
+      },
+      "handles": 150,
+      "threads": 10,
+      "health": {
+        "currentWsConnections": 2,
+        "currentActiveSessions": 2,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 1,
+        "maxWsConnections": 24,
+        "maxActiveSessions": 10,
+        "maxReconnectLeases": 10,
+        "maxLoginInFlight": 4,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2
+      },
+      "actionStartCounts": {
+        "walk": 2,
+        "login": 1,
+        "newCharacter": 1,
+        "run": 1
+      },
+      "actions": [
+        {
+          "at": 1792859768674,
+          "actor": "Lc499d700",
+          "kind": "walk",
+          "status": "budget-gap"
+        },
+        {
+          "at": 1792859769368,
+          "actor": "Lc499d701",
+          "kind": "login",
+          "status": "success"
+        },
+        {
+          "at": 1792859769447,
+          "actor": "Lc499d700",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859769959,
+          "actor": "Lc499d701",
+          "kind": "newCharacter",
+          "status": "success"
+        },
+        {
+          "at": 1792859770193,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        }
+      ]
+    },
+    {
+      "fromAtMs": 1792859770436,
+      "toAtMs": 1792859772494,
+      "toAt": "2026-10-24T16:36:12.494Z",
+      "seconds": 2.059,
+      "monitorWallDeltaSeconds": 2.058,
+      "timingScope": "OS deltaSeconds reconstructed from raw total-operation delta / recorded exact total-operation rate, independently cross-checked against stored write-byte rate; absolute timestamps are monitor wall, because raw OS sampledAt was not retained",
+      "recordedTotalOperationsPerSecond": 53016.512870325394,
+      "phase": "bootstrap-10",
+      "stop": false,
+      "reason": null,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 108862,
+        "otherOperations": 299,
+        "totalOperations": 109161,
+        "readBytes": 0,
+        "writeBytes": 371568,
+        "otherBytes": 3548
+      },
+      "rates": {
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 52871.2967459932,
+        "otherOperationsPerSecond": 145.21612433220008,
+        "totalOperationsPerSecond": 53016.512870325394,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 180460.4176784847,
+        "otherBytesPerSecond": 1723.1665857212238,
+        "totalMiBPerSecond": 0.17374380518360702,
+        "writeBytesPerWriteOperation": 3.4132020356047104,
+        "cpuLogicalEquivalents": 0.6376881981544439
+      },
+      "memory": {
+        "privateBytes": 80576512,
+        "workingSetBytes": 133718016,
+        "hostFreeBytes": 35917398016
+      },
+      "handles": 150,
+      "threads": 10,
+      "health": {
+        "currentWsConnections": 2,
+        "currentActiveSessions": 2,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0,
+        "maxWsConnections": 24,
+        "maxActiveSessions": 10,
+        "maxReconnectLeases": 10,
+        "maxLoginInFlight": 4,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2
+      },
+      "actionStartCounts": {
+        "run": 1,
+        "startGame": 1,
+        "bootstrap": 1,
+        "walk": 3
+      },
+      "actions": [
+        {
+          "at": 1792859770939,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859771460,
+          "actor": "Lc499d701",
+          "kind": "startGame",
+          "status": "success"
+        },
+        {
+          "at": 1792859771460,
+          "actor": "Lc499d701",
+          "kind": "bootstrap",
+          "status": "success"
+        },
+        {
+          "at": 1792859771686,
+          "actor": "Lc499d700",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859772092,
+          "actor": "Lc499d701",
+          "kind": "walk",
+          "status": "budget-gap"
+        },
+        {
+          "at": 1792859772433,
+          "actor": "Lc499d700",
+          "kind": "walk",
+          "status": "success"
+        }
+      ]
+    },
+    {
+      "fromAtMs": 1792859772494,
+      "toAtMs": 1792859774549,
+      "toAt": "2026-10-24T16:36:14.549Z",
+      "seconds": 2.055,
+      "monitorWallDeltaSeconds": 2.055,
+      "timingScope": "OS deltaSeconds reconstructed from raw total-operation delta / recorded exact total-operation rate, independently cross-checked against stored write-byte rate; absolute timestamps are monitor wall, because raw OS sampledAt was not retained",
+      "recordedTotalOperationsPerSecond": 56891.484184914836,
+      "phase": "bootstrap-10",
+      "stop": false,
+      "reason": null,
+      "delta": {
+        "readOperations": 26,
+        "writeOperations": 115269,
+        "otherOperations": 1617,
+        "totalOperations": 116912,
+        "readBytes": 4420,
+        "writeBytes": 361630,
+        "otherBytes": 60486
+      },
+      "rates": {
+        "readOperationsPerSecond": 12.65206812652068,
+        "writeOperationsPerSecond": 56091.970802919706,
+        "otherOperationsPerSecond": 786.861313868613,
+        "totalOperationsPerSecond": 56891.484184914836,
+        "readBytesPerSecond": 2150.8515815085157,
+        "writeBytesPerSecond": 175975.6690997567,
+        "otherBytesPerSecond": 29433.576642335764,
+        "totalMiBPerSecond": 0.19794473392829987,
+        "writeBytesPerWriteOperation": 3.137270211418508,
+        "cpuLogicalEquivalents": 0.24330900243309003
+      },
+      "memory": {
+        "privateBytes": 87248896,
+        "workingSetBytes": 140484608,
+        "hostFreeBytes": 35919925248
+      },
+      "handles": 153,
+      "threads": 10,
+      "health": {
+        "currentWsConnections": 3,
+        "currentActiveSessions": 3,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 1,
+        "maxWsConnections": 24,
+        "maxActiveSessions": 10,
+        "maxReconnectLeases": 10,
+        "maxLoginInFlight": 4,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2
+      },
+      "actionStartCounts": {
+        "walk": 1,
+        "run": 3,
+        "rtt": 1,
+        "login": 1,
+        "chat": 1,
+        "peerChat": 1,
+        "newCharacter": 1
+      },
+      "actions": [
+        {
+          "at": 1792859772868,
+          "actor": "Lc499d701",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859773179,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859773210,
+          "actor": "Lc499d700",
+          "kind": "rtt",
+          "status": "success"
+        },
+        {
+          "at": 1792859773427,
+          "actor": "Lc499d702",
+          "kind": "login",
+          "status": "success"
+        },
+        {
+          "at": 1792859773645,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859773925,
+          "actor": "Lc499d700",
+          "kind": "chat",
+          "status": "success"
+        },
+        {
+          "at": 1792859773925,
+          "actor": "Lc499d700",
+          "kind": "peerChat",
+          "status": "success"
+        },
+        {
+          "at": 1792859774034,
+          "actor": "Lc499d702",
+          "kind": "newCharacter",
+          "status": "success"
+        },
+        {
+          "at": 1792859774391,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        }
+      ]
+    },
+    {
+      "fromAtMs": 1792859774549,
+      "toAtMs": 1792859776616,
+      "toAt": "2026-10-24T16:36:16.616Z",
+      "seconds": 2.067,
+      "monitorWallDeltaSeconds": 2.067,
+      "timingScope": "OS deltaSeconds reconstructed from raw total-operation delta / recorded exact total-operation rate, independently cross-checked against stored write-byte rate; absolute timestamps are monitor wall, because raw OS sampledAt was not retained",
+      "recordedTotalOperationsPerSecond": 56477.987421383645,
+      "phase": "bootstrap-10",
+      "stop": false,
+      "reason": null,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 116428,
+        "otherOperations": 312,
+        "totalOperations": 116740,
+        "readBytes": 0,
+        "writeBytes": 414317,
+        "otherBytes": 3788
+      },
+      "rates": {
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 56327.04402515723,
+        "otherOperationsPerSecond": 150.94339622641508,
+        "totalOperationsPerSecond": 56477.987421383645,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 200443.6381228834,
+        "otherBytesPerSecond": 1832.6076439283986,
+        "totalMiBPerSecond": 0.19290566040688686,
+        "writeBytesPerWriteOperation": 3.5585683856117085,
+        "cpuLogicalEquivalents": 0.7634252539912917
+      },
+      "memory": {
+        "privateBytes": 93212672,
+        "workingSetBytes": 146395136,
+        "hostFreeBytes": 35908759552
+      },
+      "handles": 156,
+      "threads": 11,
+      "health": {
+        "currentWsConnections": 3,
+        "currentActiveSessions": 3,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0,
+        "maxWsConnections": 24,
+        "maxActiveSessions": 10,
+        "maxReconnectLeases": 10,
+        "maxLoginInFlight": 4,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2
+      },
+      "actionStartCounts": {
+        "walk": 4,
+        "run": 2,
+        "startGame": 1,
+        "bootstrap": 1,
+        "rtt": 1
+      },
+      "actions": [
+        {
+          "at": 1792859774671,
+          "actor": "Lc499d700",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859775138,
+          "actor": "Lc499d701",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859775450,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859775580,
+          "actor": "Lc499d702",
+          "kind": "startGame",
+          "status": "success"
+        },
+        {
+          "at": 1792859775580,
+          "actor": "Lc499d702",
+          "kind": "bootstrap",
+          "status": "success"
+        },
+        {
+          "at": 1792859775886,
+          "actor": "Lc499d701",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859776197,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859776292,
+          "actor": "Lc499d702",
+          "kind": "walk",
+          "status": "budget-gap"
+        },
+        {
+          "at": 1792859776602,
+          "actor": "Lc499d701",
+          "kind": "rtt",
+          "status": "success"
+        }
+      ]
+    },
+    {
+      "fromAtMs": 1792859776616,
+      "toAtMs": 1792859778733,
+      "toAt": "2026-10-24T16:36:18.733Z",
+      "seconds": 2.116,
+      "monitorWallDeltaSeconds": 2.117,
+      "timingScope": "OS deltaSeconds reconstructed from raw total-operation delta / recorded exact total-operation rate, independently cross-checked against stored write-byte rate; absolute timestamps are monitor wall, because raw OS sampledAt was not retained",
+      "recordedTotalOperationsPerSecond": 51656.42722117202,
+      "phase": "bootstrap-10",
+      "stop": false,
+      "reason": null,
+      "delta": {
+        "readOperations": 26,
+        "writeOperations": 107737,
+        "otherOperations": 1542,
+        "totalOperations": 109305,
+        "readBytes": 4420,
+        "writeBytes": 287311,
+        "otherBytes": 59902
+      },
+      "rates": {
+        "readOperationsPerSecond": 12.287334593572778,
+        "writeOperationsPerSecond": 50915.40642722117,
+        "otherOperationsPerSecond": 728.7334593572779,
+        "totalOperationsPerSecond": 51656.42722117202,
+        "readBytesPerSecond": 2088.8468809073725,
+        "writeBytesPerSecond": 135780.24574669186,
+        "otherBytesPerSecond": 28309.07372400756,
+        "totalMiBPerSecond": 0.15847984919701272,
+        "writeBytesPerWriteOperation": 2.6667811429685253,
+        "cpuLogicalEquivalents": 0.2585066162570889
+      },
+      "memory": {
+        "privateBytes": 98668544,
+        "workingSetBytes": 151814144,
+        "hostFreeBytes": 35904180224
+      },
+      "handles": 158,
+      "threads": 11,
+      "health": {
+        "currentWsConnections": 4,
+        "currentActiveSessions": 4,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 1,
+        "maxWsConnections": 24,
+        "maxActiveSessions": 10,
+        "maxReconnectLeases": 10,
+        "maxLoginInFlight": 4,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2
+      },
+      "actionStartCounts": {
+        "walk": 5,
+        "run": 3,
+        "chat": 1,
+        "peerChat": 1,
+        "login": 1,
+        "newCharacter": 1
+      },
+      "actions": [
+        {
+          "at": 1792859776633,
+          "actor": "Lc499d701",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859776944,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859777068,
+          "actor": "Lc499d702",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859777379,
+          "actor": "Lc499d701",
+          "kind": "chat",
+          "status": "success"
+        },
+        {
+          "at": 1792859777379,
+          "actor": "Lc499d701",
+          "kind": "peerChat",
+          "status": "success"
+        },
+        {
+          "at": 1792859777524,
+          "actor": "Lc499d703",
+          "kind": "login",
+          "status": "success"
+        },
+        {
+          "at": 1792859777690,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859777815,
+          "actor": "Lc499d702",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859778126,
+          "actor": "Lc499d701",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859778172,
+          "actor": "Lc499d703",
+          "kind": "newCharacter",
+          "status": "success"
+        },
+        {
+          "at": 1792859778437,
+          "actor": "Lc499d700",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859778562,
+          "actor": "Lc499d702",
+          "kind": "run",
+          "status": "success"
+        }
+      ]
+    },
+    {
+      "fromAtMs": 1792859778733,
+      "toAtMs": 1792859780794,
+      "toAt": "2026-10-24T16:36:20.794Z",
+      "seconds": 2.062,
+      "monitorWallDeltaSeconds": 2.061,
+      "timingScope": "OS deltaSeconds reconstructed from raw total-operation delta / recorded exact total-operation rate, independently cross-checked against stored write-byte rate; absolute timestamps are monitor wall, because raw OS sampledAt was not retained",
+      "recordedTotalOperationsPerSecond": 58275.46071774976,
+      "phase": "bootstrap-10",
+      "stop": false,
+      "reason": null,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 119861,
+        "otherOperations": 303,
+        "totalOperations": 120164,
+        "readBytes": 0,
+        "writeBytes": 445890,
+        "otherBytes": 3750
+      },
+      "rates": {
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 58128.51600387973,
+        "otherOperationsPerSecond": 146.94471387002912,
+        "totalOperationsPerSecond": 58275.46071774976,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 216241.51309408344,
+        "otherBytesPerSecond": 1818.6226964112514,
+        "totalMiBPerSecond": 0.20795835093545406,
+        "writeBytesPerWriteOperation": 3.720059068420921,
+        "cpuLogicalEquivalents": 0.8336566440349176
+      },
+      "memory": {
+        "privateBytes": 104693760,
+        "workingSetBytes": 157847552,
+        "hostFreeBytes": 35905261568
+      },
+      "handles": 157,
+      "threads": 11,
+      "health": {
+        "currentWsConnections": 4,
+        "currentActiveSessions": 4,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0,
+        "maxWsConnections": 24,
+        "maxActiveSessions": 10,
+        "maxReconnectLeases": 10,
+        "maxLoginInFlight": 4,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2
+      },
+      "actionStartCounts": {
+        "run": 7,
+        "walk": 2,
+        "startGame": 1,
+        "bootstrap": 1,
+        "rtt": 1
+      },
+      "actions": [
+        {
+          "at": 1792859778872,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859779184,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859779308,
+          "actor": "Lc499d702",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859779619,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859779722,
+          "actor": "Lc499d703",
+          "kind": "startGame",
+          "status": "success"
+        },
+        {
+          "at": 1792859779722,
+          "actor": "Lc499d703",
+          "kind": "bootstrap",
+          "status": "success"
+        },
+        {
+          "at": 1792859779946,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859780070,
+          "actor": "Lc499d702",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859780382,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859780478,
+          "actor": "Lc499d703",
+          "kind": "walk",
+          "status": "budget-gap"
+        },
+        {
+          "at": 1792859780694,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859780725,
+          "actor": "Lc499d702",
+          "kind": "rtt",
+          "status": "success"
+        }
+      ]
+    },
+    {
+      "fromAtMs": 1792859780794,
+      "toAtMs": 1792859782850,
+      "toAt": "2026-10-24T16:36:22.850Z",
+      "seconds": 2.055,
+      "monitorWallDeltaSeconds": 2.056,
+      "timingScope": "OS deltaSeconds reconstructed from raw total-operation delta / recorded exact total-operation rate, independently cross-checked against stored write-byte rate; absolute timestamps are monitor wall, because raw OS sampledAt was not retained",
+      "recordedTotalOperationsPerSecond": 64344.03892944039,
+      "phase": "bootstrap-10",
+      "stop": false,
+      "reason": null,
+      "delta": {
+        "readOperations": 26,
+        "writeOperations": 130652,
+        "otherOperations": 1549,
+        "totalOperations": 132227,
+        "readBytes": 4420,
+        "writeBytes": 349225,
+        "otherBytes": 60046
+      },
+      "rates": {
+        "readOperationsPerSecond": 12.65206812652068,
+        "writeOperationsPerSecond": 63577.61557177615,
+        "otherOperationsPerSecond": 753.7712895377128,
+        "totalOperationsPerSecond": 64344.03892944039,
+        "readBytesPerSecond": 2150.8515815085157,
+        "writeBytesPerSecond": 169939.17274939173,
+        "otherBytesPerSecond": 29219.464720194646,
+        "totalMiBPerSecond": 0.19198368935689436,
+        "writeBytesPerWriteOperation": 2.672940330037045,
+        "cpuLogicalEquivalents": 0.3493917274939173
+      },
+      "memory": {
+        "privateBytes": 110841856,
+        "workingSetBytes": 163901440,
+        "hostFreeBytes": 35867021312
+      },
+      "handles": 158,
+      "threads": 11,
+      "health": {
+        "currentWsConnections": 5,
+        "currentActiveSessions": 5,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 1,
+        "maxWsConnections": 24,
+        "maxActiveSessions": 10,
+        "maxReconnectLeases": 10,
+        "maxLoginInFlight": 4,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2
+      },
+      "actionStartCounts": {
+        "run": 7,
+        "walk": 3,
+        "login": 1,
+        "chat": 1,
+        "peerChat": 1,
+        "newCharacter": 1
+      },
+      "actions": [
+        {
+          "at": 1792859780818,
+          "actor": "Lc499d702",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859781129,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859781253,
+          "actor": "Lc499d703",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859781440,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859781549,
+          "actor": "Lc499d704",
+          "kind": "login",
+          "status": "success"
+        },
+        {
+          "at": 1792859781565,
+          "actor": "Lc499d702",
+          "kind": "chat",
+          "status": "success"
+        },
+        {
+          "at": 1792859781565,
+          "actor": "Lc499d702",
+          "kind": "peerChat",
+          "status": "success"
+        },
+        {
+          "at": 1792859781876,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859782000,
+          "actor": "Lc499d703",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859782187,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859782191,
+          "actor": "Lc499d704",
+          "kind": "newCharacter",
+          "status": "success"
+        },
+        {
+          "at": 1792859782312,
+          "actor": "Lc499d702",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859782623,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859782747,
+          "actor": "Lc499d703",
+          "kind": "run",
+          "status": "success"
+        }
+      ]
+    },
+    {
+      "fromAtMs": 1792859782850,
+      "toAtMs": 1792859784950,
+      "toAt": "2026-10-24T16:36:24.950Z",
+      "seconds": 2.095,
+      "monitorWallDeltaSeconds": 2.1,
+      "timingScope": "OS deltaSeconds reconstructed from raw total-operation delta / recorded exact total-operation rate, independently cross-checked against stored write-byte rate; absolute timestamps are monitor wall, because raw OS sampledAt was not retained",
+      "recordedTotalOperationsPerSecond": 65471.599045346054,
+      "phase": "bootstrap-10",
+      "stop": false,
+      "reason": null,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 136685,
+        "otherOperations": 478,
+        "totalOperations": 137163,
+        "readBytes": 0,
+        "writeBytes": 671676,
+        "otherBytes": 5784
+      },
+      "rates": {
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 65243.436754176604,
+        "otherOperationsPerSecond": 228.16229116945107,
+        "totalOperationsPerSecond": 65471.599045346054,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 320609.0692124105,
+        "otherBytesPerSecond": 2760.8591885441524,
+        "totalMiBPerSecond": 0.3083895954141184,
+        "writeBytesPerWriteOperation": 4.914043238102206,
+        "cpuLogicalEquivalents": 0.805727923627685
+      },
+      "memory": {
+        "privateBytes": 116113408,
+        "workingSetBytes": 169201664,
+        "hostFreeBytes": 35852881920
+      },
+      "handles": 158,
+      "threads": 11,
+      "health": {
+        "currentWsConnections": 5,
+        "currentActiveSessions": 5,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0,
+        "maxWsConnections": 24,
+        "maxActiveSessions": 10,
+        "maxReconnectLeases": 10,
+        "maxLoginInFlight": 4,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2
+      },
+      "actionStartCounts": {
+        "run": 7,
+        "walk": 5,
+        "rtt": 2,
+        "startGame": 1,
+        "bootstrap": 1
+      },
+      "actions": [
+        {
+          "at": 1792859782933,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859783058,
+          "actor": "Lc499d702",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859783214,
+          "actor": "Lc499d700",
+          "kind": "rtt",
+          "status": "success"
+        },
+        {
+          "at": 1792859783369,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859783494,
+          "actor": "Lc499d703",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859783680,
+          "actor": "Lc499d700",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859783730,
+          "actor": "Lc499d704",
+          "kind": "startGame",
+          "status": "success"
+        },
+        {
+          "at": 1792859783731,
+          "actor": "Lc499d704",
+          "kind": "bootstrap",
+          "status": "success"
+        },
+        {
+          "at": 1792859783821,
+          "actor": "Lc499d702",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859784132,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859784256,
+          "actor": "Lc499d703",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859784442,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859784539,
+          "actor": "Lc499d704",
+          "kind": "walk",
+          "status": "budget-gap"
+        },
+        {
+          "at": 1792859784566,
+          "actor": "Lc499d702",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859784877,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859784877,
+          "actor": "Lc499d703",
+          "kind": "rtt",
+          "status": "success"
+        }
+      ]
+    },
+    {
+      "fromAtMs": 1792859784950,
+      "toAtMs": 1792859787014,
+      "toAt": "2026-10-24T16:36:27.014Z",
+      "seconds": 2.07,
+      "monitorWallDeltaSeconds": 2.064,
+      "timingScope": "OS deltaSeconds reconstructed from raw total-operation delta / recorded exact total-operation rate, independently cross-checked against stored write-byte rate; absolute timestamps are monitor wall, because raw OS sampledAt was not retained",
+      "recordedTotalOperationsPerSecond": 71948.79227053141,
+      "phase": "bootstrap-10",
+      "stop": false,
+      "reason": null,
+      "delta": {
+        "readOperations": 26,
+        "writeOperations": 147344,
+        "otherOperations": 1564,
+        "totalOperations": 148934,
+        "readBytes": 4420,
+        "writeBytes": 396092,
+        "otherBytes": 60334
+      },
+      "rates": {
+        "readOperationsPerSecond": 12.560386473429952,
+        "writeOperationsPerSecond": 71180.67632850242,
+        "otherOperationsPerSecond": 755.5555555555557,
+        "totalOperationsPerSecond": 71948.79227053141,
+        "readBytesPerSecond": 2135.265700483092,
+        "writeBytesPerSecond": 191348.7922705314,
+        "otherBytesPerSecond": 29146.859903381646,
+        "totalMiBPerSecond": 0.21231738841476072,
+        "writeBytesPerWriteOperation": 2.688212618090998,
+        "cpuLogicalEquivalents": 0.385024154589372
+      },
+      "memory": {
+        "privateBytes": 122404864,
+        "workingSetBytes": 175161344,
+        "hostFreeBytes": 35854856192
+      },
+      "handles": 159,
+      "threads": 11,
+      "health": {
+        "currentWsConnections": 6,
+        "currentActiveSessions": 6,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 1,
+        "maxWsConnections": 24,
+        "maxActiveSessions": 10,
+        "maxReconnectLeases": 10,
+        "maxLoginInFlight": 4,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2
+      },
+      "actionStartCounts": {
+        "run": 9,
+        "walk": 4,
+        "login": 1,
+        "chat": 1,
+        "peerChat": 1,
+        "newCharacter": 1,
+        "rtt": 1
+      },
+      "actions": [
+        {
+          "at": 1792859785001,
+          "actor": "Lc499d703",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859785188,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859785312,
+          "actor": "Lc499d702",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859785313,
+          "actor": "Lc499d704",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859785624,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859785670,
+          "actor": "Lc499d705",
+          "kind": "login",
+          "status": "success"
+        },
+        {
+          "at": 1792859785748,
+          "actor": "Lc499d703",
+          "kind": "chat",
+          "status": "success"
+        },
+        {
+          "at": 1792859785749,
+          "actor": "Lc499d703",
+          "kind": "peerChat",
+          "status": "success"
+        },
+        {
+          "at": 1792859785934,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859786059,
+          "actor": "Lc499d702",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859786059,
+          "actor": "Lc499d704",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859786370,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859786398,
+          "actor": "Lc499d705",
+          "kind": "newCharacter",
+          "status": "success"
+        },
+        {
+          "at": 1792859786494,
+          "actor": "Lc499d703",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859786618,
+          "actor": "Lc499d701",
+          "kind": "rtt",
+          "status": "success"
+        },
+        {
+          "at": 1792859786681,
+          "actor": "Lc499d700",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859786805,
+          "actor": "Lc499d702",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859786805,
+          "actor": "Lc499d704",
+          "kind": "run",
+          "status": "success"
+        }
+      ]
+    },
+    {
+      "fromAtMs": 1792859787014,
+      "toAtMs": 1792859789081,
+      "toAt": "2026-10-24T16:36:29.081Z",
+      "seconds": 2.067,
+      "monitorWallDeltaSeconds": 2.067,
+      "timingScope": "OS deltaSeconds reconstructed from raw total-operation delta / recorded exact total-operation rate, independently cross-checked against stored write-byte rate; absolute timestamps are monitor wall, because raw OS sampledAt was not retained",
+      "recordedTotalOperationsPerSecond": 75131.10788582487,
+      "phase": "bootstrap-10",
+      "stop": false,
+      "reason": null,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 154907,
+        "otherOperations": 389,
+        "totalOperations": 155296,
+        "readBytes": 0,
+        "writeBytes": 655846,
+        "otherBytes": 4928
+      },
+      "rates": {
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 74942.91243347847,
+        "otherOperationsPerSecond": 188.19545234639574,
+        "totalOperationsPerSecond": 75131.10788582487,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 317293.6623125302,
+        "otherBytesPerSecond": 2384.131591678761,
+        "totalMiBPerSecond": 0.3048685015718546,
+        "writeBytesPerWriteOperation": 4.233804799008437,
+        "cpuLogicalEquivalents": 0.7556845670053217
+      },
+      "memory": {
+        "privateBytes": 131395584,
+        "workingSetBytes": 184131584,
+        "hostFreeBytes": 35842342912
+      },
+      "handles": 162,
+      "threads": 12,
+      "health": {
+        "currentWsConnections": 6,
+        "currentActiveSessions": 6,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0,
+        "maxWsConnections": 24,
+        "maxActiveSessions": 10,
+        "maxReconnectLeases": 10,
+        "maxLoginInFlight": 4,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2
+      },
+      "actionStartCounts": {
+        "walk": 5,
+        "run": 11,
+        "startGame": 1,
+        "bootstrap": 1,
+        "rtt": 1
+      },
+      "actions": [
+        {
+          "at": 1792859787147,
+          "actor": "Lc499d701",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859787240,
+          "actor": "Lc499d703",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859787427,
+          "actor": "Lc499d700",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859787551,
+          "actor": "Lc499d702",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859787552,
+          "actor": "Lc499d704",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859787811,
+          "actor": "Lc499d705",
+          "kind": "startGame",
+          "status": "success"
+        },
+        {
+          "at": 1792859787811,
+          "actor": "Lc499d705",
+          "kind": "bootstrap",
+          "status": "success"
+        },
+        {
+          "at": 1792859787873,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859788003,
+          "actor": "Lc499d703",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859788189,
+          "actor": "Lc499d700",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859788313,
+          "actor": "Lc499d702",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859788314,
+          "actor": "Lc499d704",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859788598,
+          "actor": "Lc499d705",
+          "kind": "walk",
+          "status": "budget-gap"
+        },
+        {
+          "at": 1792859788625,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859788749,
+          "actor": "Lc499d703",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859788905,
+          "actor": "Lc499d704",
+          "kind": "rtt",
+          "status": "success"
+        },
+        {
+          "at": 1792859788936,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859789060,
+          "actor": "Lc499d702",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859789061,
+          "actor": "Lc499d704",
+          "kind": "run",
+          "status": "success"
+        }
+      ]
+    },
+    {
+      "fromAtMs": 1792859789081,
+      "toAtMs": 1792859791168,
+      "toAt": "2026-10-24T16:36:31.168Z",
+      "seconds": 2.087,
+      "monitorWallDeltaSeconds": 2.087,
+      "timingScope": "OS deltaSeconds reconstructed from raw total-operation delta / recorded exact total-operation rate, independently cross-checked against stored write-byte rate; absolute timestamps are monitor wall, because raw OS sampledAt was not retained",
+      "recordedTotalOperationsPerSecond": 78009.10397700047,
+      "phase": "bootstrap-10",
+      "stop": false,
+      "reason": null,
+      "delta": {
+        "readOperations": 26,
+        "writeOperations": 161208,
+        "otherOperations": 1571,
+        "totalOperations": 162805,
+        "readBytes": 4420,
+        "writeBytes": 434939,
+        "otherBytes": 60462
+      },
+      "rates": {
+        "readOperationsPerSecond": 12.45807379012937,
+        "writeOperationsPerSecond": 77243.89075227598,
+        "otherOperationsPerSecond": 752.7551509343555,
+        "totalOperationsPerSecond": 78009.10397700047,
+        "readBytesPerSecond": 2117.8725443219932,
+        "writeBytesPerSecond": 208403.92908481072,
+        "otherBytesPerSecond": 28970.771442261615,
+        "totalMiBPerSecond": 0.22839791590823585,
+        "writeBytesPerWriteOperation": 2.697998858617438,
+        "cpuLogicalEquivalents": 0.45663632007666505
+      },
+      "memory": {
+        "privateBytes": 138121216,
+        "workingSetBytes": 190742528,
+        "hostFreeBytes": 35894300672
+      },
+      "handles": 163,
+      "threads": 12,
+      "health": {
+        "currentWsConnections": 7,
+        "currentActiveSessions": 7,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 1,
+        "maxWsConnections": 24,
+        "maxActiveSessions": 10,
+        "maxReconnectLeases": 10,
+        "maxLoginInFlight": 4,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2
+      },
+      "actionStartCounts": {
+        "run": 10,
+        "walk": 4,
+        "chat": 1,
+        "peerChat": 1,
+        "login": 1,
+        "newCharacter": 1,
+        "rtt": 1
+      },
+      "actions": [
+        {
+          "at": 1792859789372,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859789403,
+          "actor": "Lc499d705",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859789496,
+          "actor": "Lc499d703",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859789682,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859789792,
+          "actor": "Lc499d702",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859789792,
+          "actor": "Lc499d704",
+          "kind": "chat",
+          "status": "success"
+        },
+        {
+          "at": 1792859789792,
+          "actor": "Lc499d704",
+          "kind": "peerChat",
+          "status": "success"
+        },
+        {
+          "at": 1792859789866,
+          "actor": "Lc499d706",
+          "kind": "login",
+          "status": "success"
+        },
+        {
+          "at": 1792859790109,
+          "actor": "Lc499d701",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859790149,
+          "actor": "Lc499d705",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859790243,
+          "actor": "Lc499d703",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859790429,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859790481,
+          "actor": "Lc499d706",
+          "kind": "newCharacter",
+          "status": "success"
+        },
+        {
+          "at": 1792859790554,
+          "actor": "Lc499d702",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859790554,
+          "actor": "Lc499d704",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859790740,
+          "actor": "Lc499d702",
+          "kind": "rtt",
+          "status": "success"
+        },
+        {
+          "at": 1792859790896,
+          "actor": "Lc499d701",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859790897,
+          "actor": "Lc499d705",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859790989,
+          "actor": "Lc499d703",
+          "kind": "run",
+          "status": "success"
+        }
+      ]
+    },
+    {
+      "fromAtMs": 1792859791168,
+      "toAtMs": 1792859793234,
+      "toAt": "2026-10-24T16:36:33.234Z",
+      "seconds": 2.065,
+      "monitorWallDeltaSeconds": 2.066,
+      "timingScope": "OS deltaSeconds reconstructed from raw total-operation delta / recorded exact total-operation rate, independently cross-checked against stored write-byte rate; absolute timestamps are monitor wall, because raw OS sampledAt was not retained",
+      "recordedTotalOperationsPerSecond": 77957.86924939467,
+      "phase": "bootstrap-10",
+      "stop": false,
+      "reason": null,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 160582,
+        "otherOperations": 401,
+        "totalOperations": 160983,
+        "readBytes": 0,
+        "writeBytes": 708755,
+        "otherBytes": 5136
+      },
+      "rates": {
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 77763.6803874092,
+        "otherOperationsPerSecond": 194.18886198547216,
+        "totalOperationsPerSecond": 77957.86924939467,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 343222.76029055694,
+        "otherBytesPerSecond": 2487.1670702179176,
+        "totalMiBPerSecond": 0.3296946786506413,
+        "writeBytesPerWriteOperation": 4.413664047028933,
+        "cpuLogicalEquivalents": 0.862953995157385
+      },
+      "memory": {
+        "privateBytes": 146337792,
+        "workingSetBytes": 198922240,
+        "hostFreeBytes": 35920486400
+      },
+      "handles": 164,
+      "threads": 12,
+      "health": {
+        "currentWsConnections": 7,
+        "currentActiveSessions": 7,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0,
+        "maxWsConnections": 24,
+        "maxActiveSessions": 10,
+        "maxReconnectLeases": 10,
+        "maxLoginInFlight": 4,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2
+      },
+      "actionStartCounts": {
+        "run": 11,
+        "walk": 7,
+        "startGame": 1,
+        "bootstrap": 1,
+        "rtt": 2
+      },
+      "actions": [
+        {
+          "at": 1792859791176,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859791300,
+          "actor": "Lc499d702",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859791301,
+          "actor": "Lc499d704",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859791643,
+          "actor": "Lc499d701",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859791643,
+          "actor": "Lc499d705",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859791767,
+          "actor": "Lc499d703",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859791923,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859791988,
+          "actor": "Lc499d706",
+          "kind": "startGame",
+          "status": "success"
+        },
+        {
+          "at": 1792859791988,
+          "actor": "Lc499d706",
+          "kind": "bootstrap",
+          "status": "success"
+        },
+        {
+          "at": 1792859792048,
+          "actor": "Lc499d702",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859792048,
+          "actor": "Lc499d704",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859792389,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859792389,
+          "actor": "Lc499d705",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859792513,
+          "actor": "Lc499d703",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859792700,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859792794,
+          "actor": "Lc499d704",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859792825,
+          "actor": "Lc499d702",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859792859,
+          "actor": "Lc499d706",
+          "kind": "walk",
+          "status": "budget-gap"
+        },
+        {
+          "at": 1792859792949,
+          "actor": "Lc499d705",
+          "kind": "rtt",
+          "status": "success"
+        },
+        {
+          "at": 1792859793136,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859793136,
+          "actor": "Lc499d705",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859793229,
+          "actor": "Lc499d700",
+          "kind": "rtt",
+          "status": "success"
+        }
+      ]
+    },
+    {
+      "fromAtMs": 1792859793234,
+      "toAtMs": 1792859795318,
+      "toAt": "2026-10-24T16:36:35.318Z",
+      "seconds": 2.085,
+      "monitorWallDeltaSeconds": 2.084,
+      "timingScope": "OS deltaSeconds reconstructed from raw total-operation delta / recorded exact total-operation rate, independently cross-checked against stored write-byte rate; absolute timestamps are monitor wall, because raw OS sampledAt was not retained",
+      "recordedTotalOperationsPerSecond": 87540.0479616307,
+      "phase": "bootstrap-10",
+      "stop": false,
+      "reason": null,
+      "delta": {
+        "readOperations": 26,
+        "writeOperations": 180826,
+        "otherOperations": 1669,
+        "totalOperations": 182521,
+        "readBytes": 4420,
+        "writeBytes": 628576,
+        "otherBytes": 61648
+      },
+      "rates": {
+        "readOperationsPerSecond": 12.470023980815348,
+        "writeOperationsPerSecond": 86727.09832134293,
+        "otherOperationsPerSecond": 800.4796163069544,
+        "totalOperationsPerSecond": 87540.0479616307,
+        "readBytesPerSecond": 2119.904076738609,
+        "writeBytesPerSecond": 301475.2997601919,
+        "otherBytesPerSecond": 29567.3860911271,
+        "totalMiBPerSecond": 0.3177286052017761,
+        "writeBytesPerWriteOperation": 3.4761372811431985,
+        "cpuLogicalEquivalents": 0.3294964028776978
+      },
+      "memory": {
+        "privateBytes": 154103808,
+        "workingSetBytes": 206229504,
+        "hostFreeBytes": 35927605248
+      },
+      "handles": 164,
+      "threads": 12,
+      "health": {
+        "currentWsConnections": 8,
+        "currentActiveSessions": 8,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 1,
+        "maxWsConnections": 24,
+        "maxActiveSessions": 10,
+        "maxReconnectLeases": 10,
+        "maxLoginInFlight": 4,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2
+      },
+      "actionStartCounts": {
+        "run": 14,
+        "walk": 4,
+        "login": 1,
+        "chat": 1,
+        "peerChat": 1,
+        "newCharacter": 1,
+        "rtt": 1
+      },
+      "actions": [
+        {
+          "at": 1792859793260,
+          "actor": "Lc499d703",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859793447,
+          "actor": "Lc499d700",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859793572,
+          "actor": "Lc499d702",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859793572,
+          "actor": "Lc499d704",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859793634,
+          "actor": "Lc499d706",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859793851,
+          "actor": "Lc499d707",
+          "kind": "login",
+          "status": "success"
+        },
+        {
+          "at": 1792859793882,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859793883,
+          "actor": "Lc499d705",
+          "kind": "chat",
+          "status": "success"
+        },
+        {
+          "at": 1792859793883,
+          "actor": "Lc499d705",
+          "kind": "peerChat",
+          "status": "success"
+        },
+        {
+          "at": 1792859794007,
+          "actor": "Lc499d703",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859794194,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859794318,
+          "actor": "Lc499d702",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859794318,
+          "actor": "Lc499d704",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859794412,
+          "actor": "Lc499d706",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859794479,
+          "actor": "Lc499d707",
+          "kind": "newCharacter",
+          "status": "success"
+        },
+        {
+          "at": 1792859794629,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859794630,
+          "actor": "Lc499d705",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859794753,
+          "actor": "Lc499d703",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859794909,
+          "actor": "Lc499d703",
+          "kind": "rtt",
+          "status": "success"
+        },
+        {
+          "at": 1792859794940,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859795064,
+          "actor": "Lc499d702",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859795065,
+          "actor": "Lc499d704",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859795158,
+          "actor": "Lc499d706",
+          "kind": "run",
+          "status": "success"
+        }
+      ]
+    },
+    {
+      "fromAtMs": 1792859795318,
+      "toAtMs": 1792859797403,
+      "toAt": "2026-10-24T16:36:37.403Z",
+      "seconds": 2.084,
+      "monitorWallDeltaSeconds": 2.085,
+      "timingScope": "OS deltaSeconds reconstructed from raw total-operation delta / recorded exact total-operation rate, independently cross-checked against stored write-byte rate; absolute timestamps are monitor wall, because raw OS sampledAt was not retained",
+      "recordedTotalOperationsPerSecond": 97647.31285988483,
+      "phase": "bootstrap-10",
+      "stop": false,
+      "reason": null,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 203081,
+        "otherOperations": 416,
+        "totalOperations": 203497,
+        "readBytes": 0,
+        "writeBytes": 861886,
+        "otherBytes": 5408
+      },
+      "rates": {
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 97447.69673704414,
+        "otherOperationsPerSecond": 199.61612284069096,
+        "totalOperationsPerSecond": 97647.31285988483,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 413572.9366602687,
+        "otherBytesPerSecond": 2595.009596928983,
+        "totalMiBPerSecond": 0.396888681657026,
+        "writeBytesPerWriteOperation": 4.244050403533565,
+        "cpuLogicalEquivalents": 0.8622840690978887
+      },
+      "memory": {
+        "privateBytes": 163831808,
+        "workingSetBytes": 216027136,
+        "hostFreeBytes": 36005957632
+      },
+      "handles": 167,
+      "threads": 13,
+      "health": {
+        "currentWsConnections": 8,
+        "currentActiveSessions": 8,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0,
+        "maxWsConnections": 24,
+        "maxActiveSessions": 10,
+        "maxReconnectLeases": 10,
+        "maxLoginInFlight": 4,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2
+      },
+      "actionStartCounts": {
+        "run": 15,
+        "walk": 7,
+        "startGame": 1,
+        "bootstrap": 1,
+        "rtt": 2
+      },
+      "actions": [
+        {
+          "at": 1792859795374,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859795375,
+          "actor": "Lc499d705",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859795499,
+          "actor": "Lc499d703",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859795686,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859795810,
+          "actor": "Lc499d702",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859795810,
+          "actor": "Lc499d704",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859795904,
+          "actor": "Lc499d706",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859795997,
+          "actor": "Lc499d707",
+          "kind": "startGame",
+          "status": "success"
+        },
+        {
+          "at": 1792859795998,
+          "actor": "Lc499d707",
+          "kind": "bootstrap",
+          "status": "success"
+        },
+        {
+          "at": 1792859796122,
+          "actor": "Lc499d701",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859796153,
+          "actor": "Lc499d705",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859796246,
+          "actor": "Lc499d703",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859796433,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859796557,
+          "actor": "Lc499d702",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859796557,
+          "actor": "Lc499d704",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859796608,
+          "actor": "Lc499d701",
+          "kind": "rtt",
+          "status": "success"
+        },
+        {
+          "at": 1792859796650,
+          "actor": "Lc499d706",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859796868,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859796899,
+          "actor": "Lc499d705",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859796932,
+          "actor": "Lc499d707",
+          "kind": "walk",
+          "status": "budget-gap"
+        },
+        {
+          "at": 1792859796993,
+          "actor": "Lc499d703",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859797148,
+          "actor": "Lc499d706",
+          "kind": "rtt",
+          "status": "success"
+        },
+        {
+          "at": 1792859797179,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859797303,
+          "actor": "Lc499d702",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859797304,
+          "actor": "Lc499d704",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859797397,
+          "actor": "Lc499d706",
+          "kind": "walk",
+          "status": "success"
+        }
+      ]
+    },
+    {
+      "fromAtMs": 1792859797403,
+      "toAtMs": 1792859799484,
+      "toAt": "2026-10-24T16:36:39.484Z",
+      "seconds": 2.082,
+      "monitorWallDeltaSeconds": 2.081,
+      "timingScope": "OS deltaSeconds reconstructed from raw total-operation delta / recorded exact total-operation rate, independently cross-checked against stored write-byte rate; absolute timestamps are monitor wall, because raw OS sampledAt was not retained",
+      "recordedTotalOperationsPerSecond": 101986.07108549472,
+      "phase": "bootstrap-10",
+      "stop": false,
+      "reason": null,
+      "delta": {
+        "readOperations": 26,
+        "writeOperations": 210709,
+        "otherOperations": 1600,
+        "totalOperations": 212335,
+        "readBytes": 4420,
+        "writeBytes": 575710,
+        "otherBytes": 61054
+      },
+      "rates": {
+        "readOperationsPerSecond": 12.487992315081653,
+        "writeOperationsPerSecond": 101205.09125840539,
+        "otherOperationsPerSecond": 768.4918347742556,
+        "totalOperationsPerSecond": 101986.07108549472,
+        "readBytesPerSecond": 2122.958693563881,
+        "writeBytesPerSecond": 276517.77137367916,
+        "otherBytesPerSecond": 29324.687800192125,
+        "totalMiBPerSecond": 0.2936987093614914,
+        "writeBytesPerWriteOperation": 2.7322515886839196,
+        "cpuLogicalEquivalents": 0.37512007684918347
+      },
+      "memory": {
+        "privateBytes": 171589632,
+        "workingSetBytes": 223707136,
+        "hostFreeBytes": 35998175232
+      },
+      "handles": 168,
+      "threads": 13,
+      "health": {
+        "currentWsConnections": 9,
+        "currentActiveSessions": 9,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 1,
+        "maxWsConnections": 24,
+        "maxActiveSessions": 10,
+        "maxReconnectLeases": 10,
+        "maxLoginInFlight": 4,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2
+      },
+      "actionStartCounts": {
+        "walk": 7,
+        "run": 13,
+        "login": 1,
+        "chat": 1,
+        "peerChat": 1,
+        "newCharacter": 1,
+        "rtt": 1
+      },
+      "actions": [
+        {
+          "at": 1792859797646,
+          "actor": "Lc499d701",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859797646,
+          "actor": "Lc499d705",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859797708,
+          "actor": "Lc499d707",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859797739,
+          "actor": "Lc499d703",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859797920,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859797941,
+          "actor": "Lc499d708",
+          "kind": "login",
+          "status": "success"
+        },
+        {
+          "at": 1792859798050,
+          "actor": "Lc499d702",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859798050,
+          "actor": "Lc499d704",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859798144,
+          "actor": "Lc499d706",
+          "kind": "chat",
+          "status": "success"
+        },
+        {
+          "at": 1792859798144,
+          "actor": "Lc499d706",
+          "kind": "peerChat",
+          "status": "success"
+        },
+        {
+          "at": 1792859798393,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859798393,
+          "actor": "Lc499d705",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859798455,
+          "actor": "Lc499d707",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859798517,
+          "actor": "Lc499d703",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859798599,
+          "actor": "Lc499d708",
+          "kind": "newCharacter",
+          "status": "success"
+        },
+        {
+          "at": 1792859798672,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859798790,
+          "actor": "Lc499d702",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859798791,
+          "actor": "Lc499d704",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859798890,
+          "actor": "Lc499d706",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859798922,
+          "actor": "Lc499d704",
+          "kind": "rtt",
+          "status": "success"
+        },
+        {
+          "at": 1792859799139,
+          "actor": "Lc499d701",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859799140,
+          "actor": "Lc499d705",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859799202,
+          "actor": "Lc499d707",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859799264,
+          "actor": "Lc499d703",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859799451,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        }
+      ]
+    },
+    {
+      "fromAtMs": 1792859799484,
+      "toAtMs": 1792859801566,
+      "toAt": "2026-10-24T16:36:41.566Z",
+      "seconds": 2.081,
+      "monitorWallDeltaSeconds": 2.082,
+      "timingScope": "OS deltaSeconds reconstructed from raw total-operation delta / recorded exact total-operation rate, independently cross-checked against stored write-byte rate; absolute timestamps are monitor wall, because raw OS sampledAt was not retained",
+      "recordedTotalOperationsPerSecond": 102721.76838058626,
+      "phase": "bootstrap-10",
+      "stop": false,
+      "reason": null,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 213338,
+        "otherOperations": 426,
+        "totalOperations": 213764,
+        "readBytes": 0,
+        "writeBytes": 926097,
+        "otherBytes": 5664
+      },
+      "rates": {
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 102517.05910619894,
+        "otherOperationsPerSecond": 204.7092743873138,
+        "totalOperationsPerSecond": 102721.76838058626,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 445024.98798654496,
+        "otherBytesPerSecond": 2721.7683805862566,
+        "totalMiBPerSecond": 0.4270045818015396,
+        "writeBytesPerWriteOperation": 4.340984728459065,
+        "cpuLogicalEquivalents": 0.9235944257568477
+      },
+      "memory": {
+        "privateBytes": 180592640,
+        "workingSetBytes": 232570880,
+        "hostFreeBytes": 35991265280
+      },
+      "handles": 168,
+      "threads": 13,
+      "health": {
+        "currentWsConnections": 9,
+        "currentActiveSessions": 9,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0,
+        "maxWsConnections": 24,
+        "maxActiveSessions": 10,
+        "maxReconnectLeases": 10,
+        "maxLoginInFlight": 4,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2
+      },
+      "actionStartCounts": {
+        "walk": 5,
+        "run": 19,
+        "startGame": 1,
+        "bootstrap": 1,
+        "rtt": 2
+      },
+      "actions": [
+        {
+          "at": 1792859799545,
+          "actor": "Lc499d704",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859799576,
+          "actor": "Lc499d702",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859799639,
+          "actor": "Lc499d706",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859799887,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859799887,
+          "actor": "Lc499d705",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859799949,
+          "actor": "Lc499d707",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859800010,
+          "actor": "Lc499d703",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859800033,
+          "actor": "Lc499d708",
+          "kind": "startGame",
+          "status": "success"
+        },
+        {
+          "at": 1792859800033,
+          "actor": "Lc499d708",
+          "kind": "bootstrap",
+          "status": "success"
+        },
+        {
+          "at": 1792859800168,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859800307,
+          "actor": "Lc499d702",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859800307,
+          "actor": "Lc499d704",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859800400,
+          "actor": "Lc499d706",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859800618,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859800650,
+          "actor": "Lc499d705",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859800712,
+          "actor": "Lc499d707",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859800742,
+          "actor": "Lc499d702",
+          "kind": "rtt",
+          "status": "success"
+        },
+        {
+          "at": 1792859800743,
+          "actor": "Lc499d703",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859800929,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859800993,
+          "actor": "Lc499d708",
+          "kind": "walk",
+          "status": "budget-gap"
+        },
+        {
+          "at": 1792859801054,
+          "actor": "Lc499d702",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859801054,
+          "actor": "Lc499d704",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859801147,
+          "actor": "Lc499d706",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859801178,
+          "actor": "Lc499d707",
+          "kind": "rtt",
+          "status": "success"
+        },
+        {
+          "at": 1792859801396,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859801396,
+          "actor": "Lc499d705",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859801458,
+          "actor": "Lc499d707",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859801489,
+          "actor": "Lc499d703",
+          "kind": "run",
+          "status": "success"
+        }
+      ]
+    },
+    {
+      "fromAtMs": 1792859801566,
+      "toAtMs": 1792859803695,
+      "toAt": "2026-10-24T16:36:43.695Z",
+      "seconds": 2.13,
+      "monitorWallDeltaSeconds": 2.129,
+      "timingScope": "OS deltaSeconds reconstructed from raw total-operation delta / recorded exact total-operation rate, independently cross-checked against stored write-byte rate; absolute timestamps are monitor wall, because raw OS sampledAt was not retained",
+      "recordedTotalOperationsPerSecond": 102452.58215962442,
+      "phase": "bootstrap-10",
+      "stop": true,
+      "reason": "ioOperations exceeded the frozen resource envelope for 3 consecutive samples",
+      "delta": {
+        "readOperations": 26,
+        "writeOperations": 216589,
+        "otherOperations": 1609,
+        "totalOperations": 218224,
+        "readBytes": 4420,
+        "writeBytes": 591864,
+        "otherBytes": 61214
+      },
+      "rates": {
+        "readOperationsPerSecond": 12.206572769953052,
+        "writeOperationsPerSecond": 101684.9765258216,
+        "otherOperationsPerSecond": 755.3990610328639,
+        "totalOperationsPerSecond": 102452.58215962442,
+        "readBytesPerSecond": 2075.1173708920187,
+        "writeBytesPerSecond": 277870.42253521126,
+        "otherBytesPerSecond": 28738.967136150237,
+        "totalMiBPerSecond": 0.29438448623872143,
+        "writeBytesPerWriteOperation": 2.7326595533475846,
+        "cpuLogicalEquivalents": 0.4990610328638498
+      },
+      "memory": {
+        "privateBytes": 188993536,
+        "workingSetBytes": 240893952,
+        "hostFreeBytes": 35929481216
+      },
+      "handles": 172,
+      "threads": 14,
+      "health": {
+        "currentWsConnections": 10,
+        "currentActiveSessions": 10,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 1,
+        "maxWsConnections": 24,
+        "maxActiveSessions": 10,
+        "maxReconnectLeases": 10,
+        "maxLoginInFlight": 4,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2
+      },
+      "actionStartCounts": {
+        "run": 17,
+        "walk": 7,
+        "chat": 1,
+        "peerChat": 1,
+        "login": 1,
+        "rtt": 2,
+        "newCharacter": 1
+      },
+      "actions": [
+        {
+          "at": 1792859801665,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859801769,
+          "actor": "Lc499d708",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859801800,
+          "actor": "Lc499d702",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859801800,
+          "actor": "Lc499d704",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859801893,
+          "actor": "Lc499d706",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859802143,
+          "actor": "Lc499d701",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859802143,
+          "actor": "Lc499d705",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859802205,
+          "actor": "Lc499d707",
+          "kind": "chat",
+          "status": "success"
+        },
+        {
+          "at": 1792859802205,
+          "actor": "Lc499d707",
+          "kind": "peerChat",
+          "status": "success"
+        },
+        {
+          "at": 1792859802267,
+          "actor": "Lc499d703",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859802422,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859802516,
+          "actor": "Lc499d709",
+          "kind": "login",
+          "status": "success"
+        },
+        {
+          "at": 1792859802547,
+          "actor": "Lc499d702",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859802547,
+          "actor": "Lc499d704",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859802547,
+          "actor": "Lc499d708",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859802640,
+          "actor": "Lc499d706",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859802889,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859802890,
+          "actor": "Lc499d705",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859802952,
+          "actor": "Lc499d705",
+          "kind": "rtt",
+          "status": "success"
+        },
+        {
+          "at": 1792859802952,
+          "actor": "Lc499d707",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859803014,
+          "actor": "Lc499d703",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859803169,
+          "actor": "Lc499d709",
+          "kind": "newCharacter",
+          "status": "success"
+        },
+        {
+          "at": 1792859803200,
+          "actor": "Lc499d700",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859803231,
+          "actor": "Lc499d700",
+          "kind": "rtt",
+          "status": "success"
+        },
+        {
+          "at": 1792859803294,
+          "actor": "Lc499d704",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859803294,
+          "actor": "Lc499d708",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859803325,
+          "actor": "Lc499d702",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859803387,
+          "actor": "Lc499d706",
+          "kind": "walk",
+          "status": "success"
+        },
+        {
+          "at": 1792859803636,
+          "actor": "Lc499d701",
+          "kind": "run",
+          "status": "success"
+        },
+        {
+          "at": 1792859803667,
+          "actor": "Lc499d705",
+          "kind": "walk",
+          "status": "success"
+        }
+      ]
+    }
+  ],
+  "monitorTerminal": [
+    {
+      "samples": 27,
+      "at": 1792859803700,
+      "reason": "ioOperations exceeded the frozen resource envelope for 3 consecutive samples"
+    }
+  ],
+  "limitations": [
+    "Raw OS sampledAt was not retained; exact OS deltaSeconds was reconstructed from saved raw deltas and saved total-operation rate, checked against saved byte rates and millisecond precision. Absolute intervals use monitor wall timestamps. Counter classes identify kernel-accounted process I/O operations, not individual file/socket handles. No ETW/ProcMon attribution or physical disk latency/queue counters were captured.",
+    "Action counts group recorded client action-start wall time; they do not timestamp every kernel I/O operation or server completion.",
+    "Only this unique fresh actor pool and snapshot geometry were used; no repeated real probe after this guard stop."
+  ]
+}

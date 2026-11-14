@@ -1,0 +1,1586 @@
+{
+  "schema": "mir2.web-r16-taoist-v22-retest-offline-audit/1",
+  "checkedAt": "2026-11-06T21:11:35.474Z",
+  "className": "Taoist",
+  "scope": "Fresh v22 Taoist retest with earlier public supplies and conservative mine spacing.",
+  "passed": false,
+  "goalComplete": false,
+  "partial": {
+    "verifiedTrace": true,
+    "main": 19,
+    "growth": 3,
+    "level": 27,
+    "uniqueCommitted": 22,
+    "verifiedRewardQuests": 22,
+    "verifiedRewardRows": 35,
+    "normalLogout": true,
+    "fileMatches": true,
+    "snapshotMatches": true
+  },
+  "runtime": {
+    "gatewaySha256": "1b705387db5c1ce14a12909dec87f8af3268eb0cc7c43957069bdfaba76327d7",
+    "configSha256": "59b4e1b8a0dcc9f95de7871a178f715d6ce1baefe96e263f38e5d4328d4dccf7",
+    "profile": "platinum_fiveclass",
+    "cadence": "newcomer-v2",
+    "port": 19235,
+    "fileStore": true
+  },
+  "selectedRun": "2026-11-06T20-56-45-407Z",
+  "selectedReportSha256": "4ee2c46e0943f9c587e90b618c4dc419436d5426fe52af3a05484ef46ba7ddd1",
+  "previousV20Ordinary": {
+    "receiptSha256": "122568cd81c46e70ddad023d06e8fb4097d9705265195f1ce5728f80e3037126",
+    "ordinaryPassed": false,
+    "main": 19,
+    "growth": 3,
+    "level": 27,
+    "q20": 1
+  },
+  "priorV22Ordinary": {
+    "passed": false,
+    "level": 24,
+    "main": 15,
+    "growth": 2,
+    "revives": 3,
+    "receiptSha256": "d7d9c29701926d63dabda7d336ca63f0882618b9e3710f09a6ef1ece545afd38"
+  },
+  "trainingDesign": [
+    {
+      "group": 10019,
+      "questId": 2110019,
+      "map": "D022",
+      "position": {
+        "x": 340,
+        "y": 355
+      },
+      "count": 1,
+      "spread": 0
+    },
+    {
+      "group": 10020,
+      "questId": 2110020,
+      "map": "D022",
+      "position": {
+        "x": 370,
+        "y": 340
+      },
+      "count": 1,
+      "spread": 0
+    },
+    {
+      "group": 10021,
+      "questId": 2110021,
+      "map": "D022",
+      "position": {
+        "x": 300,
+        "y": 385
+      },
+      "count": 1,
+      "spread": 0
+    },
+    {
+      "group": 10022,
+      "questId": 2110019,
+      "map": "D022",
+      "position": {
+        "x": 360,
+        "y": 355
+      },
+      "count": 1,
+      "spread": 0
+    },
+    {
+      "group": 10023,
+      "questId": 2110019,
+      "map": "D022",
+      "position": {
+        "x": 335,
+        "y": 380
+      },
+      "count": 1,
+      "spread": 0
+    },
+    {
+      "group": 10024,
+      "questId": 2110020,
+      "map": "D022",
+      "position": {
+        "x": 320,
+        "y": 395
+      },
+      "count": 1,
+      "spread": 0
+    },
+    {
+      "group": 10025,
+      "questId": 2110020,
+      "map": "D022",
+      "position": {
+        "x": 370,
+        "y": 325
+      },
+      "count": 1,
+      "spread": 0
+    },
+    {
+      "group": 10026,
+      "questId": 2110021,
+      "map": "D022",
+      "position": {
+        "x": 280,
+        "y": 340
+      },
+      "count": 1,
+      "spread": 0
+    },
+    {
+      "group": 10027,
+      "questId": 2110021,
+      "map": "D022",
+      "position": {
+        "x": 300,
+        "y": 330
+      },
+      "count": 1,
+      "spread": 0
+    }
+  ],
+  "clock": {
+    "startedAt": "2026-11-06T19:11:06.877Z",
+    "deadlineAt": "2026-11-06T21:11:06.877Z",
+    "checkpointAt": "2026-11-06T21:10:47.183Z",
+    "finishUnitsWithinDeadline": 22,
+    "levelWithinDeadline": 27,
+    "goalCompletedWithinDeadline": false,
+    "elapsedToFinalLogoutMs": 7202274,
+    "finalLogoutWithinDeadline": false,
+    "separatelyTimedFunctionalContinuation": false
+  },
+  "originalClockCheckpoint": {
+    "sequence": 7223,
+    "at": "2026-11-06T21:10:47.183Z",
+    "phase": "before-logout",
+    "projection": {
+      "level": 27,
+      "map": "1",
+      "position": {
+        "x": 218,
+        "y": 389
+      },
+      "direction": "UpLeft",
+      "gold": 23820,
+      "experience": 12413,
+      "completedQuestIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004,
+        2110005,
+        2110006,
+        2110007,
+        2110008,
+        2110009,
+        2110010,
+        2110011,
+        2110012,
+        2110013,
+        2110014,
+        2110015,
+        2110016,
+        2110017,
+        2110018,
+        2110019,
+        2120015,
+        2120020,
+        2120025
+      ],
+      "activeQuests": [
+        {
+          "questId": 2110020,
+          "stage": "inprogress",
+          "current": 0,
+          "required": 3
+        }
+      ]
+    },
+    "dead": false,
+    "hp": 200,
+    "mp": 213,
+    "learnedSkills": [
+      "Healing",
+      "Poisoning",
+      "SoulFireBall",
+      "SpiritSword",
+      "SummonSkeleton"
+    ],
+    "trainingQuest": {
+      "questId": 2110020,
+      "stage": "inprogress",
+      "current": 0,
+      "required": 3,
+      "objectives": [
+        {
+          "current": 0,
+          "required": 3,
+          "done": false
+        }
+      ]
+    }
+  },
+  "survival": {
+    "maximumOrdinaryRevives": 3,
+    "passed": true,
+    "priorLedgerPreserved": true,
+    "verifiedRecoveries": 0,
+    "townReviveRequests": 0,
+    "deadObservedTransitions": 0
+  },
+  "firstActivity": {
+    "bootstrap": "2026-11-06T19:11:17.188Z",
+    "attack": "2026-11-06T19:11:18.155Z",
+    "learnedSkill": "2026-11-06T19:12:45.666Z"
+  },
+  "finalLogout": {
+    "sent": {
+      "sequence": 7353,
+      "at": "2026-11-06T21:11:07.222Z"
+    },
+    "ack": {
+      "sequence": 7354,
+      "at": "2026-11-06T21:11:09.151Z"
+    },
+    "normal": true
+  },
+  "lastAuthoritativeFrame": {
+    "sequence": 7352,
+    "at": "2026-11-06T21:11:07.185Z",
+    "phase": "before-logout",
+    "projection": {
+      "level": 27,
+      "map": "1",
+      "position": {
+        "x": 162,
+        "y": 340
+      },
+      "direction": "UpLeft",
+      "gold": 23820,
+      "experience": 12413,
+      "completedQuestIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004,
+        2110005,
+        2110006,
+        2110007,
+        2110008,
+        2110009,
+        2110010,
+        2110011,
+        2110012,
+        2110013,
+        2110014,
+        2110015,
+        2110016,
+        2110017,
+        2110018,
+        2110019,
+        2120015,
+        2120020,
+        2120025
+      ],
+      "activeQuests": [
+        {
+          "questId": 2110020,
+          "stage": "inprogress",
+          "current": 0,
+          "required": 3
+        }
+      ]
+    },
+    "dead": false,
+    "hp": 203,
+    "mp": 213,
+    "learnedSkills": [
+      "Healing",
+      "Poisoning",
+      "SoulFireBall",
+      "SpiritSword",
+      "SummonSkeleton"
+    ],
+    "trainingQuest": {
+      "questId": 2110020,
+      "stage": "inprogress",
+      "current": 0,
+      "required": 3,
+      "objectives": [
+        {
+          "current": 0,
+          "required": 3,
+          "done": false
+        }
+      ]
+    }
+  },
+  "fileComparison": {
+    "stable": true,
+    "candidateCount": 1,
+    "saved": {
+      "level": 27,
+      "map": "1",
+      "position": {
+        "x": 162,
+        "y": 340
+      },
+      "direction": "UpLeft",
+      "gold": 23820,
+      "experience": 12413,
+      "completedQuestIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004,
+        2110005,
+        2110006,
+        2110007,
+        2110008,
+        2110009,
+        2110010,
+        2110011,
+        2110012,
+        2110013,
+        2110014,
+        2110015,
+        2110016,
+        2110017,
+        2110018,
+        2110019,
+        2120015,
+        2120020,
+        2120025
+      ],
+      "activeQuests": [
+        {
+          "questId": 2110020,
+          "stage": "inprogress",
+          "current": 0,
+          "required": 3
+        }
+      ]
+    },
+    "matchesSelectedTrace": true,
+    "differenceFields": []
+  },
+  "runnerSnapshotComparison": {
+    "stable": true,
+    "matchesSelectedTrace": true,
+    "differenceFields": []
+  },
+  "pause": {
+    "questId": null,
+    "reason": "deadline"
+  },
+  "deliveries": [
+    {
+      "questId": 2110001,
+      "kind": "main",
+      "completed": true,
+      "finishRequests": 1,
+      "matchingSuccessAcks": 1,
+      "unique": true,
+      "trace": "Taoist.2026-11-06T19-11-06-866Z.trace.jsonl",
+      "sent": 765,
+      "change": 766,
+      "completeQuest": 767,
+      "successAck": 775,
+      "finishSentAt": "2026-11-06T19:11:17.538Z",
+      "completedAt": "2026-11-06T19:11:17.584Z",
+      "successAckAt": "2026-11-06T19:11:17.594Z",
+      "reward": {
+        "valid": true,
+        "rows": 3,
+        "reason": null
+      }
+    },
+    {
+      "questId": 2110002,
+      "kind": "main",
+      "completed": true,
+      "finishRequests": 1,
+      "matchingSuccessAcks": 1,
+      "unique": true,
+      "trace": "Taoist.2026-11-06T19-11-06-866Z.trace.jsonl",
+      "sent": 798,
+      "change": 799,
+      "completeQuest": 800,
+      "successAck": 808,
+      "finishSentAt": "2026-11-06T19:11:17.869Z",
+      "completedAt": "2026-11-06T19:11:17.920Z",
+      "successAckAt": "2026-11-06T19:11:17.930Z",
+      "reward": {
+        "valid": true,
+        "rows": 0,
+        "reason": null
+      }
+    },
+    {
+      "questId": 2110003,
+      "kind": "main",
+      "completed": true,
+      "finishRequests": 1,
+      "matchingSuccessAcks": 1,
+      "unique": true,
+      "trace": "Taoist.2026-11-06T19-11-06-866Z.trace.jsonl",
+      "sent": 1738,
+      "change": 1739,
+      "completeQuest": 1740,
+      "successAck": 1754,
+      "finishSentAt": "2026-11-06T19:12:45.437Z",
+      "completedAt": "2026-11-06T19:12:45.492Z",
+      "successAckAt": "2026-11-06T19:12:45.503Z",
+      "reward": {
+        "valid": true,
+        "rows": 2,
+        "reason": null
+      }
+    },
+    {
+      "questId": 2110004,
+      "kind": "main",
+      "completed": true,
+      "finishRequests": 1,
+      "matchingSuccessAcks": 1,
+      "unique": true,
+      "trace": "Taoist.2026-11-06T19-11-06-866Z.trace.jsonl",
+      "sent": 2559,
+      "change": 2560,
+      "completeQuest": 2561,
+      "successAck": 2569,
+      "finishSentAt": "2026-11-06T19:14:07.424Z",
+      "completedAt": "2026-11-06T19:14:07.477Z",
+      "successAckAt": "2026-11-06T19:14:07.487Z",
+      "reward": {
+        "valid": true,
+        "rows": 0,
+        "reason": null
+      }
+    },
+    {
+      "questId": 2110005,
+      "kind": "main",
+      "completed": true,
+      "finishRequests": 1,
+      "matchingSuccessAcks": 1,
+      "unique": true,
+      "trace": "Taoist.2026-11-06T19-11-06-866Z.trace.jsonl",
+      "sent": 3095,
+      "change": 3096,
+      "completeQuest": 3097,
+      "successAck": 3105,
+      "finishSentAt": "2026-11-06T19:15:35.477Z",
+      "completedAt": "2026-11-06T19:15:35.552Z",
+      "successAckAt": "2026-11-06T19:15:35.569Z",
+      "reward": {
+        "valid": true,
+        "rows": 2,
+        "reason": null
+      }
+    },
+    {
+      "questId": 2110006,
+      "kind": "main",
+      "completed": true,
+      "finishRequests": 1,
+      "matchingSuccessAcks": 1,
+      "unique": true,
+      "trace": "Taoist.2026-11-06T19-11-06-866Z.trace.jsonl",
+      "sent": 3196,
+      "change": 3197,
+      "completeQuest": 3198,
+      "successAck": 3208,
+      "finishSentAt": "2026-11-06T19:15:46.880Z",
+      "completedAt": "2026-11-06T19:15:46.950Z",
+      "successAckAt": "2026-11-06T19:15:46.968Z",
+      "reward": {
+        "valid": true,
+        "rows": 3,
+        "reason": null
+      }
+    },
+    {
+      "questId": 2110007,
+      "kind": "main",
+      "completed": true,
+      "finishRequests": 1,
+      "matchingSuccessAcks": 1,
+      "unique": true,
+      "trace": "Taoist.2026-11-06T19-11-06-866Z.trace.jsonl",
+      "sent": 5610,
+      "change": 5611,
+      "completeQuest": 5612,
+      "successAck": 5626,
+      "finishSentAt": "2026-11-06T19:20:18.792Z",
+      "completedAt": "2026-11-06T19:20:18.884Z",
+      "successAckAt": "2026-11-06T19:20:18.909Z",
+      "reward": {
+        "valid": true,
+        "rows": 3,
+        "reason": null
+      }
+    },
+    {
+      "questId": 2110008,
+      "kind": "main",
+      "completed": true,
+      "finishRequests": 1,
+      "matchingSuccessAcks": 1,
+      "unique": true,
+      "trace": "Taoist.2026-11-06T19-24-46-985Z.trace.jsonl",
+      "sent": 1400,
+      "change": 1402,
+      "completeQuest": 1403,
+      "successAck": 1411,
+      "finishSentAt": "2026-11-06T19:26:49.857Z",
+      "completedAt": "2026-11-06T19:26:50.049Z",
+      "successAckAt": "2026-11-06T19:26:50.076Z",
+      "reward": {
+        "valid": true,
+        "rows": 0,
+        "reason": null
+      }
+    },
+    {
+      "questId": 2110009,
+      "kind": "main",
+      "completed": true,
+      "finishRequests": 1,
+      "matchingSuccessAcks": 1,
+      "unique": true,
+      "trace": "Taoist.2026-11-06T19-24-46-985Z.trace.jsonl",
+      "sent": 2045,
+      "change": 2046,
+      "completeQuest": 2047,
+      "successAck": 2049,
+      "finishSentAt": "2026-11-06T19:28:33.173Z",
+      "completedAt": "2026-11-06T19:28:33.303Z",
+      "successAckAt": "2026-11-06T19:28:33.329Z",
+      "reward": {
+        "valid": true,
+        "rows": 3,
+        "reason": null
+      }
+    },
+    {
+      "questId": 2110010,
+      "kind": "main",
+      "completed": true,
+      "finishRequests": 1,
+      "matchingSuccessAcks": 1,
+      "unique": true,
+      "trace": "Taoist.2026-11-06T19-30-52-023Z.trace.jsonl",
+      "sent": 2262,
+      "change": 2263,
+      "completeQuest": 2264,
+      "successAck": 2274,
+      "finishSentAt": "2026-11-06T19:34:11.995Z",
+      "completedAt": "2026-11-06T19:34:12.106Z",
+      "successAckAt": "2026-11-06T19:34:12.136Z",
+      "reward": {
+        "valid": true,
+        "rows": 0,
+        "reason": null
+      }
+    },
+    {
+      "questId": 2110011,
+      "kind": "main",
+      "completed": true,
+      "finishRequests": 1,
+      "matchingSuccessAcks": 1,
+      "unique": true,
+      "trace": "Taoist.2026-11-06T19-30-52-023Z.trace.jsonl",
+      "sent": 4907,
+      "change": 4908,
+      "completeQuest": 4909,
+      "successAck": 4917,
+      "finishSentAt": "2026-11-06T19:38:56.213Z",
+      "completedAt": "2026-11-06T19:38:56.342Z",
+      "successAckAt": "2026-11-06T19:38:56.377Z",
+      "reward": {
+        "valid": true,
+        "rows": 1,
+        "reason": null
+      }
+    },
+    {
+      "questId": 2110012,
+      "kind": "main",
+      "completed": true,
+      "finishRequests": 1,
+      "matchingSuccessAcks": 1,
+      "unique": true,
+      "trace": "Taoist.2026-11-06T19-30-52-023Z.trace.jsonl",
+      "sent": 6078,
+      "change": 6080,
+      "completeQuest": 6081,
+      "successAck": 6089,
+      "finishSentAt": "2026-11-06T19:41:22.963Z",
+      "completedAt": "2026-11-06T19:41:23.203Z",
+      "successAckAt": "2026-11-06T19:41:23.240Z",
+      "reward": {
+        "valid": true,
+        "rows": 0,
+        "reason": null
+      }
+    },
+    {
+      "questId": 2110013,
+      "kind": "main",
+      "completed": true,
+      "finishRequests": 1,
+      "matchingSuccessAcks": 1,
+      "unique": true,
+      "trace": "Taoist.2026-11-06T19-30-52-023Z.trace.jsonl",
+      "sent": 6822,
+      "change": 6823,
+      "completeQuest": 6824,
+      "successAck": 6832,
+      "finishSentAt": "2026-11-06T19:43:39.067Z",
+      "completedAt": "2026-11-06T19:43:39.330Z",
+      "successAckAt": "2026-11-06T19:43:39.373Z",
+      "reward": {
+        "valid": true,
+        "rows": 7,
+        "reason": null
+      }
+    },
+    {
+      "questId": 2110014,
+      "kind": "main",
+      "completed": true,
+      "finishRequests": 1,
+      "matchingSuccessAcks": 1,
+      "unique": true,
+      "trace": "Taoist.2026-11-06T20-14-07-177Z.trace.jsonl",
+      "sent": 1735,
+      "change": 1736,
+      "completeQuest": 1737,
+      "successAck": 1745,
+      "finishSentAt": "2026-11-06T20:17:15.651Z",
+      "completedAt": "2026-11-06T20:17:15.811Z",
+      "successAckAt": "2026-11-06T20:17:15.854Z",
+      "reward": {
+        "valid": true,
+        "rows": 0,
+        "reason": null
+      }
+    },
+    {
+      "questId": 2110015,
+      "kind": "main",
+      "completed": true,
+      "finishRequests": 1,
+      "matchingSuccessAcks": 1,
+      "unique": true,
+      "trace": "Taoist.2026-11-06T20-30-31-942Z.trace.jsonl",
+      "sent": 1649,
+      "change": 1652,
+      "completeQuest": 1653,
+      "successAck": 1663,
+      "finishSentAt": "2026-11-06T20:33:01.960Z",
+      "completedAt": "2026-11-06T20:33:02.135Z",
+      "successAckAt": "2026-11-06T20:33:02.181Z",
+      "reward": {
+        "valid": true,
+        "rows": 0,
+        "reason": null
+      }
+    },
+    {
+      "questId": 2110016,
+      "kind": "main",
+      "completed": true,
+      "finishRequests": 1,
+      "matchingSuccessAcks": 1,
+      "unique": true,
+      "trace": "Taoist.2026-11-06T20-56-45-407Z.trace.jsonl",
+      "sent": 1764,
+      "change": 1766,
+      "completeQuest": 1767,
+      "successAck": 1775,
+      "finishSentAt": "2026-11-06T20:59:25.216Z",
+      "completedAt": "2026-11-06T20:59:25.451Z",
+      "successAckAt": "2026-11-06T20:59:25.505Z",
+      "reward": {
+        "valid": true,
+        "rows": 0,
+        "reason": null
+      }
+    },
+    {
+      "questId": 2110017,
+      "kind": "main",
+      "completed": true,
+      "finishRequests": 1,
+      "matchingSuccessAcks": 1,
+      "unique": true,
+      "trace": "Taoist.2026-11-06T20-56-45-407Z.trace.jsonl",
+      "sent": 1820,
+      "change": 1821,
+      "completeQuest": 1822,
+      "successAck": 1830,
+      "finishSentAt": "2026-11-06T20:59:28.244Z",
+      "completedAt": "2026-11-06T20:59:28.458Z",
+      "successAckAt": "2026-11-06T20:59:28.511Z",
+      "reward": {
+        "valid": true,
+        "rows": 5,
+        "reason": null
+      }
+    },
+    {
+      "questId": 2110018,
+      "kind": "main",
+      "completed": true,
+      "finishRequests": 1,
+      "matchingSuccessAcks": 1,
+      "unique": true,
+      "trace": "Taoist.2026-11-06T20-56-45-407Z.trace.jsonl",
+      "sent": 3362,
+      "change": 3363,
+      "completeQuest": 3364,
+      "successAck": 3366,
+      "finishSentAt": "2026-11-06T21:03:45.964Z",
+      "completedAt": "2026-11-06T21:03:46.248Z",
+      "successAckAt": "2026-11-06T21:03:46.297Z",
+      "reward": {
+        "valid": true,
+        "rows": 0,
+        "reason": null
+      }
+    },
+    {
+      "questId": 2110019,
+      "kind": "main",
+      "completed": true,
+      "finishRequests": 1,
+      "matchingSuccessAcks": 1,
+      "unique": true,
+      "trace": "Taoist.2026-11-06T20-56-45-407Z.trace.jsonl",
+      "sent": 5810,
+      "change": 5811,
+      "completeQuest": 5812,
+      "successAck": 5820,
+      "finishSentAt": "2026-11-06T21:06:44.922Z",
+      "completedAt": "2026-11-06T21:06:45.142Z",
+      "successAckAt": "2026-11-06T21:06:45.190Z",
+      "reward": {
+        "valid": true,
+        "rows": 0,
+        "reason": null
+      }
+    },
+    {
+      "questId": 2110020,
+      "kind": "main",
+      "completed": false,
+      "finishRequests": 0,
+      "matchingSuccessAcks": 0,
+      "unique": null,
+      "trace": null,
+      "sent": null,
+      "change": null,
+      "completeQuest": null,
+      "successAck": null,
+      "finishSentAt": null,
+      "completedAt": null,
+      "successAckAt": null,
+      "reward": {
+        "valid": false,
+        "rows": 0,
+        "reason": null
+      }
+    },
+    {
+      "questId": 2110021,
+      "kind": "main",
+      "completed": false,
+      "finishRequests": 0,
+      "matchingSuccessAcks": 0,
+      "unique": null,
+      "trace": null,
+      "sent": null,
+      "change": null,
+      "completeQuest": null,
+      "successAck": null,
+      "finishSentAt": null,
+      "completedAt": null,
+      "successAckAt": null,
+      "reward": {
+        "valid": false,
+        "rows": 0,
+        "reason": null
+      }
+    },
+    {
+      "questId": 2110022,
+      "kind": "main",
+      "completed": false,
+      "finishRequests": 0,
+      "matchingSuccessAcks": 0,
+      "unique": null,
+      "trace": null,
+      "sent": null,
+      "change": null,
+      "completeQuest": null,
+      "successAck": null,
+      "finishSentAt": null,
+      "completedAt": null,
+      "successAckAt": null,
+      "reward": {
+        "valid": false,
+        "rows": 0,
+        "reason": null
+      }
+    },
+    {
+      "questId": 2120015,
+      "kind": "growth",
+      "completed": true,
+      "finishRequests": 1,
+      "matchingSuccessAcks": 1,
+      "unique": true,
+      "trace": "Taoist.2026-11-06T19-11-06-866Z.trace.jsonl",
+      "sent": 5640,
+      "change": 5642,
+      "completeQuest": 5643,
+      "successAck": 5645,
+      "finishSentAt": "2026-11-06T19:20:19.075Z",
+      "completedAt": "2026-11-06T19:20:19.181Z",
+      "successAckAt": "2026-11-06T19:20:19.207Z",
+      "reward": {
+        "valid": true,
+        "rows": 3,
+        "reason": null
+      }
+    },
+    {
+      "questId": 2120020,
+      "kind": "growth",
+      "completed": true,
+      "finishRequests": 1,
+      "matchingSuccessAcks": 1,
+      "unique": true,
+      "trace": "Taoist.2026-11-06T19-30-52-023Z.trace.jsonl",
+      "sent": 6110,
+      "change": 6111,
+      "completeQuest": 6112,
+      "successAck": 6114,
+      "finishSentAt": "2026-11-06T19:41:24.031Z",
+      "completedAt": "2026-11-06T19:41:24.181Z",
+      "successAckAt": "2026-11-06T19:41:24.219Z",
+      "reward": {
+        "valid": true,
+        "rows": 1,
+        "reason": null
+      }
+    },
+    {
+      "questId": 2120025,
+      "kind": "growth",
+      "completed": true,
+      "finishRequests": 1,
+      "matchingSuccessAcks": 1,
+      "unique": true,
+      "trace": "Taoist.2026-11-06T20-56-45-407Z.trace.jsonl",
+      "sent": 1797,
+      "change": 1799,
+      "completeQuest": 1800,
+      "successAck": 1802,
+      "finishSentAt": "2026-11-06T20:59:26.705Z",
+      "completedAt": "2026-11-06T20:59:26.953Z",
+      "successAckAt": "2026-11-06T20:59:27.007Z",
+      "reward": {
+        "valid": true,
+        "rows": 2,
+        "reason": null
+      }
+    },
+    {
+      "questId": 2120030,
+      "kind": "growth",
+      "completed": false,
+      "finishRequests": 0,
+      "matchingSuccessAcks": 0,
+      "unique": null,
+      "trace": null,
+      "sent": null,
+      "change": null,
+      "completeQuest": null,
+      "successAck": null,
+      "finishSentAt": null,
+      "completedAt": null,
+      "successAckAt": null,
+      "reward": {
+        "valid": false,
+        "rows": 0,
+        "reason": null
+      }
+    }
+  ],
+  "unknownCommandKinds": 0,
+  "traceDedupAliases": [],
+  "clientStrategy": {
+    "runnerSha256": "e0c1130a8cdab016b7ef2abb4feaeb8f1214ac9f55dac3721c55bd43510efb8c",
+    "policySha256": "475eff87be544a59a1a7df0e515e9a38dff8dd43641a840af4b167443faf9f66",
+    "controllerSha256": "7c658129eda231cadcb68f2f16ee6be0b4fdd03d861a1b4051b5f4120fcd7b8c",
+    "plannedRetreats": 9,
+    "resupplyVisits": 14,
+    "boundedVersions": [
+      {
+        "runId": "2026-11-06T19-11-06-866Z",
+        "revision": "baseline-retreat-strategy"
+      },
+      {
+        "runId": "2026-11-06T19-24-46-985Z",
+        "revision": "baseline-retreat-strategy"
+      },
+      {
+        "runId": "2026-11-06T19-30-52-023Z",
+        "revision": "baseline-retreat-strategy"
+      },
+      {
+        "runId": "2026-11-06T19-48-14-437Z",
+        "revision": "baseline-retreat-strategy"
+      },
+      {
+        "runId": "2026-11-06T19-55-04-573Z",
+        "revision": "one-ordinary-mine-reentry-after-natural-window"
+      },
+      {
+        "runId": "2026-11-06T20-09-10-470Z",
+        "revision": "focused-current-zombie2-from-ordinary-mine-approach"
+      },
+      {
+        "runId": "2026-11-06T20-14-07-177Z",
+        "revision": "focused-zombie2-cooldown-waits-outside-cast-cap"
+      },
+      {
+        "runId": "2026-11-06T20-22-58-656Z",
+        "revision": "focused-q15-current-mine-target"
+      },
+      {
+        "runId": "2026-11-06T20-26-12-788Z",
+        "revision": "focused-q15-western-entry-mine-target"
+      },
+      {
+        "runId": "2026-11-06T20-30-31-942Z",
+        "revision": "focused-q15-prior-wounded-target-fresh-confirmed"
+      },
+      {
+        "runId": "2026-11-06T20-48-31-640Z",
+        "revision": "focused-q16-two-observed-targets-and-own-summon"
+      },
+      {
+        "runId": "2026-11-06T20-51-07-402Z",
+        "revision": "focused-q16-western-approach-same-observed-targets"
+      },
+      {
+        "runId": "2026-11-06T20-56-45-407Z",
+        "revision": "focused-q16-two-freshly-observed-weakened-targets"
+      }
+    ],
+    "externalInputs": [
+      {
+        "file": "focused-mine-target-cadence.mjs",
+        "sha256": "594c1c2015514598ad4013971606c799ba168f791237307434c474bc5d9b3783"
+      },
+      {
+        "file": "focused-mine-target-q15-reentry.mjs",
+        "sha256": "c8fcd280e59068ab7dc14f0ce372b095fbdec8008d8b5279e7c19510c777dd1d"
+      },
+      {
+        "file": "focused-mine-target-q15-wounded.mjs",
+        "sha256": "3013ebfaf23fa34c72847f81345a3895ce66139cf46029de6df665e5208f81cf"
+      },
+      {
+        "file": "focused-mine-target-q15.mjs",
+        "sha256": "23b9de178cb7a08ff62aa75b3516e90f398481a65c98209ccf748a0482e4e4a5"
+      },
+      {
+        "file": "focused-mine-target-q16-weak-pair.mjs",
+        "sha256": "f1b50276555bcc192f4001b7f8033f4530bdc1e33ffac8138c1e87e19797b64f"
+      },
+      {
+        "file": "focused-mine-target-q16-western.mjs",
+        "sha256": "e92147e6514f4a06dfe3df4565355aba772fb98a6f07580c1833d44bab7ff496"
+      },
+      {
+        "file": "focused-mine-target-q16.mjs",
+        "sha256": "ae437f2dd36fdec47df56f90d0d05783df7643684580fffaf31c5a765706125c"
+      },
+      {
+        "file": "focused-mine-target.mjs",
+        "sha256": "cefd731c4df8441f5ffcc93afc68cc91c1d313dace8cf22e5af1f12be4a85bbe"
+      },
+      {
+        "file": "protocol-newcomer-v2-retest-pet.mjs",
+        "sha256": "69ef6f0f778ef31aabcb21f0283a3004755e66b3a623c3eb43218b5fc909b2a9"
+      },
+      {
+        "file": "protocol-newcomer-v2-retest.mjs",
+        "sha256": "7c658129eda231cadcb68f2f16ee6be0b4fdd03d861a1b4051b5f4120fcd7b8c"
+      },
+      {
+        "file": "run-focused-mine-cadence.mjs",
+        "sha256": "cb7782f7958ce1754f394af43c27956f64f1eb89e693c016c91f6217659e9574"
+      },
+      {
+        "file": "run-focused-mine-q15-reentry.mjs",
+        "sha256": "ba93dd9401da223888bb77ba066f29eb5bdc83fdac248bed56048bc294d2d04f"
+      },
+      {
+        "file": "run-focused-mine-q15-wounded.mjs",
+        "sha256": "517b25f68ade75d2010d4ee8213664639843208e1f927445d03af26bad41f767"
+      },
+      {
+        "file": "run-focused-mine-q15.mjs",
+        "sha256": "6ab3db7e4d6a067982ac743011e45efb784c0ac48bae5fdd14914410b51e90ec"
+      },
+      {
+        "file": "run-focused-mine-q16-weak-pair.mjs",
+        "sha256": "92c1dc48eacd9202f3c3db36e42d446390f6bc130dde79d1f2e98fb5bad08d1b"
+      },
+      {
+        "file": "run-focused-mine-q16-western.mjs",
+        "sha256": "ea7c77d4ef65383d2cd349b36e6e764c003a06ac18cc06683aeee02a0f32bc77"
+      },
+      {
+        "file": "run-focused-mine-q16.mjs",
+        "sha256": "a6fb80035529d060255fdf81a089544d8852d19555ca58631f3b08ecda2dadc3"
+      },
+      {
+        "file": "run-focused-mine.mjs",
+        "sha256": "f6379c278e58f3d0b6dbb79000fb5caee4df17cf3164b61d68c01e1baf7db199"
+      },
+      {
+        "file": "run-functional-supplies.mjs",
+        "sha256": "4b694efe874dfc9cf8c7d3c74a6ac9d0561b3a3ee242c1aa0d9efcd6198d333d"
+      },
+      {
+        "file": "run-functional.mjs",
+        "sha256": "9c5c29a51e661148472e78466a220f0464481ad6a10f2179d1b7c6dfb87eadd8"
+      },
+      {
+        "file": "run-mine-reentry.mjs",
+        "sha256": "16d7b130d16349d6598b0e2d2104569a3ebd9075b38f1e522fbbd334188e2a3a"
+      },
+      {
+        "file": "strategy-mine-reentry.mjs",
+        "sha256": "d0f7a380c135654459bf1f5e8d2da1e8609220b5d2f17ee790771bcd0544c435"
+      }
+    ]
+  },
+  "traces": [
+    {
+      "runId": "2026-11-06T19-11-06-866Z",
+      "trace": "Taoist.2026-11-06T19-11-06-866Z.trace.jsonl",
+      "bytes": 19135060,
+      "sha256": "e53cdb1b6f0a85112207e017ac150541b1017d262966422a49ca60b5ab09695e",
+      "reportSha256": "1b1dda580c730fd2037b388e20e6785cfb5654d3e856e4f80f77a2d4a95043be",
+      "firstAt": "2026-11-06T19:11:06.896Z",
+      "lastAt": "2026-11-06T19:22:27.284Z",
+      "normalLogout": true,
+      "commands": {
+        "clientVersion": 139,
+        "newAccount": 1,
+        "keepAlive": 338,
+        "login": 1,
+        "newCharacter": 1,
+        "startGame": 1,
+        "interact": 6,
+        "acceptQuest": 9,
+        "finishQuest": 8,
+        "equipItem": 5,
+        "attack": 126,
+        "walk": 110,
+        "run": 597,
+        "useItem": 18,
+        "magic": 3,
+        "selectNpcDialog": 4,
+        "buyItem": 4,
+        "logOut": 1
+      },
+      "mapSequence": [
+        "0"
+      ],
+      "trainingAOI": [],
+      "trainingKills": [],
+      "recoveries": []
+    },
+    {
+      "runId": "2026-11-06T19-24-46-985Z",
+      "trace": "Taoist.2026-11-06T19-24-46-985Z.trace.jsonl",
+      "bytes": 5855987,
+      "sha256": "95d23fcfe53e5baff552022bd11b63f63cb3411ddc3e6034f35252a86a4a7b99",
+      "reportSha256": "8a4352c8a52dfd0c1519849cd72c041a96577274de8aedcc00f86c4f79c6bf1a",
+      "firstAt": "2026-11-06T19:24:47.015Z",
+      "lastAt": "2026-11-06T19:28:57.467Z",
+      "normalLogout": true,
+      "commands": {
+        "clientVersion": 33,
+        "login": 1,
+        "keepAlive": 123,
+        "startGame": 1,
+        "run": 280,
+        "walk": 37,
+        "attack": 23,
+        "useItem": 3,
+        "interact": 2,
+        "finishQuest": 2,
+        "acceptQuest": 2,
+        "selectNpcDialog": 1,
+        "buyItem": 1,
+        "logOut": 1
+      },
+      "mapSequence": [
+        "0",
+        "D001",
+        "0"
+      ],
+      "trainingAOI": [],
+      "trainingKills": [],
+      "recoveries": []
+    },
+    {
+      "runId": "2026-11-06T19-30-52-023Z",
+      "trace": "Taoist.2026-11-06T19-30-52-023Z.trace.jsonl",
+      "bytes": 27793976,
+      "sha256": "cc9dc9603f926b81582363f80ca02535b7248041420282c3a61db7b770990995",
+      "reportSha256": "f8faa8f1abfe4728161ce7a803c29b93dd5b414249e6fc8a4a6e20b3843cb3ed",
+      "firstAt": "2026-11-06T19:30:52.053Z",
+      "lastAt": "2026-11-06T19:44:56.301Z",
+      "normalLogout": true,
+      "commands": {
+        "clientVersion": 238,
+        "login": 1,
+        "keepAlive": 419,
+        "startGame": 1,
+        "magic": 72,
+        "run": 771,
+        "walk": 146,
+        "attack": 34,
+        "useItem": 27,
+        "finishQuest": 5,
+        "acceptQuest": 5,
+        "equipItem": 2,
+        "interact": 6,
+        "selectNpcDialog": 3,
+        "buyItem": 3,
+        "logOut": 1
+      },
+      "mapSequence": [
+        "0",
+        "D001",
+        "0",
+        "D001",
+        "0",
+        "D401"
+      ],
+      "trainingAOI": [],
+      "trainingKills": [],
+      "recoveries": []
+    },
+    {
+      "runId": "2026-11-06T19-48-14-437Z",
+      "trace": "Taoist.2026-11-06T19-48-14-437Z.trace.jsonl",
+      "bytes": 1169080,
+      "sha256": "4a986d0744cb710e7f5146852b9a4f55b64d5cc4c14b8fbb7aa42c99a975d5ab",
+      "reportSha256": "cfc50b16e165212ada27491e4df3462df0796cde6ba6153f7c22c14693c6873d",
+      "firstAt": "2026-11-06T19:48:14.467Z",
+      "lastAt": "2026-11-06T19:48:24.996Z",
+      "normalLogout": true,
+      "commands": {
+        "clientVersion": 4,
+        "login": 1,
+        "keepAlive": 4,
+        "startGame": 1,
+        "run": 1,
+        "walk": 1,
+        "logOut": 1
+      },
+      "mapSequence": [
+        "D401"
+      ],
+      "trainingAOI": [],
+      "trainingKills": [],
+      "recoveries": []
+    },
+    {
+      "runId": "2026-11-06T19-55-04-573Z",
+      "trace": "Taoist.2026-11-06T19-55-04-573Z.trace.jsonl",
+      "bytes": 17624563,
+      "sha256": "d455299717fa193b2590fe3e4185a3a43d3190e9f67c3ddf0ba2d730096fdecb",
+      "reportSha256": "85b7ba234de314113d7b8cc072dfca7e36cb59f47535614ac0e53393e1b35beb",
+      "firstAt": "2026-11-06T19:55:04.621Z",
+      "lastAt": "2026-11-06T20:05:17.224Z",
+      "normalLogout": true,
+      "commands": {
+        "clientVersion": 157,
+        "login": 1,
+        "keepAlive": 304,
+        "startGame": 1,
+        "useItem": 18,
+        "magic": 31,
+        "run": 570,
+        "walk": 196,
+        "logOut": 1
+      },
+      "mapSequence": [
+        "D401",
+        "0",
+        "D401",
+        "0",
+        "D401",
+        "0"
+      ],
+      "trainingAOI": [],
+      "trainingKills": [],
+      "recoveries": []
+    },
+    {
+      "runId": "2026-11-06T20-09-10-470Z",
+      "trace": "Taoist.2026-11-06T20-09-10-470Z.trace.jsonl",
+      "bytes": 6458723,
+      "sha256": "481f1c63060056ed6ec14529c71b8a9675036405f0bebb0ac3696a135e672aa1",
+      "reportSha256": "32123fd0d020c43647ab24b9dae463659e7d8f131dbdf1c8de60d8734282bf5d",
+      "firstAt": "2026-11-06T20:09:10.515Z",
+      "lastAt": "2026-11-06T20:11:59.573Z",
+      "normalLogout": true,
+      "commands": {
+        "clientVersion": 51,
+        "login": 1,
+        "keepAlive": 83,
+        "startGame": 1,
+        "magic": 12,
+        "run": 183,
+        "walk": 16,
+        "interact": 1,
+        "selectNpcDialog": 1,
+        "buyItem": 1,
+        "equipItem": 1,
+        "useItem": 4,
+        "logOut": 1
+      },
+      "mapSequence": [
+        "0",
+        "D401",
+        "0"
+      ],
+      "trainingAOI": [],
+      "trainingKills": [],
+      "recoveries": []
+    },
+    {
+      "runId": "2026-11-06T20-14-07-177Z",
+      "trace": "Taoist.2026-11-06T20-14-07-177Z.trace.jsonl",
+      "bytes": 6929210,
+      "sha256": "501d678bee4ceab9b60345fd41886975f5874cf44a5e3fa55b60d94a019ae41a",
+      "reportSha256": "245065422fdefb2ac91f183344372d2163c879634ea811c9e47b34b2250659b1",
+      "firstAt": "2026-11-06T20:14:07.219Z",
+      "lastAt": "2026-11-06T20:20:58.051Z",
+      "normalLogout": true,
+      "commands": {
+        "clientVersion": 39,
+        "login": 1,
+        "keepAlive": 203,
+        "startGame": 1,
+        "walk": 75,
+        "run": 488,
+        "interact": 4,
+        "selectNpcDialog": 4,
+        "buyItem": 4,
+        "magic": 9,
+        "finishQuest": 1,
+        "acceptQuest": 1,
+        "useItem": 3,
+        "moveItem": 1,
+        "equipItem": 2,
+        "logOut": 1
+      },
+      "mapSequence": [
+        "0",
+        "D401",
+        "0",
+        "D401"
+      ],
+      "trainingAOI": [],
+      "trainingKills": [],
+      "recoveries": []
+    },
+    {
+      "runId": "2026-11-06T20-22-58-656Z",
+      "trace": "Taoist.2026-11-06T20-22-58-656Z.trace.jsonl",
+      "bytes": 2972237,
+      "sha256": "28d5dc0aad56599cc057f093e03b6cb5736280b4a00447d00a7e62793fbc91f6",
+      "reportSha256": "374480cf7e98688505161e64e871dd093eb4a19b3cf6b4d16ba916169a349557",
+      "firstAt": "2026-11-06T20:22:58.697Z",
+      "lastAt": "2026-11-06T20:23:23.097Z",
+      "normalLogout": true,
+      "commands": {
+        "clientVersion": 22,
+        "login": 1,
+        "keepAlive": 11,
+        "startGame": 1,
+        "run": 9,
+        "walk": 5,
+        "magic": 3,
+        "useItem": 2,
+        "logOut": 1
+      },
+      "mapSequence": [
+        "D401",
+        "0"
+      ],
+      "trainingAOI": [],
+      "trainingKills": [],
+      "recoveries": []
+    },
+    {
+      "runId": "2026-11-06T20-26-12-788Z",
+      "trace": "Taoist.2026-11-06T20-26-12-788Z.trace.jsonl",
+      "bytes": 5262153,
+      "sha256": "105c620b4bea6b0a1844a0fce7aa641a746472626e91a9d227e8c6903bda1eb8",
+      "reportSha256": "4696ca162683ec1180df93a421fa0841e591533f9968c35985be933a2b6c182e",
+      "firstAt": "2026-11-06T20:26:12.829Z",
+      "lastAt": "2026-11-06T20:28:55.357Z",
+      "normalLogout": true,
+      "commands": {
+        "clientVersion": 40,
+        "login": 1,
+        "keepAlive": 79,
+        "startGame": 1,
+        "magic": 7,
+        "run": 177,
+        "walk": 27,
+        "interact": 1,
+        "selectNpcDialog": 1,
+        "buyItem": 1,
+        "useItem": 3,
+        "logOut": 1
+      },
+      "mapSequence": [
+        "0",
+        "D401",
+        "0"
+      ],
+      "trainingAOI": [],
+      "trainingKills": [],
+      "recoveries": []
+    },
+    {
+      "runId": "2026-11-06T20-30-31-942Z",
+      "trace": "Taoist.2026-11-06T20-30-31-942Z.trace.jsonl",
+      "bytes": 16574256,
+      "sha256": "335b723265fbf1b3430207551dc2c979dcafdb0d872cc848d3a5e622e4386ebd",
+      "reportSha256": "3eb136b4c04716a9cc5128065e1429c2e7d4ad1b7c07ca5f9ed148abf696a2f1",
+      "firstAt": "2026-11-06T20:30:31.983Z",
+      "lastAt": "2026-11-06T20:42:32.085Z",
+      "normalLogout": true,
+      "commands": {
+        "clientVersion": 118,
+        "login": 1,
+        "keepAlive": 357,
+        "startGame": 1,
+        "magic": 40,
+        "run": 737,
+        "walk": 159,
+        "interact": 5,
+        "selectNpcDialog": 5,
+        "buyItem": 5,
+        "useItem": 8,
+        "finishQuest": 1,
+        "acceptQuest": 1,
+        "logOut": 1
+      },
+      "mapSequence": [
+        "0",
+        "D401",
+        "0",
+        "D401",
+        "0",
+        "D401"
+      ],
+      "trainingAOI": [],
+      "trainingKills": [],
+      "recoveries": []
+    },
+    {
+      "runId": "2026-11-06T20-48-31-640Z",
+      "trace": "Taoist.2026-11-06T20-48-31-640Z.trace.jsonl",
+      "bytes": 6846301,
+      "sha256": "94f62689baa78d9dc75d40959a84fe9f82a8cb33ca0018dc3271c62c282e1f7e",
+      "reportSha256": "f616c39f69b2dba0fbe90fa3c025a6458fc6f2b5f58fe969eca8d132c1ffe8c8",
+      "firstAt": "2026-11-06T20:48:31.681Z",
+      "lastAt": "2026-11-06T20:49:05.712Z",
+      "normalLogout": true,
+      "commands": {
+        "clientVersion": 65,
+        "login": 1,
+        "keepAlive": 15,
+        "startGame": 1,
+        "run": 4,
+        "walk": 1,
+        "magic": 6,
+        "useItem": 7,
+        "logOut": 1
+      },
+      "mapSequence": [
+        "D401",
+        "0"
+      ],
+      "trainingAOI": [],
+      "trainingKills": [],
+      "recoveries": []
+    },
+    {
+      "runId": "2026-11-06T20-51-07-402Z",
+      "trace": "Taoist.2026-11-06T20-51-07-402Z.trace.jsonl",
+      "bytes": 2929134,
+      "sha256": "967ae1369039a2a8c695955c134f080b045897bfb8b2893189494cabe5ca1f17",
+      "reportSha256": "cb7ceb85b73bbb64caf2d9669f7cee7e3d4ed507fb766778db09fe291f760097",
+      "firstAt": "2026-11-06T20:51:07.443Z",
+      "lastAt": "2026-11-06T20:53:51.446Z",
+      "normalLogout": true,
+      "commands": {
+        "clientVersion": 16,
+        "login": 1,
+        "keepAlive": 80,
+        "startGame": 1,
+        "magic": 1,
+        "run": 197,
+        "walk": 31,
+        "interact": 1,
+        "selectNpcDialog": 1,
+        "buyItem": 1,
+        "useItem": 1,
+        "logOut": 1
+      },
+      "mapSequence": [
+        "0",
+        "D401",
+        "0"
+      ],
+      "trainingAOI": [],
+      "trainingKills": [],
+      "recoveries": []
+    },
+    {
+      "runId": "2026-11-06T20-56-45-407Z",
+      "trace": "Taoist.2026-11-06T20-56-45-407Z.trace.jsonl",
+      "bytes": 24168169,
+      "sha256": "d4a6e04bb961c1ee5852f5953f3d46e92d6fcccd8f465a0075f9abc133569ebb",
+      "reportSha256": "4ee2c46e0943f9c587e90b618c4dc419436d5426fe52af3a05484ef46ba7ddd1",
+      "firstAt": "2026-11-06T20:56:45.448Z",
+      "lastAt": "2026-11-06T21:11:09.176Z",
+      "normalLogout": true,
+      "commands": {
+        "clientVersion": 160,
+        "login": 1,
+        "keepAlive": 429,
+        "startGame": 1,
+        "run": 916,
+        "walk": 125,
+        "interact": 8,
+        "selectNpcDialog": 3,
+        "buyItem": 3,
+        "magic": 59,
+        "useItem": 17,
+        "finishQuest": 5,
+        "acceptQuest": 5,
+        "equipItem": 2,
+        "moveItem": 1,
+        "logOut": 1
+      },
+      "mapSequence": [
+        "0",
+        "D401",
+        "0",
+        "1",
+        "D021",
+        "D022",
+        "0",
+        "1"
+      ],
+      "trainingAOI": [
+        {
+          "group": 10019,
+          "distinctSlots": 1,
+          "maxObservedConcurrent": 1
+        },
+        {
+          "group": 10020,
+          "distinctSlots": 1,
+          "maxObservedConcurrent": 1
+        },
+        {
+          "group": 10022,
+          "distinctSlots": 1,
+          "maxObservedConcurrent": 1
+        },
+        {
+          "group": 10023,
+          "distinctSlots": 1,
+          "maxObservedConcurrent": 1
+        }
+      ],
+      "trainingKills": [
+        {
+          "group": 10019,
+          "at": "2026-11-06T21:05:03.813Z",
+          "sequence": 4779,
+          "position": {
+            "x": 340,
+            "y": 355
+          }
+        },
+        {
+          "group": 10022,
+          "at": "2026-11-06T21:05:51.932Z",
+          "sequence": 5283,
+          "position": {
+            "x": 355,
+            "y": 355
+          }
+        },
+        {
+          "group": 10023,
+          "at": "2026-11-06T21:06:44.507Z",
+          "sequence": 5801,
+          "position": {
+            "x": 340,
+            "y": 375
+          }
+        }
+      ],
+      "recoveries": []
+    }
+  ],
+  "limits": {
+    "browserReadbackIncluded": false,
+    "identityFileRead": false,
+    "networkConnections": 0,
+    "trainingObservationsLimitedToAOI": true,
+    "fileComparisonFields": [
+      "class",
+      "roleIndex",
+      "level",
+      "map",
+      "position",
+      "direction",
+      "gold",
+      "experience",
+      "completedQuestIds",
+      "activeQuests"
+    ]
+  }
+}

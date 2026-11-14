@@ -1,0 +1,457 @@
+{
+  "schema": "r16-newcomer-v2-scoped-browser-receipt/1",
+  "overallPassed": false,
+  "partialSatisfied": true,
+  "scope": {
+    "sameOrdinaryTestRole": true,
+    "combinedEvidenceAcrossRuns": true,
+    "newAccountsInFinalRun": 0,
+    "newCharactersInFinalRun": 0,
+    "ordinaryUiOnly": true,
+    "qaAdminCommands": 0,
+    "worldSaveEdits": false,
+    "modelCallsRequested": 0,
+    "originalOwnerAloAccessed": false,
+    "extraBrowserRunsAfterR8": false
+  },
+  "evidence": {
+    "nativeCardNoWorldClickThroughAndQ1": "../onboarding-v12-browser-r3/onboarding-v11-browser-proof.json",
+    "q2": "../onboarding-v12-browser-r5/onboarding-v11-browser-proof.json",
+    "priorNpcNoRepeatRewardAndPersistence": "../onboarding-v12-browser-r6/onboarding-v11-browser-proof.json",
+    "ordinaryMerchantPurchase": "../onboarding-v13-browser-r7/onboarding-v11-browser-proof.json",
+    "finalBoundedHuntAndPersistence": "onboarding-v11-browser-proof.json"
+  },
+  "questResults": [
+    {
+      "questId": 2110001,
+      "status": "completed",
+      "ordinaryJaneAcceptAndFinish": true,
+      "exactReward": {
+        "gold": 100,
+        "woodenSword": 1,
+        "smallHpMedicine": 10
+      },
+      "reclaimedInFinalRun": false
+    },
+    {
+      "questId": 2110002,
+      "status": "completed",
+      "ordinaryNativeBagWeaponEquip": true,
+      "exactGoldReward": 100,
+      "reclaimedInFinalRun": false
+    },
+    {
+      "questId": 2110003,
+      "status": "inProgress",
+      "current": 3,
+      "required": 4,
+      "scarecrow": {
+        "current": 2,
+        "required": 2
+      },
+      "rakingCat": {
+        "current": 1,
+        "required": 2
+      },
+      "finishQuestSent": false,
+      "rewardClaimed": false
+    }
+  ],
+  "ordinaryPurchase": {
+    "itemName": "(HP)DrugSmall",
+    "bought": true,
+    "quantity": 3,
+    "observedUnitGold": 40,
+    "chargedGold": 120,
+    "goldBefore": 200,
+    "goldAfter": 80,
+    "quantityBefore": 0,
+    "quantityAfter": 3,
+    "ownedUidHashes": [
+      "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44"
+    ],
+    "onePurchaseCommand": true,
+    "matchingDurableReceipt": true,
+    "incomingUidHash": "13953bc251a58f86fee3f7329ec4ffa74c71f197296014d5724e4f39b83a9e44",
+    "receiptSequence": 753
+  },
+  "clothing": {
+    "ownedDressAtFinalRunStart": false,
+    "bought": false,
+    "actualObservedUnitGold": 120,
+    "availableGoldAfterMedicine": 80
+  },
+  "finalBoundedRun": {
+    "startedAt": "2026-11-04T22:33:37.782Z",
+    "finishedAt": "2026-11-04T22:37:01.985Z",
+    "elapsedMs": 204203,
+    "maxHuntMs": 360000,
+    "perTargetLimitMs": 180000,
+    "completedNaturalTargets": [
+      {
+        "objectId": 206032,
+        "name": "RakingCat",
+        "lastOwnHitSequence": 1169,
+        "deathSequence": 1172,
+        "assistedFinalHit": false,
+        "authoritativeQuestLog": [
+          {
+            "questId": 2110001,
+            "stage": "completed",
+            "current": 1,
+            "required": 1,
+            "objectives": [
+              {
+                "label": "Report to Assistant Jane",
+                "current": 1,
+                "required": 1,
+                "done": true
+              }
+            ]
+          },
+          {
+            "questId": 2110002,
+            "stage": "completed",
+            "current": 1,
+            "required": 1,
+            "objectives": [
+              {
+                "label": "Equip a weapon you can use",
+                "current": 1,
+                "required": 1,
+                "done": true
+              }
+            ]
+          },
+          {
+            "questId": 2110003,
+            "stage": "inProgress",
+            "current": 3,
+            "required": 4,
+            "objectives": [
+              {
+                "current": 2,
+                "required": 2,
+                "done": true
+              },
+              {
+                "current": 1,
+                "required": 2,
+                "done": false
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "medicineUseCount": 3,
+    "medicine": [
+      {
+        "before": {
+          "hp": 14,
+          "maxHp": 30,
+          "mp": 21,
+          "maxMp": 21,
+          "dead": false,
+          "position": {
+            "x": 327,
+            "y": 598
+          }
+        },
+        "after": {
+          "hp": 14,
+          "maxHp": 30,
+          "mp": 21,
+          "maxMp": 21,
+          "dead": false,
+          "position": {
+            "x": 327,
+            "y": 598
+          }
+        },
+        "smallHpMedicineBefore": 3,
+        "smallHpMedicineAfter": 2,
+        "matchingUseItemAckSequence": 1050
+      },
+      {
+        "before": {
+          "hp": 15,
+          "maxHp": 30,
+          "mp": 21,
+          "maxMp": 21,
+          "dead": false,
+          "position": {
+            "x": 327,
+            "y": 587
+          }
+        },
+        "after": {
+          "hp": 20,
+          "maxHp": 30,
+          "mp": 21,
+          "maxMp": 21,
+          "dead": false,
+          "position": {
+            "x": 327,
+            "y": 587
+          }
+        },
+        "smallHpMedicineBefore": 2,
+        "smallHpMedicineAfter": 1,
+        "matchingUseItemAckSequence": 1283
+      },
+      {
+        "before": {
+          "hp": 13,
+          "maxHp": 30,
+          "mp": 21,
+          "maxMp": 21,
+          "dead": false,
+          "position": {
+            "x": 327,
+            "y": 587
+          }
+        },
+        "after": {
+          "hp": 7,
+          "maxHp": 30,
+          "mp": 21,
+          "maxMp": 21,
+          "dead": false,
+          "position": {
+            "x": 327,
+            "y": 587
+          }
+        },
+        "smallHpMedicineBefore": 1,
+        "smallHpMedicineAfter": 0,
+        "matchingUseItemAckSequence": 1364
+      }
+    ],
+    "reasonForStopping": "LOW_HP_AND_EXISTING_MEDICINE_EXHAUSTED_NORMAL_RETREAT",
+    "deathDuringOrdinaryRetreat": true,
+    "normalVisibleReviveCommands": 2,
+    "newMerchantPurchaseCommands": 0,
+    "acceptQuestCommands": 0,
+    "finishQuestCommands": 0
+  },
+  "finalKnownAuthoritativeState": {
+    "basis": "ordinary fresh relogin exact asset/progress comparison, then no economic mutation and final normal logout",
+    "gold": 80,
+    "hpMedicineOnBelt": 0,
+    "hpMedicineInBag": 0,
+    "weapon": "WoodenSword",
+    "lastInGameHp": 30,
+    "lastInGameMaxHp": 30,
+    "lastInGamePosition": {
+      "x": 288,
+      "y": 616
+    },
+    "questCurrent": 3,
+    "questRequired": 4,
+    "notRequeriedAfterLogout": true
+  },
+  "remainingTargetObserved": {
+    "objectId": 206039,
+    "name": "RakingCat",
+    "firstObservedAbsoluteHp": 32,
+    "firstObservedDead": false,
+    "firstObservedPosition": {
+      "x": 325,
+      "y": 583
+    },
+    "ownHitSequences": [
+      1274,
+      1296,
+      1316,
+      1333,
+      1354,
+      1399,
+      1424,
+      1439
+    ],
+    "lastObservedHealthPercent": 43,
+    "lastHealthSequence": 1441,
+    "observedDeath": false,
+    "screenshotAtEarlierCaptureHp": "16/32",
+    "currentPostLogoutLifeOrPositionUnknown": true
+  },
+  "persistence": {
+    "normalLogoutAck": true,
+    "freshLogin": true,
+    "exactAssetsRetained": true,
+    "exactProgressRetained": true,
+    "completedQuestIds": [
+      2110001,
+      2110002
+    ],
+    "completedNpcRewardNotOffered": null,
+    "priorNpcRevisitEvidence": "../onboarding-v12-browser-r6/onboarding-v11-browser-proof.json",
+    "completedDiaryRewardNotOffered": true,
+    "noRepeatedRewardOnUiRevisit": true,
+    "arbitraryProtocolReplayTested": false
+  },
+  "cleanup": {
+    "ordinaryLogout": true,
+    "browserClosed": true
+  },
+  "resources": {
+    "ordinaryPublicGetRechecks": [
+      {
+        "path": "original-ui/Monster/016/0.png",
+        "status": 200,
+        "bytes": 37969
+      },
+      {
+        "path": "original-ui/Monster/016/1.png",
+        "status": 200,
+        "bytes": 38277
+      },
+      {
+        "path": "original-ui/Monster/016/2.png",
+        "status": 200,
+        "bytes": 38374
+      },
+      {
+        "path": "original-ui/Monster/016/3.png",
+        "status": 200,
+        "bytes": 38383
+      }
+    ],
+    "finalBrowserHttpErrors": 0,
+    "finalBrowserFailedRequests": 0,
+    "finalConsoleErrors": 0,
+    "finalConsoleWarnings": 10
+  },
+  "limits": [
+    "q3 remains 3/4 and was not delivered; one RakingCat remains uncompleted.",
+    "First-sighting absolute HP32 is not the last target HP; later health is only a server percentage.",
+    "Medicine ACK and exact quantity consumption are proven; concurrent damage means immediate HP does not increase monotonically.",
+    "The earlier r4 UI Buy lacked a complete operation receipt; its failed proof remains unchanged. A later fresh-wallet purchase is proven by the r7 durable receipt."
+  ],
+  "failedRunsRetained": [
+    {
+      "directory": "onboarding-v11-browser",
+      "overallPassed": false
+    },
+    {
+      "directory": "onboarding-v11-browser-r2",
+      "overallPassed": false
+    },
+    {
+      "directory": "onboarding-v11-browser-r3",
+      "overallPassed": false
+    },
+    {
+      "directory": "onboarding-v11-browser-r4",
+      "overallPassed": false
+    },
+    {
+      "directory": "onboarding-v12-browser",
+      "overallPassed": false
+    },
+    {
+      "directory": "onboarding-v12-browser-r2",
+      "overallPassed": false
+    },
+    {
+      "directory": "onboarding-v12-browser-r3",
+      "overallPassed": false
+    },
+    {
+      "directory": "onboarding-v12-browser-r4",
+      "overallPassed": false
+    },
+    {
+      "directory": "onboarding-v12-browser-r5",
+      "overallPassed": false
+    },
+    {
+      "directory": "onboarding-v12-browser-r6",
+      "overallPassed": false
+    },
+    {
+      "directory": "onboarding-v13-browser",
+      "overallPassed": false
+    },
+    {
+      "directory": "onboarding-v13-browser-r2",
+      "overallPassed": false
+    },
+    {
+      "directory": "onboarding-v13-browser-r3",
+      "overallPassed": false
+    },
+    {
+      "directory": "onboarding-v13-browser-r4",
+      "overallPassed": false
+    },
+    {
+      "directory": "onboarding-v13-browser-r5",
+      "overallPassed": false
+    },
+    {
+      "directory": "onboarding-v13-browser-r6",
+      "overallPassed": false
+    },
+    {
+      "directory": "onboarding-v13-browser-r7",
+      "overallPassed": false
+    },
+    {
+      "directory": "onboarding-v13-browser-r8",
+      "overallPassed": false
+    }
+  ],
+  "publicSecretScan": {
+    "scope": "own QA identity, password, answer, character name, and realm value",
+    "proofFilesScanned": 18,
+    "totalMatches": 0
+  },
+  "screenshots": [
+    {
+      "file": "01-saved-death-before-normal-town-revive.png",
+      "bytes": 1178350,
+      "sha256": "6f5cc5254345c31f3cbb130b1bbe6c265157177487dafab78fdcbf15e1cfee08",
+      "blackIdentityMasks": true,
+      "gameplayCropPreserved": true
+    },
+    {
+      "file": "02-village-native-task-card-before-measured-readiness.png",
+      "bytes": 1225294,
+      "sha256": "af0cc80a744079fd4245f8d3a9fdfce04f78228e355b222d86890acae28d88cf",
+      "blackIdentityMasks": true,
+      "gameplayCropPreserved": true
+    },
+    {
+      "file": "03-fresh-village-native-task-card.png",
+      "bytes": 1165204,
+      "sha256": "e9b4a7b080bd63e789e66dfb26b435856f4142205f31438bebbfb634afac7afc",
+      "blackIdentityMasks": true,
+      "gameplayCropPreserved": true
+    },
+    {
+      "file": "04-bounded-natural-hunt-incomplete.png",
+      "bytes": 991206,
+      "sha256": "d80da385042c6bb3cf4937a7010a9a8d9842d994198346e5ae67f8da48c40e7f",
+      "blackIdentityMasks": true,
+      "gameplayCropPreserved": true
+    },
+    {
+      "file": "05-saved-death-before-normal-town-revive.png",
+      "bytes": 881309,
+      "sha256": "7b1cb6e2ee1531db4daf0184b038d9e9647849a0a387ddc42c7e9e7f03caa3fe",
+      "blackIdentityMasks": true,
+      "gameplayCropPreserved": true
+    },
+    {
+      "file": "06-saved-progress-native-diary.png",
+      "bytes": 1149163,
+      "sha256": "08e7e7eeb47a909a7300f20b20fccb08f3a5b74fc3bb1095031f5693d6217ccc",
+      "blackIdentityMasks": true,
+      "gameplayCropPreserved": true
+    }
+  ],
+  "otherCopyablePublicImage": "../onboarding-v13-browser-r7/04-ordinary-merchant-before-real-gold-purchase.png",
+  "runnerSha256": "44605c2bb3d4dd3bb08fd50cac8308c3d3054821ef1109fbb10a0389112b4303"
+}

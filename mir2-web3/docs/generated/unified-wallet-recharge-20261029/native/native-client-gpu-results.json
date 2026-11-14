@@ -1,0 +1,57 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T15:53:22.464335+00:00",
+  "producerReceipt": {
+    "filename": "native-client-gpu-results.json",
+    "bytes": 1641,
+    "sha256": "da43f15e74618338903e0fb39183051ca09552c50d7c34b13e7e10e3da7e0914"
+  },
+  "producerReport": [
+    {
+      "filter": "billing_windows_gpu_three_routes_and_channel_states",
+      "scope": "client-gpu",
+      "exitCode": 0,
+      "startedAtUtc": "2026-10-29T14:25:11.7103596Z",
+      "elapsedSeconds": 4.4070913,
+      "log": "C:\\mir2-build\\unified-20261029\\native-client-gpu-billing_windows_gpu_three_routes_and_channel_states.log",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "filter": "procurement_windows_gpu_five_pages_and_explicit_confirmations",
+      "scope": "client-gpu",
+      "exitCode": 0,
+      "startedAtUtc": "2026-10-29T14:25:16.1430409Z",
+      "elapsedSeconds": 1.5079773,
+      "log": "C:\\mir2-build\\unified-20261029\\native-client-gpu-procurement_windows_gpu_five_pages_and_explicit_confirmations.log",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "filter": "simplified_chinese_npc_quest_and_inventory_render_offscreen",
+      "scope": "client-gpu",
+      "exitCode": 0,
+      "startedAtUtc": "2026-10-29T14:25:17.6530948Z",
+      "elapsedSeconds": 1.5570647,
+      "log": "C:\\mir2-build\\unified-20261029\\native-client-gpu-simplified_chinese_npc_quest_and_inventory_render_offscreen.log",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "filter": "guild_main_window_matches_independent_crystal_gdi_reference_96dpi",
+      "scope": "client-gpu",
+      "exitCode": 0,
+      "startedAtUtc": "2026-10-29T14:25:19.2114377Z",
+      "elapsedSeconds": 1.4260619,
+      "log": "C:\\mir2-build\\unified-20261029\\native-client-gpu-guild_main_window_matches_independent_crystal_gdi_reference_96dpi.log",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    }
+  ],
+  "phase": "initial integrated snapshot; historical relative to final1875 Game; no stale source pins treated as current"
+}

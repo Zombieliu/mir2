@@ -1,0 +1,221 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T20:09:13.127Z",
+  "publicChild": "capacity-probe17-ended-verification-analysis-v1",
+  "scope": "Actual ended17 independent source seal/execution/result and small public prerequisites; no raw duplication",
+  "copyCount": 16,
+  "totalCopiedBytes": 552378,
+  "copies": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\verify-ended-probe17-v1.mjs",
+        "bytes": 34205,
+        "sha256": "91e33b39a79ba686d6fdadeacfa7d0a774eba791804dddad606e6a40fa6179f6"
+      },
+      "destination": {
+        "path": "capacity-probe17-ended-verification-analysis-v1/tool/verify-ended-probe17-v1.mjs",
+        "bytes": 34205,
+        "sha256": "91e33b39a79ba686d6fdadeacfa7d0a774eba791804dddad606e6a40fa6179f6"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\probe-contract-v1.mjs",
+        "bytes": 5820,
+        "sha256": "b80bedae18b07659fb77fa02f2e581bc2879b3274245e0f27cc7a0f3e00452d4"
+      },
+      "destination": {
+        "path": "capacity-probe17-ended-verification-analysis-v1/tool/probe-contract-v1.mjs",
+        "bytes": 5820,
+        "sha256": "b80bedae18b07659fb77fa02f2e581bc2879b3274245e0f27cc7a0f3e00452d4"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      },
+      "destination": {
+        "path": "capacity-probe17-ended-verification-analysis-v1/tool/hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\expected-probe-policy-v1.json",
+        "bytes": 1008,
+        "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+      },
+      "destination": {
+        "path": "capacity-probe17-ended-verification-analysis-v1/tool/expected-probe-policy-v1.json",
+        "bytes": 1008,
+        "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\run-ended-probe17-v1.mjs",
+        "bytes": 2257,
+        "sha256": "433169eb07d542f5afff0dc77727545c60e8c6b770bd64b109ca1d190d10eb07"
+      },
+      "destination": {
+        "path": "capacity-probe17-ended-verification-analysis-v1/tool/run-ended-probe17-v1.mjs",
+        "bytes": 2257,
+        "sha256": "433169eb07d542f5afff0dc77727545c60e8c6b770bd64b109ca1d190d10eb07"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\seal-tool-source-v1.mjs",
+        "bytes": 3011,
+        "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+      },
+      "destination": {
+        "path": "capacity-probe17-ended-verification-analysis-v1/tool/seal-tool-source-v1.mjs",
+        "bytes": 3011,
+        "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\derivation-v1.json",
+        "bytes": 11709,
+        "sha256": "6b24c59c2f494c09fc42cbc1ed9eb3cf8db05bd3452beca421db0c104602079c"
+      },
+      "destination": {
+        "path": "capacity-probe17-ended-verification-analysis-v1/tool/derivation-v1.json",
+        "bytes": 11709,
+        "sha256": "6b24c59c2f494c09fc42cbc1ed9eb3cf8db05bd3452beca421db0c104602079c"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\derive-verifier-v1.cjs",
+        "bytes": 8635,
+        "sha256": "377d6de698661f2f340b49e2397dc1b4e8ffc1d41505c2c439d0ce04d8e058c7"
+      },
+      "destination": {
+        "path": "capacity-probe17-ended-verification-analysis-v1/tool/derive-verifier-v1.cjs",
+        "bytes": 8635,
+        "sha256": "377d6de698661f2f340b49e2397dc1b4e8ffc1d41505c2c439d0ce04d8e058c7"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\preparation-v1.json",
+        "bytes": 5762,
+        "sha256": "6b9e51ee0f7f81ba71494be9d6f6fee402178fb15b259def90e0dd69e267d0db"
+      },
+      "destination": {
+        "path": "capacity-probe17-ended-verification-analysis-v1/tool/preparation-v1.json",
+        "bytes": 5762,
+        "sha256": "6b9e51ee0f7f81ba71494be9d6f6fee402178fb15b259def90e0dd69e267d0db"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\independent-review-v1.json",
+        "bytes": 8332,
+        "sha256": "3a145f8b33f97e44387fea854f722a90772d54b37a891052edd4a7976c106621"
+      },
+      "destination": {
+        "path": "capacity-probe17-ended-verification-analysis-v1/tool/independent-review-v1.json",
+        "bytes": 8332,
+        "sha256": "3a145f8b33f97e44387fea854f722a90772d54b37a891052edd4a7976c106621"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\tool-source-frozen-v1.json",
+        "bytes": 2111,
+        "sha256": "b0dc5460824f6b621314a08a3c9596e350e07f45db54caffbf017f4c49266009"
+      },
+      "destination": {
+        "path": "capacity-probe17-ended-verification-analysis-v1/execution/tool-source-frozen-v1.json",
+        "bytes": 2111,
+        "sha256": "b0dc5460824f6b621314a08a3c9596e350e07f45db54caffbf017f4c49266009"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\actual-verification-execution-receipt-v1.json",
+        "bytes": 813,
+        "sha256": "df616e6f7e602b274ac411c9c1dc154de09a9b3aedf8566a33aa6b6e314fed1c"
+      },
+      "destination": {
+        "path": "capacity-probe17-ended-verification-analysis-v1/execution/actual-verification-execution-receipt-v1.json",
+        "bytes": 813,
+        "sha256": "df616e6f7e602b274ac411c9c1dc154de09a9b3aedf8566a33aa6b6e314fed1c"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\actual-verification.log",
+        "bytes": 878,
+        "sha256": "f334a9f097d67bfcbff83e209b23b710b345456cdbdfdd8e0a42e9562452df16"
+      },
+      "destination": {
+        "path": "capacity-probe17-ended-verification-analysis-v1/execution/actual-verification.log",
+        "bytes": 878,
+        "sha256": "f334a9f097d67bfcbff83e209b23b710b345456cdbdfdd8e0a42e9562452df16"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\final-verification.json",
+        "bytes": 451627,
+        "sha256": "4203ff7d2384e0dfbe4a8cb7c2548168603aee67828d389d191e621ece93b519"
+      },
+      "destination": {
+        "path": "capacity-probe17-ended-verification-analysis-v1/execution/final-verification.json",
+        "bytes": 451627,
+        "sha256": "4203ff7d2384e0dfbe4a8cb7c2548168603aee67828d389d191e621ece93b519"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-root-independent-cleanup-v1.json",
+        "bytes": 325,
+        "sha256": "910bc3000ad785599b31aa3eff558a1671ec0af47855b518031c5360dac050df"
+      },
+      "destination": {
+        "path": "capacity-probe17-ended-verification-analysis-v1/execution/root-independent-cleanup-v1.json",
+        "bytes": 325,
+        "sha256": "910bc3000ad785599b31aa3eff558a1671ec0af47855b518031c5360dac050df"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-actual-terminal-independent-facts-v1.json",
+        "bytes": 11241,
+        "sha256": "e354616d0557fb7a934b75e7c8e9546842d9235d3ce45424363093e2c0e8235f"
+      },
+      "destination": {
+        "path": "capacity-probe17-ended-verification-analysis-v1/review/actual-terminal-facts-v1.json",
+        "bytes": 11241,
+        "sha256": "e354616d0557fb7a934b75e7c8e9546842d9235d3ce45424363093e2c0e8235f"
+      }
+    }
+  ],
+  "whitelist": {
+    "path": "capacity-probe17-ended-verification-analysis-v1/public-whitelist-v1.json",
+    "bytes": 6306,
+    "sha256": "e06f50ae111c9688089e5dc2afcdff7d5e6fd870e094c110331656a2b1e787ba"
+  },
+  "readme": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-probe17-ended-verification-analysis-v1\\README.md",
+    "bytes": 2395,
+    "sha256": "44242169f9450aeeba810ea5b236db0b937b530ed03ce99ce83c36eee91483b3"
+  },
+  "relativeLinksChecked": 11,
+  "byteReadbackVerified": true,
+  "originalsChanged": false,
+  "targetEntryExecuted": false,
+  "auditOrRawReplayExecuted": false,
+  "privateOrBinaryCopied": false,
+  "capacityAccepted": false,
+  "p0Passed": false,
+  "p2Frozen": true
+}

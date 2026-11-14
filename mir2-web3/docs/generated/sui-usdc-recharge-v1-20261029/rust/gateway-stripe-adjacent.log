@@ -1,0 +1,9 @@
+
+running 4 tests
+test stripe_billing::tests::stripe_checkout_urls_cannot_open_untrusted_host_credentials_or_shell_scheme ... ok
+test stripe_billing::tests::stripe_loopback_opt_in_is_disabled_by_default_and_rejects_invalid_flags ... ok
+test stripe_billing::tests::stripe_return_base_requires_https_unless_explicit_test_loopback ... ok
+test stripe_billing::tests::stripe_signature_rejects_tamper_stale_future_wrong_secret_and_duplicate_timestamp ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1305 filtered out; finished in 0.00s
+

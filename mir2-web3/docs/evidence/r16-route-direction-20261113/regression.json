@@ -1,0 +1,232 @@
+{
+  "oldSource": "9f8a2407bc9f97dff5851677ed04890e1a2be387",
+  "fixedSource": "ab02b84938eeb61ac844c6e0c894d04abf1c8bb0",
+  "before": {
+    "step": {
+      "type": "move",
+      "point": {
+        "x": 290,
+        "y": 614
+      },
+      "direction": "upright",
+      "mode": "run"
+    },
+    "pending": {
+      "from": {
+        "x": 288,
+        "y": 616
+      },
+      "to": {
+        "x": 290,
+        "y": 614,
+        "direction": "upright"
+      },
+      "direction": "upright",
+      "mode": "run",
+      "sentAt": 1000,
+      "visualUntil": 1600,
+      "phaseCount": 6
+    },
+    "ack": {
+      "x": 289,
+      "y": 615,
+      "direction": "UpRight"
+    },
+    "outcome": "correction"
+  },
+  "after": {
+    "step": {
+      "type": "move",
+      "point": {
+        "x": 290,
+        "y": 614
+      },
+      "direction": "UpRight",
+      "mode": "run"
+    },
+    "pending": {
+      "from": {
+        "x": 288,
+        "y": 616
+      },
+      "to": {
+        "x": 290,
+        "y": 614,
+        "direction": "UpRight"
+      },
+      "direction": "UpRight",
+      "mode": "run",
+      "sentAt": 1000,
+      "visualUntil": 1600,
+      "phaseCount": 6
+    },
+    "ack": {
+      "x": 289,
+      "y": 615,
+      "direction": "UpRight"
+    },
+    "outcome": "confirmed"
+  },
+  "scope": "Actual Git route implementation plus actual movement controller; aligned pending endpoint follows actual Page construction. Full actual-Page send/ACK/continuation eight-direction checks are recorded separately.",
+  "actualBrowserBefore": {
+    "passed": false,
+    "quest": {
+      "current": 2,
+      "objective": "Defeat 2 Scarecrow.\nDefeat 2 RakingCat.",
+      "objectives": [
+        {
+          "current": 2,
+          "done": true,
+          "label": "Defeat 2 Scarecrow.",
+          "required": 2
+        },
+        {
+          "current": 0,
+          "done": false,
+          "label": "Defeat 2 RakingCat.",
+          "required": 2
+        }
+      ],
+      "progressLabel": "Progress 2/4",
+      "questId": 2110003,
+      "required": 4,
+      "rewardPreview": "EXP 2200, Gold 150, Fencing x1",
+      "stage": "inProgress",
+      "summary": "Newcomer V2 main node 3.",
+      "title": "Protect the village",
+      "tracker": "Defeat 2 Scarecrow."
+    },
+    "nonvacuousScarecrowExclusion": true,
+    "route": {
+      "clicked": {
+        "x": 288,
+        "y": 345.5
+      },
+      "started": 1794580724599,
+      "first": {
+        "at": 1794580729375,
+        "point": {
+          "x": 289,
+          "y": 615
+        }
+      },
+      "wire": [
+        {
+          "type": "run",
+          "direction": "upright",
+          "seq": 22,
+          "at": 1794580729341
+        }
+      ],
+      "authority": [
+        {
+          "packet": "UserLocation",
+          "payload": {
+            "direction": "UpRight",
+            "x": 289,
+            "y": 615
+          },
+          "type": "packet",
+          "seq": 23,
+          "at": 1794580729361
+        }
+      ]
+    },
+    "corrections": {
+      "snapshot": 0,
+      "snapshotSuppressed": 0,
+      "ack": 1,
+      "dashFail": 0,
+      "confirm": 5,
+      "confirmDegraded": 1,
+      "legacyInput": 0,
+      "pendingTimeout": 0,
+      "samples": [
+        {
+          "source": "ack",
+          "at": 1794580729360,
+          "packet": "UserLocation",
+          "ack": {
+            "x": 289,
+            "y": 615,
+            "direction": "UpRight"
+          },
+          "pendingFrom": {
+            "x": 288,
+            "y": 616,
+            "direction": "Right"
+          },
+          "pendingTo": {
+            "x": 290,
+            "y": 614,
+            "direction": "upright"
+          },
+          "pendingDirection": "upright",
+          "pendingMode": "run"
+        }
+      ]
+    },
+    "finalObserved": {
+      "x": 289,
+      "y": 615
+    },
+    "host": {
+      "connectionGeneration": 1,
+      "sessionGeneration": 1,
+      "suspended": null,
+      "sceneDeferred": false,
+      "lastIntent": {
+        "direction": "Right",
+        "at": 1794580723243,
+        "discrete": true
+      },
+      "lastAttempt": {
+        "reason": "route-awaiting-authority",
+        "at": 1794580729349
+      },
+      "lastPickup": null,
+      "self": {
+        "x": 289,
+        "y": 615,
+        "direction": "UpRight",
+        "dead": false
+      },
+      "queued": null,
+      "controller": {
+        "canSend": true,
+        "sendDelayMs": 0,
+        "blockedMs": 0,
+        "pending": null
+      },
+      "target": {
+        "x": 290,
+        "y": 615
+      },
+      "targetMapBlocked": false,
+      "targetMapCell": null,
+      "nearbyEntities": [
+        {
+          "objectId": "1",
+          "kind": "npc",
+          "x": 287,
+          "y": 615,
+          "dead": false
+        },
+        {
+          "objectId": "206641",
+          "kind": "monster",
+          "x": 287,
+          "y": 616,
+          "dead": true
+        },
+        {
+          "objectId": "271801",
+          "kind": "monster",
+          "x": 291,
+          "y": 616,
+          "dead": false
+        }
+      ]
+    }
+  }
+}

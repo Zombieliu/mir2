@@ -1,0 +1,214 @@
+{
+  "schemaVersion": 1,
+  "extractedAt": "2026-10-25T06:23:53.928Z",
+  "scope": "Exactly three nearest-preceding public spectator frames, projected only to live biological entities in x241..244/y594..599. Global merged spectator state is neither owner AOI nor a server rejection reason. Original recording payload is not copied.",
+  "runId": "1792908575146-40a66fff",
+  "metadata": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\collect-release-native-10-v2-compact-halo-feasibility-12-recordings-metadata.json",
+    "bytes": 1234,
+    "sha256": "53a0a36be08a846888f2deeef49f3e2136f2fd2f7938cc839ddd16396cf8ebbb"
+  },
+  "recording": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-compact-halo-feasibility-12\\recordings\\0-498030.jsonl",
+    "bytes": 36398000,
+    "sha256": "96f2e1e9ce83188a443d9de19047fd9ad8fced8a886059a276e18c56ecae7d2b",
+    "frames": 918,
+    "unchangedDuringRead": true
+  },
+  "selectionRule": "Nearest capturedAtMs<=target wall time, one frame per target; full-file byte SHA verified in one streaming pass, at most previous raw line retained and only three selected lines JSON-parsed.",
+  "bounds": {
+    "minX": 241,
+    "maxX": 244,
+    "minY": 594,
+    "maxY": 599
+  },
+  "selected": [
+    {
+      "targetAtMs": 1792908757455,
+      "precedingFrameAgeMs": 109,
+      "frame": {
+        "schema": "obelisk.mir2.spectator.v1",
+        "mapFileName": "0",
+        "capturedAtMs": 1792908757346,
+        "sequence": 687
+      },
+      "rawLine": {
+        "line": 687,
+        "startByte": 27640912,
+        "endByteExclusive": 27678679,
+        "bytes": 37767,
+        "sha256": "d8f094ac1063a11c0f5f13d8a279eb125ba93e3469f5e68ae39d4fc88faf6046"
+      },
+      "entities": [
+        {
+          "kind": "selfplayer",
+          "x": 241,
+          "y": 596,
+          "objectId": 1000,
+          "name": "L99367200",
+          "hp": 18,
+          "dead": false
+        },
+        {
+          "kind": "player",
+          "x": 241,
+          "y": 596,
+          "objectId": 50000,
+          "name": "L99367200",
+          "dead": false
+        },
+        {
+          "kind": "monster",
+          "x": 242,
+          "y": 598,
+          "objectId": 206607,
+          "name": "Scarecrow",
+          "hp": 20,
+          "dead": false
+        },
+        {
+          "kind": "monster",
+          "x": 242,
+          "y": 596,
+          "objectId": 206613,
+          "name": "Scarecrow",
+          "hp": 20,
+          "dead": false
+        },
+        {
+          "kind": "monster",
+          "x": 242,
+          "y": 597,
+          "objectId": 206622,
+          "name": "Scarecrow",
+          "hp": 20,
+          "dead": false
+        }
+      ]
+    },
+    {
+      "targetAtMs": 1792908760473,
+      "precedingFrameAgeMs": 262,
+      "frame": {
+        "schema": "obelisk.mir2.spectator.v1",
+        "mapFileName": "0",
+        "capturedAtMs": 1792908760211,
+        "sequence": 698
+      },
+      "rawLine": {
+        "line": 698,
+        "startByte": 28056000,
+        "endByteExclusive": 28093773,
+        "bytes": 37773,
+        "sha256": "5cea5c1904aa45b378d88746a888ed57cab5818e3ee85aac0e22c031ccba7c62"
+      },
+      "entities": [
+        {
+          "kind": "selfplayer",
+          "x": 242,
+          "y": 595,
+          "objectId": 1000,
+          "name": "L99367200",
+          "hp": 18,
+          "dead": false
+        },
+        {
+          "kind": "player",
+          "x": 242,
+          "y": 595,
+          "objectId": 50000,
+          "name": "L99367200",
+          "dead": false
+        },
+        {
+          "kind": "monster",
+          "x": 241,
+          "y": 597,
+          "objectId": 206607,
+          "name": "Scarecrow",
+          "hp": 20,
+          "dead": false
+        },
+        {
+          "kind": "monster",
+          "x": 242,
+          "y": 596,
+          "objectId": 206613,
+          "name": "Scarecrow",
+          "hp": 20,
+          "dead": false
+        },
+        {
+          "kind": "monster",
+          "x": 241,
+          "y": 596,
+          "objectId": 206622,
+          "name": "Scarecrow",
+          "hp": 20,
+          "dead": false
+        }
+      ]
+    },
+    {
+      "targetAtMs": 1792908797964,
+      "precedingFrameAgeMs": 89,
+      "frame": {
+        "schema": "obelisk.mir2.spectator.v1",
+        "mapFileName": "0",
+        "capturedAtMs": 1792908797875,
+        "sequence": 840
+      },
+      "rawLine": {
+        "line": 840,
+        "startByte": 33416531,
+        "endByteExclusive": 33454171,
+        "bytes": 37640,
+        "sha256": "8083e0174e32fd898ac961d9d702e5ac5c69ba946c9b2083c27b3b20a251e104"
+      },
+      "entities": [
+        {
+          "kind": "player",
+          "x": 241,
+          "y": 597,
+          "objectId": 50000,
+          "name": "L99367200",
+          "dead": false
+        },
+        {
+          "kind": "monster",
+          "x": 242,
+          "y": 598,
+          "objectId": 206607,
+          "name": "Scarecrow",
+          "hp": 20,
+          "dead": false
+        },
+        {
+          "kind": "monster",
+          "x": 242,
+          "y": 597,
+          "objectId": 206613,
+          "name": "Scarecrow",
+          "hp": 20,
+          "dead": false
+        },
+        {
+          "kind": "monster",
+          "x": 243,
+          "y": 598,
+          "objectId": 206622,
+          "name": "Scarecrow",
+          "hp": 20,
+          "dead": false
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Captured time is frame sampling time; entity state may combine per-session public snapshots and the frame can precede or follow command consumption.",
+    "No authoritative blocker, reserve state, packet delivery order, movement acceptance reason or per-client send-time AOI is inferred.",
+    "No private recordings, stderr, credentials, account store or video is read/copied."
+  ],
+  "authorizesRun": false,
+  "capacityAccepted": false
+}

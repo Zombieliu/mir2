@@ -1,0 +1,29 @@
+{
+  "kind": "Source68 first local port handshake actual",
+  "url": "http://127.0.0.1:19206/",
+  "normalLoginAttempted": true,
+  "privateFieldsCaptured": false,
+  "network": {
+    "truncated": false,
+    "hasMore": false,
+    "error": "Error during WebSocket handshake: Unexpected response code: 403",
+    "createdEndpoint": "/ws",
+    "closed": true
+  },
+  "uiFeedback": "Connection closed. Start a new login attempt.",
+  "acceptedLogin": false,
+  "storageTooltipUiAccepted": false,
+  "rootWillUsePreviousAccepted19205Port": true,
+  "gatewayConfigReadOrChanged": false,
+  "callerClosed": true,
+  "exitCode": -1,
+  "ownedStop": true,
+  "ownedPid": 73572,
+  "ownedParentPid": 75364,
+  "exited": true,
+  "disposed": true,
+  "reason": "Normal login WebSocket handshake403 on19206, Root selected previous19205port",
+  "originalPrePostGuardPassed": true,
+  "sourceChanged": false,
+  "privateGatewayConfigReadOrChanged": false
+}

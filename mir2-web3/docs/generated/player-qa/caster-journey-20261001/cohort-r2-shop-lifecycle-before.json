@@ -1,0 +1,502 @@
+{
+  "schemaVersion": 1,
+  "capturedAtUtc": "2026-10-01T13:44:00.313604+00:00",
+  "scope": "Before-fix ordinary public protocol evidence for Alchemist Samuel level-9 NPC shop lifetime. This is not native visual acceptance or a fix verification.",
+  "sanitization": "Only sent Interact/SelectNpcDialog, public NPC packet fields, player level, and activeNpcDialog are retained. No auth, account identifiers, character/store data, complete world snapshots, or credentials are copied. SHA256 refers to the private local raw trace, which is not included.",
+  "cohorts": [
+    {
+      "class": "Wizard",
+      "level": 9,
+      "sourceTrace": "C:/mir2-caster-qa-20261001-r2/wizard/Wizard.2026-10-01T09-12-39-083Z.trace.jsonl",
+      "rawTraceSha256": "3db8ce09b47676afa8665756c11cbc6663a3a062f6c2dc2a3ea1d135bdd1fd8a",
+      "rawTraceBytes": 19463782,
+      "selectedSequenceRange": [
+        2952,
+        2958
+      ],
+      "receivedNpcResponseInSelectedRange": false,
+      "goodsToPassiveTextClearMs": 11.0,
+      "events": [
+        {
+          "sequence": 2952,
+          "at": "2026-10-01T09:17:17.741Z",
+          "direction": "sent",
+          "type": "interact",
+          "objectId": 20
+        },
+        {
+          "sequence": 2953,
+          "at": "2026-10-01T09:17:17.811Z",
+          "direction": "received",
+          "type": "packet",
+          "packet": "ObjectChat",
+          "payload": {
+            "objectId": 20,
+            "text": "View"
+          }
+        },
+        {
+          "sequence": 2954,
+          "at": "2026-10-01T09:17:17.822Z",
+          "direction": "received",
+          "type": "worldSnapshot",
+          "payload": {
+            "playerLevel": 9,
+            "activeNpcDialog": {
+              "npcObjectId": 20,
+              "npcName": "Alchemist_Samuel",
+              "title": "Alchemist_Samuel",
+              "body": [
+                "Hello traveller, How may I help you?",
+                "Store."
+              ],
+              "footer": "View",
+              "links": [
+                {
+                  "target": "@BuySell",
+                  "text": "View"
+                },
+                {
+                  "target": "@exit",
+                  "text": "Close"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "sequence": 2955,
+          "at": "2026-10-01T09:17:17.834Z",
+          "direction": "sent",
+          "type": "selectNpcDialog",
+          "target": "@BuySell"
+        },
+        {
+          "sequence": 2956,
+          "at": "2026-10-01T09:17:17.933Z",
+          "direction": "received",
+          "type": "packet",
+          "packet": "NPCGoods",
+          "payload": {
+            "hideAddedStats": true,
+            "panelType": 0,
+            "rate": 1,
+            "list": [
+              {
+                "uniqueId": 43122688,
+                "itemIndex": 658,
+                "name": "(HP)DrugSmall",
+                "price": 40,
+                "count": 1,
+                "icon": 398
+              },
+              {
+                "uniqueId": 43122689,
+                "itemIndex": 658,
+                "name": "(HP)DrugSmall",
+                "price": 40,
+                "count": 5,
+                "icon": 398
+              },
+              {
+                "uniqueId": 43122690,
+                "itemIndex": 658,
+                "name": "(HP)DrugSmall",
+                "price": 40,
+                "count": 10,
+                "icon": 398
+              },
+              {
+                "uniqueId": 43188227,
+                "itemIndex": 659,
+                "name": "(MP)DrugSmall",
+                "price": 40,
+                "count": 1,
+                "icon": 394
+              },
+              {
+                "uniqueId": 43188228,
+                "itemIndex": 659,
+                "name": "(MP)DrugSmall",
+                "price": 40,
+                "count": 5,
+                "icon": 394
+              },
+              {
+                "uniqueId": 43188229,
+                "itemIndex": 659,
+                "name": "(MP)DrugSmall",
+                "price": 40,
+                "count": 10,
+                "icon": 394
+              },
+              {
+                "uniqueId": 43253766,
+                "itemIndex": 660,
+                "name": "(HP)DrugMedium",
+                "price": 110,
+                "count": 1,
+                "icon": 400
+              },
+              {
+                "uniqueId": 43253767,
+                "itemIndex": 660,
+                "name": "(HP)DrugMedium",
+                "price": 110,
+                "count": 5,
+                "icon": 400
+              },
+              {
+                "uniqueId": 43253768,
+                "itemIndex": 660,
+                "name": "(HP)DrugMedium",
+                "price": 110,
+                "count": 10,
+                "icon": 400
+              },
+              {
+                "uniqueId": 43319305,
+                "itemIndex": 661,
+                "name": "(MP)DrugMedium",
+                "price": 110,
+                "count": 1,
+                "icon": 396
+              },
+              {
+                "uniqueId": 43319306,
+                "itemIndex": 661,
+                "name": "(MP)DrugMedium",
+                "price": 110,
+                "count": 5,
+                "icon": 396
+              },
+              {
+                "uniqueId": 43319307,
+                "itemIndex": 661,
+                "name": "(MP)DrugMedium",
+                "price": 110,
+                "count": 10,
+                "icon": 396
+              },
+              {
+                "uniqueId": 43384844,
+                "itemIndex": 662,
+                "name": "(HP)DrugLarge",
+                "price": 225,
+                "count": 1,
+                "icon": 28
+              },
+              {
+                "uniqueId": 43384845,
+                "itemIndex": 662,
+                "name": "(HP)DrugLarge",
+                "price": 225,
+                "count": 5,
+                "icon": 28
+              },
+              {
+                "uniqueId": 43384846,
+                "itemIndex": 662,
+                "name": "(HP)DrugLarge",
+                "price": 225,
+                "count": 10,
+                "icon": 28
+              },
+              {
+                "uniqueId": 43450383,
+                "itemIndex": 663,
+                "name": "(MP)DrugLarge",
+                "price": 225,
+                "count": 1,
+                "icon": 29
+              },
+              {
+                "uniqueId": 43450384,
+                "itemIndex": 663,
+                "name": "(MP)DrugLarge",
+                "price": 225,
+                "count": 5,
+                "icon": 29
+              },
+              {
+                "uniqueId": 43450385,
+                "itemIndex": 663,
+                "name": "(MP)DrugLarge",
+                "price": 225,
+                "count": 10,
+                "icon": 29
+              }
+            ],
+            "goodsCount": 18
+          }
+        },
+        {
+          "sequence": 2957,
+          "at": "2026-10-01T09:17:17.933Z",
+          "direction": "received",
+          "type": "packet",
+          "packet": "NPCSell",
+          "payload": {}
+        },
+        {
+          "sequence": 2958,
+          "at": "2026-10-01T09:17:17.944Z",
+          "direction": "received",
+          "type": "worldSnapshot",
+          "payload": {
+            "playerLevel": 9,
+            "activeNpcDialog": null
+          }
+        }
+      ]
+    },
+    {
+      "class": "Taoist",
+      "level": 9,
+      "sourceTrace": "C:/mir2-caster-qa-20261001-r2/taoist/Taoist.2026-10-01T09-12-39-082Z.trace.jsonl",
+      "rawTraceSha256": "ab71ed80206e2a7ac1a5743dee8943a552b0be235b22f7f2ce6f28be1da96053",
+      "rawTraceBytes": 29186478,
+      "selectedSequenceRange": [
+        3274,
+        3280
+      ],
+      "receivedNpcResponseInSelectedRange": false,
+      "goodsToPassiveTextClearMs": 11.0,
+      "events": [
+        {
+          "sequence": 3274,
+          "at": "2026-10-01T09:17:55.568Z",
+          "direction": "sent",
+          "type": "interact",
+          "objectId": 20
+        },
+        {
+          "sequence": 3275,
+          "at": "2026-10-01T09:17:55.637Z",
+          "direction": "received",
+          "type": "packet",
+          "packet": "ObjectChat",
+          "payload": {
+            "objectId": 20,
+            "text": "View"
+          }
+        },
+        {
+          "sequence": 3276,
+          "at": "2026-10-01T09:17:55.649Z",
+          "direction": "received",
+          "type": "worldSnapshot",
+          "payload": {
+            "playerLevel": 9,
+            "activeNpcDialog": {
+              "npcObjectId": 20,
+              "npcName": "Alchemist_Samuel",
+              "title": "Alchemist_Samuel",
+              "body": [
+                "Hello traveller, How may I help you?",
+                "Store."
+              ],
+              "footer": "View",
+              "links": [
+                {
+                  "target": "@BuySell",
+                  "text": "View"
+                },
+                {
+                  "target": "@exit",
+                  "text": "Close"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "sequence": 3277,
+          "at": "2026-10-01T09:17:55.659Z",
+          "direction": "sent",
+          "type": "selectNpcDialog",
+          "target": "@BuySell"
+        },
+        {
+          "sequence": 3278,
+          "at": "2026-10-01T09:17:55.761Z",
+          "direction": "received",
+          "type": "packet",
+          "packet": "NPCGoods",
+          "payload": {
+            "hideAddedStats": true,
+            "panelType": 0,
+            "rate": 1,
+            "list": [
+              {
+                "uniqueId": 43122688,
+                "itemIndex": 658,
+                "name": "(HP)DrugSmall",
+                "price": 40,
+                "count": 1,
+                "icon": 398
+              },
+              {
+                "uniqueId": 43122689,
+                "itemIndex": 658,
+                "name": "(HP)DrugSmall",
+                "price": 40,
+                "count": 5,
+                "icon": 398
+              },
+              {
+                "uniqueId": 43122690,
+                "itemIndex": 658,
+                "name": "(HP)DrugSmall",
+                "price": 40,
+                "count": 10,
+                "icon": 398
+              },
+              {
+                "uniqueId": 43188227,
+                "itemIndex": 659,
+                "name": "(MP)DrugSmall",
+                "price": 40,
+                "count": 1,
+                "icon": 394
+              },
+              {
+                "uniqueId": 43188228,
+                "itemIndex": 659,
+                "name": "(MP)DrugSmall",
+                "price": 40,
+                "count": 5,
+                "icon": 394
+              },
+              {
+                "uniqueId": 43188229,
+                "itemIndex": 659,
+                "name": "(MP)DrugSmall",
+                "price": 40,
+                "count": 10,
+                "icon": 394
+              },
+              {
+                "uniqueId": 43253766,
+                "itemIndex": 660,
+                "name": "(HP)DrugMedium",
+                "price": 110,
+                "count": 1,
+                "icon": 400
+              },
+              {
+                "uniqueId": 43253767,
+                "itemIndex": 660,
+                "name": "(HP)DrugMedium",
+                "price": 110,
+                "count": 5,
+                "icon": 400
+              },
+              {
+                "uniqueId": 43253768,
+                "itemIndex": 660,
+                "name": "(HP)DrugMedium",
+                "price": 110,
+                "count": 10,
+                "icon": 400
+              },
+              {
+                "uniqueId": 43319305,
+                "itemIndex": 661,
+                "name": "(MP)DrugMedium",
+                "price": 110,
+                "count": 1,
+                "icon": 396
+              },
+              {
+                "uniqueId": 43319306,
+                "itemIndex": 661,
+                "name": "(MP)DrugMedium",
+                "price": 110,
+                "count": 5,
+                "icon": 396
+              },
+              {
+                "uniqueId": 43319307,
+                "itemIndex": 661,
+                "name": "(MP)DrugMedium",
+                "price": 110,
+                "count": 10,
+                "icon": 396
+              },
+              {
+                "uniqueId": 43384844,
+                "itemIndex": 662,
+                "name": "(HP)DrugLarge",
+                "price": 225,
+                "count": 1,
+                "icon": 28
+              },
+              {
+                "uniqueId": 43384845,
+                "itemIndex": 662,
+                "name": "(HP)DrugLarge",
+                "price": 225,
+                "count": 5,
+                "icon": 28
+              },
+              {
+                "uniqueId": 43384846,
+                "itemIndex": 662,
+                "name": "(HP)DrugLarge",
+                "price": 225,
+                "count": 10,
+                "icon": 28
+              },
+              {
+                "uniqueId": 43450383,
+                "itemIndex": 663,
+                "name": "(MP)DrugLarge",
+                "price": 225,
+                "count": 1,
+                "icon": 29
+              },
+              {
+                "uniqueId": 43450384,
+                "itemIndex": 663,
+                "name": "(MP)DrugLarge",
+                "price": 225,
+                "count": 5,
+                "icon": 29
+              },
+              {
+                "uniqueId": 43450385,
+                "itemIndex": 663,
+                "name": "(MP)DrugLarge",
+                "price": 225,
+                "count": 10,
+                "icon": 29
+              }
+            ],
+            "goodsCount": 18
+          }
+        },
+        {
+          "sequence": 3279,
+          "at": "2026-10-01T09:17:55.761Z",
+          "direction": "received",
+          "type": "packet",
+          "packet": "NPCSell",
+          "payload": {}
+        },
+        {
+          "sequence": 3280,
+          "at": "2026-10-01T09:17:55.772Z",
+          "direction": "received",
+          "type": "worldSnapshot",
+          "payload": {
+            "playerLevel": 9,
+            "activeNpcDialog": null
+          }
+        }
+      ]
+    }
+  ],
+  "observedInvariant": "NPCGoods/NPCSell open a service, then an ordinary worldSnapshot clears activeNpcDialog text 11 ms later without an NPCResponse close packet. Snapshot text absence must not be interpreted as an explicit service close.",
+  "validationStatus": "Wire chronology and source cause inspected; dynamic regression and repaired production behavior remain to be verified by the integrating worker."
+}

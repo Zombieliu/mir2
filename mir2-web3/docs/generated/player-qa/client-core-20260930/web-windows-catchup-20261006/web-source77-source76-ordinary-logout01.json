@@ -1,0 +1,22 @@
+{
+  "source": "Source76 ordinary browser before Source77 replacement",
+  "ordinaryGameBeforeLogout": true,
+  "preLogoutMap": "Bichon Province",
+  "preLogoutPosition": {
+    "x": 290,
+    "y": 611
+  },
+  "panelState": "all character and spells closed; minimap collapsed ordinarily",
+  "locatorKeyAttempt": "deadline without observed state change",
+  "ordinaryNativeAltXExecuted": true,
+  "settledPublicFormCounts": {
+    "passwordFields": 1,
+    "accountFields": 1,
+    "merchantButtons": 0
+  },
+  "ordinaryLogoutReachedLogin": true,
+  "credentialValuesStored": false,
+  "loginScreenshotRetained": false,
+  "privateStateRead": false,
+  "goalComplete": false
+}

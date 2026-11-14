@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "beforeSha256": "16a4204573038f56ee1e036c7392f3ff3ea43319ccbeb6d3c5aed393f1a3b9d9",
+  "afterSha256": "1e9b8d4c7d4caf951b7b16bef72b2851b3443684fcbc66a2e905faed6825673d",
+  "addedDependencyEdges": [
+    "getrandom@0.2.17 -> js-sys",
+    "getrandom@0.2.17 -> wasm-bindgen",
+    "mir2-bevy-runtime -> getrandom@0.2.17"
+  ],
+  "versionsChanged": 0,
+  "originalCrlfPreserved": true,
+  "normalizedEqualsPreviouslyBuiltExternalLock": true
+}

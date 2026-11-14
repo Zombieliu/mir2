@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "basis": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\root-seal-and-guard-v1.mjs",
+    "bytes": 17596,
+    "sha256": "5767d9e1af9844413cc579624cf8571fd3edc4c0f56aff1d799b2bd7688cb95d"
+  },
+  "target": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-anti-convergence-feasibility-19\\root-seal-and-guard-v1.mjs",
+    "bytes": 17593,
+    "sha256": "06229ef67a7053c2e3f0a6d597a9952999a63255be3ea72987eacf98f284d455"
+  },
+  "rules": [
+    {
+      "at": 336,
+      "before": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+      "after": "4fb58ade4aa95b677bb795625d01da542a84a3f7"
+    },
+    {
+      "at": 445,
+      "before": "445325ec1b052cffffb07437c38ec0a4688741a0b9207e7895e514e8e4a7f634",
+      "after": "3b0a0a8300744d6e0d34315f7bbab934252e1e70b124353ae7cf7a2398952df8"
+    },
+    {
+      "at": 541,
+      "before": "full-lifecycle-scout-observer-preference-v1",
+      "after": "full-lifecycle-scout-anti-convergence-v1"
+    },
+    {
+      "at": 13651,
+      "before": "nodeCodeFullTests:219",
+      "after": "nodeCodeFullTests:226"
+    }
+  ],
+  "rawInverseExact": true,
+  "scope": "Only execution J, current Node aggregate, canonical new full16 directory and226 metadata count change. All source guarding, project API, actual syntax-before-write, prepare reference preflight and no-seeder controller flow stay raw exact.",
+  "controllerPreparedRevision": "root-controller-preparation-v1.json",
+  "runtimePreparedSelectedByCli": true,
+  "sourceImported": false,
+  "modeExecuted": false
+}

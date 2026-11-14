@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "attempt": 4,
+  "configPin": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source65-npc-gold-projection-20261011-01/root-approved01/gateway-npc-purchase-test04-config04.json",
+    "bytes": 5690,
+    "sha256": "824089a9ef4b80de6b35cb50a98aeb7014dd9bb86ef0ea4e7bac6d740ee5f043"
+  },
+  "outer": {
+    "owner": "Root",
+    "exitCode": 90,
+    "builderPid": 50572,
+    "kind": "Source65 generation02 Root accepted gateway-npc-purchase-test04",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 73,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source65-npc-gold-projection-20261011-01/root-approved01/gateway-npc-purchase-test04-config04.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "cargoForwarded": false,
+  "receiptFiles": 0,
+  "accepted": false,
+  "reason": "Root config environment still referenced the pending Guard policy instead of the accepted Root policy. Guard refused before probe/Cargo. Original caller and gates unchanged; correction is data-only policy path and SHA binding."
+}

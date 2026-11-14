@@ -1,0 +1,476 @@
+{
+  "schemaVersion": 1,
+  "preparedAt": "2026-10-24T19:45:29.098Z",
+  "sourceCommit": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+  "backendSourceCommit": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+  "driverSourceCommit": "c42f860e0544f0687a5ccf5ddaccad4daecc8acc",
+  "backendSourceManifest": "C:/mir2-build/p01-completion-20261024/backend-source-native-attack-v2.json",
+  "originalBackendReleaseReused": true,
+  "driverFrozenManifest": "C:\\mir2-build\\p01-completion-20261024\\capacity-movement-coordination-driver-frozen-v1.json",
+  "driverSourceSha256": "35868583cbacd7215bf3eadee0e8d6781ed1abe4f21bc40c0c0255d24797faae",
+  "sourceConfigSha256": "6d7dbb8598753fa826c1d26849c2168489cc2153e898ed75570d7e37c55ea776",
+  "files": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack\\0.map.gz",
+      "bytes": 512762,
+      "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal_respawn_manifest.json",
+      "bytes": 6799671,
+      "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\ws\\LICENSE",
+      "bytes": 1083,
+      "sha256": "dcd0a622a3a2c94fe3aa6238b76363f87df442afe788cbad966afe943ed62281"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\ws\\index.js",
+      "bytes": 45840,
+      "sha256": "af354cb13a11abe910cdbcb70943cb450b01b24f322026ae3f88d428d148395d"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\ws\\package.json",
+      "bytes": 114,
+      "sha256": "40f71b1fd703434f93cf2d4f34a68ccdd884de8b70b5ab05b2ee197726e19b26"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\node_modules\\next\\package.json",
+      "bytes": 3188,
+      "sha256": "546222266ef4402af870e96f03964570038e8498f4a4f7cb6dcf591f08cb07ec"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\package.json",
+      "bytes": 22280,
+      "sha256": "9149ab59b87c138f5aec42d4abfdb1f95006aeaf1ed70fdf736a43ab2fb6dcc9"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+      "bytes": 129465,
+      "sha256": "854a6281bfcd164176477f70dc88a41e1478a8b425448d810e197970f695c4db"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs",
+      "bytes": 180693,
+      "sha256": "17ec1c40b5c0acfdd553b171e29225311a687e80091f4c175a0775fd6e434617"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-catalog-transport.mjs",
+      "bytes": 3794,
+      "sha256": "a833ad9709da46145a991a8270ed5864f37a8023ea1290f44f7c17bf3589d24f"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-lifecycle.mjs",
+      "bytes": 39080,
+      "sha256": "e5dffc398590e9a4c6593257770753b7979431977fb2aba3d2e48986f3287410"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-load-smoke.mjs",
+      "bytes": 38588,
+      "sha256": "3dc4d65c2e514a075e11a84799ac3f1fafbfcb8df51fefbc648dc3a3c24f7fc0"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-multiplayer-smoke.mjs",
+      "bytes": 38856,
+      "sha256": "a3ce02d111925c41e25b32a5522f0d17243cd78fab8142e92bca5eb1c45915ea"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-native-resume-smoke.mjs",
+      "bytes": 20058,
+      "sha256": "2020952e157f3a0a9de16b679f1681497b3d547dce50acc1ec9ef89769cdebe2"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\newcomer-v2-supply-policy.mjs",
+      "bytes": 10901,
+      "sha256": "eb0c50969844ce6f5622a7d83336cfe7f4d86dbbe2ac05a83c0daf6e1321e398"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\policy.mjs",
+      "bytes": 87501,
+      "sha256": "b36a72ddbfcaa2cf19d6656ab53387f4161b2be0b4904342abf0ca1a87450506"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-client.mjs",
+      "bytes": 8454,
+      "sha256": "cc1efb06b93984d203a388bb9f20f042240594434572339ba1ef435fc27dad8e"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-loadout.mjs",
+      "bytes": 33042,
+      "sha256": "43479cb8d2fe7f4d3feefff13d0a2b4291112d3971629bfc07ae3bfee28f14f2"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-navigation.mjs",
+      "bytes": 18249,
+      "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-observation.mjs",
+      "bytes": 14376,
+      "sha256": "b69ba03e9f6ee05286d401341c6dbbe6dac4a6e5014fa6a67e9c6167c072d097"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-play.mjs",
+      "bytes": 46278,
+      "sha256": "ce01b337cb8650abccb04c2eb5783d20c76f73b92af1c9db441d89e9bbed8781"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-refresh.mjs",
+      "bytes": 844,
+      "sha256": "ea93b5657ff08d2415015b29cb2f6cc1d4c368bdca6b2c62f889d077b490c58f"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-status.mjs",
+      "bytes": 451,
+      "sha256": "240c070810f5386926db49c35fe9caa5b8c684724a684b9452439bb08bbc5dce"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-supplies.mjs",
+      "bytes": 79734,
+      "sha256": "0b1fd8478ac1a007a7185654dc407f68fa27f866d0fd174c45740af48d0c1fc1"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-survival.mjs",
+      "bytes": 52409,
+      "sha256": "5fd6b537c7625e00131b62e48734102b363ca2bf813c367e30c1f694191488dd"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\config\\quest-guidance\\newcomer-supplies.json",
+      "bytes": 1152,
+      "sha256": "313de1d7e0faf0cc70ab62e8a5079ea8d211fd75d06479d290621fd0aa5fa1f2"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_npc_info_manifest.json",
+      "bytes": 313945,
+      "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-movement-coordination-driver-frozen-v1.json",
+      "bytes": 7765,
+      "sha256": "61273b4e6aed7ceb3c8cbb04324d0892a560ae7f0bc2de4edfc22d3e13266853"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\launcher-source-frozen-v1.json",
+      "bytes": 2355,
+      "sha256": "c697bbeba40db903dc5c7afd452c4c1f1b3daf33422014af2c845ee300bd45e1"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\preparation-plan.json",
+      "bytes": 5171,
+      "sha256": "e1bdddce7fccb0d4309a1fcb1a70099a094f3e9beaeba569e6963a24080f38d2"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-attack-v2.json",
+      "bytes": 1139,
+      "sha256": "d27ff7ef91c979d7884aa99047c27a820d845850d63786ea30fd88d786eb197f"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/backend-source-native-attack-v2.json",
+      "bytes": 11716,
+      "sha256": "94c7ee1b121fac0634212989638d7c451e8ce89343b3bf23a9d940d7365f289d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-feasibility-05\\gateway-build-pin.json",
+      "bytes": 1168,
+      "sha256": "4b8b9ed6f90ca0a748a0e3ab18bb8a3207a0e0c437fc82292246e33906fca390"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-attack-v2-driver-frozen-v1.json",
+      "bytes": 6123,
+      "sha256": "6c8bc4eef07b455a7a7cf76cea98874a010811d720834de8897279d403ec403b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\initialize-private.ps1",
+      "bytes": 1941,
+      "sha256": "4deff086a5f53aaad191bcfd7e99de8e23c297fc6e1a121852a3fc13c1cf390e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\input-lib.mjs",
+      "bytes": 13776,
+      "sha256": "dc865126c27b3b8da895b915f5d9e7c9e6c74aa887bc8e46613b476de27c70c6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\monitor-owned.mjs",
+      "bytes": 1082,
+      "sha256": "f2d56c3eb26182251b6c8cc69c2274e5708d4e633c17bc4abb1414ed81c66c47"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\prepare-inputs.mjs",
+      "bytes": 11053,
+      "sha256": "34a9dd9389896e023974420892649ad09f0a2464aa4678b1ef2bbeb4b73ae832"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\recover-drained-owned.ps1",
+      "bytes": 2910,
+      "sha256": "443b47eb1988c982ffafb3b228e0aafff06734e1542d8219054d5c35ce408735"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\request-stop.mjs",
+      "bytes": 815,
+      "sha256": "13c6a9aee3cc0845344ebd0ebb5aa43a62da8b1629daf0fd77e7bb6d9b89d639"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\run-owned.mjs",
+      "bytes": 16294,
+      "sha256": "2e28fa5fe23077097615e93c835f862400abf455228141752b5665f461ad1285"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\verify-feasibility-gate.mjs",
+      "bytes": 12529,
+      "sha256": "ebab305c5b50500e381966e92de42892d5ff154f0bd42924ad20a033617675a9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\scenario.json",
+      "bytes": 5844,
+      "sha256": "7d0bed4a61c5e62d61b55456d87706da135712161a42987fffbd5d452dfb3402"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\resource-profile.json",
+      "bytes": 1630,
+      "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\run-options.json",
+      "bytes": 3068,
+      "sha256": "e1527c9aa14b3ee1deb60d3202e4a0b9bbc3e7b616a357bf81f6bfd7c3b92d87"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\scenario-prefix-readiness.json",
+      "bytes": 1851,
+      "sha256": "7a1e4fc52f39680c7c53f37898bb75eda742437a9173880c44c2848272677794"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\provisioning.json",
+      "bytes": 332,
+      "sha256": "754c451d51b23e06e8f4e755eede64937e542c7fd046e75510f5d038e8a3975e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\gateway-build-pin.json",
+      "bytes": 1296,
+      "sha256": "9b0efba15495ee1b31e1eba86eca5e143e7dc7418ebfef300251f982b0b8c77f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-02\\feasibility-gate.json",
+      "bytes": 3803,
+      "sha256": "a20191a7ac49e1c775915f130a9bdd2465afb5171cfeb37d00b1aeb75a12d942"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-ordinary-two-name-safe-home-100-candidate-v3.json",
+      "bytes": 5844,
+      "sha256": "7d0bed4a61c5e62d61b55456d87706da135712161a42987fffbd5d452dfb3402"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-feasibility-04\\scenario.json",
+      "bytes": 1362,
+      "sha256": "701a2a3e30c1b963653af1a767f5af290e15fef207a7359cc90492cf5e496921"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-baseline-100\\resource-profile-local-host.json",
+      "bytes": 1630,
+      "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-stage-two-name-safe-home-supply-plan-v3.json",
+      "bytes": 229425,
+      "sha256": "1fbdd41fda6398f96457f4de293fc3b5bfe6fbb34529bcc2500d4dd8abc2331a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-stage-two-name-package-v3.json",
+      "bytes": 207906,
+      "sha256": "c0fafa966e571f9e108ba6873cc6096f0a0b5118a5bff3953f2179cf829c1ce5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\realm-cleanup.json",
+      "bytes": 2039,
+      "sha256": "60ff54cd7e9d195cec7ab1c64572fa158d5fb177c502f6606456c9755ce4e79b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\gateway-build-pin.json",
+      "bytes": 1317,
+      "sha256": "cdceae9cec4b0a0383642da9f8db6328891d7c227886689558e54bdd7b911041"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\reports\\1792870589933-af9ef086.report.json",
+      "bytes": 172239,
+      "sha256": "3cff9154f0ed9ea1c7b80089b144074f8b1fd86849620675d30f8c9eadb27da4"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\source-pins-admitted-v2.json",
+      "bytes": 17608,
+      "sha256": "39005965dc2e8a6b5d605df780b0e9ea82198175b77a2106d2d8a94e9aa457e3"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\source-pins.json",
+      "bytes": 17185,
+      "sha256": "ce3302c7ad11fbb2c17c40105b89402dab30a087090d7f7556435e6f1a635840"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\report-provenance.json",
+      "bytes": 991,
+      "sha256": "5df3c47309911ed61e7d54e5ef3672830344c66dca7455b8b80d91cf66e7788e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\launcher-source-frozen-v1.json",
+      "bytes": 2396,
+      "sha256": "32303d637205386052b093ac692503231f7e236530179b12afe035a20a2ab61c"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\evidence-tools\\verify-evidence.mjs",
+      "bytes": 46895,
+      "sha256": "5d7033ea574537d9fbf01ee271a3fae4e7b40ca677e7c9aacb5ee76e6c33fe58"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\reports\\1792870589933-af9ef086.samples.jsonl",
+      "bytes": 9395564,
+      "sha256": "6ede64425f5fe435ba343ddfc74fbb824e38db280f2ca1161cb90ea8b6a0b473"
+    },
+    {
+      "file": "C:\\Program Files\\nodejs\\node.exe",
+      "bytes": 85202416,
+      "sha256": "c22d1c59a1f767a1ed0178445a027f2257d318c55430fc819d48f269586822b7"
+    },
+    {
+      "file": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\target\\debug\\seed_capacity_accounts.exe",
+      "bytes": 67974656,
+      "sha256": "3a9f0e237d3a8dea63bceb7e182a3d189c255f4d8d54ec5bb1ac1e23a3c042ec"
+    }
+  ],
+  "feasibilityGate": {
+    "schemaVersion": 1,
+    "verifiedAt": "2026-10-24T19:45:00.903Z",
+    "sourceCommit": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+    "backendSourceCommit": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+    "driverSourceCommit": "c42f860e0544f0687a5ccf5ddaccad4daecc8acc",
+    "feasibilityDriverSourceCommit": "c42f860e0544f0687a5ccf5ddaccad4daecc8acc",
+    "exactSameFrozenDriverInputs": true,
+    "driverFrozenManifest": "C:\\mir2-build\\p01-completion-20261024\\capacity-movement-coordination-driver-frozen-v1.json",
+    "driverSourceSha256": "35868583cbacd7215bf3eadee0e8d6781ed1abe4f21bc40c0c0255d24797faae",
+    "releaseSha256": "855b4ba3c80ccb99b4128a9ee1170bc56ad51fcbaf022d5269f0b6662986c61f",
+    "runId": "1792870589933-af9ef086",
+    "navigationCoordination": {
+      "scope": "Native tool-local conservative union of original AOI obstacles, active controlled owner receipts and one in-flight movement hint per connection; never authoritative occupancy, snapshots or AOI.",
+      "maximumHintCellsPerConnection": 7,
+      "blockedOpportunityRule": "A conflicting prepared move is still an offered navigation-blocked/native opportunity; original cadence, completion and correction gates remain."
+    },
+    "feasibilityPassed": true,
+    "capacityAccepted": false,
+    "profile": "probe",
+    "native10SoakSeconds": 360,
+    "actualPassedSoakWindows": 6,
+    "rawRows": 16032,
+    "rawMonitor": {
+      "count": 214,
+      "complete": true,
+      "maxGapMs": 7796
+    },
+    "files": [
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\realm-cleanup.json",
+        "bytes": 2039,
+        "sha256": "60ff54cd7e9d195cec7ab1c64572fa158d5fb177c502f6606456c9755ce4e79b"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\gateway-build-pin.json",
+        "bytes": 1317,
+        "sha256": "cdceae9cec4b0a0383642da9f8db6328891d7c227886689558e54bdd7b911041"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\reports\\1792870589933-af9ef086.report.json",
+        "bytes": 172239,
+        "sha256": "3cff9154f0ed9ea1c7b80089b144074f8b1fd86849620675d30f8c9eadb27da4"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\source-pins-admitted-v2.json",
+        "bytes": 17608,
+        "sha256": "39005965dc2e8a6b5d605df780b0e9ea82198175b77a2106d2d8a94e9aa457e3"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\source-pins.json",
+        "bytes": 17185,
+        "sha256": "ce3302c7ad11fbb2c17c40105b89402dab30a087090d7f7556435e6f1a635840"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\report-provenance.json",
+        "bytes": 991,
+        "sha256": "5df3c47309911ed61e7d54e5ef3672830344c66dca7455b8b80d91cf66e7788e"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\launcher-source-frozen-v1.json",
+        "bytes": 2396,
+        "sha256": "32303d637205386052b093ac692503231f7e236530179b12afe035a20a2ab61c"
+      },
+      {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\evidence-tools\\verify-evidence.mjs",
+        "bytes": 46895,
+        "sha256": "5d7033ea574537d9fbf01ee271a3fae4e7b40ca677e7c9aacb5ee76e6c33fe58"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-coordinated-feasibility-06\\reports\\1792870589933-af9ef086.samples.jsonl",
+        "bytes": 9395564,
+        "sha256": "6ede64425f5fe435ba343ddfc74fbb824e38db280f2ca1161cb90ea8b6a0b473"
+      }
+    ]
+  },
+  "localImportModuleCount": 21,
+  "nextBundledWsEntry": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\node_modules\\next\\dist\\compiled\\ws\\index.js",
+  "acl": {
+    "private": {
+      "allowedPrincipalCount": 2,
+      "ownerOnlyVerified": true
+    },
+    "recordings": {
+      "allowedPrincipalCount": 2,
+      "ownerOnlyVerified": true
+    }
+  },
+  "scope": "Exact formal release/driver/import/transport/data/runner and authentic feasibility raw closure. No private store/credential/recording payload in public evidence.",
+  "ordinaryLoginBudget": {
+    "admission": 25,
+    "reservedVerification": 5,
+    "total": 30,
+    "windowMs": 901000,
+    "persistentLedger": true,
+    "resetOrBypass": false
+  },
+  "realOrdinaryAccounts": 100,
+  "charactersCreated": 0,
+  "gameplayGrants": 0,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

@@ -1,0 +1,408 @@
+{
+  "head": "bfbee701891748d7897ea228677165fa0fed0d46",
+  "sourceRoot": "C:\\r16-ui-asset-recovery-20261113\\source",
+  "reusedArchive": "995458ccb096d9d682d3c0d67324e0a9962e0856f49647c17fa3875dbe52db00",
+  "previousReceiptSha256": "7b083ea43a2a8a0a05edd1d364840293a39355d584c6dbffc594fc33216b6949",
+  "previousGeneratedInputs": {
+    "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js": "3eb60cb1c4b3a931befe42485b10925ef161da576c47974c63b4b811a7a0ee99",
+    "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+    "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js": "2c18b5168f4a5210f4879c06e7373807a6dedb3a81137fdc28080191bc0f5aa5",
+    "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm": "9950afa3eb67ba5d618269f72ba1aeb23413f766a6d9bfa00021bfd4e85fbe8f",
+    "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime.js": "04e9fc42f89f1f302047b5d5101cf4e02035b0cf6241d8f9f4550e2dd531d92b",
+    "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm": "5f8b82ab48665cd20e8c45ce0da0f221a6919dfab07aca43fea7fd312f34c185",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/runtime-manifest.json": "36bdaa0116064c9b41cf8f54a547e53319011180e2275e1c5549e2ed7a33041b",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime.js": "3eb60cb1c4b3a931befe42485b10925ef161da576c47974c63b4b811a7a0ee99",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgl2/mir2_bevy_runtime.js": "2c18b5168f4a5210f4879c06e7373807a6dedb3a81137fdc28080191bc0f5aa5",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgl2/mir2_bevy_runtime_bg.wasm": "9950afa3eb67ba5d618269f72ba1aeb23413f766a6d9bfa00021bfd4e85fbe8f",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgl2-shared/mir2_bevy_runtime.js": "04e9fc42f89f1f302047b5d5101cf4e02035b0cf6241d8f9f4550e2dd531d92b",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm": "5f8b82ab48665cd20e8c45ce0da0f221a6919dfab07aca43fea7fd312f34c185",
+    "public/original-asset-manifest.generated.json": "4c4df4a5043dabd373f29ad781746d8b4e9f185db4beac51f4ac299190e6dc75",
+    "public/bootstrap/login/chrsel-0-1024.webp": "bc59b901477dfc3870e1f29e288af76006d0b1f2fea0b0e906fd6817f08fe592",
+    "public/bootstrap/login/chrsel-0-768.webp": "c6a175bda3546115b852c031c638c390bded87c8f9874dda163cf3a1b21999ca",
+    "public/bevy-entity-atlases/hooking-cat.png": "2102df985c82359a4d9bfee382c734996c25692e08669dc38173f6b81b436173",
+    "public/bevy-entity-atlases/manifest.json": "61754d2b8456fe55adecc18ec537b7b15e19998cb701c7c7a403ea1b5b1ff64d",
+    "public/bevy-entity-atlases/starter-bichon-base-p1.png": "54b329bc0716f0d866908b7a098ca7be2a62bc300087e6adb938a08341b4594d",
+    "public/bevy-entity-atlases/starter-bichon-base-p2.png": "6ecfdd3d20040ea8ac552efb7bed07c8ed0a85f67c9aa6184ee83828e7a9d0df",
+    "public/bevy-entity-atlases/starter-bichon-base-p3.png": "5c0ba7723386202ee0b70d302362c4a7e0f793c8bca7ddfb1fb9f5a000289e35",
+    "public/bevy-entity-atlases/starter-bichon-base-p4.png": "b47bba6a9948a2ecdfb6b77c7d4b153a03b66d5d930a636192929bc7662d5db4",
+    "public/bevy-entity-atlases/starter-bichon-base-p5.png": "201422cd1b26625e7205f7f7afa332ca0d3d1f159ddc95b367bcb448e1cb0a11",
+    "public/bevy-entity-atlases/starter-bichon-base-p6.png": "c0b0c1b04170ee851fbb4d83ff0d95423723ad1b5280fd0e7a9c9e3b32a0235b",
+    "public/bevy-entity-atlases/starter-bichon-base-p7.png": "26a3eb81c31001e1e47893e67e9fb3b614837cb56f165b3972b1fafeab929d20",
+    "public/bevy-entity-atlases/starter-bichon-base.png": "9cd99e43693cab3d706b4b8324e70d0697709cb5ddf2df0d957d27f0b95395ed",
+    "lib/generated/bevy_runtime_version.json": "36bdaa0116064c9b41cf8f54a547e53319011180e2275e1c5549e2ed7a33041b"
+  },
+  "changedFiles": [
+    {
+      "filename": "mir2-web3/apps/web/lib/pinned-bootstrap-chunk.ts",
+      "bytes": 1860,
+      "sha256": "03d1360370f6064c23a3d2078659c42dd7708fdbb947c0d82fc38ea6b457b421"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/first-crystal-scene-request.ts",
+      "bytes": 5353,
+      "sha256": "48b852251d28cd592dec31706c4f8309ae284cd21626b220d2d65fcef994e691"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/r16-entry-scene.ts",
+      "bytes": 11968,
+      "sha256": "950b89252300de474150c793269e6d6d59d3dbedd13c0302e9bfd611257ac1d0"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/r16-native-localization.ts",
+      "bytes": 16751,
+      "sha256": "97b84013a21157a310e48c4d8a9475ebf2b69ef357c72b4df393e431253f1909"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/generated/r16-entry-bootstrap-chunks.ts",
+      "bytes": 874,
+      "sha256": "d8679fc9154ae7bfaa64ee2b6ca44de338e3eb43327be1bbe24da4239eab90b3"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/generate-r16-bootstrap-chunks.mjs",
+      "bytes": 2412,
+      "sha256": "a257ff2f97a9251562bdf3189c6ce9432ebb58394bbcd4eebbf28e5864b49fc8"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-pinned-bootstrap-chunk.mjs",
+      "bytes": 8575,
+      "sha256": "4edb7382891c02f9f804a1a7e056f14b7c27f9dbdca7673a1f1b76e002ca18fb"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-native-localization.mjs",
+      "bytes": 24551,
+      "sha256": "3b61bbf237d493c120ed568f2d6642d1ba408aa2e801c738a74c016265923643"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs",
+      "bytes": 59810,
+      "sha256": "024b949c7c6da1c1f18cf8ce97f8420dbbab80fe92d1fded89637aaba00fb926"
+    },
+    {
+      "filename": "mir2-web3/apps/web/package.json",
+      "bytes": 23742,
+      "sha256": "78aaba367f7695c558beb1283363533ef7482767f6b9b77c32bf723b27217015"
+    }
+  ],
+  "inherited": [
+    {
+      "filename": "mir2-web3/apps/web/app/components/original-client-scene-map-rendering.tsx",
+      "sha256": "e7d750764b9d5213f46d6eddc59c343b01c9e58729b90a87953e9f8720b60abc",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/components/original-client-scene-visual-layers.tsx",
+      "sha256": "8365cdd41569c95329ad509b581e6bb64b2af757afeffcd9d1c6cfe766b4dbab",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/components/original-client-self-sprite.tsx",
+      "sha256": "e857adb1861028f0c824f3ff1eb5b0b2733ceb0ed1794e6b7b3b69952e8d44be",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/components/original-client-shell-types.ts",
+      "sha256": "ad6401295c2f0825415473df1edd87cf223104603500bfbabd32c1595d635fe0",
+      "matchesHead": false,
+      "lineEndingOnly": true,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/original-client-shell.tsx",
+      "sha256": "514c6063383a895d9a4f55fb25375fa0d7becccaab0437aaeefb313bdf10f9fb",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/page.tsx",
+      "sha256": "ed60899e3e1dd65aac35de651ced1eaca831014006adbe624e498726455b2259",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/bevy-runtime-initializer.ts",
+      "sha256": "0fa306877da37eae8daa4b4e92fb2794f99149a8802b23195cc016bd72796ffa",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/first-crystal-scene-request.ts",
+      "sha256": "d6eaf1031735dd7340c76d45b74e0c024d455e15baf0bec95984c65392709656",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/generated/bevy_runtime_version_numeron_r16.json",
+      "sha256": "36bdaa0116064c9b41cf8f54a547e53319011180e2275e1c5549e2ed7a33041b",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/generated/r16-entry-player-meta.json",
+      "sha256": "ad6009d407e1aa8f6f64cbf8ab475d57390295f1403cbde0d99abc0e8da233ed",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-0.json",
+      "sha256": "bb1eda24546b8248fea7f80996360633fc8f477b54b2951f081b8b74f189c221",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-1.json",
+      "sha256": "4bb01af39ff213e134f7231ad4650609a61d89d25788ceb5963f2ff40ce267bc",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-2.json",
+      "sha256": "4fdb6781a518fc51af12ea03dd93eaac09254c22df3e7a0f655dbb4333ee49a9",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-3.json",
+      "sha256": "37e2f47551c1f9aee517885d18ea1cb5b1e345b6b06340c1344741ca9242e898",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-4.json",
+      "sha256": "a43a11bd499f6c595118e22e3418289e383023987dae21af26a8fb8a81503565",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-5.json",
+      "sha256": "c267a43cf30648c60d4ad0af1d9d50124b06a6c057c4bfc69aa18e347ae1ea81",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-6.json",
+      "sha256": "2cb526007a83cb26658ccd97b5ffeba687f9d10816c19f3e95be523e84026e5d",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/generated/r16-standing/female-7.json",
+      "sha256": "2ac66d0fbf3ad60fb376c93b077af51e7d5df2bc8d0e46bf5eb9e03e252b20c8",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-0.json",
+      "sha256": "659f075a33af83a13333d8d5dba56b39efc944652a574a767eb06aee2c6ac87c",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-1.json",
+      "sha256": "20bf63a9b5e28dd48afeee29b1bf33e02069b607573c1a13e831135b976874d4",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-2.json",
+      "sha256": "a00c85045cee979791ab38f2e2427e662a6e7108b9519e1d0d01b23b36e65835",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-3.json",
+      "sha256": "238c9255f53c9a2606826f3a26c92ecc96e9b71bd0e7a54e4976760822788915",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-4.json",
+      "sha256": "cd70e665584658db6d1a4152589e3f69bae2a649b6c1e13eb881f8e26b9d3fa2",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-5.json",
+      "sha256": "706f243f4aa7224501528901ab8ade62b3b600c8a06a0a9260fe23550aab05f5",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-6.json",
+      "sha256": "bab3d117cd90d20cf77b29c23c1649900b2c4392a7ddc4323f166466aa4ef608",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/generated/r16-standing/male-7.json",
+      "sha256": "d7fff4cb93595e1d86176fa8a905b74e52c1a685f5ad63944a1e004f86461d3c",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/r16-entry-scene.ts",
+      "sha256": "aac1e38ca8b178bef3f771d8e0e080b687e74dd47e6252deb1129d254e4fad8e",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/r16-standing-sprites.ts",
+      "sha256": "964f3107e08ae94008abba564bc3bb6136da10db6b1a123f90f5c5ac6a6ac194",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/self-sprite-image.ts",
+      "sha256": "b394662b43381cd41feebb50244b81ef397f89dbb54d1df2f2087552c0e89441",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/self-sprite-residency.ts",
+      "sha256": "262d9491b056855cab583f6f07222f66a99220727b9aa7d7b5626bd481e15955",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/package.json",
+      "sha256": "3de43b9bb8fc206f585b341f430954ae6ebb4b0bec026efc55035cf97158fef1",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/generate-r16-entry-visuals.mjs",
+      "sha256": "350dadce53f8fa6c3b404418baffba9eb2c80d09f95be9ce2af52d37da692e75",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/generate-r16-standing-sprites.mjs",
+      "sha256": "6b0098f54c50d9c8683ca66ee6147894219299c4f0f3ea685c4b2af92ef12ef9",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/lib/production-asset-config.mjs",
+      "sha256": "812d40691adbbdc333b44b3492455b2a9fdea86492b53e5a84f670f28cf6075d",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-finite-recovery.mjs",
+      "sha256": "c9878a9194302880e847af162430888ea1c53e03538f4e81bbf4015f070f9e89",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs",
+      "sha256": "129e1f98389e836e339079d159cab143eb4699ae145eafd94d0d1410d68cf098",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-module-owner.mjs",
+      "sha256": "7d30ffb68a7c808cc907d354252d3e4c7af7b8216d89908246c12a430024f5cc",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-r2-upload.mjs",
+      "sha256": "7dcb651a471994bc61e885269f1dc14716ffb112085379928cc2c28db9953238",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-production-asset-config.mjs",
+      "sha256": "36e79fa9e637df835172c3cdd8b3a4515e42c66b84f000f18e9d5dcbdd4d0f72",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-entry-npc-recovery.mjs",
+      "sha256": "12ee33513fa10c79a8069b8b784bb59c177066def34c5486f513322564b80264",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-entry-player-readiness.mjs",
+      "sha256": "619e876df03e06c5ad17849793462dcfedee9c14d6e6fc575fb98cce66d34b41",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-standing-sprites.mjs",
+      "sha256": "de69dfc61f7b17f3ee6b902894b16d57a70f0ceb5de7d801f13389ba9c53d554",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-renderer-wasm-opt.mjs",
+      "sha256": "4ef82814341f6d260820b2f5a2d76e05f82ef393ce638e2263947dc21f283109",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs",
+      "sha256": "b959cb1c234ae9895ae6af0400d7a1b7293f43552ffe5bf29009f666cde8ea6a",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-self-sprite-residency.mjs",
+      "sha256": "d94c403ea1024cd8611c578c93c74c8286e059653c73c7777692ca5c47d10fb4",
+      "matchesHead": true,
+      "lineEndingOnly": false,
+      "pinnedGeneratedOverride": false
+    }
+  ],
+  "excludedForeignShell": true,
+  "foreignWriteSetOverlap": 0,
+  "protectedFiles": 159,
+  "foreignConcurrentChanges": 14
+}

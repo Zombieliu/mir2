@@ -1,0 +1,179 @@
+{
+  "scripts": [
+    "/_next/static/chunks/4bd1b696-cf26082be303f5ad.js",
+    "/_next/static/chunks/3794-951646a34e7a976a.js",
+    "/_next/static/chunks/main-app-52523270176102a1.js",
+    "/_next/static/chunks/9028-64ceb76c7942843e.js",
+    "/_next/static/chunks/2910-4aaf275a25c08c72.js",
+    "/_next/static/chunks/app/layout-066d458b2e2685ab.js",
+    "/_next/static/chunks/6041-c8aaa8607d41dce1.js",
+    "/_next/static/chunks/2506-fc7c64ebc7cdafe9.js",
+    "/_next/static/chunks/5335-b012c9ad2c7db658.js",
+    "/_next/static/chunks/app/game/page-4a99491afc953749.js",
+    "/_next/static/chunks/polyfills-42372ed130431b0a.js",
+    "/_next/static/chunks/webpack-90dfa2a7a22d9f2f.js"
+  ],
+  "webpack": "/_next/static/chunks/webpack-90dfa2a7a22d9f2f.js",
+  "standing": [
+    {
+      "path": "/_next/static/chunks/1800.f2c60704fa683e90.js",
+      "gender": "male",
+      "direction": 0,
+      "bytes": 15162,
+      "gzipBytes": 10767,
+      "sha256": "581a70514c3d4736a0bc75e6b1d0da117e06938a1e1737b75e0f97701860554a",
+      "id": "1800",
+      "publicPath": "/_next/static/chunks/1800.19c71628f8e82dd4.js"
+    },
+    {
+      "path": "/_next/static/chunks/2215.24ffe63880707860.js",
+      "gender": "female",
+      "direction": 2,
+      "bytes": 12045,
+      "gzipBytes": 8398,
+      "sha256": "ba09091f1378b906fa95fa522fbfcdd94f7a27c9f8fe10220babb096d8a3d189",
+      "id": "2215",
+      "publicPath": "/_next/static/chunks/2215.6ace83641d2454a7.js"
+    },
+    {
+      "path": "/_next/static/chunks/2220.9964fb3d331d1098.js",
+      "gender": "female",
+      "direction": 7,
+      "bytes": 13881,
+      "gzipBytes": 9768,
+      "sha256": "32af02c4d93b2158eeadbf7348f63630fb69d3264c00afedf2541735a9ff7016",
+      "id": "2220",
+      "publicPath": "/_next/static/chunks/2220.0b4a1634da395aaf.js"
+    },
+    {
+      "path": "/_next/static/chunks/3017.866bc7d04665a195.js",
+      "gender": "male",
+      "direction": 7,
+      "bytes": 14682,
+      "gzipBytes": 10418,
+      "sha256": "b9a1e9b96fe5a37539110747f31334bc64ece2d75e95493f1895f9f5936b60a0",
+      "id": "3017",
+      "publicPath": "/_next/static/chunks/3017.1d408f617d14e947.js"
+    },
+    {
+      "path": "/_next/static/chunks/3328.403bcc4a2a38f91a.js",
+      "gender": "female",
+      "direction": 3,
+      "bytes": 14189,
+      "gzipBytes": 9990,
+      "sha256": "af9d282c3e08ec47328e6d37ef99451dd735e564d0bdf672dd14ff52855a5b9b",
+      "id": "3328",
+      "publicPath": "/_next/static/chunks/3328.9dae2e402d18aee5.js"
+    },
+    {
+      "path": "/_next/static/chunks/4894.125e2ee32e13bc44.js",
+      "gender": "male",
+      "direction": 2,
+      "bytes": 11615,
+      "gzipBytes": 8061,
+      "sha256": "4da1ba6cb06ac7217f0280d7d64cf91c709d464d88afb8c76e40da66d1f5a6c0",
+      "id": "4894",
+      "publicPath": "/_next/static/chunks/4894.9137a019630d6459.js"
+    },
+    {
+      "path": "/_next/static/chunks/4947.6def49dba8fb3dad.js",
+      "gender": "female",
+      "direction": 6,
+      "bytes": 11797,
+      "gzipBytes": 8207,
+      "sha256": "4c46c608c5547ac59e80bd85646fd3f3d3df891342b7ee08e61d9c0fcebb7b4e",
+      "id": "4947",
+      "publicPath": "/_next/static/chunks/4947.e3fadecc4d490769.js"
+    },
+    {
+      "path": "/_next/static/chunks/5809.e689500beb523383.js",
+      "gender": "female",
+      "direction": 4,
+      "bytes": 14605,
+      "gzipBytes": 10351,
+      "sha256": "68f229d791507964c7960a91264e1bffde043ac48caa50632c8767bf239d1d4a",
+      "id": "5809",
+      "publicPath": "/_next/static/chunks/5809.b25b9fe6a961911d.js"
+    },
+    {
+      "path": "/_next/static/chunks/6322.e8929f4935465a6c.js",
+      "gender": "female",
+      "direction": 5,
+      "bytes": 13805,
+      "gzipBytes": 9756,
+      "sha256": "9363a6f02cd1fce776a7296ff478b439ae89cc20b39ca7ba63ba8d6ad3769776",
+      "id": "6322",
+      "publicPath": "/_next/static/chunks/6322.2aa571f0b44a6c4e.js"
+    },
+    {
+      "path": "/_next/static/chunks/7014.ba84ff5fd745f7b8.js",
+      "gender": "female",
+      "direction": 1,
+      "bytes": 14172,
+      "gzipBytes": 10009,
+      "sha256": "7b61741ed4bb01e1d9c90c0df1dde608ccb506d79b39c90d1b28511e579908ae",
+      "id": "7014",
+      "publicPath": "/_next/static/chunks/7014.fc532adcf7c10925.js"
+    },
+    {
+      "path": "/_next/static/chunks/8251.0a321b0e2f04a7bb.js",
+      "gender": "male",
+      "direction": 5,
+      "bytes": 14199,
+      "gzipBytes": 10031,
+      "sha256": "f8f22c2ccb6eb026de55bafc3ba441a843b91f86a6d99f309a59fae73baaa66a",
+      "id": "8251",
+      "publicPath": "/_next/static/chunks/8251.f5df49eacdde2902.js"
+    },
+    {
+      "path": "/_next/static/chunks/8276.e1c397bbd8dd7497.js",
+      "gender": "male",
+      "direction": 4,
+      "bytes": 15100,
+      "gzipBytes": 10699,
+      "sha256": "818eac72d768bfc8964b1670e29579c8ceec2813113d2dbbc1fc18e159074dfc",
+      "id": "8276",
+      "publicPath": "/_next/static/chunks/8276.6135a4ed55d62c7d.js"
+    },
+    {
+      "path": "/_next/static/chunks/8725.ca43147fd99b73be.js",
+      "gender": "female",
+      "direction": 0,
+      "bytes": 14957,
+      "gzipBytes": 10618,
+      "sha256": "be3720cc7b6412da7867c97d1af7af159a2eb90ce6d6413264668360e3bbf960",
+      "id": "8725",
+      "publicPath": "/_next/static/chunks/8725.d54c9910c41e773f.js"
+    },
+    {
+      "path": "/_next/static/chunks/9322.6598ba2629fd7643.js",
+      "gender": "male",
+      "direction": 6,
+      "bytes": 11815,
+      "gzipBytes": 8217,
+      "sha256": "c7c92711b3e4a70458642b514d1f0acd950a3665178106bce3aa4aafeb3c09a9",
+      "id": "9322",
+      "publicPath": "/_next/static/chunks/9322.2e27199a5218d8c2.js"
+    },
+    {
+      "path": "/_next/static/chunks/9517.383007a9282a0cd7.js",
+      "gender": "male",
+      "direction": 3,
+      "bytes": 15007,
+      "gzipBytes": 10652,
+      "sha256": "1aa0f9bfaefaaf439351d394eea8f9d507d549c697d202adec8d619dbb82c56c",
+      "id": "9517",
+      "publicPath": "/_next/static/chunks/9517.afd74d727e2d0ea6.js"
+    },
+    {
+      "path": "/_next/static/chunks/9839.31e3ee320dced7df.js",
+      "gender": "male",
+      "direction": 1,
+      "bytes": 14167,
+      "gzipBytes": 9993,
+      "sha256": "1fc8f6c53a9fdbc194ff0f346ed505fd00f724bf6c504dabd343755f98462698",
+      "id": "9839",
+      "publicPath": "/_next/static/chunks/9839.86b119db0960837e.js"
+    }
+  ]
+}

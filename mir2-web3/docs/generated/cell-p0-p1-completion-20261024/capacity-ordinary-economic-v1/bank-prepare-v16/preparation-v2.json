@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "state": "PENDING_CURRENT_JS_ROOT_QUALIFICATION_NO_RUNTIME_EXECUTION",
+  "packageId": "ordinary-capacity-bank-prepare-v16",
+  "tools": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\source-lib-v1.mjs",
+      "bytes": 18471,
+      "sha256": "bdbcb65eb6027f8d0c0812ab6975b5d53beee28d133be36d8cdf75593f57ca16"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\copy-source-bank-v1.mjs",
+      "bytes": 13254,
+      "sha256": "9bbf125dcded1a1e808bc804b0211e9bb973a064c5bb4edaf4a481cfbbb60a64"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\freeze-prepare-v1.mjs",
+      "bytes": 8821,
+      "sha256": "ae91d938ed4006828488a4cd08e227a84657fcdfaeade6be028b17b297457ae6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\run-owned-prepare-v1.mjs",
+      "bytes": 26491,
+      "sha256": "6cb4fe2ec2927242ea9ef4e6d301e3d7e7f3b57841cffd48eccb19abf06d1157"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\owned-child-v1.mjs",
+      "bytes": 2401,
+      "sha256": "08f7962808e5d66983766ef3ad74a284dace6ae2eeabe739a0a01445b05b08cc"
+    }
+  ],
+  "sourcePlan": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\source-bank-plan-pending-v1.json",
+    "bytes": 18226,
+    "sha256": "d05a78dc7930a4dfc49a77e0545f64de8c3ba74d1ccd49d67fdd69b1f6813be4"
+  },
+  "config": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\prepare-config-pending-v1.json",
+    "bytes": 8209,
+    "sha256": "bb61014ac6a88ab588c3fa7dde029cd05a9dfae343b29d6a0d45d677feea5930"
+  },
+  "binding": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\backend-release-binding-pending-v1.json",
+    "bytes": 1216,
+    "sha256": "0e68b64abdf8d4b579c42295d956117099b41be7730fd3fdfedf0c9908e64ef7"
+  },
+  "derivation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\derivation-v1.json",
+    "bytes": 36177,
+    "sha256": "67ff371c859c3a80b1a8850b8b69f2f7b94f4f752862cde4212fe0bf9389ae0f"
+  },
+  "syntax": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\syntax-checks-v1.json",
+    "bytes": 1227,
+    "sha256": "aed8423fb08a450258e3c3dd276914cb040ddb0def7a79f6f708e46f780e7330"
+  },
+  "readme": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\README-pending-v1.md",
+    "bytes": 1846,
+    "sha256": "55f223c95dd31333dda69bef700166cd0a2bb0b4036e4426576e424c0bcdacfb"
+  },
+  "generator": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\derive-ordinary-capacity-bank-prepare-v16.mjs",
+    "bytes": 61363,
+    "sha256": "f58938825781fc0a9018f84cd16f48d6a1a2f936b6bdfa87668449408785733f"
+  },
+  "source11PinsMatched": true,
+  "prior4PinsMatched": true,
+  "sourceLibWholeRawUnchanged": true,
+  "currentJsCommit": null,
+  "currentRootReceipt": null,
+  "currentFreshTestCount": null,
+  "currentBackendVerification": null,
+  "actualFreeze": null,
+  "continuation": {
+    "mode": "historical-prepared-index-v1",
+    "historicalPreparedCount": 42,
+    "historicalNotFresh": true,
+    "expectedThisRun": 58,
+    "freshOriginalPoolIndices1Based": [
+      43,
+      100
+    ],
+    "first4FreshReusePerformedThisRun": false
+  },
+  "eligibleForFreezeNow": false,
+  "ownedExecutionPerformed": false,
+  "sourceBankCopyPerformed": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "metadataCorrection": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\ledger-reference-correction-v2.json",
+    "bytes": 1433,
+    "sha256": "4e2e010a313fc2375aa42ae6fc5c5c5f736d785aa63295d8137a371a5c0780cf"
+  },
+  "priorPreparation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\preparation-v1.json",
+    "bytes": 3685,
+    "sha256": "92ae661202af767e4fa0a1e828901326e7590e36a1edc8076d10fc36c1407cd1"
+  }
+}

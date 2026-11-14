@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-25T16:17:46.678Z",
+  "endedAt": "2026-10-25T16:22:57.710Z",
+  "elapsedMs": 311026.8763,
+  "executable": "C:\\Program Files\\nodejs\\node.exe",
+  "args": [
+    "--test",
+    "apps/web/scripts/playtest-capacity-soak.test.mjs",
+    "apps/web/scripts/playtest-capacity-observability.test.mjs",
+    "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+    "apps/web/scripts/playtest-capacity-telemetry.test.mjs"
+  ],
+  "exitCode": 0,
+  "signal": null,
+  "sourceBefore": {
+    "files": [
+      {
+        "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+        "bytes": 37930,
+        "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+        "bytes": 149057,
+        "sha256": "bd731443c41d54a237fc0a6d83f2619d049c0226cbd7f154f67717e8fb0dcea5"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+        "bytes": 243920,
+        "sha256": "ec388119871058883781e2cf422a417c3fb319c25d344fd3092f18da9b354966"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+        "bytes": 4447,
+        "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+        "bytes": 5228,
+        "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+        "bytes": 21246,
+        "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+        "bytes": 10882,
+        "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+        "bytes": 6548,
+        "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+        "bytes": 6277,
+        "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+      }
+    ],
+    "sourceSha256": "5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9"
+  },
+  "sourceAfter": {
+    "files": [
+      {
+        "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+        "bytes": 37930,
+        "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+        "bytes": 149057,
+        "sha256": "bd731443c41d54a237fc0a6d83f2619d049c0226cbd7f154f67717e8fb0dcea5"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+        "bytes": 243920,
+        "sha256": "ec388119871058883781e2cf422a417c3fb319c25d344fd3092f18da9b354966"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+        "bytes": 4447,
+        "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+        "bytes": 5228,
+        "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+        "bytes": 21246,
+        "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+        "bytes": 10882,
+        "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+        "bytes": 6548,
+        "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+      },
+      {
+        "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+        "bytes": 6277,
+        "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+      }
+    ],
+    "sourceSha256": "5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9"
+  },
+  "sourcePinsUnchangedAfterRun": true,
+  "counts": {
+    "tests": 210,
+    "pass": 210,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "log": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\attack-deadline-poll-fix-v1\\frozen-full-driver-v1.log",
+    "bytes": 56491,
+    "sha256": "537f26b4a6037136470083a6a90acbf9ccc432f47f38cdeb82aace539b65dfb0"
+  },
+  "precedingMain185AndAdjacent25AreSeparateActualRuns": true,
+  "capacityAccepted": false
+}

@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "family": "Noto Sans CJK SC",
+  "bytes": 16437364,
+  "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b",
+  "upstreamGitBlobVerified": true,
+  "glyphCount": 65535,
+  "unicodeCodepointCount": 44810,
+  "corpusUniqueCharacters": 2007,
+  "missingCodepoints": [],
+  "corpus": {
+    "included": false,
+    "filename": "glyph-corpus.txt",
+    "bytes": 312441,
+    "sha256": "c9542dbc652fa4dcb148bbf159de77000a0000bc1a95441379d709f81f6a001d",
+    "overlaySha256": "89f6cd57e61e8bc957bb6b5ff10b317ab2948291287f5a01cffd8bb97a89d36f"
+  },
+  "fontAsset": "../../../../apps/game-client/platform-windows/assets/fonts/NotoSansCJKsc-Regular.otf",
+  "license": "../../../../apps/game-client/platform-windows/assets/fonts/OFL-NotoSansCJKsc.txt",
+  "fontBinaryIncluded": false
+}

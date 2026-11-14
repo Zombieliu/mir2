@@ -1,0 +1,7 @@
+
+running 1 test
+web session state flush failed; internal detail: WebSocket protocol error: Sending after closing is not allowed
+test web::tests::mining_websocket_tests::mining_real_websocket_attack_direction_refill_cooldown_logout_and_reentry ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 932 filtered out; finished in 19.41s
+

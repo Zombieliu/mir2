@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-25T06:27:57.166Z",
+  "scope": "FS-only bounded metadata/raw-byte verification. No product/template imports, subprocesses, syntax or test runs, sourceguard, geometry/model checks or live raw reads.",
+  "preseal": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-formal09-preseal-input-check-v1.json",
+    "bytes": 14613,
+    "sha256": "fe5a93d33cda10cbeb3a739ba085f64abb4e9676bd0f1470a7de9802aa2b79bc"
+  },
+  "reviewedFileCount": 34,
+  "reviewedSourceSha256": "705c6d2b2b51804eccd9a9acfede1a56e42381e1dd4643db6f955805b1f17c6b",
+  "allLocalPinsMatched": true,
+  "originalFormalPolicyExact": true,
+  "originalFormalResourcesRawExact": true,
+  "formalScenarioRawExact": true,
+  "noProvisioningState": true,
+  "semanticReviewPending": true,
+  "suitableToSeal": null,
+  "authorizesPrepareOrRun": false,
+  "capacityAccepted": false
+}

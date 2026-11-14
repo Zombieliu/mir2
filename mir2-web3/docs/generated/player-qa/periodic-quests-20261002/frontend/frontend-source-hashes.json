@@ -1,0 +1,328 @@
+{
+  "recordedAtUtc": "2026-10-01T23:33:20.5771038Z",
+  "repository": "C:\\Users\\Administrator\\.codex\\worktrees\\capacity-transport\\mir2-player-journey\\mir2-web3",
+  "branch": "codex/daily-weekly-20261002",
+  "head": "5c47ea01201270603f24137af1caf57ea70c9d2e",
+  "frozenUiScope": true,
+  "liveAcceptance": false,
+  "sourceFiles": [
+    {
+      "path": "apps/game-client/client-bevy/src/quest_destination.rs",
+      "sha256": "4FD27139507B5E82C74F8ACE8A3B9BB72079803F77F4D0FB080C86E70FBE7355",
+      "bytes": 4781
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_hunt_regions.rs",
+      "sha256": "DEE5887003408E2204BFA8020FDF81EFC63E3A85DFF2F88DCBFF01B3CA9F0589",
+      "bytes": 10784
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_turn_in.rs",
+      "sha256": "E84EBC05F7AE6FC4C84E5E4E0EAC04D17D7605FC2DA5416786AE9AF94337257B",
+      "bytes": 19167
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_multi_guidance.rs",
+      "sha256": "84065DCB7E49F07B3B0083E79569F797CCB63522BAF3A32AE03E62C3FCCEF0A2",
+      "bytes": 53257
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_ui.rs",
+      "sha256": "1CC5414CFE55E36F332CC7F3A78EE0837140B03A1E57F51A0BD4D92DC11B2943",
+      "bytes": 365879
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/player_text.rs",
+      "sha256": "78D9B1AA99EBA66EF1F90B42ABC843F92638F7277F8E57354B26714C74DDF46D",
+      "bytes": 49504
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_i18n.rs",
+      "sha256": "CC1CFDB4B937BCCEFE75B688BB96785814515EE068ABC5ACDAFD702E01E25AB0",
+      "bytes": 44859
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/quest_targets.rs",
+      "sha256": "188B4273058C106F158F3B7F6384341FADF7FF9190329AF76E50D89847B1D39D",
+      "bytes": 9980
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/periodic_quest_ui_tests.rs",
+      "sha256": "09D9BE7B40BD7BFBBA7033AB41C265973FF07FBE5DF756472960ACCB8206F01B",
+      "bytes": 34968
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/periodic.json",
+      "sha256": "C5EC0C4AC6904525AE92003DCAE9DD7A799ABCD01C04003149452C44B3FEA73D",
+      "bytes": 254727
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/input.rs",
+      "sha256": "15584174941FFA8D182F3921C7A5AE3F75582C33FADF16006109CD0C822D8D3E",
+      "bytes": 309882
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/quest_route_input_tests.rs",
+      "sha256": "A29E776382E9ED4F08B6019D182AA95E95BD0BA0122D9C87367A38413BE7B1BF",
+      "bytes": 50577
+    },
+    {
+      "path": "packages/game-data/src/periodic_quests.rs",
+      "sha256": "5F6FA1E864187CD1D96F7FA11B58FA5870EF5BBE9B6D25CC0CAC4DA710A6150B",
+      "bytes": 13935
+    },
+    {
+      "path": "config/quest-guidance/daily-weekly-v1.json",
+      "sha256": "22A089FBB05D2BB3663E1B5F2555B6D8147139167A67833E626ADD6A15B47DB0",
+      "bytes": 10029
+    },
+    {
+      "sha256": "E54E2C330F565B377BEAFFC9F58CAC026620594B6018D80102DA02718487DC8F",
+      "bytes": 26981,
+      "path": "apps/game-client/client-bevy/src/native_i18n_visual_tests.rs"
+    }
+  ],
+  "visualAssetRoot": "F:/mir2/Mir2Invite/game/mir2-assets",
+  "assetFrameSets": {
+    "sha256": "280D4FEE9DE0864218611F54014B4BF3487C4478A39133C25EBE211D223E62E9",
+    "path": "F:/mir2/Mir2Invite/game/mir2-assets/original-ui/frame-sets.generated.json"
+  },
+  "bundledFonts": [
+    {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\capacity-transport\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\assets\\fonts\\NotoSans-Bold.ttf",
+      "sha256": "1DF075A380FC7CB898ACF64C1F7B3B4DD780DE3CAA860178BF929DE35817A913",
+      "bytes": 631484
+    },
+    {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\capacity-transport\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\assets\\fonts\\NotoSans-Regular.ttf",
+      "sha256": "478C558EA716033CD60C03438F628DFA75694DCF6B5F6D505A2F05FD2B4F3823",
+      "bytes": 621572
+    },
+    {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\capacity-transport\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\assets\\fonts\\NotoSansArabic-Bold.ttf",
+      "sha256": "4E5462D2E8BE880317B9F49B5B2DA109DDB6A3563D91CC604B67F3535832A555",
+      "bytes": 261460
+    },
+    {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\capacity-transport\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\assets\\fonts\\NotoSansArabic-Regular.ttf",
+      "sha256": "BDFF3E5659D67E67DEF05B33F749683B9376AE819D65D3DD62AC4640B3AAEF48",
+      "bytes": 234892
+    },
+    {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\capacity-transport\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\assets\\fonts\\NotoSansDevanagari-Bold.ttf",
+      "sha256": "6A09C8D797CFC803D32CDC731E809424D74CBAFF59F503DE34ADE421A08E5BC2",
+      "bytes": 250176
+    },
+    {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\capacity-transport\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\assets\\fonts\\NotoSansDevanagari-Regular.ttf",
+      "sha256": "4E3C66638958C3E2AB5D37F47A8DEB89FFFEB7BE9985C665A519BBC7BA762313",
+      "bytes": 243520
+    },
+    {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\capacity-transport\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\assets\\fonts\\NotoSansTC.ttf",
+      "sha256": "864727D210D54F2537BBE23B3A839436C3992AF72DE9322AF5270897246BD44F",
+      "bytes": 11941968
+    },
+    {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\capacity-transport\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\assets\\fonts\\NotoSansThai-Bold.ttf",
+      "sha256": "2AC6C6E8A478E23B15F76E4894AF1FA2210F8F350E4E6E54AAD530BEC03EFBFB",
+      "bytes": 37824
+    },
+    {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\capacity-transport\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\assets\\fonts\\NotoSansThai-Regular.ttf",
+      "sha256": "61CF814EEC46B294D6EA4401AC295D0CECD5207BD2331DCC5A15E7301D30EE44",
+      "bytes": 37780
+    }
+  ],
+  "testBinaries": [
+    {
+      "path": "C:/mir2-build/client-bevy-r29-tests/debug/deps/mir2_client_bevy-4c1babf0437d187a.exe",
+      "sha256": "92D24B43693BE3981F308EDA1B19E00AA427FF06C47E512D3F239E2785537214",
+      "bytes": 176958976
+    },
+    {
+      "path": "C:/mir2-build/platform-windows-default-entry-20261002/debug/deps/mir2_platform_windows-e74665c6bcf6eeea.exe",
+      "sha256": "B601F0A1C5755F8B18295D5BE8BDA070748D0F0505B41AE9FC07049EF5CA5BB2",
+      "bytes": 159420928
+    }
+  ],
+  "visualResult": "C:/mir2-periodic-ui-20261002/visual-r3/periodic-i18n-layouts.json",
+  "visualResultSha256": "A219DF31484E044D238E73805C008F3AA262BB28A7E39632909C6DF6DE153350",
+  "checks": {
+    "i18nRegression": 11,
+    "offlineScreenshots": 90,
+    "offlineGpu": 1,
+    "questRegression": 211,
+    "shopRegression": 64,
+    "windowsRouteRegression": 20,
+    "glyphAndOverflowFailures": 0,
+    "periodicRules": 11
+  },
+  "uiFrameAssets": [
+    {
+      "sha256": "694F7DB11A46A99732C9E3AB8F413DDC6E87C3271ED603C6BF60CF7F719877DB",
+      "bytes": 41470,
+      "path": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Prguse\\360.png"
+    },
+    {
+      "sha256": "087E10D0CC56FAED445FF7A4077633C3611D04A496A407AADA917EB18F929D64",
+      "bytes": 265,
+      "path": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Prguse\\917.png"
+    },
+    {
+      "sha256": "275B3F99E3472B9792552C43ABBA55806031E73492AEA13E357ADD00706F1442",
+      "bytes": 300,
+      "path": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Prguse\\918.png"
+    },
+    {
+      "sha256": "CD50AEC8339A49FD46EECAFF6AA11688EB69ADD45CE93D39E4CCCD1F20972F72",
+      "bytes": 255,
+      "path": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Prguse\\919.png"
+    },
+    {
+      "sha256": "6D12BEA8F919538C548ABC31F7C4684F781204794853B2BE91FB13B951B08E15",
+      "bytes": 83525,
+      "path": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Prguse\\950.png"
+    },
+    {
+      "sha256": "F934D4DE62D80F0506458570F64267625A9261EDC3F3CCD5D8876E9C0272C635",
+      "bytes": 618,
+      "path": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Prguse\\951.png"
+    },
+    {
+      "sha256": "4ED358B5C0F1C6575BEBCE3ACB1753A6CC89A6DE2019DD155ED92EAE1884F662",
+      "bytes": 1194,
+      "path": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Prguse\\956.png"
+    },
+    {
+      "sha256": "929E53F6A2BF667A592527D5A7276AEA9D1F4C59CB1CF5A7EB251E4BC80A7B66",
+      "bytes": 625,
+      "path": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Prguse\\957.png"
+    },
+    {
+      "sha256": "6801DD2737FCA3A43A5669955E7DFBF2BCDA3A1390BF3A74D9E5EF040AD5F3F2",
+      "bytes": 90746,
+      "path": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Prguse\\960.png"
+    },
+    {
+      "sha256": "77EEE235CA7BAF4E9CDA9230907AC11E67CD11DF26A754405639610EAF161547",
+      "bytes": 85739,
+      "path": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Prguse\\961.png"
+    },
+    {
+      "sha256": "5DC76781E2FDAFEA4495193C0071A635DE4D04DB17CB8443970B6D09EAD1B8AA",
+      "bytes": 358,
+      "path": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Prguse\\965.png"
+    },
+    {
+      "sha256": "A6BE762C515FFE5A08CC8352107F61BB7F888A190E7F6E6549F90370FFE92EB5",
+      "bytes": 552,
+      "path": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Prguse\\966.png"
+    },
+    {
+      "sha256": "C1948AB6733B0283DDF505DBF2982FEAF42E2FC6EAD9F10B87B1F4B52353DD9D",
+      "bytes": 285,
+      "path": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Prguse\\979.png"
+    },
+    {
+      "sha256": "79C0669971276DA6A3FD4A4ABFB9EDE8835A8743F89BF3F6F95D9B6B5C5A0DC0",
+      "bytes": 295,
+      "path": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Prguse\\989.png"
+    },
+    {
+      "sha256": "F9F658D6B40C6D4EF0A3D18A0842C073AD9ADF537063E0608F7089BCAD276978",
+      "bytes": 27177,
+      "path": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Prguse\\995.png"
+    },
+    {
+      "sha256": "C027F5C7B996FE5769FE82E22087D6684781A592A15BAD7290C97CA5A1F6C1AD",
+      "bytes": 237,
+      "path": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Prguse\\997.png"
+    },
+    {
+      "sha256": "AC90C59A1D5E1B1AE4709C9B71C8EF1771D08DAB50DC5346910E3040C1410F5F",
+      "bytes": 246,
+      "path": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Prguse2\\197.png"
+    },
+    {
+      "sha256": "77FE223370825445F80B76EEE07680AABED464B3CC569A57DD3AB5BF4337A345",
+      "bytes": 221,
+      "path": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Prguse2\\205.png"
+    },
+    {
+      "sha256": "053EED6C90D967C83D367570634D45563492E317730C9D7D3DA9B9596398C018",
+      "bytes": 249,
+      "path": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Prguse2\\207.png"
+    },
+    {
+      "sha256": "4E481BCA194A082812CAA01C6E4FDEE387C016CF520B68B5FBB5FA2635D04675",
+      "bytes": 681,
+      "path": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Prguse2\\360.png"
+    },
+    {
+      "sha256": "DDE9D5BD146DCE4974BDCBF735FBC746C01FB047E7F24C753386859A7E63738C",
+      "bytes": 776,
+      "path": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Title\\14.png"
+    },
+    {
+      "sha256": "0A8EA4658362CF87153D1C7C2B972CD7EAD2F1BADF14AFD0E47431CC24410022",
+      "bytes": 1184,
+      "path": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Title\\15.png"
+    },
+    {
+      "sha256": "DDE9D5BD146DCE4974BDCBF735FBC746C01FB047E7F24C753386859A7E63738C",
+      "bytes": 776,
+      "path": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Title\\16.png"
+    },
+    {
+      "sha256": "151E538769635EE4C9F84D55A685BDA3794FE1F4F0C0CCE9F40AD6696E4FBF87",
+      "bytes": 1518,
+      "path": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Title\\17.png"
+    },
+    {
+      "sha256": "44C3FF55587D05A3CB9DECF945C7C6BF18C814BB86A1D47EF7D3E0DA5941283C",
+      "bytes": 2016,
+      "path": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Title\\193.png"
+    },
+    {
+      "sha256": "858BF44E33EEF2ADDFF9312A994D40ECEAFED23D8B73D6497CB4119761075482",
+      "bytes": 2364,
+      "path": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Title\\200.png"
+    },
+    {
+      "sha256": "8C5D6D182EC3E838E5900FAEB1F9EC10B9BDA51F57A050C787453AF550F43526",
+      "bytes": 2021,
+      "path": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Title\\203.png"
+    },
+    {
+      "sha256": "980AF8C55B5DC40CBF6E52855D42A167A9FA9A152200CAF4A2109C7285C8C2DA",
+      "bytes": 2045,
+      "path": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Title\\206.png"
+    },
+    {
+      "sha256": "CF7FF2470DBECD88472DAE406F969670A4D02B4E98E592B63526FCE53FB8EFB5",
+      "bytes": 2075,
+      "path": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Title\\210.png"
+    },
+    {
+      "sha256": "3B0F3CB5CE151A3BE6EDB0853A0EDAE7BDE05037EC0781A0DFD897367B7341C8",
+      "bytes": 1982,
+      "path": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Title\\270.png"
+    },
+    {
+      "sha256": "59200DBC82FD73373A4A1AADFBCB21143D4471B2852C2F61221DA6FAF0E4764B",
+      "bytes": 1982,
+      "path": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Title\\273.png"
+    },
+    {
+      "sha256": "44C3FF55587D05A3CB9DECF945C7C6BF18C814BB86A1D47EF7D3E0DA5941283C",
+      "bytes": 2016,
+      "path": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Title\\276.png"
+    },
+    {
+      "sha256": "8A1C3A0CC7DDF8D2A506D5BEE82F102089E59EB5781BDB81221BA7DFF5C6737B",
+      "bytes": 2143,
+      "path": "F:\\mir2\\Mir2Invite\\game\\mir2-assets\\original-ui\\Title\\616.png"
+    }
+  ]
+}

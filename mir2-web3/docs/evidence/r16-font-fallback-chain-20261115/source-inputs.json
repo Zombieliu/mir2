@@ -1,0 +1,226 @@
+{
+  "parent": "ce9b7a999316512d838e93d35777d48030843243",
+  "own": [
+    {
+      "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+      "sha256": "5b45ec68a5efd1b2fe96aa78efcb917fbaa40e8a47a02ee3279a468e141fbbb3"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-asset-worker-font-chain.mjs",
+      "sha256": "a0c26dd02e0bab33d7dfb743f2bc531e098f70ea715cab19b3cde99bac117144"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/smoke-asset-font-chain.mjs",
+      "sha256": "0918836ee19a33cd4dec97e096916fdb657f75ec3fab72b7197c3cf10106bc0a"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs",
+      "sha256": "120d20540012cc2311caf4e3f8d9ad2e73f9c5229ae47c864ead8834543f5dd5"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
+      "sha256": "a480aeb98ec454cc72d5122e50ac84e0eacd1df98e03016798c28c82dc2b77ed"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/asset-namespace-reload.ts",
+      "sha256": "04c5c6fd49ac7e9a1d36583ebff03e7720da4a8f85f5d16811efe731c57b8d43"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-asset-namespace-reload.mjs",
+      "sha256": "c2af0c86bd88d3702e37233b7a30f4d185322e00ef2a609b0e9e645a6a721f3f"
+    }
+  ],
+  "previousFrontendBindings": [
+    {
+      "filename": "mir2-web3/apps/web/lib/scene-asset-preloader.ts",
+      "localBuiltSha256": "0f1d3a0a09d9cdd25dbe1de8539ec4c814305548f9610d019cb4b51856adf93d",
+      "committedSha256": "0f1d3a0a09d9cdd25dbe1de8539ec4c814305548f9610d019cb4b51856adf93d",
+      "gitBlob": "1a1c90f28769f66399eac36302221931704cea5e",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/components/r16-login-door.tsx",
+      "localBuiltSha256": "9233ba688e2233fe05f89a4853aa5e69ac037f1d63e7aa68e36095ca08d44a2c",
+      "committedSha256": "9233ba688e2233fe05f89a4853aa5e69ac037f1d63e7aa68e36095ca08d44a2c",
+      "gitBlob": "0e57fe6da9a9b0c4df08fafdb0f82f4173cfcb8a",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-scene-asset-preloader.mjs",
+      "localBuiltSha256": "0c1aa0ce081bb7733aeb822a76aaf8c33514b986ad05c93d29a4b1751830c4bf",
+      "committedSha256": "0c1aa0ce081bb7733aeb822a76aaf8c33514b986ad05c93d29a4b1751830c4bf",
+      "gitBlob": "cca6c14de54ffac1fb8ac40b90640623b922e6a9",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-auth-layout.mjs",
+      "localBuiltSha256": "9187eb5db8e883da78b55353684d0c3badb8fc5755393ea8fe5bcdaf0db27e5a",
+      "committedSha256": "9187eb5db8e883da78b55353684d0c3badb8fc5755393ea8fe5bcdaf0db27e5a",
+      "gitBlob": "aab7b723b3717cac9d3b33a8dc983db33da446da",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/bevy-runtime-initializer.ts",
+      "localBuiltSha256": "15681d741f5d0e5509913a683dc719631e1e091e46d85cfeef7a9654c7b8eef4",
+      "committedSha256": "15681d741f5d0e5509913a683dc719631e1e091e46d85cfeef7a9654c7b8eef4",
+      "gitBlob": "766c73059d7db02c71b6f0319a5d9c5430db7566",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-initializer.mjs",
+      "localBuiltSha256": "f5f5459a3b5c140a30c15857e96a406237994b94386c0eb7e5933898fb877e6c",
+      "committedSha256": "f5f5459a3b5c140a30c15857e96a406237994b94386c0eb7e5933898fb877e6c",
+      "gitBlob": "9bda11b5d92e973b912f1ae3f747590dee131bac",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-finite-recovery.mjs",
+      "localBuiltSha256": "c87a2661b386054b5c0060a2e71c4409046fbbe2201141b9aefbed4ffc1f10f4",
+      "committedSha256": "c87a2661b386054b5c0060a2e71c4409046fbbe2201141b9aefbed4ffc1f10f4",
+      "gitBlob": "24966c60581e3b8c61ea868bedb44a3f43caf8a3",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/smoke-bevy-runtime-header-probes.mjs",
+      "localBuiltSha256": "aa30eb56dc7547e2ffdcd71ea019a3318b85910a1f7898b4a162bd85977e17bc",
+      "committedSha256": "aa30eb56dc7547e2ffdcd71ea019a3318b85910a1f7898b4a162bd85977e17bc",
+      "gitBlob": "33c7762a3c7be35f0a46585a2dbd50f8c2e9e265",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/page.tsx",
+      "localBuiltSha256": "95074eb037f52fa87262ba98cdb87920083fba64ebade51fdfd727913b80fd63",
+      "committedSha256": "95074eb037f52fa87262ba98cdb87920083fba64ebade51fdfd727913b80fd63",
+      "gitBlob": "3f37a1e54c16598cb2c7b54b14e65d0ef53c2255",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
+      "localBuiltSha256": "92fc7deb19085261dbd7aafb107473263033f855b0f958d6c5b4084ba6a93e42",
+      "committedSha256": "92fc7deb19085261dbd7aafb107473263033f855b0f958d6c5b4084ba6a93e42",
+      "gitBlob": "aebc9eaae9dd312eae9f2c2d4c600484282830e8",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/runtime-header-priority.ts",
+      "localBuiltSha256": "f4626abc2ad4bb523d0ea198085c38e162feb0213e2a6cf9370f5a06e55c19cb",
+      "committedSha256": "f4626abc2ad4bb523d0ea198085c38e162feb0213e2a6cf9370f5a06e55c19cb",
+      "gitBlob": "57618d47a3d25f75526805e2bd05fcc6438f4f91",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-runtime-header-priority.mjs",
+      "localBuiltSha256": "7f991c996d7c5f9bc8873fc95404d835aee9c9e064481505d157ecfb6588ad6f",
+      "committedSha256": "7f991c996d7c5f9bc8873fc95404d835aee9c9e064481505d157ecfb6588ad6f",
+      "gitBlob": "4a8c6985eab7ffecfdd66d08465301a75b87d539",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/lib/r16-static-waterfall.mjs",
+      "localBuiltSha256": "8e59499334a97e2b92b8a1aeeb9902d18043d50e08c388d219a02916209587f8",
+      "committedSha256": "8e59499334a97e2b92b8a1aeeb9902d18043d50e08c388d219a02916209587f8",
+      "gitBlob": "7697be12556c5c2a35bdcc235e50af7d72c06054",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/lib/r16-static-transport.mjs",
+      "localBuiltSha256": "ff35ad6e7638f9839713091a7d6ba61887c10c0510f557386b51b551240d5ab0",
+      "committedSha256": "ff35ad6e7638f9839713091a7d6ba61887c10c0510f557386b51b551240d5ab0",
+      "gitBlob": "04301bd5c70261080db6e224fdfa4842a798df64",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-static-transport.mjs",
+      "localBuiltSha256": "64cf95f53385c4bb0c434ba0757d3a7d6a22a598bd49ac0af7e9fde3cc8bf0dd",
+      "committedSha256": "64cf95f53385c4bb0c434ba0757d3a7d6a22a598bd49ac0af7e9fde3cc8bf0dd",
+      "gitBlob": "9010f05fffa7871ea24d0daaf9778815ec3d3974",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/smoke-runtime-header-priority.mjs",
+      "localBuiltSha256": "54cef1603191344782bb950cde02bdee217db979570ab635235ea6e0251bf417",
+      "committedSha256": "54cef1603191344782bb950cde02bdee217db979570ab635235ea6e0251bf417",
+      "gitBlob": "0c0a01c06afdf8b431ae956e64746c1c8e5ebf33",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/map-world-baseline-refresh.ts",
+      "localBuiltSha256": "9ae435d3b96e1be2ce644ef1456e6215e694953237ba33e78be0d1be09109138",
+      "committedSha256": "9ae435d3b96e1be2ce644ef1456e6215e694953237ba33e78be0d1be09109138",
+      "gitBlob": "511ce5d713be3732e75855633e425b88ffc7ade5",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-map-world-baseline-refresh.mjs",
+      "localBuiltSha256": "c90379b61d767c76b6f2ad7e327091ea979d0a987e83a6674d64cdfe22c884df",
+      "committedSha256": "c90379b61d767c76b6f2ad7e327091ea979d0a987e83a6674d64cdfe22c884df",
+      "gitBlob": "4809fd4dcb879b4529b6cc8bc21c58b8ea5c36fc",
+      "eol": "exact"
+    }
+  ],
+  "generatedInputs": {
+    "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js": "3eb60cb1c4b3a931befe42485b10925ef161da576c47974c63b4b811a7a0ee99",
+    "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+    "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js": "2c18b5168f4a5210f4879c06e7373807a6dedb3a81137fdc28080191bc0f5aa5",
+    "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm": "9950afa3eb67ba5d618269f72ba1aeb23413f766a6d9bfa00021bfd4e85fbe8f",
+    "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime.js": "04e9fc42f89f1f302047b5d5101cf4e02035b0cf6241d8f9f4550e2dd531d92b",
+    "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm": "5f8b82ab48665cd20e8c45ce0da0f221a6919dfab07aca43fea7fd312f34c185",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/runtime-manifest.json": "36bdaa0116064c9b41cf8f54a547e53319011180e2275e1c5549e2ed7a33041b",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime.js": "3eb60cb1c4b3a931befe42485b10925ef161da576c47974c63b4b811a7a0ee99",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgl2/mir2_bevy_runtime.js": "2c18b5168f4a5210f4879c06e7373807a6dedb3a81137fdc28080191bc0f5aa5",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgl2/mir2_bevy_runtime_bg.wasm": "9950afa3eb67ba5d618269f72ba1aeb23413f766a6d9bfa00021bfd4e85fbe8f",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgl2-shared/mir2_bevy_runtime.js": "04e9fc42f89f1f302047b5d5101cf4e02035b0cf6241d8f9f4550e2dd531d92b",
+    "public/bevy-runtime-releases/bevy-0c553a754308e5b8/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm": "5f8b82ab48665cd20e8c45ce0da0f221a6919dfab07aca43fea7fd312f34c185",
+    "public/original-asset-manifest.generated.json": "4c4df4a5043dabd373f29ad781746d8b4e9f185db4beac51f4ac299190e6dc75",
+    "public/bootstrap/login/chrsel-0-1024.webp": "bc59b901477dfc3870e1f29e288af76006d0b1f2fea0b0e906fd6817f08fe592",
+    "public/bootstrap/login/chrsel-0-768.webp": "c6a175bda3546115b852c031c638c390bded87c8f9874dda163cf3a1b21999ca",
+    "public/bevy-entity-atlases/hooking-cat.png": "2102df985c82359a4d9bfee382c734996c25692e08669dc38173f6b81b436173",
+    "public/bevy-entity-atlases/manifest.json": "61754d2b8456fe55adecc18ec537b7b15e19998cb701c7c7a403ea1b5b1ff64d",
+    "public/bevy-entity-atlases/starter-bichon-base-p1.png": "54b329bc0716f0d866908b7a098ca7be2a62bc300087e6adb938a08341b4594d",
+    "public/bevy-entity-atlases/starter-bichon-base-p2.png": "6ecfdd3d20040ea8ac552efb7bed07c8ed0a85f67c9aa6184ee83828e7a9d0df",
+    "public/bevy-entity-atlases/starter-bichon-base-p3.png": "5c0ba7723386202ee0b70d302362c4a7e0f793c8bca7ddfb1fb9f5a000289e35",
+    "public/bevy-entity-atlases/starter-bichon-base-p4.png": "b47bba6a9948a2ecdfb6b77c7d4b153a03b66d5d930a636192929bc7662d5db4",
+    "public/bevy-entity-atlases/starter-bichon-base-p5.png": "201422cd1b26625e7205f7f7afa332ca0d3d1f159ddc95b367bcb448e1cb0a11",
+    "public/bevy-entity-atlases/starter-bichon-base-p6.png": "c0b0c1b04170ee851fbb4d83ff0d95423723ad1b5280fd0e7a9c9e3b32a0235b",
+    "public/bevy-entity-atlases/starter-bichon-base-p7.png": "26a3eb81c31001e1e47893e67e9fb3b614837cb56f165b3972b1fafeab929d20",
+    "public/bevy-entity-atlases/starter-bichon-base.png": "9cd99e43693cab3d706b4b8324e70d0697709cb5ddf2df0d957d27f0b95395ed",
+    "lib/generated/bevy_runtime_version.json": "36bdaa0116064c9b41cf8f54a547e53319011180e2275e1c5549e2ed7a33041b",
+    "lib/generated/client_core_runtime.json": "0130f025581b8d57f56b8b52670446ff57cf88d41954117b49a08f62089a5c14",
+    "public/client-core/06e2c8b392593c1b2c8e367ab8721b6bf5b28cfdca95c985ce7e09e958118c19/mir2_platform_web.js": "87154c4d2b22eceffeda71d2eb52b799db0a4558d1cfb7b6510f48521ea1248a",
+    "public/client-core/06e2c8b392593c1b2c8e367ab8721b6bf5b28cfdca95c985ce7e09e958118c19/mir2_platform_web_bg.wasm": "8015bae3dc34fc00810890d768ed63ce3bac01809d57cb2940aaf24df5b7386a",
+    "public/client-core/46f02fa19b06298816c836b3f389bc11fd442ac43b1ee6cb4e9b22de9197d34f/mir2_platform_web.js": "226578557b1c61d7290f32e539f41e300a75e9f2b411dd1007a588e6de4c614d",
+    "public/client-core/46f02fa19b06298816c836b3f389bc11fd442ac43b1ee6cb4e9b22de9197d34f/mir2_platform_web_bg.wasm": "9311520cd90bcb0990be8aa2c15c5f31c947e84075445de06844410d9276e914",
+    "public/client-core/38b9327f71e789600a89d433bcaeb60f36d28870316da839fce4fcf28f55eaf7/mir2_platform_web.js": "b6a3e9848e46934dd5187120ea543da5d174bf97f1a34d63ca9be714e0b18218",
+    "public/client-core/38b9327f71e789600a89d433bcaeb60f36d28870316da839fce4fcf28f55eaf7/mir2_platform_web_bg.wasm": "9b9cf5f9f9cfbe04986f8f6619460f8a22c5f5c89f36ad2c15df12be9d2b1356",
+    "public/client-core/42d31d633ae52eebe34af0234c0f168909cedd9f74dddc90bff893791c1940e6/mir2_platform_web.js": "5c47d5460070c0a0a044026742aee403295ae086ce4c126a3ea00341c71dae53",
+    "public/client-core/42d31d633ae52eebe34af0234c0f168909cedd9f74dddc90bff893791c1940e6/mir2_platform_web_bg.wasm": "38e0353a03e5f038d259310bff13e8c576fbe73b1e3b551816b53a5a69ad5b93"
+  },
+  "firstBuildSourceComparison": {
+    "count": 2176,
+    "candidateChanges": [
+      {
+        "path": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+        "gitBlob": "a97ea7d52378b70dbcd80337ac41495cd04eec67",
+        "committedSha256": "94796b40517c7fd1ca7914ebaeb7a99d6ebd4a3546e2fa28d1c9d75abe836218",
+        "baselineSha256": "94796b40517c7fd1ca7914ebaeb7a99d6ebd4a3546e2fa28d1c9d75abe836218",
+        "candidateSha256": "5b45ec68a5efd1b2fe96aa78efcb917fbaa40e8a47a02ee3279a468e141fbbb3",
+        "baselineMatchesParent": true,
+        "candidateMatchesBaseline": false
+      }
+    ],
+    "expectedInheritedGeneratedOverride": {
+      "path": "mir2-web3/apps/web/lib/generated/bevy_runtime_version.json",
+      "gitBlob": "6385cb67a25d4cc7fc4db81df9d1fbad3ada9172",
+      "committedSha256": "fceed58ba19d24a92ac8bf27258c9443f5e1126c32c5e4be7aa5860820cbc27b",
+      "baselineSha256": "36bdaa0116064c9b41cf8f54a547e53319011180e2275e1c5549e2ed7a33041b",
+      "candidateSha256": "36bdaa0116064c9b41cf8f54a547e53319011180e2275e1c5549e2ed7a33041b",
+      "baselineMatchesParent": false,
+      "candidateMatchesBaseline": true
+    },
+    "overrideMatchesFrozenBuild": true,
+    "rawComparisonSha256": "defc36da8f8249bf7681831ef4d7068c7e9d41a3b74c13a71375054dc017a700"
+  },
+  "firstAndSecondBuildRetained": true,
+  "rawBuildReceiptSha256": "a152acf1eb63f84b37f68caf0e58f925bc530c3eecfde392b448648d3155b394"
+}

@@ -1,0 +1,29 @@
+{
+  "schema": "mir2.health-zero.root-04-format-addendum.v1",
+  "passed": true,
+  "rootProofSha256": "a659f7090c95ce0fb46b7e64ad227bbd32fb8289d404d278685719988ee93892",
+  "archiveBindings": [
+    {
+      "archive": "health-zero-authority-03",
+      "sha256": "119ac6fd6d7127bcb124fa9e81ba3c282c387ef7f24cb7e29265bdcd30d58ec3",
+      "verifiedFiles": 40
+    },
+    {
+      "archive": "delivery-checkpoint-03",
+      "sha256": "22594d8cb75cd75b51e90b755f9e63cce9a2d46d3cc9283aa4d6b09c3f79b09a",
+      "verifiedFiles": 21
+    },
+    {
+      "archive": "health-zero-authority-04",
+      "sha256": "5167ac6c04909555441c0fff805d00985eff6084cefd17c36a5a9a29f17c2cc6",
+      "verifiedFiles": 48
+    }
+  ],
+  "sourceFilesStillMatchFinalTests": 11,
+  "formatCommand": "cargo +1.95.0 fmt --manifest-path apps/game-client/platform-windows/Cargo.toml -- --check",
+  "formatLog": "health-zero-authority-root-04-07-format.log",
+  "formatLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "formatExitCode": 0,
+  "gitDiffCheckPassed": true,
+  "publicMutations": false
+}

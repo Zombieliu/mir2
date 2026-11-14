@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "state": "controller-prepared-not-executed",
+  "controller": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\root-seal-and-guard-v1.mjs",
+    "bytes": 16525,
+    "sha256": "f9a7c26ccde23894bcca03213fdef587df323d4243c867db2eb72a3e9ddc7186"
+  },
+  "syntax": {
+    "kind": "node-syntax",
+    "source": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\root-seal-and-guard-v1.mjs",
+      "bytes": 16525,
+      "sha256": "f9a7c26ccde23894bcca03213fdef587df323d4243c867db2eb72a3e9ddc7186"
+    },
+    "command": [
+      "C:/Program Files/nodejs/node.exe",
+      "--check",
+      "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\root-seal-and-guard-v1.mjs"
+    ],
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": "",
+    "sourceBeforeAfterIdentical": true
+  },
+  "supportInputs": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\verify-inputs.mjs",
+      "bytes": 14340,
+      "sha256": "a421f94c8e86bd94745b57d883cb47613179eaac27d1eb53ed59baefe2ae115b"
+    }
+  ],
+  "derivation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\template-derivation-v1.json",
+    "bytes": 99163,
+    "sha256": "00a9c3406c961b6f79b0f646985db9124fb831201251b04f1c9f3a65b73a71ff"
+  },
+  "formalConfigurationStillPending": false,
+  "modeExecuted": false
+}

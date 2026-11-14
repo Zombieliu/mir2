@@ -1,0 +1,91 @@
+{
+  "schema": "mir2.mentor-parse-native-component-public.v1",
+  "codeIntegrationRevision": "33c75002cf6a78c1bd2005c9ace0476d34816c7a",
+  "finalSourceRevision": "ecf88ae698e004df2fefa0a860879a45873c65d3",
+  "simulationNative": {
+    "uniquePassed": 84,
+    "packageOptLevel": 0,
+    "executableSha256": "8be34108b72f981c19cc30069aa8f818cab3cbe20bf89e52b343e72b7dbc6f04",
+    "executableRehashedStableByRoot": true,
+    "allNativeActualAndWrapperExitCodesZero": true,
+    "allNativeJobsNormalClosedNoKill": true,
+    "wrongQualifiedSelectorZeroExecutionHarnessFailureRetained": true,
+    "rootBinding": {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\projection-mentor-parse-release-v1\\SIMULATION-NATIVE-84-VERIFIED.json",
+      "bytes": 1958,
+      "sha256": "65d470fb1d5f457bb253193902809b954ba2d49b1257ac4558ab68f944f7242e"
+    },
+    "exactNamesAndReceipts": {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\projection-mentor-parse-native-final-summary-v1\\SUMMARY.json",
+      "sha256": "a5adeb5141299fc30e596268889fc4251e9dbe9252db65851015ac163da33ad7",
+      "bytes": 85893
+    },
+    "compileEnvelopeActualCargoWrapperExitCodes": [
+      0,
+      1
+    ],
+    "compileIdleHelperForcedCleanupAfter180SecondDrain": true
+  },
+  "optimizedComponent": {
+    "sourceRevision": "277c7d50bd60756a3cc367ddd3877cb23fb2264c",
+    "productionSourceIdenticalToFinalSource": true,
+    "simulationPackageOptLevel": 3,
+    "singleSameBinaryBeforeAfterAlgorithms": true,
+    "oneExecutedIgnoredComponentNotIncludedIn84": true,
+    "cacheReusedAcrossTrials": true,
+    "eachResultEqualityChecked": true,
+    "excludesFixtureConstructionMutexAcquisitionComparison": true,
+    "shapes": [
+      {
+        "shape": "default",
+        "trials": 3,
+        "callsPerReaderAcrossTrials": 9600,
+        "fullJsonBytesPerIdentity": 0,
+        "uncachedTotalNs": 2293800,
+        "memoTotalNs": 2552800,
+        "memoRelativeChangePercent": 11.291307001482265,
+        "uncachedFullJsonDecodesByTrial": [
+          0,
+          0,
+          0
+        ],
+        "memoFullJsonDecodesByTrial": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "shape": "level40",
+        "trials": 3,
+        "callsPerReaderAcrossTrials": 9600,
+        "fullJsonBytesPerIdentity": 2280,
+        "uncachedTotalNs": 29818000,
+        "memoTotalNs": 5237400,
+        "memoRelativeChangePercent": -82.43544167952244,
+        "uncachedFullJsonDecodesByTrial": [
+          3200,
+          3200,
+          3200
+        ],
+        "memoFullJsonDecodesByTrial": [
+          100,
+          0,
+          0
+        ]
+      }
+    ],
+    "rawLog": {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\projection-mentor-parse-build-v1\\native-validation-277-v1\\component-job\\logs\\stdout.log",
+      "bytes": 6153,
+      "sha256": "e9ca2a99bcc505119cdc7c1a56b5f709b5bc62fce116981431be12c44f9b4370"
+    },
+    "notFullRuntimeOrCcuProof": true
+  },
+  "gatewayNativeVerificationPending": true,
+  "normalReleaseArtifactPending": true,
+  "freshCapacityCaseNotYetExecuted": true,
+  "capacityQualified": false,
+  "publicServiceDeployed": false,
+  "vpnOrPowerSettingsTouched": false
+}

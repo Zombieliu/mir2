@@ -1,0 +1,19 @@
+{
+  "largestSix": [
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\mir2_client_bevy-1f94850533cba0ab.pdb",
+      "length": 1402638336,
+      "lastWriteTimeUtc": "2026-10-03T04:57:37.0980833Z"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\mir2_client_bevy-a5f55986e74346a1.pdb",
+      "length": 1395888128,
+      "lastWriteTimeUtc": "2026-10-02T18:15:29.5316622Z"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\rust-target\\windows\\debug\\deps\\mir2_bevy_runtime-9d9a7e3d97e9db99.pdb",
+      "length": 1317933056,
+      "lastWriteTimeUtc": "2026-10-03T19:52:17.3349044Z"
+    }
+  ]
+}

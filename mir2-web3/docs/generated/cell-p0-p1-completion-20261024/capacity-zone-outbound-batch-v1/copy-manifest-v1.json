@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "files": [
+    {
+      "file": "root-focused-receipt-v2.json",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\root-focused-receipt-v1.json",
+      "bytes": 31643,
+      "sha256": "8cf7cbe6ed5aaa801d510253d79d729931004b98829c9a23822501eae659480a"
+    },
+    {
+      "file": "v7-original-report.json",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v7\\episode-50\\reports\\1793018136789-d65f6a9c.report.json",
+      "bytes": 61790,
+      "sha256": "347f0b2dcf064cae30ff54fed8193a2111dd0409fc1dc3009d87b3b5aef84ade"
+    },
+    {
+      "file": "v7-original-cleanup.json",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v7\\episode-50\\realm-cleanup.json",
+      "bytes": 6553,
+      "sha256": "bce5abf154a0836479fce7abfd85594173ee2243dfea90da97e7cd9bb6c6207c"
+    },
+    {
+      "file": "v7-root-independent-cleanup.json",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\navigation-workspace-v7-stage50-root-independent-cleanup-v1.json",
+      "bytes": 848,
+      "sha256": "6ab80a3f5edea1f5735baa2035f2f7ce575c03de50b9f1dca6e1cd415dc80579"
+    },
+    {
+      "file": "v7-aoi-findings.json",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\steady-navigation-workspace-v7-aoi-analysis-v1\\findings-v1.json",
+      "bytes": 10383,
+      "sha256": "ef5c5cda2160d054472e87a014ff9c98635331ee28ba45d8ca26d0b7cb53b1c2"
+    },
+    {
+      "file": "v7-resource-store-analysis.json",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\steady-navigation-workspace-v7-resource-store-analysis-v1\\analysis-v1.json",
+      "bytes": 64095,
+      "sha256": "81d74edc3b5ebb862afccc350c25273bcb2c284adc3f342f0074ab4332de4436"
+    },
+    {
+      "file": "v7-pair-window-waits.json",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\steady-navigation-workspace-v7-resource-store-analysis-v1\\pair-window-completed-waits-v1.json",
+      "bytes": 20850,
+      "sha256": "1a896417b54e41ca59f469acddc8a45282442f6f02b05d64da37e0bdecfe462f"
+    },
+    {
+      "file": "format-stdout-v1.log",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\format-stdout-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "format-stderr-v1.log",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\format-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "web-live-overflow-stdout-v1.log",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\web-live-overflow-stdout-v1.log",
+      "bytes": 2162,
+      "sha256": "3f1f908bbdf87b64c3cac2eea2005f1b3a369f1b2d89b01f64281ac354a2327a"
+    },
+    {
+      "file": "web-live-overflow-stderr-v1.log",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\web-live-overflow-stderr-v1.log",
+      "bytes": 57767,
+      "sha256": "1acaf8de59afedbd55756da3ed217169a7a40a890b5d0e504dda1a37881edb45"
+    },
+    {
+      "file": "web-transport-close-stdout-v1.log",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\web-transport-close-stdout-v1.log",
+      "bytes": 531,
+      "sha256": "83882021c57553faba5e212fe8dff24fdedfae086f301c799fd337f8631a1344"
+    },
+    {
+      "file": "web-transport-close-stderr-v1.log",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\web-transport-close-stderr-v1.log",
+      "bytes": 53409,
+      "sha256": "4eead63c8d0d385ea920b2e4c2ef3a704ddacbd988f9e3a3f9cd229082faca3c"
+    },
+    {
+      "file": "experience-profile-stdout-v1.log",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\experience-profile-stdout-v1.log",
+      "bytes": 2798,
+      "sha256": "8512e5025624e4432fa8318eea198b3d880766492166b52448a2bf2b6f9b0fd9"
+    },
+    {
+      "file": "experience-profile-stderr-v1.log",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\experience-profile-stderr-v1.log",
+      "bytes": 43459,
+      "sha256": "cd1ba22c2f4af9d18eb6cc5f6b70f74f5c4a03bbee7ceee2a4dd5e50b01549df"
+    },
+    {
+      "file": "store-durability-stdout-v1.log",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\store-durability-stdout-v1.log",
+      "bytes": 368,
+      "sha256": "9899b97c10b02e3132e6f46753aad1c0ee65a5810e2a3c807d0d2fd37d05dd3d"
+    },
+    {
+      "file": "store-durability-stderr-v1.log",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\store-durability-stderr-v1.log",
+      "bytes": 43101,
+      "sha256": "bc3db98f513089721f0e6cd2ca295f74f48b768f447218ec01c416b43ef0d6a6"
+    },
+    {
+      "file": "guild-clock-store-stdout-v1.log",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\guild-clock-store-stdout-v1.log",
+      "bytes": 218,
+      "sha256": "ee61da1a6c268b6b225d5b44584635bb991e15ca2ab34bcbcabd1e4a96572061"
+    },
+    {
+      "file": "guild-clock-store-stderr-v1.log",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\guild-clock-store-stderr-v1.log",
+      "bytes": 43101,
+      "sha256": "ddd693c5d735ae9137a9189ed8896643aea51396984fd7d78d6841d2a01cde7f"
+    },
+    {
+      "file": "admission-lock-order-stdout-v1.log",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\admission-lock-order-stdout-v1.log",
+      "bytes": 253,
+      "sha256": "0090b2b81abd8b261c7c4233026ecd081fc203922d99a9c95b6899cab8972127"
+    },
+    {
+      "file": "admission-lock-order-stderr-v1.log",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\admission-lock-order-stderr-v1.log",
+      "bytes": 53576,
+      "sha256": "61b95cc34e9c07045bce0b1061aabaea2a65107d089cd18aa487e563b350855c"
+    },
+    {
+      "file": "kill-award-commit-stdout-v1.log",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\kill-award-commit-stdout-v1.log",
+      "bytes": 215,
+      "sha256": "65a8951aa883a801179115f0794146bf4e11345db02de30ee30e3fe3de5190e3"
+    },
+    {
+      "file": "kill-award-commit-stderr-v1.log",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\kill-award-commit-stderr-v1.log",
+      "bytes": 53409,
+      "sha256": "cfaf906ece7e8dd7b4be815dd194a9649cf446cc9c4cfa47809eb9240ba7e642"
+    },
+    {
+      "file": "guild-kill-source-stdout-v1.log",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\guild-kill-source-stdout-v1.log",
+      "bytes": 394,
+      "sha256": "55f2fbb4981db09e9459fd732d9fb94b077ab560322a38963776d6a41eba2581"
+    },
+    {
+      "file": "guild-kill-source-stderr-v1.log",
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-zone-outbound-batch-validation-v2\\guild-kill-source-stderr-v1.log",
+      "bytes": 53409,
+      "sha256": "cfaf906ece7e8dd7b4be815dd194a9649cf446cc9c4cfa47809eb9240ba7e642"
+    }
+  ],
+  "fullRawArchived": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

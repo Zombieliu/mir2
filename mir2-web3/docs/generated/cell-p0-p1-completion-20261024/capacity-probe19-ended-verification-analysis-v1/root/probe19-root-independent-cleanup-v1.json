@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-26T00:04:43.1480627Z",
+  "runId": "1792971941351-af013515",
+  "ownedPids": [
+    67440,
+    62240
+  ],
+  "remainingOwnedProcesses": [],
+  "remainingOwnedPortListeners": [],
+  "scope": "Fresh post-terminal OS observation by Root; no timestamps inferred or backdated"
+}

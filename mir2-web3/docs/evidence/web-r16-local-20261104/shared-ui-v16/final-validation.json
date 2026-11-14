@@ -1,0 +1,126 @@
+{
+  "schema": "mir2.web-r16-public-evidence-final-validation/1",
+  "createdAt": "2026-11-05T17:27:18.978Z",
+  "finalArchiveValidationPassed": true,
+  "priorArchive": {
+    "initialFiles": 45,
+    "supplementFiles": 12,
+    "verifiedFiles": 57,
+    "verifiedBytes": 2724752,
+    "metadata": [
+      {
+        "file": "mapping.json",
+        "bytes": 14344,
+        "sha256": "223ef0a9cb7fc58c68197ec574723e3c47a36cc91fa8aec9b4580cb023a5fb09"
+      },
+      {
+        "file": "validation.json",
+        "bytes": 5105,
+        "sha256": "11adbc258e2cda555d44711eace610e26d589742054ebb8c4c8d33370b60ca87"
+      },
+      {
+        "file": "supplement-mapping.json",
+        "bytes": 4212,
+        "sha256": "a968aaaeae8f3cf4dd6abadb394fa75bb0f4d935ff1f0adc9e594dba1a4888a5"
+      },
+      {
+        "file": "supplement-validation.json",
+        "bytes": 6030,
+        "sha256": "ba6f895b797f7bd9392d8127bcfc7de41db22f90bad99378c29b4782f754d223"
+      }
+    ],
+    "allPinsVerified": true,
+    "unchanged": true
+  },
+  "copiedFiles": 6,
+  "copiedBytes": 2365471,
+  "approvedPngCount": 2,
+  "scannedSourceTextCount": 4,
+  "mappingFile": "final-mapping.json",
+  "mappingSha256": "fd5b3b40088a5aba00b6d378251808c76ff5c89692b821fd47b3d2e7703da43c",
+  "copyScript": {
+    "source": "tools/finalize-shared-ui-v16-evidence-20261106.mjs",
+    "bytes": 13385,
+    "sha256": "19271dca6df1400ae6e7a2c2e1cb8ddd6e42f11b6e9460b6a8c85b6014a3abc3"
+  },
+  "secretScan": {
+    "privateSourcesReadOnlyInsideNode": true,
+    "exactSensitiveStringCount": 19,
+    "exactValueMatches": 0,
+    "knownKeyPatternMatches": 0,
+    "privateValuesEmitted": false
+  },
+  "sourceAndTargetHashesVerified": true,
+  "prior57FilesUnchanged": true,
+  "sourceFilesChangedOrRemoved": false,
+  "scopedQuest4Completion": {
+    "passedAcrossMultipleOrdinarySessions": true,
+    "sameOrdinaryCharacter": true,
+    "singleFailureFreeJourney": false,
+    "passiveFencingLearnedByNormalBagUse": true,
+    "fencingRetainedAfterRelogin": true,
+    "ordinaryClothingPurchaseAndSuccessfulEquipObserved": true,
+    "ordinaryPotionUseAcknowledged": true,
+    "naturalOmaOwnHitAndDeathWitnesses": 2,
+    "exactlyOneQuest4Delivery": true,
+    "deliveredGoldReward": 150,
+    "earnedExperienceAcrossLevelRollover": 1200,
+    "levelBeforeDelivery": 7,
+    "levelAfterDelivery": 8,
+    "separateDeliveryGainExperiencePacketObserved": false,
+    "normalLogoutAndFreshLoginVerified": true,
+    "quests1Through4CompleteAfterRelogin": true,
+    "finalGold": 180,
+    "finalSmallHpMedicineCount": 0,
+    "equipmentAndFencingPersisted": true,
+    "finalNormalLogoutVerified": true,
+    "finishQuestCommandsInFinalReloginRun": 0,
+    "gameplayOrSaveRulesChanged": false,
+    "qaAdminCommands": 0,
+    "modelCallsRequested": 0
+  },
+  "preservedRunResults": [
+    {
+      "file": "final/display-v16-quest4-r8/quest4-complete-scoped-receipt.json",
+      "originalPassed": true,
+      "meaning": "Scoped completion assembled across multiple ordinary sessions; not a single failure-free run"
+    },
+    {
+      "file": "final/display-v16-quest4-r8/onboarding-v11-browser-proof.json",
+      "originalPassed": true,
+      "passedChecks": 2,
+      "errors": 0,
+      "ordinaryLogout": true,
+      "browserClosed": true
+    },
+    {
+      "file": "final/display-v16-quest4-r7/onboarding-v11-browser-proof.json",
+      "originalPassed": false,
+      "errors": 1,
+      "meaning": "Original auxiliary assumption requiring a separate GainExperience packet remains failed; the rollover reconciliation is recorded separately"
+    },
+    {
+      "file": "final/display-v16-quest4-r5/quest4-first-oma-persisted-partial-receipt.json",
+      "originalPassed": false,
+      "meaning": "First natural Oma and persisted partial progress only"
+    }
+  ],
+  "boundaries": {
+    "wholeReleasePassed": false,
+    "singleFailureFreeJourney": false,
+    "completeTenLanguageTranslation": "Open",
+    "fencingDescriptionsAndFullSkillText": "Open",
+    "subsequentMapsAndClassCoverage": "Open",
+    "nativeSharedWorldAndSaveAcceptance": "Open",
+    "thin360MiBGate": "Failed and not changed",
+    "humanAccepted": false,
+    "candidate100Claimed": false
+  },
+  "binaryPolicy": "Only the two fixed Root-viewed recommended images. The r8 image matches its sealed receipt hash; the r7 image has no receipt evidence[] row and is independently pinned by fixed approved bytes in the copy script and final mapping. Other r8 images are not copied.",
+  "excluded": [
+    "other runs and raw dumps",
+    "executed drivers",
+    "other screenshots",
+    "private data and credentials"
+  ]
+}

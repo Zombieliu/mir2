@@ -1,0 +1,208 @@
+{
+  "schema": "mir2.web-r16-independent-package-audit/1",
+  "passed": true,
+  "startedAt": "2026-11-06T03:33:57.843Z",
+  "finishedAt": "2026-11-06T03:34:00.326Z",
+  "artifactRoot": "F:/mir2-builds/Numeron-Web-R16-20261104-v19",
+  "previousRoot": "F:/mir2-builds/Numeron-Web-R16-20261104",
+  "buildId": "-WCOg-GmVTGJ9mSZugKL0",
+  "scope": "Read-only v19 resource-only staging verification.",
+  "manifest": {
+    "sha256": "ffe1a2882c6f0ce59e983041d540993814462119465c1ee0fca0bc490e20d8d8",
+    "bytes": 7595235,
+    "checkedFiles": 32879,
+    "checkedBytes": 931736046,
+    "allRegular": true,
+    "noSymlinksOrJunctions": true,
+    "noHardLinks": true,
+    "completeOnDiskSet": true,
+    "checkedDirectories": 994,
+    "unchangedDuringAudit": true
+  },
+  "comparison": {
+    "v18ManifestSha256": "5ea5d4fe9e120c1a1f6e71539c54e5f0648e8609c6797843db6c2bf0ebb9a3db",
+    "unchanged": 31904,
+    "changed": 7,
+    "added": 968,
+    "removed": 0,
+    "deltaBytes": 2731941,
+    "allDeltasAreExactFiniteResources": true,
+    "nonPublicRuntimeAndCodeFilesUnchanged": 4184,
+    "coreActorNodeAndGatewayUnchanged": true,
+    "changedMetadata": [
+      {
+        "path": "original-ui/Monster/015/meta.json",
+        "beforeBytes": 4054,
+        "afterBytes": 6403,
+        "beforeSha256": "036e03e3881f1d79e6650d79ec6184bcd499ac75ef32330438e5f56cbc70d32e",
+        "afterSha256": "50d668b14913e1538a9211523afa0456116cf4c8bc8819c5b7f7ab8467713bc4",
+        "jsonEquivalent": true,
+        "afterMatchesPhysicalSourceSidecar": true
+      },
+      {
+        "path": "original-ui/Monster/019/meta.json",
+        "beforeBytes": 78231,
+        "afterBytes": 106569,
+        "beforeSha256": "e6ecaeee7fc1c7b5aab7273f37fbeade13d5899b989ad93a7e45db72af143a03",
+        "afterSha256": "d6c3b8ff4a64856d8f917d0f52f7b052f6b15ea8da63a8bf4ee218f9731a39fc",
+        "jsonEquivalent": true,
+        "afterMatchesPhysicalSourceSidecar": true
+      },
+      {
+        "path": "original-ui/Monster/020/meta.json",
+        "beforeBytes": 77040,
+        "afterBytes": 105012,
+        "beforeSha256": "b54b2417f05decbae53b2c9b597d5b622ca5fba6633784863a50284e330640c1",
+        "afterSha256": "343d6fb19562deafcc0a3c89d1ed46d874bb96a700b45c7dfd92b58c114d9ada",
+        "jsonEquivalent": true,
+        "afterMatchesPhysicalSourceSidecar": true
+      },
+      {
+        "path": "original-ui/Monster/021/meta.json",
+        "beforeBytes": 95151,
+        "afterBytes": 129345,
+        "beforeSha256": "f5b9e19b017fc2c1dcce139b567b804f168f47584977b6577cafc2f922225f57",
+        "afterSha256": "9411936e62740562bc7dda73cb51d4292ebe3928e6a00f189e144fb5c4ef6f63",
+        "jsonEquivalent": true,
+        "afterMatchesPhysicalSourceSidecar": true
+      },
+      {
+        "path": "original-ui/Monster/022/meta.json",
+        "beforeBytes": 85389,
+        "afterBytes": 116167,
+        "beforeSha256": "a6826e817f6869d585146c5fac4e95510359d1d30009ddcc5cd6b0f584efb0e8",
+        "afterSha256": "100454e29da824c50e32265aa0360fe4e446bee2ba0a02e2de2561b5e5bb910a",
+        "jsonEquivalent": true,
+        "afterMatchesPhysicalSourceSidecar": true
+      },
+      {
+        "path": "original-ui/Monster/023/meta.json",
+        "beforeBytes": 78672,
+        "afterBytes": 107010,
+        "beforeSha256": "ed4b6cd38c89d6408bded86ba99bb247934e78efef8b7ac5f177a0ed09ff5dd4",
+        "afterSha256": "d620db8d3c88b30568a0d4053f8c340da4c0f46ee42e435efbd7efdb04d68085",
+        "jsonEquivalent": true,
+        "afterMatchesPhysicalSourceSidecar": true
+      }
+    ],
+    "addedPinRecordsSha256": "ec36e717a894faf20ffbdabaf63f998d1a11af5dd642c2c75745670ffad4e52d"
+  },
+  "privateBoundary": {
+    "stagingPrivateEmpty": true,
+    "stagingPrivateFiles": 0,
+    "privateFileBodiesRead": 0,
+    "livePrivateDirectoriesRead": 0
+  },
+  "finiteAssets": {
+    "schemaVersion": 4,
+    "sha256": "454f30224cdec496b0a5f9d69e1e4a51d29e80a8897b00c5c158baad9ece370a",
+    "files": 24262,
+    "bytes": 288862544,
+    "oldV17RowsPreserved": 23286,
+    "oldSourcePinsPreserved": 19,
+    "oldRequiredGroupsPreserved": 9,
+    "validatorPassed": true,
+    "sourceSidecarAppendedPinsIndependentlyReadBack": 976,
+    "mapRouteMonsters": 969,
+    "transitionSamples": 7,
+    "rawMonsterPngsAdded": 963,
+    "transitionSamplesAdded": 5,
+    "transitionSamplesAlreadyPhysical": [
+      "debug/map-samples/smtile-72.png",
+      "debug/map-samples/smtile-80.png"
+    ],
+    "byMonsterLibrary": {
+      "015": {
+        "newRawPngs": 22,
+        "newExactMeta": true
+      },
+      "019": {
+        "newRawPngs": 224,
+        "newExactMeta": true
+      },
+      "020": {
+        "newRawPngs": 221,
+        "newExactMeta": true
+      },
+      "021": {
+        "newRawPngs": 272,
+        "newExactMeta": true
+      },
+      "022": {
+        "newRawPngs": 0,
+        "newExactMeta": true
+      },
+      "023": {
+        "newRawPngs": 224,
+        "newExactMeta": true
+      }
+    }
+  },
+  "gatewayBuildBinding": {
+    "passed": true,
+    "ordinaryDefault": "ws://127.0.0.1:19040/ws",
+    "compiledClientExactV18": true,
+    "standaloneExactV18": true,
+    "gatewayBinary": {
+      "path": "bin/mir2-gateway.exe",
+      "kind": "gateway",
+      "bytes": 143645696,
+      "sha256": "7fe8beb407429d3bee04f98d099d659144abe6f680cb08994bb99db59decc4c5"
+    }
+  },
+  "renderer": {
+    "version": "bevy-a46905128c316656",
+    "allPinsIdenticalV18": true,
+    "reusedSealedAbiAndBudgets": true,
+    "originalBudgets": {
+      "wasmBytes": 32505856,
+      "gzipBytes": 7340032,
+      "jsBytes": 204800
+    },
+    "packages": [
+      {
+        "id": "webgpu",
+        "wasmBytes": 31237649,
+        "gzipBytes": 6530493,
+        "jsBytes": 141118,
+        "wasmSha256": "2ae03a75e72d96412dc25fbbe054c9405bcedc8ce020dbfc06d0aaa3adee249d",
+        "jsSha256": "10216eafd2ddcdeb0dab62c1b4dc5b0b4896eb1ebf8b8add06985f4e817ecb58"
+      },
+      {
+        "id": "webgl2",
+        "wasmBytes": 16402208,
+        "gzipBytes": 4213570,
+        "jsBytes": 117176,
+        "wasmSha256": "44e1fe130faccba3fe53f5adb4e3aec49a5155201db43ca5e5f2ba6478a32531",
+        "jsSha256": "2e4c58270f49998063cf64b3605b412edce725f5df73254ce4bbf764b282998d"
+      },
+      {
+        "id": "webgl2-shared",
+        "wasmBytes": 32166227,
+        "gzipBytes": 6874702,
+        "jsBytes": 139092,
+        "wasmSha256": "c591c3ef00c758ed7915e4f9490540baf8d531e49dc481831ef8caa1ac28caf2",
+        "jsSha256": "792e256c91e98eae6d07fe53e79f2fc1adf622ffa1a29ef90bb97fb109feb0b3"
+      }
+    ],
+    "newWasmCompilations": 0
+  },
+  "thinGate": {
+    "passed": false,
+    "preparedBytes": 693754225,
+    "limitBytes": 377487360,
+    "limitUnchanged": true
+  },
+  "thin360MiBGatePassed": false,
+  "operations": {
+    "artifactChanged": false,
+    "sourceChanged": false,
+    "servicesStartedOrStopped": false,
+    "networkRequests": 0,
+    "webSocketSessions": 0,
+    "browserSessions": 0,
+    "gameActions": 0,
+    "modelCalls": 0
+  },
+  "failures": []
+}

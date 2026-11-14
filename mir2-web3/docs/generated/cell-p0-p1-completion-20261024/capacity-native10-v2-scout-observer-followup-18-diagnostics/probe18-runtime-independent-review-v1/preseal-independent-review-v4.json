@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T21:48:13.968Z",
+  "prepared": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\runtime-prepared-v4.json",
+    "bytes": 38904,
+    "sha256": "9f5ed533d8883aa1f2cd16cc93a9bae5ec1b6b195e12998593801712341cc3bd"
+  },
+  "controller": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\root-seal-and-guard-v1.mjs",
+    "bytes": 17596,
+    "sha256": "5767d9e1af9844413cc579624cf8571fd3edc4c0f56aff1d799b2bd7688cb95d"
+  },
+  "scope": "Narrow static review of the actual TDZ fix and revised source closure; no target module import, guard/seal mode, tests, backend50/executable capture, seed or realm execution.",
+  "sources": {
+    "mutationProof": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\driver-evidence-lazy-refs-mutation-v4.json",
+      "bytes": 3797,
+      "sha256": "e9bc6471fb48856c9d8dc4d9c80e70d73bda38ebfaef7427a5627b04aaa6bc97"
+    },
+    "fixedEvidenceModule": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\driver-evidence-contract.mjs",
+      "bytes": 5863,
+      "sha256": "3fdf09eb72505ebb7933af43a4178f1f3e40cf61d671521321c7aeab001f4056"
+    },
+    "originalModulePreimage": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\driver-evidence-contract.mjs.before-lazy-refs-v4.txt",
+      "bytes": 5843,
+      "sha256": "7629d35c1ff788c6db282ec834f8d471659b90526020332fe9f51b95876f900d"
+    },
+    "priorStaticReview": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-runtime-independent-review-v1\\preseal-independent-review-v3.json",
+      "bytes": 4567,
+      "sha256": "d4431b1b0693ccf783d6665bfb77f60f7fde666f9bf63503f690b11ae241dced"
+    },
+    "actualFailedSealStdout": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-seal-stdout-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "actualFailedSealStderr": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-seal-stderr-v1.log",
+      "bytes": 1019,
+      "sha256": "8718f0345424500ff4a560cc687679a019760d2d718b2e86b9430263b340a4bf"
+    }
+  },
+  "closure": {
+    "local": 75,
+    "external": 31,
+    "nonTraceRawPinsRehashed": 100,
+    "closedTraceRefsAndSizesOnly": 6,
+    "sourceSha256": "fe66b0aaca7d6af6e5376b60c50669bda4f95cddf70bba0be781049e957f72d0",
+    "externalSourceSha256": "067c16ecac6849a7a26706b1e5d922343062763295b375c8f710df6099194619",
+    "expectedSealedUniqueFiles": 121,
+    "limit": 128
+  },
+  "checks": {
+    "onlyOnePreviouslyReviewedModuleChanged": true,
+    "fiveLineHunksInverseRawExact": true,
+    "twoImportedBaseDependentRefsNowLazy": true,
+    "allFourCallsitesUseReturnedReferenceObjects": true,
+    "allReferenceBytesShaAnd219RulesUnchanged": true,
+    "adjacentCycleReportTopLevelReadsOnlyIndependentDriverBindingOrLiterals": true,
+    "controllerUnchanged": true,
+    "policyAndActualFull16BindingsUnchanged": true,
+    "allRevisionV4NonTracePinsAndAggregatesMatch": true,
+    "oldV3AndReviewAndFailedLogsPreserved": true,
+    "failedV1CreatedNoSealSyntaxGuardOrRuntimeState": true
+  },
+  "history": {
+    "priorStaticReviewMissedTopLevelCycle": true,
+    "rootActualSealV1Failed": true,
+    "failureKind": "ESM evaluation ReferenceError before input-lib.base initialization",
+    "currentFixDoesNotClaimImportSuccess": true,
+    "nodeCheckIsSyntaxOnly": true
+  },
+  "limitations": [
+    "The revised module has only author-run syntax evidence. Root actual seal-v2 must exercise ESM evaluation and readonly contracts; this review does not replace that execution.",
+    "Six closed full16 traces were not rehashed/replayed again; exact previous refs and file sizes are retained, with Root sealer required to rehash the complete final closure.",
+    "The prior source review and actual failed execution remain historical evidence; they are not retrospectively labelled as an operational pass."
+  ],
+  "verdict": {
+    "preparedContractPassed": true,
+    "eligibleForSealNow": true,
+    "blockingFindingIds": [],
+    "actualProbe18Passed": null,
+    "capacityAccepted": false,
+    "p0Passed": false,
+    "p2Started": false
+  }
+}

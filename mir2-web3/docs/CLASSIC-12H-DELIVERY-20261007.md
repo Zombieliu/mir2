@@ -1,0 +1,752 @@
+# Classic gameplay delivery — 12-hour resumed work
+
+> NPC spawn/P4 task changes integrated with actually published activities, 2026-10-12:
+> original32a7 and livebad3737 histories and account schema9 are both preserved.
+> Merged790 distinct local checks pass (439unit+225integration+97Gateway+29website);
+> thirteen new spawn checks included, seven original cadence checks run separately.
+> Two original isolated PostgreSQL checks are locally ignored, not accepted.
+> Fresh protected preflight rejected stale8fee before any mutation, then independently
+> verified livebad and preserved the complete prior private env plus exact125-byte
+> closed-phase suffix. The first physical Git hash failure was checkout CRLF only;
+> indexed published blobs are exact. Main release adds the unchanged real activities
+> PostgreSQL workflow; all original release/siege/security commands remain.
+> SSH443 published original32a7; merged commit/Linux/drained rollout remain pending.
+> Livebad/R25/feed20 is preserved. Full Source/Zone outbox and P1–P7/Mentor/native/
+> human remain open; root is sole writer and expired heartbeat remains paused.
+> [Merged source-bound receipt and limits](CLASSIC-NPC-SPAWN-ACTLIST-20261012.md).
+
+
+> 2026-10-12 NPC spawn ActList/P4 journey Candidate: original argument defaults,
+> selected ACT returns, same-cell static-valid births and base Spawned clock
+> align in the existing personal executor. Genuine Proceeder displayed @start1
+> now works beyond12 hops; exhaustion rejects partial Source commits. Real
+> normal Skeleton damage now records target UID and actual HP in task receipts.
+> Final621 distinct local checks pass (439unit+137integration+45Gateway),
+> thirteen new checks included; original cadence checks run separately and one
+> PostgreSQL check is locally ignored. RED/compile/parent/intermediate failures
+> remain retained. Explicit Linux gates added; qualification/publication pending.
+> Live stays8fee/R25/feed20. Full Source/Zone outbox, P1–P7/Mentor/native/human
+> remain open. Root is sole writer; expired heartbeat remains paused.
+> [Source-bound evidence and limits](CLASSIC-NPC-SPAWN-ACTLIST-20261012.md).
+
+
+> NPC random rollback backend8fee actually published, 2026-10-12: genuine
+> VillageChief displayed random MOVE restores RNG on known personal Source
+> save/CAS failure. Prepared-kill checkpoints preserve the same transient state;
+> unknown publication stays advanced/frozen; pure Lottery view stays no-write.
+> Actual532 distinct local checks pass (395unit+137integration), six new checks
+> included; one original PostgreSQL check is ignored locally. Exact Linux
+> 38193711006 passes all original release/siege and explicit new RNG gates;
+> whole authenticated archive/ELF/logs are qualified. Fresh empty realm was
+> backed up and normally switched; unchanged strict44 ordinary+18 resume checks
+> and protected final empty readback pass. Prior28 transport is included.
+> R25/appd917/updaterb439/feed20 is preserved, no reinstall. Original RED,
+> compiler and interrupted push/preflight evidence remain retained. Full shared
+> Source/Zone invocation/outbox and P1–P7/Mentor/native/human stay open.
+> [Actual delivery and limits](CLASSIC-NPC-RANDOM-ROLLBACK-20261012.md).
+
+
+> Gateway catalogue transport backend28f1 actually published, 2026-10-12:
+> bounded32-frame/64-KiB batches retain original frame order; accepted sockets
+> use TCP_NODELAY and partial/cancelled writes fence before unlocking. Local331
+> Gateway checks pass (13new), exact Linux38189025721 passes all release/siege
+> gates, whole authenticated archive/ELF/logs are qualified. Fresh empty realm
+> was backed up and normally switched; strict44 ordinary+18 resume checks pass,
+> with protected final empty readback. Actual eight owner-scene observations
+> retain526 catalogue packets each: first1.182s, maximum8.763s under original20s.
+> Fourteen server batch writes measured16.920–44.451ms. Original37.571s failure
+> and153ms unchanged retry remain retained; root cause and long-term latency
+> guarantee remain unconfirmed. R25/appd917/updaterb439/feed20 is preserved;
+> no reinstall. RNG source8fee is pushed and Linux38193711006 remains pending.
+> FullP1–P7/Mentor, durable shared world outbox and native/human stay open.
+> [Actual delivery and limits](CLASSIC-GATEWAY-CATALOGUE-TRANSPORT-20261012.md).
+
+
+> Ordinary NPC menu backendf574 actually published, 2026-10-12: private
+> trusted-display qualification covers ordinary links and native NPC quests.
+> Periodic Source CAS preserves no-write views/retries, real buff anchors and
+> recurrence-before-save. Final405 distinct local checks pass (362 unit +43
+> integration,24 new); one original isolated PostgreSQL check is ignored locally.
+> Actual Linux38176912491 passes all original release/siege gates and the new
+> quest lifecycle gate; authenticated whole artifact/ELF/logs are qualified.
+> A fresh empty realm was backed up and normally switched. Unchanged strict44
+> ordinary +18 resume rechecks pass, with protected final empty readback. The
+> first38-second scene-sync timeout remains retained and unresolved inP1.
+> [Immutable original evidence and limits](CLASSIC-NPC-ORDINARY-MENU-20261012.md).
+> Gatewayf574 is live; R25 appd917/updaterb439/feed20 remain unchanged, no
+> reinstall. The first protected preflight correctly rejected a changed Caddy
+> digest; independent read verified and preserved the actual external config.
+> Original RED/parent/compiler/linker failures remain retained. Full Source/
+> Zone invocation, CHECKHUM/outbox, fullP1-P7/Mentor/native/human remain open.
+> Root is sole writer; expired heartbeat paused, no blocked Goal completion.
+
+
+> NPC input backend75c5 actually published, 2026-10-12: private displayed-menu
+> and single-use input slots reject hidden/skipped/copied/argument-added input.
+> Both legacy and whole-target brackets work. Final318 distinct local checks
+> pass (24 new); focused29 are a subset. Genuine same-source Linux38159622183
+> and its complete artifact/log qualification pass all original release/siege
+> gates. A fresh empty realm was backed up and normally switched; original44
+> ordinary +18 resume public protocol checks pass, with final empty readback.
+> [Immutable original evidence and limits](CLASSIC-NPC-INPUT-ADMISSION-20261012.md).
+> Gateway75c5/PID3397094 is live; R25 appd917/engineb439/feed20 remain unchanged.
+> Existing launchers need no reinstall. Private environment, pre-existing
+> Stripe test config/monthly price1000, Caddy and original realm are preserved.
+> Original RED/compile/parent failures and cancelled c6 CI remain retained.
+> Ordinary-menu seals, full Source/Zone invocation, CHECKHUM/world outbox,
+> fullP1-P7/Mentor and native/human remain open. Root is the sole writer;
+> expired heartbeat stays paused.
+
+
+> Windows CI qualification repair and Gateway publication, 2026-10-11:
+> actual8d96 CI reported success but its unchanged Native tests failed938/3/7;
+> that EXE is quarantined. Source-pinned11 pet WAV inputs are now tracked and
+> verified before cargo. Nine fixtures exclusively own the global native queue;
+> controlled real LogOutSuccess reproduces both original failures without
+> changing assertions. Original four CI commands remain and stop on any failed
+> native exit. Actual corrected default-parallel Native941/0/7, focused13 (subset),
+> Node25, six exit-control cases and formatting pass. [Original evidence](CLASSIC-LIVE-HEALTH-BILLING-MOVEMENT-INTEGRATION-20261011.md).
+> Linux4006 is truly live with normal backup/stops/cold restart, monthly price1000
+> and original production PID/config preserved. Original44 ordinary +18 resume
+> public protocol checks pass,14 normal logouts; fresh08:22/08:48 UTC reads are
+> empty/unchanged. First failed preflight, dead owned fixture and recovery
+> diagnostic remain failed. This is not alive crowd/native/human acceptance.
+> Fresh clean client CI/build, signed R25 client/feed and fullP1-P7/Mentor remain
+> open; client stays R24/feed19. Root is sole writer; expired heartbeat paused.
+
+
+> Follow-up client build repair, 2026-10-11: the first complete4006 client CI
+> exposed optional native mail dependencies in default Android/Shared builds.
+> Mail now respects native-ui; original native behavior/assertions remain exact.
+> Actual default11 and Native13 mail checks pass (24 executions/15 functions,
+> 9 overlapping); no tests ignored. Format and neutral runtime compile pass.
+> Real monthly/Stripe PostgreSQL gates at4006 passed. [Evidence and scope](CLASSIC-LIVE-HEALTH-BILLING-MOVEMENT-INTEGRATION-20261011.md).
+> Corrected full client CI, signed delivery, safe paired publication and native
+> dense-combat/human acceptance remain open. Server and resources are unchanged;
+> artifacts retain their actual source identity. FullP1–P7/Mentor remains open.
+
+> Integrated live health/billing with Source movement and Windows escape, 2026-10-11:
+> the public01a8 and owned9c histories are both retained. Actual local checks:
+> 317 distinct server names and941 Native names pass; one PostgreSQL external
+> and seven Native external checks remain ignored. Original failures and the
+> read-only correction of the Native name collector912→941 are retained.
+> [Scope, original evidence and limits](CLASSIC-LIVE-HEALTH-BILLING-MOVEMENT-INTEGRATION-20261011.md).
+> New two-parent Git publication, matching Linux/Windows builds, safe paired
+> publication, dense native combat and human acceptance remain pending here.
+> Old1e/9c artifacts are separate; existing workflow gates and live commerce
+> are preserved. Root is the sole writer. FullP1–P7/Mentor is open; expired
+> heartbeat remains paused. Older progress below is historical.
+
+> Continued Windows round, 2026-10-11: an enqueued attack paces only the next
+> hit; escape reads the actual admitted animation. Correction keeps400ms and
+> real pending ACKs, with blocked-path hints tied to current collision. Native
+> component stage gate911 passes/7 original native-external ignored; focused11
+> and adjacent340 overlap. [Original failures, source and actual checks](CLASSIC-CLIENT-ESCAPE-ACTION-CLOCK-20261011.md).
+> Foreign-cache compilation and incomplete large-memory fixture run remain;
+> fixture-only absolute-clock repair preserves product clocks/assertions and
+> now checks actual motion prediction. Server1e is pushed; own Linux38102609192
+> is separate. New Windows package/feed, paired publication, opaque action
+> receipt and actual dense-combat/native/human acceptance remain open. Last
+> public01:59 UTC64b6/R23/feed18 had no sessions; recheck before stage/apply.
+> Root owns all files. FullP1-P7/Mentor stays open; expired heartbeat stays paused.
+
+
+> Continued server round, 2026-10-11: ready movement consumes and rechecks Source
+> CanMove/Fishing; Turn retains350/activeSlow700ms. Forty normal private ticks
+> reproduced early removal of a21-second Zone Curse in19ms; the existing real
+> duration projection fixes it. Final158 distinct selected Rust checks pass,
+> including original optimized real500ms scroll plus one normal Gateway clock
+> regression. Original strict/compile/preparation failures remain; no relaxed
+> auth/collision/clocks/assertions. [Scope and evidence](CLASSIC-SOURCE-CANMOVE-BUFF-CLOCK-20261011.md).
+> Parent9d has genuine own Linux/artifact qualification; changed source needs
+> exact new Git/Linux/drained publication. Windows escape is unqualified: its
+> isolated build succeeded but focused tests did not finish before reboot.
+> Root owns all returned source/common files. FullP1-P7/Mentor/native/human
+> remains open; expired heartbeat stays paused, no blocked Goal completion.
+
+
+> Continued hot-path round, 2026-10-10: actual6153 Linux38043237500 failed the
+> unchanged strict500ms scroll story by6ms; siege passed, no deploy. Outcome
+> tick projection now avoids full snapshots; one rebuild reuses exact respawn
+> rectangle/collision counts. Final137 distinct Rust checks pass (15 new),
+> including the original optimized scroll and adjacent movement/spawn/owned
+> pet/Purification checks. Initial added fixture failure is retained; only its
+> arrival-protected viewport was corrected. Clocks, assertions, auth and all
+> original CI gates remain. [Scope/raw evidence](CLASSIC-OUTCOME-RESPAWN-PERFORMANCE-20261010.md).
+> Root owns all returned files; new exact Git/Linux/package/drained publication
+> and native/human remain separate. Last11:33 UTC public64b6 had0 sessions;
+> R23/feed18 stays current. CanMove/receipt/world outbox and fullP1-P7/Mentor
+> remain open; expired heartbeat stays paused, no blocked Goal completion.
+
+
+> Continued fixture recovery, 2026-10-10: actual transfer348 Linux38019332713
+> failed its original Snake cold-root check; siege passed, no deploy. Eight
+> retained fixtures now use bundled ordinary terrain and equivalent geometry.
+> Production collision/recovery/permissions/clocks and the full workflow stay
+> canonically unchanged. 544 Rust+6 Node tests passed at least once;
+> one original benchmark is excluded. Strict500ms scroll failed once by31ms,
+> then passed one identical diagnostic repeat; it is not claimed fixed or green.
+> Original RED, compiler allocation failure
+> and mixed-EOL scope correction are retained. Root is sole writer; next review
+> explores the isolated movement receipt read-only. Exact new Git/Linux/package,
+> fresh drained public rollout and native/human acceptance remain separate.
+> [Scope, original evidence and remaining gates](CLASSIC-TERRAIN-FIXTURE-RECOVERY-20261010.md).
+> Public64b6/R23/feed18 stays current at closure. FullP1-P7/Mentor remains open;
+> the expired heartbeat stays paused, with no blocked Goal completion claim.
+
+
+> Continued transfer round, 2026-10-10: installed unavailable terrain and stale
+> session/map bindings cannot trigger configured portals. Crystal movement
+> destinations use raw/gzip collision and reject missing/blocked/out-of-bounds
+> terrain; trusted explicit arenas and valid closed-door landings stay valid.
+> Final146 distinct local checks pass (11 new,135 retained;1 benchmark ignored).
+> Actual431520 Linux38013314930 failed five synthetic owner-order cases; only
+> seven explicit arena setup lines fix that fixture, with original clocks and
+> assertions unchanged. Io9fe7 own Linux38006259110 genuinely passed.
+> New exact Git/Linux/publication remain separate; public64b6/R23/feed18 stays
+> current. Root is sole writer. [Scope/evidence and open action-receipt gates](CLASSIC-MAP-TRANSFER-AVAILABILITY-20261010.md).
+> FullP1-P7/Mentor/native/human remains open; expired heartbeat stays paused.
+
+
+> Continued collision round, 2026-10-10: unavailable ordinary terrain now
+> rejects walking/running before door/transfer-cell exceptions and cannot mint
+> mineable walls. Final73 distinct local checks pass, including strict cold
+> recovery, original movement/security/mining and optimized Gateway500ms flow.
+> Original red baselines and fixture-only repairs are retained. Root is the
+> sole writer; read-only review reports no blocker. New exact Git/Linux/publication
+> are separate. [Scope and original evidence](CLASSIC-UNAVAILABLE-MAP-COLLISION-20261010.md).
+> Earlier terrain64b6 is now truly Linux-qualified and published from drained
+> c704 with private backups, normal/cold stops and62 public protocol checks.
+> This publishes neither source-I/O9fe7 nor the new unavailable-collision fix.
+> Io9fe7 is actually pushed; its Linux38006259110 is still separately tracked.
+> Source Map.Load/population, current-foot transfer/Join rejection, Source-CAS
+> world outbox and fullP1-P7/Mentor/native/human remain open. Expired heartbeat
+> stays paused and the blocked Goal is not marked complete. Older entries are history.
+
+> Current bounded map I/O round, 2026-10-10 local: raw/gzip map byte reads now
+> stop at preparation limits, validate the complete first gzip footer and retain
+> typed ordinary fallback behavior. Final 59 library + 4 original optimized
+> Gateway tests pass (63 distinct; one original benchmark ignored). Actual463
+> raw files and1,620 gzip maps keep identical bytes/hashes; corpora overlap.
+> [Scope and original evidence](CLASSIC-SOURCE-MAP-IO-20261010.md).
+> Root owns all files; bounded worker returned ownership and review is read-only.
+> Source64b6 is pushed, but its Linux38001876065 remains incomplete. New I/O
+> Candidate needs its own Git/Linux qualification. Last observed publicc704/
+> R23/feed18 had1 undrained WS; no staging/switch/kick or real-save changes.
+> Source Map.Load/population, Source-CAS world outbox and fullP1–P7/Mentor/native/
+> human remain open. Expired heartbeat stays paused; no Goal completion claim.
+
+> Current Source terrain round, 2026-10-10 local: normal collision now shares
+> the Source decoder and corrects three format discrepancies. Final library32
+> pass/1 original benchmark ignored; all463 Server Maps preparations/collisions
+> and all1,620 bundled ordinary collisions match unmodified C# readers. Strict
+> preparation remains unavailable for19 trailing-byte pack records; original
+> failed probe is retained, and no Map.Load/world population receipt is minted.
+> [Evidence and exact remaining gates](CLASSIC-SOURCE-MAP-TERRAIN-20261010.md).
+> Final optimized Gateway 4/4 passes; 36 distinct final checks pass, with
+> the original benchmark excluded. New-source Linux/publication remain separate;
+> public c704/R23/feed18 remains current with 1 undrained WS. Full
+> P1–P7/Mentor/native/human and Source-CAS world actions remain unfinished.
+> Root owns common files and the returned terrain module; review is read-only.
+> Expired heartbeat stays paused; no blocked Goal completion or new deadline.
+
+> Current continued round, 2026-10-10 local: Source population predecessor855863
+> is actually pushed with exact GitHub readbacks; previous Git REST/SSH/HTTPS
+> failures are retained. New Gateway owner entry scopes preserve full accepted
+> lease/real sequence/Active-Replay role, clear all return paths and bind exact
+> admitted SessionId/Node/life/presence epoch.43 distinct local checks pass,
+> including the original optimized Gateway4/strict500ms and security20.
+> [Scope, original evidence and next gates](CLASSIC-NPC-OWNER-EXECUTION-20261010.md).
+> The private population capture is not yet an ordinary CHECKHUM consumer.
+> Successful Source-load producer, actual NPC/page/body/DefaultFIFO binding,
+> deterministic read transcript and same-Source-CAS reservations/world outbox
+> remain open. Next: exact new Linux/package and those real producer boundaries.
+> Earlier ecd81 Linux/package qualifies, but a fresh1-WS preflight still holds
+> rollout before staging. Publicc704/R23/feed18 stays unchanged; no kicks/saves
+> or other games touched. Root is sole common writer; review is read-only.
+> Full P1-P7/Mentor/native/human remains unfinished. The expired heartbeat stays
+> paused; no blocked Goal completion or new deadline. Older statuses are history.
+
+
+> Latest continued round, 2026-10-10 local: exactecd81 is pushed and actual
+> Linux37970933774 passed both original jobs; genuine package/ELF/Source checks
+> are qualified. Rollout stopped before staging because1 WS connection remained;
+> publicc704/R23/feed18 is unchanged. [Linux evidence](CLASSIC-NPC-BUFF-CATALOG-20261010.md).
+> New P7 Source population selection and real Manager census foundation passes
+>32 distinct local checks (40 executions include duplicates). Ordinary CHECKHUM,
+> successful-load producer, full Gateway invocation/replay and Source-CAS world
+> outbox are still unwired. [Exact scope and next integration](CLASSIC-NPC-POPULATION-FOUNDATION-20261010.md).
+> Root owns all common files/Git/rollout; worker/reviewer ownership is returned.
+> Full P1–P7/Mentor/native/human gates remain open; no100% claim, expired heartbeat
+> restart or blocked Goal completion. Older statuses below are historical.
+
+
+> Latest resumed round (2026-10-10 local): exact20cee is pushed, but actual
+> Linux37955396469 again failed unchanged500ms setup (+14ms); no deployment.
+> Borrowed NPC lookup removes97,500 catalog copies per rebuild; focused93 Rust/
+> Node6 and final original optimized Gateway4 pass. New exact Linux/publication
+> remain pending. Publicc704/R23/feed18 and full Goal's open gates are unchanged.
+> [Current results and limitations](CLASSIC-NPC-BUFF-CATALOG-20261010.md).
+
+> Continued-work checkpoint: original short-CHECKHUM omissions fix actual149/
+> MissMi wrong branches. Node6/Rust30, optimized normal Gateway4 pass;
+> two adjacent failures reproduce on frozen4baa. Real Linux37941832277 failed
+> strict500ms fixture setup and was not deployed. Actual UID preparation now
+> precedes cast, all Source assertions preserved; new exact CI/publication
+> is next. World durability/population and full natural/native/human P1–P7/
+> Mentor gates remain open. [Actual Candidate](CLASSIC-NPC-PARSER-OMISSIONS-20261009.md).
+
+> Current continued-work checkpoint, 2026-10-09: **Gatewayc704 is published**,
+> clientR23/feed18 stays current. Genuine Linux/siege CI and62 original public
+> protocol checks/14 confirmed normal logouts pass. Full native/human and
+> P1–P7/Mentor acceptance remain open. [Actual publication](CLASSIC-PURIFICATION-MAP-PUBLISHED-20261009.md).
+> NPC Source rollback/raw refining clocks and private ordered pet interpretation
+> pass94 selected tests, but shared-world outbox/application/recovery is not
+> integrated or published. [Current P7 foundation](CLASSIC-NPC-SOURCE-GUARD-20261009.md).
+> Older publication states below are historical; the original deadline remains
+> missed and its automatic follow-up remains stopped. No full Goal completion.
+
+Started 2026-10-07 15:13:35 UTC. Delivery checkpoint is 2026-10-08
+03:13:35 UTC / 11:13 Asia/Shanghai. That12-hour checkpoint was missed.
+Its expired automatic follow-up is stopped as instructed; the broader Goal is
+not complete and no older blocked Goal is presented as complete.
+
+## Actual delivery checkpoint — 2026-10-09
+
+Snake immediate-master implementation passes private64, normal in-process
+Zone API5 and original test-support pet-PK38. Exact-source97a Linux CI37889758213
+passed both original jobs and all retained gates; genuine artifacts are verified.
+Publication and natural native/Human PK acceptance remain open. Its original
+Zone regression was200pass/9fail. Subsequent Purification now passes focused17,
+pet/Human38 and Root Hell-AI17; Root full Zone is201pass/8fail. The remaining8
+failures and simultaneous two-actor Purification map transfer stay open.
+[Purification Source evidence and limits](CLASSIC-PURIFICATION-LIFECYCLE-20261009.md).
+[Implementation, failures and complete evidence](CLASSIC-SNAKE-MASTER-LIFECYCLE-20261009.md).
+P1faef Linux/Windows release CI passed and R23/feed18 is genuinely signed and
+decoded. Origin40 immutable objects were appended and read back; exact-head
+R2 stage37899098919 is running. It is not yet public;
+R22/feed17/Gateway536 remains the release baseline.
+
+The user continued work after the missed deadline. The new P1 target/route/owner
+ACK Candidate passes native900/0/7ignored plus actual three-class native/Gateway
+socket movement and normal logout. It is implemented and locally tested, not yet
+published or human accepted. [Current P1 Candidate](CLASSIC-TARGET-MOVEMENT-LIFECYCLE-20261009.md).
+The earlier clean7fea Zone baseline was198pass/11fail; after Snake and
+Purification it is201pass/8fail and is still not a green full suite. [Source/fixture audit](CLASSIC-ZONE-BASELINE-AUDIT-20261009.md).
+P7 source inspection identifies seven real shared-world gaps and ordered action/
+CAS/recovery requirements; none is counted complete by the new P1 tests.
+[P7 implementation plan](CLASSIC-P7-SOURCE-WORLD-AUDIT-20261009.md).
+
+
+The published Windows client is R22/source7fea, signed feed17. The playtest
+Gateway now runs536b4a59f3, replacinga41 with the compatible disconnect/frozen-save
+fix after strict session/TCP/spectator drain. Successful exact-source Linux
+CI37810114063 covers the original classic source, save/recovery, PostgreSQL and
+siege gates. Fresh public protocol acceptance is44 ordinary appearance/movement/
+relogin checks plus18 native-resume checks, with14 acknowledged normal logouts.
+Three actual transport losses preserve the exact acknowledged actor/item/gold
+state and reject used-ticket replay. Original realm, source saves, current
+spectator configuration and service resource limits were preserved and rechecked.
+There is no client reinstall for this server-only fix.
+
+| Priority | Actual implementation/test/release state | Still required before complete gameplay acceptance |
+| --- | --- | --- |
+| P1 movement/combat | Earlier escape/old-intent changes are in R22. New independent transport-close signaling, real movement-work drain and frozen save/recovery are in the published Gateway536; local Gateway270/recovery7, Linux CI and public disconnect/relogin gates pass. Subsequent live-target failed-route caching and invalid-target owner ACK fixes pass local native900 and three-class real native/Gateway transport, awaiting new paired publication. | Strict all-class seven-monster held-right escape, continued attack and no-drift native acceptance remains RED/inconclusive; ordinary WSS smoke does not replace it. |
+| P2 late maps/Boss/loot | R22 includes the previously verified208 runtime maps/209 native resource maps and bounded controller/doorway/book rules. Source implementation is included in the published pair. | Natural three-class progression, conditional entrances, actual Boss/equipment/book acquisition at original odds and native resource/render acceptance. |
+| P3 XP/drop ownership | Original party distance/level/f32 allocation, Source CAS and bounded Boss/PK/potion ownership work are included; exact-source Linux classic/source gates pass. | Remaining original Hero/Pet group-health refresh and broad natural Boss/PK/group ownership, cross-zone/death/save recovery acceptance. |
+| P4 Taoist pets/PK | Shared typed targets/modes/group/Guild/safe/life guards, growth/save/recall/logout/cold restore and bounded TCP/WS source stories are included. | Source NPC shared-pet/world outbox, unsupported Totem owner chain and natural native/public lifecycle acceptance. |
+| P5 Guild/ordinary war | Management/ranks/notices, symmetric paid wars and earned Guild XP in Source CAS are included. Linux PostgreSQL competing-writer/clock and live bridge gates pass. | Native two-account management/war/restart gameplay acceptance and broader natural ordinary-war/earned-XP validation. |
+| P6 mining/weapon upgrade | Source mining/refine/custody/material/fee/rollback/cold-state implementation and bounded regression are included; R22 client carries its NPC/wire/UI work. | Complete normal published Windows Carlos deposit/start/check/collect/failure workflow and human mining/refining acceptance. |
+| P7 map events | Parsed source/default NPC hooks, bounded queue, same-CAS rollback/replay and selected trigger tests are included. | Shared authoritative GIVEPET/REMOVE/CLEAR/MONGEN/MONCLEAR/GROUPTELEPORT/CHECKHUM outbox, ground-hole caller and source-supported general event scheduling remain unimplemented/unverified. |
+| Mentor | Source final-XP bank, expiry/graduation/logout once-only recipient settlement and bounded two-account TCP/WS/cold/rollback stories are included. | Published pair's normal native two-account complete workflow and human acceptance. |
+
+No overall completion percentage or100% Candidate claim is inferred from builds,
+data imports or test counts. P7 still has implementation gaps, and the other
+rows retain their stated natural/native gates. The deadline's heartbeat is
+PAUSED; the main Goal is not marked complete. Full raw CI output, deployment
+receipts, rejected attempts and complete sanitized public traces are linked in
+[the released disconnect-fix evidence](GATEWAY-DISCONNECT-LIFECYCLE-20261008.md).
+
+## Historical checkpoint — 2026-10-08 01:05 UTC
+
+Started 2026-10-07 15:13:35 UTC. Delivery checkpoint is 2026-10-08
+03:13:35 UTC / 11:13 Asia/Shanghai. The checkpoint was missed: the seven
+requested tracks are not fully completed or accepted. Delivery work continues;
+The03:36 Goal API read returned no active goal, not a completed result;
+the authorized unfinished scope was subsequently recorded as an active Goal.
+That does not reset the original12-hour deadline or imply completion.
+
+## Manual continuation checkpoint — 2026-10-09
+
+The user requested continuation. The Goal API still reports paused at the last
+read; manual authorized work progressed without resetting the missed deadline.
+The unpublished owner-health Candidate now passes simulation23, Gateway68,
+mentor lifecycle6 and genuine mentor socket1 checks. It fixes exact owner pool
+presentation, recovery/concurrent-life fencing, level/mentor and teardown
+settlement, and old Source registration delivery. All original failures remain
+retained. [Scope and limits](OWNER-HEALTH-PRESENTATION-20261009.md).
+
+No public service/installer/feed or native acceptance changed in this checkpoint.
+P1-P7 remains incomplete: natural crowd escape, late-map/Boss/loot stories, full
+Source health recipients/ordered event outbox and native visual/shop wheel gates
+are still required. Payment-provider recharge remains outside the authorized
+implementation; existing monthly cards use operator codes.
+
+## Current actual R22 paired public delivery — 2026-10-08
+
+The invited playtest now runs Gateway
+`a41dfe72d7e5858f11169adf88673dc44ed24200` with the frozen R22 Windows
+game `7fea5cdba8cd160d4f2c5536f14fb7ce98c6bfbc`. Signed sequence17 is
+public on both origin and `assets.mir2.obelisk.build`. The prior R20 native
+process181324 has an actual normal event-loop exit0. The subsequent strict
+six-counter/TCP preflight drained; the operator privately backed up the DB,
+state and configuration, changed only the invited ExecStart, and verified
+both normal stops and the Candidate cold restart without a shutdown panic.
+Original production PID3855184/release79ba, environment, map root, auth,
+capacity51/66/51 and resource limits were preserved.
+
+Origin feed16-to17 promotion and authenticated R2 promote37772462840 at
+publisher `e7850e9aef9ea038907bee621f331f3286c1ac9b` passed. The promotion
+artifact has6839 bytes, SHA256
+`9baa2c67aa176f5e6e2d9b1d9b3ede0142e4e3bfc16751c9d94337a419f6d73c`.
+The promotion verifies the private pointer and public aliases; its full-object
+and CMS verification flags remain false. The complete40-object/1052247716-byte
+verification belongs to stage37739769708, and CMS verification belongs to the
+retained Windows packaging/signing gates. Independent root HTTPS requests
+verify the exact prepared signed17 JSON/signature bytes at all four aliases,
+with normal TLS,200 and no-store. No Worker redeployment or immutable-object
+replacement is claimed.
+
+The actual ordinary public WSS smoke passes44 observer relation checks:
+20 initial appearances,8 gender-switch appearances,8 movement relations and
+8 relogin appearance relations. Two actors actually walk, save through normal
+logout and relogin at their acknowledged position; each has four observers.
+All six class/gender variants appear, and eight ordinary logouts are confirmed.
+It reuses five owned accounts and six existing characters with zero registrations,
+new characters, QA/admin state preparation or copied credentials. Full sprite,
+AOI removal and saved-position assertions remain. These are basic shared-player
+and lifecycle checks, not natural combat, mining, Boss/drop or capacity acceptance.
+
+The exact packaged R22 EXE was launched visibly for manual login at12:15 UTC.
+PID187896 was observed alive and responding, with diagnostics through
+first_main_update. Child auto-login variables were removed; the unchanged
+D installation, other games and saves were not replaced. Native screenshots,
+human shop-wheel and visual/feel acceptance remain open. The50000 test gold
+already claimed by father is not issued again. The later b235 Session/Source
+health correction is outside frozen R22 and is not deployed.
+
+[Original-byte rollout archive and read-only review](generated/player-qa/classic-20261008/delivery-checkpoint-05/README.md),
+[corrected bound root proof](generated/player-qa/classic-20261008/delivery-checkpoint-05/ROOT-FINAL-06.json).
+FullP1–P7, natural acceptance and the original missed12-hour deadline remain
+unfinished. Real-payment recharge is not integrated; monthly cards use operator
+codes and public paid-access enforcement remains OFF.
+
+## Historical Session and Source arithmetic follow-up — 2026-10-08
+
+The reachable personal monster mirror no longer interprets display0 as death
+or Harvest eligibility. Actual death/revive and trusted absolute vitals retain
+their authority. C# single-precision health/mana percentage and expiry byte
+cast order now share helpers across personal and Zone output, group entry,
+Revelation, same-life teleport and zombie revival.
+
+Session3/0, independent C# wrapper vectors5/0, death6/0, Revelation1/0,
+mirror5/0, group8/0, real TCP/WS health-zero7/0 and gateway projection2/0 pass.
+Adjacent revival6/2, special AI2/2 and settlement10/1 have the same five failing
+test names/counts on parent937ac636 without assertion changes. Their raw logs,
+initial compile failures and two zero-test selections are preserved. These
+bounded checks do not constitute full Harvest rewards, PvP or natural battle
+acceptance. Source recipient/ordering, shared Hero identity, retained healing
+and Web percentage0-to-HP0 gaps remain open.
+
+[Bound scope](HEALTH-ZERO-AUTHORITY-20261008.md),
+[source/test proof05](generated/player-qa/classic-20261008/health-authority-05/ROOT-FINAL-05.json),
+[original-byte archive05](generated/player-qa/classic-20261008/health-authority-05/ARCHIVE.json).
+This mutable backend correction is outside frozen R22. At10:23 UTC the actual
+R20 process was alive and Gatewayc6 retained one connection, so no strict drain,
+paired restart, feed promotion or human shop-wheel acceptance is claimed.
+The public version remains R20/feed16/Gatewayc6. The staged R22 receipt and
+original missed12-hour deadline remain unchanged; P1–P7 is not complete.
+Monthly cards still use operator codes; real-payment recharge is not integrated.
+
+## Historical raw-only native health follow-up — 2026-10-08
+
+The native adapter now retires an older revived/live packet marker only after
+a raw, current-map server snapshot confirms positive root/self HP and dead=false.
+The raw ingress check runs after previous-map rejection and before all overlays;
+packet-first replay remains a pure projection and cannot acknowledge new life.
+A later typed HP0/dead snapshot therefore wins after genuine acknowledgement.
+Actual Death still rejects stale typed live data; exact HP0 alone creates no death.
+
+Root regression evidence preserves RED14/2, the superseded GREEN16/0 and the
+read-only cache-replay finding. Final authority17/17, bridge102/102, display7/7
+and current-map ingress5/5 pass. The independent source/log binding covers all
+11 current source files and preserves the original receipts, RED attempts and
+sleep-baseline failure. Percentage formulas and health recipient rules are
+unchanged. No-live-ack causal ordering and absent-Death corpse animation remain
+open. This correction is outside frozen R22; no paired rollout is claimed.
+
+[Current root binding](generated/player-qa/classic-20261008/health-zero-authority-04/ROOT-FINAL-04.json),
+[original-byte evidence](generated/player-qa/classic-20261008/health-zero-authority-04/ARCHIVE.json).
+The original12-hour deadline and fullP1–P7 remain unfinished. Real payment
+recharge is not integrated; the separate monthly-card feature uses operator
+codes and public paid-access enforcement remains OFF.
+
+## Historical stage-only delivery and health authority — 2026-10-08 07:36 UTC
+
+R22 immutable origin append and authenticated R2/CDN stage are complete.
+CI37739769708 at publisher e7850e9aef9ea038907bee621f331f3286c1ac9b
+verifies40 objects /1052247716 public bytes. Stage receipt SHA256 is
+0a8b88330fd302af8a9cff7d0fe98234c35993e9188e7ad14405f1e7fcc7d73f.
+Worker508704-byte source/settings readback passes; no secret values are read.
+Public update aliases remain R20/feed16; the Gateway remains c6. Promote has
+not been dispatched. The failed first CI37738286145 and HTTP1010 probe remain;
+the actual CI User-Agent passes. The Linux repair changes two offline test
+paths only; production validators and Worker bytes are unchanged.
+
+In the separate mutable lane, display percentage0 no longer creates death,
+corpse/owner-drop authority, or native dead/HP0 state. Typed HP0/dead is captured
+before overlay normalization; actual Revived and subsequent Death retain their
+existing priority. Selected current evidence passes225 executions /224 unique
+names, including14 native authority,102 bridge and7 display cases. All earlier
+RED and the reproduced sleep-baseline failure remain. The baseline persistent
+Revived flag can still shadow a later dead snapshot without a new Death packet;
+no causal ordering fix or full life synchronization is claimed. Percentage math
+and Hero/Pet health recipients are unchanged. This slice is outside R22/7fea.
+
+The ordinary R20 client remains staged and signed bindings/resources verified;
+the mistaken D:R19 installation is unchanged. The pending normal-exit question
+has not been answered, so no user-client launch, replacement or Gateway restart
+is performed. Native shop-wheel and paired public acceptance remain open.
+
+[Actual stage archive](generated/player-qa/classic-20261008/delivery-checkpoint-03/ARCHIVE.json),
+[health review and limitations](HEALTH-ZERO-AUTHORITY-20261008.md).
+The original12-hour checkpoint remains missed; fullP1–P7 is not complete.
+
+## Historical local package and bounded Source slice — 2026-10-08
+
+R22 final local package at frozen7fea passes original packaging and verification:
+154579 payload files,986493911 bytes; manifest31538315 bytes is within the
+unchanged32MiB updater bound. Manifest SHA256 is
+00967a994d9586c574ca89d5ea4046b25f0a79c346d63fe76f261c0c23735916;
+unmodified EXE and v2 build attestation remain bound to their authentic CI bytes.
+Original package CMS and both missing refine PNGs pass. This external package
+has original sourceRepoCheck=unavailable by design; a separately retained call
+to the original source/build-contract functions verifies the exact clean7fea
+checkout. No inner verifier source check is falsely reported.
+
+Earlier atlas-path, metadata retrieval, private provenance and PowerShell5.1
+43.75MB-manifest failures remain retained. Fresh PowerShell7.6.5 packaging uses
+the unchanged13 core validation functions and32MiB bound. Public provenance
+keeps source hashes/crops and the digest of its retained private original.
+
+Fresh delivery-02 original build passes:15 bundles totaling841850618 bytes and
+the verified R20 base delta25720210 bytes. Descriptor SHA256 is
+d8588a95aaa384b4fb5cc3e27f3f4b7648cdd39616fc81c699f2fc865af56f4f.
+Delivery-01's second D:R19 base was correctly rejected for an ADS on the drive;
+its outputs are retained and no stream was deleted. Delivery-02 uses only the
+plain verified R20 base; other clients can use the complete EXE bundle.
+Decoded delivery validation and the separate external CMS/signing gate pass;
+the Python decoded receipt still correctly says cmsVerified=false because it
+delegates signatures to the original Windows wrapper. Locally signed feed17
+has SHA256e7efebcb6b897e15f3b93b8a7a8eeb354d0eb01ccf799bb155c26c394f6efc4f.
+Admission/CDN and public paired rollout are still pending. Private gateway
+stage/extraction/seal are verified;
+no service mutation has occurred. Public c6/feed16 and the active R19 client
+are unchanged. The pending normal-exit question permits a verified R20 client
+switch without restarting the gateway. Native wheel acceptance remains open.
+
+Separately, the personal NPC compatibility runtime now matches original
+NPCSegment.cs GIVEPET: explicit0 is legal; the5 cap is per action; only newly
+created pets receive grade; birth uses the owner's exact tile/facing and the
+original1000ms initial action delay. Short CHECKHUM lines below4 total tokens
+are omitted by the parser, including the actual expanded quest149 hook.
+Root independently checked original byte parsing/caps and the9 focused tests;
+24 trusted DefaultNPC and1 ordinary quest tests pass. The adjacent NPC suite
+has54 pass/2 failures, both reproduced with the exact baseline file and not
+suppressed. Original03 RED1/8 and all04–09 logs are archived byte-for-byte.
+This new slice is outside frozen7fea/R22. It does not deliver shared Zone pets,
+delayed CLEARPETS, world outbox or scheduled P7 events; those remain open.
+
+[Actual proof and retained logs](generated/player-qa/classic-20261008/delivery-checkpoint-02/ARCHIVE.json).
+The original12-hour deadline and unfinished overall scope are unchanged.
+
+## Historical delivery checkpoint — 2026-10-08 03:32 UTC
+
+Both release workflows have now completed successfully. Windows37712122111
+at clean game7fea5cdba8cd160d4f2c5536f14fb7ce98c6bfbc produced the authenticated
+263037676-byte ZIP11523774584; its complete local SHA256 matches the original
+GitHub digest. The unmodified111275520-byte EXE is
+8ebb7e8e32fbf2a577b90e2341767cc34b467a021e23406003d55597b077bc22.
+The original v2 attestation and clean source/build contract are verified. This
+is the unpublished build artifact, not an Authenticode/public-release claim.
+
+Linux37716453313 at a41dfe72d7e5858f11169adf88673dc44ed24200 passed both complete
+jobs, including the unchanged ordinary-war and competing-PostgreSQL gates.
+Artifact11525323477 is fully downloaded and authenticated; the34144131-byte
+archive SHA256 is a5b563efa5b65ffc005df307c39a4ed0947b0809d101f7d14a668b70cb88e60b.
+Its83362336-byte binary SHA256 is
+1ba51402a76f4c454674836f869751d63848b5370083a4cf7b71e0654fbf10d3.
+The only server/game source difference remains the workflow45-to-105-minute
+budget. All original tests remain. No service cutover has occurred.
+
+The first local R22 packaging attempt generated209 native maps but failed:
+the audit still defaulted to the absent atlas under the frozen source tree.
+The derived external recipe now supplies its supported --atlasRoot explicitly,
+preserving13 byte-identical core validation functions. The failed log/output
+are retained, and a fresh local retry is pending. No completed R22 package,
+CMS/feed17, CDN stage or public promotion is claimed yet. Subsequent GitHub
+metadata EOFs are separate retained retrieval failures, not failed game tests.
+
+Published R20 ordinary-client staging is ready: original signed metadata and
+two runtime files match their original manifest; all154564 resources and
+875088956 bytes pass exact SHA/size, with no missing/extra/linked entries.
+Shop wheel was introduced inR20 and is absent from the D/R19 mistakenly
+launched earlier. The normal-exit question is pending; father remains online
+and no process is forcibly closed. Public Gatewayc6, feed16 and D/F are intact.
+The50000 test gold is already claimed (father50874); it is not issued again.
+
+Publication preparation93b23cc3 is pushed separately. Its9 offline tests pass;
+new R22 fixed admission generation still awaits genuine completed package/CMS
+bytes. Server operators are prepared and a private staging directory created;
+this is preparation, not deployment. Shared-event execution, strict crowded
+escape and natural Boss/drop/native acceptance remain open as listed below.
+
+## Historical delivery checkpoint — 2026-10-08 02:56 UTC
+
+Gameplay/evidence source7fea5cdba8cd160d4f2c5536f14fb7ce98c6bfbc is pushed.
+Windows37712122111 passed; artifact11523774584 has263037676 authenticated bytes
+and SHA256e619172fdc25e8448611203e3d170516719d49d0676d3ad6044d3f40592a8d43.
+Current local download is incomplete, so no R22 Candidate/package/CMS/feed17
+exists. Stalled streams, bounded read deadlines and incorrect Range offsets
+remain RED. Partial ZIPs or old executables are never promoted.
+
+Linux37712122808 passed appearance, Linux save-recovery/security, and the original
+siege competing-PostgreSQL writer/clock gate. Rank17 and terminal3 passed; two
+ordinary-war cases passed before45-minute cancellation. Server retry37716453313
+usesa41dfe72d7e5858f11169adf88673dc44ed24200; its sole diff from game7fea is
+workflow45-to-105-minute timeout. All original release gates remain.
+
+Current scope audit passes208 runtime/209 resources at actual respawn907db052.
+Genuine Prguse1002/Title18 frames have exact originalLib/full-pack crop/pixel
+proof in separate new resource staging; they must enter the next new manifest
+and CMS. Old signedR20 bytes and clean frozen game checkout remain intact.
+
+User requested native mining launch. InstalledD/R19 was launched; the first
+helper supplied empty login fields and failed configuration validation. Explicit
+child-environment removal opens the normal login window and publicWSS. Screenshot
+shows father50874 gold. Shop wheel is absent fromR19 and was added inR20; this
+root version-selection error is recorded. Verified localR20 staging is in
+progress; the user must normally logout before a client-only switch. The current
+public Gateway staysc6; never interrupt the user's active play session.
+
+## Historical Candidate status — 2026-10-08 01:05 UTC
+
+The new shared gameplay implementation is a committed Candidate pending successful exact-source
+CI and paired publication. Commit c9fdd117f9669ea208c44a38206020db4f3497e3 is pushed;
+the first Linux/client CI runs are 37709000472/37709000413. Those runs exposed
+an old two-player fixture using different account stores, a siege fixture
+conflating canonical Fight with the siege deadline, formatting and one missing
+Android lock dependency edge. Corrections preserve production authority,
+original Fight semantics and existing dependency versions. Public Windows is still R20/source8faedd89fbcdda7d4f814c05f7d2f56979ab5bf5,
+signed update16; invited-playtest Gateway remains c6c32381a646dae1067dafdeec57691f606b1779.
+Original production realm, real saves and D/F installations are preserved.
+
+| Priority | Implemented and verified in this Candidate | Remaining gates |
+| --- | --- | --- |
+| P1 movement/combat | Inclusive combat RNG no longer aliases 300/600/2500ms cadence; native owner-Struck2500ms/HP10 walking fallback; native input171 and shared escape14 checks; live owner-wire ID mapping fixes the normal notification path | Strict real seven-monster pressure/attack/escape/quiet cohort is still inconclusive; native held-right-button/human acceptance and paired publication |
+| P2 late maps/Boss/loot | Source-pinned controller51 checks;228/228 actual prepared canonical doorway collision/Walk/save/relogin stories across three classes;13/13 prepared entrance/book gates; original invalid Zuma destinations are rejected and fourth legal doorway is selected | Natural three-class full progression, real Boss/source-linked drops/books, original odds, conditional instance entrances and native resources/rendering acceptance |
+| P3 XP/drop ownership | Original party16-grid/level/f32 allocation; native kills use trusted Store-to-Zone profile admission; real TCP/WS party story; EXP potion safe-zone pause/resume/expiry and CANGAINEXP source gate; generic Boss owner and causal PK source settlement | Original event-driven Hero/Pet group-health recipient selection, broad natural Boss/PK/drop ownership and published-process recovery acceptance |
+| P4 pets/PK | Typed shared player targets, modes/focus/retaliation, group/Guild/safe/Brown/life guards; original Taoist growth, source PetSave, recall/NoPets/logout/cold restore; actual Vampire bite/death and Toad flight.99 focused checks, plus real TCP/WS Source-save/rollback/cold restore story | Source NPC ordered shared-pet/world outbox, unsupported Totem owner chain, native human/public-process acceptance |
+| P5 Guild/war | Normal rank insert/options/promotion/kick/leave/disband, notice and rank rename; symmetric paid ordinary wars and authority clock; normal earned Guild XP in the same Source CAS; bounded TCP/WS party+Guild story;31 current Guild management/rank/terminal/war checks; complete Linux release and competing PostgreSQL writer/clock GREEN | Native management/war and paired publication |
+| P6 mining/refining | Original raw0..5 Belt/6..85 Bag wire,16 material cells, UID custody/fee/check/collect; Source rollback/retry/full-bag/deadline tests10; market9/oven10/shared escape14 regression; native wire3 and Bevy refine19 including unknown-outcome recovery; original byte-wrap zero preserves the concrete weapon, verified by4 transition tests plus durable10/oven10 regressions | Actual ordinary Carlos workflow in published pair and human visual acceptance; bridge recovery19 GREEN |
+| P7 map events | Actual default NPC call sites,26 source files/169 expanded sections, exact parser omissions, queue128/budget32, Login/LevelUp/Quest/client/NPC/map/death/script-item hooks, Save/rollback/idempotent recovery and Guild leave same-CAS ordering;24 tests and generator4 | Shared authoritative GIVEPET/REMOVE/CLEAR/MONGEN/MONCLEAR/GROUPTELEPORT/CHECKHUM, ground-hole caller; original18 general event filenames have no identified original scheduler caller and cannot be presented as implemented scheduled events |
+| Mentor | Source-owned final-XP bank, original expiry/graduation/logout settlement, bounded recipient-owned once-only credit; complete source rollback/cold/revision tests11; normal two-account TCP/WS story covers rollback/retry, pupil logout, teacher cancel/payout, automatic graduation and cold-file no-replay | Paired publication and native human acceptance |
+
+## Evidence scope
+
+Focused verified suites: original math11; source/private potion and late-selection13;
+party14; earned Guild9; owned-pet/custom-AI99; source default NPC24;
+mentor11; refine custody10. Counts are per named suite, not summed into a parity
+percentage. Related cases overlap and isolated prepared scenarios do not prove
+normal natural progression.
+
+New ordinary TCP/WS pet story uses actual SummonSkeleton/Amulet consumption,
+actual native kill and the normal inventory Source service. BeforePersist
+produces no XP ACK or pet growth and restores the full save; retry publishes
+before ACK. Each positive GainExp grows the real pet once. Normal logout releases
+all old Store Arc owners; a new file load and authenticated StartGame restore
+canonical five-field PetInfo. This is actual file-cold restoration in one OS
+process, not an independent OS/process restart. Three PK source boundary tests
+use real issued deaths, not manually manufactured receipts. A fourth retains
+already-saved pet growth across temporarily unavailable online mapping.
+
+Two network defects were found and repaired: first shared player life generation
+is legitimately zero; owner live notification copies must map global player ID
+back to that socket's trusted SelfPlayer ID, including nested pet MasterID.
+Global Zone state, observer identity and refused-send FIFO packets retain their
+original IDs. Five actual live-registration/backpressure/replacement/logout tests pass.
+
+The first current pressure run returned process success but all three reports
+were inconclusive. It is not a behavioral pass. The harness now fails unless
+qualification, attack escape and five-second quiet evidence all pass; the next
+strict run remains retained as RED/inconclusive. Prospective run03 derives one
+attack phase from observed real bat cycles and reacts in the real owner attack
+receive callback: Wizard has14 prior positive hits,7 positive hits while escape
+is pending,301ms target ACK and passing five-second quiet evidence. Warrior
+has8 fresh hits at commitment and does not qualify; Taoist ACKs in240ms and
+passes quiet but has no hit during the pending window. Neither is a pass, and
+the all-class test remains RED. No classifier, source clock, original stat,
+roll retry, timestamp or acceptance threshold was weakened.
+
+## Source contract and unfinished work
+
+P7 uses actual parsed source with original invalid/missing includes retained as
+sealed parser omissions. Missing scheduler callers are not invented from file
+names. Source pet/world instructions still mutate the personal compatibility
+world; a real shared implementation needs an ordered server-only plan and a
+durable outbox in the same source CAS, followed by once-only Zone consumption.
+GIVEPET then GIVEEXP/CHECKPET must observe the newly created logical pet; late
+unordered packet replay cannot provide that contract. GROUPTELEPORT must route
+actual immutable group identities through each Zone lifecycle, not create
+RemotePlayer in a private session.
+
+Original Source Boss/drop odds, movement clocks, security/admission limits and
+realm capacity remain unchanged. No undisclosed account/item/spawn grants are
+used in public verification. Prepared positions, levels, skills and encounters
+are labelled. Generated data, dormant helpers, successful builds, isolated test
+counts and human acceptance remain distinct.
+
+## Ownership and delivery
+
+Root is the sole runtime/routing integrator and publication owner. The three
+bounded workers own read-only reviews/new tests and declared nonconflicting
+modules; high-conflict files have one writer. Agent instructions and five parity
+progress documents are updated with Candidate and public states separately.
+Failures remain in the owned build archives. Sanitized passing logs and hashes
+are exported under generated/player-qa/classic-20261008.
+
+Exact-source server CI, clean attested Windows build, strict complete asset
+packaging/CMS/CDN stage, same-commit separate promotion and fresh normal session
+drain precede any actual public cutover. If players are online, finish staging
+and defer the switch; do not kick players to satisfy a deadline. No full100%
+claim is made while the remaining gates above are open.
+
+## Original group-health audit correction
+
+Source health is event driven, not a five-second group heartbeat. Expire5 is a
+client display lifetime. Group accept publishes player/Hero/Pet immediately;
+HP/MP/spawn/AOI events use owner and same-map original16-tile group recipients.
+Current shared-pet health still uses broader AOI recipients; Hero lacks an
+independent shared dispatcher. Source floating percent can truncate live health
+to0, while current percent0 paths infer death. This end-to-end interpretation
+must be fixed before changing emitters. These Source parity items remain open.
+
+## Updater behavior audit
+
+Current check_update stages/verifies/applies before normal launch. A worker
+thread/progress UI alone does not permit playing a compatible old client while
+background downloading. Future signed minimum-compatible-client metadata,
+verified-current launch, separate download cache, normal-exit atomic apply and
+failure retaining the current valid installation are required. First install
+and incompatible versions still need completion. This policy is not implemented
+or claimed byR20/R22.

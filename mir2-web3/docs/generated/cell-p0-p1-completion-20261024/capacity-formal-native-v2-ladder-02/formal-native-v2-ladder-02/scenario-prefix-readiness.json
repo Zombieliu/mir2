@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "preparedAt": "2026-10-24T18:39:54.214Z",
+  "staticOnly": true,
+  "accepted": false,
+  "source": {
+    "file": "C:/mir2-build/p01-completion-20261024/partition-ordinary-two-name-safe-home-100-candidate-v3.json",
+    "bytes": 5844,
+    "sha256": "7d0bed4a61c5e62d61b55456d87706da135712161a42987fffbd5d452dfb3402"
+  },
+  "first10": {
+    "exactAnchors": true,
+    "exactMap": true,
+    "exactPatrolSpan": true,
+    "exactMonsterNames": true,
+    "exactFilteredRoles": true,
+    "observer4": {
+      "x": 246,
+      "y": 646
+    }
+  },
+  "activePrefixes": [
+    {
+      "count": 2,
+      "combatActors": 0,
+      "movementActors": 2,
+      "combatIndices": []
+    },
+    {
+      "count": 10,
+      "combatActors": 1,
+      "movementActors": 9,
+      "combatIndices": [
+        5
+      ]
+    },
+    {
+      "count": 25,
+      "combatActors": 2,
+      "movementActors": 23,
+      "combatIndices": [
+        5,
+        15
+      ]
+    },
+    {
+      "count": 50,
+      "combatActors": 5,
+      "movementActors": 45,
+      "combatIndices": [
+        5,
+        15,
+        25,
+        35,
+        45
+      ]
+    },
+    {
+      "count": 100,
+      "combatActors": 10,
+      "movementActors": 90,
+      "combatIndices": [
+        5,
+        15,
+        25,
+        35,
+        45,
+        55,
+        65,
+        75,
+        85,
+        95
+      ]
+    }
+  ],
+  "globalCombatFraction": 0.1,
+  "limitations": [
+    "Geometry and static supply do not prove live survival or sustainable60s windows or the two-hour workload.",
+    "25-player prefix has2 fighters (8%); full100 profile declares10 fighters (10%). No role indices were changed.",
+    "Formal preparation and execution both require genuine V2 native10 feasibility; this does not promote the probe to capacity acceptance."
+  ],
+  "realmStarted": false,
+  "accountsCreated": 0
+}

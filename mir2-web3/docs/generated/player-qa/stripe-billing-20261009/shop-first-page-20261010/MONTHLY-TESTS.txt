@@ -1,0 +1,13 @@
+running 9 tests
+test billing_card_before_start_game_is_atomic_and_replays_without_new_asset ... ok
+test billing_card_failed_publication_rolls_back_inventory_credit_and_access ... ok
+test billing_card_file_restart_retains_unit_and_consumption_receipts ... ok
+test billing_card_key_alias_cannot_consume_a_card ... ok
+test billing_card_malformed_or_duplicate_owned_item_cannot_extend_access ... ok
+test billing_card_offline_select_can_activate_unclaimed_game_shop_mail ... ok
+test billing_card_real_native_shop_mail_and_use_keep_permanent_identity ... ok
+test billing_card_stacks_with_codes_and_old_uid_does_not_consume_new_card ... ok
+test billing_card_uncertain_file_publication_does_not_allow_a_second_activation ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.91s
+

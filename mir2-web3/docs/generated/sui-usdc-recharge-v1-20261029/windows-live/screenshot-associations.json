@@ -1,0 +1,54 @@
+{
+  "atomicImageDatabaseSnapshot": false,
+  "note": "Images and persisted snapshots were observed separately; pair using timestamps, order and final public receipt. No browser inline image is presented as native evidence.",
+  "associations": [
+    {
+      "screenshot": "screenshots/05-native-final-order-zero-credit.jpg",
+      "sha256": "98ae7c0126585f65af46d950bc24f0db1993ee5921319bfec28d646c635459e4",
+      "observedAt": "2026-10-28T21:06:01.148Z",
+      "evidenceKind": "actual-native-window-computer-use-jpeg",
+      "gatewayVersion": "v3 successful payment and delivery",
+      "claim": "final order before payment, Credits0 pending0"
+    },
+    {
+      "screenshot": "screenshots/06-native-real-100-credits-delivered.jpg",
+      "sha256": "2b334e5d341b0bb9e89dbc24eae1e8db72f22739d403c1b056e472b5ecd400b4",
+      "observedAt": "2026-10-28T21:15:37.738Z",
+      "evidenceKind": "actual-native-window-computer-use-jpeg",
+      "gatewayVersion": "v3 successful payment and delivery",
+      "claim": "Credits100 pending0, final order delivered"
+    },
+    {
+      "screenshot": "screenshots/07-native-repeat-refresh-100.jpg",
+      "sha256": "3fbbe6f8f0f263d4eb6596efd4a3c3a8aae3edc92127fdb896078439235b044d",
+      "observedAt": "2026-10-28T21:15:38.300Z",
+      "evidenceKind": "actual-native-window-computer-use-jpeg",
+      "gatewayVersion": "v3 successful payment and delivery",
+      "claim": "Credits100 pending0, final order delivered"
+    },
+    {
+      "screenshot": "screenshots/08-native-shop-100-credits-gold-unchanged.jpg",
+      "sha256": "0178e84b07c8cefdaecf90066d0638f2c3e47d1c937031e0273abac92066a1b4",
+      "observedAt": "2026-10-28T21:16:01.864Z",
+      "evidenceKind": "actual-native-window-computer-use-jpeg",
+      "gatewayVersion": "v3 successful payment and delivery",
+      "claim": "ordinary GameShop Credits100 and Gold10000"
+    },
+    {
+      "screenshot": "screenshots/09-native-v4-relogin-shop-100.jpg",
+      "sha256": "1dc6c96b20fd214c4dfeaa4e13b023316d25706d8e4d0966315869b4e8f5faf0",
+      "observedAt": "2026-10-28T21:29:46.367Z",
+      "evidenceKind": "actual-native-window-computer-use-jpeg",
+      "gatewayVersion": "v4 restarted with sales disabled",
+      "claim": "ordinary GameShop Credits100 and Gold10000"
+    },
+    {
+      "screenshot": "screenshots/10-native-v4-relogin-disabled-sales-delivered.jpg",
+      "sha256": "1fe2331bb0e13ff17e15332762d1c3eaf9485475d99d4f711b3bd49e9432bfe6",
+      "observedAt": "2026-10-28T21:31:01.331Z",
+      "evidenceKind": "actual-native-window-computer-use-jpeg",
+      "gatewayVersion": "v4 restarted with sales disabled",
+      "claim": "v4 relogin Credits100 pending0, sales unavailable, two old expired orders and final delivered order"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "kind": "r16-map-world-baseline-production-attempt",
+  "source": "f310e242a48b6ad69f27fcf133c90c1f8655674c",
+  "candidateDeployment": "dpl_2YKD5ztUD9mj7TnbAo11NL5rYNpt",
+  "ciSource": "7016023970a07a1764a67f8171d0df5bfb9542ca",
+  "accepted": false,
+  "functionalSecondRunPassed": true,
+  "originalMoveBudgetMs": 8000,
+  "originalNativeBudgetMs": 120000,
+  "nativeAfterFirstFrameMs": 125445,
+  "runtimeBodyAfterFirstFrameMs": 63957,
+  "walkAckMs": 135,
+  "rolledBack": true,
+  "formalRevision": "b9acf175fad0bb582f20fd76282580f179c4b0d2",
+  "formalDeployment": "dpl_6k5uD7UbVAcyzBdtto8PPAC9qNFK",
+  "gatewayRevision": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5",
+  "wholeParityAccepted": false,
+  "publicCrossMapTested": false,
+  "humanPhoneCameraTested": false,
+  "realFundsOrAssetTransactions": false
+}

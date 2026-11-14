@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 1,
+  "candidateSource": "ff957548919e9d306c11af57dad224f2178c2d0f",
+  "implementationSource": "02c1e6104b4b9fc66ea1698114f92ea922ef6b46",
+  "candidateDeployment": "dpl_MEDVQnVnEgkfV4UsJMUpE67TfQFK",
+  "stageRun": 43353683006,
+  "promoteRun": 43354733274,
+  "releaseActionsPassed": true,
+  "publicFullQualificationPassed": false,
+  "candidateRolledBack": true,
+  "rollbackMethod": "Vercel connected request_rollback after exact current alias and baseline READY/project/source checks",
+  "rollbackApiResult": null,
+  "finalProduction": {
+    "origin": "https://numeron.obelisk.build",
+    "gamePath": "/game",
+    "revision": "e7cbab02f030ae50b28031ca0237d630eccb7c03",
+    "deployment": "dpl_4jjpevpspsVtf61hUCgTHiKxRatZ",
+    "project": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+    "versionStatus": 200,
+    "gameStatus": 200,
+    "gameHasStaticScripts": true,
+    "aliasVerified": true
+  },
+  "checks": {
+    "exactRevision": true,
+    "publicEdgeAndTlsVerified": true,
+    "normalLoginVisible": true,
+    "quietLoginResources": true,
+    "realQrImage": true,
+    "emptyQaRoster": true,
+    "createOnApprovedSocket": true,
+    "oneDedicatedQaRoleCreated": true,
+    "startMatchesCreatedRole": true,
+    "visibleReadyGameStage": true,
+    "exactVersionedStarterRegion": true,
+    "renderedStarterCity": true,
+    "returnedToSelect": true
+  },
+  "timing": {
+    "clockEpochMs": 1794538574125,
+    "authoritativeLoginSuccessMs": 46519,
+    "startIntentMs": 77276,
+    "startAckMs": 80673,
+    "authoritativeStarterMapMs": 80681,
+    "authoritativeSelfMs": 80681,
+    "firstPlayableObservedMs": 111848,
+    "terrainPaintVerifiedMs": 180033,
+    "logoutIntentMs": 372527,
+    "logoutAckMs": 373570,
+    "manifestAttemptsBeforeStart": 1,
+    "manifestAttemptsAtOrAfterStart": 0,
+    "starterRegionRequestMs": 46523,
+    "starterRegionWireHeadersMs": 55080.205,
+    "starterRegionResponseEventMs": 55081,
+    "starterRegionBodyMs": 55855,
+    "starterRegionCommitMs": 80796,
+    "sceneSpritesReadyMs": 80825,
+    "localeRequestMs": 46523,
+    "localeBodyMs": 71891,
+    "localeReadyMs": 71912,
+    "firstPlayableFrameMs": 111778,
+    "rendererBodyMs": 303981
+  },
+  "movement": {
+    "attempted": true,
+    "passed": true,
+    "status": "one-authoritative-walk",
+    "from": {
+      "x": 288,
+      "y": 616
+    },
+    "to": {
+      "x": 289,
+      "y": 616,
+      "direction": "Right"
+    },
+    "geometry": {
+      "source": "sha256-pinned-local-release-reference",
+      "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325"
+    },
+    "physical": {
+      "input": "trusted-playwright-keyboard-pulse",
+      "key": "ArrowRight",
+      "atMs": 112000
+    },
+    "wire": {
+      "type": "walk",
+      "direction": "Right",
+      "atMs": 112003
+    },
+    "ack": {
+      "x": 289,
+      "y": 616,
+      "packet": "UserLocation",
+      "atMs": 112152
+    },
+    "ackWithinEightSeconds": true,
+    "rendered": {
+      "x": 289,
+      "y": 616,
+      "atMs": 112165
+    }
+  },
+  "prewarm": {
+    "passed": true,
+    "requested": 113,
+    "ok": 113,
+    "initialOk": 107,
+    "status": "done"
+  },
+  "sharedHud": {
+    "optional": true,
+    "passed": false,
+    "status": "not-observed",
+    "gateReady": false,
+    "runtimeDelivered": true,
+    "failure": {
+      "phase": "ordinary-shared-hud-optional",
+      "code": "OPTIONAL_SHARED_HUD_OR_RUNTIME_NOT_OBSERVED"
+    }
+  },
+  "logout": {
+    "attempted": true,
+    "passed": true,
+    "returnedToSelect": true,
+    "sent": 1,
+    "acknowledged": 1
+  },
+  "fontCache": {
+    "passed": false,
+    "present": 5,
+    "expected": 6,
+    "missing": [
+      "/original-ui/fonts/NotoSansCJKsc-Regular.otf"
+    ]
+  },
+  "wallet": {
+    "approvalPassed": true,
+    "onboardingPassed": true,
+    "signedLoginApprovals": 1,
+    "forbiddenCount": 0,
+    "physicalPhone": false
+  },
+  "failure": {
+    "phase": "verify-six-original-font-cache-bodies",
+    "code": "AUTOMATION_FAILED"
+  },
+  "console": {
+    "engine": "chrome",
+    "headlessDesktopViewport": true,
+    "networkMock": false,
+    "pageErrors": 0,
+    "consoleErrors": 257,
+    "browserClosed": true
+  },
+  "workerRestartPerformed": false,
+  "fullClassRoutesRetested": false,
+  "publicExistingRoleRestartRetested": false,
+  "overallCandidate100": false,
+  "humanAccepted": false,
+  "runtimeBodyAfterFirstPlayableMs": 192203,
+  "startClickToFirstPlayableMs": 34502,
+  "rawGameReceiptSha256": "82e8f64c1a3e135c4158c96e79ee72be495f07243daf0e2aea2960d1983046e7"
+}

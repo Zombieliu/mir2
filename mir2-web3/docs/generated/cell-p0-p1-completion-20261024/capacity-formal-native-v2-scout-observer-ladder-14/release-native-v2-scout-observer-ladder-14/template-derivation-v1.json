@@ -1,0 +1,2242 @@
+{
+  "schemaVersion": 1,
+  "rows": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\README-PENDING.md",
+        "bytes": 1387,
+        "sha256": "99948498a4c5534c7256764fab61a8ffbbc0465d4e005a757b376f6fad43f292"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\README-PENDING.md",
+        "bytes": 1807,
+        "sha256": "650e6a6a6f134648a7642f46fc2ea074da203d3e2e93a6d0789b1f42c09388b7"
+      },
+      "rawExact": false,
+      "hunks": [
+        {
+          "oldStart": 0,
+          "newStart": 0,
+          "before": [
+            "# Formal13 pending template\n"
+          ],
+          "after": [
+            "# Formal14 PENDING source template\n"
+          ]
+        },
+        {
+          "oldStart": 2,
+          "newStart": 2,
+          "before": [
+            "No mode has been executed. Fresh Probe17 raw/public collection and source-pinned independent verification remain unbound. Execution/provisioning gates reject.\n"
+          ],
+          "after": [
+            "No module import, guard, seal, account, preparation, realm, test or collector execution occurred. Actual entrypoints first require bound formal14/fresh18; pending18 run/report/raw/public/Store/ended/OS fields are null. Nothing certifies actual18 or formal capacity.\n"
+          ]
+        },
+        {
+          "oldStart": 4,
+          "newStart": 4,
+          "before": [
+            "Formal12 policy, resource profile,100-anchor scenario and146-window contract remain byte-exact: five300s phases,7200s soak,5resume/5save,60s post and18000s wall. Caps128/100/100/4/1/2,24logical/32GiBprivate/40GiBworking set,Tokio4 and50ms remain.\n"
+          ],
+          "after": [
+            "Complete original formal13 policy/resource100scene remains:2/10/25/50/100 each300s,100-player7200s soak,resume5/save5/post60,wall18000 and146 complete real minute windows; caps128/100/100/4/1/2,Tokio4,slow50 and24logical/private32GiB/WS40GiB. Resource/scenario/window contracts are rawexact and original policy retains exact UTF8 value bytes. Directory/source compatibility alone changes.\n"
+          ]
+        },
+        {
+          "oldStart": 6,
+          "newStart": 6,
+          "before": [
+            "Backend/execution is c743/50/dae1; Node evidence is d240/5ba/210; historical wire remains6d/187 plus28wrapper/8adapter.\n"
+          ],
+          "after": [
+            "Backend c743/50/dae1 is reused without rebuilding. Current execution and capacity Node H=3a6d8c862d03ded3133605472a8f38bc6258af52/445325/actual219 are separate from Release historicald240 and wrapper6d/187+28/adapter8. Lazy source evidence comes from sealed18. Six declarations derive through9465→6759→19099, not directly from9465.\n"
+          ]
+        },
+        {
+          "oldStart": 8,
+          "newStart": 8,
+          "before": [
+            "One stderr stream feeds unchanged803387 base3/4/7 capture and independent reviewed storeOnly:true capture. Store incompleteness cannot amend gameplay acceptance or prove holder absence. Nested occurrence maxima/samples/totals cannot be summed.\n"
+          ],
+          "after": [
+            "Base3/4/7 diagnostics remain unchanged; Store-only sidecar never adds a game threshold. Collector derives approved formal13 current50 formal146 logic and preserves partial/failure/pass verdicts. Pure historical local tests/logs are not copied into this new runtime; active source closure pins original reviewed external evidence.\n"
+          ]
+        },
+        {
+          "oldStart": 10,
+          "newStart": 10,
+          "before": [
+            "Current50 collector basenames, omitted nonexistent historical-template entries, canonical Node library path, post-seeder private1/recordings2 ACL and50-state PS gates are carried forward. No successful17 result is asserted here.\n",
+            "\n",
+            "After actual17 binding and independent review, Root exclusively performs seal → readonlyguard → prepare-inputs.mjs --prepare-authorized-inputs → run-owned.mjs --execute-authorized-probe --attack-results=v2 → collect-public/verify-public → collect-store-public/verify-store-public. No finalizer exists or is authorized in this pending revision.\n"
+          ],
+          "after": [
+            "Future Root commands are controller --seal-reviewed-inputs with dynamic prepared/review file+SHA, then --readonly-sourceguard; prepare-inputs --prepare-authorized-inputs; run-owned --execute-authorized-probe --attack-results=v2. Currently every entry refuses PENDING; no launcher freeze or execution authorization exists. Ended18 consumer schema and final external closure must be checked against actual Root producer facts before final binding.\n"
+          ]
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\ROOT-CONTROLLER.md",
+        "bytes": 1872,
+        "sha256": "814599c79189010d9eec744d147c6247ffc7f1fe7d8df630a1d6144156e725af"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\ROOT-CONTROLLER.md",
+        "bytes": 269,
+        "sha256": "e061273cfccaa897657ea477c456ac3e97d6acb7a91aa69caacb200c3f5cd5b2"
+      },
+      "rawExact": false,
+      "hunks": [
+        {
+          "oldStart": 0,
+          "newStart": 0,
+          "before": [
+            "# Formal13 Root controller\n",
+            "\n",
+            "This controller has not run. It accepts explicit prepared/review path and SHA arguments, verifies source pins before imports, uses the already finalized full16 validator with the project root before an own freeze exists, and calls the complete fresh17 gate. Readonly mode uses the own frozen50 source guard. No seed, account, test, build or service operation is available in either mode.\n",
+            "\n",
+            "Root commands after a final eligible independent review:\n",
+            "\n",
+            "1. node \"C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\root-seal-and-guard-v1.mjs\" --seal-reviewed-inputs --prepared-file=<absolute runtime-prepared revision> --prepared-sha256=<exact SHA> --review-file=<absolute review> --review-sha256=<exact SHA>\n",
+            "2. node \"C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\root-seal-and-guard-v1.mjs\" --readonly-sourceguard\n",
+            "3. node \"C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\prepare-inputs.mjs\" --prepare-authorized-inputs\n",
+            "4. node \"C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\run-owned.mjs\" --execute-authorized-probe --attack-results=v2\n",
+            "\n",
+            "Seal creates the three public source-preparation records required by prepare and includes their pins in the final freeze. The genuine syntax log is already present before any account operation. Existing output/runtime state is rejected.\n",
+            "\n",
+            "Formal policy remains the original five300s phases+7200s soak+5resume/5save+post60 and146 complete minute windows,18000s wall,128/100/100/4/1/2 caps and24logical/32GiBprivate/40GiBworking set. Source prerequisites are actual c743/50/dae1, Node d240/5ba/210, fresh50full16 and actual fresh17 only. Probe17 is not formal capacity acceptance. Store-only data remains a separate diagnostic dataset, never a new gameplay condition.\n"
+          ],
+          "after": [
+            "Root-only formal controller is prepared, not executable while fresh18 is PENDING. It preserves formal128 source cap, policy/resource and146 windows. Actual seal/guard/prepare/run are separate Root-only steps after actual18 binding and independent QA. No mode executed.\n"
+          ]
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\backend-driver-source-guard.mjs",
+        "bytes": 2675,
+        "sha256": "1d6cb996f88de6a47be1b0bedae3e1f57dd82c3aaa66eeb82dc18196061d8db5"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\backend-driver-source-guard.mjs",
+        "bytes": 2675,
+        "sha256": "1d6cb996f88de6a47be1b0bedae3e1f57dd82c3aaa66eeb82dc18196061d8db5"
+      },
+      "rawExact": true,
+      "hunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\backend-library-binding.json",
+        "bytes": 1047,
+        "sha256": "0a4ae571314cd97de54d2410f2b24bdf4e88b36134f7324702555df78d3a6044"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\backend-library-binding.json",
+        "bytes": 1047,
+        "sha256": "0a4ae571314cd97de54d2410f2b24bdf4e88b36134f7324702555df78d3a6044"
+      },
+      "rawExact": true,
+      "hunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\candidate-release-binding.json",
+        "bytes": 7226,
+        "sha256": "986430cfa67b2a9aea685f6a03943af9877eb65b3547b25dd97abbe43292e726"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\candidate-release-binding.json",
+        "bytes": 7448,
+        "sha256": "8362712a2cd1f81148dc8485caa4e168fc7c9958e6149008f666e5fccc08a75d"
+      },
+      "rawExact": false,
+      "hunks": [
+        {
+          "oldStart": 136,
+          "newStart": 136,
+          "before": [
+            "  \"capacityAccepted\": false\n"
+          ],
+          "after": [
+            "  \"capacityAccepted\": false,\n",
+            "  \"reason\": \"Original c743/50/dae1 reused; current H/Node219 and fresh H/C ordinary full16 are prior prerequisites. Formal14 remains PENDING until exact ended18 collection+independent verification+normalcleanup binding.\"\n"
+          ]
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\collect-public-current50-v2.mjs",
+        "bytes": 43374,
+        "sha256": "1eb5a6e57e64e6f8ce5329bb48259508cff91a9fc0fbad5eba3ea55582eb7481"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\collect-public.mjs",
+        "bytes": 43126,
+        "sha256": "c4c1ede0b5e96c7191ff4fdd2e7cd5ab0478c89d2e601e60e5c4e2baef43c619"
+      },
+      "rawExact": false,
+      "hunks": [
+        {
+          "oldStart": 2,
+          "newStart": 2,
+          "before": [
+            "import {assertFormal13Configured} from './formal-template-contract.mjs';\n",
+            "assertFormal13Configured();\n"
+          ],
+          "after": [
+            "import {assertFormal14Configured} from './formal-template-contract.mjs';\n",
+            "assertFormal14Configured();\n"
+          ]
+        },
+        {
+          "oldStart": 21,
+          "newStart": 21,
+          "before": [
+            "const child = 'capacity-formal-native-v2-account-store-wait-ladder-13', dest = path.join(topic, child);\n",
+            "const realm = 'release-native-v2-account-store-wait-ladder-13';\n"
+          ],
+          "after": [
+            "const child = 'capacity-formal-native-v2-scout-observer-ladder-14', dest = path.join(topic, child);\n",
+            "const realm = 'release-native-v2-scout-observer-ladder-14';\n"
+          ]
+        },
+        {
+          "oldStart": 320,
+          "newStart": 320,
+          "before": [
+            "const recordingSummaryFile = path.join(base, 'collect-formal-native-v2-account-store-wait-ladder-13-recordings-metadata.json');\n"
+          ],
+          "after": [
+            "const recordingSummaryFile = path.join(base, 'collect-formal-native-v2-scout-observer-ladder-14-recordings-metadata.json');\n"
+          ]
+        },
+        {
+          "oldStart": 322,
+          "newStart": 322,
+          "before": [
+            "const monitorEndpointsFile = path.join(base, 'collect-formal-native-v2-account-store-wait-ladder-13-monitor-endpoints.json');\n"
+          ],
+          "after": [
+            "const monitorEndpointsFile = path.join(base, 'collect-formal-native-v2-scout-observer-ladder-14-monitor-endpoints.json');\n"
+          ]
+        },
+        {
+          "oldStart": 327,
+          "newStart": 327,
+          "before": [
+            "  'slow-stage-public.jsonl', 'slow-stage-public-status.json', 'slow-stage-diagnostics-config.json', 'slow-stage-public.mjs', 'slow-stage-public.test.mjs', 'synthetic-tests-v1.log', 'slow-stage-helper-freeze-v1.json', 'slow-stage-schema-contract.json', 'legacy14-original.mjs.txt', 'candidate-release-binding.json', 'full16-gate.json', 'slow-stage-row-contract.mjs', 'verify-full16-gate.mjs', 'projection-build-source-lib.mjs',\n"
+          ],
+          "after": [
+            "  'slow-stage-public.jsonl', 'slow-stage-public-status.json', 'slow-stage-diagnostics-config.json', 'slow-stage-public.mjs', 'slow-stage-schema-contract.json', 'candidate-release-binding.json', 'full16-gate.json', 'slow-stage-row-contract.mjs', 'verify-full16-gate.mjs', 'projection-build-source-lib.mjs',\n"
+          ]
+        },
+        {
+          "oldStart": 334,
+          "newStart": 334,
+          "before": [
+            "realmFiles.push('phase-window-contract.mjs','hp-maintenance-status-schema.mjs','formal-template-contract.mjs','pending-formal13-binding-v1.json','wire-diagnostics-contract.mjs','wire-diagnostics-adapter.mjs','wire-diagnostics-adapter.test.mjs','wire-adapter-synthetic-tests.log','wire-adapter-synthetic-tests.json','verify-probe17-collected-evidence.mjs','driver-binding-contract.mjs','current-driver-binding.json','native-chase-report-contract.mjs','backend-library-binding.json','scene-driver-compatibility.mjs','scene-driver-compatibility-proof-v1.json');if(wireTerminalPin)realmFiles.push(WIRE_TERMINAL);\n",
+            "const sourcePaths = [`${realm}/collect-public-current50-v2.mjs`, `${realm}/collect-public-current50-v2-derivation-v1.json`, ...wireSource.files.map(p=>path.relative(base,p.file).split(path.sep).join('/')),...realmFiles.map(file => `${realm}/${file}`), 'release-account-store-wait-diagnostics-v1.json', 'backend-source-account-store-wait-diagnostics-v1.json', 'account-store-wait-diagnostics-v1-build-receipt.json',\n",
+            "  'capacity-attack-deadline-driver-frozen-v1.json',\n"
+          ],
+          "after": [
+            "realmFiles.push('phase-window-contract.mjs','hp-maintenance-status-schema.mjs','formal-template-contract.mjs','pending-formal14-binding-v1.json','wire-diagnostics-contract.mjs','wire-diagnostics-adapter.mjs','verify-probe18-collected-evidence.mjs','driver-binding-contract.mjs','current-driver-binding.json','native-chase-report-contract.mjs','backend-library-binding.json','scene-driver-compatibility.mjs','scene-driver-compatibility-proof-v1.json');if(wireTerminalPin)realmFiles.push(WIRE_TERMINAL);\n",
+            "const sourcePaths = [`${realm}/collect-public.mjs`, `${realm}/template-derivation-v1.json`, ...wireSource.files.map(p=>path.relative(base,p.file).split(path.sep).join('/')),...realmFiles.map(file => `${realm}/${file}`), 'release-account-store-wait-diagnostics-v1.json', 'backend-source-account-store-wait-diagnostics-v1.json', 'account-store-wait-diagnostics-v1-build-receipt.json',\n",
+            "  'capacity-scout-observer-preference-driver-frozen-v1.json',\n"
+          ]
+        },
+        {
+          "oldStart": 338,
+          "newStart": 338,
+          "before": [
+            "  'collect-formal-native-v2-account-store-wait-ladder-13-recordings-metadata.json', 'collect-formal-native-v2-account-store-wait-ladder-13-monitor-endpoints.json',\n",
+            "  'release-native-v2-account-store-wait-ladder-13/collect-public.mjs', 'release-native-v2-account-store-wait-ladder-13/verify-public.mjs'];\n"
+          ],
+          "after": [
+            "  'collect-formal-native-v2-scout-observer-ladder-14-recordings-metadata.json', 'collect-formal-native-v2-scout-observer-ladder-14-monitor-endpoints.json',\n",
+            "  'release-native-v2-scout-observer-ladder-14/collect-public.mjs', 'release-native-v2-scout-observer-ladder-14/verify-public.mjs'];\n"
+          ]
+        },
+        {
+          "oldStart": 351,
+          "newStart": 351,
+          "before": [
+            "  scope: 'Independent explicit public allowlist for authentic formal standard native compact-wire span2-halo ladder13. Original partial/failure/pass report bytes are retained; strict frozen verifier plus authentic normal cleanup adjudicates formal acceptance. No private store, secret, EXE or recording payload copied.',\n"
+          ],
+          "after": [
+            "  scope: 'Independent explicit public allowlist for authentic formal standard native compact-wire span2-halo ladder14. Original partial/failure/pass report bytes are retained; strict frozen verifier plus authentic normal cleanup adjudicates formal acceptance. No private store, secret, EXE or recording payload copied.',\n"
+          ]
+        },
+        {
+          "oldStart": 355,
+          "newStart": 355,
+          "before": [
+            "  run: { runId, wireDiagnostics:{identity:wireIdentity,terminal:wireTerminalPin,capture:wireCapture}, coreCodeEvidenceCommit:CORE_CODE_EVIDENCE_COMMIT, sourceCommit: release.sourceCommit, backendSourceCommit, driverSourceCommit, driverSourceSha256: driverFreeze.sourceSha256, socketDiagnosticsReleaseUsed: true, sceneProfile: scene.profile, sceneSourceSha256: scene.sourceSha256, scene10Sha256: scene.probeScene.sha256, scene100Sha256: scene.formalScene.sha256, sceneStaticAnalysis: scene.analysis, reportOk: report.ok, driverPlayableCapacityAccepted: report.playableCapacityAccepted, rawVerifierAccepted, normalProcessCleanup, diagnosticsComplete, slowStageMetadata: { rows: slowMeta.rows, bytes: slowMeta.bytes, sha256: slowMeta.sha256, status: slowStatus }, normalOwnedCleanup, navigationCoordination: report.navigationCoordination, nativePatrolPlanning:report.nativePatrolPlanning, measurementClock:report.measurementClock, nativeHpMaintenance:report.nativeHpMaintenance, nativeAttackWitness:report.nativeAttackWitness, nativeChasePreference:report.nativeChasePreference, gatewaySha256: release.binary.sha256, backendInputCount: manifest.files.length,\n"
+          ],
+          "after": [
+            "  run: { runId, wireDiagnostics:{identity:wireIdentity,terminal:wireTerminalPin,capture:wireCapture}, coreCodeEvidenceCommit:CORE_CODE_EVIDENCE_COMMIT, sourceCommit: release.sourceCommit, backendSourceCommit, executionSourceCommit:driverSourceCommit, driverSourceCommit, driverSourceSha256: driverFreeze.sourceSha256, socketDiagnosticsReleaseUsed: true, sceneProfile: scene.profile, sceneSourceSha256: scene.sourceSha256, scene10Sha256: scene.probeScene.sha256, scene100Sha256: scene.formalScene.sha256, sceneStaticAnalysis: scene.analysis, reportOk: report.ok, driverPlayableCapacityAccepted: report.playableCapacityAccepted, rawVerifierAccepted, normalProcessCleanup, diagnosticsComplete, slowStageMetadata: { rows: slowMeta.rows, bytes: slowMeta.bytes, sha256: slowMeta.sha256, status: slowStatus }, normalOwnedCleanup, navigationCoordination: report.navigationCoordination, nativePatrolPlanning:report.nativePatrolPlanning, measurementClock:report.measurementClock, nativeHpMaintenance:report.nativeHpMaintenance, nativeAttackWitness:report.nativeAttackWitness, nativeChasePreference:report.nativeChasePreference, gatewaySha256: release.binary.sha256, backendInputCount: manifest.files.length,\n"
+          ]
+        },
+        {
+          "oldStart": 372,
+          "newStart": 372,
+          "before": [
+            "const catalogName = 'collect-formal-native-v2-account-store-wait-ladder-13-public-artifact-catalog.json';\n"
+          ],
+          "after": [
+            "const catalogName = 'collect-formal-native-v2-scout-observer-ladder-14-public-artifact-catalog.json';\n"
+          ]
+        },
+        {
+          "oldStart": 406,
+          "newStart": 406,
+          "before": [
+            "await writeNew(path.join(base, 'collect-formal-native-v2-account-store-wait-ladder-13-collection-result.json'), { destination: dest, summary, manifest: entry });\n"
+          ],
+          "after": [
+            "await writeNew(path.join(base, 'collect-formal-native-v2-scout-observer-ladder-14-collection-result.json'), { destination: dest, summary, manifest: entry });\n"
+          ]
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\collect-store-public.mjs",
+        "bytes": 4927,
+        "sha256": "bb8203d69ac110112e2d7f31e589a4c7cdda1b60b955c3e109a9c95a55e4d048"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\collect-store-public.mjs",
+        "bytes": 4915,
+        "sha256": "ac763933fbfd0e9f8619caa101013b463fa1a6915bcf2da07a43f0edf8342664"
+      },
+      "rawExact": false,
+      "hunks": [
+        {
+          "oldStart": 0,
+          "newStart": 0,
+          "before": [
+            "import {assertFormal13Configured} from './formal-template-contract.mjs';\n",
+            "assertFormal13Configured();\n"
+          ],
+          "after": [
+            "import {assertFormal14Configured} from './formal-template-contract.mjs';\n",
+            "assertFormal14Configured();\n"
+          ]
+        },
+        {
+          "oldStart": 10,
+          "newStart": 10,
+          "before": [
+            "const child='capacity-formal-native-v2-account-store-wait-ladder-13-store-diagnostics',directory=path.join(topic,child),gameDirectory=path.join(topic,'capacity-formal-native-v2-account-store-wait-ladder-13');\n"
+          ],
+          "after": [
+            "const child='capacity-formal-native-v2-scout-observer-ladder-14-store-diagnostics',directory=path.join(topic,child),gameDirectory=path.join(topic,'capacity-formal-native-v2-scout-observer-ladder-14');\n"
+          ]
+        },
+        {
+          "oldStart": 15,
+          "newStart": 15,
+          "before": [
+            "const baseCatalogFile=path.join(gameDirectory,'collect-formal-native-v2-account-store-wait-ladder-13-public-artifact-catalog.json'),baseVerificationFile=path.join(gameDirectory,'public-verification.json');\n"
+          ],
+          "after": [
+            "const baseCatalogFile=path.join(gameDirectory,'collect-formal-native-v2-scout-observer-ladder-14-public-artifact-catalog.json'),baseVerificationFile=path.join(gameDirectory,'public-verification.json');\n"
+          ]
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\current-driver-binding.json",
+        "bytes": 2756,
+        "sha256": "8702d54a12dbbf2a57e841a2fab66f4ab25b884407fb13ee863c412d759817d1"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\current-driver-binding.json",
+        "bytes": 2748,
+        "sha256": "0ed582efe8f19a56fecde659a3452584f3fe093424a26054666968ae22bda518"
+      },
+      "rawExact": false,
+      "hunks": [
+        {
+          "oldStart": 36,
+          "newStart": 36,
+          "before": [
+            "    \"file\": \"C:\\\\mir2-build\\\\p01-completion-20261024\\\\release-native-10-v2-scout-observer-feasibility-18\\\\scene-driver-compatibility-proof-v1.json\",\n"
+          ],
+          "after": [
+            "    \"file\": \"C:\\\\mir2-build\\\\p01-completion-20261024\\\\release-native-v2-scout-observer-ladder-14\\\\scene-driver-compatibility-proof-v1.json\",\n"
+          ]
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\driver-binding-contract.mjs",
+        "bytes": 1623,
+        "sha256": "b54e5ffd89da0f048632f8d3ee7257880f00d73b44a8cc4a7b36a21fce833f72"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\driver-binding-contract.mjs",
+        "bytes": 1623,
+        "sha256": "b54e5ffd89da0f048632f8d3ee7257880f00d73b44a8cc4a7b36a21fce833f72"
+      },
+      "rawExact": true,
+      "hunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\driver-evidence-contract.mjs",
+        "bytes": 5863,
+        "sha256": "3fdf09eb72505ebb7933af43a4178f1f3e40cf61d671521321c7aeab001f4056"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\driver-evidence-contract.mjs",
+        "bytes": 5863,
+        "sha256": "3fdf09eb72505ebb7933af43a4178f1f3e40cf61d671521321c7aeab001f4056"
+      },
+      "rawExact": true,
+      "hunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\driver-report-contract.mjs",
+        "bytes": 9785,
+        "sha256": "9d5ffc35cab3516ce7ef38af2eae9f2527a4ae17e19d679529740bf4ad978938"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\driver-report-contract.mjs",
+        "bytes": 9785,
+        "sha256": "9d5ffc35cab3516ce7ef38af2eae9f2527a4ae17e19d679529740bf4ad978938"
+      },
+      "rawExact": true,
+      "hunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\formal-template-contract.mjs",
+        "bytes": 1291,
+        "sha256": "0acd15156a52211c3731505cc77d1845dc36727e51904d372505492c82d312e8"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\formal-template-contract.mjs",
+        "bytes": 1496,
+        "sha256": "74463f0fe4ad40d1f5c6809cbb36bed785797ee5d800196eb0c2aa25a4421c65"
+      },
+      "rawExact": false,
+      "hunks": [
+        {
+          "oldStart": 1,
+          "newStart": 1,
+          "before": [
+            "const finalFile=new URL('./bound-formal13-binding-v1.json',import.meta.url);\n",
+            "export const FORMAL13_BINDING=Object.freeze(JSON.parse(fs.readFileSync(fs.existsSync(finalFile)?finalFile:new URL('./pending-formal13-binding-v1.json',import.meta.url),'utf8')));\n",
+            "export function assertFormal13Configured(){const b=FORMAL13_BINDING,p=b.probe17;if(b.state!=='FINAL_FRESH_PROBE17_AND_NEW50_BOUND_NOT_EXECUTED'||b.finalized!==true||b.backendInputCount!==50||!/^\\d{13}-[a-f0-9]{8}$/.test(p?.runId??'')||!p.report||!p.raw||!p.collectedEvidence||!p.independentVerification||!Array.isArray(p.independentVerifierSources)||(p.independentVerifierSources.length<2||p.independentVerifierSources.length>128)||!p.independentSourceClosureManifest||!p.actualExecutionReceipt||!Number.isSafeInteger(p.independentVerifierRevision)||p.independentVerifierRevision<1||!/^[a-f0-9]{64}$/.test(p.preparedSourceConfigSha256??'')||JSON.stringify(p.completePhaseSeconds)!=='[300,300,360]'||JSON.stringify(p.completePhaseWindows)!=='[5,5,6]'||p.capacityAccepted!==false)throw Error('PENDING_FORMAL13: matching fresh Probe17 actual300/300/360,5/5/6>=60s PASS plus complete raw/public/independent tool-seal/executor source closure is required. Known Release/full16 are not a substitute for Probe17.');}\n"
+          ],
+          "after": [
+            "const finalFile=new URL('./bound-formal14-binding-v1.json',import.meta.url);\n",
+            "export const FORMAL14_BINDING=Object.freeze(JSON.parse(fs.readFileSync(fs.existsSync(finalFile)?finalFile:new URL('./pending-formal14-binding-v1.json',import.meta.url),'utf8')));\n",
+            "export function assertFormal14Configured(){const b=FORMAL14_BINDING,p=b.probe18;if(b.state!=='FINAL_FRESH_PROBE18_AND_NEW50_BOUND_NOT_EXECUTED'||b.finalized!==true||b.backendInputCount!==50||b.backendSourceCommit!=='c743122af05faca43d9535d8c6c2a4bfb01b924f'||b.driverSourceCommit!=='3a6d8c862d03ded3133605472a8f38bc6258af52'||b.executionSourceCommit!=='3a6d8c862d03ded3133605472a8f38bc6258af52'||!/^\\d{13}-[a-f0-9]{8}$/.test(p?.runId??'')||!p.report||!p.raw||!p.collectedEvidence||!p.independentVerification||!Array.isArray(p.independentVerifierSources)||(p.independentVerifierSources.length<2||p.independentVerifierSources.length>128)||!p.independentSourceClosureManifest||!p.actualExecutionReceipt||!Number.isSafeInteger(p.independentVerifierRevision)||p.independentVerifierRevision<1||!/^[a-f0-9]{64}$/.test(p.preparedSourceConfigSha256??'')||JSON.stringify(p.completePhaseSeconds)!=='[300,300,360]'||JSON.stringify(p.completePhaseWindows)!=='[5,5,6]'||p.capacityAccepted!==false)throw Error('PENDING_FORMAL14: matching fresh Probe18 actual300/300/360,5/5/6>=60s PASS plus complete raw/public/independent tool-seal/executor source closure is required. Known Release/full16 are not a substitute for Probe18.');}\n"
+          ]
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\full16-actual-prerequisite-v1.json",
+        "bytes": 4922,
+        "sha256": "2fd5bb822e631128ff483528ea09b74cd2e4db1316107ffb5c57b579bf8d2157"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\full16-actual-prerequisite-v1.json",
+        "bytes": 4922,
+        "sha256": "2fd5bb822e631128ff483528ea09b74cd2e4db1316107ffb5c57b579bf8d2157"
+      },
+      "rawExact": true,
+      "hunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\hp-maintenance-status-schema.mjs",
+        "bytes": 1509,
+        "sha256": "8d0c42a5cfc0fe1651c6a3840c5672a6d46c9f2c778e7538d2745f17e42d118c"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\hp-maintenance-status-schema.mjs",
+        "bytes": 1509,
+        "sha256": "8d0c42a5cfc0fe1651c6a3840c5672a6d46c9f2c778e7538d2745f17e42d118c"
+      },
+      "rawExact": true,
+      "hunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\initialize-private.ps1",
+        "bytes": 2653,
+        "sha256": "463aac45694b47be7fcbb287375c1d67148209168125985f5cc45a55574f34b6"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\initialize-private.ps1",
+        "bytes": 2677,
+        "sha256": "5f04ec6b8379b941cac75ef66b31b94039500483f29c587224730b8e9f23418a"
+      },
+      "rawExact": false,
+      "hunks": [
+        {
+          "oldStart": 2,
+          "newStart": 2,
+          "before": [
+            "$taskFormalFile=Join-Path $PSScriptRoot 'bound-formal13-binding-v1.json'\n",
+            "if(-not (Test-Path -LiteralPath $taskFormalFile)){$taskFormalFile=Join-Path $PSScriptRoot 'pending-formal13-binding-v1.json'}\n"
+          ],
+          "after": [
+            "$taskFormalFile=Join-Path $PSScriptRoot 'bound-formal14-binding-v1.json'\n",
+            "if(-not (Test-Path -LiteralPath $taskFormalFile)){$taskFormalFile=Join-Path $PSScriptRoot 'pending-formal14-binding-v1.json'}\n"
+          ]
+        },
+        {
+          "oldStart": 5,
+          "newStart": 5,
+          "before": [
+            "if($taskFormal.state -ne 'FINAL_FRESH_PROBE17_AND_NEW50_BOUND_NOT_EXECUTED' -or $taskFormal.finalized -ne $true){throw 'PENDING_FORMAL13_FRESH_PROBE17'}\n"
+          ],
+          "after": [
+            "if($taskFormal.state -ne 'FINAL_FRESH_PROBE18_AND_NEW50_BOUND_NOT_EXECUTED' -or $taskFormal.finalized -ne $true){throw 'PENDING_FORMAL14_FRESH_PROBE18'}\n"
+          ]
+        },
+        {
+          "oldStart": 7,
+          "newStart": 7,
+          "before": [
+            "if($taskCandidate.state -ne 'new50-release-and-full16-bound-not-executed' -or $taskCandidate.full16.state -ne 'passed'){throw 'PENDING_FRESH50_RELEASE_AND_FULL16'}\n"
+          ],
+          "after": [
+            "if($taskCandidate.state -ne 'reused50-release-current-driver-and-fresh-full16-bound-not-executed' -or $taskCandidate.full16.state -ne 'passed'){throw 'PENDING_FRESH50_RELEASE_AND_FULL16'}\n"
+          ]
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\input-lib.mjs",
+        "bytes": 16967,
+        "sha256": "5ff2a5b7f9a668a8d67d88971a80de6e609b5c36f12f4d3dd5786113d6bf1eab"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\input-lib.mjs",
+        "bytes": 17164,
+        "sha256": "60342898fe76d6116f71661aba2cafac815b8aa617230200747df41c714382ef"
+      },
+      "rawExact": false,
+      "hunks": [
+        {
+          "oldStart": 20,
+          "newStart": 20,
+          "before": [
+            "export const limits = [24, 10, 10, 4, 1, 2];\n"
+          ],
+          "after": [
+            "export const limits = [128, 100, 100, 4, 1, 2];\n"
+          ]
+        },
+        {
+          "oldStart": 36,
+          "newStart": 36,
+          "before": [],
+          "after": [
+            "  const formal=await import('./formal-template-contract.mjs');formal.assertFormal14Configured();\n"
+          ]
+        },
+        {
+          "oldStart": 71,
+          "newStart": 72,
+          "before": [],
+          "after": [
+            "  const formal=await import('./formal-template-contract.mjs');formal.assertFormal14Configured();\n"
+          ]
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\measured-phase-contract.mjs",
+        "bytes": 772,
+        "sha256": "b0977c31d9ee2345977e6af85f79beabc369d4c3e5c9448a50fa39133e0e2b39"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\measured-phase-contract.mjs",
+        "bytes": 772,
+        "sha256": "b0977c31d9ee2345977e6af85f79beabc369d4c3e5c9448a50fa39133e0e2b39"
+      },
+      "rawExact": true,
+      "hunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\monitor-owned.mjs",
+        "bytes": 1283,
+        "sha256": "de79844fbb6d79a9ab3e63c4fae24a3952886058b30fd55f615c10e36917f597"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\monitor-owned.mjs",
+        "bytes": 1283,
+        "sha256": "813676ce7833dc483676e0f66a0c28b81587b52b846e6f1e7c1b7c6570750387"
+      },
+      "rawExact": false,
+      "hunks": [
+        {
+          "oldStart": 0,
+          "newStart": 0,
+          "before": [
+            "import {assertFormal13Configured} from './formal-template-contract.mjs';\n",
+            "assertFormal13Configured();\n"
+          ],
+          "after": [
+            "import {assertFormal14Configured} from './formal-template-contract.mjs';\n",
+            "assertFormal14Configured();\n"
+          ]
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\native-chase-report-contract.mjs",
+        "bytes": 2266,
+        "sha256": "66b9ce1a39a1cfbe610d3f1a98559c67d178667319718f8baaa748a5d7d102c0"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\native-chase-report-contract.mjs",
+        "bytes": 2266,
+        "sha256": "66b9ce1a39a1cfbe610d3f1a98559c67d178667319718f8baaa748a5d7d102c0"
+      },
+      "rawExact": true,
+      "hunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\pending-formal13-binding-v1.json",
+        "bytes": 850,
+        "sha256": "697112611494b5bf51731758aaf88bc3690a3150502fd0eb1539d7ae588bd79f"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\pending-formal14-binding-v1.json",
+        "bytes": 1060,
+        "sha256": "84c7282c84301f2339f52142a8343db7efa41d317e7b5ed58d628ee6a8262f9b"
+      },
+      "rawExact": false,
+      "hunks": [
+        {
+          "oldStart": 2,
+          "newStart": 2,
+          "before": [
+            "  \"state\": \"PENDING_FRESH_PROBE17_COLLECTED_AND_INDEPENDENT_BINDING\",\n"
+          ],
+          "after": [
+            "  \"state\": \"PENDING_FRESH_PROBE18_COLLECTED_AND_INDEPENDENT_BINDING\",\n"
+          ]
+        },
+        {
+          "oldStart": 5,
+          "newStart": 5,
+          "before": [
+            "  \"driverSourceCommit\": \"d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16\",\n"
+          ],
+          "after": [
+            "  \"driverSourceCommit\": \"3a6d8c862d03ded3133605472a8f38bc6258af52\",\n"
+          ]
+        },
+        {
+          "oldStart": 7,
+          "newStart": 7,
+          "before": [
+            "  \"probe17\": {\n"
+          ],
+          "after": [
+            "  \"capacityAccepted\": false,\n",
+            "  \"sealed\": false,\n",
+            "  \"accountPrepared\": false,\n",
+            "  \"realmStarted\": false,\n",
+            "  \"executionSourceCommit\": \"3a6d8c862d03ded3133605472a8f38bc6258af52\",\n",
+            "  \"probe18\": {\n"
+          ]
+        },
+        {
+          "oldStart": 27,
+          "newStart": 32,
+          "before": [
+            "    \"capacityAccepted\": false\n",
+            "  },\n",
+            "  \"capacityAccepted\": false,\n",
+            "  \"sealed\": false,\n",
+            "  \"accountPrepared\": false,\n",
+            "  \"realmStarted\": false\n"
+          ],
+          "after": [
+            "    \"capacityAccepted\": false,\n",
+            "    \"independentVerifierRevision\": null,\n",
+            "    \"actualExecutionLog\": null,\n",
+            "    \"rootIndependentCleanup\": null,\n",
+            "    \"storeDiagnostics\": null\n",
+            "  }\n"
+          ]
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\phase-window-contract.mjs",
+        "bytes": 3442,
+        "sha256": "f62c44c11d415a6a277c1259b047adf04d823c553b75b4d36b74f47de9d82ea7"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\phase-window-contract.mjs",
+        "bytes": 3442,
+        "sha256": "f62c44c11d415a6a277c1259b047adf04d823c553b75b4d36b74f47de9d82ea7"
+      },
+      "rawExact": true,
+      "hunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\preparation-plan.json",
+        "bytes": 1519,
+        "sha256": "253774f0f2062389da221d44b6f1876efa10c91522c0609fd34241af648f54b0"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\preparation-plan.json",
+        "bytes": 1645,
+        "sha256": "858cde6a35a9425d012a90fa875a0d211fa06926e8ecf32d8bd07ca3180d1f4c"
+      },
+      "rawExact": false,
+      "hunks": [
+        {
+          "oldStart": 2,
+          "newStart": 2,
+          "before": [
+            "  \"state\": \"ACTUAL_BOUND_UNSEALED_NOT_EXECUTED\",\n",
+            "  \"root\": \"C:\\\\mir2-build\\\\p01-completion-20261024\\\\release-native-v2-account-store-wait-ladder-13\",\n"
+          ],
+          "after": [
+            "  \"state\": \"PENDING_FRESH_PROBE18_COLLECTED_AND_INDEPENDENT_BINDING\",\n",
+            "  \"root\": \"C:\\\\mir2-build\\\\p01-completion-20261024\\\\release-native-v2-scout-observer-ladder-14\",\n"
+          ]
+        },
+        {
+          "oldStart": 5,
+          "newStart": 5,
+          "before": [
+            "  \"driverSourceCommit\": \"d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16\",\n"
+          ],
+          "after": [
+            "  \"driverSourceCommit\": \"3a6d8c862d03ded3133605472a8f38bc6258af52\",\n",
+            "  \"executionSourceCommit\": \"3a6d8c862d03ded3133605472a8f38bc6258af52\",\n"
+          ]
+        },
+        {
+          "oldStart": 7,
+          "newStart": 8,
+          "before": [
+            "  \"formalPolicyDonor\": \"C:\\\\mir2-build\\\\p01-completion-20261024\\\\release-native-v2-attack-deadline-ladder-12\",\n"
+          ],
+          "after": []
+        },
+        {
+          "oldStart": 9,
+          "newStart": 9,
+          "before": [
+            "  \"freshProbe17Bound\": true,\n"
+          ],
+          "after": [
+            "  \"freshProbe18Bound\": false,\n"
+          ]
+        },
+        {
+          "oldStart": 14,
+          "newStart": 14,
+          "before": [],
+          "after": [
+            "  \"formalScope\": {\n",
+            "    \"stages\": [\n",
+            "      2,\n",
+            "      10,\n",
+            "      25,\n",
+            "      50,\n",
+            "      100\n",
+            "    ],\n",
+            "    \"stageSeconds\": 300,\n",
+            "    \"soakSeconds\": 7200,\n",
+            "    \"resumeSamples\": 5,\n",
+            "    \"saveSamples\": 5,\n",
+            "    \"postResumeSeconds\": 60,\n",
+            "    \"wallSeconds\": 18000,\n",
+            "    \"completeMinuteWindows\": 146\n",
+            "  },\n"
+          ]
+        },
+        {
+          "oldStart": 15,
+          "newStart": 31,
+          "before": [
+            "    \"100-player representative scout tour886 unit steps\",\n",
+            "    \"Original24ACK/20s online advancement\",\n",
+            "    \"Conditional static120 positive hits does not guarantee180 launched attacks or2h supply\",\n",
+            "    \"Historical25 stall remains unresolved; new backend is not a formal capacity result\"\n"
+          ],
+          "after": [
+            "    \"100 representative scout tour886 unitsteps is historical static evidence only\",\n",
+            "    \"Original24ACK/20s online waypoint advance budget unchanged\",\n",
+            "    \"Conditional static120 positive hits does not prove180 launched attacks or2h supply\",\n",
+            "    \"Historical25 failure is not retroactively passed by new source tests\"\n"
+          ]
+        },
+        {
+          "oldStart": 21,
+          "newStart": 37,
+          "before": [
+            "    \"Narrow source contract/consumer final integration and independent readonly review\",\n",
+            "    \"Root seal and readonlyguard\",\n",
+            "    \"Root prepare100ordinary empty accounts then explicit formal run\",\n",
+            "    \"Ended game collection/verification, then independent Store companion collection/verification\"\n"
+          ],
+          "after": [
+            "    \"Actual ended18 full PASS/raw/base+Store/independent source seal+execution/OS binding\",\n",
+            "    \"Final consumer schema/source integration and independent QA\",\n",
+            "    \"Root seal/readonlyguard/prepare100ordinary/explicit formal run\",\n",
+            "    \"Ended formal game and independent Store collection/verification\"\n"
+          ]
+        },
+        {
+          "oldStart": 26,
+          "newStart": 42,
+          "before": [
+            "  \"actualProbe17Binding\": {\n",
+            "    \"file\": \"C:\\\\mir2-build\\\\p01-completion-20261024\\\\release-native-v2-account-store-wait-ladder-13\\\\bound-formal13-binding-v1.json\",\n",
+            "    \"bytes\": 19457,\n",
+            "    \"sha256\": \"e208e8f2825f4217cc336df6dc2f74ae81617188d24fb9d42c8278058e7196a0\"\n",
+            "  }\n"
+          ],
+          "after": [
+            "  \"proposedEnded18SchemaNotYetValidated\": true,\n",
+            "  \"finalExternalSourceClosureAssemblyPending\": true\n"
+          ]
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\prepare-inputs.mjs",
+        "bytes": 13963,
+        "sha256": "0f18dd7259c70e6534ce87f71b93fcaf8fa2b61faa250f40357bc772e9c07d82"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\prepare-inputs.mjs",
+        "bytes": 14302,
+        "sha256": "c5979823e19172d1c2df7d28086036580c7d3337168750b64abea15265a2fbee"
+      },
+      "rawExact": false,
+      "hunks": [
+        {
+          "oldStart": 0,
+          "newStart": 0,
+          "before": [
+            "import {assertFormal13Configured} from './formal-template-contract.mjs';\n",
+            "assertFormal13Configured();\n"
+          ],
+          "after": [
+            "import {assertFormal14Configured} from './formal-template-contract.mjs';\n",
+            "assertFormal14Configured();\n"
+          ]
+        },
+        {
+          "oldStart": 40,
+          "newStart": 40,
+          "before": [
+            "await fs.writeFile(path.join(root, 'preparation.lock'), JSON.stringify({ preparingAt: new Date().toISOString(), sourceCommit: releaseBinding.backendSourceCommit, backendSourceCommit: releaseBinding.backendSourceCommit, driverSourceCommit: releaseBinding.driverSourceCommit, feasibilityRunId: feasibilityGate.runId }) + '\\n', { flag: 'wx' });\n"
+          ],
+          "after": [
+            "await fs.writeFile(path.join(root, 'preparation.lock'), JSON.stringify({ preparingAt: new Date().toISOString(), sourceCommit: releaseBinding.backendSourceCommit, backendSourceCommit: releaseBinding.backendSourceCommit, executionSourceCommit: releaseBinding.executionSourceCommit, driverSourceCommit: releaseBinding.driverSourceCommit, feasibilityRunId: feasibilityGate.runId }) + '\\n', { flag: 'wx' });\n"
+          ]
+        },
+        {
+          "oldStart": 72,
+          "newStart": 72,
+          "before": [
+            "  sha256: copied.sha256, bytes: copied.bytes, sourceCommit: releaseBinding.backendSourceCommit, backendSourceCommit: releaseBinding.backendSourceCommit, driverSourceCommit: releaseBinding.driverSourceCommit, baseCommit: releaseBinding.release.baseCommit,\n"
+          ],
+          "after": [
+            "  sha256: copied.sha256, bytes: copied.bytes, sourceCommit: releaseBinding.backendSourceCommit, backendSourceCommit: releaseBinding.backendSourceCommit, executionSourceCommit: releaseBinding.executionSourceCommit, driverSourceCommit: releaseBinding.driverSourceCommit, baseCommit: releaseBinding.release.baseCommit,\n"
+          ]
+        },
+        {
+          "oldStart": 77,
+          "newStart": 77,
+          "before": [
+            "  path.join(root,'synthetic-tests-v1.log'),path.join(root,'slow-stage-helper-freeze-v1.json'),path.join(root,'slow-stage-schema-contract.json'),path.join(root,'legacy14-original.mjs.txt'),path.join(root,'candidate-release-binding.json'), path.join(root,'backend-library-binding.json'), path.join(base,'account-store-wait-diagnostics-release-v1/source-lib-v1.mjs'), path.join(root, 'launcher-syntax-check.log'), releaseBinding.releasePin.file, releaseBinding.manifestPin.file, path.join(base,'account-store-wait-diagnostics-v1-build-receipt.json'),\n"
+          ],
+          "after": [
+            "  path.join(base,'release-native-10-v2-account-store-wait-feasibility-17','synthetic-tests-v1.log'),path.join(base,'release-native-10-v2-account-store-wait-feasibility-17','slow-stage-helper-freeze-v1.json'),path.join(root,'slow-stage-schema-contract.json'),path.join(base,'release-native-10-v2-account-store-wait-feasibility-17','legacy14-original.mjs.txt'),path.join(root,'candidate-release-binding.json'), path.join(root,'backend-library-binding.json'), path.join(base,'scout-observer-preference-runtime-v1/source-lib-v1.mjs'), path.join(root, 'launcher-syntax-check.log'), releaseBinding.releasePin.file, releaseBinding.manifestPin.file, path.join(base,'account-store-wait-diagnostics-v1-build-receipt.json'),\n"
+          ]
+        },
+        {
+          "oldStart": 79,
+          "newStart": 79,
+          "before": [
+            "  ...scripts.map(name => path.join(root, name)), ...['wire-adapter-synthetic-tests.log','wire-adapter-synthetic-tests.json','copied-baseline-inputs.json','scenario.json', 'resource-profile.json', 'run-options.json', 'scenario-prefix-readiness.json', 'provisioning.json', 'gateway-build-pin.json', 'full16-gate.json', 'feasibility-gate.json'].map(name => path.join(root, name)),\n"
+          ],
+          "after": [
+            "  ...scripts.map(name => path.join(root, name)), ...['copied-baseline-inputs.json','scenario.json', 'resource-profile.json', 'run-options.json', 'scenario-prefix-readiness.json', 'provisioning.json', 'gateway-build-pin.json', 'full16-gate.json', 'feasibility-gate.json'].map(name => path.join(root, name)),\n"
+          ]
+        },
+        {
+          "oldStart": 83,
+          "newStart": 83,
+          "before": [
+            "await writeNew(path.join(root, 'source-pins.json'), { schemaVersion: 1, preparedAt: new Date().toISOString(), sourceCommit: releaseBinding.backendSourceCommit, backendSourceCommit: releaseBinding.backendSourceCommit, driverSourceCommit: releaseBinding.driverSourceCommit, sceneSourceSha256: scene.sourceSha256, sceneProfile: scene.profile,\n"
+          ],
+          "after": [
+            "await writeNew(path.join(root, 'source-pins.json'), { schemaVersion: 1, preparedAt: new Date().toISOString(), sourceCommit: releaseBinding.backendSourceCommit, backendSourceCommit: releaseBinding.backendSourceCommit, executionSourceCommit: releaseBinding.executionSourceCommit, driverSourceCommit: releaseBinding.driverSourceCommit, sceneSourceSha256: scene.sourceSha256, sceneProfile: scene.profile,\n"
+          ]
+        },
+        {
+          "oldStart": 88,
+          "newStart": 88,
+          "before": [
+            "console.log(JSON.stringify({ prepared: true, root, backendSourceCommit: releaseBinding.backendSourceCommit, driverSourceCommit: releaseBinding.driverSourceCommit, backendInputs: releaseBinding.manifest.files.length,\n"
+          ],
+          "after": [
+            "console.log(JSON.stringify({ prepared: true, root, backendSourceCommit: releaseBinding.backendSourceCommit, executionSourceCommit: releaseBinding.executionSourceCommit, driverSourceCommit: releaseBinding.driverSourceCommit, backendInputs: releaseBinding.manifest.files.length,\n"
+          ]
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\projection-build-source-lib.mjs",
+        "bytes": 172,
+        "sha256": "2ef575db3c6c67eb01bf743ccb178cf648d3968ed90592fa70073efbb572769a"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\projection-build-source-lib.mjs",
+        "bytes": 172,
+        "sha256": "2ef575db3c6c67eb01bf743ccb178cf648d3968ed90592fa70073efbb572769a"
+      },
+      "rawExact": true,
+      "hunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\recover-drained-owned.ps1",
+        "bytes": 3622,
+        "sha256": "16bdcf7cf3bca1d2ccdb3d7c65d04af54ff4f488c1d4ad706af25a8cb3b4a9b7"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\recover-drained-owned.ps1",
+        "bytes": 3646,
+        "sha256": "6b92d828d6bccb733d19420f10056672dbe4f185fa3d1514b2b3f5fe73e50aa7"
+      },
+      "rawExact": false,
+      "hunks": [
+        {
+          "oldStart": 2,
+          "newStart": 2,
+          "before": [
+            "$taskFormalFile=Join-Path $PSScriptRoot 'bound-formal13-binding-v1.json'\n",
+            "if(-not (Test-Path -LiteralPath $taskFormalFile)){$taskFormalFile=Join-Path $PSScriptRoot 'pending-formal13-binding-v1.json'}\n"
+          ],
+          "after": [
+            "$taskFormalFile=Join-Path $PSScriptRoot 'bound-formal14-binding-v1.json'\n",
+            "if(-not (Test-Path -LiteralPath $taskFormalFile)){$taskFormalFile=Join-Path $PSScriptRoot 'pending-formal14-binding-v1.json'}\n"
+          ]
+        },
+        {
+          "oldStart": 5,
+          "newStart": 5,
+          "before": [
+            "if($taskFormal.state -ne 'FINAL_FRESH_PROBE17_AND_NEW50_BOUND_NOT_EXECUTED' -or $taskFormal.finalized -ne $true){throw 'PENDING_FORMAL13_FRESH_PROBE17'}\n"
+          ],
+          "after": [
+            "if($taskFormal.state -ne 'FINAL_FRESH_PROBE18_AND_NEW50_BOUND_NOT_EXECUTED' -or $taskFormal.finalized -ne $true){throw 'PENDING_FORMAL14_FRESH_PROBE18'}\n"
+          ]
+        },
+        {
+          "oldStart": 7,
+          "newStart": 7,
+          "before": [
+            "if($taskCandidate.state -ne 'new50-release-and-full16-bound-not-executed' -or $taskCandidate.full16.state -ne 'passed'){throw 'PENDING_FRESH50_RELEASE_AND_FULL16'}\n"
+          ],
+          "after": [
+            "if($taskCandidate.state -ne 'reused50-release-current-driver-and-fresh-full16-bound-not-executed' -or $taskCandidate.full16.state -ne 'passed'){throw 'PENDING_FRESH50_RELEASE_AND_FULL16'}\n"
+          ]
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\request-stop.mjs",
+        "bytes": 1016,
+        "sha256": "0652b171ed5f15602ba9246f8640a0e44db55fe0d5f89645758938d70cbf5047"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\request-stop.mjs",
+        "bytes": 1016,
+        "sha256": "45609865bb52e7777634d2259154c64d2327a4e59ecd925ab9902624a32c73f6"
+      },
+      "rawExact": false,
+      "hunks": [
+        {
+          "oldStart": 0,
+          "newStart": 0,
+          "before": [
+            "import {assertFormal13Configured} from './formal-template-contract.mjs';\n",
+            "assertFormal13Configured();\n"
+          ],
+          "after": [
+            "import {assertFormal14Configured} from './formal-template-contract.mjs';\n",
+            "assertFormal14Configured();\n"
+          ]
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\resource-profile.json",
+        "bytes": 1630,
+        "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\resource-profile.json",
+        "bytes": 1630,
+        "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+      },
+      "rawExact": true,
+      "hunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\root-seal-and-guard-v1.mjs",
+        "bytes": 16198,
+        "sha256": "7e9cdcf6e49cfa6da418690f85d77ef4d975e9cdc1e6d33fa744660961ad48a5"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\root-seal-and-guard-v1.mjs",
+        "bytes": 16503,
+        "sha256": "6bd3ae52fc59e81754a5f955aec1c1bb9579ee54393936c8bc4701eb67ed5630"
+      },
+      "rawExact": false,
+      "hunks": [
+        {
+          "oldStart": 0,
+          "newStart": 0,
+          "before": [],
+          "after": [
+            "import {assertFormal14Configured} from './formal-template-contract.mjs';\n",
+            "assertFormal14Configured();\n"
+          ]
+        },
+        {
+          "oldStart": 6,
+          "newStart": 8,
+          "before": [
+            "const HEAD='c743122af05faca43d9535d8c6c2a4bfb01b924f',CORE='d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16',DRIVER='5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9';\n",
+            "const FULL16=path.join(BASE,'full-lifecycle-account-store-wait-diagnostics-v1');\n"
+          ],
+          "after": [
+            "const HEAD='c743122af05faca43d9535d8c6c2a4bfb01b924f',CORE='3a6d8c862d03ded3133605472a8f38bc6258af52',DRIVER='445325ec1b052cffffb07437c38ec0a4688741a0b9207e7895e514e8e4a7f634';\n",
+            "const FULL16=path.join(BASE,'full-lifecycle-scout-observer-preference-v1');\n"
+          ]
+        },
+        {
+          "oldStart": 53,
+          "newStart": 55,
+          "before": [
+            " const formal=await import(pathToFileURL(path.join(ROOT,'formal-template-contract.mjs')));formal.assertFormal13Configured();\n"
+          ],
+          "after": [
+            " const formal=await import(pathToFileURL(path.join(ROOT,'formal-template-contract.mjs')));formal.assertFormal14Configured();\n"
+          ]
+        },
+        {
+          "oldStart": 55,
+          "newStart": 57,
+          "before": [
+            " assert.equal(candidate.backendSourceCommit,HEAD);assert.equal(candidate.driverSourceCommit,CORE);assert.equal(candidate.backendInputCount,50);\n"
+          ],
+          "after": [
+            " assert.equal(candidate.backendSourceCommit,HEAD);assert.equal(candidate.driverSourceCommit,CORE);assert.equal(candidate.executionSourceCommit,CORE);assert.equal(candidate.backendInputCount,50);\n"
+          ]
+        },
+        {
+          "oldStart": 61,
+          "newStart": 63,
+          "before": [
+            "  const validated=await validator.validateCandidate(input.project,FULL16,HEAD),release=await read(input.releaseFile);\n"
+          ],
+          "after": [
+            "  const validated=await validator.validateCandidate(input.project,FULL16,CORE),release=await read(input.releaseFile);\n"
+          ]
+        },
+        {
+          "oldStart": 64,
+          "newStart": 66,
+          "before": [
+            "  binding={release,manifest:validated.backendManifest,backendSourceCommit:HEAD,driverSourceCommit:CORE,releasePin:await pin(input.releaseFile),full16Gate:await verifyFull16Gate(candidate,release,validated.backendManifest)};\n"
+          ],
+          "after": [
+            "  binding={release,manifest:validated.backendManifest,backendSourceCommit:HEAD,executionSourceCommit:CORE,driverSourceCommit:CORE,releasePin:await pin(input.releaseFile),full16Gate:await verifyFull16Gate(candidate,release,validated.backendManifest)};\n"
+          ]
+        },
+        {
+          "oldStart": 75,
+          "newStart": 77,
+          "before": [
+            " assert.equal(feasibilityGate.feasibilityPassed,true);assert.equal(feasibilityGate.capacityAccepted,false);assert.equal(feasibilityGate.runId,formal.FORMAL13_BINDING.probe17.runId);\n"
+          ],
+          "after": [
+            " assert.equal(feasibilityGate.feasibilityPassed,true);assert.equal(feasibilityGate.capacityAccepted,false);assert.equal(feasibilityGate.runId,formal.FORMAL14_BINDING.probe18.runId);\n"
+          ]
+        },
+        {
+          "oldStart": 85,
+          "newStart": 87,
+          "before": [
+            " const generatedCommon={schemaVersion:1,state:'reviewed-formal13-fresh17-bound-not-executed',preparedReceipt:pre.ref,independentReview:reviewPin,backendSourceCommit:HEAD,driverSourceCommit:CORE,backendInputCount:50,freshProbe17RunId:feasibilityGate.runId,freshProbe17Passed:true,formalCompleteMinuteWindows:146,accountsProvisioned:false,realmStarted:false,capacityAccepted:false};\n"
+          ],
+          "after": [
+            " const generatedCommon={schemaVersion:1,state:'reviewed-formal14-fresh17-bound-not-executed',preparedReceipt:pre.ref,independentReview:reviewPin,backendSourceCommit:HEAD,executionSourceCommit:CORE,driverSourceCommit:CORE,backendInputCount:50,freshProbe18RunId:feasibilityGate.runId,freshProbe18Passed:true,formalCompleteMinuteWindows:146,accountsProvisioned:false,realmStarted:false,capacityAccepted:false};\n"
+          ]
+        },
+        {
+          "oldStart": 91,
+          "newStart": 93,
+          "before": [
+            " const metadata={schemaVersion:1,state:'final-source-bound-not-executed',frozenAt:new Date().toISOString(),root:ROOT,backendSourceCommit:HEAD,backendInputCount:50,backendRebuilt:true,driverSourceCommit:CORE,coreCodeEvidenceCommit:CORE,driverSourceSha256:DRIVER,binarySha256:binding.release.binary.sha256,backendSourceAggregate:binding.manifest.sourceManifestSha256,sceneProfile:scene.profile,sceneSourceSha256:scene.sourceSha256,patrolSpan:2,storeDiagnostics:storeIdentity,ordinaryAccountPoolSize:100,maximumControlledActors:100,wireDiagnostics:wireIdentity,wireSourceFiles:wireSource.files,coreFunctionalEvidenceCoversWrapper:false,nodeCodeFullTests:210,wrapperUnitTests:28,adapterUnitTests:8,actualAdmissionCaps:[128,100,100,4,1,2],tokioWorkers:4,slowStageThresholdMs:50,full16RunId:binding.full16Gate.runId,preparedReceipt:pre.ref,independentReview:reviewPin,rootSealExecutor:pre.controllerPin,rootControllerPreparation:pre.controllerPrepPin,reviewedRuntimeLocalFiles:pre.value.files.length,reviewedExternalStableInputs:pre.value.externalStableInputs.length,driverClosurePins:drivers.pins.length,formalCompleteMinuteWindows:146,freshProbe17RunId:feasibilityGate.runId,freshProbe17Passed:true,generatedPreparationFiles,sourceConfigNotYet:true,accountsProvisioned:false,realmStarted:false,capacityAccepted:false,files,sourceSha256:sha(JSON.stringify(files)),scripts:files.filter(entry=>/\\.(mjs|ps1)$/.test(entry.file))};\n"
+          ],
+          "after": [
+            " const metadata={schemaVersion:1,state:'final-source-bound-not-executed',frozenAt:new Date().toISOString(),root:ROOT,backendSourceCommit:HEAD,executionSourceCommit:CORE,backendInputCount:50,backendRebuilt:false,driverSourceCommit:CORE,coreCodeEvidenceCommit:CORE,driverSourceSha256:DRIVER,binarySha256:binding.release.binary.sha256,backendSourceAggregate:binding.manifest.sourceManifestSha256,sceneProfile:scene.profile,sceneSourceSha256:scene.sourceSha256,patrolSpan:2,storeDiagnostics:storeIdentity,ordinaryAccountPoolSize:100,maximumControlledActors:100,wireDiagnostics:wireIdentity,wireSourceFiles:wireSource.files,coreFunctionalEvidenceCoversWrapper:false,nodeCodeFullTests:219,wrapperUnitTests:28,adapterUnitTests:8,actualAdmissionCaps:[128,100,100,4,1,2],tokioWorkers:4,slowStageThresholdMs:50,full16RunId:binding.full16Gate.runId,preparedReceipt:pre.ref,independentReview:reviewPin,rootSealExecutor:pre.controllerPin,rootControllerPreparation:pre.controllerPrepPin,reviewedRuntimeLocalFiles:pre.value.files.length,reviewedExternalStableInputs:pre.value.externalStableInputs.length,driverClosurePins:drivers.pins.length,formalCompleteMinuteWindows:146,freshProbe18RunId:feasibilityGate.runId,freshProbe18Passed:true,generatedPreparationFiles,sourceConfigNotYet:true,accountsProvisioned:false,realmStarted:false,capacityAccepted:false,files,sourceSha256:sha(JSON.stringify(files)),scripts:files.filter(entry=>/\\.(mjs|ps1)$/.test(entry.file))};\n"
+          ]
+        },
+        {
+          "oldStart": 95,
+          "newStart": 97,
+          "before": [
+            " assert.equal(frozen.schemaVersion,1);assert.equal(frozen.state,'final-source-bound-not-executed');assert.equal(frozen.backendSourceCommit,HEAD);assert.equal(frozen.backendInputCount,50);assert.equal(frozen.driverSourceCommit,CORE);assert.equal(frozen.driverSourceSha256,DRIVER);assert.ok(Array.isArray(frozen.files));assert.equal(sha(JSON.stringify(frozen.files)),frozen.sourceSha256);\n",
+            " const pre=await prepared(frozen.preparedReceipt.file,frozen.preparedReceipt.sha256),reviewPin=await reviewed(pre,frozen.independentReview.file,frozen.independentReview.sha256);assert.deepEqual(frozen.preparedReceipt,pre.ref);assert.deepEqual(frozen.independentReview,reviewPin);assert.ok(Array.isArray(frozen.generatedPreparationFiles)&&frozen.generatedPreparationFiles.length===3);for(let i=0;i<GENERATED.length;i++){const entry=frozen.generatedPreparationFiles[i];assert.ok(same(entry.file,path.join(ROOT,GENERATED[i])));await expectedPin(entry);const data=await read(entry.file);assert.deepEqual(data.preparedReceipt,pre.ref);assert.deepEqual(data.independentReview,reviewPin);assert.equal(data.freshProbe17RunId,frozen.freshProbe17RunId);assert.equal(data.freshProbe17Passed,true);}\n"
+          ],
+          "after": [
+            " assert.equal(frozen.schemaVersion,1);assert.equal(frozen.state,'final-source-bound-not-executed');assert.equal(frozen.backendSourceCommit,HEAD);assert.equal(frozen.backendInputCount,50);assert.equal(frozen.driverSourceCommit,CORE);assert.equal(frozen.executionSourceCommit,CORE);assert.equal(frozen.driverSourceSha256,DRIVER);assert.ok(Array.isArray(frozen.files));assert.equal(sha(JSON.stringify(frozen.files)),frozen.sourceSha256);\n",
+            " const pre=await prepared(frozen.preparedReceipt.file,frozen.preparedReceipt.sha256),reviewPin=await reviewed(pre,frozen.independentReview.file,frozen.independentReview.sha256);assert.deepEqual(frozen.preparedReceipt,pre.ref);assert.deepEqual(frozen.independentReview,reviewPin);assert.ok(Array.isArray(frozen.generatedPreparationFiles)&&frozen.generatedPreparationFiles.length===3);for(let i=0;i<GENERATED.length;i++){const entry=frozen.generatedPreparationFiles[i];assert.ok(same(entry.file,path.join(ROOT,GENERATED[i])));await expectedPin(entry);const data=await read(entry.file);assert.deepEqual(data.preparedReceipt,pre.ref);assert.deepEqual(data.independentReview,reviewPin);assert.equal(data.freshProbe18RunId,frozen.freshProbe18RunId);assert.equal(data.freshProbe18Passed,true);}\n"
+          ]
+        },
+        {
+          "oldStart": 98,
+          "newStart": 100,
+          "before": [
+            " const {binding,drivers,scene,wireSource,wireIdentity,feasibilityGate}=await checkContracts({preSeal:false});assert.equal(feasibilityGate.runId,frozen.freshProbe17RunId);assert.deepEqual(wireSource.files,frozen.wireSourceFiles);assert.deepEqual(wireIdentity,frozen.wireDiagnostics);assert.equal(scene.sourceSha256,frozen.sceneSourceSha256);await absent(runtime);\n",
+            " await write(GUARD,{schemaVersion:1,verifiedAt:new Date().toISOString(),passed:true,readOnly:true,sourceSeal:await pin(FREEZE),preparedReceipt:pre.ref,independentReview:reviewPin,rootSealExecutor:pre.controllerPin,backendSourceCommit:HEAD,backendInputCount:50,backendSourceUnchangedSinceBuild:true,rebuildPerformed:true,backendSourceAggregate:binding.manifest.sourceManifestSha256,binary:binding.release.binary,driverSourceCommit:CORE,coreCodeEvidenceCommit:CORE,driverSourceSha256:DRIVER,driverClosurePins:drivers.pins.length,full16RunId:binding.full16Gate.runId,full16Passed:true,wireSourcePins:wireSource.files.length,sceneSourceSha256:scene.sourceSha256,sceneStaticEvidenceNotRerun:true,prepareEntryPointInvoked:false,runEntryPointInvoked:false,accountsProvisioned:false,realmStarted:false,capacityAccepted:false});await absent(runtime);console.log(JSON.stringify({sourceGuard:await pin(GUARD),accountsProvisioned:false,realmStarted:false,capacityAccepted:false}));\n"
+          ],
+          "after": [
+            " const {binding,drivers,scene,wireSource,wireIdentity,feasibilityGate}=await checkContracts({preSeal:false});assert.equal(feasibilityGate.runId,frozen.freshProbe18RunId);assert.deepEqual(wireSource.files,frozen.wireSourceFiles);assert.deepEqual(wireIdentity,frozen.wireDiagnostics);assert.equal(scene.sourceSha256,frozen.sceneSourceSha256);await absent(runtime);\n",
+            " await write(GUARD,{schemaVersion:1,verifiedAt:new Date().toISOString(),passed:true,readOnly:true,sourceSeal:await pin(FREEZE),preparedReceipt:pre.ref,independentReview:reviewPin,rootSealExecutor:pre.controllerPin,backendSourceCommit:HEAD,executionSourceCommit:CORE,backendInputCount:50,backendSourceUnchangedSinceBuild:true,rebuildPerformed:false,backendSourceAggregate:binding.manifest.sourceManifestSha256,binary:binding.release.binary,driverSourceCommit:CORE,coreCodeEvidenceCommit:CORE,driverSourceSha256:DRIVER,driverClosurePins:drivers.pins.length,full16RunId:binding.full16Gate.runId,full16Passed:true,wireSourcePins:wireSource.files.length,sceneSourceSha256:scene.sourceSha256,sceneStaticEvidenceNotRerun:true,prepareEntryPointInvoked:false,runEntryPointInvoked:false,accountsProvisioned:false,realmStarted:false,capacityAccepted:false});await absent(runtime);console.log(JSON.stringify({sourceGuard:await pin(GUARD),accountsProvisioned:false,realmStarted:false,capacityAccepted:false}));\n"
+          ]
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\run-options.json",
+        "bytes": 2910,
+        "sha256": "6bb66f7ce95e4a459c987d6a84b4f6c0bcc33f45502281298b9b256d58a69666"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\run-options.json",
+        "bytes": 2887,
+        "sha256": "953c0fba5b00e2a2c2ffc01fd24beccf7c452eb91259bf8033c0361c3d5f9421"
+      },
+      "rawExact": false,
+      "hunks": [
+        {
+          "oldStart": 14,
+          "newStart": 14,
+          "before": [
+            "  \"scenarioFile\": \"C:\\\\mir2-build\\\\p01-completion-20261024\\\\release-native-v2-account-store-wait-ladder-13\\\\scenario.json\",\n"
+          ],
+          "after": [
+            "  \"scenarioFile\": \"C:\\\\mir2-build\\\\p01-completion-20261024\\\\release-native-v2-scout-observer-ladder-14\\\\scenario.json\",\n"
+          ]
+        },
+        {
+          "oldStart": 71,
+          "newStart": 71,
+          "before": [
+            "  \"resourceProfile\": \"C:\\\\mir2-build\\\\p01-completion-20261024\\\\release-native-v2-account-store-wait-ladder-13\\\\resource-profile.json\",\n"
+          ],
+          "after": [
+            "  \"resourceProfile\": \"C:\\\\mir2-build\\\\p01-completion-20261024\\\\release-native-v2-scout-observer-ladder-14\\\\resource-profile.json\",\n"
+          ]
+        },
+        {
+          "oldStart": 75,
+          "newStart": 75,
+          "before": [
+            "  \"preparedProfileRevision\": \"formal13-c743-node-d240-actual-probe17-v1\",\n"
+          ],
+          "after": [
+            "  \"preparedProfileRevision\": \"formal14-c743-node-h-pending-probe18-v1\",\n"
+          ]
+        },
+        {
+          "oldStart": 78,
+          "newStart": 78,
+          "before": [
+            "  \"viable10GatePending\": false,\n",
+            "  \"scope\": \"Original standard/native formal policy unchanged. Actual c743/50/dae1 and Node d240/5ba/210, fresh50 full16 and actual successful Probe17 are bound prerequisites only; formal13 has not been sealed/prepared/run.\"\n"
+          ],
+          "after": [
+            "  \"viable10GatePending\": true,\n",
+            "  \"scope\": \"Original formal policy/resource100scene unchanged. Reused c743/50/dae1, current H/Node219 and fresh H/C full16 are prior facts only; exact ended18 run/collection/independent/cleanup remains PENDING.\"\n"
+          ]
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\run-owned.mjs",
+        "bytes": 21241,
+        "sha256": "4c8520670d6b86c33395080a0ba82bcc5f6f42021113890e81d6e1478f4c39c9"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\run-owned.mjs",
+        "bytes": 21597,
+        "sha256": "97eb3ada45e6615c4702a8b9a608bc7c78286b6f5824db048eb0d20279a685dc"
+      },
+      "rawExact": false,
+      "hunks": [
+        {
+          "oldStart": 0,
+          "newStart": 0,
+          "before": [
+            "import {assertFormal13Configured} from './formal-template-contract.mjs';\n",
+            "assertFormal13Configured();\n"
+          ],
+          "after": [
+            "import {assertFormal14Configured} from './formal-template-contract.mjs';\n",
+            "assertFormal14Configured();\n"
+          ]
+        },
+        {
+          "oldStart": 42,
+          "newStart": 42,
+          "before": [
+            "  MIR2_GATEWAY_ID: 'p01-release-native-v2-account-store-wait-ladder-13', MIR2_ZONE_ROUTING_MODE: 'single', MIR2_CONTENT_PROFILE: 'platinum_176', MIR2_MONTHLY_CARD_REQUIRED: '0', MIR2_RUNTIME_ENV: 'development',\n"
+          ],
+          "after": [
+            "  MIR2_GATEWAY_ID: 'p01-release-native-v2-scout-observer-ladder-14', MIR2_ZONE_ROUTING_MODE: 'single', MIR2_CONTENT_PROFILE: 'platinum_176', MIR2_MONTHLY_CARD_REQUIRED: '0', MIR2_RUNTIME_ENV: 'development',\n"
+          ]
+        },
+        {
+          "oldStart": 48,
+          "newStart": 48,
+          "before": [
+            "const cleanup = { schemaVersion: 1, scope: 'Owned formal-profile process cleanup only. Driver report and complete raw verifier adjudicate capacity separately; no forced normal-exit claim.', sourceCommit: build.sourceCommit, backendSourceCommit: build.backendSourceCommit, driverSourceCommit: build.driverSourceCommit, sha256: build.sha256, capacityAccepted: null, capacityAcceptanceAdjudicated: false, formalStarted: true, checks: {} };\n"
+          ],
+          "after": [
+            "const cleanup = { schemaVersion: 1, scope: 'Owned formal-profile process cleanup only. Driver report and complete raw verifier adjudicate capacity separately; no forced normal-exit claim.', sourceCommit: build.sourceCommit, backendSourceCommit: build.backendSourceCommit, executionSourceCommit: build.executionSourceCommit, driverSourceCommit: build.driverSourceCommit, sha256: build.sha256, capacityAccepted: null, capacityAcceptanceAdjudicated: false, formalStarted: true, checks: {} };\n"
+          ]
+        },
+        {
+          "oldStart": 58,
+          "newStart": 58,
+          "before": [
+            "  await writeNew(path.join(root, 'realm-process.json'), { schemaVersion: 1, pid: gateway.child.pid, runnerPid: process.pid, exe: build.ownedExecutable, sha256: build.sha256, sourceCommit: build.sourceCommit, backendSourceCommit: build.backendSourceCommit, driverSourceCommit: build.driverSourceCommit,\n"
+          ],
+          "after": [
+            "  await writeNew(path.join(root, 'realm-process.json'), { schemaVersion: 1, pid: gateway.child.pid, runnerPid: process.pid, exe: build.ownedExecutable, sha256: build.sha256, sourceCommit: build.sourceCommit, backendSourceCommit: build.backendSourceCommit, executionSourceCommit: build.executionSourceCommit, driverSourceCommit: build.driverSourceCommit,\n"
+          ]
+        },
+        {
+          "oldStart": 73,
+          "newStart": 73,
+          "before": [
+            "  Object.assign(options, { notStarted: false, formalRunStarted: true, viable10GatePending: false, loginNotBefore: startedAtUtc, repositoryCommit: build.driverSourceCommit, backendSourceCommit: build.backendSourceCommit, driverSourceCommit: build.driverSourceCommit, admissionLedgerScope: 'Fresh File realm; zero prior Login; persistent original auth ledger and serialized ordinary NewCharacter; no limiter changes', spectatorDataDir: path.join(root, 'recordings') });\n"
+          ],
+          "after": [
+            "  Object.assign(options, { notStarted: false, formalRunStarted: true, viable10GatePending: false, loginNotBefore: startedAtUtc, repositoryCommit: build.driverSourceCommit, backendSourceCommit: build.backendSourceCommit, executionSourceCommit: build.executionSourceCommit, driverSourceCommit: build.driverSourceCommit, admissionLedgerScope: 'Fresh File realm; zero prior Login; persistent original auth ledger and serialized ordinary NewCharacter; no limiter changes', spectatorDataDir: path.join(root, 'recordings') });\n"
+          ]
+        },
+        {
+          "oldStart": 79,
+          "newStart": 79,
+          "before": [
+            "  await writeNew(path.join(root, 'source-pins-admitted-v2.json'), { schemaVersion: 1, sourceCommit: build.sourceCommit, backendSourceCommit: build.backendSourceCommit, driverSourceCommit: build.driverSourceCommit,\n"
+          ],
+          "after": [
+            "  await writeNew(path.join(root, 'source-pins-admitted-v2.json'), { schemaVersion: 1, sourceCommit: build.sourceCommit, backendSourceCommit: build.backendSourceCommit, executionSourceCommit: build.executionSourceCommit, driverSourceCommit: build.driverSourceCommit,\n"
+          ]
+        },
+        {
+          "oldStart": 92,
+          "newStart": 92,
+          "before": [
+            "  console.log(JSON.stringify({ phase: 'owned-formal-native-account-store-wait13-ready', pid: gateway.child.pid, monitorPid: monitor.child.pid, sha256: build.sha256, sourceCommit: build.sourceCommit, backendSourceCommit: build.backendSourceCommit, driverSourceCommit: build.driverSourceCommit, explicitAttackResults: 'v2', endpoint }));\n"
+          ],
+          "after": [
+            "  console.log(JSON.stringify({ phase: 'owned-formal-native-scout-observer14-ready', pid: gateway.child.pid, monitorPid: monitor.child.pid, sha256: build.sha256, sourceCommit: build.sourceCommit, backendSourceCommit: build.backendSourceCommit, executionSourceCommit: build.executionSourceCommit, driverSourceCommit: build.driverSourceCommit, explicitAttackResults: 'v2', endpoint }));\n"
+          ]
+        },
+        {
+          "oldStart": 102,
+          "newStart": 102,
+          "before": [
+            "    backendSourceCommit: build.backendSourceCommit, driverSourceCommit: build.driverSourceCommit, backendBinarySha256: build.sha256,\n"
+          ],
+          "after": [
+            "    backendSourceCommit: build.backendSourceCommit, executionSourceCommit: build.executionSourceCommit, driverSourceCommit: build.driverSourceCommit, backendBinarySha256: build.sha256,\n"
+          ]
+        },
+        {
+          "oldStart": 108,
+          "newStart": 108,
+          "before": [
+            "  cleanup.report = { reportPath: report.reportPath, runId: report.runId, backendSourceCommit: build.backendSourceCommit, driverSourceCommit: build.driverSourceCommit, ok: report.ok, playableCapacityAccepted: report.playableCapacityAccepted, error: report.error };\n"
+          ],
+          "after": [
+            "  cleanup.report = { reportPath: report.reportPath, runId: report.runId, backendSourceCommit: build.backendSourceCommit, executionSourceCommit: build.executionSourceCommit, driverSourceCommit: build.driverSourceCommit, ok: report.ok, playableCapacityAccepted: report.playableCapacityAccepted, error: report.error };\n"
+          ]
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\scenario-prefix-readiness.json",
+        "bytes": 2279,
+        "sha256": "7029269c6148b39f9c3def94d5d5313102b7e57e4df1d792e0343a98f9ee88ba"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\scenario-prefix-readiness.json",
+        "bytes": 2279,
+        "sha256": "7029269c6148b39f9c3def94d5d5313102b7e57e4df1d792e0343a98f9ee88ba"
+      },
+      "rawExact": true,
+      "hunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\scenario.json",
+        "bytes": 5844,
+        "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\scenario.json",
+        "bytes": 5844,
+        "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+      },
+      "rawExact": true,
+      "hunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\scene-binding.json",
+        "bytes": 6784,
+        "sha256": "a8baefebcd78812287ff25bc9b0b0eb31cb8fb2af5f27f33c925ed03d121733d"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\scene-binding.json",
+        "bytes": 6784,
+        "sha256": "a8baefebcd78812287ff25bc9b0b0eb31cb8fb2af5f27f33c925ed03d121733d"
+      },
+      "rawExact": true,
+      "hunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\scene-contract.mjs",
+        "bytes": 10796,
+        "sha256": "6f91a930d2c1d05a7ca813aaff0c1e44d29289303913d470ac2a72c4211b207f"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\scene-contract.mjs",
+        "bytes": 10796,
+        "sha256": "6f91a930d2c1d05a7ca813aaff0c1e44d29289303913d470ac2a72c4211b207f"
+      },
+      "rawExact": true,
+      "hunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\scene-driver-compatibility-proof-v1.json",
+        "bytes": 2535,
+        "sha256": "31941ce952a31916bb8ca14abba4647efe012a72fbf81c45e708a8d61ab2f4ef"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\scene-driver-compatibility-proof-v1.json",
+        "bytes": 2535,
+        "sha256": "31941ce952a31916bb8ca14abba4647efe012a72fbf81c45e708a8d61ab2f4ef"
+      },
+      "rawExact": true,
+      "hunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\scene-driver-compatibility.mjs",
+        "bytes": 1550,
+        "sha256": "260b80faa43d6a52936097cb1587989cc7a9dc52022dc5f667b10dd3e76c0289"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\scene-driver-compatibility.mjs",
+        "bytes": 1550,
+        "sha256": "260b80faa43d6a52936097cb1587989cc7a9dc52022dc5f667b10dd3e76c0289"
+      },
+      "rawExact": true,
+      "hunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\slow-stage-diagnostics-config.json",
+        "bytes": 4445,
+        "sha256": "94d15b550ba934a13eb24dcc2c67f8eede457f3ac2bac627c666790d40ee5daf"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\slow-stage-diagnostics-config.json",
+        "bytes": 4445,
+        "sha256": "94d15b550ba934a13eb24dcc2c67f8eede457f3ac2bac627c666790d40ee5daf"
+      },
+      "rawExact": true,
+      "hunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\slow-stage-public.mjs",
+        "bytes": 10318,
+        "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\slow-stage-public.mjs",
+        "bytes": 10318,
+        "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c"
+      },
+      "rawExact": true,
+      "hunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\slow-stage-row-contract.mjs",
+        "bytes": 1553,
+        "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\slow-stage-row-contract.mjs",
+        "bytes": 1553,
+        "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+      },
+      "rawExact": true,
+      "hunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\slow-stage-schema-contract.json",
+        "bytes": 3573,
+        "sha256": "b8a66eaeb6dd6518b9d242c6d9d794ff1f0252d75f3c017eb2ef62d01728b512"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\slow-stage-schema-contract.json",
+        "bytes": 3573,
+        "sha256": "b8a66eaeb6dd6518b9d242c6d9d794ff1f0252d75f3c017eb2ef62d01728b512"
+      },
+      "rawExact": true,
+      "hunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\store-diagnostics-contract.mjs",
+        "bytes": 2720,
+        "sha256": "c31a1c25d6a49f3c1575afaa058f8cd022f430e80c00269e7fffcf12a26e8a08"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\store-diagnostics-contract.mjs",
+        "bytes": 2720,
+        "sha256": "c31a1c25d6a49f3c1575afaa058f8cd022f430e80c00269e7fffcf12a26e8a08"
+      },
+      "rawExact": true,
+      "hunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\verify-feasibility-gate.mjs",
+        "bytes": 19631,
+        "sha256": "b7c5c4cc2d6fc2ad45b24121f09c2e43d8909acf371757602c09e13fc6721ec7"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\verify-feasibility-gate.mjs",
+        "bytes": 19741,
+        "sha256": "7582c7ea7e6a3e7502c8cb4406fc3208d4bbb1af63c9dec8c2fc032406f4f40e"
+      },
+      "rawExact": false,
+      "hunks": [
+        {
+          "oldStart": 0,
+          "newStart": 0,
+          "before": [
+            "import {FORMAL13_BINDING,assertFormal13Configured} from './formal-template-contract.mjs';\n"
+          ],
+          "after": [
+            "import {FORMAL14_BINDING,assertFormal14Configured} from './formal-template-contract.mjs';\n"
+          ]
+        },
+        {
+          "oldStart": 2,
+          "newStart": 2,
+          "before": [
+            "import {verifyProbe17CollectedEvidence,REQUIRED_PROBE17_RUN_ID} from './verify-probe17-collected-evidence.mjs';\n"
+          ],
+          "after": [
+            "import {verifyProbe18CollectedEvidence,REQUIRED_PROBE18_RUN_ID} from './verify-probe18-collected-evidence.mjs';\n"
+          ]
+        },
+        {
+          "oldStart": 18,
+          "newStart": 18,
+          "before": [
+            "  assertFormal13Configured();\n"
+          ],
+          "after": [
+            "  assertFormal14Configured();\n"
+          ]
+        },
+        {
+          "oldStart": 20,
+          "newStart": 20,
+          "before": [
+            "  const probeRoot = path.join(base, 'release-native-10-v2-account-store-wait-feasibility-17');\n",
+            "  if (!samePath(await fs.realpath(probeRoot), probeRoot)) throw new Error('Probe17 root must be a real owned directory');\n",
+            "  const owned = async name => { const file = path.join(probeRoot, name); if (!samePath(await fs.realpath(file), file)) throw new Error('Redirected probe17 evidence is forbidden'); return file; };\n"
+          ],
+          "after": [
+            "  if(binding.executionSourceCommit!==driverSourceCommit)throw Error('Current formal execution/driver H differs');\n",
+            "  const probeRoot = path.join(base, 'release-native-10-v2-scout-observer-feasibility-18');\n",
+            "  if (!samePath(await fs.realpath(probeRoot), probeRoot)) throw new Error('Probe18 root must be a real owned directory');\n",
+            "  const owned = async name => { const file = path.join(probeRoot, name); if (!samePath(await fs.realpath(file), file)) throw new Error('Redirected probe18 evidence is forbidden'); return file; };\n"
+          ]
+        },
+        {
+          "oldStart": 26,
+          "newStart": 27,
+          "before": [
+            "  if(JSON.stringify(probeProcess.explicitAdmissionCaps)!=='[24,10,10,4,1,2]'||probeProcess.tokioWorkers!==4||probeProcess.content!=='platinum_176'||probeProcess.routing!=='single'||probeProcess.accountBackend!=='file'||probeProcess.slowStageThresholdMs!==50||probeProcess.slowStagePublicSchema!=='socket-context-v1'||probeProcess.slowStageHelperSha256!=='8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c')throw Error('Probe17 original06 launcher caps or baseline runtime configuration differs');\n"
+          ],
+          "after": [
+            "  if(JSON.stringify(probeProcess.explicitAdmissionCaps)!=='[24,10,10,4,1,2]'||probeProcess.tokioWorkers!==4||probeProcess.content!=='platinum_176'||probeProcess.routing!=='single'||probeProcess.accountBackend!=='file'||probeProcess.slowStageThresholdMs!==50||probeProcess.slowStagePublicSchema!=='socket-context-v1'||probeProcess.slowStageHelperSha256!=='8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c')throw Error('Probe18 original06 launcher caps or baseline runtime configuration differs');\n"
+          ]
+        },
+        {
+          "oldStart": 29,
+          "newStart": 30,
+          "before": [
+            "      JSON.stringify(build.releaseRecord) !== JSON.stringify(binding.releasePin) || build.sourceManifest?.inputs !== 50) throw new Error('Formal admission requires the fresh samec743/dae1/50 backend from real probe17');\n"
+          ],
+          "after": [
+            "      JSON.stringify(build.releaseRecord) !== JSON.stringify(binding.releasePin) || build.sourceManifest?.inputs !== 50) throw new Error('Formal admission requires the fresh samec743/dae1/50 backend from real probe18');\n"
+          ]
+        },
+        {
+          "oldStart": 31,
+          "newStart": 32,
+          "before": [
+            "      cleanup.sha256 !== build.sha256 || cleanup.formalStarted !== false || cleanup.capacityAccepted !== false) throw new Error('Probe17 cleanup provenance differs');\n"
+          ],
+          "after": [
+            "      cleanup.sha256 !== build.sha256 || cleanup.formalStarted !== false || cleanup.capacityAccepted !== false) throw new Error('Probe18 cleanup provenance differs');\n"
+          ]
+        },
+        {
+          "oldStart": 39,
+          "newStart": 40,
+          "before": [
+            "      !Array.isArray(sources.files) || sha(JSON.stringify(sources.files)) !== sources.sourceConfigSha256) throw new Error('Probe17 exact coordinated-driver input binding is incomplete');\n"
+          ],
+          "after": [
+            "      !Array.isArray(sources.files) || sha(JSON.stringify(sources.files)) !== sources.sourceConfigSha256) throw new Error('Probe18 exact coordinated-driver input binding is incomplete');\n"
+          ]
+        },
+        {
+          "oldStart": 42,
+          "newStart": 43,
+          "before": [
+            "      !Array.isArray(preparedSources.files) || sha(JSON.stringify(preparedSources.files)) !== preparedSources.sourceConfigSha256) throw new Error('Probe17 prepared source closure is not bound into admitted evidence');\n"
+          ],
+          "after": [
+            "      !Array.isArray(preparedSources.files) || sha(JSON.stringify(preparedSources.files)) !== preparedSources.sourceConfigSha256) throw new Error('Probe18 prepared source closure is not bound into admitted evidence');\n"
+          ]
+        },
+        {
+          "oldStart": 46,
+          "newStart": 47,
+          "before": [
+            "    if (!matched || matched.bytes !== input.bytes || matched.sha256 !== input.sha256) throw new Error('Probe17 driver/import/data/transport differs from the current exact frozen closure');\n"
+          ],
+          "after": [
+            "    if (!matched || matched.bytes !== input.bytes || matched.sha256 !== input.sha256) throw new Error('Probe18 driver/import/data/transport differs from the current exact frozen closure');\n"
+          ]
+        },
+        {
+          "oldStart": 50,
+          "newStart": 51,
+          "before": [
+            "    if (sha(Buffer.from(bytes.toString('utf8').replace(/\\r\\n/g, '\\n'))) !== sha(git(['show', build.driverSourceCommit + ':mir2-web3/' + input.file]))) throw new Error('Probe17 driver commit does not contain the exact same frozen nine inputs');\n"
+          ],
+          "after": [
+            "    if (sha(Buffer.from(bytes.toString('utf8').replace(/\\r\\n/g, '\\n'))) !== sha(git(['show', build.driverSourceCommit + ':mir2-web3/' + input.file]))) throw new Error('Probe18 driver commit does not contain the exact same frozen nine inputs');\n"
+          ]
+        },
+        {
+          "oldStart": 61,
+          "newStart": 62,
+          "before": [
+            "      cleanup.gatewayExit?.code !== 0 || cleanup.monitorExit?.code !== 0 || cleanup.inputsChangedWhileRunning || cleanup.error) throw new Error('Probe17 owned cleanup did not pass');\n"
+          ],
+          "after": [
+            "      cleanup.gatewayExit?.code !== 0 || cleanup.monitorExit?.code !== 0 || cleanup.inputsChangedWhileRunning || cleanup.error) throw new Error('Probe18 owned cleanup did not pass');\n"
+          ]
+        },
+        {
+          "oldStart": 64,
+          "newStart": 65,
+          "before": [
+            "      !samePath(await fs.realpath(reportFile), reportFile)) throw new Error('Probe17 report must be an explicit owned real file');\n"
+          ],
+          "after": [
+            "      !samePath(await fs.realpath(reportFile), reportFile)) throw new Error('Probe18 report must be an explicit owned real file');\n"
+          ]
+        },
+        {
+          "oldStart": 69,
+          "newStart": 70,
+          "before": [
+            "      JSON.stringify(provenance.report) !== JSON.stringify(reportPin)) throw new Error('Probe17 original report bytes are not bound to the backend/driver identity sidecar');\n"
+          ],
+          "after": [
+            "      JSON.stringify(provenance.report) !== JSON.stringify(reportPin)) throw new Error('Probe18 original report bytes are not bound to the backend/driver identity sidecar');\n"
+          ]
+        },
+        {
+          "oldStart": 71,
+          "newStart": 72,
+          "before": [
+            "  if(report.runId!==REQUIRED_PROBE17_RUN_ID)throw Error('Formal13 only recognizes the exact future root-bound successful Probe17; no old13 or other-run substitution');\n",
+            "  if(preparedSources.sourceConfigSha256!==FORMAL13_BINDING.probe17.preparedSourceConfigSha256)throw Error('Fresh16 original prepared source aggregate differs');\n"
+          ],
+          "after": [
+            "  if(report.runId!==REQUIRED_PROBE18_RUN_ID)throw Error('Formal14 only recognizes the exact future root-bound successful Probe18; no old13 or other-run substitution');\n",
+            "  if(preparedSources.sourceConfigSha256!==FORMAL14_BINDING.probe18.preparedSourceConfigSha256)throw Error('Fresh16 original prepared source aggregate differs');\n"
+          ]
+        },
+        {
+          "oldStart": 74,
+          "newStart": 75,
+          "before": [
+            "  for(const key of ['nativeHpMaintenance','nativeAttackWitness'])if(JSON.stringify(provenance[key])!==JSON.stringify(report[key]))throw Error('Probe17 immutable HP/witness metadata is not preserved');\n",
+            "  if (JSON.stringify(provenance.nativePatrolPlanning) !== JSON.stringify(report.nativePatrolPlanning)) throw Error('Probe17 native patrol planning declaration is not preserved by the original result sidecar');\n"
+          ],
+          "after": [
+            "  for(const key of ['nativeHpMaintenance','nativeAttackWitness'])if(JSON.stringify(provenance[key])!==JSON.stringify(report[key]))throw Error('Probe18 immutable HP/witness metadata is not preserved');\n",
+            "  if (JSON.stringify(provenance.nativePatrolPlanning) !== JSON.stringify(report.nativePatrolPlanning)) throw Error('Probe18 native patrol planning declaration is not preserved by the original result sidecar');\n"
+          ]
+        },
+        {
+          "oldStart": 77,
+          "newStart": 78,
+          "before": [
+            "  if(JSON.stringify(provenance.measurementClock)!==JSON.stringify(report.measurementClock))throw Error('Probe17 measurement-clock declaration is not preserved in its result sidecar');\n"
+          ],
+          "after": [
+            "  if(JSON.stringify(provenance.measurementClock)!==JSON.stringify(report.measurementClock))throw Error('Probe18 measurement-clock declaration is not preserved in its result sidecar');\n"
+          ]
+        },
+        {
+          "oldStart": 79,
+          "newStart": 80,
+          "before": [
+            "  if(scene.sourceSha256!==probeScene.sourceSha256||probeProcess.sceneProfile!==scene.profile||probeProcess.sceneSourceSha256!==scene.sourceSha256||probeProcess.scene10Sha256!==scene.probeScene.sha256||probeProcess.scene100Sha256!==scene.formalScene.sha256||probeProcess.sceneAnalysisSha256!==scene.analysis.sha256||probeProcess.patrolSpan!==2||preparedSources.sceneSourceSha256!==scene.sourceSha256||provenance.sceneSourceSha256!==scene.sourceSha256)throw Error('Fresh probe17 exact halo scene/static source identity differs from formal first10');\n"
+          ],
+          "after": [
+            "  if(scene.sourceSha256!==probeScene.sourceSha256||probeProcess.sceneProfile!==scene.profile||probeProcess.sceneSourceSha256!==scene.sourceSha256||probeProcess.scene10Sha256!==scene.probeScene.sha256||probeProcess.scene100Sha256!==scene.formalScene.sha256||probeProcess.sceneAnalysisSha256!==scene.analysis.sha256||probeProcess.patrolSpan!==2||preparedSources.sceneSourceSha256!==scene.sourceSha256||provenance.sceneSourceSha256!==scene.sourceSha256)throw Error('Fresh probe18 exact halo scene/static source identity differs from formal first10');\n"
+          ]
+        },
+        {
+          "oldStart": 81,
+          "newStart": 82,
+          "before": [
+            "  if(slowBefore.size>MAX_PUBLIC_BYTES) throw Error('Probe17 public diagnostic total exceeds fixed32MiB');\n"
+          ],
+          "after": [
+            "  if(slowBefore.size>MAX_PUBLIC_BYTES) throw Error('Probe18 public diagnostic total exceeds fixed32MiB');\n"
+          ]
+        },
+        {
+          "oldStart": 85,
+          "newStart": 86,
+          "before": [
+            "    if(Buffer.byteLength(line)>MAX_LINE_BYTES || !line) throw Error('Probe17 public diagnostic line is invalid');\n"
+          ],
+          "after": [
+            "    if(Buffer.byteLength(line)>MAX_LINE_BYTES || !line) throw Error('Probe18 public diagnostic line is invalid');\n"
+          ]
+        },
+        {
+          "oldStart": 94,
+          "newStart": 95,
+          "before": [
+            "    JSON.stringify(runtimeSlowStatus)!==JSON.stringify(cleanup.slowStageDiagnostics)) throw Error('Probe17 diagnostic completeness/limits/cleanup binding differs');\n"
+          ],
+          "after": [
+            "    JSON.stringify(runtimeSlowStatus)!==JSON.stringify(cleanup.slowStageDiagnostics)) throw Error('Probe18 diagnostic completeness/limits/cleanup binding differs');\n"
+          ]
+        },
+        {
+          "oldStart": 97,
+          "newStart": 98,
+          "before": [
+            "      cleanup.report?.driverSourceCommit !== build.driverSourceCommit || JSON.stringify(report.navigationCoordination) !== JSON.stringify(expectedCoordination)) throw new Error('Probe17 report navigation declaration/provenance differs from exact pinned source');\n"
+          ],
+          "after": [
+            "      cleanup.report?.driverSourceCommit !== build.driverSourceCommit || JSON.stringify(report.navigationCoordination) !== JSON.stringify(expectedCoordination)) throw new Error('Probe18 report navigation declaration/provenance differs from exact pinned source');\n"
+          ]
+        },
+        {
+          "oldStart": 100,
+          "newStart": 101,
+          "before": [
+            "  if (JSON.stringify(p) !== JSON.stringify(expectedPolicy)) throw new Error('Probe17 must retain the entire original probe policy');\n"
+          ],
+          "after": [
+            "  if (JSON.stringify(p) !== JSON.stringify(expectedPolicy)) throw new Error('Probe18 must retain the entire original probe policy');\n"
+          ]
+        },
+        {
+          "oldStart": 105,
+          "newStart": 106,
+          "before": [
+            "      report.continuousAcceptance?.passed !== true || report.continuousAcceptance.failureCount !== 0) throw new Error('The exact fresh personal-projection Probe17 has not passed; a probe remains ineligible for capacity acceptance');\n"
+          ],
+          "after": [
+            "      report.continuousAcceptance?.passed !== true || report.continuousAcceptance.failureCount !== 0) throw new Error('The exact fresh personal-projection Probe18 has not passed; a probe remains ineligible for capacity acceptance');\n"
+          ]
+        },
+        {
+          "oldStart": 108,
+          "newStart": 109,
+          "before": [
+            "  if (Object.entries(strict).some(([key, value]) => p[key] !== value)) throw new Error('Probe17 policy differs from fixed ordinary thresholds');\n"
+          ],
+          "after": [
+            "  if (Object.entries(strict).some(([key, value]) => p[key] !== value)) throw new Error('Probe18 policy differs from fixed ordinary thresholds');\n"
+          ]
+        },
+        {
+          "oldStart": 110,
+          "newStart": 111,
+          "before": [
+            "  if(JSON.stringify(report.stages?.map(p=>p.name))!==JSON.stringify(expectedPhases.map(p=>p[0]))) throw Error('Probe17 requires exactly the original measured2/10/soak order');\n"
+          ],
+          "after": [
+            "  if(JSON.stringify(report.stages?.map(p=>p.name))!==JSON.stringify(expectedPhases.map(p=>p[0]))) throw Error('Probe18 requires exactly the original measured2/10/soak order');\n"
+          ]
+        },
+        {
+          "oldStart": 115,
+          "newStart": 116,
+          "before": [
+            "      (count===10&&phase.combatCoverage!=='shared-positive-damage')) throw Error('Probe17 requires real300/300/360 clock and complete passing5/5/6 windows'); return phase;\n"
+          ],
+          "after": [
+            "      (count===10&&phase.combatCoverage!=='shared-positive-damage')) throw Error('Probe18 requires real300/300/360 clock and complete passing5/5/6 windows'); return phase;\n"
+          ]
+        },
+        {
+          "oldStart": 118,
+          "newStart": 119,
+          "before": [
+            "  if (!samePath(await fs.realpath(rawFile), rawFile)) throw new Error('Redirected raw probe17 evidence is forbidden');\n"
+          ],
+          "after": [
+            "  if (!samePath(await fs.realpath(rawFile), rawFile)) throw new Error('Redirected raw probe18 evidence is forbidden');\n"
+          ]
+        },
+        {
+          "oldStart": 127,
+          "newStart": 128,
+          "before": [
+            "  if (verifyCapacityStatus(report, streamed.selected, streamed.monitorSummary) !== false) throw new Error('Probe17 was incorrectly promoted to formal capacity acceptance');\n"
+          ],
+          "after": [
+            "  if (verifyCapacityStatus(report, streamed.selected, streamed.monitorSummary) !== false) throw new Error('Probe18 was incorrectly promoted to formal capacity acceptance');\n"
+          ]
+        },
+        {
+          "oldStart": 130,
+          "newStart": 131,
+          "before": [
+            "      streamed.selected.some(row => ['continuousFailure', 'safetyStop'].includes(row.type))) throw new Error('Probe17 raw/monitor continuity is incomplete');\n"
+          ],
+          "after": [
+            "      streamed.selected.some(row => ['continuousFailure', 'safetyStop'].includes(row.type))) throw new Error('Probe18 raw/monitor continuity is incomplete');\n"
+          ]
+        },
+        {
+          "oldStart": 133,
+          "newStart": 134,
+          "before": [
+            "    if(rows.length!==windows||rows.some(row=>row.assessment?.passed!==true||row.assessment.seconds<60)) throw Error('Probe17 raw measured windows do not match exact5/5/6 complete counts');\n"
+          ],
+          "after": [
+            "    if(rows.length!==windows||rows.some(row=>row.assessment?.passed!==true||row.assessment.seconds<60)) throw Error('Probe18 raw measured windows do not match exact5/5/6 complete counts');\n"
+          ]
+        },
+        {
+          "oldStart": 137,
+          "newStart": 138,
+          "before": [
+            "    if (!bracket?.beforeStart || !bracket.afterStart || !bracket.beforeEnd || [bracket.startBeforeGapMs, bracket.startAfterGapMs, bracket.endBeforeGapMs].some(gap => gap < 0 || gap > 15000)) throw new Error('Probe17 raw monitor does not cover its true phase interval');\n"
+          ],
+          "after": [
+            "    if (!bracket?.beforeStart || !bracket.afterStart || !bracket.beforeEnd || [bracket.startBeforeGapMs, bracket.startAfterGapMs, bracket.endBeforeGapMs].some(gap => gap < 0 || gap > 15000)) throw new Error('Probe18 raw monitor does not cover its true phase interval');\n"
+          ]
+        },
+        {
+          "oldStart": 139,
+          "newStart": 140,
+          "before": [
+            "  const collectedEvidence=await verifyProbe17CollectedEvidence({report,reportPin,rawPin,cleanup,provenance,sources,preparedSources,scene,binding,monitor,wireRaw:wireCounter.summary()});\n"
+          ],
+          "after": [
+            "  const collectedEvidence=await verifyProbe18CollectedEvidence({report,reportPin,rawPin,cleanup,provenance,sources,preparedSources,scene,binding,monitor,wireRaw:wireCounter.summary()});\n"
+          ]
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\verify-full16-gate.mjs",
+        "bytes": 5649,
+        "sha256": "cad6f1112466b41e65b4415d7c28bbf679f1f838be86af135e5a7c2fb6ae9c4d"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\verify-full16-gate.mjs",
+        "bytes": 5649,
+        "sha256": "cad6f1112466b41e65b4415d7c28bbf679f1f838be86af135e5a7c2fb6ae9c4d"
+      },
+      "rawExact": true,
+      "hunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\verify-probe17-collected-evidence.mjs",
+        "bytes": 17264,
+        "sha256": "02cb8cd660abefaa34b22e6db81267081dc1e4257248d71e475ffe6432791a7c"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\verify-probe18-collected-evidence.mjs",
+        "bytes": 17320,
+        "sha256": "cb83a51d5fcd901d3b56458fd8463cbaaee6cdfc5a8f5c77a6cee9604599bc5d"
+      },
+      "rawExact": false,
+      "hunks": [
+        {
+          "oldStart": 0,
+          "newStart": 0,
+          "before": [
+            "import {FORMAL13_BINDING,assertFormal13Configured} from './formal-template-contract.mjs';\n"
+          ],
+          "after": [
+            "import {FORMAL14_BINDING,assertFormal14Configured} from './formal-template-contract.mjs';\n"
+          ]
+        },
+        {
+          "oldStart": 11,
+          "newStart": 11,
+          "before": [
+            "export const REQUIRED_PROBE17_RUN_ID=FORMAL13_BINDING.probe17.runId;\n",
+            "export const REQUIRED_PROBE17_CHILD='capacity-native10-v2-account-store-wait-followup-17-diagnostics';\n",
+            "const realm='release-native-10-v2-account-store-wait-feasibility-17';\n",
+            "const INDEPENDENT_VERIFIER_SOURCES=FORMAL13_BINDING.probe17.independentVerifierSources;\n"
+          ],
+          "after": [
+            "export const REQUIRED_PROBE18_RUN_ID=FORMAL14_BINDING.probe18.runId;\n",
+            "export const REQUIRED_PROBE18_CHILD='capacity-native10-v2-scout-observer-followup-18-diagnostics';\n",
+            "const realm='release-native-10-v2-scout-observer-feasibility-18';\n",
+            "const INDEPENDENT_VERIFIER_SOURCES=FORMAL14_BINDING.probe18.independentVerifierSources;\n"
+          ]
+        },
+        {
+          "oldStart": 23,
+          "newStart": 23,
+          "before": [
+            " const paths={report:`${realm}/reports/${REQUIRED_PROBE17_RUN_ID}.report.json`,raw:`${realm}/reports/${REQUIRED_PROBE17_RUN_ID}.samples.jsonl`,reportProvenance:`${realm}/report-provenance.json`,catalog:`collect-${realm}-public-artifact-catalog.json`,publicCopy:'public-copy-provenance.json',publicVerification:'public-verification.json',collectionVerification:'collection-verification.json',projection:`${REQUIRED_PROBE17_CHILD}/${realm}/reports/${REQUIRED_PROBE17_RUN_ID}.raw-projection.json`,monitor:`${realm}/monitor-history.jsonl`,'root-cleanup':'probe17-root-independent-cleanup-v1.json'};\n"
+          ],
+          "after": [
+            " const paths={report:`${realm}/reports/${REQUIRED_PROBE18_RUN_ID}.report.json`,raw:`${realm}/reports/${REQUIRED_PROBE18_RUN_ID}.samples.jsonl`,reportProvenance:`${realm}/report-provenance.json`,catalog:`collect-${realm}-public-artifact-catalog.json`,publicCopy:'public-copy-provenance.json',publicVerification:'public-verification.json',collectionVerification:'collection-verification.json',projection:`${REQUIRED_PROBE18_CHILD}/${realm}/reports/${REQUIRED_PROBE18_RUN_ID}.raw-projection.json`,monitor:`${realm}/monitor-history.jsonl`,'root-cleanup':'probe18-root-independent-cleanup-v1.json'};\n"
+          ]
+        },
+        {
+          "oldStart": 25,
+          "newStart": 25,
+          "before": [
+            " if(!actual||!expected||!Number.isSafeInteger(expected.bytes)||expected.bytes<0||!hex(expected.sha256)||!locationMatches||actual.bytes!==expected.bytes||actual.sha256!==expected.sha256)throw Error('Independent probe17 '+label+' raw pin differs');\n"
+          ],
+          "after": [
+            " if(!actual||!expected||!Number.isSafeInteger(expected.bytes)||expected.bytes<0||!hex(expected.sha256)||!locationMatches||actual.bytes!==expected.bytes||actual.sha256!==expected.sha256)throw Error('Independent probe18 '+label+' raw pin differs');\n"
+          ]
+        },
+        {
+          "oldStart": 29,
+          "newStart": 29,
+          "before": [
+            "export async function verifyProbe17CollectedEvidence({report,reportPin,rawPin,cleanup,provenance,sources,preparedSources,scene,binding,monitor,wireRaw}){\n",
+            " assertFormal13Configured();\n",
+            " if(report.runId!==REQUIRED_PROBE17_RUN_ID||report.ok!==true)throw Error('Only the exact successful attack-deadline16 run is eligible; failed13 or later probes cannot substitute');\n",
+            " const directory=await under(topic,REQUIRED_PROBE17_CHILD+'/public-verification.json').then(f=>path.dirname(f));\n",
+            " const names={report:`${realm}/reports/${REQUIRED_PROBE17_RUN_ID}.report.json`,reportProvenance:`${realm}/report-provenance.json`,catalog:`collect-${realm}-public-artifact-catalog.json`,publicCopy:'public-copy-provenance.json',publicVerification:'public-verification.json',collectionVerification:'collection-verification.json',projection:`${realm}/reports/${REQUIRED_PROBE17_RUN_ID}.raw-projection.json`,wireTerminal:`${realm}/${WIRE_TERMINAL}`};\n"
+          ],
+          "after": [
+            "export async function verifyProbe18CollectedEvidence({report,reportPin,rawPin,cleanup,provenance,sources,preparedSources,scene,binding,monitor,wireRaw}){\n",
+            " assertFormal14Configured();\n",
+            " if(report.runId!==REQUIRED_PROBE18_RUN_ID||report.ok!==true)throw Error('Only the exact successful attack-deadline16 run is eligible; failed13 or later probes cannot substitute');\n",
+            " const directory=await under(topic,REQUIRED_PROBE18_CHILD+'/public-verification.json').then(f=>path.dirname(f));\n",
+            " const names={report:`${realm}/reports/${REQUIRED_PROBE18_RUN_ID}.report.json`,reportProvenance:`${realm}/report-provenance.json`,catalog:`collect-${realm}-public-artifact-catalog.json`,publicCopy:'public-copy-provenance.json',publicVerification:'public-verification.json',collectionVerification:'collection-verification.json',projection:`${realm}/reports/${REQUIRED_PROBE18_RUN_ID}.raw-projection.json`,wireTerminal:`${realm}/${WIRE_TERMINAL}`};\n"
+          ]
+        },
+        {
+          "oldStart": 39,
+          "newStart": 39,
+          "before": [
+            " for(const row of copy.files){const prefixed=relative(row.path);if(!prefixed.startsWith(REQUIRED_PROBE17_CHILD+'/'))throw Error('Wrong attack-deadline16 public child');const destination=await under(directory,prefixed.slice(REQUIRED_PROBE17_CHILD.length+1)),source=await under(base,row.source),expected={file:source,bytes:row.bytes,sha256:row.sha256};eqPin({...await pin(destination),file:source},expected,'public-copy');eqPin(await pin(source),expected,'public-copy');}\n"
+          ],
+          "after": [
+            " for(const row of copy.files){const prefixed=relative(row.path);if(!prefixed.startsWith(REQUIRED_PROBE18_CHILD+'/'))throw Error('Wrong attack-deadline16 public child');const destination=await under(directory,prefixed.slice(REQUIRED_PROBE18_CHILD.length+1)),source=await under(base,row.source),expected={file:source,bytes:row.bytes,sha256:row.sha256};eqPin({...await pin(destination),file:source},expected,'public-copy');eqPin(await pin(source),expected,'public-copy');}\n"
+          ]
+        },
+        {
+          "oldStart": 43,
+          "newStart": 43,
+          "before": [
+            " if(manifest.schemaVersion!==1||manifest.files?.length!==1||entry.runId!==report.runId||entry.report!==REQUIRED_PROBE17_CHILD+'/'+names.report||entry.projection!==REQUIRED_PROBE17_CHILD+'/'+names.projection||entry.path!==`${realm}/reports/${report.runId}.samples.jsonl`||entry.bytes!==rawPin.bytes||entry.sha256!==rawPin.sha256)throw Error('Compact12 raw manifest/projection/report linkage differs');\n"
+          ],
+          "after": [
+            " if(manifest.schemaVersion!==1||manifest.files?.length!==1||entry.runId!==report.runId||entry.report!==REQUIRED_PROBE18_CHILD+'/'+names.report||entry.projection!==REQUIRED_PROBE18_CHILD+'/'+names.projection||entry.path!==`${realm}/reports/${report.runId}.samples.jsonl`||entry.bytes!==rawPin.bytes||entry.sha256!==rawPin.sha256)throw Error('Compact12 raw manifest/projection/report linkage differs');\n"
+          ]
+        },
+        {
+          "oldStart": 45,
+          "newStart": 45,
+          "before": [
+            " const closureRef=FORMAL13_BINDING.probe17.independentSourceClosureManifest,closureFile=await under(base,closureRef.path),closurePin=await pin(closureFile);if(closurePin.bytes!==closureRef.bytes||closurePin.sha256!==closureRef.sha256)throw Error('Actual Ended16 full source manifest differs');const closure=await json(closureFile);if(!Array.isArray(closure.files)||closure.files.length<2||closure.files.length>128||closure.sourceSha256!==sha(JSON.stringify(closure.files)))throw Error('Actual Ended16 source closure is incomplete or invalid');const mapped=closure.files.map(p=>({path:path.posix.join('probe17-independent-verification-v1',relative(p.path)),bytes:p.bytes,sha256:p.sha256}));if(JSON.stringify(mapped)!==JSON.stringify(INDEPENDENT_VERIFIER_SOURCES))throw Error('Every actual Ended16 source must be bound, without an assumed two-source subset');\n",
+            " const independentVerifierPins=[];for(const expected of INDEPENDENT_VERIFIER_SOURCES){const file=await under(base,expected.path),actual=await pin(file);if(actual.bytes!==expected.bytes||actual.sha256!==expected.sha256)throw Error('Corrected probe17 independent verifier source raw pin differs');independentVerifierPins.push(actual);}\n",
+            " const receiptFile=await under(base,'probe17-independent-verification-v1/final-verification.json'),receipt=await json(receiptFile);\n",
+            " if(receipt.schemaVersion!==1||receipt.verifierRevision!==FORMAL13_BINDING.probe17.independentVerifierRevision||receipt.runId!==report.runId||!allTrue([receipt.independentVerificationPassed,receipt.probePassed,receipt.formalPreconditionOnly])||receipt.capacityAccepted!==false||receipt.rawVerifierAccepted!==false)throw Error('Independent attack-deadline16 receipt must verify a successful probe without promoting capacity');\n",
+            " const execRef=FORMAL13_BINDING.probe17.actualExecutionReceipt,execFile=await under(base,execRef.path),execPin=await pin(execFile);if(execPin.bytes!==execRef.bytes||execPin.sha256!==execRef.sha256)throw Error('Actual Ended16 execution receipt differs');const actualExecution=await json(execFile),actualFinalPin=await pin(receiptFile);if(actualExecution.runId!==report.runId||actualExecution.exitCode!==0||actualExecution.signal!==null||actualExecution.sourceBeforeAfterIdentical!==true||actualExecution.checkedInputs!==closure.files.length||actualExecution.actualVerificationExitedSuccessfully!==true||actualExecution.originalGameVerdictChanged!==false||actualExecution.seal?.path!=='tool-source-frozen-v1.json'||actualExecution.seal.bytes!==closurePin.bytes||actualExecution.seal.sha256!==closurePin.sha256||actualExecution.finalVerification?.path!=='final-verification.json'||actualExecution.finalVerification.bytes!==actualFinalPin.bytes||actualExecution.finalVerification.sha256!==actualFinalPin.sha256||actualExecution.log?.path!=='actual-verification.log')throw Error('Actual Ended16 runner/source-before-after/final proof differs');const execLogFile=await under(base,'probe17-independent-verification-v1/actual-verification.log'),execLogPin=await pin(execLogFile);if(execLogPin.bytes!==actualExecution.log.bytes||execLogPin.sha256!==actualExecution.log.sha256)throw Error('Actual Ended16 execution log differs');\n"
+          ],
+          "after": [
+            " const closureRef=FORMAL14_BINDING.probe18.independentSourceClosureManifest,closureFile=await under(base,closureRef.path),closurePin=await pin(closureFile);if(closurePin.bytes!==closureRef.bytes||closurePin.sha256!==closureRef.sha256)throw Error('Actual Ended16 full source manifest differs');const closure=await json(closureFile);if(!Array.isArray(closure.files)||closure.files.length<2||closure.files.length>128||closure.sourceSha256!==sha(JSON.stringify(closure.files)))throw Error('Actual Ended16 source closure is incomplete or invalid');const mapped=closure.files.map(p=>({path:path.posix.join('probe18-independent-verification-v1',relative(p.path)),bytes:p.bytes,sha256:p.sha256}));if(JSON.stringify(mapped)!==JSON.stringify(INDEPENDENT_VERIFIER_SOURCES))throw Error('Every actual Ended16 source must be bound, without an assumed two-source subset');\n",
+            " const independentVerifierPins=[];for(const expected of INDEPENDENT_VERIFIER_SOURCES){const file=await under(base,expected.path),actual=await pin(file);if(actual.bytes!==expected.bytes||actual.sha256!==expected.sha256)throw Error('Corrected probe18 independent verifier source raw pin differs');independentVerifierPins.push(actual);}\n",
+            " const receiptFile=await under(base,'probe18-independent-verification-v1/final-verification.json'),receipt=await json(receiptFile);\n",
+            " if(receipt.schemaVersion!==1||receipt.verifierRevision!==FORMAL14_BINDING.probe18.independentVerifierRevision||receipt.runId!==report.runId||!allTrue([receipt.independentVerificationPassed,receipt.probePassed,receipt.formalPreconditionOnly])||receipt.capacityAccepted!==false||receipt.rawVerifierAccepted!==false)throw Error('Independent attack-deadline16 receipt must verify a successful probe without promoting capacity');\n",
+            " const execRef=FORMAL14_BINDING.probe18.actualExecutionReceipt,execFile=await under(base,execRef.path),execPin=await pin(execFile);if(execPin.bytes!==execRef.bytes||execPin.sha256!==execRef.sha256)throw Error('Actual Ended16 execution receipt differs');const actualExecution=await json(execFile),actualFinalPin=await pin(receiptFile);if(actualExecution.runId!==report.runId||actualExecution.exitCode!==0||actualExecution.signal!==null||actualExecution.sourceBeforeAfterIdentical!==true||actualExecution.checkedInputs!==closure.files.length||actualExecution.actualVerificationExitedSuccessfully!==true||actualExecution.originalGameVerdictChanged!==false||actualExecution.seal?.path!=='tool-source-frozen-v1.json'||actualExecution.seal.bytes!==closurePin.bytes||actualExecution.seal.sha256!==closurePin.sha256||actualExecution.finalVerification?.path!=='final-verification.json'||actualExecution.finalVerification.bytes!==actualFinalPin.bytes||actualExecution.finalVerification.sha256!==actualFinalPin.sha256||actualExecution.log?.path!=='actual-verification.log')throw Error('Actual Ended16 runner/source-before-after/final proof differs');const execLogFile=await under(base,'probe18-independent-verification-v1/actual-verification.log'),execLogPin=await pin(execLogFile);if(execLogPin.bytes!==actualExecution.log.bytes||execLogPin.sha256!==actualExecution.log.sha256)throw Error('Actual Ended16 execution log differs');\n"
+          ]
+        },
+        {
+          "oldStart": 51,
+          "newStart": 51,
+          "before": [
+            " if(!identity||identity.backendSourceCommit!==binding.backendSourceCommit||identity.backendInputs!==50||identity.gatewaySha256!==binding.release.binary.sha256||identity.driverSourceCommit!==binding.driverSourceCommit||identity.driverSourceSha256!==sources.driverSourceSha256||identity.scene10Sha256!==scene.probeScene.sha256||identity.scene100Sha256!==scene.formalScene.sha256||identity.sceneSourceSha256!==scene.sourceSha256||identity.sourceConfigSha256!==preparedSources.sourceConfigSha256||identity.coreCodeEvidenceCommit!==CORE_CODE_EVIDENCE_COMMIT)throw Error('Independent attack-deadline16 receipt source/scene/config identity differs');\n"
+          ],
+          "after": [
+            " if(!identity||identity.backendSourceCommit!==binding.backendSourceCommit||identity.backendInputs!==50||identity.gatewaySha256!==binding.release.binary.sha256||identity.driverSourceCommit!==binding.driverSourceCommit||identity.executionSourceCommit!==binding.executionSourceCommit||identity.driverSourceSha256!==sources.driverSourceSha256||identity.scene10Sha256!==scene.probeScene.sha256||identity.scene100Sha256!==scene.formalScene.sha256||identity.sceneSourceSha256!==scene.sourceSha256||identity.sourceConfigSha256!==preparedSources.sourceConfigSha256||identity.coreCodeEvidenceCommit!==CORE_CODE_EVIDENCE_COMMIT)throw Error('Independent attack-deadline16 receipt source/scene/config identity differs');\n"
+          ]
+        },
+        {
+          "oldStart": 55,
+          "newStart": 55,
+          "before": [
+            " const rootCleanupFile=await under(base,'probe17-root-independent-cleanup-v1.json'),rootCleanupPin=await pin(rootCleanupFile);eqPin(rootCleanupPin,receipt.pins?.rootCleanup,'root-cleanup');\n"
+          ],
+          "after": [
+            " const rootCleanupFile=await under(base,'probe18-root-independent-cleanup-v1.json'),rootCleanupPin=await pin(rootCleanupFile);eqPin(rootCleanupPin,receipt.pins?.rootCleanup,'root-cleanup');\n"
+          ]
+        },
+        {
+          "oldStart": 71,
+          "newStart": 71,
+          "before": [
+            " const storeDiagnostics=receipt.storeDiagnostics,storeBound=FORMAL13_BINDING.probe17.storeDiagnostics;\n"
+          ],
+          "after": [
+            " const storeDiagnostics=receipt.storeDiagnostics,storeBound=FORMAL14_BINDING.probe18.storeDiagnostics;\n"
+          ]
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\verify-public.mjs",
+        "bytes": 19054,
+        "sha256": "3cb3aaa6d4bc7b3b16eac25dc6d2fdab88844d0e7d2578aa330b1b6ac9d19d89"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\verify-public.mjs",
+        "bytes": 19038,
+        "sha256": "4a7ddd53afc9194b50e6aaac52b9b832c6f16e1496330d1e49768e36bec5979a"
+      },
+      "rawExact": false,
+      "hunks": [
+        {
+          "oldStart": 0,
+          "newStart": 0,
+          "before": [
+            "import {assertFormal13Configured} from './formal-template-contract.mjs';\n",
+            "assertFormal13Configured();\n"
+          ],
+          "after": [
+            "import {assertFormal14Configured} from './formal-template-contract.mjs';\n",
+            "assertFormal14Configured();\n"
+          ]
+        },
+        {
+          "oldStart": 22,
+          "newStart": 22,
+          "before": [
+            "const realm = 'release-native-v2-account-store-wait-ladder-13';\n"
+          ],
+          "after": [
+            "const realm = 'release-native-v2-scout-observer-ladder-14';\n"
+          ]
+        },
+        {
+          "oldStart": 67,
+          "newStart": 67,
+          "before": [
+            "const child = 'capacity-formal-native-v2-account-store-wait-ladder-13', directory = path.join(topic, child), sha = bytes => crypto.createHash('sha256').update(bytes).digest('hex');\n"
+          ],
+          "after": [
+            "const child = 'capacity-formal-native-v2-scout-observer-ladder-14', directory = path.join(topic, child), sha = bytes => crypto.createHash('sha256').update(bytes).digest('hex');\n"
+          ]
+        },
+        {
+          "oldStart": 138,
+          "newStart": 138,
+          "before": [
+            "const catalog = await readAt(directory, 'collect-formal-native-v2-account-store-wait-ladder-13-public-artifact-catalog.json');\n"
+          ],
+          "after": [
+            "const catalog = await readAt(directory, 'collect-formal-native-v2-scout-observer-ladder-14-public-artifact-catalog.json');\n"
+          ]
+        },
+        {
+          "oldStart": 223,
+          "newStart": 223,
+          "before": [
+            "await writeNewAt(base, 'collect-formal-native-v2-account-store-wait-ladder-13-public-verification-result.json', result);\n"
+          ],
+          "after": [
+            "await writeNewAt(base, 'collect-formal-native-v2-scout-observer-ladder-14-public-verification-result.json', result);\n"
+          ]
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\verify-store-public.mjs",
+        "bytes": 4749,
+        "sha256": "51a3fceb27b61be23bdb945ff22fe8ec0a2a8a48be7bc4bfc6afd8087017779c"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\verify-store-public.mjs",
+        "bytes": 4737,
+        "sha256": "0a462f723703c9daf43e86388558cf9b8765554bbc451f1bb6d83f7b562274b7"
+      },
+      "rawExact": false,
+      "hunks": [
+        {
+          "oldStart": 0,
+          "newStart": 0,
+          "before": [
+            "import {assertFormal13Configured} from './formal-template-contract.mjs';\n",
+            "assertFormal13Configured();\n"
+          ],
+          "after": [
+            "import {assertFormal14Configured} from './formal-template-contract.mjs';\n",
+            "assertFormal14Configured();\n"
+          ]
+        },
+        {
+          "oldStart": 6,
+          "newStart": 6,
+          "before": [
+            "const directory='C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-formal-native-v2-account-store-wait-ladder-13-store-diagnostics';\n"
+          ],
+          "after": [
+            "const directory='C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-formal-native-v2-scout-observer-ladder-14-store-diagnostics';\n"
+          ]
+        },
+        {
+          "oldStart": 10,
+          "newStart": 10,
+          "before": [
+            "const gameDirectory=path.join(path.dirname(directory),'capacity-formal-native-v2-account-store-wait-ladder-13');assert.ok(samePath(catalog.baseCatalog?.file??'',path.join(gameDirectory,'collect-formal-native-v2-account-store-wait-ladder-13-public-artifact-catalog.json')));assert.ok(samePath(catalog.baseVerification?.file??'',path.join(gameDirectory,'public-verification.json')));for(const p of[catalog.baseCatalog,catalog.baseVerification]){const s=await fs.lstat(p.file);assert.ok(s.isFile()&&!s.isSymbolicLink());assert.ok(samePath(await fs.realpath(p.file),p.file));}await assertPin(catalog.baseCatalog);await assertPin(catalog.baseVerification);const game=await read(catalog.baseVerification.file);assert.equal(game.runId,catalog.runId);assert.equal(game.reportOk,catalog.originalReportOk);assert.equal(game.capacityAccepted,catalog.originalCapacityAccepted);\n"
+          ],
+          "after": [
+            "const gameDirectory=path.join(path.dirname(directory),'capacity-formal-native-v2-scout-observer-ladder-14');assert.ok(samePath(catalog.baseCatalog?.file??'',path.join(gameDirectory,'collect-formal-native-v2-scout-observer-ladder-14-public-artifact-catalog.json')));assert.ok(samePath(catalog.baseVerification?.file??'',path.join(gameDirectory,'public-verification.json')));for(const p of[catalog.baseCatalog,catalog.baseVerification]){const s=await fs.lstat(p.file);assert.ok(s.isFile()&&!s.isSymbolicLink());assert.ok(samePath(await fs.realpath(p.file),p.file));}await assertPin(catalog.baseCatalog);await assertPin(catalog.baseVerification);const game=await read(catalog.baseVerification.file);assert.equal(game.runId,catalog.runId);assert.equal(game.reportOk,catalog.originalReportOk);assert.equal(game.capacityAccepted,catalog.originalCapacityAccepted);\n"
+          ]
+        }
+      ],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\wire-diagnostics-adapter.mjs",
+        "bytes": 2514,
+        "sha256": "82c5ae7432cb7b69e576e7c283e4a4ca6afe074b692342ea5a82516dd3fef164"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\wire-diagnostics-adapter.mjs",
+        "bytes": 2514,
+        "sha256": "82c5ae7432cb7b69e576e7c283e4a4ca6afe074b692342ea5a82516dd3fef164"
+      },
+      "rawExact": true,
+      "hunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\wire-diagnostics-contract.mjs",
+        "bytes": 15767,
+        "sha256": "8d2c06f251a3b623d4ff135211046b9d039b31e9bfdad799c0cb1fd3ddfda13a"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\wire-diagnostics-contract.mjs",
+        "bytes": 15767,
+        "sha256": "8d2c06f251a3b623d4ff135211046b9d039b31e9bfdad799c0cb1fd3ddfda13a"
+      },
+      "rawExact": true,
+      "hunks": [],
+      "forwardRawExact": true,
+      "inverseRawExact": true
+    }
+  ],
+  "formalPolicy": {
+    "source": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\run-options.json",
+      "bytes": 2910,
+      "sha256": "6bb66f7ce95e4a459c987d6a84b4f6c0bcc33f45502281298b9b256d58a69666"
+    },
+    "result": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\run-options.json",
+      "bytes": 2887,
+      "sha256": "953c0fba5b00e2a2c2ffc01fd24beccf7c452eb91259bf8033c0361c3d5f9421"
+    },
+    "rawValueBytes": 1121,
+    "rawValueSha256": "7995c006893bb57d8a9a0270deb9915f9db55d817ce86a4dc8f79b1979b3716a",
+    "rawValueUnchanged": true
+  },
+  "sourceTransformOnly": true,
+  "actual18FactsPending": true,
+  "oldSourceFilesModified": false,
+  "inactiveLocalHistoryReusedByExactExternalReference": true
+}

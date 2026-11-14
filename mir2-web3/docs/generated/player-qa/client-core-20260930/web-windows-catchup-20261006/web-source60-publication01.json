@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "round": "source60",
+  "recordedAt": "2026-10-11T05:09:56.707Z",
+  "branch": "codex/windows-player-journey",
+  "parent": "12880592d68a498921c25b8bc8d4ebdebc909ed1",
+  "commit": "8b0515b47738435762a696f108acd7d0d11e8b37",
+  "commitFiles": 72,
+  "ownedCodeFiles": 18,
+  "ownedDocs": 5,
+  "ownedQaFiles": 49,
+  "localCommitPassed": true,
+  "firstPush": {
+    "passed": false,
+    "reason": "GitHub SSH connection closed: Broken pipe"
+  },
+  "retryPush": {
+    "passed": true,
+    "exitCode": 0
+  },
+  "remoteVerification": {
+    "passed": true,
+    "exitCode": 0,
+    "remoteRef": "refs/heads/codex/windows-player-journey",
+    "sha": "8b0515b47738435762a696f108acd7d0d11e8b37"
+  },
+  "goalComplete": false
+}

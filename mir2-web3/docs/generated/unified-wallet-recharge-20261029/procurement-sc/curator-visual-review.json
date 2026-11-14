@@ -1,0 +1,67 @@
+{
+  "passed": true,
+  "reviewedAtUtc": "2026-10-29T15:53:22.464335+00:00",
+  "reviewer": "Codex evidence curator via view_image",
+  "sampleCount": 7,
+  "allIncludedImagesViewed": true,
+  "locale": "zh-CN",
+  "humanAccepted": false,
+  "liveAcceptance": false,
+  "observations": [
+    "Five pages and two explicit confirmations show Simplified Chinese system labels.",
+    "No observed missing glyph, text overlap or clipping in these captures.",
+    "Opaque player name 龍城{Gold}, original equipment description 屠龍, operation IDs, booleans and operator quota label intentionally remain unchanged.",
+    "The old initial7 Traditional Chinese screenshots remain historical; they are not relabelled as SC."
+  ],
+  "files": [
+    {
+      "artifact": "procurement-sc/screenshots/procurement-claims-1024x768.png",
+      "bytes": 121605,
+      "sha256": "56500852727be15b8563c0e3c6f875b83395675867b2dc9e5d425845522ffd6f",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "artifact": "procurement-sc/screenshots/procurement-delivery-confirm-1024x768.png",
+      "bytes": 238745,
+      "sha256": "6f8e3d63072178242407609455f27b3fd059f60bb7e8da98e00f1ce728ace178",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "artifact": "procurement-sc/screenshots/procurement-mine-1024x768.png",
+      "bytes": 109228,
+      "sha256": "4f361977306ba82e21c9c0d478386b23d6cdd38dcdc91105496ba2f19d378c86",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "artifact": "procurement-sc/screenshots/procurement-public-1024x768.png",
+      "bytes": 132480,
+      "sha256": "a653df431a3050e032414eb92136cddef0e8a69868ce379e9cd8a355b6bb5dea",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "artifact": "procurement-sc/screenshots/procurement-publish-1024x768.png",
+      "bytes": 158289,
+      "sha256": "a628d7e93b0593bb2fa2dcfef518da8a7033c7a70aba6ddcb12acbaecc93ad0d",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "artifact": "procurement-sc/screenshots/procurement-publish-confirm-1024x768.png",
+      "bytes": 225723,
+      "sha256": "9cef40d2c734ee0f269b0aa3d95d4d3f6b55b1c81a0459a587896c5dd421716c",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "artifact": "procurement-sc/screenshots/procurement-service-1024x768.png",
+      "bytes": 152341,
+      "sha256": "e856c3968d86159d103b4cae04f079b7180a222fa57744ce945b45ce40042525",
+      "width": 1024,
+      "height": 768
+    }
+  ]
+}

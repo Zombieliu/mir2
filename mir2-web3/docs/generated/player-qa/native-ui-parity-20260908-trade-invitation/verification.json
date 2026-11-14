@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "checkpoint": "native-ui-parity-20260908-trade-invitation",
+  "implementationParentCommit": "58eab9a4a6684b2d2d11d2c533049b64995e7458",
+  "implementation": "Uncommitted working-tree source, bound by implementation-hashes.json",
+  "accepted": false,
+  "visualAccepted": false,
+  "globalParityPercent": null,
+  "sourceHashes": "source-hashes.json",
+  "implementationHashes": "implementation-hashes.json",
+  "toolchain": "1.95.0",
+  "environment": {
+    "locked": true,
+    "offline": true,
+    "jobs": 2,
+    "rustTestThreads": 1,
+    "incremental": false,
+    "devDebug": 0,
+    "testDebug": 0
+  },
+  "suites": [
+    {
+      "name": "Native UI",
+      "passed": 598,
+      "failed": 0,
+      "ignored": 0,
+      "seconds": 1.2,
+      "log": "native-ui-tests.log",
+      "command": "cargo +1.95.0 test --locked --offline --manifest-path apps/game-client/client-bevy/Cargo.toml --features native-ui -- --quiet"
+    },
+    {
+      "name": "Windows host",
+      "passed": 537,
+      "failed": 0,
+      "ignored": 0,
+      "seconds": 33.54,
+      "log": "windows-tests.log",
+      "command": "cargo +1.95.0 test --locked --offline --manifest-path apps/game-client/platform-windows/Cargo.toml -- --quiet"
+    },
+    {
+      "name": "Gateway",
+      "passed": 685,
+      "failed": 0,
+      "ignored": 1,
+      "seconds": 817.1,
+      "log": "gateway-tests.log",
+      "command": "cargo +1.95.0 test --locked --offline -p mir2-gateway --lib -j 2",
+      "ignoredTest": "channel_identity::tests::postgres_store_is_shared_across_gateway_instances",
+      "ignoredReason": "Requires MIR2_CHANNEL_IDENTITY_TEST_DATABASE_URL"
+    },
+    {
+      "name": "Gateway invitation/security subset",
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0,
+      "seconds": 74.61,
+      "log": "gateway-invitation-tests.log",
+      "includedInGatewayFull": true,
+      "command": "Same final mir2_gateway test executable, filter trade_invitation_tests"
+    }
+  ],
+  "assets": {
+    "log": "original-assets.json",
+    "verifiedOriginalPngs": 561,
+    "preservedPriorPngs": 552,
+    "rejectedNegativeControls": 32,
+    "newImagesThisRound": 0,
+    "historicalVerifierNewFrameCount": 5,
+    "command": "node apps/web/scripts/verify-trade-dialog-assets.mjs <original Crystal client Data directory>"
+  },
+  "formatting": {
+    "workspaceFmt": true,
+    "nativeUiFmt": true,
+    "windowsFmt": true,
+    "gitDiffCheck": true
+  },
+  "diagnostics": [
+    "Initial peer initialization hook was in teardown instead of normal command drain; corrected before final tests.",
+    "Test fixture used unsupported Default constructor; corrected to new(). See diagnostics/initial-focused.log.",
+    "Windows LNK1104 output lock on old Gateway test EXE; used separate copied temporary C-drive target without removing old artifacts or stopping unrelated processes. See diagnostics/output-lock.log.",
+    "Rejected-bootstrap fixture needed Debug trait; corrected before final tests. See diagnostics/test-service-compile.log.",
+    "One owned superseded full-test process was stopped after review identified bootstrap cleanup; final full run is complete and passing."
+  ],
+  "reviewFixes": [
+    "First-frame modal synchronization order",
+    "Chat scroll/action and belt-control modal guards",
+    "Editable unlock retains reciprocal pair",
+    "Teardown-fenced presence cannot accept invitations",
+    "Pending old cleanup blocks new invitations",
+    "Inventory-bootstrap failure closes pair and refunds waiting peer"
+  ],
+  "scope": {
+    "interactiveLaunch": false,
+    "inputInjection": false,
+    "screenshot": false,
+    "packagedExe": false,
+    "liveWss": false,
+    "productionRollout": false,
+    "liveStoreMutation": false,
+    "wireChange": false,
+    "sqlMigration": false,
+    "fullSimulationRerun": false
+  },
+  "remaining": [
+    "Positive-delta immediate editable gold escrow and bilateral unlock",
+    "Exact item custody and native deposit/retrieve/merge; native cells remain read-only",
+    "Prepared unlock/capacity rejection currently cancel/refund instead of retaining offers",
+    "Original 2-second request throttle and full invalid-request error-chat branches",
+    "Same-EXE original screenshots, live WSS, package/light, DPI, soak, legal/signing, human acceptance; all 33 IDs remain open"
+  ],
+  "archivedLogWhitespace": "Trailing whitespace and excess EOF blank lines normalized in repository copies; original logs retained in system temporary directory."
+}

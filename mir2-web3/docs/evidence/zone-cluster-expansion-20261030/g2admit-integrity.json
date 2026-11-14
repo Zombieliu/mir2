@@ -1,0 +1,152 @@
+{
+  "baseline": "c52817a003dc9a005606918c03d7958a8cf5db70",
+  "atUtc": "2026-10-30T17:33:12.9364453Z",
+  "algorithm": "SHA256",
+  "files": [
+    {
+      "name": "g2admit-base-final-result.json",
+      "bytes": 9029,
+      "sha256": "ccd2cd16431f55b65fc674c991f61b1e7740e3c183f09499bb52317ae0fb6868"
+    },
+    {
+      "name": "g2admit-base-final.log",
+      "bytes": 724,
+      "sha256": "23816e8838892d7aafb4d09f670fa235d53592e818f5c9536fb1d352fe6011ab"
+    },
+    {
+      "name": "g2admit-bins-final-result.json",
+      "bytes": 8991,
+      "sha256": "19c4b714fb694d82614b3d418c7d9fbad037f182f14f0ed7f0de15b1c564402a"
+    },
+    {
+      "name": "g2admit-bins-final.log",
+      "bytes": 61,
+      "sha256": "799f9b65f73377a1f0e6970341c64e9ee51587447b82ab013500e3cce21b7b8f"
+    },
+    {
+      "name": "g2admit-canonical-host-final-result.json",
+      "bytes": 9067,
+      "sha256": "c58c3adbcd2c9297185c029c2d8a673619560d34fa1395ccea5641ab6612d5d7"
+    },
+    {
+      "name": "g2admit-canonical-host-final.log",
+      "bytes": 918,
+      "sha256": "9861bff5bda22bfd3ae561da676665d78061136e81cb51bdb2eaecd474f399d8"
+    },
+    {
+      "name": "g2admit-fence-final-result.json",
+      "bytes": 9039,
+      "sha256": "6282f0764bd28a24ea75eddfa7666ab2c47c71ff4055611b774ade33b2b3ff29"
+    },
+    {
+      "name": "g2admit-fence-final.log",
+      "bytes": 2724,
+      "sha256": "4dac0218d04e38d969f72030e1ed6c65e731c01efae88c236a547b3b3c4eb40d"
+    },
+    {
+      "name": "g2admit-fixture-stop.json",
+      "bytes": 309,
+      "sha256": "be8f59851fe6c6a9bee5c81efcf150b7c98fdf6683f8cf5ecae01d3fb10fe65c"
+    },
+    {
+      "name": "g2admit-gateway-final-result.json",
+      "bytes": 9025,
+      "sha256": "6a99df4c2a126bb9d50cbfa4527655a84418f4be2c2766c275f2da943fce7a18"
+    },
+    {
+      "name": "g2admit-gateway-final.log",
+      "bytes": 12010,
+      "sha256": "c5d067cbd02df72cccbcea05be44197909d59ac8f24baaa5cd7d67e58391ce60"
+    },
+    {
+      "name": "g2admit-ground-final-result.json",
+      "bytes": 9025,
+      "sha256": "fffae16054547b766637c5bc4dc4746913a8ce67d4abf050cdf0e25ebe4ef462"
+    },
+    {
+      "name": "g2admit-ground-final.log",
+      "bytes": 1690,
+      "sha256": "93d84ea4aab963a63e3f5541ac48432579cba41f9095a68f284c34c8c9ba9c8e"
+    },
+    {
+      "name": "g2admit-postgres-final-result.json",
+      "bytes": 9035,
+      "sha256": "7322d82384996ef42a62b5fb5df0e584058239e7415efc8d0438b904c65721d1"
+    },
+    {
+      "name": "g2admit-postgres-final.json",
+      "bytes": 574,
+      "sha256": "7bdaca82f4f8b248d65403c3901c26762b4e0716195eaf8cb4ceb0ccdfc4e9db"
+    },
+    {
+      "name": "g2admit-postgres-final.log",
+      "bytes": 5105,
+      "sha256": "c072943c333d984a82f5939487004a3915c958aef7541cbfa748980cb1cf1d0b"
+    },
+    {
+      "name": "g2admit-promotion-final-result.json",
+      "bytes": 9021,
+      "sha256": "23b0cbbf90b2d4598adbf50112a8d1c1af418978c444295e38db4ebd917b65db"
+    },
+    {
+      "name": "g2admit-promotion-final.log",
+      "bytes": 732,
+      "sha256": "ebd38995d713cf77b1798dd1a90e5e5150058157dba9f3035f489851516f29ab"
+    },
+    {
+      "name": "g2admit-reset-final-result.json",
+      "bytes": 9039,
+      "sha256": "c69be3dad63afbdecb0075724e0ba7803dec332cc7a848d4cebc7d87bf6b9d82"
+    },
+    {
+      "name": "g2admit-reset-final.log",
+      "bytes": 1824,
+      "sha256": "38c3baad96b0e8464ce5a123c01ce62eeddbeae7bb659d7e488029084667abee"
+    },
+    {
+      "name": "g2admit-save-operation-final-result.json",
+      "bytes": 9041,
+      "sha256": "2fa1828902b4536bc4d2606c8c4f7a236fe4073137f14c6fdad6a8c5dac4a73d"
+    },
+    {
+      "name": "g2admit-save-operation-final.log",
+      "bytes": 3334,
+      "sha256": "4d70e405fe14a3298ba3184b949b055d6a02c46f927c9ba5abbb5506557bfb68"
+    },
+    {
+      "name": "g2admit-simulation-final-result.json",
+      "bytes": 9031,
+      "sha256": "23c5d3a78c5d0aa013293a4c8ef6cf7fb6fe10ab234117d450b5ffd92327950b"
+    },
+    {
+      "name": "g2admit-simulation-final.log",
+      "bytes": 5637,
+      "sha256": "e97c00ff657580e4899e92f4cdb4d8e4c41bf7e050f143c0a9580f1cf9844cce"
+    },
+    {
+      "name": "g2admit-source-final-result.json",
+      "bytes": 9049,
+      "sha256": "5f0054c40255b081084aa8d8aa2443e26f0b298ad5e0e875f5adeff955e8135e"
+    },
+    {
+      "name": "g2admit-source-final.log",
+      "bytes": 2932,
+      "sha256": "d181924de4803f840f3ea49f985012330e169c37904ede62ce3a5f3ef005d1e3"
+    },
+    {
+      "name": "g2admit-unknown-final-result.json",
+      "bytes": 9059,
+      "sha256": "79f5953d6b088717b23daa47d57d7bd1a6cd97bc466d95ee5cb9ba7721221389"
+    },
+    {
+      "name": "g2admit-unknown-final.log",
+      "bytes": 799,
+      "sha256": "82006f85d2a121ca528b0a46ae7a6ae2b84869cde785ce6778206ee89472df11"
+    },
+    {
+      "name": "g2admit-verification.json",
+      "bytes": 16003,
+      "sha256": "27bc8aa89b0577a8d6275f5f0ad8712b4f9070f8ae2598859995e14ee1f965c5"
+    }
+  ]
+}

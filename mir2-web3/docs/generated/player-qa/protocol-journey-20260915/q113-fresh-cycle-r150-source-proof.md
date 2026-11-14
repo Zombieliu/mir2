@@ -1,0 +1,9 @@
+## R150 incremental-observation classification proof
+
+Public terminal traces: `C:\mir2-protocol-journey-20260911\Wizard.2026-09-17T10-40-38-426Z.trace.jsonl` and `C:\mir2-protocol-journey-20260911\Taoist.2026-09-17T10-40-38-425Z.trace.jsonl`.
+
+Both R149 q113 caster runs stopped through the opted position-cycle guard rather than the former 2,500-step limit. The Wizard stopped on `D712` at `(228,206)` while approaching the authoritative `D712 -> D713` source `(31,193)`. Its static route has 216 cells and crosses `BlackMaggot#461501@(220,217)`, but the last incremental AOI state supplied no `disposition` or `hp` for that creature or nearby WedgeMoths. It must therefore not be selected for combat from that state alone.
+
+The Taoist provides direct stale-state proof. At `D711` cycle report `(376,180)` / final owner receipt `(378,180)`, `ObjectRemove#454500` was received at trace sequence 7752. The remaining pre-logout AOI entity was only metadata-less `BlackMaggot#454501@(379,189)`, nine cells away. The normal `clientVersion` request then yielded full `worldSnapshot` 7762 (11:01:14.426 UTC): same map and owner, with `BlackMaggot#454500@(374,180)`, four cells away, `hp:200`, `disposition:'hostile'`, plus #454501 also explicit hostile. Thus the incremental state both affected navigation's radius-two 20-second hostile-memory trail and lacked the data required by the bounded combat classifier.
+
+R150 makes one normal `clientVersion` full-snapshot request only after an opted typed cycle has passed same-map/current-owner/non-pending guards. It checks interruption before and after the request, then reuses the existing explicit-hostile path, local-six-cell, and transfer-six-cell resolver. A missing, stale, pending, wrong-map, wrong-owner, neutral, or no-response view rethrows the original typed cycle. It neither treats unknown entities as hostile nor adds a retry, wider radius, higher step budget, speed change, grant, or route workaround.

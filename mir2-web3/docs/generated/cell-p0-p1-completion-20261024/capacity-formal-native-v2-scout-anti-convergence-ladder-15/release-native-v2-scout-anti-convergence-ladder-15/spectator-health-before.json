@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "phase": "before",
+  "observedAtMs": 1792974402836,
+  "gatewayPid": 67304,
+  "sourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "dataDir": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\recordings",
+  "dataDirMatches": true,
+  "metrics": {
+    "recordingEnabled": true,
+    "activeViewers": 0,
+    "activeMaps": 0,
+    "bufferedFrames": 0,
+    "publishedFramesTotal": 0,
+    "persistedFramesTotal": 0,
+    "droppedFramesTotal": 0,
+    "recordingErrorsTotal": 0
+  },
+  "scope": "Whitelisted owned public health counts only; no recording/entity payload and no capacity acceptance"
+}

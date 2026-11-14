@@ -3581,6 +3581,7 @@ fn push_stage5_mail(
         .unwrap_or(0)
         .saturating_add(1);
     systems.mail.push(Stage5MailMessage {
+        attachment_origin: mir2_simulation::Stage5MailAttachmentOrigin::LegacyUnknown,
         id,
         delivery_nonce: mir2_simulation::new_stage5_mail_delivery_nonce(),
         from: "GM System".to_string(),
@@ -11811,6 +11812,7 @@ mod tests {
         save.credit = 55;
         let mut systems = Stage5SystemsState::default();
         systems.mail.push(mir2_simulation::Stage5MailMessage {
+            attachment_origin: mir2_simulation::Stage5MailAttachmentOrigin::LegacyUnknown,
             id: 1,
             delivery_nonce: "admin-fixture-mail-1".into(),
             from: "GM".into(),
@@ -12602,6 +12604,7 @@ mod tests {
             let save = account.saves.get_mut(&0).expect("demo save");
             let mut systems = Stage5SystemsState::default();
             systems.auction.push(mir2_simulation::Stage5AuctionListing {
+                item_state_json: None,
                 id: 1,
                 seller: "Scout".into(),
                 item_key: "auction-sword".into(),
@@ -12612,6 +12615,7 @@ mod tests {
                 expired: false,
             });
             systems.auction.push(mir2_simulation::Stage5AuctionListing {
+                item_state_json: None,
                 id: 2,
                 seller: "Scout".into(),
                 item_key: "auction-shield".into(),
@@ -12622,6 +12626,7 @@ mod tests {
                 expired: false,
             });
             systems.auction.push(mir2_simulation::Stage5AuctionListing {
+                item_state_json: None,
                 id: 3,
                 seller: "Scout".into(),
                 item_key: "auction-ring".into(),

@@ -1,0 +1,162 @@
+{
+  "passed": true,
+  "kind": "two-real-fullpayload-inno-compiles-and-independent-postcheck",
+  "compilerEngineVersion": "7.1.1",
+  "actualFullPayload": true,
+  "compilerExitCodes": [
+    0,
+    0
+  ],
+  "receipts": [
+    {
+      "path": "real-installer-normal-compile.json",
+      "sourceReceipt": {
+        "filename": "real-installer-normal-compile.json",
+        "bytes": 976,
+        "sha256": "0bcc1a33d10b8fda61725316864f638a3610cceca5832edfb7b1c3e405337d07",
+        "included": false
+      },
+      "kind": "normal",
+      "bytes": 1017970518,
+      "sha256": "b29f0638cefe77f95d1ced256a02e6260aa6e269b212f53548e39736a1272c20",
+      "publicAuthenticode": "NotSigned"
+    },
+    {
+      "path": "real-installer-validation-compile.json",
+      "sourceReceipt": {
+        "filename": "real-installer-validation-compile.json",
+        "bytes": 1000,
+        "sha256": "7bcf059fdf730db92e7ec0fad15684e3fcaa9ca3274383b409e5c4b2830b8b3b",
+        "included": false
+      },
+      "kind": "validation",
+      "bytes": 1017971207,
+      "sha256": "5fd15cf92cfe4cdace0408c5f4e99897a67d2ac8e01b44c1dae71761b7d4de4c",
+      "publicAuthenticode": "NotSigned"
+    }
+  ],
+  "curatorPreviouslyRecomputedBothActualExeHashes": true,
+  "newReceiptsMatchPriorActualArtifactHashes": true,
+  "curatorRecomputedRecipeAndBothIncludeHashes": true,
+  "actualGamePayloadSourceRoot": "F:\\m9\\mir2-web3\\dist\\mir2-windows-candidate\\WN-CANDIDATE-20261029-invited-09",
+  "payloadIncludeFirstLine": "Source: \"F:\\m9\\mir2-web3\\dist\\mir2-windows-candidate\\WN-CANDIDATE-20261029-invited-09\\BILLING-HAN-SOURCE.json\"; DestDir: \"{app}\\game\"; Flags: ignoreversion",
+  "snapshotCopyUsedAsActualInstallerPayload": false,
+  "fileVersionPostcheck": {
+    "rawPreservedInProducerReceipts": true,
+    "normalizedVersion": "2026.10.29.9",
+    "trimFixExternalOnly": true,
+    "recompilationRequired": false
+  },
+  "readOnlyAudit": {
+    "path": "installer-readonly-audit.json",
+    "sourceReceipt": {
+      "filename": "installer-readonly-audit.json",
+      "bytes": 6678,
+      "sha256": "72c02e5a39b0743d37c0f02cdbb0fadb3c832632ad209976405959126eaa5b22",
+      "included": false
+    },
+    "noBlockingFindingsAtRecordedAuditPhase": true,
+    "sourceAndEvidencePinsRecomputed": 9,
+    "currentPinResults": [
+      {
+        "filename": "Mir2-Invite.iss",
+        "matchesHistoricalAudit": true,
+        "currentReceipt": {
+          "filename": "Mir2-Invite.iss",
+          "bytes": 37809,
+          "sha256": "49f087bef9c21ba5be66b72c03221d5b5503b6ac340ac04bf286dde55f747f31",
+          "included": false
+        }
+      },
+      {
+        "filename": "launcher.rs",
+        "matchesHistoricalAudit": true,
+        "currentReceipt": {
+          "filename": "launcher.rs",
+          "bytes": 2567,
+          "sha256": "035f334548562c27ef46ffd8c6d6fa78990b9d58d81a9c41e34efb223b94532d",
+          "included": false
+        }
+      },
+      {
+        "filename": "updater.rs",
+        "matchesHistoricalAudit": true,
+        "currentReceipt": {
+          "filename": "updater.rs",
+          "bytes": 4587,
+          "sha256": "c53eaa57ac0dc96b2ad4e921375e35d4d7e01f1f5f86f84d3f4f553f4f16b7e4",
+          "included": false
+        }
+      },
+      {
+        "filename": "lib.rs",
+        "matchesHistoricalAudit": true,
+        "currentReceipt": {
+          "filename": "lib.rs",
+          "bytes": 8739,
+          "sha256": "18d276f8073ac1cb3880df967aafc991681709146b5d5e57b7bcba22dc0780fa",
+          "included": false
+        }
+      },
+      {
+        "filename": "native_locale.rs",
+        "matchesHistoricalAudit": true,
+        "currentReceipt": {
+          "filename": "native_locale.rs",
+          "bytes": 13717,
+          "sha256": "3192a50c57a6ab1eba5e793975e90f7aae19dc68e0afe27e82ee68ceef998546",
+          "included": false
+        }
+      },
+      {
+        "filename": "launch-installed-native.mjs",
+        "matchesHistoricalAudit": false,
+        "currentReceipt": {
+          "filename": "launch-installed-native.mjs",
+          "bytes": 2802,
+          "sha256": "91823f73e8bfa5b8953f612fa47abb02ff2d5376a30abf4f6ecc27eebfc55241",
+          "included": false
+        }
+      },
+      {
+        "filename": "real-installer-normal-compile.json",
+        "matchesHistoricalAudit": true,
+        "currentReceipt": {
+          "filename": "real-installer-normal-compile.json",
+          "bytes": 976,
+          "sha256": "0bcc1a33d10b8fda61725316864f638a3610cceca5832edfb7b1c3e405337d07",
+          "included": false
+        }
+      },
+      {
+        "filename": "real-installer-validation-compile.json",
+        "matchesHistoricalAudit": true,
+        "currentReceipt": {
+          "filename": "real-installer-validation-compile.json",
+          "bytes": 1000,
+          "sha256": "7bcf059fdf730db92e7ec0fad15684e3fcaa9ca3274383b409e5c4b2830b8b3b",
+          "included": false
+        }
+      },
+      {
+        "filename": "updater-release-r9-final.json",
+        "matchesHistoricalAudit": true,
+        "currentReceipt": {
+          "filename": "updater-release-r9-final.json",
+          "bytes": 4615,
+          "sha256": "6ebb8bfe931c49a16b9904c48793c10d9d9ddce56db9891d3af4cd55fab5d7e6",
+          "included": false
+        }
+      }
+    ],
+    "historicalHelperAuditNotRelabeledCurrent": true,
+    "currentLaunchHelperAuditAndRuntimePendingAtThisCompileCurationPhase": true,
+    "subsequentCurrentHelperAudit": "current-helper-readonly-validation.json"
+  },
+  "validationModeRuntimeBoundary": "Silent installation plus the reviewed helper is required for isolated APPDATA. The validation finish-page action does not set that environment itself. This does not describe normal installer behavior.",
+  "normalInstallerActuallyInstalledByThisReport": false,
+  "installationOrLaunchVerifiedByThisReport": false,
+  "publicAuthenticode": "NotSigned",
+  "publicRelease": false,
+  "binariesIncluded": false
+}

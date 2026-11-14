@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "backendInputCount": 44,
+  "sourceManifestSha256": "13e5156025198b7c96eabad8f326138554de913abd98199da59888b23bdbe5f2",
+  "sourceManifestFileSha256": "6c1d7d58de2259ae89b2f7c9e8d3768e9834fd9062e3e1c02a794cb7b7a1f31e",
+  "matchedRawInputs": 44,
+  "matchedRawDriverPins": 6,
+  "releaseSha256": "1980b7bed58499977eb6443aa3f1bf0fabcb9e8262b490f2bc6fb74cf6f7b318",
+  "scope": "This fresh44-input attack-deadline-diagnostics Release only; historical source/binary proofs remain unchanged"
+}

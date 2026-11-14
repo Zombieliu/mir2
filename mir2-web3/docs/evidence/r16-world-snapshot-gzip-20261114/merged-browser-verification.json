@@ -1,0 +1,523 @@
+{
+  "schema": "mir2.r16.snapshot-diagnostics-merge.v1",
+  "sourceRevision": "9244ce3dd7cd2129a70e650be1430e971b6c96ab",
+  "priorQualifiedSource": "199a294130f386a245e86d3c1d81f731d7d7277b",
+  "gatewaySha256": "6557d9da87e8cb867616caab80efb28c3063ac7361de1c5d59b0615d401c0842",
+  "gatewayBytes": 147968000,
+  "reusedWebBuild": "KQ7eN1Lo2uNQhIxqKTlt7",
+  "webProtocolAndCoreIdenticalAtSourceRevision": true,
+  "gatewayRegressionTests": 38,
+  "releaseGuardTests": 75,
+  "sourcePinCommits": 5,
+  "sourcePinFiles": 23,
+  "mergedGatewayFullGameSessions": 4,
+  "legacyGatewayFullGameSessions": 2,
+  "allLocalBrowserRunsPassed": true,
+  "mergedSnapshotMessagePayloads": {
+    "frames": 24,
+    "originalTextBytes": 1171080,
+    "wireBytes": 212717,
+    "reductionFraction": 0.818358267582061,
+    "excludesWsTlsAndOtherTraffic": true
+  },
+  "runs": [
+    {
+      "ordinal": 1,
+      "gatewayKind": "merged",
+      "gatewaySha256": "6557d9da87e8cb867616caab80efb28c3063ac7361de1c5d59b0615d401c0842",
+      "gatewaySourceRevision": "9244ce3dd7cd2129a70e650be1430e971b6c96ab",
+      "mode": "compatibility",
+      "language": "en-US",
+      "passed": true,
+      "sessions": [
+        {
+          "nativeReadyWaitMs": 54565,
+          "prewarm": {
+            "requested": 113,
+            "ok": 113,
+            "failed": 0
+          },
+          "completeFonts": [
+            {
+              "name": "NotoSansTC.ttf",
+              "bytes": 11941968,
+              "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+            },
+            {
+              "name": "NotoSansCJKsc-Regular.otf",
+              "bytes": 16437364,
+              "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+            },
+            {
+              "name": "NotoSans-Regular.ttf",
+              "bytes": 621572,
+              "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+            },
+            {
+              "name": "NotoSansDevanagari-Regular.ttf",
+              "bytes": 243520,
+              "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+            },
+            {
+              "name": "NotoSansThai-Regular.ttf",
+              "bytes": 37780,
+              "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+            },
+            {
+              "name": "NotoSansArabic-Regular.ttf",
+              "bytes": 234892,
+              "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+            }
+          ],
+          "questWindow": "ordinary-shared-native",
+          "rightButtonsPassed": true
+        },
+        {
+          "nativeReadyWaitMs": 1377,
+          "prewarm": {
+            "requested": 113,
+            "ok": 113,
+            "failed": 0
+          },
+          "completeFonts": [
+            {
+              "name": "NotoSansTC.ttf",
+              "bytes": 11941968,
+              "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+            },
+            {
+              "name": "NotoSansCJKsc-Regular.otf",
+              "bytes": 16437364,
+              "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+            },
+            {
+              "name": "NotoSans-Regular.ttf",
+              "bytes": 621572,
+              "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+            },
+            {
+              "name": "NotoSansDevanagari-Regular.ttf",
+              "bytes": 243520,
+              "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+            },
+            {
+              "name": "NotoSansThai-Regular.ttf",
+              "bytes": 37780,
+              "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+            },
+            {
+              "name": "NotoSansArabic-Regular.ttf",
+              "bytes": 234892,
+              "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+            }
+          ],
+          "questWindow": "ordinary-shared-native",
+          "rightButtonsPassed": true
+        }
+      ],
+      "snapshotTransport": {
+        "passed": true,
+        "gatewayKind": "merged",
+        "compressionExpected": true,
+        "sessions": [
+          {
+            "worldDeclared": true,
+            "worldSnapshots": 5,
+            "worldWireBytes": 44833,
+            "worldDecodedBytes": 242757,
+            "browserConsumption": {
+              "passed": true,
+              "version": 6,
+              "tick": 1,
+              "mapFileName": "0",
+              "entityCount": 31,
+              "rawIngressTickMatched": true,
+              "wireKind": "M2WSPGZ1"
+            }
+          },
+          {
+            "worldDeclared": true,
+            "worldSnapshots": 7,
+            "worldWireBytes": 61507,
+            "worldDecodedBytes": 342775,
+            "browserConsumption": {
+              "passed": true,
+              "version": 6,
+              "tick": 1,
+              "mapFileName": "0",
+              "entityCount": 32,
+              "rawIngressTickMatched": true,
+              "wireKind": "M2WSPGZ1"
+            }
+          }
+        ],
+        "scope": "Actual Page snapshot consumer, catalog gzip mixed ordering, existing gameplay/save gates; loopback HTTP, not public or latency-causality proof"
+      },
+      "catalogEnvelopeCountPerSession": 529,
+      "legacyTextSnapshotCounts": [
+        1,
+        1
+      ],
+      "walkRunCommands": 189,
+      "destination": {
+        "x": 324,
+        "y": 291
+      },
+      "final": {
+        "x": 322,
+        "y": 293
+      },
+      "everyMovementWithinOriginalEightSecondGate": true,
+      "ordinaryLogoutAndAuthoritySavePassed": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true,
+      "workerRestartPassed": true,
+      "browserRestartPassed": true,
+      "screenshot": {
+        "path": "merged-default-vendor-arrival.png",
+        "bytes": 1397205,
+        "sha256": "62213f81a183287338e8271f143ca7369ba1d369baba34fed5e955124effa1dd"
+      }
+    },
+    {
+      "ordinal": 2,
+      "gatewayKind": "merged",
+      "gatewaySha256": "6557d9da87e8cb867616caab80efb28c3063ac7361de1c5d59b0615d401c0842",
+      "gatewaySourceRevision": "9244ce3dd7cd2129a70e650be1430e971b6c96ab",
+      "mode": "webgl2",
+      "language": "zh-TW",
+      "passed": true,
+      "sessions": [
+        {
+          "nativeReadyWaitMs": 52188,
+          "prewarm": {
+            "requested": 113,
+            "ok": 113,
+            "failed": 0
+          },
+          "completeFonts": [
+            {
+              "name": "NotoSansTC.ttf",
+              "bytes": 11941968,
+              "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+            },
+            {
+              "name": "NotoSansCJKsc-Regular.otf",
+              "bytes": 16437364,
+              "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+            },
+            {
+              "name": "NotoSans-Regular.ttf",
+              "bytes": 621572,
+              "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+            },
+            {
+              "name": "NotoSansDevanagari-Regular.ttf",
+              "bytes": 243520,
+              "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+            },
+            {
+              "name": "NotoSansThai-Regular.ttf",
+              "bytes": 37780,
+              "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+            },
+            {
+              "name": "NotoSansArabic-Regular.ttf",
+              "bytes": 234892,
+              "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+            }
+          ],
+          "questWindow": "ordinary-shared-native",
+          "rightButtonsPassed": true
+        },
+        {
+          "nativeReadyWaitMs": 1322,
+          "prewarm": {
+            "requested": 113,
+            "ok": 113,
+            "failed": 0
+          },
+          "completeFonts": [
+            {
+              "name": "NotoSansTC.ttf",
+              "bytes": 11941968,
+              "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+            },
+            {
+              "name": "NotoSansCJKsc-Regular.otf",
+              "bytes": 16437364,
+              "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+            },
+            {
+              "name": "NotoSans-Regular.ttf",
+              "bytes": 621572,
+              "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+            },
+            {
+              "name": "NotoSansDevanagari-Regular.ttf",
+              "bytes": 243520,
+              "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+            },
+            {
+              "name": "NotoSansThai-Regular.ttf",
+              "bytes": 37780,
+              "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+            },
+            {
+              "name": "NotoSansArabic-Regular.ttf",
+              "bytes": 234892,
+              "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+            }
+          ],
+          "questWindow": "ordinary-shared-native",
+          "rightButtonsPassed": true
+        }
+      ],
+      "snapshotTransport": {
+        "passed": true,
+        "gatewayKind": "merged",
+        "compressionExpected": true,
+        "sessions": [
+          {
+            "worldDeclared": true,
+            "worldSnapshots": 5,
+            "worldWireBytes": 44831,
+            "worldDecodedBytes": 242761,
+            "browserConsumption": {
+              "passed": true,
+              "version": 6,
+              "tick": 1,
+              "mapFileName": "0",
+              "entityCount": 31,
+              "rawIngressTickMatched": true,
+              "wireKind": "M2WSPGZ1"
+            }
+          },
+          {
+            "worldDeclared": true,
+            "worldSnapshots": 7,
+            "worldWireBytes": 61546,
+            "worldDecodedBytes": 342787,
+            "browserConsumption": {
+              "passed": true,
+              "version": 6,
+              "tick": 1,
+              "mapFileName": "0",
+              "entityCount": 32,
+              "rawIngressTickMatched": true,
+              "wireKind": "M2WSPGZ1"
+            }
+          }
+        ],
+        "scope": "Actual Page snapshot consumer, catalog gzip mixed ordering, existing gameplay/save gates; loopback HTTP, not public or latency-causality proof"
+      },
+      "catalogEnvelopeCountPerSession": 529,
+      "legacyTextSnapshotCounts": [
+        1,
+        1
+      ],
+      "walkRunCommands": 189,
+      "destination": {
+        "x": 324,
+        "y": 291
+      },
+      "final": {
+        "x": 322,
+        "y": 293
+      },
+      "everyMovementWithinOriginalEightSecondGate": true,
+      "ordinaryLogoutAndAuthoritySavePassed": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true,
+      "workerRestartPassed": true,
+      "browserRestartPassed": true,
+      "screenshot": {
+        "path": "merged-webgl2-vendor-arrival.png",
+        "bytes": 1423144,
+        "sha256": "63236bb1ce9f479ad40c5fbe4a03cfc52a57950ff0722ca3d019e77d67526371"
+      }
+    },
+    {
+      "ordinal": 3,
+      "gatewayKind": "legacy",
+      "gatewaySha256": "f35261772f379b04759011a63a2f3c463a36e754ebbde71915e893c84d77d490",
+      "gatewaySourceRevision": null,
+      "mode": "compatibility",
+      "language": "en-US",
+      "passed": true,
+      "sessions": [
+        {
+          "nativeReadyWaitMs": 54563,
+          "prewarm": {
+            "requested": 113,
+            "ok": 113,
+            "failed": 0
+          },
+          "completeFonts": [
+            {
+              "name": "NotoSansTC.ttf",
+              "bytes": 11941968,
+              "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+            },
+            {
+              "name": "NotoSansCJKsc-Regular.otf",
+              "bytes": 16437364,
+              "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+            },
+            {
+              "name": "NotoSans-Regular.ttf",
+              "bytes": 621572,
+              "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+            },
+            {
+              "name": "NotoSansDevanagari-Regular.ttf",
+              "bytes": 243520,
+              "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+            },
+            {
+              "name": "NotoSansThai-Regular.ttf",
+              "bytes": 37780,
+              "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+            },
+            {
+              "name": "NotoSansArabic-Regular.ttf",
+              "bytes": 234892,
+              "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+            }
+          ],
+          "questWindow": "ordinary-shared-native",
+          "rightButtonsPassed": true
+        },
+        {
+          "nativeReadyWaitMs": 1308,
+          "prewarm": {
+            "requested": 113,
+            "ok": 113,
+            "failed": 0
+          },
+          "completeFonts": [
+            {
+              "name": "NotoSansTC.ttf",
+              "bytes": 11941968,
+              "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+            },
+            {
+              "name": "NotoSansCJKsc-Regular.otf",
+              "bytes": 16437364,
+              "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+            },
+            {
+              "name": "NotoSans-Regular.ttf",
+              "bytes": 621572,
+              "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+            },
+            {
+              "name": "NotoSansDevanagari-Regular.ttf",
+              "bytes": 243520,
+              "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+            },
+            {
+              "name": "NotoSansThai-Regular.ttf",
+              "bytes": 37780,
+              "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+            },
+            {
+              "name": "NotoSansArabic-Regular.ttf",
+              "bytes": 234892,
+              "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+            }
+          ],
+          "questWindow": "ordinary-shared-native",
+          "rightButtonsPassed": true
+        }
+      ],
+      "snapshotTransport": {
+        "passed": true,
+        "gatewayKind": "legacy",
+        "compressionExpected": false,
+        "sessions": [
+          {
+            "worldDeclared": true,
+            "worldSnapshots": 0,
+            "worldWireBytes": 0,
+            "worldDecodedBytes": 0,
+            "browserConsumption": {
+              "passed": true,
+              "version": 6,
+              "tick": 1,
+              "mapFileName": "0",
+              "entityCount": 31,
+              "rawIngressTickMatched": true,
+              "wireKind": "Text"
+            }
+          },
+          {
+            "worldDeclared": true,
+            "worldSnapshots": 0,
+            "worldWireBytes": 0,
+            "worldDecodedBytes": 0,
+            "browserConsumption": {
+              "passed": true,
+              "version": 6,
+              "tick": 1,
+              "mapFileName": "0",
+              "entityCount": 32,
+              "rawIngressTickMatched": true,
+              "wireKind": "Text"
+            }
+          }
+        ],
+        "scope": "Actual Page snapshot consumer, catalog gzip mixed ordering, existing gameplay/save gates; loopback HTTP, not public or latency-causality proof"
+      },
+      "catalogEnvelopeCountPerSession": 529,
+      "legacyTextSnapshotCounts": [
+        6,
+        8
+      ],
+      "walkRunCommands": 189,
+      "destination": {
+        "x": 324,
+        "y": 291
+      },
+      "final": {
+        "x": 322,
+        "y": 293
+      },
+      "everyMovementWithinOriginalEightSecondGate": true,
+      "ordinaryLogoutAndAuthoritySavePassed": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fixtureUnchanged": true,
+      "workerRestartPassed": true,
+      "browserRestartPassed": true,
+      "screenshot": {
+        "path": "legacy-text-vendor-arrival.png",
+        "bytes": 1397167,
+        "sha256": "1d9e58ff071ea02590e335f56e58007be066d604462335434b1de2b743bd33ac"
+      }
+    }
+  ],
+  "linuxWorkflowRunId": 43587682763,
+  "linuxPackageVerificationPending": false,
+  "publicReleasePerformed": false,
+  "publicAckOrColdLoadingFixedClaimed": false,
+  "currentSshAuthenticationRejected": true,
+  "existingCredentialsOrPasswordsRecorded": false,
+  "originalWipPreserved": true,
+  "wholeParityCandidateOrAccepted": false,
+  "linuxPackageLocallyVerified": true
+}

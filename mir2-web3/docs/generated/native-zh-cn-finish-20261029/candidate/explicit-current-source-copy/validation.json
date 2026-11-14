@@ -1,0 +1,58 @@
+{
+  "passed": true,
+  "kind": "additional-snapshot-verification-with-explicit-require-current-source",
+  "report": "verification.json",
+  "sourceReceipt": {
+    "filename": "real-candidate-verification.json",
+    "bytes": 2620,
+    "sha256": "edeb559aa6d98a25dc31bb69da3381a886084e0405e95921d845b0423a39ba41",
+    "included": false
+  },
+  "sourceRevision": "24216899acd4301d8c3b1eff08b825f4896cc410",
+  "requireCurrentSourceSwitch": true,
+  "currentSourceValidated": true,
+  "currentSourceProof": {
+    "revision": "24216899acd4301d8c3b1eff08b825f4896cc410",
+    "clean": true,
+    "statusScope": "git-status-z+diff+all-untracked-content-v2",
+    "statusLineCount": 0,
+    "statusSha256": "E1B2F46DB895143B6E5F1B6F2CAB19E2A6377FDED8C34B903CB4F26F532A8FAA"
+  },
+  "snapshotRoot": "F:\\mir2-build\\native-zh-cn-finish-20261029\\candidate-r9-installer-input",
+  "formalOriginalCandidateRoot": "F:\\m9\\mir2-web3\\dist\\mir2-windows-candidate\\WN-CANDIDATE-20261029-invited-09",
+  "fourBoundMetadataIndependentlyRehashedAndEqual": [
+    {
+      "filename": "PACKAGE-MANIFEST.json",
+      "bytes": 49703926,
+      "sha256": "ab86b5e083473c003863ead5c2ef09112cadc655684176e7ad757f7c60eb80ed"
+    },
+    {
+      "filename": "VERSION.json",
+      "bytes": 1221,
+      "sha256": "efe4507024f936fa0a8865ecb52f9717b6689adb4db4e530e9388ef5e468074c"
+    },
+    {
+      "filename": "RELEASE-STATEMENT.json",
+      "bytes": 707,
+      "sha256": "6ab2f5b745a3e98a41a63a0e5077f7bfefe1b9c71d52eef0b9b1bb16d7b41849"
+    },
+    {
+      "filename": "RELEASE-STATEMENT.p7s",
+      "bytes": 1614,
+      "sha256": "430a039ba7994cc91b9376066800ebf792cfd3e3137b04e811b783a59d5df6d8"
+    }
+  ],
+  "largeManifestAndRawSignatureCopiedToGit": false,
+  "actualInstallerPayloadUsesOriginalCandidate": true,
+  "originalVerifierFlagRemainsFalse": true,
+  "logReceipt": {
+    "filename": "real-candidate-verification.log",
+    "bytes": 406,
+    "sha256": "1c46167967b1ee58e0a64e7496be17086be62052b79e7c7e903c67c5f56ec310",
+    "included": false
+  },
+  "resultLines": [
+    "verify-windows-candidate passed; sourceRepoCheck=checked; nonvisual=True"
+  ],
+  "visualOrInstalledGameAcceptance": false
+}

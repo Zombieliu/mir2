@@ -1,0 +1,26 @@
+{
+  "schema": "mir2.promotion-invitation-feedback.aliases.v1",
+  "observedAtUtc": "2026-10-30 19:19:58 UTC",
+  "sourceSha": "3d8f81752fc21400622808a5d00a871b47047ed5",
+  "stageRunId": "41113525300",
+  "promotionRunId": "41113991681",
+  "aliases": [
+    {
+      "alias": "mir2.obelisk.build",
+      "deploymentId": "dpl_9yLef9wXkWDovACg9atHU1W1uBSx",
+      "projectId": "prj_Bl3ttB4PzcdCpJMYLRhzQjkdXyTz"
+    },
+    {
+      "alias": "mir2-web3-web.vercel.app",
+      "deploymentId": "dpl_9yLef9wXkWDovACg9atHU1W1uBSx",
+      "projectId": "prj_Bl3ttB4PzcdCpJMYLRhzQjkdXyTz"
+    },
+    {
+      "alias": "numeron-legend-of-rebirth.vercel.app",
+      "deploymentId": "dpl_7krVTQSx5Wj9Ht8Sd5KF5o9d3F97",
+      "projectId": "prj_Q14gZuvjxkfqOCExhqOrYiR2UbxA"
+    }
+  ],
+  "cloudflareOrDnsChanged": false,
+  "marketingDeploymentChanged": false
+}

@@ -1,0 +1,344 @@
+{
+  "baseSha": "f4475aad32bdc57411737de2ab2eca917cae8e29",
+  "capturedUtc": "2026-10-09T14:36:14.7771618Z",
+  "sources": [
+    {
+      "path": ".github/workflows/monthly-card-acceptance.yml",
+      "sha256": "2e40b4842ea1317209c90392813328d781e33f452a55424284061740f5ac16ee",
+      "gitBlobId": "e9fd0a1a5d9bb383d4667ab38895117d19764cfe"
+    },
+    {
+      "path": ".github/workflows/stripe-billing-acceptance.yml",
+      "sha256": "8422002eac250d0159a2d35f760182cbaa47e21e52da80f3929b5a8983143b5b",
+      "gitBlobId": "bdec17f4858537ca99acca6ed18cb9b4a03042be"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_dialog.rs",
+      "sha256": "600695aaccc5ebb61d12ec4f78502e5bdad26ff69009fdd42ef317e750daca0a",
+      "gitBlobId": "b51bd98199239875fb60c7e33db99cf9a14288aa"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "sha256": "9f21adb8947d28a81f44fe7e5932e208a8da9aeb05c28e7112f3da8b3525de57",
+      "gitBlobId": "85f68ad12f6b519d927f719cc69d525380b240c7"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/lib.rs",
+      "sha256": "6d9195a595528ea54fbd1c1b846995412743af2257b8a0448827f31a21988549",
+      "gitBlobId": "f8e194261da0fd0deea22f6a2e3a018e51569f35"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_billing.rs",
+      "sha256": "10eae26c81a7c718f172b0d6950cb31aa0483f6fb46852a496ab92c4194a56c5",
+      "gitBlobId": "62cfc3f701b9a20fd40b133706e22ea15000c790"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_i18n.rs",
+      "sha256": "178ba0e43a2b3c5984dac51531305031d08cae557a418e157c70ef3cef57478b",
+      "gitBlobId": "b7522921a355c689f1b52adcabf2ad479096dd97"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_monthly_card.rs",
+      "sha256": "801752573883f21348b6a4ac4585d3a8413a07989ee154b2d5a4b1191a4097b2",
+      "gitBlobId": "6eb0a306107a1807c54fc5aa622ae616c8a0e253"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs",
+      "sha256": "97eb76e6768239de691dab2b993f3e14f8791ed754784cfe0f8cc1552c08b803",
+      "gitBlobId": "fe171714c52068c8880ec84c6dbb2ec35805edb7"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_shell.rs",
+      "sha256": "83cd08602e1dea9d696febd8faa8a475a27cee059bc72d6d53a45104f16f41c5",
+      "gitBlobId": "15724d854b1271eac233e9e1e960fc752278e0a9"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/billing_browser.rs",
+      "sha256": "8f53aad2c740243e9adffae5cd69e5828928e01562d9fc6288e416915d553f56",
+      "gitBlobId": "b1c6fc6a489ab610982f1d52cf4ccf349d42a3bf"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/gateway.rs",
+      "sha256": "c0148dbcf1ca544f6e27e818dfb61c809594fdbaedac3ce4404e08b5f8c9cff3",
+      "gitBlobId": "e143f539cff172147f2154aa17b403878e93aba5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/main.rs",
+      "sha256": "69542a11df92d2afbbbfc6391aa9de7725164c47a31823dd2547cfc26b648636",
+      "gitBlobId": "bf4556f12b828e2fe95514c5c9fd61a8990c30bb"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/native_protocol.rs",
+      "sha256": "08bda0f01416697941ef94d746b203f7481811bd44ffe23c58eb22bc9b0d1f0b",
+      "gitBlobId": "008fb2dbc69a01321165589839f090af7bcf32a5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/shell_bridge.rs",
+      "sha256": "f4d88b287883abe0ea42005fb6ca37def983ec30399f016168dc1cfc3b3f12e8",
+      "gitBlobId": "4233c6ab2ef78d2c5e8755e209573f9864af36b1"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/events.rs",
+      "sha256": "47108b3b266d6740d70871ad3366fd027d404dc818ebab5fa4675c045bd102eb",
+      "gitBlobId": "6e84af0af2d4ce2913e8059ebb7ddf9bef2fc6ea"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/lib.rs",
+      "sha256": "5b2212a5f7f11d5c9845341d0513c910c37220d3eaba0fc30718fb3ca40ab704",
+      "gitBlobId": "5dd0c76d33a4af4ac4caca4c4a46303599081bf7"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing.rs",
+      "sha256": "696bc6530869b214a978352f7ed315d10d464efdf05d06f8b377c6a948eab1f7",
+      "gitBlobId": "5955f9e232723842850a2e37bfb8f6a651128a72"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/stripe_billing_tests.rs",
+      "sha256": "edf444e49f934d71d6283638da8269d69376272da0400316c3485730a9224082",
+      "gitBlobId": "0301d850e11c5cb9e6166099d7a86d22680a241c"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/stripe_billing.rs",
+      "sha256": "d7831684d5997952c0c32292e42968e2b071eb96d0272eb490d4330fc2dbcee7",
+      "gitBlobId": "7b785949e54d82eec4420265b1406862dabe3675"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/web_billing_tests.rs",
+      "sha256": "80364215d729cf939b0102333ea3feba0508daec5223a1f489e2326202361d84",
+      "gitBlobId": "45fb9d199e50f9df7ed219732d03356ce96a8907"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/web_billing.rs",
+      "sha256": "d235bfb68a6c639aad7686f1944a182a07ee0cb28b3ca461e74c2a15f26de19e",
+      "gitBlobId": "420bf44996769a9b9d3fbe9812d4b3da63530ff9"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/web.rs",
+      "sha256": "0b7fef2fa61b3ced93244e9aeee7de9b0fb1a9dcd14a9faa5c49da1378fd4296",
+      "gitBlobId": "1f759fa30b27553423f43d05c0a3c6ca1a7a5b17"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/zone_rpc_billing_tests.rs",
+      "sha256": "301ef34d57c00d69a99aade6473097624306f4966a0f1eabd2e75736db61ccdb",
+      "gitBlobId": "e47a66f7c04c4268bd4dc1a85dee3950a3c15c49"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/zone_rpc.rs",
+      "sha256": "d5b0f344d9c0bcfd7c3b3d661e5fa93a3009bef0286e2c4f597b273406c381a9",
+      "gitBlobId": "7194a362dfabf160774f76cf1ccc9c97397a3e30"
+    },
+    {
+      "path": "mir2-web3/apps/gateway/tests/billing_monthly_card.rs",
+      "sha256": "3606e297bfd1c146e80cc5e6bf87316fef42f26cd9f8a0e5e8399c9ae7868e11",
+      "gitBlobId": "6ab8c5b2ea3643f19cc69cadd55701ed4d1f5a0b"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/billing.rs",
+      "sha256": "120ad60028edcbcd1200cc4d3d418f4f78a6c47689ed566449e522406ff2fade",
+      "gitBlobId": "69679f55b1556fefc4c08318fefd2a117e20d7c5"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config.rs",
+      "sha256": "d087162d9e51cbd81cca495355ace68fca4356aab4e818ba21e365ec93379e34",
+      "gitBlobId": "e7824951a1180239d130fe49f79dd9c3c460abde"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/lib.rs",
+      "sha256": "8ab8d48c361b830815b48bbc7c2f2bdc14074f251e5c6c425699ac65d73ac773",
+      "gitBlobId": "bfcefaafd8ebfaca9b634858274ea7b93fabac0d"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/monthly_card.rs",
+      "sha256": "6612041a4054ed8a5777e7657487abdbba22c26f9678d99c83002d05e0a66265",
+      "gitBlobId": "eafd2e7d3567fab6e7563f77a88bcda7559d7962"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/billing_monthly_card.rs",
+      "sha256": "17e272d1ad3bb5e2cbb3f401f9f28c852701c1940525ac447af13e44c86de202",
+      "gitBlobId": "d5f8153b983429df08ac96ad9f093eea315153af"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/billing.rs",
+      "sha256": "5910beeb8eb375839602262b814c9fdfea1c84525996f97626997a81f9fab0cb",
+      "gitBlobId": "27ee069603f56f151834cd22ca6a2ec418159da1"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/inventory.rs",
+      "sha256": "033fa8b5fa807d96c0e2244123ada13cf99c6d59ec855513dbf88315e978b218",
+      "gitBlobId": "cd5ef3fbab1ac55bd197fc67e3ef48f67d7829ae"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/items.rs",
+      "sha256": "583f50693c9cfa53c64379e04fa32c7eb578d4e416270bbef993a21460cbe6d4",
+      "gitBlobId": "c0903fc5d7eb462908ef1516284c3b207e097d93"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/mod.rs",
+      "sha256": "4fa88a34acde7f5af0020293a6c1796ac4f4130e2c61f75705d151bbda622a9f",
+      "gitBlobId": "802e794e8b117185f1376a105f2563b146d74d23"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/packets.rs",
+      "sha256": "c4f81472f4ff5796931375358e9b6bf07608e6d9901a269dc1929c7eb4b4502e",
+      "gitBlobId": "042142d51401474245c781eceeffac38bf03d9d0"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/save.rs",
+      "sha256": "66f95769fd3c28e2a34e91067e4ce2527a954df9f788194d1e9f53ffdcf1c3ab",
+      "gitBlobId": "7df338b59050c4c99b3e5c19097083b87ec7e01b"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/session.rs",
+      "sha256": "ca148d698414a486bd2833d449ba5a064e5612718533275f5d25761ec7898d56",
+      "gitBlobId": "98341c4a2c0820bec5471ea14472e4617b5538a6"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/stage5.rs",
+      "sha256": "dbf25e8c6dc078e5187c98ef75d55025cfccab2a493aeb16b55836da0ae1f387",
+      "gitBlobId": "dfc9177ae3c08aa7ed418375493d61bba507510f"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/world_runtime.rs",
+      "sha256": "1a2fb123a6e264043acad27a3e3c61e8b5db19d35e85790e4a3331c2a924c0c7",
+      "gitBlobId": "ae8db3d540461841bc80b22af328b1efd06d4e7a"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/billing_monthly_card.rs",
+      "sha256": "9d1f4190ecb5efd9a3ff97f4f13995760b3ecc4bd3068a4626b4aac07f5e96b7",
+      "gitBlobId": "ece44bad7ba1fd4131f341dd699d3f9fa3826aa4"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/billing_postgres.rs",
+      "sha256": "8492b47d0fced84858d9843a596e33af531e824ceb08ff8056bd44b62922f4cd",
+      "gitBlobId": "494af368634d7817066896d5ae23d9f87b3522d0"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/billing_recharge.rs",
+      "sha256": "2d4e10a8c926c327894c80793c52d1c93440e6518e70a29decd9e12c69493c85",
+      "gitBlobId": "c8c26f0844acbd343a8aa8ba8016de9eeddf48cc"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/lib.rs",
+      "sha256": "87d02f12c2f9d492aec75f00e335bb7f8c27c9b2aa540a113164dca59f9d66d4",
+      "gitBlobId": "3921cd7be4358f790ab68f084236d3ed8c717eba"
+    }
+  ],
+  "logs": [
+    {
+      "path": "stripe-billing-gateway-20261009-05-tests.log",
+      "sha256": "0f02aec0eafb49f28835521723cdb9b68f60a8edd5d5134db43402c2ddb3cfe6",
+      "bytes": 45514,
+      "gitBlobId": "3be961039e5d62bc745a8a8e107a93fb0f048cd5"
+    },
+    {
+      "path": "stripe-billing-gateway-20261009-07-final.log",
+      "sha256": "f85d32574c700d4d72ad2149af88dea6269c9dddfc7fbad053c82d3fb82b4eab",
+      "bytes": 40803,
+      "gitBlobId": "961effdb096107e9c3a0cf1ae03699adfe0f73a0"
+    },
+    {
+      "path": "stripe-billing-gateway-20261009-08-final.log",
+      "sha256": "24bca33511b69b2e1126453754e8c055aabc11aa23113a4706e6844cdcf3b182",
+      "bytes": 50015,
+      "gitBlobId": "0394bdd4db6850230ae8489d47e262cbfe742140"
+    },
+    {
+      "path": "stripe-billing-gateway-20261009-09-final.log",
+      "sha256": "5a3660b06e6f82cd590fa9f9e6e77289724a3daa90290c5ab250676609239d8e",
+      "bytes": 36850,
+      "gitBlobId": "a9df8aa47a536ecf44c04a066316de3ac843c0b8"
+    },
+    {
+      "path": "stripe-billing-gateway-20261009-10-shared-final.log",
+      "sha256": "4d5616592a1c112ba1b103760313aa275480b68d49740fcc046f3ae6146849da",
+      "bytes": 35370,
+      "gitBlobId": "0fd3332447fafe6e261dc769dda584ab16a1e04f"
+    },
+    {
+      "path": "stripe-billing-gateway-20261009-11-adjacent.log",
+      "sha256": "1d3643d7b4d2148d250a3a53bb87b4c09790109fb9cfbd6fd939644d3d32826b",
+      "bytes": 33236,
+      "gitBlobId": "a7fa1c925f308ba864a0427724aeb5523c0b7555"
+    },
+    {
+      "path": "stripe-billing-root-20261009-01-check.log",
+      "sha256": "8d829b322af7497ba5b334971f1b9785ee99379bc1c46aa98278f01267e88536",
+      "bytes": 32903,
+      "gitBlobId": "9c9ccd1f0a36c8c963835c8a9b19a98879d85cb9"
+    },
+    {
+      "path": "stripe-billing-simulation-20261009-02-tests.log",
+      "sha256": "37268be8e97c6b2ffd48e059f1e6d24947d07f0a61c60d14137e09ca28bd491a",
+      "bytes": 36526,
+      "gitBlobId": "2a54b54afd92a6d2cfeef4477a1e512c8a534d11"
+    },
+    {
+      "path": "stripe-billing-simulation-20261009-03-tests.log",
+      "sha256": "55282c9524d3e2e981e19e01f30e08dc48d1a5e9319ca9f77f5b000492c0a6cc",
+      "bytes": 33452,
+      "gitBlobId": "659f41ad8830e09df66e20cf0cd746b056cd1e60"
+    },
+    {
+      "path": "stripe-billing-simulation-20261009-04-tests.log",
+      "sha256": "d245a95c3e08f05893897737b61b21280582ea6092c41c4e053e201068ed362a",
+      "bytes": 34340,
+      "gitBlobId": "1e73ae6ac2dfc7db327f3ae7b8eb1904eb8e82d9"
+    },
+    {
+      "path": "stripe-billing-simulation-20261009-06-final.log",
+      "sha256": "9f8f36846effbed2c8068fe6d42bdcbc3a43e8b3e6b04565ccca47b8bb8896bd",
+      "bytes": 36546,
+      "gitBlobId": "9d8f6ad57c3db07740c9a6e86c92439aaa38ba37"
+    },
+    {
+      "path": "stripe-browser2-root-run.log",
+      "sha256": "2144aedd8e8cad75f680d619632df1207789625610832e689e246dc4b6f1f09d",
+      "bytes": 268,
+      "gitBlobId": "7690baa8aabe299e252c773932b4db99452c2634"
+    },
+    {
+      "path": "stripe-native-focused-tests.log",
+      "sha256": "8265a26502e384ab9f5e4a383f9eac16a60443b2a20d422fff04bd8e107fb57a",
+      "bytes": 46322,
+      "gitBlobId": "cc3fdd3ca38635ab042c78b6d31dec52adc7a6e7"
+    },
+    {
+      "path": "stripe-native-model10-root-run.log",
+      "sha256": "d222007ef7330da24787f728c443290c9391a7452c81558455c91f84e24e0841",
+      "bytes": 713,
+      "gitBlobId": "3e278276c92c1927b36e1ce28d4a2de0d67a0711"
+    },
+    {
+      "path": "stripe-native-root-final-check.log",
+      "sha256": "4e4080466d3363cdfecf36112da352cd15df01f65473fec504eb3e83c854ee40",
+      "bytes": 45600,
+      "gitBlobId": "41c25fc20162edec9ef7c46ab1e73894dc16f177"
+    }
+  ],
+  "nativeArtifacts": [
+    {
+      "path": "C:/mir2-build/p1-native-20261007/debug/deps/libmir2_client_bevy-3be3c13c8853fc38.rlib",
+      "sha256": "26f1ca230942aa3dcba41a4926bf6a2fd76eaba5b7c792fb8d736440faab3874",
+      "modifiedUtc": "2026-10-09T12:56:48.3887772Z",
+      "bytes": 504797508
+    },
+    {
+      "path": "C:/mir2-build/p1-native-20261007/billing_copy_model_tests.exe",
+      "sha256": "49f834bf72c052776f8e9ff396ee260c33a716090147bdbb059879c82c987107",
+      "modifiedUtc": "2026-10-09T13:00:12.6957454Z",
+      "bytes": 42089984
+    },
+    {
+      "path": "C:/mir2-build/p1-native-20261007/stripe-browser-quote-tests.exe",
+      "sha256": "e47d0c42a49851d0939614dea3fa5bdfdb24841df77221975bc2ea70832c2a36",
+      "modifiedUtc": "2026-10-09T12:01:05.2248428Z",
+      "bytes": 774656
+    }
+  ],
+  "limitations": [
+    "No real Stripe credentials or transactions",
+    "No live service/feed/save/installer mutation",
+    "PostgreSQL execution pending isolated CI",
+    "Mini harness source not retained; retained binaries rerun by Root"
+  ]
+}

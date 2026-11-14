@@ -1,0 +1,4746 @@
+{
+  "schemaVersion": 1,
+  "runId": "1793057646570-c2fb7dc7",
+  "endpoint": "ws://127.0.0.1:17610/ws",
+  "profile": "full-lifecycle",
+  "startedAt": "2026-10-26T23:34:06.601Z",
+  "scope": "ordinary-public-protocol-two-independent-sockets",
+  "privateCredentialsPath": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\private\\registrations\\1793057646570-c2fb7dc7\\accounts.json",
+  "checks": {
+    "authGuards": {
+      "status": "passed",
+      "evidence": [
+        {
+          "command": "startGame",
+          "receipt": 8,
+          "code": "commandRejected",
+          "message": "The session command could not be completed."
+        },
+        {
+          "command": "newCharacter",
+          "receipt": 8,
+          "code": "commandRejected",
+          "message": "The session command could not be completed."
+        }
+      ]
+    },
+    "twoAccounts": {
+      "status": "passed",
+      "evidence": [
+        {
+          "name": "Ac351e83c",
+          "characterIndex": 1,
+          "objectId": 1000,
+          "mapFileName": "0",
+          "x": 288,
+          "y": 616,
+          "direction": "Down"
+        },
+        {
+          "name": "Bc351e83c",
+          "characterIndex": 2,
+          "objectId": 1000,
+          "mapFileName": "0",
+          "x": 288,
+          "y": 616,
+          "direction": "Down"
+        }
+      ]
+    },
+    "mutualVisibility": {
+      "status": "passed",
+      "names": [
+        "Ac351e83c",
+        "Bc351e83c"
+      ],
+      "observerObjectIds": [
+        50000,
+        50001
+      ]
+    },
+    "movement": {
+      "status": "passed",
+      "from": {
+        "mapFileName": "0",
+        "x": 285,
+        "y": 616,
+        "direction": "UpLeft"
+      },
+      "to": {
+        "mapFileName": "0",
+        "x": 282,
+        "y": 616,
+        "direction": "Left"
+      },
+      "observerReceipt": 679
+    },
+    "turn": {
+      "status": "passed",
+      "direction": "Up",
+      "observerReceipt": 680
+    },
+    "chat": {
+      "status": "passed",
+      "observerReceipt": 736,
+      "observerLatencyMs": 1
+    },
+    "chatLatency": {
+      "status": "passed",
+      "observerLatencyMs": 1,
+      "maximumMs": 1000,
+      "scope": "two sockets measured by the same monotonic host clock; excludes human and visual latency"
+    },
+    "sharedCombat": {
+      "status": "passed",
+      "evidence": {
+        "targetId": 206641,
+        "target": "Scarecrow",
+        "hits": [
+          {
+            "targetId": 206641,
+            "attackerIds": [
+              1000,
+              50000
+            ],
+            "healthPercent": 80,
+            "died": false,
+            "receipts": [
+              {
+                "struck": 769,
+                "health": 771,
+                "damage": 770
+              },
+              {
+                "struck": 705,
+                "health": 707,
+                "damage": 706
+              }
+            ],
+            "attackerName": "Ac351e83c"
+          },
+          {
+            "targetId": 206641,
+            "attackerIds": [
+              50001,
+              1000
+            ],
+            "healthPercent": 70,
+            "died": false,
+            "receipts": [
+              {
+                "struck": 773,
+                "health": 775,
+                "damage": 774
+              },
+              {
+                "struck": 712,
+                "health": 714,
+                "damage": 713
+              }
+            ],
+            "attackerName": "Bc351e83c"
+          }
+        ],
+        "lifecycleStart": {
+          "cursors": [
+            752,
+            698
+          ],
+          "baselineDropIds": [],
+          "mapFileName": "0"
+        }
+      }
+    },
+    "sharedKill": {
+      "status": "passed",
+      "evidence": {
+        "targetId": 206632,
+        "target": "Scarecrow",
+        "mapFileName": "0",
+        "location": {
+          "x": 286,
+          "y": 623
+        },
+        "attackerNames": [
+          "Ac351e83c",
+          "Bc351e83c"
+        ],
+        "deathReceipts": [
+          885,
+          822
+        ],
+        "hits": [
+          {
+            "targetId": 206632,
+            "attackerIds": [
+              1000,
+              50000
+            ],
+            "healthPercent": 90,
+            "died": false,
+            "receipts": [
+              {
+                "struck": 839,
+                "health": 841,
+                "damage": 840
+              },
+              {
+                "struck": 773,
+                "health": 775,
+                "damage": 774
+              }
+            ],
+            "attackerName": "Ac351e83c"
+          },
+          {
+            "targetId": 206632,
+            "attackerIds": [
+              50001,
+              1000
+            ],
+            "healthPercent": 75,
+            "died": false,
+            "receipts": [
+              {
+                "struck": 843,
+                "health": 845,
+                "damage": 844
+              },
+              {
+                "struck": 780,
+                "health": 782,
+                "damage": 781
+              }
+            ],
+            "attackerName": "Bc351e83c"
+          }
+        ]
+      }
+    },
+    "sharedDrop": {
+      "status": "passed",
+      "evidence": {
+        "drop": {
+          "icon": 0,
+          "loot": {
+            "amount": 26,
+            "kind": "gold"
+          },
+          "name": "Gold",
+          "nameColourArgb": -1,
+          "objectId": 1000000,
+          "ownerObjectId": 50000,
+          "ownershipRemainingTicks": 200,
+          "quantity": 1,
+          "sourceMonster": "Scarecrow",
+          "x": 286,
+          "y": 623
+        },
+        "spawnReceipts": [
+          886,
+          823
+        ],
+        "sourceScope": "Fresh shared spawn after the witnessed death, within three tiles, with the same snapshot sourceMonster name. Public packets do not expose a unique source-monster ID."
+      }
+    },
+    "uniquePickup": {
+      "status": "passed",
+      "evidence": {
+        "objectId": 1000000,
+        "winner": 0,
+        "requestReceipts": [
+          896,
+          831
+        ],
+        "gainPacket": "GainedGold",
+        "gainReceipt": 897,
+        "gain": {
+          "gold": 26
+        },
+        "removalReceipts": [
+          899,
+          834
+        ],
+        "before": [
+          {
+            "gold": 0,
+            "carried": [
+              {
+                "container": "equipmentItems",
+                "uniqueId": "0",
+                "itemIndex": null,
+                "count": 1
+              },
+              {
+                "container": "equipmentItems",
+                "uniqueId": "1",
+                "itemIndex": null,
+                "count": 1
+              },
+              {
+                "container": "equipmentItems",
+                "uniqueId": "3",
+                "itemIndex": null,
+                "count": 1
+              },
+              {
+                "container": "inventoryItems",
+                "uniqueId": "2",
+                "itemIndex": null,
+                "count": 1
+              }
+            ]
+          },
+          {
+            "gold": 0,
+            "carried": [
+              {
+                "container": "equipmentItems",
+                "uniqueId": "0",
+                "itemIndex": null,
+                "count": 1
+              },
+              {
+                "container": "equipmentItems",
+                "uniqueId": "1",
+                "itemIndex": null,
+                "count": 1
+              },
+              {
+                "container": "equipmentItems",
+                "uniqueId": "3",
+                "itemIndex": null,
+                "count": 1
+              },
+              {
+                "container": "inventoryItems",
+                "uniqueId": "2",
+                "itemIndex": null,
+                "count": 1
+              }
+            ]
+          }
+        ],
+        "after": [
+          {
+            "gold": 26,
+            "carried": [
+              {
+                "container": "equipmentItems",
+                "uniqueId": "0",
+                "itemIndex": null,
+                "count": 1
+              },
+              {
+                "container": "equipmentItems",
+                "uniqueId": "1",
+                "itemIndex": null,
+                "count": 1
+              },
+              {
+                "container": "equipmentItems",
+                "uniqueId": "3",
+                "itemIndex": null,
+                "count": 1
+              },
+              {
+                "container": "inventoryItems",
+                "uniqueId": "2",
+                "itemIndex": null,
+                "count": 1
+              }
+            ]
+          },
+          {
+            "gold": 0,
+            "carried": [
+              {
+                "container": "equipmentItems",
+                "uniqueId": "0",
+                "itemIndex": null,
+                "count": 1
+              },
+              {
+                "container": "equipmentItems",
+                "uniqueId": "1",
+                "itemIndex": null,
+                "count": 1
+              },
+              {
+                "container": "equipmentItems",
+                "uniqueId": "3",
+                "itemIndex": null,
+                "count": 1
+              },
+              {
+                "container": "inventoryItems",
+                "uniqueId": "2",
+                "itemIndex": null,
+                "count": 1
+              }
+            ]
+          }
+        ],
+        "scope": "One fresh gain, exact conserved gold or one new item UID; stack-merge item deliveries are not inferred.",
+        "replay": {
+          "objectId": 1000000,
+          "requestReceipts": [
+            903,
+            838
+          ],
+          "freshSnapshotSequences": [
+            907,
+            844
+          ]
+        },
+        "replayObservationWindowMs": 500
+      }
+    },
+    "playerDeath": {
+      "status": "passed",
+      "evidence": {
+        "actor": "Ac351e83c",
+        "observerId": 50000,
+        "mapFileName": "0",
+        "location": {
+          "x": 301,
+          "y": 594
+        },
+        "ownerDeathReceipt": 1320,
+        "observerDeathReceipt": 1191,
+        "exposure": {
+          "navigation": [
+            {
+              "actor": 0,
+              "target": {
+                "x": 286,
+                "y": 619
+              },
+              "radius": 0,
+              "fromSequence": 922,
+              "throughSequence": 934,
+              "before": {
+                "x": 286,
+                "y": 622
+              },
+              "after": {
+                "x": 286,
+                "y": 619
+              },
+              "preflightPath": [
+                {
+                  "x": 286,
+                  "y": 622
+                },
+                {
+                  "x": 286,
+                  "y": 621
+                },
+                {
+                  "x": 286,
+                  "y": 620
+                },
+                {
+                  "x": 286,
+                  "y": 619
+                }
+              ]
+            },
+            {
+              "actor": 0,
+              "target": {
+                "x": 288,
+                "y": 617
+              },
+              "radius": 0,
+              "fromSequence": 941,
+              "throughSequence": 943,
+              "before": {
+                "x": 286,
+                "y": 619
+              },
+              "after": {
+                "x": 288,
+                "y": 617
+              },
+              "preflightPath": [
+                {
+                  "x": 286,
+                  "y": 619
+                },
+                {
+                  "x": 287,
+                  "y": 618
+                },
+                {
+                  "x": 288,
+                  "y": 617
+                }
+              ]
+            },
+            {
+              "actor": 0,
+              "target": {
+                "x": 286,
+                "y": 617
+              },
+              "radius": 0,
+              "fromSequence": 946,
+              "throughSequence": 948,
+              "before": {
+                "x": 288,
+                "y": 617
+              },
+              "after": {
+                "x": 286,
+                "y": 617
+              },
+              "preflightPath": [
+                {
+                  "x": 288,
+                  "y": 617
+                },
+                {
+                  "x": 287,
+                  "y": 617
+                },
+                {
+                  "x": 286,
+                  "y": 617
+                }
+              ]
+            },
+            {
+              "actor": 0,
+              "target": {
+                "x": 285,
+                "y": 616
+              },
+              "radius": 0,
+              "fromSequence": 953,
+              "throughSequence": 957,
+              "before": {
+                "x": 286,
+                "y": 617
+              },
+              "after": {
+                "x": 285,
+                "y": 616
+              },
+              "preflightPath": [
+                {
+                  "x": 286,
+                  "y": 617
+                },
+                {
+                  "x": 285,
+                  "y": 616
+                }
+              ]
+            },
+            {
+              "actor": 0,
+              "target": {
+                "x": 284,
+                "y": 616
+              },
+              "radius": 0,
+              "fromSequence": 962,
+              "throughSequence": 964,
+              "before": {
+                "x": 285,
+                "y": 616
+              },
+              "after": {
+                "x": 284,
+                "y": 616
+              },
+              "preflightPath": [
+                {
+                  "x": 285,
+                  "y": 616
+                },
+                {
+                  "x": 284,
+                  "y": 616
+                }
+              ]
+            },
+            {
+              "actor": 0,
+              "target": {
+                "x": 282,
+                "y": 616
+              },
+              "radius": 0,
+              "fromSequence": 967,
+              "throughSequence": 969,
+              "before": {
+                "x": 284,
+                "y": 616
+              },
+              "after": {
+                "x": 282,
+                "y": 616
+              },
+              "preflightPath": [
+                {
+                  "x": 284,
+                  "y": 616
+                },
+                {
+                  "x": 283,
+                  "y": 616
+                },
+                {
+                  "x": 282,
+                  "y": 616
+                }
+              ]
+            },
+            {
+              "actor": 0,
+              "target": {
+                "x": 283,
+                "y": 615
+              },
+              "radius": 0,
+              "fromSequence": 972,
+              "throughSequence": 977,
+              "before": {
+                "x": 282,
+                "y": 616
+              },
+              "after": {
+                "x": 283,
+                "y": 615
+              },
+              "preflightPath": [
+                {
+                  "x": 282,
+                  "y": 616
+                },
+                {
+                  "x": 283,
+                  "y": 615
+                }
+              ]
+            },
+            {
+              "actor": 0,
+              "target": {
+                "x": 283,
+                "y": 614
+              },
+              "radius": 0,
+              "fromSequence": 982,
+              "throughSequence": 984,
+              "before": {
+                "x": 283,
+                "y": 615
+              },
+              "after": {
+                "x": 283,
+                "y": 614
+              },
+              "preflightPath": [
+                {
+                  "x": 283,
+                  "y": 615
+                },
+                {
+                  "x": 283,
+                  "y": 614
+                }
+              ]
+            },
+            {
+              "actor": 0,
+              "target": {
+                "x": 284,
+                "y": 613
+              },
+              "radius": 0,
+              "fromSequence": 988,
+              "throughSequence": 991,
+              "before": {
+                "x": 283,
+                "y": 614
+              },
+              "after": {
+                "x": 284,
+                "y": 613
+              },
+              "preflightPath": [
+                {
+                  "x": 283,
+                  "y": 614
+                },
+                {
+                  "x": 284,
+                  "y": 613
+                }
+              ]
+            },
+            {
+              "actor": 0,
+              "target": {
+                "x": 284,
+                "y": 612
+              },
+              "radius": 0,
+              "fromSequence": 997,
+              "throughSequence": 1002,
+              "before": {
+                "x": 284,
+                "y": 613
+              },
+              "after": {
+                "x": 284,
+                "y": 612
+              },
+              "preflightPath": [
+                {
+                  "x": 284,
+                  "y": 613
+                },
+                {
+                  "x": 284,
+                  "y": 612
+                }
+              ]
+            },
+            {
+              "actor": 0,
+              "target": {
+                "x": 286,
+                "y": 612
+              },
+              "radius": 0,
+              "fromSequence": 1008,
+              "throughSequence": 1011,
+              "before": {
+                "x": 284,
+                "y": 612
+              },
+              "after": {
+                "x": 286,
+                "y": 612
+              },
+              "preflightPath": [
+                {
+                  "x": 284,
+                  "y": 612
+                },
+                {
+                  "x": 285,
+                  "y": 612
+                },
+                {
+                  "x": 286,
+                  "y": 612
+                }
+              ]
+            },
+            {
+              "actor": 0,
+              "target": {
+                "x": 289,
+                "y": 611
+              },
+              "radius": 0,
+              "fromSequence": 1015,
+              "throughSequence": 1026,
+              "before": {
+                "x": 286,
+                "y": 612
+              },
+              "after": {
+                "x": 289,
+                "y": 611
+              },
+              "preflightPath": [
+                {
+                  "x": 286,
+                  "y": 612
+                },
+                {
+                  "x": 287,
+                  "y": 612
+                },
+                {
+                  "x": 288,
+                  "y": 612
+                },
+                {
+                  "x": 289,
+                  "y": 611
+                }
+              ]
+            },
+            {
+              "actor": 0,
+              "target": {
+                "x": 291,
+                "y": 611
+              },
+              "radius": 0,
+              "fromSequence": 1029,
+              "throughSequence": 1031,
+              "before": {
+                "x": 289,
+                "y": 611
+              },
+              "after": {
+                "x": 291,
+                "y": 611
+              },
+              "preflightPath": [
+                {
+                  "x": 289,
+                  "y": 611
+                },
+                {
+                  "x": 290,
+                  "y": 611
+                },
+                {
+                  "x": 291,
+                  "y": 611
+                }
+              ]
+            },
+            {
+              "actor": 0,
+              "target": {
+                "x": 292,
+                "y": 611
+              },
+              "radius": 0,
+              "fromSequence": 1034,
+              "throughSequence": 1038,
+              "before": {
+                "x": 291,
+                "y": 611
+              },
+              "after": {
+                "x": 292,
+                "y": 611
+              },
+              "preflightPath": [
+                {
+                  "x": 291,
+                  "y": 611
+                },
+                {
+                  "x": 292,
+                  "y": 611
+                }
+              ]
+            },
+            {
+              "actor": 0,
+              "target": {
+                "x": 293,
+                "y": 610
+              },
+              "radius": 0,
+              "fromSequence": 1041,
+              "throughSequence": 1046,
+              "before": {
+                "x": 292,
+                "y": 611
+              },
+              "after": {
+                "x": 293,
+                "y": 610
+              },
+              "preflightPath": [
+                {
+                  "x": 292,
+                  "y": 611
+                },
+                {
+                  "x": 293,
+                  "y": 610
+                }
+              ]
+            },
+            {
+              "actor": 0,
+              "target": {
+                "x": 294,
+                "y": 610
+              },
+              "radius": 0,
+              "fromSequence": 1049,
+              "throughSequence": 1051,
+              "before": {
+                "x": 293,
+                "y": 610
+              },
+              "after": {
+                "x": 294,
+                "y": 610
+              },
+              "preflightPath": [
+                {
+                  "x": 293,
+                  "y": 610
+                },
+                {
+                  "x": 294,
+                  "y": 610
+                }
+              ]
+            },
+            {
+              "actor": 0,
+              "target": {
+                "x": 294,
+                "y": 609
+              },
+              "radius": 0,
+              "fromSequence": 1054,
+              "throughSequence": 1056,
+              "before": {
+                "x": 294,
+                "y": 610
+              },
+              "after": {
+                "x": 294,
+                "y": 609
+              },
+              "preflightPath": [
+                {
+                  "x": 294,
+                  "y": 610
+                },
+                {
+                  "x": 294,
+                  "y": 609
+                }
+              ]
+            },
+            {
+              "actor": 0,
+              "target": {
+                "x": 296,
+                "y": 607
+              },
+              "radius": 0,
+              "fromSequence": 1059,
+              "throughSequence": 1065,
+              "before": {
+                "x": 294,
+                "y": 609
+              },
+              "after": {
+                "x": 296,
+                "y": 607
+              },
+              "preflightPath": [
+                {
+                  "x": 294,
+                  "y": 609
+                },
+                {
+                  "x": 295,
+                  "y": 608
+                },
+                {
+                  "x": 296,
+                  "y": 607
+                }
+              ]
+            },
+            {
+              "actor": 1,
+              "target": {
+                "x": 286,
+                "y": 617
+              },
+              "radius": 0,
+              "fromSequence": 952,
+              "throughSequence": 954,
+              "before": {
+                "x": 287,
+                "y": 618
+              },
+              "after": {
+                "x": 286,
+                "y": 617
+              },
+              "preflightPath": [
+                {
+                  "x": 287,
+                  "y": 618
+                },
+                {
+                  "x": 286,
+                  "y": 617
+                }
+              ]
+            },
+            {
+              "actor": 0,
+              "target": {
+                "x": 298,
+                "y": 605
+              },
+              "radius": 0,
+              "fromSequence": 1069,
+              "throughSequence": 1079,
+              "before": {
+                "x": 296,
+                "y": 607
+              },
+              "after": {
+                "x": 298,
+                "y": 605
+              },
+              "preflightPath": [
+                {
+                  "x": 296,
+                  "y": 607
+                },
+                {
+                  "x": 297,
+                  "y": 606
+                },
+                {
+                  "x": 298,
+                  "y": 605
+                }
+              ]
+            },
+            {
+              "actor": 1,
+              "target": {
+                "x": 288,
+                "y": 615
+              },
+              "radius": 0,
+              "fromSequence": 958,
+              "throughSequence": 970,
+              "before": {
+                "x": 286,
+                "y": 617
+              },
+              "after": {
+                "x": 288,
+                "y": 615
+              },
+              "preflightPath": [
+                {
+                  "x": 286,
+                  "y": 617
+                },
+                {
+                  "x": 287,
+                  "y": 616
+                },
+                {
+                  "x": 288,
+                  "y": 616
+                },
+                {
+                  "x": 288,
+                  "y": 615
+                }
+              ]
+            },
+            {
+              "actor": 0,
+              "target": {
+                "x": 299,
+                "y": 604
+              },
+              "radius": 0,
+              "fromSequence": 1091,
+              "throughSequence": 1093,
+              "before": {
+                "x": 298,
+                "y": 605
+              },
+              "after": {
+                "x": 299,
+                "y": 604
+              },
+              "preflightPath": [
+                {
+                  "x": 298,
+                  "y": 605
+                },
+                {
+                  "x": 299,
+                  "y": 604
+                }
+              ]
+            },
+            {
+              "actor": 1,
+              "target": {
+                "x": 289,
+                "y": 614
+              },
+              "radius": 0,
+              "fromSequence": 974,
+              "throughSequence": 977,
+              "before": {
+                "x": 288,
+                "y": 615
+              },
+              "after": {
+                "x": 289,
+                "y": 614
+              },
+              "preflightPath": [
+                {
+                  "x": 288,
+                  "y": 615
+                },
+                {
+                  "x": 289,
+                  "y": 614
+                }
+              ]
+            },
+            {
+              "actor": 0,
+              "target": {
+                "x": 299,
+                "y": 602
+              },
+              "radius": 0,
+              "fromSequence": 1097,
+              "throughSequence": 1101,
+              "before": {
+                "x": 299,
+                "y": 604
+              },
+              "after": {
+                "x": 299,
+                "y": 602
+              },
+              "preflightPath": [
+                {
+                  "x": 299,
+                  "y": 604
+                },
+                {
+                  "x": 299,
+                  "y": 603
+                },
+                {
+                  "x": 299,
+                  "y": 602
+                }
+              ]
+            },
+            {
+              "actor": 1,
+              "target": {
+                "x": 289,
+                "y": 612
+              },
+              "radius": 0,
+              "fromSequence": 982,
+              "throughSequence": 990,
+              "before": {
+                "x": 289,
+                "y": 614
+              },
+              "after": {
+                "x": 289,
+                "y": 612
+              },
+              "preflightPath": [
+                {
+                  "x": 289,
+                  "y": 614
+                },
+                {
+                  "x": 289,
+                  "y": 613
+                },
+                {
+                  "x": 289,
+                  "y": 612
+                }
+              ]
+            },
+            {
+              "actor": 0,
+              "target": {
+                "x": 300,
+                "y": 599
+              },
+              "radius": 0,
+              "fromSequence": 1111,
+              "throughSequence": 1126,
+              "before": {
+                "x": 299,
+                "y": 602
+              },
+              "after": {
+                "x": 300,
+                "y": 599
+              },
+              "preflightPath": [
+                {
+                  "x": 299,
+                  "y": 602
+                },
+                {
+                  "x": 299,
+                  "y": 601
+                },
+                {
+                  "x": 299,
+                  "y": 600
+                },
+                {
+                  "x": 300,
+                  "y": 599
+                }
+              ]
+            },
+            {
+              "actor": 1,
+              "target": {
+                "x": 300,
+                "y": 607
+              },
+              "radius": 0,
+              "fromSequence": 1001,
+              "throughSequence": 1038,
+              "before": {
+                "x": 289,
+                "y": 612
+              },
+              "after": {
+                "x": 300,
+                "y": 607
+              },
+              "preflightPath": [
+                {
+                  "x": 289,
+                  "y": 612
+                },
+                {
+                  "x": 290,
+                  "y": 612
+                },
+                {
+                  "x": 291,
+                  "y": 612
+                },
+                {
+                  "x": 292,
+                  "y": 612
+                },
+                {
+                  "x": 293,
+                  "y": 611
+                },
+                {
+                  "x": 294,
+                  "y": 610
+                },
+                {
+                  "x": 295,
+                  "y": 609
+                },
+                {
+                  "x": 296,
+                  "y": 608
+                },
+                {
+                  "x": 297,
+                  "y": 607
+                },
+                {
+                  "x": 298,
+                  "y": 607
+                },
+                {
+                  "x": 299,
+                  "y": 607
+                },
+                {
+                  "x": 300,
+                  "y": 607
+                }
+              ]
+            },
+            {
+              "actor": 0,
+              "target": {
+                "x": 301,
+                "y": 597
+              },
+              "radius": 0,
+              "fromSequence": 1172,
+              "throughSequence": 1183,
+              "before": {
+                "x": 300,
+                "y": 599
+              },
+              "after": {
+                "x": 301,
+                "y": 597
+              },
+              "preflightPath": [
+                {
+                  "x": 300,
+                  "y": 599
+                },
+                {
+                  "x": 301,
+                  "y": 599
+                },
+                {
+                  "x": 301,
+                  "y": 598
+                },
+                {
+                  "x": 301,
+                  "y": 597
+                }
+              ]
+            },
+            {
+              "actor": 0,
+              "target": {
+                "x": 301,
+                "y": 594
+              },
+              "radius": 0,
+              "fromSequence": 1188,
+              "throughSequence": 1207,
+              "before": {
+                "x": 301,
+                "y": 597
+              },
+              "after": {
+                "x": 301,
+                "y": 594
+              },
+              "preflightPath": [
+                {
+                  "x": 301,
+                  "y": 597
+                },
+                {
+                  "x": 301,
+                  "y": 596
+                },
+                {
+                  "x": 301,
+                  "y": 595
+                },
+                {
+                  "x": 301,
+                  "y": 594
+                }
+              ]
+            },
+            {
+              "actor": 1,
+              "target": {
+                "x": 291,
+                "y": 604
+              },
+              "radius": 0,
+              "fromSequence": 1066,
+              "throughSequence": 1111,
+              "before": {
+                "x": 300,
+                "y": 607
+              },
+              "after": {
+                "x": 291,
+                "y": 604
+              },
+              "preflightPath": [
+                {
+                  "x": 300,
+                  "y": 607
+                },
+                {
+                  "x": 299,
+                  "y": 607
+                },
+                {
+                  "x": 298,
+                  "y": 607
+                },
+                {
+                  "x": 297,
+                  "y": 607
+                },
+                {
+                  "x": 296,
+                  "y": 607
+                },
+                {
+                  "x": 295,
+                  "y": 607
+                },
+                {
+                  "x": 294,
+                  "y": 607
+                },
+                {
+                  "x": 293,
+                  "y": 607
+                },
+                {
+                  "x": 293,
+                  "y": 606
+                },
+                {
+                  "x": 292,
+                  "y": 605
+                },
+                {
+                  "x": 291,
+                  "y": 604
+                }
+              ]
+            }
+          ],
+          "unavailableHints": [],
+          "provocations": [
+            {
+              "objectId": 206013,
+              "name": "RakingCat",
+              "location": {
+                "x": 300,
+                "y": 598
+              },
+              "actor": {
+                "x": 300,
+                "y": 599
+              },
+              "commandSequence": 1160
+            },
+            {
+              "objectId": 206007,
+              "name": "RakingCat",
+              "location": {
+                "x": 301,
+                "y": 593
+              },
+              "actor": {
+                "x": 301,
+                "y": 594
+              },
+              "commandSequence": 1237
+            }
+          ],
+          "samples": [
+            {
+              "cursors": [
+                1160,
+                1041
+              ],
+              "hp": [
+                16,
+                18
+              ],
+              "actor": {
+                "x": 300,
+                "y": 599
+              },
+              "observer": {
+                "x": 300,
+                "y": 607
+              },
+              "currentCats": [
+                {
+                  "objectId": 206013,
+                  "x": 300,
+                  "y": 598
+                },
+                {
+                  "objectId": 206007,
+                  "x": 299,
+                  "y": 590
+                },
+                {
+                  "objectId": 206020,
+                  "x": 307,
+                  "y": 584
+                },
+                {
+                  "objectId": 206111,
+                  "x": 308,
+                  "y": 583
+                }
+              ]
+            },
+            {
+              "cursors": [
+                1237,
+                1114
+              ],
+              "hp": [
+                15,
+                18
+              ],
+              "actor": {
+                "x": 301,
+                "y": 594
+              },
+              "observer": {
+                "x": 291,
+                "y": 604
+              },
+              "currentCats": [
+                {
+                  "objectId": 206007,
+                  "x": 301,
+                  "y": 593
+                },
+                {
+                  "objectId": 206013,
+                  "x": 301,
+                  "y": 595
+                },
+                {
+                  "objectId": 206020,
+                  "x": 307,
+                  "y": 584
+                },
+                {
+                  "objectId": 206111,
+                  "x": 308,
+                  "y": 583
+                },
+                {
+                  "objectId": 206014,
+                  "x": 308,
+                  "y": 579
+                },
+                {
+                  "objectId": 206105,
+                  "x": 315,
+                  "y": 578
+                }
+              ]
+            },
+            {
+              "cursors": [
+                1248,
+                1122
+              ],
+              "hp": [
+                16,
+                18
+              ],
+              "actor": {
+                "x": 301,
+                "y": 594
+              },
+              "observer": {
+                "x": 291,
+                "y": 604
+              },
+              "currentCats": [
+                {
+                  "objectId": 206007,
+                  "x": 301,
+                  "y": 593
+                },
+                {
+                  "objectId": 206013,
+                  "x": 301,
+                  "y": 595
+                },
+                {
+                  "objectId": 206020,
+                  "x": 307,
+                  "y": 584
+                },
+                {
+                  "objectId": 206111,
+                  "x": 308,
+                  "y": 583
+                },
+                {
+                  "objectId": 206014,
+                  "x": 308,
+                  "y": 579
+                },
+                {
+                  "objectId": 206105,
+                  "x": 315,
+                  "y": 578
+                }
+              ]
+            },
+            {
+              "cursors": [
+                1254,
+                1128
+              ],
+              "hp": [
+                16,
+                18
+              ],
+              "actor": {
+                "x": 301,
+                "y": 594
+              },
+              "observer": {
+                "x": 291,
+                "y": 604
+              },
+              "currentCats": [
+                {
+                  "objectId": 206007,
+                  "x": 301,
+                  "y": 593
+                },
+                {
+                  "objectId": 206013,
+                  "x": 301,
+                  "y": 595
+                },
+                {
+                  "objectId": 206020,
+                  "x": 307,
+                  "y": 584
+                },
+                {
+                  "objectId": 206111,
+                  "x": 308,
+                  "y": 583
+                },
+                {
+                  "objectId": 206014,
+                  "x": 308,
+                  "y": 579
+                },
+                {
+                  "objectId": 206105,
+                  "x": 315,
+                  "y": 578
+                }
+              ]
+            },
+            {
+              "cursors": [
+                1267,
+                1139
+              ],
+              "hp": [
+                10,
+                18
+              ],
+              "actor": {
+                "x": 301,
+                "y": 594
+              },
+              "observer": {
+                "x": 291,
+                "y": 604
+              },
+              "currentCats": [
+                {
+                  "objectId": 206007,
+                  "x": 301,
+                  "y": 593
+                },
+                {
+                  "objectId": 206013,
+                  "x": 301,
+                  "y": 595
+                },
+                {
+                  "objectId": 206020,
+                  "x": 307,
+                  "y": 584
+                },
+                {
+                  "objectId": 206111,
+                  "x": 308,
+                  "y": 583
+                },
+                {
+                  "objectId": 206014,
+                  "x": 308,
+                  "y": 579
+                },
+                {
+                  "objectId": 206105,
+                  "x": 315,
+                  "y": 578
+                }
+              ]
+            },
+            {
+              "cursors": [
+                1270,
+                1142
+              ],
+              "hp": [
+                10,
+                18
+              ],
+              "actor": {
+                "x": 301,
+                "y": 594
+              },
+              "observer": {
+                "x": 291,
+                "y": 604
+              },
+              "currentCats": [
+                {
+                  "objectId": 206007,
+                  "x": 301,
+                  "y": 593
+                },
+                {
+                  "objectId": 206013,
+                  "x": 301,
+                  "y": 595
+                },
+                {
+                  "objectId": 206020,
+                  "x": 307,
+                  "y": 584
+                },
+                {
+                  "objectId": 206111,
+                  "x": 308,
+                  "y": 583
+                },
+                {
+                  "objectId": 206014,
+                  "x": 308,
+                  "y": 579
+                },
+                {
+                  "objectId": 206105,
+                  "x": 315,
+                  "y": 578
+                }
+              ]
+            },
+            {
+              "cursors": [
+                1274,
+                1146
+              ],
+              "hp": [
+                10,
+                18
+              ],
+              "actor": {
+                "x": 301,
+                "y": 594
+              },
+              "observer": {
+                "x": 291,
+                "y": 604
+              },
+              "currentCats": [
+                {
+                  "objectId": 206007,
+                  "x": 301,
+                  "y": 593
+                },
+                {
+                  "objectId": 206013,
+                  "x": 301,
+                  "y": 595
+                },
+                {
+                  "objectId": 206020,
+                  "x": 307,
+                  "y": 584
+                },
+                {
+                  "objectId": 206111,
+                  "x": 308,
+                  "y": 583
+                },
+                {
+                  "objectId": 206014,
+                  "x": 308,
+                  "y": 579
+                },
+                {
+                  "objectId": 206105,
+                  "x": 315,
+                  "y": 578
+                }
+              ]
+            },
+            {
+              "cursors": [
+                1278,
+                1150
+              ],
+              "hp": [
+                10,
+                18
+              ],
+              "actor": {
+                "x": 301,
+                "y": 594
+              },
+              "observer": {
+                "x": 291,
+                "y": 604
+              },
+              "currentCats": [
+                {
+                  "objectId": 206007,
+                  "x": 301,
+                  "y": 593
+                },
+                {
+                  "objectId": 206013,
+                  "x": 301,
+                  "y": 595
+                },
+                {
+                  "objectId": 206020,
+                  "x": 307,
+                  "y": 584
+                },
+                {
+                  "objectId": 206111,
+                  "x": 308,
+                  "y": 583
+                },
+                {
+                  "objectId": 206014,
+                  "x": 308,
+                  "y": 579
+                },
+                {
+                  "objectId": 206105,
+                  "x": 315,
+                  "y": 578
+                }
+              ]
+            },
+            {
+              "cursors": [
+                1286,
+                1158
+              ],
+              "hp": [
+                10,
+                18
+              ],
+              "actor": {
+                "x": 301,
+                "y": 594
+              },
+              "observer": {
+                "x": 291,
+                "y": 604
+              },
+              "currentCats": [
+                {
+                  "objectId": 206007,
+                  "x": 301,
+                  "y": 593
+                },
+                {
+                  "objectId": 206013,
+                  "x": 301,
+                  "y": 595
+                },
+                {
+                  "objectId": 206020,
+                  "x": 307,
+                  "y": 584
+                },
+                {
+                  "objectId": 206111,
+                  "x": 308,
+                  "y": 583
+                },
+                {
+                  "objectId": 206014,
+                  "x": 308,
+                  "y": 579
+                },
+                {
+                  "objectId": 206105,
+                  "x": 315,
+                  "y": 578
+                }
+              ]
+            },
+            {
+              "cursors": [
+                1296,
+                1166
+              ],
+              "hp": [
+                3,
+                18
+              ],
+              "actor": {
+                "x": 301,
+                "y": 594
+              },
+              "observer": {
+                "x": 291,
+                "y": 604
+              },
+              "currentCats": [
+                {
+                  "objectId": 206007,
+                  "x": 301,
+                  "y": 593
+                },
+                {
+                  "objectId": 206013,
+                  "x": 301,
+                  "y": 595
+                },
+                {
+                  "objectId": 206020,
+                  "x": 307,
+                  "y": 584
+                },
+                {
+                  "objectId": 206111,
+                  "x": 308,
+                  "y": 583
+                },
+                {
+                  "objectId": 206014,
+                  "x": 308,
+                  "y": 579
+                },
+                {
+                  "objectId": 206105,
+                  "x": 315,
+                  "y": 578
+                }
+              ]
+            },
+            {
+              "cursors": [
+                1300,
+                1170
+              ],
+              "hp": [
+                3,
+                18
+              ],
+              "actor": {
+                "x": 301,
+                "y": 594
+              },
+              "observer": {
+                "x": 291,
+                "y": 604
+              },
+              "currentCats": [
+                {
+                  "objectId": 206007,
+                  "x": 301,
+                  "y": 593
+                },
+                {
+                  "objectId": 206013,
+                  "x": 301,
+                  "y": 595
+                },
+                {
+                  "objectId": 206020,
+                  "x": 307,
+                  "y": 584
+                },
+                {
+                  "objectId": 206111,
+                  "x": 308,
+                  "y": 583
+                },
+                {
+                  "objectId": 206014,
+                  "x": 308,
+                  "y": 579
+                },
+                {
+                  "objectId": 206105,
+                  "x": 315,
+                  "y": 578
+                }
+              ]
+            },
+            {
+              "cursors": [
+                1304,
+                1176
+              ],
+              "hp": [
+                3,
+                18
+              ],
+              "actor": {
+                "x": 301,
+                "y": 594
+              },
+              "observer": {
+                "x": 291,
+                "y": 604
+              },
+              "currentCats": [
+                {
+                  "objectId": 206007,
+                  "x": 301,
+                  "y": 593
+                },
+                {
+                  "objectId": 206013,
+                  "x": 301,
+                  "y": 595
+                },
+                {
+                  "objectId": 206020,
+                  "x": 307,
+                  "y": 584
+                },
+                {
+                  "objectId": 206111,
+                  "x": 308,
+                  "y": 583
+                },
+                {
+                  "objectId": 206014,
+                  "x": 308,
+                  "y": 579
+                },
+                {
+                  "objectId": 206105,
+                  "x": 315,
+                  "y": 578
+                }
+              ]
+            },
+            {
+              "cursors": [
+                1311,
+                1181
+              ],
+              "hp": [
+                3,
+                18
+              ],
+              "actor": {
+                "x": 301,
+                "y": 594
+              },
+              "observer": {
+                "x": 291,
+                "y": 604
+              },
+              "currentCats": [
+                {
+                  "objectId": 206007,
+                  "x": 301,
+                  "y": 593
+                },
+                {
+                  "objectId": 206013,
+                  "x": 301,
+                  "y": 595
+                },
+                {
+                  "objectId": 206020,
+                  "x": 307,
+                  "y": 584
+                },
+                {
+                  "objectId": 206111,
+                  "x": 308,
+                  "y": 583
+                },
+                {
+                  "objectId": 206014,
+                  "x": 308,
+                  "y": 579
+                },
+                {
+                  "objectId": 206105,
+                  "x": 315,
+                  "y": 578
+                }
+              ]
+            },
+            {
+              "cursors": [
+                1315,
+                1185
+              ],
+              "hp": [
+                3,
+                18
+              ],
+              "actor": {
+                "x": 301,
+                "y": 594
+              },
+              "observer": {
+                "x": 291,
+                "y": 604
+              },
+              "currentCats": [
+                {
+                  "objectId": 206007,
+                  "x": 301,
+                  "y": 593
+                },
+                {
+                  "objectId": 206013,
+                  "x": 301,
+                  "y": 595
+                },
+                {
+                  "objectId": 206020,
+                  "x": 307,
+                  "y": 584
+                },
+                {
+                  "objectId": 206111,
+                  "x": 308,
+                  "y": 583
+                },
+                {
+                  "objectId": 206014,
+                  "x": 308,
+                  "y": 579
+                },
+                {
+                  "objectId": 206105,
+                  "x": 315,
+                  "y": 578
+                }
+              ]
+            }
+          ],
+          "supplies": [],
+          "armour": {
+            "armourRemoved": true,
+            "uniqueId": 1,
+            "to": 0,
+            "receipt": 912
+          },
+          "corridorEntry": {
+            "index": 0,
+            "preflightPath": [
+              {
+                "x": 286,
+                "y": 622
+              },
+              {
+                "x": 286,
+                "y": 621
+              },
+              {
+                "x": 286,
+                "y": 620
+              },
+              {
+                "x": 286,
+                "y": 619
+              },
+              {
+                "x": 287,
+                "y": 618
+              },
+              {
+                "x": 288,
+                "y": 617
+              }
+            ]
+          }
+        },
+        "causeScope": "Ordinary cat exposure; public Death does not identify a unique killing source."
+      }
+    },
+    "townRevive": {
+      "status": "passed",
+      "evidence": {
+        "actor": "Ac351e83c",
+        "fromMap": "0",
+        "toMap": "0",
+        "hp": 18,
+        "location": {
+          "x": 288,
+          "y": 616
+        },
+        "requestReceipt": 1326,
+        "revivedReceipt": 1344,
+        "aliveSnapshotReceipt": 1408,
+        "observerPacket": "ObjectRevived",
+        "observerReceipt": 1192,
+        "armourRestoration": {
+          "restored": true,
+          "uniqueId": 1,
+          "receipt": 1413
+        }
+      }
+    },
+    "mapRoundTrip": {
+      "status": "passed",
+      "evidence": [
+        {
+          "actor": "a",
+          "outbound": {
+            "from": {
+              "mapFileName": "0",
+              "x": 288,
+              "y": 616,
+              "direction": "Down"
+            },
+            "to": {
+              "mapFileName": "0141",
+              "x": 2,
+              "y": 11,
+              "direction": "Down"
+            },
+            "transferKey": "crystal-move:0:302:622:31:2:11",
+            "packetSequence": 1471
+          },
+          "return": {
+            "from": {
+              "mapFileName": "0141",
+              "x": 5,
+              "y": 11,
+              "direction": "Right"
+            },
+            "to": {
+              "mapFileName": "0",
+              "x": 301,
+              "y": 623,
+              "direction": "Down"
+            },
+            "transferKey": "crystal-move:0141:2:12:1:301:623",
+            "packetSequence": 1570
+          }
+        },
+        {
+          "actor": "b",
+          "outbound": {
+            "from": {
+              "mapFileName": "0",
+              "x": 291,
+              "y": 604,
+              "direction": "UpLeft"
+            },
+            "to": {
+              "mapFileName": "0141",
+              "x": 2,
+              "y": 11,
+              "direction": "Down"
+            },
+            "transferKey": "crystal-move:0:302:622:31:2:11",
+            "packetSequence": 1292
+          },
+          "return": {
+            "from": {
+              "mapFileName": "0141",
+              "x": 4,
+              "y": 13,
+              "direction": "Down"
+            },
+            "to": {
+              "mapFileName": "0",
+              "x": 301,
+              "y": 623,
+              "direction": "Down"
+            },
+            "transferKey": "crystal-move:0141:2:12:1:301:623",
+            "packetSequence": 1388
+          }
+        }
+      ]
+    },
+    "logout": {
+      "status": "passed",
+      "evidence": [
+        {
+          "actor": "a",
+          "sequence": 1624
+        },
+        {
+          "actor": "b",
+          "sequence": 1439
+        }
+      ]
+    },
+    "reloginPersistence": {
+      "status": "passed",
+      "evidence": [
+        {
+          "actor": 0,
+          "saved": {
+            "transform": {
+              "mapFileName": "0",
+              "x": 298,
+              "y": 623,
+              "direction": "Left"
+            },
+            "inventory": {
+              "gold": 26,
+              "inventory": [
+                {
+                  "uniqueId": "2",
+                  "itemIndex": 0,
+                  "name": "(HP)DrugSmall",
+                  "count": 1,
+                  "slot": "2"
+                }
+              ],
+              "equipment": [
+                {
+                  "uniqueId": "0",
+                  "itemIndex": 0,
+                  "name": "WoodenSword",
+                  "count": 1,
+                  "slot": "weapon"
+                },
+                {
+                  "uniqueId": "1",
+                  "itemIndex": 0,
+                  "name": "BaseDress(M)",
+                  "count": 1,
+                  "slot": "armour"
+                },
+                {
+                  "uniqueId": "3",
+                  "itemIndex": 0,
+                  "name": "Candle",
+                  "count": 1,
+                  "slot": "torch"
+                }
+              ]
+            }
+          },
+          "logoutReceipt": 620
+        },
+        {
+          "actor": 1,
+          "saved": {
+            "transform": {
+              "mapFileName": "0",
+              "x": 301,
+              "y": 626,
+              "direction": "Down"
+            },
+            "inventory": {
+              "gold": 0,
+              "inventory": [
+                {
+                  "uniqueId": "2",
+                  "itemIndex": 0,
+                  "name": "(HP)DrugSmall",
+                  "count": 1,
+                  "slot": "2"
+                }
+              ],
+              "equipment": [
+                {
+                  "uniqueId": "0",
+                  "itemIndex": 0,
+                  "name": "WoodenSword",
+                  "count": 1,
+                  "slot": "weapon"
+                },
+                {
+                  "uniqueId": "1",
+                  "itemIndex": 0,
+                  "name": "BaseDress(M)",
+                  "count": 1,
+                  "slot": "armour"
+                },
+                {
+                  "uniqueId": "3",
+                  "itemIndex": 0,
+                  "name": "Candle",
+                  "count": 1,
+                  "slot": "torch"
+                }
+              ]
+            }
+          },
+          "logoutReceipt": 607
+        }
+      ]
+    }
+  },
+  "accounts": [
+    {
+      "accountId": "ptac351e83c",
+      "name": "Ac351e83c"
+    },
+    {
+      "accountId": "ptbc351e83c",
+      "name": "Bc351e83c"
+    }
+  ],
+  "registrationMode": "two-fresh-ordinary-registrations",
+  "lifecycleDropAttempts": [
+    {
+      "attempt": 1,
+      "combat": {
+        "targetId": 206641,
+        "target": "Scarecrow",
+        "hits": [
+          {
+            "targetId": 206641,
+            "attackerIds": [
+              1000,
+              50000
+            ],
+            "healthPercent": 80,
+            "died": false,
+            "receipts": [
+              {
+                "struck": 769,
+                "health": 771,
+                "damage": 770
+              },
+              {
+                "struck": 705,
+                "health": 707,
+                "damage": 706
+              }
+            ],
+            "attackerName": "Ac351e83c"
+          },
+          {
+            "targetId": 206641,
+            "attackerIds": [
+              50001,
+              1000
+            ],
+            "healthPercent": 70,
+            "died": false,
+            "receipts": [
+              {
+                "struck": 773,
+                "health": 775,
+                "damage": 774
+              },
+              {
+                "struck": 712,
+                "health": 714,
+                "damage": 713
+              }
+            ],
+            "attackerName": "Bc351e83c"
+          }
+        ],
+        "lifecycleStart": {
+          "cursors": [
+            752,
+            698
+          ],
+          "baselineDropIds": [],
+          "mapFileName": "0"
+        }
+      },
+      "sharedKill": {
+        "status": "passed",
+        "evidence": {
+          "targetId": 206641,
+          "target": "Scarecrow",
+          "mapFileName": "0",
+          "location": {
+            "x": 287,
+            "y": 616
+          },
+          "attackerNames": [
+            "Ac351e83c",
+            "Bc351e83c"
+          ],
+          "deathReceipts": [
+            802,
+            741
+          ],
+          "hits": [
+            {
+              "targetId": 206641,
+              "attackerIds": [
+                1000,
+                50000
+              ],
+              "healthPercent": 80,
+              "died": false,
+              "receipts": [
+                {
+                  "struck": 769,
+                  "health": 771,
+                  "damage": 770
+                },
+                {
+                  "struck": 705,
+                  "health": 707,
+                  "damage": 706
+                }
+              ],
+              "attackerName": "Ac351e83c"
+            },
+            {
+              "targetId": 206641,
+              "attackerIds": [
+                50001,
+                1000
+              ],
+              "healthPercent": 70,
+              "died": false,
+              "receipts": [
+                {
+                  "struck": 773,
+                  "health": 775,
+                  "damage": 774
+                },
+                {
+                  "struck": 712,
+                  "health": 714,
+                  "damage": 713
+                }
+              ],
+              "attackerName": "Bc351e83c"
+            }
+          ]
+        }
+      },
+      "sharedDrop": {
+        "status": "failed",
+        "reason": "No fresh source-name/location-correlated drop visible with matching spawn packets on both clients"
+      }
+    },
+    {
+      "attempt": 2,
+      "combat": {
+        "targetId": 206632,
+        "target": "Scarecrow",
+        "hits": [
+          {
+            "targetId": 206632,
+            "attackerIds": [
+              1000,
+              50000
+            ],
+            "healthPercent": 90,
+            "died": false,
+            "receipts": [
+              {
+                "struck": 839,
+                "health": 841,
+                "damage": 840
+              },
+              {
+                "struck": 773,
+                "health": 775,
+                "damage": 774
+              }
+            ],
+            "attackerName": "Ac351e83c"
+          },
+          {
+            "targetId": 206632,
+            "attackerIds": [
+              50001,
+              1000
+            ],
+            "healthPercent": 75,
+            "died": false,
+            "receipts": [
+              {
+                "struck": 843,
+                "health": 845,
+                "damage": 844
+              },
+              {
+                "struck": 780,
+                "health": 782,
+                "damage": 781
+              }
+            ],
+            "attackerName": "Bc351e83c"
+          }
+        ],
+        "lifecycleStart": {
+          "cursors": [
+            807,
+            744
+          ],
+          "baselineDropIds": [],
+          "mapFileName": "0"
+        }
+      },
+      "sharedKill": {
+        "status": "passed",
+        "evidence": {
+          "targetId": 206632,
+          "target": "Scarecrow",
+          "mapFileName": "0",
+          "location": {
+            "x": 286,
+            "y": 623
+          },
+          "attackerNames": [
+            "Ac351e83c",
+            "Bc351e83c"
+          ],
+          "deathReceipts": [
+            885,
+            822
+          ],
+          "hits": [
+            {
+              "targetId": 206632,
+              "attackerIds": [
+                1000,
+                50000
+              ],
+              "healthPercent": 90,
+              "died": false,
+              "receipts": [
+                {
+                  "struck": 839,
+                  "health": 841,
+                  "damage": 840
+                },
+                {
+                  "struck": 773,
+                  "health": 775,
+                  "damage": 774
+                }
+              ],
+              "attackerName": "Ac351e83c"
+            },
+            {
+              "targetId": 206632,
+              "attackerIds": [
+                50001,
+                1000
+              ],
+              "healthPercent": 75,
+              "died": false,
+              "receipts": [
+                {
+                  "struck": 843,
+                  "health": 845,
+                  "damage": 844
+                },
+                {
+                  "struck": 780,
+                  "health": 782,
+                  "damage": 781
+                }
+              ],
+              "attackerName": "Bc351e83c"
+            }
+          ]
+        }
+      },
+      "sharedDrop": {
+        "status": "passed",
+        "evidence": {
+          "drop": {
+            "icon": 0,
+            "loot": {
+              "amount": 26,
+              "kind": "gold"
+            },
+            "name": "Gold",
+            "nameColourArgb": -1,
+            "objectId": 1000000,
+            "ownerObjectId": 50000,
+            "ownershipRemainingTicks": 200,
+            "quantity": 1,
+            "sourceMonster": "Scarecrow",
+            "x": 286,
+            "y": 623
+          },
+          "spawnReceipts": [
+            886,
+            823
+          ],
+          "sourceScope": "Fresh shared spawn after the witnessed death, within three tiles, with the same snapshot sourceMonster name. Public packets do not expose a unique source-monster ID."
+        }
+      }
+    },
+    {
+      "phase": "ordinary-cat-exposure",
+      "evidence": {
+        "navigation": [
+          {
+            "actor": 0,
+            "target": {
+              "x": 286,
+              "y": 619
+            },
+            "radius": 0,
+            "fromSequence": 922,
+            "throughSequence": 934,
+            "before": {
+              "x": 286,
+              "y": 622
+            },
+            "after": {
+              "x": 286,
+              "y": 619
+            },
+            "preflightPath": [
+              {
+                "x": 286,
+                "y": 622
+              },
+              {
+                "x": 286,
+                "y": 621
+              },
+              {
+                "x": 286,
+                "y": 620
+              },
+              {
+                "x": 286,
+                "y": 619
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 288,
+              "y": 617
+            },
+            "radius": 0,
+            "fromSequence": 941,
+            "throughSequence": 943,
+            "before": {
+              "x": 286,
+              "y": 619
+            },
+            "after": {
+              "x": 288,
+              "y": 617
+            },
+            "preflightPath": [
+              {
+                "x": 286,
+                "y": 619
+              },
+              {
+                "x": 287,
+                "y": 618
+              },
+              {
+                "x": 288,
+                "y": 617
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 286,
+              "y": 617
+            },
+            "radius": 0,
+            "fromSequence": 946,
+            "throughSequence": 948,
+            "before": {
+              "x": 288,
+              "y": 617
+            },
+            "after": {
+              "x": 286,
+              "y": 617
+            },
+            "preflightPath": [
+              {
+                "x": 288,
+                "y": 617
+              },
+              {
+                "x": 287,
+                "y": 617
+              },
+              {
+                "x": 286,
+                "y": 617
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 285,
+              "y": 616
+            },
+            "radius": 0,
+            "fromSequence": 953,
+            "throughSequence": 957,
+            "before": {
+              "x": 286,
+              "y": 617
+            },
+            "after": {
+              "x": 285,
+              "y": 616
+            },
+            "preflightPath": [
+              {
+                "x": 286,
+                "y": 617
+              },
+              {
+                "x": 285,
+                "y": 616
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 284,
+              "y": 616
+            },
+            "radius": 0,
+            "fromSequence": 962,
+            "throughSequence": 964,
+            "before": {
+              "x": 285,
+              "y": 616
+            },
+            "after": {
+              "x": 284,
+              "y": 616
+            },
+            "preflightPath": [
+              {
+                "x": 285,
+                "y": 616
+              },
+              {
+                "x": 284,
+                "y": 616
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 282,
+              "y": 616
+            },
+            "radius": 0,
+            "fromSequence": 967,
+            "throughSequence": 969,
+            "before": {
+              "x": 284,
+              "y": 616
+            },
+            "after": {
+              "x": 282,
+              "y": 616
+            },
+            "preflightPath": [
+              {
+                "x": 284,
+                "y": 616
+              },
+              {
+                "x": 283,
+                "y": 616
+              },
+              {
+                "x": 282,
+                "y": 616
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 283,
+              "y": 615
+            },
+            "radius": 0,
+            "fromSequence": 972,
+            "throughSequence": 977,
+            "before": {
+              "x": 282,
+              "y": 616
+            },
+            "after": {
+              "x": 283,
+              "y": 615
+            },
+            "preflightPath": [
+              {
+                "x": 282,
+                "y": 616
+              },
+              {
+                "x": 283,
+                "y": 615
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 283,
+              "y": 614
+            },
+            "radius": 0,
+            "fromSequence": 982,
+            "throughSequence": 984,
+            "before": {
+              "x": 283,
+              "y": 615
+            },
+            "after": {
+              "x": 283,
+              "y": 614
+            },
+            "preflightPath": [
+              {
+                "x": 283,
+                "y": 615
+              },
+              {
+                "x": 283,
+                "y": 614
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 284,
+              "y": 613
+            },
+            "radius": 0,
+            "fromSequence": 988,
+            "throughSequence": 991,
+            "before": {
+              "x": 283,
+              "y": 614
+            },
+            "after": {
+              "x": 284,
+              "y": 613
+            },
+            "preflightPath": [
+              {
+                "x": 283,
+                "y": 614
+              },
+              {
+                "x": 284,
+                "y": 613
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 284,
+              "y": 612
+            },
+            "radius": 0,
+            "fromSequence": 997,
+            "throughSequence": 1002,
+            "before": {
+              "x": 284,
+              "y": 613
+            },
+            "after": {
+              "x": 284,
+              "y": 612
+            },
+            "preflightPath": [
+              {
+                "x": 284,
+                "y": 613
+              },
+              {
+                "x": 284,
+                "y": 612
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 286,
+              "y": 612
+            },
+            "radius": 0,
+            "fromSequence": 1008,
+            "throughSequence": 1011,
+            "before": {
+              "x": 284,
+              "y": 612
+            },
+            "after": {
+              "x": 286,
+              "y": 612
+            },
+            "preflightPath": [
+              {
+                "x": 284,
+                "y": 612
+              },
+              {
+                "x": 285,
+                "y": 612
+              },
+              {
+                "x": 286,
+                "y": 612
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 289,
+              "y": 611
+            },
+            "radius": 0,
+            "fromSequence": 1015,
+            "throughSequence": 1026,
+            "before": {
+              "x": 286,
+              "y": 612
+            },
+            "after": {
+              "x": 289,
+              "y": 611
+            },
+            "preflightPath": [
+              {
+                "x": 286,
+                "y": 612
+              },
+              {
+                "x": 287,
+                "y": 612
+              },
+              {
+                "x": 288,
+                "y": 612
+              },
+              {
+                "x": 289,
+                "y": 611
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 291,
+              "y": 611
+            },
+            "radius": 0,
+            "fromSequence": 1029,
+            "throughSequence": 1031,
+            "before": {
+              "x": 289,
+              "y": 611
+            },
+            "after": {
+              "x": 291,
+              "y": 611
+            },
+            "preflightPath": [
+              {
+                "x": 289,
+                "y": 611
+              },
+              {
+                "x": 290,
+                "y": 611
+              },
+              {
+                "x": 291,
+                "y": 611
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 292,
+              "y": 611
+            },
+            "radius": 0,
+            "fromSequence": 1034,
+            "throughSequence": 1038,
+            "before": {
+              "x": 291,
+              "y": 611
+            },
+            "after": {
+              "x": 292,
+              "y": 611
+            },
+            "preflightPath": [
+              {
+                "x": 291,
+                "y": 611
+              },
+              {
+                "x": 292,
+                "y": 611
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 293,
+              "y": 610
+            },
+            "radius": 0,
+            "fromSequence": 1041,
+            "throughSequence": 1046,
+            "before": {
+              "x": 292,
+              "y": 611
+            },
+            "after": {
+              "x": 293,
+              "y": 610
+            },
+            "preflightPath": [
+              {
+                "x": 292,
+                "y": 611
+              },
+              {
+                "x": 293,
+                "y": 610
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 294,
+              "y": 610
+            },
+            "radius": 0,
+            "fromSequence": 1049,
+            "throughSequence": 1051,
+            "before": {
+              "x": 293,
+              "y": 610
+            },
+            "after": {
+              "x": 294,
+              "y": 610
+            },
+            "preflightPath": [
+              {
+                "x": 293,
+                "y": 610
+              },
+              {
+                "x": 294,
+                "y": 610
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 294,
+              "y": 609
+            },
+            "radius": 0,
+            "fromSequence": 1054,
+            "throughSequence": 1056,
+            "before": {
+              "x": 294,
+              "y": 610
+            },
+            "after": {
+              "x": 294,
+              "y": 609
+            },
+            "preflightPath": [
+              {
+                "x": 294,
+                "y": 610
+              },
+              {
+                "x": 294,
+                "y": 609
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 296,
+              "y": 607
+            },
+            "radius": 0,
+            "fromSequence": 1059,
+            "throughSequence": 1065,
+            "before": {
+              "x": 294,
+              "y": 609
+            },
+            "after": {
+              "x": 296,
+              "y": 607
+            },
+            "preflightPath": [
+              {
+                "x": 294,
+                "y": 609
+              },
+              {
+                "x": 295,
+                "y": 608
+              },
+              {
+                "x": 296,
+                "y": 607
+              }
+            ]
+          },
+          {
+            "actor": 1,
+            "target": {
+              "x": 286,
+              "y": 617
+            },
+            "radius": 0,
+            "fromSequence": 952,
+            "throughSequence": 954,
+            "before": {
+              "x": 287,
+              "y": 618
+            },
+            "after": {
+              "x": 286,
+              "y": 617
+            },
+            "preflightPath": [
+              {
+                "x": 287,
+                "y": 618
+              },
+              {
+                "x": 286,
+                "y": 617
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 298,
+              "y": 605
+            },
+            "radius": 0,
+            "fromSequence": 1069,
+            "throughSequence": 1079,
+            "before": {
+              "x": 296,
+              "y": 607
+            },
+            "after": {
+              "x": 298,
+              "y": 605
+            },
+            "preflightPath": [
+              {
+                "x": 296,
+                "y": 607
+              },
+              {
+                "x": 297,
+                "y": 606
+              },
+              {
+                "x": 298,
+                "y": 605
+              }
+            ]
+          },
+          {
+            "actor": 1,
+            "target": {
+              "x": 288,
+              "y": 615
+            },
+            "radius": 0,
+            "fromSequence": 958,
+            "throughSequence": 970,
+            "before": {
+              "x": 286,
+              "y": 617
+            },
+            "after": {
+              "x": 288,
+              "y": 615
+            },
+            "preflightPath": [
+              {
+                "x": 286,
+                "y": 617
+              },
+              {
+                "x": 287,
+                "y": 616
+              },
+              {
+                "x": 288,
+                "y": 616
+              },
+              {
+                "x": 288,
+                "y": 615
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 299,
+              "y": 604
+            },
+            "radius": 0,
+            "fromSequence": 1091,
+            "throughSequence": 1093,
+            "before": {
+              "x": 298,
+              "y": 605
+            },
+            "after": {
+              "x": 299,
+              "y": 604
+            },
+            "preflightPath": [
+              {
+                "x": 298,
+                "y": 605
+              },
+              {
+                "x": 299,
+                "y": 604
+              }
+            ]
+          },
+          {
+            "actor": 1,
+            "target": {
+              "x": 289,
+              "y": 614
+            },
+            "radius": 0,
+            "fromSequence": 974,
+            "throughSequence": 977,
+            "before": {
+              "x": 288,
+              "y": 615
+            },
+            "after": {
+              "x": 289,
+              "y": 614
+            },
+            "preflightPath": [
+              {
+                "x": 288,
+                "y": 615
+              },
+              {
+                "x": 289,
+                "y": 614
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 299,
+              "y": 602
+            },
+            "radius": 0,
+            "fromSequence": 1097,
+            "throughSequence": 1101,
+            "before": {
+              "x": 299,
+              "y": 604
+            },
+            "after": {
+              "x": 299,
+              "y": 602
+            },
+            "preflightPath": [
+              {
+                "x": 299,
+                "y": 604
+              },
+              {
+                "x": 299,
+                "y": 603
+              },
+              {
+                "x": 299,
+                "y": 602
+              }
+            ]
+          },
+          {
+            "actor": 1,
+            "target": {
+              "x": 289,
+              "y": 612
+            },
+            "radius": 0,
+            "fromSequence": 982,
+            "throughSequence": 990,
+            "before": {
+              "x": 289,
+              "y": 614
+            },
+            "after": {
+              "x": 289,
+              "y": 612
+            },
+            "preflightPath": [
+              {
+                "x": 289,
+                "y": 614
+              },
+              {
+                "x": 289,
+                "y": 613
+              },
+              {
+                "x": 289,
+                "y": 612
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 300,
+              "y": 599
+            },
+            "radius": 0,
+            "fromSequence": 1111,
+            "throughSequence": 1126,
+            "before": {
+              "x": 299,
+              "y": 602
+            },
+            "after": {
+              "x": 300,
+              "y": 599
+            },
+            "preflightPath": [
+              {
+                "x": 299,
+                "y": 602
+              },
+              {
+                "x": 299,
+                "y": 601
+              },
+              {
+                "x": 299,
+                "y": 600
+              },
+              {
+                "x": 300,
+                "y": 599
+              }
+            ]
+          },
+          {
+            "actor": 1,
+            "target": {
+              "x": 300,
+              "y": 607
+            },
+            "radius": 0,
+            "fromSequence": 1001,
+            "throughSequence": 1038,
+            "before": {
+              "x": 289,
+              "y": 612
+            },
+            "after": {
+              "x": 300,
+              "y": 607
+            },
+            "preflightPath": [
+              {
+                "x": 289,
+                "y": 612
+              },
+              {
+                "x": 290,
+                "y": 612
+              },
+              {
+                "x": 291,
+                "y": 612
+              },
+              {
+                "x": 292,
+                "y": 612
+              },
+              {
+                "x": 293,
+                "y": 611
+              },
+              {
+                "x": 294,
+                "y": 610
+              },
+              {
+                "x": 295,
+                "y": 609
+              },
+              {
+                "x": 296,
+                "y": 608
+              },
+              {
+                "x": 297,
+                "y": 607
+              },
+              {
+                "x": 298,
+                "y": 607
+              },
+              {
+                "x": 299,
+                "y": 607
+              },
+              {
+                "x": 300,
+                "y": 607
+              }
+            ]
+          }
+        ],
+        "unavailableHints": [],
+        "provocations": [
+          {
+            "objectId": 206013,
+            "name": "RakingCat",
+            "location": {
+              "x": 300,
+              "y": 598
+            },
+            "actor": {
+              "x": 300,
+              "y": 599
+            },
+            "commandSequence": 1160
+          }
+        ],
+        "samples": [],
+        "supplies": [],
+        "armour": {
+          "armourRemoved": true,
+          "uniqueId": 1,
+          "to": 0,
+          "receipt": 912
+        },
+        "corridorEntry": {
+          "index": 0,
+          "preflightPath": [
+            {
+              "x": 286,
+              "y": 622
+            },
+            {
+              "x": 286,
+              "y": 621
+            },
+            {
+              "x": 286,
+              "y": 620
+            },
+            {
+              "x": 286,
+              "y": 619
+            },
+            {
+              "x": 287,
+              "y": 618
+            },
+            {
+              "x": 288,
+              "y": 617
+            }
+          ]
+        }
+      }
+    },
+    {
+      "phase": "ordinary-cat-exposure",
+      "evidence": {
+        "navigation": [
+          {
+            "actor": 0,
+            "target": {
+              "x": 286,
+              "y": 619
+            },
+            "radius": 0,
+            "fromSequence": 922,
+            "throughSequence": 934,
+            "before": {
+              "x": 286,
+              "y": 622
+            },
+            "after": {
+              "x": 286,
+              "y": 619
+            },
+            "preflightPath": [
+              {
+                "x": 286,
+                "y": 622
+              },
+              {
+                "x": 286,
+                "y": 621
+              },
+              {
+                "x": 286,
+                "y": 620
+              },
+              {
+                "x": 286,
+                "y": 619
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 288,
+              "y": 617
+            },
+            "radius": 0,
+            "fromSequence": 941,
+            "throughSequence": 943,
+            "before": {
+              "x": 286,
+              "y": 619
+            },
+            "after": {
+              "x": 288,
+              "y": 617
+            },
+            "preflightPath": [
+              {
+                "x": 286,
+                "y": 619
+              },
+              {
+                "x": 287,
+                "y": 618
+              },
+              {
+                "x": 288,
+                "y": 617
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 286,
+              "y": 617
+            },
+            "radius": 0,
+            "fromSequence": 946,
+            "throughSequence": 948,
+            "before": {
+              "x": 288,
+              "y": 617
+            },
+            "after": {
+              "x": 286,
+              "y": 617
+            },
+            "preflightPath": [
+              {
+                "x": 288,
+                "y": 617
+              },
+              {
+                "x": 287,
+                "y": 617
+              },
+              {
+                "x": 286,
+                "y": 617
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 285,
+              "y": 616
+            },
+            "radius": 0,
+            "fromSequence": 953,
+            "throughSequence": 957,
+            "before": {
+              "x": 286,
+              "y": 617
+            },
+            "after": {
+              "x": 285,
+              "y": 616
+            },
+            "preflightPath": [
+              {
+                "x": 286,
+                "y": 617
+              },
+              {
+                "x": 285,
+                "y": 616
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 284,
+              "y": 616
+            },
+            "radius": 0,
+            "fromSequence": 962,
+            "throughSequence": 964,
+            "before": {
+              "x": 285,
+              "y": 616
+            },
+            "after": {
+              "x": 284,
+              "y": 616
+            },
+            "preflightPath": [
+              {
+                "x": 285,
+                "y": 616
+              },
+              {
+                "x": 284,
+                "y": 616
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 282,
+              "y": 616
+            },
+            "radius": 0,
+            "fromSequence": 967,
+            "throughSequence": 969,
+            "before": {
+              "x": 284,
+              "y": 616
+            },
+            "after": {
+              "x": 282,
+              "y": 616
+            },
+            "preflightPath": [
+              {
+                "x": 284,
+                "y": 616
+              },
+              {
+                "x": 283,
+                "y": 616
+              },
+              {
+                "x": 282,
+                "y": 616
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 283,
+              "y": 615
+            },
+            "radius": 0,
+            "fromSequence": 972,
+            "throughSequence": 977,
+            "before": {
+              "x": 282,
+              "y": 616
+            },
+            "after": {
+              "x": 283,
+              "y": 615
+            },
+            "preflightPath": [
+              {
+                "x": 282,
+                "y": 616
+              },
+              {
+                "x": 283,
+                "y": 615
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 283,
+              "y": 614
+            },
+            "radius": 0,
+            "fromSequence": 982,
+            "throughSequence": 984,
+            "before": {
+              "x": 283,
+              "y": 615
+            },
+            "after": {
+              "x": 283,
+              "y": 614
+            },
+            "preflightPath": [
+              {
+                "x": 283,
+                "y": 615
+              },
+              {
+                "x": 283,
+                "y": 614
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 284,
+              "y": 613
+            },
+            "radius": 0,
+            "fromSequence": 988,
+            "throughSequence": 991,
+            "before": {
+              "x": 283,
+              "y": 614
+            },
+            "after": {
+              "x": 284,
+              "y": 613
+            },
+            "preflightPath": [
+              {
+                "x": 283,
+                "y": 614
+              },
+              {
+                "x": 284,
+                "y": 613
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 284,
+              "y": 612
+            },
+            "radius": 0,
+            "fromSequence": 997,
+            "throughSequence": 1002,
+            "before": {
+              "x": 284,
+              "y": 613
+            },
+            "after": {
+              "x": 284,
+              "y": 612
+            },
+            "preflightPath": [
+              {
+                "x": 284,
+                "y": 613
+              },
+              {
+                "x": 284,
+                "y": 612
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 286,
+              "y": 612
+            },
+            "radius": 0,
+            "fromSequence": 1008,
+            "throughSequence": 1011,
+            "before": {
+              "x": 284,
+              "y": 612
+            },
+            "after": {
+              "x": 286,
+              "y": 612
+            },
+            "preflightPath": [
+              {
+                "x": 284,
+                "y": 612
+              },
+              {
+                "x": 285,
+                "y": 612
+              },
+              {
+                "x": 286,
+                "y": 612
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 289,
+              "y": 611
+            },
+            "radius": 0,
+            "fromSequence": 1015,
+            "throughSequence": 1026,
+            "before": {
+              "x": 286,
+              "y": 612
+            },
+            "after": {
+              "x": 289,
+              "y": 611
+            },
+            "preflightPath": [
+              {
+                "x": 286,
+                "y": 612
+              },
+              {
+                "x": 287,
+                "y": 612
+              },
+              {
+                "x": 288,
+                "y": 612
+              },
+              {
+                "x": 289,
+                "y": 611
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 291,
+              "y": 611
+            },
+            "radius": 0,
+            "fromSequence": 1029,
+            "throughSequence": 1031,
+            "before": {
+              "x": 289,
+              "y": 611
+            },
+            "after": {
+              "x": 291,
+              "y": 611
+            },
+            "preflightPath": [
+              {
+                "x": 289,
+                "y": 611
+              },
+              {
+                "x": 290,
+                "y": 611
+              },
+              {
+                "x": 291,
+                "y": 611
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 292,
+              "y": 611
+            },
+            "radius": 0,
+            "fromSequence": 1034,
+            "throughSequence": 1038,
+            "before": {
+              "x": 291,
+              "y": 611
+            },
+            "after": {
+              "x": 292,
+              "y": 611
+            },
+            "preflightPath": [
+              {
+                "x": 291,
+                "y": 611
+              },
+              {
+                "x": 292,
+                "y": 611
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 293,
+              "y": 610
+            },
+            "radius": 0,
+            "fromSequence": 1041,
+            "throughSequence": 1046,
+            "before": {
+              "x": 292,
+              "y": 611
+            },
+            "after": {
+              "x": 293,
+              "y": 610
+            },
+            "preflightPath": [
+              {
+                "x": 292,
+                "y": 611
+              },
+              {
+                "x": 293,
+                "y": 610
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 294,
+              "y": 610
+            },
+            "radius": 0,
+            "fromSequence": 1049,
+            "throughSequence": 1051,
+            "before": {
+              "x": 293,
+              "y": 610
+            },
+            "after": {
+              "x": 294,
+              "y": 610
+            },
+            "preflightPath": [
+              {
+                "x": 293,
+                "y": 610
+              },
+              {
+                "x": 294,
+                "y": 610
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 294,
+              "y": 609
+            },
+            "radius": 0,
+            "fromSequence": 1054,
+            "throughSequence": 1056,
+            "before": {
+              "x": 294,
+              "y": 610
+            },
+            "after": {
+              "x": 294,
+              "y": 609
+            },
+            "preflightPath": [
+              {
+                "x": 294,
+                "y": 610
+              },
+              {
+                "x": 294,
+                "y": 609
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 296,
+              "y": 607
+            },
+            "radius": 0,
+            "fromSequence": 1059,
+            "throughSequence": 1065,
+            "before": {
+              "x": 294,
+              "y": 609
+            },
+            "after": {
+              "x": 296,
+              "y": 607
+            },
+            "preflightPath": [
+              {
+                "x": 294,
+                "y": 609
+              },
+              {
+                "x": 295,
+                "y": 608
+              },
+              {
+                "x": 296,
+                "y": 607
+              }
+            ]
+          },
+          {
+            "actor": 1,
+            "target": {
+              "x": 286,
+              "y": 617
+            },
+            "radius": 0,
+            "fromSequence": 952,
+            "throughSequence": 954,
+            "before": {
+              "x": 287,
+              "y": 618
+            },
+            "after": {
+              "x": 286,
+              "y": 617
+            },
+            "preflightPath": [
+              {
+                "x": 287,
+                "y": 618
+              },
+              {
+                "x": 286,
+                "y": 617
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 298,
+              "y": 605
+            },
+            "radius": 0,
+            "fromSequence": 1069,
+            "throughSequence": 1079,
+            "before": {
+              "x": 296,
+              "y": 607
+            },
+            "after": {
+              "x": 298,
+              "y": 605
+            },
+            "preflightPath": [
+              {
+                "x": 296,
+                "y": 607
+              },
+              {
+                "x": 297,
+                "y": 606
+              },
+              {
+                "x": 298,
+                "y": 605
+              }
+            ]
+          },
+          {
+            "actor": 1,
+            "target": {
+              "x": 288,
+              "y": 615
+            },
+            "radius": 0,
+            "fromSequence": 958,
+            "throughSequence": 970,
+            "before": {
+              "x": 286,
+              "y": 617
+            },
+            "after": {
+              "x": 288,
+              "y": 615
+            },
+            "preflightPath": [
+              {
+                "x": 286,
+                "y": 617
+              },
+              {
+                "x": 287,
+                "y": 616
+              },
+              {
+                "x": 288,
+                "y": 616
+              },
+              {
+                "x": 288,
+                "y": 615
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 299,
+              "y": 604
+            },
+            "radius": 0,
+            "fromSequence": 1091,
+            "throughSequence": 1093,
+            "before": {
+              "x": 298,
+              "y": 605
+            },
+            "after": {
+              "x": 299,
+              "y": 604
+            },
+            "preflightPath": [
+              {
+                "x": 298,
+                "y": 605
+              },
+              {
+                "x": 299,
+                "y": 604
+              }
+            ]
+          },
+          {
+            "actor": 1,
+            "target": {
+              "x": 289,
+              "y": 614
+            },
+            "radius": 0,
+            "fromSequence": 974,
+            "throughSequence": 977,
+            "before": {
+              "x": 288,
+              "y": 615
+            },
+            "after": {
+              "x": 289,
+              "y": 614
+            },
+            "preflightPath": [
+              {
+                "x": 288,
+                "y": 615
+              },
+              {
+                "x": 289,
+                "y": 614
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 299,
+              "y": 602
+            },
+            "radius": 0,
+            "fromSequence": 1097,
+            "throughSequence": 1101,
+            "before": {
+              "x": 299,
+              "y": 604
+            },
+            "after": {
+              "x": 299,
+              "y": 602
+            },
+            "preflightPath": [
+              {
+                "x": 299,
+                "y": 604
+              },
+              {
+                "x": 299,
+                "y": 603
+              },
+              {
+                "x": 299,
+                "y": 602
+              }
+            ]
+          },
+          {
+            "actor": 1,
+            "target": {
+              "x": 289,
+              "y": 612
+            },
+            "radius": 0,
+            "fromSequence": 982,
+            "throughSequence": 990,
+            "before": {
+              "x": 289,
+              "y": 614
+            },
+            "after": {
+              "x": 289,
+              "y": 612
+            },
+            "preflightPath": [
+              {
+                "x": 289,
+                "y": 614
+              },
+              {
+                "x": 289,
+                "y": 613
+              },
+              {
+                "x": 289,
+                "y": 612
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 300,
+              "y": 599
+            },
+            "radius": 0,
+            "fromSequence": 1111,
+            "throughSequence": 1126,
+            "before": {
+              "x": 299,
+              "y": 602
+            },
+            "after": {
+              "x": 300,
+              "y": 599
+            },
+            "preflightPath": [
+              {
+                "x": 299,
+                "y": 602
+              },
+              {
+                "x": 299,
+                "y": 601
+              },
+              {
+                "x": 299,
+                "y": 600
+              },
+              {
+                "x": 300,
+                "y": 599
+              }
+            ]
+          },
+          {
+            "actor": 1,
+            "target": {
+              "x": 300,
+              "y": 607
+            },
+            "radius": 0,
+            "fromSequence": 1001,
+            "throughSequence": 1038,
+            "before": {
+              "x": 289,
+              "y": 612
+            },
+            "after": {
+              "x": 300,
+              "y": 607
+            },
+            "preflightPath": [
+              {
+                "x": 289,
+                "y": 612
+              },
+              {
+                "x": 290,
+                "y": 612
+              },
+              {
+                "x": 291,
+                "y": 612
+              },
+              {
+                "x": 292,
+                "y": 612
+              },
+              {
+                "x": 293,
+                "y": 611
+              },
+              {
+                "x": 294,
+                "y": 610
+              },
+              {
+                "x": 295,
+                "y": 609
+              },
+              {
+                "x": 296,
+                "y": 608
+              },
+              {
+                "x": 297,
+                "y": 607
+              },
+              {
+                "x": 298,
+                "y": 607
+              },
+              {
+                "x": 299,
+                "y": 607
+              },
+              {
+                "x": 300,
+                "y": 607
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 301,
+              "y": 597
+            },
+            "radius": 0,
+            "fromSequence": 1172,
+            "throughSequence": 1183,
+            "before": {
+              "x": 300,
+              "y": 599
+            },
+            "after": {
+              "x": 301,
+              "y": 597
+            },
+            "preflightPath": [
+              {
+                "x": 300,
+                "y": 599
+              },
+              {
+                "x": 301,
+                "y": 599
+              },
+              {
+                "x": 301,
+                "y": 598
+              },
+              {
+                "x": 301,
+                "y": 597
+              }
+            ]
+          },
+          {
+            "actor": 0,
+            "target": {
+              "x": 301,
+              "y": 594
+            },
+            "radius": 0,
+            "fromSequence": 1188,
+            "throughSequence": 1207,
+            "before": {
+              "x": 301,
+              "y": 597
+            },
+            "after": {
+              "x": 301,
+              "y": 594
+            },
+            "preflightPath": [
+              {
+                "x": 301,
+                "y": 597
+              },
+              {
+                "x": 301,
+                "y": 596
+              },
+              {
+                "x": 301,
+                "y": 595
+              },
+              {
+                "x": 301,
+                "y": 594
+              }
+            ]
+          },
+          {
+            "actor": 1,
+            "target": {
+              "x": 291,
+              "y": 604
+            },
+            "radius": 0,
+            "fromSequence": 1066,
+            "throughSequence": 1111,
+            "before": {
+              "x": 300,
+              "y": 607
+            },
+            "after": {
+              "x": 291,
+              "y": 604
+            },
+            "preflightPath": [
+              {
+                "x": 300,
+                "y": 607
+              },
+              {
+                "x": 299,
+                "y": 607
+              },
+              {
+                "x": 298,
+                "y": 607
+              },
+              {
+                "x": 297,
+                "y": 607
+              },
+              {
+                "x": 296,
+                "y": 607
+              },
+              {
+                "x": 295,
+                "y": 607
+              },
+              {
+                "x": 294,
+                "y": 607
+              },
+              {
+                "x": 293,
+                "y": 607
+              },
+              {
+                "x": 293,
+                "y": 606
+              },
+              {
+                "x": 292,
+                "y": 605
+              },
+              {
+                "x": 291,
+                "y": 604
+              }
+            ]
+          }
+        ],
+        "unavailableHints": [],
+        "provocations": [
+          {
+            "objectId": 206013,
+            "name": "RakingCat",
+            "location": {
+              "x": 300,
+              "y": 598
+            },
+            "actor": {
+              "x": 300,
+              "y": 599
+            },
+            "commandSequence": 1160
+          },
+          {
+            "objectId": 206007,
+            "name": "RakingCat",
+            "location": {
+              "x": 301,
+              "y": 593
+            },
+            "actor": {
+              "x": 301,
+              "y": 594
+            },
+            "commandSequence": 1237
+          }
+        ],
+        "samples": [
+          {
+            "cursors": [
+              1160,
+              1041
+            ],
+            "hp": [
+              16,
+              18
+            ],
+            "actor": {
+              "x": 300,
+              "y": 599
+            },
+            "observer": {
+              "x": 300,
+              "y": 607
+            },
+            "currentCats": [
+              {
+                "objectId": 206013,
+                "x": 300,
+                "y": 598
+              },
+              {
+                "objectId": 206007,
+                "x": 299,
+                "y": 590
+              },
+              {
+                "objectId": 206020,
+                "x": 307,
+                "y": 584
+              },
+              {
+                "objectId": 206111,
+                "x": 308,
+                "y": 583
+              }
+            ]
+          }
+        ],
+        "supplies": [],
+        "armour": {
+          "armourRemoved": true,
+          "uniqueId": 1,
+          "to": 0,
+          "receipt": 912
+        },
+        "corridorEntry": {
+          "index": 0,
+          "preflightPath": [
+            {
+              "x": 286,
+              "y": 622
+            },
+            {
+              "x": 286,
+              "y": 621
+            },
+            {
+              "x": 286,
+              "y": 620
+            },
+            {
+              "x": 286,
+              "y": 619
+            },
+            {
+              "x": 287,
+              "y": 618
+            },
+            {
+              "x": 288,
+              "y": 617
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "requiredChecks": [
+    "authGuards",
+    "twoAccounts",
+    "mutualVisibility",
+    "movement",
+    "turn",
+    "chat",
+    "chatLatency",
+    "sharedCombat",
+    "mapRoundTrip",
+    "logout",
+    "reloginPersistence",
+    "sharedKill",
+    "sharedDrop",
+    "uniquePickup",
+    "playerDeath",
+    "townRevive"
+  ],
+  "ok": true,
+  "fullLifecyclePassed": true,
+  "status": "passed",
+  "finishedAt": "2026-10-26T23:35:36.773Z",
+  "visualAccepted": false,
+  "twoPhysicalComputersTested": false,
+  "loadAccepted": false
+}

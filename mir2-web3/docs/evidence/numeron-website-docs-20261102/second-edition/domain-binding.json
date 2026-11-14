@@ -1,0 +1,75 @@
+{
+  "schema": "numeron.website.domain-binding.v1",
+  "domain": "numeron.obelisk.build",
+  "projectId": "prj_Q14gZuvjxkfqOCExhqOrYiR2UbxA",
+  "teamId": "team_pXY7oaLtibSTlKSmKXMXzrQR",
+  "dns": {
+    "success": true,
+    "cname": {
+      "id": "5e92287605b1818a53b0e504b9d02d88",
+      "type": "CNAME",
+      "name": "numeron.obelisk.build",
+      "content": "f0c0be2daf5700de.vercel-dns-016.com",
+      "proxied": false
+    },
+    "txt": {
+      "id": "35d9639b1680d597ce3d92076c24c69d",
+      "name": "_vercel.obelisk.build"
+    },
+    "errors": []
+  },
+  "verification": true,
+  "configuration": {
+    "configuredBy": "CNAME",
+    "nameservers": [
+      "bruce.ns.cloudflare.com",
+      "josephine.ns.cloudflare.com"
+    ],
+    "serviceType": "external",
+    "cnames": [
+      "f0c0be2daf5700de.vercel-dns-016.com."
+    ],
+    "aValues": [
+      "216.150.1.193",
+      "216.150.16.193"
+    ],
+    "conflicts": [],
+    "acceptedChallenges": [
+      "http-01"
+    ],
+    "recommendedIPv4": [
+      {
+        "rank": 1,
+        "value": [
+          "216.150.1.1",
+          "216.150.16.1"
+        ]
+      },
+      {
+        "rank": 2,
+        "value": [
+          "76.76.21.21"
+        ]
+      }
+    ],
+    "recommendedCNAME": [
+      {
+        "rank": 1,
+        "value": "f0c0be2daf5700de.vercel-dns-016.com."
+      },
+      {
+        "rank": 2,
+        "value": "cname.vercel-dns.com."
+      }
+    ],
+    "ipStatus": "no-change",
+    "misconfigured": false
+  },
+  "alias": {
+    "alias": "numeron.obelisk.build",
+    "deploymentId": "dpl_4dXyLJo6QFudTXzKNS6kbuEMFJd4",
+    "projectId": "prj_Q14gZuvjxkfqOCExhqOrYiR2UbxA",
+    "created": "2026-11-02T00:22:24.023Z"
+  },
+  "scope": "Added CNAME and one additional TXT verification record. Existing domain and game services unchanged. Domain serves the previously released v1 deployment; second edition is local only."
+}

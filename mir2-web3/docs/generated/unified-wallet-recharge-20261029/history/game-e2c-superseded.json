@@ -1,0 +1,57 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T15:53:22.464335+00:00",
+  "producerReceipt": {
+    "filename": "game-attestation-v1-superseded.json",
+    "bytes": 1493,
+    "sha256": "f6d6e499b80aab13101232c3482d708d75feaf9fe0bda82a9229eb613ddefdef"
+  },
+  "producerReport": {
+    "schema": "mir2.windows.build-attestation.v2",
+    "exeSha256": "570FE378C14F29C9A9104D32535876D4928FD9071CDF38AE371EDEBC724C9EBE",
+    "exeSizeBytes": 133671424,
+    "gitRevision": "e2c85519e9435ffbad34e449ba705e33e8c9ad13",
+    "worktreeDirty": false,
+    "worktreeStatusScope": "git-status-z+diff+all-untracked-content-v2",
+    "worktreeStatusSha256": "7253AB888B5CE19F79C8E1A5EC00CF8F53680992362844A124938F384254DA6C",
+    "worktreeStatusLineCount": 0,
+    "cargoVersion": "cargo 1.95.0 (f2d3ce0bd 2026-03-21)",
+    "rustcVersion": "rustc 1.95.0 (59807616e 2026-04-14)",
+    "buildCommand": {
+      "executable": "cargo",
+      "toolchain": "+1.95.0",
+      "subcommand": "build",
+      "manifestPath": "apps/game-client/platform-windows/Cargo.toml",
+      "bin": "mir2-platform-windows",
+      "release": true,
+      "locked": true,
+      "target": "x86_64-pc-windows-msvc",
+      "profile": "release",
+      "targetDir": "target-attested-windows-candidate",
+      "extraArgs": []
+    },
+    "pathRemapping": {
+      "enabled": true,
+      "environmentVariable": "RUSTFLAGS",
+      "flags": [
+        {
+          "sourceToken": "<REPO_ROOT>",
+          "destination": "."
+        },
+        {
+          "sourceToken": "<CARGO_HOME>",
+          "destination": "cargo-home"
+        }
+      ]
+    },
+    "buildCompletedUtc": "2026-10-29T14:49:16.7563726+00:00",
+    "publisherAuthenticode": {
+      "required": false,
+      "status": "internal-candidate-only",
+      "thumbprint": null,
+      "timestampRequired": false
+    }
+  },
+  "phase": "clean e2c release build succeeded, later superseded for discovered procurement SC UI gap; not final delivery"
+}

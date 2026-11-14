@@ -1,0 +1,131 @@
+{
+  "schema": 1,
+  "scope": "Passive failed cohort observation; no replay or extra asset fetch",
+  "passed": false,
+  "fontAttempts": [
+    {
+      "path": "/original-ui/fonts/NotoSansTC.ttf",
+      "status": 504,
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "status": 200,
+      "failure": null
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansTC.ttf",
+      "status": 504,
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "status": 200,
+      "failure": null
+    },
+    {
+      "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+      "status": 504,
+      "failure": null
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansTC.ttf",
+      "status": 504,
+      "failure": null
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "status": 504,
+      "failure": null
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "status": 504,
+      "failure": null
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "status": 504,
+      "failure": null
+    },
+    {
+      "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+      "status": 504,
+      "failure": null
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "status": 504,
+      "failure": null
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "status": 504,
+      "failure": null
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "status": 504,
+      "failure": null
+    },
+    {
+      "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+      "status": 504,
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+      "status": 504,
+      "failure": null
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "status": 504,
+      "failure": null
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "status": 504,
+      "failure": null
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "status": 504,
+      "failure": null
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansTC.ttf",
+      "status": null,
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansTC.ttf",
+      "status": null,
+      "failure": null
+    },
+    {
+      "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+      "status": null,
+      "failure": "net::ERR_ABORTED"
+    }
+  ],
+  "finalSharedRuntime": {
+    "booted": true,
+    "quest": {
+      "ready": false,
+      "error": "quest UI font or skin failed to load",
+      "frame": 33235,
+      "generation": 2,
+      "revision": 2,
+      "displayLanguage": "zh-TW"
+    },
+    "hud": {
+      "ready": false,
+      "error": null,
+      "frame": 33235,
+      "generation": 2,
+      "revision": 1
+    }
+  },
+  "causalClaim": "504 observations do not establish that NPC or locale code caused the upstream failure"
+}

@@ -1,0 +1,523 @@
+{
+  "writtenAt": "2026-10-29T20:35:48.029335+00:00",
+  "status": "failed-no-further-retry",
+  "runnerExitCode": 1,
+  "sourceRevision": "e824e520b902e5fc616dc8fbb806b3a4363a60ba",
+  "gatewayBinarySha256": "010c6627c9a18663eb56a5618c220f46f6051b88e3c944e621166072d9aef2ea",
+  "toolingSourceHead": "bb690060d599d6d224f0ca708af2e75a1d4b533c",
+  "executedRunnerSha256": "6ab6bf7b30d645e3fc196270ec689e8dd6eb8c34e902c974da4922eed66c09de",
+  "explicitInfrastructureRetest": true,
+  "priorFailurePreserved": true,
+  "registrationRepeated": false,
+  "priorRecordedLoginAttempts": 4,
+  "newRecordedLoginAttempts": 2,
+  "totalRecordedLoginAttempts": 6,
+  "priorFourAttemptsPreserved": true,
+  "startedAt": "2026-10-29T20:31:29.797Z",
+  "finishedAt": "2026-10-29T20:33:50.505Z",
+  "phaseWindows": [
+    {
+      "name": "bootstrap-2",
+      "kind": "bootstrap",
+      "targetActors": 2,
+      "startedAtMs": 1793305889833,
+      "endedAtMs": 1793305911734,
+      "completed": true
+    },
+    {
+      "name": "stage-2",
+      "kind": "measurement",
+      "targetActors": 2,
+      "startedAtMs": 1793305911735,
+      "endedAtMs": 1793305971814,
+      "completed": true
+    },
+    {
+      "name": "soak",
+      "kind": "measurement",
+      "targetActors": 2,
+      "startedAtMs": 1793305971815,
+      "endedAtMs": 1793306026944,
+      "completed": false
+    }
+  ],
+  "stage2": {
+    "passed": true,
+    "completed": true,
+    "measuredSeconds": 60.079,
+    "timeoutRatio": 0,
+    "correctionRatio": 0,
+    "movementPassed": true,
+    "chatPassed": true,
+    "fanoutPassed": true,
+    "aoi": {
+      "samples": 60,
+      "expectedPairs": 120,
+      "observedPairs": 120,
+      "persistentMissing": 0,
+      "ghosts": 0,
+      "duplicates": 0,
+      "minimumCoverage": 1,
+      "maximumExpectedPerObserver": 1
+    },
+    "perActorActivity": [
+      {
+        "role": "movement",
+        "plans": 80,
+        "gaps": 0,
+        "moves": 77,
+        "attacks": 0,
+        "hits": 0,
+        "damage": 0,
+        "lastSuccessAt": 1793305971388,
+        "runs": 71,
+        "cells": 148,
+        "nativeOpportunities": 80,
+        "nativeCompleted": 80,
+        "offeredDurationMs": 60000,
+        "evidenceWaits": 0,
+        "ownerAckWaits": 0,
+        "unknownPacing": 0,
+        "nativeActivity": {
+          "passed": true,
+          "completionRatio": 1,
+          "runRatio": 0.922077922077922,
+          "cellsPerMinute": 147.80538957039897,
+          "positiveHitsPerMinute": 0,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "offeredDurationMs": 60000,
+          "unknownPacing": 0,
+          "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+        },
+        "passed": true,
+        "actorOrdinal": 1
+      },
+      {
+        "role": "movement",
+        "plans": 80,
+        "gaps": 1,
+        "moves": 77,
+        "attacks": 0,
+        "hits": 0,
+        "damage": 0,
+        "lastSuccessAt": 1793305971799,
+        "runs": 69,
+        "cells": 146,
+        "nativeOpportunities": 80,
+        "nativeCompleted": 79,
+        "offeredDurationMs": 60000,
+        "evidenceWaits": 0,
+        "ownerAckWaits": 1,
+        "unknownPacing": 0,
+        "nativeActivity": {
+          "passed": true,
+          "completionRatio": 0.9875,
+          "runRatio": 0.8961038961038961,
+          "cellsPerMinute": 145.80801944106926,
+          "positiveHitsPerMinute": 0,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 1,
+          "offeredDurationMs": 60000,
+          "unknownPacing": 0,
+          "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+        },
+        "passed": true,
+        "actorOrdinal": 2
+      }
+    ]
+  },
+  "soak": {
+    "configuredSeconds": 60,
+    "measuredUntilAbortSeconds": 55.129,
+    "completed": false,
+    "passed": false
+  },
+  "firstFailedContinuousWindow": {
+    "previousCloseEmittedAtMs": 1793305966386,
+    "previousCloseEmittedAtUTC": "2026-10-29T20:32:46.386+00:00",
+    "closeEmittedAtMs": 1793306026883,
+    "closeEmittedAtUTC": "2026-10-29T20:33:46.883+00:00",
+    "emittedWallEnvelopeSeconds": 60.497,
+    "reportedMonotonicElapsedSeconds": 60.4963608,
+    "exactMonotonicStartSerialized": false,
+    "phases": [
+      "stage-2",
+      "soak"
+    ],
+    "includesRampOrSettling": false,
+    "failedGate": "timeoutRatio must be strictly below0.01; observed1/80=0.0125",
+    "timeoutRatio": 0.0125,
+    "correctionRatio": 0.012987012987012988,
+    "activityPassed": true,
+    "latencyPassed": true,
+    "fanoutPassed": true,
+    "nativeActivity": {
+      "passed": true,
+      "completionRatio": 0.95,
+      "runRatio": 0.9041095890410958,
+      "cellsPerMinute": 137.85953220511738,
+      "positiveHitsPerMinute": 0,
+      "evidenceWaits": 0,
+      "ownerAckWaits": 2,
+      "offeredDurationMs": 60000,
+      "unknownPacing": 0,
+      "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+    },
+    "activity": {
+      "plans": 80,
+      "gaps": 2,
+      "moves": 73,
+      "attacks": 0,
+      "hits": 0,
+      "damage": 0,
+      "lastSuccessAt": 1793306025734,
+      "runs": 66,
+      "cells": 139,
+      "nativeOpportunities": 80,
+      "nativeCompleted": 76,
+      "offeredDurationMs": 60000,
+      "evidenceWaits": 0,
+      "ownerAckWaits": 2,
+      "unknownPacing": 0
+    },
+    "metrics": {
+      "turn": {
+        "count": 1,
+        "status": {
+          "success": 1
+        },
+        "fromSend": {
+          "count": 1,
+          "p50Ms": 386,
+          "p95Ms": 386,
+          "p99Ms": 386,
+          "maxMs": 385.1250999999902
+        },
+        "fromPlan": {
+          "count": 1,
+          "p50Ms": 403,
+          "p95Ms": 403,
+          "p99Ms": 403,
+          "maxMs": 402.5967999999848
+        }
+      },
+      "fanout-turn": {
+        "count": 1,
+        "status": {
+          "success": 1
+        },
+        "fromSend": {
+          "count": 1,
+          "p50Ms": 385,
+          "p95Ms": 385,
+          "p99Ms": 385,
+          "maxMs": 384.8894999999902
+        },
+        "fromPlan": {
+          "count": 0,
+          "p50Ms": null,
+          "p95Ms": null,
+          "p99Ms": null,
+          "maxMs": 0
+        }
+      },
+      "walk": {
+        "count": 10,
+        "status": {
+          "success": 7,
+          "owner-ack-wait": 2,
+          "corrected": 1
+        },
+        "fromSend": {
+          "count": 8,
+          "p50Ms": 60,
+          "p95Ms": 181,
+          "p99Ms": 181,
+          "maxMs": 180.30890000000363
+        },
+        "fromPlan": {
+          "count": 8,
+          "p50Ms": 71,
+          "p95Ms": 198,
+          "p99Ms": 198,
+          "maxMs": 197.56499999998778
+        }
+      },
+      "fanout-walk": {
+        "count": 7,
+        "status": {
+          "success": 7
+        },
+        "fromSend": {
+          "count": 7,
+          "p50Ms": 166,
+          "p95Ms": 175,
+          "p99Ms": 175,
+          "maxMs": 174.15710000001127
+        },
+        "fromPlan": {
+          "count": 0,
+          "p50Ms": null,
+          "p95Ms": null,
+          "p99Ms": null,
+          "maxMs": 0
+        }
+      },
+      "run": {
+        "count": 67,
+        "status": {
+          "success": 66,
+          "timeout": 1
+        },
+        "fromSend": {
+          "count": 66,
+          "p50Ms": 61,
+          "p95Ms": 268,
+          "p99Ms": 499,
+          "maxMs": 498.0780999999988
+        },
+        "fromPlan": {
+          "count": 66,
+          "p50Ms": 87,
+          "p95Ms": 274,
+          "p99Ms": 508,
+          "maxMs": 507.7633999999962
+        }
+      },
+      "fanout-run": {
+        "count": 66,
+        "status": {
+          "success": 66
+        },
+        "fromSend": {
+          "count": 66,
+          "p50Ms": 166,
+          "p95Ms": 344,
+          "p99Ms": 499,
+          "maxMs": 498.0472000000009
+        },
+        "fromPlan": {
+          "count": 0,
+          "p50Ms": null,
+          "p95Ms": null,
+          "p99Ms": null,
+          "maxMs": 0
+        }
+      },
+      "chat": {
+        "count": 2,
+        "status": {
+          "success": 2
+        },
+        "fromSend": {
+          "count": 2,
+          "p50Ms": 59,
+          "p95Ms": 88,
+          "p99Ms": 88,
+          "maxMs": 87.25890000000072
+        },
+        "fromPlan": {
+          "count": 2,
+          "p50Ms": 68,
+          "p95Ms": 109,
+          "p99Ms": 109,
+          "maxMs": 108.19689999999537
+        }
+      },
+      "peerChat": {
+        "count": 2,
+        "status": {
+          "success": 2
+        },
+        "fromSend": {
+          "count": 2,
+          "p50Ms": 59,
+          "p95Ms": 88,
+          "p99Ms": 88,
+          "maxMs": 87.25890000000072
+        },
+        "fromPlan": {
+          "count": 0,
+          "p50Ms": null,
+          "p95Ms": null,
+          "p99Ms": null,
+          "maxMs": 0
+        }
+      },
+      "fanout-chat": {
+        "count": 2,
+        "status": {
+          "success": 2
+        },
+        "fromSend": {
+          "count": 2,
+          "p50Ms": 59,
+          "p95Ms": 88,
+          "p99Ms": 88,
+          "maxMs": 87.25890000000072
+        },
+        "fromPlan": {
+          "count": 0,
+          "p50Ms": null,
+          "p95Ms": null,
+          "p99Ms": null,
+          "maxMs": 0
+        }
+      }
+    },
+    "actorOrdinal": 2
+  },
+  "denominatorScope": {
+    "measuredStage": "Starts after completed bootstrap; excludes admission/settle.",
+    "continuousWindows": "Begin at individual actor activation/admission and continue across measurement boundaries. Both first actor windows included ramp plus stage-2 and passed. The first failed second window included only stage-2 plus soak, so no ramp/settle was in that denominator.",
+    "lastAdmissionToStageStartSeconds": 5.877,
+    "settleOnlyDuration": "Not separately recorded; interval includes post-admission guard and settling, so do not relabel the entire5.877s as settling."
+  },
+  "error": "Continuous activity window failed, regardless of the measured stage",
+  "safetyStopped": true,
+  "safetyReason": "Continuous activity window failed, regardless of the measured stage",
+  "cleanupErrors": [],
+  "nativeResumeTested": false,
+  "saveReloginTested": false,
+  "combatTested": false,
+  "capacityAccepted": false,
+  "saturationEstablished": false,
+  "automaticRetryPerformed": false,
+  "resourceObservations": {
+    "monitorSamples": 68,
+    "firstSampledAt": 1793305887576,
+    "lastSampledAt": 1793306023601,
+    "allObservedMonitorStopFlagsFalse": true,
+    "maximumObservedGatewayCgroupMemoryBytes": 94425088,
+    "maximumObservedGatewayOomKillCount": 0,
+    "maximumDriverEventLoopLagP99Ms": 150.208511,
+    "afterDriverExitMonitorObservation": {
+      "sampledAtMs": 1793306043602,
+      "sampledAtUTC": "2026-10-29T20:34:03.602+00:00",
+      "pid": 967044,
+      "currentActiveSessions": 0,
+      "currentWsConnections": 0,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0,
+      "gatewayOomKill": 0,
+      "source": "Actual parent monitor-r2.json read after driver exit; no extra client connection."
+    },
+    "interpretation": "No Gateway OOM observed; this run does not establish saturation or identify the cause of the acknowledged-action timeout. Infra service final exit/hook status is independently reported by root."
+  },
+  "schema": "mir2.capacity.two-actor-infrastructure-retest.public.v1",
+  "admissions": [
+    {
+      "actorOrdinal": 1,
+      "atMs": 1793305897324,
+      "atUTC": "2026-10-29T20:31:37.324+00:00"
+    },
+    {
+      "actorOrdinal": 2,
+      "atMs": 1793305905858,
+      "atUTC": "2026-10-29T20:31:45.858+00:00"
+    }
+  ],
+  "gameplayFailureActions": [
+    {
+      "type": "action",
+      "at": 1793306019387,
+      "phase": "soak",
+      "kind": "refresh",
+      "status": "timeout",
+      "actorOrdinal": 1
+    },
+    {
+      "type": "action",
+      "at": 1793306019449,
+      "phase": "soak",
+      "kind": "run",
+      "status": "timeout",
+      "plannedGameplay": true,
+      "scheduledAtMs": 127973.91930000001,
+      "sentAtMs": 128003.0794,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "latencyMs": 2019.3524999999936,
+      "plannedLatencyMs": 2048.513699999996,
+      "ambiguousTargetQuarantined": false,
+      "actorOrdinal": 2
+    },
+    {
+      "type": "action",
+      "at": 1793306019848,
+      "phase": "soak",
+      "kind": "run",
+      "status": "timeout",
+      "plannedGameplay": true,
+      "scheduledAtMs": 128399.3235,
+      "sentAtMs": 128402.6405,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "latencyMs": 2018.6826,
+      "plannedLatencyMs": 2021.9997000000003,
+      "ambiguousTargetQuarantined": false,
+      "actorOrdinal": 1
+    },
+    {
+      "type": "action",
+      "at": 1793306019870,
+      "phase": "soak",
+      "kind": "walk",
+      "status": "corrected",
+      "plannedGameplay": true,
+      "scheduledAtMs": 130223.91930000001,
+      "sentAtMs": 130241.1754,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "latencyMs": 180.30890000000363,
+      "plannedLatencyMs": 197.56499999998778,
+      "actorOrdinal": 2
+    }
+  ],
+  "drainActionEvidence": [
+    {
+      "type": "action",
+      "at": 1793306030009,
+      "phase": "drain",
+      "kind": "logOut",
+      "status": "success",
+      "latencyMs": 1907.6680999999808,
+      "actorOrdinal": 2
+    },
+    {
+      "type": "action",
+      "at": 1793306030320,
+      "phase": "drain",
+      "kind": "logOut",
+      "status": "success",
+      "latencyMs": 889.5941999999923,
+      "actorOrdinal": 1
+    }
+  ],
+  "rootOwnedStopEvidence": {
+    "files": [
+      "STOP-R2-REQUEST.json",
+      "STOP-R2-FINAL.json"
+    ],
+    "independentlyEvaluatedHere": false,
+    "watchdogCleanExitClaimed": false
+  },
+  "publicProjection": {
+    "sourceSha256": "7c1d327eae444a909d8bf3e20589f81f70d2b152941cb85f5646cadba063f3bf",
+    "removed": [
+      "local absolute file inventory and paths",
+      "generated actor names",
+      "raw errors containing generated actor names",
+      "private account/ledger material"
+    ],
+    "actorOrdinalsAreAnonymized": true,
+    "rawPoolAndLedgerIncluded": false,
+    "sourceDenominatorExplanationPreserved": true
+  }
+}

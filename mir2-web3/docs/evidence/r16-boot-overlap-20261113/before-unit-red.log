@@ -1,0 +1,138 @@
+TAP version 13
+# Subtest: Page prewarm delegation returns the real shared stage promise
+ok 1 - Page prewarm delegation returns the real shared stage promise
+  ---
+  duration_ms: 163.2538
+  type: 'test'
+  ...
+# Subtest: actual Page starts independent fonts and runtime while the HUD stage is still pending
+not ok 2 - actual Page starts independent fonts and runtime while the HUD stage is still pending
+  ---
+  duration_ms: 110.0864
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-runtime-font-prewarm.mjs:63:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The expression evaluated to a falsy value:
+
+      assert(run.events.some(e=>e.name==='module'))
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs:65:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual Page retains the HUD request while overlapping fonts and binary after first paint
+ok 3 - actual Page retains the HUD request while overlapping fonts and binary after first paint
+  ---
+  duration_ms: 91.6436
+  type: 'test'
+  ...
+# Subtest: a failed independent HUD stage cannot withdraw an already ready runtime
+not ok 4 - a failed independent HUD stage cannot withdraw an already ready runtime
+  ---
+  duration_ms: 89.096
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-runtime-font-prewarm.mjs:85:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The expression evaluated to a falsy value:
+
+      assert(run.events.some(e=>e.name==='module'))
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs:86:64)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: leaving before the HUD stage settles cancels independent fonts and fences late diagnostics and boot
+not ok 5 - leaving before the HUD stage settles cancels independent fonts and fences late diagnostics and boot
+  ---
+  duration_ms: 86.3315
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-runtime-font-prewarm.mjs:94:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+
+    0 !== 1
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs:95:71)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: actual Page leaves fonts deferred before first paint and for disabled, touch, missing metadata or GPU
+ok 6 - actual Page leaves fonts deferred before first paint and for disabled, touch, missing metadata or GPU
+  ---
+  duration_ms: 430.5921
+  type: 'test'
+  ...
+# Subtest: actual retryable module failure cancels overlapping fonts and keeps the retry boundary
+ok 7 - actual retryable module failure cancels overlapping fonts and keeps the retry boundary
+  ---
+  duration_ms: 75.912
+  type: 'test'
+  ...
+# Subtest: leaving while the runtime downloads cancels fonts and prevents late boot
+ok 8 - leaving while the runtime downloads cancels fonts and prevents late boot
+  ---
+  duration_ms: 80.7744
+  type: 'test'
+  ...
+# Subtest: prewarm paths exactly cover the Native display font families
+ok 9 - prewarm paths exactly cover the Native display font families
+  ---
+  duration_ms: 1.753
+  type: 'test'
+  ...
+# Subtest: two pending font bodies bound concurrency and completion waits for full bytes
+ok 10 - two pending font bodies bound concurrency and completion waits for full bytes
+  ---
+  duration_ms: 13.1387
+  type: 'test'
+  ...
+# Subtest: leaving cancels active font bodies and never starts the queued fonts
+ok 11 - leaving cancels active font bodies and never starts the queued fonts
+  ---
+  duration_ms: 0.9598
+  type: 'test'
+  ...
+# (node:3284) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: a failed font does not withdraw the runtime or prevent warming the other families
+ok 12 - a failed font does not withdraw the runtime or prevent warming the other families
+  ---
+  duration_ms: 470.246
+  type: 'test'
+  ...
+# Subtest: the slow CJK families do not wait behind short fallback requests
+ok 13 - the slow CJK families do not wait behind short fallback requests
+  ---
+  duration_ms: 2.6546
+  type: 'test'
+  ...
+1..13
+# tests 13
+# suites 0
+# pass 10
+# fail 3
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1948.3724

@@ -1,0 +1,282 @@
+{
+  "passed": true,
+  "target": "F:\\mir2-builds\\alo-r16-20261103",
+  "backup": "F:\\mir2-builds\\alo-openai-20261103\\update-backup",
+  "sourceBranch": "codex/windows-player-journey",
+  "sourceBaseRevision": "c404bde8a5190534f6bc83ec8a4fe78fffc8cb50",
+  "changedFiles": [
+    {
+      "path": "apps/ai-player/README.md",
+      "oldHash": "47ff19424598a8a535cda16774bb0fb83e52f67981b8101104d6b23e26fc0bc0",
+      "newHash": "a8e9b15fc7b53a13268ddfc05034f0715f73522727e6ef549c3ee2a2441e43ef"
+    },
+    {
+      "path": "apps/ai-player/model-settings/Cargo.lock",
+      "oldHash": null,
+      "newHash": "d386065a83056d5171d8af12720c04fd30af454daf95eb96f610f349c137e340"
+    },
+    {
+      "path": "apps/ai-player/model-settings/Cargo.toml",
+      "oldHash": null,
+      "newHash": "5d58c522921bce08054b3ab73f981fe45e342111f99c5ddeb3b94108505c1c50"
+    },
+    {
+      "path": "apps/ai-player/model-settings/README.md",
+      "oldHash": null,
+      "newHash": "fd501a547ac2a3b87859bc9f1db0a41a7280c779aeaad6cc3cb65168b78ec8d0"
+    },
+    {
+      "path": "apps/ai-player/model-settings/src/lib.rs",
+      "oldHash": null,
+      "newHash": "9e8b442c6647f15b90d7a7bca306fb34f5316480e813d0dc72449a79e0bd6489"
+    },
+    {
+      "path": "apps/ai-player/model-settings/src/main.rs",
+      "oldHash": null,
+      "newHash": "dfe7c443cbe630f39a8af3ec0b0555760ff0f22a04e659266e1b4c493e304454"
+    },
+    {
+      "path": "apps/ai-player/model-settings/src/windows.rs",
+      "oldHash": null,
+      "newHash": "fcfd70521c6fdc797d27a9d7f2e1f473a8d2d53cd667329bad82fefe6cd9aeba"
+    },
+    {
+      "path": "apps/ai-player/native-launcher/package.mjs",
+      "oldHash": "be3b2db60ac6c6ba09bdedefb616b9d33e3b80a9ea224f5ba0054d74a893647f",
+      "newHash": "367f445a2eab166e926514c4ee8869570ea566c190c552d5ef2b5d3c2f61348b"
+    },
+    {
+      "path": "apps/ai-player/scripts/companion-trial-fixture.mjs",
+      "oldHash": "b04772be8f6785bee01fd0f91ce09483648e50454a5179c85323d513c53f9c7e",
+      "newHash": "7be9d80cb51e445d679c031df8b8828a2ae1996133adeafc16c785f00adf9595"
+    },
+    {
+      "path": "apps/ai-player/scripts/run-model-companion-acceptance.mjs",
+      "oldHash": null,
+      "newHash": "c1944bd45667511d03cab243c63a6b1b14585832e0175f55ee3413a8f3f388f2"
+    },
+    {
+      "path": "apps/ai-player/src/companion-controller.mjs",
+      "oldHash": "6a1a8efe33d5e09798856de2ccc3497fc0f7c6ee3df3c049f7129e6bcabc0d96",
+      "newHash": "e0539ada38bf228202713c6d66f280385a9f063819712b11f182486b4d80150f"
+    },
+    {
+      "path": "apps/ai-player/src/companion-runtime-service.mjs",
+      "oldHash": "b57e7600c2a59cce01dc483662e9fc3b5f49041398e4845e4ba23dee40ad33ac",
+      "newHash": "4c64a403ca73122fe379a98b77580cd0b730b5f063764133b01e85237abfa5c8"
+    },
+    {
+      "path": "apps/ai-player/src/experience/experience-ledger.mjs",
+      "oldHash": "0456ce2681045392b95debaecd1a140e1e626f1be8b0f25769664991c5a57c53",
+      "newHash": "108f3288355137fd4fc336ae9da08a2b64cf1e99dc8294657ab27a7d79e32a77"
+    },
+    {
+      "path": "apps/ai-player/src/gateway-client.mjs",
+      "oldHash": "76e302f3f8a7258ddc1ac1b8573d7c765338df4ee6feac586fa51a633c2a567d",
+      "newHash": "73ce7baa0d63d30e591ea449001bc56d4b70509a266bb26d0251121cb85d1fa8"
+    },
+    {
+      "path": "apps/ai-player/src/local-model-settings.mjs",
+      "oldHash": null,
+      "newHash": "b8417491a155ec2fbbac744830a55fdc02d286c34a5015903e26ed41b0833a3f"
+    },
+    {
+      "path": "apps/ai-player/src/local-playtest.mjs",
+      "oldHash": "71688184be90011772cb1aa0ccf1dc0773bdd51dc539aff2c0a680964a3db8c3",
+      "newHash": "e7d00fe6e56942b0d480f1c49d168bb52c658d661545d8fcc75486bf4d6ae8f0"
+    },
+    {
+      "path": "apps/ai-player/src/main.mjs",
+      "oldHash": "63ed49b6b4b384cc2e55422d1823b1c3d8552f36aea9b5b3e673f867174b8d81",
+      "newHash": "e2c14cf84414322cbc0bbbc65d444173d1b7d94a1ece89c7da5cd8f132e0e2ec"
+    },
+    {
+      "path": "apps/ai-player/src/memory/companion-store.mjs",
+      "oldHash": "85f36a3598b9db009f12f5b7bad496bbc973f87b94c542037bd6bc8e67af738e",
+      "newHash": "e63be93450106d62974ee60aba66f20b7b45a3cb3a787c584bf54be7dd8788a0"
+    },
+    {
+      "path": "apps/ai-player/src/model/companion-model-runtime.mjs",
+      "oldHash": null,
+      "newHash": "7975b18eed294bd6539924bc8a23a33d35bb3087c3ac82ee16217311f1affbc5"
+    },
+    {
+      "path": "apps/ai-player/src/model/memory-context.mjs",
+      "oldHash": null,
+      "newHash": "853c269c47a95b2d1cab6801c732a272f96f15e127c8a2c93712c5fd7794e15a"
+    },
+    {
+      "path": "apps/ai-player/src/model/openai-client.mjs",
+      "oldHash": null,
+      "newHash": "a3a5f3e0f7f90bcc47cd0700668770290a5bb0d94211c3aaad7a5a0d5e57ef74"
+    },
+    {
+      "path": "apps/ai-player/src/model/plan.mjs",
+      "oldHash": null,
+      "newHash": "d8edb9ec574cbad342d6e98d78285a71f4ac85b2b76358bfcc8c50b4c1a0f00e"
+    },
+    {
+      "path": "apps/ai-player/src/resident-actor.mjs",
+      "oldHash": "f7500f58dac9e2422f03e1af978989d359c161f385b2cd2e6382dc74858168b5",
+      "newHash": "d90dfc0a4d321f234506c3c0c6fb1cc45aa84c4a474df7ff7720725cba69c07b"
+    },
+    {
+      "path": "apps/ai-player/src/skills/navigation.mjs",
+      "oldHash": "db48d652943e7cff9a260ddda44ba6cff3e1f2154013aa07d309e464fbf50ab1",
+      "newHash": "5a896ab99352132dd551dd9fc3c3f125868ea14ecd9e923b05667f2ccba94470"
+    },
+    {
+      "path": "apps/ai-player/tests/companion-store.test.mjs",
+      "oldHash": "0d5fecf6bf4198dc442ce0284aab965bdad9696017b5a79c6c78238514286a75",
+      "newHash": "7aa14d4e1ce54b822ea6fd4c764a7dcafc37c6b1824d6f22cf0bb55f32aec473"
+    },
+    {
+      "path": "apps/ai-player/tests/experience-ledger.test.mjs",
+      "oldHash": "0d9302fc4e43cd3d290367633ebce8e955ffce62f05ffca6f956d26cde398fa8",
+      "newHash": "c6db93144dd22a92a50b5caab390b981d584151d5cef6093692cba7c04779ddc"
+    },
+    {
+      "path": "apps/ai-player/tests/gateway-control.test.mjs",
+      "oldHash": "c3e61a036f430f314b61b8ceaab1a1f9bd5e4a6366aa8b3991b6d388925fb2b8",
+      "newHash": "e498f4eb47b52a4439167dad3dd67d8c9f1bc8083acd50c1ee811bf8be81a85c"
+    },
+    {
+      "path": "apps/ai-player/tests/local-model-settings.test.mjs",
+      "oldHash": null,
+      "newHash": "447a54c074a197aa0b0476c02d46cd8df3c946dca0938a402630aed50a0412ad"
+    },
+    {
+      "path": "apps/ai-player/tests/model-memory-context.test.mjs",
+      "oldHash": null,
+      "newHash": "32e078953e9ff8312a075f0bbfe5ab27cae95eedbcd3150f3110983e3808a288"
+    },
+    {
+      "path": "apps/ai-player/tests/model-runtime.test.mjs",
+      "oldHash": null,
+      "newHash": "70e1fb74be21e36e4e8e740cc871b7fc6413cd8134a1357b55ad7a688b31f50e"
+    },
+    {
+      "path": "apps/ai-player/tests/openai-client.test.mjs",
+      "oldHash": null,
+      "newHash": "dcab9df8461690588f4028e709f108df3012ab47e7932edcabb4cf0769d541de"
+    },
+    {
+      "path": "apps/ai-player/tests/runtime-service.test.mjs",
+      "oldHash": "531bab6c7a5cbb0016621f4a8ec85cd585541fef3e6fdec9245f24365afa5d2e",
+      "newHash": "fcaf41b2a934a9868fbed2fa9360b527091154c9ad07eea4377667240ad06148"
+    },
+    {
+      "path": "docs/ALO-OPENAI-20261103.zh-CN.md",
+      "oldHash": null,
+      "newHash": "d1568277ca1288f3937039a10d008b37af29c243826bbf726176e58f9bdf5736"
+    },
+    {
+      "path": "docs/COMPANION-CONTROL-CONTRACT.md",
+      "oldHash": "24fbe3b1194e9eb0db30293e66fc1c32a353a11e138f8039b357e08c5756d3db",
+      "newHash": "d406783c8a635b6afbfb79eab266601a3a0d049fb9a0ba31d37e446881d236dc"
+    },
+    {
+      "path": "docs/evidence/alo-openai-20261103/01-original-teaching-v2.png",
+      "oldHash": null,
+      "newHash": "0a5146cdfd795ff1ff5f109a673d46a18e35b0f7674e6f887552c2aed3bc50db"
+    },
+    {
+      "path": "docs/evidence/alo-openai-20261103/02-private-model-unconfigured.png",
+      "oldHash": null,
+      "newHash": "d570bcaf5268a832e1e398e2a270e1f7dca9ef0447d76fef79c1c56c27a2b8d6"
+    },
+    {
+      "path": "docs/evidence/alo-openai-20261103/03-private-chinese-draft.png",
+      "oldHash": null,
+      "newHash": "dc0b1604ebfca3ef409e34944ca8c68e66beb9bd85b5602e63536435580395cc"
+    },
+    {
+      "path": "docs/evidence/alo-openai-20261103/04-unconfigured-enter-stays-private.png",
+      "oldHash": null,
+      "newHash": "89bb76c1be3d86819f8d9a6d9239a670f8fd98dd408dfdf3b1e9de33f14203bc"
+    },
+    {
+      "path": "docs/evidence/alo-openai-20261103/05-original-chat-empty.png",
+      "oldHash": null,
+      "newHash": "38b3ea77ea29434075dd8dfb88e9fe66d06e11fa1c712e2fc02dfafc1c388866"
+    },
+    {
+      "path": "docs/evidence/alo-openai-20261103/README.md",
+      "oldHash": null,
+      "newHash": "3704d535cde4a7175895d247242d3763d00a2ca33e4ef6e8a787e6aa11c36ba9"
+    },
+    {
+      "path": "docs/evidence/alo-openai-20261103/real-network-memory-reopen.json",
+      "oldHash": null,
+      "newHash": "7bd2345205d46d78169299d8105d03f587f469247b0064a9fe71a203a3a83ba2"
+    },
+    {
+      "path": "docs/evidence/alo-openai-20261103/real-network-mock-provider.json",
+      "oldHash": null,
+      "newHash": "1bcc58baa031e76f3e0eccf6fd994782787c529a2dec9b97a775d686a9eb70c0"
+    },
+    {
+      "path": "docs/evidence/alo-openai-20261103/source-inputs.json",
+      "oldHash": null,
+      "newHash": "4ff6cec673fd1043e2a74650d1a2550990e7728e91a8777124af210e999b012c"
+    },
+    {
+      "path": "docs/evidence/alo-openai-20261103/test-groups.json",
+      "oldHash": null,
+      "newHash": "9d61f41c9e3aeb5ab39c798c38c32ceb273aaa59ac022aa50521dc8aeab5584f"
+    },
+    {
+      "path": "docs/evidence/alo-openai-20261103/windows-gui.json",
+      "oldHash": null,
+      "newHash": "149998a92787594ce624602233b0f82c41c3d5478c471e441336005a5a7de489"
+    },
+    {
+      "path": "game/mir2-platform-windows.exe",
+      "oldHash": "a6f21a6d869027b332c7f3763076e856492ceca4df7697a4a7e2e04a2cba558e",
+      "newHash": "6b7d4efac65a55dfce33353b428b4945f534d666f77d171f2431d296087a0e8a"
+    },
+    {
+      "path": "game/resource-input.json",
+      "oldHash": "39d5edeeca07480125781cc204df242cdd8ebd81816d518a12e07d167b865d41",
+      "newHash": "95ac01b58d31895c5b41ba2ef5b3ef609b87ffe1dac80f8b0d90b14861b0473d"
+    },
+    {
+      "path": "gateway/mir2-gateway.exe",
+      "oldHash": "28ceae9f6f45392238f63cf2f539f8c23e64567d25a432a72c3a934e1cf6ead9",
+      "newHash": "165eba1719866912d2b7da28ad430164bd1a9a8ef704fe976400d0b232dccc7b"
+    },
+    {
+      "path": "开始试玩.txt",
+      "oldHash": "6ecc26cdcc0da42e6477b0b06e67a0b13a4e54ef25ee1a62c8c0f5085444608d",
+      "newHash": "27bbf6124bbaa7c87f7f04e123e13a91934956caff34be8a035b1c1b89c1aa46"
+    },
+    {
+      "path": "BUILD.json",
+      "oldHash": "b466ea2487d851d754bd4de64a580028afaa80e9f1a9f8b07c5adb2ac0a6cd33",
+      "newHash": "4d5e5538fe165e1e5f0f6484f462511f3d2e6d33815ac45a847e5967eea0ede4"
+    }
+  ],
+  "verifiedPayloadFiles": 132,
+  "privateStateHashBefore": "818e64d81a8e28867fef229891326809176e8d68fc7aec6e2119d9fbc992a931",
+  "privateStateHashAfter": "818e64d81a8e28867fef229891326809176e8d68fc7aec6e2119d9fbc992a931",
+  "privateDataCopied": false,
+  "processTerminations": 0,
+  "publicDeployment": false,
+  "liveModelApiValidated": false,
+  "finalizedAt": "2026-11-03T01:10:52.481Z",
+  "originalUserProcessesCheckedAlive": [
+    60840,
+    54924,
+    51520,
+    63464,
+    52316
+  ],
+  "nativeSha256": "6b7d4efac65a55dfce33353b428b4945f534d666f77d171f2431d296087a0e8a",
+  "gatewaySha256": "165eba1719866912d2b7da28ad430164bd1a9a8ef704fe976400d0b232dccc7b",
+  "settingsSha256": "27cdaac7b641ce534b1f9132d9a82b2837655763d783765795eff85cc14e9c76",
+  "latestMetadataAddition": [
+    "wip-preservation.json",
+    "delivery-verification.json"
+  ],
+  "acceptancePending": "owner must configure local API key before live OpenAI acceptance"
+}

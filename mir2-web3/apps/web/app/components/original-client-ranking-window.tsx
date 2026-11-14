@@ -34,6 +34,8 @@ export type RankingEntry = {
 /** One ranking page (mirrors the page's `RankingState`). */
 export type RankingPage = {
   rankType: number;
+  /** Authoritative row offset captured with this page's request. */
+  rankIndex?: number;
   onlineOnly: boolean;
   myRank: number;
   count: number;
@@ -59,6 +61,9 @@ export type RankingWindowProps = {
   activeTab?: RankingTabKey;
   /** Loaded page for the active tab, if any. */
   page: RankingPage | null;
+  /** Current query filter, including while its next page is pending. */
+  onlineOnly?: boolean;
+  requestPending?: boolean;
   /** Viewer name, used to highlight the player's own row. */
   playerName?: string | null;
   /**
@@ -72,6 +77,9 @@ export type RankingWindowProps = {
   /** Fired when a tab is chosen — host should dispatch a getRanking request. */
   onSelectTab?: (tab: RankingTabKey) => void;
   onRefresh?: (tab: RankingTabKey) => void;
+  /** Host requests one row backward/forward, as in Native move_rows. */
+  onPrevious?: () => void;
+  onNext?: () => void;
   /** Toggle the online-only filter (Crystal `OnlineOnly` checkbox). */
   onToggleOnlineOnly?: (onlineOnly: boolean) => void;
   /** Inspect a ranked character (Crystal row click → Inspect packet). */
@@ -102,7 +110,6 @@ const DEFAULT_RANKING_TABS: RankingTabKey[] = [
   "taoist",
   "assassin",
   "archer",
-  "online",
 ];
 
 /** Boards whose ranked metric is a value (PK points / guild score) not level. */
@@ -112,11 +119,15 @@ export function RankingWindow({
   t,
   activeTab,
   page,
+  onlineOnly: controlledOnlineOnly,
+  requestPending,
   playerName,
   tabs,
   valueColumnLabel,
   onSelectTab,
   onRefresh,
+  onPrevious,
+  onNext,
   onToggleOnlineOnly,
   onInspect,
   onGoToMyRank,
@@ -133,13 +144,19 @@ export function RankingWindow({
   const tab = activeTab ?? internalTab;
   const tabKeys = tabs && tabs.length > 0 ? tabs : DEFAULT_RANKING_TABS;
   const entries = useMemo(
-    () => [...(page?.entries ?? [])].sort((a, b) => a.rank - b.rank),
+    () => [...(page?.entries ?? [])].sort((a, b) => a.rank - b.rank).slice(0, 20),
     [page?.entries],
   );
   // A board is value-based when its tab is a value board OR any row carries a value.
   const valueBoard =
     VALUE_TABS.has(tab) || entries.some((entry) => entry.value !== undefined || entry.valueLabel !== undefined);
-  const onlineOnly = page?.onlineOnly === true;
+  const onlineOnly = controlledOnlineOnly ?? (page?.onlineOnly === true);
+  const rankIndex = page?.rankIndex;
+  const count = page?.count;
+  const pagingReady = Number.isSafeInteger(rankIndex) && rankIndex! >= 0 && rankIndex! <= 2147483647
+    && Number.isSafeInteger(count) && count! >= 0 && count! <= 2147483647 && requestPending !== true;
+  const previousDisabled = !pagingReady || rankIndex === 0 || !onPrevious;
+  const nextDisabled = !pagingReady || rankIndex! >= Math.max(0, count! - 20) || !onNext;
 
   const selectTab = (next: RankingTabKey) => {
     setInternalTab(next);
@@ -151,6 +168,8 @@ export function RankingWindow({
       aria-label={t("ui.ranking", [], "Ranking")}
       data-ranking-tab={tab}
       data-ranking-count={entries.length}
+      data-ranking-offset={rankIndex ?? ""}
+      aria-busy={requestPending === true}
       style={style.window}
     >
       <img style={style.frame} src={FRAME.frame} alt="" draggable={false} />
@@ -264,11 +283,22 @@ export function RankingWindow({
       <div style={style.footer}>
         <div style={style.footerInfo}>
           {page ? t("ui.rankTotal", [page.count], `${page.count} ranked`) : ""}
+          {pagingReady && entries.length > 0 ? ` · ${rankIndex! + 1}–${rankIndex! + entries.length}` : ""}
         </div>
+        <button type="button" disabled={previousDisabled} data-ranking-previous
+          style={{ ...style.actionButton, ...(previousDisabled ? style.actionButtonDisabled : null) }}
+          onClick={() => { if (!previousDisabled) onPrevious?.(); }}>
+          {t("ui.previous", [], "Previous")}
+        </button>
+        <button type="button" disabled={nextDisabled} data-ranking-next
+          style={{ ...style.actionButton, ...(nextDisabled ? style.actionButtonDisabled : null) }}
+          onClick={() => { if (!nextDisabled) onNext?.(); }}>
+          {t("ui.next", [], "Next")}
+        </button>
         <button
           type="button"
-          disabled={!onRefresh}
-          style={{ ...style.actionButton, ...(!onRefresh ? style.actionButtonDisabled : null) }}
+          disabled={!onRefresh || requestPending === true}
+          style={{ ...style.actionButton, ...(!onRefresh || requestPending === true ? style.actionButtonDisabled : null) }}
           onClick={() => onRefresh?.(tab)}
         >
           {t("ui.refresh", [], "Refresh")}
@@ -438,8 +468,9 @@ const style: Record<string, CSSProperties> = {
     justifyContent: "space-between",
     gap: 8,
   },
-  footerInfo: { fontSize: 11, color: "#cbb38a" },
+  footerInfo: { fontSize: 11, color: "#cbb38a", flex: 1 },
   actionButton: {
+    minHeight: 44,
     border: "1px solid rgba(190, 157, 99, 0.56)",
     background: "linear-gradient(180deg, rgba(95, 53, 24, 0.95), rgba(45, 23, 12, 0.95))",
     color: "#f4dcaf",

@@ -1,0 +1,247 @@
+{
+  "stageRun": "43399952619",
+  "promoteRun": "43401010043",
+  "rollbackRun": "43403319810",
+  "stage": {
+    "passed": true,
+    "operation": "numeron-qr-stage",
+    "sourceSha": "2029b44abdee104445c569204477a219a1353f79",
+    "implementationSha": "6f62eaa79043731b568db739f10867dc0631c37d",
+    "candidates": {
+      "game": {
+        "id": "dpl_MS6JwmRmgJzqH411PKzFrDRaACmu",
+        "url": "numeron-r16-dccgyo5l5-obelisk-labs.vercel.app",
+        "project": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+        "readyState": "INITIALIZING"
+      }
+    },
+    "sourceClosure": {
+      "base": "bfbee701891748d7897ea228677165fa0fed0d46",
+      "assetSource": "f2de762309768b51b39438c2437c14e819df9bf7",
+      "ref": "codex/windows-player-journey",
+      "changedFiles": [
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/lib/first-crystal-scene-request.ts",
+          "sha": "dc68afd8d4b2e405f4a6f2ac7d1b1e7ea01ebb74"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-entry-bootstrap-chunks.ts",
+          "sha": "d83aa75dd0d64a641c232f61e433b9bddafd7b6b"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/pinned-bootstrap-chunk.ts",
+          "sha": "09aa098598b8ad8cfa138d9ac4fd2891a415bd09"
+        },
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/lib/r16-entry-scene.ts",
+          "sha": "bc87b6f721ebff752cb06fcff43d1b77ae7284bd"
+        },
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/lib/r16-native-localization.ts",
+          "sha": "6c493030b4a3bde8f8b178c0312db232d270d2c0"
+        },
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/package.json",
+          "sha": "755bd2411173ef54763f1abc9e1e812ca8e6cf11"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/scripts/generate-r16-bootstrap-chunks.mjs",
+          "sha": "0a02079df607dcf75f0c5e230e53dd25f21fed66"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/scripts/test-pinned-bootstrap-chunk.mjs",
+          "sha": "0a0363f551d1b259264131979b94d561653c1e27"
+        },
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/scripts/test-r16-native-localization.mjs",
+          "sha": "0af27631012b74be65a84eb8929d1a0b00d270b7"
+        },
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs",
+          "sha": "f2a9b6042d9986e78c67beb02467c3cc988e829a"
+        }
+      ]
+    },
+    "trafficBefore": {
+      "target": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd",
+      "alias": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd"
+    },
+    "trafficAfter": {
+      "target": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd",
+      "alias": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd"
+    },
+    "customDomainChanged": false,
+    "oldGameProjectMutatedByHelper": false,
+    "credentialsRecorded": false
+  },
+  "promote": {
+    "passed": true,
+    "operation": "numeron-qr-promote",
+    "sourceSha": "2029b44abdee104445c569204477a219a1353f79",
+    "implementationSha": "6f62eaa79043731b568db739f10867dc0631c37d",
+    "candidates": {
+      "game": {
+        "id": "dpl_MS6JwmRmgJzqH411PKzFrDRaACmu",
+        "url": "numeron-r16-dccgyo5l5-obelisk-labs.vercel.app"
+      }
+    },
+    "sourceClosure": {
+      "base": "bfbee701891748d7897ea228677165fa0fed0d46",
+      "assetSource": "f2de762309768b51b39438c2437c14e819df9bf7",
+      "ref": "codex/windows-player-journey",
+      "changedFiles": [
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/lib/first-crystal-scene-request.ts",
+          "sha": "dc68afd8d4b2e405f4a6f2ac7d1b1e7ea01ebb74"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-entry-bootstrap-chunks.ts",
+          "sha": "d83aa75dd0d64a641c232f61e433b9bddafd7b6b"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/pinned-bootstrap-chunk.ts",
+          "sha": "09aa098598b8ad8cfa138d9ac4fd2891a415bd09"
+        },
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/lib/r16-entry-scene.ts",
+          "sha": "bc87b6f721ebff752cb06fcff43d1b77ae7284bd"
+        },
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/lib/r16-native-localization.ts",
+          "sha": "6c493030b4a3bde8f8b178c0312db232d270d2c0"
+        },
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/package.json",
+          "sha": "755bd2411173ef54763f1abc9e1e812ca8e6cf11"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/scripts/generate-r16-bootstrap-chunks.mjs",
+          "sha": "0a02079df607dcf75f0c5e230e53dd25f21fed66"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/scripts/test-pinned-bootstrap-chunk.mjs",
+          "sha": "0a0363f551d1b259264131979b94d561653c1e27"
+        },
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/scripts/test-r16-native-localization.mjs",
+          "sha": "0af27631012b74be65a84eb8929d1a0b00d270b7"
+        },
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs",
+          "sha": "f2a9b6042d9986e78c67beb02467c3cc988e829a"
+        }
+      ]
+    },
+    "trafficBefore": {
+      "target": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd",
+      "alias": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd"
+    },
+    "trafficAfter": {
+      "target": "dpl_MS6JwmRmgJzqH411PKzFrDRaACmu",
+      "alias": "dpl_MS6JwmRmgJzqH411PKzFrDRaACmu"
+    },
+    "customDomainChanged": false,
+    "oldGameProjectMutatedByHelper": false,
+    "credentialsRecorded": false
+  },
+  "rollback": {
+    "passed": true,
+    "operation": "numeron-qr-rollback",
+    "sourceSha": "2029b44abdee104445c569204477a219a1353f79",
+    "implementationSha": "6f62eaa79043731b568db739f10867dc0631c37d",
+    "candidates": {
+      "game": {
+        "id": "dpl_MS6JwmRmgJzqH411PKzFrDRaACmu",
+        "url": "numeron-r16-dccgyo5l5-obelisk-labs.vercel.app"
+      }
+    },
+    "sourceClosure": {
+      "base": "bfbee701891748d7897ea228677165fa0fed0d46",
+      "assetSource": "f2de762309768b51b39438c2437c14e819df9bf7",
+      "ref": "codex/windows-player-journey",
+      "changedFiles": [
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/lib/first-crystal-scene-request.ts",
+          "sha": "dc68afd8d4b2e405f4a6f2ac7d1b1e7ea01ebb74"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/generated/r16-entry-bootstrap-chunks.ts",
+          "sha": "d83aa75dd0d64a641c232f61e433b9bddafd7b6b"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/lib/pinned-bootstrap-chunk.ts",
+          "sha": "09aa098598b8ad8cfa138d9ac4fd2891a415bd09"
+        },
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/lib/r16-entry-scene.ts",
+          "sha": "bc87b6f721ebff752cb06fcff43d1b77ae7284bd"
+        },
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/lib/r16-native-localization.ts",
+          "sha": "6c493030b4a3bde8f8b178c0312db232d270d2c0"
+        },
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/package.json",
+          "sha": "755bd2411173ef54763f1abc9e1e812ca8e6cf11"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/scripts/generate-r16-bootstrap-chunks.mjs",
+          "sha": "0a02079df607dcf75f0c5e230e53dd25f21fed66"
+        },
+        {
+          "status": "added",
+          "filename": "mir2-web3/apps/web/scripts/test-pinned-bootstrap-chunk.mjs",
+          "sha": "0a0363f551d1b259264131979b94d561653c1e27"
+        },
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/scripts/test-r16-native-localization.mjs",
+          "sha": "0af27631012b74be65a84eb8929d1a0b00d270b7"
+        },
+        {
+          "status": "modified",
+          "filename": "mir2-web3/apps/web/scripts/test-scene-blueprint-request.mjs",
+          "sha": "f2a9b6042d9986e78c67beb02467c3cc988e829a"
+        }
+      ]
+    },
+    "trafficBefore": {
+      "target": "dpl_MS6JwmRmgJzqH411PKzFrDRaACmu",
+      "alias": "dpl_MS6JwmRmgJzqH411PKzFrDRaACmu"
+    },
+    "trafficAfter": {
+      "target": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd",
+      "alias": "dpl_3Hf6tBQxshV6qvoHR1oSakTBokMd"
+    },
+    "customDomainChanged": false,
+    "oldGameProjectMutatedByHelper": false,
+    "credentialsRecorded": false
+  }
+}

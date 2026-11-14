@@ -59,6 +59,7 @@ pub enum UiAction {
     OpenBigMap,
     OpenStorage,
     OpenGroup,
+    OpenCompanion,
     OpenGuild,
     /// Requests the authoritative guild-storage listing. The Android and
     /// other hosts serialize the resulting typed gateway command; no local
@@ -154,6 +155,11 @@ pub enum UiAction {
         g_index: i32,
         quantity: u8,
         price_type: i32,
+    },
+    GameShopGift {
+        g_index: i32,
+        quantity: u8,
+        recipient_name: String,
     },
     /// Request-only ordinary personal storage operation. The reducer owns
     /// requestId allocation; no Android renderer is implied by this seam.

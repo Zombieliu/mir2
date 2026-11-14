@@ -1,0 +1,82 @@
+TAP version 13
+# Subtest: three-language validation preserves named/numbered parameters and rejects dropped/repeated parameters
+ok 1 - three-language validation preserves named/numbered parameters and rejects dropped/repeated parameters
+  ---
+  duration_ms: 2.1842
+  type: 'test'
+  ...
+# Subtest: empty translations and duplicate stable keys fail; equivalent aliases across domains do not
+ok 2 - empty translations and duplicate stable keys fail; equivalent aliases across domains do not
+  ---
+  duration_ms: 0.3593
+  type: 'test'
+  ...
+# Subtest: alias ambiguity is reported with both keys and context rather than silently accepted
+ok 3 - alias ambiguity is reported with both keys and context rather than silently accepted
+  ---
+  duration_ms: 0.2317
+  type: 'test'
+  ...
+# Subtest: displayed command tokens remain byte-identical; email examples are not commands
+ok 4 - displayed command tokens remain byte-identical; email examples are not commands
+  ---
+  duration_ms: 0.7964
+  type: 'test'
+  ...
+# Subtest: NPC extraction matches runtime link removal and preserves executable targets outside text
+ok 5 - NPC extraction matches runtime link removal and preserves executable targets outside text
+  ---
+  duration_ms: 0.4943
+  type: 'test'
+  ...
+# Subtest: NPC runtime values become named opaque captures before colour/link stripping
+ok 6 - NPC runtime values become named opaque captures before colour/link stripping
+  ---
+  duration_ms: 0.1373
+  type: 'test'
+  ...
+# Subtest: actual raw colour aliases coexist with plain labels without erasing player captures
+ok 7 - actual raw colour aliases coexist with plain labels without erasing player captures
+  ---
+  duration_ms: 0.3698
+  type: 'test'
+  ...
+# Subtest: original quest text is bounds checked and retains real newlines after colour removal
+ok 8 - original quest text is bounds checked and retains real newlines after colour removal
+  ---
+  duration_ms: 7.6007
+  type: 'test'
+  ...
+# Subtest: consumable medium is not male; armour/costume gender and quantity are preserved
+ok 9 - consumable medium is not male; armour/costume gender and quantity are preserved
+  ---
+  duration_ms: 2.0125
+  type: 'test'
+  ...
+# Subtest: translation vocabulary has no duplicate source term within each curated dictionary
+ok 10 - translation vocabulary has no duplicate source term within each curated dictionary
+  ---
+  duration_ms: 0.8934
+  type: 'test'
+  ...
+# Subtest: authored proper names and legitimate same-form Portuguese are distinct from missing prose
+ok 11 - authored proper names and legitimate same-form Portuguese are distinct from missing prose
+  ---
+  duration_ms: 0.3297
+  type: 'test'
+  ...
+# Subtest: released canonical name and all nonempty original quest field IDs have translations
+ok 12 - released canonical name and all nonempty original quest field IDs have translations
+  ---
+  duration_ms: 47.7973
+  type: 'test'
+  ...
+1..12
+# tests 12
+# suites 0
+# pass 12
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 140.3609

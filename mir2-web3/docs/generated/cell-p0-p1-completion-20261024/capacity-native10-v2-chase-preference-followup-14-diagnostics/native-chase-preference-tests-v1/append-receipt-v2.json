@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 2,
+  "scope": "Only the newly appended 13 focused tests changed; original 187 test bytes and all previous logs preserved.",
+  "before": {
+    "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs",
+    "bytes": 238437,
+    "sha256": "2c95cccec9d2aadf3b4a59bc5e48894ade2951fc50c8c26a1ddd48b903ad24b5"
+  },
+  "after": {
+    "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs",
+    "bytes": 238892,
+    "sha256": "5c6efc9a49a45550d4c4aed25a5083dc1afaf3e146da33ffd9c372f8902d66db"
+  },
+  "original187": {
+    "bytes": 224817,
+    "sha256": "de493f04c78bb961e2a5cfd230ce9c1e4843ec9057edf34ca055edaecaaf7c59",
+    "byteIdentical": true
+  },
+  "exactInverseToTestedV1": true,
+  "focusedTestCount": 13,
+  "mutations": [
+    {
+      "purpose": "Finite future peer receipt is ineligible at current selection time; same existing invalid-peer test count.",
+      "before": "    f => { f.second.combatPursuit.name = 'other-monster'; }]) {",
+      "after": "    f => { f.second.combatPursuit.name = 'other-monster'; },\n    f => { f.second.combatPursuit.coordinationLastReceiptMonoMs = 2000; }]) {"
+    },
+    {
+      "purpose": "Native and baseline have distinct original combat thresholds; prove each unchanged instead of equating them.",
+      "before": "  const original = f.context.policy; f.context.policy = capacityPolicy({ profile: 'probe' });\n  assert.equal(selectNativeAction(f.client, f.context, 1500).chaseTargetId, undefined);\n  assert.equal(selectNativeAction(f.client, f.context, 1500).hunting, 'Deer');\n  for (const field of ['minimumCombatAttacksPerMinute', 'minimumCombatHitsPerMinute', 'minimumNativeRunRatio', 'maximumMissedPlanRatio',\n    'maximumCorrectionRatio', 'movementP95Ms', 'maximumDriverLagP99Ms']) assert.equal(original[field], f.context.policy[field]);",
+      "after": "  const original = f.context.policy, nativeBefore = structuredClone(original);\n  f.context.policy = capacityPolicy({ profile: 'probe' }); const baselineBefore = structuredClone(f.context.policy);\n  assert.equal(selectNativeAction(f.client, f.context, 1500).chaseTargetId, undefined);\n  assert.equal(selectNativeAction(f.client, f.context, 1500).hunting, 'Deer');\n  assert.deepEqual(original, nativeBefore); assert.deepEqual(f.context.policy, baselineBefore);\n  assert.equal(original.minimumCombatAttacksPerMinute, 18); assert.equal(original.minimumCombatHitsPerMinute, 12);\n  assert.equal(f.context.policy.minimumCombatAttacksPerMinute, 12); assert.equal(f.context.policy.minimumCombatHitsPerMinute, 3);\n  for (const field of ['minimumNativeRunRatio', 'maximumMissedPlanRatio', 'maximumCorrectionRatio', 'movementP95Ms',\n    'maximumDriverLagP99Ms']) assert.equal(original[field], f.context.policy[field]);"
+    }
+  ]
+}

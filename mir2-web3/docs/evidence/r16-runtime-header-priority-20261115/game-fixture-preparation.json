@@ -1,0 +1,98 @@
+{
+  "candidate": "5b011-header-priority-5521d55e",
+  "scripts": [
+    {
+      "name": "delayed-route-game.mjs",
+      "previousSha256": "759c627fd315c90dee01093ea2833470cb85907c52596f90f53184fdbd9d8f9e",
+      "sha256": "759c627fd315c90dee01093ea2833470cb85907c52596f90f53184fdbd9d8f9e"
+    },
+    {
+      "name": "entry-player-probe.mjs",
+      "previousSha256": "6b83c0c355eb98fb36a99c634d1cd299f17d8da07b65b63dc35fab8bdaa1d4e5",
+      "sha256": "6b83c0c355eb98fb36a99c634d1cd299f17d8da07b65b63dc35fab8bdaa1d4e5"
+    },
+    {
+      "name": "hunt-navigation-game.mjs",
+      "previousSha256": "5f531b5dece526c2bd75dad708539c1c8cdb6e7949083fda57214dfe988f1a0c",
+      "sha256": "c4124e34a453215ef2ac1cee9b0b5f8010ebb95e72ab268f4910eb1b4a59c7dc"
+    },
+    {
+      "name": "npc-name-game.mjs",
+      "previousSha256": "74c1c73fd775949223804f0b915179ac9e667e7dd7345af5513be938868546ad",
+      "sha256": "74c1c73fd775949223804f0b915179ac9e667e7dd7345af5513be938868546ad"
+    },
+    {
+      "name": "observe-runtime-schedule.mjs",
+      "previousSha256": "790e0fe87d434726c256b194d5f2770249d630e95ee18990c4fdfcf9ecfba25f",
+      "sha256": "790e0fe87d434726c256b194d5f2770249d630e95ee18990c4fdfcf9ecfba25f"
+    },
+    {
+      "name": "prepare-hunt-fixture.mjs",
+      "previousSha256": "262e92ba10ac355a84034b0c98c7f3cd34c5db2cb8ff692b0678a9e76f8ac14d",
+      "sha256": "262e92ba10ac355a84034b0c98c7f3cd34c5db2cb8ff692b0678a9e76f8ac14d"
+    },
+    {
+      "name": "profile.mjs",
+      "previousSha256": "ce502083b96e0cc906e8cfcd5e8c1c02348aac4184abdb1fe29afa0a4a02e159",
+      "sha256": "ce502083b96e0cc906e8cfcd5e8c1c02348aac4184abdb1fe29afa0a4a02e159"
+    },
+    {
+      "name": "quest-navigation-game.mjs",
+      "previousSha256": "0123db0f17f4bd9a905ec5e0a72f511b865d00458832272341c645deceff4e31",
+      "sha256": "0123db0f17f4bd9a905ec5e0a72f511b865d00458832272341c645deceff4e31"
+    },
+    {
+      "name": "right-button-game.mjs",
+      "previousSha256": "874335b48b745e4907307288459f599384b32129bbf083f1868c1bd7b2b05584",
+      "sha256": "874335b48b745e4907307288459f599384b32129bbf083f1868c1bd7b2b05584"
+    },
+    {
+      "name": "run.mjs",
+      "previousSha256": "ef8ce66c63cff536a030769d8ce93daad139a3fb660e24422ec157427220880c",
+      "sha256": "38af407c61ce454d36ea140e2dd01e9d3b9c166c9c0a3a510f2c9b8da3846c90"
+    },
+    {
+      "name": "standing-faces.mjs",
+      "previousSha256": "8e540be8d184c3161330c8224e9472750b882d59136193b2a917ff30032fd044",
+      "sha256": "8e540be8d184c3161330c8224e9472750b882d59136193b2a917ff30032fd044"
+    },
+    {
+      "name": "target-switch-game.mjs",
+      "previousSha256": "65ead5533629748a43c137a89795be2ddc3fe6c7b05115ed18d82422a8705fcd",
+      "sha256": "65ead5533629748a43c137a89795be2ddc3fe6c7b05115ed18d82422a8705fcd"
+    },
+    {
+      "name": "ui-asset-fault.mjs",
+      "previousSha256": "e8a9dd4454943ffd49cea4f533d4e0bb5692e431f83888c5d9b2e740444c0b51",
+      "sha256": "e8a9dd4454943ffd49cea4f533d4e0bb5692e431f83888c5d9b2e740444c0b51"
+    },
+    {
+      "name": "verify-prewarm-session.mjs",
+      "previousSha256": "061ac2237e61e949c86ce2b22394e4bb9e0dda693787ee10a27dfbf1663b092e",
+      "sha256": "0bc5fef22b9f654e1f4adae589d7580e6afb5f6d3bd12f152e3268584473767c"
+    },
+    {
+      "name": "verify-public-quest.mjs",
+      "previousSha256": "775598cb6871214d554791386db6fe0a4f8a33678aff3fe298f1c46986df690f",
+      "sha256": "775598cb6871214d554791386db6fe0a4f8a33678aff3fe298f1c46986df690f"
+    },
+    {
+      "name": "verify-scene-state-body.mjs",
+      "previousSha256": "0d2fccce9d7d4b22266db4fe0aba0ccbc1781ee883671c2d528037f52e830df3",
+      "sha256": "0d2fccce9d7d4b22266db4fe0aba0ccbc1781ee883671c2d528037f52e830df3"
+    }
+  ],
+  "observerModules": [
+    {
+      "path": "C:/r16-header-priority-20261115/source/mir2-web3/apps/web/scripts/lib/r16-static-transport.mjs",
+      "sha256": "ff35ad6e7638f9839713091a7d6ba61887c10c0510f557386b51b551240d5ab0"
+    },
+    {
+      "path": "C:/r16-header-priority-20261115/source/mir2-web3/apps/web/scripts/lib/r16-static-waterfall.mjs",
+      "sha256": "8e59499334a97e2b92b8a1aeeb9902d18043d50e08c388d219a02916209587f8"
+    }
+  ],
+  "fixtureBuildReceiptSha256": "fbeae46d7d80b1fd5fbadfa6d1e15de38843964f2e5ad247335fadd4f2506927",
+  "original8And120SecondGatesRetained": true,
+  "scope": "New build roots and identity; additional passive allowlisted page-CDP cache/priority observation only. Original faults, authority, movement, supplier189, fonts113, save, cold/warm and all UI assertions retained."
+}

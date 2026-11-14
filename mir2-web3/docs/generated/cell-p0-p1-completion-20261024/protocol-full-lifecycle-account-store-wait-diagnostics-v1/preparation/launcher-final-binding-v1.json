@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "state": "final-50-input-release-bound-not-executed",
+  "boundAt": "2026-10-25T19:05:23.179Z",
+  "expectedSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "backendInputCount": 50,
+  "profile": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-account-store-wait-diagnostics-v1\\full-lifecycle-profile.json",
+    "bytes": 4391,
+    "sha256": "907e150b27a0d0f82e2f4d411d49587a038a5e9ec9c031073a8d30d534bca3f4"
+  },
+  "candidateReleaseBinding": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-account-store-wait-diagnostics-v1\\candidate-release-binding-v1.json",
+    "bytes": 1772,
+    "sha256": "f24a3543f225cf8c846b3bef32923978875b1ba5ca6b726f906ef264356fe080"
+  },
+  "releaseRecord": {
+    "path": "C:/mir2-build/p01-completion-20261024/release-account-store-wait-diagnostics-v1.json",
+    "bytes": 3343,
+    "sha256": "8a8228a97e4ea2005f3e47839868ba2a90615028e1c7da573130f8663c15c9fc"
+  },
+  "backendSourceManifest": {
+    "path": "C:/mir2-build/p01-completion-20261024/backend-source-account-store-wait-diagnostics-v1.json",
+    "bytes": 41831,
+    "sha256": "f9199f375175782b46dc0d18589cd714e2a2a75d7b8fad662af64c700d417ec5"
+  },
+  "binary": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\account-store-wait-diagnostics-release-v1\\bin\\mir2-gateway.exe",
+    "bytes": 87396864,
+    "sha256": "dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc"
+  },
+  "realmStarted": false,
+  "accountsCreated": 0,
+  "capacityAccepted": false,
+  "scope": "Explicit actual50-source/fresh Release and unchanged six-driver full16 launcher binding only; no account, service or gameplay execution."
+}

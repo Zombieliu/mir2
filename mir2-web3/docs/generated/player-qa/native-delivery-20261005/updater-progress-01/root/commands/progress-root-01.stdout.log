@@ -1,0 +1,15 @@
+
+running 10 tests
+test update::progress_trace_tests::cached_payloads_advance_staging_counts_with_zero_wire_and_preserve_personal ... ok
+test update::progress_trace_tests::cancellation_before_staging_keeps_verified_cache_and_never_opens_journal ... ok
+test update::progress_trace_tests::commit_observer_cancellation_does_not_interrupt_applying_journal ... ok
+test update::progress_trace_tests::completed_counts_render_in_all_nine_locales_without_download_label ... ok
+test update::progress_trace_tests::display_cadence_throttles_only_snapshots_and_forces_phase_and_final ... ok
+test update::progress_trace_tests::interrupted_commit_observation_retains_recovery_schema_and_exact_old_files ... ok
+test update::progress_trace_tests::red_actual_bundle_reports_completed_entries_not_only_verifying_30 ... ok
+test update::progress_trace_tests::red_legacy_transaction_produces_bounded_actual_phase_end_trace ... ok
+test update::progress_trace_tests::red_native_local_phases_are_translated_for_nine_locales ... ok
+test update::progress_trace_tests::stage_failure_preserves_actual_partial_count_and_completed_cache ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 45 filtered out; finished in 0.47s
+

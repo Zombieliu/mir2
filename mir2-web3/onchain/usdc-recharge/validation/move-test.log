@@ -1,0 +1,20 @@
+[NOTE] Dependencies on Sui, MoveStdlib, Bridge, DeepBook, and SuiSystem are automatically added, but this feature is disabled for your package because you have explicitly included dependencies on Sui. Consider removing these dependencies from `Move.toml`.
+INCLUDING DEPENDENCY MoveStdlib
+INCLUDING DEPENDENCY Sui
+BUILDING mir2_usdc_recharge
+Running Move unit tests
+[ PASS    ] mir2_usdc_recharge::recharge::authorized_issuer_freezes_invoice_and_shares_per_order
+[ PASS    ] mir2_usdc_recharge::recharge::concurrent_or_repeated_payment_cannot_charge_twice
+[ PASS    ] mir2_usdc_recharge::recharge::deadline_is_exclusive
+[ PASS    ] mir2_usdc_recharge::recharge::disabled_publication_rejected
+[ PASS    ] mir2_usdc_recharge::recharge::exact_coin_delivered_once_even_when_publication_paused
+[ PASS    ] mir2_usdc_recharge::recharge::expired_creation_rejected
+[ PASS    ] mir2_usdc_recharge::recharge::foreign_capability_rejected
+[ PASS    ] mir2_usdc_recharge::recharge::foreign_config_rejected
+[ PASS    ] mir2_usdc_recharge::recharge::foreign_issuer_rejected
+[ PASS    ] mir2_usdc_recharge::recharge::foreign_wallet_cannot_pay_bound_invoice
+[ PASS    ] mir2_usdc_recharge::recharge::merchant_cannot_create_self_payment
+[ PASS    ] mir2_usdc_recharge::recharge::overpayment_rejected
+[ PASS    ] mir2_usdc_recharge::recharge::underpayment_rejected
+[ PASS    ] mir2_usdc_recharge::recharge::wrong_coin_type_rejected
+Test result: OK. Total tests: 14; passed: 14; failed: 0

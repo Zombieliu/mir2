@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792908575146-40a66fff",
+  "scope": "Explicit public original files only; raw/report stay in their already collected archive and areSHA-bound. No private data, full recording copy, executable or store.",
+  "files": [
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/probe12-independent-verification-v1/verify-ended-probe12.mjs",
+      "bytes": 20511,
+      "sha256": "38a912c8712f244c3ee215f1413e1e7a40d152f57cfbd4cb372a60c46d70ed3a"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/probe12-independent-verification-v1/final-verification.json",
+      "bytes": 124145,
+      "sha256": "acbc8d169409420fece19f5376037ea6b61405a249f5e63434803dcae364755e"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/probe12-independent-verification-v1/selected-movement-events-v1.json",
+      "bytes": 103223,
+      "sha256": "96883d2b942c8be8360709e332bc7165e0d5043ff582f2054a4115696f76c463"
+    },
+    {
+      "path": "C:/mir2-build/p01-completion-20261024/probe12-independent-verification-v1/movement-failure-summary-v1.json",
+      "bytes": 14983,
+      "sha256": "9c4b044db057b5911395cfa5f309b053442eac6234c953edbc72b72ecfab9458"
+    }
+  ],
+  "capacityAccepted": false
+}

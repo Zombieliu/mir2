@@ -1,0 +1,139 @@
+{
+  "schema": "mir2.r16.v13.monster016-public-http.v1",
+  "passed": true,
+  "scope": "Direct public HTTP exact-byte verification; browser scene requests are recorded separately",
+  "results": [
+    {
+      "path": "original-ui/Monster/016/0.png",
+      "status": 200,
+      "bytes": 37969,
+      "sha256": "4a866c41b6739c11b310d82a40c2edf521f0ca6526a16c2fc2c1c7ea44994d95"
+    },
+    {
+      "path": "original-ui/Monster/016/1.png",
+      "status": 200,
+      "bytes": 38277,
+      "sha256": "113c73c2ea58c1adf76538690956717854524c59fc240065cdfc32ee4f0e9bcf"
+    },
+    {
+      "path": "original-ui/Monster/016/2.png",
+      "status": 200,
+      "bytes": 38374,
+      "sha256": "9ee65567e062010847d89f5c94f30c3c7f0360fd8a42d1ce023d9dea5fcc6afa"
+    },
+    {
+      "path": "original-ui/Monster/016/3.png",
+      "status": 200,
+      "bytes": 38383,
+      "sha256": "78257f37c1e0175f2fc132b7097b9e7324503e5229ef9757a3e875e628c7f8de"
+    },
+    {
+      "path": "original-ui/Monster/016/4.png",
+      "status": 200,
+      "bytes": 37969,
+      "sha256": "4a866c41b6739c11b310d82a40c2edf521f0ca6526a16c2fc2c1c7ea44994d95"
+    },
+    {
+      "path": "original-ui/Monster/016/5.png",
+      "status": 200,
+      "bytes": 38277,
+      "sha256": "113c73c2ea58c1adf76538690956717854524c59fc240065cdfc32ee4f0e9bcf"
+    },
+    {
+      "path": "original-ui/Monster/016/6.png",
+      "status": 200,
+      "bytes": 38374,
+      "sha256": "9ee65567e062010847d89f5c94f30c3c7f0360fd8a42d1ce023d9dea5fcc6afa"
+    },
+    {
+      "path": "original-ui/Monster/016/7.png",
+      "status": 200,
+      "bytes": 38383,
+      "sha256": "78257f37c1e0175f2fc132b7097b9e7324503e5229ef9757a3e875e628c7f8de"
+    },
+    {
+      "path": "original-ui/Monster/016/8.png",
+      "status": 200,
+      "bytes": 38173,
+      "sha256": "47ead29d021301efa1ee2350f7f02f3a158c0168b96f111027cfb071c2555099"
+    },
+    {
+      "path": "original-ui/Monster/016/9.png",
+      "status": 200,
+      "bytes": 38332,
+      "sha256": "87934771146e2570094a220c2171df7569cdecc8a76b3cfc8f06af0639a297ff"
+    },
+    {
+      "path": "original-ui/Monster/016/10.png",
+      "status": 200,
+      "bytes": 38082,
+      "sha256": "851f20a0c6c6720f764e90c30e2dd8fae3e988b7866dc8a78937750b80a66b91"
+    },
+    {
+      "path": "original-ui/Monster/016/11.png",
+      "status": 200,
+      "bytes": 38335,
+      "sha256": "a8e423cf5e795880baeefaa42ae43513a715fc54b5523af6af7f1795f336ddef"
+    },
+    {
+      "path": "original-ui/Monster/016/12.png",
+      "status": 200,
+      "bytes": 38130,
+      "sha256": "f7485345fef2eb31cf8c8bca67768bccd3da70104958d36b7d5c5da7cd5bba27"
+    },
+    {
+      "path": "original-ui/Monster/016/13.png",
+      "status": 200,
+      "bytes": 38487,
+      "sha256": "bbf7dff8070ccb30deda64a06e921df577c064e60e5661fde6dc5f84513f482e"
+    },
+    {
+      "path": "original-ui/Monster/016/14.png",
+      "status": 200,
+      "bytes": 39249,
+      "sha256": "90ac37e1ae9e1120c860579ed35a1e1f96e117e215924158fab42a727b2aecde"
+    },
+    {
+      "path": "original-ui/Monster/016/15.png",
+      "status": 200,
+      "bytes": 39569,
+      "sha256": "22830d74ee39da9a65e5cefba3aa999f4b09a2c5ee611f919a8397c9178ea390"
+    },
+    {
+      "path": "original-ui/Monster/016/16.png",
+      "status": 200,
+      "bytes": 39393,
+      "sha256": "b6a45e5f370c8b0c70b5d77cea102cff7a905de3366222bd6fba041841a93f65"
+    },
+    {
+      "path": "original-ui/Monster/016/17.png",
+      "status": 200,
+      "bytes": 39052,
+      "sha256": "fd1dcfc06cc4aabab9c596184f2b511f25b349b58cbdbb8db01d62b76d9bc770"
+    },
+    {
+      "path": "original-ui/Monster/016/18.png",
+      "status": 200,
+      "bytes": 39144,
+      "sha256": "e7bbbe1b93ec0f65db5afc6a1261c798fdcd2f430202ac2d1e62f7a79fa6f063"
+    },
+    {
+      "path": "original-ui/Monster/016/19.png",
+      "status": 200,
+      "bytes": 39296,
+      "sha256": "17204a651b5ecc4241bc0d123d11e66e09024f6e384e49c054665f0c6fc10365"
+    },
+    {
+      "path": "original-ui/Monster/016/20.png",
+      "status": 200,
+      "bytes": 39474,
+      "sha256": "6be37c07ec1ea381b4be3521543d5e40ffeb04cdbc0665a0bf630044e8e863dc"
+    },
+    {
+      "path": "original-ui/Monster/016/21.png",
+      "status": 200,
+      "bytes": 39150,
+      "sha256": "aad7f6abbf58622bba1eb3c36cc016cbd2c6b839a60d76de4722b7d07cf812fc"
+    }
+  ]
+}

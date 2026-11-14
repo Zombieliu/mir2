@@ -1,0 +1,7 @@
+{
+  "operation": "actual Guild main window GPU and independent GDI reference including original 424 image",
+  "startedAt": "2026-10-28T11:38:08.2407457Z",
+  "endedAt": "2026-10-28T11:38:33.6165080Z",
+  "exitCode": 0,
+  "output": "C:/mir2-build/guild-pixel-parity-20261028/gpu-main-window-v3"
+}

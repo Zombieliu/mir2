@@ -1,0 +1,26 @@
+{
+  "schema": "mir2.r16.v13.evidence-validation.v1",
+  "passed": true,
+  "copiedFiles": 34,
+  "linksChecked": 97,
+  "pngsVisuallyInspected": [
+    "native-task-card.png",
+    "native-task-detail.png",
+    "first-quest-reward.png",
+    "second-quest-completed.png",
+    "saved-progress-diary.png",
+    "original-alo-policy.png",
+    "original-alo-supply.png",
+    "original-alo-resources.png"
+  ],
+  "allPngsInspectedByRoot": true,
+  "additionalPublicHttpProof": {
+    "path": "v13-public-http-proof.json",
+    "bytes": 4303,
+    "sha256": "6bbd9afea61f608f64e34e9b7a612f8ba7079d5a9e36820349307ece8fd8f4f5"
+  },
+  "startupDocLines": {
+    "current": 76,
+    "orchestration": 114
+  }
+}

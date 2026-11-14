@@ -1,0 +1,920 @@
+{
+  "schemaVersion": 1,
+  "copiedAt": "2026-10-25T12:52:34.934Z",
+  "topicChild": "capacity-personal-monster-projection-fix-v1",
+  "files": [
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-journey-red-v1.log",
+        "bytes": 55074,
+        "sha256": "7d6458ce2a7e19c8141f82101934744acd0cf1e4547fc323015117b7287b3f78"
+      },
+      "destination": "execution/probe14-personal-journey-red-v1.log",
+      "bytes": 55074,
+      "sha256": "7d6458ce2a7e19c8141f82101934744acd0cf1e4547fc323015117b7287b3f78",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-journey-red-v2.log",
+        "bytes": 58333,
+        "sha256": "787d2756df83908188e557887b780b62396cd1c92c09ecf52f53907ab79a953d"
+      },
+      "destination": "execution/probe14-personal-journey-red-v2.log",
+      "bytes": 58333,
+      "sha256": "787d2756df83908188e557887b780b62396cd1c92c09ecf52f53907ab79a953d",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-journey-red-v3.log",
+        "bytes": 58549,
+        "sha256": "4eca2ada5371cd87c279f05bf20bbc61e931f58683d9527a950b07c43b364f3d"
+      },
+      "destination": "execution/probe14-personal-journey-red-v3.log",
+      "bytes": 58549,
+      "sha256": "4eca2ada5371cd87c279f05bf20bbc61e931f58683d9527a950b07c43b364f3d",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-journey-generic-red-v1.log",
+        "bytes": 55380,
+        "sha256": "4f7c89f38192ce81aaab15b01ef1f19198b41da18baaf6cf05be039226f91d12"
+      },
+      "destination": "execution/probe14-personal-journey-generic-red-v1.log",
+      "bytes": 55380,
+      "sha256": "4f7c89f38192ce81aaab15b01ef1f19198b41da18baaf6cf05be039226f91d12",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-journey-green-v1.log",
+        "bytes": 56442,
+        "sha256": "4a85aa04113c237e285a8049576bfb7ede47b3b8c1675d1a06afbb05055beb41"
+      },
+      "destination": "execution/probe14-personal-journey-green-v1.log",
+      "bytes": 56442,
+      "sha256": "4a85aa04113c237e285a8049576bfb7ede47b3b8c1675d1a06afbb05055beb41",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-journey-green-v2.log",
+        "bytes": 56423,
+        "sha256": "a923f1b9e4efb4d3e8908b1985d4d5213ba9fd5b4053ef145d64ca47e4469a3c"
+      },
+      "destination": "execution/probe14-personal-journey-green-v2.log",
+      "bytes": 56423,
+      "sha256": "a923f1b9e4efb4d3e8908b1985d4d5213ba9fd5b4053ef145d64ca47e4469a3c",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-rustfmt37-v1.log",
+        "bytes": 9871,
+        "sha256": "8c5b900335f13312c37c622a000752fd4108dccdb0cc2f7af581705d844a44ce"
+      },
+      "destination": "execution/probe14-personal-projection-rustfmt37-v1.log",
+      "bytes": 9871,
+      "sha256": "8c5b900335f13312c37c622a000752fd4108dccdb0cc2f7af581705d844a44ce",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-rustfmt39-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": "execution/probe14-personal-projection-rustfmt39-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-rustfmt39-v2.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": "execution/probe14-personal-projection-rustfmt39-v2.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-adjacent-v1.log",
+        "bytes": 79905,
+        "sha256": "3ab8730b424cd5847e6776d994583a927922de0472c65f7b17a40ff4f95cb640"
+      },
+      "destination": "execution/probe14-personal-projection-adjacent-v1.log",
+      "bytes": 79905,
+      "sha256": "3ab8730b424cd5847e6776d994583a927922de0472c65f7b17a40ff4f95cb640",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-baseline-five-v1.log",
+        "bytes": 118244,
+        "sha256": "fa1097136f293dde8e410056e1a3d4ec9ebdbda8dc6307f93b2fa722a9671429"
+      },
+      "destination": "execution/probe14-personal-projection-baseline-five-v1.log",
+      "bytes": 118244,
+      "sha256": "fa1097136f293dde8e410056e1a3d4ec9ebdbda8dc6307f93b2fa722a9671429",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-focused-modules-v1.log",
+        "bytes": 59301,
+        "sha256": "af1bd4900daea7f9fb7809f091756686b0c678e25986e747f4ae2a919de2cbf1"
+      },
+      "destination": "execution/probe14-personal-projection-focused-modules-v1.log",
+      "bytes": 59301,
+      "sha256": "af1bd4900daea7f9fb7809f091756686b0c678e25986e747f4ae2a919de2cbf1",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-baseline-overflow-v1.log",
+        "bytes": 112334,
+        "sha256": "b6dea121e332a97da12c9e1f1fb2ef9b14f413920115508568769b9f14f1acd0"
+      },
+      "destination": "execution/probe14-personal-projection-baseline-overflow-v1.log",
+      "bytes": 112334,
+      "sha256": "b6dea121e332a97da12c9e1f1fb2ef9b14f413920115508568769b9f14f1acd0",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-overflow-green-v1.log",
+        "bytes": 55033,
+        "sha256": "bf0a9968f469c128e2030e068ebfa2e4977c10af446a511253cd676a239eb471"
+      },
+      "destination": "execution/probe14-personal-projection-overflow-green-v1.log",
+      "bytes": 55033,
+      "sha256": "bf0a9968f469c128e2030e068ebfa2e4977c10af446a511253cd676a239eb471",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\run-capacity-cargo.ps1",
+        "bytes": 552,
+        "sha256": "632ae6d31959eece220dbd8ed8f6d72995dbb7c5f0798c10a6353c3301c5c43a"
+      },
+      "destination": "root-scripts/run-capacity-cargo.ps1",
+      "bytes": 552,
+      "sha256": "632ae6d31959eece220dbd8ed8f6d72995dbb7c5f0798c10a6353c3301c5c43a",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\root-personal-projection-adjacent-v1.ps1",
+        "bytes": 4278,
+        "sha256": "24b2a2a6443df16f271638ce7294b930e41e5fb3b2197840c04e6257ebb8b8b3"
+      },
+      "destination": "root-scripts/root-personal-projection-adjacent-v1.ps1",
+      "bytes": 4278,
+      "sha256": "24b2a2a6443df16f271638ce7294b930e41e5fb3b2197840c04e6257ebb8b8b3",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\root-personal-projection-baseline-five-v1.mjs",
+        "bytes": 3698,
+        "sha256": "2faa0905817b727890c8314885fdb0603c78c100b1a0254fe58c6f3985421d91"
+      },
+      "destination": "root-scripts/root-personal-projection-baseline-five-v1.mjs",
+      "bytes": 3698,
+      "sha256": "2faa0905817b727890c8314885fdb0603c78c100b1a0254fe58c6f3985421d91",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\root-personal-projection-baseline-five-v1.ps1",
+        "bytes": 836,
+        "sha256": "10a0edf0f1c70b3d50c7a0852be2ed9094fc895c0ae99a09ea9c36d4fdd0a42b"
+      },
+      "destination": "root-scripts/root-personal-projection-baseline-five-v1.ps1",
+      "bytes": 836,
+      "sha256": "10a0edf0f1c70b3d50c7a0852be2ed9094fc895c0ae99a09ea9c36d4fdd0a42b",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\root-personal-projection-baseline-overflow-v1.mjs",
+        "bytes": 4073,
+        "sha256": "484c6264f4d428b9bf61d6359445f9894ee5cdb1c73f3fe4b8cec6c1c8af27eb"
+      },
+      "destination": "root-scripts/root-personal-projection-baseline-overflow-v1.mjs",
+      "bytes": 4073,
+      "sha256": "484c6264f4d428b9bf61d6359445f9894ee5cdb1c73f3fe4b8cec6c1c8af27eb",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\root-personal-projection-baseline-overflow-v1.ps1",
+        "bytes": 355,
+        "sha256": "55ef6606570f9677e24ecc4060b40383ae88f85905b7c734f61e2269b4ec1f49"
+      },
+      "destination": "root-scripts/root-personal-projection-baseline-overflow-v1.ps1",
+      "bytes": 355,
+      "sha256": "55ef6606570f9677e24ecc4060b40383ae88f85905b7c734f61e2269b4ec1f49",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\root-personal-projection-remaining-adjacent-v2.ps1",
+        "bytes": 4730,
+        "sha256": "6261c55919510c7a8d4de18390b33534f2753e4fea12bd338f45e8264a0f0b8c"
+      },
+      "destination": "root-scripts/root-personal-projection-remaining-adjacent-v2.ps1",
+      "bytes": 4730,
+      "sha256": "6261c55919510c7a8d4de18390b33534f2753e4fea12bd338f45e8264a0f0b8c",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-adjacent-execution-v1.json",
+        "bytes": 38561,
+        "sha256": "7bfbeb92e2554935291e67949940589c882a5275bedb82c2fc2fe339544a7fee"
+      },
+      "destination": "execution/adjacent-execution-v1.json",
+      "bytes": 38561,
+      "sha256": "7bfbeb92e2554935291e67949940589c882a5275bedb82c2fc2fe339544a7fee",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\root-personal-projection-final-source-inputs-v1.json",
+        "bytes": 9940,
+        "sha256": "1eb072a6f36d61cd213e816ba95673f782195ad19542450291f72ebef35dd768"
+      },
+      "destination": "historical-inputs/root-final-source-inputs-v1.json",
+      "bytes": 9940,
+      "sha256": "1eb072a6f36d61cd213e816ba95673f782195ad19542450291f72ebef35dd768",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\capture-preimages-v1.mjs",
+        "bytes": 1396,
+        "sha256": "687cf329eab8d3355b26ea9dc570830c9f24b897c7b01cf528094ebb8db9ce9d"
+      },
+      "destination": "probe14-personal-projection-fix-v1/capture-preimages-v1.mjs",
+      "bytes": 1396,
+      "sha256": "687cf329eab8d3355b26ea9dc570830c9f24b897c7b01cf528094ebb8db9ce9d",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\capture-candidate-proof-v1.mjs",
+        "bytes": 7696,
+        "sha256": "2cfd9ebfc70437dd99e5713c40c0194853c5c690592cdbb118494dd5e9708eb9"
+      },
+      "destination": "probe14-personal-projection-fix-v1/capture-candidate-proof-v1.mjs",
+      "bytes": 7696,
+      "sha256": "2cfd9ebfc70437dd99e5713c40c0194853c5c690592cdbb118494dd5e9708eb9",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\capture-final-format-proof-v1.mjs",
+        "bytes": 5664,
+        "sha256": "f3b9cb1f1e4e2c13f4c1dfd4617d7efcb8defea358d6100e78ef1eb7310a7d11"
+      },
+      "destination": "probe14-personal-projection-fix-v1/capture-final-format-proof-v1.mjs",
+      "bytes": 5664,
+      "sha256": "f3b9cb1f1e4e2c13f4c1dfd4617d7efcb8defea358d6100e78ef1eb7310a7d11",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\candidate-source-preservation-v1.json",
+        "bytes": 4477,
+        "sha256": "5c87e0a9c704b0cce8a129b8e0077745485651dd493e5139bc52b432ced82b2f"
+      },
+      "destination": "probe14-personal-projection-fix-v1/candidate-source-preservation-v1.json",
+      "bytes": 4477,
+      "sha256": "5c87e0a9c704b0cce8a129b8e0077745485651dd493e5139bc52b432ced82b2f",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\candidate-three-file-diff-v1.patch",
+        "bytes": 24661,
+        "sha256": "ce07e87b3ad0bf1b9d7116ae4de9bd20b78242e7dc707a1816f36982348cc6f2"
+      },
+      "destination": "probe14-personal-projection-fix-v1/candidate-three-file-diff-v1.patch",
+      "bytes": 24661,
+      "sha256": "ce07e87b3ad0bf1b9d7116ae4de9bd20b78242e7dc707a1816f36982348cc6f2",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\public-whitelist-draft-v1.json",
+        "bytes": 7940,
+        "sha256": "205ed3fb3b9d48ef0be32cae732bffbce050757c7194451afbdea9988888962d"
+      },
+      "destination": "probe14-personal-projection-fix-v1/public-whitelist-draft-v1.json",
+      "bytes": 7940,
+      "sha256": "205ed3fb3b9d48ef0be32cae732bffbce050757c7194451afbdea9988888962d",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\root-red-execution-receipt-v1.json",
+        "bytes": 1844,
+        "sha256": "042c1015e367fb2b255598699cf007f03757fa6b218cf00770c0bc4b441c7f08"
+      },
+      "destination": "probe14-personal-projection-fix-v1/root-red-execution-receipt-v1.json",
+      "bytes": 1844,
+      "sha256": "042c1015e367fb2b255598699cf007f03757fa6b218cf00770c0bc4b441c7f08",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\personal-journey-regressions-v1.rs.txt",
+        "bytes": 11004,
+        "sha256": "0194412e1cb40eb205b3a9356f20c68be61689b77ccf068f5633b6c9439dee8f"
+      },
+      "destination": "probe14-personal-projection-fix-v1/personal-journey-regressions-v1.rs.txt",
+      "bytes": 11004,
+      "sha256": "0194412e1cb40eb205b3a9356f20c68be61689b77ccf068f5633b6c9439dee8f",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\personal-monster-tests-red-v1.rs.txt",
+        "bytes": 23559,
+        "sha256": "60fbf7fe473ca07c9a75205f525acc2fa9098c7f96db41d046a080699ac89d8f"
+      },
+      "destination": "probe14-personal-projection-fix-v1/personal-monster-tests-red-v1.rs.txt",
+      "bytes": 23559,
+      "sha256": "60fbf7fe473ca07c9a75205f525acc2fa9098c7f96db41d046a080699ac89d8f",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\personal-monster-tests-red-v2.rs.txt",
+        "bytes": 23580,
+        "sha256": "fd2d1add5413c5e3e7d5527b0c8bc56bba847a4eb9dbc537cbcdbf9b7acb2306"
+      },
+      "destination": "probe14-personal-projection-fix-v1/personal-monster-tests-red-v2.rs.txt",
+      "bytes": 23580,
+      "sha256": "fd2d1add5413c5e3e7d5527b0c8bc56bba847a4eb9dbc537cbcdbf9b7acb2306",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\personal-monster-tests-red-v3.rs.txt",
+        "bytes": 24063,
+        "sha256": "640669e25796e64e5c89aae262c2d11bc810638242d905826d24dd79c7c01c33"
+      },
+      "destination": "probe14-personal-projection-fix-v1/personal-monster-tests-red-v3.rs.txt",
+      "bytes": 24063,
+      "sha256": "640669e25796e64e5c89aae262c2d11bc810638242d905826d24dd79c7c01c33",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\personal-monster-tests-green-v1.rs.txt",
+        "bytes": 29377,
+        "sha256": "2ba6f26830318530896bb59b3e21af120572c14ca90784441f2323cb5d738e95"
+      },
+      "destination": "probe14-personal-projection-fix-v1/personal-monster-tests-green-v1.rs.txt",
+      "bytes": 29377,
+      "sha256": "2ba6f26830318530896bb59b3e21af120572c14ca90784441f2323cb5d738e95",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\personal-monster-tests-generic-red-v1.rs.txt",
+        "bytes": 30644,
+        "sha256": "467d8fceec5b24413d6cb21a3a6f4d0afe2778408f8c1e1b614a235787a497cc"
+      },
+      "destination": "probe14-personal-projection-fix-v1/personal-monster-tests-generic-red-v1.rs.txt",
+      "bytes": 30644,
+      "sha256": "467d8fceec5b24413d6cb21a3a6f4d0afe2778408f8c1e1b614a235787a497cc",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\routing-green-v1.rs.txt",
+        "bytes": 1388904,
+        "sha256": "7b6d3bea242f16aedf123033436b394e7fdbfe17bf85504f12d8ffe28f91b583"
+      },
+      "destination": "probe14-personal-projection-fix-v1/routing-green-v1.rs.txt",
+      "bytes": 1388904,
+      "sha256": "7b6d3bea242f16aedf123033436b394e7fdbfe17bf85504f12d8ffe28f91b583",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\archive-process-public-v1.mjs",
+        "bytes": 15422,
+        "sha256": "ff5a73162d7292bf8daf9ca1a4e50df96c72160e6d0372e639e2d69df200bf7c"
+      },
+      "destination": "probe14-personal-projection-fix-v1/archive-process-public-v1.mjs",
+      "bytes": 15422,
+      "sha256": "ff5a73162d7292bf8daf9ca1a4e50df96c72160e6d0372e639e2d69df200bf7c",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\preimages\\manifest-v1.json",
+        "bytes": 834,
+        "sha256": "b69eb52524f551464be60b3b3196087da8fc66b9c275584312e616abf9606192"
+      },
+      "destination": "probe14-personal-projection-fix-v1/preimages/manifest-v1.json",
+      "bytes": 834,
+      "sha256": "b69eb52524f551464be60b3b3196087da8fc66b9c275584312e616abf9606192",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\preimages\\routing.rs.txt",
+        "bytes": 1388304,
+        "sha256": "a0e3a19ad1184efd87a632118a98a65c975ca12d2adfda95b2f9e4a6138eff49"
+      },
+      "destination": "probe14-personal-projection-fix-v1/preimages/routing.rs.txt",
+      "bytes": 1388304,
+      "sha256": "a0e3a19ad1184efd87a632118a98a65c975ca12d2adfda95b2f9e4a6138eff49",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\preimages\\personal_monster_projection_tests.rs.txt",
+        "bytes": 12555,
+        "sha256": "dc5d0862501b588263f1a187628af6a1e00ec30a268d000e73feebb8aa42f722"
+      },
+      "destination": "probe14-personal-projection-fix-v1/preimages/personal_monster_projection_tests.rs.txt",
+      "bytes": 12555,
+      "sha256": "dc5d0862501b588263f1a187628af6a1e00ec30a268d000e73feebb8aa42f722",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\preimages\\zone-runtime.rs.txt",
+        "bytes": 748912,
+        "sha256": "4f4eaa4519e745c0bd376f33ef76b86c88ad1c1015fd42bb53ef3a159ce320a8"
+      },
+      "destination": "probe14-personal-projection-fix-v1/preimages/zone-runtime.rs.txt",
+      "bytes": 748912,
+      "sha256": "4f4eaa4519e745c0bd376f33ef76b86c88ad1c1015fd42bb53ef3a159ce320a8",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\format-candidate-v1\\original-personal-tests.rs.txt",
+        "bytes": 30640,
+        "sha256": "fe507e961403679b3b92f23986dff3f53bb52a5c528fae251dd2f7ec546197f0"
+      },
+      "destination": "probe14-personal-projection-fix-v1/format-candidate-v1/original-personal-tests.rs.txt",
+      "bytes": 30640,
+      "sha256": "fe507e961403679b3b92f23986dff3f53bb52a5c528fae251dd2f7ec546197f0",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\format-candidate-v1\\preparation-v1.json",
+        "bytes": 1518,
+        "sha256": "aa4a38eea46f39abe5525254403c7e2438c57384a24d3d23b8876f9a8411f3cc"
+      },
+      "destination": "probe14-personal-projection-fix-v1/format-candidate-v1/preparation-v1.json",
+      "bytes": 1518,
+      "sha256": "aa4a38eea46f39abe5525254403c7e2438c57384a24d3d23b8876f9a8411f3cc",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\format-candidate-v1\\rustfmt-candidate-check-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": "probe14-personal-projection-fix-v1/format-candidate-v1/rustfmt-candidate-check-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\format-candidate-v1\\personal_monster_projection_tests.rs",
+        "bytes": 30917,
+        "sha256": "7d474f50150108175bd96268c2f22270f916bbfdefc8a47e5f4fd0c249ffc0fc"
+      },
+      "destination": "probe14-personal-projection-fix-v1/format-candidate-v1/personal_monster_projection_tests.rs.txt",
+      "bytes": 30917,
+      "sha256": "7d474f50150108175bd96268c2f22270f916bbfdefc8a47e5f4fd0c249ffc0fc",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\format-candidate-v1\\reproduced.rs",
+        "bytes": 30917,
+        "sha256": "7d474f50150108175bd96268c2f22270f916bbfdefc8a47e5f4fd0c249ffc0fc"
+      },
+      "destination": "probe14-personal-projection-fix-v1/format-candidate-v1/reproduced.rs.txt",
+      "bytes": 30917,
+      "sha256": "7d474f50150108175bd96268c2f22270f916bbfdefc8a47e5f4fd0c249ffc0fc",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\format-application-v1\\application-receipt-v1.json",
+        "bytes": 2137,
+        "sha256": "d4e00f6990fc5679f9fc26e4db3a2d0498f9cb43bf0ec1a172f3a5b950755785"
+      },
+      "destination": "probe14-personal-projection-fix-v1/format-application-v1/application-receipt-v1.json",
+      "bytes": 2137,
+      "sha256": "d4e00f6990fc5679f9fc26e4db3a2d0498f9cb43bf0ec1a172f3a5b950755785",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\format-application-v1\\personal_monster_projection_tests-before.rs.txt",
+        "bytes": 30640,
+        "sha256": "fe507e961403679b3b92f23986dff3f53bb52a5c528fae251dd2f7ec546197f0"
+      },
+      "destination": "probe14-personal-projection-fix-v1/format-application-v1/personal_monster_projection_tests-before.rs.txt",
+      "bytes": 30640,
+      "sha256": "fe507e961403679b3b92f23986dff3f53bb52a5c528fae251dd2f7ec546197f0",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\final-format-candidate-v1\\routing.rs.txt",
+        "bytes": 1389827,
+        "sha256": "9135f2f3a019b04c1bb6ffe3717f730c65632df4e642702057bfbf7a699564de"
+      },
+      "destination": "probe14-personal-projection-fix-v1/final-format-candidate-v1/routing.rs.txt",
+      "bytes": 1389827,
+      "sha256": "9135f2f3a019b04c1bb6ffe3717f730c65632df4e642702057bfbf7a699564de",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\final-format-candidate-v1\\personal_monster_projection_tests.rs.txt",
+        "bytes": 30917,
+        "sha256": "7d474f50150108175bd96268c2f22270f916bbfdefc8a47e5f4fd0c249ffc0fc"
+      },
+      "destination": "probe14-personal-projection-fix-v1/final-format-candidate-v1/personal_monster_projection_tests.rs.txt",
+      "bytes": 30917,
+      "sha256": "7d474f50150108175bd96268c2f22270f916bbfdefc8a47e5f4fd0c249ffc0fc",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\final-format-candidate-v1\\zone-runtime.rs.txt",
+        "bytes": 749298,
+        "sha256": "d19840e87e6b2e718303d90d02a03e8c1c4941e069f0b168d9d253644950f3b6"
+      },
+      "destination": "probe14-personal-projection-fix-v1/final-format-candidate-v1/zone-runtime.rs.txt",
+      "bytes": 749298,
+      "sha256": "d19840e87e6b2e718303d90d02a03e8c1c4941e069f0b168d9d253644950f3b6",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\final-format-candidate-v1\\source-preservation-format-addendum-v1.json",
+        "bytes": 5848,
+        "sha256": "11df7f5e440cc50d97771a4a6314b17e431cab545797517067d56f7a2ea55534"
+      },
+      "destination": "probe14-personal-projection-fix-v1/final-format-candidate-v1/source-preservation-format-addendum-v1.json",
+      "bytes": 5848,
+      "sha256": "11df7f5e440cc50d97771a4a6314b17e431cab545797517067d56f7a2ea55534",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-baseline-five-v1\\execution-v1.json",
+        "bytes": 1772,
+        "sha256": "28d7a4a1cf4afe5eafeeba4ef5ba5bd393711beefb409382c94a42f8cecfa652"
+      },
+      "destination": "probe14-personal-projection-baseline-five-v1/execution-v1.json",
+      "bytes": 1772,
+      "sha256": "28d7a4a1cf4afe5eafeeba4ef5ba5bd393711beefb409382c94a42f8cecfa652",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-baseline-five-v1\\routing.rs.txt.candidate",
+        "bytes": 1389827,
+        "sha256": "9135f2f3a019b04c1bb6ffe3717f730c65632df4e642702057bfbf7a699564de"
+      },
+      "destination": "probe14-personal-projection-baseline-five-v1/routing.rs.txt.candidate",
+      "bytes": 1389827,
+      "sha256": "9135f2f3a019b04c1bb6ffe3717f730c65632df4e642702057bfbf7a699564de",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-baseline-five-v1\\personal_monster_projection_tests.rs.txt.candidate",
+        "bytes": 30640,
+        "sha256": "fe507e961403679b3b92f23986dff3f53bb52a5c528fae251dd2f7ec546197f0"
+      },
+      "destination": "probe14-personal-projection-baseline-five-v1/personal_monster_projection_tests.rs.txt.candidate",
+      "bytes": 30640,
+      "sha256": "fe507e961403679b3b92f23986dff3f53bb52a5c528fae251dd2f7ec546197f0",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-baseline-five-v1\\zone-runtime.rs.txt.candidate",
+        "bytes": 749298,
+        "sha256": "d19840e87e6b2e718303d90d02a03e8c1c4941e069f0b168d9d253644950f3b6"
+      },
+      "destination": "probe14-personal-projection-baseline-five-v1/zone-runtime.rs.txt.candidate",
+      "bytes": 749298,
+      "sha256": "d19840e87e6b2e718303d90d02a03e8c1c4941e069f0b168d9d253644950f3b6",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-baseline-overflow-v1\\execution-v1.json",
+        "bytes": 2674,
+        "sha256": "2352f6468c2e3c83b2fdc384f7cbe0611c47c43329ce8f8e69037e54ecc9e6dd"
+      },
+      "destination": "probe14-personal-projection-baseline-overflow-v1/execution-v1.json",
+      "bytes": 2674,
+      "sha256": "2352f6468c2e3c83b2fdc384f7cbe0611c47c43329ce8f8e69037e54ecc9e6dd",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-baseline-overflow-v1\\routing.rs.candidate",
+        "bytes": 1389827,
+        "sha256": "9135f2f3a019b04c1bb6ffe3717f730c65632df4e642702057bfbf7a699564de"
+      },
+      "destination": "probe14-personal-projection-baseline-overflow-v1/routing.rs.candidate",
+      "bytes": 1389827,
+      "sha256": "9135f2f3a019b04c1bb6ffe3717f730c65632df4e642702057bfbf7a699564de",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-baseline-overflow-v1\\personal_monster_projection_tests.rs.candidate",
+        "bytes": 30917,
+        "sha256": "7d474f50150108175bd96268c2f22270f916bbfdefc8a47e5f4fd0c249ffc0fc"
+      },
+      "destination": "probe14-personal-projection-baseline-overflow-v1/personal_monster_projection_tests.rs.candidate",
+      "bytes": 30917,
+      "sha256": "7d474f50150108175bd96268c2f22270f916bbfdefc8a47e5f4fd0c249ffc0fc",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-baseline-overflow-v1\\runtime.rs.candidate",
+        "bytes": 749298,
+        "sha256": "d19840e87e6b2e718303d90d02a03e8c1c4941e069f0b168d9d253644950f3b6"
+      },
+      "destination": "probe14-personal-projection-baseline-overflow-v1/runtime.rs.candidate",
+      "bytes": 749298,
+      "sha256": "d19840e87e6b2e718303d90d02a03e8c1c4941e069f0b168d9d253644950f3b6",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-baseline-overflow-v1\\live_aoi_order_tests.rs.candidate",
+        "bytes": 27740,
+        "sha256": "addfedf29cd0c36b2865df2e40b07b1c91cd10130a981d9d5f55447ab94c85af"
+      },
+      "destination": "probe14-personal-projection-baseline-overflow-v1/live_aoi_order_tests.rs.candidate",
+      "bytes": 27740,
+      "sha256": "addfedf29cd0c36b2865df2e40b07b1c91cd10130a981d9d5f55447ab94c85af",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-baseline-overflow-v1\\pending_zone_aoi_tests.rs.candidate",
+        "bytes": 13491,
+        "sha256": "01a11394c304296aefc450eb128a18a358c3e854c25e6627a2b3ff4484d14716"
+      },
+      "destination": "probe14-personal-projection-baseline-overflow-v1/pending_zone_aoi_tests.rs.candidate",
+      "bytes": 13491,
+      "sha256": "01a11394c304296aefc450eb128a18a358c3e854c25e6627a2b3ff4484d14716",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-adjacent-v1\\existing-adjacent-selection-v1.json",
+        "bytes": 33493,
+        "sha256": "402634eff0b84c808c389a1786065ecdd3d876ad910acebe4f043d0f4468a9cf"
+      },
+      "destination": "probe14-personal-projection-adjacent-v1/existing-adjacent-selection-v1.json",
+      "bytes": 33493,
+      "sha256": "402634eff0b84c808c389a1786065ecdd3d876ad910acebe4f043d0f4468a9cf",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-adjacent-v1\\prepare-existing-selection-v1.mjs",
+        "bytes": 10925,
+        "sha256": "c052627b7af1228444bcae4c8dc2ea8a9f49ce4ae4955f377bff9907a5bd5f91"
+      },
+      "destination": "probe14-personal-projection-adjacent-v1/prepare-existing-selection-v1.mjs",
+      "bytes": 10925,
+      "sha256": "c052627b7af1228444bcae4c8dc2ea8a9f49ce4ae4955f377bff9907a5bd5f91",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-adjacent-v1\\README.md",
+        "bytes": 7637,
+        "sha256": "2418f7dfad6455d3e8d20f47545bb73234f3437290d3422cb9786e73c2ca50da"
+      },
+      "destination": "probe14-personal-projection-adjacent-v1/README.md",
+      "bytes": 7637,
+      "sha256": "2418f7dfad6455d3e8d20f47545bb73234f3437290d3422cb9786e73c2ca50da",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-adjacent-fixture-repair-v1\\live_aoi_order_tests.rs.before.txt",
+        "bytes": 26272,
+        "sha256": "95da0e53b5c0ec844c85a383b327e07130a41d2aa09846272720dfe63874f7d3"
+      },
+      "destination": "probe14-adjacent-fixture-repair-v1/live_aoi_order_tests.rs.before.txt",
+      "bytes": 26272,
+      "sha256": "95da0e53b5c0ec844c85a383b327e07130a41d2aa09846272720dfe63874f7d3",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-adjacent-fixture-repair-v1\\pending_zone_aoi_tests.rs.before.txt",
+        "bytes": 12970,
+        "sha256": "83d1bd558fad894ebeb7862de11eaf81b71f442d7bb57b11ebc2acefb3fa1267"
+      },
+      "destination": "probe14-adjacent-fixture-repair-v1/pending_zone_aoi_tests.rs.before.txt",
+      "bytes": 12970,
+      "sha256": "83d1bd558fad894ebeb7862de11eaf81b71f442d7bb57b11ebc2acefb3fa1267",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-adjacent-fixture-repair-v1\\preimage-manifest-v1.json",
+        "bytes": 1190,
+        "sha256": "ffa9046ce923aaa20ca433497b67197a7706998c4b3e7cc0d10e43b351e7dca4"
+      },
+      "destination": "probe14-adjacent-fixture-repair-v1/preimage-manifest-v1.json",
+      "bytes": 1190,
+      "sha256": "ffa9046ce923aaa20ca433497b67197a7706998c4b3e7cc0d10e43b351e7dca4",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-adjacent-fixture-repair-v1\\mutation-proof-v1.json",
+        "bytes": 7494,
+        "sha256": "6081c6b4cb325d449705990b9888b72564e5c0b9b0a61b46e6f95365099490a5"
+      },
+      "destination": "probe14-adjacent-fixture-repair-v1/mutation-proof-v1.json",
+      "bytes": 7494,
+      "sha256": "6081c6b4cb325d449705990b9888b72564e5c0b9b0a61b46e6f95365099490a5",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-adjacent-fixture-repair-v1\\static-verification-v1.json",
+        "bytes": 1389,
+        "sha256": "8f63220d39d0493d0b35128b09d1ccc103ff1aa279793ac01854bddb0ddf06bc"
+      },
+      "destination": "probe14-adjacent-fixture-repair-v1/static-verification-v1.json",
+      "bytes": 1389,
+      "sha256": "8f63220d39d0493d0b35128b09d1ccc103ff1aa279793ac01854bddb0ddf06bc",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-adjacent-fixture-repair-v1\\README.md",
+        "bytes": 1001,
+        "sha256": "b029d312622ffe045cfce30cd73090d460a5f8280703226702d62784cc8e4f83"
+      },
+      "destination": "probe14-adjacent-fixture-repair-v1/README.md",
+      "bytes": 1001,
+      "sha256": "b029d312622ffe045cfce30cd73090d460a5f8280703226702d62784cc8e4f83",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-adjacent-fixture-repair-v1\\live_aoi_order_tests.rs.before-overflow-v2.txt",
+        "bytes": 27740,
+        "sha256": "addfedf29cd0c36b2865df2e40b07b1c91cd10130a981d9d5f55447ab94c85af"
+      },
+      "destination": "probe14-adjacent-fixture-repair-v1/live_aoi_order_tests.rs.before-overflow-v2.txt",
+      "bytes": 27740,
+      "sha256": "addfedf29cd0c36b2865df2e40b07b1c91cd10130a981d9d5f55447ab94c85af",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-adjacent-fixture-repair-v1\\overflow-mutation-proof-v2.json",
+        "bytes": 3682,
+        "sha256": "faaef41c2998e5844930d26708b711c2f693b5329d3ae83a1157e8957758e90e"
+      },
+      "destination": "probe14-adjacent-fixture-repair-v1/overflow-mutation-proof-v2.json",
+      "bytes": 3682,
+      "sha256": "faaef41c2998e5844930d26708b711c2f693b5329d3ae83a1157e8957758e90e",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-adjacent-fixture-repair-v1\\overflow-static-verification-v2.json",
+        "bytes": 1149,
+        "sha256": "59c0da1939e816cdceb16de450e8b398e60bb2532dba7f0c81e43dd86fb538ef"
+      },
+      "destination": "probe14-adjacent-fixture-repair-v1/overflow-static-verification-v2.json",
+      "bytes": 1149,
+      "sha256": "59c0da1939e816cdceb16de450e8b398e60bb2532dba7f0c81e43dd86fb538ef",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\routing.rs",
+        "bytes": 1389827,
+        "sha256": "9135f2f3a019b04c1bb6ffe3717f730c65632df4e642702057bfbf7a699564de"
+      },
+      "destination": "candidate-source-after-fixture-v2/routing.rs.txt",
+      "bytes": 1389827,
+      "sha256": "9135f2f3a019b04c1bb6ffe3717f730c65632df4e642702057bfbf7a699564de",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\routing\\tests\\personal_monster_projection_tests.rs",
+        "bytes": 30917,
+        "sha256": "7d474f50150108175bd96268c2f22270f916bbfdefc8a47e5f4fd0c249ffc0fc"
+      },
+      "destination": "candidate-source-after-fixture-v2/personal_monster_projection_tests.rs.txt",
+      "bytes": 30917,
+      "sha256": "7d474f50150108175bd96268c2f22270f916bbfdefc8a47e5f4fd0c249ffc0fc",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime.rs",
+        "bytes": 749298,
+        "sha256": "d19840e87e6b2e718303d90d02a03e8c1c4941e069f0b168d9d253644950f3b6"
+      },
+      "destination": "candidate-source-after-fixture-v2/zone-runtime.rs.txt",
+      "bytes": 749298,
+      "sha256": "d19840e87e6b2e718303d90d02a03e8c1c4941e069f0b168d9d253644950f3b6",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\routing\\tests\\live_aoi_order_tests.rs",
+        "bytes": 28187,
+        "sha256": "0f21bfd95760a94f189c6b95567b0e65f1a0018cf88e90b2342ff753010a7279"
+      },
+      "destination": "candidate-source-after-fixture-v2/live_aoi_order_tests.rs.txt",
+      "bytes": 28187,
+      "sha256": "0f21bfd95760a94f189c6b95567b0e65f1a0018cf88e90b2342ff753010a7279",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\routing\\tests\\pending_zone_aoi_tests.rs",
+        "bytes": 13491,
+        "sha256": "01a11394c304296aefc450eb128a18a358c3e854c25e6627a2b3ff4484d14716"
+      },
+      "destination": "candidate-source-after-fixture-v2/pending_zone_aoi_tests.rs.txt",
+      "bytes": 13491,
+      "sha256": "01a11394c304296aefc450eb128a18a358c3e854c25e6627a2b3ff4484d14716",
+      "sourceAfterMatched": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\probe14-personal-projection-fix-v1\\public-whitelist-process-v1.json",
+        "bytes": 30026,
+        "sha256": "f3bd95a3c1d06935ccb157bb6472f93e360861cc479a1198328ed1cf9f6cab35"
+      },
+      "destination": "public-whitelist-process-v1.json",
+      "bytes": 30026,
+      "sha256": "f3bd95a3c1d06935ccb157bb6472f93e360861cc479a1198328ed1cf9f6cab35",
+      "sourceAfterMatched": true
+    }
+  ],
+  "copies": 81,
+  "totalSourceBytes": 13657579,
+  "copiedSourceAggregateSha256": "ab1e07a21072e616e66ae4ab0eba93d37d74671fbb43fa5d0ffc6c03ed4e642a",
+  "authoredReadme": {
+    "path": "README.md",
+    "bytes": 3446,
+    "sha256": "ba66e125d7bdd8556a222f45fd9246432fbc51d7fc1c314602c638e62eba4429"
+  },
+  "allSourceAfterMatched": true,
+  "publicRustSourceFilesAdded": 0,
+  "excludedPending": [
+    "Remaining adjacent178 actual run and terminal log",
+    "Two explicitly isolated quest-cadence cases",
+    "Final aggregate functional validation and committed44-input source certificate",
+    "Fresh Release/full16 and renewed capacity profile"
+  ],
+  "originalVerdictsPreserved": true,
+  "testsRun": false,
+  "sourceFilesWritten": false,
+  "capacityAccepted": false,
+  "p0Status": "pending",
+  "p2Status": "frozen"
+}

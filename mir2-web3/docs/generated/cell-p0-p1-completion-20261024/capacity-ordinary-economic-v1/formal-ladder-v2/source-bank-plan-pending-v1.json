@@ -1,0 +1,1176 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-economic-formal-ladder-v2",
+  "state": "COMPLETE_SAVED_BANK_SOURCE_NOT_FRESH100",
+  "sourcePrivate": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private",
+  "sourceReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\preparation-episode-receipt-v1.json",
+    "bytes": 7097,
+    "sha256": "16b53f59b7c37c2bbebd8dbccff09cebafeb1551f0e8c985610e26d1cbcb05ec"
+  },
+  "sourceReport": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\reports\\1793093626787-c4c3629f.preparation-report.json",
+    "bytes": 198516,
+    "sha256": "1a3215dfb207f1cf0ff944d5d666be1f87874538239db6d4590d47ae3d2cf84a"
+  },
+  "sourcePreparedIndex": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\prepared-index-v1.json",
+    "bytes": 15927,
+    "sha256": "92aae485fe8a50bfb5d3701eb04e61a98a0b98b7375d0fd2f68677f27b9db1b9"
+  },
+  "sourceCombinedIndex": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\combined-saved-index-v1.json",
+    "bytes": 70012,
+    "sha256": "7188e79a65ae58fac2de5dae712ba9e18b30791fdbd9eec7c88369d0e7f93b12"
+  },
+  "sourceCleanup": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\cleanup-v1.json",
+    "bytes": 1037,
+    "sha256": "e6cf7ad178a767fb9a11b6f9a04f0dd5874bedb3713b81600ccdb54c767b07ee"
+  },
+  "sourceIndependentCleanup": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\root-independent-cleanup-v1.json",
+    "bytes": 164,
+    "sha256": "01fcf3a2e63ca4d14cbe54f87f55e670c1c994a3031660ece4c53a545fb7c8d0"
+  },
+  "sourceOwnedProcess": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\owned-process-v1.json",
+    "bytes": 742,
+    "sha256": "5385d01d3ff80899a281211245d2073999980b45fc9884116a411c026d0641a6"
+  },
+  "sourceFrozenManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\frozen-source-v1.json",
+    "bytes": 147797,
+    "sha256": "1cd6ef40ac14efe93ac3433499e416551dd4ce76b018fae21c0d3c2722f5496f"
+  },
+  "historyBeforeCurrent": {
+    "mode": "historical-prepared-index-v1",
+    "evidence": [
+      {
+        "report": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\reports\\1793084170216-93e9fe64.preparation-report.json",
+          "bytes": 145422,
+          "sha256": "a9afe8b257cc0af793a532a7e9b96ae59d374e391d3123d2cc8445608b2b39df"
+        },
+        "preparedIndex": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\prepared-index-v1.json",
+          "bytes": 11953,
+          "sha256": "922fd2339adea01799c35e0ef99fa511266666ad1168eb332aeab06392cb3bab"
+        },
+        "cleanup": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\cleanup-v1.json",
+          "bytes": 1037,
+          "sha256": "19ad8a7a3f017563c283cccfa152828cff4afb847ae5da996d480fa41eff2970"
+        },
+        "receipt": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v15\\episode\\preparation-episode-receipt-v1.json",
+          "bytes": 6144,
+          "sha256": "6e9505f8812fc3eb53fdd69fa2bacb4b780ba7684680be0d99d9f937142d1b67"
+        }
+      },
+      {
+        "report": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\reports\\1793090167771-5bd2d680.preparation-report.json",
+          "bytes": 92721,
+          "sha256": "c4adc922a7cd57a26f8d7824717db1c0c06cd55feb25ca886d9d3ccca0369df2"
+        },
+        "preparedIndex": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\prepared-index-v1.json",
+          "bytes": 6439,
+          "sha256": "e515646b164eefea54ef546ced556b5a71f4c688f551d9f3e3c2cf470f110601"
+        },
+        "cleanup": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\cleanup-v1.json",
+          "bytes": 1037,
+          "sha256": "c49b2b6e87f110873065df41b3dd178525a208c7e8c88d7902ff10e5ef33479a"
+        },
+        "receipt": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\episode\\preparation-episode-receipt-v1.json",
+          "bytes": 5773,
+          "sha256": "e0acda44da49d64c125b46552163039a91917cd58e9719449fdf4eb14aa5dc46"
+        }
+      }
+    ]
+  },
+  "sourcePreparedCharacters": [
+    {
+      "name": "L370e2a00",
+      "characterIndex": 1,
+      "map": "0",
+      "x": 288,
+      "y": 615,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a01",
+      "characterIndex": 2,
+      "map": "0",
+      "x": 289,
+      "y": 616,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a02",
+      "characterIndex": 3,
+      "map": "0",
+      "x": 288,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a03",
+      "characterIndex": 4,
+      "map": "0",
+      "x": 289,
+      "y": 615,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a04",
+      "characterIndex": 5,
+      "map": "0",
+      "x": 287,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a05",
+      "characterIndex": 6,
+      "map": "0",
+      "x": 289,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a06",
+      "characterIndex": 7,
+      "map": "0",
+      "x": 288,
+      "y": 614,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a07",
+      "characterIndex": 8,
+      "map": "0",
+      "x": 286,
+      "y": 616,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a08",
+      "characterIndex": 9,
+      "map": "0",
+      "x": 290,
+      "y": 616,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a09",
+      "characterIndex": 10,
+      "map": "0",
+      "x": 288,
+      "y": 618,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0a",
+      "characterIndex": 11,
+      "map": "0",
+      "x": 287,
+      "y": 614,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0b",
+      "characterIndex": 12,
+      "map": "0",
+      "x": 289,
+      "y": 614,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0c",
+      "characterIndex": 13,
+      "map": "0",
+      "x": 286,
+      "y": 615,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0d",
+      "characterIndex": 14,
+      "map": "0",
+      "x": 290,
+      "y": 615,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0e",
+      "characterIndex": 15,
+      "map": "0",
+      "x": 286,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0f",
+      "characterIndex": 16,
+      "map": "0",
+      "x": 290,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0g",
+      "characterIndex": 17,
+      "map": "0",
+      "x": 287,
+      "y": 618,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0h",
+      "characterIndex": 18,
+      "map": "0",
+      "x": 289,
+      "y": 618,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0i",
+      "characterIndex": 19,
+      "map": "0",
+      "x": 290,
+      "y": 614,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0j",
+      "characterIndex": 20,
+      "map": "0",
+      "x": 286,
+      "y": 618,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0k",
+      "characterIndex": 21,
+      "map": "0",
+      "x": 290,
+      "y": 618,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0l",
+      "characterIndex": 22,
+      "map": "0",
+      "x": 288,
+      "y": 613,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0m",
+      "characterIndex": 23,
+      "map": "0",
+      "x": 285,
+      "y": 616,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0n",
+      "characterIndex": 24,
+      "map": "0",
+      "x": 288,
+      "y": 619,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0o",
+      "characterIndex": 25,
+      "map": "0",
+      "x": 287,
+      "y": 613,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0p",
+      "characterIndex": 26,
+      "map": "0",
+      "x": 289,
+      "y": 613,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0q",
+      "characterIndex": 27,
+      "map": "0",
+      "x": 285,
+      "y": 615,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0r",
+      "characterIndex": 28,
+      "map": "0",
+      "x": 291,
+      "y": 615,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0s",
+      "characterIndex": 29,
+      "map": "0",
+      "x": 285,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0t",
+      "characterIndex": 30,
+      "map": "0",
+      "x": 291,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0u",
+      "characterIndex": 31,
+      "map": "0",
+      "x": 287,
+      "y": 619,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0v",
+      "characterIndex": 32,
+      "map": "0",
+      "x": 289,
+      "y": 619,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0w",
+      "characterIndex": 33,
+      "map": "0",
+      "x": 286,
+      "y": 613,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0x",
+      "characterIndex": 34,
+      "map": "0",
+      "x": 290,
+      "y": 613,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0y",
+      "characterIndex": 35,
+      "map": "0",
+      "x": 291,
+      "y": 614,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0z",
+      "characterIndex": 36,
+      "map": "0",
+      "x": 285,
+      "y": 618,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a10",
+      "characterIndex": 37,
+      "map": "0",
+      "x": 291,
+      "y": 618,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a11",
+      "characterIndex": 38,
+      "map": "0",
+      "x": 286,
+      "y": 619,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a12",
+      "characterIndex": 39,
+      "map": "0",
+      "x": 290,
+      "y": 619,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a13",
+      "characterIndex": 40,
+      "map": "0",
+      "x": 291,
+      "y": 613,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a14",
+      "characterIndex": 41,
+      "map": "0",
+      "x": 285,
+      "y": 619,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a15",
+      "characterIndex": 42,
+      "map": "0",
+      "x": 288,
+      "y": 612,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a16",
+      "characterIndex": 43,
+      "map": "0",
+      "x": 291,
+      "y": 619,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a17",
+      "characterIndex": 44,
+      "map": "0",
+      "x": 284,
+      "y": 616,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a18",
+      "characterIndex": 45,
+      "map": "0",
+      "x": 292,
+      "y": 616,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a19",
+      "characterIndex": 46,
+      "map": "0",
+      "x": 288,
+      "y": 620,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1a",
+      "characterIndex": 47,
+      "map": "0",
+      "x": 287,
+      "y": 612,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1b",
+      "characterIndex": 48,
+      "map": "0",
+      "x": 289,
+      "y": 612,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1c",
+      "characterIndex": 49,
+      "map": "0",
+      "x": 284,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1d",
+      "characterIndex": 50,
+      "map": "0",
+      "x": 292,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1e",
+      "characterIndex": 51,
+      "map": "0",
+      "x": 287,
+      "y": 620,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1f",
+      "characterIndex": 52,
+      "map": "0",
+      "x": 286,
+      "y": 612,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1g",
+      "characterIndex": 53,
+      "map": "0",
+      "x": 289,
+      "y": 620,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1h",
+      "characterIndex": 54,
+      "map": "0",
+      "x": 290,
+      "y": 612,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1i",
+      "characterIndex": 55,
+      "map": "0",
+      "x": 284,
+      "y": 614,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1j",
+      "characterIndex": 56,
+      "map": "0",
+      "x": 292,
+      "y": 614,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1k",
+      "characterIndex": 57,
+      "map": "0",
+      "x": 284,
+      "y": 618,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1l",
+      "characterIndex": 58,
+      "map": "0",
+      "x": 292,
+      "y": 618,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1m",
+      "characterIndex": 59,
+      "map": "0",
+      "x": 286,
+      "y": 620,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1n",
+      "characterIndex": 60,
+      "map": "0",
+      "x": 290,
+      "y": 620,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1o",
+      "characterIndex": 61,
+      "map": "0",
+      "x": 285,
+      "y": 612,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1p",
+      "characterIndex": 62,
+      "map": "0",
+      "x": 291,
+      "y": 612,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1q",
+      "characterIndex": 63,
+      "map": "0",
+      "x": 284,
+      "y": 613,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1r",
+      "characterIndex": 64,
+      "map": "0",
+      "x": 284,
+      "y": 619,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1s",
+      "characterIndex": 65,
+      "map": "0",
+      "x": 284,
+      "y": 612,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1t",
+      "characterIndex": 66,
+      "map": "0",
+      "x": 292,
+      "y": 619,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1u",
+      "characterIndex": 67,
+      "map": "0",
+      "x": 285,
+      "y": 620,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1v",
+      "characterIndex": 68,
+      "map": "0",
+      "x": 292,
+      "y": 612,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1w",
+      "characterIndex": 69,
+      "map": "0",
+      "x": 284,
+      "y": 620,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1x",
+      "characterIndex": 70,
+      "map": "0",
+      "x": 292,
+      "y": 620,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1y",
+      "characterIndex": 71,
+      "map": "0",
+      "x": 288,
+      "y": 611,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1z",
+      "characterIndex": 72,
+      "map": "0",
+      "x": 283,
+      "y": 616,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a20",
+      "characterIndex": 73,
+      "map": "0",
+      "x": 293,
+      "y": 616,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a21",
+      "characterIndex": 74,
+      "map": "0",
+      "x": 288,
+      "y": 621,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a22",
+      "characterIndex": 75,
+      "map": "0",
+      "x": 287,
+      "y": 611,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a23",
+      "characterIndex": 76,
+      "map": "0",
+      "x": 289,
+      "y": 611,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a24",
+      "characterIndex": 77,
+      "map": "0",
+      "x": 283,
+      "y": 615,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a25",
+      "characterIndex": 78,
+      "map": "0",
+      "x": 283,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a26",
+      "characterIndex": 79,
+      "map": "0",
+      "x": 293,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a27",
+      "characterIndex": 80,
+      "map": "0",
+      "x": 287,
+      "y": 621,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a28",
+      "characterIndex": 81,
+      "map": "0",
+      "x": 286,
+      "y": 611,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a29",
+      "characterIndex": 82,
+      "map": "0",
+      "x": 289,
+      "y": 621,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2a",
+      "characterIndex": 83,
+      "map": "0",
+      "x": 290,
+      "y": 611,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2b",
+      "characterIndex": 84,
+      "map": "0",
+      "x": 283,
+      "y": 614,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2c",
+      "characterIndex": 85,
+      "map": "0",
+      "x": 283,
+      "y": 618,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2d",
+      "characterIndex": 86,
+      "map": "0",
+      "x": 293,
+      "y": 614,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2e",
+      "characterIndex": 87,
+      "map": "0",
+      "x": 293,
+      "y": 618,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2f",
+      "characterIndex": 88,
+      "map": "0",
+      "x": 286,
+      "y": 621,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2g",
+      "characterIndex": 89,
+      "map": "0",
+      "x": 290,
+      "y": 621,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2h",
+      "characterIndex": 90,
+      "map": "0",
+      "x": 285,
+      "y": 611,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2i",
+      "characterIndex": 91,
+      "map": "0",
+      "x": 291,
+      "y": 611,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2j",
+      "characterIndex": 92,
+      "map": "0",
+      "x": 283,
+      "y": 613,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2k",
+      "characterIndex": 93,
+      "map": "0",
+      "x": 293,
+      "y": 613,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2l",
+      "characterIndex": 94,
+      "map": "0",
+      "x": 283,
+      "y": 619,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2m",
+      "characterIndex": 95,
+      "map": "0",
+      "x": 293,
+      "y": 619,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2n",
+      "characterIndex": 96,
+      "map": "0",
+      "x": 285,
+      "y": 621,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2o",
+      "characterIndex": 97,
+      "map": "0",
+      "x": 291,
+      "y": 621,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2p",
+      "characterIndex": 98,
+      "map": "0",
+      "x": 284,
+      "y": 611,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2q",
+      "characterIndex": 99,
+      "map": "0",
+      "x": 292,
+      "y": 611,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2r",
+      "characterIndex": 100,
+      "map": "0",
+      "x": 283,
+      "y": 612,
+      "normalLogout": true
+    }
+  ],
+  "sourceOriginalVerdicts": {
+    "W15AndW16OriginalFalseRetained": true,
+    "W17ReportOk": true,
+    "W17NewPreparedCount": 42,
+    "W17HistoricalPreparedCount": 58,
+    "W17First4": null,
+    "combinedSavedRecords": 100,
+    "all100Fresh": false,
+    "durableRelogin100Verified": false
+  },
+  "sourceControlledPoolAccounts": 100,
+  "sourceReadyCharacters": 100,
+  "sourceRegisteredAccounts": 0,
+  "sourceStoreTotalAccounts": 101,
+  "sourcePreparedEligibilityInherited": false,
+  "files": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\accounts.json",
+      "bytes": 1254887,
+      "sha256": "563e8f823ad52ff4285b398bd6632adcaa9ccfdf3ef894895dba8e0c692af8f0",
+      "relative": "accounts.json"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\capacity-pool.json",
+      "bytes": 22859,
+      "sha256": "924f2a81f70153f070948f98cea8fc6187cb25772ffead1fca4c5fa670bab8a5",
+      "relative": "capacity-pool.json"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\episode\\private\\capacity-auth-budget.json",
+      "bytes": 849,
+      "sha256": "bd803f9723a9f3c8afd80e41d435f9841cb6b7af7e9129924cd8a37f814cc94c",
+      "relative": "capacity-auth-budget.json"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\recovery-mac-key.txt",
+      "bytes": 64,
+      "sha256": "cefb29ae1ddf2091dfe55c66694fac08b657a859eb15a14cba0bc37dc3a5765a",
+      "relative": "recovery-mac-key.txt"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\identity-session-secret.txt",
+      "bytes": 64,
+      "sha256": "db2809fd0970391e8bbc9b6ca80e8c4dd5d77aabad307400d0952dcdffdfc024",
+      "relative": "identity-session-secret.txt"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\identity-recovery-pepper.txt",
+      "bytes": 64,
+      "sha256": "d7137790909ad7c7f62178f74484466941b416a0561e5211515c7081e06a077e",
+      "relative": "identity-recovery-pepper.txt"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\passkey-auth-secret.txt",
+      "bytes": 64,
+      "sha256": "37a4307699fde5753874c037b303776d3820c25feb68b24ccd116f2b0df9ed72",
+      "relative": "passkey-auth-secret.txt"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\save-recovery\\.mir2-directory-durability",
+      "bytes": 29,
+      "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+      "relative": "save-recovery/.mir2-directory-durability"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\save-recovery\\.mir2-recovery-exclusive.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "relative": "save-recovery/.mir2-recovery-exclusive.lock"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\save-recovery\\.mir2-recovery-owner-v1.json",
+      "bytes": 340,
+      "sha256": "8ad20f7e41bd3dc9889d6bc30ab323d11531f38b35d5bd95100e9390b749686e",
+      "relative": "save-recovery/.mir2-recovery-owner-v1.json"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\save-recovery\\quarantine\\.mir2-directory-durability",
+      "bytes": 29,
+      "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+      "relative": "save-recovery/quarantine/.mir2-directory-durability"
+    }
+  ],
+  "fileCount": 11,
+  "recovery": {
+    "expectedControlFiles": [
+      ".mir2-directory-durability",
+      ".mir2-recovery-exclusive.lock",
+      ".mir2-recovery-owner-v1.json",
+      "quarantine/.mir2-directory-durability"
+    ],
+    "journalPayloadsMustEqualZero": true,
+    "preservedDestination": "source-save-recovery-preserved",
+    "activeDestination": "save-recovery",
+    "activeInitialization": "Empty new directory; normal Gateway creates a new path-bound ownership sentinel. Original control files remain unchanged only in preserved archive."
+  },
+  "copyPolicy": {
+    "copyExclusively": true,
+    "sourcePinsBeforeAndAfter": true,
+    "fullStoreAndPoolRawBytes": true,
+    "accountStoreRewritePerformed": false,
+    "poolRewritePerformed": false,
+    "stockOrPositionEditPerformed": false,
+    "authLedgerCopiedUnchanged": true,
+    "loginNotBeforeOverrideAllowed": false,
+    "seederInvoked": false,
+    "secretsValuesReported": false,
+    "latestLedgerSource": "Exact complete latest actual W17 traffic ledger, same17510 endpoint and original100 identities; no reset/rollback/time origin/loginNotBefore override.",
+    "trafficLedgerSource": "Latest actual formal-v1 ended traffic ledger raw bytes; original901s/25admission/5verification policy preserved"
+  },
+  "priorRecoveryArchive": {
+    "directory": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\source-save-recovery-preserved",
+    "retainInPlace": true,
+    "copiedToNewActive": false,
+    "files": [
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\source-save-recovery-preserved\\.mir2-directory-durability",
+        "bytes": 29,
+        "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+        "relative": ".mir2-directory-durability"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\source-save-recovery-preserved\\.mir2-recovery-exclusive.lock",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "relative": ".mir2-recovery-exclusive.lock"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\source-save-recovery-preserved\\.mir2-recovery-owner-v1.json",
+        "bytes": 340,
+        "sha256": "0a2a96a16ce5b24840781dd1cfc7a78785c5ca67f3cea1cdd017ddacf7f62c42",
+        "relative": ".mir2-recovery-owner-v1.json"
+      },
+      {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\source-save-recovery-preserved\\quarantine\\.mir2-directory-durability",
+        "bytes": 29,
+        "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+        "relative": "quarantine/.mir2-directory-durability"
+      }
+    ],
+    "scope": "Actual W17 prior4 remain in place; current4 preserved unchanged in new owned destination. Empty active recovery initialized normally by Gateway."
+  },
+  "scope": "Exact immutable complete saved W17 game snapshot and controls; latest actual formal-v1 ended traffic ledger only is continued without edits. This is isolated game-snapshot replay, not continuation of formal-v1 mutated item/stock/game position state. No seeding, grants, store/pool/ledger value edits or origin reset.",
+  "totalBytes": 1279249,
+  "trafficContinuation": {
+    "state": "ACTUAL_FORMAL_V1_ENDED_LEDGER_ONLY",
+    "sourceDirectory": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\episode\\private",
+    "sourceLedger": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\episode\\private\\capacity-auth-budget.json",
+      "bytes": 849,
+      "sha256": "bd803f9723a9f3c8afd80e41d435f9841cb6b7af7e9129924cd8a37f814cc94c"
+    },
+    "originalW17Ledger": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\capacity-auth-budget.json",
+      "bytes": 585,
+      "sha256": "f64074a8c907622f8306245760116592eb235cab3e590165f0022033a8f48918"
+    },
+    "sourceReceipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\episode\\formal-episode-receipt-v1.json",
+      "bytes": 167861,
+      "sha256": "f4f57491abaede0466df03bab8cb405a950f0488b50cbfc660e0816a64149e15"
+    },
+    "sourceReport": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\episode\\reports\\1793100785101-b0981e2a.report.json",
+      "bytes": 198978,
+      "sha256": "2ed3de2b10d0e273c21f9389974c6f1e139eaa1041fed92ad80fa340070091be"
+    },
+    "sourceCopyReceipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\episode\\source-bank-copy-receipt-v1.json",
+      "bytes": 22737,
+      "sha256": "135b6cb84b18225a6b3fe8edd61e7ce0229c9763180f5e062531b4e4d9105be8"
+    },
+    "sourceCleanup": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\episode\\cleanup-v1.json",
+      "bytes": 5607,
+      "sha256": "7423fd2f9d92916bc44593eb256d03568b2b362a366b98402abd51dd32b1b0eb"
+    },
+    "sourceIndependentCleanup": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\episode\\root-independent-cleanup-v1.json",
+      "bytes": 165,
+      "sha256": "20dd1a0fad3af3c188b790cc27ca7e37724cd7eda1675803601b42c789c7912e"
+    },
+    "sourceOwnedProcess": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\episode\\owned-process-v1.json",
+      "bytes": 742,
+      "sha256": "44a491ec9ea754d891090c48397290d46f66e2350fad3d0252c2928fe7f7dfe2"
+    },
+    "sourceFrozen": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\frozen-source-v1.json",
+      "bytes": 232563,
+      "sha256": "7a4359f1a3f9af6de3aa0509aca97ff7b6c46df78e9545ebe8d1300ed47b936b"
+    },
+    "attempts": [
+      {
+        "at": 1793100785190,
+        "kind": "admission"
+      },
+      {
+        "at": 1793100789756,
+        "kind": "admission"
+      },
+      {
+        "at": 1793101120124,
+        "kind": "admission"
+      },
+      {
+        "at": 1793101124335,
+        "kind": "admission"
+      },
+      {
+        "at": 1793101128940,
+        "kind": "admission"
+      },
+      {
+        "at": 1793101133561,
+        "kind": "admission"
+      },
+      {
+        "at": 1793101137648,
+        "kind": "admission"
+      },
+      {
+        "at": 1793101142153,
+        "kind": "admission"
+      },
+      {
+        "at": 1793101146769,
+        "kind": "admission"
+      },
+      {
+        "at": 1793101151411,
+        "kind": "admission"
+      },
+      {
+        "at": 1793101495507,
+        "kind": "admission"
+      }
+    ],
+    "expectedAttemptCount": 11,
+    "expiredOriginalAttempts": 7,
+    "windowMs": 901000,
+    "originalNewestAgeAtFirstV1AttemptMs": 2120945,
+    "pruningIsOriginalLoginBudgetBehavior": true,
+    "poolAndKeysRawExact": true,
+    "identityFiles": [
+      {
+        "relative": "capacity-pool.json",
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\episode\\private\\capacity-pool.json",
+        "bytes": 22859,
+        "sha256": "924f2a81f70153f070948f98cea8fc6187cb25772ffead1fca4c5fa670bab8a5"
+      },
+      {
+        "relative": "recovery-mac-key.txt",
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\episode\\private\\recovery-mac-key.txt",
+        "bytes": 64,
+        "sha256": "cefb29ae1ddf2091dfe55c66694fac08b657a859eb15a14cba0bc37dc3a5765a"
+      },
+      {
+        "relative": "identity-session-secret.txt",
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\episode\\private\\identity-session-secret.txt",
+        "bytes": 64,
+        "sha256": "db2809fd0970391e8bbc9b6ca80e8c4dd5d77aabad307400d0952dcdffdfc024"
+      },
+      {
+        "relative": "identity-recovery-pepper.txt",
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\episode\\private\\identity-recovery-pepper.txt",
+        "bytes": 64,
+        "sha256": "d7137790909ad7c7f62178f74484466941b416a0561e5211515c7081e06a077e"
+      },
+      {
+        "relative": "passkey-auth-secret.txt",
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\episode\\private\\passkey-auth-secret.txt",
+        "bytes": 64,
+        "sha256": "37a4307699fde5753874c037b303776d3820c25feb68b24ccd116f2b0df9ed72"
+      }
+    ],
+    "sourceFormalOutcomeRetainedFalse": true,
+    "sourceCapacityEligibilityInherited": false
+  }
+}

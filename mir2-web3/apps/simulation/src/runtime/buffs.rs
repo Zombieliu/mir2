@@ -4,6 +4,9 @@ use mir2_game_data::{
     localized_text_or_fallback, starter_server_data, CrystalItemTemplate, LanguageCode,
 };
 use mir2_protocol::{crystal_stat_label, ClientBuff, ServerPacket, UserItemStat};
+use serde::{
+    de::Error as _, ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer,
+};
 
 use super::components::{current_player_is_dead, hero_entity, player_entity, PlayerVitals};
 use super::crystal_compat::*;
@@ -11,20 +14,135 @@ use super::items::{crystal_item_stat_value, user_item_stat_total};
 use super::packets::{object_health_info_for_entity, object_mana_info_for_entity};
 use super::resources::{BuffResource, PlayerRuntimeResource, PotionRecoveryResource};
 
-#[derive(Debug, Clone)]
+#[path = "buff_duration.rs"]
+mod buff_duration;
+pub(super) use buff_duration::RealTimeBuffDuration;
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub(super) struct BuffState {
     pub(super) key: String,
     pub(super) name: String,
     pub(super) description: String,
     pub(super) expires_at_tick: u64,
+    pub(super) real_time_duration: Option<RealTimeBuffDuration>,
     pub(super) attack_bonus: i32,
     pub(super) defence_bonus: i32,
     pub(super) stats: Vec<UserItemStat>,
 }
 
+// Keep the old record's timed duration scalar and Infinite None/MAX layout.
+// The optional outer field is ignored by the prior reader, so a rollback can
+// still load the complete buff instead of discarding an unfamiliar duration
+// object. The new reader restores its non-ticking Source ExpireTime metadata.
+#[derive(Deserialize)]
+struct PersistedBuffState {
+    key: String,
+    name: String,
+    description: String,
+    expires_at_tick: u64,
+    #[serde(default)]
+    real_time_duration: Option<RealTimeBuffDuration>,
+    #[serde(default)]
+    source_infinite_expire_time_ms: Option<u64>,
+    attack_bonus: i32,
+    defence_bonus: i32,
+    stats: Vec<UserItemStat>,
+}
+
+impl Serialize for BuffState {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        let source_infinite = self
+            .real_time_duration
+            .as_ref()
+            .filter(|duration| duration.is_infinite());
+        let timed = self
+            .real_time_duration
+            .as_ref()
+            .filter(|duration| !duration.is_infinite());
+        let mut record = serializer.serialize_struct(
+            "BuffState",
+            7 + usize::from(timed.is_some()) + usize::from(source_infinite.is_some()),
+        )?;
+        record.serialize_field("key", &self.key)?;
+        record.serialize_field("name", &self.name)?;
+        record.serialize_field("description", &self.description)?;
+        record.serialize_field("expires_at_tick", &self.expires_at_tick)?;
+        if let Some(duration) = timed {
+            record.serialize_field("real_time_duration", duration)?;
+        }
+        if let Some(duration) = source_infinite {
+            record.serialize_field("source_infinite_expire_time_ms", &duration.remaining_ms())?;
+        }
+        record.serialize_field("attack_bonus", &self.attack_bonus)?;
+        record.serialize_field("defence_bonus", &self.defence_bonus)?;
+        record.serialize_field("stats", &self.stats)?;
+        record.end()
+    }
+}
+
+impl<'de> Deserialize<'de> for BuffState {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let record = PersistedBuffState::deserialize(deserializer)?;
+        if record
+            .real_time_duration
+            .as_ref()
+            .is_some_and(RealTimeBuffDuration::is_infinite)
+            || (record.source_infinite_expire_time_ms.is_some()
+                && (record.real_time_duration.is_some() || record.expires_at_tick != u64::MAX))
+        {
+            return Err(D::Error::custom(
+                "infinite Buff metadata conflicts with the original persisted clock layout",
+            ));
+        }
+        let duration = record
+            .source_infinite_expire_time_ms
+            .map(RealTimeBuffDuration::new_infinite)
+            .or(record.real_time_duration);
+        Ok(Self {
+            key: record.key,
+            name: record.name,
+            description: record.description,
+            expires_at_tick: record.expires_at_tick,
+            real_time_duration: duration,
+            attack_bonus: record.attack_bonus,
+            defence_bonus: record.defence_bonus,
+            stats: record.stats,
+        })
+    }
+}
+
 impl BuffState {
+    pub(super) fn infinite(&self) -> bool {
+        self.real_time_duration.as_ref().map_or(
+            self.expires_at_tick == u64::MAX,
+            RealTimeBuffDuration::is_infinite,
+        )
+    }
+    pub(super) fn remaining_ms(&self, tick: u64) -> u64 {
+        self.real_time_duration.as_ref().map_or_else(
+            || {
+                self.expires_at_tick
+                    .saturating_sub(tick)
+                    .saturating_mul(1000)
+            },
+            RealTimeBuffDuration::remaining_ms,
+        )
+    }
+    pub(super) fn real_time_expired(&self) -> bool {
+        self.real_time_duration
+            .as_ref()
+            .is_some_and(|duration| !duration.is_infinite() && duration.remaining_ms() == 0)
+    }
+    pub(super) fn expired(&self, tick: u64) -> bool {
+        !self.infinite() && self.remaining_ms(tick) == 0
+    }
     pub(super) fn snapshot(&self, tick: u64, language: LanguageCode) -> BuffSnapshot {
-        let remaining_ticks = self.expires_at_tick.saturating_sub(tick);
+        let remaining_ms = self.remaining_ms(tick);
+        let remaining_ticks = if self.real_time_duration.is_some() {
+            remaining_ms.div_ceil(1000)
+        } else {
+            self.expires_at_tick.saturating_sub(tick)
+        };
         let mut stats = self.stats.clone();
         stats.sort_by_key(|stat| stat.stat);
         BuffSnapshot {
@@ -37,8 +155,8 @@ impl BuffState {
             // Crystal-faithful enrichment for the browser buff window, mirroring the
             // `S.AddBuff` packet path (runtime/buffs.rs `client_buff_for_state`).
             buff_type: crystal_buff_type_for_key(&self.key),
-            remaining_ms: remaining_ticks.saturating_mul(1_000),
-            infinite: self.expires_at_tick == u64::MAX,
+            remaining_ms,
+            infinite: self.infinite(),
             stats: stats
                 .iter()
                 .map(|stat| BuffStatSnapshot {
@@ -110,6 +228,11 @@ pub(super) fn apply_or_refresh_buff(world: &mut World, next: BuffState) {
 }
 
 pub(super) fn tick_buffs(world: &mut World, packets: &mut Vec<ServerPacket>) {
+    if let Some(position) =
+        player_entity(world).and_then(|entity| super::components::entity_position(world, entity))
+    {
+        packets.extend(refresh_player_safe_duration_buffs(world, &position));
+    }
     let tick = super::session::runtime_tick(world);
     let object_id = player_entity(world)
         .and_then(|player| {
@@ -130,13 +253,13 @@ pub(super) fn tick_buffs(world: &mut World, packets: &mut Vec<ServerPacket>) {
         .resource::<BuffResource>()
         .buffs
         .iter()
-        .filter(|buff| buff.expires_at_tick <= tick && !is_frozen(buff))
+        .filter(|buff| buff.expired(tick) && !is_frozen(buff))
         .map(|buff| (buff.key.clone(), crystal_buff_type_for_key(&buff.key)))
         .collect::<Vec<_>>();
     world
         .resource_mut::<BuffResource>()
         .buffs
-        .retain(|buff| buff.expires_at_tick > tick || is_frozen(buff));
+        .retain(|buff| !buff.expired(tick) || is_frozen(buff));
     for (key, buff_type) in expired_buffs {
         if let Some(buff_type) = buff_type {
             packets.push(ServerPacket::RemoveBuff {
@@ -182,18 +305,22 @@ pub(super) fn client_buff_for_state(world: &World, buff: &BuffState) -> Option<C
     let object_id = world.entity(player).get::<super::components::ObjectId>()?.0;
     let mut stats = buff.stats.clone();
     stats.sort_by_key(|stat| stat.stat);
+    let infinite = buff.infinite();
 
     Some(ClientBuff {
         buff_type: crystal_buff_type_for_key(&buff.key)?,
         visible: crystal_buff_visible_for_key(&buff.key),
         object_id,
-        expire_time: buff
-            .expires_at_tick
-            .saturating_sub(tick)
-            .saturating_mul(1_000)
-            .min(i64::MAX as u64) as i64,
-        infinite: false,
-        paused: false,
+        expire_time: if infinite && buff.real_time_duration.is_none() {
+            0
+        } else {
+            buff.remaining_ms(tick).min(i64::MAX as u64) as i64
+        },
+        infinite,
+        paused: buff
+            .real_time_duration
+            .as_ref()
+            .is_some_and(RealTimeBuffDuration::is_paused),
         stats,
         values: Vec::new(),
     })
@@ -503,6 +630,7 @@ pub(super) fn crystal_consumable_buff(
     }
 
     Some(BuffState {
+        real_time_duration: None,
         key: key.to_string(),
         name: name.to_string(),
         description: description.to_string(),
@@ -600,6 +728,16 @@ pub(super) fn crystal_template_consumable_buffs(
             "Crystal experience potion buff is active.",
             CRYSTAL_STAT_LUCK,
         )
+        .map(|mut buff| {
+            // Crystal consumes Luck as the VALUE, then stores ExpRatePercent.
+            for stat in &mut buff.stats {
+                stat.stat = 100;
+            }
+            buff.real_time_duration = Some(RealTimeBuffDuration::new(
+                duration_ticks.saturating_mul(1_000),
+            ));
+            buff
+        })
         .into_iter()
         .collect(),
         CRYSTAL_POTION_SHAPE_DROP => buff_from_stat(
@@ -608,6 +746,15 @@ pub(super) fn crystal_template_consumable_buffs(
             "Crystal drop-rate potion buff is active.",
             CRYSTAL_STAT_LUCK,
         )
+        .map(|mut buff| {
+            for stat in &mut buff.stats {
+                stat.stat = 101;
+            }
+            buff.real_time_duration = Some(RealTimeBuffDuration::new(
+                duration_ticks.saturating_mul(1_000),
+            ));
+            buff
+        })
         .into_iter()
         .collect(),
         _ => Vec::new(),
@@ -617,8 +764,20 @@ pub(super) fn crystal_template_consumable_buffs(
 pub(super) fn apply_or_stack_duration_buff(world: &mut World, next: BuffState) -> BuffState {
     let current_tick = super::session::runtime_tick(world);
     let mut buffs = world.resource_mut::<BuffResource>();
+    if next.real_time_duration.is_some() {
+        buffs
+            .buffs
+            .retain(|buff| buff.key != next.key || !buff.real_time_expired());
+    }
     let duration_ticks = next.expires_at_tick.saturating_sub(current_tick);
     if let Some(existing) = buffs.buffs.iter_mut().find(|buff| buff.key == next.key) {
+        if let Some(duration) = &next.real_time_duration {
+            let remaining = existing
+                .remaining_ms(current_tick)
+                .saturating_add(duration.remaining_ms());
+            existing.real_time_duration = Some(RealTimeBuffDuration::new(remaining));
+            return existing.clone();
+        }
         existing.expires_at_tick = existing
             .expires_at_tick
             .max(current_tick)
@@ -642,9 +801,66 @@ pub(super) fn apply_crystal_template_consumable_buffs(
 
     let mut packets = Vec::new();
     for buff in buffs {
-        let applied = apply_or_stack_duration_buff(world, buff);
+        let mut applied = apply_or_stack_duration_buff(world, buff);
+        if let Some(position) = player_entity(world)
+            .and_then(|entity| super::components::entity_position(world, entity))
+        {
+            let _ = refresh_player_safe_duration_buffs(world, &position);
+            if let Some(current) = world
+                .resource::<BuffResource>()
+                .buffs
+                .iter()
+                .find(|current| current.key == applied.key)
+            {
+                applied = current.clone();
+            }
+        }
         if let Some(packet) = client_buff_packet_for_state(world, &applied) {
             packets.push(packet);
+        }
+    }
+    packets
+}
+
+pub(super) fn refresh_player_safe_duration_buffs(
+    world: &mut World,
+    position: &mir2_protocol::Point,
+) -> Vec<ServerPacket> {
+    let (Some(config), Some(map)) = (
+        world.get_resource::<super::resources::RuntimeConfigResource>(),
+        world.get_resource::<super::resources::MapRuntimeResource>(),
+    ) else {
+        return vec![];
+    };
+    let safe = super::map::is_safe_zone_point(&config.config, map, position);
+    let object_id = player_entity(world)
+        .and_then(|entity| world.get::<super::components::ObjectId>(entity))
+        .map(|id| id.0);
+    let tick = super::resources::runtime_tick(world);
+    let mut packets = Vec::new();
+    let Some(mut buffs) = world.get_resource_mut::<BuffResource>() else {
+        return packets;
+    };
+    for buff in &mut buffs.buffs {
+        if !matches!(buff.key.as_str(), "exp" | "drop") {
+            continue;
+        }
+        if buff.real_time_duration.is_none() && buff.expires_at_tick != u64::MAX {
+            buff.real_time_duration = Some(RealTimeBuffDuration::new(buff.remaining_ms(tick)));
+        }
+        if let Some(duration) = &mut buff.real_time_duration {
+            if duration.is_paused() != safe {
+                duration.set_paused(safe);
+                if let (Some(object_id), Some(buff_type)) =
+                    (object_id, crystal_buff_type_for_key(&buff.key))
+                {
+                    packets.push(ServerPacket::PauseBuff {
+                        object_id,
+                        buff_type,
+                        paused: safe,
+                    });
+                }
+            }
         }
     }
     packets

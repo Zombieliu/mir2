@@ -1,0 +1,6 @@
+{
+  "file": "apps/gateway/src/web_native_resume_handoff_ws_tests.rs",
+  "sha256": "49c2ae5b4c5786a61cfbad6e3a4b540cbdac28b396851ada343d3009613a915e",
+  "result": "10 store tests pass; 2 WS fixtures time out because packet discriminator used name instead of packet",
+  "productionChanged": false
+}
