@@ -16,132 +16,233 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: "9244ce3dd7cd2129a70e650be1430e971b6c96ab",
+  source: "ea4b1c363eb9089bf0fbe57245660782cae3fe70",
   sourceRef: BRANCH,
-  baseSource: "199a294130f386a245e86d3c1d81f731d7d7277b",
+  baseSource: "9244ce3dd7cd2129a70e650be1430e971b6c96ab",
   assetSource: "f2de762309768b51b39438c2437c14e819df9bf7",
   sourceCommits: [
-    "525e74364ab87ad49e84c26c8dd22db9fe9348d5",
-    "5579f352b66bd32560baef45de0310677f817388",
-    "b950fce0a14f739d89008c864670dcb8f7c8df57",
-    "08cb36687161dbbf82ed03c06da9fa88a903a417",
-    "9244ce3dd7cd2129a70e650be1430e971b6c96ab"
+    "e83c60216c68953edad68b842a41ff8402908434",
+    "b0cc37a3dbc1d1092ee9befe76165883108d2c15",
+    "e4549595e1face90a3c90df4610d559b3a99d604",
+    "eb97b0ccaa3dd9469842dd3f0445eae1119ceb4a",
+    "4515fe8400285b2beb9c5b48480d020c538db738",
+    "ea4b1c363eb9089bf0fbe57245660782cae3fe70"
   ],
   changedFiles: [
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/gateway/src/routing.rs",
-      "sha": "f24008af76145a0ab1fcdb7d865c990f0228b9ae"
+      "filename": ".github/scripts/numeron-r16-release.mjs",
+      "sha": "0c1b698e8a025af9349f036772725c212ff24061"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/gateway/src/web.rs",
-      "sha": "13493b3bbbfdadadf8b0c1d0557469fb504fcd32"
+      "filename": ".github/scripts/test-numeron-r16-release.mjs",
+      "sha": "c7e2ccf82762165a62b440047ea9f9d18a888f1b"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/gateway/src/web_transport.rs",
-      "sha": "daf07cadb5b95992089ebd70153dcdcbd0beaa19"
+      "filename": ".github/scripts/test-numeron-release-entry.mjs",
+      "sha": "8652a3ee07df1f348ad5f0c008dec5126167b718"
+    },
+    {
+      "status": "modified",
+      "filename": ".github/workflows/gateway-release.yml",
+      "sha": "994f8a947e374a33a8f93e4d3429e480cd4b8746"
+    },
+    {
+      "status": "modified",
+      "filename": ".github/workflows/promotion-website-release.yml",
+      "sha": "16bb035b8da83e3b5192532ba3394ce3b2d3005b"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/app/components/r16-login-door.tsx",
+      "sha": "0e57fe6da9a9b0c4df08fafdb0f82f4173cfcb8a"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/lib/scene-asset-preloader.ts",
+      "sha": "1a1c90f28769f66399eac36302221931704cea5e"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/scripts/lib/r16-static-waterfall.mjs",
+      "sha": "789c3c762abadf2400be12d22b2de399855f0925"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-r16-auth-layout.mjs",
+      "sha": "aab7b723b3717cac9d3b33a8dc983db33da446da"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/scripts/test-r16-static-waterfall.mjs",
+      "sha": "0f505ff80bb57b87dff4a340c7130959d8cd5cd6"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-scene-asset-preloader.mjs",
+      "sha": "cca6c14de54ffac1fb8ac40b90640623b922e6a9"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/AGENT-CURRENT.md",
-      "sha": "455e8d5dc6bb2b6856a27d922b9e49f5ce96838e"
+      "sha": "a592c9645b80e45d5d17dde4871db02419a9b395"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
-      "sha": "4d198e36a0f61765c0952ef54b6339cc076d04b5"
+      "sha": "3393b106ad8fdd4b9ac64c30d1b63828b8dd0cf0"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/BACKEND-1TO1-PROGRESS.md",
-      "sha": "c073ba685c12467818f2ab951e7747e88a2f5ba4"
+      "sha": "4f5b50e6215997a38f847171293427aa1f3ec290"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
-      "sha": "7dd73a9e3f9e24c849b6eaf448860a1149791bcd"
+      "sha": "f858d08116fc0a30f055aa644017bb41377828a1"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/CRYSTAL-SERVER-PARITY.md",
-      "sha": "b9c8610f887df61a5a68eb80dde6a9027fbf2f6f"
+      "sha": "0ba16bb1ed9cf499c60529b4784fe304a39bee64"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
-      "sha": "236f123da869e58e5786b49f876136e0b33a2a72"
+      "sha": "5326401285977f49d05f0def698d1da604f9453c"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/README.zh-CN.md",
-      "sha": "7b32d096f9dd3712068722c51dceb09ee4cb7da0"
+      "sha": "420f6edd780c48b53f0494e97a4aaa2c9f1aaf11"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/cloud-fd3-progressive.closed.json",
-      "sha": "afed7f91ac98e49801f7a8d4a17bfa546dc81b81"
+      "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/input-gate-tick-gate.causal.json",
+      "sha": "07e35cb38c21bc8dbb729df6f1f7ab32ef647360"
     },
     {
       "status": "added",
+      "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/input-gate-trace100.closed.json",
+      "sha": "c22fdf486c68f631e410df2c4086dce10f0d50c1"
+    },
+    {
+      "status": "modified",
       "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/input-gate-trace2.closed.json",
-      "sha": "a58c9a944c47387bdbac5b776e09fcfbcf8ac0b3"
+      "sha": "5a5978195ccde21dd708b446563319c843e6ca21"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-login-door-retirement-20261114/README.md",
+      "sha": "8b49f44d8abdad65d85755f4888db20db72e12db"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-login-door-retirement-20261114/default-vendor-arrival.png",
+      "sha": "7efabd2db0e5f47489ed31cf423df374f0d23552"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-login-door-retirement-20261114/qualification.json",
+      "sha": "741d505239d9e7987a11c0cda252c6f61d4b4f90"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-login-door-retirement-20261114/webgl2-vendor-arrival.png",
+      "sha": "a5aef1c2d11817a4c4cd1ca49e151e1ca7f6c089"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/README.md",
-      "sha": "5ddc5d3adf007be49a45a0b04804a49142e5d314"
+      "sha": "f5057b58a51231e648a7c8f14ea2767aa70aeace"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/browser-inputs-manifest.json",
-      "sha": "b857d5418d19ad851aec5c27da25a7df5ebc1102"
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/candidate/README.md",
+      "sha": "74cc624f59133f86516eb796a5bf2d576c83d8e0"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/browser-production-readback.json",
-      "sha": "13390bc09d945b34843b546835a7a95f47d8b852"
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/candidate/checks.json",
+      "sha": "06b9fdb709f8cc50788043d31dce0320d1f68ce6"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/browser-verification.json",
-      "sha": "0678f128678cc7b0a84fd52f67f36f78803db4e3"
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/candidate/current-e6-control.json",
+      "sha": "7fbc63035f40bd66b6820333f0d17d964f2c1555"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/default-en-quest.png",
-      "sha": "2b1c172f990bd96191e75365f812d4e413127a86"
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/candidate/current-e6-shared-quest.png",
+      "sha": "7d5b1f2928399b6de08ee2369e5c108f44372c4b"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/default-en-vendor-arrival.png",
-      "sha": "dcd2afae38ad69c7f450c19d6273ab15b2684c80"
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/candidate/current-e6-static-waterfall.json",
+      "sha": "2d5b0a05de37d301199fa25c9f482f8e4f465e3e"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/linux-ci-verification.json",
-      "sha": "2babd1a2aded7e998af720341cb0a7e9381d52d2"
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/candidate/post-control-production.json",
+      "sha": "66b28be46329556169faf08336708be58bad026e"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/candidate/ready.json",
+      "sha": "7f6249ff8ff4cf514e5fd4735883eb5e92c52003"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/legacy-text-vendor-arrival.png",
+      "sha": "d1e264fd945a423372a626cb4cc58382edd70ab7"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/merged-browser-verification.json",
+      "sha": "12a7cb018506478d88d2cfa931cc80484a08a477"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/merged-default-vendor-arrival.png",
+      "sha": "9df9fe6abbe5132584a7bbf7dc77d694c8fa4363"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/merged-linux-ci-verification.json",
+      "sha": "4470545b042746f73900b26ef161a2b095542818"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/merged-private-inputs.json",
+      "sha": "11a371a45cd34a24bbf142967bbeab36884c5912"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/merged-production-readback.json",
+      "sha": "0a68886aac8e1d499c48db8ca60a853ac8d4ee66"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/merged-release-source-remote.json",
+      "sha": "394f85494aac9264b2e3e63934b3c4a9d64d08e4"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/merged-validation.json",
+      "sha": "f8fd3fe9be21ab0981e4f8a52a690ca7e8e18696"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/merged-webgl2-vendor-arrival.png",
+      "sha": "1d8b6b0083376b3aca41e6af7a97da0621b393e5"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/qualification.json",
-      "sha": "c7cc45699d5c4e983ae55597071981033a705465"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/validation.json",
-      "sha": "5e410b125513f8b0e41f1d434c634676e7755683"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/webgl2-tc-quest.png",
-      "sha": "ca516feaa3b9c130cefbfc39bd50b9e60657f35b"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/webgl2-tc-vendor-arrival.png",
-      "sha": "97a33146fe9d24622515e14eb6ffc5b599c46c87"
+      "sha": "5fce7e12229763e65799d187d9f075eb28d68ea9"
     }
   ],
   entryScene: {
