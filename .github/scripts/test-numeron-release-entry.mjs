@@ -173,7 +173,7 @@ test('domain move invokes only its separate helper and receipt; stage and promot
 });
 
 test('relay dispatches use only the website job and refuse source, asset or marketing overrides', () => {
-  for (const operation of ['numeron-qr-stage', 'numeron-qr-promote', 'numeron-qr-rollback']) {
+  for (const operation of ['numeron-qr-stage', 'numeron-qr-check', 'numeron-qr-promote', 'numeron-qr-rollback']) {
     const options = { numeron_operation: operation, deployment_id: operation === 'numeron-qr-stage' ? '' : 'dpl_qr' };
     assert(admits('numeron-website', options));
     assert(!admits('numeron-ingress', options));

@@ -22,7 +22,7 @@ on:
         required: false
         default: 'off'
         type: choice
-        options: ['off', numeron-context, numeron-stage, numeron-promote, numeron-domain-move, numeron-ingress-inspect, numeron-ingress-proxy, numeron-ingress-restore, numeron-qr-stage, numeron-qr-promote, numeron-qr-rollback]
+        options: ['off', numeron-context, numeron-stage, numeron-promote, numeron-domain-move, numeron-ingress-inspect, numeron-ingress-proxy, numeron-ingress-restore, numeron-qr-stage, numeron-qr-check, numeron-qr-promote, numeron-qr-rollback]
       numeron_ingress_guard:
         description: Current inspected DNS revision and original TTL, joined by a colon, for a Numeron ingress write
         required: false
@@ -70,7 +70,7 @@ jobs:
           const env = process.env, operation = env.NUMERON_OPERATION;
           const fail = code => { throw Error(code); };
           const ingress = ['numeron-ingress-inspect', 'numeron-ingress-proxy', 'numeron-ingress-restore'].includes(operation);
-          const qr = ['numeron-qr-stage', 'numeron-qr-promote', 'numeron-qr-rollback'].includes(operation);
+          const qr = ['numeron-qr-stage', 'numeron-qr-check', 'numeron-qr-promote', 'numeron-qr-rollback'].includes(operation);
           if (!ingress && !qr && !['numeron-context', 'numeron-stage', 'numeron-promote', 'numeron-domain-move'].includes(operation)) fail('explicitNumeronOperationRequired');
           if (env.LEGACY_RELEASE_TAG || env.LEGACY_PUBLISH_R2 === 'true' || env.LEGACY_PLAYTEST_WALLET === 'true') fail('mixedReleaseModes');
           if (env.GITHUB_REPOSITORY !== 'Zombieliu/mir2' || env.GITHUB_REF !== 'refs/heads/codex/windows-player-journey' || !/^[a-f0-9]{40}$/.test(env.GITHUB_SHA || '')) fail('sourceIdentityInvalid');
@@ -80,7 +80,7 @@ jobs:
           const source = env.NUMERON_SOURCE_SHA || env.GITHUB_SHA;
           if (!/^[a-f0-9]{40}$/.test(source) || (operation === 'numeron-stage' && source !== env.GITHUB_SHA)) fail('sourceInputInvalid');
           const paired = operation === 'numeron-promote' || operation === 'numeron-domain-move';
-          const gameOnly = operation === 'numeron-qr-promote' || operation === 'numeron-qr-rollback';
+          const gameOnly = operation === 'numeron-qr-check' || operation === 'numeron-qr-promote' || operation === 'numeron-qr-rollback';
           if ((paired || gameOnly) ? !/^dpl_[A-Za-z0-9]+$/.test(env.NUMERON_DEPLOYMENT_ID || '') : Boolean(env.NUMERON_DEPLOYMENT_ID)) fail('candidateInputInvalid');
           if (paired ? !/^dpl_[A-Za-z0-9]+$/.test(env.NUMERON_MAIN_DEPLOYMENT_ID || '') || env.NUMERON_DEPLOYMENT_ID === env.NUMERON_MAIN_DEPLOYMENT_ID : Boolean(env.NUMERON_MAIN_DEPLOYMENT_ID)) fail('candidateInputInvalid');
           const assets = operation === 'numeron-stage' || operation === 'numeron-promote';
@@ -89,7 +89,7 @@ jobs:
 
   numeron-website:
     needs: validate-numeron-entry
-    if: ${{ inputs.numeron_operation == 'numeron-context' || inputs.numeron_operation == 'numeron-stage' || inputs.numeron_operation == 'numeron-promote' || inputs.numeron_operation == 'numeron-domain-move' || inputs.numeron_operation == 'numeron-qr-stage' || inputs.numeron_operation == 'numeron-qr-promote' || inputs.numeron_operation == 'numeron-qr-rollback' }}
+    if: ${{ inputs.numeron_operation == 'numeron-context' || inputs.numeron_operation == 'numeron-stage' || inputs.numeron_operation == 'numeron-promote' || inputs.numeron_operation == 'numeron-domain-move' || inputs.numeron_operation == 'numeron-qr-stage' || inputs.numeron_operation == 'numeron-qr-check' || inputs.numeron_operation == 'numeron-qr-promote' || inputs.numeron_operation == 'numeron-qr-rollback' }}
     uses: ./.github/workflows/promotion-website-release.yml
     with:
       operation: ${{ inputs.numeron_operation }}

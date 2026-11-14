@@ -223,7 +223,7 @@ export const QR_RELEASE = Object.freeze({
   baseline: 'dpl_Ae3hNyFygQuSMZDesBXCZDpUECTY',
   relay: 'https://relay.dubhe.obelisk.build',
 });
-const QR_OPERATIONS = ['numeron-qr-stage', 'numeron-qr-promote', 'numeron-qr-rollback'];
+const QR_OPERATIONS = ['numeron-qr-stage', 'numeron-qr-check', 'numeron-qr-promote', 'numeron-qr-rollback'];
 const WALLET_ORIGIN = 'https://wallet.dubhe.obelisk.build';
 const QR_SESSION_PATH = '/api/wallet/dubhe/session';
 const DEPLOYMENT = /^dpl_[A-Za-z0-9]+$/;
@@ -538,7 +538,11 @@ async function releaseQrGame({ operation, initial, projects, candidate, id, verc
     receipt['protectedEntry' + name] = verifyEntryAsset(bytes, entry, 'entry' + name + 'DigestMismatch');
   }
   receipt.protectedQr = await proveQrRelay((pathname, token) => readCandidate(reviewed, pathname, { token }));
-  await mapping([baseline]);
+  receipt.trafficAfter = await mapping([baseline]);
+  if (operation === 'numeron-qr-check') {
+    receipt.candidateChecksPassed = true;
+    return;
+  }
   receipt.writes.push({ operation: 'promote', site: 'game', deployment: reviewed.id });
   try {
     await vercel(`/v10/projects/${gamePath}/promote/${reviewed.id}`, 'POST', {});

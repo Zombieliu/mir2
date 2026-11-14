@@ -294,6 +294,68 @@ for (const [name, mutate] of [
   });
 }
 
+test('QR candidate check proves exact protected assets and pending without changing traffic', async () => {
+  const f = fixture('numeron-qr-check'), r = await f.execute();
+  assert.ifError(r.error);
+  assert.equal(r.result.candidateChecksPassed, true);
+  assert.equal(r.result.protectedQr.pending, true);
+  assert.equal(r.result.publicQr, undefined);
+  assert.equal(writes(r).length, 0);
+  assert.deepEqual(r.result.writes, []);
+  assert.deepEqual(r.result.trafficBefore, { target: QR_RELEASE.baseline, alias: QR_RELEASE.baseline });
+  assert.deepEqual(r.result.trafficAfter, r.result.trafficBefore);
+  for (const { name, entry } of ENTRY_ASSETS) assert.deepEqual(r.result['protectedEntry' + name], entry);
+  assert(!JSON.stringify(r.receipts).includes('synthetic.private.intent'));
+  assert(!JSON.stringify(r.receipts).includes('synthetic-session'));
+});
+
+test('QR candidate check fails each corrupt asset without promotion or rollback', async () => {
+  for (const { entry, bytes, name } of ENTRY_ASSETS) {
+    const f = fixture('numeron-qr-check'), changed = Buffer.from(bytes);
+    changed[15] ^= 1;
+    f.state.onRead = (_candidate, pathname) => pathname === entry.path ? changed : undefined;
+    const r = await f.execute();
+    failed(r, new RegExp('^entry' + name + 'DigestMismatch$'));
+    assert.equal(writes(r).length, 0);
+    assert.equal(r.receipts[0].candidateChecksPassed, undefined);
+    assert.equal(r.projects.game.targets.production.id, QR_RELEASE.baseline);
+  }
+});
+
+test('QR candidate check rejects source and readiness mismatch before protected requests', async () => {
+  for (const change of [f => { f.candidates.game.gitSource.sha = 'c'.repeat(40); },
+    f => { f.candidates.game.readyState = 'BUILDING'; }, f => { f.candidates.game.projectId = SITES.main.project; }]) {
+    const f = fixture('numeron-qr-check'); change(f);
+    const r = await f.execute();
+    failed(r, /candidateIdentitySourceRootMismatch/);
+    assert.equal(writes(r).length, 0);
+    assert.equal(r.reads.length, 0);
+  }
+});
+
+test('QR candidate check refuses concurrent production changes observed after protected requests', async () => {
+  for (const key of ['game', 'main', 'original']) {
+    const f = fixture('numeron-qr-check');
+    f.state.onRead = (_candidate, pathname) => {
+      if (pathname === '/api/wallet/dubhe/session/status') f.projects[key].targets.production.id = 'dpl_external';
+    };
+    const r = await f.execute();
+    failed(r, /concurrentProductionChange|qrTrafficMappingChanged/);
+    assert.equal(writes(r).length, 0);
+    assert.equal(r.receipts[0].candidateChecksPassed, undefined);
+    assert.equal(r.projects[key].targets.production.id, 'dpl_external');
+  }
+});
+
+test('QR candidate check cannot certify an invalid protected login canary', async () => {
+  const f = fixture('numeron-qr-check');
+  f.state.onRead = (_candidate, pathname) => pathname === '/api/wallet/dubhe/session' ? '{"unexpected":true}' : undefined;
+  const r = await f.execute();
+  failed(r, /qrCreateFailed/);
+  assert.equal(writes(r).length, 0);
+  assert.equal(r.receipts[0].candidateChecksPassed, undefined);
+});
+
 test('QR promotion proves protected and public routes and keeps intents out of the receipt', async () => {
   const f = fixture('numeron-qr-promote'), r = await f.execute();
   assert.ifError(r.error);

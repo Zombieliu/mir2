@@ -37,7 +37,7 @@ on:
         required: true
         default: context
         type: choice
-        options: [context, discover-main-site, inspect-main-source, stage, promote, unified-context, unified-stage, unified-promote, realtime-context, realtime-stage, realtime-promote, windows-context, windows-config, windows-stage, windows-promote, numeron-context, numeron-stage, numeron-promote, numeron-domain-move, numeron-qr-stage, numeron-qr-promote, numeron-qr-rollback, backend-build]
+        options: [context, discover-main-site, inspect-main-source, stage, promote, unified-context, unified-stage, unified-promote, realtime-context, realtime-stage, realtime-promote, windows-context, windows-config, windows-stage, windows-promote, numeron-context, numeron-stage, numeron-promote, numeron-domain-move, numeron-qr-stage, numeron-qr-check, numeron-qr-promote, numeron-qr-rollback, backend-build]
       deployment_id:
         description: Exact accepted production candidate; required only for promote
         required: false
@@ -90,14 +90,14 @@ jobs:
           node --input-type=module <<'NODE'
           const env = process.env, operation = env.NUMERON_OPERATION;
           const fail = code => { throw Error(code); };
-          const qr = ['numeron-qr-stage', 'numeron-qr-promote', 'numeron-qr-rollback'].includes(operation);
+          const qr = ['numeron-qr-stage', 'numeron-qr-check', 'numeron-qr-promote', 'numeron-qr-rollback'].includes(operation);
           if (!qr && !['numeron-context', 'numeron-stage', 'numeron-promote', 'numeron-domain-move'].includes(operation)) fail('explicitNumeronOperationRequired');
           if (env.BACKEND_SOURCE_SHA) fail('mixedReleaseModes');
           if (env.GITHUB_REPOSITORY !== 'Zombieliu/mir2' || env.GITHUB_REF !== 'refs/heads/codex/windows-player-journey' || !/^[a-f0-9]{40}$/.test(env.GITHUB_SHA || '')) fail('sourceIdentityInvalid');
           const source = env.NUMERON_SOURCE_SHA || env.GITHUB_SHA;
           if ((qr && env.NUMERON_SOURCE_SHA) || !/^[a-f0-9]{40}$/.test(source) || (operation === 'numeron-stage' && source !== env.GITHUB_SHA)) fail('sourceInputInvalid');
           const paired = operation === 'numeron-promote' || operation === 'numeron-domain-move';
-          const gameOnly = operation === 'numeron-qr-promote' || operation === 'numeron-qr-rollback';
+          const gameOnly = operation === 'numeron-qr-check' || operation === 'numeron-qr-promote' || operation === 'numeron-qr-rollback';
           if ((paired || gameOnly) ? !/^dpl_[A-Za-z0-9]+$/.test(env.NUMERON_DEPLOYMENT_ID || '') : Boolean(env.NUMERON_DEPLOYMENT_ID)) fail('candidateInputInvalid');
           if (paired ? !/^dpl_[A-Za-z0-9]+$/.test(env.NUMERON_MAIN_DEPLOYMENT_ID || '') || env.NUMERON_DEPLOYMENT_ID === env.NUMERON_MAIN_DEPLOYMENT_ID : Boolean(env.NUMERON_MAIN_DEPLOYMENT_ID)) fail('candidateInputInvalid');
           const assets = operation === 'numeron-stage' || operation === 'numeron-promote';
