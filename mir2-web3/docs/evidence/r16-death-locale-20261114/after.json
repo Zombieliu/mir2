@@ -1,0 +1,1056 @@
+{
+  "scope": "Actual Page death component and its real translator props, rendered without gameplay state. Local font files and unchanged CSS; no Gateway, mutation, revive packet or full-game claim.",
+  "phase": "after",
+  "passed": true,
+  "nonEnglishLocalized": 36,
+  "views": 40,
+  "rows": [
+    {
+      "language": "zh-CN",
+      "width": 360,
+      "busy": false,
+      "props": {
+        "title": "你已死亡",
+        "message": "返回城镇，继续你的旅程。",
+        "reviveLabel": "回城复活",
+        "revivingLabel": "正在复活…"
+      },
+      "bodyBounds": {
+        "x": 40,
+        "y": 190.75,
+        "width": 280,
+        "height": 158.5
+      },
+      "buttonBounds": {
+        "x": 67,
+        "y": 285.25,
+        "width": 226,
+        "height": 41
+      },
+      "visible": true,
+      "disabled": false,
+      "screenshot": "360-zh-CN-ready.png"
+    },
+    {
+      "language": "zh-CN",
+      "width": 360,
+      "busy": true,
+      "props": {
+        "title": "你已死亡",
+        "message": "返回城镇，继续你的旅程。",
+        "reviveLabel": "回城复活",
+        "revivingLabel": "正在复活…"
+      },
+      "bodyBounds": {
+        "x": 40,
+        "y": 190.75,
+        "width": 280,
+        "height": 158.5
+      },
+      "buttonBounds": {
+        "x": 67,
+        "y": 285.25,
+        "width": 226,
+        "height": 41
+      },
+      "visible": true,
+      "disabled": true,
+      "screenshot": "360-zh-CN-busy.png"
+    },
+    {
+      "language": "zh-TW",
+      "width": 360,
+      "busy": false,
+      "props": {
+        "title": "你已死亡",
+        "message": "返回城鎮，繼續你的旅程。",
+        "reviveLabel": "回城復活",
+        "revivingLabel": "復活中…"
+      },
+      "bodyBounds": {
+        "x": 40,
+        "y": 188.75,
+        "width": 280,
+        "height": 162.5
+      },
+      "buttonBounds": {
+        "x": 67,
+        "y": 286.25,
+        "width": 226,
+        "height": 42
+      },
+      "visible": true,
+      "disabled": false,
+      "screenshot": "360-zh-TW-ready.png"
+    },
+    {
+      "language": "zh-TW",
+      "width": 360,
+      "busy": true,
+      "props": {
+        "title": "你已死亡",
+        "message": "返回城鎮，繼續你的旅程。",
+        "reviveLabel": "回城復活",
+        "revivingLabel": "復活中…"
+      },
+      "bodyBounds": {
+        "x": 40,
+        "y": 188.75,
+        "width": 280,
+        "height": 162.5
+      },
+      "buttonBounds": {
+        "x": 67,
+        "y": 286.25,
+        "width": 226,
+        "height": 42
+      },
+      "visible": true,
+      "disabled": true,
+      "screenshot": "360-zh-TW-busy.png"
+    },
+    {
+      "language": "en",
+      "width": 360,
+      "busy": false,
+      "props": {
+        "title": "You have died",
+        "message": "Return to town to continue your journey.",
+        "reviveLabel": "Revive in town",
+        "revivingLabel": "Reviving…"
+      },
+      "bodyBounds": {
+        "x": 28.84375,
+        "y": 190.25,
+        "width": 302.3125,
+        "height": 159.5
+      },
+      "buttonBounds": {
+        "x": 55.84375,
+        "y": 285.75,
+        "width": 248.3125,
+        "height": 41
+      },
+      "visible": true,
+      "disabled": false,
+      "screenshot": "360-en-ready.png"
+    },
+    {
+      "language": "en",
+      "width": 360,
+      "busy": true,
+      "props": {
+        "title": "You have died",
+        "message": "Return to town to continue your journey.",
+        "reviveLabel": "Revive in town",
+        "revivingLabel": "Reviving…"
+      },
+      "bodyBounds": {
+        "x": 28.84375,
+        "y": 190.25,
+        "width": 302.3125,
+        "height": 159.5
+      },
+      "buttonBounds": {
+        "x": 55.84375,
+        "y": 285.75,
+        "width": 248.3125,
+        "height": 41
+      },
+      "visible": true,
+      "disabled": true,
+      "screenshot": "360-en-busy.png"
+    },
+    {
+      "language": "pt-BR",
+      "width": 360,
+      "busy": false,
+      "props": {
+        "title": "Você morreu",
+        "message": "Volte à cidade para continuar sua jornada.",
+        "reviveLabel": "Reviver na cidade",
+        "revivingLabel": "Revivendo…"
+      },
+      "bodyBounds": {
+        "x": 24.28125,
+        "y": 190.25,
+        "width": 311.421875,
+        "height": 159.5
+      },
+      "buttonBounds": {
+        "x": 51.28125,
+        "y": 285.75,
+        "width": 257.421875,
+        "height": 41
+      },
+      "visible": true,
+      "disabled": false,
+      "screenshot": "360-pt-BR-ready.png"
+    },
+    {
+      "language": "pt-BR",
+      "width": 360,
+      "busy": true,
+      "props": {
+        "title": "Você morreu",
+        "message": "Volte à cidade para continuar sua jornada.",
+        "reviveLabel": "Reviver na cidade",
+        "revivingLabel": "Revivendo…"
+      },
+      "bodyBounds": {
+        "x": 24.28125,
+        "y": 190.25,
+        "width": 311.421875,
+        "height": 159.5
+      },
+      "buttonBounds": {
+        "x": 51.28125,
+        "y": 285.75,
+        "width": 257.421875,
+        "height": 41
+      },
+      "visible": true,
+      "disabled": true,
+      "screenshot": "360-pt-BR-busy.png"
+    },
+    {
+      "language": "ru",
+      "width": 360,
+      "busy": false,
+      "props": {
+        "title": "Вы погибли",
+        "message": "Вернитесь в город, чтобы продолжить путешествие.",
+        "reviveLabel": "Возродиться в городе",
+        "revivingLabel": "Возрождение…"
+      },
+      "bodyBounds": {
+        "x": 0,
+        "y": 180.5,
+        "width": 360,
+        "height": 179
+      },
+      "buttonBounds": {
+        "x": 27,
+        "y": 295.5,
+        "width": 306,
+        "height": 41
+      },
+      "visible": true,
+      "disabled": false,
+      "screenshot": "360-ru-ready.png"
+    },
+    {
+      "language": "ru",
+      "width": 360,
+      "busy": true,
+      "props": {
+        "title": "Вы погибли",
+        "message": "Вернитесь в город, чтобы продолжить путешествие.",
+        "reviveLabel": "Возродиться в городе",
+        "revivingLabel": "Возрождение…"
+      },
+      "bodyBounds": {
+        "x": 0,
+        "y": 180.5,
+        "width": 360,
+        "height": 179
+      },
+      "buttonBounds": {
+        "x": 27,
+        "y": 295.5,
+        "width": 306,
+        "height": 41
+      },
+      "visible": true,
+      "disabled": true,
+      "screenshot": "360-ru-busy.png"
+    },
+    {
+      "language": "hi",
+      "width": 360,
+      "busy": false,
+      "props": {
+        "title": "आपकी मृत्यु हो गई",
+        "message": "अपनी यात्रा जारी रखने के लिए नगर लौटें।",
+        "reviveLabel": "नगर में पुनर्जीवित हों",
+        "revivingLabel": "पुनर्जीवित हो रहे हैं…"
+      },
+      "bodyBounds": {
+        "x": 40,
+        "y": 190.75,
+        "width": 280,
+        "height": 158.5
+      },
+      "buttonBounds": {
+        "x": 67,
+        "y": 285.25,
+        "width": 226,
+        "height": 41
+      },
+      "visible": true,
+      "disabled": false,
+      "screenshot": "360-hi-ready.png"
+    },
+    {
+      "language": "hi",
+      "width": 360,
+      "busy": true,
+      "props": {
+        "title": "आपकी मृत्यु हो गई",
+        "message": "अपनी यात्रा जारी रखने के लिए नगर लौटें।",
+        "reviveLabel": "नगर में पुनर्जीवित हों",
+        "revivingLabel": "पुनर्जीवित हो रहे हैं…"
+      },
+      "bodyBounds": {
+        "x": 40,
+        "y": 190.75,
+        "width": 280,
+        "height": 158.5
+      },
+      "buttonBounds": {
+        "x": 67,
+        "y": 285.25,
+        "width": 226,
+        "height": 41
+      },
+      "visible": true,
+      "disabled": true,
+      "screenshot": "360-hi-busy.png"
+    },
+    {
+      "language": "id",
+      "width": 360,
+      "busy": false,
+      "props": {
+        "title": "Kamu telah gugur",
+        "message": "Kembali ke kota untuk melanjutkan petualanganmu.",
+        "reviveLabel": "Hidup kembali di kota",
+        "revivingLabel": "Menghidupkan kembali…"
+      },
+      "bodyBounds": {
+        "x": 0,
+        "y": 180.5,
+        "width": 360,
+        "height": 179
+      },
+      "buttonBounds": {
+        "x": 27,
+        "y": 295.5,
+        "width": 306,
+        "height": 41
+      },
+      "visible": true,
+      "disabled": false,
+      "screenshot": "360-id-ready.png"
+    },
+    {
+      "language": "id",
+      "width": 360,
+      "busy": true,
+      "props": {
+        "title": "Kamu telah gugur",
+        "message": "Kembali ke kota untuk melanjutkan petualanganmu.",
+        "reviveLabel": "Hidup kembali di kota",
+        "revivingLabel": "Menghidupkan kembali…"
+      },
+      "bodyBounds": {
+        "x": 0,
+        "y": 180.5,
+        "width": 360,
+        "height": 179
+      },
+      "buttonBounds": {
+        "x": 27,
+        "y": 295.5,
+        "width": 306,
+        "height": 41
+      },
+      "visible": true,
+      "disabled": true,
+      "screenshot": "360-id-busy.png"
+    },
+    {
+      "language": "vi",
+      "width": 360,
+      "busy": false,
+      "props": {
+        "title": "Bạn đã chết",
+        "message": "Trở về thành để tiếp tục hành trình.",
+        "reviveLabel": "Hồi sinh trong thành",
+        "revivingLabel": "Đang hồi sinh…"
+      },
+      "bodyBounds": {
+        "x": 40,
+        "y": 190.25,
+        "width": 280,
+        "height": 159.5
+      },
+      "buttonBounds": {
+        "x": 67,
+        "y": 285.75,
+        "width": 226,
+        "height": 41
+      },
+      "visible": true,
+      "disabled": false,
+      "screenshot": "360-vi-ready.png"
+    },
+    {
+      "language": "vi",
+      "width": 360,
+      "busy": true,
+      "props": {
+        "title": "Bạn đã chết",
+        "message": "Trở về thành để tiếp tục hành trình.",
+        "reviveLabel": "Hồi sinh trong thành",
+        "revivingLabel": "Đang hồi sinh…"
+      },
+      "bodyBounds": {
+        "x": 40,
+        "y": 190.25,
+        "width": 280,
+        "height": 159.5
+      },
+      "buttonBounds": {
+        "x": 67,
+        "y": 285.75,
+        "width": 226,
+        "height": 41
+      },
+      "visible": true,
+      "disabled": true,
+      "screenshot": "360-vi-busy.png"
+    },
+    {
+      "language": "th",
+      "width": 360,
+      "busy": false,
+      "props": {
+        "title": "คุณเสียชีวิตแล้ว",
+        "message": "กลับเมืองเพื่อเดินทางต่อ",
+        "reviveLabel": "ฟื้นคืนชีพในเมือง",
+        "revivingLabel": "กำลังฟื้นคืนชีพ…"
+      },
+      "bodyBounds": {
+        "x": 40,
+        "y": 187.75,
+        "width": 280,
+        "height": 164.5
+      },
+      "buttonBounds": {
+        "x": 67,
+        "y": 286.25,
+        "width": 226,
+        "height": 43
+      },
+      "visible": true,
+      "disabled": false,
+      "screenshot": "360-th-ready.png"
+    },
+    {
+      "language": "th",
+      "width": 360,
+      "busy": true,
+      "props": {
+        "title": "คุณเสียชีวิตแล้ว",
+        "message": "กลับเมืองเพื่อเดินทางต่อ",
+        "reviveLabel": "ฟื้นคืนชีพในเมือง",
+        "revivingLabel": "กำลังฟื้นคืนชีพ…"
+      },
+      "bodyBounds": {
+        "x": 40,
+        "y": 187.75,
+        "width": 280,
+        "height": 164.5
+      },
+      "buttonBounds": {
+        "x": 67,
+        "y": 286.25,
+        "width": 226,
+        "height": 43
+      },
+      "visible": true,
+      "disabled": true,
+      "screenshot": "360-th-busy.png"
+    },
+    {
+      "language": "ar",
+      "width": 360,
+      "busy": false,
+      "props": {
+        "title": "لقد متّ",
+        "message": "عُد إلى المدينة لمتابعة رحلتك.",
+        "reviveLabel": "الإحياء في المدينة",
+        "revivingLabel": "جارٍ الإحياء…"
+      },
+      "bodyBounds": {
+        "x": 40,
+        "y": 177.75,
+        "width": 280,
+        "height": 184.5
+      },
+      "buttonBounds": {
+        "x": 67,
+        "y": 288.25,
+        "width": 226,
+        "height": 51
+      },
+      "visible": true,
+      "disabled": false,
+      "screenshot": "360-ar-ready.png"
+    },
+    {
+      "language": "ar",
+      "width": 360,
+      "busy": true,
+      "props": {
+        "title": "لقد متّ",
+        "message": "عُد إلى المدينة لمتابعة رحلتك.",
+        "reviveLabel": "الإحياء في المدينة",
+        "revivingLabel": "جارٍ الإحياء…"
+      },
+      "bodyBounds": {
+        "x": 40,
+        "y": 177.75,
+        "width": 280,
+        "height": 184.5
+      },
+      "buttonBounds": {
+        "x": 67,
+        "y": 288.25,
+        "width": 226,
+        "height": 51
+      },
+      "visible": true,
+      "disabled": true,
+      "screenshot": "360-ar-busy.png"
+    },
+    {
+      "language": "zh-CN",
+      "width": 1024,
+      "busy": false,
+      "props": {
+        "title": "你已死亡",
+        "message": "返回城镇，继续你的旅程。",
+        "reviveLabel": "回城复活",
+        "revivingLabel": "正在复活…"
+      },
+      "bodyBounds": {
+        "x": 372,
+        "y": 190.75,
+        "width": 280,
+        "height": 158.5
+      },
+      "buttonBounds": {
+        "x": 399,
+        "y": 285.25,
+        "width": 226,
+        "height": 41
+      },
+      "visible": true,
+      "disabled": false,
+      "screenshot": "1024-zh-CN-ready.png"
+    },
+    {
+      "language": "zh-CN",
+      "width": 1024,
+      "busy": true,
+      "props": {
+        "title": "你已死亡",
+        "message": "返回城镇，继续你的旅程。",
+        "reviveLabel": "回城复活",
+        "revivingLabel": "正在复活…"
+      },
+      "bodyBounds": {
+        "x": 372,
+        "y": 190.75,
+        "width": 280,
+        "height": 158.5
+      },
+      "buttonBounds": {
+        "x": 399,
+        "y": 285.25,
+        "width": 226,
+        "height": 41
+      },
+      "visible": true,
+      "disabled": true,
+      "screenshot": "1024-zh-CN-busy.png"
+    },
+    {
+      "language": "zh-TW",
+      "width": 1024,
+      "busy": false,
+      "props": {
+        "title": "你已死亡",
+        "message": "返回城鎮，繼續你的旅程。",
+        "reviveLabel": "回城復活",
+        "revivingLabel": "復活中…"
+      },
+      "bodyBounds": {
+        "x": 372,
+        "y": 188.75,
+        "width": 280,
+        "height": 162.5
+      },
+      "buttonBounds": {
+        "x": 399,
+        "y": 286.25,
+        "width": 226,
+        "height": 42
+      },
+      "visible": true,
+      "disabled": false,
+      "screenshot": "1024-zh-TW-ready.png"
+    },
+    {
+      "language": "zh-TW",
+      "width": 1024,
+      "busy": true,
+      "props": {
+        "title": "你已死亡",
+        "message": "返回城鎮，繼續你的旅程。",
+        "reviveLabel": "回城復活",
+        "revivingLabel": "復活中…"
+      },
+      "bodyBounds": {
+        "x": 372,
+        "y": 188.75,
+        "width": 280,
+        "height": 162.5
+      },
+      "buttonBounds": {
+        "x": 399,
+        "y": 286.25,
+        "width": 226,
+        "height": 42
+      },
+      "visible": true,
+      "disabled": true,
+      "screenshot": "1024-zh-TW-busy.png"
+    },
+    {
+      "language": "en",
+      "width": 1024,
+      "busy": false,
+      "props": {
+        "title": "You have died",
+        "message": "Return to town to continue your journey.",
+        "reviveLabel": "Revive in town",
+        "revivingLabel": "Reviving…"
+      },
+      "bodyBounds": {
+        "x": 360.84375,
+        "y": 190.25,
+        "width": 302.3125,
+        "height": 159.5
+      },
+      "buttonBounds": {
+        "x": 387.84375,
+        "y": 285.75,
+        "width": 248.3125,
+        "height": 41
+      },
+      "visible": true,
+      "disabled": false,
+      "screenshot": "1024-en-ready.png"
+    },
+    {
+      "language": "en",
+      "width": 1024,
+      "busy": true,
+      "props": {
+        "title": "You have died",
+        "message": "Return to town to continue your journey.",
+        "reviveLabel": "Revive in town",
+        "revivingLabel": "Reviving…"
+      },
+      "bodyBounds": {
+        "x": 360.84375,
+        "y": 190.25,
+        "width": 302.3125,
+        "height": 159.5
+      },
+      "buttonBounds": {
+        "x": 387.84375,
+        "y": 285.75,
+        "width": 248.3125,
+        "height": 41
+      },
+      "visible": true,
+      "disabled": true,
+      "screenshot": "1024-en-busy.png"
+    },
+    {
+      "language": "pt-BR",
+      "width": 1024,
+      "busy": false,
+      "props": {
+        "title": "Você morreu",
+        "message": "Volte à cidade para continuar sua jornada.",
+        "reviveLabel": "Reviver na cidade",
+        "revivingLabel": "Revivendo…"
+      },
+      "bodyBounds": {
+        "x": 356.28125,
+        "y": 190.25,
+        "width": 311.421875,
+        "height": 159.5
+      },
+      "buttonBounds": {
+        "x": 383.28125,
+        "y": 285.75,
+        "width": 257.421875,
+        "height": 41
+      },
+      "visible": true,
+      "disabled": false,
+      "screenshot": "1024-pt-BR-ready.png"
+    },
+    {
+      "language": "pt-BR",
+      "width": 1024,
+      "busy": true,
+      "props": {
+        "title": "Você morreu",
+        "message": "Volte à cidade para continuar sua jornada.",
+        "reviveLabel": "Reviver na cidade",
+        "revivingLabel": "Revivendo…"
+      },
+      "bodyBounds": {
+        "x": 356.28125,
+        "y": 190.25,
+        "width": 311.421875,
+        "height": 159.5
+      },
+      "buttonBounds": {
+        "x": 383.28125,
+        "y": 285.75,
+        "width": 257.421875,
+        "height": 41
+      },
+      "visible": true,
+      "disabled": true,
+      "screenshot": "1024-pt-BR-busy.png"
+    },
+    {
+      "language": "ru",
+      "width": 1024,
+      "busy": false,
+      "props": {
+        "title": "Вы погибли",
+        "message": "Вернитесь в город, чтобы продолжить путешествие.",
+        "reviveLabel": "Возродиться в городе",
+        "revivingLabel": "Возрождение…"
+      },
+      "bodyBounds": {
+        "x": 332,
+        "y": 180.5,
+        "width": 360,
+        "height": 179
+      },
+      "buttonBounds": {
+        "x": 359,
+        "y": 295.5,
+        "width": 306,
+        "height": 41
+      },
+      "visible": true,
+      "disabled": false,
+      "screenshot": "1024-ru-ready.png"
+    },
+    {
+      "language": "ru",
+      "width": 1024,
+      "busy": true,
+      "props": {
+        "title": "Вы погибли",
+        "message": "Вернитесь в город, чтобы продолжить путешествие.",
+        "reviveLabel": "Возродиться в городе",
+        "revivingLabel": "Возрождение…"
+      },
+      "bodyBounds": {
+        "x": 332,
+        "y": 180.5,
+        "width": 360,
+        "height": 179
+      },
+      "buttonBounds": {
+        "x": 359,
+        "y": 295.5,
+        "width": 306,
+        "height": 41
+      },
+      "visible": true,
+      "disabled": true,
+      "screenshot": "1024-ru-busy.png"
+    },
+    {
+      "language": "hi",
+      "width": 1024,
+      "busy": false,
+      "props": {
+        "title": "आपकी मृत्यु हो गई",
+        "message": "अपनी यात्रा जारी रखने के लिए नगर लौटें।",
+        "reviveLabel": "नगर में पुनर्जीवित हों",
+        "revivingLabel": "पुनर्जीवित हो रहे हैं…"
+      },
+      "bodyBounds": {
+        "x": 372,
+        "y": 190.75,
+        "width": 280,
+        "height": 158.5
+      },
+      "buttonBounds": {
+        "x": 399,
+        "y": 285.25,
+        "width": 226,
+        "height": 41
+      },
+      "visible": true,
+      "disabled": false,
+      "screenshot": "1024-hi-ready.png"
+    },
+    {
+      "language": "hi",
+      "width": 1024,
+      "busy": true,
+      "props": {
+        "title": "आपकी मृत्यु हो गई",
+        "message": "अपनी यात्रा जारी रखने के लिए नगर लौटें।",
+        "reviveLabel": "नगर में पुनर्जीवित हों",
+        "revivingLabel": "पुनर्जीवित हो रहे हैं…"
+      },
+      "bodyBounds": {
+        "x": 372,
+        "y": 190.75,
+        "width": 280,
+        "height": 158.5
+      },
+      "buttonBounds": {
+        "x": 399,
+        "y": 285.25,
+        "width": 226,
+        "height": 41
+      },
+      "visible": true,
+      "disabled": true,
+      "screenshot": "1024-hi-busy.png"
+    },
+    {
+      "language": "id",
+      "width": 1024,
+      "busy": false,
+      "props": {
+        "title": "Kamu telah gugur",
+        "message": "Kembali ke kota untuk melanjutkan petualanganmu.",
+        "reviveLabel": "Hidup kembali di kota",
+        "revivingLabel": "Menghidupkan kembali…"
+      },
+      "bodyBounds": {
+        "x": 332,
+        "y": 180.5,
+        "width": 360,
+        "height": 179
+      },
+      "buttonBounds": {
+        "x": 359,
+        "y": 295.5,
+        "width": 306,
+        "height": 41
+      },
+      "visible": true,
+      "disabled": false,
+      "screenshot": "1024-id-ready.png"
+    },
+    {
+      "language": "id",
+      "width": 1024,
+      "busy": true,
+      "props": {
+        "title": "Kamu telah gugur",
+        "message": "Kembali ke kota untuk melanjutkan petualanganmu.",
+        "reviveLabel": "Hidup kembali di kota",
+        "revivingLabel": "Menghidupkan kembali…"
+      },
+      "bodyBounds": {
+        "x": 332,
+        "y": 180.5,
+        "width": 360,
+        "height": 179
+      },
+      "buttonBounds": {
+        "x": 359,
+        "y": 295.5,
+        "width": 306,
+        "height": 41
+      },
+      "visible": true,
+      "disabled": true,
+      "screenshot": "1024-id-busy.png"
+    },
+    {
+      "language": "vi",
+      "width": 1024,
+      "busy": false,
+      "props": {
+        "title": "Bạn đã chết",
+        "message": "Trở về thành để tiếp tục hành trình.",
+        "reviveLabel": "Hồi sinh trong thành",
+        "revivingLabel": "Đang hồi sinh…"
+      },
+      "bodyBounds": {
+        "x": 372,
+        "y": 190.25,
+        "width": 280,
+        "height": 159.5
+      },
+      "buttonBounds": {
+        "x": 399,
+        "y": 285.75,
+        "width": 226,
+        "height": 41
+      },
+      "visible": true,
+      "disabled": false,
+      "screenshot": "1024-vi-ready.png"
+    },
+    {
+      "language": "vi",
+      "width": 1024,
+      "busy": true,
+      "props": {
+        "title": "Bạn đã chết",
+        "message": "Trở về thành để tiếp tục hành trình.",
+        "reviveLabel": "Hồi sinh trong thành",
+        "revivingLabel": "Đang hồi sinh…"
+      },
+      "bodyBounds": {
+        "x": 372,
+        "y": 190.25,
+        "width": 280,
+        "height": 159.5
+      },
+      "buttonBounds": {
+        "x": 399,
+        "y": 285.75,
+        "width": 226,
+        "height": 41
+      },
+      "visible": true,
+      "disabled": true,
+      "screenshot": "1024-vi-busy.png"
+    },
+    {
+      "language": "th",
+      "width": 1024,
+      "busy": false,
+      "props": {
+        "title": "คุณเสียชีวิตแล้ว",
+        "message": "กลับเมืองเพื่อเดินทางต่อ",
+        "reviveLabel": "ฟื้นคืนชีพในเมือง",
+        "revivingLabel": "กำลังฟื้นคืนชีพ…"
+      },
+      "bodyBounds": {
+        "x": 372,
+        "y": 187.75,
+        "width": 280,
+        "height": 164.5
+      },
+      "buttonBounds": {
+        "x": 399,
+        "y": 286.25,
+        "width": 226,
+        "height": 43
+      },
+      "visible": true,
+      "disabled": false,
+      "screenshot": "1024-th-ready.png"
+    },
+    {
+      "language": "th",
+      "width": 1024,
+      "busy": true,
+      "props": {
+        "title": "คุณเสียชีวิตแล้ว",
+        "message": "กลับเมืองเพื่อเดินทางต่อ",
+        "reviveLabel": "ฟื้นคืนชีพในเมือง",
+        "revivingLabel": "กำลังฟื้นคืนชีพ…"
+      },
+      "bodyBounds": {
+        "x": 372,
+        "y": 187.75,
+        "width": 280,
+        "height": 164.5
+      },
+      "buttonBounds": {
+        "x": 399,
+        "y": 286.25,
+        "width": 226,
+        "height": 43
+      },
+      "visible": true,
+      "disabled": true,
+      "screenshot": "1024-th-busy.png"
+    },
+    {
+      "language": "ar",
+      "width": 1024,
+      "busy": false,
+      "props": {
+        "title": "لقد متّ",
+        "message": "عُد إلى المدينة لمتابعة رحلتك.",
+        "reviveLabel": "الإحياء في المدينة",
+        "revivingLabel": "جارٍ الإحياء…"
+      },
+      "bodyBounds": {
+        "x": 372,
+        "y": 177.75,
+        "width": 280,
+        "height": 184.5
+      },
+      "buttonBounds": {
+        "x": 399,
+        "y": 288.25,
+        "width": 226,
+        "height": 51
+      },
+      "visible": true,
+      "disabled": false,
+      "screenshot": "1024-ar-ready.png"
+    },
+    {
+      "language": "ar",
+      "width": 1024,
+      "busy": true,
+      "props": {
+        "title": "لقد متّ",
+        "message": "عُد إلى المدينة لمتابعة رحلتك.",
+        "reviveLabel": "الإحياء في المدينة",
+        "revivingLabel": "جارٍ الإحياء…"
+      },
+      "bodyBounds": {
+        "x": 372,
+        "y": 177.75,
+        "width": 280,
+        "height": 184.5
+      },
+      "buttonBounds": {
+        "x": 399,
+        "y": 288.25,
+        "width": 226,
+        "height": 51
+      },
+      "visible": true,
+      "disabled": true,
+      "screenshot": "1024-ar-busy.png"
+    }
+  ],
+  "browserClosed": true,
+  "serverClosed": true,
+  "pageErrors": [],
+  "source": {
+    "pageSha256": "136aeca811049e2618567731a40bdff938b5cbff350ec0913a07f3ada170e594",
+    "dictionarySha256": "e181fdd0d787a136209b86097c0e655237cf475563bebfdb67dee7243a7e4aa4"
+  }
+}

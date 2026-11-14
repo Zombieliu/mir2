@@ -26,6 +26,7 @@ const expectedKeys = [
   "ui.questRouteUnavailable", "ui.questRouteLoadingTimeout", "ui.routeConfirmationTimeout",
   "ui.retry", "ui.sceneLoadUnavailable", "ui.fishingReel", "ui.characterCreateUnconfirmed",
   "ui.gameTextLoading", "ui.gameTextLoadUnavailable", "ui.confirmReturnToCharacterSelect",
+  "ui.death.title", "ui.death.message", "ui.death.revive", "ui.death.reviving",
 ];
 
 test("browser dictionaries use the ten native languages in the native order", () => {
