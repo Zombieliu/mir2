@@ -1,0 +1,16 @@
+gateway-adjacent-r4.log
+catalog TLS roundtrip envelopes=502 binary_frames=10 legacy_bytes=592850 opt_in_bytes=74333
+snapshot TLS roundtrip snapshots=4 raw_text_bytes=167824 compressed_wire_bytes=38070 catalogs=502
+test result: ok. 35 passed; 0 failed; 0 ignored; 0 measured; 1811 filtered out; finished in 9.21s
+protocol-all-r2.log
+test result: ok. 50 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+test result: ok. 34 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+web-core-adjacent-r2.log
+# tests 59
+# pass 59
+# fail 0
+next-build-r2.log
+✓ Compiled successfully in 21.1s
+  Finished TypeScript in 12.3s ...

@@ -18,6 +18,15 @@ pub fn decode_gateway_catalog(bytes: &[u8]) -> Result<String, String> {
     serde_json::to_string(&texts).map_err(|_| invalid())
 }
 
+#[wasm_bindgen]
+pub fn gateway_world_snapshot_abi_version() -> u32 { 1 }
+
+#[wasm_bindgen]
+pub fn decode_gateway_world_snapshot(bytes: &[u8]) -> Result<String, String> {
+    mir2_protocol::world_snapshot_transport::decode_world_snapshot(bytes)
+        .map_err(|_| "Invalid bounded gateway world snapshot".to_owned())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

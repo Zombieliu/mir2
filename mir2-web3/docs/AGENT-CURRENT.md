@@ -14,7 +14,7 @@ Short routing summary, updated 2026-11-14 (Asia/Shanghai). This indexes recorded
 
 ## Last recorded decisions and open work
 
-2026-11-14 正式仍E6／Ae3，08:00:42UTC独立API确认READY；本轮无发布。旧7140首步13.286秒保留；新E6浏览器出码／Testnet登录签名／进城后首步61.929秒才ACK，原30秒等待已失败，最终六字体／113／共享HUD-Q／Worker停启／注销通过，Native124.326秒仍超120。两轮分别463／852ms观察到全局计数+1，但缺动作身份，不能证明单条执行或根因；无同窗已记录长任务。页面730＋Worker708条静态白名单观察补齐，137个只读TCP样本存在缺字段且未绑定游戏socket，完整诊断false；未改服务或网络。16项及真实Chrome工具验证通过；下一步绑定同一连接的发送/验证队列与传输，不放宽门槛、不原样重发7140。[本轮证据](evidence/r16-startup-delivery-20261114/README.md) · [既有候选失败与回退](evidence/r16-font-origin-spread-20261114/production/README.md)。寻路/NPC修复在线；动态多人占位、R15旧停步、公开长路线、语言/像素、实体手机、Windows及完整三职业30级仍开放，Goal active。
+2026-11-14 09:25UTC正式独立API仍E6／Ae3／READY，本轮无发布。已完成场景快照显式协商压缩本地候选：100协议＋35Gateway＋59Web/Core（194项）、独立WASM/Next/TypeScript及匹配debug Gateway通过；四条真实TLS快照载荷167,824→38,070B，502条本地完整目录逐字符串等同旧端，公网529门不变。原跨盘依赖构建失败与误用529计数失败保留。当前尚无完整游戏浏览器消费压缩快照的通过记录；下一轮优先配对新Gateway/Web实跑R16界面、移动与寻路、旧服兼容，再做Linux与公网资格。[候选及精确路径](evidence/r16-world-snapshot-gzip-20261114/README.md)。原61.929／13.286秒公网ACK失败、120秒冷启、字体与整体1:1仍开放；未以压缩比例证明根因或线上已修，Goal active。
 
 2026-11-12 正式站已发布 `51d2dcc346`：共享图片取消与图集计时/JSON大小缓存身份修复。本机75项、生产构建及两后端重开同档通过；公网简繁出码、手机尺寸官方钱包Testnet签名、进比奇、权威移动、共用HUD/任务窗、113/113预取和正常退出通过，无需回滚。云端缓存身份与计算一致；Worker正常更新缓存一次，未迁移旧007缓存。本次观测起点到首画面65.2秒/共用HUD104.7秒（点击进游戏后约6.8秒/46.3秒），继续优化冷加载；实体手机、完整1:1及历史未结项仍开放。[发布与边界](evidence/r16-cache-repair-20261112/README.md)
 

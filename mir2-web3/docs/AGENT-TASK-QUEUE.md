@@ -6,7 +6,7 @@ Updated 2026-11-14 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-14 正式仍E6／Ae3，08:00:42UTC独立API确认READY；本轮无发布。旧7140首步13.286秒保留；新E6浏览器出码／Testnet登录签名／进城后首步61.929秒才ACK，原30秒等待已失败，最终六字体／113／共享HUD-Q／Worker停启／注销通过，Native124.326秒仍超120。两轮分别463／852ms观察到全局计数+1，但缺动作身份，不能证明单条执行或根因；无同窗已记录长任务。页面730＋Worker708条静态白名单观察补齐，137个只读TCP样本存在缺字段且未绑定游戏socket，完整诊断false；未改服务或网络。16项及真实Chrome工具验证通过；下一步绑定同一连接的发送/验证队列与传输，不放宽门槛、不原样重发7140。[本轮证据](evidence/r16-startup-delivery-20261114/README.md) · [既有候选失败与回退](evidence/r16-font-origin-spread-20261114/production/README.md)。寻路/NPC修复在线；动态多人占位、R15旧停步、公开长路线、语言/像素、实体手机、Windows及完整三职业30级仍开放，Goal active。
+2026-11-14 09:25UTC正式独立API仍E6／Ae3／READY，本轮无发布。已完成场景快照显式协商压缩本地候选：100协议＋35Gateway＋59Web/Core（194项）、独立WASM/Next/TypeScript及匹配debug Gateway通过；四条真实TLS快照载荷167,824→38,070B，502条本地完整目录逐字符串等同旧端，公网529门不变。原跨盘依赖构建失败与误用529计数失败保留。当前尚无完整游戏浏览器消费压缩快照的通过记录；下一轮优先配对新Gateway/Web实跑R16界面、移动与寻路、旧服兼容，再做Linux与公网资格。[候选及精确路径](evidence/r16-world-snapshot-gzip-20261114/README.md)。原61.929／13.286秒公网ACK失败、120秒冷启、字体与整体1:1仍开放；未以压缩比例证明根因或线上已修，Goal active。
 
 ## 保留的当前未结项
 

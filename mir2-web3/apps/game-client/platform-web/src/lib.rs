@@ -82,3 +82,5 @@ pub use npc_pearl_buy::{npc_pearl_buy_abi_version, npc_pearl_buy_plan};
 pub mod gateway_catalog;
 #[cfg(feature = "catalog-transport-policy")]
 pub use gateway_catalog::{gateway_catalog_abi_version, decode_gateway_catalog};
+#[cfg(feature = "catalog-transport-policy")]
+pub use gateway_catalog::{gateway_world_snapshot_abi_version, decode_gateway_world_snapshot};

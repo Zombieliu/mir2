@@ -81,6 +81,7 @@ use crate::tcp::chat_broadcast::{
 use crate::{GatewayConfig, GatewaySession, ZoneRegistry, ZoneTopology};
 
 mod catalog_transport;
+mod world_snapshot_transport;
 
 type WebSocketSender = futures_util::stream::SplitSink<WebSocket, Message>;
 type SharedWebSocketSender = Arc<transport::SocketSender<WebSocketSender>>;
@@ -1198,6 +1199,7 @@ struct NativeClientCapabilities {
     native_game_shop_receipt_v1: bool,
     native_game_shop_gift_receipt_v1: bool,
     server_catalog_gzip_v1: bool,
+    server_world_snapshot_gzip_v1: bool,
     durable_npc_purchase_owner_v1: bool,
 }
 
@@ -6702,6 +6704,7 @@ async fn handle_socket_work(
                                 native_game_shop.opted_in =
                                     capabilities.native_game_shop_receipt_v1;
                                 server_catalog_gzip_v1 = capabilities.server_catalog_gzip_v1;
+                                sender.set_world_snapshot_gzip(capabilities.server_world_snapshot_gzip_v1);
                                 npc_purchase.set_opted_in(capabilities.durable_npc_purchase_owner_v1);
                                 native_game_shop.gift_opted_in = capabilities.native_game_shop_gift_receipt_v1;
                                 if !native_game_shop.opted_in && !native_game_shop.gift_opted_in {
@@ -10778,14 +10781,13 @@ async fn send_world_snapshot_with_receipts(
         );
     }
     sender
-        .send(Message::Text(
+        .send_world_snapshot(
             json!({
                 "type": "worldSnapshot",
                 "payload": payload
             })
-            .to_string()
-            .into(),
-        ))
+            .to_string(),
+        )
         .await
         .map_err(|error| error.to_string())?;
     session.note_companion_safety_snapshot_sent(companion_safety_stamp)
@@ -11451,6 +11453,9 @@ fn validate_native_client_capabilities(
         server_catalog_gzip_v1: capabilities
             .iter()
             .any(|capability| capability == CATALOG_GZIP_CAPABILITY),
+        server_world_snapshot_gzip_v1: capabilities
+            .iter()
+            .any(|capability| capability == mir2_protocol::world_snapshot_transport::WORLD_SNAPSHOT_GZIP_CAPABILITY),
         durable_npc_purchase_owner_v1: capabilities
             .iter()
             .any(|capability| capability == mir2_client_wire::NPC_PURCHASE_OWNER_CAPABILITY),

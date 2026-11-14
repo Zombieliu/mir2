@@ -1,5 +1,9 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+## R16 完整场景快照压缩候选（2026-11-14）
+
+同一 worldSnapshot 文本经显式能力协商压缩，旧端、目录及经济/身份消息保持原路径。100协议＋35Gateway＋59Web/Core及独立Next/TypeScript通过，本地真实TLS四条快照载荷167,824→38,070B；修正本地502与公网529用例的误用计数，保留原失败。候选尚未部署，下一步匹配Gateway/Web实际游戏回放，再准备Linux/公网资格；61.929秒移动长尾、完整冷启与整体1:1仍开放。[本地候选与边界](evidence/r16-world-snapshot-gzip-20261114/README.md)
+
 ## Physical attack save transform and capacity follow-up (2026-11-14)
 
 Accepted physical attacks now project the final shared Zone transform through the existing SaveTransform path before normal logout. Three focused Gateway regressions pass (the original code fails both accepted cases); four adjacent shared-Zone tests and 26 spectator tests pass. The spectator event comparison copies only the previous fields it reads, preserving current frames and event bytes. The existing synthetic safe-zone fixture failed on the baseline; after replacing its injected flag with real imported safe-boundary positions, all three attack-mode regressions pass. Fresh 100-player validation and cloud rollout remain pending; no CCU or project-wide parity increase is claimed. [Evidence and retained failures](evidence/comparable-capacity-20261113/README.zh-CN.md).

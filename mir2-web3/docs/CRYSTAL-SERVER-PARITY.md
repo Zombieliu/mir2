@@ -1,5 +1,9 @@
 # Crystal Server Parity
 
+## R16 Web 完整场景快照传输候选（2026-11-14）
+
+可选 `serverWorldSnapshotGzipV1` 保留原 worldSnapshot 的完整文本和顺序，使用与目录分离的有界 magic/验证，超限或无收益保持 Text。100 协议、35 Gateway及59 Web/Core、独立生产构建通过；本地真实 TLS 四条快照载荷减少77.316%，本地完整502目录与旧端逐条一致。未改 Crystal 游戏规则、授权/存档或旧 Native 传输，未部署；压缩快照的实际游戏浏览器、公网529目录/扫码/冷启/首步及61.929秒长尾未因此通过，不提升整体1:1。[资格范围](evidence/r16-world-snapshot-gzip-20261114/README.md)
+
 ## Physical attack save transform and capacity follow-up (2026-11-14)
 
 Accepted physical attacks now project the final shared Zone transform through the existing SaveTransform path before normal logout. Three focused Gateway regressions pass (the original code fails both accepted cases); four adjacent shared-Zone tests and 26 spectator tests pass. The spectator event comparison copies only the previous fields it reads, preserving current frames and event bytes. The existing synthetic safe-zone fixture failed on the baseline; after replacing its injected flag with real imported safe-boundary positions, all three attack-mode regressions pass. Fresh 100-player validation and cloud rollout remain pending; no CCU or project-wide parity increase is claimed. [Evidence and retained failures](evidence/comparable-capacity-20261113/README.zh-CN.md).

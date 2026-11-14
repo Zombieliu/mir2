@@ -1,5 +1,9 @@
 # Backend 1:1 Progress
 
+## R16 完整场景快照压缩候选（2026-11-14）
+
+新增独立协商 `serverWorldSnapshotGzipV1`，仅无损压缩完整 worldSnapshot，目录域与普通/身份/经济回执不变；旧客户端仍 Text，未改变玩法或持久化。100 协议、35 Gateway（含真实 TLS 普通登录/进城/转向/注销及原 resume）和59 Web/Core通过，四条实际快照167,824→38,070消息载荷字节；本地502条目录逐字符串等同旧客户端，公网529门未改。独立生产构建通过，未部署；完整游戏浏览器消费、新 Linux 工件与公网61.929秒长尾仍待验，不增加全局 parity/CCU。[证据、原失败和下一项](evidence/r16-world-snapshot-gzip-20261114/README.md)
+
 ## Physical attack save transform and capacity follow-up (2026-11-14)
 
 Accepted physical attacks now project the final shared Zone transform through the existing SaveTransform path before normal logout. Three focused Gateway regressions pass (the original code fails both accepted cases); four adjacent shared-Zone tests and 26 spectator tests pass. The spectator event comparison copies only the previous fields it reads, preserving current frames and event bytes. The existing synthetic safe-zone fixture failed on the baseline; after replacing its injected flag with real imported safe-boundary positions, all three attack-mode regressions pass. Fresh 100-player validation and cloud rollout remain pending; no CCU or project-wide parity increase is claimed. [Evidence and retained failures](evidence/comparable-capacity-20261113/README.zh-CN.md).

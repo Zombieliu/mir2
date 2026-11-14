@@ -533,6 +533,9 @@ mod tests {
         catalog_texts: Vec<String>,
         binary_frames: usize,
         catalog_wire_bytes: usize,
+        snapshot_binary_frames: usize,
+        compressed_snapshot_wire_bytes: usize,
+        compressed_snapshot_text_bytes: usize,
     }
 
     async fn read_until(
@@ -542,24 +545,37 @@ mod tests {
     ) -> Value {
         tokio::time::timeout(Duration::from_secs(20), async {
             loop {
-                let (texts, binary) = match socket
+                let (texts, binary, compressed_snapshot) = match socket
                     .next()
                     .await
                     .expect("socket ended")
                     .expect("TLS websocket frame")
                 {
-                    ClientMessage::Text(text) => (vec![text.to_string()], false),
+                    ClientMessage::Text(text) => (vec![text.to_string()], false, false),
                     ClientMessage::Binary(bytes) => {
-                        received.binary_frames += 1;
-                        received.catalog_wire_bytes += bytes.len();
-                        assert!(bytes.len() <= MAX_CATALOG_WIRE_BYTES);
-                        (decode_catalog_batch(&bytes).unwrap(), true)
+                        use mir2_protocol::world_snapshot_transport::{
+                            decode_world_snapshot, WORLD_SNAPSHOT_GZIP_MAGIC,
+                        };
+                        if bytes.starts_with(&WORLD_SNAPSHOT_GZIP_MAGIC) {
+                            received.snapshot_binary_frames += 1;
+                            received.compressed_snapshot_wire_bytes += bytes.len();
+                            (vec![decode_world_snapshot(&bytes).unwrap()], false, true)
+                        } else {
+                            received.binary_frames += 1;
+                            received.catalog_wire_bytes += bytes.len();
+                            assert!(bytes.len() <= MAX_CATALOG_WIRE_BYTES);
+                            (decode_catalog_batch(&bytes).unwrap(), true, false)
+                        }
                     }
                     ClientMessage::Ping(_) | ClientMessage::Pong(_) => continue,
                     other => panic!("unexpected TLS websocket frame: {other:?}"),
                 };
                 for text in texts {
                     let value: Value = serde_json::from_str(&text).unwrap();
+                    if compressed_snapshot {
+                        assert_eq!(value["type"], "worldSnapshot");
+                        received.compressed_snapshot_text_bytes += text.len();
+                    }
                     let catalog = matches!(
                         value["packet"].as_str(),
                         Some("NewItemInfo" | "NewRecipeInfo" | "GameShopInfo" | "NewQuestInfo")
@@ -645,8 +661,11 @@ mod tests {
         index
     }
 
-    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
-    async fn catalog_real_wss_opt_in_and_legacy_preserve_catalogs_login_logout_and_resume() {
+    fn ordinary_state() -> (
+        web::WebState,
+        Arc<web::ReconnectSessionStore>,
+        Arc<web::GatewayCapacityState>,
+    ) {
         let reconnect = Arc::new(web::ReconnectSessionStore::default());
         let capacity = Arc::new(web::GatewayCapacityState::unlimited());
         let mut spectator_config = crate::spectator::SpectatorConfig::from_env();
@@ -675,6 +694,12 @@ mod tests {
             channel_identity: crate::ChannelIdentityRegistry::in_memory(),
             companions: None,
         };
+        (state, reconnect, capacity)
+    }
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+    async fn catalog_real_wss_opt_in_and_legacy_preserve_catalogs_login_logout_and_resume() {
+        let (state, reconnect, capacity) = ordinary_state();
         let fixture = LocalWss::start(
             axum::Router::new()
                 .route("/ws", axum::routing::get(web::ws_upgrade))
@@ -773,5 +798,56 @@ mod tests {
         .await;
         assert_eq!(after_resume.binary_frames, 0);
         resumed.close(None).await.unwrap();
+    }
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+    async fn world_snapshot_real_wss_negotiation_keeps_login_catalogs_turn_and_logout() {
+        use mir2_protocol::world_snapshot_transport::WORLD_SNAPSHOT_GZIP_CAPABILITY;
+        let (state, _, _) = ordinary_state();
+        let fixture = LocalWss::start(
+            axum::Router::new()
+                .route("/ws", axum::routing::get(web::ws_upgrade))
+                .with_state(state),
+        )
+        .await;
+        let mut legacy = fixture.connect().await;
+        let mut original = Received::default();
+        start_ordinary_character(&mut legacy, "snapshot_legacy", "SnapshotOld", &mut original).await;
+        assert_eq!(original.snapshot_binary_frames, 0);
+        send(&mut legacy, json!({"type":"logOut"})).await;
+        read_until(&mut legacy, &mut original, |event| packet(event,"LogOutSuccess")).await;
+        legacy.close(None).await.unwrap();
+        let mut socket = fixture.connect().await;
+        send(
+            &mut socket,
+            json!({"type":"clientCapabilities","capabilities":[WORLD_SNAPSHOT_GZIP_CAPABILITY]}),
+        )
+        .await;
+        let mut received = Received::default();
+        start_ordinary_character(&mut socket, "snapshot_optin", "SnapshotNew", &mut received).await;
+        assert!(received.snapshot_binary_frames > 0);
+        assert_eq!(received.binary_frames, 0, "catalog gzip was not negotiated");
+        assert_eq!(received.catalog_texts, original.catalog_texts,
+            "every catalog envelope must match the complete legacy bootstrap of this fixture");
+        assert!(
+            received.compressed_snapshot_wire_bytes * 4 < received.compressed_snapshot_text_bytes
+        );
+        let start = std::time::Instant::now();
+        send(&mut socket, json!({"type":"turn","direction":"Right"})).await;
+        let location = read_until(&mut socket, &mut received, |event| {
+            packet(event, "UserLocation")
+        })
+        .await;
+        assert!(start.elapsed() < Duration::from_secs(8));
+        assert_eq!(location["payload"]["direction"], "Right");
+        send(&mut socket, json!({"type":"logOut"})).await;
+        read_until(&mut socket, &mut received, |event| {
+            packet(event, "LogOutSuccess")
+        })
+        .await;
+        socket.close(None).await.unwrap();
+        eprintln!("snapshot TLS roundtrip snapshots={} raw_text_bytes={} compressed_wire_bytes={} catalogs={}",
+            received.snapshot_binary_frames, received.compressed_snapshot_text_bytes,
+            received.compressed_snapshot_wire_bytes, received.catalog_texts.len());
     }
 }

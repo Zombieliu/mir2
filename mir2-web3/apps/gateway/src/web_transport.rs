@@ -1,6 +1,5 @@
 //! A socket failure ends transport work, never authoritative persistence.
 use std::io;
-#[cfg(test)]
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex as SyncMutex};
 use std::time::Duration;
@@ -122,6 +121,7 @@ pub(super) struct SocketSender<S> {
     sink: Mutex<S>,
     terminal: TransportSignal,
     timeout: Duration,
+    world_snapshot_gzip: AtomicBool,
     #[cfg(test)]
     peer_close_started: AtomicBool,
     #[cfg(test)]
@@ -137,6 +137,7 @@ where
             sink: Mutex::new(sink),
             terminal,
             timeout: WRITE_TIMEOUT,
+            world_snapshot_gzip: AtomicBool::new(false),
             #[cfg(test)]
             peer_close_started: AtomicBool::new(false),
             #[cfg(test)]
@@ -182,6 +183,15 @@ where
                 Err(timeout_error())
             }
         }
+    }
+
+    pub(super) fn set_world_snapshot_gzip(&self, enabled: bool) {
+        self.world_snapshot_gzip.store(enabled, Ordering::Release);
+    }
+
+    pub(super) async fn send_world_snapshot(&self, text: String) -> Result<(), axum::Error> {
+        self.send(super::world_snapshot_transport::frame(text,
+            self.world_snapshot_gzip.load(Ordering::Acquire))).await
     }
 
     /// Reading Close only queues tungstenite's automatic reply. Flush it before

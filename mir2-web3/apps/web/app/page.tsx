@@ -118,7 +118,7 @@ import type { WorldFishingGesture, WorldFishingPointer, WorldFishingAnimationCon
   WorldFishingAnimationCommit, WorldFishingCallbacks } from "../lib/world-fishing-input";
 import { readCrystalEntityActionPose, readCrystalEntityMovementBlocked, type CrystalEntityActionPose } from "./components/original-client-entity-animation-runtime";
 import { NATIVE_ATTACK_MOVEMENT_CAPABILITY, nativeAttackMovementChannel } from "../lib/native-attack-movement";
-import { GATEWAY_CATALOG_CAPABILITY, createGatewayCatalogIngress, type GatewayCatalogIngress } from "../lib/gateway-catalog-transport";
+import { createGatewayCatalogIngress, type GatewayCatalogIngress } from "../lib/gateway-catalog-transport";
 import { SharedCombatModeKeys, isCrystalCombatModeFunction, nextCombatModePhysicalGeneration, type CombatModeRuntime, type CombatModeOwner, type CombatModeProof } from "../lib/shared-combat-mode-keys";
 import { HeroPlayerAuthority, HeroPlayerOperations, captureHeroAction, heroActionBasisMatches, sameHeroSession, type HeroPlayerModel, type HeroItem, type HeroActionDto, type HeroOperationProof } from "../lib/hero-player-ui";
 import type { HeroCharacterPage, HeroManagementPage, HeroManagementWindows, HeroUiOrigin, HeroUiLease } from "./components/original-client-hero-management-window";
@@ -10652,7 +10652,7 @@ export default function HomePage() {
     if (cashReceiptSocketRef.current === socket || addedCapability === "nativeGameShopReceiptV1") capabilities.push("nativeGameShopReceiptV1");
     capabilities.push(NATIVE_ATTACK_MOVEMENT_CAPABILITY);
     const catalog = gatewayCatalogChannel(socket), codec = questCoreRuntimeRef.current?.gatewayCatalog;
-    if (catalog.declared() || codec) capabilities.push(GATEWAY_CATALOG_CAPABILITY);
+    capabilities.push(...catalog.capabilitiesFor(codec));
     socket.send(JSON.stringify({ type: "clientCapabilities", capabilities }));
     catalog.declare(codec);
     nativeAttackMovementChannel(socket).declare();

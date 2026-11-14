@@ -21,6 +21,7 @@ const wasmBytes=readFileSync(new URL('mir2_platform_web_bg.wasm',leaf));
 const wasm=await import('data:text/javascript;base64,'+glue.toString('base64'));
 await wasm.default({module_or_path:wasmBytes});
 const decoder=createGatewayCatalogDecoder(wasm);
+const snapshot=text=>{const bytes=batch([text]);bytes.write('M2WSPGZ1');return bytes;};
 const info={index:7,name:'药品 Potion',item_type:0,grade:0,required_type:0,required_class:0,required_gender:0,item_set:0,shape:0,weight:1,light:0,required_amount:0,image:1,durability:0,stack_size:99,price:1,start_item:false,effect:0,need_identify:false,show_group_pickup:false,class_based:false,level_based:false,can_mine:false,global_drop_notify:false,bind:0,unique:0,random_stats_id:0,can_fast_run:false,can_awakening:false,slots:0,stats:[],tooltip:null};
 const item=JSON.stringify({type:'packet',packet:'NewItemInfo',payload:{info}});
 const exact=' \n'+item.replace('"index":7','"future_i64":9223372036854775807,"index":7')+'\t ';
@@ -53,6 +54,50 @@ test('wire limit is checked before the wasm-bindgen input copy',()=>{
  let called=0;const bound=createGatewayCatalogDecoder({gateway_catalog_abi_version:()=>1,decode_gateway_catalog:()=>{called++;return '[]';}});
  assert.throws(()=>bound.decode(new Uint8Array(MAX_CATALOG_WIRE_BYTES+1)));assert.equal(called,0);
  assert.throws(()=>createGatewayCatalogDecoder({gateway_catalog_abi_version:()=>0,decode_gateway_catalog:()=>''}),/ABI/);
+});
+
+test('real shared WASM snapshot capability preserves all original UTF-8 text without widening catalog validation',()=>{
+ assert.equal(wasm.gateway_world_snapshot_abi_version(),1);
+ assert.deepEqual(decoder.capabilities,[GATEWAY_CATALOG_CAPABILITY,transport.GATEWAY_WORLD_SNAPSHOT_CAPABILITY]);
+ const text=' \n{"type":"worldSnapshot","payload":{"hp":18,"name":"阿洛","future":18446744073709551615,"entities":[{"id":7}]}}\t';
+ assert.deepEqual(decoder.decode(snapshot(text)),[text]);
+ assert.throws(()=>wasm.decode_gateway_catalog(snapshot(text)));
+ assert.throws(()=>wasm.decode_gateway_world_snapshot(batch([item])));
+});
+
+test('snapshot domain rejects identities, receipts, duplicate tags, nonobjects and malformed frames before delivery',()=>{
+ for(const text of ['{"type":"identitySession","token":"private"}','{"type":"npcPurchaseOwner","payload":{}}',
+  '{"type":"worldSnapshot","payload":[]}','{"type":"worldSnapshot","type":"worldSnapshot","payload":{}}',
+  '{"type":"worldSnapshot","payload":{},"secret":"private"}']){
+  assert.throws(()=>decoder.decode(snapshot(text)),e=>e.message==='Invalid bounded gateway catalog batch');
+ }
+ const good=snapshot('{"type":"worldSnapshot","payload":{}}'),badCount=Buffer.from(good),badCrc=Buffer.from(good);
+ badCount.writeUInt32LE(2,12);badCrc[badCrc.length-8]^=1;
+ for(const bytes of [badCount,badCrc,good.subarray(0,-1),Buffer.concat([good,Buffer.from([0])])])assert.throws(()=>decoder.decode(bytes));
+});
+
+test('legacy immutable catalog modules remain catalog-only and partial snapshot ABIs are rejected',()=>{
+ const legacy=createGatewayCatalogDecoder({gateway_catalog_abi_version:wasm.gateway_catalog_abi_version,decode_gateway_catalog:wasm.decode_gateway_catalog});
+ assert.deepEqual(legacy.capabilities,[GATEWAY_CATALOG_CAPABILITY]);
+ assert.deepEqual(legacy.decode(batch([item])),[item]);
+ assert.throws(()=>legacy.decode(snapshot('{"type":"worldSnapshot","payload":{}}')));
+ for(const extra of [{gateway_world_snapshot_abi_version:()=>1},{decode_gateway_world_snapshot:()=>''},
+  {gateway_world_snapshot_abi_version:()=>2,decode_gateway_world_snapshot:()=>''}]){
+  assert.throws(()=>createGatewayCatalogDecoder({gateway_catalog_abi_version:()=>1,decode_gateway_catalog:()=>'',...extra}),/snapshot ABI/);
+ }
+});
+
+test('physical connection retains its declared decoder and orders Text, snapshot and catalog synchronously',()=>{
+ const text='{"type":"worldSnapshot","payload":{"hp":18}}',seen=[];
+ const ingress=createGatewayCatalogIngress({current:()=>true,deliver:x=>seen.push(x),reject:()=>assert.fail('valid mixed frames')});
+ assert.deepEqual(ingress.capabilitiesFor(null),[]);
+ assert.deepEqual(ingress.capabilitiesFor(decoder),decoder.capabilities);
+ ingress.declare(decoder);ingress.receive('before');ingress.receive(arrayBuffer(snapshot(text)));ingress.receive(arrayBuffer(batch([item])));ingress.receive('after');
+ assert.deepEqual(seen,['before',text,item,'after']);
+ const legacy=createGatewayCatalogDecoder({gateway_catalog_abi_version:wasm.gateway_catalog_abi_version,decode_gateway_catalog:wasm.decode_gateway_catalog});
+ const pinned=createGatewayCatalogIngress({current:()=>true,deliver:()=>{},reject:()=>{}});
+ pinned.declare(legacy);pinned.declare(decoder);
+ assert.deepEqual(pinned.capabilitiesFor(decoder),[GATEWAY_CATALOG_CAPABILITY]);
 });
 
 test('mixed Text and real binary catalogs remain synchronous and in physical-frame order',()=>{
@@ -100,7 +145,7 @@ test('actual Page capability replacement retains catalog with receipts and attac
  assert(h.messages.at(-1).capabilities.includes(GATEWAY_CATALOG_CAPABILITY));
  h.env.questCoreRuntimeRef.current=null;h.env.cashReceiptSocketRef.current=h.socket;h.env.npcPurchaseOptInSocketsRef.current.add(h.socket);
  h.declare(h.socket,'durableNpcPurchaseOwnerV1');
- assert.deepEqual(new Set(h.messages.at(-1).capabilities),new Set(['durableNpcPurchaseOwnerV1','nativeGameShopReceiptV1','nativeAttackOutcomeV2',GATEWAY_CATALOG_CAPABILITY]));
+ assert.deepEqual(new Set(h.messages.at(-1).capabilities),new Set(['durableNpcPurchaseOwnerV1','nativeGameShopReceiptV1','nativeAttackOutcomeV2',GATEWAY_CATALOG_CAPABILITY,transport.GATEWAY_WORLD_SNAPSHOT_CAPABILITY]));
  h.env.gatewayCatalogChannel(h.socket).receive(arrayBuffer(batch([exact,item])));assert.deepEqual(h.seen,[exact,item]);assert.deepEqual(h.hero,[exact,item]);
 });
 

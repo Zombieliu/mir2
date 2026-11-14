@@ -115,3 +115,4 @@ mir2-web3/docs/evidence/r16-font-lanes-20261114/*.txt text eol=lf
 # Frozen diagnostic producers retain the exact observed SHA across checkouts.
 mir2-web3/docs/evidence/r16-startup-delivery-20261114/producers/*.mjs -text whitespace=cr-at-eol
 mir2-web3/docs/evidence/r16-startup-delivery-20261114/*.tap text eol=lf
+mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/*.txt text eol=lf

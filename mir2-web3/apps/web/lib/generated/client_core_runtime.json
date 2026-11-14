@@ -1,59 +1,59 @@
 {
   "abiVersion": 1,
-  "version": "a27a7e3155c84c1c67e78e2353318999c5e6c73c5db29afffcdbd0e02a466f4a",
-  "sourceSha256": "b4af5fe2d0beede83dbe317e701ef1eea5b554fc80cab0433cbd0f74914f9732",
+  "version": "06e2c8b392593c1b2c8e367ab8721b6bf5b28cfdca95c985ce7e09e958118c19",
+  "sourceSha256": "e8449e70bc75bfbbc2df220a54d59bd67b635c830eb2e253ad3a4cf01f317bd7",
   "files": {
     "mir2_platform_web.js": {
       "bytes": 26425,
       "sha256": "87154c4d2b22eceffeda71d2eb52b799db0a4558d1cfb7b6510f48521ea1248a"
     },
     "mir2_platform_web_bg.wasm": {
-      "bytes": 252454,
-      "sha256": "e6fc11126f0f1e798fd705e96bae03293d6b9506220cd5a0058910723e17e89c"
+      "bytes": 252494,
+      "sha256": "8015bae3dc34fc00810890d768ed63ce3bac01809d57cb2940aaf24df5b7386a"
     }
   },
   "presentation": {
     "abiVersion": 1,
-    "version": "b07b1e73d80a6c0dd204a5f2586910dae9755a5d5616a1128e13bcc6e9591594",
-    "sourceSha256": "b4af5fe2d0beede83dbe317e701ef1eea5b554fc80cab0433cbd0f74914f9732",
+    "version": "46f02fa19b06298816c836b3f389bc11fd442ac43b1ee6cb4e9b22de9197d34f",
+    "sourceSha256": "e8449e70bc75bfbbc2df220a54d59bd67b635c830eb2e253ad3a4cf01f317bd7",
     "files": {
       "mir2_platform_web.js": {
         "bytes": 22689,
         "sha256": "226578557b1c61d7290f32e539f41e300a75e9f2b411dd1007a588e6de4c614d"
       },
       "mir2_platform_web_bg.wasm": {
-        "bytes": 259326,
-        "sha256": "f912ce669742f00bf1e70acafab0a05d6a90b804b87eff775c7daacedfcd4c96"
+        "bytes": 259244,
+        "sha256": "9311520cd90bcb0990be8aa2c15c5f31c947e84075445de06844410d9276e914"
       }
     }
   },
   "npcPurchase": {
     "abiVersion": 1,
-    "version": "809742bb9bcb5aa6d7b0dd89f41aa75efbd804c109b7d2ec05fedf22f8c8bf3c",
-    "sourceSha256": "b4af5fe2d0beede83dbe317e701ef1eea5b554fc80cab0433cbd0f74914f9732",
+    "version": "38b9327f71e789600a89d433bcaeb60f36d28870316da839fce4fcf28f55eaf7",
+    "sourceSha256": "e8449e70bc75bfbbc2df220a54d59bd67b635c830eb2e253ad3a4cf01f317bd7",
     "files": {
       "mir2_platform_web.js": {
         "bytes": 8332,
         "sha256": "b6a3e9848e46934dd5187120ea543da5d174bf97f1a34d63ca9be714e0b18218"
       },
       "mir2_platform_web_bg.wasm": {
-        "bytes": 164087,
-        "sha256": "9cfcddcac59fc301e9500ead41fcd4ed40e48ef38d9ca09d6313111ec0b2914d"
+        "bytes": 164107,
+        "sha256": "9b9cf5f9f9cfbe04986f8f6619460f8a22c5f5c89f36ad2c15df12be9d2b1356"
       }
     }
   },
   "catalogTransport": {
     "abiVersion": 1,
-    "version": "486c17c0ac3c91191a350baf9a75de76b58b663d93ca313237b4f06ab598cc24",
-    "sourceSha256": "b4af5fe2d0beede83dbe317e701ef1eea5b554fc80cab0433cbd0f74914f9732",
+    "version": "42d31d633ae52eebe34af0234c0f168909cedd9f74dddc90bff893791c1940e6",
+    "sourceSha256": "e8449e70bc75bfbbc2df220a54d59bd67b635c830eb2e253ad3a4cf01f317bd7",
     "files": {
       "mir2_platform_web.js": {
-        "bytes": 6063,
-        "sha256": "3aef998b810fe329edf69a017308f3918151a320e733ff8ab9ff819b5efaf116"
+        "bytes": 6929,
+        "sha256": "5c47d5460070c0a0a044026742aee403295ae086ce4c126a3ea00341c71dae53"
       },
       "mir2_platform_web_bg.wasm": {
-        "bytes": 190701,
-        "sha256": "ea6be941a0d7467b63fccb7522e6f9f18691a2f4f99057c9157cac2ce44bed22"
+        "bytes": 195564,
+        "sha256": "38e0353a03e5f038d259310bff13e8c576fbe73b1e3b551816b53a5a69ad5b93"
       }
     }
   }

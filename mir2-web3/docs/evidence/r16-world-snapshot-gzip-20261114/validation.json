@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "ownedSourceFilesMatched": 11,
+  "matchingImmutableLeaves": 8,
+  "matchingPrivateInputs": 8,
+  "readmeLinks": 8,
+  "startupDocsUnder120Lines": true,
+  "testCount": 194,
+  "publicLatencyFixedClaimed": false,
+  "fullGameBrowserCompressionPassed": false,
+  "productionReleasedThisRound": false
+}
