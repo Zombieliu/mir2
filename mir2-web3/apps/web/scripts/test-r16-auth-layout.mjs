@@ -14,8 +14,13 @@ function evaluate(path, dependencies = {}, globals = {}) {
   }, module, module.exports, ...Object.values(globals));
   return module.exports;
 }
+const bootstrap = evaluate("../lib/first-crystal-scene-request.ts");
+const bootstrapChunk = evaluate("../lib/pinned-bootstrap-chunk.ts", { "./first-crystal-scene-request": bootstrap });
 const nativeLocalization = evaluate("../lib/r16-native-localization.ts", {
   "./generated/r16-native-localization-startup.json": JSON.parse(read("../lib/generated/r16-native-localization-startup.json")),
+  "./generated/r16-native-localization-delivery.json": JSON.parse(read("../lib/generated/r16-native-localization-delivery.json")),
+  "./first-crystal-scene-request": bootstrap,
+  "./pinned-bootstrap-chunk": bootstrapChunk,
 });
 const browserLocalization = evaluate("../lib/r16-browser-localization.ts");
 const characterCreate = evaluate("../lib/character-create.ts");

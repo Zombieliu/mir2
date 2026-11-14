@@ -21,8 +21,13 @@ export function R16LoginDoor({ token, onStart, onOpened }: {
   useEffect(() => {
     let cancelled = false;
     let timer: number | null = null;
+    const preload = new AbortController();
     // These large frames are prepared after auth, outside the critical login pack.
-    void preloadSceneAssetUrls(doorFrames, LOGIN_DOOR_PRELOAD_TIMEOUT_MS).then(({ visualReady }) => {
+    // Keep only one speculative frame in flight; leaving retires its queue.
+    void preloadSceneAssetUrls(doorFrames, LOGIN_DOOR_PRELOAD_TIMEOUT_MS, {
+      concurrency: 1,
+      signal: preload.signal,
+    }).then(({ visualReady }) => {
       if (cancelled) return;
       if (!visualReady) {
         onOpened(token, "unavailable");
@@ -47,6 +52,7 @@ export function R16LoginDoor({ token, onStart, onOpened }: {
 
     return () => {
       cancelled = true;
+      preload.abort();
       if (timer !== null) window.clearTimeout(timer);
     };
   }, [token, onStart, onOpened]);

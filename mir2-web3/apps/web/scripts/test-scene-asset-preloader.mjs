@@ -152,3 +152,72 @@ test("default image loading coalesces concurrent requests for the same stable UR
     else globalThis.Image = previousImage;
   }
 });
+
+test("an already retired scene cannot start image work or claim readiness", async () => {
+  const owner = new AbortController(); owner.abort();
+  let started = 0;
+  const result = await preloadSceneAssetUrls(["/retired.png"], 1000, {
+    signal: owner.signal, loadCandidate: async () => { started++; return true; },
+  });
+  assert.equal(started, 0); assert.equal(result.aborted, true); assert.equal(result.status, "loading");
+  assert.equal(result.ready, false); assert.equal(result.visualReady, false); assert.equal(result.pending, 1);
+});
+
+test("leaving a serial door preload retires queued frames and late fallbacks", async () => {
+  const owner = new AbortController(), attempted = []; let finishPrimary;
+  const result = preloadSceneAssetUrls(Array.from({ length: 19 }, (_, i) => `/door-${i}.png`), 2000, {
+    signal: owner.signal, concurrency: 1,
+    resolveCandidates: url => [url, url + "-fallback"],
+    loadCandidate: url => { attempted.push(url); return new Promise(resolve => { finishPrimary = resolve; }); },
+  });
+  assert.deepEqual(attempted, ["/door-0.png"]);
+  owner.abort();
+  const stopped = await result;
+  assert.equal(stopped.aborted, true); assert.equal(stopped.pending, 19);
+  finishPrimary(false); await new Promise(resolve => setTimeout(resolve, 0));
+  assert.deepEqual(attempted, ["/door-0.png"]);
+});
+
+test("a nearly expired queue cannot admit another large frame or a fallback beyond its budget", async () => {
+  let clock = 0; const attempted = [];
+  const result = await preloadSceneAssetUrls(["/door-0.png", "/door-1.png"], 2000, {
+    concurrency: 1, now: () => clock, resolveCandidates: url => [url, url + "-fallback"],
+    loadCandidate: async url => { attempted.push(url); clock = 1800; return false; },
+  });
+  assert.deepEqual(attempted, ["/door-0.png"]);
+  assert.equal(result.status, "timeout"); assert.equal(result.visualReady, false); assert.equal(result.pending, 1);
+});
+
+test("serial preload retains all nineteen frames when they can be prepared", async () => {
+  let active = 0, peak = 0; const attempted = [];
+  const frames = Array.from({ length: 19 }, (_, i) => `/ready-door-${i}.png`);
+  const result = await preloadSceneAssetUrls(frames, 2000, { concurrency: 1, loadCandidate: async url => {
+    active++; peak = Math.max(peak, active); attempted.push(url);
+    await Promise.resolve(); active--; return true;
+  } });
+  assert.deepEqual(attempted, frames); assert.equal(peak, 1);
+  assert.equal(result.visualReady, true); assert.equal(result.loaded, 19);
+});
+
+test("retiring one preload leaves another caller's shared image and completed cache usable", async () => {
+  const previousWindow = globalThis.window, previousImage = globalThis.Image;
+  let imageCount = 0;
+  class SharedImage {
+    complete = false; naturalWidth = 0; onload = null; onerror = null;
+    set src(_url) { imageCount++; setTimeout(() => { this.complete = true; this.naturalWidth = 32; this.onload?.(); }, 15); }
+  }
+  globalThis.window = { setTimeout, clearTimeout }; globalThis.Image = SharedImage;
+  try {
+    const owner = new AbortController();
+    const first = preloadSceneAssetUrls(["/shared-door-retire.png"], 1000, { signal: owner.signal });
+    const second = preloadSceneAssetUrls(["/shared-door-retire.png"], 1000);
+    owner.abort();
+    assert.equal((await first).aborted, true); assert.equal((await second).visualReady, true);
+    assert.equal((await preloadSceneAssetUrls(["/shared-door-retire.png"], 1000)).visualReady, true);
+    assert.equal((await preloadSceneAssetUrls(["/shared-door-retire.png"], 0)).status, "timeout");
+    assert.equal(imageCount, 1);
+  } finally {
+    if (previousWindow === undefined) delete globalThis.window; else globalThis.window = previousWindow;
+    if (previousImage === undefined) delete globalThis.Image; else globalThis.Image = previousImage;
+  }
+});

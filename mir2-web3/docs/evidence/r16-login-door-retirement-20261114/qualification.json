@@ -1,0 +1,516 @@
+{
+  "kind": "r16-login-door-preload-retirement",
+  "baseSource": "9244ce3dd7cd2129a70e650be1430e971b6c96ab",
+  "candidate": "9244ce3dd7cd-door-preload-7827df27",
+  "passed": true,
+  "localBrowserSessions": 4,
+  "tests": {
+    "currentAdjacentPassed": 66,
+    "currentAdjacentFailed": 0,
+    "baselineTargetedPassed": 0,
+    "baselineTargetedFailed": 4
+  },
+  "build": {
+    "status": {
+      "code": 0,
+      "signal": null
+    },
+    "builtId": "AL37NFT-jhQa4ZkVSmlUn",
+    "sourceRoot": "C:/r16-login-door-retirement-20261114/source-r5",
+    "dist": ".next-login-door-retirement-r2",
+    "durationMs": 45749,
+    "changedFiles": [
+      {
+        "filename": "mir2-web3/apps/web/lib/scene-asset-preloader.ts",
+        "sha256": "0f1d3a0a09d9cdd25dbe1de8539ec4c814305548f9610d019cb4b51856adf93d",
+        "bytes": 7849,
+        "baseSha256": "fb0d93cc659695131f74cbd1f9c0a220f8e84904c57d02ac0bdf25b62ef951cd"
+      },
+      {
+        "filename": "mir2-web3/apps/web/app/components/r16-login-door.tsx",
+        "sha256": "9233ba688e2233fe05f89a4853aa5e69ac037f1d63e7aa68e36095ca08d44a2c",
+        "bytes": 2151,
+        "baseSha256": "b042f6b8f3cc6b55bf53b2382598faecfe94b6789c4f746bb03a215be7a466f8"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-scene-asset-preloader.mjs",
+        "sha256": "0c1aa0ce081bb7733aeb822a76aaf8c33514b986ad05c93d29a4b1751830c4bf",
+        "bytes": 10406,
+        "baseSha256": "d933b215213fb9d0376f8dbbcb41361804f495225159932044920dc7e84a17cb"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-r16-auth-layout.mjs",
+        "sha256": "9187eb5db8e883da78b55353684d0c3badb8fc5755393ea8fe5bcdaf0db27e5a",
+        "bytes": 45458,
+        "baseSha256": "1cd3e55dfbb6186fa2367072cffce73d7606ee4b0af3540eb9b3af7c046d66c6"
+      }
+    ],
+    "sourceClosureFiles": 126109,
+    "sourceClosureBytes": 919548348,
+    "archiveSha256": "9e64474aefee61821a75b8fcbc1164aeda9d180964fc265d44a792ab0d7f6b1d",
+    "provenGitArchiveEolNormalizations": 123,
+    "fixedRuntime": "bevy-0c553a754308e5b8",
+    "fixedAssets": "20261108-r16-08ec86d5105c",
+    "prebuiltRuntimeAndCoreUnmodified": true
+  },
+  "lifecycleContract": {
+    "passed": true,
+    "abortedOwnerReady": false,
+    "abortedOwnerFlag": true,
+    "otherOwnerVisualReady": true,
+    "remainingEighteenRequestsNotStarted": true,
+    "nineteenFramesLoaded": 19,
+    "serialPeak": 1,
+    "browserClosed": true,
+    "serverClosed": true,
+    "scope": "Local actual TS preloader/Image/Worker contract only. Not a public throughput or full-game qualification."
+  },
+  "runs": [
+    {
+      "ordinal": 1,
+      "mode": "compatibility",
+      "language": "en-US",
+      "sessions": [
+        {
+          "passed": true,
+          "nativeReadyWaitMs": 54679,
+          "fonts": [
+            {
+              "name": "NotoSansTC.ttf",
+              "bytes": 11941968,
+              "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+            },
+            {
+              "name": "NotoSansCJKsc-Regular.otf",
+              "bytes": 16437364,
+              "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+            },
+            {
+              "name": "NotoSans-Regular.ttf",
+              "bytes": 621572,
+              "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+            },
+            {
+              "name": "NotoSansDevanagari-Regular.ttf",
+              "bytes": 243520,
+              "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+            },
+            {
+              "name": "NotoSansThai-Regular.ttf",
+              "bytes": 37780,
+              "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+            },
+            {
+              "name": "NotoSansArabic-Regular.ttf",
+              "bytes": 234892,
+              "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+            }
+          ],
+          "prewarm": {
+            "requested": 113,
+            "ok": 113,
+            "failed": 0
+          },
+          "nativeQuest": "ordinary-shared-native",
+          "rightButtonsPassed": true
+        },
+        {
+          "passed": true,
+          "nativeReadyWaitMs": 1435,
+          "fonts": [
+            {
+              "name": "NotoSansTC.ttf",
+              "bytes": 11941968,
+              "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+            },
+            {
+              "name": "NotoSansCJKsc-Regular.otf",
+              "bytes": 16437364,
+              "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+            },
+            {
+              "name": "NotoSans-Regular.ttf",
+              "bytes": 621572,
+              "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+            },
+            {
+              "name": "NotoSansDevanagari-Regular.ttf",
+              "bytes": 243520,
+              "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+            },
+            {
+              "name": "NotoSansThai-Regular.ttf",
+              "bytes": 37780,
+              "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+            },
+            {
+              "name": "NotoSansArabic-Regular.ttf",
+              "bytes": 234892,
+              "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+            }
+          ],
+          "prewarm": {
+            "requested": 113,
+            "ok": 113,
+            "failed": 0
+          },
+          "nativeQuest": "ordinary-shared-native",
+          "rightButtonsPassed": true
+        }
+      ],
+      "walkRunCommands": 189,
+      "originalMoveGateMs": 8000,
+      "originalNativeGateMs": 120000,
+      "requestedDestination": {
+        "x": 324,
+        "y": 291
+      },
+      "authoritativeArrival": {
+        "x": 322,
+        "y": 293
+      },
+      "collisionRegions": 9,
+      "worldSnapshotTransport": {
+        "passed": true,
+        "gatewayKind": "merged",
+        "compressionExpected": true,
+        "sessions": [
+          {
+            "worldDeclared": true,
+            "worldSnapshots": 5,
+            "worldWireBytes": 44832,
+            "worldDecodedBytes": 242757,
+            "browserConsumption": {
+              "passed": true,
+              "version": 6,
+              "tick": 1,
+              "mapFileName": "0",
+              "entityCount": 31,
+              "rawIngressTickMatched": true,
+              "wireKind": "M2WSPGZ1"
+            }
+          },
+          {
+            "worldDeclared": true,
+            "worldSnapshots": 7,
+            "worldWireBytes": 61506,
+            "worldDecodedBytes": 342776,
+            "browserConsumption": {
+              "passed": true,
+              "version": 6,
+              "tick": 1,
+              "mapFileName": "0",
+              "entityCount": 32,
+              "rawIngressTickMatched": true,
+              "wireKind": "M2WSPGZ1"
+            }
+          }
+        ],
+        "scope": "Actual Page snapshot consumer, catalog gzip mixed ordering, existing gameplay/save gates; loopback HTTP, not public or latency-causality proof"
+      },
+      "catalogCountEachSession": 529,
+      "npcNameLayerPassed": true,
+      "workerRestartPassed": true,
+      "browserFullyRestarted": true,
+      "ordinaryLogoutAndSavePassed": true,
+      "sourceFixtureUnchanged": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "screenshot": {
+        "path": "default-vendor-arrival.png",
+        "sha256": "8d55b1b1b336ec1ed4f4c624bdd91d5fd43d4ca7866762face46dd52fe49eb2a"
+      }
+    },
+    {
+      "ordinal": 2,
+      "mode": "webgl2",
+      "language": "zh-TW",
+      "sessions": [
+        {
+          "passed": true,
+          "nativeReadyWaitMs": 52264,
+          "fonts": [
+            {
+              "name": "NotoSansTC.ttf",
+              "bytes": 11941968,
+              "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+            },
+            {
+              "name": "NotoSansCJKsc-Regular.otf",
+              "bytes": 16437364,
+              "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+            },
+            {
+              "name": "NotoSans-Regular.ttf",
+              "bytes": 621572,
+              "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+            },
+            {
+              "name": "NotoSansDevanagari-Regular.ttf",
+              "bytes": 243520,
+              "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+            },
+            {
+              "name": "NotoSansThai-Regular.ttf",
+              "bytes": 37780,
+              "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+            },
+            {
+              "name": "NotoSansArabic-Regular.ttf",
+              "bytes": 234892,
+              "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+            }
+          ],
+          "prewarm": {
+            "requested": 113,
+            "ok": 113,
+            "failed": 0
+          },
+          "nativeQuest": "ordinary-shared-native",
+          "rightButtonsPassed": true
+        },
+        {
+          "passed": true,
+          "nativeReadyWaitMs": 1431,
+          "fonts": [
+            {
+              "name": "NotoSansTC.ttf",
+              "bytes": 11941968,
+              "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+            },
+            {
+              "name": "NotoSansCJKsc-Regular.otf",
+              "bytes": 16437364,
+              "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+            },
+            {
+              "name": "NotoSans-Regular.ttf",
+              "bytes": 621572,
+              "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+            },
+            {
+              "name": "NotoSansDevanagari-Regular.ttf",
+              "bytes": 243520,
+              "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+            },
+            {
+              "name": "NotoSansThai-Regular.ttf",
+              "bytes": 37780,
+              "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+            },
+            {
+              "name": "NotoSansArabic-Regular.ttf",
+              "bytes": 234892,
+              "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+            }
+          ],
+          "prewarm": {
+            "requested": 113,
+            "ok": 113,
+            "failed": 0
+          },
+          "nativeQuest": "ordinary-shared-native",
+          "rightButtonsPassed": true
+        }
+      ],
+      "walkRunCommands": 189,
+      "originalMoveGateMs": 8000,
+      "originalNativeGateMs": 120000,
+      "requestedDestination": {
+        "x": 324,
+        "y": 291
+      },
+      "authoritativeArrival": {
+        "x": 322,
+        "y": 293
+      },
+      "collisionRegions": 9,
+      "worldSnapshotTransport": {
+        "passed": true,
+        "gatewayKind": "merged",
+        "compressionExpected": true,
+        "sessions": [
+          {
+            "worldDeclared": true,
+            "worldSnapshots": 5,
+            "worldWireBytes": 44832,
+            "worldDecodedBytes": 242761,
+            "browserConsumption": {
+              "passed": true,
+              "version": 6,
+              "tick": 1,
+              "mapFileName": "0",
+              "entityCount": 31,
+              "rawIngressTickMatched": true,
+              "wireKind": "M2WSPGZ1"
+            }
+          },
+          {
+            "worldDeclared": true,
+            "worldSnapshots": 7,
+            "worldWireBytes": 61545,
+            "worldDecodedBytes": 342787,
+            "browserConsumption": {
+              "passed": true,
+              "version": 6,
+              "tick": 1,
+              "mapFileName": "0",
+              "entityCount": 32,
+              "rawIngressTickMatched": true,
+              "wireKind": "M2WSPGZ1"
+            }
+          }
+        ],
+        "scope": "Actual Page snapshot consumer, catalog gzip mixed ordering, existing gameplay/save gates; loopback HTTP, not public or latency-causality proof"
+      },
+      "catalogCountEachSession": 529,
+      "npcNameLayerPassed": true,
+      "workerRestartPassed": true,
+      "browserFullyRestarted": true,
+      "ordinaryLogoutAndSavePassed": true,
+      "sourceFixtureUnchanged": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "screenshot": {
+        "path": "webgl2-vendor-arrival.png",
+        "sha256": "801df8e0b4faaa995da37f52a38cceb8376b92fe85b953679a227c21b30372c6"
+      }
+    }
+  ],
+  "preservedForeignWorkingFiles": 29,
+  "foreignWorkingFilesUnchanged": true,
+  "retainedFailures": {
+    "firstBuildTypecheckFailed": true,
+    "firstBuildLog": "next-build-r1.log",
+    "legacyAuthFixtureImportsInitiallyMissing": true,
+    "archiveExtractionAttemptsRetained": true,
+    "initialPythonFileBudgetRejected": true,
+    "archiveEolSizeMismatchRejected": true
+  },
+  "publicPerformanceRetested": false,
+  "newSourceDeployed": false,
+  "public120SecondIssueClaimedFixed": false,
+  "globalParityCandidateOrAccepted": false,
+  "privateInputs": [
+    {
+      "path": "C:/r16-login-door-retirement-20261114/build-receipt.json",
+      "sha256": "556e4573a32b0fe9c344072f389fc1e2e59fe406475742c8ccc24de0b0481445"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/next-build-r1.log",
+      "sha256": "9d5f3d82109b4d37e056194099d2e2b8c454e8f9842bd7733c15596f9bf9ebf7"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/build-receipt-r2.json",
+      "sha256": "de1c890375a475a81c5e8850cb09f7dfa83041ee43b6cfb337f85122a54009c7"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/next-build-r2.log",
+      "sha256": "4bdff7d1f18ce44ef645169c5567665faf0dccd100c28be02ed9752038cc121d"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/build-inputs.json",
+      "sha256": "d73bd7ea2379ad7ec10b99a67baf1f9a3c4287ac42ca76bd0765b736fba43050"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/build-inputs-r2.json",
+      "sha256": "5a28253e2a2cc238f9787c283088cd4c933d70d00d1b9c252c7098b79b76e7f7"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/web-closure-r5.json",
+      "sha256": "4e52ce813de35cf6079b149ff4ab5a362736253e6c7a0966609e3232e630027e"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/extract-web-closure.py",
+      "sha256": "f91dc329457726d02bebe790d25e8bfd6bdfd35f0d84b877dc5b6f646af0de18"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/audit-archive.py",
+      "sha256": "394889565943158f6c428381cad742a8ed358822ecb61980ead101c9499311e7"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/preloader-adjacent-r1.log",
+      "sha256": "906978b10d0c5bc57aa1b25f3cfc33805aea84bb16168ef533bde8d14c6b8119"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/preloader-adjacent-r2.log",
+      "sha256": "8af2e5177426da399a870d28bf878d6cd9e414bdefa1b3bbf7cd69192c3d5175"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/preloader-adjacent-r3.log",
+      "sha256": "06075db6861a08f8a2cbe8869077208027d2fdb9fbb8a8ffe443c8688d7ebfa7"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/preloader-adjacent-r4.log",
+      "sha256": "c85954b56c968d1b5deff56c259ed5d9a67d96ffcc3a6cc8e178a7fe1d0cb720"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/preloader-adjacent-r5.log",
+      "sha256": "602a7ff97a15a57d61eacc547763069b36627530d6becdff7290a08ab24168be"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/baseline-scene-asset-preloader.ts",
+      "sha256": "fb0d93cc659695131f74cbd1f9c0a220f8e84904c57d02ac0bdf25b62ef951cd"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/baseline-scene-regression.mjs",
+      "sha256": "c6f9672659b19586bc31906a7a1cccf86e32c33660201377b0e96a348241ffe8"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/baseline-regression-r1.log",
+      "sha256": "1cee8f35adffcfcd19b8f717ee876e223515f0c9d26c6f67191ac5d297c1bf78"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/preloader-browser.mjs",
+      "sha256": "2a7a1c8f8a9c9dc4ee8ef584c766a868b8a94689d7a0eddb6b059cd690fece3e"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/preloader-browser-r1.log",
+      "sha256": "aa2cf9675aca8d8eaf9ea60f4b5bd1ac64d2fb673b6b0dc26baad39baf46252d"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/preloader-browser-r1.json",
+      "sha256": "50e772327409b5cfcd526c28faa04b5e2c232c5a4bfbf491f6c128d09925f35b"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/game-fixture-preparation.json",
+      "sha256": "c64819700a3b94f9b522fb96ae60110a5505577e73450ccef67a5542ce380fb6"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/fixture-r1/build-receipt.json",
+      "sha256": "d4838c652ed51562cc58dd6cc8696053cf4b2da9ac1f41d22cebe184fd57c122"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/browser-r1.log",
+      "sha256": "0ee3dfbd9ac29a8d369c0acc03e6c08643a5cebc8206491f32073de7dfbf897c"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/browser-r2.log",
+      "sha256": "7715573a290316bb96ebcd97e6bcae2495239ba964f0b060f125fe0ed7bf87c5"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/browser-invocation-r1.json",
+      "sha256": "d230d88a130f0f5fa59157a89beeb7ba88cbfdbf5cf12b2a552d556a1a55221b"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/browser-invocation-r2.json",
+      "sha256": "1a4cd2c285a45c9c1fc9f24c23b33537ecd96ac080b7c4af502213eb3b5fe77f"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/fixture-r1/game-full/quest-after-r1/entry-visual-receipt.json",
+      "sha256": "805c59bdacde2bdfc8b87f51690c990372c0cdeb40eb7cf7132a233e3a119ba2"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/fixture-r1/game-full/quest-after-r2/entry-visual-receipt.json",
+      "sha256": "1cfe1f90b40928c9f373414eddfe1f72262c61dd351a55183e50929423ba0f93"
+    }
+  ]
+}

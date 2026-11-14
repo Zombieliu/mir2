@@ -14,7 +14,7 @@ Short routing summary, updated 2026-11-14 (Asia/Shanghai). This indexes recorded
 
 ## Last recorded decisions and open work
 
-2026-11-14 9244独立网页候选已READY，80项发布保护、15项资源完整字节/SHA与真实扫码pending云端检查通过，未切正式。静态观测8项及Edge/Worker夹具通过；E6公网完整功能对照最终通过，但Native首帧后211585ms仍超原120秒，时间线发现开门大图进城后持续下载。SSH已验证ubuntu可用；在线fd3容量诊断与原WIP保留。下一项收紧开门预载取消/截止和并发，原8/120秒及整体1:1继续开放，Goal active。[候选、对照与边界](evidence/r16-world-snapshot-gzip-20261114/candidate/README.md)。
+2026-11-14 开门预载候选已补取消/绝对截止与并发1，66项、独立生产构建、真实Image/Worker夹具及默认英文/共享WebGL2繁中各冷启重登四场通过；两条189步商人路线到达合法邻格，原8/120秒、六字体/113/Q/保存均通过。29个既有改动文件原字节保留。正式仍E6/在线fd3；本地通过不关闭公网211585ms冷启或整体1:1，继续冻结来源并创建新候选。[修复与边界](evidence/r16-login-door-retirement-20261114/README.md)。
 
 2026-11-12 正式站已发布 `51d2dcc346`：共享图片取消与图集计时/JSON大小缓存身份修复。本机75项、生产构建及两后端重开同档通过；公网简繁出码、手机尺寸官方钱包Testnet签名、进比奇、权威移动、共用HUD/任务窗、113/113预取和正常退出通过，无需回滚。云端缓存身份与计算一致；Worker正常更新缓存一次，未迁移旧007缓存。本次观测起点到首画面65.2秒/共用HUD104.7秒（点击进游戏后约6.8秒/46.3秒），继续优化冷加载；实体手机、完整1:1及历史未结项仍开放。[发布与边界](evidence/r16-cache-repair-20261112/README.md)
 
