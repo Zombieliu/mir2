@@ -1,0 +1,16 @@
+{
+  "passed": false,
+  "kind": "pre-browser preparation failure",
+  "failedHelperSha256": "c8d3cb165cb5e7e60bc06320317aceb724ccfe8a681c433584a9063faaa7a920",
+  "expectedBootstrapWrappers": 4,
+  "actualPriorBootstrapWrappers": 3,
+  "actualKinds": [
+    "floor",
+    "scene",
+    "locale"
+  ],
+  "browserWasStarted": false,
+  "productChangedForThisCorrection": false,
+  "correction": "Fresh fixture-r2 preserves all three existing full wrapper bytes, the separate existing Walking gate and the sixteen frozen helper scopes. Mechanical bindings only; no timeout or geometry changes.",
+  "sourcePreparationSha256": "42a9ef1ea346a37b5d186b4dd9079d1abee8b0fcbde56e8c56041579b9254e09"
+}

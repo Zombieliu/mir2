@@ -16,75 +16,25 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: 'b19ca73072db16ac7f351857aa752ecc57953591',
+  source: '6ae96fa6017d511255ac46216c034594b6fe500f',
   sourceRef: BRANCH,
-  baseSource: '6e5abd6dddee46f68a6b3d74b87d2bb26f87bdaf',
+  baseSource: 'e3f073800a73a99db5e4606b6fdfc292526c66ed',
   assetSource: 'f2de762309768b51b39438c2437c14e819df9bf7',
   changedFiles: [
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/app/components/original-client-scene-visual-layers.tsx",
-      "sha": "3e8be5d789aefec818bf5564edd7802d23c5c773"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/app/globals.css",
-      "sha": "40a4db7aec41da75a09713f5549a38a8a8e6ba69"
+      "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+      "sha": "0bc19924b00cd02f62b387cbc3157838c8fdddb7"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/apps/web/public/original-ui/gdi-text/images/entity-assistant-jane-auto.png",
-      "sha": "07b48b6576fb8222aabc92752a492a9ec533c699"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/public/original-ui/gdi-text/images/entity-merchant-auto.png",
-      "sha": "c0cfdbbfaaa92d91461b4035f47dcac2137a5da1"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/public/original-ui/gdi-text/images/entity-ruben-auto.png",
-      "sha": "ad91f98094b1bca89c574fd36997d12395ea4a7b"
+      "filename": "mir2-web3/apps/web/scripts/smoke-asset-font-admission.mjs",
+      "sha": "c56ea212555969824ea54e658a52f5c5a3266ed0"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/public/original-ui/gdi-text/manifest.json",
-      "sha": "93dacd1883532edd8ea06b723a6e8af365101491"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-crystal-gdi-text-assets.mjs",
-      "sha": "b90f460a6f244aa977e2c0ece5b801cd4ce6d989"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-original-client-component-controls.mjs",
-      "sha": "c0347c06baa6dc46b09aa50bb24bec2580924952"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/tools/crystal-gdi-text/fixtures/generated/images/entity-assistant-jane-auto.png",
-      "sha": "07b48b6576fb8222aabc92752a492a9ec533c699"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/tools/crystal-gdi-text/fixtures/generated/images/entity-merchant-auto.png",
-      "sha": "c0cfdbbfaaa92d91461b4035f47dcac2137a5da1"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/tools/crystal-gdi-text/fixtures/generated/images/entity-ruben-auto.png",
-      "sha": "ad91f98094b1bca89c574fd36997d12395ea4a7b"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/tools/crystal-gdi-text/fixtures/generated/manifest.json",
-      "sha": "93dacd1883532edd8ea06b723a6e8af365101491"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/tools/crystal-gdi-text/fixtures/input.json",
-      "sha": "1b13bfcc159bb931e88ba493948d72bb2500c4be"
+      "filename": "mir2-web3/apps/web/scripts/test-asset-worker-fallback.mjs",
+      "sha": "ea02643d0c9c3a6c859a02f6a0f37296e412aa1b"
     }
   ],
   entryScene: {
@@ -156,6 +106,11 @@ export const QR_RELEASE = Object.freeze({
     "path": "/original-ui/gdi-text/images/entity-ruben-auto.png",
     "bytes": 262,
     "sha256": "3894023d68064c89a18b86d908a3e017619c73b1d632bfab382b2cca440cab5c"
+  },
+  entryAssetWorker: {
+    "path": "/mir2-asset-worker.js",
+    "bytes": 43171,
+    "sha256": "3b07de456c113135d2d37248893a707ce98179b419429fe6d58c18981b510dba"
   },
   assetRunId: '42494701555',
   baseline: 'dpl_Ae3hNyFygQuSMZDesBXCZDpUECTY',
@@ -420,12 +375,13 @@ async function releaseQrGame({ operation, initial, projects, candidate, id, verc
   const { baseline, relay, entryScene, entryFloor, entryPlayerMale, entryPlayerFemale, entryNpcs,
     entryObjects1, entryObjects2, entryObjects3,
     entryMonsterStanding, entryMonsterWalking, entryGameplayLocale,
-    entryNameAssistantJane, entryNameMerchant, entryNameRuben } = QR_RELEASE;
+    entryNameAssistantJane, entryNameMerchant, entryNameRuben, entryAssetWorker } = QR_RELEASE;
   const entryAssets = Object.entries({
     Scene: entryScene, Floor: entryFloor, PlayerMale: entryPlayerMale, PlayerFemale: entryPlayerFemale, Npcs: entryNpcs,
     Objects1: entryObjects1, Objects2: entryObjects2, Objects3: entryObjects3,
     MonsterStanding: entryMonsterStanding, MonsterWalking: entryMonsterWalking, GameplayLocale: entryGameplayLocale,
     NameAssistantJane: entryNameAssistantJane, NameMerchant: entryNameMerchant, NameRuben: entryNameRuben,
+    AssetWorker: entryAssetWorker,
   });
   const expectedOther = { original: production(initial.original), main: production(initial.main) };
   async function mapping(allowed) {

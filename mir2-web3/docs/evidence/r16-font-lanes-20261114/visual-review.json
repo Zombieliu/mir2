@@ -1,0 +1,42 @@
+{
+  "reviewed": true,
+  "images": [
+    {
+      "name": "fonts-before.png",
+      "bytes": 31464,
+      "sha256": "53260c59d3fce819802fc2400ee49efb70f89b17ce1d049e895e6b7b1bc043a5"
+    },
+    {
+      "name": "fonts-after.png",
+      "bytes": 31068,
+      "sha256": "1b09eb5dc19eddc3ac1c0c35d46e53450f08f8517ee856b4a2f9fb3709b0e082"
+    },
+    {
+      "name": "default-en-hud.png",
+      "bytes": 1382027,
+      "sha256": "01b1b4675d410040f7e2405982eb9a874142bebef3dc5dce911dc77b86479dde"
+    },
+    {
+      "name": "default-en-vendor-arrival.png",
+      "bytes": 1397272,
+      "sha256": "afe5b2877b11193f3290dbc7e038734402af4f4d872904bc5830905f4dbea631"
+    },
+    {
+      "name": "shared-gl2-tw-hud.png",
+      "bytes": 1391301,
+      "sha256": "274ce22351c0194f4fc576ea949bcf692f1d6d1b94f6e4d5c4c995350fea06c0"
+    },
+    {
+      "name": "shared-gl2-tw-vendor-arrival.png",
+      "bytes": 1423365,
+      "sha256": "886fb26fe8be8e30cfc3e1c613027fb639c3036dea30a518730b18c18a9870ff"
+    }
+  ],
+  "observed": [
+    "Controlled overload: old Worker decodes2/6; current Worker6/6 with original font bodies",
+    "Both game render paths show shared HUD and actual vendor arrival at322,293",
+    "Existing English attack-mode and currency-line Chinese, TC name-line aliasing and raw title boundaries remain"
+  ],
+  "humanAccepted": false,
+  "scope": "Root reviewed the six actual images, not complete pixel parity or all ten-language panels"
+}
