@@ -4,7 +4,7 @@
 每档 300 秒，另测共同近战场景；找出差距后再验证实际云机。
 下面的本机结果不能认证云机或三端实际分发的 CCU。
 
-## 最新已验证结果（2026-11-14，修复版两人通过，100 人未达标）
+## 最新已验证结果（2026-11-14，资格查询修复版两人通过，新 100 人测量中）
 
 修复版后端源码为 `7403bc5ee5cbb472477db101b8be603136049dcf`，Windows Release SHA `95614fad36fa8228c2aeabfb0f7b1bf29c6fdde478f915c1a53134cefedf4008`。干净快照构建的 Cargo 实际退出 0；外层构建 Job 因 MSVC 后台子进程未在收尾期退出而失败，原失败保留。性能运行由新的独立 Job 另行完整验证，不把构建 Job 写成正常退出。
 
@@ -44,7 +44,11 @@ V8 更新工具在发送 SSH 命令前因完整请求超过 98304 字节限制�
 
 该 Windows 程序的共同两人校准实际通过 64/64、2/2 窗口，普通退出/fresh/全员 File 重读及增强 V8 均通过；报告 SHA `76b09233ba389891fbd1b8c8ce9cde57629dd2b23376ebcd6a6413fdaf1961eb`，File `087bf585eef52e1e358b1435d00db6521bb35b59d2afcffde7f5f7629a2adc92`，增强 `89226a9dc434f6ceec40f2e321bceb47dc56e7ce1bd449a8fff5006abec6a00c`。共同两人近战也实际通过 104/104、2/2 窗口及同样的退出/重登/磁盘验证，报告 `4ff6af89ef26bae1b4a09b318f6b8e0f7c8af02a24ad5cb21e7fa8f260144927`、File `8377285ee001e06e029a79ab78802d06010853d412992429171bef41ce8a7334`、增强 `62e2c45b4e69e00e1ac8da3e0efe67223851a7f656946c27cf10ebd2a2dd469a`。两次 controller/driver/server 均 0，两 Game Job 全员正常退出且无 kill；新增 24 次认证完整追加到历史 921。新 100 人同计划、录盘关闭/观战开启/无 slow20 正在限流入场，截至 02:31 UTC 为 58 active，尚无新的 100 人通过结论；活动测量仍为完整 300 秒与 500 个逐人分钟窗口。
 
-Linux CI `43539916415` 的同一 8f/head、canonical branch 全工作流已 success，明确 `playtest_wallet_no_docker=true/publish_r2=false/numeron_operation=off`。新 ELF SHA `edd9f48cdb36ddd96334598aca4abc2f2e212e46ef2cbb60d4a1f5ab15a7ded5`、103748080 字节；独立 V9 实际校验退出 0，证明 SHA `6990c78333a0e28369fd701276c981e4611bd93b5027c1adbe808716ed46ce7d`，七项 native 门、真实 PG/Redis startup、源码/包及全 1620 地图匹配通过。当前 7403 测试服的全量地图只读 V5 实采也退出 0，证明 `b44d5f3c250b508f8005f4157c35af9516bbf767abcba5c77722dc740083761e`；V4 漏投影 systemd 限制导致的实际拒绝 `8fff224d5ec280cce009e4b857dd8defbd3391350d7d56e5a23bf7483b7bec63` 保留，未改写或重标旧 82 证明。云端更新尚待独立操作回执，当前仍是 7403；工件成功不代表云端已运行新程序或 100 人已通过。
+Linux CI `43539916415` 的同一 8f/head、canonical branch 全工作流已 success，明确 `playtest_wallet_no_docker=true/publish_r2=false/numeron_operation=off`。新 ELF SHA `edd9f48cdb36ddd96334598aca4abc2f2e212e46ef2cbb60d4a1f5ab15a7ded5`、103748080 字节；独立 V9 实际校验退出 0，证明 SHA `6990c78333a0e28369fd701276c981e4611bd93b5027c1adbe808716ed46ce7d`，七项 native 门、真实 PG/Redis startup、源码/包及全 1620 地图匹配通过。更新前 7403 测试服的全量地图只读 V5 实采也退出 0，证明 `b44d5f3c250b508f8005f4157c35af9516bbf767abcba5c77722dc740083761e`；V4 漏投影 systemd 限制导致的实际拒绝 `8fff224d5ec280cce009e4b857dd8defbd3391350d7d56e5a23bf7483b7bec63` 保留，未改写或重标旧 82 证明。
+
+02:44 UTC 同一 TEST 实际 install 退出 0，回执 SHA `64e9359de27a9a89508ece2cf7ae8e9023abb9de8f2c246eafd1aa1f9713d074`：运行源码 8f、上述 ELF，PID 1150828，20 个 EnvFile、19 个 drop-in，原上限 51/66/51。独立工具集成提交 `7d55b0411f`，V10 只绑定实际 native 证明的 24 项常量，函数/核心 AST 与已审查 V2 相同；V2 离线 121 次执行包括 5 次继承重复，不能称 121 项独立保护。实际绑定 5 项、负例 19 个及公共负载准备 9 项均通过。原 V5 与 V6 安装状态保持原字节。
+
+02:45 UTC 临时上限 120/150/120 已实际应用，回执 `735caa62a6cd7d1c5f2999750aa29b4d86610cb4be32d2860776392e37defdd5`：PID 1151510、invocation `fbb25efb4f464bae96a74b948f3b0744`、startTicks 1551402181，21 个 EnvFile、20 个 drop-in。两次均先以 9 个有类型零计数排空、普通 SIGINT 退出，再验证新激活；旧 Gateway/Zone/Caddy/四 validator/aux 共 8 个进程指纹及原配置不变，无 SIGKILL。云机新一轮 `capacity8f-progressive-v1` 已开始 2/25/50/100 各 300 秒公共 strict movement/chat，沿用原账号池、账本、P3/W4 与 25+5/901000ms 认证预算；主监控和只读 TCP 同采。首个 SLO/安全失败停止加人，所有已收尾结果均需正常排空并恢复 51/66/51。当前运行尚未闭合，不据此宣称 100 人通过；云端测试与本机共同 dense、真实三端渲染及完整战斗容量分列。
 
 云机第三轮 2/25 人诊断于 00:18 UTC 完整结束：每档 300 秒，窗口评分 320/320、4000/4000，10/125 个逐人分钟窗口全部通过；27 个连接（含最终 fresh 2）全部在各自原 5 秒门槛内取得 LogOutSuccess 和正常 Close，6 轮穿脱与 fresh 保存核对通过，最终 WS/active 为 0。load client 实际退出 0、所有 owned 成员退出且无 kill，同池 after 校验通过；报告 SHA `2e83a85433ee37437ee026d35653f0b5d4786d04c9cded764833309a4dccef0a`，after `f89891e33fd6a2834d1df538ff98363502ba7a816856357f2d53ba1759ff2cc7`。25 人 target CPU 平均 0.429567 核、采样峰 cgroup 约 344MiB、游戏 WS 应用下行 0.342651Mbps。沿用 51/66/51，无服务重启或上限操作；一次成功不能排除前两轮的间歇性故障，也不是 50/100 人、完整战斗或物理三端认证。
 
