@@ -1,0 +1,13 @@
+{
+  "reviewed": true,
+  "image": "public-quest-before-failure.png",
+  "bytes": 1337576,
+  "sha256": "154fbfbecd97b4e7533e21aad75e9844d3246dee47069e9a6606fce45e108c10",
+  "source": "7140aae96c41986968aadf040436e0ab396e1fdb",
+  "observed": [
+    "Traditional Chinese fallback quest list and description are visible",
+    "resource prewarm failure/progress overlay is visible at capture time; later113/113 is recorded separately",
+    "the common Native HUD is absent; this is not a passing shared HUD screenshot"
+  ],
+  "frontendAccepted": false
+}
