@@ -473,3 +473,269 @@ fn guild_xp_npc_gain_file_failure_rolls_back_source_and_reuses_only_uncommitted_
     drop(config);
     std::fs::remove_dir_all(path.parent().unwrap()).unwrap();
 }
+
+// Finish-only: fixture/checkpoint construction precedes the real Store barrier.
+// No Tick, billing, admission or has_uncommitted Store read is timed here.
+fn finish_only_with_held_account_store(
+    session: &mut crate::SimulationSession,
+    before: Option<crate::runtime::shared_guild_experience::GuildExperienceCheckpoint>,
+    packets: Vec<mir2_protocol::ServerPacket>,
+) -> (Result<Vec<mir2_protocol::ServerPacket>, String>, bool) {
+    use std::sync::mpsc;
+    use std::time::Duration;
+
+    let store = session
+        .app
+        .world()
+        .resource::<RuntimeConfigResource>()
+        .config
+        .account_store
+        .clone();
+    let (held_tx, held_rx) = mpsc::sync_channel(0);
+    let (release_tx, release_rx) = mpsc::sync_channel(0);
+    let holder = std::thread::spawn(move || {
+        let guard = store.lock().unwrap();
+        held_tx.send(()).unwrap();
+        // Old code terminates through this fallback; no mutex is leaked.
+        let explicitly_released = release_rx.recv_timeout(Duration::from_secs(5)).is_ok();
+        drop(guard);
+        explicitly_released
+    });
+    let held = held_rx.recv_timeout(Duration::from_secs(5));
+    if held.is_err() {
+        drop(release_tx);
+        let joined = holder.join();
+        assert!(joined.is_ok(), "Store holder failed before readiness");
+        panic!("Store holder did not reach the ownership handshake");
+    }
+    // The session stays on its owner thread. Only AccountStore is shared.
+    let attempt = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        session.finish_guild_experience_command(before, packets)
+    }));
+    let explicitly_released = release_tx.send(()).is_ok();
+    let joined = holder.join();
+    // Every assertion/unwrap below runs after release and join, even on panic.
+    let held_until_explicit_release = joined.expect("Store holder panicked");
+    let result = attempt.expect("finish panicked");
+    (result, explicitly_released && held_until_explicit_release)
+}
+
+#[test]
+fn quiet_finish_completes_before_held_account_store_is_released() {
+    let mut session = super::tests::session();
+    let config = session
+        .app
+        .world()
+        .resource::<RuntimeConfigResource>()
+        .config
+        .clone();
+    let identity = session.active_identity().unwrap();
+    let journal_before = crate::runtime::shared_guild_experience::snapshot(session.app.world());
+    assert!(
+        journal_before.is_empty(),
+        "all six journal fields must be empty"
+    );
+    let source_before =
+        serde_json::to_value(session.active_character_checkpoint().unwrap()).unwrap();
+    let durable_before = {
+        let store = config.account_store.lock().unwrap();
+        serde_json::to_value(&store.accounts[&identity.account_id].saves[&identity.character_index])
+            .unwrap()
+    };
+    // This forced Source checkpoint has force_save=false by its existing API.
+    let before = session.begin_default_npc_source_command().unwrap();
+    assert!(before.is_some());
+    let packets = vec![mir2_protocol::ServerPacket::LoseGold { gold: 7 }];
+    let packet_image = format!("{packets:?}");
+    let (result, completed_while_store_held) =
+        finish_only_with_held_account_store(&mut session, before, packets);
+    let packets = result.unwrap();
+    assert_eq!(format!("{packets:?}"), packet_image);
+    assert_eq!(
+        serde_json::to_value(session.active_character_checkpoint().unwrap()).unwrap(),
+        source_before,
+        "quiet finish must preserve the complete owner state and save revision"
+    );
+    assert_eq!(
+        crate::runtime::shared_guild_experience::snapshot(session.app.world()),
+        journal_before
+    );
+    let durable_after = {
+        let store = config.account_store.lock().unwrap();
+        serde_json::to_value(&store.accounts[&identity.account_id].saves[&identity.character_index])
+            .unwrap()
+    };
+    assert_eq!(durable_after, durable_before);
+    assert!(
+        completed_while_store_held,
+        "quiet finish must not wait for a mentor lookup whose XP/selected-level term is false"
+    );
+}
+
+#[test]
+fn invalid_before_stage5_json_still_errors_before_quiet_finish_filter() {
+    let mut session = super::tests::session();
+    let source_before =
+        serde_json::to_value(session.active_character_checkpoint().unwrap()).unwrap();
+    assert!(crate::runtime::shared_guild_experience::snapshot(session.app.world()).is_empty());
+    let mut before = session.begin_default_npc_source_command().unwrap();
+    let invalid = "{";
+    let expected = format!(
+        "mentor source checkpoint invalid: {}",
+        serde_json::from_str::<crate::Stage5SystemsState>(invalid).unwrap_err()
+    );
+    before.as_mut().unwrap().save_mut().stage5_systems_json = Some(invalid.into());
+    let (result, completed_while_store_held) =
+        finish_only_with_held_account_store(&mut session, before, Vec::new());
+    assert!(
+        completed_while_store_held,
+        "eager JSON error precedes any Store lookup"
+    );
+    assert_eq!(result.unwrap_err(), expected);
+    assert_eq!(
+        serde_json::to_value(session.active_character_checkpoint().unwrap()).unwrap(),
+        source_before
+    );
+}
+
+fn changed_finish_with_new_mentor_still_checks_source(level_only: bool) {
+    let mut session = super::tests::session();
+    // Warm a real complete source before measuring finish or taking the Store.
+    crate::runtime::save::persist_active_character_save(session.app.world()).unwrap();
+    let config = session
+        .app
+        .world()
+        .resource::<RuntimeConfigResource>()
+        .config
+        .clone();
+    let active = session.active_identity().unwrap();
+    let actor = crate::Stage5FriendIdentity {
+        account_id: active.account_id.clone(),
+        character_index: active.character_index,
+    };
+    let teacher = crate::Stage5FriendIdentity {
+        account_id: "finish-teacher".into(),
+        character_index: 7,
+    };
+    let owner_before = session.active_character_checkpoint().unwrap();
+    assert!(owner_before.guild_experience_journal.is_empty());
+    let mut teacher_character = config.default_character.clone();
+    teacher_character.index = teacher.character_index;
+    teacher_character.name = "FinishTeacher".into();
+    teacher_character.level = owner_before.character.level.checked_add(10).unwrap();
+    {
+        let mut store = config.account_store.lock().unwrap();
+        assert!(store
+            .accounts
+            .insert(
+                teacher.account_id.clone(),
+                crate::AccountRecord::new(teacher_character)
+            )
+            .is_none());
+    }
+    config
+        .commit_shared_mentor_mutation(&teacher, crate::SharedMentorMutation::TogglePermission, 1)
+        .unwrap();
+    let before = session.begin_default_npc_source_command().unwrap();
+    assert!(before.is_some());
+    // Publish after begin; deliberately do not refresh the owner's local social
+    // projection. The original mentor clause must inspect this NEW authority.
+    config
+        .commit_shared_mentor_mutation(
+            &teacher,
+            crate::SharedMentorMutation::Accept {
+                student: actor.clone(),
+            },
+            10,
+        )
+        .unwrap();
+    assert!(session
+        .app
+        .world()
+        .resource::<super::super::resources::Stage5SystemsResource>()
+        .stage5_systems
+        .mentor
+        .partner_identity
+        .is_none());
+    if level_only {
+        session
+            .app
+            .world_mut()
+            .resource_mut::<super::super::resources::SessionResource>()
+            .selected_character
+            .as_mut()
+            .unwrap()
+            .level = owner_before.character.level.checked_add(1).unwrap();
+    } else {
+        session
+            .app
+            .world_mut()
+            .resource_mut::<PlayerRuntimeResource>()
+            .experience = owner_before.experience.checked_add(1).unwrap();
+    }
+    let changed = session.active_character_checkpoint().unwrap();
+    if level_only {
+        assert_eq!(changed.experience, owner_before.experience);
+        assert_ne!(changed.character.level, owner_before.character.level);
+    } else {
+        assert_ne!(changed.experience, owner_before.experience);
+        assert_eq!(changed.character.level, owner_before.character.level);
+    }
+    config
+        .inject_account_store_transaction_fault(crate::AccountStoreTransactionFault::BeforePersist);
+    let (result, completed_while_store_held) =
+        finish_only_with_held_account_store(&mut session, before, Vec::new());
+    assert!(
+        !completed_while_store_held,
+        "positive scalar change keeps the fresh mentor Store read"
+    );
+    assert_eq!(
+        result.unwrap_err(),
+        "injected account-store failure before persist"
+    );
+    let rolled_back = session.active_character_checkpoint().unwrap();
+    assert_eq!(rolled_back.experience, owner_before.experience);
+    assert_eq!(rolled_back.character.level, owner_before.character.level);
+    assert_eq!(rolled_back.revision, owner_before.revision);
+    assert_eq!(
+        config
+            .shared_mentor_profile_for(&actor)
+            .unwrap()
+            .mentor
+            .partner_identity,
+        Some(teacher)
+    );
+}
+
+#[test]
+fn xp_only_changed_finish_rechecks_mentor_published_after_begin_and_rejects_source_failure() {
+    changed_finish_with_new_mentor_still_checks_source(false);
+}
+
+#[test]
+fn selected_level_only_changed_finish_rechecks_mentor_published_after_begin_and_rejects_source_failure(
+) {
+    changed_finish_with_new_mentor_still_checks_source(true);
+}
+
+#[test]
+fn changed_selected_identity_keeps_original_finish_mentor_clause() {
+    let mut session = super::tests::session();
+    assert!(crate::runtime::shared_guild_experience::snapshot(session.app.world()).is_empty());
+    let before = session.begin_default_npc_source_command().unwrap();
+    session
+        .app
+        .world_mut()
+        .resource_mut::<super::super::resources::SessionResource>()
+        .selected_character
+        .as_mut()
+        .unwrap()
+        .index += 1000;
+    let (result, completed_while_store_held) =
+        finish_only_with_held_account_store(&mut session, before, Vec::new());
+    assert!(result.unwrap().is_empty());
+    assert!(
+        !completed_while_store_held,
+        "uncertain selected identity takes the original fresh branch"
+    );
+}

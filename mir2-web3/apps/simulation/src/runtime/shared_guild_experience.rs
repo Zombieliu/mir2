@@ -291,6 +291,14 @@ pub(crate) struct GuildExperienceCheckpoint {
     refine_source: crate::Stage5RefineState,
 }
 
+#[cfg(test)]
+impl GuildExperienceCheckpoint {
+    // Test-only construction of malformed before-images; no production API.
+    pub(super) fn save_mut(&mut self) -> &mut CharacterSaveRecord {
+        &mut self.save
+    }
+}
+
 fn restore_checkpoint_npc_random(
     world: &mut World,
     random: Option<super::npc_script::CrystalNpcRandomState>,
@@ -612,12 +620,28 @@ impl SimulationSession {
             || super::default_npc_events::capture(self.app.world())
                 != before.save.default_npc_events
             || super::npc_shared_guild_actions::has_pending(self.app.world())
-            || ((mentor_before.partner_identity.is_some()
+            || ({
+                let world = self.app.world();
+                let session = world.resource::<SessionResource>();
+                match (&session.account_id, &session.selected_character) {
+                    (Some(account), Some(character))
+                        if !account.is_empty()
+                            && character.index == before.save.character.index =>
+                    {
+                        world
+                            .resource::<super::resources::PlayerRuntimeResource>()
+                            .experience
+                            != before.save.experience
+                            || character.level != before.save.character.level
+                    }
+                    _ => true,
+                }
+            } && ((mentor_before.partner_identity.is_some()
                 || mentor_checkpoint_required(self.app.world()))
                 && self.active_character_checkpoint().is_some_and(|save| {
                     save.experience != before.save.experience
                         || save.character.level != before.save.character.level
-                }))
+                })))
             || super::quests::periodic_quests::successful_claim_since(
                 self.app.world(),
                 &before.save,
