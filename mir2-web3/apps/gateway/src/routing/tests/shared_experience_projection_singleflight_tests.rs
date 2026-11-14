@@ -55,6 +55,25 @@ fn overlap_pair(prepare: impl FnOnce(&mut [ZoneRuntimeHandle], &GatewayConfig)) 
     prepare(&mut actors, &config);
     let resources = factory.resources_for_zone(&zone);
     assert_eq!(resources.zone_state.lock().unwrap().players.len(), 2);
+    let mut levels = Vec::new();
+    for runtime in &actors {
+        let shared = runtime.as_any().downcast_ref::<SharedInProcessZoneSessionRuntime>().unwrap();
+        let key = shared.current_presence_key();
+        let accepted = {
+            let state = shared.zone_state.lock().unwrap();
+            key.as_ref().and_then(|key| state.zone_sessions.get(key))
+                .and_then(|session| state.zone_manager.player_experience_profile(session)).map(|p| p.level)
+        };
+        let own = shared.inner.active_zone_experience_profile();
+        levels.push((accepted, own.as_ref().ok().and_then(|p| p.as_ref()).map(|p| p.level), own.is_err()));
+    }
+    let first = actors[0].as_any().downcast_ref::<SharedInProcessZoneSessionRuntime>().unwrap();
+    let second = actors[1].as_any().downcast_ref::<SharedInProcessZoneSessionRuntime>().unwrap();
+    eprintln!("PROJECTION_TEST_PRESTATE levels={:?} authority={} flight={} zones={} replicas={} signature={:?}", levels,
+        first.inner.shared_mentor_config().unwrap().same_shared_experience_projection_authority(&second.inner.shared_mentor_config().unwrap()),
+        Arc::ptr_eq(&first.experience_projection_flight, &second.experience_projection_flight),
+        Arc::ptr_eq(&first.ranking_zones, &second.ranking_zones), Arc::ptr_eq(&first.ranking_replica_zones, &second.ranking_replica_zones),
+        (first.shared_social_generation.load(Ordering::Acquire), config.shared_guild_clock_generation()));
     let shared = actors[0].as_any_mut().downcast_mut::<SharedInProcessZoneSessionRuntime>().unwrap();
     // A real shared generation invalidates both existing per-runtime caches.
     shared.shared_mentors.lock().unwrap().changed();
