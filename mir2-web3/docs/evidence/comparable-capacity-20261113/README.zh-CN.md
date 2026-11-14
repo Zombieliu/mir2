@@ -6,6 +6,8 @@
 
 ## 最新已验证结果（2026-11-15，新本机25/50人档通过，100人未通过）
 
+同工件新[SLOW20两人校准已严格通过](mentor-parse-slow20-calibration2.closed.json)：22:41:21.059–22:42:21.059 UTC完整60s，64/64、2/2窗口，装备、普通Logout/Close、fresh2、File全2与Enhanced均通过；controller/driver/server0/0/0、93行资源，游戏双Job及独立STAT观察器0/0正常无kill。新增12次认证全量追加V37=1906，旧1894前缀不变。仅SLOW20开启，录盘false、input/delivery trace未启用、spectator保持源默认true；它是诊断校准，不替代default-off容量结果。随后新百人诊断已启动，保持原SDK7、计划、114次正常认证预算与300s，当前在正常登录准备，尚无该轮百人终态。
+
 同一 `7d2a6c81` 工件的[50人档已严格闭合通过](projection-mentor-parse-default50.closed.json)：22:28:34.857–22:33:34.857 UTC完整300s，8000/8000动作按时完成、零超时/未发、250/250逐人分钟窗口；3名装备参与者、50人普通Logout/Close、fresh2、全员File50与Enhanced均通过。controller/driver/server0/0/0，2120行资源，双Job正常退出无kill；独立File/Enhanced两进程均实际0且正常无kill。全部64次新认证追加为V36=1894，旧1830前缀逐项不变。当前本机同条件25/50档通过、100档失败，未测出51–99档或硬件最大值，不能认证云机或三端分发容量。后续同工件SLOW20只作分段诊断，须先新两人严格通过；不改变原动作与时间门槛。
 
 同一 `7d2a6c81` 工件的[25人档已严格闭合通过](projection-mentor-parse-default25.closed.json)：共同计划300s，4000/4000动作按时完成、125/125逐人分钟窗口、3名装备参与者、25人普通Logout/Close、fresh2、全员File25与Enhanced全部通过；controller/driver/server0/0/0，1232行资源，双Job正常退出且无kill。此前已通过的同工件2人校准作为真实前驱；中间失败100的全部114次认证仍保留。25人新增39次后V35=1830，旧1791前缀不变。保持4CPU/8GiB/原SDK与原动作标准；之后的新50人轮也已闭合通过，见上。这是本机核心层这一档的验证，不是云机或三端实际分发容量认证，也未测出硬件最大值。
@@ -18,7 +20,7 @@
 
 新普通 Windows Release 已实际生成：源 `ecf88ae6`、代码集成 `33c75002`、PE `7d2a6c81`（99873792B，Gateway/Simulation 均 opt3/default features，无包 opt 覆盖）。114 个去重原生回归全部实际通过（Simulation84、Gateway29、真实RPC1）；编译 Cargo0/包装器1、180s 后仅清理已核归属的空闲 VCTIP 与原生验证0/0正常退出分开记录。Root 从实际 Cargo manifest 补核全部7个本地依赖目录，包含 client-wire，均与集成版本 Git tree 相等。[新两人校准闭合记录](projection-mentor-parse-native114-calibration2.closed.json)：20:05:26.454–20:06:26.454 UTC 完整60s，64/64、2/2逐人分钟窗口、装备、普通 Logout/Close、fresh2、全员File2与Enhanced全部通过；controller/driver/server0/0/0，93行资源，双Job正常退出无kill。新增12次认证完整追加V33=1677，旧1665前缀不变。这份两人记录之后的100人闭合结果见本节开头；114原生回归与两人校准不能代替容量通过。未部署云端或认证三端容量。
 
-[同计划100人应用字节审计](same-plan100-wire-cost.audit.json)核对原版A7与旧6024/c155实跑：300s客户端接收32947221B/187202034B，平均0.878593/4.992054Mb/s，约5.68倍。原版16000/16000、500/500窗口通过；旧现代版15398/16000、159/500窗口通过。原版计完整原生帧含4B头，现代计无压缩JSON载荷、排除WS/TCP/IP；完成工作量也不同，这个比例不能称每动作开销、线路饱和或人数比例。没有用JSONL文件大小当网络流量，也没有把旧6024数据冒记为新7d2结果；“30MBPS”的单位尚未核实，云机51是准入配置而非测得的硬件上限。V14私有归档345份闭合证据、635153859B已受限0/0正常完成，旧失败与原件保留。
+[同计划100人应用字节审计](same-plan100-wire-cost.audit.json)核对原版A7与旧6024/c155实跑：300s客户端接收32947221B/187202034B，平均0.878593/4.992054Mb/s，约5.68倍。原版16000/16000、500/500窗口通过；旧现代版15398/16000、159/500窗口通过。原版计完整原生帧含4B头，现代计无压缩JSON载荷、排除WS/TCP/IP；完成工作量也不同，这个比例不能称每动作开销、线路饱和或人数比例。没有用JSONL文件大小当网络流量，也没有把旧6024数据冒记为新7d2结果；“30MBPS”的单位尚未核实，云机51是准入配置而非测得的硬件上限。V14私有归档345份闭合证据、635153859B已受限0/0正常完成；V15另将闭合新default100失败原始证据、native114及Windows/Linux工件等379文件/1316780093B复制至E私有目录，48.501s、0/0正常无kill，旧manifest和原件不变。Root另对3份小JSON副本重哈希读回；V15不含新25/50原始记录，SDK7 redaction来源的历史作用域由独立addendum澄清，不认证公开导出。
 
 纯 Stage5 解析复用与默认关闭的 Billing/导师读取分段诊断已集成 `33c75002cf6a78c1bd2005c9ace0476d34816c7a`，干净构建源为 `ecf88ae698e004df2fefa0a860879a45873c65d3`；五份变更源码及整个编译域与集成版本一致。最终源的 Simulation 84 个去重用例已实际通过，含 8 线程新缓存用例、原 authority/mentor/billing 回归及 5 个真实师徒持久化/身份/等级回归；各原生 Job 均 0/0、正常退出且无 kill。错误模块名造成的 0 执行 selector 包装器失败原样保留，不能计入通过；编译 Cargo0/包装器1及 180s 后单独清理已核归属的空闲 VCTIP 也不改记正常构建。Root 重核最终 test EXE `8be34108` 和五份源码 SHA。见[原生与局部对照记录](projection-mentor-parse.native-component.json)。
 

@@ -1,0 +1,53 @@
+{
+  "schema": "mir2.mentor-parse-slow20-dense2-closed.v1",
+  "sourceRevision": "ecf88ae698e004df2fefa0a860879a45873c65d3",
+  "codeIntegrationRevision": "33c75002cf6a78c1bd2005c9ace0476d34816c7a",
+  "binarySha256": "7d2a6c817b009d6a7e1d0a75cd6b7847fe8cbc5aa2cb57efa8c3d1032a784ff8",
+  "outcome": "PASS",
+  "population": 2,
+  "durationMs": 60000,
+  "measurementStartedAtUtc": "2026-11-14T22:41:21.059Z",
+  "measurementPlannedEndAtUtc": "2026-11-14T22:42:21.059Z",
+  "offered": 64,
+  "completedOnTime": 64,
+  "timeouts": 0,
+  "notSent": 0,
+  "passedActorMinuteWindows": 2,
+  "totalActorMinuteWindows": 2,
+  "equipmentAll2Passed": true,
+  "normalLogoutCloseAll2Passed": true,
+  "freshReentryAll2Passed": true,
+  "filePassed": true,
+  "fileSampleCount": 2,
+  "enhancedPassed": true,
+  "controllerDriverServerActualExitCodes": [
+    0,
+    0,
+    0
+  ],
+  "allJobsNormallyClosedNoKill": true,
+  "resourceRows": 93,
+  "predecessorPins": {
+    "case": "dense2",
+    "controllerSha256": "b9ab5ae90a19147e1d7d4ebebcf992086b9deb41e4284e9a4c4258f6abcc44e3",
+    "inheritanceReceiptSha256": "62c73e5e1291b55207b87b78cab3d7e6613efbc9b40189932e8ab79f13456309",
+    "authLedgerSha256": "3d2cd3fd16e441eb4ba521d70d97288cb41ce06b463a0788f8787aa68b6a1da0",
+    "fileReadbackSha256": "00edcc5aa3cc7385160c8c569f526c8277d1e2514e3bdf615362783674a8fa7d",
+    "enhancedSha256": "de1cb4aafaf3382d09cb3719fafd997591d7f347fc9cf3be0ed6f2e319bd760c"
+  },
+  "reportSha256": "0c21a33e80a99bd4321c00497c61d545a237affe657a4fbf0062818fa7a1a854",
+  "observerJobSha256": "40dbf2e50f97a597eea7ca1bc3aa4aa158f03a0d2fc1a9d36785e731ac75bd19",
+  "observerNormallyClosedNoKill": true,
+  "latestAuthHistory": {
+    "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\local-auth-history-v37.json",
+    "sha256": "188e8c83285a0fb7041d078ece9afbcb504c3e78f59b042716d9690468e4d224",
+    "attemptCount": 1906,
+    "previousPrefixCount": 1894,
+    "prefixUnchanged": true,
+    "newAttempts": 12
+  },
+  "diagnosticOnly": true,
+  "slowStageMs": 20,
+  "capacityQualified": false,
+  "publicServiceDeployed": false
+}
