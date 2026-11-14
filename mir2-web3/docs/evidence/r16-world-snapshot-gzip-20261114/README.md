@@ -101,4 +101,8 @@ node --test scripts/test-gateway-catalog-transport.mjs scripts/test-client-core-
 
 [同源Linux工作流43587682763](https://github.com/Zombieliu/mir2/actions/runs/43587682763) 已全部成功，84,747,336 B 工件ZIP完整SHA `25c04ed92da19464fe9b07f6402270c6e49666f61c3eee57bd22cd43c9bf8842`、内部发行包 `2c450f290af80659cd510eb9bc7ab6d2b0e67387d993e2853c9e6c7059fed713`、Gateway ELF `6c42314b92de52114260d3233ac0df013b0fae460be843a49b5c04de345c5553`、Zone host `d65a74fd30137613fe8d9cabbf00cb1e61e5d1708ccb945afed38dc27d79cada` 及地图0解压后的原SHA均已本地核验。[Linux资格与私有日志摘要](merged-linux-ci-verification.json)。可复用工件在 `C:/r16-snapshot-integration-20261114/linux-package-verified`，没有安装远端服务。
 
-2026-11-14 11:41:13 UTC 独立API读回正式入口仍E6／Ae3／READY；本轮尚未切生产。[读回](merged-production-readback.json)。游戏机拒绝现有SSH认证，已请求当前有效用户名/本机密钥路径；候选与无需SSH的检查继续推进。原公网长尾、完整冷启和整体1:1仍开放，Goal active。
+2026-11-14 11:41:13 UTC 独立API读回正式入口仍E6／Ae3／READY；本轮尚未切生产。[读回](merged-production-readback.json)。该时点SSH认证被拒，随后以仓库记录的ubuntu用户验证成功；没有修改在线服务。
+
+## 候选实际云端检查与正式站对照
+
+9244独立候选已READY，云端80项发布保护、15项完整资源字节/SHA及二维码create/pending实际检查通过，正式映射保持原E6。新增有界静态时间线工具通过8项与实际Edge/Worker夹具；当前E6正式站一次官方手机尺寸Testnet确认、建角、移动136ms、六字体/113/Q/Worker/注销最终通过，但Native首帧后211585ms仍超过原120秒。1423条静态GET中观测到开门大图进城后仍下载，先对其取消/截止和并发做受控修复。原公网长尾、候选正式切换与整体1:1仍开放。全部明细、失败边界和回执见[候选与完整静态对照](candidate/README.md)。

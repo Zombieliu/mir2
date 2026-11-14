@@ -2,7 +2,7 @@
 
 ## R16 完整场景快照压缩候选（2026-11-14）
 
-冻结源码9244的合流验证已完成：38项网关定向回归、75项发布保护、合流网关两后端冷启重登四场及旧f352网关Text兼容两场；每场529目录、六完整字体/113/Q、原8/120秒门槛、189次商人走跑与保存通过。Linux CI43587682763和本地发行包/ELF/同源地图SHA均通过。来源固定为相对199a的5提交/23Blob，独立候选继续准备；正式E6未切，当前SSH认证不可用。公网61.929秒长尾、公开冷启、其他语言和整体1:1仍开放。[来源、画面与边界](evidence/r16-world-snapshot-gzip-20261114/README.md)
+2026-11-14 9244本地合流38项与Linux发行包资格保留；独立Web候选云端15项资源与扫码pending通过，未安装在线网关。正式E6/在线fd3一次功能对照移动136ms、正常注销通过，旧公网长尾未据此关闭；原120秒Native冷启仍false。[候选、对照与边界](evidence/r16-world-snapshot-gzip-20261114/candidate/README.md)。
 
 ## Physical attack save transform and capacity follow-up (2026-11-14)
 

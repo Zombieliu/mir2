@@ -14,7 +14,7 @@ Short routing summary, updated 2026-11-14 (Asia/Shanghai). This indexes recorded
 
 ## Last recorded decisions and open work
 
-2026-11-14 9244合流已通过38项网关定向回归、75项发布保护，以及合流网关默认英文/共享WebGL2繁中各冷启重登四场，旧f352网关Text兼容两场；每场529目录、六字体/113/Q、189次商人走跑、原8/120秒门槛和存档通过。四场合流24条快照1,171,080→212,717B。Web/Core/协议与199a相同，专用Web构建复用KQ7eN1Lo2uNQhIxqKTlt7；旧199a工件已保全。Linux CI43587682763、发行包/ELF/同源地图SHA全部通过；发布来源已精确固定9244的5提交/23Blob，继续创建游戏独立候选。11:41UTC独立API仍E6/Ae3/READY；现有SSH认证被拒，已询问当前用户名/密钥路径，继续无需SSH的检查。公网长尾/冷启与整体1:1仍开放，原WIP保留，Goal active。[结果与边界](evidence/r16-world-snapshot-gzip-20261114/README.md)。
+2026-11-14 9244独立网页候选已READY，80项发布保护、15项资源完整字节/SHA与真实扫码pending云端检查通过，未切正式。静态观测8项及Edge/Worker夹具通过；E6公网完整功能对照最终通过，但Native首帧后211585ms仍超原120秒，时间线发现开门大图进城后持续下载。SSH已验证ubuntu可用；在线fd3容量诊断与原WIP保留。下一项收紧开门预载取消/截止和并发，原8/120秒及整体1:1继续开放，Goal active。[候选、对照与边界](evidence/r16-world-snapshot-gzip-20261114/candidate/README.md)。
 
 2026-11-12 正式站已发布 `51d2dcc346`：共享图片取消与图集计时/JSON大小缓存身份修复。本机75项、生产构建及两后端重开同档通过；公网简繁出码、手机尺寸官方钱包Testnet签名、进比奇、权威移动、共用HUD/任务窗、113/113预取和正常退出通过，无需回滚。云端缓存身份与计算一致；Worker正常更新缓存一次，未迁移旧007缓存。本次观测起点到首画面65.2秒/共用HUD104.7秒（点击进游戏后约6.8秒/46.3秒），继续优化冷加载；实体手机、完整1:1及历史未结项仍开放。[发布与边界](evidence/r16-cache-repair-20261112/README.md)
 

@@ -6,7 +6,7 @@ Updated 2026-11-14 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-14 9244合流已通过38项网关定向回归、75项发布保护，以及合流网关默认英文/共享WebGL2繁中各冷启重登四场，旧f352网关Text兼容两场；每场529目录、六字体/113/Q、189次商人走跑、原8/120秒门槛和存档通过。四场合流24条快照1,171,080→212,717B。Web/Core/协议与199a相同，专用Web构建复用KQ7eN1Lo2uNQhIxqKTlt7；旧199a工件已保全。Linux CI43587682763、发行包/ELF/同源地图SHA全部通过；发布来源已精确固定9244的5提交/23Blob，继续创建游戏独立候选。11:41UTC独立API仍E6/Ae3/READY；现有SSH认证被拒，已询问当前用户名/密钥路径，继续无需SSH的检查。公网长尾/冷启与整体1:1仍开放，原WIP保留，Goal active。[结果与边界](evidence/r16-world-snapshot-gzip-20261114/README.md)。
+2026-11-14 9244候选云端15项资源SHA、扫码pending及正式映射保护通过，未promote。当前E6/在线fd3完整功能对照最终通过，移动136ms；Native首帧后211585ms，原120秒资格false。新静态时间线1423条/591条Worker，上游开门大图最长175435ms。下一项对开门预载取消/截止及并发做受控修复，不放宽门槛。[候选、对照与边界](evidence/r16-world-snapshot-gzip-20261114/candidate/README.md)。
 
 ## 保留的当前未结项
 
