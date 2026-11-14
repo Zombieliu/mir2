@@ -1,0 +1,94 @@
+{
+  "classifier": {
+    "sha256": "17086d553a3eebddb9a656d09c94024417081656e1e3c939a6bc3916f61ee402",
+    "name": "classify-public-result.mjs",
+    "unchanged": true
+  },
+  "artifacts": [
+    {
+      "run": "r1",
+      "privateArtifact": "receipt.json",
+      "sha256": "8021e29fe0b335abc1ea19ef70592c047502cdc414d676ec0637229b4754fb2d",
+      "bytes": 68016
+    },
+    {
+      "run": "r1",
+      "privateArtifact": "static-transport.json",
+      "sha256": "905e7f67fbe8726df7f09439fedae9698c7df873d47fb3310c90e8b33e1102bd",
+      "bytes": 542983
+    },
+    {
+      "run": "r1",
+      "privateArtifact": "static-waterfall.json",
+      "sha256": "cb1b135fb7d1abfe9782d6e6d73550c2f7922341f6cc0fc4d697998accd0288c",
+      "bytes": 725988
+    },
+    {
+      "run": "r1",
+      "privateArtifact": "worker-font-network.json",
+      "sha256": "cf72fbb09c07affeb7c176622adfc9a55b8633a240817d42e6815c6b272101be",
+      "bytes": 4853
+    },
+    {
+      "run": "r1",
+      "privateArtifact": "runtime-header-priority.json",
+      "sha256": "de32da2fa9a05bf11999b376bcee1bfbbecda34c5a239e77401ceb84ae32279a",
+      "bytes": 304
+    },
+    {
+      "run": "r1",
+      "privateArtifact": "startup-probe.json",
+      "sha256": "02a31b79c1674f6f79f53d2ace17b69ede0e5de9d38587872ad4cd8405fa829c",
+      "bytes": 97448
+    },
+    {
+      "run": "r1",
+      "privateArtifact": "private-game-start-trace.json",
+      "sha256": "8cd238f1af84e3e08592b4d8b8d1fb4bc47e304036bb89c3718b5146946ce8ee",
+      "bytes": 64357
+    },
+    {
+      "run": "r2",
+      "privateArtifact": "receipt.json",
+      "sha256": "c970499878f31c1092fb9fc98d5cce54b5b91dec0611a785afe245f7fc31c9fc",
+      "bytes": 77889
+    },
+    {
+      "run": "r2",
+      "privateArtifact": "static-transport.json",
+      "sha256": "8ff15d49f373f84355ee20c2ed0a28835f323ed439f9898bb43f7d51f12540ce",
+      "bytes": 551457
+    },
+    {
+      "run": "r2",
+      "privateArtifact": "static-waterfall.json",
+      "sha256": "02f4f39128b387c3e38b42cd850c9a1dd5873347cb15f69da102869fe4831d01",
+      "bytes": 796878
+    },
+    {
+      "run": "r2",
+      "privateArtifact": "worker-font-network.json",
+      "sha256": "920d827caae203b6725ccbf372af679c1ac217b3cf509682c0f0c11ba7092005",
+      "bytes": 11746
+    },
+    {
+      "run": "r2",
+      "privateArtifact": "runtime-header-priority.json",
+      "sha256": "c0e404a6199ebffa402a4e2c7721e89b74aa7ea53c44ab7540a6da807a2c7cf8",
+      "bytes": 304
+    },
+    {
+      "run": "r2",
+      "privateArtifact": "startup-probe.json",
+      "sha256": "25f2160f1b50227ba69a011811934fc721e6dde8be67cf7eb13756d090251140",
+      "bytes": 145135
+    },
+    {
+      "run": "r2",
+      "privateArtifact": "private-game-start-trace.json",
+      "sha256": "18bbc10bad5120a07f36aa1d8e8027e7cd7fc69e80e7ddd7f41219ee7b1a3fa0",
+      "bytes": 61510
+    }
+  ],
+  "rawAuthAndTraceNotPublished": true
+}

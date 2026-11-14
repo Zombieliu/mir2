@@ -14,7 +14,7 @@ Short routing summary, updated 2026-11-15 (Asia/Shanghai). This indexes recorded
 
 ## Last recorded decisions and open work
 
-2026-11-15 正式仍b9acf175fa／6k5u，公网8/120、六字体/113/Q/Worker/注销及简繁扫码通过，fd3未改。[正式回放](evidence/r16-runtime-header-priority-20261115/production/README.md)。本轮修复普通换图后任务导航消失／攻击模式同步：有界补读新图完整个人状态，旧目标仍撤销，注销／换角取消；110项、独立生产构建、英繁两后端实际出店／补读1次／扣住碰撞时注销／晚到零旧移动／新socket同角新目标及正常保存通过，29份无关内容WIP的SHA未变，发布另记。[修前后及范围](evidence/r16-map-world-baseline-20261115/README.md)。此前本地双客户端第三边挡路绕行及双方保存通过。[见证](evidence/r16-live-route-occupancy-20261115/README.md)。冷启动、其他地图／途中断网／公网跨图与双钱包占位、室内地面／球／反馈文字、三职业1–30及语言像素、整体1:1仍开放。
+2026-11-15 正式仍b9acf175fa／6k5u，fd3未改。换图后导航消失／攻击模式同步已修复并推送f310e242a4：110项、独立构建、英繁两后端实际出店／补读／待碰撞时注销／晚到零旧动作／新socket同角新目标及保存通过。曾发布f310，公网R2扫码／钱包确认／进城／一步135ms／六字体／113／Q／Worker／注销全走通，但Native125445ms超过原120秒，原分类器判失败；已实际回退b9，独立域名和公共版本读回、回退后简繁扫码通过。[发布失败与回退](evidence/r16-map-world-baseline-20261115/production/README.md) · [本地修复](evidence/r16-map-world-baseline-20261115/README.md)。下一项查字体回退重新排队及当前来源顺序，原8/120门槛不变。此前[双客户端第三边挡路绕行](evidence/r16-live-route-occupancy-20261115/README.md)通过。其他地图／途中断网／公网跨图与双钱包占位、室内地面／球／反馈、三职业完整1–30及语言像素、整体1:1仍开放。
 
 2026-11-12 正式站已发布 `51d2dcc346`：共享图片取消与图集计时/JSON大小缓存身份修复。本机75项、生产构建及两后端重开同档通过；公网简繁出码、手机尺寸官方钱包Testnet签名、进比奇、权威移动、共用HUD/任务窗、113/113预取和正常退出通过，无需回滚。云端缓存身份与计算一致；Worker正常更新缓存一次，未迁移旧007缓存。本次观测起点到首画面65.2秒/共用HUD104.7秒（点击进游戏后约6.8秒/46.3秒），继续优化冷加载；实体手机、完整1:1及历史未结项仍开放。[发布与边界](evidence/r16-cache-repair-20261112/README.md)
 
