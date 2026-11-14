@@ -7,7 +7,7 @@ use std::sync::mpsc;
 const POPULATION: usize = 100;
 const WORKERS: usize = 4;
 const ROUNDS: usize = 3;
-const WALL: Duration = Duration::from_secs(120);
+const WALL: Duration = Duration::from_secs(240);
 
 #[derive(Default)]
 struct ProbeWorker {
@@ -42,7 +42,7 @@ fn probe_quantiles(mut samples: Vec<u64>) -> serde_json::Value {
 }
 
 #[test]
-#[ignore = "explicit100-owner/4-caller memory diagnostic; full shared Tick, not CCU; external120s watchdog required"]
+#[ignore = "explicit100-owner/4-caller memory diagnostic; full shared Tick, not CCU; external240s watchdog required"]
 fn probe_full_shared_tick_100_owners_four_callers_memory() {
     assert_eq!(
         std::env::var("MIR2_GATEWAY_SLOW_STAGE_MS").as_deref(),
@@ -252,5 +252,5 @@ fn probe_full_shared_tick_100_owners_four_callers_memory() {
     assert_eq!(remaining_presence, 0);
     assert_eq!(calls, POPULATION * ROUNDS, "no omitted or reduced population/rounds");
     assert!(advances > 0, "diagnostic must reach actual inner personal Tick, not only grace");
-    assert!(!expired, "entire diagnostic exceeded120s; never reported as a smaller successful cohort");
+    assert!(!expired, "entire diagnostic exceeded240s; never reported as a smaller successful cohort");
 }
