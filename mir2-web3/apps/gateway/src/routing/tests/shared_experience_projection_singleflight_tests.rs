@@ -8,7 +8,7 @@ use std::sync::mpsc;
 #[derive(Default)]
 struct ProbeState { entries: usize, owners: usize, scans: usize, first_waiting: bool, release: bool, timed_out: bool }
 #[derive(Default)]
-struct Probe { state: Mutex<ProbeState>, changed: Condvar }
+struct Probe { state: Mutex<ProbeState>, changed: Condvar, owner_barrier: bool, first_publication_race: bool }
 
 impl Probe {
     fn hook(self: &Arc<Self>) -> ProjectionTestHook {
@@ -18,12 +18,29 @@ impl Probe {
             match phase {
                 ProjectionTestPhase::Entry => {
                     state.entries += 1;
+                    let second_entry = state.entries == 2;
                     this.changed.notify_all();
                     let (next, timeout) = this.changed.wait_timeout_while(state, Duration::from_secs(5), |s| s.entries < 2 && !s.timed_out).unwrap();
                     state = next;
                     if timeout.timed_out() { state.timed_out = true; this.changed.notify_all(); }
+                    // Negative premise: second owner's first publication occurs only
+                    // after the leader has captured its scan signature.
+                    if this.first_publication_race && second_entry {
+                        let (next, timeout) = this.changed.wait_timeout_while(state, Duration::from_secs(5), |s| !s.first_waiting && !s.timed_out).unwrap();
+                        state = next;
+                        if timeout.timed_out() { state.timed_out = true; this.changed.notify_all(); }
+                    }
                 }
-                ProjectionTestPhase::OwnerPublished => { state.owners += 1; this.changed.notify_all(); }
+                ProjectionTestPhase::OwnerPublished => {
+                    state.owners += 1; this.changed.notify_all();
+                    // Positive premise: both fresh owner publications must finish
+                    // before either caller captures its gate signature.
+                    if this.owner_barrier {
+                        let (next, timeout) = this.changed.wait_timeout_while(state, Duration::from_secs(5), |s| s.owners < 2 && !s.timed_out).unwrap();
+                        state = next;
+                        if timeout.timed_out() { state.timed_out = true; this.changed.notify_all(); }
+                    }
+                }
                 ProjectionTestPhase::ScanStarted => {
                     state.scans += 1;
                     if state.scans == 1 {
@@ -43,6 +60,10 @@ impl Probe {
 }
 
 fn overlap_pair(prepare: impl FnOnce(&mut [ZoneRuntimeHandle], &GatewayConfig)) -> (usize, bool) {
+    overlap_pair_with_premise(prepare, true)
+}
+
+fn overlap_pair_with_premise(prepare: impl FnOnce(&mut [ZoneRuntimeHandle], &GatewayConfig), same_generation: bool) -> (usize, bool) {
     let config = GatewayConfig::default();
     let factory = SharedInProcessZoneRuntimeFactory::new();
     let zone = ZoneId::new("projection-overlap-owned");
@@ -55,29 +76,10 @@ fn overlap_pair(prepare: impl FnOnce(&mut [ZoneRuntimeHandle], &GatewayConfig)) 
     prepare(&mut actors, &config);
     let resources = factory.resources_for_zone(&zone);
     assert_eq!(resources.zone_state.lock().unwrap().players.len(), 2);
-    let mut levels = Vec::new();
-    for runtime in &actors {
-        let shared = runtime.as_any().downcast_ref::<SharedInProcessZoneSessionRuntime>().unwrap();
-        let key = shared.current_presence_key();
-        let accepted = {
-            let state = shared.zone_state.lock().unwrap();
-            key.as_ref().and_then(|key| state.zone_sessions.get(key))
-                .and_then(|session| state.zone_manager.player_experience_profile(session)).map(|p| p.level)
-        };
-        let own = shared.inner.active_zone_experience_profile();
-        levels.push((accepted, own.as_ref().ok().and_then(|p| p.as_ref()).map(|p| p.level), own.is_err()));
-    }
-    let first = actors[0].as_any().downcast_ref::<SharedInProcessZoneSessionRuntime>().unwrap();
-    let second = actors[1].as_any().downcast_ref::<SharedInProcessZoneSessionRuntime>().unwrap();
-    eprintln!("PROJECTION_TEST_PRESTATE levels={:?} authority={} flight={} zones={} replicas={} signature={:?}", levels,
-        first.inner.shared_mentor_config().unwrap().same_shared_experience_projection_authority(&second.inner.shared_mentor_config().unwrap()),
-        Arc::ptr_eq(&first.experience_projection_flight, &second.experience_projection_flight),
-        Arc::ptr_eq(&first.ranking_zones, &second.ranking_zones), Arc::ptr_eq(&first.ranking_replica_zones, &second.ranking_replica_zones),
-        (first.shared_social_generation.load(Ordering::Acquire), config.shared_guild_clock_generation()));
     let shared = actors[0].as_any_mut().downcast_mut::<SharedInProcessZoneSessionRuntime>().unwrap();
     // A real shared generation invalidates both existing per-runtime caches.
     shared.shared_mentors.lock().unwrap().changed();
-    let probe = Arc::new(Probe::default());
+    let probe = Arc::new(Probe { owner_barrier: same_generation, first_publication_race: !same_generation, ..Probe::default() });
     let (done_tx, done_rx) = mpsc::channel();
     let mut handles = Vec::new();
     for mut runtime in actors {
@@ -138,6 +140,13 @@ fn overlapping_projection_waits_for_complete_scan_but_publishes_each_owner() {
     let (scans, early) = overlap_pair(|_, _| {});
     assert_eq!(scans, 1, "overlapping callers must share one complete projection");
     assert!(!early, "waiter cannot reuse an unfinished projection");
+}
+
+#[test]
+fn first_owner_publication_generation_change_requires_two_scans() {
+    let (scans, early) = overlap_pair_with_premise(|_, _| {}, false);
+    assert_eq!(scans, 2, "do not coalesce when the first scan's generation changes");
+    assert!(!early, "waiter must wait even though the leader's result cannot be reused");
 }
 
 fn shared(runtime: &mut ZoneRuntimeHandle) -> &mut SharedInProcessZoneSessionRuntime {

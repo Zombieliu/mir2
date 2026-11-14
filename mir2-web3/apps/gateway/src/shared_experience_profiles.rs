@@ -323,11 +323,6 @@ impl SharedInProcessZoneSessionRuntime {
         let flight = self.experience_projection_flight.clone();
         let entered_sequence = flight.sequence.load(Ordering::Acquire);
         #[cfg(test)]
-        if PROJECTION_TEST_HOOK.with(|slot| slot.borrow().is_some()) {
-            eprintln!("PROJECTION_TEST_ENTRY seen={} signature={:?}", entered_sequence,
-                (self.shared_social_generation.load(Ordering::Acquire), config.shared_guild_clock_generation()));
-        }
-        #[cfg(test)]
         projection_test_phase(ProjectionTestPhase::Entry);
         // Personal level/stats/live buff inputs can change without a shared
         // transaction. Always publish the owner's current trusted rates.
@@ -348,15 +343,6 @@ impl SharedInProcessZoneSessionRuntime {
         self.last_experience_projection = None;
         let mut completed = flight.completed.lock().map_err(|_| "experience projection flight poisoned")?;
         let signature = (self.shared_social_generation.load(Ordering::Acquire), config.shared_guild_clock_generation());
-        #[cfg(test)]
-        if PROJECTION_TEST_HOOK.with(|slot| slot.borrow().is_some()) {
-            eprintln!("PROJECTION_TEST_GATE seen={} current={} signature={:?} completed={:?}", entered_sequence,
-                flight.sequence.load(Ordering::Acquire), signature, completed.as_ref().map(|last|
-                    (last.sequence, last.signature, last.sequence > entered_sequence,
-                     config.same_shared_experience_projection_authority(&last.authority),
-                     last.zones.ptr_eq(&Arc::downgrade(&self.ranking_zones)),
-                     last.replicas.ptr_eq(&Arc::downgrade(&self.ranking_replica_zones)))));
-        }
         if completed.as_ref().is_some_and(|last| last.sequence > entered_sequence
             && last.signature == signature && config.same_shared_experience_projection_authority(&last.authority)
             && last.zones.ptr_eq(&Arc::downgrade(&self.ranking_zones))
@@ -425,10 +411,6 @@ impl SharedInProcessZoneSessionRuntime {
             self.shared_social_generation.load(Ordering::Acquire),
             config.shared_guild_clock_generation(),
         );
-        #[cfg(test)]
-        if PROJECTION_TEST_HOOK.with(|slot| slot.borrow().is_some()) {
-            eprintln!("PROJECTION_TEST_AFTER signature={:?} after={:?} same={}", signature, after, after == signature);
-        }
         if after == signature {
             self.last_experience_projection = Some(signature);
             if let Some(sequence) = flight.sequence.load(Ordering::Relaxed).checked_add(1) {
