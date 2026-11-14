@@ -4,13 +4,15 @@
 每档 300 秒，另测共同近战场景；找出差距后再验证实际云机。
 下面的本机结果不能认证云机或三端实际分发的 CCU。
 
-## 最新已验证结果（2026-11-15，新本机25人档通过，100人未通过；50人复测中）
+## 最新已验证结果（2026-11-15，新本机25/50人档通过，100人未通过）
 
-同一 `7d2a6c81` 工件的[25人档已严格闭合通过](projection-mentor-parse-default25.closed.json)：共同计划300s，4000/4000动作按时完成、125/125逐人分钟窗口、3名装备参与者、25人普通Logout/Close、fresh2、全员File25与Enhanced全部通过；controller/driver/server0/0/0，1232行资源，双Job正常退出且无kill。此前已通过的同工件2人校准作为真实前驱；中间失败100的全部114次认证仍保留。25人新增39次后V35=1830，旧1791前缀不变。保持4CPU/8GiB/原SDK与原动作标准，新50人轮已启动。这是本机核心层这一档的验证，不是云机或三端实际分发容量认证，也未测出硬件最大值。
+同一 `7d2a6c81` 工件的[50人档已严格闭合通过](projection-mentor-parse-default50.closed.json)：22:28:34.857–22:33:34.857 UTC完整300s，8000/8000动作按时完成、零超时/未发、250/250逐人分钟窗口；3名装备参与者、50人普通Logout/Close、fresh2、全员File50与Enhanced均通过。controller/driver/server0/0/0，2120行资源，双Job正常退出无kill；独立File/Enhanced两进程均实际0且正常无kill。全部64次新认证追加为V36=1894，旧1830前缀逐项不变。当前本机同条件25/50档通过、100档失败，未测出51–99档或硬件最大值，不能认证云机或三端分发容量。后续同工件SLOW20只作分段诊断，须先新两人严格通过；不改变原动作与时间门槛。
+
+同一 `7d2a6c81` 工件的[25人档已严格闭合通过](projection-mentor-parse-default25.closed.json)：共同计划300s，4000/4000动作按时完成、125/125逐人分钟窗口、3名装备参与者、25人普通Logout/Close、fresh2、全员File25与Enhanced全部通过；controller/driver/server0/0/0，1232行资源，双Job正常退出且无kill。此前已通过的同工件2人校准作为真实前驱；中间失败100的全部114次认证仍保留。25人新增39次后V35=1830，旧1791前缀不变。保持4CPU/8GiB/原SDK与原动作标准；之后的新50人轮也已闭合通过，见上。这是本机核心层这一档的验证，不是云机或三端实际分发容量认证，也未测出硬件最大值。
 
 新 `7d2a6c81` 普通 Release 的[100人复测已闭合](projection-mentor-parse-default100.closed.json)：21:05:53.733–21:10:53.733 UTC完整300s，15366/16000按时完成、81超时、553未发、167/500逐人分钟窗口通过，整体仍FAIL。3名装备参与者、100人普通Logout/Close、fresh0/99均报告成功；controller/driver/server=1/1/0，3508行资源，双Job自然退出无kill。FileV8前置门拒绝、sample0且未打开私密Store；EnhancedV8与两验证进程均实际退出1，未建立全员落盘认证。114次新认证全部追加为V34=1791，旧1677前缀完整保留，失败不能用作通过前驱。
 
-[本轮独立报告/资源分析](projection-mentor-parse-default100.failure-analysis.json)实际0/0、4GiB/0xf000、正常无kill：81超时中owner单晚30、peer单晚25、双方晚26；553未发为392次previousActionPending、161次preconditionFailed。完整300s服务均值1.168023核、区间最大3.936649核；全轮峰Job Commit2647703552B，不是RAM/RSS。应用下行均值4.986123Mb/s，也不证明公网饱和；不能拿这一轮与旧6024的单轮波动宣布提升或回归。纯解析局部改善尚未解决百人长尾，下一步保持同工件与原标准补测25/50档，沿用真实已通过的同工件2人校准并保留后来全部失败认证；新SLOW20分段诊断单列准备，需新两人通过后才可跑100。
+[本轮独立报告/资源分析](projection-mentor-parse-default100.failure-analysis.json)实际0/0、4GiB/0xf000、正常无kill：81超时中owner单晚30、peer单晚25、双方晚26；553未发为392次previousActionPending、161次preconditionFailed。完整300s服务均值1.168023核、区间最大3.936649核；全轮峰Job Commit2647703552B，不是RAM/RSS。应用下行均值4.986123Mb/s，也不证明公网饱和；不能拿这一轮与旧6024的单轮波动宣布提升或回归。纯解析局部改善尚未解决百人长尾，同工件与原标准25/50档均已补测通过，前驱为真实已通过的同工件2人校准，后来全部失败认证仍保留；新SLOW20分段诊断单列，需新两人通过后才可跑100。
 
 对应Linux候选已在维护分支 `70160239` 完成[整轮CI](https://github.com/Zombieliu/mir2/actions/runs/43638440652)；Gateway严格native job也成功，R2发布关闭、Numeron跳过。ELF `08d4d0d88b680142990a85a0905208c605dc5b4ecb366d34a6004051e0711498`、104000312B，7门槛、真实PG/Redis启动及1620地图Git/包匹配通过。[Root原生子集复核](mentor-parse-linux-artifact.native-subset.json)重新对官方2个ZIP与ELF全SHA/头/大小核对；地图逐项结论采用已冻结审计，未伪称再次全量复算。fullCandidateVerificationPassed仍false，未执行ELF、SSH或切换云机，不能将构建通过换作容量通过。
 
