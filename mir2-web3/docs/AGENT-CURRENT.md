@@ -14,7 +14,7 @@ Short routing summary, updated 2026-11-14 (Asia/Shanghai). This indexes recorded
 
 ## Last recorded decisions and open work
 
-2026-11-14 正式仍e6c923b7c6／Ae3，04:10UTC独立API确认READY。新6ae96fa601将CSS／预热器／渲染器完整字体共用两路下载；132＋68项、真实Chrome原字体拥塞2/6→6/6、混合源恢复、构建／2,773项绑定及英繁两后端四会话通过，包含六字体SHA／113／共享HUD-Q／NPC-X／长路线／同角保存与Worker停启；候选尚未发布，接着Stage／Promote并公网完整回放。[字体候选](evidence/r16-font-lanes-20261114/README.md)。先前b19公网字体504／共享HUD失败、199资源错误／202console及回退原件保留，不声称本地解决全部公网根因。[原失败／回退](evidence/r16-name-autosize-20261114/production/README.md)。旧正式三格前视／保留目标重算仍在线，HUD126.060秒超原120秒也仍开放。[正式范围](evidence/r16-route-lookahead-20261114/production/README.md)。原Shell／Native WIP保留；真实多人第三格占位、R15旧停步、混合语言／raw标题／翻译分行、完整死亡复活、全场景GPU、三职业当前新手线及实体Windows／手机继续开放。Goal active；旧30级夹具不算新路线通过。
+2026-11-14 正式恢复e6c923b7c6／Ae3，04:43UTC独立API确认READY，回退后简繁真实出码pending通过。6ae字体共用两路的本地132＋68项／Chrome／构建／2,773项／两后端四会话通过；尝试发布15项字节检查与公网确认／进城／首步185ms／113／退出通过，但共享HUD失败、六字体0/6，完整false，已回退。运行包首帧后133.443秒才收完，原120秒资格false；58资源错误／59console及所有原失败保留。[本次失败与下一步](evidence/r16-font-lanes-20261114/production/README.md) · [本地机制边界](evidence/r16-font-lanes-20261114/README.md)。先隔离实际公开源响应头、编码／解码正文、无Worker／正常Worker与运行包竞争，未定因前不再同源盲目重发。先前b19失败仍[保留](evidence/r16-name-autosize-20261114/production/README.md)。原正式寻路三格前视／保留目标重算在线，旧HUD126.060秒超120秒仍[开放](evidence/r16-route-lookahead-20261114/production/README.md)。原Shell／Native WIP保留；真实第三格多人占位、R15旧停步、混合语言／raw标题／翻译分行、完整死亡复活、全GPU、当前三职业新手线及实体Windows／手机继续开放，Goal active；旧30级夹具不算新路线通过。
 
 2026-11-12 正式站已发布 `51d2dcc346`：共享图片取消与图集计时/JSON大小缓存身份修复。本机75项、生产构建及两后端重开同档通过；公网简繁出码、手机尺寸官方钱包Testnet签名、进比奇、权威移动、共用HUD/任务窗、113/113预取和正常退出通过，无需回滚。云端缓存身份与计算一致；Worker正常更新缓存一次，未迁移旧007缓存。本次观测起点到首画面65.2秒/共用HUD104.7秒（点击进游戏后约6.8秒/46.3秒），继续优化冷加载；实体手机、完整1:1及历史未结项仍开放。[发布与边界](evidence/r16-cache-repair-20261112/README.md)
 

@@ -22,6 +22,6 @@
 
 ## 发布与剩余范围
 
-发布保护固定准确源码和三个Git blob，并将新Worker的完整字节／SHA加入原14项protected/public校验，共15项；68项发布检查通过，含各项损坏拒绝和公开校验失败回退。[检查](release-tests.txt)。2026-11-14 04:10UTC独立API读回正式仍为 `e6c923b7c6`／Ae3 READY；本候选尚未切入正式。[正式基线](production-readback.json)。后续先Stage，再验证准确候选／项目／R16／production并Promote，最后以新普通浏览器复验QR确认至共享界面及退出。
+发布保护固定准确源码和三个Git blob，并将新Worker的完整字节／SHA加入原14项protected/public校验，共15项；68项发布检查通过，含各项损坏拒绝和公开校验失败回退。[检查](release-tests.txt)。[04:10UTC的正式基线](production-readback.json)保留。随后已尝试发布，15项protected/public字节校验通过，但公网共享HUD未就绪、字体0/6，完整功能资格false，已回退e6c923；运行包在首帧后133.443秒才完整到达，原120秒资格也false。两路字体机制的本地通过不能冒充公网修复；先做实际响应头／正文及Worker隔离诊断。[失败、回退与下一步](production/README.md)。
 
 公网冷加载、实体手机相机扫码、真实第三格多人占位、R15旧停步、英文攻击模式／货币行夹中文、raw NPC标题和繁中名字分行、完整死亡复活、全部地图技能与GPU实体、三职业完整当前路线、Windows窗口和最终人类Accepted仍开放。此候选继承已验证的姓名及死亡文案代码；本轮没有重做十语死亡组件40图。整体1:1 Goal active。

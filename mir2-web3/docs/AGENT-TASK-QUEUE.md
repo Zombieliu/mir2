@@ -6,11 +6,11 @@ Updated 2026-11-14 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-14 正式保留e6c923b7c6／Ae3；后续b19姓名／死亡文案尝试发布后，出码／官方手机尺寸Testnet确认／进城／首步234ms／113项／退出通过，但字体504、五套缓存缺失和共享HUD失败，整轮false，已回退；独立API及回退简繁真实出码pending通过。[本次失败与回退](evidence/r16-name-autosize-20261114/production/README.md)。原正式三格前视／姓名层级与命中的88＋126＋75项、构建、两后端四会话长路线／保存及原公网分项仍有效；原HUD126.060秒超120秒保持false。整体1:1／实体手机开放，Goal active。[原正式范围](evidence/r16-route-lookahead-20261114/production/README.md)
+2026-11-14 正式恢复e6c923b7c6／Ae3，字体通道6ae候选尝试发布后回退；15项protected/public字节检查、真实QR确认／进城／首步185ms／113项／退出通过，但共享HUD未就绪、六字体0/6，完整false。运行包首帧后133.443秒才收完，原120秒资格false；58资源错误／59console保留，回退简繁出码及独立API通过。先隔离真实公开源的响应头／编码与解码正文／Worker及运行包竞争。[最新失败与下一步](evidence/r16-font-lanes-20261114/production/README.md)。旧正式寻路／姓名命中等已通过范围仍[保留](evidence/r16-route-lookahead-20261114/production/README.md)，旧126.060秒冷失败及此前b19原件不倒填。整体1:1／实体手机开放，Goal active。
 
 ## 保留的当前未结项
 
-- [ ] 字体共用下载通道6ae96fa601已推送：132＋68项、真实Chrome原字体拥塞恢复、构建／2,773项绑定与两后端四会话通过，正式待发布；原504未倒填。先完成新候选的公网出码／确认／共享HUD-Q／完整六字体／Worker与正常退出，再继续语言及其余1:1。[本地资格与边界](evidence/r16-font-lanes-20261114/README.md)
+- [ ] 字体通道6ae96fa601本地132＋68项／Chrome／构建／四会话通过，已尝试发布：15项字节检查、真实QR确认／进城／首步185ms／113／退出通过，但共享HUD未就绪、字体0/6，整轮false并回退e6c923，回退简繁出码通过。运行包在首帧后133.443秒才收完；先隔离公开源响应头、编码／解码正文和无Worker／正常Worker／运行包竞争条件，不同源盲目重发。[本地资格与边界](evidence/r16-font-lanes-20261114/README.md)
 
 - [x] 行走包有限恢复91b8fc9b4f的118＋70项／构建、本地四会话、第二次公网功能回放和完整静态读回通过，正式保留；首轮失败／回退均存档。原静态SHA与8秒／20秒／120秒未改，公网compiled恢复未触发、资格来自本地；不冒充全部1:1。[当前正式与范围](evidence/r16-walking-recovery-20261114/production/README.md)
 - [ ] R15战后回镇一次8秒停步仍未定因；新本地快速回镇通过不倒填旧原因。首步前权威改点287617的公网实走覆盖、其余自动路线与动态占位继续验收。

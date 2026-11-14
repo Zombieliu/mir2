@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "passed": true,
+  "workflowRun": 43557636065,
+  "implementation": "9b3439473a903e0aa77f292a1dee718eda75de92",
+  "writes": [
+    {
+      "operation": "rollback",
+      "site": "game",
+      "deployment": "dpl_Ae3hNyFygQuSMZDesBXCZDpUECTY"
+    }
+  ],
+  "trafficBefore": "dpl_2fPb8TAKHFC5phjUkKZS4oRv7CWm",
+  "trafficAfter": "dpl_Ae3hNyFygQuSMZDesBXCZDpUECTY",
+  "credentialsRecorded": false,
+  "artifact": {
+    "bytes": 2509,
+    "sha256": "d2a6f5cd54be2d3630fc168aab9f504244db916289638a3aeeca9448881449b1"
+  }
+}
