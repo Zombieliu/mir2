@@ -1,0 +1,163 @@
+{
+  "schema": "mir2.cloud-fd3.progressive-closed-public-projection.v1",
+  "sourceRevision": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5",
+  "linuxBinarySha256": "11fc151644ecb75ccb5a86789cefb2010a062ef48c3a9ddfd5ccf29b67dfe926",
+  "measurementIdentity": {
+    "pid": 1232758,
+    "startTicks": 1553418134,
+    "invocationId": "c541c068817546b88a18a2e107b692ee"
+  },
+  "profile": "legacy-public-movement-chat",
+  "distinctFromLocalCommonPlanAndPhysicalTriClient": true,
+  "stages": [
+    {
+      "players": 2,
+      "plannedSeconds": 300,
+      "observedSeconds": 300.8455338,
+      "full300SecondsCompleted": true,
+      "reportedPassed": true,
+      "observedSpanActions": {
+        "offered": 322,
+        "completed": 322,
+        "completionRatio": 1.0,
+        "moves": 302,
+        "moveOffered": 302,
+        "chats": 20,
+        "chatOffered": 20,
+        "timeouts": 0,
+        "notSent": 0,
+        "missingOutcome": 0,
+        "movementP95Ms": 147.19479999999749,
+        "chatP95Ms": 147.80419999998412,
+        "scheduleP95Ms": 30.273800000009942,
+        "reasons": {}
+      },
+      "completeMinuteWindowScore": {
+        "offered": 320,
+        "completed": 320,
+        "timeouts": 0,
+        "notSent": 0,
+        "actorMinuteWindows": 10,
+        "passedActorMinuteWindows": 10
+      },
+      "failure": null
+    },
+    {
+      "players": 25,
+      "plannedSeconds": 300,
+      "observedSeconds": 61.23543949999998,
+      "full300SecondsCompleted": false,
+      "reportedPassed": false,
+      "observedSpanActions": {
+        "offered": 810,
+        "completed": 806,
+        "completionRatio": 0.9950617283950617,
+        "moves": 756,
+        "moveOffered": 760,
+        "chats": 50,
+        "chatOffered": 50,
+        "timeouts": 3,
+        "notSent": 1,
+        "missingOutcome": 0,
+        "movementP95Ms": 483.1341000000248,
+        "chatP95Ms": 394.15810000000056,
+        "scheduleP95Ms": 29.808100000023842,
+        "reasons": {
+          "[redacted] timed out waiting for actual one-step owner ACK": 3,
+          "previousActionPending": 1
+        }
+      },
+      "completeMinuteWindowScore": {
+        "offered": 800,
+        "completed": 796,
+        "timeouts": 3,
+        "notSent": 1,
+        "actorMinuteWindows": 25,
+        "passedActorMinuteWindows": 21
+      },
+      "failure": "Continuous per-actor minute failed strict SLO during stage-25 actorOrdinal=4"
+    }
+  ],
+  "stage50Or100Attempted": false,
+  "capacityQualified": false,
+  "capacityQualified100": false,
+  "all25BusinessLogoutSuccessWithin5s": true,
+  "allWireCloseWithin5s": false,
+  "businessLogoutRequests": 25,
+  "businessLogoutSuccess": 25,
+  "closeTimeoutActorOrdinals": [
+    4,
+    20,
+    23
+  ],
+  "threeClientWebSocketsTerminatedOnlyAfterRecordedCloseTimeout": true,
+  "noOwnedOsProcessKilled": true,
+  "ownedClientActualExitCode": 1,
+  "finalFreshSaveVerificationCount": 0,
+  "allActorSaveStateIndependentlyProven": false,
+  "equipmentRoundTripsExecuted": 4,
+  "equipmentRoundTripsPassed": 4,
+  "equipmentRoundTripsRequested": 6,
+  "resourceContract": {
+    "hostLogicalCpus": 4,
+    "hostMemoryGiB": 8,
+    "provisionedMbps": null,
+    "userProvidedBandwidthText": "30MBPS",
+    "bandwidthContractVerified": false,
+    "testCgroupMemoryMaxMiB": 1600,
+    "sharedHost": true,
+    "networkExclusiveToGame": false,
+    "hostAvailableReserveIsObservedNotAnAllocation": true
+  },
+  "mainMonitor": {
+    "samples": 424,
+    "actualExitCode": 0,
+    "completed": true,
+    "stderrSocket10038ObservedAndRetainedAsToolObservation": true
+  },
+  "tcpMonitor": {
+    "samples": 424,
+    "actualExitCode": 1,
+    "diagnosticComplete": false,
+    "remoteExitStatus": null,
+    "reason": "local_stop_file"
+  },
+  "allOriginalPoolAndLedgerChecksPassed": true,
+  "p3AfterSha256": "bc63ca486dade3d287ec0648e452f9db094da2fbbd3c484d34b3f9eaa2a21be8",
+  "closedSummarizerSourceSha256": "b428dd5d431fac355a9d91482cdacacfa443e77f923291070270eba5c39ac246",
+  "closedSummarizerActualExitCode": 0,
+  "closedSummarySha256": "7faa01f35a9589d1f6498938d7bc927814a76f6bc9c8a01e32c39b49287e8f9f",
+  "sourceHashes": {
+    "report": "702938771e1c15bee0d2885927d65d7549c61b3f3b890c0cd8eb6103347d93d0",
+    "events": "d56f8bf1c7270561db66e34b2a6a35a8cd95399b921c63412fa92c2d6227aa99",
+    "hostHistory": "2f39834cddb726f8a885d9bbbb914791942edfa43569b0f11907957453dd78bc",
+    "before": "a6830597f94c372d87d72e4a39c3207508d9a51bf4500b873132eeb719f855bd",
+    "after": "bc63ca486dade3d287ec0648e452f9db094da2fbbd3c484d34b3f9eaa2a21be8",
+    "job": "165bb85c5f4d2bb527f543dfa6df8b4f7f9a6454c01abd9d31b92de04e950d5d",
+    "monitorTerminal": "c5a03b7d780ca4727d6cb260adb556b4d46c5a6c9a9721a532ab927020055eb8"
+  },
+  "forensicFreezeSha256": "2790dbf79e6e86507cc155e39a339dec07ee0c914c0e0b54925e47bcded7e2e3",
+  "legacyOwnerMarkerAmbiguityRetained": true,
+  "noSpecificLockOrTransportCauseProven": true,
+  "temporaryCapsRestored": {
+    "controllerSourceSha256": "046f8a2fe0e030ab727a54d8bce8e936e0d4f210db84cbec3b83d6955573098e",
+    "actualExitCode": 0,
+    "receiptSha256": "427c13382244218f622dcf89b670cbafca1e73ad8cc564e99dc873d0c470d2b9",
+    "identity": {
+      "pid": 1242617,
+      "invocationId": "54b0b00891c344a58ab8e5a6d05ddb5b",
+      "startTicks": 1553569321
+    },
+    "caps": [
+      51,
+      66,
+      51
+    ],
+    "environmentFileCount": 21,
+    "dropInCount": 20,
+    "traceFlagsUnset": true,
+    "protected40FilesAnd8ProcessesUnchanged": true
+  },
+  "initialSummaryMissingPublicInputRefusalPreserved": true,
+  "publicInputsTruthfullyRecordedAfterClosureFromPrelaunchBinding": true
+}
