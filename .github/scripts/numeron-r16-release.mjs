@@ -16,158 +16,168 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+  source: "05d233ed248e8b78128580ae71e7618f4338ab5c",
   sourceRef: BRANCH,
-  baseSource: "11b2c1813f293fba67a302708de5324b3aa81f81",
+  baseSource: "9d06953d7bbb94d960686bed51048d0628996d7e",
   assetSource: "f2de762309768b51b39438c2437c14e819df9bf7",
   sourceCommits: [
-  "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339"
+  "05d233ed248e8b78128580ae71e7618f4338ab5c"
 ],
   changedFiles: [
   {
     "status": "modified",
     "filename": "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
-    "sha": "6c4c1352b0e23e73b6e8e019b0c65e40fb096e77"
+    "sha": "89016f7a103d61a2722ff065d6ded018ed06019a"
   },
   {
     "status": "added",
-    "filename": "mir2-web3/apps/web/lib/asset-namespace-reload.ts",
-    "sha": "53e987e96d9c8bf17f3a8b88618bd125a73633ba"
+    "filename": "mir2-web3/apps/web/lib/asset-cache-progress.ts",
+    "sha": "e48afa923d8824d156802708bbfec65990302802"
+  },
+  {
+    "status": "modified",
+    "filename": "mir2-web3/apps/web/lib/r16-browser-localization.ts",
+    "sha": "27235c7fb20513e62add1638a9168ee88e37e24e"
   },
   {
     "status": "modified",
     "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
-    "sha": "c5c1861d04bfb5743a8c32923f287bd2d025b982"
+    "sha": "57935257fe95485dcf2523c5679967a522f20e19"
   },
   {
     "status": "added",
-    "filename": "mir2-web3/apps/web/scripts/smoke-asset-font-chain.mjs",
-    "sha": "148b552440466d946b41f9577e3ee8742eb4c09b"
+    "filename": "mir2-web3/apps/web/scripts/smoke-asset-static-admission.mjs",
+    "sha": "7f88a67bff8ab88dc0c87e9b2d6c9f27c9f8e8a2"
   },
   {
     "status": "added",
-    "filename": "mir2-web3/apps/web/scripts/test-asset-namespace-reload.mjs",
-    "sha": "a00c6a98ada0379edb8229a8474092193bab6bb4"
+    "filename": "mir2-web3/apps/web/scripts/test-asset-cache-progress.mjs",
+    "sha": "268015912598f117c9a0f5aaec1089d704d612c3"
   },
   {
     "status": "added",
-    "filename": "mir2-web3/apps/web/scripts/test-asset-worker-font-chain.mjs",
-    "sha": "b5a764bad2bb0064b607e1ec3d2e0cf70e9efb3d"
+    "filename": "mir2-web3/apps/web/scripts/test-asset-worker-static-admission.mjs",
+    "sha": "47ba6372bebbfe575413bccf3277fcec6a93c7ae"
   },
   {
     "status": "modified",
-    "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs",
-    "sha": "f73197a6bd34cd8778a529b8e267ef20df62de7f"
+    "filename": "mir2-web3/apps/web/scripts/test-r16-browser-localization.mjs",
+    "sha": "4e88845c4c8b228afe2987c3d061f1704cea6583"
   },
   {
     "status": "modified",
     "filename": "mir2-web3/docs/AGENT-CURRENT.md",
-    "sha": "5ad053526f46943f011264f23181f55682e08e65"
+    "sha": "972c5c2f02ff1c54370b5aa6a91968be62f10f15"
   },
   {
     "status": "modified",
     "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
-    "sha": "25138c4946439e1e425af658339c694cae3eb595"
+    "sha": "f152ba7aad60a67e728e0a0828492743401d61b5"
   },
   {
     "status": "modified",
     "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
-    "sha": "9805874f27ad141c8d386c81e26ff04d4c5bf0d5"
+    "sha": "8e4e1daabf7adfe680d84aec2438ce238ea1b1bf"
   },
   {
     "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-font-fallback-chain-20261115/README.md",
-    "sha": "63bd82e9ca0ac22d7d03f36abadc5bd361bf8ee3"
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/README.md",
+    "sha": "f3b2c7bf708e56a639f02f4138ddd90043799438"
   },
   {
     "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-font-fallback-chain-20261115/browser-admission.json",
-    "sha": "8a51c304ccdeae81829cc0b07b2715fecdef99fc"
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/browser-after.json",
+    "sha": "665a4b0338225b723505216364a1eae8378446c1"
   },
   {
     "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-font-fallback-chain-20261115/browser-chain-after.json",
-    "sha": "ea0d3d672ecee930333967e3fc92fbf4a694b8f7"
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/browser-before.json",
+    "sha": "9fc71c6ad52c27c7162cd12894917e5ddc371984"
   },
   {
     "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-font-fallback-chain-20261115/browser-chain-before.json",
-    "sha": "c5ad4a378e36491da6e08eafbc75a7e577b53250"
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/default-exit.png",
+    "sha": "43f55bfd955d0eeda2bee98396769159eeeb8adf"
   },
   {
     "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-font-fallback-chain-20261115/browser-retry.json",
-    "sha": "7c4d04a2c655b84b85cc1c4b5c69b7c635e40bda"
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/default-fresh-goal.png",
+    "sha": "5c2cb1fc31d5007511942c691774f54994a454bf"
   },
   {
     "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-font-fallback-chain-20261115/default-exit.png",
-    "sha": "8c1446ae38e58b0a657728f3a9ebb0462a3edce6"
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/default-game.json",
+    "sha": "bd5a110110342c1ccdc788f03b949788c849938b"
   },
   {
     "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-font-fallback-chain-20261115/default-fresh-goal.png",
-    "sha": "58fc324e682405f8923c6778015b73ab22d65106"
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/default-room.png",
+    "sha": "f7137f4fb76677c4280f1430a1e9fcb6179d5f25"
   },
   {
     "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-font-fallback-chain-20261115/default-game.json",
-    "sha": "e4acb4b78e1bc2f71a5c8ec3af406a94be7f8d8c"
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/image-admission.png",
+    "sha": "50100b02ef46e8beb5dbd667c823095fb175a8ab"
   },
   {
     "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-font-fallback-chain-20261115/default-room.png",
-    "sha": "c7457988132a35280ac08da3552a0cb5ae37c475"
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/live-asset-check.json",
+    "sha": "4edb49785ed204c1db33473469c9450944284485"
   },
   {
     "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-font-fallback-chain-20261115/fixture-source-pins.json",
-    "sha": "8b0f62d78c9ad39215672b5ebe4130a5fb4a12fd"
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/progress-panels.png",
+    "sha": "63e80f45ddfce7d18825c3a803fe34f1079544aa"
   },
   {
     "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-font-fallback-chain-20261115/qualification.json",
-    "sha": "de50caa192d14a0e7b3ca2d52f9d795a39ef8143"
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/progress-visual.json",
+    "sha": "72933d6e5cc49a3932591e2d063c574c5a59c040"
   },
   {
     "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-font-fallback-chain-20261115/regressions.txt",
-    "sha": "fcde07af641614e5326bdf6cd2c55e7dc03ec1d3"
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/qualification.json",
+    "sha": "7304bfbffce3b08a57464d74bf54f3a93507d401"
   },
   {
     "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-font-fallback-chain-20261115/retained-failures.json",
-    "sha": "ad26ba2d0f51f6a2da4e450a7ed825692a243cc5"
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/regressions.txt",
+    "sha": "246ad5f863f3bb8f9b8e35595b228b3c84f21ae8"
   },
   {
     "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-font-fallback-chain-20261115/six-fonts.png",
-    "sha": "62497d0585d5c7b13760ea39859f999e347e9960"
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/resource-path-audit.json",
+    "sha": "840c40c96c89cab09d33e61790d055c14f5826e5"
   },
   {
     "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-font-fallback-chain-20261115/source-inputs.json",
-    "sha": "52518915751d74814ce2eed19398342a644921c8"
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/retained-failures.json",
+    "sha": "16d5c6eb753de07e319c158e40535ec79cc95f7e"
   },
   {
     "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-font-fallback-chain-20261115/webgl2-exit.png",
-    "sha": "64f45edfbc5b356f3b727a0148cc6c1f126cb2d7"
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/source-inputs.json",
+    "sha": "e42379e3b594257358d1813fa3c6c7538390b76e"
   },
   {
     "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-font-fallback-chain-20261115/webgl2-fresh-goal.png",
-    "sha": "082b5c9d27504de6b69008f916c43700f3e6a4c1"
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/webgl2-exit.png",
+    "sha": "71814a1c67e75360fc5a53fcb4c56434e5e2697c"
   },
   {
     "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-font-fallback-chain-20261115/webgl2-game.json",
-    "sha": "fe67083eeb70e5352fd4451822436babd2b52a13"
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/webgl2-fresh-goal.png",
+    "sha": "ee30daf7e32c42432c3deb79ec2dcca4365c719f"
   },
   {
     "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-font-fallback-chain-20261115/webgl2-room.png",
-    "sha": "defd877eab987b7c9e3e53caa5c7974c3645f1de"
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/webgl2-game.json",
+    "sha": "b19b67dbeecf76a5732a754b155c4d08a182d126"
+  },
+  {
+    "status": "added",
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/webgl2-room.png",
+    "sha": "df66482ddf325fd9a1d4e5227ac76fce9177ab65"
   }
 ],
   entryScene: {
@@ -242,11 +252,11 @@ export const QR_RELEASE = Object.freeze({
   },
   entryAssetWorker: {
   "path": "/mir2-asset-worker.js",
-  "sha256": "5b45ec68a5efd1b2fe96aa78efcb917fbaa40e8a47a02ee3279a468e141fbbb3",
-  "bytes": 45170
+  "sha256": "2e1191cab2b9ede2cf0b09c559c7e4da1e8b84574d4910589ad1f9a968ae7a51",
+  "bytes": 47880
 },
   assetRunId: '42494701555',
-  baseline: "dpl_6k5uD7UbVAcyzBdtto8PPAC9qNFK",
+  baseline: "dpl_AWssgszkpKJznMksLsP7hiRFK6U8",
   relay: 'https://relay.dubhe.obelisk.build',
 });
 const QR_OPERATIONS = ['numeron-qr-stage', 'numeron-qr-check', 'numeron-qr-promote', 'numeron-qr-rollback'];
