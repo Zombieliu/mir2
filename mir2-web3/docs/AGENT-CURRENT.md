@@ -14,7 +14,7 @@ Short routing summary, updated 2026-11-14 (Asia/Shanghai). This indexes recorded
 
 ## Last recorded decisions and open work
 
-2026-11-14 双源无头候选补齐8秒探测→原有最终读取，99项/构建/真实Chrome四场与两后端四会话通过，商人各189次走跑到合法邻格；冷启54677/52293ms、重登1663/1370ms，六字体/113/Q/保存通过。首轮时钟断言失败保留。29份WIP未改，其他线程后台合并单列；本轮未部署，正式E6/在线fd3，继续冻结新网页来源及公网原8/120秒。EA4公网失败与已验证回退、其余路线和整体1:1均保留。[新本地资格](evidence/r16-runtime-header-probes-20261114/README.md) · [原公网失败](evidence/r16-login-door-retirement-20261114/production/README.md)。
+2026-11-14 双源无头候选5b011补齐8秒探测→原有最终读取，99项/构建/真实Chrome四场与两后端四会话通过，商人各189次走跑到合法邻格；冷启54677/52293ms、重登1663/1370ms，六字体/113/Q/保存通过。源码已推送，cf12以来1提交/12路径/8构建覆盖与独立GitHub比对一致，82发布检查通过。首轮时钟断言失败、29份WIP和其他线程后台合并单列；本轮未部署，正式E6/在线fd3，继续独立候选及公网原8/120秒。其余路线/整体1:1开放。[资格与冻结](evidence/r16-runtime-header-probes-20261114/README.md) · [EA4失败/回退](evidence/r16-login-door-retirement-20261114/production/README.md)。
 
 2026-11-12 正式站已发布 `51d2dcc346`：共享图片取消与图集计时/JSON大小缓存身份修复。本机75项、生产构建及两后端重开同档通过；公网简繁出码、手机尺寸官方钱包Testnet签名、进比奇、权威移动、共用HUD/任务窗、113/113预取和正常退出通过，无需回滚。云端缓存身份与计算一致；Worker正常更新缓存一次，未迁移旧007缓存。本次观测起点到首画面65.2秒/共用HUD104.7秒（点击进游戏后约6.8秒/46.3秒），继续优化冷加载；实体手机、完整1:1及历史未结项仍开放。[发布与边界](evidence/r16-cache-repair-20261112/README.md)
 

@@ -16,233 +16,73 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: "ea4b1c363eb9089bf0fbe57245660782cae3fe70",
+  source: "5b011e5d2fcce78883b517e5992ef23245052f84",
   sourceRef: BRANCH,
-  baseSource: "9244ce3dd7cd2129a70e650be1430e971b6c96ab",
+  baseSource: "cf12f2d5f4af4a3de2279f4d332cfa37a4e0d74d",
   assetSource: "f2de762309768b51b39438c2437c14e819df9bf7",
   sourceCommits: [
-    "e83c60216c68953edad68b842a41ff8402908434",
-    "b0cc37a3dbc1d1092ee9befe76165883108d2c15",
-    "e4549595e1face90a3c90df4610d559b3a99d604",
-    "eb97b0ccaa3dd9469842dd3f0445eae1119ceb4a",
-    "4515fe8400285b2beb9c5b48480d020c538db738",
-    "ea4b1c363eb9089bf0fbe57245660782cae3fe70"
+    "5b011e5d2fcce78883b517e5992ef23245052f84"
   ],
   changedFiles: [
     {
       "status": "modified",
-      "filename": ".github/scripts/numeron-r16-release.mjs",
-      "sha": "0c1b698e8a025af9349f036772725c212ff24061"
-    },
-    {
-      "status": "modified",
-      "filename": ".github/scripts/test-numeron-r16-release.mjs",
-      "sha": "c7e2ccf82762165a62b440047ea9f9d18a888f1b"
-    },
-    {
-      "status": "modified",
-      "filename": ".github/scripts/test-numeron-release-entry.mjs",
-      "sha": "8652a3ee07df1f348ad5f0c008dec5126167b718"
-    },
-    {
-      "status": "modified",
-      "filename": ".github/workflows/gateway-release.yml",
-      "sha": "994f8a947e374a33a8f93e4d3429e480cd4b8746"
-    },
-    {
-      "status": "modified",
-      "filename": ".github/workflows/promotion-website-release.yml",
-      "sha": "16bb035b8da83e3b5192532ba3394ce3b2d3005b"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/app/components/r16-login-door.tsx",
-      "sha": "0e57fe6da9a9b0c4df08fafdb0f82f4173cfcb8a"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/lib/scene-asset-preloader.ts",
-      "sha": "1a1c90f28769f66399eac36302221931704cea5e"
+      "filename": "mir2-web3/apps/web/lib/bevy-runtime-initializer.ts",
+      "sha": "9b7ddb89d5893bd36ce802c0f4c05ace0f595a32"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/apps/web/scripts/lib/r16-static-waterfall.mjs",
-      "sha": "789c3c762abadf2400be12d22b2de399855f0925"
+      "filename": "mir2-web3/apps/web/scripts/smoke-bevy-runtime-header-probes.mjs",
+      "sha": "33c7762a3c7be35f0a46585a2dbd50f8c2e9e265"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-r16-auth-layout.mjs",
-      "sha": "aab7b723b3717cac9d3b33a8dc983db33da446da"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/scripts/test-r16-static-waterfall.mjs",
-      "sha": "0f505ff80bb57b87dff4a340c7130959d8cd5cd6"
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-finite-recovery.mjs",
+      "sha": "24966c60581e3b8c61ea868bedb44a3f43caf8a3"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-scene-asset-preloader.mjs",
-      "sha": "cca6c14de54ffac1fb8ac40b90640623b922e6a9"
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-initializer.mjs",
+      "sha": "9bda11b5d92e973b912f1ae3f747590dee131bac"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/AGENT-CURRENT.md",
-      "sha": "a592c9645b80e45d5d17dde4871db02419a9b395"
+      "sha": "0a4a63a88e1751d35292d80d541a225097d4683b"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
-      "sha": "3393b106ad8fdd4b9ac64c30d1b63828b8dd0cf0"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/docs/BACKEND-1TO1-PROGRESS.md",
-      "sha": "4f5b50e6215997a38f847171293427aa1f3ec290"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
-      "sha": "f858d08116fc0a30f055aa644017bb41377828a1"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/docs/CRYSTAL-SERVER-PARITY.md",
-      "sha": "0ba16bb1ed9cf499c60529b4784fe304a39bee64"
+      "sha": "a8c8b8c5269690990bf5d19ca8fdd38341b73093"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
-      "sha": "5326401285977f49d05f0def698d1da604f9453c"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/README.zh-CN.md",
-      "sha": "420f6edd780c48b53f0494e97a4aaa2c9f1aaf11"
+      "sha": "5da9bef3d0e974f32ce0bac25ceeeae92b81b0c4"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/input-gate-tick-gate.causal.json",
-      "sha": "07e35cb38c21bc8dbb729df6f1f7ab32ef647360"
+      "filename": "mir2-web3/docs/evidence/r16-runtime-header-probes-20261114/README.md",
+      "sha": "2f0a3d0fb45f77027c362dd6d5ff3b551a49e14e"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/input-gate-trace100.closed.json",
-      "sha": "c22fdf486c68f631e410df2c4086dce10f0d50c1"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/input-gate-trace2.closed.json",
-      "sha": "5a5978195ccde21dd708b446563319c843e6ca21"
+      "filename": "mir2-web3/docs/evidence/r16-runtime-header-probes-20261114/default-vendor-arrival.png",
+      "sha": "2842ada3ac7694c4420600457c13c78f333c83ac"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-login-door-retirement-20261114/README.md",
-      "sha": "8b49f44d8abdad65d85755f4888db20db72e12db"
+      "filename": "mir2-web3/docs/evidence/r16-runtime-header-probes-20261114/inherited-branch-scope.json",
+      "sha": "6aee806d8bf42f24af85c96b31ec612dc0352da0"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-login-door-retirement-20261114/default-vendor-arrival.png",
-      "sha": "7efabd2db0e5f47489ed31cf423df374f0d23552"
+      "filename": "mir2-web3/docs/evidence/r16-runtime-header-probes-20261114/qualification.json",
+      "sha": "845bda00db972b5a9c29c24b5d275353c6ff5ff3"
     },
     {
       "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-login-door-retirement-20261114/qualification.json",
-      "sha": "741d505239d9e7987a11c0cda252c6f61d4b4f90"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-login-door-retirement-20261114/webgl2-vendor-arrival.png",
-      "sha": "a5aef1c2d11817a4c4cd1ca49e151e1ca7f6c089"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/README.md",
-      "sha": "f5057b58a51231e648a7c8f14ea2767aa70aeace"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/candidate/README.md",
-      "sha": "74cc624f59133f86516eb796a5bf2d576c83d8e0"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/candidate/checks.json",
-      "sha": "06b9fdb709f8cc50788043d31dce0320d1f68ce6"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/candidate/current-e6-control.json",
-      "sha": "7fbc63035f40bd66b6820333f0d17d964f2c1555"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/candidate/current-e6-shared-quest.png",
-      "sha": "7d5b1f2928399b6de08ee2369e5c108f44372c4b"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/candidate/current-e6-static-waterfall.json",
-      "sha": "2d5b0a05de37d301199fa25c9f482f8e4f465e3e"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/candidate/post-control-production.json",
-      "sha": "66b28be46329556169faf08336708be58bad026e"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/candidate/ready.json",
-      "sha": "7f6249ff8ff4cf514e5fd4735883eb5e92c52003"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/legacy-text-vendor-arrival.png",
-      "sha": "d1e264fd945a423372a626cb4cc58382edd70ab7"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/merged-browser-verification.json",
-      "sha": "12a7cb018506478d88d2cfa931cc80484a08a477"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/merged-default-vendor-arrival.png",
-      "sha": "9df9fe6abbe5132584a7bbf7dc77d694c8fa4363"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/merged-linux-ci-verification.json",
-      "sha": "4470545b042746f73900b26ef161a2b095542818"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/merged-private-inputs.json",
-      "sha": "11a371a45cd34a24bbf142967bbeab36884c5912"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/merged-production-readback.json",
-      "sha": "0a68886aac8e1d499c48db8ca60a853ac8d4ee66"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/merged-release-source-remote.json",
-      "sha": "394f85494aac9264b2e3e63934b3c4a9d64d08e4"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/merged-validation.json",
-      "sha": "f8fd3fe9be21ab0981e4f8a52a690ca7e8e18696"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/merged-webgl2-vendor-arrival.png",
-      "sha": "1d8b6b0083376b3aca41e6af7a97da0621b393e5"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/qualification.json",
-      "sha": "5fce7e12229763e65799d187d9f075eb28d68ea9"
+      "filename": "mir2-web3/docs/evidence/r16-runtime-header-probes-20261114/webgl2-vendor-arrival.png",
+      "sha": "673ef513a4a985ff656acc5c7b50edcc84d77b48"
     }
   ],
   entryScene: {
