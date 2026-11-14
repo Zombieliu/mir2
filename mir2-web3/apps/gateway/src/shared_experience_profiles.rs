@@ -13,6 +13,25 @@ pub(super) fn owner_profile_publications_for_test() -> usize {
     OWNER_PROFILE_PUBLICATIONS.with(std::cell::Cell::get)
 }
 
+#[cfg(test)]
+#[derive(Clone, Copy)]
+pub(super) enum ProjectionTestPhase { Entry, OwnerPublished, ScanStarted, ScanFinished }
+#[cfg(test)]
+pub(super) type ProjectionTestHook = Arc<dyn Fn(ProjectionTestPhase) + Send + Sync>;
+#[cfg(test)]
+std::thread_local! {
+    static PROJECTION_TEST_HOOK: std::cell::RefCell<Option<ProjectionTestHook>> = const { std::cell::RefCell::new(None) };
+}
+#[cfg(test)]
+pub(super) fn set_projection_test_hook(hook: Option<ProjectionTestHook>) {
+    PROJECTION_TEST_HOOK.with(|slot| { *slot.borrow_mut() = hook; });
+}
+#[cfg(test)]
+fn projection_test_phase(phase: ProjectionTestPhase) {
+    let hook = PROJECTION_TEST_HOOK.with(|slot| slot.borrow().clone());
+    if let Some(hook) = hook { hook(phase); }
+}
+
 pub(super) type ExperienceAuthorityRebase<'a> = dyn Fn(
         &mir2_simulation::Stage5FriendIdentity,
         &mut Option<mir2_simulation::ZoneExperienceProfile>,
@@ -285,12 +304,16 @@ impl SharedInProcessZoneSessionRuntime {
             self.last_experience_projection = None;
             return Ok(());
         };
+        #[cfg(test)]
+        projection_test_phase(ProjectionTestPhase::Entry);
         // Personal level/stats/live buff inputs can change without a shared
         // transaction. Always publish the owner's current trusted rates.
         {
             let _stage = shared_session_substage("shared_session.experience.owner_publication");
             self.refresh_current_experience_profile()?;
         }
+        #[cfg(test)]
+        projection_test_phase(ProjectionTestPhase::OwnerPublished);
         let signature = (
             self.shared_social_generation.load(Ordering::Acquire),
             config.shared_guild_clock_generation(),
@@ -301,6 +324,8 @@ impl SharedInProcessZoneSessionRuntime {
         // A partial/error projection is retried on the next command.
         self.last_experience_projection = None;
         let peer_stage = shared_session_substage("shared_session.experience.peer_projection_and_wars");
+        #[cfg(test)]
+        projection_test_phase(ProjectionTestPhase::ScanStarted);
         for presence in self.mentor_presences()? {
             let previous = {
                 let state = presence
@@ -351,6 +376,8 @@ impl SharedInProcessZoneSessionRuntime {
         }
         self.project_all_shared_guild_wars()?;
         drop(peer_stage);
+        #[cfg(test)]
+        projection_test_phase(ProjectionTestPhase::ScanFinished);
         let after = (
             self.shared_social_generation.load(Ordering::Acquire),
             config.shared_guild_clock_generation(),

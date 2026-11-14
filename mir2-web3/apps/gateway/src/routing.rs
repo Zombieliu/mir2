@@ -20573,6 +20573,8 @@ mod tests {
     mod personal_monster_projection_tests;
     #[path = "poisoning_carried_tests.rs"]
     mod poisoning_carried_tests;
+    #[path = "shared_experience_projection_singleflight_tests.rs"]
+    mod shared_experience_projection_singleflight_tests;
     #[path = "tick_leaf_probe_tests.rs"]
     mod tick_leaf_probe_tests;
     #[path = "predrain_performance_tests.rs"]
