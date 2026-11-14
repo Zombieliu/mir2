@@ -1,0 +1,126 @@
+{
+  "schema": 1,
+  "candidatePublishedThenRejected": true,
+  "source": "ea4b1c363eb9089bf0fbe57245660782cae3fe70",
+  "candidate": "dpl_CBiwpNGHSpWEy222DyppnBZnVULB",
+  "localQualificationRemainsValid": true,
+  "publicAccepted": false,
+  "rollbackPassed": true,
+  "currentProductionSource": "e6c923b7c669cb061a7a03703f05fadd91211c97",
+  "currentProductionDeployment": "dpl_Ae3hNyFygQuSMZDesBXCZDpUECTY",
+  "qr": [
+    {
+      "locale": "zh-CN",
+      "passed": true,
+      "createAttempts": 1,
+      "renderedQr": true,
+      "pending": true,
+      "normalCancel": true,
+      "pollingStopped": true,
+      "browserClosed": true
+    },
+    {
+      "locale": "zh-TW",
+      "passed": true,
+      "createAttempts": 1,
+      "renderedQr": true,
+      "pending": true,
+      "normalCancel": true,
+      "pollingStopped": true,
+      "browserClosed": true
+    }
+  ],
+  "physicalPhoneCameraTested": false,
+  "privateInputs": [
+    {
+      "path": "C:/r16-login-door-retirement-20261114/stage-r1/numeron-r16-release.json",
+      "bytes": 10706,
+      "sha256": "33056a1482e0f333df1d2d95bff6946101ab20f5fa17dfe13e1acdfc843624a1"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/check-r1/numeron-r16-release.json",
+      "bytes": 14242,
+      "sha256": "a2d8b6601c483f4f15792668d0ddd2ab7577c2f994da5f8da1c6e1727f6e0045"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/promote-r1/numeron-r16-release.json",
+      "bytes": 17941,
+      "sha256": "a94e9cf8d2c5ed6f5195781c70af0f7b44ebfab95779e69bd97b33563743f164"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/rollback-r1/numeron-r16-release.json",
+      "bytes": 10679,
+      "sha256": "fcfc5a32bfaae96358dc26a505c773aa3399250c31bf3ee78a798e6025a46ba1"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/public-acceptance-r1.json",
+      "bytes": 864,
+      "sha256": "2ab3da849e591f2e0de40e4260a4c90422a7f3b19b47017a296d62cc5dde9196"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/public-acceptance-contract-r2.json",
+      "bytes": 1335,
+      "sha256": "2dbc4e33f31dab005906a3114749705f22d1eed0e8d13f6979626ec599dda5cd"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/public-r1/preparation.json",
+      "bytes": 10839,
+      "sha256": "fd2bcd2cf1cb86b7f1473a9f422d280a273e572732b24317690fca163bb63c73"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/public-r1/approval-receipt.json",
+      "bytes": 1822,
+      "sha256": "9c5e8bd809150dd04a6ab3e07d90ee1fbfe96f7fb40ee4aae96d56cedc698b56"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/public-r1/browser-closed.json",
+      "bytes": 60,
+      "sha256": "89f6dae7d00578e36115f9dac321b046061d6d22ae16b7399d9ef6d2d4981870"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/public-r1/desktop-login-door-retirement-r1/receipt.json",
+      "bytes": 74015,
+      "sha256": "18591ecd2a30add85c8f199e14d80993f68a1d84e61f18034bc5f07bc032ea7b"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/public-r1/desktop-login-door-retirement-r1/startup-probe.json",
+      "bytes": 200245,
+      "sha256": "b1e5765c92c45fc1e409b27379e1ee48930eacb18fa0c486732b4f440f63c26c"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/public-r1/desktop-login-door-retirement-r1/worker-font-network.json",
+      "bytes": 4062,
+      "sha256": "637fc56b6b7fc54591b61d82adb8cd756da14bf84c8badc191b68bad52cda496"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/public-r1/desktop-login-door-retirement-r1/static-waterfall.json",
+      "bytes": 672326,
+      "sha256": "68fa0b45bff4b5be73e8fa1b2a71562fc16005ae03ac25f877a216305fe751cb"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/public-browser-r1.log",
+      "bytes": 1256,
+      "sha256": "2fce75719475dd33678cb9c655be0492eeba337c7ee2ab15c721b37185719413"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/public-preparation-diff.json",
+      "bytes": 646,
+      "sha256": "dc2c35e2908ec32a3aabcf4795f12f289ab4e45fec03e93befb4f7b1e6079a1d"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/pre-promotion-readiness.json",
+      "bytes": 243,
+      "sha256": "4d49061cc9e97c574a7f0d7271bedf3c2fc2338a2216ec762bed82d2a70088c8"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/rollback-public-r1/qr-smoke.mjs",
+      "bytes": 12974,
+      "sha256": "69cdf91fa1eb98f7f6588dd63f4bf51d82937660f64bea8acd507b1af8b7babb"
+    },
+    {
+      "path": "C:/r16-login-door-retirement-20261114/rollback-public-r1/verify-rendered-qr.mjs",
+      "bytes": 1366,
+      "sha256": "bdf0db36bf23fc6a2efb43bb2e741b7926c12176cdda6dee2b7fc24153f418ef"
+    }
+  ]
+}

@@ -6,7 +6,7 @@ Updated 2026-11-14 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-14 开门预载取消/截止与并发1候选通过66项、生产构建、真实资源所有权夹具及两后端四场；每场六字体/113/Q，商人189步到合法邻格、原8/120秒和保存通过。旧9244候选已完成云端15资源/扫码检查；新的预载修复待冻结和公网复测，正式仍E6/在线fd3。[本地资格与剩余](evidence/r16-login-door-retirement-20261114/README.md)。
+2026-11-14 开门预载EA4本地66项/构建/两后端四场通过，商人189步到合法邻格；已发布但公网运行包双源无响应头、六字体/共享HUD失败，首步3746ms与113项通过仍不构成完整资格。已回退E6并复验简繁出码、待确认和取消，在线fd3未动。继续有界双源无头恢复，再验公网原8/120秒；不可原样重发EA4。[本地与公网失败/回退](evidence/r16-login-door-retirement-20261114/README.md)。
 
 ## 保留的当前未结项
 
