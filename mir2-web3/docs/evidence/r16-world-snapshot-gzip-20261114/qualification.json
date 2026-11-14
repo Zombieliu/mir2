@@ -111,8 +111,28 @@
     "releasePackageAndMapLocallyVerified": true,
     "publicRollout": false
   },
-  "fullLegacyServerBrowserPassed": false,
+  "fullLegacyServerBrowserPassed": true,
   "qualifiedSourceRevision": "199a294130f386a245e86d3c1d81f731d7d7277b",
-  "integratedHeadAtReview": "b950fce0a14f739d89008c864670dcb8f7c8df57",
-  "integratedGatewayQualificationClaimed": false
+  "integratedHeadAtReview": "9244ce3dd7cd2129a70e650be1430e971b6c96ab",
+  "integratedGatewayQualificationClaimed": true,
+  "integratedQualification": {
+    "sourceRevision": "9244ce3dd7cd2129a70e650be1430e971b6c96ab",
+    "gatewayTests": 38,
+    "releaseGuardTests": 75,
+    "mergedBrowserSessions": 4,
+    "legacyBrowserSessions": 2,
+    "linuxWorkflowRunId": 43587682763,
+    "linuxWorkflowSucceeded": true,
+    "linuxPackageVerificationPending": false,
+    "publicReleased": false,
+    "releasePackageAndMapLocallyVerified": true,
+    "gatewayLinuxSha256": "6c42314b92de52114260d3233ac0df013b0fae460be843a49b5c04de345c5553"
+  },
+  "legacyServerBrowserScope": {
+    "artifactSha256": "f35261772f379b04759011a63a2f3c463a36e754ebbde71915e893c84d77d490",
+    "sessions": 2,
+    "mode": "compatibility",
+    "language": "en-US",
+    "currentPublicGatewayClaimed": false
+  }
 }

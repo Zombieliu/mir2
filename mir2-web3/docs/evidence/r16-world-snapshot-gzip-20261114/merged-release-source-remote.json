@@ -1,0 +1,132 @@
+{
+  "source": "9244ce3dd7cd2129a70e650be1430e971b6c96ab",
+  "base": "199a294130f386a245e86d3c1d81f731d7d7277b",
+  "status": "ahead",
+  "aheadBy": 5,
+  "behindBy": 0,
+  "mergeBase": "199a294130f386a245e86d3c1d81f731d7d7277b",
+  "commits": [
+    "525e74364ab87ad49e84c26c8dd22db9fe9348d5",
+    "5579f352b66bd32560baef45de0310677f817388",
+    "b950fce0a14f739d89008c864670dcb8f7c8df57",
+    "08cb36687161dbbf82ed03c06da9fa88a903a417",
+    "9244ce3dd7cd2129a70e650be1430e971b6c96ab"
+  ],
+  "files": [
+    {
+      "filename": "mir2-web3/apps/gateway/src/routing.rs",
+      "status": "modified",
+      "sha": "f24008af76145a0ab1fcdb7d865c990f0228b9ae"
+    },
+    {
+      "filename": "mir2-web3/apps/gateway/src/web.rs",
+      "status": "modified",
+      "sha": "13493b3bbbfdadadf8b0c1d0557469fb504fcd32"
+    },
+    {
+      "filename": "mir2-web3/apps/gateway/src/web_transport.rs",
+      "status": "modified",
+      "sha": "daf07cadb5b95992089ebd70153dcdcbd0beaa19"
+    },
+    {
+      "filename": "mir2-web3/docs/AGENT-CURRENT.md",
+      "status": "modified",
+      "sha": "455e8d5dc6bb2b6856a27d922b9e49f5ce96838e"
+    },
+    {
+      "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+      "status": "modified",
+      "sha": "4d198e36a0f61765c0952ef54b6339cc076d04b5"
+    },
+    {
+      "filename": "mir2-web3/docs/BACKEND-1TO1-PROGRESS.md",
+      "status": "modified",
+      "sha": "c073ba685c12467818f2ab951e7747e88a2f5ba4"
+    },
+    {
+      "filename": "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
+      "status": "modified",
+      "sha": "7dd73a9e3f9e24c849b6eaf448860a1149791bcd"
+    },
+    {
+      "filename": "mir2-web3/docs/CRYSTAL-SERVER-PARITY.md",
+      "status": "modified",
+      "sha": "b9c8610f887df61a5a68eb80dde6a9027fbf2f6f"
+    },
+    {
+      "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+      "status": "modified",
+      "sha": "236f123da869e58e5786b49f876136e0b33a2a72"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/README.zh-CN.md",
+      "status": "modified",
+      "sha": "7b32d096f9dd3712068722c51dceb09ee4cb7da0"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/cloud-fd3-progressive.closed.json",
+      "status": "added",
+      "sha": "afed7f91ac98e49801f7a8d4a17bfa546dc81b81"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/input-gate-trace2.closed.json",
+      "status": "added",
+      "sha": "a58c9a944c47387bdbac5b776e09fcfbcf8ac0b3"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/README.md",
+      "status": "modified",
+      "sha": "5ddc5d3adf007be49a45a0b04804a49142e5d314"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/browser-inputs-manifest.json",
+      "status": "added",
+      "sha": "b857d5418d19ad851aec5c27da25a7df5ebc1102"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/browser-production-readback.json",
+      "status": "added",
+      "sha": "13390bc09d945b34843b546835a7a95f47d8b852"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/browser-verification.json",
+      "status": "added",
+      "sha": "0678f128678cc7b0a84fd52f67f36f78803db4e3"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/default-en-quest.png",
+      "status": "added",
+      "sha": "2b1c172f990bd96191e75365f812d4e413127a86"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/default-en-vendor-arrival.png",
+      "status": "added",
+      "sha": "dcd2afae38ad69c7f450c19d6273ab15b2684c80"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/linux-ci-verification.json",
+      "status": "added",
+      "sha": "2babd1a2aded7e998af720341cb0a7e9381d52d2"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/qualification.json",
+      "status": "modified",
+      "sha": "c7cc45699d5c4e983ae55597071981033a705465"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/validation.json",
+      "status": "modified",
+      "sha": "5e410b125513f8b0e41f1d434c634676e7755683"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/webgl2-tc-quest.png",
+      "status": "added",
+      "sha": "ca516feaa3b9c130cefbfc39bd50b9e60657f35b"
+    },
+    {
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/webgl2-tc-vendor-arrival.png",
+      "status": "added",
+      "sha": "97a33146fe9d24622515e14eb6ffc5b599c46c87"
+    }
+  ]
+}

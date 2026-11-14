@@ -2,7 +2,7 @@
 
 ## R16 完整场景快照压缩候选（2026-11-14）
 
-新增独立协商 `serverWorldSnapshotGzipV1`，无损保留原快照文本，普通/身份/经济回执及玩法/存档不变。100协议＋35Gateway＋59Web/Core 后，匹配新 Gateway/Web 的默认与共享 WebGL2 四个真实游戏会话已通过原入口消费、移动/寻路、每场529目录及同档保存；24条已协商快照1,171,080→212,715消息载荷字节。源码199a的Linux完整CI、真实PG/Redis启动、发行包/ELF与同源地图SHA核验通过；未部署，旧服完整UI、公网61.929秒长尾、冷启及全局parity/CCU仍未因此通过。[证据与下一项](evidence/r16-world-snapshot-gzip-20261114/README.md)
+冻结源码9244的合流验证已完成：38项网关定向回归、75项发布保护、合流网关两后端冷启重登四场及旧f352网关Text兼容两场；每场529目录、六完整字体/113/Q、原8/120秒门槛、189次商人走跑与保存通过。Linux CI43587682763和本地发行包/ELF/同源地图SHA均通过。来源固定为相对199a的5提交/23Blob，独立候选继续准备；正式E6未切，当前SSH认证不可用。公网61.929秒长尾、公开冷启、其他语言和整体1:1仍开放。[来源、画面与边界](evidence/r16-world-snapshot-gzip-20261114/README.md)
 
 ## Physical attack save transform and capacity follow-up (2026-11-14)
 

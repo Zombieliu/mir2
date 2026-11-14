@@ -1,0 +1,194 @@
+{
+  "privateRoot": "C:/r16-snapshot-integration-20261114",
+  "inputs": [
+    {
+      "label": "browser-r1-receipt",
+      "path": "C:/r16-snapshot-integration-20261114/fixture-r1/game-full/quest-after-r1/entry-visual-receipt.json",
+      "bytes": 865762,
+      "sha256": "7627921bd828fee424c206825f8969796ba8fd1c3fa5100ff3ccc5eea561aa46"
+    },
+    {
+      "label": "browser-r1-log",
+      "path": "C:/r16-snapshot-integration-20261114/browser-r1.log",
+      "bytes": 3014,
+      "sha256": "3eed5d3723392aade9ddfc34c367fab50366651d964ebe9fbb821af0eff53ff2"
+    },
+    {
+      "label": "browser-r1-invocation",
+      "path": "C:/r16-snapshot-integration-20261114/browser-invocation-r1.json",
+      "bytes": 600,
+      "sha256": "c629e99ed36378d1094742d7319c2c7ab0a107139a1a45cebca76c716d9b690b"
+    },
+    {
+      "label": "browser-r2-receipt",
+      "path": "C:/r16-snapshot-integration-20261114/fixture-r1/game-full/quest-after-r2/entry-visual-receipt.json",
+      "bytes": 857016,
+      "sha256": "7c37c391f04a6ff2052fcff851dd4f0ac780f8771c53893aca2ca9cf2d3a1021"
+    },
+    {
+      "label": "browser-r2-log",
+      "path": "C:/r16-snapshot-integration-20261114/browser-r2.log",
+      "bytes": 3015,
+      "sha256": "1c15b6aaeffea32275ec11ff26d4abad17dcd354497be9890b8111be110351dc"
+    },
+    {
+      "label": "browser-r2-invocation",
+      "path": "C:/r16-snapshot-integration-20261114/browser-invocation-r2.json",
+      "bytes": 595,
+      "sha256": "05d17c542f9f099d4f24100c2ac9fd95231a4b1895535bc51349393e62db9f14"
+    },
+    {
+      "label": "browser-r3-receipt",
+      "path": "C:/r16-snapshot-integration-20261114/fixture-r1/game-full/quest-after-r3/entry-visual-receipt.json",
+      "bytes": 817352,
+      "sha256": "0733f2961d1ff28c255bd7cb18934bb7a8df3e9caf8e807811b956fbc4d714bd"
+    },
+    {
+      "label": "browser-r3-log",
+      "path": "C:/r16-snapshot-integration-20261114/browser-r3.log",
+      "bytes": 3015,
+      "sha256": "2d38dddd0739d04898aa03ce13fea8ea4e2f3f3fff5fe9a9368073de1bc442df"
+    },
+    {
+      "label": "browser-r3-invocation",
+      "path": "C:/r16-snapshot-integration-20261114/browser-invocation-r3.json",
+      "bytes": 600,
+      "sha256": "fe33ca8c6a5f8e6052a3638fb9968b1b76801bf79f918222ce36be90ffde9ca8"
+    },
+    {
+      "label": "merge-inputs.json",
+      "path": "C:/r16-snapshot-integration-20261114/merge-inputs.json",
+      "bytes": 1539,
+      "sha256": "d992d6b25304c84ae927176a6d5da7c198af891a9b5556731196a2b3b8aed1c9"
+    },
+    {
+      "label": "native-and-fixture-receipt.json",
+      "path": "C:/r16-snapshot-integration-20261114/native-and-fixture-receipt.json",
+      "bytes": 4298,
+      "sha256": "c1b0be6c8bf5940172b01986bb0c896fd63d0a4dd6c27749bf06808bcfd46457"
+    },
+    {
+      "label": "gateway-merge-regression-r1.log",
+      "path": "C:/r16-snapshot-integration-20261114/gateway-merge-regression-r1.log",
+      "bytes": 63147,
+      "sha256": "b1466ab8043d99f7ea1325b5a3810de22e37e50cadc1337f298ad9eb583eb587"
+    },
+    {
+      "label": "gateway-debug-build-r1.log",
+      "path": "C:/r16-snapshot-integration-20261114/gateway-debug-build-r1.log",
+      "bytes": 61721,
+      "sha256": "18dc18743f79277457aa2c2e26b0c688a5ad0c81dbba42cc818a6d044f12d120"
+    },
+    {
+      "label": "release-guard-tests-r1.log",
+      "path": "C:/r16-snapshot-integration-20261114/release-guard-tests-r1.log",
+      "bytes": 18446,
+      "sha256": "ea1d93d7505301400ba4a34d4ef678e78c9ea6097294dfbbb9a841784adb4dff"
+    },
+    {
+      "label": "frozen-release-source.json",
+      "path": "C:/r16-snapshot-integration-20261114/frozen-release-source.json",
+      "bytes": 4557,
+      "sha256": "9f6aac0b69953ddc68d3e46d8ef12dbe93cd502b986f616ebad4e06f72b6312c"
+    },
+    {
+      "label": "fixture-delayed-route-game.mjs",
+      "path": "C:/r16-snapshot-integration-20261114/fixture-r1/game-full/delayed-route-game.mjs",
+      "bytes": 6236,
+      "sha256": "759c627fd315c90dee01093ea2833470cb85907c52596f90f53184fdbd9d8f9e"
+    },
+    {
+      "label": "fixture-entry-player-probe.mjs",
+      "path": "C:/r16-snapshot-integration-20261114/fixture-r1/game-full/entry-player-probe.mjs",
+      "bytes": 6728,
+      "sha256": "6b83c0c355eb98fb36a99c634d1cd299f17d8da07b65b63dc35fab8bdaa1d4e5"
+    },
+    {
+      "label": "fixture-hunt-navigation-game.mjs",
+      "path": "C:/r16-snapshot-integration-20261114/fixture-r1/game-full/hunt-navigation-game.mjs",
+      "bytes": 8889,
+      "sha256": "c74db3f7558315b2389d8b75436cc6e40c548af4ab971b2caa45a49783ac428f"
+    },
+    {
+      "label": "fixture-npc-name-game.mjs",
+      "path": "C:/r16-snapshot-integration-20261114/fixture-r1/game-full/npc-name-game.mjs",
+      "bytes": 7748,
+      "sha256": "74c1c73fd775949223804f0b915179ac9e667e7dd7345af5513be938868546ad"
+    },
+    {
+      "label": "fixture-observe-runtime-schedule.mjs",
+      "path": "C:/r16-snapshot-integration-20261114/fixture-r1/game-full/observe-runtime-schedule.mjs",
+      "bytes": 1115,
+      "sha256": "790e0fe87d434726c256b194d5f2770249d630e95ee18990c4fdfcf9ecfba25f"
+    },
+    {
+      "label": "fixture-prepare-hunt-fixture.mjs",
+      "path": "C:/r16-snapshot-integration-20261114/fixture-r1/game-full/prepare-hunt-fixture.mjs",
+      "bytes": 5228,
+      "sha256": "262e92ba10ac355a84034b0c98c7f3cd34c5db2cb8ff692b0678a9e76f8ac14d"
+    },
+    {
+      "label": "fixture-profile.mjs",
+      "path": "C:/r16-snapshot-integration-20261114/fixture-r1/game-full/profile.mjs",
+      "bytes": 2432,
+      "sha256": "ce502083b96e0cc906e8cfcd5e8c1c02348aac4184abdb1fe29afa0a4a02e159"
+    },
+    {
+      "label": "fixture-quest-navigation-game.mjs",
+      "path": "C:/r16-snapshot-integration-20261114/fixture-r1/game-full/quest-navigation-game.mjs",
+      "bytes": 8906,
+      "sha256": "0123db0f17f4bd9a905ec5e0a72f511b865d00458832272341c645deceff4e31"
+    },
+    {
+      "label": "fixture-right-button-game.mjs",
+      "path": "C:/r16-snapshot-integration-20261114/fixture-r1/game-full/right-button-game.mjs",
+      "bytes": 7268,
+      "sha256": "874335b48b745e4907307288459f599384b32129bbf083f1868c1bd7b2b05584"
+    },
+    {
+      "label": "fixture-run.mjs",
+      "path": "C:/r16-snapshot-integration-20261114/fixture-r1/game-full/run.mjs",
+      "bytes": 94353,
+      "sha256": "0d90f91f09a120479d45d966246a821e6a9ca0178dde47e017a4536828afb41a"
+    },
+    {
+      "label": "fixture-standing-faces.mjs",
+      "path": "C:/r16-snapshot-integration-20261114/fixture-r1/game-full/standing-faces.mjs",
+      "bytes": 5719,
+      "sha256": "8e540be8d184c3161330c8224e9472750b882d59136193b2a917ff30032fd044"
+    },
+    {
+      "label": "fixture-target-switch-game.mjs",
+      "path": "C:/r16-snapshot-integration-20261114/fixture-r1/game-full/target-switch-game.mjs",
+      "bytes": 6005,
+      "sha256": "65ead5533629748a43c137a89795be2ddc3fe6c7b05115ed18d82422a8705fcd"
+    },
+    {
+      "label": "fixture-ui-asset-fault.mjs",
+      "path": "C:/r16-snapshot-integration-20261114/fixture-r1/game-full/ui-asset-fault.mjs",
+      "bytes": 5877,
+      "sha256": "e8a9dd4454943ffd49cea4f533d4e0bb5692e431f83888c5d9b2e740444c0b51"
+    },
+    {
+      "label": "fixture-verify-prewarm-session.mjs",
+      "path": "C:/r16-snapshot-integration-20261114/fixture-r1/game-full/verify-prewarm-session.mjs",
+      "bytes": 3895,
+      "sha256": "1996e21c83b8559662b444d7ddd09f163a9c7c28698f52f4c82e4300d0f99415"
+    },
+    {
+      "label": "fixture-verify-public-quest.mjs",
+      "path": "C:/r16-snapshot-integration-20261114/fixture-r1/game-full/verify-public-quest.mjs",
+      "bytes": 4548,
+      "sha256": "775598cb6871214d554791386db6fe0a4f8a33678aff3fe298f1c46986df690f"
+    },
+    {
+      "label": "fixture-verify-scene-state-body.mjs",
+      "path": "C:/r16-snapshot-integration-20261114/fixture-r1/game-full/verify-scene-state-body.mjs",
+      "bytes": 13005,
+      "sha256": "0d2fccce9d7d4b22266db4fe0aba0ccbc1781ee883671c2d528037f52e830df3"
+    }
+  ],
+  "rawAuthenticationOrWorldPayloadsExported": false,
+  "prior199aExePreserved": "C:/r16-snapshot-integration-20261114/preserved-199a/mir2-gateway.exe",
+  "preservedExeSha256": "c5a6a71809d94e2cae99c143521bbfa24bdf58bb199731c3d2cd24d2ddc61098"
+}

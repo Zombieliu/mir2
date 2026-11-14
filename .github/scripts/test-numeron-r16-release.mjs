@@ -113,8 +113,8 @@ function fixture(operation = 'numeron-promote') {
     if (parsed.origin === 'https://api.github.com') {
       assert.equal(request.headers.Authorization, `Bearer ${GH}`);
       if (qr && request.pathname === `/repos/${REPOSITORY}/compare/${QR_RELEASE.baseSource}...${source}`) {
-        return json({ status: 'ahead', ahead_by: 1, behind_by: 0, merge_base_commit: { sha: QR_RELEASE.baseSource },
-          commits: [{ sha: source }], files: [...QR_RELEASE.changedFiles].reverse() });
+        return json({ status: 'ahead', ahead_by: QR_RELEASE.sourceCommits.length, behind_by: 0, merge_base_commit: { sha: QR_RELEASE.baseSource },
+          commits: QR_RELEASE.sourceCommits.map(sha => ({ sha })), files: [...QR_RELEASE.changedFiles].reverse() });
       }
       if (request.pathname.endsWith('/jobs')) return json(jobs);
       if (request.pathname.endsWith('/artifacts')) return json(artifacts);
@@ -233,6 +233,7 @@ test('QR stage creates only the pinned game source, with the live alias left on 
   assert.equal(body.gitSource.ref, QR_RELEASE.sourceRef);
   assert.equal(r.result.sourceClosure.base, QR_RELEASE.baseSource);
   assert.equal(r.result.sourceClosure.assetSource, QR_RELEASE.assetSource);
+  assert.deepEqual(r.result.sourceClosure.commits, QR_RELEASE.sourceCommits);
   assert.deepEqual(r.result.sourceClosure.changedFiles, QR_RELEASE.changedFiles);
   assert.equal(body.env.MIR2_DUBHE_CONNECT_RELAY_URL, QR_RELEASE.relay);
   assert.equal(body.meta.numeronR16ConnectRelay, QR_RELEASE.relay);
@@ -243,8 +244,8 @@ test('QR stage creates only the pinned game source, with the live alias left on 
 test('QR stage rejects a deployment source beyond the exact release pin', async () => {
   const f = fixture('numeron-qr-stage');
   f.state.onRequest = request => request.pathname.includes('/compare/') ? json({
-    status: 'ahead', ahead_by: 1, behind_by: 0, merge_base_commit: { sha: QR_RELEASE.baseSource },
-    commits: [{ sha: QR_RELEASE.source }],
+    status: 'ahead', ahead_by: QR_RELEASE.sourceCommits.length, behind_by: 0, merge_base_commit: { sha: QR_RELEASE.baseSource },
+    commits: QR_RELEASE.sourceCommits.map(sha => ({ sha })),
     files: [...QR_RELEASE.changedFiles,
       { status: 'modified', filename: 'mir2-web3/apps/web/app/api/wallet/dubhe/session/route.ts' }],
   }) : undefined;
@@ -252,6 +253,46 @@ test('QR stage rejects a deployment source beyond the exact release pin', async 
   failed(result, /qrSourceClosureMismatch/);
   assert.equal(writes(result).length, 0);
 });
+
+function reviewedQrComparison() {
+  return { status: 'ahead', ahead_by: QR_RELEASE.sourceCommits.length, behind_by: 0,
+    merge_base_commit: { sha: QR_RELEASE.baseSource },
+    commits: QR_RELEASE.sourceCommits.map(sha => ({ sha })), files: [...QR_RELEASE.changedFiles] };
+}
+
+test('QR stage accepts only the reviewed merge commits regardless of API ordering', async () => {
+  const f = fixture('numeron-qr-stage');
+  f.state.onRequest = request => {
+    if (!request.pathname.includes('/compare/')) return undefined;
+    const comparison = reviewedQrComparison(); comparison.commits.reverse(); return json(comparison);
+  };
+  const result = await f.execute();
+  assert.ifError(result.error);
+  assert.equal(writes(result).length, 1);
+  assert.equal(writes(result)[0].body.gitSource.sha, QR_RELEASE.source);
+  assert.equal(result.result.trafficAfter.alias, QR_RELEASE.baseline);
+});
+
+for (const [name, mutate] of [
+  ['a missing reviewed commit', c => { c.commits.pop(); c.ahead_by--; }],
+  ['a duplicate commit at the expected count', c => { c.commits[1] = c.commits[0]; }],
+  ['an unreviewed intermediate commit', c => { c.commits[0] = { sha: 'a'.repeat(40) }; }],
+  ['an additional commit', c => { c.commits.push({ sha: 'a'.repeat(40) }); c.ahead_by++; }],
+  ['a changed merge base', c => { c.merge_base_commit.sha = 'b'.repeat(40); }],
+  ['a malformed commit collection', c => { c.commits = { length: QR_RELEASE.sourceCommits.length }; }],
+]) {
+  test('QR stage rejects ' + name + ' before any release write', async () => {
+    const f = fixture('numeron-qr-stage');
+    f.state.onRequest = request => {
+      if (!request.pathname.includes('/compare/')) return undefined;
+      const comparison = reviewedQrComparison(); mutate(comparison); return json(comparison);
+    };
+    const result = await f.execute();
+    failed(result, /qrSourceClosureMismatch/);
+    assert.equal(writes(result).length, 0);
+    assert(!JSON.stringify(result.receipts).includes(SECRET));
+  });
+}
 
 test('QR promotion proves protected and public routes and keeps intents out of the receipt', async () => {
   const f = fixture('numeron-qr-promote'), r = await f.execute();

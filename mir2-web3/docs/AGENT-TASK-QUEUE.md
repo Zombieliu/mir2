@@ -6,7 +6,7 @@ Updated 2026-11-14 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-14 10:36UTC独立API仍E6／Ae3／READY，无新发布。199a场景快照候选已在匹配新Gateway/Web完成默认英文男战士及共享WebGL2繁中女战士的冷启/完全关闭浏览器重登，共四场；原入口消费、每场529目录、六字体/113/Q、189步商人路线和保存通过。24条协商快照消息载荷1,171,080→212,715B；194项代码检查不重复累计。三轮脚本路径/诊断观察失败保留；英文画面仍含中文标签。专用Next BUILD_ID KQ7eN1Lo2uNQhIxqKTlt7，199a的Linux完整CI、发行包/ELF/地图SHA已过；期间合入b950网关诊断，先补合流回归与同源工件，再验旧服UI及公网。[候选及下一项](evidence/r16-world-snapshot-gzip-20261114/README.md)。原61.929／13.286秒公网ACK、120秒冷启和整体1:1仍开放，Goal active。
+2026-11-14 9244合流已通过38项网关定向回归、75项发布保护，以及合流网关默认英文/共享WebGL2繁中各冷启重登四场，旧f352网关Text兼容两场；每场529目录、六字体/113/Q、189次商人走跑、原8/120秒门槛和存档通过。四场合流24条快照1,171,080→212,717B。Web/Core/协议与199a相同，专用Web构建复用KQ7eN1Lo2uNQhIxqKTlt7；旧199a工件已保全。Linux CI43587682763、发行包/ELF/同源地图SHA全部通过；发布来源已精确固定9244的5提交/23Blob，继续创建游戏独立候选。11:41UTC独立API仍E6/Ae3/READY；现有SSH认证被拒，已询问当前用户名/密钥路径，继续无需SSH的检查。公网长尾/冷启与整体1:1仍开放，原WIP保留，Goal active。[结果与边界](evidence/r16-world-snapshot-gzip-20261114/README.md)。
 
 ## 保留的当前未结项
 

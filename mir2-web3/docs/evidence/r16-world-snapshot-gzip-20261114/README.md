@@ -86,3 +86,19 @@ node --test scripts/test-gateway-catalog-transport.mjs scripts/test-client-core-
 ## 分支合流边界
 
 验证期间，R16 分支合入 `525e74364a` 的有界输入/关闭延迟诊断，集成头为 `b950fce0a14f739d89008c864670dcb8f7c8df57`。与本轮 `199a294130` 相比，Web、协议和 Core 源码逐项 Git 差异为空；Gateway 的 `routing.rs`、`web.rs`、`web_transport.rs` 有新增诊断。因此本轮资格固定在 **199a**，不转记为 b950 网关已通过。现有四场浏览器证据、发行工件和未提交改动均保留；下一项先核验该合流。[来源、私有输入、图像和边界检查](validation.json)
+
+## 合流与旧网关兼容复验
+
+后续已在冻结提交 **`9244ce3dd7cd2129a70e650be1430e971b6c96ab`** 完成合流验证。它的 Gateway 产品代码包含 b950 诊断；Web、协议和 Core 与 199a 相同。本轮未提交改动继续保留。先将旧 199a debug Gateway 完整保存到 `C:/r16-snapshot-integration-20261114/preserved-199a/mir2-gateway.exe` 并校验原 SHA，之后复用私有 Cargo 编译目录，仅用 Git 中三份确定的网关文件覆盖私有编译暂存；原物理 Web 源码、Linux 199a 包和所有旧记录保留。
+
+- 合流 Gateway **38 项**通过：原快照/目录与真实 TLS、写入期限、关闭保护，加三个诊断选择器用例；0 failed/ignored。新 debug Gateway SHA `6557d9da87e8cb867616caab80efb28c3063ac7361de1c5d59b0615d401c0842`，147,968,000 B。
+- 默认英文男战士、共享 WebGL2 繁中女战士各冷启与完全关闭浏览器后重登，共 **四场**通过。继续使用字节相同的已编译 Web KQ7eN1Lo2uNQhIxqKTlt7；每场完整 529 目录、六字体 SHA、113/113、Q、原 8 秒移动/120 秒 Native、189 次商人走跑和权威保存通过。冷 Native 分别54.565/52.188秒，重登1.377/1.322秒。
+- 另用旧网关工件 SHA `f35261772f379b04759011a63a2f3c463a36e754ebbde71915e893c84d77d490` 跑默认英文的冷启/完整重开 **两场**。新 Web 声明能力后，旧网关仍发送 Text 快照；游戏自身原入口匹配 Text 数据，二进制快照数明确为0，完整529目录、Q、原门槛、商人路线和保存通过。此项不是当前公网 fd3 服务的验收。
+
+四场合流会话共24条压缩快照，1,171,080→212,717消息载荷字节；两场旧网关单独记为 Text 兼容，没有算进压缩结果。六场原黄金档未改，自己的浏览器/Next/代理/Gateway 全部正常关闭。[六场结构化结果](merged-browser-verification.json) · [私有输入与旧工件保全](merged-private-inputs.json) · [合流默认到达](merged-default-vendor-arrival.png) · [合流共用WebGL2到达](merged-webgl2-vendor-arrival.png) · [旧网关Text到达](legacy-text-vendor-arrival.png)
+
+发布保护从旧7140候选更新为精确9244来源：相对199a的 **5个完整提交ID、23个路径/状态/Blob ID**，已逐项与实际 GitHub compare 相等。保留目标团队/游戏项目、固定资源、E6生产基线、只创建候选且不自动接域名等原保护；校验完整提交集合，拒绝缺失、重复、未知、额外提交、错误merge-base或非数组响应。75项发布/入口/域名检查通过。[独立来源核对](merged-release-source-remote.json)
+
+[同源Linux工作流43587682763](https://github.com/Zombieliu/mir2/actions/runs/43587682763) 已全部成功，84,747,336 B 工件ZIP完整SHA `25c04ed92da19464fe9b07f6402270c6e49666f61c3eee57bd22cd43c9bf8842`、内部发行包 `2c450f290af80659cd510eb9bc7ab6d2b0e67387d993e2853c9e6c7059fed713`、Gateway ELF `6c42314b92de52114260d3233ac0df013b0fae460be843a49b5c04de345c5553`、Zone host `d65a74fd30137613fe8d9cabbf00cb1e61e5d1708ccb945afed38dc27d79cada` 及地图0解压后的原SHA均已本地核验。[Linux资格与私有日志摘要](merged-linux-ci-verification.json)。可复用工件在 `C:/r16-snapshot-integration-20261114/linux-package-verified`，没有安装远端服务。
+
+2026-11-14 11:41:13 UTC 独立API读回正式入口仍E6／Ae3／READY；本轮尚未切生产。[读回](merged-production-readback.json)。游戏机拒绝现有SSH认证，已请求当前有效用户名/本机密钥路径；候选与无需SSH的检查继续推进。原公网长尾、完整冷启和整体1:1仍开放，Goal active。

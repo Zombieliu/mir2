@@ -16,20 +16,132 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: '7140aae96c41986968aadf040436e0ab396e1fdb',
+  source: "9244ce3dd7cd2129a70e650be1430e971b6c96ab",
   sourceRef: BRANCH,
-  baseSource: 'fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5',
-  assetSource: 'f2de762309768b51b39438c2437c14e819df9bf7',
+  baseSource: "199a294130f386a245e86d3c1d81f731d7d7277b",
+  assetSource: "f2de762309768b51b39438c2437c14e819df9bf7",
+  sourceCommits: [
+    "525e74364ab87ad49e84c26c8dd22db9fe9348d5",
+    "5579f352b66bd32560baef45de0310677f817388",
+    "b950fce0a14f739d89008c864670dcb8f7c8df57",
+    "08cb36687161dbbf82ed03c06da9fa88a903a417",
+    "9244ce3dd7cd2129a70e650be1430e971b6c96ab"
+  ],
   changedFiles: [
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
-      "sha": "a97ea7d52378b70dbcd80337ac41495cd04eec67"
+      "filename": "mir2-web3/apps/gateway/src/routing.rs",
+      "sha": "f24008af76145a0ab1fcdb7d865c990f0228b9ae"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-asset-worker-fallback.mjs",
-      "sha": "54a151f68c09844d6154d9a7f65bb6ec4dc5887f"
+      "filename": "mir2-web3/apps/gateway/src/web.rs",
+      "sha": "13493b3bbbfdadadf8b0c1d0557469fb504fcd32"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/gateway/src/web_transport.rs",
+      "sha": "daf07cadb5b95992089ebd70153dcdcbd0beaa19"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/AGENT-CURRENT.md",
+      "sha": "455e8d5dc6bb2b6856a27d922b9e49f5ce96838e"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+      "sha": "4d198e36a0f61765c0952ef54b6339cc076d04b5"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/BACKEND-1TO1-PROGRESS.md",
+      "sha": "c073ba685c12467818f2ab951e7747e88a2f5ba4"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
+      "sha": "7dd73a9e3f9e24c849b6eaf448860a1149791bcd"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/CRYSTAL-SERVER-PARITY.md",
+      "sha": "b9c8610f887df61a5a68eb80dde6a9027fbf2f6f"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+      "sha": "236f123da869e58e5786b49f876136e0b33a2a72"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/README.zh-CN.md",
+      "sha": "7b32d096f9dd3712068722c51dceb09ee4cb7da0"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/cloud-fd3-progressive.closed.json",
+      "sha": "afed7f91ac98e49801f7a8d4a17bfa546dc81b81"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/input-gate-trace2.closed.json",
+      "sha": "a58c9a944c47387bdbac5b776e09fcfbcf8ac0b3"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/README.md",
+      "sha": "5ddc5d3adf007be49a45a0b04804a49142e5d314"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/browser-inputs-manifest.json",
+      "sha": "b857d5418d19ad851aec5c27da25a7df5ebc1102"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/browser-production-readback.json",
+      "sha": "13390bc09d945b34843b546835a7a95f47d8b852"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/browser-verification.json",
+      "sha": "0678f128678cc7b0a84fd52f67f36f78803db4e3"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/default-en-quest.png",
+      "sha": "2b1c172f990bd96191e75365f812d4e413127a86"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/default-en-vendor-arrival.png",
+      "sha": "dcd2afae38ad69c7f450c19d6273ab15b2684c80"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/linux-ci-verification.json",
+      "sha": "2babd1a2aded7e998af720341cb0a7e9381d52d2"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/qualification.json",
+      "sha": "c7cc45699d5c4e983ae55597071981033a705465"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/validation.json",
+      "sha": "5e410b125513f8b0e41f1d434c634676e7755683"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/webgl2-tc-quest.png",
+      "sha": "ca516feaa3b9c130cefbfc39bd50b9e60657f35b"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/docs/evidence/r16-world-snapshot-gzip-20261114/webgl2-tc-vendor-arrival.png",
+      "sha": "97a33146fe9d24622515e14eb6ffc5b599c46c87"
     }
   ],
   entryScene: {
@@ -500,19 +612,24 @@ export async function runNumeronRelease({ env = process.env, fetchImpl = fetch,
     const assetSha = qr ? QR_RELEASE.assetSource : sha;
     const sourceRef = qr ? QR_RELEASE.sourceRef : BRANCH;
     if (qr) {
-      const { baseSource, changedFiles } = QR_RELEASE;
+      const { baseSource, changedFiles, sourceCommits } = QR_RELEASE;
       const comparison = await github(`/compare/${baseSource}...${sha}`);
       const files = Array.isArray(comparison.files) ? comparison.files : [];
       const byPath = new Map(files.map(file => [file?.filename, file]));
-      requireRelease(comparison.status === 'ahead' && comparison.ahead_by === 1 && comparison.behind_by === 0
-        && comparison.merge_base_commit?.sha === baseSource && comparison.commits?.length === 1
-        && comparison.commits[0].sha === sha && files.length === changedFiles.length && byPath.size === files.length
+      const commits = Array.isArray(comparison.commits) ? comparison.commits : [];
+      const expectedCommits = new Set(sourceCommits);
+      const actualCommits = new Set(commits.map(commit => commit?.sha));
+      requireRelease(expectedCommits.size === sourceCommits.length && expectedCommits.has(sha)
+        && comparison.status === 'ahead' && comparison.ahead_by === sourceCommits.length && comparison.behind_by === 0
+        && comparison.merge_base_commit?.sha === baseSource && commits.length === sourceCommits.length
+        && actualCommits.size === expectedCommits.size && [...actualCommits].every(commit => expectedCommits.has(commit))
+        && files.length === changedFiles.length && byPath.size === files.length
         && changedFiles.every(expected => {
           const actual = byPath.get(expected.filename);
           return actual?.status === expected.status && actual.sha === expected.sha;
         }),
       'qrSourceClosureMismatch');
-      receipt.sourceClosure = { base: baseSource, assetSource: assetSha, ref: sourceRef, changedFiles };
+      receipt.sourceClosure = { base: baseSource, assetSource: assetSha, ref: sourceRef, commits: sourceCommits, changedFiles };
     }
     const run = await github(`/actions/runs/${runId}`), jobs = await github(`/actions/runs/${runId}/jobs?per_page=100`),
       artifacts = await github(`/actions/runs/${runId}/artifacts?per_page=100`);
