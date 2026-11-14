@@ -6,7 +6,13 @@
 
 ## 最新已验证结果（2026-11-15，本机 100 人及 fd3 云机 25 人档均未通过，云机上限已恢复）
 
-新普通 Windows Release 已实际生成：源 `ecf88ae6`、代码集成 `33c75002`、PE `7d2a6c81`（99873792B，Gateway/Simulation 均 opt3/default features，无包 opt 覆盖）。114 个去重原生回归全部实际通过（Simulation84、Gateway29、真实RPC1）；编译 Cargo0/包装器1、180s 后仅清理已核归属的空闲 VCTIP 与原生验证0/0正常退出分开记录。Root 从实际 Cargo manifest 补核全部7个本地依赖目录，包含 client-wire，均与集成版本 Git tree 相等。[新两人校准闭合记录](projection-mentor-parse-native114-calibration2.closed.json)：20:05:26.454–20:06:26.454 UTC 完整60s，64/64、2/2逐人分钟窗口、装备、普通 Logout/Close、fresh2、全员File2与Enhanced全部通过；controller/driver/server0/0/0，93行资源，双Job正常退出无kill。新增12次认证完整追加V33=1677，旧1665前缀不变。新同计划100人轮已启动，保持原限流、资源、动作与截止时间；入场连接数不等于稳态或容量通过，结果仍PENDING。未部署云端或认证三端容量。
+新 `7d2a6c81` 普通 Release 的[100人复测已闭合](projection-mentor-parse-default100.closed.json)：21:05:53.733–21:10:53.733 UTC完整300s，15366/16000按时完成、81超时、553未发、167/500逐人分钟窗口通过，整体仍FAIL。3名装备参与者、100人普通Logout/Close、fresh0/99均报告成功；controller/driver/server=1/1/0，3508行资源，双Job自然退出无kill。FileV8前置门拒绝、sample0且未打开私密Store；EnhancedV8与两验证进程均实际退出1，未建立全员落盘认证。114次新认证全部追加为V34=1791，旧1677前缀完整保留，失败不能用作通过前驱。
+
+[本轮独立报告/资源分析](projection-mentor-parse-default100.failure-analysis.json)实际0/0、4GiB/0xf000、正常无kill：81超时中owner单晚30、peer单晚25、双方晚26；553未发为392次previousActionPending、161次preconditionFailed。完整300s服务均值1.168023核、区间最大3.936649核；全轮峰Job Commit2647703552B，不是RAM/RSS。应用下行均值4.986123Mb/s，也不证明公网饱和；不能拿这一轮与旧6024的单轮波动宣布提升或回归。纯解析局部改善尚未解决百人长尾，下一步保持同工件与原标准补测25/50档，沿用真实已通过的同工件2人校准并保留后来全部失败认证；新SLOW20分段诊断单列准备，需新两人通过后才可跑100。
+
+对应Linux候选已在维护分支 `70160239` 完成[整轮CI](https://github.com/Zombieliu/mir2/actions/runs/43638440652)；Gateway严格native job也成功，R2发布关闭、Numeron跳过。ELF `08d4d0d88b680142990a85a0905208c605dc5b4ecb366d34a6004051e0711498`、104000312B，7门槛、真实PG/Redis启动及1620地图Git/包匹配通过。[Root原生子集复核](mentor-parse-linux-artifact.native-subset.json)重新对官方2个ZIP与ELF全SHA/头/大小核对；地图逐项结论采用已冻结审计，未伪称再次全量复算。fullCandidateVerificationPassed仍false，未执行ELF、SSH或切换云机，不能将构建通过换作容量通过。
+
+新普通 Windows Release 已实际生成：源 `ecf88ae6`、代码集成 `33c75002`、PE `7d2a6c81`（99873792B，Gateway/Simulation 均 opt3/default features，无包 opt 覆盖）。114 个去重原生回归全部实际通过（Simulation84、Gateway29、真实RPC1）；编译 Cargo0/包装器1、180s 后仅清理已核归属的空闲 VCTIP 与原生验证0/0正常退出分开记录。Root 从实际 Cargo manifest 补核全部7个本地依赖目录，包含 client-wire，均与集成版本 Git tree 相等。[新两人校准闭合记录](projection-mentor-parse-native114-calibration2.closed.json)：20:05:26.454–20:06:26.454 UTC 完整60s，64/64、2/2逐人分钟窗口、装备、普通 Logout/Close、fresh2、全员File2与Enhanced全部通过；controller/driver/server0/0/0，93行资源，双Job正常退出无kill。新增12次认证完整追加V33=1677，旧1665前缀不变。这份两人记录之后的100人闭合结果见本节开头；114原生回归与两人校准不能代替容量通过。未部署云端或认证三端容量。
 
 [同计划100人应用字节审计](same-plan100-wire-cost.audit.json)核对原版A7与旧6024/c155实跑：300s客户端接收32947221B/187202034B，平均0.878593/4.992054Mb/s，约5.68倍。原版16000/16000、500/500窗口通过；旧现代版15398/16000、159/500窗口通过。原版计完整原生帧含4B头，现代计无压缩JSON载荷、排除WS/TCP/IP；完成工作量也不同，这个比例不能称每动作开销、线路饱和或人数比例。没有用JSONL文件大小当网络流量，也没有把旧6024数据冒记为新7d2结果；“30MBPS”的单位尚未核实，云机51是准入配置而非测得的硬件上限。V14私有归档345份闭合证据、635153859B已受限0/0正常完成，旧失败与原件保留。
 
