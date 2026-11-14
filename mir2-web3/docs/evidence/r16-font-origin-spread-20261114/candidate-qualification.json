@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "source": "7140aae96c41986968aadf040436e0ab396e1fdb",
+  "localSessions": 4,
+  "sourceQualificationSha256": "8e4f3707f5c57bc58d7536e218d64c7fc983c0f52504e4d4909335c257bf0c42",
+  "sourceInputsSha256": "8cef019ecee0e39906f6cef788a00c790e1a3d9b49458df27ba30c3e64f9db5b",
+  "localQualificationSha256": "b326036e63760c340ef4f95f116dea4cc24456dd85f54e800c5fa63058276c8d",
+  "build": {
+    "candidate": "7140aae96c41-font-origin-spread-5feeb428",
+    "id": "NoSF23HrNg6Fu9FfUOXIC",
+    "dist": ".next-font-origin-spread-r1",
+    "durationMs": 35899,
+    "receiptSha256": "da7e3e8a104044351960efe5700f3cf494fba015408096072b81326ac2ea4206"
+  },
+  "tests": {
+    "resources": 155,
+    "routes": 59,
+    "release": 68
+  },
+  "publicUiPassed": false,
+  "humanAccepted": false
+}

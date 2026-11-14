@@ -14,7 +14,7 @@ Short routing summary, updated 2026-11-14 (Asia/Shanghai). This indexes recorded
 
 ## Last recorded decisions and open work
 
-2026-11-14 正式恢复e6c923b7c6／Ae3，04:43UTC独立API确认READY，回退后简繁真实出码pending通过。6ae字体共用两路的本地132＋68项／Chrome／构建／2,773项／两后端四会话通过；尝试发布15项字节检查与公网确认／进城／首步185ms／113／退出通过，但共享HUD失败、六字体0/6，完整false，已回退。运行包首帧后133.443秒才收完，原120秒资格false；58资源错误／59console及所有原失败保留。[本次失败与下一步](evidence/r16-font-lanes-20261114/production/README.md) · [本地机制边界](evidence/r16-font-lanes-20261114/README.md)。先隔离实际公开源响应头、编码／解码正文、无Worker／正常Worker与运行包竞争，未定因前不再同源盲目重发。先前b19失败仍[保留](evidence/r16-name-autosize-20261114/production/README.md)。原正式寻路三格前视／保留目标重算在线，旧HUD126.060秒超120秒仍[开放](evidence/r16-route-lookahead-20261114/production/README.md)。原Shell／Native WIP保留；真实第三格多人占位、R15旧停步、混合语言／raw标题／翻译分行、完整死亡复活、全GPU、当前三职业新手线及实体Windows／手机继续开放，Goal active；旧30级夹具不算新路线通过。
+2026-11-14 正式仍为e6c923b7c6／Ae3，独立API再次核对。分源候选7140aae96c已推送：155项资源＋59项寻路＋68项发布保护、独立构建／2,773项输入绑定、两后端英繁冷开／完整关闭同角重登四会话通过。两条商人路线各189次普通走跑到(322,293)，完整六字体／113／共享HUD-Q／NPC-X／Worker／保存通过。八组真实公开源隔离记录保留，含两组六字体120秒失败；候选仅自有Worker函数注入时完整收齐，非公网发行或Native证明。原6ae发布失败、133.443秒运行包与e6旧126.060秒冷失败不倒填。准备受保护发布7140并重新完整回放，尚未切流。[候选、原件及门槛](evidence/r16-font-origin-spread-20261114/README.md)。动态第三格多人占位、R15旧停步、混合语言／raw标题／分行、完整死亡复活、三职业新手30级、实体Windows／手机及整体1:1继续开放；Goal active。
 
 2026-11-12 正式站已发布 `51d2dcc346`：共享图片取消与图集计时/JSON大小缓存身份修复。本机75项、生产构建及两后端重开同档通过；公网简繁出码、手机尺寸官方钱包Testnet签名、进比奇、权威移动、共用HUD/任务窗、113/113预取和正常退出通过，无需回滚。云端缓存身份与计算一致；Worker正常更新缓存一次，未迁移旧007缓存。本次观测起点到首画面65.2秒/共用HUD104.7秒（点击进游戏后约6.8秒/46.3秒），继续优化冷加载；实体手机、完整1:1及历史未结项仍开放。[发布与边界](evidence/r16-cache-repair-20261112/README.md)
 

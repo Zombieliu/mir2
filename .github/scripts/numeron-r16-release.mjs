@@ -16,25 +16,20 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: '6ae96fa6017d511255ac46216c034594b6fe500f',
+  source: '7140aae96c41986968aadf040436e0ab396e1fdb',
   sourceRef: BRANCH,
-  baseSource: 'e3f073800a73a99db5e4606b6fdfc292526c66ed',
+  baseSource: 'fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5',
   assetSource: 'f2de762309768b51b39438c2437c14e819df9bf7',
   changedFiles: [
     {
       "status": "modified",
       "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
-      "sha": "0bc19924b00cd02f62b387cbc3157838c8fdddb7"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/scripts/smoke-asset-font-admission.mjs",
-      "sha": "c56ea212555969824ea54e658a52f5c5a3266ed0"
+      "sha": "a97ea7d52378b70dbcd80337ac41495cd04eec67"
     },
     {
       "status": "modified",
       "filename": "mir2-web3/apps/web/scripts/test-asset-worker-fallback.mjs",
-      "sha": "ea02643d0c9c3a6c859a02f6a0f37296e412aa1b"
+      "sha": "54a151f68c09844d6154d9a7f65bb6ec4dc5887f"
     }
   ],
   entryScene: {
@@ -109,8 +104,8 @@ export const QR_RELEASE = Object.freeze({
   },
   entryAssetWorker: {
     "path": "/mir2-asset-worker.js",
-    "bytes": 43171,
-    "sha256": "3b07de456c113135d2d37248893a707ce98179b419429fe6d58c18981b510dba"
+    "bytes": 44059,
+    "sha256": "94796b40517c7fd1ca7914ebaeb7a99d6ebd4a3546e2fa28d1c9d75abe836218"
   },
   assetRunId: '42494701555',
   baseline: 'dpl_Ae3hNyFygQuSMZDesBXCZDpUECTY',

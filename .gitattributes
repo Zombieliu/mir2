@@ -27,6 +27,9 @@ mir2-web3/tools/crystal-gdi-text/fixtures/generated/.crystal-gdi-text-output tex
 # Keep this round's QA display-log hashes stable across checkouts.
 mir2-web3/docs/evidence/r16-death-locale-20261114/*.txt text eol=lf
 mir2-web3/docs/evidence/r16-name-autosize-20261114/*.txt text eol=lf
+# Frozen TAP indentation and mixed-ending producer bytes retain their original SHA.
+mir2-web3/docs/evidence/r16-font-origin-spread-20261114/**/*.log text eol=lf whitespace=-blank-at-eol
+mir2-web3/docs/evidence/r16-font-origin-spread-20261114/producers/*.mjs -text whitespace=cr-at-eol
 
 # Preserve the frozen read-only CI security probe bytes.
 mir2-web3/scripts/cloudflare_read_authority_probe.py -text

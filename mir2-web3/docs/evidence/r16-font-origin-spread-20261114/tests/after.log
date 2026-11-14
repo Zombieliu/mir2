@@ -1,0 +1,948 @@
+TAP version 13
+# Subtest: HUD recovery reads only failed URLs after worker configuration and keeps first failures
+ok 1 - HUD recovery reads only failed URLs after worker configuration and keeps first failures
+  ---
+  duration_ms: 534.0634
+  type: 'test'
+  ...
+# Subtest: recovery does not erase a failure before its replacement body reaches EOF
+ok 2 - recovery does not erase a failure before its replacement body reaches EOF
+  ---
+  duration_ms: 498.1493
+  type: 'test'
+  ...
+# Subtest: persistent HUD failures get at most one bounded recovery sweep
+ok 3 - persistent HUD failures get at most one bounded recovery sweep
+  ---
+  duration_ms: 2364.2119
+  type: 'test'
+  ...
+# Subtest: owner cancellation during the configuration refresh prevents every recovery request
+ok 4 - owner cancellation during the configuration refresh prevents every recovery request
+  ---
+  duration_ms: 483.8408
+  type: 'test'
+  ...
+# Subtest: healthy HUD and non-HUD packs do not configure or retry
+ok 5 - healthy HUD and non-HUD packs do not configure or retry
+  ---
+  duration_ms: 485.1513
+  type: 'test'
+  ...
+# Subtest: a failed configuration refresh cannot manufacture success or retain the stage forever
+ok 6 - a failed configuration refresh cannot manufacture success or retain the stage forever
+  ---
+  duration_ms: 953.4953
+  type: 'test'
+  ...
+# Subtest: canceling a recovery body preserves its attempt diagnostics and cancels its bytes
+ok 7 - canceling a recovery body preserves its attempt diagnostics and cancels its bytes
+  ---
+  duration_ms: 487.9475
+  type: 'test'
+  ...
+# Subtest: public prewarm progress waits for the complete response body
+ok 8 - public prewarm progress waits for the complete response body
+  ---
+  duration_ms: 13.0214
+  type: 'test'
+  ...
+# Subtest: a disconnected body is retried and only the final complete bytes are returned
+ok 9 - a disconnected body is retried and only the final complete bytes are returned
+  ---
+  duration_ms: 160.9374
+  type: 'test'
+  ...
+# Subtest: three broken bodies produce one failed prewarm metric and its URL
+ok 10 - three broken bodies produce one failed prewarm metric and its URL
+  ---
+  duration_ms: 481.5543
+  type: 'test'
+  ...
+# Subtest: body inactivity cancels the incomplete stream before retrying
+ok 11 - body inactivity cancels the incomplete stream before retrying
+  ---
+  duration_ms: 191.588
+  type: 'test'
+  ...
+# Subtest: continuing chunks renew the idle deadline instead of imposing a total body deadline
+ok 12 - continuing chunks renew the idle deadline instead of imposing a total body deadline
+  ---
+  duration_ms: 376.708
+  type: 'test'
+  ...
+# Subtest: an owner cancellation cannot turn a cancelled body prefix into success
+ok 13 - an owner cancellation cannot turn a cancelled body prefix into success
+  ---
+  duration_ms: 0.6107
+  type: 'test'
+  ...
+# Subtest: an owner cancellation during backoff prevents another request
+ok 14 - an owner cancellation during backoff prevents another request
+  ---
+  duration_ms: 30.5524
+  type: 'test'
+  ...
+# Subtest: a header timeout retires and retries the request
+ok 15 - a header timeout retires and retries the request
+  ---
+  duration_ms: 186.1946
+  type: 'test'
+  ...
+# Subtest: non-success responses are cancelled, bounded and never counted as warmed
+ok 16 - non-success responses are cancelled, bounded and never counted as warmed
+  ---
+  duration_ms: 470.1941
+  type: 'test'
+  ...
+# Subtest: oversized bodies are cancelled once without retaining or retrying their prefix
+ok 17 - oversized bodies are cancelled once without retaining or retrying their prefix
+  ---
+  duration_ms: 0.4356
+  type: 'test'
+  ...
+# Subtest: browser-safe R2 fallback resolves before a referer-sensitive CDN
+ok 18 - browser-safe R2 fallback resolves before a referer-sensitive CDN
+  ---
+  duration_ms: 16.2263
+  type: 'test'
+  ...
+# Subtest: remote candidates are deduplicated and preserve fallback-first order
+ok 19 - remote candidates are deduplicated and preserve fallback-first order
+  ---
+  duration_ms: 1.4091
+  type: 'test'
+  ...
+# Subtest: legacy image retry query parameters collapse to one stable cache key
+ok 20 - legacy image retry query parameters collapse to one stable cache key
+  ---
+  duration_ms: 1.4183
+  type: 'test'
+  ...
+# Subtest: a cold asset streams before its background CacheStorage write completes
+ok 21 - a cold asset streams before its background CacheStorage write completes
+  ---
+  duration_ms: 2.5272
+  type: 'test'
+  ...
+# Subtest: a warm asset cache hit does not rewrite or scan CacheStorage
+ok 22 - a warm asset cache hit does not rewrite or scan CacheStorage
+  ---
+  duration_ms: 0.7459
+  type: 'test'
+  ...
+# Subtest: cache trimming is amortized across a burst of writes
+ok 23 - cache trimming is amortized across a burst of writes
+  ---
+  duration_ms: 5.2373
+  type: 'test'
+  ...
+# Subtest: /api/asset-manifest returns headers and JSON while the independent cache write remains blocked
+ok 24 - /api/asset-manifest returns headers and JSON while the independent cache write remains blocked
+  ---
+  duration_ms: 2.6451
+  type: 'test'
+  ...
+# Subtest: /api/scene/crystal?map=0&x=296&y=620&assetRelease=test returns headers and JSON while the independent cache write remains blocked
+ok 25 - /api/scene/crystal?map=0&x=296&y=620&assetRelease=test returns headers and JSON while the independent cache write remains blocked
+  ---
+  duration_ms: 1.877
+  type: 'test'
+  ...
+# Subtest: a warm versioned Crystal request returns cached data and refreshes it in the background
+ok 26 - a warm versioned Crystal request returns cached data and refreshes it in the background
+  ---
+  duration_ms: 1.4059
+  type: 'test'
+  ...
+# Subtest: a Crystal reload leaves the retry to the browser without joining the worker cache path
+ok 27 - a Crystal reload leaves the retry to the browser without joining the worker cache path
+  ---
+  duration_ms: 0.7499
+  type: 'test'
+  ...
+# Subtest: asset-manifest stays network-first and uses the same key for offline fallback
+ok 28 - asset-manifest stays network-first and uses the same key for offline fallback
+  ---
+  duration_ms: 1.9545
+  type: 'test'
+  ...
+# Subtest: Crystal preserves Retry-After and the typed resource-missing 424 without cache writes
+ok 29 - Crystal preserves Retry-After and the typed resource-missing 424 without cache writes
+  ---
+  duration_ms: 1.6902
+  type: 'test'
+  ...
+# (node:88800) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: six renderer font reads share two complete-body lanes while ordinary images stay independent
+ok 30 - six renderer font reads share two complete-body lanes while ordinary images stay independent
+  ---
+  duration_ms: 11.073
+  type: 'test'
+  ...
+# Subtest: a font waiting behind live bodies starts its own unchanged header budget only after admission
+ok 31 - a font waiting behind live bodies starts its own unchanged header budget only after admission
+  ---
+  duration_ms: 2.798
+  type: 'test'
+  ...
+# Subtest: a cancelled queued direct font reader leaves no network request or occupied lane
+ok 32 - a cancelled queued direct font reader leaves no network request or occupied lane
+  ---
+  duration_ms: 3.3508
+  type: 'test'
+  ...
+# Subtest: retiring the first HUD consumer cannot cancel a coalesced prewarm body
+ok 33 - retiring the first HUD consumer cannot cancel a coalesced prewarm body
+  ---
+  duration_ms: 1.1682
+  type: 'test'
+  ...
+# Subtest: CSS and renderer consumers share one font through its unfinished body and cache fill
+ok 34 - CSS and renderer consumers share one font through its unfinished body and cache fill
+  ---
+  duration_ms: 1.3847
+  type: 'test'
+  ...
+# Subtest: one font consumer retiring does not cancel another consumer's shared download
+ok 35 - one font consumer retiring does not cancel another consumer's shared download
+  ---
+  duration_ms: 1.2115
+  type: 'test'
+  ...
+# Subtest: font fills retain separate cache namespaces across a release change
+ok 36 - font fills retain separate cache namespaces across a release change
+  ---
+  duration_ms: 1.4887
+  type: 'test'
+  ...
+# Subtest: font lookup expiry releases the retained entry without truncating either body
+ok 37 - font lookup expiry releases the retained entry without truncating either body
+  ---
+  duration_ms: 1.8167
+  type: 'test'
+  ...
+# Subtest: fonts stay in the critical cache before and after background or runtime hints
+ok 38 - fonts stay in the critical cache before and after background or runtime hints
+  ---
+  duration_ms: 0.6837
+  type: 'test'
+  ...
+# Subtest: a byte-range font read cannot join or replace a whole-font fill
+ok 39 - a byte-range font read cannot join or replace a whole-font fill
+  ---
+  duration_ms: 1.6037
+  type: 'test'
+  ...
+# Subtest: font response retention stays bounded when many distinct fonts are requested
+ok 40 - font response retention stays bounded when many distinct fonts are requested
+  ---
+  duration_ms: 7.2486
+  type: 'test'
+  ...
+# Subtest: SC origin split: only SC prefers the configured primary current-release CDN
+ok 41 - SC origin split: only SC prefers the configured primary current-release CDN
+  ---
+  duration_ms: 1.3555
+  type: 'test'
+  ...
+# Subtest: SC origin split: CDN prefix stays unexposed and only its complete body is cached
+ok 42 - SC origin split: CDN prefix stays unexposed and only its complete body is cached
+  ---
+  duration_ms: 1.9834
+  type: 'test'
+  ...
+# Subtest: SC origin split: original headers timeout recovers through the app with no mixed prefix
+ok 43 - SC origin split: original headers timeout recovers through the app with no mixed prefix
+  ---
+  duration_ms: 2.8549
+  type: 'test'
+  ...
+# Subtest: SC origin split: original body timeout recovers through the app with no mixed prefix
+ok 44 - SC origin split: original body timeout recovers through the app with no mixed prefix
+  ---
+  duration_ms: 1.5383
+  type: 'test'
+  ...
+# Subtest: SC origin split: ranges, unversioned and older-only sources remain app-first
+ok 45 - SC origin split: ranges, unversioned and older-only sources remain app-first
+  ---
+  duration_ms: 2.9045
+  type: 'test'
+  ...
+# Subtest: SC origin split: explicit all-font mirror-first preserves the configured mirror order
+ok 46 - SC origin split: explicit all-font mirror-first preserves the configured mirror order
+  ---
+  duration_ms: 1.1212
+  type: 'test'
+  ...
+# Subtest: a complete shipped app font is exposed and cached without any CDN read
+ok 47 - a complete shipped app font is exposed and cached without any CDN read
+  ---
+  duration_ms: 4.4436
+  type: 'test'
+  ...
+# Subtest: a stalled app font prefix waits for a complete CDN fallback and never poisons the shared cache
+ok 48 - a stalled app font prefix waits for a complete CDN fallback and never poisons the shared cache
+  ---
+  duration_ms: 1.8135
+  type: 'test'
+  ...
+# Subtest: app font response headers retain their seven-second bound before ordinary mirror fallback
+ok 49 - app font response headers retain their seven-second bound before ordinary mirror fallback
+  ---
+  duration_ms: 1.8101
+  type: 'test'
+  ...
+# Subtest: app-first fonts preserve an explicitly older-first ordinary fallback order
+ok 50 - app-first fonts preserve an explicitly older-first ordinary fallback order
+  ---
+  duration_ms: 1.1121
+  type: 'test'
+  ...
+# Subtest: app-first complete font reads work without CacheStorage
+ok 51 - app-first complete font reads work without CacheStorage
+  ---
+  duration_ms: 1.6001
+  type: 'test'
+  ...
+# Subtest: partial, empty and oversized app fonts fall back without exposing their bytes
+ok 52 - partial, empty and oversized app fonts fall back without exposing their bytes
+  ---
+  duration_ms: 15.1569
+  type: 'test'
+  ...
+# Subtest: a timed-out preferred font mirror tries the other current-release origin before the app
+ok 53 - a timed-out preferred font mirror tries the other current-release origin before the app
+  ---
+  duration_ms: 3.274
+  type: 'test'
+  ...
+# Subtest: a stopped preferred font body is replaced by one complete current-release mirror
+ok 54 - a stopped preferred font body is replaced by one complete current-release mirror
+  ---
+  duration_ms: 2.194
+  type: 'test'
+  ...
+# Subtest: all current font mirrors precede the app while inherited releases remain later fallbacks
+ok 55 - all current font mirrors precede the app while inherited releases remain later fallbacks
+  ---
+  duration_ms: 1.0421
+  type: 'test'
+  ...
+# Subtest: a current-release font mirror precedes a successful but slow app origin
+ok 56 - a current-release font mirror precedes a successful but slow app origin
+  ---
+  duration_ms: 0.8072
+  type: 'test'
+  ...
+# Subtest: a missing current font mirror returns to the app before inherited releases
+ok 57 - a missing current font mirror returns to the app before inherited releases
+  ---
+  duration_ms: 0.8479
+  type: 'test'
+  ...
+# Subtest: a font mirror connection failure still allows the original complete font
+ok 58 - a font mirror connection failure still allows the original complete font
+  ---
+  duration_ms: 1.0413
+  type: 'test'
+  ...
+# Subtest: font mirror headers have an eight-second bound before returning to the app
+ok 59 - font mirror headers have an eight-second bound before returning to the app
+  ---
+  duration_ms: 2.3306
+  type: 'test'
+  ...
+# Subtest: font mirror header timeout does not truncate a progressing body
+ok 60 - font mirror header timeout does not truncate a progressing body
+  ---
+  duration_ms: 2.377
+  type: 'test'
+  ...
+# Subtest: a font mirror body that stops after a prefix returns the complete app font
+ok 61 - a font mirror body that stops after a prefix returns the complete app font
+  ---
+  duration_ms: 1.504
+  type: 'test'
+  ...
+# Subtest: font body idle time resets on progress beyond the header and idle budgets
+ok 62 - font body idle time resets on progress beyond the header and idle budgets
+  ---
+  duration_ms: 1.765
+  type: 'test'
+  ...
+# Subtest: an errored font body returns the complete app font instead of its prefix
+ok 63 - an errored font body returns the complete app font instead of its prefix
+  ---
+  duration_ms: 1.2471
+  type: 'test'
+  ...
+# Subtest: a completed decoded font retains its type and correct body metadata
+ok 64 - a completed decoded font retains its type and correct body metadata
+  ---
+  duration_ms: 0.8453
+  type: 'test'
+  ...
+# Subtest: empty mirror bodies return to the app
+ok 65 - empty mirror bodies return to the app
+  ---
+  duration_ms: 1.5971
+  type: 'test'
+  ...
+# Subtest: font mirror buffering is bounded before returning to the app
+ok 66 - font mirror buffering is bounded before returning to the app
+  ---
+  duration_ms: 10.0301
+  type: 'test'
+  ...
+# Subtest: empty chunks do not renew a stalled font body
+ok 67 - empty chunks do not renew a stalled font body
+  ---
+  duration_ms: 4.7065
+  type: 'test'
+  ...
+# Subtest: font mirror selection works even when CacheStorage is unavailable
+ok 68 - font mirror selection works even when CacheStorage is unavailable
+  ---
+  duration_ms: 1.4422
+  type: 'test'
+  ...
+# Subtest: unversioned fonts, byte ranges and images keep their app-first route
+ok 69 - unversioned fonts, byte ranges and images keep their app-first route
+  ---
+  duration_ms: 2.2979
+  type: 'test'
+  ...
+# Subtest: partial or empty mirror responses cannot replace an entire font
+ok 70 - partial or empty mirror responses cannot replace an entire font
+  ---
+  duration_ms: 1.5717
+  type: 'test'
+  ...
+# Subtest: only explicit hosted configuration opts into the current font mirror
+ok 71 - only explicit hosted configuration opts into the current font mirror
+  ---
+  duration_ms: 3.5403
+  type: 'test'
+  ...
+# Subtest: a stalled shared image header retires before page retries keep joining it
+ok 72 - a stalled shared image header retires before page retries keep joining it
+  ---
+  duration_ms: 1.7201
+  type: 'test'
+  ...
+# Subtest: each static fallback gets its own bounded header attempt
+ok 73 - each static fallback gets its own bounded header attempt
+  ---
+  duration_ms: 1.213
+  type: 'test'
+  ...
+# Subtest: an exhausted static header deadline is transient and the next read is fresh
+ok 74 - an exhausted static header deadline is transient and the next read is fresh
+  ---
+  duration_ms: 1.0721
+  type: 'test'
+  ...
+# Subtest: static header expiry never truncates an already delivered image body
+ok 75 - static header expiry never truncates an already delivered image body
+  ---
+  duration_ms: 0.9489
+  type: 'test'
+  ...
+# Subtest: a restarted worker preserves explicit fontMirrorFirst=false and complete font bytes
+ok 76 - a restarted worker preserves explicit fontMirrorFirst=false and complete font bytes
+  ---
+  duration_ms: 20.3289
+  type: 'test'
+  ...
+# Subtest: a restarted worker preserves explicit fontMirrorFirst=true and complete font bytes
+ok 77 - a restarted worker preserves explicit fontMirrorFirst=true and complete font bytes
+  ---
+  duration_ms: 3.1375
+  type: 'test'
+  ...
+# Subtest: a restarted worker serves the complete already-versioned HUD cache without another network read
+ok 78 - a restarted worker serves the complete already-versioned HUD cache without another network read
+  ---
+  duration_ms: 489.8556
+  type: 'test'
+  ...
+# Subtest: an uncached frame after restart retains exact-release remote fallbacks and original cache tier
+ok 79 - an uncached frame after restart retains exact-release remote fallbacks and original cache tier
+  ---
+  duration_ms: 485.9291
+  type: 'test'
+  ...
+# Subtest: an explicit newer configuration cannot be replaced by an older delayed restore
+ok 80 - an explicit newer configuration cannot be replaced by an older delayed restore
+  ---
+  duration_ms: 483.5809
+  type: 'test'
+  ...
+# Subtest: overlapping configuration writes are serialized so a restart restores the latest release
+ok 81 - overlapping configuration writes are serialized so a restart restores the latest release
+  ---
+  duration_ms: 484.3957
+  type: 'test'
+  ...
+# Subtest: CacheStorage denial preserves active in-memory fallbacks and reports non-durable configuration
+ok 82 - CacheStorage denial preserves active in-memory fallbacks and reports non-durable configuration
+  ---
+  duration_ms: 485.5406
+  type: 'test'
+  ...
+# Subtest: corrupt persisted metadata is ignored without fetching a stored arbitrary remote URL
+ok 83 - corrupt persisted metadata is ignored without fetching a stored arbitrary remote URL
+  ---
+  duration_ms: 1.545
+  type: 'test'
+  ...
+# Subtest: configuration cleanup keeps its single metadata record and the current versioned cache
+ok 84 - configuration cleanup keeps its single metadata record and the current versioned cache
+  ---
+  duration_ms: 482.8661
+  type: 'test'
+  ...
+# Subtest: reset waits for an older pending configuration write and cannot resurrect it
+ok 85 - reset waits for an older pending configuration write and cannot resurrect it
+  ---
+  duration_ms: 2.5215
+  type: 'test'
+  ...
+# Subtest: restart restoration leaves auth, other origins, POST and explicit scene reload outside the worker
+ok 86 - restart restoration leaves auth, other origins, POST and explicit scene reload outside the worker
+  ---
+  duration_ms: 0.6457
+  type: 'test'
+  ...
+# (node:90108) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: simultaneous cold requests share one configuration read
+ok 87 - simultaneous cold requests share one configuration read
+  ---
+  duration_ms: 483.9868
+  type: 'test'
+  ...
+# Subtest: a stalled metadata read has a bounded ordinary-origin fallback
+ok 88 - a stalled metadata read has a bounded ordinary-origin fallback
+  ---
+  duration_ms: 1.4498
+  type: 'test'
+  ...
+# Subtest: reset interrupts an old restore and its later result cannot revive configuration
+ok 89 - reset interrupts an old restore and its later result cannot revive configuration
+  ---
+  duration_ms: 1.5858
+  type: 'test'
+  ...
+# Subtest: STATUS wakes and restores a worker before reporting its namespace and canonical tiers
+ok 90 - STATUS wakes and restores a worker before reporting its namespace and canonical tiers
+  ---
+  duration_ms: 1.5421
+  type: 'test'
+  ...
+# Subtest: a batched dynamic tier HINT hydrates first and survives the next restart
+ok 91 - a batched dynamic tier HINT hydrates first and survives the next restart
+  ---
+  duration_ms: 494.3478
+  type: 'test'
+  ...
+# Subtest: an old HINT waiting for disk cannot persist or alter tiers after reset
+ok 92 - an old HINT waiting for disk cannot persist or alter tiers after reset
+  ---
+  duration_ms: 1.6049
+  type: 'test'
+  ...
+# Subtest: a restarted cold image responds before its background cache write while retaining the write lifetime
+ok 93 - a restarted cold image responds before its background cache write while retaining the write lifetime
+  ---
+  duration_ms: 484.57
+  type: 'test'
+  ...
+# Subtest: a new HINT after live reset cannot recreate durable configuration until a fresh CONFIG
+ok 94 - a new HINT after live reset cannot recreate durable configuration until a fresh CONFIG
+  ---
+  duration_ms: 486.5154
+  type: 'test'
+  ...
+# Subtest: the shipped registrar explicitly prefers its first-party font files
+ok 95 - the shipped registrar explicitly prefers its first-party font files
+  ---
+  duration_ms: 42.7558
+  type: 'test'
+  ...
+# Subtest: current font transport failure plus an older-release 404 is retryable, not confirmed missing
+ok 96 - current font transport failure plus an older-release 404 is retryable, not confirmed missing
+  ---
+  duration_ms: 17.9096
+  type: 'test'
+  ...
+# Subtest: the actual prewarm retries the current font after a mixed missing/transport failure
+ok 97 - the actual prewarm retries the current font after a mixed missing/transport failure
+  ---
+  duration_ms: 201.1436
+  type: 'test'
+  ...
+# Subtest: a preferred font source is attempted once before all-missing negative caching
+ok 98 - a preferred font source is attempted once before all-missing negative caching
+  ---
+  duration_ms: 1.2897
+  type: 'test'
+  ...
+# Subtest: app-first all-missing fonts retain one ordered fallback group and short negative caching
+ok 99 - app-first all-missing fonts retain one ordered fallback group and short negative caching
+  ---
+  duration_ms: 1.0201
+  type: 'test'
+  ...
+# Subtest: an app-first transport error plus missing fallbacks remains retryable
+ok 100 - an app-first transport error plus missing fallbacks remains retryable
+  ---
+  duration_ms: 483.9029
+  type: 'test'
+  ...
+# Subtest: an original 403 is preserved instead of an optional mirror 404
+ok 101 - an original 403 is preserved instead of an optional mirror 404
+  ---
+  duration_ms: 1.4648
+  type: 'test'
+  ...
+# Subtest: an original 429 is preserved instead of an optional mirror 404
+ok 102 - an original 429 is preserved instead of an optional mirror 404
+  ---
+  duration_ms: 1.2975
+  type: 'test'
+  ...
+# Subtest: an original 503 is preserved instead of an optional mirror 404
+ok 103 - an original 503 is preserved instead of an optional mirror 404
+  ---
+  duration_ms: 1.0099
+  type: 'test'
+  ...
+# Subtest: a font mirror error keeps its response body and Retry-After if later sources are missing
+ok 104 - a font mirror error keeps its response body and Retry-After if later sources are missing
+  ---
+  duration_ms: 1.1672
+  type: 'test'
+  ...
+# Subtest: a single confirmed 404 still has short negative caching
+ok 105 - a single confirmed 404 still has short negative caching
+  ---
+  duration_ms: 0.7009
+  type: 'test'
+  ...
+# Subtest: a single confirmed 410 still has short negative caching
+ok 106 - a single confirmed 410 still has short negative caching
+  ---
+  duration_ms: 0.5836
+  type: 'test'
+  ...
+# Subtest: a later successful current source still wins over earlier missing/error responses
+ok 107 - a later successful current source still wins over earlier missing/error responses
+  ---
+  duration_ms: 0.9975
+  type: 'test'
+  ...
+# Subtest: an invalid complete-font mirror 200 cannot become a confirmed missing result
+ok 108 - an invalid complete-font mirror 200 cannot become a confirmed missing result
+  ---
+  duration_ms: 0.9882
+  type: 'test'
+  ...
+# Subtest: an invalid complete-font mirror 206 cannot become a confirmed missing result
+ok 109 - an invalid complete-font mirror 206 cannot become a confirmed missing result
+  ---
+  duration_ms: 0.9418
+  type: 'test'
+  ...
+# Subtest: a valid ranged asset keeps its complete 206 response semantics
+ok 110 - a valid ranged asset keeps its complete 206 response semantics
+  ---
+  duration_ms: 0.9218
+  type: 'test'
+  ...
+# Subtest: Page prewarm delegation returns the real shared stage promise
+ok 111 - Page prewarm delegation returns the real shared stage promise
+  ---
+  duration_ms: 172.6795
+  type: 'test'
+  ...
+# Subtest: actual Page downloads the runtime without speculative fonts while the HUD stage is pending
+ok 112 - actual Page downloads the runtime without speculative fonts while the HUD stage is pending
+  ---
+  duration_ms: 114.557
+  type: 'test'
+  ...
+# Subtest: actual Page starts fonts only after the runtime resolves and boots without waiting for fonts
+ok 113 - actual Page starts fonts only after the runtime resolves and boots without waiting for fonts
+  ---
+  duration_ms: 91.4669
+  type: 'test'
+  ...
+# Subtest: a failed independent HUD stage cannot withdraw an already ready runtime
+ok 114 - a failed independent HUD stage cannot withdraw an already ready runtime
+  ---
+  duration_ms: 85.0193
+  type: 'test'
+  ...
+# Subtest: leaving before the runtime or HUD settles prevents late fonts, diagnostics and boot
+ok 115 - leaving before the runtime or HUD settles prevents late fonts, diagnostics and boot
+  ---
+  duration_ms: 84.0317
+  type: 'test'
+  ...
+# Subtest: actual Page leaves fonts deferred before first paint and for disabled, touch, missing metadata or GPU
+ok 116 - actual Page leaves fonts deferred before first paint and for disabled, touch, missing metadata or GPU
+  ---
+  duration_ms: 415.0725
+  type: 'test'
+  ...
+# Subtest: actual retryable module failure never starts fonts and keeps the retry boundary
+ok 117 - actual retryable module failure never starts fonts and keeps the retry boundary
+  ---
+  duration_ms: 77.6702
+  type: 'test'
+  ...
+# Subtest: leaving while the runtime downloads prevents late fonts and boot
+ok 118 - leaving while the runtime downloads prevents late fonts and boot
+  ---
+  duration_ms: 76.7466
+  type: 'test'
+  ...
+# Subtest: Page defers fonts through finite binary recovery and cancels both owners after successful boot
+ok 119 - Page defers fonts through finite binary recovery and cancels both owners after successful boot
+  ---
+  duration_ms: 78.6261
+  type: 'test'
+  ...
+# Subtest: only the final fallback backend starts fonts, once, before its single boot
+ok 120 - only the final fallback backend starts fonts, once, before its single boot
+  ---
+  duration_ms: 77.0582
+  type: 'test'
+  ...
+# Subtest: leaving during fallback cannot start fonts from a late module
+ok 121 - leaving during fallback cannot start fonts from a late module
+  ---
+  duration_ms: 77.1882
+  type: 'test'
+  ...
+# Subtest: an already booted runtime is reused without another module or font prewarm
+ok 122 - an already booted runtime is reused without another module or font prewarm
+  ---
+  duration_ms: 77.8891
+  type: 'test'
+  ...
+# Subtest: Page spends recovery once per entry/source and preserves it across same-game effect reruns
+ok 123 - Page spends recovery once per entry/source and preserves it across same-game effect reruns
+  ---
+  duration_ms: 314.5291
+  type: 'test'
+  ...
+# Subtest: prewarm paths exactly cover the Native display font families
+ok 124 - prewarm paths exactly cover the Native display font families
+  ---
+  duration_ms: 0.4422
+  type: 'test'
+  ...
+# Subtest: two pending font bodies bound concurrency and completion waits for full bytes
+ok 125 - two pending font bodies bound concurrency and completion waits for full bytes
+  ---
+  duration_ms: 11.4517
+  type: 'test'
+  ...
+# Subtest: leaving cancels active font bodies and never starts the queued fonts
+ok 126 - leaving cancels active font bodies and never starts the queued fonts
+  ---
+  duration_ms: 0.8475
+  type: 'test'
+  ...
+# (node:91924) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: a failed font does not withdraw the runtime or prevent warming the other families
+ok 127 - a failed font does not withdraw the runtime or prevent warming the other families
+  ---
+  duration_ms: 481.3197
+  type: 'test'
+  ...
+# Subtest: the slow CJK families do not wait behind short fallback requests
+ok 128 - the slow CJK families do not wait behind short fallback requests
+  ---
+  duration_ms: 2.3678
+  type: 'test'
+  ...
+# Subtest: binary compilation overlaps a pending script import and canvas gates initialization
+ok 129 - binary compilation overlaps a pending script import and canvas gates initialization
+  ---
+  duration_ms: 16.9238
+  type: 'test'
+  ...
+# (node:87332) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: wrong MIME and missing streaming support compile the original single response
+ok 130 - wrong MIME and missing streaming support compile the original single response
+  ---
+  duration_ms: 41.0173
+  type: 'test'
+  ...
+# Subtest: an import failure aborts the independent binary fetch
+ok 131 - an import failure aborts the independent binary fetch
+  ---
+  duration_ms: 0.6836
+  type: 'test'
+  ...
+# Subtest: unavailable or invalid binaries never initialize a runtime
+ok 132 - unavailable or invalid binaries never initialize a runtime
+  ---
+  duration_ms: 0.9573
+  type: 'test'
+  ...
+# Subtest: the existing 120-second budget cancels a stalled binary
+ok 133 - the existing 120-second budget cancels a stalled binary
+  ---
+  duration_ms: 0.8579
+  type: 'test'
+  ...
+# Subtest: a stalled script also exits after the binary has finished compiling
+ok 134 - a stalled script also exits after the binary has finished compiling
+  ---
+  duration_ms: 1.4383
+  type: 'test'
+  ...
+# Subtest: actual page loader shares pending/successful work and retries a failed URL
+ok 135 - actual page loader shares pending/successful work and retries a failed URL
+  ---
+  duration_ms: 171.3538
+  type: 'test'
+  ...
+# Subtest: a valid advancing binary can finish beyond the header budget without a second GET
+ok 136 - a valid advancing binary can finish beyond the header budget without a second GET
+  ---
+  duration_ms: 1.7106
+  type: 'test'
+  ...
+# Subtest: a body without positive bytes stops at the idle boundary, including empty chunks
+ok 137 - a body without positive bytes stops at the idle boundary, including empty chunks
+  ---
+  duration_ms: 1.1152
+  type: 'test'
+  ...
+# Subtest: decoded bytes are capped before runtime initialization without trusting Content-Length
+ok 138 - decoded bytes are capped before runtime initialization without trusting Content-Length
+  ---
+  duration_ms: 0.7899
+  type: 'test'
+  ...
+# Subtest: a progressing body still has an absolute lifetime cap
+ok 139 - a progressing body still has an absolute lifetime cap
+  ---
+  duration_ms: 0.8092
+  type: 'test'
+  ...
+# Subtest: a failed pinned binary source can use its supplied same-version fallback once
+ok 140 - a failed pinned binary source can use its supplied same-version fallback once
+  ---
+  duration_ms: 0.6936
+  type: 'test'
+  ...
+# Subtest: actual Page selects versioned app binary with same-package remote fallback and glue
+ok 141 - actual Page selects versioned app binary with same-package remote fallback and glue
+  ---
+  duration_ms: 96.9517
+  type: 'test'
+  ...
+# Subtest: an unavailable first source yields to its fallback after8 seconds
+ok 142 - an unavailable first source yields to its fallback after8 seconds
+  ---
+  duration_ms: 1.8874
+  type: 'test'
+  ...
+# Subtest: a stalled first source body is canceled before the next binary is read
+ok 143 - a stalled first source body is canceled before the next binary is read
+  ---
+  duration_ms: 0.9093
+  type: 'test'
+  ...
+# Subtest: binary progress cannot renew a stalled script import deadline
+ok 144 - binary progress cannot renew a stalled script import deadline
+  ---
+  duration_ms: 0.93
+  type: 'test'
+  ...
+# Subtest: a streaming compiler which never reads remains bounded
+ok 145 - a streaming compiler which never reads remains bounded
+  ---
+  duration_ms: 9.2687
+  type: 'test'
+  ...
+# Subtest: a late canvas cannot initialize an expired attempt
+ok 146 - a late canvas cannot initialize an expired attempt
+  ---
+  duration_ms: 0.9244
+  type: 'test'
+  ...
+# Subtest: a default initializer which has already started cannot be classified as a retryable download
+ok 147 - a default initializer which has already started cannot be classified as a retryable download
+  ---
+  duration_ms: 1.0594
+  type: 'test'
+  ...
+# Subtest: invalid or oversized bytes fail closed instead of consulting another source
+ok 148 - invalid or oversized bytes fail closed instead of consulting another source
+  ---
+  duration_ms: 1.61
+  type: 'test'
+  ...
+# Subtest: two interrupted pinned bodies rotate once before a single glue initialization
+ok 149 - two interrupted pinned bodies rotate once before a single glue initialization
+  ---
+  duration_ms: 1.7226
+  type: 'test'
+  ...
+# Subtest: a stalled last mirror is canceled at the unchanged idle boundary before its one retry
+ok 150 - a stalled last mirror is canceled at the unchanged idle boundary before its one retry
+  ---
+  duration_ms: 1.1024
+  type: 'test'
+  ...
+# Subtest: transient exhaustion remains bounded and permanent responses do not add retries
+ok 151 - transient exhaustion remains bounded and permanent responses do not add retries
+  ---
+  duration_ms: 0.9521
+  type: 'test'
+  ...
+# Subtest: invalid or oversized last-mirror bytes cannot turn an earlier transient failure into a retry
+ok 152 - invalid or oversized last-mirror bytes cannot turn an earlier transient failure into a retry
+  ---
+  duration_ms: 0.878
+  type: 'test'
+  ...
+# Subtest: the original final header deadline is terminal even after an earlier retryable failure
+ok 153 - the original final header deadline is terminal even after an earlier retryable failure
+  ---
+  duration_ms: 0.7561
+  type: 'test'
+  ...
+# Subtest: a diagnostic callback cannot fail or repeat initialization
+ok 154 - a diagnostic callback cannot fail or repeat initialization
+  ---
+  duration_ms: 0.5751
+  type: 'test'
+  ...
+# Subtest: a browser compiler wrapping an over-limit stream as a network error cannot authorize a retry
+ok 155 - a browser compiler wrapping an over-limit stream as a network error cannot authorize a retry
+  ---
+  duration_ms: 8.4643
+  type: 'test'
+  ...
+1..155
+# tests 155
+# suites 0
+# pass 155
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 8052.4054

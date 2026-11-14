@@ -1,0 +1,32 @@
+TAP version 13
+# Subtest: SC origin split: only SC prefers the configured primary current-release CDN
+not ok 1 - SC origin split: only SC prefers the configured primary current-release CDN
+  ---
+  duration_ms: 18.1052
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-asset-worker-fallback.mjs:716:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      [
+    +   'https://preview.example.test/original-ui/fonts/NotoSansCJKsc-Regular.otf',
+    -   'https://cdn.example.test/mir2/v/font-release-a/original-ui/fonts/NotoSansCJKsc-Regular.otf',
+        'https://preview.example.test/original-ui/fonts/NotoSansTC.ttf'
+      ]
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 'https://cdn.example.test/mir2/v/font-release-a/original-ui/fonts/NotoSansCJKsc-Regular.otf'
+    1: 'https://preview.example.test/original-ui/fonts/NotoSansTC.ttf'
+  actual:
+    0: 'https://preview.example.test/original-ui/fonts/NotoSansCJKsc-Regular.otf'
+    1: 'https://preview.example.test/original-ui/fonts/NotoSansTC.ttf'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-worker-fallback.mjs:727:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...

@@ -1,0 +1,12 @@
+{
+  "exitCode": 0,
+  "counts": {
+    "tests": 35,
+    "pass": 35,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0
+  },
+  "logSha256": "aad7f3e1d5f30ac63f8da20f40137559cdd138a4c1879877408c81408ebc63f9",
+  "helperSha256": "694be5daca3fdae13bc3fac43a8894af05473aa58e54a655e9a717fed7140f49"
+}
