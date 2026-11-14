@@ -326,9 +326,146 @@ struct SocketDiagnosticState {
     // One main-task writer and reader-task snapshots. Phase and start must be
     // one atomic value; two independent atomics would allow a torn observation.
     phase_and_start: AtomicU64,
+    input_gate_binding: AtomicU64,
+    input_gate_bound_once: AtomicBool,
+    input_gate_active_registration: OnceLock<Arc<AtomicU64>>,
+    decoded_ordinal: AtomicU64,
 }
 
 type SocketDiagnostics = Option<Arc<SocketDiagnosticState>>;
+
+// Opt-in causal diagnostics only. No payloads, accounts, names, or new gameplay state.
+const INPUT_GATE_TRACE_ROW_BUDGET: u64 = 32_768;
+fn input_gate_trace_ids() -> Option<[u32; 2]> {
+    static IDS: OnceLock<Option<[u32; 2]>> = OnceLock::new();
+    *IDS.get_or_init(|| parse_input_gate_trace_ids(
+        env::var("MIR2_GATEWAY_INPUT_GATE_TRACE").ok().as_deref(),
+        env::var("MIR2_GATEWAY_ZONE_DELIVERY_TRACE").ok().as_deref(),
+        env::var("MIR2_GATEWAY_ZONE_DELIVERY_TRACE_RECIPIENTS").ok().as_deref()))
+}
+fn parse_input_gate_trace_ids(flag: Option<&str>, delivery: Option<&str>, raw: Option<&str>) -> Option<[u32; 2]> {
+    if flag != Some("1") || delivery != Some("1") { return None; }
+    let mut ids = raw?.split(',');
+    let first = ids.next()?.trim().parse::<u32>().ok()?;
+    let second = ids.next()?.trim().parse::<u32>().ok()?;
+    if ids.next().is_some() || first == 0 || second == 0 || first == second { return None; }
+    Some([first.min(second), first.max(second)])
+}
+pub(crate) fn input_gate_trace_requested() -> bool {
+    static ENABLED: OnceLock<bool> = OnceLock::new();
+    *ENABLED.get_or_init(|| env::var("MIR2_GATEWAY_INPUT_GATE_TRACE").as_deref() == Ok("1"))
+}
+fn input_gate_trace_selected(id: u32) -> bool { input_gate_trace_ids().is_some_and(|ids| ids.contains(&id)) }
+#[derive(Clone, Copy)]
+pub(super) struct InputGateTraceContext {
+    connection: u64, registration: u64, recipient: u32, ordinal: u64,
+    kind: &'static str, direction: u8, server_trace: u64, frame_first: u64, frame_count: usize,
+    producer_unix_ms: u128, producer_elapsed_us: u128,
+}
+#[derive(Clone, Copy)]
+struct InputGateTraceClock { unix_ms: u128, mono_us: u128 }
+fn input_gate_trace_clock() -> Option<InputGateTraceClock> {
+    static ORIGIN: OnceLock<Instant> = OnceLock::new();
+    let origin = ORIGIN.get_or_init(Instant::now);
+    Some(InputGateTraceClock { unix_ms: std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).ok()?.as_millis(),
+        mono_us: origin.elapsed().as_micros() })
+}
+fn input_gate_trace_record(ctx: InputGateTraceContext, stage: &str, start: InputGateTraceClock,
+    end: InputGateTraceClock, duration_us: u128) {
+    static ROWS: AtomicU64 = AtomicU64::new(0);
+    static EXHAUSTED: AtomicBool = AtomicBool::new(false);
+    if ROWS.fetch_update(Ordering::Relaxed, Ordering::Relaxed, |n| (n < INPUT_GATE_TRACE_ROW_BUDGET).then_some(n + 1)).is_err() {
+        if !EXHAUSTED.swap(true, Ordering::Relaxed) {
+            use std::io::Write;
+            let _ = writeln!(std::io::stderr().lock(), "[gateway-input-gate-trace] stage=budget_exhausted complete=0 limit={INPUT_GATE_TRACE_ROW_BUDGET}");
+        }
+        return;
+    }
+    use std::io::Write;
+    let _ = writeln!(std::io::stderr().lock(),
+        "[gateway-input-gate-trace] stage={stage} connection={} registration={} recipientZoneID={} inputOrdinal={} kind={} direction={} directionKnown={} serverTraceID={} frameFirst={} frameCount={} frameKnown={} sourceStartUnixMs={} sourceEndUnixMs={} sourceStartMonoUs={} sourceEndMonoUs={} durationUs={duration_us} producerKnown={} producerUnixMs={} producerElapsedUs={}",
+        ctx.connection, ctx.registration, ctx.recipient, ctx.ordinal, ctx.kind, ctx.direction,
+        u8::from(ctx.direction != u8::MAX), ctx.server_trace, ctx.frame_first, ctx.frame_count,
+        u8::from(ctx.frame_first != 0), start.unix_ms, end.unix_ms, start.mono_us, end.mono_us, u8::from(ctx.producer_unix_ms != 0), ctx.producer_unix_ms, ctx.producer_elapsed_us);
+}
+pub(super) struct InputGateTraceSpan {
+    context: InputGateTraceContext, stage: &'static str, started: Instant, clock: InputGateTraceClock, minimum_us: u128,
+}
+impl InputGateTraceSpan {
+    pub(super) fn start(context: Option<InputGateTraceContext>, stage: &'static str, minimum_ms: u64) -> Option<Self> {
+        Some(Self { context: context?, stage, started: Instant::now(), clock: input_gate_trace_clock()?, minimum_us: u128::from(minimum_ms) * 1_000 })
+    }
+    pub(super) fn frames(&mut self, first: u64, count: usize) { self.context.frame_first = first; self.context.frame_count = count; }
+}
+impl Drop for InputGateTraceSpan {
+    fn drop(&mut self) {
+        let elapsed = self.started.elapsed().as_micros();
+        if elapsed < self.minimum_us { return; }
+        if let Some(end) = input_gate_trace_clock() { input_gate_trace_record(self.context, self.stage, self.clock, end, elapsed); }
+    }
+}
+fn input_gate_socket_context(diagnostics: &SocketDiagnostics, ordinal: u64,
+    kind: &'static str, direction: u8) -> Option<InputGateTraceContext> {
+    let state = diagnostics.as_ref()?; let packed = state.input_gate_binding.load(Ordering::Acquire);
+    let recipient = packed as u32; let registration = packed >> 32;
+    if registration == 0 || state.input_gate_active_registration.get()?.load(Ordering::Acquire) != registration
+        || !input_gate_trace_selected(recipient) || ordinal >= SOCKET_DIAGNOSTIC_MAX_SAFE_INTEGER { return None; }
+    Some(InputGateTraceContext { connection: state.connection, registration, recipient, ordinal, kind, direction,
+        server_trace: 0, frame_first: 0, frame_count: 0, producer_unix_ms: 0, producer_elapsed_us: 0 })
+}
+// A Close can follow Logout/Leave, when no current Zone registration remains.
+// This context proves only that this anonymous WS once had a validated selected binding.
+fn input_gate_lifecycle_context(diagnostics: &SocketDiagnostics) -> Option<InputGateTraceContext> {
+    let state = diagnostics.as_ref()?;
+    if input_gate_trace_ids().is_none() || !state.input_gate_bound_once.load(Ordering::Acquire) { return None; }
+    Some(InputGateTraceContext { connection: state.connection, registration: 0, recipient: 0, ordinal: 0,
+        kind: "connection_lifecycle", direction: u8::MAX, server_trace: 0, frame_first: 0, frame_count: 0,
+        producer_unix_ms: 0, producer_elapsed_us: 0 })
+}
+
+fn input_gate_action_context(diagnostics: &SocketDiagnostics, action: &SessionAction, ordinal: u64) -> Option<InputGateTraceContext> {
+    let (kind, direction) = match action {
+        SessionAction::Packet(ClientPacket::Walk { direction }) => ("walk", *direction as u8),
+        SessionAction::Packet(ClientPacket::Run { direction }) => ("run", *direction as u8),
+        SessionAction::Packet(ClientPacket::Turn { direction }) => ("turn", *direction as u8),
+        SessionAction::Packet(ClientPacket::Chat { .. }) => ("chat", u8::MAX),
+        _ => ("other", u8::MAX),
+    };
+    input_gate_socket_context(diagnostics, ordinal, kind, direction)
+}
+fn input_gate_queued_context(diagnostics: &SocketDiagnostics, input: &QueuedSocketInput) -> Option<InputGateTraceContext> {
+    match input.input.as_ref()? {
+        ParsedSocketInput::Action { action, .. } => input_gate_action_context(diagnostics, action, input.input_gate_ordinal),
+        _ => None,
+    }
+}
+fn bind_input_gate_trace(diagnostics: &SocketDiagnostics, identity: (u64, u64, u32)) -> Option<InputGateTraceContext> {
+    let (server_trace, registration, recipient) = identity;
+    if !input_gate_trace_selected(recipient) { return None; }
+    let registration32 = u32::try_from(registration).ok()?;
+    if registration32 == 0 { return None; }
+    let state = diagnostics.as_ref()?;
+    let packed = (u64::from(registration32) << 32) | u64::from(recipient);
+    let changed = state.input_gate_binding.swap(packed, Ordering::AcqRel) != packed;
+    let mut context = input_gate_socket_context(diagnostics, 0, "delivery", u8::MAX)?;
+    state.input_gate_bound_once.store(true, Ordering::Release);
+    context.server_trace = server_trace;
+    if changed { drop(InputGateTraceSpan::start(Some(context), "bind", 0)); }
+    Some(context)
+}
+pub(crate) fn input_gate_delivery_event(stage: &str, identity: (u64, u64, u32), producer_unix_ms: u128,
+    elapsed: Duration) {
+    let (server_trace, registration, recipient) = identity;
+    if !input_gate_trace_selected(recipient) { return; }
+    let Some(now) = input_gate_trace_clock() else { return; };
+    // A point on the source clock. producerUnixMs/elapsed remain the existing producer span.
+    let ctx = InputGateTraceContext { connection: 0, registration, recipient, ordinal: 0,
+        kind: "delivery", direction: u8::MAX, server_trace, frame_first: 0, frame_count: 0,
+        producer_unix_ms, producer_elapsed_us: elapsed.as_micros() };
+    // No source UTC is reconstructed by subtracting elapsed from observation time.
+    input_gate_trace_record(ctx, stage, now, now, 0);
+}
+
 
 fn allocate_socket_diagnostics(enabled: bool, counter: &AtomicU64) -> SocketDiagnostics {
     if !enabled {
@@ -339,10 +476,15 @@ fn allocate_socket_diagnostics(enabled: bool, counter: &AtomicU64) -> SocketDiag
             (next != 0 && next <= SOCKET_DIAGNOSTIC_MAX_SAFE_INTEGER).then(|| next + 1)
         })
         .ok()?;
+    if input_gate_trace_ids().is_some() { let _ = input_gate_trace_clock(); }
     Some(Arc::new(SocketDiagnosticState {
         connection,
         origin: Instant::now(),
         phase_and_start: AtomicU64::new(SocketDiagnosticPhase::SelectWait.pack(0)?),
+        input_gate_binding: AtomicU64::new(0),
+        input_gate_bound_once: AtomicBool::new(false),
+        input_gate_active_registration: OnceLock::new(),
+        decoded_ordinal: AtomicU64::new(0),
     }))
 }
 
@@ -455,6 +597,7 @@ struct QueuedSocketInput {
     queued_at: Instant,
     received_at: Instant,
     diagnostic_context: Option<SocketSlowContext>,
+    input_gate_ordinal: u64,
     _pending: PendingSerialAction,
     _buffered_bytes: OwnedSemaphorePermit,
 }
@@ -470,11 +613,18 @@ impl QueuedSocketInput {
         let diagnostic_context = diagnostics
             .as_ref()
             .and_then(|state| state.queued_context(&input));
+        let input_gate_ordinal = diagnostics.as_ref().map(|s| s.decoded_ordinal.load(Ordering::Relaxed)).unwrap_or(0);
+        let submit_trace = match &input {
+            ParsedSocketInput::Action { action, .. } => input_gate_action_context(diagnostics, action, input_gate_ordinal),
+            _ => None,
+        };
+        drop(InputGateTraceSpan::start(submit_trace, "input_queue_submit", 0));
         Self {
             input: Some(input),
             queued_at: Instant::now(),
             received_at,
             diagnostic_context,
+            input_gate_ordinal,
             _pending: PendingSerialAction::new(pending_count),
             _buffered_bytes: buffered_bytes,
         }
@@ -5398,7 +5548,9 @@ async fn try_handle_zone_movement_from_reader(
     movement_drain: &Arc<transport::MovementDrain>,
     authenticated: bool,
     pending_serial_actions: usize,
+    input_trace: Option<InputGateTraceContext>,
 ) -> Result<bool, String> {
+    let _trace = InputGateTraceSpan::start(input_trace, "reader_fast", 0);
     if !authenticated || pending_serial_actions != 0 {
         return Ok(false);
     }
@@ -5649,7 +5801,7 @@ fn spawn_zone_outbound_sender_with_clock(
 ) -> ZoneOutboundSenderTask {
     use crate::routing::ZoneDeliveryTraceStage as TraceStage;
 
-    let block_trace_enabled = zone_outbound_block_trace_enabled();
+    let block_trace_enabled = zone_outbound_block_trace_enabled() && !input_gate_trace_requested();
     let handle = tokio::spawn(async move {
         let mut previous_completed_at: Option<Instant> = None;
         let mut batch_id = 0_u64;
@@ -5867,11 +6019,12 @@ fn spawn_zone_outbound_sender_with_clock(
                     trace_stage(TraceStage::Stale);
                     continue;
                 }
+                let input_gate_delivery = trace.as_ref().and_then(|t| bind_input_gate_trace(&diagnostics, t.input_gate_identity()));
                 trace_stage(TraceStage::Send);
                 let send_span = block_trace
                     .as_ref()
                     .map(|trace| (trace.context, Instant::now()));
-                let send_result = send_server_packet(&sender, &packet).await;
+                let send_result = send_server_packet_traced(&sender, &packet, input_gate_delivery).await;
                 if let Some((context, started_at)) = send_span {
                     context.emit(ZoneOutboundBlockStage::Send, started_at.elapsed());
                 }
@@ -6001,6 +6154,7 @@ fn spawn_socket_reader(
             let message = match receiver.next().await {
                 Some(Ok(Message::Text(text))) => text,
                 Some(Ok(Message::Close(_))) => {
+                    drop(InputGateTraceSpan::start(input_gate_lifecycle_context(&diagnostics), "reader_peer_close", 0));
                     if let Err(error) = sender.flush_peer_close_reply().await {
                         eprintln!("web peer Close reply flush failed: {error} session_id={session_id}");
                     }
@@ -6052,6 +6206,14 @@ fn spawn_socket_reader(
                     continue;
                 }
             };
+            // Count every successfully decoded BrowserCommand before any KA/native/owner split.
+            // KA consumes an ordinal but has no input diagnostic row.
+            if input_gate_trace_ids().is_some() {
+                if let Some(state) = diagnostics.as_ref() {
+                    let _ = state.decoded_ordinal.fetch_update(Ordering::Relaxed, Ordering::Relaxed,
+                        |n| (n < SOCKET_DIAGNOSTIC_MAX_SAFE_INTEGER).then_some(n + 1));
+                }
+            }
             let command = match companion_browser_command(command) {
                 Ok(command) => command,
                 Err(command) => {
@@ -6194,6 +6356,9 @@ fn spawn_socket_reader(
                 }
                 continue;
             }
+            let input_trace = diagnostics.as_ref().and_then(|s| input_gate_action_context(
+                &diagnostics, &action, s.decoded_ordinal.load(Ordering::Relaxed)));
+            drop(InputGateTraceSpan::start(input_trace, "reader_dispatch", 0));
             match try_handle_zone_movement_from_reader(
                 &action,
                 received_at,
@@ -6203,6 +6368,7 @@ fn spawn_socket_reader(
                 &movement_drain,
                 authenticated.load(Ordering::Acquire),
                 reader_pending_count.load(Ordering::Acquire),
+                input_trace,
             )
             .await
             {
@@ -6439,11 +6605,15 @@ async fn handle_socket_work(
     reconnect_binding: &mut SocketReconnectBinding,
 ) {
     let diagnostics = allocate_socket_diagnostics(
-        gateway_slow_stage_threshold().is_some(),
+        gateway_slow_stage_threshold().is_some() || input_gate_trace_ids().is_some(),
         &NEXT_SOCKET_DIAGNOSTIC_ID,
     );
+    if input_gate_trace_ids().is_some() {
+        if let Some(state) = diagnostics.as_ref() { let _ = state.input_gate_active_registration.set(Arc::clone(&active_zone_outbound_registration_id)); }
+    }
     let (sender, receiver) = socket.split();
-    let sender = Arc::new(transport::SocketSender::new(sender, terminal.clone()));
+    let sender = Arc::new(transport::SocketSender::new(sender, terminal.clone())
+        .with_input_gate_diagnostics(diagnostics.clone()));
     if sender
         .send(Message::Text(realm_info.to_string().into()))
         .await
@@ -6598,6 +6768,8 @@ async fn handle_socket_work(
                         return;
                     }
                 };
+                let input_trace = input_gate_queued_context(&diagnostics, &queued_input);
+                drop(InputGateTraceSpan::start(input_trace, "input_dequeue", 0));
                 let mut queue_stage = GatewaySlowStage::since(
                     "socket_input.queue_residence",
                     queued_input.queued_at,
@@ -6608,7 +6780,9 @@ async fn handle_socket_work(
                     &diagnostics, SocketDiagnosticPhase::InputGate, None,
                 );
                 let serial_gate_wait = GatewaySlowStage::for_socket("serial_gate.input_wait", &diagnostics);
+                let input_trace_wait = InputGateTraceSpan::start(input_trace, "input_write_gate", 0);
                 let mut _serial_execution = serial_execution_gate.write().await;
+                drop(input_trace_wait);
                 drop(serial_gate_wait);
                 drop(input_gate_phase);
                 let input_owner_heartbeat = SocketDiagnosticPhaseGuard::enter(
@@ -7414,6 +7588,7 @@ async fn handle_socket_work(
                 let mut native_attack_admission = None;
                 let mut native_attack_error = None;
                 let execution_result = match catch_gateway_panic("web session action", || {
+                    let _trace = InputGateTraceSpan::start(input_trace, "input_execute", 0);
                     let _slow_stage = GatewaySlowStage::for_socket("session_action.execute", &diagnostics);
                     tokio::task::block_in_place(|| {
                         if let Some(request) = native_attack_request.as_ref() {
@@ -7764,6 +7939,7 @@ async fn handle_socket_work(
                 }
 
                 let flush_result = {
+                    let _trace = InputGateTraceSpan::start(input_trace, "input_flush", 0);
                     let _slow_stage = GatewaySlowStage::for_socket("session_action.flush", &diagnostics);
                     if native_attack_request.is_some() {
                         flush_session_updates_with_deferred_snapshot(
@@ -8154,15 +8330,19 @@ async fn handle_socket_work(
                 // Tick can complete a queued portal movement and rebuild the
                 // viewport. Serialize its bootstrap/re-registration/flush just
                 // like a player action so live ACKs cannot precede the landing.
+                let tick_trace = input_gate_socket_context(&diagnostics, 0, "tick", u8::MAX);
+                let tick_trace_wait = InputGateTraceSpan::start(tick_trace, "tick_write_gate", 20);
                 let tick_gate_phase = SocketDiagnosticPhaseGuard::enter(
                     &diagnostics, SocketDiagnosticPhase::TickGate,
                     Some("runtime_tick.serial_gate_wait"),
                 );
                 let _serial_execution = serial_execution_gate.write().await;
+                drop(tick_trace_wait);
                 drop(tick_gate_phase);
                 let monthly_expiry_route = monthly_expiry_pending
                     .then(|| tokio::task::block_in_place(|| OwnedSessionRoute::capture(session))).flatten();
                 let responses = match catch_gateway_panic("web session tick", || {
+                    let _trace = InputGateTraceSpan::start(tick_trace, "tick_execute", 20);
                     let _slow_stage = GatewaySlowStage::for_socket("runtime_tick.execute", &diagnostics);
                     tokio::task::block_in_place(|| {
                         let command = if fishing_tick {
@@ -8247,6 +8427,7 @@ async fn handle_socket_work(
                     continue;
                 }
                 let flush_result = {
+                    let _trace = InputGateTraceSpan::start(tick_trace, "tick_flush", 20);
                     let _slow_stage = GatewaySlowStage::for_socket("runtime_tick.flush", &diagnostics);
                     flush_session_updates(
                         &sender,
@@ -11034,11 +11215,17 @@ async fn send_server_packet(
     sender: &SharedWebSocketSender,
     packet: &ServerPacket,
 ) -> Result<(), axum::Error> {
-    sender
-        .send(Message::Text(
-            server_packet_to_event(packet).to_string().into(),
-        ))
-        .await
+    let trace = matches!(packet, ServerPacket::UserLocation { .. }).then(|| sender.input_gate_context()).flatten();
+    send_server_packet_traced(sender, packet, trace).await
+}
+
+async fn send_server_packet_traced(sender: &SharedWebSocketSender, packet: &ServerPacket,
+    trace: Option<InputGateTraceContext>) -> Result<(), axum::Error> {
+    let encoded = {
+        let _trace = InputGateTraceSpan::start(trace, "encode", 0);
+        server_packet_to_event(packet).to_string()
+    };
+    sender.send_traced(Message::Text(encoded.into()), trace).await
 }
 
 async fn send_native_game_shop_receipt(
@@ -14893,6 +15080,29 @@ mod web_native_resume_handoff_ws_tests;
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn input_gate_selector_requires_both_literal_flags() {
+        for flag in [None, Some("0"), Some("true"), Some(" 1 ")] {
+            assert_eq!(super::parse_input_gate_trace_ids(flag, Some("1"), Some("1,2")), None);
+            assert_eq!(super::parse_input_gate_trace_ids(Some("1"), flag, Some("1,2")), None);
+        }
+        assert_eq!(super::parse_input_gate_trace_ids(Some("1"), Some("1"), Some("1,2")), Some([1, 2]));
+    }
+    #[test]
+    fn input_gate_selector_requires_exactly_two_distinct_entries() {
+        for raw in [None, Some("1"), Some("1,1"), Some("1,2,2"), Some("1,2,3"), Some("1,2,")] {
+            assert_eq!(super::parse_input_gate_trace_ids(Some("1"), Some("1"), raw), None);
+        }
+        assert_eq!(super::parse_input_gate_trace_ids(Some("1"), Some("1"), Some("2, 1")), Some([1, 2]));
+    }
+    #[test]
+    fn input_gate_selector_requires_positive_u32_bounds() {
+        for raw in ["0,2", "1,0", "-1,2", "1,4294967296", "bad,2", ",2"] {
+            assert_eq!(super::parse_input_gate_trace_ids(Some("1"), Some("1"), Some(raw)), None);
+        }
+        assert_eq!(super::parse_input_gate_trace_ids(Some("1"), Some("1"), Some("4294967295,1")), Some([1, u32::MAX]));
+    }
+
     use super::{
         realm_info_event, responses_require_world_snapshot, should_send_world_snapshot_for_action,
         BrowserCommand, QaControlAction, SessionAction,
