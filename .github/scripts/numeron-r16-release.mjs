@@ -16,20 +16,75 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: 'e6c923b7c669cb061a7a03703f05fadd91211c97',
+  source: 'b19ca73072db16ac7f351857aa752ecc57953591',
   sourceRef: BRANCH,
-  baseSource: '6b6ce88212d63683a932c6b6f580fcc727891a05',
+  baseSource: '6e5abd6dddee46f68a6b3d74b87d2bb26f87bdaf',
   assetSource: 'f2de762309768b51b39438c2437c14e819df9bf7',
   changedFiles: [
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/app/original-client-shell.tsx",
-      "sha": "c94290dd335e5eca01991ff9f720dbc94da816ba"
+      "filename": "mir2-web3/apps/web/app/components/original-client-scene-visual-layers.tsx",
+      "sha": "3e8be5d789aefec818bf5564edd7802d23c5c773"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-r16-world-marker-input.mjs",
-      "sha": "7773480ded2a98bc0334151e444ee3666e55dba9"
+      "filename": "mir2-web3/apps/web/app/globals.css",
+      "sha": "40a4db7aec41da75a09713f5549a38a8a8e6ba69"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/public/original-ui/gdi-text/images/entity-assistant-jane-auto.png",
+      "sha": "07b48b6576fb8222aabc92752a492a9ec533c699"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/public/original-ui/gdi-text/images/entity-merchant-auto.png",
+      "sha": "c0cfdbbfaaa92d91461b4035f47dcac2137a5da1"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/apps/web/public/original-ui/gdi-text/images/entity-ruben-auto.png",
+      "sha": "ad91f98094b1bca89c574fd36997d12395ea4a7b"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/public/original-ui/gdi-text/manifest.json",
+      "sha": "93dacd1883532edd8ea06b723a6e8af365101491"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-crystal-gdi-text-assets.mjs",
+      "sha": "b90f460a6f244aa977e2c0ece5b801cd4ce6d989"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-original-client-component-controls.mjs",
+      "sha": "c0347c06baa6dc46b09aa50bb24bec2580924952"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/tools/crystal-gdi-text/fixtures/generated/images/entity-assistant-jane-auto.png",
+      "sha": "07b48b6576fb8222aabc92752a492a9ec533c699"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/tools/crystal-gdi-text/fixtures/generated/images/entity-merchant-auto.png",
+      "sha": "c0cfdbbfaaa92d91461b4035f47dcac2137a5da1"
+    },
+    {
+      "status": "added",
+      "filename": "mir2-web3/tools/crystal-gdi-text/fixtures/generated/images/entity-ruben-auto.png",
+      "sha": "ad91f98094b1bca89c574fd36997d12395ea4a7b"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/tools/crystal-gdi-text/fixtures/generated/manifest.json",
+      "sha": "93dacd1883532edd8ea06b723a6e8af365101491"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/tools/crystal-gdi-text/fixtures/input.json",
+      "sha": "1b13bfcc159bb931e88ba493948d72bb2500c4be"
     }
   ],
   entryScene: {
@@ -87,8 +142,23 @@ export const QR_RELEASE = Object.freeze({
     sha256: 'b373a5f2cd21d5d0270610e0b7d1d619d5e554e12a67a7190c768d59e01dd64c',
     bytes: 3283113,
   },
+  entryNameAssistantJane: {
+    "path": "/original-ui/gdi-text/images/entity-assistant-jane-auto.png",
+    "bytes": 366,
+    "sha256": "0b8664e2a2385a2ab28409a093bee5f3745f8f591abffa882a23b308fbd7c88c"
+  },
+  entryNameMerchant: {
+    "path": "/original-ui/gdi-text/images/entity-merchant-auto.png",
+    "bytes": 288,
+    "sha256": "99c2b6e88ad38051cecfbaee8e1bc1b3d5b923a5d0b9e9577ea3da8b3b5e5295"
+  },
+  entryNameRuben: {
+    "path": "/original-ui/gdi-text/images/entity-ruben-auto.png",
+    "bytes": 262,
+    "sha256": "3894023d68064c89a18b86d908a3e017619c73b1d632bfab382b2cca440cab5c"
+  },
   assetRunId: '42494701555',
-  baseline: 'dpl_44ctBTrdq2T5fb91EjrUEt6B3GUk',
+  baseline: 'dpl_Ae3hNyFygQuSMZDesBXCZDpUECTY',
   relay: 'https://relay.dubhe.obelisk.build',
 });
 const QR_OPERATIONS = ['numeron-qr-stage', 'numeron-qr-promote', 'numeron-qr-rollback'];
@@ -339,7 +409,8 @@ function protectedResponse(candidate, pathname, env, qrRequest) {
     : ['--location', '--max-redirs', '3'];
   try { return execFileSync('npx', ['--yes', 'vercel@56.4.1', 'curl', `https://${candidate.url}${pathname}`, '--',
     '--fail', '--silent', '--show-error', '--max-time', '30', ...requestArgs], {
-    env: childEnvironment(env, 'vercel'), encoding: 'utf8', timeout: 180000, maxBuffer: 8 * 1024 * 1024, stdio: ['ignore', 'pipe', 'pipe'],
+    env: childEnvironment(env, 'vercel'), encoding: pathname.endsWith('.png') ? undefined : 'utf8',
+    timeout: 180000, maxBuffer: 8 * 1024 * 1024, stdio: ['ignore', 'pipe', 'pipe'],
   }); } catch { throw new ReleaseError('protectedCandidateFetchFailed'); }
 }
 
@@ -348,11 +419,13 @@ async function releaseQrGame({ operation, initial, projects, candidate, id, verc
   const hostname = new URL(ORIGIN).hostname;
   const { baseline, relay, entryScene, entryFloor, entryPlayerMale, entryPlayerFemale, entryNpcs,
     entryObjects1, entryObjects2, entryObjects3,
-    entryMonsterStanding, entryMonsterWalking, entryGameplayLocale } = QR_RELEASE;
+    entryMonsterStanding, entryMonsterWalking, entryGameplayLocale,
+    entryNameAssistantJane, entryNameMerchant, entryNameRuben } = QR_RELEASE;
   const entryAssets = Object.entries({
     Scene: entryScene, Floor: entryFloor, PlayerMale: entryPlayerMale, PlayerFemale: entryPlayerFemale, Npcs: entryNpcs,
     Objects1: entryObjects1, Objects2: entryObjects2, Objects3: entryObjects3,
     MonsterStanding: entryMonsterStanding, MonsterWalking: entryMonsterWalking, GameplayLocale: entryGameplayLocale,
+    NameAssistantJane: entryNameAssistantJane, NameMerchant: entryNameMerchant, NameRuben: entryNameRuben,
   });
   const expectedOther = { original: production(initial.original), main: production(initial.main) };
   async function mapping(allowed) {
