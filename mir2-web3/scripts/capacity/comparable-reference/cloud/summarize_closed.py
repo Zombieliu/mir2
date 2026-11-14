@@ -105,12 +105,18 @@ def monitor_completion(latest,stop_file_exists,identity):
       latest.get('outcome')=='completed' and latest.get('servicesStopped') is False and stop_file_exists and
       readback.get('completedBy')=='localStopFile' and readback.get('streamEndReason')=='localStopFile','monitor_not_closed')
     received=readback.get('remoteExitStatusReceived');remote_exit=readback.get('remoteExitStatus')
-    need(type(received) is bool and (received and type(remote_exit) is int and remote_exit==0 or
-      not received and remote_exit is None and readback.get('exitStatusMethodReturn') is None),'inconsistent_remote_monitor_exit_scope')
+    method_return=readback.get('exitStatusMethodReturn')
+    # A locally closed SSH channel can return the -1 method sentinel without
+    # receiving a remote exit status. Preserve it without inventing exit 0.
+    known_method=method_return is None or type(method_return) is int and method_return==0
+    unknown_method=method_return is None or type(method_return) is int and method_return==-1
+    need(type(received) is bool and (received and type(remote_exit) is int and remote_exit==0 and known_method or
+      not received and remote_exit is None and unknown_method),'inconsistent_remote_monitor_exit_scope')
     return {'localReaderTerminalCompleted':True,'completedBy':readback['completedBy'],'streamEndReason':readback['streamEndReason'],
       'servicesStopped':False,'localProcessActualExitCodeInTerminal':None,
       'localProcessExitEvidence':'not present in terminal projection; root CLI exit receipt is separate',
       'remoteExitStatusReceived':received,'remoteExitStatus':remote_exit,
+      'exitStatusMethodReturn':method_return,
       'remoteTerminalSampleObserved':readback.get('remoteTerminalSampleObserved'),
       'remoteExitScope':'observed remote exit0' if received else 'unknown: owned SSH channel closed after local stop-file completion'}
 
@@ -445,7 +451,7 @@ def summarize(case,identity):
         s['serverResources']=host_statistics(host_rows,s['utcBounds'],identity) if s['fullyCompletedDuration'] else {'valid':False,'reason':'partial_stage_not_used_for_full_stage_resource_mean'}
         stages.append(s)
     options=dict(zip(spec['command'][2::2],spec['command'][3::2]))
-    return {'schema':'mir2.closed-cloud-progressive-movement-summary.v5','sourceRevision':REVISION,'declaredInstalledBinarySha256':BINARY,
+    return {'schema':'mir2.closed-cloud-progressive-movement-summary.v6','sourceRevision':REVISION,'declaredInstalledBinarySha256':BINARY,
       'monitorTargetIdentity':{'pid':identity[0],'startTicks':identity[1],'invocationId':identity[2]},
       'runCompleted':True,'reportOk':report.get('ok'),'campaignCompleted':report.get('campaignCompleted'),'allSloPassed':report.get('allSloPassed'),
       'measurementOk':report.get('measurementOk'),'steadyStageSloPassed':report.get('steadyStageSloPassed'),

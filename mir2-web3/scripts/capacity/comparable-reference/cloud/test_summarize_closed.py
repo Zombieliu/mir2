@@ -174,6 +174,30 @@ class ClosedSummaryBoundaries(unittest.TestCase):
         self.assertIsNone(result['localProcessActualExitCodeInTerminal'])
         self.assertEqual(result['completedBy'],'localStopFile')
 
+    def test_local_stop_minus_one_method_sentinel_remains_unknown(self):
+        latest=terminal_v3();latest['monitorReadback']['exitStatusMethodReturn']=-1
+        result=m.monitor_completion(latest,True,TEST_IDENTITY)
+        self.assertFalse(result['remoteExitStatusReceived']);self.assertIsNone(result['remoteExitStatus'])
+        self.assertEqual(result['exitStatusMethodReturn'],-1)
+        self.assertTrue(result['remoteExitScope'].startswith('unknown:'))
+
+    def test_unknown_remote_exit_method_rejects_zero_positive_and_boolean(self):
+        for value in [0,1,-2,False,True,'-1']:
+            latest=terminal_v3();latest['monitorReadback']['exitStatusMethodReturn']=value
+            with self.subTest(value=value),self.assertRaises(m.Refusal):
+                m.monitor_completion(latest,True,TEST_IDENTITY)
+
+    def test_received_zero_requires_consistent_method_value(self):
+        for value in [None,0,-1,False]:
+            latest=terminal_v3();latest['monitorReadback'].update(
+                remoteExitStatusReceived=True,remoteExitStatus=0,exitStatusMethodReturn=value)
+            with self.subTest(value=value):
+                if value is None or type(value) is int and value==0:
+                    result=m.monitor_completion(latest,True,TEST_IDENTITY)
+                    self.assertTrue(result['remoteExitStatusReceived']);self.assertEqual(result['remoteExitStatus'],0)
+                else:
+                    with self.assertRaises(m.Refusal):m.monitor_completion(latest,True,TEST_IDENTITY)
+
     def test_v3_missing_completion_or_inconsistent_remote_exit_is_refused(self):
         for change in ['oldArray','missingReadback','missingMarker','remoteNone','inventedZero','failedOutcome']:
             latest=terminal_v3();marker=True
