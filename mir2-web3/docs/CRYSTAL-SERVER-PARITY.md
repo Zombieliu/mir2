@@ -2,7 +2,7 @@
 
 ## R16 Web 完整场景快照传输候选（2026-11-14）
 
-可选 `serverWorldSnapshotGzipV1` 保留原 worldSnapshot 的完整文本和顺序，使用与目录分离的有界 magic/验证，超限或无收益保持 Text。100 协议、35 Gateway及59 Web/Core、独立生产构建通过；本地真实 TLS 四条快照载荷减少77.316%，本地完整502目录与旧端逐条一致。未改 Crystal 游戏规则、授权/存档或旧 Native 传输，未部署；压缩快照的实际游戏浏览器、公网529目录/扫码/冷启/首步及61.929秒长尾未因此通过，不提升整体1:1。[资格范围](evidence/r16-world-snapshot-gzip-20261114/README.md)
+可选 `serverWorldSnapshotGzipV1` 保留完整原文本/顺序并独立有界验证。194项相关检查后，已在匹配新 Gateway/Web 的两种渲染路径、冷启与重登共四场验证实际原入口消费、每场529目录、移动/寻路及保存；24条协商快照消息载荷减少81.836%。Linux网关CI目标任务通过真实PG/Redis启动。未改 Crystal 玩法、授权/存档或旧 Native 传输，未部署；旧服完整UI、公网目录/扫码/冷启/首步及61.929秒长尾仍需独立资格，不提升整体1:1。[资格范围与保留失败](evidence/r16-world-snapshot-gzip-20261114/README.md)
 
 ## Physical attack save transform and capacity follow-up (2026-11-14)
 

@@ -1,12 +1,32 @@
 {
   "passed": true,
+  "candidateSourceRevision": "199a294130f386a245e86d3c1d81f731d7d7277b",
   "ownedSourceFilesMatched": 11,
+  "currentIntegratedHeadAtReview": "08cb36687161dbbf82ed03c06da9fa88a903a417",
+  "canonicalDifferencesFromCandidate": [
+    "mir2-web3/apps/gateway/src/web.rs",
+    "mir2-web3/apps/gateway/src/web_transport.rs"
+  ],
+  "webProtocolAndCoreSourceIdenticalAtIntegratedHead": true,
+  "currentIntegratedGatewayQualificationClaimed": false,
   "matchingImmutableLeaves": 8,
   "matchingPrivateInputs": 8,
-  "readmeLinks": 8,
+  "matchingBrowserPrivateInputs": 34,
+  "matchingLinuxCiInputs": 16,
+  "matchingScreenshots": 4,
+  "readmeLinks": 18,
   "startupDocsUnder120Lines": true,
+  "startupLineCounts": {
+    "AGENT-CURRENT.md": 118,
+    "AGENT-TASK-QUEUE.md": 88
+  },
   "testCount": 194,
+  "fullGameBrowserCompressionPassed": true,
+  "physicalLocalBrowserSessions": 4,
+  "linuxWorkflowSucceeded": true,
+  "linuxPackageAndMapLocallyVerified": true,
   "publicLatencyFixedClaimed": false,
-  "fullGameBrowserCompressionPassed": false,
-  "productionReleasedThisRound": false
+  "productionReleasedThisRound": false,
+  "fullLegacyServerBrowserPassed": false,
+  "wholeParityCandidateOrAccepted": false
 }

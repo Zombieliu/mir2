@@ -2,7 +2,7 @@
 
 ## R16 完整场景快照压缩候选（2026-11-14）
 
-同一 worldSnapshot 文本经显式能力协商压缩，旧端、目录及经济/身份消息保持原路径。100协议＋35Gateway＋59Web/Core及独立Next/TypeScript通过，本地真实TLS四条快照载荷167,824→38,070B；修正本地502与公网529用例的误用计数，保留原失败。候选尚未部署，下一步匹配Gateway/Web实际游戏回放，再准备Linux/公网资格；61.929秒移动长尾、完整冷启与整体1:1仍开放。[本地候选与边界](evidence/r16-world-snapshot-gzip-20261114/README.md)
+同一完整快照文本经能力协商压缩，未改玩法/身份/经济消息。194项相关检查后，匹配 Gateway/Web 的默认英文与共享 WebGL2 繁中四场实际游戏已完成原入口消费、529目录、字体/HUD/Q、移动、189步商人路线及重登保存；24条快照消息载荷减少81.836%。Linux完整CI与发行包/ELF/同源地图SHA通过，继续旧服UI与公网资格；未部署，61.929秒长尾、公开冷启、语言残留、三职业新全程与整体1:1仍开放。[本轮资格与边界](evidence/r16-world-snapshot-gzip-20261114/README.md)
 
 ## Physical attack save transform and capacity follow-up (2026-11-14)
 

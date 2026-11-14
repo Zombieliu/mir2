@@ -1,0 +1,278 @@
+{
+  "schema": "mir2.r16.world-snapshot-gzip.linux-ci.v1",
+  "checkedAt": "2026-11-14T10:28:05.343Z",
+  "runId": 43582710524,
+  "url": "https://github.com/Zombieliu/mir2/actions/runs/43582710524",
+  "sourceRevision": "199a294130f386a245e86d3c1d81f731d7d7277b",
+  "workflowCompleted": true,
+  "workflowConclusion": "success",
+  "gatewayJob": {
+    "id": 132410661510,
+    "status": "completed",
+    "conclusion": "success",
+    "steps": [
+      {
+        "name": "Set up job",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Checkout exact playtest candidate",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Install Rust 1.95",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Reuse native Rust dependencies and build outputs",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Locate native PostgreSQL tools",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Verify isolated persistence and package Gateway with matching maps",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Upload verified playtest Gateway and maps",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Retain native compiler cache after package diagnostics",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Upload playtest verification evidence",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Post Reuse native Rust dependencies and build outputs",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Post Checkout exact playtest candidate",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "name": "Complete job",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "packageArtifact": {
+    "id": 14109078858,
+    "name": "mir2-playtest-wallet-gateway-linux-x64-199a294130f386a245e86d3c1d81f731d7d7277b",
+    "zipBytes": 84740570,
+    "zipSha256": "82cd661135f47cc2dfac289294db7bb3f96548c12126228a78ff2ffb4213c544"
+  },
+  "archiveSha256": "61d7d56b42995ced7899fa0e5e0c6039a0c12b0b719bc09fa68b1edef3a11468",
+  "binarySha256": "df84177a4778ca466458b1924186a4d4a823868392ace8c0b503dd5c691b7fee",
+  "zoneHostSha256": "317948e1149f9a6a02c3e0eee9df0ead05415cc4d2af987f8bc665a0fd0b32a4",
+  "actualReleaseStartup": {
+    "passed": true,
+    "identityBackend": "postgres",
+    "sessionCacheBackend": "redis",
+    "sessionCacheHealthy": true,
+    "gatewayExitCode": 0,
+    "redisExitCode": 0,
+    "elapsedMs": 1236,
+    "profileMode": "r16",
+    "r16GameplayBaselineMatched": true,
+    "playerAccountsCreated": 0,
+    "publicServiceContacted": false,
+    "chainDriversConfigured": false,
+    "procurementNewSalesEnabled": false,
+    "usdcNewSalesEnabled": false
+  },
+  "ciLogResultLines": [
+    {
+      "log": "activities_postgres.log",
+      "results": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.81s"
+      ]
+    },
+    {
+      "log": "billing_postgres.log",
+      "results": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.84s"
+      ]
+    },
+    {
+      "log": "build.log",
+      "results": [
+        "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 3435 filtered out; finished in 0.03s",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.45s",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.84s",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.81s"
+      ]
+    },
+    {
+      "log": "monthly_card_postgres.log",
+      "results": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.45s"
+      ]
+    },
+    {
+      "log": "schema-union.log",
+      "results": [
+        "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 3435 filtered out; finished in 0.03s"
+      ]
+    }
+  ],
+  "privateCiInputs": [
+    {
+      "name": "activities_postgres.log",
+      "bytes": 53749,
+      "sha256": "7c7bb882d6b1807ab127899f79256a445501506ccf64a78d88a9563007257e46"
+    },
+    {
+      "name": "billing_postgres.log",
+      "bytes": 53737,
+      "sha256": "979f68c09ced44d23fe8e878e2c07aab094573e29cb0d08f812f6b0a9016cff9"
+    },
+    {
+      "name": "build.log",
+      "bytes": 269142,
+      "sha256": "105d1ab75610a59f9bf84cd75fe3b9d6f685a921c5dd6169c78932c7149334c8"
+    },
+    {
+      "name": "gateway-package.log",
+      "bytes": 63079,
+      "sha256": "70d95cac0e523ca1ab16cceb8668763ccc62028736b757b7b2bd4b3afa742ba9"
+    },
+    {
+      "name": "gateway-postgres-startup.json",
+      "bytes": 2023,
+      "sha256": "babb93985500c333758dd4d46872b1717b3d9798a49ca7b6c17c6e4494a235a1"
+    },
+    {
+      "name": "gateway-postgres-startup.log",
+      "bytes": 126,
+      "sha256": "acbd674777923b7c9ac90b02e563ea41cadc34c0b13ccedfe86ac6f5e1bf5397"
+    },
+    {
+      "name": "linux-release-security.log",
+      "bytes": 226,
+      "sha256": "3d7084245af21724fc7f09bbd0f0c4b6ea5392eb0c9a98c2f37c59dc9eb1a5cf"
+    },
+    {
+      "name": "monthly_card_postgres.log",
+      "bytes": 53736,
+      "sha256": "51ca05b858147c9b1046e9693a91fb3d34430e4cf4574a2216cd40958a79e9fb"
+    },
+    {
+      "name": "native-redis-install.log",
+      "bytes": 5059,
+      "sha256": "1a0958fd4f3e9a295518701079179b1e22a26d6cea87af1472c4b4c814f5c17a"
+    },
+    {
+      "name": "postgres-init.log",
+      "bytes": 901,
+      "sha256": "48dc1346a6eb9103552473ee1282f46ed055e84dd97da91081c9dc55bafda141"
+    },
+    {
+      "name": "postgres-isolation.log",
+      "bytes": 202,
+      "sha256": "2b0a381acc24470928dc2533813e02f869242d849d7c59a699ed9e211887823c"
+    },
+    {
+      "name": "postgres-stop.log",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    },
+    {
+      "name": "postgres.log",
+      "bytes": 1754,
+      "sha256": "69a7c93be2730bad7d4b0d2f49ee4f6c725c52d41fcc6519da6bb85ab91e0873"
+    },
+    {
+      "name": "schema-union.log",
+      "bytes": 44269,
+      "sha256": "b3960e02937445f4a03eccd6a765829c0bb1da60e008b6f8baa1d7690dae998e"
+    },
+    {
+      "name": "startup-gateway.log",
+      "bytes": 1713,
+      "sha256": "eaa53636d1f5497b2d86e943ecae81489774634373e2bdf8a7d51d8fae27c4cb"
+    },
+    {
+      "name": "startup-redis.log",
+      "bytes": 1167,
+      "sha256": "2387cb4f5eeddd106fdbd5ff6ae6da7603dbbe02ef4e3614bf20b30ba9415ab4"
+    }
+  ],
+  "localPackageFullyVerified": true,
+  "publicRolloutPerformed": false,
+  "publicCompressionOrLatencyQualification": false,
+  "localPackage": {
+    "zipBytes": 84740570,
+    "zipSha256": "82cd661135f47cc2dfac289294db7bb3f96548c12126228a78ff2ffb4213c544",
+    "archiveBytes": 45746598,
+    "archiveSha256": "61d7d56b42995ced7899fa0e5e0c6039a0c12b0b719bc09fa68b1edef3a11468",
+    "gatewayBytes": 103789832,
+    "gatewaySha256": "df84177a4778ca466458b1924186a4d4a823868392ace8c0b503dd5c691b7fee",
+    "zoneHostBytes": 100037392,
+    "zoneHostSha256": "317948e1149f9a6a02c3e0eee9df0ead05415cc4d2af987f8bc665a0fd0b32a4",
+    "mapArchiveSha256": "c5681852e2947c4db73073eb0f8cb2621b40eb7f3e00296394fa05aacd12d725",
+    "map0Sha256": "ed4783215ffa989658f79892c2dd6720753fb111e1102cb14da8e6182d88d7f6",
+    "map0Bytes": 12740008,
+    "gatewayArchiveEntryCount": 4,
+    "mapArchiveEntryCount": 1621,
+    "localValidationOnly": true,
+    "linuxServiceInstalled": false
+  },
+  "localTransfer": {
+    "reusedSerialPrefixBytes": 22200320,
+    "rangeParts": [
+      {
+        "index": 0,
+        "start": 22200320,
+        "end": 37835382,
+        "receivedBytes": 15635063,
+        "sha256": "b406f6d3af4bbfd4386aa99751ee626ffbc83f0144298e34c7c09fa7a0e8c1d2",
+        "passed": true
+      },
+      {
+        "index": 1,
+        "start": 37835383,
+        "end": 53470445,
+        "receivedBytes": 15635063,
+        "sha256": "6f099ec6b824c83c2d543b3055490a33b7f6df7ee2068adab7e58b912e342dc2",
+        "passed": true
+      },
+      {
+        "index": 2,
+        "start": 53470446,
+        "end": 69105508,
+        "receivedBytes": 15635063,
+        "sha256": "cec0f83d06b9a8bb4a880a6cee0a81943e25303c5c76a656aacb9a3de1b9a8da",
+        "passed": true
+      },
+      {
+        "index": 3,
+        "start": 69105509,
+        "end": 84740569,
+        "receivedBytes": 15635061,
+        "sha256": "542e12ca39cfd1ea8f6cc2d7fdd1700d2ffd4eb09a34fe4e3839a01e93c531d9",
+        "passed": true
+      }
+    ],
+    "fullZipDigestMatchesGitHubArtifact": true,
+    "partialFilesPreserved": true,
+    "serialGhTransferStoppedOnlyAfterOwnershipCheck": true
+  }
+}

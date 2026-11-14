@@ -14,7 +14,7 @@ Short routing summary, updated 2026-11-14 (Asia/Shanghai). This indexes recorded
 
 ## Last recorded decisions and open work
 
-2026-11-14 09:25UTC正式独立API仍E6／Ae3／READY，本轮无发布。已完成场景快照显式协商压缩本地候选：100协议＋35Gateway＋59Web/Core（194项）、独立WASM/Next/TypeScript及匹配debug Gateway通过；四条真实TLS快照载荷167,824→38,070B，502条本地完整目录逐字符串等同旧端，公网529门不变。原跨盘依赖构建失败与误用529计数失败保留。当前尚无完整游戏浏览器消费压缩快照的通过记录；下一轮优先配对新Gateway/Web实跑R16界面、移动与寻路、旧服兼容，再做Linux与公网资格。[候选及精确路径](evidence/r16-world-snapshot-gzip-20261114/README.md)。原61.929／13.286秒公网ACK失败、120秒冷启、字体与整体1:1仍开放；未以压缩比例证明根因或线上已修，Goal active。
+2026-11-14 10:36UTC独立API仍E6／Ae3／READY，无新发布。199a场景快照候选已在匹配新Gateway/Web完成默认英文男战士及共享WebGL2繁中女战士的冷启/完全关闭浏览器重登，共四场；原入口消费、每场529目录、六字体/113/Q、189步商人路线和保存通过。24条协商快照消息载荷1,171,080→212,715B；194项代码检查不重复累计。三轮脚本路径/诊断观察失败保留；英文画面仍含中文标签。专用Next BUILD_ID KQ7eN1Lo2uNQhIxqKTlt7，199a的Linux完整CI、发行包/ELF/地图SHA已过；期间合入b950网关诊断，先补合流回归与同源工件，再验旧服UI及公网。[候选及下一项](evidence/r16-world-snapshot-gzip-20261114/README.md)。原61.929／13.286秒公网ACK、120秒冷启和整体1:1仍开放，Goal active。
 
 2026-11-12 正式站已发布 `51d2dcc346`：共享图片取消与图集计时/JSON大小缓存身份修复。本机75项、生产构建及两后端重开同档通过；公网简繁出码、手机尺寸官方钱包Testnet签名、进比奇、权威移动、共用HUD/任务窗、113/113预取和正常退出通过，无需回滚。云端缓存身份与计算一致；Worker正常更新缓存一次，未迁移旧007缓存。本次观测起点到首画面65.2秒/共用HUD104.7秒（点击进游戏后约6.8秒/46.3秒），继续优化冷加载；实体手机、完整1:1及历史未结项仍开放。[发布与边界](evidence/r16-cache-repair-20261112/README.md)
 

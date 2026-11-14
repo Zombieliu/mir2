@@ -1,6 +1,6 @@
 # R16 完整场景快照压缩候选（2026-11-14）
 
-已实现服务器与 Web 的显式协商压缩，完成本地协议/真实 TLS 回放、真实 WASM、相关回归及独立生产构建，**尚未部署**。这是减少同连接大消息的一项候选；原公网 61.929 秒 ACK 失败与根因未明的结论保持，不宣称延迟已经修好或整体 1:1 完成。[原失败和采样](../r16-startup-delivery-20261114/README.md)
+已实现服务器与 Web 的显式协商压缩，完成协议/真实 TLS、实际 WASM、独立生产构建，以及默认/共享 WebGL2 的四个完整游戏浏览器会话，**尚未部署**。24 条已协商快照的消息载荷合计减少 81.836%；原公网 61.929 秒 ACK 失败与根因未明的结论保持，不宣称公网延迟已经修好或整体 1:1 完成。[原失败和采样](../r16-startup-delivery-20261114/README.md) · [实际浏览器回执](browser-verification.json)
 
 ## 行为与兼容
 
@@ -50,4 +50,39 @@ cargo +1.89.0 test --locked -p mir2-gateway --lib -- web::world_snapshot_transpo
 node --test scripts/test-gateway-catalog-transport.mjs scripts/test-client-core-runtime.mjs scripts/test-client-core-release-files.mjs scripts/test-client-core-build.mjs
 ```
 
-下一步用匹配的新 Gateway 和已构建的 Web 完整跑实际 R16 游戏浏览器流程，确认压缩快照确实进入原界面、走路/寻路及旧服务器兼容；再准备同源 Linux 工件与受保护的发布和公网扫码、首步、完整字库/HUD 冷启验收。当前仅有 TLS 测试客户端和 Node WASM 证据，**尚无完整游戏浏览器消费压缩快照的通过记录**，也没有新线上发布。原 8 秒移动、120 秒冷启动、字库、公共目录与完整 1:1 门槛继续有效。
+下一步先对新增的网关诊断合流补集成回归和同源工件，再补旧 Gateway 的实际浏览器兼容，随后做受保护发布和公网扫码、首步、完整字库/HUD 冷启验收。本轮四会话只覆盖本机匹配新 Gateway/Web，不代替公网；原 8 秒移动、120 秒冷启动、字库、公共目录与完整 1:1 门槛继续有效。
+
+## 四会话实际游戏复验
+
+源码为已提交 `199a294130f386a245e86d3c1d81f731d7d7277b`；本地隔离构建仍用 `40d1662f83a5-world-snapshot-gzip-candidate` 标签。匹配新 Gateway debug、四份新 Core 与固定 `bevy-0c553a754308e5b8` 渲染器配对，专用生产构建 BUILD_ID 为 `KQ7eN1Lo2uNQhIxqKTlt7`。本轮补齐固定公开资源及本机 Gateway 的编译环境；未复制 Native/Shell WIP。前次 `wBO16…` 为编译检查，本次才是带完整试玩配置的配对构建。
+
+| 本机路径 | 冷场 Native 就绪，首帧后 | 完全关闭浏览器后，同档 Native 就绪 | 商人路线 |
+| --- | --- | --- | --- |
+| 默认 WebGPU，英文，男战士 | 54.578 秒 | 1.336 秒 | 189 次走跑，`(324,291)` → 权威终点 `(322,293)` |
+| 共用 WebGL2，繁中，女战士 | 52.239 秒 | 1.296 秒 | 同上 |
+
+四场均验证六份完整字体 SHA、113/113 HUD 预取、共用 Q 任务窗、实际右键走路/释放/黑边 DOM 菜单取消、Worker 停止后读回缓存、普通退出及权威位置保存。第二场还通过 NPC 名字/对话实点、已在稻草人半径内的零步提示、九份完整碰撞块及商人长路，到达后停止。每次实际位置前进仍受原 8 秒门槛约束；Native 保留 120 秒门槛。受控 8 秒无响应头、两次 15 秒零正文、字体源恢复等原判定继续执行，没有提高期限。
+
+每条物理连接均实际声明快照能力，Node 被动观察器用本轮 WASM 还原消息，并将 tick/金币/HP 与**游戏自身原始消息入口**的记录匹配；浏览器继续正常画面和操作。已匹配的证据按连接保留，避免 Page 仅保存最新 50 条诊断时被后续普通包挤出。四场各收到全部 **529** 条目录（145 item、200 quest、79 recipe、105 shop）。这四场是本地真实 R16 数据，公网 529 门仍须独立复验。
+
+24 条已协商快照原文本 **1,171,080 B** → **212,715 B** WebSocket 消息载荷，减少 **81.836%**；四条协商前首快照保留 Text。数字不含 WS/TLS 头或其他流量，不推导 WAN 延迟、CCU 或根因。[结构化回执](browser-verification.json) · [脚本、原始记录摘要及失败](browser-inputs-manifest.json)
+
+[英文任务窗](default-en-quest.png) · [英文商人到达](default-en-vendor-arrival.png) · [繁中任务窗](webgl2-tc-quest.png) · [繁中商人到达](webgl2-tc-vendor-arrival.png)。已逐张检查画面；英文截图仍有中文攻击模式与金币预算行，完整语言对齐继续开放。本轮只测战士和正常协议准备的 3 级角色，没有新增三职业从 1 到 30 的前端验收。
+
+首轮测试脚本缺构建回执别名；第二轮取晚期 PacketRuntime 记录，未覆盖提前返回的快照路径；第三轮已在首帧匹配实际入口，后续再次查最新 50 条记录时旧样本已被挤出，catch 又有诊断变量作用域错误。三轮均按失败保留，自己的浏览器/服务均关闭、原黄金档未变；修正测试观察与路径后 r4/r5 完整通过，未修改产品或降低门槛。最终测试工具及原失败 SHA 在摘要文件中可复查。
+
+2026-11-14 10:36:32 UTC 独立 Vercel API 仍读回 E6／Ae3／READY，正式入口未切换。[独立读回](browser-production-readback.json)。旧服务器完整 UI、Linux 发布和公网首步/冷启资格继续单列；整体 Goal active。
+
+## 同源 Linux 发行工件
+
+[工作流 43582710524](https://github.com/Zombieliu/mir2/actions/runs/43582710524) 已全部成功，源固定为 `199a294130f386a245e86d3c1d81f731d7d7277b`。目标 Gateway 任务的 schema union、月卡/计费/活动 PostgreSQL、发行边界及实际发行子进程 PG/Redis 启动均通过；没有启动容器或接触公开游戏服务，新增采购/充值关闭。该启动验证不代替 Linux 实际 WebSocket 压缩与公网玩法资格。
+
+已从 GitHub 下载并逐层核验：84,740,570 B 工件 ZIP 的 SHA 为 `82cd661135f47cc2dfac289294db7bb3f96548c12126228a78ff2ffb4213c544`；内部 Gateway tar.gz 为 `61d7d56b42995ced7899fa0e5e0c6039a0c12b0b719bc09fa68b1edef3a11468`；实际 ELF Gateway 为 `df84177a4778ca466458b1924186a4d4a823868392ace8c0b503dd5c691b7fee`，Zone host 为 `317948e1149f9a6a02c3e0eee9df0ead05415cc4d2af987f8bc665a0fd0b32a4`。地图包整包 SHA 与 sidecar 相等，`0.map.gz` 的有界解压结果与本轮 UI 的 `0.map` SHA `ed4783215ffa989658f79892c2dd6720753fb111e1102cb14da8e6182d88d7f6` 相同。
+
+原串行 CLI 下载长时间没有落盘数据，验证归属后只停止自己的下载；保留自己的序列前缀，用四条明确 Range 补齐后拼接，**完整 ZIP SHA 与 GitHub artifact digest 相等**，再解包验证实际二进制。原临时文件保留。第一次包检查使用了错误的 Zone host 文件名，第二次遗漏地图单文件为 gzip；修正检查后通过，包内容未修改。[CI、工件与逐层核验](linux-ci-verification.json)
+
+可复用本地目录是 `C:/r16-world-snapshot-gzip-20261114/linux-package-verified`：`gateway-releases/` 保存原发行包，`gateway-expanded-r2/` 保存已核验 ELF，`playtest-wallet-release/` 保存地图包。该目录是验证工件，未安装远端服务、替换环境/数据库或修改生产入口。下一次发布必须按届时服务身份与现行发布保护重新检查。
+
+## 分支合流边界
+
+验证期间，R16 分支合入 `525e74364a` 的有界输入/关闭延迟诊断，集成头为 `b950fce0a14f739d89008c864670dcb8f7c8df57`。与本轮 `199a294130` 相比，Web、协议和 Core 源码逐项 Git 差异为空；Gateway 的 `routing.rs`、`web.rs`、`web_transport.rs` 有新增诊断。因此本轮资格固定在 **199a**，不转记为 b950 网关已通过。现有四场浏览器证据、发行工件和未提交改动均保留；下一项先核验该合流。[来源、私有输入、图像和边界检查](validation.json)

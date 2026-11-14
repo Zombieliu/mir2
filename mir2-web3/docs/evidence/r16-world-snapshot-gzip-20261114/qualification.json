@@ -96,6 +96,23 @@
   },
   "productionDeployed": false,
   "publicAckLatencyFixedClaimed": false,
-  "fullGameBrowserWithCompressedSnapshotPassed": false,
-  "wholeParityCandidateOrAccepted": false
+  "fullGameBrowserWithCompressedSnapshotPassed": true,
+  "wholeParityCandidateOrAccepted": false,
+  "fullGameBrowserLocalSessions": 4,
+  "pairedBrowserBuild": {
+    "buildId": "KQ7eN1Lo2uNQhIxqKTlt7",
+    "label": "40d1662f83a5-world-snapshot-gzip-candidate",
+    "renderer": "bevy-0c553a754308e5b8",
+    "assetRelease": "20261108-r16-08ec86d5105c"
+  },
+  "linuxCi": {
+    "runId": 43582710524,
+    "workflowSucceeded": true,
+    "releasePackageAndMapLocallyVerified": true,
+    "publicRollout": false
+  },
+  "fullLegacyServerBrowserPassed": false,
+  "qualifiedSourceRevision": "199a294130f386a245e86d3c1d81f731d7d7277b",
+  "integratedHeadAtReview": "b950fce0a14f739d89008c864670dcb8f7c8df57",
+  "integratedGatewayQualificationClaimed": false
 }

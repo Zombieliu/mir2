@@ -6,7 +6,7 @@ Updated 2026-11-14 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-14 09:25UTC正式独立API仍E6／Ae3／READY，本轮无发布。已完成场景快照显式协商压缩本地候选：100协议＋35Gateway＋59Web/Core（194项）、独立WASM/Next/TypeScript及匹配debug Gateway通过；四条真实TLS快照载荷167,824→38,070B，502条本地完整目录逐字符串等同旧端，公网529门不变。原跨盘依赖构建失败与误用529计数失败保留。当前尚无完整游戏浏览器消费压缩快照的通过记录；下一轮优先配对新Gateway/Web实跑R16界面、移动与寻路、旧服兼容，再做Linux与公网资格。[候选及精确路径](evidence/r16-world-snapshot-gzip-20261114/README.md)。原61.929／13.286秒公网ACK失败、120秒冷启、字体与整体1:1仍开放；未以压缩比例证明根因或线上已修，Goal active。
+2026-11-14 10:36UTC独立API仍E6／Ae3／READY，无新发布。199a场景快照候选已在匹配新Gateway/Web完成默认英文男战士及共享WebGL2繁中女战士的冷启/完全关闭浏览器重登，共四场；原入口消费、每场529目录、六字体/113/Q、189步商人路线和保存通过。24条协商快照消息载荷1,171,080→212,715B；194项代码检查不重复累计。三轮脚本路径/诊断观察失败保留；英文画面仍含中文标签。专用Next BUILD_ID KQ7eN1Lo2uNQhIxqKTlt7，199a的Linux完整CI、发行包/ELF/地图SHA已过；期间合入b950网关诊断，先补合流回归与同源工件，再验旧服UI及公网。[候选及下一项](evidence/r16-world-snapshot-gzip-20261114/README.md)。原61.929／13.286秒公网ACK、120秒冷启和整体1:1仍开放，Goal active。
 
 ## 保留的当前未结项
 
