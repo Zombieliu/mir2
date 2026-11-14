@@ -212,8 +212,28 @@ fn fixture(label: &str, count: usize) -> NativeFixture {
         actors.push(runtime);
     }
     let zone_state = factory.resources_for_zone(&zone).zone_state.clone();
+    // Establish stable accepted owner profiles by the real native Tick path,
+    // before any measured hooks/counters; this is not the overlap_pair fixture.
+    for runtime in &mut actors {
+        runtime.execute(WorldCommand::Tick).expect("negative fixture native Tick setup");
+    }
+    for runtime in &actors {
+        let actor = runtime.as_any().downcast_ref::<SharedInProcessZoneSessionRuntime>().unwrap();
+        let own = actor.inner.active_zone_experience_profile().unwrap().map(|p| p.level);
+        let key = actor.current_presence_key().unwrap();
+        let accepted = {
+            let state = zone_state.lock().unwrap();
+            state.zone_sessions.get(&key).and_then(|session| state.zone_manager.player_experience_profile(session)).map(|p| p.level)
+        };
+        assert!(own.is_some(), "fixture must have a genuine active owner profile");
+        assert_eq!(accepted, own, "first-publication generation change must be completed during setup");
+    }
     shared(&mut actors[0]).shared_mentors.lock().unwrap().changed();
     NativeFixture { config, _factory: factory, zone_state, actors }
+}
+fn fixture_signature(fixture: &NativeFixture) -> (u64, u64) {
+    let actor = fixture.actors[0].as_any().downcast_ref::<SharedInProcessZoneSessionRuntime>().unwrap();
+    (actor.shared_social_generation.load(Ordering::Acquire), fixture.config.shared_guild_clock_generation())
 }
 fn count_hook(scans: Arc<AtomicUsize>, owners: Arc<AtomicUsize>) -> ProjectionTestHook {
     Arc::new(move |phase| match phase {
@@ -244,16 +264,23 @@ fn replace_stage5(fixture: &NativeFixture, ordinal: usize, value: Option<String>
 #[test]
 fn sequential_cold_caller_still_detects_unrelated_peer_parse_error_and_retries() {
     let mut f = fixture("cold", 2);
+    let expected_signature = fixture_signature(&f);
     let scans = Arc::new(AtomicUsize::new(0)); let owners = Arc::new(AtomicUsize::new(0));
     let hook = count_hook(scans.clone(), owners.clone());
     let first = refresh(&mut f.actors[0], hook.clone());
+    let after_first = fixture_signature(&f);
     let original = replace_stage5(&f, 0, Some("{invalid-peer-stage5".into()));
     let cold = refresh(&mut f.actors[1], hook.clone());
+    let after_cold = fixture_signature(&f);
     replace_stage5(&f, 0, original);
     let retry = refresh(&mut f.actors[1], hook);
+    let after_retry = fixture_signature(&f);
     let closed = close_fixture(&mut f);
     assert_eq!(closed, 2); assert_eq!(f.zone_state.lock().unwrap().players.len(), 0);
     assert!(first.is_ok() && cold.is_err() && retry.is_ok());
+    assert_eq!(after_first, expected_signature);
+    assert_eq!(after_cold, expected_signature);
+    assert_eq!(after_retry, expected_signature, "same-generation cold validation must not pass due to generation mismatch");
     assert_eq!(scans.load(Ordering::Relaxed), 3, "later cold caller must not reuse a historical completion");
     assert_eq!(owners.load(Ordering::Relaxed), 3);
 }
@@ -297,6 +324,7 @@ fn changing_generation_during_scan_does_not_publish_shared_success() {
 #[test]
 fn failed_later_scan_invalidates_older_success_for_an_earlier_entry() {
     let mut f = fixture("failure", 3);
+    let expected_signature = fixture_signature(&f);
     let mut waiting_actor = f.actors.pop().unwrap();
     let pause = Arc::new(Probe::default());
     let scans = Arc::new(AtomicUsize::new(0)); let owners = Arc::new(AtomicUsize::new(0));
@@ -320,17 +348,23 @@ fn failed_later_scan_invalidates_older_success_for_an_earlier_entry() {
     let (state, timeout) = pause.changed.wait_timeout_while(state, Duration::from_secs(5), |s| !s.first_waiting).unwrap();
     let entered = state.first_waiting && !timeout.timed_out(); drop(state);
     let first = refresh(&mut f.actors[0], count.clone());
+    let after_success = fixture_signature(&f);
     let original = replace_stage5(&f, 0, Some("{invalid-peer-after-success".into()));
     let failed = refresh(&mut f.actors[1], count);
+    let after_failure = fixture_signature(&f);
     replace_stage5(&f, 0, original);
     { let mut state = pause.state.lock().unwrap(); state.release = true; pause.changed.notify_all(); }
     let joined = worker.join();
     let mut resumed_ok = false;
     if let Ok((actor, result)) = joined { f.actors.push(actor); resumed_ok = result.is_ok(); }
+    let after_resume = fixture_signature(&f);
     let closed = close_fixture(&mut f);
     assert_eq!(closed, 3); assert_eq!(f.zone_state.lock().unwrap().players.len(), 0);
     assert!(entered && !pause.state.lock().unwrap().timed_out);
     assert!(first.is_ok() && failed.is_err() && resumed_ok);
+    assert_eq!(after_success, expected_signature);
+    assert_eq!(after_failure, expected_signature);
+    assert_eq!(after_resume, expected_signature, "failure invalidation must not be masked by first-publication generation changes");
     assert_eq!(scans.load(Ordering::Relaxed), 3, "failed miss must erase the older reusable completion");
     assert_eq!(owners.load(Ordering::Relaxed), 3);
 }
