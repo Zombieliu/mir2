@@ -4,6 +4,7 @@ use mir2_simulation::{validate_shared_mentor_request, SharedMentorMutation, Stag
 #[derive(Debug, Default)]
 pub(super) struct SharedMentorCoordinator {
     pub(super) generation: Arc<AtomicU64>,
+    pub(super) experience_projection_flight: Arc<super::shared_experience_profiles::SharedExperienceProjectionFlight>,
     invitations: BTreeMap<ZonePresenceKey, MentorInvitation>,
     pub(super) guild_invitations: BTreeMap<ZonePresenceKey, super::shared_guilds::GuildInvitation>,
     pub(super) guild_permissions: BTreeSet<ZonePresenceKey>,

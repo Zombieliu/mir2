@@ -24,16 +24,15 @@ impl HostedZoneOwnerCommandClient {
         if !Arc::ptr_eq(&resources.zone_state, &shared.zone_state) {
             return Err("replica factory rebind world identity mismatch".into());
         }
-        let generation = factory
-            .shared_mentors
-            .lock()
-            .map_err(|_| "social coordinator poisoned")?
-            .generation
-            .clone();
+        let (generation, experience_projection_flight) = {
+            let coordinator = factory.shared_mentors.lock().map_err(|_| "social coordinator poisoned")?;
+            (coordinator.generation.clone(), coordinator.experience_projection_flight.clone())
+        };
         shared.ranking_zones = factory.zones.clone();
         shared.ranking_replica_zones = factory.replica_zone_ids.clone();
         shared.shared_mentors = factory.shared_mentors.clone();
         shared.shared_social_generation = generation;
+        shared.experience_projection_flight = experience_projection_flight;
         shared.last_social_refresh = None;
         shared.last_experience_projection = None;
         shared.next_social_refresh_ms = 0;

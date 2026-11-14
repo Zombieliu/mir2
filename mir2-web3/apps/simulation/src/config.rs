@@ -4293,6 +4293,15 @@ impl Default for SimulationConfig {
 }
 
 impl SimulationConfig {
+    /// Read-only identity/policy check for overlapping shared projection work.
+    pub fn same_shared_experience_projection_authority(&self, other: &Self) -> bool {
+        Arc::ptr_eq(&self.account_store, &other.account_store)
+            && Arc::ptr_eq(&self.guild_clock_driver, &other.guild_clock_driver)
+            && Arc::ptr_eq(&self.guild_clock_updates, &other.guild_clock_updates)
+            && Arc::ptr_eq(&self.account_store_write_state, &other.account_store_write_state)
+            && self.crystal_newbie_guild_name == other.crystal_newbie_guild_name
+    }
+
     pub fn crystal_fishing_cast_delay(&self) -> std::time::Duration {
         crate::CRYSTAL_FISHING_CAST_DELAY
             + std::time::Duration::from_millis(u64::from(self.crystal_fishing_delay_ms))
@@ -9197,3 +9206,29 @@ mod config_account_store_durability_tests;
 mod config_schema_compat_tests;
 #[path = "config_schema_integration_tests.rs"]
 mod config_schema_integration_tests;
+
+
+#[cfg(test)]
+mod shared_experience_projection_authority_tests {
+    use super::*;
+    #[test]
+    fn projection_authority_compares_actual_store_clock_write_state_and_policy() {
+        let base = SimulationConfig::default();
+        assert!(base.same_shared_experience_projection_authority(&base.clone()));
+        let mut other = base.clone();
+        other.account_store = SimulationConfig::default().account_store;
+        assert!(!base.same_shared_experience_projection_authority(&other));
+        let mut other = base.clone();
+        other.guild_clock_driver = Arc::new(Mutex::new(guild_clock_driver::ClockDriverState::default()));
+        assert!(!base.same_shared_experience_projection_authority(&other));
+        let mut other = base.clone();
+        other.guild_clock_updates = Arc::new(std::sync::atomic::AtomicU64::new(0));
+        assert!(!base.same_shared_experience_projection_authority(&other));
+        let mut other = base.clone();
+        other.account_store_write_state = Arc::new(Mutex::new(AccountStoreWriteState::Writable));
+        assert!(!base.same_shared_experience_projection_authority(&other));
+        let mut other = base.clone();
+        other.crystal_newbie_guild_name.push('X');
+        assert!(!base.same_shared_experience_projection_authority(&other));
+    }
+}

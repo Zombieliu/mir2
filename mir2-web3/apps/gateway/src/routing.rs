@@ -10431,14 +10431,14 @@ impl ZoneRuntimeFactory for SharedInProcessZoneRuntimeFactory {
 
     fn create_runtime(&self, config: GatewayConfig, zone_id: &ZoneId) -> ZoneRuntimeHandle {
         let resources = self.resources_for_zone(zone_id);
+        let (shared_social_generation, experience_projection_flight) = {
+            let coordinator = self.shared_mentors.lock().expect("social coordinator");
+            (coordinator.generation.clone(), coordinator.experience_projection_flight.clone())
+        };
         Box::new(SharedInProcessZoneSessionRuntime {
             inner: InProcessWorldRuntime::new(config),
-            shared_social_generation: self
-                .shared_mentors
-                .lock()
-                .expect("social coordinator")
-                .generation
-                .clone(),
+            shared_social_generation,
+            experience_projection_flight,
             last_social_refresh: None,
             last_experience_projection: None,
             next_social_refresh_ms: 0,
@@ -11301,6 +11301,7 @@ struct SharedInProcessZoneSessionRuntime {
     shared_social_generation: Arc<AtomicU64>,
     last_social_refresh: Option<u64>,
     last_experience_projection: Option<(u64, u64)>,
+    experience_projection_flight: Arc<shared_experience_profiles::SharedExperienceProjectionFlight>,
     next_social_refresh_ms: u64,
     shared_mentors: Arc<Mutex<shared_mentor::SharedMentorCoordinator>>,
     ranking_zones: Arc<Mutex<BTreeMap<ZoneId, SharedInProcessZoneResources>>>,
@@ -18480,6 +18481,13 @@ fn finish_native_attack_execution(
     })
 }
 
+fn shared_session_substage(label: &'static str) -> Option<GatewaySlowStage> {
+    static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    let enabled = *ENABLED.get_or_init(|| std::env::var("MIR2_GATEWAY_SLOW_STAGE_MS").ok()
+        .and_then(|v| v.trim().parse::<u64>().ok()).is_some_and(|ms| ms > 0));
+    enabled.then(|| GatewaySlowStage::start(label))
+}
+
 impl SharedInProcessZoneSessionRuntime {
     fn execute_shared_pipeline(
         &mut self,
@@ -18873,13 +18881,20 @@ impl SharedInProcessZoneSessionRuntime {
         ) && !routes_zone_native_player_attack;
         let predrain_stage = GatewaySlowStage::start("shared_session.predrain");
         if !is_low_latency_zone_packet {
-            self.refresh_pet_progress_context()?;
-            self.refresh_personal_experience_context()?;
+            {
+                let _stage = shared_session_substage("shared_session.predrain.pet_context");
+                self.refresh_pet_progress_context()?;
+            }
+            {
+                let _stage = shared_session_substage("shared_session.predrain.experience_context");
+                self.refresh_personal_experience_context()?;
+            }
         }
         let (mut packets, mut deferred_pending_zone_monster_spawns) = if is_low_latency_zone_packet
         {
             (Vec::new(), Vec::new())
         } else {
+            let _stage = shared_session_substage("shared_session.predrain.pending_drain");
             let (mut packets, deferred) = self
                 .apply_pending_zone_packets_with_deferred_monster_spawns(
                     revives_presented_private_death,
@@ -18907,11 +18922,18 @@ impl SharedInProcessZoneSessionRuntime {
             // consuming them; otherwise a delayed pre-revive damage delta can
             // kill only the private runtime and make the next item command
             // disagree with the Zone snapshot.
+            let _stage = shared_session_substage("shared_session.predrain.vitals_sync");
             self.force_inner_to_current_zone_vitals();
         }
         if !is_low_latency_zone_packet {
-            packets.extend(self.consume_pending_player_kills()?);
-            packets.extend(self.reconcile_mentor_accounting(false, removes_presence)?);
+            {
+                let _stage = shared_session_substage("shared_session.predrain.player_kills");
+                packets.extend(self.consume_pending_player_kills()?);
+            }
+            {
+                let _stage = shared_session_substage("shared_session.predrain.mentor_accounting");
+                packets.extend(self.reconcile_mentor_accounting(false, removes_presence)?);
+            }
         }
         // Harvest is admitted by the shared Zone from freshly synchronized,
         // trusted session state before any corpse is materialized in the
@@ -19220,10 +19242,17 @@ impl SharedInProcessZoneSessionRuntime {
         }
         let reconcile_stage = GatewaySlowStage::start("shared_session.reconcile");
         if !is_low_latency_zone_packet && !removes_presence {
-            command_packets.extend(self.consume_pending_player_kills()?);
-            self.refresh_shared_experience_profiles()?;
+            {
+                let _stage = shared_session_substage("shared_session.reconcile.player_kills");
+                command_packets.extend(self.consume_pending_player_kills()?);
+            }
+            {
+                let _stage = shared_session_substage("shared_session.reconcile.experience_profiles");
+                self.refresh_shared_experience_profiles()?;
+            }
         }
         if !is_low_latency_zone_packet && !removes_presence && !is_start_game {
+            let _stage = shared_session_substage("shared_session.reconcile.mentor_accounting");
             command_packets.extend(self.reconcile_mentor_accounting(false, false)?);
         }
         // At this boundary `command_packets` is the personal command result.
@@ -20545,6 +20574,10 @@ mod tests {
     mod personal_monster_projection_tests;
     #[path = "poisoning_carried_tests.rs"]
     mod poisoning_carried_tests;
+    #[path = "shared_experience_projection_singleflight_tests.rs"]
+    mod shared_experience_projection_singleflight_tests;
+    #[path = "tick_leaf_probe_tests.rs"]
+    mod tick_leaf_probe_tests;
     #[path = "predrain_performance_tests.rs"]
     mod predrain_performance_tests;
     #[path = "private_monster_snapshot_tests.rs"]
@@ -35941,10 +35974,14 @@ mod tests {
         let shared_mentors = Arc::new(Mutex::new(
             crate::routing::shared_mentor::SharedMentorCoordinator::default(),
         ));
-        let shared_social_generation = shared_mentors.lock().unwrap().generation.clone();
+        let (shared_social_generation, experience_projection_flight) = {
+            let coordinator = shared_mentors.lock().unwrap();
+            (coordinator.generation.clone(), coordinator.experience_projection_flight.clone())
+        };
         SharedInProcessZoneSessionRuntime {
             inner: InProcessWorldRuntime::new(config),
             shared_social_generation,
+            experience_projection_flight,
             last_social_refresh: None,
             last_experience_projection: None,
             next_social_refresh_ms: 0,
