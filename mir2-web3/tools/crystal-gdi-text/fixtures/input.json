@@ -2,6 +2,33 @@
   "schemaVersion": 1,
   "items": [
     {
+      "key": "entity-assistant-jane-auto",
+      "text": "Assistant Jane",
+      "foreground": "#FF00FF00",
+      "background": "#00000000",
+      "outline": true,
+      "drawFormat": ["HorizontalCenter"],
+      "size": "auto"
+    },
+    {
+      "key": "entity-merchant-auto",
+      "text": "Merchant",
+      "foreground": "#FF00FF00",
+      "background": "#00000000",
+      "outline": true,
+      "drawFormat": ["HorizontalCenter"],
+      "size": "auto"
+    },
+    {
+      "key": "entity-ruben-auto",
+      "text": "Ruben",
+      "foreground": "#FFFFFFFF",
+      "background": "#00000000",
+      "outline": true,
+      "drawFormat": ["HorizontalCenter"],
+      "size": "auto"
+    },
+    {
       "key": "entity-assistant-jane",
       "text": "Assistant Jane",
       "foreground": "#FF00FF00",

@@ -1286,28 +1286,21 @@ function OriginalClientSceneVisualLayersInner({
                   : entityMotionOffsetForEntity(entity, entityMotionSnapshots, motionNow);
               const cameraOffset = isPlayer ? EMPTY_VIEWPORT_OFFSET : playerCameraMotionOffset;
               const labelLines = entityDisplayLabelLines(entity, t);
-              const labelText = labelLines.map((line) => line.text).join("\r\n");
               const labelColour = entityNameplateColor(entity);
               const questIcon =
                 entity.kind === "npc"
                   ? questIconForEntity(entity, world.questLog, sceneSpriteFrameIndex)
                   : null;
-              const entityGdiText = entity.dead
+              // Crystal creates an AutoSize MirLabel for each NPC name line;
+              // 48/50px is its centering anchor, never a text clipping width.
+              const labelAnchorWidth = entity.kind === "npc" || entity.kind === "monster" ? 48 : 50;
+              const labelGdiTexts = labelLines.map((line) => entity.dead
                 ? null
                 : findCrystalGdiTextAsset({
-                    text: labelText,
-                    foreground: labelColour,
+                    text: line.text,
+                    foreground: line.role === "secondary" && entity.kind === "npc" ? "#ffffff" : labelColour,
                     outline: true,
-                    width: labelLines.length > 1 ? 54 : 50,
-                    height: labelLines.length > 1 ? 32 : 15,
-                  }) ??
-                  findCrystalGdiTextAsset({
-                    text: labelText.replace(/\r?\n/g, " "),
-                    foreground: labelColour,
-                    outline: true,
-                    width: 50,
-                    height: 15,
-                  });
+                  }));
               const healthRatio =
                 isPlayer && entity.hp !== undefined && entity.maxHp
                   ? ratio(entity.hp, entity.maxHp)
@@ -1369,6 +1362,7 @@ function OriginalClientSceneVisualLayersInner({
                     }
                     type="button"
                     className={`entity-nameplate ${entityKindClassName(entity.kind)} ${entity.objectId === selectedEntity?.objectId ? "selected" : ""}`}
+                    aria-label={labelLines.map((line) => line.text).join(" ")}
                     style={{
                       left: `${VIEWPORT_ENTITY_LEFT_ORIGIN + entity.dx * VIEWPORT_CELL_WIDTH + cameraOffset.x + entityMotionOffset.x + entityNameplateLeftOffset(entity, sprite)}px`,
                       top: `${VIEWPORT_ENTITY_TOP_ORIGIN + entity.dy * VIEWPORT_CELL_HEIGHT + cameraOffset.y + entityMotionOffset.y + entityNameplateTopOffset(entity, sprite)}px`,
@@ -1395,13 +1389,20 @@ function OriginalClientSceneVisualLayersInner({
                     }
                     onClick={isInteractiveEntity ? () => onActivateEntity(entity.objectId) : undefined}
                   >
-                    {entityGdiText ? (
-                      <CrystalGdiTextImage
-                        asset={entityGdiText}
-                        className="entity-nameplate-gdi"
-                        accessibleText={labelLines.map((line) => line.text).join(" ")}
-                      />
-                    ) : labelLines.map((line, index) => (
+                    {labelLines.map((line, index) => {
+                      const gdiText = labelGdiTexts[index];
+                      return gdiText ? (
+                        <CrystalGdiTextImage
+                          key={`${entity.objectId}-label-${index}`}
+                          asset={gdiText}
+                          className="entity-nameplate-gdi"
+                          accessibleText={line.text}
+                          style={{
+                            marginLeft: Math.trunc((labelAnchorWidth - gdiText.size.output.width) / 2),
+                            top: Math.trunc(gdiText.size.output.height / 2) - 6,
+                          }}
+                        />
+                      ) : (
                         <strong
                           key={`${entity.objectId}-label-${index}`}
                           className={
@@ -1412,7 +1413,8 @@ function OriginalClientSceneVisualLayersInner({
                         >
                           {line.text}
                         </strong>
-                      ))}
+                      );
+                    })}
                     {entity.dead ? (
                       <strong className="entity-state-label">{t("ui.dead")}</strong>
                     ) : null}

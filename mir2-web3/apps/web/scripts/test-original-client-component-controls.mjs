@@ -102,6 +102,7 @@ async function realChatFrame() {
     "./crystal-gdi-text": { CrystalGdiTextImage: () => null, findCrystalGdiTextAsset: () => null },
     "./original-client-inventory-utils": { originalItemIconPath: () => "" },
     "./original-client-item-tooltip": { OriginalItemTooltip: () => null },
+    "./original-client-crystal-item-tooltip": { OriginalCrystalItemTooltip: () => null },
     "./original-client-overlays": { SpriteButton: () => null },
   });
 }

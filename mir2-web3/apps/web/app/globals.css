@@ -900,6 +900,8 @@ body:has([data-shared-touch-quest-open="true"], [data-shared-touch-bag-open="tru
   background: transparent;
   pointer-events: auto;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-auto-rows: 12px;
   gap: 0;
   text-align: center;
   box-shadow: none;
@@ -923,6 +925,8 @@ body:has([data-shared-touch-quest-open="true"], [data-shared-touch-bag-open="tru
 }
 
 .entity-nameplate strong {
+  justify-self: center;
+  white-space: pre;
   font-size: 11px;
   line-height: 12px;
   color: var(--entity-name-color, #ffffff);
@@ -5705,7 +5709,7 @@ button.character-spell-value:hover {
 }
 
 .entity-nameplate > .entity-nameplate-gdi {
-  justify-self: center;
+  justify-self: start;
 }
 
 .chat-feed-line > .crystal-gdi-text,

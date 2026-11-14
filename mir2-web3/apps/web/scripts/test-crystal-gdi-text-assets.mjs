@@ -32,6 +32,9 @@ for (const asset of manifest.assets) {
 }
 
 for (const required of [
+  "entity-assistant-jane-auto",
+  "entity-merchant-auto",
+  "entity-ruben-auto",
   "entity-assistant-jane",
   "entity-merchant-ruben-multiline",
   "hud-hp",
@@ -44,6 +47,19 @@ for (const required of [
 }
 
 const onlinePlayers = manifest.assets.find((asset) => asset.key === "chat-online-players");
+for (const key of ["entity-assistant-jane-auto", "entity-merchant-auto", "entity-ruben-auto"]) {
+  const name = manifest.assets.find((asset) => asset.key === key);
+  assert.equal(name.size.mode, "auto", `${key} must follow Crystal MirLabel AutoSize`);
+  assert.equal(name.size.output.width, name.size.measured.width + 2, `${key} must retain the full measured string plus outline`);
+  assert.equal(name.size.output.height, name.size.measured.height + 2);
+}
+const jane = manifest.assets.find((asset) => asset.key === "entity-assistant-jane-auto");
+const fixedJane = manifest.assets.find((asset) => asset.key === "entity-assistant-jane");
+assert(jane.size.output.width > fixedJane.size.output.width, "a 50px fixed label must not cap an AutoSize world name");
+assert.equal(fixedJane.size.mode, "fixed", "fixed-size UI requests keep their original fixture");
+assert.equal(fixedJane.size.output.width, 50);
+assert.equal(manifest.assets.find((asset) => asset.key === "entity-ruben-auto").foreground, "#FFFFFFFF",
+  "Crystal NPC underscore subnames use white rather than the primary name colour");
 assert.equal(onlinePlayers.background, "#FFFFFFFF");
 const lineMessage = manifest.assets.find((asset) => asset.key === "chat-line-message-net-8");
 assert.equal(lineMessage.foreground, "#FFFFFFFF");
