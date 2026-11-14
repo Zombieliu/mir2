@@ -390,6 +390,7 @@ import bevyRuntimeVersion from "../lib/bevy-runtime-build-manifest";
 import { isAbortError, signalAssetFirstPlayable } from "../lib/asset-orchestrator";
 import { createBevyRuntimeUrls } from "../lib/bevy-runtime-url";
 import { prewarmBevyRuntimeFonts } from "../lib/bevy-runtime-font-prewarm";
+import { getRuntimeHeaderPriority } from "../lib/runtime-header-priority";
 import {
   selectBevyRuntimeStartup,
   getBevyRuntimePackageForBackend,
@@ -2685,6 +2686,9 @@ export default function HomePage() {
   }, []);
   const [screen, setScreen] = useState<ClientScreen>("login");
   useEffect(() => {
+    const priority = getRuntimeHeaderPriority();
+    if (screen === "game") priority?.beginCycle();
+    else priority?.cancelCycle();
     requestAssetPrewarmStage(
       screen === "select" ? "character-select" : screen === "game" ? "game" : "login",
     );
@@ -5556,6 +5560,8 @@ export default function HomePage() {
       };
     }
 
+    const releaseHeaderPriority = getRuntimeHeaderPriority()?.captureRelease() ?? (() => false);
+
     async function bootRuntime() {
       try {
         markMir2CacheMilestone("bevyRuntimeStart", {
@@ -5679,6 +5685,7 @@ export default function HomePage() {
         try {
           runtime = await loadBevyRuntimeModule(runtimeBackend, bevyRuntimeStartup, {
             ownerSignal: runtimeOwner.signal, takeRecovery: takeRuntimeRecovery,
+            onResponseHeaders: () => releaseHeaderPriority("headers"),
           });
         } catch (error) {
           if (shouldRetryBevyRuntimeWithWebGl2(runtimeBackend, runtimeSupport.webgl2, error)) {
@@ -5694,6 +5701,7 @@ export default function HomePage() {
             });
             runtime = await loadBevyRuntimeModule(runtimeBackend, bevyRuntimeStartup, {
               ownerSignal: runtimeOwner.signal, takeRecovery: takeRuntimeRecovery,
+              onResponseHeaders: () => releaseHeaderPriority("headers"),
             });
           } else {
             throw error;
@@ -5819,6 +5827,8 @@ export default function HomePage() {
         if (scheduleBevyRuntimeCacheRecovery(message)) {
           console.info("[mir2] runtime cache mismatch detected; refreshing runtime files once");
         }
+      } finally {
+        releaseHeaderPriority("finished");
       }
     }
 
@@ -5828,6 +5838,7 @@ export default function HomePage() {
       disposed = true;
       runtimeOwner.abort();
       fontPrewarmController.abort();
+      releaseHeaderPriority("retired");
     };
   }, [bevyRuntimeStartup, clientProfile.input, clientProfile.layout, screen, shouldBootBevyRuntime]);
 
@@ -22843,6 +22854,7 @@ type RuntimeModuleLoad = {
 type RuntimeModuleLoadOwner = {
   ownerSignal?: AbortSignal;
   takeRecovery?: (sourceKey: string) => boolean;
+  onResponseHeaders?: () => void;
 };
 const bevyRuntimeModuleLoads = new Map<string, RuntimeModuleLoad>();
 
@@ -22884,6 +22896,7 @@ async function loadBevyRuntimeModule(
     pending = initializeBevyRuntimeModule(runtimePath, localRuntimeWasmPath, runtimeWasmPath, {
       ownerSignal: owner.ownerSignal,
       takeRecovery: owner.takeRecovery ? () => owner.takeRecovery!(runtimePath) : undefined,
+      onResponseHeaders: owner.onResponseHeaders,
       onInitializationStarted: () => { record.initializationStarted = true; },
     });
   } catch (error) {
@@ -22921,6 +22934,7 @@ async function initializeBevyRuntimeModule(
     ownerSignal?: AbortSignal;
     takeRecovery?: () => boolean;
     onInitializationStarted?: () => void;
+    onResponseHeaders?: () => void;
   } = {},
 ): Promise<RuntimeModule> {
   return initializeBevyRuntime({

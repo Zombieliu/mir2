@@ -16,6 +16,11 @@ function sourcePrefix(value) {
   return { origin: url.origin, prefix: url.pathname === '/' ? '' : url.pathname.replace(/\/$/, '') };
 }
 
+export function normalizeStaticResourceSources(sourceBases) {
+  if (!Array.isArray(sourceBases) || sourceBases.length < 1 || sourceBases.length > 8) throw new Error('invalid static sources');
+  return sourceBases.map(sourcePrefix).sort((left, right) => right.prefix.length - left.prefix.length);
+}
+
 export function staticResourceDescriptor(value, sources) {
   let url;
   try { url = new URL(value); } catch { return null; }
@@ -43,7 +48,7 @@ export function startStaticWaterfall({ context, elapsed, sourceBases, maxRows = 
   if (!context?.on || !context?.off || typeof elapsed !== 'function'
     || !Array.isArray(sourceBases) || sourceBases.length < 1 || sourceBases.length > 8
     || !Number.isSafeInteger(maxRows) || maxRows < 1 || maxRows > 8192) throw new Error('invalid waterfall arguments');
-  const sources = sourceBases.map(sourcePrefix).sort((left, right) => right.prefix.length - left.prefix.length);
+  const sources = normalizeStaticResourceSources(sourceBases);
   const rows = [], active = new Map(), byRequest = new WeakMap(), pending = new Set();
   let stopped = false, dropped = 0, pendingAtStop = 0;
   const now = () => {

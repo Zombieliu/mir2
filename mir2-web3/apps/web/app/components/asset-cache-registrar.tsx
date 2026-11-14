@@ -26,6 +26,7 @@ import {
 } from "../../lib/asset-release-capabilities";
 import { normalizeDeviceMemoryGiB, resolveRenderTier } from "../../lib/render-tier";
 import { fetchPrewarmAsset, type PrewarmAttemptDiagnostic } from "../../lib/asset-prewarm-request";
+import { getRuntimeHeaderPriority } from "../../lib/runtime-header-priority";
 import { OriginalClientStagePortal } from "./original-client-stage-portal";
 
 type AssetManifest = {
@@ -647,6 +648,16 @@ export function AssetCacheRegistrar() {
               lane === "background" ? pack.phase === "background" : pack.phase !== "background",
             ),
           run: async (stage, lane, signal) => {
+            if (stage === "game" && lane === "background") {
+              const started = performance.now();
+              const outcome = await getRuntimeHeaderPriority()?.wait(signal);
+              if (outcome) metrics.markMilestone("runtimeHeaderPriorityBackground", {
+                ...outcome, waitedMs: Math.round(performance.now() - started),
+              });
+              if (outcome?.reason === "cancelled" || outcome?.reason === "superseded") {
+                throw new DOMException("Prewarm stage retired", "AbortError");
+              }
+            }
             await prewarmAssetPacks(manifest, metrics, prewarmPolicy, stage, lane, signal,
               () => reconfigureWorker?.() ?? Promise.resolve());
             if (!disposed) setSnapshot(metrics.snapshot());

@@ -30,6 +30,7 @@ export async function initializeBevyRuntime<T extends RuntimeInitializer>({
   takeRecovery,
   ownerSignal,
   onInitializationStarted,
+  onResponseHeaders,
 }: {
   loadModule: () => Promise<T>;
   wasmUrl: string;
@@ -44,6 +45,7 @@ export async function initializeBevyRuntime<T extends RuntimeInitializer>({
   takeRecovery?: () => boolean;
   ownerSignal?: AbortSignal;
   onInitializationStarted?: () => void;
+  onResponseHeaders?: () => void;
 }): Promise<T> {
   if (ownerSignal?.aborted) throw ownerSignal.reason;
   const controller = new AbortController();
@@ -135,6 +137,7 @@ export async function initializeBevyRuntime<T extends RuntimeInitializer>({
             void response.body?.cancel().catch(() => {});
             throw new TypeError(`Failed to fetch runtime binary (HTTP ${response.status})`);
           }
+          try { onResponseHeaders?.(); } catch { /* Scheduling observers cannot alter runtime loading. */ }
           phase = "body";
           reader = response.body?.getReader();
           if (!reader) throw new TypeError("Runtime binary has no body");
