@@ -1,0 +1,10 @@
+{
+  "scope": "Different browser observation spans; counts overlap and must not be added.",
+  "gameConsoleErrors": 128,
+  "gamePageErrors": 0,
+  "startupConsoleLevels": {
+    "error": 119,
+    "warning": 1
+  },
+  "startupResourceErrors": 124
+}

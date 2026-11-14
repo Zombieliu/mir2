@@ -6,7 +6,7 @@ Updated 2026-11-14 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-14 双源无头5b011候选通过99项/构建/Chrome四故障场景及两后端四会话，六字体/113/Q、两条189次走跑路线和保存通过，原8/120秒不变。源码已推送，1提交/12路径与独立GitHub逐Blob一致，82发布检查通过。29份WIP与其他线程后台合并单列；正式E6/在线fd3，本轮尚未发布。继续独立候选和公网复验，保留EA4失败/回退。[资格及冻结](evidence/r16-runtime-header-probes-20261114/README.md) · [原公网失败](evidence/r16-login-door-retirement-20261114/production/README.md)。
+2026-11-14 双源无头5b011本地99项/构建/Chrome四场/两后端四会话、两条189次走跑路线和82发布检查通过。已发布并完成公网功能：3810ms首步、六字体/113/共享Q/Worker/保存通过；运行包154494ms、Native247642ms超原120，已回退E6并复验简繁扫码/取消，在线fd3未动。下一步隔离同包95.204秒响应头/43.186秒正文，不能原样重发。29份WIP及原失败保留，其他目标/动态占位和整体1:1开放。[资格](evidence/r16-runtime-header-probes-20261114/README.md) · [公网与回退](evidence/r16-runtime-header-probes-20261114/production/README.md)。
 
 ## 保留的当前未结项
 

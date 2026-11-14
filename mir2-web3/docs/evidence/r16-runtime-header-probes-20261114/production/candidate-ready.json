@@ -1,0 +1,16 @@
+{
+  "id": "dpl_CGUG4eNnpBEreSxFPi7rsoZcNVhV",
+  "url": "numeron-r16-hbybbd0bv-obelisk-labs.vercel.app",
+  "readyState": "READY",
+  "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+  "source": "5b011e5d2fcce78883b517e5992ef23245052f84",
+  "branch": "codex/windows-player-journey",
+  "target": "production",
+  "createdAt": 1794668991344,
+  "buildingAt": 1794668992535,
+  "readyAt": 1794669203154,
+  "readyAtIso": "2026-11-14T15:13:23.154Z",
+  "checkedAt": "2026-11-14T15:15:56.580Z",
+  "firstFailedCheckAt": "2026-11-14T15:13:03.101Z",
+  "firstCheckPrecededReady": true
+}
