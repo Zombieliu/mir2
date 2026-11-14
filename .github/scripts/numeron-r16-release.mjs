@@ -16,30 +16,20 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: '91b8fc9b4f5170cb37b6619b991707ed76a34d73',
+  source: 'e6c923b7c669cb061a7a03703f05fadd91211c97',
   sourceRef: BRANCH,
-  baseSource: 'f6e30a0ee8021d745ecce35e295edf5f60e39964',
+  baseSource: '6b6ce88212d63683a932c6b6f580fcc727891a05',
   assetSource: 'f2de762309768b51b39438c2437c14e819df9bf7',
   changedFiles: [
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/lib/generated/r16-entry-bootstrap-chunks.ts",
-      "sha": "a8dca3b25a331be195ea446246b65692f6e58941"
+      "filename": "mir2-web3/apps/web/app/original-client-shell.tsx",
+      "sha": "c94290dd335e5eca01991ff9f720dbc94da816ba"
     },
     {
       "status": "modified",
-      "filename": "mir2-web3/apps/web/lib/r16-entry-scene.ts",
-      "sha": "dd29f8197b00e5c04a08c28d28f0b08e2f321a36"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/generate-r16-bootstrap-chunks.mjs",
-      "sha": "04813b6d7e2d5a71f46b23170b0b5e7184905bae"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/test-pinned-bootstrap-chunk.mjs",
-      "sha": "05f50153009d532577235705d6ac3b2aa60b3147"
+      "filename": "mir2-web3/apps/web/scripts/test-r16-world-marker-input.mjs",
+      "sha": "7773480ded2a98bc0334151e444ee3666e55dba9"
     }
   ],
   entryScene: {
@@ -98,7 +88,7 @@ export const QR_RELEASE = Object.freeze({
     bytes: 3283113,
   },
   assetRunId: '42494701555',
-  baseline: 'dpl_3eNPP4uaj3nT3HsAMhJUUoXpN4Dh',
+  baseline: 'dpl_44ctBTrdq2T5fb91EjrUEt6B3GUk',
   relay: 'https://relay.dubhe.obelisk.build',
 });
 const QR_OPERATIONS = ['numeron-qr-stage', 'numeron-qr-promote', 'numeron-qr-rollback'];
