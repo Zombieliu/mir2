@@ -1,0 +1,13 @@
+{
+  "schema": "mir2.delivery-server-provenance.v1",
+  "identityReadPassed": true,
+  "firstIdentityAuthenticationFailureRetained": true,
+  "successfulIdentityReadSha256": "7635a6924a33df2925ccecd7a96f0ccce6c43644d8b031a748dc791eb2f91f35",
+  "writerReadbackSha256": "1b78fb83061d21632ae2713049acc713778391aa351e78bb981e9a0859153bf4",
+  "writerReaderSourceSha256": "1829da20c3f9ca6fde4ff591a220dd995ee6b8ae84559a25b7c79516ea2e71af",
+  "caddyStatusReadSha256": "d59c946098fa8c83bf018f0fb49d4bb7177c2b794fa77b521a5977d52dd2a84d",
+  "caddyStatusProducerSha256": "e377563a4002ffad62f6d901507877e3a053b97c2873862bde97d9933635467b",
+  "tcpCollectorSourceSha256": "1b523c7786c4c4eb8bbde574967984e442be226fe81e53418d878f1dfa6edbf3",
+  "operations": "Read-only identity/proc/health/bounded journal/ss. Password via PTY getpass and memory-only; no credentials or raw environment exported. No service restart, remote file writes or network changes.",
+  "noNewPerAckTraceEnabled": true
+}

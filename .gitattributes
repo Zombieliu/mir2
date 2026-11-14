@@ -111,3 +111,7 @@ mir2-web3/docs/evidence/windows-launcher-delivery-20261030/** -text whitespace=-
 
 # Canonical display copies retain the recorded LF log hashes across checkouts.
 mir2-web3/docs/evidence/r16-font-lanes-20261114/*.txt text eol=lf
+
+# Frozen diagnostic producers retain the exact observed SHA across checkouts.
+mir2-web3/docs/evidence/r16-startup-delivery-20261114/producers/*.mjs -text whitespace=cr-at-eol
+mir2-web3/docs/evidence/r16-startup-delivery-20261114/*.tap text eol=lf

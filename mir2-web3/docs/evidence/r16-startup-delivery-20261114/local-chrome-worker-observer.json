@@ -1,0 +1,123 @@
+{
+  "passed": true,
+  "scope": "Local real Chrome with a real fetch-intercepting Service Worker and separate Worker CDP companion, one complete4096-byte static response; no public performance claim",
+  "browserClosed": true,
+  "ownedServerClosed": true,
+  "producerSha256": "b317763af31706ef585ecabd1c38d724729baa04f90d8587fd2b856dfc582c48",
+  "observerSha256": "6f87238b42fd2a8afc8b46ca6590b1ab792faee35752038a0bc4bab027751e5f",
+  "workerObserverSha256": "e0330867cdae8f7bf9c58c3a39d28e7c2d653e26e0900e5420a5a702f0602e93",
+  "priorFailures": [
+    "ERR_UNSUPPORTED_ESM_URL_SCHEME before any browser launched; fixed import URL",
+    "Playwright1.55.1 context events omit Worker upstream by default; browser/server closed; added independent Worker CDP companion without experimental flags"
+  ],
+  "observation": {
+    "schema": "mir2.passive-static-delivery.v1",
+    "observedUntilMs": 407,
+    "rows": [
+      {
+        "id": 1,
+        "source": "page",
+        "url": "http://127.0.0.1:49773/game",
+        "requestAtMs": 14,
+        "resourceType": "document",
+        "timing": {
+          "startTime": 1794642502283.5413,
+          "domainLookupStart": -1,
+          "domainLookupEnd": -1,
+          "connectStart": -1,
+          "secureConnectionStart": -1,
+          "connectEnd": -1,
+          "requestStart": 0.169,
+          "responseStart": 2.462,
+          "responseEnd": 3.147
+        },
+        "headersAtMs": 15,
+        "status": 200,
+        "fromServiceWorker": false,
+        "finishedAtMs": 22,
+        "sizes": {
+          "requestBodySize": 0,
+          "requestHeadersSize": 685,
+          "responseBodySize": 53,
+          "responseHeadersSize": 156
+        }
+      },
+      {
+        "id": 2,
+        "source": "page",
+        "url": "http://127.0.0.1:49773/original-ui/test.png",
+        "requestAtMs": 205,
+        "resourceType": "fetch",
+        "timing": {
+          "startTime": 1794642502477.3218,
+          "domainLookupStart": -1,
+          "domainLookupEnd": -1,
+          "connectStart": -1,
+          "secureConnectionStart": -1,
+          "connectEnd": -1,
+          "requestStart": 0.135,
+          "responseStart": 1.519,
+          "responseEnd": 1.858
+        },
+        "headersAtMs": 206,
+        "status": 200,
+        "fromServiceWorker": true,
+        "finishedAtMs": 206,
+        "sizes": {
+          "requestBodySize": 0,
+          "requestHeadersSize": 338,
+          "responseHeadersSize": 171
+        }
+      }
+    ],
+    "droppedRequests": 0,
+    "observationErrors": 0,
+    "pendingSizesAtFinish": 0,
+    "sizeReadsDrained": true,
+    "eventListenersRemoved": true,
+    "observedWorkerRows": 0,
+    "workerEventCoverageInferred": false,
+    "coverage": "BrowserContext GET events for allowlisted public static paths; older Playwright requires a separate Worker CDP companion. In-flight requests stay incomplete.",
+    "payloadsRead": false,
+    "headersRead": false,
+    "requestsIntercepted": false,
+    "networkSettingsChanged": false,
+    "totalConnectionOrActorIdentityBound": false,
+    "workerCdp": {
+      "kind": "r16-passive-worker-static-network-v1",
+      "workerUrl": "http://127.0.0.1:49773/mir2-asset-worker.js",
+      "contextScoped": true,
+      "source": "service-worker-upstream-cdp",
+      "setupMs": 5,
+      "finishMs": 32,
+      "workersAttached": 1,
+      "otherContextWorkersIgnored": 0,
+      "droppedRequests": 0,
+      "cleanupComplete": true,
+      "observerErrors": [],
+      "rows": [
+        {
+          "source": "service-worker-upstream-static",
+          "workerGeneration": 1,
+          "url": "http://127.0.0.1:49773/original-ui/test.png",
+          "requestAtMs": 206,
+          "observedAtMs": 205,
+          "encodedBodyBytes": 4109,
+          "status": 200,
+          "protocol": "http/1.1",
+          "headersAtMs": 207,
+          "encodedBytes": 4280,
+          "encodedBytesComplete": true,
+          "finishedAtMs": 207,
+          "durationMs": 1
+        }
+      ],
+      "limits": [
+        "static allowlist expansion of the pinned font-only observer; all eligible GETs remain body/header/query free",
+        "future-worker requests made before Network.enable may be unobserved; no target is paused",
+        "encodedBytes from loadingFinished includes protocol overhead; failed rows only expose observed encoded body counts",
+        "only exact Worker URL in the supplied browser context is observed; no headers or payloads are accessed"
+      ]
+    }
+  }
+}
