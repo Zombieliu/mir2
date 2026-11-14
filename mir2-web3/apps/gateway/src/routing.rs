@@ -20545,6 +20545,8 @@ mod tests {
     mod personal_monster_projection_tests;
     #[path = "poisoning_carried_tests.rs"]
     mod poisoning_carried_tests;
+    #[path = "tick_leaf_probe_tests.rs"]
+    mod tick_leaf_probe_tests;
     #[path = "predrain_performance_tests.rs"]
     mod predrain_performance_tests;
     #[path = "private_monster_snapshot_tests.rs"]
