@@ -25,13 +25,21 @@
       "source": "47e6bb7f3266dda9b8067c1bf7692d017e8e221e",
       "playtestWalletNoDocker": true,
       "branch": "codex/windows-player-journey",
-      "status": "in_progress",
+      "status": "completed",
       "nativeJobId": 132502966243,
       "walletLoginJobId": 132502966093,
-      "backendSourceJobId": 132502966432
+      "backendSourceJobId": 132502966432,
+      "outcome": "success",
+      "nativeJobOutcome": "success",
+      "backendSourceJobOutcome": "success",
+      "promotionBackendJobId": 132503254220,
+      "promotionBackendOutcome": "success",
+      "strictDownloadedArtifactVerificationPassed": false,
+      "capacityQualified": false
     }
   ],
   "publishR2": false,
   "numeronOperation": "off",
-  "anyCloudServiceDeployed": false
+  "anyCloudServiceDeployed": false,
+  "closureObservationNote": "Whole run and strict Gateway job success are CI facts. Downloaded archive, ELF/maps/fresh cloud identity verification remains separate; local100 remainsFAIL."
 }
