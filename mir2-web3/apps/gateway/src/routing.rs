@@ -3562,6 +3562,10 @@ impl ZoneDeliveryTrace {
         })
     }
 
+    pub(crate) fn input_gate_identity(&self) -> (u64, u64, u32) {
+        (self.trace_id, self.registration_id, self.recipient_zone_object_id)
+    }
+
     pub(crate) fn emit(
         &self,
         stage: ZoneDeliveryTraceStage,
@@ -3587,6 +3591,11 @@ impl ZoneDeliveryTrace {
             ZoneDeliveryTraceKind::ObjectPlayer => "ObjectPlayer",
             ZoneDeliveryTraceKind::ObjectRemove => "ObjectRemove",
         };
+        if crate::web::input_gate_trace_requested() {
+            // In this mode emit only numeric identity/timing; never old x/y or target payload.
+            crate::web::input_gate_delivery_event(stage, self.input_gate_identity(), self.producer_unix_ms, self.enqueued_at.elapsed());
+            return;
+        }
         let (x, y) = self.position.unwrap_or_default();
         let queue_age_us = dequeued_at
             .map(|at| at.saturating_duration_since(self.enqueued_at).as_micros())

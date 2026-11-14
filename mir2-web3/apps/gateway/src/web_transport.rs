@@ -122,6 +122,8 @@ pub(super) struct SocketSender<S> {
     sink: Mutex<S>,
     terminal: TransportSignal,
     timeout: Duration,
+    input_gate_diagnostics: super::SocketDiagnostics,
+    input_gate_frames: std::sync::atomic::AtomicU64,
     #[cfg(test)]
     peer_close_started: AtomicBool,
     #[cfg(test)]
@@ -137,6 +139,8 @@ where
             sink: Mutex::new(sink),
             terminal,
             timeout: WRITE_TIMEOUT,
+            input_gate_diagnostics: None,
+            input_gate_frames: std::sync::atomic::AtomicU64::new(0),
             #[cfg(test)]
             peer_close_started: AtomicBool::new(false),
             #[cfg(test)]
@@ -144,11 +148,33 @@ where
         }
     }
 
+    pub(super) fn with_input_gate_diagnostics(mut self, value: super::SocketDiagnostics) -> Self {
+        self.input_gate_diagnostics = value; self
+    }
+    pub(super) fn input_gate_context(&self) -> Option<super::InputGateTraceContext> {
+        super::input_gate_socket_context(&self.input_gate_diagnostics, 0, "owner_write", u8::MAX)
+    }
+    fn input_gate_reserve_frames(&self, count: usize) -> u64 {
+        if super::input_gate_trace_ids().is_none() || count == 0 { return 0; }
+        self.input_gate_frames.fetch_update(std::sync::atomic::Ordering::Relaxed, std::sync::atomic::Ordering::Relaxed,
+            |n| n.checked_add(count as u64).filter(|v| *v < super::SOCKET_DIAGNOSTIC_MAX_SAFE_INTEGER))
+            .ok().map(|n| n + 1).unwrap_or(0)
+    }
     pub(super) async fn send(&self, message: Message) -> Result<(), axum::Error> {
+        self.send_traced(message, None).await
+    }
+    pub(super) async fn send_traced(&self, message: Message, trace: Option<super::InputGateTraceContext>) -> Result<(), axum::Error> {
         if self.terminal.ended() {
             return Err(ended_error());
         }
         let deadline = tokio::time::Instant::now() + self.timeout;
+        let trace = if matches!(&message, Message::Close(_)) {
+            let context = super::input_gate_lifecycle_context(&self.input_gate_diagnostics);
+            drop(super::InputGateTraceSpan::start(context, "writer_close_send", 0));
+            context
+        } else { trace };
+        let count = usize::from(matches!(&message, Message::Text(_) | Message::Binary(_)));
+        let mut trace_lock = super::InputGateTraceSpan::start(trace, "writer_lock", 0);
         let sink = match tokio::time::timeout_at(deadline, self.sink.lock()).await {
             Ok(sink) => sink,
             Err(_) => {
@@ -156,6 +182,10 @@ where
                 return Err(timeout_error());
             }
         };
+        let first = self.input_gate_reserve_frames(count);
+        if let Some(span) = trace_lock.as_mut() { span.frames(first, count); }
+        drop(trace_lock);
+        let trace = trace.map(|mut c| { c.frame_first = first; c.frame_count = count; c });
         if self.terminal.ended() {
             return Err(ended_error());
         }
@@ -167,6 +197,7 @@ where
         // Latch a failed/partial write while still holding the sink guard.
         // A waiting producer must not acquire and reuse a partially flushed
         // sink in the interval between cancellation and the terminal signal.
+        let _trace_send = super::InputGateTraceSpan::start(trace, "writer_sink_send", 0);
         match tokio::time::timeout_at(deadline, write.sink.send(message)).await {
             Ok(Ok(())) => {
                 write.completed = true;
@@ -197,6 +228,8 @@ where
             return Err(ended_error());
         }
         let deadline = tokio::time::Instant::now() + self.timeout.min(PEER_CLOSE_REPLY_GRACE);
+        let close_trace = super::input_gate_lifecycle_context(&self.input_gate_diagnostics);
+        let close_lock_trace = super::InputGateTraceSpan::start(close_trace, "peer_close_writer_lock", 0);
         let sink = match tokio::time::timeout_at(deadline, self.sink.lock()).await {
             Ok(sink) => sink,
             Err(_) => {
@@ -204,6 +237,7 @@ where
                 return Err(timeout_error());
             }
         };
+        drop(close_lock_trace);
         if self.terminal.ended() {
             return Err(ended_error());
         }
@@ -212,10 +246,12 @@ where
             terminal: &self.terminal,
             completed: false,
         };
+        let close_flush_trace = super::InputGateTraceSpan::start(close_trace, "peer_close_flush", 0);
         let result = tokio::time::timeout_at(deadline, write.sink.flush()).await;
         // Fence while still holding the sink, including a failed/partial Close
         // flush. A waiting producer must never reuse that closing transport.
         self.terminal.end(TransportEnd::Closed);
+        drop(close_flush_trace);
         match result {
             Ok(Ok(())) => {
                 write.completed = true;
@@ -244,6 +280,9 @@ where
             return Err(ended_error());
         }
         let deadline = tokio::time::Instant::now() + self.timeout;
+        let trace = self.input_gate_context().map(|mut c| { c.kind = "batch"; c });
+        let count = messages.iter().filter(|m| matches!(m, Message::Text(_) | Message::Binary(_))).count();
+        let mut trace_lock = super::InputGateTraceSpan::start(trace, "writer_lock", 0);
         let lock_started = std::time::Instant::now();
         let sink = match tokio::time::timeout_at(deadline, self.sink.lock()).await {
             Ok(sink) => sink,
@@ -252,6 +291,10 @@ where
                 return Err(timeout_error());
             }
         };
+        let first = self.input_gate_reserve_frames(count);
+        if let Some(span) = trace_lock.as_mut() { span.frames(first, count); }
+        drop(trace_lock);
+        let trace = trace.map(|mut c| { c.frame_first = first; c.frame_count = count; c });
         let mut timings = BatchWriteTimings {
             lock_wait: lock_started.elapsed(),
             ..BatchWriteTimings::default()
@@ -267,6 +310,7 @@ where
         // The same ten-second deadline covers lock, readiness, feed and final
         // flush. Every message remains an individual WebSocket frame.
         let result = tokio::time::timeout_at(deadline, async {
+            let trace_feed = super::InputGateTraceSpan::start(trace, "writer_batch_feed", 0);
             let feed_started = std::time::Instant::now();
             for message in messages {
                 if self.terminal.ended() {
@@ -275,9 +319,11 @@ where
                 write.sink.feed(message).await?;
             }
             timings.feed = feed_started.elapsed();
+            drop(trace_feed);
             if self.terminal.ended() {
                 return Err(ended_error());
             }
+            let _trace_flush = super::InputGateTraceSpan::start(trace, "writer_batch_flush", 0);
             let flush_started = std::time::Instant::now();
             write.sink.flush().await?;
             timings.flush = flush_started.elapsed();
