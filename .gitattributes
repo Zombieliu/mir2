@@ -105,3 +105,6 @@ mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-2026
 mir2-web3/docs/evidence/windows-launcher-20261030/** -text whitespace=-blank-at-eof,blank-at-eol,space-before-tab,cr-at-eol
 mir2-web3/docs/evidence/windows-launcher-v2-20261030/** -text whitespace=-blank-at-eof,blank-at-eol,space-before-tab,cr-at-eol
 mir2-web3/docs/evidence/windows-launcher-delivery-20261030/** -text whitespace=-blank-at-eof,blank-at-eol,space-before-tab,cr-at-eol
+
+# Canonical display copies retain the recorded LF log hashes across checkouts.
+mir2-web3/docs/evidence/r16-font-lanes-20261114/*.txt text eol=lf
