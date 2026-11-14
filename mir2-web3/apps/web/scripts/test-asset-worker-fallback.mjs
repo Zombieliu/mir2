@@ -4,7 +4,7 @@ import test from "node:test";
 import vm from "node:vm";
 
 const workerSource = readFileSync(
-  new URL("../public/mir2-asset-worker.js", import.meta.url),
+  process.env.MIR2_ASSET_WORKER_TEST_SOURCE ?? new URL("../public/mir2-asset-worker.js", import.meta.url),
   "utf8",
 );
 
@@ -710,6 +710,96 @@ function configureAppFirstFont(context) {
     runtimeConfig.remoteAssetBaseUrls = [fontRouteConfig.remoteAssetBaseUrls[1], fontRouteConfig.remoteAssetBaseUrls[0]]`, context);
   return routes;
 }
+
+const scFont = url => url.replace("NotoSansTC.ttf", "NotoSansCJKsc-Regular.otf");
+
+test("SC origin split: only SC prefers the configured primary current-release CDN", async () => {
+  const calls = [];
+  const { context } = createWorkerContext(async request => {
+    calls.push(request.url); return new Response(new Uint8Array([1, 2, 3]));
+  });
+  const routes = configureCurrentFontMirror(context, "font-release-a", true);
+  vm.runInContext("runtimeConfig.fontMirrorFirst = false", context);
+  for (const url of [scFont(routes.origin), routes.origin]) {
+    const response = await vm.runInContext(`fetchStaticAsset(new Request(${JSON.stringify(url)}))`, context);
+    assert.deepEqual([...new Uint8Array(await response.arrayBuffer())], [1, 2, 3]);
+  }
+  assert.deepEqual(calls, [scFont(routes.secondary), routes.origin]);
+});
+
+test("SC origin split: CDN prefix stays unexposed and only its complete body is cached", async t => {
+  const f = fontWorkerFixture(t), routes = configureCurrentFontMirror(f.context, "font-release-a", true);
+  vm.runInContext("runtimeConfig.fontMirrorFirst = false", f.context);
+  const request = new Request(scFont(routes.origin));
+  let exposed = false;
+  const pending = f.read(undefined, request).then(response => { exposed = true; return response; });
+  // Also drain a baseline response after a route assertion fails, otherwise
+  // Node retains the unused tee and its 180s cache-fill retention timer.
+  t.after(async () => {
+    for (const stream of f.streams) { try { stream.close(); } catch {} }
+    const response = await pending;
+    if (!response.bodyUsed) await response.arrayBuffer();
+    await Promise.all(f.completions);
+  });
+  await fontTurn();
+  f.streams[0].enqueue(new Uint8Array([1, 2])); await fontTurn();
+  assert.deepEqual(f.calls.map(row => row.url), [scFont(routes.secondary)]);
+  assert.equal(exposed, false); assert.equal(f.writes(), 0);
+  f.streams[0].enqueue(new Uint8Array([3, 4])); f.streams[0].close();
+  assert.deepEqual([...new Uint8Array(await (await pending).arrayBuffer())], [1, 2, 3, 4]);
+  await Promise.all(f.completions);
+  assert.equal(f.writes(), 1);
+  assert.deepEqual([...new Uint8Array(await (await f.read(undefined, request)).arrayBuffer())], [1, 2, 3, 4]);
+  assert.equal(f.calls.length, 1);
+});
+
+for (const phase of ["headers", "body"]) test(`SC origin split: original ${phase} timeout recovers through the app with no mixed prefix`, async t => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const calls = [];
+  let routes;
+  const { context } = createWorkerContext(request => {
+    calls.push(request);
+    if (request.url === scFont(routes.origin)) return Promise.resolve(new Response(new Uint8Array([7, 8, 9])));
+    assert.equal(request.url, scFont(routes.mirror));
+    if (phase === "headers") return new Promise(() => {});
+    return Promise.resolve(new Response(new ReadableStream({ start(controller) {
+      controller.enqueue(new Uint8Array([1, 2]));
+      request.signal.addEventListener("abort", () => controller.error(request.signal.reason), { once: true });
+    } })));
+  });
+  routes = configureCurrentFontMirror(context);
+  vm.runInContext("runtimeConfig.fontMirrorFirst = false", context);
+  const pending = vm.runInContext(`fetchStaticAsset(new Request(${JSON.stringify(scFont(routes.origin))}))`, context);
+  await fontTurn();
+  const limit = phase === "headers" ? 8_000 : 15_000;
+  t.mock.timers.tick(limit - 1); await fontTurn(); assert.equal(calls.length, 1);
+  t.mock.timers.tick(1);
+  assert.deepEqual([...new Uint8Array(await (await pending).arrayBuffer())], [7, 8, 9]);
+  assert.deepEqual(calls.map(row => row.url), [scFont(routes.mirror), scFont(routes.origin)]);
+  assert(calls[0].signal.aborted);
+});
+
+test("SC origin split: ranges, unversioned and older-only sources remain app-first", async () => {
+  for (const kind of ["range", "unversioned", "older-only"]) {
+    const calls = [];
+    const { context } = createWorkerContext(async request => { calls.push(request.url); return new Response("app"); });
+    const routes = configureCurrentFontMirror(context, "font-release-a", true);
+    vm.runInContext("runtimeConfig.fontMirrorFirst = false", context);
+    if (kind === "unversioned") vm.runInContext('runtimeConfig.assetVersion = "bootstrap"', context);
+    if (kind === "older-only") vm.runInContext('runtimeConfig.remoteAssetBaseUrls = [runtimeConfig.remoteAssetBaseUrls[0]]', context);
+    context.splitRequest = new Request(scFont(routes.origin), kind === "range" ? { headers: { Range: "bytes=0-1" } } : {});
+    assert.equal(await (await vm.runInContext("fetchStaticAsset(splitRequest)", context)).text(), "app");
+    assert.deepEqual(calls, [scFont(routes.origin)]);
+  }
+});
+
+test("SC origin split: explicit all-font mirror-first preserves the configured mirror order", async () => {
+  const calls = [];
+  const { context } = createWorkerContext(async request => { calls.push(request.url); return new Response("mirror"); });
+  const routes = configureCurrentFontMirror(context, "font-release-a", true);
+  assert.equal(await (await vm.runInContext(`fetchStaticAsset(new Request(${JSON.stringify(scFont(routes.origin))}))`, context)).text(), "mirror");
+  assert.deepEqual(calls, [scFont(routes.mirror)]);
+});
 
 test("a complete shipped app font is exposed and cached without any CDN read", async t => {
   const f = fontWorkerFixture(t), { origin } = configureAppFirstFont(f.context);

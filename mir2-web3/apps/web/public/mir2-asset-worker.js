@@ -537,20 +537,33 @@ function currentReleaseFontMirror(request, remoteRequests) {
 
 function currentReleaseFontMirrors(request, remoteRequests) {
   const version = runtimeConfig.assetVersion;
-  if (!runtimeConfig.fontMirrorFirst || !isSharedUiFont(request) || request.headers.has("range") || version === DEFAULT_VERSION ||
-      typeof version !== "string" || !/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(version)) return [];
   const source = new URL(request.url);
+  // The two complete CJK families dominate the cold font transfer. Keep TC
+  // on the app and start SC on the configured current-release CDN so they do
+  // not share one origin's body stream. Both still use complete-body checks,
+  // the common two-reader budget and the original per-source timeouts.
+  const splitCjkOrigin = source.pathname === "/original-ui/fonts/NotoSansCJKsc-Regular.otf";
+  if ((!runtimeConfig.fontMirrorFirst && !splitCjkOrigin) || !isSharedUiFont(request) || request.headers.has("range") || version === DEFAULT_VERSION ||
+      typeof version !== "string" || !/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(version)) return [];
   const suffix = `/mir2/v/${version}${source.pathname}`;
   // Exhaust the configured mirrors of this exact release before returning to
   // the app. A slow preferred path must not hide a healthy current origin;
   // inherited releases remain later fallbacks. Each source keeps its own bounds.
   const seen = new Set();
-  return remoteRequests.filter(remote => {
+  const mirrors = remoteRequests.filter(remote => {
     const url = new URL(remote.url);
     if (url.origin === source.origin || !url.pathname.endsWith(suffix) || seen.has(url.href)) return false;
     seen.add(url.href);
     return true;
   });
+  if (splitCjkOrigin && !runtimeConfig.fontMirrorFirst) {
+    // Prefer the primary immutable release over inherited/hotlink aliases.
+    // Never fabricate a source: it must also be an allowed current mirror.
+    const primary = `${runtimeConfig.remoteAssetBaseUrl}${source.pathname}${source.search}`;
+    const index = mirrors.findIndex(remote => remote.url === primary);
+    if (index > 0) mirrors.unshift(...mirrors.splice(index, 1));
+  }
+  return mirrors;
 }
 
 async function fetchFontMirror(request, owner) {
