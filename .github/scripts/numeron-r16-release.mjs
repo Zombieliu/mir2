@@ -16,125 +16,130 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: "b9acf175fad0bb582f20fd76282580f179c4b0d2",
+  source: "f310e242a48b6ad69f27fcf133c90c1f8655674c",
   sourceRef: BRANCH,
-  baseSource: "1995a556f7f5e1d4e63e0d5d47cbf3e9ee109826",
+  baseSource: "b29c15a9bf08c33885b5c4c91866e9a7f119f5e6",
   assetSource: "f2de762309768b51b39438c2437c14e819df9bf7",
   sourceCommits: [
-    "b9acf175fad0bb582f20fd76282580f179c4b0d2"
-  ],
+  "f310e242a48b6ad69f27fcf133c90c1f8655674c"
+],
   changedFiles: [
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
-      "sha": "aebc9eaae9dd312eae9f2c2d4c600484282830e8"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/app/page.tsx",
-      "sha": "e2a05ed5320612d87d7053f278d41fc94718c11f"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/lib/bevy-runtime-initializer.ts",
-      "sha": "766c73059d7db02c71b6f0319a5d9c5430db7566"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/lib/runtime-header-priority.ts",
-      "sha": "57618d47a3d25f75526805e2bd05fcc6438f4f91"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/scripts/lib/r16-static-transport.mjs",
-      "sha": "04301bd5c70261080db6e224fdfa4842a798df64"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/apps/web/scripts/lib/r16-static-waterfall.mjs",
-      "sha": "7697be12556c5c2a35bdcc235e50af7d72c06054"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/scripts/smoke-runtime-header-priority.mjs",
-      "sha": "0c0a01c06afdf8b431ae956e64746c1c8e5ebf33"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/scripts/test-r16-static-transport.mjs",
-      "sha": "9010f05fffa7871ea24d0daaf9778815ec3d3974"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/apps/web/scripts/test-runtime-header-priority.mjs",
-      "sha": "4a8c6985eab7ffecfdd66d08465301a75b87d539"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/docs/AGENT-CURRENT.md",
-      "sha": "c6ebe493ff8e9534a9b7b70d1ea4359865f02bdc"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
-      "sha": "0d9bbbe733a2a18eecfa3ca94a69adedffcc90d0"
-    },
-    {
-      "status": "modified",
-      "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
-      "sha": "c49a48c039b42ae879e0b3025e1bae6a212f3aaf"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/README.md",
-      "sha": "f87322804685cb229b8f89e95d49e56a94f250db"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/chrome-order-failed-r1.json",
-      "sha": "1d6ec5efb791bb94e3965f7566b28299ccd1c860"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/chrome-order-passed-r2.json",
-      "sha": "076cd0be4b2123ab7020ae961fd5b155f3cdc6dd"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/default-static-transport.json",
-      "sha": "5268543c29658050fca0b820d3ae8ad10301d7b0"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/default-vendor-arrival.png",
-      "sha": "a0257ad5540bdd6ddd0e25b454bdf96a88429a2e"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/foreign-preservation.json",
-      "sha": "f59eef2f30a90e1bf35f7467f89ce6b5209b6020"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/game-fixture-preparation.json",
-      "sha": "cacf3ce9c04bbb4eed7015a0d3af7065d2463ac1"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/qualification.json",
-      "sha": "bb319f3d8439725dac66ea81275c4beb3cfa6995"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/webgl2-static-transport.json",
-      "sha": "1ca8110359e2a87f4dae73869dd10901208346d8"
-    },
-    {
-      "status": "added",
-      "filename": "mir2-web3/docs/evidence/r16-runtime-header-priority-20261115/webgl2-vendor-arrival.png",
-      "sha": "91cd5d6b8c2e1b157d76a0a96cd1b4f61c7eac39"
-    }
-  ],
+  {
+    "status": "modified",
+    "filename": "mir2-web3/apps/web/app/page.tsx",
+    "sha": "3f37a1e54c16598cb2c7b54b14e65d0ef53c2255"
+  },
+  {
+    "status": "added",
+    "filename": "mir2-web3/apps/web/lib/map-world-baseline-refresh.ts",
+    "sha": "511ce5d713be3732e75855633e425b88ffc7ade5"
+  },
+  {
+    "status": "added",
+    "filename": "mir2-web3/apps/web/scripts/test-map-world-baseline-refresh.mjs",
+    "sha": "4809fd4dcb879b4529b6cc8bc21c58b8ea5c36fc"
+  },
+  {
+    "status": "modified",
+    "filename": "mir2-web3/docs/AGENT-CURRENT.md",
+    "sha": "67805c7563edb9384f31141eea076e552edc319b"
+  },
+  {
+    "status": "modified",
+    "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+    "sha": "27dca7aed8ed076690585056c6a8bdb938b98a97"
+  },
+  {
+    "status": "modified",
+    "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+    "sha": "7da01750bd78d33b6fee21d934048295bc3f6053"
+  },
+  {
+    "status": "added",
+    "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/README.md",
+    "sha": "ba2513c9feaad5f0d78a87b16270332c012d8401"
+  },
+  {
+    "status": "added",
+    "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/before-missing-guidance.png",
+    "sha": "c6d9b9f0fbfd41dc006dc2f7ef811cb0bb65995c"
+  },
+  {
+    "status": "added",
+    "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/default-fresh-goal-and-manual-step.png",
+    "sha": "8bb6109889f5ade3fc954c0469bb75aac58fc2d1"
+  },
+  {
+    "status": "added",
+    "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/default-interior-exit-arrival.png",
+    "sha": "ce51926b7b75344e5baf816061029cc1958abf62"
+  },
+  {
+    "status": "added",
+    "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/default-interior-route-before.png",
+    "sha": "ccc3f30992050fe819613da241b6f3833d043e04"
+  },
+  {
+    "status": "added",
+    "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/default-ordinary-entry.json",
+    "sha": "f3f123d100b6fb3bbc50b736a06675f17ae454b0"
+  },
+  {
+    "status": "added",
+    "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/default-route.json",
+    "sha": "b385a95445462eb660716dc4a193149a7834de5a"
+  },
+  {
+    "status": "added",
+    "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/fixture-source-pins.json",
+    "sha": "8085a96270cdf80e163502f77bab6ba24ee966ac"
+  },
+  {
+    "status": "added",
+    "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/qualification.json",
+    "sha": "b121062fb1c33dc9412b3116176cd4bc40790083"
+  },
+  {
+    "status": "added",
+    "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/regression-before-fix.txt",
+    "sha": "ae4fc2b439583525b69697f6bdee728f3d9a7133"
+  },
+  {
+    "status": "added",
+    "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/regressions.txt",
+    "sha": "eb6dd4d9e5b0561e6867c1148cd2b1b2b24df1c6"
+  },
+  {
+    "status": "added",
+    "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/retained-failures.json",
+    "sha": "e0880dccffebde84e45af174315f9bd8f14949c8"
+  },
+  {
+    "status": "added",
+    "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/webgl2-fresh-goal-and-manual-step.png",
+    "sha": "1bac9c7b65f8edf23dfe4fcf3cfae1e654473925"
+  },
+  {
+    "status": "added",
+    "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/webgl2-interior-exit-arrival.png",
+    "sha": "287b3a09caffc51820953f13556911351f343d5e"
+  },
+  {
+    "status": "added",
+    "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/webgl2-interior-route-before.png",
+    "sha": "3b209b32f63a3dfbd709ec2fb56015e627b6d802"
+  },
+  {
+    "status": "added",
+    "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/webgl2-ordinary-entry.json",
+    "sha": "5464eecaa4bc9caaf449a2f8e1fafda96d000ccb"
+  },
+  {
+    "status": "added",
+    "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/webgl2-route.json",
+    "sha": "dbfa260712443e55dc7c38a827c674145691ea4a"
+  }
+],
   entryScene: {
     path: '/bootstrap/r16-scenes/5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325.json',
     sha256: '5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325',
@@ -211,7 +216,7 @@ export const QR_RELEASE = Object.freeze({
     "sha256": "94796b40517c7fd1ca7914ebaeb7a99d6ebd4a3546e2fa28d1c9d75abe836218"
   },
   assetRunId: '42494701555',
-  baseline: 'dpl_Ae3hNyFygQuSMZDesBXCZDpUECTY',
+  baseline: "dpl_6k5uD7UbVAcyzBdtto8PPAC9qNFK",
   relay: 'https://relay.dubhe.obelisk.build',
 });
 const QR_OPERATIONS = ['numeron-qr-stage', 'numeron-qr-check', 'numeron-qr-promote', 'numeron-qr-rollback'];
