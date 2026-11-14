@@ -201,6 +201,7 @@ impl SharedInProcessZoneSessionRuntime {
             self.current_presence_key(),
             self.inner.shared_mentor_config(),
         ) {
+            let _stage = shared_session_substage("shared_session.experience.admission_capture");
             config.with_shared_zone_experience_admission(|rebase| {
                 let mut state = self
                     .zone_state
@@ -286,7 +287,10 @@ impl SharedInProcessZoneSessionRuntime {
         };
         // Personal level/stats/live buff inputs can change without a shared
         // transaction. Always publish the owner's current trusted rates.
-        self.refresh_current_experience_profile()?;
+        {
+            let _stage = shared_session_substage("shared_session.experience.owner_publication");
+            self.refresh_current_experience_profile()?;
+        }
         let signature = (
             self.shared_social_generation.load(Ordering::Acquire),
             config.shared_guild_clock_generation(),
@@ -296,6 +300,7 @@ impl SharedInProcessZoneSessionRuntime {
         }
         // A partial/error projection is retried on the next command.
         self.last_experience_projection = None;
+        let peer_stage = shared_session_substage("shared_session.experience.peer_projection_and_wars");
         for presence in self.mentor_presences()? {
             let previous = {
                 let state = presence
@@ -345,6 +350,7 @@ impl SharedInProcessZoneSessionRuntime {
             }
         }
         self.project_all_shared_guild_wars()?;
+        drop(peer_stage);
         let after = (
             self.shared_social_generation.load(Ordering::Acquire),
             config.shared_guild_clock_generation(),
