@@ -6,7 +6,7 @@ Updated 2026-11-15 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-15 正式仍b9acf175fa／6k5u，fd3未改。换图后导航消失／攻击模式同步已修复并推送f310e242a4：110项、独立构建、英繁两后端实际出店／补读／待碰撞时注销／晚到零旧动作／新socket同角新目标及保存通过。曾发布f310，公网R2扫码／钱包确认／进城／一步135ms／六字体／113／Q／Worker／注销全走通，但Native125445ms超过原120秒，原分类器判失败；已实际回退b9，独立域名和公共版本读回、回退后简繁扫码通过。[发布失败与回退](evidence/r16-map-world-baseline-20261115/production/README.md) · [本地修复](evidence/r16-map-world-baseline-20261115/README.md)。下一项查字体回退重新排队及当前来源顺序，原8/120门槛不变。此前[双客户端第三边挡路绕行](evidence/r16-live-route-occupancy-20261115/README.md)通过。其他地图／途中断网／公网跨图与双钱包占位、室内地面／球／反馈、三职业完整1–30及语言像素、整体1:1仍开放。
+2026-11-15 正式仍b9acf175fa／6k5u，fd3未改。f310换图修复曾因公网Native125445ms超原120秒回退。[原失败与回退](evidence/r16-map-world-baseline-20261115/production/README.md)。本轮修复完整字体回退重新排队及旧缓存清理打断登录：146项／独立构建，英繁两后端实际清理5缓存、登录不中断、六字体／113、跨图补读1次、晚到碰撞注销、同角新目标及存档通过，29份WIP的SHA未变。[源码与本地完整回放](evidence/r16-font-fallback-chain-20261115/README.md)。原8秒移动／120秒Native和完整资源门槛不变；下一项冻结来源并走发布与公网全流程。此前[双客户端第三边挡路](evidence/r16-live-route-occupancy-20261115/README.md)通过。其他地图／途中断网／公网跨图与双钱包占位、室内地面／反馈、三职业完整1–30、语言像素及整体1:1仍开放。
 
 ## 保留的当前未结项
 
@@ -39,7 +39,7 @@ Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 G
 - [ ] 当前R16已接入编号近战结果与实际/排队动作障碍，两个普通浏览器后端完成真实单击攻击→攻击中右键→到达→注销存档，无第二击。共享WebGL2末帧5未观测到，首包与最后观测帧约-7/-5ms，继续帧级接管、纯GPU实体、Hosted、追怪/施法和其他职业。保留旧回执/原型失败，888已发布，后续绘制候选仍未发布。[候选范围](evidence/r16-attack-handoff-20261112/README.md)；另复测玩家跳官网的实际入口。
 - [ ] 继续核对图集纯 GPU 选怪、其他普通窗重叠、移动时的场景分块更新和其余技能时序。保留原始截图和失败记录。
 - [ ] 继续 Windows 窗口、Hosted 联调和正式发行。保留连续续抛时早期咬钩的短探针超时记录。
-- [ ] 三格前视已发布，双客户端挡路绕行通过。换图补读f310本地110项／构建／两后端真实跨图及注销重登通过，但公网Native125445ms超原120秒，已回退b9并复验简繁扫码。先查字体回退重新排队及同版本来源顺序，保留原8/120、六字体／113完整门槛，再重新资格与发布；继续其他目标／地图、途中断网、公网跨图／双钱包占位及室内地面／球／入口反馈／语言。[第三边见证](evidence/r16-live-route-occupancy-20261115/README.md) · [本地修复](evidence/r16-map-world-baseline-20261115/README.md) · [公网失败与回退](evidence/r16-map-world-baseline-20261115/production/README.md)
+- [ ] 三格前视已发布，双客户端挡路绕行通过。f310换图修复公网125445ms超120秒后已回退b9。本轮字体来源链及安全缓存更新候选146项／独立构建／两后端实际清理旧缓存、不中断登录、六字体／113／跨图／晚到数据／重登目标及保存通过。先冻结来源并按原8/120与完整资源门槛发布、公网验收；继续其他地图／目标、途中断网、公网跨图／双钱包占位、室内地面／入口反馈和语言。[本轮候选](evidence/r16-font-fallback-chain-20261115/README.md) · [原公网失败](evidence/r16-map-world-baseline-20261115/production/README.md) · [第三边见证](evidence/r16-live-route-occupancy-20261115/README.md)
 - [ ] Windows 窗口重名／满槽实机暂缓，发行包另验。旧档原第五角色普通协议可用，四槽界面的恢复方案待核对。
 - [ ] 跨 Gateway／TCP 的慢保存恢复和 Windows 窗口实机另验。普通注销后的三职业同档往返见本节独立记录。
 - [ ] 拖动图标、水面波纹、声音时点、自动重抛动画、Windows 窗口与发行素材闭包另验。继续其余技能。

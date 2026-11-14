@@ -6,10 +6,10 @@ import ts from 'typescript';
 const pagePath=new URL('../app/page.tsx',import.meta.url);
 const libraryPath=new URL('../lib/bevy-runtime-font-prewarm.ts',import.meta.url);
 const turn=()=>new Promise(resolve=>setImmediate(resolve));
-function compile(source,dependencies={}){
+function compile(source,dependencies={},globals={}){
  const module={exports:{}};
  const js=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText;
- new Function('module','exports','require',js)(module,module.exports,name=>{assert(name in dependencies,name);return dependencies[name];});
+ new Function('module','exports','require',...Object.keys(globals),js)(module,module.exports,name=>{assert(name in dependencies,name);return dependencies[name];},...Object.values(globals));
  return module.exports;
 }
 function actualBoot({playable=true,mode='eager',allowed=true,criticalPending=false,support={webgpu:true,webgl2:true},screen='game',recoveryBudget=new Set(),retryWithWebGl2=false,reused=false}={}){
@@ -43,12 +43,17 @@ function actualBoot({playable=true,mode='eager',allowed=true,criticalPending=fal
   loadBevyRuntimeModule:(backend,_startup,options)=>{runtimeOptions.push(options);runtimeBackends.push(backend);events.push({name:'module',backend});return new Promise((resolve,reject)=>{finishModule=resolve;failModule=reject;});},
   testObserve:value=>{observed=value;},
  };
+ // Page now captures the document's header-admission coordinator. Load its
+ // real implementation in this browser scope rather than leaving an imported
+ // dependency undefined or substituting an unconditional release stub.
+ env.getRuntimeHeaderPriority=compile(readFileSync(new URL('../lib/runtime-header-priority.ts',import.meta.url),'utf8'),{},{window:env.window}).getRuntimeHeaderPriority;
+ const headerPriority=env.getRuntimeHeaderPriority();headerPriority.beginCycle();
  if(reused)Object.assign(env.window,{__mir2BevyRuntimeBooted:true,__mir2BevyRuntimeBackend:'webgpu',__mir2BevyRuntime:{}});
  const body=callback.body.getText(ast).replace('void bootRuntime();','testObserve(bootRuntime());');
  assert(body.includes('testObserve(bootRuntime());'));
  const js=ts.transpileModule('function effect()'+body,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText;
  const cleanup=new Function(...Object.keys(env),js+'\nreturn effect();')(...Object.values(env));
- return{events,fontSignals,runtimeOptions,runtimeBackends,cleanup,window:env.window,failModule:error=>failModule(error),
+ return{events,fontSignals,runtimeOptions,runtimeBackends,cleanup,headerPriority,window:env.window,failModule:error=>failModule(error),
   finishCritical:()=>finishCritical(),failCritical:()=>failCritical(),finishModule:()=>{const backend=runtimeBackends.at(-1);events.push({name:'module-resolved',backend});finishModule({getMir2RendererBackend:()=>backend,bootMir2Runtime:noop});},waitForBoot:()=>observed,
   settle:async()=>{cleanup();finishCritical?.();await turn();finishModule?.({});finishFonts?.({requested:6,completed:[],failed:[],aborted:true,bytes:0});await observed;await turn();}};
 }
@@ -83,6 +88,22 @@ test('actual Page starts fonts only after the runtime resolves and boots without
   assert(run.events.findIndex(e=>e.name==='module-resolved')<run.events.findIndex(e=>e.name==='fonts'));
   assert(run.events.findIndex(e=>e.name==='fonts')<run.events.findIndex(e=>e.name==='bevyRuntimeReady'));
   assert.equal(run.fontSignals[0].aborted,false);run.cleanup();assert(run.fontSignals[0].aborted);
+ }finally{await run.settle();}
+});
+
+test('the actual Page header callback releases its real document coordinator without starting fonts early',async()=>{
+ const run=actualBoot({criticalPending:true});try{
+  await turn();let released=false;const waiting=run.headerPriority.wait().then(outcome=>{released=true;return outcome;});
+  await turn();assert.equal(released,false);assert.equal(run.fontSignals.length,0);
+  run.runtimeOptions[0].onResponseHeaders();assert.equal((await waiting).reason,'headers');
+  assert.equal(run.fontSignals.length,0);run.finishModule();await run.waitForBoot();assert.equal(run.fontSignals.length,1);
+ }finally{await run.settle();}
+});
+
+test('the actual Page cleanup retires its real pending document coordinator',async()=>{
+ const run=actualBoot();try{
+  await turn();const waiting=run.headerPriority.wait();run.cleanup();assert.equal((await waiting).reason,'retired');
+  assert.equal(run.fontSignals.length,0);
  }finally{await run.settle();}
 });
 

@@ -1,0 +1,215 @@
+{
+  "fixtures": [
+    {
+      "variant": "fixture-r1",
+      "passed": false,
+      "stage": "normal-password-login-with-reused-assets",
+      "failure": "locator.waitFor: Timeout 12000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.select-overlay') to be visible\u001b[22m\n",
+      "wireFailures": 0,
+      "normalSaved": false,
+      "allOwnedClosed": true,
+      "rawReceiptSha256": "148e46728a43a3cc25ca881e0a584e59f95e67eec5582fe65f62ae4af103e021"
+    },
+    {
+      "variant": "fixture-r2",
+      "passed": false,
+      "stage": "normal-password-login-with-reused-assets",
+      "failure": "locator.waitFor: Timeout 12000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.select-overlay') to be visible\u001b[22m\n",
+      "wireFailures": 0,
+      "normalSaved": false,
+      "allOwnedClosed": true,
+      "rawReceiptSha256": "94e19de7ff36009e97e5bb8dabf14e46ecce539d08e8ee2f775234086c501d59"
+    },
+    {
+      "variant": "fixture-r3",
+      "passed": false,
+      "stage": "normal-password-login-with-reused-assets",
+      "failure": "locator.waitFor: Timeout 12000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.select-overlay') to be visible\u001b[22m\n",
+      "wireFailures": 0,
+      "normalSaved": false,
+      "allOwnedClosed": true,
+      "rawReceiptSha256": "b1cb573796231869d92ef8209ad3ef0cdb2f9d8beca5cc2472e308e2f40aa8d7"
+    },
+    {
+      "variant": "fixture-r4",
+      "passed": false,
+      "stage": "normal-password-login-with-reused-assets",
+      "failure": "locator.waitFor: Timeout 12000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.select-overlay') to be visible\u001b[22m\n",
+      "wireFailures": 0,
+      "normalSaved": false,
+      "allOwnedClosed": true,
+      "rawReceiptSha256": "aeb2b4bdbb8e547d565af4f04575b802f1c8410e42cf4dc73d65d99b2425375c"
+    },
+    {
+      "variant": "fixture-r5-baseline",
+      "passed": false,
+      "stage": "actual-Native-quest-route-through-interior-exit",
+      "failure": "The expression evaluated to a falsy value:\n\n  assert(proof.baselineReads.length>=1&&proof.baselineReads.length<=3)\n",
+      "wireFailures": 3,
+      "normalSaved": false,
+      "allOwnedClosed": true,
+      "rawReceiptSha256": "6b66085bb62c30eaf51a94724a0724fab5ed64bc57231666c9ad74083716d4b7"
+    },
+    {
+      "variant": "fixture-r6",
+      "passed": false,
+      "stage": "normal-password-login-with-reused-assets",
+      "failure": "locator.waitFor: Timeout 12000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.select-overlay') to be visible\u001b[22m\n",
+      "wireFailures": 0,
+      "normalSaved": false,
+      "allOwnedClosed": true,
+      "rawReceiptSha256": "e4f676043cae8271378dc511484a3a8b78533c9ed05b348ddb09d0ed5310fbef"
+    },
+    {
+      "variant": "fixture-r7",
+      "passed": false,
+      "stage": "normal-password-login-with-reused-assets",
+      "failure": "The expression evaluated to a falsy value:\n\n  assert(proof.cacheReuse.preStart.rows.every(r=>r.present))\n",
+      "wireFailures": 2,
+      "normalSaved": false,
+      "allOwnedClosed": true,
+      "rawReceiptSha256": "cfc655d0663ec7a3fc3ccb4cffd422de80ee42d9d6bc6bfb0d28f91f890709cc"
+    },
+    {
+      "variant": "fixture-r8",
+      "passed": false,
+      "stage": "actual-Native-quest-route-through-interior-exit",
+      "failure": "The expression evaluated to a falsy value:\n\n  assert(proof.baselineReads.length>=1&&proof.baselineReads.length<=3)\n",
+      "wireFailures": 3,
+      "normalSaved": false,
+      "allOwnedClosed": true,
+      "rawReceiptSha256": "845ae527ccd53a759ae7de75f08750346ee7ae3f394124f6b3004e76e430bce9"
+    },
+    {
+      "variant": "fixture-r9",
+      "passed": false,
+      "stage": "ordinary-primary-logout-and-authoritative-save",
+      "failure": "Expected values to be strictly equal:\n\n5 !== 0\n",
+      "wireFailures": 5,
+      "normalSaved": true,
+      "allOwnedClosed": true,
+      "rawReceiptSha256": "5b2134900b9ba9a8ba0261a421f18d33f9e8065227c3c15629d4189305a33590"
+    }
+  ],
+  "negativeTests": [
+    {
+      "name": "regression-before.txt",
+      "sha256": "2e2963849b76dd4611a6b90c9de82960b8c0cc70911de750a604c2b25aa5dc4a",
+      "summary": [
+        "# tests 5",
+        "# pass 2",
+        "# fail 3",
+        "# cancelled 0",
+        "# skipped 0"
+      ],
+      "failedTests": [
+        "not ok 1 - a headers failure continues the admitted SC font before four queued renderer families",
+        "not ok 2 - a body failure continues the admitted SC font before four queued renderer families",
+        "not ok 3 - successive mirrors retain two lanes through full bodies and still admit images"
+      ]
+    },
+    {
+      "name": "reload-before.txt",
+      "sha256": "de43088c8e0c3cb4f31655f9c8e43266acf7b9ee379d70c3d685bdd36746f56a",
+      "summary": [
+        "# tests 15",
+        "# pass 2",
+        "# fail 13",
+        "# cancelled 0",
+        "# skipped 0"
+      ],
+      "failedTests": [
+        "not ok 2 - an empty idle login reloads once at the original delay and marks only its actual reload",
+        "not ok 3 - a namespace change preserves active screen=game",
+        "not ok 4 - a namespace change preserves active screen=select",
+        "not ok 5 - a namespace change preserves active visible=false",
+        "not ok 6 - a namespace change preserves active disabled=true",
+        "not ok 7 - a namespace change preserves active value=typed account",
+        "not ok 8 - a namespace change preserves active modal=true",
+        "not ok 9 - a pending reload rechecks value at execution",
+        "not ok 10 - a pending reload rechecks disabled at execution",
+        "not ok 11 - a pending reload rechecks screen at execution",
+        "not ok 12 - a pending reload rechecks visible at execution",
+        "not ok 13 - a pending reload rechecks modal at execution",
+        "not ok 14 - an older namespace callback cannot reload or mark a later configuration"
+      ]
+    },
+    {
+      "name": "prewarm-harness-baseline.txt",
+      "sha256": "afb7f407a6eb6b6a42a9f3a7c805f61170268ee56c3d5cbbb0d3efc38d1a5dd8",
+      "summary": [
+        "# tests 18",
+        "# pass 6",
+        "# fail 12",
+        "# cancelled 0",
+        "# skipped 0"
+      ],
+      "failedTests": [
+        "not ok 2 - actual Page downloads the runtime without speculative fonts while the HUD stage is pending",
+        "not ok 3 - actual Page starts fonts only after the runtime resolves and boots without waiting for fonts",
+        "not ok 4 - a failed independent HUD stage cannot withdraw an already ready runtime",
+        "not ok 5 - leaving before the runtime or HUD settles prevents late fonts, diagnostics and boot",
+        "not ok 6 - actual Page leaves fonts deferred before first paint and for disabled, touch, missing metadata or GPU",
+        "not ok 7 - actual retryable module failure never starts fonts and keeps the retry boundary",
+        "not ok 8 - leaving while the runtime downloads prevents late fonts and boot",
+        "not ok 9 - Page defers fonts through finite binary recovery and cancels both owners after successful boot",
+        "not ok 10 - only the final fallback backend starts fonts, once, before its single boot",
+        "not ok 11 - leaving during fallback cannot start fonts from a late module",
+        "not ok 12 - an already booted runtime is reused without another module or font prewarm",
+        "not ok 13 - Page spends recovery once per entry/source and preserves it across same-game effect reruns"
+      ]
+    },
+    {
+      "name": "regressions-r1.txt",
+      "sha256": "d0bb8fa1809e4fb3355cc13661f47e09c814177d62f6e4241f1816a2865e927c",
+      "summary": [
+        "# tests 116",
+        "# pass 104",
+        "# fail 12",
+        "# cancelled 0",
+        "# skipped 0"
+      ],
+      "failedTests": [
+        "not ok 100 - actual Page downloads the runtime without speculative fonts while the HUD stage is pending",
+        "not ok 101 - actual Page starts fonts only after the runtime resolves and boots without waiting for fonts",
+        "not ok 102 - a failed independent HUD stage cannot withdraw an already ready runtime",
+        "not ok 103 - leaving before the runtime or HUD settles prevents late fonts, diagnostics and boot",
+        "not ok 104 - actual Page leaves fonts deferred before first paint and for disabled, touch, missing metadata or GPU",
+        "not ok 105 - actual retryable module failure never starts fonts and keeps the retry boundary",
+        "not ok 106 - leaving while the runtime downloads prevents late fonts and boot",
+        "not ok 107 - Page defers fonts through finite binary recovery and cancels both owners after successful boot",
+        "not ok 108 - only the final fallback backend starts fonts, once, before its single boot",
+        "not ok 109 - leaving during fallback cannot start fonts from a late module",
+        "not ok 110 - an already booted runtime is reused without another module or font prewarm",
+        "not ok 111 - Page spends recovery once per entry/source and preserves it across same-game effect reruns"
+      ]
+    }
+  ],
+  "visibilityProbe": {
+    "sourceTerminal": true,
+    "pagesBefore": [
+      {
+        "visibility": "visible",
+        "focus": true,
+        "scheme": "about:"
+      }
+    ],
+    "selectedBefore": {
+      "visibility": "visible",
+      "focus": true
+    },
+    "selectedAfter": {
+      "visibility": "visible",
+      "focus": true
+    },
+    "browserClosed": true
+  },
+  "rawPrivateAuthAndProfilesNotPublished": true,
+  "explanation": {
+    "r1to4And6": "Candidate login interrupted by cache-namespace automatic document reload; original failed results remain.",
+    "r5": "Old frozen source authenticates, but the unused WebSocket interception hides sent frames; zero-read fixture assertion fails. Not a complete baseline pass.",
+    "r7": "Safe-reload fix authenticates, then an obsolete precondition requires six old-namespace font cache hits; actual cleanup invalidates them.",
+    "r8": "Complete fonts,113/113 and restored navigation, but an obsolete fixture requires a duplicate read even if fresh authority arrives. Later observer defect also makes these zero-read observations unreliable.",
+    "r9": "Full gameplay and save occur, but added observer dereferences missing payload on five sent auth/version frames. Actual wire gate fails; zero observed reads are not claimed as true zeros. Null-safe extracted observer checked before R10."
+  }
+}

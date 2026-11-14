@@ -25,6 +25,7 @@ import {
   type AssetReleaseCapabilities,
 } from "../../lib/asset-release-capabilities";
 import { normalizeDeviceMemoryGiB, resolveRenderTier } from "../../lib/render-tier";
+import { canReloadAssetNamespace } from "../../lib/asset-namespace-reload";
 import { fetchPrewarmAsset, type PrewarmAttemptDiagnostic } from "../../lib/asset-prewarm-request";
 import { getRuntimeHeaderPriority } from "../../lib/runtime-header-priority";
 import { OriginalClientStagePortal } from "./original-client-stage-portal";
@@ -1065,9 +1066,15 @@ function maybeReloadAfterCacheNamespaceChange(cacheNamespace: string, deletedCac
 
   const reloadKey = `${CACHE_NAMESPACE_STORAGE_KEY}.reloaded.${cacheNamespace}`;
   if (readStorageValue(window.sessionStorage, reloadKey) === "1") return;
-  writeStorageValue(window.sessionStorage, reloadKey, "1");
+  if (!canReloadAssetNamespace(document)) return;
 
   window.setTimeout(() => {
+    // Configuration can settle after the player types, approves a wallet or
+    // enters the world. A late cache cleanup must never interrupt that work.
+    if (readStorageValue(window.localStorage, CACHE_NAMESPACE_STORAGE_KEY) !== cacheNamespace
+      || readStorageValue(window.sessionStorage, reloadKey) === "1"
+      || !canReloadAssetNamespace(document)) return;
+    writeStorageValue(window.sessionStorage, reloadKey, "1");
     window.location.reload();
   }, 250);
 }

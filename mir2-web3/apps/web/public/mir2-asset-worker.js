@@ -43,7 +43,10 @@ const FONT_MIRROR_BODY_IDLE_TIMEOUT_MS = 15_000;
 const FONT_MIRROR_MAX_BYTES = 32 * 1024 * 1024;
 // The renderer, CSS and prewarmer share this budget. Limiting the prewarmer
 // alone still lets the renderer start all six complete font bodies together.
-// A queued read has no network deadline until its source actually starts.
+// Admit a whole logical font through its source fallbacks. Releasing the slot
+// after each failed source lets new renderer fonts delay an already-admitted
+// large font's fallback by several more header timeouts. A queued font has no
+// network deadline until its source actually starts.
 const FONT_DOWNLOAD_CONCURRENCY = 2;
 const fontDownloadQueue = [];
 let activeFontDownloads = 0;
@@ -459,6 +462,18 @@ function sharedFontCacheFill(request, cache, name, maxEntries) {
 }
 
 async function fetchStaticAsset(request, fallbackRequests) {
+  if (isSharedUiFont(request) && !request.headers.has("range")) {
+    // All source attempts share this slot; each source keeps its existing
+    // header and body-idle budgets. Do not re-enter the admission queue from
+    // inside the admitted chain. Range requests and images stay independent.
+    const response = await withFontDownloadSlot(request.signal, () =>
+      fetchStaticAssetSources(request, fallbackRequests, readCompleteFont));
+    return response || syntheticAssetResponse(504, "font fetch failed");
+  }
+  return fetchStaticAssetSources(request, fallbackRequests);
+}
+
+async function fetchStaticAssetSources(request, fallbackRequests, readFont = fetchCompleteFont) {
   // Never throws. Resolves to the best available response and, on total
   // failure, to a synthetic 504 so callers (cacheFirst -> respondWith) always
   // receive a settled promise instead of an uncaught network rejection.
@@ -494,14 +509,14 @@ async function fetchStaticAsset(request, fallbackRequests) {
   };
   for (const fontMirror of currentReleaseFontMirrors(request, remoteRequests)) {
     attemptedUrls.add(fontMirror.url);
-    const response = await fetchFontMirror(fontMirror, request.signal);
+    const response = await fetchFontMirror(fontMirror, request.signal, readFont);
     if (response?.status === 200) return succeeded(response);
     failed(response);
   }
 
   const completeFont = isSharedUiFont(request) && !request.headers.has("range");
   const fetchCandidate = source => completeFont
-    ? fetchCompleteFont(source, request.signal, STATIC_ASSET_HEADERS_TIMEOUT_MS, true)
+    ? readFont(source, request.signal, STATIC_ASSET_HEADERS_TIMEOUT_MS, true)
     : fetchStaticAssetCandidate(freshStaticAssetRequest(source));
   const originResponse = await fetchCandidate(request);
   if (originResponse?.ok) return succeeded(originResponse);
@@ -566,12 +581,17 @@ function currentReleaseFontMirrors(request, remoteRequests) {
   return mirrors;
 }
 
-async function fetchFontMirror(request, owner) {
-  return fetchCompleteFont(request, owner, FONT_MIRROR_HEADER_TIMEOUT_MS, false);
+async function fetchFontMirror(request, owner, readFont = fetchCompleteFont) {
+  return readFont(request, owner, FONT_MIRROR_HEADER_TIMEOUT_MS, false);
 }
 
 function fetchCompleteFont(request, owner, headerTimeoutMs, transientRetries) {
   const signal = AbortSignal.any([owner, request.signal]);
+  return withFontDownloadSlot(signal, () =>
+    readCompleteFont(request, signal, headerTimeoutMs, transientRetries));
+}
+
+function withFontDownloadSlot(signal, read) {
   if (signal.aborted) return Promise.resolve(null);
   return new Promise(resolve => {
     let queued = true;
@@ -588,9 +608,10 @@ function fetchCompleteFont(request, owner, headerTimeoutMs, transientRetries) {
       signal.removeEventListener("abort", abortQueued);
       if (signal.aborted) { resolve(null); return; }
       activeFontDownloads++;
-      // readCompleteFont resolves only after a complete body or a failed
-      // source. Headers and partial prefixes cannot release this lane.
-      readCompleteFont(request, signal, headerTimeoutMs, transientRetries)
+      // Whole-font callers retain admission through fallback attempts. Direct
+      // source readers retain it through their complete body. Neither a header
+      // nor a partial prefix can release a lane.
+      Promise.resolve().then(read)
         .then(resolve, () => resolve(null))
         .finally(() => { activeFontDownloads--; drainFontDownloads(); });
     };
