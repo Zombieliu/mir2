@@ -1,0 +1,17 @@
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: missing required GDI fixture entity-assistant-jane-auto
+
+false !== true
+
+    at file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-crystal-gdi-text-assets.mjs:46:10 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: 'strictEqual'
+}
+
+Node.js v22.18.0

@@ -1,0 +1,50 @@
+[
+  {
+    "path": "focused-tests.txt",
+    "originalBytes": 9463,
+    "originalSha256": "9ae94a9d3335b777fbe6c90345de01be5f6db1b940b835457980b0b5b1475106",
+    "displaySha256": "9ae94a9d3335b777fbe6c90345de01be5f6db1b940b835457980b0b5b1475106",
+    "transformation": "Normalize CRLF to LF and remove trailing spaces/tabs only. Raw original bytes and SHA remain preserved privately.",
+    "displayBytes": 9463
+  },
+  {
+    "path": "initial-adjacent-tests.txt",
+    "originalBytes": 12539,
+    "originalSha256": "40d4a1b837fd372d298d90c8e79e3d580f8718ebf54e89b931640798e61913be",
+    "displaySha256": "40d4a1b837fd372d298d90c8e79e3d580f8718ebf54e89b931640798e61913be",
+    "transformation": "Normalize CRLF to LF and remove trailing spaces/tabs only. Raw original bytes and SHA remain preserved privately.",
+    "displayBytes": 12539
+  },
+  {
+    "path": "baseline-tests.txt",
+    "originalBytes": 4166,
+    "originalSha256": "bafedc22248da43f5781585e7ed0714260ab667c87f7b02d7536ad210b5e2daf",
+    "displaySha256": "43261d9ce12ae236c5299ae7e7db1fb20c250dc904da6dd0b412d35ae5c9da0a",
+    "transformation": "Normalize CRLF to LF and remove trailing spaces/tabs only. Raw original bytes and SHA remain preserved privately.",
+    "displayBytes": 4075
+  },
+  {
+    "path": "gdi-self-test.txt",
+    "originalBytes": 97,
+    "originalSha256": "49ec673315db04ed062f4dd2c0750f5e48794a87ec8bb4a2c502bd3a6bcc9d3f",
+    "displaySha256": "5622d34ba2fef54c1aca016da62fb7578fdd3e1136d7ccc6851b16e4639f57d8",
+    "transformation": "Normalize CRLF to LF and remove trailing spaces/tabs only. Raw original bytes and SHA remain preserved privately.",
+    "displayBytes": 96
+  },
+  {
+    "path": "gdi-node-after-lf.txt",
+    "originalBytes": 66,
+    "originalSha256": "4bf3f6e95f63c3bd5eabf607fa44e5141630258bb2cd2095ea4b408ace3ad1b5",
+    "displaySha256": "4bf3f6e95f63c3bd5eabf607fa44e5141630258bb2cd2095ea4b408ace3ad1b5",
+    "transformation": "Normalize CRLF to LF and remove trailing spaces/tabs only. Raw original bytes and SHA remain preserved privately.",
+    "displayBytes": 66
+  },
+  {
+    "path": "assets-before.txt",
+    "originalBytes": 433,
+    "originalSha256": "26429df4d2bd2f275529ca8c2335bf7518f847968f239ec6ab4c44dc40e39052",
+    "displaySha256": "303e9cbe7082a891901377b274185e3a5e050380e7234703e533ee54632722f8",
+    "transformation": "Normalize CRLF to LF and remove trailing spaces/tabs only. Raw original bytes and SHA remain preserved privately.",
+    "displayBytes": 416
+  }
+]

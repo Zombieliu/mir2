@@ -1,0 +1,262 @@
+{
+  "passed": true,
+  "source": "b19ca73072db16ac7f351857aa752ecc57953591",
+  "localSessions": 4,
+  "sessions": [
+    {
+      "run": "quest-after-r3",
+      "mode": "compatibility",
+      "browserLanguage": "en-US",
+      "passed": true,
+      "cold": {
+        "passed": true,
+        "nativeReadyWaitMs": 54545,
+        "originalNativeLimitMs": 120000,
+        "prewarmPassed": true,
+        "fontBodiesVerified": 6,
+        "diaryPassed": true,
+        "diaryLocale": "en-US",
+        "prewarmSummary": {
+          "requested": 113,
+          "ok": 113,
+          "failed": 0
+        },
+        "verifiedOriginalCachedHudSamples": 2
+      },
+      "warm": {
+        "passed": true,
+        "nativeReadyWaitMs": 1298,
+        "originalNativeLimitMs": 120000,
+        "prewarmPassed": true,
+        "fontBodiesVerified": 6,
+        "diaryPassed": true,
+        "diaryLocale": "en-US",
+        "prewarmSummary": {
+          "requested": 113,
+          "ok": 113,
+          "failed": 0
+        },
+        "verifiedOriginalCachedHudSamples": 2
+      },
+      "workerRestartPassed": true,
+      "normalLogoutAndSavePassed": true,
+      "npc": {
+        "passed": true,
+        "objectId": 1,
+        "sameIdNormalInteract": true,
+        "authoritativeDialogues": 1,
+        "nativeXClosed": true,
+        "actualNameRows": 9,
+        "wideNames": 7,
+        "autoGdi": [
+          {
+            "key": "entity-merchant-auto",
+            "text": "Merchant",
+            "width": 54
+          },
+          {
+            "key": "entity-merchant-auto",
+            "text": "Merchant",
+            "width": 54
+          },
+          {
+            "key": "entity-ruben-auto",
+            "text": "Ruben",
+            "width": 40
+          }
+        ],
+        "allFallbackPartsUnwrapped": true
+      },
+      "route": {
+        "passed": true,
+        "locale": {
+          "code": "en",
+          "dictionarySha256": "e181fdd0d787a136209b86097c0e655237cf475563bebfdb67dee7243a7e4aa4"
+        },
+        "start": {
+          "x": 288,
+          "y": 616
+        },
+        "huntFinal": {
+          "x": 288,
+          "y": 616
+        },
+        "zeroStepHunt": true,
+        "vendorDestination": {
+          "x": 324,
+          "y": 291
+        },
+        "vendorFinal": {
+          "x": 322,
+          "y": 293
+        },
+        "moveCommands": 189,
+        "durationMs": 114134,
+        "collisionRequests": 9,
+        "originalProgressLimitMs": 8000
+      },
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "protectedGraduateFixture": {
+        "unchanged": true,
+        "level": 30,
+        "scope": "Preservation of existing golden fixture; not a fresh three-class 1-to-30 journey."
+      },
+      "originalReceiptSha256": "4a19417351194e414dbef0fddc4935ea72350993ba06d8d071370ac35b01f38f",
+      "sameRoleReopen": {
+        "passed": true,
+        "allFirstBrowserProcessesExited": true,
+        "coldSavedPosition": {
+          "x": 289,
+          "y": 616
+        },
+        "warmAuthoritativeStart": {
+          "x": 289,
+          "y": 616
+        }
+      },
+      "normalLogout": {
+        "cold": {
+          "returnedToSelect": true,
+          "savedPosition": {
+            "x": 289,
+            "y": 616
+          }
+        },
+        "warm": {
+          "returnedToSelect": true,
+          "savedPosition": {
+            "x": 322,
+            "y": 293
+          }
+        }
+      }
+    },
+    {
+      "run": "quest-after-r4",
+      "mode": "webgl2",
+      "browserLanguage": "zh-TW",
+      "passed": true,
+      "cold": {
+        "passed": true,
+        "nativeReadyWaitMs": 52166,
+        "originalNativeLimitMs": 120000,
+        "prewarmPassed": true,
+        "fontBodiesVerified": 6,
+        "diaryPassed": true,
+        "diaryLocale": "zh-TW",
+        "prewarmSummary": {
+          "requested": 113,
+          "ok": 113,
+          "failed": 0
+        },
+        "verifiedOriginalCachedHudSamples": 2
+      },
+      "warm": {
+        "passed": true,
+        "nativeReadyWaitMs": 1315,
+        "originalNativeLimitMs": 120000,
+        "prewarmPassed": true,
+        "fontBodiesVerified": 6,
+        "diaryPassed": true,
+        "diaryLocale": "zh-TW",
+        "prewarmSummary": {
+          "requested": 113,
+          "ok": 113,
+          "failed": 0
+        },
+        "verifiedOriginalCachedHudSamples": 2
+      },
+      "workerRestartPassed": true,
+      "normalLogoutAndSavePassed": true,
+      "npc": {
+        "passed": true,
+        "objectId": 1,
+        "sameIdNormalInteract": true,
+        "authoritativeDialogues": 1,
+        "nativeXClosed": true,
+        "actualNameRows": 9,
+        "wideNames": 9,
+        "autoGdi": [],
+        "allFallbackPartsUnwrapped": true
+      },
+      "route": {
+        "passed": true,
+        "locale": {
+          "code": "zh-TW",
+          "dictionarySha256": "e181fdd0d787a136209b86097c0e655237cf475563bebfdb67dee7243a7e4aa4"
+        },
+        "start": {
+          "x": 288,
+          "y": 616
+        },
+        "huntFinal": {
+          "x": 288,
+          "y": 616
+        },
+        "zeroStepHunt": true,
+        "vendorDestination": {
+          "x": 324,
+          "y": 291
+        },
+        "vendorFinal": {
+          "x": 322,
+          "y": 293
+        },
+        "moveCommands": 189,
+        "durationMs": 114019,
+        "collisionRequests": 9,
+        "originalProgressLimitMs": 8000
+      },
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "protectedGraduateFixture": {
+        "unchanged": true,
+        "level": 30,
+        "scope": "Preservation of existing golden fixture; not a fresh three-class 1-to-30 journey."
+      },
+      "originalReceiptSha256": "38f425f626495495de5bf09333d27875c2ddadf2e6d7bafe978dee922c6455ed",
+      "sameRoleReopen": {
+        "passed": true,
+        "allFirstBrowserProcessesExited": true,
+        "coldSavedPosition": {
+          "x": 289,
+          "y": 616
+        },
+        "warmAuthoritativeStart": {
+          "x": 289,
+          "y": 616
+        }
+      },
+      "normalLogout": {
+        "cold": {
+          "returnedToSelect": true,
+          "savedPosition": {
+            "x": 289,
+            "y": 616
+          }
+        },
+        "warm": {
+          "returnedToSelect": true,
+          "savedPosition": {
+            "x": 322,
+            "y": 293
+          }
+        }
+      }
+    }
+  ],
+  "preparationSha256": "3ded95fc4dc1c309e3ab821afefa1123689bfcea510c76c735a0bcd482f09bf8",
+  "sourceQualificationSha256": "a3c8c92991d2f3ac4ad0e353dca87e044329a28b45071cfe840995ad8d757a6d",
+  "scope": "Fresh physical local build; controlled resources/transport on original fixed-SHA QA Gateway, ordinary browser actions, full close/reopen, Native Q/NPC-X and long routes. Not public WAN/QR, live multiplayer third-edge occupancy, full GPU entity rendering, physical Windows/phone, fresh three-class level30 or human acceptance.",
+  "humanAccepted": false,
+  "productionPublished": false
+}

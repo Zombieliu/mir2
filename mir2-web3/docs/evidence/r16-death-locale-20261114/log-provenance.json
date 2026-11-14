@@ -5,7 +5,7 @@
     "originalSha256": "3223ff828995b6565a7a6a2b86399725e639012510b7bf3fe3ae2af8144f6527",
     "displayBytes": 46921,
     "displaySha256": "9d7b6185e1e65a4757374ab6da34b3d883f7d724eee589262cc79ba6875f8784",
-    "transformation": "Remove trailing spaces/tabs only; original raw file retained privately."
+    "transformation": "Normalize CRLF to LF and remove trailing spaces/tabs only. Raw original bytes and SHA remain preserved privately."
   },
   {
     "name": "after-tests.txt",
@@ -13,6 +13,6 @@
     "originalSha256": "635941a51275d1747c0bdc0dc8898d77274fe8801fc90b4a15fd2c7a3abdf081",
     "displayBytes": 6989,
     "displaySha256": "635941a51275d1747c0bdc0dc8898d77274fe8801fc90b4a15fd2c7a3abdf081",
-    "transformation": "Remove trailing spaces/tabs only; original raw file retained privately."
+    "transformation": "Normalize CRLF to LF and remove trailing spaces/tabs only. Raw original bytes and SHA remain preserved privately."
   }
 ]

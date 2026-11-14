@@ -2,7 +2,7 @@
 
 2026-11-14，在 R16 共同代码线上补齐 `ui.death.title/message/revive/reviving`。四个现有 Page 调用原来在九种非英语界面都退回英文；现在四段文案在十种语言都有正式登记，进入玩法词库加载前后保持一致。未更改死亡判定、复活请求或服务器回包处理。
 
-既有浏览器词库完整性检查登记这四个实际使用的 key：修前 17/28 通过、11 项失败，修后连同帮助及任务语言检查共 33 项通过、零 skip。日志展示副本仅去掉行尾空格，原始字节与 SHA 单列。[修前检查](before-tests.txt) · [修后检查](after-tests.txt) · [日志来源](log-provenance.json)
+既有浏览器词库完整性检查登记这四个实际使用的 key：修前 17/28 通过、11 项失败，修后连同帮助及任务语言检查共 33 项通过、零 skip。日志展示副本只规范行尾空格和LF换行，原始字节与 SHA 单列。[修前检查](before-tests.txt) · [修后检查](after-tests.txt) · [日志来源](log-provenance.json)
 
 组件观察器直接从当前 `page.tsx` 提取真实 `DeathReviveOverlay` 函数和四个译文属性表达式，使用真实 `buildTranslator` 与 CSS 渲染。十语 × 360/1024 像素 × 正常/请求中共 40 个浏览器画面，文字、禁用态和边界通过。原组件未改；九种非英语的 36 段文字从全部英文变为各自语言，零 page error，浏览器及临时 HTTP 服务已关闭。[修前原回执](before.json) · [修后原回执及全部截图索引](after.json) · [观察器](component-observer.mjs)
 

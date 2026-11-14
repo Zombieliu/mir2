@@ -14,7 +14,7 @@ Short routing summary, updated 2026-11-14 (Asia/Shanghai). This indexes recorded
 
 ## Last recorded decisions and open work
 
-2026-11-14 正式已保留e6c923b7c6／dpl_Ae3hNyFygQuSMZDesBXCZDpUECTY：三格前视保留原目标重算、姓名层级与可见姓名优先命中；88＋126＋75项／构建和两后端四会话实际同NPC对话／原生X／长路线／存档通过。43539774527切换后新普通浏览器出码／官方手机尺寸Testnet确认／进比奇／首步141ms／共享HUD-Q／六字体／113项／Worker／退出和全部静态SHA通过，最终映射READY。公网首帧后HUD126.060秒，原120秒冷资格仍false，3条资源HTTP错误、4 console保留；不改继承脚本的可选观察窗口来冒充性能通过。[正式及边界](evidence/r16-route-lookahead-20261114/production/README.md)。真实第三格多人占位、R15旧停步、GDI长名字、死亡弹窗十语、全场景GPU、实体手机及其余1:1开放，Goal active；旧失败／回退和foreign WIP保留。
+2026-11-14 正式仍e6c923b7c6／Ae3，02:46UTC独立API读回READY；原公网功能回放通过，HUD126.060秒的120秒冷资格false及错误保留。[正式](evidence/r16-route-lookahead-20261114/production/README.md)。候选b19ca73072新增NPC逐行AutoSize／完整行与整数居中，39项、11图／8非法输入自检、构建／2,771项绑定、4次框外名字命中与英／繁两后端四会话NPC／X／长路线／同角重登保存通过，旧失败保留；含6e5abd死亡文案十语33项／40画面。当前候选未发布，原Shell／Native WIP未混入。[姓名及边界](evidence/r16-name-autosize-20261114/README.md) · [死亡文案](evidence/r16-death-locale-20261114/README.md)。真实第三格多人占位、R15旧停步、混合语言／raw标题／翻译后分行、完整死亡复活、字体像素、全场景GPU、实体手机与其余1:1开放，Goal active；不将原30级夹具保全当新三职业全路线通过。
 
 2026-11-12 正式站已发布 `51d2dcc346`：共享图片取消与图集计时/JSON大小缓存身份修复。本机75项、生产构建及两后端重开同档通过；公网简繁出码、手机尺寸官方钱包Testnet签名、进比奇、权威移动、共用HUD/任务窗、113/113预取和正常退出通过，无需回滚。云端缓存身份与计算一致；Worker正常更新缓存一次，未迁移旧007缓存。本次观测起点到首画面65.2秒/共用HUD104.7秒（点击进游戏后约6.8秒/46.3秒），继续优化冷加载；实体手机、完整1:1及历史未结项仍开放。[发布与边界](evidence/r16-cache-repair-20261112/README.md)
 

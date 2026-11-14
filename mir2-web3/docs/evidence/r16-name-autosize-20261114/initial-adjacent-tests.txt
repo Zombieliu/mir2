@@ -1,0 +1,302 @@
+TAP version 13
+# Crystal GDI text asset tests passed: 11 exact full-string assets.
+# Subtest: scripts\\test-crystal-gdi-text-assets.mjs
+ok 1 - scripts\\test-crystal-gdi-text-assets.mjs
+  ---
+  duration_ms: 54.0692
+  type: 'test'
+  ...
+# Subtest: complete map row precedes all same-row objects and the next row still occludes
+ok 2 - complete map row precedes all same-row objects and the next row still occludes
+  ---
+  duration_ms: 0.7877
+  type: 'test'
+  ...
+# Subtest: Web matches the native Bichon source-cell depth receipt
+ok 3 - Web matches the native Bichon source-cell depth receipt
+  ---
+  duration_ms: 0.0973
+  type: 'test'
+  ...
+# Subtest: camera translation and u16 map edges preserve composite f32 ordering
+ok 4 - camera translation and u16 map edges preserve composite f32 ordering
+  ---
+  duration_ms: 0.0874
+  type: 'test'
+  ...
+# Subtest: malformed far outliers cannot escape their bounded row passes
+ok 5 - malformed far outliers cannot escape their bounded row passes
+  ---
+  duration_ms: 0.0614
+  type: 'test'
+  ...
+# Subtest: floating entity and drop labels stay above world drawing inside the isolated world
+ok 6 - floating entity and drop labels stay above world drawing inside the isolated world
+  ---
+  duration_ms: 1.4818
+  type: 'test'
+  ...
+# Subtest: walking sorts by its source tile until completion while grid position stays at the target
+ok 7 - walking sorts by its source tile until completion while grid position stays at the target
+  ---
+  duration_ms: 0.7907
+  type: 'test'
+  ...
+# Subtest: death, NPCs, stale target and malformed timing never borrow an old source tile
+ok 8 - death, NPCs, stale target and malformed timing never borrow an old source tile
+  ---
+  duration_ms: 0.1956
+  type: 'test'
+  ...
+# Subtest: fractional interpolation anchors cannot invent a source cell
+ok 9 - fractional interpolation anchors cannot invent a source cell
+  ---
+  duration_ms: 0.1344
+  type: 'test'
+  ...
+# Subtest: real motion refresh records the previous authoritative target during a mid-glide retarget
+ok 10 - real motion refresh records the previous authoritative target during a mid-glide retarget
+  ---
+  duration_ms: 0.6075
+  type: 'test'
+  ...
+# Subtest: actual map producer orders right-hand stalls behind same-row NPCs but preserves next-row occlusion
+ok 11 - actual map producer orders right-hand stalls behind same-row NPCs but preserves next-row occlusion
+  ---
+  duration_ms: 0.7989
+  type: 'test'
+  ...
+# Subtest: atlas and standalone GPU producers apply the runtime map gain exactly once
+ok 12 - atlas and standalone GPU producers apply the runtime map gain exactly once
+  ---
+  duration_ms: 0.6438
+  type: 'test'
+  ...
+# Subtest: actual map draw positions and depths are invariant under a large camera/map translation
+ok 13 - actual map draw positions and depths are invariant under a large camera/map translation
+  ---
+  duration_ms: 0.2537
+  type: 'test'
+  ...
+# Subtest: DOM entity and item producers use the same raw depth contract
+ok 14 - DOM entity and item producers use the same raw depth contract
+  ---
+  duration_ms: 0.3712
+  type: 'test'
+  ...
+# Subtest: persistent spell and mask remain below bodies while transient effects stay within the same column
+ok 15 - persistent spell and mask remain below bodies while transient effects stay within the same column
+  ---
+  duration_ms: 0.1004
+  type: 'test'
+  ...
+# Subtest: standalone depth policy passes strict focused TypeScript
+ok 16 - standalone depth policy passes strict focused TypeScript
+  ---
+  duration_ms: 257.733
+  type: 'test'
+  ...
+# Subtest: bounded original-client controls do not leave visible empty click handlers
+ok 17 - bounded original-client controls do not leave visible empty click handlers
+  ---
+  duration_ms: 3.6827
+  type: 'test'
+  ...
+# Subtest: unsupported actions use disabled semantics instead of pretending to reach a backend
+ok 18 - unsupported actions use disabled semantics instead of pretending to reach a backend
+  ---
+  duration_ms: 1.0456
+  type: 'test'
+  ...
+# Subtest: real ChatFrame ignores composing Enter and legacy 229, then submits ordinary Enter
+not ok 19 - real ChatFrame ignores composing Enter and legacy 229, then submits ordinary Enter
+  ---
+  duration_ms: 100.0599
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-original-client-component-controls.mjs:127:1'
+  failureType: 'testCodeFailure'
+  error: 'Unexpected original-client-panels.tsx dependency: ./original-client-crystal-item-tooltip'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-original-client-component-controls.mjs:80:13
+    eval (eval at transpiledComponent (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-original-client-component-controls.mjs:75:3), <anonymous>:19:48)
+    transpiledComponent (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-original-client-component-controls.mjs:75:68)
+    async TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-original-client-component-controls.mjs:128:18)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: real GameUiScene send closure keeps empty, prefix, formatting and draft reset behavior
+not ok 20 - real GameUiScene send closure keeps empty, prefix, formatting and draft reset behavior
+  ---
+  duration_ms: 46.3918
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-original-client-component-controls.mjs:156:1'
+  failureType: 'testCodeFailure'
+  error: 'Unexpected original-client-panels.tsx dependency: ./original-client-crystal-item-tooltip'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-original-client-component-controls.mjs:80:13
+    eval (eval at transpiledComponent (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-original-client-component-controls.mjs:75:3), <anonymous>:19:48)
+    transpiledComponent (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-original-client-component-controls.mjs:75:68)
+    async TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-original-client-component-controls.mjs:157:18)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# node:internal/modules/run_main:123
+#     triggerUncaughtException(
+#     ^
+# AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+# + actual - expected
+#   [
+#     [
+#       0,
+# +     351
+# -     175
+#     ]
+#   ]
+#     at file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-player-frames.mjs:74:10
+#     at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+#     at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:647:26)
+#     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+#   generatedMessage: true,
+#   code: 'ERR_ASSERTION',
+#   actual: [ [ 0, 351 ] ],
+#   expected: [ [ 0, 175 ] ],
+#   operator: 'deepStrictEqual'
+# }
+# Node.js v22.18.0
+# Subtest: scripts\\test-player-frames.mjs
+not ok 4 - scripts\\test-player-frames.mjs
+  ---
+  duration_ms: 208.5968
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-player-frames.mjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Subtest: real stage capture retains a Canvas-underlay Gold marker and compatibility mouse/up cannot duplicate it
+ok 22 - real stage capture retains a Canvas-underlay Gold marker and compatibility mouse/up cannot duplicate it
+  ---
+  duration_ms: 44.6365
+  type: 'test'
+  ...
+# Subtest: a visible NPC name above another actor keeps its own identity through the real stage and shared canvas
+ok 23 - a visible NPC name above another actor keeps its own identity through the real stage and shared canvas
+  ---
+  duration_ms: 28.8967
+  type: 'test'
+  ...
+# Subtest: ground drops above NPC names and actor bodies keep their existing pickup priority
+ok 24 - ground drops above NPC names and actor bodies keep their existing pickup priority
+  ---
+  duration_ms: 20.6903
+  type: 'test'
+  ...
+# Subtest: a HUD Options press releases its original combat hold while the new modal blocks world input
+ok 25 - a HUD Options press releases its original combat hold while the new modal blocks world input
+  ---
+  duration_ms: 47.4061
+  type: 'test'
+  ...
+# Subtest: an unadmitted second pointer cannot replace the first retained world marker
+ok 26 - an unadmitted second pointer cannot replace the first retained world marker
+  ---
+  duration_ms: 19.9629
+  type: 'test'
+  ...
+# Subtest: the actual legacy stage mouse path preserves the visible Gold target instead of the offset tile
+ok 27 - the actual legacy stage mouse path preserves the visible Gold target instead of the offset tile
+  ---
+  duration_ms: 13.8525
+  type: 'test'
+  ...
+# Subtest: removing only the new legacy mouse property in memory reproduces zero pickup and wrong-tile fallback
+ok 28 - removing only the new legacy mouse property in memory reproduces zero pickup and wrong-tile fallback
+  ---
+  duration_ms: 21.4154
+  type: 'test'
+  ...
+# Subtest: NPC nameplate and interactive sprite-hit underlays activate exactly once through either real owner path
+ok 29 - NPC nameplate and interactive sprite-hit underlays activate exactly once through either real owner path
+  ---
+  duration_ms: 64.1144
+  type: 'test'
+  ...
+# Subtest: both real stage routes pick a solid body through a tree hole using native tile order
+ok 30 - both real stage routes pick a solid body through a tree hole using native tile order
+  ---
+  duration_ms: 55.5345
+  type: 'test'
+  ...
+# Subtest: actor hit resolution keeps exact cells, living priority, ties and unavailable NPC bounds
+ok 31 - actor hit resolution keeps exact cells, living priority, ties and unavailable NPC bounds
+  ---
+  duration_ms: 15.6464
+  type: 'test'
+  ...
+# Subtest: actor picking reads the current packed body rectangle on its own atlas page
+ok 32 - actor picking reads the current packed body rectangle on its own atlas page
+  ---
+  duration_ms: 11.6096
+  type: 'test'
+  ...
+# Subtest: a prebuilt atlas mask reads only the frame crop and shares one pending decode
+ok 33 - a prebuilt atlas mask reads only the frame crop and shares one pending decode
+  ---
+  duration_ms: 9.4347
+  type: 'test'
+  ...
+# Subtest: secondary taps on a canvas-underlay actor or drop reach only the terrain callback
+ok 34 - secondary taps on a canvas-underlay actor or drop reach only the terrain callback
+  ---
+  duration_ms: 53.7967
+  type: 'test'
+  ...
+# Subtest: holding secondary over an actor keeps Classic steering and New Move terrain routing
+ok 35 - holding secondary over an actor keeps Classic steering and New Move terrain routing
+  ---
+  duration_ms: 28.4704
+  type: 'test'
+  ...
+# Subtest: direct DOM world markers pass secondary to the stage without opening an actor or picking up a drop
+ok 36 - direct DOM world markers pass secondary to the stage without opening an actor or picking up a drop
+  ---
+  duration_ms: 70.8161
+  type: 'test'
+  ...
+# Subtest: foreign frames, non-Canvas top layers, missing markers and noninteractive entity markers never acquire object authority
+ok 37 - foreign frames, non-Canvas top layers, missing markers and noninteractive entity markers never acquire object authority
+  ---
+  duration_ms: 54.3657
+  type: 'test'
+  ...
+# Subtest: foreground UI, Native modal/foreground ownership and unavailable scene keep world object callbacks blocked
+ok 38 - foreground UI, Native modal/foreground ownership and unavailable scene keep world object callbacks blocked
+  ---
+  duration_ms: 191.5984
+  type: 'test'
+  ...
+# Subtest: focus blur, owner generation change and Page rejection never replay or turn a retained marker into a tile click
+ok 39 - focus blur, owner generation change and Page rejection never replay or turn a retained marker into a tile click
+  ---
+  duration_ms: 38.5392
+  type: 'test'
+  ...
+# Subtest: the Mini Map frame stops an ordinary route for both buttons without taking image or HUD actions
+ok 40 - the Mini Map frame stops an ordinary route for both buttons without taking image or HUD actions
+  ---
+  duration_ms: 8.6519
+  type: 'test'
+  ...
+1..40
+# tests 40
+# suites 0
+# pass 37
+# fail 3
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1254.4267

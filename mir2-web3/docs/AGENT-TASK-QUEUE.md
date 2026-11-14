@@ -12,7 +12,7 @@ Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 G
 
 - [x] 行走包有限恢复91b8fc9b4f的118＋70项／构建、本地四会话、第二次公网功能回放和完整静态读回通过，正式保留；首轮失败／回退均存档。原静态SHA与8秒／20秒／120秒未改，公网compiled恢复未触发、资格来自本地；不冒充全部1:1。[当前正式与范围](evidence/r16-walking-recovery-20261114/production/README.md)
 - [ ] R15战后回镇一次8秒停步仍未定因；新本地快速回镇通过不倒填旧原因。首步前权威改点287617的公网实走覆盖、其余自动路线与动态占位继续验收。
-- [ ] NPC姓名层级与可见姓名优先命中已发布e6c923，组件及两后端完整游戏／同NPC对话通过；英文长名字GDI固定宽截字仍需AutoSize。[组件](evidence/r16-npc-name-layer-20261114/README.md) · [完整范围](evidence/r16-route-lookahead-20261114/README.md)
+- [ ] NPC层级／命中已发e6c923；AutoSize及完整行候选b19通过39项、11图自检、构建／2,771项绑定、4次框外命中和英／繁两后端四会话NPC／长路线／同角保存，尚未发布。其余文字像素、raw标题与翻译后分行仍需Windows对照。[候选与范围](evidence/r16-name-autosize-20261114/README.md)
 - [ ] Web死亡弹窗四个 ui.death.* 十语已补齐，33项与40个组件画面通过；真实死亡／复活、Windows外观与本批发布仍需验收，不将文案通过冒充弹窗1:1。[本地与范围](evidence/r16-death-locale-20261114/README.md)
 
 - [x] Worker重启缓存修复已发布f6acaad6b0；公网停启后同一HUD图与配置通过。受控两后端全流程另记，公网联合检查仍false。[发布/失败范围](evidence/r16-worker-restart-20261113/production/README.md)
