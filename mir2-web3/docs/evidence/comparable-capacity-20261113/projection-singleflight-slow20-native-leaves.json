@@ -1,0 +1,404 @@
+{
+  "schema": "mir2.closed-slow20-inner-seven-leaf-analysis.v1",
+  "sourceStatsPath": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\projection-singleflight-slow20-log-analysis-prep-v1\\closed100-inner.actual.json",
+  "sourceStatsSha256": "edab8dce9469b86dd7626611c9b3f8609e461c96d0f1ad79adc3bf38d73486b4",
+  "sourceLogSha256FromPriorFullParser": "c584ae4b64bcc0095e246fa24e5efc93a99366f1d015e95a27e8d7fafbcead23",
+  "wholeLogRehashedHere": false,
+  "priorFullParserIdentityMatchedCurrentStableFile": true,
+  "sourceLogBytes": 44075031,
+  "ranges": [
+    {
+      "start": 33365739,
+      "endExclusive": 41383642
+    }
+  ],
+  "rangeBytesScannedExactlyOnce": 8017903,
+  "selectedRawRangesSha256": "e9ccd5cebb6039fdd955bad22fe079b0cd567176b813155fb09d6a802734744a",
+  "additionalTopExampleReadBytes": 681,
+  "outsideInnerRangeBodyReadBytes": 0,
+  "leadingFragmentExcludedBytes": 86,
+  "trailingFragmentExcludedBytes": 0,
+  "profileRows": 290,
+  "fullyMeasured127Count": 290,
+  "outcomeCounts": {
+    "ok": 290
+  },
+  "aggregateDurationMs": {
+    "p95": 482,
+    "max": 1284
+  },
+  "leafDistributionsMicroseconds": {
+    "billing_us": {
+      "observedCount": 290,
+      "unmeasuredOrMissingCount": 0,
+      "min": {
+        "us": 0,
+        "source": {
+          "byteOffsetStart": 37108854,
+          "byteOffsetEndExclusive": 37109076,
+          "lineSha256": "582c96200dc95724aebfa6e012a649516a3b5c4f0d5e663b83ce78817cc6398e"
+        }
+      },
+      "p50": {
+        "us": 95115,
+        "source": {
+          "byteOffsetStart": 39536019,
+          "byteOffsetEndExclusive": 39536242,
+          "lineSha256": "fb13a6751e94bf326039e98504a7f03a5ceffcb15714083d0abaeefa30be5f38"
+        }
+      },
+      "p95": {
+        "us": 482076,
+        "source": {
+          "byteOffsetStart": 38215146,
+          "byteOffsetEndExclusive": 38215372,
+          "lineSha256": "fdd6422cf3be1debc473ca13cc1570584917f3b24224dab1e903b277aada70f1"
+        }
+      },
+      "max": {
+        "us": 1284400,
+        "source": {
+          "byteOffsetStart": 33845030,
+          "byteOffsetEndExclusive": 33845259,
+          "lineSha256": "ebf98e8ccc46e0a07eaea36ddd45ccb334db94bda84e385e998f2135b0e67084"
+        }
+      }
+    },
+    "gift_us": {
+      "observedCount": 290,
+      "unmeasuredOrMissingCount": 0,
+      "min": {
+        "us": 0,
+        "source": {
+          "byteOffsetStart": 33744805,
+          "byteOffsetEndExclusive": 33745031,
+          "lineSha256": "a6f9b2621f1b8801902a6db7c155835cbe5f2c96479336ae2ba20ac102f44bbc"
+        }
+      },
+      "p50": {
+        "us": 0,
+        "source": {
+          "byteOffsetStart": 38872804,
+          "byteOffsetEndExclusive": 38873030,
+          "lineSha256": "0aa2f211ff0cdee4259d7c2aa92865620b43c4d4149d3c51aae808d992c8104c"
+        }
+      },
+      "p95": {
+        "us": 1,
+        "source": {
+          "byteOffsetStart": 38820836,
+          "byteOffsetEndExclusive": 38821062,
+          "lineSha256": "be817a26238a031462d3060ede01560f682f1b076b2e79654f1d4aeafdbdea63"
+        }
+      },
+      "max": {
+        "us": 10,
+        "source": {
+          "byteOffsetStart": 38138202,
+          "byteOffsetEndExclusive": 38138429,
+          "lineSha256": "3172d891c9862c12d20d9bba8405ce7d4633af2c40e6a05a9488f71e99836b6a"
+        }
+      }
+    },
+    "checkpoint_begin_us": {
+      "observedCount": 290,
+      "unmeasuredOrMissingCount": 0,
+      "min": {
+        "us": 21,
+        "source": {
+          "byteOffsetStart": 39336198,
+          "byteOffsetEndExclusive": 39336420,
+          "lineSha256": "c28ff62962524ca414a30b12a863f552081428375f107b03541c1c44b24c743b"
+        }
+      },
+      "p50": {
+        "us": 57,
+        "source": {
+          "byteOffsetStart": 41166119,
+          "byteOffsetEndExclusive": 41166345,
+          "lineSha256": "b2132247cc2d471f3da6e907c4ff4e0d8fb71a5df49f350dc3b3cbefa3d9de26"
+        }
+      },
+      "p95": {
+        "us": 99,
+        "source": {
+          "byteOffsetStart": 40997626,
+          "byteOffsetEndExclusive": 40997849,
+          "lineSha256": "ec0fa51739b43ec58bf7e9b1679c5c09d02e586618a08aae08ed0c48faef848d"
+        }
+      },
+      "max": {
+        "us": 23700,
+        "source": {
+          "byteOffsetStart": 37108854,
+          "byteOffsetEndExclusive": 37109076,
+          "lineSha256": "582c96200dc95724aebfa6e012a649516a3b5c4f0d5e663b83ce78817cc6398e"
+        }
+      }
+    },
+    "personal_timers_us": {
+      "observedCount": 290,
+      "unmeasuredOrMissingCount": 0,
+      "min": {
+        "us": 29,
+        "source": {
+          "byteOffsetStart": 36396493,
+          "byteOffsetEndExclusive": 36396718,
+          "lineSha256": "b99c1b0f7ef7713d8dd1255e8bc82a2b3c8139c3029235fc4189cf93e12e0514"
+        }
+      },
+      "p50": {
+        "us": 66,
+        "source": {
+          "byteOffsetStart": 41157177,
+          "byteOffsetEndExclusive": 41157401,
+          "lineSha256": "f27e3784e6d3a47d7297560632ccafa4ff7f90e3a76cd7d118805c485d652c85"
+        }
+      },
+      "p95": {
+        "us": 102,
+        "source": {
+          "byteOffsetStart": 34037090,
+          "byteOffsetEndExclusive": 34037317,
+          "lineSha256": "b3eaa7a3243a8fedf6608281daba460cecf77b99820af201811786979d2783df"
+        }
+      },
+      "max": {
+        "us": 996,
+        "source": {
+          "byteOffsetStart": 37315859,
+          "byteOffsetEndExclusive": 37316086,
+          "lineSha256": "9d6eaf28ef168a489cb0e9f19a78a0c0082709d1e426e6126ad538d359cfda76"
+        }
+      }
+    },
+    "source_dispatch_us": {
+      "observedCount": 290,
+      "unmeasuredOrMissingCount": 0,
+      "min": {
+        "us": 0,
+        "source": {
+          "byteOffsetStart": 34133266,
+          "byteOffsetEndExclusive": 34133489,
+          "lineSha256": "bc713ed750eadba1fa07f2ec1dc811a533d1f23106ccb846a72e15632424ce2b"
+        }
+      },
+      "p50": {
+        "us": 2,
+        "source": {
+          "byteOffsetStart": 36411696,
+          "byteOffsetEndExclusive": 36411922,
+          "lineSha256": "98771029d14be17102dc478b3f14f30d8e105d3aaf1a4d04b3359450a0680861"
+        }
+      },
+      "p95": {
+        "us": 3,
+        "source": {
+          "byteOffsetStart": 36613598,
+          "byteOffsetEndExclusive": 36613821,
+          "lineSha256": "17e57af97baf78f5cef81387eff38f39e9fad2cde5f5f92baa5835cd0ad560fe"
+        }
+      },
+      "max": {
+        "us": 3,
+        "source": {
+          "byteOffsetStart": 41133724,
+          "byteOffsetEndExclusive": 41133947,
+          "lineSha256": "ad2b8d05cefe23d8adaded92fef7bcd72d4a1c7c762cd556c939871971dc86ec"
+        }
+      }
+    },
+    "finalize_us": {
+      "observedCount": 290,
+      "unmeasuredOrMissingCount": 0,
+      "min": {
+        "us": 0,
+        "source": {
+          "byteOffsetStart": 34050048,
+          "byteOffsetEndExclusive": 34050271,
+          "lineSha256": "0c6d60767e8aa578a93a789d05107ccd9dd92644b156b5eaa9873b2d23f8c557"
+        }
+      },
+      "p50": {
+        "us": 2,
+        "source": {
+          "byteOffsetStart": 34137823,
+          "byteOffsetEndExclusive": 34138046,
+          "lineSha256": "76387299c89c4a909242ee640eae035fa67b8995ff9e07bb3acf5c50dbe4d9b5"
+        }
+      },
+      "p95": {
+        "us": 3,
+        "source": {
+          "byteOffsetStart": 40221246,
+          "byteOffsetEndExclusive": 40221469,
+          "lineSha256": "5a8acac1289b5c906fdbe0573c1e63e63450df74ef8243813e21219ec96a04e4"
+        }
+      },
+      "max": {
+        "us": 33,
+        "source": {
+          "byteOffsetStart": 40044235,
+          "byteOffsetEndExclusive": 40044460,
+          "lineSha256": "1f65f2e7e82226203a238f96a0a4f8f26316ccbdf3ca169b6d25704188788b33"
+        }
+      }
+    },
+    "finish_us": {
+      "observedCount": 290,
+      "unmeasuredOrMissingCount": 0,
+      "min": {
+        "us": 6,
+        "source": {
+          "byteOffsetStart": 37406730,
+          "byteOffsetEndExclusive": 37406955,
+          "lineSha256": "22fdea56d26b8c2a926b5d5aac8f205866d4097468cc255ab34c825fe46be16e"
+        }
+      },
+      "p50": {
+        "us": 23,
+        "source": {
+          "byteOffsetStart": 39417928,
+          "byteOffsetEndExclusive": 39418154,
+          "lineSha256": "2db7f98b4d30eea78883112103a36ad878175f41c25c7162f1544c27724d6385"
+        }
+      },
+      "p95": {
+        "us": 51,
+        "source": {
+          "byteOffsetStart": 38848914,
+          "byteOffsetEndExclusive": 38849141,
+          "lineSha256": "2ce29e09f4691ddf7524ffa80de3e24795904e83ced149a37fe8e0a52642b501"
+        }
+      },
+      "max": {
+        "us": 130,
+        "source": {
+          "byteOffsetStart": 37268450,
+          "byteOffsetEndExclusive": 37268675,
+          "lineSha256": "dde72da2636c48a581da25019514cd17b7d2a3414298fbfa5432ed45f5080f9f"
+        }
+      }
+    }
+  },
+  "uniqueLargestLeafCount": {
+    "billing_us": 289,
+    "gift_us": 0,
+    "checkpoint_begin_us": 1,
+    "personal_timers_us": 0,
+    "source_dispatch_us": 0,
+    "finalize_us": 0,
+    "finish_us": 0
+  },
+  "tiedOrIncompleteLargestRows": 0,
+  "topProfiles": [
+    {
+      "byteOffsetStart": 33845030,
+      "byteOffsetEndExclusive": 33845259,
+      "lineSha256": "ebf98e8ccc46e0a07eaea36ddd45ccb334db94bda84e385e998f2135b0e67084",
+      "durationMs": 1284,
+      "totalUs": 1284582,
+      "leafMask": 127,
+      "outcome": "ok",
+      "leafUs": {
+        "billing_us": 1284400,
+        "gift_us": 0,
+        "checkpoint_begin_us": 59,
+        "personal_timers_us": 96,
+        "source_dispatch_us": 2,
+        "finalize_us": 2,
+        "finish_us": 19
+      },
+      "largestKnownLeaves": [
+        "billing_us"
+      ]
+    },
+    {
+      "byteOffsetStart": 36514569,
+      "byteOffsetEndExclusive": 36514795,
+      "lineSha256": "b7365e1a302c855e2332fa9e104c208b679ecf9cec3f281aa4fd8eb3e29e7f0a",
+      "durationMs": 775,
+      "totalUs": 775914,
+      "leafMask": 127,
+      "outcome": "ok",
+      "leafUs": {
+        "billing_us": 775726,
+        "gift_us": 0,
+        "checkpoint_begin_us": 65,
+        "personal_timers_us": 88,
+        "source_dispatch_us": 2,
+        "finalize_us": 2,
+        "finish_us": 25
+      },
+      "largestKnownLeaves": [
+        "billing_us"
+      ]
+    },
+    {
+      "byteOffsetStart": 40975911,
+      "byteOffsetEndExclusive": 40976137,
+      "lineSha256": "b2927d9f588d7af1fe6ba19a9a84b683f9ef0279e31cafe4be3cc6b1cc06f3c1",
+      "durationMs": 744,
+      "totalUs": 744684,
+      "leafMask": 127,
+      "outcome": "ok",
+      "leafUs": {
+        "billing_us": 744509,
+        "gift_us": 0,
+        "checkpoint_begin_us": 53,
+        "personal_timers_us": 87,
+        "source_dispatch_us": 2,
+        "finalize_us": 2,
+        "finish_us": 27
+      },
+      "largestKnownLeaves": [
+        "billing_us"
+      ]
+    }
+  ],
+  "projectionPath": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\projection-singleflight-postslow-native-leaves-v1\\leaf-rows.jsonl",
+  "projectionSha256": "ab2b59f927fd25b00d4d951baa3af86780f5647cf1f71aab0eec9d902dccb70a",
+  "sourceMeaning": [
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\tick-leaf-probe-build-v1\\source\\mir2-web3\\apps\\simulation\\src\\world_runtime.rs",
+      "line": 1240,
+      "fact": "Billing leaf wraps poll_pending_recharge_credits(monthly_card_now_ms()), including any synchronous compute/wait inside that call."
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\tick-leaf-probe-build-v1\\source\\mir2-web3\\apps\\simulation\\src\\runtime\\personal_tick_diagnostics.rs",
+      "line": 59,
+      "fact": "Each measured leaf accumulates elapsed Instant duration; mask bit marks actually observed leaf. Printed0us with set bit is measured sub-microsecond quantization, not missing data."
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\tick-leaf-probe-build-v1\\source\\mir2-web3\\apps\\simulation\\src\\runtime\\personal_tick_diagnostics.rs",
+      "line": 97,
+      "fact": "Anonymous aggregate emits seven fields/leaf mask/outcome, with no connection or trace/source-start timestamp."
+    }
+  ],
+  "limits": [
+    "Selected append-observation inner window is approximate, not a stage execution/emit-time window.",
+    "These are290 aggregate>=20ms profiles only; not a distribution of every Tick or all active-player CPU.",
+    "Elapsed includes lock wait/scheduling/IO/compute. No durations are summed as CPU and no AccountStore or WS event is causally joined.",
+    "Same-scale AccountStore wait maxima alone cannot identify this anonymous profile or its thread.",
+    "Missing/unmeasured leaf values remain null; original workload failure and all strict gates unchanged."
+  ],
+  "sourceInputs": [
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\tick-leaf-probe-build-v1\\source\\mir2-web3\\apps\\simulation\\src\\world_runtime.rs",
+      "bytes": 92919,
+      "sha256": "885df2c342d753eeb825bb3589550088bdfb22a4e5974d1b6d572d3db7a0bca7"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\tick-leaf-probe-build-v1\\source\\mir2-web3\\apps\\simulation\\src\\runtime\\personal_tick_diagnostics.rs",
+      "bytes": 4208,
+      "sha256": "33c8146ca4bcaf706f8b1425f10490e9babdf00589ecd2120628655637078aa6"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\tick-leaf-probe-build-v1\\source\\mir2-web3\\apps\\simulation\\src\\runtime\\billing.rs",
+      "bytes": 9249,
+      "sha256": "90de6a7640b7f3946453e4d95ebbdaa9b24cedf176e4b668a20a7aebc20fa839"
+    }
+  ],
+  "capacityQualified": false,
+  "rootCauseEstablished": false
+}

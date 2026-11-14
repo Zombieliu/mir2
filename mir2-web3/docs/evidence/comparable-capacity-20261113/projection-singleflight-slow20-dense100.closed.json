@@ -1,0 +1,179 @@
+{
+  "schema": "mir2.shared-projection-slow20-dense100.closed.v1",
+  "recordedAtUtc": "2026-11-14T18:33:27.301343+00:00",
+  "sourceRevision": "6024d8ffc095dd3a149ddb2b12bd3fce4cc4245c",
+  "codeIntegrationRevision": "6024d8ffc095dd3a149ddb2b12bd3fce4cc4245c",
+  "binarySha256": "c155bb789e3c37bb4b9ed5b003c74dacef68e13240cdd9a364703945d1393e51",
+  "planSha256": "a2cafb513d9329ba1744c65ee8803e06cfc2bf96755da9e285a147a894ffd2f9",
+  "qualificationLayer": "game-core-local",
+  "diagnosticOnly": true,
+  "onlyRuntimeDeltaFromDefaultOff": {
+    "MIR2_GATEWAY_SLOW_STAGE_MS": "20"
+  },
+  "population": 100,
+  "measurementStartedAtUtc": "2026-11-14T17:58:50.960Z",
+  "measurementPlannedEndAtUtc": "2026-11-14T18:03:50.960Z",
+  "measurementEndedAtUtc": "2026-11-14T18:03:52.959Z",
+  "plannedDurationMs": 300000,
+  "totals": {
+    "offered": 16000,
+    "completed": 15254,
+    "timeout": 108,
+    "notSent": 638
+  },
+  "passedWindows": 146,
+  "totalWindows": 500,
+  "controllerDriverServerExitCodes": [
+    1,
+    1,
+    0
+  ],
+  "normalStopProven": true,
+  "abnormalCleanup": false,
+  "serverJobClose": {
+    "closed": true,
+    "allMembersExited": true,
+    "killAppliedByClose": false,
+    "rootExitCodes": {
+      "gameServer": 0
+    },
+    "failedLaunches": [],
+    "normalStopMustBeProvenByCaller": true
+  },
+  "injectorJobClose": {
+    "closed": true,
+    "allMembersExited": true,
+    "killAppliedByClose": false,
+    "rootExitCodes": {
+      "injector": 1
+    },
+    "failedLaunches": [],
+    "normalStopMustBeProvenByCaller": true
+  },
+  "resourceRows": 3678,
+  "protocolLifecycleReported": {
+    "gearActorsPassed": 3,
+    "gearOperationRecords": 12,
+    "primaryNormalLogoutAndClose": 100,
+    "maxLogoutAckMs": 933.5775000001304,
+    "maxCloseMs": 25.32440000027418,
+    "freshStatePreservedAndNormalClose": 2,
+    "fullIndependentLifecycleCertified": false
+  },
+  "diskGate": {
+    "passed": false,
+    "sampleCount": 0,
+    "failureCode": "public_protocol_or_resource_prerequisite_failed",
+    "privateStoreReadAttempted": false
+  },
+  "independentVerificationPassed": false,
+  "hardFailures": [
+    {
+      "code": "modern_all_actor_dense_File_v3_proof_missing"
+    },
+    {
+      "code": "controller_or_producer_actual_exit_failed"
+    },
+    {
+      "code": "job_exit_or_close_not_normal"
+    }
+  ],
+  "authExport": {
+    "schema": "mir2.slow20-auth-export.closed100.v1",
+    "historyPath": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\local-auth-history-v32.json",
+    "sha256": "f62c8dc710f85281f4c128e9698dd1c6fde613fc7e150ae4e2ab2d582e878339",
+    "attemptCount": 1665,
+    "previousPrefixRetained": 1551,
+    "newAttempts": 114,
+    "finalOwnLedgerSha256": "d5db146ceaf3f1fa3decf56ac072529b8edd83796c6b8a6e3e07a010c636254c",
+    "sourceCasePassed": false,
+    "sourceCaseDiagnosticOnly": true,
+    "failureNotPassingPredecessor": true
+  },
+  "observer": {
+    "passed": true,
+    "rows": 11211,
+    "sampleBytes": 2003313,
+    "sampleGaps": 0,
+    "maxGapMs": 254.387,
+    "wallClockSteps": 0,
+    "elapsedSeconds": 2807.614876,
+    "initialPrefixUnknownBytes": 290512,
+    "offsetIsEmitTimestamp": false,
+    "perSocketCausalityProven": false
+  },
+  "approximateAppendWindow": {
+    "innerSlowRows": 94622,
+    "ranges": [
+      {
+        "start": 33365739,
+        "endExclusive": 41383642
+      }
+    ],
+    "stageExecutionWindowProven": false,
+    "mappingPaddingIsAssumption": true,
+    "noPerSocketCauseOrCpuTimeClaim": true
+  },
+  "inputs": {
+    "controller": {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-projection-singleflight-slow20-dense100-v1\\runs\\dense100-v1\\controller-result.json",
+      "bytes": 4151,
+      "sha256": "b93e7f426e695f6f09799933d134f0c51a703997c9abb733262608ce75d1f0e4"
+    },
+    "summary": {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-projection-singleflight-slow20-dense100-v1\\runs\\dense100-v1\\modern.report.json",
+      "bytes": 29402188,
+      "sha256": "263dd5d86cb023fcab52070926044e8b2078b68047b089aba34e078405432ad0"
+    },
+    "events": {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-projection-singleflight-slow20-dense100-v1\\runs\\dense100-v1\\modern.events.jsonl",
+      "bytes": 543499975,
+      "sha256": "b4e549ff8b280ea9d7f740d6805ea72a478e29de3d48e27f67cb0e97e2c866bb"
+    },
+    "file": {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\projection-singleflight-slow20-factory-v1\\generated\\dense100\\disk-readback.v8.json",
+      "bytes": 449,
+      "sha256": "daa7a3ec0823a138105560b82e9bcb847ae10223113dd2424625f30fdb7fb2e1"
+    },
+    "enhanced": {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\projection-singleflight-slow20-factory-v1\\generated\\dense100\\independent-verification.v8.json",
+      "bytes": 182719,
+      "sha256": "21ff370c1733a0f8023c62225d517e3c12ca1603ee04bd4a04bbf52eac44fcf4"
+    },
+    "slowLog": {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-projection-singleflight-slow20-dense100-v1\\runs\\dense100-v1\\game-stderr.log",
+      "bytes": 44075031,
+      "sha256": "c584ae4b64bcc0095e246fa24e5efc93a99366f1d015e95a27e8d7fafbcead23"
+    },
+    "observerResult": {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\projection-singleflight-slow20-offset-observer-prep-v1\\observation-v1\\result.json",
+      "bytes": 761,
+      "sha256": "3a9862563dd1156969f4ee0cebfbbf4dd796bd942818a53b83ead18fcb93afd1"
+    },
+    "observerOffsets": {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\projection-singleflight-slow20-offset-observer-prep-v1\\observation-v1\\offsets.jsonl",
+      "bytes": 2003313,
+      "sha256": "69cd6d904bf05126dd3937730994aa8df993f14114d329e988fef5a19904da13"
+    },
+    "windowRanges": {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\projection-singleflight-slow20-window-ranges-prep-v1\\closed100-ranges.actual.json",
+      "bytes": 7480,
+      "sha256": "94090c4ba6c656d0b55f3ad0f6b20d876b275846651e6de0e0d96f41344b42d9"
+    },
+    "innerStatistics": {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\projection-singleflight-slow20-log-analysis-prep-v1\\closed100-inner.actual.json",
+      "bytes": 47031,
+      "sha256": "edab8dce9469b86dd7626611c9b3f8609e461c96d0f1ad79adc3bf38d73486b4"
+    },
+    "nativeLeaves": {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\projection-singleflight-postslow-native-leaves-v1\\ANALYSIS.json",
+      "bytes": 13774,
+      "sha256": "820056328105e76a7c71e2f2cd88f38232567270528b5669a8c12c04d7e4927a"
+    }
+  },
+  "capacityQualified": false,
+  "productionStackQualified": false,
+  "physicalTriClientQualified": false,
+  "fullCombatQualified": false,
+  "defaultOff100FailureNotSuperseded": true
+}
