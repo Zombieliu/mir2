@@ -10,7 +10,7 @@ Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 G
 
 ## 保留的当前未结项
 
-- [ ] 主字体重叠候选5d7bf8c2ea已完成414项／独立构建／两后端完整游戏、受控Chrome和同条件来源补查，83发布保护及31输入绑定通过；共享带宽的运行包延迟与CDN波动保留。尚未切流，继续原8/120和完整6/113等公网门槛，失败仍回退20de／AWss；固定前端源不包含后续独立Gateway准入提交。[结果与代价](evidence/r16-primary-font-overlap-20261115/README.md)
+- [ ] 主字体5d7bf8c2ea／BoN公网R1失败，已回退20de／AWss并独立核对域名、版本及简繁扫码，Gateway仍fd3；首步135ms／Native101946ms与六字体／113／Q／Worker通过，但最初完整行走包及正常注销未过，未跑R2。先修日记ready而HUD未就绪时Q被拦截，再补查包恢复，不原样重发。414项本地／83保护／31输入绑定不能覆盖公网失败。[原判定、失败与回退](evidence/r16-primary-font-overlap-20261115/production/README.md)
 
 - [ ] 用户补充寻路“目标不对或到不了”：ceb1c1132f本地候选补大小地图目标／30秒初始期限／到达反馈和十语入口说明。152项、独立构建与两后端真实慢碰撞／跨图／注销／重登新目标／保存通过，30份原内容WIP保持。尚未发布，更多目标／地图及狩猎区域体验继续，不替代当前公网资源资格。[证据与边界](evidence/r16-route-feedback-20261115/README.md)
 

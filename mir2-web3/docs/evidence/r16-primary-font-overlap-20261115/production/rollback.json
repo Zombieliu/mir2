@@ -1,0 +1,24 @@
+{
+  "kind": "independently-checked-rollback",
+  "passed": true,
+  "at": "2026-11-15T02:05:46.619Z",
+  "source": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+  "deployment": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8",
+  "project": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+  "trafficAfter": {
+    "target": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8",
+    "alias": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8"
+  },
+  "writes": [
+    {
+      "operation": "rollback",
+      "site": "game",
+      "deployment": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8"
+    }
+  ],
+  "version": {
+    "revision": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339"
+  },
+  "workflowRun": "43665380646",
+  "receiptSha256": "6f4f5c565a5cea67ee7b0f1578053e32243304ac5816ce0bdfeeacf3be53e129"
+}

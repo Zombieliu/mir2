@@ -1,0 +1,30 @@
+{
+  "scope": "Private records remain on local disk; only whitelist evidence is published.",
+  "pins": [
+    {
+      "path": "public-acceptance-r1.json",
+      "bytes": 806,
+      "sha256": "0729cf630abf86722d64ad52afe13c087ee2d36dd818f9d1903349df69219316"
+    },
+    {
+      "path": "rollback-r1/numeron-r16-release.json",
+      "bytes": 2568,
+      "sha256": "6f4f5c565a5cea67ee7b0f1578053e32243304ac5816ce0bdfeeacf3be53e129"
+    },
+    {
+      "path": "public-r1/desktop-primary-overlap-r1/receipt.json",
+      "bytes": 78605,
+      "sha256": "77c21c47c7f6e5b9de2e2055f32a58c6be677d8a03bfc17d0b432a398819fa68"
+    },
+    {
+      "path": "public-r1/desktop-primary-overlap-r1/terrain-observation.json",
+      "bytes": 327629,
+      "sha256": "d0a1a9a5f1422a848646ca87f997269d7aa01ad76b47ee9d13b1df6ffde6b81c"
+    },
+    {
+      "path": "public-r1/desktop-primary-overlap-r1/quest-owner-observations.json",
+      "bytes": 6232,
+      "sha256": "1f16986d147a71ee705f34c1ebe7cce0d8a1dd08c1389d8f84163546046b6cff"
+    }
+  ]
+}

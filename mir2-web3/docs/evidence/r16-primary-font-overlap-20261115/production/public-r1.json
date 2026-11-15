@@ -1,0 +1,212 @@
+{
+  "kind": "r16-primary-font-public-r1",
+  "accepted": false,
+  "source": "5d7bf8c2ea58d2ac68bbca5f18c8240fdc929d45",
+  "deployment": "dpl_BoNqc3ESVREqjmXEJtMT2VAtLTFw",
+  "checks": {
+    "exactSource": true,
+    "completeFunctionalRun": false,
+    "walletLoginOnly": true,
+    "movementOriginalEightSeconds": true,
+    "sixCompleteFonts": true,
+    "complete113": true,
+    "sharedNativeQuest": true,
+    "originalNative120": true,
+    "originalRuntimeBody120": true,
+    "workerRestart": true,
+    "normalLogout": false,
+    "bothBrowsersClosed": true
+  },
+  "firstMoveMs": null,
+  "movement": {
+    "attempted": true,
+    "passed": true,
+    "status": "one-authoritative-walk",
+    "from": {
+      "x": 288,
+      "y": 616
+    },
+    "to": {
+      "x": 289,
+      "y": 616,
+      "direction": "Right"
+    },
+    "authorityBinding": {
+      "connection": 1,
+      "startOrdinal": 1,
+      "seq": 20,
+      "packet": "UserInformation",
+      "atMs": 77015
+    },
+    "geometry": {
+      "source": "sha256-pinned-local-release-reference-and-complete-production-map-collision",
+      "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+      "townCollisionSha256": "2e3adbf954f5210c2b10ef608009f7f829edbc6da4cb7558eab3ff91eab73a8b"
+    },
+    "physical": {
+      "input": "trusted-playwright-keyboard-pulse",
+      "key": "ArrowRight",
+      "atMs": 77015
+    },
+    "wire": {
+      "type": "walk",
+      "direction": "Right",
+      "atMs": 77019
+    },
+    "ack": {
+      "x": 289,
+      "y": 616,
+      "packet": "UserLocation",
+      "atMs": 77150
+    },
+    "ackWithinEightSeconds": true,
+    "rendered": {
+      "x": 289,
+      "y": 616,
+      "atMs": 77178
+    }
+  },
+  "timing": {
+    "clockEpochMs": 1794707436849,
+    "authoritativeLoginSuccessMs": 32335,
+    "startIntentMs": 62929,
+    "startAckMs": 73529,
+    "authoritativeStarterMapMs": 73540,
+    "authoritativeSelfMs": 73540,
+    "firstPlayableObservedMs": 76882,
+    "sharedHudObservedMs": 178712,
+    "manifestAttemptsBeforeStart": 1,
+    "manifestAttemptsAtOrAfterStart": 0,
+    "starterRegionRequestMs": 32339,
+    "starterRegionWireHeadersMs": 33665.302,
+    "starterRegionResponseEventMs": 33666,
+    "starterRegionBodyMs": 33729,
+    "starterRegionCommitMs": 73696,
+    "sceneSpritesReadyMs": 73756,
+    "localeRequestMs": 32340,
+    "localeBodyMs": 37463,
+    "localeReadyMs": 37499,
+    "firstPlayableFrameMs": 76766,
+    "rendererBodyMs": 102460
+  },
+  "nativeAfterFirstFrameMs": 101946,
+  "runtimeBodyAfterFirstFrameMs": 25694,
+  "failure": {
+    "phase": "inspect-world-paint",
+    "code": "PUBLIC_VISUAL_PACK_BODY_NOT_OBSERVED:entry-monster-walking"
+  },
+  "logout": {
+    "attempted": true,
+    "passed": false,
+    "returnedToSelect": false,
+    "failure": {
+      "phase": "ordinary-logout",
+      "code": "LOGOUT_COMMAND_NOT_OBSERVED"
+    },
+    "sent": 0,
+    "acknowledged": 0
+  },
+  "walkingDelivery": {
+    "passed": false,
+    "source": "not-observed",
+    "originalJsonBodyObserved": false,
+    "originalJsonAttempts": [
+      {
+        "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+        "kind": "entry-monster-walking",
+        "lane": "game-origin",
+        "queryless": true,
+        "requestMs": 80571,
+        "initiator": "script",
+        "priority": "Low",
+        "bytes": 376831,
+        "redirected": false,
+        "status": 200,
+        "mime": "application/json",
+        "headersAfterMs": 1062,
+        "fromServiceWorker": false,
+        "fromDiskCache": false,
+        "protocol": "h2",
+        "cache": "DYNAMIC",
+        "vercelCache": "MISS",
+        "cors": "wildcard",
+        "lastDataAfterMs": 43121,
+        "failAfterMs": 46075,
+        "failed": "net::ERR_ABORTED",
+        "blockedReason": null,
+        "corsError": null
+      },
+      {
+        "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+        "kind": "entry-monster-walking",
+        "lane": "game-origin",
+        "queryless": true,
+        "requestMs": 126848,
+        "initiator": "script",
+        "priority": "Low",
+        "bytes": 0,
+        "redirected": false
+      }
+    ],
+    "compiledVerified": false,
+    "livePackedWalkingObserved": false,
+    "compiledWalkingQualified": false,
+    "expectedJsonBytes": 764724,
+    "expectedPayloadSha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+    "compiled": null,
+    "publication": {
+      "status": "not-started",
+      "frames": [],
+      "qualificationBeforeMs": 144823
+    },
+    "scope": "Equivalent full walking payload plus>=1 live visible exact-PNG DOM frame only for the compiled alternative; original JSON failures retained; no pure-GPU/all-directions/authoritative-animation claim."
+  },
+  "walkingAttempts": [
+    {
+      "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+      "kind": "entry-monster-walking",
+      "lane": "game-origin",
+      "queryless": true,
+      "requestMs": 80571,
+      "initiator": "script",
+      "priority": "Low",
+      "bytes": 376831,
+      "redirected": false,
+      "status": 200,
+      "mime": "application/json",
+      "headersAfterMs": 1062,
+      "fromServiceWorker": false,
+      "fromDiskCache": false,
+      "protocol": "h2",
+      "cache": "DYNAMIC",
+      "vercelCache": "MISS",
+      "cors": "wildcard",
+      "lastDataAfterMs": 43121,
+      "failAfterMs": 46075,
+      "failed": "net::ERR_ABORTED",
+      "blockedReason": null,
+      "corsError": null
+    },
+    {
+      "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+      "kind": "entry-monster-walking",
+      "lane": "game-origin",
+      "queryless": true,
+      "requestMs": 126848,
+      "initiator": "script",
+      "priority": "Low",
+      "bytes": 0,
+      "redirected": false,
+      "failAfterMs": 20013,
+      "failed": "net::ERR_ABORTED",
+      "blockedReason": null,
+      "corsError": null
+    }
+  ],
+  "secondCohortRun": false,
+  "unchangedOriginalBudgets": {
+    "movementMs": 8000,
+    "nativeMs": 120000
+  },
+  "scope": "One internal QA official-wallet Testnet session; no physical phone or external-user acceptance."
+}

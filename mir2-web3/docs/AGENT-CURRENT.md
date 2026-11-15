@@ -14,7 +14,7 @@ Short routing summary, updated 2026-11-15 (Asia/Shanghai). This indexes recorded
 
 ## Last recorded decisions and open work
 
-2026-11-15 主字体候选5d7bf8c2ea：有效运行包头后提前一份原SC，原六字体／并发／预算保持；414项、独立构建、两后端完整回放和83发布保护通过。受控独立限速省1.967秒，共享带宽不省总量且运行包晚1.011秒；实际旧新补查的63.576／22.451秒受SC CDN吞吐波动主导，不归功于代码。31输入绑定固定前端源5d7f，后续Gateway准入提交保留但不纳入本次发布。尚未切流，继续原8/120与完整资源公网资格，回退20de／AWss保持。[候选及范围](evidence/r16-primary-font-overlap-20261115/README.md)
+2026-11-15 主字体5d7bf8c2ea／BoN公网R1未过，已回退20de／AWss，独立域名／Vercel与简繁出码、pending、取消、零后续轮询通过；Gateway仍fd3。首步135ms／Native101946ms、六字体／113／共享Q／Worker通过，但最初画面未见完整行走包、最终Logout零条，未跑R2。日记ready/open而HUD未就绪时Q被quest-modal拦截，先修其关闭权限，再补查完整包恢复；不能原样重发。本地414项／83发布保护及31输入绑定保留，其他Gateway准入提交未部署。[原判定、失败与回退](evidence/r16-primary-font-overlap-20261115/production/README.md)
 
 2026-11-15 用户补充寻路“目标不对或到不了”：本地候选ceb1c1132f补大小地图坐标／30秒初始期限／到达反馈和十语入口说明。152项、独立严格构建与英繁两后端实际跨图／慢碰撞超时／晚到零旧移动／重登新目标／正常保存通过，30份内容WIP保持。本轮未发布；其他目标与既有公网资源失败继续。[记录与范围](evidence/r16-route-feedback-20261115/README.md)
 
