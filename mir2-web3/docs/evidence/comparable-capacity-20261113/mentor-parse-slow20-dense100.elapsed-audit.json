@@ -1,0 +1,310 @@
+{
+  "schema": "mir2.mentor-parse-slow20-dense100-elapsed-audit.v1",
+  "sourceRevision": "ecf88ae698e004df2fefa0a860879a45873c65d3",
+  "binarySha256": "7d2a6c817b009d6a7e1d0a75cd6b7847fe8cbc5aa2cb57efa8c3d1032a784ff8",
+  "closedOutcome": "FAIL",
+  "parserSha256": "9a8e51961c791cc6db06d093535ac81e44f09121f7adb68355730eb43055d235",
+  "selectorResultSha256": "ced566d8c72204b9495cd5c789fd6ab22de53b7024c5b9fbcdffebca22c49e6e",
+  "innerResultSha256": "3198e5a115ca31f4391442a4473a1f47f5a65d4cc106adf5125dc80559188af6",
+  "outerResultSha256": "4abd77ccdd3e174cfce8471411ea5b76566acf84b2db633443dd19e290f3cd27",
+  "sourceLogSha256": "5d6e9731014c3ed1bb76dd96448a758323c4250d4f5edd36efecb20c497249fe",
+  "sourceLogBytes": 34661319,
+  "exactWorkloadWindowStartUtc": "2026-11-14T23:41:47.790Z",
+  "workloadDurationMs": 300000,
+  "approximateAppendRange": [
+    [
+      24166909,
+      31949569
+    ]
+  ],
+  "innerBytes": 7782660,
+  "edgeCensoredBytes": 59175,
+  "uncertainTimingBytes": 0,
+  "unknownPrefixBytes": 0,
+  "innerSelectedSlowRows": 89041,
+  "outerSelectedSlowRows": 89670,
+  "innerOperationStages": [
+    {
+      "operation": "social_profile_read",
+      "stage": "account_store.store_wait",
+      "count": 1451,
+      "p50Ms": 105,
+      "p95Ms": 442,
+      "maxMs": 1427
+    },
+    {
+      "operation": "experience_admission",
+      "stage": "account_store.store_wait",
+      "count": 2936,
+      "p50Ms": 97,
+      "p95Ms": 408,
+      "maxMs": 1199
+    },
+    {
+      "operation": "billing_poll_front",
+      "stage": "account_store.store_wait",
+      "count": 221,
+      "p50Ms": 132,
+      "p95Ms": 392,
+      "maxMs": 1040
+    },
+    {
+      "operation": "guild_lookup",
+      "stage": "account_store.store_wait",
+      "count": 394,
+      "p50Ms": 150,
+      "p95Ms": 403,
+      "maxMs": 923
+    },
+    {
+      "operation": "experience_admission",
+      "stage": "account_store.store_held",
+      "count": 151,
+      "p50Ms": 27,
+      "p95Ms": 76,
+      "maxMs": 99
+    },
+    {
+      "operation": "transaction",
+      "stage": "account_store.store_held",
+      "count": 26,
+      "p50Ms": 22,
+      "p95Ms": 28,
+      "maxMs": 56
+    },
+    {
+      "operation": "guild_clock",
+      "stage": "account_store.driver_held",
+      "count": 7,
+      "p50Ms": 22,
+      "p95Ms": 36,
+      "maxMs": 36
+    },
+    {
+      "operation": "transaction",
+      "stage": "account_store.marker_settle_sync",
+      "count": 1,
+      "p50Ms": 36,
+      "p95Ms": 36,
+      "maxMs": 36
+    },
+    {
+      "operation": "guild_clock",
+      "stage": "account_store.store_held",
+      "count": 6,
+      "p50Ms": 21,
+      "p95Ms": 35,
+      "maxMs": 35
+    },
+    {
+      "operation": "experience_admission",
+      "stage": "account_store.writable_wait",
+      "count": 1,
+      "p50Ms": 33,
+      "p95Ms": 33,
+      "maxMs": 33
+    }
+  ],
+  "outerOperationStages": [
+    {
+      "operation": "social_profile_read",
+      "stage": "account_store.store_wait",
+      "count": 1477,
+      "p50Ms": 104,
+      "p95Ms": 440,
+      "maxMs": 1427
+    },
+    {
+      "operation": "experience_admission",
+      "stage": "account_store.store_wait",
+      "count": 2968,
+      "p50Ms": 96,
+      "p95Ms": 406,
+      "maxMs": 1199
+    },
+    {
+      "operation": "billing_poll_front",
+      "stage": "account_store.store_wait",
+      "count": 230,
+      "p50Ms": 122,
+      "p95Ms": 392,
+      "maxMs": 1040
+    },
+    {
+      "operation": "guild_lookup",
+      "stage": "account_store.store_wait",
+      "count": 395,
+      "p50Ms": 150,
+      "p95Ms": 403,
+      "maxMs": 923
+    },
+    {
+      "operation": "experience_admission",
+      "stage": "account_store.store_held",
+      "count": 151,
+      "p50Ms": 27,
+      "p95Ms": 76,
+      "maxMs": 99
+    },
+    {
+      "operation": "transaction",
+      "stage": "account_store.store_held",
+      "count": 26,
+      "p50Ms": 22,
+      "p95Ms": 28,
+      "maxMs": 56
+    },
+    {
+      "operation": "guild_clock",
+      "stage": "account_store.driver_held",
+      "count": 7,
+      "p50Ms": 22,
+      "p95Ms": 36,
+      "maxMs": 36
+    },
+    {
+      "operation": "transaction",
+      "stage": "account_store.marker_settle_sync",
+      "count": 1,
+      "p50Ms": 36,
+      "p95Ms": 36,
+      "maxMs": 36
+    },
+    {
+      "operation": "guild_clock",
+      "stage": "account_store.store_held",
+      "count": 6,
+      "p50Ms": 21,
+      "p95Ms": 35,
+      "maxMs": 35
+    },
+    {
+      "operation": "experience_admission",
+      "stage": "account_store.writable_wait",
+      "count": 1,
+      "p50Ms": 33,
+      "p95Ms": 33,
+      "maxMs": 33
+    }
+  ],
+  "largestGenericStages": [
+    {
+      "stage": "socket_turn.input",
+      "count": 1951,
+      "p50Ms": 159,
+      "p95Ms": 1358,
+      "maxMs": 2625
+    },
+    {
+      "stage": "session_action.execute",
+      "count": 1941,
+      "p50Ms": 158,
+      "p95Ms": 1349,
+      "maxMs": 2625
+    },
+    {
+      "stage": "serial_gate.zone_outbound_wait",
+      "count": 8894,
+      "p50Ms": 85,
+      "p95Ms": 930,
+      "maxMs": 2615
+    },
+    {
+      "stage": "runtime_tick.total",
+      "count": 12846,
+      "p50Ms": 30,
+      "p95Ms": 554,
+      "maxMs": 2461
+    },
+    {
+      "stage": "runtime_tick.execute",
+      "count": 12768,
+      "p50Ms": 30,
+      "p95Ms": 548,
+      "maxMs": 2461
+    },
+    {
+      "stage": "zone_owner.in_process.execute_request",
+      "count": 13243,
+      "p50Ms": 31,
+      "p95Ms": 538,
+      "maxMs": 2461
+    },
+    {
+      "stage": "socket_input.queue_residence",
+      "count": 1177,
+      "p50Ms": 206,
+      "p95Ms": 938,
+      "maxMs": 2440
+    },
+    {
+      "stage": "shared_session.predrain",
+      "count": 7254,
+      "p50Ms": 57,
+      "p95Ms": 562,
+      "maxMs": 1787
+    },
+    {
+      "stage": "shared_session.predrain.experience_context",
+      "count": 6079,
+      "p50Ms": 70,
+      "p95Ms": 517,
+      "maxMs": 1587
+    },
+    {
+      "stage": "shared_session.reconcile",
+      "count": 784,
+      "p50Ms": 112,
+      "p95Ms": 643,
+      "maxMs": 1450
+    },
+    {
+      "stage": "shared_session.predrain.mentor_accounting",
+      "count": 1006,
+      "p50Ms": 104,
+      "p95Ms": 460,
+      "maxMs": 1427
+    },
+    {
+      "stage": "account_store.store_wait",
+      "count": 5002,
+      "p50Ms": 104,
+      "p95Ms": 423,
+      "maxMs": 1427
+    },
+    {
+      "stage": "shared_session.experience.owner_publication",
+      "count": 4405,
+      "p50Ms": 80,
+      "p95Ms": 390,
+      "maxMs": 1386
+    },
+    {
+      "stage": "shared_session.experience.admission_capture",
+      "count": 2668,
+      "p50Ms": 89,
+      "p95Ms": 401,
+      "maxMs": 1199
+    },
+    {
+      "stage": "shared_session.reconcile.mentor_accounting",
+      "count": 363,
+      "p50Ms": 117,
+      "p95Ms": 511,
+      "maxMs": 1196
+    }
+  ],
+  "limitations": [
+    "Elapsed includes scheduling/preemption; StoreWait labels the acquisition span and does not identify the holder or prove CPU work.",
+    "All percentiles/counts are conditional logged stage maxima >=20ms, not all calls.",
+    "No emitted billing_pending_read/validate or billing_front-held row >=20ms is not evidence of no calls or zero cost.",
+    "Validate overlaps Held; concurrent/nested sums are not CPU.",
+    "Window mapping uses approximate append observations with assumed +/-1ms padding, not proven emission/execution times.",
+    "No per-socket or causal actor join.",
+    "SLOW20 perturbs timing; no capacity qualification follows."
+  ],
+  "narrowMutexZoneTryLockExperimentSelected": true,
+  "narrowExperimentImplementedOrVerified": false,
+  "rootCauseEstablished": false,
+  "capacityQualified": false
+}

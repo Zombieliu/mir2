@@ -1,0 +1,1151 @@
+{
+  "eventsSha256": "54314ad9e070cef01201dc6954c7fe9f93ae6cfd23478419e7da40eb138c91c3",
+  "eventFileBytes": 543552548,
+  "lines": 1995804,
+  "selectedMessageRows": 1604107,
+  "ignoredOtherConnectionOrOutsideWindowMessages": 356305,
+  "ignoredControlRows": 35392,
+  "unclassifiedLabelRows": 0,
+  "recordedTypeBreakdownComplete": true,
+  "counterBytes": {
+    "sent": 1166460,
+    "received": 186979603
+  },
+  "perActorCounterClosure": [
+    {
+      "actorOrdinal": 0,
+      "connection": 104,
+      "sent": 11918,
+      "received": 2213024,
+      "sentMessages": 310,
+      "receivedMessages": 15514
+    },
+    {
+      "actorOrdinal": 1,
+      "connection": 108,
+      "sent": 11918,
+      "received": 2379781,
+      "sentMessages": 310,
+      "receivedMessages": 17069
+    },
+    {
+      "actorOrdinal": 2,
+      "connection": 112,
+      "sent": 11780,
+      "received": 1609855,
+      "sentMessages": 306,
+      "receivedMessages": 15602
+    },
+    {
+      "actorOrdinal": 3,
+      "connection": 4,
+      "sent": 11739,
+      "received": 1610960,
+      "sentMessages": 305,
+      "receivedMessages": 15609
+    },
+    {
+      "actorOrdinal": 4,
+      "connection": 5,
+      "sent": 11918,
+      "received": 1610971,
+      "sentMessages": 310,
+      "receivedMessages": 15610
+    },
+    {
+      "actorOrdinal": 5,
+      "connection": 6,
+      "sent": 11808,
+      "received": 1610342,
+      "sentMessages": 307,
+      "receivedMessages": 15605
+    },
+    {
+      "actorOrdinal": 6,
+      "connection": 7,
+      "sent": 11918,
+      "received": 1610383,
+      "sentMessages": 310,
+      "receivedMessages": 15606
+    },
+    {
+      "actorOrdinal": 7,
+      "connection": 8,
+      "sent": 11918,
+      "received": 1610383,
+      "sentMessages": 310,
+      "receivedMessages": 15606
+    },
+    {
+      "actorOrdinal": 8,
+      "connection": 9,
+      "sent": 11849,
+      "received": 2377041,
+      "sentMessages": 308,
+      "receivedMessages": 16995
+    },
+    {
+      "actorOrdinal": 9,
+      "connection": 10,
+      "sent": 11849,
+      "received": 2210056,
+      "sentMessages": 308,
+      "receivedMessages": 15439
+    },
+    {
+      "actorOrdinal": 10,
+      "connection": 11,
+      "sent": 11749,
+      "received": 2192535,
+      "sentMessages": 305,
+      "receivedMessages": 15418
+    },
+    {
+      "actorOrdinal": 11,
+      "connection": 12,
+      "sent": 11859,
+      "received": 2363738,
+      "sentMessages": 308,
+      "receivedMessages": 16984
+    },
+    {
+      "actorOrdinal": 12,
+      "connection": 13,
+      "sent": 11887,
+      "received": 1610900,
+      "sentMessages": 309,
+      "receivedMessages": 15609
+    },
+    {
+      "actorOrdinal": 13,
+      "connection": 14,
+      "sent": 11928,
+      "received": 1610383,
+      "sentMessages": 310,
+      "receivedMessages": 15606
+    },
+    {
+      "actorOrdinal": 14,
+      "connection": 15,
+      "sent": 11818,
+      "received": 1610930,
+      "sentMessages": 307,
+      "receivedMessages": 15609
+    },
+    {
+      "actorOrdinal": 15,
+      "connection": 16,
+      "sent": 11859,
+      "received": 1611001,
+      "sentMessages": 308,
+      "receivedMessages": 15610
+    },
+    {
+      "actorOrdinal": 16,
+      "connection": 17,
+      "sent": 11928,
+      "received": 1610971,
+      "sentMessages": 310,
+      "receivedMessages": 15610
+    },
+    {
+      "actorOrdinal": 17,
+      "connection": 18,
+      "sent": 11928,
+      "received": 1610383,
+      "sentMessages": 310,
+      "receivedMessages": 15606
+    },
+    {
+      "actorOrdinal": 18,
+      "connection": 19,
+      "sent": 11928,
+      "received": 2361867,
+      "sentMessages": 310,
+      "receivedMessages": 16933
+    },
+    {
+      "actorOrdinal": 19,
+      "connection": 20,
+      "sent": 11887,
+      "received": 2195988,
+      "sentMessages": 309,
+      "receivedMessages": 15372
+    },
+    {
+      "actorOrdinal": 20,
+      "connection": 21,
+      "sent": 11790,
+      "received": 2196701,
+      "sentMessages": 306,
+      "receivedMessages": 15368
+    },
+    {
+      "actorOrdinal": 21,
+      "connection": 22,
+      "sent": 11790,
+      "received": 2345004,
+      "sentMessages": 306,
+      "receivedMessages": 16902
+    },
+    {
+      "actorOrdinal": 22,
+      "connection": 23,
+      "sent": 11859,
+      "received": 1611001,
+      "sentMessages": 308,
+      "receivedMessages": 15610
+    },
+    {
+      "actorOrdinal": 23,
+      "connection": 24,
+      "sent": 11859,
+      "received": 1611001,
+      "sentMessages": 308,
+      "receivedMessages": 15610
+    },
+    {
+      "actorOrdinal": 24,
+      "connection": 25,
+      "sent": 11790,
+      "received": 1611031,
+      "sentMessages": 306,
+      "receivedMessages": 15610
+    },
+    {
+      "actorOrdinal": 25,
+      "connection": 26,
+      "sent": 11818,
+      "received": 1610930,
+      "sentMessages": 307,
+      "receivedMessages": 15609
+    },
+    {
+      "actorOrdinal": 26,
+      "connection": 27,
+      "sent": 11749,
+      "received": 1610960,
+      "sentMessages": 305,
+      "receivedMessages": 15609
+    },
+    {
+      "actorOrdinal": 27,
+      "connection": 28,
+      "sent": 11859,
+      "received": 1611001,
+      "sentMessages": 308,
+      "receivedMessages": 15610
+    },
+    {
+      "actorOrdinal": 28,
+      "connection": 29,
+      "sent": 11859,
+      "received": 2359902,
+      "sentMessages": 308,
+      "receivedMessages": 16866
+    },
+    {
+      "actorOrdinal": 29,
+      "connection": 30,
+      "sent": 11859,
+      "received": 2209044,
+      "sentMessages": 308,
+      "receivedMessages": 15320
+    },
+    {
+      "actorOrdinal": 30,
+      "connection": 31,
+      "sent": 11887,
+      "received": 2205374,
+      "sentMessages": 309,
+      "receivedMessages": 15328
+    },
+    {
+      "actorOrdinal": 31,
+      "connection": 32,
+      "sent": 11859,
+      "received": 2366182,
+      "sentMessages": 308,
+      "receivedMessages": 16867
+    },
+    {
+      "actorOrdinal": 32,
+      "connection": 33,
+      "sent": 11928,
+      "received": 1610971,
+      "sentMessages": 310,
+      "receivedMessages": 15610
+    },
+    {
+      "actorOrdinal": 33,
+      "connection": 34,
+      "sent": 11818,
+      "received": 1610930,
+      "sentMessages": 307,
+      "receivedMessages": 15609
+    },
+    {
+      "actorOrdinal": 34,
+      "connection": 35,
+      "sent": 11928,
+      "received": 1610971,
+      "sentMessages": 310,
+      "receivedMessages": 15610
+    },
+    {
+      "actorOrdinal": 35,
+      "connection": 36,
+      "sent": 11887,
+      "received": 1610312,
+      "sentMessages": 309,
+      "receivedMessages": 15605
+    },
+    {
+      "actorOrdinal": 36,
+      "connection": 37,
+      "sent": 11652,
+      "received": 1610503,
+      "sentMessages": 302,
+      "receivedMessages": 15606
+    },
+    {
+      "actorOrdinal": 37,
+      "connection": 38,
+      "sent": 11680,
+      "received": 1610990,
+      "sentMessages": 303,
+      "receivedMessages": 15609
+    },
+    {
+      "actorOrdinal": 38,
+      "connection": 39,
+      "sent": 11928,
+      "received": 2354733,
+      "sentMessages": 310,
+      "receivedMessages": 16804
+    },
+    {
+      "actorOrdinal": 39,
+      "connection": 40,
+      "sent": 11928,
+      "received": 2198031,
+      "sentMessages": 310,
+      "receivedMessages": 15253
+    },
+    {
+      "actorOrdinal": 40,
+      "connection": 41,
+      "sent": 11818,
+      "received": 2184742,
+      "sentMessages": 307,
+      "receivedMessages": 15232
+    },
+    {
+      "actorOrdinal": 41,
+      "connection": 42,
+      "sent": 11790,
+      "received": 2339704,
+      "sentMessages": 306,
+      "receivedMessages": 16775
+    },
+    {
+      "actorOrdinal": 42,
+      "connection": 43,
+      "sent": 11818,
+      "received": 1610930,
+      "sentMessages": 307,
+      "receivedMessages": 15609
+    },
+    {
+      "actorOrdinal": 43,
+      "connection": 44,
+      "sent": 11859,
+      "received": 1611001,
+      "sentMessages": 308,
+      "receivedMessages": 15610
+    },
+    {
+      "actorOrdinal": 44,
+      "connection": 45,
+      "sent": 11818,
+      "received": 1610930,
+      "sentMessages": 307,
+      "receivedMessages": 15609
+    },
+    {
+      "actorOrdinal": 45,
+      "connection": 46,
+      "sent": 11790,
+      "received": 1610443,
+      "sentMessages": 306,
+      "receivedMessages": 15606
+    },
+    {
+      "actorOrdinal": 46,
+      "connection": 47,
+      "sent": 11859,
+      "received": 1610413,
+      "sentMessages": 308,
+      "receivedMessages": 15606
+    },
+    {
+      "actorOrdinal": 47,
+      "connection": 48,
+      "sent": 11680,
+      "received": 1610990,
+      "sentMessages": 303,
+      "receivedMessages": 15609
+    },
+    {
+      "actorOrdinal": 48,
+      "connection": 49,
+      "sent": 11611,
+      "received": 2339143,
+      "sentMessages": 301,
+      "receivedMessages": 16699
+    },
+    {
+      "actorOrdinal": 49,
+      "connection": 50,
+      "sent": 11790,
+      "received": 2172341,
+      "sentMessages": 306,
+      "receivedMessages": 15148
+    },
+    {
+      "actorOrdinal": 50,
+      "connection": 51,
+      "sent": 11721,
+      "received": 2175696,
+      "sentMessages": 304,
+      "receivedMessages": 15158
+    },
+    {
+      "actorOrdinal": 51,
+      "connection": 52,
+      "sent": 11859,
+      "received": 2340723,
+      "sentMessages": 308,
+      "receivedMessages": 16719
+    },
+    {
+      "actorOrdinal": 52,
+      "connection": 53,
+      "sent": 11721,
+      "received": 1611061,
+      "sentMessages": 304,
+      "receivedMessages": 15610
+    },
+    {
+      "actorOrdinal": 53,
+      "connection": 54,
+      "sent": 11928,
+      "received": 1610383,
+      "sentMessages": 310,
+      "receivedMessages": 15606
+    },
+    {
+      "actorOrdinal": 54,
+      "connection": 55,
+      "sent": 11619,
+      "received": 1610990,
+      "sentMessages": 302,
+      "receivedMessages": 15609
+    },
+    {
+      "actorOrdinal": 55,
+      "connection": 56,
+      "sent": 11688,
+      "received": 1610960,
+      "sentMessages": 304,
+      "receivedMessages": 15609
+    },
+    {
+      "actorOrdinal": 56,
+      "connection": 57,
+      "sent": 11661,
+      "received": 1611061,
+      "sentMessages": 303,
+      "receivedMessages": 15610
+    },
+    {
+      "actorOrdinal": 57,
+      "connection": 58,
+      "sent": 11859,
+      "received": 1610413,
+      "sentMessages": 308,
+      "receivedMessages": 15606
+    },
+    {
+      "actorOrdinal": 58,
+      "connection": 59,
+      "sent": 11472,
+      "received": 2308910,
+      "sentMessages": 299,
+      "receivedMessages": 16596
+    },
+    {
+      "actorOrdinal": 59,
+      "connection": 60,
+      "sent": 11472,
+      "received": 2162659,
+      "sentMessages": 299,
+      "receivedMessages": 15059
+    },
+    {
+      "actorOrdinal": 60,
+      "connection": 61,
+      "sent": 11509,
+      "received": 2173128,
+      "sentMessages": 301,
+      "receivedMessages": 15081
+    },
+    {
+      "actorOrdinal": 61,
+      "connection": 62,
+      "sent": 11679,
+      "received": 2332946,
+      "sentMessages": 305,
+      "receivedMessages": 16645
+    },
+    {
+      "actorOrdinal": 62,
+      "connection": 63,
+      "sent": 11619,
+      "received": 1610402,
+      "sentMessages": 302,
+      "receivedMessages": 15605
+    },
+    {
+      "actorOrdinal": 63,
+      "connection": 64,
+      "sent": 11489,
+      "received": 1610443,
+      "sentMessages": 301,
+      "receivedMessages": 15606
+    },
+    {
+      "actorOrdinal": 64,
+      "connection": 65,
+      "sent": 11473,
+      "received": 1611091,
+      "sentMessages": 299,
+      "receivedMessages": 15610
+    },
+    {
+      "actorOrdinal": 65,
+      "connection": 66,
+      "sent": 11380,
+      "received": 1610990,
+      "sentMessages": 298,
+      "receivedMessages": 15609
+    },
+    {
+      "actorOrdinal": 66,
+      "connection": 67,
+      "sent": 11540,
+      "received": 1611061,
+      "sentMessages": 301,
+      "receivedMessages": 15610
+    },
+    {
+      "actorOrdinal": 67,
+      "connection": 68,
+      "sent": 11550,
+      "received": 1611031,
+      "sentMessages": 302,
+      "receivedMessages": 15610
+    },
+    {
+      "actorOrdinal": 68,
+      "connection": 69,
+      "sent": 11223,
+      "received": 2305107,
+      "sentMessages": 294,
+      "receivedMessages": 16528
+    },
+    {
+      "actorOrdinal": 69,
+      "connection": 70,
+      "sent": 11292,
+      "received": 2153288,
+      "sentMessages": 296,
+      "receivedMessages": 14979
+    },
+    {
+      "actorOrdinal": 70,
+      "connection": 71,
+      "sent": 11510,
+      "received": 2163722,
+      "sentMessages": 301,
+      "receivedMessages": 15007
+    },
+    {
+      "actorOrdinal": 71,
+      "connection": 72,
+      "sent": 11551,
+      "received": 2336391,
+      "sentMessages": 302,
+      "receivedMessages": 16575
+    },
+    {
+      "actorOrdinal": 72,
+      "connection": 73,
+      "sent": 11291,
+      "received": 1610503,
+      "sentMessages": 296,
+      "receivedMessages": 15606
+    },
+    {
+      "actorOrdinal": 73,
+      "connection": 74,
+      "sent": 11319,
+      "received": 1610990,
+      "sentMessages": 297,
+      "receivedMessages": 15609
+    },
+    {
+      "actorOrdinal": 74,
+      "connection": 75,
+      "sent": 11291,
+      "received": 1611091,
+      "sentMessages": 296,
+      "receivedMessages": 15610
+    },
+    {
+      "actorOrdinal": 75,
+      "connection": 76,
+      "sent": 11308,
+      "received": 1610443,
+      "sentMessages": 298,
+      "receivedMessages": 15606
+    },
+    {
+      "actorOrdinal": 76,
+      "connection": 77,
+      "sent": 11310,
+      "received": 1611020,
+      "sentMessages": 296,
+      "receivedMessages": 15609
+    },
+    {
+      "actorOrdinal": 77,
+      "connection": 78,
+      "sent": 11283,
+      "received": 1610533,
+      "sentMessages": 295,
+      "receivedMessages": 15606
+    },
+    {
+      "actorOrdinal": 78,
+      "connection": 79,
+      "sent": 11389,
+      "received": 2317354,
+      "sentMessages": 299,
+      "receivedMessages": 16487
+    },
+    {
+      "actorOrdinal": 79,
+      "connection": 80,
+      "sent": 11679,
+      "received": 2149219,
+      "sentMessages": 305,
+      "receivedMessages": 14923
+    },
+    {
+      "actorOrdinal": 80,
+      "connection": 81,
+      "sent": 11740,
+      "received": 2158681,
+      "sentMessages": 306,
+      "receivedMessages": 14948
+    },
+    {
+      "actorOrdinal": 81,
+      "connection": 82,
+      "sent": 11748,
+      "received": 2314848,
+      "sentMessages": 307,
+      "receivedMessages": 16487
+    },
+    {
+      "actorOrdinal": 82,
+      "connection": 83,
+      "sent": 11706,
+      "received": 1610900,
+      "sentMessages": 306,
+      "receivedMessages": 15609
+    },
+    {
+      "actorOrdinal": 83,
+      "connection": 84,
+      "sent": 11526,
+      "received": 1610900,
+      "sentMessages": 303,
+      "receivedMessages": 15609
+    },
+    {
+      "actorOrdinal": 84,
+      "connection": 85,
+      "sent": 11497,
+      "received": 1611001,
+      "sentMessages": 302,
+      "receivedMessages": 15610
+    },
+    {
+      "actorOrdinal": 85,
+      "connection": 86,
+      "sent": 11489,
+      "received": 1610443,
+      "sentMessages": 301,
+      "receivedMessages": 15606
+    },
+    {
+      "actorOrdinal": 86,
+      "connection": 87,
+      "sent": 11369,
+      "received": 1611031,
+      "sentMessages": 299,
+      "receivedMessages": 15610
+    },
+    {
+      "actorOrdinal": 87,
+      "connection": 88,
+      "sent": 11369,
+      "received": 1611031,
+      "sentMessages": 299,
+      "receivedMessages": 15610
+    },
+    {
+      "actorOrdinal": 88,
+      "connection": 89,
+      "sent": 11376,
+      "received": 2322276,
+      "sentMessages": 300,
+      "receivedMessages": 16431
+    },
+    {
+      "actorOrdinal": 89,
+      "connection": 90,
+      "sent": 11558,
+      "received": 2151874,
+      "sentMessages": 303,
+      "receivedMessages": 14874
+    },
+    {
+      "actorOrdinal": 90,
+      "connection": 91,
+      "sent": 11317,
+      "received": 2151139,
+      "sentMessages": 299,
+      "receivedMessages": 14869
+    },
+    {
+      "actorOrdinal": 91,
+      "connection": 92,
+      "sent": 11506,
+      "received": 2308485,
+      "sentMessages": 303,
+      "receivedMessages": 16417
+    },
+    {
+      "actorOrdinal": 92,
+      "connection": 93,
+      "sent": 11179,
+      "received": 1610473,
+      "sentMessages": 295,
+      "receivedMessages": 15606
+    },
+    {
+      "actorOrdinal": 93,
+      "connection": 94,
+      "sent": 11198,
+      "received": 1610990,
+      "sentMessages": 295,
+      "receivedMessages": 15609
+    },
+    {
+      "actorOrdinal": 94,
+      "connection": 95,
+      "sent": 11429,
+      "received": 1610443,
+      "sentMessages": 300,
+      "receivedMessages": 15606
+    },
+    {
+      "actorOrdinal": 95,
+      "connection": 96,
+      "sent": 11438,
+      "received": 1610413,
+      "sentMessages": 301,
+      "receivedMessages": 15606
+    },
+    {
+      "actorOrdinal": 96,
+      "connection": 97,
+      "sent": 11206,
+      "received": 1610960,
+      "sentMessages": 296,
+      "receivedMessages": 15609
+    },
+    {
+      "actorOrdinal": 97,
+      "connection": 98,
+      "sent": 11306,
+      "received": 1611031,
+      "sentMessages": 298,
+      "receivedMessages": 15610
+    },
+    {
+      "actorOrdinal": 98,
+      "connection": 99,
+      "sent": 11436,
+      "received": 2301437,
+      "sentMessages": 301,
+      "receivedMessages": 16344
+    },
+    {
+      "actorOrdinal": 99,
+      "connection": 100,
+      "sent": 11436,
+      "received": 2139937,
+      "sentMessages": 301,
+      "receivedMessages": 14787
+    }
+  ],
+  "buckets": [
+    {
+      "direction": "received",
+      "recordedType": "packet",
+      "recordedPacket": "ObjectWalk",
+      "messages": 1408950,
+      "payloadBytes": 143009119,
+      "maxMessagePayloadBytes": 102,
+      "unknownLabel": false,
+      "firstExample": {
+        "byteOffsetStart": 89131798,
+        "byteOffsetEndExclusive": 89132042,
+        "lineSha256": "d62466f9e7f90c695d98fffd40c2ec8a89b9bc19addbd9a753ad33aa3db6af38",
+        "atMs": 3224193.3873,
+        "actorOrdinal": 1,
+        "connection": 108,
+        "payloadBytes": 102
+      },
+      "messagesPerSecond": 4696.5,
+      "averagePayloadBytes": 101.50049256538557,
+      "payloadMbps": 3.8135765066666667,
+      "shareOfSameDirectionBytes": 0.7648380716692398
+    },
+    {
+      "direction": "received",
+      "recordedType": "packet",
+      "recordedPacket": "ObjectPlayer",
+      "messages": 29504,
+      "payloadBytes": 28602792,
+      "maxMessagePayloadBytes": 970,
+      "unknownLabel": false,
+      "firstExample": {
+        "byteOffsetStart": 89428371,
+        "byteOffsetEndExclusive": 89429484,
+        "lineSha256": "40af65eb0e5557876d485862c878e150243707238ad5baf4440da3c031fbf66a",
+        "atMs": 3224406.6766,
+        "actorOrdinal": 10,
+        "connection": 11,
+        "payloadBytes": 970
+      },
+      "messagesPerSecond": 98.34666666666666,
+      "averagePayloadBytes": 969.4547180043384,
+      "payloadMbps": 0.76274112,
+      "shareOfSameDirectionBytes": 0.152972792438756
+    },
+    {
+      "direction": "received",
+      "recordedType": "packet",
+      "recordedPacket": "ObjectChat",
+      "messages": 74932,
+      "payloadBytes": 10805751,
+      "maxMessagePayloadBytes": 145,
+      "unknownLabel": false,
+      "firstExample": {
+        "byteOffsetStart": 110706694,
+        "byteOffsetEndExclusive": 110706979,
+        "lineSha256": "9f10fb0e91d781d7e6b2ca762d5483e029a8e99cff2ef78e7400dcbb32fe6f4b",
+        "atMs": 3239209.2681,
+        "actorOrdinal": 1,
+        "connection": 108,
+        "payloadBytes": 142
+      },
+      "messagesPerSecond": 249.77333333333334,
+      "averagePayloadBytes": 144.2074280681151,
+      "payloadMbps": 0.28815335999999997,
+      "shareOfSameDirectionBytes": 0.05779106825892662
+    },
+    {
+      "direction": "received",
+      "recordedType": "packet",
+      "recordedPacket": "ObjectRemove",
+      "messages": 29504,
+      "payloadBytes": 2065280,
+      "maxMessagePayloadBytes": 70,
+      "unknownLabel": false,
+      "firstExample": {
+        "byteOffsetStart": 89343225,
+        "byteOffsetEndExclusive": 89343437,
+        "lineSha256": "bd85326b0bbb8c0587ddd28a3bf3192ecdf7ebaca1a91523853d2165443cb809",
+        "atMs": 3224368.9585,
+        "actorOrdinal": 70,
+        "connection": 71,
+        "payloadBytes": 70
+      },
+      "messagesPerSecond": 98.34666666666666,
+      "averagePayloadBytes": 70.0,
+      "payloadMbps": 0.05507413333333333,
+      "shareOfSameDirectionBytes": 0.011045482859432534
+    },
+    {
+      "direction": "received",
+      "recordedType": "packet",
+      "recordedPacket": "UserLocation",
+      "messages": 14678,
+      "payloadBytes": 1269647,
+      "maxMessagePayloadBytes": 87,
+      "unknownLabel": false,
+      "firstExample": {
+        "byteOffsetStart": 89131570,
+        "byteOffsetEndExclusive": 89131798,
+        "lineSha256": "ddd03412336058cdd21a7d76a1a1b60d42ff1665131fe0ead06723da28436e39",
+        "atMs": 3224193.3037,
+        "actorOrdinal": 0,
+        "connection": 104,
+        "payloadBytes": 87
+      },
+      "messagesPerSecond": 48.92666666666667,
+      "averagePayloadBytes": 86.5,
+      "payloadMbps": 0.03385725333333334,
+      "shareOfSameDirectionBytes": 0.006790296800448336
+    },
+    {
+      "direction": "received",
+      "recordedType": "packet",
+      "recordedPacket": "KeepAlive",
+      "messages": 14970,
+      "payloadBytes": 1062870,
+      "maxMessagePayloadBytes": 71,
+      "unknownLabel": false,
+      "firstExample": {
+        "byteOffsetStart": 89162530,
+        "byteOffsetEndExclusive": 89162743,
+        "lineSha256": "1c30551a7da1ccb159442bad5c1b9ea4750d3c81f954b44c0244c022c6a846ee",
+        "atMs": 3224228.3264,
+        "actorOrdinal": 53,
+        "connection": 54,
+        "payloadBytes": 71
+      },
+      "messagesPerSecond": 49.9,
+      "averagePayloadBytes": 71.0,
+      "payloadMbps": 0.028343200000000002,
+      "shareOfSameDirectionBytes": 0.005684416818448374
+    },
+    {
+      "direction": "received",
+      "recordedType": "packet",
+      "recordedPacket": "GuildStatus",
+      "messages": 263,
+      "payloadBytes": 70747,
+      "maxMessagePayloadBytes": 269,
+      "unknownLabel": false,
+      "firstExample": {
+        "byteOffsetStart": 89114781,
+        "byteOffsetEndExclusive": 89115193,
+        "lineSha256": "2b2f365e92a3a8548ba17f44631704883d1d14f0df37452ae0e5969fb0747ae8",
+        "atMs": 3224190.4894,
+        "actorOrdinal": 32,
+        "connection": 33,
+        "payloadBytes": 269
+      },
+      "messagesPerSecond": 0.8766666666666667,
+      "averagePayloadBytes": 269.0,
+      "payloadMbps": 0.0018865866666666665,
+      "shareOfSameDirectionBytes": 0.00037836747359015413
+    },
+    {
+      "direction": "received",
+      "recordedType": "packet",
+      "recordedPacket": "GuildMemberChange",
+      "messages": 263,
+      "payloadBytes": 31297,
+      "maxMessagePayloadBytes": 119,
+      "unknownLabel": false,
+      "firstExample": {
+        "byteOffsetStart": 89115193,
+        "byteOffsetEndExclusive": 89115454,
+        "lineSha256": "57f058ebec3b13b84de90b68e2f3eabb0cc46e893f8c98b4ba8a75f9643cb461",
+        "atMs": 3224190.505,
+        "actorOrdinal": 32,
+        "connection": 33,
+        "payloadBytes": 119
+      },
+      "messagesPerSecond": 0.8766666666666667,
+      "averagePayloadBytes": 119.0,
+      "payloadMbps": 0.0008345866666666666,
+      "shareOfSameDirectionBytes": 0.00016738189352129493
+    },
+    {
+      "direction": "received",
+      "recordedType": "packet",
+      "recordedPacket": "MentorUpdate",
+      "messages": 263,
+      "payloadBytes": 26826,
+      "maxMessagePayloadBytes": 102,
+      "unknownLabel": false,
+      "firstExample": {
+        "byteOffsetStart": 89114536,
+        "byteOffsetEndExclusive": 89114781,
+        "lineSha256": "587dff5a32d58aa7e3e2fab17239ba0013ec5f66ba81fb412ab86e66e414fd82",
+        "atMs": 3224190.4379,
+        "actorOrdinal": 32,
+        "connection": 33,
+        "payloadBytes": 102
+      },
+      "messagesPerSecond": 0.8766666666666667,
+      "averagePayloadBytes": 102.0,
+      "payloadMbps": 0.0007153600000000001,
+      "shareOfSameDirectionBytes": 0.00014347019444682424
+    },
+    {
+      "direction": "received",
+      "recordedType": "packet",
+      "recordedPacket": "GuildBuffList",
+      "messages": 263,
+      "payloadBytes": 25774,
+      "maxMessagePayloadBytes": 98,
+      "unknownLabel": false,
+      "firstExample": {
+        "byteOffsetStart": 89115454,
+        "byteOffsetEndExclusive": 89115694,
+        "lineSha256": "4b1d52474ad06dc3a1941fcebef6d1d652d8808bdbebde70844802c9d68d4289",
+        "atMs": 3224190.5167,
+        "actorOrdinal": 32,
+        "connection": 33,
+        "payloadBytes": 98
+      },
+      "messagesPerSecond": 0.8766666666666667,
+      "averagePayloadBytes": 98.0,
+      "payloadMbps": 0.0006873066666666666,
+      "shareOfSameDirectionBytes": 0.00013784391231165465
+    },
+    {
+      "direction": "received",
+      "recordedType": "packet",
+      "recordedPacket": "Chat",
+      "messages": 100,
+      "payloadBytes": 9500,
+      "maxMessagePayloadBytes": 95,
+      "unknownLabel": false,
+      "firstExample": {
+        "byteOffsetStart": 200193152,
+        "byteOffsetEndExclusive": 200193389,
+        "lineSha256": "cb7b95ecb02111f9bded55b415e4ee82ad8c8fd3b4b108da70f3bd19b55d19f3",
+        "atMs": 3300142.1249,
+        "actorOrdinal": 53,
+        "connection": 54,
+        "payloadBytes": 95
+      },
+      "messagesPerSecond": 0.3333333333333333,
+      "averagePayloadBytes": 95.0,
+      "payloadMbps": 0.00025333333333333333,
+      "shareOfSameDirectionBytes": 5.08076808784325e-05
+    },
+    {
+      "direction": "sent",
+      "recordedType": "keepAlive",
+      "recordedPacket": null,
+      "messages": 14970,
+      "payloadBytes": 613770,
+      "maxMessagePayloadBytes": 41,
+      "unknownLabel": false,
+      "firstExample": {
+        "byteOffsetStart": 89161838,
+        "byteOffsetEndExclusive": 89162011,
+        "lineSha256": "35405ead19b3efa70762bdb862bdf6d8f312025520436a42a4a6553d4504d9a5",
+        "atMs": 3224228.1598,
+        "actorOrdinal": 53,
+        "connection": 54,
+        "payloadBytes": 41
+      },
+      "messagesPerSecond": 49.9,
+      "averagePayloadBytes": 41.0,
+      "payloadMbps": 0.016367200000000002,
+      "shareOfSameDirectionBytes": 0.526181780772594
+    },
+    {
+      "direction": "sent",
+      "recordedType": "walk",
+      "recordedPacket": null,
+      "messages": 14678,
+      "payloadBytes": 506391,
+      "maxMessagePayloadBytes": 35,
+      "unknownLabel": false,
+      "firstExample": {
+        "byteOffsetStart": 89130757,
+        "byteOffsetEndExclusive": 89130924,
+        "lineSha256": "6effcd4645b1a557c254496a5a220ddea3f97eaffbc43564f1dab908bff81e78",
+        "atMs": 3224191.2359,
+        "actorOrdinal": 0,
+        "connection": 104,
+        "payloadBytes": 35
+      },
+      "messagesPerSecond": 48.92666666666667,
+      "averagePayloadBytes": 34.5,
+      "payloadMbps": 0.01350376,
+      "shareOfSameDirectionBytes": 0.434126330950054
+    },
+    {
+      "direction": "sent",
+      "recordedType": "chat",
+      "recordedPacket": null,
+      "messages": 769,
+      "payloadBytes": 46299,
+      "maxMessagePayloadBytes": 61,
+      "unknownLabel": false,
+      "firstExample": {
+        "byteOffsetStart": 110704772,
+        "byteOffsetEndExclusive": 110704962,
+        "lineSha256": "75c0d75c5ff2cbd6d222274c1a8fff7b30d06ab92eddc1042851abe0695c37f0",
+        "atMs": 3239194.1496,
+        "actorOrdinal": 0,
+        "connection": 104,
+        "payloadBytes": 58
+      },
+      "messagesPerSecond": 2.5633333333333335,
+      "averagePayloadBytes": 60.20676202860858,
+      "payloadMbps": 0.0012346400000000002,
+      "shareOfSameDirectionBytes": 0.03969188827735199
+    }
+  ],
+  "snapshotProjectedCarriedState": {
+    "messagesWithFingerprint": 0,
+    "messagesWithoutFingerprint": 0,
+    "payloadBytesOfMessagesWithFingerprint": 0
+  },
+  "elapsedSeconds": 10.400499799987301,
+  "sourceCallbackWindow": [
+    3224190.0271,
+    3524190.0271
+  ],
+  "schema": "mir2.sdk7-message-type-analysis.v1",
+  "sourceRevision": "ecf88ae698e004df2fefa0a860879a45873c65d3",
+  "binarySha256": "7d2a6c817b009d6a7e1d0a75cd6b7847fe8cbc5aa2cb57efa8c3d1032a784ff8",
+  "controllerSha256": "18b0153ccdf55f2795b3138d8e8c993a3ae26a708ddc7c4270e444d69decde2c",
+  "reportSha256": "2dafb6f0bec90ecce7004d7e2b155429e1347fb9c5a2c0d419c606b41bda0f2e",
+  "adapterManifestSha256": "3fbe7649ff36946c4e7979307ee8e1d0b7dd223987b287e3b1d4582a846a9e50",
+  "scope": "Source-produced JSON application-message payload byte counts, before redaction; not WS/TCP physical frames.",
+  "counterClosureExactAllActors": true,
+  "capacityQualified": false,
+  "limitations": [
+    "Message timestamp is SDK receive callback / send submission monotonic time, not server emission or network arrival.",
+    "Recorded outer type/packet only; full UI/geometry/inner-batch bytes removed by redaction cannot be reconstructed.",
+    "No original-A7 per-type byte equivalence or JSON-vs-binary encoding multiplier follows.",
+    "No bandwidth saturation or performance cause inferred; original run outcome remains unchanged."
+  ]
+}

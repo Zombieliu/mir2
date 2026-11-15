@@ -6,7 +6,21 @@
 
 ## 最新已验证结果（2026-11-15，新本机25/50人档通过，100人未通过）
 
-同工件新[SLOW20两人校准已严格通过](mentor-parse-slow20-calibration2.closed.json)：22:41:21.059–22:42:21.059 UTC完整60s，64/64、2/2窗口，装备、普通Logout/Close、fresh2、File全2与Enhanced均通过；controller/driver/server0/0/0、93行资源，游戏双Job及独立STAT观察器0/0正常无kill。新增12次认证全量追加V37=1906，旧1894前缀不变。仅SLOW20开启，录盘false、input/delivery trace未启用、spectator保持源默认true；它是诊断校准，不替代default-off容量结果。随后新百人诊断已启动，保持原SDK7、计划、114次正常认证预算与300s，当前在正常登录准备，尚无该轮百人终态。
+新[SLOW20百人诊断已闭合](mentor-parse-slow20-dense100.closed.json)：23:41:47.790–23:46:47.790 UTC完整300s，15408/16000按时完成、81超时、511未发、141/500逐人分钟窗口通过，整体FAIL。装备3名、100人普通Logout/Close、fresh2均报告成功；controller/driver/server1/1/0、3625行资源、游戏双Job与STAT观察器均正常无kill。FileV8前置拒绝sample0、未打开私密Store，Enhanced亦失败；两个验证进程实际1且正常无kill。114次新认证全量追加V38=2020，旧1906前缀不变。SLOW日志会改变调度，本轮与default-off的单次数值差不能作为提升/回归或容量通过。
+
+[本轮分段审计](mentor-parse-slow20-dense100.elapsed-audit.json)实际0/0、4GiB/0xf000、正常无kill：完整日志34661319B，按精确300s报告锚点及已声明±1ms近似append映射选中7782660B/89041慢行，边缘删失59175B、未知prefix及不确定时序字节均0；outer敏感性范围89670行的最大值结论一致。采集到的账号锁获取阶段：social_profile_read 1451条/P95 442ms/max1427ms；experience_admission 2936条/P95 408ms/max1199ms，持锁151条/max99ms；billing_poll_front 221条/P95 392ms/max1040ms。没有达到20ms的billing-front持锁或pending-read/validate行，不能据此认定调用不存在/零耗时。上述都是含调度抢占的条件慢样本，不是全调用分布或金融CPU；尚未建立逐socket/具体holder因果。依据源码持Store等待Zone的路径，已选择只释放等待阶段、实际执行仍fresh持双锁的窄实验，正在隔离分支实现，待独立源码审阅、原生回归和新工件复测。
+
+[同工件default-off三档资源复算](mentor-parse-default-scales.resource-analysis.json)实际0/0、4GiB/0xf000正常无kill，既有100档结果逐项复现。CPU为精确300s按相邻JobCPU采样斜率分配的时长加权均值；峰值Commit来自全轮含准备/收尾，并非RSS或物理RAM。
+
+| 本机人数 | 原严格结果 | 服务Job平均CPU核数 | 全轮峰Job Commit（MiB，非RSS） | 应用下行均值（Mb/s） |
+| --- | --- | ---: | ---: | ---: |
+| 25 | PASS | 0.129 | 783.9 | 0.327 |
+| 50 | PASS | 0.330 | 1353.0 | 1.299 |
+| 100 | FAIL | 1.168 | 2525.0 | 4.986 |
+
+[100档应用消息字节分解](mentor-parse-default100.message-types.json)实际0/0、4GiB/0xf000、正常无kill：543552548B raw单次流读、1604107选中消息、100连接TX/RX计数逐一精确闭合，未知label为0。下行ObjectWalk 143009119B（76.48%）、ObjectPlayer 28602792B（15.30%）、ObjectChat 10805751B（5.78%）。这是WS应用JSON消息及发送提交/接收callback口径，物理WS帧可能重组，排除framing/control/TCP/IP/TLS；不以JSONL大小代替流量。A7成功包raw没有逐包长度，不能继续拆原版包型或推出纯JSON编码倍率、UI内部占比/公网饱和；CPU平均值也不证明硬件余量。
+
+同工件新[SLOW20两人校准已严格通过](mentor-parse-slow20-calibration2.closed.json)：22:41:21.059–22:42:21.059 UTC完整60s，64/64、2/2窗口，装备、普通Logout/Close、fresh2、File全2与Enhanced均通过；controller/driver/server0/0/0、93行资源，游戏双Job及独立STAT观察器0/0正常无kill。新增12次认证全量追加V37=1906，旧1894前缀不变。仅SLOW20开启，录盘false、input/delivery trace未启用、spectator保持源默认true；它是诊断校准，不替代default-off容量结果。随后新百人诊断按原SDK7、计划、114次正常认证预算与300s实际运行，闭合FAIL见上。
 
 同一 `7d2a6c81` 工件的[50人档已严格闭合通过](projection-mentor-parse-default50.closed.json)：22:28:34.857–22:33:34.857 UTC完整300s，8000/8000动作按时完成、零超时/未发、250/250逐人分钟窗口；3名装备参与者、50人普通Logout/Close、fresh2、全员File50与Enhanced均通过。controller/driver/server0/0/0，2120行资源，双Job正常退出无kill；独立File/Enhanced两进程均实际0且正常无kill。全部64次新认证追加为V36=1894，旧1830前缀逐项不变。当前本机同条件25/50档通过、100档失败，未测出51–99档或硬件最大值，不能认证云机或三端分发容量。后续同工件SLOW20只作分段诊断，须先新两人严格通过；不改变原动作与时间门槛。
 
