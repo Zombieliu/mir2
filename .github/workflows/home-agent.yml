@@ -32,6 +32,11 @@ jobs:
       run:
         working-directory: mir2-web3
     steps:
+      - name: Enable Git long paths before checkout
+        if: runner.os == 'Windows'
+        shell: pwsh
+        working-directory: ${{ runner.temp }}
+        run: git config --global core.longpaths true
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           submodules: false

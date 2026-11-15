@@ -1,0 +1,27 @@
+{
+  "yamlParsed": true,
+  "workflows": [
+    {
+      "workflow": ".github/workflows/mir2-candidate-gate.yml",
+      "windowsPreCheckoutSteps": 1,
+      "existingStepsAndGatesPreserved": true
+    },
+    {
+      "workflow": ".github/workflows/developer-handoff.yml",
+      "windowsPreCheckoutSteps": 1,
+      "existingStepsAndGatesPreserved": true
+    },
+    {
+      "workflow": ".github/workflows/cross-platform-client.yml",
+      "windowsPreCheckoutSteps": 2,
+      "existingStepsAndGatesPreserved": true
+    },
+    {
+      "workflow": ".github/workflows/home-agent.yml",
+      "windowsPreCheckoutSteps": 1,
+      "existingStepsAndGatesPreserved": true
+    }
+  ],
+  "addedWindowsSteps": 5,
+  "preservedWip": 29
+}

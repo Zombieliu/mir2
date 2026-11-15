@@ -1,0 +1,19 @@
+{
+  "observedAt": "2026-11-15T20:13:45.931Z",
+  "platform": "win32",
+  "git": "git version 2.50.1.windows.1",
+  "relative": "mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-native10-v2-chase-preference-followup-14-diagnostics/release-native-10-v2-chase-preference-feasibility-14/finalization-preimages-v1/collect-public.mjs-before-freeze-builder-source.txt",
+  "absolutePathCharacters": 320,
+  "longpathsFalse": {
+    "exitCode": 128,
+    "filenameTooLong": true
+  },
+  "preCheckoutCommand": "git config --global core.longpaths true",
+  "privateGlobalConfigOnly": true,
+  "developerGlobalConfigChanged": false,
+  "checkoutPassed": true,
+  "clean": true,
+  "bytes": 44,
+  "sha256": "41254b410a99383aa6946a9fb339779622fbff4de9b2e97f68303e840cd21d3d",
+  "sourceRevision": "5037ecdfa81b7481cebcdb616903eb4f4ffd0bb6"
+}

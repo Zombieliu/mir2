@@ -30,6 +30,11 @@ jobs:
   clean-checkout-and-build:
     runs-on: windows-latest
     steps:
+      - name: Enable Git long paths before checkout
+        shell: pwsh
+        working-directory: ${{ runner.temp }}
+        run: git config --global core.longpaths true
+
       - name: Checkout with Crystal
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
