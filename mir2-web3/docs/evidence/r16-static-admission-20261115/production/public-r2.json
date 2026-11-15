@@ -1,0 +1,264 @@
+{
+  "cohort": "r2",
+  "source": "05d233ed248e8b78128580ae71e7618f4338ab5c",
+  "accepted": false,
+  "functionalPassed": false,
+  "summaryPassed": false,
+  "normalSystemNetwork": true,
+  "timing": {
+    "clockEpochMs": 1794700557099,
+    "authoritativeLoginSuccessMs": 41411,
+    "startIntentMs": 71986,
+    "startAckMs": 75497,
+    "authoritativeStarterMapMs": 75505,
+    "authoritativeSelfMs": 75505,
+    "firstPlayableObservedMs": 78773,
+    "terrainPaintVerifiedMs": 146891,
+    "sharedHudObservedMs": 267770,
+    "logoutIntentMs": 273428,
+    "logoutAckMs": 274429,
+    "manifestAttemptsBeforeStart": 1,
+    "manifestAttemptsAtOrAfterStart": 0,
+    "starterRegionRequestMs": 41414,
+    "starterRegionWireHeadersMs": 44206.746,
+    "starterRegionResponseEventMs": 44207,
+    "starterRegionBodyMs": 45170,
+    "starterRegionCommitMs": 75618,
+    "sceneSpritesReadyMs": 75654,
+    "localeRequestMs": 41415,
+    "localeBodyMs": 50212,
+    "localeReadyMs": 50246,
+    "firstPlayableFrameMs": 78665,
+    "rendererBodyMs": 169576
+  },
+  "moveAckMs": 133,
+  "movement": {
+    "attempted": true,
+    "passed": true,
+    "status": "one-authoritative-walk",
+    "from": {
+      "x": 288,
+      "y": 616
+    },
+    "to": {
+      "x": 289,
+      "y": 616,
+      "direction": "Right"
+    },
+    "authorityBinding": {
+      "connection": 1,
+      "startOrdinal": 1,
+      "seq": 20,
+      "packet": "UserInformation",
+      "atMs": 78884
+    },
+    "geometry": {
+      "source": "sha256-pinned-local-release-reference-and-complete-production-map-collision",
+      "sha256": "5c08d1fd4e81d92a7be20eb98c4c6288515749d5d459978dcf78fe2b86bdf325",
+      "townCollisionSha256": "41454c147c8391ded6fc3a3bba6c89090b96ebc872f8af68d90b180c96695d27"
+    },
+    "physical": {
+      "input": "trusted-playwright-keyboard-pulse",
+      "key": "ArrowRight",
+      "atMs": 78884
+    },
+    "wire": {
+      "type": "walk",
+      "direction": "Right",
+      "atMs": 78887
+    },
+    "ack": {
+      "x": 289,
+      "y": 616,
+      "packet": "UserLocation",
+      "atMs": 79017
+    },
+    "ackWithinEightSeconds": true,
+    "rendered": {
+      "x": 289,
+      "y": 616,
+      "atMs": 79055
+    }
+  },
+  "approval": {
+    "passed": true,
+    "approveUiClicks": 1,
+    "forbiddenCount": 0,
+    "onlySignedLogin": true
+  },
+  "internalQaWallets": 1,
+  "internalQaRoles": 1,
+  "fonts": {
+    "passed": true,
+    "expected": [
+      {
+        "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+        "bytes": 16437364,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansTC.ttf",
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+        "bytes": 621572,
+        "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+        "bytes": 243520,
+        "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+        "bytes": 37780,
+        "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+        "bytes": 234892,
+        "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+      }
+    ],
+    "cacheReadsOnly": true,
+    "rows": [
+      {
+        "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+        "present": true,
+        "bytes": 16437364,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansTC.ttf",
+        "present": true,
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+        "present": true,
+        "bytes": 621572,
+        "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+        "present": true,
+        "bytes": 243520,
+        "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+        "present": true,
+        "bytes": 37780,
+        "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+        "present": true,
+        "bytes": 234892,
+        "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+      }
+    ]
+  },
+  "prewarm": {
+    "passed": false,
+    "status": "not-reached",
+    "failure": {
+      "phase": "verify-complete-body-HUD-prewarm-and-quest-markers",
+      "code": "AUTOMATION_FAILED"
+    }
+  },
+  "sharedHud": {
+    "passed": true,
+    "questPassed": true
+  },
+  "workerRestartPassed": true,
+  "normalLogout": true,
+  "returnedToSelect": true,
+  "ui": {
+    "engine": "chrome",
+    "headlessDesktopViewport": true,
+    "networkMock": false,
+    "pageErrors": 0,
+    "consoleErrors": 10,
+    "browserClosed": true
+  },
+  "mobileClosed": true,
+  "resourceErrors": [
+    {
+      "path": "/original-ui/Prguse/917.png",
+      "status": 504,
+      "atMs": 216831,
+      "serviceWorker": true
+    },
+    {
+      "path": "/original-ui/Title/15.png",
+      "status": 504,
+      "atMs": 220469,
+      "serviceWorker": true
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "status": 504,
+      "atMs": 237074,
+      "serviceWorker": true
+    },
+    {
+      "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "status": 504,
+      "atMs": 237074,
+      "serviceWorker": true
+    },
+    {
+      "path": "/original-ui/Prguse/918.png",
+      "status": 504,
+      "atMs": 242771,
+      "serviceWorker": true
+    },
+    {
+      "path": "/original-ui/Prguse/997.png",
+      "status": 504,
+      "atMs": 243196,
+      "serviceWorker": true
+    },
+    {
+      "path": "/original-ui/Prguse/956.png",
+      "status": 504,
+      "atMs": 243392,
+      "serviceWorker": true
+    },
+    {
+      "path": "/original-ui/Title/193.png",
+      "status": 504,
+      "atMs": 243444,
+      "serviceWorker": true
+    }
+  ],
+  "captures": {
+    "waterfallRows": 1418,
+    "waterfallDropped": 0,
+    "waterfallTruncated": false,
+    "transportRows": 940,
+    "transportDropped": 0,
+    "transportTruncated": false,
+    "configuredSourceBases": [
+      "https://numeron.obelisk.build",
+      "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c",
+      "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c",
+      "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260818-main-97887dcd",
+      "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20260730-fullcrystal-f71b89aa-gzip1",
+      "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260818-main-97887dcd",
+      "https://pub-72ec6e670a8346d1a6b2177df2643326.r2.dev/mir2/v/20260730-fullcrystal-f71b89aa-gzip1"
+    ]
+  },
+  "auxiliaryCacheAudit": {
+    "valid": true,
+    "observed": true,
+    "matched": 92,
+    "missing": 0,
+    "mismatched": 0,
+    "scope": "Exact complete bodies in current schema/namespace after original normal logout. Does not override original Native120 or prewarm deadline failure."
+  }
+}

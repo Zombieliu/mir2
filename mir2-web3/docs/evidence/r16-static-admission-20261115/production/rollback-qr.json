@@ -1,0 +1,40 @@
+[
+  {
+    "locale": "zh-CN",
+    "revision": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+    "passed": true,
+    "checks": {
+      "exactRevision": true,
+      "nativeBrowserLocale": true,
+      "noSplitLocaleRequestsBeforeAuth": true,
+      "localizedTitle": true,
+      "firstPartyLink": true,
+      "renderedQr": true,
+      "sameIntentPending": true,
+      "localizedPending": true,
+      "normalCancel": true,
+      "pollingStopped": true,
+      "remainedLogin": true
+    },
+    "browserClosed": true
+  },
+  {
+    "locale": "zh-TW",
+    "revision": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+    "passed": true,
+    "checks": {
+      "exactRevision": true,
+      "nativeBrowserLocale": true,
+      "noSplitLocaleRequestsBeforeAuth": true,
+      "localizedTitle": true,
+      "firstPartyLink": true,
+      "renderedQr": true,
+      "sameIntentPending": true,
+      "localizedPending": true,
+      "normalCancel": true,
+      "pollingStopped": true,
+      "remainedLogin": true
+    },
+    "browserClosed": true
+  }
+]

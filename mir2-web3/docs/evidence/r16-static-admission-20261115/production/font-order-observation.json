@@ -1,0 +1,292 @@
+{
+  "scope": "Page-CDP font requests, distinct from Worker upstream source attempts. Original cohort outcomes remain unchanged; observed request ordering does not alone establish why a request was delayed.",
+  "cohorts": [
+    {
+      "cohort": "r1",
+      "firstFrameMs": 110022,
+      "runtimeBodyMs": 122805,
+      "nativeMs": 168145,
+      "pageFonts": [
+        {
+          "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+          "requestAtMs": 102714,
+          "headersAtMs": 116197,
+          "finishedAtMs": 116197,
+          "status": 200,
+          "outcome": "finished",
+          "fromServiceWorker": true
+        },
+        {
+          "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "requestAtMs": 122997,
+          "headersAtMs": 141391,
+          "finishedAtMs": 141500,
+          "status": 200,
+          "outcome": "finished",
+          "fromServiceWorker": true
+        },
+        {
+          "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+          "requestAtMs": 122997,
+          "headersAtMs": 123000,
+          "finishedAtMs": 123098,
+          "status": 200,
+          "outcome": "finished",
+          "fromServiceWorker": true
+        },
+        {
+          "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSans-Regular.ttf",
+          "requestAtMs": 123098,
+          "headersAtMs": 124719,
+          "finishedAtMs": 124721,
+          "status": 200,
+          "outcome": "finished",
+          "fromServiceWorker": true
+        },
+        {
+          "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "requestAtMs": 123323,
+          "headersAtMs": 141391,
+          "finishedAtMs": 141449,
+          "status": 200,
+          "outcome": "finished",
+          "fromServiceWorker": true
+        },
+        {
+          "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSans-Regular.ttf",
+          "requestAtMs": 123323,
+          "headersAtMs": 124719,
+          "finishedAtMs": 124722,
+          "status": 200,
+          "outcome": "finished",
+          "fromServiceWorker": true
+        },
+        {
+          "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+          "requestAtMs": 123323,
+          "headersAtMs": 123327,
+          "finishedAtMs": 123434,
+          "status": 200,
+          "outcome": "finished",
+          "fromServiceWorker": true
+        },
+        {
+          "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+          "requestAtMs": 123323,
+          "headersAtMs": 125325,
+          "finishedAtMs": 125328,
+          "status": 200,
+          "outcome": "finished",
+          "fromServiceWorker": true
+        },
+        {
+          "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansThai-Regular.ttf",
+          "requestAtMs": 123323,
+          "headersAtMs": 125819,
+          "finishedAtMs": 125819,
+          "status": 200,
+          "outcome": "finished",
+          "fromServiceWorker": true
+        },
+        {
+          "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansArabic-Regular.ttf",
+          "requestAtMs": 123323,
+          "headersAtMs": 127048,
+          "finishedAtMs": 127049,
+          "status": 200,
+          "outcome": "finished",
+          "fromServiceWorker": true
+        },
+        {
+          "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+          "requestAtMs": 123878,
+          "headersAtMs": 123878,
+          "finishedAtMs": 123878,
+          "status": 200,
+          "outcome": "finished",
+          "fromServiceWorker": true
+        },
+        {
+          "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+          "requestAtMs": 124721,
+          "headersAtMs": 125325,
+          "finishedAtMs": 125329,
+          "status": 200,
+          "outcome": "finished",
+          "fromServiceWorker": true
+        },
+        {
+          "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansThai-Regular.ttf",
+          "requestAtMs": 125330,
+          "headersAtMs": 125819,
+          "finishedAtMs": 125820,
+          "status": 200,
+          "outcome": "finished",
+          "fromServiceWorker": true
+        },
+        {
+          "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansArabic-Regular.ttf",
+          "requestAtMs": 125820,
+          "headersAtMs": 127048,
+          "finishedAtMs": 127049,
+          "status": 200,
+          "outcome": "finished",
+          "fromServiceWorker": true
+        }
+      ]
+    },
+    {
+      "cohort": "r2",
+      "firstFrameMs": 78665,
+      "runtimeBodyMs": 169576,
+      "nativeMs": 267770,
+      "pageFonts": [
+        {
+          "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+          "requestAtMs": 71431,
+          "headersAtMs": 173089,
+          "finishedAtMs": 173090,
+          "status": 200,
+          "outcome": "finished",
+          "fromServiceWorker": true
+        },
+        {
+          "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "requestAtMs": 169791,
+          "headersAtMs": 257687,
+          "finishedAtMs": 257756,
+          "status": 200,
+          "outcome": "finished",
+          "fromServiceWorker": true
+        },
+        {
+          "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+          "requestAtMs": 169791,
+          "headersAtMs": 173005,
+          "finishedAtMs": 173137,
+          "status": 200,
+          "outcome": "finished",
+          "fromServiceWorker": true
+        },
+        {
+          "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "requestAtMs": 170127,
+          "headersAtMs": 257687,
+          "finishedAtMs": 257785,
+          "status": 200,
+          "outcome": "finished",
+          "fromServiceWorker": true
+        },
+        {
+          "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSans-Regular.ttf",
+          "requestAtMs": 170127,
+          "headersAtMs": 185768,
+          "finishedAtMs": 185771,
+          "status": 200,
+          "outcome": "finished",
+          "fromServiceWorker": true
+        },
+        {
+          "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+          "requestAtMs": 170127,
+          "headersAtMs": 173005,
+          "finishedAtMs": 173066,
+          "status": 200,
+          "outcome": "finished",
+          "fromServiceWorker": true
+        },
+        {
+          "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+          "requestAtMs": 170127,
+          "headersAtMs": 194245,
+          "finishedAtMs": 194246,
+          "status": 200,
+          "outcome": "finished",
+          "fromServiceWorker": true
+        },
+        {
+          "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansThai-Regular.ttf",
+          "requestAtMs": 170127,
+          "headersAtMs": 200127,
+          "finishedAtMs": 200130,
+          "status": 200,
+          "outcome": "finished",
+          "fromServiceWorker": true
+        },
+        {
+          "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansArabic-Regular.ttf",
+          "requestAtMs": 170127,
+          "headersAtMs": 237074,
+          "finishedAtMs": 237075,
+          "status": 504,
+          "outcome": "finished",
+          "fromServiceWorker": true
+        },
+        {
+          "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSans-Regular.ttf",
+          "requestAtMs": 173137,
+          "headersAtMs": 185769,
+          "finishedAtMs": 185773,
+          "status": 200,
+          "outcome": "finished",
+          "fromServiceWorker": true
+        },
+        {
+          "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+          "requestAtMs": 185773,
+          "headersAtMs": 194245,
+          "finishedAtMs": 194246,
+          "status": 200,
+          "outcome": "finished",
+          "fromServiceWorker": true
+        },
+        {
+          "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansThai-Regular.ttf",
+          "requestAtMs": 194246,
+          "headersAtMs": 200127,
+          "finishedAtMs": 200131,
+          "status": 200,
+          "outcome": "finished",
+          "fromServiceWorker": true
+        },
+        {
+          "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansArabic-Regular.ttf",
+          "requestAtMs": 200131,
+          "headersAtMs": 237074,
+          "finishedAtMs": 237075,
+          "status": 504,
+          "outcome": "failed",
+          "failure": "net::ERR_ABORTED",
+          "fromServiceWorker": true
+        },
+        {
+          "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansArabic-Regular.ttf",
+          "requestAtMs": 237226,
+          "headersAtMs": 251440,
+          "finishedAtMs": 251442,
+          "status": 200,
+          "outcome": "finished",
+          "fromServiceWorker": true
+        },
+        {
+          "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansArabic-Regular.ttf",
+          "requestAtMs": 238078,
+          "headersAtMs": 251440,
+          "finishedAtMs": 251442,
+          "status": 200,
+          "outcome": "finished",
+          "fromServiceWorker": true
+        },
+        {
+          "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+          "requestAtMs": 268039,
+          "headersAtMs": 268039,
+          "finishedAtMs": 268039,
+          "status": 200,
+          "outcome": "finished",
+          "fromServiceWorker": true
+        }
+      ]
+    }
+  ]
+}

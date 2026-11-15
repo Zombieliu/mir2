@@ -2,7 +2,7 @@
 
 2026-11-15（Asia/Shanghai）：候选 `20de-static-admission-ea797d99` 限制同时等待响应头的普通静态资源，避免 Native 面板一次发现大量图片时，在浏览器连接队列里耗尽每个来源的等待时间。资源进度改为按完整成功读取计数，并提供十语的加载、恢复和最终失败状态。253 项回归、独立生产构建、真实 Chrome 对照和两种渲染路径的完整本地流程通过。
 
-**本轮尚未发布。** 正式入口仍是 [numeron.obelisk.build/game](https://numeron.obelisk.build/game) 的 `20de5ea4fd`／`dpl_AWssgszkpKJznMksLsP7hiRFK6U8`，Gateway 仍 fd3。[本轮资格](qualification.json) · [上轮正式发布](../r16-font-fallback-chain-20261115/production/README.md)。不能将本轮本机对照写成公网全部 504 已解决。
+本地资格之后，`05d233ed24` 曾发布到 HSP 候选。第一场原门槛通过，第二场 Native 189105 ms 超过原 120 秒且 113 预热未过，已实际回退。正式入口仍是 [numeron.obelisk.build/game](https://numeron.obelisk.build/game) 的 `20de5ea4fd`／`dpl_AWssgszkpKJznMksLsP7hiRFK6U8`，Gateway 仍 fd3。[两场原结果、92 完整缓存体、观察器错误及回退复验](production/README.md)。[qualification.json](qualification.json) 保留冻结时本地结果，不能冒充公网通过；此前正式回执[另见](../r16-font-fallback-chain-20261115/production/README.md)。
 
 ## 先追查原来的 97 次 504
 
@@ -70,6 +70,6 @@
 
 独立构建耗时 45679 ms，编号 `FwyAa-YYQ828TTWsU61eC`。从上轮通过资格的独立镜像复制，先对比 2176 个 app／lib 输入与已提交基线；仅有此前已证明的 Bevy 发行元数据覆盖，原字节匹配其固定 SHA。叠加本轮八个代码／测试文件，固定素材、Bevy 运行包、权限、存档和服务器保持。29 份无关内容 WIP 的 SHA 未变；私人认证材料、账户库、浏览器档案和原始认证流量不入仓库。
 
-下一步冻结本轮提交和发行输入，补齐七条许可来源的公开网络采集，再按原 8 秒移动／120 秒 Native、完整字体／113／共用 Q／Worker 恢复／注销门槛做受控候选发布。其他目标和地图、途中真实断网、公开双钱包与跨图、三职业完整 1–30、技能、阿洛、跨端同档、实体手机和整体 100% Candidate／人类 Accepted 继续开放。
+后续已冻结和尝试发布，七来源观察和 92 个历史地址的完整缓存体已补证；两场原结果均保留，因追加场次失败实际回退。下一项检查运行包正文停滞与大字体在运行包完整体后才发出的串行等待，做受控竞争／重叠对照，再沿用原 8／120 和完整资源门槛，停止原样重发。[最新公网记录](production/README.md)。其他目标和地图、途中真实断网、公开双钱包与跨图、三职业完整 1–30、技能、阿洛、跨端同档、实体手机和整体 100% Candidate／人类 Accepted 继续开放。
 
-源码 `05d233ed24` 已提交推送；GitHub 独立比较确认父提交 `9d06953d7b` 之后恰有一个提交和 31 个路径。30 个前端输入与通过资格的构建逐字节或已证明的 Git 换行转换相符。83 项发布／入口／域名／代理／网关检查通过；入口 Worker 固定为 47880 字节、SHA `2e1191cab2b9ede2cf0b09c559c7e4da1e8b84574d4910589ad1f9a968ae7a51`。固定素材／运行包与发布行为保持，仅更新已审阅源码和回退绑定；回退目标是独立核验的当前正式 `20de`／AWss。[发行来源冻结](release-source.json)。此处只证明可创建候选，不表示已经正式发布或公网通过。
+源码 `05d233ed24` 已提交推送；GitHub 独立比较确认父提交 `9d06953d7b` 之后恰有一个提交和 31 个路径。30 个前端输入与通过资格的构建逐字节或已证明的 Git 换行转换相符。83 项发布／入口／域名／代理／网关检查通过；入口 Worker 固定为 47880 字节、SHA `2e1191cab2b9ede2cf0b09c559c7e4da1e8b84574d4910589ad1f9a968ae7a51`。固定素材／运行包与发布行为保持，仅更新已审阅源码和回退绑定；回退目标是独立核验的当前正式 `20de`／AWss。[发行来源冻结](release-source.json)。这是当时冻结的来源记录，后续实际发布、失败与回退见 [production](production/README.md)，不由冻结成功代替公网验收。

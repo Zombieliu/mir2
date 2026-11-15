@@ -1,0 +1,158 @@
+{
+  "classifier": {
+    "sha256": "17086d553a3eebddb9a656d09c94024417081656e1e3c939a6bc3916f61ee402",
+    "unchanged": true
+  },
+  "privateArtifacts": [
+    {
+      "cohort": "r1",
+      "privateArtifact": "receipt.json",
+      "sha256": "51072411a4dd2a91d2d22a7049f425413b3071a7f86cc49e2eca81fbea2aafcc",
+      "bytes": 74258
+    },
+    {
+      "cohort": "r1",
+      "privateArtifact": "startup-probe.json",
+      "sha256": "13c7c149d720406eb9ef7d6fa7b610fa51ca70f285491a60f5ad219213e3816e",
+      "bytes": 113183
+    },
+    {
+      "cohort": "r1",
+      "privateArtifact": "static-transport.json",
+      "sha256": "f7e43964f21e479839ce50cc2b63df37dce150246a0609ea28d5235a1b43e660",
+      "bytes": 597691
+    },
+    {
+      "cohort": "r1",
+      "privateArtifact": "static-waterfall.json",
+      "sha256": "3f18b44d6073d86e39b817e7d8105e29d6793379c3e7ae7621f9d12471158c14",
+      "bytes": 859427
+    },
+    {
+      "cohort": "r1",
+      "privateArtifact": "worker-font-network.json",
+      "sha256": "1293b793b46892b0cc7a959b9a5de3ed261a8d20239bebb43dd5f3f135c460f4",
+      "bytes": 3619
+    },
+    {
+      "cohort": "r1",
+      "privateArtifact": "final-cache-bodies.json",
+      "sha256": "ea7f793829f420bec92bffa47448a5931e13e816e0ce7f04eb7a5c50bb39d054",
+      "bytes": 10102
+    },
+    {
+      "cohort": "r1",
+      "privateArtifact": "private-game-start-trace.json",
+      "sha256": "9ef3ce18756a84059fc7ae5a4c03a2b67889f7ad70509a28a0ab7804d7e8a785",
+      "bytes": 61502
+    },
+    {
+      "cohort": "r2",
+      "privateArtifact": "receipt.json",
+      "sha256": "a41023ebc0dd06f76988b2e61c51ef69e5022a74cc7d0944ea2a369366b976ed",
+      "bytes": 68218
+    },
+    {
+      "cohort": "r2",
+      "privateArtifact": "startup-probe.json",
+      "sha256": "39c81693b4d865be84c30791d6e1392ecb85873c07bd7d91aa94e158f8de3932",
+      "bytes": 201891
+    },
+    {
+      "cohort": "r2",
+      "privateArtifact": "static-transport.json",
+      "sha256": "25254dab9a0783162c18c2db3de66cb6d6e9165dacb05ab5b715c1a24856a1eb",
+      "bytes": 757276
+    },
+    {
+      "cohort": "r2",
+      "privateArtifact": "static-waterfall.json",
+      "sha256": "b53f509200cd1d5a99404b8a896255ecaf67b008efe94095f79e292aece59f48",
+      "bytes": 1113617
+    },
+    {
+      "cohort": "r2",
+      "privateArtifact": "worker-font-network.json",
+      "sha256": "140dff5cbc39b1921961efa1478661369ad7b592b27243cd47a0bc0baea7b9a5",
+      "bytes": 7461
+    },
+    {
+      "cohort": "r2",
+      "privateArtifact": "final-cache-bodies.json",
+      "sha256": "da6853638d53266632c3917391f2c627ba768e33c70f120b73e370ed5a561264",
+      "bytes": 21462
+    },
+    {
+      "cohort": "r2",
+      "privateArtifact": "private-game-start-trace.json",
+      "sha256": "2cc205a70cbe0a086c42f5dd157bc1d7489b0c077a1e1ddfe195cdb7ce6d92c0",
+      "bytes": 61501
+    }
+  ],
+  "preparedCohorts": [
+    {
+      "cohort": "r1",
+      "preparationSha256": "f3d0bc2964b689b28ceb28729a114010152178552c5025c94509794eaee4321b",
+      "preparedScripts": {
+        "run.mjs": "2895affb44beaa9ab66726572fa8b99b3906b70b2b6eb3cf184b24226ed813fc",
+        "desktop-qr-city-direct-cdp.mjs": "e737c4eceb2385530025adc8db45dfc13aab239176ac2653967e2d0ebe33b162",
+        "scene-gate.mjs": "f3b8ffdf23af17f9f253de5c8a332f65ce276756fe118da3ccbab599f6dbdbf1",
+        "mobile-wallet-public.mjs": "7b77f6d5a971e82536f31d5cf0a45f91617e4f03bf248dcd958181252eb8dc12",
+        "coordinated-approval-step.mjs": "d1517f42b9b89025b46a50a73818d4c13ad228dcb7f0d7e61e8e5ade908c1d45",
+        "passive-approval-round.mjs": "a0b9c0c5685421940ec922366db6af4d6c2dbd01debec60227988c7ec27e90b4",
+        "classify-wallet-request.mjs": "ab34b854c2847ba041a63ebfd50df3b5cca95673731d243cbd2a9d6d4a52ea25",
+        "handoff.mjs": "2aae21d569d3c339ba190e9184b650de1647ef902b802bbc6aa85c676566918f",
+        "verify-rendered-qr.mjs": "bdf0db36bf23fc6a2efb43bb2e741b7926c12176cdda6dee2b7fc24153f418ef",
+        "terrain-observation.mjs": "90ab5e328f6a93713b6ee797545632fd8a47f5897d72d7009b175aa331845f45",
+        "verify-public-quest.mjs": "db07bef80fb1ea49fe6e679fe53d0e7011ea20b3feddd259edca79e0ef389fdf",
+        "perf-probe.mjs": "74cd2edcb670fa03db5ca527a8ec62dbf32ec9d2511593030ffff0ea0fa3a38e",
+        "verify-shared-quest.mjs": "d584dd70091f9861f532385f4a31cf5c5e7a34a14776f6cd14dcfc2ee4ec6a8b",
+        "verify-prewarm.mjs": "e5bbac30271e8fdcc4ed7d5bad466bd0f16e37ee0f32ec2936e8994bdea54d3e",
+        "frame-metadata.mjs": "779634248a24da426b82402289065e317c1cc479acc6db54619a1820ce250825",
+        "handoff-time.mjs": "6dc1d58a2d8101bf1f7272b73cc4a23691b58fd2a3b243d2dc28c5f5b05e85d7",
+        "verify-worker-restart.mjs": "fd678683ec19b582324937df06ab4a22624cd7e57ae032d90e823b742911e203",
+        "worker-font-network.mjs": "767fadc087773203b9381c9a1efa271e8d2bac108ccfc75064d5da02743005b0",
+        "verify-original-fonts.mjs": "5ce7c7a01c76f9a3dd2a19d71c5a9a0936b5b2c9b9a3631c1c0a4a507424c86d",
+        "bootstrap-chunk-observation.mjs": "28138d86a82c0030421845d8b198fc2d010ae0ffc5b1f486480dddb36c41bf37",
+        "r16-static-waterfall.mjs": "8e59499334a97e2b92b8a1aeeb9902d18043d50e08c388d219a02916209587f8",
+        "r16-static-transport.mjs": "ff35ad6e7638f9839713091a7d6ba61887c10c0510f557386b51b551240d5ab0",
+        "static-cache-audit.mjs": "68771995607a5935f7fc1cd359513f5b7126fbd38c8b71376db6066b67d19378"
+      }
+    },
+    {
+      "cohort": "r2",
+      "preparationSha256": "1337ca802a209af1d38b19a87d1bb9959d41beb8a24b4a4a4728e6b147a93d09",
+      "preparedScripts": {
+        "run.mjs": "5830f420b3ef0665223ad7c240efc74d18329065a7021da9ae7932580dd31b0e",
+        "desktop-qr-city-direct-cdp.mjs": "7bede5f69de653921f20abf3ee2f0cd24eeee576640b096fec474f424e51f4f0",
+        "scene-gate.mjs": "f3b8ffdf23af17f9f253de5c8a332f65ce276756fe118da3ccbab599f6dbdbf1",
+        "mobile-wallet-public.mjs": "7b77f6d5a971e82536f31d5cf0a45f91617e4f03bf248dcd958181252eb8dc12",
+        "coordinated-approval-step.mjs": "d1517f42b9b89025b46a50a73818d4c13ad228dcb7f0d7e61e8e5ade908c1d45",
+        "passive-approval-round.mjs": "a0b9c0c5685421940ec922366db6af4d6c2dbd01debec60227988c7ec27e90b4",
+        "classify-wallet-request.mjs": "ab34b854c2847ba041a63ebfd50df3b5cca95673731d243cbd2a9d6d4a52ea25",
+        "handoff.mjs": "2aae21d569d3c339ba190e9184b650de1647ef902b802bbc6aa85c676566918f",
+        "verify-rendered-qr.mjs": "bdf0db36bf23fc6a2efb43bb2e741b7926c12176cdda6dee2b7fc24153f418ef",
+        "terrain-observation.mjs": "90ab5e328f6a93713b6ee797545632fd8a47f5897d72d7009b175aa331845f45",
+        "verify-public-quest.mjs": "db07bef80fb1ea49fe6e679fe53d0e7011ea20b3feddd259edca79e0ef389fdf",
+        "perf-probe.mjs": "74cd2edcb670fa03db5ca527a8ec62dbf32ec9d2511593030ffff0ea0fa3a38e",
+        "verify-shared-quest.mjs": "d584dd70091f9861f532385f4a31cf5c5e7a34a14776f6cd14dcfc2ee4ec6a8b",
+        "verify-prewarm.mjs": "e5bbac30271e8fdcc4ed7d5bad466bd0f16e37ee0f32ec2936e8994bdea54d3e",
+        "frame-metadata.mjs": "779634248a24da426b82402289065e317c1cc479acc6db54619a1820ce250825",
+        "handoff-time.mjs": "6dc1d58a2d8101bf1f7272b73cc4a23691b58fd2a3b243d2dc28c5f5b05e85d7",
+        "verify-worker-restart.mjs": "fd678683ec19b582324937df06ab4a22624cd7e57ae032d90e823b742911e203",
+        "worker-font-network.mjs": "767fadc087773203b9381c9a1efa271e8d2bac108ccfc75064d5da02743005b0",
+        "verify-original-fonts.mjs": "5ce7c7a01c76f9a3dd2a19d71c5a9a0936b5b2c9b9a3631c1c0a4a507424c86d",
+        "bootstrap-chunk-observation.mjs": "28138d86a82c0030421845d8b198fc2d010ae0ffc5b1f486480dddb36c41bf37",
+        "r16-static-waterfall.mjs": "8e59499334a97e2b92b8a1aeeb9902d18043d50e08c388d219a02916209587f8",
+        "r16-static-transport.mjs": "ff35ad6e7638f9839713091a7d6ba61887c10c0510f557386b51b551240d5ab0",
+        "static-cache-audit.mjs": "8cd97adcf95e1ce8bf23f6e50eea1bfeef5a8c4300f6423e0e6ff553cbe3418a"
+      }
+    }
+  ],
+  "rawAuthProfilesAndCredentialsNotPublished": true,
+  "observerTestLog": {
+    "rawPrivateSha256": "6d80237b8fd471aeaa58cb416b38d50155ef750623ef277a2a2455762d800585",
+    "publishedSha256": "33cb3aae952ab609bbf0a1de6035c991703dac8df7d8467ee1d480487ee08ed3",
+    "normalization": "Only excess trailing blank lines removed for Git whitespace checks; original private output retained."
+  }
+}

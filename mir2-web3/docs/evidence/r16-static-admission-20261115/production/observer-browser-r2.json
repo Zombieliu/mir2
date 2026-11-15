@@ -1,0 +1,59 @@
+{
+  "kind": "real-browser-cache-only-audit",
+  "passed": true,
+  "scope": "Synthetic isolated local CacheStorage fixture with cache names evaluated from actual committed Worker. Tests exact current bodies, old namespace exclusion and corruption; no game account or public traffic.",
+  "pins": [
+    {
+      "path": "mir2-web3/apps/web/scripts/lib/static-cache-audit.mjs",
+      "sha256": "8cd97adcf95e1ce8bf23f6e50eea1bfeef5a8c4300f6423e0e6ff553cbe3418a"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-static-cache-audit.mjs",
+      "sha256": "31a75c9ac67b586b6dc7a0b443a73aa9b131fcc9998ee800c057dd366663230f"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-r16-static-source-coverage.mjs",
+      "sha256": "013577512ebc09ad9f2b074cad7ce4137b338590ab1b016c55f9556cdab5e442"
+    }
+  ],
+  "unitTests": 15,
+  "actualWorkerCacheNames": {
+    "current": "mir2-asset-cache-sw8-static-critical-current",
+    "old": "mir2-asset-cache-sw8-static-runtime-old"
+  },
+  "audit": {
+    "observed": true,
+    "namespace": "current",
+    "cacheCount": 1,
+    "expectedPaths": 3,
+    "matched": 1,
+    "missing": 1,
+    "mismatched": 1,
+    "rows": [
+      {
+        "path": "/original-ui/Prguse/985.png",
+        "present": true,
+        "status": 200,
+        "bytes": 3,
+        "sha256": "039058c6f2c0cb492c533b0a4d14ef77cc0f78abccced5287d84a1a2011cfb81",
+        "matches": true
+      },
+      {
+        "path": "/original-ui/Prguse/986.png",
+        "present": true,
+        "status": 200,
+        "bytes": 3,
+        "sha256": "b11546c0ad0e7659284b3e575dcaf1bca271a87afe8a5a6fbdf9e398a8af1edf",
+        "matches": false
+      },
+      {
+        "path": "/original-ui/Prguse/987.png",
+        "present": false,
+        "matches": false
+      }
+    ]
+  },
+  "networkRequestsDuringAudit": 0,
+  "browserClosed": true,
+  "serverClosed": true
+}
