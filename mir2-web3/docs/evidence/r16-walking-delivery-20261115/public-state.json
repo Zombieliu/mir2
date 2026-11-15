@@ -1,0 +1,19 @@
+{
+  "checkedAt": "2026-11-15T03:31:43.362Z",
+  "id": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8",
+  "source": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+  "project": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+  "readyState": "READY",
+  "target": "production",
+  "httpCheckedAt": "2026-11-15T03:34:41.236Z",
+  "web": {
+    "http": 200,
+    "revision": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339"
+  },
+  "gateway": {
+    "http": 200,
+    "ok": true,
+    "revision": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5"
+  },
+  "source9337Deployed": false
+}

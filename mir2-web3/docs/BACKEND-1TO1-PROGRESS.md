@@ -1,5 +1,9 @@
 # Backend 1:1 Progress
 
+## 共享 Zone 无目标漫游缺口（2026-11-15，未实现）
+
+R16 两后端新角色实测均0条怪物走跑包；固定 Crystal 的 ProcessRoam 与当前共享 Zone 对照确认被动／中立无目标分支缺少空闲漫游。本轮只提交前端包调度，后端未修改／未发布；下一项补权威漫游及碰撞、AOI、控制、所有权和恢复后再验自然帧，整体门槛仍开放。[原判定与参考哈希](evidence/r16-walking-delivery-20261115/README.md)
+
 ## R16 完整场景快照压缩候选（2026-11-14）
 
 2026-11-14 9244本地合流38项与Linux发行包资格保留；独立Web候选云端15项资源与扫码pending通过，未安装在线网关。正式E6/在线fd3一次功能对照移动136ms、正常注销通过，旧公网长尾未据此关闭；原120秒Native冷启仍false。[候选、对照与边界](evidence/r16-world-snapshot-gzip-20261114/candidate/README.md)。

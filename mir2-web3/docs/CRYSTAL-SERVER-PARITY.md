@@ -1,5 +1,9 @@
 # Crystal Server Parity
 
+## 未闭合：共享 Zone ProcessRoam（2026-11-15）
+
+固定 Crystal 的无目标空闲漫游尚未映射到共享 Zone；两场新角色实际无怪物走跑包、自然帧失败。前端包完整不关闭这项差距，后端本轮未改。[源码对照与失败证据](evidence/r16-walking-delivery-20261115/README.md)
+
 ## R16 Web 完整场景快照传输候选（2026-11-14）
 
 2026-11-14 9244合流38项与Linux工件资格保留，独立Web候选资源/扫码检查完成；在线服务保持fd3且配置/存档未改，SSH已验证ubuntu可用。一次E6公网移动136ms及普通注销通过，只支持该次功能，不关闭历史长尾、冷启与1:1差距。[候选、对照与边界](evidence/r16-world-snapshot-gzip-20261114/candidate/README.md)。

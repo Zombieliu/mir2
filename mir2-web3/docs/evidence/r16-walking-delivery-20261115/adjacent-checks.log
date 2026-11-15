@@ -1,0 +1,360 @@
+TAP version 13
+# Subtest: optional Native display locales are independent of four-language wire and require an exact capability
+ok 1 - optional Native display locales are independent of four-language wire and require an exact capability
+  ---
+  duration_ms: 1.7975
+  type: 'test'
+  ...
+# Subtest: NPC display defers Native prose while target, input, name and disabled state remain opaque
+ok 2 - NPC display defers Native prose while target, input, name and disabled state remain opaque
+  ---
+  duration_ms: 26.2915
+  type: 'test'
+  ...
+# Subtest: 844×390 touch stage, DPR and resize project the shell's actual CSS scale
+ok 3 - 844×390 touch stage, DPR and resize project the shell's actual CSS scale
+  ---
+  duration_ms: 0.4188
+  type: 'test'
+  ...
+# Subtest: missing or inconsistent stage/canvas geometry cannot transfer UI ownership
+ok 4 - missing or inconsistent stage/canvas geometry cannot transfer UI ownership
+  ---
+  duration_ms: 0.1397
+  type: 'test'
+  ...
+# Subtest: static definitions never become available quests without an authoritative stage
+ok 5 - static definitions never become available quests without an authoritative stage
+  ---
+  duration_ms: 0.4351
+  type: 'test'
+  ...
+# Subtest: missing endpoints, source sections, counters and exact reward indices survive projection
+ok 6 - missing endpoints, source sections, counters and exact reward indices survive projection
+  ---
+  duration_ms: 0.4218
+  type: 'test'
+  ...
+# Subtest: malformed selectable rewards fail closed instead of becoming another valid choice
+ok 7 - malformed selectable rewards fail closed instead of becoming another valid choice
+  ---
+  duration_ms: 0.454
+  type: 'test'
+  ...
+# Subtest: fixed and selectable reward previews retain their exact source through the Bevy DTO
+ok 8 - fixed and selectable reward previews retain their exact source through the Bevy DTO
+  ---
+  duration_ms: 3.8625
+  type: 'test'
+  ...
+# Subtest: NPC links retain exact wire targets, disabled state and required-input fallback
+ok 9 - NPC links retain exact wire targets, disabled state and required-input fallback
+  ---
+  duration_ms: 0.3209
+  type: 'test'
+  ...
+# Subtest: session and request sequences survive independent module loads
+ok 10 - session and request sequences survive independent module loads
+  ---
+  duration_ms: 44.4319
+  type: 'test'
+  ...
+# Subtest: old generation and malformed renderer status cannot take UI ownership
+ok 11 - old generation and malformed renderer status cannot take UI ownership
+  ---
+  duration_ms: 0.383
+  type: 'test'
+  ...
+# Subtest: Quest world context requires a complete same-player projection and exact version capability
+ok 12 - Quest world context requires a complete same-player projection and exact version capability
+  ---
+  duration_ms: 1.2036
+  type: 'test'
+  ...
+# Subtest: the actual Page capture retires raw Quest skills for self NewMagic only on the current connection
+ok 13 - the actual Page capture retires raw Quest skills for self NewMagic only on the current connection
+  ---
+  duration_ms: 144.8071
+  type: 'test'
+  ...
+# Subtest: renderer restart, first NPC input capture and stopped-loop fallback preserve one UI owner
+ok 14 - renderer restart, first NPC input capture and stopped-loop fallback preserve one UI owner
+  ---
+  duration_ms: 114.5303
+  type: 'test'
+  ...
+# Subtest: v2 Quest world preserves nullable facts, canonical IDs and unknown current map
+ok 15 - v2 Quest world preserves nullable facts, canonical IDs and unknown current map
+  ---
+  duration_ms: 0.6782
+  type: 'test'
+  ...
+# Subtest: local Quest actions require exact seven-field stamp, role and nested route payload
+ok 16 - local Quest actions require exact seven-field stamp, role and nested route payload
+  ---
+  duration_ms: 0.8121
+  type: 'test'
+  ...
+# Subtest: ordinary map packets retire same-map transitions and images never supply map authority
+ok 17 - ordinary map packets retire same-map transitions and images never supply map authority
+  ---
+  duration_ms: 0.1961
+  type: 'test'
+  ...
+# Subtest: Quest handoffs retire each lifetime dimension and attack roles keep raw life evidence
+ok 18 - Quest handoffs retire each lifetime dimension and attack roles keep raw life evidence
+  ---
+  duration_ms: 0.1891
+  type: 'test'
+  ...
+# Subtest: the shared route adapter verifies a complete JS-fake WASM response against collision and exact endpoint
+ok 19 - the shared route adapter verifies a complete JS-fake WASM response against collision and exact endpoint
+  ---
+  duration_ms: 1.1483
+  type: 'test'
+  ...
+# Subtest: NPC route targets preserve object IDs, task roles and the exact two-tile approach
+ok 20 - NPC route targets preserve object IDs, task roles and the exact two-tile approach
+  ---
+  duration_ms: 0.8621
+  type: 'test'
+  ...
+# Subtest: route execution follows bends, validates each 2/3-tile run and replans deviations
+ok 21 - route execution follows bends, validates each 2/3-tile run and replans deviations
+  ---
+  duration_ms: 0.691
+  type: 'test'
+  ...
+# Subtest: collision cache uses injected fake chunks, reuses only complete geometry and discards partial failures
+ok 22 - collision cache uses injected fake chunks, reuses only complete geometry and discards partial failures
+  ---
+  duration_ms: 5.6806
+  type: 'test'
+  ...
+# Subtest: world control reader requires actual current stamped rectangles and claims only button hits
+ok 23 - world control reader requires actual current stamped rectangles and claims only button hits
+  ---
+  duration_ms: 0.8058
+  type: 'test'
+  ...
+# Subtest: Native Quest local UI has only current measured pointer rectangles, never inferred or stale controls
+ok 24 - Native Quest local UI has only current measured pointer rectangles, never inferred or stale controls
+  ---
+  duration_ms: 0.3946
+  type: 'test'
+  ...
+# Subtest: questLocalUi never parses as an authorized world action or sends through the actual Page dispatcher
+ok 25 - questLocalUi never parses as an authorized world action or sends through the actual Page dispatcher
+  ---
+  duration_ms: 112.5602
+  type: 'test'
+  ...
+# Subtest: actual Page queued movement preserves replacement intent and retires stale Quest routes before ordinary A* or send
+ok 26 - actual Page queued movement preserves replacement intent and retires stale Quest routes before ordinary A* or send
+  ---
+  duration_ms: 98.6472
+  type: 'test'
+  ...
+# Subtest: actual Page map-image press and route ownership retire only the captured source and preserve sent movement
+ok 27 - actual Page map-image press and route ownership retire only the captured source and preserve sent movement
+  ---
+  duration_ms: 109.6633
+  type: 'test'
+  ...
+# Subtest: packaged CJK font matches its pinned upstream bytes and retains its license
+ok 28 - packaged CJK font matches its pinned upstream bytes and retains its license
+  ---
+  duration_ms: 15.2211
+  type: 'test'
+  ...
+# Subtest: actual Page map click shows the selected coordinates while waiting for complete collision
+ok 29 - actual Page map click shows the selected coordinates while waiting for complete collision
+  ---
+  duration_ms: 1.7059
+  type: 'test'
+  ...
+# Subtest: actual Page hung map collision stops at30s and a late body cannot start walking
+ok 30 - actual Page hung map collision stops at30s and a late body cannot start walking
+  ---
+  duration_ms: 0.6719
+  type: 'test'
+  ...
+# Subtest: actual Page delayed timer delivery cannot accept geometry after the same30s deadline
+ok 31 - actual Page delayed timer delivery cannot accept geometry after the same30s deadline
+  ---
+  duration_ms: 0.2778
+  type: 'test'
+  ...
+# Subtest: actual Page initial edge construction shares the deadline with collision download
+ok 32 - actual Page initial edge construction shares the deadline with collision download
+  ---
+  duration_ms: 0.3452
+  type: 'test'
+  ...
+# Subtest: actual Page complete map route before the deadline cancels its timer and moves to its exact endpoint
+ok 33 - actual Page complete map route before the deadline cancels its timer and moves to its exact endpoint
+  ---
+  duration_ms: 0.5924
+  type: 'test'
+  ...
+# Subtest: actual Page replaced map resolve and old timer cannot affect a newer click
+ok 34 - actual Page replaced map resolve and old timer cannot affect a newer click
+  ---
+  duration_ms: 0.2783
+  type: 'test'
+  ...
+# Subtest: actual Page replaced map reject and old timer cannot affect a newer click
+ok 35 - actual Page replaced map reject and old timer cannot affect a newer click
+  ---
+  duration_ms: 0.2964
+  type: 'test'
+  ...
+# Subtest: actual Page map retires map work without stale timeout or movement
+ok 36 - actual Page map retires map work without stale timeout or movement
+  ---
+  duration_ms: 0.3199
+  type: 'test'
+  ...
+# Subtest: actual Page blocked retires map work without stale timeout or movement
+ok 37 - actual Page blocked retires map work without stale timeout or movement
+  ---
+  duration_ms: 0.3642
+  type: 'test'
+  ...
+# Subtest: actual Page cancel retires map work without stale timeout or movement
+ok 38 - actual Page cancel retires map work without stale timeout or movement
+  ---
+  duration_ms: 0.3532
+  type: 'test'
+  ...
+# Subtest: actual Page zero-step map click reports only authoritative arrival without movement
+ok 39 - actual Page zero-step map click reports only authoritative arrival without movement
+  ---
+  duration_ms: 0.297
+  type: 'test'
+  ...
+# Subtest: actual Page complete unreachable map search reports once and never queues partial progress
+ok 40 - actual Page complete unreachable map search reports once and never queues partial progress
+  ---
+  duration_ms: 20.0503
+  type: 'test'
+  ...
+# (node:87044) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: NPC pack recovers in the same observer after both 20-second header waits fail
+ok 41 - NPC pack recovers in the same observer after both 20-second header waits fail
+  ---
+  duration_ms: 178.4524
+  type: 'test'
+  ...
+# Subtest: two HTTP503 responses preserve a transient outcome and recover verified NPC bytes
+ok 42 - two HTTP503 responses preserve a transient outcome and recover verified NPC bytes
+  ---
+  duration_ms: 66.8131
+  type: 'test'
+  ...
+# Subtest: one retired NPC observer does not cancel another observer's shared recovery
+ok 43 - one retired NPC observer does not cancel another observer's shared recovery
+  ---
+  duration_ms: 46.8391
+  type: 'test'
+  ...
+# Subtest: persistent NPC transport failure stops at four requests instead of looping
+ok 44 - persistent NPC transport failure stops at four requests instead of looping
+  ---
+  duration_ms: 41.4568
+  type: 'test'
+  ...
+# Subtest: definitive responses, Retry-After and corrupt NPC bytes never trigger recovery
+ok 45 - definitive responses, Retry-After and corrupt NPC bytes never trigger recovery
+  ---
+  duration_ms: 177.7546
+  type: 'test'
+  ...
+# Subtest: wrong release, retired owner and late shared completion cannot publish stale NPCs
+ok 46 - wrong release, retired owner and late shared completion cannot publish stale NPCs
+  ---
+  duration_ms: 27.6182
+  type: 'test'
+  ...
+# Subtest: the real Shell entry-art effect owns NPC recovery and retires it on cleanup
+ok 47 - the real Shell entry-art effect owns NPC recovery and retires it on cleanup
+  ---
+  duration_ms: 114.502
+  type: 'test'
+  ...
+# Subtest: metadata alone never starts the image-pack timer or releases an absent/undecoded body
+ok 48 - metadata alone never starts the image-pack timer or releases an absent/undecoded body
+  ---
+  duration_ms: 1.2105
+  type: 'test'
+  ...
+# Subtest: an already decoded body is recognized on the first animation frame
+ok 49 - an already decoded body is recognized on the first animation frame
+  ---
+  duration_ms: 0.2378
+  type: 'test'
+  ...
+# Subtest: only a verified nonempty image pack retains the existing decode safety timer
+ok 50 - only a verified nonempty image pack retains the existing decode safety timer
+  ---
+  duration_ms: 0.1971
+  type: 'test'
+  ...
+# Subtest: retiring a metadata observer removes load and RAF publication
+ok 51 - retiring a metadata observer removes load and RAF publication
+  ---
+  duration_ms: 0.0956
+  type: 'test'
+  ...
+# Subtest: current shared diary closes through its configured key and its own live owner
+ok 52 - current shared diary closes through its configured key and its own live owner
+  ---
+  duration_ms: 71.0898
+  type: 'test'
+  ...
+# Subtest: remapped Native binding works and its former key stays blocked by the modal
+ok 53 - remapped Native binding works and its former key stays blocked by the modal
+  ---
+  duration_ms: 1.3214
+  type: 'test'
+  ...
+# Subtest: repeats and declined navigation cannot toggle or fall through to the world
+ok 54 - repeats and declined navigation cannot toggle or fall through to the world
+  ---
+  duration_ms: 0.6057
+  type: 'test'
+  ...
+# Subtest: typing, another modal, stale diary authority and non-quest keys retain their input owner
+ok 55 - typing, another modal, stale diary authority and non-quest keys retain their input owner
+  ---
+  duration_ms: 2.8061
+  type: 'test'
+  ...
+# Subtest: withdrawing the current diary before dispatch blocks a captured old modal handler
+ok 56 - withdrawing the current diary before dispatch blocks a captured old modal handler
+  ---
+  duration_ms: 0.3017
+  type: 'test'
+  ...
+# Subtest: a ready diary closes before the independent main HUD is ready
+ok 57 - a ready diary closes before the independent main HUD is ready
+  ---
+  duration_ms: 0.3878
+  type: 'test'
+  ...
+# Subtest: missing or throwing diary owner never borrows the main HUD or falls through to gameplay
+ok 58 - missing or throwing diary owner never borrows the main HUD or falls through to gameplay
+  ---
+  duration_ms: 0.5793
+  type: 'test'
+  ...
+1..58
+# tests 58
+# suites 0
+# pass 58
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1596.3263

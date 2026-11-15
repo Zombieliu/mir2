@@ -1,0 +1,32 @@
+{
+  "source": "9337f00a3665f0af082ea92e57987ae813e52609",
+  "parent": "ec26ffa12e79f302bd82f05f97c0489e9d6ca464",
+  "qualifiedBase": "c1d4c85c89e3f1960d349c823cb3a42976e2b2e6",
+  "preservedCapacityDocsCommit": "ec26ffa12e79f302bd82f05f97c0489e9d6ca464",
+  "buildId": "NbhSHdD7CUFnywAreVAGx",
+  "candidate": "c1d4-walking-high-80f19345",
+  "files": [
+    {
+      "path": "mir2-web3/apps/web/lib/r16-entry-scene.ts",
+      "gitBlob": "fa42c1ff7a90df8785efc41e84fc620d840b954a",
+      "sha256": "8e5f601ad6a97156006fd14644dbceb30473728b718ebdf007aa1cbb97fdc826",
+      "frozenSha256": "4271a10ba9ab3240e2af9d0d35967eef85f74ea139f57cd30aca11d5a7482d1a"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-pinned-bootstrap-chunk.mjs",
+      "gitBlob": "3b3bbef33250f0d9377160e78ab0767a3ead4a73",
+      "sha256": "f6665a154b84876fb20254466e06384365364c5c657db4e7279f9c701d38bdce",
+      "frozenSha256": "af1434e77975835c6a5abac59ec91787aeabcf64c43f336c85f5b74b353339e2"
+    },
+    {
+      "path": "mir2-web3/apps/web/app/original-client-shell.tsx",
+      "gitBlob": "66fbd96a0cc00c85ade6ca57cf0717566a0d8f0f",
+      "sha256": "0ef760cae95a3638e7bf586b49ac0e11cfa5a23c0c9e4f8d9a162a8fc9f2dfa7",
+      "frozenSha256": "8ace0c3f0ba31bbbef566e85290690bc21cee8e04e606311d48b52642795fbec"
+    }
+  ],
+  "foreignContentWipPreserved": 29,
+  "foreignAnimationWipRetainedAndExcluded": true,
+  "productionDeployed": false,
+  "naturalWalkingAcceptance": false
+}

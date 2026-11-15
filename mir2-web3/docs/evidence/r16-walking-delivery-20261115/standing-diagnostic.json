@@ -1,0 +1,590 @@
+{
+  "diagnostic": {
+    "at": 1794712573799,
+    "quest": {
+      "ready": true,
+      "open": false,
+      "error": null
+    },
+    "hud": {
+      "ready": true,
+      "error": null
+    },
+    "composites": [
+      {
+        "hidden": "false",
+        "display": "block",
+        "visibility": "visible"
+      }
+    ],
+    "sprites": [
+      {
+        "objectId": "206641",
+        "className": "entity-sprite-stack monster     ",
+        "path": "/original-ui/Monster/005/22.png",
+        "packed": "true",
+        "srcKind": "data",
+        "walkingPath": false,
+        "complete": true,
+        "naturalWidth": 76,
+        "naturalHeight": 80,
+        "rect": {
+          "x": 549,
+          "y": 372,
+          "width": 76,
+          "height": 80
+        }
+      },
+      {
+        "objectId": "200716",
+        "className": "entity-sprite-stack monster     ",
+        "path": "/original-ui/Monster/000/1.png",
+        "packed": "true",
+        "srcKind": "data",
+        "walkingPath": false,
+        "complete": true,
+        "naturalWidth": 104,
+        "naturalHeight": 100,
+        "rect": {
+          "x": 754,
+          "y": 468,
+          "width": 104,
+          "height": 100
+        }
+      },
+      {
+        "objectId": "271801",
+        "className": "entity-sprite-stack monster     ",
+        "path": "/original-ui/Monster/003/5.png",
+        "packed": "true",
+        "srcKind": "data",
+        "walkingPath": false,
+        "complete": true,
+        "naturalWidth": 40,
+        "naturalHeight": 32,
+        "rect": {
+          "x": 755,
+          "y": 414,
+          "width": 40,
+          "height": 32
+        }
+      },
+      {
+        "objectId": "271806",
+        "className": "entity-sprite-stack monster     ",
+        "path": "/original-ui/Monster/003/3.png",
+        "packed": "true",
+        "srcKind": "data",
+        "walkingPath": false,
+        "complete": true,
+        "naturalWidth": 20,
+        "naturalHeight": 36,
+        "rect": {
+          "x": 817,
+          "y": 318,
+          "width": 20,
+          "height": 36
+        }
+      },
+      {
+        "objectId": "206644",
+        "className": "entity-sprite-stack monster     ",
+        "path": "/original-ui/Monster/005/24.png",
+        "packed": "true",
+        "srcKind": "data",
+        "walkingPath": false,
+        "complete": true,
+        "naturalWidth": 64,
+        "naturalHeight": 84,
+        "rect": {
+          "x": 846,
+          "y": 297,
+          "width": 64,
+          "height": 84
+        }
+      },
+      {
+        "objectId": "206302",
+        "className": "entity-sprite-stack monster     ",
+        "path": "/original-ui/Monster/004/30.png",
+        "packed": "true",
+        "srcKind": "data",
+        "walkingPath": false,
+        "complete": true,
+        "naturalWidth": 80,
+        "naturalHeight": 72,
+        "rect": {
+          "x": 540,
+          "y": 217,
+          "width": 80,
+          "height": 72
+        }
+      },
+      {
+        "objectId": "206515",
+        "className": "entity-sprite-stack monster     ",
+        "path": "/original-ui/Monster/004/16.png",
+        "packed": "true",
+        "srcKind": "data",
+        "walkingPath": false,
+        "complete": true,
+        "naturalWidth": 60,
+        "naturalHeight": 64,
+        "rect": {
+          "x": 426,
+          "y": 232,
+          "width": 60,
+          "height": 64
+        }
+      },
+      {
+        "objectId": "206632",
+        "className": "entity-sprite-stack monster     ",
+        "path": "/original-ui/Monster/005/11.png",
+        "packed": "true",
+        "srcKind": "data",
+        "walkingPath": false,
+        "complete": true,
+        "naturalWidth": 76,
+        "naturalHeight": 84,
+        "rect": {
+          "x": 520,
+          "y": 586,
+          "width": 76,
+          "height": 84
+        }
+      },
+      {
+        "objectId": "200325",
+        "className": "entity-sprite-stack monster     ",
+        "path": "/original-ui/Monster/139/14.png",
+        "packed": "true",
+        "srcKind": "data",
+        "walkingPath": false,
+        "complete": true,
+        "naturalWidth": 80,
+        "naturalHeight": 88,
+        "rect": {
+          "x": 949,
+          "y": 620,
+          "width": 80,
+          "height": 88
+        }
+      },
+      {
+        "objectId": "206717",
+        "className": "entity-sprite-stack monster     ",
+        "path": "/original-ui/Monster/004/3.png",
+        "packed": "true",
+        "srcKind": "data",
+        "walkingPath": false,
+        "complete": true,
+        "naturalWidth": 44,
+        "naturalHeight": 72,
+        "rect": {
+          "x": 618,
+          "y": 632,
+          "width": 44,
+          "height": 72
+        }
+      },
+      {
+        "objectId": "206339",
+        "className": "entity-sprite-stack monster     ",
+        "path": "/original-ui/Monster/004/25.png",
+        "packed": "true",
+        "srcKind": "data",
+        "walkingPath": false,
+        "complete": true,
+        "naturalWidth": 96,
+        "naturalHeight": 44,
+        "rect": {
+          "x": 199,
+          "y": 172,
+          "width": 96,
+          "height": 44
+        }
+      },
+      {
+        "objectId": "206524",
+        "className": "entity-sprite-stack monster     ",
+        "path": "/original-ui/Monster/004/28.png",
+        "packed": "true",
+        "srcKind": "data",
+        "walkingPath": false,
+        "complete": true,
+        "naturalWidth": 64,
+        "naturalHeight": 80,
+        "rect": {
+          "x": 889,
+          "y": 48,
+          "width": 64,
+          "height": 80
+        }
+      },
+      {
+        "objectId": "206626",
+        "className": "entity-sprite-stack monster     ",
+        "path": "/original-ui/Monster/005/1.png",
+        "packed": "true",
+        "srcKind": "data",
+        "walkingPath": false,
+        "complete": true,
+        "naturalWidth": 92,
+        "naturalHeight": 80,
+        "rect": {
+          "x": 508,
+          "y": 747,
+          "width": 92,
+          "height": 80
+        }
+      },
+      {
+        "objectId": "206324",
+        "className": "entity-sprite-stack monster     ",
+        "path": "/original-ui/Monster/004/6.png",
+        "packed": "true",
+        "srcKind": "data",
+        "walkingPath": false,
+        "complete": true,
+        "naturalWidth": 84,
+        "naturalHeight": 68,
+        "rect": {
+          "x": 658,
+          "y": -6,
+          "width": 84,
+          "height": 68
+        }
+      },
+      {
+        "objectId": "206714",
+        "className": "entity-sprite-stack monster     ",
+        "path": "/original-ui/Monster/004/28.png",
+        "packed": "true",
+        "srcKind": "data",
+        "walkingPath": false,
+        "complete": true,
+        "naturalWidth": 64,
+        "naturalHeight": 80,
+        "rect": {
+          "x": -23,
+          "y": 208,
+          "width": 64,
+          "height": 80
+        }
+      },
+      {
+        "objectId": "200339",
+        "className": "entity-sprite-stack monster     ",
+        "path": "/original-ui/Monster/000/29.png",
+        "packed": "true",
+        "srcKind": "data",
+        "walkingPath": false,
+        "complete": true,
+        "naturalWidth": 76,
+        "naturalHeight": 108,
+        "rect": {
+          "x": 38,
+          "y": -50,
+          "width": 76,
+          "height": 108
+        }
+      },
+      {
+        "objectId": "206530",
+        "className": "entity-sprite-stack monster     ",
+        "path": "/original-ui/Monster/004/5.png",
+        "packed": "true",
+        "srcKind": "data",
+        "walkingPath": false,
+        "complete": true,
+        "naturalWidth": 80,
+        "naturalHeight": 68,
+        "rect": {
+          "x": 612,
+          "y": -38,
+          "width": 80,
+          "height": 68
+        }
+      },
+      {
+        "objectId": "206711",
+        "className": "entity-sprite-stack monster     ",
+        "path": "/original-ui/Monster/004/24.png",
+        "packed": "true",
+        "srcKind": "data",
+        "walkingPath": false,
+        "complete": true,
+        "naturalWidth": 80,
+        "naturalHeight": 68,
+        "rect": {
+          "x": 13,
+          "y": -42,
+          "width": 80,
+          "height": 68
+        }
+      },
+      {
+        "objectId": "200340",
+        "className": "entity-sprite-stack monster     ",
+        "path": "/original-ui/Monster/000/29.png",
+        "packed": "true",
+        "srcKind": "data",
+        "walkingPath": false,
+        "complete": true,
+        "naturalWidth": 76,
+        "naturalHeight": 108,
+        "rect": {
+          "x": 230,
+          "y": -178,
+          "width": 76,
+          "height": 108
+        }
+      }
+    ],
+    "monsters": [
+      {
+        "objectId": "200325",
+        "x": 295,
+        "y": 624,
+        "direction": "DownRight",
+        "dead": false,
+        "bodyLibrary": "Monster/139",
+        "motion": {}
+      },
+      {
+        "objectId": "200339",
+        "x": 276,
+        "y": 604,
+        "direction": "UpLeft",
+        "dead": false,
+        "bodyLibrary": "Monster/000",
+        "motion": {}
+      },
+      {
+        "objectId": "200340",
+        "x": 280,
+        "y": 600,
+        "direction": "UpLeft",
+        "dead": false,
+        "bodyLibrary": "Monster/000",
+        "motion": {}
+      },
+      {
+        "objectId": "200716",
+        "x": 291,
+        "y": 620,
+        "direction": "Up",
+        "dead": false,
+        "bodyLibrary": "Monster/000",
+        "motion": {}
+      },
+      {
+        "objectId": "206302",
+        "x": 287,
+        "y": 611,
+        "direction": "UpLeft",
+        "dead": false,
+        "bodyLibrary": "Monster/004",
+        "motion": {}
+      },
+      {
+        "objectId": "206324",
+        "x": 289,
+        "y": 604,
+        "direction": "UpRight",
+        "dead": false,
+        "bodyLibrary": "Monster/004",
+        "motion": {}
+      },
+      {
+        "objectId": "206339",
+        "x": 280,
+        "y": 609,
+        "direction": "Left",
+        "dead": false,
+        "bodyLibrary": "Monster/004",
+        "motion": {}
+      },
+      {
+        "objectId": "206515",
+        "x": 284,
+        "y": 611,
+        "direction": "Down",
+        "dead": false,
+        "bodyLibrary": "Monster/004",
+        "motion": {}
+      },
+      {
+        "objectId": "206524",
+        "x": 294,
+        "y": 606,
+        "direction": "UpLeft",
+        "dead": false,
+        "bodyLibrary": "Monster/004",
+        "motion": {}
+      },
+      {
+        "objectId": "206530",
+        "x": 288,
+        "y": 603,
+        "direction": "UpRight",
+        "dead": false,
+        "bodyLibrary": "Monster/004",
+        "motion": {}
+      },
+      {
+        "objectId": "206626",
+        "x": 286,
+        "y": 628,
+        "direction": "Up",
+        "dead": false,
+        "bodyLibrary": "Monster/005",
+        "motion": {}
+      },
+      {
+        "objectId": "206632",
+        "x": 286,
+        "y": 623,
+        "direction": "Right",
+        "dead": false,
+        "bodyLibrary": "Monster/005",
+        "motion": {}
+      },
+      {
+        "objectId": "206641",
+        "x": 287,
+        "y": 616,
+        "direction": "DownLeft",
+        "dead": false,
+        "bodyLibrary": "Monster/005",
+        "motion": {}
+      },
+      {
+        "objectId": "206644",
+        "x": 293,
+        "y": 614,
+        "direction": "Left",
+        "dead": false,
+        "bodyLibrary": "Monster/005",
+        "motion": {}
+      },
+      {
+        "objectId": "206711",
+        "x": 276,
+        "y": 603,
+        "direction": "Left",
+        "dead": false,
+        "bodyLibrary": "Monster/004",
+        "motion": {}
+      },
+      {
+        "objectId": "206714",
+        "x": 275,
+        "y": 611,
+        "direction": "UpLeft",
+        "dead": false,
+        "bodyLibrary": "Monster/004",
+        "motion": {}
+      },
+      {
+        "objectId": "206717",
+        "x": 288,
+        "y": 624,
+        "direction": "Up",
+        "dead": false,
+        "bodyLibrary": "Monster/004",
+        "motion": {}
+      },
+      {
+        "objectId": "271801",
+        "x": 291,
+        "y": 616,
+        "direction": "UpRight",
+        "dead": false,
+        "bodyLibrary": "Monster/003",
+        "motion": {}
+      },
+      {
+        "objectId": "271806",
+        "x": 292,
+        "y": 613,
+        "direction": "Up",
+        "dead": false,
+        "bodyLibrary": "Monster/003",
+        "motion": {}
+      }
+    ],
+    "runtimeMethods": [
+      "clearMir2MailComposeUiIntentSink",
+      "clearMir2PresentationPoseSink",
+      "clearMir2SelfCameraMotion",
+      "getMir2EntityActionPose",
+      "getMir2LocalMotionDiagnostics",
+      "getMir2MailComposeUiCapabilities",
+      "getMir2MailComposeUiStatus",
+      "getMir2PresentationPoses",
+      "getMir2RemoteMotionPresentationDiagnostics",
+      "pushMir2HeroRawFrame",
+      "pushMir2HeroVerifiedOwnerFrame",
+      "resetMir2EntityAnimations",
+      "resolveMir2EntityAnimationPoses",
+      "setMir2LocalMotionPresentationEnabled",
+      "setMir2MailComposeUiActionEdge",
+      "setMir2MailComposeUiIntentSink",
+      "setMir2MailComposeUiPointerEdge",
+      "setMir2MailComposeUiSnapshot",
+      "setMir2PresentationPoseEnabled",
+      "setMir2PresentationPoseSink",
+      "setMir2RemoteMotionPresentationEnabled",
+      "setMir2SelfCameraMotion"
+    ]
+  },
+  "observer": {
+    "status": "observe-budget-ended",
+    "attempts": 0,
+    "pending": 0,
+    "mismatches": 0,
+    "deadlineMs": 83857,
+    "rows": []
+  },
+  "rows": [
+    {
+      "kind": "standing",
+      "path": "/bootstrap/r16-visuals/d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308.json",
+      "requestMs": 18848,
+      "priority": "High",
+      "bytesObserved": 513566,
+      "redirected": false,
+      "status": 200,
+      "mime": "application/json",
+      "fromDiskCache": false,
+      "fromServiceWorker": false,
+      "headersMs": 18876,
+      "finishedMs": 18887,
+      "bytes": 513566,
+      "sha256": "d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308",
+      "pinMatches": true,
+      "verifiedMs": 18939
+    },
+    {
+      "kind": "walking",
+      "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+      "requestMs": 18849,
+      "priority": "High",
+      "bytesObserved": 764724,
+      "redirected": false,
+      "status": 200,
+      "mime": "application/json",
+      "fromDiskCache": false,
+      "fromServiceWorker": false,
+      "headersMs": 18860,
+      "finishedMs": 18883,
+      "bytes": 764724,
+      "sha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+      "pinMatches": true,
+      "images": 240,
+      "verifiedMs": 18936
+    }
+  ]
+}
