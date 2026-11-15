@@ -3586,8 +3586,13 @@ export default function HomePage() {
     predictedPlayerPositionRef.current = predictedPlayerPosition;
   }, [predictedPlayerPosition]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    // Input guards must observe the screen that has just been committed before
+    // the first visible login field can receive an edit. Retain epoch checks.
     screenRef.current = screen;
+  }, [screen]);
+
+  useEffect(() => {
     if (screen !== "game") {
       if (firstPlayableFrameRequestRef.current !== null) {
         window.cancelAnimationFrame(firstPlayableFrameRequestRef.current);

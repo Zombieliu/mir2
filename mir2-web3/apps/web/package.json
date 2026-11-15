@@ -119,7 +119,7 @@
     "test:load-gateway-ws-client-identity": "node --test ./scripts/test-load-gateway-ws-client-identity.mjs",
     "test:load-gateway-ws-profile": "node --test ./scripts/test-load-gateway-ws-profile.mjs ./scripts/test-load-gateway-ws-process.mjs",
     "test:movement-controller": "node ./scripts/test-movement-controller.mjs",
-    "test:game-browser-defaults": "node --test ./scripts/test-game-browser-defaults.mjs",
+    "test:game-browser-defaults": "node --test ./scripts/test-game-browser-defaults.mjs ./scripts/test-login-first-visible-edit.mjs",
     "test:device-profile": "node ./scripts/test-device-profile.mjs",
     "test:responsive-stage": "node ./scripts/test-responsive-stage.mjs",
     "test:pwa": "node ./scripts/test-pwa-shell.mjs",
