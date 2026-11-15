@@ -1,0 +1,46 @@
+{
+  "rows": [
+    {
+      "source": "4204e920edde1d2c4a27e7bb7a2bba50ebd00860",
+      "path": ".github/workflows/promotion-website-release.yml",
+      "bytes": 43042,
+      "sha256": "e18dae6c9e9cec4d5ca7b8a2e6a748392640f09134bd6bbdf0c24b8cc7e18dd3",
+      "gitBlob": "62db49ff56402b38451e58a115496c175a9c28b6"
+    },
+    {
+      "source": "4204e920edde1d2c4a27e7bb7a2bba50ebd00860",
+      "path": "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
+      "bytes": 73296,
+      "sha256": "6f42b47d65be0850476e196f9f8cc3016def61689249cfe309128f86a110298b",
+      "gitBlob": "f77a95ec92bd9acadb98937297724cab008401d9"
+    },
+    {
+      "source": "4204e920edde1d2c4a27e7bb7a2bba50ebd00860",
+      "path": "mir2-web3/apps/web/scripts/test-asset-prewarm-request.mjs",
+      "bytes": 15117,
+      "sha256": "d51ff0f9fb79995bd40adf1c13020670e9bdf81cdd175d37208c7c0a663a8bd8",
+      "gitBlob": "1535c2ea03aae60ee0d8a051738630cb6be15a25"
+    },
+    {
+      "source": "d809add41e167be5092de06b238d6632a3396a49",
+      "path": ".github/scripts/numeron-r16-release.mjs",
+      "bytes": 92852,
+      "sha256": "f49a5ac61abaffc3868b48f9ab891c7c46c3f3469e18dbaa9ca47e0e77f1cfac",
+      "gitBlob": "3286132316b48595a1cdc5703bb3a595877db4e6"
+    },
+    {
+      "source": "627b68ae4dd5575a40ea37df16603087ed68a522",
+      "path": "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
+      "bytes": 73345,
+      "sha256": "8897a95341737316e31d6e1958afb853b3950360824bb618104dd9c3fab1e0be",
+      "gitBlob": "7f193189fb109915afea18940229a621cfe0fe2e"
+    },
+    {
+      "source": "627b68ae4dd5575a40ea37df16603087ed68a522",
+      "path": "mir2-web3/apps/web/scripts/test-asset-cache-progress.mjs",
+      "bytes": 6576,
+      "sha256": "6756a0ffb62c4a0ab684da1d4eea594f50017b2582074e6119b65d695f4fd605",
+      "gitBlob": "5e41810965465e6da5059e0f91b04a55618ed064"
+    }
+  ]
+}

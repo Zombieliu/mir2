@@ -1,0 +1,767 @@
+{
+  "schema": 1,
+  "kind": "r16-matched-hud-public-native-budget-failure-and-separate-layout-candidate",
+  "recordedAt": "2026-11-15T14:05:37.541612+00:00",
+  "publishedCandidateRetained": false,
+  "goalActive": true,
+  "wholeParityCandidate": false,
+  "wholeParityAccepted": false,
+  "qualifiedProductSource": "4204e920edde1d2c4a27e7bb7a2bba50ebd00860",
+  "releaseController": "d809add41e167be5092de06b238d6632a3396a49",
+  "sourceClosure": {
+    "commits": 50,
+    "files": 280,
+    "independentGitHubAndGitVerified": true
+  },
+  "checks": {
+    "releaseGuards": 57,
+    "releaseDomain": 23,
+    "layoutPresentation": 46
+  },
+  "linux": {
+    "source": "4204e920edde1d2c4a27e7bb7a2bba50ebd00860",
+    "workflowRun": 43715338164,
+    "artifact": 14163186544,
+    "downloadCompleted": true,
+    "artifactZipBytes": 95700094,
+    "artifactZipSha256LocallyComputed": "840acb59187870b571845e512e574eb3eb46f2f9571ada5066fcbbcbe0d92616",
+    "allPackageFilesShaVerified": 1841,
+    "sharedZoneTests": 310,
+    "gatewaySharedZoneTests": 40,
+    "backgroundExecutionTestsRequiredAndObserved": 7,
+    "nativePostgresTests": 216,
+    "docker": false,
+    "gateway": {
+      "path": "D:\\mir2-builds\\r16-hud-complete-release-20261115\\linux-package-r1\\mir2-gateway",
+      "bytes": 93576560,
+      "sha256": "22bb54130b2084a34c31d7b0b7bd604cc99a260a08e8d924a5513b329ee4ec96",
+      "elf": "64-bit little-endian x86_64"
+    },
+    "productionInstalled": false,
+    "publicBrowserAcceptance": false
+  },
+  "canary": {
+    "source": "4204e920edde1d2c4a27e7bb7a2bba50ebd00860",
+    "passed": true,
+    "movementMs": 105.686,
+    "neutralWalks": 1,
+    "normalLogouts": 2,
+    "sameRoleReentry": true,
+    "oldRows": {
+      "accounts": {
+        "rows": 309,
+        "canonicalBytes": 2294573,
+        "sha256": "3057d72f9354c90803f03e18b5cd1e762c616b720e5dd8cbf228353fd26635ee"
+      },
+      "characters": {
+        "rows": 221,
+        "canonicalBytes": 74613,
+        "sha256": "960038b1ff65245d9466451e89218d1954237c4eb73f07ef5f59c959016df711"
+      },
+      "character_saves": {
+        "rows": 221,
+        "canonicalBytes": 2583974,
+        "sha256": "484d8129fc2164a0dc61428488c92bc6d302609fce16120b5ec9cb9d279dba2f"
+      }
+    },
+    "productionProcessUnchanged": true,
+    "debugCommandsSent": 0
+  },
+  "release": {
+    "backendRun": 43715338164,
+    "stageRun": 43715571294,
+    "checkRun": 43716220739,
+    "promoteRun": 43719066800,
+    "rollbackRun": 43720357247,
+    "candidate": "dpl_DJXfLfzKDNSUojomGnZxdPahmVrP",
+    "protectedCheckPassed": true,
+    "publicQrPendingPassed": true,
+    "publicEntryAssetsVerified": 15,
+    "workerUnchangedBytes": 62863,
+    "workerUnchangedSha256": "4830a263f06df9901a41ac1b4c36142478559a7242d62c163790c5fc51c14c58"
+  },
+  "publicR1": {
+    "functionalPassed": true,
+    "classification": {
+      "kind": "r16-original-public-acceptance",
+      "accepted": false,
+      "checks": {
+        "exactSource": true,
+        "completeFunctionalRun": true,
+        "walletLoginOnly": true,
+        "movementOriginalEightSeconds": true,
+        "sixCompleteFonts": true,
+        "complete113": true,
+        "sharedNativeQuest": true,
+        "originalNative120": false,
+        "originalRuntimeBody120": true,
+        "workerRestart": true,
+        "normalLogout": true,
+        "bothBrowsersClosed": true
+      },
+      "source": "4204e920edde1d2c4a27e7bb7a2bba50ebd00860",
+      "deploymentId": "dpl_DJXfLfzKDNSUojomGnZxdPahmVrP",
+      "originalMoveBudgetMs": 8000,
+      "originalNativeBudgetMs": 120000,
+      "nativeAfterFirstFrameMs": 163326,
+      "runtimeBodyAfterFirstFrameMs": 51677,
+      "supplementary180ObservationChangesOriginalBudget": false,
+      "wholeParityAccepted": false
+    },
+    "startClickToFirstFrameMs": 9732,
+    "movementFromTrustedInputMs": 132,
+    "prewarm": {
+      "requested": 113,
+      "ok": 113,
+      "failed": 0
+    },
+    "fullBodyRecovery": {
+      "initialOk": 98,
+      "initialFailedUrls": [
+        "/original-ui/Prguse/1.png",
+        "/original-ui/Prguse/4.png",
+        "/original-ui/Prguse/6.png",
+        "/original-ui/Prguse/12.png",
+        "/original-ui/Prguse/13.png",
+        "/original-ui/Prguse/8.png",
+        "/original-ui/Prguse/76.png",
+        "/original-ui/UI_32bit/473.png",
+        "/original-ui/UI_32bit/472.png",
+        "/original-ui/Prguse/2034.png",
+        "/original-ui/Prguse/826.png",
+        "/original-ui/Prguse/827.png",
+        "/original-ui/Prguse/828.png",
+        "/original-ui/Prguse/1960.png",
+        "/original-ui/Prguse/1961.png"
+      ],
+      "requested": 15,
+      "recoveredUrls": [
+        "/original-ui/Prguse/1.png",
+        "/original-ui/Prguse/4.png",
+        "/original-ui/Prguse/6.png",
+        "/original-ui/Prguse/12.png",
+        "/original-ui/Prguse/13.png",
+        "/original-ui/Prguse/8.png",
+        "/original-ui/Prguse/76.png",
+        "/original-ui/UI_32bit/473.png",
+        "/original-ui/UI_32bit/472.png",
+        "/original-ui/Prguse/2034.png",
+        "/original-ui/Prguse/826.png",
+        "/original-ui/Prguse/827.png",
+        "/original-ui/Prguse/828.png",
+        "/original-ui/Prguse/1960.png",
+        "/original-ui/Prguse/1961.png"
+      ],
+      "failedUrls": [],
+      "unattemptedUrls": [],
+      "status": "done",
+      "requestFailures": []
+    },
+    "sixOriginalFontsPassed": true,
+    "normalLogout": true,
+    "bothBrowsersClosed": true,
+    "publicR2Executed": false,
+    "walletScope": "fresh internalTestnet wallet, one login signature, no funding or asset transactions, official phone viewport, not physical phone"
+  },
+  "passiveDiagnosis": {
+    "scope": "Passive timing diagnosis only; font network completion does not prove native font/atlas readiness. First observed asset200/EOF is not an original-image digest assertion. No deadlines or game behavior changed.",
+    "firstPlayableTestClockMs": 100109,
+    "startClickToFirstFrameMs": 9732,
+    "movementFromTrustedInputMs": 132,
+    "nativeAfterFirstFrameMs": 163326,
+    "runtimeBodyAfterFirstFrameMs": 51677,
+    "maxObservedMainThreadLongTaskMs": 323,
+    "prewarmDurationMs": 169817.80000001192,
+    "prewarmRecovery": {
+      "initialOk": 98,
+      "initialFailedUrls": [
+        "/original-ui/Prguse/1.png",
+        "/original-ui/Prguse/4.png",
+        "/original-ui/Prguse/6.png",
+        "/original-ui/Prguse/12.png",
+        "/original-ui/Prguse/13.png",
+        "/original-ui/Prguse/8.png",
+        "/original-ui/Prguse/76.png",
+        "/original-ui/UI_32bit/473.png",
+        "/original-ui/UI_32bit/472.png",
+        "/original-ui/Prguse/2034.png",
+        "/original-ui/Prguse/826.png",
+        "/original-ui/Prguse/827.png",
+        "/original-ui/Prguse/828.png",
+        "/original-ui/Prguse/1960.png",
+        "/original-ui/Prguse/1961.png"
+      ],
+      "requested": 15,
+      "recoveredUrls": [
+        "/original-ui/Prguse/1.png",
+        "/original-ui/Prguse/4.png",
+        "/original-ui/Prguse/6.png",
+        "/original-ui/Prguse/12.png",
+        "/original-ui/Prguse/13.png",
+        "/original-ui/Prguse/8.png",
+        "/original-ui/Prguse/76.png",
+        "/original-ui/UI_32bit/473.png",
+        "/original-ui/UI_32bit/472.png",
+        "/original-ui/Prguse/2034.png",
+        "/original-ui/Prguse/826.png",
+        "/original-ui/Prguse/827.png",
+        "/original-ui/Prguse/828.png",
+        "/original-ui/Prguse/1960.png",
+        "/original-ui/Prguse/1961.png"
+      ],
+      "failedUrls": [],
+      "unattemptedUrls": [],
+      "status": "done",
+      "requestFailures": []
+    },
+    "fonts": [
+      {
+        "font": "NotoSansTC.ttf",
+        "requests": 1,
+        "rangeRequests": 0,
+        "statuses": {
+          "200": 1
+        },
+        "cacheStatus": {
+          "None": 1
+        },
+        "firstRequestAfterFrameMs": -10399,
+        "lastNetworkFinishAfterFrameMs": 44937
+      },
+      {
+        "font": "NotoSansCJKsc-Regular.otf",
+        "requests": 43,
+        "rangeRequests": 43,
+        "statuses": {
+          "206": 30,
+          "none": 13
+        },
+        "cacheStatus": {
+          "HIT": 30,
+          "none": 13
+        },
+        "firstRequestAfterFrameMs": 3624,
+        "lastNetworkFinishAfterFrameMs": 109979
+      },
+      {
+        "font": "NotoSans-Regular.ttf",
+        "requests": 1,
+        "rangeRequests": 0,
+        "statuses": {
+          "200": 1
+        },
+        "cacheStatus": {
+          "None": 1
+        },
+        "firstRequestAfterFrameMs": 53581,
+        "lastNetworkFinishAfterFrameMs": 54536
+      },
+      {
+        "font": "NotoSansDevanagari-Regular.ttf",
+        "requests": 1,
+        "rangeRequests": 0,
+        "statuses": {
+          "200": 1
+        },
+        "cacheStatus": {
+          "None": 1
+        },
+        "firstRequestAfterFrameMs": 54539,
+        "lastNetworkFinishAfterFrameMs": 55401
+      },
+      {
+        "font": "NotoSansThai-Regular.ttf",
+        "requests": 1,
+        "rangeRequests": 0,
+        "statuses": {
+          "200": 1
+        },
+        "cacheStatus": {
+          "None": 1
+        },
+        "firstRequestAfterFrameMs": 55403,
+        "lastNetworkFinishAfterFrameMs": 55903
+      },
+      {
+        "font": "NotoSansArabic-Regular.ttf",
+        "requests": 1,
+        "rangeRequests": 0,
+        "statuses": {
+          "200": 1
+        },
+        "cacheStatus": {
+          "None": 1
+        },
+        "firstRequestAfterFrameMs": 55903,
+        "lastNetworkFinishAfterFrameMs": 56517
+      }
+    ],
+    "recoveredImageNetwork": [
+      {
+        "path": "/original-ui/Prguse/1.png",
+        "requestsObserved": 8,
+        "firstObserved200BodyFinishAfterFrameMs": 160315,
+        "source": "page",
+        "origin": "numeron.obelisk.build"
+      },
+      {
+        "path": "/original-ui/Prguse/4.png",
+        "requestsObserved": 7,
+        "firstObserved200BodyFinishAfterFrameMs": 160329,
+        "source": "service-worker-upstream",
+        "origin": "numeron.obelisk.build"
+      },
+      {
+        "path": "/original-ui/Prguse/6.png",
+        "requestsObserved": 7,
+        "firstObserved200BodyFinishAfterFrameMs": 160321,
+        "source": "service-worker-upstream",
+        "origin": "numeron.obelisk.build"
+      },
+      {
+        "path": "/original-ui/Prguse/12.png",
+        "requestsObserved": 7,
+        "firstObserved200BodyFinishAfterFrameMs": 154189,
+        "source": "service-worker-upstream",
+        "origin": "assets.mir2.obelisk.build"
+      },
+      {
+        "path": "/original-ui/Prguse/13.png",
+        "requestsObserved": 6,
+        "firstObserved200BodyFinishAfterFrameMs": 160332,
+        "source": "service-worker-upstream",
+        "origin": "numeron.obelisk.build"
+      },
+      {
+        "path": "/original-ui/Prguse/8.png",
+        "requestsObserved": 5,
+        "firstObserved200BodyFinishAfterFrameMs": 161818,
+        "source": "service-worker-upstream",
+        "origin": "numeron.obelisk.build"
+      },
+      {
+        "path": "/original-ui/Prguse/76.png",
+        "requestsObserved": 9,
+        "firstObserved200BodyFinishAfterFrameMs": 26391,
+        "source": "page",
+        "origin": "assets.mir2.obelisk.build"
+      },
+      {
+        "path": "/original-ui/UI_32bit/473.png",
+        "requestsObserved": 5,
+        "firstObserved200BodyFinishAfterFrameMs": 162994,
+        "source": "service-worker-upstream",
+        "origin": "numeron.obelisk.build"
+      },
+      {
+        "path": "/original-ui/UI_32bit/472.png",
+        "requestsObserved": 5,
+        "firstObserved200BodyFinishAfterFrameMs": 163031,
+        "source": "service-worker-upstream",
+        "origin": "numeron.obelisk.build"
+      },
+      {
+        "path": "/original-ui/Prguse/2034.png",
+        "requestsObserved": 7,
+        "firstObserved200BodyFinishAfterFrameMs": 139975,
+        "source": "service-worker-upstream",
+        "origin": "assets.mir2.obelisk.build"
+      },
+      {
+        "path": "/original-ui/Prguse/826.png",
+        "requestsObserved": 6,
+        "firstObserved200BodyFinishAfterFrameMs": 162814,
+        "source": "service-worker-upstream",
+        "origin": "numeron.obelisk.build"
+      },
+      {
+        "path": "/original-ui/Prguse/827.png",
+        "requestsObserved": 6,
+        "firstObserved200BodyFinishAfterFrameMs": 162855,
+        "source": "service-worker-upstream",
+        "origin": "numeron.obelisk.build"
+      },
+      {
+        "path": "/original-ui/Prguse/828.png",
+        "requestsObserved": 6,
+        "firstObserved200BodyFinishAfterFrameMs": 162951,
+        "source": "service-worker-upstream",
+        "origin": "numeron.obelisk.build"
+      },
+      {
+        "path": "/original-ui/Prguse/1960.png",
+        "requestsObserved": 8,
+        "firstObserved200BodyFinishAfterFrameMs": 26393,
+        "source": "page",
+        "origin": "assets.mir2.obelisk.build"
+      },
+      {
+        "path": "/original-ui/Prguse/1961.png",
+        "requestsObserved": 6,
+        "firstObserved200BodyFinishAfterFrameMs": 162631,
+        "source": "service-worker-upstream",
+        "origin": "numeron.obelisk.build"
+      }
+    ],
+    "observerCleanupComplete": true,
+    "observerErrors": [],
+    "inference": "Several required HUD image bodies are first observed around154–163seconds, while font network finishes by110seconds. Inspect image source/admission and worker configuration/retry timing next; do not ascribe this run solely to fonts or a main-thread freeze."
+  },
+  "rollback": {
+    "passed": true,
+    "webSource": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+    "deployment": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8",
+    "gatewaySource": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5",
+    "oldRows": {
+      "accounts": {
+        "preexistingRows": 309,
+        "currentRows": 310,
+        "preexistingCanonicalBytes": 2294573,
+        "preexistingSha256": "3057d72f9354c90803f03e18b5cd1e762c616b720e5dd8cbf228353fd26635ee",
+        "preexistingRowsUnchanged": true
+      },
+      "characters": {
+        "preexistingRows": 221,
+        "currentRows": 222,
+        "preexistingCanonicalBytes": 74613,
+        "preexistingSha256": "960038b1ff65245d9466451e89218d1954237c4eb73f07ef5f59c959016df711",
+        "preexistingRowsUnchanged": true
+      },
+      "character_saves": {
+        "preexistingRows": 221,
+        "currentRows": 222,
+        "preexistingCanonicalBytes": 2583974,
+        "preexistingSha256": "484d8129fc2164a0dc61428488c92bc6d302609fce16120b5ec9cb9d279dba2f",
+        "preexistingRowsUnchanged": true
+      }
+    },
+    "originalConfigurationsUnchanged": 22,
+    "databaseRestored": false,
+    "publicReadback": {
+      "checkedAt": "2026-11-15T13:51:00.533Z",
+      "passed": true,
+      "rows": [
+        {
+          "url": "https://numeron.obelisk.build/version",
+          "status": 200,
+          "revision": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+          "passed": true
+        },
+        {
+          "url": "https://165.154.65.136.sslip.io/playtest/health",
+          "status": 200,
+          "revision": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5",
+          "passed": true
+        }
+      ]
+    },
+    "qr": [
+      {
+        "locale": "zh-CN",
+        "passed": true,
+        "createAttempts": 1,
+        "realMatrix": true,
+        "sameIntentPending": true,
+        "normalCancel": true,
+        "pollsAfterCancel": 0,
+        "browserClosed": true
+      },
+      {
+        "locale": "zh-TW",
+        "passed": true,
+        "createAttempts": 1,
+        "realMatrix": true,
+        "sameIntentPending": true,
+        "normalCancel": true,
+        "pollsAfterCancel": 0,
+        "browserClosed": true
+      }
+    ],
+    "sshControllerClosed": true
+  },
+  "layoutCandidate": {
+    "source": "627b68ae4dd5575a40ea37df16603087ed68a522",
+    "published": false,
+    "strictBuild": {
+      "candidate": "44b-progress-layout-2102c056",
+      "buildId": "pq72WF2-YPIhKCFQ-xzuP",
+      "durationMs": 61976,
+      "dist": ".next-progress-layout-r1",
+      "sourceRestored": true,
+      "normalizedBuiltDraftEqualsCommittedSource": true
+    },
+    "componentFixtureCases": 200,
+    "componentFixtureScope": "Actual CacheProgressPanel component fixtures over immutable prior real-game screenshots, five viewport transforms, ten languages/four states. Layout/overlap evidence only; no game actions, runtime or public-release qualification.",
+    "componentReferences": [
+      {
+        "name": "Windows-R16-life-information",
+        "x": 0,
+        "y": 646,
+        "width": 104,
+        "height": 108
+      },
+      {
+        "name": "Windows-R16-main-HUD",
+        "x": 0,
+        "y": 616,
+        "width": 1024,
+        "height": 152
+      },
+      {
+        "name": "Windows-R16-minimap",
+        "x": 898,
+        "y": 0,
+        "width": 128,
+        "height": 154
+      },
+      {
+        "name": "observed-shared-Q-window",
+        "x": 197,
+        "y": 64,
+        "width": 310,
+        "height": 465
+      },
+      {
+        "name": "attack-mode-guide",
+        "x": 8,
+        "y": 8,
+        "width": 224,
+        "height": 85
+      },
+      {
+        "name": "quest-guide",
+        "x": 8,
+        "y": 116,
+        "width": 304,
+        "height": 251
+      }
+    ],
+    "componentFixtureProof": "layout-visual-receipt.json",
+    "functionalGameRegressions": [
+      {
+        "candidate": "44b-progress-layout-2102c056",
+        "passed": true,
+        "mode": "compatibility",
+        "language": "en-US",
+        "movementMs": 188,
+        "nativeAfterFirstFrameMs": 35803,
+        "naturalPngAfterFirstFrameMs": 2421,
+        "sixFontsOriginalSha": true,
+        "full113": true,
+        "firstAndReenteredQ": true,
+        "normalLogouts": 2,
+        "sameRoleSave": {
+          "normalLogout": true,
+          "position": {
+            "x": 288,
+            "y": 617
+          },
+          "originalRolesAndSavesPreserved": true,
+          "newRoleReopenedAtSavedPosition": true
+        },
+        "sourceSnapshotUnchanged": true,
+        "loadingOverlay": [],
+        "liveVisibleLoadingOverlayObserved": false,
+        "closed": {
+          "browser": true,
+          "proxy": true,
+          "next": true,
+          "gateway": true
+        }
+      },
+      {
+        "candidate": "44b-progress-layout-2102c056",
+        "passed": true,
+        "mode": "webgl2",
+        "language": "zh-TW",
+        "movementMs": 210,
+        "nativeAfterFirstFrameMs": 84979,
+        "naturalPngAfterFirstFrameMs": 29656,
+        "sixFontsOriginalSha": true,
+        "full113": true,
+        "firstAndReenteredQ": true,
+        "normalLogouts": 2,
+        "sameRoleSave": {
+          "normalLogout": true,
+          "position": {
+            "x": 288,
+            "y": 617
+          },
+          "originalRolesAndSavesPreserved": true,
+          "newRoleReopenedAtSavedPosition": true
+        },
+        "sourceSnapshotUnchanged": true,
+        "loadingOverlay": [],
+        "liveVisibleLoadingOverlayObserved": false,
+        "closed": {
+          "browser": true,
+          "proxy": true,
+          "next": true,
+          "gateway": true
+        }
+      }
+    ],
+    "liveLoadingOverlayObservedInGame": false,
+    "boundary": "Both real game samples had an empty loadingOverlay array.200 component fixture layouts prove the visible states; actual visible loading and formal release remain open. Backgrounds are immutable earlier real-game screenshots, not newly played Arabic gameplay."
+  },
+  "preservation": {
+    "baselineUnrelatedFiles": 29,
+    "rawShaUnchanged": 29,
+    "foreignFiles": [
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/chat.rs",
+        "bytes": 142768,
+        "sha256": "e80072eff58555cdfaa8963eaf21ce5556da247507ae49b564222484138a2437"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/companion.rs",
+        "bytes": 120392,
+        "sha256": "cfc9755f516ec7a16bc2bfcd202e240ffa7b0be8246b93d0cb2b030475a712df"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hud.rs",
+        "bytes": 98062,
+        "sha256": "556acc585807ca76d8e0fa0c0374ca5066f6d5b22f1aad44329b98d21fadc967"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hud_layout.rs",
+        "bytes": 15885,
+        "sha256": "89e767b5f26e6db984e29eb71f23e8f96ba34c64aa79d7b6aa95cb2175c94da0"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hud_reference.rs",
+        "bytes": 18162,
+        "sha256": "f3ad121ea8cb02cdb7b109553b5ae31c9bd2867f5684fd120a74a657a9dde803"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/item_image.rs",
+        "bytes": 15074,
+        "sha256": "94bcc11c7ebd58ca099da00c6006f6dbae6f83c10973729b8b43963115ffa7f4"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/login.rs",
+        "bytes": 13055,
+        "sha256": "2085337d2c1fa164f9e98796a40d307d82c585cb2e5e367adaa9e9f234192321"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/notice.rs",
+        "bytes": 29559,
+        "sha256": "e5cc1662c8e3fa2c072bbcbe6e6700524ac8a284219d435a76c1b3894c5df6b8"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/pc_login.rs",
+        "bytes": 12648,
+        "sha256": "1e033f4ca776f9225d98aadcf020f7d35323e7d659b4ab98053dd3ea9ab9b353"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/native_display.rs",
+        "bytes": 46516,
+        "sha256": "d04466e3bafb3a201e399ff9dbc3ffecaf6a13c31ca1f3044c95fa3f8f3ab9ef"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs",
+        "bytes": 172715,
+        "sha256": "b47681702030a30f1d99673a79e2b5d350aee4b1541d7173c2c15cd2f48ade69"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/periodic_quest_ui_tests.rs",
+        "bytes": 51317,
+        "sha256": "f99a8d5f2922036aa807f01f10a706a1935290f8eb7fae633d3770f4dd93b3e5"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/portable_bag_ui.rs",
+        "bytes": 177088,
+        "sha256": "d7f9f0574a43394facb4da476397e6a367c1ba5852312e46e2ee66caaa7e5014"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/quest_hunt_regions.rs",
+        "bytes": 12422,
+        "sha256": "15676c18c1812c4293087b98768a97be9a909fcab7de22aa2d390b227ffaea85"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-windows/src/atlas.rs",
+        "bytes": 163160,
+        "sha256": "930028511aee30592d94dda85e8175d76149cc38d3400d9c333fc94d6d4bdf21"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-windows/src/effects.rs",
+        "bytes": 558300,
+        "sha256": "adc33b2398789a77a6608a978911d32c2d7667d55010ab53e842b7818c7cc176"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-windows/src/entity_presentation.rs",
+        "bytes": 247361,
+        "sha256": "b3e0623cdebbcb2194635c75f9fff9f7c90b8a7519eef683b3a5656a23ac72b3"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-windows/src/hud_layout_pointer_input_tests.rs",
+        "bytes": 16056,
+        "sha256": "6bf7506b8a8f559c847b53560105de9b703e12b8e9f9c1a471ee26d160bf7455"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-windows/src/input.rs",
+        "bytes": 484911,
+        "sha256": "e316672a3b346272b5b621ce9a84af7c8a98aca678acd5c7e65fea427ba35a05"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-windows/src/main.rs",
+        "bytes": 24407,
+        "sha256": "f71773dcd52bc8e16b2a772e0ab3bf19547c839088e751e82ab2e05c6532a397"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-windows/src/pc_hud.rs",
+        "bytes": 3897,
+        "sha256": "9c8ce9950bd113bf2e454bd448a67c6de96ff939f5a09ce6e7cd5a60f25f63e8"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-windows/src/pc_hud_visual_tests.rs",
+        "bytes": 7106,
+        "sha256": "51de89e50c1bba193a8e6b7d18b9d3a209e166ed476b45a8310c80167fba2839"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-windows/src/shell_bridge.rs",
+        "bytes": 51362,
+        "sha256": "729b843d671a2dbe70407168b0a528591bb99ca28a92c6d77df0016525633713"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/runtime/src/lib.rs",
+        "bytes": 477125,
+        "sha256": "5a0c186b891228f99fc35642408249391f58d243021851c574b14c38c0241c35"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/runtime/src/native_ingest.rs",
+        "bytes": 159946,
+        "sha256": "dbfb577db9395086576fc1d9da0f7c458f1836eb69356a12cdca4b384e69fbce"
+      },
+      {
+        "path": "mir2-web3/apps/web/app/original-client-shell.tsx",
+        "bytes": 375267,
+        "sha256": "970ad6da69d41e9e8ec8d4f4f16ccd5313d9d4b84a261782bc7c7cf1d1cb5a88"
+      },
+      {
+        "path": "mir2-web3/apps/web/scripts/test-stage5-adapters.mjs",
+        "bytes": 789539,
+        "sha256": "32ec79ce9b7a10c13c3a638ed4c8258137945ca7af4f594b76701dfce59bfa7d"
+      },
+      {
+        "path": "mir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md",
+        "bytes": 146341,
+        "sha256": "024cd7215baa87027f5ae3e9d9d116593a9d088c1957cb844cb29f690dae1068"
+      },
+      {
+        "path": "mir2-web3/docs/PC-UI-INTEGRATION-20261109.zh-CN.md",
+        "bytes": 7181,
+        "sha256": "a7fd33032c54a32fc36282f032dc6bbfa059885deed798752cf264ad470379e2"
+      }
+    ],
+    "olderFailedReceiptsKept": true,
+    "original8_65_120GatesUnchanged": true
+  },
+  "next": [
+    "inspect required HUD image source/admission and worker configuration/retry timing",
+    "avoid attributing Native163s solely to fonts or main-thread freeze",
+    "do not rerun unchanged4204",
+    "separate layout candidate needs actual visible loading state and production qualification",
+    "keep remaining WindowsR16 1:1 scope: old public roles, threeclass1to30,currentmaps/skills,Alo,language/pixels,Windowswindow,physicalphone,oldfixture failures"
+  ]
+}

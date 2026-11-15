@@ -1,5 +1,9 @@
 # Crystal Server Parity
 
+## 2026-11-15 4204同源旧档通过，公网Native原门槛失败后回退
+
+4204e920ed的原Linux artifact经310项共享世界相关／216项原生PG检查及1841文件SHA核对，309／221／221旧行克隆后普通登录、移动、两次注销与同角落点通过，1条中立怪行走，未用QA命令。曾切同源正式网关；公网功能／六字体／113通过，但Native163326ms超原120秒后已恢复fd3，Web回20de／AWss，不恢复数据库；原309／221／221及22配置保持，新增QA进度保留。下一项为必需HUD图晚到，未据这些分项认定容量、全体AI／巡逻或整体Candidate／Accepted。[同源资格、原失败与数据保全](evidence/r16-hud-public-budget-20261115/README.md)
+
 ## 共享 AI1/2 的 Linux 及旧档边界已验，公网未完成（2026-11-15）
 
 同源aa524edc76经303项共享Zone／216项PG与完整ELF核验，克隆旧库普通进城、自然ObjectWalk和移动保存通过，旧行全部一致。曾切换正式，但Web行走完整包和运行包120秒失败后两端回退，Gateway仍fd3；没有据隔离结果认定公网自然PNG、其他AI或全局ProcessRoam完成。[原判定、回退和范围](evidence/r16-paired-release-20261115/README.md)
