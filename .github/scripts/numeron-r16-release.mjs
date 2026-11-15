@@ -16,11 +16,23 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: "aa524edc76d85e01f2ae8963957bbacd9728eac2",
+  source: "0bcd61e0f27147f005dee3d6c49abb6a1af15157",
   sourceRef: BRANCH,
-  baseSource: "5d7bf8c2ea58d2ac68bbca5f18c8240fdc929d45",
+  baseSource: "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
   assetSource: "f2de762309768b51b39438c2437c14e819df9bf7",
   sourceCommits: [
+  "f51306c5f1527a025b1a7a23dc2e0e624e05aa0d",
+  "b784b2f22d06d273dab1784d811d6c882b4fdddb",
+  "810f181fac18597f220235fea66b7e4b02c8846f",
+  "9aa2b0c4acb2a8b38b83023a678eb78626817b92",
+  "9d06953d7bbb94d960686bed51048d0628996d7e",
+  "05d233ed248e8b78128580ae71e7618f4338ab5c",
+  "94497a6094a3ac29c9366c26f325df19a3b0a19e",
+  "146bdf257665205a672db3fed5c984d63c7ea0ca",
+  "47ef2650392808f5bfce05d197cdb8eacc719cea",
+  "ceb1c1132f9677ca18f7467cba5278cdca1ec9c0",
+  "4aead752f62143199344bd7584c5b9120b6d30ba",
+  "5d7bf8c2ea58d2ac68bbca5f18c8240fdc929d45",
   "1cac973aa7dfc5a563a05012182341cd0fa22a49",
   "4e43d8ddcb9506cd4f0673335066b65a525a8827",
   "fef34fb07a23880c2e3ac7a87bd79d811677b6ba",
@@ -35,17 +47,42 @@ export const QR_RELEASE = Object.freeze({
   "dca152cd15fc5ab9782fd28f2247d89c5faa9e6a",
   "e9aa44751e4ffc1d91a926f22fb8175f585be088",
   "acbe3aea4bf5aaa5ce98efe76807da99427e9575",
-  "aa524edc76d85e01f2ae8963957bbacd9728eac2"
+  "aa524edc76d85e01f2ae8963957bbacd9728eac2",
+  "39832d328e40406257942f1b9385a823effd8c07",
+  "e157c2d132995132497c7bc2750ad96283bae794",
+  "213fc1737ffc6da3b84de98eed2f92b59c30a51d",
+  "32eb62774dc8ac1a49876808f6118948f137d5b6",
+  "d3aefa26d9b9a2d3aa4c12c6aebee94372cea9a6",
+  "d35e7327aa396bd0e5f15d6df4567107e9269882",
+  "f28dc9453856955fce19e005647d9612a2930f7c",
+  "b80759fe3b6a1e636268ae8b2c40f17ff4410de9",
+  "362ea11c2498ffb7dda28d38299ed4aa6ca6c425",
+  "1b5a9d1b4ccd06a007103a393cb7a670fe5fa422",
+  "1149616b3cd7e071599c3674aa9644cdfc0bd34b",
+  "9eac66ed3290ed5c4e60eb8bea07cf88619a8847",
+  "4ad940554d3588bde9e4aceac282a923265dacfe",
+  "99b959cef4286cc0c11bfa9f7a892bac061344ee",
+  "b1c7da999877507f147fbe19c448507a021f4d2c",
+  "b33533f4aa4c3fa00d9f35f2ad9d4942dd638045",
+  "b3bff60c1d91941fcb39e7ebe1ff2a5ed8e92eba",
+  "766d81d4dc786fcc48275ae020b5550a18e9601b",
+  "88002a0000943f221f494cc61b8bb28486c923db",
+  "0bcd61e0f27147f005dee3d6c49abb6a1af15157"
 ],
   changedFiles: [
   {
     "filename": ".github/scripts/numeron-r16-release.mjs",
-    "sha": "324b62d9cb2a9c138acd0b3cbb5b42489f26de12",
+    "sha": "58d65cdea3a8e9f2dd78fffd6a7ee204de272c2d",
     "status": "modified"
   },
   {
     "filename": ".github/workflows/promotion-website-release.yml",
-    "sha": "6967b8c9af6da7c4ca5962d2f0ce67e7fbefa92f",
+    "sha": "62db49ff56402b38451e58a115496c175a9c28b6",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/gateway/Cargo.toml",
+    "sha": "725948d0afd19095ca32467587bc6924c3176930",
     "status": "modified"
   },
   {
@@ -56,6 +93,51 @@ export const QR_RELEASE = Object.freeze({
   {
     "filename": "mir2-web3/apps/gateway/src/shared_experience_profiles.rs",
     "sha": "c76ecb56fe1273a58dfebce7e370a71dfe0ab2ca",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/gateway/src/web.rs",
+    "sha": "6dd09c63fe031e2ed388691fe8339f7b3c7e2c91",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/gateway/src/web/catalog_transport.rs",
+    "sha": "e94dd375f60bce743b8a394aa8db3111750e4a34",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/gateway/src/web_activities_tests.rs",
+    "sha": "a691f7157de6681e6a565a7d50c0712756d7fff1",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/gateway/src/web_background_execution.rs",
+    "sha": "77737f16776e7c8a61cf1cbcaefa033e0551955b",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/apps/gateway/src/web_billing_tests.rs",
+    "sha": "2d2079702b1cbfc881099dfc35a133cac5e348c6",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/gateway/src/web_game_shop_gift_tests.rs",
+    "sha": "e10f1331903a0def3ae67cb0de0b21373122880c",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/gateway/src/web_mining_tests.rs",
+    "sha": "0c1cf44dd0d1aa9627cf603ad036c47f4b275484",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/gateway/src/web_monthly_card_tests.rs",
+    "sha": "43ddde7b40c500447d8bb475aa802d352036e59a",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/gateway/src/web_native_resume_handoff_ws_tests.rs",
+    "sha": "eb80b14eeb330865d4f34ff52b549dd014e53699",
     "status": "modified"
   },
   {
@@ -94,6 +176,11 @@ export const QR_RELEASE = Object.freeze({
     "status": "modified"
   },
   {
+    "filename": "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
+    "sha": "89016f7a103d61a2722ff065d6ded018ed06019a",
+    "status": "modified"
+  },
+  {
     "filename": "mir2-web3/apps/web/app/components/original-client-shell-types.ts",
     "sha": "a1ee05cca3ca8d43e8ad15b947415fd574ee32e0",
     "status": "modified"
@@ -105,7 +192,42 @@ export const QR_RELEASE = Object.freeze({
   },
   {
     "filename": "mir2-web3/apps/web/app/page.tsx",
-    "sha": "f2080da34fc053f560a203f12891f92dd9131ee7",
+    "sha": "d08abe72b671a3eda9cd7e3bd55593d934a3eed9",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/web/lib/asset-cache-progress.ts",
+    "sha": "e48afa923d8824d156802708bbfec65990302802",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/apps/web/lib/bevy-runtime-font-prewarm.ts",
+    "sha": "5be9d633b6d764f40550990ded49795cddacf6f8",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/web/lib/generated/r16-entry-bootstrap-chunks.ts",
+    "sha": "2e7d97a19ccdb255ef1d88b2115085149546f73b",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/web/lib/generated/r16-entry-walking-parts.json",
+    "sha": "38d4b23fe592da18d4f12e780578a63a234b6cc9",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/apps/web/lib/pinned-bootstrap-chunk.ts",
+    "sha": "74e3b974a04e517207e8a14cda6e2847957831c5",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/web/lib/pinned-entry-actor-parts.ts",
+    "sha": "92608828de457c5eb9b2564ca486a9c45c6d9f9e",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/apps/web/lib/r16-browser-localization.ts",
+    "sha": "5bd6342e5ecd317df876082fe0cae2df42a552a7",
     "status": "modified"
   },
   {
@@ -119,18 +241,118 @@ export const QR_RELEASE = Object.freeze({
     "status": "modified"
   },
   {
+    "filename": "mir2-web3/apps/web/package.json",
+    "sha": "dcb2148d7b513f6091d8184e0d4b05d7be6b66fc",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/web/public/bootstrap/r16-visual-parts/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f/1f8307486897ae7be3af2e0f64f95dc4d2e21222c6e99ed1a1ae919300c2daa9.json",
+    "sha": "d84d7f0aee65e78120fe912232c74bf6e0eda3e4",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/apps/web/public/bootstrap/r16-visual-parts/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f/65db6b2b5abdfa41a08c81f8ee577eb306aafc21c2b14b0c18281d13a9daec97.json",
+    "sha": "b7cf6f6e4a9ce27842e723a89965adaac3870542",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/apps/web/public/bootstrap/r16-visual-parts/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f/774e7639568a7cf305cf62ea0273a2d0820abb6f5a696afdd8c349f6eb8a662d.json",
+    "sha": "a86de05b4b53dbcf0447886ae748cc704880df2d",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/apps/web/public/bootstrap/r16-visual-parts/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f/add27ee1a13b42f367f5dddde27581712bcb85b8cd670a9f8765eec43d248dfa.json",
+    "sha": "3efafba4836671ff574f46a7171921d46f2c29ad",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/apps/web/public/bootstrap/r16-visual-parts/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f/d47c92dfcbaa0e7bb9d2790c2f8204cd75c7e5fd5673cc08628d1a90d45d8f4b.json",
+    "sha": "5c1db3b61ec56dc3b3678df07b25d9d2ff2865e2",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+    "sha": "0cd0941bd7b3d2499b14a9cb5fec5d4ee634bebf",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/web/scripts/generate-font-range-pins.mjs",
+    "sha": "09490fc3e2ee96ebf14f479df6f52ee1beed636f",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/apps/web/scripts/generate-r16-bootstrap-chunks.mjs",
+    "sha": "050dc8c395e57925fa80bd0628249ea00fea39ce",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/web/scripts/lib/static-cache-audit.mjs",
+    "sha": "049d76512da9bd9ee54a915fe2287fa2550fb8e8",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/apps/web/scripts/lib/verify-r16-walking-chunks.mjs",
+    "sha": "646f7e3950b6abd7d616191fcd3e8795c7675d13",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/apps/web/scripts/smoke-asset-font-ranges.mjs",
+    "sha": "d2c66b2a83a4cb364110ea00040d2b104966a885",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/apps/web/scripts/smoke-asset-static-admission.mjs",
+    "sha": "7f88a67bff8ab88dc0c87e9b2d6c9f27c9f8e8a2",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/apps/web/scripts/test-asset-cache-progress.mjs",
+    "sha": "268015912598f117c9a0f5aaec1089d704d612c3",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/apps/web/scripts/test-asset-worker-font-ranges.mjs",
+    "sha": "84bc8b5b7147ecb82ea903e5f09952c182a58a56",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/apps/web/scripts/test-asset-worker-static-admission.mjs",
+    "sha": "47ba6372bebbfe575413bccf3277fcec6a93c7ae",
+    "status": "added"
+  },
+  {
     "filename": "mir2-web3/apps/web/scripts/test-bevy-quest-ui.mjs",
     "sha": "53797b30d7a5eb0c2faf7449e5633624a8b81d94",
     "status": "modified"
   },
   {
-    "filename": "mir2-web3/apps/web/scripts/test-map-route-feedback.mjs",
-    "sha": "a05e933dccfb5babf15db0ce692059de15cd08dd",
+    "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs",
+    "sha": "b435bdf60c7009e7470b9d942ba21bc9e01ea167",
     "status": "modified"
   },
   {
+    "filename": "mir2-web3/apps/web/scripts/test-login-first-visible-edit.mjs",
+    "sha": "ef83455f6b089277753bc18958e512fd864b2274",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/apps/web/scripts/test-map-route-feedback.mjs",
+    "sha": "a05e933dccfb5babf15db0ce692059de15cd08dd",
+    "status": "added"
+  },
+  {
     "filename": "mir2-web3/apps/web/scripts/test-pinned-bootstrap-chunk.mjs",
-    "sha": "3b3bbef33250f0d9377160e78ab0767a3ead4a73",
+    "sha": "0195f57a5b9ec507b135658ce46d91f54ba24de7",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/web/scripts/test-pinned-entry-actor-parts.mjs",
+    "sha": "436d2e109c93ac6a41bfc0f9f332d41870bec1a9",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/apps/web/scripts/test-r16-browser-localization.mjs",
+    "sha": "a2105ce527a634d3a9cc8a7c35b15038694821bc",
     "status": "modified"
   },
   {
@@ -139,39 +361,149 @@ export const QR_RELEASE = Object.freeze({
     "status": "modified"
   },
   {
+    "filename": "mir2-web3/apps/web/scripts/test-r16-quest-navigation.mjs",
+    "sha": "b0df0e200c95d66814d046bd9f14d0f5a65c68e1",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/web/scripts/test-r16-static-source-coverage.mjs",
+    "sha": "fabea7c3f1be1d7919cd605a6c6922c4a8acfe4f",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/apps/web/scripts/test-r16-walking-chunk-verification.mjs",
+    "sha": "1fbc97c594d4b716f40e67607f0bb4cb3a11d223",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/apps/web/scripts/test-static-cache-audit.mjs",
+    "sha": "d2f97fc7511394b811d5bc7bda7455fc6ac6aaf0",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/apps/web/scripts/verify-r16-walking-build.mjs",
+    "sha": "ecf2a7b8cf31be2dbe32bf1bfff0e96c7f71b30a",
+    "status": "added"
+  },
+  {
     "filename": "mir2-web3/docs/AGENT-CURRENT.md",
-    "sha": "6fe5c3bc8d4bfead60d796918aeb7838ba2bef81",
+    "sha": "d3a1a21cfdbe038aeb03de48e83a3d5a0396f068",
     "status": "modified"
   },
   {
     "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
-    "sha": "3e11c0e41d99ae10932d1764667fdd0f9ef3ef2c",
+    "sha": "6c13fd6e45b0255efd69d9a71860b104b19d53ac",
     "status": "modified"
   },
   {
     "filename": "mir2-web3/docs/BACKEND-1TO1-PROGRESS.md",
-    "sha": "d0d8cbbace973e08da8f1e786292a82b56c46e0d",
+    "sha": "7d7bec11b2a3783299602a32828852dd4d677671",
     "status": "modified"
   },
   {
     "filename": "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
-    "sha": "20b95e67ffd87232dc6c736246a14829fb3f17fb",
+    "sha": "6034efba10dfb7b6401c2dd2e38e058dc3e509c0",
     "status": "modified"
   },
   {
     "filename": "mir2-web3/docs/CRYSTAL-SERVER-PARITY.md",
-    "sha": "b8cca2fb29ff8cf89dc8548ec549e0781f781d0f",
+    "sha": "601c28d0801664d45c41bc2e488dc8489f216a8f",
     "status": "modified"
   },
   {
     "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
-    "sha": "253fde8b1b21de4153c019b1440a5d1dc952dfaa",
+    "sha": "956fbcffc69c20a6b34bd6d17b5201c72a2a1d70",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md",
+    "sha": "d9b890f5d6867265395ae06ee6785490805a201f",
     "status": "modified"
   },
   {
     "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/README.zh-CN.md",
-    "sha": "b4c380f66e93211f77ffe386fee0d85e8150421e",
+    "sha": "d60ee28bcee85967463c0abdeae3b1ed4202f198",
     "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/background-budget.calibration2.closed.json",
+    "sha": "a1319016967338c2588fb5a6b3efb88a55247f69",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/background-budget.default100.closed.json",
+    "sha": "be76b56ceaf9e4d897322bea7d9621ba90e84463",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/background-budget.default100.resource-analysis.json",
+    "sha": "7d8289ee062953b90d55ba14b13d3df78353e8d5",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/background-budget.linux-native-subset.json",
+    "sha": "0a9ad94640d5c5e86702f0d80c0d389ee37c8de6",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/background-budget.native143-and-integration.json",
+    "sha": "29adac6f716e6343a0adf6f7d0f5877806267399",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/background-budget.windows-release.json",
+    "sha": "a1e7c4ed3eb7b88f94edbc3656e9296d0a267e06",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/cloud-fd3-readonly-20261115.public.json",
+    "sha": "1a908b9003b00270451aca04fba79193556f0ce1",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/crystal-paced-admission.calibration2.closed.json",
+    "sha": "7719d8305d19caf13eff4ffeab2519b9e0541241",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/crystal-paced-admission.dense100.closed.json",
+    "sha": "364d8bf56738694590e5895b35b6d030dc1d53c6",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/mentor-parse-default-scales.resource-analysis.json",
+    "sha": "7163ec57deedf02b5ea8f867b611e640c29a779b",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/mentor-parse-default100.message-types.json",
+    "sha": "0ff057b204e103c8c2d1086b7550b6ad181491e4",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/mentor-parse-slow20-calibration2.closed.json",
+    "sha": "3ff17bfcfe507f1e7f0099dac1994a4cd92d988c",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/mentor-parse-slow20-dense100.closed.json",
+    "sha": "9302569278aef7bdff1873c3cfdfa870470b3a04",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/mentor-parse-slow20-dense100.elapsed-audit.json",
+    "sha": "8726a1511c4e8c1b133387d068ea79a597542f35",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/projection-mentor-parse-default25.closed.json",
+    "sha": "9ed0d9b1feef2c4619ddec1ee3c4e8a0ce6dee5a",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/projection-mentor-parse-default50.closed.json",
+    "sha": "5f5ade10ee426e89d36b79e3bbb75c9e584965ef",
+    "status": "added"
   },
   {
     "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/zone-admission-handoff.calibration2.closed.json",
@@ -196,6 +528,16 @@ export const QR_RELEASE = Object.freeze({
   {
     "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/zone-admission-handoff.native35.json",
     "sha": "90709502d7784fbc078d0241a151b130eab33ae9",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/zone-admission-handoff.selected-trace100.analysis.json",
+    "sha": "0e1eade6f1a17d5d69d475f9d575d84242e94d72",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/zone-admission-handoff.selected-trace100.closed.json",
+    "sha": "ab7c5ca8a4c11564a9705618034624994391d07b",
     "status": "added"
   },
   {
@@ -294,6 +636,156 @@ export const QR_RELEASE = Object.freeze({
     "status": "added"
   },
   {
+    "filename": "mir2-web3/docs/evidence/r16-font-edge-cache-20261115/README.md",
+    "sha": "6d92658aa3775ae9f25a665eba9c68252988d6ff",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-edge-cache-20261115/checks.tap.txt",
+    "sha": "70ae924198b7a9545fe73b4bc8c807fcdf0a6cf8",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-edge-cache-20261115/default-diary-open.png",
+    "sha": "ec6c21ad7596835c2dddddd1def6e0a1bc5e8b8f",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-edge-cache-20261115/default-reopened-diary-closed.png",
+    "sha": "c03707218354702cb48bfd8ecfecf55c6903ec61",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-edge-cache-20261115/private-receipt-pins.json",
+    "sha": "27642f5c71bb5c1f003a28cf127a10692da6a149",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-edge-cache-20261115/qualification.json",
+    "sha": "01cb3b03e69794bc9e54fd54c73cccd25c0baa5b",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-edge-cache-20261115/shared-tw-diary-open.png",
+    "sha": "e90d8e98a3f07c251ed6a5672045dc906757ca20",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-edge-cache-20261115/shared-tw-reopened-diary-closed.png",
+    "sha": "c2738809b98865a4f650ea117f3347977bb9cddb",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-fallback-chain-20261115/README.md",
+    "sha": "7e352442150e88a2ce1ef9abd01bd0e67fcc93a5",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-fallback-chain-20261115/production/README.md",
+    "sha": "ed0fed6a80eb014322d9a07dfdaba2aad583c73c",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-fallback-chain-20261115/production/final-readback.json",
+    "sha": "aee7701518d7886f911db2318af6fa6020efb227",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-fallback-chain-20261115/production/loading-observations.json",
+    "sha": "c31f629fd4ff99b42a0c2e03e6c4f5a8ffaf104d",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-fallback-chain-20261115/production/original-acceptance.json",
+    "sha": "03644ba792f96c045ed12daa99e6669a1d76f441",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-fallback-chain-20261115/production/private-artifact-pins.json",
+    "sha": "cd5bfd61c334c2f3ada3a76544ca7d2f1b60269e",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-fallback-chain-20261115/production/public-hud-after-worker-restart.png",
+    "sha": "ec0b78ff8cc45a52a89b4bb27eb12d720ccdc141",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-fallback-chain-20261115/production/public-result.json",
+    "sha": "8c65bd4fc7cc093ec5da496be8b3f70257ef990c",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-fallback-chain-20261115/production/qr-smoke.json",
+    "sha": "fb66661304dbfece7848a2832adb0f9a8a9cf1e6",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-fallback-chain-20261115/production/qualification.json",
+    "sha": "aa2ed873a72c8fca02247f21ab9e20e019df302d",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-fallback-chain-20261115/production/quest-shared-zh-TW.png",
+    "sha": "de58d7ac16a4a74c9c81e0b6c1bc69ec10f65efe",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-fallback-chain-20261115/production/release-workflows.json",
+    "sha": "baca60b7049865233fbb074ee713f51069bea937",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-fallback-chain-20261115/release-source.json",
+    "sha": "2a6ca833aaef94c55783b271e368c9d44c26c350",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-resume-20261115/README.md",
+    "sha": "8a01dc6ccf9bf90fa7ef55b9781e61568c158402",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-resume-20261115/controlled-six-fonts.png",
+    "sha": "c7b97b8a73e5213c564866c52bcb0caf268bf9d5",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-resume-20261115/font-checks.tap.txt",
+    "sha": "b4e840653fcf8b77a1a025fe4ab3ff8d20434541",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-resume-20261115/login-checks.tap.txt",
+    "sha": "991fdfefa5a40e845dfd781321762d755a9328be",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-resume-20261115/private-receipt-pins.json",
+    "sha": "a18c9807515cf9b35fb45dd1ee8e74ba1da0b68c",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-resume-20261115/qualification.json",
+    "sha": "dee6533fac0cda270a9a0b5a3f36d2a9092803e7",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-resume-20261115/resumed-reopened-diary-closed.png",
+    "sha": "321b46d9eff793ce2bd6b2c709c39f970cc50d2e",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-resume-20261115/upgrade-default-diary-failure.png",
+    "sha": "51f94f0c6534214e48bfda128769c39e11d53d26",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-resume-20261115/upgrade-shared-native-timeout.png",
+    "sha": "b0df26930560e954f56fb9d8adec85d5318362de",
+    "status": "added"
+  },
+  {
     "filename": "mir2-web3/docs/evidence/r16-livestock-roam-20261115/README.md",
     "sha": "ebd163f49deb015af4793db1b84c4a5723feab9a",
     "status": "added"
@@ -361,6 +853,56 @@ export const QR_RELEASE = Object.freeze({
   {
     "filename": "mir2-web3/docs/evidence/r16-livestock-roam-20261115/source-binding.json",
     "sha": "549a6f14299a7cfe62b80ab0be48dd38d966394e",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/README.md",
+    "sha": "7e0e1998c22316944ed4db310a2fd4b28518f0d7",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-map-world-baseline-20261115/production/README.md",
+    "sha": "a835b4f857fc5d31c5341310fd569840e3562945",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-paired-release-20261115/CI-ACCEPTANCE.json",
+    "sha": "2c90ac29286e88b75488818b8513a843aec4591a",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-paired-release-20261115/README.md",
+    "sha": "7111510dba79eb4bf914f1a6b383f4826ce5710c",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-paired-release-20261115/SHARED-ZONE-ACCEPTANCE.json",
+    "sha": "1801713db446dff4bf70c998531de338c7d45e9c",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-paired-release-20261115/private-receipt-pins.json",
+    "sha": "0e4ad4e4c2e8439acfeecd96e79f39728599a91b",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-paired-release-20261115/public-r1-original-classification.json",
+    "sha": "00d60e364cba793aa76218025137774445217529",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-paired-release-20261115/public-r1-quest-available.png",
+    "sha": "bcb7afac5cd0840f5822451ccbb0e9174b27acc6",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-paired-release-20261115/public-r1-terrain-window-end.png",
+    "sha": "dd5053dd9232a10b98da982138b837036e57c096",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-paired-release-20261115/qualification.json",
+    "sha": "5590a69d59550e69ec6fde8efa667b4c08d1fe4b",
     "status": "added"
   },
   {
@@ -489,6 +1031,271 @@ export const QR_RELEASE = Object.freeze({
     "status": "added"
   },
   {
+    "filename": "mir2-web3/docs/evidence/r16-r2-range-20261115/README.md",
+    "sha": "f7742d9c58c6eaee85d6ccccb5be3d18c8652058",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-r2-range-20261115/private-receipt-pins.json",
+    "sha": "4a80a3744326ce9d8ee350a6638c878a090deb8b",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-r2-range-20261115/qualification.json",
+    "sha": "bdd4e2b8cfc122995b0486ca2ebc1eb0f7fb890d",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-route-feedback-20261115/README.md",
+    "sha": "2f0b6b53276ad6156f5d48c354c8638854c19ccc",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-route-feedback-20261115/default-minimap-timeout.png",
+    "sha": "541937ea07081fe08ba1864ae8ed396dbefa08bd",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-route-feedback-20261115/default-new-goal-and-movement.png",
+    "sha": "769dad543c5988eb5445b87d96a605f858ef9d96",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-route-feedback-20261115/default-original-fonts.json",
+    "sha": "ea6c83db6b3e613fd14aa34d50f9251d380a905d",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-route-feedback-20261115/navigation-regressions.log",
+    "sha": "1ee2226469e3dc3723364447256720ea02b1f610",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-route-feedback-20261115/qualification.json",
+    "sha": "e55ad7e3435c9213b7c5c72c4b235a8520f1f7c9",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-route-feedback-20261115/webgl2-minimap-timeout.png",
+    "sha": "7d655c0110b7b1312cd7fd3a474e8c95fb7e08a2",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-route-feedback-20261115/webgl2-new-goal-and-movement.png",
+    "sha": "8b4e74a3312e388d358a3bea8ae63057edfadada",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-route-feedback-20261115/webgl2-original-fonts.json",
+    "sha": "ea6c83db6b3e613fd14aa34d50f9251d380a905d",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/README.md",
+    "sha": "cf76e9283aa223f76c588ff626e13a62d38360e4",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/browser-after.json",
+    "sha": "665a4b0338225b723505216364a1eae8378446c1",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/browser-before.json",
+    "sha": "9fc71c6ad52c27c7162cd12894917e5ddc371984",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/default-exit.png",
+    "sha": "43f55bfd955d0eeda2bee98396769159eeeb8adf",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/default-fresh-goal.png",
+    "sha": "5c2cb1fc31d5007511942c691774f54994a454bf",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/default-game.json",
+    "sha": "bd5a110110342c1ccdc788f03b949788c849938b",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/default-room.png",
+    "sha": "f7137f4fb76677c4280f1430a1e9fcb6179d5f25",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/image-admission.png",
+    "sha": "50100b02ef46e8beb5dbd667c823095fb175a8ab",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/live-asset-check.json",
+    "sha": "4edb49785ed204c1db33473469c9450944284485",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/production/README.md",
+    "sha": "4ac28f67feb0c8ea8845c08fa81900bf7509c8a8",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/production/final-cache-bodies-r2.json",
+    "sha": "11d9d325688e4803965a9d5d3d925ff292c8be4b",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/production/final-readback.json",
+    "sha": "56b58f6a5381e98936487805b8f8bc8098b1267a",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/production/font-order-observation.json",
+    "sha": "dc3696a05cf73bc135d07d87a4900360b20b9a1d",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/production/observation-correction.json",
+    "sha": "e2772bcc36042d11a4ab1d5263e32a1170e0158e",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/production/observer-browser-r2.json",
+    "sha": "82f59c989b36c9e5d807c89e91b27e5cd7d4d450",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/production/observer-checks.txt",
+    "sha": "f7b87928850ca4f039f163b74dd08baac3325e56",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/production/original-acceptance-r1.json",
+    "sha": "ed12fc5595bea0b850e99f82eda80e260a218c2f",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/production/original-acceptance-r2.json",
+    "sha": "198578e12aeb9cb31673c76444f0219ab9397b2f",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/production/private-artifact-pins.json",
+    "sha": "e84198277a5ef4bfae23c1ba073436f840ba5792",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/production/public-r1.json",
+    "sha": "3fad4e99b30b201f45e2746935356bb724d75366",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/production/public-r2.json",
+    "sha": "0e652870d44654e2f08f5d6b87e946e0de560eaf",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/production/qualification.json",
+    "sha": "a7904ee18a44b9c97d69e5b82706dcad7fd81074",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/production/r1-public-hud-after-worker-restart.png",
+    "sha": "e43339f71585a6826bba1cb814ac2504a0daa656",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/production/r1-quest-shared-zh-TW.png",
+    "sha": "a548aba8d8ea76093701d9a4712d13212a9a9ccd",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/production/r2-public-hud-after-worker-restart.png",
+    "sha": "45f7d5324759f1356523d5282ff1297e46c49705",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/production/r2-quest-shared-zh-TW.png",
+    "sha": "42117beaaabc240bcaa3f3354f876eeddd7dc604",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/production/r2-tail-diagnostics.json",
+    "sha": "96ef68c7bf2683a45ddb8c55204ccd99abe0ff6a",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/production/release-workflows.json",
+    "sha": "5d4d850f2b1199ec5f22efcccc2a7e9d4a53200a",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/production/rollback-qr.json",
+    "sha": "bf161ff07a2fe12927731e51810a1ea8be001823",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/progress-panels.png",
+    "sha": "63e80f45ddfce7d18825c3a803fe34f1079544aa",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/progress-visual.json",
+    "sha": "72933d6e5cc49a3932591e2d063c574c5a59c040",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/qualification.json",
+    "sha": "7304bfbffce3b08a57464d74bf54f3a93507d401",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/regressions.txt",
+    "sha": "246ad5f863f3bb8f9b8e35595b228b3c84f21ae8",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/release-source.json",
+    "sha": "6e978430b908b8f6500d441f08bf3251899e96fc",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/resource-path-audit.json",
+    "sha": "840c40c96c89cab09d33e61790d055c14f5826e5",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/retained-failures.json",
+    "sha": "16d5c6eb753de07e319c158e40535ec79cc95f7e",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/source-inputs.json",
+    "sha": "e42379e3b594257358d1813fa3c6c7538390b76e",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/webgl2-exit.png",
+    "sha": "71814a1c67e75360fc5a53fcb4c56434e5e2697c",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/webgl2-fresh-goal.png",
+    "sha": "ee30daf7e32c42432c3deb79ec2dcca4365c719f",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/webgl2-game.json",
+    "sha": "b19b67dbeecf76a5732a754b155c4d08a182d126",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/webgl2-room.png",
+    "sha": "df66482ddf325fd9a1d4e5227ac76fce9177ab65",
+    "status": "added"
+  },
+  {
     "filename": "mir2-web3/docs/evidence/r16-walking-delivery-20261115/README.md",
     "sha": "b0c19b2ad083fb49f2a0497022280ecb18b93545",
     "status": "added"
@@ -562,6 +1369,66 @@ export const QR_RELEASE = Object.freeze({
     "filename": "mir2-web3/docs/evidence/r16-walking-delivery-20261115/standing-diagnostic.json",
     "sha": "bd848c10e51d90ba86a964cfe0e1555ef781d96d",
     "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-walking-parts-20261115/README.md",
+    "sha": "b873e4e43eafe12705842795884a8b7925553964",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-walking-parts-20261115/checks.log",
+    "sha": "f0b10cee5fda0e7fc7c6f11ad00e76494e80b263",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-walking-parts-20261115/default-natural-walking.png",
+    "sha": "9ae214fd97083b43baddb4d12535dd2f262dbfcd",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-walking-parts-20261115/default-shared-diary.png",
+    "sha": "a4adb09712655e1d8fd8275bd5f8453af9c873ee",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-walking-parts-20261115/font-before.log",
+    "sha": "d60de15929e1f52d7570005cb2fb4940cad7963d",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-walking-parts-20261115/private-receipt-pins.json",
+    "sha": "fef30c25dfb48a5d58794901872f4844d10340cd",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-walking-parts-20261115/qualification.json",
+    "sha": "9c3daaf585ea0c56e93c29b0dcebb0899b24512e",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-walking-parts-20261115/shared-tw-native-timeout.png",
+    "sha": "9c06062960a5d0832d3047f5dae6ae959a2bf02d",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/infra/cloudflare/mir2-r2-asset-cache/README.md",
+    "sha": "627faa42fe69b00380e326fc8f5b292a2a388abe",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/infra/cloudflare/mir2-r2-asset-cache/src/index.ts",
+    "sha": "dcc5b4171fb63a8bbbf6171216177fac1421afa0",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/infra/cloudflare/mir2-r2-asset-cache/test/ranges.test.mjs",
+    "sha": "d181440e4def1c9e3b0f32add8d61af32692ac7e",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/infra/cloudflare/mir2-r2-asset-cache/wrangler.jsonc",
+    "sha": "b72b01e273df6206497dce223594c826ced7a779",
+    "status": "modified"
   }
 ],
   entryScene: {
@@ -636,8 +1503,8 @@ export const QR_RELEASE = Object.freeze({
   },
   entryAssetWorker: {
   "path": "/mir2-asset-worker.js",
-  "sha256": "2e1191cab2b9ede2cf0b09c559c7e4da1e8b84574d4910589ad1f9a968ae7a51",
-  "bytes": 47880
+  "bytes": 62863,
+  "sha256": "4830a263f06df9901a41ac1b4c36142478559a7242d62c163790c5fc51c14c58"
 },
   assetRunId: '42494701555',
   baseline: "dpl_AWssgszkpKJznMksLsP7hiRFK6U8",
