@@ -36,7 +36,7 @@ export default {
       return text("not_found", 404, "no-store");
     }
 
-    const rangeHeader = request.headers.get("range");
+    const rangeHeader = request.method === "GET" ? request.headers.get("range") : null;
     if (isStoredGzipPath(key)) {
       return serveFromR2(request, env, key, "BYPASS", rangeHeader ? parseRange(rangeHeader) : undefined);
     }
@@ -72,6 +72,7 @@ async function serveFromR2(
   // Byte ranges cannot be decoded independently, so fall back to the complete
   // representation for the rare range request against an encoded object.
   if (range && object.httpMetadata?.contentEncoding) {
+    await object.body.cancel().catch(() => {});
     object = await env.MIR2_ASSETS.get(resolved.objectKey);
     range = undefined;
     if (!object) return text("not_found", 404, "no-store", cacheState);
@@ -80,16 +81,27 @@ async function serveFromR2(
   const etag = object.httpEtag;
   if (!range && etag && request.headers.get("if-none-match") === etag) {
     const headers = responseHeaders(key, object, env, cacheState, resolved.fallbackObjectKey);
+    await object.body.cancel().catch(() => {});
     return new Response(null, { status: 304, headers });
   }
 
+  const returnedRange = range ? validatedReturnedRange(object, range) : undefined;
+  if (range && !returnedRange) {
+    await object.body.cancel().catch(() => {});
+    return text("invalid_range_response", 502, "no-store", cacheState);
+  }
   const headers = responseHeaders(key, object, env, cacheState, resolved.fallbackObjectKey);
-  const status = range ? 206 : 200;
-  if (range && object.range) {
-    headers.set("content-range", `bytes ${object.range.offset}-${object.range.end - 1}/${object.size}`);
+  const status = returnedRange ? 206 : 200;
+  if (returnedRange) {
+    const { offset, length } = returnedRange;
+    headers.set("content-range", `bytes ${offset}-${offset + length - 1}/${object.size}`);
+  }
+  if (!object.httpMetadata?.contentEncoding) {
+    headers.set("content-length", String(returnedRange?.length ?? object.size));
   }
 
   if (request.method === "HEAD") {
+    await object.body.cancel().catch(() => {});
     return new Response(null, { status, headers });
   }
 
@@ -97,6 +109,32 @@ async function serveFromR2(
     ? object.body.pipeThrough(new DecompressionStream("gzip"))
     : object.body;
   return new Response(body, { status, headers });
+}
+
+function validatedReturnedRange(
+  object: R2Object,
+  requested: R2Range,
+): { offset: number; length: number } | undefined {
+  // R2 reports the actual offset and length after clamping to the object size.
+  // Reject inconsistent metadata instead of emitting a misleading partial body.
+  const actual = object.range;
+  if (
+    !Number.isSafeInteger(object.size) || object.size <= 0 ||
+    !actual || !("offset" in actual) || !("length" in actual) ||
+    typeof actual.offset !== "number" || typeof actual.length !== "number" ||
+    !Number.isSafeInteger(actual.offset) || !Number.isSafeInteger(actual.length) ||
+    actual.offset < 0 || actual.length <= 0 || actual.offset >= object.size ||
+    actual.length > object.size - actual.offset
+  ) return undefined;
+
+  const offset = "suffix" in requested
+    ? Math.max(0, object.size - requested.suffix)
+    : requested.offset ?? 0;
+  const length = "suffix" in requested
+    ? Math.min(requested.suffix, object.size)
+    : Math.min(requested.length ?? object.size - offset, object.size - offset);
+  if (actual.offset !== offset || actual.length !== length) return undefined;
+  return { offset: actual.offset, length: actual.length };
 }
 
 function responseHeaders(
