@@ -79,5 +79,5 @@ test("regional document locales follow the selected canonical Windows language",
 test.after(() => {
   if (!process.env.MIR2_CACHE_PROGRESS_FIXTURE_OUTPUT) return;
   const cells = fixtures.map(f => `<article data-locale="${f.language}" data-state="${f.state}"><h2>${f.language} — ${f.state}</h2><div class="panel">${f.html}</div></article>`).join("");
-  writeFileSync(process.env.MIR2_CACHE_PROGRESS_FIXTURE_OUTPUT, `<!doctype html><meta charset="utf-8"><title>Actual resource progress panels</title><style>body{background:#29251f;color:#eee;font:14px sans-serif}main{display:grid;grid-template-columns:repeat(4,310px);gap:8px}h2{font-size:14px;margin:4px}.panel{position:relative;width:308px;height:160px;border:1px solid #777}.panel section{bottom:12px!important}*{box-sizing:border-box}</style><main>${cells}</main>`, { flag: "wx" });
+  writeFileSync(process.env.MIR2_CACHE_PROGRESS_FIXTURE_OUTPUT, `<!doctype html><meta charset="utf-8"><title>Actual resource progress panels</title><style>body{background:#29251f;color:#eee;font:14px sans-serif}main{display:grid;grid-template-columns:repeat(4,310px);gap:8px}h2{font-size:14px;margin:4px}.panel{position:relative;width:308px;height:160px;border:1px solid #777}*{box-sizing:border-box}</style><main>${cells}</main>`, { flag: "wx" });
 });

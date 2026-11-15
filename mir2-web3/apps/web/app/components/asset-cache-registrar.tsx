@@ -776,7 +776,6 @@ function CacheProgressPanel({ snapshot }: { snapshot: CacheMetricsSnapshot }) {
   const text = (key: string) => browserText(language, key) ?? browserText("en", key) ?? key;
   const statusLabel = text(`ui.assetCache.${progress.state}`);
   const percent = progress.percent;
-  const localCount = summary.cachedLikeCount + summary.cacheStorageEntryCount;
 
   return (
     <section
@@ -787,29 +786,32 @@ function CacheProgressPanel({ snapshot }: { snapshot: CacheMetricsSnapshot }) {
       aria-label={`${text("ui.assetCache.title")} · ${statusLabel}`}
       style={{
         position: "absolute",
-        left: 12,
-        bottom: 12,
+        left: "50%",
+        top: 8,
+        transform: "translateX(-50%)",
         zIndex: 9998,
         width: 286,
         maxWidth: "calc(100% - 24px)",
-        padding: "9px 10px",
+        padding: "6px 8px",
         color: "#f5f1df",
         background: "rgba(7, 7, 6, 0.84)",
         border: "1px solid rgba(205, 174, 96, 0.55)",
         borderRadius: 6,
-        font: "12px/1.35 Arial, Helvetica, sans-serif",
+        font: "11px/1.2 Arial, Helvetica, sans-serif",
         boxShadow: "0 2px 10px rgba(0, 0, 0, 0.35)",
         pointerEvents: "none",
       }}
     >
       <div style={{ display: "flex", justifyContent: "space-between", gap: 8, fontWeight: 700 }}>
-        <span>{text("ui.assetCache.title")} · {statusLabel}</span>
-        <span>{percent}%</span>
+        <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {text("ui.assetCache.title")} · {statusLabel}
+        </span>
+        <span style={{ flexShrink: 0 }}>{percent}%</span>
       </div>
       <div
         style={{
-          height: 4,
-          margin: "7px 0 6px",
+          height: 3,
+          margin: "4px 0 3px",
           background: "rgba(255, 255, 255, 0.16)",
           overflow: "hidden",
           borderRadius: 2,
@@ -824,14 +826,13 @@ function CacheProgressPanel({ snapshot }: { snapshot: CacheMetricsSnapshot }) {
         />
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
-        <span>{text("ui.assetCache.preparing")}</span>
-        <span>
-          {progress.ok}/{progress.total}
+        <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {text("ui.assetCache.preparing")}
         </span>
-      </div>
-      <div style={{ color: "rgba(245, 241, 223, 0.72)", marginTop: 3 }}>
-        {text("ui.assetCache.local")} {localCount} · {text("ui.assetCache.remote")} {formatBytes(summary.transferBytes)}
-        {progress.unresolved > 0 ? ` · ${text(progress.state === "failed" ? "ui.assetCache.failed" : "ui.assetCache.pending")} ${progress.unresolved}` : ""}
+        <span style={{ flexShrink: 0, whiteSpace: "nowrap" }}>
+          {progress.ok}/{progress.total}
+          {progress.unresolved > 0 ? ` · ${text(progress.state === "failed" ? "ui.assetCache.failed" : "ui.assetCache.pending")} ${progress.unresolved}` : ""}
+        </span>
       </div>
     </section>
   );
