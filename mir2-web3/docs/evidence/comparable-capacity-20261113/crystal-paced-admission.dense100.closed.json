@@ -1,0 +1,98 @@
+{
+  "schema": "mir2.original-paced100-closed-verified.v1",
+  "caseStrictPassed": true,
+  "capacityQualified": false,
+  "maximumCcuEstablished": false,
+  "scope": "local game-core comparable fixed workload; no WAN or physical three-client rendering qualification",
+  "population": 100,
+  "durationMs": 300000,
+  "offered": 16000,
+  "completedOnTime": 16000,
+  "timeouts": 0,
+  "notSent": 0,
+  "actorMinuteWindowsPassed": 500,
+  "actorMinuteWindowsTotal": 500,
+  "normalFinalExits": 100,
+  "nativeOriginalLoaderDiskActors": 100,
+  "equipmentStrongChecks": 12,
+  "freshSavedActors": [
+    0,
+    99
+  ],
+  "gameActualExitCodes": [
+    0,
+    0,
+    0
+  ],
+  "allGameJobsNormalClosedNoKill": true,
+  "allFinalVerifierActualWrapperExits": [
+    0,
+    0
+  ],
+  "finalVerifierAllOwnedClosedNoKill": true,
+  "serverLimits": {
+    "logicalCpus": 4,
+    "jobCommitLimitBytes": 8589934592,
+    "affinity": "0xf",
+    "osExcluded": true
+  },
+  "controllerSha256": "b53ef15557a34e21c3f658a6360b0bc1d69c8f1eb7b24e5ba07602e9868028cf",
+  "reportSha256": "dea968e4c72e29c61083cc52d0cf3cbaf0b96d825fa00c1cab279ef5b28bf311",
+  "nativeDiskSha256": "75018f3db6a3b31ef46e4fb71298457d47f3c3aea4a09a73222e0ba98793e03a",
+  "finalEnhancedSha256": "84e46f2b5e089d85cfe91d304ee31e54e5446bd7b9aa5af3eafdf30dc015d4d3",
+  "finalEnhancedSourceSha256": "453e8392c7320d641e83f2bcb90556beafce618aa217b510661b2ac2350ced6a",
+  "finalVerifierJobReceiptSha256": "3a669b335d924e5ac88ce9ae32623a29dc1b63d56c7f26ff676bd07ea6ab0f9e",
+  "normalAdapterSha256": "60e4bd4c2721c8ca3d0b8505124ae01a9e488647cc26635a7715c72df61a2bba",
+  "unchangedOriginalHostSha256": "26f07d85e71fa6b6e8b95ee2ae057f9b626a3ea81bf6e3aa21ad8cc6d85ea5bb",
+  "unchangedOriginalServerLibrarySha256": "8104a1cb313efbe58e68fa2229472c9b3335f2ee75e107b435309a116a7bce62",
+  "scheduleSha256": "8d682c25dc0a6743a508a5e54947f9a9f2dbfde05d8ae100a4455c3fa4cc5e7b",
+  "measurementStartedAtUtc": "2026-11-15T07:24:04.4523723+00:00",
+  "sourceFirstReservationToSteadyFloorMs": 2763110,
+  "actualFirstAttemptToSteadyMs": 2763117.125999987,
+  "steadyNotEarlierThanReference": true,
+  "readinessAndExactSimulationClockAgeMatched": false,
+  "timingReferenceModernSource": "c84670ad3cf5c9693fd78d5618c31668511f1207",
+  "timingReferenceModernControllerSha256": "1fcfd62d548b8994b00749d53cb965a0986dd590044b545a258fa5e60c3842c3",
+  "gameSourceOrGameSloChangedByVerifierFix": false,
+  "analyzerBudgetChangesOnly": {
+    "referenceKeys": [
+      100000,
+      200000
+    ],
+    "retainedRows": [
+      500000,
+      600000
+    ]
+  },
+  "earlierVerifierBudgetFailures": [
+    {
+      "resultSha256": "119694804c04c26af80560604aa40c9244a7096f7002692a58f9cc3f8dd84132",
+      "passed": false,
+      "code": "verifier_reference_bound_not_server_failure",
+      "preserved": true
+    },
+    {
+      "resultSha256": "8ac6444d881f2c038c2de484e20acb2217973bdde0ddaa052d0dcc3758fc2137",
+      "passed": false,
+      "code": "verifier_selected_evidence_bound_not_server_failure",
+      "preserved": true
+    }
+  ],
+  "eventReadAudit": {
+    "strategy": "two-complete-scans-required-packets",
+    "fullRows": 2091614,
+    "retainedRows": 511439,
+    "retainedSerializedBytes": 146775034,
+    "rawPacketsAudited": 1795928,
+    "referenceKeys": 130701,
+    "fullFileHashesAndStatsMatched": true,
+    "rawFileByteLimit": 1073741824,
+    "rowLimit": 8000000,
+    "lineByteLimit": 2097152,
+    "retainedByteLimit": 268435456,
+    "retainedRowLimit": 600000
+  },
+  "privateFixtureAndFullReportExported": false,
+  "cloud100Qualified": false,
+  "physicalWebWindowsAndroidQualified": false
+}
