@@ -1,0 +1,510 @@
+TAP version 13
+# Subtest: Page prewarm delegation returns the real shared stage promise
+ok 1 - Page prewarm delegation returns the real shared stage promise
+  ---
+  duration_ms: 216.1708
+  type: 'test'
+  ...
+# Subtest: actual Page downloads the runtime without speculative fonts while the HUD stage is pending
+ok 2 - actual Page downloads the runtime without speculative fonts while the HUD stage is pending
+  ---
+  duration_ms: 137.5679
+  type: 'test'
+  ...
+# Subtest: actual Page starts fonts only after the runtime resolves and boots without waiting for fonts
+ok 3 - actual Page starts fonts only after the runtime resolves and boots without waiting for fonts
+  ---
+  duration_ms: 109.8413
+  type: 'test'
+  ...
+# Subtest: the actual Page header callback releases its real document coordinator without starting the full-family prewarm early
+ok 4 - the actual Page header callback releases its real document coordinator without starting the full-family prewarm early
+  ---
+  duration_ms: 100.047
+  type: 'test'
+  ...
+# Subtest: the actual Page cleanup retires its real pending document coordinator
+ok 5 - the actual Page cleanup retires its real pending document coordinator
+  ---
+  duration_ms: 90.8049
+  type: 'test'
+  ...
+# Subtest: a failed independent HUD stage cannot withdraw an already ready runtime
+ok 6 - a failed independent HUD stage cannot withdraw an already ready runtime
+  ---
+  duration_ms: 85.1705
+  type: 'test'
+  ...
+# Subtest: leaving before the runtime or HUD settles prevents late fonts, diagnostics and boot
+ok 7 - leaving before the runtime or HUD settles prevents late fonts, diagnostics and boot
+  ---
+  duration_ms: 98.8215
+  type: 'test'
+  ...
+# Subtest: actual Page leaves fonts deferred before first paint and for disabled, touch, missing metadata or GPU
+ok 8 - actual Page leaves fonts deferred before first paint and for disabled, touch, missing metadata or GPU
+  ---
+  duration_ms: 423.5694
+  type: 'test'
+  ...
+# Subtest: actual retryable module failure never starts fonts and keeps the retry boundary
+ok 9 - actual retryable module failure never starts fonts and keeps the retry boundary
+  ---
+  duration_ms: 78.9741
+  type: 'test'
+  ...
+# Subtest: leaving while the runtime downloads prevents late fonts and boot
+ok 10 - leaving while the runtime downloads prevents late fonts and boot
+  ---
+  duration_ms: 81.0963
+  type: 'test'
+  ...
+# Subtest: Page defers fonts through finite binary recovery and cancels both owners after successful boot
+ok 11 - Page defers fonts through finite binary recovery and cancels both owners after successful boot
+  ---
+  duration_ms: 102.8568
+  type: 'test'
+  ...
+# Subtest: only the final fallback backend starts fonts, once, before its single boot
+ok 12 - only the final fallback backend starts fonts, once, before its single boot
+  ---
+  duration_ms: 80.202
+  type: 'test'
+  ...
+# Subtest: leaving during fallback cannot start fonts from a late module
+ok 13 - leaving during fallback cannot start fonts from a late module
+  ---
+  duration_ms: 81.6422
+  type: 'test'
+  ...
+# Subtest: an already booted runtime is reused without another module or font prewarm
+ok 14 - an already booted runtime is reused without another module or font prewarm
+  ---
+  duration_ms: 80.3781
+  type: 'test'
+  ...
+# Subtest: Page spends recovery once per entry/source and preserves it across same-game effect reruns
+ok 15 - Page spends recovery once per entry/source and preserves it across same-game effect reruns
+  ---
+  duration_ms: 320.3219
+  type: 'test'
+  ...
+# (node:93112) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: actual Page starts one primary font on valid headers before the pending runtime body, once
+ok 16 - actual Page starts one primary font on valid headers before the pending runtime body, once
+  ---
+  duration_ms: 79.8262
+  type: 'test'
+  ...
+# Subtest: actual Page admits one primary font after the shared eight-second header budget, without waiting for a slow retry
+ok 17 - actual Page admits one primary font after the shared eight-second header budget, without waiting for a slow retry
+  ---
+  duration_ms: 80.9506
+  type: 'test'
+  ...
+# Subtest: primary header-timeout admission cannot survive owner retirement or a skipped/reused runtime
+ok 18 - primary header-timeout admission cannot survive owner retirement or a skipped/reused runtime
+  ---
+  duration_ms: 671.4481
+  type: 'test'
+  ...
+# Subtest: one early primary font survives a backend fallback without spending another font admission
+ok 19 - one early primary font survives a backend fallback without spending another font admission
+  ---
+  duration_ms: 98.1025
+  type: 'test'
+  ...
+# Subtest: leaving before or after headers cancels the primary owner and ignores late callbacks
+ok 20 - leaving before or after headers cancels the primary owner and ignores late callbacks
+  ---
+  duration_ms: 222.7801
+  type: 'test'
+  ...
+# Subtest: primary failure cannot fail the runtime, and runtime failure cannot publish late primary completion
+ok 21 - primary failure cannot fail the runtime, and runtime failure cannot publish late primary completion
+  ---
+  duration_ms: 158.6929
+  type: 'test'
+  ...
+# Subtest: primary prewarm reads only the original SC body and waits for all bytes
+ok 22 - primary prewarm reads only the original SC body and waits for all bytes
+  ---
+  duration_ms: 10.5267
+  type: 'test'
+  ...
+# Subtest: failed early SC read does not poison the later full six-family pass
+ok 23 - failed early SC read does not poison the later full six-family pass
+  ---
+  duration_ms: 469.1904
+  type: 'test'
+  ...
+# Subtest: cancelling a primary read cannot start any other family
+ok 24 - cancelling a primary read cannot start any other family
+  ---
+  duration_ms: 0.7035
+  type: 'test'
+  ...
+# Subtest: prewarm paths exactly cover the Native display font families
+ok 25 - prewarm paths exactly cover the Native display font families
+  ---
+  duration_ms: 1.1591
+  type: 'test'
+  ...
+# Subtest: two pending font bodies bound concurrency and completion waits for full bytes
+ok 26 - two pending font bodies bound concurrency and completion waits for full bytes
+  ---
+  duration_ms: 1.4163
+  type: 'test'
+  ...
+# Subtest: leaving cancels active font bodies and never starts the queued fonts
+ok 27 - leaving cancels active font bodies and never starts the queued fonts
+  ---
+  duration_ms: 0.5608
+  type: 'test'
+  ...
+# Subtest: a failed font does not withdraw the runtime or prevent warming the other families
+ok 28 - a failed font does not withdraw the runtime or prevent warming the other families
+  ---
+  duration_ms: 467.5982
+  type: 'test'
+  ...
+# Subtest: the slow CJK families do not wait behind short fallback requests
+ok 29 - the slow CJK families do not wait behind short fallback requests
+  ---
+  duration_ms: 1.4326
+  type: 'test'
+  ...
+# Subtest: creates a bounded trusted session and keeps browser intent out of the QR
+ok 30 - creates a bounded trusted session and keeps browser intent out of the QR
+  ---
+  duration_ms: 7.2953
+  type: 'test'
+  ...
+# Subtest: accepts empty POST streams from NextRequest and an explicit empty object
+ok 31 - accepts empty POST streams from NextRequest and an explicit empty object
+  ---
+  duration_ms: 2.7204
+  type: 'test'
+  ...
+# Subtest: verifies a real Sui signature and reissues only the same fixed-expiry one-use proof
+ok 32 - verifies a real Sui signature and reissues only the same fixed-expiry one-use proof
+  ---
+  duration_ms: 12.6083
+  type: 'test'
+  ...
+# Subtest: rejects missing/disallowed Origin, body-selected sessions, and large bodies before relay access
+ok 33 - rejects missing/disallowed Origin, body-selected sessions, and large bodies before relay access
+  ---
+  duration_ms: 1.1299
+  type: 'test'
+  ...
+# Subtest: rejects intent tampering and use from another otherwise allowed origin
+ok 34 - rejects intent tampering and use from another otherwise allowed origin
+  ---
+  duration_ms: 1.3377
+  type: 'test'
+  ...
+# Subtest: rejects create responses that change trusted origins, protocol URLs, identity fields, or TTL
+ok 35 - rejects create responses that change trusted origins, protocol URLs, identity fields, or TTL
+  ---
+  duration_ms: 5.0045
+  type: 'test'
+  ...
+# Subtest: rejects changed signed envelopes and wrong account, key, chain, message, bytes, signature, or time
+ok 36 - rejects changed signed envelopes and wrong account, key, chain, message, bytes, signature, or time
+  ---
+  duration_ms: 11.2315
+  type: 'test'
+  ...
+# Subtest: expires intents before relay access and reports wallet rejection without issuing a proof
+ok 37 - expires intents before relay access and reports wallet rejection without issuing a proof
+  ---
+  duration_ms: 2.7721
+  type: 'test'
+  ...
+# Subtest: bounds relay responses and fails closed on malformed JSON, upstream failures, or unsafe config
+ok 38 - bounds relay responses and fails closed on malformed JSON, upstream failures, or unsafe config
+  ---
+  duration_ms: 2.3994
+  type: 'test'
+  ...
+# Subtest: Dubhe approval exchanges the proof once for the canonical channel account
+ok 39 - Dubhe approval exchanges the proof once for the canonical channel account
+  ---
+  duration_ms: 43.401
+  type: 'test'
+  ...
+# Subtest: wallet rejection and expiry never exchange an identity proof
+ok 40 - wallet rejection and expiry never exchange an identity proof
+  ---
+  duration_ms: 26.0295
+  type: 'test'
+  ...
+# Subtest: aborted or superseded create, poll, approved callback, and exchange cannot return a login
+ok 41 - aborted or superseded create, poll, approved callback, and exchange cannot return a login
+  ---
+  duration_ms: 60.5023
+  type: 'test'
+  ...
+# Subtest: a slow HTTP 200 create can finish, while a stalled body retries once unless cancelled or retired
+ok 42 - a slow HTTP 200 create can finish, while a stalled body retries once unless cancelled or retired
+  ---
+  duration_ms: 59.4799
+  type: 'test'
+  ...
+# Subtest: a transient poll retries the same intent and keeps its code, visibility and expiry
+ok 43 - a transient poll retries the same intent and keeps its code, visibility and expiry
+  ---
+  duration_ms: 16.8682
+  type: 'test'
+  ...
+# Subtest: QR retries are bounded, abortable, and never retry auth responses or exchange
+ok 44 - QR retries are bounded, abortable, and never retry auth responses or exchange
+  ---
+  duration_ms: 25.3707
+  type: 'test'
+  ...
+# Subtest: local expiry stops polling without an extra request
+ok 45 - local expiry stops polling without an extra request
+  ---
+  duration_ms: 6.057
+  type: 'test'
+  ...
+# Subtest: same-device hidden tabs wait for return before polling or claiming an approved login
+ok 46 - same-device hidden tabs wait for return before polling or claiming an approved login
+  ---
+  duration_ms: 4.4358
+  type: 'test'
+  ...
+# Subtest: hidden tabs expire without polling and cancellation stops a hidden wait
+ok 47 - hidden tabs expire without polling and cancellation stops a hidden wait
+  ---
+  duration_ms: 8.6446
+  type: 'test'
+  ...
+# Subtest: malformed create, status, and approved proof responses fail without exchange
+ok 48 - malformed create, status, and approved proof responses fail without exchange
+  ---
+  duration_ms: 53.3307
+  type: 'test'
+  ...
+# Subtest: actual page submits the canonical channel session once
+ok 49 - actual page submits the canonical channel session once
+  ---
+  duration_ms: 6.0482
+  type: 'test'
+  ...
+# Subtest: actual page cancel and retry retire old requests without clearing the newer busy flag
+ok 50 - actual page cancel and retry retire old requests without clearing the newer busy flag
+  ---
+  duration_ms: 3.0845
+  type: 'test'
+  ...
+# Subtest: actual page QR retry also ignores an older rejected promise
+ok 51 - actual page QR retry also ignores an older rejected promise
+  ---
+  duration_ms: 2.9577
+  type: 'test'
+  ...
+# Subtest: actual page identity leases reject epoch, socket, generation, auth, screen, and intent changes
+ok 52 - actual page identity leases reject epoch, socket, generation, auth, screen, and intent changes
+  ---
+  duration_ms: 25.792
+  type: 'test'
+  ...
+# Subtest: actual page lifecycle aborts retired QR and prevents old completion from clearing newer busy
+ok 53 - actual page lifecycle aborts retired QR and prevents old completion from clearing newer busy
+  ---
+  duration_ms: 2.5507
+  type: 'test'
+  ...
+# Subtest: the actual Page accepts the first edit on a freshly committed visible login
+ok 54 - the actual Page accepts the first edit on a freshly committed visible login
+  ---
+  duration_ms: 25.0439
+  type: 'test'
+  ...
+# Subtest: the actual edit guard still rejects retired epoch
+ok 55 - the actual edit guard still rejects retired epoch
+  ---
+  duration_ms: 3.3755
+  type: 'test'
+  ...
+# Subtest: the actual edit guard still rejects hidden document
+ok 56 - the actual edit guard still rejects hidden document
+  ---
+  duration_ms: 5.5776
+  type: 'test'
+  ...
+# Subtest: the actual edit guard still rejects pending login
+ok 57 - the actual edit guard still rejects pending login
+  ---
+  duration_ms: 3.7061
+  type: 'test'
+  ...
+# Subtest: the actual edit guard still rejects different screen
+ok 58 - the actual edit guard still rejects different screen
+  ---
+  duration_ms: 2.5356
+  type: 'test'
+  ...
+# Subtest: browser auth hit rectangles match the independent R16 native source
+ok 59 - browser auth hit rectangles match the independent R16 native source
+  ---
+  duration_ms: 2.7707
+  type: 'test'
+  ...
+# Subtest: login opening follows the native 18-frame clock and keeps login music
+ok 60 - login opening follows the native 18-frame clock and keeps login music
+  ---
+  duration_ms: 0.1593
+  type: 'test'
+  ...
+# Subtest: localized create captions, slots and notice match the Native bounds without overlap
+ok 61 - localized create captions, slots and notice match the Native bounds without overlap
+  ---
+  duration_ms: 0.4667
+  type: 'test'
+  ...
+# Subtest: bounded English/Simplified/Portuguese captions remain exact native catalog projections
+ok 62 - bounded English/Simplified/Portuguese captions remain exact native catalog projections
+  ---
+  duration_ms: 8.878
+  type: 'test'
+  ...
+# Subtest: registration and change-password helpers preserve the actual native fields, bounds and Title art
+ok 63 - registration and change-password helpers preserve the actual native fields, bounds and Title art
+  ---
+  duration_ms: 4.0588
+  type: 'test'
+  ...
+# Subtest: SafeKey uses the native 10-then-26 split and all 36 hit boxes clear its tools
+ok 64 - SafeKey uses the native 10-then-26 split and all 36 hit boxes clear its tools
+  ---
+  duration_ms: 2.8033
+  type: 'test'
+  ...
+# Subtest: four-slot availability never starts synthetic characters or exceeds the native cap
+ok 65 - four-slot availability never starts synthetic characters or exceeds the native cap
+  ---
+  duration_ms: 0.1827
+  type: 'test'
+  ...
+# Subtest: Wizard additive frames use the canonical R16 offsets and local source art
+ok 66 - Wizard additive frames use the canonical R16 offsets and local source art
+  ---
+  duration_ms: 18.0633
+  type: 'test'
+  ...
+# Subtest: actual auxiliary forms place all 8/4 fields and action hit boxes at Native stage coordinates
+ok 67 - actual auxiliary forms place all 8/4 fields and action hit boxes at Native stage coordinates
+  ---
+  duration_ms: 122.2935
+  type: 'test'
+  ...
+# Subtest: actual registration Enter advances, change-password Enter waits, and both Tab boundaries wrap
+ok 68 - actual registration Enter advances, change-password Enter waits, and both Tab boundaries wrap
+  ---
+  duration_ms: 87.0013
+  type: 'test'
+  ...
+# Subtest: actual SafeKey stays beside the original login, preserves shared key order and routes physical keys
+ok 69 - actual SafeKey stays beside the original login, preserves shared key order and routes physical keys
+  ---
+  duration_ms: 32.4126
+  type: 'test'
+  ...
+# Subtest: auxiliary pending gates and IME cannot dispatch while Escape can retire an auth surface
+ok 70 - auxiliary pending gates and IME cannot dispatch while Escape can retire an auth surface
+  ---
+  duration_ms: 92.4546
+  type: 'test'
+  ...
+# Subtest: actual login fields use R16 geometry and Enter advances focus without authenticating
+ok 71 - actual login fields use R16 geometry and Enter advances focus without authenticating
+  ---
+  duration_ms: 36.9592
+  type: 'test'
+  ...
+# Subtest: actual R16 login Tab order, F8 and Escape obey pending and modal gates
+ok 72 - actual R16 login Tab order, F8 and Escape obey pending and modal gates
+  ---
+  duration_ms: 28.4161
+  type: 'test'
+  ...
+# Subtest: actual select buttons and localized slot preserve native availability and opaque player names
+ok 73 - actual select buttons and localized slot preserve native availability and opaque player names
+  ---
+  duration_ms: 28.7198
+  type: 'test'
+  ...
+# Subtest: actual create dialog uses R16 modal, 18-character field and distinct class/gender choices
+ok 74 - actual create dialog uses R16 modal, 18-character field and distinct class/gender choices
+  ---
+  duration_ms: 26.3396
+  type: 'test'
+  ...
+# Subtest: character creation policy and success receipts match the R16 and classic Gateway contracts
+ok 75 - character creation policy and success receipts match the R16 and classic Gateway contracts
+  ---
+  duration_ms: 1.94
+  type: 'test'
+  ...
+# Subtest: actual create form holds the draft while pending and permits editing after a rejection
+ok 76 - actual create form holds the draft while pending and permits editing after a rejection
+  ---
+  duration_ms: 27.3664
+  type: 'test'
+  ...
+# Subtest: character creation shows shared name and slot notices in all ten languages
+ok 77 - character creation shows shared name and slot notices in all ten languages
+  ---
+  duration_ms: 263.5394
+  type: 'test'
+  ...
+# Subtest: native caption rendering is opt-in and disabled controls cannot activate
+ok 78 - native caption rendering is opt-in and disabled controls cannot activate
+  ---
+  duration_ms: 25.148
+  type: 'test'
+  ...
+# Subtest: auth language footer uses native geometry and all ten Windows choices, leaving the game default inline
+ok 79 - auth language footer uses native geometry and all ten Windows choices, leaving the game default inline
+  ---
+  duration_ms: 26.1443
+  type: 'test'
+  ...
+# Subtest: browser-only login actions and diagnostics mount only inside the collapsed footer without losing callbacks
+ok 80 - browser-only login actions and diagnostics mount only inside the collapsed footer without losing callbacks
+  ---
+  duration_ms: 26.0757
+  type: 'test'
+  ...
+# Subtest: select footer clears Start/Exit hit targets and Escape closes browser settings before logout
+ok 81 - select footer clears Start/Exit hit targets and Escape closes browser settings before logout
+  ---
+  duration_ms: 28.0095
+  type: 'test'
+  ...
+# Subtest: language popup closes on an outside capture event and releases its listener
+ok 82 - language popup closes on an outside capture event and releases its listener
+  ---
+  duration_ms: 28.9648
+  type: 'test'
+  ...
+# Subtest: stacked auth audio bounds sliders and supplies missing Chinese labels without changing channel updates
+ok 83 - stacked auth audio bounds sliders and supplies missing Chinese labels without changing channel updates
+  ---
+  duration_ms: 3.9799
+  type: 'test'
+  ...
+1..83
+# tests 83
+# suites 0
+# pass 83
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4719.9702

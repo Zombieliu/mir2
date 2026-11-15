@@ -14,7 +14,7 @@ Short routing summary, updated 2026-11-15 (Asia/Shanghai). This indexes recorded
 
 ## Last recorded decisions and open work
 
-2026-11-15 f28dc94538修复资产CDN Range错误头并已发布Worker版本9e9b30bd；22项／9相邻／9真实本地R2／严格类型与预演通过，公网两个入口8项范围协议和原字节通过。完整SC16MB的并发2／1MiB分段探针失败，仅五段SHA完整，30秒请求超时原样保留；浏览器字体分段保留／恢复尚未实现，下一项继续此边界，不能关闭繁体Native120失败。游戏前端仍20de／AWss，Gateway fd3，独立读回均200，未重启或改档。d3aefa26d9行走五块／主字体8秒准入候选269项／构建及英文完整场通过，繁体和运行包组合失败、两场完整本地／公网资格继续，原8／65／120和六字体未减。29份原内容WIP保持，容量213fc1737f／b80759fe3b及动画WIP保留；其它目标、三职业、阿洛、语言像素、6项旧夹具、Windows窗口与实体手机及整体1:1继续，Goal active。[已发CDN及完整字体失败](evidence/r16-r2-range-20261115/README.md) · [行走候选和实际失败](evidence/r16-walking-parts-20261115/README.md) · [原发布回退](evidence/r16-paired-release-20261115/README.md)。
+2026-11-15 字体分段9eac66ed32与首次登录输入4ad940554d已推送，尚未发布。原SC16MB／SHA保留，63段独立校验、失败保留和重启续读；161字体／83登录／23默认入口检查及两个严格构建通过，计数有重叠。受控Edge保留62段，重启只补1段并完整六字体；真实繁体冷场Native120仍失败，关闭后审计41段／SC缺全体／其它五字体完整。真实同版恢复一场全过：首步107ms、Native19419ms、六字体113／两次Q／两次正常注销同角保存；这不倒填冷场，默认英文重进Q关闭失败仍待复现，同版夹具升级清理误判失败也保留。Web仍20de／AWss与Gateway fd3，独立读回200，无重启改档。下一项验证字体Range读取已有完整边缘缓存的效果，保留原8／65／120和六字体，补Q及完整冷本地／公网。29份原WIP原始SHA保持，Native／容量独立改动保留；其它地图、三职业、阿洛、语言像素、6项旧夹具、Windows窗口、实体手机及整体1:1继续，Goal active。[本轮源码、实际恢复与失败](evidence/r16-font-resume-20261115/README.md) · [已发CDN范围](evidence/r16-r2-range-20261115/README.md)。
 
 2026-11-15 用户补充寻路“目标不对或到不了”：本地候选ceb1c1132f补大小地图坐标／30秒初始期限／到达反馈和十语入口说明。152项、独立严格构建与英繁两后端实际跨图／慢碰撞超时／晚到零旧移动／重登新目标／正常保存通过，30份内容WIP保持。本轮未发布；其他目标与既有公网资源失败继续。[记录与范围](evidence/r16-route-feedback-20261115/README.md)
 
