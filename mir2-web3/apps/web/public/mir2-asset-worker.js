@@ -98,6 +98,9 @@ let runtimeConfig = {
   fontMirrorFirst: false,
 };
 let staticAssetTiers = new Map();
+// Cache retention and download urgency are different: the HUD pack is warmed
+// after first paint, but its requested images are required by the Native HUD.
+let requiredHudAssetKeys = new Set();
 
 // Short-lived negative cache for confirmed missing assets. Do not cache
 // transient network/abort failures: gameplay prefetch can fan out hundreds of
@@ -260,6 +263,7 @@ self.addEventListener("message", (event) => {
     fontMirrorFirst: data.fontMirrorFirst === true,
   };
   staticAssetTiers = buildStaticAssetTierIndex(manifest.resourcePacks || []);
+  requiredHudAssetKeys = buildRequiredHudAssetKeys(manifest.resourcePacks || []);
   const revision = configurationRevision;
   const snapshot = workerConfigurationSnapshot();
   // Snapshot before joining the queue: a newer CONFIG must not change the
@@ -370,6 +374,7 @@ function workerConfigurationSnapshot() {
     schema: 1,
     runtimeConfig: { ...runtimeConfig, remoteAssetBaseUrls: [...runtimeConfig.remoteAssetBaseUrls] },
     staticAssetTiers: [...staticAssetTiers],
+    requiredHudAssetKeys: [...requiredHudAssetKeys],
   };
 }
 
@@ -404,6 +409,7 @@ function ensureWorkerConfiguration() {
       for (const [key, tier] of staticAssetTiers) putStaticAssetTier(stored.tiers, key, tier);
       runtimeConfig = stored.config;
       staticAssetTiers = stored.tiers;
+      requiredHudAssetKeys = stored.requiredHudAssetKeys;
     } catch {
       // Corrupt/denied metadata falls back to the ordinary origin path.
     }
@@ -432,13 +438,22 @@ function decodeWorkerConfiguration(stored) {
     if (!key || key !== entry[0]) return null;
     putStaticAssetTier(tiers, key, entry[1]);
   }
+  // Older persisted configurations do not contain download priorities. Keep
+  // their cache/source configuration usable until the page sends its manifest.
+  if (stored.requiredHudAssetKeys !== undefined && !Array.isArray(stored.requiredHudAssetKeys)) return null;
+  const hudKeys = new Set();
+  for (const value of stored.requiredHudAssetKeys || []) {
+    const key = normalizeStaticAssetCacheKey(value);
+    if (!key || key !== value) return null;
+    hudKeys.add(key);
+  }
   return { config: {
     version: config.version, assetVersion: config.assetVersion,
     ...Object.fromEntries(limits.map(key => [key, config[key]])),
     remoteAssetBaseUrl: normalizeAssetBaseUrl(config.remoteAssetBaseUrl),
     remoteAssetBaseUrls: normalizeAssetBaseUrls(config.remoteAssetBaseUrls),
     fontMirrorFirst: config.fontMirrorFirst,
-  }, tiers };
+  }, tiers, requiredHudAssetKeys: hudKeys };
 }
 
 function isStaticGameAsset(url) {
@@ -611,12 +626,14 @@ function withStaticHeaderSlot(request, read) {
 
 function drainStaticHeaders() {
   const priority = entry => {
+    if (requiredHudAssetKeys.has(staticAssetCacheKey(new URL(entry.request.url)))) return 0;
     const tier = staticAssetCachePolicy(entry.request).cacheKind;
     return tier === "static-critical" ? 0 : tier === "static-background" ? 2 : 1;
   };
   while (activeStaticHeaderFetches < STATIC_ASSET_HEADERS_CONCURRENCY && staticHeaderQueue.length) {
-    // Existing manifest/hints identify core HUD work. Read hints at dispatch so a
-    // later core hint can promote waiting work; retain FIFO within each tier.
+    // Read manifest/hints at dispatch so later configuration can promote waiting
+    // HUD work. Its background cache partition must not put it behind all the
+    // unclassified map/sprite reads. Retain FIFO within each priority.
     let next = 0;
     for (let i = 1; i < staticHeaderQueue.length; i++) {
       if (priority(staticHeaderQueue[i]) < priority(staticHeaderQueue[next])) next = i;
@@ -1402,6 +1419,19 @@ function buildStaticAssetTierIndex(resourcePacks) {
   }
 
   return tiers;
+}
+
+function buildRequiredHudAssetKeys(resourcePacks) {
+  const keys = new Set();
+  if (!Array.isArray(resourcePacks)) return keys;
+  for (const pack of resourcePacks) {
+    if (pack?.name !== "hud-core" || !Array.isArray(pack.urls)) continue;
+    for (const value of pack.urls) {
+      const key = normalizeStaticAssetCacheKey(value);
+      if (key) keys.add(key);
+    }
+  }
+  return keys;
 }
 
 function normalizeStaticAssetCacheKey(value) {

@@ -1,0 +1,204 @@
+{
+  "schema": 1,
+  "kind": "r16-required-hud-admission-local-candidate",
+  "recordedAt": "2026-11-15T14:46:37.601689+00:00",
+  "goalActive": true,
+  "wholeParityCandidate": false,
+  "wholeParityAccepted": false,
+  "published": false,
+  "sourcePins": "source-pins.json",
+  "originalPublicFailurePreserved": {
+    "source": "4204e920edde1d2c4a27e7bb7a2bba50ebd00860",
+    "nativeMs": 163326,
+    "originalBudgetMs": 120000,
+    "accepted": false,
+    "reverted": true
+  },
+  "regressions": {
+    "focusedAndAdjacent": 173,
+    "failed": 0,
+    "skipped": 0,
+    "oldWorkerNewCasesFailedAsExpected": 2
+  },
+  "realChromeControlled": {
+    "old": {
+      "expected": "starved",
+      "passed": false,
+      "expectedOutcomeObserved": true,
+      "completeHud": 0,
+      "decoded": 0,
+      "originalEmptyPlaceholder": "/original-ui/MMap/0.png",
+      "requiredBeforeQueuedScene": 0,
+      "completeCacheBodies": 0,
+      "cacheBodiesCorrect": false,
+      "duplicateOwner": "AbortError",
+      "elapsedMs": 18015,
+      "workerSha256": "4830a263f06df9901a41ac1b4c36142478559a7242d62c163790c5fc51c14c58",
+      "browserClosed": true,
+      "serverClosed": true
+    },
+    "new": {
+      "expected": "complete",
+      "passed": true,
+      "expectedOutcomeObserved": true,
+      "completeHud": 113,
+      "decoded": 112,
+      "originalEmptyPlaceholder": "/original-ui/MMap/0.png",
+      "requiredBeforeQueuedScene": 113,
+      "completeCacheBodies": 113,
+      "cacheBodiesCorrect": true,
+      "duplicateOwner": "AbortError",
+      "elapsedMs": 7427,
+      "workerSha256": "17d387d77329dda4b769d89cb7733a20f5642e145c0f4a0e797ebe0661430d6f",
+      "browserClosed": true,
+      "serverClosed": true
+    }
+  },
+  "realChromeImageFontIsolation": {
+    "passed": true,
+    "images": 72,
+    "completeOriginalFonts": 2,
+    "peakImagesAtServer": 6,
+    "browserClosed": true,
+    "serverClosed": true
+  },
+  "strictBuild": {
+    "passed": true,
+    "id": "bhVGnvOmbE0bDxYKQZz6s",
+    "candidate": "276-required-hud-352b4a04",
+    "durationMs": 67178,
+    "appLibInputsVerified": 2179,
+    "existingGeneratedOverride": 1,
+    "otherPinnedInputs": 29,
+    "runtimeRebuilt": false
+  },
+  "originalLocalCohorts": [
+    {
+      "mode": "compatibility",
+      "locale": "en-US",
+      "passed": true,
+      "movementMs": 170,
+      "nativeAfterFirstFrameMs": 19002,
+      "completeOriginalFonts": true,
+      "hud": {
+        "requested": 113,
+        "ok": 113,
+        "failed": 0
+      },
+      "actualWorker": [
+        {
+          "requiredHudCount": 113,
+          "cacheTier": "background"
+        }
+      ],
+      "walking": {
+        "passed": true,
+        "bodyPassed": true,
+        "framePassed": true,
+        "originalVisualBudgetMs": 65000
+      },
+      "normalLogouts": 2,
+      "saved": {
+        "normalLogout": true,
+        "position": {
+          "x": 288,
+          "y": 617
+        },
+        "originalRolesAndSavesPreserved": true,
+        "newRoleReopenedAtSavedPosition": true
+      },
+      "wireFailures": 0,
+      "pageErrors": 0,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "sourceSnapshotUnchanged": true
+    },
+    {
+      "mode": "webgl2",
+      "locale": "zh-TW",
+      "passed": true,
+      "movementMs": 191,
+      "nativeAfterFirstFrameMs": 23048,
+      "completeOriginalFonts": true,
+      "hud": {
+        "requested": 113,
+        "ok": 113,
+        "failed": 0
+      },
+      "actualWorker": [
+        {
+          "requiredHudCount": 113,
+          "cacheTier": "background"
+        }
+      ],
+      "walking": {
+        "passed": true,
+        "bodyPassed": true,
+        "framePassed": true,
+        "originalVisualBudgetMs": 65000
+      },
+      "normalLogouts": 2,
+      "saved": {
+        "normalLogout": true,
+        "position": {
+          "x": 288,
+          "y": 617
+        },
+        "originalRolesAndSavesPreserved": true,
+        "newRoleReopenedAtSavedPosition": true
+      },
+      "wireFailures": 0,
+      "pageErrors": 0,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "sourceSnapshotUnchanged": true
+    }
+  ],
+  "actualVisibleLoading": {
+    "observed": true,
+    "locale": "en-US",
+    "screenshot": "game-loading-en.png",
+    "progress": "9/113",
+    "position": "top center",
+    "hpMainHudMinimapAndLeftGuideUnobscured": true,
+    "allLocaleGameplayVerified": false,
+    "productionVerified": false
+  },
+  "harnessFailuresRetained": [
+    "first Chrome invocation missing explicit Playwright package; no browser started",
+    "first candidate Chrome fixture assumed original zero-size MMap/0.png could decode; fixed fixture then same final harness on old and new Worker",
+    "two full-game preparation attempts failed before owned services started; new frozen directories used"
+  ],
+  "preservedWip": {
+    "files": 29,
+    "rawSha256Unchanged": true
+  },
+  "privateSourceRestored": true,
+  "productionReadback": {
+    "checkedAt": "2026-11-15T14:43:45.258Z",
+    "passed": true,
+    "rows": [
+      {
+        "url": "https://numeron.obelisk.build/version",
+        "status": 200,
+        "revision": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+        "passed": true
+      },
+      {
+        "url": "https://165.154.65.136.sslip.io/playtest/health",
+        "status": 200,
+        "revision": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5",
+        "passed": true
+      }
+    ]
+  },
+  "privateRoot": "D:\\mir2-builds\\r16-hud-admission-20261115"
+}

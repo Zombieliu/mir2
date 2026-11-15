@@ -3,7 +3,8 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import vm from "node:vm";
 
-const source = readFileSync(new URL("../public/mir2-asset-worker.js", import.meta.url), "utf8");
+const source = readFileSync(process.env.MIR2_ASSET_WORKER_TEST_SOURCE
+  ?? new URL("../public/mir2-asset-worker.js", import.meta.url), "utf8");
 const origin = "https://game.example.test";
 const path = "/original-ui/Prguse/1.png";
 const bytes = [11, 22, 33];
@@ -124,7 +125,9 @@ test("an uncached frame after restart retains exact-release remote fallbacks and
 });
 
 test("an explicit newer configuration cannot be replaced by an older delayed restore", { timeout: 2000 }, async () => {
-  const cache = storage(), initial = worker(cache); await configure(initial, "a");
+  const cache = storage(), initial = worker(cache), oldConfig = configuration("a");
+  oldConfig.manifest.resourcePacks.push({ name: "hud-core", cacheTier: "background", urls: [path] });
+  await initial.message(oldConfig).done;
   const savedOpen = cache.open.bind(cache), gate = deferred(); let restoreStarted = false;
   cache.open = async name => {
     const store = await savedOpen(name);
@@ -140,6 +143,8 @@ test("an explicit newer configuration cannot be replaced by an older delayed res
   assert.equal(vm.runInContext("runtimeConfig.version", restarted.context), "namespace-b");
   assert(restarted.calls.includes("https://mirror.example.test/release-b" + path));
   assert(!restarted.calls.some(url => url.includes("release-a")));
+  assert.equal(vm.runInContext("requiredHudAssetKeys.size", restarted.context), 0,
+    "a delayed old restore cannot revive the previous release's HUD priorities");
 });
 
 test("overlapping configuration writes are serialized so a restart restores the latest release", { timeout: 2000 }, async () => {
@@ -315,4 +320,40 @@ test("a new HINT after live reset cannot recreate durable configuration until a 
   const again = worker(cache), againRead = again.fetch(dynamic); assert.equal((await againRead.response).status, 200); await againRead.done();
   assert.equal(vm.runInContext("runtimeConfig.version", again.context), "namespace-b");
   assert.equal(vm.runInContext("staticAssetTiers.get('/original-map/forest/3.png')", again.context), "background");
+});
+
+test("a restarted Worker restores required HUD urgency without a new page configuration or cache migration", async t => {
+  const cache = storage(), first = worker(cache), config = configuration("hud");
+  config.manifest.resourcePacks = [{ name: "hud-core", cacheTier: "background", phase: "background", urls: [path] }];
+  await first.message(config).done;
+  const releases = [], reads = [];
+  const restarted = worker(cache, () => new Promise(resolve => releases.push(() => resolve(new Response(new Uint8Array(bytes))))));
+  t.after(async () => {
+    for (let i = 0; i < 10; i++) { releases.slice().forEach(release => release()); await flush(); }
+    await Promise.all(reads.map(async read => { await read.response; await read.done(); }));
+  });
+  for (let i = 0; i < 6; i++) reads.push(restarted.fetch(`/original-ui/Prguse/${6000 + i}.png`));
+  await flush();
+  assert.equal(restarted.calls.length, 6);
+  reads.push(restarted.fetch("/original-ui/Prguse/7000.png"), restarted.fetch(path)); await flush();
+  releases[0](); await flush();
+  assert.equal(restarted.calls[6], origin + path, "restored HUD urgency must precede an earlier ordinary scene request");
+  assert.equal(vm.runInContext("staticAssetTiers.get('/original-ui/Prguse/1.png')", restarted.context), "background");
+  assert.equal(vm.runInContext("runtimeConfig.version", restarted.context), "namespace-hud");
+});
+
+test("older persisted configuration without HUD priorities retains its sources and cache identity", async () => {
+  const cache = storage(), first = worker(cache); await configure(first, "old");
+  for (const [name, store] of cache.stores) {
+    if (!name.includes("configuration")) continue;
+    for (const [key, response] of store.entries) {
+      const saved = await response.json(); delete saved.requiredHudAssetKeys;
+      store.entries.set(key, Response.json(saved));
+    }
+  }
+  const restarted = worker(cache), read = restarted.fetch();
+  assert.equal((await read.response).status, 200); await read.done();
+  assert.equal(vm.runInContext("runtimeConfig.version", restarted.context), "namespace-old");
+  assert.equal(vm.runInContext("requiredHudAssetKeys.size", restarted.context), 0);
+  assert(restarted.calls.includes("https://mirror.example.test/release-old" + path));
 });
