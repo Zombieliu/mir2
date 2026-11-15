@@ -146,7 +146,7 @@ test("a queued image retains its release sources across a later Worker configura
   assert(!f.calls.some(r => r.url.includes('/newer/')));
 });
 
-test("the real deferred HUD manifest admits all fifteen late required images ahead of ordinary scene work", async t => {
+test("the real deferred HUD manifest admits all fifteen late images in pack order ahead of ordinary scene work", async t => {
   const f = fixture(t, (request, hold) => hold(request));
   await f.configure();
   const hud = ASSET_CACHE_PACKS.find(p => p.name === "hud-core");
@@ -156,7 +156,7 @@ test("the real deferred HUD manifest admits all fifteen late required images ahe
   Array.from({ length: 24 }, (_, n) => f.read(7000 + n));
   const hudReads = lateHudPaths.map(p => f.read(p, { cache: true })); await turn();
   for (let batch = 0; batch < 3; batch++) { f.gates.slice().forEach(g => g.release()); await turn(); }
-  assert.deepEqual(f.calls.slice(6, 21).map(r => new URL(r.url).pathname), lateHudPaths,
+  assert.deepEqual(f.calls.slice(6, 21).map(r => new URL(r.url).pathname), hud.urls.filter(p => lateHudPaths.includes(p)),
     "a background cache partition cannot leave required HUD images behind the scene backlog");
   f.gates.slice().forEach(g => g.release()); await Promise.all(hudReads); await Promise.all(f.writes);
   assert(lateHudPaths.every(p => f.stored.has(origin + p)));
@@ -172,5 +172,24 @@ test("a later HUD configuration promotes already queued reads without admitting 
   await f.configure(); assert.equal(f.calls.length, 6);
   f.gates[0].release(); await turn();
   assert.equal(new URL(f.calls[6].url).pathname, lateHudPaths[0]);
+  assert.equal(vm.runInContext("activeStaticHeaderFetches", f.context), 6);
+});
+
+test("a simultaneous DOM HUD burst reads foundation images before earlier hover/control requests", async t => {
+  const f = fixture(t, (request, hold) => hold(request));
+  await f.configure();
+  const hud = ASSET_CACHE_PACKS.find(pack => pack.name === "hud-core");
+  const foundation = hud.urls.slice(0, 9), remainder = hud.urls.slice(9);
+  assert.deepEqual(foundation, [1, 4, 6, 12, 13, 8, 76].map(path).concat([
+    "/original-ui/UI_32bit/473.png", "/original-ui/UI_32bit/472.png",
+  ]));
+  Array.from({ length: 6 }, (_, n) => f.read(6000 + n)); await turn();
+  // React's image burst does not arrive in prewarm-manifest order. Model the
+  // public trace: other HUD controls enter just before the orb/backgrounds.
+  remainder.slice().reverse().forEach(p => f.read(p));
+  foundation.slice().reverse().forEach(p => f.read(p)); await turn();
+  for (let batch = 0; batch < 2; batch++) { f.gates.slice().forEach(g => g.release()); await turn(); }
+  assert.deepEqual(f.calls.slice(6, 15).map(r => new URL(r.url).pathname), foundation,
+    "equal HUD urgency must not leave the foundational frames behind hover/control images");
   assert.equal(vm.runInContext("activeStaticHeaderFetches", f.context), 6);
 });

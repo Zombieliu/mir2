@@ -324,7 +324,8 @@ test("a new HINT after live reset cannot recreate durable configuration until a 
 
 test("a restarted Worker restores required HUD urgency without a new page configuration or cache migration", async t => {
   const cache = storage(), first = worker(cache), config = configuration("hud");
-  config.manifest.resourcePacks = [{ name: "hud-core", cacheTier: "background", phase: "background", urls: [path] }];
+  const laterHud = "/original-ui/Prguse/4.png";
+  config.manifest.resourcePacks = [{ name: "hud-core", cacheTier: "background", phase: "background", urls: [path, laterHud] }];
   await first.message(config).done;
   const releases = [], reads = [];
   const restarted = worker(cache, () => new Promise(resolve => releases.push(() => resolve(new Response(new Uint8Array(bytes))))));
@@ -335,9 +336,10 @@ test("a restarted Worker restores required HUD urgency without a new page config
   for (let i = 0; i < 6; i++) reads.push(restarted.fetch(`/original-ui/Prguse/${6000 + i}.png`));
   await flush();
   assert.equal(restarted.calls.length, 6);
-  reads.push(restarted.fetch("/original-ui/Prguse/7000.png"), restarted.fetch(path)); await flush();
-  releases[0](); await flush();
+  reads.push(restarted.fetch("/original-ui/Prguse/7000.png"), restarted.fetch(laterHud), restarted.fetch(path)); await flush();
+  releases[0](); releases[1](); await flush();
   assert.equal(restarted.calls[6], origin + path, "restored HUD urgency must precede an earlier ordinary scene request");
+  assert.equal(restarted.calls[7], origin + laterHud, "restart preserves pack order even when renderer requests arrive in reverse");
   assert.equal(vm.runInContext("staticAssetTiers.get('/original-ui/Prguse/1.png')", restarted.context), "background");
   assert.equal(vm.runInContext("runtimeConfig.version", restarted.context), "namespace-hud");
 });

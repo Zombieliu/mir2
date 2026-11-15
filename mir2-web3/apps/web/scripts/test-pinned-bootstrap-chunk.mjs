@@ -200,6 +200,40 @@ test("two positive partial walking bodies recover the exact original pack throug
   t.mock.timers.tick(600000);await settle();assert.equal(calls.length,2);assertWalkingImports(f);
 });
 
+test("walking missing headers start the complete pinned fallback after two eight-second waits",async t=>{
+  t.mock.timers.enable({apis:["setTimeout"]});
+  const calls=[],late=deferred(),f=fixture((url,init)=>{calls.push({url,init});return late.promise;});
+  const first=f.entry.preloadR16EntryMonsterFrames(visuals.assetReleaseId,"walking");
+  assert.equal(f.entry.preloadR16EntryMonsterFrames(visuals.assetReleaseId,"walking"),first);
+  await settle();t.mock.timers.tick(7999);await settle();
+  assert.equal(calls.length,1);assert.equal(calls[0].init.signal.aborted,false);assert.deepEqual(f.imports,[]);
+  t.mock.timers.tick(1);await settle();assert.equal(calls[0].init.signal.reason?.name,"TimeoutError");
+  t.mock.timers.tick(199);await settle();assert.equal(calls.length,1);
+  t.mock.timers.tick(1);await settle();assert.equal(calls.length,2);assert.deepEqual(f.imports,[]);
+  t.mock.timers.tick(7999);await settle();assert.equal(calls[1].init.signal.aborted,false);
+  t.mock.timers.tick(1);const pack=await first;assertWalkingPack(pack);assertWalkingImports(f);
+  assert.deepEqual(calls.map(({url,init})=>[url,init.cache,init.credentials,init.priority]),[
+    [walking.path,"force-cache","omit","high"],[walking.path,"reload","omit","high"],
+  ]);
+  late.resolve(new Response(body(walking)));await settle();
+  assert.equal(await f.entry.preloadR16EntryMonsterFrames(visuals.assetReleaseId,"walking"),pack);
+  assert.equal(calls.length,2);assertWalkingImports(f);
+});
+
+test("the walking header budget does not discard a longer progressing complete HTTP body",async t=>{
+  t.mock.timers.enable({apis:["setTimeout"]});
+  const headers=deferred(),raw=body(walking);let stream,calls=0;
+  const f=fixture(()=>{calls++;return headers.promise;});
+  const pending=f.entry.preloadR16EntryMonsterFrames(visuals.assetReleaseId,"walking");
+  await settle();t.mock.timers.tick(7999);await settle();
+  headers.resolve(new Response(new ReadableStream({start(controller){stream=controller;}})));await settle();
+  const step=Math.ceil(raw.length/4);
+  for(let offset=0;offset<raw.length;offset+=step){
+    t.mock.timers.tick(7000);await settle();stream.enqueue(raw.subarray(offset,offset+step));await settle();
+  }
+  stream.close();assertWalkingPack(await pending);assert.equal(calls,1);assert.deepEqual(f.imports,[]);
+});
+
 test("walking definitive responses and rejected complete bytes never grant a compiled fallback",async()=>{
   const raw=body(walking),corrupt=Buffer.from(raw);corrupt[100]^=1;
   const responses=[

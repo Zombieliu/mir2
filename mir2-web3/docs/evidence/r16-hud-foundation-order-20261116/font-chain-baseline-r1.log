@@ -1,0 +1,31 @@
+TAP version 13
+# (node:113112) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: a slow range chain retires within 24s and verifies the healthy app fallback before mirrors
+not ok 1 - a slow range chain retires within 24s and verifies the healthy app fallback before mirrors
+  ---
+  duration_ms: 41.744
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-asset-worker-font-ranges.mjs:309:43'
+  failureType: 'testCodeFailure'
+  error: 'expected request boundary not reached'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    waitFor (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-worker-font-ranges.mjs:18:3)
+    async TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-worker-font-ranges.mjs:330:26)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 0
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 107.7856

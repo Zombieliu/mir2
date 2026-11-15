@@ -38,6 +38,7 @@ const playerPublications = new WeakMap<R16EntryActorAssets, R16EntryActorAssets>
 const transientVisualFailures = new WeakSet<Promise<unknown>>();
 const VISUAL_BODY_TIMEOUT_MS = 45_000;
 const VISUAL_RECOVERY_DELAY_MS = 1_000;
+const RECOVERABLE_VISUAL_HEADER_TIMEOUT_MS = 8_000;
 
 export function preloadR16EntryScene(pinnedRelease?: string): Promise<SceneBlueprint | null> | null {
   if (pinnedRelease !== entryScene.assetReleaseId || entryScene.schemaVersion !== SCENE_BLUEPRINT_SCHEMA_VERSION ||
@@ -70,10 +71,11 @@ async function loadProgressiveEntryJson<T>(
   priority?: RequestPriority,
   bodyTimeoutMs?: number,
   cache: RequestCache = "force-cache",
+  headerTimeoutMs = PINNED_BOOTSTRAP_HEADER_TIMEOUT_MS,
 ): Promise<T | null> {
   const { response, body } = await fetchBootstrapResponse(
     asset.path,
-    { cache, headerTimeoutMs: PINNED_BOOTSTRAP_HEADER_TIMEOUT_MS, bodyByteLimit: asset.bytes, bodyTimeoutMs },
+    { cache, headerTimeoutMs, bodyByteLimit: asset.bytes, bodyTimeoutMs },
     response => response.arrayBuffer(),
     (path, options) => fetch(path, { ...options, credentials: "omit", redirect: "error", priority }),
   );
@@ -100,7 +102,11 @@ function preloadVisual<T>(
 ): Promise<T | null> {
   const cached = loads.get(asset.path);
   if (cached) return cached;
-  const pending: Promise<T | null> = loadProgressiveEntryJson<T>(asset, priority, VISUAL_BODY_TIMEOUT_MS, cache).catch((error) => {
+  // An independently pinned compiled copy lets missing walking headers retire
+  // earlier. Keep both HTTP attempts, the progressing-body budget and terminal
+  // response checks; the shared compiled observation still has its own deadline.
+  const headerTimeoutMs = compiledFallback ? RECOVERABLE_VISUAL_HEADER_TIMEOUT_MS : PINNED_BOOTSTRAP_HEADER_TIMEOUT_MS;
+  const pending: Promise<T | null> = loadProgressiveEntryJson<T>(asset, priority, VISUAL_BODY_TIMEOUT_MS, cache, headerTimeoutMs).catch((error) => {
     // Only exhausted transport failures may use an independently verified chunk.
     // Definitive responses and rejected complete bytes do not grant a fallback.
     if (compiledFallback && isRetryableBootstrapReadFailure(error)) return compiledFallback();

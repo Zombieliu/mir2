@@ -14,7 +14,7 @@ Short routing summary, updated 2026-11-16 (Asia/Shanghai). This indexes recorded
 
 ## Last recorded decisions and open work
 
-2026-11-16 20e79131a2必需HUD优先级候选已推送；173项／严格构建／两整局通过，匹配Linux310／PG216及1841文件SHA、54提交／296文件闭包和80发布保护通过。实际切Web Bhnp及同源网关后，公网R1扫码签名／移动／六字体113／Q／Worker／注销通过分项，但完整行走包原65秒未过、Native133427ms超120秒，整轮false，未跑R2。已两端回退20de／AWss＋fd3，独立版本／alias及简繁扫码复验；原310／222／222行与22配置保持，新QA进度保留。下一项复现首批基础HUD图与其他HUD同批请求的排序／缓存及准入阶段，核对行走两次20秒后回退和SC源切换；不原样重发或放宽门槛。29份原WIP保持，其他1:1继续，Goal active。[公网失败、诊断边界及恢复](evidence/r16-hud-admission-20261115/production/README.md)。
+2026-11-16 基础HUD按清单顺序、行走缺响应头提前恢复及SC分段总时限已完成本地候选：235项／严格构建，英繁两场和额外两次扣响应头整局通过；首步83／98／129ms，Native24767／24839／18379ms，六字体113、Q重进及保存通过。首轮Native120失败保留；29份原WIP保持，独立源码覆盖已恢复。当前公网独立读回仍20de，本轮未切换，接着做同源发布包和完整来源闭包及原两场公网。其他1:1继续，Goal active。[本轮证据](evidence/r16-hud-foundation-order-20261116/README.md)。
 
 2026-11-15 用户补充寻路“目标不对或到不了”：本地候选ceb1c1132f补大小地图坐标／30秒初始期限／到达反馈和十语入口说明。152项、独立严格构建与英繁两后端实际跨图／慢碰撞超时／晚到零旧移动／重登新目标／正常保存通过，30份内容WIP保持。本轮未发布；其他目标与既有公网资源失败继续。[记录与范围](evidence/r16-route-feedback-20261115/README.md)
 

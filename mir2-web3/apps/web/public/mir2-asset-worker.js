@@ -119,6 +119,7 @@ const FONT_MIRROR_HEADER_TIMEOUT_MS = 8_000;
 const FONT_MIRROR_BODY_IDLE_TIMEOUT_MS = 15_000;
 const FONT_MIRROR_MAX_BYTES = 32 * 1024 * 1024;
 const FONT_RANGE_PART_TIMEOUT_MS = 15_000;
+const FONT_RANGE_TRANSFER_TIMEOUT_MS = 24_000;
 const FONT_RANGE_PARTS_PER_REQUEST = 4;
 const FONT_RANGE_CACHE_TIMEOUT_MS = 750;
 // The renderer, CSS and prewarmer share this budget. Limiting the prewarmer
@@ -571,6 +572,7 @@ async function fetchStaticAsset(request, fallbackRequests) {
     const sources = fallbackRequests || createRemoteAssetRequests(request);
     const pin = pinnedFontRange(request);
     const mirrors = pin ? currentReleaseFontMirrors(request, sources) : [];
+    let preferAppFont = false;
     if (pin && mirrors.length) {
       const result = await readPinnedRangeFont(request, pin, mirrors)
         .catch(() => ({ response: null, wholeFallback: false }));
@@ -578,12 +580,16 @@ async function fetchStaticAsset(request, fallbackRequests) {
       // A server ignoring Range may still serve the complete original. A real
       // range failure retains its verified parts for the next logical request.
       if (!result.wholeFallback) return syntheticAssetResponse(504, "font range fetch failed");
+      preferAppFont = result.transferExpired === true;
     }
     // All source attempts share this slot; each source keeps its existing
     // header and body-idle budgets. Do not re-enter the admission queue from
     // inside the admitted chain. Range requests and images stay independent.
+    // Every complete source must use the logical asset's pin, even when its
+    // versioned CDN pathname differs from the app pathname.
+    const readFont = (source, owner, headers, retries) => readCompleteFont(source, owner, headers, retries, pin);
     const response = await withFontDownloadSlot(request.signal, () =>
-      fetchStaticAssetSources(request, sources, readCompleteFont));
+      fetchStaticAssetSources(request, sources, readFont, preferAppFont));
     return response || syntheticAssetResponse(504, "font fetch failed");
   }
   // The cache fill already owns a release/cache namespace. A queued read must
@@ -625,15 +631,21 @@ function withStaticHeaderSlot(request, read) {
 }
 
 function drainStaticHeaders() {
+  if (activeStaticHeaderFetches >= STATIC_ASSET_HEADERS_CONCURRENCY || !staticHeaderQueue.length) return;
+  // The published pack already lists backgrounds/orbs before optional control
+  // states. Renderer image bursts can arrive in a different order from prewarm.
+  // Reuse that stable order without changing the pack or its cache partition.
+  const hudOrder = new Map(Array.from(requiredHudAssetKeys, (key, index) => [key, index]));
   const priority = entry => {
-    if (requiredHudAssetKeys.has(staticAssetCacheKey(new URL(entry.request.url)))) return 0;
+    const hudPriority = hudOrder.get(staticAssetCacheKey(new URL(entry.request.url)));
+    if (hudPriority !== undefined) return hudPriority;
     const tier = staticAssetCachePolicy(entry.request).cacheKind;
-    return tier === "static-critical" ? 0 : tier === "static-background" ? 2 : 1;
+    return hudOrder.size + (tier === "static-critical" ? 0 : tier === "static-background" ? 2 : 1);
   };
   while (activeStaticHeaderFetches < STATIC_ASSET_HEADERS_CONCURRENCY && staticHeaderQueue.length) {
     // Read manifest/hints at dispatch so later configuration can promote waiting
     // HUD work. Its background cache partition must not put it behind all the
-    // unclassified map/sprite reads. Retain FIFO within each priority.
+    // unclassified map/sprite reads. Other equal-priority work remains FIFO.
     let next = 0;
     for (let i = 1; i < staticHeaderQueue.length; i++) {
       if (priority(staticHeaderQueue[i]) < priority(staticHeaderQueue[next])) next = i;
@@ -642,7 +654,7 @@ function drainStaticHeaders() {
   }
 }
 
-async function fetchStaticAssetSources(request, fallbackRequests, readFont = fetchCompleteFont) {
+async function fetchStaticAssetSources(request, fallbackRequests, readFont = fetchCompleteFont, preferAppFont = false) {
   // Never throws. Resolves to the best available response and, on total
   // failure, to a synthetic 504 so callers (cacheFirst -> respondWith) always
   // receive a settled promise instead of an uncaught network rejection.
@@ -676,7 +688,9 @@ async function fetchStaticAssetSources(request, fallbackRequests, readFont = fet
     discard(unavailableResponse);
     return response;
   };
-  for (const fontMirror of currentReleaseFontMirrors(request, remoteRequests)) {
+  // A timed-out range chain already tried these current mirrors. Give the
+  // independent app one complete, pinned read before revisiting them.
+  for (const fontMirror of preferAppFont ? [] : currentReleaseFontMirrors(request, remoteRequests)) {
     attemptedUrls.add(fontMirror.url);
     const response = await fetchFontMirror(fontMirror, request.signal, readFont);
     if (response?.status === 200) return succeeded(response);
@@ -896,6 +910,7 @@ async function readPinnedRangeFont(request, pin, mirrors) {
   const batch = new AbortController();
   const signal = AbortSignal.any([request.signal, batch.signal]);
   let next = 0, wholeFallback = false, complete = 0, coalesce = true;
+  let transferTimer, transferExpired = false;
   const partInfo = index => {
     const offset = index * pin.partBytes;
     return { index, offset, length: Math.min(pin.partBytes, pin.bytes - offset),
@@ -912,6 +927,12 @@ async function readPinnedRangeFont(request, pin, mirrors) {
     output.set(bytes, part.offset); complete++;
   };
   const download = (index, count) => withFontDownloadSlot(signal, async () => {
+    // Start at actual admission, not while another font owns both lanes.
+    // Per-range retries and smaller pieces cannot renew the whole transfer.
+    if (transferTimer === undefined) transferTimer = setTimeout(() => {
+      transferExpired = true;
+      batch.abort();
+    }, FONT_RANGE_TRANSFER_TIMEOUT_MS);
     // One global slot owns all source fallbacks for this bounded HTTP range.
     for (const source of mirrors) {
       if (signal.aborted) break;
@@ -971,16 +992,20 @@ async function readPinnedRangeFont(request, pin, mirrors) {
     }
     throw new Error("font range cancelled");
   };
-  const results = await Promise.allSettled([take(), take()]);
-  if (results.some(result => result.status !== "fulfilled") || request.signal.aborted || complete !== pin.parts.length ||
-      await fontDigest(output) !== pin.sha256) return { response: null, wholeFallback: wholeFallback || complete === 0 };
-  return { wholeFallback: false, response: new Response(output, { status: 200, headers: {
-    "content-type": "font/otf", "content-length": String(pin.bytes),
-    "x-mir2-font-transfer": "verified-ranges",
-  } }) };
+  try {
+    const results = await Promise.allSettled([take(), take()]);
+    if (results.some(result => result.status !== "fulfilled") || signal.aborted || complete !== pin.parts.length ||
+        await fontDigest(output) !== pin.sha256) return {
+      response: null, wholeFallback: wholeFallback || complete === 0 || transferExpired, transferExpired,
+    };
+    return { wholeFallback: false, response: new Response(output, { status: 200, headers: {
+      "content-type": "font/otf", "content-length": String(pin.bytes),
+      "x-mir2-font-transfer": "verified-ranges",
+    } }) };
+  } finally { clearTimeout(transferTimer); }
 }
 
-async function readCompleteFont(request, owner, headerTimeoutMs, transientRetries) {
+async function readCompleteFont(request, owner, headerTimeoutMs, transientRetries, pin = pinnedFontRange(request)) {
   const deadline = new AbortController();
   const signal = AbortSignal.any([owner, request.signal, deadline.signal]);
   const headerTimer = setTimeout(() => deadline.abort(), headerTimeoutMs);
@@ -1045,7 +1070,6 @@ async function readCompleteFont(request, owner, headerTimeoutMs, transientRetrie
     const bytes = new Uint8Array(length);
     let offset = 0;
     for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
-    const pin = pinnedFontRange(request);
     if (pin && (length !== pin.bytes || await fontDigest(bytes) !== pin.sha256)) return null;
     const headers = new Headers(response.headers);
     // fetch has decoded a compressed body; its wire length/encoding no longer

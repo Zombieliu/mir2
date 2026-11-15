@@ -1,0 +1,35 @@
+TAP version 13
+# (node:113584) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: walking missing headers start the complete pinned fallback after two eight-second waits
+not ok 1 - walking missing headers start the complete pinned fallback after two eight-second waits
+  ---
+  duration_ms: 100.8505
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-pinned-bootstrap-chunk.mjs:203:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + undefined
+    - 'TimeoutError'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'TimeoutError'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-pinned-bootstrap-chunk.mjs:210:47)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 0
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 399.3339

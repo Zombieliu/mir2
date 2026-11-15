@@ -1,0 +1,70 @@
+TAP version 13
+# Subtest: a simultaneous DOM HUD burst reads foundation images before earlier hover/control requests
+not ok 1 - a simultaneous DOM HUD burst reads foundation images before earlier hover/control requests
+  ---
+  duration_ms: 56.1712
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-asset-worker-static-admission.mjs:178:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    equal HUD urgency must not leave the foundational frames behind hover/control images
+    + actual - expected
+    
+      [
+    +   '/original-ui/MMap/0.png',
+    +   '/original-ui/Prguse/1940.png',
+    +   '/original-ui/Prguse/1939.png',
+    +   '/original-ui/Prguse/1938.png',
+    +   '/original-ui/Prguse/1937.png',
+    +   '/original-ui/Prguse/1936.png',
+    +   '/original-ui/Prguse/1935.png',
+    +   '/original-ui/Prguse/1928.png',
+    +   '/original-ui/Prguse/1927.png'
+    -   '/original-ui/Prguse/1.png',
+    -   '/original-ui/Prguse/4.png',
+    -   '/original-ui/Prguse/6.png',
+    -   '/original-ui/Prguse/12.png',
+    -   '/original-ui/Prguse/13.png',
+    -   '/original-ui/Prguse/8.png',
+    -   '/original-ui/Prguse/76.png',
+    -   '/original-ui/UI_32bit/473.png',
+    -   '/original-ui/UI_32bit/472.png'
+      ]
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: '/original-ui/Prguse/1.png'
+    1: '/original-ui/Prguse/4.png'
+    2: '/original-ui/Prguse/6.png'
+    3: '/original-ui/Prguse/12.png'
+    4: '/original-ui/Prguse/13.png'
+    5: '/original-ui/Prguse/8.png'
+    6: '/original-ui/Prguse/76.png'
+    7: '/original-ui/UI_32bit/473.png'
+    8: '/original-ui/UI_32bit/472.png'
+  actual:
+    0: '/original-ui/MMap/0.png'
+    1: '/original-ui/Prguse/1940.png'
+    2: '/original-ui/Prguse/1939.png'
+    3: '/original-ui/Prguse/1938.png'
+    4: '/original-ui/Prguse/1937.png'
+    5: '/original-ui/Prguse/1936.png'
+    6: '/original-ui/Prguse/1935.png'
+    7: '/original-ui/Prguse/1928.png'
+    8: '/original-ui/Prguse/1927.png'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-worker-static-admission.mjs:192:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 0
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 382.8328

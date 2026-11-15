@@ -1,0 +1,190 @@
+TAP version 13
+# Subtest: cold transfer coalesces pinned pieces into sixteen bounded requests while keeping 63 restart units
+ok 1 - cold transfer coalesces pinned pieces into sixteen bounded requests while keeping 63 restart units
+  ---
+  duration_ms: 103.4739
+  type: 'test'
+  ...
+# Subtest: sparse restart holes fetch only missing original pieces and coalesce adjacent holes
+ok 2 - sparse restart holes fetch only missing original pieces and coalesce adjacent holes
+  ---
+  duration_ms: 149.4347
+  type: 'test'
+  ...
+# Subtest: a source limited to single pieces downgrades coalescing within the original two global lanes
+ok 3 - a source limited to single pieces downgrades coalescing within the original two global lanes
+  ---
+  duration_ms: 93.2324
+  type: 'test'
+  ...
+# Subtest: a corrupted interior piece of a coalesced body is never cached under its original digest
+ok 4 - a corrupted interior piece of a coalesced body is never cached under its original digest
+  ---
+  duration_ms: 16.2813
+  type: 'test'
+  ...
+# Subtest: all generated 256KiB parts and complete font are pinned to original bytes
+ok 5 - all generated 256KiB parts and complete font are pinned to original bytes
+  ---
+  duration_ms: 105.3808
+  type: 'test'
+  ...
+# Subtest: simultaneous font consumers wait for the final part and share one complete cache fill
+ok 6 - simultaneous font consumers wait for the final part and share one complete cache fill
+  ---
+  duration_ms: 96.8371
+  type: 'test'
+  ...
+# Subtest: a failed body retains verified parts across a new Worker instance and downloads only missing parts
+ok 7 - a failed body retains verified parts across a new Worker instance and downloads only missing parts
+  ---
+  duration_ms: 87.7639
+  type: 'test'
+  ...
+# Subtest: a corrupt stored part is revalidated, evicted and fetched without redownloading valid parts
+ok 8 - a corrupt stored part is revalidated, evicted and fetched without redownloading valid parts
+  ---
+  duration_ms: 143.3759
+  type: 'test'
+  ...
+# Subtest: a poisoned whole-font cache cannot bypass the full digest
+ok 9 - a poisoned whole-font cache cannot bypass the full digest
+  ---
+  duration_ms: 161.7009
+  type: 'test'
+  ...
+# Subtest: denied CacheStorage retains complete in-memory validation and two-reader admission
+ok 10 - denied CacheStorage retains complete in-memory validation and two-reader admission
+  ---
+  duration_ms: 46.0457
+  type: 'test'
+  ...
+# Subtest: wrong-range range bytes never become a whole font or a verified part
+ok 11 - wrong-range range bytes never become a whole font or a verified part
+  ---
+  duration_ms: 488.3332
+  type: 'test'
+  ...
+# Subtest: wrong-length range bytes never become a whole font or a verified part
+ok 12 - wrong-length range bytes never become a whole font or a verified part
+  ---
+  duration_ms: 498.8851
+  type: 'test'
+  ...
+# Subtest: encoded range bytes never become a whole font or a verified part
+ok 13 - encoded range bytes never become a whole font or a verified part
+  ---
+  duration_ms: 485.8596
+  type: 'test'
+  ...
+# Subtest: short range bytes never become a whole font or a verified part
+ok 14 - short range bytes never become a whole font or a verified part
+  ---
+  duration_ms: 483.2517
+  type: 'test'
+  ...
+# Subtest: oversized range bytes never become a whole font or a verified part
+ok 15 - oversized range bytes never become a whole font or a verified part
+  ---
+  duration_ms: 493.9221
+  type: 'test'
+  ...
+# Subtest: corrupt range bytes never become a whole font or a verified part
+ok 16 - corrupt range bytes never become a whole font or a verified part
+  ---
+  duration_ms: 494.6831
+  type: 'test'
+  ...
+# Subtest: a source ignoring Range falls back to a full, SHA-verified original
+ok 17 - a source ignoring Range falls back to a full, SHA-verified original
+  ---
+  duration_ms: 62.2442
+  type: 'test'
+  ...
+# Subtest: current Range outage can still use the healthy original app body
+ok 18 - current Range outage can still use the healthy original app body
+  ---
+  duration_ms: 48.4003
+  type: 'test'
+  ...
+# Subtest: new configuration cannot redirect queued old parts or persist them into the new namespace
+ok 19 - new configuration cannot redirect queued old parts or persist them into the new namespace
+  ---
+  duration_ms: 62.2234
+  type: 'test'
+  ...
+# (node:88556) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: two range readers share the original global lanes with another font; images remain independent
+ok 20 - two range readers share the original global lanes with another font; images remain independent
+  ---
+  duration_ms: 86.8375
+  type: 'test'
+  ...
+# Subtest: a stalled partial body is cancelled, keeps completed parts and resumes after Worker restart
+not ok 21 - a stalled partial body is cancelled, keeps completed parts and resumes after Worker restart
+  ---
+  duration_ms: 12.6639
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-asset-worker-font-ranges.mjs:258:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    200 !== 504
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 504
+  actual: 200
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-asset-worker-font-ranges.mjs:274:40)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: a cancelled queued range font starts no transfer and does not cancel other font bodies
+ok 22 - a cancelled queued range font starts no transfer and does not cancel other font bodies
+  ---
+  duration_ms: 3.1913
+  type: 'test'
+  ...
+# Subtest: an old partial 200 cache is discarded before rebuilding the original complete font
+ok 23 - an old partial 200 cache is discarded before rebuilding the original complete font
+  ---
+  duration_ms: 82.2586
+  type: 'test'
+  ...
+# Subtest: ordinary incoming Range remains an ordinary 206 and never enters the resumable whole-font cache
+ok 24 - ordinary incoming Range remains an ordinary 206 and never enters the resumable whole-font cache
+  ---
+  duration_ms: 1.4391
+  type: 'test'
+  ...
+# Subtest: a slow range chain retires within 24s and verifies the healthy app fallback before mirrors
+ok 25 - a slow range chain retires within 24s and verifies the healthy app fallback before mirrors
+  ---
+  duration_ms: 60.2099
+  type: 'test'
+  ...
+# Subtest: a slow range chain retires within 24s and verifies the corrupt app fallback before mirrors
+ok 26 - a slow range chain retires within 24s and verifies the corrupt app fallback before mirrors
+  ---
+  duration_ms: 63.3998
+  type: 'test'
+  ...
+# Subtest: waiting for the two font lanes does not consume the range transfer deadline
+ok 27 - waiting for the two font lanes does not consume the range transfer deadline
+  ---
+  duration_ms: 81.1325
+  type: 'test'
+  ...
+1..27
+# tests 27
+# suites 0
+# pass 26
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4588.5402

@@ -259,6 +259,7 @@ test("a stalled partial body is cancelled, keeps completed parts and resumes aft
   t.mock.timers.enable({ apis: ['setTimeout'] });
   const stopped = [], signals = [];
   const f = fixture(request => {
+    if (!request.headers.has('range')) return new Response(new Uint8Array([1, 2]));
     const response = sliceResponse(request);
     if (rangeIndex(request) !== 4) return response;
     signals.push(request.signal);
@@ -267,12 +268,11 @@ test("a stalled partial body is cancelled, keeps completed parts and resumes aft
   });
   const pending = f.read(); await waitFor(() => signals.length === 1); await turn();
   t.mock.timers.tick(15000); await waitFor(() => signals.length === 2); await turn();
-  t.mock.timers.tick(15000);
-  await waitFor(() => signals.length === 3); await turn();
-  t.mock.timers.tick(15000); await waitFor(() => signals.length === 4); await turn();
-  t.mock.timers.tick(15000);
+  // The whole range transfer now retires before another per-piece retry.
+  // Unusable complete fallbacks must still preserve all verified restart units.
+  t.mock.timers.tick(9000);
   const failed = await pending; assert.equal(failed.status, 504); await failed.arrayBuffer(); await f.flush();
-  assert.equal(stopped.length, 4); assert(signals.every(signal => signal.aborted));
+  assert.equal(stopped.length, 2); assert(signals.every(signal => signal.aborted));
   const saved = f.parts()[0][1].size; assert(saved > 0 && saved < 63); assert.equal(f.full(), undefined);
   const kept = cachedPieces(f), restarted = fixture(sliceResponse, f.stores);
   await assertOriginal(await restarted.read()); await restarted.flush();
@@ -304,4 +304,54 @@ test("ordinary incoming Range remains an ordinary 206 and never enters the resum
   const response = await vm.runInContext('fetchStaticAsset(ranged)', f.context);
   assert.equal(response.status, 206); assert.equal((await response.arrayBuffer()).byteLength, 10);
   assert.equal(f.calls.length, 1); assert.equal(f.parts().length, 0); assert.equal(f.full(), undefined);
+});
+
+for (const app of ['healthy', 'corrupt']) test(`a slow range chain retires within 24s and verifies the ${app} app fallback before mirrors`, async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const stopped = [], signals = [];
+  const f = fixture(request => {
+    if (!request.headers.has('range')) {
+      const bytes = Buffer.from(original);
+      if (app === 'corrupt' && request.url.startsWith(origin)) bytes[12345] ^= 1;
+      return new Response(bytes);
+    }
+    const response = sliceResponse(request), index = rangeIndex(request);
+    if (index < 8) return response;
+    signals.push(request.signal);
+    return new Response(new ReadableStream({
+      start(c) { c.enqueue(original.subarray(index * 262144, index * 262144 + 1024)); },
+      cancel() { stopped.push(true); },
+    }), response);
+  });
+  const pending = f.read(); await waitFor(() => signals.length === 2);
+  t.mock.timers.tick(14999); await turn(); assert(f.calls.every(request => request.headers.has('range')));
+  t.mock.timers.tick(1); await waitFor(() => signals.length === 4);
+  t.mock.timers.tick(8999); await turn(); assert(f.calls.every(request => request.headers.has('range')));
+  t.mock.timers.tick(1); await waitFor(() => f.calls.some(request => !request.headers.has('range')));
+  await assertOriginal(await pending); await f.flush();
+  const complete = f.calls.filter(request => !request.headers.has('range'));
+  assert.equal(complete[0].url, origin + path, 'expired range sources must yield to the independent app');
+  assert.deepEqual(complete.map(request => request.url), app === 'healthy' ? [origin + path] : [origin + path, mirror + path]);
+  assert(signals.every(signal => signal.aborted)); assert.equal(stopped.length, 4);
+  assert.equal(f.parts()[0][1].size, 8, 'all already verified restart units survive the expired transfer');
+  assert.equal(vm.runInContext('activeFontDownloads', f.context), 0);
+  assert.equal(vm.runInContext('fontDownloadQueue.length', f.context), 0);
+  const count = f.calls.length;t.mock.timers.tick(180000);await turn();assert.equal(f.calls.length,count);
+});
+
+test("waiting for the two font lanes does not consume the range transfer deadline", async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const bodies = [];
+  const f = fixture(request => request.headers.has('range') ? sliceResponse(request) : new Response(new ReadableStream({
+    start(c) { c.enqueue(new Uint8Array([1])); bodies.push(c); },
+  })));
+  const a = f.read('/original-ui/fonts/NotoSansTC.ttf'), b = f.read('/original-ui/fonts/NotoSans-Regular.ttf');
+  await waitFor(() => bodies.length === 2);
+  const sc = f.read(); await turn();
+  for(let n=0;n<2;n++){t.mock.timers.tick(14000);await turn();bodies.forEach(c=>c.enqueue(new Uint8Array([2])));await turn();}
+  assert.equal(f.calls.length,2);assert.equal(vm.runInContext('activeFontDownloads',f.context),2);
+  bodies.forEach(c=>c.close());await a;await b;await assertOriginal(await sc);await f.flush();
+  const scRequests=f.calls.filter(request=>request.url.endsWith(path));
+  assert.equal(scRequests.length,16);assert(scRequests.every(request=>request.headers.has('range')));
+  assert.equal(vm.runInContext('activeFontDownloads',f.context),0);
 });
