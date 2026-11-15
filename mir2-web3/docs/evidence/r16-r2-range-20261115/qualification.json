@@ -1,0 +1,380 @@
+{
+  "schema": "mir2.r16.asset-range-qualification.v1",
+  "date": "2026-11-15",
+  "source": "f28dc9453856955fce19e005647d9612a2930f7c",
+  "status": "Asset CDN range fix deployed; whole-font and end-to-end qualification incomplete",
+  "candidate100": false,
+  "accepted100": false,
+  "goalStatus": "active",
+  "sourceFiles": [
+    {
+      "path": "mir2-web3/infra/cloudflare/mir2-r2-asset-cache/src/index.ts",
+      "sha256": "51134aab7f98be67295c9ec34134d81cdd7ded4d4977367233787ccc5e9b2e7e"
+    },
+    {
+      "path": "mir2-web3/infra/cloudflare/mir2-r2-asset-cache/test/ranges.test.mjs",
+      "sha256": "0978cfbde3d36530b69b1742ba5a927507db6bee7b527d72f5479264bc597b21"
+    },
+    {
+      "path": "mir2-web3/infra/cloudflare/mir2-r2-asset-cache/wrangler.jsonc",
+      "sha256": "e05c6bd4f687f5f0c6692487e774f72659e7d5c6aad538092d4a27abfc62f9f2"
+    },
+    {
+      "path": "mir2-web3/infra/cloudflare/mir2-r2-asset-cache/README.md",
+      "sha256": "f8a07707457b417846f38f59cb0d63174225bd1c727688eb7a49661f4990b957"
+    },
+    {
+      "path": "mir2-web3/apps/web/package.json",
+      "sha256": "986dd5c5c8d6b6a1fbd6fd90ccca527ef41d911687c37804fd9a9be02127bdf3"
+    }
+  ],
+  "scope": {
+    "worker": "mir2-r2-asset-cache",
+    "frontendDeployed": false,
+    "gatewayRestarted": false,
+    "dbChanges": false,
+    "fontRangeLoaderImplemented": false,
+    "suffixMultipartUnsatisfiableSemanticsImplemented": false
+  },
+  "checks": {
+    "focused": 22,
+    "adjacent": 9,
+    "realWorkerd": 9,
+    "strictTypecheck": true,
+    "dryRuns": 2,
+    "finalFixtureOnOldSource": {
+      "passed": 2,
+      "failed": 20
+    },
+    "inheritedWorkingTreeCheckFailuresClosed": false
+  },
+  "deployment": {
+    "before": {
+      "checkedAt": "2026-11-15T07:58:54.386Z",
+      "readOnly": true,
+      "account": "85bf64d86ea9221e172d26feba9fd47e",
+      "worker": "mir2-r2-asset-cache",
+      "deploymentId": "c2ca3842-0b1a-40db-8d7f-d2e4af36bfdf",
+      "versionId": "4317a349-f738-4234-8613-8ad33bee9402",
+      "compatibilityDate": "2026-05-18",
+      "compatibilityFlags": [],
+      "vars": {
+        "MIR2_ALLOWED_PREFIX": "mir2/v/",
+        "MIR2_CACHE_CONTROL": "public, max-age=31536000, immutable",
+        "MIR2_FALLBACK_OBJECT_PREFIX": "mir2/v/20260730-fullcrystal-f71b89aa-gzip1",
+        "MIR2_OVERLAY_OBJECT_PREFIX": "mir2/v/20260818-main-97887dcd"
+      },
+      "r2Bucket": "mir2-web3-assets",
+      "route": "assets.mir2.obelisk.build/*",
+      "observability": {
+        "enabled": true,
+        "head_sampling_rate": 1,
+        "redact_query_string": false,
+        "logs": {
+          "enabled": true,
+          "head_sampling_rate": 1,
+          "persist": true,
+          "invocation_logs": true
+        },
+        "traces": {
+          "enabled": false,
+          "persist": true,
+          "head_sampling_rate": 1
+        }
+      },
+      "limits": null,
+      "placement": {},
+      "tailConsumers": []
+    },
+    "after": {
+      "checkedAt": "2026-11-15T08:04:39.878Z",
+      "readOnly": true,
+      "account": "85bf64d86ea9221e172d26feba9fd47e",
+      "worker": "mir2-r2-asset-cache",
+      "deploymentId": "ab5d6857-21c5-4379-bec5-8af6e20bf4c5",
+      "versionId": "9e9b30bd-b567-4f5d-8bf6-f8f43eb4fd69",
+      "compatibilityDate": "2026-05-18",
+      "compatibilityFlags": [],
+      "vars": {
+        "MIR2_ALLOWED_PREFIX": "mir2/v/",
+        "MIR2_CACHE_CONTROL": "public, max-age=31536000, immutable",
+        "MIR2_FALLBACK_OBJECT_PREFIX": "mir2/v/20260730-fullcrystal-f71b89aa-gzip1",
+        "MIR2_OVERLAY_OBJECT_PREFIX": "mir2/v/20260818-main-97887dcd"
+      },
+      "r2Bucket": "mir2-web3-assets",
+      "route": "assets.mir2.obelisk.build/*",
+      "observability": {
+        "enabled": true,
+        "head_sampling_rate": 1,
+        "redact_query_string": false,
+        "logs": {
+          "enabled": true,
+          "head_sampling_rate": 1,
+          "persist": true,
+          "invocation_logs": true
+        },
+        "traces": {
+          "enabled": true,
+          "persist": true,
+          "head_sampling_rate": 0.1
+        }
+      },
+      "limits": null,
+      "placement": {},
+      "tailConsumers": []
+    },
+    "preflight": {
+      "passed": true,
+      "source": "f28dc9453856955fce19e005647d9612a2930f7c",
+      "remoteSource": "f28dc9453856955fce19e005647d9612a2930f7c",
+      "worker": "mir2-r2-asset-cache",
+      "previousDeployment": "c2ca3842-0b1a-40db-8d7f-d2e4af36bfdf",
+      "rollbackVersion": "4317a349-f738-4234-8613-8ad33bee9402",
+      "account": "85bf64d86ea9221e172d26feba9fd47e",
+      "route": "assets.mir2.obelisk.build/*",
+      "varsPreserved": true,
+      "r2Bucket": "mir2-web3-assets",
+      "compatibilityPreserved": true,
+      "codeBytes": 11139,
+      "codeSha256": "cf9b674c5f8461cf647f15f3c197a5c1cac14d030c9d093a30de956942672d89",
+      "sourceFiles": [
+        {
+          "path": "mir2-web3/infra/cloudflare/mir2-r2-asset-cache/src/index.ts",
+          "sha256": "51134aab7f98be67295c9ec34134d81cdd7ded4d4977367233787ccc5e9b2e7e"
+        },
+        {
+          "path": "mir2-web3/infra/cloudflare/mir2-r2-asset-cache/test/ranges.test.mjs",
+          "sha256": "0978cfbde3d36530b69b1742ba5a927507db6bee7b527d72f5479264bc597b21"
+        },
+        {
+          "path": "mir2-web3/infra/cloudflare/mir2-r2-asset-cache/wrangler.jsonc",
+          "sha256": "e05c6bd4f687f5f0c6692487e774f72659e7d5c6aad538092d4a27abfc62f9f2"
+        },
+        {
+          "path": "mir2-web3/infra/cloudflare/mir2-r2-asset-cache/README.md",
+          "sha256": "f8a07707457b417846f38f59cb0d63174225bd1c727688eb7a49661f4990b957"
+        },
+        {
+          "path": "mir2-web3/apps/web/package.json",
+          "sha256": "986dd5c5c8d6b6a1fbd6fd90ccca527ef41d911687c37804fd9a9be02127bdf3"
+        }
+      ],
+      "intentionalConfigChange": {
+        "tracesEnabled": true,
+        "traceHeadSamplingRate": 0.1
+      },
+      "frontendDeploy": false,
+      "gatewayRestart": false,
+      "dbChanges": false
+    },
+    "independentCodeReadback": {
+      "checkedAt": "2026-11-15T08:15:57.915Z",
+      "readOnly": true,
+      "worker": "mir2-r2-asset-cache",
+      "moduleName": "index.js",
+      "bytes": 11139,
+      "sha256": "cf9b674c5f8461cf647f15f3c197a5c1cac14d030c9d093a30de956942672d89",
+      "sameAsQualifiedBundle": true
+    }
+  },
+  "public": {
+    "rangeReadback": {
+      "checkedAt": "2026-11-15T08:06:38.061Z",
+      "passed": false,
+      "scope": "Node protocol/byte readback, not browser Native or performance acceptance",
+      "frontendUpdated": false,
+      "fontRangeLoaderImplemented": false,
+      "rows": [
+        {
+          "name": "prefix",
+          "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "range": "bytes=0-65535",
+          "status": 206,
+          "contentRange": "bytes 0-65535/16437364",
+          "bytes": 65536,
+          "sha256": "8e5b96cfdc4d85d056db5ed847fc8bf6e87e5e9da4a7f74ba004fe6b997ab04c",
+          "ms": 685,
+          "passed": true
+        },
+        {
+          "name": "open-tail",
+          "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "range": "bytes=16436340-",
+          "status": 206,
+          "contentRange": "bytes 16436340-16437363/16437364",
+          "bytes": 1024,
+          "sha256": "55f07e0537080fca886915d6043dd3827e2ba342383df207b4a15c06b845f4fc",
+          "ms": 559,
+          "passed": true
+        },
+        {
+          "name": "clamped-tail",
+          "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "range": "bytes=16437354-16437463",
+          "status": 206,
+          "contentRange": "bytes 16437354-16437363/16437364",
+          "bytes": 10,
+          "sha256": "1f4dc57a8f240c9aac5d9b6dff437bfc4f1a066cc022bf0fa817140c1b296067",
+          "ms": 244,
+          "passed": true
+        },
+        {
+          "name": "head-ignores-range",
+          "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "status": 200,
+          "contentLength": "16437364",
+          "passed": true
+        },
+        {
+          "name": "prefix",
+          "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "range": "bytes=0-65535",
+          "status": 206,
+          "contentRange": "bytes 0-65535/16437364",
+          "bytes": 65536,
+          "sha256": "8e5b96cfdc4d85d056db5ed847fc8bf6e87e5e9da4a7f74ba004fe6b997ab04c",
+          "ms": 279,
+          "passed": true
+        },
+        {
+          "name": "open-tail",
+          "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "range": "bytes=16436340-",
+          "status": 206,
+          "contentRange": "bytes 16436340-16437363/16437364",
+          "bytes": 1024,
+          "sha256": "55f07e0537080fca886915d6043dd3827e2ba342383df207b4a15c06b845f4fc",
+          "ms": 584,
+          "passed": true
+        },
+        {
+          "name": "clamped-tail",
+          "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "range": "bytes=16437354-16437463",
+          "status": 206,
+          "contentRange": "bytes 16437354-16437363/16437364",
+          "bytes": 10,
+          "sha256": "1f4dc57a8f240c9aac5d9b6dff437bfc4f1a066cc022bf0fa817140c1b296067",
+          "ms": 253,
+          "passed": true
+        },
+        {
+          "name": "head-ignores-range",
+          "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "status": 200,
+          "contentLength": "16437364",
+          "passed": true
+        },
+        {
+          "name": "full-font-part-0",
+          "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "range": "bytes=0-1048575",
+          "status": 206,
+          "contentRange": "bytes 0-1048575/16437364",
+          "bytes": 1048576,
+          "sha256": "c217e1f94b92966ec04caa191962b28983d0ebdf508577936a306cae2f2b6295",
+          "ms": 8387,
+          "passed": true
+        },
+        {
+          "name": "full-font-part-2",
+          "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "range": "bytes=2097152-3145727",
+          "status": 206,
+          "contentRange": "bytes 2097152-3145727/16437364",
+          "bytes": 1048576,
+          "sha256": "e374d5a0654ac778df6008ef65ccc348e910f25670ce741ba408e9881a921180",
+          "ms": 25329,
+          "passed": true
+        },
+        {
+          "name": "full-font-part-3",
+          "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "range": "bytes=3145728-4194303",
+          "status": 206,
+          "contentRange": "bytes 3145728-4194303/16437364",
+          "bytes": 1048576,
+          "sha256": "138105b194273b40aae4abcb33d238e8fd4eba0a459bb951b904e2268f5f7503",
+          "ms": 8980,
+          "passed": true
+        },
+        {
+          "name": "full-font-part-4",
+          "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "range": "bytes=4194304-5242879",
+          "status": 206,
+          "contentRange": "bytes 4194304-5242879/16437364",
+          "bytes": 1048576,
+          "sha256": "6a63e9670b39ce1f32b31241b64f6cec229b260017be2289b41bee944b0e3a66",
+          "ms": 29497,
+          "passed": true
+        },
+        {
+          "name": "full-font-part-5",
+          "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "range": "bytes=5242880-6291455",
+          "status": 206,
+          "contentRange": "bytes 5242880-6291455/16437364",
+          "bytes": 1048576,
+          "sha256": "1763d92f58bc24265ca9ffff110107e885f1a777f1ef1f3e4d8e1465a2387f8e",
+          "ms": 23840,
+          "passed": true
+        }
+      ],
+      "whole": null,
+      "error": {
+        "name": "TimeoutError",
+        "code": 23,
+        "message": "The operation was aborted due to timeout"
+      }
+    },
+    "independentServicesReadback": {
+      "checkedAt": "2026-11-15T08:08:15.870Z",
+      "passed": true,
+      "rows": [
+        {
+          "url": "https://numeron.obelisk.build/version",
+          "status": 200,
+          "revision": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+          "passed": true
+        },
+        {
+          "url": "https://165.154.65.136.sslip.io/playtest/health",
+          "status": 200,
+          "revision": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5",
+          "passed": true
+        }
+      ]
+    }
+  },
+  "browser": {
+    "newBrowserFlowRun": false,
+    "twoCohortQualification": false,
+    "physicalPhoneTested": false,
+    "native120SecondGatePassed": false,
+    "previousFailuresPreserved": true,
+    "unchangedGates": {
+      "firstMoveMs": 8000,
+      "naturalWalkingMs": 65000,
+      "nativeMs": 120000,
+      "requiredFonts": 6
+    }
+  },
+  "preservation": {
+    "foreignBaseline": 30,
+    "rawUnchanged": 29,
+    "independentCapacityUpdatesPreserved": true,
+    "capacityCommits": [
+      "213fc1737ffc6da3b84de98eed2f92b59c30a51d",
+      "b80759fe3b6a1e636268ae8b2c40f17ff4410de9"
+    ],
+    "concurrentMergePreserved": "362ea11c24",
+    "foreignNativeAndAnimationWipExcluded": true
+  },
+  "next": [
+    "bounded resumable font delivery with all original bytes and SHA",
+    "runtime partial-body combined failure",
+    "two complete local and public browser qualifications",
+    "remaining applicable Windows R16 parity gates"
+  ]
+}

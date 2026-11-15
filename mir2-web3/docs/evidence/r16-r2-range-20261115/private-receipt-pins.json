@@ -1,0 +1,157 @@
+[
+  {
+    "name": "before-index.ts",
+    "bytes": 10285,
+    "sha256": "21c30c38de2a41fcebc032e7310335e2b16a59e2dc123d35ff89c7baca9b9d95"
+  },
+  {
+    "name": "before-tests.log",
+    "bytes": 17653,
+    "sha256": "11284d1afc8a3f4a8472b70ed98d9254e8bc6a3a2993c2291e7a0a7e73279653"
+  },
+  {
+    "name": "final-tests-old-source.log",
+    "bytes": 16856,
+    "sha256": "2dc081011dcc0df95ec8dc0f0cafe098f988965d896b8c77589e1c37451f9cb1"
+  },
+  {
+    "name": "range-tests-r1.log",
+    "bytes": 4324,
+    "sha256": "8c286f2cc3095065d49369b23b2cabbb114c5eaa20c11cfc8a1bbc3d885d737f"
+  },
+  {
+    "name": "npm-range-tests.log",
+    "bytes": 4483,
+    "sha256": "4e64ebc599927a289739b2dbd30055a31a366f83fa5b175173788707b2d5785f"
+  },
+  {
+    "name": "adjacent-tests-r1.log",
+    "bytes": 2108,
+    "sha256": "d1a3a36180924e48f325c0a36736ad8309244b41369929f85a08d89f60dfe0f8"
+  },
+  {
+    "name": "workerd-r1.log",
+    "bytes": 900,
+    "sha256": "68de9ab55dc2d91f616a60e01e895a3fe3ce674aaaead059ae5a9d714e2c901f"
+  },
+  {
+    "name": "workerd-r2.log",
+    "bytes": 2922,
+    "sha256": "3e9c9f13b91ce5b37a0712840547451dd858f4798ab277c34576e6738161d9b9"
+  },
+  {
+    "name": "workerd-r3.log",
+    "bytes": 595,
+    "sha256": "9ea525c11e3c4f213cea3fae2c8261026ff6a5599e24e6331d46b735084ae15e"
+  },
+  {
+    "name": "workerd-r1.json",
+    "bytes": 919,
+    "sha256": "4f6434aff323615e7863b588e9b56128187bf9a5fe513a78f8c336e6cb118b76"
+  },
+  {
+    "name": "workerd-check.mjs",
+    "bytes": 3500,
+    "sha256": "ca2b956f2934a3f540c9bdadf78e20b25550cda3b4922277633f7f1cf0ac9e17"
+  },
+  {
+    "name": "dry-run-r1.log",
+    "bytes": 1138,
+    "sha256": "14df31b8d8afb8c9ffc09ccd628e2da7075d4aad43a69d929952fcb962defb91"
+  },
+  {
+    "name": "dry-run-r2.log",
+    "bytes": 1076,
+    "sha256": "46cd73101260bde04c38e8e44ac1a5ebca323cec731b358aae160c7623b43269"
+  },
+  {
+    "name": "runtime-types.d.ts",
+    "bytes": 550416,
+    "sha256": "da2811017f92d8ec6765ea96484f56cac46eabc7afc3cef1f402064e2842a723"
+  },
+  {
+    "name": "runtime-types-final.d.ts",
+    "bytes": 550416,
+    "sha256": "da2811017f92d8ec6765ea96484f56cac46eabc7afc3cef1f402064e2842a723"
+  },
+  {
+    "name": "typecheck-r1.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "typecheck-final.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "deployment-preflight.json",
+    "bytes": 1628,
+    "sha256": "37cbc1ccc250329f4e094d7e2e71421687fab1c679be03e1dc9dc72eddc69a37"
+  },
+  {
+    "name": "deploy-preflight.mjs",
+    "bytes": 2524,
+    "sha256": "7d2bd999e56ff38f868ec24b8513f63e27804b72e49943d0a91717bcba6e6576"
+  },
+  {
+    "name": "live-before.json",
+    "bytes": 1068,
+    "sha256": "ab130347a41b972cefbd06d5b32dc91b44ee1423a86579ed92a1d966b6b417fb"
+  },
+  {
+    "name": "live-recheck.json",
+    "bytes": 1068,
+    "sha256": "6466f807edf01c8cac1a20b34702092e1f52820258dbf69ebe6a45936c179d1c"
+  },
+  {
+    "name": "live-after.json",
+    "bytes": 1069,
+    "sha256": "eb7fb970815445b487347104a9592ce6e3ca405c9a647603838fd01e867e4888"
+  },
+  {
+    "name": "deploy-r1.log",
+    "bytes": 1258,
+    "sha256": "420d1ba7aa3e9448a6251e90b3c098e93046bf3cb7b4387e50ecfc620a7fb77d"
+  },
+  {
+    "name": "public-range-readback.mjs",
+    "bytes": 5201,
+    "sha256": "0d5d980b2c2f5bbe0d4a7f5ca1c3b3483229fd67775c91335efd20b6010ed4c4"
+  },
+  {
+    "name": "public-range-readback-r1.json",
+    "bytes": 5632,
+    "sha256": "6eb2da45987f2b84cb806c5186b0e4e342791f6e5acaf00db5a4d3255af692ee"
+  },
+  {
+    "name": "public-range-readback-r1.log",
+    "bytes": 348,
+    "sha256": "0841dd65fc29e3b8e9b17622445193844a04296ff8f5409b005bc03b71277b67"
+  },
+  {
+    "name": "service-readback.mjs",
+    "bytes": 1242,
+    "sha256": "172aefb50ddf0480965fa009d32cc4c15fc6ae5c32779b5d52b307d814285ac2"
+  },
+  {
+    "name": "service-readback.json",
+    "bytes": 432,
+    "sha256": "dcf59ac21fc4bc3935f0a8ef450fbd617bf886707631b5e676a39c0b5e72e500"
+  },
+  {
+    "name": "read-worker-code.mjs",
+    "bytes": 2463,
+    "sha256": "22106b20d33bf59c94fab9599cf1856e7906eab3859f05f581f69820b95f9d96"
+  },
+  {
+    "name": "worker-code-readback.json",
+    "bytes": 260,
+    "sha256": "91968ef426395ac287ee06ddd1103a00c7b36592689341b1e7f2188127ebe767"
+  },
+  {
+    "name": "../r16-walking-parts-20261115/font-range-probe.json",
+    "bytes": 1171,
+    "sha256": "813e9f6d924cd8314f88a507069b85744a37a33e48fab2ca5182b2bc40f1b9bd"
+  }
+]

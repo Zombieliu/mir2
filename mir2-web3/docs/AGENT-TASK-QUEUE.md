@@ -6,11 +6,12 @@ Updated 2026-11-15 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-15 d3aefa26d9候选完成行走备用五块／并发2及主字体8秒准入；269项、严格构建和原PNG检查通过。英文完整场Native109640ms／六字体113／Q／两次注销同档通过；繁体行走及自然PNG通过，但Native120未过，关闭后缓存缺SC16MB字体。组合故障与脚本误读失败均保留。下一项修资产服务Range响应0-NaN并验证完整大字体恢复，保留原8／65／120秒和全六字体；两场完整本地／公网、其它1:1门槛仍开放。未部署，正式20de／AWss与fd3；29份原内容WIP保持，容量提交213fc1737f及其它工作保留。[本轮完整范围](evidence/r16-walking-parts-20261115/README.md) · [上轮发布失败及回退](evidence/r16-paired-release-20261115/README.md)。
+2026-11-15 f28dc94538的CDN Range修复已发布9e9b30bd，22项／9相邻／9真实本地R2、类型及预演通过，公网两个入口8项范围与原字节通过。完整SC字体并发2／1MiB探针仍失败，仅五段完整SHA，30秒请求超时保留。下一项实现完整字库有界分段保留／恢复，再重演两场原8／65／120秒、全六字体资格；不关闭d3行走候选的繁体Native和运行包组合失败。Web仍20de／AWss，Gateway fd3，未重启改档，独立版本及健康200。29份原内容WIP和容量213／b807独立提交保留。[CDN发布、完整体失败和边界](evidence/r16-r2-range-20261115/README.md) · [行走候选](evidence/r16-walking-parts-20261115/README.md) · [原发布回退](evidence/r16-paired-release-20261115/README.md)。
 
 ## 保留的当前未结项
 
-- [ ] d3aefa26d9分块及字体准入候选269项／构建通过，但仅英文完整场通过；先修CDN Range错误头和SC完整字库交付，再补Native部分正文恢复、两场原门槛本地与公网，保持旧失败。[证据和下一边界](evidence/r16-walking-parts-20261115/README.md)
+- [x] f28dc94538的CDN Range错误头已修复并发布9e9b30bd；22项／9相邻／9真实本地R2／类型／预演、公网两入口8项范围及原字节通过，资源配置保持。[已发布范围](evidence/r16-r2-range-20261115/README.md)
+- [ ] SC完整字体的1MiB／并发2公网探针失败；实现浏览器有界分段保留／恢复，保持完整SHA和原六字体，再补d3候选的繁体Native、运行包组合故障及两场原8／65／120秒本地与公网资格。现有失败不倒填。[实际失败及下一项](evidence/r16-r2-range-20261115/README.md)
 
 - [ ] dca152cd15中立AI1/2漫游已推送，270项／本地英繁两后端自然PNG保持；aa524 Linux303／PG216及隔离普通协议通过，曾切换正式，但公网完整行走包／Native120失败后两端回退20de／fd3。先修交付恢复再做两场原门槛公网，其他AI／巡逻、资源浮层、混合语言及6项旧夹具依赖失败继续。[本轮资格与失败](evidence/r16-paired-release-20261115/README.md) · [原本地结果](evidence/r16-livestock-roam-20261115/README.md)
 
