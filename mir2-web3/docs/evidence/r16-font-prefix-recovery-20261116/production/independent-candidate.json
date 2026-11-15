@@ -1,0 +1,9 @@
+{
+  "checkedAt": "2026-11-15T22:18:14.374Z",
+  "deploymentId": "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN",
+  "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+  "source": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+  "readyState": "READY",
+  "url": "numeron-r16-bqu7lxntb-obelisk-labs.vercel.app",
+  "target": "production"
+}

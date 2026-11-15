@@ -1,8 +1,8 @@
 # Frontend 1:1 Gaps
 
-## 2026-11-16 QR后字库预取本地通过，待匹配发行
+## 2026-11-16 e0字体恢复已发布，首次Q画面继续
 
-2026-11-16 主字体整源中断保留分片候选：188项（114+74，含36范围/9新增）与严格构建通过；真实Chrome旧码保留0、新码保留60，整浏览器重启仅补3片，六字体SHA/解码通过。英繁两完整局Native Q首次/重登通过，首步111/90ms、Native22449/4731ms；复用自有CacheStorage，不是公网冷速。12私有覆盖恢复，29WIP保持，全部测试句柄关闭。仅候选，正式仍6ba；匹配发行/原两场公网及冷Q接管继续，Goal active。[结果与边界](evidence/r16-font-prefix-recovery-20261116/README.md)。 正式6ba成对发行与原两场公网已通过，原312/224/224行、22配置保持；冷Q为一场Native/一场备用，实体手机未验。[发布回执](evidence/r16-qr-font-preparation-20261116/production/README.md)。
+e0原两场公网及完整资源门槛通过；共享HUD后的Q均实际Native，首次Q仍备用。R1早期黑PNG与6ba相同，未计视觉通过；R2初期HUD纹理未齐，后续完整画面已查看。继续首次画面、混合语言与整体1:1，实体手机另验。[分阶段原值与截图](evidence/r16-font-prefix-recovery-20261116/production/README.md)。
 
 ## 2026-11-16 必需 HUD 候选已尝试发布，原行走与 Native 门槛失败后回退
 

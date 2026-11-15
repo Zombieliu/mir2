@@ -1,0 +1,48 @@
+[
+  {
+    "cohort": "r1",
+    "passed": true,
+    "source": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+    "deployment": "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN",
+    "inputToAuthoritativeAckMs": 199,
+    "wireToAuthoritativeAckMs": 196,
+    "nativeAfterFirstFrameMs": 47939,
+    "runtimeBodyAfterFirstFrameMs": 16322,
+    "firstQuestRenderer": "ordinary-react-fallback",
+    "hudGateQuestRenderer": "ordinary-shared-native",
+    "hudGateQuestOwner": "bevy",
+    "package": {
+      "backend": "webgpu",
+      "packageId": "webgpu"
+    },
+    "zeroQuestWorldCommands": true,
+    "normalWalletSignedApprovalCount": 1,
+    "forbiddenWalletActions": 0,
+    "normalTestnetWalletCreated": true,
+    "returnedToSelect": true,
+    "scope": "Ordinary signed login and one safe adjacent walk; full walking/font/HUD bodies, Q, Worker restart and normal Logout; not full combat/progression or public WebGL2."
+  },
+  {
+    "cohort": "r2",
+    "passed": true,
+    "source": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+    "deployment": "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN",
+    "inputToAuthoritativeAckMs": 141,
+    "wireToAuthoritativeAckMs": 133,
+    "nativeAfterFirstFrameMs": 42927,
+    "runtimeBodyAfterFirstFrameMs": 7601,
+    "firstQuestRenderer": "ordinary-react-fallback",
+    "hudGateQuestRenderer": "ordinary-shared-native",
+    "hudGateQuestOwner": "bevy",
+    "package": {
+      "backend": "webgpu",
+      "packageId": "webgpu"
+    },
+    "zeroQuestWorldCommands": true,
+    "normalWalletSignedApprovalCount": 1,
+    "forbiddenWalletActions": 0,
+    "normalTestnetWalletCreated": true,
+    "returnedToSelect": true,
+    "scope": "Ordinary signed login and one safe adjacent walk; full walking/font/HUD bodies, Q, Worker restart and normal Logout; not full combat/progression or public WebGL2."
+  }
+]

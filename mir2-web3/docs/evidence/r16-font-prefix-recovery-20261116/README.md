@@ -3,7 +3,9 @@
 Parent: `7468b3337ac448baf18dc1b362b87acbac5fa635`.
 Candidate: `r16-font-prefix-d10fbdb7`. New Worker: 68,357 bytes,
 SHA-256 `9c301d24217f498408d77eb0b38f88f9c6825020d7d380ed2c383022db615f97`.
-This candidate is not published. Production remains application `6ba38557dd`.
+Application `e0ceea2296` is now published with a matching Gateway. Both original
+public cohorts and simplified/traditional QR checks passed; see
+[production qualification and visual limits](production/README.md).
 
 ## Observation and change
 
@@ -86,9 +88,11 @@ node mir2-web3/apps/web/scripts/smoke-asset-font-ranges.mjs --output <new-direct
 
 ## Remaining scope
 
-Matching release packaging and original public cold cohorts are still required.
-The prior public Q observation remains one Native window and one fallback window;
-these local post-readiness Q checks do not rewrite that result or prove the whole
-cold handoff fixed. Full Windows/Web 1:1, mixed NPC/welcome language, broader
+Matching release packaging and both original public cohorts are now qualified.
+At the timed shared-HUD gate both public Q windows were actually Native, while
+the first Q remained a React fallback in both cohorts. One early PNG is uniformly
+black and byte-identical to a previous 6ba capture; it is not visual acceptance.
+See the separate phases and retained limitation in [production](production/README.md).
+Full Windows/Web 1:1, mixed NPC/welcome language, broader
 routes/maps/progression/combat/economy/Alo, existing Rust formatting and human-only
 Windows/phone checks remain open. Goal stays active.

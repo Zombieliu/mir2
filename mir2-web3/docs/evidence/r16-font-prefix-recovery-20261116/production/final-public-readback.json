@@ -1,0 +1,92 @@
+{
+  "source": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+  "deploymentId": "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN",
+  "checkedAt": "2026-11-15T22:54:34.776Z",
+  "passed": true,
+  "rows": [
+    {
+      "url": "https://numeron.obelisk.build/game",
+      "status": 200,
+      "bytes": 11162,
+      "sha256": "ea48dc837280997ca215f2313c525e14d58c3fdbb1ab597faf6d53dd81902675"
+    },
+    {
+      "url": "https://numeron.obelisk.build/version",
+      "status": 200,
+      "bytes": 55,
+      "sha256": "fb49020cc1052386b21e69997740a8f92d866a27f09bad8ecab310a3a9e4a4fa",
+      "revision": "e0ceea22964c03041d45e49e506b3a8badd6984e"
+    },
+    {
+      "url": "https://165.154.65.136.sslip.io/playtest/health",
+      "status": 200,
+      "bytes": 6927,
+      "sha256": "7f4cdc0d5f0ef9e87c462088cdf90d5e46d5c5531faa0446da01b63a8347d995",
+      "revision": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+      "ok": true,
+      "capacity": {
+        "maxWsConnections": 66,
+        "maxActiveSessions": 51,
+        "maxReconnectLeases": 51,
+        "maxLoginInFlight": 2,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2,
+        "currentWsConnections": 0,
+        "currentActiveSessions": 0,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0
+      }
+    },
+    {
+      "url": "https://numeron.obelisk.build/mir2-asset-worker.js",
+      "status": 200,
+      "bytes": 68357,
+      "sha256": "9c301d24217f498408d77eb0b38f88f9c6825020d7d380ed2c383022db615f97"
+    }
+  ],
+  "bothOriginalPublicCohortsAccepted": true,
+  "allSixOriginalFontHashesAnd113Preserved": true,
+  "publicSimplifiedTraditionalQrPendingAndCancel": true,
+  "realOfficialWalletSignedApprovalCohorts": 2,
+  "physicalPhoneCameraTested": false,
+  "originalClassifierUnchanged": true,
+  "oldRows": {
+    "accounts": {
+      "preexistingRows": 314,
+      "currentRows": 316,
+      "preexistingCanonicalBytes": 2334844,
+      "preexistingSha256": "06544308e041cf4fb6aa5073dfa71992707542961f256ee57005f5ea4d778451",
+      "preexistingRowsUnchanged": true
+    },
+    "characters": {
+      "preexistingRows": 226,
+      "currentRows": 228,
+      "preexistingCanonicalBytes": 76332,
+      "preexistingSha256": "fafe4b0e2ebbda3656652327f94046144d6d9d7b085d843d11fdb8ecb28b00b5",
+      "preexistingRowsUnchanged": true
+    },
+    "character_saves": {
+      "preexistingRows": 226,
+      "currentRows": 228,
+      "preexistingCanonicalBytes": 2632955,
+      "preexistingSha256": "83b4069d5f307ba6a4da833079111e2989205d40e8d5c6396964f276c6a31118",
+      "preexistingRowsUnchanged": true
+    }
+  },
+  "originalConfigurationFilesUnchanged": 23,
+  "databaseRestored": false,
+  "ownedSshControllerClosed": {
+    "sessionId": 86249,
+    "closed": true,
+    "exitCode": 0
+  },
+  "limitations": [
+    "early Q remains React fallback;R1 early black screenshot also exists byte-identically on previous6ba and remains unresolved",
+    "mixed language remains",
+    "no public WebGL2/full1:1/human acceptance claim"
+  ],
+  "wholeParityCandidate": false,
+  "wholeParityAccepted": false
+}

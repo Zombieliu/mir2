@@ -1,8 +1,8 @@
 # e0 exact-source release guard
 
-The release controller now targets application
-`e0ceea22964c03041d45e49e506b3a8badd6984e`. Its rollback deployment is the
-currently live, two-cohort-qualified `dpl_G8iq4UBFibrWSEaSbwahtboeAom3`
+The release controller targets application
+`e0ceea22964c03041d45e49e506b3a8badd6984e`. At pinning time its rollback was the
+then-live, two-cohort-qualified `dpl_G8iq4UBFibrWSEaSbwahtboeAom3`
 (application `6ba38557ddb298df72cb9e4a23c48caf542a598e`). This controller update
 does not change production traffic.
 
@@ -26,6 +26,8 @@ unchanged. All 111 release/domain/entry/source-closure tests passed. See
 
 Matching backend build
 [43766785046](https://github.com/Zombieliu/mir2/actions/runs/43766785046)
-is running. Artifact qualification, protected Web candidate checks, a fresh backup
-and isolated lifecycle, paired rollout and the original public cohorts remain
-required. Production stays on `6ba`; global 1:1 and human acceptance stay open.
+succeeded. The exact artifact, protected candidate, fresh 6ba backup/clone,
+ordinary isolated lifecycle, paired rollout and both original public cohorts
+passed. Production is e0/Fo. See [release evidence and retained visual limits](../production/README.md);
+global 1:1 and human acceptance stay open. This pin-only record does not replace
+the actual promotion receipt.

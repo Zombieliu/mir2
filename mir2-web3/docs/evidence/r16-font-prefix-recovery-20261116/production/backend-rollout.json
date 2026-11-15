@@ -1,0 +1,51 @@
+{
+  "source": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+  "oldSource": "6ba38557ddb298df72cb9e4a23c48caf542a598e",
+  "passed": true,
+  "rollbackPerformed": false,
+  "databaseRestored": false,
+  "newPid": 1687873,
+  "newBinary": "/opt/mir2-playtest/releases/e0ceea22964c03041d45e49e506b3a8badd6984e-r16-paired-candidate/mir2-gateway",
+  "newBinarySha256": "22bb54130b2084a34c31d7b0b7bd604cc99a260a08e8d924a5513b329ee4ec96",
+  "onlyChangedEnvironmentKeys": [
+    "MIR2_DEPLOY_REVISION"
+  ],
+  "health": {
+    "ok": true,
+    "revision": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+    "capacity": {
+      "maxWsConnections": 66,
+      "maxActiveSessions": 51,
+      "maxReconnectLeases": 51,
+      "maxLoginInFlight": 2,
+      "maxNewCharacterInFlight": 1,
+      "maxStartGameInFlight": 2,
+      "currentWsConnections": 0,
+      "currentActiveSessions": 0,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    }
+  },
+  "existingRowsUnchanged": {
+    "accounts": {
+      "rows": 314,
+      "canonicalBytes": 2334844,
+      "sha256": "06544308e041cf4fb6aa5073dfa71992707542961f256ee57005f5ea4d778451"
+    },
+    "characters": {
+      "rows": 226,
+      "canonicalBytes": 76332,
+      "sha256": "fafe4b0e2ebbda3656652327f94046144d6d9d7b085d843d11fdb8ecb28b00b5"
+    },
+    "character_saves": {
+      "rows": 226,
+      "canonicalBytes": 2632955,
+      "sha256": "83b4069d5f307ba6a4da833079111e2989205d40e8d5c6396964f276c6a31118"
+    }
+  },
+  "originalConfigurationFilesUnchanged": 23,
+  "publicWebPromoted": false,
+  "observedAtUtc": "2026-11-15T22:39:38.366459+00:00"
+}

@@ -1,0 +1,108 @@
+{
+  "source": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+  "observations": [
+    {
+      "cohort": "r1",
+      "phase": "first",
+      "name": "quest-available-zh-TW.png",
+      "bytes": 3938,
+      "sha256": "bb718d72b13af61c5740dc9d8fb3fb1216b626215a1b54b5a761a4a5d63c62c4",
+      "width": 1024,
+      "height": 768,
+      "channelExtrema": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "uniformBlack": true,
+      "sameAsPreviousCapture": true
+    },
+    {
+      "cohort": "r1",
+      "phase": "hud-gate",
+      "name": "quest-shared-zh-TW.png",
+      "bytes": 1331457,
+      "sha256": "cd60111c23844a222ef5ae8c5e8245a641dad4379fc2871d6ae152eb68a9cae4",
+      "width": 1024,
+      "height": 768,
+      "channelExtrema": [
+        [
+          0,
+          255
+        ],
+        [
+          0,
+          255
+        ],
+        [
+          0,
+          255
+        ]
+      ],
+      "uniformBlack": false,
+      "sameAsPreviousCapture": false
+    },
+    {
+      "cohort": "r2",
+      "phase": "first",
+      "name": "quest-available-zh-TW.png",
+      "bytes": 1408434,
+      "sha256": "44716b4bd2f61b1992efb3d3bb7b6e8beec6c6a402205fdcad2d5629ca056b6d",
+      "width": 1024,
+      "height": 768,
+      "channelExtrema": [
+        [
+          0,
+          255
+        ],
+        [
+          0,
+          255
+        ],
+        [
+          0,
+          255
+        ]
+      ],
+      "uniformBlack": false,
+      "sameAsPreviousCapture": false
+    },
+    {
+      "cohort": "r2",
+      "phase": "hud-gate",
+      "name": "quest-shared-zh-TW.png",
+      "bytes": 1331186,
+      "sha256": "23c2c9f1645fb319de16788a0e53379a1130836cfc6a9a940da98769b11d5fb6",
+      "width": 1024,
+      "height": 768,
+      "channelExtrema": [
+        [
+          0,
+          255
+        ],
+        [
+          0,
+          255
+        ],
+        [
+          0,
+          255
+        ]
+      ],
+      "uniformBlack": false,
+      "sameAsPreviousCapture": false
+    }
+  ],
+  "originalClassifierUnchanged": true,
+  "visualFirstQNotFullyAccepted": true,
+  "scope": "Pixel observations of unmodified screenshots. A black capture is not visual acceptance and does not by itself distinguish capture failure from an actual transient black frame. Previous6ba R1 has the same black PNG. Later shared Native diaries were visually inspected separately; mixed language remains open."
+}
