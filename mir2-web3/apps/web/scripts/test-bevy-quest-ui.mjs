@@ -395,7 +395,8 @@ test("renderer restart, first NPC input capture and stopped-loop fallback preser
     const render = () => {
       refIndex = 0;
       hookView = hook({ requested: true, runtimeGeneration: 1, runtimeRef: runtimeHolder, snapshot: () => model,
-        onIntent: () => ({ accepted: true }), onOpenChange(open) { model = { ...model, questLogOpen: open }; } });
+        onIntent: () => ({ accepted: true }), onOpenChange(open) { model = { ...model, questLogOpen: open }; },
+        onCloseDiary() { model = { ...model, questLogOpen: false }; } });
     };
     render();
     cleanup = mount();
@@ -463,7 +464,7 @@ test("renderer restart, first NPC input capture and stopped-loop fallback preser
     model = { ...model, worldDraft: draft, dialog: host.projectBevyQuestDialog(null),
       presentation: { ...model.presentation, touch: false } };
     tick();
-    const context = submitted.at(-1).worldContext;
+    let context = submitted.at(-1).worldContext;
     assert.equal(context.revision, submitted.at(-1).revision);
     applied = { ...applied, frame: 4, revision: context.revision };
     tick();
@@ -483,17 +484,41 @@ test("renderer restart, first NPC input capture and stopped-loop fallback preser
     const beforeCaptureChecks = model, beforeCaptureStatus = applied;
     model = { ...model, questLogOpen: true };
     assert.equal(hookView.readLiveKeyboardCapture(), null, "a new unsubmitted host-open request cannot borrow old closed status");
+    assert.equal(hookView.closeCurrentDiary(), false, "an unapplied host request cannot authorize close");
     model = { ...beforeCaptureChecks, dialog: { ...beforeCaptureChecks.dialog, isOpen: true } };
     assert.equal(hookView.readLiveKeyboardCapture(), true, "a host NPC dialog remains a world-input blocker");
+    assert.equal(hookView.closeCurrentDiary(), false, "an NPC dialog is not a closable diary");
     model = beforeCaptureChecks;
     for (const stale of [{ revision: applied.revision - 1 }, { openRevision: applied.openRevision - 1 },
       { generation: 102 }, { frame: applied.frame - 1 }, { ready: false }]) {
-      applied = { ...beforeCaptureStatus, ...stale };
+      applied = { ...beforeCaptureStatus, questLogOpen: true, capturesPointer: true, ...stale };
       assert.equal(hookView.readLiveKeyboardCapture(), null, JSON.stringify(stale));
+      assert.equal(hookView.closeCurrentDiary(), false, JSON.stringify(stale));
     }
     applied = beforeCaptureStatus;
+    assert.equal(hookView.closeCurrentDiary(), false, "a closed diary is not toggled open");
+    applied = { ...applied, questLogOpen: true, capturesPointer: true };
+    applied = { ...applied, error: "Renderer error" };
+    assert.equal(hookView.closeCurrentDiary(), false, "an errored surface cannot authorize close");
+    applied = { ...applied, error: null };
+    model = { ...model, blocksGameplayKeys: true };
+    assert.equal(hookView.closeCurrentDiary(), false, "another modal retains its keys");
+    model = beforeCaptureChecks;
+    assert.equal(hookView.closeCurrentDiary(), true, "the ready diary closes with no main-HUD API");
+    assert.equal(model.questLogOpen, false);
+    assert.equal(hookView.closeCurrentDiary(), false, "one close edge cannot be repeated before its snapshot is applied");
+    const priorOpenRevision = applied.openRevision;
+    tick();
+    assert.equal(submitted.at(-1).questLogOpen, false);
+    assert(submitted.at(-1).openRevision > priorOpenRevision,
+      "closing before the Native open projection reaches React still publishes a new close revision");
+    applied = { ...applied, frame: applied.frame + 1, revision: submitted.at(-1).revision,
+      openRevision: submitted.at(-1).openRevision, questLogOpen: false, capturesPointer: false };
+    tick();
+    context = submitted.at(-1).worldContext;
     now += 2001;
     assert.equal(hookView.readLiveKeyboardCapture(), null, "a stopped renderer cannot release keyboard capture");
+    assert.equal(hookView.closeCurrentDiary(), false, "a stopped renderer cannot authorize diary close");
     applied = { ...applied, frame: applied.frame + 1 };
     assert.equal(hookView.readLiveKeyboardCapture(), false, "a new actual frame restores the current owner");
     tick();
@@ -553,7 +578,7 @@ test("renderer restart, first NPC input capture and stopped-loop fallback preser
     assert.equal(hookView.readLiveWorldControls(), null, "new revision cannot borrow the previously applied rectangles");
     assert.equal(JSON.parse(sink(JSON.stringify(resumedIntent))).accepted, false,
       "visibility recovery must wait for the new world context to be applied");
-    applied = { ...applied, frame: 5, revision: resumed.revision };
+    applied = { ...applied, frame: applied.frame + 1, revision: resumed.revision };
     tick();
     assert.equal(JSON.parse(sink(JSON.stringify(mapIntent))).accepted, false,
       "the old stamp cannot revive after visibility recovery");

@@ -36,6 +36,7 @@ type Options = {
   snapshot: () => SnapshotInput;
   onIntent: (intent: BevyQuestUiIntent) => BevyQuestUiIntentResult;
   onOpenChange: (open: boolean) => void;
+  onCloseDiary: () => void;
 };
 
 /** One UI owner at a time. A failed, stale, hidden, or unavailable surface yields to React. */
@@ -50,9 +51,12 @@ export function useBevyQuestUi(options: Options) {
   const refresh = useCallback(() => refreshRef.current?.(), []);
   const liveWorldControlsReaderRef = useRef<(() => QuestWorldControls | null) | null>(null);
   const worldControlBlockersReaderRef = useRef<(() => QuestWorldControls | null) | null>(null);
-  const keyboardCaptureReaderRef = useRef<(() => boolean | null) | null>(null);
+  const keyboardCaptureReaderRef = useRef<((closeDiary?: boolean) => boolean | null) | null>(null);
   const readLiveKeyboardCapture = useCallback(() => {
     try { return keyboardCaptureReaderRef.current?.() ?? null; } catch { return null; }
+  }, []);
+  const closeCurrentDiary = useCallback(() => {
+    try { return keyboardCaptureReaderRef.current?.(true) === true; } catch { return false; }
   }, []);
   const questNameTargetsReaderRef = useRef<(() => readonly number[] | null) | null>(null);
   const readLiveQuestNameTargets = useCallback(() => {
@@ -150,7 +154,7 @@ export function useBevyQuestUi(options: Options) {
       return readQuestWorldControls(runtime, context, live.presentation.logicalWidth, live.presentation.logicalHeight);
     };
     liveWorldControlsReaderRef.current = liveWorldControlsReader;
-    const keyboardCaptureReader = (): boolean | null => {
+    const keyboardCaptureReader = (closeDiary = false): boolean | null => {
       const context = acknowledgedSnapshot?.worldContext;
       if (stopped || !context || !latest.current.requested || !documentVisible()
         || latest.current.runtimeRef.current !== runtime
@@ -161,7 +165,7 @@ export function useBevyQuestUi(options: Options) {
         || !sameQuestWorldDraft(live.worldDraft ?? null, context)) return null;
       // An NPC dialog blocks immediately. Native local Q navigation may precede
       // its React projection, but cannot override an unsubmitted host request.
-      if (live.dialog.isOpen || live.dialog.hasInput) return true;
+      if (live.dialog.isOpen || live.dialog.hasInput) return closeDiary ? false : true;
       if (live.questLogOpen !== lastRequestedOpen) return null;
       const status = readBevyQuestUiStatus(runtime, live.generation), now = performance.now();
       if (!status?.ready || status.revision !== context.revision || status.openRevision !== openRevision
@@ -170,6 +174,15 @@ export function useBevyQuestUi(options: Options) {
           supportsBevyQuestDisplayLocale(runtime) ? live.displayLanguage : undefined)) return null;
       if (status.frame > lastFrame) { lastFrame = status.frame; lastFrameAt = now; }
       if (now < lastFrameAt || now - lastFrameAt > 2000) return null;
+      if (closeDiary) {
+        if (!status.questLogOpen || live.blocksGameplayKeys || status.error) return false;
+        // The diary can be ready before the independent main HUD. Close from
+        // its own live world/surface token, without borrowing HUD readiness.
+        // Preserve an explicit close edge if Native opened before React saw it.
+        lastRequestedOpen = true;
+        latest.current.onCloseDiary();
+        return true;
+      }
       return status.capturesPointer || status.questLogOpen;
     };
     keyboardCaptureReaderRef.current = keyboardCaptureReader;
@@ -406,5 +419,5 @@ export function useBevyQuestUi(options: Options) {
     };
   }, [options.requested, options.runtimeGeneration]);
   return { ...state, refresh, readLiveHudBarPlans, readLiveWorldControls, readLiveWorldControlBlockers, readLiveQuestNameTargets,
-    readLiveKeyboardCapture };
+    readLiveKeyboardCapture, closeCurrentDiary };
 }

@@ -31,7 +31,7 @@ class Input extends Element {}
 class Textarea extends Element {}
 class Select extends Element {}
 function fixture(changes = {}) {
-  const flags = { open: true, hud: true, accept: true, capture: false, focus: true, visible: true, ...changes };
+  const flags = { open: true, diary: true, hud: true, accept: true, capture: false, focus: true, visible: true, ...changes };
   const listeners = new Set(), calls = [];
   const window = {
     addEventListener(type, fn, capture) { assert.equal(type, "keydown"); assert.equal(capture, true); listeners.add(fn); },
@@ -52,6 +52,10 @@ function fixture(changes = {}) {
     bevyQuestUiCapturesPointer: true,
     readBevyHudStatus: () => flags.hud ? { navigation: { questOpen: flags.open } } : null,
     dispatchBevyHudNavigation: action => { calls.push(action); return flags.accept; },
+    closeBevyQuestDiary: () => {
+      if (!flags.diary || !flags.open) return false;
+      calls.push({ type: "closeCurrentDiary" }); return flags.accept;
+    },
     bevyHeroUiActive: false, bevyHeroUiTransitioning: false, bevyHeroUiWorldBlocked: false,
     heroPointerLeaseRef: { current: null }, sceneInteractionReady: true,
     onCrystalGameplayShortcut() { throw Error("modal key must not invoke a gameplay command"); },
@@ -64,9 +68,9 @@ function fixture(changes = {}) {
     dispatch(extra = {}) { const e = event(extra); for (const listener of [...listeners]) listener(e); return e; } };
 }
 
-test("current shared diary closes through its configured key and the Native-only navigation dispatcher", () => {
+test("current shared diary closes through its configured key and its own live owner", () => {
   const f = fixture(), e = f.dispatch();
-  assert.deepEqual(f.calls, [{ type: "closeQuest" }]); assert.equal(e.defaultPrevented, true);
+  assert.deepEqual(f.calls, [{ type: "closeCurrentDiary" }]); assert.equal(e.defaultPrevented, true);
   assert.equal(f.scope.keyboardMovementDiagnosticsRef.current.lastShortcut.accepted, true);
   f.binding.unmount();
 });
@@ -75,19 +79,19 @@ test("remapped Native binding works and its former key stays blocked by the moda
   f.scope.crystalKeyBindings = f.scope.crystalKeyBindings.map(row => row.function === "Quests" ? { ...row, key: "J" } : row);
   f.binding.render(); f.binding.commit();
   f.dispatch(); assert.equal(f.calls.length, 0);
-  f.dispatch({ key: "j", code: "KeyJ" }); assert.deepEqual(f.calls, [{ type: "closeQuest" }]);
+  f.dispatch({ key: "j", code: "KeyJ" }); assert.deepEqual(f.calls, [{ type: "closeCurrentDiary" }]);
 });
 test("repeats and declined navigation cannot toggle or fall through to the world", () => {
   const held = fixture(); assert.equal(held.dispatch({ repeat: true }).defaultPrevented, true); assert.equal(held.calls.length, 0);
   const declined = fixture({ accept: false });
-  assert.equal(declined.dispatch().defaultPrevented, true); assert.deepEqual(declined.calls, [{ type: "closeQuest" }]);
+  assert.equal(declined.dispatch().defaultPrevented, true); assert.deepEqual(declined.calls, [{ type: "closeCurrentDiary" }]);
   assert.equal(declined.scope.keyboardMovementDiagnosticsRef.current.lastShortcut.accepted, false);
 });
-test("typing, another modal, stale HUD authority and non-quest keys retain their input owner", () => {
+test("typing, another modal, stale diary authority and non-quest keys retain their input owner", () => {
   for (const target of [new Input(), new Textarea(), new Select(), Object.assign(new Element(), { isContentEditable: true })]) {
     const f = fixture(); assert.equal(f.dispatch({ target }).defaultPrevented, false); assert.equal(f.calls.length, 0);
   }
-  for (const flags of [{ hud: false }, { open: false }, { capture: true }, { focus: false }, { visible: false }, { shop: true }, { spells: true }, { storage: true }, { compose: true }]) {
+  for (const flags of [{ diary: false }, { open: false }, { capture: true }, { focus: false }, { visible: false }, { shop: true }, { spells: true }, { storage: true }, { compose: true }]) {
     const f = fixture(flags); f.dispatch(); assert.equal(f.calls.length, 0, JSON.stringify(flags));
   }
   for (const event of [{ key: "i", code: "KeyI" }, { metaKey: true }, { defaultPrevented: true }]) {
@@ -96,6 +100,22 @@ test("typing, another modal, stale HUD authority and non-quest keys retain their
   const exit = fixture(); exit.scope.stageExitDialogRef.current = { open: true };
   exit.dispatch(); assert.equal(exit.calls.length, 0);
 });
-test("withdrawing current HUD before dispatch blocks a captured old modal handler", () => {
-  const f = fixture(); f.flags.hud = false; f.dispatch(); assert.equal(f.calls.length, 0);
+test("withdrawing the current diary before dispatch blocks a captured old modal handler", () => {
+  const f = fixture(); f.flags.diary = false; f.dispatch(); assert.equal(f.calls.length, 0);
+  assert.equal(f.scope.keyboardMovementDiagnosticsRef.current.lastShortcut.accepted, false);
+});
+test("a ready diary closes before the independent main HUD is ready", () => {
+  const f = fixture({ hud: false }), e = f.dispatch();
+  assert.deepEqual(f.calls, [{ type: "closeCurrentDiary" }]);
+  assert.equal(e.defaultPrevented, true);
+  assert.equal(f.scope.keyboardMovementDiagnosticsRef.current.lastShortcut.accepted, true);
+});
+test("missing or throwing diary owner never borrows the main HUD or falls through to gameplay", () => {
+  for (const closeBevyQuestDiary of [undefined, () => { throw Error("retired diary"); }]) {
+    const f = fixture();
+    f.binding.render({ closeBevyQuestDiary }); f.binding.commit();
+    const e = f.dispatch();
+    assert.equal(e.defaultPrevented, true); assert.equal(f.calls.length, 0);
+    assert.equal(f.scope.keyboardMovementDiagnosticsRef.current.lastShortcut.accepted, false);
+  }
 });

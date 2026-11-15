@@ -574,6 +574,7 @@ export function OriginalClientShell({
   onBevyCharacterPointer,
   readBevyHudStatus,
   dispatchBevyHudNavigation,
+  closeBevyQuestDiary,
   bevyQuestUiReady = false,
   bevyQuestUiCapturesPointer = false,
   readBevyQuestKeyboardCapture,
@@ -1503,13 +1504,15 @@ export function OriginalClientShell({
       if(bevyMailComposeReady||bevyMailComposePending){diagnostic("mail");if(isCurrentMailTextTarget(event.target))return;event.preventDefault();return;}
       if (spellsPointerCallbacksRef.current.getBevySpellsPointerContext?.()?.modal) { diagnostic("spells-modal"); event.preventDefault(); return; }
       if (bevyQuestUiCapturesPointer) {
-        // The Web host owns configured shortcuts even while the shared diary
-        // captures world input. Close only the current Native diary.
+        // The diary owns its close token independently of main-HUD loading.
+        // Configured Q may close that current diary, but never reach the world.
         if (!event.metaKey && diagnosticActions.includes("quests")
-          && !keyboardInputTargetIsEditable(event.target)
-          && readBevyHudStatus?.()?.navigation.questOpen === true) {
+          && !keyboardInputTargetIsEditable(event.target)) {
           event.preventDefault();
-          const accepted = !event.repeat && dispatchBevyHudNavigation?.({ type: "closeQuest" }) === true;
+          let accepted = false;
+          if (!event.repeat) {
+            try { accepted = closeBevyQuestDiary?.() === true; } catch { /* A retired owner cannot release world input. */ }
+          }
           diagnostic("window-action", accepted, true);
         } else diagnostic("quest-modal");
         return;

@@ -12907,7 +12907,7 @@ export default function HomePage() {
     if (status === "loadingTimeout") {
       appendLog(t("ui.questRouteLoadingTimeout", [], "The route map took too long to load. Please try again."), "system");
     } else if (status === "unavailable") {
-      appendLog(t("ui.mapRouteUnavailable", [], "No complete route is available."), "system");
+      appendLog(t("ui.questRouteUnavailable", [], "No complete route is currently available. Choose another destination or try again."), "system");
     } else {
       appendLog(t("ui.questRouteArrived", [route.goal.x, route.goal.y], "You have arrived at ({0}, {1})."), "system");
     }
@@ -21862,6 +21862,11 @@ export default function HomePage() {
     },
     onIntent: dispatchBevyQuestIntent,
     onOpenChange: (open) => { if (!navigateSharedHud({ type: open ? "openQuest" : "closeQuest" })) setShowQuestLog(open); },
+    onCloseDiary: () => {
+      questLogOpenRef.current = false;
+      fallbackHudNavigationRevisionRef.current = nextHudNavigationRevision();
+      setShowQuestLogState(false);
+    },
   });
   useLayoutEffect(() => { bevyQuestUi.refresh(); }, [bevyQuestUi.refresh, hpOrbPageBlocked,
     world.playerExperience, world.playerMaxExperience, world.currentWeight, world.maxWeight, language, npcDialogLanguage]);
@@ -22037,6 +22042,7 @@ export default function HomePage() {
       onBevyCharacterPointer={bevyCharacterUi.pointer}
       readBevyHudStatus={bevyHudUi.readCurrent}
       dispatchBevyHudNavigation={bevyHudUi.dispatch}
+      closeBevyQuestDiary={bevyQuestUi.closeCurrentDiary}
       bevyQuestUiReady={bevyQuestUi.ready && !showInventory}
       bevyQuestUiCapturesPointer={bevyQuestUi.capturesPointer && !showInventory}
       readBevyQuestKeyboardCapture={showInventory ? undefined : bevyQuestUi.readLiveKeyboardCapture}

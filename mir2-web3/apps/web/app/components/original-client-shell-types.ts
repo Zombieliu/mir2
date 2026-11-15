@@ -234,6 +234,7 @@ export type OriginalClientShellProps = BagBeltCallbacks & WorldFishingCallbacks 
   onBevyCharacterPointer?: (edge: import("../../lib/bevy-character-ui").CharacterPointerEdge) => boolean;
   readBevyHudStatus?: () => import("../../lib/bevy-hud-ui").HudStatus | null;
   dispatchBevyHudNavigation?: (action: import("../../lib/bevy-hud-ui").HudAction) => boolean;
+  closeBevyQuestDiary?: () => boolean;
   bevyQuestUiReady?: boolean;
   bevyQuestUiCapturesPointer?: boolean;
   readBevyQuestKeyboardCapture?: () => boolean | null;

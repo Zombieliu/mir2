@@ -114,5 +114,11 @@ test("actual Page zero-step map click reports only authoritative arrival without
 test("actual Page complete unreachable map search reports once and never queues partial progress",async()=>{
   const h=harness();h.state.result={status:"unreachable"};h.begin();h.loading[0].resolve(h.geometry);await flush();
   assert.equal(h.queued.length,0);assert.equal(h.routeRef.current,null);assert.equal(h.timers.size,0);
-  assert.equal(terminal(h)[0]?.key,"ui.mapRouteUnavailable");assert.equal(terminal(h).length,1);
+  assert.equal(terminal(h)[0]?.key,"ui.questRouteUnavailable");assert.equal(terminal(h).length,1);
+  const dictionary={exports:{}};
+  new Function("exports",ts.transpileModule(readFileSync(new URL("../lib/r16-browser-localization.ts",import.meta.url),"utf8"),
+    {compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText)(dictionary.exports);
+  for(const language of dictionary.exports.R16_BROWSER_LANGUAGES){
+    assert(dictionary.exports.browserText(language,terminal(h)[0].key)?.trim(),language+" has actionable unreachable feedback");
+  }
 });
