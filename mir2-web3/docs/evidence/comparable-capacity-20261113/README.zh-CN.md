@@ -4,13 +4,17 @@
 每档 300 秒，另测共同近战场景；找出差距后再验证实际云机。
 下面的本机结果不能认证云机或三端实际分发的 CCU。
 
+对照边界补正（2026-11-15）：旧 Original A7 的正式300s动作计划、门槛与资源上限相同，但入场预处理不同。其整个 driver 仅322.1894485s，server-ready至steady记录差约8.705s；现代SDK7保留30次/900s认证预算并额外留1s余量，空历史下100人也需跨4窗，早入场者约等待45分3秒。因此旧结果不能标成世界时长、玩家空闲时长和缓存预热都匹配的实验，也不能仅凭该差异解释超时。新原版适配器只回放闭合现代轮次的初次认证预约偏移及首预约至steady下限，普通KeepAlive/接收任务和原游戏引擎不变；不重置认证历史，不改原SLO，也不声称匹配仿真世界时钟或server-ready起点。[新两人校准](crystal-paced-admission.calibration2.closed.json)64/64、全2存档和Enhanced通过，0/0/0正常无kill，实际首入场至steady16345.58ms不早于16339ms。新百人已按现代诊断实测2763110ms（46分3.110秒）的准备下限启动；仍在运行，尚无容量结果。
+
 ## 最新已验证结果（2026-11-15：旧工件25/50通过，新修复百人仍未通过）
 
 新 Zone 准入交接修复已从干净源 `c84670ad` [集成至维护分支 `1cac973a`](zone-admission-handoff.integration.json)：Zone 忙时先释放 Store，等待后重新取得最新 Store 检查，实际业务仍按 Store→Zone 持双锁执行；不缓存权限或跳过检查。[新35项原生回归](zone-admission-handoff.native35.json)全部实际通过（Gateway34、真实RPC1，含5个新增并发/错误策略用例），每项验证 Job 均0/0、正常退出且无kill。测试程序编译的两次 Cargo 均0，外层包装器因180s后遗留空闲VCTIP为1；仅精确清理本轮已核归属的84832，失败记录保留。旧Simulation84不计入这35项。新[普通Release](zone-admission-handoff.windows-release.json) PE `6ea6b90f`（99823616B，Gateway/Simulation均opt3/default、无包opt覆盖）已生成；其编译Cargo0/包装器1及仅清理空闲VCTIP75856的异常独立保留，全部编译成员闭合后才启动游戏。新[两人校准](zone-admission-handoff.calibration2.closed.json)02:04:07.478–02:05:07.478 UTC完整60s，64/64动作、2/2窗口、装备2名、正常Logout/Close2名、fresh2、File全2和Enhanced全部通过，controller/driver/server0/0/0、93行资源、全Job正常无kill；12次新增认证完整追加V39=2032，旧2020前缀不变。该工件的[新百人结果已闭合](zone-admission-handoff.default100.closed.json)：03:04:36.140–03:09:36.140 UTC完整300s，15224/16000按时完成、95超时、681未发、92/500逐人分钟窗口通过，整体FAIL。装备3名、100人普通Logout/Close与fresh2均报告成功；controller/driver/server1/1/0、3540行资源、双Job自然无kill。File前置拒绝sample0且未打开私密Store，Enhanced失败，两验证进程实际1且正常无kill；114次新认证全部追加V40=2146，旧2032前缀不变。本次窄实验仍未解决百人长尾，单轮数字不能证明提升或统计回归，暂不推广云端；下述25/50通过属于旧 `7d2a6c81` 工件，不能移用于新修复或云机。
 
 同一新源码对应的 Linux 工件已通过[本轮 CI](https://github.com/Zombieliu/mir2/actions/runs/43669526425)及[本地原生子集复核](zone-admission-handoff.linux-native-subset.json)：Linux 源 `c1d4c85c` 的15项编译输入与 Windows 源 `c84670ad` 一致，ELF `5a5807dc`、103884456B；两份官方 ZIP 摘要、七项门禁、真实 Postgres/Redis 启动及1620张地图内容匹配。`fullCandidateVerificationPassed=false`，没有执行 ELF、部署或替换云机。另用 Windows 同一 PE 开启两条指定连接的现有诊断标志，[新两人校准及严格落盘检查](zone-admission-handoff.selected-trace2.closed.json)全部通过，12次认证追加V41=2158，旧2146条完整保留；[日志复核](zone-admission-handoff.selected-trace2.log-coverage.json)严格解析146条trace、未耗尽预算，但实际UID只覆盖装备重连前，不能作稳态或actor映射证明。首轮解析器误拒合法的未注册Close行，失败保留；仅修正该格式门槛后，6项反例/回归及实查均0/0正常无kill，没有放宽游戏SLO。诊断开启不算容量通过。
 
-新[SLOW20百人诊断已闭合](mentor-parse-slow20-dense100.closed.json)：23:41:47.790–23:46:47.790 UTC完整300s，15408/16000按时完成、81超时、511未发、141/500逐人分钟窗口通过，整体FAIL。装备3名、100人普通Logout/Close、fresh2均报告成功；controller/driver/server1/1/0、3625行资源、游戏双Job与STAT观察器均正常无kill。FileV8前置拒绝sample0、未打开私密Store，Enhanced亦失败；两个验证进程实际1且正常无kill。114次新认证全量追加V38=2020，旧1906前缀不变。SLOW日志会改变调度，本轮与default-off的单次数值差不能作为提升/回归或容量通过。
+新[指定两接收者的百人诊断已闭合](zone-admission-handoff.selected-trace100.closed.json)：同一 `6ea6b90f` PE，05:31:27.623–05:36:27.623 UTC完整300s，15555/16000按时完成、39超时、406未发、168/500窗口通过，整体FAIL；controller/driver/server1/1/0、3060行资源，游戏双Job正常无kill。File前置拒绝sample0、Enhanced失败；114次新增认证完整追加V42=2272，2158条前缀不变。[闭合关联及慢行汇总](zone-admission-handoff.selected-trace100.analysis.json)的两个分析Job均0/0正常无kill：严格核到actor62/63与服务端连接63/64的实际绑定，但这两名没有超时；全局首超时是actor55，故不能据这两条trace解释全局首失败。全轮条件慢记录含runtime tick及该socket出站门等待最大2540ms、输入队列驻留2285ms、账号锁获取971ms、观战snapshot735ms；不是完整调用分布、稳态CPU分布或已建立的锁持有因果。旧行数预算拒绝与新格式拒绝均保留，仅分析工具修正后重跑，游戏门槛未动。下一窄候选只限制跨连接同步Tick/观战计算并发，已写源码、尚未编译；需要验证等待队列、取消及bootstrap/ACK顺序，未声称百人修复。
+
+此前[SLOW20百人诊断已闭合](mentor-parse-slow20-dense100.closed.json)：23:41:47.790–23:46:47.790 UTC完整300s，15408/16000按时完成、81超时、511未发、141/500逐人分钟窗口通过，整体FAIL。装备3名、100人普通Logout/Close、fresh2均报告成功；controller/driver/server1/1/0、3625行资源、游戏双Job与STAT观察器均正常无kill。FileV8前置拒绝sample0、未打开私密Store，Enhanced亦失败；两个验证进程实际1且正常无kill。114次新认证全量追加V38=2020，旧1906前缀不变。SLOW日志会改变调度，本轮与default-off的单次数值差不能作为提升/回归或容量通过。
 
 [本轮分段审计](mentor-parse-slow20-dense100.elapsed-audit.json)实际0/0、4GiB/0xf000、正常无kill：完整日志34661319B，按精确300s报告锚点及已声明±1ms近似append映射选中7782660B/89041慢行，边缘删失59175B、未知prefix及不确定时序字节均0；outer敏感性范围89670行的最大值结论一致。采集到的账号锁获取阶段：social_profile_read 1451条/P95 442ms/max1427ms；experience_admission 2936条/P95 408ms/max1199ms，持锁151条/max99ms；billing_poll_front 221条/P95 392ms/max1040ms。没有达到20ms的billing-front持锁或pending-read/validate行，不能据此认定调用不存在/零耗时。上述都是含调度抢占的条件慢样本，不是全调用分布或金融CPU；尚未建立逐socket/具体holder因果。[源码另核](../../../apps/gateway/src/web.rs#L5858)serial_gate.zone_outbound_wait等待每条WS连接的AsyncRwLock读门，与该连接Tick/Input的写门互斥，计时在实际发送之前结束；具体持门者与业务锁的因果仍待同连接证据。依据源码持Store等待Zone的路径，已选择只释放等待阶段、实际执行仍fresh持双锁的窄实验；实现、独立源码审阅与新35项原生回归已完成，新工件百人复测已闭合且未通过，见上。
 
@@ -477,6 +481,8 @@ CCU 通过，也不能覆盖旧 6.57 秒失败。公开分析 summary SHA
 256MiB / 500000 行。它是复核器内存预算调整，没有放宽游戏 SLO。
 
 ## 云机只读复查
+
+2026-11-15 [本轮只读实采](cloud-fd3-readonly-20261115.public.json)：04:53:41 UTC 服务仍为 fd3 / ELF `11fc1516`、PID1242617、start1553569321、invocation `54b0b00891c344a58ab8e5a6d05ddb5b`；caps仍51/66/51，MemoryMax1600MiB、High1400MiB，六项在途数和三项Redis数均为类型明确的0。04:58:47 UTC 另用相同主机key验证后的独立只读 `/proc` / cgroup 快照确认同PID/start：整机4逻辑CPU、7.751GiB，MemAvailable约1.453GiB，无swap；旧Gateway RSS约1.441GiB、Zone约1.073GiB、四validator合计约2.204GiB，测试服RSS295.164MiB、cgroup当前226.305MiB，TEST cgroup的high/max/oom/oom_kill计数均0。RSS含共享页，与cgroup计账及Windows Job Commit不同，不将RSS相加当作独占或可释放内存，也不据idle采样外推人数。两次SSH本地进程实际0并关闭连接；仅新增本地私有回执，没有服务、配置、VPN或电源操作；51仍是准入配置，测试服没有独占整机8GiB。
 
 2026-11-13T10:07:12.999Z 验证主机 key 后读取，服务身份仍为 PID803500、
 invocation `2645494fe370413593ea1b04c29707bc`、start ticks1541658437；

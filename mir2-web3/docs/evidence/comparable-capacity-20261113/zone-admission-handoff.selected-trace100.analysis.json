@@ -1,0 +1,83 @@
+{
+  "schema": "mir2.selected-trace100-closed-analysis-public.v1",
+  "sourceRevision": "c84670ad3cf5c9693fd78d5618c31668511f1207",
+  "binarySha256": "6ea6b90f67f8ab0225baf60fc978a0a794088d06f59861e51d1cf25ae926a0db",
+  "sourceControllerSha256": "1fcfd62d548b8994b00749d53cb965a0986dd590044b545a258fa5e60c3842c3",
+  "sourceReportSha256": "98ca13017fe679b802ec3ac526034932021b20f7bf7ff80621b774a829432542",
+  "closedAnalysisActualWrapperExits": {
+    "correlationV2": [
+      0,
+      0
+    ],
+    "slowSummaryV2": [
+      0,
+      0
+    ]
+  },
+  "allAnalysisJobsNormalClosedNoKill": true,
+  "correlation": {
+    "resultSha256": "121518170534cb4afec75e210d3d8b3c9fb5d64d40998e2815de93d624c318d7",
+    "resultBytes": 9919576,
+    "boundedRowBudgetSuccessorOnly": true,
+    "old250000RowBudgetRefusalPreserved": true,
+    "sourceCompleteLines": 329906,
+    "sourceInputTraceRows": 7782,
+    "sourceBudgetExhausted": false,
+    "selectedBindings": [
+      {
+        "actorOrdinal": 62,
+        "actorUid": 50062,
+        "sdkConnection": 63,
+        "serverConnection": 63,
+        "activeRegistration": 63,
+        "selectedActorTimeouts": 0
+      },
+      {
+        "actorOrdinal": 63,
+        "actorUid": 50063,
+        "sdkConnection": 64,
+        "serverConnection": 64,
+        "activeRegistration": 64,
+        "selectedActorTimeouts": 0
+      }
+    ],
+    "firstGlobalTimeout": {
+      "actorOrdinal": 55,
+      "sdkConnection": 56,
+      "ticket": 8,
+      "action": "walk",
+      "sendDelayMs": 7.6502
+    },
+    "captureCompleteForAll100": false,
+    "selectedActorsExplainFirstGlobalFailure": false,
+    "writerAttemptIsNotDelivery": true,
+    "differentClockAndTraceIdNamespacesNotEquated": true
+  },
+  "slowSummary": {
+    "resultSha256": "2447331d76c945ca833c3619a97b56daa070026a4fd1cd4125f0e50f695f0d40",
+    "resultBytes": 624038,
+    "scope": "whole-run conditional slow records, not steady-window timing or CPU distribution",
+    "slowRecords": 320519,
+    "gatewayRecords": 313007,
+    "accountStoreRecords": 6926,
+    "personalTickLeafRecords": 586,
+    "recordedStageMaxMs": {
+      "runtime_tick.execute": 2540,
+      "serial_gate.zone_outbound_wait": 2540,
+      "socket_input.queue_residence": 2285,
+      "socket_turn.input": 2244,
+      "session_action.execute": 2243,
+      "shared_session.predrain": 1777,
+      "account_store.store_wait": 971,
+      "spectator.snapshot": 735
+    },
+    "recordedExperienceStoreHeldMaxMs": 147,
+    "singleOneSecondStoreHolderProven": false,
+    "firstMovementStartsDirtyCheckpointClock": false,
+    "backgroundConcurrencyAndConvoyAreHypotheses": true
+  },
+  "diagnosticOnly": true,
+  "capacityQualified": false,
+  "publicServiceDeployed": false,
+  "privateGameDataExported": false
+}
