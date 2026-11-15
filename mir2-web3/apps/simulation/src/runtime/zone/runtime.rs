@@ -77,6 +77,7 @@ mod ground_drop_placement;
 mod ground_ownership;
 pub(super) mod mining;
 mod monster_movement;
+pub(super) mod idle_roam;
 #[cfg(test)]
 mod owner_health_tests;
 mod player_drop_custody;
@@ -13584,6 +13585,9 @@ impl ZoneRuntime {
         if !monster.hostile_to_player {
             if monster.owner_session_id.is_some() && monster.master_object_id != 0 {
                 return self.tick_native_summon_monster(object_id, monster, now_ms);
+            }
+            if idle_roam::supports_idle_roam(&monster) {
+                return self.tick_livestock_idle_roam(object_id, now_ms);
             }
             if let Some(monster) = self.native_monsters.get_mut(&object_id) {
                 monster.next_ai_ready_at_ms = now_ms.saturating_add(ZONE_NATIVE_MONSTER_THINK_MS);

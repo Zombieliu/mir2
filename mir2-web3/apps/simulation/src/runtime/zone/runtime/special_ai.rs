@@ -23,6 +23,8 @@ pub(crate) struct ZoneSpecialMonsterState {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub passive: Option<super::passive_ai::PassiveAiState>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub idle_roam: Option<super::idle_roam::IdleRoamState>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub trap_rock: Option<super::trap_rock_ai::TrapRockState>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub thunder: Option<super::thunder_ai::ThunderAiState>,

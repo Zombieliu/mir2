@@ -13,15 +13,23 @@ fn deer_base_speed() -> u64 {
     .max(900)
 }
 fn p(x: i32, y: i32) -> Point {
-    Point { x, y }
+    // Real imported, walkable Bichon tiles. Unknown maps now fail closed;
+    // a fictional map cannot exercise fleeing or authenticated cold recovery.
+    Point {
+        x: x + 291,
+        y: y + 554,
+    }
 }
 fn state(zone: &ZoneRuntime, id: u32) -> Value {
     let value: Value = serde_json::from_slice(&zone.checkpoint_bytes().unwrap()).unwrap();
     value["native_monsters"][id.to_string()].clone()
 }
 fn fixture(timid: bool) -> (ZoneRuntime, u32) {
+    // This integration-test executable hosts the same full Crystal world as
+    // Gateway. The switch is process-local; all three tests use that terrain.
+    mir2_simulation::set_crystal_full_world_zone_collision(true);
     for id in 9000..9128 {
-        let mut zone = ZoneRuntime::new(ZoneKey::for_map("deer-shared-fixture"));
+        let mut zone = ZoneRuntime::new(ZoneKey::for_map("0"));
         assert!(
             zone.spawn_world_event_monster(
                 &ZoneMonsterSpawn {
@@ -65,7 +73,7 @@ fn fixture(timid: bool) -> (ZoneRuntime, u32) {
             hp: 10000,
             max_hp: 10000,
             mp: 100,
-            map_file_name: "deer-shared-fixture".into(),
+            map_file_name: "0".into(),
             position: p(10, 11),
             direction: MirDirection::Up,
             chat_profile: Default::default(),
@@ -123,18 +131,18 @@ fn timid_deer_flees_direct_attacker_without_turning_hostile_and_respects_speed()
     assert_eq!(state(&zone, id)["move_speed_ms"], deer_base_speed() - 300);
     assert_eq!(
         state(&zone, id)["position"],
-        serde_json::json!({"x":10,"y":9})
+        serde_json::to_value(p(10, 9)).unwrap()
     );
     assert!(!attacks(&out, id));
     zone.tick(2 + deer_base_speed() - 300 - 1);
     assert_eq!(
         state(&zone, id)["position"],
-        serde_json::json!({"x":10,"y":9})
+        serde_json::to_value(p(10, 9)).unwrap()
     );
     zone.tick(2 + deer_base_speed() - 300);
     assert_eq!(
         state(&zone, id)["position"],
-        serde_json::json!({"x":10,"y":8})
+        serde_json::to_value(p(10, 8)).unwrap()
     );
 }
 #[test]
@@ -143,7 +151,7 @@ fn ordinary_deer_only_retaliates_after_a_real_hit() {
     assert!(!attacks(&zone.tick(2), id));
     assert_eq!(
         state(&zone, id)["position"],
-        serde_json::json!({"x":10,"y":10})
+        serde_json::to_value(p(10, 10)).unwrap()
     );
     let out = hit(&mut zone, id, 3);
     assert!(attacks(&out, id));
@@ -155,7 +163,23 @@ fn saved_temperament_does_not_reroll_or_double_speed_discount_and_leaving_clears
     let (mut zone, id) = fixture(true);
     hit(&mut zone, id, 2);
     let mut restored = ZoneRuntime::restore_checkpoint(&zone.checkpoint_bytes().unwrap()).unwrap();
-    assert_eq!(state(&zone, id), state(&restored, id));
+    let before = state(&zone, id);
+    let after = state(&restored, id);
+    for key in [
+        "special_ai",
+        "hp",
+        "position",
+        "direction",
+        "move_speed_ms",
+        "next_ai_ready_at_ms",
+        "next_attack_ready_at_ms",
+        "hostile_to_player",
+    ] {
+        assert_eq!(before[key], after[key], "retained animal field {key}");
+    }
+    // Cold recovery must not revive the old live reward claimant's authority.
+    assert!(before["experience_owner"].is_object());
+    assert!(after["experience_owner"].is_null());
     zone.handle(ZoneCommand::Leave {
         session_id: SessionId::new("a"),
     });
@@ -176,6 +200,6 @@ fn saved_temperament_does_not_reroll_or_double_speed_discount_and_leaving_clears
     );
     assert_eq!(
         state(&restored, id)["position"],
-        serde_json::json!({"x":10,"y":9})
+        serde_json::to_value(p(10, 9)).unwrap()
     );
 }

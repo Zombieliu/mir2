@@ -122,6 +122,23 @@ impl ZoneRuntime {
             })
             .map(|p| (p.object_id, p.position.clone()));
         state.target_object_id = target.as_ref().map(|(id, _)| *id);
+        if target.is_none() {
+            self.native_monsters
+                .get_mut(&id)
+                .unwrap()
+                .special_ai
+                .as_mut()
+                .unwrap()
+                .passive = Some(state);
+            return Some(self.tick_livestock_idle_roam(id, now_ms));
+        }
+        // The independent idle-roam clock does not shorten a previous walk
+        // when a timid animal finds a target (or is hit) during that walk.
+        if !super::idle_roam::idle_roam_move_ready(&self.native_monsters[&id], now_ms) {
+            self.native_monsters.get_mut(&id).unwrap()
+                .special_ai.as_mut().unwrap().passive = Some(state);
+            return Some(Vec::new());
+        }
         let mut out = Vec::new();
         if let Some((target_id, target)) = target {
             if !state.timid && native_monster_adjacent_to(&position, &target) {
