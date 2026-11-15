@@ -1,0 +1,55 @@
+{
+  "source": "81c51a58e903c1ec2e55f31c85d675aedbc7fe22",
+  "parent": "6623f15feac980f2db1a57ead74af34301264cec",
+  "qualifiedFrontendBase": "8359824ff7d618704121bfb83bff39422b4ad380",
+  "preservedCapacityDocsCommit": "6623f15feac980f2db1a57ead74af34301264cec",
+  "files": [
+    {
+      "path": "mir2-web3/apps/web/app/page.tsx",
+      "gitBlob": "f2080da34fc053f560a203f12891f92dd9131ee7",
+      "sha256": "4b2e95abd033009f02af61d95d516071708dba666ec5b4f0ceca7490898c25b3",
+      "frozenSha256": "f212cc4624acdc44535dc737b40e9e291787801d08af78001f68325b4b8a5809"
+    },
+    {
+      "path": "mir2-web3/apps/web/app/original-client-shell.tsx",
+      "gitBlob": "a7b33556ee88c7e7532607e206bdffa08352e964",
+      "sha256": "be8a66913749044c763c820c183a731aa37f144b28d04f1fac9415249c31b073",
+      "frozenSha256": "75d0284ee5079a554a3043ebc3b9f62e92fcfcdb023e7dc9c0214aaaa66007e0"
+    },
+    {
+      "path": "mir2-web3/apps/web/app/components/original-client-shell-types.ts",
+      "gitBlob": "a1ee05cca3ca8d43e8ad15b947415fd574ee32e0",
+      "sha256": "4c6e035a5b8b8e9d1a717b6c1e82d3893a820f86799c42bdfc6966eaa7b3b886",
+      "frozenSha256": "12251ac21cd95ed068298be7050742a0a9549b23804e765ceaa8c0e0e42d0076"
+    },
+    {
+      "path": "mir2-web3/apps/web/lib/use-bevy-quest-ui.ts",
+      "gitBlob": "99c775595cce01ef634d2228b1c28bbff2ee4354",
+      "sha256": "2fad5a73b99ddc8d47452c239ad0b2bf2c602cbe98f542ce76a0e2b9c3162db5",
+      "frozenSha256": "34e94f2abf925d1c8dd14d7398af361e8478d0227fb417ec286ee69fd726e04b"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-bevy-quest-ui.mjs",
+      "gitBlob": "53797b30d7a5eb0c2faf7449e5633624a8b81d94",
+      "sha256": "11e3f5b05f0ad0c159dcb90c43c9afa00ad4450de4595e0fc0f40afc74ebaafd",
+      "frozenSha256": "a38079eb14ed79873faa5c66c195b7dc4a537c95401656c9643e75149366a8ef"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-r16-quest-close-shortcut.mjs",
+      "gitBlob": "9f72cbba74c8e9cdb74f34169f9a7d5309da3b09",
+      "sha256": "ee497ac4532e9978dda7da18860c7256633510560683cb644408434afa638645",
+      "frozenSha256": "a539621aff972a056c9e5f5a9fd494389b33af82c698e833fe9ffc258abd06e2"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-map-route-feedback.mjs",
+      "gitBlob": "a05e933dccfb5babf15db0ce692059de15cd08dd",
+      "sha256": "90d0976d234f465fc661d66398a7cc5ad23329db4300731c3b9b4641d1799436",
+      "frozenSha256": "a7bf3cd42f86e373c9cfb50454fc066a0259a2cc674675c686cd24e9f7548580"
+    }
+  ],
+  "buildId": "_Lv72snrH2VsP9oYg9DRp",
+  "candidate": "8359-diary-close-06f9845b",
+  "foreignContentWipPreserved": 29,
+  "foreignAnimationContentRemainsUnstaged": true,
+  "productionDeployed": false
+}

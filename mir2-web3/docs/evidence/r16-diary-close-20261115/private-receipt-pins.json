@@ -1,0 +1,77 @@
+{
+  "scope": "Original profiles, account secrets, stores and auth traces remain local.",
+  "pins": [
+    {
+      "run": 1,
+      "file": "receipt.json",
+      "bytes": 64723,
+      "sha256": "f48a3eef76912e72452a8ea708ef247f950c4f8553190e85e3f0d0fd1a3be716"
+    },
+    {
+      "run": 1,
+      "file": "quest-navigation-game.json",
+      "bytes": 32734,
+      "sha256": "202e8d5842cd5d27f4dd1054a1f9067e13f3c3c837331400b3e06faf91a8861e"
+    },
+    {
+      "run": 1,
+      "file": "original-fonts.json",
+      "bytes": 2377,
+      "sha256": "4226d63d5bfbfafe63798abe48cd41f74614e776364656942df6304b30694e35"
+    },
+    {
+      "run": 1,
+      "file": "minimap-destinations.json",
+      "bytes": 921,
+      "sha256": "35bd03788a137ae5376102ee0271c153716f7f187f604e89469804c947e79c51"
+    },
+    {
+      "run": 1,
+      "file": "first-entry-diary-keys.json",
+      "bytes": 2708,
+      "sha256": "53a844dbf29a7f5cf7d3aebe572f87fc9629af9b9b68471184f60e5c605a23dc"
+    },
+    {
+      "run": 1,
+      "file": "reopened-diary-keys.json",
+      "bytes": 2705,
+      "sha256": "4e74b5c30640837cc4a0011b630bcf77dcd9c458b522adcebcf0e756548a6c9b"
+    },
+    {
+      "run": 2,
+      "file": "receipt.json",
+      "bytes": 64727,
+      "sha256": "67696aceeed09594f03bad76bf1f91de099ec9028cad4c0f9e776a675d7bc769"
+    },
+    {
+      "run": 2,
+      "file": "quest-navigation-game.json",
+      "bytes": 32751,
+      "sha256": "a9a750b9c1a861c6e02803c3a53ea7d76a9ab928c98a40a0ff84e4abcd51213d"
+    },
+    {
+      "run": 2,
+      "file": "original-fonts.json",
+      "bytes": 2377,
+      "sha256": "4226d63d5bfbfafe63798abe48cd41f74614e776364656942df6304b30694e35"
+    },
+    {
+      "run": 2,
+      "file": "minimap-destinations.json",
+      "bytes": 923,
+      "sha256": "6873b64f5db1defc808e4773313a618a6689fc5fed85f69775ded833c55c4123"
+    },
+    {
+      "run": 2,
+      "file": "first-entry-diary-keys.json",
+      "bytes": 2720,
+      "sha256": "d10986a1044fa74c4950d9ce26c543da2f51e9f5c476a8b1de15186c8fc94bd2"
+    },
+    {
+      "run": 2,
+      "file": "reopened-diary-keys.json",
+      "bytes": 2717,
+      "sha256": "1a06eff63dabd8dd980dc2f7ffa1d0c1225ea762a8916b8b90813a714e0ee5d5"
+    }
+  ]
+}
