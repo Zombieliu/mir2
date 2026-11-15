@@ -1,0 +1,811 @@
+{
+  "schema": 1,
+  "kind": "r16-coalesced-font-qualified-local-public-failure-and-hud-candidate",
+  "recordedAt": "2026-11-15T12:36:42.693577+00:00",
+  "candidateSource": "44b986b8a51682f1c72c552b82c0f21c32ce0d2a",
+  "productionRetainsCandidate": false,
+  "wholeParityCandidate": false,
+  "wholeParityAccepted": false,
+  "goalActive": true,
+  "diagnosis": {
+    "passed": true,
+    "observer": {
+      "attached": 2,
+      "errors": [],
+      "cleanup": true,
+      "dropped": 0
+    },
+    "originalGamePassed": false,
+    "originalFailure": "original shared Native120s",
+    "sc": {
+      "requests": 55,
+      "complete": 53,
+      "statuses": {
+        "206": 54,
+        "pending": 1
+      },
+      "caches": {
+        "HIT": 54,
+        "pending": 1
+      },
+      "pops": {
+        "SIN": 54,
+        "pending": 1
+      },
+      "protocol": {
+        "h2": 54,
+        "pending": 1
+      },
+      "headerMs": {
+        "min": 490,
+        "median": 1942,
+        "p90": 2481,
+        "max": 3065
+      },
+      "bodyMs": {
+        "min": 718,
+        "median": 2513,
+        "p90": 3644,
+        "max": 5060
+      },
+      "completedContentBytes": 13893632,
+      "firstAtFromFrameMs": 153,
+      "lastCompletedFromFrameMs": 117946,
+      "slowest": [
+        {
+          "range": "bytes=524288-786431",
+          "durationMs": 6463,
+          "headerMs": 1403,
+          "cache": "HIT",
+          "pop": "SIN"
+        },
+        {
+          "range": "bytes=8912896-9175039",
+          "durationMs": 5403,
+          "headerMs": 903,
+          "cache": "HIT",
+          "pop": "SIN"
+        },
+        {
+          "range": "bytes=5242880-5505023",
+          "durationMs": 5401,
+          "headerMs": 3065,
+          "cache": "HIT",
+          "pop": "SIN"
+        },
+        {
+          "range": "bytes=4980736-5242879",
+          "durationMs": 5313,
+          "headerMs": 2248,
+          "cache": "HIT",
+          "pop": "SIN"
+        },
+        {
+          "range": "bytes=262144-524287",
+          "durationMs": 5294,
+          "headerMs": 1994,
+          "cache": "HIT",
+          "pop": "SIN"
+        }
+      ]
+    },
+    "other": [
+      {
+        "font": "NotoSansTC.ttf",
+        "status": 200,
+        "durationMs": 294,
+        "bytes": null,
+        "origin": "http://127.0.0.1:20631"
+      },
+      {
+        "font": "NotoSans-Regular.ttf",
+        "status": 200,
+        "durationMs": 16,
+        "bytes": null,
+        "origin": "http://127.0.0.1:20631"
+      },
+      {
+        "font": "NotoSansDevanagari-Regular.ttf",
+        "status": 200,
+        "durationMs": 7,
+        "bytes": null,
+        "origin": "http://127.0.0.1:20631"
+      },
+      {
+        "font": "NotoSansThai-Regular.ttf",
+        "status": 200,
+        "durationMs": 3,
+        "bytes": null,
+        "origin": "http://127.0.0.1:20631"
+      },
+      {
+        "font": "NotoSansArabic-Regular.ttf",
+        "status": 200,
+        "durationMs": 7,
+        "bytes": null,
+        "origin": "http://127.0.0.1:20631"
+      }
+    ],
+    "inference": "Observed SC responses are HIT at SIN but each 256KiB request incurs header/body delay. Complete body/hash caching remains necessary; edge miss is not the observed reason for this failed run.",
+    "closed": {
+      "browser": true,
+      "proxy": true,
+      "next": true,
+      "gateway": true
+    }
+  },
+  "fontChange": {
+    "originalPieceBytes": 262144,
+    "originalPieces": 63,
+    "maxPiecesPerRequest": 4,
+    "freshHttpRequests": 16,
+    "maxFontReaders": 2,
+    "wholeFontBytes": 16437364,
+    "wholeFontSha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b",
+    "perPiecePinsAndRestartKeysUnchanged": true,
+    "headerTimeoutMs": 8000,
+    "bodyIdleTimeoutMs": 15000
+  },
+  "checks": {
+    "fontAndAdjacent": {
+      "tests": 131,
+      "pass": 131,
+      "fail": 0
+    },
+    "publicFivePartObserver": {
+      "tests": 4,
+      "pass": 4,
+      "fail": 0
+    },
+    "hudRecoveryAndAdjacent": {
+      "tests": 32,
+      "pass": 32,
+      "fail": 0
+    },
+    "hud113BeforeFailure": "hud-recovery-before.tap.txt"
+  },
+  "fontLocalJourneys": [
+    {
+      "passed": true,
+      "candidate": "880-font-batch-22e56501",
+      "renderer": "compatibility",
+      "language": "en-US",
+      "movementMs": 136,
+      "nativeAfterFirstFrameMs": 18692,
+      "naturalPngAfterFirstFrameMs": 1544,
+      "naturalPngFromObserverStartMs": 16601,
+      "sixFonts": true,
+      "prewarm": {
+        "requested": 113,
+        "ok": 113,
+        "failed": 0
+      },
+      "firstAndReenteredQ": true,
+      "normalLogouts": 2,
+      "sameRoleSavedPosition": {
+        "x": 288,
+        "y": 617
+      },
+      "oldRolesAndSavesUnchanged": true,
+      "sourceSnapshotUnchanged": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fontObserverErrors": []
+    },
+    {
+      "passed": true,
+      "candidate": "880-font-batch-22e56501",
+      "renderer": "webgl2",
+      "language": "zh-TW",
+      "movementMs": 119,
+      "nativeAfterFirstFrameMs": 27975,
+      "naturalPngAfterFirstFrameMs": 29347,
+      "naturalPngFromObserverStartMs": 43822,
+      "sixFonts": true,
+      "prewarm": {
+        "requested": 113,
+        "ok": 113,
+        "failed": 0
+      },
+      "firstAndReenteredQ": true,
+      "normalLogouts": 2,
+      "sameRoleSavedPosition": {
+        "x": 288,
+        "y": 617
+      },
+      "oldRolesAndSavesUnchanged": true,
+      "sourceSnapshotUnchanged": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "fontObserverErrors": []
+    }
+  ],
+  "linuxQualification": {
+    "source": "0bcd61e0f27147f005dee3d6c49abb6a1af15157",
+    "workflowRun": 43706354711,
+    "artifact": 14159169191,
+    "manifestFilesVerified": 1841,
+    "sharedZoneTests": 310,
+    "requiredBackgroundExecutionTests": 7,
+    "nativePostgresTests": 216,
+    "elfBytes": 93576560,
+    "elfSha256": "22bb54130b2084a34c31d7b0b7bd604cc99a260a08e8d924a5513b329ee4ec96"
+  },
+  "serverCanary": {
+    "source": "0bcd61e0f27147f005dee3d6c49abb6a1af15157",
+    "passed": true,
+    "ordinaryRegistrationAndLogin": true,
+    "movementMs": 105.01,
+    "neutralWalkCount": 1,
+    "normalLogouts": 2,
+    "sameRoleReentry": true,
+    "oldRows": {
+      "accounts": {
+        "rows": 308,
+        "canonicalBytes": 2286516,
+        "sha256": "f13127cf9a7061f7ebb41d72b07483be50f85b0faf04d996497b29d1ae6e8625"
+      },
+      "characters": {
+        "rows": 220,
+        "canonicalBytes": 74269,
+        "sha256": "4d82e23d299af472c86de37f278f80f9820c8243f792a322436d02acf1b42fc4"
+      },
+      "character_saves": {
+        "rows": 220,
+        "canonicalBytes": 2574175,
+        "sha256": "4df6c9084a3b1f7fb85c8830cc1dcbce3690c80c5af32981fbeb3524cadf827e"
+      }
+    },
+    "debugCommandsSent": 0
+  },
+  "webQualification": {
+    "source": "0bcd61e0f27147f005dee3d6c49abb6a1af15157",
+    "controller": "353a94bff10e57a6dbd2177047930e988c4fde40",
+    "stageRun": 43706928930,
+    "checkRun": 43707588125,
+    "promoteRun": 43712070140,
+    "candidate": "dpl_GbgiT5prQBFsm32vkfQ9kJc7CRRd",
+    "publicPendingCanary": true,
+    "entryAssetCount": 15,
+    "workerBytes": 62863,
+    "workerSha256": "4830a263f06df9901a41ac1b4c36142478559a7242d62c163790c5fc51c14c58",
+    "closureCommits": 47,
+    "closureFiles": 272
+  },
+  "publicR1": {
+    "classification": {
+      "kind": "r16-original-public-acceptance",
+      "accepted": false,
+      "checks": {
+        "exactSource": true,
+        "completeFunctionalRun": false,
+        "walletLoginOnly": true,
+        "movementOriginalEightSeconds": true,
+        "sixCompleteFonts": true,
+        "complete113": false,
+        "sharedNativeQuest": true,
+        "originalNative120": true,
+        "originalRuntimeBody120": true,
+        "workerRestart": true,
+        "normalLogout": true,
+        "bothBrowsersClosed": true
+      },
+      "source": "0bcd61e0f27147f005dee3d6c49abb6a1af15157",
+      "deploymentId": "dpl_GbgiT5prQBFsm32vkfQ9kJc7CRRd",
+      "originalMoveBudgetMs": 8000,
+      "originalNativeBudgetMs": 120000,
+      "nativeAfterFirstFrameMs": 106358,
+      "runtimeBodyAfterFirstFrameMs": 24121,
+      "supplementary180ObservationChangesOriginalBudget": false,
+      "wholeParityAccepted": false
+    },
+    "movementFromTrustedInputMs": 202,
+    "prewarm": {
+      "runs": [
+        {
+          "name": "hud-core",
+          "label": "Core HUD",
+          "requested": 113,
+          "ok": 112,
+          "failed": 1,
+          "failedUrls": [
+            "/original-ui/UI_32bit/472.png"
+          ],
+          "durationMs": 107364.89999997616,
+          "sceneCacheHits": 0,
+          "sceneCacheMisses": 0,
+          "status": "done",
+          "requestFailures": [
+            {
+              "url": "/original-ui/Prguse/1.png",
+              "attempt": 1,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10001,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/4.png",
+              "attempt": 1,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10000,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/6.png",
+              "attempt": 1,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10000,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/1.png",
+              "attempt": 2,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10000,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/4.png",
+              "attempt": 2,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10000,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/6.png",
+              "attempt": 2,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10001,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/1.png",
+              "attempt": 3,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10001,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/4.png",
+              "attempt": 3,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10002,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/6.png",
+              "attempt": 3,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10001,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/12.png",
+              "attempt": 1,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10001,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/13.png",
+              "attempt": 1,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10001,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/8.png",
+              "attempt": 1,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10001,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/12.png",
+              "attempt": 2,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10003,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/13.png",
+              "attempt": 2,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10002,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/8.png",
+              "attempt": 2,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10002,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/12.png",
+              "attempt": 3,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10001,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/13.png",
+              "attempt": 3,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10001,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/8.png",
+              "attempt": 3,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10001,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/76.png",
+              "attempt": 1,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10001,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/UI_32bit/473.png",
+              "attempt": 1,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10000,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/UI_32bit/472.png",
+              "attempt": 1,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10000,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/76.png",
+              "attempt": 2,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10001,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/UI_32bit/473.png",
+              "attempt": 2,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10001,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/UI_32bit/472.png",
+              "attempt": 2,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10001,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/Prguse/76.png",
+              "attempt": 3,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10000,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/UI_32bit/473.png",
+              "attempt": 3,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10000,
+              "errorName": "TimeoutError"
+            },
+            {
+              "url": "/original-ui/UI_32bit/472.png",
+              "attempt": 3,
+              "phase": "headers",
+              "bytes": 0,
+              "durationMs": 10002,
+              "errorName": "TimeoutError"
+            }
+          ],
+          "recovery": {
+            "initialOk": 104,
+            "initialFailedUrls": [
+              "/original-ui/Prguse/1.png",
+              "/original-ui/Prguse/4.png",
+              "/original-ui/Prguse/6.png",
+              "/original-ui/Prguse/12.png",
+              "/original-ui/Prguse/13.png",
+              "/original-ui/Prguse/8.png",
+              "/original-ui/Prguse/76.png",
+              "/original-ui/UI_32bit/473.png",
+              "/original-ui/UI_32bit/472.png"
+            ],
+            "requested": 8,
+            "recoveredUrls": [
+              "/original-ui/Prguse/1.png",
+              "/original-ui/Prguse/4.png",
+              "/original-ui/Prguse/6.png",
+              "/original-ui/Prguse/12.png",
+              "/original-ui/Prguse/13.png",
+              "/original-ui/Prguse/8.png",
+              "/original-ui/Prguse/76.png",
+              "/original-ui/UI_32bit/473.png"
+            ],
+            "failedUrls": [],
+            "unattemptedUrls": [
+              "/original-ui/UI_32bit/472.png"
+            ],
+            "status": "done",
+            "requestFailures": []
+          }
+        }
+      ],
+      "summary": {
+        "requested": 113,
+        "ok": 112,
+        "failed": 1
+      },
+      "orchestrator": {
+        "backgroundMode": "afterPlayable",
+        "firstPlayable": true,
+        "requestedStage": "game",
+        "pendingBackgroundStage": null,
+        "activeBackgroundStage": null,
+        "completed": [
+          "game:background"
+        ],
+        "disposed": false
+      }
+    },
+    "scRanges": {
+      "requests": 16,
+      "complete206": 16,
+      "edgeHit": 16
+    },
+    "originalJsonWalkingBodyPassed": true,
+    "later472Upstream200AtMs": 172638,
+    "later472Upstream200IsFullPrewarmProof": false,
+    "r2PreparedButNotExecuted": true,
+    "walletScope": "fresh internal Testnet wallet; one login signature, no funding or asset transaction; official phone viewport, not physical phone"
+  },
+  "rollback": {
+    "failedInputRun": 43713129702,
+    "failedInputCode": "qrCandidateInputInvalid",
+    "failedInputMutatedProduction": false,
+    "correctedRun": 43713420269,
+    "trafficAfter": {
+      "target": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8",
+      "alias": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8"
+    },
+    "backend": {
+      "readOnly": true,
+      "passed": true,
+      "observedAtUtc": "2026-11-15T12:31:18.815900+00:00",
+      "pid": 1563022,
+      "source": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5",
+      "ok": true,
+      "originalConfigurationFilesUnchanged": 22,
+      "oldRows": {
+        "accounts": {
+          "preexistingRows": 308,
+          "currentRows": 309,
+          "preexistingCanonicalBytes": 2286516,
+          "preexistingSha256": "f13127cf9a7061f7ebb41d72b07483be50f85b0faf04d996497b29d1ae6e8625",
+          "preexistingRowsUnchanged": true
+        },
+        "characters": {
+          "preexistingRows": 220,
+          "currentRows": 221,
+          "preexistingCanonicalBytes": 74269,
+          "preexistingSha256": "4d82e23d299af472c86de37f278f80f9820c8243f792a322436d02acf1b42fc4",
+          "preexistingRowsUnchanged": true
+        },
+        "character_saves": {
+          "preexistingRows": 220,
+          "currentRows": 221,
+          "preexistingCanonicalBytes": 2574175,
+          "preexistingSha256": "4df6c9084a3b1f7fb85c8830cc1dcbce3690c80c5af32981fbeb3524cadf827e",
+          "preexistingRowsUnchanged": true
+        }
+      },
+      "capacity": {
+        "maxWsConnections": 66,
+        "maxActiveSessions": 51,
+        "maxReconnectLeases": 51,
+        "maxLoginInFlight": 2,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2,
+        "currentWsConnections": 0,
+        "currentActiveSessions": 0,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0
+      },
+      "databaseRestored": false,
+      "credentialsRecorded": false
+    },
+    "publicReadback": {
+      "checkedAt": "2026-11-15T12:31:20.326Z",
+      "passed": true,
+      "rows": [
+        {
+          "url": "https://numeron.obelisk.build/version",
+          "status": 200,
+          "revision": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+          "passed": true
+        },
+        {
+          "url": "https://165.154.65.136.sslip.io/playtest/health",
+          "status": 200,
+          "revision": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5",
+          "passed": true
+        }
+      ]
+    },
+    "qr": [
+      {
+        "locale": "zh-CN",
+        "passed": true,
+        "createAttempts": 1,
+        "realQrMatrix": true,
+        "sameIntentPending": true,
+        "normalCancel": true,
+        "pollsAfterCancel": 0,
+        "browserClosed": true
+      },
+      {
+        "locale": "zh-TW",
+        "passed": true,
+        "createAttempts": 1,
+        "realQrMatrix": true,
+        "sameIntentPending": true,
+        "normalCancel": true,
+        "pollsAfterCancel": 0,
+        "browserClosed": true
+      }
+    ],
+    "originalDatabaseRestored": false
+  },
+  "hudFix": {
+    "source": "44b986b8a51682f1c72c552b82c0f21c32ce0d2a",
+    "scope": "one recovery sweep of every failed URL from the finite original pack; no healthy rereads, same max2 readers and existing per-request budgets; EOF before success",
+    "transient113TestPassed": true,
+    "publicFixedCandidateTested": false,
+    "build": {
+      "candidate": "44b-hud-recovery-44a2780a",
+      "buildId": "S4jWwWWsvzY3qzXebQG2-",
+      "durationMs": 47823,
+      "dist": ".next-hud-recovery-r1",
+      "appLibFilesVerified": 2179,
+      "foreignFrontendWipExcluded": true
+    },
+    "localJourneys": [
+      {
+        "passed": true,
+        "candidate": "44b-hud-recovery-44a2780a",
+        "renderer": "compatibility",
+        "language": "en-US",
+        "movementMs": 153,
+        "nativeAfterFirstFrameMs": 22159,
+        "naturalPngAfterFirstFrameMs": 5928,
+        "naturalPngFromObserverStartMs": 21792,
+        "sixFonts": true,
+        "prewarm": {
+          "requested": 113,
+          "ok": 113,
+          "failed": 0
+        },
+        "firstAndReenteredQ": true,
+        "normalLogouts": 2,
+        "sameRoleSavedPosition": {
+          "x": 288,
+          "y": 617
+        },
+        "oldRolesAndSavesUnchanged": true,
+        "sourceSnapshotUnchanged": true,
+        "closed": {
+          "browser": true,
+          "proxy": true,
+          "next": true,
+          "gateway": true
+        },
+        "fontObserverErrors": []
+      },
+      {
+        "passed": true,
+        "candidate": "44b-hud-recovery-44a2780a",
+        "renderer": "webgl2",
+        "language": "zh-TW",
+        "movementMs": 104,
+        "nativeAfterFirstFrameMs": 50192,
+        "naturalPngAfterFirstFrameMs": 31985,
+        "naturalPngFromObserverStartMs": 46494,
+        "sixFonts": true,
+        "prewarm": {
+          "requested": 113,
+          "ok": 113,
+          "failed": 0
+        },
+        "firstAndReenteredQ": true,
+        "normalLogouts": 2,
+        "sameRoleSavedPosition": {
+          "x": 288,
+          "y": 617
+        },
+        "oldRolesAndSavesUnchanged": true,
+        "sourceSnapshotUnchanged": true,
+        "closed": {
+          "browser": true,
+          "proxy": true,
+          "next": true,
+          "gateway": true
+        },
+        "fontObserverErrors": []
+      }
+    ]
+  },
+  "preservation": {
+    "baselineFiles": 30,
+    "rawShaUnchanged": 29,
+    "concurrentCapacityDocumentCommit": "766d81d4dc",
+    "concurrentChange": [
+      {
+        "sha256": "50bd1281ff133dfddaa84ed526f864b50787face4642dc28fb1e84ff870b7c44",
+        "path": "mir2-web3/docs/evidence/comparable-capacity-20261113/README.zh-CN.md",
+        "afterSha256": "e850b3112263a3d389434e0e9ede5be7ecc92d5fb2ecad49efe573214cc1b1f4"
+      }
+    ],
+    "foreignWorkNotReverted": true,
+    "originalDeadlinesUnchanged": true,
+    "olderFailuresRetained": true
+  },
+  "open": [
+    "matching44bLinuxAndWebCandidate",
+    "twoIndependentFullPublicCohorts",
+    "oldQFailureNotRootCaused",
+    "resourceOverlayObscuresHealthOrbDuringLoading",
+    "mixedLanguageAndPixelParity",
+    "sixOldFixtureDependencyFailures",
+    "publicOldRoleColdReentry",
+    "currentThreeClass1to30",
+    "moreMapsAndSkills",
+    "AloCrossPlatformCombat",
+    "physicalPhone",
+    "WindowsWindowAcceptance"
+  ]
+}

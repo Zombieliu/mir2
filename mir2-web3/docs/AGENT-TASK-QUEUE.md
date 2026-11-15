@@ -6,14 +6,14 @@ Updated 2026-11-15 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-15 b33533f4aa字体Range复用完整CDN缓存已发布f7abaa19，41项（127相邻包含）／9真实workerd／类型／预演、独立代码SHA及SIN范围HIT通过。原英繁两组升级冷流程完整通过：首步108／136ms，Native24979／118490ms，自然PNG、六字体113、首次和重进Q、两次正常注销同档保持；8／65／120不改，旧失败不倒填。繁中SC仍在118.3秒才完成，先补被动Worker网络观测，再做匹配候选及完整两场公网。Web仍20de／AWss，Gateway fd3，只有CDN发布；29份原WIP SHA保持，其它1:1仍开放。[发布、两场与边界](evidence/r16-font-edge-cache-20261115/README.md)。
+2026-11-15 字体合并读取880已推送，63原段SHA／续读键不变，新读16次、max2；131项（含24字体）、真实Edge62+1及原本地英繁两场通过。0b匹配Linux310／PG216／1841文件SHA、克隆旧档及普通协议通过，Web Gbgi与网关曾切正式；公网R1首步202ms、Native106358ms、六字体／Q／行走包／Worker／注销通过，但HUD初始9败只补8，112/113导致原判定false，未跑R2。已两端回退20de／AWss与fd3，简繁扫码及原308／220／220行、22配置保持，新增QA档保留。44b986b8a5补齐有限包全部失败项一次恢复，32项／严格构建／原两组本地完整流程通过：首步153／104ms、Native22159／50192ms，六字体113、Q／重进／两次保存通过；44b未发布。下一轮做匹配新候选及两场原8／65／120公网，不重发旧0b。浮层遮血球、混合语言、原Q未定因、6项旧夹具、三职业／地图／阿洛／Windows窗口／实体手机继续；29份原WIP SHA保持，容量文档并发766另记，Goal active。[公网失败、回退、修复与剩余资格](evidence/r16-font-coalescing-20261115/README.md)。
 
 ## 保留的当前未结项
 
 - [x] f28dc94538的CDN Range错误头已修复并发布9e9b30bd；22项／9相邻／9真实本地R2／类型／预演、公网两入口8项范围及原字节通过，资源配置保持。[已发布范围](evidence/r16-r2-range-20261115/README.md)
 - [x] 9eac66ed32实现SC63个原字节分段校验／失败保留／重启续读；受控Edge62+1及实际失败档案恢复完整场通过，4ad940554d补首次可见登录输入时序。仅候选，未发布，不关闭冷两场资格。[源码、检查和实际恢复](evidence/r16-font-resume-20261115/README.md)
 - [x] b33533f4aa字体范围缓存已发布，原两组本地升级冷场六字体／113／Q／保存完整通过；实际SIN HIT原字节与代码SHA一致，配置保持。[两场原值与发布](evidence/r16-font-edge-cache-20261115/README.md)
-- [ ] 繁中Native118490ms接近120秒，先用被动Worker网络记录区分SC长尾，再做匹配候选与完整两场公网、运行包组合故障。原Q关闭失败本轮未复现，未定因；旧41段／120秒及夹具失败保持，不改原门槛。[当前边界](evidence/r16-font-edge-cache-20261115/README.md)
+- [ ] 880字体合并及0b匹配包曾发布，公网R1因9败只补8而112/113失败，已回退两端并复验扫码／原档。44b完整HUD补读的32项、独立构建和原本地两场通过；下一轮匹配新Linux／Web与完整两场公网。原Q失败未复现未定因，旧41段／120秒／6项夹具失败保持，8／65／120不改。[本轮原值与下一步](evidence/r16-font-coalescing-20261115/README.md)
 
 - [ ] dca152cd15中立AI1/2漫游已推送，270项／本地英繁两后端自然PNG保持；aa524 Linux303／PG216及隔离普通协议通过，曾切换正式，但公网完整行走包／Native120失败后两端回退20de／fd3。先修交付恢复再做两场原门槛公网，其他AI／巡逻、资源浮层、混合语言及6项旧夹具依赖失败继续。[本轮资格与失败](evidence/r16-paired-release-20261115/README.md) · [原本地结果](evidence/r16-livestock-roam-20261115/README.md)
 

@@ -1,0 +1,54 @@
+{
+  "kind": "immutable-git-source-pins",
+  "rows": [
+    {
+      "source": "88002a0000943f221f494cc61b8bb28486c923db",
+      "path": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+      "gitBlob": "0cd0941bd7b3d2499b14a9cb5fec5d4ee634bebf",
+      "bytes": 62863,
+      "sha256": "4830a263f06df9901a41ac1b4c36142478559a7242d62c163790c5fc51c14c58"
+    },
+    {
+      "source": "88002a0000943f221f494cc61b8bb28486c923db",
+      "path": "mir2-web3/apps/web/scripts/test-asset-worker-font-ranges.mjs",
+      "gitBlob": "84bc8b5b7147ecb82ea903e5f09952c182a58a56",
+      "bytes": 19165,
+      "sha256": "cff39e2540c9a0aa4ccd00934c4664d70c849963053c9a69f75c455d854ae48e"
+    },
+    {
+      "source": "88002a0000943f221f494cc61b8bb28486c923db",
+      "path": "mir2-web3/apps/web/scripts/smoke-asset-font-ranges.mjs",
+      "gitBlob": "d2c66b2a83a4cb364110ea00040d2b104966a885",
+      "bytes": 10146,
+      "sha256": "4232ea65de1c09656a95ef421deb7e370196937e407bec9cefc7febc4c4b3638"
+    },
+    {
+      "source": "0bcd61e0f27147f005dee3d6c49abb6a1af15157",
+      "path": ".github/workflows/promotion-website-release.yml",
+      "gitBlob": "62db49ff56402b38451e58a115496c175a9c28b6",
+      "bytes": 43042,
+      "sha256": "e18dae6c9e9cec4d5ca7b8a2e6a748392640f09134bd6bbdf0c24b8cc7e18dd3"
+    },
+    {
+      "source": "353a94bff10e57a6dbd2177047930e988c4fde40",
+      "path": ".github/scripts/numeron-r16-release.mjs",
+      "gitBlob": "2a4707699cab2e39d010b19e34351730883319b4",
+      "bytes": 91288,
+      "sha256": "83b087086fb2ed2f7dba8090a6647e1964e4113d19e2c478b8cb966aae17f572"
+    },
+    {
+      "source": "44b986b8a51682f1c72c552b82c0f21c32ce0d2a",
+      "path": "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
+      "gitBlob": "f77a95ec92bd9acadb98937297724cab008401d9",
+      "bytes": 73296,
+      "sha256": "6f42b47d65be0850476e196f9f8cc3016def61689249cfe309128f86a110298b"
+    },
+    {
+      "source": "44b986b8a51682f1c72c552b82c0f21c32ce0d2a",
+      "path": "mir2-web3/apps/web/scripts/test-asset-prewarm-request.mjs",
+      "gitBlob": "1535c2ea03aae60ee0d8a051738630cb6be15a25",
+      "bytes": 15117,
+      "sha256": "d51ff0f9fb79995bd40adf1c13020670e9bdf81cdd175d37208c7c0a663a8bd8"
+    }
+  ]
+}
