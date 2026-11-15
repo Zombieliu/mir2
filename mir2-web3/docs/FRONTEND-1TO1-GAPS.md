@@ -2,7 +2,7 @@
 
 ## 2026-11-16 QR后字库预取本地通过，待匹配发行
 
-2026-11-16 6ba38557dd匹配发行及原两场公网通过，首步131/136ms、Native89688/86942ms、六字体113；简繁出码/取消复验。R1 Q为Native，R2为React备用且完整字体后Native就绪；冷Q接管／混合语言／像素仍待，不能由两个原判定通过推成整体1:1。旧档、配置和29WIP保持。[发行、原值与范围](evidence/r16-qr-font-preparation-20261116/production/README.md)。
+2026-11-16 主字体整源中断保留分片候选：188项（114+74，含36范围/9新增）与严格构建通过；真实Chrome旧码保留0、新码保留60，整浏览器重启仅补3片，六字体SHA/解码通过。英繁两完整局Native Q首次/重登通过，首步111/90ms、Native22449/4731ms；复用自有CacheStorage，不是公网冷速。12私有覆盖恢复，29WIP保持，全部测试句柄关闭。仅候选，正式仍6ba；匹配发行/原两场公网及冷Q接管继续，Goal active。[结果与边界](evidence/r16-font-prefix-recovery-20261116/README.md)。 正式6ba成对发行与原两场公网已通过，原312/224/224行、22配置保持；冷Q为一场Native/一场备用，实体手机未验。[发布回执](evidence/r16-qr-font-preparation-20261116/production/README.md)。
 
 ## 2026-11-16 必需 HUD 候选已尝试发布，原行走与 Native 门槛失败后回退
 

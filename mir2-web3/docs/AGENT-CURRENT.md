@@ -14,7 +14,7 @@ Short routing summary, updated 2026-11-16 (Asia/Shanghai). This indexes recorded
 
 ## Last recorded decisions and open work
 
-2026-11-16 应用6ba38557dd已成对发布到Web G8iq／同源Gateway。原两场公网通过：首步131/136ms、Native89688/86942ms、六字体113、行走整包、Q、Worker与注销；简繁出码/取消复验。Q实际为R1 Native／R2 React备用，接管和语言像素仍待；实体手机未验。原312/224/224行和22配置保持，新增2QA档保留，29WIP保持；测试浏览器/服务/SSH均关闭。Windows长路径检出修复，四托管检出过，Rust格式仍开放。整体1:1/Goal继续。[发行、原值与范围](evidence/r16-qr-font-preparation-20261116/production/README.md)。
+2026-11-16 主字体整源中断保留分片候选：188项（114+74，含36范围/9新增）与严格构建通过；真实Chrome旧码保留0、新码保留60，整浏览器重启仅补3片，六字体SHA/解码通过。英繁两完整局Native Q首次/重登通过，首步111/90ms、Native22449/4731ms；复用自有CacheStorage，不是公网冷速。12私有覆盖恢复，29WIP保持，全部测试句柄关闭。仅候选，正式仍6ba；匹配发行/原两场公网及冷Q接管继续，Goal active。[结果与边界](evidence/r16-font-prefix-recovery-20261116/README.md)。 正式6ba成对发行与原两场公网已通过，原312/224/224行、22配置保持；冷Q为一场Native/一场备用，实体手机未验。[发布回执](evidence/r16-qr-font-preparation-20261116/production/README.md)。
 
 2026-11-15 用户补充寻路“目标不对或到不了”：本地候选ceb1c1132f补大小地图坐标／30秒初始期限／到达反馈和十语入口说明。152项、独立严格构建与英繁两后端实际跨图／慢碰撞超时／晚到零旧移动／重登新目标／正常保存通过，30份内容WIP保持。本轮未发布；其他目标与既有公网资源失败继续。[记录与范围](evidence/r16-route-feedback-20261115/README.md)
 

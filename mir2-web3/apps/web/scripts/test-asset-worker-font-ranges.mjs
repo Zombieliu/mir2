@@ -69,6 +69,119 @@ async function assertOriginal(response) {
   assert.equal(body.length, original.length); assert.equal(digest(body), expected);
 }
 
+function interruptedWholeFont(prefix, { eof = false, onEnd = () => {} } = {}) {
+  let offset = 0;
+  return new Response(new ReadableStream({ pull(controller) {
+    if (offset === prefix.length) {
+      onEnd();
+      if (eof) controller.close();
+      else controller.error(new TypeError("whole font connection interrupted"));
+      return;
+    }
+    const end = Math.min(offset + 79_331, prefix.length);
+    controller.enqueue(prefix.subarray(offset, end)); offset = end;
+  } }), { headers: { "content-type": "font/otf", "content-length": String(original.length) } });
+}
+function readWholeFont(f, owner = new AbortController().signal) {
+  f.context.fontSourceOwner = owner;
+  return vm.runInContext(`readCompleteFont(new Request('${origin}${path}'),fontSourceOwner,8000,false)`, f.context);
+}
+
+test("whole-font prefix: a failed near-complete body preserves only verified parts and resumes after Worker restart", async () => {
+  const prefix = original.subarray(0, 60 * 262144 + 12345);
+  const f = fixture(() => interruptedWholeFont(prefix));
+  assert.equal(await readWholeFont(f), null);
+  assert.equal(f.full(), undefined, 'a partial response never becomes a usable font');
+  assert.deepEqual([...cachedPieces(f)], Array.from({ length: 60 }, (_, n) => n));
+  const restarted = fixture(sliceResponse, f.stores);
+  await assertOriginal(await restarted.read()); await restarted.flush();
+  assert.deepEqual(requestedPieces(restarted.calls).toSorted((a,b) => a-b), [60,61,62]);
+});
+
+test("whole-font prefix: a short clean EOF keeps complete units but never its incomplete tail", async () => {
+  const f = fixture(() => interruptedWholeFont(original.subarray(0, 3 * 262144 + 19), { eof: true }));
+  assert.equal(await readWholeFont(f), null);
+  assert.deepEqual([...cachedPieces(f)], [0,1,2]);
+  for (const [key, response] of f.parts()[0][1]) {
+    const offset = Number(new URL(key).pathname.split('/')[3]);
+    assert.equal(digest(Buffer.from(await response.arrayBuffer())), digest(original.subarray(offset, offset+262144)));
+  }
+});
+
+test("whole-font prefix: corrupt complete units are not cached under a pinned digest", async () => {
+  const prefix = Buffer.from(original.subarray(0, 4 * 262144 + 3)); prefix[262144 + 5] ^= 1;
+  const f = fixture(() => interruptedWholeFont(prefix));
+  assert.equal(await readWholeFont(f), null);
+  assert.deepEqual([...cachedPieces(f)], [0,2,3]);
+  const restarted = fixture(sliceResponse, f.stores);
+  await assertOriginal(await restarted.read()); await restarted.flush();
+  const requested = requestedPieces(restarted.calls);
+  assert(requested.includes(1)); assert(!requested.includes(0) && !requested.includes(2) && !requested.includes(3));
+});
+
+test("whole-font prefix: a configuration change during the body cannot persist old data", async () => {
+  let f;
+  f = fixture(() => interruptedWholeFont(original.subarray(0, 3 * 262144), { onEnd() {
+    vm.runInContext("noteConfigurationChange();runtimeConfig={...runtimeConfig,version:'other-release'}", f.context);
+  } }));
+  assert.equal(await readWholeFont(f), null);
+  assert(f.parts().every(([,rows]) => rows.size === 0));
+});
+
+test("whole-font prefix: explicit owner cancellation starts no preservation work", async () => {
+  const owner = new AbortController();
+  const f = fixture(() => interruptedWholeFont(original.subarray(0, 3 * 262144), { onEnd() { owner.abort(); } }));
+  assert.equal(await readWholeFont(f, owner.signal), null);
+  assert.equal(f.parts().length, 0);
+});
+
+test("whole-font prefix: queued old range work cannot preserve a later full fallback in a new namespace", async () => {
+  let unblock;
+  const held = new Promise(resolve => { unblock = resolve; });
+  const f = fixture(async request => {
+    if (request.headers.has('range')) { await held; return new Response(null, { status: 503 }); }
+    return request.url === origin + path ? interruptedWholeFont(original.subarray(0, 3 * 262144))
+      : new Response(null, { status: 503 });
+  });
+  const pending = f.read(); await waitFor(() => f.calls.length === 2);
+  vm.runInContext("noteConfigurationChange();runtimeConfig={...runtimeConfig,version:'new-release',assetVersion:'new',remoteAssetBaseUrl:'https://other.test/mir2/v/new',remoteAssetBaseUrls:[]}", f.context);
+  unblock(); const failed = await pending; assert.notEqual(failed.status, 200); await failed.arrayBuffer(); await f.flush();
+  assert(f.calls.some(request => !request.headers.has('range') && request.url === origin + path));
+  assert(f.calls.every(request => request.url === origin + path || request.url.startsWith(primary) || request.url.startsWith(mirror)));
+  assert(f.parts().every(([,rows]) => rows.size === 0));
+  assert(!f.parts().some(([name]) => name.endsWith('-new-release')));
+});
+
+test("whole-font prefix: expired persistence permission cannot be bypassed by retained bytes", async () => {
+  let f;
+  f = fixture(() => interruptedWholeFont(original.subarray(0, 3 * 262144), { onEnd() {
+    vm.runInContext('configurationPersistenceAllowed=false', f.context);
+  } }));
+  assert.equal(await readWholeFont(f), null); assert.equal(f.parts().length, 0);
+});
+
+test("whole-font prefix: one bounded cache budget retires a delayed open without late writes", async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const f = fixture(() => interruptedWholeFont(original.subarray(0, 3 * 262144)));
+  const open = f.context.caches.open;
+  let resume;
+  f.context.caches.open = name => new Promise(resolve => { resume = async () => resolve(await open(name)); });
+  const pending = readWholeFont(f); await waitFor(() => resume); await turn();
+  t.mock.timers.tick(751); assert.equal(await pending, null);
+  await resume(); await turn(); await turn();
+  assert(f.parts().every(([,rows]) => rows.size === 0));
+});
+
+test("whole-font prefix: unavailable storage and malformed complete bodies remain failures", async () => {
+  const denied = fixture(() => interruptedWholeFont(original.subarray(0, 3 * 262144)), new Map(), { denied: true });
+  assert.equal(await readWholeFont(denied), null); assert.equal(denied.parts().length, 0);
+  for (const bytes of [Buffer.from(original), Buffer.concat([original, Buffer.from([1])])]) {
+    if (bytes.length === original.length) bytes[4] ^= 1;
+    const f = fixture(() => new Response(bytes));
+    assert.equal(await readWholeFont(f), null); assert.equal(f.parts().length, 0);
+  }
+});
+
 test("cold transfer coalesces pinned pieces into sixteen bounded requests while keeping 63 restart units", async () => {
   const f = fixture(); await assertOriginal(await f.read()); await f.flush();
   assert.equal(f.calls.length, 16);

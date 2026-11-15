@@ -6,9 +6,11 @@ Updated 2026-11-16 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-16 6ba38557dd已成对发布，匹配Linux310／PG216／1841文件SHA与原两场公网通过；首步131/136ms、Native89688/86942ms，六字体113和简繁扫码通过。冷Q为一场Native、一场React备用，整体1:1未关闭，下一项收敛Q接管并继续真实寻路／跨图和语言。旧档、22配置与29WIP保持。[发行、原值与范围](evidence/r16-qr-font-preparation-20261116/production/README.md)。
+2026-11-16 主字体整源中断保留分片候选：188项（114+74，含36范围/9新增）与严格构建通过；真实Chrome旧码保留0、新码保留60，整浏览器重启仅补3片，六字体SHA/解码通过。英繁两完整局Native Q首次/重登通过，首步111/90ms、Native22449/4731ms；复用自有CacheStorage，不是公网冷速。12私有覆盖恢复，29WIP保持，全部测试句柄关闭。仅候选，正式仍6ba；匹配发行/原两场公网及冷Q接管继续，Goal active。[结果与边界](evidence/r16-font-prefix-recovery-20261116/README.md)。 正式6ba成对发行与原两场公网已通过，原312/224/224行、22配置保持；冷Q为一场Native/一场备用，实体手机未验。[发布回执](evidence/r16-qr-font-preparation-20261116/production/README.md)。
 
 ## 保留的当前未结项
+
+- [ ] 整源中断字体分片候选已通过188项、严格构建、真实Chrome和英繁两完整局；下一步匹配打包与原两场公网，保留完整六字体/113与原时限。[候选](evidence/r16-font-prefix-recovery-20261116/README.md)
 
 - [ ] 冷启动Q所有权接管：6ba公网R1 Native／R2 React备用，完整字体后Native均就绪；继续定位切换时机并以实际Native窗口验收，不用原分类器的字段名替代界面证据。[发行、原值与范围](evidence/r16-qr-font-preparation-20261116/production/README.md)
 

@@ -571,6 +571,7 @@ async function fetchStaticAsset(request, fallbackRequests) {
     // this original, byte-pinned large font uses resumable ranges.
     const sources = fallbackRequests || createRemoteAssetRequests(request);
     const pin = pinnedFontRange(request);
+    const partCache = fontPartCacheContext(pin);
     const mirrors = pin ? currentReleaseFontMirrors(request, sources) : [];
     let preferAppFont = false;
     if (pin && mirrors.length) {
@@ -587,7 +588,7 @@ async function fetchStaticAsset(request, fallbackRequests) {
     // inside the admitted chain. Range requests and images stay independent.
     // Every complete source must use the logical asset's pin, even when its
     // versioned CDN pathname differs from the app pathname.
-    const readFont = (source, owner, headers, retries) => readCompleteFont(source, owner, headers, retries, pin);
+    const readFont = (source, owner, headers, retries) => readCompleteFont(source, owner, headers, retries, pin, partCache);
     const response = await withFontDownloadSlot(request.signal, () =>
       fetchStaticAssetSources(request, sources, readFont, preferAppFont));
     return response || syntheticAssetResponse(504, "font fetch failed");
@@ -820,6 +821,55 @@ async function fontDigest(bytes) {
     value => value.toString(16).padStart(2, "0")).join("");
 }
 
+function fontPartCacheContext(pin) {
+  return pin ? { revision: configurationRevision, enabled: configurationPersistenceAllowed,
+    name: cacheName(`font-parts-${pin.sha256.slice(0, 16)}`) } : null;
+}
+
+function pinnedFontPart(pin, index) {
+  const offset = index * pin.partBytes;
+  return { index, offset, length: Math.min(pin.partBytes, pin.bytes - offset),
+    key: `${self.location.origin}/__mir2_font_part__/${pin.sha256}/${offset}/${pin.parts[index]}` };
+}
+
+async function preserveFontPrefixParts(chunks, length, pin, context, owner) {
+  if (!context?.enabled || !pin || length <= 0 || length > pin.bytes) return;
+  let retired = false, timer;
+  const current = () => !retired && !owner?.aborted && context.revision === configurationRevision
+    && configurationPersistenceAllowed;
+  if (!current()) return;
+  // Retain independently verified restart units after a broken whole body.
+  // This is cache work only: no new network request or partial font response.
+  // One cache budget covers the entire prefix, including slow/unavailable IO.
+  const preserve = (async () => {
+    const cache = await caches.open(context.name);
+    let chunkIndex = 0, chunkOffset = 0;
+    for (let index = 0; index < pin.parts.length && current(); index++) {
+      const part = pinnedFontPart(pin, index);
+      if (part.offset + part.length > length) break;
+      const bytes = new Uint8Array(part.length);
+      let copied = 0;
+      while (copied < bytes.length) {
+        const source = chunks[chunkIndex];
+        if (!source) return;
+        const count = Math.min(source.byteLength - chunkOffset, bytes.length - copied);
+        bytes.set(source.subarray(chunkOffset, chunkOffset + count), copied);
+        copied += count; chunkOffset += count;
+        if (chunkOffset === source.byteLength) { chunkIndex++; chunkOffset = 0; }
+      }
+      if (await fontDigest(bytes) !== pin.parts[index]) continue;
+      if (!current()) return;
+      await cache.put(part.key, new Response(bytes, { headers: { "content-length": String(part.length) } }));
+    }
+  })();
+  try {
+    await Promise.race([preserve, new Promise(resolve => {
+      timer = setTimeout(() => { retired = true; resolve(); }, FONT_RANGE_CACHE_TIMEOUT_MS);
+    })]);
+  } catch { /* Storage failure cannot replace the original network result. */ }
+  finally { retired = true; clearTimeout(timer); void preserve.catch(() => {}); }
+}
+
 async function boundedFontCache(operation) {
   let timer;
   try {
@@ -911,11 +961,7 @@ async function readPinnedRangeFont(request, pin, mirrors) {
   const signal = AbortSignal.any([request.signal, batch.signal]);
   let next = 0, wholeFallback = false, complete = 0, coalesce = true;
   let transferTimer, transferExpired = false;
-  const partInfo = index => {
-    const offset = index * pin.partBytes;
-    return { index, offset, length: Math.min(pin.partBytes, pin.bytes - offset),
-      key: `${self.location.origin}/__mir2_font_part__/${pin.sha256}/${offset}/${pin.parts[index]}` };
-  };
+  const partInfo = index => pinnedFontPart(pin, index);
   const keepPart = async (part, bytes, persist) => {
     if (persist && cache && !request.signal.aborted && revision === configurationRevision && configurationPersistenceAllowed) {
       // Restart units and keys stay at the original 256KiB. A coalesced HTTP
@@ -1005,11 +1051,14 @@ async function readPinnedRangeFont(request, pin, mirrors) {
   } finally { clearTimeout(transferTimer); }
 }
 
-async function readCompleteFont(request, owner, headerTimeoutMs, transientRetries, pin = pinnedFontRange(request)) {
+async function readCompleteFont(request, owner, headerTimeoutMs, transientRetries, pin = pinnedFontRange(request),
+  partCache = fontPartCacheContext(pin)) {
   const deadline = new AbortController();
   const signal = AbortSignal.any([owner, request.signal, deadline.signal]);
   const headerTimer = setTimeout(() => deadline.abort(), headerTimeoutMs);
   let bodyTimer, reader;
+  const chunks = [];
+  let length = 0;
   let rejectAborted;
   const aborted = new Promise((_, reject) => { rejectAborted = reject; });
   const abortRead = () => {
@@ -1051,8 +1100,6 @@ async function readCompleteFont(request, owner, headerTimeoutMs, transientRetrie
       }, FONT_MIRROR_BODY_IDLE_TIMEOUT_MS);
     };
     expectProgress();
-    const chunks = [];
-    let length = 0;
     for (;;) {
       const { value, done } = await Promise.race([reader.read(), aborted]);
       if (signal.aborted) throw signal.reason;
@@ -1070,7 +1117,11 @@ async function readCompleteFont(request, owner, headerTimeoutMs, transientRetrie
     const bytes = new Uint8Array(length);
     let offset = 0;
     for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
-    if (pin && (length !== pin.bytes || await fontDigest(bytes) !== pin.sha256)) return null;
+    if (pin && length !== pin.bytes) {
+      await preserveFontPrefixParts(chunks, length, pin, partCache, owner);
+      return null;
+    }
+    if (pin && await fontDigest(bytes) !== pin.sha256) return null;
     const headers = new Headers(response.headers);
     // fetch has decoded a compressed body; its wire length/encoding no longer
     // describe the reconstructed response delivered to CSS and the runtime.
@@ -1080,6 +1131,8 @@ async function readCompleteFont(request, owner, headerTimeoutMs, transientRetrie
   } catch {
     deadline.abort();
     void reader?.cancel().catch(() => {});
+    clearTimeout(bodyTimer);
+    await preserveFontPrefixParts(chunks, length, pin, partCache, owner);
     return null;
   } finally {
     // Neither budget is a total body deadline: each nonempty chunk renews the

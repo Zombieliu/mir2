@@ -1,0 +1,69 @@
+{
+  "files": {
+    "world-r1/run-1/receipt.json": {
+      "bytes": 58007,
+      "sha256": "3cf9db6a6e89cdc0c18789a7d82252e3fd6d4d740aeae686995a83dd5837e4f1"
+    },
+    "world-r1/run-1/first-entry-diary-keys.json": {
+      "bytes": 2708,
+      "sha256": "bf21f717c7eaddd7b77abeab0dc9c8fe1dc695433bf00d451bfc165e5f870774"
+    },
+    "world-r1/run-1/reopened-diary-keys.json": {
+      "bytes": 2705,
+      "sha256": "5530784b72f24f23b9d074d0a8bec059d0340a39d605265679af285565807067"
+    },
+    "world-r1/run-1/first-entry-diary-open.png": {
+      "bytes": 1355293,
+      "sha256": "ba1fafa0c088fbc73434ae59626dc0dc0ef79a8f47b32bb6bb7a9a9e296a4020"
+    },
+    "world-r2/run-2/receipt.json": {
+      "bytes": 72266,
+      "sha256": "5b74dac1bf5dde5095481d72f46baa8e38f06abc085f3400f78764b5948c18c1"
+    },
+    "world-r2/run-2/first-entry-diary-keys.json": {
+      "bytes": 2723,
+      "sha256": "771c6074da07cf384cc98053fe0bff626023042444dd21c94fae61bd3b2d2e47"
+    },
+    "world-r2/run-2/reopened-diary-keys.json": {
+      "bytes": 2717,
+      "sha256": "2e587a14dd0fc13ed784437e9bb952c7e43c43c42844e7cb7bb6532e8e1dcfa8"
+    },
+    "world-r2/run-2/first-entry-diary-open.png": {
+      "bytes": 1350333,
+      "sha256": "1c5052c1af523b9f315d7f3ede40c83caa26937cfd04ad28be2a2a96c82fe11f"
+    },
+    "chrome-baseline-r1/receipt.json": {
+      "bytes": 5258,
+      "sha256": "48c8d3b5480232c0b3f5a341fe8d9ebf56af164fc17ad26683f9f9d0e2739764"
+    },
+    "chrome-candidate-r1/receipt.json": {
+      "bytes": 21143,
+      "sha256": "4b273706f5235cd15f9beb1afbf8f2fb2b00cb76b7eee18629a84b37f6ab0527"
+    },
+    "chrome-qr-adjacent-r1/receipt.json": {
+      "bytes": 7195,
+      "sha256": "5492695ea14970edb8ae0cf0cb040d8cda48f7f6340931fcbd7bcc472232d9a3"
+    },
+    "build-receipt-r1.json": {
+      "bytes": 15928,
+      "sha256": "cfba33bf986f9eee63c11e225ad317217a0381320883ac842cb671ab1d002cff"
+    },
+    "candidate-source.json": {
+      "bytes": 17702,
+      "sha256": "5a70ffdea15148047573b3cb5233a5feb29c059700ce6f26a1ae7ba948d178c0"
+    },
+    "private-source-restored.json": {
+      "bytes": 2469,
+      "sha256": "799ac0ef5c31197601fb2040df414870562adb985a01871fab00d85067f1a5e9"
+    },
+    "adjacent-tests.log": {
+      "bytes": 28430,
+      "sha256": "55575c0242cb0598bf47cd9e82eff2d5012aff8b222910f9db10d17590b4b1f5"
+    },
+    "remaining-worker-tests.log": {
+      "bytes": 16872,
+      "sha256": "f2bc686b34eb9dd1bc9cc7c00d10d40092d434fb0cfd2079874f3d7cafd5caea"
+    }
+  },
+  "rawAuthAndAccountDataNotPublished": true
+}
