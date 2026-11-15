@@ -1,0 +1,162 @@
+{
+  "source": "6ba38557ddb298df72cb9e4a23c48caf542a598e",
+  "files": {
+    "public-r1/first-party-signed-summary.json": {
+      "bytes": 47550,
+      "sha256": "64ab6a7956077c02ed8094bceda96533f73dfecdce489d2b42f9156999e8b5a4"
+    },
+    "public-r1/approval-receipt.json": {
+      "bytes": 1821,
+      "sha256": "b8fbefec87f79a0cfa741c87dee93eedc949a0296a554398f3744bc3eb9feee6"
+    },
+    "public-r1/browser-closed.json": {
+      "bytes": 60,
+      "sha256": "0fafc2999298dd3e5639718004439b07df1e79d74ead13565cf7ff6750129768"
+    },
+    "public-r1/wallet-network-guard.json": {
+      "bytes": 228,
+      "sha256": "0be00d3039e2c3b10cec31be8d79f0743bbfb3876fac9f1731882537e492a407"
+    },
+    "public-r1/desktop-qr-font-preparation-r1/receipt.json": {
+      "bytes": 73134,
+      "sha256": "7c750df9472123ecadd5ce3d291757d06e48fa306961c1994174d9628568375f"
+    },
+    "public-r1/desktop-qr-font-preparation-r1/static-waterfall.json": {
+      "bytes": 879169,
+      "sha256": "c1f15fd185fa0e8c53fe3098df038c7e9617d83a9368d026a148585179b21096"
+    },
+    "public-r1/desktop-qr-font-preparation-r1/static-transport.json": {
+      "bytes": 585746,
+      "sha256": "5ca1e50caa26a3d4255f49c31382f1ec76e00e8bce678f36c22b28883fbc8f4d"
+    },
+    "public-r1/desktop-qr-font-preparation-r1/worker-font-network.json": {
+      "bytes": 17638,
+      "sha256": "8cf3815ff587ccfcb8530018091d8e6b9bf29d5b6396080a473e318f8cd69b5e"
+    },
+    "public-r1/desktop-qr-font-preparation-r1/worker-pre-restart-resource-timings.json": {
+      "bytes": 15827,
+      "sha256": "8b404aa639ebb3a49551da90ae841ab67b9e5082e254b97eb99961ffc7b1e96e"
+    },
+    "public-r1/desktop-qr-font-preparation-r1/quest-shared-observations.json": {
+      "bytes": 5649,
+      "sha256": "aa8ef45eb0d1c2ae46e557fb33476164e31c60c29135cb0142fdb0c34521de09"
+    },
+    "public-r2/first-party-signed-summary.json": {
+      "bytes": 48775,
+      "sha256": "82c06b70237ee8ae59ced1fe10ac29095ab40b155d796f5eea5e9294d5061984"
+    },
+    "public-r2/approval-receipt.json": {
+      "bytes": 1821,
+      "sha256": "416cef5fd65d4f9be045dc41b39993e12f55f913aac10df44a164ae1d4c21f73"
+    },
+    "public-r2/browser-closed.json": {
+      "bytes": 60,
+      "sha256": "f0e1641350efa0991d4b2e1b0022672f1f8fd2857b59c83005bca3184f2fc3d3"
+    },
+    "public-r2/wallet-network-guard.json": {
+      "bytes": 288,
+      "sha256": "40b77e0a600818fd8e3051f02eac1f509c69a58f450cf6f1a86c2427c6f201d5"
+    },
+    "public-r2/desktop-qr-font-preparation-r2/receipt.json": {
+      "bytes": 74181,
+      "sha256": "ec036b48866e6b4a03bb365c2606b0b54ca32e743425ff4fc8138ca1d165a21e"
+    },
+    "public-r2/desktop-qr-font-preparation-r2/static-waterfall.json": {
+      "bytes": 895755,
+      "sha256": "1658b8e78355d27bc86ac7fe637c0ea099b01ff03a6b0ee0c37916aba7b6dc1a"
+    },
+    "public-r2/desktop-qr-font-preparation-r2/static-transport.json": {
+      "bytes": 595725,
+      "sha256": "7f44701283815608ca23eacc0ee41c7fa4f35e10f9f242adbc2662656298818a"
+    },
+    "public-r2/desktop-qr-font-preparation-r2/worker-font-network.json": {
+      "bytes": 25495,
+      "sha256": "0f2c63faa281cd90700c013da457a09ffe048771269f0cd1f7e593d18e4cdfd1"
+    },
+    "public-r2/desktop-qr-font-preparation-r2/worker-pre-restart-resource-timings.json": {
+      "bytes": 21561,
+      "sha256": "84467562eb169d9b4cacda89f05f2687aaef1cb60cd8063bb1f7d8c740219bcc"
+    },
+    "public-r2/desktop-qr-font-preparation-r2/quest-shared-observations.json": {
+      "bytes": 5587,
+      "sha256": "03641d90f5a95110f2da7310291d46d56f68f02733ec88e8b7447ce1cee00245"
+    },
+    "artifact-info.json": {
+      "bytes": 407,
+      "sha256": "df6a1647cdbde5a616e528f9dc564b04b72149e36482a067990c874e20f9c415"
+    },
+    "linux-package-verification.json": {
+      "bytes": 840,
+      "sha256": "ecca174b6b517fa24c7113b263483932e8c9ed63ed1702314f78f2275e7158cf"
+    },
+    "server-canary-qualification.json": {
+      "bytes": 2426,
+      "sha256": "5fe37249d4a444efe1074fb704c3f154415166b6d76cd489d46c0758ec1888f5"
+    },
+    "remote-backup-r1.json": {
+      "bytes": 9377,
+      "sha256": "ef3ae845db6cbfebf00b547f5b7ba863136978b59604881d5465d79d588a24a0"
+    },
+    "remote-clone-r1.json": {
+      "bytes": 1018,
+      "sha256": "0a4f80a20a9c0cc9712a20803fd0ef77aa29e04aee5504bb699ce8f0a76cde88"
+    },
+    "remote-preswitch-r1.json": {
+      "bytes": 4489,
+      "sha256": "41c5c0ad5ad5cdc5696fb7ab8599cc5c603edfb0f73694e605a12e52d1182b00"
+    },
+    "remote-rollout-r1.json": {
+      "bytes": 1612,
+      "sha256": "29d2797b68d4b50e85ec88d6f57c48e4a20d66cc4e80256c3fb878b406dbf353"
+    },
+    "remote-postrelease-readonly-r1.json": {
+      "bytes": 1450,
+      "sha256": "cbadd528afa1bd1d634acced9c5c3262737b9e1dcfdeaf1a1e45957eade42302"
+    },
+    "server-script-pins.json": {
+      "bytes": 2082,
+      "sha256": "c2dbd26e1ecd8299039b8543103655230c1112c1a39705d6270ea609daf6631a"
+    },
+    "web-stage-summary.json": {
+      "bytes": 884,
+      "sha256": "752c5a6ded04c3b5ee9ecbbd9f864d35c3cf9ce807018583eb7a6e6179bc5946"
+    },
+    "web-check-summary.json": {
+      "bytes": 874,
+      "sha256": "b0c04f90abd3060df169343378604759e7c042c3d3bbfba3e862dcfd5f3e89dc"
+    },
+    "web-promote-summary.json": {
+      "bytes": 876,
+      "sha256": "da95a4a58eb0437ba7229d3208e8c4b08bf0c57b63482e155531ad39a53b57d0"
+    },
+    "alias-final.json": {
+      "bytes": 187,
+      "sha256": "163afe6b3f0baaf3d678b885cca9d2c02746c105d5291f2accbe09a42de2a435"
+    },
+    "public-qr/qr-zh-cn-receipt.json": {
+      "bytes": 2363,
+      "sha256": "53810962de9033859ab0aac3db254ccf3c5c509258e9a145c3d8373eadf9ea9a"
+    },
+    "public-qr/qr-zh-tw-receipt.json": {
+      "bytes": 2363,
+      "sha256": "cd426a8aa52de5dd14a0dff84e73848c49d89f1274c8daaa59acfdb3a9edeae8"
+    },
+    "public-r1/desktop-qr-font-preparation-r1/public-hud-after-worker-restart.png": {
+      "bytes": 1399614,
+      "sha256": "145501896b5efdb209cfcee952d9e301ddf763dafb0a0e84954aab426cff3c80"
+    },
+    "public-r1/desktop-qr-font-preparation-r1/quest-shared-zh-TW.png": {
+      "bytes": 1322184,
+      "sha256": "2384184aa4daf14db3451ceec5ef94ea4ab0abe9bde130de87ac987f4a04f870"
+    },
+    "public-r2/desktop-qr-font-preparation-r2/public-hud-after-worker-restart.png": {
+      "bytes": 1390645,
+      "sha256": "794ff1e0993f5259f2db636cf8099102b5ace9092de044bb30fe123bebc83cd5"
+    },
+    "public-r2/desktop-qr-font-preparation-r2/quest-shared-zh-TW.png": {
+      "bytes": 1249315,
+      "sha256": "c4b09a5441734c0dbce44e904ad601f1f3f3ce12537843ea5e381093c1c2d130"
+    }
+  },
+  "rawApprovalAndLoginDataNotPublished": true
+}

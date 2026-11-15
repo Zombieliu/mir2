@@ -1,5 +1,7 @@
 # R16 二维码后预取原字库（2026-11-16）
 
+后续发行：应用 `6ba38557dd` 已完成匹配打包和两场原门槛公网验收并保留线上版本；R2 Q 实际为备用窗口，整体 1:1 和实体手机仍开放。见 [发布回执与界面分支](production/README.md)。以下本地验证与当时的未发布状态保留为历史记录。
+
 桌面玩家看到二维码后，已有资源 Worker 可以提前填充完整简中字库；进城读取复用同一份缓存填充。扫码认证协议和普通玩法保持原有入口，**本轮为本地候选，尚未发布**。
 
 源码基于 `1f08bfe4be38cb25ef8f3656048863a187cef8da`，候选 `r16-qr-font-8515912b`，构建 `lj7I4rCtgpbaostdWbw5n`。对应 [source.json](source.json)、[build.json](build.json)、[compiled-marker.json](compiled-marker.json)。

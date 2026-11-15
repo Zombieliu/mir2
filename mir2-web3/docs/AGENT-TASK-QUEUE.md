@@ -6,20 +6,22 @@ Updated 2026-11-16 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-16 QR显示后预取原SC候选：185项/启动子集122、严格构建、真实Worker整字体/63分片及英繁两整局通过。实际QR组件本地pending后取消，零晚轮询；预取提前14206/14115ms，首步98/113ms，Native10519/4586ms，六字体SHA/113、Q和正常同档通过。两场QR未真实钱包确认，不作公网冷启动通过。29份WIP保持，8覆盖恢复，全部浏览器/服务关闭。本轮未发布，正式20de＋fd3；匹配发行与原两场公网待完成。1f08常规CI的长路径checkout/既有Rust格式另开放，整体1:1与Goal继续。[候选、诊断和范围](evidence/r16-qr-font-preparation-20261116/README.md)。
+2026-11-16 6ba38557dd已成对发布，匹配Linux310／PG216／1841文件SHA与原两场公网通过；首步131/136ms、Native89688/86942ms，六字体113和简繁扫码通过。冷Q为一场Native、一场React备用，整体1:1未关闭，下一项收敛Q接管并继续真实寻路／跨图和语言。旧档、22配置与29WIP保持。[发行、原值与范围](evidence/r16-qr-font-preparation-20261116/production/README.md)。
 
 ## 保留的当前未结项
+
+- [ ] 冷启动Q所有权接管：6ba公网R1 Native／R2 React备用，完整字体后Native均就绪；继续定位切换时机并以实际Native窗口验收，不用原分类器的字段名替代界面证据。[发行、原值与范围](evidence/r16-qr-font-preparation-20261116/production/README.md)
 
 - [x] f28dc94538的CDN Range错误头已修复并发布9e9b30bd；22项／9相邻／9真实本地R2／类型／预演、公网两入口8项范围及原字节通过，资源配置保持。[已发布范围](evidence/r16-r2-range-20261115/README.md)
 - [x] 9eac66ed32实现SC63个原字节分段校验／失败保留／重启续读；受控Edge62+1及实际失败档案恢复完整场通过，4ad940554d补首次可见登录输入时序。仅候选，未发布，不关闭冷两场资格。[源码、检查和实际恢复](evidence/r16-font-resume-20261115/README.md)
 - [x] b33533f4aa字体范围缓存已发布，原两组本地升级冷场六字体／113／Q／保存完整通过；实际SIN HIT原字节与代码SHA一致，配置保持。[两场原值与发布](evidence/r16-font-edge-cache-20261115/README.md)
-- [ ] QR后字库预取/选角运行包候选本地185项、Chrome整SC/63分片和英繁两场通过；匹配发行/原两场公网/真实钱包尚待。常规CI的超长路径和Rust格式失败另开放。[当前候选](evidence/r16-qr-font-preparation-20261116/README.md)
-- [ ] ef6本地／同源包和公网完整功能通过，但运行包146013／Native191284ms超原120，两端已回退并复验。继续运行包／大字库正文及读取时机，保持六字体113和原时限；不原样重发。[发布与原失败](evidence/r16-hud-foundation-order-20261116/production/README.md)
+- [x] 6ba QR后原SC预取／选角运行包已匹配成对发布，原两场公网、六字体113、简繁出码通过；范围不扩为全部1:1。[发行、原值与范围](evidence/r16-qr-font-preparation-20261116/production/README.md)
+- [x] ef6原运行包146013／Native191284ms失败与回退记录保留；新6ba经准备时机修复及匹配发行后，原两场公网时限通过。更多地图／断网／长路线资格继续，不改旧失败。[旧失败](evidence/r16-hud-foundation-order-20261116/production/README.md) · [发行、原值与范围](evidence/r16-qr-font-preparation-20261116/production/README.md)
 - [x] 627浮层46项／十语五尺寸200组件布局及本地整局完整画面通过；本轮公网65秒地形裁图实际看见顶部0/113加载、小地图／引导可见，裁图不含血球，不能补该项公网视觉验收。候选随20e回退，正式布局与十语实战仍另验。[本地完整图](evidence/r16-hud-admission-20261115/README.md) · [公网截图边界](evidence/r16-hud-admission-20261115/production/README.md)
 
 - [ ] dca152cd15中立AI1/2漫游已推送，270项／本地英繁两后端自然PNG保持；aa524 Linux303／PG216及隔离普通协议通过，曾切换正式，但公网完整行走包／Native120失败后两端回退20de／fd3。先修交付恢复再做两场原门槛公网，其他AI／巡逻、资源浮层、混合语言及6项旧夹具依赖失败继续。[本轮资格与失败](evidence/r16-paired-release-20261115/README.md) · [原本地结果](evidence/r16-livestock-roam-20261115/README.md)
 
-- [ ] 用户补充寻路“目标不对或到不了”：ceb1c1132f目标／期限／入口反馈后，81c51a58e9补日记独立关闭与十语不可达提示；134项／构建、两后端完整回放通过，实际325295到达、墙体322292零移动、Q／重登／Alt+X／保存通过，29份其他内容WIP保留。仅本地候选；完整行走包公网资格、更多目标／狩猎区及6项旧夹具依赖失败继续。[当前结果与边界](evidence/r16-diary-close-20261115/README.md)
+- [ ] 用户补充寻路“目标不对或到不了”：ceb1c1132f目标／期限／入口反馈后，81c51a58e9补日记独立关闭与十语不可达提示；134项／构建、两后端完整回放通过，实际325295到达、墙体322292零移动、Q／重登／Alt+X／保存通过，29份其他内容WIP保留。已随6ba发布，完整行走包原两场公网资格通过；公开服具体长目标／狩猎区、跨图和6项旧夹具依赖失败继续。[当前结果与边界](evidence/r16-diary-close-20261115/README.md)
 
 - [ ] 05图片排队／十语进度候选已尝试发布；R1原门槛过，R2 Native189105ms超120秒、113未过，已回退20de／AWss并复验。七来源及92完整缓存体补证，新增观察器前缀错误更正后15项／Chrome通过，原错误不倒填。下一步受控检查运行包正文／SC字体启动串行与竞争，守原8/120及完整资源门槛，停止原样重发。[两场、纠错、回退及依据](evidence/r16-static-admission-20261115/production/README.md)
 

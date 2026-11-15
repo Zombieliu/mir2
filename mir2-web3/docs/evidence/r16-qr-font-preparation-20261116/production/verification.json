@@ -1,0 +1,310 @@
+{
+  "checkedAt": "2026-11-15T20:57:37.981Z",
+  "application": "6ba38557ddb298df72cb9e4a23c48caf542a598e",
+  "controller": "3a1d96c91abaadbad3801207562c925f8da63e90",
+  "deployment": "dpl_G8iq4UBFibrWSEaSbwahtboeAom3",
+  "originalPublicCohortsAccepted": true,
+  "cohorts": [
+    {
+      "cohort": "r1",
+      "originalAccepted": true,
+      "originalChecks": {
+        "exactSource": true,
+        "completeFunctionalRun": true,
+        "walletLoginOnly": true,
+        "movementOriginalEightSeconds": true,
+        "sixCompleteFonts": true,
+        "complete113": true,
+        "sharedNativeQuest": true,
+        "originalNative120": true,
+        "originalRuntimeBody120": true,
+        "workerRestart": true,
+        "normalLogout": true,
+        "bothBrowsersClosed": true
+      },
+      "authoritativeWalkAckMs": 131,
+      "firstFrameAfterStartIntentMs": 6950,
+      "nativeAfterFirstFrameMs": 89688,
+      "runtimeBodyAfterFirstFrameMs": 21386,
+      "fonts": [
+        {
+          "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "present": true,
+          "bytes": 16437364,
+          "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansTC.ttf",
+          "present": true,
+          "bytes": 11941968,
+          "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+          "present": true,
+          "bytes": 621572,
+          "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+          "present": true,
+          "bytes": 243520,
+          "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+          "present": true,
+          "bytes": 37780,
+          "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+          "present": true,
+          "bytes": 234892,
+          "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+        }
+      ],
+      "completeHud": {
+        "requested": 113,
+        "ok": 113,
+        "failed": 0
+      },
+      "originalWalkingPackage": true,
+      "walkingSource": "json",
+      "diaryRenderer": "ordinary-shared-native",
+      "diary": {
+        "passed": true,
+        "locale": "zh-TW",
+        "renderer": "ordinary-shared-native",
+        "questOpened": true,
+        "qClosed": true,
+        "owner": "bevy",
+        "package": {
+          "backend": "webgpu",
+          "packageId": "webgpu"
+        },
+        "navigation": {
+          "characterOpen": false,
+          "characterPage": "character",
+          "bagOpen": false,
+          "questOpen": false
+        },
+        "zeroWorldCommands": true,
+        "screenshot": "quest-shared-zh-TW.png"
+      },
+      "observedPackage": {
+        "backend": "webgpu",
+        "packageId": "webgpu"
+      },
+      "questReadyBeforeQ": true,
+      "nativeHudAndQuestReadyAfterFontVerificationAndWorkerRestart": true,
+      "earlyWorkerScRequestMs": 10855,
+      "firstFrameMs": 82150,
+      "scRequestBeforeFirstFrameMs": 71295,
+      "lateQrPollsAfterCancel": 0,
+      "normalLogout": true,
+      "returnedToSelection": true,
+      "browserClosed": true,
+      "walletSignedLoginApprovals": 1,
+      "forbiddenWalletOperations": 0,
+      "physicalPhoneCamera": false
+    },
+    {
+      "cohort": "r2",
+      "originalAccepted": true,
+      "originalChecks": {
+        "exactSource": true,
+        "completeFunctionalRun": true,
+        "walletLoginOnly": true,
+        "movementOriginalEightSeconds": true,
+        "sixCompleteFonts": true,
+        "complete113": true,
+        "sharedNativeQuest": true,
+        "originalNative120": true,
+        "originalRuntimeBody120": true,
+        "workerRestart": true,
+        "normalLogout": true,
+        "bothBrowsersClosed": true
+      },
+      "authoritativeWalkAckMs": 136,
+      "firstFrameAfterStartIntentMs": 7086,
+      "nativeAfterFirstFrameMs": 86942,
+      "runtimeBodyAfterFirstFrameMs": 37194,
+      "fonts": [
+        {
+          "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+          "present": true,
+          "bytes": 16437364,
+          "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansTC.ttf",
+          "present": true,
+          "bytes": 11941968,
+          "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+          "present": true,
+          "bytes": 621572,
+          "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+          "present": true,
+          "bytes": 243520,
+          "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+          "present": true,
+          "bytes": 37780,
+          "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+        },
+        {
+          "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+          "present": true,
+          "bytes": 234892,
+          "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+        }
+      ],
+      "completeHud": {
+        "requested": 113,
+        "ok": 113,
+        "failed": 0
+      },
+      "originalWalkingPackage": true,
+      "walkingSource": "json",
+      "diaryRenderer": "ordinary-react-fallback",
+      "diary": {
+        "passed": true,
+        "locale": "zh-TW",
+        "renderer": "ordinary-react-fallback",
+        "questId": 2110001,
+        "stage": "available",
+        "objective": "\u5411\u52a9\u7406\u7c21\u5831\u544a",
+        "counter": "0/1",
+        "chapter": "\u7ae0\u7bc0 1/6 \u00b7 \u6751\u838a\u8d77\u6b65 \u00b7 \u672c\u7ae0 0/4",
+        "journey": "\u7576\u524d\u4e3b\u7dda 0/26",
+        "zeroWorldCommands": true,
+        "screenshot": "quest-shared-zh-TW.png"
+      },
+      "observedPackage": {
+        "backend": "webgpu",
+        "packageId": "webgpu"
+      },
+      "questReadyBeforeQ": false,
+      "nativeHudAndQuestReadyAfterFontVerificationAndWorkerRestart": true,
+      "earlyWorkerScRequestMs": 5918,
+      "firstFrameMs": 54227,
+      "scRequestBeforeFirstFrameMs": 48309,
+      "lateQrPollsAfterCancel": 0,
+      "normalLogout": true,
+      "returnedToSelection": true,
+      "browserClosed": true,
+      "walletSignedLoginApprovals": 1,
+      "forbiddenWalletOperations": 0,
+      "physicalPhoneCamera": false
+    }
+  ],
+  "matchingBackend": {
+    "run": 43755627882,
+    "artifact": 14179605047,
+    "allFileHashes": 1841,
+    "sharedZoneTests": 310,
+    "postgresTests": 216
+  },
+  "canary": {
+    "passed": true,
+    "ordinaryRegistration": true,
+    "ordinaryLogin": true,
+    "normalLogouts": 2,
+    "sameRoleReentry": true,
+    "walkMs": 104.962,
+    "debugCommandsSent": 0
+  },
+  "preservation": {
+    "readOnly": true,
+    "passed": true,
+    "observedAtUtc": "2026-11-15T20:49:51.790260+00:00",
+    "pid": 1662109,
+    "source": "6ba38557ddb298df72cb9e4a23c48caf542a598e",
+    "ok": true,
+    "originalConfigurationFilesUnchanged": 22,
+    "oldRows": {
+      "accounts": {
+        "preexistingRows": 312,
+        "currentRows": 314,
+        "preexistingCanonicalBytes": 2318736,
+        "preexistingSha256": "a5f180681d236393b0da4febc984719ed25a86db1420a7e351b10d432ea59af3",
+        "preexistingRowsUnchanged": true
+      },
+      "characters": {
+        "preexistingRows": 224,
+        "currentRows": 226,
+        "preexistingCanonicalBytes": 75644,
+        "preexistingSha256": "da790a4f1b09af99aa051b20705614b0ec9450c448fd4b9ac0c0185720e12c27",
+        "preexistingRowsUnchanged": true
+      },
+      "character_saves": {
+        "preexistingRows": 224,
+        "currentRows": 226,
+        "preexistingCanonicalBytes": 2613363,
+        "preexistingSha256": "df8a3e86901bed2d31d90602e296f4414c172253bfcd02a9dcc6c75368d06bb7",
+        "preexistingRowsUnchanged": true
+      }
+    },
+    "capacity": {
+      "maxWsConnections": 66,
+      "maxActiveSessions": 51,
+      "maxReconnectLeases": 51,
+      "maxLoginInFlight": 2,
+      "maxNewCharacterInFlight": 1,
+      "maxStartGameInFlight": 2,
+      "currentWsConnections": 0,
+      "currentActiveSessions": 0,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    },
+    "databaseRestored": false,
+    "credentialsRecorded": false
+  },
+  "readback": [
+    {
+      "url": "https://numeron.obelisk.build/version",
+      "status": 200,
+      "revision": "6ba38557ddb298df72cb9e4a23c48caf542a598e",
+      "ok": null
+    },
+    {
+      "url": "https://165.154.65.136.sslip.io/playtest/health",
+      "status": 200,
+      "revision": "6ba38557ddb298df72cb9e4a23c48caf542a598e",
+      "ok": true
+    }
+  ],
+  "alias": {
+    "alias": "numeron.obelisk.build",
+    "deploymentId": "dpl_G8iq4UBFibrWSEaSbwahtboeAom3",
+    "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+    "checkedAt": "2026-11-15T20:54:01.669Z"
+  },
+  "qrLocales": [
+    "zh-CN",
+    "zh-TW"
+  ],
+  "qrPairPassed": true,
+  "physicalPhoneCamera": false,
+  "allOwnedBrowsersClosed": true,
+  "sshControllerClosed": true,
+  "credentialsRecorded": false,
+  "productionDatabaseRestored": false,
+  "bothPublicDiaryObservationsWereNative": false,
+  "wholeParityCandidate": false,
+  "wholeParityAccepted": false,
+  "goal": "active",
+  "unrelatedWipRawSha256Verified": 29,
+  "fourDeliveredScreenshotsViewed": true
+}

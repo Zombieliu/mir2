@@ -14,7 +14,7 @@ Short routing summary, updated 2026-11-16 (Asia/Shanghai). This indexes recorded
 
 ## Last recorded decisions and open work
 
-2026-11-16 QR显示后预取原SC候选：185项/启动子集122、严格构建、真实Worker整字体/63分片及英繁两整局通过。实际QR组件本地pending后取消，零晚轮询；预取提前14206/14115ms，首步98/113ms，Native10519/4586ms，六字体SHA/113、Q和正常同档通过。两场QR未真实钱包确认，不作公网冷启动通过。29份WIP保持，8覆盖恢复，全部浏览器/服务关闭。本轮未发布，正式20de＋fd3；匹配发行与原两场公网待完成。1f08常规CI的长路径checkout/既有Rust格式另开放，整体1:1与Goal继续。[候选、诊断和范围](evidence/r16-qr-font-preparation-20261116/README.md)。
+2026-11-16 应用6ba38557dd已成对发布到Web G8iq／同源Gateway。原两场公网通过：首步131/136ms、Native89688/86942ms、六字体113、行走整包、Q、Worker与注销；简繁出码/取消复验。Q实际为R1 Native／R2 React备用，接管和语言像素仍待；实体手机未验。原312/224/224行和22配置保持，新增2QA档保留，29WIP保持；测试浏览器/服务/SSH均关闭。Windows长路径检出修复，四托管检出过，Rust格式仍开放。整体1:1/Goal继续。[发行、原值与范围](evidence/r16-qr-font-preparation-20261116/production/README.md)。
 
 2026-11-15 用户补充寻路“目标不对或到不了”：本地候选ceb1c1132f补大小地图坐标／30秒初始期限／到达反馈和十语入口说明。152项、独立严格构建与英繁两后端实际跨图／慢碰撞超时／晚到零旧移动／重登新目标／正常保存通过，30份内容WIP保持。本轮未发布；其他目标与既有公网资源失败继续。[记录与范围](evidence/r16-route-feedback-20261115/README.md)
 
