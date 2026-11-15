@@ -1,0 +1,340 @@
+{
+  "schema": "mir2.zone-admission-linux-native-artifact-subset-audit.v1",
+  "nativeArtifactChecksPassed": true,
+  "fullCandidateVerificationPassed": false,
+  "fullVerifierExecuted": false,
+  "oldUnboundVerifierModifiedOrBypassed": false,
+  "sourceRevision": "c1d4c85c89e3f1960d349c823cb3a42976e2b2e6",
+  "windowsSourceRevision": "c84670ad3cf5c9693fd78d5618c31668511f1207",
+  "canonicalIntegrationRevision": "1cac973aa7dfc5a563a05012182341cd0fa22a49",
+  "runId": 43669526425,
+  "nativeJobId": 132676250119,
+  "wholeWorkflowStatus": "completed",
+  "wholeWorkflowConclusion": "success",
+  "wholeWorkflowSuccessProven": true,
+  "nativeJobConclusion": "success",
+  "artifacts": {
+    "gateway": {
+      "path": "gateway-artifact.zip",
+      "id": 14144091629,
+      "bytes": 84737977,
+      "sha256": "bba0dc3986aaa4d885c0eee1ca9350db455974892443a078acbd307064349497",
+      "name": "mir2-playtest-wallet-gateway-linux-x64-c1d4c85c89e3f1960d349c823cb3a42976e2b2e6"
+    },
+    "nativeEvidence": {
+      "path": "native-evidence-artifact.zip",
+      "id": 14143603867,
+      "bytes": 88396,
+      "sha256": "bd42a94a61f2e6cc981b67892223565e3d109a08c5c35c513fb133610f874241",
+      "name": "mir2-playtest-wallet-build-evidence-c1d4c85c89e3f1960d349c823cb3a42976e2b2e6"
+    }
+  },
+  "binarySha256": "5a5807dc56884265176a795c881b534114d8cca99c82ff30015eccc13d1697ed",
+  "binarySizeBytes": 103884456,
+  "packageSha256": "8ebc32a1bc7efc381ced69a9c2b18c9b0237b8b8c46e8823940c565e9d377dec",
+  "releaseManifestSha256": "5cb24271ecd16e15a11ab9252825c9b23d035ad271fe9cf2514c7abee4fe37ff",
+  "artifactDirectory": "E:\\mir2-capacity-linux-artifacts-20261115-v1\\native-audit\\release",
+  "startupReceiptSha256": "8a9b92485e92b29fffbd2375de04fd9d67f5f484f65bf30e693ce27feee870a2",
+  "gatewayExitCode": 0,
+  "redisExitCode": 0,
+  "nativeRequiredGates": [
+    "activities_postgres",
+    "billing_postgres",
+    "gateway-package",
+    "gateway-postgres-startup",
+    "linux-release-security",
+    "monthly_card_postgres",
+    "schema_union"
+  ],
+  "gateReceiptSha256": "d11f7db93360d96cc078b4c57b2f02f7b7009f0552a57500376a68663fcbe0d3",
+  "mapManifestSha256": "ba432a06a496508a835331bbbb1010929f80feae0b6f61a06db1dac5e4c54706",
+  "mapArchiveSha256": "fb547ffe4f988d256a933b257744f1c492b80ffb79819d8707e1013d73d545b1",
+  "maps": {
+    "fileCount": 1620,
+    "totalFileBytes": 42111309,
+    "allGitArtifactBytesMatch": true,
+    "noLFSPointers": true,
+    "freshLiveMapMatchNotProven": true
+  },
+  "allFifteenCompiledInputsEqualWindowsC846": true,
+  "sourceEquivalenceSha256": "b18d720ca29637d38c6e6fc355a2028d2c42d402f1c32ec57be314ada92af2f8",
+  "windowsNative35DescriptorIsReferenceNotLinuxFullSuite": true,
+  "oldSimulation84NotRerunOrRelabelled": true,
+  "releaseTag": "playtest-wallet-c1d4c85c89e3",
+  "ELFExecutedLocally": false,
+  "missingFullQualification": [
+    "fresh current TEST identity/config/map proof",
+    "strict whole-candidate binding and Root review",
+    "actual deployment authorization",
+    "closed qualifying workload result"
+  ],
+  "nativePreauditOnly": false,
+  "actualInputSha256": "f5c8f66b2684a7912f1dd6f32e2eb9047a92517839becfe7942d7de9e9ba72cc",
+  "completedOfficialMetadataSha256": "357b58e571c79edf0d8d5c0e4437ffcade2dc340bc5dc68f64a0b9be5b551cdd",
+  "verifiedFilesStat": [
+    {
+      "path": "gateway-artifact.zip",
+      "bytes": 84737977,
+      "mtimeNs": 1794715672184191400,
+      "ctimeNs": 1794715373383694500,
+      "device": 3285285304534750817,
+      "fileId": 3377699722489154,
+      "links": 1
+    },
+    {
+      "path": "native-audit/gateway-bundle/gateway-releases/latest-mir2-gateway-release.json",
+      "bytes": 1711,
+      "mtimeNs": 1794715810265934000,
+      "ctimeNs": 1794715810265934000,
+      "device": 3285285304534750817,
+      "fileId": 844424935740876,
+      "links": 1
+    },
+    {
+      "path": "native-audit/gateway-bundle/gateway-releases/mir2-gateway-linux-x64-playtest-wallet-c1d4c85c89e3.tar.gz",
+      "bytes": 45758792,
+      "mtimeNs": 1794715810364221400,
+      "ctimeNs": 1794715810267438400,
+      "device": 3285285304534750817,
+      "fileId": 844424935740877,
+      "links": 1
+    },
+    {
+      "path": "native-audit/gateway-bundle/gateway-releases/mir2-gateway-linux-x64-playtest-wallet-c1d4c85c89e3.tar.gz.sha256",
+      "bytes": 125,
+      "mtimeNs": 1794715810364221400,
+      "ctimeNs": 1794715810364221400,
+      "device": 3285285304534750817,
+      "fileId": 844424935740878,
+      "links": 1
+    },
+    {
+      "path": "native-audit/gateway-bundle/playtest-wallet-release/crystal-map-pack-manifest.json",
+      "bytes": 269794,
+      "mtimeNs": 1794715810365731300,
+      "ctimeNs": 1794715810364221400,
+      "device": 3285285304534750817,
+      "fileId": 844424935740880,
+      "links": 1
+    },
+    {
+      "path": "native-audit/gateway-bundle/playtest-wallet-release/mir2-crystal-map-pack-c1d4c85c89e3f1960d349c823cb3a42976e2b2e6.tar.gz",
+      "bytes": 39415973,
+      "mtimeNs": 1794715810427605100,
+      "ctimeNs": 1794715810365731300,
+      "device": 3285285304534750817,
+      "fileId": 844424935740881,
+      "links": 1
+    },
+    {
+      "path": "native-audit/gateway-bundle/playtest-wallet-release/mir2-crystal-map-pack-c1d4c85c89e3f1960d349c823cb3a42976e2b2e6.tar.gz.sha256",
+      "bytes": 136,
+      "mtimeNs": 1794715810429110000,
+      "ctimeNs": 1794715810427605100,
+      "device": 3285285304534750817,
+      "fileId": 844424935740882,
+      "links": 1
+    },
+    {
+      "path": "native-audit/gateway-bundle/playtest-wallet-release/playtest-release-verification.json",
+      "bytes": 569,
+      "mtimeNs": 1794715810429110000,
+      "ctimeNs": 1794715810429110000,
+      "device": 3285285304534750817,
+      "fileId": 844424935740883,
+      "links": 1
+    },
+    {
+      "path": "native-audit/native-evidence/activities_postgres.log",
+      "bytes": 53749,
+      "mtimeNs": 1794715810429110000,
+      "ctimeNs": 1794715810429110000,
+      "device": 3285285304534750817,
+      "fileId": 562949959030230,
+      "links": 1
+    },
+    {
+      "path": "native-audit/native-evidence/billing_postgres.log",
+      "bytes": 53737,
+      "mtimeNs": 1794715810429110000,
+      "ctimeNs": 1794715810429110000,
+      "device": 3285285304534750817,
+      "fileId": 562949959030231,
+      "links": 1
+    },
+    {
+      "path": "native-audit/native-evidence/build.log",
+      "bytes": 269141,
+      "mtimeNs": 1794715810430615600,
+      "ctimeNs": 1794715810430615600,
+      "device": 3285285304534750817,
+      "fileId": 562949959030232,
+      "links": 1
+    },
+    {
+      "path": "native-audit/native-evidence/gateway-package.log",
+      "bytes": 63079,
+      "mtimeNs": 1794715810432211600,
+      "ctimeNs": 1794715810432211600,
+      "device": 3285285304534750817,
+      "fileId": 562949959030233,
+      "links": 1
+    },
+    {
+      "path": "native-audit/native-evidence/gateway-postgres-startup.json",
+      "bytes": 2022,
+      "mtimeNs": 1794715810432211600,
+      "ctimeNs": 1794715810432211600,
+      "device": 3285285304534750817,
+      "fileId": 562949959030235,
+      "links": 1
+    },
+    {
+      "path": "native-audit/native-evidence/gateway-postgres-startup.log",
+      "bytes": 126,
+      "mtimeNs": 1794715810432211600,
+      "ctimeNs": 1794715810432211600,
+      "device": 3285285304534750817,
+      "fileId": 562949959030234,
+      "links": 1
+    },
+    {
+      "path": "native-audit/native-evidence/linux-release-security.log",
+      "bytes": 226,
+      "mtimeNs": 1794715810432211600,
+      "ctimeNs": 1794715810432211600,
+      "device": 3285285304534750817,
+      "fileId": 562949959030236,
+      "links": 1
+    },
+    {
+      "path": "native-audit/native-evidence/monthly_card_postgres.log",
+      "bytes": 53735,
+      "mtimeNs": 1794715810433717400,
+      "ctimeNs": 1794715810432211600,
+      "device": 3285285304534750817,
+      "fileId": 562949959030237,
+      "links": 1
+    },
+    {
+      "path": "native-audit/native-evidence/native-redis-install.log",
+      "bytes": 5059,
+      "mtimeNs": 1794715810433717400,
+      "ctimeNs": 1794715810433717400,
+      "device": 3285285304534750817,
+      "fileId": 562949959030238,
+      "links": 1
+    },
+    {
+      "path": "native-audit/native-evidence/postgres-init.log",
+      "bytes": 901,
+      "mtimeNs": 1794715810433717400,
+      "ctimeNs": 1794715810433717400,
+      "device": 3285285304534750817,
+      "fileId": 562949959030239,
+      "links": 1
+    },
+    {
+      "path": "native-audit/native-evidence/postgres-isolation.log",
+      "bytes": 202,
+      "mtimeNs": 1794715810433717400,
+      "ctimeNs": 1794715810433717400,
+      "device": 3285285304534750817,
+      "fileId": 562949959030240,
+      "links": 1
+    },
+    {
+      "path": "native-audit/native-evidence/postgres-stop.log",
+      "bytes": 56,
+      "mtimeNs": 1794715810433717400,
+      "ctimeNs": 1794715810433717400,
+      "device": 3285285304534750817,
+      "fileId": 562949959030241,
+      "links": 1
+    },
+    {
+      "path": "native-audit/native-evidence/postgres.log",
+      "bytes": 1753,
+      "mtimeNs": 1794715810433717400,
+      "ctimeNs": 1794715810433717400,
+      "device": 3285285304534750817,
+      "fileId": 562949959030242,
+      "links": 1
+    },
+    {
+      "path": "native-audit/native-evidence/schema-union.log",
+      "bytes": 44269,
+      "mtimeNs": 1794715810433717400,
+      "ctimeNs": 1794715810433717400,
+      "device": 3285285304534750817,
+      "fileId": 562949959030245,
+      "links": 1
+    },
+    {
+      "path": "native-audit/native-evidence/startup-gateway.log",
+      "bytes": 1713,
+      "mtimeNs": 1794715810433717400,
+      "ctimeNs": 1794715810433717400,
+      "device": 3285285304534750817,
+      "fileId": 562949959030243,
+      "links": 1
+    },
+    {
+      "path": "native-audit/native-evidence/startup-redis.log",
+      "bytes": 1167,
+      "mtimeNs": 1794715810433717400,
+      "ctimeNs": 1794715810433717400,
+      "device": 3285285304534750817,
+      "fileId": 562949959030244,
+      "links": 1
+    },
+    {
+      "path": "native-audit/release/mir2-gateway",
+      "bytes": 103884456,
+      "mtimeNs": 1794715810713898500,
+      "ctimeNs": 1794715810441338100,
+      "device": 3285285304534750817,
+      "fileId": 562949959030247,
+      "links": 1
+    },
+    {
+      "path": "native-audit/release/README.txt",
+      "bytes": 7476,
+      "mtimeNs": 1794715810975925400,
+      "ctimeNs": 1794715810975925400,
+      "device": 3285285304534750817,
+      "fileId": 562949959030250,
+      "links": 1
+    },
+    {
+      "path": "native-audit/release/RELEASE.json",
+      "bytes": 1549,
+      "mtimeNs": 1794715810975925400,
+      "ctimeNs": 1794715810975925400,
+      "device": 3285285304534750817,
+      "fileId": 562949959030249,
+      "links": 1
+    },
+    {
+      "path": "native-audit/release/zone_host",
+      "bytes": 100033352,
+      "mtimeNs": 1794715810974417500,
+      "ctimeNs": 1794715810713898500,
+      "device": 3285285304534750817,
+      "fileId": 562949959030248,
+      "links": 1
+    },
+    {
+      "path": "native-evidence-artifact.zip",
+      "bytes": 88396,
+      "mtimeNs": 1794715150509635300,
+      "ctimeNs": 1794715150390570600,
+      "device": 3285285304534750817,
+      "fileId": 1407374889160101,
+      "links": 1
+    }
+  ],
+  "deploymentApproved": false,
+  "capacityQualified": false,
+  "localHundredActorOutcomeNotInferred": true
+}

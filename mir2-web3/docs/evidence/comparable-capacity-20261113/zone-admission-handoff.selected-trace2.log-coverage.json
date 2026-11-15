@@ -1,0 +1,128 @@
+{
+  "schema": "mir2.zone-admission-selected-trace-log-audit.v1",
+  "case": "dense2",
+  "diagnosticOnly": true,
+  "capacityQualified": false,
+  "sourceRevision": "c84670ad3cf5c9693fd78d5618c31668511f1207",
+  "codeIntegrationRevision": "1cac973aa7dfc5a563a05012182341cd0fa22a49",
+  "binarySha256": "6ea6b90f67f8ab0225baf60fc978a0a794088d06f59861e51d1cf25ae926a0db",
+  "closedExitCodes": [
+    0,
+    0,
+    0
+  ],
+  "normalClosedNoKill": true,
+  "selectedUidPair": [
+    50000,
+    50001
+  ],
+  "stageCounts": {
+    "enqueue": 13,
+    "dequeue": 13,
+    "gate": 13,
+    "bind": 2,
+    "send": 13,
+    "encode": 13,
+    "writer_lock": 15,
+    "writer_sink_send": 13,
+    "sent": 13,
+    "reader_dispatch": 4,
+    "reader_fast": 4,
+    "input_queue_submit": 4,
+    "input_dequeue": 4,
+    "input_write_gate": 4,
+    "input_execute": 4,
+    "writer_batch_feed": 2,
+    "writer_batch_flush": 2,
+    "input_flush": 4,
+    "reader_peer_close": 2,
+    "peer_close_writer_lock": 2,
+    "peer_close_flush": 2
+  },
+  "stageCountsByUid": {
+    "50000": {
+      "enqueue": 1,
+      "dequeue": 1,
+      "gate": 1,
+      "bind": 1,
+      "send": 1,
+      "encode": 1,
+      "writer_lock": 2,
+      "writer_sink_send": 1,
+      "sent": 1,
+      "reader_dispatch": 2,
+      "reader_fast": 2,
+      "input_queue_submit": 2,
+      "input_dequeue": 2,
+      "input_write_gate": 2,
+      "input_execute": 2,
+      "writer_batch_feed": 1,
+      "writer_batch_flush": 1,
+      "input_flush": 2
+    },
+    "50001": {
+      "enqueue": 12,
+      "dequeue": 12,
+      "gate": 12,
+      "bind": 1,
+      "send": 12,
+      "encode": 12,
+      "writer_lock": 13,
+      "writer_sink_send": 12,
+      "sent": 12,
+      "reader_dispatch": 2,
+      "reader_fast": 2,
+      "input_queue_submit": 2,
+      "input_dequeue": 2,
+      "input_write_gate": 2,
+      "input_execute": 2,
+      "writer_batch_feed": 1,
+      "writer_batch_flush": 1,
+      "input_flush": 2
+    }
+  },
+  "budgetPotentiallyExhausted": false,
+  "formatCoverage": {
+    "counts": {
+      "allLines": 583,
+      "nonInputLines": 437,
+      "inputPrefixRows": 146
+    },
+    "otherLines": {
+      "otherLinesNotExported": 174,
+      "slowStagePrefixNotParsedHere": 263
+    },
+    "inputPrefixStrictlyParsed": true,
+    "unknownInputRowsSilentlySkipped": false,
+    "otherFamiliesNotClaimedParsed": true
+  },
+  "actorUidOrSdkConnectionMappingProven": false,
+  "steadyPhaseCoverageProven": false,
+  "sourceAuditSha256": "57eb48e9a5edd3d7bb8059ce49667eefeb126cd582c826852a3611163e200231",
+  "auditSourceSha256": "3cecf9f48739c2496c655a895efc78e26e8d2f4455b117ed533167bdc4ae5a9d",
+  "auditFreezeSha256": "07f23c041e6fcd771756401231c846622ec1fb6c07ce4a1fb11cc2c94bf7ba85",
+  "syntheticTestsPassed": 6,
+  "initialStrictParserAttempt": {
+    "actualExitCode": 1,
+    "code": "unexpected_unselected_uid",
+    "normalClosedNoKill": true,
+    "preserved": true
+  },
+  "successorReason": "Exact valid unregistered connection lifecycle rows remain Unknown, not UID mapping",
+  "newAuditActualExitCode": 0,
+  "observedServerBindings": [
+    {
+      "connection": 1,
+      "registration": 1,
+      "recipientZoneID": 50000,
+      "sourceStartUnixMs": 1794716517606
+    },
+    {
+      "connection": 2,
+      "registration": 2,
+      "recipientZoneID": 50001,
+      "sourceStartUnixMs": 1794716517742
+    }
+  ],
+  "steadyCoverageLimitation": "Selected two initial UIDs end at equipment reconnect; this audit proves format and pre-equipment bindings only"
+}

@@ -1,0 +1,30 @@
+{
+  "schema": "mir2.zone-admission-selected-trace-dense2-closed.v1",
+  "sourceRevision": "c84670ad3cf5c9693fd78d5618c31668511f1207",
+  "binarySha256": "6ea6b90f67f8ab0225baf60fc978a0a794088d06f59861e51d1cf25ae926a0db",
+  "strictDiagnosticPassed": true,
+  "capacityQualified": false,
+  "previousCase": {
+    "case": "dense2",
+    "controllerSha256": "e2b065b3aa95fcf5b7d086766d144174a93e31a36c91cbb4359a0c9e5b0184b9",
+    "inheritanceReceiptSha256": "155ad80d6c022cf363bf7ba62d1aba4b271ba5ce793d2fd8f6ac2a234af70b2d",
+    "authLedgerSha256": "f28ed7632c77396398a19529fd3cee4d72bad37c82dd03b682745718f633c219",
+    "fileReadbackSha256": "0ed2f8c5852591217b2fe6f47e2ca0b42aee467a48d354b6fdf794b87ab1df27",
+    "enhancedSha256": "5235e6ac706875e4ac35df5917dcbc63bb9a848e51f34d034f150dd630f40c99"
+  },
+  "actualExitCodes": [
+    0,
+    0,
+    0
+  ],
+  "resourcesRowCount": 93,
+  "normalAllOwnedJobsClosedNoKill": true,
+  "fileSampleCount": 2,
+  "measurementStartedAtUtc": "2026-11-15T04:22:11.784Z",
+  "measurementEndedAtUtc": "2026-11-15T04:23:12.794Z",
+  "historyPath": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\local-auth-history-v41.json",
+  "historySha256": "89f301dc365a5b72539062d2bad1681e9e5ad61599ebe642ae9bf6a62708e600",
+  "historyAttemptCount": 2158,
+  "newAuthAttempts": 12,
+  "traceCoverageAuditStillRequired": true
+}
