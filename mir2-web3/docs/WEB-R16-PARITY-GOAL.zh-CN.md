@@ -1,5 +1,7 @@
 # Windows R16 与 Web 1:1 验收
 
+2026-11-15 同源aa524edc76完成Linux303项共享Zone／216项PG、完整工件SHA及克隆旧档普通协议验证，实际切换两端。公网R1首步571ms／扫码／六字体／Worker／注销通过，但完整行走包、Native-Q／113未过，运行包正文首帧后138.163秒超过原120秒；未跑R2，已回退20de／AWss与Gateway fd3。独立别名／版本、简繁扫码及原307账号／219角色存档保持通过。下一项修行走正文／备用包恢复及响应头—字体等待，不原样重发；寻路候选与整体1:1仍开放，Goal active。[完整证据与边界](evidence/r16-paired-release-20261115/README.md)
+
 2026-11-14 行走包91b8fc9b4f已保留正式；118＋70项／构建、本地两后端四会话、第二次公网登录进城／首步124ms／共享HUD-Q／六字体／113项／Worker／退出与16站立、4bootstrap、8core完整读回通过。首轮前置早退和回退不重写，当前改点分支仅离线覆盖；原静态SHA与8秒／20秒／120秒不变。Native108.238秒且原资源错误仍保留，R15、NPC名字和整体1:1开放，Goal active。[正式分项及边界](evidence/r16-walking-recovery-20261114/production/README.md)
 
 2026-11-14 上一版来源 f6603c89a3，继承 Windows R16 寻路修复并新增部分正文失败后的有限来源轮换。95项、70保护、构建、两后端四会话及第二次公网功能回放／完整静态读回通过；首次行走包失败和回退单列。该次120秒冷资格false：首帧30.667秒、Native观测204.320秒，不由后续通过倒填；该版作为本轮回退基线继续保留。[历史分项](evidence/r16-runtime-source-rotation-20261114/production/README.md) · [寻路方向与确认](evidence/r16-route-direction-20261113/README.md)

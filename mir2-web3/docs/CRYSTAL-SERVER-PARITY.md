@@ -1,5 +1,9 @@
 # Crystal Server Parity
 
+## 共享 AI1/2 的 Linux 及旧档边界已验，公网未完成（2026-11-15）
+
+同源aa524edc76经303项共享Zone／216项PG与完整ELF核验，克隆旧库普通进城、自然ObjectWalk和移动保存通过，旧行全部一致。曾切换正式，但Web行走完整包和运行包120秒失败后两端回退，Gateway仍fd3；没有据隔离结果认定公网自然PNG、其他AI或全局ProcessRoam完成。[原判定、回退和范围](evidence/r16-paired-release-20261115/README.md)
+
 ## 共享 AI1/2 空闲漫游本地通过（2026-11-15）
 
 对照固定Crystal的ProcessRoam／CheckAlone／CanMove，为无主中立家畜实现独立漫游时钟、概率动作、占位及AOI；随机流可回放，不承诺System.Random逐次同序列。270项和两端普通创角／自然PNG／Q／退出保存通过。仅本地dca候选，其他AI／Route及公网未关闭；旧失败仍保留。[范围与证据](evidence/r16-livestock-roam-20261115/README.md)

@@ -1,0 +1,120 @@
+{
+  "scope": "Raw receipts stay in the private paired-release directory; no keys, auth storage or wallet intents are published.",
+  "files": [
+    {
+      "file": "linux-package-verification.json",
+      "bytes": 695,
+      "sha256": "fd661ff0db026707fb336b525f7fc37fe0874426915713076d8a1ee9fac0dfc9"
+    },
+    {
+      "file": "linux-package-r1/SHARED-ZONE-ACCEPTANCE.json",
+      "bytes": 766,
+      "sha256": "59b048160c610b5cbb10f98ef6fb4e21172aac815d345d3c319aa9992a8d7d8b"
+    },
+    {
+      "file": "linux-package-r1/CI-ACCEPTANCE.json",
+      "bytes": 6670,
+      "sha256": "8c025f4d90aaac20e7f9d2d84620b8ad103855db05e1813314548faecfb952f6"
+    },
+    {
+      "file": "remote-canary-protocol-r1.json",
+      "bytes": 2206,
+      "sha256": "6604cc1f9a74de36d77044b171bd0502258ed358adf5f9799e36302272f401d4"
+    },
+    {
+      "file": "remote-preswitch-r1.json",
+      "bytes": 4465,
+      "sha256": "6975dc1a59481add6bef21c6e3b19a39ad544f813c3b8ffa0712cd94cc16cba5"
+    },
+    {
+      "file": "remote-rollout-r1.json",
+      "bytes": 1612,
+      "sha256": "b62c896ccc5c555dcdb3662149cbfa3dfbac89a9d2c26453d5df0a92b6f49430"
+    },
+    {
+      "file": "remote-backend-rollback-r1.json",
+      "bytes": 1059,
+      "sha256": "e3ced81ef1b132580a8bab3f9c42bbaf41a2da9caa4ef00320cc575e2c087cae"
+    },
+    {
+      "file": "remote-postrelease-after-rollback-r1.json",
+      "bytes": 1871,
+      "sha256": "8928fe7d36d92c3c83b2906632c5dcf7d6ca2b575a3b206376d36a7ba63dd45f"
+    },
+    {
+      "file": "web-stage-r1/numeron-r16-release.json",
+      "bytes": 23503,
+      "sha256": "a5a2d9c97a38402c570523722d93210b790ccd04e3c43856908dba2937f663eb"
+    },
+    {
+      "file": "web-check-r1/numeron-r16-release.json",
+      "bytes": 27039,
+      "sha256": "b609a5a319002c37d0e34b57258bad00aceaf4f004c2f94f93c0044781663b27"
+    },
+    {
+      "file": "web-promote-r1/numeron-r16-release.json",
+      "bytes": 30738,
+      "sha256": "64a588f5d8f1b69fefe1fb4fa44b4996b46111336516c8610c841a6d9f1062ad"
+    },
+    {
+      "file": "web-rollback-r1/numeron-r16-release.json",
+      "bytes": 23476,
+      "sha256": "57cf1a01c3179457c237847a05ee697852afe4676bd6966be7e671e58a8e1af3"
+    },
+    {
+      "file": "public-r1/desktop-paired-r1/receipt.json",
+      "bytes": 67366,
+      "sha256": "e52a49ad1c36437b28cc4525a09ffa35c4a660885ede7345f3b68a1af139ceb2"
+    },
+    {
+      "file": "public-r1/desktop-paired-r1/terrain-observation.json",
+      "bytes": 302842,
+      "sha256": "dfbabcc584e617b5680e1b6addb8653615e09a03a51d3bb7f4c87d39c14e79f7"
+    },
+    {
+      "file": "public-r1/desktop-paired-r1/compiled-bootstrap-observation.json",
+      "bytes": 1239,
+      "sha256": "786aa2d9b334960de0cc4604c0a7216d89047892ceb26710ca125f68226d2832"
+    },
+    {
+      "file": "public-r1/approval-receipt.json",
+      "bytes": 1821,
+      "sha256": "0af5dce9b21faf9418fbfbaf0fafa439f9f8cbca2a4c4742cfdb430322a7f60e"
+    },
+    {
+      "file": "public-r1/wallet-network-guard.json",
+      "bytes": 288,
+      "sha256": "11692a1f895a2f00e41710451b604b2cee65481d483ff18040bc7d32d29c3fdb"
+    },
+    {
+      "file": "public-r1/browser-closed.json",
+      "bytes": 60,
+      "sha256": "dca39d2c9ff6a3033871572e0bb64176d6356c158aa867611711a86c4d574e75"
+    },
+    {
+      "file": "public-r1/first-party-signed-summary.json",
+      "bytes": 29145,
+      "sha256": "40e923b427353787a5a345fffe20b900ee861155842745200592c5286a913210"
+    },
+    {
+      "file": "public-r1-original-classification.json",
+      "bytes": 808,
+      "sha256": "1e7743472e4972846242de7662fe3a85269e41c22d2075fdbfff902715ef61ae"
+    },
+    {
+      "file": "rollback-qr/qr-zh-cn-receipt.json",
+      "bytes": 2377,
+      "sha256": "4fabbe85915494f4ae2521f0886e5a1b944b45656b85d653f0dce73dac9c9f2a"
+    },
+    {
+      "file": "rollback-qr/qr-zh-tw-receipt.json",
+      "bytes": 2377,
+      "sha256": "84dfaf1b495d02e55c696b51d1abbca84c2bd95950e22325e66c50331237a597"
+    },
+    {
+      "file": "final-public-readback.json",
+      "bytes": 388,
+      "sha256": "b44c522bfc3723f588421452e9a0642720f861106e2f19a1f36f5b4e97024e51"
+    }
+  ]
+}

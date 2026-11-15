@@ -6,11 +6,11 @@ Updated 2026-11-15 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-15 正式已实际回退20de5ea4fd／AWss，Gateway仍fd3。05／HSP候选83保护及切流资源通过；公网R1首步207ms／Native58123ms／113／六字体／Q／Worker／注销通过，R2首步133ms但Native189105ms超过原120秒、113窗口失败，已回退并复验简繁扫码及独立域名／版本。[两场原判定与回退](evidence/r16-static-admission-20261115/production/README.md)。七条许可来源补齐观察，第二场92个历史地址完整缓存体SHA全匹配；首场缓存观察器前缀错误已保留、更正并以真实Worker格式15项／Chrome验证，不能将原92缺失计为产品故障。本地253项／构建／两后端及29份内容WIP保持。下一项受控检查运行包正文停滞和SC字体两场都在运行包完整体后发出的串行等待，保持原8/120及全字体／113门槛，停止原样重发。其他地图／断网／公网跨图与双钱包、室内地面／旧反馈、三职业完整1–30、语言像素及整体1:1仍开放。
+2026-11-15 aa524edc76／CKP同源Linux和Web候选已实际切流；Linux303共享Zone／216原生PG、1,841文件SHA、克隆旧库普通协议及旧行保持通过。公网R1扫码／首步571ms／六字体／Worker／注销通过，但完整行走包、Native-Q／113未过，运行包正文首帧后138.163秒超原120秒；R2未跑，已将两端回退20de／AWss与fd3并复验独立映射、公开版本、简繁扫码及原307账号／219角色存档。下一项修行走正文／备用包恢复和响应头—字体启动依赖，保持8／65／120秒及完整资源，不原样重发。29份原内容WIP保持，容量文档的并行修改保留；其他地图／断网／寻路目标、三职业自然1–30、阿洛、视觉语言及整体1:1继续。[本轮原判定与回退](evidence/r16-paired-release-20261115/README.md)。此前05第二场189.105秒及缓存观察器纠错仍保留在[原记录](evidence/r16-static-admission-20261115/production/README.md)。
 
 ## 保留的当前未结项
 
-- [ ] dca152cd15中立无主AI1/2漫游已推送，270项／dev Gateway构建及英繁两后端自然行走完整两场通过，原8／65／120秒门槛保持。下一项为匹配Linux Gateway与9337 Web的发行资格、独立公网完整帧／字体113／Q／Worker／正常注销，再切流；正式仍20de／AWss、Gateway fd3。其他AI／巡逻、资源浮层覆盖血球、混合语言与6项旧前端夹具依赖失败继续。[当前证据](evidence/r16-livestock-roam-20261115/README.md) · [此前公网失败与回退](evidence/r16-primary-font-overlap-20261115/production/README.md)
+- [ ] dca152cd15中立AI1/2漫游已推送，270项／本地英繁两后端自然PNG保持；aa524 Linux303／PG216及隔离普通协议通过，曾切换正式，但公网完整行走包／Native120失败后两端回退20de／fd3。先修交付恢复再做两场原门槛公网，其他AI／巡逻、资源浮层、混合语言及6项旧夹具依赖失败继续。[本轮资格与失败](evidence/r16-paired-release-20261115/README.md) · [原本地结果](evidence/r16-livestock-roam-20261115/README.md)
 
 - [ ] 用户补充寻路“目标不对或到不了”：ceb1c1132f目标／期限／入口反馈后，81c51a58e9补日记独立关闭与十语不可达提示；134项／构建、两后端完整回放通过，实际325295到达、墙体322292零移动、Q／重登／Alt+X／保存通过，29份其他内容WIP保留。仅本地候选；完整行走包公网资格、更多目标／狩猎区及6项旧夹具依赖失败继续。[当前结果与边界](evidence/r16-diary-close-20261115/README.md)
 

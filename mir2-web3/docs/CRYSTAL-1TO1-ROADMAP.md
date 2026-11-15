@@ -1,5 +1,9 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+## 同源 Linux／旧档通过，公网完整资源失败已回退（2026-11-15）
+
+aa524edc76的Linux303项共享Zone及216项原生PG回归、1,841文件SHA和独立旧档普通协议验证通过，Web候选实际切流。公网R1首步571ms／扫码／六字体／Worker／注销通过，但完整行走包未过、运行包正文首帧后138.163秒，原120秒及Native-Q／113未过，已将两端回退20de／AWss与fd3并复验简繁扫码、旧307账号／219角色存档。下一项修行走正文／备用包恢复及运行包响应头—字体启动等待；寻路候选、其他AI和整体Candidate／Accepted仍开放。[完整判定与回退](evidence/r16-paired-release-20261115/README.md)
+
 ## 中立家畜漫游候选通过；下一项成套发布资格（2026-11-15）
 
 dca152cd15已补共享无主中立AI1/2漫游，270项／独立dev构建、英繁两后端完整自然帧及退出保存通过；其他AI、巡逻与全局ProcessRoam继续。下一项准备同源Linux Gateway和Web候选，保留原公网门槛后再切流。正式20de／fd3未变，资源浮层／语言、其他寻路目标、整体Candidate／Accepted仍开放。[证据与边界](evidence/r16-livestock-roam-20261115/README.md)
