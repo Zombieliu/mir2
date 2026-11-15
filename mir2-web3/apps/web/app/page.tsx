@@ -2460,7 +2460,8 @@ export default function HomePage() {
   const mapImageSourceRef = useRef<{ source: MapImageRouteSource; identity: QuestWorldIdentity;
     socket: WebSocket; core: ClientCoreRuntime; renderer: RuntimeModule | null; rendererGeneration: number } | null>(null);
   const mapImageRouteRef = useRef<{ source: MapImageRouteSource; goal: QuestRoutePoint; acceptedAt: number;
-    geometry: QuestCollisionGeometry | null; plan: QuestRoutePlan | null; queued: QueuedMoveIntent | null; planning: boolean } | null>(null);
+    geometry: QuestCollisionGeometry | null; plan: QuestRoutePlan | null; queued: QueuedMoveIntent | null;
+    planning: boolean; loadingTimer: number | null } | null>(null);
   const mapRouteLocalModalRef = useRef(false);
   const mapRoutePageBlockedRef = useRef(true);
   const questAttackHandoffRef = useRef<{ lifetime: QuestWorldLifetime; objectId: number;
@@ -12882,8 +12883,20 @@ export default function HomePage() {
   function cancelMapImageRoute() {
     const route = mapImageRouteRef.current;
     mapImageRouteRef.current = null;
+    if (route?.loadingTimer != null) { window.clearTimeout(route.loadingTimer); route.loadingTimer = null; }
     if (route?.queued && queuedMoveIntentRef.current === route.queued) {
       queuedMoveIntentRef.current = null; movementPlanRef.current = null;
+    }
+  }
+  function finishMapImageRoute(route: NonNullable<typeof mapImageRouteRef.current>, status: "arrived" | "unavailable" | "loadingTimeout") {
+    if (mapImageRouteRef.current !== route) return;
+    cancelMapImageRoute();
+    if (status === "loadingTimeout") {
+      appendLog(t("ui.questRouteLoadingTimeout", [], "The route map took too long to load. Please try again."), "system");
+    } else if (status === "unavailable") {
+      appendLog(t("ui.mapRouteUnavailable", [], "No complete route is available."), "system");
+    } else {
+      appendLog(t("ui.questRouteArrived", [route.goal.x, route.goal.y], "You have arrived at ({0}, {1})."), "system");
     }
   }
   function mapImageRouteCurrent(route: NonNullable<typeof mapImageRouteRef.current>): boolean {
@@ -12901,14 +12914,17 @@ export default function HomePage() {
       if (!mapImageRouteCurrent(route)) { if (mapImageRouteRef.current === route) cancelMapImageRoute(); return; }
       const self = currentAuthoritativeSelf();
       if (!edges || !self) { cancelMapImageRoute(); return; }
+      if (route.loadingTimer != null && Date.now() - route.acceptedAt >= 30_000) { finishMapImageRoute(route, "loadingTimeout"); return; }
       const origin = { x: self.x, y: self.y };
       const result = captured.core.searchMapRoute({ width: geometry.width, height: geometry.height, origin, goal: route.goal, edges });
       if (!mapImageRouteCurrent(route)) { if (mapImageRouteRef.current === route) cancelMapImageRoute(); return; }
+      if (route.loadingTimer != null && Date.now() - route.acceptedAt >= 30_000) { finishMapImageRoute(route, "loadingTimeout"); return; }
       if (result.status !== "ok") {
-        cancelMapImageRoute(); appendLog(t("ui.mapRouteUnavailable", [], "No complete route is available."), "system"); return;
+        finishMapImageRoute(route, "unavailable"); return;
       }
       route.plan = { origin, destination: route.goal, radius: 0, steps: result.steps }; route.planning = false;
-      if (!result.steps.length) { cancelMapImageRoute(); return; }
+      if (route.loadingTimer != null) { window.clearTimeout(route.loadingTimer); route.loadingTimer = null; }
+      if (!result.steps.length) { finishMapImageRoute(route, "arrived"); return; }
       if (!route.queued) {
         route.queued = { kind: "target", targetX: route.goal.x, targetY: route.goal.y,
           requestedMode: "run", requestedAt: Date.now(), consumeAfterSend: false };
@@ -12916,7 +12932,8 @@ export default function HomePage() {
       } else if (queuedMoveIntentRef.current === route.queued) void trySendQueuedCrystalMove();
     } catch {
       if (mapImageRouteRef.current !== route) return;
-      cancelMapImageRoute(); appendLog(t("ui.mapRouteUnavailable", [], "No complete route is available."), "system");
+      if (!mapImageRouteCurrent(route)) { cancelMapImageRoute(); return; }
+      finishMapImageRoute(route, "unavailable");
     }
   }
   function beginMapImageRoute(intent: MapImageRouteIntent) {
@@ -12931,16 +12948,24 @@ export default function HomePage() {
     queuedMoveIntentRef.current = null; movementPlanRef.current = null;
     const route = { source, goal: Object.freeze({ x: intent.x, y: intent.y }), acceptedAt: Date.now(),
       geometry: null as QuestCollisionGeometry | null, plan: null as QuestRoutePlan | null,
-      queued: null as QueuedMoveIntent | null, planning: true };
+      queued: null as QueuedMoveIntent | null, planning: true, loadingTimer: null as number | null };
     mapImageRouteRef.current = route;
+    appendLog(t("ui.questRoutePlanning", [intent.x, intent.y], "Planning a route to ({0}, {1})…"), "system");
+    route.loadingTimer = window.setTimeout(() => {
+      if (mapImageRouteRef.current !== route) return;
+      if (!mapImageRouteCurrent(route)) { cancelMapImageRoute(); return; }
+      finishMapImageRoute(route, "loadingTimeout");
+    }, 30_000);
     void questCollisionCacheRef.current!.load(source.mapFileName).then(geometry => {
-      if (!mapImageRouteCurrent(route) || Date.now() - route.acceptedAt > 30_000) {
+      if (!mapImageRouteCurrent(route)) {
         if (mapImageRouteRef.current === route) cancelMapImageRoute(); return;
       }
+      if (Date.now() - route.acceptedAt >= 30_000) { finishMapImageRoute(route, "loadingTimeout"); return; }
       route.geometry = geometry; return refreshMapImageRoute(route);
     }).catch(() => {
       if (mapImageRouteRef.current !== route) return;
-      cancelMapImageRoute(); appendLog(t("ui.mapRouteUnavailable", [], "No complete route is available."), "system");
+      if (!mapImageRouteCurrent(route)) { cancelMapImageRoute(); return; }
+      finishMapImageRoute(route, "unavailable");
     });
   }
   function pressMapImage(source: MapImageRouteSource | null) {
@@ -12965,7 +12990,7 @@ export default function HomePage() {
     const distance = mode === "run" ? crystalSelfMovementProfile(worldRef.current, mode).distance : 1;
     let step = nextQuestRouteStep(plan, self, distance, blocked);
     if (step.type === "replan") { void refreshMapImageRoute(route); return null; }
-    if (step.type !== "move") { cancelMapImageRoute(); return null; }
+    if (step.type !== "move") { finishMapImageRoute(route, step.type === "arrived" ? "arrived" : "unavailable"); return null; }
     if (movementStepBlockedByRecentCorrection(self, step.direction, step.mode, recentMovementBlockedSteps(movementBlockedStepsRef.current, now))) {
       step = nextQuestRouteStep(plan, self, 1, blocked);
       if (step.type !== "move") { void refreshMapImageRoute(route); return null; }
@@ -12996,6 +13021,8 @@ export default function HomePage() {
       const target = route.action.routeTarget.type;
       const [key, fallback] = target === "huntRegion"
         ? ["ui.questRouteHuntArrived", "You are in the hunting area around ({0}, {1}). Select a quest monster to fight."]
+        : target === "entrance" || target === "supply" && route.plan?.radius === 0
+          ? ["ui.questRouteEntranceArrived", "You have reached the entrance at ({0}, {1}). After changing maps, use Auto-route again to continue."]
         : target === "taskNpc" || target === "mapNpc" || target === "supply"
           ? ["ui.questRouteNpcArrived", "You have arrived near ({0}, {1}). Talk to the NPC to continue."]
           : ["ui.questRouteArrived", "You have arrived at ({0}, {1})."];

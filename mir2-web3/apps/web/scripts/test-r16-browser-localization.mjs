@@ -23,6 +23,7 @@ const expectedKeys = [
   "ui.questClientLoading", "ui.questClientUnavailable", "ui.questActionPending", "ui.questActionRewardRequired",
   "ui.questActionTalkToNpc", "ui.questActionStateChanged",
   "ui.questRoutePlanning", "ui.questRouteHuntArrived", "ui.questRouteNpcArrived", "ui.questRouteArrived",
+  "ui.questRouteEntranceArrived",
   "ui.questRouteUnavailable", "ui.questRouteLoadingTimeout", "ui.routeConfirmationTimeout",
   "ui.retry", "ui.sceneLoadUnavailable", "ui.fishingReel", "ui.characterCreateUnconfirmed",
   "ui.gameTextLoading", "ui.gameTextLoadUnavailable", "ui.confirmReturnToCharacterSelect",

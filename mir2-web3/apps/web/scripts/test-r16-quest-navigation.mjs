@@ -129,7 +129,7 @@ for (const [target, key] of [
   [{ type: "taskNpc", objectId: 4 }, "ui.questRouteNpcArrived"],
   [{ type: "mapNpc", objectId: 4 }, "ui.questRouteNpcArrived"],
   [{ type: "supply", vendor: "potions" }, "ui.questRouteNpcArrived"],
-  [{ type: "entrance" }, "ui.questRouteArrived"],
+  [{ type: "entrance" }, "ui.questRouteEntranceArrived"],
 ]) test(`actual Page: zero-step ${target.type} arrival explains what to do without sending movement`, async () => {
   const h = harness(target); h.plans.push(arrivedPlan(h)); h.begin();
   assert.deepEqual(h.logs[0], { key: "ui.questRoutePlanning", args: [340, 550], tone: "system" });
@@ -150,6 +150,14 @@ test("actual Page: a complete route keeps moving until authoritative endpoint ar
   assert.equal(h.questRouteMovement(route, h.state.self, "run", h.timer.now()), null);
   assert.equal(terminal(h).length, 1); assert.equal(terminal(h)[0].key, "ui.questRouteHuntArrived");
   assert.equal(h.queuedRef.current, null);
+});
+
+for (const target of [{ type: "entrance" }, { type: "supply", vendor: "potions" }])
+test(`actual Page: ${target.type} entrance never claims that the distant NPC has been reached`, async () => {
+  const h = harness(target); h.plans.push({ ...arrivedPlan(h), radius: 0 }); h.begin();
+  h.loading[0].resolve(h.geometry); await flush();
+  assert.deepEqual(terminal(h), [{ key: "ui.questRouteEntranceArrived", args: [340, 550], tone: "system" }]);
+  assert.deepEqual(h.sent, []); assert.equal(h.routeRef.current, null);
 });
 
 for (const outcome of ["unavailable", "arrived", "detour"]) test(`actual Page: occupied next step replans original hunt area and ${outcome}`, async () => {
