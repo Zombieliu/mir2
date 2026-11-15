@@ -1,0 +1,162 @@
+{
+  "schema": "mir2.background-default100-resource-analysis.v1",
+  "sourceRevision": "32eb62774dc8ac1a49876808f6118948f137d5b6",
+  "codeIntegrationRevision": "362ea11c2498ffb7dda28d38299ed4aa6ca6c425",
+  "binarySha256": "a930e11764211d50230fdc61e79f2bc781b8abf2766838261a8e405efe0a3222",
+  "case": "dense100",
+  "outcome": "PASS",
+  "caseOutcomeNotUpgraded": true,
+  "producerReportOk": true,
+  "measurementSloPassed": true,
+  "window": {
+    "startUtc": "2026-11-15T09:56:36.509Z",
+    "endUtc": "2026-11-15T10:01:36.509Z"
+  },
+  "totals": {
+    "offered": 16000,
+    "completedOnTime": 16000,
+    "timeouts": 0,
+    "notSent": 0,
+    "passedActorMinuteWindows": 500,
+    "totalActorMinuteWindows": 500
+  },
+  "resource": {
+    "server": {
+      "sampleRows": 3064,
+      "coverageMs": 300000.0,
+      "maxIntersectingSampleGapMs": 1029,
+      "meanCpuCores": 0.9060667918208852,
+      "durationWeightedCpuP95Cores": 1.2347560975609757,
+      "maximumOverlappingIntervalCpuCores": 1.6415369649805447,
+      "fullRunJobPeakCommitBytes": 2518609920,
+      "fullRunJobPeakCommitMiB": 2401.93359375,
+      "allRowsResourceQualified": true,
+      "logicalCpuBudget": 4,
+      "commitBudgetBytes": 8589934592,
+      "affinityMaskHex": "0xf",
+      "peakCommitIsRAMorRSS": false
+    },
+    "injector": {
+      "sampleRows": 3062,
+      "coverageMs": 300000.0,
+      "maxIntersectingSampleGapMs": 1029,
+      "meanCpuCores": 0.21810403468161144,
+      "durationWeightedCpuP95Cores": 0.39634146341463417,
+      "maximumOverlappingIntervalCpuCores": 0.640869140625,
+      "fullRunJobPeakCommitBytes": 811798528,
+      "fullRunJobPeakCommitMiB": 774.19140625,
+      "allRowsResourceQualified": true,
+      "logicalCpuBudget": 8,
+      "commitBudgetBytes": 4294967296,
+      "affinityMaskHex": "0xff0",
+      "peakCommitIsRAMorRSS": false
+    }
+  },
+  "sampling": {
+    "server": {
+      "nominalControllerIntervalMs": 1000,
+      "controllerMaximumAllowedGapMs": 2500,
+      "intersectingIntervals": 294,
+      "minimumIntersectingIntervalMs": 1023,
+      "maximumIntersectingIntervalMs": 1029,
+      "intersectingIntervalsAboveAllowedGap": 0,
+      "firstSampleAtUnixMs": 1794733832304,
+      "lastSampleAtUnixMs": 1794736973985,
+      "windowBoundaryCoverageProvenByInheritedResourceFunction": true,
+      "numberOfMissingSamples": null,
+      "missingCountIsUnknownNoFabricatedZero": true,
+      "boundaryInterpolationAssumesConstantRateInsideEachSampleInterval": true
+    },
+    "injector": {
+      "nominalControllerIntervalMs": 1000,
+      "controllerMaximumAllowedGapMs": 2500,
+      "intersectingIntervals": 294,
+      "minimumIntersectingIntervalMs": 1023,
+      "maximumIntersectingIntervalMs": 1029,
+      "intersectingIntervalsAboveAllowedGap": 0,
+      "firstSampleAtUnixMs": 1794733832407,
+      "lastSampleAtUnixMs": 1794736973044,
+      "windowBoundaryCoverageProvenByInheritedResourceFunction": true,
+      "numberOfMissingSamples": null,
+      "missingCountIsUnknownNoFabricatedZero": true,
+      "boundaryInterpolationAssumesConstantRateInsideEachSampleInterval": true
+    }
+  },
+  "applicationBytes": {
+    "scope": "JSON WebSocket payload bytes submitted/received; excludes WS framing/control/TCP/IP; no deflate",
+    "method": "per-frame epoch<=atMs<epoch+durationMs",
+    "durationMs": 300000,
+    "clientTxBytes": 1191142,
+    "clientRxBytes": 193930970,
+    "clientTxMbps": 0.03176378666666667,
+    "clientRxMbps": 5.171492533333333,
+    "allLifecycleConnections": 114,
+    "allLifecycleClientTxBytes": 4701047,
+    "allLifecycleClientRxBytes": 324708207,
+    "socketOrNICBytes": false,
+    "jsonlSizeUsedAsTraffic": false,
+    "txCounterIsSubmittedJsonBeforeWsSend": true,
+    "rxCounterIsAcceptedJsonCallback": true
+  },
+  "inputs": [
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\background-budget-default-factory-bound-v1\\generated\\dense100\\CLOSED-STRICT.json",
+      "bytes": 2818,
+      "sha256": "5571737981d739e852d76481b5685b15f592acf4bd67643fe0909f34c0358de5"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-background-budget-dense100-v1\\runs\\dense100-v1\\controller-result.json",
+      "bytes": 4152,
+      "sha256": "07f3f84cf3bbebd8261c5d07527047e75d067d61091f2a7ac9ae04a4e27d705f"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-background-budget-dense100-v1\\runs\\dense100-v1\\runtime-receipt.json",
+      "bytes": 1446,
+      "sha256": "a49e3dff06156173bb47bcc89ae6f9eacd3370cbceba6b5c6184e700d2d68b89"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-background-budget-dense100-v1\\runs\\dense100-v1\\service-result.json",
+      "bytes": 236,
+      "sha256": "68604b440a1b9b4b22fc50c15fe45f56be45594398946ff32055c016ffa36ff5"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-background-budget-dense100-v1\\runs\\dense100-v1\\modern.report.json",
+      "bytes": 30168063,
+      "sha256": "d9aa423217d520b8138aec9ea61d1054aee5c073b0eb18c01565dfc050b7c684"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-background-budget-dense100-v1\\runs\\dense100-v1\\resources.jsonl",
+      "bytes": 6892216,
+      "sha256": "19fb7220f0cc1168b2645ac3b2e007741ed8fb39c9cd40358fe9c1749166481e"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-background-budget-dense100-v1\\runs\\dense100-v1\\injector-resources.jsonl",
+      "bytes": 4826689,
+      "sha256": "42ebed5e5cd1e731c7ee8ab94cc6f9f4afc5c6218261438e46fc6144727a0f5a"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-background-budget-dense100-v1\\runs\\dense100-v1\\resources.jsonl",
+      "bytes": 6892216,
+      "sha256": "19fb7220f0cc1168b2645ac3b2e007741ed8fb39c9cd40358fe9c1749166481e"
+    },
+    {
+      "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\modern-audit\\fixture-background-budget-dense100-v1\\runs\\dense100-v1\\injector-resources.jsonl",
+      "bytes": 4826689,
+      "sha256": "42ebed5e5cd1e731c7ee8ab94cc6f9f4afc5c6218261438e46fc6144727a0f5a"
+    }
+  ],
+  "cpuMethod": "Unchanged frozen resource(): adjacent cumulative JobCPU deltas, exact300s UTC overlap interpolation, duration-weightedP95; max sampled interval rate, not instantaneous CPU.",
+  "commitScope": "Full-run observed Job peakCommit including admission/gear/cleanup. Commit is not RAM or RSS.",
+  "limitations": [
+    "Sample-boundary interpolation assumes constant CPU rate within each interval. Gaps/coverage are disclosed; missing count is unknown.",
+    "Application bytes are unchanged SDK JSON scope only: submitted TX before ws.send and accepted successful JSON RX callback, excluding WS/TCP/IP/TLS/retransmission bytes.",
+    "Low CPU on a failed case is not headroom, a root-cause proof or a maximum-capacity result. No other engine or run is compared.",
+    "No raw events, private Store/accounts/auth ledger or native/Game/cloud operation is read or executed."
+  ],
+  "capacityQualified": false,
+  "cloudQualified": false,
+  "maximumCapacityClaim": false,
+  "fullTriClientQualified": false,
+  "privateOrEventsRead": false,
+  "noNewQualification": true
+}
