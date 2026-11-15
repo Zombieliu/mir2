@@ -488,7 +488,7 @@ jobs:
             cargo +1.95.0 test --locked --release -p mir2-simulation --lib idle_roam -- --test-threads=1
             cargo +1.95.0 test --locked --release -p mir2-simulation --lib runtime::zone::runtime::checkpoint::tests -- --test-threads=1
           } 2>&1 | tee ../promotion-backend-release/SHARED-ZONE-UNIT.log
-          cargo +1.95.0 test --locked --release -p mir2-gateway --lib -- --test-threads=1 shared_experience_projection_singleflight_tests admission_handoff_tests web::transport::tests web::world_snapshot_transport::tests 2>&1 | tee ../promotion-backend-release/SHARED-ZONE-GATEWAY.log
+          cargo +1.95.0 test --locked --release -p mir2-gateway --lib -- --test-threads=1 shared_experience_projection_singleflight_tests admission_handoff_tests web::transport::tests web::world_snapshot_transport::tests web::background_execution::tests 2>&1 | tee ../promotion-backend-release/SHARED-ZONE-GATEWAY.log
           node --input-type=module <<'NODE'
           import {readFileSync,writeFileSync} from 'node:fs';
           import {createHash} from 'node:crypto';
@@ -498,6 +498,13 @@ jobs:
             {file:'SHARED-ZONE-GATEWAY.log', binaries:1, required:[
               'shared_experience_projection_singleflight_tests::', 'admission_handoff_tests::',
               'web::transport::tests::', 'web::world_snapshot_transport::tests::',
+              'web::background_execution::tests::process_background_slots_respect_the_windows_process_mask',
+              'web::background_execution::tests::cloned_socket_budgets_share_the_same_execution_limit',
+              'web::background_execution::tests::queued_tick_does_not_lock_its_socket_while_compute_is_full',
+              'web::background_execution::tests::a_blocked_socket_leaves_compute_available_for_another_socket',
+              'web::background_execution::tests::completed_tick_keeps_bootstrap_exclusive_but_releases_shared_compute',
+              'web::background_execution::tests::a_panicking_background_body_releases_both_resources',
+              'web::background_execution::tests::finite_reader_churn_does_not_duplicate_or_lose_a_selected_tick',
             ]},
           ];
           const logs = Object.fromEntries(groups.map(({file,binaries,expected,required=[]}) => {
