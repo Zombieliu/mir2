@@ -1,6 +1,6 @@
 # Windows R16 与 Web 1:1 验收
 
-2026-11-15 字体分段9eac66ed32／首次登录输入4ad940554d已推送，未发布。161字体／83登录／23默认入口及两个严格构建通过；受控Edge重启62+1段后六字体完整，真实同版恢复107ms首步／Native19419ms／六字体113／Q／两次注销同档通过。原默认升级重进Q关闭失败、繁体Native120冷失败及41段不足、同版夹具清理误判失败均保留，不合并成冷两场通过。正式仍20de／AWss，Gateway fd3，独立版本／健康200；29份原WIP SHA保持。先验证字体Range使用完整边缘缓存的效果，继续Q、运行包组合故障、两场本地／公网及所有其它1:1，原8／65／120和六字体不减。Goal active，Candidate100／Accepted100为false。[完整源码、实际恢复和未通过范围](evidence/r16-font-resume-20261115/README.md)
+2026-11-15 b33533f4aa字体Range复用完整CDN缓存已发f7abaa19；41项（127相邻包含）／9真实workerd／类型／预演、独立代码SHA与SIN范围HIT通过，配置保持。沿用严格4ad前端和冻结dca网关，原英繁升级冷场完整通过：首步108／136ms，Native24979／118490ms，自然PNG、六字体113、首次及重进Q、两次正常注销同角保存通过，原8／65／120不改。繁中SC仍在118.3秒完成，先收集被动Worker网络长尾，再做匹配候选及完整两场公网；原Q失败未复现未定因，旧冷失败保留。Web仍20de／AWss，Gateway fd3，仅CDN发布；29份原WIP保持，四图浮层／混合语言和其它1:1继续。Goal active，Candidate100／Accepted100为false。[发布、两场原值和剩余边界](evidence/r16-font-edge-cache-20261115/README.md) · [此前恢复与失败](evidence/r16-font-resume-20261115/README.md)
 
 2026-11-15 f28dc94538已修复并发布资产CDN的Range头9e9b30bd；22项／9相邻／9真实本地R2／严格类型与预演、公网两个入口8项范围和原字节通过。完整SC16MB的并发2／1MiB探针仍失败，只有五段完整SHA，30秒请求超时保留；浏览器有界分段保留／恢复尚未实现。下一项继续完整字体交付，再验原8／65／120、全六字体和两场完整本地／公网；不能由本轮关闭繁体Native或运行包组合失败。Web仍20de／AWss，Gateway fd3，未重启改档，独立版本和健康均200。Goal active，整体Candidate100／Accepted100为false。[发布、失败和范围](evidence/r16-r2-range-20261115/README.md)
 

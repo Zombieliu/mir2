@@ -6,13 +6,14 @@ Updated 2026-11-15 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-15 字体分段9eac66ed32、首次输入4ad940554d已推送；161字体／83登录／23默认入口及两个严格构建通过。实际Edge重启62+1段、六字体；真实同版恢复107ms首步／Native19419ms／六字体113／Q／两次注销同档通过。原英文升级重进Q失败、繁体Native120及41段未完成、同版夹具清理误判失败保留，不合并成冷两场通过。正式仍20de／AWss、fd3，未发布。下一项试验字体Range读已有完整边缘缓存的效果，再验原8／65／120和六字体冷场、Q及两场公网；29份原WIP SHA保持，其它1:1仍开放。[实际源码、机制与完整失败范围](evidence/r16-font-resume-20261115/README.md)。
+2026-11-15 b33533f4aa字体Range复用完整CDN缓存已发布f7abaa19，41项（127相邻包含）／9真实workerd／类型／预演、独立代码SHA及SIN范围HIT通过。原英繁两组升级冷流程完整通过：首步108／136ms，Native24979／118490ms，自然PNG、六字体113、首次和重进Q、两次正常注销同档保持；8／65／120不改，旧失败不倒填。繁中SC仍在118.3秒才完成，先补被动Worker网络观测，再做匹配候选及完整两场公网。Web仍20de／AWss，Gateway fd3，只有CDN发布；29份原WIP SHA保持，其它1:1仍开放。[发布、两场与边界](evidence/r16-font-edge-cache-20261115/README.md)。
 
 ## 保留的当前未结项
 
 - [x] f28dc94538的CDN Range错误头已修复并发布9e9b30bd；22项／9相邻／9真实本地R2／类型／预演、公网两入口8项范围及原字节通过，资源配置保持。[已发布范围](evidence/r16-r2-range-20261115/README.md)
 - [x] 9eac66ed32实现SC63个原字节分段校验／失败保留／重启续读；受控Edge62+1及实际失败档案恢复完整场通过，4ad940554d补首次可见登录输入时序。仅候选，未发布，不关闭冷两场资格。[源码、检查和实际恢复](evidence/r16-font-resume-20261115/README.md)
-- [ ] 繁体升级冷场Native120仍失败，部分缓存41段；默认升级重进Q关闭失败待复现。先验证字体Range读已有完整边缘缓存的效果，再补运行包组合故障及两场原8／65／120、六字体冷本地／公网资格；恢复成功不倒填冷失败。[实际边界](evidence/r16-font-resume-20261115/README.md)
+- [x] b33533f4aa字体范围缓存已发布，原两组本地升级冷场六字体／113／Q／保存完整通过；实际SIN HIT原字节与代码SHA一致，配置保持。[两场原值与发布](evidence/r16-font-edge-cache-20261115/README.md)
+- [ ] 繁中Native118490ms接近120秒，先用被动Worker网络记录区分SC长尾，再做匹配候选与完整两场公网、运行包组合故障。原Q关闭失败本轮未复现，未定因；旧41段／120秒及夹具失败保持，不改原门槛。[当前边界](evidence/r16-font-edge-cache-20261115/README.md)
 
 - [ ] dca152cd15中立AI1/2漫游已推送，270项／本地英繁两后端自然PNG保持；aa524 Linux303／PG216及隔离普通协议通过，曾切换正式，但公网完整行走包／Native120失败后两端回退20de／fd3。先修交付恢复再做两场原门槛公网，其他AI／巡逻、资源浮层、混合语言及6项旧夹具依赖失败继续。[本轮资格与失败](evidence/r16-paired-release-20261115/README.md) · [原本地结果](evidence/r16-livestock-roam-20261115/README.md)
 
