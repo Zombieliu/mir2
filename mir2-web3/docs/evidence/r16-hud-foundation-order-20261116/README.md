@@ -2,6 +2,8 @@
 
 本轮完成本地候选资格，尚未发布。235 项定向／相邻检查、严格生产构建及三场实际浏览器流程通过。首次候选因字库分段下载超过原 Native 120 秒而失败；修复后另跑三场，原失败保留，不倒填为成功。
 
+代码和证据已提交并推送 `ef6d20c095a20460908ae9fab311ae39aaa55f6e`；三份编译覆盖与该提交的 Git blob 逐字节相等。已启动 [匹配源码的 Linux 构建](https://github.com/Zombieliu/mir2/actions/runs/43739146537)，当前快照见 [ci-build.json](ci-build.json)。这只是构建和检查，不发布 R2，也不变更生产；尚未取得本轮产物通过凭证。
+
 完整数据在 [validation.json](validation.json)。公网 `/version` 于 `2026-11-15T16:57:53.179Z` 独立读回 HTTP 200、`20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339`。本轮没有切换 Web、Gateway、DNS 或 CDN，也没有恢复生产数据库。
 
 ## 改动与依据

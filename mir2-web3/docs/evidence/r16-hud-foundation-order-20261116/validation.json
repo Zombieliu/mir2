@@ -39,7 +39,8 @@
       "previous": "7d85699bb244fb8fee0202547eca854f2b2a5a06",
       "actual": "a86aa7031698190197527d7d9f1f1234c7070ac1",
       "reason": "r2 preparation updated the raw SHA but carried the r1 draft blob identifier. Original input and receipt retained; actual build bytes, candidate name, build ID and validation results unchanged."
-    }
+    },
+    "compiledOverlaysMatchCommittedSource": true
   },
   "tests": [
     {
@@ -7040,5 +7041,6 @@
     "world-headers"
   ],
   "productionDeploy": false,
-  "goalComplete": false
+  "goalComplete": false,
+  "committedSource": "ef6d20c095a20460908ae9fab311ae39aaa55f6e"
 }
