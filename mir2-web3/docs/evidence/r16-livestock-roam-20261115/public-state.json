@@ -1,0 +1,27 @@
+{
+  "vercel": {
+    "observedAt": "2026-11-15T04:17:42.025Z",
+    "id": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8",
+    "readyState": "READY",
+    "target": "production",
+    "source": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339"
+  },
+  "http": {
+    "observedAt": "2026-11-15T04:18:52.099473+00:00",
+    "endpoints": [
+      {
+        "url": "https://numeron.obelisk.build/version",
+        "http": 200,
+        "revision": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+        "ok": null
+      },
+      {
+        "url": "https://165.154.65.136.sslip.io/playtest/health",
+        "http": 200,
+        "revision": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5",
+        "ok": true
+      }
+    ]
+  },
+  "thisSourceDeployed": false
+}

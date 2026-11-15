@@ -1,8 +1,8 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
-## 下一项：共享 Zone 无目标漫游（2026-11-15）
+## 中立家畜漫游候选通过；下一项成套发布资格（2026-11-15）
 
-前端9337并行包的130项／构建通过，真实新角色完整包、Q与保存分项通过，自然帧仍失败；固定 Crystal 参考确认缺少共享 ProcessRoam。补齐服务器权威空闲动作、碰撞／AOI／控制及恢复后，再跑自然帧与公网原门槛；本轮无后端实现或部署，整体Candidate／Accepted未完成。[证据与范围](evidence/r16-walking-delivery-20261115/README.md)
+dca152cd15已补共享无主中立AI1/2漫游，270项／独立dev构建、英繁两后端完整自然帧及退出保存通过；其他AI、巡逻与全局ProcessRoam继续。下一项准备同源Linux Gateway和Web候选，保留原公网门槛后再切流。正式20de／fd3未变，资源浮层／语言、其他寻路目标、整体Candidate／Accepted仍开放。[证据与边界](evidence/r16-livestock-roam-20261115/README.md)
 
 ## R16 完整场景快照压缩候选（2026-11-14）
 

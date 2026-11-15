@@ -1,0 +1,50 @@
+[
+  {
+    "run": 1,
+    "name": "receipt.json",
+    "bytes": 32030,
+    "sha256": "699d5107b6f1e7b4fcfeb1f62edf874b0da0f41809858e5489305e098e5e02fb"
+  },
+  {
+    "run": 1,
+    "name": "town-walking.json",
+    "bytes": 2416,
+    "sha256": "f68209c20cf8ec130372920573c92f755fb40f5862134eb4530e404ef6d86301"
+  },
+  {
+    "run": 1,
+    "name": "town-diagnostic.json",
+    "bytes": 15624,
+    "sha256": "1be47b07669cc514490002a40331e6928c0d98136bcae1e5bb76f7870e8850ee"
+  },
+  {
+    "run": 1,
+    "name": "town-pack-network.json",
+    "bytes": 2501,
+    "sha256": "d27eac2d6ff985a921efdda8eae111e97fbd0d0878a681d8bcad2c5c625398ff"
+  },
+  {
+    "run": 2,
+    "name": "receipt.json",
+    "bytes": 32055,
+    "sha256": "f61d097e3e9481850b4f65ce7aab551a50495bd66d6f9a744d7412c50fc40322"
+  },
+  {
+    "run": 2,
+    "name": "town-walking.json",
+    "bytes": 2416,
+    "sha256": "5ba90d3b103639472256c8767872b0d3e4ac811f8d339c28bf9c3e4370eec4be"
+  },
+  {
+    "run": 2,
+    "name": "town-diagnostic.json",
+    "bytes": 15653,
+    "sha256": "3e0afa312373718d5d522955f3a4182b5339c7d5012a7b073b3edbe44c36e7dc"
+  },
+  {
+    "run": 2,
+    "name": "town-pack-network.json",
+    "bytes": 2501,
+    "sha256": "0d2eca3ca44c96e571ff048e996058d2a4a0650009e76598212469d8df023254"
+  }
+]

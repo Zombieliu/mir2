@@ -14,7 +14,7 @@ Short routing summary, updated 2026-11-15 (Asia/Shanghai). This indexes recorded
 
 ## Last recorded decisions and open work
 
-2026-11-15 9337f00a36已推送：站立／行走包并行、行走High，130项／独立构建通过；29份其他内容WIP保留。英繁新角色均完整读到原包，移动／Native120／六字体／首次113／Q／注销／重登／保存分项通过，但自然行走帧未过，整场仍false。两场怪物ObjectWalk／Run均0；对照固定Crystal子模块确认当前共享Zone缺少无目标Roam。下一项补权威空闲漫游及恢复／AOI／控制检查，再验完整帧和公网。重登资源浮层覆盖血球、混合语言及其他地图继续。[原判定、源码与画面](evidence/r16-walking-delivery-20261115/README.md)。公网仍20de／AWss、Gateway fd3，本轮未部署；旧公网失败不改判。日记／寻路81c51a58e9的本地资格另见[前轮记录](evidence/r16-diary-close-20261115/README.md)。
+2026-11-15 dca152cd15已推送：共享Zone中立无主AI1/2空闲漫游候选，270项／独立dev Gateway构建通过，29份其他内容WIP保留。沿用9337并行原包前端，英繁两后端普通创角／自然行走PNG／六字体113／Q／两次注销／同角色保存完整两场通过；首步202／108ms，Native106336／114165ms，均保留原8／65／120秒门槛。其他AI／巡逻仍开放；资源浮层覆盖血球及混合语言仍见。下一项准备匹配Linux Gateway和Web，完成独立公网原门槛后再切流。公网仍20de／AWss、Gateway fd3，未部署；旧失败不改写。[证据与范围](evidence/r16-livestock-roam-20261115/README.md)。日记／寻路81c51a58e9另见[前轮记录](evidence/r16-diary-close-20261115/README.md)。
 
 2026-11-15 用户补充寻路“目标不对或到不了”：本地候选ceb1c1132f补大小地图坐标／30秒初始期限／到达反馈和十语入口说明。152项、独立严格构建与英繁两后端实际跨图／慢碰撞超时／晚到零旧移动／重登新目标／正常保存通过，30份内容WIP保持。本轮未发布；其他目标与既有公网资源失败继续。[记录与范围](evidence/r16-route-feedback-20261115/README.md)
 

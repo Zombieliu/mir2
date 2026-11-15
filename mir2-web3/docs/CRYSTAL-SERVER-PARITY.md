@@ -1,8 +1,8 @@
 # Crystal Server Parity
 
-## 未闭合：共享 Zone ProcessRoam（2026-11-15）
+## 共享 AI1/2 空闲漫游本地通过（2026-11-15）
 
-固定 Crystal 的无目标空闲漫游尚未映射到共享 Zone；两场新角色实际无怪物走跑包、自然帧失败。前端包完整不关闭这项差距，后端本轮未改。[源码对照与失败证据](evidence/r16-walking-delivery-20261115/README.md)
+对照固定Crystal的ProcessRoam／CheckAlone／CanMove，为无主中立家畜实现独立漫游时钟、概率动作、占位及AOI；随机流可回放，不承诺System.Random逐次同序列。270项和两端普通创角／自然PNG／Q／退出保存通过。仅本地dca候选，其他AI／Route及公网未关闭；旧失败仍保留。[范围与证据](evidence/r16-livestock-roam-20261115/README.md)
 
 ## R16 Web 完整场景快照传输候选（2026-11-14）
 

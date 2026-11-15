@@ -10,7 +10,7 @@ Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 G
 
 ## 保留的当前未结项
 
-- [ ] 9337f00a36两包并行／行走High已推送，130项及构建通过；英繁新角色包完整、移动／Native120／首次六字体113／Q／注销／重登／存档分项过，自然帧未过，整场false。怪物ObjectWalk／Run为0，固定Crystal参考与当前Zone对照确认缺少无目标Roam；下一项实现共享权威空闲漫游及碰撞／AOI／控制／所有权／恢复，重跑完整帧与公网，暂不发布。资源浮层覆盖血球、混合语言与6项旧夹具依赖失败继续。[证据与范围](evidence/r16-walking-delivery-20261115/README.md) · [此前公网失败与回退](evidence/r16-primary-font-overlap-20261115/production/README.md)
+- [ ] dca152cd15中立无主AI1/2漫游已推送，270项／dev Gateway构建及英繁两后端自然行走完整两场通过，原8／65／120秒门槛保持。下一项为匹配Linux Gateway与9337 Web的发行资格、独立公网完整帧／字体113／Q／Worker／正常注销，再切流；正式仍20de／AWss、Gateway fd3。其他AI／巡逻、资源浮层覆盖血球、混合语言与6项旧前端夹具依赖失败继续。[当前证据](evidence/r16-livestock-roam-20261115/README.md) · [此前公网失败与回退](evidence/r16-primary-font-overlap-20261115/production/README.md)
 
 - [ ] 用户补充寻路“目标不对或到不了”：ceb1c1132f目标／期限／入口反馈后，81c51a58e9补日记独立关闭与十语不可达提示；134项／构建、两后端完整回放通过，实际325295到达、墙体322292零移动、Q／重登／Alt+X／保存通过，29份其他内容WIP保留。仅本地候选；完整行走包公网资格、更多目标／狩猎区及6项旧夹具依赖失败继续。[当前结果与边界](evidence/r16-diary-close-20261115/README.md)
 

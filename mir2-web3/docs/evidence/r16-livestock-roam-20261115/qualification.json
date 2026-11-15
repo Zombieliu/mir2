@@ -1,0 +1,390 @@
+{
+  "source": "dca152cd15fc5ab9782fd28f2247d89c5faa9e6a",
+  "base": "f0eb9ea6121080763ec1cad07dd316b10b6febe6",
+  "scope": "Shared authoritative idle roam only for unowned neutral AI1/2 livestock, not all monster ProcessRoam implementations.",
+  "checks": [
+    {
+      "path": "integration.log",
+      "passed": 246,
+      "sha256": "b65fc4328aaf531fca005e7a3e5ff27c3252b237cf84070e733645359b9d3250"
+    },
+    {
+      "path": "idle-roam-unit.log",
+      "passed": 5,
+      "sha256": "fa2d2daec8612ab5284773307bb9a34c6dd479b1171a859dcb6cbe21e9aee110"
+    },
+    {
+      "path": "checkpoint.log",
+      "passed": 19,
+      "sha256": "0a1b76898bd21228ca25b0d7f145527db1564fd4f423b14eb3ebd1fbf35a3242"
+    }
+  ],
+  "targetedTestsPassed": 270,
+  "workspaceWideClaim": false,
+  "baseline": {
+    "newBehaviorFailures": 4,
+    "originalLegacyFixtureFailures": 2,
+    "correctedFixturesOnUnchangedBaselinePassed": 3,
+    "details": "Unknown-map movement fixture replaced by ordinary full-map 0 terrain; cold-recovery comparison retains animal fields and explicitly rejects retained live experience-owner authority."
+  },
+  "build": {
+    "source": "dca152cd15fc5ab9782fd28f2247d89c5faa9e6a",
+    "base": "f0eb9ea6121080763ec1cad07dd316b10b6febe6",
+    "filesComparedToGitBlobs": 1594,
+    "rawByteExactFiles": 1456,
+    "lfEquivalentTextFiles": 138,
+    "matchedInputTreeDigest": "6d7a83352108c10835359f5d5bd822b9e2dce9f822b283e85d78ee999ebacdf0",
+    "mismatches": [],
+    "gatewayBytes": 135721472,
+    "gatewaySha256": "13457688b5d414b525536b66a0ec4444584622857003d47a29c7f0d956a6754f",
+    "profile": "dev; debug=0; incremental=0; not a release package",
+    "rust": "1.95.0 MSVC",
+    "productionChanged": false
+  },
+  "runs": [
+    {
+      "passed": true,
+      "mode": "compatibility",
+      "language": "en-US",
+      "cache": "Closed played profile CacheStorage reused; HTTP cache cleared before login. Not a cold performance run.",
+      "movement": {
+        "passed": true,
+        "ackMs": 202,
+        "from": {
+          "map": "0",
+          "x": 288,
+          "y": 616,
+          "interactive": true,
+          "first": 1794715919188
+        },
+        "to": {
+          "map": "0",
+          "x": 288,
+          "y": 617,
+          "interactive": true,
+          "first": 1794715919188
+        }
+      },
+      "nativeAfterFirstFrameMs": 106336,
+      "nativeGateMs": 120000,
+      "completeOriginalWalking": {
+        "passed": true,
+        "bodyPassed": true,
+        "framePassed": true,
+        "failure": null,
+        "scope": "Normal new-role town entry. A missing natural frame remains a failure while independent lifecycle checks continue; no asset prefill, forced actor action, teleport or pure-GPU/all-directions acceptance.",
+        "originalVisualBudgetMs": 65000,
+        "browserHttpCacheClearedBeforeLogin": true,
+        "rows": [
+          {
+            "kind": "standing",
+            "path": "/bootstrap/r16-visuals/d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308.json",
+            "requestMs": 16962,
+            "priority": "High",
+            "bytesObserved": 513566,
+            "redirected": false,
+            "status": 200,
+            "mime": "application/json",
+            "fromDiskCache": false,
+            "fromServiceWorker": false,
+            "headersMs": 16976,
+            "finishedMs": 16991,
+            "bytes": 513566,
+            "sha256": "d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308",
+            "pinMatches": true,
+            "verifiedMs": 17020
+          },
+          {
+            "kind": "walking",
+            "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+            "requestMs": 16963,
+            "priority": "High",
+            "bytesObserved": 764724,
+            "redirected": false,
+            "status": 200,
+            "mime": "application/json",
+            "fromDiskCache": false,
+            "fromServiceWorker": false,
+            "headersMs": 16976,
+            "finishedMs": 16993,
+            "bytes": 764724,
+            "sha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+            "pinMatches": true,
+            "images": 240,
+            "verifiedMs": 17077
+          }
+        ],
+        "visibleFrame": {
+          "atMs": 17244,
+          "verifiedMs": 17245,
+          "objectId": "271806",
+          "path": "/original-ui/Monster/003/36.png",
+          "index": 36,
+          "direction": 0,
+          "decoded": true,
+          "packed": true,
+          "visible": true,
+          "naturalWidth": 24,
+          "naturalHeight": 53,
+          "pngBytes": 843,
+          "pngSha256": "03d2cf3425c8411442364f1d5ec2e90aa3df67d694218359714541e4e3e089a7",
+          "pixelSha256": "2075671c9f4558b9705a343325949d7db51351a34e4c0fa44b4fde0cc54d4f5e",
+          "rect": {
+            "x": 817,
+            "y": 295,
+            "width": 24,
+            "height": 53
+          },
+          "scope": "One live visible DOM packed walking image; no pure-GPU or multi-frame authority claim."
+        },
+        "expectedJsonBytes": 764724,
+        "expectedJsonSha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+        "pngCount": 240
+      },
+      "fontSetsPassed": 6,
+      "prewarm": {
+        "requested": 113,
+        "ok": 113,
+        "failed": 0
+      },
+      "diaryFirstEntry": {
+        "passed": true,
+        "zeroGameplayMutations": true
+      },
+      "diaryReentry": {
+        "passed": true,
+        "zeroGameplayMutations": true
+      },
+      "saved": {
+        "normalLogout": true,
+        "position": {
+          "x": 288,
+          "y": 617
+        },
+        "originalRolesAndSavesPreserved": true,
+        "newRoleReopenedAtSavedPosition": true
+      },
+      "packetCounts": {
+        "ObjectWalk": 43,
+        "ObjectRun": 0,
+        "ObjectMonster": 76,
+        "UserLocation": 1
+      },
+      "objectTurnNotSampledByThisBrowserDriver": true,
+      "pageErrors": 0,
+      "wireFailures": 0,
+      "webSocketInterception": false,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "sourceSnapshotUnchanged": true,
+      "screenshots": [
+        {
+          "path": "default-natural-walking.png",
+          "bytes": 1422570,
+          "sha256": "8cbddb063b6ec49bcdc9dc380cf4f3232fe0773f49cf9c973bd9895a1e1469bb",
+          "visuallyInspected": true
+        },
+        {
+          "path": "default-reopened-diary.png",
+          "bytes": 1369096,
+          "sha256": "e1d67634600cf90339261f35a2acce9bc1ccad54c16b8bbdd1ff5aeb6914020b",
+          "visuallyInspected": true
+        }
+      ]
+    },
+    {
+      "passed": true,
+      "mode": "webgl2",
+      "language": "zh-TW",
+      "cache": "Closed played profile CacheStorage reused; HTTP cache cleared before login. Not a cold performance run.",
+      "movement": {
+        "passed": true,
+        "ackMs": 108,
+        "from": {
+          "map": "0",
+          "x": 288,
+          "y": 616,
+          "interactive": true,
+          "first": 1794716102048
+        },
+        "to": {
+          "map": "0",
+          "x": 288,
+          "y": 617,
+          "interactive": true,
+          "first": 1794716102048
+        }
+      },
+      "nativeAfterFirstFrameMs": 114165,
+      "nativeGateMs": 120000,
+      "completeOriginalWalking": {
+        "passed": true,
+        "bodyPassed": true,
+        "framePassed": true,
+        "failure": null,
+        "scope": "Normal new-role town entry. A missing natural frame remains a failure while independent lifecycle checks continue; no asset prefill, forced actor action, teleport or pure-GPU/all-directions acceptance.",
+        "originalVisualBudgetMs": 65000,
+        "browserHttpCacheClearedBeforeLogin": true,
+        "rows": [
+          {
+            "kind": "standing",
+            "path": "/bootstrap/r16-visuals/d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308.json",
+            "requestMs": 15890,
+            "priority": "High",
+            "bytesObserved": 513566,
+            "redirected": false,
+            "status": 200,
+            "mime": "application/json",
+            "fromDiskCache": false,
+            "fromServiceWorker": false,
+            "headersMs": 15903,
+            "finishedMs": 15918,
+            "bytes": 513566,
+            "sha256": "d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308",
+            "pinMatches": true,
+            "verifiedMs": 15927
+          },
+          {
+            "kind": "walking",
+            "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+            "requestMs": 15891,
+            "priority": "High",
+            "bytesObserved": 764724,
+            "redirected": false,
+            "status": 200,
+            "mime": "application/json",
+            "fromDiskCache": false,
+            "fromServiceWorker": false,
+            "headersMs": 15903,
+            "finishedMs": 15920,
+            "bytes": 764724,
+            "sha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+            "pinMatches": true,
+            "images": 240,
+            "verifiedMs": 15985
+          }
+        ],
+        "visibleFrame": {
+          "atMs": 16298,
+          "verifiedMs": 16299,
+          "objectId": "271806",
+          "path": "/original-ui/Monster/003/32.png",
+          "index": 32,
+          "direction": 0,
+          "decoded": true,
+          "packed": true,
+          "visible": true,
+          "naturalWidth": 24,
+          "naturalHeight": 53,
+          "pngBytes": 859,
+          "pngSha256": "93f2d7e5fde6fe39c33f01052f54884869579876a85fc2bda9b85a8b3b82925a",
+          "pixelSha256": "1c53da5213f0a189777b53ceb032b503478d666280e0b0b6676983bba631c214",
+          "rect": {
+            "x": 817,
+            "y": 311,
+            "width": 24,
+            "height": 53
+          },
+          "scope": "One live visible DOM packed walking image; no pure-GPU or multi-frame authority claim."
+        },
+        "expectedJsonBytes": 764724,
+        "expectedJsonSha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+        "pngCount": 240
+      },
+      "fontSetsPassed": 6,
+      "prewarm": {
+        "requested": 113,
+        "ok": 113,
+        "failed": 0
+      },
+      "diaryFirstEntry": {
+        "passed": true,
+        "zeroGameplayMutations": true
+      },
+      "diaryReentry": {
+        "passed": true,
+        "zeroGameplayMutations": true
+      },
+      "saved": {
+        "normalLogout": true,
+        "position": {
+          "x": 288,
+          "y": 617
+        },
+        "originalRolesAndSavesPreserved": true,
+        "newRoleReopenedAtSavedPosition": true
+      },
+      "packetCounts": {
+        "ObjectWalk": 47,
+        "ObjectRun": 0,
+        "ObjectMonster": 78,
+        "UserLocation": 1
+      },
+      "objectTurnNotSampledByThisBrowserDriver": true,
+      "pageErrors": 0,
+      "wireFailures": 0,
+      "webSocketInterception": false,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      },
+      "sourceSnapshotUnchanged": true,
+      "screenshots": [
+        {
+          "path": "shared-natural-walking.png",
+          "bytes": 1432107,
+          "sha256": "d5476a039acf78078fcbfecfd673d0b02b3370a829683ba91759abf679aa4308",
+          "visuallyInspected": true
+        },
+        {
+          "path": "shared-reopened-diary.png",
+          "bytes": 1364796,
+          "sha256": "d3ed19e66cbc89c5a3d558bc96680cc8e3deba3a5be2166524131de746b23ea6",
+          "visuallyInspected": true
+        }
+      ]
+    }
+  ],
+  "preservedContentWip": 29,
+  "production": {
+    "vercel": {
+      "observedAt": "2026-11-15T04:17:42.025Z",
+      "id": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8",
+      "readyState": "READY",
+      "target": "production",
+      "source": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339"
+    },
+    "http": {
+      "observedAt": "2026-11-15T04:18:52.099473+00:00",
+      "endpoints": [
+        {
+          "url": "https://numeron.obelisk.build/version",
+          "http": 200,
+          "revision": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+          "ok": null
+        },
+        {
+          "url": "https://165.154.65.136.sslip.io/playtest/health",
+          "http": 200,
+          "revision": "fd3fcedc8b8a4d0b6bb16f6c45cd57a77364c8b5",
+          "ok": true
+        }
+      ]
+    },
+    "thisSourceDeployed": false
+  },
+  "limits": [
+    "Other monster AI families remain unchanged.",
+    "Local ordinary account, not fresh public phone signing or public-network qualification.",
+    "The old public 5d walking-body failure and rollback stay false.",
+    "Resource-progress panel can obscure HP while loading; attack prompt and some names remain mixed languages.",
+    "First-entry 113/113 does not assert second-login screenshot prewarm completion.",
+    "Windows/physical phone, full three-class 1–30 and global Candidate/Accepted remain open."
+  ]
+}
