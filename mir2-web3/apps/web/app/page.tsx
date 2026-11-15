@@ -390,7 +390,7 @@ import {
 import bevyRuntimeVersion from "../lib/bevy-runtime-build-manifest";
 import { isAbortError, signalAssetFirstPlayable } from "../lib/asset-orchestrator";
 import { createBevyRuntimeUrls } from "../lib/bevy-runtime-url";
-import { prewarmBevyRuntimeFonts } from "../lib/bevy-runtime-font-prewarm";
+import { prewarmBevyRuntimeFonts, prewarmBevyRuntimePrimaryFont } from "../lib/bevy-runtime-font-prewarm";
 import { getRuntimeHeaderPriority } from "../lib/runtime-header-priority";
 import {
   selectBevyRuntimeStartup,
@@ -5565,6 +5565,20 @@ export default function HomePage() {
     }
 
     const releaseHeaderPriority = getRuntimeHeaderPriority()?.captureRelease() ?? (() => false);
+    let primaryFontStarted = false;
+    const handleRuntimeHeaders = () => {
+      releaseHeaderPriority("headers");
+      if (disposed || runtimeOwner.signal.aborted || fontPrewarmController.signal.aborted || primaryFontStarted) return;
+      primaryFontStarted = true;
+      markMir2CacheMilestone("bevyRuntimePrimaryFontPrewarmStart");
+      void prewarmBevyRuntimePrimaryFont({ signal: fontPrewarmController.signal }).then((result) => {
+        if (disposed || fontPrewarmController.signal.aborted) return;
+        markMir2CacheMilestone("bevyRuntimePrimaryFontPrewarmComplete", {
+          requested: result.requested, ok: result.completed.length,
+          failed: result.failed.length, aborted: result.aborted, bytes: result.bytes,
+        });
+      }).catch(() => { /* The later full pass and Native readers retain recovery. */ });
+    };
 
     async function bootRuntime() {
       try {
@@ -5689,7 +5703,7 @@ export default function HomePage() {
         try {
           runtime = await loadBevyRuntimeModule(runtimeBackend, bevyRuntimeStartup, {
             ownerSignal: runtimeOwner.signal, takeRecovery: takeRuntimeRecovery,
-            onResponseHeaders: () => releaseHeaderPriority("headers"),
+            onResponseHeaders: handleRuntimeHeaders,
           });
         } catch (error) {
           if (shouldRetryBevyRuntimeWithWebGl2(runtimeBackend, runtimeSupport.webgl2, error)) {
@@ -5705,7 +5719,7 @@ export default function HomePage() {
             });
             runtime = await loadBevyRuntimeModule(runtimeBackend, bevyRuntimeStartup, {
               ownerSignal: runtimeOwner.signal, takeRecovery: takeRuntimeRecovery,
-              onResponseHeaders: () => releaseHeaderPriority("headers"),
+              onResponseHeaders: handleRuntimeHeaders,
             });
           } else {
             throw error;
@@ -5713,10 +5727,9 @@ export default function HomePage() {
         }
         if (disposed) return;
 
-        // Do not proactively start both large CJK fonts while the runtime body
-        // is still downloading or recovering. DOM fonts may already be in use;
-        // warm every Native family after the final backend succeeds, without
-        // making font completion a prerequisite for App initialization.
+        // One SC body can overlap the runtime after valid headers. Defer the
+        // full six-family pass until the final backend succeeds; its SC reader
+        // shares the early Worker fill. Font completion never gates App boot.
         markMir2CacheMilestone("bevyRuntimeFontPrewarmStart");
         void prewarmBevyRuntimeFonts({ signal: fontPrewarmController.signal }).then((result) => {
           if (disposed) return;

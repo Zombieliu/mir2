@@ -18,8 +18,8 @@ function actualBoot({playable=true,mode='eager',allowed=true,criticalPending=fal
  const visit=node=>{if(ts.isCallExpression(node)&&node.expression.getText(ast)==='useEffect'){
   const candidate=node.arguments[0];if(candidate&&candidate.getText(ast).includes('async function bootRuntime()'))callback=candidate;
  }ts.forEachChild(node,visit);};visit(ast);assert(callback);
- const events=[];let finishModule,failModule,finishFonts,finishCritical,failCritical,observed=Promise.resolve();
- const fontSignals=[],runtimeOptions=[],runtimeBackends=[];
+ const events=[];let finishModule,failModule,finishFonts,finishPrimary,failPrimary,finishCritical,failCritical,observed=Promise.resolve();
+ const fontSignals=[],primarySignals=[],runtimeOptions=[],runtimeBackends=[];
  const noop=()=>{},ref=()=>({current:null});
  const env={
   AbortController,window:{location:{search:''},matchMedia:()=>({matches:false})},navigator:{maxTouchPoints:0,userAgent:'Chrome desktop'},
@@ -40,6 +40,7 @@ function actualBoot({playable=true,mode='eager',allowed=true,criticalPending=fal
   isBevyRuntimeNetworkFailure:()=>true,scheduleBevyRuntimeCacheRecovery:()=>false,
   runtimeRef:ref(),runtimeDownloadRecoveryRef:{current:recoveryBudget},lastBevyEntityRenderStateJsonRef:ref(),lastBevyMapRenderStateJsonRef:ref(),lastBevyMapCameraOffsetRef:ref(),
   prewarmBevyRuntimeFonts:options=>{events.push({name:'fonts'});fontSignals.push(options.signal);return new Promise(resolve=>{finishFonts=resolve;});},
+  prewarmBevyRuntimePrimaryFont:options=>{events.push({name:'primary-font'});primarySignals.push(options.signal);return new Promise((resolve,reject)=>{finishPrimary=resolve;failPrimary=reject;});},
   loadBevyRuntimeModule:(backend,_startup,options)=>{runtimeOptions.push(options);runtimeBackends.push(backend);events.push({name:'module',backend});return new Promise((resolve,reject)=>{finishModule=resolve;failModule=reject;});},
   testObserve:value=>{observed=value;},
  };
@@ -53,9 +54,10 @@ function actualBoot({playable=true,mode='eager',allowed=true,criticalPending=fal
  assert(body.includes('testObserve(bootRuntime());'));
  const js=ts.transpileModule('function effect()'+body,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText;
  const cleanup=new Function(...Object.keys(env),js+'\nreturn effect();')(...Object.values(env));
- return{events,fontSignals,runtimeOptions,runtimeBackends,cleanup,headerPriority,window:env.window,failModule:error=>failModule(error),
+ return{events,fontSignals,primarySignals,runtimeOptions,runtimeBackends,cleanup,headerPriority,window:env.window,failModule:error=>failModule(error),
+  finishPrimary:result=>finishPrimary(result??{requested:1,completed:['/original-ui/fonts/NotoSansCJKsc-Regular.otf'],failed:[],aborted:false,bytes:3}),failPrimary:error=>failPrimary(error),
   finishCritical:()=>finishCritical(),failCritical:()=>failCritical(),finishModule:()=>{const backend=runtimeBackends.at(-1);events.push({name:'module-resolved',backend});finishModule({getMir2RendererBackend:()=>backend,bootMir2Runtime:noop});},waitForBoot:()=>observed,
-  settle:async()=>{cleanup();finishCritical?.();await turn();finishModule?.({});finishFonts?.({requested:6,completed:[],failed:[],aborted:true,bytes:0});await observed;await turn();}};
+  settle:async()=>{cleanup();finishCritical?.();await turn();finishModule?.({});finishPrimary?.({requested:1,completed:[],failed:[],aborted:true,bytes:0});finishFonts?.({requested:6,completed:[],failed:[],aborted:true,bytes:0});await observed;await turn();}};
 }
 
 test('Page prewarm delegation returns the real shared stage promise',()=>{
@@ -91,7 +93,7 @@ test('actual Page starts fonts only after the runtime resolves and boots without
  }finally{await run.settle();}
 });
 
-test('the actual Page header callback releases its real document coordinator without starting fonts early',async()=>{
+test('the actual Page header callback releases its real document coordinator without starting the full-family prewarm early',async()=>{
  const run=actualBoot({criticalPending:true});try{
   await turn();let released=false;const waiting=run.headerPriority.wait().then(outcome=>{released=true;return outcome;});
   await turn();assert.equal(released,false);assert.equal(run.fontSignals.length,0);
@@ -194,6 +196,69 @@ test('Page spends recovery once per entry/source and preserves it across same-ga
 
 const request=compile(readFileSync(new URL('../lib/asset-prewarm-request.ts',import.meta.url),'utf8'));
 const library=existsSync(libraryPath)?compile(readFileSync(libraryPath,'utf8'),{'./asset-prewarm-request':request}):{};
+
+test('actual Page starts one primary font on valid headers before the pending runtime body, once',async()=>{
+ const run=actualBoot({criticalPending:true});try{
+  await turn();assert.equal(run.primarySignals.length,0);assert.equal(run.fontSignals.length,0);
+  run.runtimeOptions[0].onResponseHeaders();await turn();assert.equal(run.primarySignals.length,1);assert.equal(run.fontSignals.length,0);
+  run.runtimeOptions[0].onResponseHeaders();assert.equal(run.primarySignals.length,1);
+  assert(!run.events.some(e=>e.name==='bevyRuntimeReady'));
+  run.finishModule();await run.waitForBoot();assert(run.events.some(e=>e.name==='bevyRuntimeReady'));assert.equal(run.fontSignals.length,1);
+  assert.equal(run.primarySignals.length,1,'runtime boot does not await or duplicate the pending single-font read');
+ }finally{await run.settle();}
+});
+
+test('one early primary font survives a backend fallback without spending another font admission',async()=>{
+ const run=actualBoot({retryWithWebGl2:true});try{
+  await turn();run.runtimeOptions[0].onResponseHeaders();await turn();assert.equal(run.primarySignals.length,1);
+  run.failModule(new TypeError('Failed to fetch'));await turn();assert.deepEqual(run.runtimeBackends,['webgpu','webgl2']);
+  run.runtimeOptions[1].onResponseHeaders();assert.equal(run.primarySignals.length,1);assert.equal(run.fontSignals.length,0);
+  run.finishModule();await run.waitForBoot();assert.equal(run.fontSignals.length,1);assert.equal(run.events.filter(e=>e.name==='bevyRuntimeReady').length,1);
+ }finally{await run.settle();}
+});
+
+test('leaving before or after headers cancels the primary owner and ignores late callbacks',async()=>{
+ for(const beforeHeaders of[true,false]){
+  const run=actualBoot();try{await turn();if(!beforeHeaders)run.runtimeOptions[0].onResponseHeaders();await turn();
+   assert.equal(run.primarySignals.length,beforeHeaders?0:1);run.cleanup();run.runtimeOptions[0].onResponseHeaders();
+   assert.equal(run.primarySignals.length,beforeHeaders?0:1);assert(run.primarySignals.every(s=>s.aborted));
+   if(!beforeHeaders)run.finishPrimary();run.finishModule();await run.waitForBoot();await turn();
+   assert.equal(run.fontSignals.length,0);assert(!run.events.some(e=>e.name==='bevyRuntimePrimaryFontPrewarmComplete'));assert(!run.events.some(e=>e.name==='bevyRuntimeReady'));
+  }finally{await run.settle();}
+ }
+});
+
+test('primary failure cannot fail the runtime, and runtime failure cannot publish late primary completion',async()=>{
+ const run=actualBoot();try{await turn();run.runtimeOptions[0].onResponseHeaders();await turn();run.failPrimary(new TypeError('font source unavailable'));await turn();
+  assert.notEqual(run.window.__mir2BevyRuntimeFailed,true);run.finishModule();await run.waitForBoot();assert.equal(run.fontSignals.length,1);assert(run.events.some(e=>e.name==='bevyRuntimeReady'));
+ }finally{await run.settle();}
+ const failed=actualBoot();try{await turn();failed.runtimeOptions[0].onResponseHeaders();await turn();assert.equal(failed.primarySignals.length,1);
+  failed.failModule(new TypeError('Failed to fetch'));await failed.waitForBoot();assert(failed.primarySignals[0].aborted);failed.finishPrimary();await turn();
+  assert(!failed.events.some(e=>e.name==='bevyRuntimePrimaryFontPrewarmComplete'));assert.equal(failed.fontSignals.length,0);
+ }finally{await failed.settle();}
+});
+
+test('primary prewarm reads only the original SC body and waits for all bytes',async()=>{
+ assert.equal(typeof library.prewarmBevyRuntimePrimaryFont,'function');
+ const calls=[];let body,done=false;
+ const pending=library.prewarmBevyRuntimePrimaryFont({fetchImpl:async path=>{calls.push(path);return new Response(new ReadableStream({start(c){body=c;c.enqueue(new Uint8Array([1,2]));}}));}}).then(r=>{done=true;return r;});
+ await turn();assert.deepEqual(calls,['/original-ui/fonts/NotoSansCJKsc-Regular.otf']);assert.equal(done,false);
+ body.enqueue(new Uint8Array([3,4]));body.close();const result=await pending;assert.equal(result.requested,1);assert.equal(result.bytes,4);assert.equal(result.completed.length,1);assert.equal(result.failed.length,0);
+});
+
+test('failed early SC read does not poison the later full six-family pass',async()=>{
+ assert.equal(typeof library.prewarmBevyRuntimePrimaryFont,'function');
+ const failed=await library.prewarmBevyRuntimePrimaryFont({fetchImpl:async()=>new Response(null,{status:503})});assert.equal(failed.failed.length,1);assert.equal(failed.completed.length,0);
+ const paths=[];const full=await library.prewarmBevyRuntimeFonts({fetchImpl:async path=>{paths.push(path);return new Response(new Uint8Array([1,2,3]));}});
+ assert.equal(paths.length,6);assert.equal(full.completed.length,6);assert.equal(full.failed.length,0);
+});
+
+test('cancelling a primary read cannot start any other family',async()=>{
+ assert.equal(typeof library.prewarmBevyRuntimePrimaryFont,'function');
+ const owner=new AbortController(),calls=[];
+ const pending=library.prewarmBevyRuntimePrimaryFont({signal:owner.signal,fetchImpl:async path=>{calls.push(path);return new Response(new ReadableStream({start(c){c.enqueue(new Uint8Array([1]));}}));}});
+ await turn();owner.abort();const result=await pending;assert(result.aborted);assert.equal(calls.length,1);assert.equal(result.completed.length,0);
+});
 
 test('prewarm paths exactly cover the Native display font families',()=>{
  const rust=readFileSync(new URL('../../game-client/client-bevy/src/quest_presentation_text.rs',import.meta.url),'utf8');

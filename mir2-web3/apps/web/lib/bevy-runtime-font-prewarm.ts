@@ -12,18 +12,19 @@ export const BEVY_RUNTIME_FONT_PATHS = [
   "/original-ui/fonts/NotoSansArabic-Regular.ttf",
 ] as const;
 
-/** Warm complete bodies after first playable; never gate renderer boot. */
-export async function prewarmBevyRuntimeFonts({
+type FontPrewarmOptions = { signal?: AbortSignal; fetchImpl?: typeof fetch };
+
+async function prewarmFontPaths(paths: readonly string[], concurrency: 1 | 2, {
   signal,
   fetchImpl,
-}: { signal?: AbortSignal; fetchImpl?: typeof fetch } = {}) {
+}: FontPrewarmOptions) {
   const completed: string[] = [];
   const failed: Array<{ path: string; errorName: string }> = [];
   let next = 0;
   let bytes = 0;
   const consume = async () => {
     while (!signal?.aborted) {
-      const path = BEVY_RUNTIME_FONT_PATHS[next++];
+      const path = paths[next++];
       if (!path) break;
       try {
         const result = await fetchPrewarmAsset(path, {
@@ -46,8 +47,16 @@ export async function prewarmBevyRuntimeFonts({
       }
     }
   };
-  // Start after first paint and renderer checks, alongside HUD recovery.
-  // It cannot consume six image lanes at once.
-  await Promise.all([consume(), consume()]);
-  return { requested: BEVY_RUNTIME_FONT_PATHS.length, completed, failed, aborted: signal?.aborted === true, bytes };
+  await Promise.all(Array.from({ length: concurrency }, consume));
+  return { requested: paths.length, completed, failed, aborted: signal?.aborted === true, bytes };
+}
+
+/** Start one unchanged SC body after valid runtime headers, without gating boot. */
+export function prewarmBevyRuntimePrimaryFont(options: FontPrewarmOptions = {}) {
+  return prewarmFontPaths([BEVY_RUNTIME_FONT_PATHS[0]], 1, options);
+}
+
+/** Warm all complete Native font bodies; CSS/Bevy share the same Worker fills. */
+export function prewarmBevyRuntimeFonts(options: FontPrewarmOptions = {}) {
+  return prewarmFontPaths(BEVY_RUNTIME_FONT_PATHS, 2, options);
 }
