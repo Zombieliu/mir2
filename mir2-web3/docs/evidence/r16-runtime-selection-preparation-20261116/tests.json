@@ -5,5 +5,13 @@
   "command": "node --test scripts/test-bevy-runtime-initializer.mjs scripts/test-bevy-runtime-finite-recovery.mjs scripts/test-bevy-runtime-module-owner.mjs scripts/test-bevy-runtime-source-rotation.mjs scripts/test-bevy-runtime-font-prewarm.mjs scripts/test-runtime-header-priority.mjs scripts/test-bevy-runtime-package-selection.mjs scripts/test-bevy-runtime-policy.mjs scripts/test-bevy-runtime-preparation.mjs",
   "logSha256": "16a61a1fef59c0bc404ebce1f9eba7c05f8fc2fe6ade2f30f59228037d2e2b85",
   "browserTransportCases": 6,
-  "browserReceipt": "chrome.json"
+  "browserReceipt": "chrome.json",
+  "registeredStartupCommand": {
+    "command": "npm run test:bevy-runtime-startup",
+    "passed": 108,
+    "failed": 0,
+    "skipped": 0,
+    "includedIn147": true,
+    "logSha256": "c2508941a4fab961ddeb855532fc723e3e238baa1d883516efd44c3626de5837"
+  }
 }

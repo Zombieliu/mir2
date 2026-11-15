@@ -36,5 +36,11 @@
     "unchangedCompileCoreSha256": "765503b4d410b231d440efafd1f7b9e1b905231a8125e85610e8bebeac74a437",
     "compileCorePreserved": true
   },
-  "foreignWipExcluded": true
+  "foreignWipExcluded": true,
+  "testEntryPointFollowup": {
+    "path": "mir2-web3/apps/web/package.json",
+    "sha256": "18fbfbe9b97284a5c3d20ed210fd5f8d43a47a098b98e08bbb9d3fdd8a31e904",
+    "onlyChange": "Append preparation test to test:bevy-runtime-startup; dependencies, lock and application inputs unchanged",
+    "builtApplicationCommit": "18449b7aa204f07e00627558aa26e9a4f95bfee2"
+  }
 }
