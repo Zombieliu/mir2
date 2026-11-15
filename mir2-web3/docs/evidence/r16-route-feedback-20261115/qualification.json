@@ -1,0 +1,1175 @@
+{
+  "date": "2026-11-15",
+  "scope": "Bounded local Page feedback/route planning deadline, not all navigation targets or whole1:1 acceptance. Formal publication unchanged by this round.",
+  "source": "47ef2650392808f5bfce05d197cdb8eacc719cea",
+  "candidate": "47ef-map-feedback-75d92fd5",
+  "build": {
+    "id": "YROGjQwrgGsj16U204nPZ",
+    "exit": 0,
+    "durationMs": 44802,
+    "sourceRoot": "F:/mir2-builds/r16-route-feedback-20261115/source"
+  },
+  "unchanged": {
+    "runtime": "bevy-0c553a754308e5b8",
+    "assets": "20261108-r16-08ec86d5105c",
+    "gatewaySource": "9244ce3dd7cd2129a70e650be1430e971b6c96ab",
+    "gatewayScope": "local only; not publicfd3"
+  },
+  "sourceInputs": [
+    {
+      "filename": "mir2-web3/apps/web/app/page.tsx",
+      "sha256": "a512db9de5d9b674fcbc11be8abbe5c8dd00471eb7b222773cf1d2858b4c933c"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/r16-browser-localization.ts",
+      "sha256": "4c4b8403c549a3c9261b0ab3b1c107b81a6abcacc73ccc89106930589cc9dc76"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-map-route-feedback.mjs",
+      "sha256": "d0814287a25c99beb30c0acf4ee907433e176c51d642fdd4d1a536e7c8183a93"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-quest-navigation.mjs",
+      "sha256": "0309050e9c552c7a9b25b8459ee3d9d8272dca2084511c342fbef1e6e75bba61"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-browser-localization.mjs",
+      "sha256": "c65f439028f014ba0a40cd4087afbca79c9a9f42c8ef184b03e321cebeda1df2"
+    }
+  ],
+  "fixtureInputs": [
+    {
+      "name": "focused-driver.mjs",
+      "sha256": "5cf01497c77f095ea8999f83837652f4a0dd3d98ad51675af3bfa30e67722498",
+      "previousSha256": "5cf01497c77f095ea8999f83837652f4a0dd3d98ad51675af3bfa30e67722498"
+    },
+    {
+      "name": "profile.mjs",
+      "sha256": "ce502083b96e0cc906e8cfcd5e8c1c02348aac4184abdb1fe29afa0a4a02e159",
+      "previousSha256": "ce502083b96e0cc906e8cfcd5e8c1c02348aac4184abdb1fe29afa0a4a02e159"
+    },
+    {
+      "name": "route-intent-gate.mjs",
+      "sha256": "b06cdd5facd1feba31e1455aa8a2fcfa06c9c0cec0b00f2168adbcbb16e5d728",
+      "previousSha256": "b06cdd5facd1feba31e1455aa8a2fcfa06c9c0cec0b00f2168adbcbb16e5d728"
+    },
+    {
+      "name": "route-plan-probe.mjs",
+      "sha256": "706cbc5378b68cb9328278d61b1c2de49711c84d53494d46e58f27c0f575406c",
+      "previousSha256": "706cbc5378b68cb9328278d61b1c2de49711c84d53494d46e58f27c0f575406c"
+    },
+    {
+      "name": "verify-original-fonts.mjs",
+      "sha256": "5ce7c7a01c76f9a3dd2a19d71c5a9a0936b5b2c9b9a3631c1c0a4a507424c86d",
+      "previousSha256": "5ce7c7a01c76f9a3dd2a19d71c5a9a0936b5b2c9b9a3631c1c0a4a507424c86d"
+    },
+    {
+      "name": "verify-prewarm.mjs",
+      "sha256": "e5bbac30271e8fdcc4ed7d5bad466bd0f16e37ee0f32ec2936e8994bdea54d3e",
+      "previousSha256": "e5bbac30271e8fdcc4ed7d5bad466bd0f16e37ee0f32ec2936e8994bdea54d3e"
+    },
+    {
+      "name": "prepare-store-visit.mjs",
+      "sha256": "3052bf26524bf4a0752da8d5df09d41a10313d73834794d765610da639aece11",
+      "previousSha256": "3052bf26524bf4a0752da8d5df09d41a10313d73834794d765610da639aece11"
+    },
+    {
+      "name": "hunt-navigation-game.mjs",
+      "sha256": "39f86cbdf413ee38fa0909c5ee91d8dce0cd7ee407205946ae311a733f2b2205",
+      "previousSha256": "39f86cbdf413ee38fa0909c5ee91d8dce0cd7ee407205946ae311a733f2b2205"
+    },
+    {
+      "name": "map-feedback-game.mjs",
+      "sha256": "8ac86872ccb77f8f918ef8b11bce2bab739c11d8cd1114f3876bf131cb497df5",
+      "previousSha256": "cd1feba9d0ecb6538513f51fdef22a0f590a98e872246a254c1f8ed58d2c0486"
+    }
+  ],
+  "regressions": {
+    "passed": 152,
+    "failed": 0,
+    "skipped": 0,
+    "run": "node --test scripts/test-map-route-feedback.mjs scripts/test-r16-quest-navigation.mjs scripts/test-bevy-quest-ui.mjs scripts/test-r16-browser-localization.mjs scripts/test-route-authority-wait.mjs scripts/test-r16-route-correction.mjs scripts/test-map-world-baseline-refresh.mjs"
+  },
+  "preserved": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/chat.rs",
+      "sha256": "e80072eff58555cdfaa8963eaf21ce5556da247507ae49b564222484138a2437"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/companion.rs",
+      "sha256": "cfc9755f516ec7a16bc2bfcd202e240ffa7b0be8246b93d0cb2b030475a712df"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hud.rs",
+      "sha256": "556acc585807ca76d8e0fa0c0374ca5066f6d5b22f1aad44329b98d21fadc967"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hud_layout.rs",
+      "sha256": "89e767b5f26e6db984e29eb71f23e8f96ba34c64aa79d7b6aa95cb2175c94da0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hud_reference.rs",
+      "sha256": "f3ad121ea8cb02cdb7b109553b5ae31c9bd2867f5684fd120a74a657a9dde803"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/item_image.rs",
+      "sha256": "94bcc11c7ebd58ca099da00c6006f6dbae6f83c10973729b8b43963115ffa7f4"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/login.rs",
+      "sha256": "2085337d2c1fa164f9e98796a40d307d82c585cb2e5e367adaa9e9f234192321"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/notice.rs",
+      "sha256": "e5cc1662c8e3fa2c072bbcbe6e6700524ac8a284219d435a76c1b3894c5df6b8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/pc_login.rs",
+      "sha256": "1e033f4ca776f9225d98aadcf020f7d35323e7d659b4ab98053dd3ea9ab9b353"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_display.rs",
+      "sha256": "d04466e3bafb3a201e399ff9dbc3ffecaf6a13c31ca1f3044c95fa3f8f3ab9ef"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs",
+      "sha256": "b47681702030a30f1d99673a79e2b5d350aee4b1541d7173c2c15cd2f48ade69"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/periodic_quest_ui_tests.rs",
+      "sha256": "f99a8d5f2922036aa807f01f10a706a1935290f8eb7fae633d3770f4dd93b3e5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/portable_bag_ui.rs",
+      "sha256": "d7f9f0574a43394facb4da476397e6a367c1ba5852312e46e2ee66caaa7e5014"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_hunt_regions.rs",
+      "sha256": "15676c18c1812c4293087b98768a97be9a909fcab7de22aa2d390b227ffaea85"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/atlas.rs",
+      "sha256": "930028511aee30592d94dda85e8175d76149cc38d3400d9c333fc94d6d4bdf21"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/effects.rs",
+      "sha256": "adc33b2398789a77a6608a978911d32c2d7667d55010ab53e842b7818c7cc176"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/entity_presentation.rs",
+      "sha256": "b3e0623cdebbcb2194635c75f9fff9f7c90b8a7519eef683b3a5656a23ac72b3"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/hud_layout_pointer_input_tests.rs",
+      "sha256": "6bf7506b8a8f559c847b53560105de9b703e12b8e9f9c1a471ee26d160bf7455"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/input.rs",
+      "sha256": "e316672a3b346272b5b621ce9a84af7c8a98aca678acd5c7e65fea427ba35a05"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/main.rs",
+      "sha256": "f71773dcd52bc8e16b2a772e0ab3bf19547c839088e751e82ab2e05c6532a397"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/pc_hud.rs",
+      "sha256": "9c8ce9950bd113bf2e454bd448a67c6de96ff939f5a09ce6e7cd5a60f25f63e8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/pc_hud_visual_tests.rs",
+      "sha256": "51de89e50c1bba193a8e6b7d18b9d3a209e166ed476b45a8310c80167fba2839"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/shell_bridge.rs",
+      "sha256": "729b843d671a2dbe70407168b0a528591bb99ca28a92c6d77df0016525633713"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/lib.rs",
+      "sha256": "5a0c186b891228f99fc35642408249391f58d243021851c574b14c38c0241c35"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/native_ingest.rs",
+      "sha256": "dbfb577db9395086576fc1d9da0f7c458f1836eb69356a12cdca4b384e69fbce"
+    },
+    {
+      "path": "mir2-web3/apps/web/app/original-client-shell.tsx",
+      "sha256": "91bc5aa6f8cde16ca4ff4f9b2f5c7bf965162b8049316683a262855c48a37fd9"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs",
+      "sha256": "3107bd2726ee36cc5463fe8b29d2b0e697ff8594de1ba15e83fc71fac80a7c91"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-stage5-adapters.mjs",
+      "sha256": "32ec79ce9b7a10c13c3a638ed4c8258137945ca7af4f594b76701dfce59bfa7d"
+    },
+    {
+      "path": "mir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md",
+      "sha256": "024cd7215baa87027f5ae3e9d9d116593a9d088c1957cb844cb29f690dae1068"
+    },
+    {
+      "path": "mir2-web3/docs/PC-UI-INTEGRATION-20261109.zh-CN.md",
+      "sha256": "a7fd33032c54a32fc36282f032dc6bbfa059885deed798752cf264ad470379e2"
+    }
+  ],
+  "runs": [
+    {
+      "name": "default",
+      "passed": true,
+      "sourceReceiptSha256": "b7bea1bc57503cf6ea0cb6ab0b8f056e9a36cde38f82fd21dda86244a535e833",
+      "nativeReadyMs": 15322,
+      "prewarm": {
+        "requested": 113,
+        "ok": 113,
+        "failed": 0
+      },
+      "originalFontRecordSha256": "4226d63d5bfbfafe63798abe48cd41f74614e776364656942df6304b30694e35",
+      "initial": {
+        "map": "0108",
+        "position": {
+          "x": 8,
+          "y": 12
+        }
+      },
+      "portal": {
+        "manifestSha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2",
+        "from": 4,
+        "file": "0108",
+        "to": 1,
+        "map_index": 1,
+        "source": {
+          "x": 10,
+          "y": 13
+        },
+        "destination": {
+          "x": 326,
+          "y": 289
+        },
+        "need_hole": false,
+        "need_move": false,
+        "conquest_index": 0,
+        "show_on_big_map": false,
+        "icon": 0
+      },
+      "interiorPlan": {
+        "at": 1794703770172,
+        "phase": "interior-route",
+        "query": {
+          "version": 1,
+          "stamp": {
+            "generation": 2,
+            "revision": 2,
+            "connectionGeneration": 1,
+            "sessionGeneration": 1,
+            "sceneRevision": 3,
+            "playerObjectId": 1000,
+            "mapFileName": "0108"
+          },
+          "mapIndex": 4,
+          "mapFileName": "0108",
+          "width": 15,
+          "height": 18,
+          "origin": {
+            "x": 8,
+            "y": 12
+          },
+          "destination": {
+            "x": 10,
+            "y": 13
+          },
+          "routeTarget": {
+            "type": "entrance"
+          },
+          "occupiedTiles": [
+            {
+              "x": 7,
+              "y": 7
+            }
+          ],
+          "rejectedEdges": []
+        },
+        "result": {
+          "destination": {
+            "x": 10,
+            "y": 13
+          },
+          "error": null,
+          "mapFileName": "0108",
+          "mapIndex": 4,
+          "ok": true,
+          "origin": {
+            "x": 8,
+            "y": 12
+          },
+          "radius": 0,
+          "stamp": {
+            "connectionGeneration": 1,
+            "generation": 2,
+            "mapFileName": "0108",
+            "playerObjectId": 1000,
+            "revision": 2,
+            "sceneRevision": 3,
+            "sessionGeneration": 1
+          },
+          "steps": [
+            {
+              "x": 9,
+              "y": 13
+            },
+            {
+              "x": 10,
+              "y": 13
+            }
+          ],
+          "version": 1
+        }
+      },
+      "afterTransfer": {
+        "map": "0",
+        "position": {
+          "x": 325,
+          "y": 290
+        }
+      },
+      "interiorMoves": [
+        {
+          "type": "walk",
+          "direction": "DownRight",
+          "at": 1794703770174
+        },
+        {
+          "type": "walk",
+          "direction": "Right",
+          "at": 1794703770797
+        }
+      ],
+      "oldMapMoves": 0,
+      "baselineReads": 1,
+      "pendingLogout": {
+        "at": 1794703778928,
+        "normalAck": true,
+        "noMoveBeforeAck": true
+      },
+      "lateCollision": {
+        "phase": "pending-logout",
+        "map": "0",
+        "url": "/api/scene/collision?map=0&quest=1&minX=0&maxX=255&minY=0&maxY=255",
+        "at": 1794703775085,
+        "sha256": "88a8a89d4835e9eebdbe30f86b4a8528865d6501e3201f6c81e5f713b4c97be6",
+        "heldAt": 1794703775298,
+        "bounds": {
+          "minX": 0,
+          "maxX": 255,
+          "minY": 0,
+          "maxY": 255
+        },
+        "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+        "releasedAt": 1794703778928,
+        "fulfilledAt": 1794703778933
+      },
+      "reopened": {
+        "map": "0",
+        "position": {
+          "x": 325,
+          "y": 290
+        }
+      },
+      "mapFeedback": {
+        "passed": true,
+        "scope": "Actual minimap click, original map collision JSON delayed12s per complete chunk, exact30s Page action deadline, no movement before or after late completion. The 15s per chunk and all geometry validation remain unchanged. Local warm-resource browser; no public latency claim.",
+        "language": "en",
+        "before": {
+          "map": "0",
+          "x": 325,
+          "y": 290
+        },
+        "readOnlyMetadata": {
+          "status": 200,
+          "sha256": "88a8a89d4835e9eebdbe30f86b4a8528865d6501e3201f6c81e5f713b4c97be6",
+          "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e"
+        },
+        "geometry": {
+          "rect": {
+            "left": 1029,
+            "top": 118,
+            "width": 120,
+            "height": 108
+          },
+          "width": 1052,
+          "height": 700,
+          "mapWidth": 700,
+          "mapHeight": 700
+        },
+        "expectedTarget": {
+          "x": 325,
+          "y": 295
+        },
+        "started": 1794703801087,
+        "planningAt": 1794703801163,
+        "timeoutAt": 1794703831158,
+        "after": {
+          "map": "0",
+          "x": 325,
+          "y": 290
+        },
+        "collision": [
+          {
+            "started": 1794703801121,
+            "bounds": [
+              "0",
+              "0",
+              "255",
+              "255"
+            ],
+            "headersAt": 1794703801470,
+            "sha256": "88a8a89d4835e9eebdbe30f86b4a8528865d6501e3201f6c81e5f713b4c97be6",
+            "bytes": 396235,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794703813486
+          },
+          {
+            "started": 1794703813536,
+            "bounds": [
+              "0",
+              "256",
+              "255",
+              "511"
+            ],
+            "headersAt": 1794703813820,
+            "sha256": "1c5117428d12286d7f396f02d1a3a33ee274730c1cfc971ecf7ec6496bc169fe",
+            "bytes": 182087,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794703825834
+          },
+          {
+            "started": 1794703813537,
+            "bounds": [
+              "0",
+              "512",
+              "255",
+              "767"
+            ],
+            "headersAt": 1794703814068,
+            "sha256": "09de35f86834510468e7f981994b0a2f4e18114acf22f509d9706a842346878f",
+            "bytes": 366915,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794703826088
+          },
+          {
+            "started": 1794703813537,
+            "bounds": [
+              "256",
+              "0",
+              "511",
+              "255"
+            ],
+            "headersAt": 1794703814361,
+            "sha256": "23b36c8fddd0b1b6d38842e0ae7bf849811f05e3403b80f2224a4fa27414c6ae",
+            "bytes": 491344,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794703826374
+          },
+          {
+            "started": 1794703813537,
+            "bounds": [
+              "256",
+              "256",
+              "511",
+              "511"
+            ],
+            "headersAt": 1794703814605,
+            "sha256": "b2ed3ae8b8d606f37138829aba3c4d11cca75ec45d08ddac3535dbb42bc6bb4e",
+            "bytes": 260297,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794703826623
+          },
+          {
+            "started": 1794703825888,
+            "bounds": [
+              "256",
+              "512",
+              "511",
+              "767"
+            ],
+            "headersAt": 1794703826174,
+            "sha256": "fed1e41d1fab61006e5e96fbbaaf1e315afcaa7029131aca01c6069a86294bae",
+            "bytes": 332891,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794703838184
+          },
+          {
+            "started": 1794703826140,
+            "bounds": [
+              "512",
+              "0",
+              "767",
+              "255"
+            ],
+            "headersAt": 1794703826459,
+            "sha256": "4a619f0b854c4e984a9a3232b80c4f88da728a21bc3b644dbb301b7829e12873",
+            "bytes": 402119,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794703838472
+          },
+          {
+            "started": 1794703826425,
+            "bounds": [
+              "512",
+              "256",
+              "767",
+              "511"
+            ],
+            "headersAt": 1794703826749,
+            "sha256": "f6e60d665059e9d61536fcd468a97c1c65dd258191f92ae0736e3234eac74e72",
+            "bytes": 186947,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794703838754
+          },
+          {
+            "started": 1794703826678,
+            "bounds": [
+              "512",
+              "512",
+              "767",
+              "767"
+            ],
+            "headersAt": 1794703827011,
+            "sha256": "b9f99894981075172a7c45002160fe5fc562cf25e6927059075743a8ae2b4f08",
+            "bytes": 223829,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794703839025
+          }
+        ],
+        "noMoveBeforeOrAfterLateCompletion": true,
+        "chat": [
+          "[Mode: Peaceful]",
+          "[Pet: Attack and Move]",
+          "Planning a route to (325, 295)…",
+          "The route map took too long to load. Please try again."
+        ]
+      },
+      "supplyPlan": {
+        "at": 1794703840049,
+        "phase": "fresh-supply-goal",
+        "query": {
+          "version": 1,
+          "stamp": {
+            "generation": 2,
+            "revision": 2,
+            "connectionGeneration": 1,
+            "sessionGeneration": 1,
+            "sceneRevision": 3,
+            "playerObjectId": 1000,
+            "mapFileName": "0"
+          },
+          "mapIndex": 1,
+          "mapFileName": "0",
+          "width": 700,
+          "height": 700,
+          "origin": {
+            "x": 325,
+            "y": 290
+          },
+          "destination": {
+            "x": 324,
+            "y": 291
+          },
+          "routeTarget": {
+            "type": "supply",
+            "vendor": "potions"
+          },
+          "occupiedTiles": [
+            {
+              "x": 324,
+              "y": 291
+            },
+            {
+              "x": 310,
+              "y": 283
+            },
+            {
+              "x": 329,
+              "y": 289
+            },
+            {
+              "x": 341,
+              "y": 275
+            }
+          ],
+          "rejectedEdges": []
+        },
+        "result": {
+          "destination": {
+            "x": 325,
+            "y": 290
+          },
+          "error": null,
+          "mapFileName": "0",
+          "mapIndex": 1,
+          "ok": true,
+          "origin": {
+            "x": 325,
+            "y": 290
+          },
+          "radius": 2,
+          "stamp": {
+            "connectionGeneration": 1,
+            "generation": 2,
+            "mapFileName": "0",
+            "playerObjectId": 1000,
+            "revision": 2,
+            "sceneRevision": 3,
+            "sessionGeneration": 1
+          },
+          "steps": [],
+          "version": 1
+        }
+      },
+      "manualStep": {
+        "at": 1794703840136,
+        "ackAt": 1794703840263,
+        "moves": [
+          {
+            "type": "walk",
+            "direction": "Down",
+            "seq": 30,
+            "at": 1794703840156
+          }
+        ],
+        "position": {
+          "x": 325,
+          "y": 291
+        }
+      },
+      "saved": {
+        "normalLogout": true,
+        "position": {
+          "x": 325,
+          "y": 291
+        },
+        "preservedFields": 12
+      },
+      "pageErrors": 0,
+      "wireFailures": 0,
+      "sourceSnapshotUnchanged": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      }
+    },
+    {
+      "name": "webgl2",
+      "passed": true,
+      "sourceReceiptSha256": "7b8916ea2b385353411aa8b0901dc4207d1d7f6f432cf701532b5e0e251ea666",
+      "nativeReadyMs": 15552,
+      "prewarm": {
+        "requested": 113,
+        "ok": 113,
+        "failed": 0
+      },
+      "originalFontRecordSha256": "4226d63d5bfbfafe63798abe48cd41f74614e776364656942df6304b30694e35",
+      "initial": {
+        "map": "0108",
+        "position": {
+          "x": 8,
+          "y": 12
+        }
+      },
+      "portal": {
+        "manifestSha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2",
+        "from": 4,
+        "file": "0108",
+        "to": 1,
+        "map_index": 1,
+        "source": {
+          "x": 10,
+          "y": 13
+        },
+        "destination": {
+          "x": 326,
+          "y": 289
+        },
+        "need_hole": false,
+        "need_move": false,
+        "conquest_index": 0,
+        "show_on_big_map": false,
+        "icon": 0
+      },
+      "interiorPlan": {
+        "at": 1794703913445,
+        "phase": "interior-route",
+        "query": {
+          "version": 1,
+          "stamp": {
+            "generation": 2,
+            "revision": 1,
+            "connectionGeneration": 1,
+            "sessionGeneration": 1,
+            "sceneRevision": 3,
+            "playerObjectId": 1000,
+            "mapFileName": "0108"
+          },
+          "mapIndex": 4,
+          "mapFileName": "0108",
+          "width": 15,
+          "height": 18,
+          "origin": {
+            "x": 8,
+            "y": 12
+          },
+          "destination": {
+            "x": 10,
+            "y": 13
+          },
+          "routeTarget": {
+            "type": "entrance"
+          },
+          "occupiedTiles": [
+            {
+              "x": 7,
+              "y": 7
+            }
+          ],
+          "rejectedEdges": []
+        },
+        "result": {
+          "destination": {
+            "x": 10,
+            "y": 13
+          },
+          "error": null,
+          "mapFileName": "0108",
+          "mapIndex": 4,
+          "ok": true,
+          "origin": {
+            "x": 8,
+            "y": 12
+          },
+          "radius": 0,
+          "stamp": {
+            "connectionGeneration": 1,
+            "generation": 2,
+            "mapFileName": "0108",
+            "playerObjectId": 1000,
+            "revision": 1,
+            "sceneRevision": 3,
+            "sessionGeneration": 1
+          },
+          "steps": [
+            {
+              "x": 9,
+              "y": 13
+            },
+            {
+              "x": 10,
+              "y": 13
+            }
+          ],
+          "version": 1
+        }
+      },
+      "afterTransfer": {
+        "map": "0",
+        "position": {
+          "x": 325,
+          "y": 290
+        }
+      },
+      "interiorMoves": [
+        {
+          "type": "walk",
+          "direction": "DownRight",
+          "at": 1794703913445
+        },
+        {
+          "type": "walk",
+          "direction": "Right",
+          "at": 1794703914055
+        }
+      ],
+      "oldMapMoves": 0,
+      "baselineReads": 1,
+      "pendingLogout": {
+        "at": 1794703921824,
+        "normalAck": true,
+        "noMoveBeforeAck": true
+      },
+      "lateCollision": {
+        "phase": "pending-logout",
+        "map": "0",
+        "url": "/api/scene/collision?map=0&quest=1&minX=0&maxX=255&minY=0&maxY=255",
+        "at": 1794703918482,
+        "sha256": "88a8a89d4835e9eebdbe30f86b4a8528865d6501e3201f6c81e5f713b4c97be6",
+        "heldAt": 1794703918730,
+        "bounds": {
+          "minX": 0,
+          "maxX": 255,
+          "minY": 0,
+          "maxY": 255
+        },
+        "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+        "releasedAt": 1794703921824,
+        "fulfilledAt": 1794703921830
+      },
+      "reopened": {
+        "map": "0",
+        "position": {
+          "x": 325,
+          "y": 290
+        }
+      },
+      "mapFeedback": {
+        "passed": true,
+        "scope": "Actual minimap click, original map collision JSON delayed12s per complete chunk, exact30s Page action deadline, no movement before or after late completion. The 15s per chunk and all geometry validation remain unchanged. Local warm-resource browser; no public latency claim.",
+        "language": "zh-TW",
+        "before": {
+          "map": "0",
+          "x": 325,
+          "y": 290
+        },
+        "readOnlyMetadata": {
+          "status": 200,
+          "sha256": "88a8a89d4835e9eebdbe30f86b4a8528865d6501e3201f6c81e5f713b4c97be6",
+          "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e"
+        },
+        "geometry": {
+          "rect": {
+            "left": 1029,
+            "top": 118,
+            "width": 120,
+            "height": 108
+          },
+          "width": 1052,
+          "height": 700,
+          "mapWidth": 700,
+          "mapHeight": 700
+        },
+        "expectedTarget": {
+          "x": 325,
+          "y": 295
+        },
+        "started": 1794703943940,
+        "planningAt": 1794703943980,
+        "timeoutAt": 1794703973980,
+        "after": {
+          "map": "0",
+          "x": 325,
+          "y": 290
+        },
+        "collision": [
+          {
+            "started": 1794703943962,
+            "bounds": [
+              "0",
+              "0",
+              "255",
+              "255"
+            ],
+            "headersAt": 1794703944245,
+            "sha256": "88a8a89d4835e9eebdbe30f86b4a8528865d6501e3201f6c81e5f713b4c97be6",
+            "bytes": 396235,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794703956267
+          },
+          {
+            "started": 1794703956289,
+            "bounds": [
+              "0",
+              "256",
+              "255",
+              "511"
+            ],
+            "headersAt": 1794703956623,
+            "sha256": "1c5117428d12286d7f396f02d1a3a33ee274730c1cfc971ecf7ec6496bc169fe",
+            "bytes": 182087,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794703968639
+          },
+          {
+            "started": 1794703956290,
+            "bounds": [
+              "0",
+              "512",
+              "255",
+              "767"
+            ],
+            "headersAt": 1794703956913,
+            "sha256": "09de35f86834510468e7f981994b0a2f4e18114acf22f509d9706a842346878f",
+            "bytes": 366915,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794703968922
+          },
+          {
+            "started": 1794703956290,
+            "bounds": [
+              "256",
+              "0",
+              "511",
+              "255"
+            ],
+            "headersAt": 1794703957191,
+            "sha256": "23b36c8fddd0b1b6d38842e0ae7bf849811f05e3403b80f2224a4fa27414c6ae",
+            "bytes": 491344,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794703969208
+          },
+          {
+            "started": 1794703956290,
+            "bounds": [
+              "256",
+              "256",
+              "511",
+              "511"
+            ],
+            "headersAt": 1794703957531,
+            "sha256": "b2ed3ae8b8d606f37138829aba3c4d11cca75ec45d08ddac3535dbb42bc6bb4e",
+            "bytes": 260297,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794703969547
+          },
+          {
+            "started": 1794703968656,
+            "bounds": [
+              "256",
+              "512",
+              "511",
+              "767"
+            ],
+            "headersAt": 1794703968939,
+            "sha256": "fed1e41d1fab61006e5e96fbbaaf1e315afcaa7029131aca01c6069a86294bae",
+            "bytes": 332891,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794703980945
+          },
+          {
+            "started": 1794703968950,
+            "bounds": [
+              "512",
+              "0",
+              "767",
+              "255"
+            ],
+            "headersAt": 1794703969205,
+            "sha256": "4a619f0b854c4e984a9a3232b80c4f88da728a21bc3b644dbb301b7829e12873",
+            "bytes": 402119,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794703981227
+          },
+          {
+            "started": 1794703969234,
+            "bounds": [
+              "512",
+              "256",
+              "767",
+              "511"
+            ],
+            "headersAt": 1794703969492,
+            "sha256": "f6e60d665059e9d61536fcd468a97c1c65dd258191f92ae0736e3234eac74e72",
+            "bytes": 186947,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794703981507
+          },
+          {
+            "started": 1794703969567,
+            "bounds": [
+              "512",
+              "512",
+              "767",
+              "767"
+            ],
+            "headersAt": 1794703969805,
+            "sha256": "b9f99894981075172a7c45002160fe5fc562cf25e6927059075743a8ae2b4f08",
+            "bytes": 223829,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794703981824
+          }
+        ],
+        "noMoveBeforeOrAfterLateCompletion": true,
+        "chat": [
+          "[模式: 和平]",
+          "[寵物: 攻擊並移動]",
+          "正在規劃前往 (325, 295) 的路線…",
+          "路線地圖載入逾時，請重試。"
+        ]
+      },
+      "supplyPlan": {
+        "at": 1794703982724,
+        "phase": "fresh-supply-goal",
+        "query": {
+          "version": 1,
+          "stamp": {
+            "generation": 2,
+            "revision": 1,
+            "connectionGeneration": 1,
+            "sessionGeneration": 1,
+            "sceneRevision": 3,
+            "playerObjectId": 1000,
+            "mapFileName": "0"
+          },
+          "mapIndex": 1,
+          "mapFileName": "0",
+          "width": 700,
+          "height": 700,
+          "origin": {
+            "x": 325,
+            "y": 290
+          },
+          "destination": {
+            "x": 324,
+            "y": 291
+          },
+          "routeTarget": {
+            "type": "supply",
+            "vendor": "potions"
+          },
+          "occupiedTiles": [
+            {
+              "x": 324,
+              "y": 291
+            },
+            {
+              "x": 310,
+              "y": 283
+            },
+            {
+              "x": 329,
+              "y": 289
+            },
+            {
+              "x": 341,
+              "y": 275
+            }
+          ],
+          "rejectedEdges": []
+        },
+        "result": {
+          "destination": {
+            "x": 325,
+            "y": 290
+          },
+          "error": null,
+          "mapFileName": "0",
+          "mapIndex": 1,
+          "ok": true,
+          "origin": {
+            "x": 325,
+            "y": 290
+          },
+          "radius": 2,
+          "stamp": {
+            "connectionGeneration": 1,
+            "generation": 2,
+            "mapFileName": "0",
+            "playerObjectId": 1000,
+            "revision": 1,
+            "sceneRevision": 3,
+            "sessionGeneration": 1
+          },
+          "steps": [],
+          "version": 1
+        }
+      },
+      "manualStep": {
+        "at": 1794703982779,
+        "ackAt": 1794703982893,
+        "moves": [
+          {
+            "type": "walk",
+            "direction": "Down",
+            "seq": 30,
+            "at": 1794703982786
+          }
+        ],
+        "position": {
+          "x": 325,
+          "y": 291
+        }
+      },
+      "saved": {
+        "normalLogout": true,
+        "position": {
+          "x": 325,
+          "y": 291
+        },
+        "preservedFields": 12
+      },
+      "pageErrors": 0,
+      "wireFailures": 0,
+      "sourceSnapshotUnchanged": true,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      }
+    }
+  ],
+  "retainedFailures": [
+    {
+      "kind": "new checks against unchanged Page",
+      "path": "F:/mir2-builds/r16-route-feedback-20261115/before-tests.log",
+      "sha256": "2c99134951de497ee1b89eeb889b6507dfaa6b86b21e12ff3adc356441185b99",
+      "result": "31 passed,10 failed,0 skip; preserves the old silent timeout/arrival behavior"
+    },
+    {
+      "kind": "locale test inventory",
+      "path": "F:/mir2-builds/r16-route-feedback-20261115/after-tests-r1.log",
+      "sha256": "e4ad42f22bfe17607b917673291f41445f0179dc7ae860893870cf0aacf610f0",
+      "result": "86 passed,11 failed; test key list still expected58 before adding the new entrance key. Product translations existed in all10. Expected inventory updated to59."
+    },
+    {
+      "kind": "first browser fixture",
+      "path": "F:/mir2-builds/r16-route-feedback-20261115/fixture-r1/run-1/receipt.json",
+      "sha256": "85f14a671327a590a98b588b1421e460de743506effb260bf6a78577f4820134",
+      "result": "QA read originalMapRegion from the debug Stage5 snapshot where it is intentionally omitted. Failed before test click, all owned processes closed. R2 uses an independent read-only actual collision endpoint for dimensions; product and budgets unchanged."
+    }
+  ],
+  "files": [
+    {
+      "path": "default-minimap-timeout.png",
+      "sha256": "7eec55265df57f74d77f6af7a8c05d6e32dbe6b0ce0dc205c4f605a8e1066fb8"
+    },
+    {
+      "path": "default-new-goal-and-movement.png",
+      "sha256": "781567da6f0c26cc75c52c66551f4ca0d715782cf5b95dc5edaa6cc0a403a84e"
+    },
+    {
+      "path": "default-original-fonts.json",
+      "sha256": "4226d63d5bfbfafe63798abe48cd41f74614e776364656942df6304b30694e35"
+    },
+    {
+      "path": "webgl2-minimap-timeout.png",
+      "sha256": "2c7b80e9276bd9eb1f9f80256583e2d69dc5ae4b41169266135c5e045a7598d2"
+    },
+    {
+      "path": "webgl2-new-goal-and-movement.png",
+      "sha256": "91bec0eba6c51a210bb8bb2e8d90158b10cd65581fb15ec824506ac8aa69479f"
+    },
+    {
+      "path": "webgl2-original-fonts.json",
+      "sha256": "4226d63d5bfbfafe63798abe48cd41f74614e776364656942df6304b30694e35"
+    },
+    {
+      "path": "navigation-regressions.log",
+      "sha256": "968ee4d11efa29c6dd60783625d9c1cbbb8be92528dea9145bf4fd481e889516"
+    }
+  ],
+  "open": [
+    "Public rollout and public route evidence",
+    "More targets/maps, physical browser mouse gestures and actual Windows GUI",
+    "Full three-class1-30, Alo, language/pixel and global Crystal parity"
+  ],
+  "productCommit": "ceb1c1132f9677ca18f7467cba5278cdca1ec9c0",
+  "visualReview": {
+    "reviewed": true,
+    "files": [
+      "default-minimap-timeout.png",
+      "default-new-goal-and-movement.png",
+      "webgl2-minimap-timeout.png",
+      "webgl2-new-goal-and-movement.png"
+    ],
+    "observations": "New English and Traditional Chinese planning/timeout text is visible. Existing mixed attack captions, supply currency language and NPC mixed names remain open."
+  }
+}
