@@ -1995,13 +1995,11 @@ export function OriginalClientShell({
     const release = process.env.MIR2_PINNED_ASSET_VERSION;
     const standing = preloadR16EntryMonsterFrames(release, "standing");
     if (!standing) return;
+    const walking = preloadR16EntryMonsterFrames(release, "walking");
+    if (!walking) return;
     let current = true;
-    void standing.then(async (assets) => {
-      if (!current) return;
-      setEntryMonsterStanding(assets);
-      const walking = await preloadR16EntryMonsterFrames(release, "walking");
-      if (current) setEntryMonsterWalking(walking);
-    });
+    void standing.then(assets => { if (current) setEntryMonsterStanding(assets); });
+    void walking.then(assets => { if (current) setEntryMonsterWalking(assets); });
     return () => { current = false; };
   }, [warmEntryMonsters]);
 

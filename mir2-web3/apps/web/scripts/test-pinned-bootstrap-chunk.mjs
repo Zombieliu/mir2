@@ -150,6 +150,17 @@ function assertWalkingPack(value) {
   }
 }
 
+test("the complete town walking pack is a high-priority playable resource and still shares one verified read",async()=>{
+  const calls=[],f=fixture(async(url,init)=>{
+    calls.push({url,init});return new Response(body(walking));
+  });
+  const first=f.entry.preloadR16EntryMonsterFrames(visuals.assetReleaseId,"walking");
+  assert.equal(f.entry.preloadR16EntryMonsterFrames(visuals.assetReleaseId,"walking"),first);
+  assertWalkingPack(await first);assert.equal(calls.length,1);assert.deepEqual(f.imports,[]);
+  assert.equal(calls[0].url,walking.path);assert.equal(calls[0].init.priority,"high");
+  assert.equal(calls[0].init.cache,"force-cache");assert.equal(calls[0].init.credentials,"omit");
+});
+
 // Reproduce both positive-byte idle failures from the public receipt. No partial
 // buffer is a valid pack, and no third JSON request is authorized by the chunk.
 test("two positive partial walking bodies recover the exact original pack through one compiled observation",async t=>{
@@ -173,7 +184,7 @@ test("two positive partial walking bodies recover the exact original pack throug
   t.mock.timers.tick(7999);await settle();assert.equal(calls[1].init.signal.aborted,false);
   t.mock.timers.tick(1);const pack=await first;assertWalkingPack(pack);
   assert.deepEqual(calls.map(({url,init})=>[url,init.cache,init.credentials,init.priority]),[
-    [walking.path,"force-cache","omit","low"],[walking.path,"reload","omit","low"],
+    [walking.path,"force-cache","omit","high"],[walking.path,"reload","omit","high"],
   ]);
   assert.equal(f.imports.length,1);assert(f.imports[0].endsWith(walking.path));
   assert.deepEqual(cancellations.map(value=>value.ordinal),[0,1]);
@@ -236,7 +247,30 @@ test("standing failure and another release cannot start the walking compiled fal
   assert.equal(calls,2);assert.deepEqual(f.imports,[]);
 });
 
-test("the unchanged Shell monster effect suppresses a retired observer and shares verified walking recovery with the live entry",async t=>{
+test("the actual town effect starts walking independently of a pending standing pack and drops late owner updates",async()=>{
+  const source=read(new URL("../app/original-client-shell.tsx",lib));
+  const tree=ts.createSourceFile("original-client-shell.tsx",source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
+  let effect;
+  const visit=node=>{
+    if(ts.isCallExpression(node)&&node.expression.getText(tree)==="useEffect"&&
+      node.arguments[1]?.getText(tree)==="[warmEntryMonsters]")effect=node.arguments[0].getText(tree);
+    ts.forEachChild(node,visit);
+  };visit(tree);assert(effect);
+  const standing=deferred(),walking=deferred(),calls=[],updates=[],exports={};
+  new Function("exports","warmEntryMonsters","process","preloadR16EntryMonsterFrames","setEntryMonsterStanding","setEntryMonsterWalking",
+    compile(`exports.effect=${effect};`))(
+    exports,true,{env:{MIR2_PINNED_ASSET_VERSION:visuals.assetReleaseId}},
+    (release,action)=>{assert.equal(release,visuals.assetReleaseId);calls.push(action);return(action==="standing"?standing:walking).promise;},
+    value=>updates.push({action:"standing",value}),value=>updates.push({action:"walking",value}),
+  );
+  const cleanup=exports.effect();assert.deepEqual(calls,["standing","walking"]);
+  walking.resolve(JSON.parse(body(visuals.monsterWalking)));await settle();
+  assert.equal(updates.length,1);assert.equal(updates[0].action,"walking");assertWalkingPack(updates[0].value);
+  cleanup();standing.resolve(JSON.parse(body(visuals.monsterStanding)));await settle();
+  assert.equal(updates.length,1,"a late standing response belongs to the retired owner");
+});
+
+test("the actual Shell monster effect suppresses a retired observer and shares verified walking recovery with the live entry",async t=>{
   t.mock.timers.enable({apis:["setTimeout"]});
   const shell=read(new URL("../app/original-client-shell.tsx",lib));
   const tree=ts.createSourceFile("original-client-shell.tsx",shell,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
@@ -263,6 +297,7 @@ test("the unchanged Shell monster effect suppresses a retired observer and share
   };
   const cleanup=start(retired);
   for(let i=0;i<100&&!walkingPromises.length;i++)await settle();assert.equal(walkingPromises.length,1);
+  await settle();
   t.mock.timers.tick(200);await settle();assert.equal(f.imports.length,1);
   cleanup();const liveCleanup=start(live);await settle();assert.equal(walkingPromises.length,2);
   assert.equal(walkingPromises[0],walkingPromises[1]);blocked.resolve();await Promise.all(walkingPromises);await settle();

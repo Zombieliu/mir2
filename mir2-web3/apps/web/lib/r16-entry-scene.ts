@@ -232,7 +232,9 @@ export function loadR16EntryNpcsWithRecovery(
 export function preloadR16EntryMonsterFrames(pinnedRelease: string | undefined, action: EntryMonsterAction) {
   if (!entryVisualsMatch(pinnedRelease)) return null;
   const asset = action === "standing" ? entryVisuals.monsterStanding : entryVisuals.monsterWalking;
-  return preloadVisual(asset, actorLoads, action === "walking" ? "low" : undefined, "force-cache",
+  // Town walking frames are needed by the playable scene, alongside the
+  // standing bodies. Do not queue them behind optional background images.
+  return preloadVisual(asset, actorLoads, action === "walking" ? "high" : undefined, "force-cache",
     action === "walking" ? readR16EntryMonsterWalkingChunk : undefined);
 }
 
