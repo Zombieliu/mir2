@@ -19,6 +19,21 @@ const startup = { manifest: { version: "fixed-version" } };
 const deferred = () => { let resolve, reject; const promise = new Promise((a, b) => { resolve = a; reject = b; }); return { promise, resolve, reject }; };
 const flush = () => new Promise(setImmediate);
 
+test("a prepared binary is requested for the exact immutable module and initializer owner", async () => {
+  const module = await WebAssembly.compile(Buffer.from("0061736d01000000", "hex"));
+  const prepared = Promise.resolve(module), owner = new AbortController(), calls = [];
+  const headers = () => {};
+  const actual = loader(async (path, _wasm, _fallback, options) => {
+    assert.equal(options.getPreparedBinary(owner.signal), prepared);
+    assert.equal(calls[0].path, path); return {};
+  });
+  await actual("webgpu", startup, {
+    onResponseHeaders: headers,
+    getPreparedBinary: (path, signal, callback) => { calls.push({ path, signal, callback }); return prepared; },
+  });
+  assert.equal(calls.length, 1); assert.equal(calls[0].signal, owner.signal); assert.equal(calls[0].callback, headers);
+});
+
 test("owner replacement evicts only its pending source before initialization", async () => {
   const records = [], retired = new AbortController(), active = new AbortController();
   const actual = loader((_js, _wasm, _fallback, options) => {

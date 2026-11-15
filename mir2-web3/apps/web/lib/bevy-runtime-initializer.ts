@@ -15,27 +15,9 @@ export type RuntimeBinaryAttempt = {
   retryable?: boolean;
 };
 
-/** Stream one pinned binary at a time while importing its glue, then initialize at the canvas. */
-export async function initializeBevyRuntime<T extends RuntimeInitializer>({
-  loadModule,
-  wasmUrl,
-  wasmFallbackUrls = [],
-  waitForCanvas,
-  timeoutMs,
-  bodyIdleTimeoutMs = 15_000,
-  bodyTimeoutMs = 600_000,
-  maxBodyBytes = 32 * 1024 * 1024,
-  fetchImpl = fetch,
-  onDownloadAttempt,
-  takeRecovery,
-  ownerSignal,
-  onInitializationStarted,
-  onResponseHeaders,
-}: {
-  loadModule: () => Promise<T>;
+export type RuntimeBinaryOptions = {
   wasmUrl: string;
   wasmFallbackUrls?: readonly string[];
-  waitForCanvas: () => Promise<void>;
   timeoutMs: number;
   bodyIdleTimeoutMs?: number;
   bodyTimeoutMs?: number;
@@ -44,25 +26,24 @@ export async function initializeBevyRuntime<T extends RuntimeInitializer>({
   onDownloadAttempt?: (attempt: RuntimeBinaryAttempt) => void;
   takeRecovery?: () => boolean;
   ownerSignal?: AbortSignal;
-  onInitializationStarted?: () => void;
   onResponseHeaders?: () => void;
-}): Promise<T> {
+};
+
+/** Download and compile the immutable package without importing glue or creating an App. */
+export async function compileBevyRuntimeBinary({
+  wasmUrl, wasmFallbackUrls = [], timeoutMs, bodyIdleTimeoutMs = 15_000,
+  bodyTimeoutMs = 600_000, maxBodyBytes = 32 * 1024 * 1024,
+  fetchImpl = fetch, onDownloadAttempt, takeRecovery, ownerSignal, onResponseHeaders,
+}: RuntimeBinaryOptions): Promise<WebAssembly.Module> {
   if (ownerSignal?.aborted) throw ownerSignal.reason;
   const controller = new AbortController();
-  let defaultStarted = false;
-  const uncertain = () => Object.assign(new Error("Runtime initializer owner retired after initialization began; fresh page required"), {
-    runtimeInitializationUncertain: true,
-  });
-  const abortOwner = () => controller.abort(defaultStarted ? uncertain() : ownerSignal?.reason);
+  const abortOwner = () => controller.abort(ownerSignal?.reason);
   ownerSignal?.addEventListener("abort", abortOwner, { once: true });
-  const scriptTimeout = setTimeout(() => controller.abort(), timeoutMs);
-  let initializationTimeout: ReturnType<typeof setTimeout> | undefined;
   let onAbort: (() => void) | undefined;
   const cancelled = new Promise<never>((_, reject) => {
     onAbort = () => reject(controller.signal.reason);
     controller.signal.addEventListener("abort", onAbort, { once: true });
   });
-  // Also cover synchronous import failures which exit before the race is built.
   void cancelled.catch(() => {});
   const recoveryCooldown = () => new Promise<void>((resolve, reject) => {
     if (controller.signal.aborted) { reject(controller.signal.reason); return; }
@@ -248,9 +229,74 @@ export async function initializeBevyRuntime<T extends RuntimeInitializer>({
     throw lastError ?? new TypeError("Failed to fetch runtime binary");
   };
   try {
+    return await Promise.race([compile(), cancelled]);
+  } finally {
+    if (onAbort) controller.signal.removeEventListener("abort", onAbort);
+    ownerSignal?.removeEventListener("abort", abortOwner);
+    controller.abort();
+  }
+}
+
+/** Stream one pinned binary at a time while importing its glue, then initialize at the canvas. */
+export async function initializeBevyRuntime<T extends RuntimeInitializer>({
+  loadModule,
+  wasmUrl,
+  wasmFallbackUrls = [],
+  waitForCanvas,
+  timeoutMs,
+  bodyIdleTimeoutMs = 15_000,
+  bodyTimeoutMs = 600_000,
+  maxBodyBytes = 32 * 1024 * 1024,
+  fetchImpl = fetch,
+  onDownloadAttempt,
+  takeRecovery,
+  ownerSignal,
+  onInitializationStarted,
+  onResponseHeaders,
+  getPreparedBinary,
+}: {
+  loadModule: () => Promise<T>;
+  wasmUrl: string;
+  wasmFallbackUrls?: readonly string[];
+  waitForCanvas: () => Promise<void>;
+  timeoutMs: number;
+  bodyIdleTimeoutMs?: number;
+  bodyTimeoutMs?: number;
+  maxBodyBytes?: number;
+  fetchImpl?: typeof fetch;
+  onDownloadAttempt?: (attempt: RuntimeBinaryAttempt) => void;
+  takeRecovery?: () => boolean;
+  ownerSignal?: AbortSignal;
+  onInitializationStarted?: () => void;
+  onResponseHeaders?: () => void;
+  getPreparedBinary?: (signal: AbortSignal) => Promise<WebAssembly.Module> | undefined;
+}): Promise<T> {
+  if (ownerSignal?.aborted) throw ownerSignal.reason;
+  const controller = new AbortController();
+  let defaultStarted = false;
+  const uncertain = () => Object.assign(new Error("Runtime initializer owner retired after initialization began; fresh page required"), {
+    runtimeInitializationUncertain: true,
+  });
+  const abortOwner = () => controller.abort(defaultStarted ? uncertain() : ownerSignal?.reason);
+  ownerSignal?.addEventListener("abort", abortOwner, { once: true });
+  const scriptTimeout = setTimeout(() => controller.abort(), timeoutMs);
+  let initializationTimeout: ReturnType<typeof setTimeout> | undefined;
+  let onAbort: (() => void) | undefined;
+  const cancelled = new Promise<never>((_, reject) => {
+    onAbort = () => reject(controller.signal.reason);
+    controller.signal.addEventListener("abort", onAbort, { once: true });
+  });
+  // Also cover synchronous import failures which exit before the race is built.
+  void cancelled.catch(() => {});
+  try {
+    const prepared = getPreparedBinary?.(controller.signal);
     const script = Promise.resolve(loadModule()).finally(() => clearTimeout(scriptTimeout));
     const initialize = async () => {
-      const [runtime, compiled] = await Promise.all([script, compile()]);
+      const [runtime, compiled] = await Promise.all([script, prepared ?? compileBevyRuntimeBinary({
+        wasmUrl, wasmFallbackUrls, timeoutMs, bodyIdleTimeoutMs, bodyTimeoutMs,
+        maxBodyBytes, fetchImpl, onDownloadAttempt, takeRecovery,
+        ownerSignal: controller.signal, onResponseHeaders,
+      })]);
       if (controller.signal.aborted) throw controller.signal.reason;
       initializationTimeout = setTimeout(() => {
         if (!defaultStarted) { controller.abort(); return; }

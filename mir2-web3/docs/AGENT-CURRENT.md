@@ -14,7 +14,7 @@ Short routing summary, updated 2026-11-16 (Asia/Shanghai). This indexes recorded
 
 ## Last recorded decisions and open work
 
-2026-11-16 ef6已实际发布：本地235项／构建／三场，Linux310／PG216及1841文件SHA，57提交／314文件来源链和113发布保护通过。公网R1完整功能、行走原JSON、六字体113、Q／Worker／注销通过，但运行包146013ms、Native191284ms均超原120秒；R2未跑，两端已回退20de／AWss＋fd3，独立读回和简繁扫码复验。原311／223／223行与22配置保持，新QA进度保留，29份WIP保持，浏览器／SSH关闭。下一项查运行包首次在首帧后才发起及正文竞争，保持原8／65／120／20和完整资源，不原样重发。整体1:1继续，Goal active。[实际发布与恢复](evidence/r16-hud-foundation-order-20261116/production/README.md)。
+2026-11-16 新增普通选角预下载/编译，首帧后只接管同包，不提前创建App；147项、Chrome6场、严格构建和英繁两整局通过。请求提前8974/8349ms，首步108/147ms，Native25080/52755ms；每页面一次WASM，六字体SHA/113、Q和正常重登同档通过。29份WIP保持，六份私有覆盖已恢复，全部浏览器/服务关闭。本轮未发布；正式仍20de＋fd3，前轮ef6公网146013/191284超时回退保留。下一项查公网大正文缓存/传输及匹配发行，守原门槛和完整资源，整体1:1与Goal继续。[选角预下载候选](evidence/r16-runtime-selection-preparation-20261116/README.md)。
 
 2026-11-15 用户补充寻路“目标不对或到不了”：本地候选ceb1c1132f补大小地图坐标／30秒初始期限／到达反馈和十语入口说明。152项、独立严格构建与英繁两后端实际跨图／慢碰撞超时／晚到零旧移动／重登新目标／正常保存通过，30份内容WIP保持。本轮未发布；其他目标与既有公网资源失败继续。[记录与范围](evidence/r16-route-feedback-20261115/README.md)
 

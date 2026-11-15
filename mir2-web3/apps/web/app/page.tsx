@@ -45,7 +45,8 @@ import {
   type Mir2Language,
 } from "../lib/localization";
 import { R16_FULL_CJK_FONT_CSS } from "../lib/r16-cjk-fonts";
-import { initializeBevyRuntime } from "../lib/bevy-runtime-initializer";
+import { compileBevyRuntimeBinary, initializeBevyRuntime } from "../lib/bevy-runtime-initializer";
+import { BevyRuntimePreparation } from "../lib/bevy-runtime-preparation";
 import { hasR16GameplayLocalization, hasR16NpcLocalization, loadR16GameplayLocalization, loadR16NpcLocalization } from "../lib/r16-native-localization";
 import { commerceRuntimeLanguage, questRuntimeLanguage } from "../lib/r16-runtime-language";
 import { r16QuestGuidanceProfile, shouldAutoStartR16Tutorial } from "../lib/r16-gameplay-baseline";
@@ -3359,6 +3360,8 @@ export default function HomePage() {
   const shouldLoadGameplayLocale = screen !== "login";
   const [assetFirstPlayable, setAssetFirstPlayable] = useState(false);
   const shouldBootBevyRuntime = screen === "game" && assetFirstPlayable;
+  const retainRuntimePreparation = screen === "select" || screen === "game";
+  const runtimeBinaryPreparationRef = useRef<BevyRuntimePreparation | null>(null);
   const [npcLocaleReady, setNpcLocaleReady] = useState(hasR16NpcLocalization);
   const npcLanguage = questDisplayLanguage(language);
   const npcDialogLanguage = npcLocaleReady ? npcLanguage : undefined;
@@ -5546,6 +5549,62 @@ export default function HomePage() {
     return tiles;
   }, [viewportCenter, world.sceneView, viewportLayout]);
 
+  useEffect(function prepareRuntimeAtCharacterSelection() {
+    if (!retainRuntimePreparation || screenRef.current !== "select") return;
+    let disposed = false;
+    let preparation: BevyRuntimePreparation | undefined;
+    async function prepare() {
+      const params = new URLSearchParams(window.location.search);
+      const decision = resolveBevyRuntimeBootDecision({
+        layout: clientProfile.layout, input: clientProfile.input,
+        coarsePointer: window.matchMedia?.("(pointer: coarse)").matches ?? false,
+        maxTouchPoints: navigator.maxTouchPoints ?? 0, userAgent: navigator.userAgent, params,
+      });
+      const runtimeWindow = window as typeof window & {
+        __mir2BevyRuntimeBooted?: boolean;
+        __mir2BevyRuntimeBootAttempted?: boolean;
+        __mir2BevyRuntimeFailed?: boolean;
+        __mir2BevyRuntimeRetryable?: boolean;
+      };
+      if (decision.mode !== "eager" || !bevyRuntimeStartup.runtimeAllowed ||
+          runtimeWindow.__mir2BevyRuntimeBooted || runtimeWindow.__mir2BevyRuntimeBootAttempted ||
+          (runtimeWindow.__mir2BevyRuntimeFailed && !runtimeWindow.__mir2BevyRuntimeRetryable)) return;
+      const support = await detectBevyRuntimeSupport();
+      if (disposed) return;
+      const backend = selectBevyRuntimeBackend(params, support);
+      const selectedPackage = backend && getBevyRuntimePackageForBackend(bevyRuntimeStartup, backend);
+      if (!selectedPackage || !bevyRuntimeStartup.manifest) return;
+      const version = bevyRuntimeStartup.manifest.version;
+      const remote = createBevyRuntimeUrls(version, selectedPackage.id, BEVY_RUNTIME_ASSET_BASE_URL);
+      const local = createBevyRuntimeUrls(version, selectedPackage.id);
+      if (bevyRuntimeModuleLoads.has(remote.moduleUrl)) return;
+      preparation = new BevyRuntimePreparation(remote.moduleUrl, (signal, onResponseHeaders) =>
+        compileBevyRuntimeBinary({
+          wasmUrl: local.wasmUrl, wasmFallbackUrls: [remote.wasmUrl],
+          timeoutMs: BEVY_RUNTIME_BOOT_TIMEOUT_MS, ownerSignal: signal, onResponseHeaders,
+          onDownloadAttempt: (attempt) => markMir2CacheMilestone("bevyRuntimeDownload", {
+            ...attempt, preparation: true,
+          }),
+          takeRecovery: () => {
+            if (disposed || signal.aborted || runtimeDownloadRecoveryRef.current.has(remote.moduleUrl)) return false;
+            runtimeDownloadRecoveryRef.current.add(remote.moduleUrl);
+            markMir2CacheMilestone("bevyRuntimeDownloadRecovery", { sourceKey: remote.moduleUrl });
+            return true;
+          },
+        }));
+      runtimeBinaryPreparationRef.current = preparation;
+      markMir2CacheMilestone("bevyRuntimePreparationStart", { backend, packageId: selectedPackage.id, stage: "character-select" });
+    }
+    void prepare().catch(() => { /* Normal game startup retains its existing error boundary. */ });
+    return () => {
+      disposed = true;
+      preparation?.dispose();
+      if (runtimeBinaryPreparationRef.current === preparation) runtimeBinaryPreparationRef.current = null;
+    };
+    // Keep the same binary owner across select -> game. The existing game effect
+    // still owns initialization, first-frame readiness, fonts, HUD and re-entry.
+  }, [bevyRuntimeStartup, clientProfile.input, clientProfile.layout, retainRuntimePreparation]);
+
   useEffect(() => {
     let disposed = false;
     const fontPrewarmController = new AbortController();
@@ -5718,6 +5777,7 @@ export default function HomePage() {
           runtime = await loadBevyRuntimeModule(runtimeBackend, bevyRuntimeStartup, {
             ownerSignal: runtimeOwner.signal, takeRecovery: takeRuntimeRecovery,
             onResponseHeaders: handleRuntimeHeaders,
+            getPreparedBinary: (key, signal, onHeaders) => runtimeBinaryPreparationRef.current?.take(key, signal, onHeaders),
           });
         } catch (error) {
           if (shouldRetryBevyRuntimeWithWebGl2(runtimeBackend, runtimeSupport.webgl2, error)) {
@@ -5734,6 +5794,7 @@ export default function HomePage() {
             runtime = await loadBevyRuntimeModule(runtimeBackend, bevyRuntimeStartup, {
               ownerSignal: runtimeOwner.signal, takeRecovery: takeRuntimeRecovery,
               onResponseHeaders: handleRuntimeHeaders,
+              getPreparedBinary: (key, signal, onHeaders) => runtimeBinaryPreparationRef.current?.take(key, signal, onHeaders),
             });
           } else {
             throw error;
@@ -22944,6 +23005,7 @@ type RuntimeModuleLoadOwner = {
   ownerSignal?: AbortSignal;
   takeRecovery?: (sourceKey: string) => boolean;
   onResponseHeaders?: () => void;
+  getPreparedBinary?: (key: string, signal: AbortSignal, onResponseHeaders?: () => void) => Promise<WebAssembly.Module> | undefined;
 };
 const bevyRuntimeModuleLoads = new Map<string, RuntimeModuleLoad>();
 
@@ -22986,6 +23048,8 @@ async function loadBevyRuntimeModule(
       ownerSignal: owner.ownerSignal,
       takeRecovery: owner.takeRecovery ? () => owner.takeRecovery!(runtimePath) : undefined,
       onResponseHeaders: owner.onResponseHeaders,
+      getPreparedBinary: owner.getPreparedBinary
+        ? (signal) => owner.getPreparedBinary!(runtimePath, signal, owner.onResponseHeaders) : undefined,
       onInitializationStarted: () => { record.initializationStarted = true; },
     });
   } catch (error) {
@@ -23024,6 +23088,7 @@ async function initializeBevyRuntimeModule(
     takeRecovery?: () => boolean;
     onInitializationStarted?: () => void;
     onResponseHeaders?: () => void;
+    getPreparedBinary?: (signal: AbortSignal) => Promise<WebAssembly.Module> | undefined;
   } = {},
 ): Promise<RuntimeModule> {
   return initializeBevyRuntime({

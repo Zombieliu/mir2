@@ -1,0 +1,13 @@
+{
+  "buildId": "ZMCK5Xwe_LW1wLAwN66iZ",
+  "candidate": "r16-selection-aef8e659",
+  "rows": [
+    {
+      "path": "static/chunks/2007-294998d5a0fb5a96.js",
+      "bytes": 3006722,
+      "sha256": "70c98d0d46ab2c19702a2896cd970abd2940bc399adee1f47be71e98a0d5ca89",
+      "hasPreparationMilestone": true,
+      "hasSelectionStage": true
+    }
+  ]
+}

@@ -38,7 +38,7 @@ function actualBoot({playable=true,mode='eager',allowed=true,criticalPending=fal
   shouldRetryBevyRuntimeWithWebGl2:backend=>retryWithWebGl2&&backend==='webgpu',canRetryBevyRuntimeBeforeBoot:()=>true,
   safeLocalStorageRemove:noop,
   isBevyRuntimeNetworkFailure:()=>true,scheduleBevyRuntimeCacheRecovery:()=>false,
-  runtimeRef:ref(),runtimeDownloadRecoveryRef:{current:recoveryBudget},lastBevyEntityRenderStateJsonRef:ref(),lastBevyMapRenderStateJsonRef:ref(),lastBevyMapCameraOffsetRef:ref(),
+  runtimeRef:ref(),runtimeBinaryPreparationRef:ref(),runtimeDownloadRecoveryRef:{current:recoveryBudget},lastBevyEntityRenderStateJsonRef:ref(),lastBevyMapRenderStateJsonRef:ref(),lastBevyMapCameraOffsetRef:ref(),
   prewarmBevyRuntimeFonts:options=>{events.push({name:'fonts'});fontSignals.push(options.signal);return new Promise(resolve=>{finishFonts=resolve;});},
   prewarmBevyRuntimePrimaryFont:options=>{events.push({name:'primary-font'});primarySignals.push(options.signal);return new Promise((resolve,reject)=>{finishPrimary=resolve;failPrimary=reject;});},
   loadBevyRuntimeModule:(backend,_startup,options)=>{runtimeOptions.push(options);runtimeBackends.push(backend);events.push({name:'module',backend});return new Promise((resolve,reject)=>{finishModule=resolve;failModule=reject;});},

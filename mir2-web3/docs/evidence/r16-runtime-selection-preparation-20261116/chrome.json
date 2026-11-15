@@ -1,0 +1,255 @@
+{
+  "passed": true,
+  "scope": "Actual Chrome, immutable WASM compilation and selection-to-game transfer over loopback; no game account, production timing, GPU or whole-game acceptance",
+  "hashes": {
+    "initializer": "4330b17d64fbbe3dcf5743726f05f5d867f65a369b9792a6f884a669c903fcbf",
+    "preparation": "5ae850d347d216233b7cde54b1f132eca97d9c61ce09b7cf1acdb81cca9b8c54"
+  },
+  "closed": {
+    "browser": true,
+    "server": true
+  },
+  "browserVersion": "157.0.8103.78",
+  "cases": [
+    {
+      "name": "inflight",
+      "initialImports": 0,
+      "imports": 1,
+      "initialized": 1,
+      "answer": 42,
+      "errorName": null,
+      "requests": 1,
+      "sourceAborted": true,
+      "events": [
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        "headers-adopted",
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "completed",
+          "phase": "compile",
+          "bytes": 39,
+          "status": 200
+        }
+      ]
+    },
+    {
+      "name": "complete",
+      "initialImports": 0,
+      "imports": 1,
+      "initialized": 1,
+      "answer": 42,
+      "errorName": null,
+      "requests": 1,
+      "sourceAborted": true,
+      "events": [
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "completed",
+          "phase": "compile",
+          "bytes": 39,
+          "status": 200
+        },
+        "headers-adopted"
+      ]
+    },
+    {
+      "name": "cancel-selection",
+      "initialImports": 0,
+      "imports": 0,
+      "initialized": 0,
+      "answer": null,
+      "errorName": null,
+      "requests": 1,
+      "sourceAborted": true,
+      "events": [
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "failed",
+          "phase": "headers",
+          "bytes": 0,
+          "reason": "cancelled",
+          "retryable": false
+        }
+      ]
+    },
+    {
+      "name": "cancel-game",
+      "initialImports": 0,
+      "imports": 1,
+      "initialized": 0,
+      "answer": null,
+      "errorName": "AbortError",
+      "requests": 1,
+      "sourceAborted": true,
+      "events": [
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        "headers-adopted",
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "failed",
+          "phase": "body",
+          "bytes": 8,
+          "status": 200,
+          "reason": "cancelled",
+          "retryable": false
+        }
+      ]
+    },
+    {
+      "name": "invalid",
+      "initialImports": 0,
+      "imports": 1,
+      "initialized": 0,
+      "answer": null,
+      "errorName": "CompileError",
+      "requests": 1,
+      "sourceAborted": true,
+      "events": [
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "failed",
+          "phase": "compile",
+          "bytes": 12,
+          "status": 200,
+          "reason": "invalid-binary",
+          "retryable": false
+        },
+        "headers-adopted"
+      ]
+    },
+    {
+      "name": "changed",
+      "initialImports": 0,
+      "imports": 1,
+      "initialized": 1,
+      "answer": 42,
+      "errorName": null,
+      "requests": 2,
+      "sourceAborted": true,
+      "events": [
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "started",
+          "phase": "headers",
+          "bytes": 0
+        },
+        {
+          "attempt": 1,
+          "sourceIndex": 0,
+          "retry": false,
+          "state": "failed",
+          "phase": "body",
+          "bytes": 8,
+          "status": 200,
+          "reason": "cancelled",
+          "retryable": false
+        }
+      ]
+    }
+  ],
+  "origins": [
+    "http://127.0.0.1:49480"
+  ],
+  "pageErrors": [],
+  "requests": [
+    {
+      "name": "inflight",
+      "kind": "pinned",
+      "at": 1794768372715
+    },
+    {
+      "name": "complete",
+      "kind": "pinned",
+      "at": 1794768372731
+    },
+    {
+      "name": "cancel-selection",
+      "kind": "pinned",
+      "at": 1794768372744
+    },
+    {
+      "name": "cancel-game",
+      "kind": "pinned",
+      "at": 1794768372760
+    },
+    {
+      "name": "invalid",
+      "kind": "pinned",
+      "at": 1794768372763
+    },
+    {
+      "name": "changed",
+      "kind": "pinned",
+      "at": 1794768372777
+    },
+    {
+      "name": "changed",
+      "kind": "fresh",
+      "at": 1794768372789
+    }
+  ],
+  "abortedBodies": [
+    {
+      "name": "cancel-selection",
+      "kind": "pinned"
+    },
+    {
+      "name": "cancel-game",
+      "kind": "pinned"
+    },
+    {
+      "name": "changed",
+      "kind": "pinned"
+    }
+  ]
+}
