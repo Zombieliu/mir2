@@ -17,7 +17,15 @@ mir2/v/37596e16d64fde7c/original-ui/Monster/003/52.png
 
 The Worker keeps immutable game assets cached at the edge, supports CORS for
 the Player Web Service Worker, stamps CORS headers on both fresh R2 responses
-and Cache API hits, and bypasses the cache for byte-range requests.
+and Cache API hits. Single-range requests for original `.otf`/`.ttf` fonts can
+reuse an already cached complete font through Cloudflare's Cache API. The lookup
+has a 500 ms budget; a miss, cache failure or inconsistent partial response falls
+back to R2. Other byte-range requests continue to bypass the cache.
+
+Cached font ranges must be unencoded 206 responses with a valid, matching
+`Content-Range` and `Content-Length`. This path streams the cached slice without
+buffering the complete font and never stores a 206 response. It does not warm a
+missing complete font or imply that caches in other Cloudflare locations are warm.
 
 Single closed/open byte ranges use R2's returned `offset` and `length`, clamped
 to the object size. The Worker checks this metadata against the requested range

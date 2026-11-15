@@ -36,13 +36,31 @@ class Bucket {
   }
 }
 
-function setup() {
+function setup({ match } = {}) {
   const bucket = new Bucket();
   const cache = new Map();
   const reads = [], writes = [], pending = [];
   const previous = globalThis.caches;
   globalThis.caches = { default: {
-    async match(request) { reads.push(request.url); return cache.get(request.url)?.clone(); },
+    async match(request) {
+      reads.push(request.url);
+      if (match) return match(request);
+      const cached = cache.get(request.url)?.clone();
+      const range = /^bytes=(\d+)-(\d*)$/i.exec(request.headers.get("range") ?? "");
+      // Cloudflare slices a cached complete response when Content-Length exists.
+      // The real Cache API behavior is separately exercised in workerd.
+      if (cached?.status === 200 && cached.headers.has("content-length") && range) {
+        const value = new Uint8Array(await cached.arrayBuffer());
+        const offset = Number(range[1]);
+        const end = Math.min(range[2] ? Number(range[2]) : value.length - 1, value.length - 1);
+        if (offset >= value.length) return undefined;
+        const headers = new Headers(cached.headers);
+        headers.set("content-range", `bytes ${offset}-${end}/${value.length}`);
+        headers.set("content-length", String(end - offset + 1));
+        return new Response(value.slice(offset, end + 1), { status: 206, headers });
+      }
+      return cached;
+    },
     async put(request, response) {
       writes.push(request.url);
       const body = await response.arrayBuffer();
@@ -81,7 +99,7 @@ for (const [range, contentRange, body] of [
       assert.equal(response.headers.get("access-control-allow-origin"), "*");
       assert.match(response.headers.get("access-control-expose-headers"), /content-range/);
       assert.equal(await response.text(), body);
-      assert.equal(f.reads.length, 0);
+      assert.equal(f.reads.length, 1);
       assert.equal(f.writes.length, 0);
     } finally { await f.close(); }
   });
@@ -104,6 +122,115 @@ test("hotlink alias preserves the same R2 range and overlay fallback", async () 
     ]);
   } finally { await f.close(); }
 });
+
+for (const [range, contentRange, body] of [
+  ["bytes=0-3", "bytes 0-3/10", "0123"],
+  ["bytes=4-", "bytes 4-9/10", "456789"],
+  ["bytes=8-99", "bytes 8-9/10", "89"],
+  ["Bytes=2-4", "bytes 2-4/10", "234"],
+]) {
+  test(`complete font edge cache serves ${range} without another R2 read`, async () => {
+    const f = setup();
+    try {
+      f.bucket.put();
+      assert.equal(await (await f.fetch()).text(), "0123456789");
+      await f.flush();
+      const response = await f.fetch({ Range: range }, "GET",
+        url.replace(".build/", ".build/hotlink-ok/") + "?retry=2");
+      assert.equal(response.status, 206);
+      assert.equal(response.headers.get("x-mir2-edge-cache"), "HIT");
+      assert.equal(response.headers.get("content-range"), contentRange);
+      assert.equal(response.headers.get("content-length"), String(body.length));
+      assert.equal(response.headers.get("access-control-allow-origin"), "*");
+      assert.match(response.headers.get("access-control-expose-headers"), /content-range/);
+      assert.equal(await response.text(), body);
+      assert.deepEqual(f.reads, [url, url]);
+      assert.equal(f.bucket.calls.length, 1);
+      assert.equal(f.writes.length, 1, "partial responses must never be stored");
+    } finally { await f.close(); }
+  });
+}
+
+for (const invalid of [
+  { status: 200 },
+  { headers: { "content-range": "bytes 0-3/10" } },
+  { headers: { "content-range": "bytes 2-6/10" } },
+  { headers: { "content-range": "bytes 2-5/*" } },
+  { headers: { "content-range": "bytes 2-5/99999999999999999999" } },
+  { headers: { "content-length": "3" } },
+  { headers: { "content-length": "4.0" } },
+  { headers: { "content-length": "" } },
+  { headers: { "content-encoding": "gzip" } },
+  { headers: { "x-mir2-storage-content-encoding": "gzip" } },
+]) {
+  test(`unusable cached range falls through to exact R2 bytes: ${JSON.stringify(invalid)}`, async () => {
+    let cancelled = 0;
+    const f = setup({ match: () => new Response(new ReadableStream({ cancel() { cancelled++; } }), {
+      status: invalid.status ?? 206,
+      headers: { "content-range": "bytes 2-5/10", "content-length": "4", ...invalid.headers },
+    }) });
+    try {
+      f.bucket.put();
+      const response = await f.fetch({ Range: "bytes=2-5" });
+      assert.equal(response.status, 206);
+      assert.equal(response.headers.get("x-mir2-edge-cache"), "BYPASS");
+      assert.equal(response.headers.get("content-range"), "bytes 2-5/10");
+      assert.equal(await response.text(), "2345");
+      assert.equal(cancelled, 1);
+      assert.equal(f.bucket.calls.length, 1);
+      assert.equal(f.writes.length, 0);
+    } finally { await f.close(); }
+  });
+}
+
+test("cache exceptions do not break a ranged font download", async () => {
+  const f = setup({ match: () => { throw new Error("cache unavailable"); } });
+  try {
+    f.bucket.put();
+    const response = await f.fetch({ Range: "bytes=2-5" });
+    assert.equal(response.headers.get("x-mir2-edge-cache"), "BYPASS");
+    assert.equal(await response.text(), "2345");
+    assert.equal(f.bucket.calls.length, 1);
+  } finally { await f.close(); }
+});
+
+test("slow cache is bounded and a late range body is cancelled", async () => {
+  let finish, cancelled = 0;
+  const f = setup({ match: () => new Promise(resolve => { finish = resolve; }) });
+  try {
+    f.bucket.put();
+    const start = performance.now();
+    const response = await f.fetch({ Range: "bytes=2-5" });
+    assert.ok(performance.now() - start < 1500, "cache must not consume the font header budget");
+    assert.equal(await response.text(), "2345");
+    assert.equal(f.bucket.calls.length, 1);
+    assert.equal(typeof finish, "function", "cache lookup must have been attempted");
+    finish(new Response(new ReadableStream({ cancel() { cancelled++; } }), {
+      status: 206, headers: { "content-range": "bytes 2-5/10", "content-length": "4" },
+    }));
+    await new Promise(resolve => setTimeout(resolve, 0));
+    assert.equal(cancelled, 1);
+    assert.equal(f.writes.length, 0);
+  } finally { await f.close(); }
+});
+
+for (const [path, range] of [
+  ["original-ui/Prguse/1.png", "bytes=0-3"],
+  ["generated/crystal-packs/full/pack.json", "bytes=0-3"],
+  ["original-ui/fonts/font.otf", "bytes=0-1,4-5"],
+]) {
+  test(`non-font or unsupported range still bypasses cache: ${path} ${range}`, async () => {
+    const f = setup({ match: () => { throw new Error("must not read cache"); } });
+    try {
+      f.bucket.put(`${prefix}/${path}`);
+      const response = await f.fetch({ Range: range }, "GET", `https://assets.mir2.obelisk.build/${prefix}/${path}`);
+      assert.equal(response.headers.get("x-mir2-edge-cache"), "BYPASS");
+      assert.equal(await response.text(), range.includes(",") ? "0123456789" : "0123");
+      assert.equal(f.reads.length, 0);
+      assert.equal(f.writes.length, 0);
+    } finally { await f.close(); }
+  });
+}
 
 test("HEAD ignores Range and exposes full size without a partial status", async () => {
   const f = setup();
