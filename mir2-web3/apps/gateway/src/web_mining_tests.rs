@@ -153,6 +153,7 @@ mod mining_websocket_tests {
             session_cache: Arc::new(crate::InMemoryGatewaySessionCache::default()),
             reconnect_sessions: Arc::new(super::super::ReconnectSessionStore::default()),
             capacity: Arc::new(super::super::GatewayCapacityState::unlimited()),
+            background_execution: crate::web::BackgroundExecutionBudget::for_current_process(),
             gameplay_event_sink: None,
             identity: Arc::new(crate::identity::IdentityService::local_for_tests()),
             injector: crate::inject::LiveSessionInjector::default(),

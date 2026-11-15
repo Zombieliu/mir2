@@ -408,6 +408,7 @@ impl Fixture {
             session_cache: Arc::new(crate::InMemoryGatewaySessionCache::default()),
             reconnect_sessions: Arc::clone(&store),
             capacity: Arc::clone(&capacity),
+            background_execution: crate::web::BackgroundExecutionBudget::for_current_process(),
             gameplay_event_sink: None,
             identity: Arc::new(crate::identity::IdentityService::local_for_tests()),
             auth_rate_limit_policy: AuthRateLimitPolicy::default(),

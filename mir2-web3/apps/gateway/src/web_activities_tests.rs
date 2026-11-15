@@ -271,6 +271,7 @@ fn web_state(config: GatewayConfig) -> WebState {
         session_cache: Arc::new(InMemoryGatewaySessionCache::default()),
         reconnect_sessions: Arc::new(ReconnectSessionStore::default()),
         capacity: Arc::new(GatewayCapacityState::unlimited()),
+        background_execution: crate::web::BackgroundExecutionBudget::for_current_process(),
         gameplay_event_sink: None,
         identity: Arc::new(IdentityService::local_for_tests()),
         injector: crate::inject::LiveSessionInjector::default(),
