@@ -16,7 +16,7 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: "4204e920edde1d2c4a27e7bb7a2bba50ebd00860",
+  source: "20e79131a23a4c22dbadf118dc514f33bdf85a80",
   sourceRef: BRANCH,
   baseSource: "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
   assetSource: "f2de762309768b51b39438c2437c14e819df9bf7",
@@ -70,12 +70,16 @@ export const QR_RELEASE = Object.freeze({
   "0bcd61e0f27147f005dee3d6c49abb6a1af15157",
   "353a94bff10e57a6dbd2177047930e988c4fde40",
   "44b986b8a51682f1c72c552b82c0f21c32ce0d2a",
-  "4204e920edde1d2c4a27e7bb7a2bba50ebd00860"
+  "4204e920edde1d2c4a27e7bb7a2bba50ebd00860",
+  "d809add41e167be5092de06b238d6632a3396a49",
+  "627b68ae4dd5575a40ea37df16603087ed68a522",
+  "276df66ab3b02cf7ebcc5555836647c6d66ef39b",
+  "20e79131a23a4c22dbadf118dc514f33bdf85a80"
 ],
   changedFiles: [
   {
     "filename": ".github/scripts/numeron-r16-release.mjs",
-    "sha": "2a4707699cab2e39d010b19e34351730883319b4",
+    "sha": "3286132316b48595a1cdc5703bb3a595877db4e6",
     "status": "modified"
   },
   {
@@ -180,7 +184,7 @@ export const QR_RELEASE = Object.freeze({
   },
   {
     "filename": "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
-    "sha": "f77a95ec92bd9acadb98937297724cab008401d9",
+    "sha": "7f193189fb109915afea18940229a621cfe0fe2e",
     "status": "modified"
   },
   {
@@ -275,7 +279,7 @@ export const QR_RELEASE = Object.freeze({
   },
   {
     "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
-    "sha": "0cd0941bd7b3d2499b14a9cb5fec5d4ee634bebf",
+    "sha": "efbaf32091cb5a0446edb622509d58108d1ac777",
     "status": "modified"
   },
   {
@@ -304,13 +308,18 @@ export const QR_RELEASE = Object.freeze({
     "status": "added"
   },
   {
+    "filename": "mir2-web3/apps/web/scripts/smoke-asset-hud-admission.mjs",
+    "sha": "30047328048f797b024cc2cff0e56ca944a67321",
+    "status": "added"
+  },
+  {
     "filename": "mir2-web3/apps/web/scripts/smoke-asset-static-admission.mjs",
     "sha": "7f88a67bff8ab88dc0c87e9b2d6c9f27c9f8e8a2",
     "status": "added"
   },
   {
     "filename": "mir2-web3/apps/web/scripts/test-asset-cache-progress.mjs",
-    "sha": "268015912598f117c9a0f5aaec1089d704d612c3",
+    "sha": "5e41810965465e6da5059e0f91b04a55618ed064",
     "status": "added"
   },
   {
@@ -324,8 +333,13 @@ export const QR_RELEASE = Object.freeze({
     "status": "added"
   },
   {
+    "filename": "mir2-web3/apps/web/scripts/test-asset-worker-lifecycle.mjs",
+    "sha": "0d51ba69d11502786c8cd7209ccbc53590a2c4cd",
+    "status": "modified"
+  },
+  {
     "filename": "mir2-web3/apps/web/scripts/test-asset-worker-static-admission.mjs",
-    "sha": "47ba6372bebbfe575413bccf3277fcec6a93c7ae",
+    "sha": "b808b5dde692488ec90e915ef7497109c9557a7a",
     "status": "added"
   },
   {
@@ -395,37 +409,37 @@ export const QR_RELEASE = Object.freeze({
   },
   {
     "filename": "mir2-web3/docs/AGENT-CURRENT.md",
-    "sha": "b535132962fd684642e976e04d6f09bedbfa59da",
+    "sha": "44e31c9ce4241de4d1d3ad13a9c7d9d7291e8007",
     "status": "modified"
   },
   {
     "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
-    "sha": "ec59b01d79307be4400f320a2b83682c11827c18",
+    "sha": "2ed792dd473b3a7053c3167e1dcd2a22209d0ecf",
     "status": "modified"
   },
   {
     "filename": "mir2-web3/docs/BACKEND-1TO1-PROGRESS.md",
-    "sha": "7d7bec11b2a3783299602a32828852dd4d677671",
+    "sha": "bd645dcfd05feb7d3c4b677d17b3890e6ee34cb3",
     "status": "modified"
   },
   {
     "filename": "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
-    "sha": "6034efba10dfb7b6401c2dd2e38e058dc3e509c0",
+    "sha": "788a0775ddaf4f5862cfce9444404e8d9ce8694a",
     "status": "modified"
   },
   {
     "filename": "mir2-web3/docs/CRYSTAL-SERVER-PARITY.md",
-    "sha": "601c28d0801664d45c41bc2e488dc8489f216a8f",
+    "sha": "6e3a111c143b9f40d8da4507e3b98ec4eb722d33",
     "status": "modified"
   },
   {
     "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
-    "sha": "914ca1dcff0db1e025aecdb7c242cb26c517a0bd",
+    "sha": "c110f7eaadf748b07426cdb862d8afd83e039a9b",
     "status": "modified"
   },
   {
     "filename": "mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md",
-    "sha": "35a20c180d933eb8eddfc4c0b8972a8112b10cab",
+    "sha": "d2b486cc6c9d5c73702c1acda1c801d31ebd031d",
     "status": "modified"
   },
   {
@@ -826,6 +840,76 @@ export const QR_RELEASE = Object.freeze({
   {
     "filename": "mir2-web3/docs/evidence/r16-font-resume-20261115/upgrade-shared-native-timeout.png",
     "sha": "b0df26930560e954f56fb9d8adec85d5318362de",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-hud-admission-20261115/README.md",
+    "sha": "abc401fcd3a0367ae028697be87bb229dbc49323",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-hud-admission-20261115/game-loading-en.png",
+    "sha": "1c73e5ba7c1eaa0a4a5fb24c55795a7ff3591f04",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-hud-admission-20261115/private-evidence-pins.json",
+    "sha": "cbf36e2d0039dc81004aff8eb7a0e88521b77a66",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-hud-admission-20261115/quest-shared-zh-TW.png",
+    "sha": "6d5e9a31305d51737b652240b6073d5f251103f9",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-hud-admission-20261115/source-pins.json",
+    "sha": "6ae72cdc319ded7eeca49fe3f0a55a28dd2cf2bf",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-hud-admission-20261115/verification.json",
+    "sha": "25966d43224a5bd952f7855b448631c19e5acff4",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-hud-public-budget-20261115/README.md",
+    "sha": "b03c76fbba932873ae72bea40f7aefd6738381cc",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-hud-public-budget-20261115/component-ar-failed.png",
+    "sha": "a567f0cd40db9a26829919e41ba8661162f725da",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-hud-public-budget-20261115/component-en-loading.png",
+    "sha": "030459527b55eaa1628e460ae779288377eebf26",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-hud-public-budget-20261115/component-tw-retrying.png",
+    "sha": "fb24fed828613334e753b8dfeb927fb3b9abce76",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-hud-public-budget-20261115/private-evidence-pins.json",
+    "sha": "69003423d10bd59a63d3e5929a8ee615966ddd29",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-hud-public-budget-20261115/public-quest-after-native-budget.png",
+    "sha": "9ebf81c097b6d7560f6e5a84143ba08771b9f636",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-hud-public-budget-20261115/source-pins.json",
+    "sha": "ae79e6b49d98cf684626eddd2b247be59200ec35",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-hud-public-budget-20261115/verification.json",
+    "sha": "456d46f1cdcbc27b1848316ecca29bb30b304b04",
     "status": "added"
   },
   {
@@ -1546,8 +1630,8 @@ export const QR_RELEASE = Object.freeze({
   },
   entryAssetWorker: {
   "path": "/mir2-asset-worker.js",
-  "bytes": 62863,
-  "sha256": "4830a263f06df9901a41ac1b4c36142478559a7242d62c163790c5fc51c14c58"
+  "bytes": 64313,
+  "sha256": "17d387d77329dda4b769d89cb7733a20f5642e145c0f4a0e797ebe0661430d6f"
 },
   assetRunId: '42494701555',
   baseline: "dpl_AWssgszkpKJznMksLsP7hiRFK6U8",
