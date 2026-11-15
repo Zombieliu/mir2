@@ -5564,13 +5564,13 @@ export default function HomePage() {
       };
     }
 
-    const releaseHeaderPriority = getRuntimeHeaderPriority()?.captureRelease() ?? (() => false);
+    const runtimeHeaderPriority = getRuntimeHeaderPriority();
+    const releaseHeaderPriority = runtimeHeaderPriority?.captureRelease() ?? (() => false);
     let primaryFontStarted = false;
-    const handleRuntimeHeaders = () => {
-      releaseHeaderPriority("headers");
+    const startPrimaryFont = (admission: "headers" | "header-timeout") => {
       if (disposed || runtimeOwner.signal.aborted || fontPrewarmController.signal.aborted || primaryFontStarted) return;
       primaryFontStarted = true;
-      markMir2CacheMilestone("bevyRuntimePrimaryFontPrewarmStart");
+      markMir2CacheMilestone("bevyRuntimePrimaryFontPrewarmStart", { admission });
       void prewarmBevyRuntimePrimaryFont({ signal: fontPrewarmController.signal }).then((result) => {
         if (disposed || fontPrewarmController.signal.aborted) return;
         markMir2CacheMilestone("bevyRuntimePrimaryFontPrewarmComplete", {
@@ -5578,6 +5578,10 @@ export default function HomePage() {
           failed: result.failed.length, aborted: result.aborted, bytes: result.bytes,
         });
       }).catch(() => { /* The later full pass and Native readers retain recovery. */ });
+    };
+    const handleRuntimeHeaders = () => {
+      releaseHeaderPriority("headers");
+      startPrimaryFont("headers");
     };
 
     async function bootRuntime() {
@@ -5700,6 +5704,11 @@ export default function HomePage() {
         let runtimeBackend = selectedBackend;
         let fallbackFrom: BevyRuntimeBackend | undefined;
         let runtime: RuntimeModule;
+        // A slow final header retry must not keep the primary font behind it.
+        // Share the existing eight-second admission budget and current owner.
+        void runtimeHeaderPriority?.wait(fontPrewarmController.signal).then(({ reason }) => {
+          if (reason === "timeout") startPrimaryFont("header-timeout");
+        }).catch(() => { /* Retired owners do not start a font transfer. */ });
         try {
           runtime = await loadBevyRuntimeModule(runtimeBackend, bevyRuntimeStartup, {
             ownerSignal: runtimeOwner.signal, takeRecovery: takeRuntimeRecovery,
@@ -5727,7 +5736,7 @@ export default function HomePage() {
         }
         if (disposed) return;
 
-        // One SC body can overlap the runtime after valid headers. Defer the
+        // One SC body can overlap the runtime after headers or their bounded wait. Defer the
         // full six-family pass until the final backend succeeds; its SC reader
         // shares the early Worker fill. Font completion never gates App boot.
         markMir2CacheMilestone("bevyRuntimeFontPrewarmStart");

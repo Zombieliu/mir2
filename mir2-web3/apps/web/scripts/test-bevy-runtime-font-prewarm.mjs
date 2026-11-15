@@ -208,6 +208,33 @@ test('actual Page starts one primary font on valid headers before the pending ru
  }finally{await run.settle();}
 });
 
+test('actual Page admits one primary font after the shared eight-second header budget, without waiting for a slow retry',async t=>{
+ t.mock.timers.enable({apis:['setTimeout']});
+ const run=actualBoot({criticalPending:true});try{
+  await turn();assert.equal(run.primarySignals.length,0);assert.equal(run.runtimeOptions.length,1);
+  t.mock.timers.tick(7999);await turn();assert.equal(run.primarySignals.length,0);
+  t.mock.timers.tick(1);await turn();assert.equal(run.primarySignals.length,1);
+  assert.equal(run.events.find(e=>e.name==='bevyRuntimePrimaryFontPrewarmStart').detail.admission,'header-timeout');
+  assert.equal(run.fontSignals.length,0);assert(!run.events.some(e=>e.name==='bevyRuntimeReady'));
+  t.mock.timers.tick(80000);run.runtimeOptions[0].onResponseHeaders();await turn();
+  assert.equal(run.primarySignals.length,1,'late response headers share the existing primary read');
+  run.finishModule();await run.waitForBoot();assert.equal(run.fontSignals.length,1);
+ }finally{await run.settle();}
+});
+
+test('primary header-timeout admission cannot survive owner retirement or a skipped/reused runtime',async t=>{
+ t.mock.timers.enable({apis:['setTimeout']});
+ for(const options of [{},{playable:false},{mode:'disabled'},{mode:'compatibility'},{allowed:false},
+   {support:{webgpu:false,webgl2:false}},{reused:true}]){
+  const run=actualBoot(options);try{
+   await turn();if(Object.keys(options).length===0)run.cleanup();
+   t.mock.timers.tick(80000);await turn();assert.equal(run.primarySignals.length,0);
+   if(run.runtimeOptions.length)run.runtimeOptions[0].onResponseHeaders();
+   assert.equal(run.primarySignals.length,0);
+  }finally{await run.settle();}
+ }
+});
+
 test('one early primary font survives a backend fallback without spending another font admission',async()=>{
  const run=actualBoot({retryWithWebGl2:true});try{
   await turn();run.runtimeOptions[0].onResponseHeaders();await turn();assert.equal(run.primarySignals.length,1);

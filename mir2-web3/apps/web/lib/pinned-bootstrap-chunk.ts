@@ -7,29 +7,38 @@ const CHUNK_OBSERVER_TIMEOUT_MS = 20_000;
  * enter its module cache, but cannot resolve this rejected observation. */
 export function createPinnedBootstrapChunk<T>(
   pin: BootstrapChunkPin,
-  load: () => Promise<{ default: unknown }>,
+  load: (signal: AbortSignal) => Promise<{ default: unknown }>,
   format: BootstrapChunkFormat,
 ): () => Promise<T> {
   let observed: Promise<T> | null = null;
   return () => {
     if (observed) return observed;
+    const controller = new AbortController();
     let timer: ReturnType<typeof setTimeout>;
     const deadline = new Promise<never>((_, reject) => {
-      timer = setTimeout(() => reject(new DOMException("Pinned bootstrap chunk wait elapsed", "TimeoutError")),
-        CHUNK_OBSERVER_TIMEOUT_MS);
+      timer = setTimeout(() => {
+        const error = new DOMException("Pinned bootstrap chunk wait elapsed", "TimeoutError");
+        controller.abort(error);
+        reject(error);
+      }, CHUNK_OBSERVER_TIMEOUT_MS);
     });
-    const read = Promise.resolve().then(load).then(async ({ default: payload }) => {
+    const read = Promise.resolve().then(() => load(controller.signal)).then(async ({ default: payload }) => {
+      controller.signal.throwIfAborted();
       const text = format === "pretty-json-line" ? JSON.stringify(payload, null, 2) + "\n"
         : JSON.stringify(payload) + (format === "json-line" ? "\n" : "");
       const body = new TextEncoder().encode(text);
       if (body.byteLength !== pin.bytes) throw new Error("Pinned bootstrap chunk response is incomplete.");
       const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", body));
+      controller.signal.throwIfAborted();
       const sha256 = Array.from(digest, byte => byte.toString(16).padStart(2, "0")).join("");
       if (sha256 !== pin.sha256) throw new Error("Pinned bootstrap chunk digest mismatch.");
       // Publish only a verified JSON value, using the same parse boundary as HTTP.
       return JSON.parse(text) as T;
     });
-    observed = Promise.race([read, deadline]).finally(() => clearTimeout(timer));
+    observed = Promise.race([read, deadline]).finally(() => {
+      clearTimeout(timer);
+      controller.abort();
+    });
     return observed;
   };
 }

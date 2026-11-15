@@ -16,6 +16,7 @@ const scene = JSON.parse(read(new URL("generated/r16-entry-scene.json", lib)));
 const floor = JSON.parse(read(new URL("generated/r16-entry-floor.json", lib)));
 const visuals = JSON.parse(read(new URL("generated/r16-entry-visuals.json", lib)));
 const walking = visuals.monsterWalking;
+const walkingParts = JSON.parse(read(new URL("generated/r16-entry-walking-parts.json", lib)));
 const locale = JSON.parse(read(new URL("generated/r16-native-localization-delivery.json", lib)));
 const body = pin => readFileSync(new URL("../public" + pin.path, lib));
 const settle = async () => { for (let i = 0; i < 8; i++) await new Promise(setImmediate); };
@@ -150,6 +151,12 @@ function assertWalkingPack(value) {
   }
 }
 
+function assertWalkingImports(fixture) {
+  assert.equal(fixture.imports.length, 5);
+  assert.deepEqual(fixture.imports.map(path => walkingParts.parts.find(part => path.endsWith(part.path))?.path),
+    walkingParts.parts.map(part => part.path));
+}
+
 test("the complete town walking pack is a high-priority playable resource and still shares one verified read",async()=>{
   const calls=[],f=fixture(async(url,init)=>{
     calls.push({url,init});return new Response(body(walking));
@@ -186,11 +193,11 @@ test("two positive partial walking bodies recover the exact original pack throug
   assert.deepEqual(calls.map(({url,init})=>[url,init.cache,init.credentials,init.priority]),[
     [walking.path,"force-cache","omit","high"],[walking.path,"reload","omit","high"],
   ]);
-  assert.equal(f.imports.length,1);assert(f.imports[0].endsWith(walking.path));
+  assertWalkingImports(f);
   assert.deepEqual(cancellations.map(value=>value.ordinal),[0,1]);
   for(const cancelled of cancellations)assert.equal(cancelled.reason,calls[cancelled.ordinal].init.signal.reason);
   assert.equal(await f.entry.preloadR16EntryMonsterFrames(visuals.assetReleaseId,"walking"),pack);
-  t.mock.timers.tick(600000);await settle();assert.equal(calls.length,2);assert.equal(f.imports.length,1);
+  t.mock.timers.tick(600000);await settle();assert.equal(calls.length,2);assertWalkingImports(f);
 });
 
 test("walking definitive responses and rejected complete bytes never grant a compiled fallback",async()=>{
@@ -221,7 +228,7 @@ test("a corrupt compiled walking payload is rejected after exactly two transient
   let calls=0;const f=fixture(async()=>{calls++;return new Response(null,{status:503});},data=>({...data,unexpected:true}));
   const pending=f.entry.preloadR16EntryMonsterFrames(visuals.assetReleaseId,"walking");
   await settle();t.mock.timers.tick(200);assert.equal(await pending,null);
-  t.mock.timers.tick(600000);await settle();assert.equal(calls,2);assert.equal(f.imports.length,1);
+  t.mock.timers.tick(600000);await settle();assert.equal(calls,2);assert.equal(f.imports.length,2);
 });
 
 test("walking compiled timeout remains twenty seconds and a late valid module cannot publish",async t=>{
@@ -230,11 +237,11 @@ test("walking compiled timeout remains twenty seconds and a late valid module ca
   const f=fixture(async()=>{calls++;return new Response(null,{status:503});},data=>blocked.promise.then(()=>data));
   const pending=f.entry.preloadR16EntryMonsterFrames(visuals.assetReleaseId,"walking");
   void pending.then(()=>{settled=true;});
-  await settle();t.mock.timers.tick(200);await settle();assert.equal(f.imports.length,1);
+  await settle();t.mock.timers.tick(200);await settle();assert.equal(f.imports.length,2);
   t.mock.timers.tick(19999);await settle();assert.equal(settled,false);
   t.mock.timers.tick(1);assert.equal(await pending,null);assert.equal(settled,true);
   blocked.resolve();await settle();assert.equal(await pending,null);
-  t.mock.timers.tick(600000);await settle();assert.equal(calls,2);assert.equal(f.imports.length,1);
+  t.mock.timers.tick(600000);await settle();assert.equal(calls,2);assert.equal(f.imports.length,2);
 });
 
 test("standing failure and another release cannot start the walking compiled fallback",async t=>{
@@ -298,12 +305,12 @@ test("the actual Shell monster effect suppresses a retired observer and shares v
   const cleanup=start(retired);
   for(let i=0;i<100&&!walkingPromises.length;i++)await settle();assert.equal(walkingPromises.length,1);
   await settle();
-  t.mock.timers.tick(200);await settle();assert.equal(f.imports.length,1);
+  t.mock.timers.tick(200);await settle();assert.equal(f.imports.length,2);
   cleanup();const liveCleanup=start(live);await settle();assert.equal(walkingPromises.length,2);
   assert.equal(walkingPromises[0],walkingPromises[1]);blocked.resolve();await Promise.all(walkingPromises);await settle();
   assert.equal(retired.filter(value=>value.action==="walking").length,0);
   assert.equal(live.filter(value=>value.action==="walking").length,1);
   assertWalkingPack(live.find(value=>value.action==="walking").value);
-  assert.equal(calls.filter(value=>value.url===walking.path).length,2);assert.equal(f.imports.length,1);
+  assert.equal(calls.filter(value=>value.url===walking.path).length,2);assertWalkingImports(f);
   liveCleanup();
 });

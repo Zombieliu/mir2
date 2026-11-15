@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "assetReleaseId": "20261108-r16-08ec86d5105c",
+  "sourceSha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+  "sourceBytes": 764724,
+  "parts": [
+    {
+      "libraryKey": "Monster/000",
+      "path": "/bootstrap/r16-visual-parts/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f/1f8307486897ae7be3af2e0f64f95dc4d2e21222c6e99ed1a1ae919300c2daa9.json",
+      "bytes": 210658,
+      "sha256": "1f8307486897ae7be3af2e0f64f95dc4d2e21222c6e99ed1a1ae919300c2daa9"
+    },
+    {
+      "libraryKey": "Monster/003",
+      "path": "/bootstrap/r16-visual-parts/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f/d47c92dfcbaa0e7bb9d2790c2f8204cd75c7e5fd5673cc08628d1a90d45d8f4b.json",
+      "bytes": 60788,
+      "sha256": "d47c92dfcbaa0e7bb9d2790c2f8204cd75c7e5fd5673cc08628d1a90d45d8f4b"
+    },
+    {
+      "libraryKey": "Monster/004",
+      "path": "/bootstrap/r16-visual-parts/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f/65db6b2b5abdfa41a08c81f8ee577eb306aafc21c2b14b0c18281d13a9daec97.json",
+      "bytes": 151180,
+      "sha256": "65db6b2b5abdfa41a08c81f8ee577eb306aafc21c2b14b0c18281d13a9daec97"
+    },
+    {
+      "libraryKey": "Monster/005",
+      "path": "/bootstrap/r16-visual-parts/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f/add27ee1a13b42f367f5dddde27581712bcb85b8cd670a9f8765eec43d248dfa.json",
+      "bytes": 176845,
+      "sha256": "add27ee1a13b42f367f5dddde27581712bcb85b8cd670a9f8765eec43d248dfa"
+    },
+    {
+      "libraryKey": "Monster/139",
+      "path": "/bootstrap/r16-visual-parts/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f/774e7639568a7cf305cf62ea0273a2d0820abb6f5a696afdd8c349f6eb8a662d.json",
+      "bytes": 165361,
+      "sha256": "774e7639568a7cf305cf62ea0273a2d0820abb6f5a696afdd8c349f6eb8a662d"
+    }
+  ]
+}
