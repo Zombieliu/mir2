@@ -116,6 +116,7 @@ const FONT_MIRROR_HEADER_TIMEOUT_MS = 8_000;
 const FONT_MIRROR_BODY_IDLE_TIMEOUT_MS = 15_000;
 const FONT_MIRROR_MAX_BYTES = 32 * 1024 * 1024;
 const FONT_RANGE_PART_TIMEOUT_MS = 15_000;
+const FONT_RANGE_PARTS_PER_REQUEST = 4;
 const FONT_RANGE_CACHE_TIMEOUT_MS = 750;
 // The renderer, CSS and prewarmer share this budget. Limiting the prewarmer
 // alone still lets the renderer start all six complete font bodies together.
@@ -829,8 +830,8 @@ async function validPinnedFontResponse(response, pin) {
   return bytes && await fontDigest(bytes) === pin.sha256;
 }
 
-async function readFontRangePart(source, owner, pin, index, noteWholeFallback) {
-  const offset = index * pin.partBytes, length = Math.min(pin.partBytes, pin.bytes - offset);
+async function readFontRangePart(source, owner, pin, index, count, noteWholeFallback) {
+  const offset = index * pin.partBytes, length = Math.min(count * pin.partBytes, pin.bytes - offset);
   const deadline = new AbortController();
   const signal = AbortSignal.any([owner, source.signal, deadline.signal]);
   let timer, rejectRead;
@@ -857,7 +858,10 @@ async function readFontRangePart(source, owner, pin, index, noteWholeFallback) {
         response.headers.get("content-length") !== String(length) ||
         ![null, "identity"].includes(response.headers.get("content-encoding"))) return null;
     const bytes = await readPinnedFontBytes(response, length, signal, FONT_RANGE_PART_TIMEOUT_MS);
-    if (!bytes || signal.aborted || await fontDigest(bytes) !== pin.parts[index]) return null;
+    if (!bytes || signal.aborted) return null;
+    for (let part = 0; part < count; part++) {
+      if (await fontDigest(bytes.subarray(part * pin.partBytes, (part + 1) * pin.partBytes)) !== pin.parts[index + part]) return null;
+    }
     complete = true; return bytes;
   } catch { return null; }
   finally {
@@ -874,37 +878,79 @@ async function readPinnedRangeFont(request, pin, mirrors) {
   const output = new Uint8Array(pin.bytes);
   const batch = new AbortController();
   const signal = AbortSignal.any([request.signal, batch.signal]);
-  let next = 0, wholeFallback = false, complete = 0;
+  let next = 0, wholeFallback = false, complete = 0, coalesce = true;
+  const partInfo = index => {
+    const offset = index * pin.partBytes;
+    return { index, offset, length: Math.min(pin.partBytes, pin.bytes - offset),
+      key: `${self.location.origin}/__mir2_font_part__/${pin.sha256}/${offset}/${pin.parts[index]}` };
+  };
+  const keepPart = async (part, bytes, persist) => {
+    if (persist && cache && !request.signal.aborted && revision === configurationRevision && configurationPersistenceAllowed) {
+      // Restart units and keys stay at the original 256KiB. A coalesced HTTP
+      // response must pass every original piece digest before persisting any.
+      await boundedFontCache(() => cache.put(part.key, new Response(bytes, {
+        headers: { "content-length": String(part.length) },
+      })));
+    }
+    output.set(bytes, part.offset); complete++;
+  };
+  const download = (index, count) => withFontDownloadSlot(signal, async () => {
+    // One global slot owns all source fallbacks for this bounded HTTP range.
+    for (const source of mirrors) {
+      if (signal.aborted) break;
+      const bytes = await readFontRangePart(source, signal, pin, index, count, () => { wholeFallback = true; });
+      if (bytes) return bytes;
+    }
+    return null;
+  });
+  const fillMissing = async parts => {
+    if (signal.aborted) return false;
+    if (parts.length > 1 && coalesce) {
+      const bytes = await download(parts[0].index, parts.length);
+      if (bytes) {
+        for (let n = 0; n < parts.length; n++) {
+          await keepPart(parts[n], bytes.subarray(n * pin.partBytes, n * pin.partBytes + parts[n].length), true);
+        }
+        return !signal.aborted;
+      }
+      // Some sources or connections cannot complete the larger range within
+      // the unchanged deadlines. Downgrade this logical fill, including queued
+      // groups, to the original single-piece transport. No nested slot awaits.
+      coalesce = false;
+    }
+    const singles = await Promise.all(parts.map(async part => {
+      const bytes = await download(part.index, 1);
+      if (!bytes || signal.aborted) { batch.abort(); return false; }
+      await keepPart(part, bytes, true); return true;
+    }));
+    return singles.every(Boolean) && !signal.aborted;
+  };
   const take = async () => {
     while (!signal.aborted) {
-      const index = next++; if (index >= pin.parts.length) return;
-      const offset = index * pin.partBytes, length = Math.min(pin.partBytes, pin.bytes - offset);
-      const key = `${self.location.origin}/__mir2_font_part__/${pin.sha256}/${offset}/${pin.parts[index]}`;
-      let bytes = null;
-      const cached = cache && await boundedFontCache(() => cache.match(key));
-      if (cached) {
-        bytes = cached.status === 200 && await readPinnedFontBytes(cached, length, signal, FONT_MIRROR_BODY_IDLE_TIMEOUT_MS);
-        if (bytes && await fontDigest(bytes) !== pin.parts[index]) bytes = null;
-        if (!bytes) await boundedFontCache(() => cache.delete(key));
-      }
-      if (!bytes && !signal.aborted) {
-        bytes = await withFontDownloadSlot(signal, async () => {
-          // A single slot owns all current-release fallbacks for this part.
-          for (const source of mirrors) {
-            if (signal.aborted) break;
-            const part = await readFontRangePart(source, signal, pin, index, () => { wholeFallback = true; });
-            if (part) return part;
-          }
-          return null;
-        });
-        if (bytes && cache && !request.signal.aborted && revision === configurationRevision && configurationPersistenceAllowed) {
-          // The full-font cache is never given partial bytes. CacheStorage
-          // failure only loses resumability, not the valid in-memory result.
-          await boundedFontCache(() => cache.put(key, new Response(bytes, { headers: { "content-length": String(length) } })));
+      const start = next, count = Math.min(coalesce ? FONT_RANGE_PARTS_PER_REQUEST : 1, pin.parts.length - start);
+      if (count <= 0) return;
+      next += count;
+      const groups = []; let missing = [];
+      for (let n = 0; n < count; n++) {
+        const part = partInfo(start + n);
+        let bytes = null;
+        const cached = cache && await boundedFontCache(() => cache.match(part.key));
+        if (cached) {
+          bytes = cached.status === 200 && await readPinnedFontBytes(cached, part.length, signal, FONT_MIRROR_BODY_IDLE_TIMEOUT_MS);
+          if (bytes && await fontDigest(bytes) !== pin.parts[part.index]) bytes = null;
+          if (!bytes) await boundedFontCache(() => cache.delete(part.key));
+        }
+        if (bytes) {
+          if (missing.length) { groups.push(missing); missing = []; }
+          await keepPart(part, bytes, false);
+        } else {
+          missing.push(part);
         }
       }
-      if (!bytes || signal.aborted) { batch.abort(); throw new Error("incomplete font range"); }
-      output.set(bytes, offset); complete++;
+      if (missing.length) groups.push(missing);
+      for (const group of groups) {
+        if (!await fillMissing(group)) { batch.abort(); throw new Error("incomplete font range"); }
+      }
     }
     throw new Error("font range cancelled");
   };

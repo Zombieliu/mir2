@@ -108,9 +108,11 @@ try {
       assert.equal(row.bytes, pin.bytes); assert.equal(row.sha256, pin.sha256); }
   }
   const resumed = proof.requests.filter(r => r.phase === 'resume' && r.logical === sc);
-  assert(resumed.every(r => r.range)); assert.equal(resumed.length, 63 - proof.first.parts.length);
+  assert(resumed.every(r => r.range));
   const savedOffsets = new Set(proof.first.parts.map(url => Number(url.split('/').at(-2))));
-  assert(resumed.every(row => !savedOffsets.has(row.offset)));
+  const fetchedOffsets = resumed.flatMap(row => Array.from({length:Math.ceil(row.bytes/262144)},(_,n)=>row.offset+n*262144));
+  assert.deepEqual(fetchedOffsets.toSorted((a,b)=>a-b),Array.from({length:63},(_,n)=>n*262144).filter(offset=>!savedOffsets.has(offset)));
+  proof.resumedRequests = resumed.length; proof.resumedPieces = fetchedOffsets.length;
   proof.resumedMissingOnly = true; proof.sixFontsComplete = proof.second.rows.every(r => r.status === 200 && r.decoded);
   proof.peakServerFontBodies = peak; assert(peak <= 2); assert(proof.sixFontsComplete);
   await page.screenshot({ path: join(output, 'six-original-fonts-after-restart.png') }); proof.passed = true;

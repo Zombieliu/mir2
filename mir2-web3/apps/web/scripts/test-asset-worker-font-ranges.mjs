@@ -21,12 +21,17 @@ const sliceResponse = request => {
   const match = /^bytes=(\d+)-(\d+)$/.exec(request.headers.get("range") ?? "");
   if (!match) return new Response(original);
   const start = Number(match[1]), end = Number(match[2]);
-  assert(start >= 0 && end < original.length && end - start < 262144);
+  assert(start >= 0 && end < original.length && end - start < 1048576);
   return new Response(original.subarray(start, end + 1), { status: 206, headers: {
     "content-range": `bytes ${start}-${end}/${original.length}`, "content-length": String(end - start + 1),
   } });
 };
 const rangeIndex = request => Math.floor(Number(/^bytes=(\d+)/.exec(request.headers.get("range") ?? "")?.[1]) / 262144);
+const requestedPieces = calls => calls.flatMap(request => {
+  const [, start, end] = /^bytes=(\d+)-(\d+)$/.exec(request.headers.get('range'));
+  return Array.from({length:Math.floor(Number(end)/262144)-Number(start)/262144+1},(_,n)=>Number(start)/262144+n);
+});
+const cachedPieces = f => new Set([...f.parts()[0][1].keys()].map(key => Number(new URL(key).pathname.split('/')[3])/262144));
 
 function fixture(fetchImpl = sliceResponse, stores = new Map(), options = {}) {
   const calls = [], pending = [];
@@ -64,9 +69,68 @@ async function assertOriginal(response) {
   assert.equal(body.length, original.length); assert.equal(digest(body), expected);
 }
 
+test("cold transfer coalesces pinned pieces into sixteen bounded requests while keeping 63 restart units", async () => {
+  const f = fixture(); await assertOriginal(await f.read()); await f.flush();
+  assert.equal(f.calls.length, 16);
+  assert.equal(f.parts()[0][1].size, 63);
+  assert(f.calls.every(request => {
+    const [, start, end] = /^bytes=(\d+)-(\d+)$/.exec(request.headers.get('range'));
+    return Number(end) - Number(start) + 1 <= 1048576;
+  }));
+  assert.equal(f.calls.map(request => Number(/^bytes=\d+-(\d+)$/.exec(request.headers.get('range'))[1]) -
+    Number(/^bytes=(\d+)/.exec(request.headers.get('range'))[1]) + 1).reduce((a,b)=>a+b,0), original.length);
+});
+
+test("sparse restart holes fetch only missing original pieces and coalesce adjacent holes", async () => {
+  const f = fixture(); await assertOriginal(await f.read()); await f.flush();
+  const missing = new Set([3, 4, 6, 7, 8, 62]);
+  const rows = f.parts()[0][1];
+  for (const key of rows.keys()) if (missing.has(Number(new URL(key).pathname.split('/')[3]) / 262144)) rows.delete(key);
+  assert.equal(rows.size, 57);
+  f.stores.get('mir2-asset-cache-sw8-static-critical-font-range-test').clear();
+  const restarted = fixture(sliceResponse, f.stores); await assertOriginal(await restarted.read()); await restarted.flush();
+  const fetched=[];
+  for (const request of restarted.calls) {
+    const [, start, end] = /^bytes=(\d+)-(\d+)$/.exec(request.headers.get('range'));
+    for(let n=Number(start)/262144;n<=Math.floor(Number(end)/262144);n++)fetched.push(n);
+  }
+  assert.deepEqual(fetched.toSorted((a,b)=>a-b), [...missing]);
+  assert(restarted.calls.length < missing.size, 'adjacent missing pieces should share a request');
+});
+
+test("a source limited to single pieces downgrades coalescing within the original two global lanes", async () => {
+  let peak=0,active=0;
+  const f=fixture(async request=>{
+    const match=/^bytes=(\d+)-(\d+)$/.exec(request.headers.get('range')??'');
+    if(match && Number(match[2])-Number(match[1])+1>262144)return new Response(null,{status:416});
+    active++;peak=Math.max(peak,active);await turn();active--;return sliceResponse(request);
+  });
+  await assertOriginal(await f.read()); await f.flush();
+  assert(peak<=2);assert.equal(f.parts()[0][1].size,63);
+  assert(f.calls.filter(request=>{
+    const [,a,b]=/^bytes=(\d+)-(\d+)$/.exec(request.headers.get('range'));return Number(b)-Number(a)+1>262144;
+  }).length<=4,'only the two initially admitted batches may try both sources');
+});
+
+test("a corrupted interior piece of a coalesced body is never cached under its original digest", async () => {
+  const f=fixture(request=>{
+    const match=/^bytes=(\d+)-(\d+)$/.exec(request.headers.get('range')??'');
+    if(!match)return new Response(null,{status:503});
+    const a=Number(match[1]),b=Number(match[2]),bytes=Buffer.from(original.subarray(a,b+1));
+    if(a<=262144&&b>=262144)bytes[262144-a]^=1;
+    return new Response(bytes,sliceResponse(request));
+  });
+  const response=await f.read();assert.notEqual(response.status,200);await response.arrayBuffer();await f.flush();
+  assert.equal(f.full(),undefined);
+  for(const [,rows]of f.parts())for(const [key,response]of rows){
+    const offset=Number(new URL(key).pathname.split('/')[3]);assert.notEqual(offset,262144);
+    assert.equal(digest(Buffer.from(await response.arrayBuffer())),digest(original.subarray(offset,Math.min(offset+262144,original.length))));
+  }
+});
+
 test("all generated 256KiB parts and complete font are pinned to original bytes", async () => {
   const f = fixture(); await assertOriginal(await f.read()); await f.flush();
-  assert.equal(f.calls.length, 63); assert(f.calls.every(r => r.headers.has("range")));
+  assert.equal(f.calls.length, 16); assert(f.calls.every(r => r.headers.has("range")));
   assert.equal(f.parts()[0][1].size, 63); assert(f.full());
   assert.equal(vm.runInContext("activeFontDownloads", f.context), 0);
   const before = f.calls.length; await assertOriginal(await f.read()); assert.equal(f.calls.length, before);
@@ -76,27 +140,28 @@ test("simultaneous font consumers wait for the final part and share one complete
   let release, reached;
   const arrived = new Promise(resolve => { reached = resolve; });
   const f = fixture(async request => {
-    if (rangeIndex(request) === 62) { reached(); await new Promise(resolve => { release = resolve; }); }
+    if (request.headers.get('range')?.endsWith(`-${original.length-1}`)) { reached(); await new Promise(resolve => { release = resolve; }); }
     return sliceResponse(request);
   });
   let done = false;
   const a = f.read().then(r => { done = true; return r; }), b = f.read();
   await arrived; assert.equal(done, false); assert.equal(f.full(), undefined);
   release(); await assertOriginal(await a); await assertOriginal(await b); await f.flush();
-  assert.equal(f.calls.length, 63);
+  assert.equal(f.calls.length, 16);
 });
 
 test("a failed body retains verified parts across a new Worker instance and downloads only missing parts", async () => {
   const stores = new Map();
   const f = fixture(request => {
     const response = sliceResponse(request);
-    return rangeIndex(request) === 4 ? new Response(new Uint8Array([1, 2]), response) : response;
+    return rangeIndex(request) === 8 ? new Response(new Uint8Array([1, 2]), response) : response;
   }, stores);
   const failed = await f.read(); assert.equal(failed.status, 504); await failed.arrayBuffer(); await f.flush();
   const saved = f.parts()[0][1].size; assert(saved >= 3 && saved < 63); assert.equal(f.full(), undefined);
-  const restarted = fixture(sliceResponse, stores);
+  const kept = cachedPieces(f), restarted = fixture(sliceResponse, stores);
   await assertOriginal(await restarted.read()); await restarted.flush();
-  assert.equal(restarted.calls.length, 63 - saved); assert(restarted.full());
+  assert.deepEqual(requestedPieces(restarted.calls).toSorted((a,b)=>a-b),Array.from({length:63},(_,n)=>n).filter(n=>!kept.has(n)));
+  assert(restarted.full());
 });
 
 test("a corrupt stored part is revalidated, evicted and fetched without redownloading valid parts", async () => {
@@ -120,7 +185,7 @@ test("a poisoned whole-font cache cannot bypass the full digest", async () => {
 
 test("denied CacheStorage retains complete in-memory validation and two-reader admission", async () => {
   const f = fixture(sliceResponse, new Map(), { denied: true });
-  await assertOriginal(await f.read()); assert.equal(f.calls.length, 63);
+  await assertOriginal(await f.read()); assert.equal(f.calls.length, 16);
   assert.equal(vm.runInContext("activeFontDownloads", f.context), 0);
 });
 
@@ -129,8 +194,8 @@ for (const broken of ["wrong-range", "wrong-length", "encoded", "short", "oversi
     const f = fixture(request => {
       if (!request.headers.has("range")) return new Response(null, { status: 503 });
       const response = sliceResponse(request), headers = new Headers(response.headers);
-      const begin = rangeIndex(request) * 262144;
-      let body = Buffer.from(original.subarray(begin, begin + 262144));
+      const [, begin, end] = /^bytes=(\d+)-(\d+)$/.exec(request.headers.get('range'));
+      let body = Buffer.from(original.subarray(Number(begin), Number(end)+1));
       if (broken === "wrong-range") headers.set("content-range", `bytes 0-NaN/${original.length}`);
       if (broken === "wrong-length") headers.set("content-length", "2");
       if (broken === "encoded") headers.set("content-encoding", "gzip");
@@ -203,11 +268,15 @@ test("a stalled partial body is cancelled, keeps completed parts and resumes aft
   const pending = f.read(); await waitFor(() => signals.length === 1); await turn();
   t.mock.timers.tick(15000); await waitFor(() => signals.length === 2); await turn();
   t.mock.timers.tick(15000);
+  await waitFor(() => signals.length === 3); await turn();
+  t.mock.timers.tick(15000); await waitFor(() => signals.length === 4); await turn();
+  t.mock.timers.tick(15000);
   const failed = await pending; assert.equal(failed.status, 504); await failed.arrayBuffer(); await f.flush();
-  assert.equal(stopped.length, 2); assert(signals.every(signal => signal.aborted));
+  assert.equal(stopped.length, 4); assert(signals.every(signal => signal.aborted));
   const saved = f.parts()[0][1].size; assert(saved > 0 && saved < 63); assert.equal(f.full(), undefined);
-  const restarted = fixture(sliceResponse, f.stores);
-  await assertOriginal(await restarted.read()); await restarted.flush(); assert.equal(restarted.calls.length, 63 - saved);
+  const kept = cachedPieces(f), restarted = fixture(sliceResponse, f.stores);
+  await assertOriginal(await restarted.read()); await restarted.flush();
+  assert.deepEqual(requestedPieces(restarted.calls).toSorted((a,b)=>a-b),Array.from({length:63},(_,n)=>n).filter(n=>!kept.has(n)));
 });
 
 test("a cancelled queued range font starts no transfer and does not cancel other font bodies", async () => {
@@ -227,7 +296,7 @@ test("an old partial 200 cache is discarded before rebuilding the original compl
   const stores = new Map([['mir2-asset-cache-sw8-static-critical-font-range-test',
     new Map([[origin + path, new Response(original.subarray(0, 100))]])]]);
   const f = fixture(sliceResponse, stores); await assertOriginal(await f.read()); await f.flush();
-  assert.equal(f.calls.length, 63); assert.equal(Number(f.full().headers.get('content-length')), original.length);
+  assert.equal(f.calls.length, 16); assert.equal(Number(f.full().headers.get('content-length')), original.length);
 });
 
 test("ordinary incoming Range remains an ordinary 206 and never enters the resumable whole-font cache", async () => {
