@@ -55,6 +55,73 @@ pub(super) type ExperienceAuthorityRebase<'a> = dyn Fn(
     ) -> Result<(), String>
     + 'a;
 
+pub(super) type ZoneAdmissionLockResult<'a> =
+    std::sync::LockResult<std::sync::MutexGuard<'a, SharedInProcessZoneState>>;
+
+enum ZoneAdmissionAttempt<T> {
+    Busy,
+    Complete(T),
+}
+
+/// Run the business body once while fresh Store and Zone guards overlap.
+/// A busy first attempt does no Zone work; wait only after Store is released,
+/// then use the original blocking Store -> Zone path with fresh admission.
+pub(super) fn with_zone_experience_admission<T>(
+    config: &GatewayConfig,
+    zone: &Mutex<SharedInProcessZoneState>,
+    body: impl for<'zone, 'rebase, 'store> FnOnce(
+        ZoneAdmissionLockResult<'zone>,
+        &'rebase ExperienceAuthorityRebase<'store>,
+    ) -> Result<T, String>,
+) -> Result<T, String> {
+    with_zone_experience_admission_impl(config, zone, body, || {})
+}
+
+fn with_zone_experience_admission_impl<T>(
+    config: &GatewayConfig,
+    zone: &Mutex<SharedInProcessZoneState>,
+    body: impl for<'zone, 'rebase, 'store> FnOnce(
+        ZoneAdmissionLockResult<'zone>,
+        &'rebase ExperienceAuthorityRebase<'store>,
+    ) -> Result<T, String>,
+    after_busy: impl FnOnce(),
+) -> Result<T, String> {
+    let mut body = Some(body);
+    let attempt = config.with_shared_zone_experience_admission(|rebase| {
+        let locked = match zone.try_lock() {
+            Ok(guard) => Ok(guard),
+            Err(std::sync::TryLockError::Poisoned(error)) => Err(error),
+            Err(std::sync::TryLockError::WouldBlock) => {
+                return Ok(ZoneAdmissionAttempt::Busy);
+            }
+        };
+        let run = body.take().expect("Zone admission body is used once");
+        run(locked, rebase).map(ZoneAdmissionAttempt::Complete)
+    })?;
+    match attempt {
+        ZoneAdmissionAttempt::Complete(result) => Ok(result),
+        ZoneAdmissionAttempt::Busy => {
+            // The production hook is a no-op. Tests observe this exact boundary
+            // after config returned and dropped Store, before the outside wait.
+            after_busy();
+            // Even a poisoned result is only dropped here. The fresh admission
+            // below preserves Store-first errors and the body's Zone policy.
+            drop(zone.lock());
+            config.with_shared_zone_experience_admission(|rebase| {
+                let locked = zone.lock();
+                let run = body
+                    .take()
+                    .expect("busy admission did not consume the body");
+                run(locked, rebase)
+            })
+        }
+    }
+}
+
+#[cfg(test)]
+#[path = "zone_experience_admission_handoff_tests.rs"]
+mod admission_handoff_tests;
+
 /// Called only from the authority admission callback, after taking the Zone
 /// mutex. The supplied rebase reads the already-locked AccountStore; it never
 /// enters another character's private command lane or reacquires the store.
@@ -237,11 +304,9 @@ impl SharedInProcessZoneSessionRuntime {
             self.inner.shared_mentor_config(),
         ) {
             let _stage = shared_session_substage("shared_session.experience.admission_capture");
-            config.with_shared_zone_experience_admission(|rebase| {
-                let mut state = self
-                    .zone_state
-                    .lock()
-                    .map_err(|_| "personal experience Zone unavailable")?;
+            let zone = Arc::clone(&self.zone_state);
+            with_zone_experience_admission(&config, &zone, |locked, rebase| {
+                let mut state = locked.map_err(|_| "personal experience Zone unavailable")?;
                 capture_locked_personal_experience_context(&mut state, &key, rebase)
             })?
         } else {

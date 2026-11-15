@@ -11071,22 +11071,26 @@ fn run_shared_zone_owner_tick_with_deadline(
         .clone();
     if maintenance {
         if let Some(config) = authority {
-            return config.with_shared_zone_experience_admission(|rebase| {
-                let mut state = zone_state.lock().map_err(|_| "shared Zone unavailable")?;
-                if state.any_teardown_fenced() {
-                    return Ok(());
-                }
-                let _work_metric = SharedZoneWorkMetric(Instant::now());
-                shared_experience_profiles::rebase_locked_zone_experience_authority(
-                    &mut state, rebase,
-                )?;
-                run_shared_zone_owner_tick_locked(
-                    &mut state,
-                    now_ms,
-                    maintenance,
-                    maintenance_deadline,
-                )
-            });
+            return shared_experience_profiles::with_zone_experience_admission(
+                &config,
+                zone_state,
+                |locked, rebase| {
+                    let mut state = locked.map_err(|_| "shared Zone unavailable")?;
+                    if state.any_teardown_fenced() {
+                        return Ok(());
+                    }
+                    let _work_metric = SharedZoneWorkMetric(Instant::now());
+                    shared_experience_profiles::rebase_locked_zone_experience_authority(
+                        &mut state, rebase,
+                    )?;
+                    run_shared_zone_owner_tick_locked(
+                        &mut state,
+                        now_ms,
+                        maintenance,
+                        maintenance_deadline,
+                    )
+                },
+            );
         }
     }
     let mut zone_state = zone_state
@@ -13906,7 +13910,9 @@ impl SharedInProcessZoneSessionRuntime {
                 Ok((Vec::new(), Vec::new(), Vec::new(), Vec::new(), Vec::new()))
             };
         };
-        let mut issuer = |rebase: Option<
+        let zone = Arc::clone(&self.zone_state);
+        let mut issuer = |locked: shared_experience_profiles::ZoneAdmissionLockResult<'_>,
+                          rebase: Option<
             &shared_experience_profiles::ExperienceAuthorityRebase<'_>,
         >| {
             let (
@@ -13918,10 +13924,8 @@ impl SharedInProcessZoneSessionRuntime {
                 player_damages,
                 player_heals,
             ) = {
-                let mut zone_state = self
-                    .zone_state
-                    .lock()
-                    .expect("shared zone presence mutex should not be poisoned");
+                let mut zone_state =
+                    locked.expect("shared zone presence mutex should not be poisoned");
                 if let Some(rebase) = rebase {
                     shared_experience_profiles::rebase_locked_zone_experience_authority(
                         &mut zone_state,
@@ -14009,9 +14013,13 @@ impl SharedInProcessZoneSessionRuntime {
         };
         let authority = self.inner.shared_mentor_config();
         let issued = if let Some(config) = authority {
-            config.with_shared_zone_experience_admission(|rebase| issuer(Some(rebase)))
+            shared_experience_profiles::with_zone_experience_admission(
+                &config,
+                &zone,
+                |locked, rebase| issuer(locked, Some(rebase)),
+            )
         } else {
-            issuer(None)
+            issuer(zone.lock(), None)
         };
         let (
             packets,
