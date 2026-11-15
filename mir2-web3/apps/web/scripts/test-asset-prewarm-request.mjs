@@ -70,13 +70,30 @@ test('recovery does not erase a failure before its replacement body reaches EOF'
   stream.close();await pending;assert.equal(metrics.prewarmRuns[0].ok,1);assert.equal(metrics.prewarmRuns[0].failed,0);
 });
 
+test('HUD recovery covers all 113 original entries after a transient first pass, including failures past eight',async()=>{
+  const urls=Array.from({length:113},(_,n)=>'/original-ui/hud/'+n+'.png'),calls=new Map(),metrics={prewarmRuns:[]};
+  let active=0,peak=0,configured=0;
+  const pack=loadPrewarmPack(async url=>{
+    const count=(calls.get(url)??0)+1;calls.set(url,count);
+    if(count<=3)return new Response(null,{status:503});
+    assert.equal(configured,1);active++;peak=Math.max(peak,active);await turn();active--;
+    return bytes([1,2,3]);
+  });
+  await pack({name:'hud-core',label:'HUD',urls},metrics,6,null,'high',undefined,false,undefined,async()=>{configured++;});
+  const result=metrics.prewarmRuns[0];assert.equal(result.requested,113);assert.equal(result.ok,113);assert.equal(result.failed,0);
+  assert.equal(result.recovery.requested,113);assert.deepEqual(result.recovery.unattemptedUrls,[]);
+  assert.equal(result.recovery.initialFailedUrls.length,113);assert.equal(result.recovery.recoveredUrls.length,113);
+  for(const url of urls)assert.equal(calls.get(url),4);
+  assert(peak<=2,'recovery must retain the existing two-reader limit');
+});
+
 test('persistent HUD failures get at most one bounded recovery sweep',async()=>{
   const urls=Array.from({length:9},(_,n)=>'/failed/'+n),calls=new Map(),metrics={prewarmRuns:[]};
   await loadPrewarmPack(async url=>{calls.set(url,(calls.get(url)??0)+1);return new Response(null,{status:503});})(
     {name:'hud-core',label:'HUD',urls},metrics,9,null,'high',undefined,false);
-  for(const url of urls.slice(0,8))assert.equal(calls.get(url),6);assert.equal(calls.get(urls[8]),3);
+  for(const url of urls)assert.equal(calls.get(url),6);
   const result=metrics.prewarmRuns[0];assert.equal(result.requested,9);assert.equal(result.ok,0);assert.equal(result.failed,9);
-  assert.equal(result.recovery.requested,8);assert.deepEqual(result.recovery.unattemptedUrls,[urls[8]]);
+  assert.equal(result.recovery.requested,9);assert.deepEqual(result.recovery.unattemptedUrls,[]);
 });
 
 test('owner cancellation during the configuration refresh prevents every recovery request',async()=>{

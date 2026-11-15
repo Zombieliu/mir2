@@ -1202,13 +1202,15 @@ async function prewarmPack(
     const initial = await prewarmUrls(pack.urls, packMetric, metrics, concurrency, signal);
     if (pack.name === "hud-core" && initial.failedUrls.length > 0) {
       if (signal?.aborted) throw createAbortError();
-      // Retry at most eight failed URLs once. Registration stays off first
-      // paint; only an already-available, bounded configuration ACK is awaited.
-      const retryUrls = initial.failedUrls.slice(0, 8);
+      // Give each failed entry in this finite pack one recovery pass. A partial
+      // slice leaves later assets missing even after the source recovers.
+      // Registration stays off first paint; existing request budgets and the
+      // two-reader limit below still apply, and healthy URLs are not reread.
+      const retryUrls = initial.failedUrls;
       const recovery: NonNullable<CachePrewarmMetric["recovery"]> = {
         initialOk: initial.okUrls.length,
         initialFailedUrls: [...initial.failedUrls], requested: retryUrls.length,
-        recoveredUrls: [], failedUrls: [], unattemptedUrls: initial.failedUrls.slice(8), status: "running",
+        recoveredUrls: [], failedUrls: [], unattemptedUrls: [], status: "running",
       };
       packMetric.recovery = recovery;
       try { await beforeHudRecovery?.(); }
