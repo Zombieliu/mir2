@@ -1,0 +1,220 @@
+{
+  "root": "D:\\mir2-builds\\r16-hud-admission-20261115",
+  "files": [
+    {
+      "path": "release-pin.json",
+      "bytes": 967,
+      "sha256": "5db1e3b31f7d33733f9a26bef1195b1670b1074e5f867be4af5273f530ca4db7"
+    },
+    {
+      "path": "release-source-closure.json",
+      "bytes": 59315,
+      "sha256": "0f877616d0d58b9f765b15f20fdd56ef5167ddc85ab77b2e786b50e6cbed9c45"
+    },
+    {
+      "path": "release-checks.json",
+      "bytes": 170,
+      "sha256": "fc9bd7a4008792f2d81889a067b521ad63af60e385cfe9767c63181eb561c282"
+    },
+    {
+      "path": "release-entry-checks.json",
+      "bytes": 169,
+      "sha256": "3b5f8de25d6c239d6be5b8f7e3a414750457c98e743b968f3b717dfe28114fb2"
+    },
+    {
+      "path": "artifact-info.json",
+      "bytes": 481,
+      "sha256": "d595fb3dd717d5de9e12417b0070cb76cfe8e64b6ab1887b53bdd6640d1270d7"
+    },
+    {
+      "path": "linux-package-verification.json",
+      "bytes": 825,
+      "sha256": "cf59e0232093b51f6c5918112bfb7de9353e99cd28f21a0391352074b8805bb0"
+    },
+    {
+      "path": "remote-backup-r1.json",
+      "bytes": 9281,
+      "sha256": "4592a5de275a8561d1657d16f317676b90b0093847c93f460ef68c57934bbe94"
+    },
+    {
+      "path": "remote-clone-r1.json",
+      "bytes": 1014,
+      "sha256": "27c1e5868fdb1601e291f862247ffdf8caac76acc46f4307bfeb5fdbfac0a0cc"
+    },
+    {
+      "path": "remote-dependency-keys-r1.json",
+      "bytes": 1456,
+      "sha256": "91f78b93f54086c9bb44049c7312ef46a7b72483588ffe1b32705619e86b67fd"
+    },
+    {
+      "path": "remote-content-cache-copy-r1.json",
+      "bytes": 699,
+      "sha256": "4bb43bf34865003156bc243be7ffa1e0089833f859b810b9e1f6070e11936c74"
+    },
+    {
+      "path": "server-script-pins.json",
+      "bytes": 1376,
+      "sha256": "a9b4e999442fcd80bf692baf25ddb7e33109bff75b97a6432ef5ee5d4e61b3bd"
+    },
+    {
+      "path": "remote-canary-start-r1.json",
+      "bytes": 9032,
+      "sha256": "f4436346b2fd4bf74cd86812bc3430d692dc18f68c53d434bf3a1f0a3e012680"
+    },
+    {
+      "path": "remote-canary-protocol-r1.json",
+      "bytes": 2208,
+      "sha256": "9d1edea295e3b3bd387ebe6be0592961a8f9d0c2d777e4a1915434381ed50340"
+    },
+    {
+      "path": "remote-preswitch-r1.json",
+      "bytes": 4477,
+      "sha256": "3a12276d70beb930992bc6377719422930cbf691ac9b775d15a69e8eaa366c73"
+    },
+    {
+      "path": "remote-rollout-r1.json",
+      "bytes": 1612,
+      "sha256": "ae8fd04b3a4ba9716d5c2d69cfda4574c35a524b006856c25eb4680dcb8f0022"
+    },
+    {
+      "path": "remote-backend-rollback-r1.json",
+      "bytes": 1067,
+      "sha256": "2c6228d9ea305a222a57c8a82e6d5f264b1146b73215292ec952b8bb3c459291"
+    },
+    {
+      "path": "remote-postrollback-readonly-r1.json",
+      "bytes": 1450,
+      "sha256": "143e72b363313802eaa64b097d7a1ffdb4c405f63a75f8b70e1e72c93fd2555a"
+    },
+    {
+      "path": "web-stage-artifact-info.json",
+      "bytes": 158,
+      "sha256": "f469fcea585bf871f481a4c345e6f3f42d3c3d691c8d50df4641d3ad2bfa1f17"
+    },
+    {
+      "path": "web-check-artifact-info.json",
+      "bytes": 156,
+      "sha256": "a1100ac25aa582c12ba8f162b03639503beb156729f874285119fbcfa9c0289e"
+    },
+    {
+      "path": "web-promote-artifact-info.json",
+      "bytes": 156,
+      "sha256": "bda6463c457723f70db552140bb1d728bc767b1d30a554875127cf59d12bf6a7"
+    },
+    {
+      "path": "web-rollback-artifact-info.json",
+      "bytes": 156,
+      "sha256": "9f346cd34ebcdc301ed336ed89269dbc4e4abbbb0278c03e56b65f1524bfbb23"
+    },
+    {
+      "path": "web-stage-r1/numeron-r16-release.json",
+      "bytes": 64210,
+      "sha256": "d92a170955491348678468ed998846848ddfe34fbda18c1f7a80a44fc9c02885"
+    },
+    {
+      "path": "web-check-r1/numeron-r16-release.json",
+      "bytes": 67746,
+      "sha256": "e582a2e8c53a42930d5c3c568e039983e88da8f633124985cd9846ade0cd8f54"
+    },
+    {
+      "path": "web-promote-r1/numeron-r16-release.json",
+      "bytes": 71445,
+      "sha256": "91f0897420935e46051c1846983c1043c30f2d0366d46a190771f79a5744d775"
+    },
+    {
+      "path": "web-rollback-r1/numeron-r16-release.json",
+      "bytes": 64183,
+      "sha256": "7f54de96332fb344ef9c3ddff7ddf628b48a6bbed00921b158b6a1ffbd59f4a1"
+    },
+    {
+      "path": "independent-candidate.json",
+      "bytes": 288,
+      "sha256": "c52f9aa2b0b6802c25f9020d8dcd8f7c7dd4535bba2e331cc6f2c014a2f97613"
+    },
+    {
+      "path": "alias-before.json",
+      "bytes": 187,
+      "sha256": "603e7809ebbc8d2a07e6bc9a153ed7d9f0df9103dc383b2985a1971bad0cec01"
+    },
+    {
+      "path": "alias-after.json",
+      "bytes": 187,
+      "sha256": "89bb1568e58c4d75ece269ebd406e772fd39baf80aabd72a09e77a135d5c2857"
+    },
+    {
+      "path": "alias-final.json",
+      "bytes": 187,
+      "sha256": "04734561bdea444cec79a0b8e93f6f0dccc706eedbef0a5ab3f414828af4fa54"
+    },
+    {
+      "path": "final-public-readback.json",
+      "bytes": 432,
+      "sha256": "db952382931441e38a1a947d622129de9aa5e0ed0ca2bbbbe65161c4909b3cc0"
+    },
+    {
+      "path": "admission-before-hud.json",
+      "bytes": 3489,
+      "sha256": "33eb1da8b841fb6a6b36d57b1a415626e1d7a583367502f7972880dfd666c117"
+    },
+    {
+      "path": "public-r1/original-acceptance.json",
+      "bytes": 806,
+      "sha256": "558b5064a66c96ec44bd920c063fd619f49d32da0df6e2b076b7a1e4bd00527a"
+    },
+    {
+      "path": "public-r1/first-party-signed-summary.json",
+      "bytes": 42450,
+      "sha256": "879b2f395448841794e5144b6734db80386fe957457182850eaa221cae891eba"
+    },
+    {
+      "path": "public-r1/desktop-required-hud-r1/receipt.json",
+      "bytes": 80708,
+      "sha256": "c9f66351b1acac054104b6649ffb5a5d974cdd41a0e4789e7e0b3459db2ab297"
+    },
+    {
+      "path": "public-r1/desktop-required-hud-r1/static-waterfall.json",
+      "bytes": 1012292,
+      "sha256": "4114764403e25181c54eae5a3ac1a957971402ee6ba1728a24a668cd9dba100d"
+    },
+    {
+      "path": "public-r1/desktop-required-hud-r1/worker-font-network.json",
+      "bytes": 11662,
+      "sha256": "3d1b01c1ccad3e9a86324094ceb4d413dcf7f6526257635da3b57a7f4e7d9ece"
+    },
+    {
+      "path": "public-r1/desktop-required-hud-r1/compiled-bootstrap-observation.json",
+      "bytes": 1811,
+      "sha256": "cf2415dcda71f13493e184c18937fc4e2771e045eb02bc114c2addd1cfa5c317"
+    },
+    {
+      "path": "public-r1/desktop-required-hud-r1/startup-probe.json",
+      "bytes": 151117,
+      "sha256": "6b106b70ccc8409573fbf0f1a8ff1e9ed089943c4a6a66d90ade2a49c08b193c"
+    },
+    {
+      "path": "public-r1/preparation.json",
+      "bytes": 13496,
+      "sha256": "7cdbb187fbbba1f91a364245dd6ad386d9f89bc1ca37d198a8ce90fbf397d1a3"
+    },
+    {
+      "path": "public-r2/preparation.json",
+      "bytes": 13496,
+      "sha256": "ce3c3d37c3d47ba9b94864dba852b97ffa6582f6bd8b5ad6c140f496e81155b1"
+    },
+    {
+      "path": "rollback-qr/qr-zh-cn-receipt.json",
+      "bytes": 2374,
+      "sha256": "77968b23f5d75825e01974ec6367b08b716a27418d818a271e12e4ce86dfe125"
+    },
+    {
+      "path": "rollback-qr/qr-zh-tw-receipt.json",
+      "bytes": 2374,
+      "sha256": "d5f147407b20b5802b7a75c5d2b4d5800b897db7376298ba51c166bc68dc39cc"
+    },
+    {
+      "path": "final-public-readback-r2.json",
+      "bytes": 432,
+      "sha256": "f190faf4e56909d9101626267ad0da78f97c2be57ba25fc30d8b47417ece871b"
+    }
+  ]
+}
