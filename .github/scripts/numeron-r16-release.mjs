@@ -16,7 +16,7 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: "0bcd61e0f27147f005dee3d6c49abb6a1af15157",
+  source: "4204e920edde1d2c4a27e7bb7a2bba50ebd00860",
   sourceRef: BRANCH,
   baseSource: "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
   assetSource: "f2de762309768b51b39438c2437c14e819df9bf7",
@@ -67,12 +67,15 @@ export const QR_RELEASE = Object.freeze({
   "b3bff60c1d91941fcb39e7ebe1ff2a5ed8e92eba",
   "766d81d4dc786fcc48275ae020b5550a18e9601b",
   "88002a0000943f221f494cc61b8bb28486c923db",
-  "0bcd61e0f27147f005dee3d6c49abb6a1af15157"
+  "0bcd61e0f27147f005dee3d6c49abb6a1af15157",
+  "353a94bff10e57a6dbd2177047930e988c4fde40",
+  "44b986b8a51682f1c72c552b82c0f21c32ce0d2a",
+  "4204e920edde1d2c4a27e7bb7a2bba50ebd00860"
 ],
   changedFiles: [
   {
     "filename": ".github/scripts/numeron-r16-release.mjs",
-    "sha": "58d65cdea3a8e9f2dd78fffd6a7ee204de272c2d",
+    "sha": "2a4707699cab2e39d010b19e34351730883319b4",
     "status": "modified"
   },
   {
@@ -177,7 +180,7 @@ export const QR_RELEASE = Object.freeze({
   },
   {
     "filename": "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
-    "sha": "89016f7a103d61a2722ff065d6ded018ed06019a",
+    "sha": "f77a95ec92bd9acadb98937297724cab008401d9",
     "status": "modified"
   },
   {
@@ -311,6 +314,11 @@ export const QR_RELEASE = Object.freeze({
     "status": "added"
   },
   {
+    "filename": "mir2-web3/apps/web/scripts/test-asset-prewarm-request.mjs",
+    "sha": "1535c2ea03aae60ee0d8a051738630cb6be15a25",
+    "status": "modified"
+  },
+  {
     "filename": "mir2-web3/apps/web/scripts/test-asset-worker-font-ranges.mjs",
     "sha": "84bc8b5b7147ecb82ea903e5f09952c182a58a56",
     "status": "added"
@@ -387,12 +395,12 @@ export const QR_RELEASE = Object.freeze({
   },
   {
     "filename": "mir2-web3/docs/AGENT-CURRENT.md",
-    "sha": "d3a1a21cfdbe038aeb03de48e83a3d5a0396f068",
+    "sha": "b535132962fd684642e976e04d6f09bedbfa59da",
     "status": "modified"
   },
   {
     "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
-    "sha": "6c13fd6e45b0255efd69d9a71860b104b19d53ac",
+    "sha": "ec59b01d79307be4400f320a2b83682c11827c18",
     "status": "modified"
   },
   {
@@ -412,12 +420,12 @@ export const QR_RELEASE = Object.freeze({
   },
   {
     "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
-    "sha": "956fbcffc69c20a6b34bd6d17b5201c72a2a1d70",
+    "sha": "914ca1dcff0db1e025aecdb7c242cb26c517a0bd",
     "status": "modified"
   },
   {
     "filename": "mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md",
-    "sha": "d9b890f5d6867265395ae06ee6785490805a201f",
+    "sha": "35a20c180d933eb8eddfc4c0b8972a8112b10cab",
     "status": "modified"
   },
   {
@@ -633,6 +641,41 @@ export const QR_RELEASE = Object.freeze({
   {
     "filename": "mir2-web3/docs/evidence/r16-diary-close-20261115/unreachable-before.log",
     "sha": "fc1211cbe70eb51c603de953ca53a2355f17bd29",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-coalescing-20261115/README.md",
+    "sha": "2cf7a49bfd46a5aa8e81e6026aa986a737ed2633",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-coalescing-20261115/candidate-en-reentered.png",
+    "sha": "157d746d3f67827414dd987ddfc463e25bfa4356",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-coalescing-20261115/candidate-tw-quest.png",
+    "sha": "cdcf74047e43c233cda336983606705126e0a3f3",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-coalescing-20261115/private-evidence-pins.json",
+    "sha": "beb9f6089a009723776dad295fdd75c33a25b6c1",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-coalescing-20261115/public-r1-quest-and-loading.png",
+    "sha": "5fee8a269cdfd3d75bd8047888564f6929141ab7",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-coalescing-20261115/source-pins.json",
+    "sha": "7bddcaadf82efd6cbf916a1140110de748ea75ab",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-coalescing-20261115/verification.json",
+    "sha": "b5829bd95ee4a8111ef467243c1f727bb0ac605d",
     "status": "added"
   },
   {
