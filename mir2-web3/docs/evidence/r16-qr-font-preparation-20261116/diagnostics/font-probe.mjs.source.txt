@@ -1,0 +1,44 @@
+import assert from 'node:assert/strict';
+import {readFile,writeFile,mkdir} from 'node:fs/promises';
+import {createRequire} from 'node:module';
+const root='D:/mir2-builds/r16-runtime-transport-cost-20261116/font-isolation',repo='E:/mir2-player-journey';
+await mkdir(root,{recursive:false});
+const {chromium}=createRequire('F:/mir2-builds/web-r16-20261104/tools/package.json')('playwright');
+const config=JSON.parse(await readFile(repo+'/mir2-web3/config/numeron-r16-web-assets.json'));
+const app='https://numeron.obelisk.build',assets=config.assetBaseUrl.replace('/mir2/','/hotlink-ok/mir2/');
+const pins=[{name:'NotoSansCJKsc-Regular.otf',bytes:16437364,sha256:'2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b'},
+ {name:'NotoSansTC.ttf',bytes:11941968,sha256:'864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f'}];
+const names=['cache-control','content-type','content-length','content-encoding','x-vercel-cache','cf-cache-status','cf-ray','age','etag','x-mir2-edge-cache'];
+const proof={kind:'isolated-public-original-font-bodies',startedAt:new Date().toISOString(),passed:false,
+ scope:'One font at a time in a new actual Chrome profile. Complete original SHA and byte count, no game/Worker/font subset, no deployment or purge. Diagnostic180sec is not an original game acceptance budget.',cases:[]};
+const save=()=>writeFile(root+'/receipt.json',JSON.stringify(proof,null,2)+'\n');let context;
+try{
+ for(const [originName,origin,pin]of[['app',app,pins[0]],['app',app,pins[1]],['asset',assets,pins[0]],['asset',assets,pins[1]]]){
+  const url=origin+'/original-ui/fonts/'+pin.name,name=originName+'-'+pin.name;
+  const row={name,url,pin,requests:[],responses:[],finished:[],failed:[],closed:false};proof.cases.push(row);await save();
+  context=await chromium.launchPersistentContext(root+'/'+name,{executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe',headless:true,serviceWorkers:'block'});
+  const page=context.pages()[0],cdp=await context.newCDPSession(page);await cdp.send('Network.enable');
+  const ids=new Set();cdp.on('Network.requestWillBeSent',e=>{if(e.request.url===url){ids.add(e.requestId);row.requests.push({requestId:e.requestId,timestamp:e.timestamp,wallTime:e.wallTime});}});
+  cdp.on('Network.responseReceived',e=>{if(ids.has(e.requestId)){const h=Object.fromEntries(Object.entries(e.response.headers).map(([k,v])=>[k.toLowerCase(),v]));row.responses.push({requestId:e.requestId,timestamp:e.timestamp,status:e.response.status,protocol:e.response.protocol,fromDiskCache:e.response.fromDiskCache,fromServiceWorker:e.response.fromServiceWorker,headers:Object.fromEntries(names.map(k=>[k,h[k]??null]))});}});
+  cdp.on('Network.loadingFinished',e=>{if(ids.has(e.requestId))row.finished.push({requestId:e.requestId,timestamp:e.timestamp,encodedDataLength:e.encodedDataLength});});
+  cdp.on('Network.loadingFailed',e=>{if(ids.has(e.requestId))row.failed.push({requestId:e.requestId,timestamp:e.timestamp,errorText:e.errorText});});
+  await page.exposeBinding('fontProbeProgress',(_source,value)=>console.log(JSON.stringify({case:name,...value})));
+  await page.goto(app+'/version',{waitUntil:'domcontentloaded',timeout:30000});row.userAgent=await page.evaluate(()=>navigator.userAgent);
+  console.log(JSON.stringify({case:name,phase:'starting'}));
+  row.result=await page.evaluate(async({url,pin})=>{
+   const start=performance.now(),owner=new AbortController(),deadline=setTimeout(()=>owner.abort(),180000),chunks=[];
+   let bytes=0,headerMs=null,phase='headers';const heartbeat=setInterval(()=>void window.fontProbeProgress({phase,elapsedMs:Math.round(performance.now()-start),bytes}),15000);
+   try{
+    const response=await fetch(url,{signal:owner.signal});headerMs=performance.now()-start;if(!response.ok)throw Error('HTTP'+response.status);
+    phase='body';const reader=response.body.getReader();while(true){const chunk=await reader.read();if(chunk.done)break;bytes+=chunk.value.byteLength;if(bytes>32*1024*1024)throw RangeError('Diagnostic font body bound');chunks.push(chunk.value);}
+    const bodyMs=performance.now()-start,data=new Uint8Array(bytes);let offset=0;for(const chunk of chunks){data.set(chunk,offset);offset+=chunk.length;}
+    const sha256=[...new Uint8Array(await crypto.subtle.digest('SHA-256',data))].map(x=>x.toString(16).padStart(2,'0')).join('');
+    return{passed:bytes===pin.bytes&&sha256===pin.sha256,bytes,sha256,headerMs,bodyMs,elapsedMs:performance.now()-start};
+   }catch(error){return{passed:false,phase,bytes,headerMs,elapsedMs:performance.now()-start,error:{name:error.name,message:error.message}};}
+   finally{clearInterval(heartbeat);clearTimeout(deadline);owner.abort();}
+  },{url,pin});
+  await cdp.detach();await context.close();context=null;row.closed=true;console.log(JSON.stringify({case:name,result:row.result}));await save();
+ }
+ proof.passed=proof.cases.every(row=>row.result?.passed&&row.closed);
+}catch(error){proof.failure={name:error.name,message:error.message};process.exitCode=1;}
+finally{await context?.close();proof.allOwnedBrowsersClosed=true;proof.finishedAt=new Date().toISOString();await save();console.log(JSON.stringify({passed:proof.passed,cases:proof.cases.length,closed:true,receipt:root+'/receipt.json'}));if(!proof.passed)process.exitCode=1;}

@@ -47,6 +47,7 @@ import {
 import { R16_FULL_CJK_FONT_CSS } from "../lib/r16-cjk-fonts";
 import { compileBevyRuntimeBinary, initializeBevyRuntime } from "../lib/bevy-runtime-initializer";
 import { BevyRuntimePreparation } from "../lib/bevy-runtime-preparation";
+import { prepareFontAfterWalletQrImage } from "../lib/wallet-qr-font-preparation";
 import { hasR16GameplayLocalization, hasR16NpcLocalization, loadR16GameplayLocalization, loadR16NpcLocalization } from "../lib/r16-native-localization";
 import { commerceRuntimeLanguage, questRuntimeLanguage } from "../lib/r16-runtime-language";
 import { r16QuestGuidanceProfile, shouldAutoStartR16Tutorial } from "../lib/r16-gameplay-baseline";
@@ -2784,6 +2785,32 @@ export default function HomePage() {
   const [suiWallets, setSuiWallets] = useState<SuiWalletSummary[]>([]);
   const [walletPickerOpen, setWalletPickerOpen] = useState(false);
   const [dubheQr, setDubheQr] = useState<DubheQrLoginState | null>(null);
+  const dubheQrStateRef = useRef(dubheQr);
+  useLayoutEffect(() => { dubheQrStateRef.current = dubheQr; }, [dubheQr]);
+  useEffect(function prepareFontDuringWalletConfirmation() {
+    return prepareFontAfterWalletQrImage({
+      target: window,
+      eligible: () => {
+        const qr = dubheQrStateRef.current;
+        if (qr?.status !== "pending" || typeof qr.expiresAt !== "number" || qr.expiresAt <= Date.now() ||
+            !bevyRuntimeStartup.runtimeAllowed) return false;
+        return resolveBevyRuntimeBootDecision({
+          layout: clientProfile.layout, input: clientProfile.input,
+          coarsePointer: window.matchMedia?.("(pointer: coarse)").matches ?? false,
+          maxTouchPoints: navigator.maxTouchPoints ?? 0, userAgent: navigator.userAgent,
+          params: new URLSearchParams(window.location.search),
+        }).mode === "eager";
+      },
+      workerReady: () => {
+        const controller = navigator.serviceWorker?.controller;
+        return window.__mir2AssetCache?.enabled === true && window.__mir2AssetCache.status === "registered" &&
+          Boolean(controller && new URL(controller.scriptURL).origin === window.location.origin &&
+            new URL(controller.scriptURL).pathname === "/mir2-asset-worker.js");
+      },
+      readFont: prewarmBevyRuntimePrimaryFont,
+      onState: (state, detail) => markMir2CacheMilestone(`walletQrFontPreparation${state}`, detail),
+    });
+  }, [bevyRuntimeStartup, clientProfile.input, clientProfile.layout]);
   const dubheQrAbortRef = useRef<AbortController | null>(null);
   useEffect(() => {
     setDubheQr(null);

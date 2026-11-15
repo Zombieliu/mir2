@@ -1,0 +1,15 @@
+{
+  "passed": 185,
+  "failed": 0,
+  "skipped": 0,
+  "command": "node --test scripts/test-bevy-runtime-initializer.mjs scripts/test-bevy-runtime-finite-recovery.mjs scripts/test-bevy-runtime-module-owner.mjs scripts/test-bevy-runtime-source-rotation.mjs scripts/test-bevy-runtime-font-prewarm.mjs scripts/test-runtime-header-priority.mjs scripts/test-bevy-runtime-package-selection.mjs scripts/test-bevy-runtime-policy.mjs scripts/test-bevy-runtime-preparation.mjs scripts/test-wallet-qr-font-preparation.mjs scripts/test-dubhe-wallet-login.mjs scripts/test-dubhe-connect-auth.mjs",
+  "logSha256": "880c6ff154516112f652deaf81691ec07c7883eaa747c951027f1a223616df72",
+  "registeredStartup": {
+    "command": "npm run test:bevy-runtime-startup",
+    "passed": 122,
+    "failed": 0,
+    "skipped": 0,
+    "includedIn185": true,
+    "logSha256": "3aaa260332b8508361585ac4d1472e2304e315cf8c34d6b558856681495c269e"
+  }
+}

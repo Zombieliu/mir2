@@ -1,0 +1,343 @@
+{
+  "kind": "isolated-public-runtime-transport-and-compiler-cost",
+  "source": "1f08bfe4be38cb25ef8f3656048863a187cef8da",
+  "startedAt": "2026-11-15T19:08:50.897Z",
+  "passed": true,
+  "scope": "Fresh installed Chrome profiles, one public immutable runtime at a time, no login, game, fonts, GPU initialization, Service Worker, cache purge or deployment. Diagnostic owner deadline300s and compile observation180s do not change or qualify original game8/65/120/20 gates.",
+  "initializerSha256": "4330b17d64fbbe3dcf5743726f05f5d867f65a369b9792a6f884a669c903fcbf",
+  "manifestVersion": "bevy-0c553a754308e5b8",
+  "expectedSha256": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+  "cases": [
+    {
+      "name": "app-download-then-compile",
+      "url": "https://numeron.obelisk.build/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "mode": "raw",
+      "startedAt": "2026-11-15T19:08:50.898Z",
+      "requests": [
+        {
+          "requestId": "118552.4",
+          "url": "https://numeron.obelisk.build/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+          "timestamp": 318120.860883,
+          "wallTime": 1794769732.832822,
+          "type": "Fetch"
+        }
+      ],
+      "responses": [
+        {
+          "requestId": "118552.4",
+          "timestamp": 318124.203636,
+          "status": 200,
+          "protocol": "h2",
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "headers": {
+            "cache-control": "public, max-age=31536000, immutable",
+            "content-type": "application/wasm",
+            "content-length": null,
+            "content-encoding": "br",
+            "x-vercel-cache": "MISS",
+            "cf-cache-status": "DYNAMIC",
+            "cf-ray": "a5b08c14c8993fdb-SIN",
+            "age": "0",
+            "etag": "W/\"e226d7d41735a2cd8d9b5031355aa906\"",
+            "x-mir2-edge-cache": null,
+            "x-mir2-storage-content-encoding": null
+          }
+        }
+      ],
+      "finished": [
+        {
+          "requestId": "118552.4",
+          "timestamp": 318130.042809,
+          "encodedDataLength": 6027540
+        }
+      ],
+      "failed": [],
+      "progress": [
+        {
+          "phase": "body",
+          "elapsedMs": 3343,
+          "bytes": 0
+        },
+        {
+          "phase": "body",
+          "elapsedMs": 4156,
+          "bytes": 4194304
+        },
+        {
+          "phase": "body",
+          "elapsedMs": 5048,
+          "bytes": 8388608
+        },
+        {
+          "phase": "body",
+          "elapsedMs": 6233,
+          "bytes": 12582912
+        },
+        {
+          "phase": "body",
+          "elapsedMs": 7287,
+          "bytes": 16777216
+        },
+        {
+          "phase": "body",
+          "elapsedMs": 8183,
+          "bytes": 20971520
+        },
+        {
+          "phase": "body",
+          "elapsedMs": 8238,
+          "bytes": 25165824
+        },
+        {
+          "phase": "body",
+          "elapsedMs": 8468,
+          "bytes": 29360128
+        },
+        {
+          "phase": "compile",
+          "elapsedMs": 9209,
+          "bytes": 31452436
+        },
+        {
+          "phase": "complete",
+          "elapsedMs": 9236,
+          "bytes": 31452436
+        }
+      ],
+      "pageErrors": [],
+      "closed": true,
+      "browserVersion": "157.0.8103.78",
+      "result": {
+        "passed": true,
+        "elapsedMs": 9237,
+        "headerMs": 3343.300000011921,
+        "bodyMs": 9182.800000011921,
+        "compileMs": 24.80000001192093,
+        "bytes": 31452436,
+        "sha256": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+        "shaDirectlyMeasured": true,
+        "exportCount": 152,
+        "events": []
+      }
+    },
+    {
+      "name": "asset-download-then-compile",
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "mode": "raw",
+      "startedAt": "2026-11-15T19:09:02.186Z",
+      "requests": [
+        {
+          "requestId": "110580.4",
+          "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+          "timestamp": 318131.297873,
+          "wallTime": 1794769743.269771,
+          "type": "Fetch"
+        }
+      ],
+      "responses": [
+        {
+          "requestId": "110580.4",
+          "timestamp": 318131.836195,
+          "status": 200,
+          "protocol": "h2",
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "headers": {
+            "cache-control": "public, max-age=31536000",
+            "content-type": "application/wasm",
+            "content-length": null,
+            "content-encoding": "gzip",
+            "x-vercel-cache": null,
+            "cf-cache-status": "HIT",
+            "cf-ray": "a5b08c5868fc401d-SIN",
+            "age": "237103",
+            "etag": "W/\"598eeb7815459920e9deb3fccb410e9e\"",
+            "x-mir2-edge-cache": "HIT",
+            "x-mir2-storage-content-encoding": "gzip"
+          }
+        }
+      ],
+      "finished": [
+        {
+          "requestId": "110580.4",
+          "timestamp": 318185.460625,
+          "encodedDataLength": 6441651
+        }
+      ],
+      "failed": [],
+      "progress": [
+        {
+          "phase": "body",
+          "elapsedMs": 539,
+          "bytes": 0
+        },
+        {
+          "phase": "body",
+          "elapsedMs": 11952,
+          "bytes": 4194304
+        },
+        {
+          "phase": "body",
+          "elapsedMs": 15009,
+          "bytes": 6026019
+        },
+        {
+          "phase": "body",
+          "elapsedMs": 20413,
+          "bytes": 8388608
+        },
+        {
+          "phase": "body",
+          "elapsedMs": 30007,
+          "bytes": 12353769
+        },
+        {
+          "phase": "body",
+          "elapsedMs": 30395,
+          "bytes": 12582912
+        },
+        {
+          "phase": "body",
+          "elapsedMs": 37898,
+          "bytes": 16777216
+        },
+        {
+          "phase": "body",
+          "elapsedMs": 45010,
+          "bytes": 20276868
+        },
+        {
+          "phase": "body",
+          "elapsedMs": 45391,
+          "bytes": 20971520
+        },
+        {
+          "phase": "body",
+          "elapsedMs": 46455,
+          "bytes": 25165824
+        },
+        {
+          "phase": "body",
+          "elapsedMs": 47893,
+          "bytes": 29360128
+        },
+        {
+          "phase": "compile",
+          "elapsedMs": 54192,
+          "bytes": 31452436
+        },
+        {
+          "phase": "complete",
+          "elapsedMs": 54221,
+          "bytes": 31452436
+        }
+      ],
+      "pageErrors": [],
+      "closed": true,
+      "browserVersion": "157.0.8103.78",
+      "result": {
+        "passed": true,
+        "elapsedMs": 54222,
+        "headerMs": 538.8000000119209,
+        "bodyMs": 54163.69999998808,
+        "compileMs": 27.100000023841858,
+        "bytes": 31452436,
+        "sha256": "55024cc3247f30d4b2f5dd376298927bd0733dae1c7a795c21e7441e59c7552e",
+        "shaDirectlyMeasured": true,
+        "exportCount": 152,
+        "events": []
+      }
+    },
+    {
+      "name": "app-product-streaming",
+      "url": "https://numeron.obelisk.build/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "mode": "product",
+      "startedAt": "2026-11-15T19:09:57.588Z",
+      "requests": [
+        {
+          "requestId": "119656.5",
+          "url": "https://numeron.obelisk.build/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+          "timestamp": 318186.672313,
+          "wallTime": 1794769798.64425,
+          "type": "Fetch"
+        }
+      ],
+      "responses": [
+        {
+          "requestId": "119656.5",
+          "timestamp": 318187.281677,
+          "status": 200,
+          "protocol": "h2",
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "headers": {
+            "cache-control": "public, max-age=31536000, immutable",
+            "content-type": "application/wasm",
+            "content-length": null,
+            "content-encoding": "br",
+            "x-vercel-cache": "HIT",
+            "cf-cache-status": "DYNAMIC",
+            "cf-ray": "a5b08db03cc0fd37-SIN",
+            "age": "63",
+            "etag": "W/\"e226d7d41735a2cd8d9b5031355aa906\"",
+            "x-mir2-edge-cache": null,
+            "x-mir2-storage-content-encoding": null
+          }
+        }
+      ],
+      "finished": [
+        {
+          "requestId": "119656.5",
+          "timestamp": 318193.40694,
+          "encodedDataLength": 6027425
+        }
+      ],
+      "failed": [],
+      "progress": [
+        {
+          "phase": "complete",
+          "elapsedMs": 6746,
+          "bytes": 31452436
+        }
+      ],
+      "pageErrors": [],
+      "closed": true,
+      "browserVersion": "157.0.8103.78",
+      "result": {
+        "passed": true,
+        "elapsedMs": 6748,
+        "headerMs": 611.6999999880791,
+        "bodyMs": null,
+        "compileMs": 6746.399999976158,
+        "bytes": 31452436,
+        "sha256": null,
+        "shaDirectlyMeasured": false,
+        "exportCount": 152,
+        "events": [
+          {
+            "attempt": 1,
+            "sourceIndex": 0,
+            "retry": false,
+            "state": "started",
+            "phase": "headers",
+            "bytes": 0,
+            "atMs": 2
+          },
+          {
+            "attempt": 1,
+            "sourceIndex": 0,
+            "retry": false,
+            "state": "completed",
+            "phase": "compile",
+            "bytes": 31452436,
+            "status": 200,
+            "atMs": 6746
+          }
+        ]
+      }
+    }
+  ],
+  "allOwnedBrowsersClosed": true,
+  "finishedAt": "2026-11-15T19:10:05.503Z"
+}

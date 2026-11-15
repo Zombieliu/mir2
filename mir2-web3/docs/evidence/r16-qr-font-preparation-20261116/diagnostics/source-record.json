@@ -1,0 +1,13 @@
+{
+  "frozenHostInputs": [
+    {
+      "path": "probe.mjs.source.txt",
+      "sha256": "62eb9a0d0dbdf2030914ee174b2e498eb2bdcff2ca10eedab4587879439dca15"
+    },
+    {
+      "path": "font-probe.mjs.source.txt",
+      "sha256": "848a43cc791739d0d1531a1c77a11b78d86dc2b7a96c3c83f4d9f70ef8b16eba"
+    }
+  ],
+  "scope": "Frozen diagnostic sources retain the recorded host paths; they are audit inputs, not portable product scripts. Original game budgets and completeness gates were not changed."
+}

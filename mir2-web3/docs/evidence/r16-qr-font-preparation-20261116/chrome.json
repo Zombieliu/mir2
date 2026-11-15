@@ -1,0 +1,258 @@
+{
+  "kind": "actual-qr-effects-and-worker-shared-font-preparation",
+  "passed": true,
+  "scope": "Loopback QR matrix fixture using the real Page and QR observer effects, helper and current Worker; complete original SC body/63 parts. Not a game, real wallet approval, public performance or full six-font qualification.",
+  "sourceSha256": {
+    "page": "24f0d3401eaae95aea6c708f18a403d789d5766d5e0ebb88121d783ed72f227f",
+    "qr": "d9445566ea488f4d7634a23bc273fe9f79c12187a114d8a07e622effd3b929ab",
+    "helper": "e8779d46dd854fa842ef7a0aee474dcda95d708fae61ae8f64b33197dddaacc8",
+    "worker": "4ea2465084ba90eafe9f969a5ba3c42c8b0d2ff61fb05febb14a72f21916de40"
+  },
+  "pin": {
+    "bytes": 16437364,
+    "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+  },
+  "requests": [
+    {
+      "phase": "shared-fill",
+      "path": "/mir2/v/current/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "range": "bytes=0-1048575",
+      "start": 0,
+      "length": 1048576,
+      "at": 1794771464824,
+      "closedAt": 1794771464943
+    },
+    {
+      "phase": "shared-fill",
+      "path": "/mir2/v/current/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "range": "bytes=1048576-2097151",
+      "start": 1048576,
+      "length": 1048576,
+      "at": 1794771464824,
+      "closedAt": 1794771464825
+    },
+    {
+      "phase": "shared-fill",
+      "path": "/mir2/v/current/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "range": "bytes=2097152-3145727",
+      "start": 2097152,
+      "length": 1048576,
+      "at": 1794771464839,
+      "closedAt": 1794771464839
+    },
+    {
+      "phase": "shared-fill",
+      "path": "/mir2/v/current/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "range": "bytes=3145728-4194303",
+      "start": 3145728,
+      "length": 1048576,
+      "at": 1794771464846,
+      "closedAt": 1794771464847
+    },
+    {
+      "phase": "shared-fill",
+      "path": "/mir2/v/current/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "range": "bytes=4194304-5242879",
+      "start": 4194304,
+      "length": 1048576,
+      "at": 1794771464854,
+      "closedAt": 1794771464854
+    },
+    {
+      "phase": "shared-fill",
+      "path": "/mir2/v/current/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "range": "bytes=5242880-6291455",
+      "start": 5242880,
+      "length": 1048576,
+      "at": 1794771464860,
+      "closedAt": 1794771464861
+    },
+    {
+      "phase": "shared-fill",
+      "path": "/mir2/v/current/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "range": "bytes=6291456-7340031",
+      "start": 6291456,
+      "length": 1048576,
+      "at": 1794771464867,
+      "closedAt": 1794771464868
+    },
+    {
+      "phase": "shared-fill",
+      "path": "/mir2/v/current/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "range": "bytes=7340032-8388607",
+      "start": 7340032,
+      "length": 1048576,
+      "at": 1794771464874,
+      "closedAt": 1794771464874
+    },
+    {
+      "phase": "shared-fill",
+      "path": "/mir2/v/current/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "range": "bytes=8388608-9437183",
+      "start": 8388608,
+      "length": 1048576,
+      "at": 1794771464881,
+      "closedAt": 1794771464881
+    },
+    {
+      "phase": "shared-fill",
+      "path": "/mir2/v/current/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "range": "bytes=9437184-10485759",
+      "start": 9437184,
+      "length": 1048576,
+      "at": 1794771464888,
+      "closedAt": 1794771464888
+    },
+    {
+      "phase": "shared-fill",
+      "path": "/mir2/v/current/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "range": "bytes=10485760-11534335",
+      "start": 10485760,
+      "length": 1048576,
+      "at": 1794771464894,
+      "closedAt": 1794771464894
+    },
+    {
+      "phase": "shared-fill",
+      "path": "/mir2/v/current/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "range": "bytes=11534336-12582911",
+      "start": 11534336,
+      "length": 1048576,
+      "at": 1794771464901,
+      "closedAt": 1794771464901
+    },
+    {
+      "phase": "shared-fill",
+      "path": "/mir2/v/current/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "range": "bytes=12582912-13631487",
+      "start": 12582912,
+      "length": 1048576,
+      "at": 1794771464908,
+      "closedAt": 1794771464908
+    },
+    {
+      "phase": "shared-fill",
+      "path": "/mir2/v/current/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "range": "bytes=13631488-14680063",
+      "start": 13631488,
+      "length": 1048576,
+      "at": 1794771464928,
+      "closedAt": 1794771464929
+    },
+    {
+      "phase": "shared-fill",
+      "path": "/mir2/v/current/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "range": "bytes=14680064-15728639",
+      "start": 14680064,
+      "length": 1048576,
+      "at": 1794771464935,
+      "closedAt": 1794771464935
+    },
+    {
+      "phase": "shared-fill",
+      "path": "/mir2/v/current/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "range": "bytes=15728640-16437363",
+      "start": 15728640,
+      "length": 708724,
+      "at": 1794771464943,
+      "closedAt": 1794771464944
+    }
+  ],
+  "closed": {
+    "browser": true,
+    "server": true
+  },
+  "browserVersion": "157.0.8103.78",
+  "shared": {
+    "passed": true,
+    "requestsBeforeJoin": 15,
+    "totalRangeRequests": 16,
+    "peak": 2,
+    "started": {
+      "ready": {
+        "name": "image-ready",
+        "id": 1,
+        "at": 101.5,
+        "decoded": true
+      },
+      "events": [
+        {
+          "name": "image-ready",
+          "id": 1,
+          "at": 101.5,
+          "decoded": true
+        },
+        {
+          "name": "walletQrFontPreparationStart",
+          "detail": {
+            "stage": "wallet-qr-visible"
+          },
+          "at": 101.89999997615814
+        },
+        {
+          "name": "image-retired",
+          "id": 1,
+          "at": 221.80000001192093,
+          "decoded": true
+        }
+      ],
+      "qrHidden": true
+    },
+    "result": {
+      "requested": 1,
+      "completed": [
+        "/original-ui/fonts/NotoSansCJKsc-Regular.otf"
+      ],
+      "failed": [],
+      "aborted": false,
+      "bytes": 16437364
+    },
+    "cached": {
+      "bytes": 16437364,
+      "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b",
+      "checkedParts": 63,
+      "fontFaceLoaded": true
+    },
+    "events": [
+      {
+        "name": "image-ready",
+        "id": 1,
+        "at": 101.5,
+        "decoded": true
+      },
+      {
+        "name": "walletQrFontPreparationStart",
+        "detail": {
+          "stage": "wallet-qr-visible"
+        },
+        "at": 101.89999997615814
+      },
+      {
+        "name": "image-retired",
+        "id": 1,
+        "at": 221.80000001192093,
+        "decoded": true
+      }
+    ]
+  },
+  "cancelBeforeConfirmation": {
+    "passed": true,
+    "events": [
+      {
+        "name": "image-ready",
+        "id": 1,
+        "at": 44.5,
+        "decoded": true
+      },
+      {
+        "name": "image-retired",
+        "id": 1,
+        "at": 47.09999996423721,
+        "decoded": true
+      }
+    ],
+    "upstreamFontRequests": 0
+  },
+  "pageErrors": [],
+  "unexpectedNetworkOrigins": []
+}

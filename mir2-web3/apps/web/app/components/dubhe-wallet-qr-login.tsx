@@ -5,6 +5,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import type { DubheQrLoginState } from "../../lib/dubhe-wallet-login";
 import { nativeText } from "../../lib/r16-native-localization";
 import { browserText } from "../../lib/r16-browser-localization";
+import { observeWalletQrImage } from "../../lib/wallet-qr-font-preparation";
 export type { DubheQrLoginState } from "../../lib/dubhe-wallet-login";
 
 type DubheWalletQrLoginProps = {
@@ -20,6 +21,7 @@ export function DubheWalletQrLogin({ language, state, onRetry, onCancel }: Dubhe
   const descriptionId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
   const cancelRef = useRef<HTMLButtonElement>(null);
+  const qrCodeRef = useRef<HTMLImageElement>(null);
   const [now, setNow] = useState(Date.now);
   const [qrImage, setQrImage] = useState<{ url: string; dataUrl: string } | null>(null);
   const [qrErrorUrl, setQrErrorUrl] = useState<string | null>(null);
@@ -33,6 +35,11 @@ export function DubheWalletQrLogin({ language, state, onRetry, onCancel }: Dubhe
   const qrFailed = canApprove && qrErrorUrl === approvalUrl;
   const canRetry = status === "expired" || status === "rejected" || status === "error" || qrFailed;
   const imageUrl = canApprove && qrImage?.url === approvalUrl ? qrImage.dataUrl : null;
+
+  useEffect(() => {
+    if (!imageUrl || !qrCodeRef.current) return;
+    return observeWalletQrImage(qrCodeRef.current);
+  }, [imageUrl]);
 
   useEffect(() => {
     if (state.status !== "pending" || !state.expiresAt) return;
@@ -132,7 +139,7 @@ export function DubheWalletQrLogin({ language, state, onRetry, onCancel }: Dubhe
         </p>
         <div className={`dubhe-wallet-qr-code${imageUrl ? " ready" : ""}`} aria-busy={canApprove && !imageUrl && !qrFailed}>
           {imageUrl ? (
-            <img src={imageUrl} width={240} height={240} alt={copy("ui.walletQrAlt", "QR code for Dubhe Wallet login approval")} />
+            <img ref={qrCodeRef} src={imageUrl} width={240} height={240} alt={copy("ui.walletQrAlt", "QR code for Dubhe Wallet login approval")} />
           ) : (
             <span>{qrFailed ? copy("ui.walletQrFailed", "Code generation failed") : statusText}</span>
           )}

@@ -1,0 +1,73 @@
+import assert from 'node:assert/strict';
+import {readFile,writeFile,mkdir} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {createRequire} from 'node:module';
+import ts from 'file:///E:/mir2-player-journey/mir2-web3/apps/web/node_modules/typescript/lib/typescript.js';
+const root='D:/mir2-builds/r16-runtime-transport-cost-20261116',repo='E:/mir2-player-journey';
+const {chromium}=createRequire('F:/mir2-builds/web-r16-20261104/tools/package.json')('playwright');
+const manifest=JSON.parse(await readFile(repo+'/mir2-web3/apps/web/lib/generated/bevy_runtime_version_numeron_r16.json'));
+const config=JSON.parse(await readFile(repo+'/mir2-web3/config/numeron-r16-web-assets.json'));
+const initializer=await readFile(repo+'/mir2-web3/apps/web/lib/bevy-runtime-initializer.ts','utf8');
+const js=ts.transpileModule(initializer,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext}}).outputText;
+const moduleUrl='data:text/javascript;base64,'+Buffer.from(js).toString('base64');
+const app='https://numeron.obelisk.build',path='/bevy-runtime/v/'+manifest.version+'/pkg-webgpu/mir2_bevy_runtime_bg.wasm';
+const remote=config.assetBaseUrl.replace('/mir2/','/hotlink-ok/mir2/')+path;
+const expected=manifest.files.find(r=>r.path==='public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm').sha256;
+const headers=['cache-control','content-type','content-length','content-encoding','x-vercel-cache','cf-cache-status','cf-ray','age','etag','x-mir2-edge-cache','x-mir2-storage-content-encoding'];
+const proof={kind:'isolated-public-runtime-transport-and-compiler-cost',source:'1f08bfe4be38cb25ef8f3656048863a187cef8da',startedAt:new Date().toISOString(),passed:false,
+ scope:'Fresh installed Chrome profiles, one public immutable runtime at a time, no login, game, fonts, GPU initialization, Service Worker, cache purge or deployment. Diagnostic owner deadline300s and compile observation180s do not change or qualify original game8/65/120/20 gates.',
+ initializerSha256:createHash('sha256').update(initializer).digest('hex'),manifestVersion:manifest.version,expectedSha256:expected,cases:[]};
+await mkdir(root+'/runs',{recursive:false});
+const save=()=>writeFile(root+'/receipt.json',JSON.stringify(proof,null,2)+'\n');
+let context;
+try{
+ for(const [name,url,mode]of[['app-download-then-compile',app+path,'raw'],['asset-download-then-compile',remote,'raw'],['app-product-streaming',app+path,'product']]){
+  const row={name,url,mode,startedAt:new Date().toISOString(),requests:[],responses:[],finished:[],failed:[],progress:[],pageErrors:[],closed:false};proof.cases.push(row);await save();
+  context=await chromium.launchPersistentContext(root+'/runs/'+name,{executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe',headless:true,serviceWorkers:'block'});
+  row.browserVersion=context.browser()?.version();const page=context.pages()[0];
+  await page.exposeBinding('probeProgress',async(_source,value)=>{row.progress.push(value);console.log(JSON.stringify({case:name,...value}));});
+  page.on('pageerror',error=>row.pageErrors.push(error.message));
+  const cdp=await context.newCDPSession(page);await cdp.send('Network.enable');
+  const ids=new Set();
+  cdp.on('Network.requestWillBeSent',event=>{if(event.request.url===url||event.request.url===remote){ids.add(event.requestId);row.requests.push({requestId:event.requestId,url:event.request.url,timestamp:event.timestamp,wallTime:event.wallTime,type:event.type});}});
+  cdp.on('Network.responseReceived',event=>{if(ids.has(event.requestId)){const h=Object.fromEntries(Object.entries(event.response.headers).map(([k,v])=>[k.toLowerCase(),v]));row.responses.push({requestId:event.requestId,timestamp:event.timestamp,status:event.response.status,protocol:event.response.protocol,fromDiskCache:event.response.fromDiskCache,fromServiceWorker:event.response.fromServiceWorker,headers:Object.fromEntries(headers.map(k=>[k,h[k]??null]))});}});
+  cdp.on('Network.loadingFinished',event=>{if(ids.has(event.requestId))row.finished.push({requestId:event.requestId,timestamp:event.timestamp,encodedDataLength:event.encodedDataLength});});
+  cdp.on('Network.loadingFailed',event=>{if(ids.has(event.requestId))row.failed.push({requestId:event.requestId,timestamp:event.timestamp,errorText:event.errorText});});
+  await page.goto(app+'/version',{waitUntil:'domcontentloaded',timeout:30000});
+  console.log(JSON.stringify({case:name,phase:'starting',mode}));
+  row.result=await page.evaluate(async({url,remote,mode,moduleUrl,expected})=>{
+   const started=performance.now(),owner=new AbortController(),events=[];
+   const timer=setTimeout(()=>owner.abort(new DOMException('Diagnostic owner deadline','TimeoutError')),300000);
+   let phase='headers',bytes=0,headerAt=null,bodyAt=null,compileAt=null,sha256=null,module;
+   const report=async()=>window.probeProgress({phase,elapsedMs:Math.round(performance.now()-started),bytes});
+   const heartbeat=setInterval(()=>void report(),15000);
+   try{
+    if(mode==='raw'){
+     const response=await fetch(url,{signal:owner.signal});headerAt=performance.now()-started;
+     if(!response.ok)throw Error('HTTP'+response.status);phase='body';await report();
+     const reader=response.body.getReader(),chunks=[];let reported=0;
+     while(true){const chunk=await reader.read();if(chunk.done)break;bytes+=chunk.value.byteLength;if(bytes>32*1024*1024)throw RangeError('Diagnostic body bound');chunks.push(chunk.value);if(bytes-reported>=4*1024*1024){reported=bytes;await report();}}
+     bodyAt=performance.now()-started;const data=new Uint8Array(bytes);let offset=0;for(const chunk of chunks){data.set(chunk,offset);offset+=chunk.length;}
+     sha256=[...new Uint8Array(await crypto.subtle.digest('SHA-256',data))].map(x=>x.toString(16).padStart(2,'0')).join('');
+     if(sha256!==expected)throw Error('Immutable binary SHA mismatch');phase='compile';await report();
+     const compileStart=performance.now();let deadline;
+     try{module=await Promise.race([WebAssembly.compile(data),new Promise((_,reject)=>{deadline=setTimeout(()=>reject(Error('Diagnostic compile observation deadline')),180000);})]);}
+     finally{clearTimeout(deadline);}compileAt=performance.now()-compileStart;
+    }else{
+     const {compileBevyRuntimeBinary}=await import(moduleUrl);
+     module=await compileBevyRuntimeBinary({wasmUrl:url,wasmFallbackUrls:[remote],timeoutMs:120000,ownerSignal:owner.signal,
+      onResponseHeaders:()=>{headerAt??=performance.now()-started;phase='streaming-compile';},onDownloadAttempt:event=>{events.push({...event,atMs:Math.round(performance.now()-started)});bytes=event.bytes;}});
+     compileAt=performance.now()-started;
+    }
+    phase='complete';await report();
+    return{passed:true,elapsedMs:Math.round(performance.now()-started),headerMs:headerAt,bodyMs:bodyAt,compileMs:compileAt,bytes,sha256,
+     shaDirectlyMeasured:mode==='raw',exportCount:WebAssembly.Module.exports(module).length,events};
+   }catch(error){return{passed:false,phase,elapsedMs:Math.round(performance.now()-started),headerMs:headerAt,bodyMs:bodyAt,compileMs:compileAt,bytes,sha256,error:{name:error.name,message:error.message},events};}
+   finally{clearTimeout(timer);clearInterval(heartbeat);owner.abort();}
+  },{url,remote,mode,moduleUrl,expected});
+  await cdp.detach();await context.close();context=null;row.closed=true;
+  console.log(JSON.stringify({case:name,result:row.result}));await save();
+ }
+ proof.passed=proof.cases.every(row=>row.result?.passed&&row.closed&&row.pageErrors.length===0);
+}catch(error){proof.failure={name:error.name,message:error.message};process.exitCode=1;}
+finally{await context?.close();proof.allOwnedBrowsersClosed=true;proof.finishedAt=new Date().toISOString();await save();console.log(JSON.stringify({passed:proof.passed,cases:proof.cases.length,closed:true,receipt:root+'/receipt.json'}));if(!proof.passed)process.exitCode=1;}

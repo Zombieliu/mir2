@@ -1,0 +1,234 @@
+{
+  "kind": "isolated-public-original-font-bodies",
+  "startedAt": "2026-11-15T19:17:27.435Z",
+  "passed": true,
+  "scope": "One font at a time in a new actual Chrome profile. Complete original SHA and byte count, no game/Worker/font subset, no deployment or purge. Diagnostic180sec is not an original game acceptance budget.",
+  "cases": [
+    {
+      "name": "app-NotoSansCJKsc-Regular.otf",
+      "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "pin": {
+        "name": "NotoSansCJKsc-Regular.otf",
+        "bytes": 16437364,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+      },
+      "requests": [
+        {
+          "requestId": "106060.4",
+          "timestamp": 318637.515711,
+          "wallTime": 1794770249.487611
+        }
+      ],
+      "responses": [
+        {
+          "requestId": "106060.4",
+          "timestamp": 318639.568682,
+          "status": 200,
+          "protocol": "h2",
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "headers": {
+            "cache-control": "public, max-age=14400",
+            "content-type": "font/otf",
+            "content-length": null,
+            "content-encoding": "br",
+            "x-vercel-cache": "MISS",
+            "cf-cache-status": "BYPASS",
+            "cf-ray": "a5b098b1fd135199-SIN",
+            "age": "0",
+            "etag": "W/\"6d30d01b9b25bd766898ecba71d5cd3d\"",
+            "x-mir2-edge-cache": null
+          }
+        }
+      ],
+      "finished": [
+        {
+          "requestId": "106060.4",
+          "timestamp": 318725.455455,
+          "encodedDataLength": 14167534
+        }
+      ],
+      "failed": [],
+      "closed": true,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36",
+      "result": {
+        "passed": true,
+        "bytes": 16437364,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b",
+        "headerMs": 2053.400000035763,
+        "bodyMs": 87969.10000002384,
+        "elapsedMs": 87984.20000004768
+      }
+    },
+    {
+      "name": "app-NotoSansTC.ttf",
+      "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+      "pin": {
+        "name": "NotoSansTC.ttf",
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+      },
+      "requests": [
+        {
+          "requestId": "115476.4",
+          "timestamp": 318728.304532,
+          "wallTime": 1794770340.276432
+        }
+      ],
+      "responses": [
+        {
+          "requestId": "115476.4",
+          "timestamp": 318728.537573,
+          "status": 200,
+          "protocol": "h2",
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "headers": {
+            "cache-control": "public, max-age=14400",
+            "content-type": "font/ttf",
+            "content-length": null,
+            "content-encoding": "br",
+            "x-vercel-cache": "HIT",
+            "cf-cache-status": "BYPASS",
+            "cf-ray": "a5b09ae9cc829e34-SIN",
+            "age": "75923",
+            "etag": "W/\"0a0a4b7814f8f6de52e1eec67e999109\"",
+            "x-mir2-edge-cache": null
+          }
+        }
+      ],
+      "finished": [
+        {
+          "requestId": "115476.4",
+          "timestamp": 318795.121139,
+          "encodedDataLength": 7671454
+        }
+      ],
+      "failed": [],
+      "closed": true,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36",
+      "result": {
+        "passed": true,
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f",
+        "headerMs": 233.5,
+        "bodyMs": 66832.80000001192,
+        "elapsedMs": 66842.19999998808
+      }
+    },
+    {
+      "name": "asset-NotoSansCJKsc-Regular.otf",
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "pin": {
+        "name": "NotoSansCJKsc-Regular.otf",
+        "bytes": 16437364,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+      },
+      "requests": [
+        {
+          "requestId": "110984.4",
+          "timestamp": 318796.087074,
+          "wallTime": 1794770408.058972
+        }
+      ],
+      "responses": [
+        {
+          "requestId": "110984.4",
+          "timestamp": 318796.614502,
+          "status": 200,
+          "protocol": "h2",
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "headers": {
+            "cache-control": "public, max-age=31536000",
+            "content-type": "font/otf",
+            "content-length": null,
+            "content-encoding": "gzip",
+            "x-vercel-cache": null,
+            "cf-cache-status": "HIT",
+            "cf-ray": "a5b09c931fd6f88e-SIN",
+            "age": "353823",
+            "etag": "W/\"6d30d01b9b25bd766898ecba71d5cd3d\"",
+            "x-mir2-edge-cache": "HIT"
+          }
+        }
+      ],
+      "finished": [
+        {
+          "requestId": "110984.4",
+          "timestamp": 318903.047127,
+          "encodedDataLength": 13614793
+        }
+      ],
+      "failed": [],
+      "closed": true,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36",
+      "result": {
+        "passed": true,
+        "bytes": 16437364,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b",
+        "headerMs": 527.8000000119209,
+        "bodyMs": 106991.39999997616,
+        "elapsedMs": 107006
+      }
+    },
+    {
+      "name": "asset-NotoSansTC.ttf",
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansTC.ttf",
+      "pin": {
+        "name": "NotoSansTC.ttf",
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+      },
+      "requests": [
+        {
+          "requestId": "117796.4",
+          "timestamp": 318904.906753,
+          "wallTime": 1794770516.878654
+        }
+      ],
+      "responses": [
+        {
+          "requestId": "117796.4",
+          "timestamp": 318905.517515,
+          "status": 200,
+          "protocol": "h2",
+          "fromDiskCache": false,
+          "fromServiceWorker": false,
+          "headers": {
+            "cache-control": "public, max-age=31536000",
+            "content-type": "font/ttf",
+            "content-length": null,
+            "content-encoding": "gzip",
+            "x-vercel-cache": null,
+            "cf-cache-status": "HIT",
+            "cf-ray": "a5b09f3b7ebd81a4-SIN",
+            "age": "354056",
+            "etag": "W/\"0a0a4b7814f8f6de52e1eec67e999109\"",
+            "x-mir2-edge-cache": "HIT"
+          }
+        }
+      ],
+      "finished": [
+        {
+          "requestId": "117796.4",
+          "timestamp": 318932.034537,
+          "encodedDataLength": 7606460
+        }
+      ],
+      "failed": [],
+      "closed": true,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36",
+      "result": {
+        "passed": true,
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f",
+        "headerMs": 611.1000000238419,
+        "bodyMs": 27148.19999998808,
+        "elapsedMs": 27159.19999998808
+      }
+    }
+  ],
+  "allOwnedBrowsersClosed": true,
+  "finishedAt": "2026-11-15T19:22:24.152Z"
+}
