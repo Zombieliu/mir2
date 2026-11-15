@@ -273,9 +273,9 @@ test('QR stage accepts only the reviewed merge commits regardless of API orderin
   assert.equal(writes(result).length, 1);
   assert.equal(writes(result)[0].body.gitSource.sha, QR_RELEASE.source);
   assert.equal(result.result.trafficAfter.alias, QR_RELEASE.baseline);
-  assert.equal(result.result.sourceClosure.changedFiles.length, 386);
+  assert.equal(result.result.sourceClosure.changedFiles.length, 49);
   assert.equal(result.result.sourceClosure.checkpoints.length, 2);
-  assert.deepEqual(result.result.sourceClosure.checkpoints.map(segment => segment.files), [296, 105]);
+  assert.deepEqual(result.result.sourceClosure.checkpoints.map(segment => segment.files), [35,18]);
   assert.equal(f.state.calls.filter(request => request.pathname.includes('/compare/')).length, 2);
 });
 
