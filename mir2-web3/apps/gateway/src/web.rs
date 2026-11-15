@@ -99,6 +99,9 @@ mod packet_batch;
 mod procurement;
 #[path = "web_transport.rs"]
 mod transport;
+#[path = "web_background_execution.rs"]
+mod background_execution;
+use background_execution::BackgroundExecutionBudget;
 #[path = "web_reconnect_handoff.rs"]
 mod reconnect_handoff;
 use reconnect_handoff::{HandoffBinding, HandoffRegistry, HandoffToken};
@@ -752,6 +755,7 @@ struct WebState {
     session_cache: SharedGatewaySessionCache,
     reconnect_sessions: Arc<ReconnectSessionStore>,
     capacity: Arc<GatewayCapacityState>,
+    background_execution: BackgroundExecutionBudget,
     gameplay_event_sink: Option<SharedGameplayEventSink>,
     identity: Arc<IdentityService>,
     auth_rate_limit_policy: AuthRateLimitPolicy,
@@ -3336,6 +3340,8 @@ pub async fn serve_web_gateway_with_zone_registry(
                 .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
         }
     }
+    let background_execution = BackgroundExecutionBudget::for_current_process();
+    eprintln!("web background execution budget slots={}", background_execution.slots());
     let state = WebState {
         config: Arc::new(config),
         deploy_revision: deploy_revision_from_env(),
@@ -3345,6 +3351,7 @@ pub async fn serve_web_gateway_with_zone_registry(
             .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?,
         reconnect_sessions: Arc::new(ReconnectSessionStore::default()),
         capacity: Arc::new(GatewayCapacityState::from_env()),
+        background_execution,
         gameplay_event_sink: default_gameplay_event_sink_from_env(),
         identity: Arc::new(identity),
         auth_rate_limit_policy,
@@ -5316,6 +5323,7 @@ async fn handle_socket(
             Arc::clone(&state.session_cache),
             Arc::clone(&state.reconnect_sessions),
             Arc::clone(&state.capacity),
+            state.background_execution.clone(),
             Arc::clone(&state.identity),
             state.auth_rate_limit_policy,
             &mut active_session_permit,
@@ -6454,6 +6462,7 @@ async fn handle_socket_inner(
     session_cache: SharedGatewaySessionCache,
     reconnect_sessions: Arc<ReconnectSessionStore>,
     capacity: Arc<GatewayCapacityState>,
+    background_execution: BackgroundExecutionBudget,
     identity: Arc<IdentityService>,
     auth_rate_limit_policy: AuthRateLimitPolicy,
     active_session_permit: &mut Option<GatewayCapacityPermit>,
@@ -6484,6 +6493,7 @@ async fn handle_socket_inner(
         session_cache,
         reconnect_sessions,
         capacity,
+        background_execution,
         identity,
         auth_rate_limit_policy,
         active_session_permit,
@@ -6581,6 +6591,7 @@ async fn handle_socket_work(
     session_cache: SharedGatewaySessionCache,
     reconnect_sessions: Arc<ReconnectSessionStore>,
     capacity: Arc<GatewayCapacityState>,
+    background_execution: BackgroundExecutionBudget,
     identity: Arc<IdentityService>,
     auth_rate_limit_policy: AuthRateLimitPolicy,
     active_session_permit: &mut Option<GatewayCapacityPermit>,
@@ -8167,14 +8178,16 @@ async fn handle_socket_work(
                 let _spectator_turn = SocketDiagnosticPhaseGuard::enter(
                     &diagnostics, SocketDiagnosticPhase::Spectator, Some("socket_turn.spectator"),
                 );
-                let result = tokio::task::block_in_place(|| {
-                    publish_spectator_frame_if_enabled(&spectator, || {
-                        let _snapshot_stage = GatewaySlowStage::for_socket(
-                            "spectator.snapshot", &diagnostics,
-                        );
-                        session.active_identity().map(|_| session.spectator_world_snapshot())
+                let result = background_execution.run_spectator(|| {
+                    tokio::task::block_in_place(|| {
+                        publish_spectator_frame_if_enabled(&spectator, || {
+                            let _snapshot_stage = GatewaySlowStage::for_socket(
+                                "spectator.snapshot", &diagnostics,
+                            );
+                            session.active_identity().map(|_| session.spectator_world_snapshot())
+                        })
                     })
-                });
+                }).await;
                 if let Err(error) = result {
                     eprintln!("spectator frame publish skipped: {error}");
                 }
@@ -8331,31 +8344,34 @@ async fn handle_socket_work(
                 // viewport. Serialize its bootstrap/re-registration/flush just
                 // like a player action so live ACKs cannot precede the landing.
                 let tick_trace = input_gate_socket_context(&diagnostics, 0, "tick", u8::MAX);
-                let tick_trace_wait = InputGateTraceSpan::start(tick_trace, "tick_write_gate", 20);
+                let tick_trace_wait = InputGateTraceSpan::start(tick_trace, "tick_background_and_write_gate", 20);
                 let tick_gate_phase = SocketDiagnosticPhaseGuard::enter(
                     &diagnostics, SocketDiagnosticPhase::TickGate,
-                    Some("runtime_tick.serial_gate_wait"),
+                    Some("runtime_tick.background_and_serial_gate_wait"),
                 );
-                let _serial_execution = serial_execution_gate.write().await;
-                drop(tick_trace_wait);
-                drop(tick_gate_phase);
-                let monthly_expiry_route = monthly_expiry_pending
-                    .then(|| tokio::task::block_in_place(|| OwnedSessionRoute::capture(session))).flatten();
-                let responses = match catch_gateway_panic("web session tick", || {
-                    let _trace = InputGateTraceSpan::start(tick_trace, "tick_execute", 20);
-                    let _slow_stage = GatewaySlowStage::for_socket("runtime_tick.execute", &diagnostics);
-                    tokio::task::block_in_place(|| {
-                        let command = if fishing_tick {
-                            WorldCommand::TickFishing
-                        } else {
-                            WorldCommand::Tick
-                        };
-                        session
-                            .execute_with_outcome(command)
-                            .map(|execution| execution.packets)
-                    })
-                })
-                .and_then(|result| result) {
+                let ((monthly_expiry_route, tick_result), _serial_execution) =
+                    background_execution.run_tick(&serial_execution_gate, || {
+                        drop(tick_trace_wait);
+                        drop(tick_gate_phase);
+                        let monthly_expiry_route = monthly_expiry_pending
+                            .then(|| tokio::task::block_in_place(|| OwnedSessionRoute::capture(session))).flatten();
+                        let tick_result = catch_gateway_panic("web session tick", || {
+                            let _trace = InputGateTraceSpan::start(tick_trace, "tick_execute", 20);
+                            let _slow_stage = GatewaySlowStage::for_socket("runtime_tick.execute", &diagnostics);
+                            tokio::task::block_in_place(|| {
+                                let command = if fishing_tick {
+                                    WorldCommand::TickFishing
+                                } else {
+                                    WorldCommand::Tick
+                                };
+                                session
+                                    .execute_with_outcome(command)
+                                    .map(|execution| execution.packets)
+                            })
+                        }).and_then(|result| result);
+                        (monthly_expiry_route, tick_result)
+                    }).await;
+                let responses = match tick_result {
                     Ok(responses) => responses,
                     Err(error) => {
                         if crate::gate15::health().is_some() {
@@ -16287,6 +16303,7 @@ mod tests {
             session_cache: Arc::new(crate::InMemoryGatewaySessionCache::default()),
             reconnect_sessions: Arc::new(super::ReconnectSessionStore::default()),
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
+            background_execution: super::BackgroundExecutionBudget::for_current_process(),
             gameplay_event_sink: None,
             identity: Arc::new(crate::identity::IdentityService::local_for_tests()),
             auth_rate_limit_policy: super::AuthRateLimitPolicy::default(),
@@ -16351,6 +16368,7 @@ mod tests {
             session_cache: Arc::new(crate::InMemoryGatewaySessionCache::default()),
             reconnect_sessions: Arc::new(super::ReconnectSessionStore::default()),
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
+            background_execution: super::BackgroundExecutionBudget::for_current_process(),
             gameplay_event_sink: Some(shared_event_sink),
             identity: Arc::new(crate::identity::IdentityService::local_for_tests()),
             auth_rate_limit_policy: super::AuthRateLimitPolicy::default(),
@@ -16444,6 +16462,7 @@ mod tests {
             session_cache: cache,
             reconnect_sessions: Arc::new(super::ReconnectSessionStore::default()),
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
+            background_execution: super::BackgroundExecutionBudget::for_current_process(),
             gameplay_event_sink: None,
             identity: Arc::new(crate::identity::IdentityService::local_for_tests()),
             auth_rate_limit_policy: super::AuthRateLimitPolicy::default(),
@@ -18750,6 +18769,7 @@ mod tests {
             session_cache: Arc::new(crate::InMemoryGatewaySessionCache::default()),
             reconnect_sessions: Arc::new(super::ReconnectSessionStore::default()),
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
+            background_execution: super::BackgroundExecutionBudget::for_current_process(),
             gameplay_event_sink: None,
             identity: Arc::new(crate::identity::IdentityService::local_for_tests()),
             auth_rate_limit_policy: super::AuthRateLimitPolicy::default(),
@@ -19088,6 +19108,7 @@ mod tests {
             session_cache: Arc::new(crate::InMemoryGatewaySessionCache::default()),
             reconnect_sessions: Arc::clone(&reconnect_sessions),
             capacity: Arc::clone(&capacity),
+            background_execution: super::BackgroundExecutionBudget::for_current_process(),
             gameplay_event_sink: None,
             identity: Arc::new(crate::identity::IdentityService::local_for_tests()),
             auth_rate_limit_policy: super::AuthRateLimitPolicy::default(),

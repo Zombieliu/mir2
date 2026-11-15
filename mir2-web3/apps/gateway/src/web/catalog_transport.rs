@@ -681,6 +681,7 @@ mod tests {
             session_cache: Arc::new(crate::InMemoryGatewaySessionCache::default()),
             reconnect_sessions: Arc::clone(&reconnect),
             capacity: Arc::clone(&capacity),
+            background_execution: crate::web::BackgroundExecutionBudget::for_current_process(),
             gameplay_event_sink: None,
             identity: Arc::new(crate::identity::IdentityService::local_for_tests()),
             injector: crate::inject::LiveSessionInjector::default(),
