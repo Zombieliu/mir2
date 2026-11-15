@@ -16,28 +16,552 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: "5d7bf8c2ea58d2ac68bbca5f18c8240fdc929d45",
+  source: "aa524edc76d85e01f2ae8963957bbacd9728eac2",
   sourceRef: BRANCH,
-  baseSource: "4aead752f62143199344bd7584c5b9120b6d30ba",
+  baseSource: "5d7bf8c2ea58d2ac68bbca5f18c8240fdc929d45",
   assetSource: "f2de762309768b51b39438c2437c14e819df9bf7",
   sourceCommits: [
-  "5d7bf8c2ea58d2ac68bbca5f18c8240fdc929d45"
+  "1cac973aa7dfc5a563a05012182341cd0fa22a49",
+  "4e43d8ddcb9506cd4f0673335066b65a525a8827",
+  "fef34fb07a23880c2e3ac7a87bd79d811677b6ba",
+  "8359824ff7d618704121bfb83bff39422b4ad380",
+  "6623f15feac980f2db1a57ead74af34301264cec",
+  "81c51a58e903c1ec2e55f31c85d675aedbc7fe22",
+  "4d30fb8d1275304e17bf3722186d8ea14b2fc6ae",
+  "c1d4c85c89e3f1960d349c823cb3a42976e2b2e6",
+  "ec26ffa12e79f302bd82f05f97c0489e9d6ca464",
+  "9337f00a3665f0af082ea92e57987ae813e52609",
+  "f0eb9ea6121080763ec1cad07dd316b10b6febe6",
+  "dca152cd15fc5ab9782fd28f2247d89c5faa9e6a",
+  "e9aa44751e4ffc1d91a926f22fb8175f585be088",
+  "acbe3aea4bf5aaa5ce98efe76807da99427e9575",
+  "aa524edc76d85e01f2ae8963957bbacd9728eac2"
 ],
   changedFiles: [
   {
-    "status": "modified",
+    "filename": ".github/scripts/numeron-r16-release.mjs",
+    "sha": "324b62d9cb2a9c138acd0b3cbb5b42489f26de12",
+    "status": "modified"
+  },
+  {
+    "filename": ".github/workflows/promotion-website-release.yml",
+    "sha": "6967b8c9af6da7c4ca5962d2f0ce67e7fbefa92f",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/gateway/src/routing.rs",
+    "sha": "65607af77b7ec536170b6382f52a091573f44bdf",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/gateway/src/shared_experience_profiles.rs",
+    "sha": "c76ecb56fe1273a58dfebce7e370a71dfe0ab2ca",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/gateway/src/zone_experience_admission_handoff_tests.rs",
+    "sha": "20b35f2df4fe5791645c76ba278666994ebd797d",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+    "sha": "1474264f0fe21c09120055a6ce4665de0ea5cbcf",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/simulation/src/runtime/zone/runtime/idle_roam.rs",
+    "sha": "d31455fc5880e2b22ae0b7c2bca1b6a4f5ee1af2",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/apps/simulation/src/runtime/zone/runtime/passive_ai.rs",
+    "sha": "22d35c4349920a3447ffbd72228c5281d724cc03",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/simulation/src/runtime/zone/runtime/special_ai.rs",
+    "sha": "d36176bfefa09e01a13af2290f0bf5556df3d732",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/simulation/tests/shared_monster_idle_roam.rs",
+    "sha": "50eab89284f697879a1d29bfbbb809447d912dd9",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/apps/simulation/tests/shared_monster_passive_ai.rs",
+    "sha": "5e7bf1f4a4408d16d7746a63d2c444d038c927cf",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/web/app/components/original-client-shell-types.ts",
+    "sha": "a1ee05cca3ca8d43e8ad15b947415fd574ee32e0",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/web/app/original-client-shell.tsx",
+    "sha": "66fbd96a0cc00c85ade6ca57cf0717566a0d8f0f",
+    "status": "modified"
+  },
+  {
     "filename": "mir2-web3/apps/web/app/page.tsx",
-    "sha": "e2e1bf78946b35430f096ab8364b6ed3c09d3cb1"
+    "sha": "f2080da34fc053f560a203f12891f92dd9131ee7",
+    "status": "modified"
   },
   {
-    "status": "modified",
-    "filename": "mir2-web3/apps/web/lib/bevy-runtime-font-prewarm.ts",
-    "sha": "5be9d633b6d764f40550990ded49795cddacf6f8"
+    "filename": "mir2-web3/apps/web/lib/r16-entry-scene.ts",
+    "sha": "fa42c1ff7a90df8785efc41e84fc620d840b954a",
+    "status": "modified"
   },
   {
-    "status": "modified",
-    "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs",
-    "sha": "fd7ee1787e0e6a24e5a284874fa5a9dd8f27a56f"
+    "filename": "mir2-web3/apps/web/lib/use-bevy-quest-ui.ts",
+    "sha": "99c775595cce01ef634d2228b1c28bbff2ee4354",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/web/scripts/test-bevy-quest-ui.mjs",
+    "sha": "53797b30d7a5eb0c2faf7449e5633624a8b81d94",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/web/scripts/test-map-route-feedback.mjs",
+    "sha": "a05e933dccfb5babf15db0ce692059de15cd08dd",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/web/scripts/test-pinned-bootstrap-chunk.mjs",
+    "sha": "3b3bbef33250f0d9377160e78ab0767a3ead4a73",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/web/scripts/test-r16-quest-close-shortcut.mjs",
+    "sha": "9f72cbba74c8e9cdb74f34169f9a7d5309da3b09",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/docs/AGENT-CURRENT.md",
+    "sha": "6fe5c3bc8d4bfead60d796918aeb7838ba2bef81",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+    "sha": "3e11c0e41d99ae10932d1764667fdd0f9ef3ef2c",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/docs/BACKEND-1TO1-PROGRESS.md",
+    "sha": "d0d8cbbace973e08da8f1e786292a82b56c46e0d",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
+    "sha": "20b95e67ffd87232dc6c736246a14829fb3f17fb",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/docs/CRYSTAL-SERVER-PARITY.md",
+    "sha": "b8cca2fb29ff8cf89dc8548ec549e0781f781d0f",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+    "sha": "253fde8b1b21de4153c019b1440a5d1dc952dfaa",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/README.zh-CN.md",
+    "sha": "b4c380f66e93211f77ffe386fee0d85e8150421e",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/zone-admission-handoff.calibration2.closed.json",
+    "sha": "731ece44df2fb02d35f1522ee43d5d4fa9c0d189",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/zone-admission-handoff.default100.closed.json",
+    "sha": "b0cd08df94627801ec36aefed1510c5e162b9cfa",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/zone-admission-handoff.integration.json",
+    "sha": "84f8bd178f06c002f53a10b156345fd0e00bc064",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/zone-admission-handoff.linux-native-subset.json",
+    "sha": "267b049669701bfc70e0575f168de1944ea8f0f8",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/zone-admission-handoff.native35.json",
+    "sha": "90709502d7784fbc078d0241a151b130eab33ae9",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/zone-admission-handoff.selected-trace2.closed.json",
+    "sha": "01116c260135b3dd58bf90f3b783f59ae3e1efb8",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/zone-admission-handoff.selected-trace2.log-coverage.json",
+    "sha": "4ce967d37b4e32eb17bdbb907e9925dc7b28d2d4",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/comparable-capacity-20261113/zone-admission-handoff.windows-release.json",
+    "sha": "6f2b0fb573b382f44ef71b76f750221fe9c24a3d",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-diary-close-20261115/README.md",
+    "sha": "a4b239549f0d994646cc24a9d8af0e967aa5b583",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-diary-close-20261115/broadened-fixtures.log",
+    "sha": "aa2c314936ce15be7bb033f12c93626f820bc920",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-diary-close-20261115/checks.log",
+    "sha": "e3e145b7fadf122abcc4b9324fa2a6e928b0c500",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-diary-close-20261115/default-arrival.png",
+    "sha": "3b351f2b8ba219ef842b3bdbcd71ebcf6ff2c6ff",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-diary-close-20261115/default-blocked.png",
+    "sha": "6a7baf8f57100846d9d73f72d9f9f572f500adeb",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-diary-close-20261115/default-diary-open.png",
+    "sha": "3d3fffe2ea60976bc80039a97f2514b856177768",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-diary-close-20261115/diary-before.log",
+    "sha": "58a4d7076da17301412858040c29fde5c9d5b273",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-diary-close-20261115/inherited-fixtures-baseline.log",
+    "sha": "9b6c92f2f9954212533476643b43001d7775da07",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-diary-close-20261115/private-receipt-pins.json",
+    "sha": "b6f5c2e5902c116321eef8a38dc9addbd3e985d5",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-diary-close-20261115/public-state.json",
+    "sha": "ef419ea6711440de4402a7bc7711a9e2665b9c8d",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-diary-close-20261115/qualification.json",
+    "sha": "d9b18691cc3b903889447896e739b39fca6c1bb2",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-diary-close-20261115/shared-arrival.png",
+    "sha": "126073a182548d0a9bb90e56eaee9109d85d6ca7",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-diary-close-20261115/shared-blocked.png",
+    "sha": "3be3e7758e3184f90d01c707a539f203fc562eca",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-diary-close-20261115/shared-diary-closed.png",
+    "sha": "d75b9221b110127bd7b6356b2e29bc8dcb6ebfa5",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-diary-close-20261115/source-binding.json",
+    "sha": "dd17f03e6439ad38f05aee84ad843bad56923cfd",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-diary-close-20261115/unreachable-before.log",
+    "sha": "fc1211cbe70eb51c603de953ca53a2355f17bd29",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-livestock-roam-20261115/README.md",
+    "sha": "ebd163f49deb015af4793db1b84c4a5723feab9a",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-livestock-roam-20261115/baseline-fixture-correction.log",
+    "sha": "3cfa5e01ce634b1c81cdcf049957300ab445f3b5",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-livestock-roam-20261115/before-roam.log",
+    "sha": "6f428e73036fdb8232d6063e46aed0bf18b22e6e",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-livestock-roam-20261115/checkpoint.log",
+    "sha": "438b2eac5599bd49bcb7423e4f2d9a5289f064e7",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-livestock-roam-20261115/default-natural-walking.png",
+    "sha": "d73d1e72ea5dca83022f3bce124ecd210549a992",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-livestock-roam-20261115/default-reopened-diary.png",
+    "sha": "8a8fefb88419a48a6eddaf0e1d0ce7079f214d42",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-livestock-roam-20261115/idle-roam-unit.log",
+    "sha": "d86dcdeedb827adabe943f5bd10647ae9caa7091",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-livestock-roam-20261115/integration.log",
+    "sha": "1c1a3fc77a4a97f44961df4a6e1f818e24d7bf30",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-livestock-roam-20261115/private-receipt-pins.json",
+    "sha": "e4c01469063b68242e24437ec1997a242f1f135a",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-livestock-roam-20261115/public-state.json",
+    "sha": "cae789d88c9ddc36a4a61f54048d059e44deb2f0",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-livestock-roam-20261115/qualification.json",
+    "sha": "90e919d03617415b4898a2de8cf1f739f24071c0",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-livestock-roam-20261115/shared-natural-walking.png",
+    "sha": "3c4d8f01603e2a9181634030dc869dca34e74dc0",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-livestock-roam-20261115/shared-reopened-diary.png",
+    "sha": "fa309226d8d2f429e929b35cb800c6b85684b2ec",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-livestock-roam-20261115/source-binding.json",
+    "sha": "549a6f14299a7cfe62b80ab0be48dd38d966394e",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-primary-font-overlap-20261115/README.md",
+    "sha": "8115367c00787c291159a32183ecef46f954842a",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-primary-font-overlap-20261115/aggregate-after.json",
+    "sha": "8e260df78013c57830d0a46d039339af0929c5ef",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-primary-font-overlap-20261115/aggregate-after.png",
+    "sha": "af6b1ca55dd7b30a1508b145e5c96c97e9109218",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-primary-font-overlap-20261115/aggregate-before.json",
+    "sha": "97d6dfa5ce3667e79756d72df4b211f845ac0e0a",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-primary-font-overlap-20261115/default-actual-game.png",
+    "sha": "f69b9313d326850b4f7acb1e66c29981c8619d69",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-primary-font-overlap-20261115/default-original-fonts.json",
+    "sha": "ea6c83db6b3e613fd14aa34d50f9251d380a905d",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-primary-font-overlap-20261115/independent-after.json",
+    "sha": "8de0d8490af4d6cf66f78bc34c1399b24f6be149",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-primary-font-overlap-20261115/independent-after.png",
+    "sha": "af6b1ca55dd7b30a1508b145e5c96c97e9109218",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-primary-font-overlap-20261115/independent-before.json",
+    "sha": "28494d1252cb138d2caf3a1b062ad8382f7921f1",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-primary-font-overlap-20261115/initial-loading-source-comparison.json",
+    "sha": "a81500c6e03bf815b1cce651147c47463303ba60",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-primary-font-overlap-20261115/production/README.md",
+    "sha": "79f27c1b5b5b79b4170c656b8a4d7cb847d206bc",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-primary-font-overlap-20261115/production/hud-after-worker-restart.png",
+    "sha": "f2a2135077e0f0b154e9b7ee43f7468e4e8052b9",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-primary-font-overlap-20261115/production/original-acceptance-r1.json",
+    "sha": "25f2ce436c18e02a0b39eb6fe39bb3fa3dad0ba0",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-primary-font-overlap-20261115/production/private-receipt-pins.json",
+    "sha": "5f8cc638fe11cc54d2e56bad00341457645f71c9",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-primary-font-overlap-20261115/production/public-r1.json",
+    "sha": "f15ac5b17aab876d800fcfe3f51dfef2c0622434",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-primary-font-overlap-20261115/production/quest-failure.png",
+    "sha": "b41da0298e00238d7160d0d695d244feb207e72b",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-primary-font-overlap-20261115/production/quest-owner-observations.json",
+    "sha": "c2f261f65ed4f3e632c48355fd43e7a3567e3604",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-primary-font-overlap-20261115/production/rollback-qr.json",
+    "sha": "e544e0acdae7283985d9ffde4cafb6265029e156",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-primary-font-overlap-20261115/production/rollback.json",
+    "sha": "a1eca7a12b2d76d35cb7b3219aedcd4e8ce739cc",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-primary-font-overlap-20261115/qualification.json",
+    "sha": "4c27ec41ad609dcd4123e5c5082c461f0e9ccd69",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-primary-font-overlap-20261115/regressions.log",
+    "sha": "6eb3f7e31502e2c8038ff1f46a81b40270e95741",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-primary-font-overlap-20261115/release-checks.log",
+    "sha": "2e38ce8d9d12f358e2dfd55529a57883b2b97924",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-primary-font-overlap-20261115/release-source.json",
+    "sha": "679c86881101ca64f901ced3ac867d5eab191de5",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-primary-font-overlap-20261115/webgl2-actual-game.png",
+    "sha": "623851e6d855e5e4bafbee7223a7273d059b7f4f",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-primary-font-overlap-20261115/webgl2-original-fonts.json",
+    "sha": "ea6c83db6b3e613fd14aa34d50f9251d380a905d",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-walking-delivery-20261115/README.md",
+    "sha": "b0c19b2ad083fb49f2a0497022280ecb18b93545",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-walking-delivery-20261115/adjacent-checks.log",
+    "sha": "4363a70e26977ab84ff925125b02251adf8d2b4f",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-walking-delivery-20261115/concurrent-before.log",
+    "sha": "4536115dd2ad3e9b5bce928ae6e5f74906783044",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-walking-delivery-20261115/default-reopened-diary.png",
+    "sha": "2a2e8230cadaccd479a24f38bbd7db432dc52c5c",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-walking-delivery-20261115/default-town-frame-missing.png",
+    "sha": "e0991981b25b30657b1a3f4e12888a041b6f13a9",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-walking-delivery-20261115/initial-live-delivery.json",
+    "sha": "b61dfee8ad98f05a96d337e6eb678f192fabd024",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-walking-delivery-20261115/pack-checks.log",
+    "sha": "4bd759ca67e11968ac239d344ce4d532e26b9c62",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-walking-delivery-20261115/priority-before.log",
+    "sha": "9cf01a517ceef2ad8f92d4f8762b5c39e6f60d8c",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-walking-delivery-20261115/private-receipt-pins.json",
+    "sha": "ba9aedb02cdc4e132cebbbd4b098145f18ec13a1",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-walking-delivery-20261115/public-state.json",
+    "sha": "9aa0f481f2cf646db28ea0bf5311033d791e9993",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-walking-delivery-20261115/qualification.json",
+    "sha": "3b0e1405ae47bb1b0d29f465fc5e8be1b6d78a60",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-walking-delivery-20261115/shared-reopened-diary.png",
+    "sha": "cbdf1340cb2e86936adaf7a9e2ff738c57eb4e87",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-walking-delivery-20261115/shared-town-frame-missing.png",
+    "sha": "6e095264fa44c9c92309022d5c8204f645ca4b59",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-walking-delivery-20261115/source-binding.json",
+    "sha": "66b9b34f603e81d3bdb2f23518548b314a1dd598",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-walking-delivery-20261115/standing-diagnostic.json",
+    "sha": "bd848c10e51d90ba86a964cfe0e1555ef781d96d",
+    "status": "added"
   }
 ],
   entryScene: {
