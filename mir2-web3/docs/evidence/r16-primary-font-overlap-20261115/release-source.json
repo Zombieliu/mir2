@@ -1,0 +1,323 @@
+{
+  "source": "5d7bf8c2ea58d2ac68bbca5f18c8240fdc929d45",
+  "releaseClosureBase": "4aead752f62143199344bd7584c5b9120b6d30ba",
+  "qualifiedBuildBase": "4aead752f62143199344bd7584c5b9120b6d30ba",
+  "candidate": "4aea-primary-overlap-40fb88a7",
+  "buildId": "znEmb0XGCHUXJzhkFwG7l",
+  "commits": [
+    "5d7bf8c2ea58d2ac68bbca5f18c8240fdc929d45"
+  ],
+  "files": [
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/app/page.tsx",
+      "sha": "e2e1bf78946b35430f096ab8364b6ed3c09d3cb1"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/lib/bevy-runtime-font-prewarm.ts",
+      "sha": "5be9d633b6d764f40550990ded49795cddacf6f8"
+    },
+    {
+      "status": "modified",
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs",
+      "sha": "fd7ee1787e0e6a24e5a284874fa5a9dd8f27a56f"
+    }
+  ],
+  "frontendBindings": [
+    {
+      "filename": "mir2-web3/apps/web/lib/scene-asset-preloader.ts",
+      "localBuiltSha256": "0f1d3a0a09d9cdd25dbe1de8539ec4c814305548f9610d019cb4b51856adf93d",
+      "committedSha256": "0f1d3a0a09d9cdd25dbe1de8539ec4c814305548f9610d019cb4b51856adf93d",
+      "gitBlob": "1a1c90f28769f66399eac36302221931704cea5e",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/components/r16-login-door.tsx",
+      "localBuiltSha256": "9233ba688e2233fe05f89a4853aa5e69ac037f1d63e7aa68e36095ca08d44a2c",
+      "committedSha256": "9233ba688e2233fe05f89a4853aa5e69ac037f1d63e7aa68e36095ca08d44a2c",
+      "gitBlob": "0e57fe6da9a9b0c4df08fafdb0f82f4173cfcb8a",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-scene-asset-preloader.mjs",
+      "localBuiltSha256": "0c1aa0ce081bb7733aeb822a76aaf8c33514b986ad05c93d29a4b1751830c4bf",
+      "committedSha256": "0c1aa0ce081bb7733aeb822a76aaf8c33514b986ad05c93d29a4b1751830c4bf",
+      "gitBlob": "cca6c14de54ffac1fb8ac40b90640623b922e6a9",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-auth-layout.mjs",
+      "localBuiltSha256": "9187eb5db8e883da78b55353684d0c3badb8fc5755393ea8fe5bcdaf0db27e5a",
+      "committedSha256": "9187eb5db8e883da78b55353684d0c3badb8fc5755393ea8fe5bcdaf0db27e5a",
+      "gitBlob": "aab7b723b3717cac9d3b33a8dc983db33da446da",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/bevy-runtime-initializer.ts",
+      "localBuiltSha256": "15681d741f5d0e5509913a683dc719631e1e091e46d85cfeef7a9654c7b8eef4",
+      "committedSha256": "15681d741f5d0e5509913a683dc719631e1e091e46d85cfeef7a9654c7b8eef4",
+      "gitBlob": "766c73059d7db02c71b6f0319a5d9c5430db7566",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-initializer.mjs",
+      "localBuiltSha256": "f5f5459a3b5c140a30c15857e96a406237994b94386c0eb7e5933898fb877e6c",
+      "committedSha256": "f5f5459a3b5c140a30c15857e96a406237994b94386c0eb7e5933898fb877e6c",
+      "gitBlob": "9bda11b5d92e973b912f1ae3f747590dee131bac",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-finite-recovery.mjs",
+      "localBuiltSha256": "c87a2661b386054b5c0060a2e71c4409046fbbe2201141b9aefbed4ffc1f10f4",
+      "committedSha256": "c87a2661b386054b5c0060a2e71c4409046fbbe2201141b9aefbed4ffc1f10f4",
+      "gitBlob": "24966c60581e3b8c61ea868bedb44a3f43caf8a3",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/smoke-bevy-runtime-header-probes.mjs",
+      "localBuiltSha256": "aa30eb56dc7547e2ffdcd71ea019a3318b85910a1f7898b4a162bd85977e17bc",
+      "committedSha256": "aa30eb56dc7547e2ffdcd71ea019a3318b85910a1f7898b4a162bd85977e17bc",
+      "gitBlob": "33c7762a3c7be35f0a46585a2dbd50f8c2e9e265",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/page.tsx",
+      "localBuiltSha256": "8f06b34d3c17550e203a6aef8957d2ec1bd77d3686e187b65db2463d0b3cf59f",
+      "committedSha256": "8f06b34d3c17550e203a6aef8957d2ec1bd77d3686e187b65db2463d0b3cf59f",
+      "gitBlob": "e2e1bf78946b35430f096ab8364b6ed3c09d3cb1",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
+      "localBuiltSha256": "81e82feaedb7a3eb73e74b01deda4a1ad2b9afc3124c0021230c049dc2bcb47e",
+      "committedSha256": "81e82feaedb7a3eb73e74b01deda4a1ad2b9afc3124c0021230c049dc2bcb47e",
+      "gitBlob": "89016f7a103d61a2722ff065d6ded018ed06019a",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/runtime-header-priority.ts",
+      "localBuiltSha256": "f4626abc2ad4bb523d0ea198085c38e162feb0213e2a6cf9370f5a06e55c19cb",
+      "committedSha256": "f4626abc2ad4bb523d0ea198085c38e162feb0213e2a6cf9370f5a06e55c19cb",
+      "gitBlob": "57618d47a3d25f75526805e2bd05fcc6438f4f91",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-runtime-header-priority.mjs",
+      "localBuiltSha256": "7f991c996d7c5f9bc8873fc95404d835aee9c9e064481505d157ecfb6588ad6f",
+      "committedSha256": "7f991c996d7c5f9bc8873fc95404d835aee9c9e064481505d157ecfb6588ad6f",
+      "gitBlob": "4a8c6985eab7ffecfdd66d08465301a75b87d539",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/lib/r16-static-waterfall.mjs",
+      "localBuiltSha256": "8e59499334a97e2b92b8a1aeeb9902d18043d50e08c388d219a02916209587f8",
+      "committedSha256": "8e59499334a97e2b92b8a1aeeb9902d18043d50e08c388d219a02916209587f8",
+      "gitBlob": "7697be12556c5c2a35bdcc235e50af7d72c06054",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/lib/r16-static-transport.mjs",
+      "localBuiltSha256": "ff35ad6e7638f9839713091a7d6ba61887c10c0510f557386b51b551240d5ab0",
+      "committedSha256": "ff35ad6e7638f9839713091a7d6ba61887c10c0510f557386b51b551240d5ab0",
+      "gitBlob": "04301bd5c70261080db6e224fdfa4842a798df64",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-static-transport.mjs",
+      "localBuiltSha256": "64cf95f53385c4bb0c434ba0757d3a7d6a22a598bd49ac0af7e9fde3cc8bf0dd",
+      "committedSha256": "64cf95f53385c4bb0c434ba0757d3a7d6a22a598bd49ac0af7e9fde3cc8bf0dd",
+      "gitBlob": "9010f05fffa7871ea24d0daaf9778815ec3d3974",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/smoke-runtime-header-priority.mjs",
+      "localBuiltSha256": "54cef1603191344782bb950cde02bdee217db979570ab635235ea6e0251bf417",
+      "committedSha256": "54cef1603191344782bb950cde02bdee217db979570ab635235ea6e0251bf417",
+      "gitBlob": "0c0a01c06afdf8b431ae956e64746c1c8e5ebf33",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/map-world-baseline-refresh.ts",
+      "localBuiltSha256": "9ae435d3b96e1be2ce644ef1456e6215e694953237ba33e78be0d1be09109138",
+      "committedSha256": "9ae435d3b96e1be2ce644ef1456e6215e694953237ba33e78be0d1be09109138",
+      "gitBlob": "511ce5d713be3732e75855633e425b88ffc7ade5",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-map-world-baseline-refresh.mjs",
+      "localBuiltSha256": "c90379b61d767c76b6f2ad7e327091ea979d0a987e83a6674d64cdfe22c884df",
+      "committedSha256": "c90379b61d767c76b6f2ad7e327091ea979d0a987e83a6674d64cdfe22c884df",
+      "gitBlob": "4809fd4dcb879b4529b6cc8bc21c58b8ea5c36fc",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
+      "localBuiltSha256": "2e1191cab2b9ede2cf0b09c559c7e4da1e8b84574d4910589ad1f9a968ae7a51",
+      "committedSha256": "2e1191cab2b9ede2cf0b09c559c7e4da1e8b84574d4910589ad1f9a968ae7a51",
+      "gitBlob": "57935257fe95485dcf2523c5679967a522f20e19",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-asset-worker-font-chain.mjs",
+      "localBuiltSha256": "a0c26dd02e0bab33d7dfb743f2bc531e098f70ea715cab19b3cde99bac117144",
+      "committedSha256": "a0c26dd02e0bab33d7dfb743f2bc531e098f70ea715cab19b3cde99bac117144",
+      "gitBlob": "b5a764bad2bb0064b607e1ec3d2e0cf70e9efb3d",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/smoke-asset-font-chain.mjs",
+      "localBuiltSha256": "0918836ee19a33cd4dec97e096916fdb657f75ec3fab72b7197c3cf10106bc0a",
+      "committedSha256": "0918836ee19a33cd4dec97e096916fdb657f75ec3fab72b7197c3cf10106bc0a",
+      "gitBlob": "148b552440466d946b41f9577e3ee8742eb4c09b",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs",
+      "localBuiltSha256": "3107bd2726ee36cc5463fe8b29d2b0e697ff8594de1ba15e83fc71fac80a7c91",
+      "committedSha256": "3107bd2726ee36cc5463fe8b29d2b0e697ff8594de1ba15e83fc71fac80a7c91",
+      "gitBlob": "fd7ee1787e0e6a24e5a284874fa5a9dd8f27a56f",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/asset-namespace-reload.ts",
+      "localBuiltSha256": "04c5c6fd49ac7e9a1d36583ebff03e7720da4a8f85f5d16811efe731c57b8d43",
+      "committedSha256": "04c5c6fd49ac7e9a1d36583ebff03e7720da4a8f85f5d16811efe731c57b8d43",
+      "gitBlob": "53e987e96d9c8bf17f3a8b88618bd125a73633ba",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-asset-namespace-reload.mjs",
+      "localBuiltSha256": "c2af0c86bd88d3702e37233b7a30f4d185322e00ef2a609b0e9e645a6a721f3f",
+      "committedSha256": "c2af0c86bd88d3702e37233b7a30f4d185322e00ef2a609b0e9e645a6a721f3f",
+      "gitBlob": "a00c6a98ada0379edb8229a8474092193bab6bb4",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/asset-cache-progress.ts",
+      "localBuiltSha256": "a7048ff227376798b4d0a9f610ee3dd6140220b2d86f64b7df625abf19cd6a35",
+      "committedSha256": "a7048ff227376798b4d0a9f610ee3dd6140220b2d86f64b7df625abf19cd6a35",
+      "gitBlob": "e48afa923d8824d156802708bbfec65990302802",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/r16-browser-localization.ts",
+      "localBuiltSha256": "4c4b8403c549a3c9261b0ab3b1c107b81a6abcacc73ccc89106930589cc9dc76",
+      "committedSha256": "4c4b8403c549a3c9261b0ab3b1c107b81a6abcacc73ccc89106930589cc9dc76",
+      "gitBlob": "5bd6342e5ecd317df876082fe0cae2df42a552a7",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-asset-worker-static-admission.mjs",
+      "localBuiltSha256": "d47fda772e19620eb518ce1ae91f218049e89235d9c6f9230eae04c7d4f234e9",
+      "committedSha256": "d47fda772e19620eb518ce1ae91f218049e89235d9c6f9230eae04c7d4f234e9",
+      "gitBlob": "47ba6372bebbfe575413bccf3277fcec6a93c7ae",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/smoke-asset-static-admission.mjs",
+      "localBuiltSha256": "e212c00ab7df4343c0db307773d0de644c21435cbde6542682b328fdfcbdcb9b",
+      "committedSha256": "e212c00ab7df4343c0db307773d0de644c21435cbde6542682b328fdfcbdcb9b",
+      "gitBlob": "7f88a67bff8ab88dc0c87e9b2d6c9f27c9f8e8a2",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-asset-cache-progress.mjs",
+      "localBuiltSha256": "665154eeed48bbd5728134ed8285b5dd7de014e68495f258d402fbafc129a10a",
+      "committedSha256": "665154eeed48bbd5728134ed8285b5dd7de014e68495f258d402fbafc129a10a",
+      "gitBlob": "268015912598f117c9a0f5aaec1089d704d612c3",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-r16-browser-localization.mjs",
+      "localBuiltSha256": "c65f439028f014ba0a40cd4087afbca79c9a9f42c8ef184b03e321cebeda1df2",
+      "committedSha256": "c65f439028f014ba0a40cd4087afbca79c9a9f42c8ef184b03e321cebeda1df2",
+      "gitBlob": "a2105ce527a634d3a9cc8a7c35b15038694821bc",
+      "eol": "exact"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/bevy-runtime-font-prewarm.ts",
+      "localBuiltSha256": "f2e10e60c07c60adfa7b04863a67e8caf5ebc1cf959b1ed38674b7b5c33539ab",
+      "committedSha256": "f2e10e60c07c60adfa7b04863a67e8caf5ebc1cf959b1ed38674b7b5c33539ab",
+      "gitBlob": "5be9d633b6d764f40550990ded49795cddacf6f8",
+      "eol": "exact"
+    }
+  ],
+  "formalProductDelta": [
+    "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
+    "mir2-web3/apps/web/app/page.tsx",
+    "mir2-web3/apps/web/lib/asset-cache-progress.ts",
+    "mir2-web3/apps/web/lib/bevy-runtime-font-prewarm.ts",
+    "mir2-web3/apps/web/lib/r16-browser-localization.ts",
+    "mir2-web3/apps/web/public/mir2-asset-worker.js"
+  ],
+  "independentRemoteCompare": {
+    "repository_full_name": "Zombieliu/mir2",
+    "base": "4aead752f62143199344bd7584c5b9120b6d30ba",
+    "head": "5d7bf8c2ea58d2ac68bbca5f18c8240fdc929d45",
+    "status": "ahead",
+    "ahead_by": 1,
+    "behind_by": 0,
+    "total_commits": 1,
+    "too_large": null,
+    "base_commit": {
+      "sha": "4aead752f62143199344bd7584c5b9120b6d30ba",
+      "url": "https://api.github.com/repos/Zombieliu/mir2/commits/4aead752f62143199344bd7584c5b9120b6d30ba",
+      "html_url": "https://github.com/Zombieliu/mir2/commit/4aead752f62143199344bd7584c5b9120b6d30ba"
+    },
+    "merge_base_commit": {
+      "sha": "4aead752f62143199344bd7584c5b9120b6d30ba",
+      "url": "https://api.github.com/repos/Zombieliu/mir2/commits/4aead752f62143199344bd7584c5b9120b6d30ba",
+      "html_url": "https://github.com/Zombieliu/mir2/commit/4aead752f62143199344bd7584c5b9120b6d30ba"
+    },
+    "files": [
+      {
+        "filename": "mir2-web3/apps/web/app/page.tsx",
+        "status": "modified",
+        "additions": 20,
+        "deletions": 7,
+        "changes": 27,
+        "previous_filename": null
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/bevy-runtime-font-prewarm.ts",
+        "status": "modified",
+        "additions": 17,
+        "deletions": 8,
+        "changes": 25,
+        "previous_filename": null
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs",
+        "status": "modified",
+        "additions": 70,
+        "deletions": 5,
+        "changes": 75,
+        "previous_filename": null
+      }
+    ]
+  },
+  "rollback": {
+    "project": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+    "deployment": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8",
+    "revision": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+    "independentVercelRead": true
+  },
+  "assetSource": "f2de762309768b51b39438c2437c14e819df9bf7",
+  "assetRunId": "42494701555",
+  "entryAssetWorker": {
+    "path": "/mir2-asset-worker.js",
+    "sha256": "2e1191cab2b9ede2cf0b09c559c7e4da1e8b84574d4910589ad1f9a968ae7a51",
+    "bytes": 47880
+  },
+  "oldHelperSha256": "c489ccd9230884d16f6c13b2af6e2f3411f5bd34953a33235ab6aa3dd1bf3e83",
+  "newHelperSha256": "7bcad06c68e239c073623eaf97e94d66ac4fa694061202b4ac5ab6ed837727f8",
+  "releaseBehaviorOutsideReviewedPinsUnchanged": true,
+  "releaseChecks": {
+    "passed": 83,
+    "failed": 0,
+    "skipped": 0,
+    "rawOutputSha256": "1cfb6ef006db8b6744919fe71a9b37d41dee9e6ff0465dc614dc6234abfe2bea"
+  },
+  "scope": "Game project only. Source snapshot5d7f excludes later independent Gateway/Store admission commits; no backend operation is authorized by this frontend release."
+}

@@ -1,0 +1,1215 @@
+{
+  "passed": true,
+  "sourceBase": "4aead752f62143199344bd7584c5b9120b6d30ba",
+  "candidate": "4aea-primary-overlap-40fb88a7",
+  "productionDeployment": false,
+  "tests": 414,
+  "unitPrimaryChecks": 27,
+  "build": {
+    "id": "znEmb0XGCHUXJzhkFwG7l",
+    "exit": 0,
+    "durationMs": 46131,
+    "sourceRoot": "F:/mir2-builds/r16-primary-font-overlap-20261115/source"
+  },
+  "sourceInputs": [
+    {
+      "filename": "mir2-web3/apps/web/app/page.tsx",
+      "sha256": "8f06b34d3c17550e203a6aef8957d2ec1bd77d3686e187b65db2463d0b3cf59f"
+    },
+    {
+      "filename": "mir2-web3/apps/web/lib/bevy-runtime-font-prewarm.ts",
+      "sha256": "f2e10e60c07c60adfa7b04863a67e8caf5ebc1cf959b1ed38674b7b5c33539ab"
+    },
+    {
+      "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs",
+      "sha256": "3107bd2726ee36cc5463fe8b29d2b0e697ff8594de1ba15e83fc71fac80a7c91"
+    }
+  ],
+  "fixtureInputs": [
+    {
+      "name": "focused-driver.mjs",
+      "sha256": "d3a2473358b237592b66b5f496160819c5f3ccc525f516468fa4bb84faea4fdd",
+      "previousSha256": "5cf01497c77f095ea8999f83837652f4a0dd3d98ad51675af3bfa30e67722498"
+    },
+    {
+      "name": "profile.mjs",
+      "sha256": "ce502083b96e0cc906e8cfcd5e8c1c02348aac4184abdb1fe29afa0a4a02e159",
+      "previousSha256": "ce502083b96e0cc906e8cfcd5e8c1c02348aac4184abdb1fe29afa0a4a02e159"
+    },
+    {
+      "name": "route-intent-gate.mjs",
+      "sha256": "b06cdd5facd1feba31e1455aa8a2fcfa06c9c0cec0b00f2168adbcbb16e5d728",
+      "previousSha256": "b06cdd5facd1feba31e1455aa8a2fcfa06c9c0cec0b00f2168adbcbb16e5d728"
+    },
+    {
+      "name": "route-plan-probe.mjs",
+      "sha256": "706cbc5378b68cb9328278d61b1c2de49711c84d53494d46e58f27c0f575406c",
+      "previousSha256": "706cbc5378b68cb9328278d61b1c2de49711c84d53494d46e58f27c0f575406c"
+    },
+    {
+      "name": "verify-original-fonts.mjs",
+      "sha256": "5ce7c7a01c76f9a3dd2a19d71c5a9a0936b5b2c9b9a3631c1c0a4a507424c86d",
+      "previousSha256": "5ce7c7a01c76f9a3dd2a19d71c5a9a0936b5b2c9b9a3631c1c0a4a507424c86d"
+    },
+    {
+      "name": "verify-prewarm.mjs",
+      "sha256": "e5bbac30271e8fdcc4ed7d5bad466bd0f16e37ee0f32ec2936e8994bdea54d3e",
+      "previousSha256": "e5bbac30271e8fdcc4ed7d5bad466bd0f16e37ee0f32ec2936e8994bdea54d3e"
+    },
+    {
+      "name": "prepare-store-visit.mjs",
+      "sha256": "3052bf26524bf4a0752da8d5df09d41a10313d73834794d765610da639aece11",
+      "previousSha256": "3052bf26524bf4a0752da8d5df09d41a10313d73834794d765610da639aece11"
+    },
+    {
+      "name": "hunt-navigation-game.mjs",
+      "sha256": "d8d98ac033d73c61e56ad2b2e575808c102c18d9f7f848fe72ed0162458bb6b1",
+      "previousSha256": "39f86cbdf413ee38fa0909c5ee91d8dce0cd7ee407205946ae311a733f2b2205"
+    },
+    {
+      "name": "map-feedback-game.mjs",
+      "sha256": "1451575d714ed835f1757ae10a41f83e8bd66142528e68b1eed06c8b9dd2ee5f",
+      "previousSha256": "8ac86872ccb77f8f918ef8b11bce2bab739c11d8cd1114f3876bf131cb497df5"
+    }
+  ],
+  "immutable": {
+    "runtime": "bevy-0c553a754308e5b8",
+    "assets": "20261108-r16-08ec86d5105c",
+    "workerSha256": "2e1191cab2b9ede2cf0b09c559c7e4da1e8b84574d4910589ad1f9a968ae7a51",
+    "gateway": "9244ce3dd7cd2129a70e650be1430e971b6c96ab",
+    "gatewayScope": "local; not publicfd3"
+  },
+  "controlled": {
+    "scope": "Actual Page runtime effect and unchanged actual Worker in real Chrome, valid8MiB custom-section fixture Wasm and six complete original fonts. Not a Bevy gameplay/bootstrap test, public speed claim or CWV measurement.",
+    "fixtureScriptSha256": "a5f60e9ebeb4ccd67faa5ddb0357c8f14d5fd9a734a819a263b865c8c291315c",
+    "browserHarnessAssumptions": "Runs the actual Page effect after first-playable/GPU gates, actual prewarmer and Worker, with stub App bootstrap and valid custom-section fixture Wasm. Separate actual game tests below prove the real runtime flow. Interaction button is not authoritative game movement.",
+    "results": [
+      {
+        "name": "independent-before",
+        "passed": true,
+        "runtimeMs": 10118,
+        "allFontsMs": 12148,
+        "browserClosed": true
+      },
+      {
+        "name": "independent-after",
+        "passed": true,
+        "runtimeMs": 10006,
+        "allFontsMs": 10181,
+        "browserClosed": true
+      },
+      {
+        "name": "aggregate-before",
+        "passed": true,
+        "runtimeMs": 2042,
+        "allFontsMs": 4609,
+        "browserClosed": true
+      },
+      {
+        "name": "aggregate-after",
+        "passed": true,
+        "runtimeMs": 3053,
+        "allFontsMs": 4655,
+        "browserClosed": true
+      }
+    ],
+    "independentSavedMs": 1967,
+    "aggregateAllFontsDeltaMs": 46,
+    "aggregateRuntimeDeltaMs": 1011,
+    "closed": {
+      "browser": true,
+      "server": true
+    }
+  },
+  "games": [
+    {
+      "name": "default",
+      "passed": true,
+      "rawReceiptSha256": "28dc2360ab68f51ab6f5a2c18c2785bd9f97c03f756e3ae203a302d7aa70a01d",
+      "nativeReadyMs": 87362,
+      "primaryMarks": [
+        {
+          "name": "bevyRuntimePrimaryFontPrewarmStart",
+          "epochMs": 1794704967164
+        },
+        {
+          "name": "bevyRuntimeFontPrewarmStart",
+          "epochMs": 1794704967252
+        },
+        {
+          "name": "bevyRuntimeModuleReady",
+          "epochMs": 1794704967253,
+          "detail": {
+            "backend": "webgpu",
+            "compiledBackend": "webgpu",
+            "fallbackFrom": null
+          }
+        },
+        {
+          "name": "bevyRuntimeFontPrewarmComplete",
+          "epochMs": 1794705054192,
+          "detail": {
+            "requested": 6,
+            "ok": 6,
+            "failed": 0,
+            "aborted": false,
+            "bytes": 29517096
+          }
+        },
+        {
+          "name": "bevyRuntimePrimaryFontPrewarmComplete",
+          "epochMs": 1794705054250,
+          "detail": {
+            "requested": 1,
+            "ok": 1,
+            "failed": 0,
+            "aborted": false,
+            "bytes": 16437364
+          }
+        }
+      ],
+      "prewarm": {
+        "requested": 113,
+        "ok": 113,
+        "failed": 0
+      },
+      "originalFontsSha256": "4226d63d5bfbfafe63798abe48cd41f74614e776364656942df6304b30694e35",
+      "initial": {
+        "map": "0108",
+        "position": {
+          "x": 8,
+          "y": 12
+        }
+      },
+      "afterTransfer": {
+        "map": "0",
+        "position": {
+          "x": 325,
+          "y": 290
+        }
+      },
+      "interiorPlan": {
+        "at": 1794705055780,
+        "phase": "interior-route",
+        "query": {
+          "version": 1,
+          "stamp": {
+            "generation": 2,
+            "revision": 2,
+            "connectionGeneration": 1,
+            "sessionGeneration": 1,
+            "sceneRevision": 3,
+            "playerObjectId": 1000,
+            "mapFileName": "0108"
+          },
+          "mapIndex": 4,
+          "mapFileName": "0108",
+          "width": 15,
+          "height": 18,
+          "origin": {
+            "x": 8,
+            "y": 12
+          },
+          "destination": {
+            "x": 10,
+            "y": 13
+          },
+          "routeTarget": {
+            "type": "entrance"
+          },
+          "occupiedTiles": [
+            {
+              "x": 7,
+              "y": 7
+            }
+          ],
+          "rejectedEdges": []
+        },
+        "result": {
+          "destination": {
+            "x": 10,
+            "y": 13
+          },
+          "error": null,
+          "mapFileName": "0108",
+          "mapIndex": 4,
+          "ok": true,
+          "origin": {
+            "x": 8,
+            "y": 12
+          },
+          "radius": 0,
+          "stamp": {
+            "connectionGeneration": 1,
+            "generation": 2,
+            "mapFileName": "0108",
+            "playerObjectId": 1000,
+            "revision": 2,
+            "sceneRevision": 3,
+            "sessionGeneration": 1
+          },
+          "steps": [
+            {
+              "x": 9,
+              "y": 13
+            },
+            {
+              "x": 10,
+              "y": 13
+            }
+          ],
+          "version": 1
+        }
+      },
+      "oldMapMoves": 0,
+      "baselineReads": 1,
+      "pendingLogout": {
+        "at": 1794705064733,
+        "normalAck": true,
+        "noMoveBeforeAck": true
+      },
+      "lateCollision": {
+        "phase": "pending-logout",
+        "map": "0",
+        "url": "/api/scene/collision?map=0&quest=1&minX=0&maxX=255&minY=0&maxY=255",
+        "at": 1794705060808,
+        "sha256": "88a8a89d4835e9eebdbe30f86b4a8528865d6501e3201f6c81e5f713b4c97be6",
+        "heldAt": 1794705061036,
+        "bounds": {
+          "minX": 0,
+          "maxX": 255,
+          "minY": 0,
+          "maxY": 255
+        },
+        "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+        "releasedAt": 1794705064733,
+        "fulfilledAt": 1794705064738
+      },
+      "reopened": {
+        "map": "0",
+        "position": {
+          "x": 325,
+          "y": 290
+        }
+      },
+      "mapFeedback": {
+        "passed": true,
+        "scope": "Actual minimap click, original map collision JSON delayed12s per complete chunk, exact30s Page action deadline, no movement before or after late completion. The 15s per chunk and all geometry validation remain unchanged. Local warm-resource browser; no public latency claim.",
+        "language": "en",
+        "before": {
+          "map": "0",
+          "x": 325,
+          "y": 290
+        },
+        "readOnlyMetadata": {
+          "status": 200,
+          "sha256": "88a8a89d4835e9eebdbe30f86b4a8528865d6501e3201f6c81e5f713b4c97be6",
+          "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e"
+        },
+        "geometry": {
+          "rect": {
+            "left": 1029,
+            "top": 118,
+            "width": 120,
+            "height": 108
+          },
+          "width": 1052,
+          "height": 700,
+          "mapWidth": 700,
+          "mapHeight": 700
+        },
+        "expectedTarget": {
+          "x": 325,
+          "y": 295
+        },
+        "started": 1794705087837,
+        "planningAt": 1794705087908,
+        "timeoutAt": 1794705117898,
+        "after": {
+          "map": "0",
+          "x": 325,
+          "y": 290
+        },
+        "collision": [
+          {
+            "started": 1794705087869,
+            "bounds": [
+              "0",
+              "0",
+              "255",
+              "255"
+            ],
+            "headersAt": 1794705088124,
+            "sha256": "88a8a89d4835e9eebdbe30f86b4a8528865d6501e3201f6c81e5f713b4c97be6",
+            "bytes": 396235,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794705100140
+          },
+          {
+            "started": 1794705100200,
+            "bounds": [
+              "0",
+              "256",
+              "255",
+              "511"
+            ],
+            "headersAt": 1794705100501,
+            "sha256": "1c5117428d12286d7f396f02d1a3a33ee274730c1cfc971ecf7ec6496bc169fe",
+            "bytes": 182087,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794705112518
+          },
+          {
+            "started": 1794705100200,
+            "bounds": [
+              "0",
+              "512",
+              "255",
+              "767"
+            ],
+            "headersAt": 1794705100750,
+            "sha256": "09de35f86834510468e7f981994b0a2f4e18114acf22f509d9706a842346878f",
+            "bytes": 366915,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794705112769
+          },
+          {
+            "started": 1794705100201,
+            "bounds": [
+              "256",
+              "0",
+              "511",
+              "255"
+            ],
+            "headersAt": 1794705101016,
+            "sha256": "23b36c8fddd0b1b6d38842e0ae7bf849811f05e3403b80f2224a4fa27414c6ae",
+            "bytes": 491344,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794705113040
+          },
+          {
+            "started": 1794705100201,
+            "bounds": [
+              "256",
+              "256",
+              "511",
+              "511"
+            ],
+            "headersAt": 1794705101303,
+            "sha256": "b2ed3ae8b8d606f37138829aba3c4d11cca75ec45d08ddac3535dbb42bc6bb4e",
+            "bytes": 260297,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794705113314
+          },
+          {
+            "started": 1794705112575,
+            "bounds": [
+              "256",
+              "512",
+              "511",
+              "767"
+            ],
+            "headersAt": 1794705112958,
+            "sha256": "fed1e41d1fab61006e5e96fbbaaf1e315afcaa7029131aca01c6069a86294bae",
+            "bytes": 332891,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794705124979
+          },
+          {
+            "started": 1794705112844,
+            "bounds": [
+              "512",
+              "0",
+              "767",
+              "255"
+            ],
+            "headersAt": 1794705113328,
+            "sha256": "4a619f0b854c4e984a9a3232b80c4f88da728a21bc3b644dbb301b7829e12873",
+            "bytes": 402119,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794705125340
+          },
+          {
+            "started": 1794705113096,
+            "bounds": [
+              "512",
+              "256",
+              "767",
+              "511"
+            ],
+            "headersAt": 1794705113644,
+            "sha256": "f6e60d665059e9d61536fcd468a97c1c65dd258191f92ae0736e3234eac74e72",
+            "bytes": 186947,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794705125652
+          },
+          {
+            "started": 1794705113361,
+            "bounds": [
+              "512",
+              "512",
+              "767",
+              "767"
+            ],
+            "headersAt": 1794705113918,
+            "sha256": "b9f99894981075172a7c45002160fe5fc562cf25e6927059075743a8ae2b4f08",
+            "bytes": 223829,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794705125932
+          }
+        ],
+        "noMoveBeforeOrAfterLateCompletion": true,
+        "chat": [
+          "[Mode: Peaceful]",
+          "[Pet: Attack and Move]",
+          "Planning a route to (325, 295)…",
+          "The route map took too long to load. Please try again."
+        ]
+      },
+      "supplyPlan": {
+        "at": 1794705126927,
+        "phase": "fresh-supply-goal",
+        "query": {
+          "version": 1,
+          "stamp": {
+            "generation": 2,
+            "revision": 2,
+            "connectionGeneration": 1,
+            "sessionGeneration": 1,
+            "sceneRevision": 3,
+            "playerObjectId": 1000,
+            "mapFileName": "0"
+          },
+          "mapIndex": 1,
+          "mapFileName": "0",
+          "width": 700,
+          "height": 700,
+          "origin": {
+            "x": 325,
+            "y": 290
+          },
+          "destination": {
+            "x": 324,
+            "y": 291
+          },
+          "routeTarget": {
+            "type": "supply",
+            "vendor": "potions"
+          },
+          "occupiedTiles": [
+            {
+              "x": 324,
+              "y": 291
+            },
+            {
+              "x": 310,
+              "y": 283
+            },
+            {
+              "x": 329,
+              "y": 289
+            },
+            {
+              "x": 341,
+              "y": 275
+            }
+          ],
+          "rejectedEdges": []
+        },
+        "result": {
+          "destination": {
+            "x": 325,
+            "y": 290
+          },
+          "error": null,
+          "mapFileName": "0",
+          "mapIndex": 1,
+          "ok": true,
+          "origin": {
+            "x": 325,
+            "y": 290
+          },
+          "radius": 2,
+          "stamp": {
+            "connectionGeneration": 1,
+            "generation": 2,
+            "mapFileName": "0",
+            "playerObjectId": 1000,
+            "revision": 2,
+            "sceneRevision": 3,
+            "sessionGeneration": 1
+          },
+          "steps": [],
+          "version": 1
+        }
+      },
+      "manualStep": {
+        "at": 1794705127023,
+        "ackAt": 1794705127161,
+        "moves": [
+          {
+            "type": "walk",
+            "direction": "Down",
+            "seq": 30,
+            "at": 1794705127044
+          }
+        ],
+        "position": {
+          "x": 325,
+          "y": 291
+        }
+      },
+      "saved": {
+        "normalLogout": true,
+        "position": {
+          "x": 325,
+          "y": 291
+        },
+        "preservedFields": 12
+      },
+      "pageErrors": 0,
+      "wireFailures": 0,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      }
+    },
+    {
+      "name": "webgl2",
+      "passed": true,
+      "rawReceiptSha256": "28f41e38cc3c28f1375c5aed38ecdaeb3f9dc7efa8fec28c911142dd7fa08440",
+      "nativeReadyMs": 75349,
+      "primaryMarks": [
+        {
+          "name": "bevyRuntimePrimaryFontPrewarmStart",
+          "epochMs": 1794705184268
+        },
+        {
+          "name": "bevyRuntimeFontPrewarmStart",
+          "epochMs": 1794705184830
+        },
+        {
+          "name": "bevyRuntimeModuleReady",
+          "epochMs": 1794705184831,
+          "detail": {
+            "backend": "webgl2",
+            "compiledBackend": "webgl2",
+            "fallbackFrom": null
+          }
+        },
+        {
+          "name": "bevyRuntimeFontPrewarmComplete",
+          "epochMs": 1794705259341,
+          "detail": {
+            "requested": 6,
+            "ok": 6,
+            "failed": 0,
+            "aborted": false,
+            "bytes": 29517096
+          }
+        },
+        {
+          "name": "bevyRuntimePrimaryFontPrewarmComplete",
+          "epochMs": 1794705259395,
+          "detail": {
+            "requested": 1,
+            "ok": 1,
+            "failed": 0,
+            "aborted": false,
+            "bytes": 16437364
+          }
+        }
+      ],
+      "prewarm": {
+        "requested": 113,
+        "ok": 113,
+        "failed": 0
+      },
+      "originalFontsSha256": "4226d63d5bfbfafe63798abe48cd41f74614e776364656942df6304b30694e35",
+      "initial": {
+        "map": "0108",
+        "position": {
+          "x": 8,
+          "y": 12
+        }
+      },
+      "afterTransfer": {
+        "map": "0",
+        "position": {
+          "x": 325,
+          "y": 290
+        }
+      },
+      "interiorPlan": {
+        "at": 1794705260498,
+        "phase": "interior-route",
+        "query": {
+          "version": 1,
+          "stamp": {
+            "generation": 2,
+            "revision": 1,
+            "connectionGeneration": 1,
+            "sessionGeneration": 1,
+            "sceneRevision": 3,
+            "playerObjectId": 1000,
+            "mapFileName": "0108"
+          },
+          "mapIndex": 4,
+          "mapFileName": "0108",
+          "width": 15,
+          "height": 18,
+          "origin": {
+            "x": 8,
+            "y": 12
+          },
+          "destination": {
+            "x": 10,
+            "y": 13
+          },
+          "routeTarget": {
+            "type": "entrance"
+          },
+          "occupiedTiles": [
+            {
+              "x": 7,
+              "y": 7
+            }
+          ],
+          "rejectedEdges": []
+        },
+        "result": {
+          "destination": {
+            "x": 10,
+            "y": 13
+          },
+          "error": null,
+          "mapFileName": "0108",
+          "mapIndex": 4,
+          "ok": true,
+          "origin": {
+            "x": 8,
+            "y": 12
+          },
+          "radius": 0,
+          "stamp": {
+            "connectionGeneration": 1,
+            "generation": 2,
+            "mapFileName": "0108",
+            "playerObjectId": 1000,
+            "revision": 1,
+            "sceneRevision": 3,
+            "sessionGeneration": 1
+          },
+          "steps": [
+            {
+              "x": 9,
+              "y": 13
+            },
+            {
+              "x": 10,
+              "y": 13
+            }
+          ],
+          "version": 1
+        }
+      },
+      "oldMapMoves": 0,
+      "baselineReads": 1,
+      "pendingLogout": {
+        "at": 1794705268453,
+        "normalAck": true,
+        "noMoveBeforeAck": true
+      },
+      "lateCollision": {
+        "phase": "pending-logout",
+        "map": "0",
+        "url": "/api/scene/collision?map=0&quest=1&minX=0&maxX=255&minY=0&maxY=255",
+        "at": 1794705265145,
+        "sha256": "88a8a89d4835e9eebdbe30f86b4a8528865d6501e3201f6c81e5f713b4c97be6",
+        "heldAt": 1794705265375,
+        "bounds": {
+          "minX": 0,
+          "maxX": 255,
+          "minY": 0,
+          "maxY": 255
+        },
+        "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+        "releasedAt": 1794705268453,
+        "fulfilledAt": 1794705268458
+      },
+      "reopened": {
+        "map": "0",
+        "position": {
+          "x": 325,
+          "y": 290
+        }
+      },
+      "mapFeedback": {
+        "passed": true,
+        "scope": "Actual minimap click, original map collision JSON delayed12s per complete chunk, exact30s Page action deadline, no movement before or after late completion. The 15s per chunk and all geometry validation remain unchanged. Local warm-resource browser; no public latency claim.",
+        "language": "zh-TW",
+        "before": {
+          "map": "0",
+          "x": 325,
+          "y": 290
+        },
+        "readOnlyMetadata": {
+          "status": 200,
+          "sha256": "88a8a89d4835e9eebdbe30f86b4a8528865d6501e3201f6c81e5f713b4c97be6",
+          "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e"
+        },
+        "geometry": {
+          "rect": {
+            "left": 1029,
+            "top": 118,
+            "width": 120,
+            "height": 108
+          },
+          "width": 1052,
+          "height": 700,
+          "mapWidth": 700,
+          "mapHeight": 700
+        },
+        "expectedTarget": {
+          "x": 325,
+          "y": 295
+        },
+        "started": 1794705290512,
+        "planningAt": 1794705290556,
+        "timeoutAt": 1794705320546,
+        "after": {
+          "map": "0",
+          "x": 325,
+          "y": 290
+        },
+        "collision": [
+          {
+            "started": 1794705290535,
+            "bounds": [
+              "0",
+              "0",
+              "255",
+              "255"
+            ],
+            "headersAt": 1794705290841,
+            "sha256": "88a8a89d4835e9eebdbe30f86b4a8528865d6501e3201f6c81e5f713b4c97be6",
+            "bytes": 396235,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794705302853
+          },
+          {
+            "started": 1794705302884,
+            "bounds": [
+              "0",
+              "256",
+              "255",
+              "511"
+            ],
+            "headersAt": 1794705303168,
+            "sha256": "1c5117428d12286d7f396f02d1a3a33ee274730c1cfc971ecf7ec6496bc169fe",
+            "bytes": 182087,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794705315178
+          },
+          {
+            "started": 1794705302885,
+            "bounds": [
+              "0",
+              "512",
+              "255",
+              "767"
+            ],
+            "headersAt": 1794705303423,
+            "sha256": "09de35f86834510468e7f981994b0a2f4e18114acf22f509d9706a842346878f",
+            "bytes": 366915,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794705315430
+          },
+          {
+            "started": 1794705302886,
+            "bounds": [
+              "256",
+              "0",
+              "511",
+              "255"
+            ],
+            "headersAt": 1794705303709,
+            "sha256": "23b36c8fddd0b1b6d38842e0ae7bf849811f05e3403b80f2224a4fa27414c6ae",
+            "bytes": 491344,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794705315732
+          },
+          {
+            "started": 1794705302886,
+            "bounds": [
+              "256",
+              "256",
+              "511",
+              "511"
+            ],
+            "headersAt": 1794705303959,
+            "sha256": "b2ed3ae8b8d606f37138829aba3c4d11cca75ec45d08ddac3535dbb42bc6bb4e",
+            "bytes": 260297,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794705315966
+          },
+          {
+            "started": 1794705315197,
+            "bounds": [
+              "256",
+              "512",
+              "511",
+              "767"
+            ],
+            "headersAt": 1794705315488,
+            "sha256": "fed1e41d1fab61006e5e96fbbaaf1e315afcaa7029131aca01c6069a86294bae",
+            "bytes": 332891,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794705327502
+          },
+          {
+            "started": 1794705315448,
+            "bounds": [
+              "512",
+              "0",
+              "767",
+              "255"
+            ],
+            "headersAt": 1794705315774,
+            "sha256": "4a619f0b854c4e984a9a3232b80c4f88da728a21bc3b644dbb301b7829e12873",
+            "bytes": 402119,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794705327786
+          },
+          {
+            "started": 1794705315757,
+            "bounds": [
+              "512",
+              "256",
+              "767",
+              "511"
+            ],
+            "headersAt": 1794705316082,
+            "sha256": "f6e60d665059e9d61536fcd468a97c1c65dd258191f92ae0736e3234eac74e72",
+            "bytes": 186947,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794705328093
+          },
+          {
+            "started": 1794705315990,
+            "bounds": [
+              "512",
+              "512",
+              "767",
+              "767"
+            ],
+            "headersAt": 1794705316348,
+            "sha256": "b9f99894981075172a7c45002160fe5fc562cf25e6927059075743a8ae2b4f08",
+            "bytes": 223829,
+            "fingerprint": "4dfd55f96fbe5240955081e68f05bd1424fab4d39b9fa0516a14fb50d6445d2e",
+            "finished": 1794705328357
+          }
+        ],
+        "noMoveBeforeOrAfterLateCompletion": true,
+        "chat": [
+          "[模式: 和平]",
+          "[寵物: 攻擊並移動]",
+          "正在規劃前往 (325, 295) 的路線…",
+          "路線地圖載入逾時，請重試。"
+        ]
+      },
+      "supplyPlan": {
+        "at": 1794705329264,
+        "phase": "fresh-supply-goal",
+        "query": {
+          "version": 1,
+          "stamp": {
+            "generation": 2,
+            "revision": 1,
+            "connectionGeneration": 1,
+            "sessionGeneration": 1,
+            "sceneRevision": 3,
+            "playerObjectId": 1000,
+            "mapFileName": "0"
+          },
+          "mapIndex": 1,
+          "mapFileName": "0",
+          "width": 700,
+          "height": 700,
+          "origin": {
+            "x": 325,
+            "y": 290
+          },
+          "destination": {
+            "x": 324,
+            "y": 291
+          },
+          "routeTarget": {
+            "type": "supply",
+            "vendor": "potions"
+          },
+          "occupiedTiles": [
+            {
+              "x": 324,
+              "y": 291
+            },
+            {
+              "x": 310,
+              "y": 283
+            },
+            {
+              "x": 329,
+              "y": 289
+            },
+            {
+              "x": 341,
+              "y": 275
+            }
+          ],
+          "rejectedEdges": []
+        },
+        "result": {
+          "destination": {
+            "x": 325,
+            "y": 290
+          },
+          "error": null,
+          "mapFileName": "0",
+          "mapIndex": 1,
+          "ok": true,
+          "origin": {
+            "x": 325,
+            "y": 290
+          },
+          "radius": 2,
+          "stamp": {
+            "connectionGeneration": 1,
+            "generation": 2,
+            "mapFileName": "0",
+            "playerObjectId": 1000,
+            "revision": 1,
+            "sceneRevision": 3,
+            "sessionGeneration": 1
+          },
+          "steps": [],
+          "version": 1
+        }
+      },
+      "manualStep": {
+        "at": 1794705329318,
+        "ackAt": 1794705329449,
+        "moves": [
+          {
+            "type": "walk",
+            "direction": "Down",
+            "seq": 30,
+            "at": 1794705329331
+          }
+        ],
+        "position": {
+          "x": 325,
+          "y": 291
+        }
+      },
+      "saved": {
+        "normalLogout": true,
+        "position": {
+          "x": 325,
+          "y": 291
+        },
+        "preservedFields": 12
+      },
+      "pageErrors": 0,
+      "wireFailures": 0,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      }
+    }
+  ],
+  "preserved": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/chat.rs",
+      "sha256": "e80072eff58555cdfaa8963eaf21ce5556da247507ae49b564222484138a2437"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/companion.rs",
+      "sha256": "cfc9755f516ec7a16bc2bfcd202e240ffa7b0be8246b93d0cb2b030475a712df"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hud.rs",
+      "sha256": "556acc585807ca76d8e0fa0c0374ca5066f6d5b22f1aad44329b98d21fadc967"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hud_layout.rs",
+      "sha256": "89e767b5f26e6db984e29eb71f23e8f96ba34c64aa79d7b6aa95cb2175c94da0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hud_reference.rs",
+      "sha256": "f3ad121ea8cb02cdb7b109553b5ae31c9bd2867f5684fd120a74a657a9dde803"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/item_image.rs",
+      "sha256": "94bcc11c7ebd58ca099da00c6006f6dbae6f83c10973729b8b43963115ffa7f4"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/login.rs",
+      "sha256": "2085337d2c1fa164f9e98796a40d307d82c585cb2e5e367adaa9e9f234192321"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/notice.rs",
+      "sha256": "e5cc1662c8e3fa2c072bbcbe6e6700524ac8a284219d435a76c1b3894c5df6b8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/pc_login.rs",
+      "sha256": "1e033f4ca776f9225d98aadcf020f7d35323e7d659b4ab98053dd3ea9ab9b353"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_display.rs",
+      "sha256": "d04466e3bafb3a201e399ff9dbc3ffecaf6a13c31ca1f3044c95fa3f8f3ab9ef"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs",
+      "sha256": "b47681702030a30f1d99673a79e2b5d350aee4b1541d7173c2c15cd2f48ade69"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/periodic_quest_ui_tests.rs",
+      "sha256": "f99a8d5f2922036aa807f01f10a706a1935290f8eb7fae633d3770f4dd93b3e5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/portable_bag_ui.rs",
+      "sha256": "d7f9f0574a43394facb4da476397e6a367c1ba5852312e46e2ee66caaa7e5014"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_hunt_regions.rs",
+      "sha256": "15676c18c1812c4293087b98768a97be9a909fcab7de22aa2d390b227ffaea85"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/atlas.rs",
+      "sha256": "930028511aee30592d94dda85e8175d76149cc38d3400d9c333fc94d6d4bdf21"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/effects.rs",
+      "sha256": "adc33b2398789a77a6608a978911d32c2d7667d55010ab53e842b7818c7cc176"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/entity_presentation.rs",
+      "sha256": "b3e0623cdebbcb2194635c75f9fff9f7c90b8a7519eef683b3a5656a23ac72b3"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/hud_layout_pointer_input_tests.rs",
+      "sha256": "6bf7506b8a8f559c847b53560105de9b703e12b8e9f9c1a471ee26d160bf7455"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/input.rs",
+      "sha256": "e316672a3b346272b5b621ce9a84af7c8a98aca678acd5c7e65fea427ba35a05"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/main.rs",
+      "sha256": "f71773dcd52bc8e16b2a772e0ab3bf19547c839088e751e82ab2e05c6532a397"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/pc_hud.rs",
+      "sha256": "9c8ce9950bd113bf2e454bd448a67c6de96ff939f5a09ce6e7cd5a60f25f63e8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/pc_hud_visual_tests.rs",
+      "sha256": "51de89e50c1bba193a8e6b7d18b9d3a209e166ed476b45a8310c80167fba2839"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/shell_bridge.rs",
+      "sha256": "729b843d671a2dbe70407168b0a528591bb99ca28a92c6d77df0016525633713"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/lib.rs",
+      "sha256": "5a0c186b891228f99fc35642408249391f58d243021851c574b14c38c0241c35"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/native_ingest.rs",
+      "sha256": "dbfb577db9395086576fc1d9da0f7c458f1836eb69356a12cdca4b384e69fbce"
+    },
+    {
+      "path": "mir2-web3/apps/web/app/original-client-shell.tsx",
+      "sha256": "91bc5aa6f8cde16ca4ff4f9b2f5c7bf965162b8049316683a262855c48a37fd9"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/test-stage5-adapters.mjs",
+      "sha256": "32ec79ce9b7a10c13c3a638ed4c8258137945ca7af4f594b76701dfce59bfa7d"
+    },
+    {
+      "path": "mir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md",
+      "sha256": "024cd7215baa87027f5ae3e9d9d116593a9d088c1957cb844cb29f690dae1068"
+    },
+    {
+      "path": "mir2-web3/docs/PC-UI-INTEGRATION-20261109.zh-CN.md",
+      "sha256": "a7fd33032c54a32fc36282f032dc6bbfa059885deed798752cf264ad470379e2"
+    }
+  ],
+  "files": [
+    {
+      "path": "regressions.log",
+      "sha256": "555dd20a0b7a56e70fbc4d9bc2cf924dc7b9726e5329448042fac7983ad12201"
+    },
+    {
+      "path": "independent-before.json",
+      "sha256": "3d27eac35e800aaf21eba415f396d2a57b016138d67cd00975dc24bbb03584ea"
+    },
+    {
+      "path": "independent-after.json",
+      "sha256": "f912a098bb0d1cff21e7d17eff96f013f7dd04caf9c400d1601f55132d4bc138"
+    },
+    {
+      "path": "aggregate-before.json",
+      "sha256": "00fbf26a39b08fe086034e294d1c0219a4f8b2cd9bf79fa038bf6b0531a15bc5"
+    },
+    {
+      "path": "aggregate-after.json",
+      "sha256": "285dae85b0998f73d8c93b23eb51e9027875f9dada35cc5d1043100fe85a9549"
+    },
+    {
+      "path": "independent-after.png",
+      "sha256": "63a13d11f50ec8d16b1a1d86e2ef9b87d96c80d458183feacda4875d8d6e5762"
+    },
+    {
+      "path": "aggregate-after.png",
+      "sha256": "63a13d11f50ec8d16b1a1d86e2ef9b87d96c80d458183feacda4875d8d6e5762"
+    },
+    {
+      "path": "default-original-fonts.json",
+      "sha256": "4226d63d5bfbfafe63798abe48cd41f74614e776364656942df6304b30694e35"
+    },
+    {
+      "path": "default-actual-game.png",
+      "sha256": "8f6d71f1d5301a1428dde9f191ca3a67255235c264553e21bb13edde54999b9a"
+    },
+    {
+      "path": "webgl2-original-fonts.json",
+      "sha256": "4226d63d5bfbfafe63798abe48cd41f74614e776364656942df6304b30694e35"
+    },
+    {
+      "path": "webgl2-actual-game.png",
+      "sha256": "d2c560b70ad4c0da4d632243ae84327d372f5f1abdd2b07df3d5088bcfc19725"
+    }
+  ],
+  "retainedNegative": {
+    "path": "F:/mir2-builds/r16-primary-font-overlap-20261115/font-overlap-current-before.txt",
+    "sha256": "df4c155eb9e89ac401d48d75804db19fa4f8ec3989bc96d2f678089847fa1e83",
+    "result": "Existing20 checks pass;7 added primary/header/failure/cancellation checks fail before implementation; no skipped tests."
+  },
+  "scope": "Local qualification only. Full original font bytes, Worker two complete-font lanes, source/body budgets, original8s/120s, complete6/113, ordinary protocol and save rules retained. Not a public speed/phone/overall parity claim.",
+  "productCommit": "5d7bf8c2ea58d2ac68bbca5f18c8240fdc929d45",
+  "initialLoadingDiagnostic": {
+    "summaryFile": "initial-loading-source-comparison.json",
+    "scope": "Matched initial loading only; no navigation or combat acceptance claimed.",
+    "conclusion": "Both use the same single CDN SC body. Source throughput changed greatly; observed Native difference cannot be attributed to a63ms start change. Advance only to original guarded public qualification."
+  },
+  "releaseChecks": 83,
+  "visualReview": {
+    "reviewed": true,
+    "scope": "Two complete original-font fixture screenshots and two actual game screenshots; existing mixed captions remain open."
+  }
+}

@@ -16,168 +16,28 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: "05d233ed248e8b78128580ae71e7618f4338ab5c",
+  source: "5d7bf8c2ea58d2ac68bbca5f18c8240fdc929d45",
   sourceRef: BRANCH,
-  baseSource: "9d06953d7bbb94d960686bed51048d0628996d7e",
+  baseSource: "4aead752f62143199344bd7584c5b9120b6d30ba",
   assetSource: "f2de762309768b51b39438c2437c14e819df9bf7",
   sourceCommits: [
-  "05d233ed248e8b78128580ae71e7618f4338ab5c"
+  "5d7bf8c2ea58d2ac68bbca5f18c8240fdc929d45"
 ],
   changedFiles: [
   {
     "status": "modified",
-    "filename": "mir2-web3/apps/web/app/components/asset-cache-registrar.tsx",
-    "sha": "89016f7a103d61a2722ff065d6ded018ed06019a"
-  },
-  {
-    "status": "added",
-    "filename": "mir2-web3/apps/web/lib/asset-cache-progress.ts",
-    "sha": "e48afa923d8824d156802708bbfec65990302802"
+    "filename": "mir2-web3/apps/web/app/page.tsx",
+    "sha": "e2e1bf78946b35430f096ab8364b6ed3c09d3cb1"
   },
   {
     "status": "modified",
-    "filename": "mir2-web3/apps/web/lib/r16-browser-localization.ts",
-    "sha": "27235c7fb20513e62add1638a9168ee88e37e24e"
+    "filename": "mir2-web3/apps/web/lib/bevy-runtime-font-prewarm.ts",
+    "sha": "5be9d633b6d764f40550990ded49795cddacf6f8"
   },
   {
     "status": "modified",
-    "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
-    "sha": "57935257fe95485dcf2523c5679967a522f20e19"
-  },
-  {
-    "status": "added",
-    "filename": "mir2-web3/apps/web/scripts/smoke-asset-static-admission.mjs",
-    "sha": "7f88a67bff8ab88dc0c87e9b2d6c9f27c9f8e8a2"
-  },
-  {
-    "status": "added",
-    "filename": "mir2-web3/apps/web/scripts/test-asset-cache-progress.mjs",
-    "sha": "268015912598f117c9a0f5aaec1089d704d612c3"
-  },
-  {
-    "status": "added",
-    "filename": "mir2-web3/apps/web/scripts/test-asset-worker-static-admission.mjs",
-    "sha": "47ba6372bebbfe575413bccf3277fcec6a93c7ae"
-  },
-  {
-    "status": "modified",
-    "filename": "mir2-web3/apps/web/scripts/test-r16-browser-localization.mjs",
-    "sha": "4e88845c4c8b228afe2987c3d061f1704cea6583"
-  },
-  {
-    "status": "modified",
-    "filename": "mir2-web3/docs/AGENT-CURRENT.md",
-    "sha": "972c5c2f02ff1c54370b5aa6a91968be62f10f15"
-  },
-  {
-    "status": "modified",
-    "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
-    "sha": "f152ba7aad60a67e728e0a0828492743401d61b5"
-  },
-  {
-    "status": "modified",
-    "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
-    "sha": "8e4e1daabf7adfe680d84aec2438ce238ea1b1bf"
-  },
-  {
-    "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/README.md",
-    "sha": "f3b2c7bf708e56a639f02f4138ddd90043799438"
-  },
-  {
-    "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/browser-after.json",
-    "sha": "665a4b0338225b723505216364a1eae8378446c1"
-  },
-  {
-    "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/browser-before.json",
-    "sha": "9fc71c6ad52c27c7162cd12894917e5ddc371984"
-  },
-  {
-    "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/default-exit.png",
-    "sha": "43f55bfd955d0eeda2bee98396769159eeeb8adf"
-  },
-  {
-    "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/default-fresh-goal.png",
-    "sha": "5c2cb1fc31d5007511942c691774f54994a454bf"
-  },
-  {
-    "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/default-game.json",
-    "sha": "bd5a110110342c1ccdc788f03b949788c849938b"
-  },
-  {
-    "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/default-room.png",
-    "sha": "f7137f4fb76677c4280f1430a1e9fcb6179d5f25"
-  },
-  {
-    "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/image-admission.png",
-    "sha": "50100b02ef46e8beb5dbd667c823095fb175a8ab"
-  },
-  {
-    "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/live-asset-check.json",
-    "sha": "4edb49785ed204c1db33473469c9450944284485"
-  },
-  {
-    "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/progress-panels.png",
-    "sha": "63e80f45ddfce7d18825c3a803fe34f1079544aa"
-  },
-  {
-    "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/progress-visual.json",
-    "sha": "72933d6e5cc49a3932591e2d063c574c5a59c040"
-  },
-  {
-    "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/qualification.json",
-    "sha": "7304bfbffce3b08a57464d74bf54f3a93507d401"
-  },
-  {
-    "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/regressions.txt",
-    "sha": "246ad5f863f3bb8f9b8e35595b228b3c84f21ae8"
-  },
-  {
-    "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/resource-path-audit.json",
-    "sha": "840c40c96c89cab09d33e61790d055c14f5826e5"
-  },
-  {
-    "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/retained-failures.json",
-    "sha": "16d5c6eb753de07e319c158e40535ec79cc95f7e"
-  },
-  {
-    "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/source-inputs.json",
-    "sha": "e42379e3b594257358d1813fa3c6c7538390b76e"
-  },
-  {
-    "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/webgl2-exit.png",
-    "sha": "71814a1c67e75360fc5a53fcb4c56434e5e2697c"
-  },
-  {
-    "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/webgl2-fresh-goal.png",
-    "sha": "ee30daf7e32c42432c3deb79ec2dcca4365c719f"
-  },
-  {
-    "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/webgl2-game.json",
-    "sha": "b19b67dbeecf76a5732a754b155c4d08a182d126"
-  },
-  {
-    "status": "added",
-    "filename": "mir2-web3/docs/evidence/r16-static-admission-20261115/webgl2-room.png",
-    "sha": "df66482ddf325fd9a1d4e5227ac76fce9177ab65"
+    "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs",
+    "sha": "fd7ee1787e0e6a24e5a284874fa5a9dd8f27a56f"
   }
 ],
   entryScene: {
