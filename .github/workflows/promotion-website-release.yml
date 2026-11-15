@@ -472,6 +472,50 @@ jobs:
           find -L . -type f ! -name SHA256SUMS ! -name SOURCE-SHA.txt -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS
           ldd mir2-gateway
           ldd runtime/node
+      - name: Verify shared Zone roaming and Gateway admission on Linux
+        working-directory: mir2-web3
+        env:
+          CARGO_BUILD_JOBS: '2'
+          CARGO_PROFILE_RELEASE_OPT_LEVEL: '1'
+          CARGO_PROFILE_RELEASE_CODEGEN_UNITS: '16'
+          CARGO_PROFILE_RELEASE_LTO: 'false'
+          CARGO_PROFILE_RELEASE_DEBUG: '0'
+          CARGO_PROFILE_RELEASE_STRIP: symbols
+        run: |
+          set -euo pipefail
+          cargo +1.95.0 test --locked --release -p mir2-simulation --test shared_monster_idle_roam --test shared_monster_passive_ai --test shared_zone_monster_movement --test security_lifecycle --test shared_zone -- --test-threads=1 2>&1 | tee ../promotion-backend-release/SHARED-ZONE-INTEGRATION.log
+          {
+            cargo +1.95.0 test --locked --release -p mir2-simulation --lib idle_roam -- --test-threads=1
+            cargo +1.95.0 test --locked --release -p mir2-simulation --lib runtime::zone::runtime::checkpoint::tests -- --test-threads=1
+          } 2>&1 | tee ../promotion-backend-release/SHARED-ZONE-UNIT.log
+          cargo +1.95.0 test --locked --release -p mir2-gateway --lib -- --test-threads=1 shared_experience_projection_singleflight_tests admission_handoff_tests web::transport::tests web::world_snapshot_transport::tests 2>&1 | tee ../promotion-backend-release/SHARED-ZONE-GATEWAY.log
+          node --input-type=module <<'NODE'
+          import {readFileSync,writeFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          const groups = [
+            {file:'SHARED-ZONE-INTEGRATION.log', binaries:5, expected:246},
+            {file:'SHARED-ZONE-UNIT.log', binaries:2, expected:24},
+            {file:'SHARED-ZONE-GATEWAY.log', binaries:1, required:[
+              'shared_experience_projection_singleflight_tests::', 'admission_handoff_tests::',
+              'web::transport::tests::', 'web::world_snapshot_transport::tests::',
+            ]},
+          ];
+          const logs = Object.fromEntries(groups.map(({file,binaries,expected,required=[]}) => {
+            const bytes=readFileSync('../promotion-backend-release/'+file), output=bytes.toString();
+            const results=[...output.matchAll(/test result: ok\. (\d+) passed; (\d+) failed; (\d+) ignored; (\d+) measured; (\d+) filtered out;/g)];
+            if(results.length!==binaries || results.some(r=>Number(r[1])<=0 || Number(r[2]) || Number(r[3]))) throw Error(file+': missing, failed or ignored test suite');
+            const passed=results.reduce((sum,r)=>sum+Number(r[1]),0);
+            if(expected!==undefined && passed!==expected) throw Error(file+': unexpected executed count');
+            for(const name of required) if(!output.split('\n').some(line=>line.startsWith('test ') && line.includes(name) && line.endsWith(' ... ok'))) throw Error(file+': missing '+name);
+            return [file,{passed,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')}];
+          }));
+          writeFileSync('../promotion-backend-release/SHARED-ZONE-ACCEPTANCE.json',JSON.stringify({
+            schema:'mir2.shared-zone-linux-release.v1',sourceSha:process.env.GITHUB_SHA,
+            workflowRunId:process.env.GITHUB_RUN_ID,passed:true,logs,
+            testsExecuted:Object.values(logs).reduce((sum,log)=>sum+log.passed,0),
+            publicBrowserAcceptance:false,productionChanged:false,
+          },null,2)+'\n');
+          NODE
       - name: Run native PostgreSQL promotion and billing regressions
         working-directory: mir2-web3
         env:
