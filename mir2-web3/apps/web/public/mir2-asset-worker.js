@@ -1,6 +1,80 @@
 const CACHE_PREFIX = "mir2-asset-cache";
 const CACHE_SCHEMA_VERSION = "sw8";
 const DEFAULT_VERSION = "bootstrap";
+// BEGIN GENERATED FONT RANGE PINS
+const PINNED_FONT_RANGES = {
+  "/original-ui/fonts/NotoSansCJKsc-Regular.otf": {
+    "bytes": 16437364,
+    "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b",
+    "partBytes": 262144,
+    "parts": [
+      "7c9cc397f01347c0ebf2e030f4fe197dcc2673841a2f4bf4930a707e39b7baa4",
+      "ecb18a10572cc4c357af3f68bacb120fd255738705ed45b5a28f9a3dc5838195",
+      "cd41b41cd9742275f8768e75b260294fc493290b17368ec17834870590a070f3",
+      "45b175edf2855a5c5154a56794715f89ca305893167e89fa2028bd4807cff39e",
+      "a5cc4d1766352db29babdb1bd1f948897d77919661df3be0ab4b2f28c6151e0b",
+      "5f807dea7309ea5f586d1a3ee2c674b461486e89c75d924ccab73e93b62c99e6",
+      "043baf82344269c31d7da02f87bb602557ad112dc3ee0d3f14a30e4369b33b42",
+      "4ddc6a7038b125f7329e55a19b2716ed7e6b25ad5c6cab490775b707bab99425",
+      "742b973a1b2b72882b35680bb6bbde27f029e19e06c33672ed8e9a9d5d90ecdc",
+      "8b4c9ea8d34183e163ef9cf127cf486d98b7359572b7081de06e4f9dd80c01f3",
+      "14a96a04a6dce3e6ce8f08845fff570f31d3181a8424c7678d759c8f41b1fdaf",
+      "17317dd33f56f63b679fb9c6ae78a20b87610e0d2fa84de0674f36d373b18dcb",
+      "898c48380ded18ab3479ce2a878cd8a6152aebf6b2b507e01aa40ac3ed6d5814",
+      "9732b4dfd0b73856d0303283734f44dc8ffff7fef71f95d36832129471988b8b",
+      "28cbd77a73a9e966806b3b364e0b3bc26ed2c9865c49c43ceac507efc025fa8b",
+      "fc16687b008bc092b883f2d0651233855e662170af46092a6d3a7b9c32a5b42e",
+      "e67109c8948f1c460602c13099e5d335251e32810ade6028bb951fdcadbed639",
+      "6cbb762dac0d2c15d9aa3510cb055505e1bf8038229cdf4f278bc80d479f51d3",
+      "e9ae7cbe14639d4b7138266ae85dcdae4b63567d44dab9a387813c04bf3d026d",
+      "8335d813aeec5fb8c2bf37552b236d6fe6aa67880e48417b234f41880741616d",
+      "9ba5b50f58a734bec46074ea4f9da8d4165c361577d94b8c4867f9970a29451a",
+      "589862cf0b03f14743d974cb96a148d1a9be88c3e1b2db53220678933fe86826",
+      "37050e8b25c31e90fa8289afbbb55839592618c3b8a24fac5a20b713ce871d73",
+      "9a203cfd9e467b49d921d70ef552cbf19053ce22d1c8da8325c976160277e868",
+      "ed5e6e859d0ecbf73404ece7a51a8ecc2af865e80bb5992998e3391eea095043",
+      "634937fc84bbf23693abf63e332339308e1bc19efeef341fc0ad8bef409bcdba",
+      "74c14e5a29874575012312b3facf1b0e6a9abe2f98a491530e89149654824b08",
+      "25db7a844f0fd56ab9b46ac2cd3ccaee4dde604e8bd7a0237b8dd10a7261b876",
+      "14dfbc6b9ea7f90404dc709f0e794b7bda42e058a3adec88a144e206aabb8825",
+      "f3cc5622e6aa3745f7c76f1ea17013de1c23295984fcc318feb6f42512a575ff",
+      "092ccf61bfd5eff624723845aa51ceccb3787bd56eb9fe8f75e1858b3dad07ed",
+      "5069b4518d96016da9ccf570e27e5a4ef3d577f5225e7fde12d2cd56fad3a446",
+      "71b4c2181cd634758ed8459642e252c3d26377711f27abdd4cf15960a036d816",
+      "6d22c78c5ad9c4242e7907a56ac4c6e83afc53a6eb71f756b1cf60167ad86ea6",
+      "2988f62707b74f220c1becad52307b74aea9860a67f02b6dc16ef7e197323db5",
+      "20a917b9711ecaa07ec8ede2671879c32643a195b13afa36b3f7371b7537dfc3",
+      "638cdf29eec4b905be6b747aadb031b1d4a27db329ceab377e2b5d276ae0ae80",
+      "de521fd77145109a34b5f471396ab2dc863f3e8cf60d82f140877f42e59580fb",
+      "8160cbfe88858b670b99be005278f46cba17cda83368391f668ebb6bd32cb079",
+      "8f16cee42fa7517194c9e848def69094f73d0ef81371379070964859282a5151",
+      "c32c8316df13078f4be54e0ab881cef994424063b5a04aa5fd8bf4e681c3b405",
+      "6fa89aa7c67f406ad5aee7faaf2812fa1f2a9f3052fde6e37e9633a242dc9762",
+      "fb1d785a726bba9d39283834a7f5e46229e2f2116462231f568f0f4910ebe514",
+      "2c8b67fd42fad361b5ca8433305c111691f1fb095326edcd1c02110990f941a8",
+      "84f6289bd9e93bf4db4a40734a2ae022793f544e54d618df488801c38abe550e",
+      "526ea1f6b8c63b8b463d3e4cc7e9044fb33ba8d45e9c36ed4d091e89250d6a2c",
+      "624080e8701a20efa1902ac724ddea62d5747d4b2656eae30d301e264011d907",
+      "c215d746f17667d30e8d0e3241b9c2a4ace00a170d15b8503962f4db74471373",
+      "96505403396ce39355c8436eb5b9a8ad4172b3905bf7cfb43dd2666a6b0dc63d",
+      "2750c8b387d5d1a79f916d6c9c0ef217169dafc890ad37900ebe38218a30f459",
+      "a569e841c97bb483db5deb7cf5d8dbf7965153f67b95d6dbdbd67ae5e6fb872c",
+      "2d73c9c14d0d8fc2013827251834094dc8be6ad7d5662e3ba451bd897bd9d76c",
+      "2b8394ca493f498d21892a4a96047bbf8e19cb846f3a992b45d85898b65d6252",
+      "fc56cadafc54e7db47cc0b048f9df38a2973020a5b6b627742126986a252794c",
+      "217bc932a01725d327d5c54629eee0769f70f9091d06b828f8a5a51d3d4b7250",
+      "3be843319e37adbeaf00c410aa98ccc078d37f0cfa50437887134e4a062112ae",
+      "9e3beec39755af11655149fc1cc0eca449ec74ffd490427cdad38b643affa207",
+      "8752142da0bd192e0d4e92f99fdaec67daf44961011c9e21e959513c92ac49ce",
+      "641a6bd7fc66eaea90fad6c792163527d9eb2604d49c34216e716e8c6b6bd275",
+      "2eb25fca20aeafcf9ce8a2dce1a77b526d01f2af4d195cf9a42920de4244ca9c",
+      "082a320b5055f2fea469d8b010051ea592dc11192c7c157bc5a282ebd81e860f",
+      "f11529602f44d0846ea2bbb7aab4502989cba0c94baa9e3b3d62d044bab4cd91",
+      "6e6b750a03e1481deef28bd4b73c3653e262897fb37386a46326fc83bd856035"
+    ]
+  }
+};
+// END GENERATED FONT RANGE PINS
 const CONFIGURATION_CACHE_NAME = `${CACHE_PREFIX}-configuration-${CACHE_SCHEMA_VERSION}`;
 const CONFIGURATION_CACHE_URL = `${self.location.origin}/__mir2_asset_worker_configuration__`;
 const CONFIGURATION_RESTORE_TIMEOUT_MS = 750;
@@ -41,6 +115,8 @@ const FONT_INFLIGHT_MAX_AGE_MS = 180_000;
 const FONT_MIRROR_HEADER_TIMEOUT_MS = 8_000;
 const FONT_MIRROR_BODY_IDLE_TIMEOUT_MS = 15_000;
 const FONT_MIRROR_MAX_BYTES = 32 * 1024 * 1024;
+const FONT_RANGE_PART_TIMEOUT_MS = 15_000;
+const FONT_RANGE_CACHE_TIMEOUT_MS = 750;
 // The renderer, CSS and prewarmer share this budget. Limiting the prewarmer
 // alone still lets the renderer start all six complete font bodies together.
 // Admit a whole logical font through its source fallbacks. Releasing the slot
@@ -411,7 +487,10 @@ async function cacheFirst(request, name, maxEntries, event) {
     cache = await caches.open(name);
     const cached = await cache.match(request);
     if (cached) {
-      return cached;
+      const pin = pinnedFontRange(request);
+      if (!pin || await validPinnedFontResponse(cached.clone(), pin)) return cached;
+      void cached.body?.cancel().catch(() => {});
+      await cache.delete(request).catch(() => {});
     }
   } catch {
     // CacheStorage can be unavailable (private mode, quota teardown). Fall
@@ -471,11 +550,24 @@ function sharedFontCacheFill(request, cache, name, maxEntries) {
 
 async function fetchStaticAsset(request, fallbackRequests) {
   if (isSharedUiFont(request) && !request.headers.has("range")) {
+    // Snapshot allowed sources and cache identity before any queued work. Only
+    // this original, byte-pinned large font uses resumable ranges.
+    const sources = fallbackRequests || createRemoteAssetRequests(request);
+    const pin = pinnedFontRange(request);
+    const mirrors = pin ? currentReleaseFontMirrors(request, sources) : [];
+    if (pin && mirrors.length) {
+      const result = await readPinnedRangeFont(request, pin, mirrors)
+        .catch(() => ({ response: null, wholeFallback: false }));
+      if (result.response) return result.response;
+      // A server ignoring Range may still serve the complete original. A real
+      // range failure retains its verified parts for the next logical request.
+      if (!result.wholeFallback) return syntheticAssetResponse(504, "font range fetch failed");
+    }
     // All source attempts share this slot; each source keeps its existing
     // header and body-idle budgets. Do not re-enter the admission queue from
     // inside the admitted chain. Range requests and images stay independent.
     const response = await withFontDownloadSlot(request.signal, () =>
-      fetchStaticAssetSources(request, fallbackRequests, readCompleteFont));
+      fetchStaticAssetSources(request, sources, readCompleteFont));
     return response || syntheticAssetResponse(504, "font fetch failed");
   }
   // The cache fill already owns a release/cache namespace. A queued read must
@@ -686,6 +778,145 @@ function drainFontDownloads() {
   }
 }
 
+function pinnedFontRange(request) {
+  if (request.method !== "GET" || request.headers.has("range") || !globalThis.crypto?.subtle) return null;
+  return PINNED_FONT_RANGES[new URL(request.url).pathname] || null;
+}
+
+async function fontDigest(bytes) {
+  return Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", bytes)),
+    value => value.toString(16).padStart(2, "0")).join("");
+}
+
+async function boundedFontCache(operation) {
+  let timer;
+  try {
+    return await Promise.race([Promise.resolve().then(operation),
+      new Promise(resolve => { timer = setTimeout(() => resolve(null), FONT_RANGE_CACHE_TIMEOUT_MS); })]);
+  } catch { return null; }
+  finally { clearTimeout(timer); }
+}
+
+async function readPinnedFontBytes(response, expected, signal, timeoutMs) {
+  if (!response?.body || signal?.aborted) return null;
+  const reader = response.body.getReader();
+  let timer, rejectRead;
+  const failed = new Promise((_, reject) => { rejectRead = reject; });
+  const fail = () => { void reader.cancel().catch(() => {}); rejectRead(new Error("font part stopped")); };
+  signal?.addEventListener("abort", fail, { once: true });
+  timer = setTimeout(fail, timeoutMs);
+  try {
+    const bytes = new Uint8Array(expected); let offset = 0;
+    for (;;) {
+      const { value, done } = await Promise.race([reader.read(), failed]);
+      if (signal?.aborted) return null;
+      if (done) return offset === expected ? bytes : null;
+      if (offset + value.byteLength > expected) return null;
+      bytes.set(value, offset); offset += value.byteLength;
+    }
+  } catch { return null; }
+  finally {
+    clearTimeout(timer); signal?.removeEventListener("abort", fail);
+    void reader.cancel().catch(() => {}); reader.releaseLock();
+  }
+}
+
+async function validPinnedFontResponse(response, pin) {
+  if (response.status !== 200 || response.headers.has("content-range")) {
+    void response.body?.cancel().catch(() => {}); return false;
+  }
+  const bytes = await readPinnedFontBytes(response, pin.bytes, null, FONT_MIRROR_BODY_IDLE_TIMEOUT_MS);
+  return bytes && await fontDigest(bytes) === pin.sha256;
+}
+
+async function readFontRangePart(source, owner, pin, index, noteWholeFallback) {
+  const offset = index * pin.partBytes, length = Math.min(pin.partBytes, pin.bytes - offset);
+  const deadline = new AbortController();
+  const signal = AbortSignal.any([owner, source.signal, deadline.signal]);
+  let timer, rejectRead;
+  const aborted = new Promise((_, reject) => { rejectRead = reject; });
+  const stop = () => rejectRead(new Error("font range stopped"));
+  signal.addEventListener("abort", stop, { once: true });
+  void aborted.catch(() => {});
+  timer = setTimeout(() => deadline.abort(), FONT_MIRROR_HEADER_TIMEOUT_MS);
+  let response, complete = false;
+  try {
+    if (signal.aborted) return null;
+    const headers = new Headers(source.headers);
+    headers.set("range", `bytes=${offset}-${offset + length - 1}`);
+    headers.delete("if-none-match"); headers.delete("if-modified-since"); headers.delete("if-range");
+    const started = Promise.resolve(fetch(new Request(source, { headers, signal, cache: "reload" }))).then(value => {
+      if (signal.aborted) { void value?.body?.cancel().catch(() => {}); return null; }
+      return value;
+    });
+    response = await Promise.race([started, aborted]);
+    clearTimeout(timer);
+    if (!response) return null;
+    if (response.status === 200) { noteWholeFallback(); return null; }
+    if (response.status !== 206 || response.headers.get("content-range") !== `bytes ${offset}-${offset + length - 1}/${pin.bytes}` ||
+        response.headers.get("content-length") !== String(length) ||
+        ![null, "identity"].includes(response.headers.get("content-encoding"))) return null;
+    const bytes = await readPinnedFontBytes(response, length, signal, FONT_RANGE_PART_TIMEOUT_MS);
+    if (!bytes || signal.aborted || await fontDigest(bytes) !== pin.parts[index]) return null;
+    complete = true; return bytes;
+  } catch { return null; }
+  finally {
+    if (!complete) deadline.abort();
+    clearTimeout(timer); signal.removeEventListener("abort", stop);
+    void response?.body?.cancel().catch(() => {});
+  }
+}
+
+async function readPinnedRangeFont(request, pin, mirrors) {
+  const revision = configurationRevision;
+  const name = cacheName(`font-parts-${pin.sha256.slice(0, 16)}`);
+  const cache = await boundedFontCache(() => caches.open(name));
+  const output = new Uint8Array(pin.bytes);
+  const batch = new AbortController();
+  const signal = AbortSignal.any([request.signal, batch.signal]);
+  let next = 0, wholeFallback = false, complete = 0;
+  const take = async () => {
+    while (!signal.aborted) {
+      const index = next++; if (index >= pin.parts.length) return;
+      const offset = index * pin.partBytes, length = Math.min(pin.partBytes, pin.bytes - offset);
+      const key = `${self.location.origin}/__mir2_font_part__/${pin.sha256}/${offset}/${pin.parts[index]}`;
+      let bytes = null;
+      const cached = cache && await boundedFontCache(() => cache.match(key));
+      if (cached) {
+        bytes = cached.status === 200 && await readPinnedFontBytes(cached, length, signal, FONT_MIRROR_BODY_IDLE_TIMEOUT_MS);
+        if (bytes && await fontDigest(bytes) !== pin.parts[index]) bytes = null;
+        if (!bytes) await boundedFontCache(() => cache.delete(key));
+      }
+      if (!bytes && !signal.aborted) {
+        bytes = await withFontDownloadSlot(signal, async () => {
+          // A single slot owns all current-release fallbacks for this part.
+          for (const source of mirrors) {
+            if (signal.aborted) break;
+            const part = await readFontRangePart(source, signal, pin, index, () => { wholeFallback = true; });
+            if (part) return part;
+          }
+          return null;
+        });
+        if (bytes && cache && !request.signal.aborted && revision === configurationRevision && configurationPersistenceAllowed) {
+          // The full-font cache is never given partial bytes. CacheStorage
+          // failure only loses resumability, not the valid in-memory result.
+          await boundedFontCache(() => cache.put(key, new Response(bytes, { headers: { "content-length": String(length) } })));
+        }
+      }
+      if (!bytes || signal.aborted) { batch.abort(); throw new Error("incomplete font range"); }
+      output.set(bytes, offset); complete++;
+    }
+    throw new Error("font range cancelled");
+  };
+  const results = await Promise.allSettled([take(), take()]);
+  if (results.some(result => result.status !== "fulfilled") || request.signal.aborted || complete !== pin.parts.length ||
+      await fontDigest(output) !== pin.sha256) return { response: null, wholeFallback: wholeFallback || complete === 0 };
+  return { wholeFallback: false, response: new Response(output, { status: 200, headers: {
+    "content-type": "font/otf", "content-length": String(pin.bytes),
+    "x-mir2-font-transfer": "verified-ranges",
+  } }) };
+}
+
 async function readCompleteFont(request, owner, headerTimeoutMs, transientRetries) {
   const deadline = new AbortController();
   const signal = AbortSignal.any([owner, request.signal, deadline.signal]);
@@ -751,6 +982,8 @@ async function readCompleteFont(request, owner, headerTimeoutMs, transientRetrie
     const bytes = new Uint8Array(length);
     let offset = 0;
     for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
+    const pin = pinnedFontRange(request);
+    if (pin && (length !== pin.bytes || await fontDigest(bytes) !== pin.sha256)) return null;
     const headers = new Headers(response.headers);
     // fetch has decoded a compressed body; its wire length/encoding no longer
     // describe the reconstructed response delivered to CSS and the runtime.
