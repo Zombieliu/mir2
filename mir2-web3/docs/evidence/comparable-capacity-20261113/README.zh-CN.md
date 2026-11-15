@@ -6,9 +6,11 @@
 
 ## 最新已验证结果（2026-11-15，新本机25/50人档通过，100人未通过）
 
+新 Zone 准入交接修复已从干净源 `c84670ad` [集成至维护分支 `1cac973a`](zone-admission-handoff.integration.json)：Zone 忙时先释放 Store，等待后重新取得最新 Store 检查，实际业务仍按 Store→Zone 持双锁执行；不缓存权限或跳过检查。[新35项原生回归](zone-admission-handoff.native35.json)全部实际通过（Gateway34、真实RPC1，含5个新增并发/错误策略用例），每项验证 Job 均0/0、正常退出且无kill。测试程序编译的两次 Cargo 均0，外层包装器因180s后遗留空闲VCTIP为1；仅精确清理本轮已核归属的84832，失败记录保留。旧Simulation84不计入这35项。正式Release和该工件的新2/100人测试尚未完成；下述25/50通过属于旧 `7d2a6c81` 工件，不能移用于新修复或云机。
+
 新[SLOW20百人诊断已闭合](mentor-parse-slow20-dense100.closed.json)：23:41:47.790–23:46:47.790 UTC完整300s，15408/16000按时完成、81超时、511未发、141/500逐人分钟窗口通过，整体FAIL。装备3名、100人普通Logout/Close、fresh2均报告成功；controller/driver/server1/1/0、3625行资源、游戏双Job与STAT观察器均正常无kill。FileV8前置拒绝sample0、未打开私密Store，Enhanced亦失败；两个验证进程实际1且正常无kill。114次新认证全量追加V38=2020，旧1906前缀不变。SLOW日志会改变调度，本轮与default-off的单次数值差不能作为提升/回归或容量通过。
 
-[本轮分段审计](mentor-parse-slow20-dense100.elapsed-audit.json)实际0/0、4GiB/0xf000、正常无kill：完整日志34661319B，按精确300s报告锚点及已声明±1ms近似append映射选中7782660B/89041慢行，边缘删失59175B、未知prefix及不确定时序字节均0；outer敏感性范围89670行的最大值结论一致。采集到的账号锁获取阶段：social_profile_read 1451条/P95 442ms/max1427ms；experience_admission 2936条/P95 408ms/max1199ms，持锁151条/max99ms；billing_poll_front 221条/P95 392ms/max1040ms。没有达到20ms的billing-front持锁或pending-read/validate行，不能据此认定调用不存在/零耗时。上述都是含调度抢占的条件慢样本，不是全调用分布或金融CPU；尚未建立逐socket/具体holder因果。依据源码持Store等待Zone的路径，已选择只释放等待阶段、实际执行仍fresh持双锁的窄实验，正在隔离分支实现，待独立源码审阅、原生回归和新工件复测。
+[本轮分段审计](mentor-parse-slow20-dense100.elapsed-audit.json)实际0/0、4GiB/0xf000、正常无kill：完整日志34661319B，按精确300s报告锚点及已声明±1ms近似append映射选中7782660B/89041慢行，边缘删失59175B、未知prefix及不确定时序字节均0；outer敏感性范围89670行的最大值结论一致。采集到的账号锁获取阶段：social_profile_read 1451条/P95 442ms/max1427ms；experience_admission 2936条/P95 408ms/max1199ms，持锁151条/max99ms；billing_poll_front 221条/P95 392ms/max1040ms。没有达到20ms的billing-front持锁或pending-read/validate行，不能据此认定调用不存在/零耗时。上述都是含调度抢占的条件慢样本，不是全调用分布或金融CPU；尚未建立逐socket/具体holder因果。依据源码持Store等待Zone的路径，已选择只释放等待阶段、实际执行仍fresh持双锁的窄实验；实现、独立源码审阅与新35项原生回归已完成，新工件复测待完成，见上。
 
 [同工件default-off三档资源复算](mentor-parse-default-scales.resource-analysis.json)实际0/0、4GiB/0xf000正常无kill，既有100档结果逐项复现。CPU为精确300s按相邻JobCPU采样斜率分配的时长加权均值；峰值Commit来自全轮含准备/收尾，并非RSS或物理RAM。
 

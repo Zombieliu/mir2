@@ -1,0 +1,345 @@
+{
+  "schema": "mir2.zone-admission-handoff-gateway-rpc-native35.v1",
+  "sourceRevision": "c84670ad3cf5c9693fd78d5618c31668511f1207",
+  "codeIntegrationRevision": null,
+  "canonicalIntegrationPending": true,
+  "uniquePassed": 35,
+  "gatewayUniquePassed": 34,
+  "rpcUniquePassed": 1,
+  "exactPassedNames": [
+    "routing::shared_experience_profiles::admission_handoff_tests::body_error_does_not_retry_and_releases_both_locks",
+    "routing::shared_experience_profiles::admission_handoff_tests::busy_handoff_consumes_nonclone_body_once_with_both_locks_held",
+    "routing::shared_experience_profiles::admission_handoff_tests::busy_handoff_fresh_store_poison_precedes_zone_poison_without_running_body",
+    "routing::shared_experience_profiles::admission_handoff_tests::busy_handoff_releases_store_and_rechecks_fresh_checkpoint",
+    "routing::shared_experience_profiles::admission_handoff_tests::poisoned_zone_preserves_result_error_and_expect_store_poison_policies",
+    "routing::tests::owner_health_sync_tests::owner_health_routing_mentor_peer_uses_confirmed_source_level_before_viewport_refresh",
+    "routing::tests::owner_health_sync_tests::owner_health_routing_mentor_source_level_graduates_immediately_and_during_fenced_teardown",
+    "routing::tests::owner_health_sync_tests::owner_health_routing_repository_admission_can_acquire_zone_while_personal_tick_waits",
+    "routing::tests::personal_experience_admission_tests::personal_experience_admission_deduplicates_partners_and_keeps_offline_gates",
+    "routing::tests::personal_experience_admission_tests::personal_experience_admission_fenced_owner_is_a_copy_and_fenced_peer_is_not_changed",
+    "routing::tests::personal_experience_admission_tests::personal_experience_admission_invalid_required_peer_rate_source_cannot_partly_publish",
+    "routing::tests::personal_experience_admission_tests::personal_experience_admission_missing_or_malformed_required_authority_is_fail_closed",
+    "routing::tests::personal_experience_admission_tests::personal_experience_admission_rebases_only_current_partners_among_100_registered_players",
+    "routing::tests::personal_experience_admission_tests::personal_experience_admission_selects_new_store_partners_instead_of_stale_zone_partners",
+    "routing::tests::personal_experience_admission_tests::personal_experience_admission_uses_actual_locked_store_partner_change_without_generation_hint",
+    "routing::tests::personal_experience_admission_tests::personal_experience_admission_validates_all_required_partners_before_publishing_any",
+    "routing::tests::personal_experience_admission_tests::personal_experience_tick_authority_failure_preserves_previous_zone_publication",
+    "routing::tests::personal_experience_admission_tests::personal_experience_tick_final_publication_removes_the_rate_expired_by_that_tick",
+    "routing::tests::personal_experience_admission_tests::personal_experience_tick_fishing_retains_the_non_tick_publication_path",
+    "routing::tests::personal_experience_admission_tests::personal_experience_tick_publication_reads_changed_authority_without_generation_hint",
+    "routing::tests::personal_experience_admission_tests::personal_experience_tick_publishes_owner_only_before_capture_and_after_command",
+    "routing::tests::shared_experience_projection_singleflight_tests::actual_zone_and_replica_registry_domains_are_part_of_overlap_key",
+    "routing::tests::shared_experience_projection_singleflight_tests::changing_generation_during_scan_does_not_publish_shared_success",
+    "routing::tests::shared_experience_projection_singleflight_tests::different_store_authorities_never_share_overlap_completion",
+    "routing::tests::shared_experience_projection_singleflight_tests::failed_later_scan_invalidates_older_success_for_an_earlier_entry",
+    "routing::tests::shared_experience_projection_singleflight_tests::first_owner_publication_generation_change_requires_two_scans",
+    "routing::tests::shared_experience_projection_singleflight_tests::overlapping_projection_waits_for_complete_scan_but_publishes_each_owner",
+    "routing::tests::shared_experience_projection_singleflight_tests::same_store_different_real_clock_authority_does_not_share_completion",
+    "routing::tests::shared_experience_projection_singleflight_tests::sequential_cold_caller_still_detects_unrelated_peer_parse_error_and_retries",
+    "routing::tests::shared_experience_projection_singleflight_tests::stable_local_cache_keeps_original_shortcut_but_always_publishes_owner",
+    "routing::tests::shared_player_kill_source_tests::actual_causal_player_kill_tampering_is_rejected_before_source_and_original_remains_retriable",
+    "routing::tests::shared_player_kill_source_tests::actual_player_death_committed_before_ack_cold_replay_keeps_penalty_and_weapon_exactly_once",
+    "routing::tests::shared_player_kill_source_tests::actual_player_death_known_source_failure_cold_checkpoint_retry_publishes_then_acknowledges_once",
+    "routing::tests::shared_player_kill_source_tests::actual_summoned_pet_committed_source_keeps_pending_growth_during_gateway_mapping_outage",
+    "standby_readiness_requires_exact_replica_and_commonware_fence_before_promotion"
+  ],
+  "requiredSet": {
+    "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\zone-admission-handoff-native-prep-v1\\REQUIRED-NATIVE-SETS.json",
+    "bytes": 12304,
+    "sha256": "4a378f924e4b2b07d5323329b4a8d525f2ec557f70700aca820fe9aaf2112240"
+  },
+  "artifacts": {
+    "gatewayLib": {
+      "checkpointProof": {
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\zone-admission-handoff-native-prep-v1\\native-artifacts-v1\\gateway-lib\\EXE-CHECKPOINT.json",
+        "bytes": 1317,
+        "sha256": "15c32deacc5b165100410b6bc692620fd48aad69f2f4119d03e73c6afb6cbf4b"
+      },
+      "binarySha256": "30b1a6f22c4086fbc8f29408f326a0332647895ef66cc469cb6edff91a449756",
+      "binaryBytes": 180191232,
+      "packageOptLevel": 0,
+      "normalSimulationDependencyOptLevel": 3
+    },
+    "zoneRpc": {
+      "checkpointProof": {
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\zone-admission-handoff-native-prep-v1\\native-artifacts-v1\\zone-rpc\\EXE-CHECKPOINT.json",
+        "bytes": 1303,
+        "sha256": "c4da01b8f422e96879e8af6cd15097df148bf07fcb456840e70524aaee685500"
+      },
+      "binarySha256": "bc6fa39b33a895a82ba799f68ec86294377250823918d11f62e886d815ded7fa",
+      "binaryBytes": 113052160,
+      "packageOptLevel": 0,
+      "normalSimulationDependencyOptLevel": 3
+    }
+  },
+  "allActualAndWrapperExitCodesZero": true,
+  "allNativeJobsNormalClosedNoKill": true,
+  "compilerEnvelopeFailedIfForcedCleanupPreserved": true,
+  "rows": [
+    {
+      "name": "gateway-list",
+      "artifactTarget": "gatewayLib",
+      "actualExitCode": 0,
+      "wrapperExitCode": 0,
+      "allOwnedMembersExited": true,
+      "killAppliedByClose": false,
+      "executedOkNames": [],
+      "elapsedSeconds": 1.0282272000040393,
+      "peakCommitBytes": 2945024,
+      "jobReceipt": {
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\zone-admission-handoff-native-prep-v1\\native-validation-v1\\gateway-list-job\\job-result.json",
+        "bytes": 1066,
+        "sha256": "b3926dcf5aa305e66405fc3178c1dcb7e8e8bb6820dcaba410c9553a680ef8aa"
+      },
+      "stdout": {
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\zone-admission-handoff-native-prep-v1\\native-validation-v1\\gateway-list-job\\logs\\stdout.log",
+        "bytes": 191773,
+        "sha256": "3c38f473f138db6a27f55e0ca48b31a6d21a9724e04ef96934905cecac879aff"
+      },
+      "passed": true
+    },
+    {
+      "name": "rpc-list",
+      "artifactTarget": "zoneRpc",
+      "actualExitCode": 0,
+      "wrapperExitCode": 0,
+      "allOwnedMembersExited": true,
+      "killAppliedByClose": false,
+      "executedOkNames": [],
+      "elapsedSeconds": 1.0286897999758366,
+      "peakCommitBytes": 2514944,
+      "jobReceipt": {
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\zone-admission-handoff-native-prep-v1\\native-validation-v1\\rpc-list-job\\job-result.json",
+        "bytes": 1059,
+        "sha256": "20e375175a858635d2f08a039780f613582ee07c51b65671068219b3d6acee70"
+      },
+      "stdout": {
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\zone-admission-handoff-native-prep-v1\\native-validation-v1\\rpc-list-job\\logs\\stdout.log",
+        "bytes": 2198,
+        "sha256": "6dc43e1008a1a7f0e29306ccf22cb59f008a72addab14ef01cb6afab0007ea13"
+      },
+      "passed": true
+    },
+    {
+      "name": "gateway-1",
+      "artifactTarget": "gatewayLib",
+      "actualExitCode": 0,
+      "wrapperExitCode": 0,
+      "allOwnedMembersExited": true,
+      "killAppliedByClose": false,
+      "executedOkNames": [
+        "routing::tests::shared_experience_projection_singleflight_tests::actual_zone_and_replica_registry_domains_are_part_of_overlap_key",
+        "routing::tests::shared_experience_projection_singleflight_tests::changing_generation_during_scan_does_not_publish_shared_success",
+        "routing::tests::shared_experience_projection_singleflight_tests::different_store_authorities_never_share_overlap_completion",
+        "routing::tests::shared_experience_projection_singleflight_tests::failed_later_scan_invalidates_older_success_for_an_earlier_entry",
+        "routing::tests::shared_experience_projection_singleflight_tests::first_owner_publication_generation_change_requires_two_scans",
+        "routing::tests::shared_experience_projection_singleflight_tests::overlapping_projection_waits_for_complete_scan_but_publishes_each_owner",
+        "routing::tests::shared_experience_projection_singleflight_tests::same_store_different_real_clock_authority_does_not_share_completion",
+        "routing::tests::shared_experience_projection_singleflight_tests::sequential_cold_caller_still_detects_unrelated_peer_parse_error_and_retries",
+        "routing::tests::shared_experience_projection_singleflight_tests::stable_local_cache_keeps_original_shortcut_but_always_publishes_owner"
+      ],
+      "elapsedSeconds": 2.034378599986667,
+      "peakCommitBytes": 55738368,
+      "jobReceipt": {
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\zone-admission-handoff-native-prep-v1\\native-validation-v1\\gateway-1-job\\job-result.json",
+        "bytes": 1150,
+        "sha256": "6a6321102c69d6d30e34fbbb552b0df35a115dbe57e490eeca965fd296aebdc4"
+      },
+      "stdout": {
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\zone-admission-handoff-native-prep-v1\\native-validation-v1\\gateway-1-job\\logs\\stdout.log",
+        "bytes": 1409,
+        "sha256": "1f441f94cafa0128e1eb5421edf7173544e0cde49afe1ed59ef3b8747df396a2"
+      },
+      "passed": true
+    },
+    {
+      "name": "gateway-2",
+      "artifactTarget": "gatewayLib",
+      "actualExitCode": 0,
+      "wrapperExitCode": 0,
+      "allOwnedMembersExited": true,
+      "killAppliedByClose": false,
+      "executedOkNames": [
+        "routing::tests::personal_experience_admission_tests::personal_experience_admission_deduplicates_partners_and_keeps_offline_gates",
+        "routing::tests::personal_experience_admission_tests::personal_experience_admission_fenced_owner_is_a_copy_and_fenced_peer_is_not_changed",
+        "routing::tests::personal_experience_admission_tests::personal_experience_admission_invalid_required_peer_rate_source_cannot_partly_publish",
+        "routing::tests::personal_experience_admission_tests::personal_experience_admission_missing_or_malformed_required_authority_is_fail_closed",
+        "routing::tests::personal_experience_admission_tests::personal_experience_admission_rebases_only_current_partners_among_100_registered_players",
+        "routing::tests::personal_experience_admission_tests::personal_experience_admission_selects_new_store_partners_instead_of_stale_zone_partners",
+        "routing::tests::personal_experience_admission_tests::personal_experience_admission_uses_actual_locked_store_partner_change_without_generation_hint",
+        "routing::tests::personal_experience_admission_tests::personal_experience_admission_validates_all_required_partners_before_publishing_any",
+        "routing::tests::personal_experience_admission_tests::personal_experience_tick_authority_failure_preserves_previous_zone_publication",
+        "routing::tests::personal_experience_admission_tests::personal_experience_tick_final_publication_removes_the_rate_expired_by_that_tick",
+        "routing::tests::personal_experience_admission_tests::personal_experience_tick_fishing_retains_the_non_tick_publication_path",
+        "routing::tests::personal_experience_admission_tests::personal_experience_tick_publication_reads_changed_authority_without_generation_hint",
+        "routing::tests::personal_experience_admission_tests::personal_experience_tick_publishes_owner_only_before_capture_and_after_command"
+      ],
+      "elapsedSeconds": 1.02297869999893,
+      "peakCommitBytes": 55435264,
+      "jobReceipt": {
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\zone-admission-handoff-native-prep-v1\\native-validation-v1\\gateway-2-job\\job-result.json",
+        "bytes": 1137,
+        "sha256": "264870b470216eafd200ee2425ebc9125d894eab0092a28aee12f51df00a1582"
+      },
+      "stdout": {
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\zone-admission-handoff-native-prep-v1\\native-validation-v1\\gateway-2-job\\logs\\stdout.log",
+        "bytes": 2044,
+        "sha256": "2ce72485b14f5328f5d84433e3ae2a888242d28ddbfc1a35cd62d2d53271a506"
+      },
+      "passed": true
+    },
+    {
+      "name": "gateway-3",
+      "artifactTarget": "gatewayLib",
+      "actualExitCode": 0,
+      "wrapperExitCode": 0,
+      "allOwnedMembersExited": true,
+      "killAppliedByClose": false,
+      "executedOkNames": [
+        "routing::tests::shared_player_kill_source_tests::actual_causal_player_kill_tampering_is_rejected_before_source_and_original_remains_retriable",
+        "routing::tests::shared_player_kill_source_tests::actual_player_death_committed_before_ack_cold_replay_keeps_penalty_and_weapon_exactly_once",
+        "routing::tests::shared_player_kill_source_tests::actual_player_death_known_source_failure_cold_checkpoint_retry_publishes_then_acknowledges_once",
+        "routing::tests::shared_player_kill_source_tests::actual_summoned_pet_committed_source_keeps_pending_growth_during_gateway_mapping_outage"
+      ],
+      "elapsedSeconds": 4.0571113000041805,
+      "peakCommitBytes": 42188800,
+      "jobReceipt": {
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\zone-admission-handoff-native-prep-v1\\native-validation-v1\\gateway-3-job\\job-result.json",
+        "bytes": 1135,
+        "sha256": "1da9615a28bfe96cf7ac6740d53f30691a732d8ab96d30b13735b65586289023"
+      },
+      "stdout": {
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\zone-admission-handoff-native-prep-v1\\native-validation-v1\\gateway-3-job\\logs\\stdout.log",
+        "bytes": 728,
+        "sha256": "a4afa10e6f46a436928c6a920d2647f23d91eabcda6a6a1ae899f5cbf50676f7"
+      },
+      "passed": true
+    },
+    {
+      "name": "gateway-4",
+      "artifactTarget": "gatewayLib",
+      "actualExitCode": 0,
+      "wrapperExitCode": 0,
+      "allOwnedMembersExited": true,
+      "killAppliedByClose": false,
+      "executedOkNames": [
+        "routing::tests::owner_health_sync_tests::owner_health_routing_repository_admission_can_acquire_zone_while_personal_tick_waits"
+      ],
+      "elapsedSeconds": 1.0245088000083342,
+      "peakCommitBytes": 50147328,
+      "jobReceipt": {
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\zone-admission-handoff-native-prep-v1\\native-validation-v1\\gateway-4-job\\job-result.json",
+        "bytes": 1170,
+        "sha256": "3546becc39cfde876afdec785d02c0c871322f5593ffcfc1e26923152c1de4fa"
+      },
+      "stdout": {
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\zone-admission-handoff-native-prep-v1\\native-validation-v1\\gateway-4-job\\logs\\stdout.log",
+        "bytes": 253,
+        "sha256": "7cda2a60a25e40c5992bcf07f006b6ba9c7abafccb901f5896b28e7c31a4c9fa"
+      },
+      "passed": true
+    },
+    {
+      "name": "gateway-5",
+      "artifactTarget": "gatewayLib",
+      "actualExitCode": 0,
+      "wrapperExitCode": 0,
+      "allOwnedMembersExited": true,
+      "killAppliedByClose": false,
+      "executedOkNames": [
+        "routing::tests::owner_health_sync_tests::owner_health_routing_mentor_source_level_graduates_immediately_and_during_fenced_teardown"
+      ],
+      "elapsedSeconds": 1.0242041999881621,
+      "peakCommitBytes": 53882880,
+      "jobReceipt": {
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\zone-admission-handoff-native-prep-v1\\native-validation-v1\\gateway-5-job\\job-result.json",
+        "bytes": 1232,
+        "sha256": "ac9388852f9c413cfe41565791d027ab5063d57b91705ff02b493cea51089e6b"
+      },
+      "stdout": {
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\zone-admission-handoff-native-prep-v1\\native-validation-v1\\gateway-5-job\\logs\\stdout.log",
+        "bytes": 258,
+        "sha256": "62a2b793b194db1ec71543b0c4d98bf8cd5a25165cbc5238d3c0fc600ffac46d"
+      },
+      "passed": true
+    },
+    {
+      "name": "gateway-6",
+      "artifactTarget": "gatewayLib",
+      "actualExitCode": 0,
+      "wrapperExitCode": 0,
+      "allOwnedMembersExited": true,
+      "killAppliedByClose": false,
+      "executedOkNames": [
+        "routing::tests::owner_health_sync_tests::owner_health_routing_mentor_peer_uses_confirmed_source_level_before_viewport_refresh"
+      ],
+      "elapsedSeconds": 1.0278477999963798,
+      "peakCommitBytes": 53981184,
+      "jobReceipt": {
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\zone-admission-handoff-native-prep-v1\\native-validation-v1\\gateway-6-job\\job-result.json",
+        "bytes": 1227,
+        "sha256": "d25e711d6ef07dc191f88e39db9706246f55abf943b68b0f28e6b1ba44f219c2"
+      },
+      "stdout": {
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\zone-admission-handoff-native-prep-v1\\native-validation-v1\\gateway-6-job\\logs\\stdout.log",
+        "bytes": 253,
+        "sha256": "d1864652dbdb183c886dcd1661152bb5528f4f78725b1f1f6f0ee14ef2793d9d"
+      },
+      "passed": true
+    },
+    {
+      "name": "gateway-7",
+      "artifactTarget": "gatewayLib",
+      "actualExitCode": 0,
+      "wrapperExitCode": 0,
+      "allOwnedMembersExited": true,
+      "killAppliedByClose": false,
+      "executedOkNames": [
+        "routing::shared_experience_profiles::admission_handoff_tests::body_error_does_not_retry_and_releases_both_locks",
+        "routing::shared_experience_profiles::admission_handoff_tests::busy_handoff_consumes_nonclone_body_once_with_both_locks_held",
+        "routing::shared_experience_profiles::admission_handoff_tests::busy_handoff_fresh_store_poison_precedes_zone_poison_without_running_body",
+        "routing::shared_experience_profiles::admission_handoff_tests::busy_handoff_releases_store_and_rechecks_fresh_checkpoint",
+        "routing::shared_experience_profiles::admission_handoff_tests::poisoned_zone_preserves_result_error_and_expect_store_poison_policies"
+      ],
+      "elapsedSeconds": 1.0251613000000361,
+      "peakCommitBytes": 4780032,
+      "jobReceipt": {
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\zone-admission-handoff-native-prep-v1\\native-validation-v1\\gateway-7-job\\job-result.json",
+        "bytes": 1147,
+        "sha256": "acf51d2c30a3e89e404aa679081bf108d1d618a09231a4378a83d7307f1c09ab"
+      },
+      "stdout": {
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\zone-admission-handoff-native-prep-v1\\native-validation-v1\\gateway-7-job\\logs\\stdout.log",
+        "bytes": 800,
+        "sha256": "36781d1282f4ae9a4ed26fb585f5b95959ee98ee5e05cf3b3fb511e23de18b41"
+      },
+      "passed": true
+    },
+    {
+      "name": "rpc-promotion",
+      "artifactTarget": "zoneRpc",
+      "actualExitCode": 0,
+      "wrapperExitCode": 0,
+      "allOwnedMembersExited": true,
+      "killAppliedByClose": false,
+      "executedOkNames": [
+        "standby_readiness_requires_exact_replica_and_commonware_fence_before_promotion"
+      ],
+      "elapsedSeconds": 1.0249610999890137,
+      "peakCommitBytes": 50327552,
+      "jobReceipt": {
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\zone-admission-handoff-native-prep-v1\\native-validation-v1\\rpc-promotion-job\\job-result.json",
+        "bytes": 1173,
+        "sha256": "c2e1189e267606c8bf7aa5cbf99ace23d00eb484ee30b9f041bfe63a7c328c13"
+      },
+      "stdout": {
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-comparable-capacity-20261113\\zone-admission-handoff-native-prep-v1\\native-validation-v1\\rpc-promotion-job\\logs\\stdout.log",
+        "bytes": 204,
+        "sha256": "c08b755f27e1f5a1fc7a1d12d2d32aef52787d08bce1680f15471798379cc319"
+      },
+      "passed": true
+    }
+  ],
+  "capacityQualified": false,
+  "publicServiceDeployed": false
+}
