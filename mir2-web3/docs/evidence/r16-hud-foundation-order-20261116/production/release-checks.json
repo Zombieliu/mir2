@@ -1,0 +1,15 @@
+{
+  "tests": 113,
+  "passed": 113,
+  "failed": 0,
+  "skipped": 0,
+  "logSha256": "d90b907640398357f858ec4a0e677ec75fc33dec0694b53294d9a18f7165b350",
+  "suites": [
+    "test-numeron-source-closure",
+    "test-numeron-r16-release",
+    "test-numeron-release-entry",
+    "test-numeron-r16-domain",
+    "test-numeron-ingress"
+  ],
+  "productionDeploy": false
+}

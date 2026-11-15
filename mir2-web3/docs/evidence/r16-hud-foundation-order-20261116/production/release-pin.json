@@ -1,0 +1,32 @@
+{
+  "source": "ef6d20c095a20460908ae9fab311ae39aaa55f6e",
+  "base": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+  "checkpoint": "20e79131a23a4c22dbadf118dc514f33bdf85a80",
+  "commits": 57,
+  "totalFiles": 314,
+  "segments": [
+    {
+      "base": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+      "source": "20e79131a23a4c22dbadf118dc514f33bdf85a80",
+      "commits": 54,
+      "files": 296
+    },
+    {
+      "base": "20e79131a23a4c22dbadf118dc514f33bdf85a80",
+      "source": "ef6d20c095a20460908ae9fab311ae39aaa55f6e",
+      "commits": 3,
+      "files": 30
+    }
+  ],
+  "independentGitHubComparisons": true,
+  "compiledAppLibFiles": 2179,
+  "generatedOverride": 1,
+  "buildId": "LZjq7Ay1AKHJBmDEoOLKW",
+  "candidate": "bf0-hud-order-d9084c1b",
+  "entryAssetWorker": {
+    "bytes": 65861,
+    "sha256": "4ea2465084ba90eafe9f969a5ba3c42c8b0d2ff61fb05febb14a72f21916de40"
+  },
+  "controllerSha256": "12ac76b64dc09b862768eafc91452e2aba3c2611a3a65e3296970b68e7ab8d83",
+  "publicDeploy": false
+}

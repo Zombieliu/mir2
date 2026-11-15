@@ -1,3 +1,5 @@
+import { verifyNumeronSourceClosure } from './numeron-source-closure.mjs';
+import SOURCE_CHECKPOINTS from './numeron-r16-source-checkpoints.json' with { type: 'json' };
 import { readFile, writeFile, mkdtemp, lstat, readdir } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -16,8 +18,9 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: "20e79131a23a4c22dbadf118dc514f33bdf85a80",
+  source: "ef6d20c095a20460908ae9fab311ae39aaa55f6e",
   sourceRef: BRANCH,
+  sourceCheckpoints: SOURCE_CHECKPOINTS,
   baseSource: "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
   assetSource: "f2de762309768b51b39438c2437c14e819df9bf7",
   sourceCommits: [
@@ -74,12 +77,15 @@ export const QR_RELEASE = Object.freeze({
   "d809add41e167be5092de06b238d6632a3396a49",
   "627b68ae4dd5575a40ea37df16603087ed68a522",
   "276df66ab3b02cf7ebcc5555836647c6d66ef39b",
-  "20e79131a23a4c22dbadf118dc514f33bdf85a80"
+  "20e79131a23a4c22dbadf118dc514f33bdf85a80",
+  "b299be39fbace1d57fcb2d29efcffad23e4d0f57",
+  "bf0ed0ce019a587b3bd50554708b62682bbde8f6",
+  "ef6d20c095a20460908ae9fab311ae39aaa55f6e"
 ],
   changedFiles: [
   {
     "filename": ".github/scripts/numeron-r16-release.mjs",
-    "sha": "3286132316b48595a1cdc5703bb3a595877db4e6",
+    "sha": "7359114987cd765c6388842c9e4700de54ee1d7a",
     "status": "modified"
   },
   {
@@ -239,7 +245,7 @@ export const QR_RELEASE = Object.freeze({
   },
   {
     "filename": "mir2-web3/apps/web/lib/r16-entry-scene.ts",
-    "sha": "fa42c1ff7a90df8785efc41e84fc620d840b954a",
+    "sha": "10437197b77d9d2274d5784003733540a33a6b8a",
     "status": "modified"
   },
   {
@@ -279,7 +285,7 @@ export const QR_RELEASE = Object.freeze({
   },
   {
     "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
-    "sha": "efbaf32091cb5a0446edb622509d58108d1ac777",
+    "sha": "a86aa7031698190197527d7d9f1f1234c7070ac1",
     "status": "modified"
   },
   {
@@ -313,6 +319,11 @@ export const QR_RELEASE = Object.freeze({
     "status": "added"
   },
   {
+    "filename": "mir2-web3/apps/web/scripts/smoke-asset-hud-order.mjs",
+    "sha": "33108c5f3e50927b58f31063b4cc1e8ff4dc1caf",
+    "status": "added"
+  },
+  {
     "filename": "mir2-web3/apps/web/scripts/smoke-asset-static-admission.mjs",
     "sha": "7f88a67bff8ab88dc0c87e9b2d6c9f27c9f8e8a2",
     "status": "added"
@@ -329,17 +340,17 @@ export const QR_RELEASE = Object.freeze({
   },
   {
     "filename": "mir2-web3/apps/web/scripts/test-asset-worker-font-ranges.mjs",
-    "sha": "84bc8b5b7147ecb82ea903e5f09952c182a58a56",
+    "sha": "eb1d80184e162e310c7b466d78119819cf0e3c2d",
     "status": "added"
   },
   {
     "filename": "mir2-web3/apps/web/scripts/test-asset-worker-lifecycle.mjs",
-    "sha": "0d51ba69d11502786c8cd7209ccbc53590a2c4cd",
+    "sha": "79bb16af3e330e643d883dd93a2800ad60f6f24c",
     "status": "modified"
   },
   {
     "filename": "mir2-web3/apps/web/scripts/test-asset-worker-static-admission.mjs",
-    "sha": "b808b5dde692488ec90e915ef7497109c9557a7a",
+    "sha": "f099b69d357944926f5ecf620b950115f4ee592e",
     "status": "added"
   },
   {
@@ -364,7 +375,7 @@ export const QR_RELEASE = Object.freeze({
   },
   {
     "filename": "mir2-web3/apps/web/scripts/test-pinned-bootstrap-chunk.mjs",
-    "sha": "0195f57a5b9ec507b135658ce46d91f54ba24de7",
+    "sha": "d9c240fddc2467cf9cb72da75adc02ef2b51244d",
     "status": "modified"
   },
   {
@@ -409,12 +420,12 @@ export const QR_RELEASE = Object.freeze({
   },
   {
     "filename": "mir2-web3/docs/AGENT-CURRENT.md",
-    "sha": "44e31c9ce4241de4d1d3ad13a9c7d9d7291e8007",
+    "sha": "575869c3bd5e5ca8f3d989eb69c9f3c2323f0778",
     "status": "modified"
   },
   {
     "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
-    "sha": "2ed792dd473b3a7053c3167e1dcd2a22209d0ecf",
+    "sha": "ebdf0bab4ad0931536d15718c17ef63da459a55e",
     "status": "modified"
   },
   {
@@ -434,12 +445,12 @@ export const QR_RELEASE = Object.freeze({
   },
   {
     "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
-    "sha": "c110f7eaadf748b07426cdb862d8afd83e039a9b",
+    "sha": "ec529ab31f98ab4c84abe9d2336a0e9bd968572e",
     "status": "modified"
   },
   {
     "filename": "mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md",
-    "sha": "d2b486cc6c9d5c73702c1acda1c801d31ebd031d",
+    "sha": "11658137b2a1000a9ae3a80eb142d5871f0750ed",
     "status": "modified"
   },
   {
@@ -844,7 +855,7 @@ export const QR_RELEASE = Object.freeze({
   },
   {
     "filename": "mir2-web3/docs/evidence/r16-hud-admission-20261115/README.md",
-    "sha": "abc401fcd3a0367ae028697be87bb229dbc49323",
+    "sha": "18b371f0d90be7481ac8b000b44482396a4e658b",
     "status": "added"
   },
   {
@@ -855,6 +866,31 @@ export const QR_RELEASE = Object.freeze({
   {
     "filename": "mir2-web3/docs/evidence/r16-hud-admission-20261115/private-evidence-pins.json",
     "sha": "cbf36e2d0039dc81004aff8eb7a0e88521b77a66",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-hud-admission-20261115/production/README.md",
+    "sha": "280835a68fa8758faff0557eb2fe8abf2b58e2d4",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-hud-admission-20261115/production/private-evidence-pins.json",
+    "sha": "ff471648645a3a87ac05cadd1710add9d2f9754c",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-hud-admission-20261115/production/public-shared-quest.png",
+    "sha": "c25df304de29a85c59be70ac58d08ca0ed35473f",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-hud-admission-20261115/production/public-window-end.png",
+    "sha": "6c59daff3fb24761c34e8ec30f1d2b830239b330",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-hud-admission-20261115/production/verification.json",
+    "sha": "91a4c8e0c06d9094f1e4caf88bbb3ed5724ddb58",
     "status": "added"
   },
   {
@@ -870,6 +906,66 @@ export const QR_RELEASE = Object.freeze({
   {
     "filename": "mir2-web3/docs/evidence/r16-hud-admission-20261115/verification.json",
     "sha": "25966d43224a5bd952f7855b448631c19e5acff4",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/README.md",
+    "sha": "ac3270c364b5281e29f02df647d53564c398a38c",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/baseline-dom-burst.log",
+    "sha": "d9f74b5a2aefb05c9efda83d1ea78bcc7b3e535c",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/english-hud.png",
+    "sha": "868f65c6fa02b3927d396e2b7073ff6bcf9b1bb8",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/font-chain-baseline-r1.log",
+    "sha": "c312487af66e2f0d5b5681074f980df9f782e350",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/font-chain-focused-r2.log",
+    "sha": "aeccfcada25ade5e636ffae14c42bab02c893cd1",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/traditional-hud.png",
+    "sha": "efc2e9a414e20b5b675b1e127e4e696de70ae7a7",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/validation.json",
+    "sha": "09cfa7b3f4c4776c70a5e5d376603a5f94b96a83",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/walking-baseline-r1.log",
+    "sha": "13d2491218fca2a93e30473c6037f9bb3fb99302",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/world-r1-font-network.json",
+    "sha": "a406916f49c8c2b4966ff5bbb4b4d395371cad3d",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/world-v2-headers-font-network.json",
+    "sha": "a155f1a483710b37a5a809a07ec21565bbc73b9f",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/world-v2-r1-font-network.json",
+    "sha": "8f76b941152e9da5f31dc679ae50fc7872904c37",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/world-v2-r2-font-network.json",
+    "sha": "6888def2e7d863505faa85cbf2f8f3b2cca4e23a",
     "status": "added"
   },
   {
@@ -1630,8 +1726,8 @@ export const QR_RELEASE = Object.freeze({
   },
   entryAssetWorker: {
   "path": "/mir2-asset-worker.js",
-  "bytes": 64313,
-  "sha256": "17d387d77329dda4b769d89cb7733a20f5642e145c0f4a0e797ebe0661430d6f"
+  "bytes": 65861,
+  "sha256": "4ea2465084ba90eafe9f969a5ba3c42c8b0d2ff61fb05febb14a72f21916de40"
 },
   assetRunId: '42494701555',
   baseline: "dpl_AWssgszkpKJznMksLsP7hiRFK6U8",
@@ -2030,24 +2126,9 @@ export async function runNumeronRelease({ env = process.env, fetchImpl = fetch,
     const assetSha = qr ? QR_RELEASE.assetSource : sha;
     const sourceRef = qr ? QR_RELEASE.sourceRef : BRANCH;
     if (qr) {
-      const { baseSource, changedFiles, sourceCommits } = QR_RELEASE;
-      const comparison = await github(`/compare/${baseSource}...${sha}`);
-      const files = Array.isArray(comparison.files) ? comparison.files : [];
-      const byPath = new Map(files.map(file => [file?.filename, file]));
-      const commits = Array.isArray(comparison.commits) ? comparison.commits : [];
-      const expectedCommits = new Set(sourceCommits);
-      const actualCommits = new Set(commits.map(commit => commit?.sha));
-      requireRelease(expectedCommits.size === sourceCommits.length && expectedCommits.has(sha)
-        && comparison.status === 'ahead' && comparison.ahead_by === sourceCommits.length && comparison.behind_by === 0
-        && comparison.merge_base_commit?.sha === baseSource && commits.length === sourceCommits.length
-        && actualCommits.size === expectedCommits.size && [...actualCommits].every(commit => expectedCommits.has(commit))
-        && files.length === changedFiles.length && byPath.size === files.length
-        && changedFiles.every(expected => {
-          const actual = byPath.get(expected.filename);
-          return actual?.status === expected.status && actual.sha === expected.sha;
-        }),
-      'qrSourceClosureMismatch');
-      receipt.sourceClosure = { base: baseSource, assetSource: assetSha, ref: sourceRef, commits: sourceCommits, changedFiles };
+      const closure = await verifyNumeronSourceClosure(QR_RELEASE, sha,
+        (base, source) => github(`/compare/${base}...${source}`), requireRelease);
+      receipt.sourceClosure = { ...closure, assetSource: assetSha, ref: sourceRef };
     }
     const run = await github(`/actions/runs/${runId}`), jobs = await github(`/actions/runs/${runId}/jobs?per_page=100`),
       artifacts = await github(`/actions/runs/${runId}/artifacts?per_page=100`);

@@ -112,9 +112,8 @@ function fixture(operation = 'numeron-promote') {
     }
     if (parsed.origin === 'https://api.github.com') {
       assert.equal(request.headers.Authorization, `Bearer ${GH}`);
-      if (qr && request.pathname === `/repos/${REPOSITORY}/compare/${QR_RELEASE.baseSource}...${source}`) {
-        return json({ status: 'ahead', ahead_by: QR_RELEASE.sourceCommits.length, behind_by: 0, merge_base_commit: { sha: QR_RELEASE.baseSource },
-          commits: QR_RELEASE.sourceCommits.map(sha => ({ sha })), files: [...QR_RELEASE.changedFiles].reverse() });
+      if (qr && request.pathname.startsWith(`/repos/${REPOSITORY}/compare/`)) {
+        const comparison = reviewedQrComparison(request.pathname); comparison.files.reverse(); return json(comparison);
       }
       if (request.pathname.endsWith('/jobs')) return json(jobs);
       if (request.pathname.endsWith('/artifacts')) return json(artifacts);
@@ -243,34 +242,65 @@ test('QR stage creates only the pinned game source, with the live alias left on 
 
 test('QR stage rejects a deployment source beyond the exact release pin', async () => {
   const f = fixture('numeron-qr-stage');
-  f.state.onRequest = request => request.pathname.includes('/compare/') ? json({
-    status: 'ahead', ahead_by: QR_RELEASE.sourceCommits.length, behind_by: 0, merge_base_commit: { sha: QR_RELEASE.baseSource },
-    commits: QR_RELEASE.sourceCommits.map(sha => ({ sha })),
-    files: [...QR_RELEASE.changedFiles,
-      { status: 'modified', filename: 'mir2-web3/apps/web/app/api/wallet/dubhe/session/route.ts' }],
-  }) : undefined;
+  f.state.onRequest = request => {
+    if (!request.pathname.includes('/compare/')) return undefined;
+    const comparison = reviewedQrComparison(request.pathname);
+    comparison.files.push({ status: 'modified', filename: 'mir2-web3/apps/web/app/api/wallet/dubhe/session/route.ts', sha: 'a'.repeat(40) });
+    return json(comparison);
+  };
   const result = await f.execute();
   failed(result, /qrSourceClosureMismatch/);
   assert.equal(writes(result).length, 0);
 });
 
-function reviewedQrComparison() {
-  return { status: 'ahead', ahead_by: QR_RELEASE.sourceCommits.length, behind_by: 0,
-    merge_base_commit: { sha: QR_RELEASE.baseSource },
-    commits: QR_RELEASE.sourceCommits.map(sha => ({ sha })), files: [...QR_RELEASE.changedFiles] };
+function reviewedQrComparison(pathname) {
+  const segments = QR_RELEASE.sourceCheckpoints ?? [{ ...QR_RELEASE }];
+  const segment = pathname ? segments.find(s => pathname.endsWith(`/compare/${s.baseSource}...${s.source}`)) : segments[0];
+  assert(segment);
+  return { status: 'ahead', ahead_by: segment.sourceCommits.length, behind_by: 0,
+    merge_base_commit: { sha: segment.baseSource },
+    commits: segment.sourceCommits.map(sha => ({ sha })), files: structuredClone(segment.changedFiles) };
 }
 
 test('QR stage accepts only the reviewed merge commits regardless of API ordering', async () => {
   const f = fixture('numeron-qr-stage');
   f.state.onRequest = request => {
     if (!request.pathname.includes('/compare/')) return undefined;
-    const comparison = reviewedQrComparison(); comparison.commits.reverse(); return json(comparison);
+    const comparison = reviewedQrComparison(request.pathname); comparison.commits.reverse(); return json(comparison);
   };
   const result = await f.execute();
   assert.ifError(result.error);
   assert.equal(writes(result).length, 1);
   assert.equal(writes(result)[0].body.gitSource.sha, QR_RELEASE.source);
   assert.equal(result.result.trafficAfter.alias, QR_RELEASE.baseline);
+  assert.equal(result.result.sourceClosure.changedFiles.length, 314);
+  assert.equal(result.result.sourceClosure.checkpoints.length, 2);
+  assert.deepEqual(result.result.sourceClosure.checkpoints.map(segment => segment.files), [296, 30]);
+  assert.equal(f.state.calls.filter(request => request.pathname.includes('/compare/')).length, 2);
+});
+
+test('QR stage rejects an unreviewed final-checkpoint blob before any release write', async () => {
+  const f = fixture('numeron-qr-stage');
+  f.state.onRequest = request => {
+    if (!request.pathname.includes('/compare/')) return undefined;
+    const comparison = reviewedQrComparison(request.pathname);
+    if (request.pathname.endsWith('...' + QR_RELEASE.source)) comparison.files[0].sha = '0'.repeat(40);
+    return json(comparison);
+  };
+  const result = await f.execute();failed(result, /qrSourceClosureMismatch/);
+  assert.equal(f.state.calls.filter(request => request.pathname.includes('/compare/')).length, 2);
+  assert.equal(writes(result).length, 0);
+});
+
+test('QR stage does not substitute a truncated overall file list for the final checkpoint', async () => {
+  const f = fixture('numeron-qr-stage');
+  f.state.onRequest = request => {
+    if (!request.pathname.includes('/compare/')) return undefined;
+    const comparison = reviewedQrComparison(request.pathname);
+    if (request.pathname.endsWith('...' + QR_RELEASE.source)) comparison.files = structuredClone(QR_RELEASE.changedFiles.slice(0, 300));
+    return json(comparison);
+  };
+  const result = await f.execute();failed(result, /qrSourceClosureMismatch/);assert.equal(writes(result).length, 0);
 });
 
 for (const [name, mutate] of [
@@ -285,7 +315,7 @@ for (const [name, mutate] of [
     const f = fixture('numeron-qr-stage');
     f.state.onRequest = request => {
       if (!request.pathname.includes('/compare/')) return undefined;
-      const comparison = reviewedQrComparison(); mutate(comparison); return json(comparison);
+      const comparison = reviewedQrComparison(request.pathname); mutate(comparison); return json(comparison);
     };
     const result = await f.execute();
     failed(result, /qrSourceClosureMismatch/);
