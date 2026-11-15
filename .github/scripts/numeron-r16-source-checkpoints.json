@@ -1543,21 +1543,77 @@
   },
   {
     "baseSource": "20e79131a23a4c22dbadf118dc514f33bdf85a80",
-    "source": "ef6d20c095a20460908ae9fab311ae39aaa55f6e",
+    "source": "6ba38557ddb298df72cb9e4a23c48caf542a598e",
     "sourceCommits": [
       "b299be39fbace1d57fcb2d29efcffad23e4d0f57",
       "bf0ed0ce019a587b3bd50554708b62682bbde8f6",
-      "ef6d20c095a20460908ae9fab311ae39aaa55f6e"
+      "ef6d20c095a20460908ae9fab311ae39aaa55f6e",
+      "872ceb21550abbd072269770c6ca81875b239aa3",
+      "0b2a5e7abfcd408f1a8c0b15e80e2b348d1a15eb",
+      "71a7bf898d1855c4c4a45bbb0a80b51e2a8f2065",
+      "18449b7aa204f07e00627558aa26e9a4f95bfee2",
+      "1f08bfe4be38cb25ef8f3656048863a187cef8da",
+      "6ba38557ddb298df72cb9e4a23c48caf542a598e"
     ],
     "changedFiles": [
       {
         "filename": ".github/scripts/numeron-r16-release.mjs",
-        "sha": "7359114987cd765c6388842c9e4700de54ee1d7a",
+        "sha": "1bcdba7c3cf64e3bbf6a627baaca33a11b397049",
         "status": "modified"
+      },
+      {
+        "filename": ".github/scripts/numeron-r16-source-checkpoints.json",
+        "sha": "953b451dfb5411b58001b6c9c06682e369d9738e",
+        "status": "added"
+      },
+      {
+        "filename": ".github/scripts/numeron-source-closure.mjs",
+        "sha": "35ef7728af337d02160ad299fef0afd38a10574b",
+        "status": "added"
+      },
+      {
+        "filename": ".github/scripts/test-numeron-r16-release.mjs",
+        "sha": "07a5f051848829f944a77fd3f67351c18ecc1106",
+        "status": "modified"
+      },
+      {
+        "filename": ".github/scripts/test-numeron-source-closure.mjs",
+        "sha": "cdbb6d39fe74aa2b09093e6cd2bd48076f9e81b8",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/apps/web/app/components/dubhe-wallet-qr-login.tsx",
+        "sha": "01245ecb27085355ae3973b11f068c1aae7295ea",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/apps/web/app/page.tsx",
+        "sha": "bac1e9609eb3ce4379ce27013d323cc45d6cd409",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/bevy-runtime-initializer.ts",
+        "sha": "2a10b4f26c1d41e066c4e9f84f668136d61eaf49",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/bevy-runtime-preparation.ts",
+        "sha": "9ee372cf367a7ae3f28ef63038cfa4dbc104ba4a",
+        "status": "added"
       },
       {
         "filename": "mir2-web3/apps/web/lib/r16-entry-scene.ts",
         "sha": "10437197b77d9d2274d5784003733540a33a6b8a",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/apps/web/lib/wallet-qr-font-preparation.ts",
+        "sha": "097bee6214a9f1363365460c1126ad312fac4ccc",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/apps/web/package.json",
+        "sha": "e918acd897cc66fa5885aac5545259f145918331",
         "status": "modified"
       },
       {
@@ -1568,6 +1624,16 @@
       {
         "filename": "mir2-web3/apps/web/scripts/smoke-asset-hud-order.mjs",
         "sha": "33108c5f3e50927b58f31063b4cc1e8ff4dc1caf",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/smoke-bevy-runtime-preparation.mjs",
+        "sha": "0d2eeace7c026f612fa82388b7a3635e95688947",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/smoke-wallet-qr-font-preparation.mjs",
+        "sha": "2aca57ce1a7a184b94e8dfd79e780b00c6611bdf",
         "status": "added"
       },
       {
@@ -1586,28 +1652,48 @@
         "status": "modified"
       },
       {
+        "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-font-prewarm.mjs",
+        "sha": "b8ec544b8555a029c020a81bc535db8df67f1865",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-module-owner.mjs",
+        "sha": "d02179fbabd99b35952618147c490f13a08089fb",
+        "status": "modified"
+      },
+      {
+        "filename": "mir2-web3/apps/web/scripts/test-bevy-runtime-preparation.mjs",
+        "sha": "01517972f28420a550f921fb66db0feb9c3dea3d",
+        "status": "added"
+      },
+      {
         "filename": "mir2-web3/apps/web/scripts/test-pinned-bootstrap-chunk.mjs",
         "sha": "d9c240fddc2467cf9cb72da75adc02ef2b51244d",
         "status": "modified"
       },
       {
+        "filename": "mir2-web3/apps/web/scripts/test-wallet-qr-font-preparation.mjs",
+        "sha": "53e739e2005857249192fd038a961e3768e84b29",
+        "status": "added"
+      },
+      {
         "filename": "mir2-web3/docs/AGENT-CURRENT.md",
-        "sha": "575869c3bd5e5ca8f3d989eb69c9f3c2323f0778",
+        "sha": "ad3e43f00e7345c69137577130d2fe72dd7ceb69",
         "status": "modified"
       },
       {
         "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
-        "sha": "ebdf0bab4ad0931536d15718c17ef63da459a55e",
+        "sha": "7dbded1f79dfa2e0711705f90e9375b85ef1818f",
         "status": "modified"
       },
       {
         "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
-        "sha": "ec529ab31f98ab4c84abe9d2336a0e9bd968572e",
+        "sha": "4111e23d55732bac071d499eb6a989a17225cf57",
         "status": "modified"
       },
       {
         "filename": "mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md",
-        "sha": "11658137b2a1000a9ae3a80eb142d5871f0750ed",
+        "sha": "e79924deed81130e39cd31c7f736e1ffa33c422a",
         "status": "modified"
       },
       {
@@ -1642,12 +1728,17 @@
       },
       {
         "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/README.md",
-        "sha": "ac3270c364b5281e29f02df647d53564c398a38c",
+        "sha": "bdf6616e506ab1a24787e778636d63294d5e2874",
         "status": "added"
       },
       {
         "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/baseline-dom-burst.log",
         "sha": "d9f74b5a2aefb05c9efda83d1ea78bcc7b3e535c",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/ci-build.json",
+        "sha": "1b12d66782c62bede610583d8f08c710979e648e",
         "status": "added"
       },
       {
@@ -1666,13 +1757,118 @@
         "status": "added"
       },
       {
+        "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/production/README.md",
+        "sha": "98ae3198ecda9c8884abf78ea1580255260b6b87",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/production/alias-after-rollback.json",
+        "sha": "2f67a457c0a8a5e0acbe10187ddefed8f9b94c3b",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/production/canary.json",
+        "sha": "0aaad4dd69abfc746acd603f1ac0bd9b82ef1028",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/production/final-public-readback-r2.json",
+        "sha": "77782191f3d653944ce4897c76072f16ab476300",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/production/final-public-readback-r3.json",
+        "sha": "09a6d3e43246f55dcd2c910564abe544ef8a6db6",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/production/independent-candidate.json",
+        "sha": "2c10ceb7daad911a32b09e2cb47535ea7e03e410",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/production/linux-package-verification.json",
+        "sha": "427b8064812699ad3887d0d0efa509d01d523e94",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/production/network-evidence.json",
+        "sha": "cf2c0fc27717e620419b20782f3c7b17c73bed5b",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/production/public-at-45s.png",
+        "sha": "634945775761388938d4ed2f4ee23db781938659",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/production/public-late-native-quest.png",
+        "sha": "a927902aa33a2a50498c56eb60513cec1bed00c1",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/production/public-r1.json",
+        "sha": "ca23b2666dba528ede4f8594b858fe73ef0dce06",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/production/release-checks.json",
+        "sha": "d5ca18cb046c7661fc2ed315d630b36201830975",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/production/release-pin.json",
+        "sha": "5fc521340ec148601e02ba4a830fddc559f6892f",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/production/remote-backup-summary.json",
+        "sha": "6462fd1d948c03eb491c73f5fca91fde555b04b1",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/production/rollback-and-preservation.json",
+        "sha": "b55c65bb788a8d73c741da3ee5241c9984276898",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/production/rollback-qr.json",
+        "sha": "975bd973e249bc70a40d1cdc093721aaa6de8e1f",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/production/source-closure.json",
+        "sha": "7b4a11d55f52cff72f5d8ec00dcea065de509a51",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/production/web-check-summary.json",
+        "sha": "c5f5072289e4cc6aa06de465d2f5892b4f196201",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/production/web-promote-summary.json",
+        "sha": "d807d764679be9fed3bc0f1ed285b772e77946c9",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/production/web-rollback-summary.json",
+        "sha": "7fd2122dc9d561429ec04987c04ea99fb8b10b15",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/production/web-stage-summary.json",
+        "sha": "c4006e2087d87911e382403b5b050b84164fbe31",
+        "status": "added"
+      },
+      {
         "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/traditional-hud.png",
         "sha": "efc2e9a414e20b5b675b1e127e4e696de70ae7a7",
         "status": "added"
       },
       {
         "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/validation.json",
-        "sha": "09cfa7b3f4c4776c70a5e5d376603a5f94b96a83",
+        "sha": "7b7d7b77a70fce9acb4a2dce852c61d403a66f9b",
         "status": "added"
       },
       {
@@ -1698,6 +1894,191 @@
       {
         "filename": "mir2-web3/docs/evidence/r16-hud-foundation-order-20261116/world-v2-r2-font-network.json",
         "sha": "6888def2e7d863505faa85cbf2f8f3b2cca4e23a",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/README.md",
+        "sha": "a8285ab1790164401217564326c6b0f18c4d9f32",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/build.json",
+        "sha": "1976b58077ed08a5d1d1945c1ff0ed7b6bffac42",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/chrome.json",
+        "sha": "d6f425498f39c4e91ca124a258a4e31973fb29de",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/ci-audit.json",
+        "sha": "0ce6fe9ab7e8ba06af11eff5adb94903f99950a5",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/compiled-marker.json",
+        "sha": "1d7671b10e8759c2aec6189a17608e945bf013bd",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/diagnostics/font-probe.mjs.source.txt",
+        "sha": "e6a7ef5d06e4562063c2052775c47ef4d9421024",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/diagnostics/fonts.json",
+        "sha": "0414759fb0781a366405b0d184f46af64a3e8e47",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/diagnostics/probe.mjs.source.txt",
+        "sha": "906c92351a60ffd614cbcf12befc7d9fc850dec3",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/diagnostics/source-record.json",
+        "sha": "2aff794c2085565bf44315f400cb8541e2be7afc",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/diagnostics/wasm.json",
+        "sha": "6240607a29c0018ed5ffb8ef44283b6af35162fb",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/games.json",
+        "sha": "5d41c8f9eac062ecce4cec80c98ce989ca40d64e",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/preservation.json",
+        "sha": "e5ce732f931f68bbe542e997b2750b81fbc64ffd",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/public-readback.json",
+        "sha": "8622f58e76e6ec22a3039b986fcf5a9c38bcb835",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/qr-visible-before-font-completes.png",
+        "sha": "cb98a2a653aabfdcba4d1afaa3fa617f1ffebe55",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/react-review.json",
+        "sha": "9a9a5eeda657c3c6d522ac5798c061f6664c1c98",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/shared-font-complete.png",
+        "sha": "cc77bbda0b28e3cb405ce5e9b7e30aa3094d2ab0",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/source.json",
+        "sha": "b3c7e64a8196f1681296a9c3c2a0efc0bc599bc4",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/tests.json",
+        "sha": "b088773f1457c2ef05f787021b867a78e2b21376",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/world-r1-first-entry-diary-open.png",
+        "sha": "334bf781e1553096e540b1b45241a8dc4062ab67",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/world-r1-qr-pending-actual-component.png",
+        "sha": "8930dfb9f7afef40909588718f111c3152bd6f5a",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/world-r1-town-natural-walking.png",
+        "sha": "6eb56feb5069034bdd5e13ea723fd09a27165e75",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/world-r2-first-entry-diary-open.png",
+        "sha": "1c7845740ef8646fc0ada6a7eb1ea3278e643dfc",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/world-r2-qr-pending-actual-component.png",
+        "sha": "22981b6a5011d808deaa6c264b830832550c9219",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-qr-font-preparation-20261116/world-r2-town-natural-walking.png",
+        "sha": "b213690ed8595a569c414c8848890448170160b3",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-runtime-selection-preparation-20261116/README.md",
+        "sha": "f6a6e21fface5c4fae9640f43a6b9f91c993eb63",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-runtime-selection-preparation-20261116/build.json",
+        "sha": "977c8f231d2987bce9d1c0d65009034c5d6735f8",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-runtime-selection-preparation-20261116/chrome.json",
+        "sha": "51ee930c37b89287aac669ca69b643fb887e1eaf",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-runtime-selection-preparation-20261116/compiled-marker.json",
+        "sha": "55db3cac47fcec5baad6d59eaea449a1b42c5bb2",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-runtime-selection-preparation-20261116/games.json",
+        "sha": "7f871caf6aadd385696c235b01fd345bea6520ae",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-runtime-selection-preparation-20261116/preservation.json",
+        "sha": "fe0f22cf4f28dbb01c183c8338ec898c1833eed7",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-runtime-selection-preparation-20261116/public-readback.json",
+        "sha": "2e77fa33566e7378bb2d1be00054dab4a7a3fdf3",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-runtime-selection-preparation-20261116/source.json",
+        "sha": "f6f19c47164bca6161a2848792e931b67ca5d7f5",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-runtime-selection-preparation-20261116/tests.json",
+        "sha": "924a5fb7c57b545feb344dc8d549c144aa6324aa",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-runtime-selection-preparation-20261116/world-r1-first-entry-diary-open.png",
+        "sha": "0244ebb74d389fb2f1f44ba5c2971b6c3baa965b",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-runtime-selection-preparation-20261116/world-r1-town-natural-walking.png",
+        "sha": "149df61b5cd9181acd13e0418b443635295f25d1",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-runtime-selection-preparation-20261116/world-r2-first-entry-diary-open.png",
+        "sha": "590be49c7f4c1c704f82bfaa7a1fd5e24ad2bd30",
+        "status": "added"
+      },
+      {
+        "filename": "mir2-web3/docs/evidence/r16-runtime-selection-preparation-20261116/world-r2-town-natural-walking.png",
+        "sha": "01d3d04a9ec8ace7524ba0968bad99f28ad65888",
         "status": "added"
       }
     ]

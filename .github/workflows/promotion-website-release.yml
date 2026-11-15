@@ -125,7 +125,7 @@ jobs:
           node-version: '22'
       - name: Verify bounded Numeron release guards without credentials or network
         if: startsWith(inputs.operation, 'numeron-')
-        run: node --test .github/scripts/test-numeron-r16-release.mjs .github/scripts/test-numeron-r16-domain.mjs .github/scripts/test-numeron-release-entry.mjs
+        run: node --test .github/scripts/test-numeron-r16-release.mjs .github/scripts/test-numeron-r16-domain.mjs .github/scripts/test-numeron-release-entry.mjs .github/scripts/test-numeron-source-closure.mjs
       - name: Inspect the three Numeron project identities without Gateway credentials
         if: inputs.operation == 'numeron-context'
         env:

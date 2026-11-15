@@ -1,0 +1,34 @@
+{
+  "source": "6ba38557ddb298df72cb9e4a23c48caf542a598e",
+  "base": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+  "checkpoint": "20e79131a23a4c22dbadf118dc514f33bdf85a80",
+  "controllerParent": "f16f42c9eacde04b383dd2b25acadfde09a5f2be",
+  "commits": 63,
+  "totalFiles": 386,
+  "segments": [
+    {
+      "base": "20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339",
+      "source": "20e79131a23a4c22dbadf118dc514f33bdf85a80",
+      "commits": 54,
+      "files": 296
+    },
+    {
+      "base": "20e79131a23a4c22dbadf118dc514f33bdf85a80",
+      "source": "6ba38557ddb298df72cb9e4a23c48caf542a598e",
+      "commits": 9,
+      "files": 105
+    }
+  ],
+  "independentGitHubComparisons": true,
+  "compiledAppLibFiles": 2181,
+  "generatedOverride": 1,
+  "buildId": "lj7I4rCtgpbaostdWbw5n",
+  "candidate": "r16-qr-font-8515912b",
+  "entryAssetWorker": {
+    "bytes": 65861,
+    "sha256": "4ea2465084ba90eafe9f969a5ba3c42c8b0d2ff61fb05febb14a72f21916de40"
+  },
+  "controllerSha256": "521d2325009da947449a497fbbbf102d99c38f9bef00cb7f42106329b4d8a86c",
+  "baseline": "dpl_AWssgszkpKJznMksLsP7hiRFK6U8",
+  "publicDeploy": false
+}
