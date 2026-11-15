@@ -1,0 +1,13 @@
+{
+  "deploymentId": "dpl_G5MYZuxtdS9hbphJD2xweK4hMZgn",
+  "url": "numeron-r16-piewoyy5e-obelisk-labs.vercel.app",
+  "source": "ef6d20c095a20460908ae9fab311ae39aaa55f6e",
+  "ref": "codex/windows-player-journey",
+  "readyState": "READY",
+  "target": "production",
+  "project": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC",
+  "team": "team_pXY7oaLtibSTlKSmKXMXzrQR",
+  "method": "independent Vercel connector get_project and get_deployment",
+  "readyEpochMs": 1794763816112,
+  "productionPromoted": false
+}

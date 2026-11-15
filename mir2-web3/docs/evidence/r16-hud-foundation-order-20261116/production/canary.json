@@ -1,0 +1,27 @@
+{
+  "source": "ef6d20c095a20460908ae9fab311ae39aaa55f6e",
+  "passed": true,
+  "debugCommandsSent": 0,
+  "normalLogouts": 2,
+  "sameRoleReentry": true,
+  "savedLocationPreserved": true,
+  "neutralMonsterWalkCount": 1,
+  "productionProcessUnchanged": true,
+  "existingRowsUnchanged": {
+    "accounts": {
+      "rows": 311,
+      "canonicalBytes": 2310675,
+      "sha256": "c948617550505af7f3e0cdac48c1256ca1039c4d59a3a5004a9831dea7f8685f"
+    },
+    "characters": {
+      "rows": 223,
+      "canonicalBytes": 75300,
+      "sha256": "8aaf0f7deb200c90ee47907fbdc1ff4fb7be2d5ed488ea765881311e38e1a6f9"
+    },
+    "character_saves": {
+      "rows": 223,
+      "canonicalBytes": 2603560,
+      "sha256": "172d481b1ff21b3f9ab08686aa8e7824feba67f52d110f80fc2b7a69d89e49f6"
+    }
+  }
+}

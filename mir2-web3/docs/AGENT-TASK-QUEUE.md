@@ -6,14 +6,14 @@ Updated 2026-11-16 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-16 基础HUD按清单顺序、行走缺响应头提前恢复及SC分段总时限已完成本地候选：235项／严格构建，英繁两场和额外两次扣响应头整局通过；首步83／98／129ms，Native24767／24839／18379ms，六字体113、Q重进及保存通过。首轮Native120失败保留；29份原WIP保持，独立源码覆盖已恢复。当前公网独立读回仍20de，本轮未切换，接着做同源发布包和完整来源闭包及原两场公网。其他1:1继续，Goal active。[本轮证据](evidence/r16-hud-foundation-order-20261116/README.md)。
+2026-11-16 ef6已实际发布：本地235项／构建／三场，Linux310／PG216及1841文件SHA，57提交／314文件来源链和113发布保护通过。公网R1完整功能、行走原JSON、六字体113、Q／Worker／注销通过，但运行包146013ms、Native191284ms均超原120秒；R2未跑，两端已回退20de／AWss＋fd3，独立读回和简繁扫码复验。原311／223／223行与22配置保持，新QA进度保留，29份WIP保持，浏览器／SSH关闭。下一项查运行包首次在首帧后才发起及正文竞争，保持原8／65／120／20和完整资源，不原样重发。整体1:1继续，Goal active。[实际发布与恢复](evidence/r16-hud-foundation-order-20261116/production/README.md)。
 
 ## 保留的当前未结项
 
 - [x] f28dc94538的CDN Range错误头已修复并发布9e9b30bd；22项／9相邻／9真实本地R2／类型／预演、公网两入口8项范围及原字节通过，资源配置保持。[已发布范围](evidence/r16-r2-range-20261115/README.md)
 - [x] 9eac66ed32实现SC63个原字节分段校验／失败保留／重启续读；受控Edge62+1及实际失败档案恢复完整场通过，4ad940554d补首次可见登录输入时序。仅候选，未发布，不关闭冷两场资格。[源码、检查和实际恢复](evidence/r16-font-resume-20261115/README.md)
 - [x] b33533f4aa字体范围缓存已发布，原两组本地升级冷场六字体／113／Q／保存完整通过；实际SIN HIT原字节与代码SHA一致，配置保持。[两场原值与发布](evidence/r16-font-edge-cache-20261115/README.md)
-- [ ] 基础HUD排序／行走响应头／SC总时限本地235项、构建与三场完整流程通过，原失败保留，尚未发布。继续匹配Linux包、完整来源闭包和两场原8／65／120公网；完整113／六字体保持。[本轮证据](evidence/r16-hud-foundation-order-20261116/README.md)
+- [ ] ef6本地／同源包和公网完整功能通过，但运行包146013／Native191284ms超原120，两端已回退并复验。继续运行包／大字库正文及读取时机，保持六字体113和原时限；不原样重发。[发布与原失败](evidence/r16-hud-foundation-order-20261116/production/README.md)
 - [x] 627浮层46项／十语五尺寸200组件布局及本地整局完整画面通过；本轮公网65秒地形裁图实际看见顶部0/113加载、小地图／引导可见，裁图不含血球，不能补该项公网视觉验收。候选随20e回退，正式布局与十语实战仍另验。[本地完整图](evidence/r16-hud-admission-20261115/README.md) · [公网截图边界](evidence/r16-hud-admission-20261115/production/README.md)
 
 - [ ] dca152cd15中立AI1/2漫游已推送，270项／本地英繁两后端自然PNG保持；aa524 Linux303／PG216及隔离普通协议通过，曾切换正式，但公网完整行走包／Native120失败后两端回退20de／fd3。先修交付恢复再做两场原门槛公网，其他AI／巡逻、资源浮层、混合语言及6项旧夹具依赖失败继续。[本轮资格与失败](evidence/r16-paired-release-20261115/README.md) · [原本地结果](evidence/r16-livestock-roam-20261115/README.md)

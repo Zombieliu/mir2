@@ -1,10 +1,10 @@
 # R16 基础 HUD 排序、行走恢复及字库时限
 
-本轮完成本地候选资格，尚未发布。235 项定向／相邻检查、严格生产构建及三场实际浏览器流程通过。首次候选因字库分段下载超过原 Native 120 秒而失败；修复后另跑三场，原失败保留，不倒填为成功。
+本轮本地 235 项检查、严格构建及三场完整流程通过后，已实际发布 ef6。公网首场完整功能通过，但运行包 146,013 ms／Native 191,284 ms 超过原 120 秒，原判定 false，已两端回退。第二场未执行；[实际发布、原值和恢复](production/README.md)单列。本地初次候选的 Native120 失败也保留，不倒填为成功。
 
-代码和证据已提交并推送 `ef6d20c095a20460908ae9fab311ae39aaa55f6e`；三份编译覆盖与该提交的 Git blob 逐字节相等。已启动 [匹配源码的 Linux 构建](https://github.com/Zombieliu/mir2/actions/runs/43739146537)，当前快照见 [ci-build.json](ci-build.json)。这只是构建和检查，不发布 R2，也不变更生产；尚未取得本轮产物通过凭证。
+代码和证据已提交并推送 `ef6d20c095a20460908ae9fab311ae39aaa55f6e`；三份编译覆盖与该提交的 Git blob 逐字节相等。[匹配源码 Linux 构建](https://github.com/Zombieliu/mir2/actions/runs/43739146537)已通过，1,841 文件 SHA、310 共享世界及 216 PG 检查见[新包回执](production/linux-package-verification.json)。[最初 CI 快照](ci-build.json)仅保留当时状态。
 
-完整数据在 [validation.json](validation.json)。公网 `/version` 于 `2026-11-15T16:57:53.179Z` 独立读回 HTTP 200、`20de5ea4fd93b3c61e4aa590dca2ea2d8f5d2339`。本轮没有切换 Web、Gateway、DNS 或 CDN，也没有恢复生产数据库。
+本地完整数据在 [validation.json](validation.json)。本轮曾切换匹配 Web／Gateway，后因原性能门槛失败回退；[最新回退公开读回](production/final-public-readback-r3.json)为 20de／fd3。本轮没有修改 DNS／CDN，没有恢复生产数据库。
 
 ## 改动与依据
 
@@ -43,4 +43,4 @@
 
 构建辅助记录曾携带 r1 的 Worker blob 标识，已仅纠正该元数据，保留前后记录；实际原始 SHA、已编译输入、构建 ID 与测试均未改。第二次准备游戏脚本碰到既有只读观察器文件后在启动服务前退出，核对相同 SHA 后继续；没有覆盖旧记录。
 
-接着制作与提交源码匹配的发布包、补完整来源闭包，再做两场原门槛公网验证。上轮生产基线到当前已超过 GitHub Compare 的 300 文件上限，必须用完整证据链或树校验，不能截断清单。既有 [20e 公网失败与两端回退](../r16-hud-admission-20261115/production/README.md) 继续保留。寻路修复的正式发布、当前三职业完整 1–30、地图／阿洛／Native 同档、混合语言、实体手机及全局 1:1 仍开放，Goal 保持 active。
+本轮已完成匹配发布包、57 提交／314 文件的完整来源链和 113 项发布保护，并实际发布复测；公网第一场性能失败后已回退，第二场未跑。下一轮先查运行包及字体正文竞争和读取时机，不原样重发。既有 [20e 公网失败与两端回退](../r16-hud-admission-20261115/production/README.md) 继续保留。寻路修复的正式发布、当前三职业完整 1–30、地图／阿洛／Native 同档、混合语言、实体手机及全局 1:1 仍开放，Goal 保持 active。

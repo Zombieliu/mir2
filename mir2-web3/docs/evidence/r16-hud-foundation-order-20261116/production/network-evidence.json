@@ -1,0 +1,190 @@
+{
+  "scope": "Passive recorded transport, not a complete census: font Worker attachment timed out once. Six font cache SHA come from the independent complete-cache-body check.",
+  "originalClockEpochMs": 1794765384389,
+  "firstPlayableMs": 89062,
+  "runtimeRows": [
+    {
+      "ordinal": 248,
+      "page": 1,
+      "url": "https://numeron.obelisk.build/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+      "category": "runtime",
+      "source": "page-cdp",
+      "requestAtMs": 89154,
+      "outcome": "finished",
+      "initialPriority": "High",
+      "headersAtMs": 93016,
+      "status": 200,
+      "fromServiceWorker": false,
+      "fromDiskCache": false,
+      "protocol": "h2",
+      "cache": {
+        "age": 0,
+        "cf-cache-status": "DYNAMIC",
+        "x-vercel-cache": "MISS",
+        "content-encoding": "br",
+        "cache-control": "public, max-age=31536000, immutable",
+        "cfPop": "SIN"
+      },
+      "networkTimingMs": {
+        "proxyStart": -1,
+        "proxyEnd": -1,
+        "dnsStart": -1,
+        "dnsEnd": -1,
+        "connectStart": -1,
+        "connectEnd": -1,
+        "sslStart": -1,
+        "sslEnd": -1,
+        "sendStart": 0.075,
+        "sendEnd": 0.132,
+        "receiveHeadersStart": 3860.876,
+        "receiveHeadersEnd": 3860.952
+      },
+      "finishedAtMs": 235294,
+      "browserReportedEncodedBytes": 6027048
+    }
+  ],
+  "fontObserver": {
+    "setupMs": 4,
+    "finishMs": 36,
+    "workersAttached": 0,
+    "droppedRequests": 0,
+    "cleanupComplete": true,
+    "errors": [
+      {
+        "code": "WORKER_FONT_CDP_COMMAND_TIMEOUT",
+        "method": "Network.enable"
+      }
+    ]
+  },
+  "fontRows": [
+    {
+      "source": "service-worker-upstream",
+      "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansTC.ttf",
+      "range": null,
+      "requestAtMs": 78628,
+      "finishedAtMs": 85629,
+      "durationMs": 7001,
+      "encodedBytesComplete": false,
+      "netError": "net::ERR_ABORTED"
+    },
+    {
+      "source": "service-worker-upstream",
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansTC.ttf",
+      "range": null,
+      "requestAtMs": 85629,
+      "headersAtMs": 86752,
+      "finishedAtMs": 193904,
+      "durationMs": 108275,
+      "status": 200,
+      "encoding": "gzip",
+      "encodedBytesComplete": true
+    },
+    {
+      "source": "service-worker-upstream",
+      "url": "https://assets.mir2.obelisk.build/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "range": "bytes=0-1048575",
+      "requestAtMs": 93018,
+      "headersAtMs": 94320,
+      "finishedAtMs": 109321,
+      "durationMs": 16303,
+      "status": 206,
+      "encoding": null,
+      "encodedBytesComplete": false,
+      "netError": "net::ERR_ABORTED"
+    },
+    {
+      "source": "service-worker-upstream",
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "range": "bytes=0-1048575",
+      "requestAtMs": 109321,
+      "headersAtMs": 110495,
+      "finishedAtMs": 117019,
+      "durationMs": 7698,
+      "status": 206,
+      "encoding": null,
+      "encodedBytesComplete": false,
+      "netError": "net::ERR_ABORTED"
+    },
+    {
+      "source": "service-worker-upstream",
+      "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+      "range": null,
+      "requestAtMs": 117018,
+      "headersAtMs": 121199,
+      "finishedAtMs": 252153,
+      "durationMs": 135135,
+      "status": 200,
+      "encoding": "br",
+      "encodedBytesComplete": true
+    },
+    {
+      "source": "service-worker-upstream",
+      "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSans-Regular.ttf",
+      "range": null,
+      "requestAtMs": 235422,
+      "finishedAtMs": 242423,
+      "durationMs": 7001,
+      "encodedBytesComplete": false,
+      "netError": "net::ERR_ABORTED"
+    },
+    {
+      "source": "service-worker-upstream",
+      "url": "https://assets.mir2.obelisk.build/hotlink-ok/mir2/v/20261108-r16-08ec86d5105c/original-ui/fonts/NotoSans-Regular.ttf",
+      "range": null,
+      "requestAtMs": 242423,
+      "headersAtMs": 243418,
+      "finishedAtMs": 247224,
+      "durationMs": 4801,
+      "status": 200,
+      "encoding": "gzip",
+      "encodedBytesComplete": true
+    },
+    {
+      "source": "service-worker-upstream",
+      "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+      "range": null,
+      "requestAtMs": 247225,
+      "headersAtMs": 252202,
+      "finishedAtMs": 252713,
+      "durationMs": 5488,
+      "status": 200,
+      "encoding": "br",
+      "encodedBytesComplete": true
+    },
+    {
+      "source": "service-worker-upstream",
+      "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansThai-Regular.ttf",
+      "range": null,
+      "requestAtMs": 252195,
+      "headersAtMs": 253110,
+      "finishedAtMs": 253207,
+      "durationMs": 1012,
+      "status": 200,
+      "encoding": "br",
+      "encodedBytesComplete": true
+    },
+    {
+      "source": "service-worker-upstream",
+      "url": "https://numeron.obelisk.build/original-ui/fonts/NotoSansArabic-Regular.ttf",
+      "range": null,
+      "requestAtMs": 252714,
+      "headersAtMs": 253332,
+      "finishedAtMs": 253875,
+      "durationMs": 1161,
+      "status": 200,
+      "encoding": "br",
+      "encodedBytesComplete": true
+    }
+  ],
+  "transportObserver": {
+    "capturedRows": 787,
+    "droppedRows": 0,
+    "truncated": false,
+    "cleanupComplete": true,
+    "errors": []
+  },
+  "mainThread": {
+    "maxLongTaskMs": 217,
+    "longTaskCount": 5
+  }
+}
