@@ -6,11 +6,11 @@ Updated 2026-11-16 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-16 8bf已完成215项／构建／Chrome／本地整局和Linux310／PG216／1841SHA、旧档普通协议并试发。原R1签名后桌面仅pending、未进游戏，已回退e0／Fo；原320／232／232及24配置保持，简繁pending／取消复验。下一项受控定位授权状态交接，保留原失败与全部门槛，不原样重发；整体Goal active。[原结果与回退](evidence/r16-font-body-progress-20261116/production/README.md)。
+2026-11-16 扫码读取边界候选完成28项／严格隔离构建／本地真实Passkey与Gateway登录、同证明401。额外公网对照仍有批准后12秒无头失败，也有登录成功后进城画面超时；根因未关闭。正式保持e0／Fo，原8bf失败保留。下一项冻结新源并取得匹配发行／公网原门槛，29份WIP保持；整体Goal active。[当前范围](evidence/r16-auth-handoff-20261116/README.md) · [原结果与回退](evidence/r16-font-body-progress-20261116/production/README.md)。
 
 ## 保留的当前未结项
 
-- [ ] CJK／授权交接：8bf的215项／构建／Chrome／整局、Linux310／PG216／1841SHA与旧档通过并试发；R1真实签名后11次200仍pending，交换／WS为0，APPROVED_WALLET_LOGIN_NOT_OBSERVED，未测字体或Native性能，R2未执行。已回退e0／Fo，原320／232／232行及24配置、29份WIP保持。下一项受控复现状态交接，不改原8／65／120／字体113；306的旧128080ms及本地原失败均保留。[当前资格、失败与回退](evidence/r16-font-body-progress-20261116/production/README.md) · [旧试发](evidence/r16-cjk-progress-20261116/production/README.md)
+- [ ] CJK／授权交接：额外e0对照确认14个pending均在批准前，批准后无头12秒取消；API和另一次含主动探针的整局登录通过，后者进城画面失败。新正文边界候选已过28项／严格构建／本地实际UI与Gateway登录、同证明401，尚未发布且不宣称修复偶发根因。正式e0／Fo、原8bf和306失败保留，29份WIP保持、19覆盖恢复。继续新同源发行及公网原8／65／120／六字体113，首Q／语言等范围不缩减。[新时序与候选](evidence/r16-auth-handoff-20261116/README.md) · [原发行与回退](evidence/r16-font-body-progress-20261116/production/README.md)
 
 - [x] e0整源字体中断分片已通过本地188项／真实Chrome恢复、匹配Linux／PG／SHA、成对发行与原两场公网；六字体／113／原时限保持。[已发布范围](evidence/r16-font-prefix-recovery-20261116/production/README.md)
 

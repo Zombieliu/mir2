@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
+import { createECDH, createHash, createPrivateKey, sign } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { after, test } from "node:test";
 import vm from "node:vm";
 
 import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
+import { PasskeyKeypair } from "@mysten/sui/keypairs/passkey";
 import ts from "typescript";
 
 const require = createRequire(import.meta.url);
@@ -99,13 +101,13 @@ async function create(pending = session()) {
   return result.json();
 }
 
-async function approve(pending) {
+async function approve(pending, signer = keypair) {
   const message = buildDubheConnectLoginMessage(pending);
-  const signed = await keypair.signPersonalMessage(new TextEncoder().encode(message));
+  const signed = await signer.signPersonalMessage(new TextEncoder().encode(message));
   return {
     ...pending, status: "approved", result: {
       account: {
-        address: keypair.toSuiAddress(), publicKey: keypair.getPublicKey().toBase64(),
+        address: signer.toSuiAddress(), publicKey: signer.getPublicKey().toBase64(),
         chains: ["sui:testnet"], features: ["sui:signPersonalMessage"],
       },
       message, bytes: signed.bytes, signature: signed.signature,
@@ -123,6 +125,14 @@ async function status(intentToken, resolved, options = {}) {
 
 function proofPayload(token) {
   return JSON.parse(Buffer.from(token.split(".")[0], "base64url").toString("utf8"));
+}
+
+async function keepLoopAliveUntil(promise) {
+  // AbortSignal.timeout uses an unref timer. The isolated fake transport has
+  // no real socket to keep Node alive while the production deadline expires.
+  const timer = setInterval(() => {}, 1_000);
+  try { return await promise; }
+  finally { clearInterval(timer); }
 }
 
 test("creates a bounded trusted session and keeps browser intent out of the QR", async () => {
@@ -179,6 +189,99 @@ test("verifies a real Sui signature and reissues only the same fixed-expiry one-
   const second = await (await status(created.intentToken, approved)).json();
   assert.equal(second.login.token, first.login.token);
   assert.equal(second.login.expiresAt, first.login.expiresAt);
+});
+
+test("verifies a WebAuthn Passkey proof and rejects its altered challenge or public key", async () => {
+  reset();
+  const secret = Buffer.alloc(32, 4);
+  const ec = createECDH("prime256v1");
+  ec.setPrivateKey(secret);
+  const uncompressed = ec.getPublicKey();
+  const privateKey = createPrivateKey({ format: "jwk", key: {
+    kty: "EC", crv: "P-256", d: secret.toString("base64url"),
+    x: uncompressed.subarray(1, 33).toString("base64url"),
+    y: uncompressed.subarray(33).toString("base64url"),
+  } });
+  const signer = new PasskeyKeypair(ec.getPublicKey(undefined, "compressed"), {
+    async get(challenge) {
+      const clientDataJSON = Buffer.from(JSON.stringify({
+        type: "webauthn.get", challenge: Buffer.from(challenge).toString("base64url"),
+        origin: walletOrigin, crossOrigin: false,
+      }));
+      const authenticatorData = Buffer.concat([
+        createHash("sha256").update(new URL(walletOrigin).hostname).digest(),
+        Buffer.from([5, 0, 0, 0, 1]),
+      ]);
+      const payload = Buffer.concat([authenticatorData, createHash("sha256").update(clientDataJSON).digest()]);
+      return { response: { authenticatorData, clientDataJSON, signature: sign("sha256", payload, privateKey) } };
+    },
+  });
+  const pending = session();
+  const created = await create(pending);
+  const approved = await approve(pending, signer);
+  assert.equal(Buffer.from(approved.result.signature, "base64")[0], 6);
+  const response = await status(created.intentToken, approved);
+  assert.equal(response.status, 200);
+  const body = await response.json();
+  assert.equal(body.status, "approved");
+  assert.equal(body.login.accountId, `sui:${signer.toSuiAddress()}`);
+  assert.equal(proofPayload(body.login.token).expMs, created.expiresAt);
+  const wrongMessage = await signer.signPersonalMessage(new TextEncoder().encode("another login challenge"));
+  for (const result of [
+    { ...approved.result, signature: wrongMessage.signature },
+    { ...approved.result, account: { ...approved.result.account, publicKey: keypair.getPublicKey().toBase64() } },
+  ]) {
+    const rejected = await status(created.intentToken, { ...approved, result });
+    assert.ok(rejected.status >= 400);
+    assert.equal((await rejected.json()).login, undefined);
+  }
+});
+
+test("bounds an unfinished empty POST without waiting for producer cancellation", { timeout: 4_000 }, async () => {
+  reset();
+  const body = new ReadableStream({
+    start(controller) { controller.enqueue(new TextEncoder().encode("{}")); },
+    cancel() { return new Promise(() => {}); },
+  });
+  const result = await keepLoopAliveUntil(createDubheConnectLogin(new Request(`${origin}/api/wallet/dubhe/session`, {
+    method: "POST", headers: { origin }, body, duplex: "half",
+  })));
+  assert.equal(result.status, 400);
+  assert.equal(requests.length, 0);
+  assert.equal((await result.json()).login, undefined);
+});
+
+test("rejects an oversized input or relay body even if cancellation never settles", { timeout: 2_000 }, async () => {
+  reset();
+  const neverCancelled = (bytes) => new ReadableStream({
+    start(controller) { controller.enqueue(new Uint8Array(bytes).fill(32)); },
+    cancel() { return new Promise(() => {}); },
+  });
+  const input = await createDubheConnectLogin(new Request(`${origin}/api/wallet/dubhe/session`, {
+    method: "POST", headers: { origin }, body: neverCancelled(1_025), duplex: "half",
+  }));
+  assert.equal(input.status, 400);
+  assert.equal(requests.length, 0);
+  fetchImplementation = async () => new Response(neverCancelled(32_769));
+  const relay = await createDubheConnectLogin(request(""));
+  assert.equal(relay.status, 502);
+  assert.equal((await relay.json()).login, undefined);
+});
+
+test("the relay's existing eight-second deadline also bounds an unfinished response body", { timeout: 12_000 }, async () => {
+  reset();
+  const pending = session();
+  const created = await create(pending);
+  fetchImplementation = async () => new Response(new ReadableStream({
+    start(controller) { controller.enqueue(new TextEncoder().encode('{"status":"approved"')); },
+    cancel() { return new Promise(() => {}); },
+  }));
+  const response = await keepLoopAliveUntil(readDubheConnectLogin(request("/status", {
+    headers: { authorization: `Bearer ${created.intentToken}` },
+  })));
+  assert.equal(response.status, 503);
+  assert.equal(requests.at(-1)[1].signal.aborted, true);
+  assert.equal((await response.json()).login, undefined);
 });
 
 test("rejects missing/disallowed Origin, body-selected sessions, and large bodies before relay access", async () => {

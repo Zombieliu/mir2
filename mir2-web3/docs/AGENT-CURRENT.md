@@ -14,7 +14,7 @@ Short routing summary, updated 2026-11-16 (Asia/Shanghai). This indexes recorded
 
 ## Last recorded decisions and open work
 
-2026-11-16 8bf字体正文／来源切换候选已完成215项、严格构建、Chrome／本地整局及同源Linux310／PG216／1841SHA、旧档隔离普通协议，已配套试发。原R1手机尺寸真实签名约28秒完成，但桌面11次200仍pending、交换／WS为0，原APPROVED_WALLET_LOGIN_NOT_OBSERVED失败，未测游戏或字体性能，R2未跑。已两端恢复e0／Fo，原320／232／232行与24配置保持，简繁出码／pending／取消通过但不代表签名交接已修。15覆盖恢复、29份WIP保持、进程全关。下一项受控复现状态交接／响应时序，保原门槛，不重发8bf或旧控制流程。首次冷Q／语言及全部1:1继续，Goal active。[原值、资格和回退](evidence/r16-font-body-progress-20261116/production/README.md)。
+2026-11-16 正式仍e0／Fo，本轮未发布。额外对照14个pending均在批准前，批准后两次无头12秒取消；独立真实Passkey／API通过。含两个主动探针的整局对照登录／建角成功，但FIRST_PLAYABLE_SCENE_NOT_OBSERVED、走路0且正常注销，原8bf失败未覆盖。新候选补显式空JSON、正文2秒及Relay原8秒完整体边界；28项／严格隔离构建、本地实际UI→Next→Passkey→Gateway唯一登录、同证明401通过，R1界面失败／R2原始CDP补图单列。29份WIP保持、19覆盖恢复、进程关闭；下一项新同源资格及公网原门槛。偶发根因、进城资源、首次Q／语言与整体1:1继续，Goal active。[当前证据](evidence/r16-auth-handoff-20261116/README.md) · [原试发回退](evidence/r16-font-body-progress-20261116/production/README.md)。
 
 2026-11-15 用户补充寻路“目标不对或到不了”：本地候选ceb1c1132f补大小地图坐标／30秒初始期限／到达反馈和十语入口说明。152项、独立严格构建与英繁两后端实际跨图／慢碰撞超时／晚到零旧移动／重登新目标／正常保存通过，30份内容WIP保持。本轮未发布；其他目标与既有公网资源失败继续。[记录与范围](evidence/r16-route-feedback-20261115/README.md)
 

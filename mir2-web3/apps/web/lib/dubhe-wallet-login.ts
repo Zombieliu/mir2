@@ -63,7 +63,10 @@ async function waitForVisible(options: LoginOptions, expiresAt: number) {
 
 async function requestQrJson(options: LoginOptions, session?: { intentToken: string; expiresAt: number }) {
   const path = session ? "/api/wallet/dubhe/session/status" : "/api/wallet/dubhe/session";
-  const headers = session ? { authorization: `Bearer ${session.intentToken}` } : undefined;
+  const headers = {
+    "content-type": "application/json",
+    ...(session ? { authorization: `Bearer ${session.intentToken}` } : {}),
+  };
   const timeoutMs = session ? POLL_TIMEOUT_MS : CREATE_TIMEOUT_MS;
   for (let attempt = 0; ; attempt++) {
     assertCurrent(options);
@@ -74,7 +77,9 @@ async function requestQrJson(options: LoginOptions, session?: { intentToken: str
     const signal = AbortSignal.any([options.signal, deadline]);
     let response: Response | undefined;
     try {
-      response = await fetch(path, { method: "POST", cache: "no-store", credentials: "same-origin", headers, signal });
+      response = await fetch(path, {
+        method: "POST", cache: "no-store", credentials: "same-origin", headers, body: "{}", signal,
+      });
       return await readResponse(response);
     } catch (error) {
       assertCurrent(options);

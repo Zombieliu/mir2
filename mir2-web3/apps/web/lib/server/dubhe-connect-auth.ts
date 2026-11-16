@@ -199,37 +199,48 @@ function verifyIntent(token: string, origin: string, context?: DubheAuthContext)
   return { auth: INTENT_AUTH, iatMs, expMs, session: trusted };
 }
 
-async function boundedText(response: Response, maxBytes: number): Promise<string> {
+async function boundedText(response: Response, maxBytes: number, signal: AbortSignal): Promise<string> {
   if (!response.ok || !response.body) fail(502);
+  signal.throwIfAborted();
   const reader = response.body.getReader();
   const parts: Uint8Array[] = [];
   let length = 0;
+  let abort: () => void;
+  const aborted = new Promise<never>((_, reject) => {
+    abort = () => reject(signal.reason);
+    signal.addEventListener("abort", abort, { once: true });
+  });
   try {
     while (true) {
-      const { done, value } = await reader.read();
+      const { done, value } = await Promise.race([reader.read(), aborted]);
       if (done) break;
       length += value.byteLength;
       if (length > maxBytes) {
-        await reader.cancel();
         fail(502);
       }
       parts.push(value);
     }
   } finally {
+    signal.removeEventListener("abort", abort!);
+    // Cancellation belongs to the producer and is allowed to remain pending.
+    // An oversized or stalled body must not hold the login handler open while
+    // waiting for that producer to acknowledge cancellation.
+    void reader.cancel().catch(() => undefined);
     reader.releaseLock();
   }
   return Buffer.concat(parts).toString("utf8");
 }
 
-async function boundedJson(response: Response, maxBytes: number): Promise<unknown> {
-  return JSON.parse(await boundedText(response, maxBytes));
+async function boundedJson(response: Response, maxBytes: number, signal: AbortSignal): Promise<unknown> {
+  return JSON.parse(await boundedText(response, maxBytes, signal));
 }
 
 async function relayJson(url: string, init?: RequestInit) {
+  const signal = AbortSignal.timeout(8_000);
   const response = await fetch(url, {
-    ...init, cache: "no-store", redirect: "error", signal: AbortSignal.timeout(8_000),
+    ...init, cache: "no-store", redirect: "error", signal,
   });
-  return boundedJson(response, MAX_RELAY_BYTES);
+  return boundedJson(response, MAX_RELAY_BYTES, signal);
 }
 
 async function allowedOrigin(request: Request, context?: DubheAuthContext): Promise<string> {
@@ -240,7 +251,8 @@ async function allowedOrigin(request: Request, context?: DubheAuthContext): Prom
   if (request.body) {
     // NextRequest can expose an empty stream for a bodyless POST. Treat that
     // exactly like Request.body === null while still bounding any supplied body.
-    const raw = await boundedText(new Response(request.body), 1_024).catch(() => fail(400));
+    const raw = await boundedText(new Response(request.body), 1_024, AbortSignal.timeout(2_000))
+      .catch(() => fail(400));
     if (raw.trim()) {
       let body: unknown;
       try { body = JSON.parse(raw); } catch { fail(400); }

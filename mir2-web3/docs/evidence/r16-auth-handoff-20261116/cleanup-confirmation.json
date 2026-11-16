@@ -1,0 +1,13 @@
+{
+  "listeners": [],
+  "checkedPorts": [
+    20630,
+    20631,
+    20632
+  ],
+  "allClosed": true,
+  "at": "2026-11-16T05:15:38.1235784Z",
+  "scope": "Later actual port and exact owned source-directory process check. Original r1 next=false flag omitted signalCode; original receipt is unchanged.",
+  "matchingOwnedNextProcesses": [],
+  "originalR1FlagRetained": true
+}

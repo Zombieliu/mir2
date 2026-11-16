@@ -1,0 +1,25 @@
+{
+  "source": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+  "controlFailed": true,
+  "failure": "APPROVED_WALLET_LOGIN_NOT_OBSERVED",
+  "mobileApprovedAtEpoch": 1794803362168,
+  "preApprovalPending": 14,
+  "postApprovalHeaders": 0,
+  "afterApproval": [
+    {
+      "requestAtMs": 53535,
+      "elapsedUntilFailure": 12002,
+      "failure": "net::ERR_ABORTED",
+      "headersReceived": false
+    },
+    {
+      "requestAtMs": 65792,
+      "elapsedUntilFailure": 12000,
+      "failure": "net::ERR_ABORTED",
+      "headersReceived": false
+    }
+  ],
+  "allVisibilitySamplesVisible": true,
+  "observedDynamicNoStore": true,
+  "interpretation": "All observed pending bodies preceded approval. Subsequent two requests had no response headers and were cancelled at12s each. Does not establish upstream cache or signature-verifier cause."
+}

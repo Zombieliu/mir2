@@ -1,0 +1,50 @@
+{
+  "source": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+  "deployment": "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN",
+  "diagnosticControl": true,
+  "activeProbes": 2,
+  "passed": false,
+  "failure": {
+    "phase": "ordinary-first-playable-scene",
+    "code": "FIRST_PLAYABLE_SCENE_NOT_OBSERVED"
+  },
+  "ws": {
+    "gameSockets": 1,
+    "passkeyLogin": 1,
+    "loginSuccess": 1,
+    "newCharacter": 1,
+    "newCharacterSuccess": 1,
+    "startGame": 1,
+    "startGameResult": 4,
+    "walk": 0,
+    "logOut": 1,
+    "logOutSuccess": 1,
+    "unexpectedMutation": 0
+  },
+  "timing": {
+    "clockEpochMs": 1794804883819,
+    "authoritativeLoginSuccessMs": 27362,
+    "startIntentMs": 58257,
+    "startAckMs": 62812,
+    "authoritativeStarterMapMs": 62817,
+    "authoritativeSelfMs": 62818,
+    "logoutIntentMs": 183043,
+    "logoutAckMs": 184251,
+    "manifestAttemptsBeforeStart": 1,
+    "manifestAttemptsAtOrAfterStart": 0,
+    "starterRegionRequestMs": 27365,
+    "starterRegionWireHeadersMs": null,
+    "starterRegionResponseEventMs": null,
+    "starterRegionBodyMs": null,
+    "starterRegionCommitMs": null,
+    "sceneSpritesReadyMs": null,
+    "localeRequestMs": 43730,
+    "localeBodyMs": 68715,
+    "localeReadyMs": 68753,
+    "firstPlayableFrameMs": null,
+    "rendererBodyMs": null
+  },
+  "selectWaitAfterAuthMs": 30432,
+  "scope": "Existing production control only. Original gameplay classifier and deadlines retained; additional active probes mean it is not a replacement for the original failed public run.",
+  "originalSource8bfFailureRetained": true
+}

@@ -1,0 +1,96 @@
+{
+  "scope": "API diagnosis only; no game, channel exchange, WS, account/role or gameplay acceptance.",
+  "startedAt": "2026-11-16T04:50:34.448Z",
+  "source": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+  "requests": [
+    {
+      "label": "before-approval-bodyless",
+      "httpStatus": 200,
+      "headerAtMs": 251,
+      "bodyAtMs": 251,
+      "bodyBytes": 20,
+      "status": "pending",
+      "hasLoginProof": false,
+      "headers": {
+        "cache-control": "no-store",
+        "pragma": "no-cache",
+        "cf-cache-status": "DYNAMIC",
+        "x-vercel-cache": "MISS",
+        "x-vercel-id": "sin1::sin1::zzqlx-1794804646075-b43877e46c6c"
+      }
+    },
+    {
+      "label": "after-approval-version",
+      "httpStatus": 200,
+      "headerAtMs": 175,
+      "bodyAtMs": 175,
+      "bodyBytes": 55,
+      "status": null,
+      "hasLoginProof": false,
+      "revision": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+      "headers": {
+        "cache-control": "no-store",
+        "cf-cache-status": "DYNAMIC",
+        "x-vercel-cache": "MISS",
+        "x-vercel-id": "sin1::sin1::zwwj8-1794804649260-3da9523ce6a2"
+      }
+    },
+    {
+      "label": "after-approval-bodyless",
+      "httpStatus": 200,
+      "headerAtMs": 295,
+      "bodyAtMs": 295,
+      "bodyBytes": 504,
+      "status": "approved",
+      "hasLoginProof": true,
+      "headers": {
+        "cache-control": "no-store",
+        "pragma": "no-cache",
+        "cf-cache-status": "DYNAMIC",
+        "x-vercel-cache": "MISS",
+        "x-vercel-id": "sin1::sin1::qk5sh-1794804649217-481ab18c54d3"
+      }
+    },
+    {
+      "label": "node-after-approval-empty-object",
+      "httpStatus": 200,
+      "headerAtMs": 797,
+      "bodyAtMs": 798,
+      "status": "approved",
+      "hasLoginProof": true,
+      "vercelRequestId": "sin1::sin1::2lh75-1794804649719-e66244328920"
+    },
+    {
+      "label": "after-approval-empty-object",
+      "httpStatus": 200,
+      "headerAtMs": 1617,
+      "bodyAtMs": 1618,
+      "bodyBytes": 504,
+      "status": "approved",
+      "hasLoginProof": true,
+      "headers": {
+        "cache-control": "no-store",
+        "pragma": "no-cache",
+        "cf-cache-status": "DYNAMIC",
+        "x-vercel-cache": "MISS",
+        "x-vercel-id": "sin1::sin1::xxpzn-1794804649261-a7a9ede10394"
+      }
+    }
+  ],
+  "proofPersisted": false,
+  "productionChanged": false,
+  "approvedAt": "2026-11-16T04:50:48.904Z",
+  "remainingAtApprovalMs": 116625,
+  "relayApprovedBodyBytes": 2531,
+  "signatureBytes": 287,
+  "signatureScheme": "Passkey",
+  "localVerification": {
+    "valid": true,
+    "publicKeyMatches": true,
+    "elapsedMs": 269,
+    "fetchAttempts": 0
+  },
+  "completed": true,
+  "desktopClosed": true,
+  "endedAt": "2026-11-16T04:50:50.721Z"
+}

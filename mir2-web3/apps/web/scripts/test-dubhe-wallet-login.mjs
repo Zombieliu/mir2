@@ -105,6 +105,11 @@ test("Dubhe approval exchanges the proof once for the canonical channel account"
   assert.equal(state.requests[1][1].headers.authorization, `Bearer ${state.created.intentToken}`);
   assert.equal(state.requests[0][1].credentials, "same-origin");
   assert.equal(state.requests[0][1].cache, "no-store");
+  for (const [, options] of state.requests) {
+    assert.equal(options.headers["content-type"], "application/json");
+    assert.equal(options.body, "{}");
+    assert.equal(options.signal.aborted, false);
+  }
   assert.ok(!state.states.some((value) => JSON.stringify(value).includes(state.created.intentToken)));
 });
 
@@ -249,7 +254,7 @@ test("a transient poll retries the same intent and keeps its code, visibility an
     assert.equal(state.requests.length, 3);
     for (const [, request] of state.requests.slice(1)) {
       assert.equal(request.headers.authorization, `Bearer ${state.created.intentToken}`);
-      assert.equal(request.body, undefined);
+      assert.equal(request.body, "{}");
     }
     assert.equal(state.exchanges.length, 1);
   }

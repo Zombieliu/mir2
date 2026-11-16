@@ -1,0 +1,52 @@
+{
+  "scope": "Isolated strict production Next build, controlled in-memory relay with real Passkey crypto, actual Rust Gateway and browser UI. No production access, real wallet/phone acceptance or role/gameplay qualification.",
+  "candidate": "r16-auth-body-56c223a0",
+  "startedAt": "2026-11-16T05:08:51.926Z",
+  "passed": false,
+  "requestBodies": [
+    {
+      "kind": "create",
+      "bodyIsEmptyObject": true,
+      "jsonContentType": true,
+      "intentHeaderPresent": false
+    },
+    {
+      "kind": "status",
+      "bodyIsEmptyObject": true,
+      "jsonContentType": true,
+      "intentHeaderPresent": true
+    },
+    {
+      "kind": "status",
+      "bodyIsEmptyObject": true,
+      "jsonContentType": true,
+      "intentHeaderPresent": true
+    }
+  ],
+  "relay": {
+    "creates": 1,
+    "polls": 2,
+    "approvals": 1
+  },
+  "wire": {
+    "loginSuccess": 1,
+    "passkeyLogin": 1,
+    "unexpectedMutation": 0
+  },
+  "closed": {
+    "browser": true,
+    "next": false,
+    "gateway": true,
+    "relay": true
+  },
+  "incompletePost": {
+    "status": 400,
+    "elapsedMs": 2023
+  },
+  "failure": {
+    "name": "TimeoutError",
+    "category": "assertion-or-browser-failure",
+    "messageHash": "d2fb405f53287ceb51c089b19050c63b8d34e726b33e3962fd4c7293880a0115"
+  },
+  "finishedAt": "2026-11-16T05:09:35.571Z"
+}
