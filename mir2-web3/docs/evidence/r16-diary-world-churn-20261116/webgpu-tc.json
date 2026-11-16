@@ -1,0 +1,705 @@
+{
+  "passed": true,
+  "scope": "Fresh ordinary Warrior in Bichon, complete original standing/walking body verification and a natural DOM walking frame; local shared Zone AI1/2 idle-roam candidate Gateway, reused real asset CacheStorage and cleared browser HTTP cache. Not public-network, pure-GPU/all-directions or complete1:1 acceptance.",
+  "source": "r16-diary-world-615e1a69",
+  "language": "zh-TW",
+  "legacyHelperMode": "compatibility",
+  "actualBackend": {
+    "selectedBackend": "webgpu",
+    "packageId": "webgpu"
+  },
+  "movement": {
+    "passed": true,
+    "ackMs": 116,
+    "from": {
+      "map": "0",
+      "x": 288,
+      "y": 616,
+      "interactive": true,
+      "first": 1794814846070
+    },
+    "to": {
+      "map": "0",
+      "x": 288,
+      "y": 617,
+      "interactive": true,
+      "first": 1794814846070
+    }
+  },
+  "native": {
+    "millisecondsAfterFirstFrame": 111853,
+    "originalBudgetMs": 120000
+  },
+  "originalPublicDiary": {
+    "passed": true,
+    "locale": "zh-TW",
+    "renderer": "ordinary-shared-native",
+    "questOpened": true,
+    "qClosed": true,
+    "owner": "bevy",
+    "package": {
+      "backend": "webgpu",
+      "packageId": "webgpu"
+    },
+    "navigation": {
+      "characterOpen": false,
+      "characterPage": "character",
+      "bagOpen": false,
+      "questOpen": true
+    },
+    "zeroWorldCommands": true,
+    "screenshot": "quest-shared-zh-TW.png"
+  },
+  "firstDiary": {
+    "passed": true,
+    "label": "first-entry",
+    "before": {
+      "at": 1794814958518,
+      "owner": "bevy",
+      "interactive": true,
+      "canvas": "#mir2-web3-canvas",
+      "quest": {
+        "ready": true,
+        "open": false,
+        "generation": 2,
+        "revision": 33,
+        "openRevision": 3
+      },
+      "hud": {
+        "ready": true,
+        "navigation": {
+          "characterOpen": false,
+          "characterPage": "character",
+          "bagOpen": false,
+          "questOpen": true
+        }
+      },
+      "keyboard": {
+        "at": 1794814958470,
+        "actions": [
+          "quests"
+        ],
+        "stage": "dispatch",
+        "reason": "window-action",
+        "accepted": true,
+        "handled": true,
+        "repeat": false,
+        "focused": true,
+        "visible": true,
+        "editable": null,
+        "sceneInteractionReady": true,
+        "gameplayCallbackPresent": true,
+        "defaultPrevented": true,
+        "heroActive": false,
+        "heroTransitioning": false,
+        "heroWorldBlocked": false,
+        "heroLeaseHeld": false
+      },
+      "first": 1794814846070
+    },
+    "opened": {
+      "at": 1794814958650,
+      "owner": "bevy",
+      "interactive": true,
+      "canvas": "#mir2-web3-canvas",
+      "quest": {
+        "ready": true,
+        "open": true,
+        "generation": 2,
+        "revision": 34,
+        "openRevision": 4
+      },
+      "hud": {
+        "ready": true,
+        "navigation": {
+          "characterOpen": false,
+          "characterPage": "character",
+          "bagOpen": false,
+          "questOpen": true
+        }
+      },
+      "keyboard": {
+        "at": 1794814958589,
+        "actions": [
+          "quests"
+        ],
+        "stage": "dispatch",
+        "reason": "window-action",
+        "accepted": true,
+        "repeat": false,
+        "focused": true,
+        "visible": true,
+        "editable": false,
+        "sceneInteractionReady": true,
+        "gameplayCallbackPresent": true,
+        "defaultPrevented": false,
+        "heroActive": false,
+        "heroTransitioning": false,
+        "heroWorldBlocked": false,
+        "heroLeaseHeld": false
+      },
+      "first": 1794814846070
+    },
+    "closed": {
+      "at": 1794814958920,
+      "owner": "bevy",
+      "interactive": true,
+      "canvas": "#mir2-web3-canvas",
+      "quest": {
+        "ready": true,
+        "open": false,
+        "generation": 2,
+        "revision": 35,
+        "openRevision": 5
+      },
+      "hud": {
+        "ready": true,
+        "navigation": {
+          "characterOpen": false,
+          "characterPage": "character",
+          "bagOpen": false,
+          "questOpen": true
+        }
+      },
+      "keyboard": {
+        "at": 1794814958895,
+        "actions": [
+          "quests"
+        ],
+        "stage": "dispatch",
+        "reason": "window-action",
+        "accepted": true,
+        "handled": true,
+        "repeat": false,
+        "focused": true,
+        "visible": true,
+        "editable": null,
+        "sceneInteractionReady": true,
+        "gameplayCallbackPresent": true,
+        "defaultPrevented": true,
+        "heroActive": false,
+        "heroTransitioning": false,
+        "heroWorldBlocked": false,
+        "heroLeaseHeld": false
+      },
+      "first": 1794814846070
+    },
+    "zeroGameplayMutations": true,
+    "scope": "Actual installed Edge, original Native runtime and normal configured Q. HUD readiness is observed, never forced or simulated."
+  },
+  "reopenedDiary": {
+    "passed": true,
+    "label": "reopened",
+    "before": {
+      "at": 1794814975861,
+      "owner": "bevy",
+      "interactive": true,
+      "canvas": "#mir2-web3-canvas",
+      "quest": {
+        "ready": true,
+        "open": false,
+        "generation": 2,
+        "revision": 2,
+        "openRevision": 1
+      },
+      "hud": {
+        "ready": true,
+        "navigation": {
+          "characterOpen": false,
+          "characterPage": "character",
+          "bagOpen": false,
+          "questOpen": false
+        }
+      },
+      "keyboard": null,
+      "first": 1794814974704
+    },
+    "opened": {
+      "at": 1794814975992,
+      "owner": "bevy",
+      "interactive": true,
+      "canvas": "#mir2-web3-canvas",
+      "quest": {
+        "ready": true,
+        "open": true,
+        "generation": 2,
+        "revision": 3,
+        "openRevision": 2
+      },
+      "hud": {
+        "ready": true,
+        "navigation": {
+          "characterOpen": false,
+          "characterPage": "character",
+          "bagOpen": false,
+          "questOpen": true
+        }
+      },
+      "keyboard": {
+        "at": 1794814975906,
+        "actions": [
+          "quests"
+        ],
+        "stage": "dispatch",
+        "reason": "window-action",
+        "accepted": true,
+        "repeat": false,
+        "focused": true,
+        "visible": true,
+        "editable": false,
+        "sceneInteractionReady": true,
+        "gameplayCallbackPresent": true,
+        "defaultPrevented": false,
+        "heroActive": false,
+        "heroTransitioning": false,
+        "heroWorldBlocked": false,
+        "heroLeaseHeld": false
+      },
+      "first": 1794814974704
+    },
+    "closed": {
+      "at": 1794814976358,
+      "owner": "bevy",
+      "interactive": true,
+      "canvas": "#mir2-web3-canvas",
+      "quest": {
+        "ready": true,
+        "open": false,
+        "generation": 2,
+        "revision": 4,
+        "openRevision": 3
+      },
+      "hud": {
+        "ready": true,
+        "navigation": {
+          "characterOpen": false,
+          "characterPage": "character",
+          "bagOpen": false,
+          "questOpen": true
+        }
+      },
+      "keyboard": {
+        "at": 1794814976323,
+        "actions": [
+          "quests"
+        ],
+        "stage": "dispatch",
+        "reason": "window-action",
+        "accepted": true,
+        "handled": true,
+        "repeat": false,
+        "focused": true,
+        "visible": true,
+        "editable": null,
+        "sceneInteractionReady": true,
+        "gameplayCallbackPresent": true,
+        "defaultPrevented": true,
+        "heroActive": false,
+        "heroTransitioning": false,
+        "heroWorldBlocked": false,
+        "heroLeaseHeld": false
+      },
+      "first": 1794814974704
+    },
+    "zeroGameplayMutations": true,
+    "scope": "Actual installed Edge, original Native runtime and normal configured Q. HUD readiness is observed, never forced or simulated."
+  },
+  "fonts": {
+    "passed": true,
+    "expected": [
+      {
+        "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+        "bytes": 16437364,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansTC.ttf",
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+        "bytes": 621572,
+        "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+        "bytes": 243520,
+        "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+        "bytes": 37780,
+        "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+        "bytes": 234892,
+        "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+      }
+    ],
+    "cacheReadsOnly": true,
+    "rows": [
+      {
+        "path": "/original-ui/fonts/NotoSansCJKsc-Regular.otf",
+        "present": true,
+        "bytes": 16437364,
+        "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansTC.ttf",
+        "present": true,
+        "bytes": 11941968,
+        "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSans-Regular.ttf",
+        "present": true,
+        "bytes": 621572,
+        "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansDevanagari-Regular.ttf",
+        "present": true,
+        "bytes": 243520,
+        "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansThai-Regular.ttf",
+        "present": true,
+        "bytes": 37780,
+        "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+      },
+      {
+        "path": "/original-ui/fonts/NotoSansArabic-Regular.ttf",
+        "present": true,
+        "bytes": 234892,
+        "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+      }
+    ]
+  },
+  "prewarm": {
+    "runs": [
+      {
+        "name": "hud-core",
+        "label": "Core HUD",
+        "requested": 113,
+        "ok": 113,
+        "failed": 0,
+        "failedUrls": [],
+        "durationMs": 191.60000002384186,
+        "sceneCacheHits": 0,
+        "sceneCacheMisses": 0,
+        "status": "done"
+      }
+    ],
+    "summary": {
+      "requested": 113,
+      "ok": 113,
+      "failed": 0
+    },
+    "active": null
+  },
+  "walking": {
+    "passed": true,
+    "bodyPassed": true,
+    "framePassed": true,
+    "failure": null,
+    "clockEpochMs": 1794814831498,
+    "originalVisualBudgetMs": 65000,
+    "browserHttpCacheClearedBeforeLogin": true,
+    "rows": [
+      {
+        "kind": "runtime",
+        "path": "/bevy-runtime/v/bevy-0c553a754308e5b8/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
+        "requestMs": 6545,
+        "priority": "High",
+        "bytesObserved": 31452436,
+        "redirected": false,
+        "status": 200,
+        "mime": "application/wasm",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "headersMs": 6565,
+        "finishedMs": 7013
+      },
+      {
+        "kind": "standing",
+        "path": "/bootstrap/r16-visuals/d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308.json",
+        "requestMs": 14567,
+        "priority": "High",
+        "bytesObserved": 513566,
+        "redirected": false,
+        "status": 200,
+        "mime": "application/json",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "headersMs": 14574,
+        "finishedMs": 14580,
+        "bytes": 513566,
+        "sha256": "d3f04c400820d8cd66b49b8af638a86e719bcf1032082be5a7ec80757bdf4308",
+        "pinMatches": true,
+        "verifiedMs": 14589
+      },
+      {
+        "kind": "walking",
+        "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+        "requestMs": 14567,
+        "priority": "High",
+        "bytesObserved": 530467,
+        "redirected": false,
+        "status": 200,
+        "mime": "application/json",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "headersMs": 14574,
+        "failure": "net::ERR_ABORTED",
+        "failedMs": 22579
+      },
+      {
+        "kind": "walking",
+        "path": "/bootstrap/r16-visuals/41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f.json",
+        "requestMs": 22781,
+        "priority": "High",
+        "bytesObserved": 0,
+        "redirected": false,
+        "failure": "net::ERR_ABORTED",
+        "failedMs": 30783
+      },
+      {
+        "kind": "compiled-part",
+        "path": "/_next/static/chunks/r16-entry-monster-walking-000-fallback.7a8d33b38b946008.js",
+        "requestMs": 30783,
+        "priority": "Low",
+        "bytesObserved": 210772,
+        "redirected": false,
+        "libraryKey": "Monster/000",
+        "status": 200,
+        "mime": "application/javascript",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "headersMs": 30797,
+        "finishedMs": 30797,
+        "part": {
+          "passed": true,
+          "libraryKey": "Monster/000",
+          "scriptBytes": 210772,
+          "scriptSha256": "ed4fd1ee0928ee7196296c34629184bd6adc2600287060948eb59e0b5ec12558",
+          "payloadBytes": 210658,
+          "payloadSha256": "1f8307486897ae7be3af2e0f64f95dc4d2e21222c6e99ed1a1ae919300c2daa9",
+          "imageCount": 48
+        },
+        "verifiedMs": 30803
+      },
+      {
+        "kind": "compiled-part",
+        "path": "/_next/static/chunks/r16-entry-monster-walking-003-fallback.5afec1e37d86cb60.js",
+        "requestMs": 30783,
+        "priority": "Low",
+        "bytesObserved": 60903,
+        "redirected": false,
+        "libraryKey": "Monster/003",
+        "status": 200,
+        "mime": "application/javascript",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "headersMs": 30788,
+        "finishedMs": 30788,
+        "part": {
+          "passed": true,
+          "libraryKey": "Monster/003",
+          "scriptBytes": 60903,
+          "scriptSha256": "86f8649e69e5f1ec516a1f6e597faec98215dadf3cc4d16c7d25a6166f8155b5",
+          "payloadBytes": 60788,
+          "payloadSha256": "d47c92dfcbaa0e7bb9d2790c2f8204cd75c7e5fd5673cc08628d1a90d45d8f4b",
+          "imageCount": 48
+        },
+        "verifiedMs": 30796
+      },
+      {
+        "kind": "compiled-part",
+        "path": "/_next/static/chunks/r16-entry-monster-walking-004-fallback.50fc51be1c8a9cad.js",
+        "requestMs": 30790,
+        "priority": "Low",
+        "bytesObserved": 151295,
+        "redirected": false,
+        "libraryKey": "Monster/004",
+        "status": 200,
+        "mime": "application/javascript",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "headersMs": 30804,
+        "finishedMs": 30804,
+        "part": {
+          "passed": true,
+          "libraryKey": "Monster/004",
+          "scriptBytes": 151295,
+          "scriptSha256": "bc0f2276f93d8e34b69ac765182956524f69699eeb62bd7b2a8b69712ca98318",
+          "payloadBytes": 151180,
+          "payloadSha256": "65db6b2b5abdfa41a08c81f8ee577eb306aafc21c2b14b0c18281d13a9daec97",
+          "imageCount": 48
+        },
+        "verifiedMs": 30808
+      },
+      {
+        "kind": "compiled-part",
+        "path": "/_next/static/chunks/r16-entry-monster-walking-005-fallback.817e924c658656f8.js",
+        "requestMs": 30792,
+        "priority": "Low",
+        "bytesObserved": 176960,
+        "redirected": false,
+        "libraryKey": "Monster/005",
+        "status": 200,
+        "mime": "application/javascript",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "headersMs": 30804,
+        "finishedMs": 30804,
+        "part": {
+          "passed": true,
+          "libraryKey": "Monster/005",
+          "scriptBytes": 176960,
+          "scriptSha256": "0dab72861109a9f113954dfe2ac6d3e49cdedf3a48b30fcdfb714d79b2ac891f",
+          "payloadBytes": 176845,
+          "payloadSha256": "add27ee1a13b42f367f5dddde27581712bcb85b8cd670a9f8765eec43d248dfa",
+          "imageCount": 48
+        },
+        "verifiedMs": 30810
+      },
+      {
+        "kind": "compiled-part",
+        "path": "/_next/static/chunks/r16-entry-monster-walking-139-fallback.c2cedcc45ee3e622.js",
+        "requestMs": 30801,
+        "priority": "Low",
+        "bytesObserved": 165475,
+        "redirected": false,
+        "libraryKey": "Monster/139",
+        "status": 200,
+        "mime": "application/javascript",
+        "fromDiskCache": false,
+        "fromServiceWorker": false,
+        "headersMs": 30811,
+        "finishedMs": 30811,
+        "part": {
+          "passed": true,
+          "libraryKey": "Monster/139",
+          "scriptBytes": 165475,
+          "scriptSha256": "47191790835e6802f6bd7e7f4c7c5907a8a19e5a049c506c5e4e8ee0696ef86c",
+          "payloadBytes": 165361,
+          "payloadSha256": "774e7639568a7cf305cf62ea0273a2d0820abb6f5a696afdd8c349f6eb8a662d",
+          "imageCount": 48
+        },
+        "verifiedMs": 30825
+      }
+    ],
+    "compiled": {
+      "passed": true,
+      "parts": [
+        {
+          "passed": true,
+          "libraryKey": "Monster/000",
+          "scriptBytes": 210772,
+          "scriptSha256": "ed4fd1ee0928ee7196296c34629184bd6adc2600287060948eb59e0b5ec12558",
+          "payloadBytes": 210658,
+          "payloadSha256": "1f8307486897ae7be3af2e0f64f95dc4d2e21222c6e99ed1a1ae919300c2daa9",
+          "imageCount": 48
+        },
+        {
+          "passed": true,
+          "libraryKey": "Monster/003",
+          "scriptBytes": 60903,
+          "scriptSha256": "86f8649e69e5f1ec516a1f6e597faec98215dadf3cc4d16c7d25a6166f8155b5",
+          "payloadBytes": 60788,
+          "payloadSha256": "d47c92dfcbaa0e7bb9d2790c2f8204cd75c7e5fd5673cc08628d1a90d45d8f4b",
+          "imageCount": 48
+        },
+        {
+          "passed": true,
+          "libraryKey": "Monster/004",
+          "scriptBytes": 151295,
+          "scriptSha256": "bc0f2276f93d8e34b69ac765182956524f69699eeb62bd7b2a8b69712ca98318",
+          "payloadBytes": 151180,
+          "payloadSha256": "65db6b2b5abdfa41a08c81f8ee577eb306aafc21c2b14b0c18281d13a9daec97",
+          "imageCount": 48
+        },
+        {
+          "passed": true,
+          "libraryKey": "Monster/005",
+          "scriptBytes": 176960,
+          "scriptSha256": "0dab72861109a9f113954dfe2ac6d3e49cdedf3a48b30fcdfb714d79b2ac891f",
+          "payloadBytes": 176845,
+          "payloadSha256": "add27ee1a13b42f367f5dddde27581712bcb85b8cd670a9f8765eec43d248dfa",
+          "imageCount": 48
+        },
+        {
+          "passed": true,
+          "libraryKey": "Monster/139",
+          "scriptBytes": 165475,
+          "scriptSha256": "47191790835e6802f6bd7e7f4c7c5907a8a19e5a049c506c5e4e8ee0696ef86c",
+          "payloadBytes": 165361,
+          "payloadSha256": "774e7639568a7cf305cf62ea0273a2d0820abb6f5a696afdd8c349f6eb8a662d",
+          "imageCount": 48
+        }
+      ],
+      "payloadBytes": 764724,
+      "payloadSha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+      "pngs": 240,
+      "libraries": 5,
+      "directions": 8,
+      "framesPerDirection": 6,
+      "scope": "Complete AST/JSON extraction from observed scripts, exact aggregate digest and PNG decoding; no module execution or resource prefill.",
+      "verifiedMs": 30861,
+      "source": "compiled-parts"
+    },
+    "visibleFrame": {
+      "atMs": 31324,
+      "verifiedMs": 31324,
+      "objectId": "206339",
+      "path": "/original-ui/Monster/004/68.png",
+      "index": 68,
+      "direction": 6,
+      "decoded": true,
+      "packed": true,
+      "visible": true,
+      "naturalWidth": 80,
+      "naturalHeight": 68,
+      "pngBytes": 2364,
+      "pngSha256": "846962f1356b7aeaac2fa78e2bbe16b8e6379b098cb3869bfed9cd29f0136082",
+      "pixelSha256": "e9f0ba609f6a0f4a330aab8b8e00129c4c32da3cd6c84ba832244d8ffad87e05",
+      "rect": {
+        "x": 197,
+        "y": 150,
+        "width": 80,
+        "height": 68
+      },
+      "scope": "One live visible DOM packed walking image; no pure-GPU or multi-frame authority claim."
+    },
+    "expectedJsonBytes": 764724,
+    "expectedJsonSha256": "41fcaae2757ad0351da2e3840bf54008952b5c2714441530bb64c21f5c9fd64f",
+    "pngCount": 240,
+    "scope": "Controlled local transport failures, original full payload and visible exact-PNG natural frame. No valid body prefill, forced actor motion, WebSocket interception or pure-GPU/all-directions acceptance."
+  },
+  "normalSave": {
+    "normalLogout": true,
+    "position": {
+      "x": 288,
+      "y": 617
+    },
+    "originalRolesAndSavesPreserved": true,
+    "newRoleReopenedAtSavedPosition": true
+  },
+  "packetMotionCounts": {
+    "ObjectWalk": 54,
+    "ObjectRun": 0,
+    "ObjectTurn": 0
+  },
+  "closed": {
+    "browser": true,
+    "proxy": true,
+    "next": true,
+    "gateway": true
+  },
+  "originalSourceSnapshotUnchanged": true,
+  "physicalPhone": false,
+  "publicColdQualification": false
+}

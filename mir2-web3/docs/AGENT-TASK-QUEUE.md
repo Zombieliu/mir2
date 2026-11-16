@@ -6,7 +6,7 @@ Updated 2026-11-16 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-16 fea同源Linux／旧档canary及本地英繁完整流程通过，已实际成对试发。公网原R1签名登录及136ms首步通过，完整行走／Native120／Q关闭／正常注销未过，R2不执行；两端已恢复e0／Fo，原321／233／233行及24配置保持、QA进度保留。下一项默认WebGPU受控完整回放、场景包超时恢复及共享界面启动／Q输入；不原样重发、不以compat／WebGL2通过代替默认路径。29份WIP保持、全部自建进程关闭，全部R16目标继续active。[原判定、画面与回退](evidence/r16-auth-handoff-20261116/production/README.md)。
+2026-11-16 新日记关闭候选通过66项／严格构建，繁体默认WebGPU及共享WebGL2均完成原公网Q helper、六字体113／自然帧／正常注销和同角保存重进；原本地截图字体等待失败保留，21覆盖恢复、29份WIP保持。未发布，正式仍e0／Fo；下一项场景对象包两次20秒无头后的恢复、完整行走和Native冷启。此前fea公网原R1失败及成对回退不改写，全部R16目标继续active。[当前候选](evidence/r16-diary-world-churn-20261116/README.md) · [原试发与回退](evidence/r16-auth-handoff-20261116/production/README.md)。
 
 ## 保留的当前未结项
 

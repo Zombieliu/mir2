@@ -1,0 +1,10 @@
+{
+  "accepted": false,
+  "cohort": "game-r1",
+  "failure": "locator.screenshot: Timeout 11997.260000000002ms exceeded.\nCall log:\n\u001b[2m  - taking element screenshot\u001b[22m\n\u001b[2m  - waiting for fonts to load...\u001b[22m\n",
+  "stage": "ordinary-create-new-warrior-and-enter-original-town",
+  "allOwnedHandlesClosed": true,
+  "actualBackend": "webgpu",
+  "questNotReached": true,
+  "priorOriginalFailureRetained": true
+}

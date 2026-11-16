@@ -1233,6 +1233,83 @@ test("actual Page map-image press and route ownership retire only the captured s
     "map-route movement reaches only the ordinary directional Walk/Run wire");
 });
 
+function withOpenDiaryFixture(run) {
+  let mount, tick, closed = 0, intents = 0;
+  const react = { useRef: current => ({ current }), useCallback: fn => fn,
+    useState: initial => [initial, () => {}], useEffect: effect => { mount = effect; } };
+  const hook = load("../lib/use-bevy-quest-ui.ts", { react, "./bevy-quest-ui": host,
+    "./bevy-quest-world-context": worldContext,
+    "./bevy-hp-orb": load("../lib/bevy-hp-orb.ts"),
+    "./bevy-experience-bar": load("../lib/bevy-experience-bar.ts"),
+    "./bevy-weight-bar": load("../lib/bevy-weight-bar.ts"),
+    "./bevy-hud-bar-draw-plan": load("../lib/bevy-hud-bar-draw-plan.ts") }).useBevyQuestUi;
+  let model = { generation: 101, worldDraft: completeQuestDraft(101), inGame: true, hostVisible: true,
+    questLogOpen: true, blocksGameplayKeys: false, turnInBlocked: false, profile: "newcomer-v2", quests: [],
+    presentation: { logicalWidth: 1024, logicalHeight: 768, stageCssScale: 0.8, touch: false },
+    completedKnown: true, completedQuestIds: [], dialog: host.projectBevyQuestDialog(null),
+    player: { hp: 10, maxHp: 10, level: 1 } };
+  const submitted = [];
+  let applied = { ready: true, error: null, capturesPointer: true, questLogOpen: true,
+    generation: 101, revision: 0, openRevision: 0, frame: 1 };
+  const runtime = { getMir2QuestWorldContextVersion: () => 2,
+    setMir2QuestUiSnapshot(json) { submitted.push(JSON.parse(json)); return true; },
+    setMir2QuestUiIntentSink() {}, clearMir2QuestUiIntentSink() {},
+    getMir2QuestUiStatus: () => JSON.stringify(applied) };
+  const runtimeRef = { current: runtime };
+  const previousWindow = globalThis.window, previousDocument = globalThis.document;
+  globalThis.window = { setInterval(fn) { tick = fn; return 1; }, clearInterval() {} };
+  globalThis.document = { visibilityState: "visible", addEventListener() {}, removeEventListener() {} };
+  const view = hook({ requested: true, runtimeGeneration: 1, runtimeRef, snapshot: () => model,
+    onIntent() { intents++; return { accepted: true }; }, onOpenChange() {},
+    onCloseDiary() { closed++; model = { ...model, questLogOpen: false }; } });
+  let cleanup;
+  const apply = () => { applied = { ...applied, generation: submitted.at(-1).generation,
+    revision: submitted.at(-1).revision, openRevision: submitted.at(-1).openRevision,
+    questLogOpen: submitted.at(-1).questLogOpen, frame: applied.frame + 1 }; };
+  try {
+    cleanup = mount(); apply(); tick();
+    assert.equal(view.readLiveKeyboardCapture(), true);
+    run({ view, runtimeRef, patch: change => { model = change(model); }, tick: () => tick(), apply,
+      submitted, result: () => ({ closed, intents, open: model.questLogOpen }) });
+  } finally { cleanup?.(); globalThis.window = previousWindow; globalThis.document = previousDocument; }
+}
+
+test("diary close survives ordinary world changes before and after the next snapshot is submitted", () => {
+  for (const submit of [false, true]) withOpenDiaryFixture(f => {
+    f.patch(model => ({ ...model, player: { ...model.player, hp: 9 }, worldDraft: {
+      ...model.worldDraft, inventory: { ...model.worldDraft.inventory, gold: 1 },
+      entities: model.worldDraft.entities.map(row => row.kind === "monster" ? { ...row, x: row.x + 1 } : row),
+    } }));
+    if (submit) f.tick(); // Native still paints the prior revision of the same diary owner.
+    assert.equal(f.view.readLiveWorldControls(), null, "old world-action authority remains unavailable");
+    assert.equal(f.view.closeCurrentDiary(), true, "an ordinary update cannot trap the current diary");
+    assert.deepEqual(f.result(), { closed: 1, intents: 0, open: false });
+    assert.equal(f.view.closeCurrentDiary(), false, "the same close edge cannot repeat");
+  });
+});
+
+test("diary close waits for the new scene owner and rejects replaced runtime or generation", () => {
+  withOpenDiaryFixture(f => {
+    f.patch(model => ({ ...model, worldDraft: { ...model.worldDraft,
+      sceneRevision: model.worldDraft.sceneRevision + 1, mapFileName: "3" } }));
+    assert.equal(f.view.closeCurrentDiary(), false, "unsubmitted scene changes retire the old diary");
+    f.tick();
+    assert.equal(f.view.closeCurrentDiary(), false, "the old painted revision cannot authorize a new scene");
+    f.apply(); f.tick();
+    assert.equal(f.view.closeCurrentDiary(), true, "the applied new scene obtains its own close token");
+  });
+  withOpenDiaryFixture(f => {
+    f.runtimeRef.current = { ...f.runtimeRef.current };
+    assert.equal(f.view.closeCurrentDiary(), false);
+    assert.deepEqual(f.result(), { closed: 0, intents: 0, open: true });
+  });
+  withOpenDiaryFixture(f => {
+    f.patch(model => ({ ...model, generation: model.generation + 1,
+      worldDraft: { ...model.worldDraft, generation: model.worldDraft.generation + 1 } }));
+    assert.equal(f.view.closeCurrentDiary(), false);
+  });
+});
+
 test("packaged CJK font matches its pinned upstream bytes and retains its license", () => {
   const bytes = readFileSync(new URL("../public/original-ui/fonts/NotoSansCJKsc-Regular.otf", import.meta.url));
   assert.equal(bytes.length, 16437364);

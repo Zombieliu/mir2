@@ -1,0 +1,43 @@
+{
+  "passed": true,
+  "focusedTests": 37,
+  "adjacentTests": 29,
+  "totalDistinctTests": 66,
+  "failed": 0,
+  "skipped": 0,
+  "focusedCommand": "node --test scripts/test-bevy-quest-ui.mjs scripts/test-r16-quest-close-shortcut.mjs",
+  "adjacentCommand": "node --test scripts/test-bevy-hud-ui.mjs scripts/test-r16-keyboard-ownership.mjs",
+  "focusedScope": "Executed on canonical draft and then isolated source; count37 once only. Raw stdout retained in tool history.",
+  "adjacentLogSha256": "5b3a99f6404c0c433ed3d1e48e3215560ce15bc3c42e0d6d956b46db9f7212dc",
+  "adjacentInputs": {
+    "passed": true,
+    "files": [
+      {
+        "name": "scripts/test-bevy-hud-ui.mjs",
+        "sha256": "e306481c2ec3b534de2736b5f41799aba640e1e6eece71ea872ac1086d7abdc8",
+        "publishedSourceMatched": true
+      },
+      {
+        "name": "scripts/test-r16-keyboard-ownership.mjs",
+        "sha256": "fe95c2289ac9852eafd9553b6e9cce85f89d5d474f64b64ddc02da08169431b7",
+        "publishedSourceMatched": true
+      },
+      {
+        "name": "scripts/test-r16-quest-close-shortcut.mjs",
+        "sha256": "a539621aff972a056c9e5f5a9fd494389b33af82c698e833fe9ffc258abd06e2",
+        "publishedSourceMatched": true
+      },
+      {
+        "name": "scripts/lib/window-keydown-test-fixture.mjs",
+        "sha256": "6ec564922d6cc187544721005da6fb1a13d8a062e739fb54647d770425bd4262",
+        "publishedSourceMatched": true
+      }
+    ]
+  },
+  "originalAdjacentInputGuardFailure": {
+    "cause": "preparation helper referenced shell-keydown-fixture.mjs instead of window-keydown-test-fixture.mjs",
+    "testExecutionOccurred": false,
+    "correctedGuardPassed": true
+  },
+  "wholeParityCandidate": false
+}

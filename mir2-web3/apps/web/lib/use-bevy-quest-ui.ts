@@ -18,8 +18,8 @@ import {
   type BevyQuestUiRuntime,
   type BevyQuestUiSnapshot,
 } from "./bevy-quest-ui";
-import { sameQuestWorldDraft, sameQuestWorldStamp, stampBevyQuestWorldContext,
-  supportsBevyQuestWorldContext, type QuestWorldDraft } from "./bevy-quest-world-context";
+import { sameQuestWorldDraft, sameQuestWorldIdentity, sameQuestWorldStamp, stampBevyQuestWorldContext,
+  supportsBevyQuestWorldContext, type QuestWorldDraft, type QuestWorldStamp } from "./bevy-quest-world-context";
 import { isQuestWorldAction, parseQuestWorldAction } from "./bevy-quest-world-actions";
 import { readQuestWorldControls, type QuestWorldControls } from "./bevy-quest-world-controls";
 
@@ -108,6 +108,9 @@ export function useBevyQuestUi(options: Options) {
     let currentSnapshot: Omit<SnapshotInput, "worldDraft"> | null = null;
     let lastValidSnapshot: BevyQuestUiSnapshot | null = null;
     let acknowledgedSnapshot: BevyQuestUiSnapshot | null = null;
+    // Closing a diary needs its applied scene owner, not fresh monster/inventory
+    // contents. World actions continue to require the complete latest draft.
+    let diaryOwner: QuestWorldStamp | null = null;
     let requiredPresentationRevision = 0;
     let lastPresentation = "";
     let lastFrame = -1;
@@ -162,13 +165,18 @@ export function useBevyQuestUi(options: Options) {
       const live = latest.current.snapshot();
       if (!live.inGame || !live.hostVisible || !live.presentation
         || JSON.stringify(live.presentation) !== JSON.stringify(acknowledgedSnapshot?.presentation)
-        || !sameQuestWorldDraft(live.worldDraft ?? null, context)) return null;
+        || (closeDiary
+          ? live.worldDraft?.generation !== context.generation || !sameQuestWorldIdentity(live.worldDraft ?? null, context)
+          : !sameQuestWorldDraft(live.worldDraft ?? null, context))) return null;
       // An NPC dialog blocks immediately. Native local Q navigation may precede
       // its React projection, but cannot override an unsubmitted host request.
       if (live.dialog.isOpen || live.dialog.hasInput) return closeDiary ? false : true;
       if (live.questLogOpen !== lastRequestedOpen) return null;
       const status = readBevyQuestUiStatus(runtime, live.generation), now = performance.now();
-      if (!status?.ready || status.revision !== context.revision || status.openRevision !== openRevision
+      const appliedDiaryOwner = Boolean(diaryOwner && status && diaryOwner.generation === context.generation
+        && sameQuestWorldIdentity(diaryOwner, context)
+        && status.revision >= diaryOwner.revision && status.revision <= context.revision);
+      if (!status?.ready || (closeDiary ? !appliedDiaryOwner : status.revision !== context.revision) || status.openRevision !== openRevision
         || !Number.isFinite(now) || status.frame < lastFrame
         || !currentBevyQuestLocale(status, live.language, requiredPresentationRevision,
           supportsBevyQuestDisplayLocale(runtime) ? live.displayLanguage : undefined)) return null;
@@ -300,6 +308,7 @@ export function useBevyQuestUi(options: Options) {
           lastPresentation = "";
           lastValidSnapshot = null;
           acknowledgedSnapshot = null;
+          diaryOwner = null;
           lastRequestedOpen = !currentSnapshot.questLogOpen;
         }
         if (currentSnapshot.questLogOpen !== lastRequestedOpen) {
@@ -307,6 +316,7 @@ export function useBevyQuestUi(options: Options) {
           lastRequestedOpen = currentSnapshot.questLogOpen;
         }
         if (!currentSnapshot.presentation) {
+          diaryOwner = null;
           rendererHealthy = false;
           lastPresentation = "";
           // Geometry loss is a surface handoff, not a session exit. Tell Rust
@@ -339,6 +349,8 @@ export function useBevyQuestUi(options: Options) {
           }
           lastValidSnapshot = sentSnapshot;
           acknowledgedSnapshot = sentSnapshot;
+          if (!worldContext || !diaryOwner || diaryOwner.generation !== worldContext.generation
+            || !sameQuestWorldIdentity(diaryOwner, worldContext)) diaryOwner = worldContext;
           // A new layout needs an applied geometry acknowledgement. Ordinary
           // HP/quest/NPC updates keep the same renderer owner while Bevy consumes
           // the model on its next frame; switching to React on each update

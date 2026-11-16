@@ -28,7 +28,7 @@ Linux artifact `14200204143`，95700095字节，原ZIP SHA256 `9cbaf87eca1f09a43
 
 正式库一致快照与24配置备份后恢复独立canary；克隆旧行全部SHA匹配。仅普通协议注册／建角／进城、116.594ms移动、自然中立怪行走、两次注销和同角色重登通过，debug命令为0；正式服务／存档当时未改。[备份](server-backup-summary.json) · [canary](server-canary.json)。实际切流后安装同一ELF，仅改变版本环境；失败后按原路径回退，没有恢复数据库。[后端试发](backend-rollout.json)
 
-同源本地English／compatibility与繁中／WebGL2两场完整流程通过：首步83／108ms，Native113473／28505ms，六套完整字体／113图、行走自然帧、Q开关、正常注销及同角色保存重进均通过。覆盖19个私有文件随后恢复，29份原内容WIP的SHA保持。[本地结果与恢复](same-source-local-results.json)。本地缓存／路径不是公网冷启或默认WebGPU资格。
+同源本地English／默认WebGPU与繁中／WebGL2两场完整流程通过：首步83／108ms，Native113473／28505ms，六套完整字体／113图、行走自然帧、Q开关、正常注销及同角色保存重进均通过。覆盖19个私有文件随后恢复，29份原内容WIP的SHA保持。[本地结果与恢复](same-source-local-results.json)。后核对英文场的helper参数虽然叫compatibility，实际选包／编译后端均为webgpu、fallbackFrom=null；前文据参数名称判断未覆盖默认后端有误。本地缓存／路径仍不是公网冷启资格。
 
 ## 公网原R1的判定
 
@@ -59,8 +59,8 @@ Linux artifact `14200204143`，95700095字节，原ZIP SHA256 `9cbaf87eca1f09a43
 
 ## 下一项与完整范围
 
-公网默认走WebGPU；本地两条通过路径为compat／WebGL2。WebGPU manifest的primarySharedUiCompiled=false／primarySharedUiStartup=false是既定有效合同，单凭该标记不能认定bug或擅自改为true。被动时序显示共享HUD明显晚于首帧，Q确实被消费却未关闭。[被动诊断](passive-failure-analysis.json)
+公网默认走WebGPU；本地通过路径实际为英文WebGPU／繁体共享WebGL2，不能因英文helper的compatibility名称而误判为后端差异。WebGPU manifest的primarySharedUiCompiled=false／primarySharedUiStartup=false是既定有效合同，单凭该标记不能认定bug或擅自改为true。被动时序显示共享HUD明显晚于首帧，Q确实被消费却未关闭。[被动诊断](passive-failure-analysis.json)
 
-下一项以默认WebGPU做受控完整回放，分别检查场景包超时／重试和共享界面启动／输入路由，不用兼容后端替代默认验收。原偶发签名交接根因、首次Q／语言／像素、其他地图／寻路、三职业新手至30级、技能、组队／交易／阿洛、Native同档及真人最终Accepted仍在整个Goal内。
+下一项以繁体默认WebGPU做受控完整回放，检查世界持续更新时的Q关闭，并分别检查场景包超时／重试和共享界面启动。原偶发签名交接根因、首次Q／语言／像素、其他地图／寻路、三职业新手至30级、技能、组队／交易／阿洛、Native同档及真人最终Accepted仍在整个Goal内。
 
 原失败保留、不跑原样R2。所有自建浏览器／Next／Gateway／Relay进程和SSH控制会话已关闭，两个canary服务已停止，私有工厂19覆盖均恢复。[SSH关闭](owned-ssh-closed-after-rollback.json)。大原始trace／全部脚本及失败部分保留在私有主题目录；此目录只发布选定脱敏回执，文件摘要见[evidence-manifest](evidence-manifest.json)。
