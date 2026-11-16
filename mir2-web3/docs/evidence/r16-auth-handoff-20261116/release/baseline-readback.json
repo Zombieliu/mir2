@@ -1,0 +1,26 @@
+{
+  "checkedAt": "2026-11-16T05:21:13.101Z",
+  "alias": {
+    "alias": "numeron.obelisk.build",
+    "deploymentId": "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN",
+    "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC"
+  },
+  "deployment": {
+    "id": "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN",
+    "source": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+    "readyState": "READY"
+  },
+  "connectorReadback": "Independent Vercel get_alias and get_deployment checked immediately before this script preparation; only whitelisted fields persisted.",
+  "endpoints": [
+    {
+      "url": "https://numeron.obelisk.build/version",
+      "status": 200,
+      "revision": "e0ceea22964c03041d45e49e506b3a8badd6984e"
+    },
+    {
+      "url": "https://165.154.65.136.sslip.io/playtest/health",
+      "status": 200,
+      "revision": "e0ceea22964c03041d45e49e506b3a8badd6984e"
+    }
+  ]
+}

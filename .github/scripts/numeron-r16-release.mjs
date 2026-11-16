@@ -18,7 +18,7 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: "8bf3dbcbeae86c0f4782e2c7dcdd8dd203756efe",
+  source: "fea64484b6a25ccd59a22d8f52a5718aa6e57df6",
   sourceRef: BRANCH,
   sourceCheckpoints: SOURCE_CHECKPOINTS,
   baseSource: "e0ceea22964c03041d45e49e506b3a8badd6984e",
@@ -29,22 +29,35 @@ export const QR_RELEASE = Object.freeze({
   "306066f29590d1e2e14155d83644fbc19f11a4c3",
   "b87aa402a38aeb70f30e5afe285862cd8ecf7a46",
   "2b7b5d7079300f45315e172d4c58784aaed6fb5c",
-  "8bf3dbcbeae86c0f4782e2c7dcdd8dd203756efe"
+  "8bf3dbcbeae86c0f4782e2c7dcdd8dd203756efe",
+  "133d1c790d2069a31ac8698d418034fa609b1176",
+  "7c50e19e8152ef172bf877073657356eaa0a0efe",
+  "fea64484b6a25ccd59a22d8f52a5718aa6e57df6"
 ],
   changedFiles: [
   {
     "filename": ".github/scripts/numeron-r16-release.mjs",
-    "sha": "98aa427e070442814c620e9c358509c22d8be797",
+    "sha": "f900319c90ce145bc29ad3dbab105297e992a7ab",
     "status": "modified"
   },
   {
     "filename": ".github/scripts/numeron-r16-source-checkpoints.json",
-    "sha": "504f0864c2dd73c9cdc7087ed954577361847f5e",
+    "sha": "679d7564b2f8b201a91a14621a9a9efca74e7ade",
     "status": "modified"
   },
   {
     "filename": ".github/scripts/test-numeron-r16-release.mjs",
-    "sha": "03087980a591b2c4e01f3c6c97855cdec1a24c9a",
+    "sha": "deaf2d376927c798c92c5c53108b594a6704b676",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/web/lib/dubhe-wallet-login.ts",
+    "sha": "aead9ca323d34f139811d1ca08dd9ffdb22d5bea",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/web/lib/server/dubhe-connect-auth.ts",
+    "sha": "9f5ff78fb8fa33cbfe812dc4e965f798f06f59f3",
     "status": "modified"
   },
   {
@@ -78,24 +91,99 @@ export const QR_RELEASE = Object.freeze({
     "status": "modified"
   },
   {
+    "filename": "mir2-web3/apps/web/scripts/test-dubhe-connect-auth.mjs",
+    "sha": "d84c38c6b90d5b5d78dd5bf336a9e5b178a74f81",
+    "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/apps/web/scripts/test-dubhe-wallet-login.mjs",
+    "sha": "d277501614ece5d9270e4ad679ac87aa2b2dfe7d",
+    "status": "modified"
+  },
+  {
     "filename": "mir2-web3/docs/AGENT-CURRENT.md",
-    "sha": "ce2f349efb8039ca82aa72ccd082bd03a0b9e2ae",
+    "sha": "b9d572bba1705231d83621e02b26e4af052be36d",
     "status": "modified"
   },
   {
     "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
-    "sha": "ec050ab6a6b4e676afb3975d03488c6e29ae7617",
+    "sha": "039c3178e39d72c358149e5f2c5c073665b31d35",
     "status": "modified"
   },
   {
     "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
-    "sha": "c5adcd8135a46dbc1e4558f61c9dba199124953e",
+    "sha": "9d3627b038cb53d88019e0811d4047fec139cb7f",
     "status": "modified"
   },
   {
     "filename": "mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md",
-    "sha": "7142aa5bf63af015d33d9d59e09e634afb3dc7e1",
+    "sha": "4a909b2f912b2b04c65c9dccb4b341264c97045c",
     "status": "modified"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/README.md",
+    "sha": "76b370fdd66e56b646eddb67dde7efd556db5a23",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/cleanup-confirmation.json",
+    "sha": "65ea12bd84226596e40d7dc87312239d4824c392",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/control-api-probe.json",
+    "sha": "89f6abff24061a5967745740b51a28797916851f",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/control-findings.json",
+    "sha": "f8040a0e28280d296c7167ca5813e6f47fb03c47",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/control-loaded-auth.json",
+    "sha": "afe9723c310ec908cbaf63f2f654e1765a186f7d",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/control-loaded-summary.json",
+    "sha": "bf7027e463ea3e935b48593308ef3a02790bf2de",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/isolated-build.json",
+    "sha": "995701d86279e1cd7dd0f4c558b7732041fa6b51",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/local-auth-r1.json",
+    "sha": "654c14d72fd7e9a2eec43f6a335059df8572161c",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/local-auth-r2.json",
+    "sha": "875a3adde5a4b77b318ec337f3ecdcea1beff387",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/pending.png",
+    "sha": "fdc9a70dc42c5323b669a9275beed7d93e1d4984",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/restoration.json",
+    "sha": "ee9ccad139605b271184b5532ebc6c6ec50dfe97",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/select-raw-cdp.png",
+    "sha": "45ee9ee5499cf66cf48d7501c85edf0e3b13111c",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-auth-handoff-20261116/validation.json",
+    "sha": "19490438172abb88d5b21eff4d95286cb3c4b38e",
+    "status": "added"
   },
   {
     "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/.gitattributes",
@@ -334,7 +422,7 @@ export const QR_RELEASE = Object.freeze({
   },
   {
     "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/README.md",
-    "sha": "e1bf606c3342db159ac8fdd3b9e8a06868f457f2",
+    "sha": "91bb62161dfcbbf53a42a66d0698b9c348c0c9ee",
     "status": "added"
   },
   {
@@ -395,6 +483,86 @@ export const QR_RELEASE = Object.freeze({
   {
     "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/preceding-public-failure.json",
     "sha": "28d952a7fa787dda36c1ba471c5fc05c0d2bcbcd",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/production/README.md",
+    "sha": "2f8fac6555e6ad2cecec43c8eebf6e97c7deb1ff",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/production/artifact-transfer.json",
+    "sha": "2da84d5443e7b688790c30bebc02d37e071fb115",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/production/auth-handoff-diagnosis.json",
+    "sha": "e0b47e8fd334491337612f04bda06d5161516525",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/production/candidate-asset-readback.json",
+    "sha": "ee81e80a74a7493e62659a84e0e329a9d0b51830",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/production/evidence-index.json",
+    "sha": "eb93cf9cf7f440dd1d7af59508a26377f16c2342",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/production/linux-package-verification.json",
+    "sha": "f198d52c1ca8f397bd0b0eb9b3677891a6f8ab05",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/production/ordinary-canary.json",
+    "sha": "1e116c4a441a0d9bef53b7916b13562535df23a9",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/production/original-r1-gates.json",
+    "sha": "53f6ea9e901f172cc7c2b8da986d26c20d0b1382",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/production/outcome.json",
+    "sha": "722345db694100527356069a269d57cba901a3ee",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/production/postrollback-qr.json",
+    "sha": "29c66a0196eb2a0278339fa8d909165f0dca7dc1",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/production/web-jobs.json",
+    "sha": "85cb880120352207537109250f9f42327622d560",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/release/baseline-readback.json",
+    "sha": "df9df593d7aecaa72efa77088dda77cd05e19643",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/release/evidence-manifest.json",
+    "sha": "e4f7a0355dcf39d6c421d49edc123ba5efa4e4d9",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/release/release-guards.log",
+    "sha": "ca2c10c85cc884bd6ec3ca2cfb1138dc2210438d",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/release/release-pin.json",
+    "sha": "bc7e33043e01f9dfc7b112ffa0a4fa293e8b802a",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/release/source-closure.json",
+    "sha": "2d749fc067eca5950a5f9608b4e662b93ba58c2e",
     "status": "added"
   },
   {
