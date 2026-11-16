@@ -3046,7 +3046,8 @@ export default function HomePage() {
   const questLogOpenRef = useRef(false);
   function setShowQuestLog(open: boolean) {
     questLogOpenRef.current = open;
-    if (sharedHudNavigationRef.current.ready && !hudProjectionRef.current) { navigateSharedHud({ type: open ? "openQuest" : "closeQuest" }); return; }
+    if (sharedHudNavigationRef.current.ready && !hudProjectionRef.current
+      && sharedHudNavigationRef.current.dispatch({ type: open ? "openQuest" : "closeQuest" })) return;
     if (!hudProjectionRef.current) fallbackHudNavigationRevisionRef.current = nextHudNavigationRevision();
     setShowQuestLogState(open);
   }
@@ -11875,7 +11876,7 @@ export default function HomePage() {
       case "friends": { const open = !socialRosterWindowsRef.current.friends; setShowFriends(open); if (open) refreshFriends(); break; }
       case "bonds": setShowBonds(value => !value); break;
       case "ranking": setShowRanking(value => !value); break;
-      case "quests": toggleQuestLogWindow(); break;
+      case "quests": return toggleQuestLogWindow();
       case "options": toggleReferenceWindow("options"); break;
       case "help": toggleReferenceWindow("help"); break;
       case "keybind": toggleReferenceWindow("hotkeys"); break;
@@ -14019,10 +14020,12 @@ export default function HomePage() {
   }
 
   function toggleQuestLogWindow() {
-    if (navigateSharedHud({ type: "quest" })) return;
-    const opening = !showQuestLog;
+    const current = bevyQuestUi.readCurrentDiaryOpen();
+    if (current === true) return bevyQuestUi.closeCurrentDiary();
+    const opening = current === false || !questLogOpenRef.current;
     if (opening && clientProfile.layout === "touch") closeTouchSecondaryWindows();
     setShowQuestLog(opening);
+    return true;
   }
   toggleQuestLogRef.current = toggleQuestLogWindow;
 
@@ -21963,7 +21966,7 @@ export default function HomePage() {
       };
     },
     onIntent: dispatchBevyQuestIntent,
-    onOpenChange: (open) => { if (!navigateSharedHud({ type: open ? "openQuest" : "closeQuest" })) setShowQuestLog(open); },
+    onOpenChange: setShowQuestLog,
     onCloseDiary: () => {
       questLogOpenRef.current = false;
       fallbackHudNavigationRevisionRef.current = nextHudNavigationRevision();
@@ -22145,6 +22148,7 @@ export default function HomePage() {
       readBevyHudStatus={bevyHudUi.readCurrent}
       dispatchBevyHudNavigation={bevyHudUi.dispatch}
       closeBevyQuestDiary={bevyQuestUi.closeCurrentDiary}
+      readBevyQuestDiaryOpen={bevyQuestUi.readCurrentDiaryOpen}
       bevyQuestUiReady={bevyQuestUi.ready && !showInventory}
       bevyQuestUiCapturesPointer={bevyQuestUi.capturesPointer && !showInventory}
       readBevyQuestKeyboardCapture={showInventory ? undefined : bevyQuestUi.readLiveKeyboardCapture}

@@ -50,6 +50,8 @@ function fixture(changes = {}) {
     isCurrentMailTextTarget: () => false,
     spellsPointerCallbacksRef: { current: { getBevySpellsPointerContext: () => flags.spells ? { modal: true } : null } },
     bevyQuestUiCapturesPointer: true,
+    readBevyQuestDiaryOpen: () => flags.diaryState ?? null,
+    onCrystalWindowShortcut: action => { calls.push({ type: "window", action }); return flags.accept; },
     readBevyHudStatus: () => flags.hud ? { navigation: { questOpen: flags.open } } : null,
     dispatchBevyHudNavigation: action => { calls.push(action); return flags.accept; },
     closeBevyQuestDiary: () => {
@@ -73,6 +75,13 @@ test("current shared diary closes through its configured key and its own live ow
   assert.deepEqual(f.calls, [{ type: "closeCurrentDiary" }]); assert.equal(e.defaultPrevented, true);
   assert.equal(f.scope.keyboardMovementDiagnosticsRef.current.lastShortcut.accepted, true);
   f.binding.unmount();
+});
+
+test("a stale captured flag cannot swallow Q when the current diary owner is freshly closed", () => {
+  const f = fixture({ open: false, diaryState: false }), e = f.dispatch();
+  assert.deepEqual(f.calls, [{ type: "window", action: "quests" }]);
+  assert.equal(e.defaultPrevented, true);
+  assert.equal(f.scope.keyboardMovementDiagnosticsRef.current.lastShortcut.accepted, true);
 });
 test("remapped Native binding works and its former key stays blocked by the modal", () => {
   const f = fixture();

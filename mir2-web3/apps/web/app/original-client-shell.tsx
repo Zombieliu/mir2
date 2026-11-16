@@ -575,6 +575,7 @@ export function OriginalClientShell({
   readBevyHudStatus,
   dispatchBevyHudNavigation,
   closeBevyQuestDiary,
+  readBevyQuestDiaryOpen,
   bevyQuestUiReady = false,
   bevyQuestUiCapturesPointer = false,
   readBevyQuestKeyboardCapture,
@@ -1505,13 +1506,16 @@ export function OriginalClientShell({
       if (spellsPointerCallbacksRef.current.getBevySpellsPointerContext?.()?.modal) { diagnostic("spells-modal"); event.preventDefault(); return; }
       if (bevyQuestUiCapturesPointer) {
         // The diary owns its close token independently of main-HUD loading.
-        // Configured Q may close that current diary, but never reach the world.
+        // A cached modal flag may lag the current diary. Q stays a UI action.
         if (!event.metaKey && diagnosticActions.includes("quests")
           && !keyboardInputTargetIsEditable(event.target)) {
           event.preventDefault();
           let accepted = false;
           if (!event.repeat) {
-            try { accepted = closeBevyQuestDiary?.() === true; } catch { /* A retired owner cannot release world input. */ }
+            try {
+              const open = readBevyQuestDiaryOpen?.();
+              accepted = open === false ? onCrystalWindowShortcut?.("quests") === true : closeBevyQuestDiary?.() === true;
+            } catch { /* A retired owner cannot release world input. */ }
           }
           diagnostic("window-action", accepted, true);
         } else diagnostic("quest-modal");

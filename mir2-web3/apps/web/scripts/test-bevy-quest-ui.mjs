@@ -1310,6 +1310,28 @@ test("diary close waits for the new scene owner and rejects replaced runtime or 
   });
 });
 
+test("live diary state uses only its applied scene token without granting stale world authority", () => {
+  withOpenDiaryFixture(f => {
+    assert.equal(f.view.readCurrentDiaryOpen(), true);
+    f.patch(model => ({ ...model, questLogOpen: false })); f.tick(); f.apply(); f.tick();
+    assert.equal(f.view.readCurrentDiaryOpen(), false);
+    f.patch(model => ({ ...model, worldDraft: { ...model.worldDraft,
+      entities: model.worldDraft.entities.map(row => row.kind === "monster" ? { ...row, x: row.x + 1 } : row) } }));
+    assert.equal(f.view.readLiveKeyboardCapture(), null);
+    assert.equal(f.view.readCurrentDiaryOpen(), false, "unrelated movement cannot revive an old captured flag");
+    f.patch(model => ({ ...model, blocksGameplayKeys: true }));
+    assert.equal(f.view.readCurrentDiaryOpen(), null, "another modal keeps its keys");
+  });
+  withOpenDiaryFixture(f => {
+    f.patch(model => ({ ...model, worldDraft: { ...model.worldDraft, sceneRevision: model.worldDraft.sceneRevision + 1 } }));
+    assert.equal(f.view.readCurrentDiaryOpen(), null);
+    f.tick(); assert.equal(f.view.readCurrentDiaryOpen(), null, "new identity must be painted first");
+    f.apply(); f.tick(); assert.equal(f.view.readCurrentDiaryOpen(), true);
+    f.runtimeRef.current = { ...f.runtimeRef.current };
+    assert.equal(f.view.readCurrentDiaryOpen(), null, "an old runtime cannot classify a new key");
+  });
+});
+
 test("packaged CJK font matches its pinned upstream bytes and retains its license", () => {
   const bytes = readFileSync(new URL("../public/original-ui/fonts/NotoSansCJKsc-Regular.otf", import.meta.url));
   assert.equal(bytes.length, 16437364);

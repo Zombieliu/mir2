@@ -1,0 +1,50 @@
+{
+  "at": "2026-11-16T09:32:24.128Z",
+  "goal": "active",
+  "parent": "c4b2e44c5ed2ca59050f092dbeb8ec7702b7a8a5",
+  "candidate": "r16-diary-nav-259e9823",
+  "unitChecks": 73,
+  "rapidEdges": 48,
+  "localResults": [
+    {
+      "label": "webgpu-tc",
+      "passed": true,
+      "backend": {
+        "selectedBackend": "webgpu",
+        "packageId": "webgpu"
+      },
+      "ackMs": 99,
+      "nativeMs": 30773,
+      "rapidEdges": 24,
+      "maxEdgeMs": 91,
+      "opensWithStaleCapturedFlag": 0,
+      "distinctDeclinedHudRecords": 0
+    },
+    {
+      "label": "webgl2-tc",
+      "passed": true,
+      "backend": {
+        "selectedBackend": "webgl2",
+        "packageId": "webgl2-shared"
+      },
+      "ackMs": 105,
+      "nativeMs": 29704,
+      "rapidEdges": 24,
+      "maxEdgeMs": 67,
+      "opensWithStaleCapturedFlag": 3,
+      "distinctDeclinedHudRecords": 4
+    }
+  ],
+  "localTwoBackendFullFlowsPassed": true,
+  "originalC4bR2RemainsFailed": true,
+  "originalC4bR2SpecificBranchStillUnproven": true,
+  "productionSource": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+  "productionChanged": false,
+  "allOwnedHandlesClosed": true,
+  "privateOverlaysRestored": 27,
+  "unchangedRawWip": 28,
+  "foreignShellInverseBytePreserved": true,
+  "wholeParityCandidate": false,
+  "humanAccepted": false,
+  "next": "Commit/push exact7draft source, freeze a fresh immutable release qualification for current candidate; public signed flow, cold Native120 and remaining full R16 parity gates still required."
+}

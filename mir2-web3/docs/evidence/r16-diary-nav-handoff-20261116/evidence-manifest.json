@@ -1,0 +1,80 @@
+{
+  "files": [
+    {
+      "name": "validation.json",
+      "bytes": 1022,
+      "sha256": "91fe69ce718671b85d3a317b9ef201abbff14d1f7af977082ceeaa1677c7f4ba"
+    },
+    {
+      "name": "isolated-build.json",
+      "bytes": 11915,
+      "sha256": "b541c8223da06d6eebd5dafb509293ecd96f3eb13ae973d97f97dbfaf28f2d71"
+    },
+    {
+      "name": "source-ownership.json",
+      "bytes": 604,
+      "sha256": "5bc63fd26cdf4b6c8f0f53a32943915021cdaccdae47629e71a6155cceffb926"
+    },
+    {
+      "name": "restoration.json",
+      "bytes": 1271,
+      "sha256": "361748963897b5174040518f91b22cb99ac238a86b798b4d064f559244419896"
+    },
+    {
+      "name": "unchanged-control-summary.json",
+      "bytes": 860,
+      "sha256": "ab3c004b824b80f9b8f3ff310fc853bbd4234066ad7eef596679a726d62ba8a7"
+    },
+    {
+      "name": "unchanged-control-diary-observations.json",
+      "bytes": 5078,
+      "sha256": "d2d4f089249ccaabc648711ab828d42fdc40f63b0abe44143649a533b5ca5426"
+    },
+    {
+      "name": "webgpu-tc.json",
+      "bytes": 120858,
+      "sha256": "6e863512dc0a2b62b9f7e0488b3b2684d790ba1691d678973270464c265baa55"
+    },
+    {
+      "name": "webgpu-tc-diary-open.png",
+      "bytes": 1355225,
+      "sha256": "68e29c6e3851e39df16f13fd8cc033d306a6a959f22bcd58b63bc3bcb25a78a5"
+    },
+    {
+      "name": "webgpu-tc-diary-closed.png",
+      "bytes": 1416711,
+      "sha256": "c6697a99ce92e258130683e77bbabd7d1318855f9d2c72f3996119c6be9b8b3e"
+    },
+    {
+      "name": "webgl2-tc.json",
+      "bytes": 123149,
+      "sha256": "28d2648385aaeb670069701c1e77b2f12a6de9cdd3aa3a17701e2727225effcb"
+    },
+    {
+      "name": "webgl2-tc-diary-open.png",
+      "bytes": 1356998,
+      "sha256": "122f42896c14b3db0c6828ea6394ebf59a7b68a76a11f0e5811fcbeb6b986729"
+    },
+    {
+      "name": "webgl2-tc-diary-closed.png",
+      "bytes": 1413029,
+      "sha256": "f4cea2aec35a67a2773492ab77e79fba0514ea000b6f63f696c760ad15c53664"
+    },
+    {
+      "name": "public-readback.json",
+      "bytes": 513,
+      "sha256": "53e444050244db2d13e2c07465866fe06bc94dbffc6386a55164bdcaedaa81f6"
+    },
+    {
+      "name": "alias-readback.json",
+      "bytes": 239,
+      "sha256": "8a49d73e4522e71f2e1ab9f4227dc9911ee8061d8d23f46fc562ae33d9366962"
+    },
+    {
+      "name": "status.json",
+      "bytes": 1504,
+      "sha256": "046ac439f10368c3c1d5753be8348488feba88a2ae6e7b7bceb645f8d3717a3b"
+    }
+  ],
+  "scope": "Sanitized exact-source local diary handoff evidence. Original control, red tests and C4B R2 failure retained separately; no new public deployment qualification."
+}

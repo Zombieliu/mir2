@@ -38,6 +38,7 @@ type Options = {
   onOpenChange: (open: boolean) => void;
   onCloseDiary: () => void;
 };
+type KeyboardReadMode = "capture" | "close" | "diary";
 
 /** One UI owner at a time. A failed, stale, hidden, or unavailable surface yields to React. */
 export function useBevyQuestUi(options: Options) {
@@ -51,12 +52,15 @@ export function useBevyQuestUi(options: Options) {
   const refresh = useCallback(() => refreshRef.current?.(), []);
   const liveWorldControlsReaderRef = useRef<(() => QuestWorldControls | null) | null>(null);
   const worldControlBlockersReaderRef = useRef<(() => QuestWorldControls | null) | null>(null);
-  const keyboardCaptureReaderRef = useRef<((closeDiary?: boolean) => boolean | null) | null>(null);
+  const keyboardCaptureReaderRef = useRef<((mode?: KeyboardReadMode) => boolean | null) | null>(null);
   const readLiveKeyboardCapture = useCallback(() => {
     try { return keyboardCaptureReaderRef.current?.() ?? null; } catch { return null; }
   }, []);
   const closeCurrentDiary = useCallback(() => {
-    try { return keyboardCaptureReaderRef.current?.(true) === true; } catch { return false; }
+    try { return keyboardCaptureReaderRef.current?.("close") === true; } catch { return false; }
+  }, []);
+  const readCurrentDiaryOpen = useCallback(() => {
+    try { return keyboardCaptureReaderRef.current?.("diary") ?? null; } catch { return null; }
   }, []);
   const questNameTargetsReaderRef = useRef<(() => readonly number[] | null) | null>(null);
   const readLiveQuestNameTargets = useCallback(() => {
@@ -157,7 +161,8 @@ export function useBevyQuestUi(options: Options) {
       return readQuestWorldControls(runtime, context, live.presentation.logicalWidth, live.presentation.logicalHeight);
     };
     liveWorldControlsReaderRef.current = liveWorldControlsReader;
-    const keyboardCaptureReader = (closeDiary = false): boolean | null => {
+    const keyboardCaptureReader = (mode: KeyboardReadMode = "capture"): boolean | null => {
+      const closeDiary = mode === "close", diaryOnly = mode !== "capture";
       const context = acknowledgedSnapshot?.worldContext;
       if (stopped || !context || !latest.current.requested || !documentVisible()
         || latest.current.runtimeRef.current !== runtime
@@ -165,23 +170,24 @@ export function useBevyQuestUi(options: Options) {
       const live = latest.current.snapshot();
       if (!live.inGame || !live.hostVisible || !live.presentation
         || JSON.stringify(live.presentation) !== JSON.stringify(acknowledgedSnapshot?.presentation)
-        || (closeDiary
+        || (diaryOnly
           ? live.worldDraft?.generation !== context.generation || !sameQuestWorldIdentity(live.worldDraft ?? null, context)
           : !sameQuestWorldDraft(live.worldDraft ?? null, context))) return null;
       // An NPC dialog blocks immediately. Native local Q navigation may precede
       // its React projection, but cannot override an unsubmitted host request.
-      if (live.dialog.isOpen || live.dialog.hasInput) return closeDiary ? false : true;
+      if (live.dialog.isOpen || live.dialog.hasInput) return mode === "diary" ? null : closeDiary ? false : true;
       if (live.questLogOpen !== lastRequestedOpen) return null;
       const status = readBevyQuestUiStatus(runtime, live.generation), now = performance.now();
       const appliedDiaryOwner = Boolean(diaryOwner && status && diaryOwner.generation === context.generation
         && sameQuestWorldIdentity(diaryOwner, context)
         && status.revision >= diaryOwner.revision && status.revision <= context.revision);
-      if (!status?.ready || (closeDiary ? !appliedDiaryOwner : status.revision !== context.revision) || status.openRevision !== openRevision
+      if (!status?.ready || (diaryOnly ? !appliedDiaryOwner : status.revision !== context.revision) || status.openRevision !== openRevision
         || !Number.isFinite(now) || status.frame < lastFrame
         || !currentBevyQuestLocale(status, live.language, requiredPresentationRevision,
           supportsBevyQuestDisplayLocale(runtime) ? live.displayLanguage : undefined)) return null;
       if (status.frame > lastFrame) { lastFrame = status.frame; lastFrameAt = now; }
       if (now < lastFrameAt || now - lastFrameAt > 2000) return null;
+      if (mode === "diary") return live.blocksGameplayKeys || status.error ? null : status.questLogOpen;
       if (closeDiary) {
         if (!status.questLogOpen || live.blocksGameplayKeys || status.error) return false;
         // The diary can be ready before the independent main HUD. Close from
@@ -431,5 +437,5 @@ export function useBevyQuestUi(options: Options) {
     };
   }, [options.requested, options.runtimeGeneration]);
   return { ...state, refresh, readLiveHudBarPlans, readLiveWorldControls, readLiveWorldControlBlockers, readLiveQuestNameTargets,
-    readLiveKeyboardCapture, closeCurrentDiary };
+    readLiveKeyboardCapture, closeCurrentDiary, readCurrentDiaryOpen };
 }

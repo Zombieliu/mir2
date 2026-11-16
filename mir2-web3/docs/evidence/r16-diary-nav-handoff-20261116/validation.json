@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "uniqueChecks": 73,
+  "failed": 0,
+  "skipped": 0,
+  "command": "node --test scripts/test-r16-quest-navigation-handoff.mjs scripts/test-r16-quest-close-shortcut.mjs scripts/test-bevy-quest-ui.mjs scripts/test-bevy-hud-ui.mjs scripts/test-r16-keyboard-ownership.mjs",
+  "rawLogSha256": "834ff12bfbe6958722c1b0fceeecb8e63ad500c1cd1389a6cb1035bb3ce07e09",
+  "originalRed": {
+    "failed": 2,
+    "rawLogSha256": "7224b6d8a28762bbe6b31ca0105608c2de0dfa15251b71093c2db8f05868f189",
+    "cases": [
+      "actual Page pending-HUD reopen discarded",
+      "stale captured Shell flag swallows current closed diary Q"
+    ]
+  },
+  "intermediate": {
+    "failed": 1,
+    "passed": 42,
+    "rawLogSha256": "d3a8c22be28b64546635a2b85a53c691721494a9e18af3ea70ff33239cf417d3",
+    "finding": "navigateSharedHud returns owned/ready rather than dispatch acceptance; diary uses actual dispatch acceptance and explicit desired edges."
+  },
+  "ownSourceNormalizedToRepositoryLF": true,
+  "wholeParityCandidate": false
+}
