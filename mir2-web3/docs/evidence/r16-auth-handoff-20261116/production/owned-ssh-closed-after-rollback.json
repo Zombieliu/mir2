@@ -1,0 +1,12 @@
+{
+  "at": "2026-11-16T06:58:05.577Z",
+  "session": 41849,
+  "closed": true,
+  "transportClosed": true,
+  "hostKeyVerified": true,
+  "authMemoryOnly": true,
+  "ownedCanariesStopped": true,
+  "backendSource": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+  "pid": 1787421,
+  "databaseRestored": false
+}

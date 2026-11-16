@@ -1,0 +1,75 @@
+{
+  "at": "2026-11-16T07:17:04.113Z",
+  "goal": "active",
+  "applicationSource": "fea64484b6a25ccd59a22d8f52a5718aa6e57df6",
+  "controller": "2cf385ceaa1a99ad0dc472f6123d703bb4064010",
+  "sourceClosure": {
+    "commits": 9,
+    "files": 139,
+    "segments": [
+      90,
+      59
+    ],
+    "guards": 111
+  },
+  "backendRun": 43809422151,
+  "stageRun": 43810036864,
+  "checkRun": 43811555491,
+  "promoteRun": 43816295547,
+  "rollbackRun": 43818203903,
+  "originalPublicR1Accepted": false,
+  "publicR2Executed": false,
+  "restoredProduction": {
+    "source": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+    "deployment": "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN",
+    "pid": 1787421
+  },
+  "preexistingRowsUnchanged": {
+    "accounts": {
+      "preexistingRows": 321,
+      "currentRows": 322,
+      "preexistingCanonicalBytes": 2391236,
+      "preexistingSha256": "1a62150ac110fcfa71388150c0ec38b102c3796fe299d158f8cad7e6040f8bee",
+      "preexistingRowsUnchanged": true
+    },
+    "characters": {
+      "preexistingRows": 233,
+      "currentRows": 234,
+      "preexistingCanonicalBytes": 78738,
+      "preexistingSha256": "5e7348047c852fcd041af57213b21615b71bb37e24e2ab948f260e4682278bbf",
+      "preexistingRowsUnchanged": true
+    },
+    "character_saves": {
+      "preexistingRows": 233,
+      "currentRows": 234,
+      "preexistingCanonicalBytes": 2701539,
+      "preexistingSha256": "61e73bb5e78d0952a4c69a402bcce50e51f408ec069623a0f420c4dc91515e0e",
+      "preexistingRowsUnchanged": true
+    }
+  },
+  "originalConfigsUnchanged": 24,
+  "databaseRestored": false,
+  "localFactoryOverlaysRestored": 19,
+  "preservedRawWip": 29,
+  "allOwnedHandlesClosed": true,
+  "canaryUnitsStopped": true,
+  "qr": [
+    {
+      "locale": "zh-cn",
+      "passed": true,
+      "revision": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+      "realMatrix": true,
+      "rawReceiptFile": "post-rollback-qr/qr-zh-cn-receipt.json"
+    },
+    {
+      "locale": "zh-tw",
+      "passed": true,
+      "revision": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+      "realMatrix": true,
+      "rawReceiptFile": "post-rollback-qr/qr-zh-tw-receipt.json"
+    }
+  ],
+  "signedRestoredRevisionNotRetested": true,
+  "physicalPhoneCamera": false,
+  "wholeParityCandidate": false
+}

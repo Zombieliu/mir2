@@ -1,0 +1,146 @@
+{
+  "files": [
+    {
+      "name": "web-stage-summary.json",
+      "bytes": 848,
+      "sha256": "fd69887e18660a98c022fffc96365d1c938d7480184a7e64827f627d0c490b48"
+    },
+    {
+      "name": "web-check-summary.json",
+      "bytes": 838,
+      "sha256": "08dfe2af68245b49b80dafca266b91c49c96d0493fcfe5b248ef21d5dbbd7472"
+    },
+    {
+      "name": "web-promote-summary.json",
+      "bytes": 840,
+      "sha256": "d4cc9d6ab4d011838cc8f78c18867590ae3438ed7a647824de7ce7c67f0ad10b"
+    },
+    {
+      "name": "web-rollback-summary.json",
+      "bytes": 841,
+      "sha256": "f77014f7f19e43a2379c65d8ec4451b5502c4776935209e781a2973a2898f783"
+    },
+    {
+      "name": "linux-package-verification.json",
+      "bytes": 813,
+      "sha256": "e5cd1a6e4ec55758b9c2ba3621138ee45db252a28eb67d8697897cbacceddc4b"
+    },
+    {
+      "name": "alias-after-rollback.json",
+      "bytes": 187,
+      "sha256": "583455004a4ebed6767bc4524f334b448c1dcdff27b5111d9e64e9d374116d5d"
+    },
+    {
+      "name": "postrollback-independent-http.json",
+      "bytes": 370,
+      "sha256": "422d9928e0a29c2b214e33074c3df0b6b2533d2cbc6d68aff25f1ee53d9dfcc0"
+    },
+    {
+      "name": "owned-ssh-closed-after-rollback.json",
+      "bytes": 299,
+      "sha256": "95e8f5951801757b347cc12c17d2685971640ec676a641e691eb2ce5a7940c94"
+    },
+    {
+      "name": "server-backup-summary.json",
+      "bytes": 1069,
+      "sha256": "c7924c942f3a4658ea5b875326c70f52ec37175870ca7dee48a8fa78da64fd22"
+    },
+    {
+      "name": "server-canary.json",
+      "bytes": 2428,
+      "sha256": "fd0a351f6a28f6cd1b89fe2395d5ee7324e9e1190c93784e72f8e44432bb4aca"
+    },
+    {
+      "name": "backend-rollout.json",
+      "bytes": 1663,
+      "sha256": "28c642896f84bec46548c352c607f522a480cf38f6cea5d59aab1441b6b95906"
+    },
+    {
+      "name": "backend-rollback.json",
+      "bytes": 1012,
+      "sha256": "315314d9f07f2a5ea48261d39b24723971744241dcf3de4e75409909081eb40c"
+    },
+    {
+      "name": "postrollback-preservation.json",
+      "bytes": 1492,
+      "sha256": "81d8e1d13fefc7ea485a600bec76b5c15fa1b4e9a98843204be940565c3d6357"
+    },
+    {
+      "name": "artifact-transfer.json",
+      "bytes": 1424,
+      "sha256": "1f83e57621ee5ade2b5eea37e136f1643d55f10b0eeeb7be46c9e0f8d60bdda1"
+    },
+    {
+      "name": "same-source-local-results.json",
+      "bytes": 814,
+      "sha256": "b59f22b4949d2e11bfea87eabbfee4444578aa105db592553a0146ab322c9e52"
+    },
+    {
+      "name": "public-r1-original-acceptance.json",
+      "bytes": 809,
+      "sha256": "4a476ef0634b609af3271dfb2a1ae4748b59261d8a5d9af452345c97c3e4a457"
+    },
+    {
+      "name": "public-r1-result.json",
+      "bytes": 16420,
+      "sha256": "b048985d98da7128988b4cd9d3e65520fbbca5b1696042510d6e88b52e1ecf27"
+    },
+    {
+      "name": "phone-approval.json",
+      "bytes": 1821,
+      "sha256": "0065bbfc309aa769f822727d730286af49ed92966711f7919a79272df5b5b38d"
+    },
+    {
+      "name": "wallet-network-guard.json",
+      "bytes": 288,
+      "sha256": "39a6cdbcb021f711aed8a47c90703b26b79b4eb12b862ff105d715ba92abbe9c"
+    },
+    {
+      "name": "mobile-browser-closed.json",
+      "bytes": 69,
+      "sha256": "f567d472dba064203f7a8105b7375420c37452641e96d3fd8c725d90f33bcc33"
+    },
+    {
+      "name": "quest-key-observations.json",
+      "bytes": 6811,
+      "sha256": "4c949216f9f6b84cde8b113009cd6ee90d8b0ed7dd48294aaa206ab13e0f1ddd"
+    },
+    {
+      "name": "quest-failure-stage.json",
+      "bytes": 62,
+      "sha256": "a0b00d211c04c15f0bf8a6d29b219e8f959965e25758af73fb87285c0e749334"
+    },
+    {
+      "name": "restored-qr-zh-cn.json",
+      "bytes": 2377,
+      "sha256": "b79f6defa62ec128d77e7b5be48496d286b55d30c06909f0f3e076b80ac5b92e"
+    },
+    {
+      "name": "restored-qr-zh-tw.json",
+      "bytes": 2377,
+      "sha256": "4e1716a9432666e5ea4e915a44a4b87373e6c59c361891767bc5ada3e4a79af9"
+    },
+    {
+      "name": "passive-failure-analysis.json",
+      "bytes": 5363,
+      "sha256": "4f7b8dfdf49b1f1a8c59d11781fe9591d6f6326c07352580d658e7270d7d459a"
+    },
+    {
+      "name": "first-playable-terrain.png",
+      "bytes": 756003,
+      "sha256": "350d7b20675d109dfbbd55d60c9d2c44babe54623c7aa77f04210c75dcb6eeb2"
+    },
+    {
+      "name": "quest-left-open.png",
+      "bytes": 1258772,
+      "sha256": "fcbf12e3f92553df29841fde4e9490d799c6723e0b075469f0d6a3006adf24e0"
+    },
+    {
+      "name": "status.json",
+      "bytes": 2239,
+      "sha256": "c1282bd6ab598d9d21762647cac54bfc8850dcc9638c2dfdca76f3c3353ecec6"
+    }
+  ],
+  "scope": "Selected sanitized final release/canary/public/rollback records. Large original network traces and all source scripts retained in private topic.",
+  "privateTopic": "F:/mir2-builds/r16-auth-handoff-20261116"
+}

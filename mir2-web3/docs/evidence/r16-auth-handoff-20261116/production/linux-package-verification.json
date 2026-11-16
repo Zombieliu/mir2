@@ -1,0 +1,22 @@
+{
+  "source": "fea64484b6a25ccd59a22d8f52a5718aa6e57df6",
+  "workflowRun": 43809422151,
+  "artifact": 14200204143,
+  "downloadCompleted": true,
+  "artifactZipBytes": 95700095,
+  "artifactZipSha256LocallyComputed": "9cbaf87eca1f09a43a5fbef5908f9921f48df309b4be7eb5a499ce0f72b08fda",
+  "allPackageFilesShaVerified": 1841,
+  "sharedZoneTests": 310,
+  "gatewaySharedZoneTests": 40,
+  "backgroundExecutionTestsRequiredAndObserved": 7,
+  "nativePostgresTests": 216,
+  "docker": false,
+  "gateway": {
+    "path": "F:\\mir2-builds\\r16-auth-handoff-20261116\\release\\linux-package-r1\\mir2-gateway",
+    "bytes": 93576560,
+    "sha256": "22bb54130b2084a34c31d7b0b7bd604cc99a260a08e8d924a5513b329ee4ec96",
+    "elf": "64-bit little-endian x86_64"
+  },
+  "productionInstalled": false,
+  "publicBrowserAcceptance": false
+}

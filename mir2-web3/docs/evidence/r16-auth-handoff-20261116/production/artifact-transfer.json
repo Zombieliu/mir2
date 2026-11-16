@@ -1,0 +1,34 @@
+{
+  "id": 14200204143,
+  "source": "fea64484b6a25ccd59a22d8f52a5718aa6e57df6",
+  "workflowRun": 43809422151,
+  "bytes": 95700095,
+  "sha256": "9cbaf87eca1f09a43a5fbef5908f9921f48df309b4be7eb5a499ce0f72b08fda",
+  "githubDigestMatched": true,
+  "transport": "new ZIP metadata and changed ranges plus prior compressed-body cache; full official ZIP digest verified",
+  "priorArchiveSha256": "4f3f294faed5b12e5a5580117bcbd854c28e5fa35d64eb501dd837ca7cee51f0",
+  "downloadedBytes": 5634622,
+  "reusedBytes": 90275895,
+  "allFileShaSubsequentlyVerified": 1841,
+  "firstReconstructionFailure": {
+    "terminal": true,
+    "session": 21187,
+    "exitCode": 1,
+    "errorType": "URLError",
+    "partialBytes": 30047727,
+    "partialSha256": "0930007fde58f3386b9033cb4d60abd2e73501b0836b766ae38e9968358e6d71",
+    "runnerSha256": "88bd596dbc621035f4ea94c9ff26c4f35b1c6d5e6c67c9fc7cb39e83d8baf481",
+    "retained": true,
+    "standardTransferStillRunning": true
+  },
+  "redundantSlowerTransferStop": {
+    "completeZipSha256": "9cbaf87eca1f09a43a5fbef5908f9921f48df309b4be7eb5a499ce0f72b08fda",
+    "stoppedOwnedTransfer": true,
+    "originalPartialRetained": true,
+    "pid": 113208,
+    "at": "2026-11-16T06:00:23.8237196Z",
+    "session": 83280,
+    "reason": "Complete new artifact exactly matched independent GitHub digest; stop redundant slower transfer and retain its partial file"
+  },
+  "signedUrlsAndTokensPersisted": false
+}

@@ -1,0 +1,36 @@
+{
+  "restored": true,
+  "at": "2026-11-16T06:08:35.585Z",
+  "overlays": 19,
+  "preservedWip": 29,
+  "results": [
+    {
+      "name": "local-game-r1",
+      "source": "r16-auth-body-56c223a0",
+      "ackMs": 83,
+      "nativeMs": 113473,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      }
+    },
+    {
+      "name": "local-game-r2",
+      "source": "r16-auth-body-56c223a0",
+      "ackMs": 108,
+      "nativeMs": 28505,
+      "closed": {
+        "browser": true,
+        "proxy": true,
+        "next": true,
+        "gateway": true
+      }
+    }
+  ],
+  "allLocalGameProcessesClosed": true,
+  "sshControllerIndependentOfFactory": true,
+  "source": "D:/mir2-builds/r16-font-batch-20261115/source",
+  "buildNotServableAgainstRestoredSource": true
+}

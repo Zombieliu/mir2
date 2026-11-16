@@ -14,7 +14,7 @@ Short routing summary, updated 2026-11-16 (Asia/Shanghai). This indexes recorded
 
 ## Last recorded decisions and open work
 
-2026-11-16 正式仍e0／Fo，本轮未发布。额外对照14个pending均在批准前，批准后两次无头12秒取消；独立真实Passkey／API通过。含两个主动探针的整局对照登录／建角成功，但FIRST_PLAYABLE_SCENE_NOT_OBSERVED、走路0且正常注销，原8bf失败未覆盖。新候选补显式空JSON、正文2秒及Relay原8秒完整体边界；28项／严格隔离构建、本地实际UI→Next→Passkey→Gateway唯一登录、同证明401通过，R1界面失败／R2原始CDP补图单列。29份WIP保持、19覆盖恢复、进程关闭；下一项新同源资格及公网原门槛。偶发根因、进城资源、首次Q／语言与整体1:1继续，Goal active。[当前证据](evidence/r16-auth-handoff-20261116/README.md) · [原试发回退](evidence/r16-font-body-progress-20261116/production/README.md)。
+2026-11-16 fea正文边界候选已取得同源Linux／旧库克隆及英繁本地完整资格，并实际成对试发。公网原R1签名登录／首步136ms／六字体113／Worker通过，但对象包无头超时、完整行走帧未过、Native229253ms超120秒；第二次Q被消费而未关闭，未发出LogOut。R2不执行，已成对恢复e0／Fo，未恢复数据库；原321／233／233行及24配置SHA保持，新增QA保留。简繁出码／待确认／取消复验通过，恢复版签名未重测。29份WIP保持、19覆盖恢复、进程及canary关闭。下一项默认WebGPU完整回放，区分场景包恢复与共享界面启动／Q输入；本地compat／WebGL2不能代替默认路径。原偶发交接、语言和全部R16 1:1仍开放，Goal active。[原判定、截图与回退](evidence/r16-auth-handoff-20261116/production/README.md)。
 
 2026-11-15 用户补充寻路“目标不对或到不了”：本地候选ceb1c1132f补大小地图坐标／30秒初始期限／到达反馈和十语入口说明。152项、独立严格构建与英繁两后端实际跨图／慢碰撞超时／晚到零旧移动／重登新目标／正常保存通过，30份内容WIP保持。本轮未发布；其他目标与既有公网资源失败继续。[记录与范围](evidence/r16-route-feedback-20261115/README.md)
 

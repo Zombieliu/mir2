@@ -1,0 +1,31 @@
+{
+  "source": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+  "pid": 1754094,
+  "backup": "/var/backups/mir2-playtest/r16-auth-body-fea64484b6-20261116T053637Z",
+  "dump": {
+    "path": "/var/backups/mir2-playtest/r16-auth-body-fea64484b6-20261116T053637Z/store.dump",
+    "bytes": 1249298,
+    "sha256": "208ba04a9495a3f84b1c168d46143c8a7fef2ccd7ff8d739ac7024c98626ea6f",
+    "pgDumpVersion": "pg_dump (PostgreSQL) 16.13 (Ubuntu 16.13-0ubuntu0.24.04.1)"
+  },
+  "fingerprints": {
+    "accounts": {
+      "rows": 321,
+      "canonicalBytes": 2391236,
+      "sha256": "1a62150ac110fcfa71388150c0ec38b102c3796fe299d158f8cad7e6040f8bee"
+    },
+    "characters": {
+      "rows": 233,
+      "canonicalBytes": 78738,
+      "sha256": "5e7348047c852fcd041af57213b21615b71bb37e24e2ab948f260e4682278bbf"
+    },
+    "character_saves": {
+      "rows": 233,
+      "canonicalBytes": 2701539,
+      "sha256": "61e73bb5e78d0952a4c69a402bcce50e51f408ec069623a0f420c4dc91515e0e"
+    }
+  },
+  "configurationCount": 24,
+  "sameExportedSnapshot": true,
+  "productionServiceRestarted": false
+}
