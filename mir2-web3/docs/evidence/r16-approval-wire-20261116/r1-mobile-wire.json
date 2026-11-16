@@ -1,0 +1,89 @@
+{
+  "kind": "passive-auth-wire-v1",
+  "side": "mobile",
+  "startedAtEpochMs": 1794827466721,
+  "endedAtEpochMs": 1794827477855,
+  "dropped": 0,
+  "marks": [
+    {
+      "name": "approval-tap-armed",
+      "atEpochMs": 1794827476885
+    },
+    {
+      "name": "approval-round-ended",
+      "atEpochMs": 1794827477741
+    }
+  ],
+  "scope": "Existing CDP Network events only. No fetch, interception, protocol command, focus change, URL, identifier, request headers, payload, credentials or signature retained.",
+  "rows": [
+    {
+      "ordinal": 1,
+      "kind": "relay-session",
+      "method": "GET",
+      "requestAtEpochMs": 1794827476125,
+      "dataEvents": 1,
+      "decodedBytesObserved": 692,
+      "encodedBytesObserved": 366,
+      "headersAtEpochMs": 1794827476858,
+      "status": 200,
+      "protocol": "h2",
+      "fromDiskCache": false,
+      "fromServiceWorker": false,
+      "cache": {
+        "serverDateEpochMs": 1794827477000,
+        "jsonContentType": true,
+        "cfPop": "SIN"
+      },
+      "firstDataAtEpochMs": 1794827476858,
+      "lastDataAtEpochMs": 1794827476858,
+      "finishedAtEpochMs": 1794827476858,
+      "totalEncodedBytes": 634,
+      "outcome": "body-finished"
+    },
+    {
+      "ordinal": 2,
+      "kind": "relay-approve",
+      "method": "POST",
+      "requestAtEpochMs": 1794827477459,
+      "dataEvents": 1,
+      "decodedBytesObserved": 2531,
+      "encodedBytesObserved": 1412,
+      "headersAtEpochMs": 1794827477736,
+      "status": 200,
+      "protocol": "h2",
+      "fromDiskCache": false,
+      "fromServiceWorker": false,
+      "cache": {
+        "serverDateEpochMs": 1794827478000,
+        "jsonContentType": true,
+        "cfPop": "SIN"
+      },
+      "firstDataAtEpochMs": 1794827477736,
+      "lastDataAtEpochMs": 1794827477736,
+      "finishedAtEpochMs": 1794827477736,
+      "totalEncodedBytes": 1449,
+      "outcome": "body-finished"
+    },
+    {
+      "ordinal": 3,
+      "kind": "relay-approve",
+      "method": "OPTIONS",
+      "requestAtEpochMs": 1794827477460,
+      "dataEvents": 0,
+      "decodedBytesObserved": 0,
+      "encodedBytesObserved": 0,
+      "headersAtEpochMs": 1794827477603,
+      "status": 204,
+      "protocol": "h2",
+      "fromDiskCache": false,
+      "fromServiceWorker": false,
+      "cache": {
+        "serverDateEpochMs": 1794827478000,
+        "cfPop": "SIN"
+      },
+      "finishedAtEpochMs": 1794827477603,
+      "totalEncodedBytes": 0,
+      "outcome": "body-finished"
+    }
+  ]
+}

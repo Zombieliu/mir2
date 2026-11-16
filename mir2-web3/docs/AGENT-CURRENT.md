@@ -14,7 +14,7 @@ Short routing summary, updated 2026-11-16 (Asia/Shanghai). This indexes recorded
 
 ## Last recorded decisions and open work
 
-2026-11-16 f05／b5 同源资格、1841文件SHA、Linux310／Native PG216及隔离旧档canary通过；正式成对试发后原R1钱包单次批准通过，游戏交换／WS均0、未建角未到场景，APPROVED_WALLET_LOGIN_NOT_OBSERVED，原判定false、R2不跑。已恢复e0／Fo／PID1832898，322／234／234全行及24配置保持，未还原库；简繁出码／待确认／取消复验通过，恢复版签名与实体手机未测。累计16个200/pending缺逐次时间，不据此判定批准后pending或唯一根因。48次Q本地资格及原失败保持，33追踪WIP保留、27覆盖恢复，Goal继续active。下一项围绕单次批准加被动请求／正文时序，先查批准→游戏交换；不重发未变候选。[试发、原判定与回退](evidence/r16-diary-nav-handoff-20261116/production/README.md)。
+2026-11-16 新增被动认证 wire 观察器，10项定向检查通过；现有e0／Fo两轮单次批准均到游戏登录，批准正文到完整状态正文1399／1653ms。R1首个可操作场景失败；R2功能通过但首次任务窗是备用、缺原120秒Native就绪记录，严格判定均false，后续Worker后Native已就绪。首步7692ms且同期KeepAlive4761ms，继续首次准入和传输定位。未改应用／发布／SSH，33原WIP保持，各建一个专用QA角色并正常注销保留；不宣称本轮全库重读。f05原批准交接失败未重现也未定因，不能由e0成功关闭；原回退及全部门槛保留，Goal active。[两轮时序、截图与边界](evidence/r16-approval-wire-20261116/README.md) · [f05试发及回退](evidence/r16-diary-nav-handoff-20261116/production/README.md)。
 
 此前fea实际试发的公网原R1签名及136ms首步通过，场景／Native120／Q关闭／注销未过，R2不跑、两端已恢复e0且未还原数据库；原321／233／233行及24配置保持，新增QA保留。简繁出码通过，恢复版签名未重测。英文helper参数compatibility实际选中WebGPU、无回退，早期据名称判断未覆盖默认后端有误。[原失败、纠正与回退](evidence/r16-auth-handoff-20261116/production/README.md)。
 

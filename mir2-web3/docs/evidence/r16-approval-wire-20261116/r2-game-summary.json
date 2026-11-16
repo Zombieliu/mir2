@@ -1,0 +1,257 @@
+{
+  "kind": "r16-existing-production-game-control",
+  "cohort": "r2",
+  "source": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+  "deploymentId": "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN",
+  "passed": true,
+  "originalAccepted": false,
+  "failure": null,
+  "gameProtocol": {
+    "gameSockets": 1,
+    "passkeyLogin": 1,
+    "loginSuccess": 1,
+    "newCharacter": 1,
+    "newCharacterSuccess": 1,
+    "startGame": 1,
+    "startGameResult": 4,
+    "walk": 1,
+    "logOut": 1,
+    "logOutSuccess": 1,
+    "unexpectedMutation": 0
+  },
+  "gameAuthExchange": [
+    200
+  ],
+  "normalFreshTestnetWalletCreated": true,
+  "oneQaRoleCreated": true,
+  "qaRoleDeleted": false,
+  "returnedToSelection": true,
+  "desktopBrowserClosed": true,
+  "mobileBrowserClosed": true,
+  "timing": {
+    "clockEpochMs": 1794828110390,
+    "authoritativeLoginSuccessMs": 64755,
+    "startIntentMs": 95644,
+    "startAckMs": 100262,
+    "authoritativeStarterMapMs": 100267,
+    "authoritativeSelfMs": 100267,
+    "firstPlayableObservedMs": 103510,
+    "terrainPaintVerifiedMs": 179482,
+    "logoutIntentMs": 382268,
+    "logoutAckMs": 383482,
+    "manifestAttemptsBeforeStart": 1,
+    "manifestAttemptsAtOrAfterStart": 0,
+    "starterRegionRequestMs": 64766,
+    "starterRegionWireHeadersMs": 65318.562,
+    "starterRegionResponseEventMs": 65319,
+    "starterRegionBodyMs": 65415,
+    "starterRegionCommitMs": 100405,
+    "sceneSpritesReadyMs": 100446,
+    "localeRequestMs": 64767,
+    "localeBodyMs": 74455,
+    "localeReadyMs": 74491,
+    "firstPlayableFrameMs": 103455,
+    "rendererBodyMs": 185685
+  },
+  "movement": {
+    "attempted": true,
+    "passed": true,
+    "from": {
+      "x": 288,
+      "y": 616
+    },
+    "to": {
+      "x": 289,
+      "y": 616,
+      "direction": "Right"
+    },
+    "physical": {
+      "input": "trusted-playwright-keyboard-pulse",
+      "key": "ArrowRight",
+      "atMs": 103619
+    },
+    "wire": {
+      "type": "walk",
+      "direction": "Right",
+      "atMs": 103622
+    },
+    "ack": {
+      "x": 289,
+      "y": 616,
+      "packet": "UserLocation",
+      "atMs": 111311
+    },
+    "ackWithinEightSeconds": true
+  },
+  "firstWalkTransport": {
+    "websocketFrameMs": 7688,
+    "keepAlives": [
+      {
+        "sentRelativeToWalkMs": -27059,
+        "rttMs": 133
+      },
+      {
+        "sentRelativeToWalkMs": -12062,
+        "rttMs": 133
+      },
+      {
+        "sentRelativeToWalkMs": 2940,
+        "rttMs": 4761
+      },
+      {
+        "sentRelativeToWalkMs": 17938,
+        "rttMs": 132
+      },
+      {
+        "sentRelativeToWalkMs": 32939,
+        "rttMs": 134
+      },
+      {
+        "sentRelativeToWalkMs": 47938,
+        "rttMs": 134
+      },
+      {
+        "sentRelativeToWalkMs": 62938,
+        "rttMs": 133
+      },
+      {
+        "sentRelativeToWalkMs": 77940,
+        "rttMs": 155
+      },
+      {
+        "sentRelativeToWalkMs": 92946,
+        "rttMs": 137
+      },
+      {
+        "sentRelativeToWalkMs": 107938,
+        "rttMs": 132
+      },
+      {
+        "sentRelativeToWalkMs": 122939,
+        "rttMs": 138
+      },
+      {
+        "sentRelativeToWalkMs": 137940,
+        "rttMs": 134
+      },
+      {
+        "sentRelativeToWalkMs": 152938,
+        "rttMs": 135
+      },
+      {
+        "sentRelativeToWalkMs": 167939,
+        "rttMs": 138
+      },
+      {
+        "sentRelativeToWalkMs": 182938,
+        "rttMs": 136
+      },
+      {
+        "sentRelativeToWalkMs": 197939,
+        "rttMs": 135
+      },
+      {
+        "sentRelativeToWalkMs": 212939,
+        "rttMs": 138
+      },
+      {
+        "sentRelativeToWalkMs": 227938,
+        "rttMs": 135
+      },
+      {
+        "sentRelativeToWalkMs": 242939,
+        "rttMs": 133
+      },
+      {
+        "sentRelativeToWalkMs": 257940,
+        "rttMs": 134
+      },
+      {
+        "sentRelativeToWalkMs": 272938,
+        "rttMs": 135
+      }
+    ],
+    "gatewayHealthBefore": {
+      "status": 200,
+      "startedAt": 95626,
+      "finishedAt": 95818,
+      "revision": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+      "complete": true,
+      "sinceInitializationMs": 2605090,
+      "successes": 0,
+      "failures": 0,
+      "count": 0,
+      "sumUs": 0
+    },
+    "gatewayHealthAfter": {
+      "status": 200,
+      "startedAt": 111473,
+      "finishedAt": 111532,
+      "revision": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+      "complete": true,
+      "sinceInitializationMs": 2620808,
+      "successes": 1,
+      "failures": 0,
+      "count": 1,
+      "sumUs": 578
+    },
+    "admissionCounterDelta": {
+      "successes": 1,
+      "failures": 0,
+      "count": 1,
+      "sumUs": 578,
+      "oneObservedAdmission": true
+    }
+  },
+  "sharedHud": {
+    "optional": true,
+    "passed": false,
+    "status": "not-observed",
+    "gateReady": false,
+    "runtimeDelivered": true,
+    "failure": {
+      "phase": "ordinary-shared-hud-optional",
+      "code": "OPTIONAL_SHARED_HUD_OR_RUNTIME_NOT_OBSERVED"
+    }
+  },
+  "quest": {
+    "passed": true,
+    "locale": "zh-TW",
+    "renderer": "ordinary-react-fallback",
+    "questId": 2110001,
+    "stage": "available",
+    "objective": "向助理簡報告",
+    "counter": "0/1",
+    "chapter": "章節 1/6 · 村莊起步 · 本章 0/4",
+    "journey": "當前主線 0/26",
+    "zeroWorldCommands": true,
+    "screenshot": "quest-available-zh-TW.png"
+  },
+  "prewarm": {
+    "passed": true,
+    "summary": {
+      "requested": 113,
+      "ok": 113,
+      "failed": 0
+    }
+  },
+  "sixCompleteFonts": {
+    "passed": true,
+    "count": 6
+  },
+  "workerRestart": {
+    "passed": true,
+    "nativeReady": true,
+    "noConfigurationMessageSentByTest": true
+  },
+  "process": {
+    "pid": 131996,
+    "startedAt": "2026-11-16T11:21:48.984Z",
+    "endedAt": "2026-11-16T11:28:18.112Z",
+    "exitCode": 0,
+    "signal": null
+  },
+  "noDeploymentPerformed": true,
+  "noSshOrDatabaseMutationPerformed": true,
+  "databaseBoundary": "Only normal dedicated QA role creation and normal LogOut saves; no total row counts or old-row preservation reread this round."
+}

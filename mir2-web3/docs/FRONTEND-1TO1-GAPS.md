@@ -1,5 +1,9 @@
 # Frontend 1:1 Gaps
 
+## 2026-11-16 现有正式版两轮批准交接通过，首次场景／Native资格继续
+
+新增只读wire观察器及10项检查；e0／Fo两轮实际单次批准到游戏登录通过，原f05失败未重现亦未定因。R1可操作场景失败；R2首步7692ms、六字体113／Worker／正常退出通过，但首次任务窗为React备用、无原120秒Native就绪记录，严格原判定均false。后续Worker后Native ready=true与完整HUD不倒填首次准入。未改应用／发布，33原WIP保留；截图仍混合语言，继续首次Native、传输延迟、失败交接及全部R16 1:1。[逐轮原判定、时间和截图](evidence/r16-approval-wire-20261116/README.md)
+
 ## 2026-11-16 f05试发在批准到游戏登录交接失败后回退
 
 本地73项／两TC后端／48次Q资格及111发布保护、同源制品和旧档canary通过。正式原R1单次钱包批准通过，游戏交换／WS均0、未建角未到场景，原判定false、R2未跑。已恢复e0／Fo；322／234／234及24配置保持，简繁出码复验通过。此次公网性能／Q门槛未测到，下一项用被动时间关联批准与轮询交接；原失败及整体R16 Candidate／Accepted保持开放。 [原回执及边界](evidence/r16-diary-nav-handoff-20261116/production/README.md)

@@ -1,0 +1,22 @@
+TAP version 13
+# Subtest: observer preserves timing/status/cache evidence without recording login capabilities or identities
+ok 1 - observer preserves timing/status/cache evidence without recording login capabilities or identities
+  ---
+  duration_ms: 4.3272
+  type: 'test'
+  ...
+# Subtest: an interrupted response is recorded as unavailable without inventing a pending or approved state
+ok 2 - an interrupted response is recorded as unavailable without inventing a pending or approved state
+  ---
+  duration_ms: 1.5203
+  type: 'test'
+  ...
+1..2
+# tests 2
+# suites 0
+# pass 2
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2061.8254

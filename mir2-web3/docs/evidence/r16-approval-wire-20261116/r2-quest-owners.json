@@ -1,0 +1,82 @@
+[
+  {
+    "label": "before-q",
+    "owner": "react",
+    "quest": {},
+    "hud": {},
+    "package": {},
+    "fonts": {
+      "status": "loading",
+      "faces": [
+        {
+          "family": "Noto Sans TC",
+          "status": "loading"
+        }
+      ]
+    }
+  },
+  {
+    "label": "after-q",
+    "owner": "react",
+    "quest": {},
+    "hud": {},
+    "package": {},
+    "fonts": {
+      "status": "loading",
+      "faces": [
+        {
+          "family": "Noto Sans TC",
+          "status": "loading"
+        }
+      ]
+    }
+  },
+  {
+    "label": "task-text-verified",
+    "owner": "react",
+    "quest": {},
+    "hud": {},
+    "package": {},
+    "fonts": {
+      "status": "loading",
+      "faces": [
+        {
+          "family": "Noto Sans TC",
+          "status": "loading"
+        }
+      ]
+    }
+  },
+  {
+    "label": "pixels-captured",
+    "owner": "react",
+    "quest": {},
+    "hud": {},
+    "package": {},
+    "fonts": {
+      "status": "loading",
+      "faces": [
+        {
+          "family": "Noto Sans TC",
+          "status": "loading"
+        }
+      ]
+    }
+  },
+  {
+    "label": "after-close",
+    "owner": "react",
+    "quest": {},
+    "hud": {},
+    "package": {},
+    "fonts": {
+      "status": "loading",
+      "faces": [
+        {
+          "family": "Noto Sans TC",
+          "status": "loading"
+        }
+      ]
+    }
+  }
+]

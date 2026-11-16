@@ -1,0 +1,26 @@
+{
+  "files": [
+    "r1-auth-analysis.json",
+    "r1-desktop-wire.json",
+    "r1-mobile-wire.json",
+    "r1-original-acceptance.json",
+    "r1-game-summary.json",
+    "r1-frozen-qa-inputs.json",
+    "r2-auth-analysis.json",
+    "r2-desktop-wire.json",
+    "r2-mobile-wire.json",
+    "r2-original-acceptance.json",
+    "r2-game-summary.json",
+    "r2-frozen-qa-inputs.json",
+    "r2-original-fonts.json",
+    "r2-quest-owners.json",
+    "r2-first-quest-fallback.png",
+    "r2-hud-after-worker-restart.png",
+    "auth-wire-tests.log",
+    "adjacent-observer-tests.log",
+    "preservation-and-scope.json",
+    "independent-alias-final.json",
+    "independent-http-final.json",
+    "historical-runtime-log-scope.json"
+  ]
+}

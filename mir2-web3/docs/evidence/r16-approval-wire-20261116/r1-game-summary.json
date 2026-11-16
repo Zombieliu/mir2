@@ -1,0 +1,148 @@
+{
+  "kind": "r16-existing-production-game-control",
+  "cohort": "r1",
+  "source": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+  "deploymentId": "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN",
+  "passed": false,
+  "originalAccepted": false,
+  "failure": {
+    "phase": "ordinary-first-playable-scene",
+    "code": "FIRST_PLAYABLE_SCENE_NOT_OBSERVED"
+  },
+  "gameProtocol": {
+    "gameSockets": 1,
+    "passkeyLogin": 1,
+    "loginSuccess": 1,
+    "newCharacter": 1,
+    "newCharacterSuccess": 1,
+    "startGame": 1,
+    "startGameResult": 4,
+    "walk": 0,
+    "logOut": 1,
+    "logOutSuccess": 1,
+    "unexpectedMutation": 0
+  },
+  "gameAuthExchange": [
+    200
+  ],
+  "normalFreshTestnetWalletCreated": true,
+  "oneQaRoleCreated": true,
+  "qaRoleDeleted": false,
+  "returnedToSelection": true,
+  "desktopBrowserClosed": true,
+  "mobileBrowserClosed": true,
+  "timing": {
+    "clockEpochMs": 1794827436599,
+    "authoritativeLoginSuccessMs": 44843,
+    "startIntentMs": 75701,
+    "startAckMs": 79727,
+    "authoritativeStarterMapMs": 79732,
+    "authoritativeSelfMs": 79732,
+    "logoutIntentMs": 199943,
+    "logoutAckMs": 201079,
+    "manifestAttemptsBeforeStart": 1,
+    "manifestAttemptsAtOrAfterStart": 0,
+    "starterRegionRequestMs": 44847,
+    "starterRegionWireHeadersMs": 59950.145,
+    "starterRegionResponseEventMs": 59951,
+    "starterRegionBodyMs": 63140,
+    "starterRegionCommitMs": 79846,
+    "sceneSpritesReadyMs": 79936,
+    "localeRequestMs": 44848,
+    "localeBodyMs": 101413,
+    "localeReadyMs": 101451,
+    "firstPlayableFrameMs": null,
+    "rendererBodyMs": null
+  },
+  "movement": {
+    "attempted": false,
+    "passed": null
+  },
+  "firstWalkTransport": {
+    "websocketFrameMs": null,
+    "keepAlives": [
+      {
+        "sentRelativeToWalkMs": null,
+        "rttMs": 131
+      },
+      {
+        "sentRelativeToWalkMs": null,
+        "rttMs": 130
+      },
+      {
+        "sentRelativeToWalkMs": null,
+        "rttMs": 134
+      },
+      {
+        "sentRelativeToWalkMs": null,
+        "rttMs": 131
+      },
+      {
+        "sentRelativeToWalkMs": null,
+        "rttMs": 131
+      },
+      {
+        "sentRelativeToWalkMs": null,
+        "rttMs": 131
+      },
+      {
+        "sentRelativeToWalkMs": null,
+        "rttMs": 130
+      },
+      {
+        "sentRelativeToWalkMs": null,
+        "rttMs": 130
+      },
+      {
+        "sentRelativeToWalkMs": null,
+        "rttMs": 136
+      },
+      {
+        "sentRelativeToWalkMs": null,
+        "rttMs": 139
+      }
+    ],
+    "gatewayHealthBefore": {
+      "status": 200,
+      "startedAt": 75684,
+      "finishedAt": 76550,
+      "revision": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+      "complete": true,
+      "sinceInitializationMs": 1911866,
+      "successes": 0,
+      "failures": 0,
+      "count": 0,
+      "sumUs": 0
+    },
+    "gatewayHealthAfter": null,
+    "admissionCounterDelta": null
+  },
+  "sharedHud": {
+    "optional": true,
+    "passed": false,
+    "status": "not-reached"
+  },
+  "quest": {
+    "passed": false,
+    "status": "not-reached"
+  },
+  "prewarm": {
+    "passed": false,
+    "summary": null
+  },
+  "sixCompleteFonts": {
+    "passed": false,
+    "count": 0
+  },
+  "workerRestart": null,
+  "process": {
+    "pid": 130272,
+    "startedAt": "2026-11-16T11:10:35.398Z",
+    "endedAt": "2026-11-16T11:14:01.893Z",
+    "exitCode": 1,
+    "signal": null
+  },
+  "noDeploymentPerformed": true,
+  "noSshOrDatabaseMutationPerformed": true,
+  "databaseBoundary": "Only normal dedicated QA role creation and normal LogOut saves; no total row counts or old-row preservation reread this round."
+}

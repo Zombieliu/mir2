@@ -6,11 +6,11 @@ Updated 2026-11-16 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-16 f05／b5同源包与旧档canary通过并实际试发；原公网R1批准成功但未到游戏交换／建角，原判定false，R2未跑，已成对回退e0／Fo。322账号／234角色／234存档和24配置保持，未恢复库；简繁真实出码／待确认／取消通过，恢复版签名未重测。下一项先加单次批准前后的被动请求／响应／正文时间，关联游戏轮询交接；累计16个200/pending缺时间，不认定缓存或唯一根因。原8／65／120与完整六字体113不改，33WIP及全部失败保留，完整R16 Goal继续active。[本轮试发、回退与下一项](evidence/r16-diary-nav-handoff-20261116/production/README.md)。
+2026-11-16 被动认证时序工具10项通过，e0／Fo两轮单次批准均完成游戏登录；R1可操作场景失败，R2功能通过但首次备用任务窗／原Native120资格未过，后续Worker后Native已就绪。首步7692ms、同期KeepAlive4761ms仍需定位；未改应用或部署，33WIP保持，两个专用QA角色正常注销保留。f05原批准交接失败仍开放，不能用对照成功替代；原8／65／120／六字体113及完整R16 Goal保持。[最新对照、严格原判定和下一项](evidence/r16-approval-wire-20261116/README.md) · [原试发与回退](evidence/r16-diary-nav-handoff-20261116/production/README.md)。
 
 ## 保留的当前未结项
 
-- [ ] CJK／授权交接：额外e0对照确认14个pending均在批准前，批准后无头12秒取消；API和另一次含主动探针的整局登录通过，后者进城画面失败。新正文边界候选已过28项／严格构建／本地实际UI与Gateway登录、同证明401，尚未发布且不宣称修复偶发根因。正式e0／Fo、原8bf和306失败保留，29份WIP保持、19覆盖恢复。继续新同源发行及公网原8／65／120／六字体113，首Q／语言等范围不缩减。[新时序与候选](evidence/r16-auth-handoff-20261116/README.md) · [原发行与回退](evidence/r16-font-body-progress-20261116/production/README.md)
+- [ ] 批准交接：f05正式原R1批准后游戏交换／WS为0，已回退e0／Fo，原轮询缺逐次时间；本轮新增无探针wire时序，两轮e0登录通过不能替代该失败。保留更早批准后无头12秒取消及正文边界修补证据；下一项捕获失败的请求／头／正文边界再定因，不原样重发f05或放宽门槛。并行保留首次可操作场景／Native120和7692ms首步的定位范围、33原WIP及全部1:1目标。[最新两轮对照](evidence/r16-approval-wire-20261116/README.md) · [原f05失败](evidence/r16-diary-nav-handoff-20261116/production/README.md) · [较早正文边界](evidence/r16-auth-handoff-20261116/README.md)
 
 - [x] e0整源字体中断分片已通过本地188项／真实Chrome恢复、匹配Linux／PG／SHA、成对发行与原两场公网；六字体／113／原时限保持。[已发布范围](evidence/r16-font-prefix-recovery-20261116/production/README.md)
 
