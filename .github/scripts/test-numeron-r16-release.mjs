@@ -273,10 +273,10 @@ test('QR stage accepts only the reviewed merge commits regardless of API orderin
   assert.equal(writes(result).length, 1);
   assert.equal(writes(result)[0].body.gitSource.sha, QR_RELEASE.source);
   assert.equal(result.result.trafficAfter.alias, QR_RELEASE.baseline);
-  assert.equal(result.result.sourceClosure.changedFiles.length, 139);
-  assert.equal(result.result.sourceClosure.checkpoints.length, 2);
-  assert.deepEqual(result.result.sourceClosure.checkpoints.map(segment => segment.files), [90,59]);
-  assert.equal(f.state.calls.filter(request => request.pathname.includes('/compare/')).length, 2);
+  assert.equal(result.result.sourceClosure.changedFiles.length, 237);
+  assert.equal(result.result.sourceClosure.checkpoints.length, 3);
+  assert.deepEqual(result.result.sourceClosure.checkpoints.map(segment => segment.files), [90,59,105]);
+  assert.equal(f.state.calls.filter(request => request.pathname.includes('/compare/')).length, 3);
 });
 
 test('QR stage rejects an unreviewed final-checkpoint blob before any release write', async () => {
@@ -288,7 +288,7 @@ test('QR stage rejects an unreviewed final-checkpoint blob before any release wr
     return json(comparison);
   };
   const result = await f.execute();failed(result, /qrSourceClosureMismatch/);
-  assert.equal(f.state.calls.filter(request => request.pathname.includes('/compare/')).length, 2);
+  assert.equal(f.state.calls.filter(request => request.pathname.includes('/compare/')).length, 3);
   assert.equal(writes(result).length, 0);
 });
 

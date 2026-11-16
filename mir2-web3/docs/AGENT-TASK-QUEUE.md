@@ -6,7 +6,7 @@ Updated 2026-11-16 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-16 Q快速重开修补通过73项／严格构建及繁体默认WebGPU、共享WebGL2两场完整原门槛，48次快速开关和日记/HUD最终一致通过。七个草稿独立固定，Shell外部WIP逆变换保留、27覆盖恢复；未发布，正式仍e0／Fo。下一项新提交／控制器冻结及同源发行资格，再验公网真实签名、完整冷资源／Native120与退出；不重发旧候选、不覆盖C4B原R2和旧公网失败，全部R16范围继续active。[新源、回归与截图](evidence/r16-diary-nav-handoff-20261116/README.md) · [原失败](evidence/r16-entry-object-recovery-20261116/README.md)。
+2026-11-16 Q快速重开修补通过73项／严格构建及繁体默认WebGPU、共享WebGL2两场完整原门槛，48次快速开关和日记/HUD最终一致通过。七个草稿独立固定，Shell外部WIP逆变换保留、27覆盖恢复；未发布，正式仍e0／Fo。新源 f05 已推送，三段来源／111发布保护通过；下一项同源发行资格，再验公网真实签名、完整冷资源／Native120与退出；不重发旧候选、不覆盖C4B原R2和旧公网失败，全部R16范围继续active。[新源、回归与截图](evidence/r16-diary-nav-handoff-20261116/README.md) · [原失败](evidence/r16-entry-object-recovery-20261116/README.md)。
 
 ## 保留的当前未结项
 

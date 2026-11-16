@@ -14,7 +14,7 @@ Short routing summary, updated 2026-11-16 (Asia/Shanghai). This indexes recorded
 
 ## Last recorded decisions and open work
 
-2026-11-16 Q快速重开候选通过73项／严格隔离构建及繁体WebGPU、共享WebGL2完整两场；48次快速开关均过，最终日记/HUD一致、零世界指令、原六字体113／原包自然帧／两次注销同角保存均过。日记使用实际dispatch接受结果及当前已绘制状态，保留未应用UI请求，世界校验不放宽；共享场实测旧捕获分支3次重开和4条拒绝记录。未改C4B对照未复现旧R2且初次诊断字段读错，原失败保留、不认定唯一根因。27覆盖恢复、28份原WIP及Shell外部字节保留。未发布，公网两端独立读回仍e0／Fo；下一项冻结新源与同源发行／公网原门槛，语言和完整R16 Goal继续active。[源、像素与边界](evidence/r16-diary-nav-handoff-20261116/README.md)。
+2026-11-16 Q快速重开候选通过73项／严格隔离构建及繁体WebGPU、共享WebGL2完整两场；48次快速开关均过，最终日记/HUD一致、零世界指令、原六字体113／原包自然帧／两次注销同角保存均过。日记使用实际dispatch接受结果及当前已绘制状态，保留未应用UI请求，世界校验不放宽；共享场实测旧捕获分支3次重开和4条拒绝记录。未改C4B对照未复现旧R2且初次诊断字段读错，原失败保留、不认定唯一根因。27覆盖恢复、28份原WIP及Shell外部字节保留。未发布，公网两端独立读回仍e0／Fo；新源 f05 与三段来源已冻结，111 发布保护通过；同源 CI／公网原门槛继续，语言和完整R16 Goal继续active。[源、像素与边界](evidence/r16-diary-nav-handoff-20261116/README.md)。
 
 此前fea实际试发的公网原R1签名及136ms首步通过，场景／Native120／Q关闭／注销未过，R2不跑、两端已恢复e0且未还原数据库；原321／233／233行及24配置保持，新增QA保留。简繁出码通过，恢复版签名未重测。英文helper参数compatibility实际选中WebGPU、无回退，早期据名称判断未覆盖默认后端有误。[原失败、纠正与回退](evidence/r16-auth-handoff-20261116/production/README.md)。
 
