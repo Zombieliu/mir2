@@ -1,5 +1,7 @@
 # R16 日记关闭后快速重开的导航交接
 
+后续 f05／b5 已取得同源发行资格并试发；原公网R1批准后未进入游戏登录，已成对恢复e0／Fo。原存档／配置保持，当前以[试发与回退记录](production/README.md)为准；下文保留本地资格阶段的原记录。
+
 2026-11-16，Asia/Shanghai。父提交 `c4b2e44c5ed2ca59050f092dbeb8ec7702b7a8a5`，隔离候选 `r16-diary-nav-259e9823`。**73项检查、严格生产构建及繁体两个后端完整流程通过，48次快速开关全部通过。尚未发布；完整Windows R16 1:1 Goal仍active。**[状态](status.json)
 
 ## 证据和修补范围
@@ -46,8 +48,8 @@
 
 原有28份其它WIP的字节SHA保持，Shell本轮位置逆变换后逐字节还原修改前工作文件；提交只纳入本轮位置。[所有权证明](source-ownership.json)。全部浏览器／Next／Gateway／代理已关闭，27个私有覆盖恢复；未删除制品。[恢复与两场结果](restoration.json)
 
-独立Vercel域名仍为Fo，公共游戏／版本／Gateway健康均200，前后端source仍e0。本轮无部署、DNS、正式重启或数据库恢复，恢复版签名未重测。[域名](alias-readback.json) · [HTTP读回](public-readback.json)
+独立Vercel域名仍为Fo，公共游戏／版本／Gateway健康均200，前后端source仍e0。上述本地资格记录阶段没有部署、DNS、正式重启或数据库恢复，恢复版签名未重测。[域名](alias-readback.json) · [HTTP读回](public-readback.json)
 
 下一项固定新应用提交和发行控制器，取得新的同源发行资格，再按原公网签名／完整冷加载／退出门槛验收。旧公网fea原R1、旧C4B本地R2及所有原失败不改写。完整目标仍包括UI、登录／选角／进城、战斗／药品／拾取／组队／交易、阿洛、语言、新手至30级三职业、技能／地图、Native同档和最终人体验收。[文件摘要](evidence-manifest.json)
 
-新源码 f05 的三段来源与 111 项发行保护见 [发行准备](release/README.md)；同源构建仍在运行，尚未切换公网。
+新源码 f05 的三段来源与 111 项发行保护见 [发行准备](release/README.md)。同源构建、制品和canary后来通过；正式试发在批准→游戏登录阶段失败，已回退，见 [原判定与当前发行](production/README.md)。

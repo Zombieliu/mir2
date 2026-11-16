@@ -1,0 +1,25 @@
+{
+  "revision": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+  "locale": "zh-TW",
+  "passed": true,
+  "normalSystemNetwork": true,
+  "noInterception": true,
+  "checks": {
+    "exactRevision": true,
+    "nativeBrowserLocale": true,
+    "noSplitLocaleRequestsBeforeAuth": true,
+    "localizedTitle": true,
+    "firstPartyLink": true,
+    "renderedQr": true,
+    "sameIntentPending": true,
+    "localizedPending": true,
+    "normalCancel": true,
+    "pollingStopped": true,
+    "remainedLogin": true
+  },
+  "createAttempts": 1,
+  "pollsAfterCancel": 0,
+  "browserClosed": true,
+  "signedGameLoginRetested": false,
+  "scope": "Unsigned actual-pixel QR pending and cancel only"
+}

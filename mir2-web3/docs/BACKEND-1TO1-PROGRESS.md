@@ -1,5 +1,9 @@
 # Backend 1:1 Progress
 
+## 2026-11-16 f05同源Linux与旧档通过，公网登录交接未过后回退
+
+新CI原ZIP和1841文件SHA、Linux共享310项／Native PG216项及7后台执行必需用例通过；隔离同快照322／234／234普通协议移动106ms、漫游、两次注销和同角保存通过。试发原R1未到游戏交换／WS，已成对恢复e0／Fo／PID1832898，全正式行和24配置保持，未还原库；不由canary通过代替公网钱包登录资格。 [原回执及边界](evidence/r16-diary-nav-handoff-20261116/production/README.md)
+
 ## 2026-11-16 同源Linux与旧档canary通过，正式已恢复e0
 
 fea原制品1841文件SHA、Linux共享相关310项及Native PG216项通过；一致旧库克隆的普通协议移动／两次注销／同角保存通过。正式成对试发后因Web原门槛失败恢复e0，未恢复数据库；原321账号／233角色／233存档及24配置SHA保持，新增QA保留。[发行、canary及保全记录](evidence/r16-auth-handoff-20261116/production/README.md)

@@ -1,5 +1,9 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+## 2026-11-16 f05同源试发未到游戏登录，已恢复e0
+
+f05原制品1841项SHA、Linux310／Native PG216与旧档canary通过并试发。公网原R1批准后游戏交换／WS为0，未到场景；原判定false、R2未跑，已恢复e0／Fo。322／234／234及24配置保持，未恢复库。先查批准→游戏交换的被动时序，完整R16 Candidate／Accepted继续开放。 [原回执及边界](evidence/r16-diary-nav-handoff-20261116/production/README.md)
+
 ## 2026-11-16 同源试发后恢复e0，默认WebGPU完整流程继续
 
 fea同源Linux／旧档与本地英繁资格通过，公网原R1签名及136ms移动通过，但场景／Native120／Q关闭／注销未过，R2不跑，两端已恢复e0／Fo。下一项默认WebGPU受控完整回放；完整R16 Candidate／Accepted仍开放。[原判定与当前发行](evidence/r16-auth-handoff-20261116/production/README.md)

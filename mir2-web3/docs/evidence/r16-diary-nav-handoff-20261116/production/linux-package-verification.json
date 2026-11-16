@@ -1,0 +1,18 @@
+{
+  "source": "f05fb757ef4dcac75dd5bfbdd2b23ddb67ce810b",
+  "workflowRun": 43842463384,
+  "artifact": 14214923839,
+  "artifactZipBytes": 95700097,
+  "artifactZipSha256": "56901e5f0dad2060c1cdee7b7cfe1c5e0c8593e4b45c2024c3eb43883fd777c4",
+  "allPackageFilesShaVerified": 1841,
+  "sharedZoneTests": 310,
+  "gatewaySharedZoneTests": 40,
+  "backgroundExecutionTestsRequiredAndObserved": 7,
+  "nativePostgresTests": 216,
+  "docker": false,
+  "gateway": {
+    "bytes": 93576560,
+    "sha256": "22bb54130b2084a34c31d7b0b7bd604cc99a260a08e8d924a5513b329ee4ec96",
+    "elf": "64-bit little-endian x86_64"
+  }
+}

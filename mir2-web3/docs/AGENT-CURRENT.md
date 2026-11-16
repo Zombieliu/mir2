@@ -14,7 +14,7 @@ Short routing summary, updated 2026-11-16 (Asia/Shanghai). This indexes recorded
 
 ## Last recorded decisions and open work
 
-2026-11-16 Q快速重开候选通过73项／严格隔离构建及繁体WebGPU、共享WebGL2完整两场；48次快速开关均过，最终日记/HUD一致、零世界指令、原六字体113／原包自然帧／两次注销同角保存均过。日记使用实际dispatch接受结果及当前已绘制状态，保留未应用UI请求，世界校验不放宽；共享场实测旧捕获分支3次重开和4条拒绝记录。未改C4B对照未复现旧R2且初次诊断字段读错，原失败保留、不认定唯一根因。27覆盖恢复、28份原WIP及Shell外部字节保留。未发布，公网两端独立读回仍e0／Fo；新源 f05 与三段来源已冻结，111 发布保护通过；同源 CI／公网原门槛继续，语言和完整R16 Goal继续active。[源、像素与边界](evidence/r16-diary-nav-handoff-20261116/README.md)。
+2026-11-16 f05／b5 同源资格、1841文件SHA、Linux310／Native PG216及隔离旧档canary通过；正式成对试发后原R1钱包单次批准通过，游戏交换／WS均0、未建角未到场景，APPROVED_WALLET_LOGIN_NOT_OBSERVED，原判定false、R2不跑。已恢复e0／Fo／PID1832898，322／234／234全行及24配置保持，未还原库；简繁出码／待确认／取消复验通过，恢复版签名与实体手机未测。累计16个200/pending缺逐次时间，不据此判定批准后pending或唯一根因。48次Q本地资格及原失败保持，33追踪WIP保留、27覆盖恢复，Goal继续active。下一项围绕单次批准加被动请求／正文时序，先查批准→游戏交换；不重发未变候选。[试发、原判定与回退](evidence/r16-diary-nav-handoff-20261116/production/README.md)。
 
 此前fea实际试发的公网原R1签名及136ms首步通过，场景／Native120／Q关闭／注销未过，R2不跑、两端已恢复e0且未还原数据库；原321／233／233行及24配置保持，新增QA保留。简繁出码通过，恢复版签名未重测。英文helper参数compatibility实际选中WebGPU、无回退，早期据名称判断未覆盖默认后端有误。[原失败、纠正与回退](evidence/r16-auth-handoff-20261116/production/README.md)。
 

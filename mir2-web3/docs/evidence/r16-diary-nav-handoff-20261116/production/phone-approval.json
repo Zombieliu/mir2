@@ -1,0 +1,51 @@
+{
+  "passed": true,
+  "officialPwa": true,
+  "mobileBrowserEmulation": true,
+  "virtualPasskey": true,
+  "passiveNetworkObservationOnly": true,
+  "startedAt": "2026-11-16T10:35:57.884Z",
+  "finishedAt": "2026-11-16T10:36:10.194Z",
+  "approveUiClicks": 1,
+  "liveTestnetAppAndSessionMatch": true,
+  "mobileLoginOnlyConsentVisible": true,
+  "relayApprovedExactSession": true,
+  "mobileApprovedView": true,
+  "forbiddenNetworkOperations": 0,
+  "network": [
+    {
+      "operation": "session",
+      "method": "GET",
+      "status": 200,
+      "ms": 7833,
+      "protocol": "h2",
+      "browserVerifiedTls": true,
+      "directPublicTls": false,
+      "realEdgeResponseHeader": true,
+      "serviceWorker": false
+    },
+    {
+      "operation": "approve",
+      "method": "POST",
+      "status": 200,
+      "ms": 265,
+      "protocol": "h2",
+      "browserVerifiedTls": true,
+      "directPublicTls": false,
+      "realEdgeResponseHeader": true,
+      "serviceWorker": false
+    },
+    {
+      "operation": "approve",
+      "method": "OPTIONS",
+      "status": 204,
+      "ms": 111,
+      "protocol": "h2",
+      "browserVerifiedTls": true,
+      "directPublicTls": false,
+      "realEdgeResponseHeader": true,
+      "serviceWorker": false
+    }
+  ],
+  "physicalPhoneCameraTested": false
+}

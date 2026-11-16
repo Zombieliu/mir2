@@ -1,0 +1,121 @@
+{
+  "source": "f05fb757ef4dcac75dd5bfbdd2b23ddb67ce810b",
+  "files": [
+    {
+      "name": "public-r1-original-acceptance.json",
+      "bytes": 810,
+      "sha256": "3f3af9688348630317094e1ed120c3015078b561a4de97819ef00920593f5256"
+    },
+    {
+      "name": "public-r1-auth-summary.json",
+      "bytes": 2106,
+      "sha256": "b13333a139ad03ed235e054b19fd17e67f8f4e0e34721a0e8d4bc5ce6bcfa31a"
+    },
+    {
+      "name": "phone-approval.json",
+      "bytes": 1286,
+      "sha256": "7e10b705d463a2a1f1fea02a8fb13e4888b32179f48b74a5c5bb4f75bf57edd4"
+    },
+    {
+      "name": "linux-package-verification.json",
+      "bytes": 602,
+      "sha256": "069f48d0d01d1fe669dae0abdbba6b866faeac453c8080fcf181509786771b38"
+    },
+    {
+      "name": "artifact-transfer.json",
+      "bytes": 557,
+      "sha256": "6b47449c4917f32d9b62edb366d6f9229e5fcfe2122d0a49329892f6edff09dd"
+    },
+    {
+      "name": "fresh-backup-summary.json",
+      "bytes": 542,
+      "sha256": "2c6b9d22a2d689a94aa15340c257a1a383a4d0f17ea961d498880effa56174e2"
+    },
+    {
+      "name": "server-canary.json",
+      "bytes": 897,
+      "sha256": "97719997639412a44bffeeb1694ba1716de4f82763d1ea05e6b34be7bf5a7146"
+    },
+    {
+      "name": "backend-rollout.json",
+      "bytes": 991,
+      "sha256": "2161e44f7848aa8b2180b61c8b224748d4cabc5067edf8cf68f3b532f1f8f40d"
+    },
+    {
+      "name": "backend-rollback.json",
+      "bytes": 1012,
+      "sha256": "f99f9a267a73af21e2f3dce6b5eda5dab7e6a0400d1f493195cff63fa0ab5832"
+    },
+    {
+      "name": "postrollback-preservation.json",
+      "bytes": 1492,
+      "sha256": "bfa09e1f785c2c11e63dc66bf1903c5499b968b892a71333db4cf3ccf4b602d2"
+    },
+    {
+      "name": "web-stage-summary.json",
+      "bytes": 860,
+      "sha256": "42b69182058c0b56bfff307645333277e1ca7e61b998d84776242cc9cc39f5c8",
+      "originalWorkingBytes": 892,
+      "originalWorkingSha256": "9db2884ea9b708086fb4661adff4ffbe4283d57281583ca5b7ed4c4a6f59ab3c",
+      "normalization": "CRLF to repository LF; parsed JSON unchanged"
+    },
+    {
+      "name": "web-check-summary.json",
+      "bytes": 850,
+      "sha256": "aa85ec98c2eacb16af0b995311cf71ddc4f8db9153d0620c3f05a11e1c920ec6",
+      "originalWorkingBytes": 882,
+      "originalWorkingSha256": "e2877203591d402f7e2ebd16513986286d885b917bc9cd28624335856ff8b37b",
+      "normalization": "CRLF to repository LF; parsed JSON unchanged"
+    },
+    {
+      "name": "web-promote-summary.json",
+      "bytes": 852,
+      "sha256": "244ff02e53cde4f26d9a8bc8a6d21f54f0b44dd8b8bbf0be642b109e476085c0",
+      "originalWorkingBytes": 884,
+      "originalWorkingSha256": "bb3cc92cfbabcb956ae899a651653e935efd1b61f8054cc6d070cf65face9914",
+      "normalization": "CRLF to repository LF; parsed JSON unchanged"
+    },
+    {
+      "name": "alias-after-rollback.json",
+      "bytes": 187,
+      "sha256": "23dcef699cffcc52c5ed8879063d0103e94b76549a38f232a79db559d018c2d3"
+    },
+    {
+      "name": "postrollback-independent-http.json",
+      "bytes": 370,
+      "sha256": "11b7e81e1832c9ed95c636500f1e4476ff35514e56bc4133c400ce3794153083"
+    },
+    {
+      "name": "web-rollback.json",
+      "bytes": 745,
+      "sha256": "f7e1b79de93823797a909d019dba17efe4aefd00c8cbc72d638a923430a36367"
+    },
+    {
+      "name": "restored-qr-zh-cn.json",
+      "bytes": 674,
+      "sha256": "31df10302b1bbaadee98bb800a4937a47f166a6d6139d22bcac5e555397b96db"
+    },
+    {
+      "name": "restored-qr-zh-tw.json",
+      "bytes": 674,
+      "sha256": "edd8c2b4cd1bb9de24213c2800275ee2aad8fc98c888f2ecf884542e592890b8"
+    },
+    {
+      "name": "passive-failure-analysis.json",
+      "bytes": 1156,
+      "sha256": "cd402c4d465d104eececdc0b20e83bc4685c86a6e154476a0ff7e9e17793e9c9"
+    },
+    {
+      "name": "owned-processes-closed.json",
+      "bytes": 378,
+      "sha256": "35d5e523811a5ec22ee1f2806aeb0c97f1351f436eb1f2fc1d5d4af782c9ac47"
+    },
+    {
+      "name": "status.json",
+      "bytes": 1932,
+      "sha256": "67315ad23593d513276310a760e7e8becd2f90530767e8b6970ac733aca6d40c"
+    }
+  ],
+  "originalFailuresRetained": true,
+  "evidenceSanitized": true
+}

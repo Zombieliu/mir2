@@ -1,5 +1,9 @@
 # Crystal Server Parity
 
+## 2026-11-16 f05同源旧档及漫游通过，公网登录未完成后回退
+
+普通注册／口令canary在322／234／234同快照上完成权威移动、中立怪漫游、两次注销及同角保存，debug为0；新包Linux310／Native PG216及全部文件SHA通过。正式原R1钱包批准成功但游戏交换／WS为0，原完整资格false，已恢复e0／Fo并保持全行／24配置；其他AI、地图及全部1:1继续开放。 [原回执及边界](evidence/r16-diary-nav-handoff-20261116/production/README.md)
+
 ## 2026-11-16 旧档及中立漫游发行边界，公网完整画面未通过
 
 fea同源旧库canary用普通协议观察到一次中立怪行走，移动与同角重登保存通过、debug为0；不据此认定全部AI或公网完整自然帧通过。因Web原R1失败两端已回退e0／Fo，旧档保持；其他AI／地图与全部1:1继续。[真实判定及边界](evidence/r16-auth-handoff-20261116/production/README.md)

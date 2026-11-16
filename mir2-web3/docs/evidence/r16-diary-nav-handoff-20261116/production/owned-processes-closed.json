@@ -1,0 +1,19 @@
+{
+  "originalDesktopAndMobileClosed": true,
+  "originalProcess": {
+    "session": 49388,
+    "exitCode": 1
+  },
+  "restoredQrProcess": {
+    "session": 62223,
+    "exitCode": 0
+  },
+  "sshSessionsClosed": [
+    67379,
+    28735
+  ],
+  "isolatedCanaryUnitsStopped": true,
+  "privateFactoryOverlaysRestored": 27,
+  "originalTrackedWipPreserved": 33,
+  "databaseRestored": false
+}
