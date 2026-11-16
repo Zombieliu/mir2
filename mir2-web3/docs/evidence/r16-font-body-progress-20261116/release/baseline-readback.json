@@ -1,0 +1,26 @@
+{
+  "checkedAt": "2026-11-16T02:56:26.630Z",
+  "alias": {
+    "alias": "numeron.obelisk.build",
+    "deploymentId": "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN",
+    "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC"
+  },
+  "deployment": {
+    "id": "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN",
+    "source": "e0ceea22964c03041d45e49e506b3a8badd6984e",
+    "readyState": "READY",
+    "url": "numeron-r16-bqu7lxntb-obelisk-labs.vercel.app",
+    "projectId": "prj_QzS3a2wirTJCixU4tYRVY5nmvSjC"
+  },
+  "web": {
+    "url": "https://numeron.obelisk.build/version",
+    "status": 200,
+    "revision": "e0ceea22964c03041d45e49e506b3a8badd6984e"
+  },
+  "gateway": {
+    "url": "https://165.154.65.136.sslip.io/playtest/health",
+    "status": 200,
+    "revision": "e0ceea22964c03041d45e49e506b3a8badd6984e"
+  },
+  "httpCheckedAt": "2026-11-16T02:57:08.898Z"
+}

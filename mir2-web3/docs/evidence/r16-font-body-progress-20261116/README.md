@@ -79,6 +79,16 @@ Gateway 均关闭。只迁移了本轮已关闭的测试浏览器档案，保留
 
 新候选须取得新的不可变源码与发布控制配置、Linux／PG／SHA 和旧档隔离资格，再按原门槛
 做两场公网。不得重发已回退的 306、重跑其已完成的控制流程或放宽时限。
+
+应用源码已提交并推送为 `8bf3dbcbeae86c0f4782e2c7dcdd8dd203756efe`。
+新发布配置以上版 e0／Fo 为实际回退基准；独立 Vercel alias／部署、Web 版本和网关健康一致。
+独立 GitHub 比较核对 6 个提交、106 个文件，两个检查点为 90／23 个文件；
+只变更许可的源码／字节 pin 与精确测试，**88 项发布保护通过**，未切生产。
+[配置](release/release-pin.json) · [源码闭包](release/source-closure.json) ·
+[独立正式读回](release/baseline-readback.json) · [88 项输出](release/release-guards.log)。
+新的 [Linux／PG 构建](https://github.com/Zombieliu/mir2/actions/runs/43795056603)仍在进行，
+尚未据此声明同源服务包、旧档或生产资格。
+
 首次冷 Q 的备用布局／黑帧、系统英文欢迎、更多地图／断网、三职业完整 1–30、阿洛、
 技能及 Windows 实际窗口、实体手机仍按原范围继续。
 

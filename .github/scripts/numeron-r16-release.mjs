@@ -18,7 +18,7 @@ export const SITES = Object.freeze({
 });
 export const ORIGIN = 'https://numeron.obelisk.build';
 export const QR_RELEASE = Object.freeze({
-  source: "306066f29590d1e2e14155d83644fbc19f11a4c3",
+  source: "8bf3dbcbeae86c0f4782e2c7dcdd8dd203756efe",
   sourceRef: BRANCH,
   sourceCheckpoints: SOURCE_CHECKPOINTS,
   baseSource: "e0ceea22964c03041d45e49e506b3a8badd6984e",
@@ -26,22 +26,25 @@ export const QR_RELEASE = Object.freeze({
   sourceCommits: [
   "2dd2d1ef3c3ca899e1a488caa7d7873be97fddb8",
   "7de1b38dd26d969bc5daf7cae64261ab70e3285c",
-  "306066f29590d1e2e14155d83644fbc19f11a4c3"
+  "306066f29590d1e2e14155d83644fbc19f11a4c3",
+  "b87aa402a38aeb70f30e5afe285862cd8ecf7a46",
+  "2b7b5d7079300f45315e172d4c58784aaed6fb5c",
+  "8bf3dbcbeae86c0f4782e2c7dcdd8dd203756efe"
 ],
   changedFiles: [
   {
     "filename": ".github/scripts/numeron-r16-release.mjs",
-    "sha": "b1455c6a486a623666901039e6bc959e49eb0f10",
+    "sha": "98aa427e070442814c620e9c358509c22d8be797",
     "status": "modified"
   },
   {
     "filename": ".github/scripts/numeron-r16-source-checkpoints.json",
-    "sha": "ebd94f84ef8dcb41845ee595425f6ba4d748ec18",
+    "sha": "504f0864c2dd73c9cdc7087ed954577361847f5e",
     "status": "modified"
   },
   {
     "filename": ".github/scripts/test-numeron-r16-release.mjs",
-    "sha": "72c7fa540a5cb1f6e3c89079169b48e250c12507",
+    "sha": "03087980a591b2c4e01f3c6c97855cdec1a24c9a",
     "status": "modified"
   },
   {
@@ -51,7 +54,7 @@ export const QR_RELEASE = Object.freeze({
   },
   {
     "filename": "mir2-web3/apps/web/public/mir2-asset-worker.js",
-    "sha": "e09f2575d6c174958484579f0b52a625b8b3ad11",
+    "sha": "9e9c23eaebd462ff7f51d0a103670834e032e36b",
     "status": "modified"
   },
   {
@@ -61,12 +64,12 @@ export const QR_RELEASE = Object.freeze({
   },
   {
     "filename": "mir2-web3/apps/web/scripts/smoke-asset-font-ranges.mjs",
-    "sha": "53ec5db2a2b1fe57a729600ea4ed40e5cd715367",
+    "sha": "fb165c94f919f1d52b4c037a226df80955f77e19",
     "status": "modified"
   },
   {
     "filename": "mir2-web3/apps/web/scripts/test-asset-worker-cjk-progress.mjs",
-    "sha": "2fd63456a4d7f099add042250b7a56c3bfdc7b84",
+    "sha": "6b2f1f8a48cccdf59473e5ed1d9d2718c8ec9275",
     "status": "added"
   },
   {
@@ -76,22 +79,22 @@ export const QR_RELEASE = Object.freeze({
   },
   {
     "filename": "mir2-web3/docs/AGENT-CURRENT.md",
-    "sha": "672b0e27f736ff15ce0c9b2a487f3f6eedd63e91",
+    "sha": "ce2f349efb8039ca82aa72ccd082bd03a0b9e2ae",
     "status": "modified"
   },
   {
     "filename": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
-    "sha": "5c890062d0805ca3d05aaadfa28355f49796daf7",
+    "sha": "ec050ab6a6b4e676afb3975d03488c6e29ae7617",
     "status": "modified"
   },
   {
     "filename": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
-    "sha": "39370d2da1f5153a2917d8280f33a6372ca2b2b5",
+    "sha": "c5adcd8135a46dbc1e4558f61c9dba199124953e",
     "status": "modified"
   },
   {
     "filename": "mir2-web3/docs/WEB-R16-PARITY-GOAL.zh-CN.md",
-    "sha": "e66a56ef421d92aebc15b45e1e45a855ad97484e",
+    "sha": "7142aa5bf63af015d33d9d59e09e634afb3dc7e1",
     "status": "modified"
   },
   {
@@ -101,7 +104,7 @@ export const QR_RELEASE = Object.freeze({
   },
   {
     "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/README.md",
-    "sha": "8deba141baf538a29d88b79478670493e8b68d38",
+    "sha": "206db3ad8d471ff0f233cec0c4f5e8ba684963cb",
     "status": "added"
   },
   {
@@ -165,8 +168,148 @@ export const QR_RELEASE = Object.freeze({
     "status": "added"
   },
   {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/.gitattributes",
+    "sha": "b87185bfcf6b78d8e740d29f3fa1ff92f595c2c6",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/README.md",
+    "sha": "35a0e47881744b7abbe0f4c96c6073dc0240b1c5",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/alias-final.json",
+    "sha": "6fcde2bfabd3a568d20baac1363035195a4b3b54",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/backend-artifact.json",
+    "sha": "c788f331247e8cf8010f48296a3aba5d692c39bb",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/backend-rollback.json",
+    "sha": "a8bbd5ebd6f65a047fb6558e59b9132ae9b78e82",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/backend-rollout.json",
+    "sha": "414862b27e0a36b159608c217a91de3095b284c6",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/canary-protocol.json",
+    "sha": "912eaa1d7fde2a3d5ba854d891f5f234fff2afc3",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/evidence-index.json",
+    "sha": "1e7454da702b92adc92aa70a5cc4eba431ce196d",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/font-tail-diagnosis.json",
+    "sha": "28d952a7fa787dda36c1ba471c5fc05c0d2bcbcd",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/independent-candidate.json",
+    "sha": "d54ba54d0dbb0eb413f00640c261ce07d8365f93",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/outcome.json",
+    "sha": "54570e1c1b9063be23ecd265ef40b02efcfc4918",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/preservation.json",
+    "sha": "fea2fd22a906997bbe29afd2543b93ef262b2445",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/public-q-pixels.json",
+    "sha": "eadb9e0ae5f879ae1af6bd7903c6edc49e0e859e",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/public-r1-acceptance.json",
+    "sha": "cd57c5abc6870ef4381c344be786e43ffc11287c",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/public-r2-acceptance.json",
+    "sha": "d251f3e63e7db72e16c9f2c61cbefb436aa65dc8",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/r1-first-q-black.png",
+    "sha": "1426a70f48edb42d3855d4b90850f46ff2faf180",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/r1-native-q.png",
+    "sha": "5fd0f428929ee15689b5637073d0db2faa424cfd",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/r2-first-q-fallback.png",
+    "sha": "398b88f665cfd62e0522ba34f2d144e747c2f01e",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/r2-native-q.png",
+    "sha": "557c9999bdf5367bc13acca243198f79c9b1ae40",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/web-check.json",
+    "sha": "674faa9543797bfa9f8c59a5372f6b3adc9a4743",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/web-promote.json",
+    "sha": "d932045de196d92462a07c31748a34b3819ffc2c",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/web-rollback.json",
+    "sha": "a29de3ed43bc9e1be8847ca584830161ed44fda6",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/production/web-stage.json",
+    "sha": "01ddcbe5b31209ffa9c2837831aff38de7f6ac1e",
+    "status": "added"
+  },
+  {
     "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/public-e0-failed-font-trace.json",
     "sha": "06c344828ab7aa5baf5cfb12e43a1f11c9535af5",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/release/baseline-readback.json",
+    "sha": "130cb2d5d6a51ab94e825312b97c0f91b2118672",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/release/manifest.json",
+    "sha": "4dc4236bdd17d87cec2ced4a849c4a69ffb1f16e",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/release/release-guards.log",
+    "sha": "5dc69b0d8390b20581d028df54f50e41822065f8",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/release/release-pin.json",
+    "sha": "2e2989660a855e384a390242e3fcc32926f4d464",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/release/source-closure.json",
+    "sha": "48aa1d134f840ab9b32c8e6e45e4d81d8d99278f",
     "status": "added"
   },
   {
@@ -187,6 +330,86 @@ export const QR_RELEASE = Object.freeze({
   {
     "filename": "mir2-web3/docs/evidence/r16-cjk-progress-20261116/validation.json",
     "sha": "ae38c0edf2cfb95cc6d80b0ffeb13ddfffd0f372",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/README.md",
+    "sha": "e1bf606c3342db159ac8fdd3b9e8a06868f457f2",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/adjacent-final.log",
+    "sha": "edc91b80584b7ec4d2590b940a95f12699c0cb33",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/before-regressions.log",
+    "sha": "b06bb6b73f457f0eb1dc40faa6f4bed70fc945f0",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/chrome-baseline-chunks.json",
+    "sha": "7575d294f9ac9679ec582c52102c5f0913b00663",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/chrome-header-failover-body-observer.json",
+    "sha": "4f8db8197fac5f3ba2bff3ee6f14bb19e7b731ab",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/chrome-header-failover.json",
+    "sha": "882b8fe45579ea7be1d8d451ff03b53c8cc25130",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/chrome-sc-chunks.json",
+    "sha": "2e65588b05d81f6546777e5473a8589a625925b3",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/chrome-tc-chunks.json",
+    "sha": "c0fd8c250fd6a1f06f51bb4721e68ab23bca30b4",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/disk-preflight-failure.json",
+    "sha": "61c3446ad10fc5b6ab48d86d6e3d65b8fd0f02f9",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/english-native-quest.png",
+    "sha": "24ca7454e3322df23d7c211b2d46f793e8654889",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/evidence-manifest.json",
+    "sha": "1a3f187c639954b9105de6eafd22f74eb094f4e7",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/focused-final.log",
+    "sha": "da0e1071c25d73c36d0c08b9eb6021a09c44908b",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/preceding-public-failure.json",
+    "sha": "28d952a7fa787dda36c1ba471c5fc05c0d2bcbcd",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/six-original-fonts.png",
+    "sha": "c7b97b8a73e5213c564866c52bcb0caf268bf9d5",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/traditional-native-quest-supplement.png",
+    "sha": "0f98d3a64269c74a32aaf879c97f0a457925d1ff",
+    "status": "added"
+  },
+  {
+    "filename": "mir2-web3/docs/evidence/r16-font-body-progress-20261116/validation.json",
+    "sha": "3d2531cb5ce31c29aa82a9f815b7bd1f9efeece8",
     "status": "added"
   },
   {
@@ -412,8 +635,8 @@ export const QR_RELEASE = Object.freeze({
   },
   entryAssetWorker: {
   "path": "/mir2-asset-worker.js",
-  "bytes": 72815,
-  "sha256": "5369d5c2a5c51a89e892ad5e283d63b36a2bf0f24cc035b5a3d81cd5e599bbdb"
+  "bytes": 73875,
+  "sha256": "2333c5f6c64c05c2485c65bf4965df859e25d0bc446f72ac72ab716885f4aba2"
 },
   assetRunId: '42494701555',
   baseline: "dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN",

@@ -1,0 +1,538 @@
+TAP version 13
+# Subtest: import is inert; source, branch, team and original CI identity fail before I/O
+ok 1 - import is inert; source, branch, team and original CI identity fail before I/O
+  ---
+  duration_ms: 2.9069
+  type: 'test'
+  ...
+# Subtest: context reads only safe metadata and never requires Gateway/GitHub secrets
+ok 2 - context reads only safe metadata and never requires Gateway/GitHub secrets
+  ---
+  duration_ms: 3.1928
+  type: 'test'
+  ...
+# Subtest: stage creates two same-source production candidates with explicit roots, Node22 and no automatic domains
+ok 3 - stage creates two same-source production candidates with explicit roots, Node22 and no automatic domains
+  ---
+  duration_ms: 5.7683
+  type: 'test'
+  ...
+# Subtest: QR stage creates only the pinned game source, with the live alias left on its baseline
+ok 4 - QR stage creates only the pinned game source, with the live alias left on its baseline
+  ---
+  duration_ms: 2.9208
+  type: 'test'
+  ...
+# Subtest: QR stage rejects a deployment source beyond the exact release pin
+ok 5 - QR stage rejects a deployment source beyond the exact release pin
+  ---
+  duration_ms: 1.3356
+  type: 'test'
+  ...
+# Subtest: QR stage accepts only the reviewed merge commits regardless of API ordering
+ok 6 - QR stage accepts only the reviewed merge commits regardless of API ordering
+  ---
+  duration_ms: 1.7992
+  type: 'test'
+  ...
+# Subtest: QR stage rejects an unreviewed final-checkpoint blob before any release write
+ok 7 - QR stage rejects an unreviewed final-checkpoint blob before any release write
+  ---
+  duration_ms: 0.9394
+  type: 'test'
+  ...
+# Subtest: QR stage does not substitute a truncated overall file list for the final checkpoint
+ok 8 - QR stage does not substitute a truncated overall file list for the final checkpoint
+  ---
+  duration_ms: 0.8303
+  type: 'test'
+  ...
+# Subtest: QR stage rejects a missing reviewed commit before any release write
+ok 9 - QR stage rejects a missing reviewed commit before any release write
+  ---
+  duration_ms: 1.1248
+  type: 'test'
+  ...
+# Subtest: QR stage rejects a duplicate commit at the expected count before any release write
+ok 10 - QR stage rejects a duplicate commit at the expected count before any release write
+  ---
+  duration_ms: 0.7688
+  type: 'test'
+  ...
+# Subtest: QR stage rejects an unreviewed intermediate commit before any release write
+ok 11 - QR stage rejects an unreviewed intermediate commit before any release write
+  ---
+  duration_ms: 0.6381
+  type: 'test'
+  ...
+# Subtest: QR stage rejects an additional commit before any release write
+ok 12 - QR stage rejects an additional commit before any release write
+  ---
+  duration_ms: 0.4948
+  type: 'test'
+  ...
+# Subtest: QR stage rejects a changed merge base before any release write
+ok 13 - QR stage rejects a changed merge base before any release write
+  ---
+  duration_ms: 0.4737
+  type: 'test'
+  ...
+# Subtest: QR stage rejects a malformed commit collection before any release write
+ok 14 - QR stage rejects a malformed commit collection before any release write
+  ---
+  duration_ms: 0.4585
+  type: 'test'
+  ...
+# Subtest: QR candidate check proves exact protected assets and pending without changing traffic
+ok 15 - QR candidate check proves exact protected assets and pending without changing traffic
+  ---
+  duration_ms: 7.4216
+  type: 'test'
+  ...
+# Subtest: QR candidate check fails each corrupt asset without promotion or rollback
+ok 16 - QR candidate check fails each corrupt asset without promotion or rollback
+  ---
+  duration_ms: 65.4107
+  type: 'test'
+  ...
+# Subtest: QR candidate check rejects source and readiness mismatch before protected requests
+ok 17 - QR candidate check rejects source and readiness mismatch before protected requests
+  ---
+  duration_ms: 3.186
+  type: 'test'
+  ...
+# Subtest: QR candidate check refuses concurrent production changes observed after protected requests
+ok 18 - QR candidate check refuses concurrent production changes observed after protected requests
+  ---
+  duration_ms: 19.6511
+  type: 'test'
+  ...
+# Subtest: QR candidate check cannot certify an invalid protected login canary
+ok 19 - QR candidate check cannot certify an invalid protected login canary
+  ---
+  duration_ms: 6.0981
+  type: 'test'
+  ...
+# Subtest: QR promotion proves protected and public routes and keeps intents out of the receipt
+ok 20 - QR promotion proves protected and public routes and keeps intents out of the receipt
+  ---
+  duration_ms: 17.1184
+  type: 'test'
+  ...
+# Subtest: QR promotion rejects a bad candidate before writing and rolls back a failed public check
+ok 21 - QR promotion rejects a bad candidate before writing and rolls back a failed public check
+  ---
+  duration_ms: 13.1264
+  type: 'test'
+  ...
+# Subtest: QR promotion verifies each entry asset before and after assigning traffic
+ok 22 - QR promotion verifies each entry asset before and after assigning traffic
+  ---
+  duration_ms: 272.7737
+  type: 'test'
+  ...
+# Subtest: QR rollback is limited to its promoted candidate and never touches a third-party alias
+ok 23 - QR rollback is limited to its promoted candidate and never touches a third-party alias
+  ---
+  duration_ms: 2.5763
+  type: 'test'
+  ...
+# Subtest: Windows links default to required; explicit empty mode accepts only a real download page
+ok 24 - Windows links default to required; explicit empty mode accepts only a real download page
+  ---
+  duration_ms: 1.6905
+  type: 'test'
+  ...
+# Subtest: download identity follows the real website source markup and ignores serialized or commented markers
+ok 25 - download identity follows the real website source markup and ignores serialized or commented markers
+  ---
+  duration_ms: 1.7534
+  type: 'test'
+  ...
+# Subtest: Windows unavailable baseline cannot gain a link, and a previous real link cannot disappear
+ok 26 - Windows unavailable baseline cannot gain a link, and a previous real link cannot disappear
+  ---
+  duration_ms: 4.2572
+  type: 'test'
+  ...
+# Subtest: baseline and candidate download HTML must both be genuine, even with zero Windows links
+ok 27 - baseline and candidate download HTML must both be genuine, even with zero Windows links
+  ---
+  duration_ms: 4.7663
+  type: 'test'
+  ...
+# Subtest: empty Windows policy never tolerates missing, malformed or unsafe tracked hrefs
+ok 28 - empty Windows policy never tolerates missing, malformed or unsafe tracked hrefs
+  ---
+  duration_ms: 0.3372
+  type: 'test'
+  ...
+# Subtest: missing secret, old prefix, foreign asset run or skipped job cannot stage anything
+ok 29 - missing secret, old prefix, foreign asset run or skipped job cannot stage anything
+  ---
+  duration_ms: 2.6276
+  type: 'test'
+  ...
+# Subtest: all fixed asset receipt safety flags and hashes are mandatory
+ok 30 - all fixed asset receipt safety flags and hashes are mandatory
+  ---
+  duration_ms: 0.2909
+  type: 'test'
+  ...
+# Subtest: existing manifest revalidation requires all objects, gzip bodies and successful readback counts
+ok 31 - existing manifest revalidation requires all objects, gzip bodies and successful readback counts
+  ---
+  duration_ms: 1.1465
+  type: 'test'
+  ...
+# Subtest: public manifest missing, changed, old or oversized prevents writes
+ok 32 - public manifest missing, changed, old or oversized prevents writes
+  ---
+  duration_ms: 1.2134
+  type: 'test'
+  ...
+# Subtest: project swaps and concurrent old/main/new production changes are rejected before staging
+ok 33 - project swaps and concurrent old/main/new production changes are rejected before staging
+  ---
+  duration_ms: 4.1008
+  type: 'test'
+  ...
+# Subtest: concurrent change after first stage prevents second write and never changes original site
+ok 34 - concurrent change after first stage prevents second write and never changes original site
+  ---
+  duration_ms: 0.7403
+  type: 'test'
+  ...
+# Subtest: promote verifies protected pages and promotes marketing before new game, without domain API
+ok 35 - promote verifies protected pages and promotes marketing before new game, without domain API
+  ---
+  duration_ms: 1.147
+  type: 'test'
+  ...
+# Subtest: already QA-promoted own game candidate is accepted without another promotion
+ok 36 - already QA-promoted own game candidate is accepted without another promotion
+  ---
+  duration_ms: 0.8981
+  type: 'test'
+  ...
+# Subtest: promote permits an older immutable candidate source while keeping the current implementation identity
+ok 37 - promote permits an older immutable candidate source while keeping the current implementation identity
+  ---
+  duration_ms: 1.2324
+  type: 'test'
+  ...
+# Subtest: candidate source, ref, root, metadata, target and readiness mismatches prevent all writes
+ok 38 - candidate source, ref, root, metadata, target and readiness mismatches prevent all writes
+  ---
+  duration_ms: 4.2515
+  type: 'test'
+  ...
+# Subtest: modern Git snapshots without root still require exact staged metadata and every protected application proof
+ok 39 - modern Git snapshots without root still require exact staged metadata and every protected application proof
+  ---
+  duration_ms: 2.3151
+  type: 'test'
+  ...
+# Subtest: any explicitly returned incorrect deployment root rejects even when the other root field is absent
+ok 40 - any explicitly returned incorrect deployment root rejects even when the other root field is absent
+  ---
+  duration_ms: 2.1075
+  type: 'test'
+  ...
+# Subtest: missing API root never bypasses metaRoot or HTML/version/PWA/download failure
+ok 41 - missing API root never bypasses metaRoot or HTML/version/PWA/download failure
+  ---
+  duration_ms: 4.291
+  type: 'test'
+  ...
+# Subtest: failed HTML/version/PWA or changed Windows downloads cannot promote
+ok 42 - failed HTML/version/PWA or changed Windows downloads cannot promote
+  ---
+  duration_ms: 2.5632
+  type: 'test'
+  ...
+# Subtest: concurrent change during protected page reads is caught before first promotion
+ok 43 - concurrent change during protected page reads is caught before first promotion
+  ---
+  duration_ms: 0.7185
+  type: 'test'
+  ...
+# Subtest: failed second promotion rolls back only the mapping still owned by this release
+ok 44 - failed second promotion rolls back only the mapping still owned by this release
+  ---
+  duration_ms: 1.3492
+  type: 'test'
+  ...
+# Subtest: a third-party production change during failure is never rolled back
+ok 45 - a third-party production change during failure is never rolled back
+  ---
+  duration_ms: 1.6168
+  type: 'test'
+  ...
+# Subtest: an applied promotion with a lost response is rolled back only while still owned
+ok 46 - an applied promotion with a lost response is rolled back only while still owned
+  ---
+  duration_ms: 1.045
+  type: 'test'
+  ...
+# Subtest: failed uncertain staging still reads all baselines and never retries the create
+ok 47 - failed uncertain staging still reads all baselines and never retries the create
+  ---
+  duration_ms: 0.6409
+  type: 'test'
+  ...
+# Subtest: CLI transports receive only the relevant credential and never the Gateway signing secret
+ok 48 - CLI transports receive only the relevant credential and never the Gateway signing secret
+  ---
+  duration_ms: 0.113
+  type: 'test'
+  ...
+# Subtest: workflow isolates Numeron operations, pins Node22, grants read-only artifacts and never invokes old release scripts for them
+ok 49 - workflow isolates Numeron operations, pins Node22, grants read-only artifacts and never invokes old release scripts for them
+  ---
+  duration_ms: 0.2034
+  type: 'test'
+  ...
+# Subtest: off/default retains every legacy job body byte-for-byte and the original job selection
+ok 50 - off/default retains every legacy job body byte-for-byte and the original job selection
+  ---
+  duration_ms: 28.6443
+  type: 'test'
+  ...
+# Subtest: each explicit Numeron operation selects only validation and the reusable website job
+ok 51 - each explicit Numeron operation selects only validation and the reusable website job
+  ---
+  duration_ms: 16.7127
+  type: 'test'
+  ...
+# Subtest: orphan Numeron inputs fail closed rather than dispatching legacy jobs
+ok 52 - orphan Numeron inputs fail closed rather than dispatching legacy jobs
+  ---
+  duration_ms: 42.8367
+  type: 'test'
+  ...
+# Subtest: ingress operations only select the guarded DNS job and keep deployment inputs separate
+ok 53 - ingress operations only select the guarded DNS job and keep deployment inputs separate
+  ---
+  duration_ms: 18.8251
+  type: 'test'
+  ...
+# Subtest: legacy publishing and wallet switches cannot be mixed into Numeron dispatch
+ok 54 - legacy publishing and wallet switches cannot be mixed into Numeron dispatch
+  ---
+  duration_ms: 9.4976
+  type: 'test'
+  ...
+# Subtest: both actual guards reject bad source identity, stale stage source and missing or confused inputs
+ok 55 - both actual guards reject bad source identity, stale stage source and missing or confused inputs
+  ---
+  duration_ms: 23.4317
+  type: 'test'
+  ...
+# Subtest: the reusable workflow declares all four optional inputs and forwards only the necessary secrets
+ok 56 - the reusable workflow declares all four optional inputs and forwards only the necessary secrets
+  ---
+  duration_ms: 0.3089
+  type: 'test'
+  ...
+# Subtest: validation and context steps have no Gateway secret access and cannot interpolate input as code
+ok 57 - validation and context steps have no Gateway secret access and cannot interpolate input as code
+  ---
+  duration_ms: 0.2424
+  type: 'test'
+  ...
+# Subtest: domain move invokes only its separate helper and receipt; stage and promote never move the domain
+ok 58 - domain move invokes only its separate helper and receipt; stage and promote never move the domain
+  ---
+  duration_ms: 0.3673
+  type: 'test'
+  ...
+# Subtest: relay dispatches use only the website job and refuse source, asset or marketing overrides
+ok 59 - relay dispatches use only the website job and refuse source, asset or marketing overrides
+  ---
+  duration_ms: 28.8907
+  type: 'test'
+  ...
+# Subtest: a complete chain composes an added path later modified and checks every segment
+ok 60 - a complete chain composes an added path later modified and checks every segment
+  ---
+  duration_ms: 1.6023
+  type: 'test'
+  ...
+# Subtest: more than300 total paths are verified without accepting a truncated comparison
+ok 61 - more than300 total paths are verified without accepting a truncated comparison
+  ---
+  duration_ms: 2.0403
+  type: 'test'
+  ...
+# Subtest: segment1 rejects missing file
+ok 62 - segment1 rejects missing file
+  ---
+  duration_ms: 0.2189
+  type: 'test'
+  ...
+# Subtest: segment1 rejects extra file
+ok 63 - segment1 rejects extra file
+  ---
+  duration_ms: 0.1837
+  type: 'test'
+  ...
+# Subtest: segment1 rejects duplicate path
+ok 64 - segment1 rejects duplicate path
+  ---
+  duration_ms: 0.1385
+  type: 'test'
+  ...
+# Subtest: segment1 rejects changed blob
+ok 65 - segment1 rejects changed blob
+  ---
+  duration_ms: 0.1382
+  type: 'test'
+  ...
+# Subtest: segment1 rejects changed status
+ok 66 - segment1 rejects changed status
+  ---
+  duration_ms: 0.1661
+  type: 'test'
+  ...
+# Subtest: segment1 rejects missing commit
+ok 67 - segment1 rejects missing commit
+  ---
+  duration_ms: 0.1115
+  type: 'test'
+  ...
+# Subtest: segment1 rejects unreviewed commit
+ok 68 - segment1 rejects unreviewed commit
+  ---
+  duration_ms: 0.2733
+  type: 'test'
+  ...
+# Subtest: segment1 rejects wrong merge base
+ok 69 - segment1 rejects wrong merge base
+  ---
+  duration_ms: 0.3481
+  type: 'test'
+  ...
+# Subtest: segment1 rejects malformed files
+ok 70 - segment1 rejects malformed files
+  ---
+  duration_ms: 0.1655
+  type: 'test'
+  ...
+# Subtest: segment2 rejects missing file
+ok 71 - segment2 rejects missing file
+  ---
+  duration_ms: 0.1374
+  type: 'test'
+  ...
+# Subtest: segment2 rejects extra file
+ok 72 - segment2 rejects extra file
+  ---
+  duration_ms: 0.4492
+  type: 'test'
+  ...
+# Subtest: segment2 rejects duplicate path
+ok 73 - segment2 rejects duplicate path
+  ---
+  duration_ms: 0.1035
+  type: 'test'
+  ...
+# Subtest: segment2 rejects changed blob
+ok 74 - segment2 rejects changed blob
+  ---
+  duration_ms: 0.0837
+  type: 'test'
+  ...
+# Subtest: segment2 rejects changed status
+ok 75 - segment2 rejects changed status
+  ---
+  duration_ms: 0.0742
+  type: 'test'
+  ...
+# Subtest: segment2 rejects missing commit
+ok 76 - segment2 rejects missing commit
+  ---
+  duration_ms: 0.0706
+  type: 'test'
+  ...
+# Subtest: segment2 rejects unreviewed commit
+ok 77 - segment2 rejects unreviewed commit
+  ---
+  duration_ms: 0.0711
+  type: 'test'
+  ...
+# Subtest: segment2 rejects wrong merge base
+ok 78 - segment2 rejects wrong merge base
+  ---
+  duration_ms: 0.07
+  type: 'test'
+  ...
+# Subtest: segment2 rejects malformed files
+ok 79 - segment2 rejects malformed files
+  ---
+  duration_ms: 0.0683
+  type: 'test'
+  ...
+# Subtest: configuration rejects gap
+ok 80 - configuration rejects gap
+  ---
+  duration_ms: 0.1353
+  type: 'test'
+  ...
+# Subtest: configuration rejects early final source
+ok 81 - configuration rejects early final source
+  ---
+  duration_ms: 0.0902
+  type: 'test'
+  ...
+# Subtest: configuration rejects unaccounted final path
+ok 82 - configuration rejects unaccounted final path
+  ---
+  duration_ms: 0.0927
+  type: 'test'
+  ...
+# Subtest: configuration rejects wrong composed add status
+ok 83 - configuration rejects wrong composed add status
+  ---
+  duration_ms: 0.0969
+  type: 'test'
+  ...
+# Subtest: configuration rejects repeated commit across segments
+ok 84 - configuration rejects repeated commit across segments
+  ---
+  duration_ms: 0.1203
+  type: 'test'
+  ...
+# Subtest: configuration rejects ambiguous300-file segment
+ok 85 - configuration rejects ambiguous300-file segment
+  ---
+  duration_ms: 0.1956
+  type: 'test'
+  ...
+# Subtest: configuration rejects unsupported checkpoint removal
+ok 86 - configuration rejects unsupported checkpoint removal
+  ---
+  duration_ms: 0.1276
+  type: 'test'
+  ...
+# Subtest: configuration rejects duplicate add across checkpoints
+ok 87 - configuration rejects duplicate add across checkpoints
+  ---
+  duration_ms: 0.1056
+  type: 'test'
+  ...
+# Subtest: a single legacy closure retains the original exact comparison contract
+ok 88 - a single legacy closure retains the original exact comparison contract
+  ---
+  duration_ms: 0.1119
+  type: 'test'
+  ...
+1..88
+# tests 88
+# suites 0
+# pass 88
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 566.9419
