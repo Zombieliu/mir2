@@ -1,0 +1,46 @@
+[
+  {
+    "cohort": "r1",
+    "file": "quest-available-zh-TW.png",
+    "bytes": 3938,
+    "sha256": "bb718d72b13af61c5740dc9d8fb3fb1216b626215a1b54b5a761a4a5d63c62c4",
+    "dimensions": [
+      1024,
+      768
+    ],
+    "uniformBlack": true
+  },
+  {
+    "cohort": "r1",
+    "file": "quest-shared-zh-TW.png",
+    "bytes": 1325531,
+    "sha256": "0533d04fd1046d82e94831834d56b691f60d782ba706cdcc0f33dc1b6fec23fc",
+    "dimensions": [
+      1024,
+      768
+    ],
+    "uniformBlack": false
+  },
+  {
+    "cohort": "r2",
+    "file": "quest-available-zh-TW.png",
+    "bytes": 1485395,
+    "sha256": "e6791969f88ee02294e929a837bbb0ecefebc535cca0fd040798e806540c70e0",
+    "dimensions": [
+      1024,
+      768
+    ],
+    "uniformBlack": false
+  },
+  {
+    "cohort": "r2",
+    "file": "quest-shared-zh-TW.png",
+    "bytes": 1332768,
+    "sha256": "8cdedc1aba688bfaece3bfe4695551e70453357f521c55077de8b35cb2189cfb",
+    "dimensions": [
+      1024,
+      768
+    ],
+    "uniformBlack": false
+  }
+]

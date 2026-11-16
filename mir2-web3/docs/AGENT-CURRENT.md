@@ -14,7 +14,7 @@ Short routing summary, updated 2026-11-16 (Asia/Shanghai). This indexes recorded
 
 ## Last recorded decisions and open work
 
-2026-11-16 正式仍 e0／Fo。补充公网 Native210624ms 超原120秒，失败保留；新 CJK 候选为 TC46原片续传和已校验进展续期／48秒硬限，207项、五场实际Chrome、严格构建及英文完整流程通过。原繁体地形截图等待字体12秒超时，单列失败；仅改附属截图的繁体补充流程通过原玩法门槛。15私有覆盖已恢复，29份原WIP保持，自有进程全关。下一项同源Linux／PG及新成对发行资格，再做原两场公网；冷Q、语言和其他1:1继续，Goal active。[候选、原失败及后续](evidence/r16-cjk-progress-20261116/README.md)。
+2026-11-16 306 CJK候选已完成310／216同源Linux／PG、1841SHA、旧档克隆和配套试发；R1原门槛通过，R2 Native128080ms 超原120秒，已两端回退e0／Fo并复验简繁扫码、原318／230／230行与24配置，新QA进度保留。207项、五场Chrome和本地原失败／补充流程边界保持，15覆盖恢复、29份WIP保持，自有进程全关。下一项受控复现分段正文15秒总计时及失败来源重复等待，保原8／65／120，不原样重发。冷Q及其他1:1继续，Goal active。[试发、原判定、回退与后续](evidence/r16-cjk-progress-20261116/production/README.md)。
 
 2026-11-15 用户补充寻路“目标不对或到不了”：本地候选ceb1c1132f补大小地图坐标／30秒初始期限／到达反馈和十语入口说明。152项、独立严格构建与英繁两后端实际跨图／慢碰撞超时／晚到零旧移动／重登新目标／正常保存通过，30份内容WIP保持。本轮未发布；其他目标与既有公网资源失败继续。[记录与范围](evidence/r16-route-feedback-20261115/README.md)
 

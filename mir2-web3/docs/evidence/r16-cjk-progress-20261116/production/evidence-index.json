@@ -1,0 +1,86 @@
+{
+  "files": {
+    "outcome.json": {
+      "bytes": 3212,
+      "sha256": "1e5954eb9c8dab459a7862caa0e2e375e9783b1b637737949caec25b4f25d815"
+    },
+    "font-tail-diagnosis.json": {
+      "bytes": 14265,
+      "sha256": "590a25521333122de70c86949a955c7f49ba99ca8ad01034e4228a7bcc83c3cd"
+    },
+    "preservation.json": {
+      "bytes": 1492,
+      "sha256": "25791630da88fcf992fadc75015a2f1b2a958100fda80f303d6260993b81a9a4"
+    },
+    "backend-rollback.json": {
+      "bytes": 1018,
+      "sha256": "26775188e03fde28b2235967691136d45c1da9c9ff61af23798676799616ed75"
+    },
+    "backend-artifact.json": {
+      "bytes": 833,
+      "sha256": "36b339adef3c0b9d869417769988a3bf8d021b83bf9077e48c28c02979c0f558"
+    },
+    "web-stage.json": {
+      "bytes": 877,
+      "sha256": "ecf58917d600461f96af36f6d3d9042e50e36c81471daf52fd9393d1c404592e"
+    },
+    "web-check.json": {
+      "bytes": 867,
+      "sha256": "4384167dcf2cc978d5efdcb81780e99bc46665cc5c4bcb3e156cd4764122dc72"
+    },
+    "web-promote.json": {
+      "bytes": 869,
+      "sha256": "4e024ade7122400be5cf29e2a2bc2db6b66d1351e6f65fd6a7ea4d59a7096e72"
+    },
+    "web-rollback.json": {
+      "bytes": 870,
+      "sha256": "4209e23c8326be03f8433a5b2b932dcf427c78e12843f7885ffedac2781ad3fa"
+    },
+    "independent-candidate.json": {
+      "bytes": 290,
+      "sha256": "30e7d6a8cfa2327b7ae43ec2657d6a475458d9fb1f7d663064c630c0f1472b58"
+    },
+    "alias-final.json": {
+      "bytes": 187,
+      "sha256": "1a41f10ac45b65ebef71790d13197c1af7f92b0063fa4a3ea0c2301ac5c4d0e3"
+    },
+    "canary-protocol.json": {
+      "bytes": 2428,
+      "sha256": "0c815838d934f1e5330f4ce6afc43b521326aa7e51981e63a57499c8c8db5bc8"
+    },
+    "public-r1-acceptance.json": {
+      "bytes": 802,
+      "sha256": "5da382531dfd8c22dc59b7e324d7e4b056f578685a6e3ab9e466dd4520265228"
+    },
+    "public-r2-acceptance.json": {
+      "bytes": 804,
+      "sha256": "385881ad26ac39900f14c53c7c747e7f73b37494e710c7e9e663f40a5dd2a91b"
+    },
+    "public-q-pixels.json": {
+      "bytes": 1035,
+      "sha256": "0a5d53a6922bfe40a6173a6c176e5d2aa666db6644eb29ca994acd99c10e5252"
+    },
+    "backend-rollout.json": {
+      "bytes": 1663,
+      "sha256": "041a964624c2ec412bbc5bcce59a90b1c22fd1a0fbb8b313b650029bf092a2df"
+    },
+    "r1-first-q-black.png": {
+      "bytes": 3938,
+      "sha256": "bb718d72b13af61c5740dc9d8fb3fb1216b626215a1b54b5a761a4a5d63c62c4"
+    },
+    "r1-native-q.png": {
+      "bytes": 1325531,
+      "sha256": "0533d04fd1046d82e94831834d56b691f60d782ba706cdcc0f33dc1b6fec23fc"
+    },
+    "r2-first-q-fallback.png": {
+      "bytes": 1485395,
+      "sha256": "e6791969f88ee02294e929a837bbb0ecefebc535cca0fd040798e806540c70e0"
+    },
+    "r2-native-q.png": {
+      "bytes": 1332768,
+      "sha256": "8cdedc1aba688bfaece3bfe4695551e70453357f521c55077de8b35cb2189cfb"
+    }
+  },
+  "rawAccountsAndAuthNotPublished": true,
+  "allOwnedHandlesClosed": true
+}

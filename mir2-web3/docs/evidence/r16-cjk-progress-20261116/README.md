@@ -1,7 +1,9 @@
 # CJK 字体持续下载与繁体断点恢复候选
 
 本轮基于 R16 `codex/windows-player-journey` 的 `7de1b38dd26d969bc5daf7cae64261ab70e3285c`。
-本地候选 `r16-cjk-progress-d90b62f7` 已验证并保留原改动，**尚未部署**。
+本地候选 `r16-cjk-progress-d90b62f7` 已验证并保留原改动；已尝试成对发布，
+R1 通过、R2 Native128080ms 超原120秒后**两端回退 e0／Fo**。
+[试发、原判定与回退](production/README.md)。
 整体 Web/Windows 1:1 Candidate、最终人类 Accepted 与 Goal 均未完成。
 
 ## 为什么继续处理加载
@@ -22,7 +24,7 @@
   后一场换截图标志时 runtime 阶段不同，不能据此关闭首次 Q 的问题。
 
 这些是正式 e0 的补充观察；不改写[原发行的两场记录](../r16-font-prefix-recovery-20261116/production/README.md)。
-本轮没有切生产，因此没有新的上线版本需要回退。
+前一轮补充观察期间没有切生产；本轮的试发与回退另见[生产记录](production/README.md)。
 
 ## 改动和不变的验收
 
@@ -78,8 +80,9 @@ TC 的整包中断也沿用原配置版本、存储权限、撤销及缓存期�
 
 正式仍为 `e0ceea22964c03041d45e49e506b3a8badd6984e`／`dpl_FoNUgjSRpw56hwUFDNrSs7LZZQFN`；
 本轮独立 alias、Web `/version` 和 Gateway `/playtest/health` 均读回该版本。
-接下来准备本候选的同源 Linux／PG／资产及成对发布资格，再做原两场公网门槛。
-新发布控制器必须以 e0／Fo 为上版，不能重跑仍固定旧 6ba／G8 的历史控制器。
+本候选同源 Linux／PG、隔离旧档与成对发布资格已完成，但原第二场公网 Native 超时，
+已回退并复验简繁扫码、原行和配置。继续字体正文持续进展及失败来源后备的受控复现，
+不原样重发。新一轮仍须以实际 e0／Fo 为上版，不能重跑已完成的历史派发。
 
 发布保护配置现已更新为本候选 `306066f29590d1e2e14155d83644fbc19f11a4c3`，
 上版固定 e0／Fo。独立 GitHub 比较核对 3 个提交、62 个文件，两个检查点分别为 37／29 个文件；
@@ -87,8 +90,9 @@ Worker 72,815 字节，SHA `5369d5c2a5c51a89e892ad5e283d63b36a2bf0f24cc035b5a3d8
 **88 项发布保护测试通过**。仅修改发布 pin 及对应精确测试，没有据此切换生产。
 [固定配置与源码检查](release/release-pin.json) · [源码闭包](release/source-closure.json) ·
 [独立正式读回](release/baseline-readback.json) · [88 项输出](release/release-guards.log)。
-同源 [Linux／Postgres CI](https://github.com/Zombieliu/mir2/actions/runs/43782096198) 已启动，
-在完成前不认领其结果；后续候选构建、切流和公网两场仍须独立验收。
+同源 [Linux／Postgres CI](https://github.com/Zombieliu/mir2/actions/runs/43782096198) 已完成，
+310／216 项及 1,841 文件 SHA 独立核对通过。候选构建、检查、切换及回退均有精确回执；
+公网两场原结果分别保留，R2 失败未改判。详见[本轮完整结果](production/README.md)。
 
 首次冷 Q、其他线路／地图／断网、三职业完整 1–30、阿洛、语言像素、Windows 真窗口和实体手机继续。
 本轮[词库核对](runtime-catalog-observation.json)确认当前 2,242 项 portable 词库已逐字节嵌入已发运行包。
