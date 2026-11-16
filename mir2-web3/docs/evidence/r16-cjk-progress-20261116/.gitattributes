@@ -1,0 +1,3 @@
+*.json -text
+*.png -text
+*.log -text

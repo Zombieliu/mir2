@@ -1,0 +1,199 @@
+{
+  "files": [
+    {
+      "name": "validation.json",
+      "source": "D:/mir2-builds/r16-cjk-progress-20261116/validation.json",
+      "sourceBytes": 15391,
+      "sourceSha256": "bc02f2b72acd8b9fb68a21e4d403e3eb545c01f8d12fe74281c20ceb2dd8b5e8",
+      "bytes": 15391,
+      "sha256": "bc02f2b72acd8b9fb68a21e4d403e3eb545c01f8d12fe74281c20ceb2dd8b5e8",
+      "normalizedNewlines": false
+    },
+    {
+      "name": "preceding-public-observations.json",
+      "source": "D:/mir2-builds/r16-cjk-progress-20261116/preceding-public-observations.json",
+      "sourceBytes": 3027,
+      "sourceSha256": "d0708ba26cec83a167f4b4bdf5d2a6d279c0a69a1811e543c8b0e8cc1f671af3",
+      "bytes": 3027,
+      "sha256": "d0708ba26cec83a167f4b4bdf5d2a6d279c0a69a1811e543c8b0e8cc1f671af3",
+      "normalizedNewlines": false
+    },
+    {
+      "name": "public-e0-failed-font-trace.json",
+      "source": "D:/mir2-builds/r16-cjk-progress-20261116/public-e0-failed-font-trace.json",
+      "sourceBytes": 13570,
+      "sourceSha256": "e4171d416aea8f155f42fac6bf4bbd3abf3a9cc28d1e4b17bf6a2707ed90f26e",
+      "bytes": 13570,
+      "sha256": "e4171d416aea8f155f42fac6bf4bbd3abf3a9cc28d1e4b17bf6a2707ed90f26e",
+      "normalizedNewlines": false
+    },
+    {
+      "name": "runtime-catalog-observation.json",
+      "source": "D:/mir2-builds/r16-first-q-capture-20261116/runtime-catalog-observation.json",
+      "sourceBytes": 3542,
+      "sourceSha256": "109a87bc67fe2cb521f37d57ba27c472cefdce7aeb6648c57a0aa603f250f4b0",
+      "bytes": 3542,
+      "sha256": "109a87bc67fe2cb521f37d57ba27c472cefdce7aeb6648c57a0aa603f250f4b0",
+      "normalizedNewlines": false
+    },
+    {
+      "name": "chrome-tc-baseline.json",
+      "source": "D:/mir2-builds/r16-cjk-progress-20261116/chrome-tc-baseline/receipt.json",
+      "sourceBytes": 3918,
+      "sourceSha256": "3bcaaba7285eae96be569548a1ebb70cd2e1396a6c9bb4bd01bd98b88fecb315",
+      "bytes": 3918,
+      "sha256": "3bcaaba7285eae96be569548a1ebb70cd2e1396a6c9bb4bd01bd98b88fecb315",
+      "normalizedNewlines": false
+    },
+    {
+      "name": "chrome-tc-prefix.json",
+      "source": "D:/mir2-builds/r16-cjk-progress-20261116/chrome-tc-prefix/receipt.json",
+      "sourceBytes": 24243,
+      "sourceSha256": "99e459fb1d742fc4fe3b9412916f0cb35ec890ee556f5877b220666bb205aaf0",
+      "bytes": 24243,
+      "sha256": "99e459fb1d742fc4fe3b9412916f0cb35ec890ee556f5877b220666bb205aaf0",
+      "normalizedNewlines": false
+    },
+    {
+      "name": "chrome-sc-progress.json",
+      "source": "D:/mir2-builds/r16-cjk-progress-20261116/chrome-sc-progress/receipt.json",
+      "sourceBytes": 27234,
+      "sourceSha256": "795b0f1edb25fde8b7f43a469f909fab58ce211ab2a6d3935e03639945e23b2b",
+      "bytes": 27234,
+      "sha256": "795b0f1edb25fde8b7f43a469f909fab58ce211ab2a6d3935e03639945e23b2b",
+      "normalizedNewlines": false
+    },
+    {
+      "name": "chrome-tc-progress.json",
+      "source": "D:/mir2-builds/r16-cjk-progress-20261116/chrome-tc-progress/receipt.json",
+      "sourceBytes": 23820,
+      "sourceSha256": "7041ffea12d6aa3c676a33717e97a869c8f9f6e9b675775864f5be962d7ebfc4",
+      "bytes": 23820,
+      "sha256": "7041ffea12d6aa3c676a33717e97a869c8f9f6e9b675775864f5be962d7ebfc4",
+      "normalizedNewlines": false
+    },
+    {
+      "name": "chrome-sc-prefix-adjacent.json",
+      "source": "D:/mir2-builds/r16-cjk-progress-20261116/chrome-sc-prefix-adjacent/receipt.json",
+      "sourceBytes": 24704,
+      "sourceSha256": "bd8916b641cd44086387b83420ff203806caa80483ebefaeb7cfd998ff9b8cf4",
+      "bytes": 24704,
+      "sha256": "bd8916b641cd44086387b83420ff203806caa80483ebefaeb7cfd998ff9b8cf4",
+      "normalizedNewlines": false
+    },
+    {
+      "name": "chrome-tc-range-stall.json",
+      "source": "D:/mir2-builds/r16-cjk-progress-20261116/chrome-tc-range-stall/receipt.json",
+      "sourceBytes": 26238,
+      "sourceSha256": "1e3880516815d9070177216f0e6b6ff5f0e024fce6fd5002b88ff5e8fd02e268",
+      "bytes": 26238,
+      "sha256": "1e3880516815d9070177216f0e6b6ff5f0e024fce6fd5002b88ff5e8fd02e268",
+      "normalizedNewlines": false
+    },
+    {
+      "name": "focused-regression.log",
+      "source": "D:/mir2-builds/r16-cjk-progress-20261116/focused-regression.log",
+      "sourceBytes": 34934,
+      "sourceSha256": "720707fd405e4b72263db785cf5d0eea86f432d06a39701d530d042144872857",
+      "bytes": 34050,
+      "sha256": "df92571e92d43bbb26157a8c0ff2874299e2f7b5cf593172c3706358c3353b36",
+      "normalizedNewlines": true,
+      "trimmedTapTrailingWhitespace": true
+    },
+    {
+      "name": "adjacent-regression.log",
+      "source": "D:/mir2-builds/r16-cjk-progress-20261116/adjacent-regression.log",
+      "sourceBytes": 15513,
+      "sourceSha256": "4e29d2428bc6fafb06dfa6c79bed3a549a310f745707a322d03c9272d912bcb2",
+      "bytes": 15121,
+      "sha256": "bf81a139f15465acc6bedd2c0b4bf0cd896f686bcb3ffa3f39d50a99ee5b40a4",
+      "normalizedNewlines": true,
+      "trimmedTapTrailingWhitespace": true
+    },
+    {
+      "name": "old-worker-expected-failure.log",
+      "source": "D:/mir2-builds/r16-cjk-progress-20261116/old-worker-expected-failure.log",
+      "sourceBytes": 3011,
+      "sourceSha256": "e455a4b2c240f9c3d94289046bfc5238276863f3d4922295ab12a1bd8229d2cc",
+      "bytes": 2922,
+      "sha256": "5a5d401c1cd5d6d49f3cf331b26fd4af9d12c975914f7d9b05417f3050ce0681",
+      "normalizedNewlines": true,
+      "trimmedTapTrailingWhitespace": true
+    },
+    {
+      "name": "six-original-fonts.png",
+      "source": "D:/mir2-builds/r16-cjk-progress-20261116/chrome-tc-prefix/six-original-fonts-after-restart.png",
+      "sourceBytes": 21149,
+      "sourceSha256": "9c5da663ff478575dd2f285740610d556671a918dae450b35b52a280cb1c311e",
+      "bytes": 21149,
+      "sha256": "9c5da663ff478575dd2f285740610d556671a918dae450b35b52a280cb1c311e",
+      "normalizedNewlines": false
+    },
+    {
+      "name": "english-native-quest.png",
+      "source": "D:/mir2-builds/r16-cjk-progress-20261116/world-r1/run-1/first-entry-diary-open.png",
+      "sourceBytes": 1357264,
+      "sourceSha256": "8e887e3ba1724aada85bddd2dd0790b2abca7dd77bec9fca0399d8b90b8a534e",
+      "bytes": 1357264,
+      "sha256": "8e887e3ba1724aada85bddd2dd0790b2abca7dd77bec9fca0399d8b90b8a534e",
+      "normalizedNewlines": false
+    },
+    {
+      "name": "traditional-native-quest-supplement.png",
+      "source": "D:/mir2-builds/r16-cjk-progress-20261116/world-r3-capture/run-2/first-entry-diary-open.png",
+      "sourceBytes": 1352151,
+      "sourceSha256": "4d0e54fe1641aacd81be7addc21a3f1a9dfbfbbe2a88a7c76f4d6ab6956260b1",
+      "bytes": 1352151,
+      "sha256": "4d0e54fe1641aacd81be7addc21a3f1a9dfbfbbe2a88a7c76f4d6ab6956260b1",
+      "normalizedNewlines": false
+    }
+  ],
+  "privatePins": [
+    {
+      "relative": "build-receipt-r1.json",
+      "bytes": 16171,
+      "sha256": "137ac0e0c9f7c34c13e39c38b5fae50c798495dab4ff94f256e0a5b6436f3cfe"
+    },
+    {
+      "relative": "candidate-source.json",
+      "bytes": 19276,
+      "sha256": "c3b58a898496d2cbf9e6874863cb314319adedc8cea25efb9a7c4d4a28dc9962"
+    },
+    {
+      "relative": "private-source-restored.json",
+      "bytes": 138,
+      "sha256": "6901dd1af9265481cb5cab64bd79339e60b0733fa820e799b7ae5cbc0384d2ae"
+    },
+    {
+      "relative": "preserved-wip-before.json",
+      "bytes": 5257,
+      "sha256": "b347fac4c56191ad7045eccc3016d5bf73190161dc940fb14de239b51c877967"
+    },
+    {
+      "relative": "world-r1/run-1/receipt.json",
+      "bytes": 99972,
+      "sha256": "5e528df6e9ce5a0f7bdb0025d3d623a16533d7e96cf615461479e76913c93ff8"
+    },
+    {
+      "relative": "world-r2/run-2/receipt.json",
+      "bytes": 57136,
+      "sha256": "7935906b7b501b012a1ec6fcb241bbeb091bab97d17cb480821c3ca9817c9cf6"
+    },
+    {
+      "relative": "world-r3-capture/run-2/receipt.json",
+      "bytes": 85503,
+      "sha256": "b3fcdb8c2a7f83807e49c876a59e6eac071a15fc38bf0f61be3f0588ffd17dbe"
+    },
+    {
+      "relative": "world-r3-capture/preparation.json",
+      "bytes": 5185,
+      "sha256": "0176798fc810df28e76a8a85005d136bad0523e2d1b63e5a4589e86d0705244a"
+    },
+    {
+      "relative": "world-r3-capture/town-walking-game.mjs",
+      "bytes": 7071,
+      "sha256": "d8fd3dbe5d8cf845db6adc03622419387ed50c8d030c03e565e3555be2408c26"
+    }
+  ],
+  "rawAuthAndAccountDataNotPublished": true
+}

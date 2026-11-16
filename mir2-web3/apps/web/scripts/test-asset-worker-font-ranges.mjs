@@ -349,7 +349,7 @@ test("new configuration cannot redirect queued old parts or persist them into th
 test("two range readers share the original global lanes with another font; images remain independent", async () => {
   const held = []; let requested = 0;
   const f = fixture(request => {
-    if (request.headers.has("range") && requested++ < 2 || request.url.endsWith('NotoSansTC.ttf')) {
+    if (request.headers.has("range") && requested++ < 2 || request.url.endsWith('NotoSansDevanagari-Regular.ttf')) {
       const response = request.headers.has("range") ? sliceResponse(request) : new Response(new Uint8Array([1, 2]));
       return new Response(new ReadableStream({ start(c) {
         response.arrayBuffer().then(body => { c.enqueue(new Uint8Array(body)); held.push(() => c.close()); });
@@ -358,14 +358,14 @@ test("two range readers share the original global lanes with another font; image
     return request.headers.has('range') ? sliceResponse(request) : new Response(new Uint8Array([7]));
   });
   const sc = f.read(); while (held.length < 2) await turn();
-  const tc = f.read('/original-ui/fonts/NotoSansTC.ttf'); await turn();
+  const other = f.read('/original-ui/fonts/NotoSansDevanagari-Regular.ttf'); await turn();
   assert.equal(f.calls.length, 2); held[0]();
   while (held.length < 3) await turn();
-  assert(f.calls.some(r => r.url.endsWith('NotoSansTC.ttf')));
+  assert(f.calls.some(r => r.url.endsWith('NotoSansDevanagari-Regular.ttf')));
   assert.equal(vm.runInContext('activeFontDownloads', f.context), 2);
   const image = await vm.runInContext(`fetchStaticAsset(new Request('${origin}/original-ui/Prguse/1.png'))`, f.context);
   assert.equal(image.status, 200); held[1](); held[2]();
-  await assertOriginal(await sc); assert.equal((await tc).status, 200); await f.flush();
+  await assertOriginal(await sc); assert.equal((await other).status, 200); await f.flush();
 });
 
 test("a stalled partial body is cancelled, keeps completed parts and resumes after Worker restart", async t => {
@@ -395,7 +395,7 @@ test("a stalled partial body is cancelled, keeps completed parts and resumes aft
 test("a cancelled queued range font starts no transfer and does not cancel other font bodies", async () => {
   const close = [];
   const f = fixture(() => new Response(new ReadableStream({ start(c) { c.enqueue(new Uint8Array([1])); close.push(() => c.close()); } })));
-  const a = f.read('/original-ui/fonts/NotoSansTC.ttf'), b = f.read('/original-ui/fonts/NotoSans-Regular.ttf');
+  const a = f.read('/original-ui/fonts/NotoSansDevanagari-Regular.ttf'), b = f.read('/original-ui/fonts/NotoSans-Regular.ttf');
   await waitFor(() => close.length === 2);
   const owner = new AbortController(); f.context.owned = new Request(origin + path, { signal: owner.signal });
   const pending = vm.runInContext('fetchStaticAsset(owned)', f.context);
@@ -458,7 +458,7 @@ test("waiting for the two font lanes does not consume the range transfer deadlin
   const f = fixture(request => request.headers.has('range') ? sliceResponse(request) : new Response(new ReadableStream({
     start(c) { c.enqueue(new Uint8Array([1])); bodies.push(c); },
   })));
-  const a = f.read('/original-ui/fonts/NotoSansTC.ttf'), b = f.read('/original-ui/fonts/NotoSans-Regular.ttf');
+  const a = f.read('/original-ui/fonts/NotoSansDevanagari-Regular.ttf'), b = f.read('/original-ui/fonts/NotoSans-Regular.ttf');
   await waitFor(() => bodies.length === 2);
   const sc = f.read(); await turn();
   for(let n=0;n<2;n++){t.mock.timers.tick(14000);await turn();bodies.forEach(c=>c.enqueue(new Uint8Array([2])));await turn();}

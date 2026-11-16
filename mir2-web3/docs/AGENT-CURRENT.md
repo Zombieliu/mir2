@@ -14,7 +14,7 @@ Short routing summary, updated 2026-11-16 (Asia/Shanghai). This indexes recorded
 
 ## Last recorded decisions and open work
 
-2026-11-16 正式 Web／Gateway 为 e0，原两场公网与简繁扫码通过，旧档、配置及29份WIP保持，本轮测试／SSH已关闭。下一项定位首次Q黑色抓图与Native接管，再继续语言及其他适用1:1差距；实体手机和整体验收仍开放，Goal active。[当前发行与边界](evidence/r16-font-prefix-recovery-20261116/production/README.md)。
+2026-11-16 正式仍 e0／Fo。补充公网 Native210624ms 超原120秒，失败保留；新 CJK 候选为 TC46原片续传和已校验进展续期／48秒硬限，207项、五场实际Chrome、严格构建及英文完整流程通过。原繁体地形截图等待字体12秒超时，单列失败；仅改附属截图的繁体补充流程通过原玩法门槛。15私有覆盖已恢复，29份原WIP保持，自有进程全关。下一项同源Linux／PG及新成对发行资格，再做原两场公网；冷Q、语言和其他1:1继续，Goal active。[候选、原失败及后续](evidence/r16-cjk-progress-20261116/README.md)。
 
 2026-11-15 用户补充寻路“目标不对或到不了”：本地候选ceb1c1132f补大小地图坐标／30秒初始期限／到达反馈和十语入口说明。152项、独立严格构建与英繁两后端实际跨图／慢碰撞超时／晚到零旧移动／重登新目标／正常保存通过，30份内容WIP保持。本轮未发布；其他目标与既有公网资源失败继续。[记录与范围](evidence/r16-route-feedback-20261115/README.md)
 

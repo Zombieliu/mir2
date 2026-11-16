@@ -6,9 +6,11 @@ Updated 2026-11-16 (Asia/Shanghai). Read [coordination](AGENT-ORCHESTRATION.md) 
 
 Windows R16 的 codex/windows-player-journey 为跨平台共同基线，持续 Goal 是适用门槛的 100% Candidate 后再做最终人类 Accepted。优先无需桌面控制的代码、协议、无界面浏览器与构建；独立 Windows 窗口验收单列。具体差距、范围和来源见 [Web/R16 Goal](WEB-R16-PARITY-GOAL.zh-CN.md)。
 
-2026-11-16 e0字体中断恢复已完成配套发行与原两场公网，完整六字体／113和原时限保持。旧档、配置及29份WIP保全；继续下列冷Q与语言等未结项，整体Goal active。[发布与原判定](evidence/r16-font-prefix-recovery-20261116/production/README.md)。
+2026-11-16 正式 e0／Fo 未变，补充公网 Native210624ms 超原120秒的失败保留。两套 CJK 续传及持续进展候选已过207项／实际Chrome／严格构建；英文整局与繁体补充流程通过，原繁体截图字体等待失败单列。29份WIP保持、15私有覆盖恢复；下一项同源发布资格与原两场公网，整体Goal active。[本轮候选与剩余](evidence/r16-cjk-progress-20261116/README.md)。
 
 ## 保留的当前未结项
+
+- [ ] CJK 加载长尾候选：SC原63片保持，TC新增46片及中断前缀恢复；24秒无已校验进展／48秒硬限，公网8／65／120及六字体113不变。207项、五场实际Chrome、严格构建通过；英文86ms／Native78271ms，原繁体附属截图12秒失败保留，仅附属图改原始viewport的补充繁体110ms／18612ms通过。尚未发布，准备同源Linux／PG／成对发行后再做原两场公网，不重跑旧6ba／G8控制器。[依据与资格](evidence/r16-cjk-progress-20261116/README.md)
 
 - [x] e0整源字体中断分片已通过本地188项／真实Chrome恢复、匹配Linux／PG／SHA、成对发行与原两场公网；六字体／113／原时限保持。[已发布范围](evidence/r16-font-prefix-recovery-20261116/production/README.md)
 

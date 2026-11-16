@@ -9,11 +9,12 @@ import { fileURLToPath } from "node:url";
 const args = new Map();
 for (let i = 2; i < process.argv.length; i += 2) {
   const key = process.argv[i], value = process.argv[i + 1];
-  assert(["--output", "--worker-source", "--chrome", "--playwright-package", "--failure-mode"].includes(key) && value && !args.has(key)); args.set(key, value);
+  assert(["--output", "--worker-source", "--chrome", "--playwright-package", "--failure-mode", "--font"].includes(key) && value && !args.has(key)); args.set(key, value);
 }
 assert(args.has("--output"));
 const failureMode = args.get("--failure-mode") ?? "range-stall";
-assert(["range-stall", "whole-prefix"].includes(failureMode));
+assert(["range-stall", "whole-prefix", "progressing"].includes(failureMode));
+const family = args.get("--font") ?? "sc"; assert(["sc", "tc"].includes(family));
 const web = resolve(dirname(fileURLToPath(import.meta.url)), ".."), output = resolve(args.get("--output"));
 await mkdir(output, { recursive: false });
 const require = createRequire(args.has("--playwright-package") ? resolve(args.get("--playwright-package")) : import.meta.url);
@@ -24,8 +25,10 @@ const paths = [...(await readFile(join(web, "lib/bevy-runtime-font-prewarm.ts"),
 assert.equal(new Set(paths).size, 6);
 const fonts = new Map(await Promise.all(paths.map(async path => [path, await readFile(join(web, "public", path.slice(1)))])));
 const sc = paths[0]; assert(sc.endsWith("NotoSansCJKsc-Regular.otf"));
+const target = family === "sc" ? sc : paths.find(path => path.endsWith("NotoSansTC.ttf")); assert(target);
+const targetParts = Math.ceil(fonts.get(target).length / 262144), prefixParts = targetParts - 3;
 const proof = { kind: failureMode === "whole-prefix" ? "actual-browser-whole-font-prefix-restart" : "actual-edge-font-range-restart",
-  failureMode, workerSha256: sha(worker), noCachePrefill: true,
+  failureMode, family, target, targetParts, workerSha256: sha(worker), noCachePrefill: true,
   fontPins: [...fonts].map(([path, bytes]) => ({ path, bytes: bytes.length, sha256: sha(bytes) })), requests: [], browserClosures: [], passed: false };
 const sockets = new Set(); let app, assets, context, phase = "partial", active = 0, peak = 0;
 const serve = (request, response) => {
@@ -43,18 +46,29 @@ const serve = (request, response) => {
   const row = { phase, path: pathname, logical, range: request.headers.range ?? null, offset, bytes: end - offset + 1, at: Date.now() };
   proof.requests.push(row); active++; peak = Math.max(peak, active);
   response.once("close", () => { active--; row.closed = Date.now(); });
-  if (failureMode === "whole-prefix" && phase === "partial" && logical === sc
+  if (failureMode === "whole-prefix" && phase === "partial" && logical === target
     && (range || request.socket.localPort !== app.address().port)) {
     response.writeHead(503); response.end(); return;
   }
+  if (failureMode === "range-stall" && phase === "partial" && logical === target && !range) {
+    // Isolate restart recovery: an available whole-font fallback would make
+    // the first logical request succeed instead of leaving missing pieces.
+    row.injectedWholeFallbackUnavailable = true; response.writeHead(504); response.end(); return;
+  }
   response.writeHead(range ? 206 : 200, { "content-type": logical.endsWith(".otf") ? "font/otf" : "font/ttf",
     "content-length": end - offset + 1, ...(range ? { "content-range": `bytes ${offset}-${end}/${original.length}` } : {}) });
-  if (failureMode === "whole-prefix" && phase === "partial" && logical === sc) {
-    row.injectedWholeBodyInterrupt = true; row.sentPrefixBytes = 60 * 262144 + 12345;
+  if (failureMode === "whole-prefix" && phase === "partial" && logical === target) {
+    row.injectedWholeBodyInterrupt = true; row.sentPrefixBytes = prefixParts * 262144 + 12345;
     response.write(original.subarray(0, row.sentPrefixBytes), () => setTimeout(() => response.destroy(), 150)); return;
   }
-  if (failureMode === "range-stall" && phase === "partial" && logical === sc && offset === 4 * 262144) {
+  if (failureMode === "range-stall" && phase === "partial" && logical === target && offset === 4 * 262144) {
     row.injectedBodyStall = true; response.write(original.subarray(offset, offset + 8192)); return;
+  }
+  if (failureMode === "progressing" && phase === "partial" && logical === target && range) {
+    row.injectedProgressDelayMs = family === "sc" ? 3600 : 5000;
+    response.flushHeaders();
+    const timer = setTimeout(() => response.end(original.subarray(offset, end + 1)), row.injectedProgressDelayMs);
+    response.once("close", () => clearTimeout(timer)); return;
   }
   response.end(original.subarray(offset, end + 1));
 };
@@ -84,21 +98,28 @@ try {
         manifest: { version: 'current', remoteAssets: { enabled: true, assetBaseUrl: remote + '/mir2/v/current', browserFallbackBaseUrls: [remote + '/hotlink-ok/mir2/v/current'] } } });
     });
   }, remote);
-  proof.first = await page.evaluate(async sc => {
-    const began = performance.now(), response = await fetch(sc); await response.arrayBuffer();
+  proof.first = await page.evaluate(async target => {
+    const began = performance.now(), response = await fetch(target), bytes = await response.arrayBuffer();
+    const sha256 = [...new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))].map(x => x.toString(16).padStart(2,'0')).join('');
     const parts = []; for (const name of await caches.keys()) if (name.includes('font-parts-')) {
       const cache = await caches.open(name); for (const key of await cache.keys()) parts.push(key.url); }
-    const whole = await caches.match(location.origin + sc);
-    return { status: response.status, elapsedMs: performance.now() - began, parts, wholePresent: !!whole };
-  }, sc);
+    const whole = await caches.match(location.origin + target);
+    return { status: response.status, bytes: bytes.byteLength, sha256, elapsedMs: performance.now() - began, parts, wholePresent: !!whole };
+  }, target);
   if (failureMode === "whole-prefix") {
     assert([503,504].includes(proof.first.status));
-    assert.equal(proof.first.parts.length, 60, 'the interrupted whole body retains exactly its sixty complete verified units');
+    assert.equal(proof.first.parts.length, prefixParts, 'the interrupted whole body retains exactly its complete verified units');
     assert.equal(proof.requests.filter(r => r.injectedWholeBodyInterrupt).length, 1);
+  } else if (failureMode === "range-stall") {
+    assert.equal(proof.first.status, 504); assert(proof.first.parts.length > 0 && proof.first.parts.length < targetParts);
   } else {
-    assert.equal(proof.first.status, 504); assert(proof.first.parts.length > 0 && proof.first.parts.length < 63);
+    assert.equal(proof.first.status, 200); assert.equal(proof.first.parts.length, targetParts);
+    assert.equal(proof.first.bytes, fonts.get(target).length); assert.equal(proof.first.sha256, sha(fonts.get(target)));
+    assert(proof.first.elapsedMs > 24000 && proof.first.elapsedMs < 48000);
+    assert(proof.requests.filter(row => row.logical === target).every(row => row.range), 'progress must not be discarded for a whole-body fallback');
+    assert(proof.first.wholePresent);
   }
-  assert(!proof.first.wholePresent);
+  if (failureMode !== "progressing") assert(!proof.first.wholePresent);
   await closeBrowser(); phase = "resume";
   page = await launch(origin);
   // No configuration resend or cache population: restore the previous Worker configuration from its own persistent cache.
@@ -125,11 +146,11 @@ try {
     for (const row of [proof.second.rows.find(r => r.path === pin.path), proof.second.cache.find(r => r.path === pin.path)]) {
       assert.equal(row.bytes, pin.bytes); assert.equal(row.sha256, pin.sha256); }
   }
-  const resumed = proof.requests.filter(r => r.phase === 'resume' && r.logical === sc);
+  const resumed = proof.requests.filter(r => r.phase === 'resume' && r.logical === target);
   assert(resumed.every(r => r.range));
   const savedOffsets = new Set(proof.first.parts.map(url => Number(url.split('/').at(-2))));
   const fetchedOffsets = resumed.flatMap(row => Array.from({length:Math.ceil(row.bytes/262144)},(_,n)=>row.offset+n*262144));
-  assert.deepEqual(fetchedOffsets.toSorted((a,b)=>a-b),Array.from({length:63},(_,n)=>n*262144).filter(offset=>!savedOffsets.has(offset)));
+  assert.deepEqual(fetchedOffsets.toSorted((a,b)=>a-b),Array.from({length:targetParts},(_,n)=>n*262144).filter(offset=>!savedOffsets.has(offset)));
   proof.resumedRequests = resumed.length; proof.resumedPieces = fetchedOffsets.length;
   proof.resumedMissingOnly = true; proof.sixFontsComplete = proof.second.rows.every(r => r.status === 200 && r.decoded);
   proof.peakServerFontBodies = peak; assert(peak <= 2); assert(proof.sixFontsComplete);

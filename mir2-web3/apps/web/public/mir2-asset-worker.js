@@ -6,6 +6,7 @@ const PINNED_FONT_RANGES = {
   "/original-ui/fonts/NotoSansCJKsc-Regular.otf": {
     "bytes": 16437364,
     "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b",
+    "contentType": "font/otf",
     "partBytes": 262144,
     "parts": [
       "7c9cc397f01347c0ebf2e030f4fe197dcc2673841a2f4bf4930a707e39b7baa4",
@@ -72,6 +73,60 @@ const PINNED_FONT_RANGES = {
       "f11529602f44d0846ea2bbb7aab4502989cba0c94baa9e3b3d62d044bab4cd91",
       "6e6b750a03e1481deef28bd4b73c3653e262897fb37386a46326fc83bd856035"
     ]
+  },
+  "/original-ui/fonts/NotoSansTC.ttf": {
+    "bytes": 11941968,
+    "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f",
+    "contentType": "font/ttf",
+    "partBytes": 262144,
+    "parts": [
+      "5ea02d910cb6d1c7b6ad36c6208177c004dd16c82cc399e3c4dd1a932b852c6b",
+      "95425ed006fb62c1b9a5c2e6152108201021568ea1e5a621d318017e62e48e58",
+      "025d451f77e9508c0d8df80e8fe59a63218fe56816c414de07a2e1da729c781d",
+      "e286be52e05ab95a6c011257b42598c5cb2454638b5af111d7bcb4eb4524eda9",
+      "ae2d57f244a06a9ff23be26e1b37a452c5c30fb0640841a93b58bcd8ea1baf20",
+      "a59c39e006f7fed66ff2bf1c5af9b8aaad24d54a2856d5392a63a9f436005f66",
+      "d0e2937292115cd7694726889b86a6560536ec737442f381af66b68085310dd8",
+      "e27a8fcc7229f0ed030897576c092dcffb4a2c37caf2f19bea40154d06bc8440",
+      "b86270091723e1a79be33e60843579ad562eb86b7f34fae9da403d1fc3c7a528",
+      "60ea657df7ca3bc52e02a2e2f7650f465bf42d30e48e6371a22f61ed258c085c",
+      "2063fcce12a1fb83fe940dc5941ba9a412b641f763b71f4922e1e4a2a170e3ba",
+      "57d721b7526791fd830afee5fdfb2143ceda1995c2af25e62308dafdeb4d241b",
+      "de9989ae23b55b45f423c12ed2955de8b3938a7d24d44cdb3cb980d720991362",
+      "616f96df5cfb312c96f8c62c7d37ee48c069e819afb10975d8850171009b5525",
+      "e82a6cda5f81fe4499657cdee0ccdf2276481011fdc4b9a3737b08270803b512",
+      "62e0f000445fec057530dbe07469cd46aa227532d7184602f6b4341506abdb77",
+      "b7914951f49c054a0b7ff27e431c196b7dfe3e783256a30ac2b15e235b6b54d4",
+      "fbff1e8f72d9e05bc8ee2f1354ef0b61573cded8b28569eb015b1b2d77ef1828",
+      "c361650c1dceec65dabc7e20b83ff81c4a07e099a79a6efbeecc4cd930c3c031",
+      "48f8c1a8e53e0fbd30c46b5686d3991b7405b1b2476ac1dca0f82d5b6bbb1cd8",
+      "9a8a38b2a2995f87a67f63aeda6469292dd15b8e4c6f96c31ad34ea8a43373f5",
+      "292fc3f5bbfbb74d6b5c419ec15b267a54885836b838f566d0ae1f00144561b5",
+      "3250ad510f5edd257dafef5a84daeec62d572da35f6c5f8e0c33654ed3593485",
+      "0a631dd0149b4cbbfed99a68c8de17599192f544d2d86f40e13eccb480a2239b",
+      "c96e9cae6d6ff1cb915334f60f33d12c5a85c16b62579800f87e25d471f1fa61",
+      "aede8bb4c6a2a7464033d27aa640597d4471614529e15b8974fb0af5450bee35",
+      "3e015736cca3eb2ec1261401b83d94061b5b204bee3f3a921f64d6258bf6b724",
+      "7ce46467a18128cb076ee155d2c61d312e5b3e2be364f1f54fe6b7ef33a724e5",
+      "3ce570ef446d80323f9cfd2f24b16e53522b803ff1eae2910724c0a593c759dc",
+      "a6e99cb654a248ef3511c6eeca0a18640793897712985af9def42f39a9a6df21",
+      "7a8a432accfcfc6561fd1bd12ed1247c6d85a8bcbf15d65eed7b38bed5249ff5",
+      "9109eba223a44112439cfeb6b151d174df14fc0be501a0934b5e0fb6d4047613",
+      "186fd5d6055b1b4e2474876fa1313e2727ffda4e30b635fdaaefeec6860ef69e",
+      "6e201c6be128170685ad3a46271ae5707817af6f1349b9e071ee2e2a622944e4",
+      "563d23ba6bfbb30ab62e5378e0b429af02f8710f555ea8043eb6c7c19edcac68",
+      "8f5eb189c4df2c570bb0f184e74fbe35a33112d92777e85414ce8a2b1d26aef4",
+      "828866dc4a0eb0f0857210eb46230bd2c86477368606390df8d0cd88b7569fd7",
+      "2de7d4374f4bb9a119835de0c328fb4a3b4a5e283b8fa903c7f13c37fb485726",
+      "de97f7b8d8f26d2cd8f8454620bb909f612e4b17e3ed2413c17be2bc7461a581",
+      "9dd02c74225baed6632b63576d99adbc00ee6be726701bdb8be2cc936bc44618",
+      "1ec8ba8147cbf7ba5644cdb2b86d76bc56fe8b11ffe7f2a9ab94ce11716cde02",
+      "a3b28e5db439a7275c43872d8b6404cb921f151184b57e7e4ad58e941c7d5dd0",
+      "9dacc2cd6ec3e3a6866618c3f4cb80aa4a6cd931819482a63ca3522455696ecc",
+      "6f0bde2f5a9630beb4ce844005aeaf991722fe2015cee0b57e3b069d4c618b90",
+      "29595ca5afd9684da8b4d3f730713bafd3159cbdea36bfb66695c8e0890a1787",
+      "52598d78f3051bd8da7292d78b174cab9fcfcb0246162b31d5d0f1a5bb6ba86b"
+    ]
   }
 };
 // END GENERATED FONT RANGE PINS
@@ -119,7 +174,11 @@ const FONT_MIRROR_HEADER_TIMEOUT_MS = 8_000;
 const FONT_MIRROR_BODY_IDLE_TIMEOUT_MS = 15_000;
 const FONT_MIRROR_MAX_BYTES = 32 * 1024 * 1024;
 const FONT_RANGE_PART_TIMEOUT_MS = 15_000;
+// A live, independently verified range must not be thrown away merely because
+// the first request started 24s ago. Only verified network progress renews this
+// no-progress budget; a second original window is the absolute transfer cap.
 const FONT_RANGE_TRANSFER_TIMEOUT_MS = 24_000;
+const FONT_RANGE_MAX_TRANSFER_MS = 2 * FONT_RANGE_TRANSFER_TIMEOUT_MS;
 const FONT_RANGE_PARTS_PER_REQUEST = 4;
 const FONT_RANGE_CACHE_TIMEOUT_MS = 750;
 // The renderer, CSS and prewarmer share this budget. Limiting the prewarmer
@@ -568,11 +627,11 @@ function sharedFontCacheFill(request, cache, name, maxEntries) {
 async function fetchStaticAsset(request, fallbackRequests) {
   if (isSharedUiFont(request) && !request.headers.has("range")) {
     // Snapshot allowed sources and cache identity before any queued work. Only
-    // this original, byte-pinned large font uses resumable ranges.
+    // these original, byte-pinned CJK fonts use resumable ranges.
     const sources = fallbackRequests || createRemoteAssetRequests(request);
     const pin = pinnedFontRange(request);
     const partCache = fontPartCacheContext(pin);
-    const mirrors = pin ? currentReleaseFontMirrors(request, sources) : [];
+    const mirrors = pin ? currentReleaseFontMirrors(request, sources, true) : [];
     let preferAppFont = false;
     if (pin && mirrors.length) {
       const result = await readPinnedRangeFont(request, pin, mirrors)
@@ -734,14 +793,14 @@ function currentReleaseFontMirror(request, remoteRequests) {
   return currentReleaseFontMirrors(request, remoteRequests)[0] || null;
 }
 
-function currentReleaseFontMirrors(request, remoteRequests) {
+function currentReleaseFontMirrors(request, remoteRequests, resumable = false) {
   const version = runtimeConfig.assetVersion;
   const source = new URL(request.url);
-  // The two complete CJK families dominate the cold font transfer. Keep TC
-  // on the app and start SC on the configured current-release CDN so they do
-  // not share one origin's body stream. Both still use complete-body checks,
-  // the common two-reader budget and the original per-source timeouts.
-  const splitCjkOrigin = source.pathname === "/original-ui/fonts/NotoSansCJKsc-Regular.otf";
+  // Both pinned CJK families can use the configured current-release ranges.
+  // Whole-font fallback keeps the existing app-first TC / CDN-first SC policy.
+  // All reads retain the same global two-reader and per-source budgets.
+  const splitCjkOrigin = source.pathname === "/original-ui/fonts/NotoSansCJKsc-Regular.otf"
+    || resumable && Boolean(pinnedFontRange(request));
   if ((!runtimeConfig.fontMirrorFirst && !splitCjkOrigin) || !isSharedUiFont(request) || request.headers.has("range") || version === DEFAULT_VERSION ||
       typeof version !== "string" || !/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(version)) return [];
   const suffix = `/mir2/v/${version}${source.pathname}`;
@@ -960,7 +1019,12 @@ async function readPinnedRangeFont(request, pin, mirrors) {
   const batch = new AbortController();
   const signal = AbortSignal.any([request.signal, batch.signal]);
   let next = 0, wholeFallback = false, complete = 0, coalesce = true;
-  let transferTimer, transferExpired = false;
+  let transferTimer, absoluteTimer, transferExpired = false;
+  const expire = () => { transferExpired = true; batch.abort(); };
+  const expectVerifiedProgress = () => {
+    clearTimeout(transferTimer);
+    transferTimer = setTimeout(expire, FONT_RANGE_TRANSFER_TIMEOUT_MS);
+  };
   const partInfo = index => pinnedFontPart(pin, index);
   const keepPart = async (part, bytes, persist) => {
     if (persist && cache && !request.signal.aborted && revision === configurationRevision && configurationPersistenceAllowed) {
@@ -974,16 +1038,21 @@ async function readPinnedRangeFont(request, pin, mirrors) {
   };
   const download = (index, count) => withFontDownloadSlot(signal, async () => {
     // Start at actual admission, not while another font owns both lanes.
-    // Per-range retries and smaller pieces cannot renew the whole transfer.
-    if (transferTimer === undefined) transferTimer = setTimeout(() => {
-      transferExpired = true;
-      batch.abort();
-    }, FONT_RANGE_TRANSFER_TIMEOUT_MS);
+    // Waiting for a lane is not network time. Once admitted, retries, cached
+    // pieces and unverified bytes cannot renew either clock. Verified network
+    // pieces renew the no-progress clock, while the absolute cap never moves.
+    if (absoluteTimer === undefined) {
+      absoluteTimer = setTimeout(expire, FONT_RANGE_MAX_TRANSFER_MS);
+      expectVerifiedProgress();
+    }
     // One global slot owns all source fallbacks for this bounded HTTP range.
     for (const source of mirrors) {
       if (signal.aborted) break;
       const bytes = await readFontRangePart(source, signal, pin, index, count, () => { wholeFallback = true; });
-      if (bytes) return bytes;
+      if (bytes) {
+        if (!signal.aborted) expectVerifiedProgress();
+        return bytes;
+      }
     }
     return null;
   });
@@ -1045,10 +1114,10 @@ async function readPinnedRangeFont(request, pin, mirrors) {
       response: null, wholeFallback: wholeFallback || complete === 0 || transferExpired, transferExpired,
     };
     return { wholeFallback: false, response: new Response(output, { status: 200, headers: {
-      "content-type": "font/otf", "content-length": String(pin.bytes),
+      "content-type": pin.contentType, "content-length": String(pin.bytes),
       "x-mir2-font-transfer": "verified-ranges",
     } }) };
-  } finally { clearTimeout(transferTimer); }
+  } finally { clearTimeout(transferTimer); clearTimeout(absoluteTimer); }
 }
 
 async function readCompleteFont(request, owner, headerTimeoutMs, transientRetries, pin = pinnedFontRange(request),
